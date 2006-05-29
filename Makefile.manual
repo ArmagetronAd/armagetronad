@@ -176,10 +176,10 @@ $(srcdir)/version: $(wildcard $(srcdir)/*_version)
 # Keep the changelog up to date as well (triggered by make dist only)
 $(srcdir)/ChangeLog: .cvsfiles
 	touch $@
-#	rm -f $@
-#	@echo -e "\nGenerating ChangeLog from CVS, please be patient...\n"
-#	cd ${srcdir}; cvs2cl --follow-only b0_2_8_0 2>&1 || echo "No official releasse: no changelog" > ChangeLog
-#	test -r $@ || touch $@
+	rm -f $@
+	@echo -e "\nGenerating ChangeLog from SVN, please be patient...\n"
+	cd ${srcdir}; svn log 2>&1 > ChangeLog || echo "No official releasse: no changelog" > ChangeLog
+	test -r $@ || touch $@
 
 cvsclean:
 	rm -rf .cvsfiles .version.new
