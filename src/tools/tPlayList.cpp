@@ -62,6 +62,8 @@ const tSong& tPlayList::GetNextSong() {
     } else {
         if(m_Playlist.size() > 1)
             m_CurrentSong++;
+            if(m_CurrentSong == m_Playlist.end() )
+                m_CurrentSong = m_Playlist.begin();
     }
     std::cout << "Got song:" << (*m_CurrentSong).location << "\n";
     return (*m_CurrentSong);
@@ -71,6 +73,7 @@ const tSong& tPlayList::GetPreviousSong() {
     std::cout << "Getting previous song from playlist\n";
     if(m_CurrentSong == m_Playlist.begin() ) {
         m_CurrentSong = m_Playlist.end();
+        m_CurrentSong--;
     } else {
         if(m_Playlist.size() > 1)
             m_CurrentSong--;
