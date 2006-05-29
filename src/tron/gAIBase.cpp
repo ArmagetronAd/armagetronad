@@ -1386,6 +1386,12 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
 // state update functions:
 void gAIPlayer::ThinkSurvive(  ThinkData & data )
 {
+    if (!character)
+    {
+        st_Breakpoint();
+        return;
+    }
+
     REAL random = 0;
     // do nothing much. Rely on the emergency program.
     /*
@@ -1981,6 +1987,12 @@ public:
 // emergency functions:
 bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int preferedSide)
 {
+    if (!character)
+    {
+        st_Breakpoint();
+        return false;
+    }
+
     gAISensor const & front = data.front;
     gAISensor const & left = data.left;
     gAISensor const & right = data.right;
@@ -2519,6 +2531,12 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
 {
     if ( nCLIENT == sn_GetNetState() )
         return;
+
+    if (!character)
+    {
+        st_Breakpoint();
+        return;
+    }
 
     gRandomController random( randomizer_ );
 
