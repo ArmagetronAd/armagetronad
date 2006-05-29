@@ -1,0 +1,38 @@
+# configuration for @progname@ rc scripts
+
+# The defaults assume that you want to run as user @prognamebase@
+# and store the variable files in /var/log and /var/run where it needs
+# to have the appropriate writing rights.
+# The alternative, commented configuration assumes you want to run
+# the processes as whoever runs the init scripts ( usually root, so
+# this is only recommended for testing ).
+
+
+# user to run as
+
+user=@prognamebase@
+#user=$USER
+
+# directories for variable data, defaults to
+# @aa_localstatedir_reloc@
+# Warning: this directory will be chowned to the user running the server. 
+# Don't make it simply / or /var or anything other processes need to access.
+
+#VARDIR=@aa_localstatedir_reloc@
+#VARDIR=$HOME/./@progname@
+
+# directories for PID files and logs
+PIDDIR=@rundir_reloc@
+LOGDIR=@logdir_reloc@
+
+# alternatives, the previous default
+#PIDDIR=$VARDIR/run
+#LOGDIR=$VARDIR/log
+
+# arguments the server will be called with
+
+server_args=""
+
+# niceness level of the servers
+
+niceness_level=-5

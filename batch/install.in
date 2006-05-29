@@ -1,0 +1,169 @@
+#!/bin/bash
+#
+# starts @progtitle@ from the installation directory
+
+# set -x
+
+INSTALL=@rpmroot@@prefix@/games/@progname@
+
+#find old configuration
+if test @enable_etc@ = yes ; then
+    CONFIG=@rpmroot@/etc/@prognamebase@
+else
+    CONFIG=$INSTALL/config
+fi
+
+if test -r $INSTALL/.config.orig ; then
+    CONFIG_ORIG=$INSTALL/.config.orig
+    CONFIG_OLD=$INSTALL/config
+else
+    if test -r @rpmroot@/etc/@prognamebase@/.orig ; then
+	CONFIG_ORIG=@rpmroot@/etc/@prognamebase@/.orig
+	CONFIG_OLD=@rpmroot@/etc/@prognamebase@
+    else
+	if test -r $INSTALL/config/.orig ; then
+	    CONFIG_ORIG=$INSTALL/config/.orig
+	CONFIG_OLD=$INSTALL/config
+	fi
+    fi
+fi
+
+NEW_CONFIG_ORIG=$CONFIG/.orig
+CONFIG_USER=$CONFIG/.user
+CONFIG_NEW=$CONFIG/.new
+
+BIN=@rpmroot@@prefix@/bin
+
+FORCE=n
+
+STARTSERVER=NO
+STARTMASTER=NO
+
+UPDATE=no
+
+if test -r $INSTALL/bin/@progname@ ; then
+    if test ! "$1" = "-f" -a ! "$1" = "-u" ; then
+	echo "Installation aborted; detected previous installation."
+	echo "Use \"install -f\"/\"make install_force\" to force installation ( previous version will get overwritten )"
+	echo "or \"install -u\"/\"make update\" ( your configuration files will be kept; requires diff3 )."
+	exit 1
+    else
+	if test -r ./rc.d/@prognamebase@  ; then
+	    FORCE=y
+	    $INSTALL/rc.d/@prognamebase@ status        && STARTSERVER=yes
+	    $INSTALL/rc.d/@prognamebase@-master status && STARTMASTER=yes
+	fi
+
+	install -m 755 -d $CONFIG
+
+	# make backup of old configuration
+	rm -rf $CONFIG_USER.old
+	test -d $CONFIG_USER && mv $CONFIG_USER $CONFIG_USER.old
+	mkdir $CONFIG_USER
+	test -r $CONFIG_OLD/settings.cfg && cp $CONFIG_OLD/* $CONFIG_USER
+	rm -f $CONFIG_USER/*~
+
+	if test "$1" = "-u"; then
+	    UPDATE=yes
+	fi
+    fi
+fi
+
+
+echo
+echo "Making directories..."
+install -m 755 -d $BIN || { echo "Installation failed. Bin folder does not exist and cannot be created."; exit 1; }
+
+install -m 755 -d $INSTALL/log || { echo "Installation failed. Install folder does not exist and cannot be created."; exit 1; }
+
+install -m 755 -d $CONFIG || { echo "Installation failed. Configuration folder does not exist and cannot be created."; exit 1; }
+
+
+if test $STARTSERVER = yes ; then
+    ./rc.d/@prognamebase@ stop
+fi
+
+if test $STARTMASTER = yes ; then
+    ./rc.d/@prognamebase@-master stop
+fi
+
+if test "@rpmroot@" = "dddd" ; then
+    if ! install -m 755 -d @rpmroot@ ; then
+	echo "Installation failed. RPM root folder does not exist and cannot be created."
+	exit 1
+    fi
+fi
+
+echo "Copying data..."
+rm -rf $INSTALL/doc
+rm -rf $INSTALL/bin/*
+cp -R * $INSTALL || { echo "Installation failed. Either the installation target is write protected or your disk is full."; exit 1; }
+
+rm -rf $INSTALL/install
+rm -rf $INSTALL/bin/starter
+rm -rf $INSTALL/bin/stat
+
+echo "Installing scripts..."
+install -m 755 bin/starter $BIN/@progname@ || { echo "Installation failed. Could not install launcher. You may have insufficient rights to $BIN."; exit 1 ;}
+
+install -m 755 bin/stat $BIN/@prognamebase@-stat || { echo "Installation failed. Could not install server browser. . You may have insufficient rights to $BIN."; exit 1; }
+
+#copy new configuration
+if test @enable_etc@ = yes ; then
+    test -d $CONFIG || mkdir $CONFIG
+    cp $INSTALL/config/* $CONFIG
+fi
+
+rm -rf $CONFIG_NEW
+mkdir $CONFIG_NEW
+cp $CONFIG/* $CONFIG_NEW
+
+if test "$UPDATE" = "yes" && test -d $CONFIG_ORIG; then
+    echo "Integrating user changes..." #"from $CONFIG_USER to $CONFIG_ORIG and $CONFIG..."
+	test -r $CONFIG_USER || mkdir $CONFIG_USER
+	test -r $CONFIG_ORIG || mkdir $CONFIG_ORIG
+    
+    chmod 755 $CONFIG_ORIG
+
+    PWD_OLD=$( pwd )
+    cd $CONFIG_USER
+    for f in *; do
+	if test ! "$f" = "*" ; then
+	    if test ! -r $CONFIG/$f || test ! -r $CONFIG_ORIG/$f ; then
+			echo " " Copying $f...
+			cp $f $CONFIG
+	    else
+			echo " " Merging $f...
+			diff3 -m -L "Your version follows:" $f -L "Original version follows:" $CONFIG_ORIG/$f -L "New version above." $CONFIG_NEW/$f > $CONFIG/$f || { echo -e "\nWarning: conflicts during configuration merge of config/$f.\nYou should check it manually.\n" ; WARN=ON; }
+	    fi
+	fi
+    done
+    cd $PWD_OLD
+fi
+
+rm -rf $CONFIG_ORIG
+rm -rf $NEW_CONFIG_ORIG
+mv $CONFIG_NEW $NEW_CONFIG_ORIG
+chmod 755 $NEW_CONFIG_ORIG
+chmod 400 $NEW_CONFIG_ORIG/*
+echo -e "Don't change anything in this directory; it will be needed exactly as it is now\nwhen you upgrate to a new version." >> $NEW_CONFIG_ORIG/README
+
+#delete obsolete configuration
+if test @enable_etc@ = yes ; then
+    rm -rf $INSTALL/config*
+else
+    rm -rf @rpmroot@/etc/@prognamebase@
+fi
+
+if test $STARTMASTER = yes ; then
+    ./rc.d/@prognamebase@-master start
+fi
+
+if test $STARTSERVER = yes ; then
+    ./rc.d/@prognamebase@ start
+fi
+
+echo -e "Installation complete! Just type @progname@ to start.\n"
+if test "$WARN" = "ON"; then
+    echo -e "Check the above output for warnigs first!\n"
+fi

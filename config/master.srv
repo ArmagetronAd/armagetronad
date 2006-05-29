@@ -1,0 +1,35 @@
+ServerBegin
+connection  master1.armagetronad.net
+port        4533
+method      0
+key         0  
+tna         0
+name        Master Server 1
+ServerEnd
+
+ServerBegin
+connection  master2.armagetronad.net
+port        4533
+method      0
+key         0  
+tna         0
+name        Master Server 2
+ServerEnd
+
+ServerBegin
+connection  master3.armagetronad.net
+port        4533
+method      0
+key         0  
+tna         0
+name        Master Server 3
+ServerEnd
+
+ServerBegin
+connection  master4.armagetronad.net
+port        4533
+method      0
+key         0  
+tna         0
+name        Master Server 4
+ServerEnd

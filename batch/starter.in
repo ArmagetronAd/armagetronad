@@ -1,0 +1,36 @@
+#!/bin/bash
+#
+# starts @progtitle@ from the installation directory
+
+INSTALL=@prefix@/games/@progname@
+
+if test ! -r $HOME/.@prognamebase@ ; then
+   mkdir $HOME/.@prognamebase@
+
+   if test -r $HOME/.ArmageTronrc ; then
+       #migrage very old configuration
+       echo "Porting very old configuration..."
+       mkdir $HOME/.@prognamebase@/var
+       mv $HOME/.ArmageTronrc $HOME/.@prognamebase@/var/user.cfg
+   fi
+fi
+
+if test ! -r $HOME/.@prognamebase@/var ; then
+    #migrate old configuration
+    files=$( find $HOME/.@prognamebase@ -type f -maxdepth 1 )
+
+    mkdir $HOME/.@prognamebase@/var
+       
+    test "$files" != "" && echo "Porting old configuration..." && mv $files $HOME/.@prognamebase@/var
+fi
+
+if test  "x$1" = "x-h" ; then
+    echo -e "\n\nTo uninstall @progtitle@, type @progname@ --uninstall."
+fi
+
+if test  "x$1" = "x--uninstall"  ; then
+    $INSTALL/bin/uninstall
+else
+    $INSTALL/bin/@progname@ --datadir $INSTALL @configdir@ --userdatadir $HOME/.@prognamebase@ $*
+fi
+

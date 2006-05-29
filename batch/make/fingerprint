@@ -1,0 +1,76 @@
+#! /bin/sh
+
+# generates a fingerprint of the source code state in the form of an archive of CVS directories
+
+# set -x
+
+echo Generating CVS fingerprint...
+
+rm -rf fingerprint
+PD="`pwd`"
+cd ${top_srcdir}/..
+rm -rf "$PD/fingerprint"
+mkdir "$PD/fingerprint"
+for f in *rmagetronad *rmagetronad_build* *rmagetronad_win* release; do
+    if test -d $f; then
+        mkdir "$PD/fingerprint/$f"
+    	find $f -type d -mindepth 1 ! -name "fingerprint" -exec mkdir "$PD/fingerprint/"\{\} \;  > /dev/null 2>&1
+        find $f -name Entries -exec cp -r \{\} "$PD/fingerprint/"\{\} \; > /dev/null 2>&1
+        find $f -name Tag -exec cp -r \{\} "$PD/fingerprint/"\{\} \;  > /dev/null 2>&1
+        find $f -name Repository -exec cp -r \{\} "$PD/fingerprint/"\{\} \;  > /dev/null 2>&1
+	fi
+done
+cd "$PD"
+
+find fingerprint -depth -type d ! -name CVS -exec rmdir \{\} \; > /dev/null 2>&1 
+
+# copy regeneration script
+cp ${top_srcdir}/batch/make/regenerate_fingerprint fingerprint/regenerate.sh
+
+# see if all CVS directories contain the Tag file
+CVSDIRS=`find fingerprint -depth -type d -name CVS`
+TAG=""
+SAMETAG=true
+for f in $CVSDIRS; do
+    if test -d $f; then
+        if test -r "$f/Tag"; then
+            THISTAG=`sed < "$f/Tag" -e 's,^N,,' -e 's,^T,,'`
+            if test -z "$TAG" || test "$THISTAG" = "$TAG"; then
+                TAG=$THISTAG
+            else
+                if test $SAMETAG = true; then
+                    echo $f has an unique tag, full fingerprint required
+                fi
+                SAMETAG=false
+            fi
+        else
+            if test $SAMETAG = true; then
+                echo $f has no tag, full fingerprint required
+            fi
+            SAMETAG=false
+        fi
+    fi
+done
+
+if echo $TAG | grep "^b" > /dev/null; then
+    if test $SAMETAG = true; then
+        echo $TAG is is only a branch tag, full fingerprint required
+    fi
+    SAMETAG=false
+fi
+
+if test $SAMETAG = true; then
+    echo "This seems to be a tagged release, no fingerprint needed."
+    cd fingerprint
+    for f in *; do if test -d $f; then
+        echo cvs co  -r $TAG `cat $f/CVS/Repository`>> regenerate.sh
+        rm -rf $f
+    fi;  done
+    cd "$PD"
+fi
+
+chmod 755 fingerprint/regenerate.sh
+
+# compress everything
+tar -cjf fingerprint.tbz fingerprint
+rm -rf fingerprint

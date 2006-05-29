@@ -1,0 +1,213 @@
+# Parts of the makefile that are not handled by automake
+
+###############
+# Fingerprint #
+###############
+
+# make snapshot of CVS state
+fingerprint.tbz:
+# make copies of all CVS state directories
+#   top_srcdir=${top_srcdir} sh ${top_srcdir}/batch/make/fingerprint
+	touch $@
+# later, you can uncompress it somewhere and do "./regenerate.sh" to regenerate the source tree
+# from CVS, so you have something to base your bugfixes on.
+
+##################
+# Beautification #
+##################
+
+# use this target if you're OK with the project's defaults and
+# want updated file timestamps
+rebeautify:
+	ARTISTIC_STYLE_OPTIONS=$(srcdir)/config/astylerc sh $(srcdir)/batch/make/beautify -t $(srcdir) .beautytag.re
+
+# use this target if you want to switch between your settings
+# (beautify-personal) and the project defaults to get back to
+# the defaults (timestamps stay untouched)
+beautify:
+	rm -f $(srcdir)/.beautytag.personal
+	ARTISTIC_STYLE_OPTIONS=$(srcdir)/config/astylerc sh $(srcdir)/batch/make/beautify $(srcdir) .beautytag
+
+# use this target to run astyle with your personal settings for
+# it (but remember to do "make beautify" before comitting to CVS!)
+beautify-personal:
+	rm -f $(srcdir)/.beautytag $(srcdir)/.beautytag.re
+	ARTISTIC_STYLE_OPTIONS=~/.astylerc sh $(srcdir)/batch/make/beautify $(srcdir) .beautytag.personal 
+
+##########
+# Checks #
+##########
+
+destdir.inst=/destdir
+destdir.inst2=/destdir
+destdir.inst3=
+
+predistcheckclean=rm -rf ._$* .leftover.$* .help .doc
+# checks whether installation and uninstallation works fine
+installcheck_install.%:
+	$(predistcheckclean)
+	mkdir ._$*
+
+#   simulate old data to migrate
+	mkdir -p ._$*/@oldvardir@
+	echo "Z-Man was here" > ._$*/@oldvardir@/users.txt
+
+#	install into destdir
+	ARMAGETRONAD_INSTALL_TESTING="yes" DESTDIR=`pwd`/._$*$(destdir.$*) ROOTDIR=`pwd`/._$* $(MAKE) install
+
+#	install fake rc.config
+	echo "user=$(USER)" >> ._$*$(destdir.$*)/$(aa_sysconfdir)/rc.config
+	echo "niceness_level=5" >> ._$*$(destdir.$*)/$(aa_sysconfdir)/rc.config
+#   echo "VARDIR=$$(pwd)/._$*/${localstatedir}" >> ._$*/destdir/$(aa_sysconfdir)/rc.config
+
+#	delete old configuration and prune empty directories
+	rm -rf ._$*@oldvardir@
+	for d in `find ._$* -type d -depth`; do rmdir $$d; done > /dev/null 2>&1 || true
+
+#   move to final destination
+	mv -f ._$*$(destdir.$*)/* ._$*/ || true
+	rmdir ._$*$(destdir.$*) || true
+
+	test -r	._$*/@aa_localstatedir@/users.txt
+
+installcheck_run_%: installcheck_install_%
+	@echo "Testing executable..."
+	cd ._$*; ./$(bindir)/@progname@
+
+installcheck_test.%: installcheck_install.%
+	@echo "Testing executable..."
+if BUILDMAIN
+	cd ._$*; ./$(bindir)/@progname@ --help > .help
+	test -s ._$*/.help
+	cd ._$*; ./$(bindir)/@progname@ --doc > .doc
+	test -s ._$*/.doc
+endif
+	rm -rf ._$*/var
+	rm -rf ._$*/${localstatedir}
+if USE_SYSINSTALL
+if BUILDMASTER
+	@echo "Testing master server starter script..."
+	@cd ._$*; ./$(initdir)/@prognamebase@-master start
+	@cd ._$*; ./$(initdir)/@prognamebase@-master status || { sleep 5; ./$(initdir)/@prognamebase@-master status; }
+	@cd ._$*; ./$(initdir)/@prognamebase@-master restart
+	@cd ._$*; ./$(initdir)/@prognamebase@-master status || { sleep 5; ./$(initdir)/@prognamebase@-master status; }
+	@cd ._$*; ./$(initdir)/@prognamebase@-master stop
+	@sleep 1
+	@cd ._$*; ./$(initdir)/@prognamebase@-master stop || true
+	@cd ._$*; if ./$(initdir)/@prognamebase@-master status; then exit 1; else echo "Success!"; fi
+endif
+if BUILDDEDICATED
+	@echo "Testing server starter script..."
+	@cd ._$*; ./$(initdir)/@progname@ start
+	@cd ._$*; ./$(initdir)/@progname@ status || { sleep 5; ./$(initdir)/@progname@ status; }
+	@cd ._$*; ./$(initdir)/@progname@ restart
+	@cd ._$*; ./$(initdir)/@progname@ status || { sleep 5; ./$(initdir)/@progname@ status; }
+	@cd ._$*; ./$(initdir)/@progname@ stop
+	@sleep 1
+	@cd ._$*; ./$(initdir)/@progname@ stop || true
+	@cd ._$*; if ./$(initdir)/@progname@ status; then exit 1; else echo "Success!"; fi
+#   for testing the stop-on-uninstall code
+#   @cd ._$*; ./$(initdir)/@progname@ start
+endif
+endif
+
+installcheck_douninstall.inst:
+	DESTDIR=`pwd`/._inst $(MAKE) uninstall
+
+installcheck_douninstall.inst2:
+	./._inst2/$(bindir)/${uninstaller}
+
+installcheck_douninstall.inst3:
+	./._inst3/$(bindir)/${uninstaller}
+
+installcheck_uninstall.inst: installcheck_test.inst
+installcheck_uninstall.%: installcheck_install.%
+	rm -rf ._$*/${localstatedir} ._$*/.doc ._$*/.help ._$*/leak.log ._$*/memprofile*.txt ._$*/gmon.out ._$*/@logdir@
+	$(MAKE) installcheck_douninstall.$*
+	find ._$* -type f -exec echo leftover file \{\} >> .leftover.$* \;
+	find ._$* -type l -exec echo leftover link \{\} >> .leftover.$* \;
+	if test -s .leftover.$*; then cat .leftover.$*; false; else true; fi
+	rm -f .leftover.$*
+
+installcheck: installcheck_uninstall.inst installcheck_uninstall.inst2
+	$(predistcheckclean)
+	@echo -e "\n---------------------------------------\nInstallation and uninstallation worked!\n---------------------------------------\n"
+
+cvscheck: beautify installcheck
+fullcheck: beautify cvscheck distcheck
+
+########################
+# tracking CVS changes #
+########################
+
+# tag that will be newer than all CVS control files, thus being a good indicator for
+# official code changes that warrant version bumps or ChangeLog updates
+.cvsfiles:
+	touch $@
+#	rm -f $@
+#	touch -r $(srcdir)/ChangeLog $@
+#	for dir in $$(find $(srcdir) -name CVS | grep -v ". ."); do\
+#		echo -e .cvsfiles: $${dir}/Entries "\n" $${dir}/Entries: "\n\t@rm -f .cvsfiles" >> $@; \
+#	done
+
+ @silent_inc@ .cvsfiles
+
+# the version creation shell script only looks for changes of this directory, so
+# we update it as well
+$(srcdir)/CVS: .cvsfiles
+	test -r $@ && touch $@
+
+# Keeping version up to date,
+# but only touch it silently on real changes, and only when a distribution is built
+VERSIONDEPS=$(wildcard $(srcdir)/*_version) $(wildcard $(srcdir)/CVS)
+.version.new: $(VERSIONDEPS)
+	echo "m4_define(AUTOMATIC_VERSION,["`sh $(srcdir)/batch/make/version $(srcdir)`"])" > .version.new
+	if diff $@ ${srcdir}/version >/dev/null 2>&1; then :; else cp $@ ${srcdir}/version; fi
+
+# extra target to make before a real distribution is built
+distprep: .version.new
+# clear fingerprint
+#   if test -r ${srcdir}/CVS/Entries; then rm -f fingerprint.tbz; fi
+
+# change version on deliberate version edit anyway
+$(srcdir)/version: $(wildcard $(srcdir)/*_version)
+	echo "m4_define(AUTOMATIC_VERSION,["`sh $(srcdir)/batch/make/version $(srcdir)`"])" > $@
+
+# Keep the changelog up to date as well (triggered by make dist only)
+$(srcdir)/ChangeLog: .cvsfiles
+	touch $@
+#	rm -f $@
+#	@echo -e "\nGenerating ChangeLog from CVS, please be patient...\n"
+#	cd ${srcdir}; cvs2cl --follow-only b0_2_8_0 2>&1 || echo "No official releasse: no changelog" > ChangeLog
+#	test -r $@ || touch $@
+
+cvsclean:
+	rm -rf .cvsfiles .version.new
+
+clean-local: cvsclean
+
+#############
+# Debugging #
+#############
+
+.gdbinit:
+	echo "break st_Breakpoint()" > $@
+
+@progname@: all
+	ln -sf src/armagetronad_main $@
+
+DEBUGFILES=.gdbinit @progname@
+debug: $(DEBUGFILES)
+
+run: debug all
+	./@progname@
+
+debugclean:
+	rm -rf @progname@ @prognamebase@ $(DEBUGFILES) leak.log memprofile*.txt
+
+debugdistclean:
+	rm -rf var
+
+clean-local: debugclean
+
+distclean-local: debugdistclean

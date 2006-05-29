@@ -1,0 +1,13 @@
+install
+masterstarter
+pushscores
+rcd_config
+rcd_master
+rcd_server
+rcd_startstop
+serverstarter
+starter
+stat
+uninstall
+Makefile.in
+sysinstall

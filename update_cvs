@@ -1,0 +1,7 @@
+#!/bin/sh
+if ! [ -r .dont_update ] ; then
+ cd ..
+ cvs -d:pserver:anonymous@cvs.armagetron.sourceforge.net:/cvsroot/armagetron login
+ cvs -d:pserver:anonymous@cvs.armagetron.sourceforge.net:/cvsroot/armagetron co armagetron
+ cd armagetron
+fi

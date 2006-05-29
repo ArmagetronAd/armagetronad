@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# pushes @progtitle@ scorefiles up to a webserver using rsync
+# these variables probably need adaption to your local needs
+
+VAR=/home/@prognamebase@/.@prognamebase@/var
+LOCALTARGETBASE=$HOME/WWW/SourceForge/htdocs
+REMOTETARGETBASE=armagetron.sourceforge.net:/home/groups/a/ar/armagetron/htdocs
+LOCALTARGET=$LOCALTARGETBASE/scores/zman
+REMOTETARGET=$REMOTETARGETBASE/scores/zman
+REMOTEUSER=z-man
+
+test -r $VAR || { echo "$VAR not readable"; exit 1; }
+test -r $LOCALTARGET || { echo "$LOCALTARGET not writable"; exit 1; }
+cp -R $VAR/* $LOCALTARGET
+
+cd $LOCALTARGET
+
+rsync -t -r --exclude "*~" --exclude "scorelog*"  -e "ssh -x -l $REMOTEUSER" $LOCALTARGET/* $REMOTETARGET
+
+cd ../..
+
+rm -f scores.html
+make scores.html
+
+rsync -t  -e "ssh -x -l $REMOTEUSER" $LOCALTARGETBASE/scores.html $REMOTETARGETBASE

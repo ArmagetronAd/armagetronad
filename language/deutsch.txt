@@ -1,0 +1,2297 @@
+# maintained (mainly) by z-man
+# distributed under the same conditions as the
+# rest of Armagetron Advanced (see COPYING)
+
+language                      Deutsch
+
+#*****************************************
+#*****************************************
+#*****************************************
+#*****************************************
+# 
+# Help texts for the various configuration
+# options that can be set via the console.
+# 
+# The text item for a configuration item
+# with name NAME has the ID name_help.
+#
+#*****************************************
+#*****************************************
+#*****************************************
+#*****************************************
+
+first_use_help                Wurde \g zum ersten mal gestartet?
+include_help                  bindet die angegebene Datei ein
+sinclude_help                 bindet die angegebene Datei ein, ohne eine Fehlermeldung zu liefern, wenn sie nicht gefunden wurde
+new_team_allowed_help         Kann man momentan ein neues Team eröffnen?
+
+#********************************************
+#********************************************
+#
+# lost settings
+#
+#********************************************
+#********************************************
+
+keyboard_help                 Tastatureinstellungen
+
+#********************************************
+#********************************************
+#
+# keyboard settings
+#
+#********************************************
+#********************************************
+
+doublebind_time_help          Zeit, die zwischen zwei verschiedenen Tastendrücken für dieselbe Aktion liegen muss
+
+#********************************************
+#********************************************
+#
+# Cycle physics related configuration options
+#
+#********************************************
+#********************************************
+
+cycle_speed_help              Grundgeschwindigkeit der Vehikel im freien Raum
+cycle_speed_min_help          Minimalgeschwindigkeit der Vehikel im Verhältnis zu CYCLE_SPEED
+cycle_speed_decay_below_help  Rate, mit der sich die Geschwindigkeit der Vehikel CYCLE_SPEED von unten nähert
+cycle_speed_decay_above_help  Rate, mit der sich die Geschwindigkeit der Vehikel CYCLE_SPEED von oben nähert
+cycle_start_speed_help        Startgeschwindigkeit der Vehikel
+cycle_sound_speed_help        Geschwindigkeit, bei der der Motorton "normal" klingt
+
+cycle_accel_help              Beschleunigungsstärke der Wände
+cycle_accel_self_help         Multiplikator für CYCLE_ACCEL für eigene Wände
+cycle_accel_team_help         Multiplikator für CYCLE_ACCEL für Wände von Teampartnern
+cycle_accel_enemy_help        Multiplikator für CYCLE_ACCEL für Wände von Feinden
+cycle_accel_rim_help          Multiplikator für CYCLE_ACCEL für Arenawände
+cycle_accel_slingshot_help    Multiplikator für den Gesamteffekt von CYCLE_ACCEL, wenn sich das Vehikel zwischen einer eigenen und einer beliebigen anderen Wand befindet
+cycle_accel_offset_help       Minimaler effektiver Abstand zu einer Wand
+cycle_wall_near_help          Bei diesem Abstand setzt die Beschleunigung durch Wände ein
+
+cycle_turn_memory_help        Zahl der noch nicht ausgeführten Lenkvorgänge, die sich ein Vehikel exakt vormerkt
+
+cycle_delay_help              Pause zwischen zwei Lenkvorgängen
+cycle_delay_bonus_help        Extrafaktor, mit dem CYCLE_DELAY auf dem Server multipliziert wird.
+cycle_delay_timebased_help    CYCLE_DELAY wird als Zeit interpretiert, wenn diese Variable 1 ist (Standard) und als Länge (gemessen an der Besisgeschwindigkeit) wenn dies 0 ist. Zwischenwerte und Werte außerhalb von 0 und 1 sind ebenfalls erlaubt.
+cycle_turn_speed_factor_help  Faktor, mit dem die Geschwindigkeit der Vehikel bei jedem Abbiegen multipliziert wird.
+
+
+cycle_brake_help              Effizienz der Bremsen
+
+cycle_rubber_help             Toleranz bei Kollisionen mit Wänden
+cycle_rubber_time_help        Zeit, in der der Rubber-Vorrat aufgefüllt wird.
+cycle_rubber_legacy_help      Restauriert das alte, von der Darstellungsgeschwindigkeit der Clients abhängige, Rubber-Verhalten wenn alte Clients mitspielen. Alt heißt hier <= 0.2.7.0.
+cycle_rubber_timebased_help   Die Rate, mit der sich das Rubber-Meter füllt, wird von der Geschwindigkeit des Vehikels bestimmt, wenn diese Variable 0 ist. Bei einem Wert von 0 ist ist die Rate konstant. Zwischenwerte und Werte außerhalb von 0 und 1 sind ebenfalls erlaubt.
+cycle_rubber_speed_help       Maximale logarithmische Annäherungsgeschwindigket an Wände, wenn Kollisionstoleranz aktiv ist (pro Sekunde kann das Vehikel der Wand nur um den Faktor ca. 0.4^{dieser Wert} näher kommen)
+cycle_rubber_mindistance_help Die Kollisionstoleranz hält Vehikel mindestens in diesem Abstand zu Wänden
+cycle_rubber_mindistance_ratio_help Zusatzwert zu CYCLE_RUBBER_MINDISTANCE, wächst mit der Länge der Wand an
+cycle_rubber_mindistance_reservoir_help Zusatzwert zu CYCLE_RUBBER_MINDISTANCE, der bei leerem Rubber-Meter voll und zum tragen kommt und mit steigendem Füllstand langsam ausgeblendet wird.
+cycle_rubber_mindistance_unprepared_help Zusatzwert zu CYCLE_RUBBER_MINDISTANCE für schlecht vorbereitete Annäherungen. Eine Annäherung zählt als schleicht vorbereitet, wenn die letzte Richtungsänderung des Vehikels weniger als CYCLE_RUBBER_MINDISTANCE_PREPARATION her ist.
+cycle_rubber_mindistance_preparation_help Die Zeitskala, nach der eine Annäherung als schlecht vorbereitet zählt und der wert in CYCLE_RUBBER_MINDISTANCE_UNPREPARED zum Tragen kommt.
+cycle_rubber_mindistance_legacy_help Zusatzfaktor zu CYCLE_RUBBER_MINDISTANCE wenn ältere (<0.2.7.1) Versionen mit im Spiel sind
+cycle_rubber_minadjust_help   Unabhängig vom Wert von CYCLE_RUBBER_MINDISTANCE kann man sich, wenn man schon nah an einer Wand ist, durch Zickzackbewegungen und volle Drehungen in diesen relativen Schritten der Wand nähern.
+cycle_rubber_delay_help       Während dieser Zeit, die noch mit CYCLE_DELAY multipliziert wird, wird die Effizienz des Rubber-Vorrats mit CYCLE_RUBBER_DELAY_BONUS multipliziert.
+cycle_rubber_delay_bonus_help Faktor für CYCLE_RUBBER_DELAY.
+cycle_ping_rubber_help        Noch mehr Toleranz für Spieler mit hohem Ping
+cycle_rubber_wall_shrink_help Bei endlicher Wandlänge wird der aufgebrauchte Rubber-Vorrat mit diesem Wert multipliziert und das Ergebnis wird von der Wandlänge abgezogen.
+cycle_brake_refill_help       Wiederauffüllgeschwindigkeit des Bremsenreservoirs
+cycle_brake_deplete_help      Entleerungsgeschwindigkeit des Bremsenreservoirs
+cycle_sync_interval_enemy_help Zeit zwischen Positionsupdates der gegnerischen Vehikel in Sekunden
+cycle_sync_interval_self_help Zeit zwischen Positionsupdates des eigenen Vehikels in Sekunden
+cycle_avoid_oldclient_bad_sync_help Wenn dies auf 1 gesetzt wird, versucht der Server, älteren Clients keine verwirrenden Positionsupdates zu senden
+cycle_fair_antilag_help       Wenn dies auf 1 gesetzt wird, wird der Fairness halber der Code deaktiviert, der seitliches gleiten der Vehikel verhindern soll, wenn ältere Versionen im Spiel sind.
+cycle_time_tolerance_help     Maximale Zeitdifferenz zwischen dem Kommando und der Ausfürhung einer Richtungsänderung
+cycle_packetloss_tolerance_help Solange ein fehlender Abbiegebefehl eines Spielers durch den Verlust so vieler Netzwerkpakete erklärt werden kann, wird sein Vehikel nicht zerztört. Achtung, duch Aktivieren dieser Option wird Betrug ermöglicht.
+cycle_sync_ff_help            Geschwindigkeit der Simulation für die Extrapolation: bei kleineren Werten sinkt die Prozessorlast, aber dafür steigt die effektive Netzverzögerung.
+cycle_sync_ff_steps_help      Zahl der Extrapolationszeitschritte in jedem echten Zeitschritt: je mehr, desto genauer ist die Extrapolation
+topology_police_help          Die Topologiepolizei analysiert das Spielgeschehen im nachhinein und fängt verletzungen der Regeln ab. 1 hier aktiviert sie.
+cycle_smooth_time_help        Zeitskala für Positionsglättungen. Höhere Werte lassen die animationen glatter aussehen, sind aber weniger genau. Zu niedrige Werte bewirken Sprünge in der Netzwerksynchronisation.
+cycle_smooth_min_speed_help   Minimale Geschwindigketi für Netzwerk-Positionskorrekturen (relativ zur Vehikelgeschwindigkeit angegeben)
+cycle_smooth_threshold_help   Nur Positonsupdates, die das Vehikel um mehr als diesen Wert (gemessen relativ zur Geschwindigkeit) korrigieren, werden geglättet, grössere Korrekturen werden direkt übernommen.
+cycle_max_refcount_help       Maximale Zahl der Referenzen auf ein Vehikel, bevor es sich selbst zerstört. Dient zum Schutz gegen DOS-Attacken, die dem Server Rechenzeit kosten.
+
+#********************************************
+#********************************************
+#
+#      Score rules configuration items
+#
+#********************************************
+#********************************************
+
+enemy_teammate_penalty_help   Abzug in Sekunden, mit der der Zeitpunkt des Kontaktes mit einem Teampartner bei der Bestimmung des Killers belegt wird.
+enemy_dead_penalty_help       Abzug in Sekunden, mit der der Zeitpunkt des Kontaktes mit einem schon toten Feind bei der Bestimmung des Killers belegt wird.
+enemy_chatbot_penalty_help    Abzug in Sekunden, mit der der Zeitpunkt des Kontaktes mit einem Feind bei der Bestimmung des Killers belegt wird, wenn es sich nur um die Ausweichreaktion des Chatbots handelt.
+enemy_currenttime_influence_help Wenn dies auf 1 gesetzt wird, so ist nicht mehr die Aufbauzeit der Mauer, sondern die Zeit des Kontaktes relevant für die Bestimmug des Killers. Alle Zahlenwerte sind hier erlaubt.
+enemy_suicide_timeout_help    Wenn es keinen Feindkontakt innerhalb dieser Zeit in Sekunden gab, dann zählt ein Tod als Selbstmord.
+score_die_help                Punktzahl, die man fürs Sterben erhält (sollte negativ sein)
+score_kill_help               Punktzahl, die man für das Beseitigen eines Gegners erhält (sollte positiv sein)
+score_suicide_help            Was man für Selbstmord erhält (sollte negativ sein)
+score_win_help                Was man für den Gewinn einer Runde erhält (sollte positiv sein)
+score_deathzone_help          Was Sie für das Schlagen der Todeszone erhalten
+
+sp_score_win_help             Was man für den Gewinn einer Runde im Einzelspielermodus erhält (sollte positiv sein)
+sp_walls_stay_up_delay_help   Anzahl der Sekunden, die die Wände noch stehenbleiben, wenn ein Spieler crasht; negative Werte lassen die Wände ewig stehen.
+sp_walls_length_help          Länge der Wände in Metern; negative Werte lassen die Wand unendlich lang sein.
+sp_explosion_radius_help      Zerstörungsradius der Explosionen
+sp_team_balance_on_quit_help  Gleiche Teams aus, wenn jemand das Spiel verlässt?
+sp_team_balance_with_ais_help Gleiche Teams mit Computergegnern aus?
+sp_team_max_imbalance_help    Höchste tolerierte Ungleichheit der Teams, temporär
+sp_team_max_players_help      Höchstzahl von Spielern pro Team
+sp_team_min_players_help      Mindestzahl von Spielern pro Team
+sp_teams_max_help             Höchstzahl von Teams
+sp_teams_min_help             Mindestzahl von Teams
+sp_finish_type_help           Rundenende schnell oder langsam?
+sp_game_type_help             Spieltyp
+sp_auto_iq_help               Passt automatisch den IQ der Computergegner an
+sp_auto_ais_help              Passt automatisch die Zahl der Computergegner an
+sp_ai_iq_help                 IQ der Computergegner
+sp_min_players_help           Mindestzahl von Spielern
+sp_num_ais_help               Anzahl der Computergegner
+sp_limit_score_help           Beende das Match wenn ein Spieler diesen Punktestand erreicht    
+sp_limit_rounds_help          Beende das Match nach dieser Rundenzahl
+sp_limit_time_help            Beende das Match nach Ablauf von soviel Minuten
+
+spawn_wingmen_back_help       Bestimmt, wie weit die Flügelmänner in der Teamformation nach hinten versetzt sind.
+spawn_wingmen_side_help       Bestimmt, wie weit die Flügelmänner in der Teamformation zur Seite versetzt sind.
+
+walls_stay_up_delay_help      Anzahl der Sekunden, die die Wände noch stehenbleiben, wenn ein Spieler crasht; negative Werte lassen die Wände ewig stehen.
+walls_length_help             Länge der Wände in Metern; negative Werte lassen die Wand unendlich lang sein.
+explosion_radius_help         Zerstörungsradius der Explosionen
+team_balance_on_quit_help     Gleiche Teams aus, wenn jemand das Spiel verlässt?
+team_balance_with_ais_help    Gleiche Teams mit Computergegnern aus?
+team_max_imbalance_help       Höchste tolerierte Ungleichheit der Teams, temporär
+team_max_players_help         Höchstzahl von Spielern pro Team
+team_min_players_help         Mindestzahl von Spielern pro Team
+team_allow_shuffle_up_help    Wenn dies auf 1 gesetzt wird, dann dürfen sich Spieler mit /teamshuffle selber nach innen befördern. Ansonsten dürfen sie sich nur degradieren.
+team_center_is_boss_help      Wenn dies auf 1 gesetzt wird, so ist der mittlere Spieler immer der Boss eines Teams. Ansonsten trägt der älteste Spieler diese Verantwortung.
+
+teams_max_help                Höchstzahl von Teams
+teams_min_help                Mindestzahl von Teams
+finish_type_help              Rundenende schnell oder langsam?
+game_type_help                Spieltyp
+auto_iq_help                  Passt automatisch den IQ der Computergegner an
+auto_ais_help                 Passt automatisch die Zahl der Computergegner an
+ai_iq_help                    IQ der Computergegner
+min_players_help              Mindestzahl von Spielern
+num_ais_help                  Anzahl der Computergegner
+limit_score_help              Beende das Match wenn ein Spieler diesen Punktestand erreicht
+limit_rounds_help             Beende das Match nach dieser Rundenzahl
+limit_time_help               Beende das Match nach Ablauf von soviel Minuten
+
+auto_team_help                Wenn dies auf 1 steht, werden Spieler automatisch einem Team zugeteilt. Steht es auf 0, bleiben sie Zuschauer.
+
+allow_team_name_color_help    Erlaubt es, ein Team nach einer Farbe zu benennen
+allow_team_name_player_help   Erlaubt es, ein Team nach dem Anführer zu benennen
+
+# wall length modification
+cycle_dist_wall_shrink_help   Entfernungsmultiplikator bei der Wandlängenberechnung. Genaue Anleitung in settings.cfg.
+cycle_dist_wall_shrink_offset_help Entfernungsoffset bei der Wandlängenberechnung. Genaue Anleitung in settings.cfg.
+
+# respawn relevant settings (no server supports respawning yet, but the client is prepared)
+cycle_blink_frequency_help    Frequenz in Hz, mit der ein unverwundbares Vehikel blinkt
+cycle_invulnerable_time_help  Zeit in Sekunden, die ein Vehikel nach dem Weidererscheinen unverwundbar ist.
+cycle_wall_time_help          Zeit in Sekunden, die ein Vehikel nach dem Weidererscheinen noch keine Wand hinterlässt.
+cycle_first_spawn_protection_help Wenn dies auf 1 gesetzt wird, so gelten CYCLE_INVULNERABLE_TIME und CYCLE_WALL_TIME schon am Anfang der Runde.
+
+#********************************************
+#********************************************
+#
+#       Game rules configuration items
+#
+#********************************************
+#********************************************
+
+# map file
+map_file_help                 Pfad zur Datei der Karte, auf der gespielt wird.
+map_uri_help                  VERALTET: verwende RESOURCE_REPOSITORY_SERVER und MAP_FILE.
+arena_axes_help               In wie viele Richtungen können die Vehikel fahren?
+resource_repository_client_help Nicht lokal vorhandene Resourcen werden von hier heruntergeladen. Dieser Wert wird auf dem Client unabhängig vom Server festgelegt und zeigt standardmäßig auf ein von den Entwicklern verwaltetes Archiv.
+resource_repository_server_help Nicht lokal vorhandene Resourcen werden von hier heruntergeladen. Dieser Wert wird auf dem Server festgelegt und and die Clients übertragen. Server-Administratoren können diesen Wert auf ein von ihnen verwaltetes Archiv setzen.
+
+# limits
+speed_factor_help             Geschwindigkeitsmodifizierer (logarithmisch)
+sp_speed_factor_help          Geschwindigkeitsmodifizierer (logarithmisch)
+size_factor_help              Arenagrösse (logarithmisch)
+sp_size_factor_help           Arenagrösse (logarithmisch)
+
+# single player settings (used by dedicated server only)
+sp_ais_help                   Zahl der Computergegner im Einzelspielermodus
+
+start_new_match_help          Beginnt ein neues Match
+
+# ladder and highscore rules
+ladder_min_bet_help           Minimale Punktzahl, die als Leitereinsatz gegeben wird
+ladder_percent_bet_help       Prozentsatz der eigenen Punktzahl, der al Leitereinsatz gegeben wird
+ladder_tax_help               Prozentsatz des Leitereinsatzes, den das Finanzamt kassiert
+ladder_lose_percent_on_load_help Prozentsatz der Leiterpunktzahl, der bei jedem Neuladen verlorengeht
+ladder_lose_min_on_load_help  minimale Punktzahl, die bei jedem Neuladen verlorengeht
+
+ladder_gain_extra_help        Ping-Abhängiger Leiter-Bonus für den Sieger
+
+real_arena_size_factor_help   Aktuelle Arenagrösse; Finger weg! verändere stattdessen arena_size_factor.
+real_cycle_speed_factor_help  Aktueller Geschwindigkeitsfaktor; Finger weg! verändere stattdessen cycle_speed_factor.
+
+sp_win_zone_min_round_time_help Bevor die Siegzone aktiviert wird, muss die aktuelle Runde mindestens so viele Sekunden gedauert haben.
+sp_win_zone_min_last_death_help Bevor die Siegzone aktiviert wird, muss das letzte interessante Ereignis ( Tod ) so viele Sekunden zurück liegen.
+win_zone_min_round_time_help  Bevor die Siegzone aktiviert wird, muss die aktuelle Runde mindestens so viele Sekunden gedauert haben.
+win_zone_min_last_death_help  Bevor die Siegzone aktiviert wird, muss das letzte interessante Ereignis ( Tod ) so viele Sekunden zurück liegen.
+win_zone_expansion_help       Expansionsgeschwindigkeit der Siegzone
+win_zone_initial_size_help    Anfangsgrösse der Siegzone
+win_zone_deaths_help          Ein Wert von 1 macht es zu eine Todeszone
+win_zone_randomness_help      Zufallsfaktor in der Anfangsposition der Siegzone. 0 lässt sie immer in der Mitte erscheinen, 1 verteilt sie gleichmässig.
+
+game_timeout_help             Zeitlimit für die Synchronisation des Spielzustands; gibt in etwa die maximale Gesamtzeit an, die der Server auf die Clients zwischen Runden wartet.
+last_chat_break_time_help     Der letzte Zeitpunkt in einer laufenden Runde, zu der ein Spieler noch die Uhr anhält, wenn er in eimem Menu steckt.
+extra_round_time_help         Länge einer Extra-Pause am Anfang jeder Runde
+player_chat_wait_max_help     So lange (in Sekunden) wird maximal auf einen Spieler gewartet, der in einem Menu steckt.
+player_chat_wait_fraction_help So lange (an der Gesamtzeit gemessen) wird maximal auf einen Spieler gewartet, der in einem Menu steckt.
+player_chat_wait_single_help  Setze dies auf 1, wenn immer nur ein Spieler seinen Zeitvorrat reduziert bekommen soll, obwohl auch auf andere noch gewartet wird.
+player_chat_wait_teamleader_help Setze dies auf 1, wenn nur Teamchefs eine Spielpause auslösen können soll, oder auf 0, um das allen Spielern zu erlauben.
+
+chatter_remove_time_help      Zeit in Sekunden im Chatbot-Zustand, nach der ein Spieler aus dem Spiel geworfen wird
+idle_remove_time_help         Zeit in Sekunden ohne Steuerungsbefehl, nach der ein Spieler aus dem Spiel geworfen wird
+idle_kick_time_help           Zeit in Sekunden ohne Steuerungsbefehl, nach der ein Spieler vom Server geworfen wird
+
+#********************************************
+#********************************************
+#
+#       Player Configuration items
+#
+#********************************************
+#********************************************
+
+player_name_confitem_help     Spielername
+camcenter_help                Zentriere die interne Kamera in Fahrtrichtung
+start_cam_help                Lieblingskameramodus
+start_fov_help                Anfänglicher Sichtwinkel
+allow_cam_help                Erlaubt/Verbietet die veschiedenen Kameramodi
+instant_chat_string_help      Kurzmeldungen, die man per Tastendruck aktivieren kann
+name_team_after_player_help   Benenne das Team nach dem Anführer?
+fav_num_per_team_player_help  Bevorzugte Anzahl von Spielern pro Team
+spectator_mode_help           Setzt diesen Spieler in den Beobachtungsmodus
+auto_incam_help               Schaltet automatisch in die interne Kamera, wenn man in ein Labyrinth fährt
+camwobble_help                Bewegt die interne Kamera mit dem Vehikel
+
+color_b_help                  Vehikel- und Wandfarbe, blauer Anteil. Direkte Änderungen an dieser Variablen während eines Spiels werden nicht unterstützt ( Das Menu kurz aktivieren hilft aber ).
+color_g_help                  Vehikel- und Wandfarbe, grüner Anteil. Direkte Änderungen an dieser Variablen während eines Spiels werden nicht unterstützt ( Das Menu kurz aktivieren hilft aber ).
+color_r_help                  Vehikel- und Wandfarbe, roter Anteil. Direkte Änderungen an dieser Variablen während eines Spiels werden nicht unterstützt ( Das Menu kurz aktivieren hilft aber ).
+
+#********************************************
+#********************************************
+#
+#       Convenience
+#
+#********************************************
+#********************************************
+
+history_size_console_help     Anzahl der Zeilen im Konsolengedächtnis.
+history_size_chat_help        Anzahl der Zeilen im Chat-Gedächtnis.
+
+#********************************************
+#********************************************
+#
+#       Spam protection
+#
+#********************************************
+#********************************************
+
+ping_flood_time_10_help       Kürzeste tolerierte Zeit, während der 10 Pings von einer Maschine kommen dürfen.
+ping_flood_time_20_help       Kürzeste tolerierte Zeit, während der 10 Pings von einer Maschine kommen dürfen.
+ping_flood_time_50_help       Kürzeste tolerierte Zeit, während der 10 Pings von einer Maschine kommen dürfen.
+ping_flood_time_100_help      Kürzeste tolerierte Zeit, während der 10 Pings von einer Maschine kommen dürfen.
+ping_flood_global_help        Die Zeiten, die bei PING_FLOOD_TIME_X angegeben sind, zählen, mit diesem Faktor multipliziert, auch für Pings von allen Maschinen zusammengenommen. Ein negativer Wert schaltet dieses Feature ab.
+
+spam_protection_repeat_help   Mindestzeit, die zwischen gleichlautenden Chat-Nachrichten liegen muss.
+spam_protection_help          Schärfe des Spamschutzes; der Kehrwert bestimmt die minimale Zeit zwischen zwei Nachrichten.
+spam_protection_vote_help     Extrafaktor auf SPAM_PROTECTION für das eröffnen von Abstimmungen.
+spam_protection_chat_help     Extrafaktor auf SPAM_PROTECTION für Chat-Nachrichten.
+spam_penalty_help             Extrastrafe für eine erkanne Spam-Aktion
+spam_maxlen_help              Maximallänge für die Chat-Nachrichten.
+spam_autokick_help            Spamer-Wert, bei dem der Spieler automatisch vom Server geworfen wird.
+silence_all_help              Wenn dieser Wert auf 1 gesetzt ist, dann wird aller Chat unterbunden.
+
+#********************************************
+#********************************************
+#
+#       Cheat protection
+#
+#********************************************
+#********************************************
+
+allow_enemies_same_ip_help    Wenn dies auf 1 gesetzt wird, dürfen Spieler von derselben Netwerkverbindung für Punkte gegeneinander spielen.
+allow_enemies_same_client_help Wenn dies auf 1 gesetzt wird, dürfen Spieler von derselben Netwerkverbindung für Punkte gegeneinander spielen.
+
+allow_control_during_chat_help Wenn dies auf 1 gesetzt wird, dürfen Spieler vom Chat-Modus aus ihr Vehikel steuern (dabei verlieren sie natürlich den Chatbot und die gelbe Pyramide über dem Vehikel).
+
+allow_imposters_help          Wenn dies auf 1 gesetzt wird, dürfen zwei Spieler denselben Namen tragen. Sonst wird einer automatisch umbenannt.
+allow_impostors_help          Wenn dies auf 1 gesetzt wird, dürfen zwei Spieler denselben Namen tragen. Sonst wird einer automatisch umbenannt.
+
+#********************************************
+#********************************************
+#
+#       Banning
+#
+#********************************************
+#********************************************
+
+network_min_ban_help          Wenn jemand ausgesperrt ist und trotztem versucht, sich mit dem Server zu verbinden, wird ihm mindestens noch diese Zeit in Sekunden aufgebrummt.
+
+network_autoban_offset_help   Häufig vertriebene Spieler werden für NETWORK_AUTOBAN_FACTOR * ( kph - NETWORK_AUTOBAN_OFFSET ) minuten verbannt. kph ist die mittlere Zahl der Kicks pro Stunde.
+network_autoban_factor_help   Häufig vertriebene Spieler werden für NETWORK_AUTOBAN_FACTOR * ( kph - NETWORK_AUTOBAN_OFFSET ) minuten verbannt. kph ist die mittlere Zahl der Kicks pro Stunde.
+network_autoban_max_kph_help  Maximalwert der Kicks pro Stunde.
+
+network_spectator_time_help   Wenn dies größer als 0 ist, so gibt es die maximale Zeit in Sekunden an, die ein Client ohne Spieler toleriert wird.
+
+#********************************************
+#********************************************
+#
+#       Voting settings
+#
+#********************************************
+#********************************************
+
+vote_use_server_controlled_kick_help Wenn dies auf 1 gesetzt wird, wird die neue, verbesserte, vom Server kontrollierte Methode für Rausschmissabstimmungen verwendet. Funktionniert nur für Clients ab Version 0.2.8.0_rc1.
+voting_timeout_help           Abstimmungen, die älter als dieser Wert in Sekunden sind, werden abgelehnt.
+voting_timeout_per_voter_help Für jeden Stimmberechtigten wird dieser Wert auf VOTING TIMEOUT aufgeschlagen. 
+allow_voting_help             Wenn dieser Wert auf 1 gesetz ist, dann sind Abstimmungen erlaubt.
+allow_voting_spectator_help   Wenn dies auf 1 gesetzt wird, dann dürfen auch Zuschauer abstimmen.
+min_voters_help               Minimalzahl der Stimmberechtigten, damit Abstimmungen zugelassen werden.
+max_votes_help                Maximalzahl der Abstimmungen, die gleichzeitig laufen können.
+max_votes_per_voter_help      Maximalzahl der Abstimmungen von jedem Stimmberechtigten, die gleichzeitig laufen könnnen.
+voting_start_decay_help       Nach sovielen Sekunden wird begonnen, die Enthaltungen in einer Abstimmung zu ignorieren; es kommt dadurch auch bei nicht absoluten Mehrheiten zu einem Ergebnis.
+voting_decay_help             Alle soviele Sekunden wird eine Enthaltung mehr ignoriert.
+voting_bias_help              fügt so viele virtuelle Wähler hinzu, die sich gegen jede Veränderung aussprechen.
+voting_privacy_help           Kontrolliert die Ausgabe von Abstimmungen. 2: alles bleibt geheim 1: der Initiator einer Abstimmung wird im Serverlog vermerkt 0: die gesamte Abstimmung wird im Log vermerkt -1: der Initiator einer Abstimmung wird öffentlich bekanntgegeben -2: die gesamte Abstimmung ist öffentlich.
+voting_spam_issue_help        Es wird als so nevig angesehen, eine Abstimmung zu beginnen.
+voting_spam_reject_help       Es wird als so nevig angesehen, wenn eine Abstimmung abgelehnt wird..
+voting_kick_time_help         Mindestzeit in Sekunden, die zwischen zwei Vertreibungsvorschlägen gegen denselben Spieler liegen muss.
+
+#********************************************
+#********************************************
+#
+#       Name Display
+#
+#********************************************
+#********************************************
+
+fadeout_name_delay_help       Zeit in Sekunden, die die Spielernamen über den Vehikeln gezeigt werden. Ein Wert von 0 zeigt sie gar nicht, ein Wert von -1 immer.
+show_own_name_help            Möchtest du auch deinen eigenen Namen sehen?
+
+#********************************************
+#********************************************
+#
+#       Recording and playback
+#
+#********************************************
+#********************************************
+
+recording_debuglevel_help     Niveau der zusätzlichen Informationen, die zur Fehlersuche in Aufzeichnungen abgelegt werden
+fast_forward_maxstep_help     Maximale Zeit in aufgezeichneten Sekunden, die zwischen Renderschritten im schnellen Vorlauf liegt
+fast_forward_maxstep_real_help Maximale Zeit in echten Sekunden, die zwischen Renderschritten im schnellen Vorlauf liegt
+fast_forward_maxstep_rel_help Maximale Zeit gemessen in der Zeit bis zum Vorspulziel, die zwischen Renderschritten liegt
+
+#********************************************
+#********************************************
+#
+#       Camera Configuration items
+#
+#********************************************
+#********************************************
+
+camera_forbid_smart_help      Verbietet die Benutzung der SmartCam für alle Clients
+camera_forbid_in_help         Verbietet die Benutzung der internen Kamera für alle Clients
+camera_forbid_free_help       Verbietet die Benutzung der freien Kamera für alle Clients
+camera_forbid_follow_help     Verbietet die Benutzung der dummen externen Kamera für alle Clients
+camera_forbid_custom_help     Verbietet die Benutzung der einstellbaren Kamera für alle Clients
+camera_forbid_server_custom_help Verbietet die Benutzung der serverbestimmten einstellbaren Kamera für alle Clients
+
+camera_follow_start_x_help    Startposition der festen externen Kamera
+camera_follow_start_y_help    Startposition der festen externen Kamera
+camera_follow_start_z_help    Startposition der festen externen Kamera
+
+camera_smart_start_x_help     Startposition der SmartCam
+camera_smart_start_y_help     Startposition der SmartCam
+camera_smart_start_z_help     Startposition der SmartCam
+camera_smart_glance_custom_help Soll die SmartCam beim Umsehen die Positionswerte der einstellbaren Kammera übernehmen?
+camera_smart_glance_custom_text Einstellbares Umsehen
+
+camera_free_start_x_help      Startposition der freien Kamera
+camera_free_start_y_help      Startposition der freien Kamera
+camera_free_start_z_help      Startposition der freien Kamera
+
+camera_custom_back_help       Position der einstellbaren Kamera: wie weit liegt sie hinter dem Vehikel?
+camera_custom_rise_help       Position der einstellbaren Kamera: wie weit liegt sie über dem Vehikel?
+camera_custom_back_fromspeed_help Dieser Wert wird mit der Geschwindigkeit des Vehikels multipliziert und auf CAMERA_CUSTOM_BACK aufgeschlagen.
+camera_custom_rise_fromspeed_help Dieser Wert wird mit der Geschwindigkeit des Vehikels multipliziert und auf CAMERA_CUSTOM_RISE aufgeschlagen.
+camera_custom_pitch_help      Position der einstellbaren Kamera: wie weit sieht sie nach oben oder unten?
+camera_custom_zoom_help       Position der einstellbaren Kamera: wie weit zoomt sie am Anfang der Runde herein, um die Formation zu zeigen?
+camera_custom_turn_speed_help Geschwindigkeit, mit der sich die einstellbare Kamera dreht
+camera_custom_turn_speed_180_help Direkt nach einer Kehrtwende wird CAMERA_CUSTOM_TURN_SPEED mit diesem Wert multipliziert angewandt.
+camera_in_turn_speed_help     Geschwindigkeit, mit der sich die interne Kamera dreht
+
+camera_server_custom_back_help Position der einstellbaren Kamera: wie weit liegt sie hinter dem Vehikel?
+camera_server_custom_rise_help Position der einstellbaren Kamera: wie weit liegt sie über dem Vehikel?
+camera_server_custom_back_fromspeed_help Dieser Wert wird mit der Geschwindigkeit des Vehikels multipliziert und auf CAMERA_SERVER_CUSTOM_BACK aufgeschlagen.
+camera_server_custom_rise_fromspeed_help Dieser Wert wird mit der Geschwindigkeit des Vehikels multipliziert und auf CAMERA_SERVER_CUSTOM_RISE aufgeschlagen.
+camera_server_custom_pitch_help Position der einstellbaren Kamera: wie weit sieht sie nach oben oder unten?
+camera_server_custom_turn_speed_help Geschwindigkeit, mit der sich die serverseitig einstellbare Kamera dreht; der Wert wird von den clientseitigen Einstellungen übernommen, wenn dieser Wert negativ ist.
+camera_server_custom_turn_speed_180_help Direkt nach einer Kehrtwende wird CAMERA_SERVER_CUSTOM_TURN_SPEED mit diesem Wert multipliziert angewandt.
+
+camera_visibility_recovery_speed_help Die Geschwindigkeit, mit der die externen Kamera-Referenzpunkte sich nach außen bewegen
+camera_visibility_wall_distance_help Entfernung, die die Kamera-Referenzpunkte von Wänden halten
+camera_visibility_clip_speed_help Geschwindigkeit, mit der die Kamera versucht, die Kamera-Referenzpunkte ins Blickfeld zu bringen
+camera_visibility_extension_help Entfernung (gemessen an der Vehikelgeschwindigleit) der Kamera-Referenzpunkte vom Vehikel
+camera_visibility_sideskew_help Zusätzliche Verschiebung nach vorne, die die seitlichen Kamera-Referenzpunkte erfahren
+camera_visibility_lower_wall_help Wenn dies auf 1 gesetzt wird, dann werden Wände, die die Sicht blockieren, abgesenkt anstatt dass die Kamera versucht, sich um sie herum zu bewegen.
+camera_visibility_lower_wall_smart_help wie CAMERA_VISIBILITY_LOWER_WALL, aber speziell für die SmartCam.
+bug_transparency_help         Wird nicht unterstützt: schaltet Transparenztests für hohe Wände generell ab.
+bug_transparency_demand_help  Wird nicht unterstützt: anstatt dass die Wände abgesenkt werden, werden einfach die Sichtbarkeitstests für sie ausgeschaltet, so dass sie seltsam transparent erscheinen.
+
+#********************************************
+#********************************************
+#
+#       Network Configuration items
+#
+#********************************************
+#********************************************
+ 
+custom_server_name_help       Name des Servers, mit dem Verbindung aufgenommen werden soll
+dedicated_idle_help           Nach dieser Zeit (in Stunden) beendet sich der Dedicated Server bei der nächsten Gelegenheit selbst.
+dedicated_fps_help            Maximale Zahl der Simulationsschritte pro Sekunde, die der Server ausführen soll
+talk_to_master_help           Soll dieser Server im Internet bekannt gemacht werden?
+max_out_rate_help             Maximale Netzwerkbandbreite (Ausgabe)
+max_in_rate_help              Maximale Netzwerkbandbreite (Eingabe)
+ping_charity_help             Ping-Spende: Wieviel Ping möchtest Du gerne von deinen minderbemittelten Mitspielern übernehmen?
+big_brother_help              Wurde die Big-Brother information schon gesendet?
+server_name_help              Name dieses Servers
+server_options_help           Kurze Beschreibung der Einstellungen auf diesem Server.
+server_ip_help                IP-Adresse, auf der der Server laufen soll
+server_dns_help               Wenn der Server auf einem Rechner mit dynamischer, oft wechselnder IP-Adresse läuft, aber ein DNS-Name existiert, der immer auf den Server verweist, so kann dieser DNS-Name hier eingetragen werden. Clients finden den Server so besser wieder.
+server_port_help              Port, auf dem dieser Server Verbindungen annimmt
+client_port_help              Port, auf dem wir versuchen, Verbindung aufzunehmen
+max_clients_help              Maximale Zahl der akzeptierten Verbindungen von Clients.
+max_clients_same_ip_soft_help Maximale Zahl der Clients, die von derselben IP-Adresse dauerhaft akzeptiert werden: die Verbindung überzählige Clients kann jederzeit abreissen.
+max_clients_same_ip_hard_help Maximale Zahl der Clients, die von derselben IP-Adresse akzeptiert werden: mehr Clients werden von Anfang an abgeblockt.
+max_players_same_ip_help      Maximalzahl der Spieler, die von derselben Internetadresse aus spielen dürfen.
+url_help                      Mit dem Server verbundene URI
+
+# settings compatibility 
+
+setting_legacy_behavior_breaking_help Bestimmt das Verhalten gegenüber älteren Clients, wenn Einstellungngen geändert wurden, die das Spielen praktisch unmöglich machen (z.B. MAP_FILE)
+setting_legacy_behavior_bumpy_help Bestimmt das Verhalten gegenüber älteren Clients, wenn Einstellungngen geändert wurden, die das Spielen erschweren (z.B. Cycle_DELAY_TIMEBASED)
+setting_legacy_behavior_annoying_help Bestimmt das Verhalten gegenüber älteren Clients, wenn Einstellungngen geändert wurden, die leichte Störungen hervorrufen (z.B. Cycle_RUBBER_MINDISTANCE)
+setting_legacy_behavior_cheating_help Bestimmt das Verhalten gegenüber älteren Clients, wenn Einstellungngen geändert wurden, die, wenn ignoriert, als Betrug angesehen werden (z.B. DOUBLEBIND_TIME)
+setting_legacy_behavior_visual_help Bestimmt das Verhalten gegenüber älteren Clients, wenn Einstellungngen geändert wurden, die nur Auswirkungen auf Anzeigen haben (z.B. CYCLE_RUBBER_*)
+
+#********************************************
+#********************************************
+#
+#       Graphics Configuration items
+#
+#********************************************
+#********************************************
+
+png_screenshot_help           Speichert Schnappschüsse als PNG, nicht BMP.
+white_sparks_help             Zeichnet Funken in weiß, nicht in der Farbe der Vehikel.
+keep_window_active_help       Auch wenn das Fenster nicht mehr aktiv ist, soll die Bilddarstellung nicht abbrechen.
+
+# hud
+show_brake_help               Soll die Bremsanzeige im HUD gezeigt werden?
+show_alive_help               Soll der Freund/Feindzähler im HUD gezeigt werden?
+show_fastest_help             Soll der schnellste Spieler im HUD gezeigt werden?
+show_hud_help                 Soll das HUD gezeigt werden?
+show_ping_help                Soll dein Ping im HUD gezeigt werden?
+show_rubber_help              Soll die Rubber-Anzeige im HUD gezeigt werden?
+show_score_help               Soll die Punktzahl im HUD gezeigt werden?
+show_speed_help               Soll das Tachometer im HUD gezeigt werden?
+show_time_help                Soll die aktuelle Uhrzeit im HUD gezeigt werden?
+show_time_24_help             Soll die Uhr im 24-Stunden-Format gezeigt werden?
+speed_gauge_locx_help         Horizontale Position des Tachometers
+speed_gauge_locy_help         Vertikale Position des Tachometers
+speed_gauge_size_help         Göße des Tachometers
+rubber_gauge_locx_help        Horizontale Position des Rubber-Meters
+rubber_gauge_locy_help        Vertikale Position des Rubber-Meters
+rubber_gauge_size_help        Göße des Rubber-Meters
+brake_gauge_locx_help         Horizontale Position der Bremsanzeige
+brake_gauge_locy_help         Vertikale Position der Bremsanzeige
+brake_gauge_size_help         Göße der Bremsanzeige
+alive_locx_help               Horizontale Position des Freund/Feindzählers
+alive_locy_help               Vertikale Position des Freund/Feindzählers
+alive_size_help               Göße des Freund/Feindzählers
+fastest_locx_help             Horizontale Position des schnellsten Spielers in der Anzeige
+fastest_locy_help             Vertikale Position des schnellsten Spielers in der Anzeige
+fastest_size_help             Göße des schnellsten Spielers in der Anzeige
+ping_locx_help                Horizontale Position der Ping-Anzeige
+ping_locy_help                Vertikale Position der Ping-Anzeige
+ping_size_help                Göße der Ping-Anzeige
+score_locx_help               Horizontale Position der Punktzahl in der Anzeige
+score_locy_help               Vertikale Position der Punktzahl in der Anzeige
+score_size_help               Göße der Punktzahl in der Anzeige
+cm_locy_help                  Vertikale Position der Zentralnachrichten vom Server
+
+#floor
+grid_size_help                Abstand zwischen Rasterlinien
+grid_size_moviepack_help      Abstand zwischen Rasterlinien im Moviepack
+floor_red_help                Bodenfarbe
+floor_green_help              Bodenfarbe
+floor_blue_help               Bodenfarbe
+
+rim_wall_stretch_x_help       Ausdehnung der Textur der Arenabegrenzung, horizontal
+rim_wall_stretch_y_help       Ausdehnung der Textur der Arenabegrenzung, vertikal
+rim_wall_wrap_y_help          Wenn dies auf 1 gesetzt wird, dann wird die Textur der Arenabegrenzung vertikal wiederholt.
+
+#moviepack settings
+moviepack_floor_red_help      Bodenfarbe
+moviepack_floor_green_help    Bodenfarbe
+moviepack_floor_blue_help     Bodenfarbe
+moviepack_wall_stretch_help   Abstand der vertikalen Linien auf den Wänden (mit Moviepack)
+moviepack_rim_wall_stretch_x_help Ausdehnung der Textur der Arenabegrenzung, horizontal (Für Moviepack)
+moviepack_rim_wall_stretch_y_help Ausdehnung der Textur der Arenabegrenzung, vertikal (Für Moviepack)
+
+#detail settings
+swapmode_text                 Pufferumschaltmodus:
+swapmode_help                 Bestimmt die Methode, mit der in jedem Renderschritt die Ausgabe mit der Eingabe synchronisiert wird. Der Aktuelle Wert bewirkt:
+swapmode_fastest_text         Schnell
+swapmode_fastest_help         Keine Synchronisation. Das ist am schnellsten, aber die Grafikausgabe kann möglicherweise sehr lange hiter der Eingabe herhinken.
+swapmode_glflush_text         glFlush
+swapmode_glflush_help         Die Funktion glFlush() wird zur Synchronisation verwendet. Die Prozessorbelastung ist gering.
+swapmode_glfinish_text        glFinish
+swapmode_glfinish_help        glFinish() wird zur Synchronisation verwendet. Nur so ist es garantiert, dass Eingabe und Ausgabe wirklich Synchron laufen, aber der Preis ist auf einigen Systemen die Vollauslastung des Prozessors.
+swap_mode_help                Bestimmt, wie Ein- und Ausgabe synchronisiert werden. 0: gar nicht, 1: mit glFlush(), 2: mit glFinish().
+
+ztrick_help                   Knifflige Leistungsverbesserung: funktionniert leider meist nicht... (3dfx-Karten sind die einzig bekannte Ausnahme)
+texture_mode_0_help           Bodentextur:
+texture_mode_1_help           Wandtexturen:
+texture_mode_2_help           Objekttexturen:
+texture_mode_3_help           Schrift:
+
+gl_extensions_help            OpenGL System-Information
+gl_version_help               OpenGL System-Information
+gl_renderer_help              OpenGL System-Information
+gl_vendor_help                OpenGL System-Information
+line_antialias_help           Aktiviert Kantenglättung für Linien
+poly_antialias_help           Aktiviert Kantenglättung für Polygone
+persp_correct_help            Aktiviert Perspektivenkorrektur
+alpha_blend_help              Aktiviert Transparenzeffekte
+smooth_shading_help           Aktiviert "Rundes Licht"
+text_out_help                 Aktiviert Textausgabe
+console_columns_help          Anzahl der Spalten der Textausgabe
+console_rows_help             Anzahl der Zeilen der Textausgabe (normal)
+console_rows_max_help         Anzahl der Zeilen der Textausgabe (maximal beim Hochscrollen)
+console_decorate_id_help      Jede Ausgabezeile wird mit der ID-Nummer des Clients, der sie verursacht hat, dekoriert
+console_decorate_ip_help      Jede Ausgabezeile wird mit der IP-Adresse des Clients, der sie verursacht hat, dekoriert
+show_fps_help                 Aktiviert Performance-Anzeige 
+floor_mirror_help             Spiegelung des Bodens
+floor_detail_help             Detail des Bodens
+high_rim_help                 Aktiviert sehr hohe Randwände
+dither_help                   Verwende Farbmischung
+upper_sky_help                Zeichne die obere Himmelsebene
+lower_sky_help                Zeichne die untere Himmelsebene
+sky_wobble_help               Himmelsbewegung
+infinity_plane_help           Verwende unendlich ferne Punkte (funktionniert manchmal nicht)
+lag_o_meter_help              Zeichne das Lag-O-Meter im Netzwerkspiel
+lag_o_meter_scale_help        Größenfaktor des Lag-O-Meters. 1.0 wäre korrekt, aber ältere Versionen von AA waren durch einen Bug auf .5 fest eingestellt.
+predict_objects_help          Vorhersage der Vehikelbewegungen im Netzwerkspiel
+textures_hi_help              Verwende 32-Bit-Texturen
+sparks_help                   Lässt die Funken fliegen
+explosion_help                Schaltet Explosionen ein
+wrap_menu_help                Kann man ein Menu nach oben verlassen (und es somit von unten wieder betreten)?
+floor_mirror_int_help         Stärke der Bodenspiegelungen
+color_strings_help            Markiere Texte farblich (z.B. Namen im Chat)
+filter_color_strings_help     Entferne Farbcodierungen aus allen Texten, die über das Netwerk empfangen werden.
+filter_color_names_help       Entferne Farbcodierungen aus Spielernamen.
+filter_name_ends_help         Entferne Leerzeichen und anderen Müll von Anfang und Ende der Spielernamen.
+filter_color_server_names_help Entferne Farbcodierungen aus Servernamen im Browser.
+
+#screen mode
+custom_screen_height_help     Benutzerdefinierte Bildschirmhöhe
+custom_screen_width_help      Benutzerdefinierte Bildschirmbreite
+custom_screen_aspect_help     Benutzerdefiniertes Verhältnis Pixelbreite/Pixelhöhe
+armagetron_screenmode_help    Bildschirmauflösung
+armagetron_last_screenmode_help letzte Bildschirmauflösung
+armagetron_windowsize_help    Fenstergrösse
+armagetron_last_windowsize_help letzte Fenstergrösse
+fullscreen_help               Vollbild oder Fenster?
+last_fullscreen_help          Vollbild oder Fenster, letzte erfolgreiche Einstellung
+check_errors_help             Soll \g auf Fehler bei der Grafikinitialisierung achten?
+last_check_errors_help        Soll \g auf Fehler bei der Grafikinitialisierung achten, letzte erfolgreiche Einstellung?
+colordepth_help               Farbtiefe: 0 für 16 Bit, 1 für Standard, 2 für 32 Bit
+last_colordepth_help          Farbtiefe, letzte erfolgreiche Einstellung
+zdepth_help                   Z-Buffer-Tiefe: 0 für 16 Bit, 1 für Standard, 2 für 32 Bit
+last_zdepth_help              Z-Buffer-Tiefe, letzte erfolgreiche Einstellung
+use_sdl_help                  Initiiere OpenGL über SDL?
+last_use_sdl_help             Initiiere OpenGL über SDL, letzte erfolgreiche Einstellung
+failed_attempts_help          Anzahl der erfolglosen Versuche, die Graphik zu initialisieren
+software_renderer_help        Ist der OpenGL Renderer nicht Hadware-Beschleunigt?
+
+#model
+use_displaylists_help         Sollen display lists für die Vehikel verwendet werden?
+
+#********************************************
+#********************************************
+#
+#       Sound Configuration items
+#
+#********************************************
+#********************************************
+
+sound_buffer_shift_help       Puffergrössen-Multiplikator
+sound_quality_help            Soundqualität [0=aus, 3=hoch]
+sound_sources_help            Anzahl der Soundquellen, die gleichzeitig hörbar sind
+
+
+#********************************************
+#********************************************
+#
+#       Viewport Configuration items
+#
+#********************************************
+#********************************************
+
+
+viewport_conf_help            Fensterkonfiguration; bestimmt wie viele Spieler an diesem Computer spielen
+viewport_belongs_help         Dieses Fenster einem Spieler zuweisen
+
+#********************************************
+#********************************************
+#
+#       Misc. Configuration items
+#
+#********************************************
+#********************************************
+
+word_delimiters_help          Zeichen, die in Texteingabefeldern als Wortgrenzen zählen.
+
+mouse_grab_help               Fängt den Mauszeiger ein, damit er das Fenster nicht verlässt
+moviepack_help                Verwende das Moviepack, wenn es installiert ist
+armagetron_version_help       Aktuelle Version von \g
+message_of_day_help           Begrüssungstext für neue Benutzer
+round_console_message_help    Konsolennachricht, die jede Runde wiederholt wird
+round_center_message_help     Zentralnachricht, die jede Runde wiederholt wird
+
+password_storage_help         Bestimmt, wo die Passwörter gespeichert werden: gar nicht (-1), nur im Speicher(0) oder auf der Festplatte(1, nicht empfohlen)
+admin_pass_help               Kennwort für das grundlegende im Spiel admin
+
+backward_compatibility_help   Maximale Zahl älterer Versionen, die noch unterstützt werden.
+new_feature_delay_help        Deaktiviert alle Features, die erst während der letzten X Versionen des Netzwerkprotokolls hinzugekommen sind.
+
+# program control
+quit_help                     Beendet den Serverprozess.
+exit_help                     Beendet den Serverprozess.
+
+# manning and kicking commands
+players_help                  Gibt eine Liste der eingeloggten Spieler aus
+kill_help                     Tötet den angegebenen Spieler (als Warnung vor einem Rausschmiss)
+kick_help                     Wirft den angegebenen Spieler vom Server.
+ban_help                      Wirft den angegebenen Spieler vom Server und verbannt ihn für eine variable Zeit in Minuten.
+ban_ip_help                   Verbannt spieler von der angegebenen IP-Adresse für die angegebene Zeit in Minuten vom Server.
+ban_list_help                 Gibt die Liste der Verbannten IP-Adressen aus.
+unban_ip_help                 Hebt eine Verbannung auf.
+
+# communication
+console_message_help          Gibt eine Nachricht auf den Konsolen aller angeschlossenen Spieler aus.
+center_message_help           Gibt eine Nachricht in der Bildschirmmitte aller angeschlossenen Spieler aus.
+say_help                      Lässt den Server-Administrator etwas sagen.
+
+#********************************************
+#********************************************
+#
+#       Bugs
+#
+#********************************************
+#********************************************
+
+bug_rip_help                  Ermöglicht es, durch sehr nahes Fahren am Rand ein Loch in diesen zu reissen.
+bug_tunnel_help               Lässt in manchen Situationen Spieler durch Wände gehen.
+bug_color_overflow_help       Verhindert nicht den Überlaufsfehler, der es Spielern erlaubt, ihrem Vehikel und ihrer Wand verschiedene Farben zu geben
+
+#********************************************
+#********************************************
+#********************************************
+#
+# Key bindings; every input ITEM item gets two
+# strings: the short description string 
+# appearing in the configuration menus
+# (named input_item_text) and the help message 
+# you see below the input configuration menu
+# when you select the input item for a longer
+# time (named input_item_help).
+#
+#********************************************
+#********************************************
+#********************************************
+#********************************************
+
+#generic texts
+input_items_unbound           Nicht belegt
+input_items_global            Sondertasten
+
+
+#********************************************
+#********************************************
+#
+#       Misc. Configuration items
+#
+#********************************************
+#********************************************
+
+input_console_input_text      Konsole
+input_console_input_help      Hiermit kann man einen Befehl in der Konsole eingeben
+
+input_screenshot_text         Screenshot
+input_screenshot_help         Macht einen Screenshot und speichert ihn in der Datei screenshot_X.bmp
+
+input_chat_text               Chat
+input_chat_help               Zum Plaudern in Netzwerkspielen
+
+input_toggle_spectator_text   Zuschauermodus An/Aus
+input_toggle_spectator_help   Aktiviert/Deaktiviert den Zuschauermodus für kleinere Spielpausen.
+
+input_score_text              Punkte
+input_score_help              Zeigt den aktuellen Punktestand an
+
+input_toggle_fullscreen_text  Vollbild/Fenster umschalten
+input_toggle_fullscreen_help  Wechselt zwischen Vollbild und Fenstermodus
+
+input_toggle_mousegrab_text   Maus einfangen/freilassen
+input_toggle_mousegrab_help   Fängt den Mauszeiger im Fenster ein oder befreit ihn wieder
+
+input_reload_textures_text    Texturen neu laden
+input_reload_textures_help    Lädt alle Texturen neu. Nützlich für Grafiker, um ihre neuen Werke zu testen.
+
+input_ingame_menu_text        Menu aktivieren
+input_ingame_menu_help        Aktiviert das Menu aus dem Spiel heraus. ESC is zusätzlich zu den hier gesetzten Tasten fest darauf einprogrammiert, damit niemand im Spiel gefangen bleibt :)
+
+input_pause_game_text         Pause
+input_pause_game_help         Hält die Spielzeit an oder setzt sie wieder fort.
+
+#********************************************
+#********************************************
+#
+#       console scrolling items
+#
+#********************************************
+#********************************************
+
+input_mess_up_text            nach oben scrollen
+input_mess_up_help            Scrollt die Nachrichten eine Seite nach oben.
+
+input_mess_down_text          nach unten scrollen
+input_mess_down_help          Scrollt die Nachrichten eine Seite nach unten.
+	
+#********************************************
+#********************************************
+#
+#       cycle control keys
+#
+#********************************************
+#********************************************
+
+input_cycle_brake_text        Bremsen
+input_cycle_brake_help        Verringert die Geschwindigkeit
+
+input_cycle_brake_toggle_text Bremse ein/ausschalten
+input_cycle_brake_toggle_help Schaltet die Bremse permanent ein oder aus, ohne dass man eine Taste gedrückt halten muss
+
+input_cycle_turn_right_text   Rechts
+input_cycle_turn_right_help   Macht eine scharfe Rechtskurve
+
+input_cycle_turn_left_text    Links
+input_cycle_turn_left_help    Macht eine scharfe Linkskurve
+
+
+#********************************************
+#********************************************
+#
+#       camera control keys
+#
+#********************************************
+#********************************************
+
+input_move_back_text          Hinten
+input_move_back_help          Bewegt die Kamera nach hinten (falls das in der aktuellen Kamera erlaubt ist)
+
+input_move_forward_text       Vorn
+input_move_forward_help       Bewegt die Kamera nach vorne (falls das in der aktuellen Kamera erlaubt ist)
+
+input_move_down_text          Unten
+input_move_down_help          Bewegt die Kamera nach unten (falls das in der aktuellen Kamera erlaubt ist)
+
+input_move_up_text            Oben
+input_move_up_help            Bewegt die Kamera nach oben (falls das in der aktuellen Kamera erlaubt ist)
+
+input_move_right_text         Rechts
+input_move_right_help         Bewegt die Kamera nach rechts (falls das in der aktuellen Kamera erlaubt ist) oder dreht sie nach links.
+
+input_move_left_text          Links
+input_move_left_help          Bewegt die Kamera nach links (falls das in der aktuellen Kamera erlaubt ist) oder dreht sie nach rechts.
+
+input_zoom_out_text           Rauszoomen
+input_zoom_out_help           Vergrössert den Bildausschnitt
+
+input_zoom_in_text            Reinzoomen
+input_zoom_in_help            Verkleinert den Bildauschnitt (erhöht die Vergrösserung)
+
+input_glance_back_text        Rückspiegel
+input_glance_back_help        Kehrt die Kamerarichtung um, solange die Taste gedrückt ist.
+
+input_glance_right_text       Rechtsblick
+input_glance_right_help       Dreht die Kamera für kurze Zeit nach rechts.
+
+input_glance_left_text        Linksblick
+input_glance_left_help        Dreht die Kamera für kurze Zeit nach links.
+
+input_bank_down_text          Blick senken
+input_bank_down_help          Dreht die Kamera nach unten (falls das erlaubt ist) oder bewegt sie nach oben
+
+input_bank_up_text            Blick heben
+input_bank_up_help            Dreht die Kamera nach oben (falls das erlaubt ist) oder bewegt sie nach unten
+
+input_look_right_text         Rechtsdrehung
+input_look_right_help         Dreht die Kamera nach rechts (falls das erlaubt ist) oder bewegt sie nach links
+
+input_look_left_text          Linksdrehung
+input_look_left_help          Dreht die Kamera nach links (falls das erlaubt ist) oder bewegt sie nach rechts
+
+input_switch_view_text        Umschalten
+input_switch_view_help        Verändert den Kameramodus. Zur Verfügung steheh: Schlaue extene Kamera (Voreinstellung), dumme extene Kamera sowie freie Kamera und interne Kamera.
+
+#********************************************
+#********************************************
+#
+#          instant chat keys
+#
+#********************************************
+#********************************************
+
+input_instant_chat_text       Kurzmeldung \1
+input_instant_chat_help       Aktiviert eine der vorher eingespeicherten Kurznachrichten an die anderen Spieler
+
+
+
+#********************************************
+#********************************************
+#********************************************
+#********************************************
+#
+# Menu texts (titles, menuitems and
+# selection items) and their corresponding
+# help texts (the texts that appear when
+# you don't press up and down in the menu
+# for a while)
+#
+#********************************************
+#********************************************
+#********************************************
+#********************************************
+
+
+#********************************************
+#********************************************
+#
+#             main menu
+#
+#********************************************
+#********************************************
+
+main_menu_text                \g v\1
+
+game_menu_text                Spielen
+game_menu_main_help           Stellt die Spielparameter ein und startet das Spiel
+
+player_mainmenu_text          Spieler konfigurieren
+player_mainmenu_help          Spielernamen, Tastatureinstellung, Kameraoptionen....
+
+system_settings_menu_text     System konfigurieren
+system_settings_menu_help     Einstellungen für Sound, Graphik und allgemeines Erscheinungsbild
+
+main_menu_exit_text           Spiel verlassen
+main_menu_exit_help           Auf Wiedersehen!
+
+
+#ingame menu
+ingame_menu_text              Spielmenu
+
+game_menu_ingame_text         Spiel anpassen
+game_menu_ingame_help         Stellt die Spielparameter ein
+
+ingame_menu_exit_text         Zurück zum Spiel
+ingame_menu_exit_help         Bringt dich zurück auf das Spieleraster.
+
+game_menu_shutdown_text       Server beenden
+game_menu_shutdown_help       Beendet den Serverprozess und führt wieder zum Hauptmenü.
+
+game_menu_exit_text           Spieleraster verlassen
+game_menu_exit_help           Beendet das aktuelle Spiel und führt zurück zum Spielmenü.
+
+game_menu_disconnect_text     Verbindung trennen
+game_menu_disconnect_help     Trennt die Verbindung zum Server und führt wieder zum Hauptmenü.
+
+
+
+#********************************************
+#********************************************
+#
+#             game menu
+#
+#********************************************
+#********************************************
+
+game_menu_start_text          Solospiel
+game_menu_start_help          Transportiert alle lokal eingerichteten Spieler auf das Spieleraster.
+
+network_menu_text             Netzwerkspiel
+network_menu_help             Verbindet dich mit einem Netzwerkspiel oder fängt eines an.
+
+game_settings_menu_text       Spiel konfigurieren
+game_settings_menu_help       Wähle die Anzahl der Gegner und den Spielmodus.
+
+
+game_menu_reset_text          Neues Match
+game_menu_reset_help          Nach der aktuellen Runde wird ein neues Match begonnen; alle Punktzahlen werden wieder auf Null gesetzt.
+
+#game settings
+game_menu_finish_text         Am Rundenende:
+game_menu_finish_help         Was passiert, wenn alle menschlichen Spieler tot sind?
+
+game_menu_finish_expr_text    Schnellstart
+game_menu_finish_expr_help    Die nächste Runde beginnt so schnell wie möglich
+
+game_menu_finish_stop_text    Normaler Neustart
+game_menu_finish_stop_help    Die nächste Runde beginnt nach ein paar Sekunden
+
+game_menu_finish_fast_text    Zeitrafferende
+game_menu_finish_fast_help    Das Spiel wird fortgesetzt, bis ein Sieger feststeht, allerdings in Zeitraffer.
+
+game_menu_finish_normal_text  Langsames Ende
+game_menu_finish_normal_help  Das Spiel wird fortgesetzt, bis ein Sieger feststeht. Extrem öde.
+
+game_menu_mode_text           Spielmodus:
+game_menu_mode_help           Die Regeln, nach denen gespielt wird:
+
+game_menu_mode_free_text      Freistil
+game_menu_mode_free_help      Keine Regeln, kein Sieger. Das Spiel endet, wenn alle tot sind.
+
+game_menu_mode_lms_text       Duell
+game_menu_mode_lms_help       Der letzte lebende Spieler gewinnt
+
+game_menu_mode_team_text      Mensch gegen Maschine
+game_menu_mode_team_help      Menschen spielen im Team gegen die Computergegner.
+
+game_menu_autoai_text         Gegnerautomatik:
+game_menu_autoai_help         Passt die Anzahl der Computergegner an die Fähigkeiten der Spieler an.
+
+game_menu_autoiq_text         Intelligenzautomatik:
+game_menu_autoiq_help         Passt die Intelligenz der Computergegner an die Fähigkeiten der Spieler an.
+
+game_menu_ais_text            Computergegner:
+game_menu_ais_help            Die Anzahl der Computergegner
+
+game_menu_iq_text             Intelligenz:
+game_menu_iq_help             Die Intelligenz der Computergegner
+
+game_menu_minplayers_text     Min. Spielerzahl:
+game_menu_minplayers_help     Mindestzahl der Spieler auf dem Feld. Positionen, die nicht von Menschen gefüllt werden, werden von Computergegnern besetzt.
+
+game_menu_speed_text          Tempo:
+game_menu_speed_help          Bestimmt die allgemeine Geschwindigkeit. Negative Werte verlangsamen, positive beschleunigen. Eine Erhöhung um zwei verdoppelt die Geschwindigkeit. Sinnvolle Werte liegen zwischen -2 und +4.
+
+game_menu_size_text           Arenagrösse:
+game_menu_size_help           Bestimmt die Grösse der Kampfarena. Negative werte ergeben eine kleine Arena, positive Werte eine grosse. Eine Erhöhung dieses Werts um 2 verdoppelt die Arenagrösse. Sinnvolle Werte liegen zwischen -6 und +2.
+
+game_menu_balance_quit_text   Teamausgleich beim Verlassen:
+game_menu_balance_quit_help   Sollen die Teams ausgeglichen werden, sobald ein Spieler ein Team verlässt?
+
+game_menu_balance_ais_text    Bots in Userteams:
+game_menu_balance_ais_help    Gleiche die Spielerzahl in ungleichen Teams mit Computergesteuerten Spielern aus
+
+game_menu_imb_perm_text       Max. dauerhafte Ungleichheit:
+game_menu_imb_perm_help       Maximaler Unterschied der Spielerstärke von Teams, der auf Dauer toleriert wird
+
+game_menu_imb_text            Max. Ungleichheit:
+game_menu_imb_help            Maximaler Unterschied der Spielerstärke von Teams, der kurzfristig toleriert wird
+
+game_menu_max_players_text    Max. Spieler im Team:
+game_menu_max_players_help    Maximale Anzahl von Spielern in einem Team
+
+game_menu_min_players_text    Min. Spieler im Team:
+game_menu_min_players_help    Minimale Anzahl von Spielern in einem Team
+
+game_menu_max_teams_text      Max. Teams:
+game_menu_max_teams_help      Maximal erlaubte Anzahl von Teams
+
+game_menu_min_teams_text      Min. Teams:
+game_menu_min_teams_help      Minimale Anzahl von Teams
+
+game_menu_wallstayup_text     Wand-Verzögerung:
+game_menu_wallstayup_help     Die Zeit, die die Wände nach dem Tod eines Spielers noch stehen bleiben
+
+game_menu_wallstayup_infinite_text unendlich
+game_menu_wallstayup_infinite_help Wand bleibt immer stehen
+
+game_menu_wallstayup_immediate_text sofort
+game_menu_wallstayup_immediate_help Wand verschwindet sofort
+
+game_menu_wallstayup_halfsecond_text 1/2s
+game_menu_wallstayup_halfsecond_help Wand verschwindet nach einer halben Sekunde
+
+game_menu_wallstayup_second_text 1s
+game_menu_wallstayup_second_help Wand verschwindet nach einer Sekunde
+
+game_menu_wallstayup_2second_text 2s
+game_menu_wallstayup_2second_help Wand verschwindet nach zwei Sekunden
+
+game_menu_wallstayup_4second_text 4s
+game_menu_wallstayup_4second_help Wand verschwindet nach 4 Sekunden
+
+game_menu_wallstayup_8second_text 8s
+game_menu_wallstayup_8second_help Wand verschwindet nach 8 Sekunden
+
+game_menu_wallstayup_16second_text 16s
+game_menu_wallstayup_16second_help Wand verschwindet nach 16 Sekunden
+
+game_menu_wallstayup_32second_text 32s
+game_menu_wallstayup_32second_help Wand verschwindet nach 32 Sekunden
+
+game_menu_wallslength_text    Wandlänge:
+game_menu_wallslength_help    Länge der Lichtwände in Metern
+
+game_menu_wallslength_infinite_text unendlich
+game_menu_wallslength_infinite_help Die Wände werden immer länger
+
+game_menu_wallslength_25meter_text 25m
+game_menu_wallslength_25meter_help Wände haben eine Länge von 25 Metern
+
+game_menu_wallslength_50meter_text 50m
+game_menu_wallslength_50meter_help Wände haben eine Länge von 50  Metern
+
+game_menu_wallslength_100meter_text 100m
+game_menu_wallslength_100meter_help Wände haben eine Länge von 100 Metern
+
+game_menu_wallslength_200meter_text 200m
+game_menu_wallslength_200meter_help Wände haben eine Länge von 200 Metern
+
+game_menu_wallslength_300meter_text 300m
+game_menu_wallslength_300meter_help Wände haben eine Länge von 300 Metern
+
+game_menu_wallslength_400meter_text 400m
+game_menu_wallslength_400meter_help Wände haben eine Länge von 400 Metern
+
+game_menu_wallslength_600meter_text 600m
+game_menu_wallslength_600meter_help Wände haben eine Länge von 600 Metern
+
+game_menu_wallslength_800meter_text 800m
+game_menu_wallslength_800meter_help Wände haben eine Länge von 800 Metern
+
+game_menu_wallslength_1200meter_text 1200m
+game_menu_wallslength_1200meter_help Wände haben eine Länge von 1200 Metern
+
+game_menu_wallslength_1600meter_text 1600m
+game_menu_wallslength_1600meter_help Wände haben eine Länge von 1600 Metern
+
+game_menu_wallslength_2400meter_text 2400m
+game_menu_wallslength_2400meter_help Wände haben eine Länge von 2400 Metern
+
+game_menu_exrad_text          Explosionsradius:
+game_menu_exrad_help          Grösse des Gebiets, das von Explosionen verwüstet wird.
+
+game_menu_exrad_0_text        kein
+game_menu_exrad_0_help        Keine Verwüstung
+
+game_menu_exrad_2meters_text  2m
+game_menu_exrad_2meters_help  Zerstörung innerhalb eines Radius von 2 Metern
+
+game_menu_exrad_4meters_text  4m
+game_menu_exrad_4meters_help  Zerstörung innerhalb eines Radius von 4 Metern
+
+game_menu_exrad_8meters_text  8m
+game_menu_exrad_8meters_help  Zerstörung innerhalb eines Radius von 8 Metern
+
+game_menu_exrad_16meters_text 16m
+game_menu_exrad_16meters_help Zerstörung innerhalb eines Radius von 16 Metern
+
+game_menu_exrad_32meters_text 32m
+game_menu_exrad_32meters_help Zerstörung innerhalb eines Radius von 32 Metern
+
+game_menu_exrad_64meters_text 64m
+game_menu_exrad_64meters_help Zerstörung innerhalb eines Radius von 64 Metern
+
+game_menu_exrad_128meters_text 128m
+game_menu_exrad_128meters_help Zerstörung innerhalb eines Radius von 128 Metern
+
+game_menu_wz_mr_text          Siegzone Min. Rundenzeit
+game_menu_wz_mr_help          Bevor die Siegzone aktiviert wird, muss die aktuelle Runde mindestens so viele Sekunden gedauert haben.
+
+game_menu_wz_ld_text          Siegzone Min. Ereignis
+game_menu_wz_ld_help          Bevor die Siegzone aktiviert wird, muss das letzte interessante Ereignis ( Tod ) so viele Sekunden zurück liegen.
+
+
+#********************************************
+#********************************************
+#
+#             network menus
+#
+#********************************************
+#********************************************
+
+#network game menu
+network_menu_lan_text         Spiel im LAN
+network_menu_lan_help         Einen Server im lokalen Netz suchen oder einen neuen starten.
+
+network_menu_internet_text    Spiel im Internet
+network_menu_internet_help    Einen Server im Internet suchen oder einen neuen starten.
+
+network_opts_text             Netzwerk konfigurieren
+network_opts_help             Einige Einstellungen und Präferenzen für das Netzwerkspiel
+
+#network options
+network_opts_pingchar_text    Ping-Spende:
+network_opts_pingchar_help    Sei nett und stelle diesen Wert schön hoch ein! Dann wird etwas vom Lag von anderen Spielern (mit höherem "Ping") auf dich übertragen, was zu einem faireren Spiel führt.
+
+network_opts_lagometer_text   Lag-O-Meter:
+network_opts_lagometer_help   Zeichnet Umrisse dorthin, wo die Vehikel jetzt prinzipiell schon sein könnten (basierend auf dem Lag). Sehr nützlich!
+
+network_opts_predict_text     Vorhersage:
+network_opts_predict_help     Sagt die Bewegung der Vehikel im Spiel, basierend auf der Netzwerkverzögerung, voraus. Allerdings wirken die Bewegungen dadurch sehr eckig. Ich persönlich verlasse mich lieber auf das Lag-O-Meter.
+
+network_opts_inrate_text      Bandbreite, eingehend:
+network_opts_inrate_help      Die maximale Anzahl von Kilobytes, die der Server diesem Rechner schickt. Maximale Werte: 1 für 9.6k-Modems, 3 für 28.8k-Modems, 7 für 56k-Modems, 8 für ISDN, mehr für Kabelmodems, (A)DSL and LAN. 4 ist üblicherweise ausreichend.
+
+network_opts_outrate_text     Bandbreite, ausgehend:
+network_opts_outrate_help     Die maximale Anzahl von Kilobytes, die das Netzwerk nach aussen schickt. Drei ist normalerweise für Clients völlig ausreichend.
+
+
+network_opts_deletepw_text    Passwörter löschen
+network_opts_deletepw_help    Diese Funktion löscht alle gespeicherten Passwörter.
+network_opts_deletepw_complete Passwörter gelöscht.
+
+network_opts_minport_text     Kleinster Port:
+network_opts_minport_help     Der kleinste Netzwerkport, auf dem nach einem lokalen Server gesucht wird.
+
+network_opts_maxport_text     Grösster Port:
+network_opts_maxport_help     Der grösste Netzwerkport, auf dem nach einem lokalen Server gesucht wird.
+
+network_opts_master_text      Im Internet anmelden:
+network_opts_master_help      Soll dieser Server im Internet bekannt gemacht werden? Diese Option sollte nur dann aktiviert werden, wenn der Server für länger als ein paar Minuten läuft.
+
+
+#network custom join menu
+network_custjoin_text         Manueller Verbindungsaufbau
+network_custjoin_help         Falls die automatische Suche mal nicht klappt: hier kann man direkt den gewünschten Server eingeben.
+
+network_custjoin_port_text    Server Port
+network_custjoin_port_help    Der Netzwerkport auf den der Server eingestellt ist. Muss denselben Wert haben wie die entsprechende Einstellung, mit der der Server gestartet wurde.
+
+network_custjoin_name_text    Servername:
+network_custjoin_name_help    Der Rechnername oder die IP-Adresse des Rechners, auf dem der Server läuft
+
+network_custjoin_connect_text Verbindung aufbauen
+network_custjoin_connect_help Teleport zum Spieleraster!
+
+#network host menu
+network_host_text             Spiel leiten
+network_host_help             Startet einen Server; andere Spieler können sich dann verbinden.
+
+network_host_name_text        Servername:
+network_host_name_help        Der Name, der bei den Clients im Serverbrowser auftauchen soll
+
+network_host_port_text        Server Port
+network_host_port_help        Der Netzwerkport dieses Servers
+
+network_host_host_text        Server starten
+network_host_host_help        Teleport zum Spieleraster! Andere Spieler können sich mit diesem Rechner verbinden.
+
+bookmarks_menu                Lieblings-Server
+bookmarks_menu_help           Verwaltet die Lieblingsserver und initiiert Verbindungen.
+bookmarks_menu_edit           Verwaltung
+bookmarks_menu_edit_help      Verwaltet die Lieblingsserver
+bookmarks_menu_edit_slot      Bearbeite \1
+bookmarks_menu_address        Adresse
+bookmarks_menu_address_help   Die Adresse des Servers
+bookmarks_menu_name           Name
+bookmarks_menu_name_help      Der Name des Servers. Wird nur für die Anzeige verwendet und hat keine Funktion, ist also frei wählbar.
+bookmarks_menu_connect        Verbindung zu \1 aufbauen
+
+#********************************************
+#********************************************
+#
+#             "Misc Stuff" menu
+#
+#********************************************
+#********************************************
+
+misc_menu_text                Verschiedenes
+misc_menu_help                Diverse Dinge, die sonst nirdendwo gepasst haben, wie z.B. globale Tastatureinstellung.
+
+misc_global_key_text          Globale Tastatureinstellung
+misc_global_key_help          Einige Tastaturbefehle, die unabhängig von den Spielern interpretiert werden.
+
+misc_menuwrap_text            Menuüberlauf:
+misc_menuwrap_help            Wenn diese Option aktiviert ist, kann man ein Menu nach oben und unten verlassen und betritt es wieder von der anderen Seite
+
+misc_textout_text             Textausgabe:
+misc_textout_help             Kontolliert die Ausgabe diverser Textnachrichten (Chat, Statusmeldungen...).
+
+misc_moviepack_text           Moviepack:
+misc_moviepack_help           Aktiviert die Unterstützung für das separat verfügbare Moviepack, das die Graphiken mehr an den Film "Tron" angleicht.
+
+
+#*************************************
+#*************************************
+#
+#    language menu
+#
+#*************************************
+#*************************************
+
+language_first_help           Legt die erste Wahl für die verwendete Sprache fest
+language_second_help          Legt die zweite Wahl für die verwendete Sprache fest
+
+language_menu_title           Spracheinstellungen
+language_menu_help            wählt die Sprache für alle Bildschirmtexte aus
+
+language_menu_item_fist       Erste Sprache:
+language_menu_item_first_help \g wird die meisten Textmeldungen in dieser Sprache anzeigen
+
+language_menu_item_second     Zweite Sprache:
+language_menu_item_second_help ist ein Text nicht in der ersten Sprache verfügbar, so wird er in der zweiten Sprache angezeigt. Gibt es ihn auch nicht in der zweiten, fällt die Wahl auf Englisch.
+
+#*************************************
+#*************************************
+#
+#       police menu
+#
+#*************************************
+#*************************************
+
+player_police_text            Polizeimenu
+player_police_help            Hier kann man andere Spieler stummschalten oder vom Server werfen lassen.
+
+player_police_silence_text    Stummschaltung
+player_police_silence_help    Hier kann man andere Spieler zum schweigen bringen ( nur lokal ).
+
+silence_player_help           Wenn dieser Menupunkt aktiviert ist, dann werden alle Nachrichten von diesem Spieler ignoriert.
+silence_player_text           Ignoriere \1 :
+
+player_police_kick_text       Rausschmiss
+player_police_kick_help       Hier kann man vorschlagen, andere Spieler vom Server zu verweisen.
+
+kick_player_details_text      Wenn dieser Vorschlag akzeptiert wird, dann wird \1 vom Server entfernt.
+kick_player_text              Vertreibe \1
+kick_player_help              Dieser Menupunkt schlägt den anderen Spielern vor, besagten Spieler vom Server zu werfen.
+
+#*************************************
+#*************************************
+#
+#       vote menu
+#
+#*************************************
+#*************************************
+
+voting_menu_text              Abstimmung
+voting_menu_help              Hier kannst Du deine Stimme auf aktuelle Anfragen abgeben.
+
+vote_approve                  Annehmen
+vote_approve_help             Damit stimmst Du dem Vorschlag zu.
+
+vote_dont_mind                Egal
+vote_dont_mind_help           Diese Option zählt als Enthaltung; Du kannst deine Meinung ändern, solange die Abstimmung noch aktiv ist.
+
+vote_reject                   Ablehnen
+vote_reject_help              Damit lehnst du den Vorschlag ab.
+
+vote_details_help             Dieser Menupunkt bestimmt deine Stimmabgabe. Details: \1
+vote_submitter_text           Dieser Vorschlag kommt von \1.
+
+#*************************************
+#*************************************
+#
+#       player menus
+#
+#*************************************
+#*************************************
+
+#player menu
+
+player_menu_text              Einstellungen für Spieler \1
+player_menu_help              Name, Tastaturbelegung und sonstige Optionen für Spieler \1
+
+viewport_menu_title           Fenster
+viewport_menu_help            \g kann man auch zu mehreren an einem Rechner spielen.
+
+viewport_conf_text            Fenster : 
+viewport_conf_name_0          Einzelspieler
+viewport_conf_name_1          Horizontal geteilt
+viewport_conf_name_2          Vertikal geteilt
+viewport_conf_name_3          Drei Spieler, Variante a
+viewport_conf_name_4          Drei Spieler, Variante b
+viewport_conf_name_5          Vier Spieler Wahnsinn!
+
+viewport_belongs_text         Fenster \1 gehört Spieler \2 (\3)
+
+viewport_assign_text          Fenster zuteilen
+viewport_assign_help          Welcher Spieler spielt in welchem Fenster?
+
+
+#player setup
+
+player_name_text              Name:
+player_name_help              Das ... in "Sieger: ... ". Benutze die normalen Editiertasten.
+
+player_input_text             Spiel-Tasten
+player_input_help             Stellt die Tastaturbelegung für die Steuerung der Vehikel ein
+
+input_for_player              Eingabe für Spieler \1: \2
+
+player_camera_input_text      Kamera-Tasten
+player_camera_input_help      Stellt Tastatur- und Mauskonfiguration der Kamera ein
+
+camera_controls               \1s Kameraeinstellungen
+
+player_camera_text            Kamera konfigurieren
+player_camera_help            Stellt den verwendeten Kameramodus ein.
+
+player_chat_text              Kurzmeldungen konfigurieren
+
+player_chat_chat              Kurzmeldung \1
+player_chat_chat_help         Editieren der kurzen Texte, die im Mehrspielermodus auf einen Tastendruck an die Mitspieler gesendet werden können
+
+player_blue_text              Blau:
+player_blue_help              Stellt den Blauanteil deiner Farbe ein
+
+player_green_text             Grün:
+player_green_help             Stellt den Grünanteil deiner Farbe ein
+
+player_red_text               Rot:
+player_red_help               Stellt den Rotanteil deiner Farbe ein
+
+player_spectator_text         Nur Zuschauer:
+player_spectator_help         Wenn man nur Zuschauer ist, so steuert man kein eigenes Vehikel und kann nur den anderen zusehen.
+
+player_name_team_text         Benenne Team nach Anführer:
+player_name_team_help         Teams werden entweder nach einer Farbe oder nach dem Anführer benannt; hier kann man die Präferenz festlegen.
+
+player_num_per_team_text      Spieler pro Team:
+player_num_per_team_help      Bevorzugte Anzahl von Spielern in einem Team. Wenn die vorhandenen Teams zu voll sind, dann wird automatisch ein neues eröffnet.
+
+
+#camera prefs menu
+
+player_camera_initial_text    Kameramodus beim Start:
+player_camera_initial_help    Wähle hier deine Lieblingskamera.
+
+player_camera_initial_int_text intern
+player_camera_initial_int_help die Sicht aus dem Vehikel heraus
+
+player_camera_initial_smrt_text smart
+player_camera_initial_smrt_help externe Kamera; versucht selbst, eine gute Perspektive zu wählen
+
+player_camera_initial_ext_text extern
+player_camera_initial_ext_help externe Kamera; Blickwinkel auf das Vehikel ist starr (kann aber vom Benutzer verändert werden)
+
+player_camera_initial_free_text frei
+player_camera_initial_free_help externe Kamera; schwebt frei im Raum. Eigentlich nur für Screenshots gut...
+
+player_camera_initial_cust_text einstellbar
+player_camera_initial_cust_help Eine einstellbare Kamera, die das Vehikel immer aus derselben Perspektive zeigt.
+
+player_camera_initial_scust_text Serverberstimmt
+player_camera_initial_scust_help Eine vom Serveradministrator einstellbare Kamera, die das Vehikel immer aus derselben Perspektive zeigt.
+
+player_camera_fov_text        Sichtfeld:
+player_camera_fov_help        Gibt die Breite des Sichtfeldes (auch Field of Vision, FOV, genannt) an. 120 Grad ist extreme Weitwinkelperspektive, 30 Grad entspricht schon fast einem Teleobjektiv.
+
+player_camera_incam_text      Erlaube interne Kamera:
+player_camera_incam_help      Erlaubt, die interne Kamera auszuwählen. (Liefert eine Sicht aus dem Vehikel heraus)
+
+player_camera_free_text       Erlaube freie Kamera:
+player_camera_free_help       Erlaubt, die freie Kamera auszuwählen. (Eine Kamera, die an kein Vehikel gebunden ist)
+
+player_camera_fixed_text      Erlaube feste Kamera:
+player_camera_fixed_help      Erlaubt, die feste externe Kamera auszuwählen. (Eine externe Kamera, die relativ zum Vehikel fest steht)
+
+player_camera_smartcam_text   Erlaube Smartcam:
+player_camera_smartcam_help   Erlaubt, die Smartcam auszuwählen. (Eine externe Kamera, die versucht ein möglichst dramatisches Bild des Geschehens zu liefern)
+
+player_camera_custom_text     Erlaube Einstellbar:
+player_camera_custom_help     Erlaubt, die einstellbare Kamera auszuwählen. (Position ist konfigurierbar in settings.cfg)
+
+player_camera_server_custom_text Erlaube Serverbestimmt:
+player_camera_server_custom_help Erlaubt, die vom Server aus einstellbare Kamera auszuwählen.
+
+
+player_camera_center_int_text Zentrierung der int. Kamera:
+player_camera_center_int_help Ein: die interne Kamera richtet sich ständig an der Fahrtrichtung aus; das ist gut, wenn man nur mit der Tastatur spielt.\nAus: Die Blickrichtung ist weitgehend unabhängig von der Fahrtrichtung. Extrem gut, wenn man sich lieber mit der Maus umsieht.
+
+player_camera_wobble_text     Kamerawackeln:
+player_camera_wobble_help     Bewegt die Kamera mit dem schaukeln des Vehikels mit. Sehr gewöhnungsbedürftig; Man kann davon Seekrank werden :-)
+
+player_camera_autoin_text     Labyrinthkamera:
+player_camera_autoin_help     Wenn das hier aktiviert ist, so schaltet die smartcam immer dann in die interne Kamera um, wenn man in einen engen Gang eingefahren ist. Steigert die Dramatik, ist aber auch manchmal verwirrend.
+
+# team menu
+team_menu_title               Team wählen
+team_menu_help                Lässt die Spieler ihre Teams wählen oder neue erstellen.
+
+team_menu_player_title        Wähle Team für \1
+team_menu_player_help         Lässt diesen Spieler das Team wechseln
+
+team_menu_join                Trete \1 bei
+team_menu_join_help           Werde Mitglied von diesem Team
+
+team_menu_create              Neues Team
+team_menu_create_help         Gründet ein neues Team und lässt ihm den Spieler beitreten
+
+team_owned_by                 \1s Team
+team_ai                       Computergegner
+team_empty                    Leeres Team
+
+team_name_blue                Team Blau
+team_name_gold                Team Gold
+team_name_red                 Team Rot
+team_name_green               Team Grün
+team_name_violet              Team Lila
+team_name_ugly                Team Türkis
+team_name_white               Team Weiss
+team_name_black               Team Schwarz
+
+#********************************************
+#********************************************
+#
+#             sound menu
+#
+#********************************************
+#********************************************
+
+sound_menu_text               Soundeinstellungen
+sound_menu_help               Hier kann man die Qualität der Soundeffekte regeln.
+
+sound_menu_sources_text       Anzahl der Sounds:
+sound_menu_sources_help       Hier kann man die ungefähre Zahl der Soundquellen, die gleichzeitig zu hören sein können, einstellen.
+
+sound_menu_quality_text       Qualität:
+sound_menu_quality_help       Hier kann man die Qualität der Sounds einstellen.
+
+sound_menu_quality_off_text   Aus
+sound_menu_quality_off_help   Gar kein Sound
+
+sound_menu_quality_low_text   Niedrig
+sound_menu_quality_low_help   Soundausgabe ist in 16 bit 11025 Hz stereo.
+
+sound_menu_quality_medium_text Mittel
+sound_menu_quality_medium_help Soundausgabe ist in 16 bit 22050 Hz stereo.
+
+sound_menu_quality_high_text  Hoch
+sound_menu_quality_high_help  Soundausgabe ist in 16 bit 44100 Hz stereo.
+
+sound_menu_buffer_text        Puffer:
+sound_menu_buffer_help        Regelt die Grösse des Datenbereichs, in dem gemischte Sounds vorgehalten werden. Kleine Puffer erzeugen manchmal Knattern, grosse eine spürbare Verzögerung zwischen Grafik und Sound.
+
+sound_menu_buffer_vsmall_text Sehr klein
+sound_menu_buffer_vsmall_help Verzögerung: etwa 0.02s, aber fast sicher mit Knattern.
+
+sound_menu_buffer_small_text  Klein
+sound_menu_buffer_small_help  Verzögerung: 0.04s, hohe Wahrscheinlichkeit für Knattern.
+
+sound_menu_buffer_med_text    Normal
+sound_menu_buffer_med_help    Verzögerung: 0.1s, möglicherweise noch Knattern
+
+sound_menu_buffer_high_text   Gross
+sound_menu_buffer_high_help   Verzögerung: 0.2s (normalerweise schon wahrnehmbar), dafür fast sicher ohne Knattern.
+
+sound_menu_buffer_vhigh_text  Sehr Gross
+sound_menu_buffer_vhigh_help  Verzögerung: 0.4s.
+
+
+#********************************************
+#********************************************
+#
+#             graphics menus
+#
+#********************************************
+#********************************************
+
+#display menu
+display_settings_menu         Grafikeinstellungen
+display_settings_menu_help    Hier kann man ettliche Darstellungsoptionen an die eigenen Wünsche anpassen.
+
+screen_mode_menu              Anzeige
+screen_mode_menu_help         Auflösung, Farbtiefe,...
+
+preferences_menu              Geschmacksfragen
+preferences_menu_help         Einige Dinge, die das Aussehen von \g verändern, aber nur wenig von der Leistung der Hardware abhängen
+
+hud_menu                      Statusanzeige
+hud_menu_help                 Verändert die Optionen der Statusanzeige (HUD, Head up display)
+
+detail_settings_menu          Detail
+detail_settings_menu_help     Anpassungen der Grafik an die verwendete Hardware.
+
+performance_tweaks_menu       Tricks
+performance_tweaks_menu_help  Einige Einstellungen, die nicht immer funktionieren, aber manchmal Geschwindigkeitsvorteile liefern.
+
+graphics_load_defaults_text   Voreinstellungen laden
+graphics_load_defaults_help   Alle Enstellungen werden wieder auf ihre Ausgangswerte gesetzt.
+
+
+#feature menuitem
+feature_disabled_text         Aus
+feature_disabled_help         Diese Option ist momentan deaktiviert.
+
+feature_default_text          Voreinstellung
+feature_default_help          Wir lassen das System darüber entscheiden...
+
+feature_enabled_text          An
+feature_enabled_help          Diese Option ist momentan aktiviert.
+
+#texture menuitem
+texture_menuitem_help         Wählt den Texturierungsmodus, beachte wie sich das Menü verändert. Die aktuelle Einstellung ist:
+
+texture_off_text              Aus
+texture_off_help              Gar keine Texturen
+
+texture_nearest_text          Grob
+texture_nearest_help          Keine Filterung, keine Detail-Levels. Sehr hässlich. Nur auf ganz langsamen Maschinen brauchbar.
+
+texture_bilinear_text         Gefiltert
+texture_bilinear_help         Immer noch unschön: keine Detail-Levels, aber immerhin Filterung. Nicht zu empfehlen: zu hässlich auf Beschleunigerkarten, zu langsam in Software.
+
+texture_mipmap_nearest_text   Mipmap
+texture_mipmap_nearest_help   Keine Filterung, aber Detail-Levels. Hässlich, aber gut für Software-Rendering.
+
+texture_mipmap_bilinear_text  Mipmap gefiltert
+texture_mipmap_bilinear_help  Filterung und Detail-Levels. Ziemlich brauchbar.
+
+texture_mipmap_trilinear_text Trilinear
+texture_mipmap_trilinear_help Filterung und Interpolation zwischen den Detail-Levels. Zu empfehlen auf moderner (>= Voodoo 2) Hardware. Ist so schnell wie Mipmap gefiltert.
+
+
+#screen mode menu
+screen_resolution_text        Auflösung:
+screen_resolution_help        Wählt die Auflösung im Vollbildmodus. Zum übernehmen muss \g neugestartet oder auf Aktivieren geklickt werden.
+
+window_size_text              Fenstergrösse:
+window_size_help              Bestimmt die Fenstergrösse im Fenstermodus. Zum übernehmen muss \g neugestartet oder auf Aktivieren geklickt werden.
+
+screen_custom_text            Benutzerdefiniert
+screen_custom_help            Setze die Variablen CUSTOM_SCREEN_WIDTH und CUSTOM_SCREEN_HEIGHT in user.cfg, um eine eigene Auflösung zu definieren (z.B. für breite Bildschirme)
+
+screen_fullscreen_text        Vollbild:
+screen_fullscreen_help        Schaltet zwischen Vollbildmodus (Ein) und Fenstermodus (Aus) um. Auf einigen Systemen läuft \g leider nicht im Vollbild. Zum übernehmen muss \g neugestartet oder auf Aktivieren geklickt werden.
+
+screen_colordepth_text        Farbtiefe:
+screen_colordepth_help        Die Farbtiefe bestimmt die Bildqualität.
+
+screen_colordepth_16_text     16 Bit
+screen_colordepth_16_help     Niedrige Qualität; empfohlen für ältere Graphikkarten. \g verwendet keine aufwändigen Blendingeffekte, daher fällt die Rasterung nicht so sehr auf.
+
+screen_colordepth_desk_text   Voreinstellung
+screen_colordepth_desk_help   Das System gibt eine "optimale" Farbtiefe vor; üblicherweise kommt sie von den Einstellungen des Desktops.
+
+screen_colordepth_32_text     32 Bit
+screen_colordepth_32_help     Hohe Qualität; empfohlen für alle Graphikkarten vom GeForce/Radeon-Kaliber.
+
+screen_zdepth_text            Z-Buffer-Tiefe:
+screen_zdepth_help            Bestimmt die Genauigkeit des Tiefenpuffers. Zum übernehmen muss \g neugestartet oder auf Aktivieren geklickt werden.
+
+screen_zdepth_16_text         16 Bit
+screen_zdepth_16_help         Niedrige Qualität; verursacht leichter "Z-Fighting"-Artefakte. Nur setzen, wenn die anderen Möglichkeiten gar nicht gehen.
+
+screen_zdepth_desk_text       Voreinstellung
+screen_zdepth_desk_help       Tiefe des Z-Buffers ist identisch mit der Farbtiefe. Empfohlene Einstellung.
+
+screen_zdepth_32_text         32 Bit
+screen_zdepth_32_help         Hohe Qualität; verringert Artefakte.
+
+screen_check_errors_text      Beachte Fehler:
+screen_check_errors_help      Soll \g bei der Graphikinitialisierung auf Warnungen des Systems achten? Üblicherweise sollte man diese Option so lassen, wie sie ist.
+
+screen_use_sdl_text           Verwende SDL
+screen_use_sdl_help           Wenn aktiviert, wird OpenGL über die sauberen Initialisierungsroutinen von SDL gestartet. Sonst wird ein Hack benutzt. (SDL: Multiplattformbibliothek, die bei \g für Eingabe, Sound und Fenstermanagement verwendet wird)
+
+screen_grab_mouse_text        Maus einfangen:
+screen_grab_mouse_help        Wenn das hier aktiviert ist, so kann der Mauszeiger das Fenster nicht verlassen. Nur so lässt sich die Maus im Fenstermodus richtig nutzen.
+
+screen_apply_changes_text     Aktivieren
+screen_apply_changes_help     Versucht, die neuen Einstellungen ohne Neustart zu übernehmen. Benutzung auf eigene Gefahr
+
+screen_keep_window_active_text Aktiv lassen
+screen_keep_window_active_help Bestimmt, ob \g im Hintergrund aktiv bleiben soll, wenn es den Eigabefocus verliert (z.B. durch ALT-TAB).
+
+#detail menu
+detail_floor_mirror_text      Spiegelung:
+detail_floor_mirror_help      Welche Objekte sollen sich im Boden spiegeln?
+
+detail_floor_mirror_off_text  Keine
+detail_floor_mirror_off_help  Keine
+
+detail_floor_mirror_obj_text  nur Objekte
+detail_floor_mirror_obj_help  alles, was sich bewegt (Vehikel, Funken, Explosionen)
+
+detail_floor_mirror_ow_text   Objekte und Wände
+detail_floor_mirror_ow_help   eingentlich alles, was im Spiel momentan vorkommt...
+
+detail_floor_mirror_ev_text   Alles
+detail_floor_mirror_ev_help   (Kein Unterschied zu "Objekte und Wände")
+
+detail_dither_text            Rasterung:
+detail_dither_help            Wenn die derzeitigen Einstellungen eine Farbe nicht darstellen können wird sie durch Mischung simuliert. In niedrigen Auflösungen sieht das allerdings nicht gut aus. Auf manchen Systemen erhöht das abschalten die Geschwindigkeit.
+
+detail_floor_text             Boden:
+detail_floor_help             Der Boden kann auf mehrere verschiedene Arten dargestellt werden. Momentane Einstellung:
+
+detail_floor_no_text          Keiner
+detail_floor_no_help          Gar nichts wird dargestellt. Ist am schnellsten.
+
+detail_floor_grid_text        Raster
+detail_floor_grid_help        Ein paar Rasterlinien werden gezeichnet. Ziemlich schnell und für Softwarerendering empfohlen.
+
+detail_floor_tex_text         Texturierte Ebene
+detail_floor_tex_help         Eine einfache texturierte Ebene wird gezeichnet. Schön schnell bei Hardwarebeschleunigung, aber die schärfe des Rasters nimmt zum Horizont hin schnell ab.
+
+detail_floor_2tex_text        Doppelt texturierte Ebene
+detail_floor_2tex_help        Die beiden Gruppen von Rasterlinien werden separat gezeichnet und sind damit bis zum Horizont gestochen scharf. Kostet allerdings auch etwas an Performance.
+
+detail_polyantialias_text     Polygon-Antial.:
+detail_polyantialias_help     Sollen die Kanten von Polygonen geglättet werden? Auf den meisten Systemen ist dieses Feature leider nicht richtig implementiert.
+
+detail_lineantialias_text     Line-Antial.:
+detail_lineantialias_help     Sollen die Kanten von Linien geglättet werden?
+
+detail_alpha_text             Transparenz:
+detail_alpha_help             Kostenlos auf den meisten 3D-Karten: Einige Objekte (die ersten Meter der Wände hinter den Vehikeln) werden transparent dargestellt. Verlangsamt den Software Renderer ein wenig.
+
+detail_smooth_text            Rundes Licht:
+detail_smooth_help            (Besser bekannt als Smooth Shading) Lässt die Beleuchtung der Objekte "runder" erscheinen. Auch bei Softwarerendering fast umsonst.
+
+detail_persp_text             Perpektivenkorrektur:
+detail_persp_help             Wenn man dieses Feature deaktivert, so werden die Boden- und Wandtexturen fürchterlich verzerrt; Objekttexturen leiden jedoch nur wenig. Bringt im Softwaremodus etwas Geschwindigkeit, bei den meisten 3D-Beschleunigern kann man es gar nicht mehr abschalten.
+
+detail_text_truecolor_text    Texturen in TrueColor:
+detail_text_truecolor_help    Speichert die Texturen in 32 Bit (24 Bit Farbe + 8 Bit Transparenz), sonst werden 16 Bit verwendet.
+
+#preferences menu
+pref_sparks_text              Funken:
+pref_sparks_help              Schaltet die Funken, die bei Beinahekollisionen fliegen, ein oder aus.
+
+pref_explosion_text           Explosionen:
+pref_explosion_help           Schaltet den Explosionseffekt an oder aus.
+
+pref_skymove_text             Himmelsbewegung:
+pref_skymove_help             Wenn aktiviert, dann wird die untere Himmelsebene ein wenig animiert.
+
+pref_lowersky_text            Unterer Himmel:
+pref_lowersky_help            Wird die untere Himmelsebene gezeichnet? Beide Himmelsebenen an zu zeigen verringert die Geschwindigkeit
+
+pref_uppersky_text            Oberer Himmel:
+pref_uppersky_help            Wird die obere Himmelsebene gezeichnet? Beide Himmelsebenen an zu zeigen verringert die Geschwindigkeit
+
+pref_highrim_text             Hoher Rand:
+pref_highrim_help             Macht die Wände am Rand der Arena unendlich hoch. Sonst sind die Wände so hoch wie die von Spielern.
+
+pref_headlight_text           Frontlicht:
+pref_headlight_help           Gibt den Vehikeln Frontscheinwerfer. Benötigt eine Grafikkarte mit Pixelshadern.
+
+pref_showhud_text             Head-up-Display (HUD) anzeigen
+pref_showhud_help             Wenn aktiviert, wird ein Head up display angezeigt während des Spieles im Einzelbenutzer modus.
+
+pref_showfastest_text         Schnellsten Spieler
+pref_showfastest_help         Zeigt den schnellsten Spieler insgesamt auf dem Raster in einem Spiel (wenn Head-up-Display aktiviert ist).
+
+pref_showscore_text           Spielstand anzeigen
+pref_showscore_help           Zeigt dein Spielstand und den höchsten Spielstand in dem HUD (wenn Head-up-Display aktiviert ist).
+
+pref_showenemies_text         Gegner anzeigen
+pref_showenemies_help         Zeigt wie viele Spieler noch am leben sind ohne dich (wenn Head-up-Display aktiviert ist).
+
+pref_showtime_text            Zeitanzeige:
+pref_showtime_help            Zeigt die aktuelle Uhrzeit an.
+
+pref_show24hour_text          24-Stunden-Uhr:
+pref_show24hour_help          Wenn dies aktiviert wird, läuft die Uhr im 24-Stunden-Modus (statt 12 Stunden).
+
+pref_showping_text            Show Ping
+pref_showping_help            Zeigt dein ping in dem HUD an (wenn Head-up-Display aktiviert ist).
+
+pref_showbrake_text           Bremsanzeige
+pref_showbrake_help           Zeigt den Füllstand des Bremsvorrats in der Statusanzeige
+
+pref_showspeed_text           Geschwindigkeitsanzeige
+pref_showspeed_help           Zeigt die aktuelle Geschwindigkeit in der Statusanzeige
+
+pref_showrubber_text          Gummianzeige
+pref_showrubber_help          Zeigt den Status des etwas obskuren Gummifüllstands (regelt die Toleranz bei Kollisionen mit Wänden)
+
+misc_fps_text                 FPS-Anzeige:
+misc_fps_help                 Wenn die FPS-Anzeige aktiviert ist, wird die aktuelle Geschwindigkeit der Graphikausgabe am unteren linken Bildschirmrand in Bildern pro Sekunde (frames per second) angezeigt.
+
+#tweaks menu
+tweaks_displaylists_text      Display Lists:
+tweaks_displaylists_help      Display Lists sind ein OpenGL-Feature, um ein Objekt schnell oft rendern zu können; es wird normalerweise für die Vehikel verwendet. Manchmal funktioniert das aber nicht richtig: wenn die Vehikel unsichtbar sind, dann sollte dieses Feature ausgeschaltet werden.
+
+tweaks_ztrick_text            Z-Trick:
+tweaks_ztrick_help            Geschwindigkeitstrick: auf 3dfx-Karten kann man das Löschen des Z-Puffers (für die Tiefensortierung der Objekte) sparen. Wenn es nicht funktionniert, so verschwinden die Vehikel mit seltsamen Effekten aus dem Bild.
+
+tweaks_infinity_text          Unendlich:
+tweaks_infinity_help          OpenGL unterstützt eigentlich unendlich ferne Punkte: sie entsprechen einfach nur Richtungen. Senn dieser Menupunkt aktiviert wird, dann verwendet \g diese unendlichen Punkte, um z.B. den Boden zu zeichnen. Meistens ist dieses Feature allerdings kaputtoptimiert.
+
+
+#********************************************
+#********************************************
+#
+#           generic menu texts
+#
+#********************************************
+#********************************************
+
+#menu texts: generic
+menuitem_exit_text            Beenden
+menuitem_exit_help            Verlässt dieses Menu und kehrt zur übergeordneten Ebene zurück
+
+menuitem_accept               Akzeptieren
+menuitem_accept_help          Übernimmt die Einstellungen in diesem Menü und fährt mit dem übergeordneten Menü fort.
+
+input_item_help               Um die Belegung zu ändern, drücke die Leertaste oder Return, dann die Taste, die diese Funktion auslösen soll. Maustasten oder Mausbewegungen sind auch möglich.
+input_press_any_key           Drücke die gewünschte Taste!
+
+menuitem_toggle_on            Ein
+menuitem_toggle_off           Aus
+
+
+
+
+
+
+
+#********************************************
+#********************************************
+#********************************************
+#********************************************
+#
+#   Game messages printed on the console
+#
+#********************************************
+#********************************************
+#********************************************
+#********************************************
+
+#********************************************
+#********************************************
+#
+#   Greeting message printed on first start
+#
+#********************************************
+#********************************************
+
+welcome_message_heading       Wilkommen bei \g!
+welcome_message_intro         Die Graphikeinstellungen wurden auf die OpenGL-Konfiguration\n\n
+welcome_message_vendor        Hersteller : 
+welcome_message_renderer      Typ        : 
+welcome_message_version       Version    : 
+welcome_message_finish        \nangepasst.\n\nViel Spass!\n
+#\n\nThis Game is supported from KGN (Krawall Gaming Network, www.krawall.de).
+
+#********************************************
+#********************************************
+#
+#   Network compatibility warnings
+#
+#********************************************
+#********************************************
+
+setting_legacy_clientblock    Die Einstellung \1 (Gruppe: \2) weicht vom Standartwert ab. Verbindungen von Clients älter als Version \3 werden abgewiesen.\n
+setting_legacy_revert         Die Einstellung \1 (Gruppe: \2) weicht vom Standartwert ab. Wenn sich Clients älter als Version \3 mit diesem Server verbinden, wird die Einstellung auf den Standartwert zurückgesetzt.\n
+setting_legacy_ignore         Die Einstellung \1 (Gruppe: \2) weicht vom Standartwert ab. Clients älter als Version \3 könnten damit Probleme haben.\n
+setting_legacy_change_blocked Die Einstellung \1 (Gruppe: \2) kann jetzt nicht geändert werden. Clients älter als Version \3 sind mit dem Server verbunden.\n
+
+#********************************************
+#********************************************
+#
+#      leaque/highscore messages
+#
+#********************************************
+#********************************************
+
+league_message_rose           \1 ist in der \4 an \2 vorbei auf Platz \3 gestiegen.
+league_message_dropped        \1 ist in der \4 an \2 vorbei auf Platz \3 gefallen.
+
+league_message_greet_intro    Du bist 
+league_message_greet_sep      ,
+league_message_greet_lastsep  und 
+league_message_greet          auf Platz \1 von \2 auf der \3
+league_message_greet_new      nicht auf der \3
+
+won_rounds_description        Rundensiegerliste
+won_matches_description       Matchsiegerliste
+
+highscore_description         Einzelspieler-Highscores
+highscore_message_entered     \1 kommt auf die \2 mit \3 Punkten 
+highscore_message_improved    \1 verbesserte seine Bestmarke auf der \2 auf \3 
+highscore_message_move_top    und ist nun an der Spitze!
+highscore_message_move_pos    und landet auf Rang \4.
+highscore_message_stay_top    und bleibt an der Spitze.
+highscore_message_stay_pos    und bleibt auf Position \4.
+
+ladder_description            Leiter
+ladder_message_entered        \1 kommt auf die \2 mit \3 Punkten 
+ladder_message_gained         \1 erhält \5 Punkte für die \2 
+ladder_message_lost           \1 verliert \5 Punkte für die \2 
+ladder_message_move_top       und ist nun an der Spitze!
+ladder_message_move_pos       und landet auf Rang \4.
+ladder_message_stay_top       und bleibt and der Spitze.
+ladder_message_stay_pos       und bleibt auf Position \4.
+
+online_activity_nobody        Niemand da.
+online_activity_onespec       Ein Spieler online, aber nur als Zuschauer.
+online_activity_manyspec      \1 Spieler online, aber alle im Zuschauermodus.
+online_activity_napping       Niemand da. Ich mache ein Nickerchen...
+
+
+#********************************************
+#********************************************
+#
+#  messages describing the current gamestate
+#
+#********************************************
+#********************************************
+
+gamestate_deleting_objects    Lösche Objekte...\n
+gamestate_deleting_grid       Lösche Raster...\n
+gamestate_creating_grid       Erzeuge Raster...\n
+gamestate_done                fertig!\n
+gamestate_timeout_intro       \n\nZeitüberschreitung! Grund:\n
+gamestate_timeout_message     Benutzer \1 weiss noch nichts von Objekt \2 ( \3 ).\n
+
+gamestate_reset_center        Reset
+gamestate_reset_console       Nach dieser Runde beginnt ein neues Match; Punktzahlen werden zurückgesetzt.\n
+gamestate_resetnow_center     Neues Match
+gamestate_resetnow_console    Setzte Punktzahlen zurück...\n
+gamestate_resetnow_log        Neues Match\n
+gamestate_newround_console    Los (Runde \1 von \2 )!\n
+gamestate_newround_goldengoal Los (Verlängerung; Wer als erster die Führung übernimmt, gewinnt)!\n
+gamestate_newround_log        Neue Runde\n
+gamestate_chat_wait           Warte bis zu \2 Sekunden auf \1.\n
+
+gamestate_wait_players        Warte auf echte Spieler...\n
+gamestate_wait_players_con    Warte auf echte Spieler ( nur Zuschauer sind online )...\n
+
+gamestate_tensecond_warn      Noch zehn Sekunden!\n
+gamestate_30seconds_warn      Noch 30 Sekunden!\n
+gamestate_minute_warn         Noch eine Minute!\n
+gamestate_2minutes_warn       Noch zwei Minuten!\n
+gamestate_5minutes_warn       Noch fünf Minuten!\n
+gamestate_10minutes_warn      Noch zehn Minuten!\n
+
+gamestate_champ_center        Meister: \1
+gamestate_champ_console       Gesamtsieger: \1 
+gamestate_champ_scorehit      hat das Punktelimit ( \1 / \2 ) erreicht.\n
+gamestate_champ_timehit       nachdem das Zeitlimit von \1 Minuten erreicht war.\n
+gamestate_champ_default       nach \1 Runden.\n
+gamestate_champ_finalscores   Endergebnis:\n
+
+gamestate_winner_winner       Sieger: 
+gamestate_winner_ai           Computer.
+gamestate_winner_humans       Menschen.
+
+instant_win_activated         Die Siegzone wurde aktiviert! Finde sie und fahre hinein um zu gewinnen.\n
+instant_death_activated       Die Todeszone wurde aktiviert! Vermeide sie!\n
+
+player_win_instant            \1 bekam \2 Punkte durch das Erreichen der Siegzone.\n
+player_win_conquest           \1 bekam \2 Punkte für das erobern der Basis des Feindes.\n
+player_win_conquest_specific  \1 bekam \2 Punkte für das erobern der Basis von \3.\n
+player_kill_collapse          \1 wurde von seiner kollabierenden Zone vernichtet.\n
+player_win_survive            \1 bekam \2 Punkte für das Halten der eigenen Basis.\n
+
+
+#********************************************
+#********************************************
+#
+#  messages about player activity
+#
+#********************************************
+#********************************************
+
+player_pingcharity_changed    Ping-Spende ist nun \2 (vorher: \1).\n
+spam_protection_repeat        SPAM PROTECTION: du sagsest bereits: \1\n
+spam_protection               LABER-SCHUTZ: du bist für die nächsten \1 Sekunden geknebelt.\n
+vote_spam_protection          ABSTIMMUNGS-SPAMSCHUTZ: du darft die nächsten \1 Sekunden keine Abstimmung mehr initiieren.\n
+chat_title_text               Sage:
+player_entered_game           \1 0x7fff7fkommt ins Spiel.\n
+player_entered_spectator      \1 0x7fff7f schaut zu.\n
+player_left_spectator         0xff7f7fZuschauer \1 0xff7f7fis weg.\n
+player_left_game              \1 0xff7f7fwurde mit \2 Punkten endgültig gelöscht.\n
+player_leaving_game           \1 0xff7f7fhat das Spiel verlassen.\n
+player_renamed                \2 hat sich auf \1 umbenannt.\n
+player_rename_rejected        \1 0xffffffdarf sich nicht in \2 0xffffffumbenennen, das könnte die Abstimmenden verwirren.\n
+player_welcome                \n\nWilkommen \1! Auf diesem Server läuft Version \2.\n
+player_win_default            \1 erhält aus sehr seltsamen Gründen \2 Punkte.\n
+player_lose_default           \1 verliert aus sehr seltsamen Gründen \2 Punkte.\n
+player_lose_suicide           \1 verliert \2 Punkte wegen Selbstmord.\n
+player_free_suicide           \1 beging Selbstmord.\n
+player_win_frag               \1 liess \3 für \2 Punkte in die Falle laufen.\n
+player_free_frag              \1 liess \2 in die Falle laufen.\n
+player_teamkill               \1 hat den Teampartner \2 beseitigt! Buh! Dafür gibt es keinen einzigen Punkt!\n
+player_win_frag_ai            \1 erhält \2 Punkte für das glorreiche Vernichten eines Computergegners.\n
+player_lose_frag              \1 verursacht eine allgemeine Schutzverletzung und verliert \2 Punkte.\n
+player_lose_rim               \1 bekommt \2 Punkte wegen versuchter Flucht aus dem Spieleraster abgezogen.\n
+player_win_survivor           \1 erhält als letztes aktives Team \2 Punkte.\n
+player_joins_team             \1 will ab der nächsten Runde für \2 spielen.\n
+player_joins_team_wish        \1 will immer noch für \2 spielen, darf aber nicht.\n
+player_joins_team_noex        Ignoriere \1s Wunsch, für ein nicht mehr existierendes Team zu spielen.\n
+player_leave_team_wish        \1 will ab der nächsten Runde nicht mehr für \2 spielen.\n
+player_leave_game_wish        \1 will ab der nächsten Runde nicht mehr spielen.\n
+player_joins_team_start       \1 0x7fff7fspielt für \2.\n
+#player_joins_team_now   \1 0x7fff7fnow plays for \2.\n
+player_changes_team           \1 0x7f7fffwechselt von \3 zu \2.\n
+player_leaves_team            \1 0xff7f7fverlässt \2.\n
+player_creates_team           \1 gründet \2.\n
+player_nocreate_team          \1 kann momentan kein neues Team gründen.\n
+player_nojoin_team            \1 kann sich momentan \2 nicht anschliessen.\n
+player_not_on_team            Du bist in keinem Team.\n
+player_topologypolice         Die Topologiepolizei befiehlt: \1
+
+team_shuffle                  \1 wird von Position \2 auf \3 verschoben.\n
+player_noshuffleup            Du darfst dich hier nicht selbst befördern.\n
+player_noshuffle              Dein Positionsänderungswunsch hat keinen Effekt.\n
+
+msg_toomanymatches            0xff0000Zu viele Treffer bei Suche nach \1. Bitte etwas genauer.\n
+msg_nomatch                   0xff0000Keine Treffer bein Suche nach \1.\n
+
+
+
+player_toggle_spectator_on    \1 wird ab der nächsten Runde nur noch zusehen.\n
+player_toggle_spectator_off   \1 spielt wieder mit.\n
+
+#camera messages
+camera_watching_ai            Beobachte Computergegner\n
+camera_watching_player        Beobachte \1\n
+
+#score table
+team_scoretable_name          Team:
+team_scoretable_score         Score:
+player_scoretable_name        Spieler:
+player_scoretable_team        Mitglied von Team:
+player_scoretable_score       Punkte:
+player_scoretable_ping        Ping:
+player_scoretable_alive       Lebendig:
+player_scoretable_alive_yes   Ja
+player_scoretable_alive_no    Nein
+player_scoretable_pingcharity Ping-Spende:            
+player_scoretable_nobody      Niemand da.\n
+player_scoretable_inactive    nicht aktiv
+
+
+
+#********************************************
+#********************************************
+#
+#          network messages
+#
+#********************************************
+#********************************************
+
+network_message_timeout_title Server antwortet nicht
+network_message_timeout_inter Der Server, mit dem Verbindung aufgebaut werden sollte, hat nicht geantwortet.\nDas könnte daran liegen, dass er momentan nicht aktiv oder nicht erreichbar ist; oder Du hast dich beim "Manuellen Verbindungsaufbau" vertippt.
+
+network_message_denied_title  Verbindung abgelehnt
+network_message_denied_inter  Der Server hat den Verbindungsversuch abgelehnt.\nDas bedeutet normalerweise, dass er voll ist. Versuche einen anderen Server.
+network_message_denied_inter2 Der Server hat den Verbindungsversuch abgelehnt.
+
+network_message_lateto_title  Zeitüberschreitung
+network_message_lateto_inter  Obwohl der Verbindungsaufbau erforlgreich war, konnten die Spieldaten nicht übertragen werden.\nVersuche es einfach nochmal!
+
+network_message_lostconn_title Verbindung verloren
+network_message_lostconn_inter Die Verbindung zum Server wurde unterbrochen. Das kann daran liegen, dass die tatsächliche Netzwerkverbindung abgebrochen wurde (Ethernet-Kabel gezogen, Modem hat aufgelegt...). Oder der Server ist abgestürzt. Letzteres wäre ein Fall für einen Bug-Report.
+
+network_message_abortconn_title Verbindung abgebrochen
+network_message_abortconn_inter Der Server hat die Verbindung abgebrochen.
+
+network_master_timeout_retry  Einer der Master-Server antwortet nicht. Nächster wird kontaktiert...\n
+network_master_timeout_title  Master-Server antwortet nicht
+network_master_timeout_inter  Der Master-Server ist momentan nicht erreichbar und die Liste der Server konnte nicht aktualisiert werden.\nWir versuchen es mal mit der alten Liste...
+
+network_master_denied_title   Verbindung zum Master-Server abgelehnt
+network_master_denied_inter   Der Master-Server lässt keine Verbindung zu sich aufbauen. Vermutlich greifen gerade zu viele Benutzer auf ihn zu.\nWir versuchen es mal mit der alten Liste...
+
+testing_version_expired_title Version abgelaufen
+testing_version_expired       Dies ist eine Testversion, und der Server verwendet eine viel neuere Version. Aufgrund unkalkulierbarer Risiken müssen wir leider den Verbindungsaufbau abbrechen. Wahscheinlich gibt es aber bereits eine neuere Testversion auf www.armagetronad.net oder beta.armagetronad.net zum Herunterladen.
+
+network_master_upgrage        Zu neue Version
+network_master_downgrage      Zu alte Version
+network_master_incompatible   Nicht kompatibel
+network_master_full           Besetzt
+network_master_serverinfo     Version : \1\nURI     : \2\nOptionen: \3\n
+network_master_players        Spieler : 
+network_master_players_empty  leer
+network_master_options        Optionen:\n
+
+network_connecting_to_server  Verbinde mit \1 ...\n
+network_connecting_gamestate  Warte auf Spielstand...\n
+network_syncing_gamestate     Erhalten! Synchronisiere Spielstand...\n
+network_warn_unknowndescriptor \n\n\nUnbekannte Nachricht (ID \1) erhalten.\n\nES IST RATSAM, EINE NEUE VERSION VON ARMAGETRON ZU BESORGEN!!!!\n
+network_error                 Netzwerkfehler.\n
+network_error_timeout         Verbindung zu Benutzer \1 verloren.\n
+network_error_shortmessage    Benutzer \1 sendet eine unzulässige (zu kurze) Nachricht. Er wird beseitigt.\n
+network_error_overflow        Benutzer \1 kommt mit dem Netzwerkverkehr nicht hinterher.\n
+network_killuser              Beseitige Benutzer \1, Ping \2.\n
+network_statistics1           Zeit:      \1 Sekunden\n
+network_statistics2           Gesendet:  \2 Bytes in \3 Paketen (\4 Bytes/s)\n
+network_statistics3           Empfangen: \5 Bytes in \6 Paketen (\7 Bytes/s)\n
+
+network_login_denial          Verbindungsabbruch bestätigt...\n
+network_server_login          Empfange Verbindungsaufbau von \1.\n
+network_server_login_success  Neuer Benutzer: \1\n
+
+network_toomanyservers        \n\n\nWarnung: auf dieem Computer laufen zu viele Server.\nDieser könnte von Clients eventuell nicht gefunden werden.\n\n\n
+
+network_browser_unidentified  Nichtidentifizierbare Serverinformation von \1 "uber Kanal \2 erhalten.\n
+
+network_logout_process        Trenne Verbindung...\n
+network_logout_done           Fertig!\n
+network_logout_server         Verbindungsabbruch wird von \1 gewünscht.\n
+
+network_login_process         Verbindungsaufbau initiiert. Warte auf Antwort...\n
+network_login_failed          Verbindungsaufbau fehlgeschlagen.
+network_login_failed_full     Verbindungsaufbau fehlgeschlagen: Der Server ist voll belegt.\n
+network_login_failed_timeout  Verbindungsaufbau fehlgeschlagen: Keine Antwort erhalten.\n
+network_login_success         Verbindungsaufbau erfolgreich. Als Benutzer \1 angemeldet.\n
+network_login_sync            Synchronisiere mit dem Server...\n
+network_login_relabeling      NetObjects werden neu geordnet...\n
+network_login_sync2           Nochmal Synchronisieren...\n
+network_login_done            Fertig!\n
+
+network_kill_preface          Vom Server angegebener Grund:
+network_kill_maxidgrabber     Keine ObjektIDs mehr frei; Dein Client hatte die meisten davon für sich selbst belegt ( Bug? ).
+network_kill_maxiduser        Keine ObjektIDs mehr frei; Dein Client hatte die meisten davon belegt ( Bug? ).
+network_kill_cheater          Du hast den Cheater-Alarm ausgelöst. Wenn das nicht gerechtfertigt war, sende bitte einen Bug-Report.
+network_kill_error            Beim Bearbeiten eines Netzwerkpakets von Deinem Client wurde ein Fehler festgestellt. Vermutlich gibt es entweder im Server oder im Client einen Bug.
+network_kill_timeout          Dein Client hat zu lange nicht geantwortet.
+network_kill_logout           Du hast dich ausgeloggt.
+network_kill_incompatible     Die Version deines Clients passt nicht zum Server.
+network_kill_full             Der Server ist voll besetzt.
+network_kill_shutdown         Der Server wurde heruntergefahren.          
+network_kill_overflow         Es gab einen Netzwerk-Überlauf.
+network_kill_too_many_players Zu viele Spieler mit identischen Verbindungsdaten.
+network_kill_kick             Der Server-Adminstrator hat Dich vor die Tür gesetzt. Bitte bleibe draussen.
+network_kill_idle             Du wurdest automatisch vor die Tür gesetzt, weil Du gar nicht spielst.
+network_kill_banned           Der Server-Administrator hat Dich verbannt. Grund: \2. Je öfter Du versuchst, dich mit dem Server zu verbinden, umso länger wird deine Verbannung dauern.
+#network_kill_banned         You are banned. Please stay away. The more often you retry to connect, the longer your ban stays.
+network_kill_unknown          Kein Grund angegeben.
+network_kill_spamkick         Du wurdest wegen Spammings automatisch vom Server entfernt. Sei bitte etwas vorsichtiger.
+voted_kill_kick               Du wurdest von einem wütenden Mob vom Server geschmissen; wahrscheinlich hassen sie dich. Gute Arbeit! Versuche, woanders zu spielen.
+network_kill_spectator        Du warst zu lange nur Beobachter.
+
+network_kick_notfound         Spieler \1 nicht gefunden. Gross/Kleinschreibung?\n
+
+network_ban_kph               IP \1 ist nun mit \2 Kicks pro Stunde registriert.\n
+network_ban                   Spieler von IP \1 sind für die nächsten \2 minuten gesperrt. Grund: \3\n
+network_noban                 Spieler von IP \1 sind nicht mehr gesperrt.
+
+network_ban_kick              Dies ist eine automatische Verbannung aufgrund zu vieler Rausschmisse.
+network_ban_noreason          Kein Grund angegeben.
+
+#*************************************
+#*************************************
+#
+#       vote messages
+#
+#*************************************
+#*************************************
+
+vote_accepted                 Vorschlag "\1" wurde angenommen.\n
+vote_rejected                 Vorschlag "\1" wurde abgelehnt.\n
+vote_timeout                  Abstimmung "\1" wurde ohne Ergebnis beendet.\n
+vote_new                      Neuer Abstimmungsvorschlag: "\1". Gib deine Stimme im Hauptmenu ab.\n
+vote_redundant                Vorschlag abgelehnt, ein identischer Vorschlag wurde bereits gemacht.\n
+vote_overflow                 Vorschlag abgelehnt, es sind bereits zu viele Vorschläge aktiv.\n
+vote_disabled                 Abstimmungen wurden leider von Serveradministrator abgeschaltet.\n
+vote_disabled_spectator       Vorschlag abgelehnt, Zuschauer sind hier nicht Wahlberechtigt.\n
+vote_toofew                   Vorschlag abgelehnt, es sind zu wenig Wahlberechtigte online.\n
+vote_submitted                Vorschlag "\2" wurde von \1 eingebracht.\n
+vote_vote_for                 \1 hat für Vorschlag "\2" gestimmt.\n
+vote_vote_against             \1 hat gegen Vorschlag "\2" gestimmt.\n
+
+#********************************************
+#********************************************
+#
+#          the server browser menu
+#          and master server messages
+#
+#********************************************
+#********************************************
+
+network_master_unknown        Unbekannter Server
+network_master_polling        Teste...
+network_master_unreachable    Nicht erreichbar
+network_master_noserver       Tut mir leid, keine Server gefunden :-(
+network_master_servername     Servername
+network_master_score          Bewertung
+network_master_users          Benutzer
+network_master_ping           Ping
+network_master_browserhelp    Drücke Return/Enter, um eine Verbindung zu diesem Server aufzubauen, "p" um diesen Server anzuPingen, "r", um die gesamte Liste aufzufRischen, "+/-" um dem Server einen Bewertungsbonus/malus zu geben, "Pfeiltaste Links/Rechts" um die Sortierung zu ändern, oder "b", um den Server zu den LieBlingsservern hinzuzufügen. 
+network_master_connecting     Verbindung mit \1 wird aufgebaut...\n
+network_master_send           Schicke meine Daten...\n
+network_master_reqlist        Fordere Server-Liste an...\n
+network_master_status         Empfange Server \1...\n
+network_master_finish         \1 Server empfangen.\n
+network_master_start          Spiel leiten
+network_master_host_inet_help Startet einen Server auf diesem Rechner und macht ihn im Internet bekannt.
+network_master_host_lan_help  Startet einen Server auf diesem Rechner, der nur in diesem lokalen Netz sichtbar ist.
+
+
+#********************************************
+#********************************************
+#
+#       Resource messages
+#
+#********************************************
+#********************************************
+
+resource_not_cached           Datei \1 befindet sich nicht im lokalen Speicher. Bitte etwas Geduld, sie wird heruntergeladen...\n
+resource_downloading          Lade \1 herunter ...\n
+resource_fetcherror_404       FEHLER 404 : Datei nicht gefunden.\n
+resource_fetcherror           FEHLER \1 != 200.\n
+resource_no_filename          FEHLER: Leerer Dateiname.\n
+resource_abs_path             FEHLER: Absoluter Dateiname, der Server versucht, Systemdateien zu überschreiben.
+resource_no_writepath         FEHLER: Konnte nicht herausfinden, wo die Datei hingeschrieben werden soll.\n
+resource_no_write             FEHLER: Konnte \1 nicht schreiben.\n
+
+#********************************************
+#********************************************
+#
+#       Directory messages
+#
+#********************************************
+#********************************************
+
+directory_path_nonwritable    Konnte den Pfad zu "\1" nicht erzeugen, wahrscheinlich aufgrund unzureichender Benutzerrechte.
+directory_path_null           FEHLER: Der angegebene Pfad ist leer.\n
+directory_path_absolute       FEHLER: Der angegebene Pfad "\1" ist ein absoluter Pfad. Dateien ausserhalb der spielrelevanten Verzeichnisse sind tabu.\n
+directory_path_relative       FEHLER: Der angegebene Pfad "\1" ist ein relativer Pfad. Dateien ausserhalb der spielrelevanten Verzeichnisse sind tabu.\n
+directory_path_hidden         FEHLER: Der angegebene Pfad "\1" enthält eine versteckte Komponente.\n
+
+#********************************************
+#********************************************
+#
+#       map messages
+#
+#********************************************
+#********************************************
+
+# title of map error message
+map_file_load_failure_title   Fehler mit Arena
+
+# printed when a map can't be loaded, and the user can do something about it
+map_file_load_failure_self    Die Arena \1 konnte nicht geladen werden. Vielleicht ein Tippfehler?\n
+
+# printed when a map can't be loaded, and  the failure is the server admin's fault
+map_file_load_failure_server  Die Arena \1 konnte nicht geladen werden. Wahrscheinlich hat der Serveradministrator einen Fehler bei der Konfiguration gemacht; bitte informiere ihn darüber.\n
+
+# worst case: default map could not load, either
+map_file_load_failure_default \nDie Standardarena konnte auch nicht geladen werden. Das sollte nie passieren; bitte sende einen Fehlerbericht.\n
+
+# resource at the wrong place
+resource_file_wrong_place_title Datei am falschen Ort
+resource_file_wrong_place     Die Datei, die von "\1" geladen wurde, sollte bei "\2" liegen. Korrekturmöglichkeiten:\na) Wenn Du nicht der Autor der Datei bist, solltest Du sie dahin verschieben, wo sie sein will.\nb) Wenn du der Autor bist und die Datei bleiben soll, wo sie ist, kannst Du auch den <Resource> tag in der Datei anpassen. Wie genau, sagt die Dokumentation.
+
+#********************************************
+#********************************************
+#
+#         Texture messages
+#
+#********************************************
+#********************************************
+
+# texture not found error message
+texture_error_filenotfound    Die Textur \1 konnte nicht geladen werden.\n
+texture_error_filenotfound_title Texturfehler
+
+#********************************************
+#********************************************
+#
+#         Sound messages
+#
+#********************************************
+#********************************************
+
+sound_error_no16bit           Ups. \g benötigt leider eine 16-Bit Soundkarte für den Sound.\n
+sound_error_initfailed        Sound-Initialisierung fehlgeschlagen.\n
+sound_firstinit               Sound wird zum ersten mal gestartet. Manchmal stürzt \g dabei ab; ein Neustart hilft dann manchmal.\n
+sound_inited                  Sound intialisiert: 16 Bit Stereo bei \1 Hz, Puffergrösse \2 Samples.\n
+sound_disabling               Deaktiviere Sound...\n
+sound_disabling_done          Fertig!\n
+sound_error_filenotfound      Sound-Datei \1 nicht gefunden. Läuft \g im richtigen Verzeichnis?
+sound_error_unsupported       Sound-Datei \1 ist leider in einem nicht unterstützten Format.
+
+
+#********************************************
+#********************************************
+#
+#         Configuration messages
+#
+#********************************************
+#********************************************
+
+config_include_not_found      Zu ladende Konfigurationsdatei "\1" nicht gefunden.\n
+config_command_unknown        Kommando \1 unbekannt.\n
+config_command_other          Wahrscheinlich war in deinem Sinn:\n
+config_command_more           Es gibt noch weitere Kommandos, aber die wurden weggelassen, um die Konsole nicht zu überfluten.
+config_file_write_error       Konnte Konfiguration nicht speichern!\n
+config_value_changed          \1 wurde von \2 auf \3 verändert.\n
+config_error_read             Eingabefehler beim Lesen von \1: Ungültiges Format.\n
+config_message_info           \1 steht momentan auf \2.\n
+
+nconfig_errror_protected      Nix da. Nur der Server darf \1 ändern.\n
+nconfig_error_unknown         Konfigurationsänderung für die unbekannte Variable \1 erhalten.\n\n\n\nWAHRSCHEINLICH SOLLTE EINE NEUE VERSION VON ARMAGETRON INSTALLIERT WERDEN!!!!\n
+nconfig_error_nonet           Konfigurationsänderung über das Netwzerk für die Variable \1 erhalten, die jedoch keinen Netzwerksupport hat.\n\n\n\nWAHRSCHEINLICH SOLLTE EINE NEUE VERSION VON ARMAGETRON INSTALLIERT WERDEN!!!!\n
+nconfig_error_ignoreold       Veraltete Konfigurationsänderung für Einstellung \1 wird ignoriert.\n
+nconfig_value_changed         \1 wurde auf Befehl des Servers von \2 auf \3 verändert.\n
+
+
+#*************************************
+#*************************************
+#
+#    Login messages
+#
+#*************************************
+#*************************************
+
+#login texts
+login_password_title          Passwort :
+login_password_help           Trage hier Dein Krawall-Passwort ein (zu erhalten unter www.krawall.de). Zum Login hier einfach Return drücken.
+
+login_cancel                  Login abbrechen
+login_cancel_help             Hiermit wird die Loginprozedur beendet und zum Netzwerk-Menu zurückgekehrt.
+
+login_username                Kennung :
+login_username_help           Trage hier Deine Krawall-Benutzerkennung ein (zu erhalten unter www.krawall.de).
+
+login_storepw_text            Passwörter speichern :
+login_storepw_help            Bestimmt, was mit einmal eingegebenen Passwörtern geschiet
+
+login_storepw_dont_text       Gar nicht
+login_storepw_dont_help       Für Paranoiker: die Passwörter werden sofort aus dem Speicher entfernt, nachdem sie verschlüsselt an den Server geschickt wurden. Passwort muss oft neu eingegeben werden.
+
+login_storepw_mem_text        Im Speicher
+login_storepw_mem_help        Passwort wird für diese Sitzung behalten und muss erst nach einem Neustart von \g neu eingegeben werden.
+
+login_storepw_disk_text       Auf Festplatte
+login_storepw_disk_help       Für Faulpelze: Passwort muss nie wieder eingegeben werden.\nDiese Einstellung ist ziemlich unsicher (Obwohl die Passwörter verschlüsselt werden) und sollte nicht verwendet werden.
+
+password_help                 Passwort-Einstellung
+
+login_request_failed          Login fehlgeschlagen. Neuer Versuch!
+login_request_first           Dieser Server erfordert ein Login.
+login_request_namechange      Neues Login nach Namensänderung erforderlich.
+login_request_master          Der Master-Server erfordert ein Login.
+
+# items that should not be translated
+
+# Room for lost settings in translation files:
+
+
+# Outdated:
+sp_team_max_imbalance_perm_help Höchste tolerierte Ungleichheit der Teams, dauerhaft
+player_joins_team_now         \1 0x7fff7fspielt nun für \2.\n
+team_max_imbalance_perm_help  Höchste tolerierte Ungleichheit der Teams, dauerhaft

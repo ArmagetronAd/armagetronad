@@ -1,0 +1,53 @@
+# include $(top_srcdir)/Makefile.paths
+
+# documentation location
+armadocdir=${aa_docdir}
+
+#*********************************************************
+#           HTML generation rules: need M4               *
+#*********************************************************
+
+htmlm4 = $(top_builddir)/src/doc/html.m4
+
+$(htmlm4): $(top_builddir)/config.status Makefile $(top_srcdir)/src/doc/html.m4.in
+	cd ${top_builddir}; ./config.status src/doc/html.m4
+
+if HAVE_M4
+%.html : $(srcdir)/%.html.m4 %.html.dep $(htmlm4) Makefile 
+if DATE_R
+	{ echo "define(CHANGEDATE,`date +"%b %d %Y" -r $<`) include($(htmlm4))" ; cat $< ; } | m4 -I ${srcdir} > $@
+else
+	{ echo "define(CHANGEDATE,`date +"%b %d %Y"`) include($(htmlm4))" ; cat $< ; } | m4 -I ${srcdir} > $@
+endif
+
+%.dep: %.m4 Makefile
+	echo $*.dep ":\\" > $@
+	{ echo -n "define(include,$(srcdir)/\$$1\)" ; grep "include(" $<; }| m4 >> $@
+	echo "Makefile" >> $@
+endif
+
+.PRECIOUS: %.dep
+
+ @silent_inc@ $(wildcard *.dep) .dummy.dep
+
+.dummy.dep:
+	echo > $@
+
+auto_html_files_m4 = $(wildcard $(srcdir)/*.html.m4)
+auto_html_files_m4_dist = $(wildcard $(srcdir)/*.m4)
+
+auto_html_files_here_m4 = $(patsubst $(srcdir)/%.html.m4, %.html, $(auto_html_files_m4) )
+
+auto_html_files_here_processed = $(patsubst $(srcdir)/%.html, %.html, $(auto_html_files_processed) )
+auto_html_files = $(sort $(auto_html_files_here_m4) $(auto_html_files_here_processed) ) 
+
+htmlclean-local:
+	rm -rf *.dep .dummy.dep
+if HAVE_M4
+	rm -f blubb $(auto_html_files_here_m4)
+endif
+
+clean-local: htmlclean-local
+
+htmldist-hook:
+	cp ${auto_html_files_m4_dist} ${distfiles} ${distdir}

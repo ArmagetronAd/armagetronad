@@ -1,0 +1,49 @@
+#!/bin/sh
+#
+# starts the @progtitle@ master server from the installation directory
+
+test "$PIDDIR" = "" && PIDDIR=$HOME/.@prognamebase@
+test "$VARDIR" = "" && VARDIR=$HOME/.@prognamebase@/var
+test "$BINDIR" = "" && BINDIR=@prefix_reloc@/bin
+
+echo $$ > $PIDDIR/@progname@-masterstarter.pid
+
+pushd $VARDIR
+
+declare -a STARTDATE_LOG
+
+function run()
+{
+    $BINDIR/@prognamebase@-master@executable_suffix@ --userdatadir $VARDIR $* &
+    jobs -p > $PIDDIR/@progname@-master.pid
+    test -s $PIDDIR/@progname@-master.pid || { echo "Warning: main program PID unavailable, master server can't be stopped reliably."; echo $$ > $PIDDIR/@progname@-master.pid ; }
+    wait
+    echo Terminated
+}
+
+while true; do
+  STARTDATE=`date +%s`
+
+  run
+
+  # give up if restarts come too quickly; ten per minute is suspicious
+  OLDESTSTART=${STARTDATE_LOG[1]}
+  if ! test -z "$OLDESTSTART"; then
+      TIMESPENT=$(($STARTDATE - $OLDESTSTART))
+      if test ${TIMESPENT} -lt 60; then
+          echo "Stopping server, it is restarting too quickly."
+          rm -f $PIDDIR/@progname@-masterstarter.pid
+          rm -f $PIDDIR/@progname@-master.pid
+          popd
+          exit
+      fi
+  fi
+
+  # keep log of past start dates
+  for f in 1 2 3 4 5 6  7 8 9; do
+      next=$(( $f + 1 ))
+      STARTDATE_LOG[$f]=${STARTDATE_LOG[$next]}
+  done
+  STARTDATE_LOG[10]=${STARTDATE}
+done
+popd

@@ -1,0 +1,5 @@
+#!/bin/sh
+autoconf
+autoheader
+rm config.cache
+DEBUGLEVEL="3" CODELEVEL="2" CXXFLAGS="-Werror" ./configure $*

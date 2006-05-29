@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# starts @progtitle@ master server query tool from the installation directory
+
+INSTALL=@prefix@/games/@progname@
+
+if [ ! -r $HOME/.@prognamebase@ ] ; then
+   mkdir $HOME/.@prognamebase@
+fi
+
+if [  "x$1" = "x-h" ] ; then
+    echo -e "\n\nTo uninstall @progtitle@, type @progname@ --uninstal."
+fi
+
+if [  "x$1" = "x--uninstall" ] ; then
+    $INSTALL/bin/uninstall
+else
+    $INSTALL/bin/@prognamebase@-stat --datadir $INSTALL @configdir@ --userdatadir $HOME/.@prognamebase@ $*
+fi
+

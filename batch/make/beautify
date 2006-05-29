@@ -1,0 +1,42 @@
+#!/bin/sh
+# Applies astyle on all source files
+# usage: beautify <source directory> <tagfile> <astyle-options>
+# if the sources should stay untouched or
+# beautify -t <source directory> <tagfile> <astyle-options>
+# if changed sources should be marked
+
+# set -x
+
+TOUCH=false
+
+SRCDIR="$1"
+shift
+if test "$SRCDIR" == "-t"; then
+    TOUCH=true
+    SRCDIR="$1"
+    shift
+fi
+
+TAGFILE=$SRCDIR/"$1"
+shift
+
+# mark tag file as really old file so everything will be beautified at first
+test -r $TAGFILE || touch -t 198001010000 $TAGFILE
+
+# find all edited source files
+for f in `find $SRCDIR \( -name \*.cpp -o -name \*.h \) -a -cnewer $TAGFILE`; do
+  echo "Beautifying $f"
+
+  # copy and beautify
+  cp $f $f.beautify
+  astyle $f.beautify "$@"
+
+  # test and touch/move back to original
+  test "$TOUCH" = "false" && touch -r $f $f.beautify
+  diff $f.beautify $f > /dev/null || mv $f.beautify $f
+  rm -f $f.beautify*
+done
+
+# retouch tag file
+rm -f $TAGFILE
+echo "x" > $TAGFILE

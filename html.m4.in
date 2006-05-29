@@ -1,0 +1,80 @@
+dnl some macros to make HTML-creation easier
+dnl
+define(HEADSTART,dnl
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+changequote([,])dnl
+   <meta name="date" content="esyscmd(echo -n [`date +%Y-%m-%dT%H:%M:%S+01:00`])">
+
+   <meta name="author" content="Manuel Moos">
+   <title>$1</title>)dnl
+define(HEAD,HEADSTART($1)</head><body>)dnl
+define(HEADEND,</head><body>)
+dnl
+define(KEYWORDS,[   ]<meta name="KeyWords" content="$*">)dnl
+define(DESCRIPTION,[   ]<meta name="description" content="$*">)dnl
+dnl
+dnl structure
+dnl
+define(CODE,code)
+define(CODEITEM,<h4 align=left><a name="$1"><CODE>$2</CODE></a></h4>
+<p align=left>$3</p><hr>)
+define(CODELISTBEGIN,)
+define(CODELISTEND,)
+
+define(LIST,<list>$1</list>)
+define(ULIST,<ul>$1</ul>)
+define(ITEM,<li>$1</li>)
+define(ITEM2,<li><strong>$1</strong> $2</li>)
+
+define(TABLE,<table $2>$1</table>)
+define(THEAD,<th [$2]>[$1]</th>)
+define(TROW,<tr [$2]>[$1]</tr>)
+define(TDAT,<td [$2]>[$1]</td>)
+define(TROW1,<tr $2>TDAT($1,$3)</tr>)
+define(TROW2,<tr $3>TDAT($1,$4)TDAT($2,$4)</tr>)
+define(TROW3,<tr $4>TDAT($1,$5)TDAT($2,$5)TDAT($3,$5)</tr>)
+define(TROW4,<tr $5>TDAT($1,$6)TDAT($2,$6)TDAT($3,$6)TDAT($4,$6)</tr>)
+define(TROW5,<tr $6>TDAT($1,$7)TDAT($2,$7)TDAT($3,$7)TDAT($4,$7)TDAT($5,$7)</tr>)
+define(TROW6,<tr $7>TDAT($1,$8)TDAT($2,$8)TDAT($3,$8)TDAT($4,$8)TDAT($5,$8)TDAT($6,$8)</tr>)
+
+define(STRONG,<strong>$1</strong>)
+
+define(TITLE,<a name=$2><h1 align=center>$1</h1></a>)
+define(SECTION,<a name=$2><h2 align=left>$1</h2></a>)
+define(SUBSECTION,<a name=$2><h3 align=left>$1</h3></a>)
+define(SUBSUBSECTION,<a name=$2><h4 align=left>$1</h4></a>)
+
+define(PARAGRAPH,<p align=justify>$1</p>)
+define(LINK,<a href="$1" target=_top>$2</a>)
+define(ELINK,<a href="http://$1" target=_top><strong>$2</strong></a>)
+dnl
+dnl for the source level documentation
+dnl
+define(CLASS,[define(CURRENTCLASS,]$1[)] )
+define(MAILMANGLE,<b> </b> <script language="JavaScript"> var b = "$3"; var c = "$1"; var a="$2"; document.write(c); document.write("@") ; document.write(a) ; document.write(".") ; document.write(b); </script> )
+define(MAILSCRIPT, [ <script language="JavaScript"> document.write("$2")
+; document.write("@") ; document.write("$1"); </script> ])
+
+define(CMDLINE,<pre>$1</pre>)
+define(OPTION,<strong>$1</strong>)
+define(FILE,<strong>$1</strong>)
+
+define(PROGTITLE, @progtitle@) 
+define(PROGNAME,  @progname@) 
+dnl define(PROGNAMEBASE,  @prognamebase@) 
+define(PROGNAMEBASE,  @progname@) 
+define(DOCSTYLE,@docstyle@)
+define(ENABLE_ETC,@enable_etc@)
+dnl define(DOCSTYLE, web)
+define(PREFIX,@prefix@)
+define(CONFIGPATH_ETC,/etc/PROGNAMEBASE)
+define(CONFIGPATH_NOETC,PREFIX/games/PROGNAME/config)
+define(CONFIGPATH,ifelse(@enable_etc@,yes,CONFIGPATH_ETC,CONFIGPATH_NOETC))
+
+define(EXE,ifelse(DOCSTYLE,unix,,.exe))
+define(LINUX,ifelse(DOCSTYLE,web,Linux))
+define(WINDOWS,ifelse(DOCSTYLE,web,Windows))
+define(MACOSX,ifelse(DOCSTYLE,web,Mac OS X))

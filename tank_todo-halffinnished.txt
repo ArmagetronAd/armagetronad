@@ -1,0 +1,57 @@
+There are something which don't have complete documentation, or features that aren't completly finnished. Here is a little bit of information about them...
+
+There are some new commands that have been added...
+    ROUND_CONSOLE MESSAGE_5
+    ROUND_CONSOLE MESSAGE_4
+    ROUND_CONSOLE MESSAGE_3
+    ROUND_CONSOLE MESSAGE_2
+    ROUND_CONSOLE MESSAGE_1
+    ROUND_CENTER_MESSAGE
+    MESSAGE_OF_DAY_5
+They need to have some help written up for them, probably not a bad idea to add to config files either.
+
+The instant winzone has been changed into an instant deathzone, this needs a switch of some sort, and some more help to go with it.
+
+Very primitive completly different remote admin has been added consiting of like 5 commands...
+    ul - User List
+    ku - Kick User #
+    cm - Center Message
+    com - Console Message
+    say - Say
+The password is currently hard coded to "setpwd" we need to make that a variable.
+These commands are used by typing in game chat <password> <command> <arguements>
+I've been trying to tie this into the standard console commands for a while with no luck, stupid iostreams...
+
+Been working on some HUD ideas... It's clunky and takes up half the "Say:" bar, we may want to avoid this somehow, get it streamlined some or something...
+Currently displays your name, your score, highscore, fps, ping, rubber*100, location, and enimies left alive.
+Refreshes some parts every second to save on CPU or something like that...
+
+In tString I've been working on the formatting with the 0x bits displacing things, hopefully we can fix that display issue, or at worst, disable that feature until it is fixed.
+
+Also the scoretable has undergone some repair work, the above being part of that.
+Also, the text file output has greater spacing or something like that, and a new column to show if someone is alive or dead has been added.
+That needs the appropriate fill-ins in the language files.
+New (040609): Added options to language file...
+
+There was also a small issue with killing teamates to get points, this has been fixed, but still needs the language file addins.
+
+Finally, to the best of everyone's enjoyment, spam protection has done some work on it.
+It now remembers the last twelve things you have said and the game time you said them at.
+If you say the same things in 5 seconds, it is ignored until the 5 seconds are up.
+
+(On a side note, issues have been observed with pings being unaccurate on servers with a long period of up time.
+This may be due to the game clock wrapping around maybe?
+Also, there apear to be some issues with the silence menu not working at some times which should be checked into.
+And with the HUD someone (name escapes me at this moment) has done some graphical work and has managed to figure out speed.)
+
+RIGHT! I'm 90% sure that's all I've changed... Hope it looks good!
+
+Edit: Argh! Keep forgetting things! There are several name based cheats/exploits we need to fix.
+These would include the "has entered the game" exploit and the talk as someone else exploit.
+
+Edit (040609): We gotta remember for that any new console config items we add, we have to add help
+descriptors too...
+
+-------------------
+
+Add new config options to 

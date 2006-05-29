@@ -1,0 +1,113 @@
+In progress:
+
+eConnector
+- make a teleport capacity
+- Associate 2 segments and pass cycle from one to another
+- Trace should end at a segment and start at the other. Test with
+fixed length traces.
+- Proper side (A and B) detection for the source segment
+- Proper side (A and B) insertion on the destination segment
+- Proper rules of association (crossed, uncrossed, partial
+association)
+- Proper "snap back to right axis" code after passing a connector
+- eSegment "collision" should happen before wall collision. Unsure
+about priority again traces.
+
+
+To come
+eBorder: 
+- Detach border detection from rim
+- render only the shape described by the border
+- Limitation: shape described must be convex
+- Make an automatic eBorder for maps of 0.1 and 0.2
+- Move gArena::GetRandomPos to eGrid::GetRandomPos
+- Fix the eGrid::GetRandomPos to return only pos inside the eBorder
+- Fix gArena::GetRandomPos to randomly pick an eGrid base on the
+eBorder surface.
+
+
+Multiple fields, one plane (x=z=0)
+- Rename eGrid to eField to mark the change
+a) break the "only one grid" assumption. Many field per arena
+b) break the "only one arena" assumption. Many arenas. ? later ?
+- Camera code will get screwed because of a and b
+- eConnector will need to work between fields.
+- eConnector will need to work between arenas.
+
+
+Multiple fields, any plane
+- Hopefully, this should be mostly a camera fix.
+- language to describe orientation of a field
+
+Colliseum
+- Multiple arenas support
+
+Empire
+- Multiple Colliseum support
+
+Decoration 1
+- Specifying all multimedia data resources in the map. Have to
+find the paper that had it all specified.
+
+Decoration 2
+- Rule support. ex:
+-- Spawn point allocation based on rule
+-- Winzone allocaiton based on rule
+
+Old list:
+
+// *************************************************************'
+//                  Dont read the following
+// *************************************************************'
+
+
+*Have 2 field connecting
+
+
+Details:
+
+- in egrid::DrawLine, when crossing edge c, should do some test for rim.
+- Test when it end on D or B for grid switching. 
+- When a trace is exactly on a correspondant edge, it should be copied to both
+edge.??? Probably not. But have test in DrawLine that when the start point is 
+on a connecting edge and the "end" is out of the shape, to pass to the other
+grid. Now we just need to figure out when end is out of the grid.
+- Test the current code to transit from one field to the next
+- Need to connec the 2 new coorrespondant edges (Need to be tested now)
+
+Cameras:
+- Are not owned by any map element, but by the game
+
+Todo:
+- Camera need to be made aware of new grids
+	- Should the list of interesting objects be at the grid or empire
+	  level? Currently grid. Maybe Arena. Why not have it at all level.
+	  Inserting at the empire, then it probagate to the right structure.
+	  This way, the camera code can pick where to toggle based on user
+	  input.
+- Cycles need to be made aware of new grids
+- Does an ePoint store its grid
+
+****************************************************************
+    //! returns the bounding rectangle enclosing all rim walls
+    static eRectangle const & GetBounds();
+****************************************************************
+
+#########################################
+tools    depends on nothing.
+network  depends on tools
+render   depends on tools
+ui       depends on tools and render
+engine   depends on all of the above
+tron     depends on all of the above 
+#########################################
+Objects defined here register variables with the configuration system
+so they can get loaded, saved and netsynced. They come in three
+flavors:
+tSettingItem are for settings that only get loaded from the
+configuration files, tConfItem are for configuration items that get
+saved in user.cfg and nSettingItem are settings that get netsynced
+from server to client. 
+#########################################
+loading configs from map:
+ePlayer.cpp::handle_chat_admin_commands

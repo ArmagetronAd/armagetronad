@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=@version@
+Encoding=UTF-8
+Name=@progtitle@@progtitle_server@
+Exec=@progname@
+Comment=3d light cycle game
+Icon=@progname@.png
+Terminal=@build_dedicated@
+Path=@prefix@/bin
+Categories=Application;Game;ActionGame;GameAction;ActionGames;GamesAction;
+StartupNotify=@build_dedicated@
+MimeType=application/x-armagetronad;

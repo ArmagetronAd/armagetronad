@@ -1,0 +1,32 @@
+# 
+# Common configuration code for server and master server
+# tested on Gentoo Linux 2004.4
+# Author: Manuel Moos <manuel@moosnet.de>
+#
+
+# set -x
+
+# load global config if it exists
+test -r /etc/rc.config && . /etc/rc.config
+
+BINDIR=@bindir_reloc@
+RCDDIR=$PROGDIR
+export BINDIR
+
+#set configuration directory
+CONFIG=@aa_sysconfdir_reloc@
+
+# set defaults
+VARDIR=@aa_localstatedir_reloc@
+
+# load configuration file
+CONFIGFILE=$CONFIG/rc.config
+test -r $CONFIGFILE || { echo "Configuration file $CONFIGFILE not found."; exit -1; }
+. $CONFIGFILE
+
+# set PID and LOG directories if they were not set
+test -z "$PIDDIR" && PIDDIR=$VARDIR/run
+test -z "$LOGDIR" && LOGDIR=$VARDIR/log
+
+# test if user exists
+test "$user" = "$USER" || su "$user" -c "echo" > /dev/null 2>&1 || { echo "@progtitle@ configuration problem: User $user does not exist or cannot be su'd to."; exit 1; }

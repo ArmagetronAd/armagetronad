@@ -1,0 +1,11 @@
+doxygen
+Doxyfile
+commands.txt
+Makefile
+ml
+*.html
+*.ghost
+.m4.dep
+Makefile.in
+*.dep
+html.m4

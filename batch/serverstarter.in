@@ -1,0 +1,49 @@
+#! /bin/bash
+#
+# starts @progtitle@ from the installation directory and keeps it running
+
+test "$PIDDIR" = "" && PIDDIR=$HOME/.@prognamebase@
+test "$VARDIR" = "" && VARDIR=$HOME/.@prognamebase@/var
+test "$BINDIR" = "" && BINDIR=@prefix_reloc@/bin
+
+echo $$ > $PIDDIR/@progname@-starter.pid
+
+pushd $VARDIR
+
+declare -a STARTDATE_LOG
+
+function run()
+{
+    $BINDIR/@progname@@executable_suffix@ --userdatadir $VARDIR --daemon $* &
+    jobs -p > $PIDDIR/@progname@.pid
+    test -s $PIDDIR/@progname@.pid || { echo "Warning: main program PID unavailable, server can't be stopped reliably."; echo $$ > $PIDDIR/@progname@.pid ; }
+    wait
+    echo Terminated
+}
+
+while true; do
+  STARTDATE=`date +%s`
+
+  run
+
+  # give up if restarts come too quickly; ten per minute is suspicious
+  OLDESTSTART=${STARTDATE_LOG[1]}
+  if ! test -z "$OLDESTSTART"; then
+      TIMESPENT=$(($STARTDATE - $OLDESTSTART))
+      if test ${TIMESPENT} -lt 60; then
+          echo "Stopping server, it is restarting too quickly."
+          rm -f $PIDDIR/@progname@-starter.pid
+          rm -f $PIDDIR/@progname@.pid
+          popd
+          exit
+      fi
+  fi
+
+  # keep log of past start dates
+  for f in 1 2 3 4 5 6  7 8 9; do
+      next=$(( $f + 1 ))
+      STARTDATE_LOG[$f]=${STARTDATE_LOG[$next]}
+  done
+  STARTDATE_LOG[10]=${STARTDATE}
+done
+popd

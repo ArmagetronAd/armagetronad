@@ -1,0 +1,820 @@
+This tutorial is to help map designer to get a grasp of the World
+format used by Armagetron Advance.
+
+This tutorial describe the version 0.1 of the World format. As
+it focuses on very basic elements, the possibility of it
+to be understood by later parser should be quite good.
+
+WARNING: it is currently outdated. The order of the top tags as
+described here is deprecated (it works, but not for long). Until
+Philippe updates the docs, it's probably best to just take the
+included maps as examples on how to start a file. Everything below
+<Field> is still like described here.
+
+Table of Content
+1. Format overview
+2. World
+3. Map
+4. Field
+5. Axes
+6. Advanced Axes 
+6.1 Normalization
+6.2 Uneven Axes
+6.3 Order of the axes
+7. Wall
+8. Spawn points
+9. Experimental Features
+Appendix I: Map writing best practice
+Appendix II: Resource file name convention
+Appendix III: Resource repository
+Appendix IV: Examples
+
+
+1. Format overview
+
+The classic Armagetron arena could be described with the following
+map:
+
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE World SYSTEM "map-0.1.dtd">
+<World version="0.1">
+
+<Map name="Armagetron Classic" version="1.0" author="Manuel Moos">
+    <Field>
+        <Axes number="4"/>
+
+	<Spawn x="255" y="50" xdir="0" ydir="1" />
+	<Spawn x="245" y="450" xdir="0" ydir="-1" />
+	<Spawn x="50" y="245" xdir="1" ydir="0" />
+	<Spawn x="450" y="255" xdir="-1" ydir="0" />
+
+	<Spawn x="305" y="100" xdir="0" ydir="1" />
+	<Spawn x="195" y="400" xdir="0" ydir="-1" />
+	<Spawn x="100" y="195" xdir="1" ydir="0" />
+	<Spawn x="400" y="305" xdir="-1" ydir="0" />
+
+	<Spawn x="205" y="100" xdir="0" ydir="1" />
+	<Spawn x="295" y="400" xdir="0" ydir="-1" />
+	<Spawn x="100" y="295" xdir="1" ydir="0" />
+	<Spawn x="400" y="205" xdir="-1" ydir="0" />
+
+	<Wall>
+            <Point x="0" y="0" />
+            <Point x="500" y="0" />
+            <Point x="500" y="500" />
+            <Point x="0" y="500" />
+            <Point x="0" y="0" />
+	</Wall>
+    </Field>
+</Map>
+</World>
+
+The World format start with a XML header. The actual definition
+start with the Map element. You can see on line 5 that this is has
+been designed by Manuel Moos as the classic arena definition to be
+used for its game. 
+
+Inside the Field element, line 7 define that 4 axes are to be
+used. From line 9 to 22, all the spawn points, ie: the points where
+the cycles are located when the match starts, are defined. Finally
+the walls are defined, delimiting the play area.
+
+2. World
+At this moment, the element possible inside of the Map element is
+the Field element. Only one Field can be defined.
+
+The World element only has one attribute, describing the version
+of the rules and definition used. At the moment, only "0.1" is
+valid.
+
+3. Map
+At this moment, the element possible inside of the Map element is
+the Field element. Only one Field can be defined.
+
+The Map element has 3 attributes: name, version and author.
+Store the name of your map in the name field, your name in the
+author, and use the version field to allow others to find the
+latest definition of your fine work.
+
+Example 3.1:
+<Map name="HexaTRON" version="0.2" author="Luke-Jr">
+
+4. Field
+The Field element holds the description required to construct the
+play area. Inside the Field, Axes, Spawn and Wall elements can be
+defined. 
+
+5. Axes
+The Axes element define how the cycles will behave on this
+particular Field. The original Armagetron used 4 axes. 
+
+The Axes element has 2 field:
+- number: This specifies the number of axes that should be
+used. If not specified, 4 axes are assumed.
+- normalize: When set to true, specify that the game should ensure
+that the direction vectors are scaled to have a size of exactly
+1.0. When not specified, the individual axis will be keep at the exact
+length they are specified. This is covered in section 6. When not
+specified, it is assumed that normalization is desired.
+
+
+Example 5.1: 
+        <Axes number="6" normalize="true"/>
+
+When used without any other information, it is assumed that
+equally spaced axes should be generated, starting from (1,0) and
+going clockwise. The number generated is the value specified by
+the number attribute.
+
+The Axes element can also be used to describe each direction that
+can be used, instead of relying on the automatic generation. To do
+this, Axis elements are used to describe each directions.
+
+Example 5.2: 
+	<Axes number="4">
+	      <Axis x="1" y="1"/>
+	      <Axis x="1" y="-1"/>
+	      <Axis x="-1" y="-1"/>
+	      <Axis x="-1" y="1"/>
+	</Axes>
+
+The Axis element uses the following fields:
+- x: This is size of the displacement along the x's for this axis
+- y: This is size of the displacement along the y's for this axis
+- angle: This allow to describe the Axis in degrees
+- length: When the angle is specified, the length can be used to scale
+the size of the vector described. This value is only used when angle
+are specified.
+
+If the angle field is found, the length will be queried and used. If
+the length is absent, a default of 1 is used for the length. If no
+angle is specified, then both the x and y need to be specified for the
+Axis to be valid.
+
+The previous example could be re-written with:
+Example 5.3:
+	<Axes number="4">
+	      <Axis angle="45" length="1.4142"/>
+	      <Axis angle="135" length="1.4142"/>
+	      <Axis x="225" length="1.4142"/>
+	      <Axis x="335" length="1.4142"/>
+	</Axes>
+Note that even thou the length is specified, because the Axes element
+doesn't have the normalize="false", all the lengths will be scaled
+back to exactly 1.
+
+The Axes should be specified in clockwise order. The specified
+axes are stored in the order they appear. When a player want to
+turn right, it is passed to the next axis on the list, or to the
+first when turning from the last direction.
+
+You might observe that in Example 5.2, the direction sum up to
+more than 1.0. For example, the first Axis has a x and a y of 1. The
+real length of the described Axis is sqrt(x*x + y*y), which is
+approximately 1.4142. By specifying the normalize="true", or using the
+default behavior, you ensure that they are scaled back to 1.0.
+
+The number of Axis specified should be the same as the number of
+axes. Any extra axes will be discarded. Any missing Axis will be
+assumed to be (1,0). 
+
+Nota: Some old maps will use Point instead of Axis. The Point is
+deprecated in this context. New maps should use the Axis element.
+
+6. Advanced Axes 
+
+6.1 Normalization
+
+It is often easier to write directions are (2,1) rather than
+(.89442719099991587856 , .44721359549995793928), which is the
+normalized equivalent. The normalization mechanism ensure that
+displacement is constant on all the axes. This has always been the
+behavior of the game. So what is the effect of having non normalized
+Axis? Before anything else, a bit of understanding how the engine of
+Armagetron operates might be required. 
+
+You might recall from your physic class that the distance traveled is
+computed from the speed at which you travel multiplied by the time
+during with you traveled ie: distance = speed * time.
+
+Armagetron has at its core a 2D engine. Vehicle move along a 2D
+surface, changing their x's and y's position. To find the new position
+of a vehicle, the distance is multiplied by a 2D vector, the
+direction, before being added to the old position. Because the
+direction is a normalized vector, the resulting displacement is of the
+same size than the calculated distance. But if the direction is a
+non-normalized vector, ie: it has a size that is lesser or greater
+than 1, but not equal, then the displacement gets to have a different
+size than the distance.
+
+By setting the Axis to non-normalized values, the map designer can
+modify displacement in the arena. By defining Axis with a vector size
+of 2, see example 6.1.1, all the cycles would behave as if they where
+moving twice as fast. Setting the Axis a length of 0.5, see example
+6.1.2, the opposite effect occurs. Now the cycle move as if their
+speed was halved.
+
+Example 6.1.2 Axes of size 2
+	<Axes number="4" normalize="false">
+	      <Axis x="0" y="2"/>
+	      <Axis x="2" y="0"/>
+	      <Axis x="0" y="-2"/>
+	      <Axis x="-2" y="0"/>
+	</Axes>
+
+Example 6.1.2 Axes of size 0.5
+	<Axes number="4" normalize="false">
+	      <Axis x="0" y="0.5"/>
+	      <Axis x="0.5" y="0"/>
+	      <Axis x="0" y="-0.5"/>
+	      <Axis x="-0.5" y="0"/>
+	</Axes>
+
+By setting the normalize attribute to false, the designer ensure
+that the game will use the Axis values as is. While this section has
+used Axis that all have the same size, this is not a requirement. The
+next section will explore setting Axis with different size.
+This permit to affect the displacement on certain axes.
+
+
+6.2 Uneven Axes
+Up to now, the Axis have always have the same size. This mean that for
+a given speed, the displacement of a cycle is always the same in every
+direction. But nothing permit you to define it differently. 
+
+Imagine an arena shaped as a rectangle. The height, along the y's,
+would be ten times the size of the length, along the x's. Normally, with
+the Axis all of the same size, it would take a player ten time as long to
+run from one wall to another when cruising along the height of the
+rectangle. 
+
+But you could decide to make motion along the height occur at ten time the
+rate, so it would take a player the same time to cover the height of
+the arena than to cover the length, giving it an "Alice in Wonderland"
+feeling (see example 6.2.1). This feeling could be exaggerated even more
+by making traveling along the longest distance occur in half the time
+that travel along the shortest distance. To do this, you could double
+the size of the Axis set in the previous example (see example
+6.2.2). Now, even thou one dimension of the rectangle is 10 time the
+other, travel along this longer dimension occur at a much higher rate,
+compressing this dimension in the player's mind.
+
+Example 6.2.1 Rectangle of equal travel time
+	<Axes number="4" normalize="false">
+	      <Axis x="0" y="10"/>
+	      <Axis x="1" y="0"/>
+	      <Axis x="0" y="-10"/>
+	      <Axis x="-1" y="0"/>
+	</Axes>
+	<Wall>
+	      <Point x="0" y="0"/>
+	      <Point x="100" y="0"/>
+	      <Point x="100" y="1000"/>
+	      <Point x="0" y="1000"/>
+	      <Point x="0" y="0"/>
+	</Wall>
+
+Example 6.2.2 Rectangle of compressed travel time
+	<Axes number="4" normalize="false">
+	      <Axis x="0" y="20"/>
+	      <Axis x="1" y="0"/>
+	      <Axis x="0" y="-20"/>
+	      <Axis x="-1" y="0"/>
+	</Axes>
+	<Wall>
+	      <Point x="0" y="0"/>
+	      <Point x="100" y="0"/>
+	      <Point x="100" y="1000"/>
+	      <Point x="0" y="1000"/>
+	      <Point x="0" y="0"/>
+	</Wall>
+
+The current game play is balanced around the fact that normally,
+the displacement factor is of size 1. By increasing this too much, your
+map might quickly become unplayable. While the example present Axis
+size of 10's and 20's, it is only for a pedagogical value. If you want
+to create great difference of displacement among different Axis, you
+might find that augmenting Axes size a little bit and raising others
+also could produce a better effect. The example 6.2.3 offers a ratio of
+6 between the displacement on the x's and y's, while keeping the faster
+displacement at only 3 times the regular one.
+
+Example 6.2.3
+	<Axes number="4" normalize="false">
+	      <Axis x="0.5" y="0"/>
+	      <Axis x="0" y="-3"/>
+	      <Axis x="-0.5" y="0"/>
+	      <Axis x="0" y="3"/>
+	</Axes>
+
+Up to now, the Axes where always evenly placed around the
+player. Distributing the Axes in a non-equal fashion can allow for
+different kind of game play. If you where to make a parallelogram
+shaped arena, you might want the players to be able to move along the
+walls of the arena. For this, the different Axis would need to be
+properly set. 
+
+Example 6.2.4: Parallelogram arena
+	<Axes number="4" normalize="false">
+	      <Axis x="0" y="1"/>
+	      <Axis x="1" y="0.5"/>
+	      <Axis x="0" y="-1"/>
+	      <Axis x="-1" y="-0.5"/>
+	</Axes>
+	<Wall>
+	      <Point x="0" y="0"/>
+	      <Point x="100" y="50"/>
+	      <Point x="100" y="150"/>
+	      <Point x="0" y="100"/>
+	      <Point x="0" y="0"/>
+	</Wall>
+
+
+6.3 Order of the axes
+Turning right is translated to passing to the next axis, and
+turning left to the previous axis. But by changing the order that
+the axes are defined, this behavior can be altered.
+
+Example 6.3.1:
+        <Axes number="6" normalize="true">
+            <Axis x="-0.5" y="-0.866025404"/>
+            <Axis x="-1" y="0"/>
+            <Axis x="-0.5" y="0.866025404"/>
+            <Axis x="0.5" y="0.866025404"/>
+            <Axis x="1" y="0"/>
+            <Axis x="0.5" y="-0.866025404"/>
+        </Axes>
+
+Example 6.3.1, in degrees:
+        <Axes number="6">
+            <Axis angle="210"/>
+            <Axis angle="270"/>
+            <Axis angle="330"/>
+            <Axis angle="30"/>
+            <Axis angle="90"/>
+            <Axis angle="150"/>
+        </Axes>
+
+This defines a regular 6 axes. Turning right will make the cycle
+face a direction that is 60 degrees to its right. But by changing
+the order, this can be altered.
+
+Example 6.3.2:
+        <Axes number="6" normalize="true">
+            <Axis x="-0.5" y="-0.866025404"/>
+            <Axis x="-0.5" y="0.866025404"/>
+            <Axis x="-1" y="0"/>
+            <Axis x="0.5" y="0.866025404"/>
+            <Axis x="0.5" y="-0.866025404"/>
+            <Axis x="1" y="0"/>
+        </Axes>
+
+or, in degrees:
+        <Axes number="6">
+            <Axis angle="210"/>
+            <Axis angle="330"/>
+            <Axis angle="270"/>
+            <Axis angle="30"/>
+            <Axis angle="150"/>
+            <Axis angle="90"/>
+        </Axes>
+
+Now turning right from the first axis, the player will have the
+impression of turning 120 degrees. Turning right again will turn
+the player by -60 degrees. Continuing, the player would experience
+turn of 120, 120 - 60 and 120 degrees, ending in the first
+direction.
+ 
+Also, the order of the axes could be totally reversed. This would
+effectively make the left key turn the player to the right, and
+the right key to the left
+
+Example 6.3.3:
+        <Axes number="4" normalize="true">
+            <Axis x="1" y="0"/>
+            <Axis x="0" y="1"/>
+            <Axis x="-1" y="0"/>
+            <Axis x="0" y="-1"/>
+        </Axes>
+
+
+7. Wall
+Wall are those big clunky elements normally associated with the
+rim.
+
+To define a wall, you need to specify all the corners of all its
+segments. A wall segment will be created from one point to the
+next. 
+
+Example 7.1:
+        <Wall>
+            <Point x="0" y="0" />
+            <Point x="200" y="0" />
+            <Point x="200" y="200" />
+            <Point x="0" y="200" />
+            <Point x="0" y="0" />
+        </Wall>
+
+You should notice that for an wall to be closed, you need to loop
+back to the first point. 
+
+Any number of walls can be specified inside the field element. A
+Wall need at least 2 Points, but doesn't have any upper limits.
+
+Walls to not need to be closed. In the arena defined earlier, it
+would be possible to add some obstacle walls. 
+        <Wall>
+            <Point x="100" y="50" />
+            <Point x="100" y="150" />
+        </Wall>
+
+It is possible to have walls touching, and even crossing. There is
+no difference between segments assembled from many wall elements,
+or from a single one.
+
+While it is possible to leave the play arena unbounded, this
+behavior should be considered undefined and unsupported. It is
+highly recommended that the play area be bounded by a wall or a
+series of walls leaving no holes.
+
+Also, while it it possible to define "holes" , ie
+completely bounded areas inside a bigger area, or "islands", ie
+independent bounded areas independent of another play area, these
+behaviors are undefined and unsupported. 
+
+8. Spawn points
+Spawn points are where cycles are first located on the map. At
+game start, the game server will spread the players and AI among
+the different spawn locations described. You should provide
+sufficient spawn location for the number of players you entered to
+play on your map.
+
+Along with the location where the cycles will be placed, you
+need to specify the starting direction of the cycle. This will
+determine the direction that the cycle is facing when it appears.
+
+To specify this, two methods are offered:
+Vector orientation:
+In this method, you specify the direction as a vector, from (0, 0)
+to (xdir, ydir). This will indicate the direction to be face by
+the cycle.
+Angle orientation:
+In this method, you specify the direction as an angle. Degrees are
+used for this.
+
+Because Armagetron is a game where motion occurs on certain axes
+only, starting direction should also be done on those axes. The
+game will use the direction described to find the closest matching
+axis. It is the direction of the chosen axis that is assigned to
+an spawned cycle. The direction specified is only used as a
+recommendation.
+
+A Spawn has six attributes. Only three to four are needed to
+describe a Spawn. Two of them, x and y, are mandatory.
+x= the x coordinate where the cycle is to be created
+y= the y coordinate where the cycle is to be created
+xdir= the x coordinate of the recommended direction the cycle will face at
+creation.
+ydir= the y coordinate of the recommended direction the cycle will face at
+creation.
+angle= the recommended angle to orient the cycle
+
+If the angle attribute is specified, xdir and ydir are
+ignored. When no angle attribute is specified, both xdir and ydir
+are needed.
+
+Example 8.1:
+       <Spawn x="-15.5" y="368.0608" xdir="0.5" ydir="-0.866"/>
+       <Spawn x="-15.5" y="368.0608" angle="60"/>
+
+Only the direction indicated is used. The size of the direction
+described doesn't influence the start up speed or displacement of a
+cycle.
+
+It is to be noted that specifying a direction of (0,0) is
+undefined. Also, specifying spawn points outside the play area
+that you defined is undefined and unsupported. 
+
+9. Experimental Features
+A few experimental features have been included in the current version
+of Armagetron Ad. You will find there alternative ways of writing
+Walls in a map, and a last minute addition allowing you to control the
+height of Walls.
+
+It should be noted that these features are experimental. Their
+syntax and presence in other version of the map format thus can't be
+guarantied. 
+
+To make use of these features, your map need to indicate that it want
+to use the experimental dtd. This is specified by 
+
+<!DOCTYPE World SYSTEM "map-0.1-exp.dtd">
+
+Doing so allow you to use all the experimental features, while still
+having full access to the standard ones.
+
+The experimental elements part of the map-0.1-exp.dtd are: Line,
+Rectangle, SavePos, RestorePos and ObstacleWall. All but ObstableWall
+are sub elements of Wall. Thus they can only be used inside of a Wall element.
+
+Line: Allows to specify a 2 point line in a single element. The Line
+attributes are :
+startx= The x coordinate of the first point of the line
+starty= The y coordinate of the first point of the line
+endx= The x coordinate of the last point of the line
+endy= The y coordinate of the last point of the line
+
+Rectangle: Allows to specify a rectangle in a single element. The
+Rectangle attributes are:
+startx= The x coordinate of a corner of the rectangle
+starty= The y coordinate of a corner of the rectangle
+endx= The x coordinate of the opposite corner of the rectangle
+endy= The y coordinate of the opposite corner of the rectangle
+
+SavePos/RestorePos: This is a simple, 1 level stack, that can be used
+during the definition of a wall. When declaring SavePos, the x and y
+coordinate are saved. Calling RestorePos will reload the point that
+was saved last and set it as the current point.
+
+ObstacleWall: The obstacle Wall behaves exactly like the Wall element,
+except for a new attribute, the height. This allows you to define
+obstacles in your arena that will not be of rim height. The height of
+the Walls are client defined, either a low rim (most of the time on
+slower computer) or a high rim (faster computer with accelerated
+graphics). With ObstacleWall, you can fully control the height of
+walls. It is now possible to define obstacles that will not limit the
+visibility inside your arena. For comparison purpose, the height of a
+trace is of 1.0, and the height of a low rim is of 4.0. For better
+performance on most clients, ObstacleWall higher than 4.0 should be
+kept to a minimal.
+height= The height to assign to this ObstacleWall. If this parameter is
+absent, a default of 1.5 is used. 
+
+
+Appendix I: Map writing best practice
+I - 1) Comment your work
+You should always comment the various parts of your work. Doing so
+improve maintainability. Something that is obvious during the creation of
+a particular map often becomes very cryptic after a few weeks. A good
+comment allow you to quickly grasp the meaning of what is described.
+
+A comments in xml start with "<!--" (without the quotes) and ends with
+"-->". Comment can spawn on multiple lines. If your editor doesn't
+highlight the commented part, be careful not to exclude a part of
+your map by mistake.
+
+I - 2) Arena size
+The original map is of size 500 by 500. Many servers have setting
+that are oriented toward this size, and players are used to battle
+in such an environment. 
+
+A map that is significantly larger or smaller will require the
+server admin to affect the scale facter to be used with the map to
+preserve the gaming experience tailorder to the server. 
+
+This is not a hard rule of any sort. One could easily imagine a
+extremely large maze. In this instance, the true factor would be
+the corridor width rather than the total size of the play area.
+
+I - 3) Don't overload attributes
+Certain elements of the map have attributes that are exclusive. For
+example, in the Axis element, when the attribute angle is defined, the
+x and y attribute are never queried.
+
+While the engine ignore the exceeding data, this practice has the
+following drawbacks:
+- File size: The exceeding information is never used, but need to be
+transmitted as part of the file, and stored.
+- Readability: Exceeding information complicate the reading of a map by
+humans. 
+- Maintenance: Maintenance of the map is not much more complex. If the
+author is minimalist, he/she risk updating the part of information
+that is ignored. Extremely good knowledge of the working of the parser
+is required to avoid this pitfall, and the change is only valid if the
+rule of precedences aren't updated. Specifying only one set of
+information avoid this problem. Also, if both set of information are
+updated, then the task for the author is double, and so are the risks
+for error.
+
+
+Appendix II: Resource file name convention
+Resource are external content that makes the game
+interesting. Textures, sounds, models and maps are all resources for
+Armagetron Ad. While at the time of writing of this tutorial, only maps
+are supported as true resources, soon support for the other types will
+be added. Also, while this section incorporated in the Maps tutorial,
+it might be moved as an independent document, and the standard
+described might be updated in a near future. Please inform yourself.
+
+For ease of administration and to avoid conflicting versions, all
+resources for Armagetron Ad should follow the following naming
+convention. 
+
+<AuthorName>/[SubDirectory/]<ResourceName>-<VersionNumber>.<Extension>
+
+- AuthorName: The name of the person who currently maintains the resource,
+usually also one of the creators. This should be either a nickname on
+forums.armagetronad.net, a nickname registered for the central resource
+repository (we're making sure they don't collide) or, for lone wolves who
+don't want to register, the slightly long construct 
+"unofficial/mailto/<Domain>/<User>", where <User>@<Domain> is a valid email
+address the maintainer can be reached under. Please stick to these conventions
+to prevent name collisions.
+Alternatively, the author can forgo his or her name and instead opt for a 
+group name. Group name should be used when the author want to indicate that
+a set of resources are associate with a group. Instances of this could be 
+when the resources are for a clan, a community, a [set of] server[s].
+Needless to say, group names should be registered with the central repository.
+
+- SubDirectory: Prolific authors and those are free to set up any
+number of sub directories to help them organize and possibly
+categorize their resources. The Armagetron Ad team recommend you to
+categorize resources by topics (ie: all the resources required for a
+particular movie-pack set in the same sub directory) over other
+categorization, such as categorization by type (ie: all the floor
+tiles set in the same sub directory). Any number of sub directory level 
+should be supported. This is not a mandatory item.
+
+- ResourceName: The actual name of the resource. This should be
+descriptive, and somewhat unique to facilitate identification of the
+described resource. The advantage of specifying a somewhat unique name
+here is that should the resource be accidentally moved out of its
+folder, it is still possible to quickly and easily identify it. A
+special note for maps: the ResourceName should be the same as the name
+attribute of the Map element defined in the xml file.
+
+- VersionNumber: This part should be used by the author to identify
+which version of the resource is described. During its life, a
+resource can receive many modifications and improvements. To find new
+resources, Armagetron Ad rely solely on this part to be updated. Should
+a resource be updated and the old name kept, it would cause problems
+between different clients. Client already having the old resource
+would not get the modifications, as they would expect the content to
+be the same, and only clients that would not have a local copy of file
+would get the latest version. The actual format to be used for the
+VersionNumber is left to the choice of the author. While the
+Armagetron Ad team recommend a VERSION.MAJOR.MINOR dot notation similar
+to those used for software's versions, any other notation can be
+used, such as a simple numeral (GlowStick-1.png, GlowStick-2.png,
+...). Keep in mind that it should be obvious to other as to which is
+the most up to date version of the resource. A special note for maps:
+the VersionNumber should be the same as the version attribute of the
+Map element defined in the xml file.
+
+- Extension: This is the regular type of extension. While Armagetron Ad
+doesn't verify that the extension describe the right type of content,
+it is favorable for other users that you set it to the appropriate
+type, and thus facilitate the usage of your resource.
+
+A few examples: 
+philippeqc/Firewall-0.3.2.png
+philippeqc/castle-6.aamap.xml
+TigersNetwork/CougarMoviepack/cougar-3.1.aamap.xml
+TigersNetwork/CougarMoviepack/PawTrace-floor-2.png
+AngelOfMercy-Clan/OfficialCycleMode-2.1.7.ace
+AngelOfMercy-Clan/trainingMap-6.aamap.xml
+
+
+Appendix III: Resource repository
+
+When a player doesn't have the map being used on a server, their game will
+automatically download it from the resource repository. To add your completed
+maps to the official resource repository, go to:
+	http://beta.armagetronad.net/028-link/addmaps
+
+
+Appendix IV: Examples
+
+II - 1 Parallelogram arena
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE World SYSTEM "map-0.1.dtd">
+<World version="0.1">
+
+<Map name="Parallelogram" version="1.0" author="Philippe Villeneuve">
+<!-- A variation on the classic arena -->
+    <Field>
+        <Axes number="4" normalize="false">
+            <Axis x="1" y="0"/>
+            <Axis x="-0.2" y="-1"/>
+            <Axis x="-1" y="0"/>
+            <Axis x="0.2" y="1"/>
+	</Axes>
+
+	<Spawn x="265" y="50" xdir="0.2" ydir="1" />
+	<Spawn x="335" y="450" xdir="-0.2" ydir="-1" />
+	<Spawn x="99" y="245" xdir="1" ydir="0" />
+	<Spawn x="501" y="255" xdir="-1" ydir="-0" />
+
+	<Spawn x="325" y="100" xdir="0.2" ydir="1" />
+	<Spawn x="275" y="400" xdir="-0.2" ydir="-1" />
+	<Spawn x="139" y="195" xdir="1" ydir="0" />
+	<Spawn x="461" y="305" xdir="-1" ydir="-0" />
+
+	<Spawn x="225" y="100" xdir="0.2" ydir="1" />
+	<Spawn x="375" y="400" xdir="-0.2" ydir="-1" />
+	<Spawn x="159" y="295" xdir="1" ydir="0" />
+	<Spawn x="441" y="205" xdir="-1" ydir="-0" />
+
+	<Wall>
+            <Point x="0" y="0" />
+            <Point x="500" y="0" />
+            <Point x="600" y="500" />
+            <Point x="100" y="500" />
+            <Point x="0" y="0" />
+	</Wall>
+    </Field>
+</Map>
+</World>
+
+
+II - 2 HexaTRON
+The HexaTRON map has been developed by Luke-Jr for his HexaTRON
+mod on the code. It has a hexagonal flower and uses 6
+directions. Please not that this is the version 0.2 of the map, and
+that many newer version have been published.
+
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE World SYSTEM "map-0.1.dtd">
+<World version="0.1">
+
+<Map name="HexaTRON" version="0.2" author="Luke-Jr">
+    <Field>
+<!-- This is the Hexa map put in XML. This should work out of the
+box, ie: without changes to the aa engine code beside a flashy new
+parser. Errors might have been introduced during the conversion to
+XML by philippeqc, for your debugging amusement -->
+
+        <Axes number="6"/>
+        <Spawn x="99.5" y="73.612159" xdir="-0.5" ydir="0.866"/>
+        <Spawn x="-15.5" y="368.0608" xdir="0.5" ydir="-0.866"/>
+        <Spawn x="198.333333" y="196.29909" xdir="-1.0" ydir="0"/>
+        <Spawn x="-114.333333" y="245.37387" xdir="1" ydir="0"/>
+        <Spawn x="141.666666" y="343.52341" xdir="-0.5" ydir="-0.866"/>
+        <Spawn x="-57.666666" y="98.149545" xdir="0.5" ydir="0.866"/>
+        <Wall>
+            <Point x="0" y="0" />
+            <Point x="85" y="0" />
+            <Point x="127.5" y="73.612159" />
+            <Point x="212.5" y="73.612159" />
+            <Point x="255" y="147.22432" />
+            <Point x="212.5" y="220.83648" />
+            <Point x="255" y="294.44864" />
+            <Point x="212.5" y="368.0608" />
+            <Point x="127.5" y="368.0608" />
+            <Point x="85" y="441.67296" />
+            <Point x="0" y="441.67296" />
+            <Point x="-43.5" y="368.0608" />
+            <Point x="-128.5" y="368.0608" />
+            <Point x="-170" y="294.44864" />
+            <Point x="-128.5" y="220.83648" />
+            <Point x="-170" y="147.22432" />
+            <Point x="-128.5" y="73.612159" />
+            <Point x="-43.5" y="73.612159" />
+            <Point x="0" y="0" />
+        </Wall>
+        <Wall>
+            <Point x="127.5" y="73.612159" />
+            <Point x="113.333333" y="98.149545" />
+        </Wall>
+        <Wall>
+            <Point x="212.5" y="220.83648" />
+            <Point x="184.166666" y="220.83648" />
+        </Wall>
+        <Wall>
+            <Point x="127.5" y="368.0608" />
+            <Point x="113.333333" y="343.52341" />
+        </Wall>
+        <Wall>
+            <Point x="-43.5" y="368.0608" />
+            <Point x="-29.666666" y="343.52341" />
+        </Wall>
+        <Wall>
+            <Point x="-128.5" y="220.83648" />
+            <Point x="-100.833333" y="220.83648" />
+        </Wall>
+        <Wall>
+            <Point x="-43.5" y="73.612159" />
+            <Point x="-29.666666" y="98.149545" />
+        </Wall>
+    </Field>
+</Map>
+</World>
+
+
+
+
+About the "undefined and unsupported":
+Many possible combinations are marked as "undefined and
+unsupported". While it may be possible to do them now, and even
+amusing to do it, they are strongly discouraged. Later version of
+the World format will most probably conflict with those
+behaviors. This will make such behaviors difficult to preserve, if
+possible at all. For this reasons, it has been decided that _NO_
+effort would be put to maintain them. Use them if you want, but do
+not come complaining if and when they stop working. 
+
+
+TODO:
+
+-how to submit resource
+-Extension

@@ -1,0 +1,103 @@
+# 
+# Common start-stop code for server and master server
+# tested on Gentoo Linux 2004.4
+# Author: Manuel Moos <manuel@moosnet.de>
+#
+
+# set -x
+
+# determine required su command
+test "$user" = "$USER" || SU="su $user -c"
+
+# create directories writable by user
+test -d $VARDIR || mkdir -p $VARDIR
+test -d $LOGDIR || mkdir -p $LOGDIR
+test -d $PIDDIR || mkdir -p $PIDDIR
+#chmod 755 `dirname $VARDIR` -R
+#chown -R "$user" $LOGDIR
+#chown -R "$user" $PIDDIR
+chown -R "$user" $VARDIR
+
+# export PIDDIR and VARDIR for service starter script
+export PIDDIR
+export VARDIR
+
+# ps command listing all PIDs
+PS="ps axo pid"
+
+# return codes
+test -n "$rc_done" || rc_done=" done."
+test -n "$rc_failed" || rc_failed=" failed."
+
+# The echo return value for success (defined in /etc/rc.config).
+return=$rc_done
+case "$1" in
+    start)
+    if $0 status > /dev/null 2>&1; then
+        echo "@prognamebase@ $TYPE not started, already running."
+        exit 1
+    fi
+    rm -f $MAINPIDFILE $STARTERPIDFILE
+    touch -f $MAINPIDFILE $STARTERPIDFILE
+    echo -n "Starting @prognamebase@ $TYPE..."
+	if test "$user" = "$USER"; then
+		{ nohup $BINFILE $server_args >> $LOGFILE 2>&1 & } > /dev/null 2>&1 
+		#$BINFILE $server_args
+        rm -f nohup.out
+	else
+        chown "$user" $MAINPIDFILE $STARTERPIDFILE
+        #USER=$user
+        #export USER
+		{ nohup $SU "$BINFILE $server_args" >> $LOGFILE 2>&1 & } > /dev/null 2>&1 
+		#$SU "$BINFILE $server_args
+        rm -f nohup.out
+	fi
+	COUNT=10
+	while test $COUNT -gt 0; do
+		test -s $MAINPIDFILE && COUNT=0 || sleep 1
+		COUNT=$(($COUNT-1))
+	done
+	test -s $MAINPIDFILE || return=$rc_failed
+	echo -e "$return"
+    if test "$niceness_level" != "" && test "$niceness_level" != "0"; then
+        renice $niceness_level -p `cat $MAINPIDFILE`    > /dev/null
+        renice $niceness_level -p `cat $STARTERPIDFILE` > /dev/null
+    fi
+	;;
+    stop)
+	echo -n "Shutting down @prognamebase@ $TYPE..."
+	MAINPID=""
+	STARTERPID=""
+	test -s $MAINPIDFILE && MAINPID=$( cat $MAINPIDFILE ) || return=$rc_failed
+	test -s $STARTERPIDFILE && STARTERPID=$( cat $STARTERPIDFILE ) || return=$rc_failed
+	test -n "$STARTERPID" && kill -TERM $STARTERPID || return=$rc_failed
+	test -n "$MAINPID" && kill -TERM $MAINPID || return=$rc_failed
+	rm -f $STARTERPIDFILE
+	rm -f $MAINPIDFILE
+
+	echo -e "$return"
+	;;
+    restart)
+	$0 stop  ;  $0 start  ||  return=$rc_failed
+	;;
+    status)
+	echo -n "Checking for service @prognamebase@ $TYPE: "
+
+	RESPONSE=OK
+	test -s $STARTERPIDFILE || RESPONSE="Not running"
+	test "$RESPONSE" = "OK" && { test -s $MAINPIDFILE || RESPONSE="Inconsistent. Starter PID logged, but server PID missing"; }
+	test "$RESPONSE" = "OK" && { $PS | grep $(cat $STARTERPIDFILE) >/dev/null || RESPONSE="Inconsistent. PIDs logged, but no service running"; }
+	test "$RESPONSE" = "OK" && { $PS | grep $(cat $MAINPIDFILE) >/dev/null || RESPONSE="Inconsistent. PIDs logged, starter is running, but server is missing."; }
+	
+	echo $RESPONSE
+	test "$RESPONSE" = "OK" || exit 1
+	exit 0
+	;;
+    *)
+	echo "Usage: $0 {start|stop|status|restart}"
+	exit 1
+esac
+
+# Inform the caller not only verbosely and set an exit status.
+test "$return" = "$rc_done" || exit 1
+exit 0

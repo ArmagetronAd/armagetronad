@@ -1,0 +1,401 @@
+Changes since 0.2.8.1:
+- Timestamps and teamscores added to scorelog.txt
+- Dedicated server now works on FreeBSD and OpenBSD
+- User running the dedicated server is called "armagetronad" again, the
+  longer "armagetronad-dedicated" caused problems with BSD
+- Test versions refuse to connect to servers more than one version ahead
+- Prepared client for respawns
+- Team spawn formation is now configurable
+- Added reasons to bans
+- Added spectator autokicking
+- Added history to chat and console (wrtlprnft)
+- You only enter a game once your client is synced
+- /msg now prefers exact matches over partial matches
+- Cycles now have better memory for pending turns (wrtlprnft)
+- Added player join/leave/rename messages to ladderlog.txt with IPs
+- Ping variance influence on packet loss tolerance code is now clamped
+  by the regular, configurable, packet loss tolerance: effect of variance
+  can be no bigger than the effect of ping.
+- Spectators are now regular players and can chat
+- The /msg command now converts the entered pattern into the internal
+  name so if you write "/msg צהü" and there is a user named "צהü" with
+  an internal nick of "oau" it will still get matched
+- Team changes are now only executed when allowed, the need for the 
+  temporary/permanent team imbalance setting distinction has gone away
+- Added brake toggle button
+  Bugfixes:
+- The server starting scripts were chowning /var/run and /var/log to armagetronad
+- Short names could crash the server
+- Direct cycle collisions sometimes lead to both passing trough each other
+- Init scripts now installed correctly with --enable-initscripts
+- Hopeless pending team change wishes are deleted
+- Large timesteps are now broken down into smaller ones on the game level 
+- Pretend keys are released before entering chat
+- Two cycle steering events were sent if you doublebound the brake
+- Large speed boosts out of game rule bounds were possible during network
+  glitches
+- Debug recording reliability increased, function call with undefined return
+  value eliminated
+- Recording and scorekeeping no longer conflict
+- Input during a recording now has an end marker, making quick keypresses
+  after leaving a menu not break it
+- CYCLE_RUBBER_DELAY was overridden sometimes by packet loss tolerance
+- ALLOW_CONTROL_DURING_CHAT now ignores modifier keys like shift and
+  has been reactivated
+- The camera sometimes got stuck in free mode for the first round you watch
+- Crashfix in hole blowing code when no cycle was set
+- After a "perfect" 180, you're more often on the right side of your own wall
+  That code caused some havoc at first, so it has been reworked
+- The smart cam did not like fluctuating framerates
+- Improved debug recording reliability: multiple master server visits
+  and too quick keypresses were causing trouble.
+- Canonical DESTDIR support and added ROOTDIR support for testing
+- Login floods are detected and ignored
+- Player name updates sanitized
+- Disabled complicated feasibility tests for team menu entries, 
+  they did not have the full information and were often wrong
+- Team score only added to player score if no teamplay is possible
+
+Changes since 0.2.8.0:
+- INCLUDE console command now gives a file not found error
+- ALL user given paths are validated for security problems in a special function
+- Fallback to default map on map load failure works again (broken sine 0.2.8.0_rc4)
+
+Changes since 0.2.8.0_rc4:
+Bugfixes:
+- SECURITY FIX: via a MAP_FILE path with included .., it was possible
+  to write files anywhere, provided they did not exist previously.
+  Clients with this vulnerability are locked out of the server now.
+- ALLOW_CONTROL_DURING_CHAT has been disabled for now.
+- Another connection termination bug.
+
+Changes since 0.2.8.0_rc3: 
+- Added spectator mode toggle key.
+- Thresholds when a white background bar is rendered behind texts is
+  now configurable in the expert section of settings.cfg.
+- Ingame menu trigger key is configurable now, only ESC stays hardcoded.
+- The map parser checks whether the map is stored at the right location.
+- Map validation errors are now visible on the client.
+- Made magic numbers used by the smart camera configurable for user tweaking.
+  This is undocumented and unsupported.
+- The server browser now shows a B beside the score to mark bookmarked servers.
+ Bugfixes:
+- -Os compile option is filtered out if GCC 3.3 is used, it makes the build go bad.
+- Extremely low values of CYCLE_DELAY were not honored, an arbitrary delay of .005s
+  was added to it.
+- On entering a server, the camera would sometimes be stuck in free mode.
+
+Changes since 0.2.8.0_rc2:
+- Almost final artwork
+- Moviepacks can now also contain texture replacements for the default cycle model
+- Added number of teammates alive to HUD
+  Bugfixes:
+- Dual textured floor rendering is now disabled without alpha blending as it
+  did not work anyway.
+- Lag-O-Meter now has the correct size (the old, buggy one can be restored by
+  setting LAG_O_METER_SCALE to .5).
+- The network system made some IDs randomly unusable, causing zombie
+  cycles, invisible walls and disconnections.
+- The AI Team from a previous local game session was sometimes still visible
+  on the score table in the following network game on a remote server.
+- The server did not start a new match when temporarily, only spectators were online.
+- Player walls were rendered twice.
+- The server wrote console center messages to stderr.
+- UNBAN_IP did not work at all.
+- The code that should kill a cycle in performance/DOS protection
+  circumstances just crashed.
+
+Changes since 0.2.8.0_rc1: 
+- Bugfixes:
+  Dedicated server for Windows works again.
+  Cycle turns are now executed more accurately on the server.
+  Timer stuttering at end of round (was non-critical, but ugly).
+  Custom camera did not turn when the internal camera was
+  configured not to turn.
+  Idle player kick code crashed when it kicked a client with
+  many players.
+  The code that removes inactive players after a while removed
+  the AI players.
+- Reverted smart camera movement to pre-beta4 behavior,
+  the new code made some players seasick :)
+- Ingame admin interface gives more useful information to the invoker 
+- Small font rendering improvements
+- Zone conquest message, if it is not the one that ends the round,
+  now states the name of the zone owning team.
+
+Changes since 0.2.8_beta4.2:
+- Fixed bugs:
+  Random client disconnection
+  Another vote-not-appearing-on-client bug
+  Invisible wall segments right after turn
+  Arena initialization before all settings are transmitted from the server
+  The server was using more rubber than the client sometimes
+  Crash with moviepack and some maps
+  Object sync messages not accepted by client in second network session
+- Improved kill/suicide/team kill distinction (ENEMY_* settings)
+- Chatbots and idle players can be removed from the game and kicked
+  (CHATTER/IDLE_REMOVE_TIME,IDLE_KICK_TIME)
+- Players/team leaders can pause the game before a rond starts (PLAYER_CHAT_WAIT*)
+- Color codes can be filtered from player names (FILTER_COLOR_NAMES)
+- New machine readable log file: ladderlog.txt
+- Configurable and better core dump/team kill/suicide distinction algorithm
+- Unknown settings are recognized now in configuration files
+- All global key bindings (Grab mouse, pause and texture reload were left)
+  are now configurable
+- Player listing length limit adjusted so two teams/16 players fits on screen
+- Less verbose upgrade warning messages
+- Imposters can get a non-conflicting name (ALLOW_IMPOST[EO]RS)
+
+Changes since 0.2.8_beta4:
+- Fixed bugs:
+  Windows version had a memory overwrite error causing crashes and weird behavior.
+  The game quit when the chat key and a key bound to an instant chat were pressed to quickly.
+  Votes expired too early on the client.
+  Performance: a lot of unused temporary walls were hanging around each round.
+  Cycles sometimes warped to odd locations.
+- Tweaked smart camera to not stay in front of the cycle so much.
+  Tweaked smart camera custom glancing.
+  Report back whether you like or hate it!
+- Made custom camera even more configurable, changed default settings.
+  (old ones are still in settings.cfg)
+- Forced glancing end on cycle turn now looks better.
+- FOV settings now deal better with wide screens/splitscreen mode.
+- Increased ping measurements again by adding the fluctuations. The raw 
+  average ping caused the game logic to be too picky.
+
+Changes since 0.2.8_beta3:
+- Famous fixed bugs: 
+  Random huge felt lag or blank screen (it was actually a problem with the timer) is gone.
+  Bogus "possible phase bug" message.
+  Seemingly random walls popping out of nothing, only to disappear a second later.
+  Random camera focus changes while you were still alive.
+  Every 100th console line got deleted.
+- Reduced pings! Actually, just the measurement is improved, the actual latency
+  stays the same. I hope nobody notices that. Good thing nobody reads NEWS files :)
+- New text editing convenience: Home and end keys work, and CTRL+left/right/del/backspace
+  work on whole words. Thanks, Nemo!
+- New instant chat functions: There are now 25 instant chat strings. If an instant
+  chat string ends in a \, it will not be sent immediately, it's opened to be edited by you.
+  Pressing an instant chat key while already chatting will insert the string, provided the
+  key does not produce a regular character.
+- If enabled by the server administrator: control your cycle while you chat.
+- Turning speed of custom and internal camera can be adjusted with CAMERA_CUSTOM_TURN_SPEED
+  and CAMERA_IN_TURN_SPEED.
+- The custom camera zooms out from a closeup at round start. Useful to see your position
+  in your team. Configurable with CAMERA_CUSTOM_ZOOM.
+- Master server redundancy enabled. Thanks to Lucifer for hosting the backup master!
+
+Changes since 0.2.8_beta2:
+- More bugfixes: most annoying was the crash/infinite loop a server got in when
+  the master server was unreachable
+- Added zones to map specification
+- Reworked top level map format (sorry to the map makers for the inconvenience)
+- Windows: added start menu entries that open the system and user data directories
+- Bandwidth limitation now works. That means if you lowered the bandwidth
+  limits in the network setup, they were not respected. You probably should
+  readjust them.
+
+Changes since 0.2.8_beta1:
+- bugfixes, of course
+- added recording and playback startmenu entries for Windows
+- abuse prevention: added IP banning, player number per IP and client limit, 
+  doublebinding can be crippled on server command
+
+Changes since 0.2.7.1:
+- Server side cycle synchronization issues fixed:
+  destination removal fixed
+  lag sliding caused by different interpretation of grinding turn commands on client and server fixed
+  niceness for older clients: sync interval decreased, no sync in front of wall to prevent local tunneling
+- Client side cycle synchronization issues fixed:
+  smooth corrections now only affect the appearance, the correct values are used internally
+  sync messages are no longer ignored,
+  new extrapolating sync method implemented,
+  ghosting fixed,
+  wall ends sticking out fixed ( for enemy cycles ),
+  the sophisticated distance based sync code implemented years ago is now actually used, oh dear.
+- Performance improvements:
+  netobject synchronization does no longer traverse all netobjects
+  disabled gameobject-gameobject interaction
+- added support for nonorthogonal driving directions
+- added support for debug recording and playback
+- switched to using automake
+
+Changes since 0.2.7.0:
+- Fixed security issues: fake message ID crash, fake peer ID crash ( both
+  maybe could be used to execute arbitrary code ), fake logout exploit, fake
+  connections DOS attack
+- The feared "left grid" error message has been replaced by recovery code
+- Fixed transfer of infinite floats over the network
+- Fixed network timer inaccuracies on long running servers
+- Fixed rip bug ( for those who like it: search and you will find )
+- Fixed wall bending ( there is still some wall bending left, but it will be
+  too small to notice )
+- Fixed tunneling bugs ( you were able to move from one side of a wall to the other )
+- Fixed bounce bug ( a small zigzag towards a wall sometimes put you further
+  away from it, leaving a hole )
+- Fixed massive reference counting overflow crash caused by repeated close grinding/180ing
+- Made rubber code customizable and frame rate independent ( new CYCLE_RUBBER_
+  variables in settings.cfg )
+- For debugging and scripting: dedicated server console messages can be
+  decorated with client ID and IP
+- Topology police: facility to catch tunneling issues after they happened. off
+  by default
+- Cycle network code is more robust
+- Update frequency of cycle position now configurable and more frequent for
+  client's own cycle that the rest by default
+- Corrected rc.d scripts to start the server as a system service
+- Voting more configurable: voters can be made public, spectators can't vote
+  any more by default
+- Moviepack floor color fixed
+- Hostname lookup failure fixed
+- "PLAYER_1 nick" console command problems fixed
+- Windows libraries moved out of the main source tree
+- Source code now compatible with 64 bit and gcc 3.4
+- Colored explosions!
+- HUD enhancements: customization, works in splitscreen mode
+- Directory scanning code added ( not yet visible, will be used for
+  moviepack/cycle selection )
+- Moviepack sky texture support
+- Master server can now run on windows, too
+- Explosion sound now actually works
+
+Changes since 0.2.6.0:
+- added HUD
+- Winzone may now be a deathzone
+
+Changes since 0.2.5.2:
+- Split custom camera into server defined and client defined custom camera
+- Fixed monster chat message exploit
+- Added local player silencing
+- Added Kick voting
+- Added player names on cycles ( implemented by Christian Reitwiessner )
+- Harsher ( and configurable ) spam protection
+- Fixed strangely bent walls
+
+Changes since 0.2.5.1:
+- Fixed fullscreen toggle while chatting
+- Disabled trilinear filtering for ATI cards by default ( to avoid lockups )
+- Worked around flawy S3 texture storage
+- Fixed crash when trying to change teams in spectator mode
+
+Changes since 0.2.5:
+- Another go at the "11th Round Bug"
+- Player list is now sorted after displayed score ( before: some invisible combination of team score and own score )
+- Fixed brakes when connecting to a 0.2.4 or earlier server
+- Updated FAQ with server setting hints
+- Unified Windows and Unix network code
+- Fixed texture hardware mode
+- Less connection losses
+- Fixed network ID related crash
+- Added player names to information you get from a server
+- Added window-fullscreen toggle key and separate setting of screen resolution/window size
+
+Changes since 0.2.4:
+- Fixed online observer mode switching
+- Fixed command line options
+- Fixed player quit message
+- Fixed AI join message
+- Fixed double registration of some network objects ( had no known visible symptom )
+- Added security checks to see if Armagetron is run correctly
+- Fixed big brother ( reporting of OS, graphic card and version to the master server )
+- Disabled memory manager by default
+- Fixed single player exit game crash
+- Fixed zero length sting receive crash
+- Completed network version control
+- Added timestamps to logfiles ( code fragments by k_at_work )
+- Added reason to login deny/kick messages
+- Fixed 11th round bug ( additional round started after match end )
+- Added --doc command line switch to print offline version of online help
+- Fixed sign of rise/drop highscore messages
+- New console commands: quit/exit ( dedicated server only ), kick <player name>, center_message <message> and console_message <message>
+- New setting item: MAX_CLIENTS
+- Improved server browser, less skipping around
+- Added instant win zone
+- Cycle brake is now of limited duration
+
+Changes since 0.2.3:
+- Fixed score display ( really! )
+- Fixed freestyle mode round counting
+- Fixed server freezer
+- Fixed explosion sync
+- Fixed AI crashes when player leaves in mid-battle
+- Fixed configure script: now really uses sdl-config
+- Speeded up deletion of unreachable servers
+- Fixed endless recursion bug ( "11th player bug" )
+- Moved team start positions further apart
+- Player name is now taken from $USER on first start and player color is randomized
+
+Changes since 0.2.2:
+- Fixed highscores and ladder
+- Delayed score deletion after match end
+- Fixed autoexec.cfg loading
+- More automatic rebuilding
+- Fixed dedicated server idle quitting
+- Fixed auto AI
+- Fixed instant chat
+- Fixed score display for many players or long player names
+- Fixed very rare client crash
+- Fixed not so rare release only crash
+- Fixed balance-related typos
+- Tweaked smart camera so that it works well when braking
+- Fixed finish mode game setting
+
+Changes since 0.2.1:
+- Fixed another connection-loss bug
+- Fixed observer freeze
+- Observers now don't just get kicked when nobody else is online
+- Fixed software renderer detection
+- Updated FAQ
+- Fixed config file loading on some architectures
+- Improved team coloring
+- Fixed stuck brake bug
+
+Changes since 0.2.0:
+- Fixed crash when watching a quitting player
+
+Changes since 0.2.pre4:
+- Fixed crashes
+- Fixed windows network connection problems
+- Fixed clour related problems
+- Added marker for own cycle to avoid confusion in team mode
+- Changed directory placement: configuration resides in /etc/armagetron,
+  user configuration in ~/.armagetron/var
+- Data files added to ~/.armagetron/textures ( or /models or /sounds )
+  are now loaded in favor of original data, allowing user specific mods
+
+Changes since 0.2.pre3:
+- Fixed some more rare crashes and lockups
+- Fixed team handling: all team change operations now get only active
+  on next round address
+- Fixed moviesounds
+- Fixed server-master server communications
+- new installation method: make update ( keeps user configuration )
+
+Changes since 0.2.pre2:
+- Fixed some rare crashes and lockups
+- Improved cycle handling over network
+- It is now allowed to fight with an arbitrary large team against the AI
+  regardless of the balancing settings
+- improved rendering precision: z-fighting artefact are now uncommon,
+  and at the same time early clipping on the near clipping plane
+
+Changes since 0.2.pre:
+- got rid of "zombie" players
+- corrected team messages
+- fixed chatting
+- fixed 32 bit rendering
+
+Changes since 0.1.4.9:
+- it is now possible for players to form teams
+- explosion now can blow holes in player walls
+- delay added to wall disappearance after death
+- finite wall length supported for snake-style gameplay
+- arena size and game speed configurable in the menu
+- the AI has been greatly improved
+- there is an Internet master server active
+- support for localization has been added, currently featuring 
+  English and German
+- AI players now have names
+- the moviepack title screen is displayed
+- Linux version: easier system-wide installation with RPM packages 
+  or "make install"

@@ -1,0 +1,11 @@
+#!/bin/sh
+DIRS="tron engine win32 tools render ui network ."
+rm filelist
+for f in $DIRS ; do
+  find src/$f -maxdepth 1  -name "*.h" >> filelist
+done
+
+find src \( -name "*.cpp" -o -name "*.in" \) >> filelist
+
+cat filelist | shar -ST
+

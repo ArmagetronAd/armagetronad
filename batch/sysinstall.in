@@ -1,0 +1,398 @@
+#! /bin/bash
+#
+# installs @progtitle@ files into /etc 
+# usage: sysinstall install/uninstall [<prefix>]
+# where <prefix> is the prefix the game was installed under.
+#
+# Respected variables:
+# ${DESTDIR} is a temporary path all files should be installed to
+# for now; it is assumed that they'll be moved to their final
+# destination before anything is run, and it is assumed all
+# files already installed by make or the packager currently reside 
+# below ${DESTDIR}.
+# ${ROOTDIR} is the final destination used primarily for testing.
+# All scripts and executables should work after being moved there.
+# It is ignored on uninstallation.
+#
+# Caveat: the script refuses to do system administration tasks if
+# ${ROOTDIR} or ${DESTDIR} is non-empty; the rationale is that if 
+# you don't want to do a system wide installation, the system 
+# should be completely unharmed.
+#
+# Caveat2: If your build system does not like system administration
+# tasks to be done during "make install", you'll have a problem with
+# the user adding here and possibly the OpenBSD init script injection.
+# You have two choices: configure with --disable-useradd resp. 
+# --disable-initscripts and do the corresponding actions manually, or
+# configure with --disable-sysinstall and call this script in its 
+# installed location, usually 
+# ${prefix}/share/games/armagetronad(-dedicated)/scripts/sysinstall,
+# giving the final prefix as the second argument and "install" as the first,
+# as a post-install script.
+#
+# Everything should work if you do
+# sysinstall; move ${DESTDIR} ${ROOTDIR}; ${ROOTDIR}/path/to/binary/armagetronad
+
+# set -x
+
+# look for kde path (this script is sometimes run without it)
+for KDEDIR in /opt/kde* /opt/kde/* /usr/kde* /usr/kde/* /usr/local/kde* /usr/local/kde/*; do
+    test -x ${KDEDIR}/bin/kde-config && PATH=${PATH}:${KDEDIR}/bin
+done
+
+THISSCRIPT=`which $0`
+
+MODE="$1"
+shift
+PREFIX="$1"
+shift
+
+INSTALLING="Installing"
+test ${MODE} == install || INSTALLING="Uninstalling"
+
+# prefix in lowercase is the prefix the game was built with. For source
+# installations, this will be identical to PREFIX, but for binary installs
+# with relocation, all configured paths need to be adapted: ${prefix} needs
+# to be replaced with ${PREFIX}. 
+test -z "${prefix}" && prefix=@prefix@
+# The variable name is a bit unfortunate, but it is given from the outside by
+# RPM.
+
+# check if the game is relocatable and if relocation was requested
+if test @relocatable@ = no && test ${prefix} != ${PREFIX}; then
+    echo -e "\nSorry, the configuration @progtitle@ was compiled with does not allow relocating it. You have to install it with prefix=${prefix}.\n\n"
+    exit 1
+fi
+
+if test "$MODE" != "install" && test "$MODE" != "uninstall"; then
+    echo "Usage: sysinstall install/uninstall [<prefix>] [<destdir>]"
+    exit 1
+fi
+
+# relocates a path: replaces compiled prefix with prefix from command line argument
+# usage: relocate <path>
+function relocate()
+{
+    echo "$1" | sed -e "s,^@prefix@,${PREFIX},"
+}
+
+# relocates a path: replaces compiled prefix with prefix from command line argument and final installation root directorty
+# usage: relocate <path>
+function relocate_root()
+{
+    echo -n ${ROOTDIR}
+    echo "$1" | sed -e "s,^@prefix@,${PREFIX},"
+}
+
+# cleans a bsd script from injected AA commands
+function BSD_cleanse()
+{
+    test -w $1 || exit 0
+    mv $1 $1.bak
+    grep -v TAG_ARMAGETRONAD < $1.bak > $1
+    rm $1.bak
+}
+
+# stops a server if installed and running
+function stop_server()
+{
+    test -x $1 && $1 status && $1 stop
+}
+
+# replacement for mkdir -p, it's said not be available everywhere
+# usage: mkdir <directory>
+# no options accepted, paths with relative components can be problematic.
+function mkdir_p()
+{
+    parent=`dirname "$1"`
+    test -d ${parent} || mkdir_p ${parent}
+    test -d $1 || mkdir $1
+}
+
+# install or uninstall a symbolic link depending on mode
+# usage: install_link <source> <destination>
+# source and destination must not come with the ${DEST/ROOTDIR} prefix.
+function install_link()
+{
+    # right now, the source should be here:
+    source_now=${DESTDIR}$1
+    # but it will be moved here before it is used:
+    source_final=${ROOTDIR}$1
+    # the link should go here:
+    target=${DESTDIR}$2
+
+    # if we don't link, but copy, the copy source needs to be the current source position
+    echo "@LN_S@" | grep "cp" > /dev/null && source_final=${source_now}
+
+    if test "$MODE" = "install"; then
+        if test -r ${source_now}; then
+            mkdir_p `dirname ${target}`
+            test -f ${target} || @LN_S@ -f ${source_final} ${target} || exit 1
+        fi
+    else
+        if test -L ${target} ; then
+            rm -f ${target} || exit 1
+        fi
+    fi
+}
+
+# gets writable path to KDE resource
+# usage: kde_get_write_path <resourcetype> DESTDIR
+# the returned path is without the DESTDIR component
+function kde_get_write_path()
+{
+    FIRST=""
+    SECOND=""
+    for TEST in `kde-config --expandvars --install $1` `kde-config --expandvars --path $1 | sed -e "s,:, ,g"`; do
+        redTEST="${TEST}"
+        while ! test -a "$2${redTEST}"; do
+            redTESTn="`dirname "${redTEST}"`"
+            if test "${redTESTn}" = "${redTEST}"; then
+                continue 2;
+            fi
+			redTEST="${redTESTn}"
+        done
+        if test -w $2${redTEST}; then
+            if echo $2${TEST} | grep kde > /dev/null; then
+                test -z ${SECOND} && SECOND=${TEST}
+            else
+                FIRST=${TEST}
+            fi
+        fi
+    done
+
+    if test -z "${FIRST}"; then
+        FIRST=${SECOND}
+    fi
+    mkdir_p $2${FIRST} > /dev/null 2>&1
+    echo ${FIRST}
+}
+
+SOURCE=$DESTDIR$PREFIX
+
+#@datadir@
+#@prefix@
+
+if test -z "$SOURCE"; then
+    # determine prefix directory from executable location
+    SCRIPTDIR=`dirname $THISSCRIPT`
+    SOURCE=`dirname $SCRIPTDIR`
+    SOURCE=`dirname $SOURCE`
+    SOURCE=`dirname $SOURCE`
+    SOURCE=`dirname $SOURCE`
+    DESTDIR=`echo $SOURCE | sed -e "s,${prefix},,"`
+    BINDIR=${SOURCE}/bin
+else
+    SCRIPTDIR=`relocate @scriptdir@`
+    BINDIR=`relocate @bindir@`
+fi
+
+# determine data locations
+EXECUTABLE=${DESTDIR}${BINDIR}/@progname@@executable_suffix@
+CONFIGDIR=`relocate @aa_sysconfdir@`
+VARDIR=`relocate @aa_localstatedir@`
+
+# determine location of scripts
+
+test -d $DESTDIR$SCRIPTDIR || { echo "Script directory not found."; exit 1; }
+
+# transscribe true location into scripts
+if test $MODE = install; then
+    echo "Relocating scripts..."
+    sedcommands=$(eval echo "RELOCATECOMMANDS
+")
+    # echo ${sedcommands}
+    for script in $DESTDIR$SCRIPTDIR/* $DESTDIR$CONFIGDIR/rc.config; do
+        if test $script != $DESTDIR$SCRIPTDIR/sysinstall; then
+            sed -e ${sedcommands} < $script > $script.trans || exit 1
+            mv $script.trans $script
+            chmod 755 $script
+        fi
+    done
+fi
+
+# install init scripts into /etc/init.d
+INITSCRIPTDIR=$DESTDIR@initdir@
+if test @enable_initscripts@ = yes ; then
+    # stop running servers on uninstall
+    if test ${MODE} = uninstall; then
+        echo Making sure servers are stopped...
+        stop_server $DESTDIR$SCRIPTDIR/rcd_master
+        stop_server $DESTDIR$SCRIPTDIR/rcd_server
+    fi
+
+    # install/uninstall scripts
+    if test @initdir@ == OpenBSD; then
+        if test -z "${DESTDIR}${ROOTDIR}" && test -w /etc/rc.local; then
+        # special code for OpenBSD, they don't use init script directories, but one huge
+        # file where you have to add your startup stuff. The parts that work done
+        # by belenus, those that don't by z-man :)
+            if test $MODE = install; then
+                echo Injecting OpenBSD init commands into /etc/rc.local...
+
+                #install shortcut script (TODO: I bet there's a canonical path for sbin)
+                AACTL=${PREFIX}/sbin/aactl
+                AAMCTL=${PREFIX}/sbin/aamasterctl
+                install_link ${SCRIPTDIR}/rcd_server ${AACTL}
+                install_link ${SCRIPTDIR}/rcd_master ${AAMCTL}
+
+                if test `cat /etc/rc.local | grep TAG_ARMAGETRONAD | wc -c` = 0; then
+                    if test -r $DESTDIR$SCRIPTDIR/rcd_server; then
+                        cat >> /etc/rc.local <<EOF
+# Armagetron Advanced                                     #TAG_ARMAGETRONAD
+if [ X"\${armagetronad}" != X"NO" -a -x ${AACTL} ]; then  #TAG_ARMAGETRONAD
+    ${AACTL} start                                        #TAG_ARMAGETRONAD
+fi                                                        #TAG_ARMAGETRONAD
+EOF
+                    fi
+                    if test -r $DESTDIR$SCRIPTDIR/rcd_master; then
+                        cat >> /etc/rc.local <<EOF
+if [ X"\${armagetronad_master}" != X"NO" -a -x ${AAMCTL} ]; then #TAG_ARMAGETRONAD
+    ${AAMCTL} start                                              #TAG_ARMAGETRONAD
+fi                                                               #TAG_ARMAGETRONAD
+EOF
+                    fi
+                fi
+
+	        # Inserting configuration IF AA should be started at system boot, default = NO
+                if test `cat /etc/rc.conf.local | grep TAG_ARMAGETRONAD | wc -c` = 0; then
+
+                    if test -r $DESTDIR$SCRIPTDIR/rcd_server; then
+                        echo 'armagetronad="NO"              #TAG_ARMAGETRONAD, change "NO" to "YES" to autostart an armagetronad game server' >> /etc/rc.conf.local
+                    fi
+                    if test -r $DESTDIR$SCRIPTDIR/rcd_master; then
+                        echo 'armagetronad_master="NO"       #TAG_ARMAGETRONAD, change "NO" to "YES" to autostart an armagetronad master server' >> /etc/rc.conf.local
+                    fi
+                fi
+            else # uninstall
+                echo Removing OpenBSD init commands from /etc/rc.local...
+                BSD_cleanse /etc/rc.conf.local
+                BSD_cleanse /etc/rc.local
+            fi
+        fi
+    else
+        # for the rest of the world. Link the starter scripts to the init script dir.
+        if mkdir_p ${DESTDIR}@initdir@ > /dev/null 2>&1 && test -w ${DESTDIR}@initdir@; then
+            install_link $SCRIPTDIR/rcd_master @initdir@/@prognamebase@-master
+            install_link $SCRIPTDIR/rcd_master @initdir@/@prognamebase@-master-@version@
+            install_link $SCRIPTDIR/rcd_server @initdir@/@progname@
+            install_link $SCRIPTDIR/rcd_server @initdir@/@progname@-@version@
+        else
+            echo -e "\nWarning: unable to ${MODE} start script symlinks in ${DESTDIR}@initdir@, it's not writable.\n"
+        fi
+    fi
+fi
+
+# install etc configuration (if it's not already there)
+if test @enable_etc@ = yes && echo @aa_sysconfdir@ | grep -v "^/etc/" > /dev/null; then
+    if mkdir_p $DESTDIR/etc > /dev/null 2>&1 && test -w $DESTDIR/etc; then
+        echo ${INSTALLING} configuration directories in $DESTDIR/etc...
+        install_link $CONFIGDIR /etc/@progname@
+        test -z "@progdir_suffix@" || install_link $CONFIGDIR /etc/@progname@-@progdir_suffix@
+    fi
+fi
+
+# link executable files
+install_link ${BINDIR}/@progname@-@version@            ${BINDIR}/@progname@
+install_link ${BINDIR}/@prognamebase@-master-@version@ ${BINDIR}/@prognamebase@-master
+
+# add KDE icons and desktop link
+if test @enable_desktop@ = yes && kde-config --install icon > /dev/null 2>&1; then
+    DESKTOPSOURCE=@aa_datadir@/desktop
+    ICONSDEST=`kde_get_write_path icon ${DESTDIR}`
+    if test -z "${ICONSDEST}"; then
+        echo "No permission to write to KDE icons directory."
+    else
+        echo "${INSTALLING} KDE icon in ${ICONSDEST}..."
+        install_link ${DESKTOPSOURCE}/icons/large/armagetronad.png ${ICONSDEST}/@progname@.png
+    fi
+
+    DESKTOPDEST=`kde_get_write_path apps ${DESTDIR}`
+    if test -z "${DESKTOPDEST}"; then
+        echo "No permission to write to KDE application menu directory."
+    else
+        echo "${INSTALLING} KDE start menu entry in ${DESKTOPDEST}..."
+        install_link ${DESKTOPSOURCE}/armagetronad.desktop ${DESKTOPDEST}/@progname@.desktop
+    fi
+fi
+
+# on uninstallation, look for other installed versions in the same prefix
+# to reinstall the links bended to them
+if test @enable_restoreold@ = yes && test ${MODE} = uninstall; then
+    scriptsuffix=`echo @scriptdir@ | sed -e "s,^@datadir@,,"`
+    NEWEST=""
+    for CANDIDATE in $SOURCE/@progname@* $SOURCE/share/@progname@* $SOURCE/share/games/@progname@* $SOURCE/games/@progname@*; do
+        SCRIPTCANDIDATE=$CANDIDATE${scriptsuffix}/sysinstall
+        if test "$CANDIDATE"${scriptsuffix} != "$SCRIPTDIR" && echo "$CANDIDATE" | grep -v "@progname@-dedicated" > /dev/null && test "$THISSCRIPT" != "`which $SCRIPTCANDIDATE 2>/dev/null`" && test -r "$SCRIPTCANDIDATE"; then
+            test "$SCRIPTCANDIDATE" -nt "$NEWEST" && NEWEST=$SCRIPTCANDIDATE
+        fi
+    done
+
+    # reinstall old version
+    if test -z "$NEWEST"; then :; else
+        VERSION=`dirname $NEWEST`
+        VERSION=`dirname $VERSION`
+        VERSION=`basename $VERSION`
+        echo "Reinstalling links to version $VERSION..."
+        sh $NEWEST install $PREFIX
+    fi
+fi
+
+# migrate old configuration
+if test ${MODE} = install && test @enable_migratestate@ != no; then
+    # locate old configuration
+    OLDVARDIR=`relocate @oldvardir@`
+    if test -d ${ROOTDIR}${OLDVARDIR}; then
+        # locate new configuration
+        NEWVARDIR=`relocate @aa_localstatedir@`
+        if ! test -r ${ROOTDIR}${NEWVARDIR}/won_rounds.txt && test ${OLDVARDIR} != ${NEWVARDIR}; then
+            # move or copy it over
+            command=cp
+            verb=copying
+            if test "x${ROOTDIR}" = "x${DESTDIR}"; then
+                command=mv
+                verb=movimg
+            fi
+            echo "Old dynamic data found in ${OLDVARDIR}, ${verb} it to ${NEWVARDIR}."
+            mkdir_p ${DESTDIR}${NEWVARDIR}
+            ${command} ${ROOTDIR}${OLDVARDIR}/* ${DESTDIR}${NEWVARDIR}/
+        fi
+    fi
+fi
+
+# add user
+user=@prognamebase@
+if test ${MODE} = install && test @enable_useradd@ = yes && ! grep ^${user}: /etc/passwd > /dev/null ; then
+    if test -z "${DESTDIR}${ROOTDIR}"; then
+        if test -w /etc/passwd; then
+            echo "Creating user ${user}..."
+            if which useradd > /dev/null 2>&1; then
+                useradd ${user} || echo -e "\nWarning: unable to create user with 'useradd'. Giving up.\n"
+            else
+                if which pw > /dev/null 2>&1; then
+                    pw useradd ${user} || echo "Warning: unable to create user with 'pw'. Giving up."
+                else
+                    echo -e "\nWarning: unable to find suitable program to add user.\n"
+                fi
+            fi
+        else # no write acces to /etc/passwd
+            echo -e "\nWarning: no write access to /etc/passwd, can't add user.\n"
+        fi
+    else # ${DESTDIR} or ${SRCDIR} set
+        if test -z "${ARMAGETRONAD_INSTALL_TESTING}"; then
+            cat <<EOF
+
+Warning: not adding user contrary to your request,
+DESTDIR or ROOTDIR are set. Adapt your build scheme
+to call this script after everything has been moved
+to its final places or configure with 
+--disable-useradd and take care of user creation
+manually.
+
+EOF
+        fi
+    fi
+fi
+
+# everything done, exit cleanly
+exit 0

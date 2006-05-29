@@ -1,0 +1,7 @@
+# append version to all program directories if multiple
+# versions should be allowed to coexist
+
+# installation targets for automake. No longer used.
+# therefore, we have something here to trigger automake warinigs:
+bla:
+	#blubb

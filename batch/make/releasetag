@@ -1,0 +1,63 @@
+#!/bin/sh
+# determines the core version/release tag (for RPM/debian) of a version and the slot (main(""), cvs or exp)
+# usage: releasetag <full version>
+
+# examples: 
+
+# "releasetag 0.2.8_beta1" should give 
+# COREVERSION=0.2.8
+# RELEASETAG=0.6.beta1
+# SLOT=""
+
+# "releasetag 0.3.0" should give 
+# COREVERSION=0.3.0
+# RELEASETAG=1.final
+# SLOT="exp"
+
+# "releasetag 1.0_alpha20060101" should give 
+# COREVERSION=1.0
+# RELEASETAG=0.3.alpha20060101
+# SLOT="cvs"
+
+VERSION="$1"
+
+# adapt version and release to RPM/Debian standards: strip trailing _* that signifies
+# the build
+COREVERSION=$(echo $VERSION | sed -e "s,_.*,,")
+
+SLOT=""
+
+# add the stripped part of the version to the release tag, taking
+# care that RPM will sort the versions correctly
+# (alpha < beta < pre < rc < final)
+if echo $VERSION | grep _ -qv; then
+    RELEASETAG=1.final
+else
+    PRE=`echo $VERSION | sed -e "s,.*_,," | tr A-Z a-z`
+    RELEASETAG=0.0
+
+    echo $PRE | grep -q ^rc      && RELEASETAG=0.9
+    echo $PRE | grep -q ^pre     && RELEASETAG=0.8
+    echo $PRE | grep -q ^pre20   && RELEASETAG=0.7
+    echo $PRE | grep -q ^beta    && RELEASETAG=0.6
+    echo $PRE | grep -q ^beta20  && RELEASETAG=0.5
+    echo $PRE | grep -q ^alpha   && RELEASETAG=0.4 SLOT=cvs
+    echo $PRE | grep -q ^alpha20 && RELEASETAG=0.3 SLOT=cvs
+
+    RELEASETAG=${RELEASETAG}.${PRE}
+fi
+
+# determine if minor version is even or odd
+if test -z "$SLOT"; then
+    MINOR=`echo $COREVERSION | sed -e "s,[0-9]*\.,," -e "s,\..*,,"`
+    #echo MINOR = $MINOR
+    test -z "$MINOR" && exit -1
+    if echo $MINOR | grep -q "[13579]$"; then
+        SLOT=exp
+    fi
+fi
+
+# echo
+echo COREVERSION=$COREVERSION
+echo RELEASETAG=$RELEASETAG
+echo SLOT=\"$SLOT\"

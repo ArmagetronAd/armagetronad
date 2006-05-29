@@ -1,0 +1,46 @@
+# all values have a range of 0 to 10. More is only meaningful for the range variable.
+# the "meta"-meaning of a value was used by me to deduce the AI abilities from the abilites of the real program.
+# 1st column "name": Program name
+# 2nd column "rs": Program reaction speed (meta: program execution speed)
+# 3rd column "er": Reaction in an emergency
+# 4th column "vr": Program viewing range
+# 5th column "trace": wall tracing ability (meta: how good can the program handle texts?)
+# 6th column "close": close combat ability (meta: how good can you control the prog with keyboard alone?)
+# 7th column "path": pathfinding ability  (meta: mouse control quality)
+# 8th column "loop": ability to detect closed areas and to close the enemy in (meta: is the program secure?)
+# 9th column "cycle": ability to evade or cross enemy cycles (meta: is there a feud going on with users of another similar program?)
+#10th column "tunl": ability to avoid dangerous tunnels ( meta: is it stable?)
+#11th column "tr-det": ability to react on enemy cycles tracing the own wall (meta: meaningful error messages)
+#12th column "state": state the AI starts in (0: survive, 1: trace, 2: closecombat, 3: pathfind)
+#13th column "str": time the AI drives straight on at the beginning
+#14th column "sttch": time before the first state change
+
+# Feel free to modify the AIs or add new ones; but be aware that the interpretation
+# of these values is not yet final. PLEASE DON'T send me your changes. They'll
+# probably be useless when I get them.
+
+#name		rs  er  vr  trace  close  path  loop  cycle  tunl  tr-det  state  str  sttch
+
+Outlook	3	 3	  0	0	    0	     0	  0	  0	   4	   0	     0	   10	  10
+Notepad	9	 5	  0	0	    6	     6	  10	  0	   10	   0	     0	   10	  10
+Word		4	 5	  3	1	    5	     10	  0	  0	   0	   0	     0	   10	  10
+Excel		6	 2	  3	1	    5	     10	  0	  0	   0	   0	     0	   10   10
+Emacs		5	 2	  3	10	    10	  0	  10	  10   	8	   5	     0	   10	  10
+Vi		   10	 6	  0	10	    10     0	  10	  10	   10	   0	     0	   10	  10
+Pine		7	 5	  1	10	    10	  0	  5	  10	   10	   10	     0	   10	  10
+Elm		9	7	  1	10	    10	  0	  10	  10	   10	   0	     0	   10   10
+LaTeX		7	5	  4	10	    0	     0	  10	  0	   10	   5	     0	   10	  10
+TeX		10	7	  4	10	    0	     0	  10	  0	   10	   5	     0	   10	  10
+Gcc		8	6	  6	0	    0	     0	  10	  5	   7	   7	     0	   10	  10
+Gdb		8	10	  6	0	    0	     0	  10	  5	   7	   7	     0	   7	  10
+MSVC++	6	6	  5	5	    10	  10	  10	  5	   7	   7	     0	   7	  10
+Photoshop 2	4	  3	0	    0	     10	  10	  10  	10  	10      0	   7	  10
+Gimp		3	2	  3	0	    0	     10	  10	  10	   10  	10	     0	   7	  10
+Windows	7	8	  8	10	    10	  10	  10	  10	   10	   10	     0	   5	  10
+Linux		7	8	  8	10	    10	  10	  10	  10	   10	   10	     0	   5	  10
+Unreal	10	10	  2	10	    10	  10	  10	  10	   10	   10	     1	   5	  10
+Quake		10	10	  2	10	    10	  10	  10	  10	   10	   10	     1	   5	  10
+Cycles3D	10	10	  10	30	    1	     1	  10	  10	   10  	10	     1	   7	  10
+glTron	10	10	  10	30	    1	     1	  10	  10	   10	   10	     1	   7	  10
+Armagetron	10	10	10	30	1	1	10	10	10	10	1	7	10
+

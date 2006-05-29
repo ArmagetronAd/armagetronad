@@ -1,0 +1,29 @@
+#! /bin/bash
+# 
+# script to be put in /etc/rc.d to start @progtitle@ server process
+# tested on Gentoo 2004.4
+# Author: Manuel Moos <manuel@moosnet.de>
+#
+
+# set -x
+
+# program installation directory
+PROGDIR=@scriptdir_reloc@
+
+# load configuration
+. $PROGDIR/rcd_config
+
+# files where PIDs are stored
+STARTERPIDFILE=$PIDDIR/@progname@-masterstarter.pid
+MAINPIDFILE=$PIDDIR/@progname@-master.pid
+
+# program to run
+BINARY=masterstarter
+BINFILE=$PROGDIR/$BINARY
+TYPE=master
+
+# log file
+LOGFILE=$LOGDIR/@prognamebase@-master.log
+
+# delegate to common start/stop/status code
+. $RCDDIR/rcd_startstop

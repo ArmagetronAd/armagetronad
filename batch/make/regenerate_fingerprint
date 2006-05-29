@@ -1,0 +1,23 @@
+#! /bin/sh
+# run this script to regerate CVS checkout from a fingerprint
+
+echo -n "Enter you SF username (hit return for anonymous access) :"
+U=`line`
+if test -z "$U"; then
+    CVSROOT=:pserver:anonymous@cvs.sourceforge.net:/cvsroot/armagetronad
+else
+    CVSROOT=:ext:$U@cvs.sourceforge.net:/cvsroot/armagetronad
+fi
+export CVSROOT
+
+# generate CVS root files
+echo $CVSROOT > Root
+find . -name CVS -exec cp Root \{\} \;
+rm Root
+
+for f in *; do if test -d $f; then
+    pushd $f
+    cvs -q update -P -d -r BASE
+    popd
+fi; done
+

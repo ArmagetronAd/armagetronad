@@ -1,0 +1,77 @@
+#! /bin/bash
+# generates script doing what "make uninstall" would do
+# first parameter: the name of the uninstallation script, defaulting to uninstall.sh
+# second, optional parameter: the command to execute to uninstall, like "rpm -e armagetronad".
+
+#set -x
+
+UNINSTALL=$1
+test x$UNINSTALL = x && UNINSTALL=uninstall
+
+EXTERNAL_CMD=$2
+
+test -z "`echo $UNINSTALL | grep '^/'`" && UNINSTALL=`pwd`/$UNINSTALL
+echo -n "Generating uninstallation script" $UNINSTALL...
+
+if test "$EXTERNAL_CMD" != "" && test "$EXTERNAL_CMD" != "yes"; then
+	{
+		echo '#! /bin/sh'
+		echo "$EXTERNAL_CMD"
+	} > $UNINSTALL
+else
+
+# start $UNINSTALL
+cat > ${UNINSTALL} <<EOF
+#! /bin/sh
+#uninstalls ${PROGTITLE}
+
+# set default destdir to where the game was installed to
+test -z "\${DESTDIR}" && DESTDIR=${ROOTDIR}
+export DESTDIR
+
+# uninstall system files
+\${DESTDIR}${SCRIPTDIR}/sysinstall uninstall ${PREFIX} || exit 1
+
+# automaticall generated from "make uninstall"
+EOF
+
+# generate wrapper for "rm"
+TMPBIN=${DESTDIR}${PREFIX}/armatempbin
+test -d ${TMPBIN} || mkdir ${TMPBIN} || exit 1
+RM=${TMPBIN}/rm
+
+# eek, that's horrible. For every call to rm, we need to record what is done, but we
+# have to revert the value of ${DESTDIR} with the literal ${DESTDIR}. A lot of
+# escaping is needed to get the literal through all the expansion layers.
+
+cat > ${RM} <<EOF
+#! /bin/sh
+ARGS=""
+for arg in "\$@"; do
+ #echo \${arg}
+ arg_trans=\`echo "\${arg}" | sed -e "s,^${DESTDIR},\\\\\\\${DESTDIR},"\`
+ #echo \${arg_trans}
+ ARGS="\${ARGS} \"\${arg_trans}\""
+done
+#echo "\${ARGS}"
+echo rm "\${ARGS}" >> ${UNINSTALL}
+EOF
+
+chmod 755 ${RM} || exit 1
+
+# invoke "make uninstall" with path bend to the rm wrapper
+OLDPATH=$PATH
+PATH=${TMPBIN}:$OLDPATH
+export PATH
+AA_FAKE_UNINSTALL="YES" ${MAKE} uninstall > /dev/null || exit 1
+
+# remove the wrapper
+PATH=$OLDPATH
+rm -rf ${TMPBIN} || exit -1
+rm -f ${RM}
+
+fi
+
+chmod 755 $UNINSTALL
+
+echo "done."

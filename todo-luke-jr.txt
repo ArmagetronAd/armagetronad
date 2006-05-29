@@ -1,0 +1,20 @@
+Legend:
+	c = Completed
+	B = Do this in a new branch
+	U = Undecided
+	F = Future
+	> = Feel free to take this from me!
+
+>	some kind of header defining "original/map-1.0.1.xml", "map-0.1.dtd", etc
+
+U>	win/death-zone spawn(s) in map file
+
+>	fix rim wall texture stretching (how?)
+
+F>	fallback to original/map-1.0.xml if map not found (on server only)
+
+	central resource db
+
+BUF	AutoWrap if turn is < X degrees
+
+UF	take units for angle (degrees or radians)

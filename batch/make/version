@@ -1,0 +1,44 @@
+#!/bin/sh
+# determines the version of the sources
+# usage: version <source directory>
+
+srcdir="$1"
+
+# set version parts to defaults for CVS snapshot
+major_version=`cat ${srcdir}/major_version`
+DATE=`date +%Y%m%d`
+
+#echo $major_version
+#echo $minor_version
+
+if test -d "${srcdir}/CVS"; then
+    # get the date/branch/version tag
+    rawtag=`cat ${srcdir}/CVS/Entries | grep major_version | sed -e "s,/major_version/.*/.*/.*/,,"`
+    #echo $rawtag
+    # determine the type of the tag
+    echo $rawtag | grep "^D" > /dev/null && tagtype=D
+    #echo $rawtag | grep "^Tb" > /dev/null && tagtype=Tb
+    echo $rawtag | grep "^Tv" > /dev/null && tagtype=Tv
+    #echo $tagtype
+
+    # extract the raw tag
+    tag=`echo $rawtag | sed -e "s,^$tagtype,,"`
+    #echo $tag
+
+    # date tag: make it a date dagged alpha release
+    if test "$tagtype" = D; then
+        DATE=`echo $tag | sed -e "s,\...\...\...\$,," | sed -e "s,\.,,g"`
+        minor_version=`cat ${srcdir}/minor_version | sed -e "s,DATE,$DATE," -e "s,YYYYMMDD,$DATE,"`
+    fi
+
+    # version tag: take whole version, replace _[number] with .[number]
+    if test "$tagtype" = Tv; then
+        major_version=`echo $tag | sed -e "s,_\([0-9]\),\.\\1,g"`
+        minor_version=""
+        DATE=""
+    fi
+fi
+
+test -z "$DATE" || minor_version=`cat ${srcdir}/minor_version | sed -e "s,DATE,$DATE," -e "s,YYYYMMDD,$DATE,"`
+
+echo $major_version$minor_version
