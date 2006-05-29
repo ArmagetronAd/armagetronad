@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "gHud.h"
 
-
+// These variables don't have any effect anymore, they're just here to get this file and all of the cockpit linked by being used in gGame.cpp.
 REAL subby_SpeedGaugeSize=.150, subby_SpeedGaugeLocX=-0.165, subby_SpeedGaugeLocY=-0.9;
 REAL subby_BrakeGaugeSize=.150, subby_BrakeGaugeLocX=0.25, subby_BrakeGaugeLocY=-0.9;
 REAL subby_RubberGaugeSize=.150, subby_RubberGaugeLocX=-0.55, subby_RubberGaugeLocY=-0.9;
