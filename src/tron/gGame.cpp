@@ -1526,6 +1526,8 @@ void ret_to_MainMenu(){
         sg_currentGame->NoLongerGoOn();
 
     sn_SetNetState(nSTANDALONE);
+
+    uMenu::SetIdle(NULL);
 }
 
 
