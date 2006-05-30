@@ -4,7 +4,7 @@ dnl AC_DEFUN([AUTOMATIC_VERSION],syscmd([sh batch/make/version .]))
 dnl but have to do this with version generated in bootstrap.sh instead for some reason
 m4_include(version)
 
-dnl Comment this out to disable autoconf custom directories: 
+dnl Comment this out to disable autoconf custom directories:
 m4_include(accustomdir.m4)
 
 dnl Process this file with autoconf to produce a configure script.
@@ -117,9 +117,18 @@ AC_ARG_ENABLE(memmanager,
 enable_memmanager=no)
 
 AC_ARG_ENABLE(sound,
-	AC_HELP_STRING([--enable-sound],
-	[compile in support for sound (default=enabled)]),,
+    AC_HELP_STRING([--enable-sound],
+    [compile in support for sound (default=enabled)]),,
 enable_sound=yes)
+
+AC_ARG_ENABLE(particles,
+    AC_HELP_STRING([--enable-particles],
+    [compile in support for experimental particle system (default=disabled)]),,
+enable_particles=no)
+
+if test x$enable_particles = xyes; then
+AC_DEFINE(USEPARTICLES,,enables particle system)
+fi
 
 AC_ARG_ENABLE(joystick,
 	AC_HELP_STRING([--enable-joystick],
@@ -684,7 +693,7 @@ for candidate in ${FTGL_HEADERS}; do
         CPPFLAGS="$CPPFLAGS -I${candidate}"
         found=true
         break
-    fi    
+    fi
 done
 
 if test ${found} = false; then
@@ -825,7 +834,7 @@ if test "x$enable_automakedefaults" = "xno"; then
     # DEVIATION FROM AUTOMAKE DEFAULT for better FHS compatibility:
     # automake puts localstatedir to ${prefix}/var. This violates
     # the FHS condition that /usr needs to be mountable read-only
-    # (except for installing/uninstalling software), so we put it 
+    # (except for installing/uninstalling software), so we put it
     # by default to /var. Relocation does not suffer as no files
     # are installed there initially.
     if test "x$build_dedicated" = "xtrue" || test "x$armamaster" = "xtrue"; then
@@ -939,7 +948,7 @@ config/rc.config config/aiplayers.cfg
 src/doc/Makefile src/doc/net/Makefile src/doc/Doxyfile
 src/doc/html.m4
 src/thirdparty/Makefile
-dnl src/thirdparty/particles/Makefile
+src/thirdparty/particles/Makefile
 src/thirdparty/shttpd/Makefile
 resource/Makefile
 config/Makefile
@@ -949,7 +958,7 @@ desktop/armagetronad.desktop
 desktop/armagetronad.protocol
 )
 
-# m4_define(FULLEVAL,stage1=`eval echo $1`; stage2 
+# m4_define(FULLEVAL,stage1=`eval echo $1`; stage2
 
 echo "Configuration complete!"
 echo ""
@@ -972,13 +981,13 @@ echo "     Add user to run server             : $enable_useradd"
 echo ""
 fi
 echo "     Sound support: $enable_sound"
+echo "     Particle System support: $enable_particles"
 echo "     Joystick support; $enable_joystick"
 echo "     Binaries will be installed in      : `eval echo ${bindir}`"
 echo "     Static data will be installed in   : `eval echo ${aa_datadir}`"
 echo "     Configuration will be installed in : `eval echo ${aa_sysconfdir}`"
 echo "     Documentation will be installed in : `eval echo ${aa_docdir}`"
 test "x$enable_etc" = "xyes" && echo "     Link to configuration will go to   : /etc/${progname}"
-echo "     Music support: $enable_music"
 echo "     Build with Krawall authentication support: $enable_krawall"
 echo "     Use dirty SDL initialization: $enable_dirty"
 echo "     Call sysinstall: $enable_sysinstall"

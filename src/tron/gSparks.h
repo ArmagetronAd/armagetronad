@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -37,6 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class gSpark: public eGameObject{ // When the player nearly hits a eWall
     REAL createTime;
 
+#ifndef USEPARTICLES
 #define SPARKS 10
 
     Vec3 x         [SPARKS];
@@ -51,8 +52,14 @@ class gSpark: public eGameObject{ // When the player nearly hits a eWall
     REAL sparkenemycolor_r;
     REAL sparkenemycolor_g;
     REAL sparkenemycolor_b;
+#endif
 
 private:
+#ifdef USEPARTICLES
+    int particle_handle;
+#define SPARKS 100
+#endif
+
 public:
     gSpark(eGrid *grid, const eCoord &pos,const eCoord &dir,REAL time,REAL ocolor_r,REAL ocolor_g,REAL ocolor_b,REAL ecolor_r,REAL ecolor_g,REAL ecolor_b);
     virtual ~gSpark();

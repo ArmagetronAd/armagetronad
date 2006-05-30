@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -30,6 +30,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rRender.h"
 #include "tRandom.h"
 
+#ifdef USEPARTICLES
+#include "papi.h"
+#endif
+
 bool white_sparks=false;
 
 gSpark::gSpark(eGrid *grid, const eCoord &pos,const eCoord &dir,REAL time,REAL ocolor_r,REAL ocolor_g,REAL ocolor_b,REAL ecolor_r,REAL ecolor_g,REAL ecolor_b)
@@ -38,6 +42,7 @@ gSpark::gSpark(eGrid *grid, const eCoord &pos,const eCoord &dir,REAL time,REAL o
 createTime(time){
     lastTime=createTime;
 
+#ifndef USEPARTICLES
     sparkowncolor_r=ocolor_r;
     sparkowncolor_g=ocolor_g;
     sparkowncolor_b=ocolor_b;
@@ -68,12 +73,18 @@ createTime(time){
         //      heat[i]=2+rand()/REAL(RAND_MAX);
         lastBreak[i]=createTime;
     }
+#else
+    particle_handle = pGenParticleGroups(1, SPARKS);
 
+    pCurrentGroup(particle_handle);
+    // Generate particles along a very small line in the nozzle.
+    pSource(1000, PDLine(pVec(Position().x, Position().y, 0.0), pVec(Position().x, Position().y, 1.0)));
+#endif
     // add to game grid
     this->AddToList();
 }
 
-gSpark::~gSpark(){}
+gSpark::~gSpark(){  }
 
 // virtual eGameObject_type type();
 
@@ -81,6 +92,7 @@ bool gSpark::Timestep(REAL currentTime){
     REAL ts=currentTime-lastTime;
     lastTime=currentTime;
 
+#ifndef USEPARTICLES
     for (int i=SPARKS-1;i>=0;i--){
         x[i]+=xDot[i]*ts;
         xDot[i].x[2]-=5*ts;
@@ -97,7 +109,35 @@ bool gSpark::Timestep(REAL currentTime){
         return true;
     else
         return false;
+#else
+    pCurrentGroup(particle_handle);
+    // Set up the state.
+    pVelocityD(PDCylinder(pVec(0.0, -0.01, 0.25), pVec(0.0, -0.01, 0.27), 0.021, 0.019));
+    pColorD(PDLine(pVec(0.8, 0.9, 1.0), pVec(1.0, 1.0, 1.0)));
+    pSize(1.5);
+    pStartingAge(0);
 
+    // Gravity.
+    pGravity(pVec(0.0, 0.0, -0.01));
+
+    // Bounce particles off a disc of radius 5.
+    pBounce(-0.05, 0.35, 0, PDDisc(pVec(0, 0, 0), pVec(0, 0, 1), 5));
+
+    // Kill particles below Z=0.
+    pSink(false, PDPlane(pVec(0,0,0), pVec(0,0,1)));
+
+    pKillOld(40);
+
+    // Move particles to their new positions.
+    pMove();
+
+    // Finished when there are less than 1/10 of the original particles
+    if (pGetGroupCount() < SPARKS/10) {
+        pDeleteParticleGroups(particle_handle, particle_handle);
+        return true;
+    } else
+        return false;
+#endif
 }
 
 void gSpark::InteractWith(eGameObject *,REAL ,int){}
@@ -108,6 +148,7 @@ void gSpark::Kill(){createTime=lastTime-100000;}
 
 #ifndef DEDICATED
 void gSpark::Render(const eCamera *cam){
+#ifndef USEPARTICLES
     glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 
     //glMatrixMode(GL_MODELVIEW);
@@ -161,9 +202,29 @@ void gSpark::Render(const eCamera *cam){
     }
     RenderEnd();
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-
     //glPopMatrix();
+#else
+    pCurrentGroup(particle_handle);
+    int cnt = (int)pGetGroupCount();
+    if(cnt < 1) return;
 
+    float *ptr;
+    size_t flstride, pos3Ofs, posB3Ofs, size3Ofs, vel3Ofs, velB3Ofs, color3Ofs, alpha1Ofs, age1Ofs;
+
+    cnt = (int)pGetParticlePointer(ptr, flstride, pos3Ofs, posB3Ofs,
+        size3Ofs, vel3Ofs, velB3Ofs, color3Ofs, alpha1Ofs, age1Ofs);
+    if(cnt < 1) return;
+
+    glEnableClientState(GL_COLOR_ARRAY);
+    glColorPointer(4, GL_FLOAT, int(flstride) * sizeof(float), ptr + color3Ofs);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, int(flstride) * sizeof(float), ptr + pos3Ofs);
+
+    glDrawArrays(GL_POINTS, 0, cnt);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+#endif
 }
 
 /*

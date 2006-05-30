@@ -4,6 +4,6 @@ else
 if BUILDDEDICATED
 SUBDIRS=shttpd
 else
-SUBDIRS=shttpd
+SUBDIRS=shttpd particles
 endif
 endif
