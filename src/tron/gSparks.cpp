@@ -78,7 +78,7 @@ createTime(time){
 
     pCurrentGroup(particle_handle);
     // Generate particles along a very small line in the nozzle.
-    pSource(1000, PDLine(pVec(Position().x, Position().y, 0.0), pVec(Position().x, Position().y, 1.0)));
+    pSource(SPARKS, PDLine(pVec(Position().x, Position().y, 0.3), pVec(Position().x, Position().y, 0.8)));
 #endif
     // add to game grid
     this->AddToList();
@@ -112,16 +112,18 @@ bool gSpark::Timestep(REAL currentTime){
 #else
     pCurrentGroup(particle_handle);
     // Set up the state.
-    pVelocityD(PDCylinder(pVec(0.0, -0.01, 0.25), pVec(0.0, -0.01, 0.27), 0.021, 0.019));
-    pColorD(PDLine(pVec(0.8, 0.9, 1.0), pVec(1.0, 1.0, 1.0)));
-    pSize(1.5);
-    pStartingAge(0);
+    pVelocityD(PDCylinder(pVec(0.0, 0.0, 0.0), pVec(0.0, 0.0, 0.01), 0.01, 0.007));
+    pColorD(PDLine(pVec(1.0, 1.0, 1.0), pVec(1.0, 1.0, 1.0)));
+    pSize(40.0);
+    //pStartingAge(0);
+
+    //pRandomAccel(PDSphere(pVec(Position().x, Position().y, 0.0), 100.0));
 
     // Gravity.
-    pGravity(pVec(0.0, 0.0, -0.01));
+    pGravity(pVec(0.0, 0.0, -0.001));
 
     // Bounce particles off a disc of radius 5.
-    pBounce(-0.05, 0.35, 0, PDDisc(pVec(0, 0, 0), pVec(0, 0, 1), 5));
+    pBounce(-0.05, 1.0, 0.1, PDDisc(pVec(0, 0, 0), pVec(0, 0, 1), 5000000));
 
     // Kill particles below Z=0.
     pSink(false, PDPlane(pVec(0,0,0), pVec(0,0,1)));
