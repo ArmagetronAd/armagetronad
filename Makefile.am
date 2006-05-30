@@ -14,7 +14,7 @@ include $(top_srcdir)/Makefile.manual
 # what goes into the distribution
 EXTRA_DIST = README-DEVELOPER README-KDevelop3_0 README-SDL \
 armagetron.kdevelop armagetron.kdevelop.pcs armagetron.kdevses tron.ico \
-models sound textures bootstrap.sh accustomdir.m4 fingerprint.tbz
+models sound textures bootstrap.sh accustomdir.m4 fingerprint
 # language/update.py
 
 # resource is included as a subdir for the purpose of keeping this makefile short and delegating

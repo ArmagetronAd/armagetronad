@@ -1,17 +1,5 @@
 # Parts of the makefile that are not handled by automake
 
-###############
-# Fingerprint #
-###############
-
-# make snapshot of CVS state
-fingerprint.tbz:
-# make copies of all CVS state directories
-#   top_srcdir=${top_srcdir} sh ${top_srcdir}/batch/make/fingerprint
-	touch $@
-# later, you can uncompress it somewhere and do "./regenerate.sh" to regenerate the source tree
-# from CVS, so you have something to base your bugfixes on.
-
 ##################
 # Beautification #
 ##################
@@ -136,55 +124,42 @@ installcheck: installcheck_uninstall.inst installcheck_uninstall.inst2
 devcheck: beautify installcheck
 fullcheck: beautify cvscheck distcheck
 
-########################
-# tracking CVS changes #
-########################
+###############
+# Fingerprint #
+###############
 
-# tag that will be newer than all CVS control files, thus being a good indicator for
-# official code changes that warrant version bumps or ChangeLog updates
-.cvsfiles:
+# initial rule for source change tag
+.changetag:
 	touch $@
-#	rm -f $@
-#	touch -r $(srcdir)/ChangeLog $@
-#	for dir in $$(find $(srcdir) -name CVS | grep -v ". ."); do\
-#		echo -e .cvsfiles: $${dir}/Entries "\n" $${dir}/Entries: "\n\t@rm -f .cvsfiles" >> $@; \
-#	done
 
- @silent_inc@ .cvsfiles
+# make snapshot of SVN state, tracking relevant changes in .changetag
+fingerprint: .changetag
+# easy, just do svn info, that contains all the information needed
+	svn info ${top_srcdir} > $@
+	svn info ${top_srcdir}/.. >> $@
+	diff $@ .changetag > /dev/null 2>&1 || cp $@ .changetag
 
-# the version creation shell script only looks for changes of this directory, so
-# we update it as well
-$(srcdir)/CVS: .cvsfiles
-	test -r $@ && touch $@
+########################
+# tracking changes     #
+########################
 
-# Keeping version up to date,
-# but only touch it silently on real changes, and only when a distribution is built
-VERSIONDEPS=$(wildcard $(srcdir)/*_version) $(wildcard $(srcdir)/CVS)
-.version.new: $(VERSIONDEPS)
-	echo "m4_define(AUTOMATIC_VERSION,["`sh $(srcdir)/batch/make/version $(srcdir)`"])" > .version.new
-	if diff $@ ${srcdir}/version >/dev/null 2>&1; then :; else cp $@ ${srcdir}/version; fi
-
-# extra target to make before a real distribution is built
-distprep: .version.new
-# clear fingerprint
-#   if test -r ${srcdir}/CVS/Entries; then rm -f fingerprint.tbz; fi
-
-# change version on deliberate version edit anyway
-$(srcdir)/version: $(wildcard $(srcdir)/*_version)
+# change version on deliberate version edit
+$(srcdir)/version: $(wildcard $(srcdir)/*_version) .changetag
 	echo "m4_define(AUTOMATIC_VERSION,["`sh $(srcdir)/batch/make/version $(srcdir)`"])" > $@
 
 # Keep the changelog up to date as well (triggered by make dist only)
-$(srcdir)/ChangeLog: .cvsfiles
+$(srcdir)/ChangeLog: .changetag
 	touch $@
 	rm -f $@
 	@echo -e "\nGenerating ChangeLog from SVN, please be patient...\n"
 	cd ${srcdir}; svn log 2>&1 > ChangeLog || echo "No official releasse: no changelog" > ChangeLog
 	test -r $@ || touch $@
 
-cvsclean:
-	rm -rf .cvsfiles .version.new
-
-clean-local: cvsclean
+# extra target to make before a real distribution is built
+# triggers regeneration of ChangeLog and version
+distprep:
+# rebuild fingerprint and update source change tag that way
+	if test -d ${srcdir}/.svn; then rm -f fingerprint; $(MAKE) fingerprint; fi
 
 #############
 # Debugging #
