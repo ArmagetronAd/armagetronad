@@ -133,7 +133,7 @@ installcheck: installcheck_uninstall.inst installcheck_uninstall.inst2
 	$(predistcheckclean)
 	@echo -e "\n---------------------------------------\nInstallation and uninstallation worked!\n---------------------------------------\n"
 
-cvscheck: beautify installcheck
+devcheck: beautify installcheck
 fullcheck: beautify cvscheck distcheck
 
 ########################
