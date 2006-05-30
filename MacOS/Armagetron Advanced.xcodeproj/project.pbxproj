@@ -2052,15 +2052,14 @@
 					/Library/Frameworks/ArmagetronAdvanced/current/SDL_mixer.framework/Headers,
 					/Library/Frameworks/ArmagetronAdvanced/current/libpng.framework/Headers,
 					/usr/include/libxml2,
-					../src/tron/,
-					/opt/local/include/FTGL,
-					/opt/local/include,
-					/opt/local/include/freetype2,
+					../src/tron,
+					/Library/Frameworks/ArmagetronAdvanced/current/include/freetype2,
+					/Library/Frameworks/ArmagetronAdvanced/current/include/FTGL,
+					/Library/Frameworks/ArmagetronAdvanced/current/include,
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
-					/opt/local/lib,
 					/usr/lib,
 					"$(HOME)/Library/Frameworks",
 					/Library/Frameworks,
@@ -2104,15 +2103,14 @@
 					/Library/Frameworks/ArmagetronAdvanced/current/SDL_mixer.framework/Headers,
 					/Library/Frameworks/ArmagetronAdvanced/current/libpng.framework/Headers,
 					/usr/include/libxml2,
-					../src/tron/,
-					/opt/local/include/FTGL,
-					/opt/local/include,
-					/opt/local/include/freetype2,
+					../src/tron,
+					/Library/Frameworks/ArmagetronAdvanced/current/include/freetype2,
+					/Library/Frameworks/ArmagetronAdvanced/current/include/FTGL,
+					/Library/Frameworks/ArmagetronAdvanced/current/include,
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
-					/opt/local/lib,
 					/usr/lib,
 					"$(HOME)/Library/Frameworks",
 					/Library/Frameworks,
