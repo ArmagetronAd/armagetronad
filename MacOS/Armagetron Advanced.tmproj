@@ -5,6 +5,8 @@
 	<key>documents</key>
 	<array>
 		<dict>
+			<key>expanded</key>
+			<true/>
 			<key>name</key>
 			<string>armagetronad</string>
 			<key>regexFolderFilter</key>
@@ -16,7 +18,7 @@
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
-	<integer>243</integer>
+	<integer>205</integer>
 	<key>metaData</key>
 	<dict/>
 	<key>shellVariables</key>
@@ -29,10 +31,18 @@
 			<key>variable</key>
 			<string>TM_XCODE_PROJECT</string>
 		</dict>
+		<dict>
+			<key>enabled</key>
+			<true/>
+			<key>value</key>
+			<string>1</string>
+			<key>variable</key>
+			<string>TM_MUTE</string>
+		</dict>
 	</array>
 	<key>showFileHierarchyDrawer</key>
-	<false/>
+	<true/>
 	<key>windowFrame</key>
-	<string>{{171, 71}, {913, 740}}</string>
+	<string>{{257, 72}, {913, 740}}</string>
 </dict>
 </plist>
