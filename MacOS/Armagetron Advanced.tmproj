@@ -9,6 +9,8 @@
 			<string>armagetronad</string>
 			<key>regexFolderFilter</key>
 			<string>!.*(/\.[^/]*|build|_darcs|vendor/rails|CVS|autom4te.cache|~\.nib|\.(framework|app|pbproj|pbxproj|xcode|bundle|xcodeproj))$</string>
+			<key>selected</key>
+			<true/>
 			<key>sourceDirectory</key>
 			<string>..</string>
 		</dict>
@@ -29,8 +31,8 @@
 		</dict>
 	</array>
 	<key>showFileHierarchyDrawer</key>
-	<true/>
+	<false/>
 	<key>windowFrame</key>
-	<string>{{358, 84}, {785, 738}}</string>
+	<string>{{171, 71}, {913, 740}}</string>
 </dict>
 </plist>
