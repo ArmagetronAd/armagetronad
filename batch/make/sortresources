@@ -16,7 +16,7 @@ test -d $source || exit 0
 
 # remake directory for included resources
 rm -rf ${destination}
-mkdir ${destination}
+mkdir -p ${destination}
 
 # link/softlink/copy them over
 cp -Rlf ${source}/* ${destination}/ > /dev/null 2>&1 || cp -Rsf ${source}/* ${destination}/ > /dev/null 2>&1 || cp -Rf ${source}/* ${destination}/ || { echo Copying or linking resources failed. ; exit 1;}
