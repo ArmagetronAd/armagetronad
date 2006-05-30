@@ -128,9 +128,9 @@ fullcheck: beautify cvscheck distcheck
 # Fingerprint #
 ###############
 
-# initial rule for source change tag
+# initial rule for source change tag (make it really old)
 .changetag:
-	touch $@
+	touch -t 7001010101 $@
 
 # make snapshot of SVN state, tracking relevant changes in .changetag
 fingerprint: .changetag

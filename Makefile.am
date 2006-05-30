@@ -136,7 +136,7 @@ install-first:
 	test -x $(uninstall_location) && $(uninstall_location) || true
 
 distclean-local:
-	rm -f uninstall.sh batch/relocate.in universal_variable* extrapaths src/tUniversalVariables.h*
+	rm -f uninstall.sh batch/relocate.in universal_variable* extrapaths src/tUniversalVariables.h* .changetag
 
 # remove files left over by distcheck
 distcheck-clean:
