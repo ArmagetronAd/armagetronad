@@ -552,8 +552,6 @@ fi
 AC_CHECK_LIB($SDLLIB,SDL_Init,
 CXXFLAGS="$CXXFLAGS `${SDL_CONFIG} --cflags`"
 CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
-export CPPFLAGS
-export CXXFLAGS
 LIBS="${SDLLIBS} $LIBS"
 export LIBS
 AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
@@ -640,17 +638,19 @@ dnl *************************************************
 dnl         freetype
 dnl *************************************************
 
-dnl test -z "$FREETYPE_CONFIG" && FREETYPE_CONFIG=freetype-config
-dnl AC_CHECK_LIB(freetype,FT_Free,
-dnl CPPFLAGS="$CPPFLAGS `$FREETYPE_CONFIG --cflags`"
-dnl LIBS="$LIBS `$FREETYPE_CONFIG --libs`"
-dnl ,
-dnl AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file doc/install_linux.html.])
-dnl )
+test -z "$FREETYPE_CONFIG" && FREETYPE_CONFIG=freetype-config
+
+AC_CHECK_LIB(freetype,FT_Free,
+CPPFLAGS="$CPPFLAGS `$FREETYPE_CONFIG --cflags`"
+LIBS="$LIBS `$FREETYPE_CONFIG --libs`"
+,
+AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file doc/install_linux.html.])
+)
 
 dnl *************************************************
 dnl         FTGL
 dnl *************************************************
+
 AC_CHECK_LIB(ftgl,FT_Render_Glyph,
 CPPFLAGS="$CPPFLAGS `pkg-config ftgl --cflags`"
 LIBS="$LIBS `pkg-config ftgl --libs`"
@@ -658,6 +658,39 @@ LIBS="$LIBS `pkg-config ftgl --libs`"
 AC_MSG_ERROR([You need the library ftgl to compile Armagetron. Read the file doc/install_linux.html.]),
 `pkg-config ftgl --libs`
 )
+
+USE_FTGL=yes
+
+# `pkg-config ftgl --cflags` doesn't reliably give the include path to FTGL itself, we are on our own finding the includes
+# look for FTGL headers in default system header locations and the prefixes of the libraries that do have a -config script
+FTGL_HEADERS="/usr/include/FTGL /usr/local/include/FTGL `$FREETYPE_CONFIG --prefix`/include/FTGL `$SDL_CONFIG --prefix`/include/FTGL `$XML2_CONFIG --prefix/`include/FTGL ${prefix}/include/FTGL "
+
+AC_ARG_WITH(ftgl,
+    AC_HELP_STRING([--with-ftgl],
+        [use FTGL for rendering (default=enabled, which is currently required), the argument is the location of the FTGL headers]),
+    if test "${withval}" = yes -o "${withval}" = no; then
+        USE_FTGL="${withval}"
+    else
+        FTGL_HEADERS=${withval}
+    fi
+)
+
+# candidates are collected, walk through them
+found=false
+AC_MSG_CHECKING(for location of FTGL includes)
+for candidate in ${FTGL_HEADERS}; do
+    if test -r ${candidate}/FTGL.h; then
+        AC_MSG_RESULT(${candidate})
+        CPPFLAGS="$CPPFLAGS -I${candidate}"
+        found=true
+        break
+    fi    
+done
+
+if test ${found} = false; then
+    AC_MSG_RESULT(not found)
+    AC_MSG_ERROR([FTGL headers not found on your system. Please pass the correct location via --with-ftgl=<path to FTGL include directory>.])
+fi
 
 # end of dedicated server if/else
 fi
@@ -716,6 +749,9 @@ AC_MSG_ERROR([OpenGL header not found.])
 )
 ])
 
+export CPPFLAGS
+export CXXFLAGS
+
 fi dnl (dedicated server)
 
 if test "`$CXX -v 2>&1 | grep -v executing | grep pgcc`"  ; then
@@ -732,9 +768,7 @@ about it. You will get the message \"I told you not to use PGCC!\")
 
 ])
 CXXFLAGS="$CXXFLAGS -fno-exceptions -DNOEXCEPT"
-export CXXFLAGS
 fi
-
 
 dnl Replace `main' with a function in -lpthread:
 
