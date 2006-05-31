@@ -4,7 +4,8 @@
 //
 // Defines these classes: ParticleState
 
-#pragma once
+#ifndef PARTICLESTATE_H
+#define PARTICLESTATE_H
 
 #include "papi.h"
 #include "actions.h"
@@ -93,3 +94,5 @@ inline void _PUnLock() {}
 #endif
 
 #define PASSERT(x,y) {if(!(x)) { _GetPState().SetError(PERR_INTERNAL_ERROR, (y)); }}
+
+#endif // PARTICLESTATE_H

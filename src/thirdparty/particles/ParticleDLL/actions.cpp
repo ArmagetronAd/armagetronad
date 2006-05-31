@@ -425,7 +425,7 @@ void PABounce::Exec(const PDPlane &dom, ParticleGroup &group, ParticleList::iter
             continue;
 
         float nv = dom.nrm * m.vel;
-        float t = -distold / nv; // Time steps before hit
+        // float t = -distold / nv; // Time steps before hit
 
         // A hit! A most palpable hit!
         // Compute tangential and normal components of velocity

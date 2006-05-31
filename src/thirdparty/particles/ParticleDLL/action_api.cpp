@@ -155,7 +155,7 @@ PARTICLEDLL_API void pGravity(const pVec &dir)
 
 PARTICLEDLL_API void pJet(const pDomain &dom, const pDomain &accel)
 {
-    ParticleState &PS = _GetPState();
+    // ParticleState &PS = _GetPState();
 
     PAJet *S = new PAJet();
 

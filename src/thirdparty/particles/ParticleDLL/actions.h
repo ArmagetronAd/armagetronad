@@ -4,7 +4,8 @@
 //
 // These structures store the details of actions for action lists
 
-#pragma once
+#ifndef PARTICLEACTIONS_H
+#define PARTICLEACTIONS_H
 
 // domain includes particle group and vector.
 #include "pDomain.h"
@@ -29,6 +30,7 @@ struct PActionBase
 
     virtual EXEC_METHOD = 0;
 
+	virtual ~PActionBase(){}
 private:
     // These are used for doing optimizations where we perform all actions to a working set of particles,
     // then to the next working set, etc. to improve cache coherency.
@@ -371,3 +373,5 @@ struct PAVortex : public PActionBase
 
     EXEC_METHOD;
 };
+
+#endif // PARTICLEACTIONS_H

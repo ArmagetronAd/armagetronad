@@ -343,8 +343,9 @@ PARTICLEDLL_API size_t pSetMaxParticles(size_t max_count)
     if(PS.in_new_list)
         return 0; // ERROR
 
-    if(max_count < 0)
-        return 0; // ERROR
+	// useless test, can never be negative
+    // if(max_count < 0)
+    //    return 0; // ERROR
 
     // This can kill them and call their death callback.
     PS.GetPGroup(PS.pgroup_id).SetMaxParticles(max_count);
@@ -375,8 +376,10 @@ PARTICLEDLL_API void pCopyGroup(int p_src_group_num, size_t index, size_t copy_c
         ccount = srcgrp.size() - index;
     if(ccount > destgrp.GetMaxParticles() - destgrp.size())
         ccount = destgrp.GetMaxParticles() - destgrp.size();
-    if(ccount<0)
-        ccount = 0;
+
+	// useless test, can never be negative
+    // if(ccount<0)
+    //     ccount = 0;
 
     // Directly copy the particles to the current list.
     for(size_t i=0; i<ccount; i++) {
@@ -397,15 +400,16 @@ PARTICLEDLL_API size_t pGetParticles(size_t index, size_t count, float *verts,
     // For now, it means color4.
 
     if(PS.in_new_list)
-        return -1; // ERROR
+        return static_cast< size_t >( -1 ); // ERROR
 
     _PLock();
 
     if(PS.pgroup_id < 0 || PS.pgroup_id >= (int)PS.PGroups.size())
-        return -2; // ERROR
+        return static_cast< size_t >( -2 ); // ERROR
 
-    if(index < 0 || count < 0)
-        return -3; // ERROR
+	// useless test, both are never negative
+    // if(index < 0 || count < 0)
+    //    return static_cast< size_t >( -3 ); // ERROR
 
     ParticleGroup &pg = PS.PGroups[PS.pgroup_id];
 
@@ -414,7 +418,7 @@ PARTICLEDLL_API size_t pGetParticles(size_t index, size_t count, float *verts,
     if(index + count > pg.size()) {
         count = pg.size() - index;
         if(count <= 0)
-            return -4; // ERROR index out of bounds.
+            return static_cast< size_t >( -4 ); // ERROR index out of bounds.
     }
 
     int vi = 0, ci = 0, li = 0, si = 0, ai = 0;
@@ -470,12 +474,12 @@ PARTICLEDLL_API size_t pGetParticlePointer(float *&ptr, size_t &stride, size_t &
     ParticleState &PS = _GetPState();
 
     if(PS.in_new_list)
-        return -1; // ERROR
+        return static_cast< size_t >( -1 ); // ERROR
 
     ParticleGroup &pg = PS.PGroups[PS.pgroup_id];
 
     if(pg.size() < 1) {
-        return -4; // ERROR index out of bounds.
+        return static_cast< size_t >( -4 ); // ERROR index out of bounds.
     }
 
     ParticleList::iterator it = pg.begin();
@@ -511,7 +515,7 @@ PARTICLEDLL_API size_t pGetGroupCount()
     _PLock();
 
     if(PS.pgroup_id < 0 || PS.pgroup_id >= (int)PS.PGroups.size())
-        return -2; // ERROR
+        return static_cast< size_t >( -2 ); // ERROR
 
     _PUnLock();
 
@@ -529,7 +533,7 @@ PARTICLEDLL_API size_t pGetMaxParticles()
     _PLock();
 
     if(PS.pgroup_id < 0 || PS.pgroup_id >= (int)PS.PGroups.size())
-        return -2; // ERROR
+        return static_cast< size_t >( -2 ); // ERROR
 
     _PUnLock();
 
