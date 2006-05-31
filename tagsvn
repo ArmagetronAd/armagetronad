@@ -1,0 +1,4 @@
+#!/bin/sh
+svn -q update
+svn -q commit
+echo todo: cvs tag $* v0_2_7_1

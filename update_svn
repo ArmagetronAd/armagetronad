@@ -1,0 +1,9 @@
+#!/bin/sh
+if ! [ -r .dont_update ] ; then
+ if [ -r .svn ] ; then
+ 	svn update
+ else
+  mydir=`basename $PWD`
+  svn co https://svn.sourceforge.net/svnroot/armagetronad/armagetronad/trunk/armagetronad .
+ fi
+fi
