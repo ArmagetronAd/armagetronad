@@ -28,7 +28,6 @@ end
 
 namespace "xcode" do
   
-  desc "Prepare generated files"
   task :prepare => [:process_in_files, :sort_resources]
   
   # TODO: Don't need to run this everytime. Change it to a file based task
@@ -39,7 +38,6 @@ namespace "xcode" do
   end
   
   # TODO: file based...
-  desc "Package files, remove unecessary files, etc."
   task :cleanup => [:package_in_files] do
     rm_rf "#{AAConfig::PACKGAGE_RESOURCE_DIR}/resource"
     cp_r "#{AAConfig::BUILD_DIR}/resource", AAConfig::PACKGAGE_RESOURCE_DIR
