@@ -60,6 +60,8 @@ REAL subby_FastestLocX=-0.0, subby_FastestLocY=-0.95, subby_FastestSize =.12;
 REAL subby_AlivePeopleLocX=.45, subby_AlivePeopleLocY=-0.95, subby_AlivePeopleSize =.13;
 REAL subby_PingLocX=.80, subby_PingLocY=-0.95, subby_PingSize =.13;
 
+REAL max_player_speed=0;
+
 #ifndef DEDICATED
 
 void GLmeter_subby(float value,float max, float locx, float locy, float size, const char * t,bool displayvalue = true, bool reverse = false, REAL r=.5, REAL g=.5, REAL b=1)
@@ -228,8 +230,6 @@ static void tank_display_hud( ePlayerNetID* me ){
         }
     }
 }
-
-REAL max_player_speed=0;
 
 static void display_hud_subby( ePlayer* player ){
     if ( !player )
