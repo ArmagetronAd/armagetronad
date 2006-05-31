@@ -1,15 +1,8 @@
 module AAConfig
   
-  # TODO: update this when branch/0.2.8 is merged to trunk
-  def self.version
-    ["#{SRC_DIR}/major_version", "#{SRC_DIR}/minor_version"].inject("") { |version, f|
-      version + IO.read(f).chomp
-    }.gsub(/DATE/, Time.now.strftime("%Y%m%d"))
-  end
-  
   # Paths are relative the Rakefile
   SRC_DIR = ".."
-    
+  
   BUILD_DIR = ENV["SYMROOT"] + "/.."
   
   PACKGAGE_RESOURCE_DIR = [ENV["CONFIGURATION_BUILD_DIR"], ENV["PRODUCT_NAME"] + ENV["WRAPPER_SUFFIX"], "Contents/Resources"].join("/")
@@ -20,7 +13,7 @@ module AAConfig
               "#{SRC_DIR}/config/aiplayers.cfg.in" => true,
               "#{SRC_DIR}/language/languages.txt.in" => true}
   
-  TAG_MAPPINGS = {"@version@" => version(),
+  TAG_MAPPINGS = {"@version@" => %x{"#{SRC_DIR}/batch/make/version" "#{SRC_DIR}"}.chomp,
                   "@year@" => Time.now.strftime("%Y"),
                   "@progtitle@" => "Armagetron Advanced"}
     
@@ -43,9 +36,10 @@ AAConfig::IN_FILES.each do |infile, should_package|
   file result_file => infile do |t|
     mkdir_p File.dirname(t.name)
     cp t.prerequisites[0], t.name
+    # Subsitute the tags in the resulting file
     open(t.name, 'r+') do |f|
       data = f.read
-      AAConfig::TAG_MAPPINGS.each { |tag, value| data.gsub!(tag, value) }      
+      AAConfig::TAG_MAPPINGS.each { |tag, value| data.gsub!(tag, value) }
       f.pos = 0
       f.write(data)
       f.truncate(f.pos)
@@ -56,7 +50,7 @@ AAConfig::IN_FILES.each do |infile, should_package|
   # Define the task to package the file
   if should_package
     # builddir/config/foo -> builddir/build/Debug/Armagetron Advanced.app/Contents/Resources/config/foo
-    # Currently we all files we package follow the same pattern -- we only need the last two paths
+    # Currently all files we package follow the same pattern -- we only need the last two paths
     package_file = AAConfig::PACKGAGE_RESOURCE_DIR + "/" + result_file.split("/")[-2, 2].join("/")
     file package_file => result_file do |t|
       mkdir_p File.dirname(t.name)
