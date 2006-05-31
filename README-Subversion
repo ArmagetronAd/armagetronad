@@ -38,6 +38,18 @@ There is also a helper module for the unix build, managing the tasks above and m
 Check it out parallel to the armagetronad module, cd there and read the enclosed README.
 If you're in a hurry, just run "make" there.
 
+****************
+* KDevelop 3.0 *
+****************
+
+First, you need to bootstrap. Execute: sh ./bootstrap.sh
+Run 'kdevelop' if you haven't done so already.
+From the Project menu, choose Open Project
+Select 'armagetron.kdevelop' and press OK
+From the Build menu, choose Run Configure
+
+If all goes smoothly, you can now edit Armagetron Advanced and run it.
+
 ********
 * OS X *
 ********
@@ -102,4 +114,6 @@ Not supported yet.
 
 
 ------------------------------------------
-Initialy written by z-man. Some changes, including Subversion migration, by Luke-Jr
+Initialy written by z-man.
+Some changes, including Subversion migration, by Luke-Jr
+Original KDevelop 3.0 instructions by subby
