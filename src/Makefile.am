@@ -152,9 +152,15 @@ else
 noinst_LIBRARIES = libnetwork.a libtools.a
 endif
 
+if BUILDDEDICATED
+extralibs=
+else
+extralibs= thirdparty/particles/libparticles.a
+endif
+
 armagetronad_main_SOURCES = tron/gFloor.cpp
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_LDADD=libtron.a libengine.a libnetwork.a libui.a thirdparty/particles/libparticles.a thirdparty/shttpd/libshttpd.a librender.a libtools.a
+armagetronad_main_LDADD=libtron.a libengine.a libnetwork.a libui.a thirdparty/shttpd/libshttpd.a librender.a libtools.a ${extralibs}
 
 armagetronad_main_master_SOURCES = network/master.cpp
 armagetronad_main_master_CXXFLAGS =$(libtron_a_CXXFLAGS)
