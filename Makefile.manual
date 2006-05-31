@@ -17,7 +17,7 @@ beautify:
 	ARTISTIC_STYLE_OPTIONS=$(srcdir)/config/astylerc sh $(srcdir)/batch/make/beautify $(srcdir) .beautytag
 
 # use this target to run astyle with your personal settings for
-# it (but remember to do "make beautify" before comitting to CVS!)
+# it (but remember to do "make beautify" before comitting to Subversion!)
 beautify-personal:
 	rm -f $(srcdir)/.beautytag $(srcdir)/.beautytag.re
 	ARTISTIC_STYLE_OPTIONS=~/.astylerc sh $(srcdir)/batch/make/beautify $(srcdir) .beautytag.personal 
@@ -122,7 +122,7 @@ installcheck: installcheck_uninstall.inst installcheck_uninstall.inst2
 	@echo -e "\n---------------------------------------\nInstallation and uninstallation worked!\n---------------------------------------\n"
 
 devcheck: beautify installcheck
-fullcheck: beautify cvscheck distcheck
+fullcheck: beautify devcheck distcheck
 
 ###############
 # Fingerprint #
