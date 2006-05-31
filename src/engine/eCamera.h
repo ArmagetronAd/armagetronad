@@ -62,7 +62,7 @@ public:
 
 class eCamera{
 protected:
-    static const int se_glances = 4;
+    enum { se_glances = 4 };
     static uActionCamera se_lookUp,se_lookDown,se_lookLeft,se_lookRight,
     se_moveLeft,se_moveRight,se_moveUp,se_moveDown,se_moveForward,se_moveBack,
     se_zoomIn,se_zoomOut, se_switchView;

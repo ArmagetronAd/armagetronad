@@ -1495,7 +1495,7 @@ void nServerInfo::GetFromLAN(unsigned int pollBeginPort, unsigned int pollEndPor
 {
     sn_AcceptingFromBroadcast = true;
 
-    sn_LastLoaded.clear();
+    sn_LastLoaded.Clear();
 
     // enter client state
     if (sn_GetNetState() != nCLIENT)
@@ -1546,7 +1546,7 @@ void nServerInfo::GetFromLANContinuously(unsigned int pollBeginPort, unsigned in
 {
     sn_AcceptingFromBroadcast = true;
 
-    sn_LastLoaded.clear();
+    sn_LastLoaded.Clear();
 
     // enter client state
     if (sn_GetNetState() != nCLIENT)
