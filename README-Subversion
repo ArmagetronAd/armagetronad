@@ -54,44 +54,19 @@ If all goes smoothly, you can now edit Armagetron Advanced and run it.
 * OS X *
 ********
 
-The Mac OS projects are located in the armagetronad/MacOS/ directory.
+## Prerequisites
 
-== Armagetron.pbproj
+* [Apple developer tools](http://developer.apple.com)
+    * Xcode 2.2 or greater is required.
+* [rake](http://rubyforge.org/projects/rake)
+* [Other Libraries](http://generalconsumption.org/armagetron/MacOSX_AALibraries.zip)
+    * Unzip and install to /Libraries
 
-This is the old project. If you would like to build on Xcode < 2.1 or Project Builder you must use this. It is not up-to date, so you must add several missing files to it.
+## Building
 
-== Armagetron Advanced.xcodeproj
-
-This will only open in Xcode >= 2.1. It has three targets:
-* Armagetron Advanced -- The client
-* Armagetron Advanced 10.2.8 -- The client for Mac OS X 10.2.8
-* Armagetron Advanced Dedicated -- Dedicated Server
-
-Armagetron Advanced requires:
-* SDL.framework
-* SDL_mixer.framework
-* SDL_image.framework
-* libpng.framework
-
-Armagetron Advanced 10.2.8 requires everything listed for Armagetron Advanced plus:
-* libxml2 built for 10.2.8
-* The Mac OS X 10.2.8 SDK
-
-All dependencies for Armagetron Advanced Dedicated are included with Mac OS X.
-
-To build:
-== Armagetron Advanced
-* The default configuration is Release. The other option is Debug.
-* Build
-
-== Armagetron Advanced 10.2.8
-* Change the target to Armagetron Advanced 10.2.8
-* In config_common.h un-comment "#define MACOSX_VERSION_10_2 1"
-* Build
-
-== Armagetron Advanced Dedicated
-* Change to the dedicated target.
-* Build
+1. Open “MacOS/Armagetron Advanced.xcodeproj”.
+2. There is a big “Build” button. Click it.
+3. An “armagetronad-build” directory will be created along-side the source directory, in which generated files and products are stored.
 
 *********************
 * Windows + VisualC *
