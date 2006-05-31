@@ -1,4 +1,0 @@
-#!/bin/sh
-cvs -q update
-cvs -q commit
-cvs tag $* v0_2_7_1

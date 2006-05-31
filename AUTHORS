@@ -27,6 +27,8 @@ Alex E. Kelly : former Project Administrator
 Additional contributions from:
 Belenus                  : OpenBSD support sniplets
 Ben Hines                : first working Mac OS X port
+Fabrice Holbe            : original Moviepack and font
+Tomas Birraux            : french accents in font
 Christian Reitwiessner   : contributed name rendering above cycles
 Edd Keefe                : contributed Mac OS X icon and the title screen
 Fabrice Holbe            : original Moviepack and font

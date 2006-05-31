@@ -19,8 +19,8 @@ $AUTOHEADER || rm config.h.in
 echo "Running autoconf..."
 $AUTOCONF || rm configure
 echo "Running automake..."
-if test -r CVS/Entries; then
-    # activate dependency tracking for CVS users
+if test -r CVS/Entries || test -r .svn/entries; then
+    # activate dependency tracking for CVS and Subversion users
     $AUTOMAKE -a
 else
     # deactivate dependency tracking
