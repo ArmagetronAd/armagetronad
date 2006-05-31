@@ -15,7 +15,7 @@ include $(top_srcdir)/Makefile.manual
 # what goes into the distribution
 EXTRA_DIST = README-DEVELOPER README-KDevelop3_0 README-SDL \
 armagetron.kdevelop armagetron.kdevelop.pcs armagetron.kdevses tron.ico \
-models sound textures bootstrap.sh music accustomdir.m4 fingerprint.tbz
+models sound textures bootstrap.sh music accustomdir.m4 fingerprint
 # language/update.py
 
 # resource is included as a subdir for the purpose of keeping this makefile short and delegating
@@ -64,14 +64,14 @@ doxy:
 	cd ../../
 
 # generate configure.ac with version hardcoded and ChangeLog
-dist-hook-cvs:
+dist-hook-scm:
 #	replace dynamic version in configure.ac with the version this build is configured with
 	sed -e "s/m4_include(version)//" -e "s/AUTOMATIC_VERSION/$(VERSION)/" < @srcdir@/configure.ac > $(distdir)/configure.ac
 
 #   regenerate dependant files so they no longer reference to the file "version" which will be removed
 	cp @srcdir@/bootstrap.sh $(distdir)
 	cd $(distdir); rm version; sh ./bootstrap.sh; rm version
-	rm $(distdir)/autom4te.cache
+	rm -rf $(distdir)/autom4te.cache
 
 dist-hook:
 #   copy mac files
@@ -80,6 +80,9 @@ dist-hook:
 #	clear CVS
 	find $(distdir) -name CVS -depth -exec rm -rf \{\} \;
 
+#	clear SVN
+	find $(distdir) -name .svn -depth -exec rm -rf \{\} \;
+
 #   strip comments from translated files
 	cd $(distdir)/language; python ./update.py --dist
 #	restore timestamps
@@ -87,7 +90,7 @@ dist-hook:
 	rm -f $(distdir)/language/*.bak
 
 # 	generate ChangeLog and configure.ac
-	test -r $(srcdir)/version && $(MAKE) dist-hook-cvs || echo "No CVS source version, skipping version fixing."
+	test -r $(srcdir)/version && $(MAKE) dist-hook-scm || echo "Version not from SCM, skipping version fixing."
 
 if USE_UNINSTALL
 
@@ -145,7 +148,7 @@ install-first:
 	test -x $(uninstall_location) && $(uninstall_location) || true
 
 distclean-local:
-	rm -f uninstall.sh batch/relocate.in universal_variable* extrapaths src/tUniversalVariables.h*
+	rm -f uninstall.sh batch/relocate.in universal_variable* extrapaths src/tUniversalVariables.h* .changetag
 
 # remove files left over by distcheck
 distcheck-clean:

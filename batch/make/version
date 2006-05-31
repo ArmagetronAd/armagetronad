@@ -39,6 +39,47 @@ if test -d "${srcdir}/CVS"; then
     fi
 fi
 
+if test -d "${srcdir}/.svn"; then
+    # get the inter-repository path by parsing the URL
+
+    URL=`svn info ${srcdir} | grep ^URL | sed -e 's,^URL: ,,'`
+
+    # uncomment the followint URLs to test various cases
+    # trunk
+    # URL=https://svn.sourceforge.net/svnroot/armagetronad/armagetronad/trunk/armagetronad
+    # branch 0.4
+    # URL=https://svn.sourceforge.net/svnroot/armagetronad/armagetronad/branches/0.4/armagetronad
+
+    # tag 0.2.8.2
+    # URL=https://svn.sourceforge.net/svnroot/armagetronad/armagetronad/tags/0.2.8.2/armagetronad
+
+    #echo URL=$URL
+    REPOPATH=`echo $URL | sed -e 's,/armagetronad$,,' -e 's,.*/armagetronad/,,'`
+    #echo REPOPATH=$REPOPATH
+
+    # is it a tag?
+    if echo $REPOPATH | grep '^tags/' > /dev/null; then
+        # echo Tag
+        major_version=`echo $REPOPATH | sed -e 's,^tags/,,'`
+        minor_version=""
+        DATE=""
+    else
+        # is it a branch?
+        if echo $REPOPATH | grep '^branches/' > /dev/null; then
+            # echo Branch
+            major_version=`echo $REPOPATH | sed -e 's,^branches/,,'`
+        fi
+        
+        # trunk or branch
+
+        # make revision the alpha tag (activate later, not in 0.2.8 branch)
+        # REVISION=`svn info ${srcdir} | grep ^Revision | sed -e 's,^Revision: ,,'`
+        # echo REVISION=$REVISION
+        # minor_version=_alpha$REVISION
+        # DATE=""
+    fi
+fi
+
 test -z "$DATE" || minor_version=`cat ${srcdir}/minor_version | sed -e "s,DATE,$DATE," -e "s,YYYYMMDD,$DATE,"`
 
 echo $major_version$minor_version
