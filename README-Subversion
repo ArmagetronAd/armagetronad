@@ -18,9 +18,9 @@ You're in luck, you already have everything you'll need. Follow these steps:
 # generate configure, config.h.in and the like
 > sh ./bootstrap.sh
 # generate and change to build directory
-> mkdir ../armagetronad-build; cd ../armagetronad-build
+> mkdir ../armagetronad-build && cd ../armagetronad-build
 # run the configure script ( add --disable-glout for the dedicated server )
-> ../armagetronad/configure 
+> ../armagetronad/configure
 # run make
 > make
 # run game
