@@ -3,9 +3,12 @@ module AAConfig
   # Paths are relative the Rakefile
   SRC_DIR = ".."
   
-  BUILD_DIR = ENV["SYMROOT"] + "/.."
+  BUILD_DIR = (ENV["SYMROOT"] || "#{SRC_DIR}/../armagetronad-build/build") + "/.."
   
-  PACKGAGE_RESOURCE_DIR = [ENV["CONFIGURATION_BUILD_DIR"], ENV["PRODUCT_NAME"] + ENV["WRAPPER_SUFFIX"], "Contents/Resources"].join("/")
+  PACKGAGE_RESOURCE_DIR = [(ENV["CONFIGURATION_BUILD_DIR"] || ""),
+                           (ENV["PRODUCT_NAME"] || "") +
+                             (ENV["WRAPPER_SUFFIX"] || ""),
+                           "Contents/Resources"].join("/")
   
   # The files that need processing. The key is the file, value is wheter the file will be packaged.
   IN_FILES = {"#{SRC_DIR}/src/macosx/version.h.in" => false,
@@ -16,17 +19,32 @@ module AAConfig
   TAG_MAPPINGS = {"@version@" => %x{"#{SRC_DIR}/batch/make/version" "#{SRC_DIR}"}.chomp,
                   "@year@" => Time.now.strftime("%Y"),
                   "@progtitle@" => "Armagetron Advanced"}
-    
+   
 end
 
-desc "Prepare generated files"
-task :prepare => [:process_in_files, :sort_resources]
+# =========
+# = Xcode =
+# =========
 
-# TODO: Don't need to run this everytime. Change it to a file based task
-task :sort_resources do
-  sh %{"#{AAConfig::SRC_DIR}/batch/make/sortresources" \\
-       "#{AAConfig::SRC_DIR}/resource/proto" \\
-       "#{AAConfig::BUILD_DIR}/resource/included"}
+namespace "xcode" do
+  
+  desc "Prepare generated files"
+  task :prepare => [:process_in_files, :sort_resources]
+  
+  # TODO: Don't need to run this everytime. Change it to a file based task
+  task :sort_resources do
+    sh %{"#{AAConfig::SRC_DIR}/batch/make/sortresources" \\
+         "#{AAConfig::SRC_DIR}/resource/proto" \\
+         "#{AAConfig::BUILD_DIR}/resource/included"}
+  end
+  
+  # TODO: file based...
+  desc "Package files, remove unecessary files, etc."
+  task :cleanup => [:package_in_files] do
+    rm_rf "#{AAConfig::PACKGAGE_RESOURCE_DIR}/resource"
+    cp_r "#{AAConfig::BUILD_DIR}/resource", AAConfig::PACKGAGE_RESOURCE_DIR
+  end
+  
 end
 
 AAConfig::IN_FILES.each do |infile, should_package|
@@ -45,7 +63,9 @@ AAConfig::IN_FILES.each do |infile, should_package|
       f.truncate(f.pos)
     end
   end
-  task :process_in_files => result_file
+  namespace "xcode" do
+    task :process_in_files => result_file
+  end
   
   # Define the task to package the file
   if should_package
@@ -56,14 +76,44 @@ AAConfig::IN_FILES.each do |infile, should_package|
       mkdir_p File.dirname(t.name)
       cp t.prerequisites[0], t.name
     end
-    task :package_in_files => package_file
+    namespace "xcode" do
+      task :package_in_files => package_file
+    end
   end
   
 end
 
-# TODO: file based...
-desc "Package files, remove unecessary files, etc."
-task :cleanup => [:package_in_files] do
-  rm_rf "#{AAConfig::PACKGAGE_RESOURCE_DIR}/resource"
-  cp_r "#{AAConfig::BUILD_DIR}/resource", AAConfig::PACKGAGE_RESOURCE_DIR
+# ==================
+# = Beautification =
+# ==================
+
+desc "Uses project defaults and updates file timestamps"
+task :rebeautify do
+  #
+  sh %{ARTISTIC_STYLE_OPTIONS="#{AAConfig::SRC_DIR}/config/astylerc" \\
+       "#{AAConfig::SRC_DIR}/batch/make/beautify" -t "#{AAConfig::SRC_DIR}" "#{AAConfig::SRC_DIR}/.beautytag.re"}
+end
+
+desc "Switches between your settings (beautify-personal) to the project defaults, and leaves timestamps untouched"
+task :beautify do
+  rm_f %{"#{AAConfig::SRC_DIR}/.beautytag.personal"}
+  sh %{ARTISTIC_STYLE_OPTIONS="#{AAConfig::SRC_DIR}/config/astylerc" \\
+       "#{AAConfig::SRC_DIR}/batch/make/beautify" "#{AAConfig::SRC_DIR}" "#{AAConfig::SRC_DIR}/.beautytag"}
+end
+
+desc "Uses your personal settings. Remeber to run ``rake beautify'' before commit!"
+task :beautify_personal do
+  rm_f %{"#{AAConfig::SRC_DIR}/.beautytag"}, %{"#{AAConfig::SRC_DIR}/.beautytag.re"}
+  sh %{ARTISTIC_STYLE_OPTIONS=$HOME/.astylerc \\
+       "#{AAConfig::SRC_DIR}/batch/make/beautify" "#{AAConfig::SRC_DIR}" "#{AAConfig::SRC_DIR}/.beautytag.personal"}
+end
+
+# =====================
+# = Automated release =
+# =====================
+
+desc "Generate the ChangeLog"
+task :changelog do
+  puts "Generating ChangeLog..."
+  sh %{svn log "#{AAConfig::SRC_DIR}" 2>&1 > "#{AAConfig::BUILD_DIR}/ChangeLog"}
 end

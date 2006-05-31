@@ -1482,7 +1482,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "rake cleanup";
+			shellScript = "rake xcode:cleanup";
 		};
 		9BD7DB490A2CBA7A00D7033C /* Prepare */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1496,7 +1496,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "rake prepare";
+			shellScript = "rake xcode:prepare";
 		};
 /* End PBXShellScriptBuildPhase section */
 
