@@ -17,6 +17,4 @@ UF	take units for angle (degrees or radians)
 
 	figure out how to handle changes in dynamic keysyms (cleanly)
 
-    Transition from CVS to SVN is painless enough for a developer that we can set a date where we simply stop committing to CVS, then start the conversion, and when it is done, start to work with SVN. I'd do it when b0_2_8 is reasonably dead.  Sure, three way syncing is possible, but there can be three times as many errors. My current two way darcs-CVS syncing is, in principle, designed to be extensible (chages are first converted into an universal format, then applied to the other SCMs), but I don't know how easy it will be to adapt it to the SVN way of branching, so I'd rather start over with a pure SVN-darcs syncing script.
-
 	tResource/{tXmlResource/{gMap,cCockpit},tCssResource,tBinaryResource}
