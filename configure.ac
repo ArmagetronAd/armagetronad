@@ -982,7 +982,7 @@ echo ""
 fi
 echo "     Sound support: $enable_sound"
 echo "     Particle System support: $enable_particles"
-echo "     Joystick support; $enable_joystick"
+echo "     Joystick support: $enable_joystick"
 echo "     Binaries will be installed in      : `eval echo ${bindir}`"
 echo "     Static data will be installed in   : `eval echo ${aa_datadir}`"
 echo "     Configuration will be installed in : `eval echo ${aa_sysconfdir}`"
