@@ -2136,6 +2136,7 @@
 		8CBA5D49089EE60D007E21DC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SYMROOT = "$(PROJECT_DIR)/../../armagetronad-build/build";
 			};
 			name = Debug;
@@ -2143,6 +2144,7 @@
 		8CBA5D4A089EE60D007E21DC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SYMROOT = "$(PROJECT_DIR)/../../armagetronad-build/build";
 			};
 			name = Release;
