@@ -214,7 +214,7 @@ public:
         if (sr_fontType != 0) {
             if(sr_fontType >= 3) {
                 glPushMatrix();
-                glTranslatef(where.x, where.y, .5);
+                glTranslatef(where.x, where.y, 0.);
                 glScalef(2./sr_screenWidth, 2./sr_screenHeight, 1.);
 		if(sr_fontType == 3) {
 		    glEnable(GL_TEXTURE_2D);
