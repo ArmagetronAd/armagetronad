@@ -25,16 +25,16 @@ Alex E. Kelly : former Project Administrator
 
 
 Additional contributions from:
+Belenus                  : OpenBSD support sniplets
 Ben Hines                : first working Mac OS X port
-Fabrice Holbe            : original Moviepack and font
-Tomas Birraux            : french accents in font
-Wrtlprnft                : additional font work
 Christian Reitwiessner   : contributed name rendering above cycles
 Edd Keefe                : contributed Mac OS X icon and the title screen
+Fabrice Holbe            : original Moviepack and font
 hang3r                   : skeleton for more accurate timer on Windows
 Jonathan                 : Headlight (needs activation) and overhead map (will be in 0.3.X)
+meriton                  : camera glancing code
 Oscilloscope             : Most default instant chats
-Belenus                  : OpenBSD support sniplets
+Tomas Birraux            : french accents in font
 
 External code merged in from:
 ID Software         : first version of the low level networking code

@@ -54,6 +54,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tMath.h"
 #include "eNetGameObject.h"
 
+#include "eSoundMixer.h"
+#include "rViewport.h"
+
 // camera visibility settings
 static REAL se_hitCacheSpeed = 1; // the speed the hit cache for external visibility targets recovers from hits
 
@@ -125,7 +128,6 @@ static nSettingItem<bool> a_f
 static nSettingItem<bool> a_fe
 ("CAMERA_FORBID_FOLLOW",
  forbid_camera[CAMERA_FOLLOW]);
-
 
 #ifndef DEDICATED
 #include "rGL.h"
@@ -203,7 +205,7 @@ uActionCamera eCamera::se_lookRight("LOOK_RIGHT",
                                     uAction::uINPUT_ANALOG);
 
 uActionCamera eCamera::se_lookLeft("LOOK_LEFT",
-                                -150,
+                                   -150,
                                    uAction::uINPUT_ANALOG);
 
 
@@ -256,12 +258,14 @@ static tSettingItem<REAL> s_mercamz("CAMERA_MER_Z",mercamz);
 
 // glancing configuration
 static int glanceMode = 2;
-static REAL glanceAngularVelocity = 4*3.1415927; //!< angular velocity if target direction perpendicular to current one
+static REAL glanceAngularVelocity = 4*M_PI; //!< angular velocity if target direction perpendicular to current one
+static REAL glanceAngularVelocityBonus = 12.; //!< factor to glanceAngularVelocity for glances larger than M_PI_2
 static REAL smartcamGlancingBack = 20;
 static REAL smartcamGlancingHeight = 10;
 
 static tSettingItem<int>  s_glanceMode("CAMERA_GLANCE_MODE",glanceMode);
 static tSettingItem<REAL> s_glanceRotSpeed("CAMERA_GLANCE_ANGULAR_VELOCITY",glanceAngularVelocity);
+static tSettingItem<REAL> s_glanceRotSpeedBonus("CAMERA_GLANCE_ANGULAR_VELOCITY_BONUS",glanceAngularVelocityBonus);
 static tSettingItem<REAL> s_smartcamGlanceBack("CAMERA_SMART_GLANCING_BACK",smartcamGlancingBack);
 static tSettingItem<REAL> s_smartcamGlanceHeight("CAMERA_SMART_GLANCING_HEIGHT",smartcamGlancingHeight);
 
@@ -284,7 +288,7 @@ inline REAL robust_acos(REAL arg) {
     if (arg>=1)
         return 0;
     else if (arg<=-1)
-        return 3.14159265;
+        return M_PI;
     else
         return acos(arg);
 }
@@ -308,21 +312,21 @@ eCoord eCamera::nextDirIfGlancing(eCoord const & dir, eCoord const & targetDir, 
         } case 1: {
             // glance keys rotate camera with angular velocity proportional to alpha
             // CHECK: You wanted to fix that trigonometry? Good luck :)
-            REAL arc = robust_acos(eCoord::F(dir,targetDir)) * ts * glanceAngularVelocity / (3.1415927/2);
+            REAL arc = robust_acos(eCoord::F(dir,targetDir)) * ts * glanceAngularVelocity / (M_PI_2);
             if (dir*targetDir>0)
                 arc=-arc;
             return dir.Turn(cos(arc),sin(arc));
         } case 2: {
             // glance keys rotate camera with angular velocity =
-            // glanceAngularVelocity * ((alpha<PI/2) ? sin(alpha) : 1)
+            // glanceAngularVelocity * ((alpha<PI/2) ? sin(alpha) : glanceAngularVelocityBonus)
             REAL arc = glanceAngularVelocity*ts;
             eCoord newdir;
             if (eCoord::F(dir,targetDir)>0) {
                 newdir = dir+targetDir*arc;
             } else if (dir*targetDir>0) {
-                newdir = dir.Turn(1,-arc);
+                newdir = dir.Turn(1,-arc*glanceAngularVelocityBonus);
             } else {
-                newdir = dir.Turn(1,arc);
+                newdir = dir.Turn(1,arc*glanceAngularVelocityBonus);
             }
             newdir.Normalize();
             return newdir;
@@ -1492,6 +1496,12 @@ void eCamera::SwitchCenter(int d){
 }
 
 void eCamera::Timestep(REAL ts){
+    // find net player
+    if (!netPlayer && localPlayer)
+    {
+        netPlayer = localPlayer->netPlayer;
+    }
+
     // the best center is always our own vehicle. Focus on it if possible.
     if (netPlayer)
     {
@@ -1659,7 +1669,14 @@ void eCamera::Timestep(REAL ts){
 
     top=eCoord(0,0);
 
-    switch (newmode){
+    // temporarily use free cam code if nothing interesting to watch exists
+    eCamMode effectiveMode = mode;
+    if (!InterestingToWatch(Center()))
+    {
+        effectiveMode=CAMERA_FREE;
+    }
+
+    switch (effectiveMode){
     case CAMERA_FREE:
         newpos=pos;
         newdir=dir;
@@ -1673,9 +1690,9 @@ void eCamera::Timestep(REAL ts){
         if (WhobbleIncam()){
             top=CenterCamTop();
             newpos=CenterCamPos();
-        } else {
-            newpos=CenterPos();
         }
+        else
+            newpos=CenterPos();
 
         if (CenterIncamOnTurn() || newmode==CAMERA_SMART_IN || newmode == CAMERA_CUSTOM || newmode == CAMERA_SERVER_CUSTOM )
         {
@@ -1881,9 +1898,43 @@ void eCamera::Timestep(REAL ts){
                 if (d<.0001) d=.0001;
                 newrise=(CenterZ()-newz)/d;
 
-                usernewpos=pos + centerpos - centerposLast;
-                usernewdir=newdir;
-                usernewrise=newrise;
+                usernewpos=pos + centerpos - centerPosLast;
+                // usernewdir=newdir;
+                // usernewrise=newrise;
+//
+//                // use custom camera settings when glancing
+//                if ( localPlayer && localPlayer->smartCustomGlance && ( glancingBack || glancingRight || glancingLeft || glanceSmoothAbs > .01 ))
+//                {
+//                    // update blending factor raw data
+//                    REAL abs = fabs(glanceSmooth);
+//                    glanceSmoothAbs = abs > glanceSmoothAbs ? abs : glanceSmoothAbs;
+//
+//                    // calculate blending factor c. c=0 will take the smart cam position, c=1 the custom cam.
+//                    REAL b = 1 - glanceSmoothAbs;
+//                    REAL c = 1 - b/(b + ts * GLANCE_SPEED);
+//
+//                    // override: go all the way when glancing back
+//                    if ( glancingBack )
+//                    {
+//                        c = 1;
+//                        glanceSmoothAbs = 1;
+//                    }
+//
+//                    // the camera pitch is calculated anew every frame, blend it accordingly
+//                    usernewrise = newrise = newrise * ( 1-glanceSmoothAbs) + customPitch * glanceSmoothAbs;
+//
+//                    // the other values are updated every frame, blend them softer
+//                    if ( glancingBack || glancingRight || glancingLeft )
+//                    {
+//                        usernewpos  =  newpos = pos * (1-c) + (CenterPos() - CenterCamDir() * customBack) * c;
+//                        usernewz    = newz    = z * (1-c) + (CenterCamZ() + customRise) * c;
+//
+//                        newdir=centerpos-newpos;
+//                        REAL dist=sqrt(newdir.NormSquared());
+//                        if (dist<.001) dist=.01;
+//                        usernewdir=newdir=newdir*(1/sqrt(newdir.NormSquared()));
+//                    }
+//                }
 
                 if (AutoSwitchIncam()){
                     if (smartcamIncamSmooth<.7 && CenterAlive()){
@@ -1980,22 +2031,34 @@ void eCamera::Timestep(REAL ts){
 
     } else {
 
-        //  REAL ratio=1-exp(-100*exp(-userCameraControl)*ts);
+    /*
+      REAL ratio=1 - exp(-4*userCameraControl);
+      ratio*=ts;
+      ratio*=100;
+      ratio=exp(-ratio);
+    */
 
-        /*
-          REAL ratio=1 - exp(-4*userCameraControl);
-          ratio*=ts;
-          ratio*=100;
-          ratio=exp(-ratio);
-        */
+    // calcualte ratios under which user and automatic camera positions should be blended
+    REAL aratio = exp(-4*userCameraControl);
+    REAL ratio = 1 - aratio;
 
-        REAL ratio=1 - exp(-4*userCameraControl);
+    // blend
+    pos=newpos*aratio + usernewpos*ratio;
+    dir=newdir*aratio + usernewdir*ratio;
+    z  =newz  *aratio + usernewz  *ratio;
 
-        mode=newmode;
-        pos=newpos*(1-ratio) + usernewpos*ratio;
-        dir=newdir*(1-ratio) + usernewdir*ratio;
-        z  =newz  *(1-ratio) + usernewz  *ratio;
-        rise=newrise*(1-ratio) + usernewrise*ratio;
+    // newrise rise is calculated anew every frame, use a different blending
+    if (userCameraControl > .01)
+    {
+        rise=newrise + (usernewrise-newrise)*exp(-ts/userCameraControl);
+    }
+    else
+    {
+        rise=newrise;
+    }
+
+    // normalize direction
+    dir=dir*(1/sqrt(dir.NormSquared()));
     }
 
     #ifdef CAMERA_LOGGING
@@ -2030,53 +2093,53 @@ void eCamera::s_Timestep(eGrid *grid, REAL time){
 
 #ifndef DEDICATED
 
-void eCamera::SoundMix(Uint8 *dest,unsigned int len){
-    if (!this)
-        return;
-
-    if (id>=0){
-        eGameObject *c=Center();
-        for(int i=grid->gameObjects.Len()-1;i>=0;i--){
-            eGameObject *go=grid->gameObjects(i);
-            SoundMixGameObject(dest,len,go);
-        }
-        if (c && c->id<0)
-            SoundMixGameObject(dest,len,c);
-    }
-}
-
-
-void eCamera::SoundMixGameObject(Uint8 *dest,unsigned int len,eGameObject *go){
-    eCoord vec((go->pos-pos).Turn(dir.Conj()));
-    REAL dist_squared=vec.NormSquared()+(z-go->z)*(z-go->z);
-
-    //dist_squared*=.1;
-    if (dist_squared<1)
-        dist_squared=1;
-
-    REAL dist=sqrt(dist_squared);
-
-#define MAXVOL .4
-
-    REAL l=(dist*.5+vec.y)/dist_squared;
-    REAL r=(dist*.5-vec.y)/dist_squared;
-
-    if (l<0) l=0;
-    if (r<0) r=0;
-    if (l>MAXVOL) l=MAXVOL;
-    if (r>MAXVOL) r=MAXVOL;
-
-    if (go==Center()){
-        if (mode==CAMERA_IN || mode==CAMERA_SMART_IN)
-            l=r=.2;
-        else if (mode!=CAMERA_FREE){
-            l*=.9;
-            r*=.9;
-        }
-    }
-
-    //go->SoundMix(dest,len,id,r,l);
-}
+//void eCamera::SoundMix(Uint8 *dest,unsigned int len){
+//    if (!this)
+//        return;
+//
+//    if (id>=0){
+//        eGameObject *c=Center();
+//        for(int i=grid->gameObjects.Len()-1;i>=0;i--){
+//            eGameObject *go=grid->gameObjects(i);
+//            SoundMixGameObject(dest,len,go);
+//        }
+//        if (c && c->id<0)
+//            SoundMixGameObject(dest,len,c);
+//    }
+//}
+//
+//
+//void eCamera::SoundMixGameObject(Uint8 *dest,unsigned int len,eGameObject *go){
+//    eCoord vec((go->pos-pos).Turn(dir.Conj()));
+//    REAL dist_squared=vec.NormSquared()+(z-go->z)*(z-go->z);
+//
+//    //dist_squared*=.1;
+//    if (dist_squared<1)
+//        dist_squared=1;
+//
+//    REAL dist=sqrt(dist_squared);
+//
+//#define MAXVOL .4
+//
+//    REAL l=(dist*.5+vec.y)/dist_squared;
+//    REAL r=(dist*.5-vec.y)/dist_squared;
+//
+//    if (l<0) l=0;
+//    if (r<0) r=0;
+//    if (l>MAXVOL) l=MAXVOL;
+//    if (r>MAXVOL) r=MAXVOL;
+//
+//    if (go==Center()){
+//        if (mode==CAMERA_IN || mode==CAMERA_SMART_IN)
+//            l=r=.2;
+//        else if (mode!=CAMERA_FREE){
+//            l*=.9;
+//            r*=.9;
+//        }
+//    }
+//
+//    go->SoundMix(dest,len,id,r,l);
+//}
 
 
 #endif

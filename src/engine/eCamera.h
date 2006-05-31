@@ -172,9 +172,9 @@ public:
 
 #ifndef DEDICATED
     void Render();
-    void SoundMix(unsigned char *dest,unsigned int len);
+    //void SoundMix(unsigned char *dest,unsigned int len);
 private:
-    void SoundMixGameObject(unsigned char *dest,unsigned int len,eGameObject *go);
+    //void SoundMixGameObject(unsigned char *dest,unsigned int len,eGameObject *go);
 public:
 #endif
 
