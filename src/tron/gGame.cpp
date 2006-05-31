@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -1272,6 +1272,7 @@ REAL exponent(int i)
     return ret;
 }
 
+extern REAL max_player_speed;
 
 void init_game_grid(eGrid *grid, gParser *aParser){
     se_ResetGameTimer();
@@ -1287,12 +1288,13 @@ void init_game_grid(eGrid *grid, gParser *aParser){
 
         // rSysDep::SwapGL();
     }
+    max_player_speed = 0.0;
 #endif
 
     /*
       if(!speedup)
       SDL_Delay(1000);
-    */   
+    */
 
     Arena.PrepareGrid(grid, aParser);
 
@@ -1548,7 +1550,7 @@ void init_game_objects(eGrid *grid){
     	// don't give inactive players a cycle
     	if (!pni->IsActive())
     		continue;
-       
+
     	eCoord pos,dir;
     	gCycle *cycle=NULL;
     	if (sn_GetNetState()!=nCLIENT){
@@ -1605,13 +1607,13 @@ void init_game_objects(eGrid *grid){
       {1,1,.2},
       {1,.2,1},
       {.2,1,1},
-      {1,.6,.2},      
-      {.2,1,.6},      
-      {.6,.2,1},      
-      {1,.2,.6},      
-      {.6,1,.2},      
-      {1,1,1},      
-      {.2,.2,.2}       
+      {1,.6,.2},
+      {.2,1,.6},
+      {.6,.2,1},
+      {1,.2,.6},
+      {.6,1,.2},
+      {1,1,1},
+      {.2,.2,.2}
     };
     */
 
@@ -1791,6 +1793,7 @@ static void cp(){
 static void own_game( nNetState enter_state ){
     tNEW(gGame);
     se_MakeGameTimer();
+    max_player_speed = 0.0;
     sg_EnterGame( enter_state );
 
     // write scores one last time
@@ -2077,6 +2080,7 @@ void ret_to_MainMenu(){
         sg_currentGame->NoLongerGoOn();
 
     sn_SetNetState(nSTANDALONE);
+    max_player_speed = 0.0;
 
     uMenu::SetIdle(NULL);
 }
@@ -2101,7 +2105,7 @@ void net_options(){
     							"$network_opts_deletepw_text",
     							"$network_opts_deletepw_help",
     							&se_DeletePasswords);
-      
+
     	uMenuItemSelection<int> storepw(&net_menu,
     									"$login_storepw_text",
     									"$login_storepw_help",
@@ -2500,7 +2504,7 @@ void MainMenu(bool ingame){
 
 #define GS_CREATED 0        // newborn baby
 #define GS_TRANSFER_SETTINGS	7
-#define GS_CREATE_GRID			10       
+#define GS_CREATE_GRID			10
 #define GS_CREATE_OBJECTS		20
 #define GS_TRANSFER_OBJECTS		30
 #define GS_CAMERA				35
@@ -2615,7 +2619,7 @@ static void sg_ParseMap ( gParser * aParser )
     FILE* mapFD = NULL;
 
     gMapLoadConsoleFilter consoleLog;
-#ifdef DEBUG      
+#ifdef DEBUG
     /*
       con << "Message stats:\n";
       for(int i=0;i<40;i++){
@@ -2625,7 +2629,7 @@ static void sg_ParseMap ( gParser * aParser )
     */
 
     con << "Loading map " << mapfile << "...\n";
-#endif      
+#endif
     mapFD = tResourceManager::openResource(mapuri, mapfile);
 
     if (!mapFD || !aParser->LoadAndValidateMapXML("", mapFD, mapfile))
@@ -2795,7 +2799,7 @@ void gGame::SyncState(unsigned short state){
                 con << "Waiting for users to enter gamestate " << state << '\n';
                 if (sn_Connections[1].ackPending>2)
                     con << "Ack_pending=" << sn_Connections[1].ackPending << ".\n";
-#endif	  
+#endif
             }
         }
     }
@@ -3690,7 +3694,7 @@ void gGame::StartNewMatchNow(){
     ePlayerNetID::ResetScore();
 }
 
-#ifdef DEBUG	      
+#ifdef DEBUG
 extern bool debug_grid;
 // from display.cpp
 bool simplify_grid=1;
@@ -3822,7 +3826,7 @@ bool gGame::GameLoop(bool input){
                                     //                                case('q'):
                                     st_ToDo(&ingame_menu);
                         break;
-#ifdef DEBUG	      
+#ifdef DEBUG
                     case('d'):
                                     debug_grid=!debug_grid;
                         break;
@@ -3847,7 +3851,7 @@ bool gGame::GameLoop(bool input){
                            fullscreen=(!fullscreen);
                            con << fullscreen << "x!\n";
                            XMesaSetFXmode(fullscreen ? XMESA_FX_FULLSCREEN : XMESA_FX_WINDOW);
-                           break;        
+                           break;
                            #endif */
 #endif
 
@@ -3994,19 +3998,19 @@ bool gGame::GridIsReady(int client){
             client_gamestate[client]<=GS_DELETE_OBJECTS);
 }
 
-#include <fcntl.h> 
-#include <stdio.h> 
-#include <errno.h> 
+#include <fcntl.h>
+#include <stdio.h>
+#include <errno.h>
 
 bool GameLoop(bool input=true){
     /*
       int oldflags = fcntl (fileno(stdin), F_GETFD, 0);
       if (oldflags<0)
       std::cout << errno << '\n';
-       
+
       if (fcntl(fileno(stdin), F_SETFL, oldflags | O_NONBLOCK)<0)
       std::cout << errno << '\n';
-      
+
     //if (std::cin && std::cin.good() && !std::cin.eof() && !std::cin.fail() && !std::cin.bad()){
     //if (std::cin.rdbuf()->overflow()!=EOF){
     //if (std::cin.rdbuf()->in_avail()>0){

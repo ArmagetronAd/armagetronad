@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -83,7 +83,7 @@ void GLmeter_subby(float value,float max, float locx, float locy, float size, co
     	Vertex(locx-size-.04,locy+size+.04,0);
     	Vertex(locx+size+.04,locy+size+.04,0);
     	Vertex(locx+size+.04,locy-.04,0);
-    	
+
     	Color(.1,.1,.1,.8);
     	Vertex(locx-size-.02,locy-.02,0);
     	Vertex(locx-size-.02,locy+size+.02,0);
@@ -229,6 +229,8 @@ static void tank_display_hud( ePlayerNetID* me ){
     }
 }
 
+REAL max_player_speed=0;
+
 static void display_hud_subby( ePlayer* player ){
     if ( !player )
         return;
@@ -248,12 +250,12 @@ static void display_hud_subby( ePlayer* player ){
         if(subby_ShowHUD){
             // static int max=0,lastmax=0;
             // static int imax=-1,lastimax=0;
-            static REAL max=0;
             static REAL imax=-1;
             char fasteststring[50];
             // REAL distance;
             static float maxmeterspeed= 50;
             float myping;
+            static REAL max=max_player_speed;
             static tString name;
             static tString ultiname;
             static bool  wrotefastest = false;
