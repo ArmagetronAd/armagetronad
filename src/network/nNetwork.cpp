@@ -49,6 +49,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <deque>
 
+#ifdef MACOSX_XCODE
+#include "version.h"
+#endif // MACOSX_XCODE
+
 // debug watchs
 #ifdef DEBUG
 nMessage* sn_WatchMessage = NULL;

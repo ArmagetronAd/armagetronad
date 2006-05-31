@@ -8,7 +8,7 @@ module AAConfig
   PACKGAGE_RESOURCE_DIR = [ENV["CONFIGURATION_BUILD_DIR"], ENV["PRODUCT_NAME"] + ENV["WRAPPER_SUFFIX"], "Contents/Resources"].join("/")
   
   # The files that need processing. The key is the file, value is wheter the file will be packaged.
-  IN_FILES = {"#{SRC_DIR}/src/macosx/config_common.h.in" => false,
+  IN_FILES = {"#{SRC_DIR}/src/macosx/version.h.in" => false,
               "#{SRC_DIR}/src/macosx/English.lproj/InfoPlist.strings.in" => true, 
               "#{SRC_DIR}/config/aiplayers.cfg.in" => true,
               "#{SRC_DIR}/language/languages.txt.in" => true}

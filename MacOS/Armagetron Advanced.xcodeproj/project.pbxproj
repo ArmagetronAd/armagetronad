@@ -715,6 +715,7 @@
 		9B1EA5260A20BB0900FA3478 /* rGradient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rGradient.h; sourceTree = "<group>"; };
 		9B1EA53B0A20BC0100FA3478 /* gRotation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gRotation.cpp; sourceTree = "<group>"; };
 		9B1EA53C0A20BC0100FA3478 /* gRotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gRotation.h; sourceTree = "<group>"; };
+		9B86E63A0A2DFDA600D90F1C /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config_common.h; path = ../src/macosx/config_common.h; sourceTree = SOURCE_ROOT; };
 		9BD7D96B0A2C7CB400D7033C /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libfreetype.a; sourceTree = "<absolute>"; };
 		9BD7D96C0A2C7CB400D7033C /* libftgl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libftgl.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libftgl.a; sourceTree = "<absolute>"; };
 		9BD7D96D0A2C7CB400D7033C /* libpng.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libpng.framework; path = /Library/Frameworks/ArmagetronAdvanced/current/libpng.framework; sourceTree = "<absolute>"; };
@@ -840,6 +841,7 @@
 				8C1AB77D09A3D2D9007E2048 /* AAURLHandler.mm */,
 				32CA4F630368D1EE00C91783 /* Armagetron Advanced_Prefix.pch */,
 				8CAD912B095A33BE00DA0ECC /* client */,
+				9B86E63A0A2DFDA600D90F1C /* config_common.h */,
 				8CAD912A095A33AF00DA0ECC /* dedicated */,
 				8CBA5E0B089EEC66007E21DC /* defs.h */,
 				8CBA646108A065A8007E21DC /* Info.plist */,

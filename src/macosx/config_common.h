@@ -159,9 +159,6 @@
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
-/* Version number of package */
-#define VERSION "@version@"
-
 /* Windows 9x/NT/2k/XP */
 /* #undef WIN32 */
 
