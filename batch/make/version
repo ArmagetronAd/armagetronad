@@ -72,11 +72,11 @@ if test -d "${srcdir}/.svn"; then
         
         # trunk or branch
 
-        # make revision the alpha tag (activate later, not in 0.2.8 branch)
-        # REVISION=`svn info ${srcdir} | grep ^Revision | sed -e 's,^Revision: ,,'`
+        # make revision the alpha tag
+        REVISION=`svn info ${srcdir} | grep ^Revision | sed -e 's,^Revision: ,,'`
         # echo REVISION=$REVISION
-        # minor_version=_alpha$REVISION
-        # DATE=""
+        minor_version=_alpha$REVISION
+        DATE=""
     fi
 fi
 
