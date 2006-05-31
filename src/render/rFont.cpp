@@ -38,6 +38,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <FTGLBitmapFont.h>
 #include <FTGLTextureFont.h>
 #include <FTGLPolygonFont.h>
+#include <FTGLOutlineFont.h>
+#include <FTGLExtrdFont.h>
 //#include <GL/gl>
 //#include <SDL>
 #endif
@@ -201,26 +203,37 @@ public:
     }
     float GetWidth(tString const &str, float height) {
         switch(sr_fontType) {
-case 1: case 2: case 3:
-            return GetFont(height).Advance(str.c_str())/sr_screenWidth*2.;
-        default:
+        case 1:
             return height*(height*sr_screenHeight < sr_bigFontThresholdHeight ? .41 : .5)*str.size();
+	    break;
+	default:
+            return GetFont(height).Advance(str.c_str())/sr_screenWidth*2.;
         }
     }
     void Render(tString const &str, float height, tCoord const &where) {
         if (sr_fontType != 0) {
-            if(sr_fontType == 3) {
+            if(sr_fontType >= 3) {
                 glPushMatrix();
-                glEnable(GL_TEXTURE_2D);
-                glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                glTranslatef(where.x, where.y, 0.0);
-                glScalef(2./sr_screenWidth, 2./sr_screenHeight, 0.0);
+                glTranslatef(where.x, where.y, .5);
+                glScalef(2./sr_screenWidth, 2./sr_screenHeight, 1.);
+		if(sr_fontType == 3) {
+		    glEnable(GL_TEXTURE_2D);
+		    glEnable(GL_BLEND);
+		    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		}
+		if(sr_fontType == 6) {
+		    glEnable( GL_DEPTH_TEST);
+		    glDisable( GL_BLEND);
+		    glEnable(GL_TEXTURE_2D);
+		    static rFileTexture sg_RimWallNoWrap(rTextureGroups::TEX_WALL,"textures/dir_wall.png",1,0);
+		    sg_RimWallNoWrap.Select();
+		    glRotatef(45,1.,0.,0.);
+		}
             } else {
                 glRasterPos2f(where.x, where.y);
             }
             GetFont(height).Render(str.c_str());
-            if(sr_fontType == 3) {
+            if(sr_fontType >= 3) {
                 glPopMatrix();
             }
         } else {
@@ -306,6 +319,16 @@ FTFont &rFontContainer::New(int size) {
     case 2:
         font = new FTGLBitmapFont(theFontFile);
         break;
+    case 4:
+        font = new FTGLPolygonFont(theFontFile);
+        break;
+    case 5:
+        font = new FTGLOutlineFont(theFontFile);
+        break;
+    case 6:
+        font = new FTGLExtrdFont(theFontFile);
+	reinterpret_cast<FTGLExtrdFont *>(font)->Depth(10.);
+        break;
     default:
         font = new FTGLTextureFont(theFontFile);
     }
@@ -319,6 +342,15 @@ FTFont &rFontContainer::New(int size) {
             break;
         case 2:
             font = new FTGLBitmapFont(tDirectories::Data().GetReadPath("textures/Armagetronad.ttf"));
+            break;
+        case 4:
+            font = new FTGLPolygonFont(tDirectories::Data().GetReadPath("textures/Armagetronad.ttf"));
+            break;
+        case 5:
+            font = new FTGLOutlineFont(tDirectories::Data().GetReadPath("textures/Armagetronad.ttf"));
+            break;
+        case 6:
+            font = new FTGLExtrdFont(tDirectories::Data().GetReadPath("textures/Armagetronad.ttf"));
             break;
         default:
             font = new FTGLTextureFont(tDirectories::Data().GetReadPath("textures/Armagetronad.ttf"));
