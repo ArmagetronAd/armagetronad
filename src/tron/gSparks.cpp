@@ -89,10 +89,9 @@ gSpark::~gSpark(){  }
 // virtual eGameObject_type type();
 
 bool gSpark::Timestep(REAL currentTime){
-    REAL ts=currentTime-lastTime;
-    lastTime=currentTime;
-
 #ifndef USEPARTICLES
+    REAL ts=currentTime-lastTime;
+
     for (int i=SPARKS-1;i>=0;i--){
         x[i]+=xDot[i]*ts;
         xDot[i].x[2]-=5*ts;
@@ -110,6 +109,7 @@ bool gSpark::Timestep(REAL currentTime){
     else
         return false;
 #else
+#ifndef DEDICATED
     pCurrentGroup(particle_handle);
     // Set up the state.
     pVelocityD(PDCylinder(pVec(0.0, 0.0, 0.0), pVec(0.0, 0.0, 0.01), 0.01, 0.007));
@@ -139,7 +139,10 @@ bool gSpark::Timestep(REAL currentTime){
         return true;
     } else
         return false;
-#endif
+#endif // dedicated
+#endif // particles
+
+    lastTime=currentTime;
 }
 
 void gSpark::InteractWith(eGameObject *,REAL ,int){}
