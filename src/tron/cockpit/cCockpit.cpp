@@ -43,6 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rScreen.h"
 #include "eSensor.h"
 #include <iostream>
+#include "eSoundMixer.h"
 
 #include <time.h>
 
@@ -277,6 +278,10 @@ std::auto_ptr<tValue::Base> cCockpit::cb_TimeToImpactLeft(void){
     eSensor test(m_FocusCycle, m_FocusCycle->Position(), m_FocusCycle->Direction().Turn(0,1));
     test.detect(5.*m_FocusCycle->Speed());
     return std::auto_ptr<tValue::Base>(new tValue::Float(test.hit/m_FocusCycle->Speed()));
+}
+
+std::auto_ptr<tValue::Base> cCockpit::cb_CurrentSong(void){
+    return std::auto_ptr<tValue::Base>(new tValue::String(eSoundMixer::GetMixer()->GetCurrentSong()));
 }
 
 cCockpit* cCockpit::_instance = 0;

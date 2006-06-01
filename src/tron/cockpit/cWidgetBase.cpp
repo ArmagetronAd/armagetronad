@@ -251,6 +251,7 @@ tValue::Base *WithDataFunctions::ProcessDataSource(tString const &data) {
     callbacks[tString("time_to_impact_front")] = &cCockpit::cb_TimeToImpactFront;
     callbacks[tString("time_to_impact_right")] = &cCockpit::cb_TimeToImpactRight;
     callbacks[tString("time_to_impact_left")] = &cCockpit::cb_TimeToImpactLeft;
+    callbacks[tString("current_song")] = &cCockpit::cb_CurrentSong;
     std::map<tString, tValue::Callback<cCockpit>::cb_ptr>::iterator iter;
     if((iter = callbacks.find(data.ToLower())) != callbacks.end()) {
         return new tValue::Callback<cCockpit>(iter->second, cCockpit::GetCockpit());

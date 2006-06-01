@@ -157,6 +157,7 @@ void eMusicTrack::LoadVorbisTrack(tSong& thesong) {
     thesong.tracklist[tString("only")] = thesong.location;
     thesong.sequence[tString("0")] = "only";
     std::cout << "Track: " << thesong.location << "\n";
+    thesong.title = thesong.location;
 #endif
 }
 

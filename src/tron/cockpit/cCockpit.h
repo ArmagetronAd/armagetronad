@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -135,6 +135,7 @@ public:
     std::auto_ptr<tValue::Base> cb_TimeToImpactFront(void);             //!< Gets the time it will take the cycle to reach the next wall in front of it
     std::auto_ptr<tValue::Base> cb_TimeToImpactRight(void);             //!< Gets the time it will take the cycle to reach the next wall right of it
     std::auto_ptr<tValue::Base> cb_TimeToImpactLeft(void);             //!< Gets the time it will take the cycle to reach the next wall left of it
+    std::auto_ptr<tValue::Base> cb_CurrentSong(void);
 
     static bool ProcessKey1(float i=0);
     static bool ProcessKey2(float i=0);
@@ -146,6 +147,7 @@ public:
 
     void Readjust(void); //!< Readjusts the cockpit to a new window height
 };
+
 
 #endif
 #endif

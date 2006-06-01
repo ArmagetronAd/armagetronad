@@ -24,7 +24,7 @@
 		</Solid>
 	    </Foreground>
 	</NeedleGauge>
-        
+
         <!-- Example configuration for a new rubber meter -->
         <BarGauge camera="^in">
             <DataSet>
@@ -192,29 +192,32 @@
                 </Table>
             </Face>
         </Label>
-	<Label camera="^in" viewport="top">
+        <Label camera="^in" viewport="top">
             <DataSet id="hours">
-		<AtomicData source="current_hours12h" minwidth="2" fill="0" />
-	    </DataSet>
+                <AtomicData source="current_hours12h" minwidth="2" fill="0" />
+            </DataSet>
             <DataSet id="minutes">
-		<AtomicData source="current_minutes" minwidth="2" fill="0" />
-	    </DataSet>
+                <AtomicData source="current_minutes" minwidth="2" fill="0" />
+            </DataSet>
             <DataSet id="ampm">
-		<Conditional field="source" lvalue="current_hours" rvalue="12" operator="le">
-		    <IfTrue>
-			<AtomicData source="AM" />
-		    </IfTrue>
-		    <IfFalse>
-			<AtomicData source="PM" />
-		    </IfFalse>
-		</Conditional>
-	    </DataSet>
+                <Conditional field="source" lvalue="current_hours" rvalue="12" operator="le">
+                    <IfTrue>
+                        <AtomicData source="AM" />
+                    </IfTrue>
+                    <IfFalse>
+                        <AtomicData source="PM" />
+                    </IfFalse>
+                </Conditional>
+            </DataSet>
             <DataSet id="fps">
-		<AtomicData source="current_framerate" />
-	    </DataSet>
+                <AtomicData source="current_framerate" />
+            </DataSet>
             <DataSet id="seconds">
-		<AtomicData source="time_since_start" />
-	    </DataSet>
+                <AtomicData source="time_since_start" />
+            </DataSet>
+            <DataSet id="song">
+                <AtomicData source="current_song" />
+            </DataSet>
             <Position x="0.4" y="0.45" />
             <Size height="0.04" width="0.02" /> <!-- Size would be the font size in this case -->
             <Caption location="top">
@@ -222,6 +225,9 @@
             </Caption>
             <Face>
                 <Table>
+                    <Row>
+                        <Cell><GameData data="song" /></Cell>
+                    </Row>
                     <Row>
                         <Cell><Text value="Time:" /></Cell>
                         <Cell><GameData data="hours" /><Text value=":" /><GameData data="minutes" /><Text value=" " /><GameData data="ampm" /></Cell>

@@ -325,10 +325,10 @@ void eSoundMixer::Init() {
     m_SoundEffects[ANNOUNCER_2].LoadWavFile(vpath.GetReadPath("sound/2voicemale.ogg") );
     m_SoundEffects[ANNOUNCER_3].LoadWavFile(vpath.GetReadPath("sound/3voicemale.ogg") );
     m_SoundEffects[ANNOUNCER_GO].LoadWavFile(vpath.GetReadPath("sound/announcerGO.ogg"));
-    m_SoundEffects[NEW_MATCH].LoadWavFile(vpath.GetReadPath("sound/none.ogg") );
-    m_SoundEffects[NEW_ROUND].LoadWavFile(vpath.GetReadPath("sound/none.ogg") );
-    m_SoundEffects[ROUND_WINNER].LoadWavFile(vpath.GetReadPath("sound/none.ogg") );
-    m_SoundEffects[MATCH_WINNER].LoadWavFile(vpath.GetReadPath("sound/none.ogg") );
+    //m_SoundEffects[NEW_MATCH].LoadWavFile(vpath.GetReadPath("sound/none.ogg") );
+    //m_SoundEffects[NEW_ROUND].LoadWavFile(vpath.GetReadPath("sound/none.ogg") );
+    //m_SoundEffects[ROUND_WINNER].LoadWavFile(vpath.GetReadPath("sound/none.ogg") );
+    //m_SoundEffects[MATCH_WINNER].LoadWavFile(vpath.GetReadPath("sound/none.ogg") );
     m_SoundEffects[ZONE_SPAWN].LoadWavFile(vpath.GetReadPath("sound/zone_spawn.ogg") );
     m_SoundEffects[CYCLE_MOTOR].LoadWavFile(vpath.GetReadPath("sound/cyclrun.ogg") );
     m_SoundEffects[CYCLE_GRIND_WALL].LoadWavFile(vpath.GetReadPath("sound/grind.ogg") );
@@ -514,6 +514,10 @@ void eSoundMixer::Update() {
     if ( m_GuiTrack && m_GuiTrack->currentMusic )
         m_GuiTrack->currentMusic->Update();
 #endif // DEDICATED
+}
+
+tString eSoundMixer::GetCurrentSong() {
+    return m_GameTrack->currentMusic->GetFileName();
 }
 
 eSoundMixer* eSoundMixer::_instance = 0;
