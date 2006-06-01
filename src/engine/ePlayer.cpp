@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -86,25 +86,25 @@ void se_DeletePasswords(){
     /*
 
       REAL timeout = tSysTimeFloat() + 3;
-     
+
       while(tSysTimeFloat() < timeout){
-       
+
       sr_ResetRenderState(true);
       rViewport::s_viewportFullscreen.Select();
-       
+
       sr_ClearGL();
-       
+
       uMenu::GenericBackground();
 
       REAL w=16*3/640.0;
       REAL h=32*3/480.0;
-       
-       
+
+
       //REAL middle=-.6;
-       
+
       Color(1,1,1);
       DisplayText(0,.8,w,h,tOutput("$network_opts_deletepw_complete"));
-       
+
       sr_SwapGL();
       }
 
@@ -1691,9 +1691,27 @@ public:
         if (e.type==SDL_KEYDOWN &&
                 (e.key.keysym.sym==SDLK_KP_ENTER || e.key.keysym.sym==SDLK_RETURN)){
 
-            for(int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
-                if (se_PlayerNetIDs(i)->pID==me->ID())
-                    se_PlayerNetIDs(i)->Chat(*content);
+            if(content->StartsWith("/console") ) {
+                tString params("");
+                if (content->StrPos(" ") == -1)
+                    return true;
+                else
+                    params = content->SubStr(content->StrPos(" ") + 1);
+
+                if ( tRecorder::IsPlayingBack() )
+                {
+                    tConfItemBase::LoadPlayback();
+                }
+                else
+                {
+                    std::stringstream s(static_cast< char const * >( params ) );
+                    tConfItemBase::LoadAll(s);
+                }
+                std::cout << "console selected\n";
+            } else
+                for(int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
+                    if (se_PlayerNetIDs(i)->pID==me->ID())
+                        se_PlayerNetIDs(i)->Chat(*content);
 
             MyMenu()->Exit();
             return true;

@@ -103,7 +103,7 @@ static void S_BlowHoles( eWall * w )
         return;
     }
     REAL endAlpha = ( end - wallBeg ) / ( wallEnd - wallBeg );
-    // std::cout << wall->BegTime() << "\n";
+    // //std::cout << wall->BegTime() << "\n";
     clamp01( endAlpha );
     REAL endHoleTime = wall->Time( endAlpha );
     if ( endHoleTime > s_explosionTime )
@@ -145,17 +145,17 @@ gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& col
 {
     eSoundMixer* mixer = eSoundMixer::GetMixer();
     mixer->PushButton(CYCLE_EXPLOSION, pos);
-    std::cout << "explosion sound effect\n";
+    //std::cout << "explosion sound effect\n";
     lastTime = time;
     explosion_r = color.r;
     explosion_g = color.g;
     explosion_b = color.b;
-    std::cout << "about to do sg_Explosions.Add\n";
+    //std::cout << "about to do sg_Explosions.Add\n";
     sg_Explosions.Add( this, listID );
     z=0;
-    std::cout << "explosion constructed\n";
+    //std::cout << "explosion constructed\n";
 #ifdef USEPARTICLES
-    std::cout << "Using particle explosion\n";
+    //std::cout << "Using particle explosion\n";
 //    particle_handle_circle = pGenParticleGroups(1, 10);
 //    particle_handle_cylinder = pGenParticleGroups(1, 1000);
 
@@ -169,7 +169,7 @@ gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& col
 
     // add to game object lists
     AddToList();
-    std::cout << "Last line of constructor\n";
+    //std::cout << "Last line of constructor\n";
 }
 
 gExplosion::~gExplosion(){
@@ -194,7 +194,7 @@ gExplosion::~gExplosion(){
 
 bool gExplosion::Timestep(REAL currentTime){
     lastTime=currentTime;
-    std::cout << "Started timestep\n";
+    ////std::cout << "Started timestep\n";
 
     int currentExpansion = int(REAL( expansionSteps )*((currentTime - createTime)/expansionTime)) + 1;
     if ( currentExpansion > expansionSteps )
@@ -279,7 +279,7 @@ bool gExplosion::Timestep(REAL currentTime){
         return true;
     } else
         return false;*/
-        std::cout << "returning from timestep\n";
+        //std::cout << "returning from timestep\n";
     if (currentTime>createTime+4)
         return true;
     else
@@ -347,7 +347,7 @@ bool sg_crashExplosion = true;
 
 #ifndef DEDICATED
 void gExplosion::Render(const eCamera *cam){
-    std::cout << "Starting render\n";
+    //std::cout << "Starting render\n";
 #ifdef USEPARTICLES
     /*if(sg_crashExplosion){
         ModelMatrix();
@@ -429,7 +429,7 @@ void gExplosion::Render(const eCamera *cam){
     }
     */
 #endif
-std::cout << "Finishing render\n";
+//std::cout << "Finishing render\n";
 }
 
 #if 0
