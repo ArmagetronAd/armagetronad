@@ -170,6 +170,8 @@ public:
     void SwitchCenter(int d);
     bool Act(uActionCamera *act,REAL x);
 
+    eCamMode GetCamMode() {return mode;}
+
 #ifndef DEDICATED
     void Render();
     //void SoundMix(unsigned char *dest,unsigned int len);

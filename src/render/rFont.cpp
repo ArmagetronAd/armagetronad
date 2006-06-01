@@ -205,8 +205,8 @@ public:
         switch(sr_fontType) {
         case 1:
             return height*(height*sr_screenHeight < sr_bigFontThresholdHeight ? .41 : .5)*str.size();
-	    break;
-	default:
+            break;
+        default:
             return GetFont(height).Advance(str.c_str())/sr_screenWidth*2.;
         }
     }
@@ -216,19 +216,19 @@ public:
                 glPushMatrix();
                 glTranslatef(where.x, where.y, 0.);
                 glScalef(2./sr_screenWidth, 2./sr_screenHeight, 1.);
-		if(sr_fontType == 3) {
-		    glEnable(GL_TEXTURE_2D);
-		    glEnable(GL_BLEND);
-		    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
-		if(sr_fontType == 6) {
-		    glEnable( GL_DEPTH_TEST);
-		    glDisable( GL_BLEND);
-		    glEnable(GL_TEXTURE_2D);
-		    static rFileTexture sg_RimWallNoWrap(rTextureGroups::TEX_WALL,"textures/dir_wall.png",1,0);
-		    sg_RimWallNoWrap.Select();
-		    glRotatef(45,1.,0.,0.);
-		}
+                if(sr_fontType == 3) {
+                    glEnable(GL_TEXTURE_2D);
+                    glEnable(GL_BLEND);
+                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                }
+                if(sr_fontType == 6) {
+                    glEnable( GL_DEPTH_TEST);
+                    glDisable( GL_BLEND);
+                    glEnable(GL_TEXTURE_2D);
+                    static rFileTexture sg_RimWallNoWrap(rTextureGroups::TEX_WALL,"textures/dir_wall.png",1,0);
+                    sg_RimWallNoWrap.Select();
+                    glRotatef(45,1.,0.,0.);
+                }
             } else {
                 glRasterPos2f(where.x, where.y);
             }
@@ -310,8 +310,8 @@ FTFont &rFontContainer::New(int size) {
         theFontFile = "textures/" + fontFile;
         theFontFile = tDirectories::Data().GetReadPath(theFontFile);
     }
-    std::cout << "Use custom font: " << useCustomFont << std::endl;
-    std::cout << "The font file: " << theFontFile << std::endl;
+    //std::cout << "Use custom font: " << useCustomFont << std::endl;
+    //std::cout << "The font file: " << theFontFile << std::endl;
     switch (sr_fontType) {
     case 1:
         font = new FTGLPixmapFont(theFontFile);
@@ -327,7 +327,7 @@ FTFont &rFontContainer::New(int size) {
         break;
     case 6:
         font = new FTGLExtrdFont(theFontFile);
-	reinterpret_cast<FTGLExtrdFont *>(font)->Depth(10.);
+        reinterpret_cast<FTGLExtrdFont *>(font)->Depth(10.);
         break;
     default:
         font = new FTGLTextureFont(theFontFile);

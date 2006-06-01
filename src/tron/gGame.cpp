@@ -722,6 +722,9 @@ REAL exponent(int i)
     return ret;
 }
 
+#ifndef DEDICATED
+extern REAL stc_fastestSpeedRound;
+#endif
 
 void init_game_grid(eGrid *grid, gParser *aParser){
     se_ResetGameTimer();
@@ -737,6 +740,7 @@ void init_game_grid(eGrid *grid, gParser *aParser){
 
         // rSysDep::SwapGL();
     }
+    stc_fastestSpeedRound = .0;
 #endif
 
     /*
@@ -1239,6 +1243,9 @@ static void cp(){
 static void own_game( nNetState enter_state ){
     tNEW(gGame);
     se_MakeGameTimer();
+#ifndef DEDICATED
+    stc_fastestSpeedRound = .0;
+#endif
     sg_EnterGame( enter_state );
 
     // write scores one last time

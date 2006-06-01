@@ -60,29 +60,29 @@ WithCoordinates::WithCoordinates() : m_originalPosition(0,0), m_originalSize(1,1
 
 bool WithCoordinates::Process(tXmlParser::node cur) {
     if(cur.IsOfType("Position")) {
-	tCoord shift;
+        tCoord shift;
         cur.GetProp("x", shift.x);
         cur.GetProp("y", shift.y);
-	m_position += shift;
-	m_originalPosition = m_position;
+        m_position += shift;
+        m_originalPosition = m_position;
         return true;
     }
     if(cur.IsOfType("Size")) {
-	tCoord factor;
+        tCoord factor;
         cur.GetProp("width", factor.x);
         cur.GetProp("height", factor.y);
-	m_size *= factor;
-	m_originalSize = m_size;
+        m_size *= factor;
+        m_originalSize = m_size;
         return true;
     }
     return Base::Process(cur);
 }
 
 //!@arg factor the factor to multiply with
- void WithCoordinates::SetFactor(float factor) {
+void WithCoordinates::SetFactor(float factor) {
     m_position.y = (m_originalPosition.y + 1.) * factor - 1.;
     m_size.y = m_originalSize.y * factor;
- }
+}
 
 bool WithDataFunctions::Process(tXmlParser::node cur) {
     return Base::Process(cur);
@@ -246,6 +246,8 @@ tValue::Base *WithDataFunctions::ProcessDataSource(tString const &data) {
     callbacks[tString("top_score")]            = &cCockpit::cb_TopScore;
     callbacks[tString("fastest_speed")]        = &cCockpit::cb_FastestSpeed;
     callbacks[tString("fastest_name")]         = &cCockpit::cb_FastestName;
+    callbacks[tString("fastest_speed_round")]  = &cCockpit::cb_FastestSpeedRound;
+    callbacks[tString("fastest_name_round")]   = &cCockpit::cb_FastestNameRound;
     callbacks[tString("time_to_impact_front")] = &cCockpit::cb_TimeToImpactFront;
     callbacks[tString("time_to_impact_right")] = &cCockpit::cb_TimeToImpactRight;
     callbacks[tString("time_to_impact_left")] = &cCockpit::cb_TimeToImpactLeft;

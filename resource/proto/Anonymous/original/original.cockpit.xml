@@ -4,7 +4,7 @@
 <Resource type="aacockpit" name="standard" version="0.0.1" author="Anonymous" category="">
     <Cockpit version="0.0.1">
         <!-- Example configuration for an old speed meter -->
-        <NeedleGauge camera="*">
+        <NeedleGauge camera="^in">
             <DataSet>
 		<AtomicData field="source" source="player_speed" />
 		<AtomicData field="minimum" source="0" />
@@ -95,7 +95,7 @@
         </BarGauge>
 
         <!-- Example configuration for a Enemies: x Mates: y display -->
-	<Label camera="*">
+	<Label camera="^in">
             <DataSet id="enemies">
 		<AtomicData field="source" source="enemies_alive" />
 	    </DataSet>
@@ -118,7 +118,7 @@
                 </Table>
             </Face>
         </Label>
-	<Label camera="*">
+	<Label camera="^in">
             <DataSet id="ping">
 		<AtomicData field="source" source="current_ping" />
 	    </DataSet>
@@ -136,12 +136,12 @@
                 </Table>
             </Face>
         </Label>
-	<Label camera="*">
+	<Label camera="^in">
             <DataSet id="number">
-		<AtomicData source="fastest_speed" />
+		<AtomicData source="fastest_speed_round" />
 	    </DataSet>
             <DataSet id="name">
-		<AtomicData source="fastest_name" />
+		<AtomicData source="fastest_name_round" />
 	    </DataSet>
             <Position x="-0.7" y="-0.96" />
             <Size height="0.035" width="0.017" /> <!-- Size would be the font size in this case -->
@@ -158,7 +158,7 @@
                 </Table>
             </Face>
         </Label>
-	<Label camera="*">
+	<Label camera="^in">
             <DataSet id="myscore">
 		<AtomicData source="current_score" />
 	    </DataSet>
@@ -200,7 +200,7 @@
                 </Table>
             </Face>
         </Label>
-	<Label camera="*" viewport="top">
+	<Label camera="^in" viewport="top">
             <DataSet id="hours">
 		<AtomicData source="current_hours12h" minwidth="2" fill="0" />
 	    </DataSet>
@@ -245,7 +245,7 @@
                 </Table>
             </Face>
         </Label>
-        <BarGauge camera="*" viewport="top">
+        <BarGauge camera="^in" viewport="top">
             <DataSet>
 		<AtomicData field="source" source="current_framerate" />
 		<AtomicData field="minimum" source="0" />
@@ -267,7 +267,7 @@
                 </Solid>
             </Foreground>
         </BarGauge>
-	<Map camera="*" viewport="top">
+	<Map camera="^in" viewport="top">
 	    <Position x="0.73" y="-0.72" />
 	    <Size height="0.25" width="0.25" />
 	</Map>

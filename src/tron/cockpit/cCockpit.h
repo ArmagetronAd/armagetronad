@@ -65,7 +65,7 @@ public:
         in            = 010,
         server_custom = 020,
         smart         = 040,
-        all           = 047
+        all           = 077
     }; //!< the different cameras, can be combined via the | operator
 
     cCockpit(); //!< default constructor
@@ -129,6 +129,8 @@ public:
     std::auto_ptr<tValue::Base> cb_TopScore(void);                //!< Gets the top personal score
     std::auto_ptr<tValue::Base> cb_FastestSpeed(void);            //!< Gets the speed of the player who's currently the fastest in m/s
     std::auto_ptr<tValue::Base> cb_FastestName(void);             //!< Gets the name of the player who's currently the fastest
+    std::auto_ptr<tValue::Base> cb_FastestSpeedRound(void);            //!< Gets the speed of the player who's been the fastest during the round in m/s
+    std::auto_ptr<tValue::Base> cb_FastestNameRound(void);             //!< Gets the name of the player who's been the fastest during the round
 
     std::auto_ptr<tValue::Base> cb_TimeToImpactFront(void);             //!< Gets the time it will take the cycle to reach the next wall in front of it
     std::auto_ptr<tValue::Base> cb_TimeToImpactRight(void);             //!< Gets the time it will take the cycle to reach the next wall right of it

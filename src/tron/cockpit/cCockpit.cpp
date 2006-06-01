@@ -37,6 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ePlayer.h"
 #include "gCycle.h"
 #include "eTimer.h"
+#include "eCamera.h"
 #include "rRender.h"
 #include "rFont.h"
 #include "rScreen.h"
@@ -221,21 +222,45 @@ std::auto_ptr<tValue::Base> cCockpit::cb_TopScore(void){
     return std::auto_ptr<tValue::Base>(new tValue::Int(topscore));
 }
 
-std::auto_ptr<tValue::Base> cCockpit::cb_FastestSpeed(void){
-    REAL max=0;
-    //tString name;
+REAL stc_fastestSpeedRound = .0;
+REAL stc_fastestSpeed;
+tString stc_fastestNameRound;
+tString stc_fastestName;
 
+static void stc_updateFastest() {
+    stc_fastestSpeed = 0.;
     for(int i =0 ; i< se_PlayerNetIDs.Len(); i++){
         ePlayerNetID *p = se_PlayerNetIDs[i];
 
         if(gCycle *h = (gCycle*)(p->Object())){
-            if (h->Speed()>max && h->Alive()){
-                max =  (float) h->Speed();  // changed to float for more accuracy in reporting top speed
-                //name = p->GetName();
+            if (h->Speed()>stc_fastestSpeedRound && h->Alive()){
+                stc_fastestSpeedRound =  (float) h->Speed();  // changed to float for more accuracy in reporting top speed
+                stc_fastestNameRound = p->GetName();
+            }
+            if (h->Speed()>stc_fastestSpeed && h->Alive()){
+                stc_fastestSpeed =  (float) h->Speed();  // changed to float for more accuracy in reporting top speed
+                stc_fastestName = p->GetName();
             }
         }
     }
-    return std::auto_ptr<tValue::Base>(new tValue::Float(max));
+}
+
+static rPerFrameTask stcuf(&stc_updateFastest);
+
+std::auto_ptr<tValue::Base> cCockpit::cb_FastestSpeedRound(void){
+    return std::auto_ptr<tValue::Base>(new tValue::Float(stc_fastestSpeedRound));
+}
+
+std::auto_ptr<tValue::Base> cCockpit::cb_FastestNameRound(void){
+    return std::auto_ptr<tValue::Base>(new tValue::String(stc_fastestNameRound));
+}
+
+std::auto_ptr<tValue::Base> cCockpit::cb_FastestSpeed(void){
+    return std::auto_ptr<tValue::Base>(new tValue::Float(stc_fastestSpeed));
+}
+
+std::auto_ptr<tValue::Base> cCockpit::cb_FastestName(void){
+    return std::auto_ptr<tValue::Base>(new tValue::String(stc_fastestName));
 }
 
 std::auto_ptr<tValue::Base> cCockpit::cb_TimeToImpactFront(void){
@@ -254,23 +279,6 @@ std::auto_ptr<tValue::Base> cCockpit::cb_TimeToImpactLeft(void){
     return std::auto_ptr<tValue::Base>(new tValue::Float(test.hit/m_FocusCycle->Speed()));
 }
 
-std::auto_ptr<tValue::Base> cCockpit::cb_FastestName(void){
-    REAL max=0;
-    tString name;
-
-    for(int i =0 ; i< se_PlayerNetIDs.Len(); i++){
-        ePlayerNetID *p = se_PlayerNetIDs[i];
-
-        if(gCycle *h = (gCycle*)(p->Object())){
-            if (h->Speed()>max && h->Alive()){
-                max =  (float) h->Speed();  // changed to float for more accuracy in reporting top speed
-                name = p->GetName();
-            }
-        }
-    }
-    return std::auto_ptr<tValue::Base>(new tValue::String(name));
-}
-
 cCockpit* cCockpit::_instance = 0;
 
 void cCockpit::ProcessCockpit(void) {
@@ -287,7 +295,7 @@ void cCockpit::ProcessCockpit(void) {
     }
     if (cur.IsOfType("Cockpit")) {
         ProcessWidgets(cur);
-	if(sr_screenWidth != 0) Readjust();
+        if(sr_screenWidth != 0) Readjust();
         return;
     } else {
         tERR_WARN("Found a node of type '" + cur.GetName() + "' where type 'Cockpit' was expected");
@@ -299,10 +307,10 @@ void cCockpit::ProcessWidgets(node cur) {
     std::map<tString, node> templates;
     for(cur = cur.GetFirstChild(); cur; ++cur) {
         if (cur.IsOfType("text") || cur.IsOfType("comment")) continue;
-	if (cur.IsOfType("WidgetTemplate")) {
-	    templates[cur.GetProp("id")] = cur;
-	    continue;
-	}
+        if (cur.IsOfType("WidgetTemplate")) {
+            templates[cur.GetProp("id")] = cur;
+            continue;
+        }
         cWidget::Base_ptr widget_ptr = ProcessWidgetType(cur);
         if(&*widget_ptr == 0) {
             tERR_WARN("Unknown Widget type '" + cur.GetName() + "'");
@@ -310,23 +318,23 @@ void cCockpit::ProcessWidgets(node cur) {
         }
         cWidget::Base &widget = *widget_ptr;
 
-	//Process all templates first
-	tString use(cur.GetProp("usetemplate"));
+        //Process all templates first
+        tString use(cur.GetProp("usetemplate"));
 
-	use += " "; //add the extra seperator, makes things easier
-	int pos = 0;
-	int next;
-	while((next = use.find(' ', pos)) != -1) {
-	    tString thisuse = use.SubStr(pos, next - pos);
-	    if(templates.count(thisuse)) {
-		ProcessWidget(templates[thisuse], widget);
-	    } else if (!thisuse.empty()) {
-		tERR_WARN(tString("Nothing known about template id '") + thisuse + "'.");
-	    }
-	    pos = next+1;
-	}
+        use += " "; //add the extra seperator, makes things easier
+        int pos = 0;
+        int next;
+        while((next = use.find(' ', pos)) != -1) {
+            tString thisuse = use.SubStr(pos, next - pos);
+            if(templates.count(thisuse)) {
+                ProcessWidget(templates[thisuse], widget);
+            } else if (!thisuse.empty()) {
+                tERR_WARN(tString("Nothing known about template id '") + thisuse + "'.");
+            }
+            pos = next+1;
+        }
 
-	ProcessWidget(cur, widget);
+        ProcessWidget(cur, widget);
         if(cur.GetProp("viewport") == "all") {
             m_Widgets_perplayer.push_back(widget_ptr.release());
         } else {
@@ -336,13 +344,13 @@ void cCockpit::ProcessWidgets(node cur) {
 }
 
 void cCockpit::ProcessWidget(node cur, cWidget::Base &widget) {
-        ProcessWidgetCamera(cur, widget);
-        int num;
-        cur.GetProp("toggle", num);
-        m_EventHandlers.insert(std::pair<int, cWidget::Base *>(num, &widget));
-        widget.SetDefaultState(cur.GetPropBool("toggleDefault"));
-        widget.SetSticky(cur.GetPropBool("toggleSticky"));
-        ProcessWidgetCore(cur, widget);
+    ProcessWidgetCamera(cur, widget);
+    int num;
+    cur.GetProp("toggle", num);
+    m_EventHandlers.insert(std::pair<int, cWidget::Base *>(num, &widget));
+    widget.SetDefaultState(cur.GetPropBool("toggleDefault"));
+    widget.SetSticky(cur.GetPropBool("toggleSticky"));
+    ProcessWidgetCore(cur, widget);
 }
 
 cWidget::Base_ptr cCockpit::ProcessWidgetType(node cur) {
@@ -430,7 +438,31 @@ void cCockpit::RenderPlayer() {
 
                 for(unsigned int i=0; i<m_Widgets_perplayer.size(); i++)
                 {
-                    if (m_Widgets_perplayer[i]->GetCam() & m_Cam && m_Widgets_perplayer[i]->Active())
+                    int cam = m_Widgets_perplayer[i]->GetCam();
+                    switch(m_Player->cam->GetCamMode()) {
+                    case CAMERA_IN:
+                    case CAMERA_SMART_IN:
+                        if(!(cam & in)) continue;
+                        break;
+                    case CAMERA_CUSTOM:
+                        if(!(cam & custom)) continue;
+                        break;
+                    case CAMERA_FREE:
+                        if(!(cam & free)) continue;
+                        break;
+                    case CAMERA_FOLLOW:
+                        if(!(cam & follow)) continue;
+                        break;
+                    case CAMERA_SMART:
+                        if(!(cam & smart)) continue;
+                        break;
+                    case CAMERA_SERVER_CUSTOM:
+                        if(!(cam & server_custom)) continue;
+                        break;
+                    default:
+                        break;
+                    }
+                    if (m_Widgets_perplayer[i]->Active())
                         m_Widgets_perplayer[i]->Render();
                 }
                 //  bool displayfastest = true;// put into global, set via menusytem... subby to do.make sr_DISPLAYFASTESTout
@@ -463,7 +495,6 @@ void cCockpit::RenderRootwindow() {
 
 
 static void display_cockpit_lucifer() {
-    //std::cerr << "display_cockpit_lucifer()\n";
     cCockpit* theCockpit = cCockpit::GetCockpit();
 
     static bool loaded = false;
@@ -531,8 +562,6 @@ bool cCockpit::HandleEvent(int id, bool state) {
 
 void cCockpit::Readjust(void) {
     if (sr_screenWidth == 0) return;
-    std::cerr << "sr_screenWidth: " << sr_screenWidth << std::endl;
-    std::cerr << "sr_screenHeight: " << sr_screenHeight << std::endl;
     float factor = 4./3. / (static_cast<float>(sr_screenWidth)/static_cast<float>(sr_screenHeight));
     //float factor = 2.;
     for(tAutoDeque<cWidget::Base>::iterator iter = m_Widgets_perplayer.begin(); iter != m_Widgets_perplayer.end(); ++iter) {

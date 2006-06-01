@@ -217,7 +217,7 @@ void gSpark::Render(const eCamera *cam){
     size_t flstride, pos3Ofs, posB3Ofs, size3Ofs, vel3Ofs, velB3Ofs, color3Ofs, alpha1Ofs, age1Ofs;
 
     cnt = (int)pGetParticlePointer(ptr, flstride, pos3Ofs, posB3Ofs,
-        size3Ofs, vel3Ofs, velB3Ofs, color3Ofs, alpha1Ofs, age1Ofs);
+                                   size3Ofs, vel3Ofs, velB3Ofs, color3Ofs, alpha1Ofs, age1Ofs);
     if(cnt < 1) return;
 
     glEnableClientState(GL_COLOR_ARRAY);
