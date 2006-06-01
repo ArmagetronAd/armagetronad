@@ -211,25 +211,22 @@ std::auto_ptr<tValue::Base> cCockpit::cb_CurrentTimeSeconds(void){
     return std::auto_ptr<tValue::Base>(new tValue::Int(thisTime->tm_sec));
 }
 
-std::auto_ptr<tValue::Base> cCockpit::cb_CurrentScore(void){
-    return std::auto_ptr<tValue::Base>(new tValue::Int(m_ViewportPlayer->TotalScore()));
-}
-std::auto_ptr<tValue::Base> cCockpit::cb_TopScore(void){
-    int topscore = 0;
-    for(int i =0 ; i< se_PlayerNetIDs.Len(); i++){
-        int thisscore = se_PlayerNetIDs[i]->TotalScore();
-        thisscore>topscore?topscore=thisscore:1;
-    }
-    return std::auto_ptr<tValue::Base>(new tValue::Int(topscore));
-}
-
 REAL stc_fastestSpeedRound = .0;
 REAL stc_fastestSpeed;
 tString stc_fastestNameRound;
 tString stc_fastestName;
+int stc_topScore;
+
+std::auto_ptr<tValue::Base> cCockpit::cb_CurrentScore(void){
+    return std::auto_ptr<tValue::Base>(new tValue::Int(m_ViewportPlayer->TotalScore()));
+}
+std::auto_ptr<tValue::Base> cCockpit::cb_TopScore(void){
+    return std::auto_ptr<tValue::Base>(new tValue::Int(stc_topScore));
+}
 
 static void stc_updateFastest() {
     stc_fastestSpeed = 0.;
+    stc_topScore = 0;
     for(int i =0 ; i< se_PlayerNetIDs.Len(); i++){
         ePlayerNetID *p = se_PlayerNetIDs[i];
 
@@ -243,6 +240,9 @@ static void stc_updateFastest() {
                 stc_fastestName = p->GetName();
             }
         }
+        int thisscore = se_PlayerNetIDs[i]->TotalScore();
+        if(thisscore>stc_topScore)
+	    stc_topScore=thisscore;
     }
 }
 

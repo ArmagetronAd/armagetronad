@@ -215,19 +215,13 @@
             <DataSet id="seconds">
                 <AtomicData source="time_since_start" />
             </DataSet>
-            <DataSet id="song">
-                <AtomicData source="current_song" />
-            </DataSet>
             <Position x="0.4" y="0.45" />
-            <Size height="0.04" width="0.02" /> <!-- Size would be the font size in this case -->
+            <Size height="0.04" width="0.02" />
             <Caption location="top">
                 <Text value="Time/Fps/Timestamp" />
             </Caption>
             <Face>
                 <Table>
-                    <Row>
-                        <Cell><GameData data="song" /></Cell>
-                    </Row>
                     <Row>
                         <Cell><Text value="Time:" /></Cell>
                         <Cell><GameData data="hours" /><Text value=":" /><GameData data="minutes" /><Text value=" " /><GameData data="ampm" /></Cell>
@@ -239,6 +233,23 @@
                     <Row>
                         <Cell><Text value="Running for:" /></Cell>
                         <Cell><GameData data="seconds" /><Text value=" Seconds" /></Cell>
+                    </Row>
+                </Table>
+            </Face>
+        </Label>
+        <Label camera="^in" viewport="top">
+            <DataSet id="song">
+                <AtomicData source="current_song" />
+            </DataSet>
+            <Position x="0.4" y="0.29" />
+            <Size height="0.04" width="0.02" />
+            <Caption location="top">
+                <Text value="Currently Playing:" />
+            </Caption>
+            <Face>
+                <Table>
+                    <Row>
+                        <Cell><GameData data="song" /></Cell>
                     </Row>
                 </Table>
             </Face>
