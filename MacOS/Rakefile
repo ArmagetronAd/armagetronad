@@ -34,7 +34,8 @@ namespace "xcode" do
   task :sort_resources do
     sh %{"#{AAConfig::SRC_DIR}/batch/make/sortresources" \\
          "#{AAConfig::SRC_DIR}/resource/proto" \\
-         "#{AAConfig::BUILD_DIR}/resource/included"}
+         "#{AAConfig::BUILD_DIR}/resource/included" \\
+         "#{AAConfig::SRC_DIR}/batch/make/sortresources.py"}
   end
   
   # TODO: file based...
@@ -115,3 +116,29 @@ task :changelog do
   puts "Generating ChangeLog..."
   sh %{svn log "#{AAConfig::SRC_DIR}" 2>&1 > "#{AAConfig::BUILD_DIR}/ChangeLog"}
 end
+
+# namespace "release" do
+#   
+#   task :create => [:build, :package_create, :package_convert]
+#   
+#   # TODO: Move into a method so we can pass parameters pragmatically. The task will just take an ENV setting.
+#   task :build do
+#     sh %{xcodebuild -project "#{AAConfig::SRC_DIR}/MacOS/Armagetron Advanced.xcodeproj" \\
+#          -target "Armagetron Advanced" -configuration Release build}
+#   end
+#   
+#   # TODO: method
+#   task :package_create do
+#     package_dir = %{"#{AAConfig::BUILD_DIR}/build/Release"}
+#     mkdir_p package_dir
+#     sh %{hdiutil create -srcdir "#{AAConfig::BUILD_DIR}/build/Release" \\
+#          -format UDIF #{package_dir}/release-uncompresed -volname "Armagetron Advanced"}
+#   end
+#   
+#   # TODO: method
+#   task :package_convert do
+#     sh %{hdiutil convert }
+#     hdiutil convert "${2}" -format UDZO -o "${3}"
+#   end
+#   
+# end
