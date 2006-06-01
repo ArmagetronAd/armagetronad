@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -36,6 +36,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tMath.h"
 
 #include "eSoundMixer.h"
+#ifdef USEPARTICLES
+#include "papi.h"
+#endif
 
 static tList< gExplosion > sg_Explosions;
 
@@ -142,40 +145,31 @@ gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& col
 {
     eSoundMixer* mixer = eSoundMixer::GetMixer();
     mixer->PushButton(CYCLE_EXPLOSION, pos);
-        
+    std::cout << "explosion sound effect\n";
     lastTime = time;
     explosion_r = color.r;
     explosion_g = color.g;
     explosion_b = color.b;
+    std::cout << "about to do sg_Explosions.Add\n";
     sg_Explosions.Add( this, listID );
     z=0;
+    std::cout << "explosion constructed\n";
+#ifdef USEPARTICLES
+    std::cout << "Using particle explosion\n";
+//    particle_handle_circle = pGenParticleGroups(1, 10);
+//    particle_handle_cylinder = pGenParticleGroups(1, 1000);
 
-    theExplosion = 0;
-#ifdef USE_PARTICLES
-    ParticleSystem expParams;
-
-    expParams.particle_size = 10.0f;  // Obviously, the size of the particles
-    expParams.numParticles = 1000;     // Total number of particles in the system
-    expParams.initialSpread = 1.0f;    // Initial spread of particles
-    expParams.gravity = 2.0f;        // (Gravity)
-    expParams.generateNewParticles = false; // Flag, if false don't generate new particles
-    expParams.numStartParticles = 1000;  // Number of active particles to initialize with
-    expParams.life = 10000.0f;           // Average lifetime of a particle
-    expParams.lifeRand = 1.03f;       // Factor to use to randomize particle lifetime
-    expParams.expansion = 1.0f;      // The rate at which the system will run
-    expParams.flow = 1.0f;
-
-    glCoord theVector;
-
-    theVector.x = 0;
-    theVector.y = 0;
-    theVector.z = 2;
-
-    theExplosion = new gParticles(pos, theVector, time, expParams);
+//    pCurrentGroup(particle_handle_circle);
+    // Generate particles along a very small line in the nozzle.
+//    pSource(1000, PDSphere(pVec(pos.x, pos.y, 0.3), 0.2));
+//    pCurrentGroup(particle_handle_cylinder);
+    // Generate particles along a very small line in the nozzle.
+//    pSource(1000, PDSphere(pVec(Position().x, Position().y, 0.3), 0.2));
 #endif
 
     // add to game object lists
     AddToList();
+    std::cout << "Last line of constructor\n";
 }
 
 gExplosion::~gExplosion(){
@@ -193,7 +187,6 @@ gExplosion::~gExplosion(){
         						   this->CurrentFace() );
         */
     }
-    delete theExplosion;
 }
 
 // virtual eGameObject_type type();
@@ -201,6 +194,7 @@ gExplosion::~gExplosion(){
 
 bool gExplosion::Timestep(REAL currentTime){
     lastTime=currentTime;
+    std::cout << "Started timestep\n";
 
     int currentExpansion = int(REAL( expansionSteps )*((currentTime - createTime)/expansionTime)) + 1;
     if ( currentExpansion > expansionSteps )
@@ -224,6 +218,7 @@ bool gExplosion::Timestep(REAL currentTime){
         }
 
     }
+#ifndef USEPARTICLES
 
     /*
     	// see every once in a while if all cycles did a turn since the expl was created
@@ -235,7 +230,7 @@ bool gExplosion::Timestep(REAL currentTime){
     	{
     		expansion = currentExpansion;
     		REAL time = createTime + 5.0f;
-    		
+
     		const tList<eGameObject>& gameObjects = this->Grid()->GameObjects();
     		for ( int i = gameObjects.Len() - 1; i>=0; --i )
     		{
@@ -247,7 +242,7 @@ bool gExplosion::Timestep(REAL currentTime){
     				const gPlayerWall* w = c->CurrentWall();
 
     				if ( !w	|| w->BegTime() < time || w->EndTime() < time )
-    				{	
+    				{
     					// c has not made a turn; we need to stay around some more
     					return false;
     				}
@@ -255,9 +250,36 @@ bool gExplosion::Timestep(REAL currentTime){
     		}
     	}
     */
-#ifdef USE_PARTICLES
-    return theExplosion->Timestep(currentTime);
+    if (currentTime>createTime+4)
+        return true;
+    else
+        return false;
 #else
+/*    pCurrentGroup(particle_handle_circle);
+    // Set up the state.
+    pExplosion(Position().x, Position().y, 0.3, 20.0, 20.0, 1.0);
+    //pVelocityD(PDCylinder(pVec(0.0, 0.0, 0.0), pVec(0.0, 0.0, 0.01), 0.01, 0.007));
+    pColorD(PDLine(pVec(1.0, 1.0, 1.0), pVec(1.0, 1.0, 1.0)));
+    pSize(40.0);
+    //pStartingAge(0);
+
+    //pRandomAccel(PDSphere(pVec(Position().x, Position().y, 0.0), 100.0));
+
+    // Bounce particles off the grid floor.
+    pBounce(-0.05, 1.0, 0.1, PDDisc(pVec(0, 0, 0), pVec(0, 0, 1), 5000000));
+
+    pKillOld(400.0);
+
+    // Move particles to their new positions.
+    pMove();
+
+    // Finished when there are less than 1/10 of the original particles
+    if (pGetGroupCount() < 100) {
+        pDeleteParticleGroups(particle_handle_circle, particle_handle_circle);
+        return true;
+    } else
+        return false;*/
+        std::cout << "returning from timestep\n";
     if (currentTime>createTime+4)
         return true;
     else
@@ -325,11 +347,34 @@ bool sg_crashExplosion = true;
 
 #ifndef DEDICATED
 void gExplosion::Render(const eCamera *cam){
-#ifdef USE_PARTICLES
-    if(sg_crashExplosion){
-        theExplosion->Render(cam);
-    }
-#else	
+    std::cout << "Starting render\n";
+#ifdef USEPARTICLES
+    /*if(sg_crashExplosion){
+        ModelMatrix();
+        glPushMatrix();
+        pCurrentGroup(particle_handle_circle);
+        int cnt = (int)pGetGroupCount();
+        if(cnt < 1) return;
+
+        float *ptr;
+        size_t flstride, pos3Ofs, posB3Ofs, size3Ofs, vel3Ofs, velB3Ofs, color3Ofs, alpha1Ofs, age1Ofs;
+
+        cnt = (int)pGetParticlePointer(ptr, flstride, pos3Ofs, posB3Ofs,
+            size3Ofs, vel3Ofs, velB3Ofs, color3Ofs, alpha1Ofs, age1Ofs);
+        if(cnt < 1) return;
+
+        glEnableClientState(GL_COLOR_ARRAY);
+        glColorPointer(4, GL_FLOAT, int(flstride) * sizeof(float), ptr + color3Ofs);
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(3, GL_FLOAT, int(flstride) * sizeof(float), ptr + pos3Ofs);
+
+        glDrawArrays(GL_POINTS, 0, cnt);
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_COLOR_ARRAY);
+        glPopMatrix();
+    }*/
+#else
     if(sg_crashExplosion){
         REAL a1=(lastTime-createTime)+.01f;//+.2;
         REAL e=a1-1;
@@ -384,6 +429,7 @@ void gExplosion::Render(const eCamera *cam){
     }
     */
 #endif
+std::cout << "Finishing render\n";
 }
 
 #if 0

@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -29,8 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ArmageTron_explosion_H
 
 #include "eGameObject.h"
-
-#include "gParticles.h"
 
 struct gRealColor;
 
@@ -55,9 +53,11 @@ public:
 #endif
 
     static void OnNewWall( eWall* w );	// blow holes into a new wall
+//#ifdef USEPARTICLES
+    int particle_handle_circle;
+    int particle_handle_cylinder;
+//#endif
 private:
-    gParticles *theExplosion;
-
     REAL        createTime;
 
     //	gRealColor	color_;
