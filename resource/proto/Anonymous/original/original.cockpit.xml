@@ -78,18 +78,10 @@
                 </Solid>
             </Background>
             <Foreground>
-                <Gradient orientation="horizontal">
-                    <Color r="1." g="0." b="0." alpha=".7" at="0." />
-                    <Color r="1." g="1." b="0." alpha=".7" at=".1" />
-                    <Color r="0." g="1." b="0." alpha=".7" at=".2" />
-                    <Color r="0." g="1." b="1." alpha=".7" at=".3" />
-                    <Color r="0." g="0." b="1." alpha=".7" at=".4" />
-                    <Color r="1." g="0." b="1." alpha=".7" at=".5" />
-                    <Color r="1." g="1." b="0." alpha=".7" at=".6" />
-                    <Color r="0." g="1." b="0." alpha=".7" at=".7" />
-                    <Color r="0." g="1." b="1." alpha=".7" at=".8" />
-                    <Color r="0." g="0." b="1." alpha=".7" at=".9" />
-                    <Color r="1." g="0." b="1." alpha=".7" at="1." />
+                <Gradient orientation="value">
+                    <Color r="0." g="1." b="0." alpha=".7" at="0." />
+                    <Color r="1." g="1." b="0." alpha=".7" at=".5" />
+                    <Color r="0." g="1." b="0." alpha=".7" at="1." />
                 </Gradient>
             </Foreground>
         </BarGauge>
@@ -122,7 +114,7 @@
             <DataSet id="ping">
 		<AtomicData field="source" source="current_ping" />
 	    </DataSet>
-            <Position x="-0.1" y="-0.96" />
+            <Position x="-0.15" y="-0.96" />
             <Size height="0.035" width="0.017" /> <!-- Size would be the font size in this case -->
             <Caption location="off">
                 <Text value="Player Status" />
