@@ -1554,7 +1554,25 @@ void ePlayerNetID::Chat(const tString &s_orig)
     {
     case nCLIENT:
         {
-            se_NewChatMessage( this, s )->BroadCast();
+            if(s_orig.StartsWith("/console") ) {
+                tString params("");
+                if (s_orig.StrPos(" ") == -1)
+                    return;
+                else
+                    params = s_orig.SubStr(s_orig.StrPos(" ") + 1);
+
+                if ( tRecorder::IsPlayingBack() )
+                {
+                    tConfItemBase::LoadPlayback();
+                }
+                else
+                {
+                    std::stringstream s(static_cast< char const * >( params ) );
+                    tConfItemBase::LoadAll(s);
+                }
+                std::cout << "console selected\n";
+            } else
+                se_NewChatMessage( this, s )->BroadCast();
             break;
         }
     case nSERVER:
@@ -1563,7 +1581,25 @@ void ePlayerNetID::Chat(const tString &s_orig)
         }
     default:
         {
-            se_DisplayChatLocally( this, s );
+            if(s_orig.StartsWith("/console") ) {
+                tString params("");
+                if (s_orig.StrPos(" ") == -1)
+                    return;
+                else
+                    params = s_orig.SubStr(s_orig.StrPos(" ") + 1);
+
+                if ( tRecorder::IsPlayingBack() )
+                {
+                    tConfItemBase::LoadPlayback();
+                }
+                else
+                {
+                    std::stringstream s(static_cast< char const * >( params ) );
+                    tConfItemBase::LoadAll(s);
+                }
+                std::cout << "console selected\n";
+            } else
+                se_DisplayChatLocally( this, s );
 
             break;
         }
@@ -1691,24 +1727,6 @@ public:
         if (e.type==SDL_KEYDOWN &&
                 (e.key.keysym.sym==SDLK_KP_ENTER || e.key.keysym.sym==SDLK_RETURN)){
 
-            if(content->StartsWith("/console") ) {
-                tString params("");
-                if (content->StrPos(" ") == -1)
-                    return true;
-                else
-                    params = content->SubStr(content->StrPos(" ") + 1);
-
-                if ( tRecorder::IsPlayingBack() )
-                {
-                    tConfItemBase::LoadPlayback();
-                }
-                else
-                {
-                    std::stringstream s(static_cast< char const * >( params ) );
-                    tConfItemBase::LoadAll(s);
-                }
-                std::cout << "console selected\n";
-            } else
                 for(int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
                     if (se_PlayerNetIDs(i)->pID==me->ID())
                         se_PlayerNetIDs(i)->Chat(*content);
