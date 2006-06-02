@@ -520,7 +520,10 @@ void eSoundMixer::Update() {
 }
 
 tString eSoundMixer::GetCurrentSong() {
-    return tString(basename(m_GameTrack->currentMusic->GetFileName()));
+    if(m_GameTrack != NULL)
+        if(m_GameTrack->currentMusic != NULL)
+            return tString(basename(m_GameTrack->currentMusic->GetFileName()));
+    return tString(" ");
 }
 
 eSoundMixer* eSoundMixer::_instance = 0;
