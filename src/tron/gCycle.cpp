@@ -2113,7 +2113,7 @@ void gCycle::InteractWith(eGameObject *target,REAL,int){
     */
 }
 
-void gCycle::KillAt( const eCoord& pos){
+void gCycle::KillAt( const eCoord& deathPos){
     // find the killer from the enemy influence storage
     ePlayerNetID const * constHunter = enemyInfluence.GetEnemy();
     ePlayerNetID * hunter = Player();
@@ -2206,6 +2206,9 @@ void gCycle::KillAt( const eCoord& pos){
         if (Player())
             Player()->AddScore(score_die,tOutput(),"$player_lose_frag");
     }
+
+    // set position to death position so the explosion is at the right place (I dimly remember this caused problems in an earlier attempt)
+    this->pos = deathPos;
 
     Kill();
 }
@@ -2325,7 +2328,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                 otherPlayer->KillAt( collPos );
             }
         }
-        else if (time > w->Time(a)+EPS) // sad but true
+        else // sad but true
         {
             // this cycle has to die here unless it has rubber left
             throw gCycleDeath( collPos );
