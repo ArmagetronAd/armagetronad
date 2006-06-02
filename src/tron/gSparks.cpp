@@ -74,11 +74,13 @@ createTime(time){
         lastBreak[i]=createTime;
     }
 #else
+#ifndef DEDICATED
     particle_handle = pGenParticleGroups(1, SPARKS);
 
     pCurrentGroup(particle_handle);
     // Generate particles along a very small line in the nozzle.
     pSource(SPARKS, PDLine(pVec(Position().x, Position().y, 0.3), pVec(Position().x, Position().y, 0.8)));
+#endif
 #endif
     // add to game grid
     this->AddToList();
