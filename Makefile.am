@@ -12,7 +12,7 @@ modeldir=${armadatadir}
 include $(top_srcdir)/Makefile.manual
 
 # what goes into the distribution
-EXTRA_DIST = README-DEVELOPER README-KDevelop3_0 README-SDL \
+EXTRA_DIST = README-DEVELOPER README-Subversion README-SDL \
 armagetron.kdevelop armagetron.kdevelop.pcs armagetron.kdevses tron.ico \
 models sound textures bootstrap.sh accustomdir.m4 fingerprint
 # language/update.py
