@@ -69,6 +69,13 @@ static bool st_ReadEscapeSequence( char & c, char & c2, std::istream & s )
     {
         c = s.get();
 
+        // nothing useful read?
+        if ( s.eof() )
+        {
+            c = '\\'
+            return false;
+        }
+
         // interpret special escape sequences
         switch (c)
         {
