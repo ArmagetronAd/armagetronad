@@ -135,7 +135,7 @@ public:
     std::auto_ptr<tValue::Base> cb_TimeToImpactFront(void);             //!< Gets the time it will take the cycle to reach the next wall in front of it
     std::auto_ptr<tValue::Base> cb_TimeToImpactRight(void);             //!< Gets the time it will take the cycle to reach the next wall right of it
     std::auto_ptr<tValue::Base> cb_TimeToImpactLeft(void);             //!< Gets the time it will take the cycle to reach the next wall left of it
-    std::auto_ptr<tValue::Base> cb_CurrentSong(void);
+    std::auto_ptr<tValue::Base> cb_CurrentSong(void);		    //!< Gets the file name of the song currently played. May be swiched to the title embedded in the music file later
 
     static bool ProcessKey1(float i=0);
     static bool ProcessKey2(float i=0);
