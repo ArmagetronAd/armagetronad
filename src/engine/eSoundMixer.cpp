@@ -50,9 +50,6 @@ eSoundMixer by Dave Fancella
 // Possibly temporary?
 #include <math.h>
 
-// Needed for basename
-#include <string.h>
-
 // sound quality
 #define SOUND_OFF 0
 #define SOUND_LOW 1
@@ -521,8 +518,17 @@ void eSoundMixer::Update() {
 
 tString eSoundMixer::GetCurrentSong() {
     if(m_GameTrack != NULL)
-        if(m_GameTrack->currentMusic != NULL)
-            return tString(basename(m_GameTrack->currentMusic->GetFileName()));
+        if(m_GameTrack->currentMusic != NULL) {
+	    tString const &str = m_GameTrack->currentMusic->GetFileName();
+#ifndef WIN32
+	    size_t pos = str.find_last_of('/');
+#else
+	    size_t pos = str.find_last_of('\\');
+#endif
+	    if(pos == tString::npos) return str;
+	    if(pos == str.size()) return tString();
+	    return str.SubStr(pos + 1);
+	}
     return tString(" ");
 }
 

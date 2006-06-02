@@ -69,7 +69,7 @@ public:
 
     void Loop() { m_Loop = true; };
 
-    tString GetFileName() { return m_Filename; };
+    tString const &GetFileName() { return m_Filename; };
 
     bool Play();
     void Stop() {
