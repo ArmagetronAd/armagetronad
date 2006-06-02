@@ -72,7 +72,7 @@ static bool st_ReadEscapeSequence( char & c, char & c2, std::istream & s )
         // nothing useful read?
         if ( s.eof() )
         {
-            c = '\\'
+            c = '\\';
             return false;
         }
 
