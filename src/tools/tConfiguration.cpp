@@ -442,12 +442,12 @@ void tConfItemBase::LoadAll(std::istream &s){
         line.ReadLine( s );
 
         /// concatenate lines ending in a backslash
-        while ( line.Len() > 1 && line[line.Len()-2] == '\\' && s.good() && !s.eof() )
+        while ( line.Size() > 0 && line[line.Size()-1] == '\\' && s.good() && !s.eof() )
         {
-            line[line.Len()-2] = '\0';
+            line = line.SubStr( 0, line.Size()-1 );
 
             // unless it is a double backslash
-            if ( line.Len() > 2 && line[line.Len()-3] == '\\' )
+            if ( line.Size() > 0 && line[line.Size()-1] == '\\' )
             {
                 break;
             }
