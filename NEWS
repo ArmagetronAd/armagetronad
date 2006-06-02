@@ -24,6 +24,7 @@ Changes since 0.2.8.1:
   temporary/permanent team imbalance setting distinction has gone away
 - Added brake toggle button
   Bugfixes:
+- Client sometimes crashed when leaving a server with AIs on over the menu
 - The server starting scripts were chowning /var/run and /var/log to armagetronad
 - Short names could crash the server
 - Direct cycle collisions sometimes lead to both passing trough each other
