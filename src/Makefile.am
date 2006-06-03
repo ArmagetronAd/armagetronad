@@ -76,8 +76,10 @@ libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentificati
 	engine/eSensor.h engine/eTeam.cpp engine/eTeam.h engine/eTess2.h\
 	engine/eTimer.cpp engine/eTimer.h engine/eVoter.cpp engine/eVoter.h engine/eWall.cpp engine/eWall.h\
 	engine/eRectangle.cpp engine/eRectangle.h \
-	engine/sound/sdl_mixer/eChannel.cpp engine/sound/sdl_mixer/eChannel.h engine/sound/sdl_mixer/eMusicTrack.cpp \
-	engine/sound/sdl_mixer/eMusicTrack.h \
+	engine/sound/sdl_mixer/eChannelSDLMixer.cpp \
+	engine/sound/sdl_mixer/eChannel.h \
+	engine/sound/sdl_mixer/eMusicTrackSDLMixer.cpp \
+	engine/sound/sdl_mixer/eMusicTrackSDLMixer.h \
 	engine/eSoundMixer.h engine/eSoundMixer.cpp
 
 librender_a_SOURCES=render/rConsole.cpp render/rConsoleGraph.cpp render/rConsole.h render/rFont.cpp\

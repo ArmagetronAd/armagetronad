@@ -36,17 +36,17 @@ typedef int Mix_Music;
 #include "tPlayList.h"
 #include "eCoord.h"
 
-#ifndef ECHANNEL_H
-#define ECHANNEL_H
+#ifndef ECHANNELSDLMIXER_H
+#define ECHANNELSDLMIXER_H
 
 // Forward declarations from other files
 class eGameObject;
 class eCoord;
 
 // Forward declarations from this file
-class eWavData;
-class eMusicTrack;
-class eChannel;
+class eWavDataSDLMixer;
+class eMusicTrackSDLMixer;
+class eChannelSDLMixer;
 
 /*******************************************************************************
  *
@@ -54,7 +54,7 @@ class eChannel;
  *
  *******************************************************************************/
 
-class eWavData {
+class eWavDataSDLMixer : public eWavData {
 public:
     eWavData();
     ~eWavData();
