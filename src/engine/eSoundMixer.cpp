@@ -44,8 +44,8 @@ eSoundMixer by Dave Fancella
 #include "eCoord.h"
 
 #include "eSoundMixer.h"
-#include "eMusicTrack.h"
-#include "eChannel.h"
+#include "sdl_mixer/eMusicTrack.h"
+#include "sdl_mixer/eChannel.h"
 
 // Possibly temporary?
 #include <math.h>

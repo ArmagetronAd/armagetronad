@@ -475,7 +475,7 @@ void sg_SetIcon()
 {
 #ifndef DEDICATED
 #ifndef MACOSX
-    rSurface tex( "desktop/icons/small/armagetronad.png" );
+    rSurface tex( "desktop/icons/medium/armagetronad.png" );
     //    SDL_Surface *tex=IMG_Load( tDirectories::Data().GetReadPath( "textures/icon.png" ) );
 
     if (tex.GetSurface())
