@@ -1,5 +1,5 @@
 
-#include "eChannel.h"
+#include "eChannelSDLMixer.h"
 
 // I don't know how many of these includes are actually necessary
 #include "rSDL.h"

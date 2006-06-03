@@ -36,6 +36,8 @@ typedef int Mix_Music;
 #include "tPlayList.h"
 #include "eCoord.h"
 
+#include "base/eChannel.h"
+
 #ifndef ECHANNELSDLMIXER_H
 #define ECHANNELSDLMIXER_H
 
@@ -56,9 +58,9 @@ class eChannelSDLMixer;
 
 class eWavDataSDLMixer : public eWavData {
 public:
-    eWavData();
-    ~eWavData();
-    eWavData(const char* filename);
+    eWavDataSDLMixer();
+    ~eWavDataSDLMixer();
+    eWavDataSDLMixer(const char* filename);
     void LoadWavFile(const char* filename);
 
     Mix_Chunk* GetWavData() { return m_WavData; };
@@ -79,9 +81,9 @@ private:
  *
  *******************************************************************************/
 
-class eChannel {
+class eChannelSDLMixer {
 public:
-    eChannel();
+    eChannelSDLMixer();
     void SetVolume(int volume);
     int GetId() { return m_ChannelID; };
     void SetId(int newID) { m_ChannelID = newID; };

@@ -1,4 +1,5 @@
-#include "eMusicTrack.h"
+#include "sdl_mixer/eMusicTrackSDLMixer.h"
+
 
 // I don't know how many of these includes are actually necessary
 #include "rSDL.h"

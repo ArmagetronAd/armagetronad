@@ -45,7 +45,7 @@ typedef int Mix_Music;
 #endif
 #include "tPlayList.h"
 
-#include "sdl_mixer/eChannel.h"
+#include "sdl_mixer/eChannelSDLMixer.h"
 
 #include <deque>
 
