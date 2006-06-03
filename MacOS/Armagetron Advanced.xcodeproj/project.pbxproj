@@ -101,12 +101,6 @@
 		8C1D3881099D3DAF00A334A8 /* eSoundMixer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8C1D387F099D3DAF00A334A8 /* eSoundMixer.cpp */; };
 		8C1D3883099D3DAF00A334A8 /* eSoundMixer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8C1D387F099D3DAF00A334A8 /* eSoundMixer.cpp */; };
 		8C1D3885099D3DAF00A334A8 /* eSoundMixer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8C1D387F099D3DAF00A334A8 /* eSoundMixer.cpp */; };
-		8C1D38DF099D41A500A334A8 /* eChannel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8C1D38DB099D41A500A334A8 /* eChannel.cpp */; };
-		8C1D38E1099D41A500A334A8 /* eMusicTrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8C1D38DD099D41A500A334A8 /* eMusicTrack.cpp */; };
-		8C1D38E3099D41A500A334A8 /* eChannel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8C1D38DB099D41A500A334A8 /* eChannel.cpp */; };
-		8C1D38E5099D41A500A334A8 /* eMusicTrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8C1D38DD099D41A500A334A8 /* eMusicTrack.cpp */; };
-		8C1D38E7099D41A500A334A8 /* eChannel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8C1D38DB099D41A500A334A8 /* eChannel.cpp */; };
-		8C1D38E9099D41A500A334A8 /* eMusicTrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8C1D38DD099D41A500A334A8 /* eMusicTrack.cpp */; };
 		8C1D3945099D454800A334A8 /* tRecorder.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 8C1D3943099D454800A334A8 /* tRecorder.h */; };
 		8C1D3946099D454800A334A8 /* tRecorder.h in Headers */ = {isa = PBXBuildFile; fileRef = 8C1D3943099D454800A334A8 /* tRecorder.h */; };
 		8CAA3EF3099D3BB6001CB80C /* uWebinterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CAA3EF1099D3BB6001CB80C /* uWebinterface.cpp */; };
@@ -398,6 +392,11 @@
 		9BD7DB3E0A2CAE4600D7033C /* textures in Resources */ = {isa = PBXBuildFile; fileRef = 9BD7DB270A2CAE4600D7033C /* textures */; };
 		9BD7DB770A2CE28500D7033C /* SDLMain.nib in Resources */ = {isa = PBXBuildFile; fileRef = 9BD7DB760A2CE28500D7033C /* SDLMain.nib */; };
 		9BD7DB7E0A2CE35600D7033C /* Armagetron Advanced.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9BD7DB7D0A2CE35600D7033C /* Armagetron Advanced.icns */; };
+		9BFF72E90A32238500F471CD /* eChannel.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BFF72E10A32238500F471CD /* eChannel.h */; };
+		9BFF72EA0A32238500F471CD /* eChannelSDLMixer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BFF72E50A32238500F471CD /* eChannelSDLMixer.cpp */; };
+		9BFF72EB0A32238500F471CD /* eChannelSDLMixer.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BFF72E60A32238500F471CD /* eChannelSDLMixer.h */; };
+		9BFF72EC0A32238500F471CD /* eMusicTrackSDLMixer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BFF72E70A32238500F471CD /* eMusicTrackSDLMixer.cpp */; };
+		9BFF72ED0A32238500F471CD /* eMusicTrackSDLMixer.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BFF72E80A32238500F471CD /* eMusicTrackSDLMixer.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildStyle section */
@@ -459,6 +458,9 @@
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9A90A2C7CCF00D7033C /* SDL_mixer.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
+				9BFF72E90A32238500F471CD /* eChannel.h in Copy Frameworks */,
+				9BFF72EB0A32238500F471CD /* eChannelSDLMixer.h in Copy Frameworks */,
+				9BFF72ED0A32238500F471CD /* eMusicTrackSDLMixer.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -475,10 +477,6 @@
 		8C1AB77F09A3D2FB007E2048 /* AAURLHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AAURLHandler.h; path = ../src/macosx/AAURLHandler.h; sourceTree = SOURCE_ROOT; };
 		8C1D387F099D3DAF00A334A8 /* eSoundMixer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eSoundMixer.cpp; sourceTree = "<group>"; };
 		8C1D3880099D3DAF00A334A8 /* eSoundMixer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eSoundMixer.h; sourceTree = "<group>"; };
-		8C1D38DB099D41A500A334A8 /* eChannel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = eChannel.cpp; path = sound/eChannel.cpp; sourceTree = "<group>"; };
-		8C1D38DC099D41A500A334A8 /* eChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = eChannel.h; path = sound/eChannel.h; sourceTree = "<group>"; };
-		8C1D38DD099D41A500A334A8 /* eMusicTrack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = eMusicTrack.cpp; path = sound/eMusicTrack.cpp; sourceTree = "<group>"; };
-		8C1D38DE099D41A500A334A8 /* eMusicTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = eMusicTrack.h; path = sound/eMusicTrack.h; sourceTree = "<group>"; };
 		8C1D3943099D454800A334A8 /* tRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tRecorder.h; sourceTree = "<group>"; };
 		8CAA3EF1099D3BB6001CB80C /* uWebinterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uWebinterface.cpp; sourceTree = "<group>"; };
 		8CAA3EF2099D3BB6001CB80C /* uWebinterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uWebinterface.h; sourceTree = "<group>"; };
@@ -732,6 +730,11 @@
 		9BD7DB270A2CAE4600D7033C /* textures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = textures; path = ../textures; sourceTree = SOURCE_ROOT; };
 		9BD7DB760A2CE28500D7033C /* SDLMain.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = SDLMain.nib; path = ../src/macosx/SDLMain.nib; sourceTree = SOURCE_ROOT; };
 		9BD7DB7D0A2CE35600D7033C /* Armagetron Advanced.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "Armagetron Advanced.icns"; sourceTree = "<group>"; };
+		9BFF72E10A32238500F471CD /* eChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eChannel.h; sourceTree = "<group>"; };
+		9BFF72E50A32238500F471CD /* eChannelSDLMixer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eChannelSDLMixer.cpp; sourceTree = "<group>"; };
+		9BFF72E60A32238500F471CD /* eChannelSDLMixer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eChannelSDLMixer.h; sourceTree = "<group>"; };
+		9BFF72E70A32238500F471CD /* eMusicTrackSDLMixer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eMusicTrackSDLMixer.cpp; sourceTree = "<group>"; };
+		9BFF72E80A32238500F471CD /* eMusicTrackSDLMixer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eMusicTrackSDLMixer.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -854,6 +857,7 @@
 		8CBA5E0E089EEC7C007E21DC /* engine */ = {
 			isa = PBXGroup;
 			children = (
+				9BFF72DF0A32238500F471CD /* sound */,
 				8CBA5E10089EEC7C007E21DC /* eAdvWall.cpp */,
 				8CBA5E11089EEC7C007E21DC /* eAdvWall.h */,
 				8CBA5E12089EEC7C007E21DC /* eAuthentification.cpp */,
@@ -862,8 +866,6 @@
 				8CBA5E15089EEC7C007E21DC /* eAxis.h */,
 				8CBA5E16089EEC7C007E21DC /* eCamera.cpp */,
 				8CBA5E17089EEC7C007E21DC /* eCamera.h */,
-				8C1D38DB099D41A500A334A8 /* eChannel.cpp */,
-				8C1D38DC099D41A500A334A8 /* eChannel.h */,
 				8CBA5E18089EEC7C007E21DC /* eCoord.h */,
 				8CBA5E19089EEC7C007E21DC /* eDebugLine.cpp */,
 				8CBA5E1A089EEC7C007E21DC /* eDebugLine.h */,
@@ -876,8 +878,6 @@
 				8CBA5E21089EEC7C007E21DC /* eGrid.h */,
 				8CBA5E22089EEC7D007E21DC /* eKrawall.cpp */,
 				8CBA5E23089EEC7D007E21DC /* eKrawall.h */,
-				8C1D38DD099D41A500A334A8 /* eMusicTrack.cpp */,
-				8C1D38DE099D41A500A334A8 /* eMusicTrack.h */,
 				8CBA5E24089EEC7D007E21DC /* eNetGameObject.cpp */,
 				8CBA5E25089EEC7D007E21DC /* eNetGameObject.h */,
 				8CBA5E26089EEC7D007E21DC /* ePath.cpp */,
@@ -1191,6 +1191,50 @@
 				9BD7DB270A2CAE4600D7033C /* textures */,
 			);
 			name = Resources;
+			sourceTree = "<group>";
+		};
+		9BFF72DF0A32238500F471CD /* sound */ = {
+			isa = PBXGroup;
+			children = (
+				9BFF72E00A32238500F471CD /* base */,
+				9BFF72E20A32238500F471CD /* openal */,
+				9BFF72E30A32238500F471CD /* sdl */,
+				9BFF72E40A32238500F471CD /* sdl_mixer */,
+			);
+			path = sound;
+			sourceTree = "<group>";
+		};
+		9BFF72E00A32238500F471CD /* base */ = {
+			isa = PBXGroup;
+			children = (
+				9BFF72E10A32238500F471CD /* eChannel.h */,
+			);
+			path = base;
+			sourceTree = "<group>";
+		};
+		9BFF72E20A32238500F471CD /* openal */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = openal;
+			sourceTree = "<group>";
+		};
+		9BFF72E30A32238500F471CD /* sdl */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = sdl;
+			sourceTree = "<group>";
+		};
+		9BFF72E40A32238500F471CD /* sdl_mixer */ = {
+			isa = PBXGroup;
+			children = (
+				9BFF72E50A32238500F471CD /* eChannelSDLMixer.cpp */,
+				9BFF72E60A32238500F471CD /* eChannelSDLMixer.h */,
+				9BFF72E70A32238500F471CD /* eMusicTrackSDLMixer.cpp */,
+				9BFF72E80A32238500F471CD /* eMusicTrackSDLMixer.h */,
+			);
+			path = sdl_mixer;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1606,8 +1650,6 @@
 				8CAA3F39099D3CCA001CB80C /* tPlayList.cpp in Sources */,
 				8CAA3F3B099D3CCA001CB80C /* tRecorder.cpp in Sources */,
 				8C1D3883099D3DAF00A334A8 /* eSoundMixer.cpp in Sources */,
-				8C1D38E7099D41A500A334A8 /* eChannel.cpp in Sources */,
-				8C1D38E9099D41A500A334A8 /* eMusicTrack.cpp in Sources */,
 				8CC3F04C099D46AD0034B6B8 /* tRecorderInternal.cpp in Sources */,
 				9B1EA4930A20B20200FA3478 /* cCockpit.cpp in Sources */,
 				9B1EA4950A20B20200FA3478 /* cGauges.cpp in Sources */,
@@ -1727,8 +1769,6 @@
 				8CAA3F42099D3CCA001CB80C /* tPlayList.cpp in Sources */,
 				8CAA3F44099D3CCA001CB80C /* tRecorder.cpp in Sources */,
 				8C1D3885099D3DAF00A334A8 /* eSoundMixer.cpp in Sources */,
-				8C1D38E3099D41A500A334A8 /* eChannel.cpp in Sources */,
-				8C1D38E5099D41A500A334A8 /* eMusicTrack.cpp in Sources */,
 				8CC3F04A099D46AD0034B6B8 /* tRecorderInternal.cpp in Sources */,
 				9B1EA4870A20B20200FA3478 /* cCockpit.cpp in Sources */,
 				9B1EA4890A20B20200FA3478 /* cGauges.cpp in Sources */,
@@ -1848,8 +1888,6 @@
 				8CAA3F30099D3CCA001CB80C /* tPlayList.cpp in Sources */,
 				8CAA3F32099D3CCA001CB80C /* tRecorder.cpp in Sources */,
 				8C1D3881099D3DAF00A334A8 /* eSoundMixer.cpp in Sources */,
-				8C1D38DF099D41A500A334A8 /* eChannel.cpp in Sources */,
-				8C1D38E1099D41A500A334A8 /* eMusicTrack.cpp in Sources */,
 				8CC3F048099D46AD0034B6B8 /* tRecorderInternal.cpp in Sources */,
 				8CAED01B09A2890600EE312F /* gCommandLineJumpStart.cpp in Sources */,
 				8C1AB77E09A3D2D9007E2048 /* AAURLHandler.mm in Sources */,
@@ -1863,6 +1901,8 @@
 				9B1EA5270A20BB0900FA3478 /* rGradient.cpp in Sources */,
 				9B1EA53D0A20BC0100FA3478 /* gRotation.cpp in Sources */,
 				9BD7DAB70A2C87FA00D7033C /* shttpd.c in Sources */,
+				9BFF72EA0A32238500F471CD /* eChannelSDLMixer.cpp in Sources */,
+				9BFF72EC0A32238500F471CD /* eMusicTrackSDLMixer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2048,6 +2088,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					../src/engine/sound,
 					"$(SYMROOT)/../src/macosx",
 					/Library/Frameworks/ArmagetronAdvanced/current/SDL.framework/Headers,
 					/Library/Frameworks/ArmagetronAdvanced/current/SDL_image.framework/Headers,
@@ -2099,6 +2140,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					../src/engine/sound,
 					"$(SYMROOT)/../src/macosx",
 					/Library/Frameworks/ArmagetronAdvanced/current/SDL.framework/Headers,
 					/Library/Frameworks/ArmagetronAdvanced/current/SDL_image.framework/Headers,
