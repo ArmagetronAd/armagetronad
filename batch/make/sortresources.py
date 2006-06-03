@@ -214,7 +214,7 @@ if __name__ == "__main__":
     # parse arguments
     for arg in sys.argv[1:]:
         # parse options
-        if arg[0] == "-":
+        if len(arg)>0 and arg[0] == "-":
             if len(arg) > 1:
                 if arg[1] == "h":
                     Options( 0 )
