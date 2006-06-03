@@ -644,21 +644,10 @@ You need GLU to compile Armagetron; it SHOULD have come with OpenGL.
 Read the file doc/install_linux.html.]))
 
 dnl *************************************************
-dnl         freetype
+dnl         FTGL
 dnl *************************************************
 
 test -z "$FREETYPE_CONFIG" && FREETYPE_CONFIG=freetype-config
-
-AC_CHECK_LIB(freetype,FT_Free,
-CPPFLAGS="$CPPFLAGS `$FREETYPE_CONFIG --cflags`"
-LIBS="$LIBS `$FREETYPE_CONFIG --libs`"
-,
-AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file doc/install_linux.html.])
-)
-
-dnl *************************************************
-dnl         FTGL
-dnl *************************************************
 
 AC_CHECK_LIB(ftgl,FT_Render_Glyph,
 CPPFLAGS="$CPPFLAGS `pkg-config ftgl --cflags`"
@@ -700,6 +689,20 @@ if test ${found} = false; then
     AC_MSG_RESULT(not found)
     AC_MSG_ERROR([FTGL headers not found on your system. Please pass the correct location via --with-ftgl=<path to FTGL include directory>.])
 fi
+
+dnl *************************************************
+dnl         freetype
+dnl *************************************************
+
+dnl FTGL has this one in its dependencies and libraries it passes via pkg-config, but
+dnl they're in the wrong order for static linking. That's why we add freetype once again.
+
+AC_CHECK_LIB(freetype,FT_Free,
+CPPFLAGS="$CPPFLAGS `$FREETYPE_CONFIG --cflags`"
+LIBS="$LIBS `$FREETYPE_CONFIG --libs`"
+,
+AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file doc/install_linux.html.])
+)
 
 # end of dedicated server if/else
 fi
