@@ -44,41 +44,38 @@ namespace "xcode" do
     cp_r "#{AAConfig::BUILD_DIR}/resource", AAConfig::PACKGAGE_RESOURCE_DIR
   end
   
-end
+  AAConfig::IN_FILES.each do |infile, should_package|
+    result_file = infile.sub(AAConfig::SRC_DIR, AAConfig::BUILD_DIR).sub(/\.in$/, '')
 
-AAConfig::IN_FILES.each do |infile, should_package|
-  result_file = infile.sub(AAConfig::SRC_DIR, AAConfig::BUILD_DIR).sub(/\.in$/, '')
-  
-  # Define the task for the resulting file
-  file result_file => infile do |t|
-    mkdir_p File.dirname(t.name)
-    cp t.prerequisites[0], t.name
-    # Subsitute the tags in the resulting file
-    open(t.name, 'r+') do |f|
-      data = f.read
-      AAConfig::TAG_MAPPINGS.each { |tag, value| data.gsub!(tag, value) }
-      f.pos = 0
-      f.write(data)
-      f.truncate(f.pos)
-    end
-  end
-  namespace "xcode" do
-    task :process_in_files => result_file
-  end
-  
-  # Define the task to package the file
-  if should_package
-    # builddir/config/foo -> builddir/build/Debug/Armagetron Advanced.app/Contents/Resources/config/foo
-    # Currently all files we package follow the same pattern -- we only need the last two paths
-    package_file = AAConfig::PACKGAGE_RESOURCE_DIR + "/" + result_file.split("/")[-2, 2].join("/")
-    file package_file => result_file do |t|
+    # Define the task for the resulting file
+    file result_file => infile do |t|
       mkdir_p File.dirname(t.name)
       cp t.prerequisites[0], t.name
+      # Subsitute the tags in the resulting file
+      open(t.name, 'r+') do |f|
+        data = f.read
+        AAConfig::TAG_MAPPINGS.each { |tag, value| data.gsub!(tag, value) }
+        f.pos = 0
+        f.write(data)
+        f.truncate(f.pos)
+      end
     end
-    namespace "xcode" do
+    task :process_in_files => result_file
+    
+    # Define the task to package the file
+    if should_package
+      # builddir/config/foo -> builddir/build/Debug/Armagetron Advanced.app/Contents/Resources/config/foo
+      # Currently all files we package follow the same pattern -- we only need the last two paths
+      package_file = AAConfig::PACKGAGE_RESOURCE_DIR + "/" + result_file.split("/")[-2, 2].join("/")
+      file package_file => result_file do |t|
+        mkdir_p File.dirname(t.name)
+        cp t.prerequisites[0], t.name
+      end
       task :package_in_files => package_file
     end
+
   end
+  
   
 end
 
@@ -142,3 +139,4 @@ end
 #   end
 #   
 # end
+
