@@ -60,7 +60,6 @@ static uMenuItemFunction defaul
 uMenu screen_menu_detail("$detail_settings_menu");
 uMenu screen_menu_tweaks("$performance_tweaks_menu");
 uMenu screen_menu_prefs("$preferences_menu");
-uMenu hud_prefs("$hud_menu");
 
 static void sg_ScreenModeMenu();
 
@@ -72,10 +71,6 @@ static uMenuItemSubmenu smp(&sg_screenMenu,&screen_menu_prefs,
                             "$preferences_menu_help");
 static uMenuItemFunction smm(&sg_screenMenu,"$screen_mode_menu",
                              "$screen_mode_menu_help", sg_ScreenModeMenu );
-
-static uMenuItemSubmenu huds(&screen_menu_prefs,&hud_prefs,
-                             "$hud_menu_help");
-
 
 static tConfItemLine c_ext("GL_EXTENSIONS",gl_extensions);
 static tConfItemLine c_ver("GL_VERSION",gl_version);
@@ -557,90 +552,6 @@ static uSelectEntry<rSysDep::rSwapMode> swapMode_60Hz(swapMode,"$swapmode_60hz_t
 */
 
 static tConfItem<int> swapModeCI("SWAP_MODE", reinterpret_cast< int & >( rSysDep::swapMode_ ) );
-
-static tConfItem<REAL> sgs("SPEED_GAUGE_SIZE",subby_SpeedGaugeSize);
-static tConfItem<REAL> sgx("SPEED_GAUGE_LOCX",subby_SpeedGaugeLocX);
-static tConfItem<REAL> sgy("SPEED_GAUGE_LOCY",subby_SpeedGaugeLocY);
-static tConfItem<bool> sgbar("SPEED_GAUGE_BAR", subby_SpeedGaugeBar);
-
-static tConfItem<REAL> bgs("BRAKE_GAUGE_SIZE",subby_BrakeGaugeSize);
-static tConfItem<REAL> bgx("BRAKE_GAUGE_LOCX",subby_BrakeGaugeLocX);
-static tConfItem<REAL> bgy("BRAKE_GAUGE_LOCY",subby_BrakeGaugeLocY);
-static tConfItem<bool> bgbar("BRAKE_GAUGE_BAR", subby_BrakeGaugeBar);
-
-static tConfItem<REAL> rgs("RUBBER_GAUGE_SIZE",subby_RubberGaugeSize);
-static tConfItem<REAL> rgx("RUBBER_GAUGE_LOCX",subby_RubberGaugeLocX);
-static tConfItem<REAL> rgy("RUBBER_GAUGE_LOCY",subby_RubberGaugeLocY);
-static tConfItem<bool> rgbar("RUBBER_GAUGE_BAR", subby_RubberGaugeBar);
-
-static tConfItem<bool> showh("SHOW_HUD",subby_ShowHUD);
-static tConfItem<bool> showf("SHOW_FASTEST",subby_ShowSpeedFastest);
-static tConfItem<bool> shows("SHOW_SCORE",subby_ShowScore);
-static tConfItem<bool> showae("SHOW_ALIVE",subby_ShowAlivePeople);
-static tConfItem<bool> showp("SHOW_PING",subby_ShowPing);
-static tConfItem<bool> showsm("SHOW_SPEED",subby_ShowSpeedMeter);
-static tConfItem<bool> showbm("SHOW_BRAKE",subby_ShowBrakeMeter);
-static tConfItem<bool> showrm("SHOW_RUBBER",subby_ShowRubberMeter);
-static tConfItem<bool> showtim("SHOW_TIME",showTime);
-static tConfItem<bool> show24("SHOW_TIME_24",show24hour);
-
-static tConfItem<REAL> scorex("SCORE_LOCX",subby_ScoreLocX);
-static tConfItem<REAL> scorey("SCORE_LOCY",subby_ScoreLocY);
-static tConfItem<REAL> scores("SCORE_SIZE",subby_ScoreSize);
-
-static tConfItem<REAL> fastx("FASTEST_LOCX",subby_FastestLocX);
-static tConfItem<REAL> fasty("FASTEST_LOCY",subby_FastestLocY);
-static tConfItem<REAL> fasts("FASTEST_SIZE",subby_FastestSize);
-
-static tConfItem<REAL> aex("ALIVE_LOCX",subby_AlivePeopleLocX);
-static tConfItem<REAL> aey("ALIVE_LOCY",subby_AlivePeopleLocY);
-static tConfItem<REAL> aes("ALIVE_SIZE",subby_AlivePeopleSize);
-
-static tConfItem<REAL> px("PING_LOCX",subby_PingLocX);
-static tConfItem<REAL> py("PING_LOCY",subby_PingLocY);
-static tConfItem<REAL> ps("PING_SIZE",subby_PingSize);
-
-uMenuItemToggle hud3
-(&hud_prefs,"$pref_showfastest_text",
- "$pref_showfastest_help",subby_ShowSpeedFastest);
-
-uMenuItemToggle mud4
-(&hud_prefs,"$pref_showscore_text",
- "$pref_showscore_help",subby_ShowScore);
-
-uMenuItemToggle hud5
-(&hud_prefs,"$pref_showenemies_text",
- "$pref_showenemies_help",subby_ShowAlivePeople);
-
-uMenuItemToggle hud6
-(&hud_prefs,"$pref_showping_text",
- "$pref_showping_help",subby_ShowPing);
-
-uMenuItemToggle hud7
-(&hud_prefs,"$pref_showspeed_text",
- "$pref_showspeed_help",subby_ShowSpeedMeter);
-
-uMenuItemToggle hud8
-(&hud_prefs,"$pref_showbrake_text",
- "$pref_showbrake_help",subby_ShowBrakeMeter);
-
-uMenuItemToggle hud9
-(&hud_prefs,"$pref_showrubber_text",
- "$pref_showrubber_help",subby_ShowRubberMeter);
-
-uMenuItemToggle hud10
-(&hud_prefs,"$pref_showtime_text",
- "$pref_showtime_help",showTime);
-
-uMenuItemToggle hud11
-(&hud_prefs,"$pref_show24hour_text",
- "$pref_show24hour_help",show24hour);
-
-uMenuItemToggle hud2
-(&hud_prefs,"$pref_showhud_text",
- "$pref_showhud_help",subby_ShowHUD);
-
-
 
 static tConfItem<bool> WRAP("WRAP_MENU",uMenu::wrap);
 

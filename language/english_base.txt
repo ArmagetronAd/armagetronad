@@ -788,6 +788,26 @@ input_mess_down_help				Scrolls the messages down a page.
 #********************************************
 #********************************************
 #
+#       cockpit keys
+#
+#********************************************
+#********************************************
+
+input_cockpit_key_1_text			Cockpit key 1
+input_cockpit_key_2_text			Cockpit key 2
+input_cockpit_key_3_text			Cockpit key 3
+input_cockpit_key_4_text			Cockpit key 4
+input_cockpit_key_5_text			Cockpit key 5
+
+input_cockpit_key_1_help			Cockpit keys can trigger actions, such as showing/hiding parts of the cockpit. Their actual effect depends on the cockpit file you use.
+input_cockpit_key_2_help			Cockpit keys can trigger actions, such as showing/hiding parts of the cockpit. Their actual effect depends on the cockpit file you use.
+input_cockpit_key_3_help			Cockpit keys can trigger actions, such as showing/hiding parts of the cockpit. Their actual effect depends on the cockpit file you use.
+input_cockpit_key_4_help			Cockpit keys can trigger actions, such as showing/hiding parts of the cockpit. Their actual effect depends on the cockpit file you use.
+input_cockpit_key_5_help			Cockpit keys can trigger actions, such as showing/hiding parts of the cockpit. Their actual effect depends on the cockpit file you use.
+	
+#********************************************
+#********************************************
+#
 #       cycle control keys
 #
 #********************************************
@@ -846,6 +866,9 @@ input_glance_right_help		Turns the camera temporarily to the right.
 
 input_glance_left_text		Glance left
 input_glance_left_help		Turns the camera temporarily to the left.
+
+input_glance_forward_text	Glance forward
+input_glance_forward_help	Turns the camera temporarily to the front.
 
 input_bank_down_text		Look down
 input_bank_down_help		Turns the camera down or moves it up if the camera direction is fixed.
