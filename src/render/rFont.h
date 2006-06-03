@@ -31,26 +31,42 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rSDL.h"
 
 #include "defs.h"
-#include "rTexture.h"
+//#include "rTexture.h"
 #include "tString.h"
 #include "tColor.h"
 
 #include <map>
+
+//! Different types of fonts, they might get different font files assigned
+enum sr_fontClass {
+    sr_fontConsole       = 00001, //!< for the console
+    sr_fontMenu          = 00002, //!< for menu text
+    sr_fontMenuTitle     = 00004, //!< for the titles above menus
+    sr_fontScoretable    = 00010, //!< for the score table (the one that comes when you press TAB)
+    sr_fontMenuHelp      = 00020, //!< for the help that pops up if you idle in the menu
+    sr_fontError         = 00040, //!< for error messages like the one that pops up if you get kicked from the server
+    sr_fontCockpit       = 00100, //!< for all font in the cockpit
+    sr_fontCenterMessage = 00200, //!< for CENTER_MESSAGEs
+    sr_fontServerBrowser = 00400, //!< for the LAN and master server browser
+    sr_fontCycleLabel    = 01000, //!< for the player name displayed over cycles
+    sr_fontServerDetails = 02000  //!< for the details displayed in the server browser (server description, player names etc)
+};
 
 class FTFont;
 
 // maybe make this a child of std::ostream...
 class rTextField{
     tString buffer;       // buffer where we store stuff before we print it
-    int  width;          // width in characters
+    float  width;          // width in openGL units
     int  parIndent;      // number of spaces to insert after automatic newline
     REAL left,top;       // top left corner of the console
-    REAL cwidth,cheight; // character dimensions
+    REAL cheight; // character dimensions
     //    rFont *F;             // the font
     int  x,y,realx;      // current cursor position
     float nextx;          // x-coordinate the next char should go to
     bool multiline;        // linewrapping enabled?
     FTFont *font;
+    sr_fontClass type;    //what is the type of this font?
 
     tColor color_;               //!< current color
     static tColor defaultColor_; //!< default color
@@ -68,14 +84,13 @@ public:
  #define  rCHEIGHT_NORMAL (32/480.0)
 
     rTextField(REAL Left,REAL Top,
-               REAL Cwidth=rCWIDTH_NORMAL,REAL Cheight=rCHEIGHT_NORMAL);
+               REAL Cheight, sr_fontClass Type);
 
     virtual ~rTextField(); // for future extensions (buffered console?)
 
-    REAL GetCWidth(){ return cwidth; }
     REAL GetCHeight(){ return cheight; }
 
-    void SetWidth(int w){
+    void SetWidth(float w){
         width=w;
     }
 
@@ -131,7 +146,7 @@ template<class T> rTextField & operator<<(rTextField &c,const T &x){
     return c.StringOutput(out);
 }
 
-void DisplayText(REAL x,REAL y,REAL w,REAL h,const char *text,int center=0,
+void DisplayText(REAL x,REAL y,REAL h,const char *text, sr_fontClass type,int center=0,
                  int cursor=0,int cursorPos=0);
 
 // *******************************************************************************************

@@ -396,7 +396,6 @@ gServerMenu::~gServerMenu()
 
 #ifndef DEDICATED
 static REAL text_height=.05;
-static REAL text_width=.025;
 
 static REAL shrink = .6f;
 static REAL displace = .15;
@@ -407,43 +406,10 @@ void gServerMenu::Render(REAL y,
 {
     if (sr_glOut)
     {
-        DisplayText(-.9f, y, text_width, text_height, servername.c_str(), -1);
-        DisplayText(.6f, y, text_width, text_height, ping.c_str(), 1);
-        DisplayText(.75f, y, text_width, text_height, users.c_str(), 1);
-        DisplayText(.9f, y, text_width, text_height, score.c_str(), 1);
-
-        ////int posDisplacement = 0;
-        //tColoredString text;
-        //if (tColoredString::RemoveColors(servername).Len() > 1)
-        //{
-        //    text << servername << "0xRESETT";
-        //}
-        //else
-        //    text << tOutput("$network_master_unknown");
-
-        //bool cut = true;
-        //if (ping.Len() > 1)
-        //{
-        //    text.SetPos(static_cast<int>(1.35/c.GetCWidth())  - tColoredString::RemoveColors( ping ).Len() - 1, cut );
-        //    cut = false;
-        //    text << " " << ping;
-        //}
-
-        //if (users.Len() > 1)
-        //{
-        //    text.SetPos(static_cast<int>(1.6/c.GetCWidth()) - tColoredString::RemoveColors( users ).Len(), cut );
-        //    cut = false;
-        //    text << users;
-        //}
-
-        //if (score.Len() > 1)
-        //{
-        //    text.SetPos(static_cast<int>(1.8/c.GetCWidth()) - tColoredString::RemoveColors( score ).Len(), cut );
-        //    cut = false;
-        //    text << score;
-        //}
-
-        //c << text;
+        DisplayText(-.9f, y, text_height, servername.c_str(), sr_fontServerBrowser, -1);
+        DisplayText(.6f, y, text_height, ping.c_str(), sr_fontServerBrowser, 1);
+        DisplayText(.75f, y, text_height, users.c_str(), sr_fontServerBrowser, 1);
+        DisplayText(.9f, y, text_height, score.c_str(), sr_fontServerBrowser, 1);
     }
 }
 
@@ -594,8 +560,8 @@ void gServerMenuItem::RenderBackground()
     {
         rTextField::SetDefaultColor( tColor(1,1,1) );
 
-        rTextField players( -.9, -.3, text_width, text_height );
-	players.EnableLineWrap();
+        rTextField players( -.9, -.3, text_height, sr_fontServerDetails );
+        players.EnableLineWrap();
         players << tOutput( "$network_master_players" );
         if ( server->UserNamesOneLine().Len() > 2 )
             players << server->UserNamesOneLine();

@@ -483,7 +483,7 @@
               </Label> -->
 
               <!-- FPS -->
-              <BarGauge camera="in" viewport="top">
+              <BarGauge camera="in">
                   <DataSet>
                       <AtomicData field="source" source="current_framerate" />
                       <AtomicData field="minimum" source="0" />

@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rSysdep.h"
 #include "rScreen.h"
 #include "rViewport.h"
+#include "rTexture.h"
 #include "tString.h"
 #include "math.h"
 #include "uInputQueue.h"
@@ -96,9 +97,6 @@ void uMenu::ReverseItems(){
 //static REAL text_width=rCWIDTH_NORMAL;
 
 static REAL text_height=.11;
-#ifndef DEDICATED
-static REAL text_width=.05;
-#endif
 
 #ifndef DEDICATED
 static REAL titlefac=1.2;
@@ -290,8 +288,8 @@ void uMenu::OnEnter(){
 
             Color(.6,.6,1,1);
             ::DisplayText(0,menuTop+text_height*titlefac
-                          ,text_width*titlefac,text_height*titlefac,
-                          title,0);
+                          ,text_height*titlefac,
+                          title,sr_fontMenuTitle,0);
 
             glDisable(GL_TEXTURE_2D);
             //glDisable(GL_TEXTURE);
@@ -310,9 +308,9 @@ void uMenu::OnEnter(){
                           .8*(tSysTimeFloat()-lastkey-timeout),
                           .8*(tSysTimeFloat()-lastkey-timeout));
 
-                rTextField c(-.95f,menuBot-.04f);
-                c.SetWidth(static_cast<int>((1.9f-items[selected]->SpaceRight())/c.GetCWidth()));
-		c.EnableLineWrap();
+                rTextField c(-.95f,menuBot-.04f,rCHEIGHT_NORMAL, sr_fontMenu);
+                c.SetWidth(1.9f-items[selected]->SpaceRight());
+                c.EnableLineWrap();
                 c << items[selected]->Help();
             }
             else disphelp=false;
@@ -502,7 +500,6 @@ void uMenuItem::DisplayText(REAL x,REAL y,const char *text,
     if (sr_glOut){
         SetColor( selected, alpha );
 
-        REAL tw = text_width;
         REAL th = text_height;
 
         REAL availw = 1.9f;
@@ -516,7 +513,7 @@ void uMenuItem::DisplayText(REAL x,REAL y,const char *text,
             th *= availw/(usedwidth);
         }
 
-        ::DisplayText(x,y,tw,th,text,center,c,cp);
+        ::DisplayText(x,y,th,text,sr_fontMenu,center,c,cp);
     }
 #endif
 }
@@ -1241,13 +1238,13 @@ void uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 }
 
                 Color(1,1,1);
-                DisplayText(0,.8,w,h, message);
+                DisplayText(0,.8,w,message,sr_fontError);
 
                 w = 16/640.0;
                 h = 32/480.0;
 
                 {
-                    rTextField c(-.8,.6, w, h);
+                    rTextField c(-.8,.6, h, sr_fontError);
 
                     c << interpretation;
                 }

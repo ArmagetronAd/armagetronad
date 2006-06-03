@@ -430,16 +430,16 @@ float eTeam::RankingGraph( float y, int MAX ){
         tColoredString name;
         name << tColoredString::ColorString(1.,.5,.5)
         << tOutput("$team_scoretable_name");
-        DisplayText(-.7, y, 1., .06, name.c_str(), -1);
+        DisplayText(-.7, y, .06, name.c_str(), sr_fontScoretable, -1);
         tColoredString score;
         score << tOutput("$team_scoretable_score");
-        DisplayText(-.3, y, 1., .06, score.c_str(), -1);
+        DisplayText(-.3, y, .06, score.c_str(), sr_fontScoretable, -1);
         tColoredString members;
         members << tOutput("$team_scoretable_members");
-        DisplayText(-.1, y, 1., .06, members.c_str(), -1);
+        DisplayText(-.1, y, .06, members.c_str(), sr_fontScoretable, -1);
         tColoredString alive;
         alive << tOutput("$team_scoretable_alive");
-        DisplayText(.3, y, 1., .06, alive.c_str(), -1);
+        DisplayText(.3, y, .06, alive.c_str(), sr_fontScoretable, -1);
         y-=.06;
 
         int max = teams.Len();
@@ -451,13 +451,13 @@ float eTeam::RankingGraph( float y, int MAX ){
             eTeam *t = teams(i);
             tColoredString name;
             name << ColorString(t) << t->Name();
-            DisplayText(-.7, y, 1., .06, name.c_str(), -1);
+            DisplayText(-.7, y, .06, name.c_str(), sr_fontScoretable, -1);
             tColoredString score;
             score << t->score;
-            DisplayText(-.3, y, 1., .06, score.c_str(), -1);
+            DisplayText(-.3, y, .06, score.c_str(), sr_fontScoretable, -1);
             tColoredString members;
             members << t->NumPlayers();
-            DisplayText(-.1, y, 1., .06, members.c_str(), -1);
+            DisplayText(-.1, y, .06, members.c_str(), sr_fontScoretable, -1);
             tColoredString alive;
             int alivep=t->AlivePlayers();
             if(alivep)
@@ -465,12 +465,12 @@ float eTeam::RankingGraph( float y, int MAX ){
             else
                 alive << tColoredString::ColorString(1,0,0);
             alive << alivep;
-            DisplayText(.3, y, 1., .06, alive.c_str(), -1);
+            DisplayText(.3, y, .06, alive.c_str(), sr_fontScoretable, -1);
             y-=.06;
         }
         if ( max < teams.Len() )
         {
-            DisplayText(-.7, y, 1., .06, "...", -1);
+            DisplayText(-.7, y, .06, "...", sr_fontScoretable, -1);
             y-=.06;
         }
     }

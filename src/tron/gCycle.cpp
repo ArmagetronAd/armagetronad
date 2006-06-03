@@ -3153,7 +3153,7 @@ void gCycle::RenderName( const eCamera* cam ) {
     glLoadIdentity();
 
     glColor4f(1, 1, 1, alpha);
-    DisplayText(xp, yp, rCWIDTH_NORMAL, rCHEIGHT_NORMAL, this->player->GetName(), 0, 0);
+    DisplayText(xp, yp, rCHEIGHT_NORMAL, this->player->GetName(), sr_fontCycleLabel, 0, 0);
 
     ProjMatrix();
     glPopMatrix();

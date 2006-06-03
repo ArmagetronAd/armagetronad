@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tConfiguration.h"
 #include "tDirectories.h"
 #include "tCoord.h"
+#include "rTexture.h"
 #include <ctype.h>
 
 #ifndef DEDICATED
@@ -369,17 +370,15 @@ void sr_ReloadFont(void) {
 #endif
 
 rTextField::rTextField(REAL Left,REAL Top,
-                       REAL Cwidth,REAL Cheight)
+                       REAL Cheight, sr_fontClass Type)
         :parIndent(0),
-left(Left),top(Top),cwidth(Cwidth),cheight(Cheight),x(0),y(0),realx(0),nextx(Left),multiline(false),cursor(0),cursorPos(0){
-    if (cwidth*sr_screenWidth<10)
-        cwidth=10/REAL(sr_screenWidth);
+left(Left),top(Top),cheight(Cheight),x(0),y(0),realx(0),nextx(Left),multiline(false),type(Type),cursor(0),cursorPos(0){
     if (cheight*sr_screenHeight<18)
         cheight=18/REAL(sr_screenHeight);
 
     color_ = defaultColor_;
 
-    width = int((1-Left)/cwidth);
+    width = 1.-Left;
 
     /*
     top=(int(top*sr_screenHeight)+.5)/REAL(sr_screenHeight);
@@ -583,7 +582,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
 {
 #ifndef DEDICATED
     float currentWidth = nextx - left;
-    float maxWidth = width * cwidth;
+    float const &maxWidth = width;
     bool lastIsNewline = true;
     bool trouble = false; // Do we have a word that won't fit on a line?
     // run through string
@@ -690,7 +689,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
     return *this;
 }
 
-void DisplayText(REAL x,REAL y,REAL w,REAL h,const char *text,int center,int cursor,int cursorPos){
+void DisplayText(REAL x,REAL y,REAL h,const char *text,sr_fontClass type,int center,int cursor,int cursorPos){
 #ifndef DEDICATED
     float height;
     float width = rTextField::GetTextLength(tString(text), h, true, true, &height);
@@ -703,9 +702,9 @@ void DisplayText(REAL x,REAL y,REAL w,REAL h,const char *text,int center,int cur
         width=maxw;
     }
 
-    rTextField c(x-(center+1)*width*.5,y+h*.5,w,h);
+    rTextField c(x-(center+1)*width*.5,y+h*.5,h,type);
     if (center==-1)
-        c.SetWidth(int((1-x)/w));
+        c.SetWidth(1.-x);
     else
         c.SetWidth(10000);
 

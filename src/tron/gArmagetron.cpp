@@ -307,12 +307,12 @@ static void welcome(){
             //REAL middle=-.6;
 
             Color(1,1,1);
-            DisplayText(0,.8,w,h,tOutput("$welcome_message_heading"));
+            DisplayText(0,.8,h,tOutput("$welcome_message_heading"), sr_fontError);
 
             w/=2;
             h/=2;
 
-            rTextField c(-.8,.6, w, h);
+            rTextField c(-.8,.6, h, sr_fontError);
 
 
             c << tOutput("$welcome_message_intro");

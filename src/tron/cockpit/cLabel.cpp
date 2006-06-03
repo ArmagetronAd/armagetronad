@@ -83,7 +83,7 @@ void Label::Render()
         } else if(m_captionloc) {
             captionloc.y = m_position.y - height*m_size.y;
         }
-        rTextField c(captionloc.x,captionloc.y,m_size.x,m_size.y);
+        rTextField c(captionloc.x,captionloc.y,m_size.y,sr_fontCockpit);
         c<<m_caption;
     }
 
@@ -94,7 +94,7 @@ void Label::Render()
             pos.x = m_position.x;
             std::deque<float>::iterator m(coloumns.begin());
             for(std::deque<tString>::iterator j(i->begin()); j != i->end(); ++j, ++m) {
-                rTextField c(pos.x,pos.y,m_size.x,m_size.y);
+                rTextField c(pos.x,pos.y,m_size.y, sr_fontCockpit);
                 c<<*j;
                 pos.x += *m+m_size.x;
             }

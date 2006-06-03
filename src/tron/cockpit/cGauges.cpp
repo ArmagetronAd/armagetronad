@@ -55,18 +55,18 @@ void BarGauge::RenderMinMax(tValue::Base const &min_s, tValue::Base const &max_s
     if((m_showmin && !m_reverse) || (m_showmax && m_reverse))
         DisplayText(
             m_position.x-m_size.x, m_position.y-.15*m_size.x,
-            .12*m_size.x, .24*m_size.x,
-            ((m_reverse?max_s:min_s).GetString()).c_str());
+            .24*m_size.x,
+            ((m_reverse?max_s:min_s).GetString()).c_str(), sr_fontCockpit);
     if((m_showmax && !m_reverse) || (m_showmin && m_reverse))
         DisplayText( m_position.x+m_size.x, m_position.y-.15*m_size.x,
-                     .12*m_size.x, .24*m_size.x,
-                     ((m_reverse?min_s:max_s).GetString()).c_str());
+                     .24*m_size.x,
+                     ((m_reverse?min_s:max_s).GetString()).c_str(), sr_fontCockpit);
 }
 
 void BarGauge::RenderCaption(void) {
     if ( m_captionloc != off ) {
         const float y=(m_captionloc==top ? m_position.y+m_size.y+.2*m_size.x : m_position.y-.15*m_size.x);
-        DisplayText(m_position.x,y,.12*m_size.x,.24*m_size.x,m_caption.c_str());
+        DisplayText(m_position.x,y,.24*m_size.x,m_caption.c_str(),sr_fontCockpit);
     }
 }
 
@@ -126,7 +126,7 @@ void BarGauge::RenderGraph(float min, float max, float val, float factor, tValue
 
     //Value
     if(m_showvalue)
-        DisplayText( m_position.x, m_position.y+.20*m_size.x, .12*m_size.x, .24*m_size.x, (val_s.GetString()).c_str());
+        DisplayText( m_position.x, m_position.y+.20*m_size.x, .24*m_size.x, (val_s.GetString()).c_str(), sr_fontCockpit);
 }
 
 
@@ -159,7 +159,7 @@ void VerticalBarGauge::RenderGraph(float min, float max, float val, float factor
 
     //Value
     if(m_showvalue)
-        DisplayText( m_position.x, m_position.y, .025*m_size.y, .05*m_size.y, (val_s.GetString()).c_str());
+        DisplayText( m_position.x, m_position.y, .05*m_size.y, (val_s.GetString()).c_str(), sr_fontCockpit);
 }
 
 
@@ -193,8 +193,9 @@ void NeedleGauge::RenderGraph(float min, float max, float val, float factor, tVa
 
     if(m_showvalue)
         DisplayText( -x*1.45*m_size.x+m_position.x, y*1.35*m_size.y+m_position.y,
-                     .1*m_size.x, .2*m_size.x,
-                     val_s.GetString().c_str());
+                     .2*m_size.x,
+                     val_s.GetString().c_str(),
+                     sr_fontCockpit);
     if (!sr_glOut)
         return;
 }

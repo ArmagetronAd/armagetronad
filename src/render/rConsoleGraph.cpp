@@ -109,9 +109,9 @@ void rConsole::Render(){
 
             rTextField::SetDefaultColor( tColor(1,1,1) );
 
-            rTextField out(-.95f,.99f,rCWIDTH_CON,rCHEIGHT_CON);//,&rFont::s_defaultFontSmall);
+            rTextField out(-.95f,.99f,rCHEIGHT_CON, sr_fontConsole);//,&rFont::s_defaultFontSmall);
             out.SetWidth(static_cast<int>(1.9f/rCWIDTH_CON));
-	    out.EnableLineWrap();
+            out.EnableLineWrap();
 
             int i;
             for(i=currentTop;i<=currentIn && i<=currentTop+MaxHeight();i++)
@@ -157,7 +157,7 @@ void rConsole::Render(){
                 height *= space/needed;
             }
 
-            DisplayText(0,centerMessageY,width,height,sr_centerString);
+            DisplayText(0,centerMessageY,height,sr_centerString,sr_fontCenterMessage);
             //std::cerr << "DisplayText(0," << centerMessageY << "," << (rCWIDTH_CON*4*fak) << "," << (rCHEIGHT_CON*4*fak) << "," <<sr_centerString << ");\n";
         }
 

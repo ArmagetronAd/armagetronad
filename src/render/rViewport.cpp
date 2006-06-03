@@ -217,7 +217,7 @@ void rViewportConfiguration::DemonstrateViewport(tString *titles){
         glEnd();
 
         glColor3f(1,1,1);
-        DisplayText(0,0,.15,.5,titles[i]);
+        DisplayText(0,0,.5,titles[i], sr_fontMenu);
     }
 
     rViewport::s_viewportFullscreen.Select();

@@ -2822,7 +2822,6 @@ void ePlayerNetID::DisplayScores(){
 #ifndef DEDICATED
     if (sr_glOut){
         ::Color(1,1,1);
-        rTextField c(-.7,.6,10/W,18/H);
         float y=.6;
 
         // print team ranking if there actually is a team with more than one player
@@ -2934,19 +2933,19 @@ float ePlayerNetID::RankingGraph( float y, int MAX ){
         tColoredString name;
         name << tColoredString::ColorString(1.,.5,.5)
         << tOutput("$player_scoretable_name");
-        DisplayText(-.7, y, 1., .06, name.c_str(), -1);
+        DisplayText(-.7, y, .06, name.c_str(), sr_fontScoretable, -1);
         tColoredString alive;
         alive << tOutput("$player_scoretable_alive");
-        DisplayText(-.3, y, 1., .06, alive.c_str(), -1);
+        DisplayText(-.3, y, .06, alive.c_str(), sr_fontScoretable, -1);
         tColoredString score;
         score << tOutput("$player_scoretable_score");
-        DisplayText(.05, y, 1., .06, score.c_str(), 1);
+        DisplayText(.05, y, .06, score.c_str(), sr_fontScoretable, 1);
         tColoredString ping;
         ping << tOutput("$player_scoretable_ping");
-        DisplayText(.25, y, 1., .06, ping.c_str(), 1);
+        DisplayText(.25, y, .06, ping.c_str(), sr_fontScoretable, 1);
         tColoredString team;
         team << tOutput("$player_scoretable_team");
-        DisplayText(.3, y, 1., .06, team.c_str(), -1);
+        DisplayText(.3, y, .06, team.c_str(), sr_fontScoretable, -1);
         y-=.06;
 
         int max = se_PlayerNetIDs.Len();
@@ -2964,10 +2963,10 @@ float ePlayerNetID::RankingGraph( float y, int MAX ){
         for(int i=0;i<max;i++){
             ePlayerNetID *p=se_PlayerNetIDs(i);
             if(p->chatting_)
-                DisplayText(-.705, y, 1., .06, "*", 1);
+                DisplayText(-.705, y, .06, "*", sr_fontScoretable, 1);
             tColoredString name;
             name << *p;
-            DisplayText(-.7, y, 1., .06, name.c_str(), -1);
+            DisplayText(-.7, y, .06, name.c_str(), sr_fontScoretable, -1);
             tColoredString alive;
             if ( p->Object() && p->Object()->Alive() )
             {
@@ -2979,33 +2978,33 @@ float ePlayerNetID::RankingGraph( float y, int MAX ){
                 alive << tColoredString::ColorString(1,0,0)
                 << tOutput("$player_scoretable_alive_no");
             }
-            DisplayText(-.3, y, 1., .06, alive.c_str(), -1);
+            DisplayText(-.3, y, .06, alive.c_str(), sr_fontScoretable, -1);
             tColoredString score;
             score << p->score;
-            DisplayText(.05, y, 1., .06, score.c_str(), 1);
+            DisplayText(.05, y, .06, score.c_str(), sr_fontScoretable, 1);
             if (p->IsActive())
             {
                 tColoredString ping;
                 ping << int(p->ping*1000);
-                DisplayText(.25, y, 1., .06, ping.c_str(), 1);
+                DisplayText(.25, y, .06, ping.c_str(), sr_fontScoretable, 1);
                 if ( p->currentTeam )
                 {
                     tColoredString team;
                     eTeam *t = p->currentTeam;
                     team << tColoredStringProxy(t->R()/15.f, t->G()/15.f, t->B()/15.f) << t->Name();
-                    DisplayText(.3, y, 1., .06, team.c_str(), -1);
+                    DisplayText(.3, y, .06, team.c_str(), sr_fontScoretable, -1);
                 }
             }
             else {
                 tColoredString noone;
                 noone << tOutput("$player_scoretable_inactive");
-                DisplayText(.1, y, 1., .06, noone.c_str(), -1);
+                DisplayText(.1, y, .06, noone.c_str(), sr_fontScoretable, -1);
             }
             y-=.06;
         }
         if ( max < se_PlayerNetIDs.Len() )
         {
-            DisplayText(-.7, y, 1., .06, "...", -1);
+            DisplayText(-.7, y, .06, "...", sr_fontScoretable, -1);
             y-=.06;
         }
 
@@ -3013,7 +3012,7 @@ float ePlayerNetID::RankingGraph( float y, int MAX ){
     else {
         tColoredString noone;
         noone << tOutput("$player_scoretable_nobody");
-        DisplayText(-.7, y, 1., .06, noone.c_str(), -1);
+        DisplayText(-.7, y, .06, noone.c_str(), sr_fontScoretable, -1);
     }
     return y;
 }
