@@ -1434,15 +1434,14 @@ void handle_chat(nMessage &m){
                     return;
                 }
                 else if (command == "/msg") {
-                    int current_place=0; // current place in buffer_name.
+                    size_t current_place=0; // current place in buffer_name.
 
                     // search for end of recipient and store recipient in buffer_name
                     tString buffer_name;
-                    while (current_place < msg.Len() && !isspace(msg[current_place])) {
-                        buffer_name[current_place]=msg[current_place];
+                    while (current_place < msg.size() && !isspace(msg[current_place])) {
+                        buffer_name+=msg[current_place];
                         current_place++;
                     }
-                    buffer_name[current_place] = '\0';
                     buffer_name = ePlayerNetID::FilterName(buffer_name);
 
                     // Check for match
@@ -1453,7 +1452,7 @@ void handle_chat(nMessage &m){
                     if (num_matches == 1) {
                         // extract rest of message: it is the true message to send
                         tString msg_core;
-                        while (current_place < msg.Len()-1) {
+                        while (current_place < msg.size() - 1) {
                             current_place++;
                             msg_core += msg[current_place];
                         }
@@ -1727,9 +1726,9 @@ public:
         if (e.type==SDL_KEYDOWN &&
                 (e.key.keysym.sym==SDLK_KP_ENTER || e.key.keysym.sym==SDLK_RETURN)){
 
-                for(int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
-                    if (se_PlayerNetIDs(i)->pID==me->ID())
-                        se_PlayerNetIDs(i)->Chat(*content);
+            for(int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
+                if (se_PlayerNetIDs(i)->pID==me->ID())
+                    se_PlayerNetIDs(i)->Chat(*content);
 
             MyMenu()->Exit();
             return true;
