@@ -620,6 +620,11 @@ private:
 static tExtraConfigCommandLineAnalyzer s_extraAnalyzer;
 #endif
 
+// configuration files to load. The first one found will be loaded, and
+// only the very first one will be written to. Use it to protect stable client's
+// config from the experimental client's wrath.
+char *st_userConfigs[] = { "user_3_0.cfg", "user.cfg", 0 };
+
 void st_LoadConfig()
 {
     const tPath& var = tDirectories::Var();
@@ -631,7 +636,10 @@ void st_LoadConfig()
     tConfItemBase::printErrors=false;
 #endif
     {
-        Load( var, "user.cfg" );
+        // load the first available user configuration file
+        char ** userConfig = st_userConfigs;
+        while ( *userConfig && !Load( var, *userConfig ) )
+            userConfig++;
     }
     tConfItemBase::printErrors=true;
 
@@ -667,7 +675,7 @@ void st_SaveConfig()
     }
 
     std::ofstream s;
-    if ( tDirectories::Var().Open( s, "user.cfg" ) )
+    if ( tDirectories::Var().Open( s, st_userConfigs[0] ) )
     {
         tConfItemBase::SaveAll(s);
     }
