@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -54,7 +54,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gCycle.h"
 //#include <unistd>
 #include <stdio.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <fstream>
 
 #include "nServerInfo.h"
@@ -143,7 +143,7 @@ private:
         s << "-d, --daemon                 : allow the dedicated server to run as a daemon\n"
         << "                               (will not poll for input on stdin)\n";
 #endif
-#endif              
+#endif
     }
 };
 
@@ -350,18 +350,18 @@ void cleanup(eGrid *grid){
           if (playerConfig[i])
           destroy(playerConfig[i]->cam);
           }
-          
-          
+
+
           gNetPlayerWall::Clear();
 
           eFace::Clear();
           eEdge::Clear();
           ePoint::Clear();
-          
+
           eFace::Clear();
           eEdge::Clear();
           ePoint::Clear();
-          
+
           eGameObject::DeleteAll();
 
 
@@ -447,9 +447,9 @@ int filter(const SDL_Event *tEvent){
         if (tEvent->type==SDL_ACTIVEEVENT)
         {
             // Jonathans fullscreen bugfix.
-#ifdef MACOSX 
+#ifdef MACOSX
             if(currentScreensetting.fullscreen ^ lastSuccess.fullscreen) return false;
-#endif 
+#endif
             int flags = SDL_APPINPUTFOCUS;
             if ( tEvent->active.gain && tEvent->active.state & flags )
                 Activate(true);
@@ -475,7 +475,7 @@ void sg_SetIcon()
 {
 #ifndef DEDICATED
 #ifndef MACOSX
-    rSurface tex( "textures/icon.png" );
+    rSurface tex( "desktop/icons/small/armagetronad.png" );
     //    SDL_Surface *tex=IMG_Load( tDirectories::Data().GetReadPath( "textures/icon.png" ) );
 
     if (tex.GetSurface())
@@ -509,7 +509,7 @@ int main(int argc,char **argv){
         // read RAND_MAX from recording or write it to recording
         if ( !tRecorder::PlaybackStrict( dedicatedSection, dedicatedServer ) )
         {
-#ifdef DEDICATED          
+#ifdef DEDICATED
             dedicatedServer = true;
 #endif
         }
