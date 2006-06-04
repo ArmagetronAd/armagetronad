@@ -36,7 +36,6 @@
 		8C11CA66095A2B6E007AE0EA /* gExplosion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5ED1089EEC7D007E21DC /* gExplosion.cpp */; };
 		8C11CA67095A2B6E007AE0EA /* gFloor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5ED3089EEC7D007E21DC /* gFloor.cpp */; };
 		8C11CA68095A2B6E007AE0EA /* gGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5ED4089EEC7D007E21DC /* gGame.cpp */; };
-		8C11CA69095A2B6E007AE0EA /* gHud.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5ED6089EEC7D007E21DC /* gHud.cpp */; };
 		8C11CA6A095A2B6E007AE0EA /* gLanguageMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5ED8089EEC7D007E21DC /* gLanguageMenu.cpp */; };
 		8C11CA6B095A2B6E007AE0EA /* gLogo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EDA089EEC7D007E21DC /* gLogo.cpp */; };
 		8C11CA6C095A2B6E007AE0EA /* gMenus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EDC089EEC7D007E21DC /* gMenus.cpp */; };
@@ -208,7 +207,6 @@
 		8CB97B0F096265A800AE8BCD /* gExplosion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5ED1089EEC7D007E21DC /* gExplosion.cpp */; };
 		8CB97B10096265A800AE8BCD /* gFloor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5ED3089EEC7D007E21DC /* gFloor.cpp */; };
 		8CB97B11096265A800AE8BCD /* gGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5ED4089EEC7D007E21DC /* gGame.cpp */; };
-		8CB97B12096265A800AE8BCD /* gHud.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5ED6089EEC7D007E21DC /* gHud.cpp */; };
 		8CB97B13096265A800AE8BCD /* gLanguageMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5ED8089EEC7D007E21DC /* gLanguageMenu.cpp */; };
 		8CB97B14096265A800AE8BCD /* gLogo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EDA089EEC7D007E21DC /* gLogo.cpp */; };
 		8CB97B15096265A800AE8BCD /* gMenus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EDC089EEC7D007E21DC /* gMenus.cpp */; };
@@ -302,7 +300,6 @@
 		8CBA5FB7089EEC7E007E21DC /* gExplosion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5ED1089EEC7D007E21DC /* gExplosion.cpp */; };
 		8CBA5FB9089EEC7E007E21DC /* gFloor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5ED3089EEC7D007E21DC /* gFloor.cpp */; };
 		8CBA5FBA089EEC7E007E21DC /* gGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5ED4089EEC7D007E21DC /* gGame.cpp */; };
-		8CBA5FBC089EEC7E007E21DC /* gHud.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5ED6089EEC7D007E21DC /* gHud.cpp */; };
 		8CBA5FBE089EEC7E007E21DC /* gLanguageMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5ED8089EEC7D007E21DC /* gLanguageMenu.cpp */; };
 		8CBA5FC0089EEC7E007E21DC /* gLogo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EDA089EEC7D007E21DC /* gLogo.cpp */; };
 		8CBA5FC2089EEC7E007E21DC /* gMenus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EDC089EEC7D007E21DC /* gMenus.cpp */; };
@@ -647,8 +644,6 @@
 		8CBA5ED3089EEC7D007E21DC /* gFloor.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = gFloor.cpp; sourceTree = "<group>"; };
 		8CBA5ED4089EEC7D007E21DC /* gGame.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = gGame.cpp; sourceTree = "<group>"; };
 		8CBA5ED5089EEC7D007E21DC /* gGame.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = gGame.h; sourceTree = "<group>"; };
-		8CBA5ED6089EEC7D007E21DC /* gHud.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = gHud.cpp; sourceTree = "<group>"; };
-		8CBA5ED7089EEC7D007E21DC /* gHud.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = gHud.h; sourceTree = "<group>"; };
 		8CBA5ED8089EEC7D007E21DC /* gLanguageMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = gLanguageMenu.cpp; sourceTree = "<group>"; };
 		8CBA5ED9089EEC7D007E21DC /* gLanguageMenu.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = gLanguageMenu.h; sourceTree = "<group>"; };
 		8CBA5EDA089EEC7D007E21DC /* gLogo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = gLogo.cpp; sourceTree = "<group>"; };
@@ -688,7 +683,7 @@
 		8CBA646108A065A8007E21DC /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
 		8CC3F046099D46AD0034B6B8 /* tRecorderInternal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tRecorderInternal.cpp; sourceTree = "<group>"; };
 		8CC3F047099D46AD0034B6B8 /* tRecorderInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tRecorderInternal.h; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B1EA46F0A20B20200FA3478 /* cCockpit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cCockpit.cpp; sourceTree = "<group>"; };
 		9B1EA4700A20B20200FA3478 /* cCockpit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cCockpit.h; sourceTree = "<group>"; };
 		9B1EA4710A20B20200FA3478 /* cGauges.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cGauges.cpp; sourceTree = "<group>"; };
@@ -1067,8 +1062,6 @@
 				8CBA5ED3089EEC7D007E21DC /* gFloor.cpp */,
 				8CBA5ED4089EEC7D007E21DC /* gGame.cpp */,
 				8CBA5ED5089EEC7D007E21DC /* gGame.h */,
-				8CBA5ED6089EEC7D007E21DC /* gHud.cpp */,
-				8CBA5ED7089EEC7D007E21DC /* gHud.h */,
 				8CBA5ED8089EEC7D007E21DC /* gLanguageMenu.cpp */,
 				8CBA5ED9089EEC7D007E21DC /* gLanguageMenu.h */,
 				8CBA5EDA089EEC7D007E21DC /* gLogo.cpp */,
@@ -1572,7 +1565,6 @@
 				8C11CA66095A2B6E007AE0EA /* gExplosion.cpp in Sources */,
 				8C11CA67095A2B6E007AE0EA /* gFloor.cpp in Sources */,
 				8C11CA68095A2B6E007AE0EA /* gGame.cpp in Sources */,
-				8C11CA69095A2B6E007AE0EA /* gHud.cpp in Sources */,
 				8C11CA6A095A2B6E007AE0EA /* gLanguageMenu.cpp in Sources */,
 				8C11CA6B095A2B6E007AE0EA /* gLogo.cpp in Sources */,
 				8C11CA6C095A2B6E007AE0EA /* gMenus.cpp in Sources */,
@@ -1735,7 +1727,6 @@
 				8CB97B0F096265A800AE8BCD /* gExplosion.cpp in Sources */,
 				8CB97B10096265A800AE8BCD /* gFloor.cpp in Sources */,
 				8CB97B11096265A800AE8BCD /* gGame.cpp in Sources */,
-				8CB97B12096265A800AE8BCD /* gHud.cpp in Sources */,
 				8CB97B13096265A800AE8BCD /* gLanguageMenu.cpp in Sources */,
 				8CB97B14096265A800AE8BCD /* gLogo.cpp in Sources */,
 				8CB97B15096265A800AE8BCD /* gMenus.cpp in Sources */,
@@ -1854,7 +1845,6 @@
 				8CBA5FB7089EEC7E007E21DC /* gExplosion.cpp in Sources */,
 				8CBA5FB9089EEC7E007E21DC /* gFloor.cpp in Sources */,
 				8CBA5FBA089EEC7E007E21DC /* gGame.cpp in Sources */,
-				8CBA5FBC089EEC7E007E21DC /* gHud.cpp in Sources */,
 				8CBA5FBE089EEC7E007E21DC /* gLanguageMenu.cpp in Sources */,
 				8CBA5FC0089EEC7E007E21DC /* gLogo.cpp in Sources */,
 				8CBA5FC2089EEC7E007E21DC /* gMenus.cpp in Sources */,
