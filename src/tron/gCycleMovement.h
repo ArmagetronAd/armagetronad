@@ -71,7 +71,8 @@ public:
     void                    NotifyNewDestination    ( gDestination *        dest        )           ;   //!< notifies cycle of the insertion of a new destination ( don't call manually )
     bool                    IsDestinationUsed       ( const gDestination *  dest        ) const     ;   //!< returns whether the given destination is in active use
 
-    inline void            DropTempWall             ( gPlayerWall *         wall        )           ;   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
+    inline void            DropTempWall             ( gPlayerWall *         wall
+            ,                                         eCoord const &        pos         )           ;   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
     // information query
     virtual bool            EdgeIsDangerous         ( const eWall *         wall
             ,                                         REAL                  time
@@ -126,7 +127,8 @@ protected:
     // destination handling
     REAL                    DistanceToDestination   ( gDestination &        dest        ) const     ;   //!< calculates the distance to the given destination
     virtual void            OnNotifyNewDestination  ( gDestination *        dest        )           ;   //!< notifies cycle of the insertion of a new destination
-    virtual void            OnDropTempWall          ( gPlayerWall *         wall        )           ;   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
+    virtual void            OnDropTempWall          ( gPlayerWall *         wall
+            ,                                         eCoord const &        pos         )           ;   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
     virtual bool            DoIsDestinationUsed     ( const gDestination *  dest        ) const     ;   //!< returns whether the given destination is in active use
     static  gDestination*   GetDestinationBefore    ( const SyncData &      sync
             ,                                         gDestination*         first       ) 		    ;   //!< determine the destination from before the sync message
@@ -314,12 +316,13 @@ inline bool gCycleMovement::IsDestinationUsed( const gDestination * dest ) const
 // *******************************************************************************************
 //!
 //!		@param	wall	   the wall the other cycle is grinding
+//!		@param	pos	       the position of the grind
 //!
 // *******************************************************************************************
 
-inline void gCycleMovement::DropTempWall( gPlayerWall * wall )
+inline void gCycleMovement::DropTempWall( gPlayerWall * wall, eCoord const & pos )
 {
-    this->OnDropTempWall( wall );
+    this->OnDropTempWall( wall, pos );
 }
 
 // *******************************************************************************************

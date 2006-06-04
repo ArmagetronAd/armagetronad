@@ -806,19 +806,25 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
 // *******************************************************************************************
 //!
 //!		@param	wall	   the wall the other cycle is grinding
+//!		@param	pos	       the position of the grind
 //!
 // *******************************************************************************************
 
-void gCycle::OnDropTempWall( gPlayerWall * wall )
+void gCycle::OnDropTempWall( gPlayerWall * wall, eCoord const & position )
 {
     tASSERT( wall );
 
     // drop the current wall if eiter this or the last wall is grinded
-    gNetPlayerWall * nw = wall->NetWall();
-    if ( nw == currentWall || ( nw == lastWall && currentWall && currentWall->Vec().NormSquared() > EPS ) )
+    // gNetPlayerWall * nw = wall->NetWall();
+    if ( currentWall && ( wall == currentWall->Wall() || wall == currentWall->LastWall() ) )
     {
-        // just request the drop, Timestep() will execute it later
-        dropWallRequested_ = true;
+        // calculate relative position of grinding in wall
+        REAL alpha = wall->Edge()->Ratio( position );
+        if ( alpha > .5 )
+        {
+            // just request the drop, Timestep() will execute it later
+            dropWallRequested_ = true;
+        }
     }
 }
 
@@ -1545,7 +1551,9 @@ bool gCycle::Timestep(REAL currentTime){
         if ( time >= nextDrop )
         {
             nextDrop = time + sg_minDropInterval;
-            this->DropWall();
+            if ( currentWall )
+                currentWall->PartialCopyIntoGrid( grid );
+            dropWallRequested_ = false;
         }
     }
 

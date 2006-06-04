@@ -586,7 +586,7 @@ REAL gWallRim::SeeHeight( void )
 #endif
 
 gPlayerWall::gPlayerWall(gNetPlayerWall*w, gCycle *p)
-        :eWall(p->grid),cycle_(p),netWall_(w),begAlpha_(0.0f),endAlpha_(1.0f)
+        :eWall(p->grid),cycle_(p),netWall_(w),begDist_(w->Pos(0)),endDist_(w->Pos(1))
 {
     CHECKWALL;
 
@@ -611,7 +611,7 @@ void gPlayerWall::Flip(){
     CHECKWALL;
 
     eWall::Flip();
-    Swap( this->begAlpha_, this->endAlpha_ );
+    Swap( this->begDist_, this->endDist_ );
 
     CHECKWALL;
 }
@@ -796,9 +796,9 @@ void gPlayerWall::Split(eWall *& w1,eWall *& w2,REAL a){
     W2=tNEW(gPlayerWall(netWall_,cycle_));
     W1->windingNumber_ = windingNumber_;
     W2->windingNumber_ = windingNumber_;
-    W1->begAlpha_ = begAlpha_;
-    W2->endAlpha_ = endAlpha_;
-    W1->endAlpha_ = W2->begAlpha_ = begAlpha_ + ( endAlpha_ - begAlpha_ ) * a;
+    W1->begDist_ = begDist_;
+    W2->endDist_ = endDist_;
+    W1->endDist_ = W2->begDist_ = begDist_ + ( endDist_ - begDist_ ) * a;
 
     /*
     	int divindex = IndexPos( mp );
@@ -1258,9 +1258,14 @@ void gPlayerWall::Check() const
 
 REAL gPlayerWall::LocalToGlobal( REAL a ) const
 {
+    CHECKWALL;
+
     tASSERT( good( a ) );
 
-    REAL ret = this->begAlpha_ + ( this->endAlpha_ - this->begAlpha_ ) * a;
+    REAL begAlpha = netWall_->Alpha( begDist_ );
+    REAL endAlpha = netWall_->Alpha( endDist_ );
+
+    REAL ret = begAlpha + ( endAlpha - begAlpha ) * a;
 
     tASSERT( good( ret ) );
 
@@ -1269,16 +1274,21 @@ REAL gPlayerWall::LocalToGlobal( REAL a ) const
 
 REAL gPlayerWall::GlobalToLocal( REAL a ) const
 {
+    CHECKWALL;
+
     tASSERT( good( a ) );
 
-    REAL div = ( this->endAlpha_ - this->begAlpha_ );
+    REAL begAlpha = netWall_->Alpha( begDist_ );
+    REAL endAlpha = netWall_->Alpha( endDist_ );
+
+    REAL div = ( endAlpha - begAlpha );
     if ( div == 0 )
     {
         return .5f;
     }
     else
     {
-        REAL ret = ( a - begAlpha_ ) / div;
+        REAL ret = ( a - begAlpha ) / div;
 
         tASSERT( good( ret ) );
 
@@ -1327,28 +1337,28 @@ REAL gPlayerWall::EndPos() const
 {
     CHECKWALL;
 
-    return netWall_->Pos( LocalToGlobal( this->endAlpha_ ) );
+    return netWall_->Pos( LocalToGlobal( netWall_->Alpha( this->endDist_ ) ) );
 }
 
 REAL gPlayerWall::BegPos() const
 {
     CHECKWALL;
 
-    return netWall_->Pos( LocalToGlobal( this->begAlpha_ ) );
+    return netWall_->Pos( LocalToGlobal( netWall_->Alpha( this->begDist_ ) ) );
 }
 
 REAL gPlayerWall::EndTime() const
 {
     CHECKWALL;
 
-    return netWall_->Time( LocalToGlobal( this->endAlpha_ ) );
+    return netWall_->Time( LocalToGlobal( netWall_->Alpha( this->endDist_ ) ) );
 }
 
 REAL gPlayerWall::BegTime() const
 {
     CHECKWALL;
 
-    return netWall_->Time( LocalToGlobal( this->begAlpha_ ) );
+    return netWall_->Time( LocalToGlobal( netWall_->Alpha( this->begDist_ ) ) );
 }
 
 void gPlayerWall::BlowHole	( REAL beg, REAL end )
@@ -1487,7 +1497,7 @@ gNetPlayerWall::gNetPlayerWall(gCycle *cyc,
                                REAL tBegi, REAL dbeg)
         :nNetObject(cyc->Owner()),
         id(-1),griddedid(-1),
-        cycle_(cyc),dir(d),dbegin(dbeg),
+        cycle_(cyc),lastWall_(NULL),dir(d),dbegin(dbeg),
         beg(begi),end(begi),tBeg(tBegi),tEnd(tBegi),
 inGrid(false){
     dir=dir*REAL(1/sqrt(dir.NormSquared()));
@@ -1553,7 +1563,8 @@ void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
 
     if (bool( this->edge_ ) && this->edge_->Point(0) && this->edge_->Point(1)){
         this->edge_->Coord(1) = end;
-        this->edge_->Coord(0) = beg;
+        if ( !lastWall_ )
+            this->edge_->Coord(0) = beg;
     }
 
     SetEndTime(tEnd);
@@ -1570,7 +1581,10 @@ void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
     gPlayerWall *w = Wall();
 
     if ( w )
+    {
         w->CalcLen();
+        w->endDist_ = EndPos();
+    }
 }
 
 void gNetPlayerWall::CopyIntoGrid(eGrid * grid, bool force){
@@ -1642,6 +1656,46 @@ void gNetPlayerWall::real_CopyIntoGrid(eGrid *grid){
                 }
             }
         }
+    }
+
+#ifdef DEBUG
+    grid->Check();
+#endif
+
+}
+
+void gNetPlayerWall::PartialCopyIntoGrid(eGrid *grid){
+    //  con << "Gridding " << ID() << " : ";
+    //con << "from " << *e->Point(0) << " to " << *e->Point(1) << '\n';
+
+    tJUST_CONTROLLED_PTR< gNetPlayerWall > keep( this );
+
+#ifdef DEBUG
+    grid->Check();
+#endif
+
+    if(griddedid<0 && this->cycle_ && !preliminary ){
+
+        // just copy the current edge into the grid
+        if ( this->edge_ ){
+            lastWall_ = Wall();
+            Wall()->Insert();
+            this->edge_->CopyIntoGrid(grid);
+            this->edge_ = NULL;
+        }
+
+        // and create a new one just at the end bit
+        gPlayerWall* w = tNEW(gPlayerWall)(this,
+                                           this->cycle_);
+        this->edge_=tNEW(eTempEdge)(end,
+                                    end,
+                                    w );
+
+        // insert it into the list of not yet gridded walls
+        w->Remove();
+
+        // hack the beginning distance to be the same as the starting distance
+        w->begDist_ = w->endDist_;
     }
 
 #ifdef DEBUG
@@ -1764,7 +1818,7 @@ void gNetPlayerWall::WriteCreate(nMessage &m)
 gNetPlayerWall::gNetPlayerWall(nMessage &m)
         :nNetObject(m),
         id(-1),griddedid(-1),
-        cycle_(NULL),edge_(NULL),//w(NULL),
+        cycle_(NULL),edge_(NULL), lastWall_(NULL),
         dir(0,0),dbegin(0),
         beg(0,0),end(0,0),
         tBeg(0),tEnd(0),
@@ -1806,6 +1860,10 @@ gPlayerWall *gNetPlayerWall::Wall(){
     }
     else
         return NULL;
+}
+
+gPlayerWall *gNetPlayerWall::LastWall(){
+    return lastWall_;
 }
 
 void gNetPlayerWall::ReleaseData()

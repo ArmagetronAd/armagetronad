@@ -201,7 +201,7 @@ private:
     void	SyncFromExtrapolator();							// take over the extrapolator's data
 
     virtual void OnNotifyNewDestination(gDestination *dest);   //!< called when a destination is successfully inserted into the destination list
-    virtual void OnDropTempWall        (gPlayerWall * wall);   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
+    virtual void OnDropTempWall        ( gPlayerWall * wall, eCoord const & position );   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
 
     //	unsigned short currentWallID;
 

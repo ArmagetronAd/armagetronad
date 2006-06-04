@@ -934,10 +934,11 @@ void gCycleMovement::OnNotifyNewDestination( gDestination * dest )
 // *******************************************************************************************
 //!
 //!		@param	wall	   the wall the other cycle is grinding
+//!		@param	pos	       the position of the grind
 //!
 // *******************************************************************************************
 
-void gCycleMovement::OnDropTempWall( gPlayerWall * wall )
+void gCycleMovement::OnDropTempWall( gPlayerWall * wall, eCoord const & pos )
 {
 }
 
@@ -1131,7 +1132,7 @@ static void DropTempWall( eCoord const & dir, gSensor const & sensor )
 
             // let it drop wall
             if ( other )
-                other->DropTempWall( w );
+                other->DropTempWall( w, sensor.before_hit );
         }
     }
 }
@@ -1976,11 +1977,17 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
     bool slingshot  = true;         // flag indicating whether the cycle is between two walls
     bool oneOwnWall = false;        // flag indicating whether one of the walls is your own
     for(int d=1;d>=-1;d-=2){
-        gSensor rear(this,pos,dirDrive.Turn(-1,d));
+        // the direction to cast the acceleration rays in
+        eCoord dirCast = dirDrive.Turn(-1,d);
+        gSensor rear(this,pos,dirCast);
         rear.detect(sg_nearCycle);
 
         if ( rear.ehit )
         {
+            // drop walls that are grinded
+            if ( rear.hit < verletSpeed_ * .01 )
+                ::DropTempWall( dirCast, rear );
+
             // see if the wall is parallel to the driving direction, only then should it add speed
             eCoord wallVec = rear.ehit->Vec();
             if ( fabs( eCoord::F( wallVec, dirDrive  ) ) > .9 )
