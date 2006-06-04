@@ -101,7 +101,7 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/gStatList.h tron/gStatList.cpp\
 	tron/gCommandLineJumpStart.cpp tron/gCommandLineJumpStart.h \
 	tron/gRotation.h tron/gRotation.cpp \
-	tron/cockpit/cCockpit.h \
+	tron/cockpit/cCockpit.cpp tron/cockpit/cCockpit.h \
 	tron/cockpit/cWidgetBase.h tron/cockpit/cWidgetBase.cpp \
 	tron/cockpit/cMap.h tron/cockpit/cMap.cpp \
 	tron/cockpit/cLabel.h tron/cockpit/cLabel.cpp \
@@ -160,7 +160,7 @@ else
 extralibs= thirdparty/particles/libparticles.a
 endif
 
-armagetronad_main_SOURCES = tron/gFloor.cpp tron/cockpit/cCockpit.cpp
+armagetronad_main_SOURCES = tron/gFloor.cpp
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
 armagetronad_main_LDADD=libtron.a libengine.a libnetwork.a libui.a thirdparty/shttpd/libshttpd.a librender.a libtools.a ${extralibs}
 
