@@ -198,6 +198,25 @@
                 </Table>
             </Face>
         </Label>
+	<Label camera="*" usetemplate="SmallText">
+            <DataSet id="fastest">
+		<AtomicData field="source" source="fastest_speed_round" />
+	    </DataSet>
+            <DataSet id="name">
+		<AtomicData field="source" source="fastest_name_round" />
+	    </DataSet>
+            <Position x="-.99" y="-.95" />
+            <Caption location="off">
+                <Text value="Speed" />
+            </Caption>
+            <Face>
+                <Table>
+                    <Row>
+                        <Cell><Text value="Fastest: " /><GameData data="name" /><Text value=" (" /><GameData data="fastest" /><Text value=")" /></Cell>
+                    </Row>
+                </Table>
+            </Face>
+        </Label>
 
         <Rectangle camera="^in">
             <DataSet>
