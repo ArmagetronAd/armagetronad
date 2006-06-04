@@ -136,7 +136,7 @@ sp_team_min_players_help	Minimum number of players per team in single player mod
 sp_teams_max_help		Maximum number of teams in single player mode
 sp_teams_min_help		Minimum number of teams in single player mode
 sp_finish_type_help		What happens when the last human is dead in single player mode?
-sp_game_type_help		Type of game played in single player mode
+sp_game_type_help		Type of game played in single player mode. 0 for freestyle, 1 for last team standing and 2 for humans vs. AIs.
 sp_auto_iq_help			Automatically adjust AI IQ in single player mode?
 sp_auto_ais_help		Automatically spawn AI players in single player mode?
 sp_ai_iq_help			IQ of the AI opponents in single player mode
@@ -163,7 +163,7 @@ team_center_is_boss_help    If set to 1, the center player is the team's boss. I
 teams_max_help			Maximum number of teams
 teams_min_help			Minimum number of teams
 finish_type_help		What happens when the last human is dead?
-game_type_help			Type of game played
+game_type_help			Type of game played. 0 for freestyle, 1 for last team standing and 2 for humans vs. AIs.
 auto_iq_help			Automatically adjust AI IQ?
 auto_ais_help			Automatically spawn AI players?
 ai_iq_help			IQ of the AI opponents
