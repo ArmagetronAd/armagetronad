@@ -16,9 +16,11 @@ autoconf || rm configure
 echo "Running automake..."
 if test -r CVS/Entries || test -r .svn/entries; then
     # activate dependency tracking for CVS and Subversion users
+    echo "with dependency tracking..."
     automake -a
 else
     # deactivate dependency tracking
+    echo "without dependency tracking..."
     rm -f depcomp
     automake -a -i
 fi
