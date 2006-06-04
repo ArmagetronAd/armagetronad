@@ -110,7 +110,7 @@ void rConsole::Render(){
             rTextField::SetDefaultColor( tColor(1,1,1) );
 
             rTextField out(-.95f,.99f,rCHEIGHT_CON, sr_fontConsole);//,&rFont::s_defaultFontSmall);
-            out.SetWidth(static_cast<int>(1.9f/rCWIDTH_CON));
+            out.SetWidth(1.9f);
             out.EnableLineWrap();
 
             int i;
