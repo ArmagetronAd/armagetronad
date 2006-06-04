@@ -63,6 +63,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef DEDICATED
 #include "rRender.h"
 #include "rSDL.h"
+#include <SDL_syswm.h>
 
 static gCommandLineJumpStartAnalyzer sg_jumpStartAnalyzer;
 #endif
@@ -475,11 +476,23 @@ void sg_SetIcon()
 {
 #ifndef DEDICATED
 #ifndef MACOSX
+#ifdef  WIN32
+    SDL_SysWMinfo	info;
+	HICON			icon;
+	// get the HWND handle
+    SDL_VERSION( &info.version );
+	if( SDL_GetWMInfo( &info ) )
+	{
+        icon = LoadIcon( GetModuleHandle( NULL ), MAKEINTRESOURCE( 1 ) );
+        SetClassLong( info.window, GCL_HICON, (LONG) icon );
+	}
+#else
     rSurface tex( "desktop/icons/medium/armagetronad.png" );
     //    SDL_Surface *tex=IMG_Load( tDirectories::Data().GetReadPath( "textures/icon.png" ) );
 
     if (tex.GetSurface())
         SDL_WM_SetIcon(tex.GetSurface(),NULL);
+#endif
 #endif
 #endif
 }
