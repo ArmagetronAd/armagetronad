@@ -575,8 +575,7 @@ if test x$enable_sound = xyes; then
  AC_CHECK_LIB(SDL_mixer,Mix_OpenAudio,
  AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Define if you have the SDL_mixer library (-lSDL_mixer).])
  LIBS="-lSDL_mixer $LIBS",
- AC_MSG_WARN([
- SDL_mixer library not found. You will not hear music.])
+ AC_MSG_ERROR([SDL_mixer library not found. It is required for now. Sorry.])
  enable_sound=no
  ,)
 fi
