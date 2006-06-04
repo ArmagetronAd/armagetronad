@@ -51,14 +51,14 @@ bool Map::Process(tXmlParser::node cur) {
     }
 }
 void Map::Render() {
-    //sr_ResetRenderState(false);
     // I haven't checked possible initial matrix state, so init to identity and modelview
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_LIGHTING);
+    //glDisable(GL_LIGHTING);
+    glDisable(GL_LINE_SMOOTH);
+    glHint (GL_LINE_SMOOTH_HINT, GL_FASTEST);
     DrawMap(true, true, true,
             5.5, 0.,
             m_position.x-m_size.x, m_position.y-m_size.y, 2.*m_size.x, 2.*m_size.y,
