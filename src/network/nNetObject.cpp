@@ -202,9 +202,6 @@ static unsigned short next_free_server_nokill(){
 
         if ( net_current_id != start_id )
         {
-#ifdef DEBUG
-            sn_BreakOnObjectID( net_current_id );
-#endif
             // no problem!
 #ifdef DEBUG
             sn_BreakOnObjectID( net_current_id );
