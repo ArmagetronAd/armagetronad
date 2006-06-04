@@ -108,6 +108,9 @@ static tConfItem<int> scc("SOUND_CHANNELS",numSoundcardChannels);
 int musicActive = 1;
 static tConfItem<int> se("MUSIC_ACTIVE", musicActive);
 
+float buffersize = 0.5;
+static tConfItem<float> sbs("SOUND_BUFFER_SIZE", buffersize);
+
 tString titleTrack("music/titletrack.ogg");
 static tConfItemLine stt("TITLE_TRACK", titleTrack);
 
@@ -267,11 +270,7 @@ void eSoundMixer::Init() {
     }
 
     // guesstimate the desired number of samples to calculate in advance
-#ifdef WIN32
-    int samples = frequency/10;
-#else
-    int samples = 64;
-#endif
+    int samples = buffersize * 512;
 
     rc = Mix_OpenAudio( frequency, AUDIO_S16LSB,
                         numSoundcardChannels, samples );
