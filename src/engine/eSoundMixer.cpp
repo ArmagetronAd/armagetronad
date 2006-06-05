@@ -270,7 +270,7 @@ void eSoundMixer::Init() {
     }
 
     // guesstimate the desired number of samples to calculate in advance
-    int samples = buffersize * 512;
+    int samples = static_cast< int >( buffersize * 512 );
 
     rc = Mix_OpenAudio( frequency, AUDIO_S16LSB,
                         numSoundcardChannels, samples );
