@@ -2203,7 +2203,7 @@ bool ePlayerNetID::ActionOnQuit()
 
     // clear legacy spectator
     se_ClearLegacySpectator( Owner() );
-
+    
     this->RemoveFromGame();
     return true;
 }
@@ -2222,7 +2222,7 @@ void ePlayerNetID::ActionOnDelete()
             if ( se_PlayerNetIDs[i]->Owner() == Owner() )
                 playerCount++;
         }
-
+    
         // if this is the last player, store it
         if ( playerCount == 1 )
         {
@@ -2240,7 +2240,7 @@ void ePlayerNetID::ActionOnDelete()
 
             // and kill controlled object
             ControlObject( NULL );
-
+            
             // inform other clients that the player left
             TakeOwnership();
             RequestSync();
@@ -3658,7 +3658,8 @@ void ePlayerNetID::ReceiveControlNet(nMessage &m)
             // exist any more. Create a new team instead.
             if ( !newTeam )
             {
-                sn_ConsoleOut( tOutput( "$player_joins_team_noex" ), Owner() );
+                if ( currentTeam )
+                    sn_ConsoleOut( tOutput( "$player_joins_team_noex" ), Owner() );
                 break;
             }
 
