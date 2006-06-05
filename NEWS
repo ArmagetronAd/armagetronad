@@ -2,6 +2,7 @@ Changes since 0.2.8.2:
 - New sdl_mixer-based sound engine
 - Experimental particle system for sparks (disabled, probably crashes on some machines)
 - Embedded webserver that serves up the resource directory
+- Switched from proprietary class to a class derived from standard std::string for strings
 
 Changes since 0.2.8.1:
 - Timestamps and teamscores added to scorelog.txt
