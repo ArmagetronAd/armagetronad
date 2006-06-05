@@ -56,7 +56,8 @@ void Map::Render() {
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    //glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
     glDisable(GL_LINE_SMOOTH);
     glHint (GL_LINE_SMOOTH_HINT, GL_FASTEST);
     DrawMap(true, true, true,
