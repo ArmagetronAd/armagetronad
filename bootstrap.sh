@@ -4,27 +4,18 @@ test -r ChangeLog || touch touch -t 198001010000 ChangeLog
 MYDIR=`dirname $0`
 if test -r batch/make/version; then
     echo "Generating version..."
-    echo "m4_define(AUTOMATIC_VERSION,["`sh batch/make/version $MYDIR`"])" > version
+    echo "m4_define(AUTOMATIC_VERSION,["`sh batch/make/version $MYDIR`"])" > version || exit 1
 fi
 echo "Running aclocal..."
-aclocal || rm aclocal.m4
+aclocal || { rm aclocal.m4; exit 1; }
 echo "Running autoheader..."
 rm -f config.h.in
-autoheader || rm config.h.in
+autoheader || { rm config.h.in; exit 1; }
 echo "Running autoconf..."
-autoconf || rm configure
+autoconf || { rm configure; exit 1; }
 echo "Running automake..."
-if test -r CVS/Entries || test -r .svn/entries; then
-    # activate dependency tracking for CVS and Subversion users
-    echo "with dependency tracking..."
-    automake -a
-else
-    # deactivate dependency tracking
-    echo "without dependency tracking..."
-    rm -f depcomp
-    automake -a -i
-fi
+automake -a || exit 1
 
 echo "Flagging scripts as executable..."
-chmod 755 $MYDIR/*.sh $MYDIR/*-sh
+chmod 755 $MYDIR/*.sh $MYDIR/*-sh || exit 1
 echo "Done!  You may now run configure and start building."
