@@ -3442,6 +3442,84 @@ REAL nAverager::GetAverageVariance( void ) const
         return 0;
 }
 
+// *******************************************************************************
+// *
+// *	operator <<
+// *
+// *******************************************************************************
+//!
+//!		@param	stream	stream to read from
+//!		@return		    stream for chaining
+//!
+// *******************************************************************************
+
+std::istream & nAverager::operator <<( std::istream & stream )
+{
+    char c;
+    stream >> c;
+    tASSERT( c == '(' );
+
+    stream >> weight_ >> sum_ >> sumSquared_ >> weightSquared_;
+
+    stream >> c;
+    tASSERT( c == ')' );
+
+    return stream;
+}
+
+// *******************************************************************************
+// *
+// *	operator >>
+// *
+// *******************************************************************************
+//!
+//!		@param	stream	stream to write to
+//!		@return		    stream for chaining
+//!
+// *******************************************************************************
+
+std::ostream & nAverager::operator >>( std::ostream & stream ) const
+{
+    stream << '(' << weight_ << ' ' << sum_  << ' ' << sumSquared_  << ' ' << weightSquared_  << ')';
+
+    return stream;
+}
+
+// *******************************************************************************
+// *
+// *	operator >>
+// *
+// *******************************************************************************
+//!
+//!		@param	stream	stream to read to
+//!		@param  averager averager to read
+//!		@return		    stream for chaining
+//!
+// *******************************************************************************
+
+std::istream & operator >> ( std::istream & stream, nAverager & averager )
+{
+    return averager << stream;
+}
+
+// *******************************************************************************
+// *
+// *	operator <<
+// *
+// *******************************************************************************
+//!
+//!		@param	stream	stream to write to
+//!		@param  averager averager to write
+//!		@return		    stream for chaining
+//!
+// *******************************************************************************
+
+std::ostream & operator << ( std::ostream & stream, nAverager const & averager )
+{
+    return averager >> stream;
+}
+
+
 // *******************************************************************************************
 // *
 // *	nPingAverager
@@ -3963,6 +4041,8 @@ void nMachine::OnKick( REAL severity )
     con << tOutput( "$network_ban_kph", GetIP(), GetKicksPerHour() );
 }
 
+static bool sn_printBans = true;
+
 // *******************************************************************************
 // *
 // *	Ban
@@ -3980,10 +4060,13 @@ void nMachine::Ban( REAL time )
     // set the banning timeout to the current time plus the given time
     banned_ = tSysTimeFloat() + time;
 
-    if ( time > 0 )
-        con << tOutput( "$network_ban", GetIP(), int(time/60), banReason_.Len() > 1 ? banReason_ : tOutput( "$network_ban_noreason" ) );
-    else
-        con << tOutput( "$network_noban", GetIP() );
+    if ( sn_printBans )
+    {
+        if ( time > 0 )
+            con << tOutput( "$network_ban", GetIP(), int(time/60), banReason_.Len() > 1 ? banReason_ : tOutput( "$network_ban_noreason" ) );
+        else
+            con << tOutput( "$network_noban", GetIP() );
+    }
 }
 
 // *******************************************************************************
@@ -4078,50 +4161,83 @@ int nMachine::GetPlayerCount( void )
 
 static char const * sn_machinesFileName = "bans.txt";
 
-// save ban info of machines
-static void sn_SaveMachines()
+class nMachinePersistor
 {
-    std::ofstream s;
-    if (tDirectories::Var().Open( s, sn_machinesFileName ) )
+public:
+    // save ban info of machines
+    static void SaveMachines()
     {
-        nMachineMap & map = sn_GetMachineMap();
-        for( nMachineMap::iterator iter = map.begin(); iter != map.end(); ++iter )
+        std::ofstream s;
+        if (tDirectories::Var().Open( s, sn_machinesFileName ) )
         {
-            nMachine & machine = *(*iter).second.machine;
-            if ( machine.IsBanned() > 0 )
+            nMachineMap & map = sn_GetMachineMap();
+            for( nMachineMap::iterator iter = map.begin(); iter != map.end(); ++iter )
             {
-                s << (*iter).first << " " << machine.IsBanned() << " " << machine.GetBanReason() << "\n";
+                nMachine & machine = *(*iter).second.machine;
+                // if ( machine.IsBanned() > 0 )
+                {
+                    s << (*iter).first << " " << machine.IsBanned() << " " << machine.kph_ << " " << machine.GetBanReason() << "\n";
+                }
             }
         }
     }
+
+    // load and enter ban info of machines
+    static void LoadMachines()
+    {
+        sn_printBans = false;
+
+        tTextFileRecorder machines( tDirectories::Var(), sn_machinesFileName );
+        while ( !machines.EndOfFile() )
+        {
+            std::stringstream line( machines.GetLine() );
+
+            // address and ban time left
+            tString address;
+            REAL banTime;
+
+            // read relevant info
+            line >> address >> banTime;
+            std::ws(line);
+
+            // read kph averager
+            nAverager kph;
+            char c;
+            line.get(c);
+            line.putback(c);
+            if ( c == '(' )
+            {
+                line >> kph;
+                std::ws(line);
+            }
+
+            // read reason
+            tString reason;
+            reason.ReadLine( line );
+
+            if ( address.Len() > 2 )
+            {
+                // ban
+                nMachine & machine = sn_LookupMachine( address );
+                machine.Ban( banTime, reason );
+                machine.kph_ = kph;
+            }
+        }
+
+        sn_printBans = true;
+    }
+}
+;
+// save ban info of machines
+static void sn_SaveMachines()
+{
+    nMachinePersistor::SaveMachines();
 }
 
 // load and enter ban info of machines
 static void sn_LoadMachines()
 {
-    tTextFileRecorder machines( tDirectories::Var(), sn_machinesFileName );
-    while ( !machines.EndOfFile() )
-    {
-        std::stringstream line( machines.GetLine() );
-
-        // address and ban time left
-        tString address;
-        REAL banTime;
-
-        // read relevant info
-        line >> address >> banTime;
-        std::ws(line);
-
-        // read reason
-        tString reason;
-        reason.ReadLine( line );
-
-        if ( address.Len() > 2 )
-        {
-            // ban
-            sn_LookupMachine( address ).Ban( banTime, reason );
-        }
-    }
+    nMachinePersistor::LoadMachines();
 }
 
 // *******************************************************************************
@@ -4375,5 +4491,4 @@ nMachineDecorator::nMachineDecorator( nMachine & machine )
 {
     Insert( machine.decorators_ );
 }
-
 
