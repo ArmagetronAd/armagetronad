@@ -18,7 +18,7 @@ tUniversalVariables.h: Makefile tUniversalVariables.h.in ${top_builddir}/univers
 
 ${srcdir}/tools/tDirectories.cpp: tUniversalVariables.h
 
-EXTRA_DIST = render/rConsoleCout.cpp tools/tAutoDeque.h
+EXTRA_DIST = render/rConsoleCout.cpp tools/tAutoDeque.h engine/sound/base/eChannel.h
 
 dist-hook:
 	cp -R ${srcdir}/config_ide.h ${srcdir}/macosx ${srcdir}/win32 ${srcdir}/win32_ded $(distdir)
