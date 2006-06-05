@@ -139,12 +139,13 @@ bool gSpark::Timestep(REAL currentTime){
     if (pGetGroupCount() < SPARKS/10) {
         pDeleteParticleGroups(particle_handle, particle_handle);
         return true;
-    } else
-        return false;
+    }
 #endif // dedicated
 #endif // particles
 
     lastTime=currentTime;
+
+    return false;
 }
 
 void gSpark::InteractWith(eGameObject *,REAL ,int){}
