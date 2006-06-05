@@ -935,10 +935,11 @@ void gCycleMovement::OnNotifyNewDestination( gDestination * dest )
 //!
 //!		@param	wall	   the wall the other cycle is grinding
 //!		@param	pos	       the position of the grind
+//!     @param  dir        the direction the raycast triggering the gridding comes from
 //!
 // *******************************************************************************************
 
-void gCycleMovement::OnDropTempWall( gPlayerWall * wall, eCoord const & pos )
+void gCycleMovement::OnDropTempWall( gPlayerWall * wall, eCoord const & pos, eCoord const & dir )
 {
 }
 
@@ -1132,7 +1133,7 @@ static void DropTempWall( eCoord const & dir, gSensor const & sensor )
 
             // let it drop wall
             if ( other )
-                other->DropTempWall( w, sensor.before_hit );
+                other->DropTempWall( w, sensor.before_hit, dir );
         }
     }
 }

@@ -807,10 +807,11 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
 //!
 //!		@param	wall	   the wall the other cycle is grinding
 //!		@param	pos	       the position of the grind
+//!     @param  dir        the direction the raycast triggering the gridding comes from
 //!
 // *******************************************************************************************
 
-void gCycle::OnDropTempWall( gPlayerWall * wall, eCoord const & position )
+void gCycle::OnDropTempWall( gPlayerWall * wall, eCoord const & position, eCoord const & dir )
 {
     tASSERT( wall );
 
@@ -824,6 +825,10 @@ void gCycle::OnDropTempWall( gPlayerWall * wall, eCoord const & position )
         {
             // just request the drop, Timestep() will execute it later
             dropWallRequested_ = true;
+
+            // bend last driving direction to -dir. That way, should the grinder overtake this cycle,
+            // it will end up on the right side of his wall.
+            lastDirDrive = -dir;
         }
     }
 }
@@ -2301,7 +2306,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
         {
             // we were first!
             static bool tryToSaveFutureWallOwner = true;
-            
+
             if ( tryToSaveFutureWallOwner && sn_GetNetState() != nCLIENT && otherPlayer->currentWall && w == otherPlayer->currentWall->Wall() && otherPlayer->LastTime() < time + .5f )
             {
                 // teleport the other cycle back to the point before the collision; its next timestep
