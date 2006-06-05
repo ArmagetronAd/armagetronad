@@ -3,6 +3,11 @@ Changes since 0.2.8.2:
 - Experimental particle system for sparks (disabled, probably crashes on some machines)
 - Embedded webserver that serves up the resource directory
 - Switched from proprietary class to a class derived from standard std::string for strings
+- Tab completion for chat and console
+- New cockpit files as resurces, replacing the old HUD
+- HUD minimap
+- New fonts, font are now truetype files and can be nonproportional
+- New chat command /console--works like /admin, but on the local client and doesn't require being logged in
 
 Changes since 0.2.8.1:
 - Timestamps and teamscores added to scorelog.txt
