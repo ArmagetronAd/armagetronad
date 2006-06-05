@@ -745,6 +745,8 @@ public:
 protected:
     virtual bool DoFillFromMessage( nMessage& m )
     {
+        double time = tSysTimeFloat();
+
         // check whether the issuer is allowed to start a vote
         eVoter * sender = eVoter::GetVoter( m.SenderID() );
         if ( sender && sender->lastChange_ + se_votingMaturity > tSysTimeFloat() )
@@ -753,6 +755,10 @@ protected:
             sn_ConsoleOut( message, m.SenderID() );
             return false;
         }
+        
+        // prevent the sender from changing his name for confusion
+        if ( sender )
+            sender->lastKickVote_ = time;
 
         // read player ID
         unsigned short id;
@@ -769,7 +775,6 @@ protected:
             {
                 machine_ = tNEW( nMachineObserver )( voter->machine_ );
 
-                double time = tSysTimeFloat();
                 if ( time < voter->lastKickVote_ + se_minTimeBetweenKicks )
                 {
                     tOutput message("$vote_redundant");
