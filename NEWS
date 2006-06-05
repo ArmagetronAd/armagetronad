@@ -1,3 +1,8 @@
+Changes since 0.2.8.2:
+- New sdl_mixer-based sound engine
+- Experimental particle system for sparks (disabled, probably crashes on some machines)
+- Embedded webserver that serves up the resource directory
+
 Changes since 0.2.8.1:
 - Timestamps and teamscores added to scorelog.txt
 - Dedicated server now works on FreeBSD and OpenBSD
@@ -18,9 +23,9 @@ Changes since 0.2.8.1:
   can be no bigger than the effect of ping.
 - Spectators are now regular players and can chat
 - The /msg command now converts the entered pattern into the internal
-  name so if you write "/msg צהü" and there is a user named "צהü" with
+  name so if you write "/msg ן¿½" and there is a user named "ן¿½" with
   an internal nick of "oau" it will still get matched
-- Team changes are now only executed when allowed, the need for the 
+- Team changes are now only executed when allowed, the need for the
   temporary/permanent team imbalance setting distinction has gone away
 - Added brake toggle button
   Bugfixes:
@@ -30,7 +35,7 @@ Changes since 0.2.8.1:
 - Direct cycle collisions sometimes lead to both passing trough each other
 - Init scripts now installed correctly with --enable-initscripts
 - Hopeless pending team change wishes are deleted
-- Large timesteps are now broken down into smaller ones on the game level 
+- Large timesteps are now broken down into smaller ones on the game level
 - Pretend keys are released before entering chat
 - Two cycle steering events were sent if you doublebound the brake
 - Large speed boosts out of game rule bounds were possible during network
@@ -53,7 +58,7 @@ Changes since 0.2.8.1:
 - Canonical DESTDIR support and added ROOTDIR support for testing
 - Login floods are detected and ignored
 - Player name updates sanitized
-- Disabled complicated feasibility tests for team menu entries, 
+- Disabled complicated feasibility tests for team menu entries,
   they did not have the full information and were often wrong
 - Team score only added to player score if no teamplay is possible
 
@@ -70,7 +75,7 @@ Bugfixes:
 - ALLOW_CONTROL_DURING_CHAT has been disabled for now.
 - Another connection termination bug.
 
-Changes since 0.2.8.0_rc3: 
+Changes since 0.2.8.0_rc3:
 - Added spectator mode toggle key.
 - Thresholds when a white background bar is rendered behind texts is
   now configurable in the expert section of settings.cfg.
@@ -106,7 +111,7 @@ Changes since 0.2.8.0_rc2:
 - The code that should kill a cycle in performance/DOS protection
   circumstances just crashed.
 
-Changes since 0.2.8.0_rc1: 
+Changes since 0.2.8.0_rc1:
 - Bugfixes:
   Dedicated server for Windows works again.
   Cycle turns are now executed more accurately on the server.
@@ -119,7 +124,7 @@ Changes since 0.2.8.0_rc1:
   the AI players.
 - Reverted smart camera movement to pre-beta4 behavior,
   the new code made some players seasick :)
-- Ingame admin interface gives more useful information to the invoker 
+- Ingame admin interface gives more useful information to the invoker
 - Small font rendering improvements
 - Zone conquest message, if it is not the one that ends the round,
   now states the name of the zone owning team.
@@ -161,11 +166,11 @@ Changes since 0.2.8_beta4:
   (old ones are still in settings.cfg)
 - Forced glancing end on cycle turn now looks better.
 - FOV settings now deal better with wide screens/splitscreen mode.
-- Increased ping measurements again by adding the fluctuations. The raw 
+- Increased ping measurements again by adding the fluctuations. The raw
   average ping caused the game logic to be too picky.
 
 Changes since 0.2.8_beta3:
-- Famous fixed bugs: 
+- Famous fixed bugs:
   Random huge felt lag or blank screen (it was actually a problem with the timer) is gone.
   Bogus "possible phase bug" message.
   Seemingly random walls popping out of nothing, only to disappear a second later.
@@ -199,7 +204,7 @@ Changes since 0.2.8_beta2:
 Changes since 0.2.8_beta1:
 - bugfixes, of course
 - added recording and playback startmenu entries for Windows
-- abuse prevention: added IP banning, player number per IP and client limit, 
+- abuse prevention: added IP banning, player number per IP and client limit,
   doublebinding can be crippled on server command
 
 Changes since 0.2.7.1:
@@ -394,9 +399,9 @@ Changes since 0.1.4.9:
 - arena size and game speed configurable in the menu
 - the AI has been greatly improved
 - there is an Internet master server active
-- support for localization has been added, currently featuring 
+- support for localization has been added, currently featuring
   English and German
 - AI players now have names
 - the moviepack title screen is displayed
-- Linux version: easier system-wide installation with RPM packages 
+- Linux version: easier system-wide installation with RPM packages
   or "make install"
