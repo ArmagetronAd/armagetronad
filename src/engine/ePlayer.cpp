@@ -2223,6 +2223,7 @@ void ePlayerNetID::CreateVoter()
     if ( sn_GetNetState() != nCLIENT && this->Owner() != 0 && sn_Connections[ this->Owner() ].version.Max() >= 3 )
     {
         this->voter_ = eVoter::GetVoter( this->Owner() );
+        this->voter_->PlayerChanged();
     }
 }
 
@@ -3925,11 +3926,6 @@ void ePlayerNetID::UpdateName( void )
         if ( !bool(this->voter_) || voter_->AllowNameChange() || nameFromServer_.Len() <= 1 )
         {
             nameFromServer_ = nameFromClient_;
-
-            if (this->voter_)
-            {
-                this->voter_->PlayerChanged();
-            }
         }
         else if ( nameFromServer_ != nameFromClient_ )
         {
@@ -4044,6 +4040,12 @@ void ePlayerNetID::UpdateName( void )
                 }
 #endif
                 mess << "$player_renamed";
+
+                if ( bool(this->voter_) )
+                {
+                    this->voter_->PlayerChanged();
+                }
+
                 sn_ConsoleOut(mess);
 
                 {
