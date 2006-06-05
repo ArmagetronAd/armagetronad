@@ -849,8 +849,15 @@ static void net_destroy_handler(nMessage &m){
         // notify object of pending deletion
         if (nNetObject *no=sn_netObjects[id])
         {
+            tASSERT( !no->Owned() );
+
             no->ActionOnDelete();
             info.actionOnDeleteExecuted=true;
+
+            // if the object is now suddenly owned by this machine, there must be a reason.
+            // undo the deletion. Whoever did this has now the responsibility for the object.
+            if ( no->Owned() )
+                sn_Destroyed.SetLen( sn_Destroyed.Len() - 1 );
         }
 
 #ifdef DEBUG
