@@ -2025,6 +2025,32 @@ static tSettingItem<bool> se_silAll("SILENCE_ALL",
 static int se_maxPlayersPerIP = 4;
 static tSettingItem<int> se_maxPlayersPerIPConf( "MAX_PLAYERS_SAME_IP", se_maxPlayersPerIP );
 
+// array of players in legacy spectator mode: they have been
+// deleted by their clients, but no new player has popped up for them yet
+static tJUST_CONTROLLED_PTR< ePlayerNetID > se_legacySpectators[MAXCLIENTS+2];
+
+static void se_ClearLegacySpectator( int owner )
+{
+    ePlayerNetID * player = se_legacySpectators[ owner ];
+
+    // fully remove player
+    if ( player )
+    {
+        player->RemoveFromGame();
+    }
+
+    se_legacySpectators[ owner ] = NULL;
+}
+
+// callback clearing the legacy spectator when a client enters or leaves
+static void se_LegacySpectatorClearer()
+{
+    se_ClearLegacySpectator( nCallbackLoginLogout::User() );
+}
+static nCallbackLoginLogout se_legacySpectatorClearer( se_LegacySpectatorClearer );
+
+
+
 void ePlayerNetID::MyInitAfterCreation()
 {
     this->CreateVoter();
@@ -2042,6 +2068,9 @@ void ePlayerNetID::MyInitAfterCreation()
             // kill them
             sn_DisconnectUser( Owner(), "$network_kill_too_many_players" );
         }
+
+        // clear old legacy spectator that may be lurking around
+        se_ClearLegacySpectator( Owner() );
     }
 
     this->wait_ = 0;
@@ -2121,6 +2150,9 @@ static nDescriptor player_removed_from_game(202,&player_removed_from_game_handle
 
 void ePlayerNetID::RemoveFromGame()
 {
+    // unregister with the machine
+    this->UnregisterWithMachine();
+
     // release voter
     if ( this->voter_ )
         this->voter_->RemoveFromGame();
@@ -2167,29 +2199,58 @@ void ePlayerNetID::RemoveFromGame()
 
 bool ePlayerNetID::ActionOnQuit()
 {
-    UnregisterWithMachine();
-
     tControlledPTR< ePlayerNetID > holder( this );
 
-    //	else
-    {
-        this->RemoveFromGame();
+    // clear legacy spectator
+    se_ClearLegacySpectator( Owner() );
 
-        se_PlayerNetIDs.Remove(this,listID);
-
-        return true;
-    }
+    this->RemoveFromGame();
+    return true;
 }
 
 void ePlayerNetID::ActionOnDelete()
 {
-    UnregisterWithMachine();
-
     tControlledPTR< ePlayerNetID > holder( this );
 
-    this->RemoveFromGame();
+    if ( sn_GetNetState() == nSERVER )
+    {
+        // get the number of players registered from this client
+        // int playerCount = nMachine::GetMachine(Owner()).GetPlayerCount();
+        int playerCount = 0;
+        for ( int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
+        {
+            if ( se_PlayerNetIDs[i]->Owner() == Owner() )
+                playerCount++;
+        }
 
-    se_PlayerNetIDs.Remove(this,listID);
+        // if this is the last player, store it
+        if ( playerCount == 1 )
+        {
+            // clear legacy spectator
+            se_ClearLegacySpectator( Owner() );
+
+            // store new legacy spectator
+            se_legacySpectators[ Owner() ] = this;
+            spectating_ = true;
+
+            // quit team already
+            SetTeamWish( NULL );
+            SetTeam( NULL );
+            UpdateTeam();
+
+            // and kill controlled object
+            ControlObject( NULL );
+
+            // inform other clients that the player left
+            TakeOwnership();
+            RequestSync();
+
+            return;
+        }
+    }
+
+    // standard behavior: just get us out of here
+    this->RemoveFromGame();
 }
 
 void ePlayerNetID::PrintName(tString &s) const
