@@ -2300,8 +2300,9 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
         if(time < otherTime*(1-EPS))
         {
             // we were first!
-            static bool tryToSaveFutureWallOwner = false;
-            if ( tryToSaveFutureWallOwner && sn_GetNetState() != nCLIENT && w->NetWall() == otherPlayer->currentWall && otherPlayer->LastTime() < time + .5f )
+            static bool tryToSaveFutureWallOwner = true;
+            
+            if ( tryToSaveFutureWallOwner && sn_GetNetState() != nCLIENT && otherPlayer->currentWall && w == otherPlayer->currentWall->Wall() && otherPlayer->LastTime() < time + .5f )
             {
                 // teleport the other cycle back to the point before the collision; its next timestep
                 // will simulate the collision again from the right viewpoint
