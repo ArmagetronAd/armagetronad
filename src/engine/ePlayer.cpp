@@ -3925,6 +3925,11 @@ void ePlayerNetID::UpdateName( void )
         if ( !bool(this->voter_) || voter_->AllowNameChange() || nameFromServer_.Len() <= 1 )
         {
             nameFromServer_ = nameFromClient_;
+
+            if (this->voter_)
+            {
+                this->voter_->PlayerChanged();
+            }
         }
         else if ( nameFromServer_ != nameFromClient_ )
         {

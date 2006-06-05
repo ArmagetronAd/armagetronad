@@ -360,6 +360,7 @@ voting_privacy_help					Controls logging of voting process. 2: nothing gets logg
 voting_spam_issue_help              The spam level of issuing a vote.
 voting_spam_reject_help             The spam level of getting your vote rejected.
 voting_kick_time_help               The minimum time in seconds between two kick votes against the same player.
+voting_maturity_help                The minimum time in seconds a player needs to be online with the same name before he can issue votes.
 
 #********************************************
 #********************************************
@@ -2098,6 +2099,7 @@ vote_rejected						Poll "\1" has been rejected.\n
 vote_timeout						Poll "\1" timed out.\n
 vote_new							New poll: "\1". Enter the main menu vote on it.\n
 vote_redundant                      Poll rejected, same suggestion was made already.\n
+vote_maturity                       Poll rejected, you're not old enough to issue votes.\n
 vote_overflow						Poll rejected, too many pending polls.\n
 vote_disabled						Poll rejected, disabled by server admin.\n
 vote_disabled_spectator				Poll/Vote rejected, disabled for spectators by server admin.\n
