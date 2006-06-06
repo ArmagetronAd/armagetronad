@@ -1,16 +1,16 @@
 Changes since 0.2.8.2:
-- New sdl_mixer-based sound engine
+- New SDL_mixer-based sound engine
 - Experimental particle system for sparks (disabled, probably crashes on some machines)
-- Embedded webserver that serves up the resource directory
+- Embedded web-server that serves up the resource directory
 - Switched from proprietary class to a class derived from standard std::string for strings
 - Tab completion for chat and console
-- New cockpit files as resurces, replacing the old HUD
-- HUD minimap
-- New fonts, font are now truetype files and can be nonproportional
+- New cockpit files as resources, replacing the old HUD
+- HUD mini-map
+- New fonts, font are now truetype files and can be non-proportional
 - New chat command /console--works like /admin, but on the local client and doesn't require being logged in
 - Score table shows the number of players alive/total on each team
-- "Member of team:" coloumn in score table is only displayed if there are teams
-- "Member of team:" coloumn shows the team names in the teams' colors
+- "Member of team:" column in score table is only displayed if there are teams
+- "Member of team:" column shows the team names in the teams' colors
 - Players that are chatting have a star in front of their names in the score table
 - Chat lines of dead players are marked with "*DEAD*" in front of them
 - Voting outcome messages show how many players voted for/against the poll and how many didn't vote yet
@@ -35,7 +35,7 @@ Changes since 0.2.8.1:
   can be no bigger than the effect of ping.
 - Spectators are now regular players and can chat
 - The /msg command now converts the entered pattern into the internal
-  name so if you write "/msg �" and there is a user named "�" with
+  name so if you write "/msg öäü" and there is a user named "öäü" with
   an internal nick of "oau" it will still get matched
 - Team changes are now only executed when allowed, the need for the
   temporary/permanent team imbalance setting distinction has gone away
