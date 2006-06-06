@@ -8,6 +8,11 @@ Changes since 0.2.8.2:
 - HUD minimap
 - New fonts, font are now truetype files and can be nonproportional
 - New chat command /console--works like /admin, but on the local client and doesn't require being logged in
+- Score table shows the number of players alive/total on each team
+- "Member of team:" coloumn in score table is only displayed if there are teams
+- Players that are chatting have a star in front of their names in the score table
+- Chat lines of dead players are marked with "*DEAD*" in front of them
+- Voting outcome messages show how many players voted for/against the poll and how many didn't vote yet
 
 Changes since 0.2.8.1:
 - Timestamps and teamscores added to scorelog.txt

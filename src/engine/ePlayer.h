@@ -257,7 +257,7 @@ public:
 
     static void SortByScore(); // brings the players into the right order
     static tString Ranking( int MAX=12, bool cut = true );     // returns a ranking list
-    static float RankingGraph( float y, int MAX=12 );     // prints a ranking list
+    static float RankingGraph( float y, int MAX, bool showTeam );     // prints a ranking list
     static void  ResetScore();  // resets the ranking list
 
     static void DisplayScores(); // display scores on the screen
