@@ -2284,7 +2284,8 @@ void ePlayerNetID::CreateVoter()
     if ( sn_GetNetState() != nCLIENT && this->Owner() != 0 && sn_Connections[ this->Owner() ].version.Max() >= 3 )
     {
         this->voter_ = eVoter::GetVoter( this->Owner() );
-        this->voter_->PlayerChanged();
+        if ( this->voter_ )
+            this->voter_->PlayerChanged();
     }
 }
 
