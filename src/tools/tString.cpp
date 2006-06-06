@@ -122,8 +122,14 @@ void tString::ReadLine(std::istream &s, bool enableEscapeSequences ){
     s.putback(c);
     c='x';
 
-    while(c!='\n' && c!='\r' && s.good() && !s.eof()){
+    while( true )
+    {
         c=s.get();
+     
+        // notice end of line or file
+        if ( c=='\n' || c=='\r' || !s.good() || s.eof())
+            break;
+
         if ( enableEscapeSequences )
         {
             char c2 = '\0';
@@ -143,10 +149,8 @@ void tString::ReadLine(std::istream &s, bool enableEscapeSequences ){
         }
         operator[](i++)=c;
     }
-    if (i>0)
-        operator[](i-1)='\0';
-    else
-        operator[](0)='\0';
+
+    operator[](i)='\0';
 }
 
 tString & tString::operator<<(const char *c){
