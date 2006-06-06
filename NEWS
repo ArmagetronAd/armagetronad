@@ -14,6 +14,8 @@ Changes since 0.2.8.2:
 - Players that are chatting have a star in front of their names in the score table
 - Chat lines of dead players are marked with "*DEAD*" in front of them
 - Voting outcome messages show how many players voted for/against the poll and how many didn't vote yet
+- Added support for armagetronad URLs on Mac OS X and KDE -- armagetronad://<server>[:<port>]. port defaults to 4534.
+- New command-line flag: --connect <server>[:<port>]. Startup the game and connect directly to <server>.
 
 Changes since 0.2.8.1:
 - Timestamps and teamscores added to scorelog.txt
