@@ -118,11 +118,11 @@ enemy_dead_penalty_help           Penalty on the effective time in seconds if th
 enemy_chatbot_penalty_help        Penalty in seconds if the victim is in chatbot state and the enemy influence is just the chatbot evading a wall
 enemy_currenttime_influence_help  If set to 1, not the build time of the encountered wall, but the current time enters the comparison of enemy influences. Arbitrary blending values are allowed.
 enemy_suicide_timeout_help        If no enemy influence can be found for the last this many seconds, a player's death counts as a suicide.
-score_die_help			What you get for dying
-score_kill_help			What you get for killing someone
-score_suicide_help		What you get for stupidly dying
-score_win_help			What you get for winning a round
-score_deathzone_help		What you get for hitting the Death Zone
+score_die_help						Amount of points you get for dying
+score_kill_help						Amount of points you get for killing someone
+score_suicide_help					Amount of points you get for stupidly dying
+score_win_help						Amount of points you get for winning a round
+score_deathzone_help				Amount of points you get for hitting the Death Zone
 
 sp_score_win_help			What you get for winning a round in single player mode
 sp_walls_stay_up_delay_help	Number of seconds the walls stay up after a player died; negative values will keep them up forever.
@@ -255,7 +255,8 @@ idle_kick_time_help                 Time in seconds after which an inactive play
 #********************************************
 #********************************************
 
-player_name_confitem_help	Player name
+player_name_confitem_help	    Player name
+player_teamname_confitem_help	Team name
 camcenter_help			Center internal camera on driving direction
 start_cam_help			Initial Camera
 start_fov_help			Initial field of vision
@@ -1388,6 +1389,9 @@ viewport_assign_help		Which player's game is seen on which part of the screen?
 player_name_text		Name:
 player_name_help		The ... in "Winner: ... ". Use cursor <left>/<right>, delete, backspace and all the other keys.
 
+player_teamname_text	Teamname:
+player_teamname_help	Use cursor <left>/<right>, delete, backspace and all the other keys.
+
 player_input_text		Input Configuration
 player_input_help		Setup keyboard and mouse controls for this player.
 
@@ -1484,17 +1488,20 @@ team_menu_title			Team Menu
 team_menu_help			Let the players change their teams or created new teams
 
 team_menu_player_title		Choose team for \1
-team_menu_player_help		Let this player make team related decicions
+team_menu_player_help		Lets this player make team related decicions
 
-team_menu_join			join \1
+team_menu_join			\3join \1 (\2)
 team_menu_join_help		Let the current player join the specified team
+
+team_menu_info_current_team	Current team: \1
+team_menu_info_next_team	Next team: \1
 
 team_menu_create		create new team
 team_menu_create_help		Creates a new team and lets the current player join it
 
 team_owned_by			\1's team
-team_ai				AI team
-team_empty			Empty team
+team_ai					\1's AI team
+team_empty				<none>
 
 team_name_blue			Team blue
 team_name_gold			Team gold
@@ -1972,6 +1979,7 @@ player_left_spectator    0xff7f7fSpectator \1 0xff7f7fleft.\n
 player_left_game		\1 was discarded with \2 points.\n
 player_leaving_game		\1 0xff7f7fleft the game.\n
 player_renamed			\2 renamed to \1.\n
+player_renamed_teamname	\2 changed teamname to \1.\n
 player_rename_rejected  \1 0xffffffis not allowed to rename to \2 0xffffffright now to avoid confusion with kick votes.\n
 player_welcome			\n\nWelcome \1! This server is running version \2.\n
 player_win_default		\1 got \2 points for a very strange reason.\n
@@ -1998,6 +2006,7 @@ player_creates_team		\1 founded \2.\n
 player_nocreate_team		\1 cannot currently create a new team.\n
 player_nojoin_team		\1 cannot currently join \2.\n
 player_not_on_team      You are not on a team.\n
+team_renamed			\1 renamed it's team to \2.\n
 player_topologypolice	Order from Topology Police: \1
 
 team_shuffle            \1 gets shuffled from rank \2 to \3.\n
@@ -2074,7 +2083,7 @@ testing_version_expired         You are running a public test version or an unsu
 network_master_upgrage			Upgrade needed
 network_master_downgrage		Server is outdated
 network_master_incompatible		Server is incompatible
-network_master_full			Full
+network_master_full				Full
 network_master_serverinfo       Version: \1\nURI    : \2\nOptions: \3\n
 network_master_players			Players: 
 network_master_players_empty	Empty
@@ -2129,7 +2138,7 @@ network_kill_overflow		There was a network overflow.
 network_kill_too_many_players Too many players were logged in from your connection.
 network_kill_kick			You have been kicked by the server administrator; please stay away.
 network_kill_idle           You have been kicked automatically for being idle.
-network_kill_banned		You are banned for at least \1 minutes. \2
+network_kill_banned			You are banned for at least \1 minutes. \2
 #network_kill_banned         You are banned. Please stay away. The more often you retry to connect, the longer your ban stays.
 network_kill_unknown		No reason was given.
 network_kill_spamkick		You have been auto-kicked for spamming.
