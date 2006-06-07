@@ -101,11 +101,9 @@ static nSettingItemWatched<REAL> sg_cycleBrakeDepleteConf("CYCLE_BRAKE_DEPLETE",
 // static nSettingItem<REAL> sg_cycleBrakeDepleteConf("CYCLE_BRAKE_DEPLETE",sg_cycleBrakeDeplete );
 
 // cycle width: it won't fit into tunnels that are smaller than this
-/*
 REAL sg_cycleWidth = 0;
 static tSettingItem<REAL> c_cw("CYCLE_WIDTH",
                                sg_cycleWidth);
-*/
 
 // base speed of cycle im m/s
 static REAL sg_speedCycle=10;
@@ -1974,7 +1972,7 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
 
     // sense near wall behind us, accelerate more
     REAL totalWallAcceleration = 0; // total acceleration by walls
-    // REAL tunnelWidth           = 0; // with of the tunnel the cycle is in
+    REAL tunnelWidth           = 0; // with of the tunnel the cycle is in
     bool slingshot  = true;         // flag indicating whether the cycle is between two walls
     bool oneOwnWall = false;        // flag indicating whether one of the walls is your own
     for(int d=1;d>=-1;d-=2){
@@ -1997,7 +1995,7 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
                 REAL wallAcceleration=SpeedMultiplier() * sg_accelerationCycle * ((1/(rear.hit+sg_accelerationCycleOffs))
                                       -(1/(sg_nearCycle+sg_accelerationCycleOffs)));
 
-                // tunnelWidth += rear.hit;
+                tunnelWidth += rear.hit;
 
                 // apply modificators
                 switch (rear.type)
@@ -2036,14 +2034,36 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
         sg_ArchiveReal( totalWallAcceleration, 9 );
     }
 
-    /*
     // kill cycle if it is inside a too narrow channel
     if ( sn_GetNetState() != nCLIENT && slingshot && tunnelWidth < sg_cycleWidth )
     {
-        st_Breakpoint();
-        throw gCycleDeath( NULL, pos );
+            tunnelWidth = 0;
+
+            // check again with sensors to the front, both sensor pairs need
+            // to see a narrow tunnel
+            for(int d=1;d>=-1;d-=2)
+            {
+                // the direction to cast the acceleration rays in
+                eCoord dirCast = dirDrive.Turn(1,d);
+                gSensor front(this,pos,dirCast);
+                front.detect(sg_nearCycle);
+
+                if ( front.ehit && front.ehit->Other() )
+                {
+                    tunnelWidth += front.hit;
+                }
+                else
+                {
+                    tunnelWidth += sg_cycleWidth;
+                }
+            }
+
+            if ( tunnelWidth < sg_cycleWidth )
+            {
+                // st_Breakpoint();
+                throw gCycleDeath( pos );
+            }
     }
-    */
 
     // apply slingshot multiplier
     if ( slingshot && oneOwnWall )
