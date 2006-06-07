@@ -2203,7 +2203,7 @@ bool ePlayerNetID::ActionOnQuit()
 
     // clear legacy spectator
     se_ClearLegacySpectator( Owner() );
-    
+
     this->RemoveFromGame();
     return true;
 }
@@ -2222,10 +2222,13 @@ void ePlayerNetID::ActionOnDelete()
             if ( se_PlayerNetIDs[i]->Owner() == Owner() )
                 playerCount++;
         }
-    
+
         // if this is the last player, store it
         if ( playerCount == 1 )
         {
+            // log scores
+            LogScoreDifference();
+
             // clear legacy spectator
             se_ClearLegacySpectator( Owner() );
 
@@ -2240,7 +2243,7 @@ void ePlayerNetID::ActionOnDelete()
 
             // and kill controlled object
             ControlObject( NULL );
-            
+
             // inform other clients that the player left
             TakeOwnership();
             RequestSync();
