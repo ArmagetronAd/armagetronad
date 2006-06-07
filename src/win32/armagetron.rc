@@ -1,6 +1,7 @@
 //Microsoft Developer Studio generated resource script.
-//
+//http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tools/tools/about_resource_files.asp
 #include "resource.h"
+#include "..\version.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -19,6 +20,7 @@
 #ifdef _WIN32
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 #pragma code_page(1252)
+//28605 code page value for ISO-885-15 (includes euro sign)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -28,19 +30,19 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON1               ICON    DISCARDABLE     "icons\\armagetronad-16-16-32.ico"
-IDI_ICON2               ICON    DISCARDABLE     "icons\\armagetronad-24-24-32.ico"
-IDI_ICON3               ICON    DISCARDABLE     "icons\\armagetronad-32-32-32.ico"
-IDI_ICON4               ICON    DISCARDABLE     "icons\\armagetronad-48-48-32.ico"
-IDI_ICON5               ICON    DISCARDABLE     "icons\\armagetronad-64-64-32.ico"
-IDI_ICON6               ICON    DISCARDABLE     "icons\\armagetronad-16-16-16.ico"
-IDI_ICON7               ICON    DISCARDABLE     "icons\\armagetronad-24-24-16.ico"
-IDI_ICON8               ICON    DISCARDABLE     "icons\\armagetronad-32-32-16.ico"
-IDI_ICON9               ICON    DISCARDABLE     "icons\\armagetronad-16-16-256.ico"
-1                       ICON    DISCARDABLE     "icons\\armagetronad-32-32-256.ico"
-IDI_ICON11              ICON    DISCARDABLE     "icons\\armagetronad-24-24-256.ico"
-IDI_ICON12              ICON    DISCARDABLE     "icons\\armagetronad-48-48-256.ico"
-IDI_ICON13              ICON    DISCARDABLE     "icons\\armagetronad-64-64-256.ico"
+10               ICON    DISCARDABLE     "icons\\armagetronad-16-16-32.ico"
+11               ICON    DISCARDABLE     "icons\\armagetronad-24-24-32.ico"
+12               ICON    DISCARDABLE     "icons\\armagetronad-32-32-32.ico"
+13               ICON    DISCARDABLE     "icons\\armagetronad-48-48-32.ico"
+14               ICON    DISCARDABLE     "icons\\armagetronad-64-64-32.ico"
+15               ICON    DISCARDABLE     "icons\\armagetronad-16-16-16.ico"
+16               ICON    DISCARDABLE     "icons\\armagetronad-24-24-16.ico"
+17               ICON    DISCARDABLE     "icons\\armagetronad-32-32-16.ico"
+18               ICON    DISCARDABLE     "icons\\armagetronad-16-16-256.ico"
+1                ICON    DISCARDABLE     "icons\\armagetronad-32-32-256.ico"
+2                ICON    DISCARDABLE     "icons\\armagetronad-24-24-256.ico"
+3                ICON    DISCARDABLE     "icons\\armagetronad-48-48-256.ico"
+4                ICON    DISCARDABLE     "icons\\armagetronad-64-64-256.ico"
 
 
 
@@ -57,6 +59,49 @@ IDI_ICON13              ICON    DISCARDABLE     "icons\\armagetronad-64-64-256.i
 LANGUAGE LANG_SPANISH, SUBLANG_SPANISH_MODERN
 #pragma code_page(1252)
 #endif //_WIN32
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 0,3,0,0
+ PRODUCTVERSION 0,3,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS VS_FF_PRERELEASE | VS_FF_DEBUG//0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS VOS_NT_WINDOWS32 //0x40004L
+ FILETYPE VFT_APP //0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "Armagetron Advanced\0"
+            VALUE "FileVersion", "2, 1, 2, 0\0"
+            VALUE "InternalName", "ArmagetronAd\0"
+            VALUE "LegalCopyright", "GNU Public License\0"
+            VALUE "License", "GPL\0"
+            VALUE "Homepage", "http://www.armagetronad.net\0"
+            VALUE "OriginalFilename", "ArmagetronAd.exe\0"
+            VALUE "ProductName", "Armagetron Advanced\0"
+            VALUE "ProductVersion", VERSION
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
