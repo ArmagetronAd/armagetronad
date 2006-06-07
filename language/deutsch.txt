@@ -779,7 +779,7 @@ input_mess_up_help            Scrollt die Nachrichten eine Seite nach oben.
 
 input_mess_down_text          nach unten scrollen
 input_mess_down_help          Scrollt die Nachrichten eine Seite nach unten.
-	
+
 #********************************************
 #********************************************
 #

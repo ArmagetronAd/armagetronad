@@ -767,7 +767,7 @@ input_mess_up_help            Desplaza los mensajes una página hacia arriba.
 
 input_mess_down_text          Desplazar hacia abajo
 input_mess_down_help          Desplaza los mensajes una página hacia abajo.
-	
+
 #********************************************
 #********************************************
 #
