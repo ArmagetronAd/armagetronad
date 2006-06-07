@@ -1,4 +1,7 @@
 Changes since 0.2.8.2:
+- New team join menu (colored, shows number of players per team)
+- Customizable teamname
+- Updated Windows libraries (SDL,SDL_mixer,SDL_image,libxml2)
 - New SDL_mixer-based sound engine
 - Experimental particle system for sparks (disabled, probably crashes on some machines)
 - Embedded web-server that serves up the resource directory
