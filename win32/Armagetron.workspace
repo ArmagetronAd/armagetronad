@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="Armagetron workspace">
+		<Project filename="Armagetron.cbp">
+			<Depends filename="SDL.cbp" />
+			<Depends filename="SDL_image.cbp" />
+			<Depends filename="SDL_mixer.cbp" />
+			<Depends filename="FTGL.cbp" />
+		</Project>
+		<Project filename="Dedicated.cbp" />
+		<Project filename="Master.cbp" />
+		<Project filename="SDL.cbp" />
+		<Project filename="SDL_image.cbp">
+			<Depends filename="SDL.cbp" />
+		</Project>
+		<Project filename="SDL_mixer.cbp">
+			<Depends filename="mikmod.cbp" />
+			<Depends filename="libvorbis.cbp" />
+			<Depends filename="libvorbisfile.cbp" />
+			<Depends filename="libogg.cbp" />
+		</Project>
+		<Project filename="mikmod.cbp" />
+		<Project filename="libvorbis.cbp" />
+		<Project filename="libvorbisfile.cbp" />
+		<Project filename="FTGL.cbp" active="1" />
+		<Project filename="libogg.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>

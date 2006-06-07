@@ -34,10 +34,10 @@
 
 // defines for data directories in Windows
 #ifndef DEBUG
-#define USER_DATA_DIR  "${APPDATA}/Armagetron" 
-#define SCREENSHOT_DIR "${MYPICTURES}/Armagetron" 
+#define USER_DATA_DIR  "${APPDATA}/Armagetron"
+#define SCREENSHOT_DIR "${MYPICTURES}/Armagetron"
 #else
-#define USER_DATA_DIR  "." 
+#define USER_DATA_DIR  "."
 #endif
 
 // for now, no joystick support in Windows
@@ -45,3 +45,6 @@
 
 // Define this for the particle library
 #define PARTICLEDLL_EXPORTS
+
+// define version
+#include "../../version.h"
