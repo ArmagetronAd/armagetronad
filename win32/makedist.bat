@@ -3,56 +3,65 @@ SETLOCAL
 REM This batch file can be used to build the target directories "dist" and "debug" one layer
 REM up from here where the release and debug binaries will be compiled to.
 
-SET AA_DIR=..\armagetronad
-SET LIBS_DIR=..\winlibs
+SET AA_DIR=..
+SET AA_BUILD_DIR=%AA_DIR%\build
+SET LIBS_DIR=..\..\winlibs
+SET LIBS_BUILD_DIR=%LIBS_DIR%\build
+SET INSTALLER_DIR=..\..\build\win32
+
 SET DIST_DIR_BASE=dist
 SET DEBUG_DIR_BASE=debug
-SET DIST_DIR=..\%DIST_DIR_BASE%
-SET DEBUG_DIR=..\%DEBUG_DIR_BASE%
+SET PROFILE_DIR_BASE=profile
+SET DIST_DIR=%AA_BUILD_DIR%\%DIST_DIR_BASE%
+SET DEBUG_DIR=%AA_BUILD_DIR%\%DEBUG_DIR_BASE%
+SET PROFILE_DIR=%AA_BUILD_DIR%\%PROFILE_DIR_BASE%
 
-REM SET PROFILE_DIR_BASE=profile
-REM SET PROFILE_DIR=..\%PROFILE_DIR_BASE%
-
-echo making directory...
+REM echo making directory...
 REM del %DIST_DIR% /S /Q
 REM del %DEBUG_DIR% /S /Q
-mkdir %DIST_DIR%
-mkdir %DIST_DIR%\var
-mkdir %DEBUG_DIR%
+REM del %PROFILE_DIR% /S /Q
+REM mkdir %DEBUG_DIR%
 REM mkdir %PROFILE_DIR%
 
-echo Your personal configuration will be stored here. Updates will never touch this directory. > %DIST_DIR%\var\README.txt
-
 echo *** checking python
-call python.bat -C
+call python.bat -C 1>nul
 IF %ERRORLEVEL%==0 SET HAVE_PYTHON=1
 IF *%HAVE_PYTHON%*==*1* (
+	echo     PYTHON found
 	echo *** generating version.h...
-	call python.bat -c "import datetime; print '#define VERSION ""0.3.0_Alpha'+datetime.date.today().strftime('%%%%Y%%%%m%%%%d')+'""' " > %AA_DIR%\version.h
-	call python.bat -c "import datetime; print 'Version: Alpha'+datetime.date.today().strftime('%%%%Y%%%%m%%%%d') "
+	call python.bat -c "import datetime; print '#define VERSION ""0.3.0_Alpha'+datetime.date.today().strftime('%%%%Y%%%%m%%%%d')+'\\\\0""' " > %AA_DIR%\src\version.h
+	call python.bat -c "import datetime; print 'Version: Alpha'+datetime.date.today().strftime('%%%%Y%%%%m%%%%d')"
 ) else (
+	echo !!! PYTHON not found
 	echo *** generating pseudo version.h...
-	echo #define VERSION "CVS" > %AA_DIR%\version.h
+	echo #define VERSION "CVS\0" > %AA_DIR%\src\version.h
 )
 
-echo making dist...
-call :copy_files %DIST_DIR%
+IF EXIST %DIST_DIR% (
+	mkdir %DEBUG_DIR%\var
+	echo Your personal configuration will be stored here. > %DIST_DIR%\var\README.txt
+	echo Updates will never touch this directory. >> %DIST_DIR%\var\README.txt
+	call :copy_files %DIST_DIR% %DIST_DIR_BASE%
+)
 
-echo making debug...
-REM xcopy %DIST_DIR% %DEBUG_DIR% /I /E /Y /C
-call :copy_files %DEBUG_DIR%
+IF EXIST %DEBUG_DIR% (
+	call :copy_files %DEBUG_DIR% %DEBUG_DIR_BASE%
+)
 
-REM echo making profile...
-REM xcopy %DIST_DIR% %PROFILE_DIR% /I /E /Y /C
-REM call :copy_files %PROFILE_DIR%
+IF EXIST %PROFILE_DIR% (
+	call :copy_files %PROFILE_DIR% %PROFILE_DIR_BASE%
+)
 
-call status.bat %DIST_DIR%
-call status.bat %DEBUG_DIR%
-REM call status.bat %PROFILE_DIR%
+IF EXIST %DIST_DIR% call status.bat %DIST_DIR%
+IF EXIST %DEBUG_DIR% call status.bat %DEBUG_DIR%
+IF EXIST %PROFILE_DIR% call status.bat %PROFILE_DIR%
 
 goto :exit
 
 :copy_files
+echo +-------------------------------------------------------
+echo ^| updating %2                                           
+echo +-------------------------------------------------------
 echo *** copying files...
 xcopy %AA_DIR%\arenas %1\arenas /I /E /Y /C
 xcopy %AA_DIR%\config %1\config /I /E /Y /C
@@ -73,33 +82,45 @@ move /Y %1\language\languages.txt.in %1\language\languages.txt
 
 echo *** copying binary only dlls ( WATCH FOR ERRORS! )...
 xcopy %LIBS_DIR%\SDL_image\VisualC\graphics\lib\*.dll %1 /C /Y /I
+xcopy %LIBS_DIR%\SDL_mixer\VisualC\smpeg\lib\*.dll %1 /C /Y /I
 xcopy %LIBS_DIR%\libxml2\lib\*.dll %1 /C /Y /I
 xcopy %LIBS_DIR%\iconv\lib\*.dll %1 /C /Y /I
-xcopy %LIBS_DIR%\freetype\lib\*.dll %1 /C /Y /I
+xcopy %LIBS_DIR%\FTGL\win32\freetype\lib\*.dll %1 /C /Y /I
+xcopy %LIBS_BUILD_DIR%\%2\*.dll %1 /C /Y /I
 
 echo *** copying installation files...
-xcopy *.nsi %1 /Y
-xcopy *.bmp %1 /Y
-xcopy *.url %1 /Y
+xcopy %INSTALLER_DIR%\*.nsi %1 /Y
+xcopy %INSTALLER_DIR%\*.bmp %1 /Y
+xcopy %INSTALLER_DIR%\*.url %1 /Y
 
 echo *** moving resources
 IF *%HAVE_PYTHON%*==*1* (
-	echo ***************************************************
 	echo *** Sort resources
 	call python.bat "%AA_DIR%/batch/make/sortresources.py" %~1/resource/included
-	echo ***************************************************
-) else (
-	echo ***************************************************
-	echo *** WARNING: Python missing - can't sort resources
-	echo ***************************************************
 )
 goto :return
 
 :exit
+IF NOT *%HAVE_PYTHON%*==*1* (
+	echo ************************************************************************
+	echo *** WARNING: Python was not found - can't sort XML resources         ***
+	echo ************************************************************************	
+	echo *** Please check your python configuration. You can set the path for ***
+	echo *** python in "build_codeblocks\python.bat"                          ***     
+	echo ************************************************************************
+)
 SET AA_DIR=
+SET AA_BUILD_DIR=
 SET LIBS_DIR=
-SET DIST_DIR=
-SET DEBUG_DIR=
+SET LIBS_BUILD_DIR=
+SET INSTALLER_DIR=
+
+REM SET DIST_DIR=
+REM SET DIST_DIR_BASE=
+REM SET DEBUG_DIR=
+REM SET DEBUG_DIR_BASE=
+REM SET PROFILE_DIR_BASE=
+REM SET PROFILE_DIR=
 
 echo done!
 pause

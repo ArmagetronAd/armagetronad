@@ -8,10 +8,10 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Win32 Release">
-				<Option output="..\dist\libvorbisfile.a" />
+				<Option output="..\..\winlibs\build\dist\libvorbisfile.a" />
 				<Option working_dir="" />
-				<Option object_output="tmp\libvorbisfile___Win32_Release" />
-				<Option external_deps="..\dist\libvorbis.a;" />
+				<Option object_output="..\..\winlibs\build\tmp\libvorbisfile___Win32_Release" />
+				<Option external_deps="..\..\winlibs\build\dist\libvorbis.a;" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option includeInTargetAll="1" />
@@ -24,15 +24,15 @@
 					<Add option="-D_WIN32" />
 				</Compiler>
 				<Linker>
-					<Add library="..\dist\libogg.a" />
-					<Add library="..\dist\libvorbis.a" />
+					<Add library="..\..\winlibs\build\dist\libogg.a" />
+					<Add library="..\..\winlibs\build\dist\libvorbis.a" />
 				</Linker>
 			</Target>
 			<Target title="Win32 Debug">
-				<Option output="..\debug\libvorbisfile.a" />
+				<Option output="..\..\winlibs\build\debug\libvorbisfile.a" />
 				<Option working_dir="" />
-				<Option object_output="tmp\libvorbisfile___Win32_Debug" />
-				<Option external_deps="..\winlibs\libvorbis\win32\Vorbis_Static_Debug\libvorbis_static_d.a;" />
+				<Option object_output="..\..\winlibs\build\tmp\libvorbisfile___Win32_Debug" />
+				<Option external_deps="..\..\winlibs\libvorbis\win32\Vorbis_Static_Debug\libvorbis_static_d.a;" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option includeInTargetAll="1" />
@@ -44,15 +44,15 @@
 					<Add option="-D_DEBUG" />
 				</Compiler>
 				<Linker>
-					<Add library="..\debug\libogg.a" />
-					<Add library="..\debug\libvorbis.a" />
+					<Add library="..\..\winlibs\build\debug\libogg.a" />
+					<Add library="..\..\winlibs\build\debug\libvorbis.a" />
 				</Linker>
 			</Target>
 			<Target title="Win32 Profile">
-				<Option output="..\profile\libvorbisfile.a" />
+				<Option output="..\..\winlibs\build\profile\libvorbisfile.a" />
 				<Option working_dir="" />
-				<Option object_output="tmp\libvorbisfile___Win32_Profile" />
-				<Option external_deps="..\winlibs\libvorbis\win32\Vorbis_Static_Debug\libvorbis_static_d.a;" />
+				<Option object_output="..\..\winlibs\build\tmp\libvorbisfile___Win32_Profile" />
+				<Option external_deps="..\..\winlibs\libvorbis\win32\Vorbis_Static_Debug\libvorbis_static_d.a;" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option includeInTargetAll="1" />
@@ -64,8 +64,8 @@
 					<Add option="-D_DEBUG" />
 				</Compiler>
 				<Linker>
-					<Add library="..\debug\libogg.a" />
-					<Add library="..\debug\libvorbis.a" />
+					<Add library="..\..\winlibs\build\profile\libogg.a" />
+					<Add library="..\..\winlibs\build\profile\libvorbis.a" />
 				</Linker>
 			</Target>
 		</Build>
@@ -74,10 +74,10 @@
 			<Add option="-DWIN32" />
 			<Add option="-D_MBCS" />
 			<Add option="-D_LIB" />
-			<Add directory="..\winlibs\libvorbis\include" />
-			<Add directory="..\winlibs\libogg\include" />
+			<Add directory="..\..\winlibs\libvorbis\include" />
+			<Add directory="..\..\winlibs\libogg\include" />
 		</Compiler>
-		<Unit filename="..\winlibs\libvorbis\include\vorbis\vorbisfile.h">
+		<Unit filename="..\..\winlibs\libvorbis\include\vorbis\vorbisfile.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -85,7 +85,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\libvorbis\lib\vorbisfile.c">
+		<Unit filename="..\..\winlibs\libvorbis\lib\vorbisfile.c">
 			<Option compilerVar="CC" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />

@@ -97,6 +97,3 @@
 
 /* Define to 1 if you have the `wmemset' function. */
 #define HAVE_WMEMSET 1
-
-// define version
-#define VERSION "CVS"

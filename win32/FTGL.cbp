@@ -8,8 +8,8 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Win32 Release">
-				<Option output="..\dist\FTGL.dll" />
-				<Option object_output="tmp\FTGL___Win32_Release" />
+				<Option output="..\..\winlibs\build\dist\FTGL.dll" />
+				<Option object_output="..\..\winlibs\build\tmp\FTGL___Win32_Release" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option includeInTargetAll="1" />
@@ -22,8 +22,8 @@
 				</Compiler>
 			</Target>
 			<Target title="Win32 Debug">
-				<Option output="..\debug\FTGL.dll" />
-				<Option object_output="tmp\FTGL___Win32_Debug" />
+				<Option output="..\..\winlibs\build\debug\FTGL.dll" />
+				<Option object_output="..\..\winlibs\build\tmp\FTGL___Win32_Debug" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option includeInTargetAll="1" />
@@ -36,8 +36,8 @@
 				</Compiler>
 			</Target>
 			<Target title="Win32 Profile">
-				<Option output="..\profile\FTGL.dll" />
-				<Option object_output="tmp\FTGL___Win32_Profile" />
+				<Option output="..\..\winlibs\build\profile\FTGL.dll" />
+				<Option object_output="..\..\winlibs\build\tmp\FTGL___Win32_Profile" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option includeInTargetAll="1" />
@@ -53,17 +53,17 @@
 		<Compiler>
 			<Add option="-fexceptions" />
 			<Add option="-DWIN32" />
-			<Add directory="..\winlibs\FTGL\win32\freetype\include" />
-			<Add directory="..\winlibs\FTGL\win32\freetype\include\freetype2" />
-			<Add directory="..\winlibs\FTGL\include" />
-			<Add directory="..\winlibs\FTGL\src" />
+			<Add directory="..\..\winlibs\FTGL\win32\freetype\include" />
+			<Add directory="..\..\winlibs\FTGL\win32\freetype\include\freetype2" />
+			<Add directory="..\..\winlibs\FTGL\include" />
+			<Add directory="..\..\winlibs\FTGL\src" />
 		</Compiler>
 		<Linker>
 			<Add library="libopengl32.a" />
 			<Add library="libglu32.a" />
-			<Add library="..\winlibs\FTGL\win32\freetype\lib\libfreetype.dll.a" />
+			<Add library="..\..\winlibs\FTGL\win32\freetype\lib\libfreetype.dll.a" />
 		</Linker>
-		<Unit filename="..\winlibs\FTGL\include\FTBBox.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTBBox.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -71,7 +71,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTBitmapGlyph.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTBitmapGlyph.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -79,7 +79,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTCharToGlyphIndexMap.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTCharToGlyphIndexMap.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -87,7 +87,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTCharmap.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTCharmap.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -95,7 +95,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTContour.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTContour.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -103,7 +103,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTExtrdGlyph.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTExtrdGlyph.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -111,7 +111,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTFace.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTFace.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -119,7 +119,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTFont.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTFont.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -127,7 +127,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTGL.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTGL.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -135,7 +135,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTGLBitmapFont.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTGLBitmapFont.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -143,7 +143,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTGLExtrdFont.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTGLExtrdFont.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -151,7 +151,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTGLOutlineFont.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTGLOutlineFont.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -159,7 +159,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTGLPixmapFont.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTGLPixmapFont.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -167,7 +167,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTGLPolygonFont.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTGLPolygonFont.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -175,7 +175,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTGLTextureFont.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTGLTextureFont.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -183,7 +183,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTGlyph.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTGlyph.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -191,7 +191,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTGlyphContainer.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTGlyphContainer.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -199,7 +199,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTLibrary.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTLibrary.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -207,7 +207,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTList.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTList.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -215,7 +215,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTOutlineGlyph.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTOutlineGlyph.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -223,7 +223,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTPixmapGlyph.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTPixmapGlyph.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -231,7 +231,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTPoint.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTPoint.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -239,7 +239,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTPolyGlyph.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTPolyGlyph.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -247,7 +247,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTSize.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTSize.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -255,7 +255,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTTextureGlyph.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTTextureGlyph.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -263,7 +263,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTVector.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTVector.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -271,7 +271,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\include\FTVectoriser.h">
+		<Unit filename="..\..\winlibs\FTGL\include\FTVectoriser.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -279,146 +279,146 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTBitmapGlyph.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTBitmapGlyph.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTCharmap.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTCharmap.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTContour.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTContour.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTExtrdGlyph.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTExtrdGlyph.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTFace.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTFace.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTFont.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTFont.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTGLBitmapFont.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTGLBitmapFont.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTGLExtrdFont.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTGLExtrdFont.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTGLOutlineFont.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTGLOutlineFont.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTGLPixmapFont.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTGLPixmapFont.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTGLPolygonFont.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTGLPolygonFont.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTGLTextureFont.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTGLTextureFont.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTGlyph.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTGlyph.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTGlyphContainer.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTGlyphContainer.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTLibrary.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTLibrary.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTOutlineGlyph.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTOutlineGlyph.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTPixmapGlyph.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTPixmapGlyph.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTPoint.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTPoint.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTPolyGlyph.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTPolyGlyph.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTSize.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTSize.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTTextureGlyph.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTTextureGlyph.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\src\FTVectoriser.cpp">
+		<Unit filename="..\..\winlibs\FTGL\src\FTVectoriser.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\win32_vcpp\ftgl_dll\Version.rc">
+		<Unit filename="..\..\winlibs\FTGL\win32\Version.rc">
 			<Option compilerVar="WINDRES" />
-			<Option objectName="winlibs\FTGL\win32_vcpp\ftgl_dll\Version.res" />
+			<Option objectName="winlibs\FTGL\win32\Version.res" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\FTGL\win32_vcpp\ftgl_dll\resource.h">
+		<Unit filename="..\..\winlibs\FTGL\win32_vcpp\ftgl_dll\resource.h">
 			<Option compilerVar="CPP" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -426,7 +426,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\cache\ftccache.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\cache\ftccache.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -434,7 +434,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\cache\ftccmap.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\cache\ftccmap.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -442,7 +442,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\cache\ftcglyph.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\cache\ftcglyph.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -450,7 +450,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\cache\ftcimage.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\cache\ftcimage.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -458,7 +458,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\cache\ftcmanag.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\cache\ftcmanag.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -466,7 +466,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\cache\ftcmru.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\cache\ftcmru.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -474,7 +474,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\cache\ftcsbits.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\cache\ftcsbits.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -482,7 +482,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\config\ftconfig.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\config\ftconfig.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -490,7 +490,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\config\ftheader.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\config\ftheader.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -498,7 +498,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\config\ftmodule.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\config\ftmodule.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -506,7 +506,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\config\ftoption.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\config\ftoption.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -514,7 +514,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\config\ftstdlib.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\config\ftstdlib.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -522,7 +522,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\freetype.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\freetype.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -530,7 +530,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftbbox.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftbbox.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -538,7 +538,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftbdf.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftbdf.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -546,7 +546,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftbitmap.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftbitmap.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -554,7 +554,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftcache.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftcache.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -562,7 +562,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftchapters.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftchapters.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -570,7 +570,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\fterrdef.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\fterrdef.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -578,7 +578,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\fterrors.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\fterrors.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -586,7 +586,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftglyph.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftglyph.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -594,7 +594,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftgzip.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftgzip.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -602,7 +602,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftimage.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftimage.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -610,7 +610,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftincrem.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftincrem.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -618,7 +618,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftlist.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftlist.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -626,7 +626,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftlzw.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftlzw.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -634,7 +634,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftmac.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftmac.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -642,7 +642,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftmm.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftmm.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -650,7 +650,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftmodapi.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftmodapi.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -658,7 +658,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftmoderr.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftmoderr.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -666,7 +666,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftotval.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftotval.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -674,7 +674,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftoutln.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftoutln.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -682,7 +682,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftpfr.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftpfr.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -690,7 +690,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftrender.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftrender.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -698,7 +698,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftsizes.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftsizes.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -706,7 +706,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftsnames.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftsnames.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -714,7 +714,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftstroke.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftstroke.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -722,7 +722,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftsynth.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftsynth.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -730,7 +730,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftsysio.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftsysio.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -738,7 +738,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftsysmem.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftsysmem.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -746,7 +746,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftsystem.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftsystem.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -754,7 +754,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\fttrigon.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\fttrigon.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -762,7 +762,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\fttypes.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\fttypes.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -770,7 +770,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftwinfnt.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftwinfnt.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -778,7 +778,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ftxf86.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ftxf86.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -786,7 +786,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\autohint.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\autohint.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -794,7 +794,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\ftcalc.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\ftcalc.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -802,7 +802,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\ftdebug.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\ftdebug.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -810,7 +810,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\ftdriver.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\ftdriver.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -818,7 +818,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\ftgloadr.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\ftgloadr.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -826,7 +826,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\ftmemory.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\ftmemory.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -834,7 +834,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\ftobjs.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\ftobjs.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -842,7 +842,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\ftrfork.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\ftrfork.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -850,7 +850,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\ftserv.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\ftserv.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -858,7 +858,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\ftstream.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\ftstream.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -866,7 +866,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\fttrace.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\fttrace.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -874,7 +874,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\ftvalid.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\ftvalid.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -882,7 +882,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\internal.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\internal.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -890,7 +890,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\pcftypes.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\pcftypes.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -898,7 +898,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\psaux.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\psaux.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -906,7 +906,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\pshints.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\pshints.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -914,7 +914,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\sfnt.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\sfnt.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -922,7 +922,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\svbdf.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\svbdf.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -930,7 +930,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\svgldict.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\svgldict.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -938,7 +938,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\svmm.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\svmm.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -946,7 +946,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\svotval.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\svotval.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -954,7 +954,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\svpfr.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\svpfr.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -962,7 +962,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\svpostnm.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\svpostnm.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -970,7 +970,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\svpscmap.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\svpscmap.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -978,7 +978,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\svpsinfo.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\svpsinfo.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -986,7 +986,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\svsfnt.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\svsfnt.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -994,7 +994,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\svttcmap.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\svttcmap.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -1002,7 +1002,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\svwinfnt.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\svwinfnt.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -1010,7 +1010,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\svxf86nm.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\svxf86nm.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -1018,7 +1018,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\t1types.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\t1types.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -1026,7 +1026,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\internal\tttypes.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\internal\tttypes.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -1034,7 +1034,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\t1tables.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\t1tables.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -1042,7 +1042,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ttnameid.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ttnameid.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -1050,7 +1050,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\tttables.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\tttables.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -1058,7 +1058,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\tttags.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\tttags.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -1066,7 +1066,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\freetype2\freetype\ttunpat.h">
+		<Unit filename="..\..\winlibs\freetype\include\freetype2\freetype\ttunpat.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -1074,7 +1074,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\freetype\include\ft2build.h">
+		<Unit filename="..\..\winlibs\freetype\include\ft2build.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />

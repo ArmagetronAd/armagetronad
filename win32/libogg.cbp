@@ -8,9 +8,9 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Win32 Release">
-				<Option output="..\dist\libogg.a" />
+				<Option output="..\..\winlibs\build\dist\libogg.a" />
 				<Option working_dir="" />
-				<Option object_output="tmp\libogg___Win32_Release" />
+				<Option object_output="..\..\winlibs\build\tmp\libogg___Win32_Release" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option includeInTargetAll="1" />
@@ -23,9 +23,9 @@
 				</Compiler>
 			</Target>
 			<Target title="Win32 Debug">
-				<Option output="..\debug\libogg.a" />
+				<Option output="..\..\winlibs\build\debug\libogg.a" />
 				<Option working_dir="" />
-				<Option object_output="tmp\libogg___Win32_Debug" />
+				<Option object_output="..\..\winlibs\build\tmp\libogg___Win32_Debug" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option includeInTargetAll="1" />
@@ -38,9 +38,9 @@
 				</Compiler>
 			</Target>
 			<Target title="Win32 Profile">
-				<Option output="..\profile\libogg.a" />
+				<Option output="..\..\winlibs\build\profile\libogg.a" />
 				<Option working_dir="" />
-				<Option object_output="tmp\libogg___Win32_Profile" />
+				<Option object_output="..\..\winlibs\build\tmp\libogg___Win32_Profile" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option includeInTargetAll="1" />
@@ -58,9 +58,9 @@
 			<Add option="-DWIN32" />
 			<Add option="-D_MBCS" />
 			<Add option="-D_LIB" />
-			<Add directory="..\winlibs\libogg\include" />
+			<Add directory="..\..\winlibs\libogg\include" />
 		</Compiler>
-		<Unit filename="..\winlibs\libogg\include\ogg\ogg.h">
+		<Unit filename="..\..\winlibs\libogg\include\ogg\ogg.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -68,7 +68,7 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\libogg\include\ogg\os_types.h">
+		<Unit filename="..\..\winlibs\libogg\include\ogg\os_types.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
 			<Option link="0" />
@@ -76,13 +76,13 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\libogg\src\bitwise.c">
+		<Unit filename="..\..\winlibs\libogg\src\bitwise.c">
 			<Option compilerVar="CC" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\winlibs\libogg\src\framing.c">
+		<Unit filename="..\..\winlibs\libogg\src\framing.c">
 			<Option compilerVar="CC" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
