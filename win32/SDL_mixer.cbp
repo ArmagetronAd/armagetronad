@@ -81,7 +81,6 @@
 			<Add option="-DWAV_MUSIC" />
 			<Add option="-DMOD_MUSIC" />
 			<Add option="-DOGG_MUSIC" />
-			<Add option="-DMP3_MUSIC" />
 			<Add option="-DMID_MUSIC" />
 			<Add option="-DUSE_NATIVE_MIDI" />
 			<Add option="-DUSE_TIMIDITY_MIDI" />

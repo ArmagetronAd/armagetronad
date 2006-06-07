@@ -57,7 +57,7 @@
 			<Add option="-DDENABLE_DIRECTX" />
 			<Add option="-D_WIN32_WINNT=0x0400" />
 			<Add option="-D_CRT_SECURE_NO_DEPRECATE" />
-			<Add directory="directx\include" />
+			<Add directory="..\src\win32\directx\include" />
 			<Add directory="..\..\winlibs\SDL\src" />
 			<Add directory="..\..\winlibs\SDL\src\audio" />
 			<Add directory="..\..\winlibs\SDL\src\video" />
