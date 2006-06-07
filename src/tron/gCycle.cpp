@@ -3245,7 +3245,7 @@ void gCycle::SoundMix(Uint8 *dest,unsigned int len,
 #endif
 
 eCoord gCycle::PredictPosition(){
-    gSensor s(this,pos, dir * (verletSpeed_ * se_PredictTime()) + correctPosSmooth );
+    gSensor s(this,pos, dir * (verletSpeed_ * se_PredictTime() * rubberSpeedFactor ) );
     s.detect(1);
     return s.before_hit;
 
