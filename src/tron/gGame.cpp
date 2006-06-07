@@ -3232,6 +3232,19 @@ void gGame::Analysis(REAL time){
 
     static REAL wintimer=0;
 
+    // only do this expensive stuff once a second
+    {
+        static double nextTime = -1;
+        if ( tSysTimeFloat() > nextTime )
+        {
+            nextTime = tSysTimeFloat() + 1.0;
+        }
+        else
+        {
+            return;
+        }
+    }
+
     // send timeout warnings
 
 
