@@ -1,3 +1,22 @@
+Changes since 0.2.8.2:
+
+  New settings:
+- CYCLE_WIDTH for making it impossible to squeeze through tight tunnels
+- VOTING_MATURITY controls how long you have to wait after login before
+  you can issue kick votes.
+
+  Featurelets:
+- Players leaving to spectator mode with <0.2.8.2 clients are handled like
+  spectators of 0.2.8.2 clients: they stay visible to the others.
+- Kick statistics are now persistent across server runs.
+
+  Bugfixes:
+- "Team Red" bug. If the server allows maximally two teams, no team ever
+  gets to be Team Red.
+- Phasing made even more difficult; nice side effect of the fix is
+  reduced network bandwidth usage.
+- Speed gauge resets between rounds.
+
 Changes since 0.2.8.1:
 - Timestamps and teamscores added to scorelog.txt
 - Dedicated server now works on FreeBSD and OpenBSD
