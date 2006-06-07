@@ -67,8 +67,8 @@ LANGUAGE LANG_SPANISH, SUBLANG_SPANISH_MODERN
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,3,0,0
- PRODUCTVERSION 0,3,0,0
+ FILEVERSION MAJOR_VERSION
+ PRODUCTVERSION MAJOR_VERSION
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS VS_FF_PRERELEASE | VS_FF_DEBUG//0x1L
@@ -85,7 +85,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "\0"
             VALUE "FileDescription", "Armagetron Advanced\0"
-            VALUE "FileVersion", "2, 1, 2, 0\0"
+            VALUE "FileVersion", VERSION
             VALUE "InternalName", "ArmagetronAd\0"
             VALUE "LegalCopyright", "GNU Public License\0"
             VALUE "License", "GPL\0"

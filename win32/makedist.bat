@@ -16,6 +16,10 @@ SET DIST_DIR=%AA_BUILD_DIR%\%DIST_DIR_BASE%
 SET DEBUG_DIR=%AA_BUILD_DIR%\%DEBUG_DIR_BASE%
 SET PROFILE_DIR=%AA_BUILD_DIR%\%PROFILE_DIR_BASE%
 
+SET /P MAJOR_VERSION= < %AA_DIR%\major_version
+SET /P MINOR_VERSION_TPL= < %AA_DIR%\minor_version
+SET HELP_FILE=%AA_BUILD_DIR%/help-%RANDOM%.txt
+
 REM echo making directory...
 REM del %DIST_DIR% /S /Q
 REM del %DEBUG_DIR% /S /Q
@@ -28,14 +32,20 @@ call python.bat -C 1>nul
 IF %ERRORLEVEL%==0 SET HAVE_PYTHON=1
 IF *%HAVE_PYTHON%*==*1* (
 	echo     PYTHON found
-	echo *** generating version.h...
-	call python.bat -c "import datetime; print '#define VERSION ""0.3.0_Alpha'+datetime.date.today().strftime('%%%%Y%%%%m%%%%d')+'\\\\0""' " > %AA_DIR%\src\version.h
-	call python.bat -c "import datetime; print 'Version: Alpha'+datetime.date.today().strftime('%%%%Y%%%%m%%%%d')"
+	call python.bat -c "import datetime; print datetime.date.today().strftime('%%%%Y%%%%m%%%%d')" > %HELP_FILE%
+	SET /P DATESTAMP= < %HELP_FILE%
+	del %HELP_FILE% /Q /F
 ) else (
 	echo !!! PYTHON not found
-	echo *** generating pseudo version.h...
-	echo #define VERSION "CVS\0" > %AA_DIR%\src\version.h
+	SET DATESTAMP=SVN
 )
+
+SET MINOR_VERSION=%MINOR_VERSION_TPL:DATE=%%DATESTAMP%
+echo *** generating version.h...
+echo Detected version: Armagetron Advanced %MAJOR_VERSION%%MINOR_VERSION%
+echo #define MAJOR_VERSION %MAJOR_VERSION:.=,%,%DATESTAMP:~4% > %AA_DIR%\src\version.h
+echo #define MINOR_VERSION %MINOR_VERSION% >> %AA_DIR%\src\version.h
+echo #define VERSION "%MAJOR_VERSION%%MINOR_VERSION%" >> %AA_DIR%\src\version.h
 
 IF EXIST %DIST_DIR% (
 	mkdir %DEBUG_DIR%\var
@@ -52,6 +62,10 @@ IF EXIST %PROFILE_DIR% (
 	call :copy_files %PROFILE_DIR% %PROFILE_DIR_BASE%
 )
 
+echo.
+echo. 
+echo === Armagetron Advanced %MAJOR_VERSION%%MINOR_VERSION% ===
+echo.
 IF EXIST %DIST_DIR% call status.bat %DIST_DIR%
 IF EXIST %DEBUG_DIR% call status.bat %DEBUG_DIR%
 IF EXIST %PROFILE_DIR% call status.bat %PROFILE_DIR%
