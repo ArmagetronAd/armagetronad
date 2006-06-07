@@ -110,6 +110,7 @@ public:
 
     //callback functions for subwidgets
     std::auto_ptr<tValue::Base> cb_CurrentRubber(void);           //!< Gets the used rubber for the currently watched cycle
+    std::auto_ptr<tValue::Base> cb_CurrentAcceleration(void);           //!< Gets the current acceleration for the currently watched cycle
     std::auto_ptr<tValue::Base> cb_CurrentPing(void);             //!< Gets the current ping for the player the viewport belongs to in ms
     std::auto_ptr<tValue::Base> cb_CurrentSpeed(void);            //!< Gets the speed of the currently watched cycle in m/s
     std::auto_ptr<tValue::Base> cb_MaxSpeed(void);                //!< Gets the maximum possible speed on the server

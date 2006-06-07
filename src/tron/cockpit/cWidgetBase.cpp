@@ -230,6 +230,7 @@ tValue::Base *WithDataFunctions::ProcessDataSource(tString const &data) {
     //is it one of the dynamic callbacks?
     std::map<tString, tValue::Callback<cCockpit>::cb_ptr>callbacks;
     callbacks[tString("player_rubber")]        = &cCockpit::cb_CurrentRubber;
+    callbacks[tString("player_acceleration")]        = &cCockpit::cb_CurrentAcceleration;
     callbacks[tString("current_ping")]         = &cCockpit::cb_CurrentPing;
     callbacks[tString("player_speed")]         = &cCockpit::cb_CurrentSpeed;
     callbacks[tString("max_speed")]            = &cCockpit::cb_MaxSpeed;

@@ -25,9 +25,30 @@
             </Background>
             <Foreground>
                 <Solid>
-                            <Color r="1." g="0." b="0." alpha="1." />
+                    <Color r="1." g="0." b="0." alpha="1." />
                 </Solid>
             </Foreground>
+        </BarGauge>
+        <!--- Acceleration meter -->
+        <BarGauge camera="*">
+            <DataSet>
+                <AtomicData field="source" source="player_acceleration" />
+                <AtomicData field="minimum" source="-50" />
+                <AtomicData field="maximum" source="50" />
+            </DataSet>
+            <Position x="0.4" y="-0.5" />
+            <Size height="0.015" width="0.15" />
+            <ShowCurrent value="false" />
+            <ShowMaximum value="false" />
+            <ShowMinimum value="false" />
+            <Caption location="off">
+                <Text value="Speed" />
+            </Caption>
+            <Background>
+                <Solid>
+                    <Color r="0.1" g="0.3" b="0.2" alpha="0.2" />
+                </Solid>
+            </Background>
         </BarGauge>
         <!-- Brakes -->
         <BarGauge camera="*">
@@ -235,7 +256,7 @@
         </BarGauge>
 
         <!-- HUD Map (obviously) -->
-        <Map camera="*" viewport="top">
+        <Map camera="*">
             <Position x="0" y="-0.759" />
             <Size height="0.24" width="0.24" />
         </Map>
