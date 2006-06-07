@@ -155,21 +155,26 @@ void eTeam::UpdateAppearance()
     {
         oldest = OldestAIPlayer();
     }
+	/* Logic:
+		  No more voting about teamnames.
+		  The teamname of the player who has been on the team for the longest time
+		  is used for a team!
 
-    // vote on team name: color or leader?
-    int voteName = 0;
+	      Color Teamname:
+	            -more than 1 player in the current team
+				-oldest player's custom teamname is empty
+				-if "Player Settings->Player 1->Name Team After Player" is off
+	      Custom Teamname:
+		        -oldest player's custom teamname is NOT empty
+	      Non-Color Teamname (e.g. "Player 1's Team"):
+	            -more than 1 player in the current team
+				-oldest/first player's custom teamname is empty
+				-if "Player Settings->Player 1->Name Team After Player" is on
+	*/
+	bool nameTeamColor = players.Len() > 1 && (!oldest || oldest->teamname.Len()<=1 || !oldest->nameTeamAfterMe);
 
-    int i;
-    for ( i = players.Len()-1; i>=0; --i )
-    {
-        if ( players(i)->IsHuman() && ( players(i) != oldest && players(i)->nameTeamAfterMe ) )
-            voteName++;
-    }
-
-    bool nameTeamColor = players.Len() > 1 && ( voteName * 2 < players.Len() || !oldest );
-
-    if ( !IsHuman() )
-        nameTeamColor = false;
+//	if ( !IsHuman() )
+//		nameTeamColor = false;
     if ( !se_allowTeamNameColor )
         nameTeamColor = false;
     if ( !se_allowTeamNamePlayer )
@@ -177,6 +182,7 @@ void eTeam::UpdateAppearance()
 
     nameTeamColor = NameTeamAfterColor ( nameTeamColor );
 
+	tString updateName;
     if ( oldest )
     {
         if ( nameTeamColor )
@@ -185,7 +191,7 @@ void eTeam::UpdateAppearance()
             tOutput newname;
             newname << se_team_name[ colorID ];
 
-            name = newname;
+			updateName = newname;
 
             r = se_team_rgb[colorID][0];
             g = se_team_rgb[colorID][1];
@@ -193,29 +199,45 @@ void eTeam::UpdateAppearance()
         }
         else
         {
-            // let oldest player own a human team
-            if ( IsHuman() )
-            {
-                if ( players.Len() > 1 )
-                {
-                    if ( sn_GetNetState() != nSERVER )
-                        oldest->UpdateName();
-                    tOutput newname;
-                    newname.SetTemplateParameter( 1, oldest->GetName() );
-                    newname << "$team_owned_by";
-
-                    name = newname;
-                }
-                else
-                {
-                    name = oldest->GetName();
-                }
-            }
-            else
-            {
-                // it's the AI team
-                name = tOutput("$team_ai");
-            }
+			// let oldest own the team
+			if ( players.Len() > 1 )
+			{
+				if ( oldest->IsHuman() )
+				{
+					// did the player set a custom teamname ?
+					if (oldest->teamname.Len()>1)
+					{
+						// Use player's custom teamname
+						updateName = oldest->teamname;
+					}
+					else
+					{
+						// name team after first/oldest player
+						tOutput newname;
+						newname.SetTemplateParameter( 1, oldest->GetName() );
+						newname << "$team_owned_by";
+						updateName = newname;
+					}
+				}
+				else
+				{
+					// name team after oldest bot
+					tOutput newname;
+					newname.SetTemplateParameter( 1, oldest->GetName() );
+					newname << "$team_ai";
+					updateName = newname;
+				}
+			}
+			else
+			{
+				// did the player set a custom teamname ?
+				if (oldest->teamname.Len()>1)
+					// use custom teamname
+					updateName = oldest->teamname;
+				else
+					// use player name as teamname
+					updateName = oldest->GetUserName();
+			}
 
             r = oldest->r;
             g = oldest->g;
@@ -224,7 +246,7 @@ void eTeam::UpdateAppearance()
             // update colored player names
             if ( sn_GetNetState() != nSERVER )
             {
-                for ( i = players.Len()-1; i>=0; --i )
+                for ( int i = players.Len()-1; i>=0; --i )
                 {
                     players(i)->UpdateName();
                 }
@@ -237,6 +259,31 @@ void eTeam::UpdateAppearance()
         name = tOutput("$team_empty");
         r = g = b = 7;
     }
+
+	// if the name has been changed then update it
+	if (name!=updateName)
+	{
+		// only display a message if
+		// the oldest player changed the name of the team
+		// the server also sets the teamname sometimes
+		if(sn_GetNetState()!=nCLIENT && oldest)
+		{
+			tOutput message;
+			tColoredString name;
+			name << *oldest;
+			name << tColoredString::ColorString(1,1,1);
+			message.SetTemplateParameter(1, name);
+
+			tColoredString resetColor;
+			resetColor << tColoredString::ColorString(r,g,b);
+			resetColor << updateName;
+			resetColor << tColoredString::ColorString(1,1,1);
+			message.SetTemplateParameter(2, resetColor);
+			message << "$team_renamed";
+			sn_ConsoleOut(message);
+		}
+		name = updateName;
+	}
 
     /* z-man: no longer required
     // make the oldest player spawn in front
@@ -847,7 +894,9 @@ void eTeam::RemovePlayer ( ePlayerNetID* player )
 // see if the given player may join this team
 bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
 {
-    int i;
+	// a player who is already on the team can "join" the team
+	if (player->currentTeam==this)
+		return true;
 
     int maxInb = maxImbalanceLocal;
 
@@ -861,7 +910,7 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
             minP = 10000;
     }
 
-    for ( i = teams.Len()-1; i>=0; --i )
+    for ( int i = teams.Len()-1; i>=0; --i )
     {
         eTeam *t = teams(i);
 
@@ -894,7 +943,7 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
             for ( std::set< eTeam const * >::iterator iter = swapTargets.begin(); iter != swapTargets.end(); ++iter )
                 {
                     eTeam const * team = *iter;
-                    for ( i = team->players.Len()-1; i>=0; --i )
+                    for ( int i = team->players.Len()-1; i>=0; --i )
                     {
                         ePlayerNetID * otherPlayer = team->players(i);
                         eTeam * swapTeam = otherPlayer->NextTeam();

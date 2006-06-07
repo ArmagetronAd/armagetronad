@@ -30,6 +30,27 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ePlayer.h"
 #include "eTeam.h"
 
+static tOutput* PrepareTeamText(tOutput* text, eTeam* team, const ePlayerNetID* player, const char* textTemplate)
+{
+	if (team)
+	{
+		text->SetTemplateParameter(1 , team->Name() );
+		text->SetTemplateParameter(2 , team->NumPlayers() );
+		if (team->PlayerMayJoin(player))
+			text->SetTemplateParameter(3, "0x00ff00");
+		else
+			text->SetTemplateParameter(3, "0xff0000");
+	}
+	else
+	{
+		text->SetTemplateParameter(1 , tOutput("$team_empty") );
+		text->SetTemplateParameter(2 , 0 );
+		text->SetTemplateParameter(3 , "0x00ff00" );
+	}
+	*text << textTemplate << "0xffffff";
+	return text;
+}
+
 class gMenuItemPlayerTeam: public uMenuItem
 {
     ePlayerNetID* 	player;
@@ -45,8 +66,7 @@ public:
     virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0)
     {
         tOutput text;
-        text.SetTemplateParameter(1 , team->Name() );
-        text << "$team_menu_join";
+		PrepareTeamText(&text, team, player, "$team_menu_join");
         DisplayTextSpecial( x, y, text, selected, alpha );
     }
 
@@ -79,6 +99,50 @@ public:
     }
 };
 
+class gMenuItemSpacer: public uMenuItem
+{
+public:	
+	gMenuItemSpacer(uMenu *M)
+		: uMenuItem( M, tOutput() )
+	{
+	}
+
+    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0)
+    {
+    }
+
+	virtual bool IsSelectable()
+	{
+		return false;
+	}
+};
+
+class gMenuItemStatus: public uMenuItem
+{
+	ePlayerNetID *player;
+	bool currentTeam;
+public:	
+	gMenuItemStatus(uMenu *M, ePlayerNetID *playerID, bool displayCurrentTeam)
+		: uMenuItem( M, tOutput() ), player(playerID), currentTeam(displayCurrentTeam)
+	{
+	}
+
+    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0)
+    {
+		tOutput text;
+		if  (currentTeam)
+			PrepareTeamText(&text, player->CurrentTeam(), player, "$team_menu_info_current_team");
+		else
+			PrepareTeamText(&text, player->NextTeam(), player, "$team_menu_info_next_team");
+		DisplayTextSpecial( x, y, text, false, alpha );
+    }
+
+	virtual bool IsSelectable()
+	{
+		return false;
+	}
+};
+
 class gMenuItemPlayer: public uMenuItem
 {
     ePlayerNetID* player;
@@ -97,21 +161,35 @@ public:
 
     virtual void Enter()
     {
-        int i;
+        int i = 0;
 
         tOutput title;
         title.SetTemplateParameter( 1, player->GetName() );
         title << "$team_menu_player_title";
         uMenu playerMenu( title );
         tArray<uMenuItem*> items;
+        
+        if ( player->NextTeam()!=NULL )
+        {
+        	items[0] = tNEW(gMenuItemPlayerTeam) (&playerMenu, player, NULL);
+        }
 
-        for ( i = eTeam::teams.Len()-1; i>=0; --i )
+		// first pass add teams who probably can't be joined
+        for (i = 0; i<eTeam::teams.Len(); i++ )
         {
             eTeam *team = eTeam::teams(i);
             if ( team != player->NextTeam() && team->PlayerMayJoin( player ) )
             {
                 items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team );
             }
+        }
+	    // second pass add teams who probably can be joined
+		// Note: these will appear above the unjoinable ones.
+        for (i = 0; i<eTeam::teams.Len(); i++ )
+        {
+            eTeam *team = eTeam::teams(i);
+            if ( team != player->NextTeam() && team->PlayerMayJoin( player ))
+					items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team );
         }
 
         if ( /* eTeam::NewTeamAllowed() && */
@@ -122,6 +200,10 @@ public:
             items[ items.Len() ] = tNEW( gMenuItemNewTeam ) ( &playerMenu, player );
 
         }
+        	
+		items[items.Len()] = tNEW ( gMenuItemSpacer ) ( &playerMenu );
+		items[items.Len()] = tNEW ( gMenuItemStatus ) ( &playerMenu, player, false);
+		items[items.Len()] = tNEW ( gMenuItemStatus ) ( &playerMenu, player, true);
 
         playerMenu.Enter();
 
@@ -171,6 +253,3 @@ void gTeam::TeamMenu()
         delete items(i);
     }
 }
-
-
-

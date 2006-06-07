@@ -39,8 +39,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rModel.h"
 #include "gGame.h"
 #include "gCycle.h"
-// Gone, now?
-//#include "gHud.h"
 #include "tRecorder.h"
 #include "rSysdep.h"
 
@@ -945,6 +943,11 @@ void sg_PlayerMenu(int Player){
     cam_s.NewChoice("$player_camera_initial_smrt_text","$player_camera_initial_smrt_help",CAMERA_SMART);
     cam_s.NewChoice("$player_camera_initial_ext_text","$player_camera_initial_ext_help",CAMERA_FOLLOW);
     cam_s.NewChoice("$player_camera_initial_free_text","$player_camera_initial_free_help",CAMERA_FREE);
+
+    uMenuItemString tn(&playerMenu,
+                      "$player_teamname_text",
+                      "$player_teamname_help",
+                      p->teamname, 16);
 
     uMenuItemString n(&playerMenu,
                       "$player_name_text",

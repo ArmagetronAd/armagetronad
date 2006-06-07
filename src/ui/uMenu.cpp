@@ -168,7 +168,8 @@ void uMenu::OnEnter(){
     lastkey=tSysTimeFloat();
     static const REAL timeout=3;
 #endif
-
+	// inverted logic (0 = last item! prev(0) = top most item)
+	selected = GetPrevSelectable(0);
     while (!exitFlag && !quickexit && !exitToMain){
         st_DoToDo();
         tAdvanceFrame();
@@ -337,6 +338,7 @@ void uMenu::HandleEvent( SDL_Event event )
 #ifndef DEDICATED
     if (!items[selected]->Event(event))
     {
+    	int newSelected = -1;
         switch (event.type){
         case SDL_KEYDOWN:
             {
@@ -352,23 +354,11 @@ void uMenu::HandleEvent( SDL_Event event )
 
                 case(SDLK_UP):
                                 lastkey=tSysTimeFloat();
-                    selected++;
-                    if (selected>=items.Len())
-                        if (wrap)
-                            selected=0;
-                        else
-                            selected=items.Len()-1;
+                    selected = GetNextSelectable(selected);
                     break;
-
                 case(SDLK_DOWN):
                                 lastkey=tSysTimeFloat();
-                    selected--;
-                    if (selected<0)
-                        if(wrap)
-                            selected=items.Len()-1;
-                        else
-                            selected=0;
-
+                    selected = GetPrevSelectable(selected);
                     break;
 
                 case(SDLK_LEFT):
@@ -432,6 +422,48 @@ void uMenu::HandleEvent( SDL_Event event )
 
     su_inMenu = true;
 #endif
+}
+
+int uMenu::GetPrevSelectable(int start)
+{
+    int prev = start-1;
+    while (prev!=start)
+    {
+        if (prev<0)
+        {
+            if (wrap)
+                prev = items.Len()-1;
+            else
+            	break;
+        }
+        if (items[prev]->IsSelectable())
+        {
+        	return prev;
+        }
+    	prev--;
+    }
+	return -1;	
+}
+
+int uMenu::GetNextSelectable(int start)
+{
+    int next = start+1;
+    while (next!=start)
+    {
+        if (next>=items.Len())
+        {
+            if (this->wrap)
+                next = 0;
+            else
+            	break;
+        }
+        if (items[next]->IsSelectable())
+        {
+        	return next;
+        }
+    	next++;
+    }
+	return -1;	
 }
 
 

@@ -119,6 +119,9 @@ protected:
 
     //! marks the menu for exit
     virtual void OnExit();
+
+	int GetNextSelectable(int start);
+	int GetPrevSelectable(int start);
 };
 
 
@@ -178,6 +181,8 @@ virtual tString Help(){return tString(helpText);}
     virtual REAL SpaceRight(){return 0;}
 
     int GetID(){return idnum;}
+    
+    virtual bool IsSelectable(){return true;};
 
 protected:
     void SetColor( bool selected, REAL alpha );            //!< Sets the color of text output for this menuitem
