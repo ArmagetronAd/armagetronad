@@ -1694,11 +1694,27 @@ bool gCycle::Timestep(REAL currentTime){
     else
     {
         // just basic movement to do: let base class handle that.
-        gCycleMovement::Timestep( currentTime );
+        try
+        {
+            gCycleMovement::Timestep(currentTime);
+        }
+        catch ( gCycleDeath const & death )
+        {
+            KillAt( death.pos_ );
+            return false;
+        }
     }
 
     // do the rest of the timestep
-    return gCycleMovement::Timestep( currentTime );
+    try
+    {
+        return gCycleMovement::Timestep(currentTime);
+    }
+    catch ( gCycleDeath const & death )
+    {
+        KillAt( death.pos_ );
+        return false;
+    }
 }
 
 static void blocks(const gSensor &s, const gCycle *c, int lr)
