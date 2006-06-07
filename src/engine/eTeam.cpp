@@ -742,6 +742,13 @@ void eTeam::RemovePlayerDirty ( ePlayerNetID* player )
     {
         teams.Remove( this, listID );
     }
+    
+    // don't forget the colored team list
+    if ( colorID >= 0 )
+    {
+        se_ColoredTeams[ colorID ] = 0;
+        colorID = -1;
+    }
 }
 
 // deregister a player
