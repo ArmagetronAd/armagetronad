@@ -741,13 +741,13 @@ void eTeam::RemovePlayerDirty ( ePlayerNetID* player )
     if ( listID >= 0 && players.Len() == 0 )
     {
         teams.Remove( this, listID );
-    }
-    
-    // don't forget the colored team list
-    if ( colorID >= 0 )
-    {
-        se_ColoredTeams[ colorID ] = 0;
-        colorID = -1;
+
+        // don't forget the colored team list
+        if ( colorID >= 0 )
+        {
+            se_ColoredTeams[ colorID ] = 0;
+            colorID = -1;
+        }
     }
 }
 
