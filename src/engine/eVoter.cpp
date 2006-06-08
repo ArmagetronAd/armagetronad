@@ -749,7 +749,7 @@ protected:
 
         // check whether the issuer is allowed to start a vote
         eVoter * sender = eVoter::GetVoter( m.SenderID() );
-        if ( sender && sender->lastChange_ + se_votingMaturity > tSysTimeFloat() || sender->lastChange_ * 2 < tSysTimeFloat() )
+        if ( sender && sender->lastChange_ + se_votingMaturity > tSysTimeFloat() && sender->lastChange_ * 2 > tSysTimeFloat() )
         {
             tOutput message("$vote_maturity");
             sn_ConsoleOut( message, m.SenderID() );
