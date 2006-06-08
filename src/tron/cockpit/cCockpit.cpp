@@ -108,8 +108,8 @@ void cCockpit::SetPlayer(ePlayer *player) {
 }
 
 //callbacks
-std::auto_ptr<tValue::Base> cCockpit::cb_CurrentRubber(void) {
-    return std::auto_ptr<tValue::Base>(new tValue::Float(m_FocusCycle->GetRubber()));
+tValue::BasePtr cCockpit::cb_CurrentRubber(void) {
+    return tValue::BasePtr(new tValue::Float(m_FocusCycle->GetRubber()));
 }
 std::auto_ptr<tValue::Base> cCockpit::cb_CurrentAcceleration(void) {
     return std::auto_ptr<tValue::Base>(new tValue::Float(m_FocusCycle->GetAcceleration()));
@@ -117,16 +117,16 @@ std::auto_ptr<tValue::Base> cCockpit::cb_CurrentAcceleration(void) {
 std::auto_ptr<tValue::Base> cCockpit::cb_CurrentPing(void) {
     return std::auto_ptr<tValue::Base>(new tValue::Float(static_cast<int>(m_ViewportPlayer->ping*1000)));
 }
-std::auto_ptr<tValue::Base> cCockpit::cb_CurrentSpeed(void) {
-    return std::auto_ptr<tValue::Base>(new tValue::Float(m_FocusCycle->Speed()));
+tValue::BasePtr cCockpit::cb_CurrentSpeed(void) {
+    return tValue::BasePtr(new tValue::Float(m_FocusCycle->Speed()));
 }
-std::auto_ptr<tValue::Base> cCockpit::cb_MaxSpeed(void) {
-    return std::auto_ptr<tValue::Base>(new tValue::Int( static_cast<int>(ceil( m_FocusCycle->MaximalSpeed() / 10.) *10)));
+tValue::BasePtr cCockpit::cb_MaxSpeed(void) {
+    return tValue::BasePtr(new tValue::Int( static_cast<int>(ceil( m_FocusCycle->MaximalSpeed() / 10.) *10)));
 }
-std::auto_ptr<tValue::Base> cCockpit::cb_CurrentBrakingReservoir(void) {
-    return std::auto_ptr<tValue::Base>(new tValue::Float(m_FocusCycle->GetBrakingReservoir()));
+tValue::BasePtr cCockpit::cb_CurrentBrakingReservoir(void) {
+    return tValue::BasePtr(new tValue::Float(m_FocusCycle->GetBrakingReservoir()));
 }
-std::auto_ptr<tValue::Base> cCockpit::cb_AliveEnemies(void){
+tValue::BasePtr cCockpit::cb_AliveEnemies(void){
     int aliveenemies=0;
     unsigned short int max = se_PlayerNetIDs.Len();
     if(m_ViewportPlayer)
@@ -137,9 +137,9 @@ std::auto_ptr<tValue::Base> cCockpit::cb_AliveEnemies(void){
                 aliveenemies++;
         }
     }
-    return std::auto_ptr<tValue::Base>(new tValue::Int(aliveenemies));
+    return tValue::BasePtr(new tValue::Int(aliveenemies));
 }
-std::auto_ptr<tValue::Base> cCockpit::cb_AliveTeammates(void){
+tValue::BasePtr cCockpit::cb_AliveTeammates(void){
     int alivemates=0;
     unsigned short int max = se_PlayerNetIDs.Len();
     if(m_ViewportPlayer)
@@ -150,10 +150,10 @@ std::auto_ptr<tValue::Base> cCockpit::cb_AliveTeammates(void){
                 alivemates++;
         }
     }
-    return std::auto_ptr<tValue::Base>(new tValue::Int(alivemates));
+    return tValue::BasePtr(new tValue::Int(alivemates));
 }
 
-std::auto_ptr<tValue::Base> cCockpit::cb_Framerate(void){
+tValue::BasePtr cCockpit::cb_Framerate(void){
 
     static int fps       = 60;
     static REAL lastTime = 0;
@@ -167,51 +167,51 @@ std::auto_ptr<tValue::Base> cCockpit::cb_Framerate(void){
         fps      = newfps;
         lastTime = newtime;
     }
-    return std::auto_ptr<tValue::Base>(new tValue::Int(fps));
+    return tValue::BasePtr(new tValue::Int(fps));
 }
 
-std::auto_ptr<tValue::Base> cCockpit::cb_RunningTime(void){
-    return std::auto_ptr<tValue::Base>(new tValue::Float(tSysTimeFloat()));
+tValue::BasePtr cCockpit::cb_RunningTime(void){
+    return tValue::BasePtr(new tValue::Float(tSysTimeFloat()));
 }
 
-std::auto_ptr<tValue::Base> cCockpit::cb_CurrentTimeHours(void){
+tValue::BasePtr cCockpit::cb_CurrentTimeHours(void){
     struct tm* thisTime;
     time_t rawtime;
 
     time ( &rawtime );
     thisTime = localtime ( &rawtime );
 
-    return std::auto_ptr<tValue::Base>(new tValue::Int(thisTime->tm_hour));
+    return tValue::BasePtr(new tValue::Int(thisTime->tm_hour));
 }
 
-std::auto_ptr<tValue::Base> cCockpit::cb_CurrentTimeHours12h(void){
+tValue::BasePtr cCockpit::cb_CurrentTimeHours12h(void){
     struct tm* thisTime;
     time_t rawtime;
 
     time ( &rawtime );
     thisTime = localtime ( &rawtime );
 
-    return std::auto_ptr<tValue::Base>(new tValue::Int((thisTime->tm_hour+11)%12+1));
+    return tValue::BasePtr(new tValue::Int((thisTime->tm_hour+11)%12+1));
 }
 
-std::auto_ptr<tValue::Base> cCockpit::cb_CurrentTimeMinutes(void){
+tValue::BasePtr cCockpit::cb_CurrentTimeMinutes(void){
     struct tm* thisTime;
     time_t rawtime;
 
     time ( &rawtime );
     thisTime = localtime ( &rawtime );
 
-    return std::auto_ptr<tValue::Base>(new tValue::Int(thisTime->tm_min));
+    return tValue::BasePtr(new tValue::Int(thisTime->tm_min));
 }
 
-std::auto_ptr<tValue::Base> cCockpit::cb_CurrentTimeSeconds(void){
+tValue::BasePtr cCockpit::cb_CurrentTimeSeconds(void){
     struct tm* thisTime;
     time_t rawtime;
 
     time ( &rawtime );
     thisTime = localtime ( &rawtime );
 
-    return std::auto_ptr<tValue::Base>(new tValue::Int(thisTime->tm_sec));
+    return tValue::BasePtr(new tValue::Int(thisTime->tm_sec));
 }
 
 REAL stc_fastestSpeedRound = .0;
@@ -220,11 +220,11 @@ tString stc_fastestNameRound;
 tString stc_fastestName;
 int stc_topScore;
 
-std::auto_ptr<tValue::Base> cCockpit::cb_CurrentScore(void){
-    return std::auto_ptr<tValue::Base>(new tValue::Int(m_ViewportPlayer->TotalScore()));
+tValue::BasePtr cCockpit::cb_CurrentScore(void){
+    return tValue::BasePtr(new tValue::Int(m_ViewportPlayer->TotalScore()));
 }
-std::auto_ptr<tValue::Base> cCockpit::cb_TopScore(void){
-    return std::auto_ptr<tValue::Base>(new tValue::Int(stc_topScore));
+tValue::BasePtr cCockpit::cb_TopScore(void){
+    return tValue::BasePtr(new tValue::Int(stc_topScore));
 }
 
 static void stc_updateFastest() {
@@ -245,46 +245,64 @@ static void stc_updateFastest() {
         }
         int thisscore = se_PlayerNetIDs[i]->TotalScore();
         if(thisscore>stc_topScore)
-	    stc_topScore=thisscore;
+            stc_topScore=thisscore;
     }
 }
 
 static rPerFrameTask stcuf(&stc_updateFastest);
 
-std::auto_ptr<tValue::Base> cCockpit::cb_FastestSpeedRound(void){
-    return std::auto_ptr<tValue::Base>(new tValue::Float(stc_fastestSpeedRound));
+tValue::BasePtr cCockpit::cb_FastestSpeedRound(void){
+    return tValue::BasePtr(new tValue::Float(stc_fastestSpeedRound));
 }
 
-std::auto_ptr<tValue::Base> cCockpit::cb_FastestNameRound(void){
-    return std::auto_ptr<tValue::Base>(new tValue::String(stc_fastestNameRound));
+tValue::BasePtr cCockpit::cb_FastestNameRound(void){
+    return tValue::BasePtr(new tValue::String(stc_fastestNameRound));
 }
 
-std::auto_ptr<tValue::Base> cCockpit::cb_FastestSpeed(void){
-    return std::auto_ptr<tValue::Base>(new tValue::Float(stc_fastestSpeed));
+tValue::BasePtr cCockpit::cb_FastestSpeed(void){
+    return tValue::BasePtr(new tValue::Float(stc_fastestSpeed));
 }
 
-std::auto_ptr<tValue::Base> cCockpit::cb_FastestName(void){
-    return std::auto_ptr<tValue::Base>(new tValue::String(stc_fastestName));
+tValue::BasePtr cCockpit::cb_FastestName(void){
+    return tValue::BasePtr(new tValue::String(stc_fastestName));
 }
 
-std::auto_ptr<tValue::Base> cCockpit::cb_TimeToImpactFront(void){
+tValue::BasePtr cCockpit::cb_TimeToImpactFront(void){
     eSensor test(m_FocusCycle, m_FocusCycle->Position(), m_FocusCycle->Direction());
     test.detect(5.*m_FocusCycle->Speed());
-    return std::auto_ptr<tValue::Base>(new tValue::Float(test.hit/m_FocusCycle->Speed()));
+    return tValue::BasePtr(new tValue::Float(test.hit/m_FocusCycle->Speed()));
 }
-std::auto_ptr<tValue::Base> cCockpit::cb_TimeToImpactRight(void){
+tValue::BasePtr cCockpit::cb_TimeToImpactRight(void){
     eSensor test(m_FocusCycle, m_FocusCycle->Position(), m_FocusCycle->Direction().Turn(0,-1));
     test.detect(5.*m_FocusCycle->Speed());
-    return std::auto_ptr<tValue::Base>(new tValue::Float(test.hit/m_FocusCycle->Speed()));
+    return tValue::BasePtr(new tValue::Float(test.hit/m_FocusCycle->Speed()));
 }
-std::auto_ptr<tValue::Base> cCockpit::cb_TimeToImpactLeft(void){
+tValue::BasePtr cCockpit::cb_TimeToImpactLeft(void){
     eSensor test(m_FocusCycle, m_FocusCycle->Position(), m_FocusCycle->Direction().Turn(0,1));
     test.detect(5.*m_FocusCycle->Speed());
-    return std::auto_ptr<tValue::Base>(new tValue::Float(test.hit/m_FocusCycle->Speed()));
+    return tValue::BasePtr(new tValue::Float(test.hit/m_FocusCycle->Speed()));
 }
 
-std::auto_ptr<tValue::Base> cCockpit::cb_CurrentSong(void){
-    return std::auto_ptr<tValue::Base>(new tValue::String(eSoundMixer::GetMixer()->GetCurrentSong()));
+tValue::BasePtr cCockpit::cb_CurrentSong(void){
+    return tValue::BasePtr(new tValue::String(eSoundMixer::GetMixer()->GetCurrentSong()));
+}
+
+tValue::BasePtr cCockpit::cb_CurrentName(void) {
+    return tValue::BasePtr(new tValue::String(tString(m_FocusPlayer->GetName())));
+}
+
+tValue::BasePtr cCockpit::cb_CurrentColoredName(void) {
+    tColoredString ret;
+    ret << *m_FocusPlayer;
+    return tValue::BasePtr(new tValue::String(ret));
+}
+
+tValue::BasePtr cCockpit::cb_CurrentPosX(void) {
+    return tValue::BasePtr(new tValue::Float(m_FocusCycle->Position().x));
+}
+
+tValue::BasePtr cCockpit::cb_CurrentPosY(void) {
+    return tValue::BasePtr(new tValue::Float(m_FocusCycle->Position().x));
 }
 
 cCockpit* cCockpit::_instance = 0;

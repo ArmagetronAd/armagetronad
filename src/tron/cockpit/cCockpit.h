@@ -39,6 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <typeinfo>
 
 #include "tAutoDeque.h"
+#include "tValue.h"
 
 #ifndef ARMAGETRON_COCKPIT_H
 #define ARMAGETRON_COCKPIT_H
@@ -46,9 +47,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef DEDICATED
 
 namespace cWidget {
-class Base;
-}
-namespace tValue {
 class Base;
 }
 class ePlayer;
@@ -116,27 +114,31 @@ public:
     std::auto_ptr<tValue::Base> cb_MaxSpeed(void);                //!< Gets the maximum possible speed on the server
     std::auto_ptr<tValue::Base> cb_CurrentBrakingReservoir(void); //!< Gets the available brakes for the currently watched cycle
 
-    std::auto_ptr<tValue::Base> cb_AliveEnemies(void);            //!< Gets the number of enemies alive (from the viewport owner's perspective)
-    std::auto_ptr<tValue::Base> cb_AliveTeammates(void);          //!< Gets the number of Teammates alive (from the viewport owner's perspective)
+    tValue::BasePtr cb_AliveEnemies(void);            //!< Gets the number of enemies alive (from the viewport owner's perspective)
+    tValue::BasePtr cb_AliveTeammates(void);          //!< Gets the number of Teammates alive (from the viewport owner's perspective)
 
-    std::auto_ptr<tValue::Base> cb_Framerate(void);               //!< Gets the current framerate in fps
-    std::auto_ptr<tValue::Base> cb_RunningTime(void);             //!< Gets the time the game is running in seconds
-    std::auto_ptr<tValue::Base> cb_CurrentTimeMinutes(void);      //!< Gets the current time in minutes
-    std::auto_ptr<tValue::Base> cb_CurrentTimeHours(void);        //!< Gets the current time in hours
-    std::auto_ptr<tValue::Base> cb_CurrentTimeHours12h(void);     //!< Gets the current time in hours, 12h format
-    std::auto_ptr<tValue::Base> cb_CurrentTimeSeconds(void);      //!< Gets the current time in seconds
+    tValue::BasePtr cb_Framerate(void);               //!< Gets the current framerate in fps
+    tValue::BasePtr cb_RunningTime(void);             //!< Gets the time the game is running in seconds
+    tValue::BasePtr cb_CurrentTimeMinutes(void);      //!< Gets the current time in minutes
+    tValue::BasePtr cb_CurrentTimeHours(void);        //!< Gets the current time in hours
+    tValue::BasePtr cb_CurrentTimeHours12h(void);     //!< Gets the current time in hours, 12h format
+    tValue::BasePtr cb_CurrentTimeSeconds(void);      //!< Gets the current time in seconds
 
-    std::auto_ptr<tValue::Base> cb_CurrentScore(void);            //!< Gets the viewport owner's score
-    std::auto_ptr<tValue::Base> cb_TopScore(void);                //!< Gets the top personal score
-    std::auto_ptr<tValue::Base> cb_FastestSpeed(void);            //!< Gets the speed of the player who's currently the fastest in m/s
-    std::auto_ptr<tValue::Base> cb_FastestName(void);             //!< Gets the name of the player who's currently the fastest
-    std::auto_ptr<tValue::Base> cb_FastestSpeedRound(void);            //!< Gets the speed of the player who's been the fastest during the round in m/s
-    std::auto_ptr<tValue::Base> cb_FastestNameRound(void);             //!< Gets the name of the player who's been the fastest during the round
+    tValue::BasePtr cb_CurrentScore(void);            //!< Gets the viewport owner's score
+    tValue::BasePtr cb_TopScore(void);                //!< Gets the top personal score
+    tValue::BasePtr cb_FastestSpeed(void);            //!< Gets the speed of the player who's currently the fastest in m/s
+    tValue::BasePtr cb_FastestName(void);             //!< Gets the name of the player who's currently the fastest
+    tValue::BasePtr cb_FastestSpeedRound(void);            //!< Gets the speed of the player who's been the fastest during the round in m/s
+    tValue::BasePtr cb_FastestNameRound(void);             //!< Gets the name of the player who's been the fastest during the round
 
-    std::auto_ptr<tValue::Base> cb_TimeToImpactFront(void);             //!< Gets the time it will take the cycle to reach the next wall in front of it
-    std::auto_ptr<tValue::Base> cb_TimeToImpactRight(void);             //!< Gets the time it will take the cycle to reach the next wall right of it
-    std::auto_ptr<tValue::Base> cb_TimeToImpactLeft(void);             //!< Gets the time it will take the cycle to reach the next wall left of it
-    std::auto_ptr<tValue::Base> cb_CurrentSong(void);		    //!< Gets the file name of the song currently played. May be swiched to the title embedded in the music file later
+    tValue::BasePtr cb_TimeToImpactFront(void);             //!< Gets the time it will take the cycle to reach the next wall in front of it
+    tValue::BasePtr cb_TimeToImpactRight(void);             //!< Gets the time it will take the cycle to reach the next wall right of it
+    tValue::BasePtr cb_TimeToImpactLeft(void);             //!< Gets the time it will take the cycle to reach the next wall left of it
+    tValue::BasePtr cb_CurrentSong(void);		    //!< Gets the file name of the song currently played. May be swiched to the title embedded in the music file later
+    tValue::BasePtr cb_CurrentName(void);		    //!< Gets the name of the player that is being watched
+    tValue::BasePtr cb_CurrentColoredName(void);		    //!< Gets the colored name of the player that is being watched
+    tValue::BasePtr cb_CurrentPosX(void);		    //!< Gets the position of the cycle as x- coordinate
+    tValue::BasePtr cb_CurrentPosY(void);		    //!< Gets the position of the cycle as y- coordinate
 
     static bool ProcessKey1(float i=0);
     static bool ProcessKey2(float i=0);

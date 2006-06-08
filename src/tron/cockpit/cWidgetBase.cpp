@@ -251,8 +251,12 @@ tValue::Base *WithDataFunctions::ProcessDataSource(tString const &data) {
     callbacks[tString("fastest_name_round")]   = &cCockpit::cb_FastestNameRound;
     callbacks[tString("time_to_impact_front")] = &cCockpit::cb_TimeToImpactFront;
     callbacks[tString("time_to_impact_right")] = &cCockpit::cb_TimeToImpactRight;
-    callbacks[tString("time_to_impact_left")] = &cCockpit::cb_TimeToImpactLeft;
-    callbacks[tString("current_song")] = &cCockpit::cb_CurrentSong;
+    callbacks[tString("time_to_impact_left")]  = &cCockpit::cb_TimeToImpactLeft;
+    callbacks[tString("current_song")]         = &cCockpit::cb_CurrentSong;
+    callbacks[tString("current_name")]         = &cCockpit::cb_CurrentName;
+    callbacks[tString("current_colored_name")] = &cCockpit::cb_CurrentColoredName;
+    callbacks[tString("current_pos_x")]        = &cCockpit::cb_CurrentPosX;
+    callbacks[tString("current_pos_y")]        = &cCockpit::cb_CurrentPosY;
     std::map<tString, tValue::Callback<cCockpit>::cb_ptr>::iterator iter;
     if((iter = callbacks.find(data.ToLower())) != callbacks.end()) {
         return new tValue::Callback<cCockpit>(iter->second, cCockpit::GetCockpit());
