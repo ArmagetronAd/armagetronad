@@ -102,8 +102,18 @@ static nSettingItemWatched<REAL> sg_cycleBrakeDepleteConf("CYCLE_BRAKE_DEPLETE",
 
 // cycle width: it won't fit into tunnels that are smaller than this
 REAL sg_cycleWidth = 0;
-static tSettingItem<REAL> c_cw("CYCLE_WIDTH",
-                               sg_cycleWidth);
+static nSettingItemWatched<REAL> c_cw("CYCLE_WIDTH",
+                                      sg_cycleWidth, nConfItemVersionWatcher::Group_Bumpy, 14 );
+
+// amout of rubber you use per meter when you squeeze inside a too tight tunnel
+// when just barely squeezed
+REAL sg_cycleWidthRubberMin = 0;
+static nSettingItemWatched<REAL> c_cwrmax("CYCLE_WIDTH_RUBBER_MIN",
+        sg_cycleWidthRubberMin, nConfItemVersionWatcher::Group_Bumpy, 14 );
+// when squeezed to a point
+REAL sg_cycleWidthRubberMax = 0;
+static nSettingItemWatched<REAL> c_cwrmin("CYCLE_WIDTH_RUBBER_MAX",
+        sg_cycleWidthRubberMax, nConfItemVersionWatcher::Group_Bumpy, 14 );
 
 // base speed of cycle im m/s
 static REAL sg_speedCycle=10;
@@ -1907,6 +1917,27 @@ void gCycleMovement::InitAfterCreation( void )
 // version feature indicating that proper scaling of the base acceleration with the speed multiplier is used
 static nVersionFeature sg_correctAccelerationScaling( 8 );
 
+// calculate essential rubber values
+static void sg_RubberValues( ePlayerNetID const * player, REAL & max, REAL & effectiveness )
+{
+    // base values
+    max=sg_rubberCycle;
+    effectiveness=1;
+
+    // make rubber more effective for high ping players
+    if ( player )
+    {
+        if ( max > 0 )
+            // either by increasing the effectiveness...
+            effectiveness *= ( max + player->ping * sg_rubberCyclePing )/max;
+        else
+            // or the reservoir.
+            max += player->ping * sg_rubberCyclePing;
+    }
+
+
+}
+
 // *******************************************************************************************
 // *
 // *	CalculateAcceleration
@@ -2035,34 +2066,61 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
     }
 
     // kill cycle if it is inside a too narrow channel
-    if ( sn_GetNetState() != nCLIENT && slingshot && tunnelWidth < sg_cycleWidth )
+    if ( slingshot && tunnelWidth < sg_cycleWidth )
     {
-            tunnelWidth = 0;
+        tunnelWidth = 0;
 
-            // check again with sensors to the front, both sensor pairs need
-            // to see a narrow tunnel
-            for(int d=1;d>=-1;d-=2)
+        // check again with sensors to the front, both sensor pairs need
+        // to see a narrow tunnel
+        for(int d=1;d>=-1;d-=2)
+        {
+            // the direction to cast the acceleration rays in
+            eCoord dirCast = dirDrive.Turn(1,d);
+            gSensor front(this,pos,dirCast);
+            front.detect(sg_nearCycle);
+
+            if ( front.ehit && front.ehit->Other() )
             {
-                // the direction to cast the acceleration rays in
-                eCoord dirCast = dirDrive.Turn(1,d);
-                gSensor front(this,pos,dirCast);
-                front.detect(sg_nearCycle);
+                tunnelWidth += front.hit;
+            }
+            else
+            {
+                tunnelWidth += sg_cycleWidth;
+            }
+        }
 
-                if ( front.ehit && front.ehit->Other() )
+        if ( tunnelWidth < sg_cycleWidth )
+        {
+
+            // get rubber values
+            REAL rubberGranted, rubberEffectiveness;
+            sg_RubberValues( player, rubberGranted, rubberEffectiveness );
+
+            // calculate rubber usage from squeezing
+            REAL rubberUsage = sg_cycleWidthRubberMax + ( sg_cycleWidthRubberMin - sg_cycleWidthRubberMax ) * tunnelWidth / sg_cycleWidth;
+
+            // use up rubber
+            if ( rubberEffectiveness > 0 )
+            {
+                rubber += rubberUsage * dt * verletSpeed_ / rubberEffectiveness;            }
+            else
+            {
+                rubber = rubberGranted + 10;
+            }
+
+            // decide over kill
+            if ( rubber > rubberGranted || ( sg_cycleWidthRubberMax == 0 && sg_cycleWidthRubberMin == 0 ) )
+            {
+                if ( sn_GetNetState() != nCLIENT )
                 {
-                    tunnelWidth += front.hit;
+                    // since this is new, inform clients
+                    sn_ConsoleOut( "Squeeze death: " );
+                    throw gCycleDeath( pos );
                 }
                 else
-                {
-                    tunnelWidth += sg_cycleWidth;
-                }
+                    rubber = rubberGranted;
             }
-
-            if ( tunnelWidth < sg_cycleWidth )
-            {
-                // st_Breakpoint();
-                throw gCycleDeath( pos );
-            }
+        }
     }
 
     // apply slingshot multiplier
@@ -2324,25 +2382,13 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
     rubberSpeedFactor = 1;
 
     // be a little nice and don't drive into the wall
-    REAL rubber_granted=sg_rubberCycle;
+    REAL rubber_granted, rubberEffectiveness;
 
-    // phasing test debug code
-    //if ( tSysTimeFloat() < 16 || ( Player() && Player()->IsHuman() ) )
-    //    rubber_granted = 0;
+    // get rubber values
+    sg_RubberValues( player, rubber_granted, rubberEffectiveness );
 
     // rubber effectiveness right now
-    REAL rubberEffectiveness = 1/(1 + rubberMalus );
-
-    // make rubber more effective for high ping players
-    if ( player )
-    {
-        if ( rubber_granted > 0 )
-            // either by increasing the effectiveness...
-            rubberEffectiveness *= ( rubber_granted + player->ping * sg_rubberCyclePing )/rubber_granted;
-        else
-            // or the reservoir.
-            rubber_granted += player->ping * sg_rubberCyclePing;
-    }
+    rubberEffectiveness /= (1 + rubberMalus );
 
     // reduce it further if cycle turned recently
     {
