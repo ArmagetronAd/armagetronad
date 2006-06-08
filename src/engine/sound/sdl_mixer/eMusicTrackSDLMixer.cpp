@@ -138,7 +138,7 @@ void eMusicTrack::LoadAATrack(tSong& thesong) {
     if(isInstalledS == "yes") m_IsInstalled = true;
     else m_IsInstalled = false;
 
-    std::cout << thesong.title << ", by " << thesong.author << "\n";
+    std::cout << thesong.title << " by " << thesong.author << "\n";
     thesong.tracklist = theFile.GetGroup("tracks");
     thesong.sequence = theFile.GetGroup("sequence");
 #endif
