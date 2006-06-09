@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE Resource SYSTEM "cockpit.dtd">
+
+<Resource type="aacockpit" name="classic" version="0.0.1" author="wrtlprnft" category="">
+    <Cockpit version="0.0.1">
+	<!-- Template for all needle gauges -->
+	<WidgetTemplate id="ng">
+            <Position x="0." y="-0.9" />
+            <Size height="0.175" width="0.175" />
+            <ShowCurrent value="true" />
+            <ShowMaximum value="true" />
+            <ShowMinimum value="true" />
+            <Foreground>
+                <Solid>
+                    <Color r="1." g="1." b="1." alpha="1." />
+                </Solid>
+            </Foreground>
+	</WidgetTemplate>
+	<!-- Template for text displays -->
+	<WidgetTemplate id="text">
+            <Size height="0.039" width="0.0195" />
+	</WidgetTemplate>
+
+        <!-- speed meter -->
+        <NeedleGauge usetemplate="ng">
+            <DataSet>
+                <AtomicData field="source" source="player_speed" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="max_speed" />
+            </DataSet>
+            <Caption location="bottom">
+                <Text value="0xff3333Speed" />
+            </Caption>
+        </NeedleGauge>
+
+        <!-- rubber meter -->
+        <NeedleGauge usetemplate="ng">
+            <DataSet>
+                <AtomicData field="source" source="player_rubber" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="cycle_rubber" />
+            </DataSet>
+            <Position x="-0.48" y="0." />
+            <Caption location="bottom">
+                <Text value="0xff3333Rubber" />
+            </Caption>
+        </NeedleGauge>
+
+	<!-- brake meter -->
+        <NeedleGauge usetemplate="ng">
+            <DataSet>
+                <AtomicData field="source" source="player_brakes" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="1" />
+            </DataSet>
+            <Position x="0.48" y="0." />
+            <Caption location="bottom">
+                <Text value="0xff3333Brakes" />
+            </Caption>
+        </NeedleGauge>
+
+        <!-- Enemies: x Mates: y display -->
+        <Label usetemplate="text">
+            <DataSet id="enemies">
+                <AtomicData field="source" source="enemies_alive" />
+            </DataSet>
+            <DataSet id="friends">
+                <AtomicData field="source" source="friends_alive" />
+            </DataSet>
+            <Position x="0.35" y="-0.95" />
+            <Caption location="off">
+                <Text value="Player Status" />
+            </Caption>
+            <Face>
+                <Table>
+                    <Row>
+                        <Cell><Text value="Enemies:" /></Cell>
+                        <Cell><GameData data="enemies" /></Cell>
+                        <Cell><Text value="Friends:" /></Cell>
+                        <Cell><GameData data="friends" /></Cell>
+                    </Row>
+                </Table>
+            </Face>
+        </Label>
+
+	<!-- ping -->
+        <Label usetemplate="text">
+            <DataSet id="ping">
+                <AtomicData field="source" source="current_ping" />
+            </DataSet>
+            <Position x=".75" y="-0.95" />
+            <Caption location="off">
+                <Text value="Player Status" />
+            </Caption>
+            <Face>
+                <Table>
+                    <Row>
+                        <Cell><Text value="Ping:" /></Cell>
+                        <Cell><GameData data="ping" /></Cell>
+                    </Row>
+                </Table>
+            </Face>
+        </Label>
+
+	<!-- fastest -->
+        <Label usetemplate="text">
+            <DataSet id="number">
+                <AtomicData source="fastest_speed_round" />
+            </DataSet>
+            <DataSet id="name">
+                <AtomicData source="fastest_name_round" />
+            </DataSet>
+            <Position x="-0.175" y="-0.95" />
+	    <Size height="0.9230769230769230769" width="0.9230769230769230769" />
+            <Caption location="off">
+                <Text value="Fastest" />
+            </Caption>
+            <Face>
+                <Table>
+                    <Row>
+                        <Cell><Text value="Fastest:" /></Cell>
+                        <Cell><GameData data="name" /></Cell>
+                        <Cell><Text value="(" /><GameData data="number" /><Text value=")" /></Cell>
+                    </Row>
+                </Table>
+            </Face>
+        </Label>
+
+	<!-- scores -->
+        <Label usetemplate="text">
+            <DataSet id="myscore">
+                <AtomicData source="current_score" />
+            </DataSet>
+            <DataSet id="topscore">
+                <AtomicData source="top_score" />
+            </DataSet>
+            <DataSet id="color">
+                <Conditional field="source" lvalue="current_score" rvalue="top_score" operator="eq">
+                    <IfTrue>
+                        <AtomicData source="0xff9d50" />
+                    </IfTrue>
+                    <IfFalse>
+                        <Conditional lvalue="current_score" rvalue="top_score" operator="gt">
+                            <IfTrue>
+                                <AtomicData source="0x11ff11" />
+                            </IfTrue>
+                            <IfFalse>
+                                <AtomicData source="0x11ffff" />
+                            </IfFalse>
+                        </Conditional>
+                    </IfFalse>
+                </Conditional>
+            </DataSet>
+            <Position x="-.93" y="-.88" />
+            <Caption location="top">
+                <Text value="Scores" />
+            </Caption>
+            <Face>
+                <Table>
+                    <Row>
+                        <Cell><GameData data="color" /><Text value="Me:" /></Cell>
+                        <Cell><GameData data="color" /><Text value="Top:" /></Cell>
+                    </Row>
+                    <Row>
+                        <Cell><GameData data="color" /><GameData data="myscore" /></Cell>
+                        <Cell><GameData data="color" /><GameData data="topscore" /></Cell>
+                    </Row>
+                </Table>
+            </Face>
+        </Label>
+
+	<!-- combined meter for rest -->
+        <Label usetemplate="text" viewport="top">
+            <DataSet id="hours">
+                <AtomicData source="current_hours12h" minwidth="2" fill="0" />
+            </DataSet>
+            <DataSet id="minutes">
+                <AtomicData source="current_minutes" minwidth="2" fill="0" />
+            </DataSet>
+            <DataSet id="ampm">
+                <Conditional field="source" lvalue="current_hours" rvalue="12" operator="le">
+                    <IfTrue>
+                        <AtomicData source="AM" />
+                    </IfTrue>
+                    <IfFalse>
+                        <AtomicData source="PM" />
+                    </IfFalse>
+                </Conditional>
+            </DataSet>
+            <DataSet id="fps">
+                <AtomicData source="current_framerate" />
+            </DataSet>
+            <DataSet id="seconds">
+                <AtomicData source="time_since_start" />
+            </DataSet>
+            <DataSet id="song">
+                <AtomicData source="current_song" />
+            </DataSet>
+            <Position x="0.4" y="0.45" />
+            <Caption location="top">
+                <Text value="Time/Fps/Timestamp" />
+            </Caption>
+            <Face>
+                <Table>
+                    <Row>
+                        <Cell><Text value="Time:" /></Cell>
+                        <Cell><GameData data="hours" /><Text value=":" /><GameData data="minutes" /><Text value=" " /><GameData data="ampm" /></Cell>
+                    </Row>
+                    <Row>
+                        <Cell><Text value="Framerate:" /></Cell>
+                        <Cell><GameData data="fps" /><Text value=" FPS" /></Cell>
+                    </Row>
+                    <Row>
+                        <Cell><Text value="Running for:" /></Cell>
+                        <Cell><GameData data="seconds" /><Text value=" Seconds" /></Cell>
+                    </Row>
+                    <Row>
+                        <Cell><Text value="Music:" /></Cell>
+                        <Cell><GameData data="song" /></Cell>
+                    </Row>
+                </Table>
+            </Face>
+        </Label>
+    </Cockpit>
+</Resource>
