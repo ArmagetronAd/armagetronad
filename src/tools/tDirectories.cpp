@@ -105,6 +105,7 @@ static tString st_bindirCompiled(BINDIR);
 #define _WIN32_IE 0x400
 #endif
 
+#undef DATADIR
 #include <direct.h>
 #include <windows.h>
 #include <shlobj.h>

@@ -398,6 +398,7 @@ case "$target" in
         MATHLIB=""
         SYS_GL_LIB="opengl32"
         SYS_GLU_LIB="glu32"
+	LIBS="$LIBS -lwsock32"
         ;;
     *-*-beos*)
 	AC_DEFINE(BEOS, 1, [BeOS])
