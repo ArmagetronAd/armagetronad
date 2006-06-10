@@ -87,10 +87,10 @@ void sr_Read_stdin(){
     {
         unsigned long reallyread;
         INPUT_RECORD input;
-        bool ret=PeekConsoleInput(stdinhandle, &input, 1, &reallyread);
+        PeekConsoleInput(stdinhandle, &input, 1, &reallyread);
         if (reallyread > 0)
         {
-            bool ret=ReadConsoleInput(stdinhandle, &input, 1, &reallyread);
+            ReadConsoleInput(stdinhandle, &input, 1, &reallyread);
             if (input.EventType == KEY_EVENT)
             {
                 char key = input.Event.KeyEvent.uChar.AsciiChar;

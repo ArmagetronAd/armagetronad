@@ -66,6 +66,26 @@ static const char * s_topSourceDir = ".";
 #define PROGDIR_SUFFIX ""
 #endif
 
+#ifdef WIN32
+// activate used function from shlobj.h (z-man does not know if this is a bad hack)
+#ifdef __MINGW32__
+#define _WIN32_IE 0x400
+#endif
+
+#include <direct.h>
+#include <windows.h>
+#include <shlobj.h>
+#define mkdir(x, y)   _mkdir(x)
+#ifndef strdup
+#define strdup        _strdup
+#endif
+#ifndef _stat
+#define _stat stat
+#endif
+#else
+#include <pwd.h>
+#endif
+
 #ifdef TOP_SOURCE_DIR
 // #include "tPaths.h"
 #include "tUniversalVariables.h"
@@ -1429,6 +1449,7 @@ static tString AddPrefix( const char * suffix )
 }
 */
 
+#ifndef WIN32
 static tString st_RelocatePath( tString const & original )
 {
     // fetch prefix as it was compiled in
@@ -1448,6 +1469,7 @@ static tString st_RelocatePath( tString const & original )
         return original;
     }
 }
+#endif
 
 // tries to find the path to the data files, given the location of the executable
 static void FindDataPath()

@@ -131,7 +131,7 @@ void GetTime( tTime & time )
 }
 */
 
-static double	blocktime;
+// static double	blocktime;
 
 static unsigned int sleep_rest=0;
 void usleep(int x)
@@ -271,12 +271,12 @@ void tAdvanceFrame( int usecdelay )
 
 #ifdef FIXED_FRAMERATE
         tTime fixed, catchup, timeFixedRelative;
-        fixed.seconds = 0;
-        fixed.microseconds = (int)(1000000. / FIXED_FRAMERATE);
+    fixed.seconds = 0;
+    fixed.microseconds = (int)(1000000. / FIXED_FRAMERATE);
         timeFixedRelative = timeRelative + fixed;
 
-        catchup = timeFixedRelative/*game-time*/ - timeNewRelative/*real-time*/;
-        if (catchup.seconds >= 0) {
+    catchup = timeFixedRelative/*game-time*/ - timeNewRelative/*real-time*/;
+    if (catchup.seconds >= 0) {
 #ifdef DEBUG
             printf("catching up %d.%d seconds\n", catchup.seconds, catchup.microseconds);
 #endif

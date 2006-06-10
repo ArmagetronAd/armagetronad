@@ -39,7 +39,7 @@ uWebInterface by Dave Fancella
 #ifndef __MINGW32__
 #define snprintf            _snprintf
 #endif
-#pragma comment(lib,"ws2_32")
+// #pragma comment(lib,"ws2_32")
 #else
 #include <sys/types.h>
 #include <sys/select.h>

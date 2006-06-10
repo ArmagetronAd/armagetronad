@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <iosfwd>
 #include <string>
 #if HAVE_UNISTD_H
-#include <unistd.h>
+// #include <unistd.h>
 #endif
 
 #define tVERIFY( x ) { if ( !( x ) ){ char* mess = "Assertion " #x " failed";  tERR_ERROR_INT( mess ); } }

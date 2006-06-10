@@ -398,7 +398,8 @@ case "$target" in
         MATHLIB=""
         SYS_GL_LIB="opengl32"
         SYS_GLU_LIB="glu32"
-	LIBS="$LIBS -lwsock32"
+        LIBS="$LIBS -lwsock32"
+        CFLAGS="$CFLAGS -DNO_SOCKLEN_T"
         ;;
     *-*-beos*)
 	AC_DEFINE(BEOS, 1, [BeOS])
@@ -589,14 +590,6 @@ dnl *************************************************
 
 if test x$enable_joystick = xno; then
 	AC_DEFINE(NOJOYSTICK, 1, [Define if you don't want joystick support.])
-fi
-
-dnl *************************************************
-dnl  Winsock on windows cross-compile
-dnl *************************************************
-
-if test "`${SDL_CONFIG} --libs | grep windows`" ; then
-	AC_CHECK_LIB(wsock32, main)
 fi
 
 dnl *************************************************

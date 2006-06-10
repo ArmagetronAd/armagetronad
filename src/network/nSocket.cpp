@@ -31,6 +31,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Copyright (C) 1996-1997 Id Software, Inc.
 // Modified for Armagetron by Manuel Moos (manuel@moosnet.de)
 
+#include "nSocket.h"
+
 #include "config.h"
 #include "tRandom.h"
 
@@ -99,10 +101,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #if HAVE_UNISTD_H
-#include <unistd.h>
+// #include <unistd.h>
 #endif
 
-#include "nSocket.h"
 #include "tConfiguration.h"
 #include "tRecorder.h"
 

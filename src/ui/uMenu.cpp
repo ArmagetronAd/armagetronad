@@ -168,8 +168,8 @@ void uMenu::OnEnter(){
     lastkey=tSysTimeFloat();
     static const REAL timeout=3;
 #endif
-	// inverted logic (0 = last item! prev(0) = top most item)
-	selected = GetPrevSelectable(0);
+    // inverted logic (0 = last item! prev(0) = top most item)
+    selected = GetPrevSelectable(0);
     while (!exitFlag && !quickexit && !exitToMain){
         st_DoToDo();
         tAdvanceFrame();
@@ -338,7 +338,7 @@ void uMenu::HandleEvent( SDL_Event event )
 #ifndef DEDICATED
     if (!items[selected]->Event(event))
     {
-    	int newSelected = -1;
+        // int newSelected = -1;
         switch (event.type){
         case SDL_KEYDOWN:
             {
@@ -434,15 +434,15 @@ int uMenu::GetPrevSelectable(int start)
             if (wrap)
                 prev = items.Len()-1;
             else
-            	break;
+                break;
         }
         if (items[prev]->IsSelectable())
         {
-        	return prev;
+            return prev;
         }
-    	prev--;
+        prev--;
     }
-	return -1;	
+    return -1;
 }
 
 int uMenu::GetNextSelectable(int start)
@@ -455,15 +455,15 @@ int uMenu::GetNextSelectable(int start)
             if (this->wrap)
                 next = 0;
             else
-            	break;
+                break;
         }
         if (items[next]->IsSelectable())
         {
-        	return next;
+            return next;
         }
-    	next++;
+        next++;
     }
-	return -1;	
+    return -1;
 }
 
 
