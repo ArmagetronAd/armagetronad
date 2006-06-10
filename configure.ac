@@ -372,7 +372,7 @@ GENERICUNIX
 ]
 )
 
-SDL_CONFIG=sdl-config
+SDL_CONFIG_DEFAULT=sdl-config
 
 dnl *************************************************
 dnl GL AND  MATHLIB SELECTION ( SYSTEM DEPENDANT)
@@ -423,7 +423,7 @@ SAFEUNIX
         ;;
     *-*-freebsd* )
         # FreeBSD, sdl-config is specialized to sdl11-config there
-        SDL_CONFIG=sdl11-config
+        SDL_CONFIG_DEFAULT=sdl11-config
 SAFEUNIX
         ;;
     *)
@@ -431,6 +431,8 @@ SAFEUNIX
 SAFEUNIX
         ;;
 esac
+
+test -z "$SDL_CONFIG" && SDL_CONFIG=$SDL_CONFIG_DEFAULT
 
 AC_SUBST(docstyle)
 
@@ -455,6 +457,12 @@ dnl         libxml2
 dnl *************************************************
 
 test -z "$XML2_CONFIG" && XML2_CONFIG=xml2-config
+
+if $XML2_CONFIG --libs > /dev/null; then
+  echo -n ""
+else
+  AC_MSG_ERROR([Fatal error: the libxml2 configuration script $XML2_CONFIG does not work/exist.])
+fi
 
 # if test x$armamain = xtrue; then
 AC_CHECK_LIB(xml2,xmlParseMemory,
