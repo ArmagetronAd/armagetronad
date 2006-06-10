@@ -1814,6 +1814,9 @@ static REAL ClampDisplacement( gCycle* cycle, eCoord& displacement, const eCoord
     return sensor.hit;
 }
 
+// from gCycleMovement.cpp
+REAL sg_GetSparksDistance();
+
 bool gCycle::TimestepCore(REAL currentTime){
     if (!finite(skew))
         skew=0;
@@ -1896,7 +1899,10 @@ bool gCycle::TimestepCore(REAL currentTime){
     rotate(rotationFrontWheel,2*verletSpeed_*animts/.43);
     rotate(rotationRearWheel,2*verletSpeed_*animts/.73);
 
-    const REAL extension=.25;
+    REAL sparksDistance = sg_GetSparksDistance();
+    REAL extension = .25;
+    if ( extension < sparksDistance )
+        extension = sparksDistance;
 
     //    REAL step=speed*ts; // +.5*acceleration*ts*ts;
 
@@ -2020,20 +2026,15 @@ bool gCycle::TimestepCore(REAL currentTime){
         // generate sparks
         eCoord sparkpos,sparkdir;
 
-        if (fl.ehit && fl.hit<extension){
+        if (fl.ehit && fl.hit<=sparksDistance){
             sparkpos=pos+dirDrive.Turn(1,1)*fl.hit;
             sparkdir=dirDrive.Turn(0,-1);
         }
-        if (fr.ehit && fr.hit<extension){
-            //      blocks(fr, this, -1);
+        if (fr.ehit && fr.hit<=sparksDistance){
             sparkpos=pos+dirDrive.Turn(1,-1)*fr.hit;
             sparkdir=dirDrive.Turn(0,1);
         }
 
-        /*
-          if (crash_sparks && animts>0)
-          new gSpark(pos,dirDrive,currentTime);
-        */
         if (fabs(skew)<fabs(lr*.8) ){
             skewDot-=lr*1000*animts;
             if (crash_sparks && animts>0)

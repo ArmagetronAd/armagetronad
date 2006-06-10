@@ -73,6 +73,11 @@ cycle_turn_speed_factor_help    Factor the speed of a lightcycle is multiplied w
 
 cycle_brake_help		Brake intensity
 
+cycle_width_help        The width of the cycle collision object. It can only squeeze through tunnels wider than that without taking harm.
+cycle_width_side_help        Minimum distance of a cycle to a wall on either side before it takes harm.
+cycle_width_rubber_min_help  If the cycle_width conditions are barely violated, use up this much rubber.If set to 1, the rubber usage rate is the same as if you were sitting in front of a wall.
+cycle_width_rubber_max_help  If the cycle_width conditions are massively violated, use up this much rubber.If set to 1, the rubber usage rate is the same as if you were sitting in front of a wall.
+
 cycle_rubber_help		Niceness factor to allow you drive really close to a wall
 cycle_rubber_time_help		    Timescale rubber is restored on.
 cycle_rubber_legacy_help		Revert to old, framerate dependant and old-clients-ripping, rubber code if old clients are present. Old means <= 0.2.7.0 here.

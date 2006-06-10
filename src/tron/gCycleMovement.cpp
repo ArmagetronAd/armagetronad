@@ -105,6 +105,20 @@ REAL sg_cycleWidth = 0;
 static nSettingItemWatched<REAL> c_cw("CYCLE_WIDTH",
                                       sg_cycleWidth, nConfItemVersionWatcher::Group_Bumpy, 14 );
 
+REAL sg_cycleWidthSide = 0;
+static nSettingItemWatched<REAL> c_cws("CYCLE_WIDTH_SIDE",
+                                       sg_cycleWidthSide, nConfItemVersionWatcher::Group_Bumpy, 14 );
+// calculate the gridning distance sparks should start flying at
+REAL sg_GetSparksDistance()
+{
+    if ( sg_cycleWidth < 2 * sg_cycleWidthSide )
+        return sg_cycleWidth;
+    else if ( sg_cycleWidthSide > 0 )
+        return sg_cycleWidthSide * 2;
+    else
+        return .25; // return 0.2.8.2 default
+}
+
 // amout of rubber you use per meter when you squeeze inside a too tight tunnel
 // when just barely squeezed
 REAL sg_cycleWidthRubberMin = 0;
@@ -1918,7 +1932,7 @@ void gCycleMovement::InitAfterCreation( void )
 static nVersionFeature sg_correctAccelerationScaling( 8 );
 
 // calculate essential rubber values
-static void sg_RubberValues( ePlayerNetID const * player, REAL & max, REAL & effectiveness )
+static void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness )
 {
     // base values
     max=sg_rubberCycle;
@@ -1935,7 +1949,12 @@ static void sg_RubberValues( ePlayerNetID const * player, REAL & max, REAL & eff
             max += player->ping * sg_rubberCyclePing;
     }
 
+    {
+        // modify rubber effectiveness by a speed dependant power law
+        REAL speedFactor = speed/(sg_speedCycle*gCycleMovement::SpeedMultiplier());
 
+        effectiveness *= pow( speedFactor, sg_rubberCycleTimeBased );
+    }
 }
 
 // *******************************************************************************************
@@ -2004,6 +2023,7 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
     // sense near wall behind us, accelerate more
     REAL totalWallAcceleration = 0; // total acceleration by walls
     REAL tunnelWidth           = 0; // with of the tunnel the cycle is in
+    REAL sideWidth             = sg_cycleWidthSide * 2; // minimal distance to wall
     bool slingshot  = true;         // flag indicating whether the cycle is between two walls
     bool oneOwnWall = false;        // flag indicating whether one of the walls is your own
     for(int d=1;d>=-1;d-=2){
@@ -2014,6 +2034,10 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
 
         if ( rear.ehit )
         {
+            // update the minimal wall distance
+            if ( sideWidth > rear.hit )
+                sideWidth = rear.hit;
+
             // drop walls that are grinded
             if ( rear.hit < verletSpeed_ * .01 )
                 ::DropTempWall( dirCast, rear );
@@ -2066,9 +2090,10 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
     }
 
     // kill cycle if it is inside a too narrow channel
-    if ( slingshot && tunnelWidth < sg_cycleWidth )
+    if ( slingshot && tunnelWidth < sg_cycleWidth || sideWidth < sg_cycleWidthSide )
     {
         tunnelWidth = 0;
+        REAL sideWidth = sg_cycleWidthSide * 2;
 
         // check again with sensors to the front, both sensor pairs need
         // to see a narrow tunnel
@@ -2081,6 +2106,10 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
 
             if ( front.ehit && front.ehit->Other() )
             {
+                // update the minimal wall distance
+                if ( sideWidth > front.hit )
+                    sideWidth = front.hit;
+
                 tunnelWidth += front.hit;
             }
             else
@@ -2089,15 +2118,23 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
             }
         }
 
-        if ( tunnelWidth < sg_cycleWidth )
+        if ( tunnelWidth < sg_cycleWidth || sideWidth < sg_cycleWidthSide )
         {
+            // determine the space available measured in the space allowed
+            REAL available1 = 1;
+            REAL available2 = 1;
+            if ( sg_cycleWidth > 0 )
+                available1 = tunnelWidth/sg_cycleWidth;
+            if ( sg_cycleWidthSide > 0 )
+                available2 = sideWidth/sg_cycleWidthSide;
+            REAL available = available1 < available2 ? available1 : available2;
 
             // get rubber values
             REAL rubberGranted, rubberEffectiveness;
-            sg_RubberValues( player, rubberGranted, rubberEffectiveness );
+            sg_RubberValues( player, verletSpeed_, rubberGranted, rubberEffectiveness );
 
             // calculate rubber usage from squeezing
-            REAL rubberUsage = sg_cycleWidthRubberMax + ( sg_cycleWidthRubberMin - sg_cycleWidthRubberMax ) * tunnelWidth / sg_cycleWidth;
+            REAL rubberUsage = sg_cycleWidthRubberMax + ( sg_cycleWidthRubberMin - sg_cycleWidthRubberMax ) * available;
 
             // use up rubber
             if ( rubberEffectiveness > 0 )
@@ -2113,8 +2150,6 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
             {
                 if ( sn_GetNetState() != nCLIENT )
                 {
-                    // since this is new, inform clients
-                    sn_ConsoleOut( "Squeeze death: " );
                     throw gCycleDeath( pos );
                 }
                 else
@@ -2385,7 +2420,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
     REAL rubber_granted, rubberEffectiveness;
 
     // get rubber values
-    sg_RubberValues( player, rubber_granted, rubberEffectiveness );
+    sg_RubberValues( player, verletSpeed_, rubber_granted, rubberEffectiveness );
 
     // rubber effectiveness right now
     rubberEffectiveness /= (1 + rubberMalus );
@@ -2421,12 +2456,6 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
         //clamp effectiveness of rubber
         if ( rubberEffectiveness <= 0 )
             rubberEffectiveness = .0001;
-        {
-            // modify rubber effectiveness by a speed dependant power law
-            REAL speedFactor = verletSpeed_/(sg_speedCycle*SpeedMultiplier());
-
-            rubberEffectiveness *= pow( speedFactor, sg_rubberCycleTimeBased );
-        }
 
         // formerly: rubberFactor = .5
         REAL beta = ts * sg_rubberCycleSpeed;
