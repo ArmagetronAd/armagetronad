@@ -550,7 +550,8 @@ void   ePlayer::DeleteConfitems(){
 uActionPlayer *ePlayer::se_instantChatAction[MAX_INSTANT_CHAT];
 
 #ifdef WIN32
-#include <Lmcons.h>
+#include <lmcons.h>
+#include <windows.h>
 #ifndef ULEN
 //we're not using more than 16 characters of it anyway
 #define ULEN 20
@@ -564,6 +565,7 @@ static tString se_UserNameHelper()
 
     return tString();
 }
+#undef GetUserName
 #else
 static char const * se_UserNameHelper()
 {
@@ -3615,7 +3617,7 @@ eTeam* ePlayerNetID::FindDefaultTeam( )
       )
     {
         // return the team
-        return min;				
+        return min;
 	}
     // return NULL to indicate no team was found => "create a new team" (?)
     return NULL;

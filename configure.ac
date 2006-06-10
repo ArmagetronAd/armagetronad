@@ -38,6 +38,7 @@ version=$VERSION
 AC_SUBST(version)
 
 AC_ARG_VAR(XML2_CONFIG,[Configuration script of libxml2 to use, defaults to xml2-config])
+AC_ARG_VAR(SDL_CONFIG,[Configuration script of SDL to use, defaults to sdl-config])
 AC_ARG_VAR(FREETYPE_CONFIG,[Configuration script of freetype to use, defaults to freetype-config])
 AC_ARG_VAR(CXXFLAGS,Flags passed to the C++ compiler)
 AC_ARG_VAR(DEBUGLEVEL,[Debug level for developers, normal users can safely ignore it. Accepted values go from 0 to 5. See README-DEVELOPER for details.])
@@ -387,7 +388,6 @@ GENERICUNIX
 ]
 )
 
-SDL_CONFIG=sdl-config
 
 dnl *************************************************
 dnl GL AND  MATHLIB SELECTION ( SYSTEM DEPENDANT)
@@ -535,6 +535,8 @@ fi
 dnl *************************************************
 dnl         SDL
 dnl *************************************************
+
+test -z "$SDL_CONFIG" && SDL_CONFIG=sdl-config
 
 AC_MSG_CHECKING(whether SDL is installed)
 if SDLLIBS=`${SDL_CONFIG} --libs`; then

@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -46,7 +46,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <vector>
 
 #ifndef WIN32
-#include <arpa/inet.h> 
+#include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/param.h>
 #include <sys/ioctl.h>
@@ -80,7 +80,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ESHUTDOWN WSAESHUTDOWN
 #define EMSGSIZE WSAEMSGSIZE
 #define ETIMEDOUT WSAETIMEDOUT
-#define ENETUNREACH WSAENETUNREACH 
+#define ENETUNREACH WSAENETUNREACH
 #define close closesocket
 #define snprintf _snprintf
 #endif
@@ -866,14 +866,14 @@ nSocketListener const & nBasicNetworkSystem::GetListener( void ) const
 
 /*
 // *******************************************************************************************
-// *	
+// *
 // *	GetListener
-// *	
+// *
 // *******************************************************************************************
-//!		
+//!
 //!		@param	listener	listening sockets to fill
 //!		@return		A reference to this to allow chaining
-//!		
+//!
 // *******************************************************************************************
 
 nBasicNetworkSystem const & nBasicNetworkSystem::GetListener( nSocketListener & listener ) const
@@ -883,14 +883,14 @@ nBasicNetworkSystem const & nBasicNetworkSystem::GetListener( nSocketListener & 
 }
 
 // *******************************************************************************************
-// *	
+// *
 // *	SetListener
-// *	
+// *
 // *******************************************************************************************
-//!		
+//!
 //!		@param	listener	listening sockets to set
 //!		@return		A reference to this to allow chaining
-//!		
+//!
 // *******************************************************************************************
 
 nBasicNetworkSystem & nBasicNetworkSystem::SetListener( nSocketListener const & listener )
@@ -933,14 +933,14 @@ nSocket const & nBasicNetworkSystem::GetControlSocket( void ) const
 
 /*
 // *******************************************************************************************
-// *	
+// *
 // *	GetControlSocket
-// *	
+// *
 // *******************************************************************************************
-//!		
+//!
 //!		@param	controlSocket	network control socket to fill
 //!		@return		A reference to this to allow chaining
-//!		
+//!
 // *******************************************************************************************
 
 nBasicNetworkSystem const & nBasicNetworkSystem::GetControlSocket( nSocket & controlSocket ) const
@@ -950,14 +950,14 @@ nBasicNetworkSystem const & nBasicNetworkSystem::GetControlSocket( nSocket & con
 }
 
 // *******************************************************************************************
-// *	
+// *
 // *	SetControlSocket
-// *	
+// *
 // *******************************************************************************************
-//!		
+//!
 //!		@param	controlSocket	network control socket to set
 //!		@return		A reference to this to allow chaining
-//!		
+//!
 // *******************************************************************************************
 
 nBasicNetworkSystem & nBasicNetworkSystem::SetControlSocket( nSocket const & controlSocket )
