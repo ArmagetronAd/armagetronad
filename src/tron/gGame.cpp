@@ -3789,13 +3789,13 @@ bool gGame::GameLoop(bool input){
     // network syncing
     REAL gtime=0;
     REAL time=0;
+    se_SyncGameTimer();
     if (state==GS_PLAY){
         NetSync();
         if ( netstate != sn_GetNetState() )
         {
             return false;
         }
-        se_SyncGameTimer();
         gtime=se_GameTime();
         time=gtime;
 
@@ -3888,6 +3888,33 @@ bool gGame::GameLoop(bool input){
         return false;
     }
 
+    bool synced = se_mainGameTimer && ( se_mainGameTimer->IsSynced() || ( stateNext >= GS_DELETE_OBJECTS || stateNext <= GS_CREATE_GRID ) );
+
+    if  (!synced)
+    {
+        // see if there is a game object owned by this client, if so, declare emergency sync
+        for (int pi = MAX_PLAYERS-1; pi >= 0; --pi )
+        {
+            ePlayer * p = ePlayer::PlayerConfig(pi);
+            if ( !p )
+                break;
+            ePlayerNetID * np = p->netPlayer;
+            if ( !np )
+                break;
+            if ( np->Object() )
+            {
+                synced = true;
+                break;
+            }
+        }
+    }
+    else if ( !synced_ )
+    {
+        // synced finally. Send our player info over so we can join the game.
+        ePlayerNetID::Update();
+        synced_ = true;
+    }
+
     if (state==GS_PLAY){
         if (gtime<0 && gtime>-PREPARE_TIME+.3)
             eCamera::s_Timestep(grid, gtime);
@@ -3929,33 +3956,6 @@ bool gGame::GameLoop(bool input){
                 se_PauseGameTimer( gtime < sg_lastChatBreakTime && ePlayerNetID::WaitToLeaveChat() );
         }
 
-        bool synced = se_mainGameTimer && se_mainGameTimer->IsSynced();
-
-        if  (!synced)
-        {
-            // see if there is a game object owned by this client, if so, declare emergency sync
-            for (int pi = MAX_PLAYERS-1; pi >= 0; --pi )
-            {
-                ePlayer * p = ePlayer::PlayerConfig(pi);
-                if ( !p )
-                    break;
-                ePlayerNetID * np = p->netPlayer;
-                if ( !np )
-                    break;
-                if ( np->Object() )
-                {
-                    synced = true;
-                    break;
-                }
-            }
-        }
-        else if ( !synced_ )
-        {
-            // synced finally. Send our player info over so we can join the game.
-            ePlayerNetID::Update();
-            synced_ = true;
-        }
-
         if (sr_glOut && gtime>-PREPARE_TIME+.5 && goon && synced )
         {
             Render(grid, gtime, input);
@@ -3987,9 +3987,9 @@ bool gGame::GameLoop(bool input){
     }
     else{
         // between rounds, assume we're synced
-        if ( !synced_ && sn_GetNetState() != nSERVER )
-            ePlayerNetID::Update();
-        synced_ = true;
+        //if ( !synced_ && sn_GetNetState() != nSERVER )
+        //    ePlayerNetID::Update();
+        // synced_ = true;
 
 #ifndef DEDICATED
         if (input)
@@ -4213,9 +4213,184 @@ void Activate(bool act){
     }
 }
 
+// ************************************
+// full screen messages from the server
+// ************************************
+
+static nVersionFeature sg_fullscreenMessages(14);
+
+static void sg_FullscreenIdle()
+{
+    tAdvanceFrame();
+    se_SyncGameTimer();
+    gGame::NetSync();
+    if ( sg_currentGame )
+        sg_currentGame->StateUpdate();
+}
+
+void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message, REAL timeout ){
+    // keep syncing the network
+    rPerFrameTask idle( sg_FullscreenIdle );
+
+    // put players into idle mode
+    ePlayerNetID::SpectateAll();
+    se_ChatState( ePlayerNetID::ChatFlags_Menu, true );
+
+    // show message
+    uMenu::Message( title, message, timeout );
+
+    // and print it to the console
+#ifndef DEDICATED    
+    con <<  title << ":\n" << message << "\n";
+#endif
+
+    // get them out again
+    se_ChatState( ePlayerNetID::ChatFlags_Menu, false );
+}
+
+static void sg_ClientFullscreenMessage(nMessage &m){
+    if (sn_GetNetState()!=nSERVER){
+        tString title;
+        m >> title;
+
+        tString message;
+        m >> message;
+
+        REAL timeout = 60;
+        m >> timeout;
+
+        sg_ClientFullscreenMessage( title, message, timeout );
+    }
+}
+
+static nDescriptor sg_clientFullscreenMessage(312,sg_ClientFullscreenMessage,"client_fsm");
+
+// causes the connected clients to break and print a fullscreen message
+void sg_FullscreenMessage(tOutput const & title, tOutput const & message, REAL timeout, int client){
+    nMessage *m=new nMessage(sg_clientFullscreenMessage);
+    *m << title;
+    *m << message;
+    *m << timeout;
+
+    tString complete( title );
+    complete << "\n" << message << "\n";
+
+    if (client <= 0){
+        if ( sg_fullscreenMessages.Supported() )
+            m->BroadCast();
+        else
+        {
+            for(int c = MAXCLIENTS; c > 0; --c)
+            {
+                if ( sn_Connections[c].socket )
+                {
+                    if ( sg_fullscreenMessages.Supported(c) )
+                        m->Send(c);
+                    else
+                        sn_ConsoleOut(complete, c);
+                }
+            }
+        }
+
+        // display the message locally, waiting for the clients to have seen it
+        {
+            // stop the game
+            bool paused = se_mainGameTimer && se_mainGameTimer->speed < .0001;
+            se_PauseGameTimer(true);
+            gGame::NetSyncIdle();
+
+            REAL waitTo = tSysTimeFloat() + timeout;
+            REAL waitToMin = tSysTimeFloat() + 1.0;
+            sg_ClientFullscreenMessage( title, message, timeout );
+
+            // wait for players to see it
+            bool goon = true;
+            while( goon && waitTo > tSysTimeFloat() )
+            {
+                sg_FullscreenIdle();
+                gameloop_idle();
+                if ( se_GameTime() > sg_lastChatBreakTime )
+                    se_PauseGameTimer(true);
+
+                // give the clients a second to enter chat state
+                if ( tSysTimeFloat() > waitToMin )
+                {
+                    goon = false;
+                    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+                    {
+                        ePlayerNetID* player = se_PlayerNetIDs(i);
+                        if ( player->IsChatting() )
+                            goon = true;
+                    }
+                }
+            }
+
+            // continue the game
+            se_PauseGameTimer(paused);
+            gGame::NetSyncIdle();
+        }
+    }
+    else
+    {
+        if ( sg_fullscreenMessages.Supported(client) )
+            m->Send(client);
+        else
+            sn_ConsoleOut(complete, client);
+    }
+}
+
+static void sg_FullscreenMessageConf(std::istream &s)
+{
+    // read the timeout
+    REAL timeout;
+    s >> timeout;
+
+    if ( !s.good() || s.eof() )
+    {
+        con << "Usage: FULLSCREEN_MESSAGE <timeout> <message>\n";
+        return;
+    }
+
+    // read the message
+    tString message;
+    message.ReadLine( s, true );
+
+    message += "\n";
+
+    // display it
+    sg_FullscreenMessage( "$fullscreen_message_title", message , timeout );
+}
+
+static tConfItemFunc sg_fullscreenMessageConf("FULLSCREEN_MESSAGE",&sg_FullscreenMessageConf);
+
+// **************
+// Login callback
+// **************
+
+// message of day presented to clients logging in
+tString sg_greeting("");
+static tConfItemLine a_mod("MESSAGE_OF_DAY",sg_greeting);
+
+tString sg_greetingTitle("");
+static tConfItemLine a_tod("TITLE_OF_DAY",sg_greetingTitle);
+
+REAL sg_greetingTimeout=60;
+static tSettingItem< REAL > a_modt("MESSAGE_OF_DAY_TIMEOUT",sg_greetingTimeout);
+
 static void LoginCallback(){
     client_gamestate[nCallbackLoginLogout::User()]=0;
+    if ( nCallbackLoginLogout::Login() )
+    {
+        if ( sg_greeting.Len()>1 )
+        {
+            if ( sg_greetingTitle.Len() <= 1 )
+                sg_greetingTitle = "Server message";
+
+            sg_FullscreenMessage( sg_greetingTitle, sg_greeting, sg_greetingTimeout, nCallbackLoginLogout::User() );
+        }
+    }
 }
 
 static nCallbackLoginLogout lc(LoginCallback);
+
 

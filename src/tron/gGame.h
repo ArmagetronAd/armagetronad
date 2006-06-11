@@ -125,6 +125,9 @@ void Activate(bool act);
 
 void sg_DeclareWinner( eTeam* team, char const * message );
 
+void sg_FullscreenMessage(tOutput const & title, tOutput const & message,REAL timeout = 60, int client = 0); //!< Displays a message on a specific client or all clients that gets displayed on the whole screen, blocking view to the game
+void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message, REAL timeout = 60 ); //!< Displays a message locally that gets displayed on the whole screen, blocking view to the game
+
 class gGameSettings
 {
 public:

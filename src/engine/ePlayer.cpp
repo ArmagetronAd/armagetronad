@@ -2613,10 +2613,6 @@ void ePlayerNetID::ClearObject(){
 #endif
 }
 
-// message of day presented to clients logging in
-tString se_greeting("");
-static tConfItemLine a_mod("MESSAGE_OF_DAY",se_greeting);
-
 void ePlayerNetID::Greet(){
     if (!greeted){
         tOutput o;
@@ -2627,9 +2623,6 @@ void ePlayerNetID::Greet(){
         s << o;
         s << "\n";
         GreetHighscores(s);
-        s << "\n";
-        if (se_greeting.Len()>1)
-            s << se_greeting << "\n";
         s << "\n";
         //std::cout << s;
         sn_ConsoleOut(s,Owner());
@@ -2924,15 +2917,35 @@ void ePlayerNetID::ClearAll(){
     }
 }
 
-void ePlayerNetID::CompleteRebuild(){
-    ClearAll();
-    Update();
-}
-
-static bool se_VisubleSpectatorsSupported()
+static bool se_VisibleSpectatorsSupported()
 {
     static nVersionFeature se_visibleSpectator(13);
     return sn_GetNetState() != nCLIENT || se_visibleSpectator.Supported(0);
+}
+
+void ePlayerNetID::SpectateAll(){
+    for(int i=MAX_PLAYERS-1;i>=0;i--){
+        ePlayer *local_p=ePlayer::PlayerConfig(i);
+        if (local_p)
+        {
+            if ( se_VisibleSpectatorsSupported() && local_p->netPlayer )
+            {
+                if ( !local_p->netPlayer->spectating_ )
+                {
+                    local_p->netPlayer->spectating_ = true;
+                }
+
+                local_p->netPlayer->RequestSync();
+            }
+            else
+                local_p->netPlayer = NULL;
+        }
+    }
+}
+
+void ePlayerNetID::CompleteRebuild(){
+    ClearAll();
+    Update();
 }
 
 // Update the netPlayer_id list
@@ -2947,14 +2960,14 @@ void ePlayerNetID::Update(){
             tASSERT(local_p);
             tCONTROLLED_PTR(ePlayerNetID) &p=local_p->netPlayer;
 
-            if (!p && in_game && ( !local_p->spectate || se_VisubleSpectatorsSupported() ) ) // insert new player
+            if (!p && in_game && ( !local_p->spectate || se_VisibleSpectatorsSupported() ) ) // insert new player
             {
                 p=tNEW(ePlayerNetID) (i);
                 p->FindDefaultTeam();
                 p->RequestSync();
             }
 
-            if (bool(p) && (!in_game || ( local_p->spectate && !se_VisubleSpectatorsSupported() ) ) && // remove player
+            if (bool(p) && (!in_game || ( local_p->spectate && !se_VisibleSpectatorsSupported() ) ) && // remove player
                     p->Owner() == ::sn_myNetID )
             {
                 p->RemoveFromGame();

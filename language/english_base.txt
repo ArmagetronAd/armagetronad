@@ -666,7 +666,9 @@ word_delimiters_help    Characters that count as word delimiters when skipping o
 mouse_grab_help			Grab the mouse pointer, so it can't leave the window
 moviepack_help			Use the moviepack if available
 armagetron_version_help		your version of \g
-message_of_day_help		Message sent to clients on connection
+message_of_day_help		Message sent to clients on connection, if supported by the client, it will be displayed fullscreen
+title_of_day_help		If fullscreen display is supported, this will be the title above message_of_day
+message_of_day_timeout_help		Time message_of_day is displayed for in fullscreen mode
 round_console_message_help	Message sent to clients after every round
 round_center_message_help	Big message sent to clients after every round
 
@@ -692,6 +694,7 @@ unban_ip_help               Revokes the ban of the specified IP address.
 # communication
 console_message_help		Prints a message on the console of all connected clients.
 center_message_help			Prints a big message on the screen of all connected clients.
+fullscreen_message_help     Prints a big message all over the screen, interrupting gameplay for a configurable timeout. Use with care.
 say_help					Dedicated server only: let the server administator say something.
 
 #********************************************
@@ -1990,6 +1993,8 @@ player_scoretable_inactive	Disconnected
 #
 #********************************************
 #********************************************
+
+fullscreen_message_title        Sever Message
 
 network_message_timeout_title	Server does not answer
 network_message_timeout_inter	The server you wanted to connect to did not answer for ten seconds.\nIt is probably down or unreachable, or you mistyped its name in the "custom connect" menu.
