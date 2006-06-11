@@ -969,6 +969,10 @@ nMessage& nMessage::operator << (const tColoredString &s){
     return *this << static_cast< const tString & >( s );
 }
 
+nMessage& nMessage::operator << ( const tOutput &o ){
+    return *this << static_cast< tString >( o );
+}
+
 bool sn_filterColorStrings = false;
 static tConfItem<bool> cs("FILTER_COLOR_STRINGS",sn_filterColorStrings);
 
@@ -1586,8 +1590,6 @@ int login_handler(const nMessage &m, const nVersion& version, unsigned short rat
         //      tString s;
         // s << "User " << new_id << " logged in.\n";
 
-        nCallbackLoginLogout::UserLoggedIn(new_id);
-
         sn_Connections[new_id].ping.Reset();
         sn_Connections[new_id].bandwidthControl_.Reset();
         reset_last_acks(new_id);
@@ -1619,6 +1621,8 @@ int login_handler(const nMessage &m, const nVersion& version, unsigned short rat
         nMachine & machine = nMachine::GetMachine( new_id );
         machine.AddPlayer();
         machine.RemovePlayer();
+
+        nCallbackLoginLogout::UserLoggedIn(new_id);
 
         //      ANET_Listen(false);
         //      ANET_Listen(true);

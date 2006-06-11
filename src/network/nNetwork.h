@@ -471,6 +471,7 @@ public:
     nMessage& operator >> (tColoredString &s);
     nMessage& operator << (const tString &s);
     nMessage& operator << (const tColoredString &s);
+    nMessage& operator << (const tOutput &o);
 
     template<class T> void BinWrite (const T &x){
         for(unsigned int i=0;i<sizeof(T)/2;i++)
