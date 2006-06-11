@@ -1,8 +1,10 @@
 Changes since 0.2.8.2:
 
   New settings:
+- CYCLE_BOOST_? and CYCLE_BOOSTFACTOR_? for boosts when breaking away from walls,
+  see settings.cfg or config.html for details
 - CYCLE_ACCEL_TUNNEL, works like CYCLE_ACCEL_SLINGSHOT, but is active when
-  none of the two walls you're in between is your own
+  none of the two walls you're in between is your own.
 - CYCLE_WIDTH for making it impossible to squeeze through tight tunnels,
   see settings.cfg for details
 - VOTING_MATURITY controls how long you have to wait after login before
