@@ -121,11 +121,11 @@ REAL sg_GetSparksDistance()
 
 // amout of rubber you use per meter when you squeeze inside a too tight tunnel
 // when just barely squeezed
-REAL sg_cycleWidthRubberMin = 0;
+REAL sg_cycleWidthRubberMin = 1;
 static nSettingItemWatched<REAL> c_cwrmax("CYCLE_WIDTH_RUBBER_MIN",
         sg_cycleWidthRubberMin, nConfItemVersionWatcher::Group_Bumpy, 14 );
 // when squeezed to a point
-REAL sg_cycleWidthRubberMax = 0;
+REAL sg_cycleWidthRubberMax = 1;
 static nSettingItemWatched<REAL> c_cwrmin("CYCLE_WIDTH_RUBBER_MAX",
         sg_cycleWidthRubberMax, nConfItemVersionWatcher::Group_Bumpy, 14 );
 
