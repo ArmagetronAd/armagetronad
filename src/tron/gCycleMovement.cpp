@@ -224,6 +224,12 @@ static nSettingItemWatched<REAL> c_acs("CYCLE_ACCEL_SLINGSHOT",
                                        nConfItemVersionWatcher::Group_Bumpy,
                                        8);
 
+REAL sg_accelerationCycleTunnel = 1;
+static nSettingItemWatched<REAL> c_acu("CYCLE_ACCEL_TUNNEL",
+                                       sg_accelerationCycleTunnel,
+                                       nConfItemVersionWatcher::Group_Bumpy,
+                                       14);
+
 // acceleration offset
 static REAL sg_accelerationCycleOffs=2;
 static nSettingItem<REAL> c_ao("CYCLE_ACCEL_OFFSET",
@@ -537,14 +543,32 @@ float gCycleMovement::MaximalSpeed( void )
     wallAcceleration = sg_accelerationCycleRim * sg_accelerationCycle;
     if ( wallAcceleration > maxWallAcceleration )
         maxWallAcceleration = wallAcceleration;
-    // self acceleration is tricky: slingshot countermeasures have to be taken into account
-    wallAcceleration = sg_accelerationCycleSelf * sg_accelerationCycle;
-    wallAcceleration *= sg_accelerationCycleSlingshot;
-    if ( wallAcceleration > maxWallAcceleration )
-        maxWallAcceleration = wallAcceleration;
 
-    // and there can always be two walls, and use wall accel formula
-    maxWallAcceleration *= 2 * ( 1/sg_accelerationCycleOffs - 1/(sg_accelerationCycleOffs+sg_nearCycle ) );
+    // self acceleration is tricky: slingshot countermeasures have to be taken into account
+    REAL wallAccelerationSelf = sg_accelerationCycleSelf * sg_accelerationCycle;
+
+    {
+        // different combinations are now possible to get a maximum. It could be a single wall:
+        REAL wallAccelerationSingle = maxWallAcceleration;
+        if ( wallAccelerationSingle < wallAccelerationSelf )
+            wallAccelerationSingle = wallAccelerationSelf;
+
+        // it could be a slingshot, one arbitrary wall and one own wall:
+        REAL wallAccelerationSlingshot = ( wallAccelerationSingle + wallAccelerationSelf ) * sg_accelerationCycleSlingshot;
+
+        // or a tunnel, two foreign walls:
+        REAL wallAccelerationTunnel = ( maxWallAcceleration ) * sg_accelerationCycleTunnel;
+
+
+        // take the maximum
+        if ( maxWallAcceleration < wallAccelerationSlingshot )
+            maxWallAcceleration = wallAccelerationSlingshot;
+        if ( maxWallAcceleration < wallAccelerationTunnel )
+            maxWallAcceleration = wallAccelerationTunnel;
+    }
+
+    // use wall accel formula to take wall distance into account
+    maxWallAcceleration *= ( 1/sg_accelerationCycleOffs - 1/(sg_accelerationCycleOffs+sg_nearCycle ) );
 
     // maximal sustainable speed from that
     REAL maxSpeed = sg_MaxSpeed( maxWallAcceleration );
@@ -2158,9 +2182,14 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
         }
     }
 
-    // apply slingshot multiplier
-    if ( slingshot && oneOwnWall )
-        totalWallAcceleration *= sg_accelerationCycleSlingshot;
+    // apply slingshot/tunnel multiplier
+    if ( slingshot )
+    {
+        if ( oneOwnWall )
+            totalWallAcceleration *= sg_accelerationCycleSlingshot;
+        else
+            totalWallAcceleration *= sg_accelerationCycleTunnel;
+    }
 
     // apply wall acceleration
     acceleration += totalWallAcceleration;

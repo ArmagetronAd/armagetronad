@@ -60,6 +60,7 @@ cycle_accel_team_help           Multiplicator to CYCLE_ACCEL for your temmates' 
 cycle_accel_enemy_help          Multiplicator to CYCLE_ACCEL for your enemies' walls
 cycle_accel_rim_help            Multiplicator to CYCLE_ACCEL for the rim walls
 cycle_accel_slingshot_help      Multiplicator to the total effect of CYCLE_ACCEL, if the cycle is between its own wall and another wall
+cycle_accel_tunnel_help         Multiplicator to the total effect of CYCLE_ACCEL, if the cycle is between two walls not created by it
 cycle_accel_offset_help	        Minimum numeric wall distance, must be positive
 cycle_wall_near_help		    Maximum accelerating wall distance
 
