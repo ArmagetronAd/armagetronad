@@ -558,6 +558,24 @@ static tConfItem<bool> WRAP("WRAP_MENU",uMenu::wrap);
 
 #ifndef DEDICATED
 
+class gAutoCompleterConsole : public uAutoCompleter {
+public:
+    int Complete(tString &string, unsigned pos) {
+        if(string.find_first_of(' ') == pos - 1) {
+            tConfItemBase *cfg = tConfItemBase::FindConfigItem(string.substr(0, pos-1));
+            if(cfg != 0) {
+                std::ostringstream toAdd("");
+                cfg->WriteVal(toAdd);
+                string << toAdd.str();
+                return string.size();
+            }
+        }
+        //delegate
+        return uAutoCompleter::Complete(string, pos);
+    }
+    gAutoCompleterConsole(std::deque<tString> &words) : uAutoCompleter(words) {}
+};
+
 //! Handles the console prompt
 class gMemuItemConsole: uMenuItemStringWithHistory{
 public:
@@ -612,7 +630,7 @@ void do_con(){
     uMenu con_menu("",false);
     std::deque<tString> commands;
     commands = tConfItemBase::GetCommands();
-    uAutoCompleter completer(commands);
+    gAutoCompleterConsole completer(commands);
     gMemuItemConsole s(&con_menu,c,&completer);
     con_menu.SetCenter(-.75);
     con_menu.SetBot(-2);
@@ -945,9 +963,9 @@ void sg_PlayerMenu(int Player){
     cam_s.NewChoice("$player_camera_initial_free_text","$player_camera_initial_free_help",CAMERA_FREE);
 
     uMenuItemString tn(&playerMenu,
-                      "$player_teamname_text",
-                      "$player_teamname_help",
-                      p->teamname, 16);
+                       "$player_teamname_text",
+                       "$player_teamname_help",
+                       p->teamname, 16);
 
     uMenuItemString n(&playerMenu,
                       "$player_name_text",

@@ -334,7 +334,7 @@ void ConfItem::operator=(ConfItem const &other) {
 //! Tests if the search for the right configuration item at construction time was successful
 //! @returns true on success, false on failure (read operations will segfault)
 bool ConfItem::Good() const {
-    return m_value != 0 ? true : false;
+    return m_value != 0;
 }
 
 //! Reads from the configuration item
