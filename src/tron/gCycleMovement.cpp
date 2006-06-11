@@ -241,6 +241,56 @@ static REAL sg_nearCycle=6;
 static nSettingItem<REAL> c_n("CYCLE_WALL_NEAR",
                               sg_nearCycle);
 
+// boost settings, absolute speed increase applied when you break from a wall
+REAL sg_boostCycleSelf = 0;
+static nSettingItemWatched<REAL> c_bco("CYCLE_BOOST_SELF",
+                                       sg_boostCycleSelf,
+                                       nConfItemVersionWatcher::Group_Bumpy,
+                                       14);
+
+REAL sg_boostCycleTeam = 0;
+static nSettingItemWatched<REAL> c_bct("CYCLE_BOOST_TEAM",
+                                       sg_boostCycleTeam,
+                                       nConfItemVersionWatcher::Group_Bumpy,
+                                       14);
+
+REAL sg_boostCycleEnemy = 0;
+static nSettingItemWatched<REAL> c_bce("CYCLE_BOOST_ENEMY",
+                                       sg_boostCycleEnemy,
+                                       nConfItemVersionWatcher::Group_Bumpy,
+                                       14);
+
+REAL sg_boostCycleRim = 0;
+static nSettingItemWatched<REAL> c_bcr("CYCLE_BOOST_RIM",
+                                       sg_boostCycleRim,
+                                       nConfItemVersionWatcher::Group_Bumpy,
+                                       14);
+
+// boostFactor settings, speed factor when you break from a wall
+REAL sg_boostFactorCycleSelf = 1;
+static nSettingItemWatched<REAL> c_bfco("CYCLE_BOOSTFACTOR_SELF",
+                                        sg_boostFactorCycleSelf,
+                                        nConfItemVersionWatcher::Group_Bumpy,
+                                        14);
+
+REAL sg_boostFactorCycleTeam = 1;
+static nSettingItemWatched<REAL> c_bfct("CYCLE_BOOSTFACTOR_TEAM",
+                                        sg_boostFactorCycleTeam,
+                                        nConfItemVersionWatcher::Group_Bumpy,
+                                        14);
+
+REAL sg_boostFactorCycleEnemy = 1;
+static nSettingItemWatched<REAL> c_bfce("CYCLE_BOOSTFACTOR_ENEMY",
+                                        sg_boostFactorCycleEnemy,
+                                        nConfItemVersionWatcher::Group_Bumpy,
+                                        14);
+
+REAL sg_boostFactorCycleRim = 1;
+static nSettingItemWatched<REAL> c_bfcr("CYCLE_BOOSTFACTOR_RIM",
+                                        sg_boostFactorCycleRim,
+                                        nConfItemVersionWatcher::Group_Bumpy,
+                                        14);
+
 // tolerance for packet loss
 static REAL sg_packetLossTolerance = 0;
 static tSettingItem<REAL> conf_packetLossTolerance ("CYCLE_PACKETLOSS_TOLERANCE", sg_packetLossTolerance);
@@ -2276,21 +2326,70 @@ bool gCycleMovement::DoTurn( int dir )
         // send out a sensor a bit backwards and forwards into the turn direction to
         // copy all temporary walls into the grid
         {
-            eCoord range = nextDirDrive * .1 * Speed();
-            gSensor gridder1( this, Position(), range );
-            gridder1.detect( 1 );
+            REAL range = .1 * Speed();
+            eCoord dirCast = nextDirDrive;
+            gSensor gridder1( this, Position(), dirCast );
+            gridder1.detect( range );
             if ( gridder1.ehit )
                 ::DropTempWall( nextDirDrive, gridder1 );
 
-            gSensor gridder2( this, Position(), -range );
-            gridder2.detect( 1 );
-            if ( gridder2.ehit )
-                ::DropTempWall( nextDirDrive, gridder2 );
-
-            gSensor gridder3( this, Position()-range*.5, range );
-            gridder3.detect( 1 );
+            gSensor gridder3( this, Position() - dirCast * (range*.5), dirCast );
+            gridder3.detect( range );
             if ( gridder3.ehit )
                 ::DropTempWall( nextDirDrive, gridder3 );
+
+            // the ray backwards should detect walls that affected the acceleration;
+            // they can also give a boost. Increase the range.
+            if ( range < sg_nearCycle )
+                range = sg_nearCycle;
+
+            gSensor gridder2( this, Position(), -dirCast );
+            gridder2.detect( range );
+            if ( gridder2.ehit )
+            {
+                ::DropTempWall( nextDirDrive, gridder2 );
+
+                // apply the boost. Calculate wall distance
+                REAL dist = gridder2.hit;
+
+                // calculate the factor acceleration would be multiplied with
+                REAL accellerationFactorOffset = 1/(sg_nearCycle+sg_accelerationCycleOffs);
+                REAL accelerationFactor = (1/(dist+sg_accelerationCycleOffs)) - accellerationFactorOffset;
+                // this would be the maximal acceleration factor
+                REAL accelerationFactorMax = (1/sg_accelerationCycleOffs) - accellerationFactorOffset;
+
+                // select boost settings according to wall type
+                // apply modificators
+                REAL boost = 0, boostFactor = 1;
+                switch (gridder2.type)
+                {
+                case gSENSOR_SELF:
+                    boost = sg_boostCycleSelf;
+                    boostFactor = sg_boostFactorCycleSelf;
+                    break;
+                case gSENSOR_TEAMMATE:
+                    boost = sg_boostCycleTeam;
+                    boostFactor = sg_boostFactorCycleTeam;
+                    break;
+                case gSENSOR_ENEMY:
+                    boost = sg_boostCycleEnemy;
+                    boostFactor = sg_boostFactorCycleEnemy;
+                    break;
+                case gSENSOR_RIM:
+                    boost = sg_boostCycleRim;
+                    boostFactor = sg_boostFactorCycleRim;
+                    break;
+                case gSENSOR_NONE:
+                    break;
+                }
+
+                // apply acceleration factor to boost
+                boostFactor = 1 + ( boostFactor - 1 ) * accelerationFactor / accelerationFactorMax;
+                boost *= accelerationFactor / accelerationFactorMax;
+
+                // apply boost to speed
+                verletSpeed_ = verletSpeed_ * boostFactor + boost;
+            }
 
             // if edges have been inserted into the grid, find a new current face.
             FindCurrentFace();
