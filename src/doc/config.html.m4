@@ -207,9 +207,11 @@ approach CI(CYCLE_SPEED) over time. The bigger the constants, the faster the app
 
 PARAGRAPH([
 The acceleration caused by the wall at distance <CODE>D</CODE> is
+<pre>acceleration=CYCLE_ACCEL * F(D)</pre>
+with
 <pre>
-acceleration=CYCLE_ACCEL / (CYCLE_ACCEL_OFFSET + D)-
-             CYCLE_ACCEL / (CYCLE_ACCEL_OFFSET + CYCLE_WALL_NEAR)
+F(D) = 1 / (CYCLE_ACCEL_OFFSET + D) 
+     - 1 / (CYCLE_ACCEL_OFFSET + CYCLE_WALL_NEAR)
 </pre>
 if the wall is closer than <CODE>CYCLE_WALL_NEAR</CODE>. 
 the stuff in the second
@@ -219,7 +221,9 @@ Depending on the nature of the wall (whether it belongs to you, your teammate,
 your enemy or is the arena rim), the acceleration gets multiplied with 
 CI(CYCLE_ACCEL_SELF), CI(_TEAM) resp. CI(_ENEMY) or CI(_RIM). If your cycle
 is stuck between one of your walls and a wall of any other type, your total
-acceleration by walls gets multiplied by CI(CYCLE_ACCEL_SLINGSHOT).
+acceleration by walls gets multiplied by CI(CYCLE_ACCEL_SLINGSHOT). If you drive
+between two walls that are not your own, your acceleration gets multiplied with
+CI(CYCLE_ACCEL_TUNNEL).
 ])
 
 PARAGRAPH([
@@ -250,6 +254,18 @@ At every turn, your cycle loses a bit of speed; how much is determined by
 CI(CYCLE_TURN_SPEED_FACTOR). At every turn, your speed gets multiplied with this value.
 Set it to 1 to disable the turn slowdown.
 ])
+PARAGRAPH([
+When you turn away from a wall, your cycle can get an instant speed boost or speed drain
+from it. The formula for your speed after the break is
+<pre>speed_after=speed_before + (F(D)/F(0)) * ( CYCLE_BOOST_? + ( CYCLE_BOOSTFACTOR_? - 1 ) * speed_before )
+</pre>where ? is, as for the different acceleration effects of walls, either SELF, TEAM, ENEMY or
+RIM for your own walls, teammates' walls, enemy walls or rim walls that you break away from, and
+F(D) is the same function that is used in the wall acceleration formula.])
+PARAGRAPH([
+In words: If you break away from a wall after grinding it really hard, your speed gets multiplied
+with CYCLE_BOOSTFACTOR_?, then CYCLE_BOOST_? is added. If you're not really close, the boost
+is scaled down with the same profile as the continuous wall acceleration.])
+
 
 SUBSUBSECTION(Rubber)
 PARAGRAPH([

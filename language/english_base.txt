@@ -64,6 +64,15 @@ cycle_accel_tunnel_help         Multiplicator to the total effect of CYCLE_ACCEL
 cycle_accel_offset_help	        Minimum numeric wall distance, must be positive
 cycle_wall_near_help		    Maximum accelerating wall distance
 
+Cycle_boost_self_help           Speed boost when breaking from your own wall
+cycle_boost_team_help           Speed boost when breaking from a teammate's wall
+cycle_boost_enemy_help          Speed boost when breaking from an enemy wall
+cycle_boost_rim_help            Speed boost when breaking from the rim wall
+cycle_boostfactor_self_help     Factor your speed is multiplied with when breaking from your own wall
+cycle_boostfactor_team_help     Factor your speed is multiplied with when breaking from a teammate's wall
+cycle_boostfactor_enemy_help    Factor your speed is multiplied with when breaking from an enemy wall
+cycle_boostfactor_rim_help      Factor your speed is multiplied with when breaking from the rim wall
+
 cycle_turn_memory_help          Number of pending turns a cycle will memorize exactly
 
 cycle_delay_help		        Minimum time between turns (must be greater than 0)
