@@ -1,7 +1,8 @@
 Changes since 0.2.8.2:
 
   New settings:
-- CYCLE_WIDTH for making it impossible to squeeze through tight tunnels
+- CYCLE_WIDTH for making it impossible to squeeze through tight tunnels,
+  see settings.cfg for details
 - VOTING_MATURITY controls how long you have to wait after login before
   you can issue kick votes.
 
@@ -9,6 +10,9 @@ Changes since 0.2.8.2:
 - Players leaving to spectator mode with <0.2.8.2 clients are handled like
   spectators of 0.2.8.2 clients: they stay visible to the others.
 - Kick statistics are now persistent across server runs.
+- MESSAGE_OF_DAY is now displayed fullscreen if both server and client support it
+- Manual fullscreen messages can be triggered with 
+  FULLSCREEN_MESSAGE <timeout> <message content>
 
   Bugfixes:
 - "Team Red" bug. If the server allows maximally two teams, no team ever
@@ -27,7 +31,8 @@ Changes since 0.2.8.1:
 - Team spawn formation is now configurable
 - Added reasons to bans
 - Added spectator autokicking
-- Added history to chat and console (wrtlprnft)
+- Added history to chat and console (wrtlprnft). Press "Cursor up" to
+  edit and repeat previous chats and console commands.
 - You only enter a game once your client is synced
 - /msg now prefers exact matches over partial matches
 - Cycles now have better memory for pending turns (wrtlprnft)
