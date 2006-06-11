@@ -2385,7 +2385,7 @@ bool gCycleMovement::DoTurn( int dir )
 
                 // apply acceleration factor to boost
                 boostFactor = 1 + ( boostFactor - 1 ) * accelerationFactor / accelerationFactorMax;
-                boost *= accelerationFactor / accelerationFactorMax;
+                boost *= SpeedMultiplier() * accelerationFactor / accelerationFactorMax;
 
                 // apply boost to speed
                 verletSpeed_ = verletSpeed_ * boostFactor + boost;
