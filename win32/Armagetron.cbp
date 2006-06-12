@@ -7,7 +7,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Win32 Release">
-				<Option output="..\build\dist\Armagetron.exe" />
+				<Option output="..\build\dist\ArmagetronAd.exe" />
 				<Option working_dir="..\build\dist" />
 				<Option object_output="..\build\tmp\Armagetron___Win32_Release" />
 				<Option type="0" />
@@ -30,7 +30,7 @@
 				</Linker>
 			</Target>
 			<Target title="Win32 Debug">
-				<Option output="..\build\debug\Armagetron.exe" />
+				<Option output="..\build\debug\ArmagetronAd.exe" />
 				<Option working_dir="..\build\debug" />
 				<Option object_output="..\build\tmp\Armagetron___Win32_Debug" />
 				<Option type="0" />
@@ -51,7 +51,7 @@
 				</Linker>
 			</Target>
 			<Target title="Win32 Profile">
-				<Option output="..\build\profile\armagetronad.exe" />
+				<Option output="..\build\profile\ArmagetronAd.exe" />
 				<Option working_dir="..\build\profile" />
 				<Option object_output="..\build\tmp\Armagetron___Win32_Profile" />
 				<Option type="0" />
