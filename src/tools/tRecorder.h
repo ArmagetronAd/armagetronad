@@ -933,6 +933,12 @@ void tRecorderSync< DATA >::Archive( char const * section, int level, DATA & dat
                 data = copy;
             }
         }
+        else if ( tRecorder::IsPlayingBack() )
+        {
+            std::cout << "Syncing difference found: expected " << section << ".\n";
+
+            st_Breakpoint();
+        }
     }
 
     // archive data
