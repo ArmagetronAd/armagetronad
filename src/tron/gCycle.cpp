@@ -815,6 +815,9 @@ void gCycle::OnDropTempWall( gPlayerWall * wall, eCoord const & position, eCoord
 {
     tASSERT( wall );
 
+    unsigned short idrec = ID();
+    tRecorderSync< unsigned short >::Archive( "_ON_DROP_WALL", 8, idrec );
+
     // drop the current wall if eiter this or the last wall is grinded
     // gNetPlayerWall * nw = wall->NetWall();
     if ( currentWall && ( wall == currentWall->Wall() || wall == currentWall->LastWall() ) )
@@ -823,6 +826,9 @@ void gCycle::OnDropTempWall( gPlayerWall * wall, eCoord const & position, eCoord
         REAL alpha = wall->Edge()->Ratio( position );
         if ( alpha > .5 )
         {
+            unsigned short idrec = ID();
+            tRecorderSync< unsigned short >::Archive( "_ON_DROP_WALL_DROP", 8, idrec );
+
             // just request the drop, Timestep() will execute it later
             dropWallRequested_ = true;
 
@@ -1555,6 +1561,9 @@ bool gCycle::Timestep(REAL currentTime){
         double time = tSysTimeFloat();
         if ( time >= nextDrop )
         {
+            unsigned short idrec = ID();
+            tRecorderSync< unsigned short >::Archive( "_PARTIAL_COPY_GRID", 8, idrec );
+
             nextDrop = time + sg_minDropInterval;
             if ( currentWall )
                 currentWall->PartialCopyIntoGrid( grid );
