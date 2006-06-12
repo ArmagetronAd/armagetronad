@@ -1729,7 +1729,6 @@ void nSendBuffer::AddMessage	( nMessage&			message, nBandwidthControl* control )
     unsigned long id = message.MessageID();
     unsigned short len = message.DataLen();
     tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_SEND", 5, id );
-    tRecorderSync< unsigned short >::Archive( "_MESSAGE_SEND_LEN", 5, len );
 
     sendBuffer_[sendBuffer_.Len()]=htons(message.Descriptor());
 
@@ -1738,6 +1737,8 @@ void nSendBuffer::AddMessage	( nMessage&			message, nBandwidthControl* control )
     sendBuffer_[sendBuffer_.Len()]=htons(message.DataLen());
     for(int i=0;i<len;i++)
         sendBuffer_[sendBuffer_.Len()]=htons(message.Data(i));
+
+    tRecorderSync< unsigned short >::Archive( "_MESSAGE_SEND_LEN", 5, len );
 
     if ( control )
     {

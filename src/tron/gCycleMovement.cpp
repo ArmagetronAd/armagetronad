@@ -164,7 +164,7 @@ static nSettingItem<REAL> c_d("CYCLE_DELAY",
 //bonus for turns in the same direcion
 REAL sg_delayCycleDoublebindBonus = 1.;
 static nSettingItemWatched<REAL> c_d_d_b("CYCLE_DELAY_DOUBLEBIND_BONUS",
-                                      sg_delayCycleDoublebindBonus, nConfItemVersionWatcher::Group_Bumpy, 14 );
+        sg_delayCycleDoublebindBonus, nConfItemVersionWatcher::Group_Bumpy, 14 );
 
 // number of turns buffered exactly
 int sg_cycleTurnMemory = 3;
@@ -861,20 +861,24 @@ REAL gCycleMovement::GetTurnDelayDb( void ) const
 REAL gCycleMovement::GetNextTurn( int direction ) const
 {
     float right,left;
+#ifdef DEBUG
     std::cerr << "GetNextTurn: " << direction << std::endl;
+#endif
     if(direction == 1) {
-	right = lastTurnTimeRight_ + GetTurnDelayDb();
-	left = lastTurnTimeLeft_ + GetTurnDelay();
+        right = lastTurnTimeRight_ + GetTurnDelayDb();
+        left = lastTurnTimeLeft_ + GetTurnDelay();
     } else {
-	right = lastTurnTimeLeft_ + GetTurnDelayDb();
-	left = lastTurnTimeRight_ + GetTurnDelay();
+        right = lastTurnTimeLeft_ + GetTurnDelayDb();
+        left = lastTurnTimeRight_ + GetTurnDelay();
     }
+#ifdef DEBUG
     std::cerr << "GetTurnDelay: " << GetTurnDelay() << std::endl;
     std::cerr << "GetTurnDelayDb: " << GetTurnDelayDb() << std::endl;
     std::cerr << "lastTurnTimeRight_: " << lastTurnTimeRight_ << std::endl;
     std::cerr << "lastTurnTimeLeft_: " << lastTurnTimeLeft_ << std::endl;
     std::cerr << "right: " << right << std::endl;
     std::cerr << "left: " << left << std::endl;
+#endif
     return left > right ? left : right;
 }
 
@@ -1617,10 +1621,10 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     if ( nextTurn < currentTime )
                     {
                         TimestepCore( nextTurn );
-			if(pendingTurns.back() == 1)
-			    lastTurnTimeRight_ = -100;
-			else
-			    lastTurnTimeLeft_ = -100;
+                        if(pendingTurns.back() == 1)
+                            lastTurnTimeRight_ = -100;
+                        else
+                            lastTurnTimeLeft_ = -100;
                     }
                     else
                     {
@@ -1764,19 +1768,19 @@ bool gCycleMovement::Timestep( REAL currentTime )
     // simulate exactly to the time of the next turn if it is in reach
     if ( !pendingTurns.empty())
     {
-	REAL nextTurn = GetNextTurn(pendingTurns.front());
-	if(currentTime>nextTurn) {
-	    if ( nextTurn > lastTime )
-		TimestepCore( nextTurn );
-	    if(pendingTurns.front() == 1)
-		lastTurnTimeRight_ = -100;
-	    else
-		lastTurnTimeLeft_ = -100;
+        REAL nextTurn = GetNextTurn(pendingTurns.front());
+        if(currentTime>nextTurn) {
+            if ( nextTurn > lastTime )
+                TimestepCore( nextTurn );
+            if(pendingTurns.front() == 1)
+                lastTurnTimeRight_ = -100;
+            else
+                lastTurnTimeLeft_ = -100;
 
-	    //con << "Executing delayed turn at time " << lastTime << "\n";
-	    Turn(pendingTurns.front());
-	    pendingTurns.pop_front();
-	}
+            //con << "Executing delayed turn at time " << lastTime << "\n";
+            Turn(pendingTurns.front());
+            pendingTurns.pop_front();
+        }
     }
 
     // do the rest of the timestep
@@ -2151,6 +2155,8 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
 
         if ( rear.ehit )
         {
+            sg_ArchiveReal( rear.hit, 9 );
+
             // update the minimal wall distance
             if ( sideWidth > rear.hit )
                 sideWidth = rear.hit;
@@ -2191,6 +2197,8 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
                     break;
 
                 }
+
+                sg_ArchiveReal( wallAcceleration, 9 );
                 totalWallAcceleration += wallAcceleration;
             }
             else
@@ -2223,6 +2231,8 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
 
             if ( front.ehit && front.ehit->Other() )
             {
+                sg_ArchiveReal( front.hit, 9 );
+
                 // update the minimal wall distance
                 if ( sideWidth > front.hit )
                     sideWidth = front.hit;
@@ -2441,10 +2451,10 @@ bool gCycleMovement::DoTurn( int dir )
         // update driving directions
         lastDirDrive = dirDrive;
 
-	if(dir == 1)
-	    lastTurnTimeRight_ = lastTime;
-	else
-	    lastTurnTimeLeft_ = lastTime;
+        if(dir == 1)
+            lastTurnTimeRight_ = lastTime;
+        else
+            lastTurnTimeLeft_ = lastTime;
 
         dirDrive = nextDirDrive;
 

@@ -28,6 +28,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef     TRECORDER_H_INCLUDED
 #define     TRECORDER_H_INCLUDED
 
+#ifdef DEBUG
+#ifndef DEBUG_DIFFERENCE
+#define DEBUG_DIFFERENCE
+#endif
+#endif
+
 // self include
 #ifndef     TRECORDER_H_INCLUDED
 #include    "tRecorder.h"
@@ -905,7 +911,7 @@ void tRecorderSync< DATA >::Archive( char const * section, int level, DATA & dat
         // read data from archive
         if ( tRecorder::PlaybackStrict( section, copy ) )
         {
-#ifdef DEBUG
+#ifdef DEBUG_DIFFERENCE
             // determine difference
             REAL diff = GetDifference( data, copy );
 
