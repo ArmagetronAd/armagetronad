@@ -565,7 +565,6 @@ static tString se_UserNameHelper()
 
     return tString();
 }
-#undef GetUserName
 #else
 static char const * se_UserNameHelper()
 {
