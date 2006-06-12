@@ -57,11 +57,12 @@ public:
     virtual bool            Alive                   ()                                    const     ;   //!< returns whether the cycle is still alive
     virtual bool            Vulnerable              ()                                    const     ;   //!< returns whether the cycle can be killed
 
-    bool                    CanMakeTurn             ()                                    const     ;   //!< returns whether a turn is currently possible
-    bool                    CanMakeTurn             ( REAL time                         ) const     ;   //!< returns whether a turn is possible at the given time
+    bool                    CanMakeTurn             (int direction)                                    const     ;   //!< returns whether a turn is currently possible
+    bool                    CanMakeTurn             ( REAL time, int direction                         ) const     ;   //!< returns whether a turn is possible at the given time
     inline  REAL            GetDistanceSinceLastTurn(                                   ) const     ;   //!< returns the distance since the last turn
-    REAL                    GetTurnDelay            (                                   ) const     ;   //!< returns the time between turns
-    REAL                    GetNextTurn             (                                   ) const     ;   //!< returns the time of the next turn
+    REAL                    GetTurnDelay            (                                   ) const     ;   //!< returns the time between turns in different directions
+    REAL                    GetTurnDelayDb            (                                   ) const     ;   //!< returns the time between turns in the same direcion
+    REAL                    GetNextTurn             (int direction                                   ) const     ;   //!< returns the time of the next turn
 
     // destination handling
     void                    AddDestination          ()                                              ;   //!< adds current position as destination
@@ -177,7 +178,8 @@ protected:
     int             windingNumberWrapped_;      //!< winding number wrapped to be used as an index to the axes code
 
     eCoord			lastTurnPos_;	            //! the location of the last turn
-    REAL            lastTurnTime_;              //!< the time of the last turn
+    REAL            lastTurnTimeRight_;         //!< the time of the last turn right
+    REAL            lastTurnTimeLeft_;          //!< the time of the last turn left
     REAL            lastTimeAlive_;             //!< the time of the last timestep where we would not have been killed
     std::deque<int> pendingTurns;               //!< stores turns ordered by the user, but not yet executed
 
@@ -698,7 +700,7 @@ gCycleMovement & gCycleMovement::SetLastTurnPos( eCoord const & lastTurnPos )
 
 REAL const & gCycleMovement::GetLastTurnTime( void ) const
 {
-    return this->lastTurnTime_;
+    return lastTurnTimeRight_ > lastTurnTimeLeft_ ? lastTurnTimeRight_ : lastTurnTimeLeft_;
 }
 
 // *******************************************************************************************
@@ -714,7 +716,7 @@ REAL const & gCycleMovement::GetLastTurnTime( void ) const
 
 gCycleMovement const & gCycleMovement::GetLastTurnTime( REAL & lastTurnTime ) const
 {
-    lastTurnTime = this->lastTurnTime_;
+    lastTurnTime = GetLastTurnTime();
     return *this;
 }
 
@@ -731,7 +733,7 @@ gCycleMovement const & gCycleMovement::GetLastTurnTime( REAL & lastTurnTime ) co
 
 gCycleMovement & gCycleMovement::SetLastTurnTime( REAL const & lastTurnTime )
 {
-    this->lastTurnTime_ = lastTurnTime;
+    lastTurnTimeRight_ = lastTurnTimeLeft_ = lastTurnTime;
     return *this;
 }
 

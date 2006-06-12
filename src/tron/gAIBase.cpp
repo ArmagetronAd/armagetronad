@@ -1506,7 +1506,7 @@ void gAIPlayer::ThinkTrace( ThinkData & data )
     nextTurn/= Object()->Speed() * .98f;
 
     REAL delay = Delay() * 1.5f;
-    if ((!Object()->CanMakeTurn() || success) && nextTurn > delay)
+    if ((!Object()->CanMakeTurn(1) || !Object()->CanMakeTurn(-1) || success) && nextTurn > delay)
         nextTurn = delay;
 
     if (nextTurn > .3f)
@@ -2036,7 +2036,7 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
     REAL range = Object()->Speed() * delay;
 
     // nothing we can do if we cannot make a turn immediately
-    if (!Object()->CanMakeTurn())
+    if (!Object()->CanMakeTurn(1) || !Object()->CanMakeTurn(-1))
         return false;
 
     //  bool dontCheckForLoop[2] = { false, false };

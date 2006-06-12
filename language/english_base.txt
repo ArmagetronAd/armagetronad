@@ -78,6 +78,7 @@ cycle_turn_memory_help          Number of pending turns a cycle will memorize ex
 cycle_delay_help		        Minimum time between turns (must be greater than 0)
 cycle_delay_bonus_help		    Extra fudge factor to CYCLE_DELAY applied on the dedicated server only.
 cycle_delay_timebased_help		Turn delays will be based on the time since the last turn if this is 1 (default) and the distance if this is 0. Intermediate values and values out of these bounds are supported as well.
+cycle_delay_help_doublebind_bonus       Factor to CYCLE_DELAY for two consecutive turns in the same direction
 cycle_turn_speed_factor_help    Factor the speed of a lightcycle is multiplied with when turning 
 
 
