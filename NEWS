@@ -9,6 +9,10 @@ Changes since 0.2.8.2:
   see settings.cfg for details
 - VOTING_MATURITY controls how long you have to wait after login before
   you can issue kick votes.
+- CYCLE_DELAY_DOUBLEBIND_BONUS is an extra factor applied to CYCLE_DELAY
+  for turns in the same direction. Can be used to limit the advantage
+  doublebinders get while not punishing players who press both left and
+  right at the same time.
 
   Featurelets:
 - Players leaving to spectator mode with <0.2.8.2 clients are handled like
