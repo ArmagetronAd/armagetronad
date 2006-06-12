@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "tXmlParser.h"
 #include "tResourceManager.h"
+#include "tDirectories.h"
 #include "tConsole.h"
 #include "tArray.h"
 
@@ -166,6 +167,7 @@ int myxmlInputCloseFILE (void *context) {
     return (fclose((FILE *)context) == 0) ? 0 : -1;
 }
 
+#ifndef HAVE_LIBXML2_WO_PIBCREATE
 static bool sg_IgnoreRequest( tString const & URI )
 {
 #ifdef WIN32
@@ -175,7 +177,6 @@ static bool sg_IgnoreRequest( tString const & URI )
 #endif
 }
 
-#ifndef HAVE_LIBXML2_WO_PIBCREATE
 xmlParserInputBufferPtr myxmlParserInputBufferCreateFilenameFunc (const char *URI, xmlCharEncoding enc) {
     if ( sg_IgnoreRequest( tString( URI ) ) )
     {
