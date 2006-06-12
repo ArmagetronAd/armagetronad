@@ -204,13 +204,13 @@ REAL sg_accelerationCycleTeam = 1;
 static nSettingItemWatched<REAL> c_act("CYCLE_ACCEL_TEAM",
                                        sg_accelerationCycleTeam,
                                        nConfItemVersionWatcher::Group_Bumpy,
-                                       8);
+                                       14);
 
 REAL sg_accelerationCycleEnemy = 1;
 static nSettingItemWatched<REAL> c_ace("CYCLE_ACCEL_ENEMY",
                                        sg_accelerationCycleEnemy,
                                        nConfItemVersionWatcher::Group_Bumpy,
-                                       8);
+                                       14);
 
 REAL sg_accelerationCycleRim = 0;
 static nSettingItemWatched<REAL> c_acr("CYCLE_ACCEL_RIM",

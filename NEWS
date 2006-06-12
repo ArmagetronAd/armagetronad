@@ -19,6 +19,16 @@ Changes since 0.2.8.2:
   FULLSCREEN_MESSAGE <timeout> <message content>
 
   Bugfixes:
+- The acceleration and boost system always used settings for enemy walls instead of
+  settings for team players' walls. That means that old clients connecting to a
+  0.2.8.3+ server that has CYCLE_ACCEL_ENEMY and CYCLE_ACCEL_TEAM set to different
+  values experience syncing problems. The default behavior therefore is to lock 0.2.8.2
+  and earlier out of your server if you set one of them away from the default. 
+  If you want to set both accelerations away from the default, but to the same value,
+  there won't be a compatibility problem; in that case, set CYCLE_ACCEL_ENEMY_OVERRIDE
+  and CYCLE_ACCEL_TEAM_OVERRIDE to 0 and old clients will be allowed in. However, you
+  should manually lock out players with 0.2.7 clients, for example by modifying
+  CYCLE_ACCEL_RIM a tiny bit.
 - "Team Red" bug. If the server allows maximally two teams, no team ever
   gets to be Team Red.
 - Phasing made even more difficult; nice side effect of the fix is
