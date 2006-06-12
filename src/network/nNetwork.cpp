@@ -903,8 +903,6 @@ senderID(::sn_myNetID), readOut(0){
 
     tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_OUT", 3, messageIDBig_ );
     tRecorderSync< unsigned short >::Archive( "_MESSAGE_DECL_OUT", 3, descriptor );
-    unsigned short len = DataLen();
-    tRecorderSync< unsigned short >::Archive( "_MESSAGE_LEN_OUT", 3, len );
 }
 
 

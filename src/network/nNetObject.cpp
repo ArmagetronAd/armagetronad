@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tSysTime.h"
 #include "tToDo.h"
 #include "nObserver.h"
+#include "tRecorder.h"
 
 #include <deque>
 #include <set>
@@ -998,6 +999,9 @@ nNetObject::~nNetObject(){
     // send it
     if ( sendDestroyMessage )
     {
+        int idsync=id;
+        tRecorderSync< int >::Archive( "_NETOBJECT_DESTROYED", 3, idsync );
+
         // con << "Destroying object " << id << '\n';
         for(int user=MAXCLIENTS;user>=0;user--){
             if(user!=sn_myNetID && knowsAbout[user].knowsAboutExistence ||
