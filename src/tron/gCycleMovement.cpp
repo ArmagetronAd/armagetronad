@@ -1611,7 +1611,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 REAL t = currentDestination->direction * dirDrive;
 
                 // if we can't turn now, simulate a bit further
-                if ( fabs(t) > .01 && !CanMakeTurn(pendingTurns.back()) )
+                if ( fabs(t) > .01 && !pendingTurns.empty() && !CanMakeTurn(pendingTurns.back()) )
                 {
                     REAL nextTurn = GetNextTurn(pendingTurns.back()) + .005;
                     if ( nextTurn < currentTime )
