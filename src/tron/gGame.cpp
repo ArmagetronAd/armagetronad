@@ -4379,7 +4379,7 @@ static tSettingItem< REAL > a_modt("MESSAGE_OF_DAY_TIMEOUT",sg_greetingTimeout);
 
 static void LoginCallback(){
     client_gamestate[nCallbackLoginLogout::User()]=0;
-    if ( nCallbackLoginLogout::Login() )
+    if ( nCallbackLoginLogout::Login() && nCallbackLoginLogout::User() > 0 )
     {
         if ( sg_greeting.Len()>1 )
         {
