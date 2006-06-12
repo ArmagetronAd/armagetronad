@@ -818,12 +818,16 @@ void gCycle::OnDropTempWall( gPlayerWall * wall, eCoord const & position, eCoord
     unsigned short idrec = ID();
     tRecorderSync< unsigned short >::Archive( "_ON_DROP_WALL", 8, idrec );
 
+    bool wallRight = ( currentWall && ( wall == currentWall->Wall() || wall == currentWall->LastWall() ) );
+    tRecorderSync< bool >::Archive( "_ON_DROP_WALL_RIGHT", 8, wallRight );
+
     // drop the current wall if eiter this or the last wall is grinded
     // gNetPlayerWall * nw = wall->NetWall();
-    if ( currentWall && ( wall == currentWall->Wall() || wall == currentWall->LastWall() ) )
+    if ( wallRight )
     {
         // calculate relative position of grinding in wall
         REAL alpha = wall->Edge()->Ratio( position );
+        tRecorderSync< REAL >::Archive( "_ON_DROP_WALL_ALPHA", 8, alpha );
         if ( alpha > .5 )
         {
             unsigned short idrec = ID();
