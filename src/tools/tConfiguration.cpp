@@ -376,7 +376,14 @@ static bool s_Veto( tString line_in, std::vector< tString > const & vetos )
         tString const & veto = *iter;
 
         if ( line.StartsWith( veto ) )
+        {
+            if ( !line.StartsWith( "INCLUDE" ) )
+            {
+                con << "Ignoring vetoed input: " << line << "\n";
+            }
+
             return true;
+        }
     }
 
     return false;
