@@ -1,28 +1,10 @@
-Compiling Armagetron Advanced on Windows with Code::Blocks
-----------------------------------------------------------
-
-Code::Blocks is an open source, cross platform C/C++ IDE.
-It has multiple compiler support, and it comes in two presentations:
-MinGW bundle or Standalone for use with other compilers.
-
-More info and download of Code::Blocks: http://www.codeblocks.org
-
-Armagetron Advanced can be compiled with these compilers:
-* MinGw: obtained in the MinGW bundle download of Code::Blocks
-* Free Microsoft Visual C++ Toolkit 2003: http://msdn.microsoft.com/visualc/vctoolkit2003/
-
-Currently I use the following nightly build of Code::Blocks:
-	CB_20060428_rev2395_win32_wx263.7z
-You also need an additional DLL:
-	wxmsw26u_gcc_cb_wx2.6.3.7z
-	
-Download Link: http://developer.berlios.de/project/showfiles.php?group_id=5358
-
-The sources are distributed over two SVN modules:
-* armagetronad: containing generic sources and codeblocks project files
-* winlibs: containing the libraries Armagetron Advanced depends on
-
-You need to check out the two modules from the repository at
+Here are some short directions on compiling Armagetron on windows.
+You will need Code::Blocks. The sources are distributed over three
+SVN modules: the generic sources are in "armagetronad", the Code::Blocks
+build files are in "armagetronad/win32" (which you probably
+already have, since this file usually lives there) and the libraries
+Armagetron depends on are in "winlibs". You need to check out the two
+modules from the repository at
 
 https://svn.sourceforge.net/svnroot/armagetronad
 
