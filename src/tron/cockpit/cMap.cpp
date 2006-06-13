@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "cockpit/cMap.h"
+#include "nConfig.h"
 
 #ifndef DEDICATED
 
@@ -35,6 +36,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eRectangle.h"
 #include "ePlayer.h"
 #include "eTimer.h"
+#endif
+
+static bool stc_forbidHudMap = false;
+static nSettingItem<bool> fcs("FORBID_HUD_MAP", stc_forbidHudMap);
+
+#ifndef DEDICATED
 
 extern tList<gNetPlayerWall> gridded_sg_netPlayerWalls;
 extern std::deque<gZone *> sg_Zones;
@@ -52,6 +59,7 @@ bool Map::Process(tXmlParser::node cur) {
 }
 void Map::Render() {
     // I haven't checked possible initial matrix state, so init to identity and modelview
+    if(stc_forbidHudMap) return; // the server doesn't want us to do that
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
