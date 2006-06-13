@@ -210,6 +210,7 @@ public:
         default:
             return GetFont(height).Advance(str.c_str())/sr_screenWidth*2.;
         }
+        return 0; // just to make gcc 4.0 happy, it falsely complains about possibly reaching the end of the function otherwise.
     }
     void Render(tString const &str, float height, tCoord const &where) {
         if (sr_fontType != 0) {
