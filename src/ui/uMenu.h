@@ -404,6 +404,8 @@ protected:
 public:
     uAutoCompleter(std::deque<tString> &words); //!< Constructor
     virtual int Complete(tString &string, unsigned pos); //!< Attempts the completion
+    
+    virtual ~uAutoCompleter(){}
 };
 
 //! uMenuItemString extended by a simple history function and tab completion

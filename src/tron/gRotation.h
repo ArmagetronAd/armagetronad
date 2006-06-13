@@ -39,6 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class gRotationEvent {
 public:
     virtual void Print() = 0; //virtual function, more or less just to ensure that polymorphism works...
+
+    virtual ~gRotationEvent(){};
 };
 
 class gRotationTag;
