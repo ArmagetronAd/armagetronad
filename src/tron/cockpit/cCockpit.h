@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tXmlParser.h"
 #include <deque>
 #include <map>
+#include <set>
 
 #include <memory>
 #include <typeinfo>
@@ -151,6 +152,8 @@ public:
     void Readjust(void); //!< Readjusts the cockpit to a new window height
 };
 
+extern const std::map<tString, tValue::Callback<cCockpit>::cb_ptr> stc_callbacks;
+extern std::set<tString> stc_forbiddenCallbacks;
 
 #endif
 #endif

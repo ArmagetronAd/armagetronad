@@ -193,6 +193,9 @@ rFont rFont::s_defaultFontSmall("textures/font_s.png",32,5/128.0,9/128.0,1/128.0
 static int sr_fontType = 3;
 static tConfItem< int > sr_fontTypeConf( "FONT_TYPE", sr_fontType, &sr_ReloadFont );
 
+static float sr_fontSizeFactor = .9;
+static tConfItem< float > sr_fontSizeFactorConf( "FONT_SIZE_FACTOR", sr_fontSizeFactor, &sr_ReloadFont );
+
 class rFontContainer : std::map<int, FTFont *> {
     FTFont &New(int size);
 public:
@@ -203,14 +206,10 @@ public:
         std::map<int, FTFont *>::clear();
     }
     float GetWidth(tString const &str, float height) {
-        switch(sr_fontType) {
-        case 1:
+        if(sr_fontType == 1) {
             return height*(height*sr_screenHeight < sr_bigFontThresholdHeight ? .41 : .5)*str.size();
-            break;
-        default:
-            return GetFont(height).Advance(str.c_str())/sr_screenWidth*2.;
-        }
-        return 0; // just to make gcc 4.0 happy, it falsely complains about possibly reaching the end of the function otherwise.
+	}
+	return GetFont(height).Advance(str.c_str())/sr_screenWidth*2.;
     }
     void Render(tString const &str, float height, tCoord const &where) {
         if (sr_fontType != 0) {
@@ -257,7 +256,7 @@ public:
         }
     }
     FTFont &GetFont(float height) {
-        int size = int(height*0.9*sr_screenHeight/2.+.5);
+        int size = int(height*sr_fontSizeFactor*sr_screenHeight/2.+.5);
         if(count(size)) {
             return *((*this)[size]); //already exists
         } else {

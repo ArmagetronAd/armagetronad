@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "cockpit/cLabel.h"
 #include "cockpit/cMap.h"
 #include "cockpit/cRectangle.h"
+#include "nConfig.h"
 
 #ifndef DEDICATED
 
@@ -59,6 +60,69 @@ static rCallbackAfterScreenModeChange reloadft(&readjust_cockpit);
 
 static tString cockpit_file("Anonymous/standard-0.0.1.aacockpit.xml");
 static tConfItem<tString> cf("COCKPIT_FILE",cockpit_file,&parsecockpit);
+
+typedef std::pair<tString, tValue::Callback<cCockpit>::cb_ptr> cbpair;
+static const cbpair cbarray[] = {
+    cbpair(tString("player_rubber")       , &cCockpit::cb_CurrentRubber),
+    cbpair(tString("player_acceleration") , &cCockpit::cb_CurrentAcceleration),
+    cbpair(tString("current_ping")        , &cCockpit::cb_CurrentPing),
+    cbpair(tString("player_speed")        , &cCockpit::cb_CurrentSpeed),
+    cbpair(tString("max_speed")           , &cCockpit::cb_MaxSpeed),
+    cbpair(tString("player_brakes")       , &cCockpit::cb_CurrentBrakingReservoir),
+    cbpair(tString("enemies_alive")       , &cCockpit::cb_AliveEnemies),
+    cbpair(tString("friends_alive")       , &cCockpit::cb_AliveTeammates),
+    cbpair(tString("current_framerate")   , &cCockpit::cb_Framerate),
+    cbpair(tString("time_since_start")    , &cCockpit::cb_RunningTime),
+    cbpair(tString("current_minutes")     , &cCockpit::cb_CurrentTimeMinutes),
+    cbpair(tString("current_hours")       , &cCockpit::cb_CurrentTimeHours),
+    cbpair(tString("current_hours12h")    , &cCockpit::cb_CurrentTimeHours12h),
+    cbpair(tString("current_seconds")     , &cCockpit::cb_CurrentTimeSeconds),
+    cbpair(tString("current_score")       , &cCockpit::cb_CurrentScore),
+    cbpair(tString("top_score")           , &cCockpit::cb_TopScore),
+    cbpair(tString("fastest_speed")       , &cCockpit::cb_FastestSpeed),
+    cbpair(tString("fastest_name")        , &cCockpit::cb_FastestName),
+    cbpair(tString("fastest_speed_round") , &cCockpit::cb_FastestSpeedRound),
+    cbpair(tString("fastest_name_round")  , &cCockpit::cb_FastestNameRound),
+    cbpair(tString("time_to_impact_front"), &cCockpit::cb_TimeToImpactFront),
+    cbpair(tString("time_to_impact_right"), &cCockpit::cb_TimeToImpactRight),
+    cbpair(tString("time_to_impact_left") , &cCockpit::cb_TimeToImpactLeft),
+    cbpair(tString("current_song")        , &cCockpit::cb_CurrentSong),
+    cbpair(tString("current_name")        , &cCockpit::cb_CurrentName),
+    cbpair(tString("current_colored_name"), &cCockpit::cb_CurrentColoredName),
+    cbpair(tString("current_pos_x")       , &cCockpit::cb_CurrentPosX),
+    cbpair(tString("current_pos_y")       , &cCockpit::cb_CurrentPosY)
+};
+std::map<tString, tValue::Callback<cCockpit>::cb_ptr> const stc_callbacks(cbarray, cbarray+sizeof(cbarray)/sizeof(cbpair));
+
+std::set<tString> stc_forbiddenCallbacks;
+#endif
+static tString stc_forbiddenCallbacksString;
+#ifndef DEDICATED
+
+
+static void reparseforbiddencallbacks(void) {
+    stc_forbiddenCallbacks.clear();
+
+    tString callbacks = stc_forbiddenCallbacksString + ":"; //add the extra separator, makes things easier
+
+    size_t pos = 0;
+    size_t next;
+    while((next = callbacks.find(':', pos)) != tString::npos) {
+        tString callback = callbacks.SubStr(pos, next - pos);
+        if(stc_callbacks.count(callback)) {
+	    stc_forbiddenCallbacks.insert(callback);
+        }
+        pos = next+1;
+    }
+    parsecockpit();
+}
+
+static nSettingItem<tString> fcs("FORBID_COCKPIT_DATA", stc_forbiddenCallbacksString,&reparseforbiddencallbacks);
+#else
+static nSettingItem<tString> fcs("FORBID_COCKPIT_DATA", stc_forbiddenCallbacksString);
+#endif
+#ifndef DEDICATED
+
 
 cCockpit::~cCockpit() {
     ClearWidgets();

@@ -140,6 +140,7 @@ public:
                 con << con.ColorString(1,.3,.3) << o;
             }
             *this->target=dummy;
+	    ExecuteCallback();
             changed=true;
         }
     }
@@ -190,8 +191,8 @@ public:
     //    :nConfItem<T>(t), tConfItemBase(title, help){}
     //  virtual ~nSettingItem(){}
 
-    nSettingItem(const char *title,T& t)
-            :tConfItemBase(title), nConfItem<T>(t){}
+    nSettingItem(const char *title,T& t,tConfItemBase::callbackFunc *cb=0)
+            :tConfItemBase(title, cb), nConfItem<T>(t){}
     virtual ~nSettingItem(){}
 
     virtual bool Save(){return false;}
@@ -203,7 +204,7 @@ protected:
 public:
     //  nConfItemLine(const char *title,const tOutput &help,tString &s)
     //    :nConfItem<tString>(s), tConfItemBase(title,help){};
-    nConfItemLine(const char *title,tString &s);
+    nConfItemLine(const char *title,tString &s, callbackFunc *cb=0);
 
     virtual ~nConfItemLine();
 

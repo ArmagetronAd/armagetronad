@@ -228,37 +228,9 @@ tValue::Base *WithDataFunctions::ProcessDataSource(tString const &data) {
     if(data.Convert(val_float)) return new tValue::Float(val_float);
 
     //is it one of the dynamic callbacks?
-    std::map<tString, tValue::Callback<cCockpit>::cb_ptr>callbacks;
-    callbacks[tString("player_rubber")]        = &cCockpit::cb_CurrentRubber;
-    callbacks[tString("player_acceleration")]        = &cCockpit::cb_CurrentAcceleration;
-    callbacks[tString("current_ping")]         = &cCockpit::cb_CurrentPing;
-    callbacks[tString("player_speed")]         = &cCockpit::cb_CurrentSpeed;
-    callbacks[tString("max_speed")]            = &cCockpit::cb_MaxSpeed;
-    callbacks[tString("player_brakes")]        = &cCockpit::cb_CurrentBrakingReservoir;
-    callbacks[tString("enemies_alive")]        = &cCockpit::cb_AliveEnemies;
-    callbacks[tString("friends_alive")]        = &cCockpit::cb_AliveTeammates;
-    callbacks[tString("current_framerate")]    = &cCockpit::cb_Framerate;
-    callbacks[tString("time_since_start")]     = &cCockpit::cb_RunningTime;
-    callbacks[tString("current_minutes")]      = &cCockpit::cb_CurrentTimeMinutes;
-    callbacks[tString("current_hours")]        = &cCockpit::cb_CurrentTimeHours;
-    callbacks[tString("current_hours12h")]     = &cCockpit::cb_CurrentTimeHours12h;
-    callbacks[tString("current_seconds")]      = &cCockpit::cb_CurrentTimeSeconds;
-    callbacks[tString("current_score")]        = &cCockpit::cb_CurrentScore;
-    callbacks[tString("top_score")]            = &cCockpit::cb_TopScore;
-    callbacks[tString("fastest_speed")]        = &cCockpit::cb_FastestSpeed;
-    callbacks[tString("fastest_name")]         = &cCockpit::cb_FastestName;
-    callbacks[tString("fastest_speed_round")]  = &cCockpit::cb_FastestSpeedRound;
-    callbacks[tString("fastest_name_round")]   = &cCockpit::cb_FastestNameRound;
-    callbacks[tString("time_to_impact_front")] = &cCockpit::cb_TimeToImpactFront;
-    callbacks[tString("time_to_impact_right")] = &cCockpit::cb_TimeToImpactRight;
-    callbacks[tString("time_to_impact_left")]  = &cCockpit::cb_TimeToImpactLeft;
-    callbacks[tString("current_song")]         = &cCockpit::cb_CurrentSong;
-    callbacks[tString("current_name")]         = &cCockpit::cb_CurrentName;
-    callbacks[tString("current_colored_name")] = &cCockpit::cb_CurrentColoredName;
-    callbacks[tString("current_pos_x")]        = &cCockpit::cb_CurrentPosX;
-    callbacks[tString("current_pos_y")]        = &cCockpit::cb_CurrentPosY;
-    std::map<tString, tValue::Callback<cCockpit>::cb_ptr>::iterator iter;
-    if((iter = callbacks.find(data.ToLower())) != callbacks.end()) {
+    std::map<tString, tValue::Callback<cCockpit>::cb_ptr>::const_iterator iter;
+    if((iter = stc_callbacks.find(data.ToLower())) != stc_callbacks.end()) {
+	if(stc_forbiddenCallbacks.count(data.ToLower())) return new tValue::Base();
         return new tValue::Callback<cCockpit>(iter->second, cCockpit::GetCockpit());
     }
 

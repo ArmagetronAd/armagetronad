@@ -219,8 +219,8 @@ void nConfItemBase::s_RevertToSavedValues( void )
     }
 }
 
-nConfItemLine::nConfItemLine(const char *title,tString &s)
-        :tConfItemBase(title),nConfItem<tString>(s){}
+nConfItemLine::nConfItemLine(const char *title,tString &s, callbackFunc *cb)
+        :tConfItemBase(title, cb),nConfItem<tString>(s){}
 
 nConfItemLine::~nConfItemLine(){}
 
@@ -240,6 +240,7 @@ void nConfItemLine::ReadVal(std::istream & s)
         }
         *target=dummy;
         changed=true;
+	ExecuteCallback();
     }
 
     *target=dummy;
