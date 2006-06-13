@@ -861,7 +861,7 @@ REAL gCycleMovement::GetTurnDelayDb( void ) const
 REAL gCycleMovement::GetNextTurn( int direction ) const
 {
     float right,left;
-#ifdef DEBUG
+#ifdef DEBUG_X
     std::cerr << "GetNextTurn: " << direction << std::endl;
 #endif
     if(direction == 1) {
@@ -871,7 +871,7 @@ REAL gCycleMovement::GetNextTurn( int direction ) const
         right = lastTurnTimeLeft_ + GetTurnDelayDb();
         left = lastTurnTimeRight_ + GetTurnDelay();
     }
-#ifdef DEBUG
+#ifdef DEBUG_X
     std::cerr << "GetTurnDelay: " << GetTurnDelay() << std::endl;
     std::cerr << "GetTurnDelayDb: " << GetTurnDelayDb() << std::endl;
     std::cerr << "lastTurnTimeRight_: " << lastTurnTimeRight_ << std::endl;
