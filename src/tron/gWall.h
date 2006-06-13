@@ -239,7 +239,6 @@ public:
 
 eTempEdge   *Edge(){return this->edge_;}
     gPlayerWall *Wall();
-    gPlayerWall *LastWall();
     gCycle *Cycle() const {return this->cycle_;}
     gCycleMovement *CycleMovement() const;
 

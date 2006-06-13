@@ -1862,10 +1862,6 @@ gPlayerWall *gNetPlayerWall::Wall(){
         return NULL;
 }
 
-gPlayerWall *gNetPlayerWall::LastWall(){
-    return lastWall_;
-}
-
 void gNetPlayerWall::ReleaseData()
 {
     if (this->cycle_){

@@ -67,6 +67,8 @@ bool sg_gnuplotDebug = false;
 static tSettingItem<bool> sg_("DEBUG_GNUPLOT",sg_gnuplotDebug);
 #endif
 
+static REAL sg_minDropInterval=0.05;
+static tSettingItem< REAL > sg_minDropIntervalConf( "CYCLE_MIN_WALLDROP_INTERVAL", sg_minDropInterval );
 //  *****************************************************************
 
 static nNOInitialisator<gCycle> cycle_init(320,"cycle");
@@ -818,17 +820,23 @@ void gCycle::OnDropTempWall( gPlayerWall * wall, eCoord const & position, eCoord
     unsigned short idrec = ID();
     tRecorderSync< unsigned short >::Archive( "_ON_DROP_WALL", 8, idrec );
 
-    bool wallRight = ( currentWall && ( wall == currentWall->Wall() || wall == currentWall->LastWall() ) );
+    // determine if the grinded wall is current enough
+    bool wallRight = ( currentWall && ( wall->NetWall() == currentWall || wall->NetWall() == currentWall ) );
+
+    // don't drop if we already dropped a short time ago
+    if ( wallRight && currentWall->Edge()->Vec().NormSquared() < verletSpeed_ * verletSpeed_ * sg_minDropInterval * sg_minDropInterval )
+        wallRight = false;
+
     tRecorderSync< bool >::Archive( "_ON_DROP_WALL_RIGHT", 8, wallRight );
 
     // drop the current wall if eiter this or the last wall is grinded
     // gNetPlayerWall * nw = wall->NetWall();
     if ( wallRight )
     {
-        // calculate relative position of grinding in wall
-        REAL alpha = wall->Edge()->Ratio( position );
+        // calculate relative position of grinding in wall; if alpha is positive, it's already too late
+        REAL alpha = currentWall->Edge()->Edge(0)->Ratio( position );
         tRecorderSync< REAL >::Archive( "_ON_DROP_WALL_ALPHA", 8, alpha );
-        if ( alpha > .5 )
+        if ( alpha > -.5 )
         {
             unsigned short idrec = ID();
             tRecorderSync< unsigned short >::Archive( "_ON_DROP_WALL_DROP", 8, idrec );
@@ -1552,9 +1560,6 @@ bool crash_sparks=true;
 
 // from nNetwork.C
 extern REAL planned_rate_control[MAXCLIENTS+2];
-
-static REAL sg_minDropInterval=0.05;
-static tSettingItem< REAL > sg_minDropIntervalConf( "CYCLE_MIN_WALLDROP_INTERVAL", sg_minDropInterval );
 
 bool gCycle::Timestep(REAL currentTime){
     // drop current wall if it was requested
