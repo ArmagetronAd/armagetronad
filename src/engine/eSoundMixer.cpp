@@ -449,7 +449,7 @@ void eSoundMixer::PlayContinuous(int soundEffect, eGameObject* owner) {
 
 void eSoundMixer::RemoveContinuous(int soundEffect, eGameObject* owner) {
 #ifdef HAVE_LIBSDL_MIXER
-	for(std::deque<eChannel>::iterator i = m_Channels.begin(); i != m_Channels.end(); ++i) {
+    for(std::deque<eChannel>::iterator i = m_Channels.begin(); i != m_Channels.end(); ++i) {
         if ((*i).GetOwner() == owner) {
             (*i).StopSound();
             std::cout << "removed continuous sound\n";
@@ -518,16 +518,12 @@ void eSoundMixer::Update() {
 tString eSoundMixer::GetCurrentSong() {
     if(m_GameTrack != NULL)
         if(m_GameTrack->currentMusic != NULL) {
-	    tString const &str = m_GameTrack->currentMusic->GetFileName();
-#ifndef WIN32
-	    size_t pos = str.find_last_of('/');
-#else
-	    size_t pos = str.find_last_of('\\');
-#endif
-	    if(pos == tString::npos) return str;
-	    if(pos == str.size()) return tString();
-	    return str.SubStr(pos + 1);
-	}
+            tString const &str = m_GameTrack->currentMusic->GetFileName();
+            size_t pos = str.find_last_of("/\\");
+            if(pos == tString::npos) return str;
+            if(pos == str.size()) return tString();
+            return str.SubStr(pos + 1);
+        }
     return tString(" ");
 }
 
