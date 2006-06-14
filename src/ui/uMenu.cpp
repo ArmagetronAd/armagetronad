@@ -1277,6 +1277,7 @@ void uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
 
                 {
                     rTextField c(-.8,.6, h, sr_fontError);
+		    c.EnableLineWrap();
 
                     c << interpretation;
                 }
