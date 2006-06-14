@@ -3592,7 +3592,12 @@ void ePlayerNetID::CreateNewTeam()
         sn_ConsoleOut( message, Owner() );
 
         if ( !currentTeam )
+        {
+            bool assignBack = se_assignTeamAutomatically;
+            se_assignTeamAutomatically = true;
             FindDefaultTeam();
+            se_assignTeamAutomatically = assignBack;
+        }
 
         return;
     }
@@ -4093,7 +4098,7 @@ void ePlayerNetID::UpdateName( void )
 #endif
 
                 // print spectating join message (regular join messages are handled by eTeam)
-                if ( IsSpectating() )
+                if ( IsSpectating() || !se_assignTeamAutomatically )
                 {
                     mess << "$player_entered_spectator";
                     sn_ConsoleOut(mess);

@@ -1454,8 +1454,8 @@ team_menu_player_help		Let this player make team related decicions
 team_menu_join			join \1
 team_menu_join_help		Let the current player join the specified team
 
-team_menu_create		create new team
-team_menu_create_help		Creates a new team and lets the current player join it
+team_menu_create		create new team/join any
+team_menu_create_help		Creates a new team and lets the current player join it, or, if that is not possible, joins any team.
 
 team_owned_by			\1's team
 team_ai				AI team
