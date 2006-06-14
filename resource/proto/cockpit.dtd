@@ -145,8 +145,8 @@
 <!ELEMENT ShowCurrent EMPTY>
 <!ATTLIST ShowCurrent value (true | false) "true">
 
-<!ELEMENT ShowReverse EMPTY>
-<!ATTLIST ShowReverse value (true | false) "true">
+<!ELEMENT Reverse EMPTY>
+<!ATTLIST Reverse value (true | false) "true">
 
 <!ELEMENT Caption (Text?) >
 <!ATTLIST Caption location (top | bottom | off) "bottom">
