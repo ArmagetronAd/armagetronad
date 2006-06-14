@@ -45,6 +45,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eDebugLine.h"
 #include "tMath.h"
 #include "eNetGameObject.h"
+#include "nObserver.h"
 
 // camera visibility settings
 static REAL se_hitCacheSpeed = 1; // the speed the hit cache for external visibility targets recovers from hits
@@ -240,6 +241,48 @@ bool eCamera::InterestingToWatch(eGameObject const *g){
             (lastTime - g->deathTime<1));
 }
 
+// pointer holding the last player watched actively
+static nObserverPtr< ePlayerNetID > se_watchedPlayer[ MAX_PLAYERS ];
+
+// returns the player a camera last watched for modification
+static nObserverPtr< ePlayerNetID > & se_GetWatchedPlayer( eCamera * cam )
+{
+    static nObserverPtr< ePlayerNetID > dummy;
+
+    ePlayer const * localPlayer = cam->LocalPlayer();
+    if ( !localPlayer )
+        return dummy;
+
+    return se_watchedPlayer[ localPlayer->ID() ];
+}
+
+// returns the last watched game object
+static eGameObject * se_GetWatchedObject( eCamera * cam )
+{
+    ePlayerNetID const * player = se_GetWatchedPlayer( cam );
+    if ( player )
+        return player->Object();
+
+    return NULL;
+}
+
+static void se_SetWatchedObject( eCamera * cam, eGameObject * obj )
+{
+    nObserverPtr< ePlayerNetID > & player = se_GetWatchedPlayer( cam );
+
+    // switch the favorite player to watch if we switch away from him deliberately
+    if ( !player || ( player->Object() && player->Object()->Alive() ) )
+    {
+        // determine the player that controls the object, a bit awkward...
+        for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+        {
+            ePlayerNetID * p = se_PlayerNetIDs(i);
+            if ( p->Object() == obj )
+                player = p;
+        }
+    }
+}
+
 void eCamera::MyInit(){
     if (localPlayer){
         mode=localPlayer->startCamera;
@@ -330,6 +373,7 @@ void eCamera::MyInit(){
 }
 
 const ePlayerNetID* eCamera::Player() const { return netPlayer; }
+const ePlayer* eCamera::LocalPlayer() const { return localPlayer; }
 
 eCamera::eCamera(eGrid *g, rViewport *view,ePlayerNetID *p,
                  ePlayer *lp,eCamMode m)
@@ -448,7 +492,10 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
             turning+=.5;
         if (netPlayer) cent=netPlayer->Object();
         if (!InterestingToWatch(cent) && x>0)
+        {
             SwitchCenter(turn);
+            se_SetWatchedObject( this, center );
+        }
     }
 
     REAL ll=0,lu=0,ml=0,mf=0,mu=0,zi=1;
@@ -1471,8 +1518,10 @@ void eCamera::Timestep(REAL ts){
     // switch away from dead players
     if (lastSwitch>lastTime)
         lastSwitch=lastTime;
-    if (!InterestingToWatch(Center()) && lastTime-lastSwitch>2){
-        SwitchCenter(1);
+    if (!InterestingToWatch(center) && lastTime-lastSwitch>2){
+        center = se_GetWatchedObject( this );
+        if ( !center || !InterestingToWatch(center) )
+            SwitchCenter(1);
 
         // Did not work as expected, more work needs to be done to reset the settings
         //        else
