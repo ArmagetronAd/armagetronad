@@ -79,7 +79,7 @@
             </Background>
             <Foreground>
                 <Gradient orientation="value">
-                    <Color r="0." g="1." b="0." alpha=".7" at="0." />
+                    <Color r="1." g="0." b="0." alpha=".7" at="0." />
                     <Color r="1." g="1." b="0." alpha=".7" at=".5" />
                     <Color r="0." g="1." b="0." alpha=".7" at="1." />
                 </Gradient>
@@ -257,12 +257,12 @@
             <ShowMinimum value="false" />
             <Background>
                 <Solid>
-                    <Color r="0." g="1." b="0." alpha="1." />
+                    <Color r="1." g="0." b="0." alpha="1." />
                 </Solid>
             </Background>
             <Foreground>
                 <Solid>
-                    <Color r="1." g="0." b="0." alpha="1." />
+                    <Color r="0." g="1." b="0." alpha="1." />
                 </Solid>
             </Foreground>
         </BarGauge>
