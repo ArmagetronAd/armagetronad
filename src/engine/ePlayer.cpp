@@ -1339,8 +1339,7 @@ void handle_chat(nMessage &m){
                     return;
                 }
                 else if (command == "/teamname") {
-					tString teamname(((const char*)say)+6);
-					p->SetTeamname(teamname);
+					p->SetTeamname(msg);
 					return;
                 }
                 else if (command == "/teamleave") {
