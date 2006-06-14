@@ -432,7 +432,7 @@ static int sg_cycleMaxRefCount = 30000;
 static tSettingItem<int> conf_sgCycleMaxRefCount ("CYCLE_MAX_REFCOUNT", sg_cycleMaxRefCount );
 
 static inline bool clamp(REAL &c, REAL min, REAL max){
-    tASSERT(min < max);
+    tASSERT(min <= max);
 
     if (!finite(c))
     {
