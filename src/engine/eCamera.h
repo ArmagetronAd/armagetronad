@@ -136,6 +136,7 @@ public:
     void SetRenderingMain( bool f ){ renderingMain_ = f; }
 
     const ePlayerNetID* Player() const;
+    const ePlayer* LocalPlayer() const;
 
     eCamera(eGrid *grid, rViewport *vp,ePlayerNetID *owner,ePlayer *lp,eCamMode m=CAMERA_IN);
     virtual ~eCamera();

@@ -63,7 +63,7 @@ class ePlayer: public uPlayerPrototype{
 public:
     tString    name;
     // REAL	   rubberstatus;
-	tString     teamname;	
+    tString     teamname;
     bool       centerIncamOnTurn;
     bool       wobbleIncam;
     bool       autoSwitchIncam;
@@ -91,11 +91,11 @@ public:
     virtual ~ePlayer();
 
     virtual const char *Name() const{return name;}
-	virtual const char *Teamname() const{return teamname;}
+    virtual const char *Teamname() const{return teamname;}
 
     virtual bool Act(uAction *act,REAL x);
 
-    int ID(){return id;};
+    int ID() const {return id;};
 #ifndef DEDICATED
     void Render();
 #endif
@@ -165,7 +165,7 @@ public:
     };
 
     int    pID;
-	tString teamname;
+    tString teamname;
     // REAL	rubberstatus;
     tArray<tString> lastSaid;
     tArray<nTimeRolling> lastSaidTimes;
@@ -204,7 +204,7 @@ public:
     void SetTeamForce(eTeam* team );           	// register me in the given team without checks
     void SetTeam(eTeam* team);          		// register me in the given team (callable on the server)
     void SetTeamWish(eTeam* team); 				// express the wish to be part of the given team (always callable)
-	void SetTeamname(const char *);				// set teamname to be used for my own team
+    void SetTeamname(const char *);				// set teamname to be used for my own team
     void UpdateTeamForce();						// update team membership without checks
     void UpdateTeam();							// update team membership
 
@@ -279,6 +279,7 @@ public:
 
     static void CompleteRebuild(); // same as above, but rebuilds every ePlayerNetID.
     static void ClearAll(); // deletes all ePlayerNetIDs.
+    static void SpectateAll(); // puts all players into spectator mode.
 
     static void ThrowOutDisconnected(); // get rid of everyone that disconnected from the game
 

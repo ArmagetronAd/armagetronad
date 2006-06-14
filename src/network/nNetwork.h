@@ -217,12 +217,21 @@ public:
     void Timestep( REAL decay );           //!< lets all values decay, so they can be replaced by new ones
     void Add( REAL value, REAL weight=1 ); //!< adds a value to the average
     void Reset();                          //!< resets average to zero
+
+    std::istream & operator << ( std::istream & stream );       //!< read operator
+    std::ostream & operator >> ( std::ostream & stream ) const; //!< write operator
 private:
     REAL weight_;       //!< the total statistical weight
     REAL sum_;          //!< the total sum of value*weight
     REAL sumSquared_;   //!< the total sum of value*value*weight
     REAL weightSquared_;//!< the sum of all weights, squared
 };
+
+//! read operator for nAveragers
+std::istream & operator >> ( std::istream & stream, nAverager & averager );
+
+//! write operator for nAveragers
+std::ostream & operator << ( std::ostream & stream, nAverager const & averager );
 
 //! averager for pings, detects lag
 class nPingAverager
@@ -462,6 +471,7 @@ public:
     nMessage& operator >> (tColoredString &s);
     nMessage& operator << (const tString &s);
     nMessage& operator << (const tColoredString &s);
+    nMessage& operator << (const tOutput &o);
 
     template<class T> void BinWrite (const T &x){
         for(unsigned int i=0;i<sizeof(T)/2;i++)
@@ -658,6 +668,7 @@ private:
 class nMachine
 {
     friend class nMachineDecorator;
+    friend class nMachinePersistor;
 public:
     nMachine();          //!< constructor
     virtual ~nMachine(); //!< destructor

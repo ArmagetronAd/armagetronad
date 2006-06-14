@@ -70,6 +70,8 @@ bool sg_gnuplotDebug = false;
 static tSettingItem<bool> sg_("DEBUG_GNUPLOT",sg_gnuplotDebug);
 #endif
 
+static REAL sg_minDropInterval=0.05;
+static tSettingItem< REAL > sg_minDropIntervalConf( "CYCLE_MIN_WALLDROP_INTERVAL", sg_minDropInterval );
 //  *****************************************************************
 
 static nNOInitialisator<gCycle> cycle_init(320,"cycle");
@@ -805,19 +807,46 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
 // *******************************************************************************************
 //!
 //!		@param	wall	   the wall the other cycle is grinding
+//!		@param	pos	       the position of the grind
+//!     @param  dir        the direction the raycast triggering the gridding comes from
 //!
 // *******************************************************************************************
 
-void gCycle::OnDropTempWall( gPlayerWall * wall )
+void gCycle::OnDropTempWall( gPlayerWall * wall, eCoord const & position, eCoord const & dir )
 {
     tASSERT( wall );
 
+    unsigned short idrec = ID();
+    tRecorderSync< unsigned short >::Archive( "_ON_DROP_WALL", 8, idrec );
+
+    // determine if the grinded wall is current enough
+    bool wallRight = ( currentWall && ( wall->NetWall() == currentWall || wall->NetWall() == currentWall ) );
+
+    // don't drop if we already dropped a short time ago
+    if ( wallRight && currentWall->Edge()->Vec().NormSquared() < verletSpeed_ * verletSpeed_ * sg_minDropInterval * sg_minDropInterval )
+        wallRight = false;
+
+    tRecorderSync< bool >::Archive( "_ON_DROP_WALL_RIGHT", 8, wallRight );
+
     // drop the current wall if eiter this or the last wall is grinded
-    gNetPlayerWall * nw = wall->NetWall();
-    if ( nw == currentWall || ( nw == lastWall && currentWall && currentWall->Vec().NormSquared() > EPS ) )
+    // gNetPlayerWall * nw = wall->NetWall();
+    if ( wallRight )
     {
-        // just request the drop, Timestep() will execute it later
-        dropWallRequested_ = true;
+        // calculate relative position of grinding in wall; if alpha is positive, it's already too late
+        REAL alpha = currentWall->Edge()->Edge(0)->Ratio( position );
+        tRecorderSync< REAL >::Archive( "_ON_DROP_WALL_ALPHA", 8, alpha );
+        if ( alpha > -.5 )
+        {
+            unsigned short idrec = ID();
+            tRecorderSync< unsigned short >::Archive( "_ON_DROP_WALL_DROP", 8, idrec );
+
+            // just request the drop, Timestep() will execute it later
+            dropWallRequested_ = true;
+
+            // bend last driving direction to -dir. That way, should the grinder overtake this cycle,
+            // it will end up on the right side of his wall.
+            lastDirDrive = -dir;
+        }
     }
 }
 
@@ -1521,9 +1550,6 @@ bool crash_sparks=true;
 // from nNetwork.C
 extern REAL planned_rate_control[MAXCLIENTS+2];
 
-static REAL sg_minDropInterval=0.05;
-static tSettingItem< REAL > sg_minDropIntervalConf( "CYCLE_MIN_WALLDROP_INTERVAL", sg_minDropInterval );
-
 bool gCycle::Timestep(REAL currentTime){
     // drop current wall if it was requested
     if ( dropWallRequested_ )
@@ -1533,8 +1559,13 @@ bool gCycle::Timestep(REAL currentTime){
         double time = tSysTimeFloat();
         if ( time >= nextDrop )
         {
+            unsigned short idrec = ID();
+            tRecorderSync< unsigned short >::Archive( "_PARTIAL_COPY_GRID", 8, idrec );
+
             nextDrop = time + sg_minDropInterval;
-            this->DropWall();
+            if ( currentWall )
+                currentWall->PartialCopyIntoGrid( grid );
+            dropWallRequested_ = false;
         }
     }
 
@@ -1670,11 +1701,27 @@ bool gCycle::Timestep(REAL currentTime){
     else
     {
         // just basic movement to do: let base class handle that.
-        gCycleMovement::Timestep( currentTime );
+        try
+        {
+            gCycleMovement::Timestep(currentTime);
+        }
+        catch ( gCycleDeath const & death )
+        {
+            KillAt( death.pos_ );
+            return false;
+        }
     }
 
     // do the rest of the timestep
-    return gCycleMovement::Timestep( currentTime );
+    try
+    {
+        return gCycleMovement::Timestep(currentTime);
+    }
+    catch ( gCycleDeath const & death )
+    {
+        KillAt( death.pos_ );
+        return false;
+    }
 }
 
 static void blocks(const gSensor &s, const gCycle *c, int lr)
@@ -1774,6 +1821,9 @@ static REAL ClampDisplacement( gCycle* cycle, eCoord& displacement, const eCoord
     return sensor.hit;
 }
 
+// from gCycleMovement.cpp
+REAL sg_GetSparksDistance();
+
 bool gCycle::TimestepCore(REAL currentTime){
     if (!finite(skew))
         skew=0;
@@ -1856,7 +1906,10 @@ bool gCycle::TimestepCore(REAL currentTime){
     rotate(rotationFrontWheel,2*verletSpeed_*animts/.43);
     rotate(rotationRearWheel,2*verletSpeed_*animts/.73);
 
-    const REAL extension=.25;
+    REAL sparksDistance = sg_GetSparksDistance();
+    REAL extension = .25;
+    if ( extension < sparksDistance )
+        extension = sparksDistance;
 
     //    REAL step=speed*ts; // +.5*acceleration*ts*ts;
 
@@ -1980,20 +2033,15 @@ bool gCycle::TimestepCore(REAL currentTime){
         // generate sparks
         eCoord sparkpos,sparkdir;
 
-        if (fl.ehit && fl.hit<extension){
+        if (fl.ehit && fl.hit<=sparksDistance){
             sparkpos=pos+dirDrive.Turn(1,1)*fl.hit;
             sparkdir=dirDrive.Turn(0,-1);
         }
-        if (fr.ehit && fr.hit<extension){
-            //      blocks(fr, this, -1);
+        if (fr.ehit && fr.hit<=sparksDistance){
             sparkpos=pos+dirDrive.Turn(1,-1)*fr.hit;
             sparkdir=dirDrive.Turn(0,1);
         }
 
-        /*
-          if (crash_sparks && animts>0)
-          new gSpark(pos,dirDrive,currentTime);
-        */
         if (fabs(skew)<fabs(lr*.8) ){
             skewDot-=lr*1000*animts;
             if (crash_sparks && animts>0)
@@ -2292,8 +2340,9 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
         if(time < otherTime*(1-EPS))
         {
             // we were first!
-            static bool tryToSaveFutureWallOwner = false;
-            if ( tryToSaveFutureWallOwner && sn_GetNetState() != nCLIENT && w->NetWall() == otherPlayer->currentWall && otherPlayer->LastTime() < time + .5f )
+            static bool tryToSaveFutureWallOwner = true;
+
+            if ( tryToSaveFutureWallOwner && sn_GetNetState() != nCLIENT && otherPlayer->currentWall && w == otherPlayer->currentWall->Wall() && otherPlayer->LastTime() < time + .5f )
             {
                 // teleport the other cycle back to the point before the collision; its next timestep
                 // will simulate the collision again from the right viewpoint
@@ -3219,7 +3268,7 @@ void gCycle::SoundMix(Uint8 *dest,unsigned int len,
 #endif
 
 eCoord gCycle::PredictPosition(){
-    gSensor s(this,pos, dir * (verletSpeed_ * se_PredictTime()) + correctPosSmooth );
+    gSensor s(this,pos, dir * (verletSpeed_ * se_PredictTime() * rubberSpeedFactor ) );
     s.detect(1);
     return s.before_hit;
 

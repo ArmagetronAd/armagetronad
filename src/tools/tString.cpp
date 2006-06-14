@@ -411,7 +411,14 @@ void tString::ReadLine( std::istream & s, bool enableEscapeSequences )
     s.putback(c);
     c='x';
 
-    while('\n'!=(c=s.get()) && c!='\r' && s.good() && !s.eof()){
+    while( true )
+    {
+        c=s.get();
+
+        // notice end of line or file
+        if ( c=='\n' || c=='\r' || !s.good() || s.eof())
+            break;
+
         if ( enableEscapeSequences )
         {
             char c2 = '\0';

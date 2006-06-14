@@ -42,6 +42,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tMath.h"
 #include "nConfig.h" 
 
+#include "tRecorder.h"
+
 #include <vector>
 #include <set>
 
@@ -1933,6 +1935,9 @@ bool eHalfEdge::Simplify(eGrid *grid)
 
     tControlledPTR< eHalfEdge > keep( this );
 
+    int idrec = ID;
+    tRecorderSync< int >::Archive( "_GRID_SIMPLIFY_REAL", 8, idrec );
+
     // the faces that will be removed
     tControlledPTR< eFace > killed1 = grid->ZombifyFace( face );
     tControlledPTR< eFace > killed2 = grid->ZombifyFace( other->face );
@@ -1998,6 +2003,8 @@ void eGrid::SimplifyNum(int e){
         ePoint * toBeRemoved = E->other->Point();
         if ( toBeRemoved == A || toBeRemoved == B || toBeRemoved == C )
             return;
+
+        tRecorderSync< int >::Archive( "_GRID_SIMPLIFY", 8, e );
 
         E->Simplify(this);
 
@@ -2362,6 +2369,9 @@ void eGrid::AddEdge    (eHalfEdge *e)
     tASSERT(e->Other() && *e->Point() != *e->Other()->Point());
 
     edges.Add(e, e->ID);
+
+    int idrec = e->ID;
+    tRecorderSync< int >::Archive( "_GRID_ADD_EDGE", 8, idrec );
 }
 
 void eGrid::RemoveEdge (eHalfEdge *e)
@@ -2371,6 +2381,9 @@ void eGrid::RemoveEdge (eHalfEdge *e)
 
     if (e->ID < 0)
         return;
+
+    int idrec = e->ID;
+    tRecorderSync< int >::Archive( "_GRID_REMOVE_EDGE", 8, idrec );
 
     edges.Remove(e, e->ID);
 }

@@ -605,11 +605,11 @@ ePlayer::ePlayer(){
                                        "$player_name_confitem_help",
                                        name));
 
-	confname.Clear();
-	confname << "TEAMNAME_"<< id+1;
-	StoreConfitem(tNEW(tConfItemLine) (confname,
-									   "$team_name_confitem_help",
-									   teamname));
+    confname.Clear();
+    confname << "TEAMNAME_"<< id+1;
+    StoreConfitem(tNEW(tConfItemLine) (confname,
+                                       "$team_name_confitem_help",
+                                       teamname));
 
     confname.Clear();
     confname << "CAMCENTER_"<< id+1;
@@ -1339,8 +1339,8 @@ void handle_chat(nMessage &m){
                     return;
                 }
                 else if (command == "/teamname") {
-					p->SetTeamname(msg);
-					return;
+                    p->SetTeamname(msg);
+                    return;
                 }
                 else if (command == "/teamleave") {
                     if ( se_assignTeamAutomatically )
@@ -2018,7 +2018,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1)
         ePlayer *P = ePlayer::PlayerConfig(p);
         if (P){
             SetName( P->Name() );
-			teamname = P->Teamname();
+            teamname = P->Teamname();
             r=   P->rgb[0];
             g=   P->rgb[1];
             b=   P->rgb[2];
@@ -2027,10 +2027,10 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1)
     }
     /*
     else
-	{
+    {
         SetName( "AI" );
-		teamname = "";
-	}
+    teamname = "";
+    }
     */
     lastSaid.SetLen(12);
     lastSaidTimes.SetLen(12);
@@ -2074,7 +2074,7 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     r = g = b = 15;
 
     nameTeamAfterMe = false;
-	teamname = "";
+    teamname = "";
 
     lastSaid.SetLen(12);
     lastSaidTimes.SetLen(12);
@@ -2133,6 +2133,32 @@ static tSettingItem<bool> se_silAll("SILENCE_ALL",
 static int se_maxPlayersPerIP = 4;
 static tSettingItem<int> se_maxPlayersPerIPConf( "MAX_PLAYERS_SAME_IP", se_maxPlayersPerIP );
 
+// array of players in legacy spectator mode: they have been
+// deleted by their clients, but no new player has popped up for them yet
+static tJUST_CONTROLLED_PTR< ePlayerNetID > se_legacySpectators[MAXCLIENTS+2];
+
+static void se_ClearLegacySpectator( int owner )
+{
+    ePlayerNetID * player = se_legacySpectators[ owner ];
+
+    // fully remove player
+    if ( player )
+    {
+        player->RemoveFromGame();
+    }
+
+    se_legacySpectators[ owner ] = NULL;
+}
+
+// callback clearing the legacy spectator when a client enters or leaves
+static void se_LegacySpectatorClearer()
+{
+    se_ClearLegacySpectator( nCallbackLoginLogout::User() );
+}
+static nCallbackLoginLogout se_legacySpectatorClearer( se_LegacySpectatorClearer );
+
+
+
 void ePlayerNetID::MyInitAfterCreation()
 {
     this->CreateVoter();
@@ -2150,6 +2176,9 @@ void ePlayerNetID::MyInitAfterCreation()
             // kill them
             sn_DisconnectUser( Owner(), "$network_kill_too_many_players" );
         }
+
+        // clear old legacy spectator that may be lurking around
+        se_ClearLegacySpectator( Owner() );
     }
 
     this->wait_ = 0;
@@ -2166,7 +2195,7 @@ void ePlayerNetID::InitAfterCreation()
 #ifndef KRAWALL_SERVER
         GetScoreFromDisconnectedCopy();
 #endif
-		SetDefaultTeam();
+        SetDefaultTeam();
     }
 }
 
@@ -2229,6 +2258,9 @@ static nDescriptor player_removed_from_game(202,&player_removed_from_game_handle
 
 void ePlayerNetID::RemoveFromGame()
 {
+    // unregister with the machine
+    this->UnregisterWithMachine();
+
     // release voter
     if ( this->voter_ )
         this->voter_->RemoveFromGame();
@@ -2275,29 +2307,61 @@ void ePlayerNetID::RemoveFromGame()
 
 bool ePlayerNetID::ActionOnQuit()
 {
-    UnregisterWithMachine();
-
     tControlledPTR< ePlayerNetID > holder( this );
 
-    //	else
-    {
-        this->RemoveFromGame();
+    // clear legacy spectator
+    se_ClearLegacySpectator( Owner() );
 
-        se_PlayerNetIDs.Remove(this,listID);
-
-        return true;
-    }
+    this->RemoveFromGame();
+    return true;
 }
 
 void ePlayerNetID::ActionOnDelete()
 {
-    UnregisterWithMachine();
-
     tControlledPTR< ePlayerNetID > holder( this );
 
-    this->RemoveFromGame();
+    if ( sn_GetNetState() == nSERVER )
+    {
+        // get the number of players registered from this client
+        // int playerCount = nMachine::GetMachine(Owner()).GetPlayerCount();
+        int playerCount = 0;
+        for ( int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
+        {
+            if ( se_PlayerNetIDs[i]->Owner() == Owner() )
+                playerCount++;
+        }
 
-    se_PlayerNetIDs.Remove(this,listID);
+        // if this is the last player, store it
+        if ( playerCount == 1 )
+        {
+            // log scores
+            LogScoreDifference();
+
+            // clear legacy spectator
+            se_ClearLegacySpectator( Owner() );
+
+            // store new legacy spectator
+            se_legacySpectators[ Owner() ] = this;
+            spectating_ = true;
+
+            // quit team already
+            SetTeamWish( NULL );
+            SetTeam( NULL );
+            UpdateTeam();
+
+            // and kill controlled object
+            ControlObject( NULL );
+
+            // inform other clients that the player left
+            TakeOwnership();
+            RequestSync();
+
+            return;
+        }
+    }
+
+    // standard behavior: just get us out of here
+    this->RemoveFromGame();
 }
 
 void ePlayerNetID::PrintName(tString &s) const
@@ -2331,6 +2395,8 @@ void ePlayerNetID::CreateVoter()
     if ( sn_GetNetState() != nCLIENT && this->Owner() != 0 && sn_Connections[ this->Owner() ].version.Max() >= 3 )
     {
         this->voter_ = eVoter::GetVoter( this->Owner() );
+        if ( this->voter_ )
+            this->voter_->PlayerChanged();
     }
 }
 
@@ -2365,7 +2431,7 @@ void ePlayerNetID::WriteSync(nMessage &m){
 
     m << favoriteNumberOfPlayersPerTeam;
     m << nameTeamAfterMe;
-	m << teamname;
+    m << teamname;
 }
 
 // makes sure the passed string is not longer than the given maximum
@@ -2580,7 +2646,7 @@ void ePlayerNetID::ReadSync(nMessage &m){
             if ( newCurrentTeam != currentTeam )
             {
                 if ( newCurrentTeam )
-					// automatically removed player from currentTeam
+                    // automatically removed player from currentTeam
                     newCurrentTeam->AddPlayerDirty( this );
                 else
                     currentTeam->RemovePlayer( this );
@@ -2598,10 +2664,10 @@ void ePlayerNetID::ReadSync(nMessage &m){
         m >> favoriteNumberOfPlayersPerTeam;
         m >> nameTeamAfterMe;
     }
-	if (!m.End())
-	{
-		m >> teamname;
-	}
+    if (!m.End())
+    {
+        m >> teamname;
+    }
     // con << "Player info updated.\n";
 
     // make sure we did not accidentally overwrite values
@@ -2662,10 +2728,6 @@ void ePlayerNetID::ClearObject(){
 #endif
 }
 
-// message of day presented to clients logging in
-tString se_greeting("");
-static tConfItemLine a_mod("MESSAGE_OF_DAY",se_greeting);
-
 void ePlayerNetID::Greet(){
     if (!greeted){
         tOutput o;
@@ -2676,9 +2738,6 @@ void ePlayerNetID::Greet(){
         s << o;
         s << "\n";
         GreetHighscores(s);
-        s << "\n";
-        if (se_greeting.Len()>1)
-            s << se_greeting << "\n";
         s << "\n";
         //std::cout << s;
         sn_ConsoleOut(s,Owner());
@@ -2849,7 +2908,7 @@ void ePlayerNetID::DisplayScores(){
 
         // print team ranking if there actually is a team with more than one player
         int maxPlayers = 20;
-	bool showTeam = false;
+        bool showTeam = false;
         for ( int i = eTeam::teams.Len() - 1; i >= 0; --i )
         {
             if ( eTeam::teams[i]->NumPlayers() > 1 ||
@@ -2858,7 +2917,7 @@ void ePlayerNetID::DisplayScores(){
                 y = eTeam::RankingGraph(y);
                 y-=.06;
                 maxPlayers -= ( eTeam::teams.Len() > 6 ? 6 : eTeam::teams.Len() ) + 2;
-		showTeam = true;
+                showTeam = true;
                 break;
             }
         }
@@ -2968,11 +3027,11 @@ float ePlayerNetID::RankingGraph( float y, int MAX, bool showTeam ){
         tColoredString ping;
         ping << tOutput("$player_scoretable_ping");
         DisplayText(.25, y, .06, ping.c_str(), sr_fontScoretable, 1);
-	if (showTeam) {
-	    tColoredString team;
-	    team << tOutput("$player_scoretable_team");
-	    DisplayText(.3, y, .06, team.c_str(), sr_fontScoretable, -1);
-	}
+        if (showTeam) {
+            tColoredString team;
+            team << tOutput("$player_scoretable_team");
+            DisplayText(.3, y, .06, team.c_str(), sr_fontScoretable, -1);
+        }
         y-=.06;
 
         int max = se_PlayerNetIDs.Len();
@@ -3065,15 +3124,35 @@ void ePlayerNetID::ClearAll(){
     }
 }
 
-void ePlayerNetID::CompleteRebuild(){
-    ClearAll();
-    Update();
-}
-
-static bool se_VisubleSpectatorsSupported()
+static bool se_VisibleSpectatorsSupported()
 {
     static nVersionFeature se_visibleSpectator(13);
     return sn_GetNetState() != nCLIENT || se_visibleSpectator.Supported(0);
+}
+
+void ePlayerNetID::SpectateAll(){
+    for(int i=MAX_PLAYERS-1;i>=0;i--){
+        ePlayer *local_p=ePlayer::PlayerConfig(i);
+        if (local_p)
+        {
+            if ( se_VisibleSpectatorsSupported() && local_p->netPlayer )
+            {
+                if ( !local_p->netPlayer->spectating_ )
+                {
+                    local_p->netPlayer->spectating_ = true;
+                }
+
+                local_p->netPlayer->RequestSync();
+            }
+            else
+                local_p->netPlayer = NULL;
+        }
+    }
+}
+
+void ePlayerNetID::CompleteRebuild(){
+    ClearAll();
+    Update();
 }
 
 // Update the netPlayer_id list
@@ -3088,14 +3167,14 @@ void ePlayerNetID::Update(){
             tASSERT(local_p);
             tCONTROLLED_PTR(ePlayerNetID) &p=local_p->netPlayer;
 
-            if (!p && in_game && ( !local_p->spectate || se_VisubleSpectatorsSupported() ) ) // insert new player
+            if (!p && in_game && ( !local_p->spectate || se_VisibleSpectatorsSupported() ) ) // insert new player
             {
                 p=tNEW(ePlayerNetID) (i);
                 p->SetDefaultTeam();
                 p->RequestSync();
             }
 
-            if (bool(p) && (!in_game || ( local_p->spectate && !se_VisubleSpectatorsSupported() ) ) && // remove player
+            if (bool(p) && (!in_game || ( local_p->spectate && !se_VisibleSpectatorsSupported() ) ) && // remove player
                     p->Owner() == ::sn_myNetID )
             {
                 p->RemoveFromGame();
@@ -3114,7 +3193,7 @@ void ePlayerNetID::Update(){
                 p->g=ePlayer::PlayerConfig(i)->rgb[1];
                 p->b=ePlayer::PlayerConfig(i)->rgb[2];
                 p->pingCharity=::pingCharity;
-				p->SetTeamname(local_p->Teamname());
+                p->SetTeamname(local_p->Teamname());
 
                 // update spectator status
                 if ( p->spectating_ != local_p->spectate )
@@ -3582,23 +3661,23 @@ void ePlayerNetID::SetDefaultTeam( )
     if ( sn_GetNetState() == nCLIENT || !se_assignTeamAutomatically || spectating_ )
         return;
 
-	eTeam* defaultTeam = FindDefaultTeam();
-	if (defaultTeam)
-		SetTeamWish(defaultTeam);
-	else if ( eTeam::NewTeamAllowed() )
-		CreateNewTeamWish();
-	// yes, if all teams are full and no team creation is allowed, the player stays without team and will not be spawned.
-	//TODO: Might add AI to null team here.
+    eTeam* defaultTeam = FindDefaultTeam();
+    if (defaultTeam)
+        SetTeamWish(defaultTeam);
+    else if ( eTeam::NewTeamAllowed() )
+        CreateNewTeamWish();
+    // yes, if all teams are full and no team creation is allowed, the player stays without team and will not be spawned.
+    //TODO: Might add AI to null team here.
 }
 
 // put a new player into a default team
 eTeam* ePlayerNetID::FindDefaultTeam( )
 {
-//    if ( !IsHuman() )
-//    {
-//        SetTeam( NULL );
-//        return;
-//    }
+    //    if ( !IsHuman() )
+    //    {
+    //        SetTeam( NULL );
+    //        return;
+    //    }
     // find the team with the least number of players on it
     eTeam *min = NULL;
     for ( int i=eTeam::teams.Len()-1; i>=0; --i )
@@ -3612,11 +3691,11 @@ eTeam* ePlayerNetID::FindDefaultTeam( )
             eTeam::teams.Len() >= eTeam::minTeams &&
             min->PlayerMayJoin( this ) &&
             ( !eTeam::NewTeamAllowed() || ( min->NumHumanPlayers() > 0 && min->NumHumanPlayers() < favoriteNumberOfPlayersPerTeam ) )
-      )
+       )
     {
         // return the team
         return min;
-	}
+    }
     // return NULL to indicate no team was found => "create a new team" (?)
     return NULL;
 }
@@ -3647,21 +3726,21 @@ void ePlayerNetID::SetTeam( eTeam* newTeam )
 // set teamname to be used for my own team
 void ePlayerNetID::SetTeamname(const char* newTeamname)
 {
-	teamname = newTeamname;
-	if (bool(currentTeam) && currentTeam->OldestHumanPlayer() &&
-		currentTeam->OldestHumanPlayer()->ID()==ID())
-	{
-		currentTeam->UpdateAppearance();
-	}
+    teamname = newTeamname;
+    if (bool(currentTeam) && currentTeam->OldestHumanPlayer() &&
+            currentTeam->OldestHumanPlayer()->ID()==ID())
+    {
+        currentTeam->UpdateAppearance();
+    }
 }
 
 // register me in the given team (callable on the server)
 void ePlayerNetID::SetTeamForce( eTeam* newTeam )
 {
     // check if the team change is legal
-	//tASSERT ( !newTeam || nCLIENT !=  sn_GetNetState() );
+    //tASSERT ( !newTeam || nCLIENT !=  sn_GetNetState() );
 #ifdef DEBUG
- 	std::cout << "DEBUG: Player:" << this->GetName() << " SetTeamForce:" << ((newTeam)?(const char*)newTeam->Name():"NULL") << "\n";
+    std::cout << "DEBUG: Player:" << this->GetName() << " SetTeamForce:" << ((newTeam)?(const char*)newTeam->Name():"NULL") << "\n";
 #endif
     nextTeam = newTeam;
 }
@@ -3735,13 +3814,18 @@ void ePlayerNetID::CreateNewTeam()
 
         sn_ConsoleOut( message, Owner() );
 
-// TODO Check
+        // TODO Check
         if ( !currentTeam )
+        {
+            // Shouldn't CreateNewTeam just create a team or fail ?
+            // if it can't create a team => just idle?
+            //         //If team==NULL then the player joins NO team (and perhaps can join one later)
+            //	       SetTeamWish(FindDefaultTeam());
+            bool assignBack = se_assignTeamAutomatically;
+            se_assignTeamAutomatically = true;
             SetDefaultTeam();
-// Shouldn't CreateNewTeam just create a team or fail ?
-// if it can't create a team => just idle?
-//         //If team==NULL then the player joins NO team (and perhaps can join one later)
-//	       SetTeamWish(FindDefaultTeam());
+            se_assignTeamAutomatically = assignBack;
+        }
 
         return;
     }
@@ -3765,8 +3849,8 @@ const unsigned short NEW_TEAM   = 1;
 // express the wish to be part of the given team (always callable)
 void ePlayerNetID::SetTeamWish(eTeam* newTeam)
 {
-	if (NextTeam()==newTeam)
-		return;
+    if (NextTeam()==newTeam)
+        return;
 
     if ( nCLIENT ==  sn_GetNetState() && Owner() == sn_myNetID )
     {
@@ -3776,8 +3860,8 @@ void ePlayerNetID::SetTeamWish(eTeam* newTeam)
         (*m) << newTeam;
 
         m->BroadCast();
-		// update local client data, should be ok (dangerous?, why?)
-		SetTeamForce( newTeam );
+        // update local client data, should be ok (dangerous?, why?)
+        SetTeamForce( newTeam );
     }
     else
     {
@@ -3829,7 +3913,8 @@ void ePlayerNetID::ReceiveControlNet(nMessage &m)
             // exist any more. Create a new team instead.
             if ( !newTeam )
             {
-                sn_ConsoleOut( tOutput( "$player_joins_team_noex" ), Owner() );
+                if ( currentTeam )
+                    sn_ConsoleOut( tOutput( "$player_joins_team_noex" ), Owner() );
                 break;
             }
 
@@ -4258,7 +4343,7 @@ void ePlayerNetID::UpdateName( void )
 #endif
 
                 // print spectating join message (regular join messages are handled by eTeam)
-                if ( IsSpectating() )
+                if ( IsSpectating() || !se_assignTeamAutomatically )
                 {
                     mess << "$player_entered_spectator";
                     sn_ConsoleOut(mess);
@@ -4284,6 +4369,12 @@ void ePlayerNetID::UpdateName( void )
                 }
 #endif
                 mess << "$player_renamed";
+
+                if ( bool(this->voter_) )
+                {
+                    this->voter_->PlayerChanged();
+                }
+
                 sn_ConsoleOut(mess);
 
                 {

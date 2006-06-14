@@ -702,7 +702,7 @@ input_mess_up_help            Derouler les messages d'une page vers le haut.
 
 input_mess_down_text          Derouler vers le bas
 input_mess_down_help          Derouler les messages d'une page vers le bas.
-	
+
 #********************************************
 #********************************************
 #

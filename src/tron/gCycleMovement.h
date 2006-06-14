@@ -57,11 +57,12 @@ public:
     virtual bool            Alive                   ()                                    const     ;   //!< returns whether the cycle is still alive
     virtual bool            Vulnerable              ()                                    const     ;   //!< returns whether the cycle can be killed
 
-    bool                    CanMakeTurn             ()                                    const     ;   //!< returns whether a turn is currently possible
-    bool                    CanMakeTurn             ( REAL time                         ) const     ;   //!< returns whether a turn is possible at the given time
+    bool                    CanMakeTurn             (int direction)                                    const     ;   //!< returns whether a turn is currently possible
+    bool                    CanMakeTurn             ( REAL time, int direction                         ) const     ;   //!< returns whether a turn is possible at the given time
     inline  REAL            GetDistanceSinceLastTurn(                                   ) const     ;   //!< returns the distance since the last turn
-    REAL                    GetTurnDelay            (                                   ) const     ;   //!< returns the time between turns
-    REAL                    GetNextTurn             (                                   ) const     ;   //!< returns the time of the next turn
+    REAL                    GetTurnDelay            (                                   ) const     ;   //!< returns the time between turns in different directions
+    REAL                    GetTurnDelayDb            (                                   ) const     ;   //!< returns the time between turns in the same direcion
+    REAL                    GetNextTurn             (int direction                                   ) const     ;   //!< returns the time of the next turn
 
     // destination handling
     void                    AddDestination          ()                                              ;   //!< adds current position as destination
@@ -71,7 +72,9 @@ public:
     void                    NotifyNewDestination    ( gDestination *        dest        )           ;   //!< notifies cycle of the insertion of a new destination ( don't call manually )
     bool                    IsDestinationUsed       ( const gDestination *  dest        ) const     ;   //!< returns whether the given destination is in active use
 
-    inline void            DropTempWall             ( gPlayerWall *         wall        )           ;   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
+    inline void            DropTempWall             ( gPlayerWall *         wall
+            ,                                         eCoord const &        pos
+            ,                                         eCoord const &        dir         )           ;   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
     // information query
     virtual bool            EdgeIsDangerous         ( const eWall *         wall
             ,                                         REAL                  time
@@ -126,7 +129,9 @@ protected:
     // destination handling
     REAL                    DistanceToDestination   ( gDestination &        dest        ) const     ;   //!< calculates the distance to the given destination
     virtual void            OnNotifyNewDestination  ( gDestination *        dest        )           ;   //!< notifies cycle of the insertion of a new destination
-    virtual void            OnDropTempWall          ( gPlayerWall *         wall        )           ;   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
+    virtual void            OnDropTempWall          ( gPlayerWall *         wall
+            ,                                         eCoord const &        pos
+            ,                                         eCoord const &        dir         )           ;   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
     virtual bool            DoIsDestinationUsed     ( const gDestination *  dest        ) const     ;   //!< returns whether the given destination is in active use
     static  gDestination*   GetDestinationBefore    ( const SyncData &      sync
             ,                                         gDestination*         first       ) 		    ;   //!< determine the destination from before the sync message
@@ -173,7 +178,8 @@ protected:
     int             windingNumberWrapped_;      //!< winding number wrapped to be used as an index to the axes code
 
     eCoord			lastTurnPos_;	            //! the location of the last turn
-    REAL            lastTurnTime_;              //!< the time of the last turn
+    REAL            lastTurnTimeRight_;         //!< the time of the last turn right
+    REAL            lastTurnTimeLeft_;          //!< the time of the last turn left
     REAL            lastTimeAlive_;             //!< the time of the last timestep where we would not have been killed
     std::deque<int> pendingTurns;               //!< stores turns ordered by the user, but not yet executed
 
@@ -315,12 +321,14 @@ inline bool gCycleMovement::IsDestinationUsed( const gDestination * dest ) const
 // *******************************************************************************************
 //!
 //!		@param	wall	   the wall the other cycle is grinding
+//!		@param	pos	       the position of the grind
+//!     @param  dir        the direction the raycast triggering the gridding comes from
 //!
 // *******************************************************************************************
 
-inline void gCycleMovement::DropTempWall( gPlayerWall * wall )
+inline void gCycleMovement::DropTempWall( gPlayerWall * wall, eCoord const & pos, eCoord const & dir )
 {
-    this->OnDropTempWall( wall );
+    this->OnDropTempWall( wall, pos, dir );
 }
 
 // *******************************************************************************************
@@ -693,7 +701,7 @@ gCycleMovement & gCycleMovement::SetLastTurnPos( eCoord const & lastTurnPos )
 
 REAL const & gCycleMovement::GetLastTurnTime( void ) const
 {
-    return this->lastTurnTime_;
+    return lastTurnTimeRight_ > lastTurnTimeLeft_ ? lastTurnTimeRight_ : lastTurnTimeLeft_;
 }
 
 // *******************************************************************************************
@@ -709,7 +717,7 @@ REAL const & gCycleMovement::GetLastTurnTime( void ) const
 
 gCycleMovement const & gCycleMovement::GetLastTurnTime( REAL & lastTurnTime ) const
 {
-    lastTurnTime = this->lastTurnTime_;
+    lastTurnTime = GetLastTurnTime();
     return *this;
 }
 
@@ -726,7 +734,7 @@ gCycleMovement const & gCycleMovement::GetLastTurnTime( REAL & lastTurnTime ) co
 
 gCycleMovement & gCycleMovement::SetLastTurnTime( REAL const & lastTurnTime )
 {
-    this->lastTurnTime_ = lastTurnTime;
+    lastTurnTimeRight_ = lastTurnTimeLeft_ = lastTurnTime;
     return *this;
 }
 

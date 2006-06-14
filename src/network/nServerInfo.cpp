@@ -1148,15 +1148,24 @@ nServerInfo* nServerInfo::GetBigServerInfoCommon(nMessage &m)
     }
     else
     {
-#ifndef DEBUG
         if ( sn_IsMaster )
-#endif
         {
             tOutput message;
             message.SetTemplateParameter(1, ToString( baseInfo ) );
             message.SetTemplateParameter(2, sn_Connections[m.MessageID()].socket->GetAddress().ToString() );
             message << "$network_browser_unidentified";
             con << message;
+        }
+        else
+        {
+            // add the server, but ping it again
+            nServerInfo * n = CreateServerInfo();
+            n->CopyFrom( baseInfo );
+            n->name = ToString( baseInfo );
+            n->QueryServer();
+#ifdef DEBUG
+            con << "Recevied unknown server " << n->name << ".\n";
+#endif
         }
     }
 
@@ -2466,7 +2475,7 @@ void nServerInfoBase::NetReadThis( nMessage & m )
     m >> port_;                            // get the port
     sn_ReadFiltered( m, connectionName_ ); // get the connection name
 
-    if (connectionName_.Len()<=1 ) // no valid name (must come directly from the server who does not know his own address)
+    if ( sn_AcceptingFromBroadcast || connectionName_.Len()<=1 ) // no valid name (must come directly from the server who does not know his own address)
     {
         {
             sn_GetAdr( m.SenderID(), connectionName_ );

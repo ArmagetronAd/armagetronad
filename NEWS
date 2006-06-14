@@ -1,4 +1,4 @@
-Changes since 0.2.8.2:
+Changes since 0.2.8:
 - New team join menu (colored, shows number of players per team)
 - Customizable teamname
 - Updated Windows libraries (SDL,SDL_mixer,SDL_image,libxml2)
@@ -20,6 +20,48 @@ Changes since 0.2.8.2:
 - Added support for armagetronad URLs on Mac OS X and KDE -- armagetronad://<server>[:<port>]. port defaults to 4534.
 - New command-line flag: --connect <server>[:<port>]. Startup the game and connect directly to <server>.
 
+Changes since 0.2.8.2:
+
+  New settings:
+- CYCLE_BOOST_? and CYCLE_BOOSTFACTOR_? for boosts when breaking away from walls,
+  see settings.cfg or config.html for details
+- CYCLE_ACCEL_TUNNEL, works like CYCLE_ACCEL_SLINGSHOT, but is active when
+  none of the two walls you're in between is your own.
+- CYCLE_WIDTH for making it impossible to squeeze through tight tunnels,
+  see settings.cfg for details
+- VOTING_MATURITY controls how long you have to wait after login before
+  you can issue kick votes.
+- CYCLE_DELAY_DOUBLEBIND_BONUS is an extra factor applied to CYCLE_DELAY
+  for turns in the same direction. Can be used to limit the advantage
+  doublebinders get while not punishing players who press both left and
+  right at the same time.
+
+  Featurelets:
+- Players leaving to spectator mode with <0.2.8.2 clients are handled like
+  spectators of 0.2.8.2 clients: they stay visible to the others.
+- Kick statistics are now persistent across server runs.
+- MESSAGE_OF_DAY is now displayed fullscreen if both server and client support it
+- Manual fullscreen messages can be triggered with 
+  FULLSCREEN_MESSAGE <timeout> <message content>
+
+  Bugfixes:
+- The acceleration and boost system always used settings for enemy walls instead of
+  settings for team players' walls. That means that old clients connecting to a
+  0.2.8.3+ server that has CYCLE_ACCEL_ENEMY and CYCLE_ACCEL_TEAM set to different
+  values experience syncing problems. The default behavior therefore is to lock 0.2.8.2
+  and earlier out of your server if you set one of them away from the default. 
+  If you want to set both accelerations away from the default, but to the same value,
+  there won't be a compatibility problem; in that case, set CYCLE_ACCEL_ENEMY_OVERRIDE
+  and CYCLE_ACCEL_TEAM_OVERRIDE to 0 and old clients will be allowed in. However, you
+  should manually lock out players with 0.2.7 clients, for example by modifying
+  CYCLE_ACCEL_RIM a tiny bit.
+- "Team Red" bug. If the server allows maximally two teams, no team ever
+  gets to be Team Red.
+- Phasing made even more difficult; nice side effect of the fix is
+  reduced network bandwidth usage.
+- Speed gauge resets between rounds.
+
+>>>>>>> .merge-right.r4902
 Changes since 0.2.8.1:
 - Timestamps and teamscores added to scorelog.txt
 - Dedicated server now works on FreeBSD and OpenBSD
@@ -30,7 +72,8 @@ Changes since 0.2.8.1:
 - Team spawn formation is now configurable
 - Added reasons to bans
 - Added spectator autokicking
-- Added history to chat and console (wrtlprnft)
+- Added history to chat and console (wrtlprnft). Press "Cursor up" to
+  edit and repeat previous chats and console commands.
 - You only enter a game once your client is synced
 - /msg now prefers exact matches over partial matches
 - Cycles now have better memory for pending turns (wrtlprnft)

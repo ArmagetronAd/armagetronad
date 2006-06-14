@@ -52,6 +52,10 @@ void gSensor::PassEdge(const eWall *ww,REAL time,REAL a,int r){
             {
                 type=gSENSOR_SELF;
             }
+            else if ( owner && owned && owner->Team() == owned->Team() )
+            {
+                type=gSENSOR_TEAMMATE;
+            }
             else
             {
                 type=gSENSOR_ENEMY;

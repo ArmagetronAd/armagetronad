@@ -101,11 +101,33 @@ static nSettingItemWatched<REAL> sg_cycleBrakeDepleteConf("CYCLE_BRAKE_DEPLETE",
 // static nSettingItem<REAL> sg_cycleBrakeDepleteConf("CYCLE_BRAKE_DEPLETE",sg_cycleBrakeDeplete );
 
 // cycle width: it won't fit into tunnels that are smaller than this
-/*
 REAL sg_cycleWidth = 0;
-static tSettingItem<REAL> c_cw("CYCLE_WIDTH",
-                               sg_cycleWidth);
-*/
+static nSettingItemWatched<REAL> c_cw("CYCLE_WIDTH",
+                                      sg_cycleWidth, nConfItemVersionWatcher::Group_Bumpy, 14 );
+
+REAL sg_cycleWidthSide = 0;
+static nSettingItemWatched<REAL> c_cws("CYCLE_WIDTH_SIDE",
+                                       sg_cycleWidthSide, nConfItemVersionWatcher::Group_Bumpy, 14 );
+// calculate the gridning distance sparks should start flying at
+REAL sg_GetSparksDistance()
+{
+    if ( sg_cycleWidth < 2 * sg_cycleWidthSide )
+        return sg_cycleWidth;
+    else if ( sg_cycleWidthSide > 0 )
+        return sg_cycleWidthSide * 2;
+    else
+        return .25; // return 0.2.8.2 default
+}
+
+// amout of rubber you use per meter when you squeeze inside a too tight tunnel
+// when just barely squeezed
+REAL sg_cycleWidthRubberMin = 1;
+static nSettingItemWatched<REAL> c_cwrmax("CYCLE_WIDTH_RUBBER_MIN",
+        sg_cycleWidthRubberMin, nConfItemVersionWatcher::Group_Bumpy, 14 );
+// when squeezed to a point
+REAL sg_cycleWidthRubberMax = 1;
+static nSettingItemWatched<REAL> c_cwrmin("CYCLE_WIDTH_RUBBER_MAX",
+        sg_cycleWidthRubberMax, nConfItemVersionWatcher::Group_Bumpy, 14 );
 
 // base speed of cycle im m/s
 static REAL sg_speedCycle=10;
@@ -139,6 +161,10 @@ static tSettingItem<REAL> c_st("CYCLE_START_SPEED",
 REAL sg_delayCycle = .1;
 static nSettingItem<REAL> c_d("CYCLE_DELAY",
                               sg_delayCycle);
+//bonus for turns in the same direcion
+REAL sg_delayCycleDoublebindBonus = 1.;
+static nSettingItemWatched<REAL> c_d_d_b("CYCLE_DELAY_DOUBLEBIND_BONUS",
+        sg_delayCycleDoublebindBonus, nConfItemVersionWatcher::Group_Bumpy, 14 );
 
 // number of turns buffered exactly
 int sg_cycleTurnMemory = 3;
@@ -182,13 +208,13 @@ REAL sg_accelerationCycleTeam = 1;
 static nSettingItemWatched<REAL> c_act("CYCLE_ACCEL_TEAM",
                                        sg_accelerationCycleTeam,
                                        nConfItemVersionWatcher::Group_Bumpy,
-                                       8);
+                                       14);
 
 REAL sg_accelerationCycleEnemy = 1;
 static nSettingItemWatched<REAL> c_ace("CYCLE_ACCEL_ENEMY",
                                        sg_accelerationCycleEnemy,
                                        nConfItemVersionWatcher::Group_Bumpy,
-                                       8);
+                                       14);
 
 REAL sg_accelerationCycleRim = 0;
 static nSettingItemWatched<REAL> c_acr("CYCLE_ACCEL_RIM",
@@ -202,6 +228,12 @@ static nSettingItemWatched<REAL> c_acs("CYCLE_ACCEL_SLINGSHOT",
                                        nConfItemVersionWatcher::Group_Bumpy,
                                        8);
 
+REAL sg_accelerationCycleTunnel = 1;
+static nSettingItemWatched<REAL> c_acu("CYCLE_ACCEL_TUNNEL",
+                                       sg_accelerationCycleTunnel,
+                                       nConfItemVersionWatcher::Group_Bumpy,
+                                       14);
+
 // acceleration offset
 static REAL sg_accelerationCycleOffs=2;
 static nSettingItem<REAL> c_ao("CYCLE_ACCEL_OFFSET",
@@ -212,6 +244,56 @@ static nSettingItem<REAL> c_ao("CYCLE_ACCEL_OFFSET",
 static REAL sg_nearCycle=6;
 static nSettingItem<REAL> c_n("CYCLE_WALL_NEAR",
                               sg_nearCycle);
+
+// boost settings, absolute speed increase applied when you break from a wall
+REAL sg_boostCycleSelf = 0;
+static nSettingItemWatched<REAL> c_bco("CYCLE_BOOST_SELF",
+                                       sg_boostCycleSelf,
+                                       nConfItemVersionWatcher::Group_Bumpy,
+                                       14);
+
+REAL sg_boostCycleTeam = 0;
+static nSettingItemWatched<REAL> c_bct("CYCLE_BOOST_TEAM",
+                                       sg_boostCycleTeam,
+                                       nConfItemVersionWatcher::Group_Bumpy,
+                                       14);
+
+REAL sg_boostCycleEnemy = 0;
+static nSettingItemWatched<REAL> c_bce("CYCLE_BOOST_ENEMY",
+                                       sg_boostCycleEnemy,
+                                       nConfItemVersionWatcher::Group_Bumpy,
+                                       14);
+
+REAL sg_boostCycleRim = 0;
+static nSettingItemWatched<REAL> c_bcr("CYCLE_BOOST_RIM",
+                                       sg_boostCycleRim,
+                                       nConfItemVersionWatcher::Group_Bumpy,
+                                       14);
+
+// boostFactor settings, speed factor when you break from a wall
+REAL sg_boostFactorCycleSelf = 1;
+static nSettingItemWatched<REAL> c_bfco("CYCLE_BOOSTFACTOR_SELF",
+                                        sg_boostFactorCycleSelf,
+                                        nConfItemVersionWatcher::Group_Bumpy,
+                                        14);
+
+REAL sg_boostFactorCycleTeam = 1;
+static nSettingItemWatched<REAL> c_bfct("CYCLE_BOOSTFACTOR_TEAM",
+                                        sg_boostFactorCycleTeam,
+                                        nConfItemVersionWatcher::Group_Bumpy,
+                                        14);
+
+REAL sg_boostFactorCycleEnemy = 1;
+static nSettingItemWatched<REAL> c_bfce("CYCLE_BOOSTFACTOR_ENEMY",
+                                        sg_boostFactorCycleEnemy,
+                                        nConfItemVersionWatcher::Group_Bumpy,
+                                        14);
+
+REAL sg_boostFactorCycleRim = 1;
+static nSettingItemWatched<REAL> c_bfcr("CYCLE_BOOSTFACTOR_RIM",
+                                        sg_boostFactorCycleRim,
+                                        nConfItemVersionWatcher::Group_Bumpy,
+                                        14);
 
 // tolerance for packet loss
 static REAL sg_packetLossTolerance = 0;
@@ -350,7 +432,7 @@ static int sg_cycleMaxRefCount = 30000;
 static tSettingItem<int> conf_sgCycleMaxRefCount ("CYCLE_MAX_REFCOUNT", sg_cycleMaxRefCount );
 
 static inline bool clamp(REAL &c, REAL min, REAL max){
-    tASSERT(min < max);
+    tASSERT(min <= max);
 
     if (!finite(c))
     {
@@ -515,14 +597,32 @@ float gCycleMovement::MaximalSpeed( void )
     wallAcceleration = sg_accelerationCycleRim * sg_accelerationCycle;
     if ( wallAcceleration > maxWallAcceleration )
         maxWallAcceleration = wallAcceleration;
-    // self acceleration is tricky: slingshot countermeasures have to be taken into account
-    wallAcceleration = sg_accelerationCycleSelf * sg_accelerationCycle;
-    wallAcceleration *= sg_accelerationCycleSlingshot;
-    if ( wallAcceleration > maxWallAcceleration )
-        maxWallAcceleration = wallAcceleration;
 
-    // and there can always be two walls, and use wall accel formula
-    maxWallAcceleration *= 2 * ( 1/sg_accelerationCycleOffs - 1/(sg_accelerationCycleOffs+sg_nearCycle ) );
+    // self acceleration is tricky: slingshot countermeasures have to be taken into account
+    REAL wallAccelerationSelf = sg_accelerationCycleSelf * sg_accelerationCycle;
+
+    {
+        // different combinations are now possible to get a maximum. It could be a single wall:
+        REAL wallAccelerationSingle = maxWallAcceleration;
+        if ( wallAccelerationSingle < wallAccelerationSelf )
+            wallAccelerationSingle = wallAccelerationSelf;
+
+        // it could be a slingshot, one arbitrary wall and one own wall:
+        REAL wallAccelerationSlingshot = ( wallAccelerationSingle + wallAccelerationSelf ) * sg_accelerationCycleSlingshot;
+
+        // or a tunnel, two foreign walls:
+        REAL wallAccelerationTunnel = ( maxWallAcceleration ) * sg_accelerationCycleTunnel;
+
+
+        // take the maximum
+        if ( maxWallAcceleration < wallAccelerationSlingshot )
+            maxWallAcceleration = wallAccelerationSlingshot;
+        if ( maxWallAcceleration < wallAccelerationTunnel )
+            maxWallAcceleration = wallAccelerationTunnel;
+    }
+
+    // use wall accel formula to take wall distance into account
+    maxWallAcceleration *= ( 1/sg_accelerationCycleOffs - 1/(sg_accelerationCycleOffs+sg_nearCycle ) );
 
     // maximal sustainable speed from that
     REAL maxSpeed = sg_MaxSpeed( maxWallAcceleration );
@@ -688,13 +788,14 @@ bool gCycleMovement::Vulnerable() const
 // *
 // *******************************************************************************************
 //!
+//!	@param  direction the direction of the planned turn
 //!		@return	true if a new turn is possible right now
 //!
 // *******************************************************************************************
 
-bool gCycleMovement::CanMakeTurn( void ) const
+bool gCycleMovement::CanMakeTurn( int direction ) const
 {
-    return pendingTurns.empty() && CanMakeTurn( lastTime );
+    return pendingTurns.empty() && CanMakeTurn( lastTime, direction );
 }
 
 // *******************************************************************************************
@@ -704,13 +805,14 @@ bool gCycleMovement::CanMakeTurn( void ) const
 // *******************************************************************************************
 //!
 //!     @param  time the time to check
+//!	@param  direction the direction of the planned turn
 //!		@return	true if a new turn is possible at the given time
 //!
 // *******************************************************************************************
 
-bool gCycleMovement::CanMakeTurn( REAL time ) const
+bool gCycleMovement::CanMakeTurn( REAL time, int direction ) const
 {
-    return time >= GetTurnDelay() + lastTurnTime_;
+    return time >= GetNextTurn(direction);
 }
 
 // *******************************************************************************************
@@ -734,6 +836,18 @@ REAL gCycleMovement::GetTurnDelay( void ) const
     return baseDelay * pow( speedFactor, sg_delayCycleTimeBased-1 );
 }
 
+//!		@return	the delay between turns in seconds
+REAL gCycleMovement::GetTurnDelayDb( void ) const
+{
+    // the basic delay as it was before 0.2.8 looked like this:
+    REAL baseDelay   = sg_delayCycle*sg_delayCycleBonus/SpeedMultiplier()*sg_delayCycleDoublebindBonus;
+
+    // we're modifying it by a power law to make speed turns easier or harder:
+    REAL speedFactor = verletSpeed_/(sg_speedCycle*SpeedMultiplier());
+
+    return baseDelay * pow( speedFactor, sg_delayCycleTimeBased-1 );
+}
+
 // *******************************************************************************************
 // *
 // *	GetNextTurn
@@ -744,9 +858,28 @@ REAL gCycleMovement::GetTurnDelay( void ) const
 //!
 // *******************************************************************************************
 
-REAL gCycleMovement::GetNextTurn( void ) const
+REAL gCycleMovement::GetNextTurn( int direction ) const
 {
-    return lastTurnTime_ + GetTurnDelay();
+    float right,left;
+#ifdef DEBUG_X
+    std::cerr << "GetNextTurn: " << direction << std::endl;
+#endif
+    if(direction == 1) {
+        right = lastTurnTimeRight_ + GetTurnDelayDb();
+        left = lastTurnTimeLeft_ + GetTurnDelay();
+    } else {
+        right = lastTurnTimeLeft_ + GetTurnDelayDb();
+        left = lastTurnTimeRight_ + GetTurnDelay();
+    }
+#ifdef DEBUG_X
+    std::cerr << "GetTurnDelay: " << GetTurnDelay() << std::endl;
+    std::cerr << "GetTurnDelayDb: " << GetTurnDelayDb() << std::endl;
+    std::cerr << "lastTurnTimeRight_: " << lastTurnTimeRight_ << std::endl;
+    std::cerr << "lastTurnTimeLeft_: " << lastTurnTimeLeft_ << std::endl;
+    std::cerr << "right: " << right << std::endl;
+    std::cerr << "left: " << left << std::endl;
+#endif
+    return left > right ? left : right;
 }
 
 // *******************************************************************************************
@@ -934,10 +1067,12 @@ void gCycleMovement::OnNotifyNewDestination( gDestination * dest )
 // *******************************************************************************************
 //!
 //!		@param	wall	   the wall the other cycle is grinding
+//!		@param	pos	       the position of the grind
+//!     @param  dir        the direction the raycast triggering the gridding comes from
 //!
 // *******************************************************************************************
 
-void gCycleMovement::OnDropTempWall( gPlayerWall * wall )
+void gCycleMovement::OnDropTempWall( gPlayerWall * wall, eCoord const & pos, eCoord const & dir )
 {
 }
 
@@ -1131,7 +1266,7 @@ static void DropTempWall( eCoord const & dir, gSensor const & sensor )
 
             // let it drop wall
             if ( other )
-                other->DropTempWall( w );
+                other->DropTempWall( w, sensor.before_hit, dir );
         }
     }
 }
@@ -1480,13 +1615,16 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 REAL t = currentDestination->direction * dirDrive;
 
                 // if we can't turn now, simulate a bit further
-                if ( fabs(t) > .01 && !CanMakeTurn() )
+                if ( fabs(t) > .01 && !pendingTurns.empty() && !CanMakeTurn(pendingTurns.back()) )
                 {
-                    REAL nextTurn = GetNextTurn() + .005;
+                    REAL nextTurn = GetNextTurn(pendingTurns.back()) + .005;
                     if ( nextTurn < currentTime )
                     {
                         TimestepCore( nextTurn );
-                        lastTurnTime_ = -100;
+                        if(pendingTurns.back() == 1)
+                            lastTurnTimeRight_ = -100;
+                        else
+                            lastTurnTimeLeft_ = -100;
                     }
                     else
                     {
@@ -1628,16 +1766,21 @@ bool gCycleMovement::Timestep( REAL currentTime )
     }
 
     // simulate exactly to the time of the next turn if it is in reach
-    REAL nextTurn = GetNextTurn();
-    if ( !pendingTurns.empty() && currentTime > nextTurn )
+    if ( !pendingTurns.empty())
     {
-        if ( nextTurn > lastTime )
-            TimestepCore( nextTurn );
-        lastTurnTime_ = -100;
+        REAL nextTurn = GetNextTurn(pendingTurns.front());
+        if(currentTime>nextTurn) {
+            if ( nextTurn > lastTime )
+                TimestepCore( nextTurn );
+            if(pendingTurns.front() == 1)
+                lastTurnTimeRight_ = -100;
+            else
+                lastTurnTimeLeft_ = -100;
 
-        //con << "Executing delayed turn at time " << lastTime << "\n";
-        Turn(pendingTurns.front());
-        pendingTurns.pop_front();
+            //con << "Executing delayed turn at time " << lastTime << "\n";
+            Turn(pendingTurns.front());
+            pendingTurns.pop_front();
+        }
     }
 
     // do the rest of the timestep
@@ -1810,7 +1953,9 @@ void gCycleMovement::CopyFrom( const gCycleMovement & other )
 #endif
 
     // update number of turns if the player is not turning wildly
-    if ( lastTime > GetNextTurn() + 2 * GetTurnDelay() )
+    REAL right = GetNextTurn(1);
+    REAL left  = GetNextTurn(-1);
+    if ( lastTime > (right > left ? right : left) + 2 * GetTurnDelay() )
         turns			= other.turns;
 }
 
@@ -1878,7 +2023,7 @@ void gCycleMovement::CopyFrom( const SyncData & sync, const gCycleMovement & oth
     MoveSafely( sync.pos, sync.time, sync.time );
 
     // set last turn
-    lastTurnTime_ = -100;
+    lastTurnTimeRight_ = lastTurnTimeLeft_ = -100;
 }
 
 // *******************************************************************************************
@@ -1906,6 +2051,32 @@ void gCycleMovement::InitAfterCreation( void )
 
 // version feature indicating that proper scaling of the base acceleration with the speed multiplier is used
 static nVersionFeature sg_correctAccelerationScaling( 8 );
+
+// calculate essential rubber values
+static void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness )
+{
+    // base values
+    max=sg_rubberCycle;
+    effectiveness=1;
+
+    // make rubber more effective for high ping players
+    if ( player )
+    {
+        if ( max > 0 )
+            // either by increasing the effectiveness...
+            effectiveness *= ( max + player->ping * sg_rubberCyclePing )/max;
+        else
+            // or the reservoir.
+            max += player->ping * sg_rubberCyclePing;
+    }
+
+    {
+        // modify rubber effectiveness by a speed dependant power law
+        REAL speedFactor = speed/(sg_speedCycle*gCycleMovement::SpeedMultiplier());
+
+        effectiveness *= pow( speedFactor, sg_rubberCycleTimeBased );
+    }
+}
 
 // *******************************************************************************************
 // *
@@ -1972,15 +2143,28 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
 
     // sense near wall behind us, accelerate more
     REAL totalWallAcceleration = 0; // total acceleration by walls
-    // REAL tunnelWidth           = 0; // with of the tunnel the cycle is in
+    REAL tunnelWidth           = 0; // with of the tunnel the cycle is in
+    REAL sideWidth             = sg_cycleWidthSide * 2; // minimal distance to wall
     bool slingshot  = true;         // flag indicating whether the cycle is between two walls
     bool oneOwnWall = false;        // flag indicating whether one of the walls is your own
     for(int d=1;d>=-1;d-=2){
-        gSensor rear(this,pos,dirDrive.Turn(-1,d));
+        // the direction to cast the acceleration rays in
+        eCoord dirCast = dirDrive.Turn(-1,d);
+        gSensor rear(this,pos,dirCast);
         rear.detect(sg_nearCycle);
 
         if ( rear.ehit )
         {
+            sg_ArchiveReal( rear.hit, 9 );
+
+            // update the minimal wall distance
+            if ( sideWidth > rear.hit )
+                sideWidth = rear.hit;
+
+            // drop walls that are grinded
+            if ( rear.hit < verletSpeed_ * .01 )
+                ::DropTempWall( dirCast, rear );
+
             // see if the wall is parallel to the driving direction, only then should it add speed
             eCoord wallVec = rear.ehit->Vec();
             if ( fabs( eCoord::F( wallVec, dirDrive  ) ) > .9 )
@@ -1989,7 +2173,7 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
                 REAL wallAcceleration=SpeedMultiplier() * sg_accelerationCycle * ((1/(rear.hit+sg_accelerationCycleOffs))
                                       -(1/(sg_nearCycle+sg_accelerationCycleOffs)));
 
-                // tunnelWidth += rear.hit;
+                tunnelWidth += rear.hit;
 
                 // apply modificators
                 switch (rear.type)
@@ -2013,6 +2197,8 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
                     break;
 
                 }
+
+                sg_ArchiveReal( wallAcceleration, 9 );
                 totalWallAcceleration += wallAcceleration;
             }
             else
@@ -2028,18 +2214,85 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
         sg_ArchiveReal( totalWallAcceleration, 9 );
     }
 
-    /*
     // kill cycle if it is inside a too narrow channel
-    if ( sn_GetNetState() != nCLIENT && slingshot && tunnelWidth < sg_cycleWidth )
+    if ( slingshot && tunnelWidth < sg_cycleWidth || sideWidth < sg_cycleWidthSide )
     {
-        st_Breakpoint();
-        throw gCycleDeath( NULL, pos );
-    }
-    */
+        tunnelWidth = 0;
+        REAL sideWidth = sg_cycleWidthSide * 2;
 
-    // apply slingshot multiplier
-    if ( slingshot && oneOwnWall )
-        totalWallAcceleration *= sg_accelerationCycleSlingshot;
+        // check again with sensors to the front, both sensor pairs need
+        // to see a narrow tunnel
+        for(int d=1;d>=-1;d-=2)
+        {
+            // the direction to cast the acceleration rays in
+            eCoord dirCast = dirDrive.Turn(1,d);
+            gSensor front(this,pos,dirCast);
+            front.detect(sg_nearCycle);
+
+            if ( front.ehit && front.ehit->Other() )
+            {
+                sg_ArchiveReal( front.hit, 9 );
+
+                // update the minimal wall distance
+                if ( sideWidth > front.hit )
+                    sideWidth = front.hit;
+
+                tunnelWidth += front.hit;
+            }
+            else
+            {
+                tunnelWidth += sg_cycleWidth;
+            }
+        }
+
+        if ( tunnelWidth < sg_cycleWidth || sideWidth < sg_cycleWidthSide )
+        {
+            // determine the space available measured in the space allowed
+            REAL available1 = 1;
+            REAL available2 = 1;
+            if ( sg_cycleWidth > 0 )
+                available1 = tunnelWidth/sg_cycleWidth;
+            if ( sg_cycleWidthSide > 0 )
+                available2 = sideWidth/sg_cycleWidthSide;
+            REAL available = available1 < available2 ? available1 : available2;
+
+            // get rubber values
+            REAL rubberGranted, rubberEffectiveness;
+            sg_RubberValues( player, verletSpeed_, rubberGranted, rubberEffectiveness );
+
+            // calculate rubber usage from squeezing
+            REAL rubberUsage = sg_cycleWidthRubberMax + ( sg_cycleWidthRubberMin - sg_cycleWidthRubberMax ) * available;
+
+            // use up rubber
+            if ( rubberEffectiveness > 0 )
+            {
+                rubber += rubberUsage * dt * verletSpeed_ / rubberEffectiveness;            }
+            else
+            {
+                rubber = rubberGranted + 10;
+            }
+
+            // decide over kill
+            if ( rubber > rubberGranted || ( sg_cycleWidthRubberMax == 0 && sg_cycleWidthRubberMin == 0 ) )
+            {
+                if ( sn_GetNetState() != nCLIENT )
+                {
+                    throw gCycleDeath( pos );
+                }
+                else
+                    rubber = rubberGranted;
+            }
+        }
+    }
+
+    // apply slingshot/tunnel multiplier
+    if ( slingshot )
+    {
+        if ( oneOwnWall )
+            totalWallAcceleration *= sg_accelerationCycleSlingshot;
+        else
+            totalWallAcceleration *= sg_accelerationCycleTunnel;
+    }
 
     // apply wall acceleration
     acceleration += totalWallAcceleration;
@@ -2106,7 +2359,7 @@ bool gCycleMovement::DoTurn( int dir )
     if (dir >  1) dir =  1;
     if (dir < -1) dir = -1;
 
-    if ( CanMakeTurn( lastTime ) )
+    if ( CanMakeTurn( lastTime, dir ) )
     {
         // store last postion
         lastTurnPos_ = pos;
@@ -2126,21 +2379,70 @@ bool gCycleMovement::DoTurn( int dir )
         // send out a sensor a bit backwards and forwards into the turn direction to
         // copy all temporary walls into the grid
         {
-            eCoord range = nextDirDrive * .1 * Speed();
-            gSensor gridder1( this, Position(), range );
-            gridder1.detect( 1 );
+            REAL range = .1 * Speed();
+            eCoord dirCast = nextDirDrive;
+            gSensor gridder1( this, Position(), dirCast );
+            gridder1.detect( range );
             if ( gridder1.ehit )
                 ::DropTempWall( nextDirDrive, gridder1 );
 
-            gSensor gridder2( this, Position(), -range );
-            gridder2.detect( 1 );
-            if ( gridder2.ehit )
-                ::DropTempWall( nextDirDrive, gridder2 );
-
-            gSensor gridder3( this, Position()-range*.5, range );
-            gridder3.detect( 1 );
+            gSensor gridder3( this, Position() - dirCast * (range*.5), dirCast );
+            gridder3.detect( range );
             if ( gridder3.ehit )
                 ::DropTempWall( nextDirDrive, gridder3 );
+
+            // the ray backwards should detect walls that affected the acceleration;
+            // they can also give a boost. Increase the range.
+            if ( range < sg_nearCycle )
+                range = sg_nearCycle;
+
+            gSensor gridder2( this, Position(), -dirCast );
+            gridder2.detect( range );
+            if ( gridder2.ehit )
+            {
+                ::DropTempWall( nextDirDrive, gridder2 );
+
+                // apply the boost. Calculate wall distance
+                REAL dist = gridder2.hit;
+
+                // calculate the factor acceleration would be multiplied with
+                REAL accellerationFactorOffset = 1/(sg_nearCycle+sg_accelerationCycleOffs);
+                REAL accelerationFactor = (1/(dist+sg_accelerationCycleOffs)) - accellerationFactorOffset;
+                // this would be the maximal acceleration factor
+                REAL accelerationFactorMax = (1/sg_accelerationCycleOffs) - accellerationFactorOffset;
+
+                // select boost settings according to wall type
+                // apply modificators
+                REAL boost = 0, boostFactor = 1;
+                switch (gridder2.type)
+                {
+                case gSENSOR_SELF:
+                    boost = sg_boostCycleSelf;
+                    boostFactor = sg_boostFactorCycleSelf;
+                    break;
+                case gSENSOR_TEAMMATE:
+                    boost = sg_boostCycleTeam;
+                    boostFactor = sg_boostFactorCycleTeam;
+                    break;
+                case gSENSOR_ENEMY:
+                    boost = sg_boostCycleEnemy;
+                    boostFactor = sg_boostFactorCycleEnemy;
+                    break;
+                case gSENSOR_RIM:
+                    boost = sg_boostCycleRim;
+                    boostFactor = sg_boostFactorCycleRim;
+                    break;
+                case gSENSOR_NONE:
+                    break;
+                }
+
+                // apply acceleration factor to boost
+                boostFactor = 1 + ( boostFactor - 1 ) * accelerationFactor / accelerationFactorMax;
+                boost *= SpeedMultiplier() * accelerationFactor / accelerationFactorMax;
+
+                // apply boost to speed
+                verletSpeed_ = verletSpeed_ * boostFactor + boost;
+            }
 
             // if edges have been inserted into the grid, find a new current face.
             FindCurrentFace();
@@ -2149,7 +2451,10 @@ bool gCycleMovement::DoTurn( int dir )
         // update driving directions
         lastDirDrive = dirDrive;
 
-        lastTurnTime_ = lastTime;
+        if(dir == 1)
+            lastTurnTimeRight_ = lastTime;
+        else
+            lastTurnTimeLeft_ = lastTime;
 
         dirDrive = nextDirDrive;
 
@@ -2296,29 +2601,17 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
     rubberSpeedFactor = 1;
 
     // be a little nice and don't drive into the wall
-    REAL rubber_granted=sg_rubberCycle;
+    REAL rubber_granted, rubberEffectiveness;
 
-    // phasing test debug code
-    //if ( tSysTimeFloat() < 16 || ( Player() && Player()->IsHuman() ) )
-    //    rubber_granted = 0;
+    // get rubber values
+    sg_RubberValues( player, verletSpeed_, rubber_granted, rubberEffectiveness );
 
     // rubber effectiveness right now
-    REAL rubberEffectiveness = 1/(1 + rubberMalus );
-
-    // make rubber more effective for high ping players
-    if ( player )
-    {
-        if ( rubber_granted > 0 )
-            // either by increasing the effectiveness...
-            rubberEffectiveness *= ( rubber_granted + player->ping * sg_rubberCyclePing )/rubber_granted;
-        else
-            // or the reservoir.
-            rubber_granted += player->ping * sg_rubberCyclePing;
-    }
+    rubberEffectiveness /= (1 + rubberMalus );
 
     // reduce it further if cycle turned recently
     {
-        REAL delayTime = lastTurnTime_ + GetTurnDelay() * sg_rubberCycleDelay;
+        REAL delayTime = (lastTurnTimeRight_ > lastTurnTimeLeft_ ? lastTurnTimeRight_ : lastTurnTimeLeft_) + GetTurnDelay() * sg_rubberCycleDelay;
         if ( lastTime < delayTime )
         {
             rubberEffectiveness *= sg_rubberCycleDelayBonus;
@@ -2347,12 +2640,6 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
         //clamp effectiveness of rubber
         if ( rubberEffectiveness <= 0 )
             rubberEffectiveness = .0001;
-        {
-            // modify rubber effectiveness by a speed dependant power law
-            REAL speedFactor = verletSpeed_/(sg_speedCycle*SpeedMultiplier());
-
-            rubberEffectiveness *= pow( speedFactor, sg_rubberCycleTimeBased );
-        }
 
         // formerly: rubberFactor = .5
         REAL beta = ts * sg_rubberCycleSpeed;
@@ -2626,7 +2913,7 @@ void gCycleMovement::MyInitAfterCreation( void )
     turns=1;
 
     pendingTurns.clear();
-    lastTurnTime_=lastTime-10;
+    lastTurnTimeRight_ = lastTurnTimeLeft_=lastTime-10;
 
     lastTimeAlive_ = lastTime;
 

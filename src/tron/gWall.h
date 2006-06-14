@@ -74,6 +74,8 @@ public:
 
 class gPlayerWall:public eWall{
 public:
+    friend class gNetPlayerWall;
+
     gPlayerWall(gNetPlayerWall*w, gCycle *p);
     virtual ~gPlayerWall();
 
@@ -98,8 +100,8 @@ public:
 
     int WindingNumber() const {return windingNumber_;}
 
-    REAL LocalToGlobal( REAL a ) const;
-    REAL GlobalToLocal( REAL a ) const;
+    REAL LocalToGlobal( REAL a ) const; //!< transform alpha value of this wall into alpha value of underlying net wall
+    REAL GlobalToLocal( REAL a ) const; //!< transform alpha value of underlying net wall to value of this wall
 
     REAL Time(REAL a) const;
     REAL Pos(REAL a) const;
@@ -131,7 +133,8 @@ private:
     //  nObserverPtr< gNetPlayerWall > netWall_;
 
     int windingNumber_;
-    REAL begAlpha_, endAlpha_;	// relative position i gNetPlayerWall
+    // REAL begAlpha_, endAlpha_;	// relative position i gNetPlayerWall
+    REAL begDist_, endDist_;	// cycle driving distance at beginning and end
 
     gPlayerWall();
 };
@@ -144,6 +147,7 @@ class gNetPlayerWall: public nNetObject{
 
     tCONTROLLED_PTR(gCycle) cycle_;       // our cycle
     tCONTROLLED_PTR(eTempEdge) edge_;       // the eEdge we are representing
+    gPlayerWall * lastWall_;                //! the last wall that was dropped into the grid by PartialCopyIntoGrid()
 
     eCoord dir;      // the direction from start to end
     REAL dbegin;    // the start position
@@ -161,6 +165,7 @@ bool           preliminary:1; // is it a eWall preliminary installed?
     void InitArray();
     void MyInitAfterCreation();
     void real_CopyIntoGrid(eGrid *grid);
+    void PartialCopyIntoGrid(eGrid *grid);
     void real_Update(REAL tEnd,const eCoord &pend, bool force );
 public:
     virtual void InitAfterCreation();

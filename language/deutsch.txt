@@ -790,7 +790,7 @@ input_mess_up_help            Scrollt die Nachrichten eine Seite nach oben.
 
 input_mess_down_text          nach unten scrollen
 input_mess_down_help          Scrollt die Nachrichten eine Seite nach unten.
-	
+
 #********************************************
 #********************************************
 #
@@ -1472,8 +1472,8 @@ team_menu_player_help         Lässt diesen Spieler das Team wechseln
 team_menu_join                Trete \1 bei
 team_menu_join_help           Werde Mitglied von diesem Team
 
-team_menu_create              Neues Team
-team_menu_create_help         Gründet ein neues Team und lässt ihm den Spieler beitreten
+team_menu_create              Neues Team/Beliebiges Team
+team_menu_create_help         Gründet ein neues Team und lässt den Spieler beitreten, oder, sollte das nicht möglich sein, tritt einem beliebigen Team bei
 
 team_owned_by                 \1s Team
 team_ai                       Computergegner

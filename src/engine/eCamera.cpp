@@ -53,6 +53,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eDebugLine.h"
 #include "tMath.h"
 #include "eNetGameObject.h"
+#include "nObserver.h"
 
 #include "eSoundMixer.h"
 #include "rViewport.h"
@@ -168,7 +169,7 @@ uActionCamera eCamera::se_moveLeft("MOVE_LEFT",
                                    uAction::uINPUT_ANALOG);
 
 uActionCamera eCamera::se_zoomOut("ZOOM_OUT",
-                                -70,
+                                  -70,
                                   uAction::uINPUT_ANALOG);
 
 uActionCamera eCamera::se_zoomIn("ZOOM_IN",
@@ -177,18 +178,18 @@ uActionCamera eCamera::se_zoomIn("ZOOM_IN",
 
 
 class uGlanceAction : public uActionCamera {
-  public:
+public:
     eCoord const relDir;
     uGlanceAction(char* const name, int priority, eCoord const relativeDirection)
-        : uActionCamera(name, priority), relDir(relativeDirection) {}
+            : uActionCamera(name, priority), relDir(relativeDirection) {}
 };
 
 uGlanceAction eCamera::se_glance[eCamera::se_glances] = {
-    uGlanceAction("GLANCE_FORWARD",-85,eCoord(1,0)), // CHECK: Want to change priority? I have no clue what it does, so I leave that to you ...
-    uGlanceAction("GLANCE_BACK",-90,eCoord(-1,0)),
-    uGlanceAction("GLANCE_RIGHT",-100,eCoord(0,-1)),
-    uGlanceAction("GLANCE_LEFT",-110,eCoord(0,1))
-};
+            uGlanceAction("GLANCE_FORWARD",-85,eCoord(1,0)), // CHECK: Want to change priority? I have no clue what it does, so I leave that to you ...
+            uGlanceAction("GLANCE_BACK",-90,eCoord(-1,0)),
+            uGlanceAction("GLANCE_RIGHT",-100,eCoord(0,-1)),
+            uGlanceAction("GLANCE_LEFT",-110,eCoord(0,1))
+        };
 
 
 
@@ -297,7 +298,7 @@ inline REAL robust_acos(REAL arg) {
 eCoord eCamera::nextDirIfGlancing(eCoord const & dir, eCoord const & targetDir, REAL ts) {
 
     switch (glanceMode) {
-          case 0: {
+    case 0: {
             // glance keys rotate the camera with constant angular velocity
             REAL d = dir*targetDir;
             REAL arc = glanceAngularVelocity*ts;
@@ -309,14 +310,14 @@ eCoord eCamera::nextDirIfGlancing(eCoord const & dir, eCoord const & targetDir, 
                 return newdir;
             }
             break;
-        } case 1: {
+    } case 1: {
             // glance keys rotate camera with angular velocity proportional to alpha
             // CHECK: You wanted to fix that trigonometry? Good luck :)
             REAL arc = robust_acos(eCoord::F(dir,targetDir)) * ts * glanceAngularVelocity / (M_PI_2);
             if (dir*targetDir>0)
                 arc=-arc;
             return dir.Turn(cos(arc),sin(arc));
-        } case 2: {
+    } case 2: {
             // glance keys rotate camera with angular velocity =
             // glanceAngularVelocity * ((alpha<PI/2) ? sin(alpha) : glanceAngularVelocityBonus)
             REAL arc = glanceAngularVelocity*ts;
@@ -330,11 +331,53 @@ eCoord eCamera::nextDirIfGlancing(eCoord const & dir, eCoord const & targetDir, 
             }
             newdir.Normalize();
             return newdir;
-        } default:
-            return targetDir;
+    } default:
+        return targetDir;
     }
 }
 
+
+// pointer holding the last player watched actively
+static nObserverPtr< ePlayerNetID > se_watchedPlayer[ MAX_PLAYERS ];
+
+// returns the player a camera last watched for modification
+static nObserverPtr< ePlayerNetID > & se_GetWatchedPlayer( eCamera * cam )
+{
+    static nObserverPtr< ePlayerNetID > dummy;
+
+    ePlayer const * localPlayer = cam->LocalPlayer();
+    if ( !localPlayer )
+        return dummy;
+
+    return se_watchedPlayer[ localPlayer->ID() ];
+}
+
+// returns the last watched game object
+static eGameObject * se_GetWatchedObject( eCamera * cam )
+{
+    ePlayerNetID const * player = se_GetWatchedPlayer( cam );
+    if ( player )
+        return player->Object();
+
+    return NULL;
+}
+
+static void se_SetWatchedObject( eCamera * cam, eGameObject * obj )
+{
+    nObserverPtr< ePlayerNetID > & player = se_GetWatchedPlayer( cam );
+
+    // switch the favorite player to watch if we switch away from him deliberately
+    if ( !player || ( player->Object() && player->Object()->Alive() ) )
+    {
+        // determine the player that controls the object, a bit awkward...
+        for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+        {
+            ePlayerNetID * p = se_PlayerNetIDs(i);
+            if ( p->Object() == obj )
+                player = p;
+        }
+    }
+}
 
 void eCamera::MyInit(){
     if (localPlayer){
@@ -430,6 +473,7 @@ void eCamera::MyInit(){
 }
 
 const ePlayerNetID* eCamera::Player() const { return netPlayer; }
+const ePlayer* eCamera::LocalPlayer() const { return localPlayer; }
 
 eCamera::eCamera(eGrid *g, rViewport *view,ePlayerNetID *p,
                  ePlayer *lp,eCamMode m)
@@ -534,7 +578,10 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
             turning+=.5;
         if (netPlayer) cent=netPlayer->Object();
         if (!InterestingToWatch(cent) && x>0)
+        {
             SwitchCenter(turn);
+            se_SetWatchedObject( this, center );
+        }
     }
 
     REAL ll=0,lu=0,ml=0,mf=0,mu=0,zi=1;
@@ -1550,8 +1597,12 @@ void eCamera::Timestep(REAL ts){
     // switch away from dead players
     if (lastSwitch>lastTime)
         lastSwitch=lastTime;
+
     if (!InterestingToWatch(Center()) && lastTime-lastSwitch>2 && (center==0 || lastTime-center->deathTime > 4)){ // CHECK: not glancing-related. gives the player a chance to analyse the cause of his death before the camera switches away.
-        SwitchCenter(1);
+        center = se_GetWatchedObject( this );
+        if ( !center || !InterestingToWatch(center) )
+            SwitchCenter(1);
+
         if (!InterestingToWatch(Center()))
         {
             newmode=CAMERA_FREE;
@@ -1901,40 +1952,40 @@ void eCamera::Timestep(REAL ts){
                 usernewpos=pos + centerpos - centerPosLast;
                 // usernewdir=newdir;
                 // usernewrise=newrise;
-//
-//                // use custom camera settings when glancing
-//                if ( localPlayer && localPlayer->smartCustomGlance && ( glancingBack || glancingRight || glancingLeft || glanceSmoothAbs > .01 ))
-//                {
-//                    // update blending factor raw data
-//                    REAL abs = fabs(glanceSmooth);
-//                    glanceSmoothAbs = abs > glanceSmoothAbs ? abs : glanceSmoothAbs;
-//
-//                    // calculate blending factor c. c=0 will take the smart cam position, c=1 the custom cam.
-//                    REAL b = 1 - glanceSmoothAbs;
-//                    REAL c = 1 - b/(b + ts * GLANCE_SPEED);
-//
-//                    // override: go all the way when glancing back
-//                    if ( glancingBack )
-//                    {
-//                        c = 1;
-//                        glanceSmoothAbs = 1;
-//                    }
-//
-//                    // the camera pitch is calculated anew every frame, blend it accordingly
-//                    usernewrise = newrise = newrise * ( 1-glanceSmoothAbs) + customPitch * glanceSmoothAbs;
-//
-//                    // the other values are updated every frame, blend them softer
-//                    if ( glancingBack || glancingRight || glancingLeft )
-//                    {
-//                        usernewpos  =  newpos = pos * (1-c) + (CenterPos() - CenterCamDir() * customBack) * c;
-//                        usernewz    = newz    = z * (1-c) + (CenterCamZ() + customRise) * c;
-//
-//                        newdir=centerpos-newpos;
-//                        REAL dist=sqrt(newdir.NormSquared());
-//                        if (dist<.001) dist=.01;
-//                        usernewdir=newdir=newdir*(1/sqrt(newdir.NormSquared()));
-//                    }
-//                }
+                //
+                //                // use custom camera settings when glancing
+                //                if ( localPlayer && localPlayer->smartCustomGlance && ( glancingBack || glancingRight || glancingLeft || glanceSmoothAbs > .01 ))
+                //                {
+                //                    // update blending factor raw data
+                //                    REAL abs = fabs(glanceSmooth);
+                //                    glanceSmoothAbs = abs > glanceSmoothAbs ? abs : glanceSmoothAbs;
+                //
+                //                    // calculate blending factor c. c=0 will take the smart cam position, c=1 the custom cam.
+                //                    REAL b = 1 - glanceSmoothAbs;
+                //                    REAL c = 1 - b/(b + ts * GLANCE_SPEED);
+                //
+                //                    // override: go all the way when glancing back
+                //                    if ( glancingBack )
+                //                    {
+                //                        c = 1;
+                //                        glanceSmoothAbs = 1;
+                //                    }
+                //
+                //                    // the camera pitch is calculated anew every frame, blend it accordingly
+                //                    usernewrise = newrise = newrise * ( 1-glanceSmoothAbs) + customPitch * glanceSmoothAbs;
+                //
+                //                    // the other values are updated every frame, blend them softer
+                //                    if ( glancingBack || glancingRight || glancingLeft )
+                //                    {
+                //                        usernewpos  =  newpos = pos * (1-c) + (CenterPos() - CenterCamDir() * customBack) * c;
+                //                        usernewz    = newz    = z * (1-c) + (CenterCamZ() + customRise) * c;
+                //
+                //                        newdir=centerpos-newpos;
+                //                        REAL dist=sqrt(newdir.NormSquared());
+                //                        if (dist<.001) dist=.01;
+                //                        usernewdir=newdir=newdir*(1/sqrt(newdir.NormSquared()));
+                //                    }
+                //                }
 
                 if (AutoSwitchIncam()){
                     if (smartcamIncamSmooth<.7 && CenterAlive()){
@@ -2031,38 +2082,38 @@ void eCamera::Timestep(REAL ts){
 
     } else {
 
-    /*
-      REAL ratio=1 - exp(-4*userCameraControl);
-      ratio*=ts;
-      ratio*=100;
-      ratio=exp(-ratio);
-    */
+        /*
+          REAL ratio=1 - exp(-4*userCameraControl);
+          ratio*=ts;
+          ratio*=100;
+          ratio=exp(-ratio);
+        */
 
-    // calcualte ratios under which user and automatic camera positions should be blended
-    REAL aratio = exp(-4*userCameraControl);
-    REAL ratio = 1 - aratio;
+        // calcualte ratios under which user and automatic camera positions should be blended
+        REAL aratio = exp(-4*userCameraControl);
+        REAL ratio = 1 - aratio;
 
-    // blend
-    pos=newpos*aratio + usernewpos*ratio;
-    dir=newdir*aratio + usernewdir*ratio;
-    z  =newz  *aratio + usernewz  *ratio;
+        // blend
+        pos=newpos*aratio + usernewpos*ratio;
+        dir=newdir*aratio + usernewdir*ratio;
+        z  =newz  *aratio + usernewz  *ratio;
 
-    // newrise rise is calculated anew every frame, use a different blending
-    if (userCameraControl > .01)
-    {
-        rise=newrise + (usernewrise-newrise)*exp(-ts/userCameraControl);
-    }
-    else
-    {
-        rise=newrise;
-    }
+        // newrise rise is calculated anew every frame, use a different blending
+        if (userCameraControl > .01)
+        {
+            rise=newrise + (usernewrise-newrise)*exp(-ts/userCameraControl);
+        }
+        else
+        {
+            rise=newrise;
+        }
 
-    // normalize direction
-    dir=dir*(1/sqrt(dir.NormSquared()));
+        // normalize direction
+        dir=dir*(1/sqrt(dir.NormSquared()));
     }
 
     #ifdef CAMERA_LOGGING
-        std::cout << (activeGlanceRequest ? "g " : "  ") << (pos-CenterPos()).Norm() << " " << (newpos-CenterPos()).Norm() << " " << z << " " << rise << "\n";
+    std::cout << (activeGlanceRequest ? "g " : "  ") << (pos-CenterPos()).Norm() << " " << (newpos-CenterPos()).Norm() << " " << z << " " << rise << "\n";
     #endif
     dir.Normalize();
     centerposLast=centerpos;

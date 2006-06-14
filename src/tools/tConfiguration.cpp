@@ -375,7 +375,14 @@ static bool s_Veto( tString line_in, std::vector< tString > const & vetos )
         tString const & veto = *iter;
 
         if ( line.StartsWith( veto ) )
+        {
+            if ( !line.StartsWith( "INCLUDE" ) )
+            {
+                con << "Ignoring vetoed input: " << line << "\n";
+            }
+
             return true;
+        }
     }
 
     return false;
@@ -401,7 +408,7 @@ static bool s_VetoPlayback( tString const & line )
 {
     static char const * vetos_char[]=
         { "USE_DISPLAYLISTS", "CHECK_ERRORS", "ZDEPTH",
-          "COLORDEPTH", "FULLSCREEN", "ARMAGETRON_LAST_WINDOWSIZE",
+          "COLORDEPTH", "FULLSCREEN ", "ARMAGETRON_LAST_WINDOWSIZE",
           "ARMAGETRON_WINDOWSIZE", "ARMAGETRON_LAST_SCREENMODE",
           "ARMAGETRON_SCREENMODE", "CUSTOM_SCREEN", "SOUND",
           "PASSWORD", "ADMIN_PASS", "RECORDING_DEBUGLEVEL",

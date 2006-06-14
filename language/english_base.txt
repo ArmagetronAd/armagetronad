@@ -60,18 +60,34 @@ cycle_accel_team_help           Multiplicator to CYCLE_ACCEL for your temmates' 
 cycle_accel_enemy_help          Multiplicator to CYCLE_ACCEL for your enemies' walls
 cycle_accel_rim_help            Multiplicator to CYCLE_ACCEL for the rim walls
 cycle_accel_slingshot_help      Multiplicator to the total effect of CYCLE_ACCEL, if the cycle is between its own wall and another wall
+cycle_accel_tunnel_help         Multiplicator to the total effect of CYCLE_ACCEL, if the cycle is between two walls not created by it
 cycle_accel_offset_help	        Minimum numeric wall distance, must be positive
 cycle_wall_near_help		    Maximum accelerating wall distance
+
+Cycle_boost_self_help           Speed boost when breaking from your own wall
+cycle_boost_team_help           Speed boost when breaking from a teammate's wall
+cycle_boost_enemy_help          Speed boost when breaking from an enemy wall
+cycle_boost_rim_help            Speed boost when breaking from the rim wall
+cycle_boostfactor_self_help     Factor your speed is multiplied with when breaking from your own wall
+cycle_boostfactor_team_help     Factor your speed is multiplied with when breaking from a teammate's wall
+cycle_boostfactor_enemy_help    Factor your speed is multiplied with when breaking from an enemy wall
+cycle_boostfactor_rim_help      Factor your speed is multiplied with when breaking from the rim wall
 
 cycle_turn_memory_help          Number of pending turns a cycle will memorize exactly
 
 cycle_delay_help		        Minimum time between turns (must be greater than 0)
 cycle_delay_bonus_help		    Extra fudge factor to CYCLE_DELAY applied on the dedicated server only.
 cycle_delay_timebased_help		Turn delays will be based on the time since the last turn if this is 1 (default) and the distance if this is 0. Intermediate values and values out of these bounds are supported as well.
+cycle_delay_help_doublebind_bonus       Factor to CYCLE_DELAY for two consecutive turns in the same direction
 cycle_turn_speed_factor_help    Factor the speed of a lightcycle is multiplied with when turning 
 
 
 cycle_brake_help		Brake intensity
+
+cycle_width_help        The width of the cycle collision object. It can only squeeze through tunnels wider than that without taking harm.
+cycle_width_side_help        Minimum distance of a cycle to a wall on either side before it takes harm.
+cycle_width_rubber_min_help  If the cycle_width conditions are barely violated, use up this much rubber.If set to 1, the rubber usage rate is the same as if you were sitting in front of a wall.
+cycle_width_rubber_max_help  If the cycle_width conditions are massively violated, use up this much rubber.If set to 1, the rubber usage rate is the same as if you were sitting in front of a wall.
 
 cycle_rubber_help		Niceness factor to allow you drive really close to a wall
 cycle_rubber_time_help		    Timescale rubber is restored on.
@@ -81,8 +97,8 @@ cycle_rubber_speed_help             Logarithmic speed of wall approximation when
 cycle_rubber_mindistance_help		The minimal distance rubber code keeps you from the wall in front of you
 cycle_rubber_mindistance_ratio_help	Additional distance to CYCLE_RUBBER_MINDISTANCE for every length unit of the wall you have in front of you
 cycle_rubber_mindistance_reservoir_help		Addidional distance if you have an empty rubber meter (gets faded out gradually as you use up all your rubber)
-cycle_rubber_mindistance_unprepared_help	Additional distance for unprepared grinds; it gets applied when the cycle's last turn was just a fraction of a second ago and faded out preparation times larger than CYCLE_RUBBER_MINDISTANCE_PREPARATION.	
-cycle_rubber_mindistance_preparation_help	Timescale in seconds a cycle's last turn time is compared with to determine the effect of CYCLE_RUBBER_MINDISTANCE_UNPREPARED.	
+cycle_rubber_mindistance_unprepared_help	Additional distance for unprepared grinds; it gets applied when the cycle's last turn was just a fraction of a second ago and faded out preparation times larger than CYCLE_RUBBER_MINDISTANCE_PREPARATION.
+cycle_rubber_mindistance_preparation_help	Timescale in seconds a cycle's last turn time is compared with to determine the effect of CYCLE_RUBBER_MINDISTANCE_UNPREPARED.
 cycle_rubber_mindistance_legacy_help		Extra factor for minimal distance to walls enforced by the rubber code, active when peers with the rip bug are connected
 cycle_rubber_minadjust_help			When adjusting to or 180ing into a wall, allow going closer by at least this amount (relative to the last distance)
 cycle_rubber_delay_help     During this fraction of the cycle delay time after each turn, rubber efficiency will be multiplied with CYCLE_RUBBER_DELAY_BONUS.
@@ -136,7 +152,7 @@ sp_team_min_players_help	Minimum number of players per team in single player mod
 sp_teams_max_help		Maximum number of teams in single player mode
 sp_teams_min_help		Minimum number of teams in single player mode
 sp_finish_type_help		What happens when the last human is dead in single player mode?
-sp_game_type_help		Type of game played in single player mode
+sp_game_type_help		Type of game played in single player mode. 0 for freestyle, 1 for last team standing and 2 for humans vs. AIs.
 sp_auto_iq_help			Automatically adjust AI IQ in single player mode?
 sp_auto_ais_help		Automatically spawn AI players in single player mode?
 sp_ai_iq_help			IQ of the AI opponents in single player mode
@@ -163,7 +179,7 @@ team_center_is_boss_help    If set to 1, the center player is the team's boss. I
 teams_max_help			Maximum number of teams
 teams_min_help			Minimum number of teams
 finish_type_help		What happens when the last human is dead?
-game_type_help			Type of game played
+game_type_help			Type of game played. 0 for freestyle, 1 for last team standing and 2 for humans vs. AIs.
 auto_iq_help			Automatically adjust AI IQ?
 auto_ais_help			Automatically spawn AI players?
 ai_iq_help			IQ of the AI opponents
@@ -351,7 +367,7 @@ voting_timeout_help					Votes older than this time out and are rejected.
 voting_timeout_per_voter_help   	Additional value for VOTING_TIMEOUT for every voter present.
 allow_voting_help					If set to 1, voting will be allowed for players.
 allow_voting_spectator_help			If set to 1, voting will be allowed for spectators.
-min_voters_help						Number of voters that need to be online to enable voting.						
+min_voters_help						Number of voters that need to be online to enable voting.
 max_votes_help                      The maximum number of total votes that can be active at any given moment.
 max_votes_per_voter_help            The maximum number of votes suggested by each voter that can be active at any given moment.
 voting_start_decay_help				Number of seconds after that the non-voters start to get ignored.
@@ -361,6 +377,7 @@ voting_privacy_help					Controls logging of voting process. 2: nothing gets logg
 voting_spam_issue_help              The spam level of issuing a vote.
 voting_spam_reject_help             The spam level of getting your vote rejected.
 voting_kick_time_help               The minimum time in seconds between two kick votes against the same player.
+voting_maturity_help                The minimum time in seconds a player needs to be online with the same name before he can issue votes.
 
 #********************************************
 #********************************************
@@ -672,7 +689,9 @@ word_delimiters_help    Characters that count as word delimiters when skipping o
 mouse_grab_help			Grab the mouse pointer, so it can't leave the window
 moviepack_help			Use the moviepack if available
 armagetron_version_help		your version of \g
-message_of_day_help		Message sent to clients on connection
+message_of_day_help		Message sent to clients on connection, if supported by the client, it will be displayed fullscreen
+title_of_day_help		If fullscreen display is supported, this will be the title above message_of_day
+message_of_day_timeout_help		Time message_of_day is displayed for in fullscreen mode
 round_console_message_help	Message sent to clients after every round
 round_center_message_help	Big message sent to clients after every round
 
@@ -698,6 +717,7 @@ unban_ip_help               Revokes the ban of the specified IP address.
 # communication
 console_message_help		Prints a message on the console of all connected clients.
 center_message_help			Prints a big message on the screen of all connected clients.
+fullscreen_message_help     Prints a big message all over the screen, interrupting gameplay for a configurable timeout. Use with care.
 say_help					Dedicated server only: let the server administator say something.
 
 #********************************************
@@ -785,7 +805,7 @@ input_mess_up_help					Scrolls the messages up a page.
 
 input_mess_down_text				Scroll down
 input_mess_down_help				Scrolls the messages down a page.
-	
+
 #********************************************
 #********************************************
 #
@@ -1381,7 +1401,7 @@ viewport_conf_name_5		Four Player Mayhem!
 viewport_belongs_text		Viewport \1 belongs to player \2 (\3)
 
 viewport_assign_text		Assign Viewports to Players
-viewport_assign_help		Which player's game is seen on which part of the screen?		
+viewport_assign_help		Which player's game is seen on which part of the screen?
 
 
 #player setup
@@ -1496,8 +1516,8 @@ team_menu_join_help		Let the current player join the specified team
 team_menu_info_current_team	Current team: \1
 team_menu_info_next_team	Next team: \1
 
-team_menu_create		create new team
-team_menu_create_help		Creates a new team and lets the current player join it
+team_menu_create		create new team/join any
+team_menu_create_help		Creates a new team and lets the current player join it, or, if that is not possible, joins any team.
 
 team_owned_by			\1's team
 team_ai					\1's AI team
@@ -1551,7 +1571,7 @@ sound_menu_buffer_small_text	Small
 sound_menu_buffer_small_help	Latency below 0.04s, but high probability of artefacts.
 
 sound_menu_buffer_med_text	Normal
-sound_menu_buffer_med_help	Latency of about 0.1s, and may still produce artefacts.	
+sound_menu_buffer_med_help	Latency of about 0.1s, and may still produce artefacts.
 
 sound_menu_buffer_high_text	High
 sound_menu_buffer_high_help	Latency of about 0.2s, probably no artifacts.
@@ -2037,7 +2057,7 @@ player_scoretable_ping		Ping:
 player_scoretable_alive		Alive:
 player_scoretable_alive_yes	Yes
 player_scoretable_alive_no	No
-player_scoretable_pingcharity   Ping Charity:			
+player_scoretable_pingcharity   Ping Charity:
 player_scoretable_nobody	Nobody there.\n
 player_scoretable_inactive	Disconnected
 
@@ -2050,6 +2070,8 @@ player_scoretable_inactive	Disconnected
 #
 #********************************************
 #********************************************
+
+fullscreen_message_title        Sever Message
 
 network_message_timeout_title	Server does not answer
 network_message_timeout_inter	The server you wanted to connect to did not answer for ten seconds.\nIt is probably down or unreachable, or you mistyped its name in the "custom connect" menu.
@@ -2131,9 +2153,9 @@ network_kill_cheater		It assumed you are cheating. If that is untrue, it is a bu
 network_kill_error			An error occured while processing messages from your client. This usually indicates a client or server bug.
 network_kill_timeout		You timed out.
 network_kill_logout			You logged out regularily.
-network_kill_incompatible	You are running a version incompatible with the server.				
+network_kill_incompatible	You are running a version incompatible with the server.
 network_kill_full			The server is full.
-network_kill_shutdown		The server was shut down.				
+network_kill_shutdown		The server was shut down.
 network_kill_overflow		There was a network overflow.
 network_kill_too_many_players Too many players were logged in from your connection.
 network_kill_kick			You have been kicked by the server administrator; please stay away.
@@ -2167,6 +2189,7 @@ vote_rejected						Poll "\1" has been rejected. (\2 Players voted for the poll, 
 vote_timeout						Poll "\1" timed out.\n
 vote_new							New poll: "\1". Enter the main menu vote on it.\n
 vote_redundant                      Poll rejected, same suggestion was made already.\n
+vote_maturity                       Poll rejected, you're not old enough to issue votes.\n
 vote_overflow						Poll rejected, too many pending polls.\n
 vote_disabled						Poll rejected, disabled by server admin.\n
 vote_disabled_spectator				Poll/Vote rejected, disabled for spectators by server admin.\n

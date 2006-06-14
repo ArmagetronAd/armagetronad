@@ -119,6 +119,7 @@ public:
 
     virtual void ReleaseOwnership(); // release the object only if it was created on this machine
     virtual void TakeOwnership(); // treat an object like it was created locally
+    bool Owned(){ return createdLocally; } //!< returns whether the object is owned by this machine
 
     nObserver& GetObserver() const;    // retunrs the observer of this object
 

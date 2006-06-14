@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tSysTime.h"
 #include "tToDo.h"
 #include "nObserver.h"
+#include "tRecorder.h"
 
 #include <deque>
 #include <set>
@@ -202,9 +203,6 @@ static unsigned short next_free_server_nokill(){
 
         if ( net_current_id != start_id )
         {
-#ifdef DEBUG
-            sn_BreakOnObjectID( net_current_id );
-#endif
             // no problem!
 #ifdef DEBUG
             sn_BreakOnObjectID( net_current_id );
@@ -852,8 +850,15 @@ static void net_destroy_handler(nMessage &m){
         // notify object of pending deletion
         if (nNetObject *no=sn_netObjects[id])
         {
+            tASSERT( !no->Owned() );
+
             no->ActionOnDelete();
             info.actionOnDeleteExecuted=true;
+
+            // if the object is now suddenly owned by this machine, there must be a reason.
+            // undo the deletion. Whoever did this has now the responsibility for the object.
+            if ( no->Owned() )
+                sn_Destroyed.SetLen( sn_Destroyed.Len() - 1 );
         }
 
 #ifdef DEBUG
@@ -994,6 +999,9 @@ nNetObject::~nNetObject(){
     // send it
     if ( sendDestroyMessage )
     {
+        int idsync=id;
+        tRecorderSync< int >::Archive( "_NETOBJECT_DESTROYED", 3, idsync );
+
         // con << "Destroying object " << id << '\n';
         for(int user=MAXCLIENTS;user>=0;user--){
             if(user!=sn_myNetID && knowsAbout[user].knowsAboutExistence ||

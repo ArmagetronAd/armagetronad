@@ -97,6 +97,10 @@ static tSettingItem< int > se_maxVotesPerVoterSI( "MAX_VOTES_PER_VOTER", se_maxV
 static int se_minTimeBetweenKicks = 300;
 static tSettingItem< int > se_minTimeBetweenKicksSI( "VOTING_KICK_TIME", se_minTimeBetweenKicks );
 
+// time between name changes and you being allowed to issue votes again
+static int se_votingMaturity = 300;
+static tSettingItem< int > se_votingMaturitySI( "VOTING_MATURITY", se_votingMaturity );
+
 static eVoter* se_GetVoter( const nMessage& m )
 {
     return eVoter::GetVoter( m.SenderID(), true );
@@ -751,6 +755,21 @@ public:
 protected:
     virtual bool DoFillFromMessage( nMessage& m )
     {
+        double time = tSysTimeFloat();
+
+        // check whether the issuer is allowed to start a vote
+        eVoter * sender = eVoter::GetVoter( m.SenderID() );
+        if ( sender && sender->lastChange_ + se_votingMaturity > tSysTimeFloat() && sender->lastChange_ * 2 > tSysTimeFloat() )
+        {
+            tOutput message("$vote_maturity");
+            sn_ConsoleOut( message, m.SenderID() );
+            return false;
+        }
+
+        // prevent the sender from changing his name for confusion
+        if ( sender )
+            sender->lastKickVote_ = time;
+
         // read player ID
         unsigned short id;
         m.Read(id);
@@ -766,7 +785,6 @@ protected:
             {
                 machine_ = tNEW( nMachineObserver )( voter->machine_ );
 
-                double time = tSysTimeFloat();
                 if ( time < voter->lastKickVote_ + se_minTimeBetweenKicks )
                 {
                     tOutput message("$vote_redundant");
@@ -993,6 +1011,7 @@ eVoter::eVoter( nMachine & machine )
     selfReference_ = this;
     voters_.Add( this );
     lastKickVote_ = -1E+40;
+    lastChange_ = tSysTimeFloat();
 }
 
 eVoter::~eVoter()
@@ -1319,6 +1338,20 @@ tString eVoter::Name( int senderID ) const
         name = machine_.GetIP();
 
     return name;
+}
+
+// *******************************************************************************
+// *
+// *	PlayerChanged
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+void eVoter::PlayerChanged( void )
+{
+    this->lastChange_ = tSysTimeFloat();
 }
 
 
