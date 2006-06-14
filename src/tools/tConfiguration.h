@@ -161,10 +161,11 @@ protected:
     const tString title;
     const tOutput help;
     bool changed;
-    typedef void callbackFunc(void);
     typedef std::map< tString, tConfItemBase * > tConfItemMap;
     static tConfItemMap & ConfItemMap();
 
+public:
+    typedef void callbackFunc(void);
 private:
     callbackFunc *callback;
 protected:
