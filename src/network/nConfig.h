@@ -140,7 +140,7 @@ public:
                 con << con.ColorString(1,.3,.3) << o;
             }
             *this->target=dummy;
-	    ExecuteCallback();
+            this->ExecuteCallback();
             changed=true;
         }
     }
