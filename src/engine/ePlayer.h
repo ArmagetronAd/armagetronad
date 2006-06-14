@@ -93,7 +93,7 @@ public:
 
     virtual bool Act(uAction *act,REAL x);
 
-    int ID(){return id;};
+    int ID() const {return id;};
 #ifndef DEDICATED
     void Render();
 #endif
