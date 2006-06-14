@@ -58,13 +58,14 @@ class gCycle;
 class cCockpit : private tXmlResource {
 public:
     enum cameras {
-        custom        = 001,
-        follow        = 002,
-        free          = 004,
-        in            = 010,
-        server_custom = 020,
-        smart         = 040,
-        all           = 077
+        custom        = 0001,
+        follow        = 0002,
+        free          = 0004,
+        in            = 0010,
+        server_custom = 0020,
+        smart         = 0040,
+        mer           = 0100,
+        all           = 0177
     }; //!< the different cameras, can be combined via the | operator
 
     cCockpit(); //!< default constructor

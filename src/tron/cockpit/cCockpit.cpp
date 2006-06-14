@@ -63,35 +63,35 @@ static tConfItem<tString> cf("COCKPIT_FILE",cockpit_file,&parsecockpit);
 
 typedef std::pair<tString, tValue::Callback<cCockpit>::cb_ptr> cbpair;
 static const cbpair cbarray[] = {
-    cbpair(tString("player_rubber")       , &cCockpit::cb_CurrentRubber),
-    cbpair(tString("player_acceleration") , &cCockpit::cb_CurrentAcceleration),
-    cbpair(tString("current_ping")        , &cCockpit::cb_CurrentPing),
-    cbpair(tString("player_speed")        , &cCockpit::cb_CurrentSpeed),
-    cbpair(tString("max_speed")           , &cCockpit::cb_MaxSpeed),
-    cbpair(tString("player_brakes")       , &cCockpit::cb_CurrentBrakingReservoir),
-    cbpair(tString("enemies_alive")       , &cCockpit::cb_AliveEnemies),
-    cbpair(tString("friends_alive")       , &cCockpit::cb_AliveTeammates),
-    cbpair(tString("current_framerate")   , &cCockpit::cb_Framerate),
-    cbpair(tString("time_since_start")    , &cCockpit::cb_RunningTime),
-    cbpair(tString("current_minutes")     , &cCockpit::cb_CurrentTimeMinutes),
-    cbpair(tString("current_hours")       , &cCockpit::cb_CurrentTimeHours),
-    cbpair(tString("current_hours12h")    , &cCockpit::cb_CurrentTimeHours12h),
-    cbpair(tString("current_seconds")     , &cCockpit::cb_CurrentTimeSeconds),
-    cbpair(tString("current_score")       , &cCockpit::cb_CurrentScore),
-    cbpair(tString("top_score")           , &cCockpit::cb_TopScore),
-    cbpair(tString("fastest_speed")       , &cCockpit::cb_FastestSpeed),
-    cbpair(tString("fastest_name")        , &cCockpit::cb_FastestName),
-    cbpair(tString("fastest_speed_round") , &cCockpit::cb_FastestSpeedRound),
-    cbpair(tString("fastest_name_round")  , &cCockpit::cb_FastestNameRound),
-    cbpair(tString("time_to_impact_front"), &cCockpit::cb_TimeToImpactFront),
-    cbpair(tString("time_to_impact_right"), &cCockpit::cb_TimeToImpactRight),
-    cbpair(tString("time_to_impact_left") , &cCockpit::cb_TimeToImpactLeft),
-    cbpair(tString("current_song")        , &cCockpit::cb_CurrentSong),
-    cbpair(tString("current_name")        , &cCockpit::cb_CurrentName),
-    cbpair(tString("current_colored_name"), &cCockpit::cb_CurrentColoredName),
-    cbpair(tString("current_pos_x")       , &cCockpit::cb_CurrentPosX),
-    cbpair(tString("current_pos_y")       , &cCockpit::cb_CurrentPosY)
-};
+                                    cbpair(tString("player_rubber")       , &cCockpit::cb_CurrentRubber),
+                                    cbpair(tString("player_acceleration") , &cCockpit::cb_CurrentAcceleration),
+                                    cbpair(tString("current_ping")        , &cCockpit::cb_CurrentPing),
+                                    cbpair(tString("player_speed")        , &cCockpit::cb_CurrentSpeed),
+                                    cbpair(tString("max_speed")           , &cCockpit::cb_MaxSpeed),
+                                    cbpair(tString("player_brakes")       , &cCockpit::cb_CurrentBrakingReservoir),
+                                    cbpair(tString("enemies_alive")       , &cCockpit::cb_AliveEnemies),
+                                    cbpair(tString("friends_alive")       , &cCockpit::cb_AliveTeammates),
+                                    cbpair(tString("current_framerate")   , &cCockpit::cb_Framerate),
+                                    cbpair(tString("time_since_start")    , &cCockpit::cb_RunningTime),
+                                    cbpair(tString("current_minutes")     , &cCockpit::cb_CurrentTimeMinutes),
+                                    cbpair(tString("current_hours")       , &cCockpit::cb_CurrentTimeHours),
+                                    cbpair(tString("current_hours12h")    , &cCockpit::cb_CurrentTimeHours12h),
+                                    cbpair(tString("current_seconds")     , &cCockpit::cb_CurrentTimeSeconds),
+                                    cbpair(tString("current_score")       , &cCockpit::cb_CurrentScore),
+                                    cbpair(tString("top_score")           , &cCockpit::cb_TopScore),
+                                    cbpair(tString("fastest_speed")       , &cCockpit::cb_FastestSpeed),
+                                    cbpair(tString("fastest_name")        , &cCockpit::cb_FastestName),
+                                    cbpair(tString("fastest_speed_round") , &cCockpit::cb_FastestSpeedRound),
+                                    cbpair(tString("fastest_name_round")  , &cCockpit::cb_FastestNameRound),
+                                    cbpair(tString("time_to_impact_front"), &cCockpit::cb_TimeToImpactFront),
+                                    cbpair(tString("time_to_impact_right"), &cCockpit::cb_TimeToImpactRight),
+                                    cbpair(tString("time_to_impact_left") , &cCockpit::cb_TimeToImpactLeft),
+                                    cbpair(tString("current_song")        , &cCockpit::cb_CurrentSong),
+                                    cbpair(tString("current_name")        , &cCockpit::cb_CurrentName),
+                                    cbpair(tString("current_colored_name"), &cCockpit::cb_CurrentColoredName),
+                                    cbpair(tString("current_pos_x")       , &cCockpit::cb_CurrentPosX),
+                                    cbpair(tString("current_pos_y")       , &cCockpit::cb_CurrentPosY)
+                                };
 std::map<tString, tValue::Callback<cCockpit>::cb_ptr> const stc_callbacks(cbarray, cbarray+sizeof(cbarray)/sizeof(cbpair));
 
 std::set<tString> stc_forbiddenCallbacks;
@@ -110,7 +110,7 @@ static void reparseforbiddencallbacks(void) {
     while((next = callbacks.find(':', pos)) != tString::npos) {
         tString callback = callbacks.SubStr(pos, next - pos);
         if(stc_callbacks.count(callback)) {
-	    stc_forbiddenCallbacks.insert(callback);
+            stc_forbiddenCallbacks.insert(callback);
         }
         pos = next+1;
     }
@@ -472,6 +472,7 @@ void cCockpit::ProcessWidgetCamera(node cur, cWidget::Base &widget) {
     cams[tString("in")] = in;
     cams[tString("server_custom")] = server_custom;
     cams[tString("smart")] = smart;
+    cams[tString("mer")] = mer;
     cams[tString("all")] = all;
     cams[tString("*")] = all;
 
@@ -549,8 +550,11 @@ void cCockpit::RenderPlayer() {
                     case CAMERA_SERVER_CUSTOM:
                         if(!(cam & server_custom)) continue;
                         break;
-                    default:
+                    case CAMERA_MER:
+                        if(!(cam & mer)) continue;
                         break;
+                    case CAMERA_COUNT:
+                        continue; //not handled, no sense?!
                     }
                     if (m_Widgets_perplayer[i]->Active())
                         m_Widgets_perplayer[i]->Render();
