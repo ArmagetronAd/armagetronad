@@ -66,7 +66,7 @@ REAL	nSpamProtection::BlockTime()					// time left in silenced mode
     return ( spamProtect_ - 6 ) * timeScale + ( tSysTimeFloat() - spamProtectTime_ );
 }
 
-nSpamProtection::Level	nSpamProtection::CheckSpam( REAL spamlevel, int userToKick )	// check if someone is spamming
+nSpamProtection::Level	nSpamProtection::CheckSpam( REAL spamlevel, int userToKick, tOutput const & reason )	// check if someone is spamming
 {
     if ( se_SpamProtection < 0.01f )
     {
@@ -96,7 +96,10 @@ nSpamProtection::Level	nSpamProtection::CheckSpam( REAL spamlevel, int userToKic
 
         if ( spamProtect_ > se_SpamAutoKick )
         {
-            sn_KickUser( userToKick, "$network_kill_spamkick" );
+            tOutput message( "$network_kill_spamkick" );
+            message.Append( " " );
+            message.Append( reason );
+            sn_KickUser( userToKick, message );
 
             return Level_Hard;
         }

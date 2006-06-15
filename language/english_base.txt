@@ -321,6 +321,12 @@ spam_maxlen_help					Maximal length of chat message.
 spam_autokick_help					Spam score that causes you to get kicked instantly.
 silence_all_help					If set to 1, all chat messages will be omitted.
 
+# spam kick messages
+spam_chat                   You chatted too much.
+spam_teamchage              You switched teams too often.
+spam_vote_kick_issue        You issued too many kick votes.
+spam_vote_rejected          Too many of your votes got rejected.
+
 #********************************************
 #********************************************
 #

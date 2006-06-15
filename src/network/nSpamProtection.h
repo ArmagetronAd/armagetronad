@@ -55,8 +55,8 @@ public:
         Level_Hard				// extremly annoying
     };
 
-    Level	CheckSpam( REAL spamlevel, int UserToKick );	// check if someone is spamming
-    REAL	BlockTime();									// time left in silenced mode
+    Level	CheckSpam( REAL spamlevel, int UserToKick, tOutput const & message );	// check if someone is spamming
+    REAL	BlockTime();									                        // time left in silenced mode
 
     nSpamProtection( const nSpamProtectionSettings& settings );
     ~nSpamProtection();

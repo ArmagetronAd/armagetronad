@@ -249,7 +249,7 @@ public:
 
         if ( items_.Len() < se_maxVotes )
         {
-            voter->Spam( m.SenderID(), se_votingSpamIssue );
+            voter->Spam( m.SenderID(), se_votingSpamIssue, tOutput("$spam_vote_kick_issue") );
             return true;
         }
         else
@@ -376,7 +376,7 @@ public:
             if ( con >= pro && con * 2 >= total )
             {
                 if ( this->suggestor_ )
-                    this->suggestor_->Spam( user_, se_votingSpamReject );
+                    this->suggestor_->Spam( user_, se_votingSpamReject, tOutput("$spam_vote_rejected") );
 
                 this->BroadcastMessage( tOutput( "$vote_rejected" ) );
                 delete this;
@@ -755,7 +755,7 @@ protected:
             sn_ConsoleOut( message, m.SenderID() );
             return false;
         }
-        
+
         // prevent the sender from changing his name for confusion
         if ( sender )
             sender->lastKickVote_ = time;
@@ -1009,17 +1009,17 @@ eVoter::~eVoter()
     voters_.Remove( this );
 }
 
-void eVoter::Spam( int user, REAL spamLevel )
+void eVoter::Spam( int user, REAL spamLevel, tOutput const & message )
 {
     if ( sn_GetNetState() == nSERVER )
-        votingSpam_.CheckSpam( spamLevel, user );
+        votingSpam_.CheckSpam( spamLevel, user, message );
 }
 
 bool eVoter::IsSpamming( int user )
 {
     if ( sn_GetNetState() == nSERVER )
     {
-        return nSpamProtection::Level_Ok != votingSpam_.CheckSpam( 0.0f, user );
+        return nSpamProtection::Level_Ok != votingSpam_.CheckSpam( 0.0f, user, tOutput("") );
     }
 
     return false;
