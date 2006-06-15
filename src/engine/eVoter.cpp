@@ -751,14 +751,15 @@ protected:
         eVoter * sender = eVoter::GetVoter( m.SenderID() );
         if ( sender && sender->lastChange_ + se_votingMaturity > tSysTimeFloat() && sender->lastChange_ * 2 > tSysTimeFloat() )
         {
-            tOutput message("$vote_maturity");
+            REAL time = sender->lastChange_ + se_votingMaturity - tSysTimeFloat();
+            tOutput message( "$vote_maturity", time );
             sn_ConsoleOut( message, m.SenderID() );
             return false;
         }
 
         // prevent the sender from changing his name for confusion
         if ( sender )
-            sender->lastKickVote_ = time;
+            sender->lastNameChangePreventor_ = time;
 
         // read player ID
         unsigned short id;
@@ -784,6 +785,7 @@ protected:
                 else
                 {
                     voter->lastKickVote_ = time;
+                    voter->lastNameChangePreventor_ = time;
                 }
             }
         }
@@ -1001,6 +1003,7 @@ eVoter::eVoter( nMachine & machine )
     selfReference_ = this;
     voters_.Add( this );
     lastKickVote_ = -1E+40;
+    lastNameChangePreventor_ = -1E+40;
     lastChange_ = tSysTimeFloat();
 }
 
@@ -1019,7 +1022,7 @@ bool eVoter::IsSpamming( int user )
 {
     if ( sn_GetNetState() == nSERVER )
     {
-        return nSpamProtection::Level_Ok != votingSpam_.CheckSpam( 0.0f, user, tOutput("") );
+        return nSpamProtection::Level_Ok != votingSpam_.CheckSpam( 0.0f, user, tOutput("$spam_vote_kick_issue") );
     }
 
     return false;
@@ -1051,7 +1054,7 @@ void eVoter::OnDestroy( void )
 
 bool eVoter::AllowNameChange( void ) const
 {
-    return tSysTimeFloat() > this->lastKickVote_ + se_minTimeBetweenKicks;
+    return tSysTimeFloat() > this->lastNameChangePreventor_ + se_minTimeBetweenKicks;
 }
 
 void eVoter::RemoveFromGame()
@@ -1220,6 +1223,7 @@ eVoter* eVoter::GetVoter( nMachine & machine )			// find or create the voter for
             {
                 voters_.Add( voter );
                 voter->lastKickVote_ = -1E30;
+                voter->lastNameChangePreventor_ = -1E30;
             }
 
             // return result
