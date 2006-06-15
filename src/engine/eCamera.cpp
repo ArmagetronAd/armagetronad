@@ -119,6 +119,26 @@ static nSettingItem<bool> a_fe
 ("CAMERA_FORBID_FOLLOW",
  forbid_camera[CAMERA_FOLLOW]);
 
+
+
+// override custom glance settings with server glance settings
+static bool se_overrideCustom=false;
+static nSettingItem<bool> a_ocg
+("CAMERA_OVERRIDE_CUSTOM_GLANCE",
+ se_overrideCustom);
+
+// override custom glance settings with server glance settings when using the server custom camera
+static bool se_overrideCustomServerCustom=false;
+static nSettingItem<bool> a_ocgs
+("CAMERA_OVERRIDE_CUSTOM_GLANCE_SERVER_CUSTOM",
+ se_overrideCustomServerCustom);
+
+// forbid custom glancing alltogether
+static bool se_forbidCustomGlance=false;
+static nSettingItem<bool> a_fcg
+("CAMERA_FORBID_CUSTOM_GLANCE",
+ se_forbidCustomGlance);
+
 #ifndef DEDICATED
 #include "rGL.h"
 #endif
@@ -211,7 +231,9 @@ static tSettingItem<REAL> s_frZ("CAMERA_FREE_START_Z", s_startFreeZ);
 
 // custom camera displacement
 static REAL s_customBack = 30, s_customRise = 20, s_customBackSpeed = 0, s_customRiseSpeed = 0 , s_customPitch = -.7, s_customZoom = 0.5, s_customTurnSpeed=40, s_customTurnSpeed180 = 2;
+static REAL s_glanceBack = 30, s_glanceRise = 20, s_glanceBackSpeed = 0, s_glanceRiseSpeed = 0 , s_glancePitch = -.7;
 static REAL s_serverCustomBack = 30, s_serverCustomRise = 20, s_serverCustomBackSpeed = 0, s_serverCustomRiseSpeed = 0, s_serverCustomPitch = -.7, s_serverCustomTurnSpeed=-1, s_serverCustomTurnSpeed180 = 2;
+static REAL s_serverGlanceBack = 30, s_serverGlanceRise = 20, s_serverGlanceBackSpeed = 0, s_serverGlanceRiseSpeed = 0, s_serverGlancePitch = -.7;
 
 
 static tSettingItem<REAL> s_iBack("CAMERA_CUSTOM_BACK", s_customBack);
@@ -223,6 +245,12 @@ static tSettingItem<REAL> s_iZoom("CAMERA_CUSTOM_ZOOM", s_customZoom);
 static tSettingItem<REAL> s_iCustomTurnSpeed("CAMERA_CUSTOM_TURN_SPEED", s_customTurnSpeed);
 static tSettingItem<REAL> s_iCustomTurnSpeed180("CAMERA_CUSTOM_TURN_SPEED_180", s_customTurnSpeed180);
 
+static tSettingItem<REAL> s_iGBack("CAMERA_GLANCE_BACK", s_glanceBack);
+static tSettingItem<REAL> s_iGRise("CAMERA_GLANCE_RISE", s_glanceRise);
+static tSettingItem<REAL> s_iGBackSpeed("CAMERA_GLANCE_BACK_FROMSPEED", s_glanceBackSpeed);
+static tSettingItem<REAL> s_iGRiseSpeed("CAMERA_GLANCE_RISE_FROMSPEED", s_glanceRiseSpeed);
+static tSettingItem<REAL> s_iGPitch("CAMERA_GLANCE_PITCH", s_glancePitch);
+
 static nSettingItem<REAL> s_iSBack("CAMERA_SERVER_CUSTOM_BACK", s_serverCustomBack);
 static nSettingItem<REAL> s_iSRise("CAMERA_SERVER_CUSTOM_RISE", s_serverCustomRise);
 static nSettingItem<REAL> s_iSBackSpeed("CAMERA_SERVER_CUSTOM_BACK_FROMSPEED", s_serverCustomBackSpeed);
@@ -230,6 +258,12 @@ static nSettingItem<REAL> s_iSRiseSpeed("CAMERA_SERVER_CUSTOM_RISE_FROMSPEED", s
 static nSettingItem<REAL> s_iSPitch("CAMERA_SERVER_CUSTOM_PITCH", s_serverCustomPitch);
 static nSettingItem<REAL> s_iSCustomTurnSpeed("CAMERA_SERVER_CUSTOM_TURN_SPEED", s_serverCustomTurnSpeed);
 static nSettingItem<REAL> s_iSCustomTurnSpeed180("CAMERA_SERVER_CUSTOM_TURN_SPEED_180", s_serverCustomTurnSpeed180);
+
+static nSettingItem<REAL> s_iSGBack("CAMERA_SERVER_GLANCE_BACK", s_serverGlanceBack);
+static nSettingItem<REAL> s_iSGRise("CAMERA_SERVER_GLANCE_RISE", s_serverGlanceRise);
+static nSettingItem<REAL> s_iSGBackSpeed("CAMERA_SERVER_GLANCE_BACK_FROMSPEED", s_serverGlanceBackSpeed);
+static nSettingItem<REAL> s_iSGRiseSpeed("CAMERA_SERVER_GLANCE_RISE_FROMSPEED", s_serverGlanceRiseSpeed);
+static nSettingItem<REAL> s_iSGPitch("CAMERA_SERVER_GLANCE_PITCH", s_serverGlancePitch);
 
 // turn speed of internal camera
 static REAL s_inTurnSpeed=40;
@@ -1491,8 +1525,21 @@ void eCamera::Timestep(REAL ts){
         }
     }
 
-    // determine camera custom parameters based on speed
+    // update blending factor for smooth glancing
+    {
+        REAL abs = fabs(glanceSmooth);
+        glanceSmoothAbs = abs > glanceSmoothAbs ? abs : glanceSmoothAbs;
+
+        // override: go all the way when glancing back
+        if ( glancingBack )
+        {
+            glanceSmoothAbs = 1;
+        }
+    }
+
+    // determine camera custom parameters based on speed, camera mode and camera settings
     REAL customBack = 0, customRise = 0, customPitch = 0, customTurnSpeed = s_customTurnSpeed, customTurnSpeed180 = s_customTurnSpeed180;
+    REAL glanceBack = 0, glanceRise = 0, glancePitch = 0;
     {
         REAL speed = centerSpeedSmooth;
         if ( mode == CAMERA_SERVER_CUSTOM )
@@ -1513,6 +1560,31 @@ void eCamera::Timestep(REAL ts){
             customRise = s_customRise + speed * s_customRiseSpeed;
             customPitch = s_customPitch;
         }
+
+        // select glance settings
+        if ( ( mode == CAMERA_SERVER_CUSTOM && se_overrideCustomServerCustom ) ||
+                se_overrideCustom )
+        {
+            glanceBack = s_serverGlanceBack + speed * s_serverGlanceBackSpeed;
+            glanceRise = s_serverGlanceRise + speed * s_serverGlanceRiseSpeed;
+            glancePitch = s_serverGlancePitch;
+        }
+        else
+        {
+            glanceBack = s_glanceBack + speed * s_glanceBackSpeed;
+            glanceRise = s_glanceRise + speed * s_glanceRiseSpeed;
+            glancePitch = s_glancePitch;
+        }
+
+        // blend the two according to the glance status
+        REAL blend = glanceSmoothAbs;
+        if ( mode != CAMERA_CUSTOM && mode != CAMERA_SERVER_CUSTOM )
+            blend = 1;
+        if ( se_forbidCustomGlance )
+            blend = 0;
+        customBack  = customBack  * ( 1-blend ) + glanceBack  * blend;
+        customRise  = customRise  * ( 1-blend ) + glanceRise  * blend;
+        customPitch = customPitch * ( 1-blend ) + glancePitch * blend;
     }
 
     // switch away from dead players
@@ -1883,22 +1955,11 @@ void eCamera::Timestep(REAL ts){
                 // usernewrise=newrise;
 
                 // use custom camera settings when glancing
-                if ( localPlayer && localPlayer->smartCustomGlance && ( glancingBack || glancingRight || glancingLeft || glanceSmoothAbs > .01 ))
+                if ( localPlayer && !se_forbidCustomGlance && localPlayer->smartCustomGlance && ( glancingBack || glancingRight || glancingLeft || glanceSmoothAbs > .01 ))
                 {
-                    // update blending factor raw data
-                    REAL abs = fabs(glanceSmooth);
-                    glanceSmoothAbs = abs > glanceSmoothAbs ? abs : glanceSmoothAbs;
-
                     // calculate blending factor c. c=0 will take the smart cam position, c=1 the custom cam.
                     REAL b = 1 - glanceSmoothAbs;
                     REAL c = 1 - b/(b + ts * GLANCE_SPEED);
-
-                    // override: go all the way when glancing back
-                    if ( glancingBack )
-                    {
-                        c = 1;
-                        glanceSmoothAbs = 1;
-                    }
 
                     // the camera pitch is calculated anew every frame, blend it accordingly
                     usernewrise = newrise = newrise * ( 1-glanceSmoothAbs) + customPitch * glanceSmoothAbs;

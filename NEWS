@@ -1,6 +1,10 @@
 Changes since 0.2.8.2:
 
   New settings:
+- CAMERA_GLANCE_*: separate settings for the glancing camera, work like CAMERA_CUSTOM_*.
+  Likewise, CAMERA_SERVER_GLANCE_* can replace CAMERA_SERVER_CUSTOM_* when glancing.
+  CAMERA_*CUSTOM_GLANCE* are server side settings that can control whether server or
+  clientside settings are used in various situations, see settings.cfg for details.
 - CYCLE_BOOST_? and CYCLE_BOOSTFACTOR_? for boosts when breaking away from walls,
   see settings.cfg or config.html for details
 - CYCLE_ACCEL_TUNNEL, works like CYCLE_ACCEL_SLINGSHOT, but is active when

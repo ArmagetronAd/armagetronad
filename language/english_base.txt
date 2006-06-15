@@ -415,7 +415,11 @@ camera_forbid_in_help		Forbids the use of the internal camera on all clients
 camera_forbid_free_help		Forbids the use of the free camera on all clients
 camera_forbid_follow_help	Forbids the use of the fixed external camera on all clients
 camera_forbid_custom_help	Forbids the use of the custom camera on all clients
-camera_forbid_server_custom_help  Forbid the use of the server custom camera? 
+camera_forbid_server_custom_help  Forbids the use of the server custom camera
+
+camera_forbid_custom_glance_help                 Forbids use of special glance camera settings
+camera_override_custom_glance_help               Overrides custom glance settings with vanues from the server
+camera_override_custom_glance_server_custom_help Overrides custom glance settings with vanues from the server only for the server custom camera
 
 camera_follow_start_x_help	Start position of the fixed external camera
 camera_follow_start_y_help	Start position of the fixed external camera
@@ -448,6 +452,18 @@ camera_server_custom_rise_fromspeed_help		This value is multiplied with the curr
 camera_server_custom_pitch_help		Position of the custom camera: how much does it look up/down?
 camera_server_custom_turn_speed_help Speed the server custom camera turns with. Turn values are taken from the clientside settings if this is negative.
 camera_server_custom_turn_speed_180_help Extra factor to CAMERA_SERVER_CUSTOM_TURN_SPEED after a quick reverse
+
+camera_glance_back_help		Position of the glance camera: how much is it moved back from the cycle?
+camera_glance_rise_help		Position of the glance camera: how much is it moved up from the cycle?
+camera_glance_back_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_GLANCE_BACK.
+camera_glance_rise_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_GLANCE_RISE.
+camera_glance_pitch_help	Position of the glance camera: how much does it look up/down?
+
+camera_server_glance_back_help		Position of the server glance camera: how much is it moved back from the cycle?
+camera_server_glance_rise_help		Position of the server glance camera: how much is it moved up from the cycle?
+camera_server_glance_back_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_SERVER_GLANCE_BACK.
+camera_server_glance_rise_fromspeed_help		This value is multiplied with the current speed and added to CAMERA_SERVER_GLANCE_RISE.
+camera_server_glance_pitch_help		Position of the server glance camera: how much does it look up/down?
 
 camera_visibility_recovery_speed_help The speed the external visibility targets recovers from wall hits
 camera_visibility_wall_distance_help  The distance the visibility targets keep from walls

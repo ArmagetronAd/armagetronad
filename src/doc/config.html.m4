@@ -358,6 +358,12 @@ camera perspectives anyway.) Try a match with all but the internal
 camera disabled :-)
 ])
 
+PARAGRAPH([Likewise, you can override the glance settings with server defined glance
+settings with CAMERA_OVERRIDE_CUSTOM_GLANCE 1 for all cameras or just for the server defined
+custom camera with CAMERA_OVERRIDE_CUSTOM_GLANCE_SERVER_CUSTOM 1. You can forbid custom
+glancing settings alltogether with CAMERA_FORBID_CUSTOM_GLANCE 1. Note that only relatively
+new clients (0.2.8.3 or later) respect these settings.])
+
 SUBSECTION(Maps)
 PARAGRAPH([
 New in 0.2.8 is the possibility to select an arena to fight in. It is still a bit experimental
