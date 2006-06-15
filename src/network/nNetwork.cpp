@@ -2938,6 +2938,9 @@ void sn_Receive(){
 
 void sn_KickUser(int i, const tOutput& reason, REAL severity )
 {
+    // print it
+    con << tOutput( "$network_kill_log", i, reason );
+
     // log it
     nMachine::GetMachine(i).OnKick( severity );
 
