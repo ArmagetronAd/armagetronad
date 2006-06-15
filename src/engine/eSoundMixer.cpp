@@ -236,6 +236,29 @@ void eSoundMixer::Init() {
 
     m_active = false;
 
+    const tPath& vpath = tDirectories::Data();
+
+    // We haven't started playing any music yet
+    m_musicIsPlaying = false;
+    m_active = true;
+
+    tString musFile;
+
+    musFile = vpath.GetReadPath( titleTrack );
+    std::cout << titleTrack << "\n";
+    m_TitleTrack = new eMusicTrack(musFile, true);
+    musFile = vpath.GetReadPath( guiTrack );
+    std::cout << guiTrack << "\n";
+    m_GuiTrack = new eMusicTrack(musFile, true);
+
+    //m_GuiTrack->Loop();
+
+    // Don't load a file for this, we don't know what we're playing until it's time
+    // to play.
+    m_GameTrack = new eMusicTrack();
+
+    LoadPlaylist();
+
     if(!SDL_WasInit( SDL_INIT_AUDIO )) {
         int rc;
         rc = se_Wrap_SDL_InitSubSystem();
@@ -274,6 +297,7 @@ void eSoundMixer::Init() {
 
     rc = Mix_OpenAudio( frequency, AUDIO_S16LSB,
                         numSoundcardChannels, samples );
+
     if(rc==0) {
         // don't know what to do here
         int a,c;
@@ -288,29 +312,6 @@ void eSoundMixer::Init() {
     // Register music finished callback
     Mix_VolumeMusic( musicVolume );
     Mix_HookMusicFinished( &eSoundMixer::SDLMusicFinished );
-
-    const tPath& vpath = tDirectories::Data();
-
-    // We haven't started playing any music yet
-    m_musicIsPlaying = false;
-    m_active = true;
-
-    tString musFile;
-
-    musFile = vpath.GetReadPath( titleTrack );
-    std::cout << titleTrack << "\n";
-    m_TitleTrack = new eMusicTrack(musFile, true);
-    musFile = vpath.GetReadPath( guiTrack );
-    std::cout << guiTrack << "\n";
-    m_GuiTrack = new eMusicTrack(musFile, true);
-
-    //m_GuiTrack->Loop();
-
-    // Don't load a file for this, we don't know what we're playing until it's time
-    // to play.
-    m_GameTrack = new eMusicTrack();
-
-    LoadPlaylist();
 
     // Now we're done with music and initializing sdl_mixer, we'll setup the sound
     // effect stuff
@@ -519,7 +520,11 @@ tString eSoundMixer::GetCurrentSong() {
     if(m_GameTrack != NULL)
         if(m_GameTrack->currentMusic != NULL) {
             tString const &str = m_GameTrack->currentMusic->GetFileName();
-            size_t pos = str.find_last_of("/\\");
+#ifndef WIN32
+            size_t pos = str.find_last_of('/');
+#else
+            size_t pos = str.find_last_of('\\');
+#endif
             if(pos == tString::npos) return str;
             if(pos == str.size()) return tString();
             return str.SubStr(pos + 1);
