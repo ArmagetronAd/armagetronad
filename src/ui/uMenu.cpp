@@ -871,12 +871,13 @@ int uAutoCompleter::FindLengthOfLastWord(tString &string, unsigned pos) {
 //! @param results    the list where the possible completions will be saved
 //! @param ignorecase if true, the case will be ignored
 void uAutoCompleter::FindPossibleWords(tString word, std::deque<tString> &results, bool ignorecase) {
-    if(ignorecase)
-        word = word.ToLower();
-    unsigned len = word.size();
     for(std::deque<tString>::iterator i=m_PossibleWords.begin(); i!=m_PossibleWords.end(); ++i) {
-        if((ignorecase ? i->SubStr(0, len).ToLower() : i->SubStr(0, len)) == word)
+	size_t pos;
+        if((pos = (ignorecase ? i->ToLower() : *i).find(word)) != tString::npos) {
+	    if(isalpha((*i)[pos]) && pos != 0 && isalpha((*i)[pos-1]))
+		continue; //both the char we're at and the one before is alphanumeric; we're in the middle of a word
             results.push_back(*i);
+	}
     }
 }
 
@@ -885,49 +886,73 @@ void uAutoCompleter::FindPossibleWords(tString word, std::deque<tString> &result
 //! @param ignorecase if true, the case will be ignored
 //! @return the match, if any
 tString uAutoCompleter::FindClosestMatch(tString &word, std::deque<tString> &results, bool ignorecase) {
-    tString ret(word);
+    tString ret(ignorecase?word.ToLower():word);
     unsigned int len = ret.size();
-    while(true) {
+    while(true) { // complete right side
         std::deque<tString>::iterator i;
         i = results.begin();
-        char nextchar;
         bool found=true;
-        if(len < i->size()) {
+        tString::size_type pos=(ignorecase?i->ToLower():*i).find(ret);
+        if(pos!=tString::npos && pos+len < i->size()) {
             found=false;
-            nextchar=i->at(len);
-            if(ignorecase) nextchar=tolower(nextchar);
+            ret+=(ignorecase ? tolower(i->at(pos+len)) : i->at(pos+len));
             ++i;
             for(; i!=results.end(); ++i) {
-                if(len >= i->size() || nextchar != (ignorecase ? tolower(i->at(len)) : i->at(len))) {
+                if((ignorecase?i->ToLower():*i).find(ret) == tString::npos) {
                     found=true;
+                   ret.erase(ret.length()-1);
                     break;
                 }
             }
         }
         if (found) //we found a mismatch
             break;
-        else{
-            ret += nextchar;
+        else
             len++;
-        }
     }
+    while(true) { // something similar, but now for the left side of the word
+        std::deque<tString>::iterator i;
+        i = results.begin();
+        bool found=true;
+       tString::size_type pos=(ignorecase?i->ToLower():*i).find(ret);
+        if(pos!=tString::npos && pos > 0) {
+            found=false;
+            ret.insert(ret.begin(),(ignorecase ? tolower(i->at(pos-1)) : i->at(pos-1)));
+            ++i;
+            for(; i!=results.end(); ++i) {
+                if((ignorecase?i->ToLower():*i).find(ret) == tString::npos) {
+                    found=true;
+                   ret.erase(0,1);
+                    break;
+                }
+            }
+        }
+        if (found)  //we found a mismatch
+            break;
+        else
+            len++;
+     }
     return ret;
 }
 
 //! @param results    the list of possible completions
-//! @param len        the length of the word that was already typed, it will be highlighted
-void uAutoCompleter::ShowPossibilities(std::deque<tString> &results, int len) {
+//! @param word       the word that was already typed, it will be highlighted
+//! @param ignorecase if true, the case will be ignored
+void uAutoCompleter::ShowPossibilities(std::deque<tString> &results, tString &word, bool ignorecase) {
     if(results.size() > 10) {
         con << tOutput("$tab_completion_toomanyresults");
     }
     else {
-        con << tOutput("$tab_completion_results");
+        tString::size_type len=word.length();
         for(std::deque<tString>::iterator i=results.begin(); i!=results.end(); ++i) {
-            con << "0xff8888"
-            << i->SubStr(0, len)
-            << "0xffffff"
-            << i->SubStr(len)
-            << "\n";
+        con << tOutput("$tab_completion_results");
+           tString::size_type pos=(ignorecase?i->ToLower():*i).find(word);
+            con << i->SubStr(0,pos)
+                << "0xff8888"
+                << i->SubStr(pos, len)
+                << "0xffffff"
+                << i->SubStr(pos+len)
+                << "\n";
         }
     }
 }
@@ -964,7 +989,7 @@ int uAutoCompleter::TryCompletion(tString &string, unsigned pos, unsigned len) {
     if(results.size() > 1){
         tString match(FindClosestMatch(word, results, true));
         if(match == word) { //no completion took place
-            ShowPossibilities(results, len);
+            ShowPossibilities(results, word);
             return pos;
         }
         else { //do the completion
@@ -1277,7 +1302,7 @@ void uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
 
                 {
                     rTextField c(-.8,.6, h, sr_fontError);
-		    c.EnableLineWrap();
+                    c.EnableLineWrap();
 
                     c << interpretation;
                 }
