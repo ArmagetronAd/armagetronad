@@ -478,14 +478,14 @@ void sg_SetIcon()
 #ifndef MACOSX
 #ifdef  WIN32
     SDL_SysWMinfo	info;
-	HICON			icon;
-	// get the HWND handle
+    HICON			icon;
+    // get the HWND handle
     SDL_VERSION( &info.version );
-	if( SDL_GetWMInfo( &info ) )
-	{
+    if( SDL_GetWMInfo( &info ) )
+    {
         icon = LoadIcon( GetModuleHandle( NULL ), MAKEINTRESOURCE( 1 ) );
         SetClassLong( info.window, GCL_HICON, (LONG) icon );
-	}
+    }
 #else
     rSurface tex( "desktop/icons/medium/armagetronad.png" );
     //    SDL_Surface *tex=IMG_Load( tDirectories::Data().GetReadPath( "textures/icon.png" ) );
@@ -496,8 +496,6 @@ void sg_SetIcon()
 #endif
 #endif
 }
-
-static const char * dedicatedSection = "DEDICATED";
 
 int main(int argc,char **argv){
     //std::cout << "enter\n";
@@ -519,14 +517,26 @@ int main(int argc,char **argv){
         if ( ! commandLine.Analyse(argc, argv) )
             return 0;
 
-        // read RAND_MAX from recording or write it to recording
-        if ( !tRecorder::PlaybackStrict( dedicatedSection, dedicatedServer ) )
+
         {
-#ifdef DEDICATED
-            dedicatedServer = true;
-#endif
+            // embed version in recording
+            const char * versionSection = "VERSION";
+            tString version( VERSION );
+            tRecorder::Playback( versionSection, version );
+            tRecorder::Record( versionSection, version );
         }
-        tRecorder::Record( dedicatedSection, dedicatedServer );
+
+        {
+            // read/write server/client mode from/to recording
+            const char * dedicatedSection = "DEDICATED";
+            if ( !tRecorder::PlaybackStrict( dedicatedSection, dedicatedServer ) )
+            {
+#ifdef DEDICATED          
+                dedicatedServer = true;
+#endif
+            }
+            tRecorder::Record( dedicatedSection, dedicatedServer );
+        }
 
         // tERR_MESSAGE( "Initializing player data." );
         ePlayer::Init();

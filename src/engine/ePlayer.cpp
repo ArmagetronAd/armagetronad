@@ -1312,7 +1312,7 @@ void handle_chat(nMessage &m){
                 p->lastSaidTimes[0] = currentTime;
             }
 
-            nSpamProtection::Level spamLevel = p->chatSpam_.CheckSpam( 1.0f + lengthMalus, m.SenderID() );
+            nSpamProtection::Level spamLevel = p->chatSpam_.CheckSpam( 1.0f + lengthMalus, m.SenderID(), tOutput("$spam_chat") );
             bool pass = false;
 
             if (say.StartsWith("/")) {
@@ -3936,7 +3936,7 @@ void ePlayerNetID::ReceiveControlNet(nMessage &m)
 
                 // count it as spam if it is obnoxious
                 if ( obnoxious )
-                    chatSpam_.CheckSpam( 4.0, Owner() );
+                    chatSpam_.CheckSpam( 4.0, Owner(), tOutput("$spam_teamchage") );
             }
 
             break;

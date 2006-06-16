@@ -376,9 +376,9 @@ static bool s_Veto( tString line_in, std::vector< tString > const & vetos )
 
         if ( line.StartsWith( veto ) )
         {
-            if ( !line.StartsWith( "INCLUDE" ) )
+            if ( !line.StartsWith( "INCLUDE" ) && tRecorder::IsRunning() )
             {
-                con << "Ignoring vetoed input: " << line << "\n";
+                con << "Veto on config line: " << line << "\n";
             }
 
             return true;

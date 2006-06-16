@@ -51,7 +51,7 @@ public:
 
     void PlayerChanged();                                       //!< call when a player changed (logged in or changed name). He'll be blocked from issuing kick votes for a while.
 
-    void Spam( int user, REAL spamLevel );			            // trigger spam guard
+    void Spam( int user, REAL spamLevel, tOutput const & message );	// trigger spam guard
     bool IsSpamming( int user );								// check if user has been found spamming
     void RemoveFromGame();										// remove from game
 
@@ -74,6 +74,7 @@ private:
     nSpamProtection votingSpam_;					// spam control
     tJUST_CONTROLLED_PTR< eVoter > selfReference_;  //!< reference to self
     double lastKickVote_;                           //!< the last time a kick vote was issued for this player
+    double lastNameChangePreventor_;                //!< the last time something happened that should prevent the voter from changing names
     double lastChange_;                             //!< the last time a player assigned to this voter changed
 };
 

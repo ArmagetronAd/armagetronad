@@ -23,6 +23,10 @@ Changes since 0.2.8:
 Changes since 0.2.8.2:
 
   New settings:
+- CAMERA_GLANCE_*: separate settings for the glancing camera, work like CAMERA_CUSTOM_*.
+  Likewise, CAMERA_SERVER_GLANCE_* can replace CAMERA_SERVER_CUSTOM_* when glancing.
+  CAMERA_*CUSTOM_GLANCE* are server side settings that can control whether server or
+  clientside settings are used in various situations, see settings.cfg for details.
 - CYCLE_BOOST_? and CYCLE_BOOSTFACTOR_? for boosts when breaking away from walls,
   see settings.cfg or config.html for details
 - CYCLE_ACCEL_TUNNEL, works like CYCLE_ACCEL_SLINGSHOT, but is active when
@@ -37,6 +41,10 @@ Changes since 0.2.8.2:
   right at the same time.
 
   Featurelets:
+- The camera has a memory which player you like to watch. Every time you manually switch
+  the camera and your favorite player is not dead, the favorite is set to the currently 
+  watched player. The next time the camera doesn't know what to watch, your favorite
+  will be selected.
 - Players leaving to spectator mode with <0.2.8.2 clients are handled like
   spectators of 0.2.8.2 clients: they stay visible to the others.
 - Kick statistics are now persistent across server runs.

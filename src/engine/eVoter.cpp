@@ -249,7 +249,7 @@ public:
 
         if ( items_.Len() < se_maxVotes )
         {
-            voter->Spam( m.SenderID(), se_votingSpamIssue );
+            voter->Spam( m.SenderID(), se_votingSpamIssue, tOutput("$spam_vote_kick_issue") );
             return true;
         }
         else
@@ -376,7 +376,7 @@ public:
             if ( con >= pro && con * 2 >= total )
             {
                 if ( this->suggestor_ )
-                    this->suggestor_->Spam( user_, se_votingSpamReject );
+                    this->suggestor_->Spam( user_, se_votingSpamReject, tOutput("$spam_vote_rejected") );
 
                 tOutput voteMessage;
                 voteMessage.SetTemplateParameter( 1, GetDescription() );
@@ -761,14 +761,15 @@ protected:
         eVoter * sender = eVoter::GetVoter( m.SenderID() );
         if ( sender && sender->lastChange_ + se_votingMaturity > tSysTimeFloat() && sender->lastChange_ * 2 > tSysTimeFloat() )
         {
-            tOutput message("$vote_maturity");
+            REAL time = sender->lastChange_ + se_votingMaturity - tSysTimeFloat();
+            tOutput message( "$vote_maturity", time );
             sn_ConsoleOut( message, m.SenderID() );
             return false;
         }
 
         // prevent the sender from changing his name for confusion
         if ( sender )
-            sender->lastKickVote_ = time;
+            sender->lastNameChangePreventor_ = time;
 
         // read player ID
         unsigned short id;
@@ -794,6 +795,7 @@ protected:
                 else
                 {
                     voter->lastKickVote_ = time;
+                    voter->lastNameChangePreventor_ = time;
                 }
             }
         }
@@ -1011,6 +1013,7 @@ eVoter::eVoter( nMachine & machine )
     selfReference_ = this;
     voters_.Add( this );
     lastKickVote_ = -1E+40;
+    lastNameChangePreventor_ = -1E+40;
     lastChange_ = tSysTimeFloat();
 }
 
@@ -1019,17 +1022,17 @@ eVoter::~eVoter()
     voters_.Remove( this );
 }
 
-void eVoter::Spam( int user, REAL spamLevel )
+void eVoter::Spam( int user, REAL spamLevel, tOutput const & message )
 {
     if ( sn_GetNetState() == nSERVER )
-        votingSpam_.CheckSpam( spamLevel, user );
+        votingSpam_.CheckSpam( spamLevel, user, message );
 }
 
 bool eVoter::IsSpamming( int user )
 {
     if ( sn_GetNetState() == nSERVER )
     {
-        return nSpamProtection::Level_Ok != votingSpam_.CheckSpam( 0.0f, user );
+        return nSpamProtection::Level_Ok != votingSpam_.CheckSpam( 0.0f, user, tOutput("$spam_vote_kick_issue") );
     }
 
     return false;
@@ -1061,7 +1064,7 @@ void eVoter::OnDestroy( void )
 
 bool eVoter::AllowNameChange( void ) const
 {
-    return tSysTimeFloat() > this->lastKickVote_ + se_minTimeBetweenKicks;
+    return tSysTimeFloat() > this->lastNameChangePreventor_ + se_minTimeBetweenKicks;
 }
 
 void eVoter::RemoveFromGame()
@@ -1230,6 +1233,7 @@ eVoter* eVoter::GetVoter( nMachine & machine )			// find or create the voter for
             {
                 voters_.Add( voter );
                 voter->lastKickVote_ = -1E30;
+                voter->lastNameChangePreventor_ = -1E30;
             }
 
             // return result
