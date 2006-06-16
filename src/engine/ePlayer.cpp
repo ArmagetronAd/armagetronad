@@ -2170,7 +2170,7 @@ void ePlayerNetID::RemoveFromGame()
         m->BroadCast();
 
         if ( listID >= 0 ){
-            if ( IsSpectating() )
+            if ( ( IsSpectating() || !se_assignTeamAutomatically ) && CurrentTeam() == NULL )
             {
                 // get colored player name
                 tColoredString playerName;
