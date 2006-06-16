@@ -2048,7 +2048,7 @@ player_creates_team		\1 founded \2.\n
 player_nocreate_team		\1 cannot currently create a new team.\n
 player_nojoin_team		\1 cannot currently join \2.\n
 player_not_on_team      You are not on a team.\n
-team_renamed			\1 renamed it's team to \2.\n
+team_renamed			\1 renamed its team to \2.\n
 player_topologypolice	Order from Topology Police: \1
 
 team_shuffle            \1 gets shuffled from rank \2 to \3.\n

@@ -1287,7 +1287,8 @@ void sg_HostGame(){
 
     //#ifndef DEBUG
 #ifdef DEDICATED
-    uWebInterface::Initialize();
+    if ( !tRecorder::IsPlayingBack() )
+        uWebInterface::Initialize();
     static double startTime=tSysTimeFloat();
 
     if ( sg_NumUsers() == 0)
@@ -2934,7 +2935,7 @@ void gGame::Analysis(REAL time){
                     sg_currentSettings->AutoAI( eTeam::teams( last_team_alive )->NumHumanPlayers() > 0 );
 
 
-                if ( winner > 0 )
+                if ( ( sg_currentSettings->scoreWin != 0 || sg_currentSettings->gameType != gFREESTYLE ) && winner > 0 )
                 {
                     // check if the win was legitimate: at least one enemy team needs to be online
                     if ( sg_EnemyExists( winner-1 ) || sg_currentSettings->gameType==gFREESTYLE )

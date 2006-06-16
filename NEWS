@@ -1,3 +1,24 @@
+Changes since 0.3.0_alpha4872:
+- Tab completion now looks for partial matches in nicknames, instead of
+  just at the beginning of the nick. Only the beginning of words (a series
+  of alphanumerical characters) is matched.
+- Fixed the <Reverse> tag in cockpit files
+- Little changes to the default cockpit file
+  - The brake meter now becomes red when it's almost empty (before it
+    became green again, after becoming yellow)
+  - Switched the colors of the FPS gauge, they are more intuitive like that
+- The "currently playing" display in the cockpit is now cropped to the
+  basename on Windows
+- Fixed handling of the mercam mode in the cockpit
+- New serverside settings FORBID_HUD_MAP (boolean) and FORBID_COCKPIT_DATA
+  (colon separated list of forbidden cockpit data sources)
+- New setting FONT_SIZE_FACTOR, a global factor to all font sizes
+- A winner is now only declared if there are points for winning or the
+  game mode is not "Freestyle"
+- Disabled web server in playback mode
+- Language fix: "...renamed it's team to..." becomes "...renames its team
+  to..."
+
 Changes since 0.2.8:
 - New team join menu (colored, shows number of players per team)
 - Customizable teamname
