@@ -1,3 +1,8 @@
+NOTE: This file isn't really used any more and is sort of just hanging around.
+Half of it doesn't apply any more. Consider it stored for archival purposes.
+
+-------------------------
+
 There are something which don't have complete documentation, or features that aren't completly finnished. Here is a little bit of information about them...
 
 There are some new commands that have been added...
