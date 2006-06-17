@@ -1095,9 +1095,8 @@ void uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
 
                     c << interpretation;
                 }
-
-                rSysDep::SwapGL();
             }
+            rSysDep::SwapGL();
             tAdvanceFrame();
         }
     }
