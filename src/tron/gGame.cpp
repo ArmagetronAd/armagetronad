@@ -4241,25 +4241,30 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
 
     // and print it to the console
 #ifndef DEDICATED    
-    con <<  title << ":\n" << message << "\n";
+    con <<  title << "\n" << message << "\n";
 #endif
 
     // get them out again
     se_ChatState( ePlayerNetID::ChatFlags_Menu, false );
 }
 
+static tString sg_fullscreenMessageTitle;
+static tString sg_fullscreenMessageMessage;
+static REAL sg_fullscreenMessageTimeout;
+static void sg_TodoClientFullscreenMessage()
+{
+    sg_ClientFullscreenMessage( sg_fullscreenMessageTitle, sg_fullscreenMessageMessage, sg_fullscreenMessageTimeout );
+}
+
 static void sg_ClientFullscreenMessage(nMessage &m){
     if (sn_GetNetState()!=nSERVER){
-        tString title;
-        m >> title;
+        sg_fullscreenMessageTimeout = 60;
 
-        tString message;
-        m >> message;
+        m >> sg_fullscreenMessageTitle;
+        m >> sg_fullscreenMessageMessage;
+        m >> sg_fullscreenMessageTimeout;
 
-        REAL timeout = 60;
-        m >> timeout;
-
-        sg_ClientFullscreenMessage( title, message, timeout );
+        st_ToDo( sg_TodoClientFullscreenMessage );
     }
 }
 
