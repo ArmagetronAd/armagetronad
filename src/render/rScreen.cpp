@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rTexture.h"
 #include "rScreen.h"
 #include "rSysdep.h"
+#include "rConsole.h"
 #include "rViewport.h"
 #include "tConfiguration.h"
 #include "tSysTime.h"
@@ -160,8 +161,14 @@ static tConfItem<int> fa("FAILED_ATTEMPTS", failed_attempts);
 
 static tCallback *rPerFrameTask_anchor;
 
+bool sr_True(){return true;}
+
 rPerFrameTask::rPerFrameTask(VOIDFUNC *f):tCallback(rPerFrameTask_anchor, f){}
-void rPerFrameTask::DoPerFrameTasks(){Exec(rPerFrameTask_anchor);}
+void rPerFrameTask::DoPerFrameTasks(){
+    // prevent console rendering, that can cause nasty recursions
+    rNoAutoDisplayAtNewlineCallback noAutoDisplay( sr_True );
+    Exec(rPerFrameTask_anchor);
+}
 
 
 // *******************************************
