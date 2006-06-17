@@ -2653,7 +2653,7 @@ static gAISensor * sg_GetSensor( int currentDirectionNumber, gCycle const & obje
     int turns = 1;
     grid.Turn( direction, turn );
     eCoord dir = grid.GetDirection( direction );
-    while ( turn * ( origDir * dir ) > .01 && currentDirectionNumber != direction )
+    while ( !ret || ( turn * ( origDir * dir ) > .01 && currentDirectionNumber != direction ) )
     {
         // cast rays
         gAISensor * sensor = tNEW(gAISensor)(&object,object.Position(),dir, side, range, corridor*.5f, turn );
