@@ -542,6 +542,11 @@ void rSysDep::SwapGL(){
             sr_glOut = true;
             rSysDep::ClearGL();
         }
+
+        // in playback or recording mode, always execute frame tasks, they may be improtant for consistency
+        if ( tRecorder::IsRunning() )
+            rPerFrameTask::DoPerFrameTasks();
+
         return;
     }
 
