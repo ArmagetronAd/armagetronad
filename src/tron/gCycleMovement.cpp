@@ -1007,36 +1007,44 @@ REAL gCycleMovement::DistanceToDestination( gDestination & dest ) const
     // read future direction from destination
     eCoord dirTurned = dest.direction;
 
-    REAL F = eCoord::F( dirTurned, dirDrive );
-    if ( F > .99 )
+    REAL divisor = ( dirDrive * dirTurned );
+    if ( divisor < EPS && divisor > -EPS )
     {
-        // destination direction and driving direction coincide; we have to
-        // make up a new turned direction
-
-        // no need to worry if brake status changed
-        if ( ( braking != 0 ) != dest.braking )
+        REAL F = eCoord::F( dirTurned, dirDrive );
+        if ( F > 0 )
         {
-            return eCoord::F( dest.position - pos, dirDrive );
+            // destination direction and driving direction coincide; we have to
+            // make up a new turned direction
+
+            // no need to worry if brake status changed
+            if ( ( braking != 0 ) != dest.braking )
+            {
+                return eCoord::F( dest.position - pos, dirDrive )/dirDrive.NormSquared();
+            }
+
+            // we'd have to turn in this direction to reach the destination
+            int side = (dest.position - pos) * dirDrive > 0 ? -1 : 1;
+
+            // pretend to turn in that direction and fetch driving vector
+            int w = windingNumberWrapped_;
+            Grid()->Turn(w, side);
+            dirTurned = Grid()->GetDirection( w );
+
+            // recalculate divisor
+            divisor = ( dirDrive * dirTurned );
+            tASSERT( fabs( divisor ) > EPS );
         }
-
-        // we'd have to turn in this direction to reach the destination
-        int side = (dest.position - pos) * dirDrive > 0 ? -1 : 1;
-
-        // pretend to turn in that direction and fetch driving vector
-        int w = windingNumberWrapped_;
-        Grid()->Turn(w, side);
-        dirTurned = Grid()->GetDirection( w );
-    }
-    else if ( F < -.99 )
-    {
-        // destination direction and driving direction are opposed. This must be a grave error,
-        // so we'll make something up
-        return eCoord::F( dest.position - pos, dirDrive );
+        else
+        {
+            // destination direction and driving direction are opposed. This must be a grave error,
+            // so we'll make something up
+            return eCoord::F( dest.position - pos, dirDrive )/dirDrive.NormSquared();
+        }
     }
 
     // calculate when a turn would need to be made that aligns
     // this cycle with the destination
-    return ( ( dest.position - pos ) * dirTurned ) / ( dirDrive * dirTurned );
+    return ( ( dest.position - pos ) * dirTurned ) / divisor;
 }
 
 // *******************************************************************************************
@@ -1149,7 +1157,7 @@ gDestination * gCycleMovement::GetDestinationBefore( const SyncData & sync, gDes
             }
 
             // see if brake status and driving direction match; this is a must
-            if ( eCoord::F( run->direction, sync.dir ) > .9 && run->braking == ( sync.braking != 0 ) )
+            if ( eCoord::F( run->direction, sync.dir ) > .9*sync.dir.NormSquared() && run->braking == ( sync.braking != 0 ) )
             {
                 if ( !bestMatch || distance < bestMatchDistance )
                 {
@@ -1647,10 +1655,6 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 int turnTo=0;
                 {
                     // the direction we need to drive in
-                    eCoord dirTurn = currentDestination->direction;
-                    if ( missed )
-                        dirTurn = (currentDestination->position - pos);
-
                     // see which direction we drive into after a left or right turn
                     int wn = windingNumberWrapped_;
                     Grid()->Turn(wn, 1);
@@ -1659,8 +1663,22 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     Grid()->Turn(wn, -1);
                     eCoord dirMinus = Grid()->GetDirection(wn);
 
-                    // see witch of the alternatives comes closer
-                    turnTo = ( ( fabs( dirMinus * dirTurn ) - eCoord::F( dirMinus, dirTurn ) )/dirTurn.NormSquared() < ( fabs( dirPlus * dirTurn ) - eCoord::F( dirPlus, dirTurn ) )/dirTurn.NormSquared() ) ? -1 : +1;
+                    if ( missed )
+                    {
+                        eCoord dirTurn = (currentDestination->position - pos);
+
+                        // see witch of the alternatives comes closer to the desired direction
+                        turnTo = ( ( fabs( dirMinus * dirTurn ) - .1 * eCoord::F( dirMinus, dirTurn ) )/dirTurn.NormSquared() < ( fabs( dirPlus * dirTurn ) - .1 * eCoord::F( dirPlus, dirTurn ) )/dirTurn.NormSquared() ) ? -1 : +1;
+                    }
+                    else
+                    {
+                        // just see which axis gets closer
+                        eCoord dirTurn = currentDestination->direction;
+
+                        turnTo = ( ( dirMinus - dirTurn ).NormSquared() < ( dirPlus - dirTurn ).NormSquared() ) ? -1 : +1;
+
+                    }
+
                 }
 
                 if (!missed){ // then we did not miss a destination
@@ -1963,6 +1981,8 @@ void gCycleMovement::CopyFrom( const gCycleMovement & other )
     windingNumber_          = other.windingNumber_;
     windingNumberWrapped_   = other.windingNumberWrapped_;
 
+    tASSERT(finite(distance));
+
     // std::cout << "copy: " << brakingReservoir << ":" << braking << "\n";
 
 #ifdef DEBUG_X
@@ -2005,6 +2025,8 @@ void gCycleMovement::CopyFrom( const SyncData & sync, const gCycleMovement & oth
     turns			= sync.turns;
     brakingReservoir= sync.brakingReservoir;
     // std::cout << "fromsync: " << brakingReservoir << ":" << braking << "\n";
+
+    tASSERT(finite(distance));
 
     // reset winding number and acceleration
     this->SetWindingNumberWrapped( Grid()->DirectionWinding(dirDrive) );
@@ -2187,7 +2209,7 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
 
             // see if the wall is parallel to the driving direction, only then should it add speed
             eCoord wallVec = rear.ehit->Vec();
-            if ( fabs( eCoord::F( wallVec, dirDrive  ) ) > .9 )
+            if ( fabs( eCoord::F( wallVec, dirDrive  ) ) > .9 * dirDrive.NormSquared() )
             {
                 // enemyInfluence.AddSensor( rear, 1 );
                 REAL wallAcceleration=SpeedMultiplier() * sg_accelerationCycle * ((1/(rear.hit+sg_accelerationCycleOffs))
@@ -2614,6 +2636,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
     clamp(ts, -10, 10);
 
     REAL step=verletSpeed_*ts;
+    tASSERT(finite(step));
 
     int numTries = 0;
     bool emergency = false;
@@ -2780,6 +2803,9 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
             }
         }
 #endif
+
+        tASSERT(finite(distance));
+        tASSERT(finite(step));
         distance += step;
         lastTimeAlive_ = currentTime;
     }
@@ -2831,7 +2857,9 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
                 rubber = rubber_granted;
 
                 // update distance to include the really covered space
-                distance += eCoord::F( dirDrive, pos - lastPos );
+                tASSERT(finite(distance));
+                distance += eCoord::F( dirDrive, pos - lastPos )/dirDrive.NormSquared();
+                tASSERT(finite(distance));
 
                 throw;
             }
@@ -2892,6 +2920,8 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
     // apply acceleration
     if ( !sg_verletIntegration.Supported() )
         this->ApplyAcceleration( ts );
+
+    tASSERT(finite(distance));
 
     return false;
 }
@@ -3051,7 +3081,7 @@ void gCycleMovement::MyInitAfterCreation( void )
 
 REAL gCycleMovement::DoGetDistanceSinceLastTurn( void ) const
 {
-    return eCoord::F( dirDrive, pos - lastTurnPos_ );
+    return eCoord::F( dirDrive, pos - lastTurnPos_ )/dirDrive.NormSquared();
 }
 
 // *******************************************************************************************

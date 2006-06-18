@@ -3956,11 +3956,8 @@ bool gGame::GameLoop(bool input){
                 se_PauseGameTimer( gtime < sg_lastChatBreakTime && ePlayerNetID::WaitToLeaveChat() );
         }
 
-        if (sr_glOut && gtime>-PREPARE_TIME+.5 && goon && synced )
+        if ( !sr_glOut | gtime<=-PREPARE_TIME+.5 || !goon || !synced )
         {
-            Render(grid, gtime, input);
-        }
-        else{
 #ifndef DEDICATED
             if (input)
             {
@@ -3971,12 +3968,11 @@ bool gGame::GameLoop(bool input){
 
                 if ( sr_glOut )
                     rSysDep::ClearGL();
-                rSysDep::SwapGL();
             }
-
-            tDelay(10000);
 #endif
         }
+
+        Render(grid, gtime, input);
 
         if ( netstate != sn_GetNetState() )
         {

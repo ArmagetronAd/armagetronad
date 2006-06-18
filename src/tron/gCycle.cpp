@@ -1066,6 +1066,7 @@ bool gCycleExtrapolator::TimestepCore(REAL currentTime)
     // correct distance
     distance = dest->distance - DistanceToDestination( *dest );
     REAL distanceBefore = GetDistance();
+    tASSERT(finite(distance));
 
     // delegate
     bool ret = gCycleMovement::TimestepCore( currentTime );
@@ -1310,7 +1311,14 @@ void gCycle::MyInitAfterCreation(){
 
     skew=skewDot=0;
 
-    // dir=dirDrive;
+    {
+        dir=dirDrive;
+        REAL dirLen=dir.NormSquared();
+        if ( dirLen > 0 )
+        {
+            dir = dir * (1/sqrt( dirLen ));
+        }
+    }
 
     if (sn_GetNetState()!=nCLIENT){
         if(!player)
@@ -2350,7 +2358,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                 REAL d = otherPlayer->GetDistanceSinceLastTurn() * .001;
                 if ( d < .01 )
                     d = .01;
-                REAL maxd = eCoord::F( otherPlayer->dirDrive, collPos - otherPlayer->GetLastTurnPos() ) * .5;
+                REAL maxd = eCoord::F( otherPlayer->dirDrive, collPos - otherPlayer->GetLastTurnPos() ) * .5/otherPlayer->dirDrive.NormSquared();
                 if ( d > maxd )
                     d = maxd;
                 if ( d < 0 )
@@ -3621,7 +3629,7 @@ static tSettingItem<int> sg_useExtrapolatorSyncConf("EXTRAPOLATOR_SYNC",sg_useEx
 // make sure no correction moves the cycle backwards beyond the beginning of the last wall
 void ClampForward( eCoord& newPos, const eCoord& startPos, const eCoord& dir )
 {
-    REAL forward = eCoord::F( newPos - startPos, dir );
+    REAL forward = eCoord::F( newPos - startPos, dir )/dir.NormSquared();
     if ( forward < 0 )
         newPos = newPos - dir * forward;
 }
@@ -3728,7 +3736,7 @@ void gCycle::ReadSync( nMessage &m )
     // store last known good position: a bit before the last position confirmed by the server
     lastGoodPosition_ = sync.pos + ( sync.lastTurn - sync.pos ) *.01;
     // offset it a tiny bit by our last driving direction
-    if ( eCoord::F( dirDrive, sync.dir ) > .99f )
+    if ( eCoord::F( dirDrive, sync.dir ) > .99f*dirDrive.NormSquared() )
         lastGoodPosition_ = lastGoodPosition_ - this->lastDirDrive * .0001;
 
     //eDebugLine::SetTimeout( 2 );
@@ -3912,7 +3920,7 @@ void gCycle::ReadSync( nMessage &m )
         }
 
         correctPosSmooth = correctPosSmooth + pos - newPos;
-        distance += eCoord::F( newPos - pos, Direction() );
+        distance += eCoord::F( newPos - pos, Direction() )/Direction().NormSquared();
 
         MoveSafely( newPos, lastTime, lastTime );
 
@@ -3995,7 +4003,7 @@ void gCycle::SyncEnemy ( const eCoord& )
     // calculate turning
     bool turned = false;
     REAL turnDirection=( dirDrive*lastSyncMessage_.dir );
-    REAL notTurned=eCoord::F( dirDrive, lastSyncMessage_.dir );
+    REAL notTurned=eCoord::F( dirDrive, lastSyncMessage_.dir )/dirDrive.NormSquared();
 
     // calculate the position of the last turn from the sync data
     if ( distance > 0 && ( notTurned < .99 || this->turns < lastSyncMessage_.turns ) )
