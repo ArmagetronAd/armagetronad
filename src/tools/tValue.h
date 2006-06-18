@@ -34,10 +34,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tString.h"
 #include <memory>
 #include <iomanip>
+#include <set>
+#include <iterator>
+#include <algorithm>
+#include <boost/shared_ptr.hpp>
 class tConfItemBase;
 
 //! Namespace for all Value classes for use by the cockpit
 namespace tValue {
+
+  class Base;
+  class FooPtrOps;
+  typedef boost::shared_ptr<Base> BasePtr; //!< convinience definition for the use in derived classes
+  
+  typedef std::set<BasePtr, FooPtrOps> myCol;
 
 //! Offers basic functions to set the precision etc.
 class Base {
@@ -74,6 +84,36 @@ public:
     virtual bool operator< (Base const &other) const; //!< compares two values
 };
 
+struct FooPtrOps
+{
+  bool operator()( const BasePtr & a, const BasePtr & b )
+  { 
+    return (*a < *b);
+  }
+  /*
+   * Usefull for debug purpose
+   */
+  /*
+    void operator()( const BasePtr & a )
+    { std::cout << a->GetInt() << "\n"; }
+  */
+};
+
+class BaseExt: public Base {
+public:
+  BaseExt() :Base() {};
+  BaseExt(Base const &other): Base(other) {};
+  BaseExt(BaseExt const &other): Base(other) {};
+  virtual ~BaseExt() { };
+  
+  virtual Base *copy(void) const {return new BaseExt();};
+  
+//! Convert the stored data into a collection.
+//! @returns a collection of at least 1.
+  virtual myCol GetCol(void) const ;
+  operator myCol() const { return GetCol(); }
+};
+
 //! Returns a string using the settings from this or another object.
 //!
 //! This function is inline even though its size since it gets called extemely often from the derived classes.
@@ -87,7 +127,6 @@ template<typename T> inline tString Base::Output(T value, Base const *other) con
     buf << std::setfill(other->m_fill) << std::setw(other->m_minsize) << std::fixed << std::setprecision(other->m_precision) << value; return buf.str();
 }
 
-typedef std::auto_ptr<Base> BasePtr; //!< convinience definition for the use in derived classes
 
 //! min, max and value in one class which handles the pointer buisness
 class Set {
@@ -95,10 +134,15 @@ class Set {
     BasePtr m_max; //!< The maxumim value
     BasePtr m_val; //!< The current value
 public:
+    /*
     Set(Base *val = new Base,
         Base *min = new Base,
         Base *max = new Base); //!< Default constructor
+    */
+    Set(); //!< Constructor using std::auto_ptr
+    Set(BasePtr &val); //!< Constructor using std::auto_ptr
     Set(BasePtr &val, BasePtr &min, BasePtr &max); //!< Constructor using std::auto_ptr
+    //    Set(BasePtr &val = BasePtr(), BasePtr &min = BasePtr(), BasePtr &max = BasePtr()); //!< Constructor using std::auto_ptr
     Set(const Set &other); //!< Copy constructor
     ~Set(); //!< Destructor
     void operator=(Set const &other); //!< Overloaded assignment operator
@@ -110,14 +154,15 @@ public:
 //! Basic number class
 //!
 //! This should be used for types that can be converted to int and float and inserted into an istream
-template<typename T> class Number : public Base {
+template<typename T> class Number : public BaseExt {
     T m_value; //!< The stored value
 public:
     Number(T value); //!< Constructor
     Number(Base const &other); //!< Copy constructor
+    Number(BaseExt const &other); //!< Copy constructor
     virtual ~Number() { };
 
-    Number *copy(void) const;
+    Base *copy(void) const;
 
     int GetInt(void) const;
     float GetFloat(void) const;
@@ -134,20 +179,28 @@ public:
 //! Stores the given value inside the new class.
 //! @param value the value to be used
 template<typename T> Number<T>::Number(T value):
-        Base(),
+        BaseExt(),
         m_value(value)
 { }
 
 //! If the other value is not a Number object this constructor will only copy the current value and drop all other information.
 //! @param other another Base or derived class to copy from
 template<typename T> Number<T>::Number(Base const &other):
-        Base(other),
+        BaseExt(other), // TODO: check if Base or BaseExt goes here
+        m_value(static_cast<T>(other))
+{ }
+
+//! If the other value is not a Number object this constructor will only copy the current value and drop all other information.
+//! @param other another Base or derived class to copy from
+template<typename T> Number<T>::Number(BaseExt const &other):
+        BaseExt(other),
         m_value(static_cast<T>(other))
 { }
 
 //! Overwritten copy function
 //! @returns a new copy of the current object
-template<typename T> Number<T> *Number<T>::copy(void) const {
+// TODO: Changed from Number<T> * to Base*
+template<typename T> Base *Number<T>::copy(void) const {
     return new Number(*this);
 }
 
@@ -192,7 +245,7 @@ typedef Number<float> Float;
 typedef Number<int> Int;
 
 //! Stores a string (tString) value
-class String : public Base {
+class String : public BaseExt {
     tString m_value; //!< The stored value
 public:
     String(tString value); //!< Constructor
@@ -203,6 +256,7 @@ public:
     virtual ~String() { };
 
     tString GetString(Base const *other=0) const;
+
     bool operator==(Base const &other) const;
     bool operator!=(Base const &other) const;
     bool operator>=(Base const &other) const;
@@ -212,9 +266,9 @@ public:
 };
 
 //! Stores a function pointer to a function within another class and offers functions to get that function's return value
-template<typename T> class Callback : public Base {
+template<typename T> class Callback : public BaseExt {
 public:
-    typedef std::auto_ptr<Base> (T::*cb_ptr)(void); //!< convinience typedef for a callback that can be used with this class
+    typedef boost::shared_ptr<Base> (T::*cb_ptr)(void); //!< convinience typedef for a callback that can be used with this class
 private:
     cb_ptr m_value; //!< Pointer to the function
     T *m_cockpit; //!< Pointer to the object that the function will be called within
@@ -229,6 +283,7 @@ public:
     tString GetString(Base const *other=0) const;
     int GetInt(void) const;
     float GetFloat(void) const;
+
     bool operator==(Base const &other) const;
     bool operator!=(Base const &other) const;
     bool operator>=(Base const &other) const;
@@ -238,7 +293,7 @@ public:
 };
 
 //! Stores two other values and returns one of them based on a specific condition
-class Condition : public Base {
+class Condition : public BaseExt {
     BasePtr m_lvalue; //!< The lvalue for the comparison
     BasePtr m_rvalue; //!< The rvalue for the comparison
     BasePtr m_truevalue; //!< The value that is used if the condition is true
@@ -252,7 +307,7 @@ public:
 private:
     Base const &GetValue() const; //!< Performs the comparison
 public:
-    Condition(Base *lvalue, Base *rvalue, Base *truevalue, Base *falsevalue, comparator comp); //!< Basic constructor
+    Condition(BasePtr lvalue, BasePtr rvalue, BasePtr truevalue, BasePtr falsevalue, comparator comp); //!< Basic constructor
     Condition(Condition const &other); //!< Copy constructor, will not work with any class except another Condition object
 
     virtual ~Condition() { };
@@ -271,7 +326,7 @@ public:
 };
 
 //! Supports basic arithmetical operations between two values and returns the result
-class Math : public Base {
+class Math : public BaseExt {
     BasePtr m_lvalue; //!< The lvalue for the operation
     BasePtr m_rvalue; //!< The rvalue for the operation
 public:
@@ -282,7 +337,7 @@ private:
     type m_type; //!< The operation to be performed
     template<typename T> T GetValue(T (Base::*fun)(void) const) const; //!< Performs the operation
 public:
-    Math(Base *lvalue, Base *rvalue, type comp); //!< Basic constructor
+    Math(BasePtr lvalue, BasePtr rvalue, type comp); //!< Basic constructor
     Math(Math const &other); //!< Copy constructor
 
     virtual ~Math() { };
@@ -296,7 +351,7 @@ public:
 //TODO: Find a better solution for this, this is a bit slow.
 
 //! stores a pointer to a configuration item and gets the value from it
-class ConfItem : public Base {
+class ConfItem : public BaseExt {
     tConfItemBase *m_value; //!< pointer to the configuration item that contains the value
     tString Read() const; //!< Reads the value from the configuration item
 public:
@@ -318,7 +373,7 @@ public:
 //! @param value the callback to be used
 //! @param hud the Cockpit to call the callback from
 template<typename T> Callback<T>::Callback(cb_ptr value, T *hud):
-        Base(),
+        BaseExt(),
         m_value(value),
         m_cockpit(hud)
 { }
@@ -326,7 +381,7 @@ template<typename T> Callback<T>::Callback(cb_ptr value, T *hud):
 //! Initializes the Callback object using the information from another one
 //! @param other another Callback object
 template<typename T> Callback<T>::Callback(Callback const &other):
-        Base(other),
+        BaseExt(other),
         m_value(other.m_value),
         m_cockpit(other.m_cockpit)
 { }
@@ -340,7 +395,7 @@ template<typename T> Base *Callback<T>::copy(void) const {
 //! Does nothing different than the default assignment operator, but gets rid of a compiler warning
 //! @param other the Callback to be copied
 template<typename T> void Callback<T>::operator=(Callback const &other) {
-    this->Base::operator=(other);
+    this->BaseExt::operator=(other);
     m_value=other.m_value;
     m_cockpit=other.m_cockpit;
 }
@@ -369,6 +424,220 @@ template<typename T> bool Callback<T>::operator>=(Base const &other) const { ret
 template<typename T> bool Callback<T>::operator<=(Base const &other) const { return *(m_cockpit->*m_value)() <= other; }
 template<typename T> bool Callback<T>::operator> (Base const &other) const { return *(m_cockpit->*m_value)() >  other; }
 template<typename T> bool Callback<T>::operator< (Base const &other) const { return *(m_cockpit->*m_value)() <  other; }
+
+
+class ColNode : public BaseExt {
+protected:
+  myCol m_col;
+
+public:
+  template <typename InputIterator>
+    ColNode(InputIterator begin, InputIterator end): BaseExt(), m_col(begin, end) { } 
+
+//!< Specialised constructor from iterators
+
+  ColNode(BaseExt const &other): BaseExt(other), m_col() { };
+  ColNode(ColNode const &other): BaseExt(other), m_col(other.m_col) { };
+  virtual ~ColNode() { };
+  
+  Base *copy(void) const { return new ColNode(*this); };
+  int GetInt(void) const;
+  float GetFloat(void) const;
+  myCol GetCol(void) const;
+  
+  bool operator==(Base const &other) const;
+  bool operator!=(Base const &other) const;
+  bool operator>=(Base const &other) const;
+  bool operator<=(Base const &other) const;
+  bool operator> (Base const &other) const;
+  bool operator< (Base const &other) const;
+};
+
+
+/*
+  ColUnary holds one BaseExt object.
+  Any query toward the underlying BaseExt object are done only as collection.
+  
+  For each operation, ColUnary and its childs will query the BaseExt object for 
+  its collection of tValue, possibly do a manipulation on the collection and
+  return the associated result.
+  
+  It is to be noted that GetInt and GetFloat will return the value of the 
+  first element of the resulting collection, if not otherly overridden.
+  
+  It is to be noted that there are no guaranties that 2 consecutive queries 
+  will provide the same results. Any subsequent query should will be considered 
+  as a new one, possibly affecting the state of the data. It is recommended to 
+  store the data returned for as long as its current state is relevant.
+*/
+class ColUnary : public BaseExt {
+protected:
+  BasePtr m_child;
+public:
+  ColUnary(BasePtr child) : BaseExt(), m_child(child) { };
+  
+  ColUnary(const ColUnary &other): BaseExt(), m_child(other.m_child->copy()) { };
+  virtual ~ColUnary() { };
+  
+  Base *copy(void) const { return new ColUnary(*this); };
+  
+  int GetInt(void) const;
+  float GetFloat(void) const;
+  myCol GetCol(void) const;
+  
+  bool operator==(Base const &other) const;
+  bool operator!=(Base const &other) const;
+  bool operator>=(Base const &other) const;
+  bool operator<=(Base const &other) const;
+  bool operator> (Base const &other) const;
+  bool operator< (Base const &other) const;
+ protected:
+  virtual myCol _operation(void) const {
+    //      return m_child->GetCol();
+    Base *base = m_child->copy();
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(base);
+    return baseExt->GetCol();
+  };
+};
+
+
+/*
+  After querying the child BaseExt object contained for its collection, 
+  PickOneCol will select a random element and return only this one
+*/
+class ColPickOne : public ColUnary {
+public:
+  ColPickOne(BasePtr child = new BasePtr ) : ColUnary(child) { };
+
+  ColPickOne(const ColPickOne &other): ColUnary(other) { };
+  virtual ~ColPickOne() { };
+  
+  Base *copy(void) const { return new ColPickOne(*this); };
+
+protected:
+  virtual myCol _operation(void) const ;
+};
+
+
+/* 
+   Set
+   Intersection: Elements that are both on A and B
+   Difference  : Elements that are in A and not B
+   Union       :
+   Symetric Difference: Elements that are either in A or B, but not in both
+*/
+
+/*
+  The ColBinary and its children class operates on 2 tValue. The exact manipulation is determined by the child class
+  
+  It is to be noted that there are no guaranties that 2 consecutive queries 
+  will provide the same results. Any subsequent query should will be considered 
+  as a new one, possibly affecting the state of the data. It is recommended to 
+  store the data returned for as long as its current state is relevant.
+*/
+class ColBinary : public BaseExt {
+protected:
+  BasePtr r_child;
+  BasePtr l_child;
+
+public:
+  ColBinary(BaseExt *r_value = new BaseExt,
+	    BaseExt *l_value = new BaseExt ) : 
+    r_child(r_value),
+    l_child(l_value) 
+    { };
+  ColBinary(BasePtr &r_value,
+	    BasePtr &l_value):
+    r_child(r_value),
+    l_child(l_value) 
+    { };
+  ColBinary(const ColBinary &other) : 
+    BaseExt(other),
+    r_child(other.r_child->copy()),
+    l_child(other.l_child->copy())
+    { };
+  virtual ~ColBinary() { };
+  
+  Base *copy(void) const { return new ColBinary(*this); };
+  
+  int GetInt(void) const;
+  float GetFloat(void) const;
+  myCol GetCol(void) const;
+
+  bool operator==(Base const &other) const;
+  bool operator!=(Base const &other) const;
+  bool operator>=(Base const &other) const;
+  bool operator<=(Base const &other) const;
+  bool operator> (Base const &other) const;
+  bool operator< (Base const &other) const;
+protected:
+  virtual myCol _operation(void) const;
+};
+
+
+
+class ColUnion : public ColBinary {
+public:
+  ColUnion(BaseExt *r_value = new BaseExt,
+	   BaseExt *l_value = new BaseExt ) : 
+    ColBinary(r_value, l_value)
+    { };
+  ColUnion(BasePtr &r_value,
+	   BasePtr &l_value):
+    ColBinary(r_value, l_value) { };
+  ColUnion(const ColBinary &other) : 
+    ColBinary(other) { };
+  virtual ~ColUnion() { };
+  
+  Base *copy(void) const { return new ColUnion(*this); };
+  
+protected:
+  myCol _operation(void) const;
+};
+
+
+class ColIntersection : public ColBinary {
+
+public:
+  ColIntersection(BaseExt *r_value = new BaseExt,
+		  BaseExt *l_value = new BaseExt ) : 
+    ColBinary(r_value, l_value)
+    { };
+  ColIntersection(BasePtr &r_value,
+		  BasePtr &l_value):
+    ColBinary(r_value, l_value) { };
+  ColIntersection(const ColBinary &other) : 
+    ColBinary(other) { };
+  virtual ~ColIntersection() { };
+  
+  Base *copy(void) const { return new ColIntersection(*this); };
+        
+protected:
+  myCol _operation(void) const;
+};
+
+
+
+class ColDifference : public ColBinary {
+public:
+  ColDifference(BaseExt *r_value = new BaseExt,
+		BaseExt *l_value = new BaseExt ) : 
+    ColBinary(r_value, l_value)
+    { };
+  ColDifference(BasePtr &r_value,
+		BasePtr &l_value):
+    ColBinary(r_value, l_value) { };
+  ColDifference(const ColBinary &other) : 
+    ColBinary(other) { };
+  virtual ~ColDifference() { };
+  
+  Base *copy(void) const { return new ColDifference(*this); };
+  
+protected:
+  myCol _operation(void) const;
+};
+
+
 
 }
 

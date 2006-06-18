@@ -91,7 +91,7 @@ bool WithDataFunctions::Process(tXmlParser::node cur) {
 //! @param cur the node to be parsed as DataSet
 //! @return the resulting data set
 tValue::Set WithDataFunctions::ProcessDataSet(tXmlParser::node cur) {
-    std::auto_ptr<tValue::Base>
+    tValue::BasePtr
     value(new tValue::Base()),
     minimum(new tValue::Base()),
     maximum(new tValue::Base());
@@ -108,18 +108,25 @@ tValue::Set WithDataFunctions::ProcessDataSet(tXmlParser::node cur) {
         if(newvalue != 0) {
             tString field = cur.GetProp("field");
             if(field == "source") {
-                value = std::auto_ptr<tValue::Base>(newvalue);
+                value = tValue::BasePtr(newvalue);
             } else if(field=="minimum") {
-                minimum = std::auto_ptr<tValue::Base>(newvalue);
+                minimum = tValue::BasePtr(newvalue);
             } else if(field=="maximum") {
-                maximum = std::auto_ptr<tValue::Base>(newvalue);
+                maximum = tValue::BasePtr(newvalue);
             }
         }
     }
+    // TODO:
+    /*
     return tValue::Set(
                value.release(),
                minimum.release(),
                maximum.release());
+    */
+    return tValue::Set(
+               value,
+               minimum,
+               maximum);
 }
 
 tValue::Base *WithDataFunctions::ProcessMath(tXmlParser::node cur) {
@@ -147,14 +154,14 @@ tValue::Base *WithDataFunctions::ProcessMath(tXmlParser::node cur) {
     }
 
 
-    tValue::Base *val = new tValue::Math(lvalue.release(), rvalue.release(), iter->second);
+    tValue::Base *val = new tValue::Math(lvalue, rvalue, iter->second);
     ProcessDataTags(cur, *val);
     return val;
 }
 
 tValue::Base *WithDataFunctions::ProcessConditional(tXmlParser::node cur) {
-    tValue::Base *lvalue = ProcessDataSource(cur.GetProp("lvalue"));
-    tValue::Base *rvalue = ProcessDataSource(cur.GetProp("rvalue"));
+    tValue::BasePtr lvalue(ProcessDataSource(cur.GetProp("lvalue")));
+    tValue::BasePtr rvalue(ProcessDataSource(cur.GetProp("rvalue")));
     tValue::BasePtr truevalue(new tValue::Base), falsevalue(new tValue::Base);
 
     std::map<tString, tValue::Condition::comparator> comparators;
@@ -179,7 +186,7 @@ tValue::Base *WithDataFunctions::ProcessConditional(tXmlParser::node cur) {
             falsevalue = tValue::BasePtr(ProcessConditionalCore(cur));
         }
     }
-    return new tValue::Condition(lvalue, rvalue, truevalue.release(), falsevalue.release(), iter->second);
+    return new tValue::Condition(lvalue, rvalue, truevalue, falsevalue, iter->second);
 }
 
 tValue::Base *WithDataFunctions::ProcessConditionalCore(tXmlParser::node cur) {
@@ -304,7 +311,11 @@ void WithTable::ProcessRow(tXmlParser::node cur) {
 void WithTable::ProcessCell(tXmlParser::node cur) {
     for (cur = cur.GetFirstChild(); cur; ++cur) {
         if(cur.IsOfType("Text")) {
-            m_table.back().back().push_back((tValue::Set(new tValue::String(cur.GetProp("value")))));
+	  //            m_table.back().back().push_back((tValue::Set(tValue::BasePtr(new tValue::String(cur.GetProp("value"))))));
+            tValue::BasePtr a(new tValue::String(cur.GetProp("value")));
+            tValue::BasePtr b(new tValue::Int(3));
+            tValue::BasePtr c(new tValue::Int(4));
+            m_table.back().back().push_back((tValue::Set(a, b, c)));
         } else if(cur.IsOfType("GameData")) {
             std::map<tString, tValue::Set>::iterator iter;
             if((iter = m_data.find(cur.GetProp("data"))) != m_data.end()) {

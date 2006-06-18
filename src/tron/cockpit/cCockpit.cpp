@@ -175,11 +175,11 @@ void cCockpit::SetPlayer(ePlayer *player) {
 tValue::BasePtr cCockpit::cb_CurrentRubber(void) {
     return tValue::BasePtr(new tValue::Float(m_FocusCycle->GetRubber()));
 }
-std::auto_ptr<tValue::Base> cCockpit::cb_CurrentAcceleration(void) {
-    return std::auto_ptr<tValue::Base>(new tValue::Float(m_FocusCycle->GetAcceleration()));
+tValue::BasePtr cCockpit::cb_CurrentAcceleration(void) {
+    return tValue::BasePtr(new tValue::Float(m_FocusCycle->GetAcceleration()));
 }
-std::auto_ptr<tValue::Base> cCockpit::cb_CurrentPing(void) {
-    return std::auto_ptr<tValue::Base>(new tValue::Float(static_cast<int>(m_ViewportPlayer->ping*1000)));
+tValue::BasePtr cCockpit::cb_CurrentPing(void) {
+    return tValue::BasePtr(new tValue::Float(static_cast<int>(m_ViewportPlayer->ping*1000)));
 }
 tValue::BasePtr cCockpit::cb_CurrentSpeed(void) {
     return tValue::BasePtr(new tValue::Float(m_FocusCycle->Speed()));

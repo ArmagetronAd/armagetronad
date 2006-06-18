@@ -108,13 +108,14 @@ private:
 
 public:
 
+
     //callback functions for subwidgets
-    std::auto_ptr<tValue::Base> cb_CurrentRubber(void);           //!< Gets the used rubber for the currently watched cycle
-    std::auto_ptr<tValue::Base> cb_CurrentAcceleration(void);           //!< Gets the current acceleration for the currently watched cycle
-    std::auto_ptr<tValue::Base> cb_CurrentPing(void);             //!< Gets the current ping for the player the viewport belongs to in ms
-    std::auto_ptr<tValue::Base> cb_CurrentSpeed(void);            //!< Gets the speed of the currently watched cycle in m/s
-    std::auto_ptr<tValue::Base> cb_MaxSpeed(void);                //!< Gets the maximum possible speed on the server
-    std::auto_ptr<tValue::Base> cb_CurrentBrakingReservoir(void); //!< Gets the available brakes for the currently watched cycle
+    tValue::BasePtr cb_CurrentRubber(void);           //!< Gets the used rubber for the currently watched cycle
+    tValue::BasePtr cb_CurrentAcceleration(void);           //!< Gets the current acceleration for the currently watched cycle
+    tValue::BasePtr cb_CurrentPing(void);             //!< Gets the current ping for the player the viewport belongs to in ms
+    tValue::BasePtr cb_CurrentSpeed(void);            //!< Gets the speed of the currently watched cycle in m/s
+    tValue::BasePtr cb_MaxSpeed(void);                //!< Gets the maximum possible speed on the server
+    tValue::BasePtr cb_CurrentBrakingReservoir(void); //!< Gets the available brakes for the currently watched cycle
 
     tValue::BasePtr cb_AliveEnemies(void);            //!< Gets the number of enemies alive (from the viewport owner's perspective)
     tValue::BasePtr cb_AliveTeammates(void);          //!< Gets the number of Teammates alive (from the viewport owner's perspective)
