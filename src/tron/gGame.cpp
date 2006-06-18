@@ -4244,7 +4244,8 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     con <<  title << "\n" << message << "\n";
 #endif
 
-    // get them out again
+    // get players out of idle mode again
+    ePlayerNetID::SpectateAll(false);
     se_ChatState( ePlayerNetID::ChatFlags_Menu, false );
 }
 

@@ -2923,17 +2923,15 @@ static bool se_VisibleSpectatorsSupported()
     return sn_GetNetState() != nCLIENT || se_visibleSpectator.Supported(0);
 }
 
-void ePlayerNetID::SpectateAll(){
+// @param spectate if true
+void ePlayerNetID::SpectateAll( bool spectate ){
     for(int i=MAX_PLAYERS-1;i>=0;i--){
         ePlayer *local_p=ePlayer::PlayerConfig(i);
         if (local_p)
         {
             if ( se_VisibleSpectatorsSupported() && local_p->netPlayer )
             {
-                if ( !local_p->netPlayer->spectating_ )
-                {
-                    local_p->netPlayer->spectating_ = true;
-                }
+                local_p->netPlayer->spectating_ = spectate || local_p->spectate;
 
                 local_p->netPlayer->RequestSync();
             }
