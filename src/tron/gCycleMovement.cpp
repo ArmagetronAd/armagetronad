@@ -1643,11 +1643,31 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 if ( missed && lastDestination && lastDestination->messageID == currentDestination->messageID-1 )
                     missed = false;
 
+                // determine whether to turn left or right (coping with weird axis settings)
+                int turnTo=0;
+                {
+                    // the direction we need to drive in
+                    eCoord dirTurn = currentDestination->direction;
+                    if ( missed )
+                        dirTurn = (currentDestination->position - pos);
+
+                    // see which direction we drive into after a left or right turn
+                    int wn = windingNumberWrapped_;
+                    Grid()->Turn(wn, 1);
+                    eCoord dirPlus = Grid()->GetDirection(wn);
+                    wn = windingNumberWrapped_;
+                    Grid()->Turn(wn, -1);
+                    eCoord dirMinus = Grid()->GetDirection(wn);
+
+                    // see witch of the alternatives comes closer
+                    turnTo = ( ( fabs( dirMinus * dirTurn ) - eCoord::F( dirMinus, dirTurn ) )/dirTurn.NormSquared() < ( fabs( dirPlus * dirTurn ) - eCoord::F( dirPlus, dirTurn ) )/dirTurn.NormSquared() ) ? -1 : +1;
+                }
+
                 if (!missed){ // then we did not miss a destination
                     used = true;
 
                     if (fabs(t)>.01)
-                        Turn(-t);
+                        Turn(turnTo);
                     else{
                         braking = currentDestination->braking;
                         if (sn_GetNetState()!=nCLIENT)
@@ -1672,7 +1692,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     REAL side = (currentDestination->position - pos) * dirDrive;
                     if (fabs(side)>1)
                     {
-                        Turn(-side);
+                        Turn(turnTo);
                     }
                     else
                         used = true;
