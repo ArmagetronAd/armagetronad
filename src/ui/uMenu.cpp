@@ -872,12 +872,12 @@ int uAutoCompleter::FindLengthOfLastWord(tString &string, unsigned pos) {
 //! @param ignorecase if true, the case will be ignored
 void uAutoCompleter::FindPossibleWords(tString word, std::deque<tString> &results, bool ignorecase) {
     for(std::deque<tString>::iterator i=m_PossibleWords.begin(); i!=m_PossibleWords.end(); ++i) {
-	size_t pos;
+        size_t pos;
         if((pos = (ignorecase ? i->ToLower() : *i).find(word)) != tString::npos) {
-	    if(isalpha((*i)[pos]) && pos != 0 && isalpha((*i)[pos-1]))
-		continue; //both the char we're at and the one before is alphanumeric; we're in the middle of a word
+            if(isalpha((*i)[pos]) && pos != 0 && isalpha((*i)[pos-1]))
+                continue; //both the char we're at and the one before is alphanumeric; we're in the middle of a word
             results.push_back(*i);
-	}
+        }
     }
 }
 
@@ -900,7 +900,7 @@ tString uAutoCompleter::FindClosestMatch(tString &word, std::deque<tString> &res
             for(; i!=results.end(); ++i) {
                 if((ignorecase?i->ToLower():*i).find(ret) == tString::npos) {
                     found=true;
-                   ret.erase(ret.length()-1);
+                    ret.erase(ret.length()-1);
                     break;
                 }
             }
@@ -914,7 +914,7 @@ tString uAutoCompleter::FindClosestMatch(tString &word, std::deque<tString> &res
         std::deque<tString>::iterator i;
         i = results.begin();
         bool found=true;
-       tString::size_type pos=(ignorecase?i->ToLower():*i).find(ret);
+        tString::size_type pos=(ignorecase?i->ToLower():*i).find(ret);
         if(pos!=tString::npos && pos > 0) {
             found=false;
             ret.insert(ret.begin(),(ignorecase ? tolower(i->at(pos-1)) : i->at(pos-1)));
@@ -922,7 +922,7 @@ tString uAutoCompleter::FindClosestMatch(tString &word, std::deque<tString> &res
             for(; i!=results.end(); ++i) {
                 if((ignorecase?i->ToLower():*i).find(ret) == tString::npos) {
                     found=true;
-                   ret.erase(0,1);
+                    ret.erase(0,1);
                     break;
                 }
             }
@@ -931,7 +931,7 @@ tString uAutoCompleter::FindClosestMatch(tString &word, std::deque<tString> &res
             break;
         else
             len++;
-     }
+    }
     return ret;
 }
 
@@ -945,14 +945,14 @@ void uAutoCompleter::ShowPossibilities(std::deque<tString> &results, tString &wo
     else {
         tString::size_type len=word.length();
         for(std::deque<tString>::iterator i=results.begin(); i!=results.end(); ++i) {
-        con << tOutput("$tab_completion_results");
-           tString::size_type pos=(ignorecase?i->ToLower():*i).find(word);
+            con << tOutput("$tab_completion_results");
+            tString::size_type pos=(ignorecase?i->ToLower():*i).find(word);
             con << i->SubStr(0,pos)
-                << "0xff8888"
-                << i->SubStr(pos, len)
-                << "0xffffff"
-                << i->SubStr(pos+len)
-                << "\n";
+            << "0xff8888"
+            << i->SubStr(pos, len)
+            << "0xffffff"
+            << i->SubStr(pos+len)
+            << "\n";
         }
     }
 }
@@ -1306,9 +1306,8 @@ void uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
 
                     c << interpretation;
                 }
-
-                rSysDep::SwapGL();
             }
+            rSysDep::SwapGL();
             tAdvanceFrame();
         }
     }

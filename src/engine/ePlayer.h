@@ -279,7 +279,7 @@ public:
 
     static void CompleteRebuild(); // same as above, but rebuilds every ePlayerNetID.
     static void ClearAll(); // deletes all ePlayerNetIDs.
-    static void SpectateAll(); // puts all players into spectator mode.
+    static void SpectateAll( bool spectate=true ); // puts all players into spectator mode.
 
     static void ThrowOutDisconnected(); // get rid of everyone that disconnected from the game
 

@@ -333,34 +333,34 @@ static void make_screenshot(){
         write(s_videooutDest, temp->pixels, sr_screenWidth * sr_screenHeight * 3);
 
     if (sr_screenshotIsPlanned) {
-    // save screenshot in unused slot
-    bool done = false;
-    while ( !done )
-    {
-        // generate filename
-        tString fileName("screenshot_");
-        fileName << number;
-        if(png_screenshot)
-            fileName << ".png";
-        else
-            fileName << ".bmp";
-
-        // test if file exists
-        std::ifstream s;
-        if ( tDirectories::Screenshot().Open( s, fileName ) )
+        // save screenshot in unused slot
+        bool done = false;
+        while ( !done )
         {
-            // yes! try next number
-            number++;
-            continue;
-        }
+            // generate filename
+            tString fileName("screenshot_");
+            fileName << number;
+            if(png_screenshot)
+                fileName << ".png";
+            else
+                fileName << ".bmp";
 
-        // save image
-        if(png_screenshot)
-            SDL_SavePNG(image, tDirectories::Screenshot().GetWritePath( fileName ));
-        else
-            SDL_SaveBMP(temp, tDirectories::Screenshot().GetWritePath( fileName ) );
-        done = true;
-    }
+            // test if file exists
+            std::ifstream s;
+            if ( tDirectories::Screenshot().Open( s, fileName ) )
+            {
+                // yes! try next number
+                number++;
+                continue;
+            }
+
+            // save image
+            if(png_screenshot)
+                SDL_SavePNG(image, tDirectories::Screenshot().GetWritePath( fileName ));
+            else
+                SDL_SaveBMP(temp, tDirectories::Screenshot().GetWritePath( fileName ) );
+            done = true;
+        }
     }
 
     // cleanup
@@ -581,6 +581,11 @@ void rSysDep::SwapGL(){
             sr_glOut = true;
             rSysDep::ClearGL();
         }
+
+        // in playback or recording mode, always execute frame tasks, they may be improtant for consistency
+        if ( tRecorder::IsRunning() )
+            rPerFrameTask::DoPerFrameTasks();
+
         return;
     }
 

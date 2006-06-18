@@ -1500,7 +1500,7 @@ gNetPlayerWall::gNetPlayerWall(gCycle *cyc,
         cycle_(cyc),lastWall_(NULL),dir(d),dbegin(dbeg),
         beg(begi),end(begi),tBeg(tBegi),tEnd(tBegi),
 inGrid(false){
-    dir=dir*REAL(1/sqrt(dir.NormSquared()));
+    dir=dir; // Don't normalize: *REAL(1/sqrt(dir.NormSquared()));
     preliminary=(sn_GetNetState()==nCLIENT);
     obsoleted_=-100;
     gridding=1E+20;
@@ -1545,7 +1545,7 @@ void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
     end=pend;
 
     // make sure the wall points forward
-    REAL forward = eCoord::F( end-beg, dir );
+    REAL forward = eCoord::F( end-beg, dir )/dir.NormSquared();
     if ( forward < 0 )
     {
         end = beg;
@@ -1558,7 +1558,7 @@ void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
 #endif
 
     eCoord odir=dir.Turn(0,1);
-    REAL x=eCoord::F(odir,(end-beg));
+    REAL x=eCoord::F(odir,(end-beg))/dir.NormSquared();
     beg=beg+odir*x;
 
     if (bool( this->edge_ ) && this->edge_->Point(0) && this->edge_->Point(1)){
@@ -1575,7 +1575,7 @@ void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
     }
     else
     {
-        SetEndPos(REAL(dbegin+sqrt((beg-end).NormSquared())));
+        SetEndPos( dbegin + eCoord::F(dir, end - beg )/dir.NormSquared() );
     }
 
     gPlayerWall *w = Wall();
