@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8C11C74B095A1836007AE0EA /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C11C74A095A1836007AE0EA /* libpng.framework */; };
-		8C11C751095A1840007AE0EA /* libpng.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 8C11C74A095A1836007AE0EA /* libpng.framework */; };
 		8C11CA49095A2B6E007AE0EA /* action_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E7D089EEC7D007E21DC /* action_api.cpp */; };
 		8C11CA4A095A2B6E007AE0EA /* actions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E7E089EEC7D007E21DC /* actions.cpp */; };
 		8C11CA4B095A2B6E007AE0EA /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E10089EEC7C007E21DC /* eAdvWall.cpp */; };
@@ -119,9 +117,6 @@
 		8CB97AB8096265A800AE8BCD /* Armagetron Advanced.icns in Resources */ = {isa = PBXBuildFile; fileRef = 8CBA62E008A01A55007E21DC /* Armagetron Advanced.icns */; };
 		8CB97AB9096265A800AE8BCD /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8CBA646108A065A8007E21DC /* Info.plist */; };
 		8CB97ABA096265A800AE8BCD /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8C6EF51B08A32A0500816348 /* InfoPlist.strings */; };
-		8CB97ABD096265A800AE8BCD /* SDL_image.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA5D79089EEBA8007E21DC /* SDL_image.framework */; };
-		8CB97ABE096265A800AE8BCD /* SDL_mixer.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA5D7A089EEBA8007E21DC /* SDL_mixer.framework */; };
-		8CB97ABF096265A800AE8BCD /* SDL.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA5D7B089EEBA8007E21DC /* SDL.framework */; };
 		8CB97AC1096265A800AE8BCD /* SDLMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E08089EEC5B007E21DC /* SDLMain.mm */; };
 		8CB97AC2096265A800AE8BCD /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E10089EEC7C007E21DC /* eAdvWall.cpp */; };
 		8CB97AC3096265A800AE8BCD /* eAuthentification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E12089EEC7C007E21DC /* eAuthentification.cpp */; };
@@ -222,17 +217,11 @@
 		8CB97B22096265A800AE8BCD /* uInputQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EF8089EEC7E007E21DC /* uInputQueue.cpp */; };
 		8CB97B23096265A800AE8BCD /* uMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EFA089EEC7E007E21DC /* uMenu.cpp */; };
 		8CB97B25096265A800AE8BCD /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		8CB97B26096265A800AE8BCD /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA5D79089EEBA8007E21DC /* SDL_image.framework */; };
-		8CB97B27096265A800AE8BCD /* SDL_mixer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA5D7A089EEBA8007E21DC /* SDL_mixer.framework */; };
-		8CB97B28096265A800AE8BCD /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA5D7B089EEBA8007E21DC /* SDL.framework */; };
 		8CB97B29096265A800AE8BCD /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA60B0089F00F2007E21DC /* OpenGL.framework */; };
 		8CB97B400962676B00AE8BCD /* libxml2.2.6.22.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CB97B3F0962676B00AE8BCD /* libxml2.2.6.22.dylib */; };
 		8CB97B450962677F00AE8BCD /* libxml2.2.6.22.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 8CB97B3F0962676B00AE8BCD /* libxml2.2.6.22.dylib */; };
 		8CB97BAB0962719600AE8BCD /* libpng12.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CB97BAA0962719600AE8BCD /* libpng12.0.dylib */; };
 		8CB97BAC096271B000AE8BCD /* libpng12.0.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 8CB97BAA0962719600AE8BCD /* libpng12.0.dylib */; };
-		8CBA5D7E089EEBA8007E21DC /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA5D79089EEBA8007E21DC /* SDL_image.framework */; };
-		8CBA5D7F089EEBA8007E21DC /* SDL_mixer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA5D7A089EEBA8007E21DC /* SDL_mixer.framework */; };
-		8CBA5D80089EEBA8007E21DC /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA5D7B089EEBA8007E21DC /* SDL.framework */; };
 		8CBA5E0A089EEC5B007E21DC /* SDLMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E08089EEC5B007E21DC /* SDLMain.mm */; };
 		8CBA5EFD089EEC7E007E21DC /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E10089EEC7C007E21DC /* eAdvWall.cpp */; };
 		8CBA5EFF089EEC7E007E21DC /* eAuthentification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E12089EEC7C007E21DC /* eAuthentification.cpp */; };
@@ -340,13 +329,20 @@
 		8CBA6049089EF359007E21DC /* resource in Resources */ = {isa = PBXBuildFile; fileRef = 8CBA603F089EF359007E21DC /* resource */; };
 		8CBA604A089EF359007E21DC /* sound in Resources */ = {isa = PBXBuildFile; fileRef = 8CBA6040089EF359007E21DC /* sound */; };
 		8CBA604B089EF359007E21DC /* textures in Resources */ = {isa = PBXBuildFile; fileRef = 8CBA6041089EF359007E21DC /* textures */; };
-		8CBA605B089EF3F6007E21DC /* SDL_image.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA5D79089EEBA8007E21DC /* SDL_image.framework */; };
-		8CBA605C089EF3F6007E21DC /* SDL_mixer.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA5D7A089EEBA8007E21DC /* SDL_mixer.framework */; };
-		8CBA605D089EF3F6007E21DC /* SDL.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA5D7B089EEBA8007E21DC /* SDL.framework */; };
 		8CBA60B1089F00F2007E21DC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA60B0089F00F2007E21DC /* OpenGL.framework */; };
 		8CBA62E108A01A55007E21DC /* Armagetron Advanced.icns in Resources */ = {isa = PBXBuildFile; fileRef = 8CBA62E008A01A55007E21DC /* Armagetron Advanced.icns */; };
 		8CBA646208A065A8007E21DC /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8CBA646108A065A8007E21DC /* Info.plist */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		9B5414A50A45C78200745CE6 /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414A20A45C78200745CE6 /* libpng.framework */; };
+		9B5414A60A45C78200745CE6 /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414A30A45C78200745CE6 /* SDL_image.framework */; };
+		9B5414A70A45C78200745CE6 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414A40A45C78200745CE6 /* SDL.framework */; };
+		9B5414DB0A45C78D00745CE6 /* libpng.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414A20A45C78200745CE6 /* libpng.framework */; };
+		9B5414DC0A45C78D00745CE6 /* SDL_image.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414A30A45C78200745CE6 /* SDL_image.framework */; };
+		9B5414DD0A45C78D00745CE6 /* SDL.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414A40A45C78200745CE6 /* SDL.framework */; };
+		9B5414E90A45C7CB00745CE6 /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414E70A45C7CB00745CE6 /* SDL_image.framework */; };
+		9B5414EA0A45C7CB00745CE6 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414E80A45C7CB00745CE6 /* SDL.framework */; };
+		9B54150F0A45C7D700745CE6 /* SDL_image.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414E70A45C7CB00745CE6 /* SDL_image.framework */; };
+		9B5415100A45C7D700745CE6 /* SDL.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414E80A45C7CB00745CE6 /* SDL.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildStyle section */
@@ -383,11 +379,10 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				9B54150F0A45C7D700745CE6 /* SDL_image.framework in Copy Frameworks */,
+				9B5415100A45C7D700745CE6 /* SDL.framework in Copy Frameworks */,
 				8CB97BAC096271B000AE8BCD /* libpng12.0.dylib in Copy Frameworks */,
 				8CB97B450962677F00AE8BCD /* libxml2.2.6.22.dylib in Copy Frameworks */,
-				8CB97ABD096265A800AE8BCD /* SDL_image.framework in Copy Frameworks */,
-				8CB97ABE096265A800AE8BCD /* SDL_mixer.framework in Copy Frameworks */,
-				8CB97ABF096265A800AE8BCD /* SDL.framework in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -398,10 +393,9 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				8C11C751095A1840007AE0EA /* libpng.framework in Copy Frameworks */,
-				8CBA605B089EF3F6007E21DC /* SDL_image.framework in Copy Frameworks */,
-				8CBA605C089EF3F6007E21DC /* SDL_mixer.framework in Copy Frameworks */,
-				8CBA605D089EF3F6007E21DC /* SDL.framework in Copy Frameworks */,
+				9B5414DB0A45C78D00745CE6 /* libpng.framework in Copy Frameworks */,
+				9B5414DC0A45C78D00745CE6 /* SDL_image.framework in Copy Frameworks */,
+				9B5414DD0A45C78D00745CE6 /* SDL.framework in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -414,7 +408,6 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Armagetron Advanced_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Armagetron Advanced_Prefix.pch"; path = "../src/macosx/Armagetron Advanced_Prefix.pch"; sourceTree = "<group>"; };
-		8C11C74A095A1836007AE0EA /* libpng.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libpng.framework; path = ../../Library/Frameworks/libpng.framework; sourceTree = SOURCE_ROOT; };
 		8C11CA38095A264A007AE0EA /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config_common.h; path = ../src/macosx/config_common.h; sourceTree = SOURCE_ROOT; };
 		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C6EF51C08A32A0500816348 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; name = English; path = InfoPlist.strings; sourceTree = "<group>"; };
@@ -423,9 +416,6 @@
 		8CB97B30096265A800AE8BCD /* Armagetron Advanced.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CB97B3F0962676B00AE8BCD /* libxml2.2.6.22.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.2.6.22.dylib; path = ../../Library/Frameworks/Platforms/10.2/libxml2.2.6.22.dylib; sourceTree = SOURCE_ROOT; };
 		8CB97BAA0962719600AE8BCD /* libpng12.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng12.0.dylib; path = ../../Library/Frameworks/Platforms/10.2/libpng12.0.dylib; sourceTree = SOURCE_ROOT; };
-		8CBA5D79089EEBA8007E21DC /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = ../../Library/Frameworks/SDL_image.framework; sourceTree = SOURCE_ROOT; };
-		8CBA5D7A089EEBA8007E21DC /* SDL_mixer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_mixer.framework; path = ../../Library/Frameworks/SDL_mixer.framework; sourceTree = SOURCE_ROOT; };
-		8CBA5D7B089EEBA8007E21DC /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = ../../Library/Frameworks/SDL.framework; sourceTree = SOURCE_ROOT; };
 		8CBA5E07089EEC5B007E21DC /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDLMain.h; path = ../src/macosx/SDLMain.h; sourceTree = SOURCE_ROOT; };
 		8CBA5E08089EEC5B007E21DC /* SDLMain.mm */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.objcpp; name = SDLMain.mm; path = ../src/macosx/SDLMain.mm; sourceTree = SOURCE_ROOT; };
 		8CBA5E0B089EEC66007E21DC /* defs.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = defs.h; path = ../src/defs.h; sourceTree = SOURCE_ROOT; };
@@ -629,7 +619,7 @@
 		8CBA5EF9089EEC7E007E21DC /* uInputQueue.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = uInputQueue.h; sourceTree = "<group>"; };
 		8CBA5EFA089EEC7E007E21DC /* uMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = uMenu.cpp; sourceTree = "<group>"; };
 		8CBA5EFB089EEC7E007E21DC /* uMenu.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = uMenu.h; sourceTree = "<group>"; };
-		8CBA6032089EF32F007E21DC /* SDLMain.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = SDLMain.nib; path = ../../Library/Frameworks/SDL.framework/Versions/A/Resources/SDLMain.nib; sourceTree = "<group>"; };
+		8CBA6032089EF32F007E21DC /* SDLMain.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = SDLMain.nib; path = /Library/Frameworks/ArmagetronAdvanced/current/SDL.framework/Versions/A/Resources/SDLMain.nib; sourceTree = "<absolute>"; };
 		8CBA6039089EF359007E21DC /* AUTHORS */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = AUTHORS; path = ../AUTHORS; sourceTree = SOURCE_ROOT; };
 		8CBA603B089EF359007E21DC /* config */ = {isa = PBXFileReference; lastKnownFileType = folder; name = config; path = ../config; sourceTree = SOURCE_ROOT; };
 		8CBA603D089EF359007E21DC /* language */ = {isa = PBXFileReference; lastKnownFileType = folder; name = language; path = ../language; sourceTree = SOURCE_ROOT; };
@@ -642,6 +632,11 @@
 		8CBA62E008A01A55007E21DC /* Armagetron Advanced.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "Armagetron Advanced.icns"; sourceTree = "<group>"; };
 		8CBA646108A065A8007E21DC /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
 		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9B5414A20A45C78200745CE6 /* libpng.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libpng.framework; path = /Library/Frameworks/ArmagetronAdvanced/current/libpng.framework; sourceTree = "<absolute>"; };
+		9B5414A30A45C78200745CE6 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = /Library/Frameworks/ArmagetronAdvanced/current/SDL_image.framework; sourceTree = "<absolute>"; };
+		9B5414A40A45C78200745CE6 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = /Library/Frameworks/ArmagetronAdvanced/current/SDL.framework; sourceTree = "<absolute>"; };
+		9B5414E70A45C7CB00745CE6 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = /Library/Frameworks/ArmagetronAdvanced/10.2.8/SDL_image.framework; sourceTree = "<absolute>"; };
+		9B5414E80A45C7CB00745CE6 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = /Library/Frameworks/ArmagetronAdvanced/10.2.8/SDL.framework; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -657,12 +652,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				8CB97B25096265A800AE8BCD /* Cocoa.framework in Frameworks */,
-				8CB97B26096265A800AE8BCD /* SDL_image.framework in Frameworks */,
-				8CB97B27096265A800AE8BCD /* SDL_mixer.framework in Frameworks */,
-				8CB97B28096265A800AE8BCD /* SDL.framework in Frameworks */,
 				8CB97B29096265A800AE8BCD /* OpenGL.framework in Frameworks */,
 				8CB97B400962676B00AE8BCD /* libxml2.2.6.22.dylib in Frameworks */,
 				8CB97BAB0962719600AE8BCD /* libpng12.0.dylib in Frameworks */,
+				9B5414E90A45C7CB00745CE6 /* SDL_image.framework in Frameworks */,
+				9B5414EA0A45C7CB00745CE6 /* SDL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -671,11 +665,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
-				8CBA5D7E089EEBA8007E21DC /* SDL_image.framework in Frameworks */,
-				8CBA5D7F089EEBA8007E21DC /* SDL_mixer.framework in Frameworks */,
-				8CBA5D80089EEBA8007E21DC /* SDL.framework in Frameworks */,
 				8CBA60B1089F00F2007E21DC /* OpenGL.framework in Frameworks */,
-				8C11C74B095A1836007AE0EA /* libpng.framework in Frameworks */,
+				9B5414A50A45C78200745CE6 /* libpng.framework in Frameworks */,
+				9B5414A60A45C78200745CE6 /* SDL_image.framework in Frameworks */,
+				9B5414A70A45C78200745CE6 /* SDL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -723,12 +716,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				8CB97BAA0962719600AE8BCD /* libpng12.0.dylib */,
-				8CB97B3F0962676B00AE8BCD /* libxml2.2.6.22.dylib */,
-				8C11C74A095A1836007AE0EA /* libpng.framework */,
-				8CBA5D79089EEBA8007E21DC /* SDL_image.framework */,
-				8CBA5D7A089EEBA8007E21DC /* SDL_mixer.framework */,
-				8CBA5D7B089EEBA8007E21DC /* SDL.framework */,
+				9B5414DF0A45C7A200745CE6 /* current */,
+				9B5414E60A45C7B900745CE6 /* 10.2.8 */,
 				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
 				13E42FB307B3F0F600E4EEF1 /* CoreData.framework */,
@@ -1066,6 +1055,27 @@
 			path = ../src/ui;
 			sourceTree = SOURCE_ROOT;
 		};
+		9B5414DF0A45C7A200745CE6 /* current */ = {
+			isa = PBXGroup;
+			children = (
+				9B5414A20A45C78200745CE6 /* libpng.framework */,
+				9B5414A30A45C78200745CE6 /* SDL_image.framework */,
+				9B5414A40A45C78200745CE6 /* SDL.framework */,
+			);
+			name = current;
+			sourceTree = "<group>";
+		};
+		9B5414E60A45C7B900745CE6 /* 10.2.8 */ = {
+			isa = PBXGroup;
+			children = (
+				9B5414E70A45C7CB00745CE6 /* SDL_image.framework */,
+				9B5414E80A45C7CB00745CE6 /* SDL.framework */,
+				8CB97BAA0962719600AE8BCD /* libpng12.0.dylib */,
+				8CB97B3F0962676B00AE8BCD /* libxml2.2.6.22.dylib */,
+			);
+			name = 10.2.8;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1259,7 +1269,7 @@
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/bash;
+			shellPath = "/bin/bash -l";
 			shellScript = "# Author: Daniel Harple\n# Purpose:\n# \tGet rid of useless files, and move some files to their correct positions\n\ntarget_build=\"${TARGET_BUILD_DIR}/${WRAPPER_NAME}\"\n\n# Xcode copies this file over to Resources/, not where it belongs.\nrm -f \"${target_build}/Contents/Resources/Info.plist\"\n\n# Move InfoPlist.strings to the correct spot (we should really fix this correctly)\nif [ ! -d \"${target_build}/Contents/Resources/English.lproj\" ]\nthen\n\tmkdir \"${target_build}/Contents/Resources/English.lproj\"\n\tmv \"${target_build}/Contents/Resources/InfoPlist.strings\" \"${target_build}/Contents/Resources/English.lproj/InfoPlist.strings\"\nfi\n\n# App sometimes loads this icon if it exists, so we remove it.\nrm -f \"${target_build}/Contents/Resources/textures/icon.png\"\n\n# Remove useless files\nfor a in \"*.am\" \"*.in\" \"*.h\" \"astylerc\" \".cvsignore\"\ndo\n\tfind \"${target_build}/Contents\" -name \"${a}\" -exec rm -f \\{\\} \\;\ndone\n\n# Remove the proto/ directory\nrm -rf \"${target_build}/Contents/Resources/resource/proto\"\n";
 		};
 		8CA7C30608B71B3B00BE10F2 /* Sort Resources */ = {
@@ -1273,7 +1283,7 @@
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/bash;
+			shellPath = "/bin/bash -l";
 			shellScript = "# Sort map resources\n\ntop_level=..\n\n# Only run this script when it is a CVS build\nif [ \"`ruby -ryaml -e 'print YAML.load_file(\\\"../macosx_build_information.yml\\\")[:kind]'`\" = \"CVS\" ]\nthen\n\tsh \"${top_level}/batch/make/sortresources\" \"${top_level}/resource/proto\" \"${top_level}/resource/included\" \"${top_level}/batch/make/sortresources.py\"\nfi";
 		};
 		8CAD9172095A3BB700DA0ECC /* Process Files */ = {
@@ -1287,7 +1297,7 @@
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
+			shellPath = "/bin/bash -l";
 			shellScript = "# Replace tags and move *.in files\n\nbuild_tools_dir=build_tools\n\nruby \"${build_tools_dir}/process_files.rb\"";
 		};
 		8CAD917A095A3BD000DA0ECC /* Sort Resources */ = {
@@ -1301,7 +1311,7 @@
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
+			shellPath = "/bin/bash -l";
 			shellScript = "# Sort map resources\n\ntop_level=..\n\n# Only run this script when it is a CVS build\nif [ \"`ruby -ryaml -e 'print YAML.load_file(\\\"../macosx_build_information.yml\\\")[:kind]'`\" = \"CVS\" ]\nthen\n\tsh \"${top_level}/batch/make/sortresources\" \"${top_level}/resource/proto\" \"${top_level}/resource/included\" \"${top_level}/batch/make/sortresources.py\"\nfi";
 		};
 		8CAD91B7095A459400DA0ECC /* Sort Package */ = {
@@ -1315,7 +1325,7 @@
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
+			shellPath = "/bin/bash -l";
 			shellScript = "package_dir=\"${TARGET_BUILD_DIR}/Armagetron Advanced Dedicated\"\ntop_level=..\n\n#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n#\n# Create a directory and put the needed files inside\n#\n#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nif [ -d \"${package_dir}\" ]\nthen\n\trm -rf \"${package_dir}\"\nfi\n\nmkdir \"${package_dir}\"\necho \"${TARGET_BUILD_DIR}/${TARGET_NAME}\"\ncp \"${TARGET_BUILD_DIR}/armagetronad-dedicated\" \"${package_dir}\"\n\nfor copy_me in \"${top_level}/config\" \"${top_level}/language\" \"${top_level}/resource\"\ndo\n\tcp -R \"${copy_me}\" \"${package_dir}\"\ndone\n\n\n\n#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n#\n# Remove useless files\n#\n#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nrm -rf \"${package_dir}/resource/proto\"\nfind \"${package_dir}\" -depth -type d -name CVS -exec rm -rf \\{\\} \\;\nfor a in \"*.am\" \"*.in\" \"*.h\" \"astylerc\" \".cvsignore\"\ndo\n\tfind \"${package_dir}\" -name \"${a}\" -exec rm -f \\{\\} \\;\ndone";
 		};
 		8CB97AAD096265A800AE8BCD /* Process Files */ = {
@@ -1329,7 +1339,7 @@
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/bash;
+			shellPath = "/bin/bash -l";
 			shellScript = "# Replace tags and move *.in files\n\nbuild_tools_dir=build_tools\n\nruby \"${build_tools_dir}/process_files.rb\"";
 		};
 		8CB97AAE096265A800AE8BCD /* Sort Resources */ = {
@@ -1343,7 +1353,7 @@
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/bash;
+			shellPath = "/bin/bash -l";
 			shellScript = "# Sort map resources\n\ntop_level=..\n\n# Only run this script when it is a CVS build\nif [ \"`ruby -ryaml -e 'print YAML.load_file(\\\"../macosx_build_information.yml\\\")[:kind]'`\" = \"CVS\" ]\nthen\n\tsh \"${top_level}/batch/make/sortresources\" \"${top_level}/resource/proto\" \"${top_level}/resource/included\" \"${top_level}/batch/make/sortresources.py\"\nfi";
 		};
 		8CB97B2B096265A800AE8BCD /* Sort Package */ = {
@@ -1357,7 +1367,7 @@
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/bash;
+			shellPath = "/bin/bash -l";
 			shellScript = "# Author: Daniel Harple\n# Purpose:\n# \tGet rid of useless files, and move some files to their correct positions\n\ntarget_build=\"${TARGET_BUILD_DIR}/${WRAPPER_NAME}\"\n\n# Xcode copies this file over to Resources/, not where it belongs.\nrm -f \"${target_build}/Contents/Resources/Info.plist\"\n\n# Move InfoPlist.strings to the correct spot (we should really fix this correctly)\nif [ ! -d \"${target_build}/Contents/Resources/English.lproj\" ]\nthen\n\tmkdir \"${target_build}/Contents/Resources/English.lproj\"\n\tmv \"${target_build}/Contents/Resources/InfoPlist.strings\" \"${target_build}/Contents/Resources/English.lproj/InfoPlist.strings\"\nfi\n\n# App sometimes loads this icon if it exists, so we remove it.\nrm -f \"${target_build}/Contents/Resources/textures/icon.png\"\n\n# Remove useless files\nfor a in \"*.am\" \"*.in\" \"*.h\" \"astylerc\" \".cvsignore\"\ndo\n\tfind \"${target_build}/Contents\" -name \"${a}\" -exec rm -f \\{\\} \\;\ndone\n\n# Remove the proto/ directory\nrm -rf \"${target_build}/Contents/Resources/resource/proto\"\n";
 		};
 		8CB97B2C096265A800AE8BCD /* Change Dependencies */ = {
@@ -1371,7 +1381,7 @@
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/bash;
+			shellPath = "/bin/bash -l";
 			shellScript = "install_name_tool -change /usr/local/lib/libxml2.2.dylib \\\n@executable_path/../Frameworks/libxml2.2.6.22.dylib \\\n\"${TARGET_BUILD_DIR}/${WRAPPER_NAME}/Contents/MacOS/${PRODUCT_NAME}\"\n\ninstall_name_tool -change /usr/local/lib/libpng12.0.dylib \\\n@executable_path/../Frameworks/libpng12.0.dylib \\\n\"${TARGET_BUILD_DIR}/${WRAPPER_NAME}/Contents/MacOS/${PRODUCT_NAME}\"";
 		};
 		8CBA6203089F11BE007E21DC /* Process Files */ = {
@@ -1385,7 +1395,7 @@
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/bash;
+			shellPath = "/bin/bash -l";
 			shellScript = "# Replace tags and move *.in files\n\nbuild_tools_dir=build_tools\n\nruby \"${build_tools_dir}/process_files.rb\"";
 		};
 		8CEA127508A67DE4005E93C1 /* Change libpng */ = {
@@ -1399,7 +1409,7 @@
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/bash;
+			shellPath = "/bin/bash -l";
 			shellScript = "# Change the libpng to the one in the Frameworks/ directory\n# UPDATE: moved to libpng framework. This is not needed anymore. It is kept here for future reference.\n\n# install_name_tool -change /usr/local/lib/libpng12.0.dylib @executable_path/../Frameworks/libpng12.0.dylib \\\n# \"${TARGET_BUILD_DIR}/${TARGET_NAME}.app/Contents/MacOS/${TARGET_NAME}\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -1799,10 +1809,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(HOME)/Library/Frameworks",
-					/Library/Frameworks,
-				);
+				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/10.2.8;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -1813,19 +1820,14 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(HOME)/Library/Frameworks/SDL.framework/Headers",
-					"$(HOME)/Library/Frameworks/SDL_image.framework/Headers",
-					"$(HOME)/Library/Frameworks/SDL_mixer.framework/Headers",
-					"$(HOME)/Library/Frameworks/libpng.framework/Headers",
-					"$(HOME)/Library/Frameworks/Platforms/10.2/libxml",
-					"$(HOME)/Library/Frameworks/Platforms/10.2",
+					/Library/Frameworks/ArmagetronAdvanced/10.2.8/SDL.framework/Headers,
+					/Library/Frameworks/ArmagetronAdvanced/10.2.8/SDL_image.framework/Headers,
+					/Library/Frameworks/ArmagetronAdvanced/current/libpng.framework/Headers,
+					/Library/Frameworks/ArmagetronAdvanced/10.2.8/libxml,
 				);
 				INFOPLIST_FILE = /Users/dharple/armagetronad/MacOS/../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(HOME)/Library/Frameworks",
-					"$(SRCROOT)/../../Library/Frameworks/Platforms/10.2",
-				);
+				LIBRARY_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/10.2.8;
 				OTHER_LDFLAGS = (
 					"-framework SDL",
 					"-framework SDL_image",
@@ -1847,10 +1849,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(HOME)/Library/Frameworks",
-					/Library/Frameworks,
-				);
+				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/10.2.8;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
@@ -1861,19 +1860,14 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(HOME)/Library/Frameworks/SDL.framework/Headers",
-					"$(HOME)/Library/Frameworks/SDL_image.framework/Headers",
-					"$(HOME)/Library/Frameworks/SDL_mixer.framework/Headers",
-					"$(HOME)/Library/Frameworks/libpng.framework/Headers",
-					"$(HOME)/Library/Frameworks/Platforms/10.2/libxml",
-					"$(HOME)/Library/Frameworks/Platforms/10.2",
+					/Library/Frameworks/ArmagetronAdvanced/10.2.8/SDL.framework/Headers,
+					/Library/Frameworks/ArmagetronAdvanced/10.2.8/SDL_image.framework/Headers,
+					/Library/Frameworks/ArmagetronAdvanced/current/libpng.framework/Headers,
+					/Library/Frameworks/ArmagetronAdvanced/10.2.8/libxml,
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(HOME)/Library/Frameworks",
-					"$(SRCROOT)/../../Library/Frameworks/Platforms/10.2",
-				);
+				LIBRARY_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/10.2.8;
 				MACOSX_DEPLOYMENT_TARGET = 10.2;
 				OTHER_LDFLAGS = (
 					"-framework SDL",
@@ -1896,11 +1890,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(HOME)/Library/Frameworks",
-					/Library/Frameworks,
-					"$(SRCROOT)/../../Library/Frameworks",
-				);
+				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/current/;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -1911,18 +1901,16 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(HOME)/Library/Frameworks/SDL.framework/Headers",
-					"$(HOME)/Library/Frameworks/SDL_image.framework/Headers",
-					"$(HOME)/Library/Frameworks/SDL_mixer.framework/Headers",
-					"$(HOME)/Library/Frameworks/libpng.framework/Headers",
+					/Library/Frameworks/ArmagetronAdvanced/current/SDL.framework/Headers,
+					/Library/Frameworks/ArmagetronAdvanced/current/SDL_image.framework/Headers,
+					/Library/Frameworks/ArmagetronAdvanced/current/libpng.framework/Headers,
 					/usr/include/libxml2,
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
 					/usr/lib,
-					"$(HOME)/Library/Frameworks",
-					"$(SRCROOT)/../../Library/Frameworks",
+					/Library/Frameworks/ArmagetronAdvanced/current,
 				);
 				OTHER_LDFLAGS = (
 					"-framework SDL",
@@ -1945,11 +1933,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(HOME)/Library/Frameworks",
-					/Library/Frameworks,
-					"$(SRCROOT)/../../Library/Frameworks",
-				);
+				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/current/;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
@@ -1960,18 +1944,16 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(HOME)/Library/Frameworks/SDL.framework/Headers",
-					"$(HOME)/Library/Frameworks/SDL_image.framework/Headers",
-					"$(HOME)/Library/Frameworks/SDL_mixer.framework/Headers",
-					"$(HOME)/Library/Frameworks/libpng.framework/Headers",
+					/Library/Frameworks/ArmagetronAdvanced/current/SDL.framework/Headers,
+					/Library/Frameworks/ArmagetronAdvanced/current/SDL_image.framework/Headers,
+					/Library/Frameworks/ArmagetronAdvanced/current/libpng.framework/Headers,
 					/usr/include/libxml2,
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
 					/usr/lib,
-					"$(HOME)/Library/Frameworks",
-					"$(SRCROOT)/../../Library/Frameworks",
+					/Library/Frameworks/ArmagetronAdvanced/current,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.3;
 				OTHER_LDFLAGS = (
@@ -2013,6 +1995,7 @@
 				8C11CA48095A269A007AE0EA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		8CB97B2D096265A800AE8BCD /* Build configuration list for PBXNativeTarget "Armagetron Advanced 10.2.8" */ = {
 			isa = XCConfigurationList;
