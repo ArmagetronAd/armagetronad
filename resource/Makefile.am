@@ -11,6 +11,7 @@ included: ${sourcefiles} ${top_srcdir}/batch/make/sortresources.py ${top_srcdir}
 all: included
 
 linked_included.%: included
+	rm -rf $@
 	if test -d included; then\
 		ln -sf included $@;\
 	else\
@@ -35,16 +36,20 @@ dist-hook: linked_included.dist
 	cp -LR $</* $(distdir)/included/
 
 #	delete temporary files
-	rm -f $< $(distdir)/included/map.dtd
+	rm -f $<
 
-#	update included resources to correct map version
-	if test -r included/.mapversion; then \
-		for file in `find $(distdir)/included/ -name "*.aamap.xml"`; do \
-			echo "Adapting dtd in $$file" | sed -e "s,$(distdir)/included/,,";\
-			sed -e "s,map.dtd,AATeam/map-`cat included/.mapversion`.dtd,g" < $$file > $$file.processed ;\
-			mv $$file.processed $$file ;\
-		done ;\
-	fi
+#	update included resources to correct dtd version
+	for type in `ls included | grep '.dtd$$' | grep -v -- - | sed -e 's,.dtd,,'`; do\
+	    echo fixing referenced DTD version of XML files of type $${type}...; \
+		if test -r included/.$${type}version; then \
+			for file in `find $(distdir)/included/ -name "*.aa$${type}.xml" -o -name "*.$${type}.xml"`; do \
+				echo "Adapting dtd in $$file" | sed -e "s,$(distdir)/included/,,";\
+				sed -e "s,$${type}.dtd,AATeam/$${type}-`cat included/.$${type}version`.dtd,g" < $$file > $$file.processed ;\
+				mv $$file.processed $$file ;\
+			done ;\
+		fi; \
+		rm -f $(distdir)/included/$${type}.dtd; \
+	done
 
 clean-local:
 	test -d ${srcdir}/proto && rm -rf included || true

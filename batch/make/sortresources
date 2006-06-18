@@ -31,11 +31,14 @@ python ${sortresources} -v ${destination} || exit 1
 # silently remove empty directories
 find ${destination} -type d -depth -exec rmdir \{\} \; > /dev/null 2>&1 
 
-# copy map dtd file to one with correct version
-MAPVERSION=`grep "<!-- version=" < ${destination}/map.dtd | sed -e "s,.*=\",," -e "s,\".*,,"`
+# copy dtds
 test -r ${destination}/AATeam || mkdir ${destination}/AATeam
-cp ${destination}/map.dtd ${destination}/AATeam/map-$MAPVERSION.dtd
-echo $MAPVERSION > ${destination}/.mapversion
+for type in `ls ${source} | grep '.dtd$' | grep -v -- - | sed -e 's,.dtd,,'`; do
+    # copy dtd file to one with correct version
+    VERSION=`grep "<!-- version=" < ${destination}/${type}.dtd | sed -e "s,.*=\",," -e "s,\".*,,"`
+    cp ${destination}/${type}.dtd ${destination}/AATeam/${type}-$VERSION.dtd
+    echo $VERSION > ${destination}/.${type}version
+done
 
 # tag completion
 touch ${destination} || exit 1

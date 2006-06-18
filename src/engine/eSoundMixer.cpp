@@ -240,7 +240,6 @@ void eSoundMixer::Init() {
 
     // We haven't started playing any music yet
     m_musicIsPlaying = false;
-    m_active = true;
 
     tString musFile;
 
@@ -258,6 +257,22 @@ void eSoundMixer::Init() {
     m_GameTrack = new eMusicTrack();
 
     LoadPlaylist();
+
+    int frequency;
+
+    switch (sound_quality)
+    {
+    case SOUND_LOW:
+        frequency=11025; break;
+    case SOUND_MED:
+        frequency=22050; break;
+    case SOUND_HIGH:
+        frequency=44100; break;
+    case SOUND_OFF:
+        return; break;
+    default:
+        frequency=22050;
+    }
 
     if(!SDL_WasInit( SDL_INIT_AUDIO )) {
         int rc;
@@ -278,19 +293,6 @@ void eSoundMixer::Init() {
     }
 
     int rc;
-    int frequency;
-
-    switch (sound_quality)
-    {
-    case SOUND_LOW:
-        frequency=11025; break;
-    case SOUND_MED:
-        frequency=22050; break;
-    case SOUND_HIGH:
-        frequency=44100; break;
-    default:
-        frequency=22050;
-    }
 
     // guesstimate the desired number of samples to calculate in advance
     int samples = static_cast< int >( buffersize * 512 );
@@ -342,6 +344,9 @@ void eSoundMixer::Init() {
         m_Channels[i].SetId(i);
     }
     Mix_ChannelFinished( &eSoundMixer::ChannelFinished );
+
+    // only now, everything is all right
+    m_active = true;
 #endif
 }
 
@@ -536,14 +541,17 @@ eSoundMixer* eSoundMixer::_instance = 0;
 
 void eSoundMixer::ShutDown() {
 #ifdef HAVE_LIBSDL_MIXER
-    Mix_CloseAudio();
+    if ( _instance && _instance->m_active )
+    {
+        Mix_CloseAudio();
+        SDL_QuitSubSystem( SDL_INIT_AUDIO );
+    }
+
     delete _instance;
     delete m_TitleTrack;
     delete m_GuiTrack;
     if(m_GameTrack) delete m_GameTrack;
 
-    // if (SDL_WasInit( SDL_INIT_AUDIO ))
-    SDL_QuitSubSystem( SDL_INIT_AUDIO );
 
 #endif // DEDICATED
 }

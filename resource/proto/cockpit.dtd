@@ -1,4 +1,4 @@
-<!-- version="0.2.8_beta3" -->
+<!-- version="0.3.0" -->
 <!ELEMENT Resource (Cockpit)>
 
 <!ATTLIST Resource
