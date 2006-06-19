@@ -62,6 +62,7 @@ Changes since 0.2.8.2:
   right at the same time.
 
   Featurelets:
+- Nonnormalized axes and axes with odd turning directions are now properly supported
 - The camera has a memory which player you like to watch. Every time you manually switch
   the camera and your favorite player is not dead, the favorite is set to the currently 
   watched player. The next time the camera doesn't know what to watch, your favorite
