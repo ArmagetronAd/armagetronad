@@ -871,6 +871,8 @@ int uAutoCompleter::FindLengthOfLastWord(tString &string, unsigned pos) {
 //! @param results    the list where the possible completions will be saved
 //! @param ignorecase if true, the case will be ignored
 void uAutoCompleter::FindPossibleWords(tString word, std::deque<tString> &results, bool ignorecase) {
+    if(ignorecase)
+        word = word.ToLower();
     for(std::deque<tString>::iterator i=m_PossibleWords.begin(); i!=m_PossibleWords.end(); ++i) {
         size_t pos;
         if((pos = (ignorecase ? i->ToLower() : *i).find(word)) != tString::npos) {

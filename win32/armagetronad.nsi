@@ -156,6 +156,7 @@ Section Uninstall
   RMDir /r "$INSTDIR\sound"
   RMDir /r "$INSTDIR\resource\included"
   RMDir /r "$INSTDIR\models"
+  RMDir /r "$INSTDIR\music"
   RMDir /r "$INSTDIR\language"
   RMDir /r "$INSTDIR\doc"
   RMDir /r "$INSTDIR\config\examples"
