@@ -183,6 +183,7 @@ private:
 
     typedef std::vector< tJUST_CONTROLLED_PTR< eTeam > > TeamArray;
     TeamArray enemies_;                     //!< list of teams that currently have a player in the zone
+    REAL lastEnemyContact_;                 //!< last time an enemy player was in the zone
 
     REAL teamDistance_;                     //!< distance to the closest member of the owning team
 

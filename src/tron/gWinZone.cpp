@@ -672,6 +672,7 @@ gBaseZoneHack::gBaseZoneHack( eGrid * grid, const eCoord & pos )
     conquered_ = 0;
     lastSync_ = -10;
     teamDistance_ = 0;
+    lastEnemyContact_ = se_GameTime();
 }
 
 // *******************************************************************************
@@ -691,6 +692,7 @@ gBaseZoneHack::gBaseZoneHack( nMessage & m )
     conquered_ = 0;
     lastSync_ = -10;
     teamDistance_ = 0;
+    lastEnemyContact_ = se_GameTime();
 }
 
 // *******************************************************************************
@@ -713,6 +715,10 @@ static REAL sg_conquestDecayRate = .1;
 static tSettingItem< REAL > sg_conquestRateConf( "FORTRESS_CONQUEST_RATE", sg_conquestRate );
 static tSettingItem< REAL > sg_defendRateConf( "FORTRESS_DEFEND_RATE", sg_defendRate );
 static tSettingItem< REAL > sg_conquestDecayRateConf( "FORTRESS_CONQUEST_DECAY_RATE", sg_conquestDecayRate );
+
+// time with no enemy inside a zone before it collapses harmlessly
+static REAL sg_conquestTimeout = 0;
+static tSettingItem< REAL > sg_conquestTimeoutConf( "FORTRESS_CONQUEST_TIMEOUT", sg_conquestTimeout );
 
 // kill at least than many players from the team that just got its zone conquered
 static int sg_onConquestKillMin = 0;
@@ -806,12 +812,12 @@ bool gBaseZoneHack::Timestep( REAL time )
         REAL omegaDot = 2 * conquered_ * conquest * maxSpeed;
 
         // determine the time since the last sync (exaggerate for smoother motion in local games)
-        REAL time = lastTime - lastSync_;
+        REAL timeStep = lastTime - lastSync_;
         if ( sn_GetNetState() != nSERVER )
-            time *= 100;
+            timeStep *= 100;
 
         if ( sn_GetNetState() != nCLIENT &&
-                ( ( fabs( omega - GetRotationSpeed() ) + fabs( omegaDot - GetRotationAcceleration() ) ) * time > .5 ) )
+                ( ( fabs( omega - GetRotationSpeed() ) + fabs( omegaDot - GetRotationAcceleration() ) ) * timeStep > .5 ) )
         {
             SetRotationSpeed( omega );
             SetRotationAcceleration( omegaDot );
@@ -819,14 +825,31 @@ bool gBaseZoneHack::Timestep( REAL time )
             RequestSync();
             lastSync_ = lastTime;
         }
+
+
+        // check for enemy contact timeout
+        if ( sg_conquestTimeout > 0 && lastEnemyContact_ + sg_conquestTimeout < time )
+        {
+            enemies_.clear();
+
+            // if the zone would collapse without defenders, let it collapse now. A smart defender would
+            // have left the zone to let it collapse anyway.
+            if ( sg_conquestDecayRate < 0 )
+            {
+                if ( team )
+                    sn_ConsoleOut( tOutput( "$zone_collapse_harmless", team->Name()  ) );
+                conquered_ = 1.0;
+            }
+        }
+
+        // check whether the zone got conquered
+        if ( conquered_ >= 1 )
+        {
+            currentState_ = State_Conquering;
+            OnConquest();
+        }
     }
 
-    // check whether the zone got conquered
-    if ( currentState_ == State_Safe && conquered_ >= 1 )
-    {
-        currentState_ = State_Conquering;
-        OnConquest();
-    }
 
     // reset counts
     enemiesInside_ = ownersInside_ = 0;
@@ -930,7 +953,7 @@ void gBaseZoneHack::OnVanish( void )
     CheckSurvivor();
 
     // kill the closest owners of the zone
-    if ( currentState_ != State_Safe && enemies_.size() > 0 )
+    if ( currentState_ != State_Safe && ( enemies_.size() > 0 || sg_defendRate < 0 ) )
     {
         int kills = int( sg_onConquestKillRatio * team->NumPlayers() );
         kills = kills > sg_onConquestKillMin ? kills : sg_onConquestKillMin;
@@ -1089,6 +1112,8 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
     tJUST_CONTROLLED_PTR< eTeam > otherTeam = target->Player()->CurrentTeam();
     if (!otherTeam)
         return;
+    if ( currentState_ != State_Safe )
+        return;
 
     // remember who is inside
     if ( team == otherTeam )
@@ -1103,6 +1128,8 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
         ++ enemiesInside_;
         if ( std::find( enemies_.begin(), enemies_.end(), otherTeam ) == enemies_.end() )
             enemies_.push_back( otherTeam );
+
+        lastEnemyContact_ = time;
     }
 }
 
