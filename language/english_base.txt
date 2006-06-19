@@ -1939,6 +1939,7 @@ player_win_conquest_specific \1 was awarded \2 points for conquering \3's base.\
 player_kill_collapse        \1 was eradicated by its collapsing zone.\n
 player_win_survive			\1 was awarded \2 points for holding the base.\n
 
+zone_collapse_harmless      \1's zone collapses harmlessly for lack of enemy contacts.\n
 
 #********************************************
 #********************************************
