@@ -507,7 +507,7 @@ public:
 */
 class ColPickOne : public ColUnary {
 public:
-  ColPickOne(BasePtr child = new BasePtr ) : ColUnary(child) { };
+  ColPickOne(BasePtr child = BasePtr( new Base() ) ) : ColUnary(child) { };
 
   ColPickOne(const ColPickOne &other): ColUnary(other) { };
   virtual ~ColPickOne() { };
