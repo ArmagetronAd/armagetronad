@@ -116,6 +116,7 @@ cycle_packetloss_tolerance_help     Cycle death is prevented as long as the play
 cycle_sync_ff_help 					Speed of simulation of the extrapolating sync; decrease for lower CPU load, but higher effective ping
 cycle_sync_ff_steps_help 			Number of extrapolation simulation timesteps each real timestep; increase for better accuracy
 topology_police_help				The topology police does posteriori checks to determine whether game moves were legal.
+topology_police_parallel_help		Extra topology police flag to check for walls that are put into the grid datastructure exactly parallel to each other. Requites TOPOLOGY_POLICE to be active.
 cycle_smooth_time_help				Timescale for smoothing options. Increasing this will make interpolation smoother, but less accurate. Decreasing it will make network synchronization jumpy.
 cycle_smooth_min_speed_help			Minimum speed of smooth correction relative to cycle speed.
 cycle_smooth_threshold_help			Only syncs that differ from your position by less than this amount (measured in speed) will be handled smoothly, bigger differences will be applied instantly. 
@@ -636,6 +637,7 @@ color_strings_help		Generate strings that will be rendered with color effects.
 filter_color_strings_help		Filter color codes from strings coming in over the network.
 filter_color_names_help		    Filter color codes from player names.
 filter_name_ends_help           Filter whitespace and other junk from beginnings and ends of player names.
+filter_name_middle_help         Filter excess whitespace and other junk from the middle of player names.
 filter_color_server_names_help	Filter color codes from server names in the server browser.
 
 #screen mode
