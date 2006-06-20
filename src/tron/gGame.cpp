@@ -3970,7 +3970,8 @@ bool gGame::GameLoop(bool input){
                     rSysDep::ClearGL();
             }
 
-            rSysDep::SwapGL();
+            if ( input )
+                rSysDep::SwapGL();
 #endif
         }
         else

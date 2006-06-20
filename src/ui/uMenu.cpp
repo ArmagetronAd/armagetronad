@@ -257,7 +257,6 @@ void uMenu::OnEnter(){
             yOffset+=menuTop-smallborder-YPos(menuentries-1);
 
 #ifndef DEDICATED
-        rSysDep::ClearGL();
         sr_ResetRenderState(true);
         items[selected]->RenderBackground();
 
@@ -318,12 +317,14 @@ void uMenu::OnEnter(){
         }
         else
 #endif
-        {
-            tDelay( 100000 );
-        }
+            if ( !sr_glOut )
+            {
+                tDelay( 10000 );
+            }
 
 #ifndef DEDICATED
         rSysDep::SwapGL();
+        rSysDep::ClearGL();
 #endif
     }
 
