@@ -1,6 +1,8 @@
 Changes since 0.2.8.2:
 
   New settings:
+- TOPOLOGY_POLICE_PARALLEL, extra topology police flag to control the checks 
+  for walls getting copied into the grid in exactly the same place.
 - CAMERA_GLANCE_*: separate settings for the glancing camera, work like CAMERA_CUSTOM_*.
   Likewise, CAMERA_SERVER_GLANCE_* can replace CAMERA_SERVER_CUSTOM_* when glancing.
   CAMERA_*CUSTOM_GLANCE* are server side settings that can control whether server or

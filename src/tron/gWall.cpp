@@ -649,6 +649,9 @@ void sg_TopologyPoliceKill( gCycle* cycle )
 static short sg_topologyPolice = false;
 static tSettingItem< short > sg_topologyPoliceCofig( "TOPOLOGY_POLICE", sg_topologyPolice );
 
+static short sg_topologyPoliceParallel = true;
+static tSettingItem< short > sg_topologyPoliceParallelCofig( "TOPOLOGY_POLICE_PARALLEL", sg_topologyPoliceParallel );
+
 class gTopologyPoliceConsoleFiler: public tConsoleFilter
 {
     virtual void DoFilterLine( tString& line )
@@ -666,7 +669,7 @@ extern bool sg_gnuplotDebug; // from gCycle.cpp
 // called on a post-insert collision of two walls
 // oldWall is the wall that was in place first, newWall is the wall just drawn, and point
 // is a point of collision between the two.
-void sg_TopologyPoliceCheck( gCycle* cycle, eWall* oldWall, gPlayerWall* newWall, const eCoord& point )
+void sg_TopologyPoliceCheck( gCycle* cycle, eWall* oldWall, gPlayerWall* newWall, const eCoord& point, bool split )
 {
     // test if topology police is enabled
     if ( !sg_topologyPolice && !sg_gnuplotDebug )
@@ -709,7 +712,7 @@ void sg_TopologyPoliceCheck( gCycle* cycle, eWall* oldWall, gPlayerWall* newWall
 #endif
 
     // last chance to exit
-    if ( !sg_topologyPolice )
+    if ( !sg_topologyPolice || ( !split && !sg_topologyPoliceParallel ) )
         return;
 
     gTopologyPoliceConsoleFiler filter;
@@ -732,7 +735,7 @@ void gPlayerWall::SplitByActive( eWall * oldWall )
     {
         // pretend our cycle crossed the old wall just now
         eCoord intersection = oldWall->Edge()->IntersectWithCareless( Edge() );
-        sg_TopologyPoliceCheck( Cycle(), oldWall, this, intersection );
+        sg_TopologyPoliceCheck( Cycle(), oldWall, this, intersection, true );
     }
     else
     {
@@ -751,7 +754,7 @@ bool gPlayerWall::RunsParallelActive( eWall* oldWall )
         // collision point: center of gravity
         eCoord collision = ( oldWall->Point(.5f) + this->Point(.5f) ) *.5f;
 
-        sg_TopologyPoliceCheck( Cycle(), oldWall, this, collision );
+        sg_TopologyPoliceCheck( Cycle(), oldWall, this, collision, false );
     }
     else
     {
