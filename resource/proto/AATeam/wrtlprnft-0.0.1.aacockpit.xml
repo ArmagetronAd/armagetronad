@@ -347,36 +347,29 @@
             <DataSet id="topscore">
 		<AtomicData source="top_score" />
 	    </DataSet>
-            <DataSet id="color">
-		<Conditional field="source" lvalue="current_score" rvalue="top_score" operator="eq">
-		    <IfTrue>
-			<AtomicData source="0xff9d50" />
-		    </IfTrue>
-		    <IfFalse>
-			<Conditional lvalue="current_score" rvalue="top_score" operator="gt">
-			    <IfTrue>
-				<AtomicData source="0x11ff11" />
-			    </IfTrue>
-			    <IfFalse>
-				<AtomicData source="0x11ffff" />
-			    </IfFalse>
-			</Conditional>
-		    </IfFalse>
-		</Conditional>
+            <DataSet id="myscoreteam">
+		<AtomicData source="current_score_team" />
 	    </DataSet>
-            <Position x=".81" y="0.1" />
+            <DataSet id="topscoreteam">
+		<AtomicData source="top_score_team" />
+	    </DataSet>
+            <Position x=".81" y="0.12" />
             <Caption location="top">
                 <Text value="Scores" />
             </Caption>
             <Face>
                 <Table>
                     <Row>
-                        <Cell><GameData data="color" /><Text value="Me:" /></Cell>
-                        <Cell><GameData data="color" /><Text value="Top:" /></Cell>
+                        <Cell><Text value="Me:" /></Cell>
+                        <Cell><Text value="Top:" /></Cell>
                     </Row>
                     <Row>
-                        <Cell><GameData data="color" /><GameData data="myscore" /></Cell>
-                        <Cell><GameData data="color" /><GameData data="topscore" /></Cell>
+                        <Cell><GameData data="myscore" /></Cell>
+                        <Cell><GameData data="topscore" /></Cell>
+                    </Row>
+                    <Row>
+                        <Cell><GameData data="myscoreteam" /></Cell>
+                        <Cell><GameData data="topscoreteam" /></Cell>
                     </Row>
                 </Table>
             </Face>

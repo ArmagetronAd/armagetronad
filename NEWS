@@ -1,3 +1,13 @@
+Changes since 0.3.0_alpha4941:
+- Added name hilighting: If your name appears in someone else's chat
+  message it gets hilighted in red
+- Added new cockpit data sources: top_score_team and current_score_team
+- The tab completion for names now uses the same mechanism as the /msg
+  command: Nicks are simplified and latin-1 characters mapped to ASCII
+  ones
+- The /msg command now gets correctly recognized by the tab completion:
+  Spaces in the neme are now replaced by '_'
+
 Changes since 0.3.0_alpha4872:
 - Tab completion now looks for partial matches in nicknames, instead of
   just at the beginning of the nick. Only the beginning of words (a series

@@ -129,6 +129,8 @@ public:
 
     tValue::BasePtr cb_CurrentScore(void);            //!< Gets the viewport owner's score
     tValue::BasePtr cb_TopScore(void);                //!< Gets the top personal score
+    tValue::BasePtr cb_CurrentScoreTeam(void);            //!< Gets the viewport owner's team's score
+    tValue::BasePtr cb_TopScoreTeam(void);                //!< Gets the top team score
     tValue::BasePtr cb_FastestSpeed(void);            //!< Gets the speed of the player who's currently the fastest in m/s
     tValue::BasePtr cb_FastestName(void);             //!< Gets the name of the player who's currently the fastest
     tValue::BasePtr cb_FastestSpeedRound(void);            //!< Gets the speed of the player who's been the fastest during the round in m/s

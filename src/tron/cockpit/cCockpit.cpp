@@ -38,6 +38,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ePlayer.h"
 #include "gCycle.h"
 #include "eTimer.h"
+#include "eTeam.h"
 #include "eCamera.h"
 #include "rRender.h"
 #include "rFont.h"
@@ -79,6 +80,8 @@ static const cbpair cbarray[] = {
                                     cbpair(tString("current_seconds")     , &cCockpit::cb_CurrentTimeSeconds),
                                     cbpair(tString("current_score")       , &cCockpit::cb_CurrentScore),
                                     cbpair(tString("top_score")           , &cCockpit::cb_TopScore),
+                                    cbpair(tString("current_score_team")  , &cCockpit::cb_CurrentScoreTeam),
+                                    cbpair(tString("top_score_team")      , &cCockpit::cb_TopScoreTeam),
                                     cbpair(tString("fastest_speed")       , &cCockpit::cb_FastestSpeed),
                                     cbpair(tString("fastest_name")        , &cCockpit::cb_FastestName),
                                     cbpair(tString("fastest_speed_round") , &cCockpit::cb_FastestSpeedRound),
@@ -289,6 +292,21 @@ tValue::BasePtr cCockpit::cb_CurrentScore(void){
 }
 tValue::BasePtr cCockpit::cb_TopScore(void){
     return tValue::BasePtr(new tValue::Int(stc_topScore));
+}
+
+tValue::BasePtr cCockpit::cb_CurrentScoreTeam(void){
+    if(m_ViewportPlayer->CurrentTeam() == 0) {
+        return tValue::BasePtr(new tValue::Base());
+    }
+    return tValue::BasePtr(new tValue::Int(m_ViewportPlayer->CurrentTeam()->Score()));
+}
+tValue::BasePtr cCockpit::cb_TopScoreTeam(void){
+    int max = 0;
+    for(int i=0;i<eTeam::teams.Len();++i){
+        eTeam *t = eTeam::teams(i);
+        if(t->Score() > max) max = t->Score();
+    }
+    return tValue::BasePtr(new tValue::Int(max));
 }
 
 static void stc_updateFastest() {

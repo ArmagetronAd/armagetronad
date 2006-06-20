@@ -393,19 +393,23 @@ class uAutoCompleter {
 protected:
     std::deque<tString> &m_PossibleWords; //!< The words that can be used for completion
     int m_LastCompletion;
+    bool m_ignorecase;
 
     virtual int FindLengthOfLastWord(tString &string, unsigned pos); //!< Finds the space to the last delimiter
-    virtual void FindPossibleWords(tString word, std::deque<tString> &results, bool ignorecase=true); //!< Finds the possible completions for a word
-    virtual tString FindClosestMatch(tString &word, std::deque<tString> &results, bool ignorecase=true); //!< Attempts to complete as much of the word as possible
-    virtual void ShowPossibilities(std::deque<tString> &results, tString &word, bool ignorecase=true); //!< Prints the possible completions to the console
+    virtual void FindPossibleWords(tString word, std::deque<tString> &results); //!< Finds the possible completions for a word
+    virtual tString FindClosestMatch(tString &word, std::deque<tString> &results); //!< Attempts to complete as much of the word as possible
+    virtual void ShowPossibilities(std::deque<tString> &results, tString &word); //!< Prints the possible completions to the console
     virtual int DoCompletion(tString &string, int pos, int len, tString &match); //!< Replaces the word the cursor is on by the closest match
     virtual int DoFullCompletion(tString &string, int pos, int len, tString &match); //!< Replaces the word the cursor is on by the given match and a space
     virtual int TryCompletion(tString &string, unsigned pos, unsigned len); //!< Attempt completion with a certain word length
+
+    virtual tString Simplify(tString const &str); //!< Simplifies a string, by default converts it to lowercase
 public:
     uAutoCompleter(std::deque<tString> &words); //!< Constructor
     virtual int Complete(tString &string, unsigned pos); //!< Attempts the completion
 
     virtual ~uAutoCompleter(){}
+    void SetIgnorecase(bool ignorecase); //!< Enable or disable case ignoring?
 };
 
 //! uMenuItemString extended by a simple history function and tab completion

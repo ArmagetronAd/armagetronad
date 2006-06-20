@@ -840,7 +840,8 @@ bool uMenuItemString::Event(SDL_Event &e){
 //! @param words a deque containing the possible words that can be used for completion
 uAutoCompleter::uAutoCompleter(std::deque<tString> &words) :
         m_PossibleWords(words),
-        m_LastCompletion(-1)
+        m_LastCompletion(-1),
+        m_ignorecase(true)
 {}
 
 //! @param string the string that should be tested
@@ -869,13 +870,12 @@ int uAutoCompleter::FindLengthOfLastWord(tString &string, unsigned pos) {
 
 //! @param word       the part of the word that is searched for
 //! @param results    the list where the possible completions will be saved
-//! @param ignorecase if true, the case will be ignored
-void uAutoCompleter::FindPossibleWords(tString word, std::deque<tString> &results, bool ignorecase) {
-    if(ignorecase)
-        word = word.ToLower();
+void uAutoCompleter::FindPossibleWords(tString word, std::deque<tString> &results) {
+    if(m_ignorecase)
+        word = Simplify(word);
     for(std::deque<tString>::iterator i=m_PossibleWords.begin(); i!=m_PossibleWords.end(); ++i) {
         size_t pos;
-        if((pos = (ignorecase ? i->ToLower() : *i).find(word)) != tString::npos) {
+        if((pos = (m_ignorecase ? Simplify(*i) : *i).find(word)) != tString::npos) {
             if(isalpha((*i)[pos]) && pos != 0 && isalpha((*i)[pos-1]))
                 continue; //both the char we're at and the one before is alphanumeric; we're in the middle of a word
             results.push_back(*i);
@@ -885,22 +885,21 @@ void uAutoCompleter::FindPossibleWords(tString word, std::deque<tString> &result
 
 //! @param word       the part of the word that is searched for
 //! @param results    the list of possible completions
-//! @param ignorecase if true, the case will be ignored
 //! @return the match, if any
-tString uAutoCompleter::FindClosestMatch(tString &word, std::deque<tString> &results, bool ignorecase) {
-    tString ret(ignorecase?word.ToLower():word);
+tString uAutoCompleter::FindClosestMatch(tString &word, std::deque<tString> &results) {
+    tString ret(m_ignorecase?Simplify(word):word);
     unsigned int len = ret.size();
     while(true) { // complete right side
         std::deque<tString>::iterator i;
         i = results.begin();
         bool found=true;
-        tString::size_type pos=(ignorecase?i->ToLower():*i).find(ret);
+        tString::size_type pos=(m_ignorecase?Simplify(*i):*i).find(ret);
         if(pos!=tString::npos && pos+len < i->size()) {
             found=false;
-            ret+=(ignorecase ? tolower(i->at(pos+len)) : i->at(pos+len));
+            ret+=(m_ignorecase ? tolower(i->at(pos+len)) : i->at(pos+len));
             ++i;
             for(; i!=results.end(); ++i) {
-                if((ignorecase?i->ToLower():*i).find(ret) == tString::npos) {
+                if((m_ignorecase?Simplify(*i):*i).find(ret) == tString::npos) {
                     found=true;
                     ret.erase(ret.length()-1);
                     break;
@@ -916,13 +915,13 @@ tString uAutoCompleter::FindClosestMatch(tString &word, std::deque<tString> &res
         std::deque<tString>::iterator i;
         i = results.begin();
         bool found=true;
-        tString::size_type pos=(ignorecase?i->ToLower():*i).find(ret);
+        tString::size_type pos=(m_ignorecase?Simplify(*i):*i).find(ret);
         if(pos!=tString::npos && pos > 0) {
             found=false;
-            ret.insert(ret.begin(),(ignorecase ? tolower(i->at(pos-1)) : i->at(pos-1)));
+            ret.insert(ret.begin(),(m_ignorecase ? tolower(i->at(pos-1)) : i->at(pos-1)));
             ++i;
             for(; i!=results.end(); ++i) {
-                if((ignorecase?i->ToLower():*i).find(ret) == tString::npos) {
+                if((m_ignorecase?Simplify(*i):*i).find(ret) == tString::npos) {
                     found=true;
                     ret.erase(0,1);
                     break;
@@ -939,16 +938,15 @@ tString uAutoCompleter::FindClosestMatch(tString &word, std::deque<tString> &res
 
 //! @param results    the list of possible completions
 //! @param word       the word that was already typed, it will be highlighted
-//! @param ignorecase if true, the case will be ignored
-void uAutoCompleter::ShowPossibilities(std::deque<tString> &results, tString &word, bool ignorecase) {
+void uAutoCompleter::ShowPossibilities(std::deque<tString> &results, tString &word) {
     if(results.size() > 10) {
         con << tOutput("$tab_completion_toomanyresults");
     }
     else {
+        con << tOutput("$tab_completion_results");
         tString::size_type len=word.length();
         for(std::deque<tString>::iterator i=results.begin(); i!=results.end(); ++i) {
-            con << tOutput("$tab_completion_results");
-            tString::size_type pos=(ignorecase?i->ToLower():*i).find(word);
+            tString::size_type pos=(m_ignorecase?Simplify(*i):*i).find(word);
             con << i->SubStr(0,pos)
             << "0xff8888"
             << i->SubStr(pos, len)
@@ -989,7 +987,7 @@ int uAutoCompleter::TryCompletion(tString &string, unsigned pos, unsigned len) {
     std::deque<tString> results;
     FindPossibleWords(word, results);
     if(results.size() > 1){
-        tString match(FindClosestMatch(word, results, true));
+        tString match(FindClosestMatch(word, results));
         if(match == word) { //no completion took place
             ShowPossibilities(results, word);
             return pos;
@@ -1020,6 +1018,17 @@ int uAutoCompleter::Complete(tString &string, unsigned pos) {
         return res;
     }
     return pos;
+}
+
+//! @param ignorecase ignore upper and lower case?
+void uAutoCompleter::SetIgnorecase(bool ignorecase) {
+    m_ignorecase = ignorecase;
+}
+
+//! @param str the string to simplify
+//! @returns the simplified string(in this case everything converted to lowercase)
+tString uAutoCompleter::Simplify(tString const &str) {
+    return str.ToLower();
 }
 
 //! @param M         passed on to uMenuItemString

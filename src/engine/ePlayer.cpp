@@ -770,16 +770,51 @@ static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
     }
 }
 
+static bool se_enableNameHilighting=true; // maximal size of chat history
+static tSettingItem< bool > se_enableNameHilightingConf("ENABLE_NAME_HILIGHTING",se_enableNameHilighting);
+
 static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message )
 {
     if ( p && !p->IsSilenced() )
     {
-        if (p->Object() && p->Object()->Alive())
-            con << message << "\n";
-        else {
+        if (!p->Object() || !p->Object()->Alive()) {
             con << tOutput("$dead_console_decoration");
-            con << message << "\n";
         }
+        tString actualMessage(message);
+
+        if(se_enableNameHilighting) {
+            //iterate through players...
+            rViewportConfiguration* viewportConfiguration = rViewportConfiguration::CurrentViewportConfiguration();
+            if(viewportConfiguration == 0) return;
+            for ( int viewport = viewportConfiguration->num_viewports-1; viewport >= 0; --viewport ) {
+                int playerID = sr_viewportBelongsToPlayer[ viewport ];
+
+                // get the player
+                ePlayer* player = ePlayer::PlayerConfig( playerID );
+                if(player == 0) continue;
+                ePlayerNetID* netPlayer = player->netPlayer;
+                if(netPlayer == 0) continue;
+                if(netPlayer == p) continue; //the same player who chatted, no point in hilighting
+                tString const &name = netPlayer->GetName();
+
+                //find all occureces of the name...
+                for(tString::size_type pos = actualMessage.find(name); pos != tString::npos; pos = actualMessage.find(name, pos+16)) {
+                    //find the last color code
+                    tString::size_type lastcolorpos = actualMessage.rfind("0x", pos);
+                    tString lastcolorstring;
+                    if(lastcolorpos != tString::npos) {
+                        lastcolorstring = actualMessage.SubStr(lastcolorpos, 8);
+                    } else {
+                        lastcolorstring = "0xffff7f";
+                    }
+
+                    //actually insert the color codes around the name
+                    actualMessage.insert(pos+name.size(), lastcolorstring);
+                    actualMessage.insert(pos, "0xff887f");
+                }
+            }
+        }
+        con << actualMessage << "\n";
     }
 }
 
@@ -1710,11 +1745,19 @@ public:
     eAutoCompleterChat(std::deque<tString> &words):uAutoCompleter(words) {};
     int DoFullCompletion(tString &string, int pos, int len, tString &match) {
         tString actualString;
-        if(pos - len == 0)
+        std::cerr << "pos-len: " << pos-len << std::endl;
+        std::cerr << "actualString: " << actualString << std::endl;
+        if(pos - len == 0) {
             actualString = match + ": ";
-        else
+        } else if(pos - len == 5 && string.StartsWith("/msg ")) {
+            actualString = Simplify(match) + " ";
+        } else {
             actualString = match + " ";
+        }
         return DoCompletion(string, pos, len, actualString);
+    }
+    tString Simplify(tString const &str) {
+        return ePlayerNetID::FilterName(str);
     }
 };
 
