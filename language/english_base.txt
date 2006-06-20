@@ -636,6 +636,7 @@ color_strings_help		Generate strings that will be rendered with color effects.
 filter_color_strings_help		Filter color codes from strings coming in over the network.
 filter_color_names_help		    Filter color codes from player names.
 filter_name_ends_help           Filter whitespace and other junk from beginnings and ends of player names.
+filter_name_middle_help         Filter excess whitespace and other junk from the middle of player names.
 filter_color_server_names_help	Filter color codes from server names in the server browser.
 
 #screen mode

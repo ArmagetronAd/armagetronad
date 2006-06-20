@@ -1,6 +1,9 @@
 Changes since 0.2.8.2:
 
   New settings:
+- FILTER_NAME_MIDDLE: collapses multiple whitespaces to one in player names.
+- FORTRESS_CONQEST_TIMEOUT: if an enemy contact with a zone happens longer ago than
+  this value, it is discarded from zone memory.
 - TOPOLOGY_POLICE_PARALLEL, extra topology police flag to control the checks 
   for walls getting copied into the grid in exactly the same place.
 - CAMERA_GLANCE_*: separate settings for the glancing camera, work like CAMERA_CUSTOM_*.

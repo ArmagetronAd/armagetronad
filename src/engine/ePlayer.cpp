@@ -2423,6 +2423,53 @@ static bool se_filterColorNames=false;
 tSettingItem< bool > se_coloredNamesConf( "FILTER_COLOR_NAMES", se_filterColorNames );
 static bool se_stripNames=true;
 tSettingItem< bool > se_stripConf( "FILTER_NAME_ENDS", se_stripNames );
+static bool se_stripMiddle=true;
+tSettingItem< bool > se_stripMiddleConf( "FILTER_NAME_MIDDLE", se_stripMiddle );
+
+// do the optional filtering steps
+static void se_OptionalNameFilters( tString & remoteName )
+{
+    // filter colors
+    if ( se_filterColorNames )
+        remoteName = tColoredString::RemoveColors( remoteName );
+
+    // strip whitespace
+    if ( se_stripNames )
+        se_StripNameEnds( remoteName );
+
+    if ( se_stripMiddle )
+    {
+        // first, scan for double whitespace
+        bool whitespace=false;
+        int i;
+        for ( i = 0; i < remoteName.Len()-1; ++i )
+        {
+            bool newWhitespace=isblank(remoteName[i]);
+            if ( newWhitespace && whitespace )
+            {
+                // yes, double whitespace there. Filter it out.
+                whitespace=newWhitespace=false;
+                tString copy;
+                for ( i = 0; i < remoteName.Len()-1; ++i )
+                {
+                    char c = remoteName[i];
+                    newWhitespace=isblank(c);
+                    if ( !whitespace || !newWhitespace )
+                    {
+                        copy+=c;
+                    }
+                    whitespace=newWhitespace;
+                }
+                remoteName=copy;
+
+                // abort loop.
+                break;
+            }
+
+            whitespace=newWhitespace;
+        }
+    }
+}
 
 void ePlayerNetID::ReadSync(nMessage &m){
     nNetObject::ReadSync(m);
@@ -2451,13 +2498,8 @@ void ePlayerNetID::ReadSync(nMessage &m){
         // read and shorten name, but don't update it yet
         m >> remoteName;
 
-        // filter colors
-        if ( se_filterColorNames )
-            remoteName = tColoredString::RemoveColors( remoteName );
-
-        // strip whitespace
-        if ( se_stripNames )
-            se_StripNameEnds( remoteName );
+        // filter
+        se_OptionalNameFilters( remoteName );
 
         se_CutString( remoteName, 16 );
 
@@ -4001,8 +4043,7 @@ void ePlayerNetID::UpdateName( void )
     // apply client change, stripping excess spaces
     if ( sn_GetNetState() != nCLIENT )
     {
-        if ( se_stripNames )
-            se_StripNameEnds( nameFromClient_ );
+        se_OptionalNameFilters( nameFromClient_ );
 
         // disallow name changes if there was a kick vote recently
         if ( !bool(this->voter_) || voter_->AllowNameChange() || nameFromServer_.Len() <= 1 )
