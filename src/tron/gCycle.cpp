@@ -1583,7 +1583,10 @@ bool gCycle::Timestep(REAL currentTime){
 
             nextDrop = time + sg_minDropInterval;
             if ( currentWall )
+            {
+                currentWall->Update(lastTime,pos);
                 currentWall->PartialCopyIntoGrid( grid );
+            }
             dropWallRequested_ = false;
         }
     }
@@ -2371,6 +2374,8 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
 
                 // do the move
                 otherPlayer->MoveSafely( collPos-otherPlayer->dirDrive*d, otherPlayer->LastTime(), otherTime - d/otherPlayer->Speed() );
+                otherPlayer->currentWall->Update( otherPlayer->lastTime, otherPlayer->pos );
+                otherPlayer->dropWallRequested_ = false;
 
                 // drop our wall so collisions are more accurate
                 dropWallRequested_ = true;
