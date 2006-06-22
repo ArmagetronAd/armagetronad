@@ -7,6 +7,9 @@ Changes since 0.3.0_alpha4941:
   ones
 - The /msg command now gets correctly recognized by the tab completion:
   Spaces in the neme are now replaced by '_'
+- The names that are displayed over other cycles now get colored in the
+  same color as the cycle. Disable this by setting
+  DISPLAY_COLORED_NAMES_OVER_CYCLES to 0.
 
 Changes since 0.3.0_alpha4872:
 - Tab completion now looks for partial matches in nicknames, instead of

@@ -396,6 +396,7 @@ voting_maturity_help                The minimum time in seconds a player needs t
 
 fadeout_name_delay_help				Time the player names are shown. Set to 0 if you don't want to show them at all or -1 if you want to show them always.
 show_own_name_help					  Should your name be displayed above your cycle on your screen?
+display_colored_names_over_cycles_help		Should the names over cycles appear in the cycles' colors?
 dead_console_decoration *DEAD*  
 #********************************************
 #********************************************

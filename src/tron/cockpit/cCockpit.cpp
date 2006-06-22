@@ -167,7 +167,7 @@ void cCockpit::SetPlayer(ePlayer *player) {
             }
         }
     }
-    if(m_FocusPlayer != NULL) {
+    if(m_FocusPlayer != 0) {
         m_FocusCycle = dynamic_cast<gCycle *>(m_FocusPlayer->Object());
     } else {
         m_FocusCycle = 0;
@@ -536,6 +536,7 @@ cCockpit* cCockpit::GetCockpit() {
 
 void cCockpit::RenderPlayer() {
     if( m_Player == 0 ) return;
+    if(m_ViewportPlayer == 0) return;
 
     if(m_FocusPlayer != 0 && m_ViewportPlayer != 0) {
         sr_ResetRenderState(false);
