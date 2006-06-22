@@ -2013,7 +2013,8 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
         log->Print();
         //      st_Breakpoint();
     }
-    last = log->entries[log->current-1].turn;
+    if ( log->current > 0 )
+        last = log->entries[log->current-1].turn;
 #endif
 
     triesLeft = (triesLeft * character->properties[AI_EMERGENCY])/10;
