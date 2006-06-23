@@ -104,11 +104,11 @@ void uWebInterface::Initialize() {
 
         // Setup cgi handlers
         // path isn't currently implemented in shttpd, but the extension is
-        shttpd_addcgihandler(".py", "/usr/bin/python");
+        //shttpd_addcgihandler(".py", "/usr/bin/python");
 
         // Setup callbacks
         // The admin callback for executing a console command on the server
-        shttpd_register_url("/admin/actions/doconsole", &uWebInterface::set_console, NULL);
+        //shttpd_register_url("/admin/actions/doconsole", &uWebInterface::set_console, NULL);
 
         // Open port, get socket so we can poll
         mSocket = shttpd_open_port(0);

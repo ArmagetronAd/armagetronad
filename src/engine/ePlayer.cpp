@@ -1745,8 +1745,6 @@ public:
     eAutoCompleterChat(std::deque<tString> &words):uAutoCompleter(words) {};
     int DoFullCompletion(tString &string, int pos, int len, tString &match) {
         tString actualString;
-        std::cerr << "pos-len: " << pos-len << std::endl;
-        std::cerr << "actualString: " << actualString << std::endl;
         if(pos - len == 0) {
             actualString = match + ": ";
         } else if(pos - len == 5 && string.StartsWith("/msg ")) {
