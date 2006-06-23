@@ -2291,7 +2291,13 @@ bool gCycle::EdgeIsDangerous(const eWall* ww, REAL time, REAL a) const{
             return false;
 
         gNetPlayerWall *nw = w->NetWall();
-        if( nw == currentWall || nw == lastWall || nw == lastNetWall )
+
+        // check whether the wall is one of the walls no real collision is
+        // possible with. The lastNetWall is only checked for enemy cycles,
+        // because it can be an arbitrary wall for your own cycle. But for
+        // enemy cycles, it may be what lastWall should be, and the test
+        // prevents enemy cycles from getting stuck right after a turn.
+        if( nw == currentWall || nw == lastWall || ( nw == lastNetWall && Owner() != sn_myNetID ) )
             return false;
 
         // see if the wall is from another player and from the future.
