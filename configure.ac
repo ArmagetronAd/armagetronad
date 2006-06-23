@@ -907,6 +907,7 @@ AC_AA_PATH_RAW(mandir)
 # additional paths:
 # scripts
 AC_AA_PATH(scriptdir,${aa_datadir}/scripts,[shell scripts],[DATADIR/scripts])
+AC_AA_PATH(wwwrootdir,${aa_datadir}/www-root,[web root],[DATADIR/www-root])
 
 # documentation
 AC_AA_PATH_PREPARE(docdir)

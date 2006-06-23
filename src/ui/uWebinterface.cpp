@@ -95,6 +95,7 @@ void uWebInterface::Initialize() {
 
         // Set configuration parameters
 #ifdef DEDICATED
+        std::cout << tDirectories::Webroot().GetDirPath() << std::endl;
         shttpd_setopt("document_root", tDirectories::Webroot().GetDirPath() );
 #endif
         shttpd_register_mountpoint("/resource", tDirectories::Resource().GetDirPath());
@@ -108,7 +109,8 @@ void uWebInterface::Initialize() {
 
         // Setup callbacks
         // The admin callback for executing a console command on the server
-        //shttpd_register_url("/admin/actions/doconsole", &uWebInterface::set_console, NULL);
+        shttpd_register_url("/admin/actions/doconsole", &uWebInterface::set_console, NULL);
+        shttpd_protect_url("/admin", tDirectories::Config().GetReadPath("web_password.cfg") );
 
         // Open port, get socket so we can poll
         mSocket = shttpd_open_port(0);
@@ -135,9 +137,7 @@ int uWebInterface::set_console(struct shttpd_callback_arg *arg)
 
     /* Output HTTP headers */
     shttpd_printf(arg->connection, "%s\r\n", "HTTP/1.1 200 OK");
-    shttpd_printf(arg->connection, "%s\r\n", "Content-Type: text/plain");
-    shttpd_printf(arg->connection, "%s\r\n", "");
-
+    //shttpd_printf(arg->connection, "%s: %s", "Location", arg->connection->referer);
     tDelay(2);
 
     return 0;

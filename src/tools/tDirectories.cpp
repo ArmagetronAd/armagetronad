@@ -195,8 +195,8 @@ static tString st_VarDir("");     // directory for dynamic logs and highscores
 #endif
 
 #ifdef DEDICATED
-#ifdef WWW_DIR
-static tString st_WwwDir(expand_home_c(WWW_DIR));     // directory for dynamic logs and highscores
+#ifdef WWWROOTDIR
+static tString st_WwwDir(expand_home_c(WWWROOTDIR));     // directory for dynamic logs and highscores
 #else
 static tString st_WwwDir("");     // directory for dynamic logs and highscores
 #endif
@@ -575,11 +575,12 @@ void tPathWebroot::Paths ( tArray< tString >& paths ) const
     paths.SetLen( 0 );
     int pos = 0;
 
-    paths[ pos++ ] = st_WwwDir + "www-root";
+    paths[ pos++ ] = st_WwwDir;
 }
 
 tString tPathWebroot::GetDirPath() {
-    return st_WwwDir + "www-root";
+    //std::cout << st_WwwDir;
+    return st_WwwDir;
 }
 
 static const tPathWebroot st_Webroot;
