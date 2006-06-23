@@ -44,7 +44,7 @@ if test -d "${srcdir}/.svn"; then
 
     URL=`svn info ${srcdir} | grep ^URL | sed -e 's,^URL: ,,'`
 
-    # uncomment the followint URLs to test various cases
+    # uncomment the following URLs to test various cases
     # trunk
     # URL=https://svn.sourceforge.net/svnroot/armagetronad/armagetronad/trunk/armagetronad
     # branch 0.4
