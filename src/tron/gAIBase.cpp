@@ -1222,10 +1222,12 @@ void gAIPlayer::SetNumberOfAIs(int num, int minPlayers, int iq, int tries)
 
         gAICharacter* bestIQ = BestIQ( iq );
 
+		// count = numberOfAIs to add / remove(numberofAIs - requestedNumAIs)
         count -= num;
 
-        // count the active players
+		// pcount = numberPlayers above minPlayers
         int pcount = - minPlayers;
+		// check if more AIs are required (because there are less than minPlayers players)
         for (i = se_PlayerNetIDs.Len()-1; i>=0; i--)
         {
             ePlayerNetID *p = se_PlayerNetIDs(i);

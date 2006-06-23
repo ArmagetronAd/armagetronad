@@ -108,8 +108,11 @@ void uWebInterface::Initialize() {
         //shttpd_addcgihandler(".py", "/usr/bin/python");
 
         // Setup callbacks
+        // The front of the admin interface
+        shttpd_register_url("/admin", &uWebInterface::admin_html, NULL);
         // The admin callback for executing a console command on the server
         shttpd_register_url("/admin/actions/doconsole", &uWebInterface::set_console, NULL);
+        // First protect the admin directory
         shttpd_protect_url("/admin", tDirectories::Config().GetReadPath("web_password.cfg") );
 
         // Open port, get socket so we can poll
@@ -124,6 +127,18 @@ void uWebInterface::PollNetwork(unsigned milliseconds) {
 
 void uWebInterface::Shutdown() {
     shttpd_fini();
+}
+
+int uWebInterface::admin_html(struct shttpd_callback_arg *arg)
+{
+    shttpd_printf(arg->connection, "%s\r\n", "HTTP/1.1 200 OK");
+    shttpd_printf(arg->connection, "%s\r\n", "Content-Type: text/html");
+    shttpd_printf(arg->connection, "%s\r\n", "");
+
+    shttpd_printf(arg->connection, "%s\r\n", "<html><head><title>Armagetron Advanced Server Administration</title></head>");
+    shttpd_printf(arg->connection, "%s\r\n", "<body><h1>Server Administration</h1></body></html>");
+
+    
 }
 
 int uWebInterface::set_console(struct shttpd_callback_arg *arg)

@@ -1501,6 +1501,15 @@ int nSocket::Create( void )
     if ( socket_ < 0 )
         return -1;
 
+    // TODO: IP_TOS only Supported under Windows 2000
+    // See: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winsock/winsock/socket_options.asp
+
+    // Tutorial on using Windows 98+ RSVP (QoS / Resource reSerVation Protocol)
+    // http://msdn.microsoft.com/msdnmag/issues/01/04/qos/default.aspx
+
+    // TODO: Linux only way setting the IP_TOS ?
+    // http://homepages.cwi.nl/~aeb/linux/man2html/man2/getsockopt.2.html
+
     // unblock it
     bool _true = true;
     return ioctl (socket_, FIONBIO, reinterpret_cast<char *>(&_true)) == -1;
