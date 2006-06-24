@@ -5,5 +5,5 @@ wwwrootdir=${armadatadir}/www-root
 
 EXTRA_DIST=index.html
 
-wwwroot_DATA=index.html
+nobase_wwwroot_DATA=index.html css/admin.css admin/README
 

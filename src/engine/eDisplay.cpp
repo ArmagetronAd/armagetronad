@@ -414,7 +414,7 @@ void eGrid::display_simple( int viewer,bool floor,
         case rFLOOR_TEXTURE:
             TexMatrix();
             glLoadIdentity();
-            glScalef(1/se_GridSize(),1/se_GridSize(),1/se_GridSize());
+            glScalef(1/se_GridSize(),1/se_GridSize(),1.);
 
             se_glFloorTexture();
             se_glFloorColor(flooralpha);
@@ -443,7 +443,7 @@ void eGrid::display_simple( int viewer,bool floor,
             TexMatrix();
             glLoadIdentity();
             REAL gs = 1/se_GridSize();
-            glScalef(0.01*gs,gs,gs);
+            glScalef(0.01*gs,gs,1.);
 
             se_glFloorTexture_a();
             infinity_xy_plane( camPos, CameraDir(viewer) );
@@ -452,7 +452,7 @@ void eGrid::display_simple( int viewer,bool floor,
 
             TexMatrix();
             glLoadIdentity();
-            glScalef(gs,.01*gs,gs);
+            glScalef(gs,.01*gs,1.);
 
             se_glFloorTexture_b();
 

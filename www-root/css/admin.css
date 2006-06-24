@@ -1,0 +1,10 @@
+body {
+    background: #fefefe;
+    color: black;
+}
+
+div.mainCopy {
+    border: black inset 1px;
+}
+
+
