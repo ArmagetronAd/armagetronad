@@ -1222,12 +1222,12 @@ void gAIPlayer::SetNumberOfAIs(int num, int minPlayers, int iq, int tries)
 
         gAICharacter* bestIQ = BestIQ( iq );
 
-		// count = numberOfAIs to add / remove(numberofAIs - requestedNumAIs)
+        // count = numberOfAIs to add / remove(numberofAIs - requestedNumAIs)
         count -= num;
 
-		// pcount = numberPlayers above minPlayers
+        // pcount = numberPlayers above minPlayers
         int pcount = - minPlayers;
-		// check if more AIs are required (because there are less than minPlayers players)
+        // check if more AIs are required (because there are less than minPlayers players)
         for (i = se_PlayerNetIDs.Len()-1; i>=0; i--)
         {
             ePlayerNetID *p = se_PlayerNetIDs(i);
@@ -2015,7 +2015,8 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
         log->Print();
         //      st_Breakpoint();
     }
-    last = log->entries[log->current-1].turn;
+    if ( log->current > 0 )
+        last = log->entries[log->current-1].turn;
 #endif
 
     triesLeft = (triesLeft * character->properties[AI_EMERGENCY])/10;
