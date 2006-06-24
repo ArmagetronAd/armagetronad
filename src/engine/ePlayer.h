@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ArmageTron_PLAYER_H
 
 #ifndef MAX_INSTANT_CHAT 
-#define MAX_INSTANT_CHAT 25
+#define MAX_INSTANT_CHAT 26
 #endif
 
 #define MAX_PLAYERS 4

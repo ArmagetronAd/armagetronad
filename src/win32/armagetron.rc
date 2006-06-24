@@ -30,19 +30,19 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-10               ICON    DISCARDABLE     "icons\\armagetronad-16-16-32.ico"
-11               ICON    DISCARDABLE     "icons\\armagetronad-24-24-32.ico"
-12               ICON    DISCARDABLE     "icons\\armagetronad-32-32-32.ico"
-13               ICON    DISCARDABLE     "icons\\armagetronad-48-48-32.ico"
-14               ICON    DISCARDABLE     "icons\\armagetronad-64-64-32.ico"
-15               ICON    DISCARDABLE     "icons\\armagetronad-16-16-16.ico"
-16               ICON    DISCARDABLE     "icons\\armagetronad-24-24-16.ico"
-17               ICON    DISCARDABLE     "icons\\armagetronad-32-32-16.ico"
-18               ICON    DISCARDABLE     "icons\\armagetronad-16-16-256.ico"
-1                ICON    DISCARDABLE     "icons\\armagetronad-32-32-256.ico"
-2                ICON    DISCARDABLE     "icons\\armagetronad-24-24-256.ico"
-3                ICON    DISCARDABLE     "icons\\armagetronad-48-48-256.ico"
-4                ICON    DISCARDABLE     "icons\\armagetronad-64-64-256.ico"
+10               ICON    DISCARDABLE     "..\\icons\\armagetronad-16-16-32.ico"
+11               ICON    DISCARDABLE     "..\\icons\\armagetronad-24-24-32.ico"
+12               ICON    DISCARDABLE     "..\\icons\\armagetronad-32-32-32.ico"
+13               ICON    DISCARDABLE     "..\\icons\\armagetronad-48-48-32.ico"
+14               ICON    DISCARDABLE     "..\\icons\\armagetronad-64-64-32.ico"
+15               ICON    DISCARDABLE     "..\\icons\\armagetronad-16-16-16.ico"
+16               ICON    DISCARDABLE     "..\\icons\\armagetronad-24-24-16.ico"
+17               ICON    DISCARDABLE     "..\\icons\\armagetronad-32-32-16.ico"
+18               ICON    DISCARDABLE     "..\\icons\\armagetronad-16-16-256.ico"
+1                ICON    DISCARDABLE     "..\\icons\\armagetronad-32-32-256.ico"
+2                ICON    DISCARDABLE     "..\\icons\\armagetronad-24-24-256.ico"
+3                ICON    DISCARDABLE     "..\\icons\\armagetronad-48-48-256.ico"
+4                ICON    DISCARDABLE     "..\\icons\\armagetronad-64-64-256.ico"
 
 
 

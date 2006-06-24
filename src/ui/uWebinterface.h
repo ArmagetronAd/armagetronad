@@ -47,6 +47,7 @@ public:
     // Callbacks for the web server
     static int set_console(struct shttpd_callback_arg *arg);
     static int admin_html(struct shttpd_callback_arg *arg);
+    static int admin_disabled(struct shttpd_callback_arg *arg);
 
     static int mSocket;
 private:

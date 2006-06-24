@@ -4,7 +4,7 @@
 configdir=${aa_sysconfdir}
 
 nobase_config_DATA=default.cfg master.srv settings.cfg\
-	settings_dedicated.cfg aiplayers.cfg rc.config settings_web.cfg\
+	settings_dedicated.cfg aiplayers.cfg rc.config\
 	settings_visual.cfg\
 	web_password.cfg\
 	settings_dedicated.cfg aiplayers.cfg rc.config\

@@ -167,9 +167,13 @@ Mix_Music* eMusicTrack::LoadFile(const char* filename) {
 #ifdef HAVE_LIBSDL_MIXER
 
     theMusic = Mix_LoadMUS( filename );
-
     if(!theMusic) {
-        tERR_WARN("Failed to load track\n");
+        //TODO: move error Handling else where?
+        tOutput error;
+        error.SetTemplateParameter(1 , filename );
+        error.SetTemplateParameter(2 , SDL_GetError() );
+        error << "$sound_error_unknown";
+        con << error;
     }
 #endif // DEDICATED
     return theMusic;

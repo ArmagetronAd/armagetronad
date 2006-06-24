@@ -965,6 +965,8 @@ input_music_volume_up_help  Increases the volume of the music
 input_music_volume_down_text Volume Down
 input_music_volume_down_help Decreases the volume of the music
 
+
+
 #********************************************
 #********************************************
 #********************************************
@@ -2328,14 +2330,16 @@ texture_error_filenotfound_title  Texture not found.
 #********************************************
 #********************************************
 
-sound_error_no16bit		Sorry. We need 16 bit stereo output (I'm too lazy to support other formats. Maybe if you ask really nice?).\n
-sound_error_initfailed		Sound initialisation failed.\n
-sound_firstinit			Trying to start sound. Just restart \g in case of crash.\n
-sound_inited			Sound initialised: 16 bit stereo at \1 Hz, buffer size \2 samples.\n
-sound_disabling			Disabling sound...\n
-sound_disabling_done		Done!\n
-sound_error_filenotfound	Sound file \1 not found. Have you called \g from the right directory?
-sound_error_unsupported		Sound file \1 has unsupported format. Sorry!
+#sound_error_no16bit		Sorry. We need 16 bit stereo output (I'm too lazy to support other formats. Maybe if you ask really nice?).\n
+#sound_error_initfailed		Sound initialisation failed.\n
+#sound_firstinit			Trying to start sound. Just restart \g in case of crash.\n
+#sound_inited				Sound initialised: 16 bit stereo at \1 Hz, buffer size \2 samples.\n
+#sound_disabling			Disabling sound...\n
+#sound_disabling_done		Done!\n
+#sound_error_filenotfound	Sound file \1 not found. Have you called \g from the right directory?
+#sound_error_unsupported	Sound file \1 has unsupported format. Sorry!
+sound_error_unknown			File \1 could not be loaded: \2
+
 
 
 #********************************************

@@ -51,7 +51,8 @@ EXTRA_DIST=\
 	make/releasetag\
 	make/sortresources.py\
 	make/sortresources\
-	make/regenerate_fingerprint
+	make/regenerate_fingerprint\
+	armagetronad-password.py
 
 # The command for building scripts
 buildscript = sed -f ${top_builddir}/universal_variable_values_sed\

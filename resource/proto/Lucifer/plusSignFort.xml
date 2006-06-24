@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE Resource SYSTEM "map-0.2.8_beta3.dtd">
+<Resource type="aamap" name="PlusSignFortress" version="0.2.2" author="Lucifer" category="sick">
+    <!-- This map is based on a map Your_mom wrote originally, but the credit isn't in the resource tag to
+         avoid having a filepath that includes commas and spaces -->
+    <Map version="0.2.8">
+        <World>
+            <Field>
+                <Axes number="4"/>
+		        <Spawn x="740" y="100" angle="90" />
+		        <Spawn x="760" y="1400" angle="-90" />
+                <Spawn x="100" y="740" angle="0" />
+                <Spawn x="1400" y="760" angle="180" />
+			<Wall>
+          	   	       <Point x="600" y="0" />
+        	           <Point x="900" y="0" />
+         		       <Point x="900" y="400" />
+         		       <Point x="1100" y="400" />
+         		       <Point x="1100" y="600" />
+         		       <Point x="1500" y="600" />
+         		       <Point x="1500" y="900" />
+         		       <Point x="1100" y="900" />
+         		       <Point x="1100" y="1100" />
+         		       <Point x="900" y="1100" />
+         		       <Point x="900" y="1500" />
+         		       <Point x="600" y="1500" />
+         		       <Point x="600" y="1100" />
+         		       <Point x="400" y="1100" />
+         		       <Point x="400" y="900" />
+         		       <Point x="0" y="900" />
+         		       <Point x="0" y="600" />
+         		       <Point x="400" y="600" />
+         		       <Point x="400" y="400" />
+         		       <Point x="600" y="400" />
+         		       <Point x="600" y="0" />
+			</Wall>
+			<Wall>
+         		       <Point x="600" y="600" />
+         		       <Point x="600" y="450" />
+         		       <Point x="500" y="450" />
+         		       <Point x="500" y="500" />
+         		       <Point x="450" y="500" />
+         		       <Point x="450" y="600" />
+         		       <Point x="600" y="600" />
+			</Wall>
+			<Wall>
+         		       <Point x="600" y="900" />
+         		       <Point x="600" y="1050" />
+         		       <Point x="500" y="1050" />
+         		       <Point x="500" y="1000" />
+         		       <Point x="450" y="1000" />
+         		       <Point x="450" y="900" />
+         		       <Point x="600" y="900" />
+			</Wall>
+			<Wall>
+         		       <Point x="900" y="600" />
+         		       <Point x="900" y="450" />
+         		       <Point x="1000" y="450" />
+         		       <Point x="1000" y="500" />
+         		       <Point x="1050" y="500" />
+         		       <Point x="1050" y="600" />
+         		       <Point x="900" y="600" />
+			</Wall>
+			<Wall>
+         		       <Point x="900" y="900" />
+         		       <Point x="900" y="1050" />
+         		       <Point x="1000" y="1050" />
+         		       <Point x="1000" y="1000" />
+         		       <Point x="1050" y="1000" />
+         		       <Point x="1050" y="900" />
+         		       <Point x="900" y="900" />
+			</Wall>
+            <Zone effect="fortress">
+                <ShapeCircle radius="100" growth="0">
+                    <Point x="750" y="100" />
+                </ShapeCircle>
+            </Zone>
+            <Zone effect="fortress">
+                <ShapeCircle radius="100" growth="0">
+                    <Point x="750" y="1400" />
+                </ShapeCircle>
+            </Zone>
+            <Zone effect="fortress">
+                <ShapeCircle radius="100" growth="0">
+                    <Point x="100" y="750" />
+                </ShapeCircle>
+            </Zone>
+            <Zone effect="fortress">
+                <ShapeCircle radius="100" growth="0">
+                    <Point x="1400" y="750" />
+                </ShapeCircle>
+            </Zone>
+		</Field>
+    </World>
+</Map>
+</Resource>
