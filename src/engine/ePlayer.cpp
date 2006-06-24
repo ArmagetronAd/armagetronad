@@ -1485,7 +1485,7 @@ void handle_chat(nMessage &m){
 
                     // search for end of recipient and store recipient in buffer_name
                     tString buffer_name;
-                    while (current_place < msg.size() && !isspace(msg[current_place])) {
+                    while (current_place < msg.size() && !isblank(msg[current_place])) {
                         buffer_name+=msg[current_place];
                         current_place++;
                     }
@@ -2533,26 +2533,29 @@ static void se_StripMatchingEnds( tString & stripper, TestCharacter & beginTeste
 //}
 
 // function wrapper for what may be a macro
-static bool se_IsSpace( char c )
+static bool se_IsBlank( char c )
 {
-    return isspace( c );
+    return isblank( c );
 }
 
 // enf of player names should neither be space or :
 static bool se_IsInvalidNameEnd( char c )
 {
-    return isspace( c ) || c == ':' || c == '.';
+    return isblank( c ) || c == ':' || c == '.';
 }
 
 // filter name ends
 static void se_StripNameEnds( tString & name )
 {
-    se_StripMatchingEnds( name, se_IsSpace, se_IsInvalidNameEnd );
+    se_StripMatchingEnds( name, se_IsBlank, se_IsInvalidNameEnd );
 }
 
 // test if a user name is used by anyone else than the passed player
 static bool se_IsNameTaken( tString const & name, ePlayerNetID const * exception )
 {
+    if ( name.Len() <= 1 )
+        return false;
+
     for (int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
     {
         ePlayerNetID * player = se_PlayerNetIDs(i);
@@ -2583,6 +2586,11 @@ static void se_OptionalNameFilters( tString & remoteName )
     // filter colors
     if ( se_filterColorNames )
         remoteName = tColoredString::RemoveColors( remoteName );
+
+    // don't do the fancy stuff on the client, it only makes names on score tables and
+    // console messages go out of sync.
+    if ( sn_GetNetState() == nCLIENT )
+        return;
 
     // strip whitespace
     if ( se_stripNames )
@@ -3220,7 +3228,7 @@ void ePlayerNetID::SpectateAll( bool spectate ){
         ePlayer *local_p=ePlayer::PlayerConfig(i);
         if (local_p)
         {
-            if ( se_VisibleSpectatorsSupported() && local_p->netPlayer )
+            if ( se_VisibleSpectatorsSupported() && bool(local_p->netPlayer) )
             {
                 local_p->netPlayer->spectating_ = spectate || local_p->spectate;
 

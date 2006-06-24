@@ -651,7 +651,7 @@ public:
 bool ANET_ListenOn( char * hostname, int net_hostport,  nSocketListener::SocketArray & sockets, bool & onesocketonly, bool & relaxed, bool & ignoreErrors )
 {
     // skip whitespace
-    while ( isspace( *hostname ) )
+    while ( isblank( *hostname ) )
         hostname ++;
 
     // quit silently on empty hostname
@@ -693,7 +693,7 @@ bool ANET_Listen (bool state, int net_hostport, const tString & net_hostip, nSoc
         size_t lastpos = 0;            // position where the current IP starts
         for ( size_t pos = 0; pos < ips.Size(); ++pos )
         {
-            if (isspace(ips[pos]))
+            if (isblank(ips[pos]))
             {
                 ips[pos] = '\0';
                 if ( pos > lastpos )

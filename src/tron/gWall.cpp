@@ -1677,7 +1677,7 @@ void gNetPlayerWall::PartialCopyIntoGrid(eGrid *grid){
     grid->Check();
 #endif
 
-    if(griddedid<0 && this->cycle_ && !preliminary ){
+    if(griddedid<0 && bool(this->cycle_) && !preliminary ){
 
         // just copy the current edge into the grid
         if ( this->edge_ ){

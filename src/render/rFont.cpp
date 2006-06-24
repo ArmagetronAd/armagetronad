@@ -208,8 +208,8 @@ public:
     float GetWidth(tString const &str, float height) {
         if(sr_fontType == 1) {
             return height*(height*sr_screenHeight < sr_bigFontThresholdHeight ? .41 : .5)*str.size();
-	}
-	return GetFont(height).Advance(str.c_str())/sr_screenWidth*2.;
+        }
+        return GetFont(height).Advance(str.c_str())/sr_screenWidth*2.;
     }
     void Render(tString const &str, float height, tCoord const &where) {
         if (sr_fontType != 0) {
@@ -601,13 +601,13 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
             }
         }
         // break line if next space character is too far away
-        if ( !trouble && multiline && (isspace(*c) || lastIsNewline) )
+        if ( !trouble && multiline && (isblank(*c) || lastIsNewline) )
         {
             lastIsNewline = false;
             // count number of nonblank characters following
             char const * nextSpace = c+1;
             int wordLen = 0;
-            while ( *nextSpace != '\0' && !isspace(*nextSpace) )
+            while ( *nextSpace != '\0' && !isblank(*nextSpace) )
             {
                 if (*nextSpace=='0' && strlen(nextSpace)>=8 && nextSpace[1]=='x' && colorMode != COLOR_IGNORE )
                 {

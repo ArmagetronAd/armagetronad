@@ -109,10 +109,11 @@ static bool st_ReadEscapeSequence( char & c, std::istream & s )
 
 std::istream & operator>> (std::istream &s,tString &x)
 {
-    char c=' ';
     x.Clear();
 
-    while(isspace(c) && s.good() && !s.eof()) c=s.get();
+    std::ws(s);
+
+    char c=s.get();
 
     // check if the string is quoted
     bool quoted = false;
@@ -124,7 +125,7 @@ std::istream & operator>> (std::istream &s,tString &x)
         c = s.get();
     }
 
-    while((quoted || !isspace(c)) && s.good() && !s.eof()){
+    while((quoted || !( isblank(c) || c == '\n' || c == '\r' ) ) && s.good() && !s.eof()){
         x += c;
         c=s.get();
 
@@ -404,7 +405,7 @@ void tString::ReadLine( std::istream & s, bool enableEscapeSequences )
 {
     char c=' ';
     Clear();
-    while(c!='\n' && c!='\r' && isspace(c) &&  s.good() && !s.eof()){
+    while(c!='\n' && c!='\r' && isblank(c) &&  s.good() && !s.eof()){
         c=s.get();
     }
 
@@ -601,7 +602,7 @@ tString tString::LTrim( void ) const
 
     for( size_t i = 0; i<size(); i++ )
     {
-        if( !isspace((*this)[i]) )
+        if( !isblank((*this)[i]) )
             trim = false;
         if( !trim)
             toReturn << (*this)[i];
@@ -868,7 +869,7 @@ tString tString::StripWhitespace( void ) const
 
     for( int i = 0; i<=Len()-2; i++ )
     {
-        if( !isspace((*this)(i)) )
+        if( !isblank((*this)(i)) )
             toReturn << (*this)(i);
     }
     return toReturn;
@@ -1678,7 +1679,7 @@ bool tString::Convert( int & target, size_type startPos ) const
     s >> target;
 
     // return failure condition
-    return !s.fail() && s.eof() || isspace(s.get());
+    return !s.fail() && s.eof() || isblank(s.get());
 }
 
 bool tString::Convert( REAL & target, size_type startPos ) const
@@ -1691,7 +1692,7 @@ bool tString::Convert( REAL & target, size_type startPos ) const
     s >> target;
 
     // return failure condition
-    return !s.fail() && s.eof() || isspace(s.get());
+    return !s.fail() && s.eof() || isblank(s.get());
 }
 
 #endif
