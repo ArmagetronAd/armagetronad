@@ -410,12 +410,12 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
     while (*c!='\0')
     {
         // break line if next space character is too far away
-        if ( isspace(*c) )
+        if ( isblank(*c) )
         {
             // count number of nonblank characters following
             char const * nextSpace = c+1;
             int wordLen = 0;
-            while ( *nextSpace != '\0' && !isspace(*nextSpace) )
+            while ( *nextSpace != '\0' && !isblank(*nextSpace) )
             {
                 if (*nextSpace=='0' && strlen(nextSpace)>=8 && nextSpace[1]=='x' && colorMode != COLOR_IGNORE )
                 {

@@ -115,17 +115,19 @@ void tString::ReadLine(std::istream &s, bool enableEscapeSequences ){
     char c=' ';
     int i=0;
     SetLen(0);
-    while(c!='\n' && c!='\r' && isspace(c) &&  s.good() && !s.eof()){
+
+    // note: this is not the same as std::ws(s), we're stopping at newlines.
+    while(c!='\n' && c!='\r' && isblank(c) &&  s.good() && !s.eof()){
         c=s.get();
     }
-
     s.putback(c);
+
     c='x';
 
     while( true )
     {
         c=s.get();
-     
+
         // notice end of line or file
         if ( c=='\n' || c=='\r' || !s.good() || s.eof())
             break;
@@ -226,11 +228,13 @@ std::ostream & operator<< (std::ostream &s,const tString &x){
 }
 
 std::istream & operator>> (std::istream &s,tString &x){
-    char c=' ';
     int i=0;
     x.SetLen(0);
 
-    while(isspace(c) && s.good() && !s.eof()) c=s.get();
+    // eat whitespace
+    std::ws(s);
+
+    char c=s.get();
 
     // check if the string is quoted
     bool quoted = false;
@@ -242,7 +246,7 @@ std::istream & operator>> (std::istream &s,tString &x){
         c = s.get();
     }
 
-    while((quoted || !isspace(c)) && s.good() && !s.eof()){
+    while((quoted || !( isblank(c) || c == '\n' || c == '\r') ) && s.good() && !s.eof()){
         x[i++]=c;
         c=s.get();
 
@@ -1371,7 +1375,7 @@ tString tString::StripWhitespace( void )
 
     for( int i = 0; i<=Len()-2; i++ )
     {
-        if( !isspace((*this)(i)) )
+        if( !isblank((*this)(i)) )
             toReturn << (*this)(i);
     }
     return toReturn;

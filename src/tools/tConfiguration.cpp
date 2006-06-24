@@ -211,7 +211,7 @@ void tConfItemBase::SaveAll(std::ostream &s){
 int tConfItemBase::EatWhitespace(std::istream &s){
     int c=' ';
 
-    while(isspace(c) &&
+    while(isblank(c) &&
             c!='\n'    &&
             s.good()  &&
             !s.eof())
@@ -362,7 +362,7 @@ static bool s_Veto( tString line_in, std::vector< tString > const & vetos )
 
     // eat whitespace at the beginning
     char const * test = line_in;
-    while( isspace(*test) )
+    while( isblank(*test) )
         test++;
 
     // skip "LAST_"

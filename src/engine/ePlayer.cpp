@@ -2382,7 +2382,7 @@ static void se_StripMatchingEnds( tString & stripper, TestCharacter & beginTeste
 //}
 
 // function wrapper for what may be a macro
-static bool se_IsSpace( char c )
+static bool se_IsBlank( char c )
 {
     return isblank( c );
 }
@@ -2396,12 +2396,15 @@ static bool se_IsInvalidNameEnd( char c )
 // filter name ends
 static void se_StripNameEnds( tString & name )
 {
-    se_StripMatchingEnds( name, se_IsSpace, se_IsInvalidNameEnd );
+    se_StripMatchingEnds( name, se_IsBlank, se_IsInvalidNameEnd );
 }
 
 // test if a user name is used by anyone else than the passed player
 static bool se_IsNameTaken( tString const & name, ePlayerNetID const * exception )
 {
+    if ( name.Len() <= 1 )
+        return false;
+
     for (int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
     {
         ePlayerNetID * player = se_PlayerNetIDs(i);
