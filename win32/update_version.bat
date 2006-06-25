@@ -24,8 +24,7 @@ IF "%HAVE_PYTHON%"=="0" (
 	SET DATESTAMP=SVN
 )
 
-SET MINOR_VERSION=%MINOR_VERSION_TPL:
-DATE=%%DATESTAMP%
+SET MINOR_VERSION=%MINOR_VERSION_TPL:DATE=%%DATESTAMP%
 
 IF EXIST %AA_DIR%\.svn (
 	echo.
@@ -70,14 +69,17 @@ IF EXIST %AA_DIR%\.svn (
 )
 echo.
 echo.
+
+echo %REV%
+IF NOT DEFINED REV SET REV=%DATESTAMP:~4%
+
 echo *** generating version.h...
-echo #define MAJOR_VERSION %MAJOR_VERSION:.=,%,%DATESTAMP:~4% > %HELP_FILE%
+echo #define MAJOR_VERSION %MAJOR_VERSION:.=,%,%REV% > %HELP_FILE%
 echo #define MINOR_VERSION %MINOR_VERSION% >> %HELP_FILE%
 echo #define VERSION "%MAJOR_VERSION%%MINOR_VERSION%" >> %HELP_FILE%
 echo #define BUILD_DATE "%DATESTAMP%" >> %HELP_FILE%
 
-echo. - Detected:
-Armagetron Advanced %MAJOR_VERSION%%MINOR_VERSION%
+echo. - Detected: Armagetron Advanced %MAJOR_VERSION%%MINOR_VERSION%
 echo.
 echo.
 echo Do you want to update 'version.h' ? (requires full rebuild afterwards)
