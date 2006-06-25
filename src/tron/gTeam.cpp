@@ -178,7 +178,7 @@ public:
         for (i = 0; i<eTeam::teams.Len(); i++ )
         {
             eTeam *team = eTeam::teams(i);
-            if ( team != player->NextTeam() && team->PlayerMayJoin( player ) )
+            if ( team != player->NextTeam() && !team->PlayerMayJoin( player ) )
             {
                 items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team );
             }
