@@ -33,6 +33,8 @@ uWebInterface by Dave Fancella
 
 #ifdef DEDICATED
 
+#include "tString.h"
+
 class uWebInterface {
 
 public:
@@ -52,6 +54,14 @@ public:
     static int mSocket;
 private:
     static bool isInited;
+    static tString GetHeaders();
+
+    static tString GetPageHeader(const char* title);
+
+    static tString GetPageFooter();
+
+    static bool AllowAdmin();
+
     uWebInterface();
     ~uWebInterface();
 };

@@ -558,7 +558,8 @@ int main(int argc,char **argv){
         if ( commandLineAnalyzer.dont_use_directx_ )
             use_directx                       = false;
 
-        gAICharacter::LoadAll(tString( "aiplayers.cfg" ) );
+        //gAICharacter::LoadAll(tString( "aiplayers.cfg" ) );
+        gAICharacter::LoadAll( aiPlayersConfig );
 
         sg_LanguageInit();
         atexit(tLocale::Clear);

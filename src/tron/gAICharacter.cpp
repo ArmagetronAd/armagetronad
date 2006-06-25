@@ -27,9 +27,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "gAICharacter.h"
 #include "tDirectories.h"
+#include "tConfiguration.h"
 #include "tRecorder.h"
 #include <fstream>
 #include <sstream>
+
+tString aiPlayersConfig("aiplayers.cfg");
+static tSettingItem<tString> aifile("AI_CHARACTER_FILE", aiPlayersConfig);
 
 tArray<gAICharacter> gAICharacter::s_Characters(0);
 

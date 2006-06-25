@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE Resource SYSTEM "map-0.2.8_beta3.dtd">
+<Resource type="aamap" name="LucifersMansion" version="0.2.6" author="Lucifer" category="ThreePlayerFortress">
+    <!-- This map is based on a map Your_mom wrote originally, but the credit isn't in the resource tag to
+         avoid having a filepath that includes commas and spaces -->
+    <Map version="0.2.8">
+        <World>
+            <Field>
+                <Axes number="4"/>
+		        <!--Spawn x="370" y="50" angle="90" /-->
+		        <Spawn x="380" y="500" angle="-90" />
+                <Spawn x="50" y="170" angle="0" />
+                <Spawn x="700" y="180" angle="180" />
+            <!-- Bounding Wall -->
+            <Wall height="100">
+                <Point x="0" y="0" />
+                <Point x="750" y="0" />
+                <Point x="750" y="550" />
+                <Point x="0" y="550" />
+                <Point x="0" y="0" />
+            </Wall>
+            
+            <!-- Lower Right Corner -->
+            <Wall height="50">
+                <!-- C-1a -->
+                <Point x="550" y="100" />
+                <Point x="625" y="100" />
+                <Point x="625" y="25" />
+                <Point x="550" y="25" />
+                <Point x="550" y="100" />
+            </Wall>
+            <Wall height="50">
+                <!-- C-1b -->
+                <Point x="650" y="100" />
+                <Point x="725" y="100" />
+                <Point x="725" y="25" />
+                <Point x="650" y="25" />
+                <Point x="650" y="100" />
+            </Wall>
+            <Wall height="50">
+                <!-- A-1 -->
+                <Point x="450" y="100" />
+                <Point x="450" y="25" />
+                <Point x="500" y="25" />
+                <Point x="500" y="50" />
+                <Point x="525" y="50" />
+                <Point x="525" y="100" />
+                <Point x="450" y="100" />
+            </Wall>
+
+            <!-- Lower Left Corner -->
+            <Wall height="50">
+                <!-- B-1a -->
+                <Point x="100" y="100" />
+                <Point x="100" y="25" />
+                <Point x="25" y="25" />
+                <Point x="25" y="100" />
+                <Point x="100" y="100" />
+            </Wall>
+            <Wall height="50">
+                <!-- B-1b -->
+                <Point x="200" y="100" />
+                <Point x="200" y="25" />
+                <Point x="125" y="25" />
+                <Point x="125" y="100" />
+                <Point x="200" y="100" />
+            </Wall>
+            <Wall height="50">
+                <!-- A-1 -->
+         		       <Point x="300" y="100" />
+         		       <Point x="300" y="25" />
+         		       <Point x="250" y="25" />
+         		       <Point x="250" y="50" />
+         		       <Point x="225" y="50" />
+         		       <Point x="225" y="100" />
+         		       <Point x="300" y="100" />
+			</Wall>
+
+            <!-- Upper-middle Right -->
+            <Wall height="50">
+                <!-- C1a -->
+                <Point x="550" y="250" />
+                <Point x="625" y="250" />
+                <Point x="625" y="325" />
+                <Point x="550" y="325" />
+                <Point x="550" y="250" />
+            </Wall>
+            <Wall height="50">
+                <!-- C1b -->
+                <Point x="650" y="250" />
+                <Point x="725" y="250" />
+                <Point x="725" y="325" />
+                <Point x="650" y="325" />
+                <Point x="650" y="250" />
+            </Wall>
+            <Wall height="7">
+                <!-- C2a -->
+                <Point x="550" y="350" />
+                <Point x="600" y="350" />
+                <Point x="600" y="400" />
+                <Point x="550" y="400" />
+                <Point x="550" y="350" />
+            </Wall>
+            <Wall height="7">
+                <!-- C2b -->
+                <Point x="625" y="350" />
+                <Point x="725" y="350" />
+                <Point x="725" y="400" />
+                <Point x="625" y="400" />
+                <Point x="625" y="350" />
+            </Wall>
+            <Wall height="50">
+                <!-- A1 -->
+                <Point x="450" y="250" />
+                <Point x="450" y="325" />
+                <Point x="500" y="325" />
+                <Point x="500" y="300" />
+                <Point x="525" y="300" />
+                <Point x="525" y="250" />
+                <Point x="450" y="250" />
+            </Wall>
+            <Wall height="50">
+                <!-- A2 -->
+                <Point x="450" y="350" />
+                <Point x="450" y="425" />
+                <Point x="525" y="425" />
+                <Point x="525" y="350" />
+                <Point x="450" y="350" />
+            </Wall>
+
+            <!-- Upper Right -->
+            <Wall height="50">
+                <!-- A3 -->
+                <Point x="450" y="450" />
+                <Point x="450" y="525" />
+                <Point x="525" y="525" />
+                <Point x="525" y="450" />
+                <Point x="450" y="450" />
+            </Wall>
+            <Wall height="7">
+                <!-- C3a -->
+                <Point x="550" y="425" />
+                <Point x="600" y="425" />
+                <Point x="600" y="525" />
+                <Point x="550" y="525" />
+                <Point x="550" y="425" />
+            </Wall>
+            <Wall height="7">
+                <!-- C3b -->
+                <Point x="625" y="425" />
+                <Point x="725" y="425" />
+                <Point x="725" y="525" />
+                <Point x="625" y="525" />
+                <Point x="625" y="425" />
+            </Wall>
+            
+            <!-- Upper-middle Left -->
+            <Wall height="50">
+                <!-- B1a -->
+                <Point x="100" y="250" />
+                <Point x="100" y="325" />
+                <Point x="25" y="325" />
+                <Point x="25" y="250" />
+                <Point x="100" y="250" />
+            </Wall>
+            <Wall height="50">
+                <!-- B1b -->
+                <Point x="200" y="250" />
+                <Point x="200" y="325" />
+                <Point x="125" y="325" />
+                <Point x="125" y="250" />
+                <Point x="200" y="250" />
+            </Wall>
+            <Wall height="7">
+                <!-- B2a -->
+                <Point x="125" y="350" />
+                <Point x="25" y="350" />
+                <Point x="25" y="400" />
+                <Point x="125" y="400" />
+                <Point x="125" y="350" />
+            </Wall>
+            <Wall height="7">
+                <!-- B2b -->
+                <Point x="200" y="350" />
+                <Point x="150" y="350" />
+                <Point x="150" y="400" />
+                <Point x="200" y="400" />
+                <Point x="200" y="350" />
+            </Wall>
+            <Wall height="50">
+                <!-- A1 -->
+                <Point x="300" y="250" />
+                <Point x="300" y="325" />
+                <Point x="250" y="325" />
+                <Point x="250" y="300" />
+                <Point x="225" y="300" />
+                <Point x="225" y="250" />
+                <Point x="300" y="250" />
+            </Wall>
+            <Wall height="50">
+                <!-- A2 -->
+                <Point x="300" y="350" />
+                <Point x="300" y="425" />
+                <Point x="225" y="425" />
+                <Point x="225" y="350" />
+                <Point x="300" y="350" />
+            </Wall>
+
+            <!-- Upper Left -->
+            <Wall height="50">
+                <!-- A3 -->
+                <Point x="300" y="450" />
+                <Point x="300" y="525" />
+                <Point x="225" y="525" />
+                <Point x="225" y="450" />
+                <Point x="300" y="450" />
+            </Wall>
+            <Wall height="7">
+                <!-- B3a -->
+                <Point x="125" y="425" />
+                <Point x="25" y="425" />
+                <Point x="25" y="525" />
+                <Point x="125" y="525" />
+                <Point x="125" y="425" />
+            </Wall>
+            <Wall height="7">
+                <!-- B3b -->
+                <Point x="200" y="425" />
+                <Point x="150" y="425" />
+                <Point x="150" y="525" />
+                <Point x="200" y="525" />
+                <Point x="200" y="425" />
+            </Wall>
+            
+            <!-- Zone A - Top -->
+            <Zone effect="fortress">
+                <ShapeCircle radius="50" growth="0">
+                    <Point x="375" y="475" />
+                </ShapeCircle>
+            </Zone>
+
+            <!-- Zone B - Left -->
+            <Zone effect="fortress">
+                <ShapeCircle radius="50" growth="0">
+                    <Point x="75" y="175" />
+                </ShapeCircle>
+            </Zone>
+            
+            <!-- Zone C - Right -->
+            <Zone effect="fortress">
+                <ShapeCircle radius="50" growth="0">
+                    <Point x="675" y="175" />
+                </ShapeCircle>
+            </Zone>
+		</Field>
+    </World>
+</Map>
+</Resource>

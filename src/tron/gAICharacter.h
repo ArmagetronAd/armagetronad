@@ -34,6 +34,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // definition of the different AI characters that can be activated
 
+extern tString aiPlayersConfig;
+
 #define AI_PROPERTIES 13
 
 class gAICharacter{

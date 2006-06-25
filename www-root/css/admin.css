@@ -3,8 +3,43 @@ body {
     color: black;
 }
 
-div.mainCopy {
-    border: black inset 1px;
+h1 {
+    font-size: 110%;
+    margin-left: 5%;
 }
 
+h2 {
+    font-size: 110%;
+    margin-left: 5%;
+}
 
+h3 {
+    font-size: 110%;
+    margin-left: 5%;
+}
+
+h4 {
+    font-size: 110%;
+    margin-left: 5%;
+}
+
+h5 {
+    font-size: 110%;
+    margin-left: 5%;
+}
+
+h6 {
+    font-size: 110%;
+    margin-left: 5%;
+}
+
+div.mainContent {
+    border: black inset 1px;
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+div.mainContent p {
+    margin-left: 10%;
+    margin-right: 10%;
+}
