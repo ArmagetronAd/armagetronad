@@ -1,28 +1,28 @@
 /*
-
+ 
 *************************************************************************
-
+ 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
 Copyright (C) 2000  Manuel Moos (manuel@moosnet.de)
-
+ 
 **************************************************************************
-
+ 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
 of the License, or (at your option) any later version.
-
+ 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
+ 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
   
 ***************************************************************************
-
+ 
 */
 
 #include "eTeam.h"
@@ -86,9 +86,11 @@ static nSettingItem<bool> se_newTeamAllowed("NEW_TEAM_ALLOWED", newTeamAllowed )
 
 static bool se_allowTeamNameColor  = true; // allow to name a team after a color
 static bool se_allowTeamNamePlayer = true; // allow to name a team after the leader
+static bool se_allowTeamNameLeader = false; // allow to name a team by it's leader
 
 static tSettingItem<bool> se_allowTeamNameColorConfig("ALLOW_TEAM_NAME_COLOR", se_allowTeamNameColor );
 static tSettingItem<bool> se_allowTeamNamePlayerConfig("ALLOW_TEAM_NAME_PLAYER", se_allowTeamNamePlayer );
+static tSettingItem<bool> se_allowTeamNameCustomConfig("ALLOW_TEAM_NAME_LEADER", se_allowTeamNameLeader );
 
 // update all internal information
 void eTeam::UpdateStaticFlags()
@@ -205,7 +207,7 @@ void eTeam::UpdateAppearance()
                 if ( oldest->IsHuman() )
                 {
                     // did the player set a custom teamname ?
-                    if (oldest->teamname.Len()>1)
+                    if (se_allowTeamNameLeader && oldest->teamname.Len()>1)
                     {
                         // Use player's custom teamname
                         updateName = oldest->teamname;
@@ -256,7 +258,7 @@ void eTeam::UpdateAppearance()
     else
     {
         // empty team
-        name = tOutput("$team_empty");
+        updateName = tOutput("$team_empty");
         r = g = b = 7;
     }
 
@@ -284,23 +286,6 @@ void eTeam::UpdateAppearance()
         }
         name = updateName;
     }
-
-    /* z-man: no longer required
-    // make the oldest player spawn in front
-    if ( oldest )
-    {
-        int max = players.Len()-1;
-        int real = oldest->teamListID;
-        if ( real < max )
-        {
-            players(max)->teamListID = real;
-            oldest->teamListID = max;
-
-            players(real) = players(max);
-            players(max) = oldest;
-        }
-    }
-    */
 
     if ( nSERVER == sn_GetNetState() )
         RequestSync();

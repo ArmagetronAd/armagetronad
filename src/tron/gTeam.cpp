@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -30,23 +30,42 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ePlayer.h"
 #include "eTeam.h"
 
+static tString se_TeamMenu_Team_Ok("0xffffff");
+static tString se_TeamMenu_Team_Full("0xaaaaaa");
+static tConfItem<tString> se_TeamMenu_Team_Ok_Cfg("TEAM_MENU_COLOR_TEAM_OK",
+        "$team_menu_color_team_ok_help",
+        se_TeamMenu_Team_Ok);
+static tConfItem<tString> se_TeamMenu_Team_Full_Cfg("TEAM_MENU_COLOR_TEAM_FULL",
+        "$team_menu_color_team_full_help",
+        se_TeamMenu_Team_Full);
+
 static tOutput* PrepareTeamText(tOutput* text, eTeam* team, const ePlayerNetID* player, const char* textTemplate)
 {
-    if (team)
-    {
-        text->SetTemplateParameter(1 , team->Name() );
-        text->SetTemplateParameter(2 , team->NumPlayers() );
-        if (team->PlayerMayJoin(player))
-            text->SetTemplateParameter(3, "0x00ff00");
-        else
-            text->SetTemplateParameter(3, "0xff0000");
-    }
-    else
+    // Required for Spectators in display status item
+    if (team==NULL)
     {
         text->SetTemplateParameter(1 , tOutput("$team_empty") );
-        text->SetTemplateParameter(2 , 0 );
-        text->SetTemplateParameter(3 , "0x00ff00" );
+        //TODO Easier detection of/cached number of spectators
+        int spectators = 0;
+        for (int i = se_PlayerNetIDs.Len()-1; i>=0; i--)
+        {
+            ePlayerNetID *p = se_PlayerNetIDs(i);
+            if (p->CurrentTeam()==NULL)
+                spectators++;
+        }
+        text->SetTemplateParameter(2 , spectators);
+        text->SetTemplateParameter(3, "");
+        *text << textTemplate;
+        return text;
     }
+
+    // Handling the $team_join template ;)
+    text->SetTemplateParameter(1 , team->Name() );
+    text->SetTemplateParameter(2 , team->NumPlayers() );
+    if (team->PlayerMayJoin(player))
+        text->SetTemplateParameter(3, se_TeamMenu_Team_Ok);
+    else
+        text->SetTemplateParameter(3, se_TeamMenu_Team_Full);
     *text << textTemplate << "0xffffff";
     return text;
 }
@@ -57,7 +76,7 @@ class gMenuItemPlayerTeam: public uMenuItem
     eTeam*			team;
 public:
     gMenuItemPlayerTeam(uMenu *M,ePlayerNetID* p, eTeam* t )
-            : uMenuItem( M, tOutput("$team_menu_join_help") ),
+            : uMenuItem( M, tOutput("$team_menu_join_help", t->Name())),
             player ( p ),
             team ( t)
     {
@@ -89,12 +108,56 @@ public:
 
     virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0)
     {
-        DisplayTextSpecial( x, y, tOutput("$team_menu_create"), selected, alpha );
+        DisplayTextSpecial( x, y, se_TeamMenu_Team_Ok+(const char*)tOutput(+"$team_menu_create"), selected, alpha );
     }
 
     virtual void Enter()
     {
         player->CreateNewTeamWish();
+        menu->Exit();
+    }
+};
+
+class gMenuItemSpectate: public uMenuItem
+{
+    ePlayerNetID* 	player;
+public:
+    gMenuItemSpectate( uMenu *M,ePlayerNetID* p )
+            : uMenuItem( M, tOutput("$team_menu_spectate_help") ),
+            player ( p )
+    {
+    }
+
+    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0)
+    {
+        DisplayTextSpecial( x, y, se_TeamMenu_Team_Ok+(const char*)tOutput("$team_menu_spectate"), selected, alpha );
+    }
+
+    virtual void Enter()
+    {
+        player->SetTeamWish(NULL);
+        menu->Exit();
+    }
+};
+
+class gMenuItemAutoSelect: public uMenuItem
+{
+    ePlayerNetID* 	player;
+public:
+    gMenuItemAutoSelect( uMenu *M,ePlayerNetID* p )
+            : uMenuItem( M, tOutput("$team_menu_auto_help") ),
+            player ( p )
+    {
+    }
+
+    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0)
+    {
+        DisplayTextSpecial( x, y, se_TeamMenu_Team_Ok+(const char*)tOutput("$team_menu_auto"), selected, alpha );
+    }
+
+    virtual void Enter()
+    {
+        player->SetDefaultTeam();
         menu->Exit();
     }
 };
@@ -161,36 +224,36 @@ public:
 
     virtual void Enter()
     {
-        int i = 0;
-
         tOutput title;
         title.SetTemplateParameter( 1, player->GetName() );
         title << "$team_menu_player_title";
         uMenu playerMenu( title );
         tArray<uMenuItem*> items;
 
-        if ( player->NextTeam()!=NULL )
+        if ( player->NextTeam()!=NULL)
         {
-            items[0] = tNEW(gMenuItemPlayerTeam) (&playerMenu, player, NULL);
+            items[items.Len()] = tNEW(gMenuItemSpectate) (&playerMenu, player);
         }
 
         // first pass add teams who probably can't be joined
-        for (i = 0; i<eTeam::teams.Len(); i++ )
+        for (int i = 0; i<eTeam::teams.Len(); i++ )
         {
             eTeam *team = eTeam::teams(i);
-            if ( team != player->NextTeam() && !team->PlayerMayJoin( player ) )
+            if ( team && team != player->NextTeam() && !team->PlayerMayJoin( player ) )
             {
                 items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team );
             }
         }
         // second pass add teams who probably can be joined
         // Note: these will appear above the unjoinable ones.
-        for (i = 0; i<eTeam::teams.Len(); i++ )
+        for (int i = 0; i<eTeam::teams.Len(); i++ )
         {
             eTeam *team = eTeam::teams(i);
-            if ( team != player->NextTeam() && team->PlayerMayJoin( player ))
+            if ( team && team != player->NextTeam() && team->PlayerMayJoin( player ))
                 items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team );
         }
+
+        items[items.Len()] = tNEW(gMenuItemAutoSelect) (&playerMenu, player);
 
         if ( /* eTeam::NewTeamAllowed() && */
             !( player->NextTeam() && player->NextTeam()->NumHumanPlayers() == 1 &&
@@ -207,7 +270,7 @@ public:
 
         playerMenu.Enter();
 
-        for ( i = items.Len()-1; i>=0; --i )
+        for ( int i = items.Len()-1; i>=0; --i )
         {
             delete items(i);
         }

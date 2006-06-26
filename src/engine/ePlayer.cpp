@@ -60,7 +60,7 @@ tCONFIG_ENUM( eCamMode );
 tList<ePlayerNetID> se_PlayerNetIDs;
 static ePlayer* se_Players = NULL;
 
-static bool se_assignTeamAutomatically = true;
+bool se_assignTeamAutomatically = true;
 static tSettingItem< bool > se_assignTeamAutomaticallyConf( "AUTO_TEAM", se_assignTeamAutomatically );
 
 static tReferenceHolder< ePlayerNetID > se_PlayerReferences;
@@ -1378,33 +1378,8 @@ void handle_chat(nMessage &m){
                     p->SetTeamname(msg);
                     return;
                 }
-                else if (command == "/teamleave") {
-                    if ( se_assignTeamAutomatically )
-                    {
-                        sn_ConsoleOut("Sorry, does not work with automatic team assignment.\n", p->Owner() );
-                        return;
-                    }
-
-                    eTeam * leftTeam = p->NextTeam();
-                    if ( leftTeam )
-                    {
-                        if ( !leftTeam )
-                            leftTeam = p->CurrentTeam();
-
-                        if ( leftTeam->NumPlayers() > 1 )
-                        {
-                            sn_ConsoleOut( tOutput( "$player_leave_team_wish",
-                                                    tColoredString::RemoveColors(p->GetName()),
-                                                    tColoredString::RemoveColors(leftTeam->Name()) ) );
-                        }
-                        else
-                        {
-                            sn_ConsoleOut( tOutput( "$player_leave_game_wish",
-                                                    tColoredString::RemoveColors(p->GetName()) ) );
-                        }
-                    }
-
-                    p->SetTeamWish(0);
+                else if (command == "/teamleave" || command=="/spectate") {
+                    p->SetTeamWish(NULL);
                     return;
                 }
                 else if (command == "/teamshuffle" || command == "/shuffle") {
@@ -2473,6 +2448,7 @@ void ePlayerNetID::WriteSync(nMessage &m){
 
     m << favoriteNumberOfPlayersPerTeam;
     m << nameTeamAfterMe;
+    //TODO: Only update between rounds
     m << teamname;
 }
 
@@ -2673,6 +2649,7 @@ void ePlayerNetID::ReadSync(nMessage &m){
             else
             {
                 // or replace it by a default value
+                // TODO: VERY BAD NO LOCALISATION // add variable for local user name and localise
                 remoteName = "Player 1";
             }
         }
@@ -3751,6 +3728,12 @@ void ePlayerNetID::SetDefaultTeam( )
     if ( sn_GetNetState() == nCLIENT || !se_assignTeamAutomatically || spectating_ )
         return;
 
+    //    if ( !IsHuman() )
+    //    {
+    //        SetTeam( NULL );
+    //        return;
+    //    }
+
     eTeam* defaultTeam = FindDefaultTeam();
     if (defaultTeam)
         SetTeamWish(defaultTeam);
@@ -3763,23 +3746,20 @@ void ePlayerNetID::SetDefaultTeam( )
 // put a new player into a default team
 eTeam* ePlayerNetID::FindDefaultTeam( )
 {
-    //    if ( !IsHuman() )
-    //    {
-    //        SetTeam( NULL );
-    //        return;
-    //    }
     // find the team with the least number of players on it
     eTeam *min = NULL;
     for ( int i=eTeam::teams.Len()-1; i>=0; --i )
     {
         eTeam *t = eTeam::teams( i );
-        if ( t->IsHuman()  && ( !min || min->NumHumanPlayers() > t->NumHumanPlayers() ) )
+        if ( t->IsHuman() && ( !min || min->NumHumanPlayers() > t->NumHumanPlayers() ) )
             min = t;
     }
 
     if ( min &&
+            // create new teams until minTeams is matched
             eTeam::teams.Len() >= eTeam::minTeams &&
             min->PlayerMayJoin( this ) &&
+            // no new team allowed or not more than favoriteNumberOfPlayers on team
             ( !eTeam::NewTeamAllowed() || ( min->NumHumanPlayers() > 0 && min->NumHumanPlayers() < favoriteNumberOfPlayersPerTeam ) )
        )
     {
@@ -3904,18 +3884,12 @@ void ePlayerNetID::CreateNewTeam()
 
         sn_ConsoleOut( message, Owner() );
 
-        // TODO Check
-        if ( !currentTeam )
-        {
-            // Shouldn't CreateNewTeam just create a team or fail ?
-            // if it can't create a team => just idle?
-            //         //If team==NULL then the player joins NO team (and perhaps can join one later)
-            //	       SetTeamWish(FindDefaultTeam());
-            bool assignBack = se_assignTeamAutomatically;
-            se_assignTeamAutomatically = true;
-            SetDefaultTeam();
-            se_assignTeamAutomatically = assignBack;
-        }
+        // yarrt: Should CreateNewTeam only try to create a team ?
+        // yarrt: yes, let's try
+        // if it can't create a team => just idle?
+        //Old code
+        //if ( !currentTeam )
+        //    SetDefaultTeam();
 
         return;
     }
@@ -3942,6 +3916,33 @@ void ePlayerNetID::SetTeamWish(eTeam* newTeam)
     if (NextTeam()==newTeam)
         return;
 
+    if ( nSERVER ==  sn_GetNetState() && newTeam==NULL && CurrentTeam()!=NULL && NextTeam()!=NULL)
+    {
+        if ( se_assignTeamAutomatically )
+        {
+            sn_ConsoleOut("$no_spectators_allowed", Owner() );
+            return;
+        }
+
+        eTeam * leftTeam = NextTeam();
+        if ( leftTeam )
+        {
+            if ( !leftTeam )
+                leftTeam = CurrentTeam();
+
+            if ( leftTeam->NumPlayers() > 1 )
+            {
+                sn_ConsoleOut( tOutput( "$player_leave_team_wish",
+                                        tColoredString::RemoveColors(GetName()),
+                                        tColoredString::RemoveColors(leftTeam->Name()) ) );
+            }
+            else
+            {
+                sn_ConsoleOut( tOutput( "$player_leave_game_wish",
+                                        tColoredString::RemoveColors(GetName()) ) );
+            }
+        }
+    }
     if ( nCLIENT ==  sn_GetNetState() && Owner() == sn_myNetID )
     {
         nMessage* m = NewControlMessage();
@@ -3975,8 +3976,8 @@ void ePlayerNetID::CreateNewTeamWish()
         m->BroadCast();
     }
     else
+        // create a new team if possible otherwise spectate
         CreateNewTeam();
-
 }
 
 // receive the team control wish
@@ -3989,7 +3990,11 @@ void ePlayerNetID::ReceiveControlNet(nMessage &m)
     {
     case NEW_TEAM:
         {
+            // create a new team if possible otherwise spectate or...
             CreateNewTeam();
+            // if auto_team is enabled join the default team
+            if (se_assignTeamAutomatically && NextTeam()==NULL)
+                SetDefaultTeam();
 
             break;
         }

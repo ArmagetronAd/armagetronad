@@ -63,7 +63,8 @@ class rTextField{
     REAL cheight; // character dimensions
     //    rFont *F;             // the font
     int  x,y,realx;      // current cursor position
-    float nextx;          // x-coordinate the next char should go to
+    float nextx;          // x-coordinate the next char should go to for rendering
+    float currentWidth;   //The current position where the next char will go to for caching
     bool multiline;        // linewrapping enabled?
     FTFont *font;
     sr_fontClass type;    //what is the type of this font?

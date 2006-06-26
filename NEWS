@@ -1,4 +1,7 @@
 Changes since 0.3.0_alpha4941:
+- Added setting to toggle custom teamnames
+- New team menu item: autoselect team mode
+- New team menu item: join spectators
 - Added name hilighting: If your name appears in someone else's chat
   message it gets hilighted in red
 - Added new cockpit data sources: top_score_team and current_score_team

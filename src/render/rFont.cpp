@@ -372,7 +372,7 @@ void sr_ReloadFont(void) {
 rTextField::rTextField(REAL Left,REAL Top,
                        REAL Cheight, sr_fontClass Type)
         :parIndent(0),
-left(Left),top(Top),cheight(Cheight),x(0),y(0),realx(0),nextx(Left),multiline(false),type(Type),cursor(0),cursorPos(0){
+left(Left),top(Top),cheight(Cheight),x(0),y(0),realx(0),nextx(Left),currentWidth(0),multiline(false),type(Type),cursor(0),cursorPos(0){
     if (cheight*sr_screenHeight<18)
         cheight=18/REAL(sr_screenHeight);
 
@@ -581,7 +581,7 @@ int hex_to_int(char c){
 rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
 {
 #ifndef DEDICATED
-    float currentWidth = nextx - left;
+    //float currentWidth = nextx - left;
     float const &maxWidth = width;
     bool lastIsNewline = true;
     bool trouble = false; // Do we have a word that won't fit on a line?

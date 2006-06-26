@@ -135,12 +135,11 @@ enemy_dead_penalty_help           Penalty on the effective time in seconds if th
 enemy_chatbot_penalty_help        Penalty in seconds if the victim is in chatbot state and the enemy influence is just the chatbot evading a wall
 enemy_currenttime_influence_help  If set to 1, not the build time of the encountered wall, but the current time enters the comparison of enemy influences. Arbitrary blending values are allowed.
 enemy_suicide_timeout_help        If no enemy influence can be found for the last this many seconds, a player's death counts as a suicide.
-score_die_help						Amount of points you get for dying
-score_kill_help						Amount of points you get for killing someone
-score_suicide_help					Amount of points you get for stupidly dying
-score_win_help						Amount of points you get for winning a round
-score_deathzone_help				Amount of points you get for hitting the Death Zone
-
+score_die_help                      Amount of points you get for dying
+score_kill_help                     Amount of points you get for killing someone
+score_suicide_help                  Amount of points you get for stupidly dying
+score_win_help                      Amount of points you get for winning a round
+score_deathzone_help                Amount of points you get for hitting the Death Zone
 sp_score_win_help			What you get for winning a round in single player mode
 sp_walls_stay_up_delay_help	Number of seconds the walls stay up after a player died; negative values will keep them up forever.
 sp_walls_length_help		Length of the cycle walls in meters; negative values will make the walls infinite.
@@ -191,9 +190,11 @@ limit_rounds_help		End the match after this number of rounds
 limit_time_help			End the match after this number of minutes 
 
 auto_team_help          Flag indicating whether players should be put into teams automatically.
+no_spectators_allowed	Sorry, does not work with automatic team assignment.\n
 
 allow_team_name_color_help   Allow a team to be named after a color
 allow_team_name_player_help  Allow a team to be named after the leading player
+allow_team_name_leader_help Set to 1 to allow team leader to set a team, 0 otherwise.
 
 # wall length modification
 cycle_dist_wall_shrink_help        Distance multiplier in wall length calculation. All values are legal. See settings.cfg for full docs.
@@ -965,8 +966,6 @@ input_music_volume_up_help  Increases the volume of the music
 input_music_volume_down_text Volume Down
 input_music_volume_down_help Decreases the volume of the music
 
-
-
 #********************************************
 #********************************************
 #********************************************
@@ -1538,13 +1537,21 @@ team_menu_player_title		Choose team for \1
 team_menu_player_help		Lets this player make team related decicions
 
 team_menu_join			\3join \1 (\2)
-team_menu_join_help		Let the current player join the specified team
+team_menu_join_help		Select if you wan to join team \1 if possible otherwise you join as soon as possible.
+
+# values of these "configuration items" are inserted in "\3" at team_menu_join 
+team_menu_color_team_full_help	Allows to change the prefix/color for unjoinable teams
+team_menu_color_team_ok_help	Allows to change the prefix/color for joinable teams
 
 team_menu_info_current_team	Current team: \1
 team_menu_info_next_team	Next team: \1
 
-team_menu_create		create new team/join any
-team_menu_create_help		Creates a new team and lets the current player join it, or, if that is not possible, joins any team.
+team_menu_create        create new team
+team_menu_create_help   Select if you want to have your own new team.
+team_menu_auto          join autoselected team
+team_menu_auto_help     Selects the smallest team or creates a new team for you.
+team_menu_spectate      join spectators
+team_menu_spectate_help Select if you only want to chat.
 
 team_owned_by			\1's team
 team_ai					\1's AI team
@@ -2047,11 +2054,11 @@ player_joins_team_noex  \1 wants to play for a team that ceased to exist, ignori
 player_leave_team_wish  \1 wants to leave \2 on the next respawn.\n
 player_leave_game_wish  \1 does not want to play next round.\n
 player_joins_team_start \1 0x7fff7fplays for \2.\n
-#player_joins_team_now   \1 0x7fff7fnow plays for \2.\n
+#player_joins_team_now  \1 0x7fff7fnow plays for \2.\n
 player_changes_team     \1 0x7f7fffswitches from \3 to \2.\n
 player_leaves_team		\1 0xff7f7fleft \2.\n
 player_creates_team		\1 founded \2.\n
-player_nocreate_team		\1 cannot currently create a new team.\n
+player_nocreate_team	\1 cannot currently create a new team.\n
 player_nojoin_team		\1 cannot currently join \2.\n
 player_not_on_team      You are not on a team.\n
 team_renamed			\1 renamed its team to \2.\n
@@ -2339,7 +2346,6 @@ texture_error_filenotfound_title  Texture not found.
 #sound_error_filenotfound	Sound file \1 not found. Have you called \g from the right directory?
 #sound_error_unsupported	Sound file \1 has unsupported format. Sorry!
 sound_error_unknown			File \1 could not be loaded: \2
-
 
 
 #********************************************
