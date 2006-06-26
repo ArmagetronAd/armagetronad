@@ -20,7 +20,6 @@
 					<Add option="-W" />
 					<Add option="-DNDEBUG" />
 					<Add option="-DDIRTY" />
-					<Add option="-DDONTUSEMEMMANAGER" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -43,7 +42,6 @@
 					<Add option="-W" />
 					<Add option="-g" />
 					<Add option="-DDEBUG" />
-					<Add option="-DDONTUSEMEMMANAGER" />
 				</Compiler>
 				<Linker>
 					<Add library="..\..\..\winlibs\build\debug\libSDL_mixer.a" />
@@ -80,6 +78,7 @@
 			<Add option="-D_WINDOWS" />
 			<Add option="-D_MBCS" />
 			<Add option="-DNO_SOCKLEN_T" />
+			<Add option="-DDONTUSEMEMMANAGER" />
 			<Add directory="..\..\src" />
 			<Add directory="..\..\src\engine" />
 			<Add directory="..\..\src\engine\sound" />

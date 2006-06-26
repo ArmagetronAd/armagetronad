@@ -18,7 +18,6 @@
 					<Add option="-O2" />
 					<Add option="-W" />
 					<Add option="-DNDEBUG" />
-					<Add option="-DDONTUSEMEMMANAGER" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -52,7 +51,6 @@
 					<Add option="-g" />
 					<Add option="-DNDEBUG" />
 					<Add option="-DDEBUG" />
-					<Add option="-DDONTUSEMEMMANAGER" />
 				</Compiler>
 			</Target>
 		</Build>
