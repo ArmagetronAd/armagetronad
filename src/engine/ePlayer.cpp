@@ -2436,10 +2436,10 @@ static void se_OptionalNameFilters( tString & remoteName )
     if ( se_filterColorNames )
         remoteName = tColoredString::RemoveColors( remoteName );
 
-	// don't do the fancy stuff on the client, it only makes names on score tables and
-	// console messages go out of sync.
-	if ( sn_GetNetState() == nCLIENT )
-		return;
+    // don't do the fancy stuff on the client, it only makes names on score tables and
+    // console messages go out of sync.
+    if ( sn_GetNetState() == nCLIENT )
+        return;
 
     // strip whitespace
     if ( se_stripNames )
