@@ -415,7 +415,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
             // count number of nonblank characters following
             char const * nextSpace = c+1;
             int wordLen = 0;
-            while ( *nextSpace != '\0' && !isblank(*nextSpace) )
+            while ( *nextSpace != '\0' && *nextSpace != '\n' && !isblank(*nextSpace) )
             {
                 if (*nextSpace=='0' && strlen(nextSpace)>=8 && nextSpace[1]=='x' && colorMode != COLOR_IGNORE )
                 {
