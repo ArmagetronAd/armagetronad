@@ -2831,7 +2831,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
                     // clamp it, high fluctuations are the player's own problem
                     if ( varianceTolerance > tolerance )
                         varianceTolerance = tolerance;
-                    tolerance = varianceTolerance;
+                    tolerance += varianceTolerance;
                 }
 
                 // if time has not progressed beyond tolerance, protection may be in effect
