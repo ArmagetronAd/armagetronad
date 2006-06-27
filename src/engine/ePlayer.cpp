@@ -3084,10 +3084,13 @@ void ePlayerNetID::Update(){
 
     // update team assignment
     bool assigned = true;
-    while ( assigned )
+    while ( assigned && sn_GetNetState() != nCLIENT )
     {
         assigned = false;
-        for(i=se_PlayerNetIDs.Len()-1;i>=0;i--)
+
+        // start with the players that came in earlier
+        int players = se_PlayerNetIDs.Len();
+        for( i=0; i<players; ++i )
         {
             ePlayerNetID* player = se_PlayerNetIDs(i);
 
@@ -3099,6 +3102,32 @@ void ePlayerNetID::Update(){
                 player->UpdateTeam();
                 if ( player->NextTeam() == player->CurrentTeam() )
                     assigned = true;
+            }
+        }
+
+        // assign players that are not currently on a team, but want to, to any team. Start with the late comers here.
+        if ( !assigned )
+        {
+            for( i=players-1; i>=0; --i )
+            {
+                ePlayerNetID* player = se_PlayerNetIDs(i);
+
+                // if the player is not currently on a team, but wants to join a specific team, let it join any, but keep the wish stored
+                if ( player->NextTeam() && !player->CurrentTeam() )
+                {
+                    eTeam * wish = player->NextTeam();
+                    bool assignBack = se_assignTeamAutomatically;
+                    se_assignTeamAutomatically = true;
+                    player->FindDefaultTeam();
+                    se_assignTeamAutomatically = assignBack;
+                    player->SetTeamForce( wish );
+
+                    if ( player->CurrentTeam() )
+                    {
+                        assigned = true;
+                        break;
+                    }
+                }
             }
         }
     }
