@@ -663,8 +663,6 @@ protected:
 
     void load_Name(std::istream &s,int i){
         std::ws( s );
-        char c=' ';
-        s.get(c);
 
         // read and filter name
         tString name;
