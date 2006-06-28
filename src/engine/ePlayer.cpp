@@ -2477,6 +2477,23 @@ static void se_OptionalNameFilters( tString & remoteName )
             whitespace=newWhitespace;
         }
     }
+
+    // zero strings or color code only strings are illegal
+    if ( !IsLegalPlayerName( remoteName ) )
+    {
+        tString oldName = remoteName;
+
+        // revert to old name if possible
+        if ( IsLegalPlayerName( oldName ) )
+        {
+            remoteName = oldName;
+        }
+        else
+        {
+            // or replace it by a default value
+            remoteName = "Player 1";
+        }
+    }
 }
 
 void ePlayerNetID::ReadSync(nMessage &m){
@@ -2501,8 +2518,6 @@ void ePlayerNetID::ReadSync(nMessage &m){
 
     // name handling
     {
-        tString oldName = remoteName;
-
         // read and shorten name, but don't update it yet
         m >> remoteName;
 
@@ -2510,21 +2525,6 @@ void ePlayerNetID::ReadSync(nMessage &m){
         se_OptionalNameFilters( remoteName );
 
         se_CutString( remoteName, 16 );
-
-        // zero strings or color code only strings are illegal
-        if ( !IsLegalPlayerName( remoteName ) )
-        {
-            // revert to old name if possible
-            if ( IsLegalPlayerName( oldName ) )
-            {
-                remoteName = oldName;
-            }
-            else
-            {
-                // or replace it by a default value
-                remoteName = "Player 1";
-            }
-        }
     }
 
     // directly apply name changes sent from the server, they are safe.
