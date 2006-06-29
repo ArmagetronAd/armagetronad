@@ -441,8 +441,71 @@
             </Foreground>
         </BarGauge>
 	<Map camera="*" viewport="top" toggle="1">
-	    <Position x="0" y="-.25" />
-	    <Size height=".75" width="0.7" />
+	    <Position x="0" y="-.23" />
+	    <Size height=".7" width="0.7" />
 	</Map>
+        <BarGauge camera="*">
+            <DataSet>
+		<AtomicData field="source" source="player_acceleration" />
+		<AtomicData field="minimum" source="0" />
+		<AtomicData field="maximum" source="10" />
+	    </DataSet>
+            <Position x=".35" y="-1." />
+            <Size height="0.07" width="0.35" />
+            <ShowCurrent value="false" />
+            <ShowMaximum value="false" />
+            <ShowMinimum value="false" />
+            <Background>
+                <Solid>
+                    <Color r="0." g="1." b="0." alpha="0." />
+                </Solid>
+            </Background>
+            <Foreground>
+                <Gradient>
+                    <Color r="1." g="1." b="0." alpha=".5" at="0." />
+                    <Color r="0." g="1." b="0." alpha=".5" at="1." />
+                </Gradient>
+            </Foreground>
+        </BarGauge>
+        <BarGauge camera="*">
+            <DataSet>
+		<AtomicData field="source" source="player_acceleration" />
+		<AtomicData field="minimum" source="-10" />
+		<AtomicData field="maximum" source="0" />
+	    </DataSet>
+            <Position x="-.35" y="-1." />
+            <Size height="0.07" width="0.35" />
+            <ShowCurrent value="false" />
+            <ShowMaximum value="false" />
+            <ShowMinimum value="false" />
+            <Reverse value="false" />
+            <Background>
+                <Gradient>
+                    <Color r="1." g="0." b="0." alpha=".5" at="0." />
+                    <Color r="1." g="1." b="0." alpha=".5" at="1." />
+                </Gradient>
+            </Background>
+            <Foreground>
+                <Solid>
+                    <Color r="0." g="1." b="0." alpha="0." />
+                </Solid>
+            </Foreground>
+        </BarGauge>
+	<Label camera="*" usetemplate="BigText">
+            <DataSet id="accel">
+		<AtomicData source="player_acceleration" />
+	    </DataSet>
+            <Position x=".01" y="-.94" />
+            <Caption location="off">
+                <Text value="Acceleration" />
+            </Caption>
+            <Face>
+                <Table>
+                    <Row>
+                        <Cell><Text value="Acceleration: " /><GameData data="accel" /><Text value=" m/s/s" /></Cell>
+                    </Row>
+                </Table>
+            </Face>
+        </Label>
     </Cockpit>
 </Resource>

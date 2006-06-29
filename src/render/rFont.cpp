@@ -190,14 +190,15 @@ rFont rFont::s_defaultFontSmall("textures/font_s.png",32,5/128.0,9/128.0,1/128.0
 
 #ifndef DEDICATED
 
-static int sr_fontType = 3;
-static tConfItem< int > sr_fontTypeConf( "FONT_TYPE", sr_fontType, &sr_ReloadFont );
+int sr_fontType = sr_fontTexture;
+static tConfItem< int > sr_fontTypeConf( "FONT_TYPE", sr_fontType, &sr_ReloadFont);
 
 static float sr_fontSizeFactor = .9;
 static tConfItem< float > sr_fontSizeFactorConf( "FONT_SIZE_FACTOR", sr_fontSizeFactor, &sr_ReloadFont );
 
 class rFontContainer : std::map<int, FTFont *> {
     FTFont &New(int size);
+    FTFont *Load(tString const &path);
 public:
     void clear() {
         for(iterator i = begin(); i != end(); ++i) {
@@ -206,23 +207,23 @@ public:
         std::map<int, FTFont *>::clear();
     }
     float GetWidth(tString const &str, float height) {
-        if(sr_fontType == 1) {
+        if(sr_fontType == sr_fontPixmap) {
             return height*(height*sr_screenHeight < sr_bigFontThresholdHeight ? .41 : .5)*str.size();
         }
         return GetFont(height).Advance(str.c_str())/sr_screenWidth*2.;
     }
     void Render(tString const &str, float height, tCoord const &where) {
-        if (sr_fontType != 0) {
-            if(sr_fontType >= 3) {
+        if (sr_fontType != sr_fontOld) {
+            if(sr_fontType >= sr_fontTexture) {
                 glPushMatrix();
                 glTranslatef(where.x, where.y, 0.);
                 glScalef(2./sr_screenWidth, 2./sr_screenHeight, 1.);
-                if(sr_fontType == 3) {
+                if(sr_fontType == sr_fontTexture) {
                     glEnable(GL_TEXTURE_2D);
                     glEnable(GL_BLEND);
                     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 }
-                if(sr_fontType == 6) {
+                if(sr_fontType == sr_fontExtruded) {
                     glEnable( GL_DEPTH_TEST);
                     glDisable( GL_BLEND);
                     glEnable(GL_TEXTURE_2D);
@@ -234,7 +235,7 @@ public:
                 glRasterPos2f(where.x, where.y);
             }
             GetFont(height).Render(str.c_str());
-            if(sr_fontType >= 3) {
+            if(sr_fontType >= sr_fontTexture) {
                 glPopMatrix();
             }
         } else {
@@ -264,7 +265,7 @@ public:
         }
     }
     void BBox(tString const &str, float height, tCoord where, float &l, float &b, float &r, float &t) {
-        if(sr_fontType != 0) {
+        if(sr_fontType != sr_fontOld) {
             float rubbish;
             GetFont(height).BBox(str.c_str(), l, b, rubbish, r, t, rubbish);
             l/=sr_screenWidth/2.;
@@ -301,6 +302,30 @@ static tConfItem<int> ufc("USE_CUSTOM_FONT", useCustomFont, &sr_ReloadFont);
 
 static rCallbackBeforeScreenModeChange reloadft(&sr_ReloadFont);
 
+FTFont *rFontContainer::Load(tString const &path) {
+    FTFont *font;
+    switch (sr_fontType) {
+    case sr_fontPixmap:
+        font = new FTGLPixmapFont(path);
+        break;
+    case sr_fontBitmap:
+        font = new FTGLBitmapFont(path);
+        break;
+    case sr_fontPolygon:
+        font = new FTGLPolygonFont(path);
+        break;
+    case sr_fontOutline:
+        font = new FTGLOutlineFont(path);
+        break;
+    case sr_fontExtruded:
+        font = new FTGLExtrdFont(path);
+        reinterpret_cast<FTGLExtrdFont *>(font)->Depth(10.);
+        break;
+    default:
+        font = new FTGLTextureFont(path);
+    }
+    return font;
+}
 FTFont &rFontContainer::New(int size) {
     FTFont *font;
     tString theFontFile("");
@@ -311,51 +336,14 @@ FTFont &rFontContainer::New(int size) {
         theFontFile = "textures/" + fontFile;
         theFontFile = tDirectories::Data().GetReadPath(theFontFile);
     }
+    font = Load(theFontFile);
     //std::cout << "Use custom font: " << useCustomFont << std::endl;
     //std::cout << "The font file: " << theFontFile << std::endl;
-    switch (sr_fontType) {
-    case 1:
-        font = new FTGLPixmapFont(theFontFile);
-        break;
-    case 2:
-        font = new FTGLBitmapFont(theFontFile);
-        break;
-    case 4:
-        font = new FTGLPolygonFont(theFontFile);
-        break;
-    case 5:
-        font = new FTGLOutlineFont(theFontFile);
-        break;
-    case 6:
-        font = new FTGLExtrdFont(theFontFile);
-        reinterpret_cast<FTGLExtrdFont *>(font)->Depth(10.);
-        break;
-    default:
-        font = new FTGLTextureFont(theFontFile);
-    }
     if(font->Error()) {
         std::cerr << "Error while loading font from path '" << theFontFile << "'. Error code: " << font->Error() << std::endl;
         //delete font;
         std::cerr << "Loading default font instead.  Sorry." << std::endl;
-        switch (sr_fontType) {
-        case 1:
-            font = new FTGLPixmapFont(tDirectories::Data().GetReadPath("textures/Armagetronad.ttf"));
-            break;
-        case 2:
-            font = new FTGLBitmapFont(tDirectories::Data().GetReadPath("textures/Armagetronad.ttf"));
-            break;
-        case 4:
-            font = new FTGLPolygonFont(tDirectories::Data().GetReadPath("textures/Armagetronad.ttf"));
-            break;
-        case 5:
-            font = new FTGLOutlineFont(tDirectories::Data().GetReadPath("textures/Armagetronad.ttf"));
-            break;
-        case 6:
-            font = new FTGLExtrdFont(tDirectories::Data().GetReadPath("textures/Armagetronad.ttf"));
-            break;
-        default:
-            font = new FTGLTextureFont(tDirectories::Data().GetReadPath("textures/Armagetronad.ttf"));
-        }
+        font = Load(tDirectories::Data().GetReadPath("textures/Armagetronad.ttf"));
 
     }
     font->FaceSize(size);

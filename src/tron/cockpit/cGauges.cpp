@@ -104,17 +104,20 @@ void BarGauge::RenderGraph(float min, float max, float val, float factor, tValue
     const tCoord edge1(tCoord(m_position.x-m_size.x, m_position.y));
     const tCoord edge2(tCoord(m_position.x+m_size.x, m_position.y+m_size.y));
 
-    m_foreground.SetGradientEdges(edge1, edge2);
-    m_background.SetGradientEdges(edge1, edge2);
+    rGradient &left = (factor < .0) ? m_background : m_foreground;
+    rGradient &right = (factor < .0) ? m_foreground : m_background;
 
-    m_foreground.SetValue(y);
-    m_background.SetValue(y);
+    left.SetGradientEdges(edge1, edge2);
+    right.SetGradientEdges(edge1, edge2);
 
-    m_background.DrawRect(
+    left.SetValue(y);
+    right.SetValue(y);
+
+    right.DrawRect(
         tCoord(m_size.x*x+m_position.x, m_position.y),
         tCoord(m_size.x+m_position.x, m_position.y+m_size.y));
 
-    m_foreground.DrawRect(
+    left.DrawRect(
         tCoord(m_size.x*x+m_position.x, m_position.y),
         tCoord(m_position.x-m_size.x, m_position.y+m_size.y));
 

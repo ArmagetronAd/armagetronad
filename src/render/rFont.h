@@ -52,6 +52,19 @@ enum sr_fontClass {
     sr_fontServerDetails = 02000  //!< for the details displayed in the server browser (server description, player names etc)
 };
 
+//! Different ways to render fonts
+enum sr_fontTypes {
+    sr_fontOld       = 0, //!< The old font, deprecated
+    sr_fontPixmap    = 1, //!< FTGLPixmapFont
+    sr_fontBitmap    = 2, //!< FTGLBitmapFont
+    sr_fontTexture   = 3, //!< FTGLTextureFont
+    sr_fontPolygon   = 4, //!< FTGLPolygonFont
+    sr_fontOutline   = 5, //!< FTGLOutlineFont
+    sr_fontExtruded  = 6  //!< FTGLExtrdFont (experimental)
+};
+
+extern int sr_fontType;
+
 class FTFont;
 
 // maybe make this a child of std::ostream...
