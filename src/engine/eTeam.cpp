@@ -523,20 +523,48 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
             if ( ai )
                 min = ai;
 
-            // find the second smallest team:
-            // TODO: really find the second smallest...
-            eTeam* second = max;
-
             for ( i = min->NumPlayers()-1; i>=0; --i )
             {
+                // one player from the dismantled team.
                 tJUST_CONTROLLED_PTR< ePlayerNetID > pni = min->Player(i);
-                pni->SetTeamForce( second );
-                pni->UpdateTeamForce();
+
+                // just ignore AIs, they get removed later by the "balance with AIs" code once it notices all humans are gone from this team
+                if ( !pni->IsHuman() )
+                {
+                    continue;
+                }
+
+                // find the second smallest team:
+                eTeam* second = NULL;
+                int secondMaxP = 0; // the number of humans on that team
+                for ( int j = teams.Len()-1; j>=0; --j )
+                {
+                    eTeam *t = teams(j);
+
+                    if ( t->BalanceThisTeam() )
+                    {
+                        int humans = t->NumHumanPlayers();
+
+                        if ( humans > secondMaxP && t != min )
+                        {
+                            secondMaxP = humans;
+                            second = t;
+                        }
+                    }
+                }
+
+                if ( second )
+                {
+                    // put the player into the second smallest team, overriding balancing settings (they're likely to be in the way )
+                    int imbBackup = second->maxImbalanceLocal;
+                    second->maxImbalanceLocal = 99999;
+                    pni->SetTeamForce( second );
+                    pni->UpdateTeamForce();
+                    second->maxImbalanceLocal = imbBackup;
+
+                    balance = false;
+                }
             }
-
-            //			tDESTROY( min );
-
-            balance = false;
         }
         else if ( numTeams < minTeams )
         {
