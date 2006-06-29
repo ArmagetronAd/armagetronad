@@ -4033,6 +4033,10 @@ void ePlayerNetID::ReceiveControlNet(nMessage &m)
 
             m >> newTeam;
 
+            // annihilate team if it no longer is in the game
+            if ( bool(newTeam) && newTeam->TeamID() < 0 )
+                newTeam = 0;
+
             // NULL team probably means that the change target does not
             // exist any more. Create a new team instead.
             if ( !newTeam )
@@ -4372,7 +4376,9 @@ void ePlayerNetID::UpdateName( void )
     // apply client change, stripping excess spaces
     if ( sn_GetNetState() != nCLIENT )
     {
-        se_OptionalNameFilters( nameFromClient_ );
+        // apply name filters only on remote players
+        if ( Owner() != 0 )
+            se_OptionalNameFilters( nameFromClient_ );
 
         // disallow name changes if there was a kick vote recently
         if ( !bool(this->voter_) || voter_->AllowNameChange() || nameFromServer_.Len() <= 1 )
