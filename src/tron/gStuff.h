@@ -40,7 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "defs.h"
 #include "tSafePTR.h"
 
-// #define EPS     1E-16 
+// #define EPS     1E-16
 
 #include <math.h>
 
