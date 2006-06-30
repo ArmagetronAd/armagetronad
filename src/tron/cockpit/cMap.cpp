@@ -137,14 +137,14 @@ void Map::DrawRimWalls( tList<eWallRim> &list ) {
 void Map::DrawWalls(tList<gNetPlayerWall> &list) {
     unsigned i, len=list.Len();
     double currentTime = se_GameTime();
-    double wallsLength = gCycle::WallsLength();
+    bool limitedLength = gCycle::WallsLength() > 0;
     double wallsStayUpDelay = gCycle::WallsStayUpDelay();
-    bool limitedLength = wallsLength > 0;
     glBegin(GL_LINES);
     for(i=0; i<len; i++) {
         gNetPlayerWall *wall = list[i];
         gCycle *cycle = wall->Cycle();
         if(!cycle) continue;
+        double wallsLength = cycle->ThisWallsLength();
         double alpha = 1;
         if(!cycle->Alive()) {
             alpha -= 2 * (currentTime - cycle->DeathTime() - wallsStayUpDelay);
