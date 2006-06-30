@@ -117,7 +117,6 @@ class PermanentError: public tException
         PermanentError();                                       //!< default constructor
         PermanentError( const tString & details );              //!< constructor giving details on error
         ~PermanentError();                                      //!< destructor
-
     private:
         virtual tString DoGetName()         const;              //!< returns the name of the exception
         virtual tString DoGetDescription()  const;              //!< returns a detailed description
@@ -144,6 +143,9 @@ class PermanentError: public tException
     nAddress const &   GetAddress( void )                  const   ;	//!< Gets the address the socket is bound to
     nSocket const &    GetAddress( nAddress & address )    const   ;	//!< Gets the address the socket is bound to
 
+    inline int             GetSocket( void )         const; //!< Gets the raw socket
+    inline nSocket const & GetSocket( int & socket ) const;	//!< Gets the raw socket
+
     // moving copy semantics
     void MoveFrom( const nSocket & other );       //!< move data from other to this
     nSocket( const nSocket & other );             //!< copy constructor. Warning: uses data move semantics
@@ -155,6 +157,7 @@ private:
     int Write       ( const int8 *buf, int len, const sockaddr * addr, int addrlen ) const; //!< writes data to the socket
 
     nSocket & SetAddress( nAddress const & address );  //!< Sets the address the socket is bound to
+    inline nSocket & SetSocket( int socket );	       //!< Sets the raw socket
 
     int socket_;            //!< the raw socket
     nAddress address_;      //!< the address the socket is bound to
@@ -186,6 +189,8 @@ public:
     nSocketListener &       SetIpList   ( tString const & ipList );	    //!< Sets list of IPs to bind to
     tString const &         GetIpList   ( void ) const;	                //!< Gets list of IPs to bind to
     nSocketListener const & GetIpList   ( tString & ipList ) const;	    //!< Gets list of IPs to bind to
+    inline SocketArray const     & GetSockets ( void ) const;	                //!< Gets the listening sockets
+    inline nSocketListener const & GetSockets ( SocketArray & sockets ) const;	//!< Gets the listening sockets
 private:
     SocketArray  sockets_;   //!< the listening sockets
     unsigned int port_;      //!< the network port to listen on
@@ -194,6 +199,8 @@ private:
     // forbid copying
     nSocketListener( const nSocketListener & );
     nSocketListener & operator=( const nSocketListener & );
+
+    inline nSocketListener & SetSockets( SocketArray const & sockets );	//!< Sets the listening sockets
 };
 
 //! basic network system: manages sockets
@@ -205,6 +212,8 @@ public:
 
     nSocket*  Init (void);              //!< initializes the network
     void      Shutdown (void);          //!< shuts donw the network
+
+    bool      Select (REAL dt);         //!< waits the specified time for data to arrive on the sockets
 
     nSocketListener &             AccessListener      ( void )                                ;	//!< Accesses listening sockets
     nBasicNetworkSystem &         SetListener         ( nSocketListener const & listener )    ;	//!< Sets listening sockets
@@ -225,5 +234,103 @@ private:
 
     nSocket &                     AccessControlSocket ( void )                                ; //!< Accesses network control socket
 };
+
+// *******************************************************************************
+// *
+// *	GetSockets
+// *
+// *******************************************************************************
+//!
+//!		@return		the listening sockets
+//!
+// *******************************************************************************
+
+nSocketListener::SocketArray const & nSocketListener::GetSockets( void ) const
+{
+    return this->sockets_;
+}
+
+// *******************************************************************************
+// *
+// *	GetSockets
+// *
+// *******************************************************************************
+//!
+//!		@param	sockets	the listening sockets to fill
+//!		@return		A reference to this to allow chaining
+//!
+// *******************************************************************************
+
+nSocketListener const & nSocketListener::GetSockets( SocketArray & sockets ) const
+{
+    sockets = this->sockets_;
+    return *this;
+}
+
+// *******************************************************************************
+// *
+// *	SetSockets
+// *
+// *******************************************************************************
+//!
+//!		@param	sockets	the listening sockets to set
+//!		@return		A reference to this to allow chaining
+//!
+// *******************************************************************************
+
+nSocketListener & nSocketListener::SetSockets( SocketArray const & sockets )
+{
+    this->sockets_ = sockets;
+    return *this;
+}
+
+// *******************************************************************************
+// *
+// *	GetSocket
+// *
+// *******************************************************************************
+//!
+//!		@return		the raw socket
+//!
+// *******************************************************************************
+
+int nSocket::GetSocket( void ) const
+{
+    return this->socket_;
+}
+
+// *******************************************************************************
+// *
+// *	GetSocket
+// *
+// *******************************************************************************
+//!
+//!		@param	socket	the raw socket to fill
+//!		@return		A reference to this to allow chaining
+//!
+// *******************************************************************************
+
+nSocket const & nSocket::GetSocket( int & socket ) const
+{
+    socket = this->socket_;
+    return *this;
+}
+
+// *******************************************************************************
+// *
+// *	SetSocket
+// *
+// *******************************************************************************
+//!
+//!		@param	socket	the raw socket to set
+//!		@return		A reference to this to allow chaining
+//!
+// *******************************************************************************
+
+nSocket & nSocket::SetSocket( int socket )
+{
+    this->socket_ = socket;
+    return *this;
+}
 
 #endif
