@@ -54,7 +54,7 @@ class eGameObject{
 #define GO_I ((int *)NULL)
 
     // small wrapper of TimestepThis doing preparation and cleanup work
-    static void TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObject *t);
+    static void TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObject *t, REAL minTimestep);
 
 protected:
     // does a timestep and all interactions for this gameobject,
@@ -104,6 +104,7 @@ public:
 
     int GOID() const {return id;}
     REAL LastTime() const {return lastTime;}
+    virtual REAL NextInterestingTime() const {return lastTime;} //!< the next time something interesting is going to happen with this object
 
     eGameObject(eGrid *grid, const eCoord &p,const eCoord &d, eFace *currentface, bool autodelete=1);
     virtual ~eGameObject();
@@ -184,7 +185,7 @@ public:
     virtual bool Act(uActionPlayer *Act,REAL x);
 
     // does a timestep and all interactions for every gameobject
-    static void s_Timestep(eGrid *grid, REAL currentTime);
+    static void s_Timestep(eGrid *grid, REAL currentTime, REAL minTimestep);
 
     // displays everything:
     static void RenderAll(eGrid *grid, const eCamera *cam);

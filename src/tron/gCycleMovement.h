@@ -90,6 +90,8 @@ public:
 
     virtual bool            Timestep                ( REAL                  currentTime )           ;   //!< advance to the given time
 
+    virtual REAL            NextInterestingTime     () const                                        ;   //!< the next time something interesting is going to happen with this object
+
     // existence management
     virtual void            AddRef                  ()                                              ;   //!< increase reference count
 

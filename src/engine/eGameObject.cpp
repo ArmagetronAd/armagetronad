@@ -650,6 +650,11 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
     {
         // make current face valid
         c->FindCurrentFace();
+
+        if (sn_GetNetState()!=nCLIENT)
+            for(int j=c->grid->gameObjectsInteresting.Len()-1;j>=0;j--)
+                c->InteractWith(c->grid->gameObjectsInteresting(j),currentTime,0);
+
         ret = ret || c->Timestep(lastTime+i*(currentTime-lastTime)/number_of_steps);
         c->FindCurrentFace();
     }
@@ -660,7 +665,12 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
     return ret;
 }
 
-void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObject *c)
+#ifdef DEDICATED
+static REAL se_maxSimulateAhead = .01f;
+static tSettingItem<REAL> se_maxSimulateAheadConf( "MAX_SIMULATE_AHEAD", se_maxSimulateAhead );
+#endif
+
+void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObject *c, REAL minTimestep )
 {
     su_FetchAndStoreSDLInput();
 
@@ -671,9 +681,28 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
 #endif
         simTime -= c->Lag();
 
+#ifdef DEDICATED
+    REAL nextTime = c->NextInterestingTime();
+    if ( simTime < nextTime && nextTime < simTime + se_maxSimulateAhead )
+    {
+        // something interesting is going to happen, see what it is
+        simTime = nextTime;
+    }
+    else if ( simTime < c->LastTime() + minTimestep )
+    {
+        // don't waste your time on too small timesteps
+        return;
+    }
+#endif
+
+    // simulate a bit ahead
     if (!eWallRim::IsBound(c->pos,-20))
+    {
         c->Kill();
-    else if (TimestepThis(simTime,c))
+        return;
+    }
+
+    if (TimestepThis(simTime,c))
     {
         if (c->autodelete)
             c->RemoveFromGame();
@@ -683,13 +712,10 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
             c->RemoveFromList();
         }
     }
-    else if (sn_GetNetState()!=nCLIENT)
-        for(int j=grid->gameObjectsInteresting.Len()-1;j>=0;j--)
-            c->InteractWith(grid->gameObjectsInteresting(j),currentTime,0);
 }
 
 // does a timestep and all interactions for every eGameObject
-void eGameObject::s_Timestep(eGrid *grid, REAL currentTime)
+void eGameObject::s_Timestep(eGrid *grid, REAL currentTime, REAL minTimestep)
 {
 #ifdef DEBUG
     grid->Check();
@@ -699,7 +725,7 @@ void eGameObject::s_Timestep(eGrid *grid, REAL currentTime)
     for(int i=grid->gameObjects.Len()-1;i>=0;i--)
     {
         eGameObject * c = grid->gameObjects(i);
-        TimestepThisWrapper( grid, currentTime, c );
+        TimestepThisWrapper( grid, currentTime, c, minTimestep );
     }
 
 #ifdef DEBUG

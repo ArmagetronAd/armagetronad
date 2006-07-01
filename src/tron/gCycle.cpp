@@ -1737,7 +1737,10 @@ bool gCycle::Timestep(REAL currentTime){
     // do the rest of the timestep
     try
     {
-        return gCycleMovement::Timestep(currentTime);
+        if ( currentTime > lastTime )
+            return gCycleMovement::Timestep(currentTime);
+        else
+            return false;
     }
     catch ( gCycleDeath const & death )
     {
