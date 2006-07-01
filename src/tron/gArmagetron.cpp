@@ -71,6 +71,7 @@ static gCommandLineJumpStartAnalyzer sg_jumpStartAnalyzer;
 #ifndef DEDICATED
 #ifdef MACOSX
 #include "AAURLHandler.h"
+#include "version.h"
 #endif
 #endif
 

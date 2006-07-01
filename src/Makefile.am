@@ -24,7 +24,7 @@ dist-hook:
 	cp -R ${srcdir}/config_ide.h ${srcdir}/macosx ${srcdir}/win32 ${srcdir}/win32_ded $(distdir)
 
 #   adapt versions in Mac and Windows header files
-	for f in macosx/config_common.h config_ide.h; do\
+	for f in macosx/version.h.in config_ide.h; do\
 		chmod 644 ${distdir}/$$f;\
 		sed -e "s,#define VERSION.*$$,#define VERSION \"${VERSION}\"," < ${srcdir}/$$f > ${distdir}/$$f;\
 	done

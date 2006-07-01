@@ -5,21 +5,63 @@ module AAConfig
   
   BUILD_DIR = (ENV["SYMROOT"] || "#{SRC_DIR}/../armagetronad-build/build") + "/.."
   
-  PACKGAGE_RESOURCE_DIR = [(ENV["CONFIGURATION_BUILD_DIR"] || ""),
-                           (ENV["PRODUCT_NAME"] || "") +
-                             (ENV["WRAPPER_SUFFIX"] || ""),
-                           "Contents/Resources"].join("/")
+  PRODUCT_NAME = ENV["PRODUCT_NAME"] || "Armagetron Advanced"
   
-  # The files that need processing. The key is the file, value is wheter the file will be packaged.
-  IN_FILES = {"#{SRC_DIR}/src/macosx/version.h.in" => false,
-              "#{SRC_DIR}/src/macosx/English.lproj/InfoPlist.strings.in" => true, 
-              "#{SRC_DIR}/config/aiplayers.cfg.in" => true,
-              "#{SRC_DIR}/language/languages.txt.in" => true}
+  PACKGAGE_RESOURCE_DIR = [
+    ENV["CONFIGURATION_BUILD_DIR"] || "",
+    PRODUCT_NAME + (ENV["WRAPPER_SUFFIX"] || ""),
+    PRODUCT_NAME[/dedicated/i] ? "" : "Contents/Resources"
+  ].join("/")
+    
   
-  TAG_MAPPINGS = {"@version@" => %x{"#{SRC_DIR}/batch/make/version" "#{SRC_DIR}"}.chomp,
-                  "@year@" => Time.now.strftime("%Y"),
-                  "@progtitle@" => "Armagetron Advanced"}
-   
+  BUILD_TYPE = File.exists?(SRC_DIR + "/.svn") ? :development : :release
+  
+  def self.process_file(orig, package_dir=nil)
+    result_file = (BUILD_DIR + "/" + orig).sub(/\.in$/, '')
+    orig = SRC_DIR + "/" + orig
+    
+    # Process the file (replace tags, copy to build dir)
+    file result_file => [orig] do |t|
+      mkdir_p(File.dirname(t.name))
+      cp(t.prerequisites[0], t.name)
+      
+      # replace the tags
+      open(t.name, "r+") do |f|
+        data = f.read
+        TAG_MAPPINGS.each { |tag, value| data.gsub!("@#{tag}@", value) }
+        f.rewind
+        f.print(data)
+        f.truncate(f.pos)
+      end      
+    end
+    task :process_files => result_file
+    
+    # Should the file be included with the game dist?
+    if package_dir
+      package_dest = PACKGAGE_RESOURCE_DIR + "/" + package_dir + "/" + File.basename(result_file)
+      file package_dest => [result_file] do |t|
+        mkdir_p(File.dirname(t.name))
+        cp(t.prerequisites[0], t.name)
+      end
+      task :package_files => package_dest
+    end
+    
+  end
+  
+  def self.version
+    if BUILD_TYPE == :development
+      %x("#{SRC_DIR}/batch/make/version" "#{SRC_DIR}").chomp
+    else
+      File.read("#{SRC_DIR}/src/macosx/version.h.in").scan(/#define VERSION "(.*)"/)[0][0]
+    end
+  end
+  
+  TAG_MAPPINGS = {
+    "version" => version(),
+    "year" => Time.now.strftime("%Y"),
+    "progtitle" => "Armagetron Advanced"
+  }
+  
 end
 
 # =========
@@ -28,54 +70,33 @@ end
 
 namespace "xcode" do
   
-  task :prepare => [:process_in_files, :sort_resources]
+  task :prepare => [:process_files, :sort_resources]
+  task :cleanup => [:package_files, :package_resouces]
   
-  # TODO: Don't need to run this everytime. Change it to a file based task
   task :sort_resources do
-    sh %{"#{AAConfig::SRC_DIR}/batch/make/sortresources" \\
-         "#{AAConfig::SRC_DIR}/resource/proto" \\
-         "#{AAConfig::BUILD_DIR}/resource/included" \\
-         "#{AAConfig::SRC_DIR}/batch/make/sortresources.py"}
-  end
-  
-  # TODO: file based...
-  task :cleanup => [:package_in_files] do
-    rm_rf "#{AAConfig::PACKGAGE_RESOURCE_DIR}/resource"
-    cp_r "#{AAConfig::BUILD_DIR}/resource", AAConfig::PACKGAGE_RESOURCE_DIR
-  end
-  
-  AAConfig::IN_FILES.each do |infile, should_package|
-    result_file = infile.sub(AAConfig::SRC_DIR, AAConfig::BUILD_DIR).sub(/\.in$/, '')
-
-    # Define the task for the resulting file
-    file result_file => infile do |t|
-      mkdir_p File.dirname(t.name)
-      cp t.prerequisites[0], t.name
-      # Subsitute the tags in the resulting file
-      open(t.name, 'r+') do |f|
-        data = f.read
-        AAConfig::TAG_MAPPINGS.each { |tag, value| data.gsub!(tag, value) }
-        f.pos = 0
-        f.write(data)
-        f.truncate(f.pos)
+    if !File.exists?("#{AAConfig::BUILD_DIR}/resource")
+      if AAConfig::BUILD_TYPE == :development
+        sh %{"#{AAConfig::SRC_DIR}/batch/make/sortresources" \\
+             "#{AAConfig::SRC_DIR}/resource/proto" \\
+             "#{AAConfig::BUILD_DIR}/resource/included" \\
+             "#{AAConfig::SRC_DIR}/batch/make/sortresources.py"}
+      else
+        cp_r("#{AAConfig::SRC_DIR}/resource", AAConfig::BUILD_DIR)
       end
     end
-    task :process_in_files => result_file
     
-    # Define the task to package the file
-    if should_package
-      # builddir/config/foo -> builddir/build/Debug/Armagetron Advanced.app/Contents/Resources/config/foo
-      # Currently all files we package follow the same pattern -- we only need the last two paths
-      package_file = AAConfig::PACKGAGE_RESOURCE_DIR + "/" + result_file.split("/")[-2, 2].join("/")
-      file package_file => result_file do |t|
-        mkdir_p File.dirname(t.name)
-        cp t.prerequisites[0], t.name
-      end
-      task :package_in_files => package_file
-    end
-
   end
   
+  task :package_resouces do
+    if !File.exists?("#{AAConfig::PACKGAGE_RESOURCE_DIR}/resource")
+      cp_r("#{AAConfig::BUILD_DIR}/resource", AAConfig::PACKGAGE_RESOURCE_DIR)
+    end
+  end
+
+  AAConfig.process_file("src/macosx/version.h.in")
+  AAConfig.process_file("src/macosx/English.lproj/InfoPlist.strings.in", "English.lproj")
+  AAConfig.process_file("config/aiplayers.cfg.in", "config")  
+  AAConfig.process_file("language/languages.txt.in", "language")
   
 end
 
@@ -104,39 +125,14 @@ task :beautify_personal do
        "#{AAConfig::SRC_DIR}/batch/make/beautify" "#{AAConfig::SRC_DIR}" "#{AAConfig::SRC_DIR}/.beautytag.personal"}
 end
 
-# =====================
-# = Automated release =
-# =====================
 
-desc "Generate the ChangeLog"
-task :changelog do
-  puts "Generating ChangeLog..."
-  sh %{svn log "#{AAConfig::SRC_DIR}" 2>&1 > "#{AAConfig::BUILD_DIR}/ChangeLog"}
+
+task :remove_version do
+  rm_rf("#{AAConfig::BUILD_DIR}/src/macosx")
 end
 
-# namespace "release" do
-#   
-#   task :create => [:build, :package_create, :package_convert]
-#   
-#   # TODO: Move into a method so we can pass parameters pragmatically. The task will just take an ENV setting.
-#   task :build do
-#     sh %{xcodebuild -project "#{AAConfig::SRC_DIR}/MacOS/Armagetron Advanced.xcodeproj" \\
-#          -target "Armagetron Advanced" -configuration Release build}
-#   end
-#   
-#   # TODO: method
-#   task :package_create do
-#     package_dir = %{"#{AAConfig::BUILD_DIR}/build/Release"}
-#     mkdir_p package_dir
-#     sh %{hdiutil create -srcdir "#{AAConfig::BUILD_DIR}/build/Release" \\
-#          -format UDIF #{package_dir}/release-uncompresed -volname "Armagetron Advanced"}
-#   end
-#   
-#   # TODO: method
-#   task :package_convert do
-#     sh %{hdiutil convert }
-#     hdiutil convert "${2}" -format UDZO -o "${3}"
-#   end
-#   
-# end
-
+desc "Update version"
+task :update_version => ["remove_version", "xcode:process_files"]
+  # %w(src/network/nNetwork.cpp src/tron/gArmagetron.cpp).each do |f|
+  #   touch(AAConfig::SRC_DIR + "/" + f)
+  # end

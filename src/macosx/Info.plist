@@ -24,7 +24,7 @@
   	  <string>APPL</string>
   	  
   	<key>CFBundleSignature</key>
-  	  <string>armagetronAdvanced_X</string>
+  	  <string>Arma</string>
   	  
   	<key>NSMainNibFile</key>
   	  <string>SDLMain</string>

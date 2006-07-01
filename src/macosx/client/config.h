@@ -10,7 +10,7 @@
 #define HAVE_LIBSDL_IMAGE 1
 
 /* Define if you have the SDL_mixer library (-lSDL_mixer). */
-#define HAVE_LIBSDL_MIXER 1
+/* #undef HAVE_LIBSDL_MIXER */
 
 /* Define to 1 if you have the <SDL/SDL_image.h> header file. */
 #define HAVE_SDL_IMG_H
