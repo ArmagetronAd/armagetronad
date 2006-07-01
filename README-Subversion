@@ -59,7 +59,7 @@ If all goes smoothly, you can now edit Armagetron Advanced and run it.
 * [Apple developer tools](http://developer.apple.com)
     * Xcode 2.2 or greater is required.
 * [rake](http://rubyforge.org/projects/rake)
-* [Other Libraries](http://generalconsumption.org/armagetron/MacOSX_AALibraries.zip)
+* [Other Libraries](http://generalconsumption.org/armagetron/libs)
     * Unzip and install to /Libraries
 
 ## Building

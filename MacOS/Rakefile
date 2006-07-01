@@ -133,6 +133,3 @@ end
 
 desc "Update version"
 task :update_version => ["remove_version", "xcode:process_files"]
-  # %w(src/network/nNetwork.cpp src/tron/gArmagetron.cpp).each do |f|
-  #   touch(AAConfig::SRC_DIR + "/" + f)
-  # end
