@@ -57,15 +57,19 @@ libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentification.cpp
 	network/nSocket.h network/nSpamProtection.cpp network/nSpamProtection.h
 
 if BUILDMAIN
+libenginecore_a_SOURCES=engine/eGameObject.cpp engine/eGameObject.h \
+	engine/eGrid.cpp engine/eGrid.h
+
 libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentification.cpp\
 	engine/eAuthentification.h engine/eAxis.cpp	engine/eAxis.h engine/eCamera.cpp engine/eCamera.h\
 	engine/eCoord.h engine/eDebugLine.cpp engine/eDebugLine.h engine/eDisplay.cpp engine/eFloor.cpp\
-	engine/eFloor.h engine/eGameObject.cpp engine/eGameObject.h engine/eGrid.cpp engine/eGrid.h\
+	engine/eFloor.h \
 	engine/eKrawall.cpp engine/eKrawall.h engine/eNetGameObject.cpp engine/eNetGameObject.h\
 	engine/ePath.cpp engine/ePath.h engine/ePlayer.cpp engine/ePlayer.h engine/eSensor.cpp\
 	engine/eSensor.h engine/eSound.cpp engine/eSound.h engine/eTeam.cpp engine/eTeam.h engine/eTess2.h\
 	engine/eTimer.cpp engine/eTimer.h engine/eVoter.cpp engine/eVoter.h engine/eWall.cpp engine/eWall.h\
-	engine/eRectangle.cpp engine/eRectangle.h
+	engine/eRectangle.cpp engine/eRectangle.h\
+	engine/eLagCompensation.cpp engine/eLagCompensation.h
 
 
 librender_a_SOURCES=render/rConsole.cpp render/rConsoleGraph.cpp render/rConsole.h render/rFont.cpp\
@@ -99,6 +103,14 @@ libui_a_CXXFLAGS     =$(librender_a_CXXFLAGS) -I@srcdir@/ui
 libengine_a_CXXFLAGS =$(libui_a_CXXFLAGS)     -I@srcdir@/network -I@srcdir@/engine 
 libtron_a_CXXFLAGS   =$(libengine_a_CXXFLAGS) -I@srcdir@/thirdparty/particles -I@srcdir@/tron 
 
+# core engine files can get compiled with optimization turned on for more painless debugging
+# on weak computers
+if ENGINECOREDEBUG
+libenginecore_a_CXXFLAGS =$(libengine_a_CXXFLAGS)
+else
+libenginecore_a_CXXFLAGS =$(libengine_a_CXXFLAGS) -O2
+endif
+
 if BUILDMASTER
 buildthemaster = armagetronad_main_master$(EXEEXT)
 else
@@ -124,14 +136,14 @@ armagetronad_main_master$(EXEEXT): Makefile
 	${BUILDFAKE}
 else
 if BUILDMAIN
-noinst_LIBRARIES = libengine.a librender.a  libtron.a libui.a libnetwork.a libtools.a
+noinst_LIBRARIES = libenginecore.a libengine.a librender.a  libtron.a libui.a libnetwork.a libtools.a
 else
 noinst_LIBRARIES = libnetwork.a libtools.a
 endif
 
 armagetronad_main_SOURCES = tron/gFloor.cpp
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_LDADD=libtron.a libengine.a libnetwork.a libui.a librender.a libtools.a
+armagetronad_main_LDADD=libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a
 
 armagetronad_main_master_SOURCES = network/master.cpp
 armagetronad_main_master_CXXFLAGS =$(libtron_a_CXXFLAGS)

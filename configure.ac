@@ -209,6 +209,17 @@ AC_ARG_ENABLE(games,
 		[decorates all installation paths with "games" (default=enabled)]),,
 enable_games=yes)
 
+AC_ARG_ENABLE(enginecoredebug,
+     AC_HELP_STRING([--enable-enginecoredebug],
+		[Apply debugging options to engine core (for DEBUGLEVEL>0, defaults to enabled)]),
+     [case "${enableval}" in
+       yes) enginecoredebug=true ;;
+       no)  enginecoredebug=false ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-enginecoredebug) ;;
+     esac],[enginecoredebug=true])
+	 
+AM_CONDITIONAL(ENGINECOREDEBUG, test x$enginecoredebug = xtrue)
+
 if test x$enable_krawall = xyes; then
 AC_DEFINE(KRAWALL,,enables krawall)
 fi
@@ -221,14 +232,14 @@ dnl developer CXXFLAGS
 test -z "$DEBUGLEVEL" && DEBUGLEVEL=0
 test -z "$CODELEVEL" && CODELEVEL=0
 
-test $DEBUGLEVEL -ge 1 && CXXFLAGS="$CXXFLAGS -O0 -g"
+dnl default CXX flags: optimize a bit if no optimization optimization has been selected yet
+test -z "`echo $CXXFLAGS | grep "\-O"`" && CXXFLAGS="$CXXFLAGS -O2"
+
+test $DEBUGLEVEL -ge 1 && CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-O.,,'` -g"
 test $DEBUGLEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -DDEBUG"
 test $DEBUGLEVEL -ge 3 && enable_memmanager=yes
 test $DEBUGLEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -DDEBUG_EXPENSIVE"
 test $DEBUGLEVEL -ge 5 && CXXFLAGS="$CXXFLAGS -DMEM_DEB"
-
-dnl default CXX flags: optimize for size if no optimization optimization has been selected yet
-test -z "`echo $CXXFLAGS | grep "\-O"`" && CXXFLAGS="$CXXFLAGS -O2"
 
 test $CODELEVEL -ge 1 && CXXFLAGS="$CXXFLAGS -Wall"
 dnl test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wshadow -Wpointer-arith -Wfloat-equal -W -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code --pedantic -Winline"
