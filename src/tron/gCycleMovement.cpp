@@ -1503,9 +1503,6 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
     sg_ArchiveReal( dt, 9 );
 
-    // calculate acceleration
-    this->CalculateAcceleration( dt );
-
     // if (currentTime > lastTime)
     {
         int timeout=10;
@@ -2609,6 +2606,9 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
     REAL lastSpeed=verletSpeed_;
 
     REAL ts=(currentTime-lastTime);
+
+    // calculate acceleration
+    this->CalculateAcceleration( ts );
 
     // apply acceleration
     if ( sg_verletIntegration.Supported() )
