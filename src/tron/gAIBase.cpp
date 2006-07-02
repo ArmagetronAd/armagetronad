@@ -2898,6 +2898,10 @@ void gAIPlayer::Timestep(REAL time){
         return;
     }
 
+    // don't think if the object is not up to date
+    if ( Object() && Object()->LastTime() < time - EPS )
+        return;
+
     REAL ts=time-lastTime;
     lastTime=time;
 
