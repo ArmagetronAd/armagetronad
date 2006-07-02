@@ -2767,24 +2767,27 @@ REAL gAIPlayer::Think(){
 
     REAL ret = 1;
 
-    ThinkData data( front, *left, *right);
-    switch (state)
-    {
-    case AI_SURVIVE:
-        ThinkSurvive(data);
-        break;
-    case AI_PATH:
-        ThinkPath(data);
-        break;
-    case AI_TRACE:
-        ThinkTrace(data);
-        break;
-    case AI_CLOSECOMBAT:
-        ThinkCloseCombat(data);
-        break;
+    //not the best solution, but still better than segfault...
+    if(left.get() != 0 && right.get() != 0) {
+        ThinkData data( front, *left, *right);
+        switch (state)
+        {
+        case AI_SURVIVE:
+            ThinkSurvive(data);
+            break;
+        case AI_PATH:
+            ThinkPath(data);
+            break;
+        case AI_TRACE:
+            ThinkTrace(data);
+            break;
+        case AI_CLOSECOMBAT:
+            ThinkCloseCombat(data);
+            break;
+        }
+        ActOnData( data );
+        ret = data.thinkAgain;
     }
-    ActOnData( data );
-    ret = data.thinkAgain;
 
 #ifdef DEBUG_X
     {
