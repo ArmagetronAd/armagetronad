@@ -1467,6 +1467,9 @@ static bool sg_UseAntiLagSliding( const eNetGameObject* obj )
     }
 }
 
+static REAL sg_maxSimulateAhead = .01f;
+static tSettingItem<REAL> sg_maxSimulateAheadConf( "CYCLE_DEST_SIMULATE_AHEAD", sg_maxSimulateAhead );
+
 // *******************************************************************************************
 // *
 // *	Timestep
@@ -1500,16 +1503,13 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
     sg_ArchiveReal( dt, 9 );
 
-    // calculate acceleration
-    this->CalculateAcceleration( dt );
-
     // if (currentTime > lastTime)
     {
         int timeout=10;
         bool forceTurn = false; // force turning at the next iteration
 
         // only simulate forward in time
-        while (pendingTurns.empty() && currentDestination && timeout > 0 && currentTime > lastTime )
+        while (pendingTurns.empty() && currentDestination && timeout > 0 && currentTime >= lastTime - EPS )
         {
             timeout --;
 
@@ -1575,11 +1575,15 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
             sg_ArchiveReal( dist_to_dest, 9 );
 
-            if ( dist_to_dest > ts * avgspeed && currentTime < latestTurnTime )
+            if ( dist_to_dest > ( ts + sg_maxSimulateAhead ) * avgspeed && currentTime < latestTurnTime )
                 break; // no need to worry; we won't reach the next destination
 
             if ( currentTime < earliestTurnTime && sg_CommandTime.Supported( Owner() ) )
                 break; // the turn is too far in the future
+
+            REAL simulateAhead = sg_maxSimulateAhead;
+            if ( currentTime < turnTime + EPS )
+                simulateAhead = 0;
 
             if ( lastTime >= earliestTurnTime && ( forceTurn || dist_to_dest < 0.01 || timeout <= 0 || lastTime >= latestTurnTime ) ){
                 forceTurn = false;
@@ -1779,9 +1783,9 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     st_Breakpoint();
                     return !Alive();
                 }
-                if ( tsTodo > ts )
+                if ( tsTodo > ts + simulateAhead )
                 {
-                    tsTodo = ts;
+                    tsTodo = ts + simulateAhead ;
                 }
 	#ifdef DEBUG
                 if ( tsTodo < 0 )
@@ -1822,7 +1826,9 @@ bool gCycleMovement::Timestep( REAL currentTime )
     }
 
     // do the rest of the timestep
-    bool ret = TimestepCore( currentTime );
+    bool ret = false;
+    if ( currentTime > lastTime )
+        ret = TimestepCore( currentTime );
 
     return ret;
 }
@@ -2601,6 +2607,9 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
 
     REAL ts=(currentTime-lastTime);
 
+    // calculate acceleration
+    this->CalculateAcceleration( ts );
+
     // apply acceleration
     if ( sg_verletIntegration.Supported() )
         this->ApplyAcceleration( ts );
@@ -3122,6 +3131,34 @@ void gCycleMovement::MoveSafely( const eCoord & dest, REAL startTime, REAL endTi
 
 REAL GetTurnSpeedFactor(void) {
     return sg_cycleTurnSpeedFactor;
+}
+
+// *******************************************************************************
+// *
+// *	NextInterestingTime
+// *
+// *******************************************************************************
+//!
+//!		@return
+//!
+// *******************************************************************************
+
+REAL gCycleMovement::NextInterestingTime( void ) const
+{
+    // default to the last time
+    REAL ret = LastTime();
+
+    // look for a later destination
+    gDestination * run = currentDestination;
+    while ( run )
+    {
+        REAL time = run->GetGameTime();
+        if ( time > ret )
+            ret = time;
+        run = run->next;
+    }
+
+    return ret;
 }
 
 

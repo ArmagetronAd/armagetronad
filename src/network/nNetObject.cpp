@@ -1455,6 +1455,8 @@ void nNetObject::SyncAll(){
                             unsigned long id = m->MessageIDBig();
                             m->SendImmediately(user, false);
                             m->messageIDBig_ = id;
+
+                            nos->knowsAbout[user].syncReq = false;
                         }
 #ifdef DEBUG
                         else if (DoDebugPrint())

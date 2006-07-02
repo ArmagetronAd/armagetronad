@@ -28,6 +28,7 @@ browser_query_delay_single_help UNDOCUMENTED
 browser_query_filter_help UNDOCUMENTED
 cycle_rubber_malus_time_help UNDOCUMENTED
 cycle_rubber_malus_turn_help UNDOCUMENTED
+cycle_dest_simulate_ahead_help UNDOCUMENTED
 debug_gnuplot_help UNDOCUMENTED
 drawline_timeout_help UNDOCUMENTED
 extrapolator_sync_help UNDOCUMENTED
@@ -80,6 +81,7 @@ cycle_packetmiss_tolerance_help UNDOCUMENTED
 
 timestep_max_count_help UNDOCUMENTED
 timestep_max_help UNDOCUMENTED
+max_simulate_ahead_help UNDOCUMENTED
 
 #*************************************
 #*************************************

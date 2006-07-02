@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tSysTime.h"
 #include "tLocale.h"
 #include "tCommandLine.h"
+#include "nSocket.h"
 #include  <time.h>
 
 REAL save_interval = 300.0f;
@@ -105,7 +106,8 @@ int main(int argc, char** argv)
     {
         nServerInfo::RunMaster();
 
-        tAdvanceFrame( 10000 );
+        sn_BasicNetworkSystem.Select( .1f );
+        tAdvanceFrame();
         nTimeAbsolute time = tSysTimeFloat();
 
         sn_Receive();

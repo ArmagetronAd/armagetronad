@@ -2010,6 +2010,7 @@ int nSocket::Read( int8 * buf, int len, nAddress & addr ) const
 
     if ( ret >= 0 )
     {
+        // con << "Read " << ret << " bytes from socket " << GetSocket() << ".\n";
     }
 
 #ifdef PRINTPACKETS
@@ -2586,6 +2587,58 @@ nSocket * nBasicNetworkSystem::Init()
     //  Con_Printf("UDP Initialized\n");
     //tcpipAvailable = true;
 
+}
+
+// *******************************************************************************
+// *
+// *	Select
+// *
+// *******************************************************************************
+//!
+//!		@param	dt	the time in seconds to wait at max
+//!		@return		true if data came in
+//!
+// *******************************************************************************
+
+bool nBasicNetworkSystem::Select( REAL dt )
+{
+    int retval = 0;
+    static char const * section = "NETSELECT";
+    if ( !tRecorder::PlaybackStrict( section, retval ) )
+    {
+        fd_set rfds; // set of sockets to wathc
+        struct timeval tv; // time value to pass to select()
+
+        FD_ZERO( &rfds );
+
+        // watch the control socket
+        FD_SET( controlSocket_.GetSocket(), &rfds );
+        // con << "Watching " << controlSocket_.GetSocket();
+
+        int max = controlSocket_.GetSocket();
+
+        // watch listening sockets
+        for( nSocketListener::SocketArray::const_iterator iter = listener_.GetSockets().begin(); iter != listener_.GetSockets().end(); ++iter )
+        {
+            FD_SET( (*iter).GetSocket(), &rfds );
+            if ( (*iter).GetSocket() > max )
+                max = (*iter).GetSocket();
+            // con << ", " << (*iter).GetSocket();
+        }
+
+        // set time
+        tv.tv_sec  = static_cast< long int >( dt );
+        tv.tv_usec = static_cast< long int >( (dt-tv.tv_sec)*1000000 );
+
+        // delegate to system select
+        retval = select(max+1, &rfds, NULL, NULL, &tv);
+    }
+    tRecorder::Record( section, retval );
+
+    // con << " : " << retval << "\n";
+
+    // return result
+    return ( retval > 0 );
 }
 
 // *******************************************************************************************

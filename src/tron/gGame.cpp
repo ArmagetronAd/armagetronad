@@ -1124,10 +1124,18 @@ void init_game_camera(eGrid *grid){
 
 bool think=1;
 
+#ifdef DEDICATED
+static int sg_dedicatedFPS = 200;
+static tSettingItem<int> sg_dedicatedFPSConf( "DEDICATED_FPS", sg_dedicatedFPS );
+#endif
 
 void s_Timestep(eGrid *grid, REAL time,bool cam){
     gNetPlayerWall::s_CopyIntoGrid();
-    eGameObject::s_Timestep(grid, time);
+    REAL minstep = 0;
+#ifdef DEDICATED
+    minstep = 1.0/sg_dedicatedFPS;
+#endif
+    eGameObject::s_Timestep(grid, time, minstep );
 
     if (cam)
         eCamera::s_Timestep(grid, time);
@@ -1307,7 +1315,7 @@ void sg_HostGame(){
             uWebInterface::PollNetwork(200);
             gGame::NetSyncIdle();
 
-            tDelay( 100000 );
+            sn_BasicNetworkSystem.Select( .1f );
 
             // std::cout the players who are logged in:
             numPlayers = sg_NumUsers();
@@ -3247,11 +3255,6 @@ extern bool debug_grid;
 bool simplify_grid=1;
 #endif
 
-#ifdef DEDICATED
-static int sg_dedicatedFPS = 200;
-static tSettingItem<int> sg_dedicatedFPSConf( "DEDICATED_FPS", sg_dedicatedFPS );
-#endif
-
 #ifndef DEDICATED
 // mouse grab toggling
 static uActionGlobal togglemousegrab( "TOGGLE_MOUSEGRAB" );
@@ -3303,10 +3306,6 @@ static uActionGlobalFunc ingamemenu_action(&ingamemenu,&ingamemenu_func, true );
 
 bool gGame::GameLoop(bool input){
     nNetState netstate = sn_GetNetState();
-
-#ifdef DEDICATED
-    tDelay( 1000000 / sg_dedicatedFPS );
-#endif
 
 #ifdef DEBUG
     grid->Check();
@@ -3654,7 +3653,10 @@ void sg_EnterGameCore( nNetState enter_state ){
 #ifdef DEDICATED // read input
         sr_Read_stdin();
         uWebInterface::PollNetwork(200);
+        // tDelay( 1000000 / sg_dedicatedFPS );
+        sn_BasicNetworkSystem.Select( 1.0 / sg_dedicatedFPS );
 #endif
+
         tAdvanceFrame();
         goon=GameLoop();
         st_DoToDo();
