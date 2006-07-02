@@ -809,6 +809,12 @@ static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message
                         lastcolorstring = "0xffff7f";
                     }
 
+                    if(lastcolorpos >= pos - 8) {
+                        //the name we matched is within a color code... bad idea to substitute it.
+                        pos -= 16 - name.size();
+                        continue;
+                    }
+
                     //actually insert the color codes around the name
                     actualMessage.insert(pos+name.size(), lastcolorstring);
                     actualMessage.insert(pos, "0xff887f");
