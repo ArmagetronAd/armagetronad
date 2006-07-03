@@ -100,8 +100,8 @@ public:
 
     virtual bool GameLoop(bool input=true); // return values: exit the game loop?
 
-    bool GridIsReady(int c); // can we transfer gameObjects that
-    // need the grid to exist?
+    bool GridIsReady(int c); // can we transfer gameObjects that need the grid to exist?
+    eGrid * Grid() const { return grid; }
 
     void NoLongerGoOn();
 

@@ -820,12 +820,14 @@ void update_settings()
                     sn_ConsoleOut(o2);
 
                     timeout = tSysTimeFloat() + 10.0f;
-
-                    // kick spectators and chatbots
-                    nMachine::KickSpectators();
-                    ePlayerNetID::RemoveChatbots();
                 }
 
+                // kick spectators and chatbots
+                nMachine::KickSpectators();
+                ePlayerNetID::RemoveChatbots();
+
+                // wait for network messages
+                sn_BasicNetworkSystem.Select( 0.1f );
                 gGame::NetSyncIdle();
             }
         }
@@ -1315,7 +1317,7 @@ void sg_HostGame(){
             uWebInterface::PollNetwork(200);
             gGame::NetSyncIdle();
 
-            sn_BasicNetworkSystem.Select( .1f );
+            sn_BasicNetworkSystem.Select( 1.0f );
 
             // std::cout the players who are logged in:
             numPlayers = sg_NumUsers();
@@ -3655,9 +3657,25 @@ void sg_EnterGameCore( nNetState enter_state ){
         sr_Read_stdin();
         uWebInterface::PollNetwork(200);
         // tDelay( 1000000 / sg_dedicatedFPS );
-        sn_BasicNetworkSystem.Select( 1.0 / sg_dedicatedFPS );
+        if ( sn_BasicNetworkSystem.Select( 1.0 / sg_dedicatedFPS ) )
+        {
+            // new network data arrived, do the most urgent work now
+            tAdvanceFrame();
+            se_SyncGameTimer();
+            REAL time=se_GameTime();
+            if ( time > 0 )
+            {
+                // only simulate the objects that have pending events to execute
+                eGameObject::s_Timestep(sg_currentGame->Grid(), time, 100000.0f );
+
+                // send out updates immediately
+                nNetObject::SyncAll();
+                sn_SendPlanned();
+            }
+        }
 #endif
 
+        // do the regular simulation
         tAdvanceFrame();
         goon=GameLoop();
         st_DoToDo();

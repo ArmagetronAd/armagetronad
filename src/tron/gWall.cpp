@@ -1730,6 +1730,7 @@ void gNetPlayerWall::RealWallReceived( gNetPlayerWall* realWall )
         tASSERT( preliminary && !realWall->preliminary );
 
         // accelerate gridding if the real wall is newer than this
+        if ( tBeg + tEnd < 2 * realWall->tEnd )
         {
             REAL maxGridding=se_GameTime() + 2*sn_Connections[0].ping;
             if ( gridding > maxGridding )
@@ -1772,7 +1773,7 @@ void gNetPlayerWall::RealWallReceived( gNetPlayerWall* realWall )
         if ( overlap > 0 && fabs( dir * realWall->dir ) > 10 * EPS )
             overlap = 0;
 
-        // so good overlap? Go home.
+        // no good overlap? Go home.
         if ( overlap < .8 )
             return;
 
