@@ -26,5 +26,4 @@ automake -a || exit 1
 
 echo "Flagging scripts as executable..."
 chmod 755 $MYDIR/*.sh || exit 1
-
 echo "Done!  You may now run configure and start building."

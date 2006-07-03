@@ -3168,13 +3168,6 @@ void gGame::Analysis(REAL time){
         }
 
     }
-
-    for(i=se_PlayerNetIDs.Len()-1;i>=0;i--)
-    {
-        gAIPlayer *ai = dynamic_cast<gAIPlayer*>(se_PlayerNetIDs(i));
-        if (ai && think)
-            ai->Timestep(time);
-    }
 }
 
 void rotate()
@@ -3485,7 +3478,6 @@ bool gGame::GameLoop(bool input){
 
 
                 Timestep(gtime,true);
-                NetSync();
                 lastTime_gameloop=gtime;
             }
             lastTime_gameloop=gtime;
@@ -3497,12 +3489,21 @@ bool gGame::GameLoop(bool input){
 
         if (sn_GetNetState()!=nCLIENT)
         {
+            // simulate IAs
+            for(int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
+            {
+                gAIPlayer *ai = dynamic_cast<gAIPlayer*>(se_PlayerNetIDs(i));
+                if (ai && think)
+                    ai->Timestep(gtime);
+            }
+
             Analysis(gtime);
 
             // wait for chatting players
             if ( sn_GetNetState()==nSERVER && gtime < sg_lastChatBreakTime + 1 )
                 se_PauseGameTimer( gtime < sg_lastChatBreakTime && ePlayerNetID::WaitToLeaveChat() );
         }
+        NetSync();
 
         if ( gtime<=-PREPARE_TIME+.5 || !goon || !synced )
         {
