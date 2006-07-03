@@ -1585,7 +1585,61 @@ bool gCycleMovement::Timestep( REAL currentTime )
             if ( currentTime < turnTime + EPS )
                 simulateAhead = 0;
 
-            if ( lastTime >= earliestTurnTime && ( forceTurn || dist_to_dest < 0.01 || timeout <= 0 || lastTime >= latestTurnTime ) ){
+            // determine whether to turn left or right (coping with weird axis settings)
+            int turnTo=0;
+            // and whether between the last and next destination, there was one missing that
+            // we didn't receive.
+            bool missed=false;
+
+            {
+                REAL t = currentDestination->direction * dirDrive;
+                bool turn = true;
+
+                missed  = (fabs(t)<.01);
+                if (int(braking) != int(currentDestination->braking))
+                {
+                    turn = false;
+                    missed=!missed;
+                }
+
+                // detect false misses: if the last destination's message ID is just
+                // one below the current destination's message ID, it's a fake
+                if ( missed && lastDestination && lastDestination->messageID == currentDestination->messageID-1 )
+                    missed = false;
+
+                if ( turn )
+                {
+                    // the direction we need to drive in
+                    // see which direction we drive into after a left or right turn
+                    int wn = windingNumberWrapped_;
+                    Grid()->Turn(wn, 1);
+                    eCoord dirPlus = Grid()->GetDirection(wn);
+                    wn = windingNumberWrapped_;
+                    Grid()->Turn(wn, -1);
+                    eCoord dirMinus = Grid()->GetDirection(wn);
+
+                    if ( missed )
+                    {
+                        eCoord dirTurn = (currentDestination->position - pos);
+
+                        // see witch of the alternatives comes closer to the desired direction
+                        turnTo = ( ( fabs( dirMinus * dirTurn ) - .1 * eCoord::F( dirMinus, dirTurn ) )/dirTurn.NormSquared() < ( fabs( dirPlus * dirTurn ) - .1 * eCoord::F( dirPlus, dirTurn ) )/dirTurn.NormSquared() ) ? -1 : +1;
+                    }
+                    else
+                    {
+                        // just see which axis gets closer
+                        eCoord dirTurn = currentDestination->direction;
+
+                        turnTo = ( ( dirMinus - dirTurn ).NormSquared() < ( dirPlus - dirTurn ).NormSquared() ) ? -1 : +1;
+
+                    }
+                }
+            }
+
+            // can we turn already?
+            bool canTurn = ( turnTo == 0 || CanMakeTurn(turnTo) );
+
+            if ( lastTime >= earliestTurnTime && canTurn && ( forceTurn || dist_to_dest < 0.01 || timeout <= 0 || lastTime >= latestTurnTime ) ){
                 forceTurn = false;
                 // con << timeLeft << ", " << earlyTurnTolerance << ", " << rubberActive << ", " << dist_to_dest << "\n";
 
@@ -1624,71 +1678,12 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 //eDebugLine::SetColor( 0,0,1 );
                 //eDebugLine::Draw( pos, 0, pos, 8 );
 
-                REAL t = currentDestination->direction * dirDrive;
-
-                // if we can't turn now, simulate a bit further
-                if ( fabs(t) > .01 && !pendingTurns.empty() && !CanMakeTurn(pendingTurns.back()) )
-                {
-                    REAL nextTurn = GetNextTurn(pendingTurns.back()) + .005;
-                    if ( nextTurn < currentTime )
-                    {
-                        TimestepCore( nextTurn );
-                        if(pendingTurns.back() == 1)
-                            lastTurnTimeRight_ = -100;
-                        else
-                            lastTurnTimeLeft_ = -100;
-                    }
-                    else
-                    {
-                        // not enough time to simulate to turn possibility; skip out of loop
-                        break;
-                    }
-                }
-
                 bool used = false; // flag indicating whether the current destination has been used
-                bool missed=(fabs(t)<.01);
-                if (int(braking) != int(currentDestination->braking))
-                    missed=!missed;
-
-                // detect false misses: if the last destination's message ID is just
-                // one below the current destination's message ID, it's a fake
-                if ( missed && lastDestination && lastDestination->messageID == currentDestination->messageID-1 )
-                    missed = false;
-
-                // determine whether to turn left or right (coping with weird axis settings)
-                int turnTo=0;
-                {
-                    // the direction we need to drive in
-                    // see which direction we drive into after a left or right turn
-                    int wn = windingNumberWrapped_;
-                    Grid()->Turn(wn, 1);
-                    eCoord dirPlus = Grid()->GetDirection(wn);
-                    wn = windingNumberWrapped_;
-                    Grid()->Turn(wn, -1);
-                    eCoord dirMinus = Grid()->GetDirection(wn);
-
-                    if ( missed )
-                    {
-                        eCoord dirTurn = (currentDestination->position - pos);
-
-                        // see witch of the alternatives comes closer to the desired direction
-                        turnTo = ( ( fabs( dirMinus * dirTurn ) - .1 * eCoord::F( dirMinus, dirTurn ) )/dirTurn.NormSquared() < ( fabs( dirPlus * dirTurn ) - .1 * eCoord::F( dirPlus, dirTurn ) )/dirTurn.NormSquared() ) ? -1 : +1;
-                    }
-                    else
-                    {
-                        // just see which axis gets closer
-                        eCoord dirTurn = currentDestination->direction;
-
-                        turnTo = ( ( dirMinus - dirTurn ).NormSquared() < ( dirPlus - dirTurn ).NormSquared() ) ? -1 : +1;
-
-                    }
-
-                }
 
                 if (!missed){ // then we did not miss a destination
                     used = true;
 
-                    if (fabs(t)>.01)
+                    if (turnTo != 0)
                         Turn(turnTo);
                     else{
                         braking = currentDestination->braking;
@@ -1758,10 +1753,48 @@ bool gCycleMovement::Timestep( REAL currentTime )
                          }
                 */
                 sg_ArchiveReal( tsTodo, 9 );
+
+                // we can't turn now, simulate until we can
+                if ( !canTurn )
+                {
+                    REAL nextTurn = GetNextTurn(turnTo);
+                    REAL turnStep = nextTurn - lastTime;
+
+                    // clamp timestep values
+                    if ( turnTime < nextTurn )
+                        turnTime = nextTurn;
+                    if ( earliestTurnTime < nextTurn )
+                        earliestTurnTime = nextTurn;
+                    if ( latestTurnTime < nextTurn )
+                        latestTurnTime = nextTurn;
+
+                    if ( tsTodo > turnStep )
+                    {
+                        tsTodo = turnStep;
+
+                        // if we can simulate to the turn in the next step, reset the turn timers
+                        // so the turn can be executed for sure
+                        if ( tsTodo < ts + simulateAhead && tsTodo > 0 )
+                        {
+                            if(turnTo == 1)
+                                lastTurnTimeRight_ = -100;
+                            else
+                                lastTurnTimeLeft_ = -100;
+                            tASSERT( CanMakeTurn( turnTo ) );
+                        }
+                    }
+                    else
+                    {
+                        // not enough time to simulate to turn possibility; skip out of loop
+                        break;
+                    }
+                }
+
+                sg_ArchiveReal( tsTodo, 9 );
                 // try to turn at the exactly right moment
                 REAL timeLeft = turnTime - lastTime;
                 sg_ArchiveReal( timeLeft, 9 );
-                if ( timeLeft >=0 && tsTodo > timeLeft )
+                if ( timeLeft >= 0 && tsTodo > timeLeft )
                 {
                     // force turn on next iteration, we'll be there
                     forceTurn = true;
@@ -1776,7 +1809,6 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     tsTodo = mints;
                 }
 
-
                 if ( tsTodo < 0 )
                 {
                     // should never happen
@@ -1786,6 +1818,10 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 if ( tsTodo > ts + simulateAhead )
                 {
                     tsTodo = ts + simulateAhead ;
+
+                    // quit from here if there is nothing to do
+                    if ( tsTodo <= EPS )
+                        break;
                 }
 	#ifdef DEBUG
                 if ( tsTodo < 0 )
