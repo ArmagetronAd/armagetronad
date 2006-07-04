@@ -3175,6 +3175,8 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 #endif
             gCycle * cycle = new gCycle(grid, pos, dir, p, 0);
             p->ControlObject(cycle);
+
+            sg_Timestamp();
         }
     }
 }
