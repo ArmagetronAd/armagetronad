@@ -1470,6 +1470,25 @@ static bool sg_UseAntiLagSliding( const eNetGameObject* obj )
 static REAL sg_maxSimulateAhead = .01f;
 static tSettingItem<REAL> sg_maxSimulateAheadConf( "CYCLE_DEST_SIMULATE_AHEAD", sg_maxSimulateAhead );
 
+// while an object of this class exists, turn delay is ignored
+class gTurnDelayOverride
+{
+public:
+    explicit gTurnDelayOverride( bool override )
+    {
+        delay_ = sg_delayCycle;
+        if ( override )
+            sg_delayCycle = 0.0f;
+    }
+
+    ~gTurnDelayOverride()
+    {
+        sg_delayCycle = delay_;
+    }
+private:
+    REAL delay_;
+};
+
 // *******************************************************************************************
 // *
 // *	Timestep
@@ -1507,6 +1526,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
     {
         int timeout=10;
         bool forceTurn = false; // force turning at the next iteration
+        bool overrideTurnDelay=false; // override the turn delay system, turn immediately
 
         // only simulate forward in time
         while (pendingTurns.empty() && currentDestination && timeout > 0 && currentTime >= lastTime - EPS )
@@ -1637,7 +1657,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
             }
 
             // can we turn already?
-            bool canTurn = ( turnTo == 0 || CanMakeTurn(turnTo) );
+            bool canTurn = ( turnTo == 0 || CanMakeTurn(turnTo) || overrideTurnDelay );
 
             if ( lastTime >= earliestTurnTime && canTurn && ( forceTurn || dist_to_dest < 0.01 || timeout <= 0 || lastTime >= latestTurnTime ) ){
                 forceTurn = false;
@@ -1684,7 +1704,10 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     used = true;
 
                     if (turnTo != 0)
+                    {
+                        gTurnDelayOverride override( overrideTurnDelay );
                         Turn(turnTo);
+                    }
                     else{
                         braking = currentDestination->braking;
                         if (sn_GetNetState()!=nCLIENT)
@@ -1709,6 +1732,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     REAL side = (currentDestination->position - pos) * dirDrive;
                     if (fabs(side)>1)
                     {
+                        gTurnDelayOverride override( overrideTurnDelay );
                         Turn(turnTo);
                     }
                     else
@@ -1768,19 +1792,15 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     if ( latestTurnTime < nextTurn )
                         latestTurnTime = nextTurn;
 
-                    if ( tsTodo > turnStep )
+                    if ( currentTime - lastTime > turnStep )
                     {
                         tsTodo = turnStep;
 
-                        // if we can simulate to the turn in the next step, reset the turn timers
-                        // so the turn can be executed for sure
+                        // if we can simulate to the turn in the next step, do so, overriding
+                        // the turn delay then.
                         if ( tsTodo < ts + simulateAhead && tsTodo > 0 )
                         {
-                            if(turnTo == 1)
-                                lastTurnTimeRight_ = -100;
-                            else
-                                lastTurnTimeLeft_ = -100;
-                            tASSERT( CanMakeTurn( turnTo ) );
+                            overrideTurnDelay = true;
                         }
                     }
                     else
@@ -1850,10 +1870,6 @@ bool gCycleMovement::Timestep( REAL currentTime )
         if(currentTime>nextTurn) {
             if ( nextTurn > lastTime )
                 TimestepCore( nextTurn );
-            if(pendingTurns.front() == 1)
-                lastTurnTimeRight_ = -100;
-            else
-                lastTurnTimeLeft_ = -100;
 
             //con << "Executing delayed turn at time " << lastTime << "\n";
             Turn(pendingTurns.front());
