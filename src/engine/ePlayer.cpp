@@ -1156,9 +1156,17 @@ void handle_chat_admin_commands(tJUST_CONTROLLED_PTR< ePlayerNetID > &p, tString
         else
             params = say.SubStr(say.StrPos(" ") + 1);
 
+        // the password is not stored in the recording, hence we have to store the
+        // result of the password test
+        bool accept = true;
+        static const char * section = "REMOTE_LOGIN";
+        if ( !tRecorder::Playback( section, accept ) )
+            accept = ( params == sg_adminPass && sg_adminPass != "NONE" );
+        tRecorder::Record( section, accept );
+
         //change this later to read from a password file or something...
         //or integrate it with auth if we ever get that done...
-        if (params == sg_adminPass && sg_adminPass != "NONE") {
+        if ( accept ) {
             p->beLoggedIn();
             p->setAccessLevel(1);
             sn_ConsoleOut("You have been logged in!\n",p->Owner());
