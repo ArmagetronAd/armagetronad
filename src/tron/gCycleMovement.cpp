@@ -2739,7 +2739,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
     sg_ArchiveReal( rubberEffectiveness, 9 );
 
     // TODO: solve smooth position correction trouble with rubber
-    if ( player && ( rubber_granted > rubber || sn_GetNetState() == nCLIENT ) && sg_rubberCycleSpeed > 0 && step > 0 && ( sn_GetNetState() == nCLIENT || rubberEffectiveness > 0 ) )
+    if ( player && ( rubber_granted > rubber || sn_GetNetState() == nCLIENT || !Vulnerable() ) && sg_rubberCycleSpeed > 0 && step > 0 && ( sn_GetNetState() == nCLIENT || rubberEffectiveness > 0 ) )
     {
         //clamp effectiveness of rubber
         if ( rubberEffectiveness <= 0 )

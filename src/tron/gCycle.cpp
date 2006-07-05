@@ -2162,6 +2162,13 @@ void gCycle::InteractWith(eGameObject *target,REAL,int){
 }
 
 void gCycle::KillAt( const eCoord& deathPos){
+    // don't kill invulnerable cycles
+    if ( !Vulnerable() )
+    {
+        MoveSafely( deathPos, lastTime, lastTime );
+        return;
+    }
+
     // find the killer from the enemy influence storage
     ePlayerNetID const * constHunter = enemyInfluence.GetEnemy();
     ePlayerNetID * hunter = Player();
@@ -2357,51 +2364,54 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
         gCycle *otherPlayer=w->Cycle();
 
         REAL otherTime = w->Time(a);
-        if(time < otherTime*(1-EPS))
+        if(time < otherTime*(1-EPS) )
         {
             // we were first!
-            static bool tryToSaveFutureWallOwner = true;
-
-            if ( tryToSaveFutureWallOwner && sn_GetNetState() != nCLIENT && otherPlayer->currentWall && w == otherPlayer->currentWall->Wall() && otherPlayer->LastTime() < time + .5f )
+            if ( otherPlayer->Vulnerable() )
             {
-                // teleport the other cycle back to the point before the collision; its next timestep
-                // will simulate the collision again from the right viewpoint
-                // determine the distance of the pushback
-                REAL d = otherPlayer->GetDistanceSinceLastTurn() * .001;
-                if ( d < .01 )
-                    d = .01;
-                REAL maxd = eCoord::F( otherPlayer->dirDrive, collPos - otherPlayer->GetLastTurnPos() ) * .5/otherPlayer->dirDrive.NormSquared();
-                if ( d > maxd )
-                    d = maxd;
-                if ( d < 0 )
+                static bool tryToSaveFutureWallOwner = true;
+
+                if ( tryToSaveFutureWallOwner && sn_GetNetState() != nCLIENT && otherPlayer->currentWall && w == otherPlayer->currentWall->Wall() && otherPlayer->LastTime() < time + .5f )
                 {
-                    // err, trouble. Better kill the other player.
+                    // teleport the other cycle back to the point before the collision; its next timestep
+                    // will simulate the collision again from the right viewpoint
+                    // determine the distance of the pushback
+                    REAL d = otherPlayer->GetDistanceSinceLastTurn() * .001;
+                    if ( d < .01 )
+                        d = .01;
+                    REAL maxd = eCoord::F( otherPlayer->dirDrive, collPos - otherPlayer->GetLastTurnPos() ) * .5/otherPlayer->dirDrive.NormSquared();
+                    if ( d > maxd )
+                        d = maxd;
+                    if ( d < 0 )
+                    {
+                        // err, trouble. Better kill the other player.
+                        if ( currentWall )
+                            otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, otherPlayer );
+                        otherPlayer->KillAt( collPos );
+                    }
+
+                    // do the move
+                    otherPlayer->MoveSafely( collPos-otherPlayer->dirDrive*d, otherPlayer->LastTime(), otherTime - d/otherPlayer->Speed() );
+                    otherPlayer->currentWall->Update( otherPlayer->lastTime, otherPlayer->pos );
+                    otherPlayer->dropWallRequested_ = false;
+
+                    // drop our wall so collisions are more accurate
+                    dropWallRequested_ = true;
+                }
+                else
+                {
+                    // the unfortunate other player made a turn in the meantime or too much time has passed. We cannot unroll its movement,
+                    // so we have to destroy it.
                     if ( currentWall )
                         otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, otherPlayer );
+
                     otherPlayer->KillAt( collPos );
                 }
-
-                // do the move
-                otherPlayer->MoveSafely( collPos-otherPlayer->dirDrive*d, otherPlayer->LastTime(), otherTime - d/otherPlayer->Speed() );
-                otherPlayer->currentWall->Update( otherPlayer->lastTime, otherPlayer->pos );
-                otherPlayer->dropWallRequested_ = false;
-
-                // drop our wall so collisions are more accurate
-                dropWallRequested_ = true;
-            }
-            else
-            {
-                // the unfortunate other player made a turn in the meantime or too much time has passed. We cannot unroll its movement,
-                // so we have to destroy it.
-                if ( currentWall )
-                    otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, otherPlayer );
-
-                otherPlayer->KillAt( collPos );
             }
         }
         else // sad but true
         {
-            // this cycle has to die here unless it has rubber left
+            // this cycle has to die here unless it has rubber left or is invulnerable (checked on catching the exception, and besides, this code path isn't called for invulnerable cycles)
             throw gCycleDeath( collPos );
 
             //			REAL dist = w->Pos( a );
