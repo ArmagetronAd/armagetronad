@@ -2853,11 +2853,14 @@ static void sn_SendPlanned2( REAL dt ){
     // empty the send buffers
     for(int i=0;i<=MAXCLIENTS+1;i++){
         nConnectionInfo & connection = sn_Connections[i];
-        if (connection.sendBuffer_.Len()>0 && connection.bandwidthControl_.CanSend() )
-            nMessage::SendCollected(i);
+        if ( connection.socket )
+        {
+            if (connection.sendBuffer_.Len()>0 && connection.bandwidthControl_.CanSend() )
+                nMessage::SendCollected(i);
 
-        // update bandwidth usage and other time related data
-        connection.Timestep( dt );
+            // update bandwidth usage and other time related data
+            connection.Timestep( dt );
+        }
     }
 }
 
