@@ -36,7 +36,13 @@ class eLag
 {
 public:
     //! call on the server: report that a client is lagging
-    static REAL Report( int client, REAL lag );
+    static void Report( int client, REAL lag );
+
+    //! call on the server: ask for lag credit to backdate received commands
+    static REAL TakeCredit( int client, REAL lag );
+
+    //! call on the server: ask how much lag credit is left
+    static REAL Credit( int client );
 
     //! call on the client: returns the amount of lag that is currently to be compensated by the game code
     static REAL Current();
