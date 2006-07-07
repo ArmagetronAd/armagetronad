@@ -35,9 +35,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // client side settings
 static REAL se_maxLagSpeedup=.2;        // maximal speed increase of timer while lag is compensated for
-static REAL se_lagSlowDecayTime=120.0;  // timescale the slow lag measurement decays on
+static REAL se_lagSlowDecayTime=30.0;   // timescale the slow lag measurement decays on
 static REAL se_lagFastDecayTime=5.0;    // timescale the fast lag measurement decays on
-static REAL se_lagSlowWeight=.1f;       // extra weight lag reports from the server influence the slow lag compensation with
+static REAL se_lagSlowWeight=.2f;       // extra weight lag reports from the server influence the slow lag compensation with
 static REAL se_lagFastWeight=1.0f;      // extra weight lag reports from the server influence the fast lag compensation with
 
 static tSettingItem< REAL > se_maxLagSpeedupConf( "LAG_MAX_SPEEDUP_TIMER", se_maxLagSpeedup );
@@ -49,7 +49,7 @@ static tSettingItem< REAL > se_lagFastWeightConf( "LAG_FAST_WEIGHT", se_lagFastW
 //! lag tracker on client
 class nClientLag
 {public:
-    nClientLag():lagSlow_(0), lagFast_(0), smoothLag_(0) {}
+    nClientLag():lagLast_(0), lagSlow_(0), lagFast_(0), smoothLag_(0) {}
 
     REAL SmoothLag(){ return smoothLag_; }
 
@@ -58,6 +58,10 @@ class nClientLag
 #ifdef DEBUG
         con << "Received message of " << lag << " seconds of lag, weight " << weight << "\n";
 #endif
+
+        // memorize the time of serious reports
+        if ( weight > 1 )
+            lagLast_ = tSysTimeFloat();
 
         REAL slowWeight = weight * se_lagSlowWeight;
         slowWeight = slowWeight > 1 ? 1 : slowWeight;
@@ -85,14 +89,20 @@ class nClientLag
         if (  smoothLag_ > lagFast_ )
             smoothLag_ = lagFast_;
 
-        // let regular lag decay slowly
-        lagSlow_ *= se_lagSlowDecayTime/( se_lagSlowDecayTime + dt );
-        lagFast_ *= se_lagFastDecayTime/( se_lagFastDecayTime + dt );
+        // the last serious lag report came from this many seconds ago
+        REAL lastLag = tSysTimeFloat() - lagLast_;
+
+        // let regular lag decay
+        if ( lastLag > se_lagSlowDecayTime )
+            lagSlow_ *= se_lagSlowDecayTime/( se_lagSlowDecayTime + dt );
+        if ( lastLag > se_lagFastDecayTime )
+            lagFast_ *= se_lagFastDecayTime/( se_lagFastDecayTime + dt );
     }
 private:
-    REAL lagSlow_;   //! most accurate estimate of lag
-    REAL lagFast_;   //! faster adapting, but less accurate estimate of lag
-    REAL smoothLag_; //! smoothed estimate of lag
+    REAL lagLast_;   //!< the last time a serious lag report came in
+    REAL lagSlow_;   //!< most accurate estimate of lag
+    REAL lagFast_;   //!< faster adapting, but less accurate estimate of lag
+    REAL smoothLag_; //!< smoothed estimate of lag
 };
 
 static nClientLag se_clientLag;
