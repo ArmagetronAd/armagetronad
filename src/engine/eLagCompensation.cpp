@@ -48,8 +48,7 @@ static tSettingItem< REAL > se_lagFastWeightConf( "LAG_FAST_WEIGHT", se_lagFastW
 
 //! lag tracker on client
 class nClientLag
-{
-public:
+{public:
     nClientLag():lagSlow_(0), lagFast_(0), smoothLag_(0) {}
 
     REAL SmoothLag(){ return smoothLag_; }
@@ -60,10 +59,13 @@ public:
         con << "Received message of " << lag << " seconds of lag, weight " << weight << "\n";
 #endif
 
-        lag *= weight;
+        REAL slowWeight = weight * se_lagSlowWeight;
+        slowWeight = slowWeight > 1 ? 1 : slowWeight;
+        REAL fastWeight = weight * se_lagFastWeight;
+        fastWeight = fastWeight > 1 ? 1 : fastWeight;
 
-        lagFast_ = smoothLag_ + lag * se_lagFastWeight;
-        lagSlow_ = ( smoothLag_ > lagSlow_ ? lagSlow_ : smoothLag_ ) + lag * se_lagSlowWeight;
+        lagFast_ = smoothLag_ + lag * fastWeight;
+        lagSlow_ = ( smoothLag_ > lagSlow_ ? lagSlow_ : smoothLag_ ) + lag * slowWeight;
     }
 
     void Timestep(REAL dt)
@@ -114,6 +116,9 @@ static nDescriptor se_receiveLagMessageDescriptor( 240, se_receiveLagMessage,"la
 // maximal seconds of lag credit
 static REAL se_lagCredit = .5f;
 
+// maximal seconds of lag credit given in a single event
+static REAL se_lagCreditSingle = .1f;
+
 // sweet spot, the fill ratio of lag credit the server tries to keep the client at
 static REAL se_lagCreditSweetSpot = .5f;
 
@@ -121,6 +126,7 @@ static REAL se_lagCreditSweetSpot = .5f;
 static REAL se_lagCreditTime = 600.0f;
 
 static tSettingItem< REAL > se_lagCreditConf( "LAG_CREDIT", se_lagCredit );
+static tSettingItem< REAL > se_lagCreditSingleConf( "LAG_CREDIT_SINGLE", se_lagCreditSingle );
 static tSettingItem< REAL > se_lagCreditSweetSpotConf( "LAG_SWEET_SPOT", se_lagCreditSweetSpot );
 static tSettingItem< REAL > se_lagCreditTimeConf( "LAG_CREDIT_TIME", se_lagCreditTime );
 
@@ -159,6 +165,9 @@ public:
 
     void Report( REAL lag )
     {
+        // clamp
+        lag = lag > se_lagCreditSingle ? se_lagCreditSingle : lag;
+
         // get info
         REAL credit = Credit();
         if ( credit < EPS )
@@ -180,7 +189,6 @@ public:
         if ( se_lagCreditSweetSpot > 0 )
         {
             weight = ( (creditUsed_+2*lag)/credit )/se_lagCreditSweetSpot;
-            weight = weight > 1 ? 1 : weight;
         }
         *mess << weight;
 
@@ -197,6 +205,9 @@ public:
 #ifdef DEBUG
         con << "Requesting " << lag << " seconds of lag credit for client " << client_;
 #endif
+
+        // clamp
+        lag = lag > se_lagCreditSingle ? se_lagCreditSingle : lag;
 
         // get values
         REAL credit = Credit();
@@ -312,7 +323,11 @@ REAL eLag::Credit( int client )
 {
     tVERIFY( 1 <= client && client <= MAXCLIENTS );
 
-    return se_serverLag[client].Credit();
+    // see how much total credit is left
+    REAL credit = se_serverLag[client].CreditLeft();
+
+    // but clamp it with the maximum single credit
+    return credit > se_lagCreditSingle ? se_lagCreditSingle : credit;
 }
 
 // *******************************************************************************
