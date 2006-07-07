@@ -780,6 +780,9 @@ bool gCycle::IsMe( eGameObject const * other ) const
     return other == this || other == extrapolator_;
 }
 
+// from gCycleMovement.cpp
+extern void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness );
+
 void gCycle::OnNotifyNewDestination( gDestination* dest )
 {
 #ifdef DEBUG
@@ -806,35 +809,90 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
     // resimulate_ = ( sn_GetNetState() == nCLIENT );
 
     // detect lag slides
-    REAL lag = lastTime - dest->gameTime;
-    if ( lag > 0 && sn_GetNetState() == nSERVER )
+    if( sn_GetNetState() == nSERVER )
     {
-        eLag::Report( Owner(), lag );
-        if ( currentWall && currentWall->Wall() )
+        // see how far we should be simulated in an ideal world
+        REAL simTime=se_GameTime() - Lag();
+
+        REAL lag = simTime - dest->gameTime;  // the real lag
+        REAL lagOffset = simTime - lastTime;  // difference between real lag and practical lag (what we need to compensate)
+        if ( lag > 0 && sn_GetNetState() == nSERVER )
         {
-            // see how much we can go back
-            REAL minDist   = currentWall->Wall()->Pos(0);
-            REAL maxGoBack = ( distance - minDist ) * .8;
-
-            // see how much we should go back and clamp it
-            REAL stepBack = distance - dest->distance;
-            if ( stepBack > maxGoBack )
+            eLag::Report( Owner(), lag );
+            if ( currentWall && currentWall->Wall() )
             {
-                stepBack = maxGoBack;
-                lag = stepBack/verletSpeed_;
-            }
+                lag -= lagOffset; // switch to practical lag
 
-            // ask lag compensation how much we are allowed to go back
-            lag = eLag::TakeCredit( Owner(), lag );
+                // no compensation? Just quit.
+                if ( lag < 0 )
+                    return;
 
-            // go back in time
-            TimestepCore( lastTime - lag );
+                // see how much we can go back
+                REAL minDist   = currentWall->Wall()->Pos(0);
+                REAL maxGoBack = ( distance - minDist ) * .8;
 
-            // see if we went back too far (should almost never happen)
-            if ( distance < minDist )
-            {
-                st_Breakpoint();
-                TimestepCore( lastTime + ( distance - minDist )/verletSpeed_ );
+                // see how much we should go back
+                REAL stepBack = distance - dest->distance;
+
+                if ( rubberSpeedFactor < 1-EPS )
+                {
+                    // make the correction distance based so we don't loosen a grind
+                    maxGoBack = stepBack;
+                }
+
+                // clamp so we don't go back too far
+                if ( stepBack > maxGoBack )
+                {
+                    stepBack = maxGoBack;
+                    lag = rubberSpeedFactor*stepBack/verletSpeed_;
+                }
+
+                // ask lag compensation how much we are allowed to go back; switch to real lag
+                // for the credit
+                lag = eLag::TakeCredit( Owner(), lag + lagOffset ) - lagOffset;
+
+                // no compensation? Just quit.
+                if ( lag < 0 )
+                    return;
+
+                // go back in time
+                if ( rubberSpeedFactor >= 1-EPS )
+                {
+                    // rubber is inactive, basic timestep is enough
+                    TimestepCore( simTime - lag );
+                }
+                else
+                {
+                    // rubber is active. Take care!
+
+                    // just extrapolate the movement backwards
+                    REAL step = lag * verletSpeed_;
+                    lastTime -= lag;
+
+                    // rubber is a bit tricker, we need the effectiveness
+                    REAL rubberGranted, rubberEffectiveness;
+                    sg_RubberValues( player, verletSpeed_, rubberGranted, rubberEffectiveness );
+                    if ( rubberEffectiveness > 0 )
+                        rubber -= step/rubberEffectiveness;
+
+                    if ( rubber < 0 )
+                        rubber = 0;
+
+                    // position and distance are easy
+                    step *= rubberSpeedFactor;
+                    distance -= step;
+                    pos = pos - dirDrive * step;
+
+                    // undo acceleration
+                    verletSpeed_ -= acceleration * lag;
+                }
+
+                // see if we went back too far (should almost never happen)
+                if ( distance < minDist )
+                {
+                    st_Breakpoint();
+                    TimestepCore( lastTime + ( distance - minDist )/verletSpeed_ );
+                }
             }
         }
     }

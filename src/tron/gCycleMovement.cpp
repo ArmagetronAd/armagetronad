@@ -2156,7 +2156,7 @@ void gCycleMovement::InitAfterCreation( void )
 static nVersionFeature sg_correctAccelerationScaling( 8 );
 
 // calculate essential rubber values
-static void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness )
+void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness )
 {
     // base values
     max=sg_rubberCycle;
