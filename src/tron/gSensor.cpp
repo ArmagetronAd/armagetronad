@@ -48,7 +48,7 @@ void gSensor::PassEdge(const eWall *ww,REAL time,REAL a,int r){
         if (w)
         {
             gCycle *owner=w->Cycle();
-            if (owner==owned)
+            if (owner && owner->IsMe( owned ) )
             {
                 type=gSENSOR_SELF;
             }

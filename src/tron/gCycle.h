@@ -238,6 +238,8 @@ public:
     REAL	        ThisWallsLength() const;                            //!< the maximum total length of this cycle's wall (including rubber shrink)
     static	REAL	ExplosionRadius()	 { return explosionRadius;	}	//!< the radius of the holes blewn in by an explosion
 
+    bool    IsMe( eGameObject const * other ) const;              //!< checks whether the passed pointer is logically identical with this cycle
+
     // the network routines:
     gCycle(nMessage &m);
     virtual void WriteCreate(nMessage &m);

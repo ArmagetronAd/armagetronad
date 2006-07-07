@@ -776,6 +776,11 @@ static void BroadCastNewDestination(gCycleMovement *c, gDestination *dest){
     m->BroadCast();
 }
 
+bool gCycle::IsMe( eGameObject const * other ) const
+{
+    return other == this || other == extrapolator_;
+}
+
 void gCycle::OnNotifyNewDestination( gDestination* dest )
 {
 #ifdef DEBUG
