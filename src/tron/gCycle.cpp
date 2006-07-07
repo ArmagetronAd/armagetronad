@@ -781,6 +781,9 @@ bool gCycle::IsMe( eGameObject const * other ) const
     return other == this || other == extrapolator_;
 }
 
+// from gCycleMovement.cpp
+extern void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness );
+
 void gCycle::OnNotifyNewDestination( gDestination* dest )
 {
 #ifdef DEBUG
@@ -829,7 +832,38 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
             lag = eLag::TakeCredit( Owner(), lag );
 
             // go back in time
-            TimestepCore( lastTime - lag );
+            if ( rubberSpeedFactor >= 1-EPS )
+            {
+                // rubber is inactive, basic timestep is enough
+                TimestepCore( lastTime - lag );
+            }
+            else
+            {
+                // rubber is active. Take care! First, take a zero timesep
+                // to get the current rubber speed factor
+                // gCycleMovement::TimestepCore( lastTime );
+                
+                // then just extrapolate the movement backwards
+                REAL step = lag * verletSpeed_;
+                lastTime -= lag;
+
+                // rubber is a bit tricker, we need the effectiveness
+                REAL rubberGranted, rubberEffectiveness;
+                sg_RubberValues( player, verletSpeed_, rubberGranted, rubberEffectiveness );
+                if ( rubberEffectiveness > 0 )
+                    rubber -= step/rubberEffectiveness;
+                
+                if ( rubber < 0 )
+                    rubber = 0;
+
+                // position and distance are easy
+                step *= rubberSpeedFactor;
+                distance -= step;
+                pos = pos - dirDrive * step;
+
+                // undo acceleration
+                verletSpeed_ -= acceleration * lag;
+            }
 
             // see if we went back too far (should almost never happen)
             if ( distance < minDist )
