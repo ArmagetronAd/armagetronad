@@ -1,6 +1,7 @@
 Changes since 0.2.8.2:
 
   New settings:
+- LAG_*: controls game level lag compensation.
 - FILTER_NAME_MIDDLE: collapses multiple whitespaces to one in player names.
 - FORTRESS_CONQEST_TIMEOUT: if an enemy contact with a zone happens longer ago than
   this value, it is discarded from zone memory.
@@ -24,6 +25,15 @@ Changes since 0.2.8.2:
   right at the same time.
 
   Featurelets:
+- The dedicated server no longer uses a fixed delay, but a select() call (that
+  returns when network data arrives) to idle. When data arrives, it does the minimum
+  amount of work before it sends out the responses, resulting in lower latency. It is
+  now safe to decrease DEDICATED_FPS to 20 or 10, latency is no longer influenced
+  by that setting.
+- Game level lag compensation. When a command arrives from a client that is delayed,
+  it is backdated to the time it was issued, provided enough "lag credit" is left.
+  The client is informed of the delay so it can compensate in the future, which it does
+  by forging the game timer.
 - Nonnormalized axes and axes with odd turning directions are now properly supported
 - The camera has a memory which player you like to watch. Every time you manually switch
   the camera and your favorite player is not dead, the favorite is set to the currently 
@@ -37,6 +47,8 @@ Changes since 0.2.8.2:
   FULLSCREEN_MESSAGE <timeout> <message content>
 
   Bugfixes:
+- When extrapolating, the game's sensors never detected own or teammates' walls,
+  it mistook them for enemy walls.
 - The acceleration and boost system always used settings for enemy walls instead of
   settings for team players' walls. That means that old clients connecting to a
   0.2.8.3+ server that has CYCLE_ACCEL_ENEMY and CYCLE_ACCEL_TEAM set to different
