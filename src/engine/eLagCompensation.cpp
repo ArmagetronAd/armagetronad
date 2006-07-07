@@ -140,6 +140,9 @@ static tSettingItem< REAL > se_lagCreditSingleConf( "LAG_CREDIT_SINGLE", se_lagC
 static tSettingItem< REAL > se_lagCreditSweetSpotConf( "LAG_SWEET_SPOT", se_lagCreditSweetSpot );
 static tSettingItem< REAL > se_lagCreditTimeConf( "LAG_CREDIT_TIME", se_lagCreditTime );
 
+// see if a client supports lag compensation
+static nVersionFeature se_clientLagCompensation( 14 );
+
 //! lag tracker on server
 class nServerLag
 {
@@ -175,6 +178,10 @@ public:
 
     void Report( REAL lag )
     {
+        // see if it is useful to report
+        if ( ! se_clientLagCompensation.Supported( client_ ) )
+            return;
+
         // clamp
         lag = lag > se_lagCreditSingle ? se_lagCreditSingle : lag;
 
