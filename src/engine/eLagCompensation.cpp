@@ -216,6 +216,9 @@ public:
         con << "Requesting " << lag << " seconds of lag credit for client " << client_;
 #endif
 
+        // if everyone is lagging, delete the used credit
+        Balance();
+
         // clamp
         lag = lag > se_lagCreditSingle ? se_lagCreditSingle : lag;
 
@@ -250,6 +253,8 @@ public:
 
         return lag;
     }
+
+    static void Balance();
 private:
     REAL creditUsed_; //!< the used lag credit
     double lastTime_; //!< the last time lag credit was calculated
@@ -258,6 +263,36 @@ private:
 };
 
 nServerLag se_serverLag[MAXCLIENTS+1];
+
+// credit amnesty: if everyone is lagging, it must be the server's fault. Delete the used credit.
+void nServerLag::Balance()
+{
+    int i;
+
+    // only if many users are online
+    if ( sn_NumUsers() <= 1 )
+        return;
+
+    // find the minimum used credit
+    REAL minCredit = se_lagCredit;
+    for ( i = MAXCLIENTS; i>0; --i )
+    {
+        if ( sn_Connections[i].socket )
+        {
+            REAL credit = se_serverLag[i].creditUsed_;
+            if ( credit < minCredit )
+                minCredit = credit;
+        }
+    }
+
+    // find out how much you can take away
+    REAL amnesty = minCredit - se_lagCredit * se_lagCreditSweetSpot;
+
+    // and take it away from everyone
+    if ( amnesty > 0 )
+        for ( i = MAXCLIENTS; i>0; --i )
+            se_serverLag[i].creditUsed_ -= amnesty;
+}
 
 // callback resetting the lag credit on login/logout
 static void login_callback(){
