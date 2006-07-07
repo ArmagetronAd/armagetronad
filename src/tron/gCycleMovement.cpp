@@ -39,6 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ePlayer.h"
 #include "eDebugLine.h"
 #include "eGrid.h"
+#include "eLagCompensation.h"
+#include "eTeam.h"
 
 #include "gWall.h"
 #include "gSensor.h"
@@ -2029,6 +2031,7 @@ void gCycleMovement::CopyFrom( const gCycleMovement & other )
     // std::cout << "copy: " << brakingReservoir << ":" << braking << "\n";
 
     // transfer additional data
+    team            = other.team;
     distance        = other.distance;
     lastTimestep_   = other.lastTimestep_;
     verletSpeed_    = other.verletSpeed_;
@@ -2884,6 +2887,10 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
             {
                 // calculate time tolerance to capture packet loss...
                 REAL tolerance = Lag() * sg_packetLossTolerance;
+
+                // add lag credit on top of that
+                if ( Owner() > 0 )
+                    tolerance += eLag::Credit( Owner() );
 
                 // add lag fluctuation to the mix
                 if ( sn_GetNetState() == nSERVER && player && player->Owner() != 0 )

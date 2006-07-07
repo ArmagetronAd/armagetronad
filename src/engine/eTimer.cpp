@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRecorder.h"
 #include "tMath.h"
 #include "tConfiguration.h"
+#include "eLagCompensation.h"
 
 eTimer *se_mainGameTimer=NULL;
 
@@ -202,7 +203,7 @@ static bool se_SmoothTime()
 
 REAL eTimer::Time()
 {
-    return ( smoothedSystemTime_ - startTime_ ) - startTimeSmoothedOffset_;
+    return ( smoothedSystemTime_ - startTime_ ) - startTimeSmoothedOffset_ + eLag::Current();
 }
 
 void eTimer::SyncTime(){
@@ -238,6 +239,9 @@ void eTimer::SyncTime(){
     }
 #endif
 #endif
+
+    // update lag compensation
+    eLag::Timestep( timeStep );
 
     // store and average frame times
     spf_ = timeStep;

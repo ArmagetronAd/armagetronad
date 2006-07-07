@@ -49,6 +49,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nKrawall.h"
 #include "gAIBase.h"
 #include "eDebugLine.h"
+#include "eLagCompensation.h"
 #include "gArena.h"
 #include "gStatistics.h"
 
@@ -740,7 +741,6 @@ static void new_destination_handler(nMessage &m)
                 gCycle* c = dynamic_cast<gCycle *>(o);
                 if (c)
                 {
-                    c->AddDestination(dest);
                     if ( c->Player() && !dest->Chatting() )
                         c->Player()->Activity();
 
@@ -753,6 +753,8 @@ static void new_destination_handler(nMessage &m)
                     // gameTime += .2;
 
                     dest->SetGameTime( gameTime );
+
+                    c->AddDestination(dest);
                     dest = 0;
                 }
             }
@@ -771,6 +773,11 @@ static void BroadCastNewDestination(gCycleMovement *c, gDestination *dest){
     m->Write(c->ID());
     *m << dest->GetGameTime();
     m->BroadCast();
+}
+
+bool gCycle::IsMe( eGameObject const * other ) const
+{
+    return other == this || other == extrapolator_;
 }
 
 void gCycle::OnNotifyNewDestination( gDestination* dest )
@@ -797,6 +804,40 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
 
     // start a new simulation in any case. The server may simulate the movement a bit differently at the turn.
     // resimulate_ = ( sn_GetNetState() == nCLIENT );
+
+    // detect lag slides
+    REAL lag = lastTime - dest->gameTime;
+    if ( lag > 0 && sn_GetNetState() == nSERVER )
+    {
+        eLag::Report( Owner(), lag );
+        if ( currentWall && currentWall->Wall() )
+        {
+            // see how much we can go back
+            REAL minDist   = currentWall->Wall()->Pos(0);
+            REAL maxGoBack = ( distance - minDist ) * .8;
+
+            // see how much we should go back and clamp it
+            REAL stepBack = distance - dest->distance;
+            if ( stepBack > maxGoBack )
+            {
+                stepBack = maxGoBack;
+                lag = stepBack/verletSpeed_;
+            }
+
+            // ask lag compensation how much we are allowed to go back
+            lag = eLag::TakeCredit( Owner(), lag );
+
+            // go back in time
+            TimestepCore( lastTime - lag );
+
+            // see if we went back too far (should almost never happen)
+            if ( distance < minDist )
+            {
+                st_Breakpoint();
+                TimestepCore( lastTime + ( distance - minDist )/verletSpeed_ );
+            }
+        }
+    }
 }
 
 

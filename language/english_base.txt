@@ -349,6 +349,28 @@ allow_impostors_help               If set to 1, players with identical names are
 #********************************************
 #********************************************
 #
+#       Lag compensation
+#
+#********************************************
+#********************************************
+
+lag_max_speedup_timer_help         Maximal speed increase of timer while lag is compensated for.
+lag_slow_time_help                 Timescale the slow lag measurement decays on.
+lag_fast_time_help                 Timescale the fast lag measurement decays on.
+lag_slow_weight_help               Extra weight lag reports from the server influence the slow lag compensation with.
+lag_fast_weight_help               Extra weight lag reports from the server influence the fast lag compensation with.
+
+lag_credit_help                    Maximal seconds of total lag credit.
+lag_credit_single_help             Maximal seconds of lag credit for a single lag event.
+lag_sweet_spot_help                Sweet spot, the fill ratio of lag credit the server tries to keep the client at.
+lag_credit_time_help               Timescale lag credit is restored on.
+
+lag_offset_client_help             Extra amount of lag compensation, determined by the client.
+lag_offset_server_help             Extra amount of lag compensation, determined by the server.
+
+#********************************************
+#********************************************
+#
 #       Banning
 #
 #********************************************

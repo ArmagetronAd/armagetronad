@@ -49,6 +49,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #ifndef WIN32
 #include <arpa/inet.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
 #include <netdb.h>
 #include <sys/param.h>
 #include <sys/ioctl.h>
@@ -1507,8 +1509,21 @@ int nSocket::Create( void )
     // Tutorial on using Windows 98+ RSVP (QoS / Resource reSerVation Protocol)
     // http://msdn.microsoft.com/msdnmag/issues/01/04/qos/default.aspx
 
-    // TODO: Linux only way setting the IP_TOS ?
-    // http://homepages.cwi.nl/~aeb/linux/man2html/man2/getsockopt.2.html
+    // set TOS to low latency ( see manpages getsockopt(2), ip(7) and socket(7) )
+    // maybe this works for Windows, too?
+#ifndef WIN32
+    char tos = IPTOS_LOWDELAY;
+    int ret = setsockopt( socket_, SOL_IP, IP_TOS, &tos, sizeof(char) );
+
+    // remove this error reporting some time later, the success is not critical
+    if ( ret != 0 )
+    {
+        static bool warn=true;
+        if ( warn )
+            con << "Setting TOS to LOWDELAY failed.\n";
+        warn=false;
+    }
+#endif    
 
     // unblock it
     bool _true = true;
