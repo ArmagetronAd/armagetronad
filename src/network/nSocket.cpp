@@ -47,6 +47,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #ifndef WIN32
 #include <arpa/inet.h> 
+#include <netinet/in.h>
+#include <netinet/ip.h>
 #include <netdb.h>
 #include <sys/param.h>
 #include <sys/ioctl.h>
@@ -1500,6 +1502,22 @@ int nSocket::Create( void )
     socket_ = socket( family_, socktype_, protocol_ );
     if ( socket_ < 0 )
         return -1;
+
+    // set TOS to low latency ( see manpages getsockopt(2), ip(7) and socket(7) )
+    // maybe this works for Windows, too?
+#ifndef WIN32
+    char tos = IPTOS_LOWDELAY;
+    int ret = setsockopt( socket_, SOL_IP, IP_TOS, &tos, sizeof(char) );
+
+    // remove this error reporting some time later, the success is not critical
+    if ( ret != 0 )
+    {
+        static bool warn=true;
+        if ( warn )
+            con << "Setting TOS to LOWDELAY failed.\n";
+        warn=false;
+    }
+#endif    
 
     // unblock it
     bool _true = true;
