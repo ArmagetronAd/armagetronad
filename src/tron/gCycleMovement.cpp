@@ -42,6 +42,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eLagCompensation.h"
 #include "eTeam.h"
 
+#include "eTimer.h"
+
 #include "gWall.h"
 #include "gSensor.h"
 
@@ -2858,7 +2860,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
             st_Breakpoint();
         }
 #endif
-        Move(nextpos,currentTime,currentTime);
+        Move(nextpos,lastTimeStorage,currentTime);
 #ifdef DEBUG
         {
             if ( step > 0 && ( nextpos - pos ).NormSquared() > 1 )
@@ -2903,7 +2905,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
                 }
 
                 // if time has not progressed beyond tolerance, protection may be in effect
-                toleratePacketLoss = ( currentTime - lastTimeAlive_ < tolerance );
+                toleratePacketLoss = ( se_GameTime() - Lag() - lastTimeAlive_ < tolerance );
             }
 
             // ... and apply it.
