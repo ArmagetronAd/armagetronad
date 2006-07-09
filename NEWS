@@ -47,6 +47,8 @@ Changes since 0.2.8.2:
   FULLSCREEN_MESSAGE <timeout> <message content>
 
   Bugfixes:
+- Fixed various trail end related extrapolation/simulation inaccuracies that looked
+  like lag.
 - When extrapolating, the game's sensors never detected own or teammates' walls,
   it mistook them for enemy walls.
 - The acceleration and boost system always used settings for enemy walls instead of

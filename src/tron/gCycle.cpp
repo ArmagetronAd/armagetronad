@@ -1010,6 +1010,28 @@ REAL gCycle::ThisWallsLength() const
     return len - GetRubber() * sg_cycleRubberWallShrink;
 }
 
+
+// the speed the end of the trail currently receeds with
+REAL gCycle::WallEndSpeed() const
+{
+    REAL rubberMax, rubberEffectiveness;
+    sg_RubberValues( player, Speed(), rubberMax, rubberEffectiveness );
+
+    // basic speed from cycle movement
+    REAL speed = rubberSpeedFactor * Speed();
+
+    // take distance shrinking into account
+    REAL d = sg_cycleDistWallShrinkOffset - distance;
+    if ( d > 0 )
+        speed *= ( 1 - sg_cycleDistWallShrink );
+
+    // speed from rubber usage and shringing
+    if ( rubberEffectiveness > 0 )
+        speed += Speed() * ( 1 - rubberSpeedFactor ) * sg_cycleRubberWallShrink / rubberEffectiveness;
+
+    return speed;
+}
+
 // the maximum total length of the walls
 REAL gCycle::MaxWallsLength() const
 {
@@ -1540,6 +1562,8 @@ void gCycle::MyInitAfterCreation(){
     // add to game grid
     this->AddToList();
 
+    predictPosition_ = pos;
+
 #ifdef DEBUG
     if ( sg_gnuplotDebug && Player() )
     {
@@ -1975,12 +1999,15 @@ bool gCycle::TimestepCore(REAL currentTime){
         smooth = 1 - 1/( 1 + ts / sg_cycleSyncSmoothTime );
     }
 
-    if ( smooth > 0)
-    {
-        REAL scd = correctDistanceSmooth * smooth;
-        distance += scd;
-        correctDistanceSmooth -= scd;
-    }
+    //if ( smooth > 0)
+    //{
+    //    REAL scd = correctDistanceSmooth * smooth;
+    //    distance += scd;
+    //    correctDistanceSmooth -= scd;
+    // }
+
+    // handle distance correction
+    TransferPositionCorrectionToDistanceCorrection();
 
     // apply smooth position correction
     // smooth = .5f;
@@ -2101,10 +2128,21 @@ bool gCycle::TimestepCore(REAL currentTime){
     sg_ArchiveCoord( pos, 7 );
     sg_ArchiveReal( verletSpeed_, 7 );
 
+    // predict position
+    {
+#ifdef DEDICATED
+        predictPosition_ = pos;
+#else
+        gSensor s(this,pos+correctPosSmooth, dir * (verletSpeed_ * se_PredictTime() * rubberSpeedFactor ) );
+        s.detect(1);
+        predictPosition_ = s.before_hit;
+#endif
+    }
+
     if (Alive()){
         if (currentWall)
         {
-            eCoord wallEndPos = pos;
+            eCoord wallEndPos = PredictPosition();
 
             // z-man: the next two lines are a very bad idea. This lets walls stick out on the other side while you're using up your rubber.
             //if ( sn_GetNetState() != nSERVER )
@@ -3395,9 +3433,7 @@ void gCycle::SoundMix(Uint8 *dest,unsigned int len,
 #endif
 
 eCoord gCycle::PredictPosition(){
-    gSensor s(this,pos, dir * (verletSpeed_ * se_PredictTime() * rubberSpeedFactor ) );
-    s.detect(1);
-    return s.before_hit;
+    return predictPosition_;
 
     //    eCoord p = pos + dir * (speed * se_PredictTime());
     //    return p + correctPosSmooth;
@@ -3687,9 +3723,9 @@ void se_SanifyDisplacement( eGameObject* base, eCoord& displacement )
 
 void gCycle::TransferPositionCorrectionToDistanceCorrection()
 {
-    // REAL correctDist = eCoord::F( correctPosSmooth, dirDrive );
-    // correctDistanceSmooth += correctDist;
-    // correctPosSmooth = correctPosSmooth - dirDrive * correctDist;
+    REAL newCorrectDist = eCoord::F( correctPosSmooth, dirDrive );
+    distance += newCorrectDist - correctDistanceSmooth;
+    correctDistanceSmooth = newCorrectDist;
 }
 
 // take over the extrapolator's data
@@ -3716,8 +3752,12 @@ void gCycle::SyncFromExtrapolator()
     if ( correctPosSmooth.NormSquared() > .1f )
     {
         std::cout << "Lag slide! " << correctPosSmooth << "\n";
-        int x;
-        x = 0;
+
+        if ( tSysTimeFloat() > 38 )
+        {
+            int x;
+            x = 0;
+        }
     }
 #endif
 
@@ -3731,6 +3771,7 @@ void gCycle::SyncFromExtrapolator()
     // con << 	correctDistanceSmooth << "," << trueDistance << "," << distance << "\n";
     // correctDistanceSmooth = trueDistance - distance;
     distance = trueDistance;
+    correctDistanceSmooth=0;
 
     // split away part in driving direction
     TransferPositionCorrectionToDistanceCorrection();
