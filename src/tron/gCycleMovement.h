@@ -142,7 +142,7 @@ protected:
     virtual REAL            DoGetDistanceSinceLastTurn  (                               ) const     ;   //!< returns the distance since the last turn
 
     virtual void            RightBeforeDeath        ( int                   numTries    )           ;   //!< called when the cycle is very close to a wall and about to crash
-    void                    Die                     ( REAL time                         )           ;  //!< dies at the specified time
+    virtual void            Die                     ( REAL time                         )           ;  //!< dies at the specified time
 
     virtual bool            TimestepCore            ( REAL                  currentTime )           ;   //!< core physics simulation routine
 private:
