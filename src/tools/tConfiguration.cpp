@@ -377,10 +377,12 @@ static bool s_Veto( tString line_in, std::vector< tString > const & vetos )
 
         if ( line.StartsWith( veto ) )
         {
+#ifdef DEBUG_X
             if ( !line.StartsWith( "INCLUDE" ) && tRecorder::IsRunning() )
             {
                 con << "Veto on config line: " << line << "\n";
             }
+#endif
 
             return true;
         }
