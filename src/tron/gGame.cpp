@@ -1761,7 +1761,7 @@ void Render(eGrid *grid, REAL time, bool swap=true){
         if ( swap )
             rSysDep::SwapGL();
 
-        tDelay( 50000 );
+        tDelay( sn_defaultDelay );
     }
 #endif
 }
@@ -2020,7 +2020,7 @@ void ConnectToServer(nServerInfoBase *server)
             rSysDep::ClearGL();
 #endif
 
-            tAdvanceFrame(sn_defaultDelay);
+            sn_Delay();
         }
         if (sg_currentGame){
             sr_con.autoDisplayAtNewline=false;
@@ -2751,8 +2751,7 @@ void gGame::NetSync(){
 }
 void gGame::NetSyncIdle(){
     NetSync();
-
-    tAdvanceFrame( sn_defaultDelay );
+    sn_Delay();
 }
 
 
@@ -2872,7 +2871,7 @@ void gGame::StateUpdate(){
 
         switch(state){
         case GS_DELETE_GRID:
-            sr_con.autoDisplayAtNewline=true;
+            // sr_con.autoDisplayAtNewline=true;
 
             con << tOutput("$gamestate_deleting_grid");
             //				sn_ConsoleOut(sg_roundCenterMessage + "\n");
@@ -2889,7 +2888,7 @@ void gGame::StateUpdate(){
             break;
         case GS_CREATED:
         case GS_TRANSFER_SETTINGS:
-            sr_con.autoDisplayAtNewline=true;
+            // sr_con.autoDisplayAtNewline=true;
 
             // transfer game settings
             if ( nCLIENT != sn_GetNetState() )
@@ -2918,7 +2917,7 @@ void gGame::StateUpdate(){
             break;
 
         case GS_CREATE_GRID:
-            sr_con.autoDisplayAtNewline=true;
+            // sr_con.autoDisplayAtNewline=true;
 
             sg_ParseMap( aParser );
 
@@ -3102,7 +3101,7 @@ void gGame::StateUpdate(){
             if ( synced_ && sn_GetNetState() != nSERVER )
                 ePlayerNetID::Update();
 
-            sr_con.autoDisplayAtNewline=true;
+            // sr_con.autoDisplayAtNewline=true;
 
             gHighscoresBase::SaveAll();
             con << tOutput("$gamestate_deleting_objects");
@@ -4110,7 +4109,6 @@ void sg_EnterGameCore( nNetState enter_state ){
     while (bool(sg_currentGame) && goon && sn_GetNetState()==enter_state){
 #ifdef DEDICATED // read input
         sr_Read_stdin();
-        // tDelay( 1000000 / sg_dedicatedFPS );
         if ( sn_BasicNetworkSystem.Select( 1.0 / sg_dedicatedFPS ) )
         {
             // new network data arrived, do the most urgent work now

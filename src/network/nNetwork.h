@@ -579,6 +579,9 @@ public:
 };
 
 
+//! pause a bit, abort pause on network activity
+void sn_Delay();
+
 // process the messages from all hosts and send acks
 void sn_Receive();
 

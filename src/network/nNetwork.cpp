@@ -82,6 +82,13 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason );
 
 int sn_defaultDelay=10000;
 
+//! pause a bit, abort pause on network activity
+void sn_Delay()
+{
+    sn_BasicNetworkSystem.Select( sn_defaultDelay / 1000000.0 );
+    tAdvanceFrame();
+}
+
 int sn_maxRateIn=8; // maximum data rate in kb/s
 int sn_maxRateOut=8; // maximum output data rate in kb/s
 

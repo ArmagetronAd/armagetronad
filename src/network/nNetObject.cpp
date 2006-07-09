@@ -50,7 +50,6 @@ tDEFINE_REFOBJ( nNetObject )
 // max ping to equalize;
 int sn_pingCharityServer=100;
 
-
 // first, we need a mechanism to distribute the nNetObject id's
 // among the clients and the server.
 
@@ -1791,7 +1790,7 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
             // wait for all packets to be sent and the sync ack packet to be received
             while ( sn_Connections[0].socket && ( sync_ack[0] == false || sn_Connections[0].ackPending>0 || sn_QueueLen(0)) &&
                     tSysTimeFloat()<endTime){
-                tAdvanceFrame(sn_defaultDelay);
+                sn_Delay();
                 if (sync_sn_netObjects)
                     nNetObject::SyncAll();
                 sn_Receive();
@@ -1816,7 +1815,7 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
 
         bool goon=true;
         while(goon){
-            tAdvanceFrame(sn_defaultDelay);
+            sn_Delay();
             if (sync_sn_netObjects)
                 nNetObject::SyncAll();
             sn_Receive();
