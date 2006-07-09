@@ -213,7 +213,8 @@ protected:
 
     // virtual REAL            DoGetDistanceSinceLastTurn  (                               ) const     ;   //!< returns the distance since the last turn
 public:
-    void KillAt( const eCoord& pos ); //!< kill this cycle at the given position and take care of scoring
+    virtual void Die ( REAL time )  ;  //!< dies at the specified time
+    void KillAt( const eCoord& pos );  //!< kill this cycle at the given position and take care of scoring
 
     int WindingNumber() const {return windingNumber_;}
 

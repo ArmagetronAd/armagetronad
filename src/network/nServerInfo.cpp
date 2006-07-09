@@ -1517,8 +1517,8 @@ void nServerInfo::GetFromLAN(unsigned int pollBeginPort, unsigned int pollEndPor
         nMessage *m=tNEW(nMessage)(RequestSmallServerInfoDescriptor);
         m->ClearMessageID();
         m->SendImmediately(0, false);
-        tDelay(1000);
         nMessage::BroadcastCollected(0, port);
+        tDelay(1000);
     }
 
     sn_ServerCount = 0;
@@ -1567,8 +1567,8 @@ void nServerInfo::GetFromLANContinuously(unsigned int pollBeginPort, unsigned in
         nMessage *m=tNEW(nMessage)(RequestSmallServerInfoDescriptor);
         m->ClearMessageID();
         m->SendImmediately(0, false);
-        tDelay(1000);
         nMessage::BroadcastCollected(0, port);
+        tDelay(1000);
     }
 }
 

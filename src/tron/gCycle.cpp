@@ -2298,6 +2298,36 @@ void gCycle::InteractWith(eGameObject *target,REAL,int){
     */
 }
 
+// *******************************************************************************************
+// *
+// *	Die
+// *
+// *******************************************************************************************
+//!
+//!		@param	time	the time of death
+//!
+// *******************************************************************************************
+
+void gCycle::Die( REAL time )
+{
+    gCycleMovement::Die( time );
+
+    // reset smoothing
+    correctPosSmooth = eCoord();
+    TransferPositionCorrectionToDistanceCorrection();
+    predictPosition_ = pos;
+
+    // delete all temporary walls of this cycle
+    for ( int i = sg_netPlayerWalls.Len()-1; i >= 0; --i )
+    {
+        gNetPlayerWall * wall = sg_netPlayerWalls(i);
+        if ( wall->Cycle() == this && wall->Preliminary() )
+        {
+            wall->real_CopyIntoGrid(grid);
+        }
+    }
+}
+
 void gCycle::KillAt( const eCoord& deathPos){
     // don't kill invulnerable cycles
     if ( !Vulnerable() )
@@ -3934,7 +3964,7 @@ void gCycle::ReadSync( nMessage &m )
         Die( lastSyncMessage_.time );
         MoveSafely( lastSyncMessage_.pos, lastTime, deathTime );
         distance=lastSyncMessage_.distance;
-
+        correctDistanceSmooth=0;
         DropWall( false );
 
         tNEW(gExplosion)( grid, lastSyncMessage_.pos, lastSyncMessage_.time ,color_ );
@@ -4238,6 +4268,7 @@ void gCycle::SyncEnemy ( const eCoord& begWall)
 
         // create new wall at sync location
         distance = lastSyncMessage_.distance;
+        correctDistanceSmooth=0;
         currentWall=new gNetPlayerWall
                     (this,crossPos,lastSyncMessage_.dir,crossTime,crossDist);
 
@@ -4258,6 +4289,7 @@ void gCycle::SyncEnemy ( const eCoord& begWall)
     verletSpeed_  = lastSyncMessage_.speed;
     lastTimestep_ = 0;
     distance = lastSyncMessage_.distance;
+    correctDistanceSmooth=0;
     dirDrive = lastSyncMessage_.dir;
     rubber = lastSyncMessage_.rubber;
     brakingReservoir = lastSyncMessage_.brakingReservoir;

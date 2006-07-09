@@ -2800,6 +2800,30 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
         // the rubber brake, activate rubber and slow down
         if ( space < neededSpace )
         {
+            // the minimal space rubber gets active at
+            REAL rubberStartSpace = verletSpeed_/sg_rubberCycleSpeed;
+            if ( space > rubberStartSpace )
+            {
+                // rubber will not be active immediately, simulate to the time it will
+                {
+                    static bool recurse = true;
+                    if (recurse)
+                    {
+                        gRecursionGuard guard( recurse );
+
+                        // calculate the time rubber will get active at
+                        REAL ratio = ( space - rubberStartSpace )/step;
+                        if ( ratio > EPS && ratio < 1 - EPS )
+                        {
+                            REAL rubberGetsActiveTime = lastTime + ( currentTime - lastTime ) * ratio;
+
+                            verletSpeed_=lastSpeed;
+                            return TimestepCore( rubberGetsActiveTime ) || TimestepCore( currentTime );
+                        }
+                    }
+                }
+            }
+
             // see if the obstacle will go away during this timestep.
             // if it does, simulate in two steps to make the simulation more accurate.
             {
@@ -2882,7 +2906,28 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
             // clamp rubberneeded to the amout of rubber available
             REAL rubberAvailable = ( rubber_granted - rubber ) * rubberEffectiveness;
             if ( sn_GetNetState() != nCLIENT && rubberneeded > rubberAvailable && Vulnerable() )
+            {
+                // rubber will run out this frame.
+                // split simulation into two parts, one up to the point rubber runs out
+                {
+                    REAL ratio = rubberAvailable/rubberneeded;
+
+                    if ( ratio > .01 && ratio < .99 && currentTime - lastTime > .001 )
+                    {
+                        REAL runOutTime = lastTime + ( currentTime - lastTime ) * ratio;
+                        static bool recurse = true;
+                        if (recurse)
+                        {
+                            gRecursionGuard guard( recurse );
+                            // need many attempys
+                            verletSpeed_=lastSpeed;
+                            return TimestepCore( runOutTime ) || TimestepCore( currentTime );
+                        }
+                    }
+                }
+
                 rubberneeded = rubberAvailable;
+            }
 
             // update rubber usage
             rubber += rubberneeded / rubberEffectiveness;
