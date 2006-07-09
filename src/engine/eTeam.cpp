@@ -947,6 +947,11 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
 
     int maxPlayers = maxPlayersLocal;
 
+    // AI players are always allowed to join, the logic that tries to put the AI into
+    // this team is responsible for checking
+    if ( !player->IsHuman() )
+        return true;
+
     // we must have room           and the joining must not cause huge imbalance
     if ( numHumans < maxPlayers && ( sn_GetNetState() != nSERVER || minP + maxInb > numHumans ) )
         return true;

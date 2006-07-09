@@ -2260,7 +2260,9 @@ bool gNetPlayerWall::IsDangerous( REAL a, REAL time ) const
         if ( cycle_->Alive() )
         {
             REAL dt = ( time - cycle_->lastTime );
-            cycleDistance += cycle_->rubberSpeedFactor * ( dt * cycle_->Speed() + .5 * dt * dt * cycle_->acceleration );
+
+            // cycle movement
+            cycleDistance += cycle_->WallEndSpeed() * dt;
         }
 
         if ( wallDistance + cycle_->ThisWallsLength() < cycleDistance )

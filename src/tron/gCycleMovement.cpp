@@ -42,6 +42,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eLagCompensation.h"
 #include "eTeam.h"
 
+#include "eTimer.h"
+
 #include "gWall.h"
 #include "gSensor.h"
 
@@ -1203,11 +1205,12 @@ bool gCycleMovement::EdgeIsDangerous( const eWall * wall, REAL time, REAL alpha 
             return false;
 
         // get time the wall was built
-        REAL builtTime = w->Time(alpha);
+        // REAL builtTime = w->Time(alpha);
 
-        gCycleMovement *otherPlayer=w->CycleMovement();
-        if (otherPlayer==this && time < builtTime+2.5*GetTurnDelay() )
-            return false;        // impossible to make such a small circle
+        //gCycleMovement *otherPlayer=w->CycleMovement();
+        //if (otherPlayer==this && time < builtTime+2.5*GetTurnDelay() )
+        //    return false;        // impossible to make such a small circle
+        // no, not impossible, just moderately unlikely.
     }
 
     return true; // it is a real eWall.
@@ -1281,6 +1284,13 @@ static void DropTempWall( eCoord const & dir, gSensor const & sensor )
     }
 }
 
+//! information about obstacle encountered by MaxSpaceAhead
+struct gMaxSpaceAheadHitInfo
+{
+    eHalfEdge const * edge; //!< the edge that was hit
+    eCoord            pos;  //!< the location it was hit at
+};
+
 // *******************************************************************************************
 // *
 // *	MaxSpaceAhead
@@ -1290,11 +1300,12 @@ static void DropTempWall( eCoord const & dir, gSensor const & sensor )
 //!
 //!		@param	cycle the cycle to investigate
 //!     @param  lookAhead minimum distance to look ahead
+//!     @param  extra info storage space
 //!		@return		distance from the cycle to the next wall
 //!
 // *******************************************************************************************
 
-float MaxSpaceAhead( const gCycleMovement* cycle, float lookAhead )
+float MaxSpaceAhead( const gCycleMovement* cycle, float lookAhead, gMaxSpaceAheadHitInfo * info = NULL )
 {
     sg_ArchiveReal( lookAhead, 9 );
 
@@ -1325,6 +1336,12 @@ float MaxSpaceAhead( const gCycleMovement* cycle, float lookAhead )
     // be a little nice and don't drive into the eWall if turning is allowed
     gSensor fr( const_cast< gCycleMovement* >( cycle ), cycle->Position(), cycle->Direction() );
     fr.detect( lookAhead );
+
+    if ( info )
+    {
+        info->edge = fr.ehit;
+        info->pos  = fr.before_hit;
+    }
 
     if ( fr.ehit )
     {
@@ -1568,7 +1585,13 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
                 // don't drive into a wall, turn before getting too close
                 REAL lookahead = ts * avgspeed * 2;
+
+                // forge last time while looking so obstacles that will go away in time are ignored
+                REAL lastTimeBack = lastTime;
+                lastTime = currentDestination->GetGameTime();
                 REAL distToWall = MaxSpaceAhead( this, ts, lookahead, lookahead );
+                lastTime = lastTimeBack;
+
                 if ( dist_to_dest > distToWall )
                     dist_to_dest = distToWall;
             }
@@ -2744,9 +2767,9 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
     // TODO: solve smooth position correction trouble with rubber
     if ( player && ( rubber_granted > rubber || sn_GetNetState() == nCLIENT || !Vulnerable() ) && sg_rubberCycleSpeed > 0 && step > 0 && ( sn_GetNetState() == nCLIENT || rubberEffectiveness > 0 ) )
     {
-        //clamp effectiveness of rubber
+        // ignore zero effectiveness, this happens only on the client
         if ( rubberEffectiveness <= 0 )
-            rubberEffectiveness = .0001;
+            rubberEffectiveness = 1E+20;
 
         // formerly: rubberFactor = .5
         REAL beta = ts * sg_rubberCycleSpeed;
@@ -2770,12 +2793,63 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
             neededSpace = step*3;
 
         // determine how long we can drive on
-        REAL space = MaxSpaceAhead( this, neededSpace );
+        gMaxSpaceAheadHitInfo hitInfo;
+        REAL space = MaxSpaceAhead( this, neededSpace, &hitInfo );
 
         // if the available space in front is less than the space needed to slow down via
         // the rubber brake, activate rubber and slow down
         if ( space < neededSpace )
         {
+            // see if the obstacle will go away during this timestep.
+            // if it does, simulate in two steps to make the simulation more accurate.
+            {
+                // get the wall
+                tASSERT( hitInfo.edge );
+                eWall * w = hitInfo.edge->GetWall();
+                if ( !w && hitInfo.edge->Other() )
+                {
+                    hitInfo.edge = hitInfo.edge->Other();
+                    w = hitInfo.edge->GetWall();
+                }
+
+                gPlayerWall * wall = dynamic_cast< gPlayerWall * >( w );
+                if ( wall && wall->Cycle() )
+                {
+                    // get the position of the hit
+                    REAL alpha = hitInfo.edge->Ratio( hitInfo.pos );
+
+                    // use binary search to find the time the wall goes away. Not
+                    // the fastest way, but it doesn't depend on wall internals, and
+                    // it shouldn't be called often anyway.
+                    REAL tolerance = 0.001;
+                    if ( !wall->IsDangerous( alpha, currentTime ) && currentTime > lastTime + tolerance )
+                    {
+                        REAL minTime = lastTime;
+                        REAL maxTime = currentTime;
+                        while ( minTime + tolerance < maxTime )
+                        {
+                            REAL midTime = .5 * ( minTime + maxTime );
+                            if ( wall->IsDangerous( alpha, midTime ) )
+                                minTime = midTime;
+                            else
+                                maxTime = midTime;
+                        }
+
+                        // split simulation into two parts, one up to the point the wall turns harmless
+                        {
+                            static bool recurse = true;
+                            if (recurse)
+                            {
+                                gRecursionGuard guard( recurse );
+
+                                verletSpeed_=lastSpeed;
+                                return TimestepCore( maxTime ) || TimestepCore( currentTime );
+                            }
+                        }
+                    }
+                }
+            }
+
             /*
             // debug output for sensitive space/time diagrams
             static REAL lastTimePrinted = 0;
@@ -2858,7 +2932,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
             st_Breakpoint();
         }
 #endif
-        Move(nextpos,currentTime,currentTime);
+        Move(nextpos,lastTimeStorage,currentTime);
 #ifdef DEBUG
         {
             if ( step > 0 && ( nextpos - pos ).NormSquared() > 1 )
@@ -2903,7 +2977,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
                 }
 
                 // if time has not progressed beyond tolerance, protection may be in effect
-                toleratePacketLoss = ( currentTime - lastTimeAlive_ < tolerance );
+                toleratePacketLoss = ( se_GameTime() - Lag() - lastTimeAlive_ < tolerance );
             }
 
             // ... and apply it.

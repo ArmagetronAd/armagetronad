@@ -173,6 +173,7 @@ public:
     // pos is always the correct simulated position; the displayed position is calculated as pos + correctPosSmooth
     // and correctPosSmooth decays with time.
     eCoord correctPosSmooth;
+    eCoord predictPosition_; //!< the best guess of where the cycle is at at display time
 
     // every frame, a bit of this variable is taken away and added to the step the cycle makes.
     REAL correctDistanceSmooth;
@@ -231,6 +232,7 @@ public:
     static	REAL	WallsLength()	 	 { return wallsLength;		}	//!< the default total length of the walls
     REAL	        MaxWallsLength() const;                             //!< the maximum total length of the walls (including max effect of rubber growth)
     REAL	        ThisWallsLength() const;                            //!< the maximum total length of this cycle's wall (including rubber shrink)
+    REAL	        WallEndSpeed() const;                               //!< the speed the end of the trail is receeding with right now
     static	REAL	ExplosionRadius()	 { return explosionRadius;	}	//!< the radius of the holes blewn in by an explosion
 
     bool    IsMe( eGameObject const * other ) const;              //!< checks whether the passed pointer is logically identical with this cycle

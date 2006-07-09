@@ -647,8 +647,13 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
             for(int j=c->grid->gameObjectsInteresting.Len()-1;j>=0;j--)
                 c->InteractWith(c->grid->gameObjectsInteresting(j),currentTime,0);
 
-        ret = ret || c->Timestep(lastTime+i*(currentTime-lastTime)/number_of_steps);
+        REAL timeThisStep = lastTime+i*(currentTime-lastTime)/number_of_steps;
+        ret = ret || c->Timestep(timeThisStep);
         c->FindCurrentFace();
+
+        // see if the object refused to get simulated, if yes, give up
+        if ( 2 * c->lastTime < timeThisStep + lastTime )
+            break;
     }
 #ifdef DEBUG
     c->grid->Check();
