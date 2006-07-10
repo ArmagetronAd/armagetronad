@@ -2622,10 +2622,14 @@ void ePlayerNetID::ReadSync(nMessage &m){
     // first sync message
     if ( firstSync && sn_GetNetState() == nSERVER )
     {
+        UpdateName();
+
 #ifndef KRAWALL_SERVER
         GetScoreFromDisconnectedCopy();
 #endif
         FindDefaultTeam();
+
+        RequestSync();
     }
 
 }
