@@ -860,7 +860,7 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
                 if ( rubberSpeedFactor >= 1-EPS )
                 {
                     // rubber is inactive, basic timestep is enough
-                    TimestepCore( simTime - lag );
+                    TimestepCore( lastTime - lag );
                 }
                 else
                 {
