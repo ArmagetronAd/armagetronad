@@ -1411,8 +1411,6 @@ void gCycle::MyInitAfterCreation(){
 
     resimulate_ = false;
 
-    deathTime=0;
-
     mp=sg_MoviePack();
 
     lastTimeAnim = 0;
@@ -1550,7 +1548,6 @@ void gCycle::MyInitAfterCreation(){
         spawnTime_ = -1E+20;
     }
 
-
     if ( engine )
         engine->Reset(10000);
 
@@ -1602,6 +1599,8 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p,bo
     windingNumberWrapped_ = windingNumber_ = Grid()->DirectionWinding(dirDrive);
     dirDrive = Grid()->GetDirection(windingNumberWrapped_);
     dir = dirDrive;
+
+    deathTime=0;
 
     lastNetWall=lastWall=currentWall=NULL;
 
@@ -3532,6 +3531,7 @@ gCycle::gCycle(nMessage &m)
         currentWall(NULL),
         lastWall(NULL)
 {
+    deathTime=0;
     lastNetWall=lastWall=currentWall=NULL;
     windingNumberWrapped_ = windingNumber_ = Grid()->DirectionWinding(dirDrive);
     dirDrive = Grid()->GetDirection(windingNumberWrapped_);
@@ -4157,15 +4157,6 @@ void gCycle::ReadSync( nMessage &m )
             eCoord oldPos = pos + correctPosSmooth;
             SyncEnemy( lastSyncMessage_.lastTurn );
             correctPosSmooth = oldPos - pos;
-
-#ifdef DEBUG
-            if ( correctPosSmooth.NormSquared() > .1f && lastTime > 0.0 )
-            {
-                std::cout << "Lag slide! " << correctPosSmooth << "\n";
-                int x;
-                x = 0;
-            }
-#endif
         }
 
         // restore rubber meter
@@ -4174,6 +4165,38 @@ void gCycle::ReadSync( nMessage &m )
             rubber = lastSyncMessage_.rubber;
         }
     }
+
+    // if this happens during creation, ignore position correction
+    if ( this->ID() == 0 )
+    {
+        correctPosSmooth = eCoord();
+
+        // some other stuff that should happen on the first sync
+
+        // estimate time of spawning (HACK)
+        spawnTime_=lastTime;
+        if ( verletSpeed_ > 0 )
+            spawnTime_ -= distance/verletSpeed_;
+
+        // set spawn time to infinite past if this is the first spawn
+        if ( !sg_cycleFirstSpawnProtection && spawnTime_ <= 1.0 )
+        {
+            spawnTime_ = -1E+20;
+        }
+
+        // reset position and direction
+        predictPosition_ = pos;
+        dir = dirDrive;
+    }
+#ifdef DEBUG
+    else
+        if ( correctPosSmooth.NormSquared() > .1f && lastTime > 0.0 )
+        {
+            std::cout << "Lag slide! " << correctPosSmooth << "\n";
+            int x;
+            x = 0;
+        }
+#endif
 
     sn_Update(turns,lastSyncMessage_.turns);
 

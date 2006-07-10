@@ -327,6 +327,7 @@ template<class T> class nNOInitialisator:public nDescriptor{
                 nNetObjectRegistrar registrar;
                 //			nNetObject::RegisterRegistrar( registrar );
                 tJUST_CONTROLLED_PTR< T > n=new T(m);
+                n->InitAfterCreation();
                 ((nNetObject*)n)->ReadSync(m);
                 n->Register( registrar );
 
@@ -347,10 +348,6 @@ template<class T> class nNOInitialisator:public nDescriptor{
                 {
                     // object was unable to be registered
                     n->Release(); // silently delete it.
-                }
-                else
-                {
-                    n->InitAfterCreation();
                 }
             }
 #ifndef NOEXCEPT

@@ -1981,7 +1981,7 @@ gCycleMovement::gCycleMovement( nMessage & message )
 {
     windingNumberWrapped_ = windingNumber_ = 2;
 
-    MyInitAfterCreation();
+    // MyInitAfterCreation();
 }
 
 // *******************************************************************************************
