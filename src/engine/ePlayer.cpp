@@ -1958,6 +1958,9 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1)
     accessLevel = 0;
 
     MyInitAfterCreation();
+
+    if(sn_GetNetState()==nSERVER)
+        RequestSync();
 }
 
 
@@ -1984,9 +1987,6 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     object=NULL;
     ping=sn_Connections[m.SenderID()].ping;
     lastSync=tSysTimeFloat();
-
-    if(sn_GetNetState()==nSERVER)
-        RequestSync();
 
     score=0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;
@@ -2065,8 +2065,6 @@ void ePlayerNetID::MyInitAfterCreation()
 
     this->silenced_ = se_SilenceAll;
 
-    this->UpdateName();
-
     // register with machine and kick user if too many players are present
     if ( Owner() != 0 && sn_GetNetState() == nSERVER )
     {
@@ -2089,14 +2087,6 @@ void ePlayerNetID::MyInitAfterCreation()
 void ePlayerNetID::InitAfterCreation()
 {
     MyInitAfterCreation();
-
-    if (sn_GetNetState() == nSERVER)
-    {
-#ifndef KRAWALL_SERVER
-        GetScoreFromDisconnectedCopy();
-#endif
-        FindDefaultTeam();
-    }
 }
 
 bool ePlayerNetID::ClearToTransmit(int user) const{
@@ -2505,6 +2495,9 @@ static void se_OptionalNameFilters( tString & remoteName )
 }
 
 void ePlayerNetID::ReadSync(nMessage &m){
+    // check whether this is the first sync
+    bool firstSync = ( this->ID() == 0 );
+
     nNetObject::ReadSync(m);
 
     m.Read(r);
@@ -2625,6 +2618,16 @@ void ePlayerNetID::ReadSync(nMessage &m){
         if ( currentTeam )
             currentTeam->UpdateProperties();
     }
+
+    // first sync message
+    if ( firstSync && sn_GetNetState() == nSERVER )
+    {
+#ifndef KRAWALL_SERVER
+        GetScoreFromDisconnectedCopy();
+#endif
+        FindDefaultTeam();
+    }
+
 }
 
 
@@ -4084,6 +4087,10 @@ static gServerInfoAdmin sg_serverAdmin;
 
 void ePlayerNetID::UpdateName( void )
 {
+    // don't do a thing if we're not fully synced
+    if ( this->ID() == 0 && nameFromClient_.Len() <= 1 )
+        return;
+
     // store old name for password re-request and name change message
     tColoredString oldprintname;
     tString oldUserName( GetUserName() );
