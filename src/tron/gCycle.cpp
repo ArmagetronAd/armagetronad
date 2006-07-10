@@ -820,7 +820,7 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
         if ( lag > 0 && sn_GetNetState() == nSERVER )
         {
             eLag::Report( Owner(), lag );
-            if ( currentWall && currentWall->Wall() )
+            if ( currentWall && currentWall->Wall() && rubberSpeedFactor >= 1-EPS )
             {
                 lag -= lagOffset; // switch to practical lag
 
