@@ -4188,6 +4188,8 @@ void gCycle::ReadSync( nMessage &m )
         predictPosition_ = pos;
         dir = dirDrive;
         skew = skewDot = 0;
+        lastDirDrive=dirDrive;
+        lastTurnPos_=pos;
     }
 #ifdef DEBUG
     else
