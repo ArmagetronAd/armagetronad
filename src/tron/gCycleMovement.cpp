@@ -1730,6 +1730,13 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
                     if (turnTo != 0)
                     {
+#ifdef DEBUG
+#ifdef DEDICATED
+                        eCoord slide = this->pos - currentDestination->position;
+                        if ( slide.NormSquared() > .01 )
+                            con << "Lag slide: " << slide << "\n";
+#endif
+#endif
                         gTurnDelayOverride override( overrideTurnDelay );
                         Turn(turnTo);
                     }
@@ -1834,24 +1841,26 @@ bool gCycleMovement::Timestep( REAL currentTime )
                         break;
                     }
                 }
-
+                else
+                {
                 sg_ArchiveReal( tsTodo, 9 );
-                // try to turn at the exactly right moment
-                REAL timeLeft = turnTime - lastTime;
-                sg_ArchiveReal( timeLeft, 9 );
-                if ( timeLeft >= 0 && tsTodo > timeLeft )
+                // don't turn too late
+                REAL maxts = latestTurnTime - lastTime;
+                sg_ArchiveReal( maxts, 9 );
+                if ( tsTodo > maxts )
                 {
                     // force turn on next iteration, we'll be there
                     forceTurn = true;
-                    tsTodo = timeLeft;
+                    tsTodo = maxts;
                 }
 
-                // but simulate at least until the moment we CAN make a turn
+                // don't turn too early
                 REAL mints = earliestTurnTime - lastTime;
                 // sg_ArchiveReal( mints, 9 );
                 if ( tsTodo < mints )
                 {
                     tsTodo = mints;
+                }
                 }
 
                 if ( tsTodo < 0 )
@@ -1863,6 +1872,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 if ( tsTodo > ts + simulateAhead )
                 {
                     tsTodo = ts + simulateAhead ;
+                    forceTurn = false;
 
                     // quit from here if there is nothing to do
                     if ( tsTodo <= EPS )
