@@ -862,7 +862,7 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
                     // rubber is inactive, basic timestep is enough
                     TimestepCore( lastTime - lag );
                 }
-                else
+                else if ( 0 )
                 {
                     // rubber is active. Take care!
 
