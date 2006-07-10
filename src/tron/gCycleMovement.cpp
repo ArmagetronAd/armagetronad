@@ -2960,11 +2960,6 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
     else
         nextpos=pos;
 
-    // call base timestep
-    REAL lastTimeStorage = this->lastTime;
-    if (eNetGameObject::Timestep(currentTime))
-        return true;
-
     eCoord lastPos = pos;
     tJUST_CONTROLLED_PTR< eFace > lastFace = currentFace;
     try
@@ -2977,7 +2972,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
             st_Breakpoint();
         }
 #endif
-        Move(nextpos,lastTimeStorage,currentTime);
+        Move(nextpos,lastTime,currentTime);
 #ifdef DEBUG
         {
             if ( step > 0 && ( nextpos - pos ).NormSquared() > 1 )
@@ -3028,7 +3023,6 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
             // ... and apply it.
             if ( toleratePacketLoss )
             {
-                this->lastTime = lastTimeStorage;
                 pos = lastPos;
                 verletSpeed_ = lastSpeed;
                 currentFace = lastFace;
@@ -3110,7 +3104,8 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
 
     tASSERT(finite(distance));
 
-    return false;
+    // call base timestep
+    return eNetGameObject::Timestep(currentTime);
 }
 
 // *******************************************************************************************
