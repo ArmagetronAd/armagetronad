@@ -4187,6 +4187,7 @@ void gCycle::ReadSync( nMessage &m )
         // reset position and direction
         predictPosition_ = pos;
         dir = dirDrive;
+        skew = skewDot = 0;
     }
 #ifdef DEBUG
     else
