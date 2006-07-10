@@ -49,7 +49,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "tRecorder.h"
 
-// #include <fstream>
+// #define DEBUG_RUBBER
+
+#ifdef DEBUG_RUBBER
+#include <fstream>
+#endif
 
 #undef 	INLINE_DEF
 #define INLINE_DEF
@@ -1300,12 +1304,13 @@ struct gMaxSpaceAheadHitInfo
 //!
 //!		@param	cycle the cycle to investigate
 //!     @param  lookAhead minimum distance to look ahead
+//!     @param  rubber expected to be used up until we hit the wall
 //!     @param  extra info storage space
 //!		@return		distance from the cycle to the next wall
 //!
 // *******************************************************************************************
 
-float MaxSpaceAhead( const gCycleMovement* cycle, float lookAhead, gMaxSpaceAheadHitInfo * info = NULL )
+float MaxSpaceAhead( const gCycleMovement* cycle, float lookAhead, REAL rubberUsage = 0.0, gMaxSpaceAheadHitInfo * info = NULL )
 {
     sg_ArchiveReal( lookAhead, 9 );
 
@@ -1316,7 +1321,7 @@ float MaxSpaceAhead( const gCycleMovement* cycle, float lookAhead, gMaxSpaceAhea
         REAL rubber_granted=sg_rubberCycle;
         if ( rubber_granted > 0 )
         {
-            REAL filling = cycle->GetRubber()/rubber_granted;
+            REAL filling = ( cycle->GetRubber() + rubberUsage )/rubber_granted;
             if ( filling > 1 )
                 filling = 1;
             mindistance += sg_rubberCycleMinDistanceReservoir * (1-filling);
@@ -1610,11 +1615,16 @@ bool gCycleMovement::Timestep( REAL currentTime )
             // then allow no early or late turns
             if ( sg_UseAntiLagSliding( this ) )
             {
-                earliestTurnTime = turnTime - sg_timeTolerance;
                 if ( rubberActive )
                 {
-                    earliestTurnTime = latestTurnTime = turnTime;
-
+                    // smoothly make the allowed time interval smaller with increased rubber use
+                    earliestTurnTime = turnTime - sg_timeTolerance * rubberSpeedFactor;
+                    latestTurnTime = turnTime + sg_timeTolerance * rubberSpeedFactor;
+                }
+                else
+                {
+                    // just clamp the latest turn time
+                    earliestTurnTime = turnTime - sg_timeTolerance;
                 }
             }
 
@@ -1843,24 +1853,24 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 }
                 else
                 {
-                sg_ArchiveReal( tsTodo, 9 );
-                // don't turn too late
-                REAL maxts = latestTurnTime - lastTime;
-                sg_ArchiveReal( maxts, 9 );
-                if ( tsTodo > maxts )
-                {
-                    // force turn on next iteration, we'll be there
-                    forceTurn = true;
-                    tsTodo = maxts;
-                }
+                    sg_ArchiveReal( tsTodo, 9 );
+                    // don't turn too late
+                    REAL maxts = latestTurnTime - lastTime;
+                    sg_ArchiveReal( maxts, 9 );
+                    if ( tsTodo > maxts )
+                    {
+                        // force turn on next iteration, we'll be there
+                        forceTurn = true;
+                        tsTodo = maxts;
+                    }
 
-                // don't turn too early
-                REAL mints = earliestTurnTime - lastTime;
-                // sg_ArchiveReal( mints, 9 );
-                if ( tsTodo < mints )
-                {
-                    tsTodo = mints;
-                }
+                    // don't turn too early
+                    REAL mints = earliestTurnTime - lastTime;
+                    // sg_ArchiveReal( mints, 9 );
+                    if ( tsTodo < mints )
+                    {
+                        tsTodo = mints;
+                    }
                 }
 
                 if ( tsTodo < 0 )
@@ -2804,7 +2814,15 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
 
         // determine how long we can drive on
         gMaxSpaceAheadHitInfo hitInfo;
-        REAL space = MaxSpaceAhead( this, neededSpace, &hitInfo );
+        REAL space = MaxSpaceAhead( this, neededSpace, ts * step * rubberFactor / rubberEffectiveness, &hitInfo );
+
+#ifdef DEBUG_RUBBER
+        if ( Player() && space < 1E+15)
+        {
+            std::ofstream f( Player()->GetUserName() + "_rubber", std::ios::app );
+            f << lastTime << " " << space << "\n";
+        }
+#endif
 
         // if the available space in front is less than the space needed to slow down via
         // the rubber brake, activate rubber and slow down
