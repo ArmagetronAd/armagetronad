@@ -701,7 +701,7 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
     if ( se_maxSimulateAheadLeft < 0 )
         se_maxSimulateAheadLeft = 0;
 
-    if ( nextTime < simTime + se_maxSimulateAhead )
+    if ( c->lastTime < nextTime && nextTime < simTime + se_maxSimulateAhead )
     {
         // something interesting is going to happen, see what it is
         simTime = nextTime;
