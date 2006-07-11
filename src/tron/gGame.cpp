@@ -1657,8 +1657,24 @@ void sg_HostGameMenu(){
     sg_HostMenu = NULL;
 }
 
+#ifndef DEDICATED
+class gNetIdler: public rSysDep::rNetIdler
+{
+public:
+    virtual bool Wait() //!< wait for something to do, return true fi there is work
+    {
+        return sn_BasicNetworkSystem.Select( 0.1 );
+    }
+    virtual void Do()  //!< do the work.
+    {
+        tAdvanceFrame();
+        sn_Receive();
+    }
+};
+#endif
 
 void net_game(){
+#ifndef DEDICATED
     uMenu net_menu("$network_menu_text");
 
     uMenuItemFunction cust
@@ -1688,7 +1704,11 @@ void net_game(){
     (&net_menu,"$network_menu_lan_text",
      "$network_menu_lan_help",&gServerBrowser::BrowseLAN);
 
+    gNetIdler idler;
+    rSysDep::StartNetSyncThread( &idler );
     net_menu.Enter();
+    rSysDep::StopNetSyncThread();
+#endif
 }
 
 
@@ -3661,6 +3681,7 @@ void sg_EnterGameCore( nNetState enter_state ){
         {
             // new network data arrived, do the most urgent work now
             tAdvanceFrame();
+            gGame::NetSync();
             se_SyncGameTimer();
             REAL time=se_GameTime();
             if ( time > 0 )

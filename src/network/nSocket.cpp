@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "config.h"
 #include "tRandom.h"
-
+#include "tSysTime.h"
 #include "tRandom.h"
 
 #include <string>
@@ -1513,7 +1513,12 @@ int nSocket::Create( void )
     // maybe this works for Windows, too?
 #ifndef WIN32
     char tos = IPTOS_LOWDELAY;
+
+#   ifdef MACOSX
+    int ret = setsockopt( socket_, IPPROTO_IP, IP_TOS, &tos, sizeof(char) );
+#   else
     int ret = setsockopt( socket_, SOL_IP, IP_TOS, &tos, sizeof(char) );
+#   endif
 
     // remove this error reporting some time later, the success is not critical
     if ( ret != 0 )
@@ -2621,6 +2626,12 @@ bool nBasicNetworkSystem::Select( REAL dt )
     static char const * section = "NETSELECT";
     if ( !tRecorder::PlaybackStrict( section, retval ) )
     {
+        if ( controlSocket_.GetSocket() < 0 )
+        {
+            tDelay( int( dt * 1000000 ) );
+            return false;
+        }
+
         fd_set rfds; // set of sockets to wathc
         struct timeval tv; // time value to pass to select()
 

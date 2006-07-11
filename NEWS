@@ -84,11 +84,13 @@ Changes since 0.2.8.2:
   right at the same time.
 
   Featurelets:
+- The client now can hadle network traffic while it is waiting for the graphics
+  card to swap buffers.
 - The dedicated server no longer uses a fixed delay, but a select() call (that
-  returns when network data arrives) to idle. When data arrives, it does the minimum
-  amount of work before it sends out the responses, resulting in lower latency. It is
-  now safe to decrease DEDICATED_FPS to 20 or 10, latency is no longer influenced
-  by that setting.
+  returns when network data arrives) to idle. When data arrives, it does 
+  the minimum amount of work before it sends out the responses, resulting in
+  lower latency. It is now safe to decrease DEDICATED_FPS to 20 or 10, latency
+  is no longer influenced by that setting.
 - Game level lag compensation. When a command arrives from a client that is delayed,
   it is backdated to the time it was issued, provided enough "lag credit" is left.
   The client is informed of the delay so it can compensate in the future, which it does

@@ -61,6 +61,9 @@ protected:
     // divided in many small steps
     static bool TimestepThis(REAL currentTime,eGameObject *t);
 
+    // tells game objects how far they are allowed to exeed the given simulation time
+    static REAL MaxSimulateAhead();
+
     // a list of all eGameObjects that are interesting to watch
     int interestingID;
     int inactiveID;
@@ -174,8 +177,8 @@ public:
     virtual eCoord  CamTop(){return eCoord(0,0);}
 
     // sr_laggometer
-    virtual REAL Lag() const{return 0;}
-
+    virtual REAL Lag() const{return 0;}          //!< expected average network latency
+    virtual REAL LagThreshold() const{return 0;} //!< tolerated network latency variation
 
 #ifdef POWERPAK_DEB
     virtual void PPDisplay();

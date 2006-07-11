@@ -477,6 +477,7 @@ void rISurfaceTexture::ProcessImage( SDL_Surface * surface )
 void rISurfaceTexture::Upload( rSurface & surface )
 {
 #ifndef DEDICATED
+    sr_LockSDL();
     GLenum texformat = surface.GetFormat();
     SDL_Surface * tex = surface.GetSurface();
     tASSERT( tex );
@@ -508,7 +509,9 @@ void rISurfaceTexture::Upload( rSurface & surface )
 
     gluBuild2DMipmaps(GL_TEXTURE_2D,format,tex->w,tex->h,
                       texformat,GL_UNSIGNED_BYTE,tex->pixels);
-#endif
+
+    sr_UnlockSDL();
+ #endif
 }
 
 // ******************************************************************************************

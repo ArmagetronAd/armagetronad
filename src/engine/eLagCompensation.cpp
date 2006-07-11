@@ -33,6 +33,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nNetwork.h"
 #include "nConfig.h"
 
+#define DEBUG_LAG
+
 // client side settings
 static REAL se_maxLagSpeedup=.2;        // maximal speed increase of timer while lag is compensated for
 static REAL se_lagSlowDecayTime=30.0;   // timescale the slow lag measurement decays on
@@ -140,6 +142,10 @@ static tSettingItem< REAL > se_lagCreditSingleConf( "LAG_CREDIT_SINGLE", se_lagC
 static tSettingItem< REAL > se_lagCreditSweetSpotConf( "LAG_SWEET_SPOT", se_lagCreditSweetSpot );
 static tSettingItem< REAL > se_lagCreditTimeConf( "LAG_CREDIT_TIME", se_lagCreditTime );
 
+// threshold
+static REAL se_lagThreshold = 0.0f;
+static tSettingItem< REAL > se_lagThresholdConf( "LAG_THRESHOLD", se_lagThreshold );
+
 // see if a client supports lag compensation
 static nVersionFeature se_clientLagCompensation( 14 );
 
@@ -219,44 +225,56 @@ public:
 
     REAL TakeCredit( REAL lag )
     {
-#ifdef DEBUG
-        con << "Requesting " << lag << " seconds of lag credit for client " << client_;
+        lag -= se_lagThreshold;
+        if ( lag > 0 )
+        {
+#ifdef DEBUG_LAG
+            REAL lagBefore = lag;
 #endif
 
-        // if everyone is lagging, delete the used credit
-        Balance();
+            // if everyone is lagging, delete the used credit
+            Balance();
 
-        // clamp
-        lag = lag > se_lagCreditSingle ? se_lagCreditSingle : lag;
+            // clamp
+            lag = lag > se_lagCreditSingle ? se_lagCreditSingle : lag;
 
-        // get values
-        REAL credit = Credit();
+            // get values
+            REAL credit = Credit();
 
-        // sanity check
-        if ( se_lagCreditTime < EPS )
-            se_lagCreditTime = EPS;
+            // sanity check
+            if ( se_lagCreditTime < EPS )
+                se_lagCreditTime = EPS;
 
-        // timestep credit
-        double time = tSysTimeFloat();
-        REAL dt = time - lastTime_;
-        lastTime_ = time;
-        creditUsed_ -= dt * credit/se_lagCreditTime;
-        if ( creditUsed_ < 0 )
-            creditUsed_ = 0;
+            // timestep credit
+            double time = tSysTimeFloat();
+            REAL dt = time - lastTime_;
+            lastTime_ = time;
+            creditUsed_ -= dt * credit/se_lagCreditTime;
+            if ( creditUsed_ < 0 )
+                creditUsed_ = 0;
 
-        // see how much credit is left to be used
-        REAL creditLeft = credit - creditUsed_;
-        if ( lag > creditLeft )
-            lag = creditLeft;
-        if ( lag < 0 )
-            lag = 0;
+            // see how much credit is left to be used
+            REAL creditLeft = credit - creditUsed_;
+            if ( lag > creditLeft )
+                lag = creditLeft;
+            if ( lag < 0 )
+                lag = 0;
 
-        // use it and return it
-        creditUsed_ += lag;
+            // use it and return it
+            creditUsed_ += lag;
 
-#ifdef DEBUG
-        con << ", granting " << lag << ".\n";
+#ifdef DEBUG_LAG
+            {
+                if ( lag > lagBefore )
+                    con << "Requesting " << lagBefore << " seconds of lag credit, granting " << lag << ".\n";
+                else
+                    con << "Granting " << lag << " seconds of lag credit.\n";
+            }
 #endif
+
+            lag += se_lagThreshold;
+
+        }
 
         return lag;
     }
@@ -380,6 +398,21 @@ REAL eLag::Credit( int client )
 
     // but clamp it with the maximum single credit
     return credit > se_lagCreditSingle ? se_lagCreditSingle : credit;
+}
+
+// *******************************************************************************
+// *
+// *	Threshold
+// *
+// *******************************************************************************
+//!
+//!		@return		the amount of lag that is always tolerated
+//!
+// *******************************************************************************
+
+REAL eLag::Threshold( void )
+{
+    return se_lagThreshold;
 }
 
 // *******************************************************************************

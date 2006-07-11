@@ -210,10 +210,12 @@ public:
     // the information written by this function should
     // be read from the message in the "message"- connstructor
 
-
     // control functions:
 
 protected:
+    //! returns the user that the current WriteSync() is intended for
+    static int SyncedUser();
+
     nMessage *NewControlMessage();
     // creates a new nMessage that can be used to control other
     // copies of this nNetObject; control is received with ReceiveControl();
@@ -327,6 +329,7 @@ template<class T> class nNOInitialisator:public nDescriptor{
                 nNetObjectRegistrar registrar;
                 //			nNetObject::RegisterRegistrar( registrar );
                 tJUST_CONTROLLED_PTR< T > n=new T(m);
+                n->InitAfterCreation();
                 ((nNetObject*)n)->ReadSync(m);
                 n->Register( registrar );
 
@@ -347,10 +350,6 @@ template<class T> class nNOInitialisator:public nDescriptor{
                 {
                     // object was unable to be registered
                     n->Release(); // silently delete it.
-                }
-                else
-                {
-                    n->InitAfterCreation();
                 }
             }
 #ifndef NOEXCEPT

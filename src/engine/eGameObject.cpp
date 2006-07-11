@@ -667,6 +667,13 @@ static REAL se_maxSimulateAhead = .01f;
 static tSettingItem<REAL> se_maxSimulateAheadConf( "MAX_SIMULATE_AHEAD", se_maxSimulateAhead );
 #endif
 
+// what is left of this time for the gameobject to use up
+static REAL se_maxSimulateAheadLeft = 0.0f;
+REAL eGameObject::MaxSimulateAhead()
+{
+    return se_maxSimulateAheadLeft;
+}
+
 void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObject *c, REAL minTimestep )
 {
     su_FetchAndStoreSDLInput();
@@ -680,7 +687,13 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
 
 #ifdef DEDICATED
     REAL nextTime = c->NextInterestingTime();
-    if ( simTime < nextTime && nextTime < simTime + se_maxSimulateAhead )
+
+    // store the time left to simulate
+    se_maxSimulateAheadLeft = simTime + se_maxSimulateAhead - nextTime;
+    if ( se_maxSimulateAheadLeft < 0 )
+        se_maxSimulateAheadLeft = 0;
+
+    if ( c->lastTime < nextTime && nextTime < simTime + se_maxSimulateAhead )
     {
         // something interesting is going to happen, see what it is
         simTime = nextTime;
@@ -690,25 +703,38 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
         // don't waste your time on too small timesteps
         return;
     }
+    else
+    {
+        // add an extra portion of lag compensation
+        simTime -= c->LagThreshold();
+    }
 #endif
 
     // simulate a bit ahead
     if (!eWallRim::IsBound(c->pos,-20))
     {
+        se_maxSimulateAheadLeft = 0;
+
         c->Kill();
         return;
     }
 
-    if (TimestepThis(simTime,c))
+    // only simulate forward here
+    if ( simTime > c->lastTime )
     {
-        if (c->autodelete)
-            c->RemoveFromGame();
-        else
+        if (TimestepThis(simTime,c))
         {
-            c->currentFace=NULL;
-            c->RemoveFromList();
+            if (c->autodelete)
+                c->RemoveFromGame();
+            else
+            {
+                c->currentFace=NULL;
+                c->RemoveFromList();
+            }
         }
     }
+
+    se_maxSimulateAheadLeft = 0.0;
 }
 
 // does a timestep and all interactions for every eGameObject

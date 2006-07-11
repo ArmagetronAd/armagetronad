@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "tHeap.h"
+#include "tConsole.h"
 #include <iostream>
 
 /* ************************
@@ -52,7 +53,11 @@ bool tHeapBase::SwapIf(int i,int j)
         return false;
 }
 
-tHeapBase::~tHeapBase(){}
+tHeapBase::~tHeapBase()
+{
+    while(Len() > 0)
+        Remove(0);
+}
 
 //#ifdef EVENT_DEB
 void tHeapBase::CheckHeap(){
@@ -141,7 +146,21 @@ void tHeapBase::Remove(tHeapElement *e){
     CheckHeap();
 #endif
 
-    if(i<0 || this != e->Heap())
+    // element
+    if(i<0 )
+    {
+#ifdef DEBUG
+        static bool warn = true;
+        if ( warn )
+        {
+            tERR_WARN("Element to be removed from heap was already removed. Unless there is a fatal exit in process, this is not right.");
+            warn=false;
+        }
+#endif
+        return;
+    }
+
+    if( this != e->Heap())
         tERR_ERROR_INT("Element is not in this heap! (Note: this usually is a followup error when the system fails to recover from another error. When reporting, please also include whatever happened before this.)");
 
     Remove(i);
