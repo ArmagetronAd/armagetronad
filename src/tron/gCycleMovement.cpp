@@ -1505,6 +1505,12 @@ public:
             sg_delayCycle = 0.0f;
     }
 
+    explicit gTurnDelayOverride( REAL factor )
+    {
+        delay_ = sg_delayCycle;
+        sg_delayCycle *= factor;
+    }
+
     ~gTurnDelayOverride()
     {
         sg_delayCycle = delay_;
@@ -1724,6 +1730,21 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
             if ( lastTime >= earliestTurnTime && canTurn && ( forceTurn || dist_to_dest < 0.01 || timeout <= 0 || lastTime >= latestTurnTime ) ){
                 forceTurn = false;
+
+#ifdef DEBUG
+                if ( turnTo != 0 )
+                {
+                    static REAL checkFactor = .9f;
+                    gTurnDelayOverride check( checkFactor );
+                    if ( !CanMakeTurn( turnTo ) )
+                    {
+                        con << "Early turn!\n";
+                        st_Breakpoint();
+                    }
+                }
+#endif
+
+
                 // con << timeLeft << ", " << earlyTurnTolerance << ", " << rubberActive << ", " << dist_to_dest << "\n";
 
                 // the destination is very close or we gave up. Now is the time to turn towards
@@ -1815,6 +1836,8 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     */
 
                 }
+
+                overrideTurnDelay = false;
 
                 if ( used )
                 {
