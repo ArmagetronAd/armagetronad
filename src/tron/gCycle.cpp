@@ -2146,7 +2146,7 @@ bool gCycle::TimestepCore(REAL currentTime){
             // z-man: the next two lines are a very bad idea. This lets walls stick out on the other side while you're using up your rubber.
             //if ( sn_GetNetState() != nSERVER )
             //    wallEndPos = pos + dirDrive * ( verletSpeed_ * se_PredictTime() );
-            currentWall->Update(currentTime, wallEndPos );
+            currentWall->Update(lastTime, wallEndPos );
         }
 
         // animate skew
