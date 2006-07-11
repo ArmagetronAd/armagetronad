@@ -73,6 +73,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 static int sg_cycleDebugPrintLevel = 0;
 #endif
 
+// get rubber values in effect
+void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness );
+
 //  *****************************************************************
 
 static void sg_ArchiveCoord( eCoord & coord, int level )
@@ -1580,6 +1583,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
             // check if the path to the destination is clear for the next timesteps
             sg_ArchiveReal( rubberSpeedFactor, 9 );
+            REAL distToWall=1E+30;
             if ( rubberSpeedFactor < .999 )
             {
                 // take rubber activity into account
@@ -1596,7 +1600,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 // forge last time while looking so obstacles that will go away in time are ignored
                 REAL lastTimeBack = lastTime;
                 lastTime = currentDestination->GetGameTime();
-                REAL distToWall = MaxSpaceAhead( this, ts, lookahead, lookahead );
+                distToWall = MaxSpaceAhead( this, ts, lookahead, lookahead );
                 lastTime = lastTimeBack;
 
                 if ( dist_to_dest > distToWall )
@@ -1614,7 +1618,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
             REAL latestTurnTime   = turnTime + sg_timeTolerance;
 
             // if rubber is active and anti lag sliding code should be enabled,
-            // then allow no early or late turns
+            // then allow no too early or late turns
             if ( sg_UseAntiLagSliding( this ) )
             {
                 if ( rubberActive )
@@ -1622,6 +1626,27 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     // smoothly make the allowed time interval smaller with increased rubber use
                     earliestTurnTime = turnTime - sg_timeTolerance * rubberSpeedFactor;
                     latestTurnTime = turnTime + sg_timeTolerance * rubberSpeedFactor;
+
+                    // clamp latest turn time so we don't drive into the wall
+                    if ( verletSpeed_ > 0 )
+                    {
+                        REAL maxRubber, effectiveness;
+                        sg_RubberValues( Player(), verletSpeed_, maxRubber, effectiveness );
+
+                        // see when we'll die (be a little careful, the .9 is a fudge factor)
+                        REAL rubberLeft = (maxRubber - rubber)*.9;
+                        REAL stepLeft   = rubberLeft + distToWall;
+                        REAL timeLeft   = stepLeft/verletSpeed_;
+                        REAL deathTime  = lastTime + timeLeft;
+
+                        // can't do a thing if the player wants to die
+                        if ( deathTime < turnTime )
+                            deathTime = turnTime;
+
+                        // clamp latest possible time
+                        if ( latestTurnTime > deathTime )
+                            latestTurnTime = deathTime;
+                    }
                 }
                 else
                 {
