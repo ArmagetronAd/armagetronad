@@ -1491,9 +1491,6 @@ static bool sg_UseAntiLagSliding( const eNetGameObject* obj )
     }
 }
 
-static REAL sg_maxSimulateAhead = .01f;
-static tSettingItem<REAL> sg_maxSimulateAheadConf( "CYCLE_DEST_SIMULATE_AHEAD", sg_maxSimulateAhead );
-
 // while an object of this class exists, turn delay is ignored
 class gTurnDelayOverride
 {
@@ -1532,6 +1529,10 @@ bool gCycleMovement::Timestep( REAL currentTime )
     // keep this cycle alive
     tJUST_CONTROLLED_PTR< gCycleMovement > keep( this->GetRefcount()>0 ? this : 0 );
 
+    // don't make a fuss about negative timesteps
+    if ( currentTime < lastTime )
+        return TimestepCore( currentTime );
+
     // remove old destinations
     //REAL lag = 1;
     //if ( player )
@@ -1553,7 +1554,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
         bool overrideTurnDelay=false; // override the turn delay system, turn immediately
 
         // only simulate forward in time
-        while (pendingTurns.empty() && currentDestination && timeout > 0 && currentTime >= lastTime - EPS )
+        while (pendingTurns.empty() && currentDestination && timeout > 0 )
         {
             timeout --;
 
@@ -1569,6 +1570,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
             // our speed
             REAL avgspeed=verletSpeed_;
+            CalculateAcceleration( ts );
             if (acceleration > 0)
                 avgspeed += acceleration * SpeedMultiplier() * ts * .5;
 
@@ -1630,15 +1632,16 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
             sg_ArchiveReal( dist_to_dest, 9 );
 
-            if ( dist_to_dest > ( ts + sg_maxSimulateAhead ) * avgspeed && currentTime < latestTurnTime )
+            REAL simulateAhead = MaxSimulateAhead();
+
+            if ( dist_to_dest > ( ts + simulateAhead ) * avgspeed && currentTime < latestTurnTime )
                 break; // no need to worry; we won't reach the next destination
 
             if ( currentTime < earliestTurnTime && sg_CommandTime.Supported( Owner() ) )
                 break; // the turn is too far in the future
 
-            REAL simulateAhead = sg_maxSimulateAhead;
-            if ( currentTime < turnTime + EPS )
-                simulateAhead = 0;
+            // if ( currentTime < turnTime + EPS )
+            //    simulateAhead = 0;
 
             // determine whether to turn left or right (coping with weird axis settings)
             int turnTo=0;
@@ -1743,8 +1746,8 @@ bool gCycleMovement::Timestep( REAL currentTime )
 #ifdef DEBUG
 #ifdef DEDICATED
                         eCoord slide = this->pos - currentDestination->position;
-                        if ( slide.NormSquared() > .01 )
-                            con << "Lag slide: " << slide << "\n";
+                        if ( Player() && slide.NormSquared() > .01 )
+                            con << "Lag slide for " << Player()->GetUserName() << ": "  << slide << ", rubberSpeedFactor " << rubberSpeedFactor << "\n";
 #endif
 #endif
                         gTurnDelayOverride override( overrideTurnDelay );
@@ -1897,7 +1900,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 // core simulation
                 if ( tsTodo > EPS )
                 {
-                    TimestepCore( lastTime + tsTodo );
+                    TimestepCore( lastTime + tsTodo, false );
                 }
                 else
                 {
@@ -2698,7 +2701,7 @@ private:
 //!
 // *******************************************************************************************
 
-bool gCycleMovement::TimestepCore( REAL currentTime )
+bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration )
 {
     eCoord oldpos=pos;
     REAL lastSpeed=verletSpeed_;
@@ -2706,7 +2709,8 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
     REAL ts=(currentTime-lastTime);
 
     // calculate acceleration
-    this->CalculateAcceleration( ts );
+    if ( calculateAcceleration )
+        this->CalculateAcceleration( ts );
 
     // apply acceleration
     if ( sg_verletIntegration.Supported() )
@@ -2776,13 +2780,15 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
 
                     verletSpeed_=lastSpeed;
                     // do two small timesteps
-                    return TimestepCore( delayTime ) || TimestepCore( currentTime );
+                    return TimestepCore( delayTime, false ) || TimestepCore( currentTime );
                 }
             }
         }
     }
 
     sg_ArchiveReal( rubberEffectiveness, 9 );
+
+    tASSERT( rubber >= 0 );
 
     // TODO: solve smooth position correction trouble with rubber
     if ( player && ( rubber_granted > rubber || sn_GetNetState() == nCLIENT || !Vulnerable() ) && sg_rubberCycleSpeed > 0 && step > 0 && ( sn_GetNetState() == nCLIENT || rubberEffectiveness > 0 ) )
@@ -2846,7 +2852,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
                             REAL rubberGetsActiveTime = lastTime + ( currentTime - lastTime ) * ratio;
 
                             verletSpeed_=lastSpeed;
-                            return TimestepCore( rubberGetsActiveTime ) || TimestepCore( currentTime );
+                            return TimestepCore( rubberGetsActiveTime, false ) || TimestepCore( currentTime );
                         }
                     }
                 }
@@ -2895,7 +2901,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
                                 gRecursionGuard guard( recurse );
 
                                 verletSpeed_=lastSpeed;
-                                return TimestepCore( maxTime ) || TimestepCore( currentTime );
+                                return TimestepCore( maxTime, false ) || TimestepCore( currentTime );
                             }
                         }
                     }
@@ -2949,7 +2955,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
                             gRecursionGuard guard( recurse );
                             // need many attempys
                             verletSpeed_=lastSpeed;
-                            return TimestepCore( runOutTime ) || TimestepCore( currentTime );
+                            return TimestepCore( runOutTime, false ) || TimestepCore( currentTime );
                         }
                     }
                 }
@@ -2978,6 +2984,8 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
             //}
         }
     }
+
+    tASSERT( rubber >= 0 );
 
     sg_ArchiveReal( step, 9 );
 
@@ -3078,11 +3086,15 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
             pos = lastPos;
             currentFace = lastFace;
             rubber += step/rubberEffectiveness;
+            if ( rubber < 0 )
+                rubber = 0;
 
             numTries = 0;
             emergency = true;
         }
     }
+
+    tASSERT( rubber >= 0 );
 
     // let rubber decay
     if ( sg_rubberCycleTime > 0 )
@@ -3131,6 +3143,8 @@ bool gCycleMovement::TimestepCore( REAL currentTime )
         this->ApplyAcceleration( ts );
 
     tASSERT(finite(distance));
+
+    tASSERT( rubber >= 0 );
 
     // call base timestep
     return eNetGameObject::Timestep(currentTime);

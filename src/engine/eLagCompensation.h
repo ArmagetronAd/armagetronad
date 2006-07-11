@@ -44,6 +44,9 @@ public:
     //! call on the server: ask how much lag credit is left
     static REAL Credit( int client );
 
+    //! call on the server: gives the amount of lag that is always tolerated without using up credit
+    static REAL Threshold();
+
     //! call on the client: returns the amount of lag that is currently to be compensated by the game code
     static REAL Current();
 

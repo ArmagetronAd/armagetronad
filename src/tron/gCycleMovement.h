@@ -144,7 +144,8 @@ protected:
     virtual void            RightBeforeDeath        ( int                   numTries    )           ;   //!< called when the cycle is very close to a wall and about to crash
     virtual void            Die                     ( REAL time                         )           ;  //!< dies at the specified time
 
-    virtual bool            TimestepCore            ( REAL                  currentTime )           ;   //!< core physics simulation routine
+    virtual bool            TimestepCore            ( REAL                  currentTime
+            ,                                         bool                  calculateAcceleration = true )           ;   //!< core physics simulation routine
 private:
     void                    MyInitAfterCreation     ()                                              ;   //!< private shared initialization code
 

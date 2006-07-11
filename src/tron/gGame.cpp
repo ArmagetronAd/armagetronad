@@ -4113,6 +4113,7 @@ void sg_EnterGameCore( nNetState enter_state ){
         {
             // new network data arrived, do the most urgent work now
             tAdvanceFrame();
+            gGame::NetSync();
             se_SyncGameTimer();
             REAL time=se_GameTime();
             if ( time > 0 )

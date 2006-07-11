@@ -119,7 +119,7 @@ public:
 
     virtual bool EdgeIsDangerous(const eWall *w, REAL time, REAL a) const;
 
-    virtual bool TimestepCore(REAL currentTime);
+    virtual bool TimestepCore(REAL currentTime, bool calculateAcceleration = true );
 
     // virtual bool DoTurn(int dir);
 
@@ -261,7 +261,7 @@ public:
     //virtual bool ClearToTransmit(int user) const;
 
     virtual bool Timestep(REAL currentTime);
-    virtual bool TimestepCore(REAL currentTime);
+    virtual bool TimestepCore(REAL currentTime,bool calculateAcceleration = true);
 
     virtual void InteractWith(eGameObject *target,REAL time,int recursion=1);
 

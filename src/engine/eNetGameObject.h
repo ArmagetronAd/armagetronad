@@ -101,7 +101,7 @@ public:
     void clientside_action(){lastClientsideAction=lastTime;}
 
     virtual REAL Lag() const;
-
+    virtual REAL LagThreshold() const;
 };
 
 nMessage &operator << (nMessage &m, const eCoord &x);

@@ -784,9 +784,15 @@ bool gCycle::IsMe( eGameObject const * other ) const
 // from gCycleMovement.cpp
 extern void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness );
 
+#ifdef DEBUG
+double sg_turnReceivedTime = 0;
+#endif
+
 void gCycle::OnNotifyNewDestination( gDestination* dest )
 {
 #ifdef DEBUG
+    sg_turnReceivedTime = tSysTimeFloat();
+
     if ( sg_gnuplotDebug && Player() )
     {
         std::ofstream f( Player()->GetUserName() + "_sync", std::ios::app );
@@ -1175,7 +1181,7 @@ bool gCycleExtrapolator::EdgeIsDangerous(const eWall *ww, REAL time, REAL alpha 
     return parent_->EdgeIsDangerous( ww, time, alpha ) && gCycleMovement::EdgeIsDangerous( ww, time, alpha );
 }
 
-bool gCycleExtrapolator::TimestepCore(REAL currentTime)
+bool gCycleExtrapolator::TimestepCore(REAL currentTime, bool calculateAcceleration)
 {
     // determine a suitable next destination
     gDestination destDefault( *parent_ ), *dest=&destDefault;
@@ -1190,7 +1196,7 @@ bool gCycleExtrapolator::TimestepCore(REAL currentTime)
     tASSERT(finite(distance));
 
     // delegate
-    bool ret = gCycleMovement::TimestepCore( currentTime );
+    bool ret = gCycleMovement::TimestepCore( currentTime, calculateAcceleration );
 
     // update true distance
     trueDistance_ += GetDistance() - distanceBefore;
@@ -1971,7 +1977,7 @@ static REAL ClampDisplacement( gCycle* cycle, eCoord& displacement, const eCoord
 // from gCycleMovement.cpp
 REAL sg_GetSparksDistance();
 
-bool gCycle::TimestepCore(REAL currentTime){
+bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
     if (!finite(skew))
         skew=0;
     if (!finite(skewDot))
@@ -2092,8 +2098,9 @@ bool gCycle::TimestepCore(REAL currentTime){
                 {
                     // simulate right to the spot where the wall should begin
                     if ( currentTime < startBuildWallAt )
-                        if ( gCycleMovement::TimestepCore( startBuildWallAt ) )
+                        if ( gCycleMovement::TimestepCore( startBuildWallAt, calculateAcceleration ) )
                             return true;
+                    calculateAcceleration = true;
 
                     // build the wall, modifying the spawn time to make sure it happens
                     REAL lastSpawn = spawnTime_;
@@ -2103,7 +2110,7 @@ bool gCycle::TimestepCore(REAL currentTime){
                 }
 
                 // simulate rest of frame
-                if ( gCycleMovement::TimestepCore( currentTime ) )
+                if ( gCycleMovement::TimestepCore( currentTime, calculateAcceleration ) )
                     return true;
             }
             catch ( gCycleDeath const & death )
@@ -2669,6 +2676,12 @@ private:
 bool gCycle::DoTurn(int d)
 {
 #ifdef DEBUG
+    REAL delay = tSysTimeFloat() - sg_turnReceivedTime;
+    if ( delay > EPS && sn_GetNetState() == nSERVER )
+    {
+        con << "Delayed turn execution! " << turns << "\n";
+    }
+
     if ( sg_gnuplotDebug && Player() )
     {
         std::ofstream f( Player()->GetUserName() + "_turn", std::ios::app );
