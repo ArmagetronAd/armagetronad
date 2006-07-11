@@ -45,6 +45,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRecorder.h"
 
 #ifndef DEDICATED
+#include "SDL_thread.h"
+#include "SDL_mutex.h"
+
 #include <png.h>
 #define SCREENSHOT_PNG_BITDEPTH 8
 #define SCREENSHOT_BYTES_PER_PIXEL 3
@@ -475,6 +478,86 @@ rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_glFlush;
 // for setting breakpoints in optimized mode, too
 static void breakpoint(){}
 
+static bool sr_netSyncThreadGoOn = true;
+static rSysDep::rNetIdler * sr_netIdler = NULL;
+int sr_NetSyncThread(void *lockVoid)
+{
+    SDL_mutex *lock = (SDL_mutex *)lockVoid;
+
+    SDL_mutexP(lock);
+
+    while ( sr_netSyncThreadGoOn )
+    {
+        SDL_mutexV(lock);
+        // wait for network data
+        bool toDo = sr_netIdler->Wait();
+        SDL_mutexP(lock);
+
+        if ( toDo )
+        {
+            // disable rendering (during auto-scrolling of console, for example)
+            bool glout = sr_glOut;
+            sr_glOut = false;
+
+            // new network data arrived, handle it
+            sr_netIdler->Do();
+
+            // enable rendering again
+            sr_glOut = glout;
+        }
+    }
+
+    SDL_mutexV(lock);
+
+    return 0;
+}
+
+static SDL_Thread * sr_netSyncThread = NULL;
+static SDL_mutex * sr_netLock = NULL;
+void rSysDep::StartNetSyncThread( rNetIdler * idler )
+{
+    sr_netIdler = idler;
+
+    // can't use thrading trouble while recording
+    if ( tRecorder::IsRunning() )
+        return;
+
+    if ( sr_netSyncThread )
+        return;
+
+    // create lock
+    if ( !sr_netLock )
+        sr_netLock = SDL_CreateMutex();
+
+    // start thread
+    sr_netSyncThread = SDL_CreateThread( sr_NetSyncThread, sr_netLock );
+    if ( !sr_netSyncThread )
+        return;
+
+    // lock mutex, the thread should only do work while the main thread is waiting for the refresh
+    SDL_mutexP( sr_netLock );
+}
+
+void rSysDep::StopNetSyncThread()
+{
+    // stop and delete thread
+    if ( sr_netSyncThread )
+    {
+        SDL_mutexV(  sr_netLock );
+        sr_netSyncThreadGoOn = false;
+        SDL_WaitThread( sr_netSyncThread, NULL );
+        sr_netSyncThread = NULL;
+        sr_netIdler = NULL;
+    }
+
+    // delete lock
+    if ( sr_netLock )
+    {
+        SDL_DestroyMutex( sr_netLock );
+        sr_netLock = NULL;
+    }
+}
+
 void rSysDep::SwapGL(){
     if ( s_benchmark )
     {
@@ -550,9 +633,12 @@ void rSysDep::SwapGL(){
         return;
     }
 
-    sr_LockSDL();
 
     rPerFrameTask::DoPerFrameTasks();
+
+    // unlock the mutex while waiting for the swap operation to finish
+    SDL_mutexV(  sr_netLock );
+    sr_LockSDL();
 
     switch( swapMode_ )
     {
@@ -589,6 +675,9 @@ void rSysDep::SwapGL(){
     }
 
     sr_UnlockSDL();
+    // lock mutex again
+    SDL_mutexP(  sr_netLock );
+
 
     // disable output in fast forward mode
     if ( s_fastForward && tRecorder::IsPlayingBack() )

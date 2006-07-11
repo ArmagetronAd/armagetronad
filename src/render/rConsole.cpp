@@ -99,6 +99,8 @@ tConsole & rConsole::DoPrint(const tString &s){
 #ifdef DEBUG
     print_to_stdout=true;
 #endif
+    bool swap = false;
+
     if (!sr_screen)
         print_to_stdout=true;
     if (print_to_stdout)
@@ -117,7 +119,7 @@ tConsole & rConsole::DoPrint(const tString &s){
                 currentIn++;
                 if (autoDisplayAtNewline && !rNoAutoDisplayAtNewlineCallback::NoAutoDisplayAtNewline() && (sr_textOut ||
                         rForceTextCallback::ForceText()))
-                    DisplayAtNewline();
+                    swap = true;
 
                 if (currentIn >= MAXBACK+BACKEXTRA){
                     for(int i=0;i<MAXBACK;i++)
@@ -139,6 +141,10 @@ tConsole & rConsole::DoPrint(const tString &s){
             while ((currentIn-currentTop) > Height())
                 currentTop++;
     }
+
+    if (swap)
+        DisplayAtNewline();
+
     return *this;
 }
 

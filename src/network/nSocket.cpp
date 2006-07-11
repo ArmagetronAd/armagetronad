@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "config.h"
 #include "tRandom.h"
-
+#include "tSysTime.h"
 #include "tRandom.h"
 
 #include <string>
@@ -2620,6 +2620,12 @@ bool nBasicNetworkSystem::Select( REAL dt )
     static char const * section = "NETSELECT";
     if ( !tRecorder::PlaybackStrict( section, retval ) )
     {
+        if ( controlSocket_.GetSocket() < 0 )
+        {
+            tDelay( int( dt * 1000000 ) );
+            return false;
+        }
+
         fd_set rfds; // set of sockets to wathc
         struct timeval tv; // time value to pass to select()
 
