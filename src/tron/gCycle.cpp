@@ -1191,15 +1191,16 @@ bool gCycleExtrapolator::TimestepCore(REAL currentTime, bool calculateAccelerati
     }
 
     // correct distance
-    distance = dest->distance - DistanceToDestination( *dest );
-    REAL distanceBefore = GetDistance();
+    // distance = dest->distance - DistanceToDestination( *dest );
+    // REAL distanceBefore = GetDistance();
     tASSERT(finite(distance));
 
     // delegate
     bool ret = gCycleMovement::TimestepCore( currentTime, calculateAcceleration );
 
     // update true distance
-    trueDistance_ += GetDistance() - distanceBefore;
+    // trueDistance_ += GetDistance() - distanceBefore;
+    trueDistance_ = distance;
 
     return ret;
 }
@@ -1698,6 +1699,9 @@ bool crash_sparks=true;
 extern REAL planned_rate_control[MAXCLIENTS+2];
 
 bool gCycle::Timestep(REAL currentTime){
+    // if ( Owner() == sn_myNetID )
+    //    con << pos << ',' << distance << ',' << eCoord::F( dirDrive, pos ) - distance << '\n';
+
     // drop current wall if it was requested
     if ( dropWallRequested_ )
     {
