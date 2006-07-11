@@ -128,7 +128,6 @@ Changes since 0.2.8.2:
   reduced network bandwidth usage.
 - Speed gauge resets between rounds.
 
->>>>>>> .merge-right.r4902
 Changes since 0.2.8.1:
 - Timestamps and teamscores added to scorelog.txt
 - Dedicated server now works on FreeBSD and OpenBSD
