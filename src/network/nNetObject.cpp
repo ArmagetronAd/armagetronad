@@ -1382,6 +1382,14 @@ bool nNetObject::DoDebugPrint()
     return s_DoPrintDebug;
 }
 
+static int sn_syncedUser = -1;
+
+//! returns the user that the current WriteSync() is intended for
+int nNetObject::SyncedUser()
+{
+    return sn_syncedUser;
+}
+
 void nNetObject::SyncAll(){
 #ifdef DEBUG
     s_DoPrintDebug = false;
@@ -1398,6 +1406,8 @@ void nNetObject::SyncAll(){
     for(int user=MAXCLIENTS;user>=0;user--)
         if (is_ready_to_get_objects[user] &&
                 sn_Connections[user].socket && sn_netObjects.Len()>0 && user!=sn_myNetID){
+
+            sn_syncedUser = user;
 
             // send the destroy messages
             if (destroyers[user])
@@ -1515,6 +1525,8 @@ void nNetObject::SyncAll(){
 
                 currentSync--;
             }
+
+            sn_syncedUser = -1;
 
 #ifdef DEBUG
             bool inc=false;

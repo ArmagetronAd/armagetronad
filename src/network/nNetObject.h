@@ -210,10 +210,12 @@ public:
     // the information written by this function should
     // be read from the message in the "message"- connstructor
 
-
     // control functions:
 
 protected:
+    //! returns the user that the current WriteSync() is intended for
+    static int SyncedUser();
+
     nMessage *NewControlMessage();
     // creates a new nMessage that can be used to control other
     // copies of this nNetObject; control is received with ReceiveControl();
