@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eTimer.h"
 #include "eNetGameObject.h"
 #include "nSimulatePing.h"
+#include "nConfig.h"
 #include "tRecorder.h"
 #include "tMath.h"
 #include "tConfiguration.h"
@@ -80,9 +81,20 @@ eTimer::~eTimer(){
     se_mainGameTimer=NULL;
 }
 
+// see if a client supports lag compensation
+static nVersionFeature se_clientLagCompensation( 14 );
+
+// old clients need a default lag compensation
+static REAL se_lagOffsetLegacy = 0.0f;
+static nSettingItem< REAL > se_lagOffsetLegacyConf( "LAG_OFFSET_LEGACY", se_lagOffsetLegacy );
+
 void eTimer::WriteSync(nMessage &m){
     nNetObject::WriteSync(m);
     REAL time = Time();
+
+    if ( SyncedUser() > 0 && !se_clientLagCompensation.Supported( SyncedUser() ) )
+        time += se_lagOffsetLegacy;
+
     m << time;
     m << speed;
     //std::cerr << "syncing:" << currentTime << ":" << speed << '\n';
