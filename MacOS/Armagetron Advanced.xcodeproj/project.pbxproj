@@ -343,34 +343,13 @@
 		9B5414EA0A45C7CB00745CE6 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414E80A45C7CB00745CE6 /* SDL.framework */; };
 		9B54150F0A45C7D700745CE6 /* SDL_image.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414E70A45C7CB00745CE6 /* SDL_image.framework */; };
 		9B5415100A45C7D700745CE6 /* SDL.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414E80A45C7CB00745CE6 /* SDL.framework */; };
+		9B69F6230A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */; };
+		9B69F6240A63E1A700F5F2E4 /* eLagCompensation.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */; };
+		9B69F6250A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */; };
+		9B69F6260A63E1A700F5F2E4 /* eLagCompensation.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */; };
+		9B69F6270A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */; };
+		9B69F6280A63E1A700F5F2E4 /* eLagCompensation.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXBuildStyle section */
-		4A9504CCFFE6A4B311CA0CBA /* Debug */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				PREBINDING = NO;
-				ZERO_LINK = YES;
-			};
-			name = Debug;
-		};
-		4A9504CDFFE6A4B311CA0CBA /* Release */ = {
-			isa = PBXBuildStyle;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				PREBINDING = NO;
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
-/* End PBXBuildStyle section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		8CB97ABB096265A800AE8BCD /* Copy Frameworks */ = {
@@ -383,6 +362,7 @@
 				9B5415100A45C7D700745CE6 /* SDL.framework in Copy Frameworks */,
 				8CB97BAC096271B000AE8BCD /* libpng12.0.dylib in Copy Frameworks */,
 				8CB97B450962677F00AE8BCD /* libxml2.2.6.22.dylib in Copy Frameworks */,
+				9B69F6260A63E1A700F5F2E4 /* eLagCompensation.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -396,6 +376,7 @@
 				9B5414DB0A45C78D00745CE6 /* libpng.framework in Copy Frameworks */,
 				9B5414DC0A45C78D00745CE6 /* SDL_image.framework in Copy Frameworks */,
 				9B5414DD0A45C78D00745CE6 /* SDL.framework in Copy Frameworks */,
+				9B69F6240A63E1A700F5F2E4 /* eLagCompensation.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -637,6 +618,8 @@
 		9B5414A40A45C78200745CE6 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = /Library/Frameworks/ArmagetronAdvanced/current/SDL.framework; sourceTree = "<absolute>"; };
 		9B5414E70A45C7CB00745CE6 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = /Library/Frameworks/ArmagetronAdvanced/10.2.8/SDL_image.framework; sourceTree = "<absolute>"; };
 		9B5414E80A45C7CB00745CE6 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = /Library/Frameworks/ArmagetronAdvanced/10.2.8/SDL.framework; sourceTree = "<absolute>"; };
+		9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eLagCompensation.cpp; sourceTree = "<group>"; };
+		9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eLagCompensation.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -805,6 +788,8 @@
 				8CBA5E21089EEC7C007E21DC /* eGrid.h */,
 				8CBA5E22089EEC7D007E21DC /* eKrawall.cpp */,
 				8CBA5E23089EEC7D007E21DC /* eKrawall.h */,
+				9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */,
+				9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */,
 				8CBA5E24089EEC7D007E21DC /* eNetGameObject.cpp */,
 				8CBA5E25089EEC7D007E21DC /* eNetGameObject.h */,
 				8CBA5E26089EEC7D007E21DC /* ePath.cpp */,
@@ -1084,6 +1069,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8CAD914A095A391A00DA0ECC /* config.h in Headers */,
+				9B69F6280A63E1A700F5F2E4 /* eLagCompensation.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1103,23 +1089,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				INSTALL_PATH = "$(HOME)/bin";
-				OPTIMIZATION_CFLAGS = "";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				OTHER_REZFLAGS = "";
-				PREBINDING = NO;
-				PRODUCT_NAME = "Armagetron Advanced Dedicated";
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = (
-					"-Wmost",
-					"-Wno-four-char-constants",
-					"-Wno-unknown-pragmas",
-				);
-			};
 			dependencies = (
 			);
 			name = "Armagetron Advanced Dedicated";
@@ -1142,17 +1111,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "Armagetron Advanced_Prefix.pch";
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				PRODUCT_NAME = "Armagetron Advanced";
-				WRAPPER_EXTENSION = app;
-			};
 			dependencies = (
 			);
 			name = "Armagetron Advanced 10.2.8";
@@ -1176,17 +1134,6 @@
 			);
 			buildRules = (
 			);
-			buildSettings = {
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "Armagetron Advanced_Prefix.pch";
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				PRODUCT_NAME = "Armagetron Advanced";
-				WRAPPER_EXTENSION = app;
-			};
 			dependencies = (
 			);
 			name = "Armagetron Advanced";
@@ -1201,12 +1148,6 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 8CBA5D48089EE60D007E21DC /* Build configuration list for PBXProject "Armagetron Advanced" */;
-			buildSettings = {
-			};
-			buildStyles = (
-				4A9504CCFFE6A4B311CA0CBA /* Debug */,
-				4A9504CDFFE6A4B311CA0CBA /* Release */,
-			);
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Armagetron Advanced */;
 			projectDirPath = "";
@@ -1516,6 +1457,7 @@
 				8C11CAAA095A2B6E007AE0EA /* uInputQueue.cpp in Sources */,
 				8C11CAAB095A2B6E007AE0EA /* uMenu.cpp in Sources */,
 				8CAD9141095A37DD00DA0ECC /* rConsoleCout.cpp in Sources */,
+				9B69F6270A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1622,6 +1564,7 @@
 				8CB97B21096265A800AE8BCD /* uInput.cpp in Sources */,
 				8CB97B22096265A800AE8BCD /* uInputQueue.cpp in Sources */,
 				8CB97B23096265A800AE8BCD /* uMenu.cpp in Sources */,
+				9B69F6250A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1728,6 +1671,7 @@
 				8CBA5FDB089EEC7E007E21DC /* uInput.cpp in Sources */,
 				8CBA5FDD089EEC7E007E21DC /* uInputQueue.cpp in Sources */,
 				8CBA5FDF089EEC7E007E21DC /* uMenu.cpp in Sources */,
+				9B69F6230A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1829,13 +1773,16 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/10.2.8;
 				OTHER_LDFLAGS = (
-					"-framework SDL",
-					"-framework SDL_image",
-					"-framework SDL_mixer",
+					"$(OTHER_LDFLAGS_QUOTED_1)",
+					"$(OTHER_LDFLAGS_QUOTED_2)",
+					"$(OTHER_LDFLAGS_QUOTED_3)",
 					"-lz",
 					"-lpthread",
 					"-lm",
 				);
+				OTHER_LDFLAGS_QUOTED_1 = "-framework\\ SDL";
+				OTHER_LDFLAGS_QUOTED_2 = "-framework\\ SDL_image";
+				OTHER_LDFLAGS_QUOTED_3 = "-framework\\ SDL_mixer";
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
 				SDKROOT = /Developer/SDKs/MacOSX10.2.8.sdk;
@@ -1870,13 +1817,16 @@
 				LIBRARY_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/10.2.8;
 				MACOSX_DEPLOYMENT_TARGET = 10.2;
 				OTHER_LDFLAGS = (
-					"-framework SDL",
-					"-framework SDL_image",
-					"-framework SDL_mixer",
+					"$(OTHER_LDFLAGS_QUOTED_1)",
+					"$(OTHER_LDFLAGS_QUOTED_2)",
+					"$(OTHER_LDFLAGS_QUOTED_3)",
 					"-lz",
 					"-lpthread",
 					"-lm",
 				);
+				OTHER_LDFLAGS_QUOTED_1 = "-framework\\ SDL";
+				OTHER_LDFLAGS_QUOTED_2 = "-framework\\ SDL_image";
+				OTHER_LDFLAGS_QUOTED_3 = "-framework\\ SDL_mixer";
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
 				SDKROOT = /Developer/SDKs/MacOSX10.2.8.sdk;
@@ -1913,15 +1863,18 @@
 					/Library/Frameworks/ArmagetronAdvanced/current,
 				);
 				OTHER_LDFLAGS = (
-					"-framework SDL",
-					"-framework SDL_image",
-					"-framework SDL_mixer",
+					"$(OTHER_LDFLAGS_QUOTED_1)",
+					"$(OTHER_LDFLAGS_QUOTED_2)",
+					"$(OTHER_LDFLAGS_QUOTED_3)",
 					"-lxml2",
 					"-lz",
 					"-lpthread",
 					"-liconv",
 					"-lm",
 				);
+				OTHER_LDFLAGS_QUOTED_1 = "-framework\\ SDL";
+				OTHER_LDFLAGS_QUOTED_2 = "-framework\\ SDL_image";
+				OTHER_LDFLAGS_QUOTED_3 = "-framework\\ SDL_mixer";
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
 				WRAPPER_EXTENSION = app;
@@ -1957,15 +1910,18 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.3;
 				OTHER_LDFLAGS = (
-					"-framework SDL",
-					"-framework SDL_image",
-					"-framework SDL_mixer",
+					"$(OTHER_LDFLAGS_QUOTED_1)",
+					"$(OTHER_LDFLAGS_QUOTED_2)",
+					"$(OTHER_LDFLAGS_QUOTED_3)",
 					"-lxml2",
 					"-lz",
 					"-lpthread",
 					"-liconv",
 					"-lm",
 				);
+				OTHER_LDFLAGS_QUOTED_1 = "-framework\\ SDL";
+				OTHER_LDFLAGS_QUOTED_2 = "-framework\\ SDL_image";
+				OTHER_LDFLAGS_QUOTED_3 = "-framework\\ SDL_mixer";
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
 				WRAPPER_EXTENSION = app;

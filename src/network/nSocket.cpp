@@ -1507,7 +1507,12 @@ int nSocket::Create( void )
     // maybe this works for Windows, too?
 #ifndef WIN32
     char tos = IPTOS_LOWDELAY;
-    int ret = setsockopt( socket_, SOL_IP, IP_TOS, &tos, sizeof(char) );
+    
+#   ifdef MACOSX
+        int ret = setsockopt( socket_, IPPROTO_IP, IP_TOS, &tos, sizeof(char) );
+#   else
+        int ret = setsockopt( socket_, SOL_IP, IP_TOS, &tos, sizeof(char) );
+#   endif
 
     // remove this error reporting some time later, the success is not critical
     if ( ret != 0 )
