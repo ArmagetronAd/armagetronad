@@ -233,6 +233,9 @@
 		9B1EA52B0A20BB0900FA3478 /* rGradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B1EA5250A20BB0900FA3478 /* rGradient.cpp */; };
 		9B1EA53D0A20BC0100FA3478 /* gRotation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B1EA53B0A20BC0100FA3478 /* gRotation.cpp */; };
 		9B1EA5410A20BC0100FA3478 /* gRotation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B1EA53B0A20BC0100FA3478 /* gRotation.cpp */; };
+		9B26D98E0A64AE5400F9864B /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B26D98C0A64AE5400F9864B /* eLagCompensation.cpp */; };
+		9B26D98F0A64AE5500F9864B /* eLagCompensation.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B26D98D0A64AE5400F9864B /* eLagCompensation.h */; };
+		9B26D9900A64AE5500F9864B /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B26D98C0A64AE5400F9864B /* eLagCompensation.cpp */; };
 		9BD7D9720A2C7CB400D7033C /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96B0A2C7CB400D7033C /* libfreetype.a */; };
 		9BD7D9730A2C7CB400D7033C /* libftgl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96C0A2C7CB400D7033C /* libftgl.a */; };
 		9BD7D9740A2C7CB400D7033C /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96D0A2C7CB400D7033C /* libpng.framework */; };
@@ -264,6 +267,7 @@
 				9BD7D9A70A2C7CCF00D7033C /* libpng.framework in Copy Frameworks */,
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
+				9B26D98F0A64AE5500F9864B /* eLagCompensation.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -513,6 +517,8 @@
 		9B1EA5260A20BB0900FA3478 /* rGradient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rGradient.h; sourceTree = "<group>"; };
 		9B1EA53B0A20BC0100FA3478 /* gRotation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gRotation.cpp; sourceTree = "<group>"; };
 		9B1EA53C0A20BC0100FA3478 /* gRotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gRotation.h; sourceTree = "<group>"; };
+		9B26D98C0A64AE5400F9864B /* eLagCompensation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eLagCompensation.cpp; sourceTree = "<group>"; };
+		9B26D98D0A64AE5400F9864B /* eLagCompensation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eLagCompensation.h; sourceTree = "<group>"; };
 		9B86E63A0A2DFDA600D90F1C /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config_common.h; path = ../src/macosx/config_common.h; sourceTree = SOURCE_ROOT; };
 		9BD7D96B0A2C7CB400D7033C /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libfreetype.a; sourceTree = "<absolute>"; };
 		9BD7D96C0A2C7CB400D7033C /* libftgl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libftgl.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libftgl.a; sourceTree = "<absolute>"; };
@@ -657,6 +663,8 @@
 				8CBA5E21089EEC7C007E21DC /* eGrid.h */,
 				8CBA5E22089EEC7D007E21DC /* eKrawall.cpp */,
 				8CBA5E23089EEC7D007E21DC /* eKrawall.h */,
+				9B26D98C0A64AE5400F9864B /* eLagCompensation.cpp */,
+				9B26D98D0A64AE5400F9864B /* eLagCompensation.h */,
 				8CBA5E24089EEC7D007E21DC /* eNetGameObject.cpp */,
 				8CBA5E25089EEC7D007E21DC /* eNetGameObject.h */,
 				8CBA5E26089EEC7D007E21DC /* ePath.cpp */,
@@ -1257,6 +1265,7 @@
 				9B1EA51C0A20BAD600FA3478 /* tValue.cpp in Sources */,
 				9B1EA52B0A20BB0900FA3478 /* rGradient.cpp in Sources */,
 				9B1EA5410A20BC0100FA3478 /* gRotation.cpp in Sources */,
+				9B26D9900A64AE5500F9864B /* eLagCompensation.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1380,6 +1389,7 @@
 				9BD7DAB70A2C87FA00D7033C /* shttpd.c in Sources */,
 				9BFF72EA0A32238500F471CD /* eChannelSDLMixer.cpp in Sources */,
 				9BFF72EC0A32238500F471CD /* eMusicTrackSDLMixer.cpp in Sources */,
+				9B26D98E0A64AE5400F9864B /* eLagCompensation.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
