@@ -706,15 +706,16 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
         // something interesting is going to happen, see what it is
         simTime = nextTime;
     }
-    else if ( simTime < c->LastTime() + minTimestep )
-    {
-        // don't waste your time on too small timesteps
-        return;
-    }
     else
     {
         // add an extra portion of lag compensation
         simTime -= c->LagThreshold();
+
+        if ( simTime < c->LastTime() + minTimestep )
+        {
+            // don't waste your time on too small timesteps
+            return;
+        }
     }
 #endif
 
