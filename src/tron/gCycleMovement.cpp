@@ -1519,6 +1519,8 @@ private:
     REAL delay_;
 };
 
+static nVersionFeature sg_noRedundantBrakeCommands( 13 );
+
 // *******************************************************************************************
 // *
 // *	Timestep
@@ -1694,7 +1696,35 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 // detect false misses: if the last destination's message ID is just
                 // one below the current destination's message ID, it's a fake
                 if ( missed && lastDestination && lastDestination->messageID == currentDestination->messageID-1 )
+                {
                     missed = false;
+                    if ( ( dirDrive - currentDestination->direction ).NormSquared() < EPS )
+                    {
+                        turn = false;
+                        turnTo = 0;
+                    }
+                }
+
+                // if the destination is dead ahead, it can't be a fake, either
+                if ( missed && sn_GetNetState() == nSERVER && !sg_noRedundantBrakeCommands.Supported( Owner() ) )
+                {
+                    // calculate difference in expected position at the destination's time and the transmitted position
+                    REAL timeToDest = currentDestination->GetGameTime() - lastTime;
+                    eCoord posDelta = pos + dirDrive * ( timeToDest * ( verletSpeed_ + .5f * acceleration * timeToDest ) ) - currentDestination->position;
+                    REAL deltaParallel = eCoord::F( posDelta, dirDrive );
+                    REAL deltaOrthogonal = posDelta * dirDrive;
+
+                    // if it's small, that's not a miss
+                    REAL tolerance = verletSpeed_ * GetTurnDelay();
+                    if ( fabs(deltaParallel) < tolerance && fabs(deltaOrthogonal) < tolerance * .5 )
+                    {
+                        missed = false;
+                        if ( ( dirDrive - currentDestination->direction ).NormSquared() < EPS )
+                        {
+                            turn = false;
+                        }
+                    }
+                }
 
                 if ( turn )
                 {
@@ -1821,7 +1851,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     // OK, we missed a turn. Don't panic. Just turn
                     // towards the destination:
                     REAL side = (currentDestination->position - pos) * dirDrive;
-                    if (fabs(side)>1)
+                    if ( fabs(side)>verletSpeed_ * GetTurnDelay() * .2 )
                     {
                         gTurnDelayOverride override( overrideTurnDelay );
                         Turn(turnTo);

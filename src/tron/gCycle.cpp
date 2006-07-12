@@ -897,7 +897,7 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
                 if ( distance < minDist )
                 {
                     st_Breakpoint();
-                    TimestepCore( lastTime + ( distance - minDist )/verletSpeed_ );
+                    TimestepCore( lastTime + ( minDist - distance )/verletSpeed_ );
                 }
             }
         }
