@@ -2692,7 +2692,7 @@ bool gCycle::DoTurn(int d)
 {
 #ifdef DEBUG
     REAL delay = tSysTimeFloat() - sg_turnReceivedTime;
-    if ( delay > EPS && sn_GetNetState() == nSERVER )
+    if ( delay > EPS && sn_GetNetState() == nSERVER && Owner() != 0 )
     {
         con << "Delayed turn execution! " << turns << "\n";
     }
