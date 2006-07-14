@@ -2494,7 +2494,18 @@ bool gCycle::EdgeIsDangerous(const eWall* ww, REAL time, REAL a) const{
         // z-man notes: I've got the vaque feeling something like this was
         // here before, but got thrown out again for making problems.
         if ( gJustChecking::justChecking && w->CycleMovement() != static_cast< const gCycleMovement * >( this ) && w->Time(a) > time )
-            return false;
+        {
+            // One problem with this is that you kill teammates if they can't
+            // be pushed back, whereas we'd just use our rubber to survive.
+            // So we should first check whether the other player should be
+            // protected.
+            gCycle const * otherPlayer = w->Cycle();
+            if ( !otherPlayer || // valididy
+                    otherPlayer->Team() != this->Team() || // team protection
+                    !otherPlayer->currentWall || w == otherPlayer->currentWall->Wall() // pushback protection, if the other player can be pushed back, it's all right as well
+               )
+                return false;
+        }
     }
 
     return gCycleMovement::EdgeIsDangerous( ww, time, a );
