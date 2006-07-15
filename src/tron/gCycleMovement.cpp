@@ -1581,7 +1581,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
 
             // our speed
             REAL avgspeed=verletSpeed_;
-            CalculateAcceleration( ts );
+            CalculateAcceleration();
             if (acceleration > 0)
                 avgspeed += acceleration * SpeedMultiplier() * ts * .5;
 
@@ -1830,6 +1830,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                         Turn(turnTo);
                     }
                     else{
+                        AccelerationDiscontinuity();
                         braking = currentDestination->braking;
                         if (sn_GetNetState()!=nCLIENT)
                             RequestSync();
@@ -2307,16 +2308,35 @@ void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL 
 
 // *******************************************************************************************
 // *
+// *	AccelerationDiscontinuity
+// *
+// *******************************************************************************************
+//!
+//!
+// *******************************************************************************************
+
+void gCycleMovement::AccelerationDiscontinuity()
+{
+    // make fake 0 timestep
+    verletSpeed_ = Speed();
+    lastTimestep_ = 0;
+}
+
+// *******************************************************************************************
+// *
 // *	CalculateAcceleration
 // *
 // *******************************************************************************************
 //!
-//!		@param	dt	length of timestep
 //!
 // *******************************************************************************************
 
-void gCycleMovement::CalculateAcceleration( REAL dt )
+void gCycleMovement::CalculateAcceleration()
 {
+    // reset usage variables
+    brakeUsage = 0.0f;
+    rubberUsage = 0.0f;
+
     // calculate acceleration
     acceleration=0;
 
@@ -2328,13 +2348,14 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
 
     // simply use the configured brake always on the server
     // and on the client if the server should have disabled it, but does not.
+
     if ( sn_GetNetState() != nCLIENT || brakeDepletion.Supported() || brakeDepletionHandledWithConfig.Supported(0) )
     {
         if(braking)
         {
             if ( brakingReservoir > 0.0 )
             {
-                brakingReservoir -= dt * sg_cycleBrakeDeplete;
+                brakeUsage = sg_cycleBrakeDeplete;
                 acceleration-=sg_brakeCycle * SpeedMultiplier();
             }
             else
@@ -2344,7 +2365,7 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
         {
             if ( brakingReservoir < 1.0 )
             {
-                brakingReservoir += dt * sg_cycleBrakeRefill;
+                brakeUsage = -sg_cycleBrakeRefill;
             }
             else
                 brakingReservoir = 1.0f;
@@ -2361,7 +2382,7 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
     sg_ArchiveReal( acceleration, 9 );
 
     REAL baseSpeed = sg_speedCycle * SpeedMultiplier();
-    if ( verletSpeed_ < ( sg_correctAccelerationScaling.Supported() ? baseSpeed : sg_speedCycle ) )
+    if ( verletSpeed_ <= ( sg_correctAccelerationScaling.Supported() ? baseSpeed : sg_speedCycle ) )
         acceleration+=( baseSpeed - verletSpeed_) * sg_speedCycleDecayBelow;
     else
         acceleration+=( baseSpeed - verletSpeed_) * sg_speedCycleDecayAbove;
@@ -2484,31 +2505,11 @@ void gCycleMovement::CalculateAcceleration( REAL dt )
             REAL available = available1 < available2 ? available1 : available2;
 
             // get rubber values
-            REAL rubberGranted, rubberEffectiveness;
-            sg_RubberValues( player, verletSpeed_, rubberGranted, rubberEffectiveness );
+            // REAL rubberGranted, rubberEffectiveness;
+            // sg_RubberValues( player, verletSpeed_, rubberGranted, rubberEffectiveness );
 
             // calculate rubber usage from squeezing
-            REAL rubberUsage = sg_cycleWidthRubberMax + ( sg_cycleWidthRubberMin - sg_cycleWidthRubberMax ) * available;
-
-            // use up rubber
-            if ( rubberEffectiveness > 0 )
-            {
-                rubber += rubberUsage * dt * verletSpeed_ / rubberEffectiveness;            }
-            else
-            {
-                rubber = rubberGranted + 10;
-            }
-
-            // decide over kill
-            if ( rubber > rubberGranted || ( sg_cycleWidthRubberMax == 0 && sg_cycleWidthRubberMin == 0 ) )
-            {
-                if ( sn_GetNetState() != nCLIENT )
-                {
-                    throw gCycleDeath( pos );
-                }
-                else
-                    rubber = rubberGranted;
-            }
+            rubberUsage = sg_cycleWidthRubberMax + ( sg_cycleWidthRubberMin - sg_cycleWidthRubberMax ) * available;
         }
     }
 
@@ -2549,7 +2550,44 @@ void gCycleMovement::ApplyAcceleration( REAL dt )
 
     sg_ArchiveReal( verletTimestep, 9 );
 
-    verletSpeed_+=acceleration*verletTimestep;
+    // don't use euler timesteps for large cycle speed decays
+    bool properDecay = false;
+    REAL maxTimestep = verletTimestep > dt ? verletTimestep : dt;
+    if ( sg_speedCycleDecayBelow * maxTimestep > .1 || sg_speedCycleDecayAbove * maxTimestep > .1 )
+    {
+        REAL speedDecay = 0;
+        REAL baseSpeed = sg_speedCycle * SpeedMultiplier();
+        if ( verletSpeed_ < ( sg_correctAccelerationScaling.Supported() ? baseSpeed : sg_speedCycle ) )
+            speedDecay = sg_speedCycleDecayBelow;
+        else
+            speedDecay = sg_speedCycleDecayAbove;
+
+        if ( speedDecay * maxTimestep > .1 )
+        {
+            // ok, really, a  better simulation is needed
+            properDecay = true;
+
+            // that's what CalculateAcceleration extrapolates
+            REAL decayAcceleration = ( baseSpeed - verletSpeed_) * speedDecay;
+            // throw it away
+            acceleration -= decayAcceleration;
+
+            // adapt base speed as the limit speed with the current decay and acceleration
+            baseSpeed += acceleration/speedDecay;
+
+            // do a proper decay
+            verletSpeed_ = baseSpeed + ( verletSpeed_ - baseSpeed ) * exp( -speedDecay * verletTimestep );
+
+            // calculate new acceleration based purely on the decay, the external acceleration
+            // is factored into baseSpeed now. Add extra decay factor so that
+            // Speed() returns the most accurate current speed available.
+            acceleration = ( baseSpeed - verletSpeed_) * ( 1 - exp( -speedDecay * dt * .5f ) ) / ( .5f * dt );
+        }
+    }
+
+    // if decay wasn't handled properly (because it didn't need to), use euler/verlet
+    if ( !properDecay )
+        verletSpeed_+=acceleration*verletTimestep;
 
     // clamp speed
     REAL minSpeed = sg_speedCycle*SpeedMultiplier()*sg_speedCycleMin;
@@ -2593,6 +2631,7 @@ bool gCycleMovement::DoTurn( int dir )
 
         turns++;
 
+        AccelerationDiscontinuity();
         verletSpeed_ *= sg_cycleTurnSpeedFactor;
         rubberMalus  += sg_rubberCycleMalusTurn;
 
@@ -2788,7 +2827,27 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
 
     // calculate acceleration
     if ( calculateAcceleration )
-        this->CalculateAcceleration( ts );
+        this->CalculateAcceleration();
+
+    // ApplyAcceleration modifies the acceleration, so we need to back it up
+    REAL lastAcceleration=acceleration;
+
+    // calculate when the braking reservoir will run dry and simulate to that point
+    {
+        static bool recurse = true;
+        if (recurse && brakingReservoir > 0 && brakeUsage > 0 && brakingReservoir - ts * brakeUsage < 0 )
+        {
+            gRecursionGuard guard( recurse );
+
+            // calculate the time the brake will run out
+            REAL brakeTime = lastTime + brakingReservoir/brakeUsage;
+            if ( TimestepCore( brakeTime, false ) )
+                return true;
+            AccelerationDiscontinuity();
+            brakingReservoir = -EPS;
+            return TimestepCore( currentTime );
+        }
+    }
 
     // apply acceleration
     if ( sg_verletIntegration.Supported() )
@@ -2857,6 +2916,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                     gRecursionGuard guard( recurse );
 
                     verletSpeed_=lastSpeed;
+                    acceleration=lastAcceleration;
                     // do two small timesteps
                     return TimestepCore( delayTime, false ) || TimestepCore( currentTime );
                 }
@@ -2930,6 +2990,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                             REAL rubberGetsActiveTime = lastTime + ( currentTime - lastTime ) * ratio;
 
                             verletSpeed_=lastSpeed;
+                            acceleration=lastAcceleration;
                             return TimestepCore( rubberGetsActiveTime, false ) || TimestepCore( currentTime );
                         }
                     }
@@ -2979,6 +3040,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                                 gRecursionGuard guard( recurse );
 
                                 verletSpeed_=lastSpeed;
+                                acceleration=lastAcceleration;
                                 return TimestepCore( maxTime, false ) || TimestepCore( currentTime );
                             }
                         }
@@ -3031,8 +3093,9 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                         if (recurse)
                         {
                             gRecursionGuard guard( recurse );
-                            // need many attempys
+                            // need many attempts
                             verletSpeed_=lastSpeed;
+                            acceleration=lastAcceleration;
                             return TimestepCore( runOutTime, false ) || TimestepCore( currentTime );
                         }
                     }
@@ -3139,6 +3202,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
             {
                 pos = lastPos;
                 verletSpeed_ = lastSpeed;
+                acceleration = lastAcceleration;
                 currentFace = lastFace;
                 numTries = 0;
                 emergency = true;
@@ -3173,6 +3237,31 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
     }
 
     tASSERT( rubber >= 0 );
+
+    // use up rubber from tunneling (calculated by CalculateAcceleration
+    if ( rubberEffectiveness > 0 )
+    {
+        rubber += rubberUsage * ts * verletSpeed_ / rubberEffectiveness;            }
+    else if ( rubberUsage > 0 )
+    {
+        rubber = rubber_granted + 10;
+    }
+    rubberUsage = 0;
+
+    // decide over kill
+    if ( rubber > rubber_granted || ( sg_cycleWidthRubberMax == 0 && sg_cycleWidthRubberMin == 0 ) )
+    {
+        if ( sn_GetNetState() != nCLIENT )
+        {
+            throw gCycleDeath( pos );
+        }
+        else
+            rubber = rubber_granted;
+    }
+
+    // use up brake
+    brakingReservoir -= brakeUsage * ts;
+    clamp( brakingReservoir, 0, 1 );
 
     // let rubber decay
     if ( sg_rubberCycleTime > 0 )

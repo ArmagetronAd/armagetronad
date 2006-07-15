@@ -2650,6 +2650,7 @@ bool gCycle::Act(uActionPlayer *Act, REAL x){
         unsigned short newBraking=(x>0);
         if ( braking != newBraking )
         {
+            AccelerationDiscontinuity();
             braking = newBraking;
             AddDestination();
         }
@@ -2658,6 +2659,7 @@ bool gCycle::Act(uActionPlayer *Act, REAL x){
     else if(s_brakeToggle==*Act){
         if ( x > 0 )
         {
+            AccelerationDiscontinuity();
             braking = !braking;
             AddDestination();
         }
@@ -3617,6 +3619,12 @@ void gCycle::WriteSync(nMessage &m){
     if ( sg_verletIntegration.Supported() )
         speed = Speed();
 
+    if ( speed > 15 )
+    {
+        int x;
+        x = 0;
+    }
+
     m << speed;
     m << short( Alive() ? 1 : 0 );
     m << distance;
@@ -4177,6 +4185,7 @@ void gCycle::ReadSync( nMessage &m )
             }
 
             // update brake status
+            AccelerationDiscontinuity();
             braking = lastSyncMessage_.braking;
         }
         else
