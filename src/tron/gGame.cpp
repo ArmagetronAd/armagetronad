@@ -3468,7 +3468,22 @@ void gGame::Analysis(REAL time){
         holdBackNextRound = true;
     }
     else if (winner==0 && absolute_winner==0 ){
-        if(teams_alive <= 1 )
+        // start a new match if the number of teams changes from 1 to 2 or from 2 to 1
+        {
+            static int lastTeams = 0; // the number of teams when this was last called. that way, a
+
+            // check for status change
+            if ( ( eTeam::teams.Len() <= 1 ) ^ ( lastTeams <= 1 ) )
+            {
+                StartNewMatch();
+                winner=-1;
+                wintimer=time;
+            }
+
+            lastTeams=eTeam::teams.Len(); // update last team count
+        }
+
+       if(winner == 0 && teams_alive <= 1 )
         {
             if ( sg_currentSettings->gameType!=gFREESTYLE )
             {
