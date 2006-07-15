@@ -3332,6 +3332,7 @@ void gGame::Analysis(REAL time){
     int alive_and_not_disconnected = 0;
     int alive=0;
     int ai_alive=0;
+    int human_teams=0;
     int teams_alive=0;
     int last_alive=-1;
     int last_team_alive=-1;
@@ -3357,6 +3358,8 @@ void gGame::Analysis(REAL time){
 
         if ( t->NumHumanPlayers() > 0 )
         { // human players
+            human_teams++;
+
             for (int j=t->NumPlayers()-1; j>=0; --j)
             {
                 ePlayerNetID* p = t->Player(j);
@@ -3473,14 +3476,14 @@ void gGame::Analysis(REAL time){
             static int lastTeams = 0; // the number of teams when this was last called.
 
             // check for status change
-            if ( ( eTeam::teams.Len() <= 1 ) ^ ( lastTeams <= 1 ) )
+            if ( ( human_teams <= 1 ) ^ ( lastTeams <= 1 ) )
             {
                 StartNewMatch();
                 winner=-1;
                 wintimer=time;
             }
 
-            lastTeams=eTeam::teams.Len(); // update last team count
+            lastTeams=human_teams; // update last team count
         }
 
         if(winner == 0 && teams_alive <= 1 )
