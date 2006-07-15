@@ -2406,6 +2406,9 @@ void gGame::StateUpdate(){
             if ( synced_ )
                 ePlayerNetID::Update();
 
+            // do the first analysis of the round, now is the time to get it used to the number of teams
+            Analysis( -1000 );
+
             init_game_objects(grid);
             s_Timestep(grid, se_GameTime(), false);
             SetState(GS_TRANSFER_OBJECTS,GS_CAMERA);
@@ -2707,7 +2710,7 @@ void gGame::Analysis(REAL time){
     // only do this expensive stuff once a second
     {
         static double nextTime = -1;
-        if ( tSysTimeFloat() > nextTime )
+        if ( tSysTimeFloat() > nextTime || time < -10 )
         {
             nextTime = tSysTimeFloat() + 1.0;
         }
@@ -2776,6 +2779,7 @@ void gGame::Analysis(REAL time){
     int alive_and_not_disconnected = 0;
     int alive=0;
     int ai_alive=0;
+    int human_teams=0;
     int teams_alive=0;
     int last_alive=-1;
     int last_team_alive=-1;
@@ -2801,6 +2805,8 @@ void gGame::Analysis(REAL time){
 
         if ( t->NumHumanPlayers() > 0 )
         { // human players
+            human_teams++;
+
             for (int j=t->NumPlayers()-1; j>=0; --j)
             {
                 ePlayerNetID* p = t->Player(j);
@@ -2906,28 +2912,37 @@ void gGame::Analysis(REAL time){
 
     bool holdBackNextRound = false;
 
+    // start a new match if the number of teams changes from 1 to 2 or from 2 to 1
+    {
+        static int lastTeams = 0; // the number of teams when this was last called.
+
+        // check for status change
+        if ( ( human_teams <= 1 ) ^ ( lastTeams <= 1 ) )
+        {
+            StartNewMatch();
+            // if this is the beginning of a round, just start the match now
+            if ( time < -100 )
+            {
+                StartNewMatchNow();
+            }
+            else
+            {
+                // start a new round and match.
+                winner=-1;
+                wintimer=time;
+            }
+        }
+
+        lastTeams=human_teams; // update last team count
+    }
+
     // who is alive?
     if ( time-lastdeath < 1.0f )
     {
         holdBackNextRound = true;
     }
     else if (winner==0 && absolute_winner==0 ){
-        // start a new match if the number of teams changes from 1 to 2 or from 2 to 1
-        {
-            static int lastTeams = 0; // the number of teams when this was last called.
-
-            // check for status change
-            if ( ( eTeam::teams.Len() <= 1 ) ^ ( lastTeams <= 1 ) )
-            {
-                StartNewMatch();
-                winner=-1;
-                wintimer=time;
-            }
-
-            lastTeams=eTeam::teams.Len(); // update last team count
-        }
-
-        if(winner == 0 && teams_alive <= 1 )
+        if( teams_alive <= 1 )
         {
             if ( sg_currentSettings->gameType!=gFREESTYLE )
             {
