@@ -125,7 +125,8 @@ protected:
     virtual void            InitAfterCreation       ()                                              ;   //!< shared initialization routine
 
     // acceleration handling
-    virtual void            CalculateAcceleration   ( REAL                  dt          )           ;   //!< calculate acceleration to apply later
+    virtual void            AccelerationDiscontinuity ()                                            ;   //!< call when you know the acceleration makes a sharp jump now
+    virtual void            CalculateAcceleration   (                                   )           ;   //!< calculate acceleration to apply later
     virtual void            ApplyAcceleration       ( REAL                  dt          )           ;   //!< apply acceleration calculated earlier
 
     // destination handling
@@ -190,6 +191,9 @@ protected:
     REAL            rubber;                     //!< the amount rubber used up by the cycle
     REAL            rubberMalus;                //!< additional rubber usage factor
     REAL            rubberSpeedFactor;          //!< the factor by which the speed is currently multiplied by rubber
+
+    REAL            brakeUsage;                 //!< current brake usage
+    REAL            rubberUsage;                //!< current rubber usage (not from hitting a wall, but from tunneling. Without taking efficiency into account.)
 
     // room for accessors
 public:
