@@ -2546,7 +2546,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
         if (!EdgeIsDangerous(ww,time,a) || !Alive() )
         {
             // request a sync for everyone, maybe not all clients know the wall is passable
-            RequestSync();
+            RequestSyncAll();
             return;
         }
 
