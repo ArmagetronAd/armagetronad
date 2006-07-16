@@ -1256,7 +1256,9 @@ void gPlayerWall::Insert()
 
 void gPlayerWall::Check() const
 {
-    //	netWall_->Check();
+    netWall_->Check();
+    tASSERT( begDist_ > netWall_->Pos( 0 ) - EPS );
+    tASSERT( endDist_ < netWall_->Pos( 1 ) + EPS );
 }
 
 REAL gPlayerWall::LocalToGlobal( REAL a ) const
@@ -1536,10 +1538,14 @@ void gNetPlayerWall::Update(REAL Tend,REAL dend){
 
 void gNetPlayerWall::Update(REAL Tend,const eCoord &pend)
 {
+    CHECKWALL;
+
     if (!inGrid && ( preliminary || sn_GetNetState() != nCLIENT ) )
     {
         real_Update( Tend, pend, false );
     }
+
+    CHECKWALL;
 }
 
 void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
@@ -1572,11 +1578,11 @@ void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
 
     SetEndTime(tEnd);
 
-    if ( bool( this->cycle_ ) && !force )
-    {
-        SetEndPos( this->cycle_->GetDistance() );
-    }
-    else
+    //if ( bool( this->cycle_ ) && !force )
+    //{
+    //    SetEndPos( this->cycle_->GetDistance() );
+    //}
+    //else
     {
         SetEndPos( dbegin + eCoord::F(dir, end - beg )/dir.NormSquared() );
     }
@@ -1587,6 +1593,9 @@ void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
     {
         w->CalcLen();
         w->endDist_ = EndPos();
+#ifdef DEBUG
+        w->Check();
+#endif
     }
 }
 
@@ -1700,6 +1709,10 @@ void gNetPlayerWall::PartialCopyIntoGrid(eGrid *grid){
         // hack the beginning distance to be the same as the starting distance
         w->begDist_ = w->endDist_;
     }
+
+    // add a new segment as a copy of the current one
+    // int newCoord = coords_.Len();
+    // coords_[newCoord]=coords_[newCoord-1];
 
 #ifdef DEBUG
     grid->Check();
@@ -2057,6 +2070,11 @@ void gNetPlayerWall::ReadSync(nMessage &m){
     {
         //		st_Breakpoint();
     }
+
+#ifdef DEBUG
+    if ( Wall() )
+        Wall()->Check();
+#endif
 }
 
 static nNOInitialisator<gNetPlayerWall> gNetPlayerWall_init(300,"gNetPlayerWall");
