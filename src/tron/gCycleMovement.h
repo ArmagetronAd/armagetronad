@@ -42,6 +42,7 @@ class gCycleMovement : public eNetGameObject
 {
 public:
     // accessors
+    static float            RubberSpeed             ()                                              ;   //!< returns the rubber speed (decay rate of the distance to the wall in front)
     static float            SpeedMultiplier         ()                                              ;   //!< returns the current speed multiplier
     static void             SetSpeedMultiplier      ( REAL                  mult        )           ;   //!< sets the current speed multiplier
     static float            MaximalSpeed            ()                                              ;   //!< returns the maximal speed a cycle can reach on its own

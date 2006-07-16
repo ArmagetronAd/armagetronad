@@ -548,6 +548,21 @@ static nSettingItem<float> conf_mult ("REAL_CYCLE_SPEED_FACTOR", sg_speedMultipl
 
 // *******************************************************************************************
 // *
+// *	RubberSpeed
+// *
+// *******************************************************************************************
+//!
+//!		@return 	the rubber speed (decay rate of the distance to the wall in front)
+//!
+// *******************************************************************************************
+
+float gCycleMovement::RubberSpeed()
+{
+    return sg_rubberCycleSpeed;
+}
+
+// *******************************************************************************************
+// *
 // *	SpeedMultiplier
 // *
 // *******************************************************************************************
@@ -2974,28 +2989,62 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
         {
             // the minimal space rubber gets active at
             REAL rubberStartSpace = verletSpeed_/sg_rubberCycleSpeed;
-            if ( space > rubberStartSpace )
+            static bool recurse = true;
+            if ( space > rubberStartSpace && recurse )
             {
                 // rubber will not be active immediately, simulate to the time it will
+                gRecursionGuard guard( recurse );
+
+                // calculate the time rubber will get active at
+                REAL ratio = ( space - rubberStartSpace )/step;
+                if ( ratio > EPS && ratio < 1 - EPS )
                 {
-                    static bool recurse = true;
-                    if (recurse)
+                    REAL rubberGetsActiveTime = lastTime + ( currentTime - lastTime ) * ratio;
+
+                    verletSpeed_=lastSpeed;
+                    acceleration=lastAcceleration;
+                    return TimestepCore( rubberGetsActiveTime, false ) || TimestepCore( currentTime );
+                }
+            }
+#ifdef DEDICATED
+            else
+            {
+                // see if the wall we're about to hit comes from its cycle's future. If so,
+                // it is a prediction wall and we shouldn't actually use rubber before we
+                // have to.
+                tASSERT( hitInfo.edge );
+                eWall * w = hitInfo.edge->GetWall();
+                if ( !w && hitInfo.edge->Other() )
+                {
+                    hitInfo.edge = hitInfo.edge->Other();
+                    w = hitInfo.edge->GetWall();
+                }
+
+                gPlayerWall * wall = dynamic_cast< gPlayerWall * >( w );
+                if ( wall && wall->Cycle() )
+                {
+                    // get the position of the hit
+                    REAL alpha = hitInfo.edge->Ratio( hitInfo.pos );
+
+                    // get the distance of the wall
+                    REAL wallDist = wall->Pos( alpha );
+                    // get the distance the cycle is simulated up to
+                    REAL cycleDist = wall->CycleMovement()->distance;
+                    // comparing these two gives an accurate criterion whether the wall is extrapolated
+
+                    REAL minLag = se_GameTime() - lastTime - LagThreshold();
+                    if ( cycleDist < wallDist && ( minLag < Lag() || minLag < wall->CycleMovement()->Lag() ) )
                     {
-                        gRecursionGuard guard( recurse );
+                        // it is an extrapolation wall and we are allowed to delay simulation a bit.
+                        // so let's abort here.
+                        verletSpeed_=lastSpeed;
+                        acceleration=lastAcceleration;
 
-                        // calculate the time rubber will get active at
-                        REAL ratio = ( space - rubberStartSpace )/step;
-                        if ( ratio > EPS && ratio < 1 - EPS )
-                        {
-                            REAL rubberGetsActiveTime = lastTime + ( currentTime - lastTime ) * ratio;
-
-                            verletSpeed_=lastSpeed;
-                            acceleration=lastAcceleration;
-                            return TimestepCore( rubberGetsActiveTime, false ) || TimestepCore( currentTime );
-                        }
+                        return false;
                     }
                 }
             }
+#endif
 
             // see if the obstacle will go away during this timestep.
             // if it does, simulate in two steps to make the simulation more accurate.

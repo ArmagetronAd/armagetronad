@@ -252,8 +252,8 @@ eTempEdge   *Edge(){return this->edge_;}
 
     static void Clear(); // delete all sg_netPlayerWalls.
 
-private:
     void Check() const;
+private:
     tArray<gPlayerWallCoord> coords_;
 
     unsigned int displayList_;

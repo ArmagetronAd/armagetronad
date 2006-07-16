@@ -73,6 +73,10 @@ static tSettingItem<bool> sg_("DEBUG_GNUPLOT",sg_gnuplotDebug);
 
 static REAL sg_minDropInterval=0.05;
 static tSettingItem< REAL > sg_minDropIntervalConf( "CYCLE_MIN_WALLDROP_INTERVAL", sg_minDropInterval );
+
+static bool sg_predictWalls=true;
+static tSettingItem< bool > sg_predictWallsConf( "PREDICT_WALLS", sg_predictWalls );
+
 //  *****************************************************************
 
 static nNOInitialisator<gCycle> cycle_init(320,"cycle");
@@ -2128,10 +2132,34 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
     sg_ArchiveReal( verletSpeed_, 7 );
 
     // predict position
+    REAL predictTime = lastTime;
     {
 #ifdef DEDICATED
         predictPosition_ = pos;
+
+        if ( sg_predictWalls )
+        {
+            // predict to the maximum time anyone else may be simulated up to
+            REAL maxTime = currentTime + MaxSimulateAhead();
+            REAL predictDT = maxTime - lastTime;
+            REAL lookAhead = predictDT * verletSpeed_;
+
+            // see how far we can go before rubber kicks in
+            REAL rubberStart = verletSpeed_ / RubberSpeed();
+            lookAhead += rubberStart;
+            REAL spaceAhead = MaxSpaceAhead( this, predictDT, lookAhead, lookAhead );
+            spaceAhead -= rubberStart;
+
+            if ( spaceAhead > 0 )
+            {
+                // store consistent prediction position and  time
+                predictPosition_ = pos + dirDrive * spaceAhead;
+                predictTime = lastTime + spaceAhead/verletSpeed_;
+            }
+        }
 #else
+        // predict half a frame time
+        predictTime += se_PredictTime();
         gSensor s(this,pos+correctPosSmooth, dir * (verletSpeed_ * se_PredictTime() * rubberSpeedFactor ) );
         s.detect(1);
         predictPosition_ = s.before_hit;
@@ -2141,12 +2169,12 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
     if (Alive()){
         if (currentWall)
         {
-            eCoord wallEndPos = PredictPosition();
-
             // z-man: the next two lines are a very bad idea. This lets walls stick out on the other side while you're using up your rubber.
             //if ( sn_GetNetState() != nSERVER )
             //    wallEndPos = pos + dirDrive * ( verletSpeed_ * se_PredictTime() );
-            currentWall->Update(lastTime, wallEndPos );
+
+            // but using the predicted position which halts at walls may work
+            currentWall->Update(predictTime, PredictPosition() );
         }
 
         // animate skew
@@ -2554,6 +2582,17 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
         REAL otherTime = w->Time(a);
         if(time < otherTime*(1-EPS) )
         {
+            // get the distance of the wall
+            REAL wallDist = w->Pos(a);
+            // get the distance the cycle is simulated up to
+            REAL cycleDist = w->Cycle()->distance;
+            // comparing these two gives an accurate criterion whether the wall is extrapolated
+            if ( wallDist > cycleDist * (1 + EPS ) )
+            {
+                // no worries, it's just a prediction wall, we can safely pass it
+                return;
+            }
+
             // we were first!
             if ( otherPlayer->Vulnerable() )
             {
@@ -2572,7 +2611,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                         d = maxd;
                     if ( d < 0 )
                     {
-                        // err, trouble. Better kill the other player.
+                        // err, trouble. Can't push the other guy back far enough. Better kill him.
                         if ( currentWall )
                             otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, otherPlayer );
                         otherPlayer->KillAt( collPos );
@@ -2808,9 +2847,10 @@ void gCycle::Kill(){
                 // a good idea, but unfortunately, the collision position reported from above
                 // is inaccurate. It's better not to use it at all, or the cycle's wall will stick out
                 // a bit on the other side of the wall it crashed into.
-                // reason: the wall
 
-                // currentWall->Update( lastTime, pos );
+                // but if prediction was active, do it anyway
+                if ( currentWall->Pos(1) > distance )
+                    currentWall->Update( lastTime, pos );
 
                 // copy the wall into the grid, but not directly; the grid datastructures are probably currently traversed. Kill() is called from eGameObject::Move().
                 currentWall->CopyIntoGrid( 0 );
