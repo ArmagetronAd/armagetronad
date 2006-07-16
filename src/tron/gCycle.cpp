@@ -2314,7 +2314,7 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
             }
 
             nextSync=tSysTimeFloat()+sg_syncIntervalEnemy;
-            nextSyncOwner=tSysTimeFloat()+sg_GetSyncIntervalSelf( this );
+            // nextSyncOwner=tSysTimeFloat()+sg_GetSyncIntervalSelf( this );
         }
         else if ( nextSyncOwner < tSysTimeFloat() &&
                   Owner() != 0 &&
@@ -3693,8 +3693,8 @@ void gCycle::WriteSync(nMessage &m){
     compressZeroOne.Write( m, brakingReservoir );
 
     // set new sync times
-    nextSync=tSysTimeFloat()+sg_syncIntervalEnemy;
-    nextSyncOwner=tSysTimeFloat()+sg_GetSyncIntervalSelf( this );
+    // nextSync=tSysTimeFloat()+sg_syncIntervalEnemy;
+    // nextSyncOwner=tSysTimeFloat()+sg_GetSyncIntervalSelf( this );
 }
 
 bool gCycle::SyncIsNew(nMessage &m){
