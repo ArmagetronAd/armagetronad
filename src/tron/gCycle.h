@@ -248,6 +248,8 @@ public:
     virtual void WriteCreate(nMessage &m);
     virtual void WriteSync(nMessage &m);
     virtual void ReadSync(nMessage &m);
+    virtual void RequestSyncOwner(); //!< requests special syncs to the owner on important points (just passed an enemy trail end safely...)
+    virtual void RequestSyncAll(); //!< requests special syncs to everyone on important points (just passed an enemy trail end safely...)
 
     virtual void SyncEnemy ( const eCoord& begWall );    //!< handle sync message for enemy cycles
     // virtual void SyncFriend( const eCoord& begWall );    //!< handle sync message for enemy cycles
