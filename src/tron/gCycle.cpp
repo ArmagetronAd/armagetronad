@@ -2174,7 +2174,6 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
         gSensor s(this,pos+correctPosSmooth, dir * (verletSpeed_ * se_PredictTime() * rubberSpeedFactor ) );
         s.detect(1);
         predictPosition_ = s.before_hit;
-    }
 #endif
     }
 
