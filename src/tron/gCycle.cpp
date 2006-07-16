@@ -2307,8 +2307,7 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
                   sn_Connections[Owner()].bandwidthControl_.Control( nBandwidthControl::Usage_Planning ) > 200 )
         {
             // sync only to the owner (provided there is enough bandwidth available)
-            RequestSync(Owner(), false);
-            nextSyncOwner=tSysTimeFloat()+sg_GetSyncIntervalSelf( this );
+            RequestSyncOwner();
         }
     }
 
@@ -2545,13 +2544,20 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
         gJustChecking thisIsSerious;
 
         if (!EdgeIsDangerous(ww,time,a) || !Alive() )
+        {
+            // request a sync for everyone, maybe not all clients know the wall is passable
+            RequestSyncAll();
             return;
+        }
 
 #ifdef DEBUG
         if (!EdgeIsDangerous(ww,time,a) || !Alive() )
             return;
 #endif
     }
+
+    // request a sync to bring everyone up to date about the cycle passing/getting stuck on this wall
+    RequestSyncOwner();
 
 #ifdef DEBUG_X
     // keep other cycle around
@@ -2580,8 +2586,11 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
         gCycle *otherPlayer=w->Cycle();
 
         REAL otherTime = w->Time(a);
-        if(time < otherTime*(1-EPS) )
+        if(otherPlayer && time < otherTime*(1-EPS) )
         {
+            // also send updates about the other cylce
+            otherPlayer->RequestSyncOwner();
+
             // get the distance of the wall
             REAL wallDist = w->Pos(a);
             // get the distance the cycle is simulated up to
@@ -2598,7 +2607,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
             {
                 static bool tryToSaveFutureWallOwner = true;
 
-                if ( tryToSaveFutureWallOwner && sn_GetNetState() != nCLIENT && otherPlayer->currentWall && w == otherPlayer->currentWall->Wall() && otherPlayer->LastTime() < time + .5f )
+                if ( tryToSaveFutureWallOwner && otherPlayer->currentWall && w == otherPlayer->currentWall->Wall() )
                 {
                     // teleport the other cycle back to the point before the collision; its next timestep
                     // will simulate the collision again from the right viewpoint
@@ -3703,8 +3712,8 @@ void gCycle::WriteSync(nMessage &m){
     compressZeroOne.Write( m, brakingReservoir );
 
     // set new sync times
-    nextSync=tSysTimeFloat()+sg_syncIntervalEnemy;
-    nextSyncOwner=tSysTimeFloat()+sg_GetSyncIntervalSelf( this );
+    // nextSync=tSysTimeFloat()+sg_syncIntervalEnemy;
+    // nextSyncOwner=tSysTimeFloat()+sg_GetSyncIntervalSelf( this );
 }
 
 bool gCycle::SyncIsNew(nMessage &m){
@@ -3734,6 +3743,36 @@ bool gCycle::SyncIsNew(nMessage &m){
 #endif
 
     return ret || al!=1;
+}
+
+void gCycle::RequestSyncOwner()
+{
+    // nothing to do on the client or if the cycle belongs to an AI
+    if ( sn_GetNetState() != nSERVER || Owner() == 0 )
+        return;
+
+    REAL syncInterval = sg_GetSyncIntervalSelf( this );
+   if ( nextSyncOwner < tSysTimeFloat() + syncInterval * 2.0 )
+   {
+       // postpone next sync so the notal number of syncs stays the same
+       RequestSync( Owner(), false );
+       nextSyncOwner += syncInterval;
+   }
+}
+
+void gCycle::RequestSyncAll()
+{
+    // nothing to do on the client or if the cycle belongs to an AI
+    if ( sn_GetNetState() != nSERVER || Owner() == 0 )
+        return;
+
+    REAL syncInterval = sg_syncIntervalEnemy;
+   if ( nextSync < tSysTimeFloat() + syncInterval * 2.0 )
+   {
+       // postpone next sync so the notal number of syncs stays the same
+       RequestSync( false );
+       nextSync += syncInterval;
+   }
 }
 
 // resets the extrapolator to the last known state
