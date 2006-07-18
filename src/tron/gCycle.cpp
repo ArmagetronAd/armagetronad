@@ -2547,6 +2547,34 @@ bool gCycle::EdgeIsDangerous(const eWall* ww, REAL time, REAL a) const{
     return gCycleMovement::EdgeIsDangerous( ww, time, a );
 }
 
+// turn one future walls of a cycle into gaping holes of nothingness if it inteed belongs to the cycle
+static void sg_KillFutureWall( gCycle * cycle, gNetPlayerWall * wall )
+{
+    if ( cycle && wall && wall->Cycle() == cycle && wall->Pos(1) > cycle->GetDistance() )
+    {
+        wall->BlowHole( cycle->GetDistance(), wall->Pos(1) + 100 );
+    }
+}
+
+// turn future walls of a cycle into gaping holes of nothingness
+static void sg_KillFutureWalls( gCycle * cycle )
+{
+#ifdef DEBUG_X
+    con << "Possible BUG, new code: removing future walls of the cylce that just got killed mercilessly.\n";
+#endif
+
+    // handle future walls that won't be drawn after all. Just make them a big hole.
+    if ( sn_GetNetState() != nCLIENT )
+    {
+        int i;
+        for ( i = sg_netPlayerWalls.Len()-1; i >= 0; --i )
+            sg_KillFutureWall( cycle, sg_netPlayerWalls(i) );
+
+        for ( i = sg_netPlayerWallsGridded.Len()-1; i >= 0; --i )
+            sg_KillFutureWall( cycle, sg_netPlayerWallsGridded(i) );
+    }
+}
+
 void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
     {
         // deactivate time check
@@ -2632,7 +2660,11 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                         // err, trouble. Can't push the other guy back far enough. Better kill him.
                         if ( currentWall )
                             otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, otherPlayer );
+                        otherPlayer->distance = wallDist;
                         otherPlayer->KillAt( collPos );
+
+                        // get rid of future walls
+                        sg_KillFutureWalls( otherPlayer );
                     }
 
                     // do the move
@@ -2650,7 +2682,11 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                     if ( currentWall )
                         otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, otherPlayer );
 
+                    otherPlayer->distance = wallDist;
                     otherPlayer->KillAt( collPos );
+
+                    // get rid of future walls
+                    sg_KillFutureWalls( otherPlayer );
                 }
             }
         }
