@@ -43,7 +43,6 @@ static nSettingItem<bool> fcs("FORBID_HUD_MAP", stc_forbidHudMap);
 
 #ifndef DEDICATED
 
-extern tList<gNetPlayerWall> gridded_sg_netPlayerWalls;
 extern std::deque<gZone *> sg_Zones;
 
 namespace cWidget {
@@ -109,7 +108,7 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
     if(rimWalls)
         DrawRimWalls(se_rimWalls);
     if(cycleWalls) {
-        DrawWalls(gridded_sg_netPlayerWalls);
+        DrawWalls(sg_netPlayerWallsGridded);
         DrawWalls(sg_netPlayerWalls);
     }
     DrawZones(sg_Zones);
