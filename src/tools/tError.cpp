@@ -55,8 +55,12 @@ void st_PresentError( const char* caption, const char *message )
 {
     std::cerr << caption << ": " << message << "\n";
     st_Breakpoint();
-    throw 1; //tSimpleException( message, caption );
-    exit(-1);
+    static bool error = true; // to disable the error if it is inconvenient right now and you think it may not be fatal
+    if ( error )
+    {
+        throw 1; //tSimpleException( message, caption );
+        exit(-1);
+    }
 }
 
 void st_PresentMessage( const char* caption, const char *message )

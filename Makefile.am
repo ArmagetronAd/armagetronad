@@ -146,7 +146,7 @@ endif
 
 install-first:
 #	uninstall previous version (if it exists), ignoring errors
-	test -x $(uninstall_location) && $(uninstall_location) || true
+	test -n "$(uninstall_location)" && test -x "$(uninstall_location)" && "$(uninstall_location)" || true
 
 distclean-local:
 	rm -f uninstall.sh batch/relocate.in universal_variable* extrapaths src/tUniversalVariables.h* .changetag

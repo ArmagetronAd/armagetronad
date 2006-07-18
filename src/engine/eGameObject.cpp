@@ -693,7 +693,8 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
     if ( se_maxSimulateAheadLeft < 0 )
         se_maxSimulateAheadLeft = 0;
 
-    if ( c->lastTime < nextTime && nextTime < simTime + se_maxSimulateAhead )
+    REAL lagThreshold = c->LagThreshold();
+    if ( simTime - lagThreshold < nextTime && nextTime < simTime + se_maxSimulateAhead )
     {
         // something interesting is going to happen, see what it is
         simTime = nextTime;
@@ -701,7 +702,7 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
     else
     {
         // add an extra portion of lag compensation
-        simTime -= c->LagThreshold();
+        simTime -= lagThreshold;
 
         if ( simTime < c->LastTime() + minTimestep )
         {
@@ -711,7 +712,7 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
     }
 #endif
 
-    // simulate a bit ahead
+    // check for teleports out of arena bounds
     if (!eWallRim::IsBound(c->pos,-20))
     {
         se_maxSimulateAheadLeft = 0;
