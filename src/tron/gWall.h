@@ -255,5 +255,6 @@ private:
 };
 
 extern tList<gNetPlayerWall> sg_netPlayerWalls;
+extern tList<gNetPlayerWall> sg_netPlayerWallsGridded;
 
 #endif
