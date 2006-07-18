@@ -2406,10 +2406,11 @@ void gGame::StateUpdate(){
             if ( synced_ )
                 ePlayerNetID::Update();
 
+            init_game_objects(grid);
+
             // do the first analysis of the round, now is the time to get it used to the number of teams
             Analysis( -1000 );
 
-            init_game_objects(grid);
             s_Timestep(grid, se_GameTime(), false);
             SetState(GS_TRANSFER_OBJECTS,GS_CAMERA);
 
@@ -3887,7 +3888,7 @@ static nDescriptor sg_clientFullscreenMessage(312,sg_ClientFullscreenMessage,"cl
 
 // causes the connected clients to break and print a fullscreen message
 void sg_FullscreenMessage(tOutput const & title, tOutput const & message, REAL timeout, int client){
-    nMessage *m=new nMessage(sg_clientFullscreenMessage);
+    tJUST_CONTROLLED_PTR< nMessage > m=new nMessage(sg_clientFullscreenMessage);
     *m << title;
     *m << message;
     *m << timeout;

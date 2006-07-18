@@ -1257,8 +1257,10 @@ void gPlayerWall::Insert()
 void gPlayerWall::Check() const
 {
     netWall_->Check();
-    tASSERT( begDist_ > netWall_->Pos( 0 ) - EPS );
-    tASSERT( endDist_ < netWall_->Pos( 1 ) + EPS );
+    REAL range = 5 * ( begDist_ + endDist_ ) * EPS;
+    tASSERT( begDist_ <= endDist_ + range );
+    tASSERT( begDist_ >= netWall_->Pos( 0 ) - range );
+    tASSERT( endDist_ <= netWall_->Pos( 1 ) + range );
 }
 
 REAL gPlayerWall::LocalToGlobal( REAL a ) const
@@ -1407,7 +1409,7 @@ void gPlayerWall::Clamp	(  )
 
 
 tList<gNetPlayerWall> sg_netPlayerWalls;
-tList<gNetPlayerWall> gridded_sg_netPlayerWalls;
+tList<gNetPlayerWall> sg_netPlayerWallsGridded;
 
 
 void gNetPlayerWall::CreateEdge()
@@ -1654,12 +1656,12 @@ void gNetPlayerWall::real_CopyIntoGrid(eGrid *grid){
                 tControlledPTR< nNetObject > bounce( this );
 
                 sg_netPlayerWalls.Remove(this,id);
-                gridded_sg_netPlayerWalls.Add(this,griddedid);
+                sg_netPlayerWallsGridded.Add(this,griddedid);
                 Wall()->Insert();
                 this->ReleaseData();
             }
             else{
-                gridded_sg_netPlayerWalls.Add(this,griddedid);
+                sg_netPlayerWallsGridded.Add(this,griddedid);
                 sg_netPlayerWalls.Remove(this,id);
                 if ( this->edge_ ){
                     Wall()->Insert();
@@ -1907,7 +1909,7 @@ void gNetPlayerWall::ReleaseData()
     //w=NULL;
 
     sg_netPlayerWalls.Remove(this,id);
-    gridded_sg_netPlayerWalls.Remove(this,griddedid);
+    sg_netPlayerWallsGridded.Remove(this,griddedid);
 }
 
 gNetPlayerWall::~gNetPlayerWall()
@@ -2115,13 +2117,13 @@ void gNetPlayerWall::Clear()
             w->edge_->Wall()->Insert();
 
     }
-    for(i=gridded_sg_netPlayerWalls.Len()-1;i>=0;i--){
-        // gridded_sg_netPlayerWalls(i)->owner=sn_myNetID;
-        gNetPlayerWall* w = gridded_sg_netPlayerWalls(i);
+    for(i=sg_netPlayerWallsGridded.Len()-1;i>=0;i--){
+        // sg_netPlayerWallsGridded(i)->owner=sn_myNetID;
+        gNetPlayerWall* w = sg_netPlayerWallsGridded(i);
         tControlledPTR< nNetObject > bounce( w );
         w->ReleaseData();
 
-        gridded_sg_netPlayerWalls.Remove( w, w->griddedid );
+        sg_netPlayerWallsGridded.Remove( w, w->griddedid );
     }
 }
 
