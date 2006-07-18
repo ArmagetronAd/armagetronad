@@ -3742,12 +3742,12 @@ void gCycle::RequestSyncOwner()
         return;
 
     REAL syncInterval = sg_GetSyncIntervalSelf( this );
-   if ( nextSyncOwner < tSysTimeFloat() + syncInterval * 2.0 )
-   {
-       // postpone next sync so the notal number of syncs stays the same
-       RequestSync( Owner(), false );
-       nextSyncOwner += syncInterval;
-   }
+    if ( nextSyncOwner < tSysTimeFloat() + syncInterval * 2.0 )
+    {
+        // postpone next sync so the notal number of syncs stays the same
+        RequestSync( Owner(), false );
+        nextSyncOwner += syncInterval;
+    }
 }
 
 void gCycle::RequestSyncAll()
@@ -3757,12 +3757,12 @@ void gCycle::RequestSyncAll()
         return;
 
     REAL syncInterval = sg_syncIntervalEnemy;
-   if ( nextSync < tSysTimeFloat() + syncInterval * 2.0 )
-   {
-       // postpone next sync so the notal number of syncs stays the same
-       RequestSync( false );
-       nextSync += syncInterval;
-   }
+    if ( nextSync < tSysTimeFloat() + syncInterval * 2.0 )
+    {
+        // postpone next sync so the notal number of syncs stays the same
+        RequestSync( false );
+        nextSync += syncInterval;
+    }
 }
 
 // resets the extrapolator to the last known state
