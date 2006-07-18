@@ -1993,6 +1993,9 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
 
     eCoord oldpos=pos;
 
+    // archive rubber speed for later comparison
+    REAL rubberSpeedFactorBack = rubberSpeedFactor;
+
     REAL ts=(currentTime-lastTime);
 
     clamp(ts, -10, 10);
@@ -2304,6 +2307,12 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
 
     if ( sn_GetNetState()==nSERVER )
     {
+        // do an emergency sync when rubber starts to get used, it may come unexpected to clients
+        if ( rubberSpeedFactor < .99 && rubberSpeedFactorBack >= .99 )
+        {
+            RequestSyncOwner();
+        }
+
         if (nextSync < tSysTimeFloat() )
         {
             // delay syncs for old clients when there is a wall ahead; they would tunnel locally
