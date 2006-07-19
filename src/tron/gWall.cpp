@@ -1318,14 +1318,23 @@ REAL gPlayerWall::Pos(REAL a) const
 
     tASSERT( good( a ) );
 
-    return netWall_->Pos( LocalToGlobal( a ) );
+    return begDist_ + ( endDist_ - begDist_ ) * a;
 }
 
 REAL gPlayerWall::Alpha(REAL pos) const
 {
     CHECKWALL;
 
-    return GlobalToLocal( netWall_->Alpha( pos ) );
+    REAL diff = ( endDist_  - begDist_ );
+    REAL a = pos - begDist_;
+
+    if ( diff > 0 )
+        a /= diff;
+
+    tASSERT ( -.001 < a );
+    tASSERT ( 1.001 > a );
+
+    return a;
 }
 
 bool gPlayerWall::IsDangerousAnywhere( REAL time ) const
@@ -1346,28 +1355,28 @@ REAL gPlayerWall::EndPos() const
 {
     CHECKWALL;
 
-    return netWall_->Pos( LocalToGlobal( netWall_->Alpha( this->endDist_ ) ) );
+    return this->endDist_;
 }
 
 REAL gPlayerWall::BegPos() const
 {
     CHECKWALL;
 
-    return netWall_->Pos( LocalToGlobal( netWall_->Alpha( this->begDist_ ) ) );
+    return this->begDist_;
 }
 
 REAL gPlayerWall::EndTime() const
 {
     CHECKWALL;
 
-    return netWall_->Time( LocalToGlobal( netWall_->Alpha( this->endDist_ ) ) );
+    return netWall_->Time( netWall_->Alpha( this->endDist_ ) );
 }
 
 REAL gPlayerWall::BegTime() const
 {
     CHECKWALL;
 
-    return netWall_->Time( LocalToGlobal( netWall_->Alpha( this->begDist_ ) ) );
+    return netWall_->Time( netWall_->Alpha( this->begDist_ ) );
 }
 
 void gPlayerWall::BlowHole	( REAL beg, REAL end )
