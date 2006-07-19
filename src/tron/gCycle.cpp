@@ -2560,7 +2560,7 @@ static void sg_KillFutureWall( gCycle * cycle, gNetPlayerWall * wall )
 static void sg_KillFutureWalls( gCycle * cycle )
 {
 #ifdef DEBUG_X
-    con << "Possible BUG, new code: removing future walls of the cylce that just got killed mercilessly.\n";
+    con << "Removing future walls of the cylce that just got killed mercilessly.\n";
 #endif
 
     // handle future walls that won't be drawn after all. Just make them a big hole.
