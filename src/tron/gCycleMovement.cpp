@@ -3556,10 +3556,19 @@ bool gCycleMovement::RubberMalusActive( void )
 
 void gCycleMovement::MoveSafely( const eCoord & dest, REAL startTime, REAL endTime )
 {
-    short lastAlive = alive_;
-    alive_ = 0;
-    Move( dest, startTime, endTime );
-    alive_ = lastAlive;
+    try
+    {
+        // try a regular move
+        Move( dest, startTime, endTime );
+    }
+    catch( gCycleDeath & death )
+    {
+        // and play dead if that doesn't work right
+        short lastAlive = alive_;
+        alive_ = 0;
+        Move( dest, startTime, endTime );
+        alive_ = lastAlive;
+    }
 }
 
 REAL GetTurnSpeedFactor(void) {
