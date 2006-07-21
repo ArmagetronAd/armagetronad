@@ -100,35 +100,40 @@ public:
 };
 static eInitForbidCamera se_initForbid;
 
-// forbid smart camerea
+// forbid smart camera
 static nSettingItem<bool> a_s
 ("CAMERA_FORBID_SMART",
  forbid_camera[CAMERA_SMART]);
 
-// forbid internal camerea
+// forbid internal camera
 static nSettingItem<bool> a_i
 ("CAMERA_FORBID_IN",
  forbid_camera[CAMERA_IN]);
 
-// forbid custom camerea
+// forbid custom camera
 static nSettingItem<bool> a_c
 ("CAMERA_FORBID_CUSTOM",
  forbid_camera[CAMERA_CUSTOM]);
 
-// forbid custom camerea
+// forbid custom camera
 static nSettingItem<bool> a_sc
 ("CAMERA_FORBID_SERVER_CUSTOM",
  forbid_camera[CAMERA_SERVER_CUSTOM]);
 
-// forbid free camerea
+// forbid free camera
 static nSettingItem<bool> a_f
 ("CAMERA_FORBID_FREE",
  forbid_camera[CAMERA_FREE]);
 
-// forbid fixed ext. camerea
+// forbid fixed ext. camera
 static nSettingItem<bool> a_fe
 ("CAMERA_FORBID_FOLLOW",
  forbid_camera[CAMERA_FOLLOW]);
+
+// forbid meriton's camerea
+static nSettingItem<bool> a_ffe
+("CAMERA_FORBID_MER",
+ forbid_camera[CAMERA_MER]);
 
 #ifndef DEDICATED
 #include "rGL.h"

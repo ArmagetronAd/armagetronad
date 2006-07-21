@@ -449,6 +449,7 @@ camera_forbid_free_help		Forbids the use of the free camera on all clients
 camera_forbid_follow_help	Forbids the use of the fixed external camera on all clients
 camera_forbid_custom_help	Forbids the use of the custom camera on all clients
 camera_forbid_server_custom_help  Forbids the use of the server custom camera
+camera_forbid_mer_help		Forbids the use of Meriton's camera
 
 camera_forbid_custom_glance_help                 Forbids use of special glance camera settings
 camera_override_custom_glance_help               Overrides custom glance settings with vanues from the server
@@ -1521,6 +1522,9 @@ player_camera_initial_cust_help	A configurable camera fixed relative to the cycl
 player_camera_initial_scust_text	Server Custom
 player_camera_initial_scust_help	A configurable camera fixed relative to the cycle, position determined by server administrator.
 
+player_camera_initial_mer_text	Mercam
+player_camera_initial_mer_help	Meriton's new camera mode, optimized for close combat.
+
 player_camera_fov_text		Initial FOV:
 player_camera_fov_help		Choose your favourite FOV (Field of vision).
 
@@ -1537,10 +1541,13 @@ player_camera_smartcam_text	Allow Smartcam:
 player_camera_smartcam_help	When pressing the camera switch button, this enables switching into the smart camera mode (an external camera that tries to guess what perspective on your cycle is useful).
 
 player_camera_custom_text	Allow Custom:
-player_camera_custom_help	When pressing the camera switch button, this enables switching into the custom perspective. (Configurable in settings.cfg)
+player_camera_custom_help	When pressing the camera switch button, this enables switching into the custom perspective. (Configurable in settings.cfg).
 
 player_camera_server_custom_text	Allow Server Custom:
-player_camera_server_custom_help	When pressing the camera switch button, this enables switching into the server defined custom custom perspective. (Configurable in settings.cfg on the server)
+player_camera_server_custom_help	When pressing the camera switch button, this enables switching into the server defined custom custom perspective. (Configurable in settings_custom.cfg on the server).
+
+player_camera_server_custom_text	Allow Mercam:
+player_camera_server_custom_help	When pressing the camera switch button, this enables switching into Meriton's camera mode.
 
 
 player_camera_center_int_text	Center Int. Camera:

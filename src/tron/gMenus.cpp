@@ -942,6 +942,12 @@ void sg_PlayerMenu(int Player){
      "$player_camera_incam_help",
      p->allowCam[CAMERA_IN]);
 
+    uMenuItemToggle al_m
+    (&camera_menu,
+     "$player_camera_mercam_text",
+     "$player_camera_mercam_help",
+     p->allowCam[CAMERA_MER]);
+
 
     uMenuItemInt cam_fov
     (&camera_menu,
@@ -961,6 +967,7 @@ void sg_PlayerMenu(int Player){
     cam_s.NewChoice("$player_camera_initial_smrt_text","$player_camera_initial_smrt_help",CAMERA_SMART);
     cam_s.NewChoice("$player_camera_initial_ext_text","$player_camera_initial_ext_help",CAMERA_FOLLOW);
     cam_s.NewChoice("$player_camera_initial_free_text","$player_camera_initial_free_help",CAMERA_FREE);
+    cam_s.NewChoice("$player_camera_initial_mer_text","$player_camera_initial_mer_help",CAMERA_MER);
 
     uMenuItemString tn(&playerMenu,
                        "$player_teamname_text",

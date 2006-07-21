@@ -73,7 +73,7 @@ public:
     int			favoriteNumberOfPlayersPerTeam;
 
     eCamMode startCamera;
-    bool     allowCam[10];
+    bool     allowCam[CAMERA_COUNT];
     int      startFOV;
     bool     smartCustomGlance; //!< flag making the smart camera use the custom settings for glancing
 
