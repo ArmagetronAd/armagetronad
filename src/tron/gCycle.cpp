@@ -1176,7 +1176,7 @@ bool gCycleExtrapolator::EdgeIsDangerous(const eWall *ww, REAL time, REAL alpha 
         // ignore recent walls of parent cycle
         gCycle *otherPlayer=w->Cycle();
         if (otherPlayer==parent_ &&
-                ( time < builtTime + 4 * GetTurnDelay() || GetDistance() < w->Pos( alpha ) + .01 * sg_delayCycle*Speed()/SpeedMultiplier()  )
+                ( time < builtTime + 2 * GetTurnDelay() || GetDistance() < w->Pos( alpha ) + .01 * sg_delayCycle*Speed()/SpeedMultiplier()  )
            )
             return false;
     }
@@ -3944,12 +3944,6 @@ void gCycle::SyncFromExtrapolator()
     if ( correctPosSmooth.NormSquared() > .1f )
     {
         std::cout << "Lag slide! " << correctPosSmooth << "\n";
-
-        if ( tSysTimeFloat() > 38 )
-        {
-            int x;
-            x = 0;
-        }
     }
 #endif
 
