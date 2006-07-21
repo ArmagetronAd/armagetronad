@@ -26,6 +26,13 @@ dist-hook:
 		sed -e "s,#define VERSION.*$$,#define VERSION \"${VERSION}\"," < ${srcdir}/$$f > ${distdir}/$$f;\
 	done
 
+# keep track of true version
+trueversion: $(wildcard $(top_srcdir)/*_version) $(top_srcdir)/.svn $(top_srcdir)/batch/make/version
+	echo TRUE_ARMAGETRONAD_VERSION=\"`sh $(top_srcdir)/batch/make/version $(top_srcdir)`\" > $@
+
+# the current version is passed via -D command line arguments which aren't depencency tracked, but only used in this one file, so we just track the dependency manually.
+${srcdir}/network/nNetwork.cpp: trueversion
+
 # library file listings
 
 # Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
@@ -97,7 +104,7 @@ endif
 #AM_CXXFLAGS= $(BINRELOC_CFLAGS)
 
 libtools_a_CXXFLAGS  =$(AM_CXXFLAGS)  -I@srcdir@/tools
-libnetwork_a_CXXFLAGS=$(libtools_a_CXXFLAGS)  -I@srcdir@/network
+libnetwork_a_CXXFLAGS=$(libtools_a_CXXFLAGS)  -I@srcdir@/network -D`cat trueversion`
 librender_a_CXXFLAGS =$(libtools_a_CXXFLAGS)  -I@srcdir@/render
 libui_a_CXXFLAGS     =$(librender_a_CXXFLAGS) -I@srcdir@/ui
 libengine_a_CXXFLAGS =$(libui_a_CXXFLAGS)     -I@srcdir@/network -I@srcdir@/engine 
