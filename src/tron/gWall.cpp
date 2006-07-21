@@ -2290,7 +2290,9 @@ bool gNetPlayerWall::IsDangerous( REAL a, REAL time ) const
         // extrapolate it, taking rubber slowdown into account
         if ( cycle_->Alive() )
         {
-            REAL dt = ( cycle_->lastTime - time );
+            // the time from the last simulation to the time the query shall be made;
+            // cycleDistance is valid at cycle_->lastTime, we need it at time.
+            REAL dt = ( time - cycle_->lastTime );
 
             // cycle movement
             cycleDistance += cycle_->WallEndSpeed() * dt;

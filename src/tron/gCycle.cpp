@@ -1175,7 +1175,7 @@ bool gCycleExtrapolator::EdgeIsDangerous(const eWall *ww, REAL time, REAL alpha 
         // ignore recent walls of parent cycle
         gCycle *otherPlayer=w->Cycle();
         if (otherPlayer==parent_ &&
-                ( time < builtTime + 4 * GetTurnDelay() || GetDistance() < w->Pos( alpha ) + .01 * sg_delayCycle*Speed()/SpeedMultiplier()  )
+                ( time < builtTime + 2 * GetTurnDelay() || GetDistance() < w->Pos( alpha ) + .01 * sg_delayCycle*Speed()/SpeedMultiplier()  )
            )
             return false;
     }
@@ -2163,7 +2163,7 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
 #else
         // predict half a frame time
         predictTime += se_PredictTime();
-        gSensor s(this,pos+correctPosSmooth, dir * (verletSpeed_ * se_PredictTime() * rubberSpeedFactor ) );
+        gSensor s(this,pos+correctPosSmooth, dirDrive * (verletSpeed_ * se_PredictTime() * rubberSpeedFactor ) );
         s.detect(1);
         predictPosition_ = s.before_hit;
 #endif
@@ -2560,7 +2560,7 @@ static void sg_KillFutureWall( gCycle * cycle, gNetPlayerWall * wall )
 static void sg_KillFutureWalls( gCycle * cycle )
 {
 #ifdef DEBUG_X
-    con << "Possible BUG, new code: removing future walls of the cylce that just got killed mercilessly.\n";
+    con << "Removing future walls of the cylce that just got killed mercilessly.\n";
 #endif
 
     // handle future walls that won't be drawn after all. Just make them a big hole.
@@ -2582,8 +2582,10 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
 
         if (!EdgeIsDangerous(ww,time,a) || !Alive() )
         {
-            // request a sync for everyone, maybe not all clients know the wall is passable
-            RequestSyncAll();
+            // request a sync for everyone if this is a non-bogus wall passage, maybe not all clients know the wall is passable
+            if ( ( !currentWall || ww != currentWall->Wall() ) && ( !lastWall || ww != lastWall->Wall() ) )
+                RequestSyncAll();
+
             return;
         }
 
@@ -3952,12 +3954,6 @@ void gCycle::SyncFromExtrapolator()
     if ( correctPosSmooth.NormSquared() > .1f )
     {
         std::cout << "Lag slide! " << correctPosSmooth << "\n";
-
-        if ( tSysTimeFloat() > 38 )
-        {
-            int x;
-            x = 0;
-        }
     }
 #endif
 
@@ -4321,6 +4317,9 @@ void gCycle::ReadSync( nMessage &m )
             // update brake status
             AccelerationDiscontinuity();
             braking = lastSyncMessage_.braking;
+
+            // store last turn
+            lastTurnPos_ = lastSyncMessage_.lastTurn;
         }
         else
         {
@@ -4396,6 +4395,9 @@ void gCycle::SyncEnemy ( const eCoord& begWall)
     REAL turnDirection=( dirDrive*lastSyncMessage_.dir );
     REAL notTurned=eCoord::F( dirDrive, lastSyncMessage_.dir )/dirDrive.NormSquared();
 
+    // the last known time
+    REAL lastKnownTime = lastTime;
+
     // calculate the position of the last turn from the sync data
     if ( distance > 0 && ( notTurned < .99 || this->turns < lastSyncMessage_.turns ) )
     {
@@ -4463,6 +4465,10 @@ void gCycle::SyncEnemy ( const eCoord& begWall)
 
         // save last driving direction
         lastDirDrive = dirDrive;
+
+        // move to cross position
+        MoveSafely( crossPos, lastTime, crossTime );
+        lastKnownTime = crossTime;
     }
 
     // side bending
@@ -4471,8 +4477,11 @@ void gCycle::SyncEnemy ( const eCoord& begWall)
     // calculate timestep
     // REAL ts = lastSyncMessage_.time - lastTime;
 
+    // backup current time
+    REAL oldTime = lastTime;
+
     // update position, speed, distance and direction
-    MoveSafely( lastSyncMessage_.pos, lastTime, lastTime );
+    MoveSafely( lastSyncMessage_.pos, lastKnownTime, lastSyncMessage_.time );
     verletSpeed_  = lastSyncMessage_.speed;
     lastTimestep_ = 0;
     distance = lastSyncMessage_.distance;
@@ -4482,7 +4491,6 @@ void gCycle::SyncEnemy ( const eCoord& begWall)
     brakingReservoir = lastSyncMessage_.brakingReservoir;
 
     // update time to values from sync
-    REAL oldTime = lastTime;
     lastTime = lastSyncMessage_.time;
     if ( oldTime < 0 )
         oldTime = lastTime;
@@ -4520,6 +4528,14 @@ void gCycle::SyncEnemy ( const eCoord& begWall)
             sn_GetNetState()==nCLIENT && turned )
         {
             laggometerSmooth = lag;
+
+            // but at least update the current wall
+            if ( currentWall )
+                currentWall->Update(lastTime,pos);
+
+            // and reset the animation time
+            lastTimeAnim=lastTime;
+
             return;
         }
         else
