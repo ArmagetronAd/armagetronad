@@ -90,6 +90,11 @@ protected:
 
     // entry and deletion in the list of all eGameObjects
 public:
+    //! tells game objects what the maximum lag caused by lazy simulation of timesteps is
+    static REAL GetMaxLazyLag();
+    //! sets the value reported by GetMaxLazyLag()
+    static void SetMaxLazyLag( REAL lag );
+
     eTeam* Team() const { return team; }
 
     static uActionPlayer se_turnLeft,se_turnRight;
