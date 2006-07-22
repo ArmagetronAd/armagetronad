@@ -3073,8 +3073,17 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                     REAL tolerance = 0.001;
                     if ( !wall->IsDangerous( alpha, currentTime ) && currentTime > lastTime + tolerance )
                     {
-                        REAL minTime = lastTime;
-                        REAL maxTime = currentTime;
+                        // take movement speed into account, we won't hit the wall for
+                        // another distanceOffset seconds
+                        REAL distanceOffset = 0;
+                        {
+                            REAL speed = Speed();
+                            if ( speed > 0 )
+                                distanceOffset = space/speed;
+                        }
+
+                        REAL minTime = lastTime + distanceOffset;
+                        REAL maxTime = currentTime + distanceOffset;
                         while ( minTime + tolerance < maxTime )
                         {
                             REAL midTime = .5 * ( minTime + maxTime );
@@ -3083,6 +3092,9 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                             else
                                 maxTime = midTime;
                         }
+
+                        maxTime -= distanceOffset;
+                        // minTime -= distanceOffset;
 
                         // split simulation into two parts, one up to the point the wall turns harmless
                         {

@@ -59,7 +59,13 @@ void eSensor::PassEdge(const eWall *w,REAL time,REAL a,int){
             return;
         }
 
-        if (owned && !owned->EdgeIsDangerous(w, owned->LastTime(), a))
+        // extrapolate the hit time
+        REAL hitTime = owned->LastTime();
+        REAL speed = owned->Speed();
+        if ( speed > 0 )
+            hitTime += time/speed;
+
+        if (owned && !owned->EdgeIsDangerous(w, hitTime, a))
             return;
 
         lr=0;
