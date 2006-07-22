@@ -1672,8 +1672,11 @@ void init_game_camera(eGrid *grid){
 bool think=1;
 
 #ifdef DEDICATED
-static int sg_dedicatedFPS = 200;
+static int sg_dedicatedFPS = 40;
 static tSettingItem<int> sg_dedicatedFPSConf( "DEDICATED_FPS", sg_dedicatedFPS );
+
+static REAL sg_dedicatedFPSIdleFactor = 2.0;
+static tSettingItem<REAL> sg_dedicatedFPSMinstepConf( "DEDICATED_FPS_IDLE_FACTOR", sg_dedicatedFPSIdleFactor );
 #endif
 
 void s_Timestep(eGrid *grid, REAL time,bool cam){
@@ -1682,6 +1685,10 @@ void s_Timestep(eGrid *grid, REAL time,bool cam){
     REAL minstep = 0;
 #ifdef DEDICATED
     minstep = 1.0/sg_dedicatedFPS;
+
+    // the low possible simulation frequency, together with lazy timesteps, produces
+    // this much possible extra time difference between gameobjects
+    eGameObject::SetMaxLazyLag( ( 1 + sg_dedicatedFPSIdleFactor )/( sg_dedicatedFPSIdleFactor * sg_dedicatedFPS ) );
 #endif
     eGameObject::s_Timestep(grid, time, minstep );
 
@@ -4163,7 +4170,7 @@ void sg_EnterGameCore( nNetState enter_state ){
     while (bool(sg_currentGame) && goon && sn_GetNetState()==enter_state){
 #ifdef DEDICATED // read input
         sr_Read_stdin();
-        if ( sn_BasicNetworkSystem.Select( 1.0 / sg_dedicatedFPS ) )
+        if ( sn_BasicNetworkSystem.Select( 1.0 / ( sg_dedicatedFPSIdleFactor * sg_dedicatedFPS )  ) )
         {
             // new network data arrived, do the most urgent work now
             tAdvanceFrame();
@@ -4173,7 +4180,7 @@ void sg_EnterGameCore( nNetState enter_state ){
             if ( time > 0 )
             {
                 // only simulate the objects that have pending events to execute
-                eGameObject::s_Timestep(sg_currentGame->Grid(), time, 100000.0f );
+                eGameObject::s_Timestep(sg_currentGame->Grid(), time, 1E+10 );
 
                 // send out updates immediately
                 nNetObject::SyncAll();
