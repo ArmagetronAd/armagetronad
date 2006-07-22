@@ -211,6 +211,8 @@ private:
     void MyInitAfterCreation();
 
     void SetCurrentWall(gNetPlayerWall *w);
+
+    REAL CalculatePredictPosition(); //!< Calculates predictPosition_
 protected:
     virtual ~gCycle();
 
