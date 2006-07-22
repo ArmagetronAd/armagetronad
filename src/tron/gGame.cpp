@@ -3473,8 +3473,11 @@ void gGame::Analysis(REAL time){
     {
         static int lastTeams = 0; // the number of teams when this was last called.
 
-        // check for status change
-        if ( ( human_teams <= 1 ) ^ ( lastTeams <= 1 ) )
+        // check for relevent status change, form 0 to 1 or 1 to 2 or 2 to 1 or 1 to 0 human teams.
+        int humanTeamsClamp = human_teams;
+        if ( human_teams > 2 )
+            human_teams = 2;
+        if ( humanTeamsClamp != lastTeams )
         {
             StartNewMatch();
             // if this is the beginning of a round, just start the match now
@@ -3490,7 +3493,7 @@ void gGame::Analysis(REAL time){
             }
         }
 
-        lastTeams=human_teams; // update last team count
+        lastTeams=humanTeamsClamp; // update last team count
     }
 
     // who is alive?
