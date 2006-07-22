@@ -4307,7 +4307,7 @@ void gCycle::ReadSync( nMessage &m )
             // update brake status
             AccelerationDiscontinuity();
             braking = lastSyncMessage_.braking;
-            
+
             // store last turn
             lastTurnPos_ = lastSyncMessage_.lastTurn;
         }
