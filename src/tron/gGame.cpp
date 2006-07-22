@@ -1127,8 +1127,11 @@ void init_game_camera(eGrid *grid){
 bool think=1;
 
 #ifdef DEDICATED
-static int sg_dedicatedFPS = 200;
+static int sg_dedicatedFPS = 40;
 static tSettingItem<int> sg_dedicatedFPSConf( "DEDICATED_FPS", sg_dedicatedFPS );
+
+static REAL sg_dedicatedFPSIdleFactor = 2.0;
+static tSettingItem<REAL> sg_dedicatedFPSMinstepConf( "DEDICATED_FPS_IDLE_FACTOR", sg_dedicatedFPSIdleFactor );
 #endif
 
 void s_Timestep(eGrid *grid, REAL time,bool cam){
@@ -1136,6 +1139,10 @@ void s_Timestep(eGrid *grid, REAL time,bool cam){
     REAL minstep = 0;
 #ifdef DEDICATED
     minstep = 1.0/sg_dedicatedFPS;
+
+    // the low possible simulation frequency, together with lazy timesteps, produces
+    // this much possible extra time difference between gameobjects
+    eGameObject::SetMaxLazyLag( ( 1 + sg_dedicatedFPSIdleFactor )/( sg_dedicatedFPSIdleFactor * sg_dedicatedFPS ) );
 #endif
     eGameObject::s_Timestep(grid, time, minstep );
 
@@ -2917,8 +2924,11 @@ void gGame::Analysis(REAL time){
     {
         static int lastTeams = 0; // the number of teams when this was last called.
 
-        // check for status change
-        if ( ( human_teams <= 1 ) ^ ( lastTeams <= 1 ) )
+        // check for relevent status change, form 0 to 1 or 1 to 2 or 2 to 1 or 1 to 0 human teams.
+        int humanTeamsClamp = human_teams;
+        if ( human_teams > 2 )
+            human_teams = 2;
+        if ( humanTeamsClamp != lastTeams )
         {
             StartNewMatch();
             // if this is the beginning of a round, just start the match now
@@ -2934,7 +2944,7 @@ void gGame::Analysis(REAL time){
             }
         }
 
-        lastTeams=human_teams; // update last team count
+        lastTeams=humanTeamsClamp; // update last team count
     }
 
     // who is alive?
@@ -3708,7 +3718,7 @@ void sg_EnterGameCore( nNetState enter_state ){
 #ifdef DEDICATED // read input
         sr_Read_stdin();
         uWebInterface::PollNetwork(200);
-        if ( sn_BasicNetworkSystem.Select( 1.0 / sg_dedicatedFPS ) )
+        if ( sn_BasicNetworkSystem.Select( 1.0 / ( sg_dedicatedFPSIdleFactor * sg_dedicatedFPS )  ) )
         {
             // new network data arrived, do the most urgent work now
             tAdvanceFrame();
@@ -3718,7 +3728,7 @@ void sg_EnterGameCore( nNetState enter_state ){
             if ( time > 0 )
             {
                 // only simulate the objects that have pending events to execute
-                eGameObject::s_Timestep(sg_currentGame->Grid(), time, 100000.0f );
+                eGameObject::s_Timestep(sg_currentGame->Grid(), time, 1E+10 );
 
                 // send out updates immediately
                 nNetObject::SyncAll();

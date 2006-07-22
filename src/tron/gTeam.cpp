@@ -230,13 +230,30 @@ public:
         uMenu playerMenu( title );
         tArray<uMenuItem*> items;
 
+        // quit from spectator mode, the player would be trown out of the team again otherwise
+        int i;
+        for ( i = MAX_PLAYERS; i>=0; --i )
+        {
+            if ( ePlayer::PlayerIsInGame(i))
+            {
+                ePlayer* localPlayer = ePlayer::PlayerConfig( i );
+                ePlayerNetID* pni = localPlayer->netPlayer;
+                if ( pni == this->player && localPlayer->spectate )
+                {
+                    localPlayer->spectate = false;
+                    con << tOutput("$player_toggle_spectator_off", localPlayer->name );
+                    ePlayerNetID::Update();
+                }
+            }
+        }
+
         if ( player->NextTeam()!=NULL)
         {
             items[items.Len()] = tNEW(gMenuItemSpectate) (&playerMenu, player);
         }
 
         // first pass add teams who probably can't be joined
-        for (int i = 0; i<eTeam::teams.Len(); i++ )
+        for ( i = 0; i<eTeam::teams.Len(); i++ )
         {
             eTeam *team = eTeam::teams(i);
             if ( team && team != player->NextTeam() && !team->PlayerMayJoin( player ) )
@@ -246,7 +263,7 @@ public:
         }
         // second pass add teams who probably can be joined
         // Note: these will appear above the unjoinable ones.
-        for (int i = 0; i<eTeam::teams.Len(); i++ )
+        for ( i = 0; i<eTeam::teams.Len(); i++ )
         {
             eTeam *team = eTeam::teams(i);
             if ( team && team != player->NextTeam() && team->PlayerMayJoin( player ))
@@ -270,7 +287,7 @@ public:
 
         playerMenu.Enter();
 
-        for ( int i = items.Len()-1; i>=0; --i )
+        for ( i = items.Len()-1; i>=0; --i )
         {
             delete items(i);
         }
@@ -297,7 +314,7 @@ void gTeam::TeamMenu()
             help.SetTemplateParameter(1, player->Name() );
             help << "$team_menu_player_help";
             ePlayerNetID* pni = player->netPlayer;
-            if ( pni && !player->spectate )
+            if ( pni )
                 items[ items.Len() ] = tNEW( gMenuItemPlayer ) ( &Menu, pni, help );
         }
     }

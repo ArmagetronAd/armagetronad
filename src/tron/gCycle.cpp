@@ -1777,12 +1777,15 @@ bool gCycle::Timestep(REAL currentTime){
         }
     }
 
+    bool ret = false;
+
     // nothing special if simulating backwards
     if (currentTime < lastTime)
-        return gCycleMovement::Timestep(currentTime);
-
+    {
+        ret = gCycleMovement::Timestep(currentTime);
+    }
     // no targets are given: activate chat AI
-    if (!currentDestination && pendingTurns.empty()){
+    else if (!currentDestination && pendingTurns.empty()){
         if (currentTime>nextChatAI && bool(player) &&
                 ((player->IsChatting()    && player->Owner() == sn_myNetID) ||
                  (!player->IsActive() && sn_GetNetState() == nSERVER) )
@@ -1834,7 +1837,7 @@ bool gCycle::Timestep(REAL currentTime){
         {
             try
             {
-                return gCycleMovement::Timestep(currentTime);
+                ret = gCycleMovement::Timestep(currentTime);
             }
             catch ( gCycleDeath const & death )
             {
@@ -1843,7 +1846,7 @@ bool gCycle::Timestep(REAL currentTime){
             }
         }
         else
-            return !Alive();
+            ret = !Alive();
     }
     else
     {
@@ -1863,15 +1866,27 @@ bool gCycle::Timestep(REAL currentTime){
     try
     {
         if ( currentTime > lastTime )
-            return gCycleMovement::Timestep(currentTime);
-        else
-            return false;
+            ret = gCycleMovement::Timestep(currentTime);
     }
     catch ( gCycleDeath const & death )
     {
         KillAt( death.pos_ );
         return false;
     }
+
+    REAL predictTime = CalculatePredictPosition();
+
+    if ( Alive() && currentWall )
+    {
+        // z-man: the next two lines are a very bad idea. This lets walls stick out on the other side while you're using up your rubber.
+        //if ( sn_GetNetState() != nSERVER )
+        //    wallEndPos = pos + dirDrive * ( verletSpeed_ * se_PredictTime() );
+
+        // but using the predicted position which halts at walls may work
+        currentWall->Update(predictTime, PredictPosition() );
+    }
+
+    return ret;
 }
 
 static void blocks(const gSensor &s, const gCycle *c, int lr)
@@ -1973,6 +1988,57 @@ static REAL ClampDisplacement( gCycle* cycle, eCoord& displacement, const eCoord
 
 // from gCycleMovement.cpp
 REAL sg_GetSparksDistance();
+
+
+// *******************************************************************************************
+// *
+// *	CalculatePredictPosition()
+// *
+// *******************************************************************************************
+//!
+//!		@return the time up to which the cycle's position was predicted
+//!
+// *******************************************************************************************
+
+REAL gCycle::CalculatePredictPosition()
+{
+    // predict position
+    REAL predictTime = lastTime;
+    {
+#ifdef DEDICATED
+        predictPosition_ = pos;
+
+        if ( sg_predictWalls )
+        {
+            // predict to the maximum time anyone else may be simulated up to
+            REAL maxTime = lastTime + MaxSimulateAhead() + GetMaxLazyLag();
+            REAL predictDT = maxTime - lastTime;
+            REAL lookAhead = predictDT * verletSpeed_;
+
+            // see how far we can go before rubber kicks in
+            REAL rubberStart = verletSpeed_ / RubberSpeed();
+            lookAhead += rubberStart;
+            REAL spaceAhead = MaxSpaceAhead( this, predictDT, lookAhead, lookAhead );
+            spaceAhead -= rubberStart;
+
+            if ( spaceAhead > 0 )
+            {
+                // store consistent prediction position and  time
+                predictPosition_ = pos + dirDrive * spaceAhead;
+                predictTime = lastTime + spaceAhead/verletSpeed_;
+            }
+        }
+#else
+        // predict half a frame time
+        predictTime += se_PredictTime();
+        gSensor s(this,pos+correctPosSmooth, dirDrive * (verletSpeed_ * se_PredictTime() * rubberSpeedFactor ) );
+        s.detect(1);
+        predictPosition_ = s.before_hit;
+#endif
+    }
+
+    return predictTime;
+}
 
 bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
     if (!finite(skew))
@@ -2134,52 +2200,7 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
     sg_ArchiveCoord( pos, 7 );
     sg_ArchiveReal( verletSpeed_, 7 );
 
-    // predict position
-    REAL predictTime = lastTime;
-    {
-#ifdef DEDICATED
-        predictPosition_ = pos;
-
-        if ( sg_predictWalls )
-        {
-            // predict to the maximum time anyone else may be simulated up to
-            REAL maxTime = currentTime + MaxSimulateAhead();
-            REAL predictDT = maxTime - lastTime;
-            REAL lookAhead = predictDT * verletSpeed_;
-
-            // see how far we can go before rubber kicks in
-            REAL rubberStart = verletSpeed_ / RubberSpeed();
-            lookAhead += rubberStart;
-            REAL spaceAhead = MaxSpaceAhead( this, predictDT, lookAhead, lookAhead );
-            spaceAhead -= rubberStart;
-
-            if ( spaceAhead > 0 )
-            {
-                // store consistent prediction position and  time
-                predictPosition_ = pos + dirDrive * spaceAhead;
-                predictTime = lastTime + spaceAhead/verletSpeed_;
-            }
-        }
-#else
-        // predict half a frame time
-        predictTime += se_PredictTime();
-        gSensor s(this,pos+correctPosSmooth, dirDrive * (verletSpeed_ * se_PredictTime() * rubberSpeedFactor ) );
-        s.detect(1);
-        predictPosition_ = s.before_hit;
-#endif
-    }
-
     if (Alive()){
-        if (currentWall)
-        {
-            // z-man: the next two lines are a very bad idea. This lets walls stick out on the other side while you're using up your rubber.
-            //if ( sn_GetNetState() != nSERVER )
-            //    wallEndPos = pos + dirDrive * ( verletSpeed_ * se_PredictTime() );
-
-            // but using the predicted position which halts at walls may work
-            currentWall->Update(predictTime, PredictPosition() );
-        }
-
         // animate skew
         gSensor fl(this,pos,dirDrive.Turn(1,1));
         gSensor fr(this,pos,dirDrive.Turn(1,-1));
@@ -2637,8 +2658,12 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
             // comparing these two gives an accurate criterion whether the wall is extrapolated
             if ( wallDist > cycleDist * (1 + EPS ) )
             {
-                // no worries, it's just a prediction wall, we can safely pass it
-                return;
+                static bool fix = false;
+                // it's an extrapolation wall, don't simulate further.
+                if ( fix && lastTime > se_GameTime() - 2 * Lag() - GetMaxLazyLag() )
+                    throw gCycleStop();
+                else
+                    return;
             }
 
             // we were first!
@@ -2864,6 +2889,7 @@ void gCycle::DropWall( bool buildNew )
 
     if ( buildNew && lastTime >= spawnTime_ + sg_cycleWallTime )
         currentWall=new gNetPlayerWall(this,pos,dirDrive,lastTime,distance);
+
 
     // grid datastructures change on inserting a wall, better recheck
     // all game objects. Temporarily override this cycle's driving direction.

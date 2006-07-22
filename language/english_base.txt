@@ -520,6 +520,7 @@ bug_transparency_demand_help             Unsupported: use transparency instead o
 custom_server_name_help	Name of the server to connect to
 dedicated_idle_help		After running this time (in hours), the dedicated server takes the next chance to quit.
 dedicated_fps_help      Maximum simulation steps per second the dedicated server will perform
+dedicated_fps_idle_factor_help Number of times per frame the server should check whether simulation can be done if no network input is coming
 talk_to_master_help		Announce this server on the internet?
 max_out_rate_help		Maximum network output rate
 max_in_rate_help		Maximum network input rate

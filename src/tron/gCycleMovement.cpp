@@ -1358,6 +1358,11 @@ float MaxSpaceAhead( const gCycleMovement* cycle, float lookAhead, REAL rubberUs
     lookAhead += mindistance * sg_rubberCycleMinDistanceLegacy * 2;
     // be a little nice and don't drive into the eWall if turning is allowed
     gSensor fr( const_cast< gCycleMovement* >( cycle ), cycle->Position(), cycle->Direction() );
+    {
+        REAL speed = cycle->Speed();
+        if ( speed > 0 )
+            fr.SetInverseSpeed( 1 / speed );
+    }
     fr.detect( lookAhead );
 
     if ( info )
@@ -3073,8 +3078,17 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                     REAL tolerance = 0.001;
                     if ( !wall->IsDangerous( alpha, currentTime ) && currentTime > lastTime + tolerance )
                     {
-                        REAL minTime = lastTime;
-                        REAL maxTime = currentTime;
+                        // take movement speed into account, we won't hit the wall for
+                        // another distanceOffset seconds
+                        REAL distanceOffset = 0;
+                        {
+                            REAL speed = Speed();
+                            if ( speed > 0 )
+                                distanceOffset = space/speed;
+                        }
+
+                        REAL minTime = lastTime + distanceOffset;
+                        REAL maxTime = currentTime + distanceOffset;
                         while ( minTime + tolerance < maxTime )
                         {
                             REAL midTime = .5 * ( minTime + maxTime );
@@ -3083,6 +3097,9 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                             else
                                 maxTime = midTime;
                         }
+
+                        maxTime -= distanceOffset;
+                        // minTime -= distanceOffset;
 
                         // split simulation into two parts, one up to the point the wall turns harmless
                         {
@@ -3215,6 +3232,18 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
         tASSERT(finite(step));
         distance += step;
         lastTimeAlive_ = currentTime;
+    }
+    catch ( gCycleStop const & )
+    {
+        // undo simulation done so far and stop
+        pos = lastPos;
+        verletSpeed_ = lastSpeed;
+        acceleration = lastAcceleration;
+        currentFace = lastFace;
+        numTries = 0;
+
+        // don't simulate further
+        return false;
     }
     catch ( gCycleDeath const & )
     {
@@ -3562,7 +3591,7 @@ void gCycleMovement::MoveSafely( const eCoord & dest, REAL startTime, REAL endTi
         // try a regular move
         Move( dest, startTime, endTime );
     }
-    catch( gCycleDeath & death )
+    catch( eDeath & death )
     {
         // and play dead if that doesn't work right
         short lastAlive = alive_;

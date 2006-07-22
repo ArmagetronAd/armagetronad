@@ -242,6 +242,11 @@ public:
     eCoord pos_;
 };
 
+//! Exception thrown to indicate simulation should be held for a while
+class gCycleStop: public eDeath
+{
+};
+
 // this class describes a point on the map the cycle on another
 // computer of the game IS at. The copies of the cycle on the
 // other computers try to reach this position by making the right

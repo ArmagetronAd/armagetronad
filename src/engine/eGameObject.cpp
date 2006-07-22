@@ -674,6 +674,19 @@ REAL eGameObject::MaxSimulateAhead()
     return se_maxSimulateAheadLeft;
 }
 
+static REAL se_lazyLag = 0;
+//! @return the maximum extra simulation time difference, on top of regular lag, caused by lazy simulation
+REAL eGameObject::GetMaxLazyLag()
+{
+    return se_lazyLag;
+}
+
+//! @param lag the maximum extra simulation time difference, on top of regular lag, caused by lazy simulation
+void eGameObject::SetMaxLazyLag( REAL lag )
+{
+    se_lazyLag = lag;
+}
+
 void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObject *c, REAL minTimestep )
 {
     su_FetchAndStoreSDLInput();
