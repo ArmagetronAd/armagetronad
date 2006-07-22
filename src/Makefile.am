@@ -29,6 +29,17 @@ dist-hook:
 		sed -e "s,#define VERSION.*$$,#define VERSION \"${VERSION}\"," < ${srcdir}/$$f > ${distdir}/$$f;\
 	done
 
+# keep track of true version
+nTrueVersion.h: $(wildcard $(top_srcdir)/*_version) $(wildcard $(top_srcdir)/.svn) $(wildcard $(top_srcdir)/CVS) $(wildcard $(top_srcdir)/batch/make/version) Makefile
+#	if the version generation files exist, use it to define the version. Else, Fallback to the autopackage version.
+	if test -r $(top_srcdir)/batch/make/version; then \
+		echo \#define TRUE_ARMAGETRONAD_VERSION \"`sh $(top_srcdir)/batch/make/version $(top_srcdir)`\" > $@; \
+	else \
+		echo "#define TRUE_ARMAGETRONAD_VERSION VERSION" > $@; \
+	fi
+
+${srcdir}/network/nNetwork.cpp: nTrueVersion.h
+
 # library file listings
 
 # Note: tMemManager.cpp must be last to avoid false leak reports (sorry for

@@ -522,7 +522,7 @@ int main(int argc,char **argv){
         {
             // embed version in recording
             const char * versionSection = "VERSION";
-            tString version( VERSION );
+            tString version( sn_programVersion );
             tRecorder::Playback( versionSection, version );
             tRecorder::Record( versionSection, version );
         }
