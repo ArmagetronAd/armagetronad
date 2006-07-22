@@ -3216,6 +3216,18 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
         distance += step;
         lastTimeAlive_ = currentTime;
     }
+    catch ( gCycleStop const & )
+    {
+        // undo simulation done so far and stop
+        pos = lastPos;
+        verletSpeed_ = lastSpeed;
+        acceleration = lastAcceleration;
+        currentFace = lastFace;
+        numTries = 0;
+
+        // don't simulate further
+        return false;
+    }
     catch ( gCycleDeath const & )
     {
         rubberSpeedFactor = 0;
@@ -3561,7 +3573,7 @@ void gCycleMovement::MoveSafely( const eCoord & dest, REAL startTime, REAL endTi
         // try a regular move
         Move( dest, startTime, endTime );
     }
-    catch( gCycleDeath & death )
+    catch( eDeath & death )
     {
         // and play dead if that doesn't work right
         short lastAlive = alive_;
