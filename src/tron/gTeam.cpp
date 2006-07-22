@@ -105,6 +105,22 @@ public:
         uMenu playerMenu( title );
         tArray<uMenuItem*> items;
 
+        // quit from spectator mode, the player would be trown out of the team again otherwise
+        for ( i = MAX_PLAYERS; i>=0; --i )
+        {
+            if ( ePlayer::PlayerIsInGame(i))
+            {
+                ePlayer* localPlayer = ePlayer::PlayerConfig( i );
+                ePlayerNetID* pni = localPlayer->netPlayer;
+                if ( pni == this->player && localPlayer->spectate )
+                {
+                    localPlayer->spectate = false;
+                    con << tOutput("$player_toggle_spectator_off", localPlayer->name );
+                    ePlayerNetID::Update();
+                }
+            }
+        }
+
         for ( i = eTeam::teams.Len()-1; i>=0; --i )
         {
             eTeam *team = eTeam::teams(i);
@@ -152,7 +168,7 @@ void gTeam::TeamMenu()
             help.SetTemplateParameter(1, player->Name() );
             help << "$team_menu_player_help";
             ePlayerNetID* pni = player->netPlayer;
-            if ( pni && !player->spectate )
+            if ( pni )
                 items[ items.Len() ] = tNEW( gMenuItemPlayer ) ( &Menu, pni, help );
         }
     }
