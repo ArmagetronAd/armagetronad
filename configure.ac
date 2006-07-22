@@ -592,16 +592,23 @@ AC_MSG_ERROR([You need the library SDL to compile Armagetron. Read the file doc/
 ,${SDLLIBS})
 
 dnl *************************************************
-dnl         SDL_Mixer
+dnl         Sound
 dnl *************************************************
 
 if test x$enable_sound = xyes; then
+
+dnl first do the regular sdl define
+ AC_DEFINE(HAVE_SDL_FOR_SOUND, 1  [Define if you have SDL_sound, which is part of the core SDL])
+
+dnl now check for sdl_mixer
  AC_CHECK_LIB(SDL_mixer,Mix_OpenAudio,
  AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Define if you have the SDL_mixer library (-lSDL_mixer).])
  LIBS="-lSDL_mixer $LIBS",
  AC_MSG_ERROR([SDL_mixer library not found. It is required for now. Sorry.])
- enable_sound=no
  ,)
+
+dnl now we need to know which audio formats to use
+
 fi
 
 dnl *************************************************
