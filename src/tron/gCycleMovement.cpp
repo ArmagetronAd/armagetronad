@@ -1358,6 +1358,11 @@ float MaxSpaceAhead( const gCycleMovement* cycle, float lookAhead, REAL rubberUs
     lookAhead += mindistance * sg_rubberCycleMinDistanceLegacy * 2;
     // be a little nice and don't drive into the eWall if turning is allowed
     gSensor fr( const_cast< gCycleMovement* >( cycle ), cycle->Position(), cycle->Direction() );
+    {
+        REAL speed = cycle->Speed();
+        if ( speed > 0 )
+            fr.SetInverseSpeed( 1 / speed );
+    }
     fr.detect( lookAhead );
 
     if ( info )

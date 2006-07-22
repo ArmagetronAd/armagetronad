@@ -35,8 +35,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 eSensor::eSensor(eGameObject *o,const eCoord &start,const eCoord &d)
-        :eGameObject(o->grid, start,d,o->currentFace,0),owned(o)
-        ,hit(1000),ehit(NULL),lr(0)
+        :eGameObject(o->grid, start,d,o->currentFace,0)
+        ,hit(1000),ehit(NULL),lr(0), owned(o) , inverseSpeed_(0)
 {
     if (owned)
     {
@@ -60,10 +60,7 @@ void eSensor::PassEdge(const eWall *w,REAL time,REAL a,int){
         }
 
         // extrapolate the hit time
-        REAL hitTime = owned->LastTime();
-        REAL speed = owned->Speed();
-        if ( speed > 0 )
-            hitTime += time/speed;
+        REAL hitTime = owned->LastTime() + time * inverseSpeed_;
 
         if (owned && !owned->EdgeIsDangerous(w, hitTime, a))
             return;
