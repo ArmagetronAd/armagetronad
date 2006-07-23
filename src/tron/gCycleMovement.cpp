@@ -2410,6 +2410,7 @@ void gCycleMovement::CalculateAcceleration()
     else
         acceleration+=( baseSpeed - verletSpeed_) * sg_speedCycleDecayAbove;
 
+    tASSERT( good( acceleration ) );
     sg_ArchiveReal( acceleration, 9 );
 
     // sense near wall behind us, accelerate more
@@ -2548,6 +2549,7 @@ void gCycleMovement::CalculateAcceleration()
     // apply wall acceleration
     acceleration += totalWallAcceleration;
 
+    tASSERT( good( acceleration ) );
     sg_ArchiveReal( acceleration, 9 );
 }
 
@@ -2585,7 +2587,7 @@ void gCycleMovement::ApplyAcceleration( REAL dt )
         else
             speedDecay = sg_speedCycleDecayAbove;
 
-        if ( speedDecay * maxTimestep > .1 )
+        if ( speedDecay * maxTimestep > .1 && dt > EPS )
         {
             // ok, really, a  better simulation is needed
             properDecay = true;
@@ -2594,6 +2596,8 @@ void gCycleMovement::ApplyAcceleration( REAL dt )
             REAL decayAcceleration = ( baseSpeed - verletSpeed_) * speedDecay;
             // throw it away
             acceleration -= decayAcceleration;
+
+            tASSERT( good( acceleration ) );
 
             // adapt base speed as the limit speed with the current decay and acceleration
             baseSpeed += acceleration/speedDecay;
@@ -2605,6 +2609,8 @@ void gCycleMovement::ApplyAcceleration( REAL dt )
             // is factored into baseSpeed now. Add extra decay factor so that
             // Speed() returns the most accurate current speed available.
             acceleration = ( baseSpeed - verletSpeed_) * ( 1 - exp( -speedDecay * dt * .5f ) ) / ( .5f * dt );
+
+            tASSERT( good( acceleration ) );
         }
     }
 
