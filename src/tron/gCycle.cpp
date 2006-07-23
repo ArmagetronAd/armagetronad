@@ -2113,12 +2113,8 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
             ClampDisplacement( this, correctPosSmooth, -correctPosSmooth, pos );
 
             // cast another some rays into the future
-            eCoord lookahead = dirDrive * ( 10 * correctPosSmooth.Norm() );
-            ClampDisplacement( this, correctPosSmooth, lookahead + correctPosSmooth, pos );
-            ClampDisplacement( this, correctPosSmooth, lookahead - correctPosSmooth, pos );
-            lookahead = dirDrive * Speed();
-            ClampDisplacement( this, correctPosSmooth, correctPosSmooth, pos + lookahead );
-            ClampDisplacement( this, correctPosSmooth, - correctPosSmooth, pos + lookahead );
+            eCoord lookahead = dirDrive * ( 2 * correctPosSmooth.Norm() );
+            ClampDisplacement( this, correctPosSmooth, lookahead, pos );
         }
     }
 
