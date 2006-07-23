@@ -2278,28 +2278,45 @@ bool gNetPlayerWall::IsDangerous( REAL a, REAL time ) const
             return false;
     }
 
+    // the time from the last simulation to the time the query shall be made;
+    // cycleDistance is valid at cycle_->lastTime, we need it at time.
+    REAL dt = ( time - cycle_->lastTime );
+
+    // the distance value at the spot we hit
+    REAL wallDistance = Pos( a );
+
     // test for finite wall lenght
     if ( gCycle::WallsLength() > 0 )
     {
-        // the distance value at the spot we hit
-        REAL wallDistance = Pos( a );
-
         // the distance the cycle traveled so far
         REAL cycleDistance = cycle_->GetDistance();
 
         // extrapolate it, taking rubber slowdown into account
         if ( cycle_->Alive() )
         {
-            // the time from the last simulation to the time the query shall be made;
-            // cycleDistance is valid at cycle_->lastTime, we need it at time.
-            REAL dt = ( time - cycle_->lastTime );
-
             // cycle movement
             cycleDistance += cycle_->WallEndSpeed() * dt;
         }
 
         if ( wallDistance + cycle_->ThisWallsLength() < cycleDistance )
             return false;	// hit was after the wall length
+    }
+
+    // check whether it is an extrapolated bit
+    {
+        // the distance the cycle traveled so far
+        REAL cycleDistance = cycle_->GetDistance();
+
+        // extrapolate it.
+        if ( cycle_->Alive() )
+        {
+            // cycle movement
+            cycleDistance += cycle_->Speed() * cycle_->rubberSpeedFactor * dt;
+        }
+
+        // is the wall ahead of the cycle?
+        if ( wallDistance > cycleDistance )
+            return false;
     }
 
     const gPlayerWallCoord* coord = &coords_(IndexAlpha(a));
