@@ -3482,8 +3482,8 @@ void gGame::Analysis(REAL time){
 
         // check for relevent status change, form 0 to 1 or 1 to 2 or 2 to 1 or 1 to 0 human teams.
         int humanTeamsClamp = human_teams;
-        if ( human_teams > 2 )
-            human_teams = 2;
+        if ( humanTeamsClamp > 2 )
+            humanTeamsClamp = 2;
         if ( humanTeamsClamp != lastTeams )
         {
             StartNewMatch();
