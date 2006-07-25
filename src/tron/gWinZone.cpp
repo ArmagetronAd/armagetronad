@@ -185,7 +185,7 @@ gZone::gZone( nMessage & m )
 //!
 // *******************************************************************************
 
-void gZone::RemoveFromGame( void )
+gZone::~gZone( void )
 {
     sg_Zones.erase(
         std::find_if(
@@ -196,6 +196,21 @@ void gZone::RemoveFromGame( void )
                 this)
         )
     );
+}
+
+void gZone::RemoveFromGame( void )
+{
+    // What's wrong with this?
+    // It seems to crash clients in some cases with weird error messages...
+    /*sg_Zones.erase(
+        std::find_if(
+            sg_Zones.begin(),
+            sg_Zones.end(),
+            std::bind2nd(
+                std::equal_to<gZone *>(),
+                this)
+        )
+    );*/
     eNetGameObject::RemoveFromGame();
 }
 
