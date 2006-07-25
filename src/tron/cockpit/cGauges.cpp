@@ -84,7 +84,7 @@ void BarGauge::Render() {
 
     if (val > max) val = max;
     if (val < min) val = min;
-    if (min > max) return;
+    if (min >= max) return;
 
     RenderGraph(min, max, val,m_reverse?-1.:1., val_s);
 
