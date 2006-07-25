@@ -57,6 +57,7 @@ public:
     virtual ~VerticalBarGauge() { }; //!< Do- nothing destructor
 protected:
     virtual void RenderGraph(float min, float max, float val, float factor, tValue::Base const &val_s); //!< Renders the Background, bar and current value (if enabled)
+    void RenderCaption(void);
 };
 
 //! Renders a needle gauge

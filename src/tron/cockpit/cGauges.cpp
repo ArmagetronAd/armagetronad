@@ -70,6 +70,16 @@ void BarGauge::RenderCaption(void) {
     }
 }
 
+void VerticalBarGauge::RenderCaption(void) {
+    if ( m_captionloc != off ) {
+        const float y=
+            (m_captionloc==top ?
+             m_position.y+1.2*m_size.y :
+             m_position.y-1.2*m_size.y);
+        DisplayText(m_position.x,y,.24*m_size.y,m_caption.c_str(),sr_fontCockpit);
+    }
+}
+
 void BarGauge::Render() {
     sr_ResetRenderState(0); //needs this because rFont has bugs i presume.. Ie I have problems as soon as rTextFirld is used
     // z-man: actually, it is needed because per-frame-tasks get called without rendering context, so it has to be set.
