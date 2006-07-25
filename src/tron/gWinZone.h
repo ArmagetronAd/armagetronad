@@ -72,9 +72,10 @@ class gZone: public eNetGameObject
 public:
     gZone(eGrid *grid, const eCoord &pos); //!< local constructor
     gZone(nMessage &m);                    //!< network constructor
-    ~gZone();                              //!< destructor
 
     void SetReferenceTime();               //!< sets the reference time to the current time
+
+    void RemoveFromGame();		   //!< call this instead of the destructor
 
     gZone &         SetPosition         ( eCoord const & position );	//!< Sets the current position
     eCoord          GetPosition         ( void ) const;	                //!< Gets the current position

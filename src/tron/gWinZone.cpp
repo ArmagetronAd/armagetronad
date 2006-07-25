@@ -185,7 +185,7 @@ gZone::gZone( nMessage & m )
 //!
 // *******************************************************************************
 
-gZone::~gZone( void )
+void gZone::RemoveFromGame( void )
 {
     sg_Zones.erase(
         std::find_if(
@@ -196,6 +196,7 @@ gZone::~gZone( void )
                 this)
         )
     );
+    eNetGameObject::RemoveFromGame();
 }
 
 // *******************************************************************************
