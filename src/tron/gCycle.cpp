@@ -2684,6 +2684,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                         if ( currentWall )
                             otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, otherPlayer );
                         otherPlayer->distance = wallDist;
+                        otherPlayer->DropWall();
                         otherPlayer->KillAt( collPos );
 
                         // get rid of future walls
@@ -2706,6 +2707,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                         otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, otherPlayer );
 
                     otherPlayer->distance = wallDist;
+                    otherPlayer->DropWall();
                     otherPlayer->KillAt( collPos );
 
                     // get rid of future walls

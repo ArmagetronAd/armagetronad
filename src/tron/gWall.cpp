@@ -2307,8 +2307,8 @@ bool gNetPlayerWall::IsDangerous( REAL a, REAL time ) const
         // the distance the cycle traveled so far
         REAL cycleDistance = cycle_->GetDistance();
 
-        // extrapolate it.
-        if ( cycle_->Alive() )
+        // extrapolate it if the test time lies in the cycle's future.
+        if ( cycle_->Alive() && dt > 0 )
         {
             // cycle movement
             cycleDistance += cycle_->Speed() * cycle_->rubberSpeedFactor * dt;
