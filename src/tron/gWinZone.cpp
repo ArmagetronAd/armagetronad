@@ -45,6 +45,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <algorithm>
 #include <functional>
 #include <deque>
+#include <iterator>
 
 std::deque<gZone *> sg_Zones;
 
@@ -187,31 +188,35 @@ gZone::gZone( nMessage & m )
 
 gZone::~gZone( void )
 {
-    sg_Zones.erase(
-        std::find_if(
-            sg_Zones.begin(),
-            sg_Zones.end(),
-            std::bind2nd(
-                std::equal_to<gZone *>(),
-                this)
-        )
-    );
+    RemoveFromZoneList();
 }
 
 void gZone::RemoveFromGame( void )
 {
-    // What's wrong with this?
-    // It seems to crash clients in some cases with weird error messages...
-    /*sg_Zones.erase(
+    RemoveFromZoneList();
+    eNetGameObject::RemoveFromGame();
+}
+
+void gZone::RemoveFromZoneList(void) {
+    //std::cerr << "RemoveFromZoneList " << this << " called." << std::endl;
+    //std::copy(sg_Zones.begin(), sg_Zones.end(), std::ostream_iterator<gZone *>(std::cerr, " "));
+    //std::cerr << std::endl;
+    //std::cerr << "size: " << sg_Zones.size() << std::endl;
+    std::deque<gZone *>::iterator pos_found =
         std::find_if(
             sg_Zones.begin(),
             sg_Zones.end(),
             std::bind2nd(
                 std::equal_to<gZone *>(),
                 this)
-        )
-    );*/
-    eNetGameObject::RemoveFromGame();
+        );
+    if(pos_found != sg_Zones.end())
+        sg_Zones.erase(pos_found);
+    //std::cerr << "RemoveZoneList " << this << " done." << std::endl;
+    //std::copy(sg_Zones.begin(), sg_Zones.end(), std::ostream_iterator<gZone *>(std::cerr, " "));
+    //std::cerr << std::endl;
+    //std::cerr << "size: " << sg_Zones.size() << std::endl;
+    //if(sg_Zones.size() > 100) st_Breakpoint();
 }
 
 // *******************************************************************************

@@ -208,6 +208,7 @@ void Map::DrawCycles(tList<ePlayerNetID> &list, double xscale, double yscale) {
 }
 
 void Map::DrawZones(std::deque<gZone *> const &list) {
+    if (list.empty()) return;
     for(std::deque<gZone *>::const_iterator i = list.begin(); i != list.end(); ++i) {
         tASSERT(*i);
         tCoord const &rotation = (*i)->GetRotation();

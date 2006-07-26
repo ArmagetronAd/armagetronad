@@ -129,6 +129,8 @@ private:
 
     inline REAL EvaluateFunctionNow( tFunction const & f ) const;  //!< evaluates the given function with lastTime - referenceTime_ as argument
     inline void SetFunctionNow( tFunction & f, REAL value ) const; //!< makes sure EvaluateFunctionNow() returns the given value
+
+    void RemoveFromZoneList(void); //!< Removes the zone from the sg_Zones list if it's there
 };
 
 // all the following zones are hacks until the full zone system is in place
