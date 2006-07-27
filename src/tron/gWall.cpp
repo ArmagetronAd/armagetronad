@@ -1591,14 +1591,31 @@ void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
 
     SetEndTime(tEnd);
 
+    // determine the correct end position
+    REAL endPos = 0;
     //if ( bool( this->cycle_ ) && !force )
     //{
-    //    SetEndPos( this->cycle_->GetDistance() );
+    //    endPos =  this->cycle_->GetDistance();
     //}
     //else
     {
-        SetEndPos( dbegin + eCoord::F(dir, end - beg )/dir.NormSquared() );
+        endPos = dbegin + eCoord::F(dir, end - beg )/dir.NormSquared();
     }
+
+    // delete coords_ entries that lie after the last one according to their distance; they're invalidated.
+    {
+        int len = coords_.Len();
+        while ( len >= 3 && coords_[len-2].IsDangerous == coords_[len-1].IsDangerous && coords_[len-2].Pos > endPos )
+        {
+            coords_[len-2] = coords_[len-1];
+            coords_.SetLen(len - 1);
+            len = coords_.Len();
+        }
+    }
+
+    // set end position
+    SetEndPos( endPos );
+
 
     gPlayerWall *w = Wall();
 
@@ -1610,6 +1627,17 @@ void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
         w->Check();
 #endif
     }
+}
+
+void gNetPlayerWall::Checkpoint()
+{
+    CHECKWALL;
+
+    // copy the last coordinate entry
+    int len = coords_.Len();
+    coords_[len] = coords_[len-1];
+
+    CHECKWALL;
 }
 
 void gNetPlayerWall::CopyIntoGrid(eGrid * grid, bool force){

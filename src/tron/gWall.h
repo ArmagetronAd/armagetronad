@@ -176,6 +176,7 @@ public:
     void CopyIntoGrid(eGrid *grid,bool force=false);
     static void s_CopyIntoGrid();
     void RealWallReceived( gNetPlayerWall* realwall );
+    void Checkpoint(); //!< marks the current distance and time for more accurate interpolation
 
     gNetPlayerWall(nMessage &m);
 
