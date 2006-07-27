@@ -2322,6 +2322,31 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
         skewDot=0;
     }
 
+    // checkpoint wall when rubber starts to get used
+    if ( currentWall )
+    {
+        if ( rubberSpeedFactor >= .99 && rubberSpeedFactorBack < .99 )
+        {
+            currentWall->Checkpoint();
+        }
+
+        if ( rubberSpeedFactor < .99 && rubberSpeedFactorBack >= .99 )
+        {
+            currentWall->Checkpoint();
+        }
+
+        if ( rubberSpeedFactor < .1 && rubberSpeedFactorBack >= .1 )
+        {
+            currentWall->Checkpoint();
+        }
+
+        if ( rubberSpeedFactor < .01 && rubberSpeedFactorBack >= .01 )
+        {
+            currentWall->Checkpoint();
+        }
+    }
+
+
     if ( sn_GetNetState()==nSERVER )
     {
         // do an emergency sync when rubber starts to get used, it may come unexpected to clients
@@ -2337,6 +2362,10 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
             if ( !sg_avoidBadOldClientSync || sg_NoLocalTunnelOnSync.Supported( Owner() ) || MaxSpaceAhead( this, ts, lookahead, lookahead ) >= lookahead )
             {
                 RequestSync(false);
+
+                // checkpoint wall for better collision accuracy, only required on the server
+                if ( currentWall )
+                    currentWall->Checkpoint();
             }
 
             nextSync=tSysTimeFloat()+sg_syncIntervalEnemy;
@@ -2666,6 +2695,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
             if ( otherPlayer->Vulnerable() )
             {
                 static bool tryToSaveFutureWallOwner = true;
+                bool saved = false;
 
                 if ( tryToSaveFutureWallOwner && otherPlayer->currentWall && w == otherPlayer->currentWall->Wall() )
                 {
@@ -2678,34 +2708,59 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                     REAL maxd = eCoord::F( otherPlayer->dirDrive, collPos - otherPlayer->GetLastTurnPos() ) * .5/otherPlayer->dirDrive.NormSquared();
                     if ( d > maxd )
                         d = maxd;
-                    if ( d < 0 )
+                    if ( d > 0 )
                     {
-                        // err, trouble. Can't push the other guy back far enough. Better kill him.
-                        if ( currentWall )
-                            otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, otherPlayer );
-                        otherPlayer->distance = wallDist; 
-                        otherPlayer->DropWall();
-                        otherPlayer->KillAt( collPos );
+                        saved = true;
 
-                        // get rid of future walls
-                        sg_KillFutureWalls( otherPlayer );
+                        // do the move
+                        otherPlayer->MoveSafely( collPos-otherPlayer->dirDrive*d, otherPlayer->LastTime(), otherTime - d/otherPlayer->Speed() );
+                        otherPlayer->currentWall->Update( otherPlayer->lastTime, otherPlayer->pos );
+                        otherPlayer->dropWallRequested_ = false;
+
+                        // drop our wall so collisions are more accurate
+                        dropWallRequested_ = true;
+                    }
+                }
+
+                // another possibility: if the walls are very short compared to rubber, we could
+                // get away with just accounding for some rubber on the cycle that we'd need to kill
+                // otherwise.
+                if ( !saved && verletSpeed_ >= 0 )
+                {
+                    REAL dt = otherTime - time;
+
+                    // this long would the other cycle have to sit in front of our wall
+                    // before he's released by the end
+                    REAL wallTimeLeft = this->ThisWallsLength()/verletSpeed_ - dt;
+
+                    if ( wallTimeLeft < 0 )
+                    {
+                        // isn't hit at all
+                        return;
                     }
 
-                    // do the move
-                    otherPlayer->MoveSafely( collPos-otherPlayer->dirDrive*d, otherPlayer->LastTime(), otherTime - d/otherPlayer->Speed() );
-                    otherPlayer->currentWall->Update( otherPlayer->lastTime, otherPlayer->pos );
-                    otherPlayer->dropWallRequested_ = false;
+                    // check how much rubber would be used
+                    REAL max, effectiveness;
+                    sg_RubberValues( otherPlayer->Player(), otherPlayer->verletSpeed_, max, effectiveness );
+                    if ( effectiveness > 0 )
+                    {
+                        REAL rubberToEat = wallTimeLeft * otherPlayer->Speed()/effectiveness;
 
-                    // drop our wall so collisions are more accurate
-                    dropWallRequested_ = true;
+                        otherPlayer->rubber += rubberToEat;
+                        if ( otherPlayer->rubber > max )
+                            otherPlayer->rubber = max; // too much rubber used
+                        else
+                            saved = true;              // within bounds, he may survive
+                    }
                 }
-                else
+
+                if ( !saved )
                 {
-                    // the unfortunate other player made a turn in the meantime or too much time has passed. We cannot unroll its movement,
-                    // so we have to destroy it.
+                    // last
+
+                    // err, trouble. Can't push the other guy back far enough. Better kill him.
                     if ( currentWall )
                         otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, otherPlayer );
-
                     otherPlayer->distance = wallDist;
                     otherPlayer->DropWall();
                     otherPlayer->KillAt( collPos );
