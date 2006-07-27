@@ -1723,7 +1723,10 @@ struct eChatInsertionCommand
 };
 
 
-static std::deque<tString> se_chatHistory; // global since the class doesn't live beyond the execution of the command
+static uMenuItemStringWithHistory::history_t &se_chatHistory() {
+    static uMenuItemStringWithHistory::history_t instance("chat_history.txt");
+    return instance;
+}
 static int se_chatHistoryMaxSize=10; // maximal size of chat history
 static tSettingItem< int > se_chatHistoryMaxSizeConf("HISTORY_SIZE_CHAT",se_chatHistoryMaxSize);
 
@@ -1759,7 +1762,7 @@ public:
     //! @param Me        the player the chat prompt is for
     //! @param completer the completer to be used
     eMenuItemChat(uMenu *M,tString &c,ePlayer *Me,uAutoCompleter *completer):
-    uMenuItemStringWithHistory(M,"$chat_title_text","",c, se_SpamMaxLen, se_chatHistory, se_chatHistoryMaxSize, completer),me(Me) {}
+    uMenuItemStringWithHistory(M,"$chat_title_text","",c, se_SpamMaxLen, se_chatHistory(), se_chatHistoryMaxSize, completer),me(Me) {}
 
     virtual ~eMenuItemChat(){ }
 

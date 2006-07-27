@@ -414,13 +414,21 @@ public:
 
 //! uMenuItemString extended by a simple history function and tab completion
 class uMenuItemStringWithHistory : protected uMenuItemString {
+public:
+    //! handles loading and saving the contents of the history to a file
+class history_t : public std::deque<tString> {
+        char const *m_filename;
+    public:
+        history_t(char const *filename); //!< this will load the history from the file
+        ~history_t(); //!< this will save the history to the file
+    };
 protected:
-    std::deque<tString> &m_History; //!< The saved history lines
+    history_t &m_History; //!< The saved history lines
     unsigned int m_HistoryPos; //!< The current position within the history
     unsigned int m_HistoryLimit; //!< The maximal length of the history
     uAutoCompleter *m_Completer; //!< The object used for completion
 public:
-    uMenuItemStringWithHistory(uMenu *M,const tOutput& desc, const tOutput& help,tString &c, int maxLength, std::deque<tString> &history, int limit, uAutoCompleter *completer = 0); //!< Consructor
+    uMenuItemStringWithHistory(uMenu *M,const tOutput& desc, const tOutput& help,tString &c, int maxLength, history_t &history, int limit, uAutoCompleter *completer = 0); //!< Consructor
 
     ~uMenuItemStringWithHistory(); //!< Destructor
 

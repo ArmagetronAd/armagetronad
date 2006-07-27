@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rScreen.h"
 #include "rViewport.h"
 #include "rTexture.h"
+#include "tRecorder.h"
 #include "tString.h"
 #include "math.h"
 #include "uInputQueue.h"
@@ -1042,7 +1043,7 @@ tString uAutoCompleter::Simplify(tString const &str) {
 //! @param history   a reference to the history of commands
 //! @param limit     the limit for the history's size
 //! @param completer the autocompleter to be used, if 0, no completion will take place
-uMenuItemStringWithHistory::uMenuItemStringWithHistory(uMenu *M,const tOutput& desc, const tOutput& help,tString &c, int maxLength, std::deque<tString> &history, int limit, uAutoCompleter *completer ):
+uMenuItemStringWithHistory::uMenuItemStringWithHistory(uMenu *M,const tOutput& desc, const tOutput& help,tString &c, int maxLength, history_t &history, int limit, uAutoCompleter *completer ):
         uMenuItemString(M, desc,help,c, maxLength ),
         m_History(history),
         m_HistoryPos(0),
@@ -1054,7 +1055,7 @@ m_Completer(completer) {
 //! This destructor will write the currently displayed string into the history if it isn't already in it
 uMenuItemStringWithHistory::~uMenuItemStringWithHistory() {
     if(content->Len() > 1){
-        for(std::deque<tString>::iterator i=m_History.begin(); i!=m_History.end(); ++i) {
+        for(history_t::iterator i=m_History.begin(); i!=m_History.end(); ++i) {
             if(*i == *content) {
                 m_History.erase(i);
                 break;
@@ -1110,6 +1111,23 @@ bool uMenuItemStringWithHistory::Event(SDL_Event &e){
     return false;
 }
 
+//! @param filename the name of the file (in var/) to be loaded and saved to
+uMenuItemStringWithHistory::history_t::history_t(char const *filename) : std::deque<tString>(), m_filename(filename) {
+    tTextFileRecorder the_file ( tDirectories::Var(), m_filename );
+    while(!the_file.EndOfFile()) {
+        push_front(the_file.GetLine());
+    }
+}
+
+uMenuItemStringWithHistory::history_t::~history_t() {
+    std::ofstream the_file;
+    if(tDirectories::Var().Open( the_file, m_filename)) {
+        for(reverse_iterator i = rbegin(); i != rend(); ++i) {
+            the_file << *i << "\n";
+        }
+    }
+}
+
 // *****************************************************
 //  Submenu
 // *****************************************************
@@ -1118,7 +1136,7 @@ bool uMenuItemStringWithHistory::Event(SDL_Event &e){
 uMenuItemSubmenu::uMenuItemSubmenu(uMenu *M,
                                    uMenu *s,
                                    const tOutput& help)
-    :uMenuItem(M,help),submenu(s){}
+        :uMenuItem(M,help),submenu(s){}
 
 
 void uMenuItemSubmenu::Render(REAL x,REAL y,REAL alpha,bool selected){

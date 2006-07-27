@@ -77,7 +77,11 @@ static tConfItemLine c_rEnd("GL_RENDERER",gl_renderer);
 static tConfItemLine c_vEnd("GL_VENDOR",gl_vendor);
 // static tConfItemLine a_ver("ARMAGETRON_VERSION",sn_programVersion);
 
-static std::deque<tString> sg_consoleHistory; // global since the class doesn't live beyond the execution of the command
+static uMenuItemStringWithHistory::history_t &sg_consoleHistory() {
+    static uMenuItemStringWithHistory::history_t instance("console_history.txt");
+    return instance;
+}
+
 static int sg_consoleHistoryMaxSize=100; // size of the console history
 static tSettingItem< int > sg_consoleHistoryMaxSizeConf("HISTORY_SIZE_CONSOLE",sg_consoleHistoryMaxSize);
 
@@ -588,7 +592,7 @@ public:
 //! @param c         passed on to uMenuItemStringWithHistory
 //! @param completer the completer to be used
 gMemuItemConsole::gMemuItemConsole(uMenu *M,tString &c, uAutoCompleter *completer):
-        uMenuItemStringWithHistory(M,"Con:","", c, 1024, sg_consoleHistory, sg_consoleHistoryMaxSize, completer)
+        uMenuItemStringWithHistory(M,"Con:","", c, 1024, sg_consoleHistory(), sg_consoleHistoryMaxSize, completer)
 {}
 
 
@@ -942,12 +946,6 @@ void sg_PlayerMenu(int Player){
      "$player_camera_incam_help",
      p->allowCam[CAMERA_IN]);
 
-    uMenuItemToggle al_m
-    (&camera_menu,
-     "$player_camera_mercam_text",
-     "$player_camera_mercam_help",
-     p->allowCam[CAMERA_MER]);
-
 
     uMenuItemInt cam_fov
     (&camera_menu,
@@ -967,7 +965,6 @@ void sg_PlayerMenu(int Player){
     cam_s.NewChoice("$player_camera_initial_smrt_text","$player_camera_initial_smrt_help",CAMERA_SMART);
     cam_s.NewChoice("$player_camera_initial_ext_text","$player_camera_initial_ext_help",CAMERA_FOLLOW);
     cam_s.NewChoice("$player_camera_initial_free_text","$player_camera_initial_free_help",CAMERA_FREE);
-    cam_s.NewChoice("$player_camera_initial_mer_text","$player_camera_initial_mer_help",CAMERA_MER);
 
     uMenuItemString tn(&playerMenu,
                        "$player_teamname_text",
