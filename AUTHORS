@@ -41,6 +41,7 @@ External code merged in from:
 ID Software         : first version of the low level networking code
 David McAllister    : particle system API
 Aladdin Enterprises : MD5 Hashsum implementation
+Yan Olliver         : Mathematical expression parser
 
 External resources:
 Bitstream           : default font file

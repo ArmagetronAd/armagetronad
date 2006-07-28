@@ -975,6 +975,7 @@ src/doc/Makefile src/doc/net/Makefile src/doc/Doxyfile
 src/doc/html.m4
 src/thirdparty/Makefile
 src/thirdparty/particles/Makefile
+src/thirdparty/mathexpr/Makefile
 src/thirdparty/shttpd/Makefile
 resource/Makefile
 config/Makefile

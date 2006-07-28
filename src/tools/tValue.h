@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <memory>
 #include <iomanip>
 #include <set>
+#include <map>
 #include <iterator>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
@@ -43,11 +44,11 @@ class tConfItemBase;
 //! Namespace for all Value classes for use by the cockpit
 namespace tValue {
 
-  class Base;
-  class FooPtrOps;
-  typedef boost::shared_ptr<Base> BasePtr; //!< convinience definition for the use in derived classes
-  
-  typedef std::set<BasePtr, FooPtrOps> myCol;
+class Base;
+class FooPtrOps;
+typedef boost::shared_ptr<Base> BasePtr; //!< convinience definition for the use in derived classes
+
+typedef std::set<BasePtr, FooPtrOps> myCol;
 
 //! Offers basic functions to set the precision etc.
 class Base {
@@ -86,32 +87,32 @@ public:
 
 struct FooPtrOps
 {
-  bool operator()( const BasePtr & a, const BasePtr & b )
-  { 
-    return (*a < *b);
-  }
-  /*
-   * Usefull for debug purpose
-   */
-  /*
-    void operator()( const BasePtr & a )
-    { std::cout << a->GetInt() << "\n"; }
-  */
+    bool operator()( const BasePtr & a, const BasePtr & b )
+    {
+        return (*a < *b);
+    }
+    /*
+     * Usefull for debug purpose
+     */
+    /*
+      void operator()( const BasePtr & a )
+      { std::cout << a->GetInt() << "\n"; }
+    */
 };
 
 class BaseExt: public Base {
 public:
-  BaseExt() :Base() {};
-  BaseExt(Base const &other): Base(other) {};
-  BaseExt(BaseExt const &other): Base(other) {};
-  virtual ~BaseExt() { };
-  
-  virtual Base *copy(void) const {return new BaseExt();};
-  
-//! Convert the stored data into a collection.
-//! @returns a collection of at least 1.
-  virtual myCol GetCol(void) const ;
-  operator myCol() const { return GetCol(); }
+    BaseExt() :Base() {};
+    BaseExt(Base const &other): Base(other) {};
+    BaseExt(BaseExt const &other): Base(other) {};
+    virtual ~BaseExt() { };
+
+    virtual Base *copy(void) const {return new BaseExt();};
+
+    //! Convert the stored data into a collection.
+    //! @returns a collection of at least 1.
+    virtual myCol GetCol(void) const ;
+    operator myCol() const { return GetCol(); }
 };
 
 //! Returns a string using the settings from this or another object.
@@ -263,6 +264,27 @@ public:
     bool operator<=(Base const &other) const;
     bool operator> (Base const &other) const;
     bool operator< (Base const &other) const;
+};
+
+}
+class ROperation;
+namespace tValue {
+
+//! Stores a math expression using the mathexpr library
+class Expr : public BaseExt {
+public:
+    typedef std::map<tString, float *> varmap_t; //!< map of variable names and their references
+private:
+    boost::shared_ptr<ROperation> m_operation;
+public:
+    Expr(tString const &expr); //!< Constructs a new Expr without variables and functions and the like
+    Expr(tString const &expr, varmap_t const &vars); //!< Constructs a new Expr with an array of variables
+
+    Base *copy(void) const;
+
+    float GetFloat() const;
+    int GetInt() const;
+    tString GetString(Base const *other=0) const;
 };
 
 //! Stores a function pointer to a function within another class and offers functions to get that function's return value
@@ -428,29 +450,29 @@ template<typename T> bool Callback<T>::operator< (Base const &other) const { ret
 
 class ColNode : public BaseExt {
 protected:
-  myCol m_col;
+    myCol m_col;
 
 public:
-  template <typename InputIterator>
-    ColNode(InputIterator begin, InputIterator end): BaseExt(), m_col(begin, end) { } 
+    template <typename InputIterator>
+    ColNode(InputIterator begin, InputIterator end): BaseExt(), m_col(begin, end) { }
 
-//!< Specialised constructor from iterators
+    //!< Specialised constructor from iterators
 
-  ColNode(BaseExt const &other): BaseExt(other), m_col() { };
-  ColNode(ColNode const &other): BaseExt(other), m_col(other.m_col) { };
-  virtual ~ColNode() { };
-  
-  Base *copy(void) const { return new ColNode(*this); };
-  int GetInt(void) const;
-  float GetFloat(void) const;
-  myCol GetCol(void) const;
-  
-  bool operator==(Base const &other) const;
-  bool operator!=(Base const &other) const;
-  bool operator>=(Base const &other) const;
-  bool operator<=(Base const &other) const;
-  bool operator> (Base const &other) const;
-  bool operator< (Base const &other) const;
+    ColNode(BaseExt const &other): BaseExt(other), m_col() { };
+    ColNode(ColNode const &other): BaseExt(other), m_col(other.m_col) { };
+    virtual ~ColNode() { };
+
+    Base *copy(void) const { return new ColNode(*this); };
+    int GetInt(void) const;
+    float GetFloat(void) const;
+    myCol GetCol(void) const;
+
+    bool operator==(Base const &other) const;
+    bool operator!=(Base const &other) const;
+    bool operator>=(Base const &other) const;
+    bool operator<=(Base const &other) const;
+    bool operator> (Base const &other) const;
+    bool operator< (Base const &other) const;
 };
 
 
@@ -472,32 +494,32 @@ public:
 */
 class ColUnary : public BaseExt {
 protected:
-  BasePtr m_child;
+    BasePtr m_child;
 public:
-  ColUnary(BasePtr child) : BaseExt(), m_child(child) { };
-  
-  ColUnary(const ColUnary &other): BaseExt(), m_child(other.m_child->copy()) { };
-  virtual ~ColUnary() { };
-  
-  Base *copy(void) const { return new ColUnary(*this); };
-  
-  int GetInt(void) const;
-  float GetFloat(void) const;
-  myCol GetCol(void) const;
-  
-  bool operator==(Base const &other) const;
-  bool operator!=(Base const &other) const;
-  bool operator>=(Base const &other) const;
-  bool operator<=(Base const &other) const;
-  bool operator> (Base const &other) const;
-  bool operator< (Base const &other) const;
- protected:
-  virtual myCol _operation(void) const {
-    //      return m_child->GetCol();
-    Base *base = m_child->copy();
-    BaseExt const *baseExt = dynamic_cast<BaseExt*>(base);
-    return baseExt->GetCol();
-  };
+    ColUnary(BasePtr child) : BaseExt(), m_child(child) { };
+
+    ColUnary(const ColUnary &other): BaseExt(), m_child(other.m_child->copy()) { };
+    virtual ~ColUnary() { };
+
+    Base *copy(void) const { return new ColUnary(*this); };
+
+    int GetInt(void) const;
+    float GetFloat(void) const;
+    myCol GetCol(void) const;
+
+    bool operator==(Base const &other) const;
+    bool operator!=(Base const &other) const;
+    bool operator>=(Base const &other) const;
+    bool operator<=(Base const &other) const;
+    bool operator> (Base const &other) const;
+    bool operator< (Base const &other) const;
+protected:
+    virtual myCol _operation(void) const {
+        //      return m_child->GetCol();
+        Base *base = m_child->copy();
+        BaseExt const *baseExt = dynamic_cast<BaseExt*>(base);
+        return baseExt->GetCol();
+    };
 };
 
 
@@ -507,19 +529,19 @@ public:
 */
 class ColPickOne : public ColUnary {
 public:
-  ColPickOne(BasePtr child = BasePtr( new Base() ) ) : ColUnary(child) { };
+    ColPickOne(BasePtr child = BasePtr( new Base() ) ) : ColUnary(child) { };
 
-  ColPickOne(const ColPickOne &other): ColUnary(other) { };
-  virtual ~ColPickOne() { };
-  
-  Base *copy(void) const { return new ColPickOne(*this); };
+    ColPickOne(const ColPickOne &other): ColUnary(other) { };
+    virtual ~ColPickOne() { };
+
+    Base *copy(void) const { return new ColPickOne(*this); };
 
 protected:
-  virtual myCol _operation(void) const ;
+    virtual myCol _operation(void) const ;
 };
 
 
-/* 
+/*
    Set
    Intersection: Elements that are both on A and B
    Difference  : Elements that are in A and not B
@@ -537,104 +559,104 @@ protected:
 */
 class ColBinary : public BaseExt {
 protected:
-  BasePtr r_child;
-  BasePtr l_child;
+    BasePtr r_child;
+    BasePtr l_child;
 
 public:
-  ColBinary(BaseExt *r_value = new BaseExt,
-	    BaseExt *l_value = new BaseExt ) : 
-    r_child(r_value),
-    l_child(l_value) 
+    ColBinary(BaseExt *r_value = new BaseExt,
+              BaseExt *l_value = new BaseExt ) :
+            r_child(r_value),
+            l_child(l_value)
     { };
-  ColBinary(BasePtr &r_value,
-	    BasePtr &l_value):
-    r_child(r_value),
-    l_child(l_value) 
+    ColBinary(BasePtr &r_value,
+              BasePtr &l_value):
+            r_child(r_value),
+            l_child(l_value)
     { };
-  ColBinary(const ColBinary &other) : 
-    BaseExt(other),
-    r_child(other.r_child->copy()),
-    l_child(other.l_child->copy())
+    ColBinary(const ColBinary &other) :
+            BaseExt(other),
+            r_child(other.r_child->copy()),
+            l_child(other.l_child->copy())
     { };
-  virtual ~ColBinary() { };
-  
-  Base *copy(void) const { return new ColBinary(*this); };
-  
-  int GetInt(void) const;
-  float GetFloat(void) const;
-  myCol GetCol(void) const;
+    virtual ~ColBinary() { };
 
-  bool operator==(Base const &other) const;
-  bool operator!=(Base const &other) const;
-  bool operator>=(Base const &other) const;
-  bool operator<=(Base const &other) const;
-  bool operator> (Base const &other) const;
-  bool operator< (Base const &other) const;
+    Base *copy(void) const { return new ColBinary(*this); };
+
+    int GetInt(void) const;
+    float GetFloat(void) const;
+    myCol GetCol(void) const;
+
+    bool operator==(Base const &other) const;
+    bool operator!=(Base const &other) const;
+    bool operator>=(Base const &other) const;
+    bool operator<=(Base const &other) const;
+    bool operator> (Base const &other) const;
+    bool operator< (Base const &other) const;
 protected:
-  virtual myCol _operation(void) const;
+    virtual myCol _operation(void) const;
 };
 
 
 
 class ColUnion : public ColBinary {
 public:
-  ColUnion(BaseExt *r_value = new BaseExt,
-	   BaseExt *l_value = new BaseExt ) : 
-    ColBinary(r_value, l_value)
+    ColUnion(BaseExt *r_value = new BaseExt,
+             BaseExt *l_value = new BaseExt ) :
+            ColBinary(r_value, l_value)
     { };
-  ColUnion(BasePtr &r_value,
-	   BasePtr &l_value):
+    ColUnion(BasePtr &r_value,
+             BasePtr &l_value):
     ColBinary(r_value, l_value) { };
-  ColUnion(const ColBinary &other) : 
+    ColUnion(const ColBinary &other) :
     ColBinary(other) { };
-  virtual ~ColUnion() { };
-  
-  Base *copy(void) const { return new ColUnion(*this); };
-  
+    virtual ~ColUnion() { };
+
+    Base *copy(void) const { return new ColUnion(*this); };
+
 protected:
-  myCol _operation(void) const;
+    myCol _operation(void) const;
 };
 
 
 class ColIntersection : public ColBinary {
 
 public:
-  ColIntersection(BaseExt *r_value = new BaseExt,
-		  BaseExt *l_value = new BaseExt ) : 
-    ColBinary(r_value, l_value)
+    ColIntersection(BaseExt *r_value = new BaseExt,
+                    BaseExt *l_value = new BaseExt ) :
+            ColBinary(r_value, l_value)
     { };
-  ColIntersection(BasePtr &r_value,
-		  BasePtr &l_value):
+    ColIntersection(BasePtr &r_value,
+                    BasePtr &l_value):
     ColBinary(r_value, l_value) { };
-  ColIntersection(const ColBinary &other) : 
+    ColIntersection(const ColBinary &other) :
     ColBinary(other) { };
-  virtual ~ColIntersection() { };
-  
-  Base *copy(void) const { return new ColIntersection(*this); };
-        
+    virtual ~ColIntersection() { };
+
+    Base *copy(void) const { return new ColIntersection(*this); };
+
 protected:
-  myCol _operation(void) const;
+    myCol _operation(void) const;
 };
 
 
 
 class ColDifference : public ColBinary {
 public:
-  ColDifference(BaseExt *r_value = new BaseExt,
-		BaseExt *l_value = new BaseExt ) : 
-    ColBinary(r_value, l_value)
+    ColDifference(BaseExt *r_value = new BaseExt,
+                  BaseExt *l_value = new BaseExt ) :
+            ColBinary(r_value, l_value)
     { };
-  ColDifference(BasePtr &r_value,
-		BasePtr &l_value):
+    ColDifference(BasePtr &r_value,
+                  BasePtr &l_value):
     ColBinary(r_value, l_value) { };
-  ColDifference(const ColBinary &other) : 
+    ColDifference(const ColBinary &other) :
     ColBinary(other) { };
-  virtual ~ColDifference() { };
-  
-  Base *copy(void) const { return new ColDifference(*this); };
-  
+    virtual ~ColDifference() { };
+
+    Base *copy(void) const { return new ColDifference(*this); };
+
 protected:
-  myCol _operation(void) const;
+    myCol _operation(void) const;
 };
 
 
