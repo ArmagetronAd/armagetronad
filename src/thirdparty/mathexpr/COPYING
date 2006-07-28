@@ -1,0 +1,46 @@
+From Lucifer:  I emailed the author of the math expression library for
+permission to use it under the GPL, here is the complete exchange that
+gives us permission:
+
+Yann,
+
+I am Dave Fancella with the Armagetron Advanced project, a semi-popular open 
+source game, and we've hit a spot where we'd really like to have an 
+expression parser.  So I googled up yours, and we'd like to integrate it, but 
+I'm concerned about the license.
+
+> This software may not be sold.
+
+> This software or any modified version of it may be freely used in free 
+> programs. The program should include a copy of this whole notice. If you
+> want to use it in a program you sell, contact me  
+
+Armagetron Advanced is available under the GPL, so it has no restrictions on 
+commercial use.  I.e. people can sell it.  And we can't add restrictions 
+because of the way the GPL is setup.  Would it be possible for us to get a 
+slightly more permissive license on your expression parser so that we can use 
+it in our game?
+
+Thanks!
+Dave
+
+
+  Hello,
+
+| I am Dave Fancella with the Armagetron Advanced project, a semi-popular open
+| source game, and we've hit a spot where we'd really like to have an
+| expression parser.  So I googled up yours, and we'd like to integrate it, but
+| I'm concerned about the license.
+
+| because of the way the GPL is setup.  Would it be possible for us to get a
+| slightly more permissive license on your expression parser so that we can use
+| it in our game?
+
+  It is OK tu use my program under a GPL licence. If you need more than my
+unofficial approval I can update the files and put them explicitly under
+GPL.
+
+  Yours,
+
+            Yann
+
