@@ -4177,6 +4177,7 @@ void sg_EnterGameCore( nNetState enter_state ){
             gGame::NetSync();
             se_SyncGameTimer();
             REAL time=se_GameTime();
+			sg_currentGame->StateUpdate();
             if ( time > 0 )
             {
                 // only simulate the objects that have pending events to execute
