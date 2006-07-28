@@ -31,7 +31,7 @@ int main()
 {
 
  // The number that the variable "x" will point to
- double x;
+ float x;
  // Creates a variable named "x" and which value will be x
  RVar xvar ( "x" , &x );
 
@@ -55,7 +55,7 @@ int main()
  RFunction f (op, &xvar); f.SetName("f");
 
  // Creates a second variable named y, and a formula depending on both x and y
- double y;
+ float y;
  RVar yvar ( "y" , &y );
  RVar* vararray2[2]; // table of variables containing the adresses of xvar and yvar
  vararray2[0]=&xvar; vararray2[1]=&yvar;
@@ -74,7 +74,7 @@ int main()
  RFunction g(op2, 2, vararray2); g.SetName("g");
 
  // Here is another way to do it
- double z,t;
+ float z,t;
  RVar zvar("z", &z), tvar("t", &t);
  ROperation op3,zop,top;
  zop=zvar; top=tvar; // constructs, from a variable, the operation returning its value
