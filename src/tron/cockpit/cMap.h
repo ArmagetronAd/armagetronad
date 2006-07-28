@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //! @brief Contains the class for rendering the HUD map
 //!
 //! This file has to stay in src/tron/cockpit or src/tron since
-//! it uses gZone for rendering the zones.
+//! it uses zZone for rendering the zones.
 
 #ifndef ARMAGETRON_CMAP_H
 #define ARMAGETRON_CMAP_H
@@ -43,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ePlayer.h"
 #include <deque>
 
-class gZone;
+class zZone;
 
 namespace cWidget {
 
@@ -52,7 +52,7 @@ class Map : public WithCoordinates {
     static void DrawRimWalls( tList<eWallRim> &list ); //!< Draws all the rim walls
     void DrawWalls(tList<gNetPlayerWall> &list); //!< Draws all player walls
     void DrawCycles(tList<ePlayerNetID> &list, double xscale, double yscale); //!< Draws all cycles as triangles
-    void DrawZones(std::deque<gZone *> const &list); //!< Draws all Zones
+    void DrawZones(std::deque<zZone *> const &list); //!< Draws all Zones
 
     /*
     * rimWalls    draw rim walls?

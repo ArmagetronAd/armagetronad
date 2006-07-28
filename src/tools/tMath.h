@@ -46,4 +46,28 @@ inline bool good( REAL f )
     return finite( f );
 }
 
+static inline bool clamp(REAL &c, REAL min, REAL max){
+     tASSERT(min <= max);
+
+     if (!finite(c))
+     {
+         c = 0;
+         return true;
+     }
+
+     if (c<min)
+     {
+         c = min;
+         return true;
+     }
+
+     if (c>max)
+     {
+         c = max;
+         return true;
+     }
+
+     return false;
+ }
+
 #endif

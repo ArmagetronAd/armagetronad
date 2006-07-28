@@ -38,6 +38,8 @@ class nServerInfo;
 class nServerInfoBase;
 class eTeam;
 class gParser;
+class gArena;
+class ePlayerNetID;
 
 typedef enum{gFREESTYLE,gDUEL,gHUMAN_VS_AI}
 gGameType;
@@ -48,7 +50,7 @@ extern bool      sg_TalkToMaster;  // should this server be known on the interne
 typedef enum{gFINISH_EXPRESS,gFINISH_IMMEDIATELY,gFINISH_SPEEDUP,gFINISH_NORMAL}
 gFinishType;
 
-class gZone;
+class zZone;
 
 //extern gFinishType sg_finishType;
 
@@ -56,7 +58,7 @@ class gGame:public nNetObject{
     unsigned short state;      // the gamestate we are currently in
     unsigned short stateNext; // if a state change has been requested
 
-    tJUST_CONTROLLED_PTR< gZone > winDeathZone_; // the win zone
+    tJUST_CONTROLLED_PTR< zZone > winDeathZone_; // the win zone
 
     bool goon;
 
@@ -88,6 +90,7 @@ public:
     virtual void Verify(); // verifies settings are OK, throws an exception if not.
 
     virtual void StateUpdate(); // switch to new gamestate (does all
+
     // the real work around here).
     virtual void  SetState(unsigned short act,unsigned short next);
     virtual short GetState(){return state;}
@@ -130,6 +133,13 @@ void sg_DeclareWinner( eTeam* team, char const * message );
 
 void sg_FullscreenMessage(tOutput const & title, tOutput const & message,REAL timeout = 60, int client = 0); //!< Displays a message on a specific client or all clients that gets displayed on the whole screen, blocking view to the game
 void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message, REAL timeout = 60 ); //!< Displays a message locally that gets displayed on the whole screen, blocking view to the game
+
+void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p);
+
+// HACK
+gArena * sg_GetArena();
+// END OF HACK
+
 
 class gGameSettings
 {

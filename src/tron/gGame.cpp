@@ -47,7 +47,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rViewport.h"
 #include "uInput.h"
 #include "ePlayer.h"
-#include "gArena.h"
 #include "gSpawn.h"
 #include "uInput.h"
 #include "uInputQueue.h"
@@ -63,7 +62,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gAICharacter.h"
 #include "tDirectories.h"
 #include "gTeam.h"
-#include "gWinZone.h"
+#include "zone/zZone.h"
 #include "eVoter.h"
 #include "tRecorder.h"
 #include "gStatistics.h"
@@ -83,6 +82,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 
 #include "nSocket.h"
+
+#include "gArena.h"
+gArena Arena;
 
 #ifdef KRAWALL_SERVER
 #include "nKrawall.h"
@@ -133,7 +135,7 @@ static tSettingItem<tString> conf_configrotation("CONFIG_ROTATION",configrotatio
 //0 = never, 1 = round, 2 = match
 static int rotationtype = 0;
 static tSettingItem<int> conf_rotationtype("ROTATION_TYPE",rotationtype);
-
+ 
 // bool globalingame=false;
 tString sg_GetCurrentTime( char *szFormat )
 {
@@ -663,10 +665,6 @@ static gCycle *Cycle(int id){
 #endif
 
 #include "rRender.h"
-
-gArena Arena;
-
-
 
 
 
@@ -2629,32 +2627,47 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 
         if ( ( !e || !e->Alive() && e->DeathTime() < time - .5 ) && sn_GetNetState() != nCLIENT )
         {
-            eCoord pos,dir;
-            if ( e )
-            {
-                dir = e->Direction();
-                pos = e->Position();
-                eWallRim::Bound( pos, 1 );
-                eCoord displacement = pos - e->Position();
-                if ( displacement.NormSquared() > .01 )
-                {
-                    dir = displacement;
-                    dir.Normalize();
-                }
-            }
-            else
-                arena.LeastDangerousSpawnPoint()->Spawn( pos, dir );
-#ifdef DEBUG
-            //                std::cout << "spawning player " << pni->name << '\n';
-#endif
-            gCycle * cycle = new gCycle(grid, pos, dir, p, 0);
-            p->ControlObject(cycle);
-
-            sg_Timestamp();
+	  sg_RespawnPlayer(time, grid, &arena, p);
         }
     }
 }
 #endif
+
+void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p) 
+{
+  eGameObject *e=p->Object();
+
+  if ( ( !e || !e->Alive()) && sn_GetNetState() != nCLIENT )
+    {
+      eCoord pos,dir;
+      if ( e )
+	{
+	  dir = e->Direction();
+	  pos = e->Position();
+	  eWallRim::Bound( pos, 1 );
+	  eCoord displacement = pos - e->Position();
+	  if ( displacement.NormSquared() > .01 )
+	    {
+	      dir = displacement;
+	      dir.Normalize();
+	    }
+	}
+      else
+	arena->LeastDangerousSpawnPoint()->Spawn( pos, dir );
+#ifdef DEBUG
+      //                std::cout << "spawning player " << pni->name << '\n';
+#endif
+      gCycle * cycle = new gCycle(grid, pos, dir, p, 0);
+      p->ControlObject(cycle);
+
+      sg_Timestamp();
+    }
+}
+
+gArena * sg_GetArena() {
+  return &Arena;
+}
+
 
 static REAL sg_timestepMax = .2;
 static tSettingItem<REAL> sg_timestepMaxConf( "TIMESTEP_MAX", sg_timestepMax );
@@ -2912,11 +2925,18 @@ void gGame::Analysis(REAL time){
 
     static nVersionFeature winZone(2);
 
+    /*
+***************** ===================== ********************
+HACK
+THIS HAS SIMPLY BEEN DEACTIVATED.
+IT SHOULD BE REACTIVATED WITH THE NEW ZONE CODE
+***************** ===================== ********************
     // activate instant win zone
     if ( winZone.Supported() && !bool( winDeathZone_ ) && winner == 0 && time - lastdeath > sg_currentSettings->winZoneMinLastDeath && time > sg_currentSettings->winZoneMinRoundTime )
     {
         winDeathZone_ = sg_CreateWinDeathZone( grid, Arena.GetRandomPos( sg_winZoneRandomness ) );
     }
+*/
 
     bool holdBackNextRound = false;
 

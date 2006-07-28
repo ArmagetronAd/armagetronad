@@ -4,7 +4,7 @@
 <!ATTLIST Resource
        type (aamap) "aamap" 
        name CDATA #REQUIRED
-       version CDATA "1.0"
+       version CDATA #REQUIRED
        author CDATA "Anonymous"
        category CDATA "unsorted"
        comissioner CDATA #IMPLIED
@@ -61,4 +61,3 @@
 <!ELEMENT ShapeCircle (Point)>
 <!ATTLIST ShapeCircle radius CDATA #REQUIRED>
 <!ATTLIST ShapeCircle growth CDATA "0.0">
-

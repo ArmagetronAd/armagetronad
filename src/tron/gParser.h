@@ -5,12 +5,16 @@
 #include "defs.h"
 #include "tXmlParser.h"
 #include "eCoord.h"
+#include "tValue.h"
 
 class eGrid;
 class gArena;
 class ePoint;
 class gGame;
 class gWallRim;
+
+#include "zone/zZone.h"
+#include "zone/zMisc.h"
 
 /*
 Note to the reader: In the full World idea, the parser should, 
@@ -44,6 +48,7 @@ protected:
     int myxmlGetPropInt(xmlNodePtr cur, const char *name);
     float myxmlGetPropFloat(xmlNodePtr cur, const char *name);
     bool myxmlGetPropBool(xmlNodePtr cur, const char *name);
+    Triad myxmlGetPropTriad(xmlNodePtr cur, const char *name);
     void myxmlGetDirection(xmlNodePtr cur, float &x, float &y);
 
     //    bool isElement(const xmlChar *elementName, const xmlChar *searchedElement);
@@ -62,7 +67,18 @@ protected:
     void parseZone(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
-    bool parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float &radius, float &growth, const xmlChar * keyword);
+    rColor parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
+
+    void parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float &radius, float &growth, rColor &color, const xmlChar * keyword);
+    void                 parseMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
+
+    zEffectGroupPtr      parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
+    zMonitorInfluencePtr parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
+    zEffectorPtr         parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
+    zSelectorPtr         parseZoneEffectGroupSelector(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
+    zValidatorPtr        parseZoneEffectGroupValidator(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
+    zZoneInfluencePtr    parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
+
 
     void parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseWorld(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword = NULL);

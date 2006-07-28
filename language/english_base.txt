@@ -300,6 +300,7 @@ color_r_help			Cycle and wall colour, red component.
 
 history_size_console_help    Number of lines kept in the console history.
 history_size_chat_help       Number of lines kept in the chat history.
+enable_name_hilighting_help  Hilight your name in chats other players send?
 
 #********************************************
 #********************************************
@@ -559,37 +560,9 @@ white_sparks_help        Draw sparks in white (instead of cycle colors).
 keep_window_active_help  Keeps rendering active when the program window loses input focus.
 
 # hud
-show_brake_help                   Show the brake meter on the HUD? 
-show_alive_help                   Show the number of enemies and friends left on the HUD? 
-show_fastest_help                 Show the fastest player on the HUD? 
-show_hud_help                     Show the HUD? 
-show_ping_help                    Show your ping on the HUD? 
-show_rubber_help                  Show the rubber meter on the HUD? 
-show_score_help                   Show your single player scores on the HUD? 
-show_speed_help                   Show the speed meter on the HUD? 
-show_time_help                    Show the current time in the top- right corner? 
-show_time_24_help                 Show the time in 24 hour format? 
-speed_gauge_locx_help             Horizontal position of the speed meter 
-speed_gauge_locy_help             Vertical position of the speed meter 
-speed_gauge_size_help             Size of the speed meter 
-rubber_gauge_locx_help            Horizontal position of the rubber meter 
-rubber_gauge_locy_help            Vertical position of the rubber meter 
-rubber_gauge_size_help            Size of the rubber meter 
-brake_gauge_locx_help             Horizontal position of the brake meter 
-brake_gauge_locy_help             Vertical position of the brake meter 
-brake_gauge_size_help             Size of the brake meter 
-alive_locx_help                   Horizontal position of the alive headcount display
-alive_locy_help                   Vertical position of the alive headcount display
-alive_size_help                   Size of the alive headcount display
-fastest_locx_help                 Horizontal position of the fastest player display
-fastest_locy_help                 Vertical position of the fastest player display
-fastest_size_help                 Size of the fastest player display
-ping_locx_help                    Horizontal position of the ping display
-ping_locy_help                    Vertical position of the ping display
-ping_size_help                    Size of the ping display
-score_locx_help                   Horizontal position of the score display
-score_locy_help                   Vertical position of the score display
-score_size_help                   Size of the score display
+cockpit_file_help                 File that contains the information for rendering cockpit gauges
+forbid_hud_map                    Disallow clients to display the HUD minimap?
+forbid_cockpit_data_help          Colon- separated list of cockpit data sources clients aren't allowed to use in the cockpit
 cm_locy_help                      Vertical position of the center messages
 
 #floor

@@ -442,30 +442,6 @@ static nSettingItemWatched<REAL> c_tt( "CYCLE_TIME_TOLERANCE",
 static int sg_cycleMaxRefCount = 30000;
 static tSettingItem<int> conf_sgCycleMaxRefCount ("CYCLE_MAX_REFCOUNT", sg_cycleMaxRefCount );
 
-static inline bool clamp(REAL &c, REAL min, REAL max){
-    tASSERT(min <= max);
-
-    if (!finite(c))
-    {
-        c = 0;
-        return true;
-    }
-
-    if (c<min)
-    {
-        c = min;
-        return true;
-    }
-
-    if (c>max)
-    {
-        c = max;
-        return true;
-    }
-
-    return false;
-}
-
 // *******************************************************************************************
 // *
 // *	gCycleMovement

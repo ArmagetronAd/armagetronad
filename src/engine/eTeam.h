@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ePlayer.h"
 #include "nNetObject.h"
 #include "tList.h"
+#include <vector>
 
 
 template<class T> class nConfItem;
@@ -113,6 +114,15 @@ public:												// public methods
     // player inquiry
     int	 			NumPlayers		(		) const { return players.Len(); }	// total number of players
     ePlayerNetID*	Player			( int i ) const { return players(i); 	}	// player of index i
+    // Export a list of pointers to all the players in this team
+    std::vector < ePlayerNetID * > 	GetAllMembers () const {
+        std::vector <ePlayerNetID *> tmp;
+        for (int i=0; i<players.Len(); i++) {
+            tmp.push_back( players(i) );
+        }
+        return tmp;
+    }
+
 
     int	 			NumHumanPlayers	(		) const; 							// number of human players
     int	 			NumAIPlayers	(		) const; 							// number of human players

@@ -246,20 +246,6 @@ static tSettingItem<float> conf_smoothMinSpeed ("CYCLE_SMOOTH_MIN_SPEED", sg_cyc
 static float sg_cycleSyncSmoothThreshold = .2f;
 static tSettingItem<float> conf_smoothThreshold ("CYCLE_SMOOTH_THRESHOLD", sg_cycleSyncSmoothThreshold);
 
-static inline void clamp(REAL &c, REAL min, REAL max){
-    tASSERT(min < max);
-
-    if (!finite(c))
-        c = 0;
-
-    if (c<min)
-        c = min;
-
-    if (c>max)
-        c = max;
-}
-
-
 REAL		gCycle::wallsStayUpDelay=8.0f;	// the time the cycle walls stay up ( negative values: they stay up forever )
 
 REAL		gCycle::wallsLength=-1.0f;		// the maximum total length of the walls

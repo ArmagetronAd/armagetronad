@@ -110,7 +110,16 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/gMenus.cpp tron/gMenus.h tron/gParser.cpp tron/gParser.h tron/gParticles.cpp tron/gParticles.h\
 	tron/gSensor.cpp tron/gSensor.h tron/gServerBrowser.cpp tron/gServerBrowser.h tron/gSparks.cpp tron/gSparks.h\
 	tron/gSpawn.cpp tron/gSpawn.h tron/gStuff.cpp tron/gStuff.h tron/gTeam.cpp tron/gTeam.h tron/gWall.cpp\
-	tron/gWall.h tron/gWinZone.cpp tron/gWinZone.h\
+	tron/gWall.h\
+	tron/zone/zZone.cpp        tron/zone/zZone.h\
+	tron/zone/zMonitor.h       tron/zone/zMonitor.cpp\
+	tron/zone/zEffectGroup.cpp tron/zone/zEffectGroup.h\
+	tron/zone/zMisc.h\
+	tron/zone/zValidator.h     tron/zone/zValidator.cpp\
+	tron/zone/zSelector.h      tron/zone/zSelector.cpp\
+	tron/zone/zEffector.h      tron/zone/zEffector.cpp\
+	tron/zone/zZoneInfluence.h tron/zone/zZoneInfluence.cpp\
+	tron/tFunction.h tron/tFunction.cpp\
 	tron/gServerFavorites.h tron/gServerFavorites.cpp\
 	tron/gStatistics.h tron/gStatistics.cpp\
 	tron/gStatList.h tron/gStatList.cpp\

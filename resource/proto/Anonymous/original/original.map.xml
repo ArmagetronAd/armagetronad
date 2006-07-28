@@ -1,38 +1,172 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE Resource SYSTEM "map.dtd">
-<Resource type="aamap" name="square" version="1.0.1" author="Anonymous" category="polygon/regular">
-	<Map version="2">
-		<!-- The original square map, technically created by z-man.
-	         Converted to XML by philippeqc.
-	         License: Public Domain. Do with it what you want.
+<!DOCTYPE Resource SYSTEM "map-0.2.8_beta3.dtd">
+<Resource type="aamap" name="square" version="1.0.2" author="Anonymous" category="polygon/regular">
+  <Map version="2">
+    <!-- The original square map, technically created by z-man.
+           Converted to XML by philippeqc.
+           License: Public Domain. Do with it what you want.
         -->
 
-		<World>
-			<Field>
-				<Spawn	x="255"	y="50"	xdir="0"	ydir="1"	/>
-				<Spawn	x="245"	y="450"	xdir="0"	ydir="-1"	/>
-				<Spawn	x="50"	y="245"	xdir="1"	ydir="0"	/>
-				<Spawn	x="450"	y="255"	xdir="-1"	ydir="0"	/>
+    <World>
+      <Field>
+        <Spawn  x="50"  y="245"  xdir="1"  ydir="0"  />
+        <Spawn  x="450"  y="255"  xdir="-1"  ydir="0"  />
 
-				<Spawn	x="305"	y="100"	xdir="0"	ydir="1"	/>
-				<Spawn	x="195"	y="400"	xdir="0"	ydir="-1"	/>
-				<Spawn	x="100"	y="195"	xdir="1"	ydir="0"	/>
-				<Spawn	x="400"	y="305"	xdir="-1"	ydir="0"	/>
+        <Wall>
+          <Point  x="0"  y="0"  />
+          <Point  x="0"  y="500"  />
+          <Point  x="500"  y="500"  />
+          <Point  x="500"  y="0"  />
+          <Point  x="0"  y="0"  />
+        </Wall>
+        <Monitor name="N" init="0.0" drift="-0.1" >
+          <OnBetween min="0" max="0.99">
+	    <ZoneInfluence name="A">
+              <Rotation speed="" acceleration="" />
+              <Radius radius="" />
+              <Position x="" y="" />
+	    </ZoneInfluence>
+          </OnBetween>
+	  <OnOver value="1">
+            <EffectGroup owners="" teamOwners="" > 
+	      <User asdf="all">
+                <Target fdsa="self">
+	          <Effect ijkl="point" count="2" score="7"/>
+                </Target>
+                <MonitorInfluence name="N" influence="3.3" marked="true"/> <!-- NEW -->
+	      </User>
+	    </EffectGroup>
 
-				<Spawn	x="205"	y="100"	xdir="0"	ydir="1"	/>
-				<Spawn	x="295"	y="400"	xdir="0"	ydir="-1"	/>
-				<Spawn	x="100"	y="295"	xdir="1"	ydir="0"	/>
-				<Spawn	x="400"	y="205"	xdir="-1"	ydir="0"	/>
+	    <!-- Reward any Red defender -->
+<!--
+            <EffectGroup owners="" teamOwners="Red"> 
+	      <User asdf="ownerTeam">
+                <Target fdsa="self">
+	          <Effect ijkl="point" score="8"/>
+                </Target>
+	      </User>
+	    </EffectGroup>
+-->	  
+	    <!-- Kill a Red member for every person contributing to the monitor -->
+<!--
+            <EffectGroup owners="" teamOwners="Red"> 
+	      <User asdf="all" positive="true" marked="ignore"> 
+                <Target fdsa="ownerTeamTeammate"> 
+	          <Effect ijkl="death" />
+                </Target>
+	      </User>
+	    </EffectGroup>
+-->
+	    <!-- Reward the team blue for taking it -->
+<!--
+            <EffectGroup owners="" teamOwners="Blue" > 
+	      <User asdf="all">
+                <Target fdsa="team">
+	          <Effect ijkl="point" count="1" score="9"/>
+                </Target>
+	      </User>
+	    </EffectGroup>
+-->
+	  </OnOver>
+        </Monitor>
+	<Zone>
+          <ShapeCircle radius="75" red="0.0" green="0.0" blue="0.5">
+            <Point x="450" y="50"/>
+          </ShapeCircle>
 
-				<Wall>
-					<Point	x="0"	y="0"	/>
-					<Point	x="0"	y="500"	/>
-					<Point	x="500"	y="500"	/>
-					<Point	x="500"	y="0"	/>
-					<Point	x="0"	y="0"	/>
-				</Wall>
-			</Field>
-		</World>
-	</Map>
+<!--
+	  <Enter>
+            <EffectGroup owners="Word,Gcc,Excel,Notepad" teamOwners=""> 
+	      <User asdf="owner">
+                <Target fdsa="teammate">
+	          <Effect ijkl="death" />
+                </Target>
+	      </User>
+	    </EffectGroup>
+	  </Enter>
+-->
+	  <Inside>
+            <EffectGroup owners="" teamOwners="">
+              <User asdf="all">
+                <MonitorInfluence name="N" influence="3.3" marked="true"/>
+  	      </User>
+  	    </EffectGroup>
+	  </Inside>
+	</Zone>
+
+        <Zone>
+          <ShapeCircle radius="20" red="1.0" green="0.0" blue="0.0">
+            <Point x="50" y="50"/>
+          </ShapeCircle>
+
+	  <Enter>
+<!--
+            <EffectGroup owners="ph" teamOwners="">
+  	      <User asdf="owner">
+                <Target fdsa="self">
+                  <Effect ijkl="win" />
+                </Target>
+  	      </User>
+  	    </EffectGroup>
+-->
+            <EffectGroup owners="ph" teamOwners=""> 
+              <User asdf="allButOwner"> 
+                <Target fdsa="another"> 
+                  <Effect ijkl="death" />
+                </Target>   
+  	      </User>
+            </EffectGroup>
+	  </Enter>
+        </Zone> 
+      </Field>
+    </World>
+  </Map>
 </Resource>
 
+<!--
+
+alice blue 	
+azure
+blue
+cerulean
+cerulean blue
+cobalt
+cornflower blue
+dark blue
+denim
+dodger blue
+indigo
+international klein blue
+lavender
+midnight blue
+navy blue
+periwinkle
+persian blue
+powder blue
+prussian blue
+royal blue
+sapphire
+steel blue
+ultramarine
+
+Alizarin
+Burgundy
+Cardinal
+Carmine
+Cerise
+Chestnut
+Crimson
+Falu red
+Fuchsia
+Magenta
+Maroon
+Mauve
+Red
+Red-violet
+Rust
+Puce
+Sangria
+Scarlet
+Terra cotta
+Vermilion
+-->

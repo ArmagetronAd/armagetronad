@@ -32,7 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "rRender.h"
 #include "rScreen.h"
-#include "gWinZone.h"
+#include "zone/zZone.h"
 #include "eRectangle.h"
 #include "ePlayer.h"
 #include "eTimer.h"
@@ -43,7 +43,7 @@ static nSettingItem<bool> fcs("FORBID_HUD_MAP", stc_forbidHudMap);
 
 #ifndef DEDICATED
 
-extern std::deque<gZone *> sg_Zones;
+extern std::deque<zZone *> sg_Zones;
 
 namespace cWidget {
 
@@ -207,9 +207,8 @@ void Map::DrawCycles(tList<ePlayerNetID> &list, double xscale, double yscale) {
     }
 }
 
-void Map::DrawZones(std::deque<gZone *> const &list) {
-    if (list.empty()) return;
-    for(std::deque<gZone *>::const_iterator i = list.begin(); i != list.end(); ++i) {
+void Map::DrawZones(std::deque<zZone *> const &list) {
+    for(std::deque<zZone *>::const_iterator i = list.begin(); i != list.end(); ++i) {
         tASSERT(*i);
         tCoord const &rotation = (*i)->GetRotation();
         tCoord const &position = (*i)->GetPosition();
