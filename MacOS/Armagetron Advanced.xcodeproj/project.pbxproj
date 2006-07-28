@@ -206,7 +206,6 @@
 		8CBA5FD2089EEC7E007E21DC /* gStuff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EEC089EEC7D007E21DC /* gStuff.cpp */; };
 		8CBA5FD4089EEC7E007E21DC /* gTeam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EEE089EEC7D007E21DC /* gTeam.cpp */; };
 		8CBA5FD6089EEC7E007E21DC /* gWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EF0089EEC7D007E21DC /* gWall.cpp */; };
-		8CBA5FD8089EEC7E007E21DC /* gWinZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EF2089EEC7D007E21DC /* gWinZone.cpp */; };
 		8CBA5FDB089EEC7E007E21DC /* uInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EF6089EEC7D007E21DC /* uInput.cpp */; };
 		8CBA5FDD089EEC7E007E21DC /* uInputQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EF8089EEC7E007E21DC /* uInputQueue.cpp */; };
 		8CBA5FDF089EEC7E007E21DC /* uMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EFA089EEC7E007E21DC /* uMenu.cpp */; };
@@ -235,6 +234,24 @@
 		9B1EA5410A20BC0100FA3478 /* gRotation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B1EA53B0A20BC0100FA3478 /* gRotation.cpp */; };
 		9B26D98E0A64AE5400F9864B /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B26D98C0A64AE5400F9864B /* eLagCompensation.cpp */; };
 		9B26D9900A64AE5500F9864B /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B26D98C0A64AE5400F9864B /* eLagCompensation.cpp */; };
+		9B4A19D20A7A90620070BE82 /* zEffectGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C20A7A90620070BE82 /* zEffectGroup.cpp */; };
+		9B4A19D40A7A90620070BE82 /* zEffector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C40A7A90620070BE82 /* zEffector.cpp */; };
+		9B4A19D70A7A90620070BE82 /* zMonitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C70A7A90620070BE82 /* zMonitor.cpp */; };
+		9B4A19D90A7A90620070BE82 /* zSelector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C90A7A90620070BE82 /* zSelector.cpp */; };
+		9B4A19DB0A7A90620070BE82 /* zValidator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19CB0A7A90620070BE82 /* zValidator.cpp */; };
+		9B4A19DD0A7A90620070BE82 /* zZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19CD0A7A90620070BE82 /* zZone.cpp */; };
+		9B4A19DF0A7A90620070BE82 /* zZoneInfluence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19CF0A7A90620070BE82 /* zZoneInfluence.cpp */; };
+		9B4A19E10A7A90620070BE82 /* zEffectGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C20A7A90620070BE82 /* zEffectGroup.cpp */; };
+		9B4A19E20A7A90620070BE82 /* zEffector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C40A7A90620070BE82 /* zEffector.cpp */; };
+		9B4A19E30A7A90620070BE82 /* zMonitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C70A7A90620070BE82 /* zMonitor.cpp */; };
+		9B4A19E40A7A90620070BE82 /* zSelector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C90A7A90620070BE82 /* zSelector.cpp */; };
+		9B4A19E50A7A90620070BE82 /* zValidator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19CB0A7A90620070BE82 /* zValidator.cpp */; };
+		9B4A19E60A7A90620070BE82 /* zZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19CD0A7A90620070BE82 /* zZone.cpp */; };
+		9B4A19E70A7A90620070BE82 /* zZoneInfluence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19CF0A7A90620070BE82 /* zZoneInfluence.cpp */; };
+		9B4A19FE0A7A93950070BE82 /* tFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19FC0A7A93950070BE82 /* tFunction.cpp */; };
+		9B4A1A000A7A93950070BE82 /* tFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19FC0A7A93950070BE82 /* tFunction.cpp */; };
+		9B4A1A280A7A95890070BE82 /* mathexpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A1A210A7A95890070BE82 /* mathexpr.cpp */; };
+		9B4A1A2E0A7A95890070BE82 /* mathexpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A1A210A7A95890070BE82 /* mathexpr.cpp */; };
 		9BD7D9720A2C7CB400D7033C /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96B0A2C7CB400D7033C /* libfreetype.a */; };
 		9BD7D9730A2C7CB400D7033C /* libftgl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96C0A2C7CB400D7033C /* libftgl.a */; };
 		9BD7D9740A2C7CB400D7033C /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96D0A2C7CB400D7033C /* libpng.framework */; };
@@ -517,6 +534,27 @@
 		9B1EA53C0A20BC0100FA3478 /* gRotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gRotation.h; sourceTree = "<group>"; };
 		9B26D98C0A64AE5400F9864B /* eLagCompensation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eLagCompensation.cpp; sourceTree = "<group>"; };
 		9B26D98D0A64AE5400F9864B /* eLagCompensation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eLagCompensation.h; sourceTree = "<group>"; };
+		9B4A19C10A7A90620070BE82 /* shapeCircle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shapeCircle.h; sourceTree = "<group>"; };
+		9B4A19C20A7A90620070BE82 /* zEffectGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zEffectGroup.cpp; sourceTree = "<group>"; };
+		9B4A19C30A7A90620070BE82 /* zEffectGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zEffectGroup.h; sourceTree = "<group>"; };
+		9B4A19C40A7A90620070BE82 /* zEffector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zEffector.cpp; sourceTree = "<group>"; };
+		9B4A19C50A7A90620070BE82 /* zEffector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zEffector.h; sourceTree = "<group>"; };
+		9B4A19C60A7A90620070BE82 /* zMisc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zMisc.h; sourceTree = "<group>"; };
+		9B4A19C70A7A90620070BE82 /* zMonitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zMonitor.cpp; sourceTree = "<group>"; };
+		9B4A19C80A7A90620070BE82 /* zMonitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zMonitor.h; sourceTree = "<group>"; };
+		9B4A19C90A7A90620070BE82 /* zSelector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zSelector.cpp; sourceTree = "<group>"; };
+		9B4A19CA0A7A90620070BE82 /* zSelector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zSelector.h; sourceTree = "<group>"; };
+		9B4A19CB0A7A90620070BE82 /* zValidator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zValidator.cpp; sourceTree = "<group>"; };
+		9B4A19CC0A7A90620070BE82 /* zValidator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zValidator.h; sourceTree = "<group>"; };
+		9B4A19CD0A7A90620070BE82 /* zZone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zZone.cpp; sourceTree = "<group>"; };
+		9B4A19CE0A7A90620070BE82 /* zZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zZone.h; sourceTree = "<group>"; };
+		9B4A19CF0A7A90620070BE82 /* zZoneInfluence.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zZoneInfluence.cpp; sourceTree = "<group>"; };
+		9B4A19D00A7A90620070BE82 /* zZoneInfluence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zZoneInfluence.h; sourceTree = "<group>"; };
+		9B4A19FA0A7A931B0070BE82 /* gVectorExtra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gVectorExtra.h; sourceTree = "<group>"; };
+		9B4A19FC0A7A93950070BE82 /* tFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tFunction.cpp; sourceTree = "<group>"; };
+		9B4A19FD0A7A93950070BE82 /* tFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tFunction.h; sourceTree = "<group>"; };
+		9B4A1A210A7A95890070BE82 /* mathexpr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mathexpr.cpp; sourceTree = "<group>"; };
+		9B4A1A220A7A95890070BE82 /* mathexpr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mathexpr.h; sourceTree = "<group>"; };
 		9B86E63A0A2DFDA600D90F1C /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config_common.h; path = ../src/macosx/config_common.h; sourceTree = SOURCE_ROOT; };
 		9BD7D96B0A2C7CB400D7033C /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libfreetype.a; sourceTree = "<absolute>"; };
 		9BD7D96C0A2C7CB400D7033C /* libftgl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libftgl.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libftgl.a; sourceTree = "<absolute>"; };
@@ -757,6 +795,7 @@
 			isa = PBXGroup;
 			children = (
 				9BD7DAA50A2C87FA00D7033C /* shttpd */,
+				9B4A1A1D0A7A95890070BE82 /* mathexpr */,
 			);
 			name = thirdparty;
 			path = ../src/thirdparty;
@@ -889,10 +928,14 @@
 				8CBA5EED089EEC7D007E21DC /* gStuff.h */,
 				8CBA5EEE089EEC7D007E21DC /* gTeam.cpp */,
 				8CBA5EEF089EEC7D007E21DC /* gTeam.h */,
+				9B4A19FA0A7A931B0070BE82 /* gVectorExtra.h */,
 				8CBA5EF0089EEC7D007E21DC /* gWall.cpp */,
 				8CBA5EF1089EEC7D007E21DC /* gWall.h */,
 				8CBA5EF2089EEC7D007E21DC /* gWinZone.cpp */,
 				8CBA5EF3089EEC7D007E21DC /* gWinZone.h */,
+				9B4A19FC0A7A93950070BE82 /* tFunction.cpp */,
+				9B4A19FD0A7A93950070BE82 /* tFunction.h */,
+				9B4A19C00A7A90620070BE82 /* zone */,
 			);
 			name = tron;
 			path = ../src/tron;
@@ -931,6 +974,38 @@
 				9B1EA47A0A20B20200FA3478 /* cWidgetBase.h */,
 			);
 			path = cockpit;
+			sourceTree = "<group>";
+		};
+		9B4A19C00A7A90620070BE82 /* zone */ = {
+			isa = PBXGroup;
+			children = (
+				9B4A19C10A7A90620070BE82 /* shapeCircle.h */,
+				9B4A19C20A7A90620070BE82 /* zEffectGroup.cpp */,
+				9B4A19C30A7A90620070BE82 /* zEffectGroup.h */,
+				9B4A19C40A7A90620070BE82 /* zEffector.cpp */,
+				9B4A19C50A7A90620070BE82 /* zEffector.h */,
+				9B4A19C60A7A90620070BE82 /* zMisc.h */,
+				9B4A19C70A7A90620070BE82 /* zMonitor.cpp */,
+				9B4A19C80A7A90620070BE82 /* zMonitor.h */,
+				9B4A19C90A7A90620070BE82 /* zSelector.cpp */,
+				9B4A19CA0A7A90620070BE82 /* zSelector.h */,
+				9B4A19CB0A7A90620070BE82 /* zValidator.cpp */,
+				9B4A19CC0A7A90620070BE82 /* zValidator.h */,
+				9B4A19CD0A7A90620070BE82 /* zZone.cpp */,
+				9B4A19CE0A7A90620070BE82 /* zZone.h */,
+				9B4A19CF0A7A90620070BE82 /* zZoneInfluence.cpp */,
+				9B4A19D00A7A90620070BE82 /* zZoneInfluence.h */,
+			);
+			path = zone;
+			sourceTree = "<group>";
+		};
+		9B4A1A1D0A7A95890070BE82 /* mathexpr */ = {
+			isa = PBXGroup;
+			children = (
+				9B4A1A210A7A95890070BE82 /* mathexpr.cpp */,
+				9B4A1A220A7A95890070BE82 /* mathexpr.h */,
+			);
+			path = mathexpr;
 			sourceTree = "<group>";
 		};
 		9BD7D9680A2C7C7800D7033C /* Armagetron Advanced */ = {
@@ -1264,6 +1339,15 @@
 				9B1EA52B0A20BB0900FA3478 /* rGradient.cpp in Sources */,
 				9B1EA5410A20BC0100FA3478 /* gRotation.cpp in Sources */,
 				9B26D9900A64AE5500F9864B /* eLagCompensation.cpp in Sources */,
+				9B4A19E10A7A90620070BE82 /* zEffectGroup.cpp in Sources */,
+				9B4A19E20A7A90620070BE82 /* zEffector.cpp in Sources */,
+				9B4A19E30A7A90620070BE82 /* zMonitor.cpp in Sources */,
+				9B4A19E40A7A90620070BE82 /* zSelector.cpp in Sources */,
+				9B4A19E50A7A90620070BE82 /* zValidator.cpp in Sources */,
+				9B4A19E60A7A90620070BE82 /* zZone.cpp in Sources */,
+				9B4A19E70A7A90620070BE82 /* zZoneInfluence.cpp in Sources */,
+				9B4A1A000A7A93950070BE82 /* tFunction.cpp in Sources */,
+				9B4A1A2E0A7A95890070BE82 /* mathexpr.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1358,7 +1442,6 @@
 				8CBA5FD2089EEC7E007E21DC /* gStuff.cpp in Sources */,
 				8CBA5FD4089EEC7E007E21DC /* gTeam.cpp in Sources */,
 				8CBA5FD6089EEC7E007E21DC /* gWall.cpp in Sources */,
-				8CBA5FD8089EEC7E007E21DC /* gWinZone.cpp in Sources */,
 				8CBA5FDB089EEC7E007E21DC /* uInput.cpp in Sources */,
 				8CBA5FDD089EEC7E007E21DC /* uInputQueue.cpp in Sources */,
 				8CBA5FDF089EEC7E007E21DC /* uMenu.cpp in Sources */,
@@ -1388,6 +1471,15 @@
 				9BFF72EA0A32238500F471CD /* eChannelSDLMixer.cpp in Sources */,
 				9BFF72EC0A32238500F471CD /* eMusicTrackSDLMixer.cpp in Sources */,
 				9B26D98E0A64AE5400F9864B /* eLagCompensation.cpp in Sources */,
+				9B4A19D20A7A90620070BE82 /* zEffectGroup.cpp in Sources */,
+				9B4A19D40A7A90620070BE82 /* zEffector.cpp in Sources */,
+				9B4A19D70A7A90620070BE82 /* zMonitor.cpp in Sources */,
+				9B4A19D90A7A90620070BE82 /* zSelector.cpp in Sources */,
+				9B4A19DB0A7A90620070BE82 /* zValidator.cpp in Sources */,
+				9B4A19DD0A7A90620070BE82 /* zZone.cpp in Sources */,
+				9B4A19DF0A7A90620070BE82 /* zZoneInfluence.cpp in Sources */,
+				9B4A19FE0A7A93950070BE82 /* tFunction.cpp in Sources */,
+				9B4A1A280A7A95890070BE82 /* mathexpr.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1470,6 +1562,7 @@
 				ARCHS = "$(NATIVE_ARCH)";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/current;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -1527,6 +1620,7 @@
 				);
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/current;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
@@ -1613,6 +1707,7 @@
 				ARCHS = "${NATIVE_ARCH}";
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/current;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;

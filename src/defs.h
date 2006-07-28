@@ -119,4 +119,12 @@ inline bool isblank(int x){ return ((x == ' ') || (x == '\t')); }
 //#include <>
 #endif
 
+#ifndef HAVE_POW10
+inline double pow10(double y) throw() { return pow(10.0, y); }
+#endif
+
+#ifndef HAVE_POW10F
+inline float pow10f(float y) throw() { return powf(10.0, y); }
+#endif
+
 #endif

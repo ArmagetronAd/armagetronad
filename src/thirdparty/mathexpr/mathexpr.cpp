@@ -19,7 +19,8 @@ This software comes with absolutely no warranty.
 
 */
 
-#include"mathexpr.h"
+#include "mathexpr.h"
+#include "defs.h"
 
 char* MidStr(const char*s,int i1,int i2)
 {
