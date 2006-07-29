@@ -104,14 +104,14 @@ inline void zZone::SetFunctionNow( tFunction & f, REAL value ) const
 //!
 // *******************************************************************************
 zZone::zZone( eGrid * grid )
-        :eNetGameObject( grid, eCoord(0,0), eCoord(0,0), NULL, true ), 
-	 rotation_(1,0),
-	 effectGroupEnter(),
-	 effectGroupInside(),
-	 effectGroupLeave(),
-	 effectGroupOutside(),
-	 playersInside(),
-	 playersOutside()
+        :eNetGameObject( grid, eCoord(0,0), eCoord(0,0), NULL, true ),
+        rotation_(1,0),
+        effectGroupEnter(),
+        effectGroupInside(),
+        effectGroupLeave(),
+        effectGroupOutside(),
+        playersInside(),
+        playersOutside()
 {
     // store creation time
     referenceTime_ = createTime_ = lastTime = 0;
@@ -138,9 +138,9 @@ zZone::zZone( eGrid * grid )
 // *******************************************************************************
 
 zZone::zZone( nMessage & m )
-  :eNetGameObject( m ), rotation_(1,0),
-   playersInside(),
-   playersOutside()
+        :eNetGameObject( m ), rotation_(1,0),
+        playersInside(),
+        playersOutside()
 {
     // read creation time
     m >> createTime_;
@@ -171,15 +171,24 @@ zZone::zZone( nMessage & m )
 
 zZone::~zZone( void )
 {
-    sg_Zones.erase(
+    RemoveFromZoneList();
+}
+
+void zZone::RemoveFromGame(void) {
+    RemoveFromZoneList();
+}
+
+void zZone::RemoveFromZoneList(void) {
+    std::deque<zZone *>::iterator pos_found =
         std::find_if(
             sg_Zones.begin(),
             sg_Zones.end(),
             std::bind2nd(
                 std::equal_to<zZone *>(),
                 this)
-        )
-    );
+        );
+    if(pos_found != sg_Zones.end())
+        sg_Zones.erase(pos_found);
 }
 
 // *******************************************************************************
@@ -352,40 +361,40 @@ void zZone::InteractWith( eGameObject * target, REAL time, int recursion )
     if ( prey )
     {
         REAL r = this->Radius();
-	if ( prey->Player() && prey->Alive() )
-	  {
-	    // Is the player inside or outside the zone
-	    if ( ( prey->Position() - this->Position() ).NormSquared() < r*r )
-	      {
-		// If the player is not on the "inside" list, then he was outside
-		std::set<ePlayerNetID *>::iterator iter;
-		std::set<ePlayerNetID *>::iterator iterEnd;
-		ePlayerNetID * aaa = prey->Player();
-		iter = playersInside.find(aaa) ;
-		iterEnd = playersInside.end();
-		if ((iter = playersInside.find(prey->Player()) ) == playersInside.end()) {
-		  playersInside.insert(prey->Player());
-		  // Passing from outside to inside triggers the OnEnter event
-		  OnEnter( prey, time );
-		  // The player is no longer outside
-		  playersOutside.erase(prey->Player());
-		}
-		// Being inside gives the OnInside event
-		OnInside( prey, time );
+        if ( prey->Player() && prey->Alive() )
+        {
+            // Is the player inside or outside the zone
+            if ( ( prey->Position() - this->Position() ).NormSquared() < r*r )
+            {
+                // If the player is not on the "inside" list, then he was outside
+                std::set<ePlayerNetID *>::iterator iter;
+                std::set<ePlayerNetID *>::iterator iterEnd;
+                ePlayerNetID * aaa = prey->Player();
+                iter = playersInside.find(aaa) ;
+                iterEnd = playersInside.end();
+                if ((iter = playersInside.find(prey->Player()) ) == playersInside.end()) {
+                    playersInside.insert(prey->Player());
+                    // Passing from outside to inside triggers the OnEnter event
+                    OnEnter( prey, time );
+                    // The player is no longer outside
+                    playersOutside.erase(prey->Player());
+                }
+                // Being inside gives the OnInside event
+                OnInside( prey, time );
             }
-	    else {
-		// If the player is not on the "outside" list, then he was inside
-		std::set<ePlayerNetID *>::iterator iter;
-		if ((iter = playersOutside.find(prey->Player())) == playersOutside.end()) {
-		  playersOutside.insert(prey->Player());
-		  // Passing from inside to outside triggers the OnLeave event
-		  OnLeave( prey, time );
-		  // The player is no longer inside
-		  playersInside.erase(prey->Player());
-		}
-		// Being inside gives the OnOutside event
-		OnOutside( prey, time );
-	    }
+            else {
+                // If the player is not on the "outside" list, then he was inside
+                std::set<ePlayerNetID *>::iterator iter;
+                if ((iter = playersOutside.find(prey->Player())) == playersOutside.end()) {
+                    playersOutside.insert(prey->Player());
+                    // Passing from inside to outside triggers the OnLeave event
+                    OnLeave( prey, time );
+                    // The player is no longer inside
+                    playersInside.erase(prey->Player());
+                }
+                // Being inside gives the OnOutside event
+                OnOutside( prey, time );
+            }
         }
     }
 }
@@ -402,63 +411,63 @@ void zZone::InteractWith( eGameObject * target, REAL time, int recursion )
 // *******************************************************************************
 void zZone::OnEnter( gCycle * target, REAL time )
 {
-  Triggerer triggerer;
-  triggerer.who = target;
-  triggerer.positive = _ignore;
-  triggerer.marked = _ignore;
+    Triggerer triggerer;
+    triggerer.who = target;
+    triggerer.positive = _ignore;
+    triggerer.marked = _ignore;
 
-  zEffectGroupPtrs::const_iterator iter;
-  for (iter = effectGroupEnter.begin();
-       iter != effectGroupEnter.end();
-       ++iter)
+    zEffectGroupPtrs::const_iterator iter;
+    for (iter = effectGroupEnter.begin();
+            iter != effectGroupEnter.end();
+            ++iter)
     {
-      (*iter)->OnEnter(triggerer, time);
+        (*iter)->OnEnter(triggerer, time);
     }
 }
 
 void zZone::OnInside( gCycle * target, REAL time )
 {
-  Triggerer triggerer;
-  triggerer.who = target;
-  triggerer.positive = _ignore;
-  triggerer.marked = _ignore;
+    Triggerer triggerer;
+    triggerer.who = target;
+    triggerer.positive = _ignore;
+    triggerer.marked = _ignore;
 
-  zEffectGroupPtrs::const_iterator iter;
-  for (iter = effectGroupInside.begin();
-       iter != effectGroupInside.end();
-       ++iter)
+    zEffectGroupPtrs::const_iterator iter;
+    for (iter = effectGroupInside.begin();
+            iter != effectGroupInside.end();
+            ++iter)
     {
-      (*iter)->OnInside(triggerer, time);
+        (*iter)->OnInside(triggerer, time);
     }
 }
 void zZone::OnLeave( gCycle * target, REAL time )
 {
-  Triggerer triggerer;
-  triggerer.who = target;
-  triggerer.positive = _ignore;
-  triggerer.marked = _ignore;
+    Triggerer triggerer;
+    triggerer.who = target;
+    triggerer.positive = _ignore;
+    triggerer.marked = _ignore;
 
-  zEffectGroupPtrs::const_iterator iter;
-  for (iter = effectGroupLeave.begin();
-       iter != effectGroupLeave.end();
-       ++iter)
+    zEffectGroupPtrs::const_iterator iter;
+    for (iter = effectGroupLeave.begin();
+            iter != effectGroupLeave.end();
+            ++iter)
     {
-      (*iter)->OnLeave(triggerer, time);
+        (*iter)->OnLeave(triggerer, time);
     }
 }
 void zZone::OnOutside( gCycle * target, REAL time )
 {
-  Triggerer triggerer;
-  triggerer.who = target;
-  triggerer.positive = _ignore;
-  triggerer.marked = _ignore;
+    Triggerer triggerer;
+    triggerer.who = target;
+    triggerer.positive = _ignore;
+    triggerer.marked = _ignore;
 
-  zEffectGroupPtrs::const_iterator iter;
-  for (iter = effectGroupOutside.begin();
-       iter != effectGroupOutside.end();
-       ++iter)
+    zEffectGroupPtrs::const_iterator iter;
+    for (iter = effectGroupOutside.begin();
+            iter != effectGroupOutside.end();
+            ++iter)
     {
-      (*iter)->OnOutside(triggerer, time);
+        (*iter)->OnOutside(triggerer, time);
     }
 }
 
@@ -948,7 +957,7 @@ rColor const & zZone::GetColor( void ) const
 //!
 // *******************************************************************************
 
-void zZone::SetColor( rColor const & color ) 
+void zZone::SetColor( rColor const & color )
 {
     color_ = color;
 }

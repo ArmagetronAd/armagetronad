@@ -64,10 +64,11 @@ private:
 
 class zZone: public eNetGameObject
 {
- public:
+public:
     zZone(eGrid *grid); //!< local constructor
     zZone(nMessage &m);                    //!< network constructor
     ~zZone();                              //!< destructor
+    void RemoveFromGame();		   //!< call this instead of the destructor
 
     void SetReferenceTime();               //!< sets the reference time to the current time
 
@@ -140,6 +141,9 @@ private:
 
     inline REAL EvaluateFunctionNow( tFunction const & f ) const;  //!< evaluates the given function with lastTime - referenceTime_ as argument
     inline void SetFunctionNow( tFunction & f, REAL value ) const; //!< makes sure EvaluateFunctionNow() returns the given value
+
+    void RemoveFromZoneList(void); //!< Removes the zone from the sg_Zones list if it's there
+
 };
 
 #endif
