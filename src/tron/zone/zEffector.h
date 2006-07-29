@@ -35,67 +35,73 @@ class gCycle;
 #include "ePlayer.h"
 #include "gCycle.h"
 #include "eTeam.h"
+#include "tLocale.h"
 
 class zEffector
 { 
  public: 
-  static zEffector* create();
-  zEffector(); //<! Constructor
-  zEffector(zEffector const &other);
-  void operator=(zEffector const &other); //!< overloaded assignment operator
-  virtual zEffector *copy(void) const;
+  static zEffector* create() { return new zEffector(); };
+  zEffector():count(0),message() { }; //<! Constructor
+  zEffector(zEffector const &other) { };
+  void operator=(zEffector const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+  virtual zEffector *copy(void) const { return new zEffector(*this); };
   virtual ~zEffector() {};
 
-  virtual void apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets) { };
+  void apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
+  virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets) { };
 
   void setCount(int _count) {count = _count;};
+  void setMessage(tOutput mess) { message = mess;};
  protected:
   template <typename T>
     T pickOne(std::vector <T> const &sources);
 
   int count; 
+  tOutput message;
+
 };
 
 
 class zEffectorWin : public zEffector
 { 
  public: 
-  static zEffector* create();
-  zEffectorWin(); //<! Constructor
-  zEffectorWin(zEffectorWin const &other);
-  void operator=(zEffectorWin const &other); //!< overloaded assignment operator
-  virtual zEffectorWin *copy(void) const;
+  static zEffector* create() { return new zEffectorWin(); };
+  zEffectorWin():zEffector(){ }; //<! Constructor
+  zEffectorWin(zEffectorWin const &other):zEffector(other) { };
+  void operator=(zEffectorWin const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+  virtual zEffectorWin *copy(void) const { return new zEffectorWin(*this); };
   virtual ~zEffectorWin() {};
 
-  virtual void apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
+  virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
 };
 
 class zEffectorDeath : public zEffector
 { 
  public: 
-  static zEffector* create();
-  zEffectorDeath(); //<! Constructor
-  zEffectorDeath(zEffectorDeath const &other);
-  void operator=(zEffectorDeath const &other); //!< overloaded assignment operator
-  virtual zEffectorDeath *copy(void) const;
+  static zEffector* create() { return new zEffectorDeath(); };
+  zEffectorDeath():zEffector(){ }; //<! Constructor
+  zEffectorDeath(zEffectorDeath const &other):zEffector(other) { };
+  void operator=(zEffectorDeath const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+  virtual zEffectorDeath *copy(void) const { return new zEffectorDeath(*this); };
   virtual ~zEffectorDeath() {};
 
-  virtual void apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
+  virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
 };
 
 class zEffectorPoint : public zEffector
 { 
  public: 
-  static zEffector* create();
-  zEffectorPoint(); //<! Constructor
-  zEffectorPoint(zEffectorPoint const &other);
-  void operator=(zEffectorPoint const &other); //!< overloaded assignment operator
-  virtual zEffectorPoint *copy(void) const;
+  static zEffector* create() { return new zEffectorPoint(); };
+  zEffectorPoint():zEffector(){ }; //<! Constructor
+  zEffectorPoint(zEffectorPoint const &other):zEffector(other),d_score(other.getPoint()) { };
+  void operator=(zEffectorPoint const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+  virtual zEffectorPoint *copy(void) const { return new zEffectorPoint(*this); };
   virtual ~zEffectorPoint() {};
 
-  void setPoint(int p);
+  void setPoint(int p) {d_score = p;};
+  int getPoint() const {return d_score;};
 
-  virtual void apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
+  virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
  protected:
   int d_score;
 };
@@ -103,27 +109,27 @@ class zEffectorPoint : public zEffector
 class zEffectorCycleRubber : public zEffector
 { 
  public: 
-  static zEffector* create();
-  zEffectorCycleRubber(); //<! Constructor
-  zEffectorCycleRubber(zEffectorCycleRubber const &other);
-  void operator=(zEffectorCycleRubber const &other); //!< overloaded assignment operator
-  virtual zEffectorCycleRubber *copy(void) const;
+  static zEffector* create() { return new zEffectorCycleRubber(); };
+  zEffectorCycleRubber():zEffector(){ }; //<! Constructor
+  zEffectorCycleRubber(zEffectorCycleRubber const &other):zEffector(other) { };
+  void operator=(zEffectorCycleRubber const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+  virtual zEffectorCycleRubber *copy(void) const { return new zEffectorCycleRubber(*this); };
   virtual ~zEffectorCycleRubber() {};
 
-  virtual void apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
+  virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
 };
 
 class zEffectorCycleBrake : public zEffector
 { 
  public: 
-  static zEffector* create();
-  zEffectorCycleBrake(); //<! Constructor
-  zEffectorCycleBrake(zEffectorCycleBrake const &other);
-  void operator=(zEffectorCycleBrake const &other); //!< overloaded assignment operator
-  virtual zEffectorCycleBrake *copy(void) const;
+  static zEffector* create() { return new zEffectorCycleBrake(); };
+  zEffectorCycleBrake():zEffector(){ }; //<! Constructor
+  zEffectorCycleBrake(zEffectorCycleBrake const &other):zEffector(other) { };
+  void operator=(zEffectorCycleBrake const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+  virtual zEffectorCycleBrake *copy(void) const { return new zEffectorCycleBrake(*this); };
   virtual ~zEffectorCycleBrake() {};
 
-  virtual void apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
+  virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
 };
 
 class gArena;
@@ -131,21 +137,23 @@ class gArena;
 class zEffectorSpawnPlayer : public zEffector
 { 
  public: 
-  static zEffector* create();
-  zEffectorSpawnPlayer(); //<! Constructor
-  zEffectorSpawnPlayer(zEffectorSpawnPlayer const &other);
-  void operator=(zEffectorSpawnPlayer const &other); //!< overloaded assignment operator
-  virtual zEffectorSpawnPlayer *copy(void) const;
+  static zEffector* create() { return new zEffectorSpawnPlayer(); };
+  zEffectorSpawnPlayer():zEffector(){ }; //<! Constructor
+  zEffectorSpawnPlayer(zEffectorSpawnPlayer const &other):zEffector(other) { };
+  void operator=(zEffectorSpawnPlayer const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+  virtual zEffectorSpawnPlayer *copy(void) const { return new zEffectorSpawnPlayer(*this); };
   virtual ~zEffectorSpawnPlayer() {};
 
   void setGrid(eGrid *_grid) {grid = _grid;};
   void setArena(gArena *_arena) {arena = _arena;};
 
-  virtual void apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
+  virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
  protected:
   eGrid *grid;
   gArena *arena;
 };
+
+
 
 
 #endif

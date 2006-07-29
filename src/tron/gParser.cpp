@@ -614,7 +614,7 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
       effectorPoint->setPoint(myxmlGetPropInt(cur, "score"));
     }
 
-    // Should we set the grid and arena
+    // Should we set the grid and arena for respawning
     zEffectorSpawnPlayer *effectorSpawnPlayer;
     effectorSpawnPlayer = dynamic_cast<zEffectorSpawnPlayer *>(effector.get());
     if (effectorSpawnPlayer) {
@@ -623,6 +623,9 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
     }
 
     effector->setCount(myxmlGetPropInt(cur, "count"));
+
+    if (xmlHasProp(cur, (const xmlChar*) "description"))
+      effector->setMessage(myxmlGetProp(cur, "description"));
 
     return effector;
 }
@@ -809,7 +812,10 @@ void
 gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
   float x=0.0, y=0.0, radius=0.0, growth=0.0;
-  string zoneName( myxmlGetProp(cur, "name") );
+  string zoneName = "";
+
+  if(myxmlHasProp(cur, "name")) 
+    zoneName = myxmlGetProp(cur, "name");
 
   cur = cur->xmlChildrenNode;
     

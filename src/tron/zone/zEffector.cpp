@@ -29,56 +29,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRandom.h"
 #include "gGame.h"
 
-zEffector::zEffector()
-{ }
 
-zEffector::zEffector(zEffector const &other)
-{ }
+void zEffector::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
+{
+  if (count == -1 || count > 0) {
+    effect(d_calculatedTargets);
+    sn_ConsoleOutMessage(message);
 
-void zEffector::operator=(zEffector const &other)
-{ 
-  if(this != &other) {
+    if (count > 0) 
+      count --;
   }
+  
 }
 
-zEffector * zEffector::copy(void) const
-{
-  return new zEffector(*this);
-}
-
-//
-//
-//
-zEffector* zEffectorWin::create()
-{
-  return new zEffectorWin();
-}
-
-zEffectorWin::zEffectorWin(): 
-  zEffector()
-{ }
-
-zEffectorWin::zEffectorWin(zEffectorWin const &other):
-  zEffector(other)
-{ }
-
-void zEffectorWin::operator=(zEffectorWin const &other)
-{ 
-  this->zEffector::operator=(other);
-}
-
-zEffectorWin * zEffectorWin::copy(void) const
-{
-  return new zEffectorWin(*this);
-}
-
-void zEffectorWin::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
+void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
   // BOP
   static const char* message="$player_win_instant";
   // EOP
 
-  if (count == -1 || count > 0) {
     gVectorExtra<ePlayerNetID *>::iterator iter;
     for(iter = d_calculatedTargets.begin();
 	iter != d_calculatedTargets.end();
@@ -86,38 +55,9 @@ void zEffectorWin::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
       {
 	sg_DeclareWinner((*iter)->CurrentTeam(), message );
       }
-    if (count > 0) 
-      count --;
-  }
 }
 
-//
-//
-//
-zEffector* zEffectorDeath::create()
-{
-  return new zEffectorDeath();
-}
-
-zEffectorDeath::zEffectorDeath(): 
-  zEffector()
-{ }
-
-zEffectorDeath::zEffectorDeath(zEffectorDeath const &other):
-  zEffector(other)
-{ }
-
-void zEffectorDeath::operator=(zEffectorDeath const &other)
-{ 
-  this->zEffector::operator=(other);
-}
-
-zEffectorDeath * zEffectorDeath::copy(void) const
-{
-  return new zEffectorDeath(*this);
-}
-
-void zEffectorDeath::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
+void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
   if (count == -1 || count > 0) {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -135,39 +75,8 @@ void zEffectorDeath::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 //
 //
 //
-zEffector* zEffectorPoint::create()
-{
-  return new zEffectorPoint();
-}
 
-zEffectorPoint::zEffectorPoint(): 
-  zEffector(),
-  d_score(1)
-{ }
-
-zEffectorPoint::zEffectorPoint(zEffectorPoint const &other):
-  zEffector(other),
-  d_score(other.d_score)
-{ }
-
-void 
-zEffectorPoint::setPoint(int p) {
-  d_score = p;
-}
-
-void
-zEffectorPoint::operator=(zEffectorPoint const &other)
-{ 
-  this->zEffector::operator=(other);
-  d_score = other.d_score;
-}
-
-zEffectorPoint * zEffectorPoint::copy(void) const
-{
-  return new zEffectorPoint(*this);
-}
-
-void zEffectorPoint::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
+void zEffectorPoint::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
   if (count == -1 || count > 0) {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -185,30 +94,8 @@ void zEffectorPoint::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 //
 //
 //
-zEffector* zEffectorCycleRubber::create()
-{
-  return new zEffectorCycleRubber();
-}
 
-zEffectorCycleRubber::zEffectorCycleRubber(): 
-  zEffector()
-{ }
-
-zEffectorCycleRubber::zEffectorCycleRubber(zEffectorCycleRubber const &other):
-  zEffector(other)
-{ }
-
-void zEffectorCycleRubber::operator=(zEffectorCycleRubber const &other)
-{ 
-  this->zEffector::operator=(other);
-}
-
-zEffectorCycleRubber * zEffectorCycleRubber::copy(void) const
-{
-  return new zEffectorCycleRubber(*this);
-}
-
-void zEffectorCycleRubber::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
+void zEffectorCycleRubber::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
   if (count == -1 || count > 0) {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -227,30 +114,8 @@ void zEffectorCycleRubber::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTarge
 //
 //
 //
-zEffector* zEffectorCycleBrake::create()
-{
-  return new zEffectorCycleBrake();
-}
 
-zEffectorCycleBrake::zEffectorCycleBrake(): 
-  zEffector()
-{ }
-
-zEffectorCycleBrake::zEffectorCycleBrake(zEffectorCycleBrake const &other):
-  zEffector(other)
-{ }
-
-void zEffectorCycleBrake::operator=(zEffectorCycleBrake const &other)
-{ 
-  this->zEffector::operator=(other);
-}
-
-zEffectorCycleBrake * zEffectorCycleBrake::copy(void) const
-{
-  return new zEffectorCycleBrake(*this);
-}
-
-void zEffectorCycleBrake::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
+void zEffectorCycleBrake::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
   if (count == -1 || count > 0) {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -268,32 +133,8 @@ void zEffectorCycleBrake::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTarget
 //
 //
 //
-zEffector* zEffectorSpawnPlayer::create()
-{
-  return new zEffectorSpawnPlayer();
-}
 
-zEffectorSpawnPlayer::zEffectorSpawnPlayer(): 
-  zEffector(),
-  grid(0),
-  arena(0)
-{ }
-
-zEffectorSpawnPlayer::zEffectorSpawnPlayer(zEffectorSpawnPlayer const &other):
-  zEffector(other)
-{ }
-
-void zEffectorSpawnPlayer::operator=(zEffectorSpawnPlayer const &other)
-{ 
-  this->zEffector::operator=(other);
-}
-
-zEffectorSpawnPlayer * zEffectorSpawnPlayer::copy(void) const
-{
-  return new zEffectorSpawnPlayer(*this);
-}
-
-void zEffectorSpawnPlayer::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
+void zEffectorSpawnPlayer::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
   if (count == -1 || count > 0) {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -307,4 +148,5 @@ void zEffectorSpawnPlayer::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTarge
       count --;
   }
 }
+
 
