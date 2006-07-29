@@ -99,13 +99,13 @@ bool Base::operator> (Base const &other) const { return false; }
 bool Base::operator< (Base const &other) const { return false; }
 
 myCol BaseExt::GetCol(void) const {
-  myCol col;
-  BasePtr node(this->copy());
-  col.insert(node);
-  return col;
+    myCol col;
+    BasePtr node(this->copy());
+    col.insert(node);
+    return col;
 }
 
-//! Sets 
+//! Sets
 //! @param val the value
 Set::Set() : //!< Constructor using BasePtr
         m_min(new Base()),
@@ -113,7 +113,7 @@ Set::Set() : //!< Constructor using BasePtr
         m_val(new Base())
 {}
 
-//! Sets the stored values to the given arguments 
+//! Sets the stored values to the given arguments
 //! @param val the value
 Set::Set(BasePtr &val) : //!< Constructor using BasePtr
         m_min(new Base()),
@@ -121,7 +121,7 @@ Set::Set(BasePtr &val) : //!< Constructor using BasePtr
         m_val(val)
 {}
 
-//! Sets the stored values to the given arguments 
+//! Sets the stored values to the given arguments
 //! @param val the value
 //! @param min the minimum value
 //! @param max the maximum value
@@ -201,11 +201,11 @@ Expr::Expr(tString const &expr, varmap_t const &vars) {
     vararray = new RVar*[vars.size()];
     unsigned int i = 0;
     for(varmap_t::const_iterator iter = vars.begin(); iter != vars.end(); ++iter, ++i) {
-	vararray[i] = new RVar(iter->first.c_str(), iter->second);
+        vararray[i] = new RVar(iter->first.c_str(), iter->second);
     }
     m_operation = boost::shared_ptr<ROperation>(new ROperation(expr.c_str(), vars.size(), vararray));
     for(i = 0; i < vars.size(); i++) {
-	delete vararray[i];
+        delete vararray[i];
     }
     delete[] vararray;
 }
@@ -225,6 +225,22 @@ int Expr::GetInt() const {
 tString Expr::GetString(Base const *other) const {
     return Output(m_operation->Val(), other);
 }
+
+class blah {
+public:
+    blah() {
+        float x,y;
+        RVar xvar("x",&x), yvar("y",&y);
+        RVar* vararray[2] = { &xvar, &yvar };
+        //ROperation op("x+y", 2, vararray);
+        ROperation op("5");
+        RFunction f(op, 0, vararray); f.SetName("f");
+        RFunction *funcarray[1] = { &f };
+        ROperation op2("8", 0, 0, 1, funcarray);
+        std::cerr << op2.Val() << std::endl;
+    }
+};
+blah asdfgsf;
 
 //! Constructs a new Condition object with the given parameters
 //! @param lvalue     the value to be on the left  side of the comparison
@@ -437,36 +453,36 @@ float ColNode::GetFloat(void) const           { return (*m_col.begin())->GetFloa
 myCol ColNode::GetCol(void) const { return m_col; }
 
 myCol getCol(BasePtr base) {
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(base->copy());
-  myCol ijk(baseExt->GetCol());
-  return ijk;
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(base->copy());
+    myCol ijk(baseExt->GetCol());
+    return ijk;
 }
 
 
-bool ColNode::operator==(Base const &other) const { 
-  //    return m_col == static_cast<myCol >(other);  
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return m_col == static_cast<myCol >(*baseExt) ;
+bool ColNode::operator==(Base const &other) const {
+    //    return m_col == static_cast<myCol >(other);
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return m_col == static_cast<myCol >(*baseExt) ;
 }
-bool ColNode::operator!=(Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return m_col != static_cast<myCol >(*baseExt); 
+bool ColNode::operator!=(Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return m_col != static_cast<myCol >(*baseExt);
 }
-bool ColNode::operator>=(Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return m_col >= static_cast<myCol >(*baseExt); 
+bool ColNode::operator>=(Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return m_col >= static_cast<myCol >(*baseExt);
 }
-bool ColNode::operator<=(Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return m_col <= static_cast<myCol >(*baseExt); 
-  }
-bool ColNode::operator> (Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return m_col >  static_cast<myCol >(*baseExt); 
+bool ColNode::operator<=(Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return m_col <= static_cast<myCol >(*baseExt);
 }
-bool ColNode::operator< (Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return m_col <  static_cast<myCol >(*baseExt); 
+bool ColNode::operator> (Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return m_col >  static_cast<myCol >(*baseExt);
+}
+bool ColNode::operator< (Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return m_col <  static_cast<myCol >(*baseExt);
 }
 
 
@@ -474,91 +490,91 @@ int ColUnary::GetInt(void) const               { return (*_operation().begin())-
 float ColUnary::GetFloat(void) const           { return (*_operation().begin())->GetFloat(); }
 myCol ColUnary::GetCol(void) const { return _operation(); }
 
-bool ColUnary::operator==(Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return _operation() == static_cast<myCol >(*baseExt); 
+bool ColUnary::operator==(Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return _operation() == static_cast<myCol >(*baseExt);
 }
-bool ColUnary::operator!=(Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return _operation() != static_cast<myCol >(*baseExt); 
+bool ColUnary::operator!=(Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return _operation() != static_cast<myCol >(*baseExt);
 }
-bool ColUnary::operator>=(Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return _operation() >= static_cast<myCol >(*baseExt); 
+bool ColUnary::operator>=(Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return _operation() >= static_cast<myCol >(*baseExt);
 }
-bool ColUnary::operator<=(Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return _operation() <= static_cast<myCol >(*baseExt); 
+bool ColUnary::operator<=(Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return _operation() <= static_cast<myCol >(*baseExt);
 }
-bool ColUnary::operator> (Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return _operation() >  static_cast<myCol >(*baseExt); 
+bool ColUnary::operator> (Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return _operation() >  static_cast<myCol >(*baseExt);
 }
-bool ColUnary::operator< (Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return _operation() <  static_cast<myCol >(*baseExt); 
+bool ColUnary::operator< (Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return _operation() <  static_cast<myCol >(*baseExt);
 }
 
 
 myCol ColPickOne::_operation() const
 {
-  myCol ijk = getCol(ColUnary::m_child);
-  
-  myCol tempCol;
-  int number = ijk.size();
-  if(number != 0) {
-    int ran = number / 2;
-    
-    myCol::iterator iter = ijk.begin();
-    int i=0;
-    for (i=0; i<ran; i++)
-      ++iter;
-    BasePtr asdf((*iter)->copy());
-    tempCol.insert(asdf);
-  }
-  return tempCol;
+    myCol ijk = getCol(ColUnary::m_child);
+
+    myCol tempCol;
+    int number = ijk.size();
+    if(number != 0) {
+        int ran = number / 2;
+
+        myCol::iterator iter = ijk.begin();
+        int i=0;
+        for (i=0; i<ran; i++)
+            ++iter;
+        BasePtr asdf((*iter)->copy());
+        tempCol.insert(asdf);
+    }
+    return tempCol;
 }
 
 
 myCol ColBinary::_operation(void) const {
-  myCol res;
-  
-  myCol a = getCol(ColBinary::r_child);
-  myCol b = getCol(ColBinary::l_child);
-  
-  set_union(a.begin(),
-	    a.end(),
-	    b.begin(),
-	    b.end(),
-	    inserter(res, res.begin()),
-	    FooPtrOps());
-  
-  return res;
+    myCol res;
+
+    myCol a = getCol(ColBinary::r_child);
+    myCol b = getCol(ColBinary::l_child);
+
+    set_union(a.begin(),
+              a.end(),
+              b.begin(),
+              b.end(),
+              inserter(res, res.begin()),
+              FooPtrOps());
+
+    return res;
 }
 
-bool ColBinary::operator==(Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return _operation() == static_cast<myCol >(*baseExt); 
+bool ColBinary::operator==(Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return _operation() == static_cast<myCol >(*baseExt);
 }
-bool ColBinary::operator!=(Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return _operation() != static_cast<myCol >(*baseExt); 
+bool ColBinary::operator!=(Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return _operation() != static_cast<myCol >(*baseExt);
 }
-bool ColBinary::operator>=(Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return _operation() >= static_cast<myCol >(*baseExt); 
+bool ColBinary::operator>=(Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return _operation() >= static_cast<myCol >(*baseExt);
 }
-bool ColBinary::operator<=(Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return _operation() <= static_cast<myCol >(*baseExt); 
+bool ColBinary::operator<=(Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return _operation() <= static_cast<myCol >(*baseExt);
 }
-bool ColBinary::operator> (Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return _operation() >  static_cast<myCol >(*baseExt); 
+bool ColBinary::operator> (Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return _operation() >  static_cast<myCol >(*baseExt);
 }
-bool ColBinary::operator< (Base const &other) const { 
-  BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
-  return _operation() <  static_cast<myCol >(*baseExt); 
+bool ColBinary::operator< (Base const &other) const {
+    BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
+    return _operation() <  static_cast<myCol >(*baseExt);
 }
 
 int ColBinary::GetInt(void) const               { return (*_operation().begin())->GetInt(); }
@@ -566,63 +582,63 @@ float ColBinary::GetFloat(void) const           { return (*_operation().begin())
 myCol ColBinary::GetCol(void) const             { return _operation(); }
 
 void displayCol(myCol res) {
-  myCol::iterator iter;
-  for(iter = res.begin();
-      iter != res.end();
-      ++iter) {
-    std::cout << (*iter)->GetInt() << " ";
-  }
-  std::cout << std::endl;
+    myCol::iterator iter;
+    for(iter = res.begin();
+            iter != res.end();
+            ++iter) {
+        std::cout << (*iter)->GetInt() << " ";
+    }
+    std::cout << std::endl;
 }
 
 myCol ColUnion::_operation(void) const {
-  myCol res;
-  
-  myCol a = getCol(ColBinary::r_child);
-  myCol b = getCol(ColBinary::l_child);
-  
-  set_union(a.begin(),
-	    a.end(),
-	    b.begin(),
-	    b.end(),
-	    inserter(res, res.begin()),
-	    FooPtrOps());
-  
-  return res;
+    myCol res;
+
+    myCol a = getCol(ColBinary::r_child);
+    myCol b = getCol(ColBinary::l_child);
+
+    set_union(a.begin(),
+              a.end(),
+              b.begin(),
+              b.end(),
+              inserter(res, res.begin()),
+              FooPtrOps());
+
+    return res;
 }
 
 
 myCol ColIntersection::_operation(void) const {
-  myCol res;
-  myCol a = getCol(ColBinary::r_child);
-  myCol b = getCol(ColBinary::l_child);
-  
-  set_intersection(a.begin(),
-		   a.end(),
-		   b.begin(),
-		   b.end(),
-		   inserter(res, res.begin()),
-		   FooPtrOps());
-  
-  return res;
+    myCol res;
+    myCol a = getCol(ColBinary::r_child);
+    myCol b = getCol(ColBinary::l_child);
+
+    set_intersection(a.begin(),
+                     a.end(),
+                     b.begin(),
+                     b.end(),
+                     inserter(res, res.begin()),
+                     FooPtrOps());
+
+    return res;
 }
 
 
 
 
 myCol ColDifference::_operation(void) const {
-  myCol res;
-  myCol a = getCol(ColBinary::r_child);
-  myCol b = getCol(ColBinary::l_child);
-  
-  set_difference(a.begin(),
-		 a.end(),
-		 b.begin(),
-		 b.end(),
-		 inserter(res, res.begin()),
-		 FooPtrOps());
-  
-  return res;
+    myCol res;
+    myCol a = getCol(ColBinary::r_child);
+    myCol b = getCol(ColBinary::l_child);
+
+    set_difference(a.begin(),
+                   a.end(),
+                   b.begin(),
+                   b.end(),
+                   inserter(res, res.begin()),
+                   FooPtrOps());
+
+    return res;
 }
 
 }

@@ -1128,16 +1128,9 @@ bool uMenuItemStringWithHistory::Event(SDL_Event &e){
         }
         bool ret = uMenuItemString::Event(e);
         tString searchstring = content->ToLower();
-        std::cerr << "searchstring: " << searchstring << std::endl;
         unsigned int pos = 0;
         for(history_t::iterator iter = m_History.begin(); iter != m_History.end(); ++iter, ++pos) {
             if (iter->ToLower().find(searchstring) != tString::npos) {
-                std::cerr << "found: " << *iter << std::endl;
-                std::cerr << "pos: " << pos << std::endl;
-                std::copy(m_History.begin(), m_History.end(), std::ostream_iterator<tString>(std::cerr, " "));
-                std::cerr << std::endl;
-                std::cerr << "size: " << m_History.size() << std::endl;
-                std::cerr << "willbe: " << m_History[m_HistoryPos] << std::endl;
                 m_HistoryPos = pos;
                 m_SearchFailing=false;
                 return ret;
