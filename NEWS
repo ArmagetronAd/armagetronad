@@ -1,5 +1,9 @@
 Changes since 0.3.0:
 - The chat and console history are now remembered between restarts of arma
+- Added an incremental reverse search for the console and chat history:
+  In chat or console mode press CTRL-R and start entering your search term.
+  It will show you the last found match in a new line, press right or left
+  to jump to it in the history.
 
 Changes since 0.3.0_alpha4941:
 - Added setting to toggle custom teamnames

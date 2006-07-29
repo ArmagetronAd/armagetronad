@@ -427,12 +427,15 @@ protected:
     unsigned int m_HistoryPos; //!< The current position within the history
     unsigned int m_HistoryLimit; //!< The maximal length of the history
     uAutoCompleter *m_Completer; //!< The object used for completion
+    bool m_Searchmode; //!< Are we in search mode?
+    bool m_SearchFailing; //!< Is the seach turning up any useful results?
 public:
     uMenuItemStringWithHistory(uMenu *M,const tOutput& desc, const tOutput& help,tString &c, int maxLength, history_t &history, int limit, uAutoCompleter *completer = 0); //!< Consructor
 
     ~uMenuItemStringWithHistory(); //!< Destructor
 
     virtual bool Event(SDL_Event &e); //!< Handles an event
+    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0); //!< Renders the search suggestion if needed and calls uMenuItemString::Render()
 };
 
 // *****************************************************

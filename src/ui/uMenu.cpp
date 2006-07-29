@@ -42,6 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#include "tRecording.h"
 #include "tToDo.h"
 #include "tException.h"
+#include <iterator>
 
 #ifndef DEDICATED
 #include "rRender.h"
@@ -1048,7 +1049,8 @@ uMenuItemStringWithHistory::uMenuItemStringWithHistory(uMenu *M,const tOutput& d
         m_History(history),
         m_HistoryPos(0),
         m_HistoryLimit(limit),
-m_Completer(completer) {
+        m_Completer(completer),
+m_Searchmode(false) {
     m_History.push_front(tString());
 }
 
@@ -1074,7 +1076,7 @@ uMenuItemStringWithHistory::~uMenuItemStringWithHistory() {
 bool uMenuItemStringWithHistory::Event(SDL_Event &e){
 #ifndef DEDICATED
     if (e.type==SDL_KEYDOWN &&
-            (e.key.keysym.sym==SDLK_UP)){
+            (e.key.keysym.sym==SDLK_UP && !m_Searchmode )){
         if (m_History.size() - 1 > m_HistoryPos)
         {
             if(m_HistoryPos == 0)  //the new entry... save it before overwriting it
@@ -1087,7 +1089,7 @@ bool uMenuItemStringWithHistory::Event(SDL_Event &e){
         return true;
     }
     else if (e.type==SDL_KEYDOWN &&
-             (e.key.keysym.sym==SDLK_DOWN)){
+             (e.key.keysym.sym==SDLK_DOWN && !m_Searchmode)){
         if (m_HistoryPos > 0)
         {
             m_HistoryPos--;
@@ -1097,18 +1099,65 @@ bool uMenuItemStringWithHistory::Event(SDL_Event &e){
 
         return true;
     }
+    else if (e.type==SDL_KEYDOWN && e.key.keysym.mod & KMOD_CTRL && e.key.keysym.sym == SDLK_r ) {
+        m_Searchmode = true;
+        if(m_HistoryPos == 0 && !content->empty()) {  //the new entry... save it before overwriting it
+            m_History.front() = *content;
+            m_History.push_front(tString());
+        }
+        content->erase();
+        m_HistoryPos++;
+        cursorPos=0;
+        m_SearchFailing=false;
+        return true;
+    }
     else if (e.type==SDL_KEYDOWN &&
-             (e.key.keysym.sym==SDLK_TAB)){
+             (e.key.keysym.sym==SDLK_TAB && !m_Searchmode)){
         if(m_Completer != 0) {
             cursorPos = m_Completer->Complete(*content, cursorPos);
         }
 
         return true;
     }
+    else if (e.type==SDL_KEYDOWN && m_Searchmode) {
+        if(e.key.keysym.sym==SDLK_LEFT || e.key.keysym.sym==SDLK_RIGHT) {
+            *content = m_History[m_HistoryPos];
+            m_Searchmode = false;
+            cursorPos=0;
+            return true;
+        }
+        bool ret = uMenuItemString::Event(e);
+        tString searchstring = content->ToLower();
+        std::cerr << "searchstring: " << searchstring << std::endl;
+        unsigned int pos = 0;
+        for(history_t::iterator iter = m_History.begin(); iter != m_History.end(); ++iter, ++pos) {
+            if (iter->ToLower().find(searchstring) != tString::npos) {
+                std::cerr << "found: " << *iter << std::endl;
+                std::cerr << "pos: " << pos << std::endl;
+                std::copy(m_History.begin(), m_History.end(), std::ostream_iterator<tString>(std::cerr, " "));
+                std::cerr << std::endl;
+                std::cerr << "size: " << m_History.size() << std::endl;
+                std::cerr << "willbe: " << m_History[m_HistoryPos] << std::endl;
+                m_HistoryPos = pos;
+                m_SearchFailing=false;
+                return ret;
+            }
+        }
+        m_SearchFailing=true;
+        return ret;
+    }
+
     else
         return uMenuItemString::Event(e);
 #endif
     return false;
+}
+
+void uMenuItemStringWithHistory::Render(REAL x,REAL y,REAL alpha,bool selected) {
+    if(m_Searchmode) {
+        DisplayText(-.88, y-.1, ((m_SearchFailing ? "Failing reverse search: " : "Reverse search: ") + m_History[m_HistoryPos]).c_str(), selected, alpha, -1);
+    }
+    uMenuItemString::Render(x, y, alpha, selected);
 }
 
 //! @param filename the name of the file (in var/) to be loaded and saved to
@@ -1127,6 +1176,7 @@ uMenuItemStringWithHistory::history_t::~history_t() {
         }
     }
 }
+
 
 // *****************************************************
 //  Submenu
