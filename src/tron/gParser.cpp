@@ -591,6 +591,7 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
     effectors[tString("spawnplayer")] = zEffectorSpawnPlayer::create;
     effectors[tString("brakerecharge")] = zEffectorCycleBrake::create;
     effectors[tString("rubberrecharge")] = zEffectorCycleRubber::create;
+    effectors[tString("setting")] = zEffectorSetting::create;
 
 
     // TODO: add tolower()
@@ -620,6 +621,16 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
     if (effectorSpawnPlayer) {
       effectorSpawnPlayer->setGrid(grid);
       effectorSpawnPlayer->setArena(sg_GetArena());
+    }
+
+    // Should we set the grid and arena for respawning
+    zEffectorSetting *effectorSetting;
+    effectorSetting = dynamic_cast<zEffectorSetting *>(effector.get());
+    if (effectorSetting) {
+      if(myxmlHasProp(cur, "settingName"))
+	effectorSetting->setSettingName(tString(myxmlGetProp(cur, "settingName")));
+      if(myxmlHasProp(cur, "settingValue"))
+	effectorSetting->setSettingValue(tString(myxmlGetProp(cur, "settingValue")));
     }
 
     effector->setCount(myxmlGetPropInt(cur, "count"));

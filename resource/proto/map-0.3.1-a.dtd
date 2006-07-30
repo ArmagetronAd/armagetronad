@@ -124,10 +124,12 @@ allDead | AnotherTeammateDead | anotherNotTeammateDead) "self" >
 
 <!ELEMENT Effect EMPTY>
 <!ATTLIST Effect effect (win | death | point | brakerecharge |
-rubberrecharge | spawnplayer ) "death" >
+rubberrecharge | spawnplayer | setting ) "death" >
 <!ATTLIST Effect count CDATA "-1">
-<!ATTLIST Effect score CDATA "1"> 
 <!ATTLIST Effect description CDATA #IMPLIED>
+<!ATTLIST Effect score CDATA "1"> <!-- only for point -->
+<!ATTLIST Effect settingName CDATA #IMPLIED> <!-- only for setting -->
+<!ATTLIST Effect settingValue CDATA #IMPLIED><!-- only for setting -->
 
 
 <!ELEMENT MonitorInfluence EMPTY>

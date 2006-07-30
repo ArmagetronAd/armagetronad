@@ -192,4 +192,16 @@ void zEffectorSpawnPlayer::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarg
   }
 }
 
+void zEffectorSetting::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
+{
+  if (count == -1 || count > 0) {
+    std::stringstream ss;
+    ss << settingName  << " " << settingValue;
+    tConfItemBase::LoadAll(ss);
+
+    if (count > 0) 
+      count --;
+  }
+}
+
 

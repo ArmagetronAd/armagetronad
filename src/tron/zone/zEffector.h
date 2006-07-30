@@ -154,6 +154,30 @@ class zEffectorSpawnPlayer : public zEffector
   gArena *arena;
 };
 
+class zEffectorSetting : public zEffector
+{ 
+ public: 
+  static zEffector* create() { return new zEffectorSetting(); };
+  zEffectorSetting():zEffector(),settingName(),settingValue() { }; //<! Constructor
+  zEffectorSetting(zEffectorSetting const &other):
+    zEffector(other),
+    settingName(other.getSettingName()),
+    settingValue(other.getSettingValue())  { };
+  void operator=(zEffectorSetting const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+  virtual zEffectorSetting *copy(void) const { return new zEffectorSetting(*this); };
+  virtual ~zEffectorSetting() {};
+
+  void setSettingName(tString name) {settingName = name;};
+  void setSettingValue(tString value) {settingValue = value;};
+  tString getSettingName() const {return settingName;};
+  tString getSettingValue() const {return settingValue;};
+
+  virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
+ protected:
+  tString settingName;
+  tString settingValue;
+};
+
 
 
 
