@@ -34,12 +34,54 @@ void zEffector::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
   if (count == -1 || count > 0) {
     effect(d_calculatedTargets);
-    sn_ConsoleOutMessage(message);
-
+    /*
+    tOutput asdf;
+    asdf.SetTemplateParameter(1, tString("33"));
+    asdf.SetTemplateParameter(2, tString("bibibi"));
+    asdf.Append(message);
+    sn_ConsoleOut(asdf);
+    */
     if (count > 0) 
       count --;
   }
-  
+}
+
+void 
+zEffector::setMessage(tString unformated) 
+{/*
+  tString res;
+  for (size_t i=0; i< unformated.Size(); i++)
+    {
+      char c = unformated(i);
+      if (c != '\\')
+	res += c;
+      else if (i < unformated.Size())
+	{
+	  switch (unformated(i+1))
+	    {
+	    case 'n':
+	      res += '\n';
+	      i++;
+	      break;
+	    case '1':
+	      res += '\1';
+	      i++;
+	      break;
+	    default:
+	      res += '\\';
+	      break;
+	    }
+	}
+    }
+
+  message = res;
+ */
+  message << unformated;
+  /*
+  message.Append( unformated );
+  message << unformated.c_str();
+  message.Append( unformated.c_str());
+  */
 }
 
 void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
@@ -84,7 +126,8 @@ void zEffectorPoint::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 	iter != d_calculatedTargets.end();
 	++iter)
       {
-	(*iter)->AddScore(d_score, tOutput(), "$player_lose_suicide");
+	//	(*iter)->AddScore(d_score, tOutput(), "$player_lose_suicide");
+	(*iter)->AddScore(d_score, tOutput(), message);
       }
     if (count > 0) 
       count --;

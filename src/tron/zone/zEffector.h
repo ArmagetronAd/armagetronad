@@ -51,7 +51,8 @@ class zEffector
   virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets) { };
 
   void setCount(int _count) {count = _count;};
-  void setMessage(tOutput mess) { message = mess;};
+  void setMessage(tString unformated);
+
  protected:
   template <typename T>
     T pickOne(std::vector <T> const &sources);

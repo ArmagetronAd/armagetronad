@@ -488,7 +488,7 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
     // make an empty zone and store under the right label
     // It should be populated later
     refZone = zZonePtr(new zZone(grid));
-    if (zoneName.empty())
+    if (!zoneName.empty())
       mapZones[zoneName] = refZone;
   }
   infl = zZoneInfluencePtr(new zZoneInfluence(refZone));
@@ -549,7 +549,7 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
       // make an empty zone and store under the right label
       // It should be populated later
       ref = zMonitorPtr(new zMonitor(grid));
-      if (monitorName.empty())
+      if (!monitorName.empty())
 	monitors[monitorName] = ref;
     }
 
@@ -624,8 +624,8 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
 
     effector->setCount(myxmlGetPropInt(cur, "count"));
 
-    if (xmlHasProp(cur, (const xmlChar*) "description"))
-      effector->setMessage(myxmlGetProp(cur, "description"));
+    if (myxmlHasProp(cur, "description"))
+      effector->setMessage(tString(myxmlGetProp(cur, "description")));
 
     return effector;
 }
@@ -834,7 +834,7 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 	// Create a new zone 
 	zone = zZonePtr(new zZone(grid));
 	// If a name was assigned to it, save the zone in a map so it can be refered to
-	if (zoneName.empty())
+	if (!zoneName.empty())
 	  mapZones[zoneName] = zone;
       }
 
@@ -921,7 +921,7 @@ gParser::parseMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 	// make an empty zone and store under the right label
 	// It should be populated later
 	monitor = zMonitorPtr(new zMonitor(grid));
-	if (monitorName.empty())
+	if (!monitorName.empty())
 	  monitors[monitorName] = monitor;
       }
 
