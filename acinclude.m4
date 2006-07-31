@@ -151,7 +151,7 @@ AC_DEFUN([AC_AA_PATH_RAW],
 AC_AA_PATH_NOSUFFIX_RAW($1)
 AC_SUBST_UNIVERSAL($1_suffix)
 AC_SUBST_UNIVERSAL(aa_$1)
-aa_$1=\${$1}\${$1_suffix}
+aa_$1=\${$1}\${$1_suffix}\${progdir_suffix}
 ])
 
 # Fallback function if accustomdir is not included
