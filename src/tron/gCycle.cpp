@@ -3011,7 +3011,7 @@ static nSettingItem<tString> lalala_cycle_shad("TEXTURE_CYCLE_SHADOW", lala_cycl
 rFileTexture cycle_shad(rTextureGroups::TEX_FLOOR, lala_cycle_shad, 0,0,true);
 */
 
-#define ENABLE_OLD_LAG_O_METER
+//#define ENABLE_OLD_LAG_O_METER
 
 REAL sg_laggometerScale=1;
 static tSettingItem< REAL > sg_laggometerScaleConf( "LAG_O_METER_SCALE", sg_laggometerScale );
