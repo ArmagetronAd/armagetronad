@@ -132,17 +132,6 @@ tValue::Set WithDataFunctions::ProcessDataSet(tXmlParser::node cur) {
 tValue::Base *WithDataFunctions::ProcessMath(tXmlParser::node cur) {
     tValue::BasePtr lvalue(ProcessDataSource(cur.GetProp("lvalue")));
     tValue::BasePtr rvalue(ProcessDataSource(cur.GetProp("rvalue")));
-    std::map<tString, tValue::Math::type> types;
-    types[tString("sum"       )] = tValue::Math::sum;
-    types[tString("difference")] = tValue::Math::difference;
-    types[tString("product"   )] = tValue::Math::product;
-    types[tString("quotient"  )] = tValue::Math::quotient;
-
-    std::map<tString, tValue::Math::type>::iterator iter;
-    if((iter = types.find(cur.GetProp("type"))) == types.end()) {
-        tERR_WARN("Type '" + cur.GetProp("type") + "' unknown!");
-        iter = types.begin();
-    }
 
     for (tXmlParser::node child = cur.GetFirstChild(); child; ++child) {
         tString name = child.GetName();
@@ -153,8 +142,23 @@ tValue::Base *WithDataFunctions::ProcessMath(tXmlParser::node cur) {
         }
     }
 
-
-    tValue::Base *val = new tValue::Math(lvalue, rvalue, iter->second);
+	tValue::Base *val;
+	if (cur.GetProp("type") == "sum")
+		val = new tValue::Add(lvalue, rvalue);
+	else
+	if (cur.GetProp("type") == "difference")
+		val = new tValue::Subtract(lvalue, rvalue);
+	else
+	if (cur.GetProp("type") == "product")
+		val = new tValue::Multiply(lvalue, rvalue);
+	else
+	if (cur.GetProp("type") == "quotient")
+		val = new tValue::Divide(lvalue, rvalue);
+	else
+	{
+		tERR_WARN("Type '" + cur.GetProp("type") + "' unknown!");
+		val = new tValue::Add(lvalue, rvalue);
+	}
     ProcessDataTags(cur, *val);
     return val;
 }
