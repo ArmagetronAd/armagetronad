@@ -1430,7 +1430,7 @@ player_red_text			Red:
 player_red_help			Lets you choose the red component of your colour.
 
 player_spectator_text		Spectator Mode:
-player_spectator_help		In spectator mode, you do not control a cycle; you just watch the game as if you were already dead. The other players don't know at all that you are there; you don't appear on the score table.
+player_spectator_help		In spectator mode, you do not control a cycle; you just watch the game as if you were already dead. The other players will see you on the score table and you can chat with them, but you won't be spawned at the beginng of a round.
 
 player_name_team_text		Name Team after Player:
 player_name_team_help		You can set your prefered method for naming your team here: On indicates you want the team to be named after its most senior player, Off means you want a simple colour label.
