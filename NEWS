@@ -23,6 +23,7 @@ Changes since 0.2.8.2:
   for turns in the same direction. Can be used to limit the advantage
   doublebinders get while not punishing players who press both left and
   right at the same time.
+- LAG_O_METER(TRESHOLD|BLEND|USE_OLD): Configure the minimal size of the Lag-O-Meter, its color and whether to scrap it all and stick with the old one.
 
   Featurelets:
 - The client now can hadle network traffic while it is waiting for the graphics
@@ -47,6 +48,8 @@ Changes since 0.2.8.2:
 - MESSAGE_OF_DAY is now displayed fullscreen if both server and client support it
 - Manual fullscreen messages can be triggered with 
   FULLSCREEN_MESSAGE <timeout> <message content>
+- Axes Indicators by meriton, can be enabled using the AXES_INDICATORS
+  setting.
 
   Bugfixes:
 - Fixed various trail end related extrapolation/simulation inaccuracies that looked
@@ -68,6 +71,7 @@ Changes since 0.2.8.2:
 - Phasing made even more difficult; nice side effect of the fix is
   reduced network bandwidth usage.
 - Speed gauge resets between rounds.
+- More accurate Lag-O-Meter by meriton.
 
 Changes since 0.2.8.1:
 - Timestamps and teamscores added to scorelog.txt

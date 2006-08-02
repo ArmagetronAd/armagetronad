@@ -1270,6 +1270,7 @@ REAL exponent(int i)
 }
 
 extern REAL max_player_speed;
+extern bool sg_axesIndicator;
 
 void init_game_grid(eGrid *grid, gParser *aParser){
     se_ResetGameTimer();
@@ -2164,6 +2165,11 @@ void net_options(){
     (&net_menu,"$network_opts_lagometer_text",
      "$network_opts_lagometer_help",
      sr_laggometer);
+
+    uMenuItemToggle ai
+    (&net_menu,"$network_opts_axesindicator_text",
+     "$network_opts_axesindicator_help",
+     sg_axesIndicator);
 
 
     uMenuItemInt p_s
@@ -4177,7 +4183,7 @@ void sg_EnterGameCore( nNetState enter_state ){
             gGame::NetSync();
             se_SyncGameTimer();
             REAL time=se_GameTime();
-			sg_currentGame->StateUpdate();
+            sg_currentGame->StateUpdate();
             if ( time > 0 )
             {
                 // only simulate the objects that have pending events to execute

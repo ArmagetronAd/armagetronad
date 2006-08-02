@@ -32,6 +32,7 @@ Christian Reitwiessner   : contributed name rendering above cycles
 Edd Keefe                : contributed Mac OS X icon and the title screen
 hang3r                   : skeleton for more accurate timer on Windows
 Jonathan                 : Headlight (needs activation) and overhead map (will be in 0.3.X)
+Meriton                  : Replacement for the old buggy Lag-O-Meter
 Oscilloscope             : Most default instant chats
 Belenus                  : OpenBSD support sniplets
 
