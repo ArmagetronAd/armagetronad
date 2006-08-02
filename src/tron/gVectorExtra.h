@@ -34,53 +34,53 @@ template <typename T>
 class gVectorExtra: public std::vector<T>
 {
 public:
-  gVectorExtra();
-  gVectorExtra(std::vector<T> const oldOne);
-  virtual ~gVectorExtra() {};
-  void remove(T el);
-  void removeAll(std::vector<T> els);
-  void insertAll(std::vector<T> els);
+    gVectorExtra();
+    gVectorExtra(std::vector<T> const oldOne);
+    virtual ~gVectorExtra() {};
+    void remove(T el);
+    void removeAll(std::vector<T> els);
+    void insertAll(std::vector<T> els);
 };
 
 template <typename T>
 void
 gVectorExtra<T>::remove(T singleElement) {
-  typename gVectorExtra<T>::iterator it;
-  for(it = this->begin(); 
-      it != this->end(); 
-      it++) {
-    if ( *it == singleElement ) {
-      this->erase(it);
-      if (it == this->end())
-	break;
+    typename gVectorExtra<T>::iterator it;
+    for(it = this->begin();
+            it != this->end();
+            it++) {
+        if ( *it == singleElement ) {
+            this->erase(it);
+            if (it == this->end())
+                break;
+        }
     }
-  }
 }
 
 template <typename T>
 void
 gVectorExtra<T>::removeAll(std::vector<T> multipleElements) {
-  typename gVectorExtra<T>::iterator it;
-  typename std::vector<T>::iterator elsIt;
-  for(elsIt = multipleElements.begin();
-      elsIt != multipleElements.end();
-      elsIt++) {
-    for(it = this->begin();
-	it != this->end();
-	it++) {
-      if (*elsIt == *it) {
-	this->erase(it);
-	if (it == this->end())
-	  break;
-      }
+    typename gVectorExtra<T>::iterator it;
+    typename std::vector<T>::iterator elsIt;
+    for(elsIt = multipleElements.begin();
+            elsIt != multipleElements.end();
+            elsIt++) {
+        for(it = this->begin();
+                it != this->end();
+                it++) {
+            if (*elsIt == *it) {
+                this->erase(it);
+                if (it == this->end())
+                    break;
+            }
+        }
     }
-  }
 }
 
 template <typename T>
 void
 gVectorExtra<T>::insertAll(std::vector<T> multipleElements) {
-  this->insert(this->end(), multipleElements.begin(), multipleElements.end());
+    this->insert(this->end(), multipleElements.begin(), multipleElements.end());
 }
 
 
@@ -89,12 +89,12 @@ gVectorExtra<T>::gVectorExtra() : std::vector<T>() {}
 
 template <typename T>
 gVectorExtra<T>::gVectorExtra(std::vector<T> const oldOne) {
-  typename std::vector<T>::const_iterator iter;
-  for(iter = oldOne.begin();
-      iter != oldOne.end();
-      iter++) {
-    push_back((*iter));
-  }
+    typename std::vector<T>::const_iterator iter;
+    for(iter = oldOne.begin();
+            iter != oldOne.end();
+            iter++) {
+        push_back((*iter));
+    }
 }
 
 

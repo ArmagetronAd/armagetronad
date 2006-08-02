@@ -32,7 +32,7 @@ Edd Keefe                : contributed Mac OS X icon and the title screen
 Fabrice Holbe            : original Moviepack and font
 hang3r                   : skeleton for more accurate timer on Windows
 Jonathan                 : Headlight (needs activation) and overhead map (will be in 0.3.X)
-meriton                  : camera glancing code
+Meriton                  : Replacement for the old buggy Lag-O-Meter and new camera glancing code
 Oscilloscope             : Most default instant chats
 pavelo                   : extension to the tab completion code
 Tomas Birraux            : french accents in font

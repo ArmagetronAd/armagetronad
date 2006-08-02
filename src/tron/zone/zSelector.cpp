@@ -31,33 +31,33 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 //
 // Copy all the valid players from source and copy them in result. Valid depends on the condition
-// living. 
+// living.
 //
 std::vector <ePlayerNetID *>
 zSelector::getAllValid(std::vector <ePlayerNetID *> &results, std::vector <ePlayerNetID *> const &sources, LivingStatus living)
 {
     unsigned short int max = sources.size();
     for(unsigned short int i=0;i<max;i++)
-      {
-	ePlayerNetID *p=sources[i];
-	switch (living) {
-	case _either:
-	  results.push_back(p);
-	  break;
-	case _alive:
-	  if ( p->Object() && p->Object()->Alive() )
-	    {
-	      results.push_back(p);
-	    }
-	  break;
-	case _dead: 
-	  if(  !(p->Object()) || !(p->Object()->Alive()) )
-	    {
-	      results.push_back(p);
-	    }
-	  break;
-	}
-      }
+    {
+        ePlayerNetID *p=sources[i];
+        switch (living) {
+        case _either:
+            results.push_back(p);
+            break;
+        case _alive:
+            if ( p->Object() && p->Object()->Alive() )
+            {
+                results.push_back(p);
+            }
+            break;
+        case _dead:
+            if(  !(p->Object()) || !(p->Object()->Alive()) )
+            {
+                results.push_back(p);
+            }
+            break;
+        }
+    }
     return results;
 }
 
@@ -68,253 +68,253 @@ zSelector::zSelector(zSelector const &other)
 { }
 
 void zSelector::operator=(zSelector const &other)
-{ 
-  if(this != &other) {
-  }
+{
+    if(this != &other) {
+    }
 }
 
 zSelector * zSelector::copy(void) const
 {
-  return new zSelector(*this);
+    return new zSelector(*this);
 }
 
 gVectorExtra<ePlayerNetID *> zSelector::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  gVectorExtra<ePlayerNetID *> empty;
-  return empty;
+    gVectorExtra<ePlayerNetID *> empty;
+    return empty;
 }
 
-void 
+void
 zSelector::apply(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  if (count == -1 || count > 0) 
+    if (count == -1 || count > 0)
     {
-      gVectorExtra<ePlayerNetID *> d_calculatedTargets = select(owners, teamOwners, triggerer);
-      zEffectorPtrs::const_iterator iter;
-      for(iter=effectors.begin();
-	  iter!=effectors.end();
-	  ++iter)
-	{
-	  (*iter)->apply(d_calculatedTargets);
-	}
-      if (count > 0) 
-	count --;
+        gVectorExtra<ePlayerNetID *> d_calculatedTargets = select(owners, teamOwners, triggerer);
+        zEffectorPtrs::const_iterator iter;
+        for(iter=effectors.begin();
+                iter!=effectors.end();
+                ++iter)
+        {
+            (*iter)->apply(d_calculatedTargets);
+        }
+        if (count > 0)
+            count --;
     }
 }
 
 //
 // TargetSelf
 //
-zSelector* zSelectorSelf::create() 
+zSelector* zSelectorSelf::create()
 {
-  return new zSelectorSelf();
+    return new zSelectorSelf();
 }
 
-zSelectorSelf::zSelectorSelf(): 
-  zSelector()
+zSelectorSelf::zSelectorSelf():
+        zSelector()
 { }
 
 zSelectorSelf::zSelectorSelf(zSelectorSelf const &other):
-  zSelector(other)
+        zSelector(other)
 { }
 
 void zSelectorSelf::operator=(zSelectorSelf const &other)
-{ 
-  this->zSelector::operator=(other);
+{
+    this->zSelector::operator=(other);
 }
 
 zSelectorSelf * zSelectorSelf::copy(void) const
 {
-  return new zSelectorSelf(*this);
+    return new zSelectorSelf(*this);
 }
 
 gVectorExtra<ePlayerNetID *> zSelectorSelf::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  gVectorExtra<ePlayerNetID *> self;
-  ePlayerNetID* triggererPlayer =  triggerer->Player();
-  if (triggererPlayer != 0)
-    self.push_back( triggererPlayer );
+    gVectorExtra<ePlayerNetID *> self;
+    ePlayerNetID* triggererPlayer =  triggerer->Player();
+    if (triggererPlayer != 0)
+        self.push_back( triggererPlayer );
 
-  return self;
+    return self;
 }
 
 
 //
 // zSelectorTeammate
 //
-zSelector* zSelectorTeammate::create() 
+zSelector* zSelectorTeammate::create()
 {
-  return new zSelectorTeammate();
+    return new zSelectorTeammate();
 }
 
-zSelectorTeammate::zSelectorTeammate(): 
-  zSelector()
+zSelectorTeammate::zSelectorTeammate():
+        zSelector()
 { }
 
 zSelectorTeammate::zSelectorTeammate(zSelectorTeammate const &other):
-  zSelector(other)
+        zSelector(other)
 { }
 
 void zSelectorTeammate::operator=(zSelectorTeammate const &other)
-{ 
-  this->zSelector::operator=(other);
+{
+    this->zSelector::operator=(other);
 }
 
 zSelectorTeammate * zSelectorTeammate::copy(void) const
 {
-  return new zSelectorTeammate(*this);
+    return new zSelectorTeammate(*this);
 }
 
 gVectorExtra<ePlayerNetID *> zSelectorTeammate::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  // A single, randomly selected player that is member of the team of
-  // the player that triggered the Zone receives the effect. This
-  // includes the player that triggered the Zone as a candidate.
-  gVectorExtra <ePlayerNetID *> teammates;
-  gVectorExtra <ePlayerNetID *> singleTeammate;
+    // A single, randomly selected player that is member of the team of
+    // the player that triggered the Zone receives the effect. This
+    // includes the player that triggered the Zone as a candidate.
+    gVectorExtra <ePlayerNetID *> teammates;
+    gVectorExtra <ePlayerNetID *> singleTeammate;
 
-  ePlayerNetID* triggererPlayer =  triggerer->Player();
-  if (triggererPlayer != 0) {
-    getAllValid(teammates, triggererPlayer->CurrentTeam()->GetAllMembers(), _alive);
+    ePlayerNetID* triggererPlayer =  triggerer->Player();
+    if (triggererPlayer != 0) {
+        getAllValid(teammates, triggererPlayer->CurrentTeam()->GetAllMembers(), _alive);
 
-    // Remove the triggerer if it is there 
-    teammates.remove(triggererPlayer);
-    
-    // Who is our lucky candidate ? 
-    if(teammates.size() != 0)
-      singleTeammate.push_back(pickOne(teammates));
-  }
-  return singleTeammate;
+        // Remove the triggerer if it is there
+        teammates.remove(triggererPlayer);
+
+        // Who is our lucky candidate ?
+        if(teammates.size() != 0)
+            singleTeammate.push_back(pickOne(teammates));
+    }
+    return singleTeammate;
 }
 
 //
 // zSelectorTeam
 //
-zSelector* zSelectorTeam::create() 
+zSelector* zSelectorTeam::create()
 {
-  return new zSelectorTeam();
+    return new zSelectorTeam();
 }
 
-zSelectorTeam::zSelectorTeam(): 
-  zSelector()
+zSelectorTeam::zSelectorTeam():
+        zSelector()
 { }
 
 zSelectorTeam::zSelectorTeam(zSelectorTeam const &other):
-  zSelector(other)
+        zSelector(other)
 { }
 
 void zSelectorTeam::operator=(zSelectorTeam const &other)
-{ 
-  this->zSelector::operator=(other);
+{
+    this->zSelector::operator=(other);
 }
 
 zSelectorTeam * zSelectorTeam::copy(void) const
 {
-  return new zSelectorTeam(*this);
+    return new zSelectorTeam(*this);
 }
 
 gVectorExtra<ePlayerNetID *> zSelectorTeam::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  // All the members of the team of the player triggering the
-  // Zone will receive its effect. 
+    // All the members of the team of the player triggering the
+    // Zone will receive its effect.
 
-  gVectorExtra <ePlayerNetID *> allMemberOfTeam;
+    gVectorExtra <ePlayerNetID *> allMemberOfTeam;
 
-  ePlayerNetID* triggererPlayer =  triggerer->Player();
-  if (triggererPlayer != 0) {
-    getAllValid(allMemberOfTeam, triggererPlayer->CurrentTeam()->GetAllMembers(), _alive);
-  }
+    ePlayerNetID* triggererPlayer =  triggerer->Player();
+    if (triggererPlayer != 0) {
+        getAllValid(allMemberOfTeam, triggererPlayer->CurrentTeam()->GetAllMembers(), _alive);
+    }
 
-  return allMemberOfTeam;
+    return allMemberOfTeam;
 }
 
 //
 // zSelectorAll
 //
-zSelector* zSelectorAll::create() 
+zSelector* zSelectorAll::create()
 {
-  return new zSelectorAll();
+    return new zSelectorAll();
 }
 
-zSelectorAll::zSelectorAll(): 
-  zSelector()
+zSelectorAll::zSelectorAll():
+        zSelector()
 { }
 
 zSelectorAll::zSelectorAll(zSelectorAll const &other):
-  zSelector(other)
+        zSelector(other)
 { }
 
 void zSelectorAll::operator=(zSelectorAll const &other)
-{ 
-  this->zSelector::operator=(other);
+{
+    this->zSelector::operator=(other);
 }
 
 zSelectorAll * zSelectorAll::copy(void) const
 {
-  return new zSelectorAll(*this);
+    return new zSelectorAll(*this);
 }
 
 gVectorExtra<ePlayerNetID *> zSelectorAll::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  // Everybody in the game receives the effect.
-  gVectorExtra<ePlayerNetID *> everybody;
-  for (int i=0; i<se_PlayerNetIDs.Len(); i++) {
-    everybody.push_back( se_PlayerNetIDs(i) );
-  }
+    // Everybody in the game receives the effect.
+    gVectorExtra<ePlayerNetID *> everybody;
+    for (int i=0; i<se_PlayerNetIDs.Len(); i++) {
+        everybody.push_back( se_PlayerNetIDs(i) );
+    }
 
-  gVectorExtra<ePlayerNetID *> everybodyValid;
-  getAllValid(everybodyValid, everybody, _alive);
+    gVectorExtra<ePlayerNetID *> everybodyValid;
+    getAllValid(everybodyValid, everybody, _alive);
 
-  return everybodyValid;
+    return everybodyValid;
 }
 
 //
 // zSelectorAllButSelf
 //
-zSelector* zSelectorAllButSelf::create() 
+zSelector* zSelectorAllButSelf::create()
 {
-  return new zSelectorAllButSelf();
+    return new zSelectorAllButSelf();
 }
 
-zSelectorAllButSelf::zSelectorAllButSelf(): 
-  zSelector()
+zSelectorAllButSelf::zSelectorAllButSelf():
+        zSelector()
 { }
 
 zSelectorAllButSelf::zSelectorAllButSelf(zSelectorAllButSelf const &other):
-  zSelector(other)
+        zSelector(other)
 { }
 
 void zSelectorAllButSelf::operator=(zSelectorAllButSelf const &other)
-{ 
-  this->zSelector::operator=(other);
+{
+    this->zSelector::operator=(other);
 }
 
 zSelectorAllButSelf * zSelectorAllButSelf::copy(void) const
 {
-  return new zSelectorAllButSelf(*this);
+    return new zSelectorAllButSelf(*this);
 }
 
 gVectorExtra<ePlayerNetID *> zSelectorAllButSelf::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  // Everybody in the game but the player who triggered the
-  // Zone receives the effect. This excludes the player
-  // that triggered the Zone.
+    // Everybody in the game but the player who triggered the
+    // Zone receives the effect. This excludes the player
+    // that triggered the Zone.
 
-  gVectorExtra<ePlayerNetID *> everybody;
-  for (int i=0; i<se_PlayerNetIDs.Len(); i++) {
-    everybody.push_back( se_PlayerNetIDs(i) );
-  }
+    gVectorExtra<ePlayerNetID *> everybody;
+    for (int i=0; i<se_PlayerNetIDs.Len(); i++) {
+        everybody.push_back( se_PlayerNetIDs(i) );
+    }
 
-  gVectorExtra<ePlayerNetID *> everybodyValid;
-  getAllValid(everybodyValid, everybody, _alive);
-  // Remove the triggerer from the list of targets
+    gVectorExtra<ePlayerNetID *> everybodyValid;
+    getAllValid(everybodyValid, everybody, _alive);
+    // Remove the triggerer from the list of targets
 
-  ePlayerNetID* triggererPlayer =  triggerer->Player();
-  if (triggererPlayer != 0) {
-    everybodyValid.remove(triggererPlayer);
-  }
+    ePlayerNetID* triggererPlayer =  triggerer->Player();
+    if (triggererPlayer != 0) {
+        everybodyValid.remove(triggererPlayer);
+    }
 
-  return everybodyValid;
+    return everybodyValid;
 }
 
 /*
@@ -371,319 +371,319 @@ gVectorExtra<ePlayerNetID *> zSelectorAllButTeam::select(gVectorExtra<ePlayerNet
 // zSelectorAnother
 //
 
-zSelector* zSelectorAnother::create() 
+zSelector* zSelectorAnother::create()
 {
-  return new zSelectorAnother();
+    return new zSelectorAnother();
 }
 
-zSelectorAnother::zSelectorAnother(): 
-  zSelector()
+zSelectorAnother::zSelectorAnother():
+        zSelector()
 { }
 
 zSelectorAnother::zSelectorAnother(zSelectorAnother const &other):
-  zSelector(other)
+        zSelector(other)
 { }
 
 void zSelectorAnother::operator=(zSelectorAnother const &other)
-{ 
-  this->zSelector::operator=(other);
+{
+    this->zSelector::operator=(other);
 }
 
 zSelectorAnother * zSelectorAnother::copy(void) const
 {
-  return new zSelectorAnother(*this);
+    return new zSelectorAnother(*this);
 }
 
 gVectorExtra<ePlayerNetID *> zSelectorAnother::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  // Another single, randomly selected player that is the the one that
-  // triggered the Zone receive the effect. This excludes the player
-  // that triggered the Zone.
-  
-  gVectorExtra <ePlayerNetID *> allValidPlayer;
-  gVectorExtra <ePlayerNetID *> anotherPlayer;
+    // Another single, randomly selected player that is the the one that
+    // triggered the Zone receive the effect. This excludes the player
+    // that triggered the Zone.
 
-  gVectorExtra <ePlayerNetID *> allPlayer;
-  for (int i=0; i<se_PlayerNetIDs.Len(); i++) {
-    allPlayer.push_back( se_PlayerNetIDs(i) );
-  }
+    gVectorExtra <ePlayerNetID *> allValidPlayer;
+    gVectorExtra <ePlayerNetID *> anotherPlayer;
 
-  getAllValid(allValidPlayer, allPlayer, _alive);
+    gVectorExtra <ePlayerNetID *> allPlayer;
+    for (int i=0; i<se_PlayerNetIDs.Len(); i++) {
+        allPlayer.push_back( se_PlayerNetIDs(i) );
+    }
 
-  ePlayerNetID* triggererPlayer =  triggerer->Player();
-  if (triggererPlayer != 0) {
-    allValidPlayer.remove(triggererPlayer);
-  }
+    getAllValid(allValidPlayer, allPlayer, _alive);
 
-  if(allValidPlayer.size() != 0)
-    anotherPlayer.push_back(pickOne(allValidPlayer));
-      
-  return anotherPlayer;
+    ePlayerNetID* triggererPlayer =  triggerer->Player();
+    if (triggererPlayer != 0) {
+        allValidPlayer.remove(triggererPlayer);
+    }
+
+    if(allValidPlayer.size() != 0)
+        anotherPlayer.push_back(pickOne(allValidPlayer));
+
+    return anotherPlayer;
 }
 
 //
 // zSelectorOwner
 //
 
-zSelector* zSelectorOwner::create() 
+zSelector* zSelectorOwner::create()
 {
-  return new zSelectorOwner();
+    return new zSelectorOwner();
 }
 
-zSelectorOwner::zSelectorOwner(): 
-  zSelector()
+zSelectorOwner::zSelectorOwner():
+        zSelector()
 { }
 
 zSelectorOwner::zSelectorOwner(zSelectorOwner const &other):
-  zSelector(other)
+        zSelector(other)
 { }
 
 void zSelectorOwner::operator=(zSelectorOwner const &other)
-{ 
-  this->zSelector::operator=(other);
+{
+    this->zSelector::operator=(other);
 }
 
 zSelectorOwner * zSelectorOwner::copy(void) const
 {
-  return new zSelectorOwner(*this);
+    return new zSelectorOwner(*this);
 }
 
 gVectorExtra<ePlayerNetID *> zSelectorOwner::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  // The owner of the Zone receives the effect upon trigger,
-  // irrelevantly of the user who triggers it.
-  
-  return owners;
+    // The owner of the Zone receives the effect upon trigger,
+    // irrelevantly of the user who triggers it.
+
+    return owners;
 }
 
 //
 // zSelectorOwnerTeam
 //
 
-zSelector* zSelectorOwnerTeam::create() 
+zSelector* zSelectorOwnerTeam::create()
 {
-  return new zSelectorOwnerTeam();
+    return new zSelectorOwnerTeam();
 }
 
-zSelectorOwnerTeam::zSelectorOwnerTeam(): 
-  zSelector()
+zSelectorOwnerTeam::zSelectorOwnerTeam():
+        zSelector()
 { }
 
 zSelectorOwnerTeam::zSelectorOwnerTeam(zSelectorOwnerTeam const &other):
-  zSelector(other)
+        zSelector(other)
 { }
 
 void zSelectorOwnerTeam::operator=(zSelectorOwnerTeam const &other)
-{ 
-  this->zSelector::operator=(other);
+{
+    this->zSelector::operator=(other);
 }
 
 zSelectorOwnerTeam * zSelectorOwnerTeam::copy(void) const
 {
-  return new zSelectorOwnerTeam(*this);
+    return new zSelectorOwnerTeam(*this);
 }
 
 gVectorExtra<ePlayerNetID *> zSelectorOwnerTeam::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  // The members of the team that owns the Zone receives the
-  // effect upon trigger, irrelevantly of the user who triggers it.
+    // The members of the team that owns the Zone receives the
+    // effect upon trigger, irrelevantly of the user who triggers it.
 
-  // Pick all the members of the teams
-  gVectorExtra <ePlayerNetID *> allOwnerTeamMembers;
-  gVectorExtra<eTeam *>::const_iterator iter;
-  for(iter = teamOwners.begin();
-      iter != teamOwners.end();
-      ++iter)
+    // Pick all the members of the teams
+    gVectorExtra <ePlayerNetID *> allOwnerTeamMembers;
+    gVectorExtra<eTeam *>::const_iterator iter;
+    for(iter = teamOwners.begin();
+            iter != teamOwners.end();
+            ++iter)
     {
-      allOwnerTeamMembers.insertAll((*iter)->GetAllMembers());
+        allOwnerTeamMembers.insertAll((*iter)->GetAllMembers());
     }
 
-  // Keep only the valid ones
-  gVectorExtra <ePlayerNetID *> OwnerTeamMembers;
-  getAllValid(OwnerTeamMembers, allOwnerTeamMembers, _alive);
+    // Keep only the valid ones
+    gVectorExtra <ePlayerNetID *> OwnerTeamMembers;
+    getAllValid(OwnerTeamMembers, allOwnerTeamMembers, _alive);
 
-  return OwnerTeamMembers;
+    return OwnerTeamMembers;
 }
 
 
 //
 // zSelectorOwnerTeamTeammate
 //
-zSelector* zSelectorOwnerTeamTeammate::create() 
+zSelector* zSelectorOwnerTeamTeammate::create()
 {
-  return new zSelectorOwnerTeamTeammate();
+    return new zSelectorOwnerTeamTeammate();
 }
 
-zSelectorOwnerTeamTeammate::zSelectorOwnerTeamTeammate(): 
-  zSelector()
+zSelectorOwnerTeamTeammate::zSelectorOwnerTeamTeammate():
+        zSelector()
 { }
 
 zSelectorOwnerTeamTeammate::zSelectorOwnerTeamTeammate(zSelectorOwnerTeamTeammate const &other):
-  zSelector(other)
+        zSelector(other)
 { }
 
 void zSelectorOwnerTeamTeammate::operator=(zSelectorOwnerTeamTeammate const &other)
-{ 
-  this->zSelector::operator=(other);
+{
+    this->zSelector::operator=(other);
 }
 
 zSelectorOwnerTeamTeammate * zSelectorOwnerTeamTeammate::copy(void) const
 {
-  return new zSelectorOwnerTeamTeammate(*this);
+    return new zSelectorOwnerTeamTeammate(*this);
 }
 
 gVectorExtra<ePlayerNetID *> zSelectorOwnerTeamTeammate::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  // Pick all the members of the teams
-  gVectorExtra <ePlayerNetID *> allTeammates;
-  gVectorExtra<eTeam *>::const_iterator iter;
-  for(iter = teamOwners.begin();
-      iter != teamOwners.end();
-      ++iter)
+    // Pick all the members of the teams
+    gVectorExtra <ePlayerNetID *> allTeammates;
+    gVectorExtra<eTeam *>::const_iterator iter;
+    for(iter = teamOwners.begin();
+            iter != teamOwners.end();
+            ++iter)
     {
-      allTeammates.insertAll((*iter)->GetAllMembers());
+        allTeammates.insertAll((*iter)->GetAllMembers());
     }
 
-  // Keep only the valid ones
-  gVectorExtra <ePlayerNetID *> teammates;
-  getAllValid(teammates, allTeammates, _alive);
+    // Keep only the valid ones
+    gVectorExtra <ePlayerNetID *> teammates;
+    getAllValid(teammates, allTeammates, _alive);
 
-  // Select a random one 
-  gVectorExtra<ePlayerNetID *> singleTeammate;
-  if(teammates.size() != 0)
-    singleTeammate.push_back(pickOne(teammates));
-  return singleTeammate;
+    // Select a random one
+    gVectorExtra<ePlayerNetID *> singleTeammate;
+    if(teammates.size() != 0)
+        singleTeammate.push_back(pickOne(teammates));
+    return singleTeammate;
 }
 
 //
 // zSelectorAnyDead
 //
-zSelector* zSelectorAnyDead::create() 
+zSelector* zSelectorAnyDead::create()
 {
-  return new zSelectorAnyDead();
+    return new zSelectorAnyDead();
 }
 
-zSelectorAnyDead::zSelectorAnyDead(): 
-  zSelector()
+zSelectorAnyDead::zSelectorAnyDead():
+        zSelector()
 { }
 
 zSelectorAnyDead::zSelectorAnyDead(zSelectorAnyDead const &other):
-  zSelector(other)
+        zSelector(other)
 { }
 
 void zSelectorAnyDead::operator=(zSelectorAnyDead const &other)
-{ 
-  this->zSelector::operator=(other);
+{
+    this->zSelector::operator=(other);
 }
 
 zSelectorAnyDead * zSelectorAnyDead::copy(void) const
 {
-  return new zSelectorAnyDead(*this);
+    return new zSelectorAnyDead(*this);
 }
 
 gVectorExtra<ePlayerNetID *> zSelectorAnyDead::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  // A single, randomly selected dead player receives the
-  // effect.
+    // A single, randomly selected dead player receives the
+    // effect.
 
-  gVectorExtra<ePlayerNetID *> everybody;
-  for (int i=0; i<se_PlayerNetIDs.Len(); i++) {
-    everybody.push_back( se_PlayerNetIDs(i) );
-  }
+    gVectorExtra<ePlayerNetID *> everybody;
+    for (int i=0; i<se_PlayerNetIDs.Len(); i++) {
+        everybody.push_back( se_PlayerNetIDs(i) );
+    }
 
-  gVectorExtra<ePlayerNetID *> everybodyDead;
-  getAllValid(everybodyDead, everybody, _dead);
+    gVectorExtra<ePlayerNetID *> everybodyDead;
+    getAllValid(everybodyDead, everybody, _dead);
 
-  gVectorExtra<ePlayerNetID *> singleDead;
-  if(everybodyDead.size() != 0)
-    singleDead.push_back(pickOne(everybodyDead));
+    gVectorExtra<ePlayerNetID *> singleDead;
+    if(everybodyDead.size() != 0)
+        singleDead.push_back(pickOne(everybodyDead));
 
-  return singleDead;
+    return singleDead;
 }
 
 //
 // zSelectorAllDead
 //
-zSelector* zSelectorAllDead::create() 
+zSelector* zSelectorAllDead::create()
 {
-  return new zSelectorAllDead();
+    return new zSelectorAllDead();
 }
 
-zSelectorAllDead::zSelectorAllDead(): 
-  zSelector()
+zSelectorAllDead::zSelectorAllDead():
+        zSelector()
 { }
 
 zSelectorAllDead::zSelectorAllDead(zSelectorAllDead const &other):
-  zSelector(other)
+        zSelector(other)
 { }
 
 void zSelectorAllDead::operator=(zSelectorAllDead const &other)
-{ 
-  this->zSelector::operator=(other);
+{
+    this->zSelector::operator=(other);
 }
 
 zSelectorAllDead * zSelectorAllDead::copy(void) const
 {
-  return new zSelectorAllDead(*this);
+    return new zSelectorAllDead(*this);
 }
 
 gVectorExtra<ePlayerNetID *> zSelectorAllDead::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  // All dead players receives the effect.
+    // All dead players receives the effect.
 
-  gVectorExtra<ePlayerNetID *> everybody;
-  for (int i=0; i<se_PlayerNetIDs.Len(); i++) {
-    everybody.push_back( se_PlayerNetIDs(i) );
-  }
+    gVectorExtra<ePlayerNetID *> everybody;
+    for (int i=0; i<se_PlayerNetIDs.Len(); i++) {
+        everybody.push_back( se_PlayerNetIDs(i) );
+    }
 
-  gVectorExtra<ePlayerNetID *> everybodyDead;
-  getAllValid(everybodyDead, everybody, _dead);
+    gVectorExtra<ePlayerNetID *> everybodyDead;
+    getAllValid(everybodyDead, everybody, _dead);
 
-  return everybodyDead;
+    return everybodyDead;
 }
 
 //
 // zSelectorSingleDeadOwner
 //
-zSelector* zSelectorSingleDeadOwner::create() 
+zSelector* zSelectorSingleDeadOwner::create()
 {
-  return new zSelectorSingleDeadOwner();
+    return new zSelectorSingleDeadOwner();
 }
 
-zSelectorSingleDeadOwner::zSelectorSingleDeadOwner(): 
-  zSelector()
+zSelectorSingleDeadOwner::zSelectorSingleDeadOwner():
+        zSelector()
 { }
 
 zSelectorSingleDeadOwner::zSelectorSingleDeadOwner(zSelectorSingleDeadOwner const &other):
-  zSelector(other)
+        zSelector(other)
 { }
 
 void zSelectorSingleDeadOwner::operator=(zSelectorSingleDeadOwner const &other)
-{ 
-  this->zSelector::operator=(other);
+{
+    this->zSelector::operator=(other);
 }
 
 zSelectorSingleDeadOwner * zSelectorSingleDeadOwner::copy(void) const
 {
-  return new zSelectorSingleDeadOwner(*this);
+    return new zSelectorSingleDeadOwner(*this);
 }
 
 gVectorExtra<ePlayerNetID *> zSelectorSingleDeadOwner::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  // A single, randomly selected dead member of
-  // the team of the player that triggered the Zone receives the
-  // effect.
+    // A single, randomly selected dead member of
+    // the team of the player that triggered the Zone receives the
+    // effect.
 
-  gVectorExtra <ePlayerNetID *> deadOwners;
-  gVectorExtra <ePlayerNetID *> singleDeadOwner;
+    gVectorExtra <ePlayerNetID *> deadOwners;
+    gVectorExtra <ePlayerNetID *> singleDeadOwner;
 
-  getAllValid(deadOwners, owners, _dead);
-  
-  // Who is our lucky candidate ? 
-  if(deadOwners.size() != 0)
-    singleDeadOwner.push_back(pickOne(deadOwners));
-  
-  return singleDeadOwner;
+    getAllValid(deadOwners, owners, _dead);
+
+    // Who is our lucky candidate ?
+    if(deadOwners.size() != 0)
+        singleDeadOwner.push_back(pickOne(deadOwners));
+
+    return singleDeadOwner;
 }
 
 
@@ -691,111 +691,111 @@ gVectorExtra<ePlayerNetID *> zSelectorSingleDeadOwner::select(gVectorExtra<ePlay
 //
 // zSelectorAnotherTeammateDead
 //
-zSelector* zSelectorAnotherTeammateDead::create() 
+zSelector* zSelectorAnotherTeammateDead::create()
 {
-  return new zSelectorAnotherTeammateDead();
+    return new zSelectorAnotherTeammateDead();
 }
 
-zSelectorAnotherTeammateDead::zSelectorAnotherTeammateDead(): 
-  zSelector()
+zSelectorAnotherTeammateDead::zSelectorAnotherTeammateDead():
+        zSelector()
 { }
 
 zSelectorAnotherTeammateDead::zSelectorAnotherTeammateDead(zSelectorAnotherTeammateDead const &other):
-  zSelector(other)
+        zSelector(other)
 { }
 
 void zSelectorAnotherTeammateDead::operator=(zSelectorAnotherTeammateDead const &other)
-{ 
-  this->zSelector::operator=(other);
+{
+    this->zSelector::operator=(other);
 }
 
 zSelectorAnotherTeammateDead * zSelectorAnotherTeammateDead::copy(void) const
 {
-  return new zSelectorAnotherTeammateDead(*this);
+    return new zSelectorAnotherTeammateDead(*this);
 }
 
 gVectorExtra<ePlayerNetID *> zSelectorAnotherTeammateDead::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  // A single, randomly selected dead member of
-  // the team of the player that triggered the Zone receives the
-  // effect.
+    // A single, randomly selected dead member of
+    // the team of the player that triggered the Zone receives the
+    // effect.
 
-  gVectorExtra <ePlayerNetID *> deadTeammates;
-  gVectorExtra <ePlayerNetID *> singleDeadTeammate;
+    gVectorExtra <ePlayerNetID *> deadTeammates;
+    gVectorExtra <ePlayerNetID *> singleDeadTeammate;
 
-  ePlayerNetID* triggererPlayer =  triggerer->Player();
-  if (triggererPlayer != 0) {
-    getAllValid(deadTeammates, triggererPlayer->CurrentTeam()->GetAllMembers(), _dead);
+    ePlayerNetID* triggererPlayer =  triggerer->Player();
+    if (triggererPlayer != 0) {
+        getAllValid(deadTeammates, triggererPlayer->CurrentTeam()->GetAllMembers(), _dead);
 
-    // Remove the triggerer if it is there 
-    deadTeammates.remove(triggererPlayer);
-    
-    // Who is our lucky candidate ? 
-    if(deadTeammates.size() != 0)
-      singleDeadTeammate.push_back(pickOne(deadTeammates));
-  }
-  return singleDeadTeammate;
+        // Remove the triggerer if it is there
+        deadTeammates.remove(triggererPlayer);
+
+        // Who is our lucky candidate ?
+        if(deadTeammates.size() != 0)
+            singleDeadTeammate.push_back(pickOne(deadTeammates));
+    }
+    return singleDeadTeammate;
 }
 
 
 //
 // zSelectorAnotherNotTeammateDead
 //
-zSelector* zSelectorAnotherNotTeammateDead::create() 
+zSelector* zSelectorAnotherNotTeammateDead::create()
 {
-  return new zSelectorAnotherNotTeammateDead();
+    return new zSelectorAnotherNotTeammateDead();
 }
 
-zSelectorAnotherNotTeammateDead::zSelectorAnotherNotTeammateDead(): 
-  zSelector()
+zSelectorAnotherNotTeammateDead::zSelectorAnotherNotTeammateDead():
+        zSelector()
 { }
 
 zSelectorAnotherNotTeammateDead::zSelectorAnotherNotTeammateDead(zSelectorAnotherNotTeammateDead const &other):
-  zSelector(other)
+        zSelector(other)
 { }
 
 void zSelectorAnotherNotTeammateDead::operator=(zSelectorAnotherNotTeammateDead const &other)
-{ 
-  this->zSelector::operator=(other);
+{
+    this->zSelector::operator=(other);
 }
 
 zSelectorAnotherNotTeammateDead * zSelectorAnotherNotTeammateDead::copy(void) const
 {
-  return new zSelectorAnotherNotTeammateDead(*this);
+    return new zSelectorAnotherNotTeammateDead(*this);
 }
 
 gVectorExtra<ePlayerNetID *> zSelectorAnotherNotTeammateDead::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
 {
-  // A single, randomly selected dead player receives the
-  // effect.
+    // A single, randomly selected dead player receives the
+    // effect.
 
-  // Get all the dead players
-  gVectorExtra<ePlayerNetID *> everybody;
-  for (int i=0; i<se_PlayerNetIDs.Len(); i++) {
-    everybody.push_back( se_PlayerNetIDs(i) );
-  }
-  gVectorExtra<ePlayerNetID *> everybodyDead;
-  getAllValid(everybodyDead, everybody, _dead);
-  
-  gVectorExtra <ePlayerNetID *> singleDeadNotTeammate;
-  if (everybodyDead.size() != 0)
-    {
-      gVectorExtra <ePlayerNetID *> teammates;
-      // Remove all the teammates
-      ePlayerNetID* triggererPlayer =  triggerer->Player();
-      if (triggererPlayer != 0) 
-	{
-	  getAllValid(teammates, triggererPlayer->CurrentTeam()->GetAllMembers(), _either);
-
-	  // Remove the teammates
-	  everybodyDead.removeAll(teammates);
-    
-	  // Who is our lucky candidate ? 
-	  if(everybodyDead.size() != 0)
-	    singleDeadNotTeammate.push_back(pickOne(everybodyDead));
-	}
+    // Get all the dead players
+    gVectorExtra<ePlayerNetID *> everybody;
+    for (int i=0; i<se_PlayerNetIDs.Len(); i++) {
+        everybody.push_back( se_PlayerNetIDs(i) );
     }
-  return singleDeadNotTeammate;
+    gVectorExtra<ePlayerNetID *> everybodyDead;
+    getAllValid(everybodyDead, everybody, _dead);
+
+    gVectorExtra <ePlayerNetID *> singleDeadNotTeammate;
+    if (everybodyDead.size() != 0)
+    {
+        gVectorExtra <ePlayerNetID *> teammates;
+        // Remove all the teammates
+        ePlayerNetID* triggererPlayer =  triggerer->Player();
+        if (triggererPlayer != 0)
+        {
+            getAllValid(teammates, triggererPlayer->CurrentTeam()->GetAllMembers(), _either);
+
+            // Remove the teammates
+            everybodyDead.removeAll(teammates);
+
+            // Who is our lucky candidate ?
+            if(everybodyDead.size() != 0)
+                singleDeadNotTeammate.push_back(pickOne(everybodyDead));
+        }
+    }
+    return singleDeadNotTeammate;
 }
 
 

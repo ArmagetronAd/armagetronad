@@ -55,7 +55,7 @@ public:
         xmlNode *m_cur;  //!< The current node, the whole class is a wrapper around it
     public:
         node(xmlNode *cur); //!< Constructor from a libxml node
-	node() : m_cur(0) {} //!< Dummy constructor, only of use for stl containers
+        node() : m_cur(0) {} //!< Dummy constructor, only of use for stl containers
         bool IsOfType(CHAR const *name) const; //!< Checks the type (name) of a node
         tString GetName(void) const; //!< Gets the type (name) of the node
         tString GetProp(CHAR const *prop) const; //!< Get a property of this node as a raw string

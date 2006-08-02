@@ -80,6 +80,7 @@ cycle_delay_bonus_help		    Extra fudge factor to CYCLE_DELAY applied on the ded
 cycle_delay_timebased_help		Turn delays will be based on the time since the last turn if this is 1 (default) and the distance if this is 0. Intermediate values and values out of these bounds are supported as well.
 cycle_delay_help_doublebind_bonus       Factor to CYCLE_DELAY for two consecutive turns in the same direction
 cycle_turn_speed_factor_help    Factor the speed of a lightcycle is multiplied with when turning 
+cycle_delay_doublebind_bonus_help       Factor CYCLE_DELAY is multiplied with for consecutive turns in the same direction
 
 
 cycle_brake_help		Brake intensity
@@ -627,6 +628,10 @@ sky_wobble_help			Sky animation
 infinity_plane_help		Use infinite points (Does not work properly on most Windows systems)
 lag_o_meter_help		Draw Lag-O-Meter in network play
 lag_o_meter_scale_help  Scale of the Lag-O-Meter. 1.0 is the "correct" value, older clients were hardcoded to .5 due to a bug.
+lag_o_meter_threshold_help	The Lag-O-Meter will only be drawn if the product of cycle speed and lag is bigger than this value.
+lag_o_meter_blend_help		Amount the player color should be blended with white to get the color of the Lag-O-Meter. 1 means white, 0 means the color of the player.
+lag_o_meter_use_old_help	Should we use the old buggy Lag-O-Meter? This functionality will go away soon.
+axes_indicator_help		Should the Axis Indicator be rendered?
 predict_objects_help    Predict cycle movement in network play
 textures_hi_help		Use high colour textures
 sparks_help			    Draw sparks when going too close to a wall
@@ -1245,6 +1250,8 @@ network_opts_pingchar_help	The maximum ping (in ms) you are willing to take over
 
 network_opts_lagometer_text	Lag-O-Meter:
 network_opts_lagometer_help	In a network game, the place where the other players may already be now (but you have not yet noticed because of the network delay) is indicated as a geometrical shape. Useful for internet play.
+network_opts_axesindicator_text	Axes Indicator:
+network_opts_axesindicator_help	The axes indicator is meant to show the directions the cycle can turn to as lines going out from the cycle. Good on servers with changing configs so you know what to expect before you turn.
 
 network_opts_predict_text	Prediction:
 network_opts_predict_help	In a network game, this extrapolates the cycles' movement. Leaving it disabled makes the graphics smoother, enabling it gives yo a better image of the actual situation. I leave it disabled; the Lag-O-Meter is a good substitute for prediction. This is always disabled in server mode.
@@ -1464,7 +1471,7 @@ player_red_text			Red:
 player_red_help			Lets you choose the red component of your colour.
 
 player_spectator_text		Spectator Mode:
-player_spectator_help		In spectator mode, you do not control a cycle; you just watch the game as if you were already dead. The other players don't know at all that you are there; you don't appear on the score table.
+player_spectator_help		In spectator mode, you do not control a cycle; you just watch the game as if you were already dead. The other players will see you on the score table and you can chat with them, but you won't be spawned at the beginng of a round.
 
 player_name_team_text		Name Team after Player:
 player_name_team_help		You can set your prefered method for naming your team here: On indicates you want the team to be named after its most senior player, Off means you want a simple colour label.

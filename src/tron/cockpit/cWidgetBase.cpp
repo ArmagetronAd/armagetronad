@@ -142,23 +142,23 @@ tValue::Base *WithDataFunctions::ProcessMath(tXmlParser::node cur) {
         }
     }
 
-	tValue::Base *val;
-	if (cur.GetProp("type") == "sum")
-		val = new tValue::Add(lvalue, rvalue);
-	else
-	if (cur.GetProp("type") == "difference")
-		val = new tValue::Subtract(lvalue, rvalue);
-	else
-	if (cur.GetProp("type") == "product")
-		val = new tValue::Multiply(lvalue, rvalue);
-	else
-	if (cur.GetProp("type") == "quotient")
-		val = new tValue::Divide(lvalue, rvalue);
-	else
-	{
-		tERR_WARN("Type '" + cur.GetProp("type") + "' unknown!");
-		val = new tValue::Add(lvalue, rvalue);
-	}
+    tValue::Base *val;
+    if (cur.GetProp("type") == "sum")
+        val = new tValue::Add(lvalue, rvalue);
+    else
+        if (cur.GetProp("type") == "difference")
+            val = new tValue::Subtract(lvalue, rvalue);
+        else
+            if (cur.GetProp("type") == "product")
+                val = new tValue::Multiply(lvalue, rvalue);
+            else
+                if (cur.GetProp("type") == "quotient")
+                    val = new tValue::Divide(lvalue, rvalue);
+                else
+                {
+                    tERR_WARN("Type '" + cur.GetProp("type") + "' unknown!");
+                    val = new tValue::Add(lvalue, rvalue);
+                }
     ProcessDataTags(cur, *val);
     return val;
 }
@@ -315,7 +315,7 @@ void WithTable::ProcessRow(tXmlParser::node cur) {
 void WithTable::ProcessCell(tXmlParser::node cur) {
     for (cur = cur.GetFirstChild(); cur; ++cur) {
         if(cur.IsOfType("Text")) {
-	  //            m_table.back().back().push_back((tValue::Set(tValue::BasePtr(new tValue::String(cur.GetProp("value"))))));
+            //            m_table.back().back().push_back((tValue::Set(tValue::BasePtr(new tValue::String(cur.GetProp("value"))))));
             tValue::BasePtr a(new tValue::String(cur.GetProp("value")));
             tValue::BasePtr b(new tValue::Int(3));
             tValue::BasePtr c(new tValue::Int(4));

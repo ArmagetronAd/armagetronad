@@ -85,7 +85,7 @@ void gCamera::Timestep(REAL ts){
                 }
             }
             lastCenter=Center();
-                        
+
             eSoundMixer* mixer = eSoundMixer::GetMixer();
             mixer->SetMicrophoneOwner(Center());
         }

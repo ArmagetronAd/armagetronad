@@ -221,13 +221,13 @@ protected:
     inline gCycleMovement & SetLastTurnTime( REAL const & lastTurnTime );	//!< Sets the time of the last turn
 private:
     inline gCycleMovement & SetDistance( REAL distance );   //!< Sets the distance traveled so far
-public:  // HACK 
+public:  // HACK
     //To have the zone able to influence it
     inline gCycleMovement & SetRubber( REAL rubber );   //!< Sets the amount rubber used up by the cycle
 private: // END OF HACK
     inline gCycleMovement & SetTurns( unsigned short turns );   //!< Sets the number of turns taken so far
     inline gCycleMovement & SetBraking( unsigned short braking );   //!< Sets flag indicating status of brakes ( on/off )
-public:  // HACK 
+public:  // HACK
     //To have the zone able to influence it
     inline gCycleMovement & SetBrakingReservoir( REAL brakingReservoir );	//!< Sets the reservoir for braking. 1 means full, 0 is empty
 private: // END OF HACK

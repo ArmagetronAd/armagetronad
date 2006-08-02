@@ -7,41 +7,41 @@
 /*
  * Keep track of everybody contributing to the monitor (for a tic atm)
  */
-void 
+void
 zMonitor::affectSlide(gCycle* user, REAL triggererInfluenceSlide, Triad marked) {
-  Triggerer triggerer;
-  triggerer.who = user;
-  triggerer.positive = triggererInfluenceSlide > 0.0 ? _true : _false;
-  triggerer.marked = marked;
+    Triggerer triggerer;
+    triggerer.who = user;
+    triggerer.positive = triggererInfluenceSlide > 0.0 ? _true : _false;
+    triggerer.marked = marked;
 
-  contributorsSlide.push_back(triggerer);
-  
-  totalInfluenceSlide += triggererInfluenceSlide;
+    contributorsSlide.push_back(triggerer);
+
+    totalInfluenceSlide += triggererInfluenceSlide;
 
 }
 
 void
 zMonitor::affectAdd(gCycle* user, REAL triggererInfluenceAdd, Triad marked) {
-  Triggerer triggerer;
-  triggerer.who = user;
-  triggerer.positive = triggererInfluenceAdd > 0.0 ? _true : _false;
-  triggerer.marked = marked;
+    Triggerer triggerer;
+    triggerer.who = user;
+    triggerer.positive = triggererInfluenceAdd > 0.0 ? _true : _false;
+    triggerer.marked = marked;
 
-  contributorsAdd.push_back(triggerer);
-  
-  totalInfluenceAdd += triggererInfluenceAdd;
+    contributorsAdd.push_back(triggerer);
+
+    totalInfluenceAdd += triggererInfluenceAdd;
 }
 
 void
 zMonitor::affectSet(gCycle* user, REAL triggererInfluenceSet, Triad marked) {
-  Triggerer triggerer;
-  triggerer.who = user;
-  triggerer.positive = triggererInfluenceSet > 0.0 ? _true : _false;
-  triggerer.marked = marked;
+    Triggerer triggerer;
+    triggerer.who = user;
+    triggerer.positive = triggererInfluenceSet > 0.0 ? _true : _false;
+    triggerer.marked = marked;
 
-  contributorsSet.push_back(triggerer);
-  
-  totalInfluenceSet = triggererInfluenceSet;
+    contributorsSet.push_back(triggerer);
+
+    totalInfluenceSet = triggererInfluenceSet;
 }
 
 
@@ -59,7 +59,7 @@ bool zMonitor::Timestep( REAL time )
 {
     // Do we need to reset the value?
     if (contributorsSet.size()!=0)
-      value = totalInfluenceSet;
+        value = totalInfluenceSet;
 
     // Compute the sliding influence, ie: proportional to time
     totalInfluenceSlide += drift;
@@ -89,15 +89,15 @@ bool zMonitor::Timestep( REAL time )
     // go through all the rules and find the ones to apply
     zMonitorRulePtrs::const_iterator iter;
     for(iter = rules.begin();
-	iter != rules.end();
-	++iter) 
-      {
-	// Go through all the rules of the monitor and see wich need to be activated
-	if ((*iter)->isValid(value)) {
-	  (*iter)->applyRule(contributors, time);
-	}
-      }
-    
+            iter != rules.end();
+            ++iter)
+    {
+        // Go through all the rules of the monitor and see wich need to be activated
+        if ((*iter)->isValid(value)) {
+            (*iter)->applyRule(contributors, time);
+        }
+    }
+
     // bound the value
     clamp(value, minValue, maxValue);
 
@@ -111,37 +111,37 @@ bool zMonitor::Timestep( REAL time )
 
 void
 zMonitor::addRule(zMonitorRulePtr aRule) {
-  /*
-   * HACK
-   * This only works for a single rule! fix this
-   */
-  rules.push_back(aRule);
+    /*
+     * HACK
+     * This only works for a single rule! fix this
+     */
+    rules.push_back(aRule);
 }
 
 
 
 
 void zMonitorRule::applyRule(triggerers &contributors, REAL time) {
-  /* We take all the contributors */
-  /* And apply the proper effect */
-  // HACK
-  // TODO
-  
-  std::vector<zEffectGroupPtr>::iterator iter;
-  for (iter = effectGroupList.begin();
-       iter != effectGroupList.end();
-       ++iter)
+    /* We take all the contributors */
+    /* And apply the proper effect */
+    // HACK
+    // TODO
+
+    std::vector<zEffectGroupPtr>::iterator iter;
+    for (iter = effectGroupList.begin();
+            iter != effectGroupList.end();
+            ++iter)
     {
 
-      triggerers::const_iterator iter2;
-      for (iter2 = contributors.begin();
-         iter2 != contributors.end();
-         ++iter2)
-      {
-        (*iter)->OnEnter(*iter2, time);
-      }
+        triggerers::const_iterator iter2;
+        for (iter2 = contributors.begin();
+                iter2 != contributors.end();
+                ++iter2)
+        {
+            (*iter)->OnEnter(*iter2, time);
+        }
     }
-  
+
 }
 
 /*
@@ -149,7 +149,7 @@ void zMonitorRule::applyRule(triggerers &contributors, REAL time) {
  */
 bool
 zMonitorRuleOver::isValid(float monitorValue) {
-  return (monitorValue>=limit);
+    return (monitorValue>=limit);
 }
 
 /*
@@ -157,7 +157,7 @@ zMonitorRuleOver::isValid(float monitorValue) {
  */
 bool
 zMonitorRuleUnder::isValid(float monitorValue) {
-  return (monitorValue<=limit);
+    return (monitorValue<=limit);
 }
 
 
@@ -166,7 +166,7 @@ zMonitorRuleUnder::isValid(float monitorValue) {
  */
 bool
 zMonitorRuleInRange::isValid(float monitorValue) {
-  return (lowLimit<= monitorValue && monitorValue<=highLimit);
+    return (lowLimit<= monitorValue && monitorValue<=highLimit);
 }
 
 /*
@@ -174,16 +174,16 @@ zMonitorRuleInRange::isValid(float monitorValue) {
  */
 bool
 zMonitorRuleOutsideRange::isValid(float monitorValue) {
-  return (monitorValue <= lowLimit  || highLimit <= monitorValue);
+    return (monitorValue <= lowLimit  || highLimit <= monitorValue);
 }
 
 void
 zMonitorInfluence::apply(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * user) {
-  // Currently, we discard ownership information
-  if (influenceSlideAvailable == true) 
-    monitor->affectSlide(user, influenceSlide, marked);
-  if (influenceAddAvailable == true) 
-    monitor->affectAdd(user, influenceAdd, marked);
-  if (influenceSetAvailable == true) 
-    monitor->affectSet(user, influenceSet, marked);
+    // Currently, we discard ownership information
+    if (influenceSlideAvailable == true)
+        monitor->affectSlide(user, influenceSlide, marked);
+    if (influenceAddAvailable == true)
+        monitor->affectAdd(user, influenceAdd, marked);
+    if (influenceSetAvailable == true)
+        monitor->affectSet(user, influenceSet, marked);
 }

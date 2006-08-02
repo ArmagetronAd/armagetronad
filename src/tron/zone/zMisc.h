@@ -4,15 +4,15 @@
 #include "gCycle.h"
 
 enum Triad {
-  _false,
-  _true,
-  _ignore
+    _false,
+    _true,
+    _ignore
 };
 
 struct Triggerer {
-  gCycle * who;
-  Triad    positive;
-  Triad    marked;
+    gCycle * who;
+    Triad    positive;
+    Triad    marked;
 };
 
 /*
@@ -26,11 +26,11 @@ struct Triggerer {
  *
  */
 inline bool validateTriad(Triad a, Triad b) {
-  if (a==_ignore || b==_ignore || a==b)
+    if (a==_ignore || b==_ignore || a==b)
     {
-      return true;
+        return true;
     }
-  return false;
+    return false;
 }
 
 #endif

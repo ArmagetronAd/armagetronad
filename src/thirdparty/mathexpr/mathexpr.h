@@ -52,18 +52,18 @@ const float ErrVal=DBL_MAX;
 //Class definitions for operations
 
 class RVar{
- public:
-  char*name;float*pval;
-  RVar(){name=NULL;pval=NULL;};
-  RVar(const RVar&);
-  RVar(const char*,float*);
-  ~RVar();
-  friend int operator==(const RVar&,const RVar&);
+public:
+    char*name;float*pval;
+    RVar(){name=NULL;pval=NULL;};
+    RVar(const RVar&);
+    RVar(const char*,float*);
+    ~RVar();
+    friend int operator==(const RVar&,const RVar&);
 };
 typedef RVar* PRVar;
 
 enum ROperator{ErrOp,Juxt,Num,Var,Add,Sub,Opp,Mult,Div,Pow,Sqrt,
-	       NthRoot,Abs,Sin,Cos,Tg,Ln,Exp,Acos,Asin,Atan,E10,Fun};
+               NthRoot,Abs,Sin,Cos,Tg,Ln,Exp,Acos,Asin,Atan,E10,Fun};
 
 typedef void ((*pfoncld)(float*&));
 
@@ -73,73 +73,73 @@ class RFunction;
 typedef RFunction* PRFunction;
 
 class ROperation{
-  pfoncld*pinstr;float**pvals;float*ppile;RFunction**pfuncpile;
-  mutable signed char containfuncflag;
-  void BuildCode();
-	void Destroy();
- public:
-  ROperator op;
-  PROperation mmb1,mmb2;
-  float ValC;const RVar* pvar;float*pvarval;
-  RFunction* pfunc;
-  ROperation();
-  ROperation(const ROperation&);
-  ROperation(float);
-  ROperation(const RVar&);
-  ROperation(char const*sp,int nvarp=0,PRVar*ppvarp=NULL,int nfuncp=0,PRFunction*ppfuncp=NULL);
-  ~ROperation();
-  float Val() const;
-  signed char ContainVar(const RVar&) const;
-  signed char ContainFunc(const RFunction&) const;
-  signed char ContainFuncNoRec(const RFunction&) const; // No recursive test on subfunctions
-  ROperation NthMember(int) const;int NMembers() const;
-  signed char HasError(const ROperation* =NULL) const;
-  ROperation& operator=(const ROperation&);
-  friend int operator==(const ROperation& ,const float);
-  friend int operator==(const ROperation& ,const ROperation&);
-  friend int operator!=(const ROperation& ,const ROperation&);
-  ROperation operator+() const;ROperation operator-() const;
-  friend ROperation operator,(const ROperation&,const ROperation&);
-  friend ROperation operator+(const ROperation&,const ROperation&);
-  friend ROperation operator-(const ROperation&,const ROperation&);
-  friend ROperation operator*(const ROperation&,const ROperation&);
-  friend ROperation operator/(const ROperation&,const ROperation&);
-  friend ROperation operator^(const ROperation&,const ROperation&);  // Caution: wrong associativity and precedence
-  friend ROperation sqrt(const ROperation&);
-  friend ROperation abs(const ROperation&);
-  friend ROperation sin(const ROperation&);
-  friend ROperation cos(const ROperation&);
-  friend ROperation tan(const ROperation&);
-  friend ROperation log(const ROperation&);
-  friend ROperation exp(const ROperation&);
-  friend ROperation acos(const ROperation&);
-  friend ROperation asin(const ROperation&);
-  friend ROperation atan(const ROperation&);
-  friend ROperation ApplyOperator(int,ROperation**,ROperation (*)(const ROperation&,const ROperation&));
-  ROperation Diff(const RVar&) const; //  Differentiate w.r.t a variable
-  char* Expr() const;
-  ROperation Substitute(const RVar&,const ROperation&) const;
+    pfoncld*pinstr;float**pvals;float*ppile;RFunction**pfuncpile;
+    mutable signed char containfuncflag;
+    void BuildCode();
+    void Destroy();
+public:
+    ROperator op;
+    PROperation mmb1,mmb2;
+    float ValC;const RVar* pvar;float*pvarval;
+    RFunction* pfunc;
+    ROperation();
+    ROperation(const ROperation&);
+    ROperation(float);
+    ROperation(const RVar&);
+    ROperation(char const*sp,int nvarp=0,PRVar*ppvarp=NULL,int nfuncp=0,PRFunction*ppfuncp=NULL);
+    ~ROperation();
+    float Val() const;
+    signed char ContainVar(const RVar&) const;
+    signed char ContainFunc(const RFunction&) const;
+    signed char ContainFuncNoRec(const RFunction&) const; // No recursive test on subfunctions
+    ROperation NthMember(int) const;int NMembers() const;
+    signed char HasError(const ROperation* =NULL) const;
+    ROperation& operator=(const ROperation&);
+    friend int operator==(const ROperation& ,const float);
+    friend int operator==(const ROperation& ,const ROperation&);
+    friend int operator!=(const ROperation& ,const ROperation&);
+    ROperation operator+() const;ROperation operator-() const;
+    friend ROperation operator,(const ROperation&,const ROperation&);
+    friend ROperation operator+(const ROperation&,const ROperation&);
+    friend ROperation operator-(const ROperation&,const ROperation&);
+    friend ROperation operator*(const ROperation&,const ROperation&);
+    friend ROperation operator/(const ROperation&,const ROperation&);
+    friend ROperation operator^(const ROperation&,const ROperation&);  // Caution: wrong associativity and precedence
+    friend ROperation sqrt(const ROperation&);
+    friend ROperation abs(const ROperation&);
+    friend ROperation sin(const ROperation&);
+    friend ROperation cos(const ROperation&);
+    friend ROperation tan(const ROperation&);
+    friend ROperation log(const ROperation&);
+    friend ROperation exp(const ROperation&);
+    friend ROperation acos(const ROperation&);
+    friend ROperation asin(const ROperation&);
+    friend ROperation atan(const ROperation&);
+    friend ROperation ApplyOperator(int,ROperation**,ROperation (*)(const ROperation&,const ROperation&));
+    ROperation Diff(const RVar&) const; //  Differentiate w.r.t a variable
+    char* Expr() const;
+    ROperation Substitute(const RVar&,const ROperation&) const;
 };
 
 class RFunction{
-  float*buf;
+    float*buf;
 public:
-  signed char type;
-  float ((*pfuncval)(float));
-  ROperation op;int nvars;RVar** ppvar;
-  char*name;
-  RFunction();
-  RFunction(float ((*)(float)));
-  RFunction(const ROperation& opp,RVar* pvarp);
-  RFunction(const ROperation& opp,int nvarsp,RVar**ppvarp);
-  RFunction(const RFunction&);
-  ~RFunction();
-  RFunction& operator=(const RFunction&);
-  void SetName(const char*s);
-  float Val(float) const;
-  float Val(float*) const;
-  friend int operator==(const RFunction&,const RFunction&);
-  ROperation operator()(const ROperation&);
+    signed char type;
+    float ((*pfuncval)(float));
+    ROperation op;int nvars;RVar** ppvar;
+    char*name;
+    RFunction();
+    RFunction(float ((*)(float)));
+    RFunction(const ROperation& opp,RVar* pvarp);
+    RFunction(const ROperation& opp,int nvarsp,RVar**ppvarp);
+    RFunction(const RFunction&);
+    ~RFunction();
+    RFunction& operator=(const RFunction&);
+    void SetName(const char*s);
+    float Val(float) const;
+    float Val(float*) const;
+    friend int operator==(const RFunction&,const RFunction&);
+    ROperation operator()(const ROperation&);
 };
 
 

@@ -34,103 +34,103 @@ zValidator::zValidator(Triad _positive, Triad _marked):positive(_positive), mark
 { }
 
 zValidator::zValidator(zValidator const &other):
-    positive( other.getPositive()),
-    marked( other.getMarked())
+        positive( other.getPositive()),
+        marked( other.getMarked())
 {  }
 
 
 void zValidator::operator=(zValidator const &other)
 {
-  if(this != &other) {
-    positive = other.getPositive();
-    marked   = other.getMarked();
-  }
+    if(this != &other) {
+        positive = other.getPositive();
+        marked   = other.getMarked();
+    }
 }
 
 zValidator *zValidator::copy(void) const {
-  return new zValidator(*this);
+    return new zValidator(*this);
 }
 
 bool
 zValidator::isOwner(ePlayerNetID *possibleOwner, gVectorExtra<ePlayerNetID *> &owners)
 {
-  gVectorExtra<ePlayerNetID *>::iterator iter;
-  for(iter = owners.begin();
-      iter != owners.end();
-      ++iter)
+    gVectorExtra<ePlayerNetID *>::iterator iter;
+    for(iter = owners.begin();
+            iter != owners.end();
+            ++iter)
     {
-      if (*iter == possibleOwner)
-	return true;
+        if (*iter == possibleOwner)
+            return true;
     }
-  return false;
+    return false;
 }
 
 bool
 zValidator::isTeamOwner(eTeam *possibleTeamOwner, gVectorExtra<eTeam *> &teamOwners)
 {
-  gVectorExtra<eTeam *>::iterator iter;
-  for(iter = teamOwners.begin();
-      iter != teamOwners.end();
-      ++iter)
+    gVectorExtra<eTeam *>::iterator iter;
+    for(iter = teamOwners.begin();
+            iter != teamOwners.end();
+            ++iter)
     {
-      if (*iter == possibleTeamOwner)
-	return true;
+        if (*iter == possibleTeamOwner)
+            return true;
     }
-  return false;
+    return false;
 }
 
 void
 zValidator::validate(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, Triggerer possibleUser) {
-  if(isValid(owners, teamOwners, possibleUser.who) && validateTriad(possibleUser.positive, positive) && validateTriad(possibleUser.marked, marked)) {
-    zSelectorPtrs::const_iterator iterSelector;
-    for(iterSelector=selectors.begin();
-	iterSelector!=selectors.end();
-	++iterSelector)
-      {
-	(*iterSelector)->apply(owners, teamOwners, possibleUser.who);
-      }
+    if(isValid(owners, teamOwners, possibleUser.who) && validateTriad(possibleUser.positive, positive) && validateTriad(possibleUser.marked, marked)) {
+        zSelectorPtrs::const_iterator iterSelector;
+        for(iterSelector=selectors.begin();
+                iterSelector!=selectors.end();
+                ++iterSelector)
+        {
+            (*iterSelector)->apply(owners, teamOwners, possibleUser.who);
+        }
 
-    zMonitorInfluencePtrs::const_iterator iterMonitorInfluence;
-    for(iterMonitorInfluence=monitorInfluences.begin();
-	iterMonitorInfluence!=monitorInfluences.end();
-	++iterMonitorInfluence)
-      {
-	(*iterMonitorInfluence)->apply(owners, teamOwners, possibleUser.who);
-      }
+        zMonitorInfluencePtrs::const_iterator iterMonitorInfluence;
+        for(iterMonitorInfluence=monitorInfluences.begin();
+                iterMonitorInfluence!=monitorInfluences.end();
+                ++iterMonitorInfluence)
+        {
+            (*iterMonitorInfluence)->apply(owners, teamOwners, possibleUser.who);
+        }
 
-    zZoneInfluencePtrs::const_iterator iterZoneInfluence;
-    for(iterZoneInfluence=zoneInfluences.begin();
-	iterZoneInfluence!=zoneInfluences.end();
-	++iterZoneInfluence)
-      {
-	(*iterZoneInfluence)->apply(1.0);
-      }
-  }
+        zZoneInfluencePtrs::const_iterator iterZoneInfluence;
+        for(iterZoneInfluence=zoneInfluences.begin();
+                iterZoneInfluence!=zoneInfluences.end();
+                ++iterZoneInfluence)
+        {
+            (*iterZoneInfluence)->apply(1.0);
+        }
+    }
 }
 
 // *******************
-// zValidatorAll 
+// zValidatorAll
 // *******************
 zValidator * zValidatorAll::create(Triad _positive, Triad _marked)
 {
-  return new zValidatorAll(_positive, _marked);
+    return new zValidatorAll(_positive, _marked);
 }
 
 zValidatorAll::zValidatorAll(Triad _positive, Triad _marked):
-  zValidator(_positive, _marked)
+        zValidator(_positive, _marked)
 { }
 
 zValidatorAll::zValidatorAll(zValidatorAll const &other):
-  zValidator(other)
+        zValidator(other)
 { }
 
 void zValidatorAll::operator=(zValidatorAll const &other)
 {
-  this->zValidator::operator=(other);
+    this->zValidator::operator=(other);
 }
 
 zValidator *zValidatorAll::copy(void) const {
-  return new zValidatorAll(*this);
+    return new zValidatorAll(*this);
 }
 
 // *******************
@@ -138,30 +138,30 @@ zValidator *zValidatorAll::copy(void) const {
 // *******************
 zValidator * zValidatorOwner::create(Triad _positive, Triad _marked)
 {
-  return new zValidatorOwner(_positive, _marked);
+    return new zValidatorOwner(_positive, _marked);
 }
 
 zValidatorOwner::zValidatorOwner(Triad _positive, Triad _marked):
-  zValidator(_positive, _marked)
+        zValidator(_positive, _marked)
 { }
 
 zValidatorOwner::zValidatorOwner(zValidatorOwner const &other):
-  zValidator(other)
+        zValidator(other)
 { }
 
 void zValidatorOwner::operator=(zValidatorOwner const &other)
 {
-  this->zValidator::operator=(other);
+    this->zValidator::operator=(other);
 }
 
 zValidator *zValidatorOwner::copy(void) const {
-  return new zValidatorOwner(*this);
+    return new zValidatorOwner(*this);
 }
 
 bool
 zValidatorOwner::isValid(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle* possibleUser)
 {
-  return isOwner(possibleUser->Player(), owners);
+    return isOwner(possibleUser->Player(), owners);
 }
 
 // *******************
@@ -169,30 +169,30 @@ zValidatorOwner::isValid(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTea
 // *******************
 zValidator * zValidatorOwnerTeam::create(Triad _positive, Triad _marked)
 {
-  return new zValidatorOwnerTeam(_positive, _marked);
+    return new zValidatorOwnerTeam(_positive, _marked);
 }
 
 zValidatorOwnerTeam::zValidatorOwnerTeam(Triad _positive, Triad _marked):
-  zValidator(_positive, _marked)
+        zValidator(_positive, _marked)
 { }
 
 zValidatorOwnerTeam::zValidatorOwnerTeam(zValidatorOwnerTeam const &other):
-  zValidator(other)
+        zValidator(other)
 { }
 
 void zValidatorOwnerTeam::operator=(zValidatorOwnerTeam const &other)
 {
-  this->zValidator::operator=(other);
+    this->zValidator::operator=(other);
 }
 
 zValidator *zValidatorOwnerTeam::copy(void) const {
-  return new zValidatorOwnerTeam(*this);
+    return new zValidatorOwnerTeam(*this);
 }
 
 bool
 zValidatorOwnerTeam::isValid(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle* possibleUser)
 {
-  return isTeamOwner(possibleUser->Player()->CurrentTeam(), teamOwners);
+    return isTeamOwner(possibleUser->Player()->CurrentTeam(), teamOwners);
 }
 
 // *******************
@@ -200,30 +200,30 @@ zValidatorOwnerTeam::isValid(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<
 // *******************
 zValidator * zValidatorAllButOwner::create(Triad _positive, Triad _marked)
 {
-  return new zValidatorAllButOwner(_positive, _marked);
+    return new zValidatorAllButOwner(_positive, _marked);
 }
 
 zValidatorAllButOwner::zValidatorAllButOwner(Triad _positive, Triad _marked):
-  zValidator(_positive, _marked)
+        zValidator(_positive, _marked)
 { }
 
 zValidatorAllButOwner::zValidatorAllButOwner(zValidatorAllButOwner const &other):
-  zValidator(other)
+        zValidator(other)
 { }
 
 void zValidatorAllButOwner::operator=(zValidatorAllButOwner const &other)
 {
-  this->zValidator::operator=(other);
+    this->zValidator::operator=(other);
 }
 
 zValidator *zValidatorAllButOwner::copy(void) const {
-  return new zValidatorAllButOwner(*this);
+    return new zValidatorAllButOwner(*this);
 }
 
 bool
 zValidatorAllButOwner::isValid(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle* possibleUser)
 {
-  return !isOwner(possibleUser->Player(), owners);
+    return !isOwner(possibleUser->Player(), owners);
 }
 
 

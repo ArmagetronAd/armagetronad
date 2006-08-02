@@ -166,7 +166,10 @@ static tConfItem<bool> ls("LOWER_SKY",sr_lowerSky);
 static tConfItem<bool> wos("SKY_WOBBLE",sr_skyWobble);
 static tConfItem<bool> ip("INFINITY_PLANE",sr_infinityPlane);
 
+extern bool sg_axesIndicator;
+
 static tConfItem<bool> lm("LAG_O_METER",sr_laggometer);
+static tConfItem<bool> ai("AXES_INDICATOR",sg_axesIndicator);
 static tConfItem<bool> po("PREDICT_OBJECTS",sr_predictObjects);
 static tConfItem<bool> t32("TEXTURES_HI",sr_texturesTruecolor);
 

@@ -69,41 +69,41 @@ void Base::SetFill(char fill) {
 
 Variant
 Base::GetValue(void) const {
-	std::cerr << "WARNING: Base::GetValue called!" << std::endl;
-	return std::string("");
+    std::cerr << "WARNING: Base::GetValue called!" << std::endl;
+    return std::string("");
 }
 
 //! This should be overwritten in a derived class if it's sensible to convert the value to an integer
 //! @returns 0
 int Base::GetInt(void) const {
-	try {
-		return boost::lexical_cast<int>(GetValue());
-	}
-	catch(boost::bad_lexical_cast &)
-	{
-    return 0;
-	}
+    try {
+        return boost::lexical_cast<int>(GetValue());
+    }
+    catch(boost::bad_lexical_cast &)
+    {
+        return 0;
+    }
 }
 
 //! This should be overwritten in a derived class if it's sensible to convert the value to a floating- point number
 //! @returns a stream conversion of the value
 float Base::GetFloat(void) const {
-	try {
-		return boost::lexical_cast<float>(GetValue());
-	}
-	catch(boost::bad_lexical_cast &)
-	{
-    return 0.0;
-	}
+    try {
+        return boost::lexical_cast<float>(GetValue());
+    }
+    catch(boost::bad_lexical_cast &)
+    {
+        return 0.0;
+    }
 }
 
 //! This should be overwritten in a derived class if it's sensible to convert the value to a string
 //! @returns GetValue streamed to a tString
 tString Base::GetString(Base const *other) const {
-	Variant v = GetValue();
-	if (tString *iptr = boost::get<tString>(&v))
-		return *iptr;
-	return Output(v, other);
+    Variant v = GetValue();
+    if (tString *iptr = boost::get<tString>(&v))
+            return *iptr;
+    return Output(v, other);
 }
 
 //! This should be overwritten in any derived class or they will mysteriously vanish if you use the tValue::Set container, for example
@@ -199,7 +199,7 @@ Base *String::copy(void) const {
 }
 
 Variant String::GetValue() const {
-	return GetString();
+    return GetString();
 }
 
 //! Returns the string stored inside the object
@@ -310,88 +310,88 @@ BinaryOp::BinaryOp(BinaryOp const &other) :
 { }
 
 Base *BinaryOp::copy(void) const {
-	return new BinaryOp(*this);
+    return new BinaryOp(*this);
 }
 
 //! Returns the result of adding the lvalue and rvalue
 //! @returns the result
 Variant
 Add::GetValue(void) const {
-	const Variant lvalue = m_lvalue->GetValue();
-	const Variant rvalue = m_rvalue->GetValue();
-	//return boost::apply_visitor(AddVisitor(), lvalue, rvalue);
-/*
-	if (boost::get<tString>(&lvalue) || boost::get<tString>(&rvalue))
-		return boost::lexical_cast<tString>lvalue
-		     + boost::lexical_cast<tString>rvalue;
-	else
-*/
-	if (boost::get<int>(&lvalue) && boost::get<int>(&rvalue))
-		return boost::get<int>(lvalue) + boost::get<int>(rvalue);
-	/*
-	else
-	if (boost::get<float>(&lvalue) || boost::get<float>(&rvalue))
-		return boost::lexical_cast<float>(lvalue)
-		     + boost::lexical_cast<float>(rvalue);
-	else
-		throw(1);*/
-	return m_lvalue->GetFloat() + m_rvalue->GetFloat();
+    const Variant lvalue = m_lvalue->GetValue();
+    const Variant rvalue = m_rvalue->GetValue();
+    //return boost::apply_visitor(AddVisitor(), lvalue, rvalue);
+    /*
+    	if (boost::get<tString>(&lvalue) || boost::get<tString>(&rvalue))
+    		return boost::lexical_cast<tString>lvalue
+    		     + boost::lexical_cast<tString>rvalue;
+    	else
+    */
+    if (boost::get<int>(&lvalue) && boost::get<int>(&rvalue))
+                return boost::get<int>(lvalue) + boost::get<int>(rvalue);
+    /*
+    else
+    if (boost::get<float>(&lvalue) || boost::get<float>(&rvalue))
+    	return boost::lexical_cast<float>(lvalue)
+    	     + boost::lexical_cast<float>(rvalue);
+    else
+    	throw(1);*/
+    return m_lvalue->GetFloat() + m_rvalue->GetFloat();
 }
 
 Base *Add::copy(void) const {
-	return new Add(*this);
+    return new Add(*this);
 }
 
 //! Returns the result of subtracting rvalue from lvalue
 //! @returns the result
 Variant
 Subtract::GetValue(void) const {
-	const Variant lvalue = m_lvalue->GetValue();
-	const Variant rvalue = m_rvalue->GetValue();
-	if (boost::get<int>(&lvalue) && boost::get<int>(&rvalue))
-		return boost::get<int>(lvalue) - boost::get<int>(rvalue);
-	return m_lvalue->GetFloat() - m_rvalue->GetFloat();
-	/*
-	if (boost::get<float>(&lvalue) || boost::get<float>(&rvalue))
-		return boost::lexical_cast<float>(lvalue)
-		     - boost::lexical_cast<float>(rvalue);
-	else
-	if (boost::get<int>(&lvalue) && boost::get<int>(&rvalue))
-		return boost::get<int>(lvalue) - boost::get<int>(rvalue);
-	else
-		throw(1);
-	*/
+    const Variant lvalue = m_lvalue->GetValue();
+    const Variant rvalue = m_rvalue->GetValue();
+    if (boost::get<int>(&lvalue) && boost::get<int>(&rvalue))
+                return boost::get<int>(lvalue) - boost::get<int>(rvalue);
+    return m_lvalue->GetFloat() - m_rvalue->GetFloat();
+    /*
+    if (boost::get<float>(&lvalue) || boost::get<float>(&rvalue))
+    	return boost::lexical_cast<float>(lvalue)
+    	     - boost::lexical_cast<float>(rvalue);
+    else
+    if (boost::get<int>(&lvalue) && boost::get<int>(&rvalue))
+    	return boost::get<int>(lvalue) - boost::get<int>(rvalue);
+    else
+    	throw(1);
+    */
 }
 
 Base *Subtract::copy(void) const {
-	return new Subtract(*this);
+    return new Subtract(*this);
 }
 
 //! Returns the result of multiplying lvalue by rvalue
 //! @returns the result
 Variant
 Multiply::GetValue(void) const {
-	const Variant lvalue = m_lvalue->GetValue();
-	const Variant rvalue = m_rvalue->GetValue();
-	if (boost::get<int>(&lvalue) && boost::get<int>(&rvalue))
-		return boost::get<int>(lvalue) * boost::get<int>(rvalue);
-	return m_lvalue->GetFloat() * m_rvalue->GetFloat();
+    const Variant lvalue = m_lvalue->GetValue();
+    const Variant rvalue = m_rvalue->GetValue();
+    if (boost::get<int>(&lvalue) && boost::get<int>(&rvalue))
+                return boost::get<int>(lvalue) * boost::get<int>(rvalue);
+    return m_lvalue->GetFloat() * m_rvalue->GetFloat();
 }
 
 Base *Multiply::copy(void) const {
-	return new Multiply(*this);
+    return new Multiply(*this);
 }
 
 //! Returns the result of dividing lvalue by rvalue
 //! @returns the result
 Variant
 Divide::GetValue(void) const {
-	// Operate on both values as floats, because this is division
-	return m_lvalue->GetFloat() / m_rvalue->GetFloat();
+    // Operate on both values as floats, because this is division
+    return m_lvalue->GetFloat() / m_rvalue->GetFloat();
 }
 
 Base *Divide::copy(void) const {
-	return new Divide(*this);
+    return new Divide(*this);
 }
 
 //! Reads from the Configuration item
@@ -437,7 +437,7 @@ bool ConfItem::Good() const {
 }
 
 Variant ConfItem::GetValue() const {
-	return GetString();
+    return GetString();
 }
 
 //! Reads from the configuration item
@@ -474,7 +474,7 @@ bool ColNode::operator>=(Base const &other) const {
 bool ColNode::operator<=(Base const &other) const {
     BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
     return m_col <= static_cast<myCol >(*baseExt);
-  }
+}
 bool ColNode::operator> (Base const &other) const {
     BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
     return m_col >  static_cast<myCol >(*baseExt);

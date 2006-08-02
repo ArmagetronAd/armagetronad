@@ -339,7 +339,7 @@ public:
     virtual ~Condition() { };
     Base *copy(void) const;
 
-	virtual Variant GetValue() const;
+    virtual Variant GetValue() const;
     virtual tString GetString(Base const *other=0) const;
     virtual int GetInt(void) const;
     virtual float GetFloat(void) const;

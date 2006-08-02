@@ -1,37 +1,37 @@
 #include "zZoneInfluence.h"
 
 void
-zZoneInfluence::apply(REAL value) 
+zZoneInfluence::apply(REAL value)
 {
-  zZoneInfluenceItemList::const_iterator iter;
-  for(iter=zoneInfluenceItems.begin();
-      iter!=zoneInfluenceItems.end();
-      ++iter)
+    zZoneInfluenceItemList::const_iterator iter;
+    for(iter=zoneInfluenceItems.begin();
+            iter!=zoneInfluenceItems.end();
+            ++iter)
     {
-      (*iter)->apply(value);
+        (*iter)->apply(value);
     }
 
-  zone->RequestSync();
+    zone->RequestSync();
 }
 
 void
 zZoneInfluenceItemRotation::apply(REAL value) {
-  zone->SetRotationSpeed(rotationSpeed);
-  zone->SetRotationAcceleration(rotationAcceleration);
+    zone->SetRotationSpeed(rotationSpeed);
+    zone->SetRotationAcceleration(rotationAcceleration);
 }
 
 void
 zZoneInfluenceItemRadius::apply(REAL value) {
-  zone->SetRadius(radius);
+    zone->SetRadius(radius);
 }
 
 void
 zZoneInfluenceItemPosition::apply(REAL value) {
-  zone->SetPosition(pos);
+    zone->SetPosition(pos);
 }
 
 void
 zZoneInfluenceItemColor::apply(REAL value) {
-  zone->SetColor(color);
+    zone->SetColor(color);
 }
 

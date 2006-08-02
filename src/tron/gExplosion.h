@@ -53,10 +53,10 @@ public:
 #endif
 
     static void OnNewWall( eWall* w );	// blow holes into a new wall
-//#ifdef USEPARTICLES
+    //#ifdef USEPARTICLES
     int particle_handle_circle;
     int particle_handle_cylinder;
-//#endif
+    //#endif
 private:
     REAL        createTime;
 

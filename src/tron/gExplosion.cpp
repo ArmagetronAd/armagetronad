@@ -156,15 +156,15 @@ gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& col
     //std::cout << "explosion constructed\n";
 #ifdef USEPARTICLES
     //std::cout << "Using particle explosion\n";
-//    particle_handle_circle = pGenParticleGroups(1, 10);
-//    particle_handle_cylinder = pGenParticleGroups(1, 1000);
+    //    particle_handle_circle = pGenParticleGroups(1, 10);
+    //    particle_handle_cylinder = pGenParticleGroups(1, 1000);
 
-//    pCurrentGroup(particle_handle_circle);
+    //    pCurrentGroup(particle_handle_circle);
     // Generate particles along a very small line in the nozzle.
-//    pSource(1000, PDSphere(pVec(pos.x, pos.y, 0.3), 0.2));
-//    pCurrentGroup(particle_handle_cylinder);
+    //    pSource(1000, PDSphere(pVec(pos.x, pos.y, 0.3), 0.2));
+    //    pCurrentGroup(particle_handle_cylinder);
     // Generate particles along a very small line in the nozzle.
-//    pSource(1000, PDSphere(pVec(Position().x, Position().y, 0.3), 0.2));
+    //    pSource(1000, PDSphere(pVec(Position().x, Position().y, 0.3), 0.2));
 #endif
 
     // add to game object lists
@@ -255,7 +255,7 @@ bool gExplosion::Timestep(REAL currentTime){
     else
         return false;
 #else
-/*    pCurrentGroup(particle_handle_circle);
+    /*    pCurrentGroup(particle_handle_circle);
     // Set up the state.
     pExplosion(Position().x, Position().y, 0.3, 20.0, 20.0, 1.0);
     //pVelocityD(PDCylinder(pVec(0.0, 0.0, 0.0), pVec(0.0, 0.0, 0.01), 0.01, 0.007));
@@ -275,11 +275,11 @@ bool gExplosion::Timestep(REAL currentTime){
 
     // Finished when there are less than 1/10 of the original particles
     if (pGetGroupCount() < 100) {
-        pDeleteParticleGroups(particle_handle_circle, particle_handle_circle);
-        return true;
+    pDeleteParticleGroups(particle_handle_circle, particle_handle_circle);
+    return true;
     } else
-        return false;*/
-        //std::cout << "returning from timestep\n";
+    return false;*/
+    //std::cout << "returning from timestep\n";
     if (currentTime>createTime+4)
         return true;
     else
@@ -429,7 +429,7 @@ void gExplosion::Render(const eCamera *cam){
     }
     */
 #endif
-//std::cout << "Finishing render\n";
+    //std::cout << "Finishing render\n";
 }
 
 #if 0

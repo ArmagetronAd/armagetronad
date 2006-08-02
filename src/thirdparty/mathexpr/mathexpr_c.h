@@ -59,18 +59,18 @@ const double_complex ErrVal=double_complex(DBL_MAX,0);
 //Class definitions for operations
 
 class CVar{
- public:
-  char*name;double_complex*pval;
-  CVar(const CVar&);
-  CVar(const char*,double_complex*);
-  ~CVar();
-  friend int operator==(const CVar&,const CVar&);
+public:
+    char*name;double_complex*pval;
+    CVar(const CVar&);
+    CVar(const char*,double_complex*);
+    ~CVar();
+    friend int operator==(const CVar&,const CVar&);
 };
 
 typedef CVar* PCVar;
 
 enum COperator{ErrOp,Juxt,Num,Var,Add,Sub,Opp,Mult,Div,Pow,Sqrt,
-	       NthRoot,Real,Imag,Conj,Abs,Arg,Sin,Cos,Tg,Ln,Exp,Acos,Asin,Atan,E10,Fun};
+               NthRoot,Real,Imag,Conj,Abs,Arg,Sin,Cos,Tg,Ln,Exp,Acos,Asin,Atan,E10,Fun};
 
 typedef void ((*pfoncld)(double_complex*&));
 
@@ -80,79 +80,79 @@ class CFunction;
 typedef CFunction* PCFunction;
 
 class COperation{
-  pfoncld*pinstr;double_complex**pvals;double_complex*ppile;CFunction**pfuncpile;
-  mutable signed char containfuncflag;
-  void BuildCode();
-	void Destroy();
- public:
-  COperator op;
-  PCOperation mmb1,mmb2;
-  double_complex ValC;const CVar* pvar;double_complex*pvarval;
-  CFunction* pfunc;
-  COperation();
-  COperation(const COperation&);
-  COperation(double);COperation(double_complex);
-  COperation(const CVar&);
-  COperation(char*sp,int nvarp=0,PCVar*ppvarp=NULL,int nfuncp=0,PCFunction*ppfuncp=NULL);
-  ~COperation();
-  double_complex Val() const;
-  signed char ContainVar(const CVar&) const;
-  signed char ContainFunc(const CFunction&) const;
-  signed char ContainFuncNoRec(const CFunction&) const; // No recursive test on subfunctions
-  COperation NthMember(int) const;int NMembers() const;
-  signed char HasError(const COperation* =NULL) const;
-  COperation& operator=(const COperation&);
-  friend int operator==(const COperation&,const double);
-  friend int operator==(const COperation&,const double_complex);
-  friend int operator==(const COperation&,const COperation&);
-  friend int operator!=(const COperation&,const COperation&);
-  COperation operator+() const;COperation operator-() const;
-  friend COperation operator,(const COperation&,const COperation&);
-  friend COperation operator+(const COperation&,const COperation&);
-  friend COperation operator-(const COperation&,const COperation&);
-  friend COperation operator*(const COperation&,const COperation&);
-  friend COperation operator/(const COperation&,const COperation&);
-  friend COperation operator^(const COperation&,const COperation&);  // Caution: wrong associativity and precedence
-  friend COperation real(const COperation&);
-  friend COperation imag(const COperation&);
-  friend COperation conj(const COperation&);
-  friend COperation arg(const COperation&);
-  friend COperation sqrt(const COperation&);
-  friend COperation abs(const COperation&);
-  friend COperation sin(const COperation&);
-  friend COperation cos(const COperation&);
-  friend COperation tan(const COperation&);
-  friend COperation log(const COperation&);
-  friend COperation exp(const COperation&);
-  friend COperation acos(const COperation&);
-  friend COperation asin(const COperation&);
-  friend COperation atan(const COperation&);
-  friend COperation ApplyOperator(int,COperation**,COperation (*)(const COperation&,const COperation&));
-  COperation Diff(const CVar&) const; //  Differentiate w.r.t a variable
-  COperation DiffConj(const CVar&) const; // This one is d / d conj(z)
-  char* Expr() const;
-  COperation Substitute(const CVar&,const COperation&) const;
+    pfoncld*pinstr;double_complex**pvals;double_complex*ppile;CFunction**pfuncpile;
+    mutable signed char containfuncflag;
+    void BuildCode();
+    void Destroy();
+public:
+    COperator op;
+    PCOperation mmb1,mmb2;
+    double_complex ValC;const CVar* pvar;double_complex*pvarval;
+    CFunction* pfunc;
+    COperation();
+    COperation(const COperation&);
+    COperation(double);COperation(double_complex);
+    COperation(const CVar&);
+    COperation(char*sp,int nvarp=0,PCVar*ppvarp=NULL,int nfuncp=0,PCFunction*ppfuncp=NULL);
+    ~COperation();
+    double_complex Val() const;
+    signed char ContainVar(const CVar&) const;
+    signed char ContainFunc(const CFunction&) const;
+    signed char ContainFuncNoRec(const CFunction&) const; // No recursive test on subfunctions
+    COperation NthMember(int) const;int NMembers() const;
+    signed char HasError(const COperation* =NULL) const;
+    COperation& operator=(const COperation&);
+    friend int operator==(const COperation&,const double);
+    friend int operator==(const COperation&,const double_complex);
+    friend int operator==(const COperation&,const COperation&);
+    friend int operator!=(const COperation&,const COperation&);
+    COperation operator+() const;COperation operator-() const;
+    friend COperation operator,(const COperation&,const COperation&);
+    friend COperation operator+(const COperation&,const COperation&);
+    friend COperation operator-(const COperation&,const COperation&);
+    friend COperation operator*(const COperation&,const COperation&);
+    friend COperation operator/(const COperation&,const COperation&);
+    friend COperation operator^(const COperation&,const COperation&);  // Caution: wrong associativity and precedence
+    friend COperation real(const COperation&);
+    friend COperation imag(const COperation&);
+    friend COperation conj(const COperation&);
+    friend COperation arg(const COperation&);
+    friend COperation sqrt(const COperation&);
+    friend COperation abs(const COperation&);
+    friend COperation sin(const COperation&);
+    friend COperation cos(const COperation&);
+    friend COperation tan(const COperation&);
+    friend COperation log(const COperation&);
+    friend COperation exp(const COperation&);
+    friend COperation acos(const COperation&);
+    friend COperation asin(const COperation&);
+    friend COperation atan(const COperation&);
+    friend COperation ApplyOperator(int,COperation**,COperation (*)(const COperation&,const COperation&));
+    COperation Diff(const CVar&) const; //  Differentiate w.r.t a variable
+    COperation DiffConj(const CVar&) const; // This one is d / d conj(z)
+    char* Expr() const;
+    COperation Substitute(const CVar&,const COperation&) const;
 };
 
 class CFunction{
-  double_complex*buf;
+    double_complex*buf;
 public:
-  signed char type;
-  double_complex ((*pfuncval)(double_complex));
-  COperation op;int nvars;CVar** ppvar;
-  char*name;
-  CFunction();
-  CFunction(double_complex ((*pfuncvalp)(double_complex)));
-  CFunction(const COperation& opp, CVar* pvarp);
-  CFunction(const COperation& opp, int nvarsp, CVar**ppvarp);
-  CFunction(const CFunction&);
-  ~CFunction();
-  CFunction& operator=(const CFunction&);
-  void SetName(const char*s);
-  double_complex Val(double_complex) const;
-  double_complex Val(double_complex*) const;
-  friend int operator==(const CFunction&,const CFunction&);
-  COperation operator()(const COperation&);
+    signed char type;
+    double_complex ((*pfuncval)(double_complex));
+    COperation op;int nvars;CVar** ppvar;
+    char*name;
+    CFunction();
+    CFunction(double_complex ((*pfuncvalp)(double_complex)));
+    CFunction(const COperation& opp, CVar* pvarp);
+    CFunction(const COperation& opp, int nvarsp, CVar**ppvarp);
+    CFunction(const CFunction&);
+    ~CFunction();
+    CFunction& operator=(const CFunction&);
+    void SetName(const char*s);
+    double_complex Val(double_complex) const;
+    double_complex Val(double_complex*) const;
+    friend int operator==(const CFunction&,const CFunction&);
+    COperation operator()(const COperation&);
 };
 
 char* PrettyPrint(double_complex);

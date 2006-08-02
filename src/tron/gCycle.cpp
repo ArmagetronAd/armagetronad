@@ -3011,13 +3011,155 @@ static nSettingItem<tString> lalala_cycle_shad("TEXTURE_CYCLE_SHADOW", lala_cycl
 rFileTexture cycle_shad(rTextureGroups::TEX_FLOOR, lala_cycle_shad, 0,0,true);
 */
 
+#define ENABLE_OLD_LAG_O_METER
+
 REAL sg_laggometerScale=1;
 static tSettingItem< REAL > sg_laggometerScaleConf( "LAG_O_METER_SCALE", sg_laggometerScale );
+REAL sg_laggometerThreshold=.5;
+static tSettingItem< REAL > sg_laggometerThresholdConf( "LAG_O_METER_THRESHOLD", sg_laggometerThreshold );
+REAL sg_laggometerBlend=.5;
+static tSettingItem< REAL > sg_laggometerBlendConf( "LAG_O_METER_BLEND", sg_laggometerBlend );
+#ifdef ENABLE_OLD_LAG_O_METER
+bool sg_laggometerUseOld=false;
+static tSettingItem< bool > sg_laggometerUseOldConf( "LAG_O_METER_USE_OLD", sg_laggometerUseOld );
+#endif
+bool sg_axesIndicator=false;
 
 int sg_blinkFrequency=10;
 static tSettingItem< int > sg_blinkFrequencyConf( "CYCLE_BLINK_FREQUENCY", sg_blinkFrequency );
 
 #ifndef DEDICATED
+// put meriton's classes into a namespace so they can't possibly conflict with other code, especially the Colour class. --wrtl
+namespace gLaggometer {
+class Colour {
+public:
+    REAL cp[3];
+    Colour(REAL r, REAL g, REAL b) {
+        cp[0]=r;
+        cp[1]=g;
+        cp[2]=b;
+    }
+    Colour(ePlayerNetID* player) {
+        player->Color(cp[0], cp[1], cp[2]);
+    }
+    void blend(REAL factor, const Colour& target) {
+        for (int i=0; i<3; i++) {
+            cp[i] = (1 - factor) * cp[i] + factor * target.cp[i];
+        }
+    }
+    void toGl() const { glColor3f(cp[0], cp[1], cp[2]); }
+
+    static const Colour white;
+    static const Colour black;
+};
+
+const Colour Colour::white(1,1,1);
+const Colour Colour::black(0,0,0);
+
+class DirectionTransformer {
+private:
+    eGrid* grid;
+    eCoord factor;
+public:
+    DirectionTransformer(eGrid* theGrid) : grid(theGrid), factor(theGrid->GetDirection(0).Conj()) { }
+    eCoord get(int i) {
+        return grid->GetDirection(i).Turn(factor);
+
+    }
+    int ahead() { return 2 * (grid->WindingNumber()); }
+};
+
+class LagOMeterRenderer {
+private:
+    DirectionTransformer directions;
+    REAL delay;
+    Colour color;
+protected:
+    bool drawTriangle(eCoord loc, int winding, REAL lag, int inc);
+public:
+    LagOMeterRenderer(gCycle* cycle) :
+            directions(cycle->Grid()),
+            delay(cycle->GetTurnDelay()),
+            color(cycle->Player())
+    {
+        color.blend(sg_laggometerBlend, Colour::white);
+    }
+    void render(REAL lag);
+};
+
+//! returns whether the sprial intersects its counterpart
+bool LagOMeterRenderer::drawTriangle(eCoord loc, int winding, REAL lag, int inc) {
+    eCoord outer = loc + directions.get(winding) * lag;
+    if (outer.y * inc > 0.01f) {
+        eCoord oldOuter = loc + directions.get(winding - inc) * lag;
+        eCoord d = outer - oldOuter;
+        outer = oldOuter + d * (-oldOuter.y / d.y);
+        glVertex2f(outer.x, outer.y);
+        return true;
+    } else {
+        glVertex2f(outer.x, outer.y);
+        if (lag > delay) {
+            if (drawTriangle(loc + directions.get(winding + inc) * delay, winding + inc, lag - delay, inc)) return true;
+        } else {
+            outer = loc + directions.get(winding + inc) * lag;
+            glVertex2f(outer.x, outer.y);
+        }
+        glVertex2f(loc.x, loc.y);
+        return false;
+    }
+}
+
+void LagOMeterRenderer::render(REAL lag) {
+    color.toGl();
+    BeginLineStrip();
+    drawTriangle(eCoord(0,0), directions.ahead(), lag, 1);
+    RenderEnd();
+
+    BeginLineStrip();
+    drawTriangle(eCoord(0,0), directions.ahead(), lag, -1);
+    RenderEnd();
+}
+
+
+class AxesIndicator {
+private:
+    DirectionTransformer directions;
+    Colour color;
+public:
+    AxesIndicator(gCycle* cycle) :
+            directions(cycle->Grid()),
+            color(cycle->Player())
+    {
+        color.blend(.5f, Colour::white);
+    }
+    void line(int i) {
+        eCoord midle = directions.get(directions.ahead() + i) * .1f;
+        eCoord inner = midle * .5f;
+        eCoord outer = midle + directions.get(directions.ahead() + 2 * i) * .05f;
+
+        BeginLineStrip();
+        //Colour::black.toGl();
+        color.toGl();
+        glVertex2f(inner.x, inner.y);
+
+
+        glVertex2f(midle.x, midle.y);
+
+        Colour::black.toGl();
+        glVertex2f(outer.x, outer.y);
+        RenderEnd();
+    }
+    void render() {
+        //return; // disable, for now
+        glShadeModel(GL_SMOOTH);
+        line(-1);
+        line(0);
+        line(1);
+    }
+};
+
+}
+
 void gCycle::Render(const eCamera *cam){
     if ( lastTime > spawnTime_ && !Vulnerable() )
     {
@@ -3455,11 +3597,56 @@ void gCycle::Render(const eCamera *cam){
 
         h=cam->CameraZ()*.005+.03;
 
-        if (sn_GetNetState() != nSTANDALONE && sr_laggometer && f*l>.5){
-            //&& owner!=::sn_myNetID){
+#ifdef ENABLE_OLD_LAG_O_METER
+        if(sg_laggometerUseOld) {
+            if (sn_GetNetState() != nSTANDALONE && sr_laggometer && f*l>.5) {
+                //&& owner!=::sn_myNetID){
+                glPushMatrix();
+
+                glColor3f(1,1,1);
+                //glDisable(GL_TEXTURE);
+                glDisable(GL_TEXTURE_2D);
+
+                glTranslatef(0,0,h);
+                //glScalef(.5*f,.5*f,.5*f);
+
+                // compensate for the .5 scaling further up
+                f *= 2 * sg_laggometerScale;
+
+                glScalef(f,f,f);
+
+                // move the sr_laggometer ahead a bit
+                if (!sr_predictObjects || sn_GetNetState()==nSERVER)
+                    glTranslatef(l,0,0);
+
+
+                BeginLineLoop();
+
+
+                glVertex2f(-l,-l);
+                glVertex2f(0,0);
+                glVertex2f(-l,l);
+                REAL delay = GetTurnDelay();
+                if(l> 2*delay){
+                    glVertex2f(-2*l+delay,delay);
+                    glVertex2f(-2*l+2*delay,0);
+                    glVertex2f(-2*l+delay,-delay);
+                }
+                else if (l>delay){
+                    glVertex2f(-2*l+delay,delay);
+                    glVertex2f(-l,2*delay-l);
+                    glVertex2f(-l,-(2*delay-l));
+                    glVertex2f(-2*l+delay,-delay);
+                }
+
+                RenderEnd();
+                glPopMatrix();
+            }
+        } else
+#endif
+        {
             glPushMatrix();
 
-            glColor3f(1,1,1);
             //glDisable(GL_TEXTURE);
             glDisable(GL_TEXTURE_2D);
 
@@ -3471,31 +3658,19 @@ void gCycle::Render(const eCamera *cam){
 
             glScalef(f,f,f);
 
-            // move the sr_laggometer ahead a bit
-            if (!sr_predictObjects || sn_GetNetState()==nSERVER)
-                glTranslatef(l,0,0);
-
-
-            BeginLineLoop();
-
-
-            glVertex2f(-l,-l);
-            glVertex2f(0,0);
-            glVertex2f(-l,l);
-            REAL delay = GetTurnDelay();
-            if(l> 2*delay){
-                glVertex2f(-2*l+delay,delay);
-                glVertex2f(-2*l+2*delay,0);
-                glVertex2f(-2*l+delay,-delay);
-            }
-            else if (l>delay){
-                glVertex2f(-2*l+delay,delay);
-                glVertex2f(-l,2*delay-l);
-                glVertex2f(-l,-(2*delay-l));
-                glVertex2f(-2*l+delay,-delay);
+            // move the sr_laggometer back a bit
+            if (sr_predictObjects || sn_GetNetState()==nSERVER) {
+                glTranslatef(-l,0,0);
             }
 
-            RenderEnd();
+            if (f*l>sg_laggometerThreshold) {
+                if (sr_laggometer) {
+                    gLaggometer::LagOMeterRenderer(this).render(l);
+                }
+            } else if(sg_axesIndicator) {
+                gLaggometer::AxesIndicator(this).render();
+            }
+
             glPopMatrix();
         }
         sr_DepthOffset(false);

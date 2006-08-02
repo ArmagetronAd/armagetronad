@@ -38,36 +38,36 @@ typedef boost::shared_ptr<zValidator> zValidatorPtr;
 
 class zEffectGroup
 {
- public:
-  zEffectGroup();
-  zEffectGroup(gVectorExtra<ePlayerNetID *> const owners, gVectorExtra<eTeam *> const teamOwners);
-  zEffectGroup(zEffectGroup const &other);
-  ~zEffectGroup();
-  void operator=(zEffectGroup const &other);
+public:
+    zEffectGroup();
+    zEffectGroup(gVectorExtra<ePlayerNetID *> const owners, gVectorExtra<eTeam *> const teamOwners);
+    zEffectGroup(zEffectGroup const &other);
+    ~zEffectGroup();
+    void operator=(zEffectGroup const &other);
 
-  void setValidator(zValidatorPtr _validator) {validators.push_back( _validator );};
+    void setValidator(zValidatorPtr _validator) {validators.push_back( _validator );};
 
-  bool isValidUser(gCycle *possibleUser);
-  gVectorExtra <ePlayerNetID *> getCalculatedTarget( gCycle * triggerer );
+    bool isValidUser(gCycle *possibleUser);
+    gVectorExtra <ePlayerNetID *> getCalculatedTarget( gCycle * triggerer );
 
-  void OnEnter( Triggerer target, REAL time ); //!< reacts on objects entering the zone
-  void OnLeave( Triggerer target, REAL time ); //!< reacts on objects leaving the zone
-  void OnInside( Triggerer target, REAL time ); //!< reacts on objects inside the zone
-  void OnOutside( Triggerer target, REAL time ); //!< reacts on objects outside the zone
+    void OnEnter( Triggerer target, REAL time ); //!< reacts on objects entering the zone
+    void OnLeave( Triggerer target, REAL time ); //!< reacts on objects leaving the zone
+    void OnInside( Triggerer target, REAL time ); //!< reacts on objects inside the zone
+    void OnOutside( Triggerer target, REAL time ); //!< reacts on objects outside the zone
 
-  //callback functions 
-  gCycle * cb_PossibleUser(void);           //!< Gets the used rubber for the currently watched cycle
-  gVectorExtra<ePlayerNetID *> cb_Owners(void);
-  gVectorExtra<eTeam *> cb_TeamOwners(void);
-  gVectorExtra<ePlayerNetID *> cb_Targets(void);  
+    //callback functions
+    gCycle * cb_PossibleUser(void);           //!< Gets the used rubber for the currently watched cycle
+    gVectorExtra<ePlayerNetID *> cb_Owners(void);
+    gVectorExtra<eTeam *> cb_TeamOwners(void);
+    gVectorExtra<ePlayerNetID *> cb_Targets(void);
 
- protected:
-  std::vector<zValidatorPtr> validators;
+protected:
+    std::vector<zValidatorPtr> validators;
 
-  gVectorExtra<ePlayerNetID *> d_owners;
-  gVectorExtra<eTeam *> d_teamOwners;
+    gVectorExtra<ePlayerNetID *> d_owners;
+    gVectorExtra<eTeam *> d_teamOwners;
 
-  gVectorExtra<ePlayerNetID *> d_calculatedTargets;
+    gVectorExtra<ePlayerNetID *> d_calculatedTargets;
 
 };
 

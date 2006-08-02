@@ -135,7 +135,7 @@ static tSettingItem<tString> conf_configrotation("CONFIG_ROTATION",configrotatio
 //0 = never, 1 = round, 2 = match
 static int rotationtype = 0;
 static tSettingItem<int> conf_rotationtype("ROTATION_TYPE",rotationtype);
- 
+
 // bool globalingame=false;
 tString sg_GetCurrentTime( char *szFormat )
 {
@@ -723,6 +723,7 @@ REAL exponent(int i)
 #ifndef DEDICATED
 extern REAL stc_fastestSpeedRound;
 #endif
+extern bool sg_axesIndicator;
 
 void init_game_grid(eGrid *grid, gParser *aParser){
     se_ResetGameTimer();
@@ -1618,6 +1619,11 @@ void net_options(){
     (&net_menu,"$network_opts_lagometer_text",
      "$network_opts_lagometer_help",
      sr_laggometer);
+
+    uMenuItemToggle ai
+    (&net_menu,"$network_opts_axesindicator_text",
+     "$network_opts_axesindicator_help",
+     sg_axesIndicator);
 
 
     uMenuItemInt p_s
@@ -2627,45 +2633,45 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 
         if ( ( !e || !e->Alive() && e->DeathTime() < time - .5 ) && sn_GetNetState() != nCLIENT )
         {
-	  sg_RespawnPlayer(time, grid, &arena, p);
+            sg_RespawnPlayer(time, grid, &arena, p);
         }
     }
 }
 #endif
 
-void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p) 
+void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p)
 {
-  eGameObject *e=p->Object();
+    eGameObject *e=p->Object();
 
-  if ( ( !e || !e->Alive()) && sn_GetNetState() != nCLIENT )
+    if ( ( !e || !e->Alive()) && sn_GetNetState() != nCLIENT )
     {
-      eCoord pos,dir;
-      if ( e )
-	{
-	  dir = e->Direction();
-	  pos = e->Position();
-	  eWallRim::Bound( pos, 1 );
-	  eCoord displacement = pos - e->Position();
-	  if ( displacement.NormSquared() > .01 )
-	    {
-	      dir = displacement;
-	      dir.Normalize();
-	    }
-	}
-      else
-	arena->LeastDangerousSpawnPoint()->Spawn( pos, dir );
+        eCoord pos,dir;
+        if ( e )
+        {
+            dir = e->Direction();
+            pos = e->Position();
+            eWallRim::Bound( pos, 1 );
+            eCoord displacement = pos - e->Position();
+            if ( displacement.NormSquared() > .01 )
+            {
+                dir = displacement;
+                dir.Normalize();
+            }
+        }
+        else
+            arena->LeastDangerousSpawnPoint()->Spawn( pos, dir );
 #ifdef DEBUG
-      //                std::cout << "spawning player " << pni->name << '\n';
+        //                std::cout << "spawning player " << pni->name << '\n';
 #endif
-      gCycle * cycle = new gCycle(grid, pos, dir, p, 0);
-      p->ControlObject(cycle);
+        gCycle * cycle = new gCycle(grid, pos, dir, p, 0);
+        p->ControlObject(cycle);
 
-      sg_Timestamp();
+        sg_Timestamp();
     }
 }
 
 gArena * sg_GetArena() {
-  return &Arena;
+    return &Arena;
 }
 
 
@@ -2926,17 +2932,17 @@ void gGame::Analysis(REAL time){
     static nVersionFeature winZone(2);
 
     /*
-***************** ===================== ********************
-HACK
-THIS HAS SIMPLY BEEN DEACTIVATED.
-IT SHOULD BE REACTIVATED WITH THE NEW ZONE CODE
-***************** ===================== ********************
+    ***************** ===================== ********************
+    HACK
+    THIS HAS SIMPLY BEEN DEACTIVATED.
+    IT SHOULD BE REACTIVATED WITH THE NEW ZONE CODE
+    ***************** ===================== ********************
     // activate instant win zone
     if ( winZone.Supported() && !bool( winDeathZone_ ) && winner == 0 && time - lastdeath > sg_currentSettings->winZoneMinLastDeath && time > sg_currentSettings->winZoneMinRoundTime )
     {
         winDeathZone_ = sg_CreateWinDeathZone( grid, Arena.GetRandomPos( sg_winZoneRandomness ) );
     }
-*/
+    */
 
     bool holdBackNextRound = false;
 
@@ -3745,6 +3751,7 @@ void sg_EnterGameCore( nNetState enter_state ){
             gGame::NetSync();
             se_SyncGameTimer();
             REAL time=se_GameTime();
+            sg_currentGame->StateUpdate();
             if ( time > 0 )
             {
                 // only simulate the objects that have pending events to execute
