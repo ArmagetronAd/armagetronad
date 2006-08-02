@@ -1257,12 +1257,12 @@ void gPlayerWall::Insert()
 void gPlayerWall::Check() const
 {
     netWall_->Check();
-#ifdef DEBUG
-    REAL range = 5 * ( begDist_ + endDist_ ) * EPS;
-    tASSERT( begDist_ <= endDist_ + range );
-    tASSERT( begDist_ >= netWall_->Pos( 0 ) - range );
-    tASSERT( endDist_ <= netWall_->Pos( 1 ) + range );
-#endif
+//#ifdef DEBUG
+//    REAL range = 5 * ( begDist_ + endDist_ ) * EPS;
+//    tASSERT( begDist_ <= endDist_ + range );
+//    tASSERT( begDist_ >= netWall_->Pos( 0 ) - range );
+//    tASSERT( endDist_ <= netWall_->Pos( 1 ) + range );
+//#endif
 }
 
 REAL gPlayerWall::LocalToGlobal( REAL a ) const
