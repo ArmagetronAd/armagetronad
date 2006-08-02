@@ -69,7 +69,7 @@ void Base::SetFill(char fill) {
 
 Variant
 Base::GetValue(void) const {
-    std::cerr << "WARNING: Base::GetValue called!" << std::endl;
+    //std::cerr << "WARNING: Base::GetValue called!" << std::endl;
     return std::string("");
 }
 
