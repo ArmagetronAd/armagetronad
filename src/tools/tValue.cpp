@@ -25,10 +25,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
+#include <boost/lexical_cast.hpp>
+
 #include "tValue.h"
 #include "tConfiguration.h"
-
-#include "mathexpr.h"
 
 namespace tValue {
 
@@ -67,22 +67,43 @@ void Base::SetFill(char fill) {
     m_fill = fill;
 }
 
+Variant
+Base::GetValue(void) const {
+	std::cerr << "WARNING: Base::GetValue called!" << std::endl;
+	return std::string("");
+}
+
 //! This should be overwritten in a derived class if it's sensible to convert the value to an integer
 //! @returns 0
 int Base::GetInt(void) const {
+	try {
+		return boost::lexical_cast<int>(GetValue());
+	}
+	catch(boost::bad_lexical_cast &)
+	{
     return 0;
+	}
 }
 
 //! This should be overwritten in a derived class if it's sensible to convert the value to a floating- point number
-//! @returns 0.0
+//! @returns a stream conversion of the value
 float Base::GetFloat(void) const {
+	try {
+		return boost::lexical_cast<float>(GetValue());
+	}
+	catch(boost::bad_lexical_cast &)
+	{
     return 0.0;
+	}
 }
 
 //! This should be overwritten in a derived class if it's sensible to convert the value to a string
-//! @returns ""
+//! @returns GetValue streamed to a tString
 tString Base::GetString(Base const *other) const {
-    return tString();
+	Variant v = GetValue();
+	if (tString *iptr = boost::get<tString>(&v))
+		return *iptr;
+	return Output(v, other);
 }
 
 //! This should be overwritten in any derived class or they will mysteriously vanish if you use the tValue::Set container, for example
@@ -177,6 +198,10 @@ Base *String::copy(void) const {
     return new String(*this);
 }
 
+Variant String::GetValue() const {
+	return GetString();
+}
+
 //! Returns the string stored inside the object
 //! @returns a string containing the current value
 tString String::GetString(Base const *other) const {
@@ -189,58 +214,6 @@ bool String::operator>=(Base const &other) const { return m_value >=  static_cas
 bool String::operator<=(Base const &other) const { return m_value <=  static_cast<tString>(other); }
 bool String::operator> (Base const &other) const { return m_value >   static_cast<tString>(other); }
 bool String::operator< (Base const &other) const { return m_value <   static_cast<tString>(other); }
-
-//! @param expr The expression to be parsed
-Expr::Expr(tString const &expr) : m_operation(new ROperation(expr.c_str())) {}
-
-//! @param expr The expression to be parsed
-//! @param vars A map of variable names and their references
-Expr::Expr(tString const &expr, varmap_t const &vars) {
-    // what a mess. why can't this darn library just use stl functions? :s
-    RVar **vararray;
-    vararray = new RVar*[vars.size()];
-    unsigned int i = 0;
-    for(varmap_t::const_iterator iter = vars.begin(); iter != vars.end(); ++iter, ++i) {
-        vararray[i] = new RVar(iter->first.c_str(), iter->second);
-    }
-    m_operation = boost::shared_ptr<ROperation>(new ROperation(expr.c_str(), vars.size(), vararray));
-    for(i = 0; i < vars.size(); i++) {
-        delete vararray[i];
-    }
-    delete[] vararray;
-}
-
-Base *Expr::copy(void) const {
-    return new Expr(*this);
-}
-
-float Expr::GetFloat() const {
-    return m_operation->Val();
-}
-
-int Expr::GetInt() const {
-    return static_cast<int>(m_operation->Val());
-}
-
-tString Expr::GetString(Base const *other) const {
-    return Output(m_operation->Val(), other);
-}
-
-class blah {
-public:
-    blah() {
-        float x,y;
-        RVar xvar("x",&x), yvar("y",&y);
-        RVar* vararray[2] = { &xvar, &yvar };
-        //ROperation op("x+y", 2, vararray);
-        ROperation op("5");
-        RFunction f(op, 0, vararray); f.SetName("f");
-        RFunction *funcarray[1] = { &f };
-        ROperation op2("8", 0, 0, 1, funcarray);
-        std::cerr << op2.Val() << std::endl;
-    }
-};
-blah asdfgsf;
 
 //! Constructs a new Condition object with the given parameters
 //! @param lvalue     the value to be on the left  side of the comparison
@@ -285,91 +258,140 @@ Base *Condition::copy(void) const {
 //! Uses a specific type (usually int or float) to perform the comparison
 //! @param fun the return value of this function is used for the comparison
 //! @returns a reference to either m_lvalue or m_rvalue based on if the condition is true or false
-Base const &Condition::GetValue() const {
+Base const &Condition::GetExpr() const {
     return ((*m_lvalue).*m_comparator)(*m_rvalue) ? *m_truevalue : *m_falsevalue;
+}
+
+//! Performs the comparison and returns the resulting value
+//! @returns the result as a variant
+Variant Condition::GetValue(void) const {
+    return GetExpr().GetValue();
 }
 
 //! Performs the comparison and returns the resulting value
 //! @returns the result as an integer
 int Condition::GetInt(void) const {
-    return GetValue().GetInt();
+    return GetExpr().GetInt();
 }
 
 //! Performs the comparison and returns the resulting value
 //! @returns the result as a float
 float Condition::GetFloat(void) const {
-    return GetValue().GetFloat();
+    return GetExpr().GetFloat();
 }
 
 //! Performs the comparison and returns the resulting value
 //! @returns the result as a string
 tString Condition::GetString(tValue::Base const *other) const {
-    return GetValue().GetString(other);
+    return GetExpr().GetString(other);
 }
 
-bool Condition::operator==(Base const &other) const { return GetValue() == other; }
-bool Condition::operator!=(Base const &other) const { return GetValue() != other; }
-bool Condition::operator>=(Base const &other) const { return GetValue() >= other; }
-bool Condition::operator<=(Base const &other) const { return GetValue() <= other; }
-bool Condition::operator> (Base const &other) const { return GetValue() >  other; }
-bool Condition::operator< (Base const &other) const { return GetValue() <  other; }
+bool Condition::operator==(Base const &other) const { return GetExpr() == other; }
+bool Condition::operator!=(Base const &other) const { return GetExpr() != other; }
+bool Condition::operator>=(Base const &other) const { return GetExpr() >= other; }
+bool Condition::operator<=(Base const &other) const { return GetExpr() <= other; }
+bool Condition::operator> (Base const &other) const { return GetExpr() >  other; }
+bool Condition::operator< (Base const &other) const { return GetExpr() <  other; }
 
-//! Constructs a new Math object with the given parameters
+//! Constructs a new binary operator object with the given parameters
 //! @param lvalue     the value to be on the left  side of the operation
 //! @param rvalue     the value to be on the right side of the operation
-//! @param comp       the arithmethic operator to be used
-Math::Math(BasePtr lvalue, BasePtr rvalue, type comp) :
+BinaryOp::BinaryOp(BasePtr lvalue, BasePtr rvalue) :
         m_lvalue(lvalue    ),
-        m_rvalue(rvalue    ),
-        m_type  (comp      )
+        m_rvalue(rvalue    )
 { }
 
-//! Initializes the Math object using the information from another one
-//! @param other another Math object
-Math::Math(Math const &other) :
+//! Initializes the binary operator object using the information from another one
+//! @param other another binary operator object
+BinaryOp::BinaryOp(BinaryOp const &other) :
         BaseExt (other         ),
         m_lvalue(other.m_lvalue->copy()),
-        m_rvalue(other.m_rvalue->copy()),
-        m_type  (other.m_type  )
+        m_rvalue(other.m_rvalue->copy())
 { }
 
-//! Overwritten copy function
-//! @returns a new copy of the current object
-Base *Math::copy(void) const {
-    return new Math(*this);
+Base *BinaryOp::copy(void) const {
+	return new BinaryOp(*this);
 }
 
-//! Uses a specific type (usually int or float) to perform the operation
-//! @param fun the return value of this function is used for the operation
+//! Returns the result of adding the lvalue and rvalue
 //! @returns the result
-template <typename T> T Math::GetValue(T (Base::*fun)(void) const) const {
-    const T lvalue = (m_lvalue.get()->*fun)();
-    const T rvalue = (m_rvalue.get()->*fun)();
-    switch(m_type) {
-    case sum       : return lvalue + rvalue;
-    case difference: return lvalue - rvalue;
-    case product   : return lvalue * rvalue;
-    case quotient  : return rvalue != 0 ? lvalue / rvalue : lvalue;
-    default: return lvalue; //should never happen
-    }
+Variant
+Add::GetValue(void) const {
+	const Variant lvalue = m_lvalue->GetValue();
+	const Variant rvalue = m_rvalue->GetValue();
+	//return boost::apply_visitor(AddVisitor(), lvalue, rvalue);
+/*
+	if (boost::get<tString>(&lvalue) || boost::get<tString>(&rvalue))
+		return boost::lexical_cast<tString>lvalue
+		     + boost::lexical_cast<tString>rvalue;
+	else
+*/
+	if (boost::get<int>(&lvalue) && boost::get<int>(&rvalue))
+		return boost::get<int>(lvalue) + boost::get<int>(rvalue);
+	/*
+	else
+	if (boost::get<float>(&lvalue) || boost::get<float>(&rvalue))
+		return boost::lexical_cast<float>(lvalue)
+		     + boost::lexical_cast<float>(rvalue);
+	else
+		throw(1);*/
+	return m_lvalue->GetFloat() + m_rvalue->GetFloat();
 }
 
-//! Performs the operation and returns the resulting value
-//! @returns the result as an integer
-int Math::GetInt(void) const {
-    return GetValue(&Base::GetInt);
+Base *Add::copy(void) const {
+	return new Add(*this);
 }
 
-//! Performs the operation and returns the resulting value
-//! @returns the result as a float
-float Math::GetFloat(void) const {
-    return GetValue(&Base::GetFloat);
+//! Returns the result of subtracting rvalue from lvalue
+//! @returns the result
+Variant
+Subtract::GetValue(void) const {
+	const Variant lvalue = m_lvalue->GetValue();
+	const Variant rvalue = m_rvalue->GetValue();
+	if (boost::get<int>(&lvalue) && boost::get<int>(&rvalue))
+		return boost::get<int>(lvalue) - boost::get<int>(rvalue);
+	return m_lvalue->GetFloat() - m_rvalue->GetFloat();
+	/*
+	if (boost::get<float>(&lvalue) || boost::get<float>(&rvalue))
+		return boost::lexical_cast<float>(lvalue)
+		     - boost::lexical_cast<float>(rvalue);
+	else
+	if (boost::get<int>(&lvalue) && boost::get<int>(&rvalue))
+		return boost::get<int>(lvalue) - boost::get<int>(rvalue);
+	else
+		throw(1);
+	*/
 }
 
-//! Performs the operation and returns the resulting value
-//! @returns the result as a string
-tString Math::GetString(tValue::Base const *other) const {
-    return Output(GetValue(&Base::GetFloat));
+Base *Subtract::copy(void) const {
+	return new Subtract(*this);
+}
+
+//! Returns the result of multiplying lvalue by rvalue
+//! @returns the result
+Variant
+Multiply::GetValue(void) const {
+	const Variant lvalue = m_lvalue->GetValue();
+	const Variant rvalue = m_rvalue->GetValue();
+	if (boost::get<int>(&lvalue) && boost::get<int>(&rvalue))
+		return boost::get<int>(lvalue) * boost::get<int>(rvalue);
+	return m_lvalue->GetFloat() * m_rvalue->GetFloat();
+}
+
+Base *Multiply::copy(void) const {
+	return new Multiply(*this);
+}
+
+//! Returns the result of dividing lvalue by rvalue
+//! @returns the result
+Variant
+Divide::GetValue(void) const {
+	// Operate on both values as floats, because this is division
+	return m_lvalue->GetFloat() / m_rvalue->GetFloat();
+}
+
+Base *Divide::copy(void) const {
+	return new Divide(*this);
 }
 
 //! Reads from the Configuration item
@@ -414,40 +436,17 @@ bool ConfItem::Good() const {
     return m_value != 0;
 }
 
+Variant ConfItem::GetValue() const {
+	return GetString();
+}
+
 //! Reads from the configuration item
 //! @returns the result as a string
 tString ConfItem::GetString(Base const *other) const {
     return Output(Read(), other);
 }
 
-//! Reads from the configuration item and attempts conversion to an integer every 100 times it is called
-//! @returns the result as an integer
-int ConfItem::GetInt(void) const {
-    static int lastupdate = 0;
-    static int lastvalue;
-    if(lastupdate == 0) {
-        lastupdate = 100;
-        Read().Convert(lastvalue);
-    } else {
-        lastupdate--;
-    }
-    return lastvalue;
-}
-
-//! Reads from the configuration item and attempts conversion to a float every 100 times it is called
-//! @returns the result as a float
-float ConfItem::GetFloat(void) const {
-    static int lastupdate = 0;
-    static float lastvalue;
-    if(lastupdate == 0) {
-        lastupdate = 100;
-        Read().Convert(lastvalue);
-    } else {
-        lastupdate--;
-    }
-    return lastvalue;
-}
-
+Variant ColNode::GetValue(void) const         { return (*m_col.begin())->GetValue(); }
 int ColNode::GetInt(void) const               { return (*m_col.begin())->GetInt(); }
 float ColNode::GetFloat(void) const           { return (*m_col.begin())->GetFloat(); }
 myCol ColNode::GetCol(void) const { return m_col; }
@@ -475,7 +474,7 @@ bool ColNode::operator>=(Base const &other) const {
 bool ColNode::operator<=(Base const &other) const {
     BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
     return m_col <= static_cast<myCol >(*baseExt);
-}
+  }
 bool ColNode::operator> (Base const &other) const {
     BaseExt const *baseExt = dynamic_cast<BaseExt*>(const_cast<Base*>(&other));
     return m_col >  static_cast<myCol >(*baseExt);
@@ -486,6 +485,7 @@ bool ColNode::operator< (Base const &other) const {
 }
 
 
+Variant ColUnary::GetValue(void) const         { return (*_operation().begin())->GetValue(); }
 int ColUnary::GetInt(void) const               { return (*_operation().begin())->GetInt(); }
 float ColUnary::GetFloat(void) const           { return (*_operation().begin())->GetFloat(); }
 myCol ColUnary::GetCol(void) const { return _operation(); }
@@ -577,6 +577,7 @@ bool ColBinary::operator< (Base const &other) const {
     return _operation() <  static_cast<myCol >(*baseExt);
 }
 
+Variant ColBinary::GetValue(void) const         { return (*_operation().begin())->GetValue(); }
 int ColBinary::GetInt(void) const               { return (*_operation().begin())->GetInt(); }
 float ColBinary::GetFloat(void) const           { return (*_operation().begin())->GetFloat(); }
 myCol ColBinary::GetCol(void) const             { return _operation(); }

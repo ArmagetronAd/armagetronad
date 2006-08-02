@@ -35,10 +35,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <memory>
 #include <iomanip>
 #include <set>
-#include <map>
 #include <iterator>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
+#include <boost/variant.hpp>
 class tConfItemBase;
 
 //! Namespace for all Value classes for use by the cockpit
@@ -48,6 +48,7 @@ class Base;
 class FooPtrOps;
 typedef boost::shared_ptr<Base> BasePtr; //!< convinience definition for the use in derived classes
 
+typedef boost::variant<int, float, std::string> Variant;
 typedef std::set<BasePtr, FooPtrOps> myCol;
 
 //! Offers basic functions to set the precision etc.
@@ -58,6 +59,7 @@ class Base {
 protected:
     //! Converts a value to a string using the settings like precision etc.
     template<typename T> inline tString Output(T value, Base const *other=0) const;
+    //template<typename T> inline T VariantConvert(Variant const) const;
 public:
     Base(int precision=1, int minsize=0, char fill='0'); //!< Default constructor
     Base(Base const &other); //!< Copy constructor
@@ -68,6 +70,7 @@ public:
     virtual int GetInt(void) const; //!< Returns an integer using the current value
     virtual float GetFloat(void) const; //!< Returns a float using the current value
     virtual tString GetString(Base const *other=0) const; //!< Returns a String using the current value using Output()
+    virtual Variant GetValue(void) const; //!< Returns the value in its native format
 
     void SetPrecision(int precision); //!< Sets the precision when outputting a string
     void SetMinsize(int size); //!< Sets the minimal width when outputting a string
@@ -129,6 +132,19 @@ template<typename T> inline tString Base::Output(T value, Base const *other) con
 }
 
 
+/*
+template<typename T> inline T Base::VariantConvert(Variant v) const {
+	if (T *ptr = boost::get<T>(v))
+		return *ptr;
+	std::stringstream stream("");
+	stream << v;
+	T i;
+	stream >> i;
+    return i;
+}
+*/
+
+
 //! min, max and value in one class which handles the pointer buisness
 class Set {
     BasePtr m_min; //!< The minimum value
@@ -165,9 +181,10 @@ public:
 
     Base *copy(void) const;
 
-    int GetInt(void) const;
-    float GetFloat(void) const;
-    tString GetString(Base const *other=0) const;
+    virtual Variant GetValue(void) const; //!< Returns the value in its native format
+    virtual int GetInt(void) const; //!< Returns an integer using the current value
+    virtual float GetFloat(void) const; //!< Returns a float using the current value
+    virtual tString GetString(Base const *other=0) const; //!< Returns a String using the current value using Output()
 
     bool operator==(Base const &other) const;
     bool operator!=(Base const &other) const;
@@ -203,6 +220,12 @@ template<typename T> Number<T>::Number(BaseExt const &other):
 // TODO: Changed from Number<T> * to Base*
 template<typename T> Base *Number<T>::copy(void) const {
     return new Number(*this);
+}
+
+//! Returns the value stored inside the object
+//! @returns a variant containing the current value
+template<typename T> Variant Number<T>::GetValue(void) const {
+    return static_cast<T>(m_value);
 }
 
 //! Returns the value stored inside the object
@@ -256,7 +279,8 @@ public:
     Base *copy(void) const;
     virtual ~String() { };
 
-    tString GetString(Base const *other=0) const;
+    virtual Variant GetValue(void) const; //!< Returns the value in its native format
+    virtual tString GetString(Base const *other=0) const;
 
     bool operator==(Base const &other) const;
     bool operator!=(Base const &other) const;
@@ -264,27 +288,6 @@ public:
     bool operator<=(Base const &other) const;
     bool operator> (Base const &other) const;
     bool operator< (Base const &other) const;
-};
-
-}
-class ROperation;
-namespace tValue {
-
-//! Stores a math expression using the mathexpr library
-class Expr : public BaseExt {
-public:
-    typedef std::map<tString, float *> varmap_t; //!< map of variable names and their references
-private:
-    boost::shared_ptr<ROperation> m_operation;
-public:
-    Expr(tString const &expr); //!< Constructs a new Expr without variables and functions and the like
-    Expr(tString const &expr, varmap_t const &vars); //!< Constructs a new Expr with an array of variables
-
-    Base *copy(void) const;
-
-    float GetFloat() const;
-    int GetInt() const;
-    tString GetString(Base const *other=0) const;
 };
 
 //! Stores a function pointer to a function within another class and offers functions to get that function's return value
@@ -302,9 +305,10 @@ public:
     Base *copy(void) const;
     virtual ~Callback() { };
 
-    tString GetString(Base const *other=0) const;
-    int GetInt(void) const;
-    float GetFloat(void) const;
+    virtual Variant GetValue(void) const; //!< Returns the value in its native format
+    virtual int GetInt(void) const; //!< Returns an integer using the current value
+    virtual float GetFloat(void) const; //!< Returns a float using the current value
+    virtual tString GetString(Base const *other=0) const; //!< Returns a String using the current value using Output()
 
     bool operator==(Base const &other) const;
     bool operator!=(Base const &other) const;
@@ -327,7 +331,7 @@ public:
         gt, lt, ge, le, eq, ne
     };
 private:
-    Base const &GetValue() const; //!< Performs the comparison
+    Base const &GetExpr() const; //!< Performs the comparison
 public:
     Condition(BasePtr lvalue, BasePtr rvalue, BasePtr truevalue, BasePtr falsevalue, comparator comp); //!< Basic constructor
     Condition(Condition const &other); //!< Copy constructor, will not work with any class except another Condition object
@@ -335,9 +339,10 @@ public:
     virtual ~Condition() { };
     Base *copy(void) const;
 
-    tString GetString(Base const *other=0) const;
-    int GetInt(void) const;
-    float GetFloat(void) const;
+	virtual Variant GetValue() const;
+    virtual tString GetString(Base const *other=0) const;
+    virtual int GetInt(void) const;
+    virtual float GetFloat(void) const;
 
     bool operator==(Base const &other) const;
     bool operator!=(Base const &other) const;
@@ -348,26 +353,47 @@ public:
 };
 
 //! Supports basic arithmetical operations between two values and returns the result
-class Math : public BaseExt {
+class BinaryOp : public BaseExt {
+protected:
     BasePtr m_lvalue; //!< The lvalue for the operation
     BasePtr m_rvalue; //!< The rvalue for the operation
 public:
-    enum type { //!< The operators available
-        sum, difference, product, quotient
-    };
-private:
-    type m_type; //!< The operation to be performed
-    template<typename T> T GetValue(T (Base::*fun)(void) const) const; //!< Performs the operation
+    BinaryOp(BasePtr lvalue, BasePtr rvalue); //!< Basic constructor
+    BinaryOp(BinaryOp const &other); //!< Copy constructor
+    virtual Base *copy(void) const; //!< Returns an exact copy of this object
+};
+
+class Add : public BinaryOp {
 public:
-    Math(BasePtr lvalue, BasePtr rvalue, type comp); //!< Basic constructor
-    Math(Math const &other); //!< Copy constructor
+    Add(BasePtr lvalue, BasePtr rvalue) : BinaryOp(lvalue, rvalue) {}; //!< Basic constructor
+    Add(BinaryOp const &other) : BinaryOp(other) {}; //!< Copy constructor
 
-    virtual ~Math() { };
-    Base *copy(void) const;
+    virtual Variant GetValue(void) const; //!< Returns the value in its native format
+    virtual Base *copy(void) const; //!< Returns an exact copy of this object
+};
+class Subtract : public BinaryOp {
+public:
+    Subtract(BasePtr lvalue, BasePtr rvalue) : BinaryOp(lvalue, rvalue) {}; //!< Basic constructor
+    Subtract(BinaryOp const &other) : BinaryOp(other) {}; //!< Copy constructor
 
-    tString GetString(Base const *other=0) const;
-    int GetInt(void) const;
-    float GetFloat(void) const;
+    virtual Variant GetValue(void) const; //!< Returns the value in its native format
+    virtual Base *copy(void) const; //!< Returns an exact copy of this object
+};
+class Multiply : public BinaryOp {
+public:
+    Multiply(BasePtr lvalue, BasePtr rvalue) : BinaryOp(lvalue, rvalue) {}; //!< Basic constructor
+    Multiply(BinaryOp const &other) : BinaryOp(other) {}; //!< Copy constructor
+
+    virtual Variant GetValue(void) const; //!< Returns the value in its native format
+    virtual Base *copy(void) const; //!< Returns an exact copy of this object
+};
+class Divide : public BinaryOp {
+public:
+    Divide(BasePtr lvalue, BasePtr rvalue) : BinaryOp(lvalue, rvalue) {}; //!< Basic constructor
+    Divide(BinaryOp const &other) : BinaryOp(other) {}; //!< Copy constructor
+
+    virtual Variant GetValue(void) const; //!< Returns the value in its native format
+    virtual Base *copy(void) const; //!< Returns an exact copy of this object
 };
 
 //TODO: Find a better solution for this, this is a bit slow.
@@ -386,9 +412,8 @@ public:
     Base *copy(void) const;
     virtual ~ConfItem() { };
 
-    tString GetString(Base const *other=0) const;
-    int GetInt(void) const;
-    float GetFloat(void) const;
+    virtual Variant GetValue(void) const; //!< Returns the value in its native format
+    virtual tString GetString(Base const *other=0) const;
 };
 
 //! Initializes the Callback object to a given callback function and object
@@ -420,6 +445,12 @@ template<typename T> void Callback<T>::operator=(Callback const &other) {
     this->BaseExt::operator=(other);
     m_value=other.m_value;
     m_cockpit=other.m_cockpit;
+}
+
+//! Returns the result of calling the stored callback
+//! @returns a variant containing the current value
+template<typename T> Variant Callback<T>::GetValue() const {
+    return (m_cockpit->*m_value)()->GetValue();
 }
 
 //! Returns the result of calling the stored callback as a string
@@ -463,8 +494,9 @@ public:
     virtual ~ColNode() { };
 
     Base *copy(void) const { return new ColNode(*this); };
-    int GetInt(void) const;
-    float GetFloat(void) const;
+    virtual Variant GetValue(void) const; //!< Returns the value in its native format
+    virtual int GetInt(void) const;
+    virtual float GetFloat(void) const;
     myCol GetCol(void) const;
 
     bool operator==(Base const &other) const;
@@ -503,8 +535,9 @@ public:
 
     Base *copy(void) const { return new ColUnary(*this); };
 
-    int GetInt(void) const;
-    float GetFloat(void) const;
+    virtual Variant GetValue(void) const; //!< Returns the value in its native format
+    virtual int GetInt(void) const;
+    virtual float GetFloat(void) const;
     myCol GetCol(void) const;
 
     bool operator==(Base const &other) const;
@@ -582,8 +615,9 @@ public:
 
     Base *copy(void) const { return new ColBinary(*this); };
 
-    int GetInt(void) const;
-    float GetFloat(void) const;
+    virtual Variant GetValue(void) const; //!< Returns the value in its native format
+    virtual int GetInt(void) const;
+    virtual float GetFloat(void) const;
     myCol GetCol(void) const;
 
     bool operator==(Base const &other) const;
