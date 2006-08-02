@@ -724,6 +724,7 @@ REAL exponent(int i)
 extern REAL stc_fastestSpeedRound;
 #endif
 extern bool sg_axesIndicator;
+extern bool sg_axesIndicator;
 
 void init_game_grid(eGrid *grid, gParser *aParser){
     se_ResetGameTimer();
