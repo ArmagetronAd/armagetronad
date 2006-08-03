@@ -320,20 +320,13 @@ public:
 
 //! Stores two other values and returns one of them based on a specific condition
 class Condition : public BaseExt {
-    BasePtr m_lvalue; //!< The lvalue for the comparison
-    BasePtr m_rvalue; //!< The rvalue for the comparison
+    BasePtr m_condvalue; //!< The conditional value
     BasePtr m_truevalue; //!< The value that is used if the condition is true
     BasePtr m_falsevalue; //!< The value that is used if the condition is false
-    bool (Base::*m_comparator)(Base const &) const; //!< The comparison operator used
-public:
-    //! The different binary comparison operators available
-    enum comparator {
-        gt, lt, ge, le, eq, ne
-    };
-private:
+protected:
     Base const &GetExpr() const; //!< Performs the comparison
 public:
-    Condition(BasePtr lvalue, BasePtr rvalue, BasePtr truevalue, BasePtr falsevalue, comparator comp); //!< Basic constructor
+    Condition(BasePtr condvalue, BasePtr truevalue, BasePtr falsevalue); //!< Basic constructor
     Condition(Condition const &other); //!< Copy constructor, will not work with any class except another Condition object
 
     virtual ~Condition() { };
@@ -352,7 +345,28 @@ public:
     bool operator< (Base const &other) const;
 };
 
-//! Supports basic arithmetical operations between two values and returns the result
+//! Base class for unary operators
+class UnaryOp : public BaseExt {
+protected:
+    BasePtr m_value; //!< The value for the operation
+public:
+    UnaryOp(BasePtr value); //!< Basic constructor
+    UnaryOp(UnaryOp const &other); //!< Copy constructor
+    virtual Base *copy(void) const; //!< Returns an exact copy of this object
+};
+
+#define DeclStdUnaryOp(classname)	\
+class classname : public UnaryOp {	\
+public:	\
+    classname(BasePtr value) : UnaryOp(value) {}; \
+    classname(UnaryOp const &other) : UnaryOp(other) {}; \
+    virtual Variant GetValue(void) const; \
+    virtual Base *copy(void) const; \
+};
+
+DeclStdUnaryOp(Not)
+
+//! Base class for binary operators
 class BinaryOp : public BaseExt {
 protected:
     BasePtr m_lvalue; //!< The lvalue for the operation
@@ -395,6 +409,22 @@ public:
     virtual Variant GetValue(void) const; //!< Returns the value in its native format
     virtual Base *copy(void) const; //!< Returns an exact copy of this object
 };
+
+#define DeclStdBinaryOp(classname)	\
+class classname : public BinaryOp {	\
+public:	\
+    classname(BasePtr lvalue, BasePtr rvalue) : BinaryOp(lvalue, rvalue) {}; \
+    classname(BinaryOp const &other) : BinaryOp(other) {}; \
+    virtual Variant GetValue(void) const; \
+    virtual Base *copy(void) const; \
+};
+
+DeclStdBinaryOp(GreaterThan    )
+DeclStdBinaryOp(GreaterOrEquals)
+DeclStdBinaryOp(         Equals)
+DeclStdBinaryOp(   LessOrEquals)
+DeclStdBinaryOp(   LessThan    )
+DeclStdBinaryOp(Compare)
 
 //TODO: Find a better solution for this, this is a bit slow.
 

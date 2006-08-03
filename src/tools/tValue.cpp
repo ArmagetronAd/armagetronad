@@ -216,37 +216,23 @@ bool String::operator> (Base const &other) const { return m_value >   static_cas
 bool String::operator< (Base const &other) const { return m_value <   static_cast<tString>(other); }
 
 //! Constructs a new Condition object with the given parameters
-//! @param lvalue     the value to be on the left  side of the comparison
-//! @param rvalue     the value to be on the right side of the comparison
+//! @param condvalue  the value to be used as the condition
 //! @param truevalue  the value to be used if the condition is true
 //! @param falsevalue the value to be used if the condition is false
-//! @param comp       the comparison operator to be used
-Condition::Condition(BasePtr lvalue, BasePtr rvalue, BasePtr truevalue, BasePtr falsevalue, comparator comp) :
-        m_lvalue    (lvalue    ),
-        m_rvalue    (rvalue    ),
+Condition::Condition(BasePtr condvalue, BasePtr truevalue, BasePtr falsevalue) :
+        m_condvalue (condvalue ),
         m_truevalue (truevalue ),
         m_falsevalue(falsevalue)
 {
-    switch(comp) {
-    case lt: m_comparator=&Base::operator< ; break;
-    case gt: m_comparator=&Base::operator> ; break;
-    case le: m_comparator=&Base::operator<=; break;
-    case ge: m_comparator=&Base::operator>=; break;
-    case eq: m_comparator=&Base::operator==; break;
-    case ne: m_comparator=&Base::operator!=; break;
-    default: m_comparator=&Base::operator==; //should never happen
-    }
 }
 
 //! Initializes the Condition object using the information from another one
 //! @param other another Condition object
 Condition::Condition(Condition const &other) :
         BaseExt     (other             ),
-        m_lvalue    (other.m_lvalue    ->copy()),
-        m_rvalue    (other.m_rvalue    ->copy()),
+        m_condvalue (other.m_condvalue ->copy()),
         m_truevalue (other.m_truevalue ->copy()),
-        m_falsevalue(other.m_falsevalue->copy()),
-        m_comparator(other.m_comparator)
+        m_falsevalue(other.m_falsevalue->copy())
 { }
 
 //! Overwritten copy function
@@ -259,7 +245,13 @@ Base *Condition::copy(void) const {
 //! @param fun the return value of this function is used for the comparison
 //! @returns a reference to either m_lvalue or m_rvalue based on if the condition is true or false
 Base const &Condition::GetExpr() const {
-    return ((*m_lvalue).*m_comparator)(*m_rvalue) ? *m_truevalue : *m_falsevalue;
+    bool truth = false;
+    // In the future, we might want to define some kind of rules for truth
+    try {
+        truth = boost::lexical_cast<bool>(m_condvalue->GetValue());
+    }
+    catch(boost::bad_lexical_cast &) { }
+    return truth ? *m_truevalue : *m_falsevalue;
 }
 
 //! Performs the comparison and returns the resulting value
@@ -292,6 +284,39 @@ bool Condition::operator>=(Base const &other) const { return GetExpr() >= other;
 bool Condition::operator<=(Base const &other) const { return GetExpr() <= other; }
 bool Condition::operator> (Base const &other) const { return GetExpr() >  other; }
 bool Condition::operator< (Base const &other) const { return GetExpr() <  other; }
+
+//! Constructs a new binary operator object with the given parameters
+//! @param value      the value for the operation
+UnaryOp::UnaryOp(BasePtr value) :
+        m_value(value    )
+{ }
+
+//! Initializes the binary operator object using the information from another one
+//! @param other another binary operator object
+UnaryOp::UnaryOp(UnaryOp const &other) :
+        BaseExt (other         ),
+        m_value(other.m_value->copy())
+{ }
+
+Base *UnaryOp::copy(void) const {
+    return new UnaryOp(*this);
+}
+
+//! Returns the value negated
+//! @returns the result
+Variant
+Not::GetValue(void) const {
+    bool truth = false;
+    try {
+        truth = boost::lexical_cast<bool>(m_value->GetValue());
+    }
+    catch(boost::bad_lexical_cast &) { }
+    return (int)(!truth);
+}
+
+Base *Not::copy(void) const {
+    return new Not(*this);
+}
 
 //! Constructs a new binary operator object with the given parameters
 //! @param lvalue     the value to be on the left  side of the operation
@@ -392,6 +417,37 @@ Divide::GetValue(void) const {
 
 Base *Divide::copy(void) const {
     return new Divide(*this);
+}
+
+#define CodeStdBinOp(classname, op)       \
+Variant                                   \
+classname::GetValue(void) const {         \
+    return (int)(*m_lvalue op *m_rvalue); \
+}                                         \
+Base *classname::copy(void) const {       \
+    return new classname(*this);          \
+}                                         \
+
+CodeStdBinOp(GreaterThan    , >  )
+CodeStdBinOp(GreaterOrEquals, >= )
+CodeStdBinOp(         Equals, == )
+CodeStdBinOp(   LessOrEquals, <= )
+CodeStdBinOp(   LessThan    , <  )
+
+Variant
+Compare::GetValue(void) const {
+    // This could probably be optimized
+    if (*m_lvalue == *m_rvalue)
+                return 0;
+    else
+    if (*m_lvalue < *m_rvalue)
+                return -1;
+    else
+                return 1;
+}
+
+Base *Compare::copy(void) const {
+    return new Compare(*this);
 }
 
 //! Reads from the Configuration item

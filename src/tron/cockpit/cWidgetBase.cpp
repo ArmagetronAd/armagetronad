@@ -168,19 +168,47 @@ tValue::Base *WithDataFunctions::ProcessConditional(tXmlParser::node cur) {
     tValue::BasePtr rvalue(ProcessDataSource(cur.GetProp("rvalue")));
     tValue::BasePtr truevalue(new tValue::Base), falsevalue(new tValue::Base);
 
-    std::map<tString, tValue::Condition::comparator> comparators;
-    comparators[tString("gt")] = tValue::Condition::gt;
-    comparators[tString("lt")] = tValue::Condition::lt;
-    comparators[tString("ge")] = tValue::Condition::ge;
-    comparators[tString("le")] = tValue::Condition::le;
-    comparators[tString("eq")] = tValue::Condition::eq;
-    comparators[tString("ne")] = tValue::Condition::ne;
-
-    std::map<tString, tValue::Condition::comparator>::iterator iter;
-    if((iter = comparators.find(cur.GetProp("operator"))) == comparators.end()) {
-        tERR_WARN("Operator '" + cur.GetProp("operator") + "' unknown!");
-        iter = comparators.begin();
-    }
+    tString oper = cur.GetProp("operator");
+    tValue::Base *condvalue;
+    if (oper.size() == 2)
+    {
+		switch (oper[1]) {
+		case 't': case 'T':
+			switch (oper[0]) {
+			case 'g': case 'G':
+				condvalue = new tValue::GreaterThan    (lvalue, rvalue);
+				break;
+			case 'l': case 'L':
+				condvalue = new tValue::   LessThan    (lvalue, rvalue);
+				break;
+			}
+		case 'e': case 'E':
+			switch (oper[0]) {
+			case 'g': case 'G':
+				condvalue = new tValue::GreaterOrEquals(lvalue, rvalue);
+				break;
+			case 'l': case 'L':
+				condvalue = new tValue::   LessOrEquals(lvalue, rvalue);
+				break;
+			case 'n': case 'N':
+				// TODO: !=
+				tValue::BasePtr precond(new tValue::Equals(lvalue, rvalue));
+				condvalue = new tValue::Not(precond);
+				break;
+			}
+			break;
+		case 'q': case 'Q':
+			if (oper[0] == 'e' || oper[0] == 'E')
+				condvalue = new tValue::         Equals(lvalue, rvalue);
+			break;
+		}
+	}
+	if (!condvalue)
+	{
+		tERR_WARN("Operator '" + oper + "' unknown!");
+		condvalue = new tValue::Equals(lvalue, rvalue);
+	}
+	tValue::BasePtr condvalueP(condvalue);
 
     for (cur = cur.GetFirstChild(); cur; ++cur) {
         tString name = cur.GetName();
@@ -190,7 +218,8 @@ tValue::Base *WithDataFunctions::ProcessConditional(tXmlParser::node cur) {
             falsevalue = tValue::BasePtr(ProcessConditionalCore(cur));
         }
     }
-    return new tValue::Condition(lvalue, rvalue, truevalue, falsevalue, iter->second);
+
+    return new tValue::Condition(condvalueP, truevalue, falsevalue);
 }
 
 tValue::Base *WithDataFunctions::ProcessConditionalCore(tXmlParser::node cur) {
