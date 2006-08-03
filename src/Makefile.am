@@ -61,6 +61,7 @@ libtools_a_SOURCES=	tools/tArray.cpp tools/tArray.h tools/tCallback.cpp tools/tC
 	tools/tXmlParser.h tools/tXmlParser.cpp\
 	defs.h\
     thirdparty/binreloc/prefix.c thirdparty/binreloc/prefix.h\
+	tools/tValueParser.ypp\
 	tools/tMemManager.cpp tools/tMemManager.h\
 	tools/tStatFile.cpp tools/tStatFile.h\
 	tools/tStatEntry.h tools/tStatEntry.cpp\

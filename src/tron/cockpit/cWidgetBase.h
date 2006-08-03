@@ -99,6 +99,7 @@ public:
 
 //! This class offers functions to parse DataSet and friends. It doesn't parse anything by itself, ProcessDataSet() has to be called by an inherited class
 class WithDataFunctions : virtual public Base {
+    tValue::Base *ProcessValue(tXmlParser::node cur); //!< Processes a Value node given as its parameter, parses it, and returns a tValue
     tValue::Base *ProcessMath(tXmlParser::node cur); //!< Processes a Math node given as its parameter and returns it
     tValue::Base *ProcessConditionalCore(tXmlParser::node cur); //!< Processes an IfTrue or IfFalse node and returns the resulting Value
     tValue::Base *ProcessConditional(tXmlParser::node cur); //!< Processes a Conditional node given as its parameter and returns it

@@ -96,7 +96,7 @@
                   )*)>
 <!ATTLIST Map %CommonWidgetAttributes;>
 
-<!ELEMENT DataSet ((AtomicData | Conditional | Math)+)>
+<!ELEMENT DataSet ((AtomicData | Conditional | Math | Value)+)>
 <!ATTLIST DataSet id CDATA "">
 
 <!ELEMENT AtomicData EMPTY>
@@ -112,10 +112,10 @@
 <!ATTLIST Conditional rvalue CDATA #REQUIRED>
 <!ATTLIST Conditional operator (lt | gt | eq | ne | le | ge) #REQUIRED>
 
-<!ELEMENT IfTrue ((AtomicData | Conditional | Math))>
-<!ELEMENT IfFalse ((AtomicData | Conditional | Math))>
-<!ELEMENT LValue ((AtomicData | Conditional | Math))>
-<!ELEMENT RValue ((AtomicData | Conditional | Math))>
+<!ELEMENT IfTrue ((AtomicData | Conditional | Math | Value))>
+<!ELEMENT IfFalse ((AtomicData | Conditional | Math | Value))>
+<!ELEMENT LValue ((AtomicData | Conditional | Math | Value))>
+<!ELEMENT RValue ((AtomicData | Conditional | Math | Value))>
 
 <!ELEMENT Math (LValue?, RValue?)>
 <!ATTLIST Math field (source | minimum | maximum) "source">
@@ -125,6 +125,10 @@
 <!ATTLIST Math precision CDATA "1">
 <!ATTLIST Math minwidth CDATA "0">
 <!ATTLIST Math fill CDATA "0">
+
+<!ELEMENT Value EMPTY>
+<!ATTLIST Value expr CDATA #REQUIRED>
+<!ATTLIST Value field (source | minimum | maximum) "source">
 
 <!ELEMENT Position EMPTY>
 <!ATTLIST Position x CDATA #REQUIRED>

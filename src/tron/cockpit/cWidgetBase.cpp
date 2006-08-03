@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "cockpit/cWidgetBase.h"
 #include "cockpit/cCockpit.h"
+#include "tools/tValueParser.h"
 
 #ifndef DEDICATED
 
@@ -105,6 +106,9 @@ tValue::Set WithDataFunctions::ProcessDataSet(tXmlParser::node cur) {
         } else if(name == "Math") {
             newvalue = ProcessMath(cur);
         }
+        else
+        if (name == "Value")
+            newvalue = ProcessValue(cur);
         if(newvalue != 0) {
             tString field = cur.GetProp("field");
             if(field == "source") {
@@ -191,7 +195,6 @@ tValue::Base *WithDataFunctions::ProcessConditional(tXmlParser::node cur) {
 				condvalue = new tValue::   LessOrEquals(lvalue, rvalue);
 				break;
 			case 'n': case 'N':
-				// TODO: !=
 				tValue::BasePtr precond(new tValue::Equals(lvalue, rvalue));
 				condvalue = new tValue::Not(precond);
 				break;
@@ -234,6 +237,9 @@ tValue::Base *WithDataFunctions::ProcessConditionalCore(tXmlParser::node cur) {
         if(name == "Math") {
             return ProcessMath(cur);
         }
+        else
+        if (name == "Value")
+            return ProcessValue(cur);
     }
     tERR_WARN("IfTrue or IfFalse node doesn't contain an AtomicData or Conditional node")
     return new tValue::Base();
@@ -243,6 +249,10 @@ tValue::Base *WithDataFunctions::ProcessAtomicData(tXmlParser::node cur) {
     tValue::Base *ret = ProcessDataSource(cur.GetProp("source"));
     ProcessDataTags(cur, *ret);
     return ret;
+}
+
+tValue::Base *WithDataFunctions::ProcessValue(tXmlParser::node cur) {
+    return tValueParser::parse(cur.GetProp("expr"));
 }
 
 void WithDataFunctions::ProcessDataTags(tXmlParser::node cur, tValue::Base &data) {

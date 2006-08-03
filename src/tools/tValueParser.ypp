@@ -1,0 +1,243 @@
+// bison tCodeParser.ypp && g++ -g tCodeParser.tab.cpp -o tCodeParser -DtCodeParser_STANDALONE tCodeAST.cpp -I../.. -I.. ../libtools.a -lpthread &&  ./tCodeParser
+
+%{
+	#include "tError.h"
+	#include "tValue.h"
+	#include "tValueParser.h"
+	#include "tString.h"
+	
+	int yylex(void);
+	void yyerror(char const *s);
+	
+	tValue::Base *rv;
+	
+	using tValue::BasePtr;
+%}
+
+%union
+{
+	int integer;
+	tString *string;
+	tValue::Base *expr;
+}
+
+%destructor {
+	delete $$;
+} expr function tSTRING tID
+
+%type	<expr>	expr function;
+
+%token	<integer>	tINTEGER
+%token	<string>	tSTRING tID
+
+%left	'+' '-'
+%left	'*' '/'
+%left	tUNARYMINUS
+%nonassoc '.'
+
+%%
+input:
+	  expr
+	  {
+		rv = $1;
+	  }
+	;
+	/*
+input:
+	  input '\n' input
+	| expr
+	  {
+		VarStack* stack = new VarStack;
+		Expr::TopExpr top(*$1);
+		tString o = top.compile(stack);
+		printf("Bytecode: ");
+		for (int i = 0; i < o.size(); ++i)
+			printf("%02x", (int)o[i]);
+		puts("");
+		puts("*** Begin stack");
+		for ( ; !stack->empty(); stack->pop())
+			std::cout << stack->top() << std::endl;
+		puts("*** End of stack");
+		delete stack;
+	  }
+	;
+	*/
+expr:
+	  tINTEGER
+	  {
+		$$ = new tValue::Int($1);
+	  }
+//	| tFLOAT
+	| tSTRING
+	  {
+		$$ = new tValue::String(*$1);
+		delete $1;
+	  }
+	| function
+	| expr '+' expr
+	  {
+		$$ = new tValue::Add(BasePtr($1), BasePtr($3));
+	  }
+	| expr '-' expr
+	  {
+		$$ = new tValue::Subtract(BasePtr($1), BasePtr($3));
+	  }
+	| expr '*' expr
+	  {
+		$$ = new tValue::Multiply(BasePtr($1), BasePtr($3));
+	  }
+	| expr '/' expr
+	  {
+		$$ = new tValue::Divide(BasePtr($1), BasePtr($3));
+	  }
+	| '-' expr %prec tUNARYMINUS
+	  {
+		static BasePtr zero(new tValue::Int(0));
+		$$ = new tValue::Subtract(zero, BasePtr($2));
+	  } 
+	| '(' expr ')'
+	  {
+		$$ = $2;
+	  }
+	;
+	// a ?: b !: c -- trinary conditional
+	// a <=> b -- tValue::Compare
+function:
+	  tID
+	| tID '(' arglist ')'
+	| function '.' function
+	;
+arglist:
+	  // empty
+	| expr
+	| arglist ',' expr
+	;
+%%
+
+#if tCodeParser_STANDALONE
+int
+main(void)
+{
+	return yyparse();
+}
+
+#define lex_getc	getchar
+#define lex_ungetc(c)	ungetc(c, stdin)
+#else
+tString in;
+int pos, buffer;
+
+tValue::Base *
+tValueParser::parse(tString s)
+{
+	pos = 0;
+	buffer = -1;
+	in = s;
+	if (!yyparse())
+		return rv;
+	return NULL;
+}
+
+int
+lex_getc(void)
+{
+	if (buffer != -1)
+	{
+		int r = buffer;
+		buffer = -1;
+		return r;
+	}
+	
+	if (pos >= in.size())
+		return EOF;
+	return in[pos++];
+}
+
+static void
+lex_ungetc(int c)
+{
+	assert(buffer == -1);
+	buffer = c;
+}
+#endif
+
+void
+yyerror(const char *s)
+{
+	//puts(s);
+	//exit(1);
+	tString msg("tValue parse error: ");
+	msg << s;
+	tERR_ERROR(msg);
+}
+
+static bool
+follow(int expect)
+{
+	int c = lex_getc();
+	
+	if (c == expect)
+		return true;
+	lex_ungetc(c);
+	return false;
+}
+
+int
+yylex(void)
+{
+	int c;
+	
+	/* Skip white space.  */
+	while (isspace(c = lex_getc()))
+#ifdef tCodeParser_STANDALONE
+		if (c == '\n')
+			return c;
+#endif
+		;
+	
+	if (c == EOF)
+		return 0;
+	
+	if (isdigit(c))
+	{
+		int n = 0;
+		
+		for ( ; isdigit(c); c = lex_getc())
+			n = (n * 10) + (c - '0');
+		lex_ungetc(c);
+		yylval.integer = n;
+		return tINTEGER;
+	}
+	
+	if (isalpha(c))
+	{
+		tString *s = new tString;
+		for ( ; isalnum(c); c = lex_getc())
+			s += (char)c;
+		yylval.string = s;
+		return tID;
+	}
+	
+	if (c == '"')
+	{
+		tString *s = new tString;
+		while ('"' != (c = lex_getc()))
+		{
+			switch (c) {
+			case EOF:
+				yyerror("Missing quote! wtf?");
+				break;
+			case '\\':
+				// Supported only to escape another backslash or quote
+				// in the future, this should handle \n and co
+				c = lex_getc();
+				break;
+			}
+			(*s) += (char)c;
+		}
+		yylval.string = s;
+		return tSTRING;
+	}
+	
+	return c;
+}

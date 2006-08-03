@@ -26,6 +26,9 @@ AM_INIT_AUTOMAKE
 dnl detect which link commant to use
 AC_PROG_LN_S
 
+dnl find a parser generator to use
+AC_PROG_YACC
+
 dnl check whether m4 is available for documentation processing
 AC_CHECK_PROG(HAVE_M4,m4,true,false)
 AM_CONDITIONAL(HAVE_M4, test $HAVE_M4 = true)
