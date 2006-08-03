@@ -2679,12 +2679,15 @@ nMessage* sn_ConsoleOutMessage( const tOutput& o )
 
     // truncate message to 1.4K, a safe size for all UDP packets
     static const int maxLen = 1400;
-    if ( message.Len() > maxLen )
+    static bool recurse = true;
+    if ( message.Len() > maxLen && recurse )
     {
+        recurse = false;
         tERR_WARN( "Long console message truncated.");
 
         message.SetLen( maxLen+1 );
         message[maxLen]='\0';
+        recurse = false;
     }
 
     nMessage* m=new nMessage(sn_ConsoleOut_nd);
