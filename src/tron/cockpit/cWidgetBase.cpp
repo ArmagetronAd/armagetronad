@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "cockpit/cWidgetBase.h"
 #include "cockpit/cCockpit.h"
-#include "tools/tValueParser.h"
+#include "tValueParser.h"
 
 #ifndef DEDICATED
 
