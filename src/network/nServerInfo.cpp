@@ -1447,6 +1447,7 @@ void nServerInfo::GetFromMaster(nServerInfo *masterInfo)
     while(sn_GetNetState() == nCLIENT && timeout > tSysTimeFloat())
     {
         sn_Receive();
+        sn_SendPlanned();
         tAdvanceFrame(100000);
         st_DoToDo();
         if (sn_ServerCount > lastReported + 9)
@@ -1503,6 +1504,7 @@ void nServerInfo::GetFromLAN(unsigned int pollBeginPort, unsigned int pollEndPor
     {
         tAdvanceFrame();
         sn_Receive();
+        sn_SendPlanned();
         tAdvanceFrame(10000);
         if (sn_ServerCount > lastReported)
         {
@@ -1631,12 +1633,14 @@ void nServerInfo::TellMasterAboutMe(nServerInfo *masterInfo)
     con << tOutput("$network_master_send");
     m->BroadCast();
     sn_Receive();
+    sn_SendPlanned();
 
     // wait for the data to be accepted
     nTimeRolling timeout = tSysTimeFloat() + 20;
     while(sn_GetNetState() == nCLIENT && timeout > tSysTimeFloat() && sn_Connections[0].ackPending > 0)
     {
         sn_Receive();
+        sn_SendPlanned();
         tAdvanceFrame(10000);
     }
 
@@ -1936,6 +1940,7 @@ bool nServerInfo::DoQueryAll(int simultaneous)         // continue querying the 
     }
 
     sn_Receive();
+    sn_SendPlanned();
 
     if (sn_Requesting)
         return true;
@@ -2097,6 +2102,7 @@ void nServerInfo::RunMaster()
     }
 
     sn_Receive();
+    sn_SendPlanned();
 }
 
 bool nServerInfo::Reachable() const

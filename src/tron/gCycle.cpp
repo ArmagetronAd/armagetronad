@@ -2756,8 +2756,6 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
 
                 if ( !saved )
                 {
-                    // last
-
                     // err, trouble. Can't push the other guy back far enough. Better kill him.
                     if ( currentWall )
                         otherPlayer->enemyInfluence.AddWall( currentWall->Wall(), lastTime, otherPlayer );

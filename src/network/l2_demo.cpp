@@ -114,6 +114,7 @@ void server(){
 
     while(loop>0 && sn_GetNetState()!=nSTANDALONE){ // and loop a while
         sn_Receive();
+        sn_SendPlanned();
         loop--;
         usleep(10000);
     }
@@ -121,6 +122,7 @@ void server(){
     sn_SetNetState(nSTANDALONE); // exit.
     usleep(10000);
     sn_Receive();
+    sn_SendPlanned();
 }
 
 
@@ -179,6 +181,7 @@ void client(const tString &serv){
         // don't let too many messages be pending
         while( sn_MessagesPending(0) > 10){
             sn_Receive();
+            sn_SendPlanned();
             usleep(1000);
         }
 
@@ -186,18 +189,21 @@ void client(const tString &serv){
         (*m) << j;
         m->BroadCast();
         sn_Receive();
+        sn_SendPlanned();
     }
 
     // wait before we exit, getting messages and repeating lost ones
     for(i=300;i>=0  || sn_MessagesPending(0) > 0; i--){
         con << "Pending messages: " << sn_MessagesPending(0) << "\n";
         sn_Receive();
+        sn_SendPlanned();
         usleep(1000);
     }
 
     sn_SetNetState(nSTANDALONE);
     usleep(1000);
     sn_Receive();
+    sn_SendPlanned();
 }
 
 

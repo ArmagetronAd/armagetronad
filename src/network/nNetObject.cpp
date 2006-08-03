@@ -455,6 +455,7 @@ unsigned short next_free(){
 #endif
                 sn_Receive();
                 nNetObject::SyncAll();
+                sn_SendPlanned();
                 //	st_Breakpoint();
                 tAdvanceFrame(1000000);
             }
@@ -1092,6 +1093,7 @@ nNetObject *nNetObject::Object(int i){
         }
         tAdvanceFrame(10000);
         sn_Receive();
+        sn_SendPlanned();
     }
 
     if (!ret)
@@ -1502,27 +1504,6 @@ void nNetObject::SyncAll(){
 
                 }
 
-                if ( nos )
-                {
-                    // check if nos can be removed from sync request list
-                    bool canRemove = true;
-
-                    // check if there is anything preventing the removal
-                    if ( nos == sn_netObjects( nos->id ) )
-                    {
-                        int start = ( sn_GetNetState() == nSERVER ) ? MAXCLIENTS : 0;
-                        int stop  = ( sn_GetNetState() == nSERVER ) ? 1 : 0;
-                        for ( int i = start; i>=stop && canRemove; --i )
-                        {
-                            const nKnowsAboutInfo& knows = nos->knowsAbout[i];
-                            if ( sn_Connections[i].socket && ( knows.acksPending > 0 || knows.syncReq ) )
-                                canRemove = false;
-                        }
-                    }
-                    if ( canRemove )
-                        sn_SyncRequestedObject.Remove( nos, nos->syncListID_ );
-                }
-
                 currentSync--;
             }
 
@@ -1556,6 +1537,35 @@ void nNetObject::SyncAll(){
 #endif
         }
 
+
+    // clear out objects that no longer need to be in the list because
+    // all requested syncs have been sent
+    {
+        for ( int currentSync = sn_SyncRequestedObject.Len()-1; currentSync >= 0; --currentSync ){
+            nNetObject *nos = sn_SyncRequestedObject( currentSync );
+
+            if ( nos )
+            {
+                // check if nos can be removed from sync request list
+                bool canRemove = true;
+
+                // check if there is anything preventing the removal
+                if ( nos == sn_netObjects( nos->id ) )
+                {
+                    int start = ( sn_GetNetState() == nSERVER ) ? MAXCLIENTS : 0;
+                    int stop  = ( sn_GetNetState() == nSERVER ) ? 1 : 0;
+                    for ( int i = start; i>=stop && canRemove; --i )
+                    {
+                        const nKnowsAboutInfo& knows = nos->knowsAbout[i];
+                        if ( sn_Connections[i].socket && knows.syncReq )
+                            canRemove = false;
+                    }
+                }
+                if ( canRemove )
+                    sn_SyncRequestedObject.Remove( nos, nos->syncListID_ );
+            }
+        }
+    }
 }
 
 
@@ -1803,9 +1813,10 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
             while ( sn_Connections[0].socket && ( sync_ack[0] == false || sn_Connections[0].ackPending>0 || sn_QueueLen(0)) &&
                     tSysTimeFloat()<endTime){
                 sn_Delay();
+                sn_Receive();
                 if (sync_sn_netObjects)
                     nNetObject::SyncAll();
-                sn_Receive();
+                sn_SendPlanned();
             }
 
             // decrease timeout for next try
@@ -1828,9 +1839,10 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
         bool goon=true;
         while(goon){
             sn_Delay();
+            sn_Receive();
             if (sync_sn_netObjects)
                 nNetObject::SyncAll();
-            sn_Receive();
+            sn_SendPlanned();
 
             goon=false;
             for(int user=MAXCLIENTS;user>0;user--)

@@ -705,12 +705,14 @@ bool gServerMenuItem::Event( SDL_Event& event )
 void gBrowserMenuItem::RenderBackground()
 {
     sn_Receive();
+    sn_SendPlanned();
 
     menu->GenericBackground();
     if (continuePoll)
     {
         continuePoll = nServerInfo::DoQueryAll(sg_simultaneous);
         sn_Receive();
+        sn_SendPlanned();
     }
 
     static double timeout=-1E+32f;

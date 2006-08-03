@@ -193,6 +193,7 @@ void server(){
     while(loop>0 && sn_GetNetState()!=nSTANDALONE){ // and loop a while
         sn_Receive();
         nNetObject::SyncAll();
+        sn_SendPlanned();
 
         loop--;
         usleep(10000);
@@ -201,6 +202,7 @@ void server(){
     sn_SetNetState(nSTANDALONE); // exit.
     usleep(10000);
     sn_Receive();
+    sn_SendPlanned();
 }
 
 
@@ -222,7 +224,9 @@ void client(const tString &serv){
         x->RequestSync();
 
         nNetObject::SyncAll();
+        sn_SendPlanned();
         sn_Receive();
+        sn_SendPlanned();
 
         loop--;
         usleep(1000000);
@@ -245,6 +249,7 @@ void client(const tString &serv){
 
             nNetObject::SyncAll();
             sn_Receive();
+            sn_SendPlanned();
 
             loop--;
             usleep(1000000);
@@ -255,6 +260,7 @@ void client(const tString &serv){
         while(loop>0 && sn_GetNetState()!=nSTANDALONE){
             sn_Receive();
             nNetObject::SyncAll();
+            sn_SendPlanned();
 
             loop--;
             usleep(1000);
@@ -267,6 +273,7 @@ void client(const tString &serv){
     sn_SetNetState(nSTANDALONE);
     usleep(100000);
     sn_Receive();
+    sn_SendPlanned();
 }
 
 

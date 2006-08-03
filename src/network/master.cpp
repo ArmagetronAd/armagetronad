@@ -112,6 +112,7 @@ int main(int argc, char** argv)
 
         sn_Receive();
         sn_ReceiveFromControlSocket();
+        sn_SendPlanned();
 
         static bool queryGoesOn = true;
         if (queryGoesOn && time > querytimeout)

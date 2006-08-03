@@ -2021,6 +2021,7 @@ void ConnectToServer(nServerInfoBase *server)
         while (!sg_currentGame && tSysTimeFloat()<endTime && (sn_GetNetState() != nSTANDALONE)){
             sn_Receive();
             nNetObject::SyncAll();
+            sn_SendPlanned();
             st_DoToDo();
 
 #ifndef DEDICATED
@@ -2226,6 +2227,7 @@ public:
     {
         tAdvanceFrame();
         sn_Receive();
+        sn_SendPlanned();
     }
 };
 #endif
@@ -2779,14 +2781,15 @@ void gGame::NetSync(){
     if (!sr_glOut && ePlayer::PlayerConfig(0)->cam)
         tERR_ERROR_INT("Someone messed with the camera!");
 #endif
-    nNetObject::SyncAll();
     sn_Receive();
+    nNetObject::SyncAll();
+    sn_SendPlanned();
 }
+
 void gGame::NetSyncIdle(){
     NetSync();
     sn_Delay();
 }
-
 
 unsigned short client_gamestate[MAXCLIENTS+2];
 
@@ -3850,7 +3853,6 @@ bool gGame::GameLoop(bool input){
     REAL time=0;
     se_SyncGameTimer();
     if (state==GS_PLAY){
-        NetSync();
         if ( netstate != sn_GetNetState() )
         {
             return false;
@@ -3941,7 +3943,6 @@ bool gGame::GameLoop(bool input){
     }
 #endif
 
-    NetSync();
     if ( netstate != sn_GetNetState() )
 {
         return false;
@@ -4021,7 +4022,6 @@ bool gGame::GameLoop(bool input){
             if ( sn_GetNetState()==nSERVER && gtime < sg_lastChatBreakTime + 1 )
                 se_PauseGameTimer( gtime < sg_lastChatBreakTime && ePlayerNetID::WaitToLeaveChat() );
         }
-        NetSync();
 
         if ( gtime<=-PREPARE_TIME+.5 || !goon || !synced )
         {
@@ -4180,7 +4180,7 @@ void sg_EnterGameCore( nNetState enter_state ){
         {
             // new network data arrived, do the most urgent work now
             tAdvanceFrame();
-            gGame::NetSync();
+            sn_Receive();
             se_SyncGameTimer();
             REAL time=se_GameTime();
             sg_currentGame->StateUpdate();
@@ -4198,7 +4198,14 @@ void sg_EnterGameCore( nNetState enter_state ){
 
         // do the regular simulation
         tAdvanceFrame();
+
+        sn_Receive();
+
         goon=GameLoop();
+
+        nNetObject::SyncAll();
+        sn_SendPlanned();
+
         st_DoToDo();
     }
 
