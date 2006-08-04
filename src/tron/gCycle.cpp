@@ -1624,6 +1624,8 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p,bo
 }
 
 gCycle::~gCycle(){
+    st_Breakpoint();
+
 #ifdef DEBUG
     //  con << "deleting cylce...\n";
 #endif
@@ -1668,11 +1670,14 @@ void gCycle::RemoveFromGame()
         this->Kill();
 
         // really kill the cycle even on the client
-        if ( this->Alive() )
+        if ( this->Alive() && lastTime < se_GameTime() + 10.0f )
         {
             Die( lastTime );
             tNEW(gExplosion)(grid, pos, lastTime, color_);
         }
+
+        if ( sn_GetNetState() == nSERVER )
+            RequestSync();
     }
 
     if (currentWall)

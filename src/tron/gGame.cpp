@@ -1232,13 +1232,12 @@ void exit_game_objects(eGrid *grid){
             tDESTROY(ePlayer::PlayerConfig(i)->cam);
     }
 
-
-    gNetPlayerWall::Clear();
-
     if (sn_GetNetState()!=nCLIENT)
         for(int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
             if(se_PlayerNetIDs(i))
                 se_PlayerNetIDs(i)->ClearObject();
+
+    gNetPlayerWall::Clear();
 
     eGameObject::DeleteAll(grid);
 
@@ -3143,7 +3142,6 @@ void gGame::StateUpdate(){
             gHighscoresBase::SaveAll();
             con << tOutput("$gamestate_deleting_objects");
             exit_game_objects(grid);
-            SetState(GS_DELETE_GRID,GS_TRANSFER_SETTINGS);
             if ( !uMenu::MenuActive() )
             {
                 se_ChatState( ePlayerNetID::ChatFlags_Menu, true );
@@ -3151,6 +3149,7 @@ void gGame::StateUpdate(){
                 se_ChatState( ePlayerNetID::ChatFlags_Menu, false );
             }
             nNetObject::ClearAllDeleted();
+            SetState(GS_DELETE_GRID,GS_TRANSFER_SETTINGS);
             break;
         default:
             break;
