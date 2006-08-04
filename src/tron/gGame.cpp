@@ -3091,9 +3091,6 @@ void gGame::StateUpdate(){
             sr_con.fullscreen=false;
             sr_con.autoDisplayAtNewline=false;
 
-            // pings count fully now
-            nPingAverager::SetWeight(1);
-
             break;
         case GS_PLAY:
             sr_con.autoDisplayAtNewline=false;
@@ -3125,13 +3122,13 @@ void gGame::StateUpdate(){
             }
 #endif
             // pings should not count as much in the between-round phase
-            nPingAverager::SetWeight(.001);
+            nPingAverager::SetWeight(1E-20);
 
             se_UserShowScores(false);
 
             //con.autoDisplayAtNewline=true;
             sr_con.fullscreen=true;
-            SetState(GS_DELETE_OBJECTS,GS_TRANSFER_SETTINGS);
+            SetState(GS_DELETE_OBJECTS,GS_DELETE_GRID);
             break;
         case GS_DELETE_OBJECTS:
 
@@ -3979,6 +3976,9 @@ bool gGame::GameLoop(bool input){
         if (gtime<0 && gtime>-PREPARE_TIME+.3)
             eCamera::s_Timestep(grid, gtime);
         else{
+            // keep ping weight high while playing, that gives the best meassurements
+            nPingAverager::SetWeight(1);
+
             if (gtime>=lastTime_gameloop){
 
  				#ifdef CONNECTION_STRESS
@@ -4142,6 +4142,9 @@ bool GameLoop(bool input=true){
 void gameloop_idle()
 {
     se_UserShowScores( false );
+    sn_Receive();
+    nNetObject::SyncAll();
+    sn_SendPlanned();
     GameLoop(false);
 }
 
