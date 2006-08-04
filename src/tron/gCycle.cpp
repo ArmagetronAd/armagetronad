@@ -1624,8 +1624,6 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p,bo
 }
 
 gCycle::~gCycle(){
-    st_Breakpoint();
-
 #ifdef DEBUG
     //  con << "deleting cylce...\n";
 #endif
