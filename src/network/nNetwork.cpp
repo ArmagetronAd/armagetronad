@@ -2579,6 +2579,7 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
 
         tAdvanceFrame(10000);
         sn_Receive();
+        sn_SendPlanned();
     }
     if (login_failed)
     {
@@ -2692,12 +2693,15 @@ nMessage* sn_ConsoleOutMessage( const tOutput& o )
 
     // truncate message to 1.4K, a safe size for all UDP packets
     static const int maxLen = 1400;
-    if ( message.Len() > maxLen )
+    static bool recurse = true;
+    if ( message.Len() > maxLen && recurse )
     {
+        recurse = false;
         tERR_WARN( "Long console message truncated.");
 
         message.SetLen( maxLen+1 );
         message[maxLen]='\0';
+        recurse = false;
     }
 
     nMessage* m=new nMessage(sn_ConsoleOut_nd);
@@ -2895,7 +2899,23 @@ static void sn_SendPlanned2( REAL dt ){
 
 void sn_SendPlanned()
 {
+    // propagate messages to buffers
     REAL dt = sn_SendPlanned1();
+
+    // schedule the acks: send them if it's possible (bandwith limit) or if there already is a packet in the pipe.
+    for(int i=0;i<=MAXCLIENTS+1;i++)
+        if(sn_Connections[i].socket && sn_Connections[i].ackMess && !sn_Connections[i].ackMess->End()
+                //	&& sn_ackAckPending[i] <= 1+sn_Connections[].ackMess[i]->DataLen()
+                && ( sn_Connections[i].bandwidthControl_.CanSend() || sn_Connections[i].sendBuffer_.Len() > 0 )
+          ){
+            sn_Connections[i].ackMess->SendImmediately(i, false);
+            sn_Connections[i].ackMess=NULL;
+        }
+
+    // schedule lost messages for resending
+    nWaitForAck::Resend();
+
+    // send everything out
     sn_SendPlanned2( dt );
 }
 
@@ -2948,24 +2968,13 @@ void sn_Receive(){
         break;
     }
 
-    // scedule regular messages
-    REAL dt = sn_SendPlanned1();
+    /*
+        // scedule regular messages
+        REAL dt = sn_SendPlanned1();
 
-    // schedule the acks: send them if it's possible (bandwith limit) or if there already is a packet in the pipe.
-    for(i=0;i<=MAXCLIENTS+1;i++)
-        if(sn_Connections[i].socket && sn_Connections[i].ackMess && !sn_Connections[i].ackMess->End()
-                //	&& sn_ackAckPending[i] <= 1+sn_Connections[].ackMess[i]->DataLen()
-                && ( sn_Connections[i].bandwidthControl_.CanSend() || sn_Connections[i].sendBuffer_.Len() > 0 )
-          ){
-            sn_Connections[i].ackMess->SendImmediately(i, false);
-            sn_Connections[i].ackMess=NULL;
-        }
-
-    // schedule lost messages for resending
-    nWaitForAck::Resend();
-
-    // actually resend messages
-    sn_SendPlanned2( dt );
+        // actually resend messages
+        sn_SendPlanned2( dt );
+    */
 }
 
 void sn_KickUser(int i, const tOutput& reason, REAL severity )

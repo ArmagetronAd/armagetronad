@@ -683,13 +683,12 @@ void exit_game_objects(eGrid *grid){
             tDESTROY(ePlayer::PlayerConfig(i)->cam);
     }
 
-
-    gNetPlayerWall::Clear();
-
     if (sn_GetNetState()!=nCLIENT)
         for(int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
             if(se_PlayerNetIDs(i))
                 se_PlayerNetIDs(i)->ClearObject();
+
+    gNetPlayerWall::Clear();
 
     eGameObject::DeleteAll(grid);
 
@@ -1476,6 +1475,7 @@ void ConnectToServer(nServerInfoBase *server)
         while (!sg_currentGame && tSysTimeFloat()<endTime && (sn_GetNetState() != nSTANDALONE)){
             sn_Receive();
             nNetObject::SyncAll();
+            sn_SendPlanned();
             st_DoToDo();
 
 #ifndef DEDICATED
@@ -1680,6 +1680,7 @@ public:
     {
         tAdvanceFrame();
         sn_Receive();
+        sn_SendPlanned();
     }
 };
 #endif
@@ -2220,14 +2221,15 @@ void gGame::NetSync(){
     if (!sr_glOut && ePlayer::PlayerConfig(0)->cam)
         tERR_ERROR_INT("Someone messed with the camera!");
 #endif
-    nNetObject::SyncAll();
     sn_Receive();
+    nNetObject::SyncAll();
+    sn_SendPlanned();
 }
+
 void gGame::NetSyncIdle(){
     NetSync();
     sn_Delay();
 }
-
 
 unsigned short client_gamestate[MAXCLIENTS+2];
 
@@ -2529,14 +2531,14 @@ void gGame::StateUpdate(){
             sr_con.fullscreen=false;
             sr_con.autoDisplayAtNewline=false;
 
-            // pings count fully now
-            nPingAverager::SetWeight(1);
-
             break;
         case GS_PLAY:
             sr_con.autoDisplayAtNewline=false;
 #ifdef DEDICATED
             {
+                // safe current players in a file
+                cp();
+
                 if ( sg_NumUsers() <= 0 )
                     goon = 0;
 
@@ -2557,19 +2559,16 @@ void gGame::StateUpdate(){
                     // load contents of everytime.cfg from playback
                     tConfItemBase::LoadPlayback();
                 }
-
-                // safe current players in a file
-                cp();
             }
 #endif
             // pings should not count as much in the between-round phase
-            nPingAverager::SetWeight(.001);
+            nPingAverager::SetWeight(1E-20);
 
             se_UserShowScores(false);
 
             //con.autoDisplayAtNewline=true;
             sr_con.fullscreen=true;
-            SetState(GS_DELETE_OBJECTS,GS_TRANSFER_SETTINGS);
+            SetState(GS_DELETE_OBJECTS,GS_DELETE_GRID);
             break;
         case GS_DELETE_OBJECTS:
 
@@ -2585,7 +2584,6 @@ void gGame::StateUpdate(){
 
             con << tOutput("$gamestate_deleting_objects");
             exit_game_objects(grid);
-            SetState(GS_DELETE_GRID,GS_TRANSFER_SETTINGS);
             if ( !uMenu::MenuActive() )
             {
                 se_ChatState( ePlayerNetID::ChatFlags_Menu, true );
@@ -2593,6 +2591,7 @@ void gGame::StateUpdate(){
                 se_ChatState( ePlayerNetID::ChatFlags_Menu, false );
             }
             nNetObject::ClearAllDeleted();
+            SetState(GS_DELETE_GRID,GS_TRANSFER_SETTINGS);
             break;
         default:
             break;
@@ -3407,7 +3406,6 @@ bool gGame::GameLoop(bool input){
     REAL time=0;
     se_SyncGameTimer();
     if (state==GS_PLAY){
-        NetSync();
         if ( netstate != sn_GetNetState() )
         {
             return false;
@@ -3513,7 +3511,6 @@ bool gGame::GameLoop(bool input){
     }
 #endif
 
-    NetSync();
     if ( netstate != sn_GetNetState() )
 {
         return false;
@@ -3550,6 +3547,9 @@ bool gGame::GameLoop(bool input){
         if (gtime<0 && gtime>-PREPARE_TIME+.3)
             eCamera::s_Timestep(grid, gtime);
         else{
+            // keep ping weight high while playing, that gives the best meassurements
+            nPingAverager::SetWeight(1);
+
             if (gtime>=lastTime_gameloop){
 
  				#ifdef CONNECTION_STRESS
@@ -3593,7 +3593,6 @@ bool gGame::GameLoop(bool input){
             if ( sn_GetNetState()==nSERVER && gtime < sg_lastChatBreakTime + 1 )
                 se_PauseGameTimer( gtime < sg_lastChatBreakTime && ePlayerNetID::WaitToLeaveChat() );
         }
-        NetSync();
 
         if ( gtime<=-PREPARE_TIME+.5 || !goon || !synced )
         {
@@ -3714,6 +3713,9 @@ bool GameLoop(bool input=true){
 void gameloop_idle()
 {
     se_UserShowScores( false );
+    sn_Receive();
+    nNetObject::SyncAll();
+    sn_SendPlanned();
     GameLoop(false);
 }
 
@@ -3748,7 +3750,7 @@ void sg_EnterGameCore( nNetState enter_state ){
         {
             // new network data arrived, do the most urgent work now
             tAdvanceFrame();
-            gGame::NetSync();
+            sn_Receive();
             se_SyncGameTimer();
             REAL time=se_GameTime();
             sg_currentGame->StateUpdate();
@@ -3766,7 +3768,14 @@ void sg_EnterGameCore( nNetState enter_state ){
 
         // do the regular simulation
         tAdvanceFrame();
+
+        sn_Receive();
+
         goon=GameLoop();
+
+        nNetObject::SyncAll();
+        sn_SendPlanned();
+
         st_DoToDo();
     }
 

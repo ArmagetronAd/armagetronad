@@ -670,7 +670,7 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
 
             balance = false;
         }
-        else if ( maxP - maxImbalance > minP || ( maxP > maxPlayers && minP < maxPlayers ) || ( minP == 0 && maxP > 1 ) )
+        else if ( ( ( maxP - maxImbalance > minP || maxP > maxPlayers ) && minP < maxPlayers ) || ( minP == 0 && maxP > 1 ) )
         {
             // teams are unbalanced; move one player from the strongest team to the weakest
             if ( max )

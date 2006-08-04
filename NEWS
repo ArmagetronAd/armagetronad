@@ -139,6 +139,9 @@ Changes since 0.2.8.2:
 - Speed gauge resets between rounds.
 - More accurate Lag-O-Meter by meriton.
 
+  Internals:
+- A complete netsync cycle is now sn_Receive(); nNetObject::SyncAll(); sn_SendPlanned();.
+
 Changes since 0.2.8.1:
 - Timestamps and teamscores added to scorelog.txt
 - Dedicated server now works on FreeBSD and OpenBSD
