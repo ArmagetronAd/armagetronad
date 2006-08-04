@@ -3095,6 +3095,9 @@ void gGame::StateUpdate(){
             sr_con.autoDisplayAtNewline=false;
 #ifdef DEDICATED
             {
+                // safe current players in a file
+                cp();
+
                 if ( sg_NumUsers() <= 0 )
                     goon = 0;
 
@@ -3115,9 +3118,6 @@ void gGame::StateUpdate(){
                     // load contents of everytime.cfg from playback
                     tConfItemBase::LoadPlayback();
                 }
-
-                // safe current players in a file
-                cp();
             }
 #endif
             // pings should not count as much in the between-round phase
