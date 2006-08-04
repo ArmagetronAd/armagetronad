@@ -72,6 +72,7 @@ Base::GetValue(void) const {
     //std::cerr << "WARNING: Base::GetValue called!" << std::endl;
     return std::string("");
 }
+template<> Variant Base::Get<Variant>() const { return GetValue(); }
 
 //! This should be overwritten in a derived class if it's sensible to convert the value to an integer
 //! @returns 0
@@ -84,6 +85,7 @@ int Base::GetInt(void) const {
         return 0;
     }
 }
+template<> int     Base::Get<int    >() const { return GetInt(); }
 
 //! This should be overwritten in a derived class if it's sensible to convert the value to a floating- point number
 //! @returns a stream conversion of the value
@@ -96,6 +98,7 @@ float Base::GetFloat(void) const {
         return 0.0;
     }
 }
+template<> float   Base::Get<float  >() const { return GetFloat(); }
 
 //! This should be overwritten in a derived class if it's sensible to convert the value to a string
 //! @returns GetValue streamed to a tString
@@ -105,6 +108,7 @@ tString Base::GetString(Base const *other) const {
             return *iptr;
     return Output(v, other);
 }
+template<> tString Base::Get<tString>() const { return GetString(); }
 
 //! This should be overwritten in any derived class or they will mysteriously vanish if you use the tValue::Set container, for example
 //! @returns a pointer to the newly created copy

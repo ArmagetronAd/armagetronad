@@ -72,6 +72,8 @@ public:
     virtual tString GetString(Base const *other=0) const; //!< Returns a String using the current value using Output()
     virtual Variant GetValue(void) const; //!< Returns the value in its native format
 
+    template<class T> T Get() const;
+
     void SetPrecision(int precision); //!< Sets the precision when outputting a string
     void SetMinsize(int size); //!< Sets the minimal width when outputting a string
     void SetFill(char fill); //!< Sets the fill character when outputting a string shorter than the minimal width
