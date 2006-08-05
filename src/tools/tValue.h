@@ -301,11 +301,12 @@ namespace tValue {
 class Expr : public BaseExt {
 public:
     typedef std::map<tString, float *> varmap_t; //!< map of variable names and their references
+    typedef std::map<tString, float ((*)(float))> funcmap_t; //!< map of function names and their references
 private:
     boost::shared_ptr<ROperation> m_operation;
 public:
     Expr(tString const &expr); //!< Constructs a new Expr without variables and functions and the like
-    Expr(tString const &expr, varmap_t const &vars); //!< Constructs a new Expr with an array of variables
+    Expr(tString const &expr, varmap_t const &vars, funcmap_t const &functions); //!< Constructs a new Expr with an array of variables and functions
 
     Base *copy(void) const;
 

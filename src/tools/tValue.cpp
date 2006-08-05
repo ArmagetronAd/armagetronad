@@ -226,7 +226,8 @@ Expr::Expr(tString const &expr) : m_operation(new ROperation(expr.c_str())) {}
 
 //! @param expr The expression to be parsed
 //! @param vars A map of variable names and their references
-Expr::Expr(tString const &expr, varmap_t const &vars) {
+//! @param functions A map of function names and their references
+Expr::Expr(tString const &expr, varmap_t const &vars, funcmap_t const &functions) {
     // what a mess. why can't this darn library just use stl functions? :s
     RVar **vararray;
     vararray = new RVar*[vars.size()];
@@ -234,11 +235,22 @@ Expr::Expr(tString const &expr, varmap_t const &vars) {
     for(varmap_t::const_iterator iter = vars.begin(); iter != vars.end(); ++iter, ++i) {
         vararray[i] = new RVar(iter->first.c_str(), iter->second);
     }
-    m_operation = boost::shared_ptr<ROperation>(new ROperation(expr.c_str(), vars.size(), vararray));
+    RFunction **funcarray;
+    funcarray = new RFunction*[functions.size()];
+    unsigned int j = 0;
+    for(funcmap_t::const_iterator iter = functions.begin(); iter != functions.end(); ++iter, ++j) {
+        funcarray[j] = new RFunction(iter->second);
+        funcarray[j]->SetName(iter->first.c_str());
+    }
+    m_operation = boost::shared_ptr<ROperation>(new ROperation(expr.c_str(), vars.size(), vararray, functions.size(), funcarray));
     for(i = 0; i < vars.size(); i++) {
         delete vararray[i];
     }
     delete[] vararray;
+    for(i = 0; i < functions.size(); i++) {
+        delete funcarray[i];
+    }
+    delete[] funcarray;
 }
 
 Base *Expr::copy(void) const {
@@ -256,7 +268,9 @@ Variant Expr::GetValue() const {
 //		Expr::varmap_t vars;
 //		vars[tString("x")] = &x;
 //		vars[tString("y")] = &y;
-//		Expr expr(tString("x+y"), vars);
+//		Expr::funcmap_t functions;
+//		functions[tString("f")] = &sinf;
+//		Expr expr(tString("x+f(y)"), vars, functions);
 //        std::cerr << expr.GetFloat() << std::endl;
 //    }
 //};
