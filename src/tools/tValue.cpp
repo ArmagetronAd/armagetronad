@@ -34,6 +34,89 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 namespace tValue {
 
+
+Registration::Registration(std::vector<tString> flags, tString fname, int argc, void *ctor):
+	m_flags(flags),
+	m_fname(fname),
+	m_argc(argc),
+	m_ctor(ctor)
+{
+	theRegistry.reg(this);
+}
+
+Registration::Registration(const char *flags, const char *fname, int argc, void *ctor):
+	m_fname(fname),
+	m_argc(argc),
+	m_ctor(ctor)
+{
+	m_flags.clear();
+	for (
+		const char *ptr = flags, *ep;
+		ptr;
+		ptr = (ep[0] == '\0') ? 0 : (ep + 1)
+	)
+	{
+		ep = strchr(ptr, '\n');
+		if (!ep)
+			ep = ptr + strlen(ptr);
+		std::string s(ptr, ep - ptr);
+		m_flags.push_back(s);
+	}
+	theRegistry.reg(this);
+}
+
+Base *
+Registration::use(arglist args) {
+	switch (args.size()) {
+	case 0:	return ((ctor0*)m_ctor)();
+	case 1:	return ((ctor1*)m_ctor)(args[0]);
+	case 2:	return ((ctor2*)m_ctor)(args[0], args[1]);
+	case 3:	return ((ctor3*)m_ctor)(args[0], args[1], args[2]);
+	case 4:	return ((ctor4*)m_ctor)(args[0], args[1], args[2], args[3]);
+	case 5:	return ((ctor5*)m_ctor)(args[0], args[1], args[2], args[3], args[4]);
+	}
+	throw("Unimplemented # of args");
+}
+
+bool
+Registration::match(std::vector<tString> flags, tString fname, int argc)
+{
+	if (fname.Compare(m_fname, true))
+		return false;
+	for (std::vector<tString>::iterator i = flags.begin(); i != flags.end(); ++i)
+	{
+		bool flagmatch = (flags[0] == "!");
+		tString flag = *i;
+		if (flagmatch)
+			flag = flag.SubStr(1);
+		if (!flag.Compare(*i, true))
+			flagmatch = !flagmatch;
+		if (!flagmatch)
+			return false;
+	}
+	if (argc != m_argc)
+		return false;
+	return true;
+}
+
+void
+Registry::reg(Registration *it)
+{
+	registrations.push_back(it);
+}
+
+Base *
+Registry::create(std::vector<tString> flags, tString fname, arglist args)
+{
+	for (std::vector<Registration *>::iterator i = registrations.begin(); i != registrations.end(); ++i)
+		if ((*i)->match(flags, fname, args.size()))
+			return (*i)->use(args);
+	return NULL;
+}
+
+Registry theRegistry;
+
+
 //! @param precision the number of digits after the decimal to be used when outputting a string
 //! @param minsize   the minimum width when outputting a string
 //! @param fill      the character used to fill when outputting a string and the size of the output is smaller than minsize
@@ -759,4 +842,11 @@ myCol ColDifference::_operation(void) const {
     return res;
 }
 
+
+Registration register_sin("func\nmath", "sin", 1, (void *)
+	( Registration::ctor1* )& Creator<Func::Sin>::create<Base*> );
+
+
 }
+
+

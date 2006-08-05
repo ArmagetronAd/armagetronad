@@ -32,14 +32,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ARMAGETRON_VALUE_H
 
 #include "tString.h"
+#include <deque>
 #include <memory>
 #include <map>
 #include <iomanip>
 #include <set>
 #include <iterator>
 #include <algorithm>
+#include <vector>
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
+#include <math.h>
 class tConfItemBase;
 
 //! Namespace for all Value classes for use by the cockpit
@@ -51,6 +54,38 @@ typedef boost::shared_ptr<Base> BasePtr; //!< convinience definition for the use
 
 typedef boost::variant<int, float, std::string> Variant;
 typedef std::set<BasePtr, FooPtrOps> myCol;
+typedef std::deque<Base *> arglist;
+
+
+class Registration {
+public:
+	typedef Base *ctor0();
+	typedef Base *ctor1(Base *);
+	typedef Base *ctor2(Base *, Base *);
+	typedef Base *ctor3(Base *, Base *, Base *);
+	typedef Base *ctor4(Base *, Base *, Base *, Base *);
+	typedef Base *ctor5(Base *, Base *, Base *, Base *, Base *);
+private:
+	std::vector<tString> m_flags;
+	tString m_fname;
+	int m_argc;
+	void *m_ctor;
+public:
+	Registration(std::vector<tString> flags, tString fname, int argc, void *ctor);
+	Registration(const char *flags, const char *fname, int argc, void *ctor);
+	Base *use(arglist);
+	bool match(std::vector<tString> flags, tString fname, int argc);
+};
+
+class Registry {
+	std::vector<Registration *> registrations;
+public:
+	void reg(Registration *me);
+	Base *create(std::vector<tString> flags, tString fname, arglist);
+};
+
+extern Registry theRegistry;
+
 
 //! Offers basic functions to set the precision etc.
 class Base {
@@ -745,6 +780,54 @@ public:
 protected:
     myCol _operation(void) const;
 };
+
+template<typename C> class Creator {
+public:
+	static Base *create() {
+		return new C();
+	}
+	template<typename T> static Base *create(T t) {
+		return new C(t);
+	}
+	template<typename T, typename U> static Base *create(T t, U u) {
+		return new C(t, u);
+	}
+	template<typename T, typename U, typename V> static Base *create(T t, U u, V v) {
+		return new C(t, u, v);
+	}
+	template<typename T, typename U, typename V, typename W> static Base *create(T t, U u, V v, W w) {
+		return new C(t, u, v, w);
+	}
+	template<typename T, typename U, typename V, typename W, typename X> static Base *create(T t, U u, V v, W w, X x) {
+		return new C(t, u, v, w, x);
+	}
+};
+
+namespace Func {
+	//template<typename T> struct correct_get<T> { Base::GetValue get; };
+	//template<> struct correct_get<float> { Base::GetFloat get; };
+	template<typename T, T F(void)> class fZeroary : public Base {
+	public:
+		fZeroary() { };
+		virtual Variant GetValue() const { return F(); };
+	};
+	template<typename T, typename Aa, /* Aa (Base::*GAa)(void) const, */ T F(Aa)> class fUnary : public Base {
+		BasePtr m_ArgA;
+	public:
+		fUnary(Base *ArgA): m_ArgA(ArgA) { }
+		virtual Variant GetValue() const { return F(m_ArgA->Get<Aa>()); };
+	};
+	template<typename T, typename Aa, typename Ab, T F(Aa, Ab)> class fBinary : public Base {
+		BasePtr m_ArgA, m_ArgB;
+	public:
+		fBinary(Base *ArgA, Base *ArgB): m_ArgA(ArgA), m_ArgB(ArgB) { }
+		virtual Variant GetValue() const { return F(m_ArgA->Get<Aa>(), m_ArgB->Get<Ab>()); };
+	};
+	
+	typedef fZeroary<long int, random> Random;
+	typedef fUnary<float, float, sinf> Sin;
+}
+
 
 
 

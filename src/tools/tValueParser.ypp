@@ -19,6 +19,7 @@
 	int integer;
 	tString *string;
 	tValue::Base *expr;
+	tValue::arglist *arglist;
 }
 
 %destructor {
@@ -26,6 +27,7 @@
 } expr function tSTRING tID
 
 %type	<expr>	expr function;
+%type	<arglist>	arglist;
 
 %token	<integer>	tINTEGER
 %token	<string>	tSTRING tID
@@ -103,14 +105,31 @@ expr:
 	// a ?: b !: c -- trinary conditional
 	// a <=> b -- tValue::Compare
 function:
-	  tID
-	| tID '(' arglist ')'
+	/*  tID
+	|*/ tID '(' arglist ')'
+	  {
+		std::vector<tString> flags;
+		flags.push_back(tString("func"));
+		$$ = tValue::theRegistry.create(flags, *$1, *$3);
+		delete $1, $3;
+	  }
 	| function '.' function
 	;
 arglist:
 	  // empty
+	  {
+		$$ = new tValue::arglist();
+	  }
 	| expr
+	  {
+		$$ = new tValue::arglist();
+		$$->push_back($1);
+	  }
 	| arglist ',' expr
+	  {
+		$$ = $1;
+		$$->push_back($3);
+	  }
 	;
 %%
 
@@ -215,7 +234,8 @@ yylex(void)
 	{
 		tString *s = new tString;
 		for ( ; isalnum(c); c = lex_getc())
-			s += (char)c;
+			*s += (char)c;
+		lex_ungetc(c);
 		yylval.string = s;
 		return tID;
 	}
