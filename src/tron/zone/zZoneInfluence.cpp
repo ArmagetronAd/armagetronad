@@ -1,5 +1,9 @@
 #include "zZoneInfluence.h"
 
+zZoneInfluence::zZoneInfluence(zZone * _zone) : zone(_zone), zoneInfluenceItems() { };
+
+zZoneInfluence::~zZoneInfluence() { };
+
 void
 zZoneInfluence::apply(REAL value)
 {
@@ -13,6 +17,10 @@ zZoneInfluence::apply(REAL value)
 
     zone->RequestSync();
 }
+
+zZoneInfluenceItem::zZoneInfluenceItem(zZone * aZone):zone(aZone) {};
+
+zZoneInfluenceItem::~zZoneInfluenceItem() {};
 
 void
 zZoneInfluenceItemRotation::apply(REAL value) {

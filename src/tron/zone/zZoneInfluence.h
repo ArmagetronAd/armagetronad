@@ -22,8 +22,8 @@ protected:
     zZoneInfluenceItemList zoneInfluenceItems;
 
 public:
-    zZoneInfluence(zZonePtr &_zone) : zone(_zone), zoneInfluenceItems() { };
-    ~zZoneInfluence() { };
+    zZoneInfluence(zZone * _zone);
+    ~zZoneInfluence();
     void apply(REAL value);
 
     void addZoneInfluenceRule(zZoneInfluenceItemPtr aRule) {zoneInfluenceItems.push_back(aRule);};
@@ -33,8 +33,8 @@ class zZoneInfluenceItem {
 protected:
     zZonePtr zone;
 public:
-    zZoneInfluenceItem(zZonePtr aZone):zone(aZone) {};
-    virtual ~zZoneInfluenceItem() {};
+    zZoneInfluenceItem(zZone * aZone);
+    virtual ~zZoneInfluenceItem();
 
     virtual void apply(REAL value) {};
 };
@@ -44,7 +44,7 @@ protected:
     REAL rotationSpeed;
     REAL rotationAcceleration;
 public:
-    zZoneInfluenceItemRotation(zZonePtr aZone):zZoneInfluenceItem(aZone),rotationSpeed(0.0),rotationAcceleration(0.0) {};
+    zZoneInfluenceItemRotation(zZone * aZone):zZoneInfluenceItem(aZone),rotationSpeed(0.0),rotationAcceleration(0.0) {};
     virtual ~zZoneInfluenceItemRotation() {};
 
     void set(REAL rotSp, REAL rotAcc) {rotationSpeed = rotSp; rotationAcceleration = rotAcc;};
@@ -55,7 +55,7 @@ class zZoneInfluenceItemRadius : public zZoneInfluenceItem {
 protected:
     REAL radius;
 public:
-    zZoneInfluenceItemRadius(zZonePtr aZone):zZoneInfluenceItem(aZone),radius(0.0) {};
+    zZoneInfluenceItemRadius(zZone * aZone):zZoneInfluenceItem(aZone),radius(0.0) {};
     virtual ~zZoneInfluenceItemRadius() {};
 
     void set(REAL rad) {radius = rad;};
@@ -66,7 +66,7 @@ class zZoneInfluenceItemPosition : public zZoneInfluenceItem {
 protected:
     eCoord pos;
 public:
-    zZoneInfluenceItemPosition(zZonePtr aZone):zZoneInfluenceItem(aZone),pos(0.0, 0.0) {};
+    zZoneInfluenceItemPosition(zZone * aZone):zZoneInfluenceItem(aZone),pos(0.0, 0.0) {};
     virtual ~zZoneInfluenceItemPosition() {};
 
     void set(eCoord const & p) {pos = p;};
@@ -77,7 +77,7 @@ class zZoneInfluenceItemColor : public zZoneInfluenceItem {
 protected:
     rColor color;
 public:
-    zZoneInfluenceItemColor(zZonePtr aZone):zZoneInfluenceItem(aZone),color(0.0, 0.0, 0.0, 0.0){};
+    zZoneInfluenceItemColor(zZone * aZone):zZoneInfluenceItem(aZone),color(0.0, 0.0, 0.0, 0.0){};
     virtual ~zZoneInfluenceItemColor() {};
 
     void set(rColor const & col) {color = col;};
