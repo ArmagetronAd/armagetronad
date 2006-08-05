@@ -77,10 +77,12 @@ static tConfItemLine c_rEnd("GL_RENDERER",gl_renderer);
 static tConfItemLine c_vEnd("GL_VENDOR",gl_vendor);
 // static tConfItemLine a_ver("ARMAGETRON_VERSION",sn_programVersion);
 
+#ifndef DEDICATED
 static uMenuItemStringWithHistory::history_t &sg_consoleHistory() {
     static uMenuItemStringWithHistory::history_t instance("console_history.txt");
     return instance;
 }
+#endif
 
 static int sg_consoleHistoryMaxSize=100; // size of the console history
 static tSettingItem< int > sg_consoleHistoryMaxSizeConf("HISTORY_SIZE_CONSOLE",sg_consoleHistoryMaxSize);
