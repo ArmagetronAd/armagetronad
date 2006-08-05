@@ -175,8 +175,8 @@ zZone::~zZone( void )
 }
 
 void zZone::RemoveFromGame(void) {
-//    RemoveFromZoneList();
-    eGameObject::RemoveFromGame();
+    RemoveFromZoneList();
+    eNetGameObject::RemoveFromGame();
 }
 
 void zZone::RemoveFromZoneList(void) {
