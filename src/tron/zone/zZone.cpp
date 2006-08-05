@@ -174,10 +174,10 @@ zZone::~zZone( void )
     RemoveFromZoneList();
 }
 
-//void zZone::RemoveFromGame(void) {
+void zZone::RemoveFromGame(void) {
 //    RemoveFromZoneList();
-//    eGameObject::RemoveFromGame();
-//}
+    eGameObject::RemoveFromGame();
+}
 
 void zZone::RemoveFromZoneList(void) {
     std::deque<zZone *>::iterator pos_found =

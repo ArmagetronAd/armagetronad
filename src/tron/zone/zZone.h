@@ -68,7 +68,7 @@ public:
     zZone(eGrid *grid); //!< local constructor
     zZone(nMessage &m);                    //!< network constructor
     ~zZone();                              //!< destructor
-    //void RemoveFromGame();		   //!< call this instead of the destructor
+    void RemoveFromGame();		   //!< call this instead of the destructor
 
     void SetReferenceTime();               //!< sets the reference time to the current time
 
