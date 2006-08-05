@@ -148,7 +148,7 @@ lex_getc(void)
 		return r;
 	}
 	
-	if (pos >= in.size())
+	if ((unsigned int)pos >= in.size())
 		return EOF;
 	return in[pos++];
 }
@@ -171,6 +171,7 @@ yyerror(const char *s)
 	tERR_ERROR(msg);
 }
 
+/*
 static bool
 follow(int expect)
 {
@@ -181,6 +182,7 @@ follow(int expect)
 	lex_ungetc(c);
 	return false;
 }
+*/
 
 int
 yylex(void)
