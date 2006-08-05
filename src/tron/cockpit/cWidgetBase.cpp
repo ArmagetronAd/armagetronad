@@ -107,8 +107,8 @@ tValue::Set WithDataFunctions::ProcessDataSet(tXmlParser::node cur) {
             newvalue = ProcessMath(cur);
         }
         else
-        if (name == "Value")
-            newvalue = ProcessValue(cur);
+            if (name == "Value")
+                newvalue = ProcessValue(cur);
         if(newvalue != 0) {
             tString field = cur.GetProp("field");
             if(field == "source") {
@@ -173,45 +173,45 @@ tValue::Base *WithDataFunctions::ProcessConditional(tXmlParser::node cur) {
     tValue::BasePtr truevalue(new tValue::Base), falsevalue(new tValue::Base);
 
     tString oper = cur.GetProp("operator");
-    tValue::Base *condvalue;
+    tValue::Base *condvalue = NULL;
     if (oper.size() == 2)
     {
-		switch (oper[1]) {
-		case 't': case 'T':
-			switch (oper[0]) {
-			case 'g': case 'G':
-				condvalue = new tValue::GreaterThan    (lvalue, rvalue);
-				break;
-			case 'l': case 'L':
-				condvalue = new tValue::   LessThan    (lvalue, rvalue);
-				break;
-			}
-		case 'e': case 'E':
-			switch (oper[0]) {
-			case 'g': case 'G':
-				condvalue = new tValue::GreaterOrEquals(lvalue, rvalue);
-				break;
-			case 'l': case 'L':
-				condvalue = new tValue::   LessOrEquals(lvalue, rvalue);
-				break;
-			case 'n': case 'N':
-				tValue::BasePtr precond(new tValue::Equals(lvalue, rvalue));
-				condvalue = new tValue::Not(precond);
-				break;
-			}
-			break;
-		case 'q': case 'Q':
-			if (oper[0] == 'e' || oper[0] == 'E')
-				condvalue = new tValue::         Equals(lvalue, rvalue);
-			break;
-		}
-	}
-	if (!condvalue)
-	{
-		tERR_WARN("Operator '" + oper + "' unknown!");
-		condvalue = new tValue::Equals(lvalue, rvalue);
-	}
-	tValue::BasePtr condvalueP(condvalue);
+        switch (oper[1]) {
+    case 't': case 'T':
+            switch (oper[0]) {
+        case 'g': case 'G':
+                condvalue = new tValue::GreaterThan    (lvalue, rvalue);
+                break;
+        case 'l': case 'L':
+                condvalue = new tValue::   LessThan    (lvalue, rvalue);
+                break;
+            }
+    case 'e': case 'E':
+            switch (oper[0]) {
+        case 'g': case 'G':
+                condvalue = new tValue::GreaterOrEquals(lvalue, rvalue);
+                break;
+        case 'l': case 'L':
+                condvalue = new tValue::   LessOrEquals(lvalue, rvalue);
+                break;
+        case 'n': case 'N':
+                tValue::BasePtr precond(new tValue::Equals(lvalue, rvalue));
+                condvalue = new tValue::Not(precond);
+                break;
+            }
+            break;
+    case 'q': case 'Q':
+            if (oper[0] == 'e' || oper[0] == 'E')
+                condvalue = new tValue::         Equals(lvalue, rvalue);
+            break;
+        }
+    }
+    if (!condvalue)
+    {
+        tERR_WARN("Operator '" + oper + "' unknown!");
+        condvalue = new tValue::Equals(lvalue, rvalue);
+    }
+    tValue::BasePtr condvalueP(condvalue);
 
     for (cur = cur.GetFirstChild(); cur; ++cur) {
         tString name = cur.GetName();
@@ -238,8 +238,8 @@ tValue::Base *WithDataFunctions::ProcessConditionalCore(tXmlParser::node cur) {
             return ProcessMath(cur);
         }
         else
-        if (name == "Value")
-            return ProcessValue(cur);
+            if (name == "Value")
+                return ProcessValue(cur);
     }
     tERR_WARN("IfTrue or IfFalse node doesn't contain an AtomicData or Conditional node")
     return new tValue::Base();
