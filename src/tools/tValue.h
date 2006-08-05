@@ -384,6 +384,7 @@ class Condition : public BaseExt {
 protected:
     Base const &GetExpr() const; //!< Performs the comparison
 public:
+    Condition(Base  * condvalue, Base  * truevalue, Base  * falsevalue); //!< Basic constructor
     Condition(BasePtr condvalue, BasePtr truevalue, BasePtr falsevalue); //!< Basic constructor
     Condition(Condition const &other); //!< Copy constructor, will not work with any class except another Condition object
 

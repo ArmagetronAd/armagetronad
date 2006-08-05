@@ -359,6 +359,16 @@ Variant Expr::GetValue() const {
 //};
 //blah asdfgsf;
 
+Registration register_iff("func\nlogic", "iff", 3, (void *)
+	( Registration::ctor3* )& Creator<Condition>::create<Base*,Base*,Base*> );
+
+Condition::Condition(Base  * condvalue, Base  * truevalue, Base  * falsevalue) :
+        m_condvalue (condvalue ),
+        m_truevalue (truevalue ),
+        m_falsevalue(falsevalue)
+{
+}
+
 //! Constructs a new Condition object with the given parameters
 //! @param condvalue  the value to be used as the condition
 //! @param truevalue  the value to be used if the condition is true
