@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tString.h"
 #include <memory>
+#include <map>
 #include <iomanip>
 #include <set>
 #include <iterator>
@@ -290,6 +291,25 @@ public:
     bool operator<=(Base const &other) const;
     bool operator> (Base const &other) const;
     bool operator< (Base const &other) const;
+};
+
+}
+class ROperation;
+namespace tValue {
+
+//! Stores a math expression using the mathexpr library
+class Expr : public BaseExt {
+public:
+    typedef std::map<tString, float *> varmap_t; //!< map of variable names and their references
+private:
+    boost::shared_ptr<ROperation> m_operation;
+public:
+    Expr(tString const &expr); //!< Constructs a new Expr without variables and functions and the like
+    Expr(tString const &expr, varmap_t const &vars); //!< Constructs a new Expr with an array of variables
+
+    Base *copy(void) const;
+
+    virtual Variant GetValue(void) const; //!< Returns the value in its native format
 };
 
 //! Stores a function pointer to a function within another class and offers functions to get that function's return value

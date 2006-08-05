@@ -30,6 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tValue.h"
 #include "tConfiguration.h"
 
+#include "mathexpr.h"
+
 namespace tValue {
 
 //! @param precision the number of digits after the decimal to be used when outputting a string
@@ -218,6 +220,47 @@ bool String::operator>=(Base const &other) const { return m_value >=  static_cas
 bool String::operator<=(Base const &other) const { return m_value <=  static_cast<tString>(other); }
 bool String::operator> (Base const &other) const { return m_value >   static_cast<tString>(other); }
 bool String::operator< (Base const &other) const { return m_value <   static_cast<tString>(other); }
+
+//! @param expr The expression to be parsed
+Expr::Expr(tString const &expr) : m_operation(new ROperation(expr.c_str())) {}
+
+//! @param expr The expression to be parsed
+//! @param vars A map of variable names and their references
+Expr::Expr(tString const &expr, varmap_t const &vars) {
+    // what a mess. why can't this darn library just use stl functions? :s
+    RVar **vararray;
+    vararray = new RVar*[vars.size()];
+    unsigned int i = 0;
+    for(varmap_t::const_iterator iter = vars.begin(); iter != vars.end(); ++iter, ++i) {
+        vararray[i] = new RVar(iter->first.c_str(), iter->second);
+    }
+    m_operation = boost::shared_ptr<ROperation>(new ROperation(expr.c_str(), vars.size(), vararray));
+    for(i = 0; i < vars.size(); i++) {
+        delete vararray[i];
+    }
+    delete[] vararray;
+}
+
+Base *Expr::copy(void) const {
+    return new Expr(*this);
+}
+
+Variant Expr::GetValue() const {
+    return m_operation->Val();
+}
+
+//class blah {
+//public:
+//    blah() {
+//        float x=4,y=3;
+//		Expr::varmap_t vars;
+//		vars[tString("x")] = &x;
+//		vars[tString("y")] = &y;
+//		Expr expr(tString("x+y"), vars);
+//        std::cerr << expr.GetFloat() << std::endl;
+//    }
+//};
+//blah asdfgsf;
 
 //! Constructs a new Condition object with the given parameters
 //! @param condvalue  the value to be used as the condition
@@ -442,12 +485,12 @@ Variant
 Compare::GetValue(void) const {
     // This could probably be optimized
     if (*m_lvalue == *m_rvalue)
-                return 0;
+        return 0;
     else
-    if (*m_lvalue < *m_rvalue)
-                return -1;
-    else
-                return 1;
+        if (*m_lvalue < *m_rvalue)
+            return -1;
+        else
+            return 1;
 }
 
 Base *Compare::copy(void) const {
