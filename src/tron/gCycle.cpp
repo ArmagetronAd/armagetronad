@@ -65,9 +65,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // TODO: get rid of this
 #include "tDirectories.h"
 
+// also used in gWall.cpp
 bool sg_gnuplotDebug = false;
 
-#ifdef DEBUG
+#define GNUPLOT_DEBUG
+// #define DELAYEDTURN_DEBUG
+
+#ifdef GNUPLOT_DEBUG
 static tSettingItem<bool> sg_("DEBUG_GNUPLOT",sg_gnuplotDebug);
 #endif
 
@@ -773,15 +777,17 @@ bool gCycle::IsMe( eGameObject const * other ) const
 // from gCycleMovement.cpp
 extern void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness );
 
-#ifdef DEBUG
+#ifdef DELAYEDTURN_DEBUG
 double sg_turnReceivedTime = 0;
 #endif
 
 void gCycle::OnNotifyNewDestination( gDestination* dest )
 {
-#ifdef DEBUG
+#ifdef DELAYEDTURN_DEBUG
     sg_turnReceivedTime = tSysTimeFloat();
+#endif
 
+#ifdef GNUPLOT_DEBUG
     if ( sg_gnuplotDebug && Player() )
     {
         std::ofstream f( Player()->GetUserName() + "_sync", std::ios::app );
@@ -1550,7 +1556,7 @@ void gCycle::MyInitAfterCreation(){
 
     predictPosition_ = pos;
 
-#ifdef DEBUG
+#ifdef GNUPLOT_DEBUG
     if ( sg_gnuplotDebug && Player() )
     {
         std::ofstream f( Player()->GetUserName() + "_step" );
@@ -1705,7 +1711,7 @@ bool gCycle::Timestep(REAL currentTime){
         }
     }
 
-#ifdef DEBUG
+#ifdef GNUPLOT_DEBUG
     if ( sg_gnuplotDebug && Player() )
     {
         std::ofstream f( Player()->GetUserName() + "_step", std::ios::app );
@@ -2852,13 +2858,15 @@ private:
 
 bool gCycle::DoTurn(int d)
 {
-#ifdef DEBUG
+#ifdef DELAYEDTURN_DEBUG
     REAL delay = tSysTimeFloat() - sg_turnReceivedTime;
     if ( delay > EPS && sn_GetNetState() == nSERVER && Owner() != 0 )
     {
         con << "Delayed turn execution! " << turns << "\n";
     }
+#endif
 
+#ifdef GNUPLOT_DEBUG
     if ( sg_gnuplotDebug && Player() )
     {
         std::ofstream f( Player()->GetUserName() + "_turn", std::ios::app );
@@ -2971,7 +2979,7 @@ void gCycle::Kill(){
                 // a bit on the other side of the wall it crashed into.
 
                 // but if prediction was active, do it anyway
-                if ( currentWall->Pos(1) > distance )
+                if ( currentWall->Pos(1) > distance || currentWall->Time(1) > lastTime )
                     currentWall->Update( lastTime, pos );
 
                 // copy the wall into the grid, but not directly; the grid datastructures are probably currently traversed. Kill() is called from eGameObject::Move().

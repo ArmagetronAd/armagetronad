@@ -92,7 +92,7 @@ static unsigned short inc_id(){
 
     if ( net_current_id > net_max_current_id )
     {
-        net_current_id = 0;
+        net_current_id = 1;
     }
 
     if (net_current_id==0)
@@ -178,7 +178,11 @@ static bool free_server( nNetObjectID id )
 static unsigned short next_free_server_nokill(){
     // slowly decrease max user ID
     if ( net_max_current_id > net_max_current_id_min )
+    {
         net_max_current_id--;
+        if ( net_current_id > net_max_current_id )
+            net_current_id = 1;
+    }
 
     // recycle old used IDs
     while ( sn_freedIDs.size() > 1000 && sn_freedIDs.size() * 20 > net_max_current_id )
@@ -239,15 +243,16 @@ static int kill_id_hog()
     for ( i = sn_netObjectsOwner.Len()-1; i>=0; --i )
     {
         int owner = sn_netObjectsOwner( i );
-        tASSERT( owner >= 0 && owner <= MAXCLIENTS );
-
-        if ( sn_netObjects[i] )
+        if ( owner >= 0 && owner <= MAXCLIENTS )
         {
-            usedIDs[ owner ] ++;
-        }
-        else if ( owner > 0 )
-        {
-            grabbedIDs[ owner ] ++;
+            if ( sn_netObjects[i] )
+            {
+                usedIDs[ owner ] ++;
+            }
+            else if ( owner > 0 )
+            {
+                grabbedIDs[ owner ] ++;
+            }
         }
     }
 
@@ -294,12 +299,15 @@ static int kill_id_hog()
 }
 
 // wrapper for toto tools
+static bool sg_todoKillHog=false;
 static void kill_id_hog_todo()
 {
-    kill_id_hog();
+    if ( sg_todoKillHog )
+        kill_id_hog();
+    sg_todoKillHog=false;
 }
 
-static unsigned short next_free_server(){
+static unsigned short next_free_server( bool kill ){
     nNetObjectID id = next_free_server_nokill();
     if ( id > 0 )
     {
@@ -308,6 +316,7 @@ static unsigned short next_free_server(){
     else
     {
         // plan to kill the worst ID user
+        sg_todoKillHog=true;
         st_ToDo( kill_id_hog_todo );
 
         // increase ID limit
@@ -324,6 +333,11 @@ static unsigned short next_free_server(){
         }
         else
         {
+            // throw an error
+            if ( kill )
+                throw nKillHim();
+
+            // or just exit silently
             con << "Emergency exit: desperately ran out of IDs.\n";
             exit(-1);
         }
@@ -378,7 +392,7 @@ void id_req_handler(nMessage &m){
         if (m.End())
         { // old style request; send only one ID back.
             tJUST_CONTROLLED_PTR< nMessage > rep=new nMessage(req_id);
-            unsigned short id=next_free_server();
+            unsigned short id=next_free_server(true);
             sn_netObjectsOwner[id]=m.SenderID();
             //	  con << "Assigning ID " << id << "\n";
             rep->Write(id);
@@ -393,6 +407,13 @@ void id_req_handler(nMessage &m){
             // new style request: many IDs
             unsigned short num;
             m.Read(num);
+
+            // but not too many. kick violators.
+            if ( num > ID_PREFETCH*4 )
+            {
+                throw nKillHim();
+            }
+
             tJUST_CONTROLLED_PTR< nMessage > rep=new nMessage(req_id);
 
             unsigned short begin_block=0;	// begin of the block of currently assigned IDs
@@ -400,7 +421,7 @@ void id_req_handler(nMessage &m){
 
             for (int i = num-1; i>=0; i--)
             {
-                nNetObjectID id = next_free_server();
+                nNetObjectID id = next_free_server(true);
 
                 sn_netObjectsOwner[id]=m.SenderID();
 
@@ -472,7 +493,7 @@ unsigned short next_free(){
         }
         else
         {
-            ret=next_free_server();
+            ret=next_free_server(false);
         }
 
         if (sn_netObjects[ret]){
@@ -491,12 +512,9 @@ void first_fill_ids(){
 
     distribute=request=0;
 
-    //  for (int i = 50; i>=0; i--)
-    //    {
     tJUST_CONTROLLED_PTR< nMessage > m = new nMessage(id_req);
     m->Write(ID_PREFETCH - 10);
     m->Send(0);
-    //    }
 }
 
 
@@ -760,6 +778,15 @@ nNetObject::nNetObject(nMessage &m):lastSyncID_(m.MessageIDBig()),refCtr_(0){
     //  st_Breakpoint();
 #endif
     m.Read( owner );
+
+    // clients are only allowed to create self-owned objects
+    if ( sn_GetNetState() == nSERVER )
+    {
+        if ( owner != m.SenderID() )
+        {
+            throw nKillHim();
+        }
+    }
 
     registrar.object = this;
     registrar.sender = m.SenderID();
