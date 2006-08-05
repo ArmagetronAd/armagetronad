@@ -54,47 +54,13 @@ void zEffectGroup::operator=(zEffectGroup const &other)
     }
 }
 
-void zEffectGroup::OnEnter( Triggerer possibleUser, REAL time )
+void zEffectGroup::apply( Triggerer possibleUser, REAL &time, miscDataPtr miscData )
 {
     std::vector<zValidatorPtr>::const_iterator iter;
     for(iter=validators.begin();
             iter!=validators.end();
             ++iter)
     {
-        (*iter)->validate(d_owners, d_teamOwners, possibleUser);
+        (*iter)->validate(d_owners, d_teamOwners, possibleUser, miscData);
     }
 }
-
-void zEffectGroup::OnLeave( Triggerer possibleUser, REAL time )
-{
-    std::vector<zValidatorPtr>::const_iterator iter;
-    for(iter=validators.begin();
-            iter!=validators.end();
-            ++iter)
-    {
-        (*iter)->validate(d_owners, d_teamOwners, possibleUser);
-    }
-}
-
-void zEffectGroup::OnInside( Triggerer possibleUser, REAL time )
-{
-    std::vector<zValidatorPtr>::const_iterator iter;
-    for(iter=validators.begin();
-            iter!=validators.end();
-            ++iter)
-    {
-        (*iter)->validate(d_owners, d_teamOwners, possibleUser);
-    }
-}
-
-void zEffectGroup::OnOutside( Triggerer possibleUser, REAL time )
-{
-    std::vector<zValidatorPtr>::const_iterator iter;
-    for(iter=validators.begin();
-            iter!=validators.end();
-            ++iter)
-    {
-        (*iter)->validate(d_owners, d_teamOwners, possibleUser);
-    }
-}
-

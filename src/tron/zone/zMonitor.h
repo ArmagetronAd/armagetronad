@@ -91,7 +91,7 @@ public:
     virtual ~zMonitorRule() { };
 
     void addEffectGroup(zEffectGroupPtr anEffectGroupPtr) {effectGroupList.push_back(anEffectGroupPtr);};
-    void applyRule(triggerers &contributors, REAL time) ;
+    void applyRule(triggerers &contributors, REAL time, REAL value) ;
 
 protected:
     zEffectGroupPtrs effectGroupList;

@@ -422,7 +422,7 @@ void zZone::OnEnter( gCycle * target, REAL time )
             iter != effectGroupEnter.end();
             ++iter)
     {
-        (*iter)->OnEnter(triggerer, time);
+        (*iter)->apply(triggerer, time, miscDataPtr());
     }
 }
 
@@ -438,7 +438,7 @@ void zZone::OnInside( gCycle * target, REAL time )
             iter != effectGroupInside.end();
             ++iter)
     {
-        (*iter)->OnInside(triggerer, time);
+        (*iter)->apply(triggerer, time);
     }
 }
 void zZone::OnLeave( gCycle * target, REAL time )
@@ -453,7 +453,7 @@ void zZone::OnLeave( gCycle * target, REAL time )
             iter != effectGroupLeave.end();
             ++iter)
     {
-        (*iter)->OnLeave(triggerer, time);
+        (*iter)->apply(triggerer, time);
     }
 }
 void zZone::OnOutside( gCycle * target, REAL time )
@@ -468,7 +468,7 @@ void zZone::OnOutside( gCycle * target, REAL time )
             iter != effectGroupOutside.end();
             ++iter)
     {
-        (*iter)->OnOutside(triggerer, time);
+        (*iter)->apply(triggerer, time);
     }
 }
 

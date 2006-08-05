@@ -16,7 +16,7 @@ zZoneInfluence::apply(REAL value)
 
 void
 zZoneInfluenceItemRotation::apply(REAL value) {
-    zone->SetRotationSpeed(rotationSpeed);
+    zone->SetRotationSpeed(rotationSpeed*value);
     zone->SetRotationAcceleration(rotationAcceleration);
 }
 

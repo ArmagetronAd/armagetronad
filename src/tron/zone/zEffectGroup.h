@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 class zValidator;
 typedef boost::shared_ptr<zValidator> zValidatorPtr;
 
+
 class zEffectGroup
 {
 public:
@@ -50,10 +51,7 @@ public:
     bool isValidUser(gCycle *possibleUser);
     gVectorExtra <ePlayerNetID *> getCalculatedTarget( gCycle * triggerer );
 
-    void OnEnter( Triggerer target, REAL time ); //!< reacts on objects entering the zone
-    void OnLeave( Triggerer target, REAL time ); //!< reacts on objects leaving the zone
-    void OnInside( Triggerer target, REAL time ); //!< reacts on objects inside the zone
-    void OnOutside( Triggerer target, REAL time ); //!< reacts on objects outside the zone
+    void apply( Triggerer target, REAL &time, miscDataPtr miscData = miscDataPtr() ); //!< reacts on objects interacting with  the zone
 
     //callback functions
     gCycle * cb_PossibleUser(void);           //!< Gets the used rubber for the currently watched cycle
@@ -73,6 +71,8 @@ protected:
 
 typedef boost::shared_ptr<zEffectGroup> zEffectGroupPtr;
 typedef std::vector< zEffectGroupPtr > zEffectGroupPtrs;
+
+
 
 #include "zone/zValidator.h"
 

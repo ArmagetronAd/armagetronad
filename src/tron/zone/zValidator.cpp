@@ -80,7 +80,7 @@ zValidator::isTeamOwner(eTeam *possibleTeamOwner, gVectorExtra<eTeam *> &teamOwn
 }
 
 void
-zValidator::validate(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, Triggerer possibleUser) {
+zValidator::validate(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, Triggerer possibleUser, miscDataPtr &miscData) {
     if(isValid(owners, teamOwners, possibleUser.who) && validateTriad(possibleUser.positive, positive) && validateTriad(possibleUser.marked, marked)) {
         zSelectorPtrs::const_iterator iterSelector;
         for(iterSelector=selectors.begin();
@@ -103,7 +103,11 @@ zValidator::validate(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *>
                 iterZoneInfluence!=zoneInfluences.end();
                 ++iterZoneInfluence)
         {
-            (*iterZoneInfluence)->apply(1.0);
+            REAL value = 0.0;
+            if ( miscData.get() != 0 )
+                value = *miscData;
+	
+            (*iterZoneInfluence)->apply(value);
         }
     }
 }

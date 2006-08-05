@@ -94,7 +94,7 @@ bool zMonitor::Timestep( REAL time )
     {
         // Go through all the rules of the monitor and see wich need to be activated
         if ((*iter)->isValid(value)) {
-            (*iter)->applyRule(contributors, time);
+            (*iter)->applyRule(contributors, time, value);
         }
     }
 
@@ -121,27 +121,24 @@ zMonitor::addRule(zMonitorRulePtr aRule) {
 
 
 
-void zMonitorRule::applyRule(triggerers &contributors, REAL time) {
+void zMonitorRule::applyRule(triggerers &contributors, REAL time, REAL _value) {
     /* We take all the contributors */
     /* And apply the proper effect */
-    // HACK
-    // TODO
-
+    miscDataPtr value = miscDataPtr(new REAL(_value));
+    
     std::vector<zEffectGroupPtr>::iterator iter;
     for (iter = effectGroupList.begin();
             iter != effectGroupList.end();
             ++iter)
     {
-
         triggerers::const_iterator iter2;
         for (iter2 = contributors.begin();
                 iter2 != contributors.end();
                 ++iter2)
         {
-            (*iter)->OnEnter(*iter2, time);
+            (*iter)->apply(*iter2, time, value);
         }
     }
-
 }
 
 /*

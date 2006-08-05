@@ -61,7 +61,7 @@ public:
     virtual zValidator *copy(void) const;
     virtual ~zValidator() {};
 
-    void validate(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, Triggerer possibleUser);
+    void validate(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, Triggerer possibleUser, miscDataPtr &miscData);
 
     void addSelector(zSelectorPtr _selector) {selectors.push_back(_selector);};
     void addMonitorInfluence(zMonitorInfluencePtr newInfluence) {monitorInfluences.push_back( newInfluence );};
