@@ -99,6 +99,9 @@ public:
     void addEffectGroupLeave  (zEffectGroupPtr anEffectGroup) {effectGroupLeave.push_back  (anEffectGroup);};
     void addEffectGroupOutside(zEffectGroupPtr anEffectGroup) {effectGroupOutside.push_back(anEffectGroup);};
 
+    virtual void AddRef() {eNetGameObject::AddRef();};
+    virtual void Release() {eNetGameObject::Release();};
+
 protected:
     rColor color_;           //!< the zone's color
     REAL createTime_;            //!< the time the zone was created at
