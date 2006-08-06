@@ -1060,15 +1060,26 @@ nNetObject::~nNetObject(){
         }
     }
     refCtr_=100;
-    if (id && (this == sn_netObjects[id]))
+    if (id)
     {
+        if (this == sn_netObjects[id])
+        {
 #ifdef DEBUG
-        sn_BreakOnObjectID( id );
+            sn_BreakOnObjectID( id );
 #endif
+            sn_netObjects[id] = NULL;
+        }
 
-        sn_netObjectsDeleted[id].Set( NULL );
-        sn_netObjects[id] = NULL;
+        // clear object from info arrays
+        nDeletedInfos::iterator found = sn_netObjectsDeleted.find( id );
+        if ( found != sn_netObjectsDeleted.end() )
+        {
+            nDeletedInfo  & deleted = (*found).second;
+            deleted.Set( NULL );
+            sn_netObjectsDeleted.erase(found);
+        }
     }
+
     refCtr_=-100;
     tCHECK_DEST;
 }
