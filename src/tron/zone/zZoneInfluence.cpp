@@ -1,6 +1,6 @@
 #include "zZoneInfluence.h"
 
-zZoneInfluence::zZoneInfluence(zZone * _zone) : zone(_zone), zoneInfluenceItems() { }
+zZoneInfluence::zZoneInfluence(zZonePtr _zone) : zone(_zone), zoneInfluenceItems() { }
 
 zZoneInfluence::~zZoneInfluence() { }
 
@@ -18,9 +18,16 @@ zZoneInfluence::apply(REAL value)
     zone->RequestSync();
 }
 
-zZoneInfluenceItem::zZoneInfluenceItem(zZone * aZone):zone(aZone) {}
+zZoneInfluenceItem::zZoneInfluenceItem(zZonePtr aZone):zone(aZone) {}
 
 zZoneInfluenceItem::~zZoneInfluenceItem() {}
+
+
+zZoneInfluenceItemRotation::zZoneInfluenceItemRotation(zZonePtr aZone):
+  zZoneInfluenceItem(aZone),
+  rotationSpeed(0.0),
+  rotationAcceleration(0.0) 
+{}
 
 void
 zZoneInfluenceItemRotation::apply(REAL value) {
@@ -28,15 +35,30 @@ zZoneInfluenceItemRotation::apply(REAL value) {
     zone->SetRotationAcceleration(rotationAcceleration);
 }
 
+zZoneInfluenceItemRadius::zZoneInfluenceItemRadius(zZonePtr aZone):
+  zZoneInfluenceItem(aZone),
+  radius(0.0) 
+{}
+
 void
 zZoneInfluenceItemRadius::apply(REAL value) {
     zone->SetRadius(radius);
 }
 
+zZoneInfluenceItemPosition::zZoneInfluenceItemPosition(zZonePtr aZone):
+  zZoneInfluenceItem(aZone),
+  pos(0.0, 0.0) 
+{}
+
 void
 zZoneInfluenceItemPosition::apply(REAL value) {
     zone->SetPosition(pos);
 }
+
+zZoneInfluenceItemColor::zZoneInfluenceItemColor(zZonePtr aZone):
+  zZoneInfluenceItem(aZone),
+  color(0.0, 0.0, 0.0, 0.0)
+{}
 
 void
 zZoneInfluenceItemColor::apply(REAL value) {
