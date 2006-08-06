@@ -52,11 +52,12 @@ with "r".
 ])
 
 PARAGRAPH([Internet server browsing would not be possible without master servers. We currently
-use three masters,
+use four masters,
 one in Texas run by Lucifer, one in Virginia run by antix of 
 ELINK(distortgaming.com,DistortGaming)
 (Who will gladly host your game server, Armagetronad or other. Shameless plug end.)
-and one run on Z-Man's old, trusty laptop-gone-router in Germany.
+one run on Z-Man's old, trusty laptop-gone-router in Germany, and another one in Germany run
+by iF.
 DNS service for swapping out masters without you having to update your configuration
 is provided by Tank.])
 
