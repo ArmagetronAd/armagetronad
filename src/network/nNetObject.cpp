@@ -38,6 +38,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <deque>
 #include <set>
+#include <map>
 
 // debug watchs
 #ifdef DEBUG
@@ -148,7 +149,9 @@ struct nDeletedInfo
     }
 };
 
-static tArray< nDeletedInfo > sn_netObjectsDeleted(1024);
+// info about deleted objects, sorted by their former ID
+typedef std::map< unsigned short, nDeletedInfo > nDeletedInfos;
+static nDeletedInfos sn_netObjectsDeleted;
 
 static bool free_server( nNetObjectID id )
 {
@@ -157,19 +160,24 @@ static bool free_server( nNetObjectID id )
         return false;
     }
 
-    nDeletedInfo& deleted = sn_netObjectsDeleted[ id ];
-    if ( deleted.time_ > tSysTimeFloat() - nDeletedTimeout )
+    nDeletedInfos::iterator found = sn_netObjectsDeleted.find( id );
+    if ( found != sn_netObjectsDeleted.end() )
     {
-        return false;
-    }
-    if ( deleted.object_ )
-    {
+        nDeletedInfo  & deleted = (*found).second;
+        if ( deleted.time_ > tSysTimeFloat() - nDeletedTimeout )
+        {
+            return false;
+        }
+
+        if ( deleted.object_ )
+        {
 #ifdef DEBUG
-        sn_BreakOnObjectID( id );
+            sn_BreakOnObjectID( id );
 #endif
-        // clear the deletion info, but don't reuse the ID just yet
-        deleted.UnSet();
-        return false;
+            // clear the deletion info, but don't reuse the ID just yet
+            deleted.UnSet();
+            return false;
+        }
     }
 
     return true;
@@ -1072,7 +1080,12 @@ nNetObject *nNetObject::Object(int i){
         return NULL;
 
     // the last deleted object with specified ID
-    nNetObject* deleted = sn_netObjectsDeleted[ i ].object_;
+    nNetObject* deleted = NULL;
+    nDeletedInfos::const_iterator found = sn_netObjectsDeleted.find( id );
+    if ( found != sn_netObjectsDeleted.end() )
+    {
+        deleted = (*found).second.object_;
+    }
 
     // return immediately if the object is there
     nNetObject *ret=ObjectDangerous( i );
@@ -1147,10 +1160,14 @@ nNetObject *nNetObject::ObjectDangerous(int i ){
         }
         else
         {
-            const nDeletedInfo& info = sn_netObjectsDeleted[ i ];
-            if ( info.time_ > tSysTimeFloat() - nDeletedTimeout )
+            nDeletedInfos::const_iterator found = sn_netObjectsDeleted.find( i );
+            if ( found != sn_netObjectsDeleted.end() )
             {
-                return info.object_;
+                nDeletedInfo const & deleted = (*found).second;
+                if ( deleted.time_ > tSysTimeFloat() - nDeletedTimeout )
+                {
+                    return deleted.object_;
+                }
             }
         }
     }
@@ -1619,19 +1636,17 @@ static nDescriptor net_clear(26,net_clear_handler,"net_clear");
 
 void nNetObject::ClearAllDeleted()
 {
-    int i;
-
     // forget about objects that were deleted in the past
-    for (i=sn_netObjectsDeleted.Len()-1;i>=0;i--)
+    for (nDeletedInfos::iterator iter = sn_netObjectsDeleted.begin(); iter != sn_netObjectsDeleted.end(); ++iter)
     {
-        nDeletedInfo& info = sn_netObjectsDeleted[ i ];
+        nDeletedInfo& info = (*iter).second;
         info.UnSet();
     }
 
-    sn_netObjectsDeleted.SetLen(0);
+    sn_netObjectsDeleted.clear();
 
     // send out object deletion messages
-    for( i = MAXCLIENTS;i>=0;i--)
+    for( int i = MAXCLIENTS;i>=0;i--)
     {
         if ( sn_Connections[i].socket && destroyers[i] )
         {
