@@ -59,6 +59,7 @@ typedef std::deque<Base *> arglist;
 
 class Registration {
 public:
+	typedef void (*fptr)();
 	typedef Base *ctor0();
 	typedef Base *ctor1(Base *);
 	typedef Base *ctor2(Base *, Base *);
@@ -69,10 +70,10 @@ private:
 	std::vector<tString> m_flags;
 	tString m_fname;
 	int m_argc;
-	void *m_ctor;
+	fptr m_ctor;
 public:
-	Registration(std::vector<tString> flags, tString fname, int argc, void *ctor);
-	Registration(const char *flags, const char *fname, int argc, void *ctor);
+	Registration(std::vector<tString> flags, tString fname, int argc, fptr ctor);
+	Registration(const char *flags, const char *fname, int argc, fptr ctor);
 	Base *use(arglist);
 	bool match(std::vector<tString> flags, tString fname, int argc);
 };

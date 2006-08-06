@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 namespace tValue {
 
 
-Registration::Registration(std::vector<tString> flags, tString fname, int argc, void *ctor):
+Registration::Registration(std::vector<tString> flags, tString fname, int argc, fptr ctor):
 	m_flags(flags),
 	m_fname(fname),
 	m_argc(argc),
@@ -44,7 +44,7 @@ Registration::Registration(std::vector<tString> flags, tString fname, int argc, 
 	theRegistry.reg(this);
 }
 
-Registration::Registration(const char *flags, const char *fname, int argc, void *ctor):
+Registration::Registration(const char *flags, const char *fname, int argc, fptr ctor):
 	m_fname(fname),
 	m_argc(argc),
 	m_ctor(ctor)
@@ -359,7 +359,7 @@ Variant Expr::GetValue() const {
 //};
 //blah asdfgsf;
 
-Registration register_iff("func\nlogic", "iff", 3, (void *)
+Registration register_iff("func\nlogic", "iff", 3, (Registration::fptr)
 	( Registration::ctor3* )& Creator<Condition>::create<Base*,Base*,Base*> );
 
 Condition::Condition(Base  * condvalue, Base  * truevalue, Base  * falsevalue) :
@@ -853,7 +853,7 @@ myCol ColDifference::_operation(void) const {
 }
 
 
-Registration register_sin("func\nmath", "sin", 1, (void *)
+Registration register_sin("func\nmath", "sin", 1, (Registration::fptr)
 	( Registration::ctor1* )& Creator<Func::Sin>::create<Base*> );
 
 
