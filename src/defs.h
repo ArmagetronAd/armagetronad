@@ -64,39 +64,39 @@ typedef VOIDFUNC *FUNCPTR;
 typedef INTFUNC *INTFUNCPTR;
 
 // replacements for float math functions
-#if !HAVE_DECL_SINF
+#ifndef HAVE_SINF
 inline REAL sinf( REAL angle ) throw() { return REAL(sin( angle )); }
 #endif
 
-#if !HAVE_DECL_COSF
+#ifndef HAVE_COSF
 inline REAL cosf( REAL angle ) throw() { return REAL(cos( angle )); }
 #endif
 
-#if !HAVE_DECL_TANF
+#ifndef HAVE_TANF
 inline REAL tanf( REAL angle ) throw() { return REAL(tan( angle )); }
 #endif
 
-#if !HAVE_DECL_ATAN2F
+#ifndef HAVE_ATAN2F
 inline REAL atan2f( REAL y, REAL x ) throw() { return REAL(atan2( y, x )); }
 #endif
 
-#if !HAVE_DECL_SQRTF
+#ifndef HAVE_SQRTF
 inline REAL sqrtf( REAL x ) throw() { return REAL(sqrt( x )); }
 #endif
 
-#if !HAVE_DECL_SQRTF
+#ifndef HAVE_LOGF
 inline REAL logf( REAL x ) throw() { return REAL(log( x )); }
 #endif
 
-#if !HAVE_DECL_SQRTF
+#ifndef HAVE_EXPF
 inline REAL expf( REAL x ) throw() { return REAL(exp( x )); }
 #endif
 
-#if !HAVE_DECL_FABSF
+#ifndef HAVE_FABSF
 inline REAL fabsf( REAL x ) throw() { return REAL(fabs( x )); }
 #endif
 
-#if !HAVE_DECL_FLOORF
+#ifndef HAVE_FLOORF
 inline REAL floorf( REAL x ) throw() { return REAL(floor( x )); }
 #endif
 

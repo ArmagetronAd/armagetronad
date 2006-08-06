@@ -362,8 +362,10 @@ done
 # configuration for various unix flavours
 define(GENERICUNIX,[
         MATHLIB="m"
-        AC_PATH_X
-        AC_PATH_XTRA
+        if test x$build_regular = xtrue; then
+                AC_PATH_X
+                AC_PATH_XTRA
+        fi
         if test x$have_x = xyes; then
             CFLAGS="$CFLAGS $X_CFLAGS"
             CXXFLAGS="$CXXFLAGS $X_CFLAGS"
@@ -721,7 +723,7 @@ AC_C_CONST
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS(select)
-AC_CHECK_DECLS([atan2f,sinf,cosf,tanf,sqrtf,logf,expf,fabsf,floorf],,,[#include <math.h>])
+AC_CHECK_FUNCS(atan2f sinf cosf tanf sqrtf logf expf fabsf floorf)
 AC_CHECK_FUNCS(wmemset)
 
 # if the compiler is GCC -Os produces faulty code (exceptions cause crashes), at least on AMD64. Replace it with -O2.
