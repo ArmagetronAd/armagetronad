@@ -244,9 +244,9 @@ Set::Set(BasePtr &val, BasePtr &min, BasePtr &max) : //!< Constructor using Base
 //! Copies the values from another class into the newly created one
 //! @param other the object to be copied from
 Set::Set(Set const &other) :
-        m_min(other.m_min->copy()),
-        m_max(other.m_max->copy()),
-        m_val(other.m_val->copy())
+        m_min(other.m_min),
+        m_max(other.m_max),
+        m_val(other.m_val)
 {}
 
 Set::~Set() {
