@@ -1,6 +1,8 @@
 // bison tCodeParser.ypp && g++ -g tCodeParser.tab.cpp -o tCodeParser -DtCodeParser_STANDALONE tCodeAST.cpp -I../.. -I.. ../libtools.a -lpthread &&  ./tCodeParser
 
 %{
+	#include <stdlib.h>
+	
 	#include "tError.h"
 	#include "tValue.h"
 	#include "tValueParser.h"
