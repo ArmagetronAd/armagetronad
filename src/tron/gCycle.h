@@ -47,6 +47,7 @@ class gSensor;
 class gNetPlayerWall;
 class gPlayerWall;
 class eTempEdge;
+struct gPredictPositionData;
 
 // minimum time between two cycle turns
 extern REAL sg_delayCycle;
@@ -188,7 +189,8 @@ private:
 
     void SetCurrentWall(gNetPlayerWall *w);
 
-    REAL CalculatePredictPosition(); //!< Calculates predictPosition_
+    void PreparePredictPosition( gPredictPositionData & data ); //!< prepares CalculatePredictPosition() call, requesting a raycast to the front
+    REAL CalculatePredictPosition( gPredictPositionData & data ); //!< Calculates predictPosition_
 protected:
     virtual ~gCycle();
 

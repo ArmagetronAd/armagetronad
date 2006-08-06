@@ -1568,9 +1568,98 @@ bool crash_sparks=true;
 // from nNetwork.C
 extern REAL planned_rate_control[MAXCLIENTS+2];
 
+//! intermediate data for position prediction
+struct gPredictPositionData
+{
+    REAL maxSpaceReport; //!< maximum space to report in front
+#ifdef DEDICATED
+    REAL rubberStart;    //!< distance from a wall rubber starts to get activated
+#endif
+};
+
+// *******************************************************************************************
+// *
+// *	PreparePredictPosition()
+// *
+// *******************************************************************************************
+//!
+//!     @param  data data to be passed to CalculatePredictPosition() later
+//!
+// *******************************************************************************************
+void gCycle::PreparePredictPosition( gPredictPositionData & data )
+{
+    // don't cast a ray by default
+    data.maxSpaceReport = 0;
+#ifdef DEDICATED
+    if ( sg_predictWalls )
+    {
+        // predict to the maximum time anyone else may be simulated up to
+        REAL maxTime = lastTime + MaxSimulateAhead() + GetMaxLazyLag();
+        REAL predictDT = maxTime - lastTime;
+        REAL lookAhead = predictDT * verletSpeed_;
+
+        // see how far we can go before rubber kicks in
+        data.rubberStart = verletSpeed_ / RubberSpeed();
+
+        // store max lookahead plus rubber safety
+        data.maxSpaceReport = lookAhead + data.rubberStart;
+    }
+#else
+    data.maxSpaceReport = verletSpeed_ * se_PredictTime() * rubberSpeedFactor;
+#endif
+
+    // request a raycast of the right length
+    maxSpaceMaxCast_ = data.maxSpaceReport;
+}
+
+// *******************************************************************************************
+// *
+// *	CalculatePredictPosition()
+// *
+// *******************************************************************************************
+//!
+//!     @param  data data from PreparePredictPosition()
+//!		@return the time up to which the cycle's position was predicted
+//!
+// *******************************************************************************************
+
+REAL gCycle::CalculatePredictPosition( gPredictPositionData & data )
+{
+    // predict position
+    REAL predictTime = lastTime;
+    {
+#ifdef DEDICATED
+        predictPosition_ = pos;
+
+        if ( sg_predictWalls )
+        {
+            REAL spaceAhead = GetMaxSpaceAhead( data.maxSpaceReport );
+            spaceAhead -= data.rubberStart;
+
+            if ( spaceAhead > 0 )
+            {
+                // store consistent prediction position and  time
+                predictPosition_ = pos + dirDrive * spaceAhead;
+                predictTime = lastTime + spaceAhead/verletSpeed_;
+            }
+        }
+#else
+        // predict half a frame time
+        predictTime += se_PredictTime();
+        predictPosition_ = pos+correctPosSmooth + dirDrive * GetMaxSpaceAhead( data.maxSpaceReport );
+#endif
+    }
+
+    return predictTime;
+}
+
 bool gCycle::Timestep(REAL currentTime){
     // if ( Owner() == sn_myNetID )
     //    con << pos << ',' << distance << ',' << eCoord::F( dirDrive, pos ) - distance << '\n';
+
+    // request the right space ahead for wall extrapolation
+    gPredictPositionData predictPositionData;
+    PreparePredictPosition( predictPositionData );
 
     // drop current wall if it was requested
     if ( dropWallRequested_ )
@@ -1751,7 +1840,7 @@ bool gCycle::Timestep(REAL currentTime){
         return false;
     }
 
-    REAL predictTime = CalculatePredictPosition();
+    REAL predictTime = CalculatePredictPosition( predictPositionData );
 
     if ( Alive() && currentWall )
     {
@@ -1819,56 +1908,6 @@ static REAL ClampDisplacement( gCycle* cycle, eCoord& displacement, const eCoord
 // from gCycleMovement.cpp
 REAL sg_GetSparksDistance();
 
-
-// *******************************************************************************************
-// *
-// *	CalculatePredictPosition()
-// *
-// *******************************************************************************************
-//!
-//!		@return the time up to which the cycle's position was predicted
-//!
-// *******************************************************************************************
-
-REAL gCycle::CalculatePredictPosition()
-{
-    // predict position
-    REAL predictTime = lastTime;
-    {
-#ifdef DEDICATED
-        predictPosition_ = pos;
-
-        if ( sg_predictWalls )
-        {
-            // predict to the maximum time anyone else may be simulated up to
-            REAL maxTime = lastTime + MaxSimulateAhead() + GetMaxLazyLag();
-            REAL predictDT = maxTime - lastTime;
-            REAL lookAhead = predictDT * verletSpeed_;
-
-            // see how far we can go before rubber kicks in
-            REAL rubberStart = verletSpeed_ / RubberSpeed();
-            lookAhead += rubberStart;
-            REAL spaceAhead = MaxSpaceAhead( this, predictDT, lookAhead, lookAhead );
-            spaceAhead -= rubberStart;
-
-            if ( spaceAhead > 0 )
-            {
-                // store consistent prediction position and  time
-                predictPosition_ = pos + dirDrive * spaceAhead;
-                predictTime = lastTime + spaceAhead/verletSpeed_;
-            }
-        }
-#else
-        // predict half a frame time
-        predictTime += se_PredictTime();
-        gSensor s(this,pos+correctPosSmooth, dirDrive * (verletSpeed_ * se_PredictTime() * rubberSpeedFactor ) );
-        s.detect(1);
-        predictPosition_ = s.before_hit;
-#endif
-    }
-
-    return predictTime;
-}
 
 bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
     if (!finite(skew))
@@ -2169,7 +2208,7 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
         {
             // delay syncs for old clients when there is a wall ahead; they would tunnel locally
             REAL lookahead = Speed() * sg_syncIntervalEnemy*.5;
-            if ( !sg_avoidBadOldClientSync || sg_NoLocalTunnelOnSync.Supported( Owner() ) || MaxSpaceAhead( this, ts, lookahead, lookahead ) >= lookahead )
+            if ( !sg_avoidBadOldClientSync || sg_NoLocalTunnelOnSync.Supported( Owner() ) || GetMaxSpaceAhead( lookahead ) >= lookahead )
             {
                 RequestSync(false);
 

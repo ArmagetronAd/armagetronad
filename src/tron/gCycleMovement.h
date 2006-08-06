@@ -36,6 +36,7 @@ class gDestination;
 class gPlayerWall;
 class gCycleMovement;
 class gSensor;
+struct gMaxSpaceAheadHitInfo;
 
 REAL GetTurnSpeedFactor(void);
 
@@ -202,6 +203,10 @@ protected:
     REAL            distance;                   //!< the distance traveled so far
     // REAL         wallContDistance;           //!< distance at which the walls will start to build up ( negative if the wall is already building )
 
+    mutable bool    refreshSpaceAhead_;         //!< flag to set when maximum space in front of cycle should be recalculated
+    REAL            maxSpaceMaxCast_;           //!< the maximum raycast length to determine the above value
+    mutable gMaxSpaceAheadHitInfo * maxSpaceHit_; //!< detailed information about the wall in front
+
     unsigned short  turns;                      //!< the number of turns taken so far
     unsigned short  braking;                    //!< flag indicating status of brakes ( on/off )
 
@@ -224,6 +229,8 @@ protected:
 
     // room for accessors
 public:
+    REAL GetMaxSpaceAhead( REAL maxReport ) const; //< Returns the current maximal space ahead
+
     inline REAL GetDistance( void ) const;  //!< Gets the distance traveled so far
     inline gCycleMovement const & GetDistance( REAL & distance ) const; //!< Gets the distance traveled so far
     inline REAL GetRubber( void ) const;    //!< Gets the amount rubber used up by the cycle
@@ -254,7 +261,7 @@ private:
 };
 
 //! Determines the maximum space ahead of a cycle
-float MaxSpaceAhead( const gCycleMovement* cycle, float ts, float lookAhead, float maxReport );
+// float MaxSpaceAhead( const gCycleMovement* cycle, float ts, float lookAhead, float maxReport );
 
 //! Exception to throw when cycle dies in a simulation frame
 class gCycleDeath: public eDeath
