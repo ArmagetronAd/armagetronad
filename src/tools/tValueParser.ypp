@@ -1,7 +1,7 @@
 // bison tCodeParser.ypp && g++ -g tCodeParser.tab.cpp -o tCodeParser -DtCodeParser_STANDALONE tCodeAST.cpp -I../.. -I.. ../libtools.a -lpthread &&  ./tCodeParser
 
 %{
-	#include <stdlib.h>
+	#include <stdlib.h>	// Works around a bug in BISON 2.1 non-pedantic
 	
 	#include "tError.h"
 	#include "tValue.h"
