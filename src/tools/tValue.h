@@ -59,30 +59,30 @@ typedef std::deque<Base *> arglist;
 
 class Registration {
 public:
-	typedef void (*fptr)();
-	typedef Base *ctor0();
-	typedef Base *ctor1(Base *);
-	typedef Base *ctor2(Base *, Base *);
-	typedef Base *ctor3(Base *, Base *, Base *);
-	typedef Base *ctor4(Base *, Base *, Base *, Base *);
-	typedef Base *ctor5(Base *, Base *, Base *, Base *, Base *);
+    typedef void (*fptr)();
+    typedef Base *ctor0();
+    typedef Base *ctor1(Base *);
+    typedef Base *ctor2(Base *, Base *);
+    typedef Base *ctor3(Base *, Base *, Base *);
+    typedef Base *ctor4(Base *, Base *, Base *, Base *);
+    typedef Base *ctor5(Base *, Base *, Base *, Base *, Base *);
 private:
-	std::vector<tString> m_flags;
-	tString m_fname;
-	int m_argc;
-	fptr m_ctor;
+    std::vector<tString> m_flags;
+    tString m_fname;
+    int m_argc;
+    fptr m_ctor;
 public:
-	Registration(std::vector<tString> flags, tString fname, int argc, fptr ctor);
-	Registration(const char *flags, const char *fname, int argc, fptr ctor);
-	Base *use(arglist);
-	bool match(std::vector<tString> flags, tString fname, int argc);
+    Registration(std::vector<tString> flags, tString fname, int argc, fptr ctor);
+    Registration(const char *flags, const char *fname, int argc, fptr ctor);
+    Base *use(arglist);
+    bool match(std::vector<tString> flags, tString fname, int argc);
 };
 
 class Registry {
-	std::vector<Registration *> registrations;
+    std::vector<Registration *> registrations;
 public:
-	void reg(Registration *me);
-	Base *create(std::vector<tString> flags, tString fname, arglist);
+    void reg(Registration *me);
+    Base *create(std::vector<tString> flags, tString fname, arglist);
 };
 
 extern Registry theRegistry;
@@ -331,6 +331,8 @@ public:
 
 }
 class ROperation;
+class RVar;
+class RFunction;
 namespace tValue {
 
 //! Stores a math expression using the mathexpr library
@@ -340,11 +342,15 @@ public:
     typedef std::map<tString, float ((*)(float))> funcmap_t; //!< map of function names and their references
 private:
     boost::shared_ptr<ROperation> m_operation;
+    RVar **m_vararray;
+    RFunction **m_funcarray;
+    int m_varsSize, m_functionsSize;
 public:
     Expr(tString const &expr); //!< Constructs a new Expr without variables and functions and the like
     Expr(tString const &expr, varmap_t const &vars, funcmap_t const &functions); //!< Constructs a new Expr with an array of variables and functions
 
     Base *copy(void) const;
+    ~Expr(void);
 
     virtual Variant GetValue(void) const; //!< Returns the value in its native format
 };
@@ -785,49 +791,49 @@ protected:
 
 template<typename C> class Creator {
 public:
-	static Base *create() {
-		return new C();
-	}
-	template<typename T> static Base *create(T t) {
-		return new C(t);
-	}
-	template<typename T, typename U> static Base *create(T t, U u) {
-		return new C(t, u);
-	}
-	template<typename T, typename U, typename V> static Base *create(T t, U u, V v) {
-		return new C(t, u, v);
-	}
-	template<typename T, typename U, typename V, typename W> static Base *create(T t, U u, V v, W w) {
-		return new C(t, u, v, w);
-	}
-	template<typename T, typename U, typename V, typename W, typename X> static Base *create(T t, U u, V v, W w, X x) {
-		return new C(t, u, v, w, x);
-	}
+    static Base *create() {
+        return new C();
+    }
+    template<typename T> static Base *create(T t) {
+        return new C(t);
+    }
+    template<typename T, typename U> static Base *create(T t, U u) {
+        return new C(t, u);
+    }
+    template<typename T, typename U, typename V> static Base *create(T t, U u, V v) {
+        return new C(t, u, v);
+    }
+    template<typename T, typename U, typename V, typename W> static Base *create(T t, U u, V v, W w) {
+        return new C(t, u, v, w);
+    }
+    template<typename T, typename U, typename V, typename W, typename X> static Base *create(T t, U u, V v, W w, X x) {
+        return new C(t, u, v, w, x);
+    }
 };
 
 namespace Func {
-	//template<typename T> struct correct_get<T> { Base::GetValue get; };
-	//template<> struct correct_get<float> { Base::GetFloat get; };
-	template<typename T, T F(void)> class fZeroary : public Base {
-	public:
-		fZeroary() { };
-		virtual Variant GetValue() const { return F(); };
-	};
-	template<typename T, typename Aa, /* Aa (Base::*GAa)(void) const, */ T F(Aa)> class fUnary : public Base {
-		BasePtr m_ArgA;
-	public:
-		fUnary(Base *ArgA): m_ArgA(ArgA) { }
-		virtual Variant GetValue() const { return F(m_ArgA->Get<Aa>()); };
-	};
-	template<typename T, typename Aa, typename Ab, T F(Aa, Ab)> class fBinary : public Base {
-		BasePtr m_ArgA, m_ArgB;
-	public:
-		fBinary(Base *ArgA, Base *ArgB): m_ArgA(ArgA), m_ArgB(ArgB) { }
-		virtual Variant GetValue() const { return F(m_ArgA->Get<Aa>(), m_ArgB->Get<Ab>()); };
-	};
-	
-	typedef fZeroary<long int, random> Random;
-	typedef fUnary<float, float, sinf> Sin;
+//template<typename T> struct correct_get<T> { Base::GetValue get; };
+//template<> struct correct_get<float> { Base::GetFloat get; };
+template<typename T, T F(void)> class fZeroary : public Base {
+public:
+    fZeroary() { };
+    virtual Variant GetValue() const { return F(); };
+};
+template<typename T, typename Aa, /* Aa (Base::*GAa)(void) const, */ T F(Aa)> class fUnary : public Base {
+    BasePtr m_ArgA;
+public:
+    fUnary(Base *ArgA): m_ArgA(ArgA) { }
+    virtual Variant GetValue() const { return F(m_ArgA->Get<Aa>()); };
+};
+template<typename T, typename Aa, typename Ab, T F(Aa, Ab)> class fBinary : public Base {
+    BasePtr m_ArgA, m_ArgB;
+public:
+    fBinary(Base *ArgA, Base *ArgB): m_ArgA(ArgA), m_ArgB(ArgB) { }
+    virtual Variant GetValue() const { return F(m_ArgA->Get<Aa>(), m_ArgB->Get<Ab>()); };
+};
+
+typedef fZeroary<long int, random> Random;
+typedef fUnary<float, float, sinf> Sin;
 }
 
 

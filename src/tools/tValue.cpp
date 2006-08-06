@@ -36,82 +36,82 @@ namespace tValue {
 
 
 Registration::Registration(std::vector<tString> flags, tString fname, int argc, fptr ctor):
-	m_flags(flags),
-	m_fname(fname),
-	m_argc(argc),
-	m_ctor(ctor)
+        m_flags(flags),
+        m_fname(fname),
+        m_argc(argc),
+        m_ctor(ctor)
 {
-	theRegistry.reg(this);
+    theRegistry.reg(this);
 }
 
 Registration::Registration(const char *flags, const char *fname, int argc, fptr ctor):
-	m_fname(fname),
-	m_argc(argc),
-	m_ctor(ctor)
+        m_fname(fname),
+        m_argc(argc),
+        m_ctor(ctor)
 {
-	m_flags.clear();
-	for (
-		const char *ptr = flags, *ep;
-		ptr;
-		ptr = (ep[0] == '\0') ? 0 : (ep + 1)
-	)
-	{
-		ep = strchr(ptr, '\n');
-		if (!ep)
-			ep = ptr + strlen(ptr);
-		std::string s(ptr, ep - ptr);
-		m_flags.push_back(s);
-	}
-	theRegistry.reg(this);
+    m_flags.clear();
+    for (
+        const char *ptr = flags, *ep;
+        ptr;
+        ptr = (ep[0] == '\0') ? 0 : (ep + 1)
+    )
+    {
+        ep = strchr(ptr, '\n');
+        if (!ep)
+            ep = ptr + strlen(ptr);
+        std::string s(ptr, ep - ptr);
+        m_flags.push_back(s);
+    }
+    theRegistry.reg(this);
 }
 
 Base *
 Registration::use(arglist args) {
-	switch (args.size()) {
-	case 0:	return ((ctor0*)m_ctor)();
-	case 1:	return ((ctor1*)m_ctor)(args[0]);
-	case 2:	return ((ctor2*)m_ctor)(args[0], args[1]);
-	case 3:	return ((ctor3*)m_ctor)(args[0], args[1], args[2]);
-	case 4:	return ((ctor4*)m_ctor)(args[0], args[1], args[2], args[3]);
-	case 5:	return ((ctor5*)m_ctor)(args[0], args[1], args[2], args[3], args[4]);
-	}
-	throw("Unimplemented # of args");
+    switch (args.size()) {
+    case 0:	return ((ctor0*)m_ctor)();
+    case 1:	return ((ctor1*)m_ctor)(args[0]);
+    case 2:	return ((ctor2*)m_ctor)(args[0], args[1]);
+    case 3:	return ((ctor3*)m_ctor)(args[0], args[1], args[2]);
+    case 4:	return ((ctor4*)m_ctor)(args[0], args[1], args[2], args[3]);
+    case 5:	return ((ctor5*)m_ctor)(args[0], args[1], args[2], args[3], args[4]);
+    }
+    throw("Unimplemented # of args");
 }
 
 bool
 Registration::match(std::vector<tString> flags, tString fname, int argc)
 {
-	if (fname.Compare(m_fname, true))
-		return false;
-	for (std::vector<tString>::iterator i = flags.begin(); i != flags.end(); ++i)
-	{
-		bool flagmatch = (flags[0] == "!");
-		tString flag = *i;
-		if (flagmatch)
-			flag = flag.SubStr(1);
-		if (!flag.Compare(*i, true))
-			flagmatch = !flagmatch;
-		if (!flagmatch)
-			return false;
-	}
-	if (argc != m_argc)
-		return false;
-	return true;
+    if (fname.Compare(m_fname, true))
+        return false;
+    for (std::vector<tString>::iterator i = flags.begin(); i != flags.end(); ++i)
+    {
+        bool flagmatch = (flags[0] == "!");
+        tString flag = *i;
+        if (flagmatch)
+            flag = flag.SubStr(1);
+        if (!flag.Compare(*i, true))
+            flagmatch = !flagmatch;
+        if (!flagmatch)
+            return false;
+    }
+    if (argc != m_argc)
+        return false;
+    return true;
 }
 
 void
 Registry::reg(Registration *it)
 {
-	registrations.push_back(it);
+    registrations.push_back(it);
 }
 
 Base *
 Registry::create(std::vector<tString> flags, tString fname, arglist args)
 {
-	for (std::vector<Registration *>::iterator i = registrations.begin(); i != registrations.end(); ++i)
-		if ((*i)->match(flags, fname, args.size()))
-			return (*i)->use(args);
-	return NULL;
+    for (std::vector<Registration *>::iterator i = registrations.begin(); i != registrations.end(); ++i)
+        if ((*i)->match(flags, fname, args.size()))
+            return (*i)->use(args);
+    return NULL;
 }
 
 Registry theRegistry;
@@ -305,35 +305,42 @@ bool String::operator> (Base const &other) const { return m_value >   static_cas
 bool String::operator< (Base const &other) const { return m_value <   static_cast<tString>(other); }
 
 //! @param expr The expression to be parsed
-Expr::Expr(tString const &expr) : m_operation(new ROperation(expr.c_str())) {}
+Expr::Expr(tString const &expr) : m_operation(new ROperation(expr.c_str())), m_vararray(0), m_funcarray(0), m_varsSize(0), m_functionsSize(0) {}
 
 //! @param expr The expression to be parsed
 //! @param vars A map of variable names and their references
 //! @param functions A map of function names and their references
 Expr::Expr(tString const &expr, varmap_t const &vars, funcmap_t const &functions) {
     // what a mess. why can't this darn library just use stl functions? :s
-    RVar **vararray;
-    vararray = new RVar*[vars.size()];
+    m_vararray = new RVar*[vars.size()];
     unsigned int i = 0;
     for(varmap_t::const_iterator iter = vars.begin(); iter != vars.end(); ++iter, ++i) {
-        vararray[i] = new RVar(iter->first.c_str(), iter->second);
+        m_vararray[i] = new RVar(iter->first.c_str(), iter->second);
     }
-    RFunction **funcarray;
-    funcarray = new RFunction*[functions.size()];
+    m_funcarray = new RFunction*[functions.size()];
     unsigned int j = 0;
+    m_varsSize = vars.size();
+    m_functionsSize = functions.size();
     for(funcmap_t::const_iterator iter = functions.begin(); iter != functions.end(); ++iter, ++j) {
-        funcarray[j] = new RFunction(iter->second);
-        funcarray[j]->SetName(iter->first.c_str());
+        m_funcarray[j] = new RFunction(iter->second);
+        m_funcarray[j]->SetName(iter->first.c_str());
     }
-    m_operation = boost::shared_ptr<ROperation>(new ROperation(expr.c_str(), vars.size(), vararray, functions.size(), funcarray));
-    for(i = 0; i < vars.size(); i++) {
-        delete vararray[i];
+    m_operation = boost::shared_ptr<ROperation>(new ROperation(expr.c_str(), vars.size(), m_vararray, functions.size(), m_funcarray));
+}
+
+Expr::~Expr() {
+    if(m_vararray != 0) {
+        for(int i = 0; i < m_varsSize; i++) {
+            delete m_vararray[i];
+        }
+        delete[] m_vararray;
     }
-    delete[] vararray;
-    for(i = 0; i < functions.size(); i++) {
-        delete funcarray[i];
+    if(m_funcarray != 0) {
+        for(int i = 0; i < m_functionsSize; i++) {
+            delete m_funcarray[i];
+        }
+        delete[] m_funcarray;
     }
-    delete[] funcarray;
 }
 
 Base *Expr::copy(void) const {
@@ -348,19 +355,19 @@ Variant Expr::GetValue() const {
 //public:
 //    blah() {
 //        float x=4,y=3;
-//		Expr::varmap_t vars;
+//		tValue::Expr::varmap_t vars;
 //		vars[tString("x")] = &x;
 //		vars[tString("y")] = &y;
-//		Expr::funcmap_t functions;
+//		tValue::Expr::funcmap_t functions;
 //		functions[tString("f")] = &sinf;
-//		Expr expr(tString("x+f(y)"), vars, functions);
+//		tValue::Expr expr(tString("x+f(y)"), vars, functions);
 //        std::cerr << expr.GetFloat() << std::endl;
 //    }
 //};
 //blah asdfgsf;
 
 Registration register_iff("func\nlogic", "iff", 3, (Registration::fptr)
-	( Registration::ctor3* )& Creator<Condition>::create<Base*,Base*,Base*> );
+                          ( Registration::ctor3* )& Creator<Condition>::create<Base*,Base*,Base*> );
 
 Condition::Condition(Base  * condvalue, Base  * truevalue, Base  * falsevalue) :
         m_condvalue (condvalue ),
@@ -854,7 +861,7 @@ myCol ColDifference::_operation(void) const {
 
 
 Registration register_sin("func\nmath", "sin", 1, (Registration::fptr)
-	( Registration::ctor1* )& Creator<Func::Sin>::create<Base*> );
+                          ( Registration::ctor1* )& Creator<Func::Sin>::create<Base*> );
 
 
 }
