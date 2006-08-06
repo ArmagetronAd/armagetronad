@@ -627,7 +627,7 @@ nWaitForAck::nWaitForAck(nMessage* m,int rec)
 
     timeouts=0;
 
-    REAL timeout=sn_GetTimeout( rec );
+    timeout=sn_GetTimeout( rec );
 
 #ifdef nSIMULATE_PING
     timeSendAgain=::netTime + nSIMULATE_PING;
@@ -734,7 +734,7 @@ void nWaitForAck::Resend(){
             continue;
 
         REAL packetLoss = connection.PacketLoss();
-        REAL timeout = sn_GetTimeout( pendingAck->receiver );
+        REAL timeout = pendingAck->timeout;
 
         // should we resend the packet? Certainly it if it is overdue
         bool resend = (pendingAck->timeSendAgain + timeout * .1 <=netTime);
