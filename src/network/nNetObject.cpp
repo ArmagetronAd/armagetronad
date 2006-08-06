@@ -1069,7 +1069,7 @@ nNetObject::~nNetObject(){
 #endif
             sn_netObjects[id] = NULL;
         }
-
+        
         // clear object from info arrays
         nDeletedInfos::iterator found = sn_netObjectsDeleted.find( id );
         if ( found != sn_netObjectsDeleted.end() )
@@ -1647,14 +1647,11 @@ static nDescriptor net_clear(26,net_clear_handler,"net_clear");
 
 void nNetObject::ClearAllDeleted()
 {
-    // forget about objects that were deleted in the past
-    for (nDeletedInfos::iterator iter = sn_netObjectsDeleted.begin(); iter != sn_netObjectsDeleted.end(); ++iter)
-    {
-        nDeletedInfo& info = (*iter).second;
-        info.UnSet();
-    }
-
-    sn_netObjectsDeleted.clear();
+    // forget about objects that were deleted in the past. The swap trick is to
+    // avoid that the objects try to remove themselves from the list while it is cleared.
+    nDeletedInfos swap;
+    swap.swap( sn_netObjectsDeleted );
+    swap.clear();
 
     // send out object deletion messages
     for( int i = MAXCLIENTS;i>=0;i--)
