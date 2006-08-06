@@ -1502,12 +1502,33 @@ static void sg_DropTempWall( eCoord const & dir, gSensor const & sensor )
 //! information about obstacle encountered by MaxSpaceAhead
 struct gMaxSpaceAheadHitInfo
 {
-    tJUST_CONTROLLED_PTR< eHalfEdge const > edge;    //!< the edge that was hit
     eCoord            pos;                           //!< the location it was hit at
     REAL              offset;                        //!< offset from mindistance values, to be subtracted from wall distacne
 
+    tJUST_CONTROLLED_PTR< eHalfEdge const > edge;    //!< the edge that was hit
     tJUST_CONTROLLED_PTR< gPlayerWall > playerWall;  //!< the player wall that was hit
     REAL wallAlpha;                                  //!< the wall alpha value of the hit
+};
+
+//! used to clear out dangerous information from hit info after simulation is done
+class gMaxSpaceAheadHitInfoClearer
+{
+public:
+    gMaxSpaceAheadHitInfoClearer( gMaxSpaceAheadHitInfo * & info )
+            : info_( info ){}
+
+    ~gMaxSpaceAheadHitInfoClearer()
+    {
+        gMaxSpaceAheadHitInfo * info = info_;
+        if ( info )
+        {
+            // we can't have the edges lingering around with possibly incomplete data
+            info->edge = NULL;
+            info->playerWall = NULL;
+        }
+    }
+private:
+    gMaxSpaceAheadHitInfo * & info_;
 };
 
 // *******************************************************************************************
@@ -1810,6 +1831,9 @@ bool gCycleMovement::Timestep( REAL currentTime )
 {
     // request regeneration of maximum space
     refreshSpaceAhead_ = true;
+
+    // clear out dangerous info when we're done
+    gMaxSpaceAheadHitInfoClearer hitInfoClearer( maxSpaceHit_ );
 
     // clamp stuff to finite values
     clamp( rubber, 0, sg_rubberCycle );
@@ -2916,6 +2940,9 @@ bool gCycleMovement::DoTurn( int dir )
 
     if ( CanMakeTurn( lastTime, dir ) )
     {
+        // request regeneration of maximum space
+        refreshSpaceAhead_ = true;
+
         // store last postion
         lastTurnPos_ = pos;
 
