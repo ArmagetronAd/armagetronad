@@ -111,7 +111,8 @@ function:
 		std::vector<tString> flags;
 		flags.push_back(tString("func"));
 		$$ = tValue::theRegistry.create(flags, *$1, *$3);
-		delete $1, $3;
+		delete $1;
+		delete $3;
 	  }
 	| function '.' function
 	;
