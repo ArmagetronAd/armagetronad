@@ -82,28 +82,6 @@ public:
     ~gCycleMemory();
 };
 
-class gEnemyInfluence{
-private:
-    nObserverPtr< ePlayerNetID >	lastEnemyInfluence;  	// the last enemy wall we encountered
-    REAL							lastTime;				// the time it was drawn at
-
-public:
-    gEnemyInfluence();
-
-    ePlayerNetID const *            GetEnemy() const;	    // the last enemy possibly responsible for our death
-    REAL                            GetTime() const;        // the time of the influence
-    void							AddSensor( const gSensor& sensor, REAL timePenalty, gCycle * thisCycle ); // add the result of the sensor scan to our data
-    void							AddWall( const eWall * wall, eCoord const & point, REAL timePenalty, gCycle * thisCycle ); // add the interaction with a wall to our data
-    void							AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycle * thisCycle ); // add the interaction with a wall to our data
-};
-
-struct gRealColor {
-    REAL r,g,b;
-
-    gRealColor():r(1), g(1), b(1){}
-
-};
-
 // class used to extrapolate the movement of a lightcycle
 class gCycleExtrapolator: public gCycleMovement
 {
@@ -185,8 +163,6 @@ public:
 
 private:
     void TransferPositionCorrectionToDistanceCorrection();
-
-    gEnemyInfluence				enemyInfluence;
 
     tCHECKED_PTR(gNetPlayerWall)	currentWall;                    //!< the wall that currenly is attached to the cycle
     tCHECKED_PTR(gNetPlayerWall)	lastWall;                       //!< the last wall that was attached to this cycle

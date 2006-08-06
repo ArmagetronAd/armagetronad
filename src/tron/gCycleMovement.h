@@ -34,8 +34,32 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class gCycle;
 class gDestination;
 class gPlayerWall;
+class gCycleMovement;
+class gSensor;
 
 REAL GetTurnSpeedFactor(void);
+
+class gEnemyInfluence{
+private:
+    nObserverPtr< ePlayerNetID >	lastEnemyInfluence;  	// the last enemy wall we encountered
+    REAL							lastTime;				// the time it was drawn at
+
+public:
+    gEnemyInfluence();
+
+    ePlayerNetID const *            GetEnemy() const;	    // the last enemy possibly responsible for our death
+    REAL                            GetTime() const;        // the time of the influence
+    void							AddSensor( const gSensor& sensor, REAL timePenalty, gCycleMovement * thisCycle ); // add the result of the sensor scan to our data
+    void							AddWall( const eWall * wall, eCoord const & point, REAL timePenalty, gCycleMovement * thisCycle ); // add the interaction with a wall to our data
+    void							AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycleMovement * thisCycle ); // add the interaction with a wall to our data
+};
+
+struct gRealColor {
+    REAL r,g,b;
+
+    gRealColor():r(1), g(1), b(1){}
+
+};
 
 //! class handling lightcycle movement aspects ( not networking beyond construction, no rendering, no wall building )
 class gCycleMovement : public eNetGameObject
@@ -162,6 +186,8 @@ private:
     short           alive_;                     //!< status: 1: cycle is alive, -1: cycle just died, 0: cycle is dead
 
 protected:
+    gEnemyInfluence				enemyInfluence; //!< keeps track of enemies that influenced this cycle
+
     gDestination*   destinationList;            //!< the list of destinations that belong to this cycle ( for memory management )
     gDestination*   currentDestination;         //!< the destination this cycle aims for now
     gDestination*   lastDestination;            //!< the last destination that was passed
