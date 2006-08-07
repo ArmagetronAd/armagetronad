@@ -1621,6 +1621,8 @@ void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
     if ( w )
     {
         w->CalcLen();
+        if ( !lastWall_ )
+            w->begDist_ = dbegin;
         w->endDist_ = EndPos();
 #ifdef DEBUG
         w->Check();
