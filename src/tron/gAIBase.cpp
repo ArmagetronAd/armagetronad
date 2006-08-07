@@ -951,10 +951,14 @@ static void CycleBlocksWayHelper(const gCycle *a, const gCycle *b,
 // of a
 // bDir tells the direction the wall of b is going (-1: to the left, 1:...)
 // bDist is the distance of b's wall to its start.
-void gAIPlayer::CycleBlocksWay(const gCycle *a, const gCycle *b,
+void gAIPlayer::CycleBlocksWay(const gCycleMovement *aa, const gCycleMovement *bb,
                                int aDir, int bDir, REAL bDist, int winding)
 {
-    tASSERT(a && b);
+
+
+    tASSERT(aa && bb);
+    gCycle * a = dynamic_cast< gCycle * >( const_cast< gCycleMovement * > ( aa ) );
+    gCycle * b = dynamic_cast< gCycle * >( const_cast< gCycleMovement * > ( bb ) );
 
     REAL aDist = a->GetDistance();
     aDir = (aDir > 0 ? 1 : 0);
@@ -1007,12 +1011,12 @@ void gAIPlayer::CycleBlocksWay(const gCycle *a, const gCycle *b,
 }
 
 // called whenever a cylce blocks the rim wall.
-void gAIPlayer::CycleBlocksRim(const gCycle *a, int aDir)
+void gAIPlayer::CycleBlocksRim(const gCycleMovement *a, int aDir)
 {
 }
 
 // called whenever a hole is ripped in a's wall at distance aDist.
-void gAIPlayer::BreakWall(const gCycle *a, REAL aDist)
+void gAIPlayer::BreakWall(const gCycleMovement *a, REAL aDist)
 {}
 
 

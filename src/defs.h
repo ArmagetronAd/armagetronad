@@ -88,11 +88,11 @@ inline REAL atan2f( REAL y, REAL x ) throw() { return REAL(atan2( y, x )); }
 inline REAL sqrtf( REAL x ) throw() { return REAL(sqrt( x )); }
 #endif
 
-#ifndef HAVE_SQRTF
+#ifndef HAVE_LOGF
 inline REAL logf( REAL x ) throw() { return REAL(log( x )); }
 #endif
 
-#ifndef HAVE_SQRTF
+#ifndef HAVE_EXPF
 inline REAL expf( REAL x ) throw() { return REAL(exp( x )); }
 #endif
 

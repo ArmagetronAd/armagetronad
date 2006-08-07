@@ -560,6 +560,7 @@ protected:
     int id;
     tCONTROLLED_PTR(nMessage) message;  // the message
     int           receiver;      // the computer who should send the ack
+    REAL          timeout;       // the time in seconds between send attempts
     nTimeRolling  timeSendAgain; // for timeout
     nTimeRolling  timeFirstSent; // for ping calculation
     nTimeRolling  timeLastSent;  // for ping calculation

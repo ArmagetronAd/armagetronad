@@ -54,6 +54,16 @@ const REAL se_maxGridSize = 1E+15;	// this gives us way more space than OpenGL a
 
 int se_debugExt=0;
 
+// counts how many edges we should attempt to simplify
+static int se_simplifyEdges = 0;
+
+// after one edge has been successfully simplified, simplify that many more,
+// it seems to pay
+static const int se_simplifyEdgesSuccess = 20;
+
+// after one edge has been inserted, try to simplify that many old ones
+static const int se_simplifyEdgesNew = 2;
+
 tDEFINE_REFOBJ( ePoint )
 tDEFINE_REFOBJ( eHalfEdge )
 tDEFINE_REFOBJ( eFace )
@@ -708,6 +718,9 @@ static int se_drawLineTimeout = 10000;
 static tSettingItem<int> se_drawLineTimeoutConf("DRAWLINE_TIMEOUT", se_drawLineTimeout);
 
 ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change_grid){
+    // for every edge we add, allow to simplify
+    se_simplifyEdges += se_simplifyEdgesNew;
+
     // prepare a teporary edge so we always know what the wall we are placing looks like
     tStackObject< eTempEdge > toBePlaced( *start, end, w );
     //tJUST_CONTROLLED_PTR< eWall > wal( w );
@@ -1819,12 +1832,16 @@ bool eFace::CorrectArea()
     return newarea > area;
 }
 
-
 bool eHalfEdge::Simplify(eGrid *grid)
 {
     if (GetWall() && GetWall()->Deletable() && face)
     {
         ClearWall();
+    }
+
+    if (other && other->GetWall() && other->GetWall()->Deletable() && other->face)
+    {
+        other->ClearWall();
     }
 
     if (GetWall() || !other || other->GetWall() || !face || !other->face)
@@ -2006,7 +2023,10 @@ void eGrid::SimplifyNum(int e){
 
         tRecorderSync< int >::Archive( "_GRID_SIMPLIFY", 8, e );
 
-        E->Simplify(this);
+        if ( E->Simplify(this) )
+        {
+            se_simplifyEdges += se_simplifyEdgesSuccess;
+        }
 
 #ifdef DEBUG
         tASSERT(Esave);
@@ -2029,7 +2049,10 @@ void eGrid::SimplifyAll(int count){
 
     static int counter=0;
 
-    for(;count>0;count--){
+    // try to simplify at least one edge
+    se_simplifyEdges++;
+
+    for(;count>0 && se_simplifyEdges>0;count--,se_simplifyEdges--){
         counter--;
 
         if (counter<0 || counter>=edges.Len())

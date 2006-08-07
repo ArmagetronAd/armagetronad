@@ -381,8 +381,10 @@ done
 # configuration for various unix flavours
 define(GENERICUNIX,[
         MATHLIB="m"
-        AC_PATH_X
-        AC_PATH_XTRA
+        if test x$build_regular = xtrue; then
+                AC_PATH_X
+                AC_PATH_XTRA
+        fi
         if test x$have_x = xyes; then
             CFLAGS="$CFLAGS $X_CFLAGS"
             CXXFLAGS="$CXXFLAGS $X_CFLAGS"

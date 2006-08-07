@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <deque>
 #include <set>
+#include <map>
 
 // debug watchs
 #ifdef DEBUG
@@ -148,7 +149,9 @@ struct nDeletedInfo
     }
 };
 
-static tArray< nDeletedInfo > sn_netObjectsDeleted(1024);
+// info about deleted objects, sorted by their former ID
+typedef std::map< unsigned short, nDeletedInfo > nDeletedInfos;
+static nDeletedInfos sn_netObjectsDeleted;
 
 static bool free_server( nNetObjectID id )
 {
@@ -157,19 +160,24 @@ static bool free_server( nNetObjectID id )
         return false;
     }
 
-    nDeletedInfo& deleted = sn_netObjectsDeleted[ id ];
-    if ( deleted.time_ > tSysTimeFloat() - nDeletedTimeout )
+    nDeletedInfos::iterator found = sn_netObjectsDeleted.find( id );
+    if ( found != sn_netObjectsDeleted.end() )
     {
-        return false;
-    }
-    if ( deleted.object_ )
-    {
+        nDeletedInfo  & deleted = (*found).second;
+        if ( deleted.time_ > tSysTimeFloat() - nDeletedTimeout )
+        {
+            return false;
+        }
+
+        if ( deleted.object_ )
+        {
 #ifdef DEBUG
-        sn_BreakOnObjectID( id );
+            sn_BreakOnObjectID( id );
 #endif
-        // clear the deletion info, but don't reuse the ID just yet
-        deleted.UnSet();
-        return false;
+            // clear the deletion info, but don't reuse the ID just yet
+            deleted.UnSet();
+            return false;
+        }
     }
 
     return true;
@@ -1052,15 +1060,26 @@ nNetObject::~nNetObject(){
         }
     }
     refCtr_=100;
-    if (id && (this == sn_netObjects[id]))
+    if (id)
     {
+        if (this == sn_netObjects[id])
+        {
 #ifdef DEBUG
-        sn_BreakOnObjectID( id );
+            sn_BreakOnObjectID( id );
 #endif
+            sn_netObjects[id] = NULL;
+        }
 
-        sn_netObjectsDeleted[id].Set( NULL );
-        sn_netObjects[id] = NULL;
+        // clear object from info arrays
+        nDeletedInfos::iterator found = sn_netObjectsDeleted.find( id );
+        if ( found != sn_netObjectsDeleted.end() )
+        {
+            nDeletedInfo  & deleted = (*found).second;
+            deleted.Set( NULL );
+            sn_netObjectsDeleted.erase(found);
+        }
     }
+
     refCtr_=-100;
     tCHECK_DEST;
 }
@@ -1072,7 +1091,12 @@ nNetObject *nNetObject::Object(int i){
         return NULL;
 
     // the last deleted object with specified ID
-    nNetObject* deleted = sn_netObjectsDeleted[ i ].object_;
+    nNetObject* deleted = NULL;
+    nDeletedInfos::const_iterator found = sn_netObjectsDeleted.find( id );
+    if ( found != sn_netObjectsDeleted.end() )
+    {
+        deleted = (*found).second.object_;
+    }
 
     // return immediately if the object is there
     nNetObject *ret=ObjectDangerous( i );
@@ -1147,10 +1171,14 @@ nNetObject *nNetObject::ObjectDangerous(int i ){
         }
         else
         {
-            const nDeletedInfo& info = sn_netObjectsDeleted[ i ];
-            if ( info.time_ > tSysTimeFloat() - nDeletedTimeout )
+            nDeletedInfos::const_iterator found = sn_netObjectsDeleted.find( i );
+            if ( found != sn_netObjectsDeleted.end() )
             {
-                return info.object_;
+                nDeletedInfo const & deleted = (*found).second;
+                if ( deleted.time_ > tSysTimeFloat() - nDeletedTimeout )
+                {
+                    return deleted.object_;
+                }
             }
         }
     }
@@ -1619,19 +1647,14 @@ static nDescriptor net_clear(26,net_clear_handler,"net_clear");
 
 void nNetObject::ClearAllDeleted()
 {
-    int i;
-
-    // forget about objects that were deleted in the past
-    for (i=sn_netObjectsDeleted.Len()-1;i>=0;i--)
-    {
-        nDeletedInfo& info = sn_netObjectsDeleted[ i ];
-        info.UnSet();
-    }
-
-    sn_netObjectsDeleted.SetLen(0);
+    // forget about objects that were deleted in the past. The swap trick is to
+    // avoid that the objects try to remove themselves from the list while it is cleared.
+    nDeletedInfos swap;
+    swap.swap( sn_netObjectsDeleted );
+    swap.clear();
 
     // send out object deletion messages
-    for( i = MAXCLIENTS;i>=0;i--)
+    for( int i = MAXCLIENTS;i>=0;i--)
     {
         if ( sn_Connections[i].socket && destroyers[i] )
         {

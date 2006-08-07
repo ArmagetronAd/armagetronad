@@ -94,153 +94,6 @@ static nNOInitialisator<gCycle> cycle_init(320,"cycle");
 bool headlights=0;
 bool cycleprograminited=0;
 
-// enemy influence settings
-static REAL sg_enemyChatbotTimePenalty = 30.0f;   //!< penalty for victim in chatbot mode
-static REAL sg_enemyFriendTimePenalty = 2500.0f;  //!< penalty for teammate influence
-// REAL sg_enemySelfTimePenalty = 5000.0f;    //!< penalty for self influence
-static REAL sg_enemyDeadTimePenalty = 0.0f;       //!< penalty for influence from dead players
-static REAL sg_suicideTimeout = 10000.0f;         //!< influences older than this don't count as kill cause
-static REAL sg_enemyCurrentTimeInfluence = 0.0f;  //!< blends in the current time into the relevant time
-
-static tSettingItem<REAL> sg_enemyChatbotTimePenaltyConf( "ENEMY_CHATBOT_PENALTY", sg_enemyChatbotTimePenalty );
-static tSettingItem<REAL> sg_enemyFriendTimePenaltyConf( "ENEMY_TEAMMATE_PENALTY", sg_enemyFriendTimePenalty );
-static tSettingItem<REAL> sg_enemyDeadTimePenaltyConf( "ENEMY_DEAD_PENALTY", sg_enemyDeadTimePenalty );
-static tSettingItem<REAL> sg_suicideTimeoutConf( "ENEMY_SUICIDE_TIMEOUT", sg_suicideTimeout );
-static tSettingItem<REAL> sg_enemyCurrentTimeInfluenceConf( "ENEMY_CURRENTTIME_INFLUENCE", sg_enemyCurrentTimeInfluence );
-
-// the last enemy possibly responsible for our death
-const ePlayerNetID* gEnemyInfluence::GetEnemy() const
-{
-    return lastEnemyInfluence.GetPointer();
-}
-
-REAL gEnemyInfluence::GetTime() const
-{
-    return lastTime;
-}
-
-gEnemyInfluence::gEnemyInfluence()
-{
-    lastTime = -sg_suicideTimeout;
-}
-
-// add the result of the sensor scan to our data
-void gEnemyInfluence::AddSensor( const gSensor& sensor, REAL timePenalty, gCycle * thisCycle )
-{
-    // the client has no need for this, it does not execute AI code
-    if ( sn_GetNetState() == nCLIENT )
-        return;
-
-    // check if the sensor hit an enemy wall
-    // if ( sensor.type != gSENSOR_ENEMY )
-    //    return;
-
-    // get the wall
-    if ( !sensor.ehit )
-        return;
-
-    eWall* wall = sensor.ehit->GetWall();
-    if ( !wall )
-        return;
-
-    AddWall( wall, sensor.before_hit, timePenalty, thisCycle );
-}
-
-// add the interaction with a wall to our data
-void gEnemyInfluence::AddWall( const eWall * wall, eCoord const & pos, REAL timePenalty, gCycle * thisCycle )
-{
-    // the client has no need for this, it does not execute AI code
-    if ( sn_GetNetState() == nCLIENT )
-        return;
-
-    // see if it is a player wall
-    gPlayerWall const * playerWall = dynamic_cast<gPlayerWall const *>( wall );
-    if ( !playerWall )
-        return;
-
-    // get the approximate time the wall was drawn
-    REAL alpha = .5f;
-    // try to get a more accurate value
-    if ( playerWall->Edge() )
-    {
-        // get the position of the collision point
-        alpha = playerWall->Edge()->Ratio( pos );
-    }
-    REAL timeBuilt = playerWall->Time( 0.5f );
-
-    AddWall( playerWall, timeBuilt - timePenalty, thisCycle );
-}
-
-// add the interaction with a wall to our data
-void gEnemyInfluence::AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycle * thisCycle )
-{
-    // the client has no need for this, it does not execute AI code
-    if ( sn_GetNetState() == nCLIENT )
-        return;
-
-    if ( !wall )
-        return;
-
-    // get the cycle
-    gCycle *cycle = wall->Cycle();
-    if ( !cycle )
-        return;
-
-    // don't count self influence
-    if ( thisCycle == cycle )
-        return;
-
-    REAL time = timeBuilt;
-    if ( thisCycle )
-    {
-        REAL currentTime = thisCycle->LastTime();
-        time += ( currentTime - time ) * sg_enemyCurrentTimeInfluence;
-    }
-
-    // get the player
-    ePlayerNetID* player = cycle->Player();
-    if ( !player )
-        return;
-
-    // don't accept milkers.
-    if ( thisCycle && !ePlayerNetID::Enemies( thisCycle->Player(), player ) )
-    {
-        return;
-    }
-
-    // if the player is not our enemy, add extra time penalty
-    if ( thisCycle->Player() && player->CurrentTeam() == thisCycle->Player()->CurrentTeam() )
-    {
-        // the time shall be at most the time of the last turn, it should count as suicide if
-        // I drive into your three mile long wall
-        if ( time > cycle->GetLastTurnTime() )
-            time = cycle->GetLastTurnTime();
-        time -= sg_enemyFriendTimePenalty;
-    }
-    const ePlayerNetID* pInfluence = this->lastEnemyInfluence.GetPointer();
-
-    // calculate effective last time. Add malus if the player is dead.
-    REAL lastEffectiveTime = lastTime;
-    if ( !pInfluence  || !pInfluence->Object() ||  !pInfluence->Object()->Alive() )
-    {
-        lastEffectiveTime -= sg_enemyDeadTimePenalty;
-    }
-
-    // same for the current influence
-    REAL effectiveTime = time;
-    if ( !cycle->Alive() )
-    {
-        effectiveTime -= sg_enemyDeadTimePenalty;
-    }
-
-    // if the new influence is newer, take it.
-    if ( effectiveTime > lastEffectiveTime || !bool(lastEnemyInfluence) )
-    {
-        lastEnemyInfluence = player;
-        lastTime		   = time;
-    }
-}
-
 static float sg_cycleSyncSmoothTime = .1f;
 static tSettingItem<float> conf_smoothTime ("CYCLE_SMOOTH_TIME", sg_cycleSyncSmoothTime);
 
@@ -249,6 +102,10 @@ static tSettingItem<float> conf_smoothMinSpeed ("CYCLE_SMOOTH_MIN_SPEED", sg_cyc
 
 static float sg_cycleSyncSmoothThreshold = .2f;
 static tSettingItem<float> conf_smoothThreshold ("CYCLE_SMOOTH_THRESHOLD", sg_cycleSyncSmoothThreshold);
+
+static REAL sg_enemyChatbotTimePenalty = 30.0f;   //!< penalty for victim in chatbot mode
+static tSettingItem<REAL> sg_enemyChatbotTimePenaltyConf( "ENEMY_CHATBOT_PENALTY", sg_enemyChatbotTimePenalty );
+extern REAL sg_suicideTimeout;
 
 REAL		gCycle::wallsStayUpDelay=8.0f;	// the time the cycle walls stay up ( negative values: they stay up forever )
 
@@ -1686,9 +1543,98 @@ bool crash_sparks=true;
 // from nNetwork.C
 extern REAL planned_rate_control[MAXCLIENTS+2];
 
+//! intermediate data for position prediction
+struct gPredictPositionData
+{
+    REAL maxSpaceReport; //!< maximum space to report in front
+#ifdef DEDICATED
+    REAL rubberStart;    //!< distance from a wall rubber starts to get activated
+#endif
+};
+
+// *******************************************************************************************
+// *
+// *	PreparePredictPosition()
+// *
+// *******************************************************************************************
+//!
+//!     @param  data data to be passed to CalculatePredictPosition() later
+//!
+// *******************************************************************************************
+void gCycle::PreparePredictPosition( gPredictPositionData & data )
+{
+    // don't cast a ray by default
+    data.maxSpaceReport = 0;
+#ifdef DEDICATED
+    if ( sg_predictWalls )
+    {
+        // predict to the maximum time anyone else may be simulated up to
+        REAL maxTime = lastTime + MaxSimulateAhead() + GetMaxLazyLag();
+        REAL predictDT = maxTime - lastTime;
+        REAL lookAhead = predictDT * verletSpeed_;
+
+        // see how far we can go before rubber kicks in
+        data.rubberStart = verletSpeed_ / RubberSpeed();
+
+        // store max lookahead plus rubber safety
+        data.maxSpaceReport = lookAhead + data.rubberStart;
+    }
+#else
+    data.maxSpaceReport = verletSpeed_ * se_PredictTime() * rubberSpeedFactor;
+#endif
+
+    // request a raycast of the right length
+    maxSpaceMaxCast_ = data.maxSpaceReport;
+}
+
+// *******************************************************************************************
+// *
+// *	CalculatePredictPosition()
+// *
+// *******************************************************************************************
+//!
+//!     @param  data data from PreparePredictPosition()
+//!		@return the time up to which the cycle's position was predicted
+//!
+// *******************************************************************************************
+
+REAL gCycle::CalculatePredictPosition( gPredictPositionData & data )
+{
+    // predict position
+    REAL predictTime = lastTime;
+    {
+#ifdef DEDICATED
+        predictPosition_ = pos;
+
+        if ( sg_predictWalls )
+        {
+            REAL spaceAhead = GetMaxSpaceAhead( data.maxSpaceReport );
+            spaceAhead -= data.rubberStart;
+
+            if ( spaceAhead > 0 )
+            {
+                // store consistent prediction position and  time
+                predictPosition_ = pos + dirDrive * spaceAhead;
+                predictTime = lastTime + spaceAhead/verletSpeed_;
+            }
+        }
+#else
+        // predict half a frame time
+        predictTime += se_PredictTime();
+        predictPosition_ = pos+correctPosSmooth + dirDrive * GetMaxSpaceAhead( data.maxSpaceReport );
+#endif
+    }
+
+    return predictTime;
+}
+
 bool gCycle::Timestep(REAL currentTime){
     // if ( Owner() == sn_myNetID )
     //    con << pos << ',' << distance << ',' << eCoord::F( dirDrive, pos ) - distance << '\n';
+
+    // request the right space ahead for wall extrapolation
+    gPredictPositionData predictPositionData;
+    PreparePredictPosition( predictPositionData );
 
     // drop current wall if it was requested
     if ( dropWallRequested_ )
@@ -1869,7 +1815,7 @@ bool gCycle::Timestep(REAL currentTime){
         return false;
     }
 
-    REAL predictTime = CalculatePredictPosition();
+    REAL predictTime = CalculatePredictPosition( predictPositionData );
 
     if ( Alive() && currentWall )
     {
@@ -1882,53 +1828,6 @@ bool gCycle::Timestep(REAL currentTime){
     }
 
     return ret;
-}
-
-static void blocks(const gSensor &s, const gCycle *c, int lr)
-{
-    if ( nCLIENT == sn_GetNetState() )
-        return;
-
-    if (s.type == gSENSOR_RIM)
-        gAIPlayer::CycleBlocksRim(c, lr);
-    else if (s.type == gSENSOR_TEAMMATE || s.type == gSENSOR_ENEMY && s.ehit)
-    {
-        gPlayerWall *w = dynamic_cast<gPlayerWall*>(s.ehit->GetWall());
-        if (w)
-        {
-            // int turn     = c->Grid()->WindingNumber();
-            //	  int halfTurn = turn >> 1;
-
-            // calculate the winding number.
-            int windingBefore = c->WindingNumber();  // we start driving in c's direction
-            // we need to make a sharp turn in the lr-direction
-            //	  windingBefore   += lr * halfTurn;
-
-            // after the transfer, we need to drive in the direction of the other
-            // wall:
-            int windingAfter = w->WindingNumber();
-
-            // if the other wall drives in the opposite direction, we
-            // need to turn around again:
-            //	  if (s.lr == lr)
-            // windingAfter -= lr * halfTurn;
-
-            // make the winding difference a multiple of the winding number
-            /*
-              int compensation = ((windingAfter - windingBefore - halfTurn) % turn)
-              + halfTurn;
-              while (compensation < -halfTurn)
-              compensation += turn;
-            */
-
-            // only if the two walls are parallel/antiparallel, there is true blocking.
-            if (((windingBefore - windingAfter) & 1) == 0)
-                gAIPlayer::CycleBlocksWay(c, w->Cycle(),
-                                          lr, s.lr,
-                                          w->Pos(s.ehit->Ratio(s.before_hit)),
-                                          - windingAfter + windingBefore);
-        }
-    }
 }
 
 // lets a value decay smoothly
@@ -1984,56 +1883,6 @@ static REAL ClampDisplacement( gCycle* cycle, eCoord& displacement, const eCoord
 // from gCycleMovement.cpp
 REAL sg_GetSparksDistance();
 
-
-// *******************************************************************************************
-// *
-// *	CalculatePredictPosition()
-// *
-// *******************************************************************************************
-//!
-//!		@return the time up to which the cycle's position was predicted
-//!
-// *******************************************************************************************
-
-REAL gCycle::CalculatePredictPosition()
-{
-    // predict position
-    REAL predictTime = lastTime;
-    {
-#ifdef DEDICATED
-        predictPosition_ = pos;
-
-        if ( sg_predictWalls )
-        {
-            // predict to the maximum time anyone else may be simulated up to
-            REAL maxTime = lastTime + MaxSimulateAhead() + GetMaxLazyLag();
-            REAL predictDT = maxTime - lastTime;
-            REAL lookAhead = predictDT * verletSpeed_;
-
-            // see how far we can go before rubber kicks in
-            REAL rubberStart = verletSpeed_ / RubberSpeed();
-            lookAhead += rubberStart;
-            REAL spaceAhead = MaxSpaceAhead( this, predictDT, lookAhead, lookAhead );
-            spaceAhead -= rubberStart;
-
-            if ( spaceAhead > 0 )
-            {
-                // store consistent prediction position and  time
-                predictPosition_ = pos + dirDrive * spaceAhead;
-                predictTime = lastTime + spaceAhead/verletSpeed_;
-            }
-        }
-#else
-        // predict half a frame time
-        predictTime += se_PredictTime();
-        gSensor s(this,pos+correctPosSmooth, dirDrive * (verletSpeed_ * se_PredictTime() * rubberSpeedFactor ) );
-        s.detect(1);
-        predictPosition_ = s.before_hit;
-#endif
-    }
-
-    return predictTime;
-}
 
 bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
     if (!finite(skew))
@@ -2192,6 +2041,7 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
     sg_ArchiveReal( verletSpeed_, 7 );
 
     if (Alive()){
+#ifndef DEDICATED
         // animate skew
         gSensor fl(this,pos,dirDrive.Turn(1,1));
         gSensor fr(this,pos,dirDrive.Turn(1,-1));
@@ -2199,16 +2049,6 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
         fl.detect(extension*4);
         fr.detect(extension*4);
 
-        enemyInfluence.AddSensor( fr, 0, this );
-        enemyInfluence.AddSensor( fl, 0, this );
-
-        if (fl.ehit)
-            blocks(fl, this, -1);
-
-        if (fr.ehit)
-            blocks(fr, this,  1);
-
-#ifndef DEDICATED
         if (fl.hit > extension)
             fl.hit = extension;
 
@@ -2340,7 +2180,7 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
         {
             // delay syncs for old clients when there is a wall ahead; they would tunnel locally
             REAL lookahead = Speed() * sg_syncIntervalEnemy*.5;
-            if ( !sg_avoidBadOldClientSync || sg_NoLocalTunnelOnSync.Supported( Owner() ) || MaxSpaceAhead( this, ts, lookahead, lookahead ) >= lookahead )
+            if ( !sg_avoidBadOldClientSync || sg_NoLocalTunnelOnSync.Supported( Owner() ) || GetMaxSpaceAhead( lookahead ) >= lookahead )
             {
                 RequestSync(false);
 

@@ -631,7 +631,7 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
 
                 // find the second smallest team:
                 eTeam* second = NULL;
-                int secondMaxP = 0; // the number of humans on that team
+                int secondMinP = maxPlayers; // the number of humans on that team
                 for ( int j = teams.Len()-1; j>=0; --j )
                 {
                     eTeam *t = teams(j);
@@ -640,9 +640,9 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
                     {
                         int humans = t->NumHumanPlayers();
 
-                        if ( humans > secondMaxP && t != min )
+                        if ( humans < secondMinP && t != min )
                         {
-                            secondMaxP = humans;
+                            secondMinP = humans;
                             second = t;
                         }
                     }
@@ -656,6 +656,14 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
                     pni->SetTeamForce( second );
                     pni->UpdateTeamForce();
                     second->maxImbalanceLocal = imbBackup;
+
+                    balance = false;
+                }
+                else
+                {
+                    // no room, kick the player out
+                    pni->SetTeamForce( NULL );
+                    pni->UpdateTeamForce();
 
                     balance = false;
                 }
