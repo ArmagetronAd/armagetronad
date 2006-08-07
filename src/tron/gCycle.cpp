@@ -4034,7 +4034,28 @@ void gCycle::SyncFromExtrapolator()
 
     // adjust current wall (not essential, don't do it for the first wall)
     if ( currentWall && currentWall->tBeg > spawnTime_ + sg_cycleWallTime + .01f )
+    {
+        // update start position
         currentWall->beg = extrapolator_->GetLastTurnPos();
+
+        // set begin distance as well
+        REAL dBeg = extrapolator_->GetDistance() - eCoord::F( extrapolator_->Direction(), extrapolator_->Position() - extrapolator_->GetLastTurnPos() );
+
+        currentWall->dbegin = dBeg;
+        currentWall->coords_[0].Pos = dBeg;
+
+        // and care for consistency
+        int i;
+        for ( i = currentWall->coords_.Len() -1 ; i>=0; --i )
+        {
+            gPlayerWallCoord & coord = currentWall->coords_( i );
+            if ( coord.Pos <= dBeg )
+                coord.Pos = dBeg;
+        }
+    }
+
+    // transfer last turn position
+    lastTurnPos_ = extrapolator_->GetLastTurnPos();
 
     // smooth position correction
     correctPosSmooth = correctPosSmooth + oldPos - pos;
