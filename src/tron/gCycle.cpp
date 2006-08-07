@@ -1629,6 +1629,9 @@ REAL gCycle::CalculatePredictPosition( gPredictPositionData & data )
 }
 
 bool gCycle::Timestep(REAL currentTime){
+    // clear out dangerous info when we're done
+    gMaxSpaceAheadHitInfoClearer hitInfoClearer( maxSpaceHit_ );
+
     // if ( Owner() == sn_myNetID )
     //    con << pos << ',' << distance << ',' << eCoord::F( dirDrive, pos ) - distance << '\n';
 
