@@ -1510,26 +1510,20 @@ struct gMaxSpaceAheadHitInfo
     REAL wallAlpha;                                  //!< the wall alpha value of the hit
 };
 
-//! used to clear out dangerous information from hit info after simulation is done
-class gMaxSpaceAheadHitInfoClearer
-{
-public:
-    gMaxSpaceAheadHitInfoClearer( gMaxSpaceAheadHitInfo * & info )
-            : info_( info ){}
+// clearer of that data
+gMaxSpaceAheadHitInfoClearer::gMaxSpaceAheadHitInfoClearer( gMaxSpaceAheadHitInfo * & info )
+        : info_( info ){}
 
-    ~gMaxSpaceAheadHitInfoClearer()
+gMaxSpaceAheadHitInfoClearer::~gMaxSpaceAheadHitInfoClearer()
+{
+    gMaxSpaceAheadHitInfo * info = info_;
+    if ( info )
     {
-        gMaxSpaceAheadHitInfo * info = info_;
-        if ( info )
-        {
-            // we can't have the edges lingering around with possibly incomplete data
-            info->edge = NULL;
-            info->playerWall = NULL;
-        }
+        // we can't have the edges lingering around with possibly incomplete data
+        info->edge = NULL;
+        info->playerWall = NULL;
     }
-private:
-    gMaxSpaceAheadHitInfo * & info_;
-};
+}
 
 // *******************************************************************************************
 // *
@@ -2410,6 +2404,14 @@ gCycleMovement::~gCycleMovement( void )
 
     delete maxSpaceHit_;
     maxSpaceHit_ = NULL;
+}
+
+void gCycleMovement::RemoveFromGame()
+{
+    delete maxSpaceHit_;
+    maxSpaceHit_ = NULL;
+
+    eNetGameObject::RemoveFromGame();
 }
 
 // *******************************************************************************************

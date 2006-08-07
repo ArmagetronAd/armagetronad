@@ -38,6 +38,16 @@ class gCycleMovement;
 class gSensor;
 struct gMaxSpaceAheadHitInfo;
 
+//! used to clear out dangerous information from hit info after simulation is done
+class gMaxSpaceAheadHitInfoClearer
+{
+public:
+    gMaxSpaceAheadHitInfoClearer( gMaxSpaceAheadHitInfo * & info );
+    ~gMaxSpaceAheadHitInfoClearer();
+private:
+    gMaxSpaceAheadHitInfo * & info_;
+};
+
 REAL GetTurnSpeedFactor(void);
 
 class gEnemyInfluence{
@@ -128,7 +138,7 @@ public:
                     ,                                 bool                  autodelete=1 )          ;   //!< local constructor
     gCycleMovement                                  ( nMessage &            message      )          ;   //!< remote constructor
     virtual ~gCycleMovement                         ()                                              ;   //!< destructor
-
+    virtual void RemoveFromGame(); // call this instead of the destructor
 protected:
     //! data from sync message
     struct SyncData
