@@ -1589,8 +1589,6 @@ void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
             this->edge_->Coord(0) = beg;
     }
 
-    SetEndTime(tEnd);
-
     // determine the correct end position
     REAL endPos = 0;
     //if ( bool( this->cycle_ ) && !force )
@@ -1613,8 +1611,9 @@ void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
         }
     }
 
-    // set end position
-    SetEndPos( endPos );
+    // set end position and time
+    SetEndTime(tEnd);
+    SetEndPos(endPos);
 
 
     gPlayerWall *w = Wall();
