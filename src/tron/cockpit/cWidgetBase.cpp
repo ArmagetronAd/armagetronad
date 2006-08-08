@@ -186,6 +186,7 @@ tValue::Base *WithDataFunctions::ProcessConditional(tXmlParser::node cur) {
                 condvalue = new tValue::   LessThan    (lvalue, rvalue);
                 break;
             }
+            break;
     case 'e': case 'E':
             switch (oper[0]) {
         case 'g': case 'G':
