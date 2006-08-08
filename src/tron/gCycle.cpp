@@ -136,7 +136,7 @@ static nSettingItemWatched<REAL>
 sg_cycleWallTimeConf("CYCLE_WALL_TIME",
                      sg_cycleWallTime,
                      nConfItemVersionWatcher::Group_Bumpy,
-                     12);
+                     14);
 
 // time after spawning during which a cycle can't be killed
 static REAL sg_cycleInvulnerableTime=0.0;
@@ -2016,6 +2016,7 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
                     spawnTime_ += -1E+20;
                     DropWall();
                     spawnTime_ = lastSpawn;
+                    lastTurnPos_ = pos; // hack last turn position to generate good wall
                 }
 
                 // simulate rest of frame
@@ -2780,7 +2781,6 @@ void gCycle::DropWall( bool buildNew )
 
     if ( buildNew && lastTime >= spawnTime_ + sg_cycleWallTime )
         currentWall=new gNetPlayerWall(this,pos,dirDrive,lastTime,distance);
-
 
     // grid datastructures change on inserting a wall, better recheck
     // all game objects. Temporarily override this cycle's driving direction.
@@ -4571,8 +4571,11 @@ void gCycle::SyncEnemy ( const eCoord& begWall)
         // create new wall at sync location
         distance = lastSyncMessage_.distance;
         correctDistanceSmooth=0;
-        currentWall=new gNetPlayerWall
-                    (this,crossPos,lastSyncMessage_.dir,crossTime,crossDist);
+
+        REAL startBuildWallAt = spawnTime_ + sg_cycleWallTime;
+        if ( crossTime > startBuildWallAt )
+            currentWall=new gNetPlayerWall
+                        (this,crossPos,lastSyncMessage_.dir,crossTime,crossDist);
 
         turned = true;
 
