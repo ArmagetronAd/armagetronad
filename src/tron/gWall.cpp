@@ -1258,7 +1258,7 @@ void gPlayerWall::Check() const
 {
     netWall_->Check();
 #ifdef DEBUG
-    REAL range = 5 * ( begDist_ + endDist_ ) * EPS;
+    REAL range = 5 * fabs(begDist_) + fabs(endDist_) * EPS;
     tASSERT( begDist_ <= endDist_ + range );
     tASSERT( begDist_ >= netWall_->Pos( 0 ) - range );
     tASSERT( endDist_ <= netWall_->Pos( 1 ) + range );
