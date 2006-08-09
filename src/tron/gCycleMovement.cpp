@@ -2945,6 +2945,10 @@ bool gCycleMovement::DoTurn( int dir )
         // request regeneration of maximum space
         refreshSpaceAhead_ = true;
 
+        // notify that no rubber is currently used (may be a lie, but a timestep correcting
+        // it will surely follow)
+        rubberSpeedFactor = 1;
+
         // store last postion
         lastTurnPos_ = pos;
 
