@@ -1040,7 +1040,7 @@ game_menu_disconnect_help	Disconnects from the server and returns to the main me
 #********************************************
 version_info_title              About this installation of \g
 version_info_version            Version of \g: \1
-version_info_misc_stuff         \n0xff8888Official website:0xRESETT http://armagetronad.net/\n0xff8888Official forums:0xRESETT http://forums.armagetronad.net\n0xff8888Wiki (strategies, tournaments, ...):0xRESETT http://wiki.armagetronad.net/\n0xff8888Project admins:0xRESETT z-man, Tank Program (guru3), Lucifer
+version_info_misc_stuff         \n0xff8888Official website:0xRESETT http://armagetronad.net/\n0xff8888Official forums:0xRESETT http://forums.armagetronad.net/\n0xff8888Wiki (strategies, tournaments, ...):0xRESETT http://wiki.armagetronad.net/\n0xff8888Project admins:0xRESETT z-man, Tank Program (guru3), Lucifer
 
 path_info_user_cfg              Location of user.cfg:
 path_info_config                Configuration directories:
