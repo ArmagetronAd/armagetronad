@@ -1044,7 +1044,7 @@ version_info_misc_stuff         \n0xff8888Official website:0xRESETT http://armag
 
 path_info_user_cfg              Location of user.cfg:
 path_info_config                Configuration directories:
-path_info_resource              Resource directories (maps):
+path_info_resource              Resource directories (maps, cockpits):
 path_info_data                  Data directories (textures, moviepack, ...):
 path_info_screenshot            Screenshot directories:
 path_info_var                   Var directories:

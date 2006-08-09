@@ -4,6 +4,8 @@ Changes since 0.3.0:
   In chat or console mode press CTRL-R and start entering your search term.
   It will show you the last found match in a new line, press right or left
   to jump to it in the history.
+- New cockpit data sources current_name, current_colored_name,
+  current_pos_x, current_pos_y and player_acceleration
 
 Changes since 0.3.0_alpha4941:
 - Added setting to toggle custom teamnames
