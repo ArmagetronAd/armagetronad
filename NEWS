@@ -112,10 +112,13 @@ Changes since 0.2.8.2:
   spectators of 0.2.8.2 clients: they stay visible to the others.
 - Kick statistics are now persistent across server runs.
 - MESSAGE_OF_DAY is now displayed fullscreen if both server and client support it
-- Manual fullscreen messages can be triggered with 
+- Manual fullscreen messages can be triggered with
   FULLSCREEN_MESSAGE <timeout> <message content>
 - Axes Indicators by meriton, can be enabled using the AXES_INDICATORS
   setting.
+- New "About" menu item in the main menu displays the version of
+  Armagetron Advanced, the paths it uses, links to the main site, wiki
+  and forums and the names of the project admins.
 
   Bugfixes:
 - Fixed various trail end related extrapolation/simulation inaccuracies that looked

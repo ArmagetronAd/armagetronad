@@ -50,6 +50,8 @@ public:
     tString GetWritePath  ( const char* filename   ) const; // finds the full path to a file to write
     static bool IsValidPath( char const * filename ); //!< checks whether filename is valid, i.e. does not endanger system security.
 
+    tString GetPaths(void) const; //!< Puts all paths into a tString for outputting to the user
+
     tPath(){};
     virtual ~tPath(){};
 protected:

@@ -1613,3 +1613,24 @@ private:
 };
 
 static tDirectoriesCommandLineAnalyzer analyzer;
+
+tString tPath::GetPaths(void) const {
+    tString ret;
+    tArray<tString> paths;
+    Paths(paths);
+    for (int i = 0; i < paths.Len(); ++i) {
+        if(i > 0 && paths[i - 1] == paths[i]) continue;
+        ret << paths[i] << " ";
+    }
+    return ret;
+}
+
+void st_PrintPathInfo(tOutput &buf) {
+    tString const hcol("0xff8888");
+    buf << hcol << "$path_info_user_cfg"   << "0xRESETT\n  " << tDirectories::Var().GetReadPath("user.cfg") << "\n"
+    << hcol << "$path_info_config"     << "0xRESETT\n  " << tDirectories::Config().GetPaths() << "\n"
+    << hcol << "$path_info_resource"   << "0xRESETT\n  " << tDirectories::Resource().GetPaths() << "\n"
+    << hcol << "$path_info_data"       << "0xRESETT\n  " << tDirectories::Data().GetPaths() << "\n"
+    << hcol << "$path_info_screenshot" << "0xRESETT\n  " << tDirectories::Screenshot().GetPaths() << "\n"
+    << hcol << "$path_info_var"        << "0xRESETT\n  " << tDirectories::Var().GetPaths() << "\n";
+}

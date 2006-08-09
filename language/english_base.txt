@@ -1005,6 +1005,9 @@ player_mainmenu_help		Select player names and control methods.
 system_settings_menu_text	System Setup
 system_settings_menu_help	Configure sound, graphics and overall appearence of \g
 
+main_menu_about_text		About
+main_menu_about_help		Displays information about the version of \g, the location of its config files, sites to visit and the project admins.
+
 main_menu_exit_text		Exit Game
 main_menu_exit_help		Goodbye!
 
@@ -1028,6 +1031,23 @@ game_menu_disconnect_text	Disconnect
 game_menu_disconnect_help	Disconnects from the server and returns to the main menu.
 
 
+#********************************************
+#********************************************
+#
+#             Version Info screen
+#
+#********************************************
+#********************************************
+version_info_title              About this installation of \g
+version_info_version            Version of \g: \1
+version_info_misc_stuff         \n0xff8888Official website:0xRESETT http://armagetronad.net/\n0xff8888Official forums:0xRESETT http://forums.armagetronad.net\n0xff8888Wiki (strategies, tournaments, ...):0xRESETT http://wiki.armagetronad.net/\n0xff8888Project admins:0xRESETT z-man, Tank Program (guru3), Lucifer
+
+path_info_user_cfg              Location of user.cfg:
+path_info_config                Configuration directories:
+path_info_resource              Resource directories (maps):
+path_info_data                  Data directories (textures, moviepack, ...):
+path_info_screenshot            Screenshot directories:
+path_info_var                   Var directories:
 
 #********************************************
 #********************************************

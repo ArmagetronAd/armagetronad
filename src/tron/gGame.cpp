@@ -1473,8 +1473,10 @@ void ConnectToServer(nServerInfoBase *server)
         REAL endTime=tSysTimeFloat()+30;
         con << tOutput("$network_connecting_gamestate");
         while (!sg_currentGame && tSysTimeFloat()<endTime && (sn_GetNetState() != nSTANDALONE)){
+            tAdvanceFrame();
             sn_Receive();
             nNetObject::SyncAll();
+            tAdvanceFrame();
             sn_SendPlanned();
             st_DoToDo();
 
@@ -1680,6 +1682,7 @@ public:
     {
         tAdvanceFrame();
         sn_Receive();
+        tAdvanceFrame();
         sn_SendPlanned();
     }
 };
@@ -1758,6 +1761,15 @@ static tConfItemFunc quit_conf("QUIT",&Quit_conf);
 static tConfItemFunc exit_conf("EXIT",&Quit_conf);
 #endif
 
+void st_PrintPathInfo(tOutput &buf);
+
+void sg_DisplayVersionInfo() {
+    tOutput versionInfo;
+    versionInfo << "$version_info_version" << "\n";
+    st_PrintPathInfo(versionInfo);
+    versionInfo << "$version_info_misc_stuff";
+    sg_FullscreenMessage("$version_info_title", versionInfo, 1000);
+}
 
 void MainMenu(bool ingame){
     //	update_settings();
@@ -1836,6 +1848,11 @@ void MainMenu(bool ingame){
 
     uMenuItemExit exx(&MainMenu,extitle,
                       exhelp);
+
+    uMenuItemFunction abb(&MainMenu,
+                          "$main_menu_about_text",
+                          "$main_menu_about_help",
+                          &sg_DisplayVersionInfo);
 
 
     uMenuItemFunction *return_to_main=NULL;
@@ -2223,6 +2240,7 @@ void gGame::NetSync(){
 #endif
     sn_Receive();
     nNetObject::SyncAll();
+    tAdvanceFrame();
     sn_SendPlanned();
 }
 
@@ -3761,6 +3779,7 @@ void sg_EnterGameCore( nNetState enter_state ){
 
                 // send out updates immediately
                 nNetObject::SyncAll();
+                tAdvanceFrame();
                 sn_SendPlanned();
             }
         }
@@ -3774,6 +3793,7 @@ void sg_EnterGameCore( nNetState enter_state ){
         goon=GameLoop();
 
         nNetObject::SyncAll();
+        tAdvanceFrame();
         sn_SendPlanned();
 
         st_DoToDo();
