@@ -46,6 +46,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rSDL.h"
 #endif
 
+#include <vector>
+
 FUNCPTR  uMenu::idle(NULL);
 
 bool uMenu::wrap=true;
@@ -1059,9 +1061,37 @@ void uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
 
     {
         uInputProcessGuard inputProcessGuard;
-        while(  !quickexit && ( !su_GetSDLInput(tEvent) || tEvent.type!=SDL_KEYDOWN) &&
-                (to < 0 || tSysTimeFloat() < timeout)){
 
+		unsigned offset = 0; //amount of scrolling taking place
+		//convert to an array for scrolling
+		tString interpretationString;
+		interpretationString << interpretation << "\n";
+		std::vector<tString> lines;
+		int lastNewline = 0;
+		for(int i = 0; i < interpretationString.Len() - 1; ++i) {
+			if (interpretationString[i] == '\n' && i != 0) {
+				lines.push_back(interpretationString.SubStr(lastNewline, i - lastNewline));
+				lastNewline = i + 1;
+			}
+		}
+        while(  !quickexit &&
+                (to < 0 || tSysTimeFloat() < timeout)){
+        //while(  !quickexit && ( !su_GetSDLInput(tEvent) || tEvent.type!=SDL_KEYDOWN) &&
+        //        (to < 0 || tSysTimeFloat() < timeout)){
+			if( su_GetSDLInput(tEvent) && tEvent.type==SDL_KEYDOWN) {
+				switch(tEvent.key.keysym.sym) {
+				case SDLK_UP:
+					if(offset > 0)
+						offset -= 1;
+					continue;
+				case SDLK_DOWN:
+					offset += 1;
+					continue;
+				default:
+					break;
+				}
+				break;
+			}
             if ( sr_glOut )
             {
                 sr_ResetRenderState(true);
@@ -1091,10 +1121,12 @@ void uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 w = 16/640.0;
                 h = 32/480.0;
 
+				if(offset >= lines.size()) offset = lines.size() - 1;
                 {
                     rTextField c(-.8,.6, w, h);
 
-                    c << interpretation;
+					for(unsigned i = offset; i < lines.size(); ++i)
+						c << lines[i] << "\n";
                 }
             }
             rSysDep::SwapGL();
