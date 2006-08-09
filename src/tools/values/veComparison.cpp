@@ -25,38 +25,44 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-//! @file
-//! @brief Contains the class declarations for all tValue members
+#include "vCore.h"
+#include "veComparison.h"
 
-#ifndef ARMAGETRON_VALUE_H
-#define ARMAGETRON_VALUE_H
+namespace vValue {
+	namespace Expr {
+		namespace Comparison {
 
-#include "values/vCore.h"
-#include "values/vRegistry.h"
-#include "values/vCollection.h"
-#include "values/veComparison.h"
-#include "values/veLogic.h"
-#include "values/veMath.h"
-#include "values/vebLegacy.h"
-#include "values/vebMathExpr.h"
+#define CodeStdBinOp(classname, op)       \
+Variant                                   \
+classname::GetValue(void) const {         \
+    return (int)(*m_lvalue op *m_rvalue); \
+}                                         \
+Base *classname::copy(void) const {       \
+    return new classname(*this);          \
+}                                         \
 
-namespace tValue {
-	using namespace vValue;
-	using namespace Expr::Core;
-	using namespace Expr::Collection;
-	using namespace Expr::Bindings;
-	using namespace Expr::Bindings::Legacy;
-	using namespace Expr::Logic;
-	using namespace Expr::Math;
-	namespace Func {
-		using namespace Expr::Math;
-		using namespace Expr::Math::Trig;
-	}
-	using namespace Expr::Comparison;
-	using namespace MiscWTF;
-	using namespace Type;
-	using namespace Registry;
-	typedef Expr::Bindings::MathExpr Expr;	// must be last, since it redefines Expr
+CodeStdBinOp(GreaterThan    , >  )
+CodeStdBinOp(GreaterOrEquals, >= )
+CodeStdBinOp(         Equals, == )
+CodeStdBinOp(   LessOrEquals, <= )
+CodeStdBinOp(   LessThan    , <  )
+
+Variant
+Compare::GetValue(void) const {
+    // This could probably be optimized
+    if (*m_lvalue == *m_rvalue)
+        return 0;
+    else
+        if (*m_lvalue < *m_rvalue)
+            return -1;
+        else
+            return 1;
 }
 
-#endif
+Base *Compare::copy(void) const {
+    return new Compare(*this);
+}
+
+		}
+	}
+}

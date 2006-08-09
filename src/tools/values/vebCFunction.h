@@ -26,37 +26,39 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 //! @file
-//! @brief Contains the class declarations for all tValue members
+//! @brief Contains the class declarations for direct C binding templates
 
-#ifndef ARMAGETRON_VALUE_H
-#define ARMAGETRON_VALUE_H
+#ifndef ARMAGETRON_vBindings_CFunction_h
+#define ARMAGETRON_vBindings_CFunction_h
 
 #include "values/vCore.h"
-#include "values/vRegistry.h"
-#include "values/vCollection.h"
-#include "values/veComparison.h"
-#include "values/veLogic.h"
-#include "values/veMath.h"
-#include "values/vebLegacy.h"
-#include "values/vebMathExpr.h"
 
-namespace tValue {
-	using namespace vValue;
-	using namespace Expr::Core;
-	using namespace Expr::Collection;
-	using namespace Expr::Bindings;
-	using namespace Expr::Bindings::Legacy;
-	using namespace Expr::Logic;
-	using namespace Expr::Math;
-	namespace Func {
-		using namespace Expr::Math;
-		using namespace Expr::Math::Trig;
+namespace vValue {
+	namespace Expr {
+		namespace Bindings {
+			namespace CFunction {
+
+template<typename T, T F(void)> class fZeroary : public Base {
+public:
+    fZeroary() { };
+    virtual Variant GetValue() const { return F(); };
+};
+template<typename T, typename Aa, /* Aa (Base::*GAa)(void) const, */ T F(Aa)> class fUnary : public Base {
+    BasePtr m_ArgA;
+public:
+    fUnary(BasePtr ArgA): m_ArgA(ArgA) { }
+    virtual Variant GetValue() const { return F(m_ArgA->Get<Aa>()); };
+};
+template<typename T, typename Aa, typename Ab, T F(Aa, Ab)> class fBinary : public Base {
+    BasePtr m_ArgA, m_ArgB;
+public:
+    fBinary(BasePtr ArgA, BasePtr ArgB): m_ArgA(ArgA), m_ArgB(ArgB) { }
+    virtual Variant GetValue() const { return F(m_ArgA->Get<Aa>(), m_ArgB->Get<Ab>()); };
+};
+
+			}
+		}
 	}
-	using namespace Expr::Comparison;
-	using namespace MiscWTF;
-	using namespace Type;
-	using namespace Registry;
-	typedef Expr::Bindings::MathExpr Expr;	// must be last, since it redefines Expr
 }
 
 #endif

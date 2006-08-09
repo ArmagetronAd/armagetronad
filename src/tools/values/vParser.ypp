@@ -3,25 +3,29 @@
 %{
 	#include <stdlib.h>	// Works around a bug in BISON 2.1 non-pedantic
 	
+	#include <vector>
+	
 	#include "tError.h"
-	#include "tValue.h"
-	#include "tValueParser.h"
+	#include "values/vCore.h"
+	#include "values/veMath.h"
+	#include "values/vRegistry.h"
+	#include "values/vParser.h"
 	#include "tString.h"
 	
 	int yylex(void);
 	void yyerror(char const *s);
 	
-	tValue::Base *rv;
+	using namespace vValue;
 	
-	using tValue::BasePtr;
+	Expr::Base *rv;
 %}
 
 %union
 {
 	int integer;
 	tString *string;
-	tValue::Base *expr;
-	tValue::arglist *arglist;
+	Expr::Base *expr;
+	Type::arglist *arglist;
 }
 
 %destructor {
@@ -69,35 +73,35 @@ input:
 expr:
 	  tINTEGER
 	  {
-		$$ = new tValue::Int($1);
+		$$ = new Expr::Int($1);
 	  }
 //	| tFLOAT
 	| tSTRING
 	  {
-		$$ = new tValue::String(*$1);
+		$$ = new Expr::String(*$1);
 		delete $1;
 	  }
 	| function
 	| expr '+' expr
 	  {
-		$$ = new tValue::Add(BasePtr($1), BasePtr($3));
+		$$ = new Expr::Math::Add(BasePtr($1), BasePtr($3));
 	  }
 	| expr '-' expr
 	  {
-		$$ = new tValue::Subtract(BasePtr($1), BasePtr($3));
+		$$ = new Expr::Math::Subtract(BasePtr($1), BasePtr($3));
 	  }
 	| expr '*' expr
 	  {
-		$$ = new tValue::Multiply(BasePtr($1), BasePtr($3));
+		$$ = new Expr::Math::Multiply(BasePtr($1), BasePtr($3));
 	  }
 	| expr '/' expr
 	  {
-		$$ = new tValue::Divide(BasePtr($1), BasePtr($3));
+		$$ = new Expr::Math::Divide(BasePtr($1), BasePtr($3));
 	  }
 	| '-' expr %prec tUNARYMINUS
 	  {
-		static BasePtr zero(new tValue::Int(0));
-		$$ = new tValue::Subtract(zero, BasePtr($2));
+		static BasePtr zero(new Expr::Int(0));
+		$$ = new Expr::Math::Subtract(zero, BasePtr($2));
 	  } 
 	| '(' expr ')'
 	  {
@@ -105,14 +109,14 @@ expr:
 	  }
 	;
 	// a ?: b !: c -- trinary conditional
-	// a <=> b -- tValue::Compare
+	// a <=> b -- Expr::Comparison::Compare
 function:
 	/*  tID
 	|*/ tID '(' arglist ')'
 	  {
 		std::vector<tString> flags;
 		flags.push_back(tString("func"));
-		$$ = tValue::theRegistry.create(flags, *$1, *$3);
+		$$ = Registry::theRegistry.create(flags, *$1, *$3);
 		delete $1;
 		delete $3;
 	  }
@@ -121,17 +125,17 @@ function:
 arglist:
 	  // empty
 	  {
-		$$ = new tValue::arglist();
+		$$ = new arglist();
 	  }
 	| expr
 	  {
-		$$ = new tValue::arglist();
-		$$->push_back(tValue::BasePtr($1));
+		$$ = new arglist();
+		$$->push_back(BasePtr($1));
 	  }
 	| arglist ',' expr
 	  {
 		$$ = $1;
-		$$->push_back(tValue::BasePtr($3));
+		$$->push_back(BasePtr($3));
 	  }
 	;
 %%
@@ -149,8 +153,8 @@ main(void)
 tString in;
 int pos, buffer;
 
-tValue::Base *
-tValueParser::parse(tString s)
+Expr::Base *
+vValue::Parser::parse(tString s)
 {
 	pos = 0;
 	buffer = -1;
@@ -188,7 +192,7 @@ yyerror(const char *s)
 {
 	//puts(s);
 	//exit(1);
-	tString msg("tValue parse error: ");
+	tString msg("vValue parse error: ");
 	msg << s;
 	tERR_ERROR(msg);
 }

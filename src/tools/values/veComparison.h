@@ -26,37 +26,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 //! @file
-//! @brief Contains the class declarations for all tValue members
+//! @brief Contains the class declarations for comparison vValue members
 
-#ifndef ARMAGETRON_VALUE_H
-#define ARMAGETRON_VALUE_H
+#ifndef ARMAGETRON_veComparison_h
+#define ARMAGETRON_veComparison_h
 
 #include "values/vCore.h"
-#include "values/vRegistry.h"
-#include "values/vCollection.h"
-#include "values/veComparison.h"
-#include "values/veLogic.h"
-#include "values/veMath.h"
-#include "values/vebLegacy.h"
-#include "values/vebMathExpr.h"
 
-namespace tValue {
-	using namespace vValue;
-	using namespace Expr::Core;
-	using namespace Expr::Collection;
-	using namespace Expr::Bindings;
-	using namespace Expr::Bindings::Legacy;
-	using namespace Expr::Logic;
-	using namespace Expr::Math;
-	namespace Func {
-		using namespace Expr::Math;
-		using namespace Expr::Math::Trig;
+namespace vValue {
+	namespace Expr {
+		namespace Comparison {
+
+DeclStdBinaryOp(GreaterThan    )
+DeclStdBinaryOp(GreaterOrEquals)
+DeclStdBinaryOp(         Equals)
+DeclStdBinaryOp(   LessOrEquals)
+DeclStdBinaryOp(   LessThan    )
+DeclStdBinaryOp(Compare)
+
+		}
 	}
-	using namespace Expr::Comparison;
-	using namespace MiscWTF;
-	using namespace Type;
-	using namespace Registry;
-	typedef Expr::Bindings::MathExpr Expr;	// must be last, since it redefines Expr
 }
 
 #endif
