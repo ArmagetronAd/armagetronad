@@ -2018,8 +2018,10 @@ void ConnectToServer(nServerInfoBase *server)
         REAL endTime=tSysTimeFloat()+30;
         con << tOutput("$network_connecting_gamestate");
         while (!sg_currentGame && tSysTimeFloat()<endTime && (sn_GetNetState() != nSTANDALONE)){
+            tAdvanceFrame();
             sn_Receive();
             nNetObject::SyncAll();
+            tAdvanceFrame();
             sn_SendPlanned();
             st_DoToDo();
 
@@ -2226,6 +2228,7 @@ public:
     {
         tAdvanceFrame();
         sn_Receive();
+        tAdvanceFrame();
         sn_SendPlanned();
     }
 };
@@ -2782,6 +2785,7 @@ void gGame::NetSync(){
 #endif
     sn_Receive();
     nNetObject::SyncAll();
+    tAdvanceFrame();
     sn_SendPlanned();
 }
 
@@ -4193,6 +4197,7 @@ void sg_EnterGameCore( nNetState enter_state ){
 
                 // send out updates immediately
                 nNetObject::SyncAll();
+                tAdvanceFrame();
                 sn_SendPlanned();
             }
         }
@@ -4206,6 +4211,7 @@ void sg_EnterGameCore( nNetState enter_state ){
         goon=GameLoop();
 
         nNetObject::SyncAll();
+        tAdvanceFrame();
         sn_SendPlanned();
 
         st_DoToDo();
