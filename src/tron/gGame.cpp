@@ -2307,6 +2307,15 @@ static tConfItemFunc quit_conf("QUIT",&Quit_conf);
 static tConfItemFunc exit_conf("EXIT",&Quit_conf);
 #endif
 
+void st_PrintPathInfo(tOutput &buf);
+
+void sg_DisplayVersionInfo() {
+    tOutput versionInfo;
+    versionInfo << "$version_info_version" << "\n";
+    st_PrintPathInfo(versionInfo);
+    versionInfo << "$version_info_misc_stuff";
+    sg_FullscreenMessage("$version_info_title", versionInfo, 1000);
+}
 
 void MainMenu(bool ingame){
     //	update_settings();
@@ -2385,6 +2394,11 @@ void MainMenu(bool ingame){
 
     uMenuItemExit exx(&MainMenu,extitle,
                       exhelp);
+
+    uMenuItemFunction abb(&MainMenu,
+                          "$main_menu_about_text",
+                          "$main_menu_about_help",
+                          &sg_DisplayVersionInfo);
 
 
     uMenuItemFunction *return_to_main=NULL;
