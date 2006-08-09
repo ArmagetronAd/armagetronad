@@ -54,18 +54,18 @@ typedef boost::shared_ptr<Base> BasePtr; //!< convinience definition for the use
 
 typedef boost::variant<int, float, std::string> Variant;
 typedef std::set<BasePtr, FooPtrOps> myCol;
-typedef std::deque<Base *> arglist;
+typedef std::deque<BasePtr> arglist;
 
 
 class Registration {
 public:
     typedef void (*fptr)();
     typedef Base *ctor0();
-    typedef Base *ctor1(Base *);
-    typedef Base *ctor2(Base *, Base *);
-    typedef Base *ctor3(Base *, Base *, Base *);
-    typedef Base *ctor4(Base *, Base *, Base *, Base *);
-    typedef Base *ctor5(Base *, Base *, Base *, Base *, Base *);
+    typedef Base *ctor1(BasePtr);
+    typedef Base *ctor2(BasePtr, BasePtr);
+    typedef Base *ctor3(BasePtr, BasePtr, BasePtr);
+    typedef Base *ctor4(BasePtr, BasePtr, BasePtr, BasePtr);
+    typedef Base *ctor5(BasePtr, BasePtr, BasePtr, BasePtr, BasePtr);
 private:
     std::vector<tString> m_flags;
     tString m_fname;
@@ -391,7 +391,6 @@ class Condition : public BaseExt {
 protected:
     Base const &GetExpr() const; //!< Performs the comparison
 public:
-    Condition(Base  * condvalue, Base  * truevalue, Base  * falsevalue); //!< Basic constructor
     Condition(BasePtr condvalue, BasePtr truevalue, BasePtr falsevalue); //!< Basic constructor
     Condition(Condition const &other); //!< Copy constructor, will not work with any class except another Condition object
 
@@ -812,8 +811,6 @@ public:
 };
 
 namespace Func {
-//template<typename T> struct correct_get<T> { Base::GetValue get; };
-//template<> struct correct_get<float> { Base::GetFloat get; };
 template<typename T, T F(void)> class fZeroary : public Base {
 public:
     fZeroary() { };
@@ -822,13 +819,13 @@ public:
 template<typename T, typename Aa, /* Aa (Base::*GAa)(void) const, */ T F(Aa)> class fUnary : public Base {
     BasePtr m_ArgA;
 public:
-    fUnary(Base *ArgA): m_ArgA(ArgA) { }
+    fUnary(BasePtr ArgA): m_ArgA(ArgA) { }
     virtual Variant GetValue() const { return F(m_ArgA->Get<Aa>()); };
 };
 template<typename T, typename Aa, typename Ab, T F(Aa, Ab)> class fBinary : public Base {
     BasePtr m_ArgA, m_ArgB;
 public:
-    fBinary(Base *ArgA, Base *ArgB): m_ArgA(ArgA), m_ArgB(ArgB) { }
+    fBinary(BasePtr ArgA, BasePtr ArgB): m_ArgA(ArgA), m_ArgB(ArgB) { }
     virtual Variant GetValue() const { return F(m_ArgA->Get<Aa>(), m_ArgB->Get<Ab>()); };
 };
 

@@ -367,14 +367,7 @@ Variant Expr::GetValue() const {
 //blah asdfgsf;
 
 Registration register_iff("func\nlogic", "iff", 3, (Registration::fptr)
-                          ( Registration::ctor3* )& Creator<Condition>::create<Base*,Base*,Base*> );
-
-Condition::Condition(Base  * condvalue, Base  * truevalue, Base  * falsevalue) :
-        m_condvalue (condvalue ),
-        m_truevalue (truevalue ),
-        m_falsevalue(falsevalue)
-{
-}
+                          ( Registration::ctor3* )& Creator<Condition>::create<BasePtr,BasePtr,BasePtr> );
 
 //! Constructs a new Condition object with the given parameters
 //! @param condvalue  the value to be used as the condition
@@ -861,7 +854,7 @@ myCol ColDifference::_operation(void) const {
 
 
 Registration register_sin("func\nmath", "sin", 1, (Registration::fptr)
-                          ( Registration::ctor1* )& Creator<Func::Sin>::create<Base*> );
+                          ( Registration::ctor1* )& Creator<Func::Sin>::create<BasePtr> );
 
 
 }

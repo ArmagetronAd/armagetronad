@@ -126,12 +126,12 @@ arglist:
 	| expr
 	  {
 		$$ = new tValue::arglist();
-		$$->push_back($1);
+		$$->push_back(tValue::BasePtr($1));
 	  }
 	| arglist ',' expr
 	  {
 		$$ = $1;
-		$$->push_back($3);
+		$$->push_back(tValue::BasePtr($3));
 	  }
 	;
 %%
