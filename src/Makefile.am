@@ -61,13 +61,20 @@ libtools_a_SOURCES=	tools/tArray.cpp tools/tArray.h tools/tCallback.cpp tools/tC
 	tools/tXmlParser.h tools/tXmlParser.cpp\
 	defs.h\
     thirdparty/binreloc/prefix.c thirdparty/binreloc/prefix.h\
-	tools/tValueParser.ypp\
+	tools/values/vCore.cpp \
+	tools/values/vParser.ypp \
+	tools/values/vRegistry.cpp \
+	tools/values/vCollection.cpp \
+	tools/values/veComparison.cpp \
+	tools/values/veLogic.cpp \
+	tools/values/veMath.cpp \
+	tools/values/vebLegacy.cpp \
+	tools/values/vebMathExpr.cpp \
 	tools/tMemManager.cpp tools/tMemManager.h\
 	tools/tStatFile.cpp tools/tStatFile.h\
 	tools/tStatEntry.h tools/tStatEntry.cpp\
 	tools/tPlayList.h tools/tPlayList.cpp\
-	tools/tCoord.h \
-	tools/tValue.h tools/tValue.cpp
+	tools/tCoord.h
 
 #tools/tCommandLine.cpp tools/tCommandLine.h
 libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentification.cpp\

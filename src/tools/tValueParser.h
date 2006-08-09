@@ -1,6 +1,3 @@
-#include "tValue.h"
+#include "values/vParser.h"
 
-class tValueParser {
-public:
-	static tValue::Base *parse(tString s);
-};
+typedef tValue::Parser tValueParser;
