@@ -1030,7 +1030,21 @@ bool gCycleExtrapolator::EdgeIsDangerous(const eWall *ww, REAL time, REAL alpha 
     }
 
     // delegate
-    return parent_->EdgeIsDangerous( ww, time, alpha ) && gCycleMovement::EdgeIsDangerous( ww, time, alpha );
+    return bool(parent_) && parent_->EdgeIsDangerous( ww, time, alpha ) && gCycleMovement::EdgeIsDangerous( ww, time, alpha );
+}
+
+void gCycleExtrapolator::PassEdge(const eWall *ww,REAL time,REAL a,int){
+    {
+        if (!EdgeIsDangerous(ww,time,a) || !Alive() )
+        {
+            return;
+        }
+        else
+        {
+            eCoord collPos = ww->Point( a );
+            throw gCycleDeath( collPos );
+        }
+    }
 }
 
 bool gCycleExtrapolator::TimestepCore(REAL currentTime, bool calculateAcceleration)
@@ -1048,7 +1062,14 @@ bool gCycleExtrapolator::TimestepCore(REAL currentTime, bool calculateAccelerati
     tASSERT(finite(distance));
 
     // delegate
-    bool ret = gCycleMovement::TimestepCore( currentTime, calculateAcceleration );
+    bool ret = false;
+    try{
+        ret = gCycleMovement::TimestepCore( currentTime, calculateAcceleration );
+    }
+    catch( gCycleDeath & )
+    {
+        return false;
+    }
 
     // update true distance
     // trueDistance_ += GetDistance() - distanceBefore;
