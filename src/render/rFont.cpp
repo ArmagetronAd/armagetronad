@@ -584,7 +584,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
                 trouble = false;
             } else if ( currentWidth >= maxWidth) {
                 WriteChar('\n');
-                c++;
+                //c++;
                 currentWidth = 0.;
             }
         }
