@@ -1536,9 +1536,9 @@ tString tPath::GetPaths(void) const {
 void st_PrintPathInfo(tOutput &buf) {
     tString const hcol("0xff8888");
     buf << hcol << "$path_info_user_cfg"   << "0xRESETT\n   " << tDirectories::Var().GetReadPath("user.cfg") << "\n"
-        << hcol << "$path_info_config"     << "0xRESETT\n" << tDirectories::Config().GetPaths()
-        << hcol << "$path_info_resource"   << "0xRESETT\n" << tDirectories::Resource().GetPaths()
-        << hcol << "$path_info_data"       << "0xRESETT\n" << tDirectories::Data().GetPaths()
-        << hcol << "$path_info_screenshot" << "0xRESETT\n" << tDirectories::Screenshot().GetPaths()
-        << hcol << "$path_info_var"        << "0xRESETT\n" << tDirectories::Var().GetPaths();
+    << hcol << "$path_info_config"     << "0xRESETT\n" << tDirectories::Config().GetPaths()
+    << hcol << "$path_info_resource"   << "0xRESETT\n" << tDirectories::Resource().GetPaths()
+    << hcol << "$path_info_data"       << "0xRESETT\n" << tDirectories::Data().GetPaths()
+    << hcol << "$path_info_screenshot" << "0xRESETT\n" << tDirectories::Screenshot().GetPaths()
+    << hcol << "$path_info_var"        << "0xRESETT\n" << tDirectories::Var().GetPaths();
 }
