@@ -33,8 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 using namespace vValue::Registry;
 
 namespace vValue {
-	namespace Expr {
-		namespace Math {
+namespace Expr {
+namespace Math {
 
 //! Returns the result of adding the lvalue and rvalue
 //! @returns the result
@@ -122,6 +122,6 @@ Registration register_sin("func\nmath", "sin", 1, (Registration::fptr)
                           ( ctor::a1* )& Creator<Trig::Sin>::create<BasePtr> );
 
 
-		}
-	}
+}
+}
 }

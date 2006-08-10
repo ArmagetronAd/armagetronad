@@ -36,15 +36,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "values/vCore.h"
 
 namespace vValue {
-	namespace Registry {
-		namespace ctor {
-			typedef Expr::Base *a0();
-			typedef Expr::Base *a1(BasePtr);
-			typedef Expr::Base *a2(BasePtr, BasePtr);
-			typedef Expr::Base *a3(BasePtr, BasePtr, BasePtr);
-			typedef Expr::Base *a4(BasePtr, BasePtr, BasePtr, BasePtr);
-			typedef Expr::Base *a5(BasePtr, BasePtr, BasePtr, BasePtr, BasePtr);
-		}
+namespace Registry {
+namespace ctor {
+typedef Expr::Base *a0();
+typedef Expr::Base *a1(BasePtr);
+typedef Expr::Base *a2(BasePtr, BasePtr);
+typedef Expr::Base *a3(BasePtr, BasePtr, BasePtr);
+typedef Expr::Base *a4(BasePtr, BasePtr, BasePtr, BasePtr);
+typedef Expr::Base *a5(BasePtr, BasePtr, BasePtr, BasePtr, BasePtr);
+}
 
 class Registration {
 public:
@@ -72,7 +72,7 @@ public:
 
 extern Registry theRegistry;
 
-	}
+}
 }
 
 #endif

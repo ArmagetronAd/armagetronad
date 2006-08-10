@@ -34,8 +34,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 using namespace vValue::Registry;
 
 namespace vValue {
-	namespace Expr {
-		namespace Logic {
+namespace Expr {
+namespace Logic {
 
 Registration register_iff("func\nlogic", "iff", 3, (Registration::fptr)
                           ( ctor::a3* )& Creator<Condition>::create<BasePtr,BasePtr,BasePtr> );
@@ -126,6 +126,6 @@ Base *Not::copy(void) const {
     return new Not(*this);
 }
 
-		}
-	}
+}
+}
 }

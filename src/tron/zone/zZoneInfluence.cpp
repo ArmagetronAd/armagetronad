@@ -24,9 +24,9 @@ zZoneInfluenceItem::~zZoneInfluenceItem() {}
 
 
 zZoneInfluenceItemRotation::zZoneInfluenceItemRotation(zZonePtr aZone):
-  zZoneInfluenceItem(aZone),
-  rotationSpeed(0.0),
-  rotationAcceleration(0.0) 
+        zZoneInfluenceItem(aZone),
+        rotationSpeed(0.0),
+        rotationAcceleration(0.0)
 {}
 
 void
@@ -36,8 +36,8 @@ zZoneInfluenceItemRotation::apply(REAL value) {
 }
 
 zZoneInfluenceItemRadius::zZoneInfluenceItemRadius(zZonePtr aZone):
-  zZoneInfluenceItem(aZone),
-  radius(0.0) 
+        zZoneInfluenceItem(aZone),
+        radius(0.0)
 {}
 
 void
@@ -46,8 +46,8 @@ zZoneInfluenceItemRadius::apply(REAL value) {
 }
 
 zZoneInfluenceItemPosition::zZoneInfluenceItemPosition(zZonePtr aZone):
-  zZoneInfluenceItem(aZone),
-  pos(0.0, 0.0) 
+        zZoneInfluenceItem(aZone),
+        pos(0.0, 0.0)
 {}
 
 void
@@ -56,8 +56,8 @@ zZoneInfluenceItemPosition::apply(REAL value) {
 }
 
 zZoneInfluenceItemColor::zZoneInfluenceItemColor(zZonePtr aZone):
-  zZoneInfluenceItem(aZone),
-  color(0.0, 0.0, 0.0, 0.0)
+        zZoneInfluenceItem(aZone),
+        color(0.0, 0.0, 0.0, 0.0)
 {}
 
 void

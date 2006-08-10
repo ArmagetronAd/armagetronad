@@ -40,8 +40,8 @@ class RVar;
 class RFunction;
 
 namespace vValue {
-	namespace Expr {
-		namespace Bindings {
+namespace Expr {
+namespace Bindings {
 
 //! Stores a math expression using the mathexpr library
 class MathExpr : public Base {
@@ -63,8 +63,8 @@ public:
     virtual Variant GetValue(void) const; //!< Returns the value in its native format
 };
 
-		}
-	}
+}
+}
 }
 
 #endif

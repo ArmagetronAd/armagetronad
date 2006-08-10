@@ -32,9 +32,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "vebLegacy.h"
 
 namespace vValue {
-	namespace Expr {
-		namespace Bindings {
-			namespace Legacy {
+namespace Expr {
+namespace Bindings {
+namespace Legacy {
 
 //! Reads from the Configuration item
 //! @returns the result as a string
@@ -88,7 +88,7 @@ tString ConfItem::GetString(Base const *other) const {
     return Output(Read(), other);
 }
 
-			}
-		}
-	}
+}
+}
+}
 }

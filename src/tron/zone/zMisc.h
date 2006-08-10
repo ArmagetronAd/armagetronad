@@ -33,7 +33,7 @@ inline bool validateTriad(Triad a, Triad b) {
     return false;
 }
 
-/* 
+/*
  * HACK 
  * This is a very bad solution that hopefully will find a better design
  *

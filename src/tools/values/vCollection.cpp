@@ -29,8 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "vCollection.h"
 
 namespace vValue {
-	namespace Expr {
-		namespace Collection {
+namespace Expr {
+namespace Collection {
 
 myCol BaseExt::GetCol(void) const {
     myCol col;
@@ -236,8 +236,8 @@ myCol ColDifference::_operation(void) const {
     return res;
 }
 
-		}
-	}
+}
+}
 }
 
 

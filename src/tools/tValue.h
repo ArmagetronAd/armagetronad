@@ -41,22 +41,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "values/vebMathExpr.h"
 
 namespace tValue {
-	using namespace vValue;
-	using namespace Expr::Core;
-	using namespace Expr::Collection;
-	using namespace Expr::Bindings;
-	using namespace Expr::Bindings::Legacy;
-	using namespace Expr::Logic;
-	using namespace Expr::Math;
-	namespace Func {
-		using namespace Expr::Math;
-		using namespace Expr::Math::Trig;
-	}
-	using namespace Expr::Comparison;
-	using namespace MiscWTF;
-	using namespace Type;
-	using namespace Registry;
-	typedef Expr::Bindings::MathExpr Expr;	// must be last, since it redefines Expr
+using namespace vValue;
+using namespace Expr::Core;
+using namespace Expr::Collection;
+using namespace Expr::Bindings;
+using namespace Expr::Bindings::Legacy;
+using namespace Expr::Logic;
+using namespace Expr::Math;
+namespace Func {
+using namespace Expr::Math;
+using namespace Expr::Math::Trig;
+}
+using namespace Expr::Comparison;
+using namespace MiscWTF;
+using namespace Type;
+using namespace Registry;
+typedef Expr::Bindings::MathExpr Expr;	// must be last, since it redefines Expr
 }
 
 #endif

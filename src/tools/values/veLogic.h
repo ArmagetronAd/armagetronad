@@ -34,8 +34,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "values/vCore.h"
 
 namespace vValue {
-	namespace Expr {
-		namespace Logic {
+namespace Expr {
+namespace Logic {
 
 //! Stores two other values and returns one of them based on a specific condition
 class Condition : public Core::Base {
@@ -66,8 +66,8 @@ public:
 
 DeclStdUnaryOp(Not)
 
-		}
-	}
+}
+}
 }
 
 #endif

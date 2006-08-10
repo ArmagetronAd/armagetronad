@@ -34,8 +34,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "values/vCore.h"
 
 namespace vValue {
-	namespace Expr {
-		namespace Comparison {
+namespace Expr {
+namespace Comparison {
 
 DeclStdBinaryOp(GreaterThan    )
 DeclStdBinaryOp(GreaterOrEquals)
@@ -44,8 +44,8 @@ DeclStdBinaryOp(   LessOrEquals)
 DeclStdBinaryOp(   LessThan    )
 DeclStdBinaryOp(Compare)
 
-		}
-	}
+}
+}
 }
 
 #endif

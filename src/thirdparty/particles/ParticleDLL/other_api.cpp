@@ -343,7 +343,7 @@ PARTICLEDLL_API size_t pSetMaxParticles(size_t max_count)
     if(PS.in_new_list)
         return 0; // ERROR
 
-	// useless test, can never be negative
+    // useless test, can never be negative
     // if(max_count < 0)
     //    return 0; // ERROR
 
@@ -377,7 +377,7 @@ PARTICLEDLL_API void pCopyGroup(int p_src_group_num, size_t index, size_t copy_c
     if(ccount > destgrp.GetMaxParticles() - destgrp.size())
         ccount = destgrp.GetMaxParticles() - destgrp.size();
 
-	// useless test, can never be negative
+    // useless test, can never be negative
     // if(ccount<0)
     //     ccount = 0;
 
@@ -407,7 +407,7 @@ PARTICLEDLL_API size_t pGetParticles(size_t index, size_t count, float *verts,
     if(PS.pgroup_id < 0 || PS.pgroup_id >= (int)PS.PGroups.size())
         return static_cast< size_t >( -2 ); // ERROR
 
-	// useless test, both are never negative
+    // useless test, both are never negative
     // if(index < 0 || count < 0)
     //    return static_cast< size_t >( -3 ); // ERROR
 

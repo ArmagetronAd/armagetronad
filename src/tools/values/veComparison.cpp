@@ -29,8 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "veComparison.h"
 
 namespace vValue {
-	namespace Expr {
-		namespace Comparison {
+namespace Expr {
+namespace Comparison {
 
 #define CodeStdBinOp(classname, op)       \
 Variant                                   \
@@ -63,6 +63,6 @@ Base *Compare::copy(void) const {
     return new Compare(*this);
 }
 
-		}
-	}
+}
+}
 }

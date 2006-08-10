@@ -39,21 +39,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <boost/variant.hpp>
 
 namespace vValue {
-	namespace Expr {
-		namespace Core {
+namespace Expr {
+namespace Core {
 class Base;
-		}
-	}
-	namespace Type {
-		typedef boost::shared_ptr<Expr::Core::Base> BasePtr; //!< convinience definition for the use in derived classes
+}
+}
+namespace Type {
+typedef boost::shared_ptr<Expr::Core::Base> BasePtr; //!< convinience definition for the use in derived classes
 
 typedef boost::variant<int, float, std::string> Variant;
 typedef std::deque<BasePtr> arglist;
-	}
-	using namespace Type;
+}
+using namespace Type;
 
-	namespace Expr {
-		namespace Core {
+namespace Expr {
+namespace Core {
 //! Offers basic functions to set the precision etc.
 class Base {
     int m_precision; //!< The precision when returning a string
@@ -118,9 +118,9 @@ template<typename T> inline T Base::VariantConvert(Variant v) const {
 }
 */
 
-		}
-	}
-	namespace Type {
+}
+}
+namespace Type {
 
 //! min, max and value in one class which handles the pointer buisness
 class Set {
@@ -147,9 +147,9 @@ public:
     Expr::Core::
     Base const &GetVal(void) const {return *m_val;} //!< Returns a reference to the stored current value
 };
-	}
-	namespace Expr {
-		namespace Core {
+}
+namespace Expr {
+namespace Core {
 
 //! Basic number class
 //!
@@ -316,9 +316,9 @@ public:	\
     virtual Base *copy(void) const; \
 };
 
-		}
-		using namespace Core;
-	}
+}
+using namespace Core;
+}
 
 template<typename C> class Creator {
 public:
@@ -343,7 +343,7 @@ public:
 };
 
 
-	using namespace Type;
+using namespace Type;
 }
 
 #endif

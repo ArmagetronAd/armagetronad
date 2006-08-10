@@ -36,9 +36,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 class tConfItemBase;
 
 namespace vValue {
-	namespace Expr {
-		namespace Bindings {
-			namespace Legacy {
+namespace Expr {
+namespace Bindings {
+namespace Legacy {
 
 //! Stores a function pointer to a function within another class and offers functions to get that function's return value
 template<typename T> class Callback : public Base {
@@ -150,9 +150,9 @@ public:
     virtual tString GetString(Base const *other=0) const;
 };
 
-			}
-		}
-	}
+}
+}
+}
 }
 
 #endif

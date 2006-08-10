@@ -34,9 +34,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "values/vCore.h"
 
 namespace vValue {
-	namespace Expr {
-		namespace Bindings {
-			namespace CFunction {
+namespace Expr {
+namespace Bindings {
+namespace CFunction {
 
 template<typename T, T F(void)> class fZeroary : public Base {
 public:
@@ -56,9 +56,9 @@ public:
     virtual Variant GetValue() const { return F(m_ArgA->Get<Aa>(), m_ArgB->Get<Ab>()); };
 };
 
-			}
-		}
-	}
+}
+}
+}
 }
 
 #endif

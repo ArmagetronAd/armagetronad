@@ -30,8 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "vCore.h"
 
 namespace vValue {
-	namespace Expr {
-		namespace Core {
+namespace Expr {
+namespace Core {
 
 //! @param precision the number of digits after the decimal to be used when outputting a string
 //! @param minsize   the minimum width when outputting a string
@@ -124,9 +124,9 @@ bool Base::operator<=(Base const &other) const { return false; }
 bool Base::operator> (Base const &other) const { return false; }
 bool Base::operator< (Base const &other) const { return false; }
 
-		}
-	}
-	namespace Type {
+}
+}
+namespace Type {
 
 //! Sets
 //! @param val the value
@@ -175,9 +175,9 @@ void Set::operator=(Set const &other) {
     }
 }
 
-	}
-	namespace Expr {
-		namespace Core {
+}
+namespace Expr {
+namespace Core {
 
 //! Stores the given string inside the new class
 //! @param value the string to be used
@@ -259,8 +259,8 @@ Base *BinaryOp::copy(void) const {
     return new BinaryOp(*this);
 }
 
-		}
-	}
+}
+}
 }
 
 

@@ -30,7 +30,7 @@ struct PActionBase
 
     virtual EXEC_METHOD = 0;
 
-	virtual ~PActionBase(){}
+    virtual ~PActionBase(){}
 private:
     // These are used for doing optimizations where we perform all actions to a working set of particles,
     // then to the next working set, etc. to improve cache coherency.

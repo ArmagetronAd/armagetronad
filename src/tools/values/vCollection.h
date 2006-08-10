@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "values/vCore.h"
 
 namespace vValue {
-	namespace MiscWTF {
+namespace MiscWTF {
 
 class FooPtrOps;
 
@@ -57,10 +57,10 @@ struct FooPtrOps
     */
 };
 
-	}
-	using namespace MiscWTF;
-	namespace Expr {
-		namespace Collection {
+}
+using namespace MiscWTF;
+namespace Expr {
+namespace Collection {
 
 class BaseExt: public Base {
 public:
@@ -291,8 +291,8 @@ protected:
     myCol _operation(void) const;
 };
 
-		}
-	}
+}
+}
 }
 
 #endif

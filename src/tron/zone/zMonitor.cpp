@@ -125,7 +125,7 @@ void zMonitorRule::applyRule(triggerers &contributors, REAL time, REAL _value) {
     /* We take all the contributors */
     /* And apply the proper effect */
     miscDataPtr value = miscDataPtr(new REAL(_value));
-    
+
     std::vector<zEffectGroupPtr>::iterator iter;
     for (iter = effectGroupList.begin();
             iter != effectGroupList.end();

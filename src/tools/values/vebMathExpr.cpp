@@ -31,8 +31,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "mathexpr.h"
 
 namespace vValue {
-	namespace Expr {
-		namespace Bindings {
+namespace Expr {
+namespace Bindings {
 
 //! @param expr The expression to be parsed
 MathExpr::MathExpr(tString const &expr) : m_operation(new ROperation(expr.c_str())), m_vararray(0), m_funcarray(0), m_varsSize(0), m_functionsSize(0) {}
@@ -96,6 +96,6 @@ Variant MathExpr::GetValue() const {
 //};
 //blah asdfgsf;
 
-		}
-	}
+}
+}
 }

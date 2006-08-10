@@ -4,7 +4,7 @@ namespace vValue {
 
 class Parser {
 public:
-	static vValue::Expr::Base *parse(tString s);
+    static vValue::Expr::Base *parse(tString s);
 };
 
 }

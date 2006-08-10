@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "vRegistry.h"
 
 namespace vValue {
-	namespace Registry {
+namespace Registry {
 
 Registration::Registration(std::vector<tString> flags, tString fname, int argc, fptr ctor):
         m_flags(flags),
@@ -114,5 +114,5 @@ Registry::create(std::vector<tString> flags, tString fname, arglist args)
 
 Registry theRegistry;
 
-	}
+}
 }

@@ -37,8 +37,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "values/vebCFunction.h"
 
 namespace vValue {
-	namespace Expr {
-		namespace Math {
+namespace Expr {
+namespace Math {
 
 class Add : public BinaryOp {
 public:
@@ -75,13 +75,13 @@ public:
 
 typedef Bindings::CFunction::fZeroary<long int, random> Random;
 
-			namespace Trig {
+namespace Trig {
 
 typedef Bindings::CFunction::fUnary<float, float, sinf> Sin;
 
-			}
-		}
-	}
+}
+}
+}
 }
 
 #endif

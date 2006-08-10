@@ -106,7 +106,7 @@ zValidator::validate(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *>
             REAL value = 0.0;
             if ( miscData.get() != 0 )
                 value = *miscData;
-	
+
             (*iterZoneInfluence)->apply(value);
         }
     }
