@@ -1271,10 +1271,8 @@ REAL gPlayerWall::LocalToGlobal( REAL a ) const
 
     tASSERT( good( a ) );
 
-    REAL begAlpha = netWall_->Alpha( begDist_ );
-    REAL endAlpha = netWall_->Alpha( endDist_ );
-
-    REAL ret = begAlpha + ( endAlpha - begAlpha ) * a;
+    REAL dist = begDist_ + a * ( endDist_ - begDist_ );
+    REAL ret = netWall_->Alpha( dist );
 
     tASSERT( good( ret ) );
 
@@ -1287,17 +1285,16 @@ REAL gPlayerWall::GlobalToLocal( REAL a ) const
 
     tASSERT( good( a ) );
 
-    REAL begAlpha = netWall_->Alpha( begDist_ );
-    REAL endAlpha = netWall_->Alpha( endDist_ );
+    REAL dist = netWall_->Pos( a );
 
-    REAL div = ( endAlpha - begAlpha );
+    REAL div = ( endDist_ - begDist_ );
     if ( div == 0 )
     {
         return .5f;
     }
     else
     {
-        REAL ret = ( a - begAlpha ) / div;
+        REAL ret = ( dist - begDist_ ) / div;
 
         tASSERT( good( ret ) );
 
@@ -2052,8 +2049,6 @@ void gNetPlayerWall::ReadSync(nMessage &m){
         tEnd_new = tBeg;
     }
 
-    real_Update(tEnd_new,end_new, true);
-
     unsigned short new_inGrid;
     m.Read(new_inGrid);
 
@@ -2077,6 +2072,8 @@ void gNetPlayerWall::ReadSync(nMessage &m){
 
         sg_ServerSentHoles = true;
     }
+
+    real_Update(tEnd_new,end_new, true);
 
     if(Wall() && new_inGrid && !inGrid)
     {
