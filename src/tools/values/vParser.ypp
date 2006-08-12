@@ -7,6 +7,7 @@
 	
 	#include "tError.h"
 	#include "values/vCore.h"
+	#include "values/veComparison.h"
 	#include "values/veMath.h"
 	#include "values/vRegistry.h"
 	#include "values/vParser.h"
@@ -201,7 +202,6 @@ yyerror(const char *s)
 	tERR_ERROR(msg);
 }
 
-/*
 static bool
 follow(int expect)
 {
@@ -212,7 +212,6 @@ follow(int expect)
 	lex_ungetc(c);
 	return false;
 }
-*/
 
 int
 yylex(void)
