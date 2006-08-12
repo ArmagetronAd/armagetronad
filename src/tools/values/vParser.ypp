@@ -41,6 +41,7 @@
 %left	'+' '-'
 %left	'*' '/'
 %left	tUNARYMINUS
+%left	tCOMPARE tLE tGE tLT tGT tEQ tNE
 %nonassoc '.'
 
 %%
@@ -98,6 +99,10 @@ expr:
 	  {
 		$$ = new Expr::Math::Divide(BasePtr($1), BasePtr($3));
 	  }
+	| expr tCOMPARE expr
+	  {
+		$$ = new Expr::Comparison::Compare(BasePtr($1), BasePtr($3));
+	  }
 	| '-' expr %prec tUNARYMINUS
 	  {
 		static BasePtr zero(new Expr::Int(0));
@@ -109,7 +114,6 @@ expr:
 	  }
 	;
 	// a ?: b !: c -- trinary conditional
-	// a <=> b -- Expr::Comparison::Compare
 function:
 	/*  tID
 	|*/ tID '(' arglist ')'
@@ -266,6 +270,18 @@ yylex(void)
 		}
 		yylval.string = s;
 		return tSTRING;
+	}
+	
+	switch (c) {
+	case '<':
+		if (follow('='))
+		{
+			if (follow('>'))
+				return tCOMPARE;
+			else
+				return tLE;
+		}
+		break;
 	}
 	
 	return c;
