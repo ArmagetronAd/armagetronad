@@ -1,0 +1,192 @@
+<!-- version="AATeam/0.3.0" -->
+<!ELEMENT Resource (Cockpit)>
+
+<!ATTLIST Resource
+       type (aacockpit) "aacockpit"
+       name CDATA #REQUIRED
+       version CDATA "1.0"
+       author CDATA "Anonymous"
+       category CDATA "unsorted"
+       comissioner CDATA #IMPLIED
+>
+
+<!ENTITY % CommonWidgetAttributes "
+    camera CDATA '*'
+    viewport (all | top) 'all'
+    toggle CDATA '0'
+    toggleSticky (true | false) 'true'
+    toggleDefault (on | off) 'on'
+    usetemplate CDATA ''
+">
+
+<!ELEMENT Cockpit ((BarGauge | NeedleGauge | Map | Label | VerticalBarGauge | Rectangle | WidgetTemplate)+)>
+<!ATTLIST Cockpit version CDATA #REQUIRED>
+
+<!ELEMENT WidgetTemplate ((DataSet |
+                  Position |
+                  Size |
+                  ShowCurrent |
+                  ShowMaximum |
+                  ShowMinimum |
+                  Reverse |
+                  Caption |
+                  Background |
+                  Foreground
+                  )*)>
+<!ATTLIST WidgetTemplate %CommonWidgetAttributes;>
+<!ATTLIST WidgetTemplate id CDATA #REQUIRED>
+
+<!ELEMENT BarGauge ((DataSet |
+                  Position |
+                  Size |
+                  ShowCurrent |
+                  ShowMaximum |
+                  ShowMinimum |
+                  Reverse |
+                  Caption |
+                  Background |
+                  Foreground
+                  )*)>
+<!ATTLIST BarGauge %CommonWidgetAttributes;>
+
+<!ELEMENT VerticalBarGauge ((DataSet |
+                  Position |
+                  Size |
+                  ShowCurrent |
+                  ShowMaximum |
+                  ShowMinimum |
+                  Reverse |
+                  Caption |
+                  Background |
+                  Foreground
+                  )*)>
+<!ATTLIST VerticalBarGauge %CommonWidgetAttributes;>
+
+<!ELEMENT Rectangle ((DataSet |
+                  Position |
+                  Size |
+                  Background |
+                  Foreground
+                  )*)>
+<!ATTLIST Rectangle %CommonWidgetAttributes;>
+
+<!ELEMENT NeedleGauge ((DataSet |
+                  Position |
+                  Size |
+                  ShowCurrent |
+                  ShowMaximum |
+                  ShowMinimum |
+                  Reverse |
+                  Caption |
+                  Background |
+                  Foreground
+                  )*)>
+<!ATTLIST NeedleGauge %CommonWidgetAttributes;>
+
+<!ELEMENT Label ((DataSet |
+                  Position |
+                  Size |
+                  Caption |
+                  Face
+                  )*)>
+<!ATTLIST Label %CommonWidgetAttributes;>
+
+<!ELEMENT Map ((   Position |
+                  Size
+                  )*)>
+<!ATTLIST Map %CommonWidgetAttributes;>
+
+<!ELEMENT DataSet ((AtomicData | Conditional | Math)+)>
+<!ATTLIST DataSet id CDATA "">
+
+<!ELEMENT AtomicData EMPTY>
+<!ATTLIST AtomicData field (source | minimum | maximum) "source">
+<!ATTLIST AtomicData source CDATA #REQUIRED>
+<!ATTLIST AtomicData precision CDATA "1">
+<!ATTLIST AtomicData minwidth CDATA "0">
+<!ATTLIST AtomicData fill CDATA "0">
+
+<!ELEMENT Conditional (IfTrue, IfFalse)>
+<!ATTLIST Conditional field (source | minimum | maximum) "source">
+<!ATTLIST Conditional lvalue CDATA #REQUIRED>
+<!ATTLIST Conditional rvalue CDATA #REQUIRED>
+<!ATTLIST Conditional operator (lt | gt | eq | ne | le | ge) #REQUIRED>
+
+<!ELEMENT IfTrue ((AtomicData | Conditional | Math))>
+<!ELEMENT IfFalse ((AtomicData | Conditional | Math))>
+<!ELEMENT LValue ((AtomicData | Conditional | Math))>
+<!ELEMENT RValue ((AtomicData | Conditional | Math))>
+
+<!ELEMENT Math (LValue?, RValue?)>
+<!ATTLIST Math field (source | minimum | maximum) "source">
+<!ATTLIST Math lvalue CDATA "0.">
+<!ATTLIST Math rvalue CDATA "0.">
+<!ATTLIST Math type (sum | difference | product | quotient) #REQUIRED>
+<!ATTLIST Math precision CDATA "1">
+<!ATTLIST Math minwidth CDATA "0">
+<!ATTLIST Math fill CDATA "0">
+
+<!ELEMENT Position EMPTY>
+<!ATTLIST Position x CDATA #REQUIRED>
+<!ATTLIST Position y CDATA #REQUIRED>
+<!-- z axis not currently implemented for gauges, and not required for any gauges -->
+<!ATTLIST Position z CDATA #IMPLIED>
+
+<!ELEMENT Size EMPTY>
+<!ATTLIST Size height CDATA #REQUIRED>
+<!ATTLIST Size width CDATA #REQUIRED>
+
+<!ELEMENT ShowMinimum EMPTY>
+<!ATTLIST ShowMinimum value (true | false) "true">
+
+<!ELEMENT ShowMaximum EMPTY>
+<!ATTLIST ShowMaximum value (true | false) "true">
+
+<!ELEMENT ShowCurrent EMPTY>
+<!ATTLIST ShowCurrent value (true | false) "true">
+
+<!ELEMENT Reverse EMPTY>
+<!ATTLIST Reverse value (true | false) "true">
+
+<!ELEMENT Caption (Text?) >
+<!ATTLIST Caption location (top | bottom | off) "bottom">
+
+<!ELEMENT Text EMPTY>
+<!ATTLIST Text value CDATA #REQUIRED>
+
+<!ELEMENT Background (Image?,Solid?,Gradient?)>
+<!ELEMENT Foreground (Image?,Solid?,Gradient?)>
+
+<!-- Graphic is a regular graphic file, like something.png.  ResourceGraphic is a resource xml
+file that contains more information on the image and may be a case of YouMightNeedThis -->
+<!ELEMENT Image (Graphic?,ResourceGraphic?)>
+
+<!ELEMENT Solid (Color?)>
+<!ELEMENT Gradient (Color+)>
+<!ATTLIST Gradient orientation (horizontal | vertical | value) "value">
+
+<!ELEMENT Graphic (Location?)>
+
+<!ELEMENT ResourceGraphic (Location?)>
+
+<!ELEMENT Color EMPTY>
+<!ATTLIST Color r CDATA #REQUIRED>
+<!ATTLIST Color g CDATA #REQUIRED>
+<!ATTLIST Color b CDATA #REQUIRED>
+<!ATTLIST Color alpha CDATA #REQUIRED>
+<!ATTLIST Color at CDATA "0">
+
+<!ELEMENT Face (Table?)>
+
+<!ELEMENT Table (Row+)>
+
+<!ELEMENT Row (Cell+)>
+
+<!ELEMENT Cell (Text|GameData)*>
+
+<!-- GameData provides a textual display of game data -->
+<!ELEMENT GameData EMPTY>
+<!-- data is the attribute that references a previous Data by id -->
+<!ATTLIST GameData data CDATA #REQUIRED>
+
+
