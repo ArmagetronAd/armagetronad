@@ -188,7 +188,7 @@ void Map::DrawCycles(tList<ePlayerNetID> &list, double xscale, double yscale) {
                 if(alpha <= 0) continue;
             }
             glColor4f(cycle->color_.r, cycle->color_.g, cycle->color_.b, alpha);
-            eCoord pos = cycle->Position(), dir = cycle->Direction();
+            eCoord pos = cycle->PredictPosition(), dir = cycle->Direction();
             glPushMatrix();
             GLfloat m[16] = {
                                 xscale * dir.x, yscale * dir.y, 0, 0,
