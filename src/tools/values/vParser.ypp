@@ -41,8 +41,8 @@
 
 %left	'+' '-'
 %left	'*' '/'
-%left	tUNARYMINUS
 %left	tCOMPARE tLE tGE tLT tGT tEQ tNE
+%left	tUNARYMINUS
 %nonassoc '.'
 
 %%
