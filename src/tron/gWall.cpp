@@ -938,7 +938,10 @@ void gNetPlayerWall::RenderList(bool list){
             REAL time;
             if (cycle_)
             {
-                time=cycle_->GetDistance()/SEGLEN;
+                if ( cycle_->currentWall )
+                    time = cycle_->currentWall->EndPos()/SEGLEN;
+                else
+                    time=cycle_->GetDistance()/SEGLEN;
                 if ( !cycle_->Alive() )
                     time += se_GameTime() - cycle_->deathTime;
             }
