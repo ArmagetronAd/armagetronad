@@ -274,9 +274,9 @@ public:
     //                      int viewer,REAL rvol,REAL lvol);
 #endif
 
-    virtual eCoord CamPos();
-    virtual eCoord PredictPosition();
-    virtual eCoord  CamTop();
+    virtual eCoord CamPos() const;
+    virtual eCoord PredictPosition() const;
+    virtual eCoord  CamTop() const;
 
     virtual void RightBeforeDeath( int numTries );
 

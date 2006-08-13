@@ -3713,14 +3713,14 @@ void gCycle::SoundMix(Uint8 *dest,unsigned int len,
 }
 #endif
 
-eCoord gCycle::PredictPosition(){
+eCoord gCycle::PredictPosition() const {
     return predictPosition_;
 
     //    eCoord p = pos + dir * (speed * se_PredictTime());
     //    return p + correctPosSmooth;
 }
 
-eCoord gCycle::CamPos()
+eCoord gCycle::CamPos() const
 {
     return PredictPosition() + dir.Turn(0 ,-skew*z);
 
@@ -3732,7 +3732,7 @@ eCoord gCycle::CamPos()
     // return pos + dir.Turn(0 ,-skew*z);
 }
 
-eCoord  gCycle::CamTop()
+eCoord  gCycle::CamTop() const
 {
     return dir.Turn(0,-skew);
 }
