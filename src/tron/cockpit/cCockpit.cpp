@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "cockpit/cCockpit.h"
 #include "tValue.h"
+#include "values/vParser.h"
 #include "cockpit/cGauges.h"
 #include "cockpit/cLabel.h"
 #include "cockpit/cMap.h"
@@ -642,6 +643,11 @@ static void display_cockpit_lucifer() {
     }
 
     theCockpit->RenderRootwindow();
+
+#if 0	// Testing ground :)
+    vValue::Expr::Core::Base *test = vValue::Parser::parse(tString("10"));
+    std::cerr << "test: " << test->GetValue() << std::endl;
+#endif
 }
 
 static rPerFrameTask dfps(&display_cockpit_lucifer);
