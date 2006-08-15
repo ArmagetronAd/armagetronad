@@ -1,8 +1,13 @@
 // bison tCodeParser.ypp && g++ -g tCodeParser.tab.cpp -o tCodeParser -DtCodeParser_STANDALONE tCodeAST.cpp -I../.. -I.. ../libtools.a -lpthread &&  ./tCodeParser
 
 %{
+    // With at BISON 2.1 and GCC 3.3, the generated .cpp file fails to compile.
+    // Solution for z-man: upgrade to BISON 2.2.
+    // Users of the tarball shouldn't be affected by this.
+
 	#include <stdlib.h>	// Works around a bug in BISON 2.1 non-pedantic
-	
+
+
 	#include <vector>
 	
 	#include "tError.h"
