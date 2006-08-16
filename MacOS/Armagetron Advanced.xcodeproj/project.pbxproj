@@ -268,6 +268,8 @@
 		9BD56C630A8B899700AC1048 /* veMath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C440A8B899700AC1048 /* veMath.cpp */; };
 		9BD56C640A8B899700AC1048 /* vParser.ypp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C470A8B899700AC1048 /* vParser.ypp */; };
 		9BD56C650A8B899700AC1048 /* vRegistry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C480A8B899700AC1048 /* vRegistry.cpp */; };
+		9BD56D270A8B912300AC1048 /* tRuby.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56D250A8B912300AC1048 /* tRuby.cpp */; };
+		9BD56D280A8B912300AC1048 /* tRuby.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD56D260A8B912300AC1048 /* tRuby.h */; };
 		9BD7D9720A2C7CB400D7033C /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96B0A2C7CB400D7033C /* libfreetype.a */; };
 		9BD7D9730A2C7CB400D7033C /* libftgl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96C0A2C7CB400D7033C /* libftgl.a */; };
 		9BD7D9740A2C7CB400D7033C /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96D0A2C7CB400D7033C /* libpng.framework */; };
@@ -313,6 +315,7 @@
 				9BD7D9A70A2C7CCF00D7033C /* libpng.framework in Copy Frameworks */,
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
+				9BD56D280A8B912300AC1048 /* tRuby.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -324,7 +327,7 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Armagetron Advanced_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Armagetron Advanced_Prefix.pch"; path = "../src/macosx/Armagetron Advanced_Prefix.pch"; sourceTree = "<group>"; };
-		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C1AB77D09A3D2D9007E2048 /* AAURLHandler.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AAURLHandler.mm; path = ../src/macosx/AAURLHandler.mm; sourceTree = SOURCE_ROOT; };
 		8C1AB77F09A3D2FB007E2048 /* AAURLHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AAURLHandler.h; path = ../src/macosx/AAURLHandler.h; sourceTree = SOURCE_ROOT; };
 		8C1D387F099D3DAF00A334A8 /* eSoundMixer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eSoundMixer.cpp; sourceTree = "<group>"; };
@@ -604,6 +607,8 @@
 		9BD56C480A8B899700AC1048 /* vRegistry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vRegistry.cpp; sourceTree = "<group>"; };
 		9BD56C490A8B899700AC1048 /* vRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vRegistry.h; sourceTree = "<group>"; };
 		9BD56C890A8B8A8C00AC1048 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../src/macosx/client/config.h; sourceTree = SOURCE_ROOT; };
+		9BD56D250A8B912300AC1048 /* tRuby.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tRuby.cpp; sourceTree = "<group>"; };
+		9BD56D260A8B912300AC1048 /* tRuby.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tRuby.h; sourceTree = "<group>"; };
 		9BD7D96B0A2C7CB400D7033C /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libfreetype.a; sourceTree = "<absolute>"; };
 		9BD7D96C0A2C7CB400D7033C /* libftgl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libftgl.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libftgl.a; sourceTree = "<absolute>"; };
 		9BD7D96D0A2C7CB400D7033C /* libpng.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libpng.framework; path = /Library/Frameworks/ArmagetronAdvanced/current/libpng.framework; sourceTree = "<absolute>"; };
@@ -900,6 +905,8 @@
 				8CBA5EB6089EEC7D007E21DC /* tResourceManager.h */,
 				8CBA5EB7089EEC7D007E21DC /* tRing.cpp */,
 				8CBA5EB8089EEC7D007E21DC /* tRing.h */,
+				9BD56D250A8B912300AC1048 /* tRuby.cpp */,
+				9BD56D260A8B912300AC1048 /* tRuby.h */,
 				8CBA5EB9089EEC7D007E21DC /* tSafePTR.cpp */,
 				8CBA5EBA089EEC7D007E21DC /* tSafePTR.h */,
 				8CAA3F0D099D3C3D001CB80C /* tStatEntry.cpp */,
@@ -1280,7 +1287,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "rake xcode:cleanup\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone";
+			shellScript = "rake xcode:cleanup\nrake swig:build\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone";
 		};
 		9BD7DB490A2CBA7A00D7033C /* Run script: Prepare */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1571,6 +1578,7 @@
 				9BD56C570A8B899700AC1048 /* veMath.cpp in Sources */,
 				9BD56C5A0A8B899700AC1048 /* vParser.ypp in Sources */,
 				9BD56C5B0A8B899700AC1048 /* vRegistry.cpp in Sources */,
+				9BD56D270A8B912300AC1048 /* tRuby.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1677,12 +1685,14 @@
 					/Library/Frameworks/ArmagetronAdvanced/current/include/freetype2,
 					/Library/Frameworks/ArmagetronAdvanced/current/include/FTGL,
 					/Library/Frameworks/ArmagetronAdvanced/current/include,
+					"$(HOME)/Library/ruby/1.8/lib/ruby/1.8/powerpc-darwin8.7.0/",
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
 					/usr/lib,
 					/Library/Frameworks/ArmagetronAdvanced/current,
+					"$(HOME)/Library/ruby/1.8/lib/",
 				);
 				MACOSX_DEPLOYMENT_TARGET = "";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
@@ -1694,6 +1704,7 @@
 					"-lpthread",
 					"-liconv",
 					"-lm",
+					"-lruby1.8",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
@@ -1738,12 +1749,14 @@
 					/Library/Frameworks/ArmagetronAdvanced/current/include/freetype2,
 					/Library/Frameworks/ArmagetronAdvanced/current/include/FTGL,
 					/Library/Frameworks/ArmagetronAdvanced/current/include,
+					"$(HOME)/Library/ruby/1.8/lib/ruby/1.8/powerpc-darwin8.7.0/",
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
 					/usr/lib,
 					/Library/Frameworks/ArmagetronAdvanced/current,
+					"$(HOME)/Library/ruby/1.8/lib/",
 				);
 				MACOSX_DEPLOYMENT_TARGET = "";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
@@ -1755,6 +1768,7 @@
 					"-lpthread",
 					"-liconv",
 					"-lm",
+					"-lruby1.8",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
@@ -1828,12 +1842,14 @@
 					/Library/Frameworks/ArmagetronAdvanced/current/include/freetype2,
 					/Library/Frameworks/ArmagetronAdvanced/current/include/FTGL,
 					/Library/Frameworks/ArmagetronAdvanced/current/include,
+					"$(HOME)/Library/ruby/1.8/lib/ruby/1.8/powerpc-darwin8.7.0/",
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
 					/usr/lib,
 					/Library/Frameworks/ArmagetronAdvanced/current,
+					"$(HOME)/Library/ruby/1.8/lib/",
 				);
 				MACOSX_DEPLOYMENT_TARGET = "";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
@@ -1845,6 +1861,7 @@
 					"-lpthread",
 					"-liconv",
 					"-lm",
+					"-lruby1.8",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
