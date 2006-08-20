@@ -104,10 +104,10 @@ AC_ARG_ENABLE(main,
 
 # consistency check of the three build flags	 
 test x$armamain = xfalse && build_dedicated=false build_regular=false
-test x$build_dedicated = xfalse && test x$build_regular = xfalse && buildmain=false
+test x$build_dedicated = xfalse && test x$build_regular = xfalse && armamain=false
 
 AM_CONDITIONAL(BUILDDEDICATED, test x$build_dedicated = xtrue)
-AM_CONDITIONAL(BUILDREGULAR, test x$build_regular = xfalse)
+AM_CONDITIONAL(BUILDREGULAR, test x$build_regular = xtrue)
 AM_CONDITIONAL(BUILDMAIN, test x$armamain = xtrue)
 
 AC_ARG_ENABLE(memmanager,
@@ -469,6 +469,8 @@ dnl *************************************************
 dnl         libxml2
 dnl *************************************************
 
+if test x$armamain = xtrue; then
+
 test -z "$XML2_CONFIG" && XML2_CONFIG=xml2-config
 
 if $XML2_CONFIG --libs > /dev/null; then
@@ -495,6 +497,8 @@ AC_MSG_WARN([
 ])
 )
 # fi
+
+fi
 
 if test x$build_regular = xfalse; then
  AC_MSG_RESULT([
