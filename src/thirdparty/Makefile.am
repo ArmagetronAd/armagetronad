@@ -1,7 +1,6 @@
 if BUILDFAKERELEASE
 else
-if BUILDDEDICATED
-else
+if BUILDREGULAR
 SUBDIRS=particles
 endif
 endif
