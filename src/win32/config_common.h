@@ -2,6 +2,8 @@
 
 // map BSD/Linux/OSX string compare function to Win pendant
 #define strcasecmp strcmpi
+//Required for MSVC? Breaks MingW
+//#define vsnprintf _vsnprintf
 
 // for visual studio 2005: use secure template overloads of strcopy and the like
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
