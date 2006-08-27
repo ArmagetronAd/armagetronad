@@ -74,7 +74,8 @@ libtools_a_SOURCES=	tools/tArray.cpp tools/tArray.h tools/tCallback.cpp tools/tC
 	tools/tStatFile.cpp tools/tStatFile.h\
 	tools/tStatEntry.h tools/tStatEntry.cpp\
 	tools/tPlayList.h tools/tPlayList.cpp\
-	tools/tCoord.h
+	tools/tCoord.h \
+	tools/tFunction.h tools/tFunction.cpp
 
 #tools/tCommandLine.cpp tools/tCommandLine.h
 libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentification.cpp\
@@ -127,7 +128,6 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/zone/zSelector.h      tron/zone/zSelector.cpp\
 	tron/zone/zEffector.h      tron/zone/zEffector.cpp\
 	tron/zone/zZoneInfluence.h tron/zone/zZoneInfluence.cpp\
-	tron/tFunction.h tron/tFunction.cpp\
 	tron/gServerFavorites.h tron/gServerFavorites.cpp\
 	tron/gStatistics.h tron/gStatistics.cpp\
 	tron/gStatList.h tron/gStatList.cpp\

@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ArmageTron_tFunction_H
 
 #include "defs.h"
+#include "tError.h"
 
 //! mathematical function (to be moved into tools sometime, and currently limited to linear functions)
 class tFunction
@@ -55,9 +56,14 @@ protected:
 private:
 };
 
-#include "eNetGameObject.h"
-nMessage & operator << ( nMessage & m, tFunction const & f ); //! function network message writing operator
-nMessage & operator >> ( nMessage & m, tFunction & f );       //! function network message reading operator
+//These templates are probably only useable with nMessage as parameter.
+//The reason they're templates is that nMessage isn't available in src/tools
+//and that tFunction might be needed to be in src/tools in the future.
+//Imagine a constructor for vValue that converts from a tFunction as an
+//example (or the other way, as far as possible). --wrtlprnft
+
+template<typename T> T & operator << ( T & m, tFunction const & f ); //! function network message writing operator
+template<typename T> T & operator >> ( T & m, tFunction & f );       //! function network message reading operator
 
 // *******************************************************************************
 // *
@@ -170,6 +176,60 @@ tFunction & tFunction::SetSlope( REAL const & slope )
 {
     this->slope_ = slope;
     return *this;
+}
+
+// *******************************************************************************
+// *
+// *	operator <<
+// *
+// *******************************************************************************
+//!
+//!		@param	m	message to write to
+//!		@param	f	function to write
+//!		@return		reference to message for chaining
+//!
+// *******************************************************************************
+
+template<typename T> T & operator << ( T & m, tFunction const & f )
+{
+    // write ID for compatibility with future extensions
+    unsigned short ID = 1;
+    m.Write( ID );
+
+    // write values
+    m << f.GetOffset();
+    m << f.GetSlope();
+
+    return m;
+}
+
+// *******************************************************************************
+// *
+// *	operator >>
+// *
+// *******************************************************************************
+//!
+//!     @param  m   message to read from
+//!     @param  f   function to read to
+//!     @return     reference to message for chaining
+//!
+// *******************************************************************************
+
+template<typename T> T & operator >> ( T & m, tFunction & f )
+{
+    // write ID for compatibility with future extensions
+    unsigned short ID;
+    m.Read(ID);
+    tASSERT( ID == 1 );
+
+    // read values
+    REAL slope, offset;
+    m >> offset >> slope;
+
+    // store values
+    f.SetOffset( offset ).SetSlope( slope );
+
+    return m;
 }
 
 #endif
