@@ -111,14 +111,14 @@ task :rebeautify do
        "#{AAConfig::SRC_DIR}/batch/make/beautify" -t "#{AAConfig::SRC_DIR}" "#{AAConfig::SRC_DIR}/.beautytag.re"}
 end
 
-desc "Switches between your settings (beautify-personal) to the project defaults, and leaves timestamps untouched"
+desc "Switches between your settings (beautify-personal) to the project defaults and leaves timestamps untouched"
 task :beautify do
   rm_f %{"#{AAConfig::SRC_DIR}/.beautytag.personal"}
   sh %{ARTISTIC_STYLE_OPTIONS="#{AAConfig::SRC_DIR}/config/astylerc" \\
        "#{AAConfig::SRC_DIR}/batch/make/beautify" "#{AAConfig::SRC_DIR}" "#{AAConfig::SRC_DIR}/.beautytag"}
 end
 
-desc "Uses your personal settings. Remeber to run ``rake beautify'' before commit!"
+desc "Uses your personal settings. Run “rake beautify” before commit!"
 task :beautify_personal do
   rm_f %{"#{AAConfig::SRC_DIR}/.beautytag"}, %{"#{AAConfig::SRC_DIR}/.beautytag.re"}
   sh %{ARTISTIC_STYLE_OPTIONS=$HOME/.astylerc \\

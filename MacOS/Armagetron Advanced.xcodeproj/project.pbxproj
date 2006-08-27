@@ -246,10 +246,10 @@
 		9B4A19E50A7A90620070BE82 /* zValidator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19CB0A7A90620070BE82 /* zValidator.cpp */; };
 		9B4A19E60A7A90620070BE82 /* zZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19CD0A7A90620070BE82 /* zZone.cpp */; };
 		9B4A19E70A7A90620070BE82 /* zZoneInfluence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19CF0A7A90620070BE82 /* zZoneInfluence.cpp */; };
-		9B4A19FE0A7A93950070BE82 /* tFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19FC0A7A93950070BE82 /* tFunction.cpp */; };
-		9B4A1A000A7A93950070BE82 /* tFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19FC0A7A93950070BE82 /* tFunction.cpp */; };
 		9B4A1A280A7A95890070BE82 /* mathexpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A1A210A7A95890070BE82 /* mathexpr.cpp */; };
 		9B4A1A2E0A7A95890070BE82 /* mathexpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A1A210A7A95890070BE82 /* mathexpr.cpp */; };
+		9BCDA56F0AA1E64F00EB532B /* tFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BCDA56D0AA1E64F00EB532B /* tFunction.cpp */; };
+		9BCDA5700AA1E64F00EB532B /* tFunction.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BCDA56E0AA1E64F00EB532B /* tFunction.h */; };
 		9BD56C4A0A8B899700AC1048 /* vCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C370A8B899700AC1048 /* vCollection.cpp */; };
 		9BD56C4C0A8B899700AC1048 /* vCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C390A8B899700AC1048 /* vCore.cpp */; };
 		9BD56C4F0A8B899700AC1048 /* vebLegacy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C3C0A8B899700AC1048 /* vebLegacy.cpp */; };
@@ -313,6 +313,7 @@
 				9BD7D9A70A2C7CCF00D7033C /* libpng.framework in Copy Frameworks */,
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
+				9BCDA5700AA1E64F00EB532B /* tFunction.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -324,7 +325,7 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Armagetron Advanced_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Armagetron Advanced_Prefix.pch"; path = "../src/macosx/Armagetron Advanced_Prefix.pch"; sourceTree = "<group>"; };
-		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C1AB77D09A3D2D9007E2048 /* AAURLHandler.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AAURLHandler.mm; path = ../src/macosx/AAURLHandler.mm; sourceTree = SOURCE_ROOT; };
 		8C1AB77F09A3D2FB007E2048 /* AAURLHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AAURLHandler.h; path = ../src/macosx/AAURLHandler.h; sourceTree = SOURCE_ROOT; };
 		8C1D387F099D3DAF00A334A8 /* eSoundMixer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eSoundMixer.cpp; sourceTree = "<group>"; };
@@ -578,12 +579,12 @@
 		9B4A19CF0A7A90620070BE82 /* zZoneInfluence.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zZoneInfluence.cpp; sourceTree = "<group>"; };
 		9B4A19D00A7A90620070BE82 /* zZoneInfluence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zZoneInfluence.h; sourceTree = "<group>"; };
 		9B4A19FA0A7A931B0070BE82 /* gVectorExtra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gVectorExtra.h; sourceTree = "<group>"; };
-		9B4A19FC0A7A93950070BE82 /* tFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tFunction.cpp; sourceTree = "<group>"; };
-		9B4A19FD0A7A93950070BE82 /* tFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tFunction.h; sourceTree = "<group>"; };
 		9B4A1A210A7A95890070BE82 /* mathexpr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mathexpr.cpp; sourceTree = "<group>"; };
 		9B4A1A220A7A95890070BE82 /* mathexpr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mathexpr.h; sourceTree = "<group>"; };
 		9B86E63A0A2DFDA600D90F1C /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config_common.h; path = ../src/macosx/config_common.h; sourceTree = SOURCE_ROOT; };
 		9B9E23FA0A825FA90067CCFA /* tValueParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tValueParser.h; sourceTree = "<group>"; };
+		9BCDA56D0AA1E64F00EB532B /* tFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tFunction.cpp; sourceTree = "<group>"; };
+		9BCDA56E0AA1E64F00EB532B /* tFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tFunction.h; sourceTree = "<group>"; };
 		9BD56C370A8B899700AC1048 /* vCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vCollection.cpp; sourceTree = "<group>"; };
 		9BD56C380A8B899700AC1048 /* vCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vCollection.h; sourceTree = "<group>"; };
 		9BD56C390A8B899700AC1048 /* vCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vCore.cpp; sourceTree = "<group>"; };
@@ -873,6 +874,8 @@
 				8CBA5E9D089EEC7D007E21DC /* tEventQueue.h */,
 				8CBA5E9E089EEC7D007E21DC /* tException.cpp */,
 				8CBA5E9F089EEC7D007E21DC /* tException.h */,
+				9BCDA56D0AA1E64F00EB532B /* tFunction.cpp */,
+				9BCDA56E0AA1E64F00EB532B /* tFunction.h */,
 				8CBA5EA0089EEC7D007E21DC /* tHeap.cpp */,
 				8CBA5EA1089EEC7D007E21DC /* tHeap.h */,
 				8CAA3F25099D3CCA001CB80C /* tIniFile.cpp */,
@@ -981,8 +984,6 @@
 				8CBA5EF1089EEC7D007E21DC /* gWall.h */,
 				8CBA5EF2089EEC7D007E21DC /* gWinZone.cpp */,
 				8CBA5EF3089EEC7D007E21DC /* gWinZone.h */,
-				9B4A19FC0A7A93950070BE82 /* tFunction.cpp */,
-				9B4A19FD0A7A93950070BE82 /* tFunction.h */,
 				9B4A19C00A7A90620070BE82 /* zone */,
 			);
 			name = tron;
@@ -1420,7 +1421,6 @@
 				9B4A19E50A7A90620070BE82 /* zValidator.cpp in Sources */,
 				9B4A19E60A7A90620070BE82 /* zZone.cpp in Sources */,
 				9B4A19E70A7A90620070BE82 /* zZoneInfluence.cpp in Sources */,
-				9B4A1A000A7A93950070BE82 /* tFunction.cpp in Sources */,
 				9B4A1A2E0A7A95890070BE82 /* mathexpr.cpp in Sources */,
 				9BD56C5D0A8B899700AC1048 /* vCollection.cpp in Sources */,
 				9BD56C5E0A8B899700AC1048 /* vCore.cpp in Sources */,
@@ -1560,7 +1560,6 @@
 				9B4A19DB0A7A90620070BE82 /* zValidator.cpp in Sources */,
 				9B4A19DD0A7A90620070BE82 /* zZone.cpp in Sources */,
 				9B4A19DF0A7A90620070BE82 /* zZoneInfluence.cpp in Sources */,
-				9B4A19FE0A7A93950070BE82 /* tFunction.cpp in Sources */,
 				9B4A1A280A7A95890070BE82 /* mathexpr.cpp in Sources */,
 				9BD56C4A0A8B899700AC1048 /* vCollection.cpp in Sources */,
 				9BD56C4C0A8B899700AC1048 /* vCore.cpp in Sources */,
@@ -1571,6 +1570,7 @@
 				9BD56C570A8B899700AC1048 /* veMath.cpp in Sources */,
 				9BD56C5A0A8B899700AC1048 /* vParser.ypp in Sources */,
 				9BD56C5B0A8B899700AC1048 /* vRegistry.cpp in Sources */,
+				9BCDA56F0AA1E64F00EB532B /* tFunction.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
