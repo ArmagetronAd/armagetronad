@@ -1777,7 +1777,7 @@ void MainMenu(bool ingame){
     if (ingame)
         sr_con.SetHeight(2);
 
-    gLogo::SetDisplayed(true);
+    //gLogo::SetDisplayed(true);
 
     tOutput gametitle;
     if (!ingame)
