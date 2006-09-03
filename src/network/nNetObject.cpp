@@ -150,7 +150,7 @@ struct nDeletedInfo
 };
 
 // info about deleted objects, sorted by their former ID
-typedef std::map< unsigned short, nDeletedInfo > nDeletedInfos;
+typedef std::map< nNetObjectID, nDeletedInfo > nDeletedInfos;
 static nDeletedInfos sn_netObjectsDeleted;
 
 static bool free_server( nNetObjectID id )
@@ -1069,7 +1069,7 @@ nNetObject::~nNetObject(){
 #endif
             sn_netObjects[id] = NULL;
         }
-        
+
         // clear object from info arrays
         nDeletedInfos::iterator found = sn_netObjectsDeleted.find( id );
         if ( found != sn_netObjectsDeleted.end() )
