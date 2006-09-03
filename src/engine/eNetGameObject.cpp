@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "uInput.h"
 #include "eGrid.h"
 #include "eTeam.h"
+#include "eTess2.h"
 
 //static nNOInitialisator<eNetGameObject> eNetGameObject_Init("eNetGameObject");
 
@@ -125,6 +126,8 @@ void eNetGameObject::RemoveFromGame(){
     }
 
     team = NULL;
+
+    currentFace = 0;
 }
 
 eNetGameObject::~eNetGameObject(){
