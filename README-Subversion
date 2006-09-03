@@ -57,16 +57,18 @@ If all goes smoothly, you can now edit Armagetron Advanced and run it.
 ## Prerequisites
 
 * [Apple developer tools](http://developer.apple.com)
-    * Xcode 2.2 or greater is required.
+    * Xcode 2.4 or greater is required.
 * [rake](http://rubyforge.org/projects/rake)
+* [Bison 2.2](http://www.gnu.org/software/bison/)
 * [Other Libraries](http://generalconsumption.org/armagetron/libs)
     * Unzip and install to /Libraries
 
 ## Building
 
 1. Open “MacOS/Armagetron Advanced.xcodeproj”.
-2. There is a big “Build” button. Click it.
-3. An “armagetronad-build” directory will be created along-side the source directory, in which generated files and products are stored.
+2. The BISON variables defaults to /opt/local/bin/bison. You must change it if your installed bison is located elsewhere.
+3. There is a big “Build” button. Click it.
+4. An “armagetronad-build” directory will be created along-side the source directory, in which generated files and products are stored.
 
 *********************
 * Windows + VisualC *
