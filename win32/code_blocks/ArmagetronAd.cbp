@@ -85,9 +85,13 @@
 			<Add directory="..\..\src\network" />
 			<Add directory="..\..\src\render" />
 			<Add directory="..\..\src\tools" />
+			<Add directory="..\..\src\tools\values" />
 			<Add directory="..\..\src\ui" />
 			<Add directory="..\..\src\win32" />
 			<Add directory="..\..\src\tron" />
+			<Add directory="..\..\src\tron\cockpit" />
+			<Add directory="..\..\src\tron\zone" />
+			<Add directory="..\..\src\thirdparty\mathexpr" />
 			<Add directory="..\..\src\thirdparty\particles" />
 			<Add directory="..\..\src\thirdparty\particles\ParticleDLL" />
 			<Add directory="..\..\src\thirdparty\shttpd" />
@@ -111,94 +115,6 @@
 			<Add library="..\..\..\winlibs\SDL_image\VisualC\graphics\lib\libpng13.lib" />
 			<Add library="..\..\..\winlibs\libxml2\lib\libxml2.lib" />
 		</Linker>
-		<Unit filename="..\..\build\debug\config\default.cfg">
-			<Option compilerVar="" />
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="Win32 Release" />
-			<Option target="Win32 Debug" />
-			<Option target="Win32 Profile" />
-		</Unit>
-		<Unit filename="..\..\build\debug\config\settings.cfg">
-			<Option compilerVar="" />
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="Win32 Release" />
-			<Option target="Win32 Debug" />
-			<Option target="Win32 Profile" />
-		</Unit>
-		<Unit filename="..\..\build\debug\config\settings_dedicated.cfg">
-			<Option compilerVar="" />
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="Win32 Release" />
-			<Option target="Win32 Debug" />
-			<Option target="Win32 Profile" />
-		</Unit>
-		<Unit filename="..\..\build\debug\language\american.txt">
-			<Option compilerVar="CPP" />
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="Win32 Debug" />
-			<Option target="Win32 Profile" />
-			<Option target="Win32 Release" />
-		</Unit>
-		<Unit filename="..\..\build\debug\language\british.txt">
-			<Option compilerVar="CPP" />
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="Win32 Debug" />
-			<Option target="Win32 Profile" />
-			<Option target="Win32 Release" />
-		</Unit>
-		<Unit filename="..\..\build\debug\language\deutsch.txt">
-			<Option compilerVar="" />
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="Win32 Release" />
-			<Option target="Win32 Debug" />
-			<Option target="Win32 Profile" />
-		</Unit>
-		<Unit filename="..\..\build\debug\language\english_base.txt">
-			<Option compilerVar="CPP" />
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="Win32 Debug" />
-			<Option target="Win32 Profile" />
-			<Option target="Win32 Release" />
-		</Unit>
-		<Unit filename="..\..\build\debug\language\english_base_notranslate.txt">
-			<Option compilerVar="CPP" />
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="Win32 Debug" />
-			<Option target="Win32 Profile" />
-			<Option target="Win32 Release" />
-		</Unit>
-		<Unit filename="..\..\build\debug\language\french.txt">
-			<Option compilerVar="CPP" />
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="Win32 Debug" />
-			<Option target="Win32 Profile" />
-			<Option target="Win32 Release" />
-		</Unit>
-		<Unit filename="..\..\build\debug\language\new.txt">
-			<Option compilerVar="" />
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="Win32 Release" />
-			<Option target="Win32 Debug" />
-			<Option target="Win32 Profile" />
-		</Unit>
-		<Unit filename="..\..\build\debug\language\spanish.txt">
-			<Option compilerVar="CPP" />
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="Win32 Debug" />
-			<Option target="Win32 Profile" />
-			<Option target="Win32 Release" />
-		</Unit>
 		<Unit filename="..\..\src\config_ide.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
@@ -349,6 +265,20 @@
 		</Unit>
 		<Unit filename="..\..\src\engine\eKrawall.h">
 			<Option compilerVar="" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\engine\eLagCompensation.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\engine\eLagCompensation.h">
+			<Option compilerVar="CPP" />
 			<Option compile="0" />
 			<Option link="0" />
 			<Option target="Win32 Release" />
@@ -933,6 +863,20 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
+		<Unit filename="..\..\src\thirdparty\mathexpr\mathexpr.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\thirdparty\mathexpr\mathexpr.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
 		<Unit filename="..\..\src\thirdparty\particles\ParticleDLL\Particle.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
@@ -1185,6 +1129,20 @@
 		</Unit>
 		<Unit filename="..\..\src\tools\tException.h">
 			<Option compilerVar="" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\tFunction.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\tFunction.h">
+			<Option compilerVar="CPP" />
 			<Option compile="0" />
 			<Option link="0" />
 			<Option target="Win32 Release" />
@@ -1475,12 +1433,6 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\..\src\tools\tValue.cpp">
-			<Option compilerVar="CPP" />
-			<Option target="Win32 Release" />
-			<Option target="Win32 Debug" />
-			<Option target="Win32 Profile" />
-		</Unit>
 		<Unit filename="..\..\src\tools\tValue.h">
 			<Option compilerVar="" />
 			<Option compile="0" />
@@ -1497,6 +1449,140 @@
 		</Unit>
 		<Unit filename="..\..\src\tools\tXmlParser.h">
 			<Option compilerVar="" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\vCollection.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\vCollection.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\vCore.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\vCore.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\vParser.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\vParser.ypp">
+			<Option compilerVar="CPP" />
+			<Option compiler="gcc" use="1" buildCommand="bison $file -o help.cpp\n$compiler $options $includes -c help.cpp -o $object" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\vRegistry.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\vRegistry.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\veComparison.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\veComparison.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\veLogic.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\veLogic.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\veMath.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\veMath.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\vebCFunction.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\vebLegacy.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\vebLegacy.h">
+			<Option compilerVar="CPP" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\vebMathExpr.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tools\values\vebMathExpr.h">
+			<Option compilerVar="CPP" />
 			<Option compile="0" />
 			<Option link="0" />
 			<Option target="Win32 Release" />
@@ -1957,14 +2043,106 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\..\src\tron\gWinZone.cpp">
+		<Unit filename="..\..\src\tron\zone\zEffectGroup.cpp">
 			<Option compilerVar="CPP" />
 			<Option target="Win32 Release" />
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\..\src\tron\gWinZone.h">
-			<Option compilerVar="" />
+		<Unit filename="..\..\src\tron\zone\zEffectGroup.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tron\zone\zEffector.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tron\zone\zEffector.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tron\zone\zMisc.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tron\zone\zMonitor.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tron\zone\zMonitor.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tron\zone\zSelector.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tron\zone\zSelector.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tron\zone\zValidator.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tron\zone\zValidator.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tron\zone\zZone.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tron\zone\zZone.h">
+			<Option compilerVar="CPP" />
+			<Option compile="0" />
+			<Option link="0" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tron\zone\zZoneInfluence.cpp">
+			<Option compilerVar="CPP" />
+			<Option target="Win32 Release" />
+			<Option target="Win32 Debug" />
+			<Option target="Win32 Profile" />
+		</Unit>
+		<Unit filename="..\..\src\tron\zone\zZoneInfluence.h">
+			<Option compilerVar="CPP" />
 			<Option compile="0" />
 			<Option link="0" />
 			<Option target="Win32 Release" />
@@ -2062,29 +2240,6 @@
 			<Option target="Win32 Debug" />
 			<Option target="Win32 Profile" />
 		</Unit>
-		<Unit filename="..\..\..\winlibs\build\dist\FTGL.dll">
-			<Option compilerVar="CPP" />
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="Win32 Release" />
-		</Unit>
-		<Unit filename="..\..\..\winlibs\build\dist\SDL.dll">
-			<Option compilerVar="CPP" />
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="Win32 Release" />
-		</Unit>
-		<Unit filename="..\..\..\winlibs\build\dist\SDL_image.dll">
-			<Option compilerVar="CPP" />
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="Win32 Release" />
-		</Unit>
-		<Unit filename="..\..\..\winlibs\build\dist\SDL_mixer.dll">
-			<Option compilerVar="CPP" />
-			<Option compile="0" />
-			<Option link="0" />
-			<Option target="Win32 Release" />
-		</Unit>
+		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

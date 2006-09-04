@@ -58,7 +58,7 @@ Compare::GetValue(void) const {
         else
             if (*m_lvalue > *m_rvalue)
                 return 1;
-    return NAN;
+    return 0;
 }
 
 Base *Compare::copy(void) const {

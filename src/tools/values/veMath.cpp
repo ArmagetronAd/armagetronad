@@ -30,6 +30,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "vebCFunction.h"
 #include "veMath.h"
 
+long int ve_math_random()
+{
+    return (long int)tRandomizer::GetInstance().Get(RAND_MAX);
+}
+
+
 using namespace vValue::Registry;
 
 namespace vValue {

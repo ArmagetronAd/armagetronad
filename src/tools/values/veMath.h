@@ -32,9 +32,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ARMAGETRON_veMath_h
 
 #include <math.h>
+#include "tRandom.h"
 
+long int ve_math_random();
 #include "values/vCore.h"
 #include "values/vebCFunction.h"
+
 
 namespace vValue {
 namespace Expr {
@@ -73,7 +76,7 @@ public:
     virtual Base *copy(void) const; //!< Returns an exact copy of this object
 };
 
-typedef Bindings::CFunction::fZeroary<long int, random> Random;
+typedef Bindings::CFunction::fZeroary<long int, ve_math_random> Random;
 
 namespace Trig {
 
