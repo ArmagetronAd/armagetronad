@@ -58,7 +58,8 @@ Compare::GetValue(void) const {
         else
             if (*m_lvalue > *m_rvalue)
                 return 1;
-    return 0;
+    // cast required for windows
+    return (REAL)NAN;
 }
 
 Base *Compare::copy(void) const {
