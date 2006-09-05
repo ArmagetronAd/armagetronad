@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <!DOCTYPE Resource SYSTEM "AATeam/cockpit-0.3.0.dtd">
 
-<Resource type="aacockpit" name="testfile" version="0.0.2" author="wrtlprnft" category="">
+<Resource type="aacockpit" name="testfile" version="0.0.3" author="wrtlprnft" category="">
     <Cockpit version="0.0.1">
 	<WidgetTemplate id="RubberBackground">
             <Background>
