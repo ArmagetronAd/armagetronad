@@ -37,7 +37,7 @@
                 </Solid>
             </Background>
         </Rectangle>
-        <VerticalBarGauge camera="^in" usetemplate="RubberBackground">
+        <VerticalBarGauge usetemplate="RubberBackground">
             <DataSet>
 		<AtomicData field="source" source="player_rubber" />
 		<AtomicData field="minimum" source="0" />
@@ -52,7 +52,7 @@
                 <Text value="Rubber" />
             </Caption>
         </VerticalBarGauge>
-        <VerticalBarGauge camera="^in">
+        <VerticalBarGauge>
             <DataSet>
 		<AtomicData field="source" source="player_brakes" />
 		<AtomicData field="minimum" source="0" />
@@ -84,7 +84,7 @@
                 </Gradient>
             </Foreground>
         </VerticalBarGauge>
-        <VerticalBarGauge camera="^in">
+        <VerticalBarGauge>
             <DataSet>
 		<Math lvalue="1." type="quotient">
 		    <RValue>
@@ -120,7 +120,7 @@
                 </Gradient>
             </Foreground>
         </VerticalBarGauge>
-	<Label camera="*" usetemplate="SmallText">
+	<Label usetemplate="SmallText">
             <DataSet id="time">
 		<AtomicData field="source" source="time_to_impact_front" />
 	    </DataSet>
@@ -136,7 +136,7 @@
                 </Table>
             </Face>
         </Label>
-        <VerticalBarGauge camera="^in">
+        <VerticalBarGauge>
             <DataSet>
 		<AtomicData field="source" source="player_speed" />
 		<AtomicData field="minimum" source="0" />
@@ -164,7 +164,7 @@
                 </Gradient>
             </Foreground>
         </VerticalBarGauge>
-	<Label camera="*" usetemplate="SmallText">
+	<Label usetemplate="SmallText">
             <DataSet id="speed">
 		<AtomicData field="source" source="player_speed" />
 	    </DataSet>
@@ -198,7 +198,7 @@
                 </Table>
             </Face>
         </Label>
-	<Label camera="*" usetemplate="SmallText">
+	<Label usetemplate="SmallText">
             <DataSet id="fastest">
 		<AtomicData field="source" source="fastest_speed_round" />
 	    </DataSet>
@@ -218,7 +218,7 @@
             </Face>
         </Label>
 
-        <Rectangle camera="^in">
+        <Rectangle>
             <DataSet>
 		<AtomicData field="source" source="friends_alive" />
 		<AtomicData field="minimum" source="0." />
@@ -235,7 +235,7 @@
                 </Gradient>
             </Background>
         </Rectangle>
-        <Rectangle camera="^in">
+        <Rectangle>
             <DataSet>
 		<AtomicData field="source" source="enemies_alive" />
 		<AtomicData field="minimum" source="0." />
@@ -253,7 +253,7 @@
             </Background>
         </Rectangle>
         <!-- Example configuration for a Enemies: x Mates: y display -->
-	<Label camera="*" usetemplate="SmallText">
+	<Label usetemplate="SmallText">
             <DataSet id="friends">
 		<AtomicData field="source" source="friends_alive" />
 	    </DataSet>
@@ -269,7 +269,7 @@
                 </Table>
             </Face>
         </Label>
-	<Label camera="*" usetemplate="SmallText">
+	<Label usetemplate="SmallText">
             <DataSet id="enemies">
 		<AtomicData field="source" source="enemies_alive" />
 	    </DataSet>
@@ -285,7 +285,7 @@
                 </Table>
             </Face>
         </Label>
-        <Rectangle camera="^in">
+        <Rectangle>
             <DataSet>
 		<Conditional field="source" lvalue="enemies_alive" rvalue="0" operator="eq">
 		    <IfTrue>
@@ -308,7 +308,7 @@
                 </Gradient>
             </Background>
         </Rectangle>
-        <Rectangle camera="^in">
+        <Rectangle>
             <DataSet>
 		<AtomicData field="source" source="current_ping" />
 		<AtomicData field="minimum" source="0." />
@@ -326,7 +326,7 @@
                 </Gradient>
             </Background>
         </Rectangle>
-	<Label camera="*" usetemplate="SmallText">
+	<Label usetemplate="SmallText">
             <DataSet id="ping">
 		<AtomicData field="source" source="current_ping" />
 	    </DataSet>
@@ -340,7 +340,7 @@
                 </Table>
             </Face>
         </Label>
-	<Label camera="*" usetemplate="BigText">
+	<Label  usetemplate="BigText">
             <DataSet id="myscore">
 		<AtomicData source="current_score" />
 	    </DataSet>
@@ -374,7 +374,7 @@
                 </Table>
             </Face>
         </Label>
-	<Label camera="*" viewport="top" usetemplate="BigText">
+	<Label viewport="top" usetemplate="BigText">
             <DataSet id="hours">
 		<AtomicData source="current_hours12h" minwidth="2" fill="0" />
 	    </DataSet>
@@ -418,7 +418,7 @@
                 </Table>
             </Face>
         </Label>
-        <BarGauge camera="*" viewport="top">
+        <BarGauge viewport="top">
             <DataSet>
 		<AtomicData field="source" source="current_framerate" />
 		<AtomicData field="minimum" source="0" />
@@ -440,11 +440,11 @@
                 </Solid>
             </Foreground>
         </BarGauge>
-	<Map camera="*" viewport="top" toggle="1">
+	<Map viewport="top" toggle="1">
 	    <Position x="0" y="-.23" />
 	    <Size height=".7" width="0.7" />
 	</Map>
-        <BarGauge camera="*">
+        <BarGauge >
             <DataSet>
 		<AtomicData field="source" source="player_acceleration" />
 		<AtomicData field="minimum" source="0" />
@@ -467,7 +467,7 @@
                 </Gradient>
             </Foreground>
         </BarGauge>
-        <BarGauge camera="*">
+        <BarGauge >
             <DataSet>
 		<AtomicData field="source" source="player_acceleration" />
 		<AtomicData field="minimum" source="-10" />
@@ -491,7 +491,7 @@
                 </Solid>
             </Foreground>
         </BarGauge>
-	<Label camera="*" usetemplate="BigText">
+	<Label usetemplate="BigText">
             <DataSet id="accel">
 		<AtomicData source="player_acceleration" />
 	    </DataSet>
