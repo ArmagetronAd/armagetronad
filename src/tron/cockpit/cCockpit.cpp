@@ -536,9 +536,6 @@ cCockpit* cCockpit::GetCockpit() {
 }
 
 void cCockpit::RenderPlayer() {
-    if( m_Player == 0 ) return;
-    if(m_ViewportPlayer == 0) return;
-
     if(m_FocusPlayer != 0 && m_ViewportPlayer != 0) {
         sr_ResetRenderState(false);
         Color(1,1,1);
@@ -587,6 +584,9 @@ void cCockpit::RenderPlayer() {
 
 }
 void cCockpit::RenderRootwindow() {
+    if( m_Player == 0 ) return;
+    if(m_ViewportPlayer == 0) return;
+
     sr_ResetRenderState(true);
     glViewport (GLsizei(0),
                 GLsizei(0),
