@@ -92,7 +92,8 @@
 <!ATTLIST Label %CommonWidgetAttributes;>
 
 <!ELEMENT Map ((   Position |
-                  Size
+                  Size |
+				  Background
                   )*)>
 <!ATTLIST Map %CommonWidgetAttributes;>
 

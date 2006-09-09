@@ -30,6 +30,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 //#include <iostream>
 #include "defs.h"
+#include "tError.h"
+#include <iterator>
+#include <algorithm>
+#include <map>
+#include <vector>
 
 //! Stores any kind of x and y coordinates
 class tCoord{
@@ -66,11 +71,45 @@ public:
         return(F(ab,ac)/F(ac,ac));
     }
 
+    //! returns the cross product of the three given points, whatever that is--code taken from http://en.wikipedia.org/wiki/Graham_scan
+    static REAL CrossProduct(tCoord const &a, tCoord const &b, tCoord const &c) {
+        return (b.x - a.x)*(c.y - a.y) - (c.x - a.x)*(b.y - a.y);
+    }
+
+    //! returns delta y over delta x
+    static REAL Tangent(tCoord const &a, tCoord const &b) {
+        return (b.y - a.y)/(b.x-a.x);
+    }
+
+private:
+    class GrahamComparator {
+        tCoord const &m_reference;
+    public:
+        GrahamComparator(tCoord const &reference) : m_reference(reference) {}
+        bool operator()(tCoord const &a, tCoord const &b) {
+            REAL ta = Tangent(m_reference, a), tb = Tangent(m_reference, b);
+
+            //check for 90 degree angles...
+            if(ta == NAN && tb == NAN) return fabs((m_reference-a).NormSquared()) < fabs((m_reference-b).NormSquared());
+            if(ta == NAN) return tb<0;
+            if(tb == NAN) return ta>0;
+
+            //check for opposite sides
+            if(ta>0 && tb<0) return true;
+            if(tb>0 && ta<0) return false;
+
+            return (ta<tb-EPS) || ((fabs(ta-tb)<EPS) && fabs((m_reference-a).NormSquared()) < fabs((m_reference-b).NormSquared()));
+        }
+    };
+public:
+
+    //! finds the smallest convex polygon completely surrounding all points in in and stores them in out. See also http://en.wikipedia.org/wiki/Graham_scan
+    template<typename T> static void GrahamScan(T &in, T &out);
 
     //! returns a positive number if (a,*this) form a right-handed
     //! coordinate system, a negative number, if ...
     //! and 0, if a and *this are parallel.
-    REAL   operator*(const tCoord &a) const{return -x*a.y+y*a.x;}
+REAL   operator*(const tCoord &a) const{return -x*a.y+y*a.x;}
 
 
     //! complex multiplication: turns this by angle given in a
@@ -112,6 +151,77 @@ inline std::ostream &operator<< (std::ostream &s,const tCoord &c){
 inline std::istream &operator>> (std::istream &s,tCoord &c){
     c.Read(s);
     return s;
+}
+
+//! @param in the standard container containing the tCoords to wrap into a rubber band. In will be modified!
+//! @param out the standard container to put the rubber band into, its contents will be erased
+template<typename T> void tCoord::GrahamScan(T &in, T &out) {
+    tASSERT(!in.empty());
+    out.clear();
+
+    // find the point that's closest to the bottom, preferring points to the left
+    tCoord P=in.front();
+    typename T::iterator iter(in.begin()+1);
+    for(; iter != in.end(); ++iter) {
+        if(iter->y < P.y || iter->y == P.y && iter->x < P.x) {
+            P = *iter;
+        }
+    }
+
+    std::sort(in.begin(), in.end(), GrahamComparator(P));
+
+    //std::cerr << "P: " << P << std::endl;
+
+    out.push_back(P);
+    for(typename T::iterator iter = in.begin()+1; iter != in.end(); ++iter) {
+        if(*iter != P) {
+            out.push_back(*iter);
+            break;
+        }
+    }
+    if(out.size()<2) return; //all points equeal P, kinda boring...
+
+    //std::copy(in.begin(), in.end(), std::ostream_iterator<tCoord>(std::cerr, " "));
+    //std::cerr << std::endl;
+    for(typename T::iterator iter = in.begin(); iter != in.end(); ++iter) {
+        //std::cerr << "New point: " << *iter << "; angle=" << (atanf(Tangent(P, *iter))*180/M_PI) << std::endl;
+    }
+
+    for(typename T::iterator iter = in.begin()+2; iter != in.end(); ++iter) {
+        if(*iter == P) continue;
+        if(*iter == *(iter - 1)) continue; //duplicate or near- duplicate point; We don't want that mess.
+        //std::cerr << "New point: " << *iter << "; angle=" << Tangent(P, *iter) << std::endl;
+        //if(iter->y > 200) std::cerr << "==================\n";
+        float product = CrossProduct(out[out.size()-2], out.back(), *iter);
+        if (product < 0 || fabs(product) < EPS) {
+            //the last three points are concave, remove points until they're not
+            while((product < 0 || fabs(product) < EPS) && out.size() > 2) {
+                //std::cerr << "concave: " << *(iter-2) << " " << *(iter-1) << " " << *iter << std::endl;
+                //std::copy(out.begin(), out.end(), std::ostream_iterator<tCoord>(std::cerr, " "));
+                //std::cerr << std::endl;
+                out.pop_back();
+                product = CrossProduct(out[out.size()-2], out.back(), *iter);
+            }
+        } else {
+            //std::cerr << "Passed point: " << *iter << std::endl;
+        }
+        out.push_back(*iter);
+        //std::copy(out.begin(), out.end(), std::ostream_iterator<tCoord>(std::cerr, " "));
+        //std::cerr << std::endl;
+    }
+    float product = CrossProduct(out[out.size()-2], out.back(), P);
+    while((product < 0 || fabs(product) < EPS) && out.size() > 2) {
+        //std::cerr << "concave: " << *(iter-2) << " " << *(iter-1) << " " << *iter << std::endl;
+        //std::copy(out.begin(), out.end(), std::ostream_iterator<tCoord>(std::cerr, " "));
+        //std::cerr << std::endl;
+        out.pop_back();
+        product = CrossProduct(out[out.size()-2], out.back(), P);
+    }
+    //std::cerr << "=====\n";
+    //for(typename T::iterator iter = out.begin(); iter != out.end(); ++iter) {
+    //	std::cerr << *iter << std::endl;
+    //}
+
 }
 
 //! ?

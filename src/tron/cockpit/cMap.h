@@ -48,8 +48,8 @@ class zZone;
 namespace cWidget {
 
 //! Processes and renders a map of the grid
-class Map : public WithCoordinates {
-    static void DrawRimWalls( tList<eWallRim> &list ); //!< Draws all the rim walls
+class Map : public WithCoordinates, public WithBackground {
+    void DrawRimWalls( tList<eWallRim> &list ); //!< Draws all the rim walls
     void DrawWalls(tList<gNetPlayerWall> &list); //!< Draws all player walls
     void DrawCycles(tList<ePlayerNetID> &list, double xscale, double yscale); //!< Draws all cycles as triangles
     void DrawZones(std::deque<zZone *> const &list); //!< Draws all Zones

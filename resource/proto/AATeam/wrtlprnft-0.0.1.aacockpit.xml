@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<!DOCTYPE Resource SYSTEM "AATeam/cockpit-0.3.0.dtd">
+<!DOCTYPE Resource SYSTEM "cockpit.dtd">
 
 <Resource type="aacockpit" name="testfile" version="0.0.3" author="wrtlprnft" category="">
     <Cockpit version="0.0.1">
@@ -443,6 +443,11 @@
 	<Map viewport="top" toggle="1">
 	    <Position x="0" y="-.23" />
 	    <Size height=".7" width="0.7" />
+		<Background>
+			<Solid>
+				<Color r="1." g="1." b="1." alpha="0." />
+			</Solid>
+		</Background>
 	</Map>
         <BarGauge >
             <DataSet>

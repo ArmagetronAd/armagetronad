@@ -35,6 +35,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConfiguration.h"
 #include "eRectangle.h"
 
+#include <vector>
+
 /* **********************************************
    RimWall
    ********************************************** */
@@ -143,6 +145,8 @@ const eRectangle & eWallRim::GetBounds( void )
     return se_rimWallBounds;
 }
 
+std::vector<eCoord> se_rimWallRubberBand;
+
 // ****************************************************************************
 // *
 // *	UpdateBounds
@@ -154,13 +158,20 @@ const eRectangle & eWallRim::GetBounds( void )
 
 void eWallRim::UpdateBounds( void )
 {
+    std::vector<tCoord> allPoints;
+
     // calculate bounding box
     se_rimWallBounds.Clear();
     for(int i = se_rimWalls.Len()-1; i>=0; --i )
     {
         eWall * w = se_rimWalls(i);
         se_rimWallBounds.Include(w->EndPoint(0)).Include(w->EndPoint(1));
+        allPoints.push_back(w->EndPoint(0));
+        allPoints.push_back(w->EndPoint(1));
     }
+
+    //calculate the bounding polygon of the map
+    tCoord::GrahamScan(allPoints, se_rimWallRubberBand);
 }
 
 

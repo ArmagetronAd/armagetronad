@@ -38,8 +38,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eTimer.h"
 #endif
 
+#include <vector>
+
 static bool stc_forbidHudMap = false;
 static nSettingItem<bool> fcs("FORBID_HUD_MAP", stc_forbidHudMap);
+extern std::vector<tCoord> se_rimWallRubberBand;
 
 #ifndef DEDICATED
 
@@ -49,7 +52,8 @@ namespace cWidget {
 
 bool Map::Process(tXmlParser::node cur) {
     if (
-        WithCoordinates ::Process(cur))
+        WithCoordinates ::Process(cur) ||
+        WithBackground ::Process(cur))
         return true;
     else {
         DisplayError(cur);
@@ -80,6 +84,10 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
     const eRectangle &bounds = eWallRim::GetBounds();
     double lx = bounds.GetLow().x - border, hx = bounds.GetHigh().x + border;
     double ly = bounds.GetLow().y - border, hy = bounds.GetHigh().y + border;
+    //std::cerr << "lx: " << lx << std::endl;
+    //std::cerr << "hx: " << hx << std::endl;
+    //std::cerr << "ly: " << ly << std::endl;
+    //std::cerr << "hy: " << hy << std::endl;
     double mw = hx - lx, mh = hy - ly;
     double xpos, ypos, xscale, yscale;
     double xrat = (rw * mh) / (rh * mw);
@@ -130,6 +138,15 @@ void Map::DrawRimWalls( tList<eWallRim> &list ) {
         }
 
     }
+    glEnd();
+    m_background.GetColor(tCoord(0.,0.)).Apply();
+    glBegin(GL_POLYGON);
+    //std::cerr << "===\n";
+    for(std::vector<tCoord>::iterator iter = se_rimWallRubberBand.begin(); iter != se_rimWallRubberBand.end(); ++iter) {
+        glVertex2f(iter->x, iter->y);
+        //std::cerr << "result: " << *iter << std::endl;
+    }
+    glVertex2f(se_rimWallRubberBand.front().x, se_rimWallRubberBand.front().y);
     glEnd();
 }
 

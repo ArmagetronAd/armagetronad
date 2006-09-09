@@ -269,6 +269,11 @@
         <Map camera="^in">
             <Position x="0.73" y="-0.72" />
             <Size height="0.25" width="0.25" />
+            <Background>
+                <Solid>
+                    <Color r="1." g="1." b="1." alpha=".2" />
+                </Solid>
+            </Background>
         </Map>
 <!-- Lucifer's incam cockpit follows -->
         <BarGauge camera="in">
@@ -438,6 +443,11 @@
         <Map camera="in">
             <Position x="0" y="-0.759" />
             <Size height="0.24" width="0.24" />
+            <Background>
+                <Solid>
+                    <Color r="1." g="1." b="1." alpha=".2" />
+                </Solid>
+            </Background>
         </Map>
     </Cockpit>
 </Resource>
