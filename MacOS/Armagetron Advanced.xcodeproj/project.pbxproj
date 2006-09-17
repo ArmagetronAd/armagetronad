@@ -249,7 +249,6 @@
 		9B4A1A280A7A95890070BE82 /* mathexpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A1A210A7A95890070BE82 /* mathexpr.cpp */; };
 		9B4A1A2E0A7A95890070BE82 /* mathexpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A1A210A7A95890070BE82 /* mathexpr.cpp */; };
 		9BCDA56F0AA1E64F00EB532B /* tFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BCDA56D0AA1E64F00EB532B /* tFunction.cpp */; };
-		9BCDA5700AA1E64F00EB532B /* tFunction.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BCDA56E0AA1E64F00EB532B /* tFunction.h */; };
 		9BD56C4A0A8B899700AC1048 /* vCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C370A8B899700AC1048 /* vCollection.cpp */; };
 		9BD56C4C0A8B899700AC1048 /* vCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C390A8B899700AC1048 /* vCore.cpp */; };
 		9BD56C4F0A8B899700AC1048 /* vebLegacy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C3C0A8B899700AC1048 /* vebLegacy.cpp */; };
@@ -313,7 +312,6 @@
 				9BD7D9A70A2C7CCF00D7033C /* libpng.framework in Copy Frameworks */,
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
-				9BCDA5700AA1E64F00EB532B /* tFunction.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
