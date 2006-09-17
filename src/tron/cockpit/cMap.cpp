@@ -140,15 +140,17 @@ void Map::DrawRimWalls( tList<eWallRim> &list ) {
 
     }
     glEnd();
-    m_background.GetColor(tCoord(0.,0.)).Apply();
-    glBegin(GL_POLYGON);
-    //std::cerr << "===\n";
-    for(std::vector<tCoord>::iterator iter = se_rimWallRubberBand.begin(); iter != se_rimWallRubberBand.end(); ++iter) {
-        glVertex2f(iter->x, iter->y);
-        //std::cerr << "result: " << *iter << std::endl;
-    }
-    glVertex2f(se_rimWallRubberBand.front().x, se_rimWallRubberBand.front().y);
-    glEnd();
+	if(sr_alphaBlend) {
+		m_background.GetColor(tCoord(0.,0.)).Apply();
+		glBegin(GL_POLYGON);
+		//std::cerr << "===\n";
+		for(std::vector<tCoord>::iterator iter = se_rimWallRubberBand.begin(); iter != se_rimWallRubberBand.end(); ++iter) {
+			glVertex2f(iter->x, iter->y);
+			//std::cerr << "result: " << *iter << std::endl;
+		}
+		glVertex2f(se_rimWallRubberBand.front().x, se_rimWallRubberBand.front().y);
+		glEnd();
+	}
 }
 
 void Map::DrawWalls(tList<gNetPlayerWall> &list) {
