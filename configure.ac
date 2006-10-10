@@ -324,6 +324,10 @@ if test ${HAVE_BASH} = no; then
    AC_MSG_ERROR([GNU Bourne-Again SHell (bash) is currently required for compilation.])
 fi
 
+dnl Boost
+m4_include(ax_boost_base.m4)
+AX_BOOST_BASE([1.33.1])
+
 dnl testing a nifty make feature: silent inclu[]des
 AC_SINCLUDE
 
