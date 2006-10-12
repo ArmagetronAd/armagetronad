@@ -75,7 +75,8 @@ libtools_a_SOURCES=	tools/tArray.cpp tools/tArray.h tools/tCallback.cpp tools/tC
 	tools/tStatEntry.h tools/tStatEntry.cpp\
 	tools/tPlayList.h tools/tPlayList.cpp\
 	tools/tCoord.h \
-	tools/tFunction.h tools/tFunction.cpp
+	tools/tFunction.h tools/tFunction.cpp\
+        tools/tResource.h tools/tResource.cpp
 
 #tools/tCommandLine.cpp tools/tCommandLine.h
 libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentification.cpp\

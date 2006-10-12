@@ -14,6 +14,14 @@
 #include "tResourceManager.h"
 #include "tString.h"
 
+int tResourceManager::RegisterResourceType(tNewResourceFunc func) {
+    // stub
+}
+
+tResource* GetResource(const char *file, int typeID) {
+    // stub
+}
+
 // server determined resource repository
 tString & tResourceManager::AccessRepoServer()
 {
