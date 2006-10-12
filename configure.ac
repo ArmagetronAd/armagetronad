@@ -5,7 +5,7 @@ dnl but have to do this with version generated in bootstrap.sh instead for some 
 m4_include(version)
 
 dnl Comment this out to disable autoconf custom directories:
-m4_include(accustomdir.m4)
+dnl m4_include(accustomdir.m4)
 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(Armagetronad,AUTOMATIC_VERSION)
