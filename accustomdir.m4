@@ -3,6 +3,11 @@ m4_define([_m4_divert(PARSE_ARGS_FOROPTS)], 18)
 m4_define([_m4_divert(PARSE_ARGS_MOREOPTS)], 19)
 #m4_define([_m4_divert(PARSE_ARGS)],      20)
 
+# old versions of autoconf define _AC_SRCPATHS, new (2.60 and later) use _AC_SRCDIRS.
+# map the old macro to the new one.
+m4_pattern_allow([_AC_SRCDIRS])
+m4_ifdef([_AC_SRCDIRS],,[m4_define([_AC_SRCDIRS],[_AC_SRCPATHS([$1])])])
+
 # _AC_INIT_PARSE_ARGS
 # -------------------
 m4_define([_AC_INIT_PARSE_ARGS],
@@ -549,7 +554,7 @@ if test "$ac_init_help" = "recursive"; then
   ac_popdir=`pwd`
   for ac_dir in : $ac_subdirs_all; do test "x$ac_dir" = x: && continue
     test -d $ac_dir || continue
-    _AC_SRCPATHS(["$ac_dir"])
+    _AC_SRCDIRS(["$ac_dir"])
     cd $ac_dir
     # Check for guested configure; otherwise get Cygnus style configure.
     if test -f $ac_srcdir/configure.gnu; then
