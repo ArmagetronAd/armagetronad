@@ -88,7 +88,7 @@ void GrowingArrayBase::ResizeBase(int i,int size_of_T, bool useMalloc){
     unsigned int oldsize=size;
 
     int size_a=i+(1<<12);
-    int size_b=i+(i>>8);
+    int size_b=i+(i>>2);
 
     int new_size;
 
