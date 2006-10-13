@@ -574,6 +574,7 @@ ePlayer::ePlayer(){
     if ( !getUserName )
         name << "Player " << id+1;
 
+#ifndef DEDICATED
     tString confname;
 
     confname << "PLAYER_"<< id+1;
@@ -690,6 +691,7 @@ ePlayer::ePlayer(){
                                         "$color_r_help",
                                         rgb[0]));
     confname.Clear();
+#endif
 
     tRandomizer & randomizer = tRandomizer::GetInstance();
     //static int r = rand() / ( RAND_MAX >> 2 ) + se_UserName().Len();
