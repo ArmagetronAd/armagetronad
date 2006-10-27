@@ -155,21 +155,21 @@ void nKrawall::ReceiveLeagueMessage(const tString& message)
 
     if (message[0] == 'K')
     {
-        tString killer(&message[1]);
-        tString victim(&message[1+killer.Len()]);
+        tString killer(message.c_str()+1);
+        tString victim(message.c_str()+1+killer.Len());
 
         MasterFrag(killer, victim);
     }
     else if (message[0] == 'R')
     {
-        tString numP(&message[1]);
+        tString numP(message.c_str()+1);
         int pos = 1 + numP.Len();
 
         int numPlayers = atoi(numP);
         tArray<tString> players(numPlayers);
         for (int i = numPlayers-1; i>=0; i--)
         {
-            players(i) = tString(&message[pos]);
+            players(i) = tString(message.c_str()+pos);
             pos += players(i).Len();
         }
 
