@@ -622,13 +622,7 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
         uGlanceAction* ga = static_cast<uGlanceAction*>(Act);
         eGlanceRequest* gr = &glanceRequests[ga-se_glance];
         if (x>0) {
-            eCoord baseDir;
-            if (activeGlanceRequest) {
-                uGlanceAction* aga = se_glance + (activeGlanceRequest - glanceRequests);
-                baseDir = activeGlanceRequest->dir.Turn(aga->relDir.Conj());
-            } else {
-                baseDir = grid->GetDirection(grid->DirectionWinding(dir)); // CHECK: proper focal point?
-            }
+            eCoord baseDir = grid->GetDirection(grid->DirectionWinding(dir)); // CHECK: proper focal point?
             gr->dir = baseDir.Turn(ga->relDir);
             gr->Insert(activeGlanceRequest);
         } else {
