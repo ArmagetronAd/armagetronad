@@ -614,7 +614,7 @@ ePlayer::ePlayer(){
     confname.Clear();
 
     int i;
-    for(i=CAMERA_SMART_IN;i>=0;i--){
+    for(i=CAMERA_COUNT-1;i>=0;i--){
         confname << "ALLOW_CAM_"<< id+1 << "_" << i;
         StoreConfitem(tNEW(tConfItem<bool>) (confname,
                                              "$allow_cam_help",

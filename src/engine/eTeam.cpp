@@ -45,18 +45,50 @@ static unsigned short se_team_rgb[TEAMCOLORS][3]=
       {  7,  7,  7 }   // black
     };
 
-static char* se_team_name[TEAMCOLORS]=
+static tString se_team_name[TEAMCOLORS]=
     {
-        "$team_name_blue",
-        "$team_name_gold",
-        "$team_name_red",
-        "$team_name_green",
-        "$team_name_violet",
-        "$team_name_ugly",
-        "$team_name_white",
-        "$team_name_black"
+        tString("$team_name_blue"),
+        tString("$team_name_gold"),
+        tString("$team_name_red"),
+        tString("$team_name_green"),
+        tString("$team_name_violet"),
+        tString("$team_name_ugly"),
+        tString("$team_name_white"),
+        tString("$team_name_black")
     };
 
+// class that creates config items for one team
+// TEAM_(NAME|RED|GREEN|BLUE)_X
+class eTeamColorConfig {
+    typedef tSettingItem<tString> nameConf;
+    typedef tSettingItem<unsigned short int> colorConf;
+    colorConf *m_red, *m_green, *m_blue;
+    nameConf *m_name;
+    static int teamCount;
+public:
+    eTeamColorConfig() {
+        std::ostringstream name(""), red(""), green(""), blue("");
+        name  << "TEAM_NAME_"  << teamCount + 1;
+        red   << "TEAM_RED_"   << teamCount + 1;
+        green << "TEAM_GREEN_" << teamCount + 1;
+        blue  << "TEAM_BLUE_"  << teamCount + 1;
+        m_name  = new nameConf (name .str().c_str(), se_team_name[teamCount]);
+        m_red   = new colorConf(red  .str().c_str(), se_team_rgb [teamCount][0]);
+        m_green = new colorConf(green.str().c_str(), se_team_rgb [teamCount][1]);
+        m_blue  = new colorConf(blue .str().c_str(), se_team_rgb [teamCount][2]);
+        ++teamCount;
+    }
+    ~eTeamColorConfig() {
+        delete m_name;
+        delete m_red;
+        delete m_green;
+        delete m_blue;
+    }
+};
+
+int eTeamColorConfig::teamCount = 0;
+
+static eTeamColorConfig se_team_config[TEAMCOLORS];
 
 //! Creates a color string inserter
 inline static tColoredStringProxy ColorString( const eTeam * t )
@@ -183,7 +215,7 @@ void eTeam::UpdateAppearance()
         {
             // team name determined by color
             tOutput newname;
-            newname << se_team_name[ colorID ];
+            newname << &se_team_name[ colorID ][0];
 
             name = newname;
 
