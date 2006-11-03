@@ -459,11 +459,6 @@ GENERICUNIX
         initdirdefault=OpenBSD
 SAFEUNIX
         ;;
-    *-*-freebsd* )
-        # FreeBSD, sdl-config is specialized to sdl11-config there
-        SDL_CONFIG_DEFAULT=sdl11-config
-SAFEUNIX
-        ;;
     *)
         # generic unix
 SAFEUNIX
