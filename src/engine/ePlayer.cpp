@@ -1311,6 +1311,8 @@ void handle_chat(nMessage &m){
                     << tColoredString::ColorString(1,1,1)  << "*";
 
                     se_BroadcastChatLine( p, console, forOldClients );
+					console << "\n";
+					sn_ConsoleOut(console,0);
                     return;
                 }
                 else if (command == "/teamleave") {
