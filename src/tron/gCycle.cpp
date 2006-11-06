@@ -1363,7 +1363,7 @@ void gCycle::MyInitAfterCreation(){
     {
         tERR_ERROR( "Neither classic style nor moviepack style model and textures found. "
                     "The folders \"textures\" and \"moviepack\" need to contain either "
-                    "cycle.ase and bike.png or body.mod, front.mod, rear.mod, body.png and wheel.png." );
+                    "cycle.ase and bike.png or body.mod, front.mod, rear.mod, cycle_body.png and cycle_wheel.png." );
     }
 
     mp = visuals.mpType;
