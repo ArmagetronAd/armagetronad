@@ -1123,7 +1123,7 @@ public:
                 REAL pc=player->ping + player->pingCharity*.001;
                 if (pc<0)
                     pc=0;
-                if (pc>1) // add sensible bounds
+                if (pc>.3) // add sensible bounds
                     pc=1;
 
                 REAL potExtra = pc*ladder_gain_extra;
@@ -2897,6 +2897,16 @@ extern REAL sent_per_messid[100];
 
 static REAL lastdeath=0;
 
+static void sg_VoteMenuIdle()
+{
+    if ( !uMenu::MenuActive() )
+    {
+        se_ChatState( ePlayerNetID::ChatFlags_Menu, true );
+        eVoter::VotingMenu();
+        se_ChatState( ePlayerNetID::ChatFlags_Menu, false );
+    }
+}
+
 void gGame::StateUpdate(){
 
     //	if (state==GS_CREATED)
@@ -3160,12 +3170,7 @@ void gGame::StateUpdate(){
             gHighscoresBase::SaveAll();
             con << tOutput("$gamestate_deleting_objects");
             exit_game_objects(grid);
-            if ( !uMenu::MenuActive() )
-            {
-                se_ChatState( ePlayerNetID::ChatFlags_Menu, true );
-                eVoter::VotingMenu();
-                se_ChatState( ePlayerNetID::ChatFlags_Menu, false );
-            }
+            st_ToDo( sg_VoteMenuIdle );
             nNetObject::ClearAllDeleted();
             SetState(GS_DELETE_GRID,GS_TRANSFER_SETTINGS);
             break;
