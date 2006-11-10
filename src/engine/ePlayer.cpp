@@ -495,7 +495,7 @@ void ePlayerNetID::PoliceMenu()
 
 
 
-
+#ifndef DEDICATED
 
 static char *default_instant_chat[]=
     {"/team \\",
@@ -525,7 +525,7 @@ static char *default_instant_chat[]=
      "Are you the real \"Player 1\"?",
      NULL};
 
-
+#endif
 
 
 ePlayer * ePlayer::PlayerConfig(int p){
@@ -1311,8 +1311,8 @@ void handle_chat(nMessage &m){
                     << tColoredString::ColorString(1,1,1)  << "*";
 
                     se_BroadcastChatLine( p, console, forOldClients );
-					console << "\n";
-					sn_ConsoleOut(console,0);
+                    console << "\n";
+                    sn_ConsoleOut(console,0);
                     return;
                 }
                 else if (command == "/teamleave") {
@@ -1902,6 +1902,26 @@ void ePlayer::Exit(){
 uActionPlayer ePlayer::s_chat("CHAT");
 
 int pingCharity = 100;
+static const int maxPingCharity = 300;
+
+static void sg_ClampPingCharity( int & pingCharity )
+{
+    if (pingCharity < 0 )
+        pingCharity = 0;
+    if (pingCharity > maxPingCharity )
+        pingCharity = maxPingCharity;
+}
+
+static void sg_ClampPingCharity( unsigned short & pingCharity )
+{
+    if (pingCharity > maxPingCharity )
+        pingCharity = maxPingCharity;
+}
+
+static void sg_ClampPingCharity()
+{
+    sg_ClampPingCharity( ::pingCharity );
+}
 
 static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
@@ -1930,6 +1950,8 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1)
             r=   P->rgb[0];
             g=   P->rgb[1];
             b=   P->rgb[2];
+
+            sg_ClampPingCharity();
             pingCharity=::pingCharity;
         }
     }
@@ -2517,6 +2539,7 @@ void ePlayerNetID::ReadSync(nMessage &m){
     }
 
     m.Read(pingCharity);
+    sg_ClampPingCharity(pingCharity);
 
     // name as sent from the other end
     tString & remoteName = ( sn_GetNetState() == nCLIENT ) ? nameFromServer_ : nameFromClient_;
@@ -3052,6 +3075,8 @@ void ePlayerNetID::Update(){
                 p->r=ePlayer::PlayerConfig(i)->rgb[0];
                 p->g=ePlayer::PlayerConfig(i)->rgb[1];
                 p->b=ePlayer::PlayerConfig(i)->rgb[2];
+
+                sg_ClampPingCharity();
                 p->pingCharity=::pingCharity;
 
                 // update spectator status
@@ -3074,6 +3099,7 @@ void ePlayerNetID::Update(){
     }
     // update the ping charity
     int old_c=sn_pingCharityServer;
+    sg_ClampPingCharity();
     sn_pingCharityServer=::pingCharity;
 #ifndef DEDICATED
     if (sn_GetNetState()==nCLIENT)
