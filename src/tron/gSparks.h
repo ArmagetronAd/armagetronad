@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef ArmageTron_gSparks_H
 #define ArmageTron_gSparks_H
 
-#include "config.h"
+#include "aa_config.h"
 
 #include "eSoundMixer.h"
 #include "eGameObject.h"

@@ -248,7 +248,9 @@
 		9B4A19E70A7A90620070BE82 /* zZoneInfluence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19CF0A7A90620070BE82 /* zZoneInfluence.cpp */; };
 		9B4A1A280A7A95890070BE82 /* mathexpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A1A210A7A95890070BE82 /* mathexpr.cpp */; };
 		9B4A1A2E0A7A95890070BE82 /* mathexpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A1A210A7A95890070BE82 /* mathexpr.cpp */; };
-		9BCDA56F0AA1E64F00EB532B /* tFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BCDA56D0AA1E64F00EB532B /* tFunction.cpp */; };
+		9B97FE600B053AC2005900E3 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 9B97FE5A0B053AC2005900E3 /* scripts */; };
+		9BA703200B05FAEC00732923 /* tFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BA7031E0B05FAEC00732923 /* tFunction.cpp */; };
+		9BA703210B05FAEC00732923 /* tFunction.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BA7031F0B05FAEC00732923 /* tFunction.h */; };
 		9BD56C4A0A8B899700AC1048 /* vCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C370A8B899700AC1048 /* vCollection.cpp */; };
 		9BD56C4C0A8B899700AC1048 /* vCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C390A8B899700AC1048 /* vCore.cpp */; };
 		9BD56C4F0A8B899700AC1048 /* vebLegacy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C3C0A8B899700AC1048 /* vebLegacy.cpp */; };
@@ -267,6 +269,7 @@
 		9BD56C630A8B899700AC1048 /* veMath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C440A8B899700AC1048 /* veMath.cpp */; };
 		9BD56C640A8B899700AC1048 /* vParser.ypp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C470A8B899700AC1048 /* vParser.ypp */; };
 		9BD56C650A8B899700AC1048 /* vRegistry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C480A8B899700AC1048 /* vRegistry.cpp */; };
+		9BD56D270A8B912300AC1048 /* tRuby.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56D250A8B912300AC1048 /* tRuby.cpp */; };
 		9BD7D9720A2C7CB400D7033C /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96B0A2C7CB400D7033C /* libfreetype.a */; };
 		9BD7D9730A2C7CB400D7033C /* libftgl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96C0A2C7CB400D7033C /* libftgl.a */; };
 		9BD7D9740A2C7CB400D7033C /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96D0A2C7CB400D7033C /* libpng.framework */; };
@@ -312,6 +315,7 @@
 				9BD7D9A70A2C7CCF00D7033C /* libpng.framework in Copy Frameworks */,
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
+				9BA703210B05FAEC00732923 /* tFunction.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -580,9 +584,10 @@
 		9B4A1A210A7A95890070BE82 /* mathexpr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mathexpr.cpp; sourceTree = "<group>"; };
 		9B4A1A220A7A95890070BE82 /* mathexpr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mathexpr.h; sourceTree = "<group>"; };
 		9B86E63A0A2DFDA600D90F1C /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config_common.h; path = ../src/macosx/config_common.h; sourceTree = SOURCE_ROOT; };
+		9B97FE5A0B053AC2005900E3 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = ../scripts; sourceTree = SOURCE_ROOT; };
 		9B9E23FA0A825FA90067CCFA /* tValueParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tValueParser.h; sourceTree = "<group>"; };
-		9BCDA56D0AA1E64F00EB532B /* tFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tFunction.cpp; sourceTree = "<group>"; };
-		9BCDA56E0AA1E64F00EB532B /* tFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tFunction.h; sourceTree = "<group>"; };
+		9BA7031E0B05FAEC00732923 /* tFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tFunction.cpp; sourceTree = "<group>"; };
+		9BA7031F0B05FAEC00732923 /* tFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tFunction.h; sourceTree = "<group>"; };
 		9BD56C370A8B899700AC1048 /* vCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vCollection.cpp; sourceTree = "<group>"; };
 		9BD56C380A8B899700AC1048 /* vCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vCollection.h; sourceTree = "<group>"; };
 		9BD56C390A8B899700AC1048 /* vCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vCore.cpp; sourceTree = "<group>"; };
@@ -602,7 +607,9 @@
 		9BD56C470A8B899700AC1048 /* vParser.ypp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.yacc; path = vParser.ypp; sourceTree = "<group>"; };
 		9BD56C480A8B899700AC1048 /* vRegistry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vRegistry.cpp; sourceTree = "<group>"; };
 		9BD56C490A8B899700AC1048 /* vRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vRegistry.h; sourceTree = "<group>"; };
-		9BD56C890A8B8A8C00AC1048 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../src/macosx/client/config.h; sourceTree = SOURCE_ROOT; };
+		9BD56C890A8B8A8C00AC1048 /* aa_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aa_config.h; path = ../src/macosx/client/aa_config.h; sourceTree = SOURCE_ROOT; };
+		9BD56D250A8B912300AC1048 /* tRuby.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tRuby.cpp; sourceTree = "<group>"; };
+		9BD56D260A8B912300AC1048 /* tRuby.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tRuby.h; sourceTree = "<group>"; };
 		9BD7D96B0A2C7CB400D7033C /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libfreetype.a; sourceTree = "<absolute>"; };
 		9BD7D96C0A2C7CB400D7033C /* libftgl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libftgl.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libftgl.a; sourceTree = "<absolute>"; };
 		9BD7D96D0A2C7CB400D7033C /* libpng.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libpng.framework; path = /Library/Frameworks/ArmagetronAdvanced/current/libpng.framework; sourceTree = "<absolute>"; };
@@ -685,7 +692,7 @@
 		8CAD912B095A33BE00DA0ECC /* client */ = {
 			isa = PBXGroup;
 			children = (
-				9BD56C890A8B8A8C00AC1048 /* config.h */,
+				9BD56C890A8B8A8C00AC1048 /* aa_config.h */,
 			);
 			name = client;
 			sourceTree = "<group>";
@@ -872,8 +879,8 @@
 				8CBA5E9D089EEC7D007E21DC /* tEventQueue.h */,
 				8CBA5E9E089EEC7D007E21DC /* tException.cpp */,
 				8CBA5E9F089EEC7D007E21DC /* tException.h */,
-				9BCDA56D0AA1E64F00EB532B /* tFunction.cpp */,
-				9BCDA56E0AA1E64F00EB532B /* tFunction.h */,
+				9BA7031E0B05FAEC00732923 /* tFunction.cpp */,
+				9BA7031F0B05FAEC00732923 /* tFunction.h */,
 				8CBA5EA0089EEC7D007E21DC /* tHeap.cpp */,
 				8CBA5EA1089EEC7D007E21DC /* tHeap.h */,
 				8CAA3F25099D3CCA001CB80C /* tIniFile.cpp */,
@@ -901,6 +908,8 @@
 				8CBA5EB6089EEC7D007E21DC /* tResourceManager.h */,
 				8CBA5EB7089EEC7D007E21DC /* tRing.cpp */,
 				8CBA5EB8089EEC7D007E21DC /* tRing.h */,
+				9BD56D250A8B912300AC1048 /* tRuby.cpp */,
+				9BD56D260A8B912300AC1048 /* tRuby.h */,
 				8CBA5EB9089EEC7D007E21DC /* tSafePTR.cpp */,
 				8CBA5EBA089EEC7D007E21DC /* tSafePTR.h */,
 				8CAA3F0D099D3C3D001CB80C /* tStatEntry.cpp */,
@@ -1105,6 +1114,7 @@
 		9BD7DADF0A2CAC6400D7033C /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				9B97FE5A0B053AC2005900E3 /* scripts */,
 				9BD7DB7D0A2CE35600D7033C /* Armagetron Advanced.icns */,
 				9BD7DAE20A2CAE0700D7033C /* config */,
 				9BD7DAFE0A2CAE1D00D7033C /* language */,
@@ -1233,6 +1243,7 @@
 				9BD7DB3E0A2CAE4600D7033C /* textures in Resources */,
 				9BD7DB770A2CE28500D7033C /* SDLMain.nib in Resources */,
 				9BD7DB7E0A2CE35600D7033C /* Armagetron Advanced.icns in Resources */,
+				9B97FE600B053AC2005900E3 /* scripts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1279,7 +1290,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "rake xcode:cleanup\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone";
+			shellScript = "rake xcode:cleanup\nrake swig:run\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone";
 		};
 		9BD7DB490A2CBA7A00D7033C /* Run script: Prepare */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1568,7 +1579,8 @@
 				9BD56C570A8B899700AC1048 /* veMath.cpp in Sources */,
 				9BD56C5A0A8B899700AC1048 /* vParser.ypp in Sources */,
 				9BD56C5B0A8B899700AC1048 /* vRegistry.cpp in Sources */,
-				9BCDA56F0AA1E64F00EB532B /* tFunction.cpp in Sources */,
+				9BD56D270A8B912300AC1048 /* tRuby.cpp in Sources */,
+				9BA703200B05FAEC00732923 /* tFunction.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1659,7 +1671,8 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../src/macosx/Armagetron Advanced_Prefix.pch";
-				GCC_VERSION_ppc = 3.3;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION_ppc = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -1675,16 +1688,18 @@
 					/Library/Frameworks/ArmagetronAdvanced/current/include/freetype2,
 					/Library/Frameworks/ArmagetronAdvanced/current/include/FTGL,
 					/Library/Frameworks/ArmagetronAdvanced/current/include,
+					"$(HOME)/Library/ruby/1.8/lib/ruby/1.8/powerpc-darwin8.7.0/",
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
 					/usr/lib,
 					/Library/Frameworks/ArmagetronAdvanced/current,
+					"$(HOME)/Library/ruby/1.8/lib/",
 				);
 				MACOSX_DEPLOYMENT_TARGET = "";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.3;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wno-long-double";
 				OTHER_LDFLAGS = (
 					"-lxml2",
@@ -1692,12 +1707,14 @@
 					"-lpthread",
 					"-liconv",
 					"-lm",
+					"-lruby1.8",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
 				SDKROOT = "";
 				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_ppc = /Developer/SDKs/MacOSX10.3.9.sdk;
+				SDKROOT_ppc = /Developer/SDKs/MacOSX10.4u.sdk;
+				STRIP_STYLE = all;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
@@ -1720,7 +1737,8 @@
 				GCC_OPTIMIZATION_LEVEL = 2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../src/macosx/Armagetron Advanced_Prefix.pch";
-				GCC_VERSION_ppc = 3.3;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION_ppc = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -1736,16 +1754,18 @@
 					/Library/Frameworks/ArmagetronAdvanced/current/include/freetype2,
 					/Library/Frameworks/ArmagetronAdvanced/current/include/FTGL,
 					/Library/Frameworks/ArmagetronAdvanced/current/include,
+					"$(HOME)/Library/ruby/1.8/lib/ruby/1.8/powerpc-darwin8.7.0/",
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
 					/usr/lib,
 					/Library/Frameworks/ArmagetronAdvanced/current,
+					"$(HOME)/Library/ruby/1.8/lib/",
 				);
 				MACOSX_DEPLOYMENT_TARGET = "";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.3;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wno-long-double";
 				OTHER_LDFLAGS = (
 					"-lxml2",
@@ -1753,12 +1773,14 @@
 					"-lpthread",
 					"-liconv",
 					"-lm",
+					"-lruby1.8",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
 				SDKROOT = "";
 				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_ppc = /Developer/SDKs/MacOSX10.3.9.sdk;
+				SDKROOT_ppc = /Developer/SDKs/MacOSX10.4u.sdk;
+				STRIP_STYLE = all;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
@@ -1810,7 +1832,8 @@
 				GCC_OPTIMIZATION_LEVEL = 2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../src/macosx/Armagetron Advanced_Prefix.pch";
-				GCC_VERSION_ppc = 3.3;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION_ppc = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -1826,16 +1849,18 @@
 					/Library/Frameworks/ArmagetronAdvanced/current/include/freetype2,
 					/Library/Frameworks/ArmagetronAdvanced/current/include/FTGL,
 					/Library/Frameworks/ArmagetronAdvanced/current/include,
+					"$(HOME)/Library/ruby/1.8/lib/ruby/1.8/powerpc-darwin8.7.0/",
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = (
 					/usr/lib,
 					/Library/Frameworks/ArmagetronAdvanced/current,
+					"$(HOME)/Library/ruby/1.8/lib/",
 				);
 				MACOSX_DEPLOYMENT_TARGET = "";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.3;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wno-long-double";
 				OTHER_LDFLAGS = (
 					"-lxml2",
@@ -1843,12 +1868,14 @@
 					"-lpthread",
 					"-liconv",
 					"-lm",
+					"-lruby1.8",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
 				SDKROOT = "";
 				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_ppc = /Developer/SDKs/MacOSX10.3.9.sdk;
+				SDKROOT_ppc = /Developer/SDKs/MacOSX10.4u.sdk;
+				STRIP_STYLE = all;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};

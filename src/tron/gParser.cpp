@@ -1,6 +1,6 @@
 #include "rSDL.h"
 
-#include "config.h"
+#include "aa_config.h"
 
 #include "gParser.h"
 

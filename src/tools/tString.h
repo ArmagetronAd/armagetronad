@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef ArmageTron_STRING_H
 #define ArmageTron_STRING_H
 
-#include "config.h"
+#include "aa_config.h"
 
 #include "defs.h"
 

@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tDirectories.h"
 #include "tSysTime.h"
 #include "rConsole.h"
-#include "config.h"
+#include "aa_config.h"
 #include <iostream>
 #include "rScreen.h"
 #include "rGL.h"
@@ -546,7 +546,9 @@ static SDL_mutex * sr_netLock = NULL;
 void rSysDep::StartNetSyncThread( rNetIdler * idler )
 {
     sr_netIdler = idler;
-
+    
+    return; // BUG This thread is crashing ruby
+    
     // can't use thrading trouble while recording
     if ( tRecorder::IsRunning() )
         return;
@@ -666,14 +668,18 @@ void rSysDep::SwapGL(){
         }
 
         // in playback or recording mode, always execute frame tasks, they may be improtant for consistency
-        if ( tRecorder::IsRunning() )
-            rPerFrameTask::DoPerFrameTasks();
+        if ( tRecorder::IsRunning() ) {
+	    	rPerFrameTask::DoPerFrameTasks();
+			rPerFrameTaskRuby::DoPerFrameTasks();
+		}
+        
 
         return;
     }
 
 
     rPerFrameTask::DoPerFrameTasks();
+	rPerFrameTaskRuby::DoPerFrameTasks();
 
     // unlock the mutex while waiting for the swap operation to finish
     SDL_mutexV(  sr_netLock );

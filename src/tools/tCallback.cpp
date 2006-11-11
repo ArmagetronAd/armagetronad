@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tCallbackString.h"
 #include "tError.h"
 
-tCallback::tCallback(tCallback*& anchor, VOIDFUNC *f)
+tCallback::tCallback(tCallback*& anchor, AA_VOIDFUNC *f)
         :tListItem<tCallback>(anchor), func(f){
     tASSERT(f != NULL);
 }
@@ -39,6 +39,18 @@ void tCallback::Exec(tCallback *anchor){
         (*anchor->func)();
         Exec(anchor->Next());
     }
+}
+
+tCallbackRuby::tCallbackRuby(tCallbackRuby *& anchor)
+	:tListItem<tCallbackRuby>(anchor), block(rb_block_proc())
+{
+}
+
+void tCallbackRuby::Exec(tCallbackRuby *anchor) {
+	if (anchor) {
+		rb_funcall(anchor->block, rb_intern("call"), 0);
+		Exec(anchor->Next());
+	}
 }
 
 

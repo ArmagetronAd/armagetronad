@@ -59,7 +59,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nServerInfo.h"
 #include "nSocket.h"
-
+#include "tRuby.h"
 #ifndef DEDICATED
 #include "rRender.h"
 #include "rSDL.h"
@@ -541,7 +541,14 @@ int main(int argc,char **argv){
 
         // tERR_MESSAGE( "Initializing player data." );
         ePlayer::Init();
-
+        tRuby::InitializeInterpreter();
+		try {
+	        tRuby::Load(tDirectories::Data(), "scripts/initialize.rb");
+		}
+		catch (std::runtime_error & e) {
+			std::cerr << e.what() << '\n';
+		}
+        
         // tERR_MESSAGE( "Loading configuration." );
         tLocale::Load("languages.txt");
 
@@ -653,7 +660,9 @@ int main(int argc,char **argv){
                 std::cout << "Error initializing joystick subsystem\n";
             else
             {
+#ifdef DEBUG
                 std::cout << "Joystick(s) initialized\n";
+#endif
                 su_JoystickInit();
             }
 		#endif
@@ -686,7 +695,14 @@ int main(int argc,char **argv){
                     gLogo::SetSpinning(true);
 
                     sn_bigBrotherString = renderer_identification + "VER=" + sn_programVersion + "\n\n";
-
+                    
+                    try {
+                        tRuby::Load(tDirectories::Data(), "scripts/menu.rb");
+                        tRuby::Load(tDirectories::Data(), "scripts/rotator.rb");
+                    }
+                    catch (std::runtime_error & e) {
+                        std::cerr << e.what() << '\n';
+                    }
                     MainMenu();
 
                     // remove all players
@@ -739,7 +755,7 @@ int main(int argc,char **argv){
         }
 
         ePlayer::Exit();
-
+        tRuby::CleanupInterpreter();
 
         //	tLocale::Clear();
     }
@@ -754,6 +770,16 @@ int main(int argc,char **argv){
         }
 
         return 1;
+    }
+    catch ( std::exception & e )
+    {
+        try
+        {
+            st_PresentError("", e.what());
+        }
+        catch(...)
+        {
+        }
     }
 #ifdef _MSC_VER
 #pragma warning ( disable : 4286 )

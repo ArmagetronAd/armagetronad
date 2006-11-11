@@ -1,0 +1,4 @@
+require "mkmf"
+
+$CPPFLAGS << " -I@top_builddir@ -I@top_srcdir@/src -I@top_srcdir@/src/tools @CPPFLAGS@"
+create_makefile("armagetronad/tools")

@@ -1,7 +1,7 @@
 #ifndef AT_SDL_H
 #define AT_SDL_H
 
-#include "config.h"
+#include "aa_config.h"
 
 #ifndef DEDICATED
 #include <SDL.h>

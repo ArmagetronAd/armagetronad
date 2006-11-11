@@ -38,7 +38,7 @@ the executable is not distributed).
 //#include <iostream>
 
 #include "defs.h"
-#include "config.h"
+#include "aa_config.h"
 #include "md5.h"
 
 #ifndef _IOSFWD_

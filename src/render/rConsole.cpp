@@ -196,7 +196,7 @@ bool rSmallConsoleCallback::SmallColsole(){
 
 static tCallback *CenterDisplay_anchor;
 
-rCenterDisplayCallback::rCenterDisplayCallback(VOIDFUNC *f)
+rCenterDisplayCallback::rCenterDisplayCallback(AA_VOIDFUNC *f)
         :tCallback(CenterDisplay_anchor, f){}
 
 void rCenterDisplayCallback::CenterDisplay(){

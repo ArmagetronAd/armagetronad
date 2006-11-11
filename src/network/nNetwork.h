@@ -610,7 +610,7 @@ public:
     static int User(){return user;}
     static int Login(){return login;}
 
-    nCallbackLoginLogout(VOIDFUNC *f);
+    nCallbackLoginLogout(AA_VOIDFUNC *f);
     static void UserLoggedIn(int user);
     static void UserLoggedOut(int user);
 };
@@ -628,7 +628,7 @@ public:
 class nCallbackReceivedComplete: public tCallback
 {
 public:
-    nCallbackReceivedComplete(VOIDFUNC *f);
+    nCallbackReceivedComplete(AA_VOIDFUNC *f);
     static void ReceivedComplete();
 };
 

@@ -8,7 +8,7 @@
 #import "SDLMain.h"
 #import <sys/param.h> /* for MAXPATHLEN */
 #import <unistd.h>
-#include "config.h"
+#include "aa_config.h"
 #include "tError.h"
 #include "tConfiguration.h"
 #include "uMenu.h"

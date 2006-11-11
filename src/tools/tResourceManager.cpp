@@ -1,4 +1,4 @@
-#include "config.h"
+#include "aa_config.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -14,13 +14,21 @@
 #include "tResourceManager.h"
 #include "tString.h"
 
+void tResourceManager::RegisterLoader()
+{
+}
+
+tResource* tResourceManager::GetResource(const char *file, int typeID)
+{
+}
+
 int tResourceManager::RegisterResourceType(tNewResourceFunc func) {
     // stub
 }
 
-tResource* GetResource(const char *file, int typeID) {
-    // stub
-}
+//tResource* GetResource(const char *file, int typeID) {
+//    // stub
+//}
 
 // server determined resource repository
 tString & tResourceManager::AccessRepoServer()

@@ -3043,7 +3043,7 @@ void gGame::Analysis(REAL time){
 
                 if (rotationtype == 1)
                     rotate();
-
+                
                 gRotation::HandleNewRound();
 
                 if ( last_team_alive >= 0 )

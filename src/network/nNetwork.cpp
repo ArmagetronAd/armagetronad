@@ -3081,7 +3081,7 @@ static tCallback* s_loginoutAnchor=NULL;
 int  nCallbackLoginLogout::user;
 bool nCallbackLoginLogout::login;
 
-nCallbackLoginLogout::nCallbackLoginLogout(VOIDFUNC *f)
+nCallbackLoginLogout::nCallbackLoginLogout(AA_VOIDFUNC *f)
         :tCallback(s_loginoutAnchor,f){}
 
 void nCallbackLoginLogout::UserLoggedIn(int u){
@@ -3112,7 +3112,7 @@ bool nCallbackAcceptPackedWithoutConnection::Accept( const nMessage& m )
 
 static tCallback* s_ReceivedCompleteAnchor=NULL;
 
-nCallbackReceivedComplete::nCallbackReceivedComplete(VOIDFUNC *f)
+nCallbackReceivedComplete::nCallbackReceivedComplete(AA_VOIDFUNC *f)
         : tCallback( s_ReceivedCompleteAnchor, f )
 {
 }

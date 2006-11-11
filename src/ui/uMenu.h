@@ -570,19 +570,19 @@ public:
 
 class uCallbackMenuEnter: public tCallback{
 public:
-    uCallbackMenuEnter(VOIDFUNC *f);
+    uCallbackMenuEnter(AA_VOIDFUNC *f);
     static void MenuEnter();
 };
 
 class uCallbackMenuLeave: public tCallback{
 public:
-    uCallbackMenuLeave(VOIDFUNC *f);
+    uCallbackMenuLeave(AA_VOIDFUNC *f);
     static void MenuLeave();
 };
 
 class uCallbackMenuBackground: public tCallback{
 public:
-    uCallbackMenuBackground(VOIDFUNC *f);
+    uCallbackMenuBackground(AA_VOIDFUNC *f);
     static void MenuBackground();
 };
 

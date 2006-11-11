@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef _ERROR_H_
 #define _ERROR_H_
 
-#include "config.h"
+#include "aa_config.h"
 #ifdef _MSC_VER
 #define __PRETTY_FUNCTION__ ""
 #endif

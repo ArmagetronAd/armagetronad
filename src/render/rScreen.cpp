@@ -161,15 +161,27 @@ static tConfItem<int> fa("FAILED_ATTEMPTS", failed_attempts);
 // *******************************************
 
 static tCallback *rPerFrameTask_anchor;
+static tCallbackRuby * rPerFrameTaskRuby_anchor;
 
 bool sr_True(){return true;}
 
-rPerFrameTask::rPerFrameTask(VOIDFUNC *f):tCallback(rPerFrameTask_anchor, f){}
+rPerFrameTask::rPerFrameTask(AA_VOIDFUNC *f):tCallback(rPerFrameTask_anchor, f){}
 void rPerFrameTask::DoPerFrameTasks(){
     // prevent console rendering, that can cause nasty recursions
     rNoAutoDisplayAtNewlineCallback noAutoDisplay( sr_True );
     Exec(rPerFrameTask_anchor);
 }
+
+rPerFrameTaskRuby::rPerFrameTaskRuby()
+	:tCallbackRuby(rPerFrameTaskRuby_anchor)
+{
+}
+
+void rPerFrameTaskRuby::DoPerFrameTasks(){
+   rNoAutoDisplayAtNewlineCallback noAutoDisplay( sr_True );
+   Exec(rPerFrameTaskRuby_anchor);
+}
+
 
 
 // *******************************************
@@ -1043,7 +1055,7 @@ void sr_Activate(bool active)
 
 static tCallback *sr_BeforeAnchor;
 
-rCallbackBeforeScreenModeChange::rCallbackBeforeScreenModeChange(VOIDFUNC *f)
+rCallbackBeforeScreenModeChange::rCallbackBeforeScreenModeChange(AA_VOIDFUNC *f)
         :tCallback(sr_BeforeAnchor, f){}
 
 void rCallbackBeforeScreenModeChange::Exec()
@@ -1053,7 +1065,7 @@ void rCallbackBeforeScreenModeChange::Exec()
 
 static tCallback *sr_AfterAnchor;
 
-rCallbackAfterScreenModeChange::rCallbackAfterScreenModeChange(VOIDFUNC *f)
+rCallbackAfterScreenModeChange::rCallbackAfterScreenModeChange(AA_VOIDFUNC *f)
         :tCallback(sr_AfterAnchor, f){}
 
 void rCallbackAfterScreenModeChange::Exec()

@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tString.h"
 #include "tCallback.h"
 #include "tCallbackString.h"
+#include "tRuby.h"
 
 typedef enum {
     ArmageTron_320_200=0,ArmageTron_320_240,ArmageTron_400_300,
@@ -142,8 +143,14 @@ extern tString gl_extensions;
 
 class rPerFrameTask:public tCallback{
 public:
-    rPerFrameTask(VOIDFUNC *f);
+    rPerFrameTask(AA_VOIDFUNC *f);
     static void DoPerFrameTasks();
+};
+
+class rPerFrameTaskRuby : public tCallbackRuby {
+public:
+	rPerFrameTaskRuby();
+	static void DoPerFrameTasks();
 };
 
 class rRenderIdCallback:public tCallbackString{
@@ -154,13 +161,13 @@ public:
 
 class rCallbackBeforeScreenModeChange:public tCallback{
 public:
-    rCallbackBeforeScreenModeChange(VOIDFUNC *f);
+    rCallbackBeforeScreenModeChange(AA_VOIDFUNC *f);
     static void Exec();
 };
 
 class rCallbackAfterScreenModeChange:public tCallback{
 public:
-    rCallbackAfterScreenModeChange(VOIDFUNC *f);
+    rCallbackAfterScreenModeChange(AA_VOIDFUNC *f);
     static void Exec();
 };
 

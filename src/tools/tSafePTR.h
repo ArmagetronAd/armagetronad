@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef ArmageTron_SAFEPTR_H
 #define ArmageTron_SAFEPTR_H
 
-#include "config.h"
+#include "aa_config.h"
 #include <stddef.h>
 #if HAVE_UNISTD_H
 // #include <unistd.h>

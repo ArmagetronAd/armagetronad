@@ -28,7 +28,7 @@ uWebInterface by Dave Fancella
 
 */
 
-#include "config.h"
+#include "aa_config.h"
 
 #ifdef DEDICATED
 

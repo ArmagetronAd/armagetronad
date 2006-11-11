@@ -103,7 +103,7 @@ public:
 
 class rCenterDisplayCallback:public tCallback{
 public:
-    rCenterDisplayCallback(VOIDFUNC *f);
+    rCenterDisplayCallback(AA_VOIDFUNC *f);
     static void CenterDisplay();
 };
 

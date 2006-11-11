@@ -33,7 +33,7 @@
 #include "tString.h"
 #include "gServerFavorites.h"
 #include "nServerInfo.h"
-#include "config.h"
+#include "aa_config.h"
 
 // *****************************************************************************
 // *

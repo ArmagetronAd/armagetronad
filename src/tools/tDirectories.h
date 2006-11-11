@@ -81,12 +81,13 @@ class tDirectories
 public:
     enum { eGetFilesAllFiles = 0, eGetFilesFilesOnly = 1, eGetFilesDirsOnly = 2 };
 
-    static const tPath& Data();       // directory for game data
-    static const tPath& Music();       // directory for game music
-    static const tPath& Config();     // directory for static configuration files
-    static const tPath& Var();        // directory for dynamic logs and highscores
-    static const tPath& Screenshot(); // directory for screenshots
+    static const tPath& Data();              // directory for game data
+    static const tPath& Music();             // directory for game music
+    static const tPath& Config();            // directory for static configuration files
+    static const tPath& Var();               // directory for dynamic logs and highscores
+    static const tPath& Screenshot();        // directory for screenshots
     static const tPathResource& Resource();  // directory for resources
+
 #ifdef DEDICATED    
     static const tPathWebroot& Webroot();    // directory for webroot of embedded web server
 #endif

@@ -42,7 +42,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <vector>
 
 static bool stc_forbidHudMap = false;
-static nSettingItem<bool> fcs("FORBID_HUD_MAP", stc_forbidHudMap);
+// TODO find out why this is throwing an error: “Two tConfItems with the same name FORBID_HUD_MAP!”
+// static nSettingItem<bool> fcs("FORBID_HUD_MAP", stc_forbidHudMap);
 extern std::vector<tCoord> se_rimWallRubberBand;
 
 #ifndef DEDICATED

@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#include "config.h"
+#include "aa_config.h"
 
 #ifndef ArmageTron_SOUNDMIXER_H
 #define ArmageTron_SOUNDMIXER_H

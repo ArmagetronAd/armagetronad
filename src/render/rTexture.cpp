@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "rSDL.h"
 
-#include "config.h"
+#include "aa_config.h"
 
 #include "rTexture.h"
 #include "tString.h"

@@ -1,0 +1,6 @@
+require "armagetronad/tools"
+require "armagetronad/network"
+require "armagetronad/render"
+require "armagetronad/ui"
+require "armagetronad/engine"
+require "armagetronad/tron"

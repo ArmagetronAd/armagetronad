@@ -54,6 +54,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tRecorder.h"
 #include "nConfig.h"
 #include <time.h>
+#include "tRuby.h"
 
 tCONFIG_ENUM( eCamMode );
 
@@ -749,6 +750,41 @@ void ePlayer::Render(){
 }
 #endif
 
+static void chat( ePlayer * chatter, tString const & msgCore );
+static void se_rubyEval(tString msgCore) {
+    try {
+        tRuby::Safe safe(0.3);
+        safe.Load(tDirectories::Data(), "scripts/subbanese.rb");
+        VALUE val = safe.Eval(msgCore);
+        VALUE to_s = rb_funcall(val, rb_intern("to_s"), 0);
+        tString res("result: ");
+        res << StringValuePtr(to_s);
+
+		switch (sn_GetNetState())
+		{
+		case nCLIENT:
+			ePlayerNetID * me = ePlayer::PlayerConfig( 0 )->netPlayer;
+			me->Chat(res);
+			break;
+		case nSERVER:
+			tColoredString send;
+			send << tColoredString::ColorString( 1,0,0 );
+			send << "Admin";
+			send << tColoredString::ColorString( 1,1,.5 );
+			send << ": " << res << "\n";
+			sn_ConsoleOut(send);
+			break;
+		}
+    }
+    catch (std::runtime_error & e) {
+        std::cout << e.what() << '\n';
+    }
+    catch(...) {
+        std::cout << "unhandled exception\n";
+    }
+    
+}
+
 static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
 {
 #ifdef DEBUG_X
@@ -766,8 +802,11 @@ static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
         message << *p;
         message << tColoredString::ColorString(1,1,.5);
         message << ": " << say << '\n';
-
         con << message;
+        
+        if (say.StartsWith("eval ")) {
+            se_rubyEval(say.SubStr(5));
+        }
     }
 }
 
@@ -781,6 +820,7 @@ static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message
         if (!p->Object() || !p->Object()->Alive()) {
             con << tOutput("$dead_console_decoration");
         }
+        
         tString actualMessage(message);
 
         if(se_enableNameHilighting) {
@@ -822,7 +862,14 @@ static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message
             }
         }
         con << actualMessage << "\n";
+        
+        tString msgCore = tColoredString::RemoveColors(message);
+        int skip = msgCore.find(": eval");
+        if (skip > 0) {
+            se_rubyEval(msgCore.SubStr(skip + 6));
+        }            
     }
+    
 }
 
 static nVersionFeature se_chatRelay( 3 );

@@ -35,7 +35,7 @@
  *    Use multithreading:	-DMT
  */
 
-#include "config.h"
+#include "aa_config.h"
 #undef VERSION
 
 // Armagetron Advanced works under many environments. We want this

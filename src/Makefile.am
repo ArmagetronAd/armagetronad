@@ -2,7 +2,7 @@ include $(top_srcdir)/Makefile.paths
 
 # evil hack: some target in doc will reinvoke make here. For that to work,
 # doc needs to be the last subdirectory visited.
-SUBDIRS = first doc thirdparty
+SUBDIRS = first doc swig thirdparty
 
 # target directory
 gamesdir=${bindir}
@@ -60,7 +60,7 @@ libtools_a_SOURCES=	tools/tArray.cpp tools/tArray.h tools/tCallback.cpp tools/tC
 	tools/tIniFile.h tools/tIniFile.cpp\
 	tools/tXmlParser.h tools/tXmlParser.cpp\
 	defs.h\
-    thirdparty/binreloc/prefix.c thirdparty/binreloc/prefix.h\
+    	thirdparty/binreloc/prefix.c thirdparty/binreloc/prefix.h\
 	tools/values/vCore.cpp \
 	tools/values/vParser.ypp \
 	tools/values/vRegistry.cpp \
@@ -76,7 +76,8 @@ libtools_a_SOURCES=	tools/tArray.cpp tools/tArray.h tools/tCallback.cpp tools/tC
 	tools/tPlayList.h tools/tPlayList.cpp\
 	tools/tCoord.h \
 	tools/tFunction.h tools/tFunction.cpp\
-        tools/tResource.h tools/tResource.cpp
+        tools/tResource.h tools/tResource.cpp \
+	tools/tRuby.h tools/tRuby.cpp
 
 #tools/tCommandLine.cpp tools/tCommandLine.h
 libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentification.cpp\
@@ -203,7 +204,8 @@ endif
 
 armagetronad_main_SOURCES = tron/gFloor.cpp tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_LDADD=libtron.a libenginecore.a libengine.a libnetwork.a libui.a thirdparty/shttpd/libshttpd.a librender.a libtools.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
+armagetronad_main_LDADD= $(WHOLE_ARCHIVE_FLAG) libtron.a libenginecore.a libengine.a libnetwork.a libui.a thirdparty/shttpd/libshttpd.a librender.a libtools.a thirdparty/mathexpr/libmathexpr.a ${extralibs} $(NO_WHOLE_ARCHIVE_FLAG)
+# armagetronad_main_LDFLAGS=
 
 armagetronad_main_master_SOURCES = network/master.cpp
 armagetronad_main_master_CXXFLAGS =$(libtron_a_CXXFLAGS)

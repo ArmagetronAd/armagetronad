@@ -293,8 +293,9 @@ void su_JoystickInit() {
         }
         /* TODO: Balls, Hats, Buttons */
     }
-
+#ifdef DEBUG
     std::cout << joycount << " joystick" << (joycount == 1 ? "" : "s") << " initialized\n";
+#endif
 }
 #endif
 

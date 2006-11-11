@@ -5,7 +5,7 @@ dnl but have to do this with version generated in bootstrap.sh instead for some 
 m4_include(version)
 
 dnl Comment this out to disable autoconf custom directories:
-dnl m4_include(accustomdir.m4)
+m4_include(accustomdir.m4)
 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(Armagetronad,AUTOMATIC_VERSION)
@@ -297,7 +297,7 @@ dnl AC_LIBTOOL_DLOPEN
 dnl AM_PROG_LIBTOOL
 
 dnl Header file
-AC_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADER(aa_config.h)
 
 
 dnl Checks for programs.
@@ -327,6 +327,55 @@ fi
 dnl Boost
 m4_include(ax_boost_base.m4)
 AX_BOOST_BASE([1.33.1])
+
+dnl Ruby
+
+AC_ARG_WITH(ruby,
+    AC_HELP_STRING([--with-ruby],
+        [The ruby to use]),
+    if test ! -z "${withval}"; then
+        RUBY="${withval}"
+    fi
+)
+
+AC_CHECK_PROG(RUBY, ruby, ruby, no)
+if test ${RUBY} = no || test -z ${RUBY}; then
+	AC_MSG_ERROR([Ruby 1.8 is required for compilation.])
+fi
+
+ruby_include_dir=$(${RUBY} <<EOF
+	require "rbconfig"
+	print Config::CONFIG@<:@'prefix'@:>@ + '/lib/ruby/1.8/' + Config::CONFIG@<:@'arch'@:>@
+EOF)
+
+ruby_lib_dir=$(${RUBY} <<EOF
+	require "rbconfig"
+	print Config::CONFIG@<:@'libdir'@:>@
+EOF)
+
+export CPPFLAGS="$CPPFLAGS -I${ruby_include_dir}"
+export LIBS="-L${ruby_lib_dir} -l${RUBY} $LIBS"
+export RUBY
+
+dnl SWIG
+
+m4_include(ac_pkg_swig.m4)
+AC_PROG_SWIG(1.3.29)
+SWIG_ENABLE_CXX
+
+dnl
+
+case "$target" in
+	*-*-darwin*)
+		export WHOLE_ARCHIVE_FLAG="-Wl,-all_load"
+		export NO_WHOLE_ARCHIVE_FLAG=""
+		;;
+	*-*-linux* )
+		export WHOLE_ARCHIVE_FLAG="--whole-archive"
+		export NO_WHOLE_ARCHIVE_FLAG="--no-whole-archive"
+		;;
+esac
+
 
 dnl testing a nifty make feature: silent inclu[]des
 AC_SINCLUDE
@@ -977,6 +1026,7 @@ language/languages.txt
 config/rc.config config/aiplayers.cfg
 src/doc/Makefile src/doc/net/Makefile src/doc/Doxyfile
 src/doc/html.m4
+src/swig/Makefile
 src/thirdparty/Makefile
 src/thirdparty/particles/Makefile
 src/thirdparty/mathexpr/Makefile
@@ -987,6 +1037,12 @@ desktop/Makefile
 www-root/Makefile
 desktop/armagetronad.desktop
 desktop/armagetronad.protocol
+src/swig/ext/armagetronad/engine/extconf.rb
+src/swig/ext/armagetronad/network/extconf.rb
+src/swig/ext/armagetronad/render/extconf.rb
+src/swig/ext/armagetronad/tools/extconf.rb
+src/swig/ext/armagetronad/tron/extconf.rb
+src/swig/ext/armagetronad/ui/extconf.rb
 )
 
 # m4_define(FULLEVAL,stage1=`eval echo $1`; stage2
@@ -1055,4 +1111,3 @@ if test "x$OUTSIDE_OF_PREFIX" = "xyes"; then
     echo "  of this warning, pass the corresponding opposite switches."
     echo ""
 fi
-

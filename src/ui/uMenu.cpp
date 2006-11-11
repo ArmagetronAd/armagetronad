@@ -1282,21 +1282,21 @@ void uMenuItemFileSelection::AddFile( const char *fileName, const char *filePath
 
 static tCallback *enter_anchor=NULL,*leave_anchor=NULL, *background_anchor=NULL;
 
-uCallbackMenuEnter::uCallbackMenuEnter(VOIDFUNC *f)
+uCallbackMenuEnter::uCallbackMenuEnter(AA_VOIDFUNC *f)
     :tCallback(enter_anchor,f){}
 
 void uCallbackMenuEnter::MenuEnter(){
     Exec(enter_anchor);
 }
 
-uCallbackMenuLeave::uCallbackMenuLeave(VOIDFUNC *f)
+uCallbackMenuLeave::uCallbackMenuLeave(AA_VOIDFUNC *f)
         :tCallback(leave_anchor,f){}
 
 void uCallbackMenuLeave::MenuLeave(){
     Exec(leave_anchor);
 }
 
-uCallbackMenuBackground::uCallbackMenuBackground(VOIDFUNC *f)
+uCallbackMenuBackground::uCallbackMenuBackground(AA_VOIDFUNC *f)
         :tCallback(background_anchor,f){}
 
 void uCallbackMenuBackground::MenuBackground(){

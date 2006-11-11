@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#pragma warning ( disable : 4800 4081 4244 4305 4244 4250 4541)
 #endif
 
-#include "config.h"
+#include "aa_config.h"
 
 #ifdef WIN32
 #include <windows.h>
@@ -60,11 +60,11 @@ template<class T> void Swap(T &a,T &b){
     a=b;
     b=c;
 }
-typedef void VOIDFUNC();
+typedef void AA_VOIDFUNC();
 typedef void INTFUNC(int);
 typedef bool BOOLRETFUNC();
 
-typedef VOIDFUNC *FUNCPTR;
+typedef AA_VOIDFUNC *FUNCPTR;
 typedef INTFUNC *INTFUNCPTR;
 
 // replacements for float math functions

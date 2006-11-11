@@ -30,12 +30,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "defs.h"
 #include "tLinkedList.h"
+#include "tRuby.h"
 
 class tCallback:public tListItem<tCallback>{
-    VOIDFUNC *func;
+    AA_VOIDFUNC *func;
 public:
-    tCallback(tCallback*& anchor, VOIDFUNC *f);
+    tCallback(tCallback*& anchor, AA_VOIDFUNC *f);
     static void Exec(tCallback *anchor);
+};
+
+class tCallbackRuby : public tListItem<tCallbackRuby> {
+	VALUE block;
+public:
+	tCallbackRuby(tCallbackRuby *& anchor);
+	static void Exec(tCallbackRuby *anchor);
 };
 
 class tCallbackAnd:public tListItem<tCallbackAnd>{

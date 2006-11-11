@@ -27,7 +27,7 @@
 #define _PREFIX_C_
 
 #ifdef HAVE_CONFIG_H
-	#include "config.h"
+	#include "aa_config.h"
 #endif
 
 #ifndef BR_PTHREADS

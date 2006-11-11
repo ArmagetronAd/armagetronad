@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#include "config.h"
+#include "aa_config.h"
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -168,7 +168,9 @@ void tConfItemBase::LoadLine(std::istream &s){
             // eat rest of input line
             tString rest;
             rest.ReadLine( s );
-
+#ifdef MACOSX
+            printErrors = false;
+#endif
             if (printErrors)
             {
                 tOutput o;

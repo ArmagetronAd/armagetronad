@@ -1012,7 +1012,7 @@ void sg_PlayerMenu(int Player){
 }
 
 
-VOIDFUNC viewport_menu_x;
+AA_VOIDFUNC viewport_menu_x;
 
 
 

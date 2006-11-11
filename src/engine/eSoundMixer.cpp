@@ -27,7 +27,7 @@ eSoundMixer by Dave Fancella
 
 */
 
-#include "config.h"
+#include "aa_config.h"
 
 // I don't know how many of these includes are actually necessary
 #include "rSDL.h"
