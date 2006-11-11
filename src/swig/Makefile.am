@@ -56,11 +56,11 @@ $(swig_tron): ext/armagetronad/tron/tron.i ext/armagetronad/tron/gTypemaps.i ext
 	$(SWIG) $(swig_opts) $(swig_tron_include) -o $@ $<
 
 all-local: $(swig_tools) $(swig_network) $(swig_render) $(swig_ui) $(swig_engine) $(swig_tron)
-	rm -rf ${top_builddir}/src/swig/setup.rb
-	rm -rf ${top_builddir}/src/swig/lib
-	cp -r ${srcdir}/setup.rb ${top_builddir}/src/swig
-	cp -r ${srcdir}/lib ${top_builddir}/src/swig
-	cd ${top_builddir}/src/swig && $(RUBY) setup.rb config && $(RUBY) setup.rb setup
+	test ${srcdir}/setup.rb -ef ${top_builddir}/src/swig/setup.rb || ( rm -rf ${top_builddir}/src/swig/setup.rb ; rm -rf ${top_builddir}/src/swig/lib ; cp -r ${srcdir}/setup.rb ${top_builddir}/src/swig ; cp -r ${srcdir}/lib ${top_builddir}/src/swig )
+	cd ${top_builddir}/src/swig
+	$(RUBY) setup.rb config
+	$(RUBY) setup.rb setup
 
 install-exec-local:
-	cd ${top_builddir}/src/swig && $(RUBY) setup.rb install
+	cd ${top_builddir}/src/swig
+	$(RUBY) setup.rb install --prefix=${prefix}
