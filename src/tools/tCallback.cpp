@@ -48,12 +48,17 @@ tCallbackRuby::tCallbackRuby(tCallbackRuby *& anchor)
 
 void tCallbackRuby::Exec(tCallbackRuby *anchor) {
 	if (anchor) {
-		rb_funcall(anchor->block, rb_intern("call"), 0);
+		int status = 0;
+		rb_protect(ExecProtect, anchor->block, &status);
+		tRuby::CheckStatus(status);
 		Exec(anchor->Next());
 	}
 }
 
-
+VALUE tCallbackRuby::ExecProtect(VALUE block)
+{
+	return rb_funcall(block, rb_intern("call"), 0);
+}
 
 tCallbackAnd::tCallbackAnd(tCallbackAnd*& anchor, BOOLRETFUNC *f)
         :tListItem<tCallbackAnd>(anchor), func(f){

@@ -10,6 +10,11 @@
 namespace tRuby
 {
 	/**
+		\brief	A helper function for rb_protect calls to raise a C++ exception
+	*/
+	void CheckStatus(int status);
+	
+	/**
         \brief  Initializes the ruby intepreter for use
     */
     void InitializeInterpreter();

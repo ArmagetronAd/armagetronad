@@ -3,7 +3,6 @@
 namespace tRuby
 {
 	std::string GetExceptionInfo();
-	void CheckStatus(int status);
 	VALUE RequireProtect(VALUE lib);
 	VALUE LoadProtect(VALUE data);
 	VALUE EvalProtect(VALUE code);

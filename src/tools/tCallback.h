@@ -41,6 +41,8 @@ public:
 
 class tCallbackRuby : public tListItem<tCallbackRuby> {
 	VALUE block;
+protected:
+	static VALUE ExecProtect(VALUE);	
 public:
 	tCallbackRuby(tCallbackRuby *& anchor);
 	static void Exec(tCallbackRuby *anchor);
