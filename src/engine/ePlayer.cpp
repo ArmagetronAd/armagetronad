@@ -763,8 +763,10 @@ static void se_rubyEval(tString msgCore) {
 		switch (sn_GetNetState())
 		{
 		case nCLIENT:
-			ePlayerNetID * me = ePlayer::PlayerConfig( 0 )->netPlayer;
-			me->Chat(res);
+			{
+				ePlayerNetID * me = ePlayer::PlayerConfig( 0 )->netPlayer;
+				me->Chat(res);
+			}
 			break;
 		case nSERVER:
 			tColoredString send;
