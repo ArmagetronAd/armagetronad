@@ -693,7 +693,7 @@ void nWaitForAck::Ackt(unsigned short id,unsigned short peer){
 
             // calculate and average ping
             REAL thisping=netTime - ack->timeFirstSent;
-            sn_Connections[peer].ping.Add( thisping, exp(REAL(-ack->timeouts)) );
+            sn_Connections[peer].ping.Add( thisping, 1/(1 + 10 * REAL(ack->timeouts * ack->timeouts * ack->timeouts ) ) );
 
             ack->AckExtraAction();
             delete ack;

@@ -42,15 +42,22 @@ ${srcdir}/network/nNetwork.cpp: nTrueVersion.h
 
 # library file listings
 
+if BUILDMAIN
+tools_extra=tools/tResourceManager.cpp tools/tResourceManager.h
+else
+tools_extra=
+endif
+
+
 # Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
 # the fragile dependency on undefined behaviour of the linker...)
-libtools_a_SOURCES=	tools/tArray.cpp tools/tArray.h tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.h\
+libtools_a_SOURCES=	${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.h\
 	tools/tConfiguration.cpp tools/tConfiguration.h tools/tConsole.cpp tools/tConsole.h tools/tCrypt.cpp tools/tCrypt.h\
 	tools/tDirectories.cpp tools/tDirectories.h tools/tError.cpp tools/tError.h tools/tEventQueue.cpp\
 	tools/tEventQueue.h tools/tHeap.cpp tools/tHeap.h tools/tInitExit.h tools/tLinkedList.cpp tools/tLinkedList.h\
 	tools/tList.h tools/tLocale.cpp tools/tLocale.h tools/tMath.h \
-	tools/tMemStack.cpp tools/tMemStack.h tools/tReferenceHolder.h tools/tResourceManager.cpp\
-	tools/tResourceManager.h tools/tRing.cpp tools/tRing.h tools/tSafePTR.cpp\
+	tools/tMemStack.cpp tools/tMemStack.h tools/tReferenceHolder.h \
+    tools/tRing.cpp tools/tRing.h tools/tSafePTR.cpp\
 	tools/tSafePTR.h tools/tString.cpp tools/tString.h tools/tSysTime.cpp tools/tSysTime.h tools/tToDo.cpp tools/tToDo.h\
 	tools/tException.cpp tools/tException.h\
 	tools/tRecorder.cpp tools/tRecorder.h\

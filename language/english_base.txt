@@ -197,6 +197,42 @@ allow_team_name_color_help   Allow a team to be named after a color
 allow_team_name_player_help  Allow a team to be named after the leading player
 allow_team_name_leader_help Set to 1 to allow team leader to set a team, 0 otherwise.
 
+team_name_1_help name of team 1
+team_name_2_help name of team 2
+team_name_3_help name of team 3
+team_name_4_help name of team 4
+team_name_5_help name of team 5
+team_name_6_help name of team 6
+team_name_7_help name of team 7
+team_name_8_help name of team 8
+
+team_red_1_help red portion of team 1's color
+team_red_2_help red portion of team 2's color
+team_red_3_help red portion of team 3's color
+team_red_4_help red portion of team 4's color
+team_red_5_help red portion of team 5's color
+team_red_6_help red portion of team 6's color
+team_red_7_help red portion of team 7's color
+team_red_8_help red portion of team 8's color
+
+team_green_1_help green portion of team 1's color
+team_green_2_help green portion of team 2's color
+team_green_3_help green portion of team 3's color
+team_green_4_help green portion of team 4's color
+team_green_5_help green portion of team 5's color
+team_green_6_help green portion of team 6's color
+team_green_7_help green portion of team 7's color
+team_green_8_help green portion of team 8's color
+
+team_blue_1 blue portion of team 1's color
+team_blue_2 blue portion of team 2's color
+team_blue_3 blue portion of team 3's color
+team_blue_4 blue portion of team 4's color
+team_blue_5 blue portion of team 5's color
+team_blue_6 blue portion of team 6's color
+team_blue_7 blue portion of team 7's color
+team_blue_8 blue portion of team 8's color
+
 # wall length modification
 cycle_dist_wall_shrink_help        Distance multiplier in wall length calculation. All values are legal. See settings.cfg for full docs.
 cycle_dist_wall_shrink_offset_help Distance offset in wall length calculation. See settings.cfg for full docs.

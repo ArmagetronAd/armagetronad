@@ -497,7 +497,7 @@ void ePlayerNetID::PoliceMenu()
 
 
 
-
+#ifndef DEDICATED
 
 static char *default_instant_chat[]=
     {"/team \\",
@@ -528,7 +528,7 @@ static char *default_instant_chat[]=
      "0x5aff91Only idiots0xffa962 write in0xc560ff color all0x87dfff the time!",
      NULL};
 
-
+#endif
 
 
 ePlayer * ePlayer::PlayerConfig(int p){
@@ -600,6 +600,7 @@ ePlayer::ePlayer(){
     if ( !getUserName )
         name << "Player " << id+1;
 
+#ifndef DEDICATED
     tString confname;
 
     confname << "PLAYER_"<< id+1;
@@ -645,7 +646,7 @@ ePlayer::ePlayer(){
     confname.Clear();
 
     int i;
-    for(i=CAMERA_SMART_IN;i>=0;i--){
+    for(i=CAMERA_COUNT-1;i>=0;i--){
         confname << "ALLOW_CAM_"<< id+1 << "_" << i;
         StoreConfitem(tNEW(tConfItem<bool>) (confname,
                                              "$allow_cam_help",
@@ -722,6 +723,7 @@ ePlayer::ePlayer(){
                                         "$color_r_help",
                                         rgb[0]));
     confname.Clear();
+#endif
 
     tRandomizer & randomizer = tRandomizer::GetInstance();
     //static int r = rand() / ( RAND_MAX >> 2 ) + se_UserName().Len();
@@ -1435,6 +1437,8 @@ void handle_chat(nMessage &m){
                     << tColoredString::ColorString(1,1,1)  << "*";
 
                     se_BroadcastChatLine( p, console, forOldClients );
+                    console << "\n";
+                    sn_ConsoleOut(console,0);
                     return;
                 }
                 else if (command == "/teamname") {
@@ -2076,6 +2080,26 @@ void ePlayer::Exit(){
 uActionPlayer ePlayer::s_chat("CHAT");
 
 int pingCharity = 100;
+static const int maxPingCharity = 300;
+
+static void sg_ClampPingCharity( int & pingCharity )
+{
+    if (pingCharity < 0 )
+        pingCharity = 0;
+    if (pingCharity > maxPingCharity )
+        pingCharity = maxPingCharity;
+}
+
+static void sg_ClampPingCharity( unsigned short & pingCharity )
+{
+    if (pingCharity > maxPingCharity )
+        pingCharity = maxPingCharity;
+}
+
+static void sg_ClampPingCharity()
+{
+    sg_ClampPingCharity( ::pingCharity );
+}
 
 static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
@@ -2105,6 +2129,8 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1)
             r=   P->rgb[0];
             g=   P->rgb[1];
             b=   P->rgb[2];
+
+            sg_ClampPingCharity();
             pingCharity=::pingCharity;
         }
     }
@@ -2699,6 +2725,7 @@ void ePlayerNetID::ReadSync(nMessage &m){
     }
 
     m.Read(pingCharity);
+    sg_ClampPingCharity(pingCharity);
 
     // name as sent from the other end
     tString & remoteName = ( sn_GetNetState() == nCLIENT ) ? nameFromServer_ : nameFromClient_;
@@ -3332,6 +3359,8 @@ void ePlayerNetID::Update(){
                 p->r=ePlayer::PlayerConfig(i)->rgb[0];
                 p->g=ePlayer::PlayerConfig(i)->rgb[1];
                 p->b=ePlayer::PlayerConfig(i)->rgb[2];
+
+                sg_ClampPingCharity();
                 p->pingCharity=::pingCharity;
                 p->SetTeamname(local_p->Teamname());
 
@@ -3355,6 +3384,7 @@ void ePlayerNetID::Update(){
     }
     // update the ping charity
     int old_c=sn_pingCharityServer;
+    sg_ClampPingCharity();
     sn_pingCharityServer=::pingCharity;
 #ifndef DEDICATED
     if (sn_GetNetState()==nCLIENT)

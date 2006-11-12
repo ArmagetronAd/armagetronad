@@ -392,7 +392,7 @@ rerun:
                         PassEdge(w,time,bestRRatio,0);
                 }
 
-                // switch to the next fase
+                // switch to the next face
                 if (in)
                     currentFace=in->Face();
                 else

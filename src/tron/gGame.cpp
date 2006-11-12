@@ -2338,6 +2338,16 @@ extern REAL sent_per_messid[100];
 
 static REAL lastdeath=0;
 
+static void sg_VoteMenuIdle()
+{
+    if ( !uMenu::MenuActive() )
+    {
+        se_ChatState( ePlayerNetID::ChatFlags_Menu, true );
+        eVoter::VotingMenu();
+        se_ChatState( ePlayerNetID::ChatFlags_Menu, false );
+    }
+}
+
 void gGame::StateUpdate(){
 
     //	if (state==GS_CREATED)
@@ -2602,12 +2612,7 @@ void gGame::StateUpdate(){
 
             con << tOutput("$gamestate_deleting_objects");
             exit_game_objects(grid);
-            if ( !uMenu::MenuActive() )
-            {
-                se_ChatState( ePlayerNetID::ChatFlags_Menu, true );
-                eVoter::VotingMenu();
-                se_ChatState( ePlayerNetID::ChatFlags_Menu, false );
-            }
+            st_ToDo( sg_VoteMenuIdle );
             nNetObject::ClearAllDeleted();
             SetState(GS_DELETE_GRID,GS_TRANSFER_SETTINGS);
             break;
