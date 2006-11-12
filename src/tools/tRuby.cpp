@@ -1,5 +1,9 @@
 #include "tRuby.h"
 
+#ifdef MACOSX_XCODE
+#   include "AARuby.h"
+#endif
+
 namespace tRuby
 {
 	std::string GetExceptionInfo();
@@ -12,8 +16,12 @@ namespace tRuby
 		
     void InitializeInterpreter()
 	{
-		ruby_init();
+        ruby_init();
+#ifdef MACOSX_XCODE
+        AARuby_init_loadpath();
+#else
         ruby_init_loadpath();
+#endif
         ruby_script("Armagetron Advanced");
 	}
     

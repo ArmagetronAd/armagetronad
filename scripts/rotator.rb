@@ -2,10 +2,12 @@ require "armagetronad"
 
 class Rotator
   
-  MAPS = %w[Your_mom/clever/repeat-0.3.2.aamap.xml
-            Your_mom/clever/inaktek-0.7.2.aamap.xml
+  MAPS = %w[Anonymous/polygon/regular/square-1.0.1.aamap.xml
             Anonymous/polygon/regular/40-gon-0.1.1.aamap.xml
             Anonymous/polygon/regular/diamond-1.0.2.aamap.xml
+            Your_mom/clever/inaktek-0.7.2.aamap.xml
+            Your_mom/clever/repeat-0.3.2.aamap.xml
+            Z-Man/fortress/sumo_4x4-0.1.1.aamap.xml
             Z-Man/fortress/zonetest-0.1.0.aamap.xml]
   
   def initialize
@@ -43,5 +45,5 @@ ArmagetronAd::Tron::RoundEvent.new do
 end
 
 ArmagetronAd::Tron::MatchEvent.new do
-  round_event.match_event
+  rotator.match_event
 end

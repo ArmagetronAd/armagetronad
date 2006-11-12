@@ -250,7 +250,9 @@
 		9B4A1A2E0A7A95890070BE82 /* mathexpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A1A210A7A95890070BE82 /* mathexpr.cpp */; };
 		9B97FE600B053AC2005900E3 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 9B97FE5A0B053AC2005900E3 /* scripts */; };
 		9BA703200B05FAEC00732923 /* tFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BA7031E0B05FAEC00732923 /* tFunction.cpp */; };
-		9BA703210B05FAEC00732923 /* tFunction.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BA7031F0B05FAEC00732923 /* tFunction.h */; };
+		9BAF03D90B07A4D100D984EA /* AARuby.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BAF03D70B07A4D100D984EA /* AARuby.mm */; };
+		9BAF04390B07A70C00D984EA /* libruby1.8.1.8.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */; };
+		9BAF04460B07A81E00D984EA /* libruby1.8.1.8.5.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */; };
 		9BD56C4A0A8B899700AC1048 /* vCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C370A8B899700AC1048 /* vCollection.cpp */; };
 		9BD56C4C0A8B899700AC1048 /* vCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C390A8B899700AC1048 /* vCore.cpp */; };
 		9BD56C4F0A8B899700AC1048 /* vebLegacy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C3C0A8B899700AC1048 /* vebLegacy.cpp */; };
@@ -312,10 +314,10 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				9BAF04460B07A81E00D984EA /* libruby1.8.1.8.5.dylib in Copy Frameworks */,
 				9BD7D9A70A2C7CCF00D7033C /* libpng.framework in Copy Frameworks */,
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
-				9BA703210B05FAEC00732923 /* tFunction.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -588,6 +590,9 @@
 		9B9E23FA0A825FA90067CCFA /* tValueParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tValueParser.h; sourceTree = "<group>"; };
 		9BA7031E0B05FAEC00732923 /* tFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tFunction.cpp; sourceTree = "<group>"; };
 		9BA7031F0B05FAEC00732923 /* tFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tFunction.h; sourceTree = "<group>"; };
+		9BAF03D60B07A4D100D984EA /* AARuby.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AARuby.h; path = ../src/macosx/AARuby.h; sourceTree = SOURCE_ROOT; };
+		9BAF03D70B07A4D100D984EA /* AARuby.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AARuby.mm; path = ../src/macosx/AARuby.mm; sourceTree = SOURCE_ROOT; };
+		9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libruby1.8.1.8.5.dylib; path = ../../../../../../../../Library/ruby/1.8/lib/libruby1.8.1.8.5.dylib; sourceTree = SOURCE_ROOT; };
 		9BD56C370A8B899700AC1048 /* vCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vCollection.cpp; sourceTree = "<group>"; };
 		9BD56C380A8B899700AC1048 /* vCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vCollection.h; sourceTree = "<group>"; };
 		9BD56C390A8B899700AC1048 /* vCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vCore.cpp; sourceTree = "<group>"; };
@@ -644,6 +649,7 @@
 				9BD7D9740A2C7CB400D7033C /* libpng.framework in Frameworks */,
 				9BD7D9750A2C7CB400D7033C /* SDL_image.framework in Frameworks */,
 				9BD7D9770A2C7CB400D7033C /* SDL.framework in Frameworks */,
+				9BAF04390B07A70C00D984EA /* libruby1.8.1.8.5.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -673,6 +679,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */,
 				9BD7D9680A2C7C7800D7033C /* Armagetron Advanced */,
 				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
@@ -715,6 +722,8 @@
 		8CBA5DFF089EEC0D007E21DC /* macosx */ = {
 			isa = PBXGroup;
 			children = (
+				9BAF03D60B07A4D100D984EA /* AARuby.h */,
+				9BAF03D70B07A4D100D984EA /* AARuby.mm */,
 				8C1AB77F09A3D2FB007E2048 /* AAURLHandler.h */,
 				8C1AB77D09A3D2D9007E2048 /* AAURLHandler.mm */,
 				32CA4F630368D1EE00C91783 /* Armagetron Advanced_Prefix.pch */,
@@ -1200,6 +1209,7 @@
 				8CBA5DD5089EEBB3007E21DC /* Copy Frameworks */,
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
+				9BAF04540B07A8E600D984EA /* Run Script: Package Ruby */,
 				8CBA6203089F11BE007E21DC /* Run script: Cleanup */,
 			);
 			buildRules = (
@@ -1290,7 +1300,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "rake xcode:cleanup\nrake swig:run\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone";
+			shellScript = "rake xcode:cleanup\nrake swig:run\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone\n";
+		};
+		9BAF04540B07A8E600D984EA /* Run Script: Package Ruby */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script: Package Ruby";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/zsh;
+			shellScript = "install_name_tool -change \\\n\t$HOME/Library/ruby/1.8/lib/libruby1.8.dylib \\\n\t@executable_path/../Frameworks/libruby1.8.dylib  \\\n\t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/MacOS/${PRODUCT_NAME}\"\n\nmv \\\n\t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Frameworks/libruby1.8.1.8.5.dylib\" \\\n\t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Frameworks/libruby1.8.dylib\"\n\n\nrm -rf \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Resources/ruby\"\ncp -r \"${HOME}/Library/ruby/1.8/lib/ruby\" \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Resources/ruby\"\n\nfor bundle in \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Resources/ruby/\"**/*.bundle\ndo\n\techo $bundle\n\tinstall_name_tool -change \\\n\t\t$HOME/Library/ruby/1.8/lib/libruby1.8.dylib \\\n\t\t@executable_path/../Frameworks/libruby1.8.dylib \\\n\t\t\"${bundle}\"\t\t\ndone\n";
 		};
 		9BD7DB490A2CBA7A00D7033C /* Run script: Prepare */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1581,6 +1605,7 @@
 				9BD56C5B0A8B899700AC1048 /* vRegistry.cpp in Sources */,
 				9BD56D270A8B912300AC1048 /* tRuby.cpp in Sources */,
 				9BA703200B05FAEC00732923 /* tFunction.cpp in Sources */,
+				9BAF03D90B07A4D100D984EA /* AARuby.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1707,7 +1732,6 @@
 					"-lpthread",
 					"-liconv",
 					"-lm",
-					"-lruby1.8",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
