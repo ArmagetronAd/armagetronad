@@ -20,10 +20,13 @@ void tResourceManager::RegisterLoader()
 
 tResource* tResourceManager::GetResource(const char *file, int typeID)
 {
+    // stub
+    return NULL;
 }
 
 int tResourceManager::RegisterResourceType(tNewResourceFunc func) {
     // stub
+    return 0;
 }
 
 //tResource* GetResource(const char *file, int typeID) {
