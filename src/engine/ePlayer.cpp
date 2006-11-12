@@ -762,23 +762,24 @@ static void se_rubyEval(tString msgCore) {
         tString res("result: ");
         res << StringValuePtr(to_s);
 
-		switch (sn_GetNetState())
-		{
-		case nCLIENT:
-			{
-				ePlayerNetID * me = ePlayer::PlayerConfig( 0 )->netPlayer;
-				me->Chat(res);
-			}
-			break;
-		case nSERVER:
-			tColoredString send;
-			send << tColoredString::ColorString( 1,0,0 );
-			send << "Admin";
-			send << tColoredString::ColorString( 1,1,.5 );
-			send << ": " << res << "\n";
-			sn_ConsoleOut(send);
-			break;
-		}
+        switch (sn_GetNetState())
+        {
+        case nSTANDALONE:
+        case nCLIENT:
+            {
+                ePlayerNetID * me = ePlayer::PlayerConfig( 0 )->netPlayer;
+                me->Chat(res);
+            }
+            break;
+        case nSERVER:
+            tColoredString send;
+            send << tColoredString::ColorString( 1,0,0 );
+            send << "Admin";
+            send << tColoredString::ColorString( 1,1,.5 );
+            send << ": " << res << "\n";
+            sn_ConsoleOut(send);
+            break;
+        }
     }
     catch (std::runtime_error & e) {
         std::cout << e.what() << '\n';
@@ -786,7 +787,7 @@ static void se_rubyEval(tString msgCore) {
     catch(...) {
         std::cout << "unhandled exception\n";
     }
-    
+
 }
 
 static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
@@ -807,7 +808,7 @@ static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
         message << tColoredString::ColorString(1,1,.5);
         message << ": " << say << '\n';
         con << message;
-        
+
         if (say.StartsWith("eval ")) {
             se_rubyEval(say.SubStr(5));
         }
@@ -824,7 +825,7 @@ static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message
         if (!p->Object() || !p->Object()->Alive()) {
             con << tOutput("$dead_console_decoration");
         }
-        
+
         tString actualMessage(message);
 
         if(se_enableNameHilighting) {
@@ -866,14 +867,14 @@ static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message
             }
         }
         con << actualMessage << "\n";
-        
+
         tString msgCore = tColoredString::RemoveColors(message);
         int skip = msgCore.find(": eval");
         if (skip > 0) {
             se_rubyEval(msgCore.SubStr(skip + 6));
-        }            
+        }
     }
-    
+
 }
 
 static nVersionFeature se_chatRelay( 3 );
