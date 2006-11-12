@@ -1209,6 +1209,7 @@
 				8CBA5DD5089EEBB3007E21DC /* Copy Frameworks */,
 				8D11072C0486CEB800E47090 /* Sources */,
 				8D11072E0486CEB800E47090 /* Frameworks */,
+				9BAF05A90B07D6D900D984EA /* Run Script: SWIG */,
 				9BAF04540B07A8E600D984EA /* Run Script: Package Ruby */,
 				8CBA6203089F11BE007E21DC /* Run script: Cleanup */,
 			);
@@ -1300,7 +1301,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "rake xcode:cleanup\nrake swig:run\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone\n";
+			shellScript = "rake xcode:cleanup\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone\n";
 		};
 		9BAF04540B07A8E600D984EA /* Run Script: Package Ruby */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1314,7 +1315,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/zsh;
-			shellScript = "install_name_tool -change \\\n\t$HOME/Library/ruby/1.8/lib/libruby1.8.dylib \\\n\t@executable_path/../Frameworks/libruby1.8.dylib  \\\n\t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/MacOS/${PRODUCT_NAME}\"\n\nmv \\\n\t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Frameworks/libruby1.8.1.8.5.dylib\" \\\n\t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Frameworks/libruby1.8.dylib\"\n\n\nrm -rf \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Resources/ruby\"\ncp -r \"${HOME}/Library/ruby/1.8/lib/ruby\" \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Resources/ruby\"\n\nfor bundle in \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Resources/ruby/\"**/*.bundle\ndo\n\techo $bundle\n\tinstall_name_tool -change \\\n\t\t$HOME/Library/ruby/1.8/lib/libruby1.8.dylib \\\n\t\t@executable_path/../Frameworks/libruby1.8.dylib \\\n\t\t\"${bundle}\"\t\t\ndone\n";
+			shellScript = "install_name_tool -change \\\n\t$HOME/Library/ruby/1.8/lib/libruby1.8.dylib \\\n\t@executable_path/../Frameworks/libruby1.8.dylib  \\\n\t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/MacOS/${PRODUCT_NAME}\"\n\nmv \\\n\t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Frameworks/libruby1.8.1.8.5.dylib\" \\\n\t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Frameworks/libruby1.8.dylib\"\n\n\nrm -rf \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Resources/ruby\"\ncp -r \"${HOME}/Library/ruby/1.8/lib/ruby\" \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Resources/ruby\"\n\nfor bundle in \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Resources/ruby/\"**/*.bundle\ndo\n\tchmod 777 \"${bundle}\"\n\tinstall_name_tool -change \\\n\t\t$HOME/Library/ruby/1.8/lib/libruby1.8.dylib \\\n\t\t@executable_path/../Frameworks/libruby1.8.dylib \\\n\t\t\"${bundle}\"\t\t\ndone\n";
+		};
+		9BAF05A90B07D6D900D984EA /* Run Script: SWIG */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script: SWIG";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = "/bin/bash -l";
+			shellScript = "rake swig:run";
 		};
 		9BD7DB490A2CBA7A00D7033C /* Run script: Prepare */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1797,7 +1812,6 @@
 					"-lpthread",
 					"-liconv",
 					"-lm",
-					"-lruby1.8",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
@@ -1892,7 +1906,6 @@
 					"-lpthread",
 					"-liconv",
 					"-lm",
-					"-lruby1.8",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
