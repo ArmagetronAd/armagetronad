@@ -204,7 +204,10 @@ protected:
 public:
     //  nConfItemLine(const char *title,const tOutput &help,tString &s)
     //    :nConfItem<tString>(s), tConfItemBase(title,help){};
-    nConfItemLine(const char *title,tString &s, callbackFunc *cb=0);
+    nConfItemLine(const char *title,tString &s);
+#ifndef SWIG
+    nConfItemLine(const char *title,tString &s, callbackFunc *cb);
+#endif
 
     virtual ~nConfItemLine();
 
