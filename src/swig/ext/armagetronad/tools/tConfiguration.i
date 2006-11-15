@@ -33,6 +33,8 @@ public:
     		tConfItemBase::LoadLine(s);
     	}
     }
+    virtual void ReadVal(std::istream &s)=0;
+    virtual void WriteVal(std::ostream &s)=0;
 };
 
 %pointer_class(tString, StringPointer);
