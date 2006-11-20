@@ -80,7 +80,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 + (void)growl:(NSString *)aTitle message:(NSString *)aMessage
 {
-    NSLog(@"in growl:message:");
     [GrowlApplicationBridge notifyWithTitle:aTitle
                                 description:aMessage
                            notificationName:aTitle
