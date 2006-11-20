@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
+#include "eEventNotification.h"
 #include "gCycle.h"
 #include "nConfig.h"
 #include "rModel.h"
@@ -2323,6 +2324,9 @@ void gCycle::KillAt( const eCoord& deathPos){
             tString ladderLog;
             ladderLog << "DEATH_SUICIDE " << hunter->GetUserName() << "\n";
             se_SaveToLadderLog( ladderLog );
+            tString notificationMessage(hunter->GetUserName());
+            notificationMessage << " commited suicide";
+            se_sendEventNotification(tString("Death suicide"), notificationMessage); 
 
             if ( score_suicide )
                 hunter->AddScore(score_suicide, tOutput(), "$player_lose_suicide" );
@@ -2348,6 +2352,9 @@ void gCycle::KillAt( const eCoord& deathPos){
                     tString ladderLog;
                     ladderLog << "DEATH_FRAG " << Player()->GetUserName() << " " << hunter->GetUserName()  << "\n";
                     se_SaveToLadderLog( ladderLog );
+                    tString notificationMessage(hunter->GetUserName());
+                    notificationMessage << " core dumped " << Player()->GetUserName();
+                    se_sendEventNotification(tString("Death frag"), notificationMessage);
 
                     win.SetTemplateParameter(3, preyName);
                     win << "$player_win_frag";
@@ -2364,6 +2371,9 @@ void gCycle::KillAt( const eCoord& deathPos){
                     tString ladderLog;
                     ladderLog << "DEATH_TEAMKILL " << Player()->GetUserName() << " " << hunter->GetUserName()  << "\n";
                     se_SaveToLadderLog( ladderLog );
+                    tString notificationMessage(hunter->GetUserName());
+                    notificationMessage << " teamkilled " << Player()->GetUserName();
+                    se_sendEventNotification(tString("Death teamkill"), notificationMessage);
 
                     tColoredString hunterName;
                     hunterName << *hunter << tColoredString::ColorString(1,1,1);

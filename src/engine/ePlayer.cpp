@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
+#include "eEventNotification.h"
 #include "tMemManager.h"
 #include "ePlayer.h"
 //#include "tInitExit.h"
@@ -2393,6 +2394,9 @@ void ePlayerNetID::RemoveFromGame()
                 tString ladder;
                 ladder << "PLAYER_LEFT " << userName_ << " " << nMachine::GetMachine(Owner()).GetIP() << "\n";
                 se_SaveToLadderLog(ladder);
+                tString notificationMessage(userName_);
+                notificationMessage << " left the grid";
+                se_sendEventNotification(tString("Player left"), notificationMessage);
             }
         }
     }
@@ -4591,6 +4595,9 @@ void ePlayerNetID::UpdateName( void )
                     tString ladder;
                     ladder << "PLAYER_ENTERED " << userName_ << " " << nMachine::GetMachine(Owner()).GetIP() << "\n";
                     se_SaveToLadderLog(ladder);
+                    tString notificationMessage(userName_);
+                    notificationMessage << " entered the grid";
+                    se_sendEventNotification(tString("Player entered"), notificationMessage);
 
                     Greet();
                 }
@@ -4618,6 +4625,9 @@ void ePlayerNetID::UpdateName( void )
                     tString ladder;
                     ladder << "PLAYER_RENAMED " <<  oldUserName << " "  << userName_ << " " << nMachine::GetMachine(Owner()).GetIP() << "\n";
                     se_SaveToLadderLog(ladder);
+                    tString notificationMessage(oldUserName);
+                    notificationMessage << " renamed to " << userName_;
+                    se_sendEventNotification(tString("Player renamed"), notificationMessage);
                 }
             }
         }

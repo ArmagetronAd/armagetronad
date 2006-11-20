@@ -26,45 +26,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#include <iostream>
+#ifndef __AAGrowlPlugin_H__
+#define __AAGrowlPlugin_H__
 
-#include "eEventNotification.h"
-#include "ePlayer.h"
-#include "nNetwork.h"
-#include "tString.h"
-#ifdef MACOSX_XCODE
-#   include "AAGrowlBridge.h"
-#endif
+#import <Cocoa/Cocoa.h>
+#include <Growl-WithInstaller/GrowlApplicationBridge.h>
 
-void se_eventNotificationHandle( nMessage &m );
+@interface AAGrowlPlugin : NSObject <GrowlApplicationBridgeDelegate>
+- (void)startGrowling;
++ (void)growl:(NSString *)aTitle message:(NSString *)aMessage;
+@end
 
-static nVersionFeature se_eventNotificationFeature( 20 );
-static nDescriptor se_eventNotificationDescriptor(  199, se_eventNotificationHandle, "event_notification" );
 
-void se_eventNotificationHandle( nMessage &m )
-{
-    tString title, message;
-    m >> title;
-    m >> message;
-#ifdef MACOSX_XCODE
-    Growl(title, message);
-#endif
-}
-
-void se_sendEventNotification( tString title, tString message )
-{
-    for ( int user = MAXCLIENTS; user > 0; --user )
-    {
-        if ( sn_Connections[ user ].socket )
-        {
-            if ( se_eventNotificationFeature.Supported( user ) )
-            {
-                nMessage *m = new nMessage( se_eventNotificationDescriptor );
-                *m << title;
-                *m << message;
-                m->Send( user );
-            }
-            
-        }
-    }
-}
+#endif // __AAGrowlPlugin_H__

@@ -1266,6 +1266,7 @@ static void own_game( nNetState enter_state ){
     // write scores one last time
     ePlayerNetID::LogScoreDifferences();
     se_SaveToLadderLog(tString("GAME_END\n"));
+    se_sendEventNotification(tString("Game end"), tString("The Game has ended"));
 
     sg_currentGame=NULL;
     se_KillGameTimer();
@@ -2406,7 +2407,7 @@ void gGame::StateUpdate(){
             // log scores before players get renamed
             ePlayerNetID::LogScoreDifferences();
             se_SaveToLadderLog(tString("NEW_ROUND\n"));
-            se_sendEventNotification(tString("New Round"), tString("Starting a new round…"));
+            se_sendEventNotification(tString("New Round"), tString("Starting a new round"));
             
             // kick spectators
             nMachine::KickSpectators();
@@ -3111,6 +3112,9 @@ void gGame::Analysis(REAL time){
                         tString ladderLog;
                         ladderLog << "ROUND_WINNER " << ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() ) << "\n";
                         se_SaveToLadderLog( ladderLog );
+                        tString notificationMessage( ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() ) );
+                        notificationMessage << " has won the round";
+                        se_sendEventNotification(tString("Round winner"), notificationMessage);
                     }
                 }
                 //gStatistics - highscore check
@@ -3172,6 +3176,10 @@ void gGame::Analysis(REAL time){
                         tString ladderLog;
                         ladderLog << "MATCH_WINNER " << ePlayerNetID::FilterName( eTeam::teams[0]->Name() ) << "\n";
                         se_SaveToLadderLog( ladderLog );
+                        tString notificationMessage( ePlayerNetID::FilterName( eTeam::teams[0]->Name() ) );
+                        notificationMessage << " has won the match";
+                        se_sendEventNotification(tString("Match winner"), notificationMessage);
+                        
 
                         message.SetTemplateParameter(1, name);
                         message << "$gamestate_champ_console";
@@ -3345,7 +3353,11 @@ void gGame::StartNewMatch(){
 
 void gGame::StartNewMatchNow(){
     if ( rounds != 0 )
+    {
         se_SaveToLadderLog(tString("NEW_MATCH\n"));
+        se_sendEventNotification(tString("New match"), tString("Starting a new match"));
+    }
+        
 
     rounds=0;
     warning=0;

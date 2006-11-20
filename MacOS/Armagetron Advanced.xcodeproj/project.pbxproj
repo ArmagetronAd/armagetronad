@@ -233,7 +233,6 @@
 		9B26D98E0A64AE5400F9864B /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B26D98C0A64AE5400F9864B /* eLagCompensation.cpp */; };
 		9B26D9900A64AE5500F9864B /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B26D98C0A64AE5400F9864B /* eLagCompensation.cpp */; };
 		9B30C74E0B111D66006D158D /* eEventNotification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B30C74C0B111D66006D158D /* eEventNotification.cpp */; };
-		9B30C74F0B111D66006D158D /* eEventNotification.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B30C74D0B111D66006D158D /* eEventNotification.h */; };
 		9B4A19D20A7A90620070BE82 /* zEffectGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C20A7A90620070BE82 /* zEffectGroup.cpp */; };
 		9B4A19D40A7A90620070BE82 /* zEffector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C40A7A90620070BE82 /* zEffector.cpp */; };
 		9B4A19D70A7A90620070BE82 /* zMonitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C70A7A90620070BE82 /* zMonitor.cpp */; };
@@ -250,6 +249,12 @@
 		9B4A19E70A7A90620070BE82 /* zZoneInfluence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19CF0A7A90620070BE82 /* zZoneInfluence.cpp */; };
 		9B4A1A280A7A95890070BE82 /* mathexpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A1A210A7A95890070BE82 /* mathexpr.cpp */; };
 		9B4A1A2E0A7A95890070BE82 /* mathexpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A1A210A7A95890070BE82 /* mathexpr.cpp */; };
+		9B83FE950B12161600878E8A /* Growl-WithInstaller.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
+		9B83FF0F0B121B3100878E8A /* Growl-WithInstaller.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
+		9B83FF400B12248800878E8A /* AAGrowlPlugin.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FF3E0B12248800878E8A /* AAGrowlPlugin.h */; };
+		9B83FF410B12248800878E8A /* AAGrowlPlugin.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B83FF3F0B12248800878E8A /* AAGrowlPlugin.mm */; };
+		9B83FF5D0B1227BD00878E8A /* AAGrowlBridge.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FF5B0B1227BD00878E8A /* AAGrowlBridge.h */; };
+		9B83FF5E0B1227BD00878E8A /* AAGrowlBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B83FF5C0B1227BD00878E8A /* AAGrowlBridge.mm */; };
 		9B97FE600B053AC2005900E3 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 9B97FE5A0B053AC2005900E3 /* scripts */; };
 		9BA703200B05FAEC00732923 /* tFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BA7031E0B05FAEC00732923 /* tFunction.cpp */; };
 		9BAF03D90B07A4D100D984EA /* AARuby.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BAF03D70B07A4D100D984EA /* AARuby.mm */; };
@@ -316,11 +321,13 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				9B83FF0F0B121B3100878E8A /* Growl-WithInstaller.framework in Copy Frameworks */,
 				9BAF04460B07A81E00D984EA /* libruby1.8.1.8.5.dylib in Copy Frameworks */,
 				9BD7D9A70A2C7CCF00D7033C /* libpng.framework in Copy Frameworks */,
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
-				9B30C74F0B111D66006D158D /* eEventNotification.h in Copy Frameworks */,
+				9B83FF400B12248800878E8A /* AAGrowlPlugin.h in Copy Frameworks */,
+				9B83FF5D0B1227BD00878E8A /* AAGrowlBridge.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -590,6 +597,11 @@
 		9B4A19FA0A7A931B0070BE82 /* gVectorExtra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gVectorExtra.h; sourceTree = "<group>"; };
 		9B4A1A210A7A95890070BE82 /* mathexpr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mathexpr.cpp; sourceTree = "<group>"; };
 		9B4A1A220A7A95890070BE82 /* mathexpr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mathexpr.h; sourceTree = "<group>"; };
+		9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "Growl-WithInstaller.framework"; path = "/Library/Frameworks/ArmagetronAdvanced/current/Growl-WithInstaller.framework"; sourceTree = "<absolute>"; };
+		9B83FF3E0B12248800878E8A /* AAGrowlPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AAGrowlPlugin.h; path = ../src/macosx/AAGrowlPlugin.h; sourceTree = SOURCE_ROOT; };
+		9B83FF3F0B12248800878E8A /* AAGrowlPlugin.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AAGrowlPlugin.mm; path = ../src/macosx/AAGrowlPlugin.mm; sourceTree = SOURCE_ROOT; };
+		9B83FF5B0B1227BD00878E8A /* AAGrowlBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AAGrowlBridge.h; sourceTree = "<group>"; };
+		9B83FF5C0B1227BD00878E8A /* AAGrowlBridge.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AAGrowlBridge.mm; sourceTree = "<group>"; };
 		9B86E63A0A2DFDA600D90F1C /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config_common.h; path = ../src/macosx/config_common.h; sourceTree = SOURCE_ROOT; };
 		9B97FE5A0B053AC2005900E3 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = ../scripts; sourceTree = SOURCE_ROOT; };
 		9B9E23FA0A825FA90067CCFA /* tValueParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tValueParser.h; sourceTree = "<group>"; };
@@ -655,6 +667,7 @@
 				9BD7D9750A2C7CB400D7033C /* SDL_image.framework in Frameworks */,
 				9BD7D9770A2C7CB400D7033C /* SDL.framework in Frameworks */,
 				9BAF04390B07A70C00D984EA /* libruby1.8.1.8.5.dylib in Frameworks */,
+				9B83FE950B12161600878E8A /* Growl-WithInstaller.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -727,6 +740,10 @@
 		8CBA5DFF089EEC0D007E21DC /* macosx */ = {
 			isa = PBXGroup;
 			children = (
+				9B83FF5B0B1227BD00878E8A /* AAGrowlBridge.h */,
+				9B83FF5C0B1227BD00878E8A /* AAGrowlBridge.mm */,
+				9B83FF3E0B12248800878E8A /* AAGrowlPlugin.h */,
+				9B83FF3F0B12248800878E8A /* AAGrowlPlugin.mm */,
 				9BAF03D60B07A4D100D984EA /* AARuby.h */,
 				9BAF03D70B07A4D100D984EA /* AARuby.mm */,
 				8C1AB77F09A3D2FB007E2048 /* AAURLHandler.h */,
@@ -1109,6 +1126,7 @@
 		9BD7D9680A2C7C7800D7033C /* Armagetron Advanced */ = {
 			isa = PBXGroup;
 			children = (
+				9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */,
 				9BD7D96B0A2C7CB400D7033C /* libfreetype.a */,
 				9BD7D96C0A2C7CB400D7033C /* libftgl.a */,
 				9BD7D96D0A2C7CB400D7033C /* libpng.framework */,
@@ -1629,6 +1647,8 @@
 				9BA703200B05FAEC00732923 /* tFunction.cpp in Sources */,
 				9BAF03D90B07A4D100D984EA /* AARuby.mm in Sources */,
 				9B30C74E0B111D66006D158D /* eEventNotification.cpp in Sources */,
+				9B83FF410B12248800878E8A /* AAGrowlPlugin.mm in Sources */,
+				9B83FF5E0B1227BD00878E8A /* AAGrowlBridge.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
