@@ -6,7 +6,13 @@ Changes since 0.3.0:
   to jump to it in the history.
 - New cockpit data sources current_name, current_colored_name,
   current_pos_x, current_pos_y and player_acceleration
-
+- [Growl notifications](http://growl.info) for Mac OS X when the server
+  supports it. Messages sent: Player left, Player entered, Player renamed, 
+  Death suicide, Death frag, Death teamkill, Game end, New Round, Round winner,
+  Match winner, and New match. Note that not all notifications are enabled by
+  default — you can toggle notifications and do many more things in the Growl
+  System Preferences panel.
+	
 Changes since 0.3.0_alpha4941:
 - Added setting to toggle custom teamnames
 - New team menu item: autoselect team mode
