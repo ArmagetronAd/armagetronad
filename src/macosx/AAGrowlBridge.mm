@@ -35,7 +35,7 @@ void Growl(tString title, tString message)
     NSString *nstitle, *nsmessage;
     nstitle = [[NSString alloc] initWithCString:title.c_str()];
     nsmessage = [[NSString alloc] initWithCString:message.c_str()];
-    [AAGrowlPlugin growl:nsmessage message:nsmessage];
+    [AAGrowlPlugin growl:nstitle message:nsmessage];
     [nstitle release];
     [nsmessage release];
 }

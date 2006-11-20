@@ -600,8 +600,8 @@
 		9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "Growl-WithInstaller.framework"; path = "/Library/Frameworks/ArmagetronAdvanced/current/Growl-WithInstaller.framework"; sourceTree = "<absolute>"; };
 		9B83FF3E0B12248800878E8A /* AAGrowlPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AAGrowlPlugin.h; path = ../src/macosx/AAGrowlPlugin.h; sourceTree = SOURCE_ROOT; };
 		9B83FF3F0B12248800878E8A /* AAGrowlPlugin.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AAGrowlPlugin.mm; path = ../src/macosx/AAGrowlPlugin.mm; sourceTree = SOURCE_ROOT; };
-		9B83FF5B0B1227BD00878E8A /* AAGrowlBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AAGrowlBridge.h; sourceTree = "<group>"; };
-		9B83FF5C0B1227BD00878E8A /* AAGrowlBridge.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AAGrowlBridge.mm; sourceTree = "<group>"; };
+		9B83FF5B0B1227BD00878E8A /* AAGrowlBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AAGrowlBridge.h; path = ../src/macosx/AAGrowlBridge.h; sourceTree = "<group>"; };
+		9B83FF5C0B1227BD00878E8A /* AAGrowlBridge.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AAGrowlBridge.mm; path = ../src/macosx/AAGrowlBridge.mm; sourceTree = "<group>"; };
 		9B86E63A0A2DFDA600D90F1C /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config_common.h; path = ../src/macosx/config_common.h; sourceTree = SOURCE_ROOT; };
 		9B97FE5A0B053AC2005900E3 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = ../scripts; sourceTree = SOURCE_ROOT; };
 		9B9E23FA0A825FA90067CCFA /* tValueParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tValueParser.h; sourceTree = "<group>"; };
