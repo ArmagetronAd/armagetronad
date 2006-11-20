@@ -232,6 +232,8 @@
 		9B1EA5410A20BC0100FA3478 /* gRotation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B1EA53B0A20BC0100FA3478 /* gRotation.cpp */; };
 		9B26D98E0A64AE5400F9864B /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B26D98C0A64AE5400F9864B /* eLagCompensation.cpp */; };
 		9B26D9900A64AE5500F9864B /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B26D98C0A64AE5400F9864B /* eLagCompensation.cpp */; };
+		9B30C74E0B111D66006D158D /* eEventNotification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B30C74C0B111D66006D158D /* eEventNotification.cpp */; };
+		9B30C74F0B111D66006D158D /* eEventNotification.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B30C74D0B111D66006D158D /* eEventNotification.h */; };
 		9B4A19D20A7A90620070BE82 /* zEffectGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C20A7A90620070BE82 /* zEffectGroup.cpp */; };
 		9B4A19D40A7A90620070BE82 /* zEffector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C40A7A90620070BE82 /* zEffector.cpp */; };
 		9B4A19D70A7A90620070BE82 /* zMonitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C70A7A90620070BE82 /* zMonitor.cpp */; };
@@ -318,6 +320,7 @@
 				9BD7D9A70A2C7CCF00D7033C /* libpng.framework in Copy Frameworks */,
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
+				9B30C74F0B111D66006D158D /* eEventNotification.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -566,6 +569,8 @@
 		9B1EA53C0A20BC0100FA3478 /* gRotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gRotation.h; sourceTree = "<group>"; };
 		9B26D98C0A64AE5400F9864B /* eLagCompensation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eLagCompensation.cpp; sourceTree = "<group>"; };
 		9B26D98D0A64AE5400F9864B /* eLagCompensation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eLagCompensation.h; sourceTree = "<group>"; };
+		9B30C74C0B111D66006D158D /* eEventNotification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eEventNotification.cpp; sourceTree = "<group>"; };
+		9B30C74D0B111D66006D158D /* eEventNotification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eEventNotification.h; sourceTree = "<group>"; };
 		9B4A19C10A7A90620070BE82 /* shapeCircle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shapeCircle.h; sourceTree = "<group>"; };
 		9B4A19C20A7A90620070BE82 /* zEffectGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zEffectGroup.cpp; sourceTree = "<group>"; };
 		9B4A19C30A7A90620070BE82 /* zEffectGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zEffectGroup.h; sourceTree = "<group>"; };
@@ -753,6 +758,8 @@
 				8CBA5E19089EEC7C007E21DC /* eDebugLine.cpp */,
 				8CBA5E1A089EEC7C007E21DC /* eDebugLine.h */,
 				8CBA5E1B089EEC7C007E21DC /* eDisplay.cpp */,
+				9B30C74C0B111D66006D158D /* eEventNotification.cpp */,
+				9B30C74D0B111D66006D158D /* eEventNotification.h */,
 				8CBA5E1C089EEC7C007E21DC /* eFloor.cpp */,
 				8CBA5E1D089EEC7C007E21DC /* eFloor.h */,
 				8CBA5E1E089EEC7C007E21DC /* eGameObject.cpp */,
@@ -1621,6 +1628,7 @@
 				9BD56D270A8B912300AC1048 /* tRuby.cpp in Sources */,
 				9BA703200B05FAEC00732923 /* tFunction.cpp in Sources */,
 				9BAF03D90B07A4D100D984EA /* AARuby.mm in Sources */,
+				9B30C74E0B111D66006D158D /* eEventNotification.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

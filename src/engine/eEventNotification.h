@@ -26,9 +26,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#ifndef AARUBY_H
-#define AARUBY_H
+#ifndef __eEventNotification_H__
+#define __eEventNotification_H__
 
-void AARuby_init_loadpath();
+class tString;
+void se_sendEventNotification( tString title, tString message );
 
-#endif // AARUBY_H
+#endif // __eEventNotification_H__

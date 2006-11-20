@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-
+#include "eEventNotification.h"
 #include "gStuff.h"
 #include "eSoundMixer.h"
 #include "eGrid.h"
@@ -2406,7 +2406,8 @@ void gGame::StateUpdate(){
             // log scores before players get renamed
             ePlayerNetID::LogScoreDifferences();
             se_SaveToLadderLog(tString("NEW_ROUND\n"));
-
+            se_sendEventNotification(tString("New Round"), tString("Starting a new round…"));
+            
             // kick spectators
             nMachine::KickSpectators();
 

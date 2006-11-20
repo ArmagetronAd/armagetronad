@@ -26,9 +26,40 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#ifndef AARUBY_H
-#define AARUBY_H
+#include <iostream>
 
-void AARuby_init_loadpath();
+#include "eEventNotification.h"
+#include "ePlayer.h"
+#include "nNetwork.h"
+#include "tString.h"
 
-#endif // AARUBY_H
+void se_eventNotificationHandle( nMessage &m );
+
+static nVersionFeature se_eventNotificationFeature( 20 );
+static nDescriptor se_eventNotificationDescriptor(  199, se_eventNotificationHandle, "event_notification" );
+
+void se_eventNotificationHandle( nMessage &m )
+{
+    tString title, message;
+    m >> title;
+    m >> message;
+}
+
+void se_sendEventNotification( tString title, tString message )
+{
+    for ( int user = MAXCLIENTS; user > 0; --user )
+    {
+        if ( sn_Connections[ user ].socket )
+        {
+            if ( se_eventNotificationFeature.Supported( user ) )
+            {
+                std::cout << "Found a supported peer. Sending...\n";
+                nMessage *m = new nMessage( se_eventNotificationDescriptor );
+                *m << title;
+                *m << message;
+                m->Send( user );
+            }
+            
+        }
+    }
+}

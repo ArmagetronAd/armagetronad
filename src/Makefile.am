@@ -113,7 +113,8 @@ libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentificati
 	engine/sound/sdl_mixer/eMusicTrackSDLMixer.cpp \
 	engine/sound/sdl_mixer/eMusicTrackSDLMixer.h \
 	engine/eLagCompensation.cpp engine/eLagCompensation.h \
-	engine/eSoundMixer.h engine/eSoundMixer.cpp
+	engine/eSoundMixer.h engine/eSoundMixer.cpp \
+	engine/eEventNotification.h engine/eEventNotification.cpp
 
 librender_a_SOURCES=render/rConsole.cpp render/rConsoleGraph.cpp render/rConsole.h render/rFont.cpp\
 	render/rFont.h render/rGL.h render/rGLRender.cpp render/rModel.cpp render/rModel.h render/rRender.cpp\
