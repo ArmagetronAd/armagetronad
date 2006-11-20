@@ -53,7 +53,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //! Give Growl a list of all notifications we plan on sending
 - (NSDictionary *)registrationDictionaryForGrowl
 {
-    NSArray *notes = [NSArray arrayWithObjects:PLAYER_LEFT,
+    NSArray *all_notes = [NSArray arrayWithObjects:PLAYER_LEFT,
                                                PLAYER_ENTERED,
                                                PLAYER_RENAMED,
                                                DEATH_SUICIDE,
@@ -65,10 +65,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                                                MATCH_WINNER,
                                                NEW_MATCH,
                                                nil];
+    NSArray *def_notes = [NSArray arrayWithObjects:GAME_END,
+                          NEW_ROUND,
+                          ROUND_WINNER,
+                          MATCH_WINNER,
+                          NEW_MATCH,
+                          nil];
+    
             
     NSDictionary *growlNotes = [NSDictionary dictionaryWithObjectsAndKeys:
-                                    notes, GROWL_NOTIFICATIONS_ALL,
-                                    notes, GROWL_NOTIFICATIONS_DEFAULT,
+                                    all_notes, GROWL_NOTIFICATIONS_ALL,
+                                    def_notes, GROWL_NOTIFICATIONS_DEFAULT,
                                     nil];
     return growlNotes;
 }
