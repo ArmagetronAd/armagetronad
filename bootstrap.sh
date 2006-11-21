@@ -16,13 +16,13 @@ $ACLOCAL || { rm aclocal.m4; exit 1; }
 
 echo "Running autoheader..."
 rm -f config.h.in
-$AUTOHEADER || { rm config.h.in; exit 1; }
+$AUTOHEADER || { rm aa_config.h.in; exit 1; }
 
 echo "Running autoconf..."
 $AUTOCONF || { rm configure; exit 1; }
 
 echo "Running automake..."
-automake -a || exit 1
+$AUTOMAKE -a || exit 1
 
 echo "Flagging scripts as executable..."
 chmod 755 $MYDIR/*.sh || exit 1
