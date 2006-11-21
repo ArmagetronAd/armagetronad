@@ -54,6 +54,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gArena.h"
 #include "gStatistics.h"
 
+#include "cCockpit.h"
+
 #include "tMath.h"
 #include <stdlib.h>
 #include <fstream>
@@ -2326,7 +2328,7 @@ void gCycle::KillAt( const eCoord& deathPos){
             se_SaveToLadderLog( ladderLog );
             tString notificationMessage(hunter->GetUserName());
             notificationMessage << " commited suicide";
-            se_sendEventNotification(tString("Death suicide"), notificationMessage); 
+            se_sendEventNotification(tString("Death suicide"), notificationMessage);
 
             if ( score_suicide )
                 hunter->AddScore(score_suicide, tOutput(), "$player_lose_suicide" );
@@ -3630,13 +3632,14 @@ void gCycle::RenderName( const eCamera* cam ) {
 
     /* it is visible */
 
+    bool doname = true;
     if (fadeOutNameAfter > 0) {
         REAL now = tSysTimeFloat();
         if (timeCameIntoView == 0)
             timeCameIntoView = now;
 
         if (now - timeCameIntoView > fadeOutNameAfter) {
-            return;
+            doname = false;
         } else if (now - timeCameIntoView > fadeOutNameAfter - 1) {
             /* start to fade out */
             alpha = 0.75 - (now - timeCameIntoView -
@@ -3652,13 +3655,17 @@ void gCycle::RenderName( const eCamera* cam ) {
     glPushMatrix();
     glLoadIdentity();
 
-    glColor4f(1, 1, 1, alpha);
-    tColoredString name;
-    if(sg_displayColoredNameOverCycles)
-        name << *this->player;
-    else
-        name << this->player->GetName();
-    DisplayText(xp, yp, rCHEIGHT_NORMAL, name, sr_fontCycleLabel, 0, 0);
+    glTranslatef(xp, yp, 0.);
+    if(doname) {
+        glColor4f(1, 1, 1, alpha);
+        tColoredString name;
+        if(sg_displayColoredNameOverCycles)
+            name << *this->player;
+        else
+            name << this->player->GetName();
+        DisplayText(0, 0, rCHEIGHT_NORMAL, name, sr_fontCycleLabel, 0, 0);
+    }
+    cCockpit::GetCockpit()->RenderCycle(*this);
 
     ProjMatrix();
     glPopMatrix();

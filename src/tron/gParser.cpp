@@ -781,8 +781,16 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
              */
             for (int i=0; i<se_PlayerNetIDs.Len(); i++) {
                 // TODO: change this to a call to Joda's code
-                if ( se_PlayerNetIDs(i)->GetName() == tString(*iter) ) {
+                tString str(*iter);
+                if ( se_PlayerNetIDs(i)->GetName() == str ) {
                     owners.push_back( se_PlayerNetIDs(i) );
+                }
+                //Hack to support referring to players without knowing their names.
+                int id;
+                if(str.Convert(id)) {
+                    if(i == id) {
+                        owners.push_back( se_PlayerNetIDs(i) );
+                    }
                 }
             }
         }

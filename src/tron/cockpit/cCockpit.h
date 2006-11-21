@@ -84,6 +84,8 @@ public:
     void RenderRootwindow(); //!< Renders the main viewport (all widgets that belong to the entire screen)
     void RenderPlayer(); //!< Renders all widgets that belong to the currently active player
 
+    void RenderCycle(gCycle const &cycle); //!< Render the cockpit elements above a cycle
+
     void ProcessCockpit(void); //!< Calls ClearWidgets(), then (re-) parses the cockpit file
 private:
     static cCockpit* _instance; //!< Stores a pointer to the current instance of the cockpit
@@ -95,6 +97,7 @@ private:
     gCycle *m_FocusCycle; //!< The cycle currently being watched (the one that belongs to m_ViewportPlayer)
     tAutoDeque<cWidget::Base> m_Widgets_perplayer; //!< All widgets that have to be rendered for every player
     tAutoDeque<cWidget::Base> m_Widgets_rootwindow; //!< All widgets that have to be rendered only once for the root window
+    tAutoDeque<cWidget::Base> m_Widgets_cycles; //!< All widgets that have to be rendered above each cycle
 
     void ProcessWidgets(node cur); //!< Processes all Widgets within the <Cockpit> node passed to it
     std::auto_ptr<cWidget::Base> ProcessWidgetType(node cur); //!< returns a new instance of the right widget class for the given node

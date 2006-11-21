@@ -152,6 +152,7 @@ void cCockpit::ClearWidgets(void) {
     //}
     m_Widgets_rootwindow.clear();
     m_Widgets_perplayer.clear();
+    m_Widgets_cycles.clear();
     m_EventHandlers.clear();
 }
 
@@ -446,6 +447,8 @@ void cCockpit::ProcessWidgets(node cur) {
         ProcessWidget(cur, widget);
         if(cur.GetProp("viewport") == "all") {
             m_Widgets_perplayer.push_back(widget_ptr.release());
+        } else if(cur.GetProp("viewport") == "cycle") {
+            m_Widgets_cycles.push_back(widget_ptr.release());
         } else {
             m_Widgets_rootwindow.push_back(widget_ptr.release());
         }
@@ -607,6 +610,35 @@ void cCockpit::RenderRootwindow() {
     }
 }
 
+void cCockpit::RenderCycle(gCycle const &cycle) {
+    m_ViewportPlayer = m_FocusPlayer = cycle.Player();
+    if(m_FocusPlayer != 0) {
+        m_FocusCycle = dynamic_cast<gCycle *>(m_FocusPlayer->Object());
+    } else {
+        m_FocusCycle = 0;
+    }
+    //if( m_Player == 0 ) return;
+    if(m_ViewportPlayer == 0) return;
+
+    //sr_ResetRenderState(true);
+    //glViewport (GLsizei(0),
+    //            GLsizei(0),
+    //            GLsizei(sr_screenWidth),
+    //            GLsizei(sr_screenWidth));
+
+    //BeginQuads();
+    //Color(1.,1.,1.,1.);
+    //Vertex(-.1,-.1);
+    //Vertex( .1,-.1);
+    //Vertex( .1, .1);
+    //Vertex(-.1, .1);
+    //RenderEnd();
+    for(unsigned int i=0; i<m_Widgets_cycles.size(); i++) {
+        if(m_Widgets_cycles[i]->Active()) {
+            m_Widgets_cycles[i]->Render();
+        }
+    }
+}
 
 static void display_cockpit_lucifer() {
     cCockpit* theCockpit = cCockpit::GetCockpit();

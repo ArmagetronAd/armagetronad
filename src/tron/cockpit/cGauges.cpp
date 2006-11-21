@@ -81,7 +81,8 @@ void VerticalBarGauge::RenderCaption(void) {
 }
 
 void BarGauge::Render() {
-    sr_ResetRenderState(0); //needs this because rFont has bugs i presume.. Ie I have problems as soon as rTextFirld is used
+    glDisable(GL_TEXTURE_2D);
+    //sr_ResetRenderState(0); //needs this because rFont has bugs i presume.. Ie I have problems as soon as rTextFirld is used
     // z-man: actually, it is needed because per-frame-tasks get called without rendering context, so it has to be set.
 
     const tValue::Base &val_s = m_data.GetVal();

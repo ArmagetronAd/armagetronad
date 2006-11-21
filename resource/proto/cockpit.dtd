@@ -12,7 +12,7 @@
 
 <!ENTITY % CommonWidgetAttributes "
     camera CDATA '*'
-    viewport (all | top) 'all'
+    viewport (all | top | cycle) 'all'
     toggle CDATA '0'
     toggleSticky (true | false) 'true'
     toggleDefault (on | off) 'on'
