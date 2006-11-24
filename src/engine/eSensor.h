@@ -32,6 +32,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eTess2.h"
 //#include "eGrid.h"
 
+// exception that is thrown when the sensor hit something
+class eSensorFinished{};
+
 // sensor sent out to detect near eWalls
 class eSensor: public eGameObject{
 public:
