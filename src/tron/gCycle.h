@@ -113,6 +113,8 @@ private:
     const gCycleMovement* parent_;												// the cycle that is extrapolated
 };
 
+class gCycleChatBot;
+
 // a complete lightcycle
 class gCycle: public gCycleMovement
 {
@@ -128,9 +130,10 @@ class gCycle: public gCycleMovement
     REAL lastTimeAnim;  //!< last time animation was simulated at
     REAL timeCameIntoView;
 
-    REAL nextChatAI;
-    bool dropWallRequested_; //!< flag indicating that someone requested a wall drop
+    friend class gCycleChatBot;
+    std::auto_ptr< gCycleChatBot > chatBot_;
 
+    bool dropWallRequested_; //!< flag indicating that someone requested a wall drop
 public:
     eCoord            lastGoodPosition_;    // the location of the last known good position
 
