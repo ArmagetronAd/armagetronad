@@ -1,5 +1,7 @@
 #include "tRuby.h"
 
+#ifdef HAVE_LIBRUBY
+
 #ifdef MACOSX_XCODE
 #   include "AARuby.h"
 #endif
@@ -238,3 +240,5 @@ namespace tRuby
 	{
 	}
 }
+
+#endif // HAVE_LIBRUBY

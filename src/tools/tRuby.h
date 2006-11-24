@@ -1,6 +1,8 @@
 #ifndef _TRUBY_H_
 #define _TRUBY_H_
 
+#ifdef HAVE_LIBRUBY
+
 #include <ruby.h>
 #include <intern.h>
 #include <stdexcept>
@@ -118,5 +120,6 @@ namespace tRuby
 		virtual ~Safe();
 	};
 }
+#endif // HAVE_LIBRUBY
 
-#endif // _TRUBY_H_
+#endif // ! _TRUBY_H_

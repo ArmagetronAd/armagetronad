@@ -147,11 +147,13 @@ public:
     static void DoPerFrameTasks();
 };
 
+#ifdef HAVE_LIBRUBY
 class rPerFrameTaskRuby : public tCallbackRuby {
 public:
 	rPerFrameTaskRuby();
 	static void DoPerFrameTasks();
 };
+#endif
 
 class rRenderIdCallback:public tCallbackString{
 public:

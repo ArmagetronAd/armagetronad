@@ -541,6 +541,8 @@ int main(int argc,char **argv){
 
         // tERR_MESSAGE( "Initializing player data." );
         ePlayer::Init();
+        
+#ifdef HAVE_LIBRUBY
         tRuby::InitializeInterpreter();
 		try {
 	        tRuby::Load(tDirectories::Data(), "scripts/initialize.rb");
@@ -548,6 +550,7 @@ int main(int argc,char **argv){
 		catch (std::runtime_error & e) {
 			std::cerr << e.what() << '\n';
 		}
+#endif
         
         // tERR_MESSAGE( "Loading configuration." );
         tLocale::Load("languages.txt");
@@ -696,6 +699,7 @@ int main(int argc,char **argv){
 
                     sn_bigBrotherString = renderer_identification + "VER=" + sn_programVersion + "\n\n";
                     
+#ifdef HAVE_LIBRUBY      
                     try {
                         tRuby::Load(tDirectories::Data(), "scripts/menu.rb");
                         tRuby::Load(tDirectories::Data(), "scripts/rotator.rb");
@@ -703,6 +707,8 @@ int main(int argc,char **argv){
                     catch (std::runtime_error & e) {
                         std::cerr << e.what() << '\n';
                     }
+#endif
+
                     MainMenu();
 
                     // remove all players
@@ -755,7 +761,10 @@ int main(int argc,char **argv){
         }
 
         ePlayer::Exit();
+        
+#ifdef HAVE_LIBRUBY
         tRuby::CleanupInterpreter();
+#endif
 
         //	tLocale::Clear();
     }

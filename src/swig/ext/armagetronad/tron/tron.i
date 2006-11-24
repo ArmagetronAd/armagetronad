@@ -1,5 +1,10 @@
 %module(directors="1") "ArmagetronAd::tron"
 
+%{
+#define HAVE_LIBRUBY
+%}
+
+
 %include "tTypemaps.i"
 %include "nTypemaps.i"
 %include "rTypemaps.i"

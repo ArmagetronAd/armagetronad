@@ -1,5 +1,10 @@
 %module(directors="1") "ArmagetronAd::tools"
 
+%{
+#define HAVE_LIBRUBY
+%}
+
+
 %include "cpointer.i"
 %include "std_deque.i"
 

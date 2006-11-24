@@ -27,6 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "AARuby.h"
+
+#ifdef HAVE_LIBRUBY
 #include <ruby.h>
 
 void AARuby_init_loadpath()
@@ -41,3 +43,4 @@ void AARuby_init_loadpath()
 	rb_ary_push(load_path, rb_str_new2([[NSString stringWithFormat:@"%@/%s", path, "1.8"] UTF8String]));
 	rb_ary_push(load_path, rb_str_new2([[NSString stringWithFormat:@"%@/%s", path, "1.8/powerpc-darwin8.7.0"] UTF8String]));
 }
+#endif

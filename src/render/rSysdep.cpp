@@ -670,7 +670,9 @@ void rSysDep::SwapGL(){
         // in playback or recording mode, always execute frame tasks, they may be improtant for consistency
         if ( tRecorder::IsRunning() ) {
 	    	rPerFrameTask::DoPerFrameTasks();
+#ifdef HAVE_LIBRUBY
 			rPerFrameTaskRuby::DoPerFrameTasks();
+#endif
 		}
         
 
@@ -679,7 +681,9 @@ void rSysDep::SwapGL(){
 
 
     rPerFrameTask::DoPerFrameTasks();
+#ifdef HAVE_LIBRUBY
 	rPerFrameTaskRuby::DoPerFrameTasks();
+#endif
 
     // unlock the mutex while waiting for the swap operation to finish
     SDL_mutexV(  sr_netLock );

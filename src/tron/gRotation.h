@@ -25,18 +25,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-//! @file
-//! @brief contains the map rotator
-//!
-//! This might get moved to src/ui, even though parts have to stay in
-//! the higher regions of the sources.
-
-// #include "tXmlParser.h"
-#include "tCallback.h"
-
 #ifndef ARMAGETRON_COCKPIT_H
 #define ARMAGETRON_COCKPIT_H
 
+#include "tCallback.h"
+#include "tLinkedList.h"
+
+#ifdef HAVE_LIBRUBY
 class gRoundEventRuby : public tCallbackRuby {
 public:
 	gRoundEventRuby();
@@ -48,29 +43,7 @@ public:
 	gMatchEventRuby();
 	static void DoMatchEvents();
 };
-
-// class gRotationEvent {
-// public:
-//     virtual void Print() = 0; //virtual function, more or less just to ensure that polymorphism works...
-// 
-//     virtual ~gRotationEvent(){};
-// };
-// 
-// class gRotationTag;
-// 
-// //! Rotator main class: Handles the root element and takes care of sending events
-// class gRotation : private tXmlResource {
-//     gRotationTag *m_mainRotation;
-// 
-//     gRotation();
-// public:
-//     void Parse();
-//     static void HandleNewRound();
-//     static void HandleNewMatch();
-//     static gRotation &GetRotator();
-// 
-//     ~gRotation();
-// };
+#endif // HAVE_LIBRUBY
 
 class gRotation
 {
@@ -80,5 +53,6 @@ public:
 	static void HandleNewRound();
 	static void HandleNewMatch();
 };
+
 
 #endif

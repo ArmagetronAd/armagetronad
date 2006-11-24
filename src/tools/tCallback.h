@@ -39,6 +39,7 @@ public:
     static void Exec(tCallback *anchor);
 };
 
+#ifdef HAVE_LIBRUBY
 class tCallbackRuby : public tListItem<tCallbackRuby> {
 	VALUE block;
 protected:
@@ -47,6 +48,7 @@ public:
 	tCallbackRuby(tCallbackRuby *& anchor);
 	static void Exec(tCallbackRuby *anchor);
 };
+#endif // HAVE_LIBRUBY
 
 class tCallbackAnd:public tListItem<tCallbackAnd>{
     BOOLRETFUNC *func;

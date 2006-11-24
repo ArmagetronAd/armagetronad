@@ -11,20 +11,16 @@ class Rotator
             Z-Man/fortress/zonetest-0.1.0.aamap.xml]
   
   def initialize
-    @rounds_played = 0
-    @matches_played = 0
     @map = 0
   end
   
   def round_event
-    @rounds_played += 1
-    puts "rounds_played = #{@rounds_played}"    
-    ArmagetronAd::Tools::ConfItemBase.load_line("map_file #{next_map()}")
+    map = next_map()
+    ArmagetronAd::Tools::ConfItemBase.load_line("say Get ready for #{File.basename(map)}!")
+    ArmagetronAd::Tools::ConfItemBase.load_line("map_file #{map}")
   end
   
   def match_event
-    @matches_played += 1
-    puts "matches_played = #{@matches_played}"
   end
   
   def next_map

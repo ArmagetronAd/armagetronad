@@ -755,6 +755,7 @@ void ePlayer::Render(){
 
 static void chat( ePlayer * chatter, tString const & msgCore );
 static void se_rubyEval(tString msgCore) {
+#ifdef HAVE_LIBRUBY
     try {
         tRuby::Safe safe(0.3);
         safe.Load(tDirectories::Data(), "scripts/subbanese.rb");
@@ -788,7 +789,7 @@ static void se_rubyEval(tString msgCore) {
     catch(...) {
         std::cout << "unhandled exception\n";
     }
-
+#endif
 }
 
 static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )

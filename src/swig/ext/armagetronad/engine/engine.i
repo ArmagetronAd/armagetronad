@@ -2,6 +2,7 @@
 
 %{
 #include "aa_config.h"
+#define HAVE_LIBRUBY
 %}
 
 %include "tTypemaps.i"
