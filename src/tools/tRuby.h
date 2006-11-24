@@ -1,6 +1,8 @@
 #ifndef _TRUBY_H_
 #define _TRUBY_H_
 
+#include "aa_config.h"
+
 #ifdef HAVE_LIBRUBY
 
 #include <ruby.h>

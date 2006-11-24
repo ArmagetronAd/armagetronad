@@ -4,6 +4,7 @@
 /* #define MACOSX_VERSION_10_2 1 */
 
 #define MACOSX_XCODE 1
+#define HAVE_LIBRUBY 1
 
 /* AIX */
 /* #undef AIX */
