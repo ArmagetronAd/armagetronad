@@ -182,6 +182,12 @@ AC_ARG_ENABLE(desktop,
 enable_desktop=yes)
 AC_SUBST(enable_desktop)
 
+AC_ARG_ENABLE(ruby,
+	AC_HELP_STRING([--enable-ruby],
+		[enable ruby scripting api.  Requires ruby to be installed. (default=enabled)]),,
+enable_ruby=yes)
+AC_SUBST(enable_ruby)
+
 initdir=location
 AC_ARG_ENABLE(initscripts,
 	AC_HELP_STRING([--enable-initscripts=location],
@@ -322,7 +328,7 @@ if test ${HAVE_BASH} = no; then
 fi
 
 dnl Boost
-m4_include(ax_boost_base.m4)
+dnl m4_include(ax_boost_base.m4)
 AX_BOOST_BASE([1.33.1])
 
 dnl Ruby
@@ -334,31 +340,6 @@ AC_ARG_WITH(ruby,
         RUBY="${withval}"
     fi
 )
-
-AC_CHECK_PROG(RUBY, ruby, ruby, no)
-if test ${RUBY} = no || test -z ${RUBY}; then
-	AC_MSG_ERROR([Ruby 1.8 is required for compilation.])
-fi
-
-ruby_include_dir=$(${RUBY} <<EOF
-	require "rbconfig"
-	print Config::CONFIG@<:@'prefix'@:>@ + '/lib/ruby/1.8/' + Config::CONFIG@<:@'arch'@:>@
-EOF)
-
-ruby_lib_dir=$(${RUBY} <<EOF
-	require "rbconfig"
-	print Config::CONFIG@<:@'libdir'@:>@
-EOF)
-
-export CPPFLAGS="$CPPFLAGS -I${ruby_include_dir}"
-export LIBS="-L${ruby_lib_dir} -l${RUBY} $LIBS"
-export RUBY
-
-dnl SWIG
-
-m4_include(ac_pkg_swig.m4)
-AC_PROG_SWIG(1.3.29)
-SWIG_ENABLE_CXX
 
 dnl
 
@@ -644,6 +625,49 @@ export LIBS
 AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
 AC_MSG_ERROR([You need the library SDL to compile Armagetron. Read the file doc/install_linux.html.])
 ,${SDLLIBS})
+
+dnl ********************************************* OPTIONAL STUFF AFTER THIS POINT ***********************************
+
+dnl *************************************************
+dnl         Ruby
+dnl *************************************************
+
+if test "x$enable_ruby" = "xyes"; then
+AC_CHECK_PROG(RUBY, ruby, ruby, no)
+if test ${RUBY} = no || test -z ${RUBY}; then
+	AC_MSG_ERROR([Ruby 1.8 is required for compilation.])
+else
+ AC_CHECK_LIB(ruby,ruby_run,
+ AC_DEFINE(HAVE_LIBRUBY, 1, [Define if you have the Ruby library (-lruby).])
+ LIBS="$LIBS",
+ AC_MSG_ERROR([Ruby library not found.])
+ ,)
+        export RUBY
+        ruby_include_dir=$(${RUBY} <<EOF
+require "rbconfig"
+print Config::CONFIG@<:@'prefix'@:>@ + '/lib/ruby/1.8/' + Config::CONFIG@<:@'arch'@:>@
+EOF)
+        
+        ruby_include_dir="-I${ruby_include_dir}"
+        
+        ruby_lib_dir=$(${RUBY} <<EOF
+require "rbconfig"
+print Config::CONFIG@<:@'libdir'@:>@
+EOF)
+        
+        ruby_lib_dir="-L${ruby_lib_dir} -l${RUBY}"
+    fi
+fi
+
+
+export CPPFLAGS="$CPPFLAGS  ${ruby_include_dir}"
+export LIBS="${ruby_lib_dir} $LIBS"
+
+dnl SWIG
+
+dnl m4_include(ac_pkg_swig.m4)
+AC_PROG_SWIG(1.3.29)
+SWIG_ENABLE_CXX
 
 dnl *************************************************
 dnl         Sound
@@ -1077,6 +1101,11 @@ echo "     Configuration will be installed in : `eval echo ${aa_sysconfdir}`"
 echo "     Documentation will be installed in : `eval echo ${aa_docdir}`"
 test "x$enable_etc" = "xyes" && echo "     Link to configuration will go to   : /etc/${progname}"
 echo "     Build with Krawall authentication support: $enable_krawall"
+echo "     Ruby support: $enable_ruby"
+if test "x$enable_ruby" = "xyes"; then
+echo "         Ruby include dir: $ruby_include_dir"
+echo "         Ruby lib dir: $ruby_lib_dir"
+fi
 echo "     Use dirty SDL initialization: $enable_dirty"
 echo "     Call sysinstall: $enable_sysinstall"
 if test "$enable_uninstall" = "yes" &&
