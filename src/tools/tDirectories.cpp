@@ -182,6 +182,12 @@ static tString st_ConfigDir(expand_home_c(CONFIG_DIR));  // directory for static
 static tString st_ConfigDir("");  // directory for static configuration files
 #endif
 
+#ifdef SCRIPT_DIR
+static tString st_ScriptDir(expand_home_c(SCRIPT_DIR));  // directory for scripts
+#else
+static tString st_ScriptDir("");  // directory for scripts
+#endif
+
 #ifdef USER_CONFIG_DIR
 static tString st_UserConfigDir(expand_home_c(USER_CONFIG_DIR));  // directory for static configuration files
 #else
@@ -532,7 +538,6 @@ private:
 
 static const tPathConfig st_Config;
 
-
 class tPathData: public tPath
 {
 public:
@@ -702,10 +707,12 @@ void tPathResource::Paths(tArray< tString >& paths) const {
 
 static const tPathResource st_Resource;
 
+tString tPathScripts::GetDirPath()
+{
+    return st_DataDir + "/scripts";
+}
 
-
-
-
+static const tPathScripts st_Scripts;
 
 bool tPath::Open    ( std::ifstream& f,
                       const char* filename   ) const
@@ -855,6 +862,11 @@ const tPath& tDirectories::Music()
 const tPath& tDirectories::Config()
 {
     return st_Config;
+}
+
+const tPath& tDirectories::Scripts()
+{
+    return st_Scripts;
 }
 
 const tPath& tDirectories::Var()

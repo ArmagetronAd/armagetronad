@@ -66,6 +66,11 @@ private:
     void Paths(tArray< tString >& paths) const;
 };
 
+class tPathScripts: public tPath {
+public:
+    static tString GetDirPath(); //!< returns the path to the included scripts
+}
+
 #ifdef DEDICATED
 class tPathWebroot: public tPath
 {
@@ -87,6 +92,7 @@ public:
     static const tPath& Var();               // directory for dynamic logs and highscores
     static const tPath& Screenshot();        // directory for screenshots
     static const tPathResource& Resource();  // directory for resources
+    static const tPath& Scripts();
 
 #ifdef DEDICATED    
     static const tPathWebroot& Webroot();    // directory for webroot of embedded web server
