@@ -1,0 +1,187 @@
+:Copyright: 2006 The Armagetron Advanced Developer Team.
+
+.. contents::
+
+==============
+ Installation
+==============
+
+-------
+Windows
+-------
+
+Run the executable, select a directory to install Armagetron Advanced into and
+enjoy. Start menu entries and a desktop shortcut will be created for you. To
+uninstall, start the uninstaller from the start menu.
+
+--------
+Mac OS X
+--------
+
+1. Mount the armagetronad-*version*.macosx.dmg disk-image.
+
+2. Drag the “Armagetron Advanced” application to any location on you
+hard-drive.
+
+-----
+Linux
+-----
+
+All systemwide installation has to be carried out as root. Installation from a
+source archive is recommended, as Armagetron Advanced will be tailored for
+your system and missing libraries will be identified and pointed out to you.
+Only as a last resort, you should choose the binary archives. The binary RPMs
+and Debian packages are a reasonable choice if your system supports them and
+you can get hold of the corresponding library packages in the right versions.
+
+It is very important that Armagetron Advanced and all of its dependencies are
+built with the same compiler. The different versions of gcc tend to be
+slightly binary incompatible with each other, and on complex projects like
+this one these small glitches tend to cause unexplainable problems. The
+distributed binaries are compiled with gcc 3.3, and we test source
+compatibility with 3.4 and 4.0 regularly. Yes, theoretically the binary
+interface for C code (ABI) did not change, but be prepared for problems
+nevertheless.
+
+Required libraries
+------------------
+
+- `LibXML2 <http://xmlsoft.org>`_ version 2.6.0 or later for map file
+  parsing.
+
+- OpenGL or `Mesa <http://mesa3d.sourceforge.net>`_ for rendering.
+
+- `SDL <http://libsdl.org>`_ version 1.2.x for input and sound output).
+
+- `FreeType 2 <www.freetype.org>`_ for font loading.
+
+- `FTGL <http://homepages.paradise.net.nz/henryj/code/index.html>`_ for font
+  rendering.
+
+- `SDL_image <http://libsdl.org/projects/SDL_image/>`_ version 1.2.x for
+  the textures which itself needs the libraries.
+
+- `libpng and zlib <http://libpng.org/pub/png/pngcode.html>`_ (they should be
+  included in your distribution).
+
+- Binary versions only: libstdc++ 5.0.7 (any 5.x.y or whatever came with your
+  System if it uses GCC 3.2 or higher should do). Use `rpmfind`_ or `google`_
+  to find a RPM with that library for your system. Sorry, Debian users: I
+  don't know what you need to do; use the source packages instead.
+
+.. _rpmfind: 
+    http://rpmfind.net/linux/rpm2html/search.php?query=libstdc%2B%2B5.0.7
+.. _google: http://www.google.com/search?q=libstdc%2B%2B+5.0.7
+  
+Optional libraries:
+
+- `SDL_mixer <http://libsdl.org/projects/SDL_mixer>`_ 
+
+You should take a look at the `Linux Distribution Field Report`_ to check
+how likely it is for Armagetron Advanced to work on your PC.
+
+.. _Linux Distribution Field Report: 
+    http://wiki.armagetronad.net/index.php/Linux_Distribution_Field_Report
+
+
+Installation — Source archive
+-------------------------------
+
+Unpack the archive and change into the unpacked directory; type::
+    
+    ./configure
+    gmake install
+
+Everything will be copied to ``PREFIX/games/armagetron``. Should there already
+be a version, it will be overwritten (see the section on multiple versions if
+you want to keep your old version around). If ``gmake`` is not found on your
+system, try ``make``, however only GNU make is supported.
+
+To build the dedicated server, add the option ``--disable-glout`` to the
+configure script. To change the installation path, use the option
+``--prefix=new_path``. Type::
+
+    
+    uninstall-armagetronad-<VERSION>
+    
+to uninstall.
+    
+Installation — Binary RPM
+-------------------------
+
+Type::
+
+    rpm -i filename.rpm
+
+The RPM build is quite untested, so it may be that it has registered too many
+dependencies and you are not allowed to install it; you may use the additional
+switch ``--nodeps``. However, you may then end up with a broken installation.
+
+Installation — Source RPM
+-------------------------
+
+
+Type::
+
+    rpm --rebuild filename.src.rpm
+
+This should build binary RPMs suitable for your system in
+``/usr/src/redhat/RPMS/i386`` (RedHat), ``/usr/src/packages/RPMS/i386`` (SuSe)
+— you may have to look into the other subdirectories to find them. Proceed as
+described in the previous section. Alternatively type::
+
+    rpm -i filename.src.rpm
+
+This should extract a source package in ``/usr/src/.../SOURCES`` you can
+handle like described in the “Installation — Source archive” section. You can
+surely ignore all failed dependencies with ``--nodeps`` since the dependencies
+were all there when you built the package. (It is possible, if not likely,
+that the automatic dependency generation of RPM produces junk.
+
+
+Non-Root install
+----------------
+
+You have the option to install the game as a regular user in your home
+directory. To do so, use the ``--prefix`` directive of ``rpm`` or the
+``configure`` script to point to a place in your home directory, i.e.::
+    
+    ./configure --prefix /home/username/usr
+
+You can then start the game with ``/home/username/usr/bin/armagetronad`` or,
+if you add ``/home/username/usr/bin`` to your executable search path, like
+normal.
+
+Multiple versions
+-----------------
+
+If you give the additional option ``--enable-multiver`` to
+``configure``, all installation directories and executables will get the
+suffix <GAME-VERSION>. Symbolic links will be created to your convenience.
+This allows to install multiple versions in parallel, where ``armagetronad``
+will always start the last installed version.
+
+Binary archive
+--------------
+
+Unpack the archive and change into the unpacked directory; type::
+    
+    ./install
+
+Dedicated Server
+----------------
+
+To install the dedicated server from binaries, follow all the procedures above
+with the corresponding download files; the server will be installed in
+``usr/local/games/armagetronad-dedicated`` and can be invoked by
+``armagetronad-dedicated`` Use the ``--disable-glout`` option of configure to
+build a dedicated server when you are installing from source.
+
+An init.d style start/stop script called armagetronad will be installed into
+/etc/init.d, so you can use your standard system utilities to let it be
+started at boot time. By default, it runs the server under the userid
+armagetronad-dedicated (which gets created at installation) and logs activity
+to /var/games/armagetronad-dedicated. You can change these settings in the
+configuration file CONFIGPATH/rc.config. Unfortunately, the only way to give
+commands to the server when it is run this way is to put them into
+everytime.cfg which is read every round or through the ingame admin.
