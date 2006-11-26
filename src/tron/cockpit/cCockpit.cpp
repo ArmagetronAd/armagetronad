@@ -547,9 +547,9 @@ void cCockpit::RenderPlayer() {
             if (m_FocusCycle && ( !m_Player->netPlayer || !m_Player->netPlayer->IsChatting()) && se_GameTime()>-2){
                 //h->Speed()>maxmeterspeed?maxmeterspeed+=10:1;
 
-                for(unsigned int i=0; i<m_Widgets_perplayer.size(); i++)
+                for(tAutoDeque<cWidget::Base>::const_iterator i=m_Widgets_perplayer.begin(); i!=m_Widgets_perplayer.end(); ++i)
                 {
-                    int cam = m_Widgets_perplayer[i]->GetCam();
+                    int cam = (*i)->GetCam();
                     switch(m_Player->cam->GetCamMode()) {
                     case CAMERA_IN:
                     case CAMERA_SMART_IN:
@@ -576,8 +576,8 @@ void cCockpit::RenderPlayer() {
                     case CAMERA_COUNT:
                         continue; //not handled, no sense?!
                     }
-                    if (m_Widgets_perplayer[i]->Active())
-                        m_Widgets_perplayer[i]->Render();
+                    if ((*i)->Active())
+                        (*i)->Render();
                 }
                 //  bool displayfastest = true;// put into global, set via menusytem... subby to do.make sr_DISPLAYFASTESTout
 
@@ -603,9 +603,9 @@ void cCockpit::RenderRootwindow() {
     //Vertex( .1, .1);
     //Vertex(-.1, .1);
     //RenderEnd();
-    for(unsigned int i=0; i<m_Widgets_rootwindow.size(); i++) {
-        if(m_Widgets_rootwindow[i]->Active()) {
-            m_Widgets_rootwindow[i]->Render();
+    for(tAutoDeque<cWidget::Base>::const_iterator i=m_Widgets_rootwindow.begin(); i!=m_Widgets_rootwindow.end(); ++i) {
+        if((*i)->Active()) {
+            (*i)->Render();
         }
     }
 }
@@ -633,9 +633,9 @@ void cCockpit::RenderCycle(gCycle const &cycle) {
     //Vertex( .1, .1);
     //Vertex(-.1, .1);
     //RenderEnd();
-    for(unsigned int i=0; i<m_Widgets_cycles.size(); i++) {
-        if(m_Widgets_cycles[i]->Active()) {
-            m_Widgets_cycles[i]->Render();
+    for(tAutoDeque<cWidget::Base>::const_iterator i=m_Widgets_cycles.begin(); i!=m_Widgets_cycles.end(); ++i) {
+        if((*i)->Active()) {
+            (*i)->Render();
         }
     }
 }
