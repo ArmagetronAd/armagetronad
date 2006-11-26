@@ -97,7 +97,7 @@ static void sg_ArchiveReal( REAL & real, int level )
 static nVersionFeature sg_verletIntegration( 7 );
 
 // strength of brake
-static REAL sg_brakeCycle=30;
+REAL sg_brakeCycle=30;
 static nSettingItem<REAL> c_ab("CYCLE_BRAKE",
                                sg_brakeCycle);
 

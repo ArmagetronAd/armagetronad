@@ -273,6 +273,774 @@ void gTextureCycle::OnSelect(bool enforce){
 #endif
 }
 
+// from gCycleMovement.cpp
+extern void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness );
+extern REAL sg_brakeCycle;
+extern REAL sg_cycleBrakeDeplete;
+
+// in release mode, default values should always be used. in debug mode, we want to experiment :)
+#ifdef DEBUG
+typedef tSettingItem<REAL> gChatBotSetting;
+typedef tSettingItem<bool> gChatBotSwitch;
+#else
+typedef nSettingItem<REAL> gChatBotSetting;
+typedef nSettingItem<bool> gChatBotSwitch;
+#endif
+
+static bool sg_chatBotAlwaysActive = false;
+static gChatBotSwitch sg_chatBotAlwaysActiveConf( "CHATBOT_ALWAYS_ACTIVE", sg_chatBotAlwaysActive );
+
+static REAL sg_chatBotNewWallBlindness = .3;
+static gChatBotSetting sg_chatBotNewWallBlindnessConf( "CHATBOT_NEW_WALL_BLINDNESS",
+        sg_chatBotNewWallBlindness );
+
+static REAL sg_chatBotMinTimestep = .3;
+static gChatBotSetting sg_chatBotMinTimestepConf( "CHATBOT_MIN_TIMESTEP",
+        sg_chatBotMinTimestep );
+
+static REAL sg_chatBotDelay = .5;
+static gChatBotSetting sg_chatBotDelayConf( "CHATBOT_DELAY",
+        sg_chatBotDelay );
+
+static REAL sg_chatBotRange = 1;
+static gChatBotSetting sg_chatBotRangeConf( "CHATBOT_RANGE",
+        sg_chatBotRange );
+
+static REAL sg_chatBotDecay = .02;
+static gChatBotSetting sg_chatBotDecayConf( "CHATBOT_DECAY",
+        sg_chatBotDecay );
+
+class gCycleChatBot
+{
+    gCycleChatBot();
+public:
+class Sensor: public gSensor
+    {
+    public:
+        Sensor(gCycle *o,const eCoord &start,const eCoord &d)
+                : gSensor(o,start,d)
+                , hitOwner_( 0 )
+                , hitTime_ ( 0 )
+                , hitDistance_( o->MaxWallsLength() )
+                , lrSuggestion_( 0 )
+                , windingNumber_( 0 )
+        {
+            if ( hitDistance_ <= 0 )
+                hitDistance_ = o->GetDistance();
+        }
+
+        /*
+        // do detection and additional stuff
+        void detect( REAL range )
+        {
+            gSensor::detect( range );
+        }
+        */
+
+        virtual void PassEdge(const eWall *ww,REAL time,REAL a,int r)
+        {
+            try{
+                gSensor::PassEdge(ww,time,a,r);
+            }
+            catch( eSensorFinished & e )
+            {
+                if ( DoExtraDetectionStuff() )
+                    throw;
+            }
+        }
+
+        bool DoExtraDetectionStuff()
+        {
+            // move towards the beginning of a wall
+            lrSuggestion_ = -lr;
+
+            switch ( type )
+            {
+            case gSENSOR_NONE:
+            case gSENSOR_RIM:
+                lrSuggestion_ = 0;
+                return true;
+            default:
+                // unless it is an enemy, follow his wall instead (uncomment for a nasty cowardy campbot)
+                // lrSuggestion *= -1;
+            case gSENSOR_SELF:
+                {
+                    // determine whether we're hitting the front or back half of his wall
+                    if ( !ehit )
+                        return true;
+                    eWall * wall = ehit->GetWall();
+                    if ( !wall )
+                        return true;
+                    gPlayerWall * playerWall = dynamic_cast< gPlayerWall * >( wall );
+                    if ( !playerWall )
+                        return true;
+                    hitOwner_ = playerWall->Cycle();
+                    if ( !hitOwner_ )
+                        return true;
+
+                    // gCycleChatBot & enemyChatBot = Get( hitOwner_ );
+
+                    REAL wallAlpha = playerWall->Edge()->Ratio( before_hit );
+                    // that's an unreliable source
+                    if ( wallAlpha < 0 )
+                        wallAlpha = 0;
+                    if ( wallAlpha > 1 )
+                        wallAlpha = 1;
+                    hitDistance_   = hitOwner_->GetDistance() - playerWall->Pos( wallAlpha );
+                    hitTime_       = playerWall->Time( wallAlpha );
+                    windingNumber_ = playerWall->WindingNumber();
+
+                    // don't see new walls
+                    if ( hitTime_ > hitOwner_->LastTime() - sg_chatBotNewWallBlindness && hitOwner_ != owned )
+                    {
+                        ehit = false;
+                        hit = 1E+40;
+                        return false;
+                    }
+
+                    // REAL cycleDistance = hitOwner_->GetDistance();
+
+                    // REAL wallStart = 0;
+
+                    /*
+                    if ( gCycle::WallsLength() > 0 )
+                    {
+                        wallStart = cyclePos - playerWall->Cycle()->ThisWallsLength();
+                        if ( wallStart < 0 )
+                            wallStart = 0;
+                    }
+                    */
+                }
+            }
+
+            return true;
+        }
+
+        // check how far the hit wall extends straight into the given direction
+        REAL HitWallExtends( eCoord const & dir, eCoord const & origin )
+        {
+            if ( !ehit || !ehit->Other() )
+            {
+                return 1E+30;
+            }
+
+            REAL ret = -1E+30;
+            eCoord ends[2] = { *ehit->Point(), *ehit->Other()->Point() };
+            for ( int i = 1; i>=0; --i )
+            {
+                REAL newRet = eCoord::F( dir, ends[i]-origin );
+                if ( newRet > ret )
+                    ret = newRet;
+            }
+
+            return ret;
+        }
+
+        gCycle * hitOwner_;     // the owner of the hit wall
+        REAL     hitTime_;      // the time the hit wall was built at
+        REAL     hitDistance_;  // the distance of the wall to the cycle that built it
+        short    lrSuggestion_; // sensor's oppinon on whether moving to the left or right of the hit wall is recommended (-1 for left, +1 for right)
+        int      windingNumber_; // the number of turns (with sign) the cycle has taken
+    };
+
+    gCycleChatBot( gCycle * owner )
+            : nextChatAI_( 0 )
+            , timeOnChatAI_( 0 )
+            , lastTurn_( 0 )
+            , nextTurn_ ( 0 )
+            , turnedRecently_ ( 0 )
+            , owner_ ( owner )
+    {
+    }
+
+    // describes walls we like. We like enemy walls. We like to go between them.
+    class WallHug
+    {
+    public:
+        gCycle const * owner_;  // the cycle the walls we like belong to
+        REAL lastTimeSeen_;    // the last time we saw such a wall
+
+        WallHug()
+                : owner_ ( NULL )
+                , lastTimeSeen_ ( 0 )
+        {
+        }
+    };
+
+    // promote seen walls to possible wallhug replacements
+    void FindHugReplacement( Sensor const & sensor )
+    {
+        gCycle const * owner = sensor.hitOwner_;
+        if (!owner)
+            return;
+
+        // store as possible replacement
+        if ( !hugReplacement_.owner_ && sensor.type != gSENSOR_SELF &&
+                owner != hugLeft_.owner_ &&
+                owner != hugRight_.owner_ )
+        {
+            hugReplacement_.owner_ = sensor.hitOwner_;
+            hugReplacement_.lastTimeSeen_ = nextChatAI_;
+        }
+
+        // update timestamps
+        if ( owner == hugLeft_.owner_ )
+            hugLeft_.lastTimeSeen_ = nextChatAI_;
+        if ( owner == hugRight_.owner_ )
+            hugRight_.lastTimeSeen_ = nextChatAI_;
+    }
+
+    // determines the distance between two sensors; the size should give the likelyhood
+    // to survive if you pass through a gap between the two selected walls
+    REAL Distance( Sensor const & a, Sensor const & b )
+    {
+        // make sure a is left from b
+        if ( a.Direction() * b.Direction() < 0 )
+            return Distance( b, a );
+
+        bool self = a.type == gSENSOR_SELF || b.type == gSENSOR_SELF;
+        bool rim  = a.type == gSENSOR_RIM || b.type == gSENSOR_RIM;
+
+        // avoid. own. walls.
+        REAL selfHatred = 1;
+        if ( a.type == gSENSOR_SELF )
+        {
+            selfHatred *= .5;
+            if ( a.lr > 0 )
+            {
+                selfHatred *= .5;
+                if ( b.type == gSENSOR_RIM )
+                    selfHatred *= .25;
+            }
+        }
+        if ( b.type == gSENSOR_SELF )
+        {
+            selfHatred *= .5;
+            if ( b.lr < 0 )
+            {
+                selfHatred *= .5;
+                if ( a.type == gSENSOR_RIM )
+                    selfHatred *= .25;
+            }
+        }
+
+        // some big distance to return if we don't know anything better
+        REAL bigDistance = owner_->MaxWallsLength();
+        if ( bigDistance <= 0 )
+            bigDistance = owner_->GetDistance();
+
+        if ( a.hitOwner_ != b.hitOwner_ )
+        {
+            // different owners? Great, there has to be a way through!
+            REAL ret =
+                a.hitDistance_ + b.hitDistance_;
+
+            if ( rim )
+            {
+                ret = bigDistance * .001 + ret * .01 + ( a.before_hit - b.before_hit).Norm();
+
+                // we love going between the rim and enemies
+                if ( !self )
+                    ret = bigDistance * 2;
+            }
+
+            // minimal factor should be 1, this path should never return something smaller than the
+            // paths where only one cycle's walls are hit
+            ret *= 16;
+
+            // or empty space
+            if ( a.type == gSENSOR_NONE || b.type == gSENSOR_NONE )
+                ret *= 2;
+
+            return ret * selfHatred;
+        }
+        else if ( rim )
+        {
+            // at least one rim wall? Take the distance between the hit positions.
+            return ( a.before_hit - b.before_hit).Norm() * selfHatred;
+        }
+        else if ( a.type == gSENSOR_NONE && b.type == gSENSOR_NONE )
+        {
+            // empty space! Woo!
+            return owner_->GetDistance() * 256;
+        }
+        else if ( a.lr != b.lr )
+        {
+            // different directions? Also great!
+            return ( fabsf( a.hitDistance_ - b.hitDistance_ ) + .25 * bigDistance ) * selfHatred;
+        }
+        /*
+        else if ( - 2 * a.lr * (a.windingNumber_ - b.windingNumber_ ) > owner_->Grid()->WindingNumber() )
+        {
+            // this looks like a way out to me
+            return fabsf( a.hitDistance_ - b.hitDistance_ ) * 10 * selfHatred;
+        }
+        */
+        else
+        {
+            // well, the longer the wall segment between the two points, the better.
+            return fabsf( a.hitDistance_ - b.hitDistance_ ) * selfHatred;
+        }
+
+        // default: hit distance
+        return ( a.before_hit - b.before_hit).Norm() * selfHatred;
+    }
+
+    static gCycleChatBot & Get( gCycle * cycle )
+    {
+        tASSERT( cycle );
+
+        // create
+        if ( &(*cycle->chatBot_) == 0 )
+            cycle->chatBot_ = std::auto_ptr< gCycleChatBot >( new gCycleChatBot( cycle ) );
+
+        return *cycle->chatBot_;
+    }
+
+    bool CanMakeTurn( uActionPlayer * action )
+    {
+        return owner_->CanMakeTurn( ( action == &gCycle::se_turnRight ) ? 1 : -1 );
+    }
+
+    // does the main thinking
+    void Activate( REAL currentTime )
+    {
+        // is it already time for activation?
+        if ( currentTime < nextChatAI_ )
+            return;
+
+        REAL lookahead = sg_chatBotRange;  // seconds to plan ahead
+        REAL minstep   = sg_chatBotMinTimestep; // minimum timestep between thoughts in seconds
+        REAL maxstep   = sg_chatBotMinTimestep * 4 * ( 1 + .1 * tReproducibleRandomizer::GetInstance().Get() );  // maximum timestep between thoughts in seconds
+
+        // chat AI wasn't active yet, so don't start immediately
+        if ( nextChatAI_ <= EPS )
+        {
+            nextChatAI_ = sg_chatBotDelay + currentTime;
+            return;
+        }
+
+        timeOnChatAI_ += currentTime - nextChatAI_;
+
+        // cylce data
+        REAL speed = owner_->Speed();
+        eCoord dir = owner_->Direction();
+        eCoord pos = owner_->Position();
+
+        // make chat AI worse over time
+        if ( sn_GetNetState() != nSTANDALONE )
+        {
+            REAL qualityFactor = ( timeOnChatAI_ * sg_chatBotDecay );
+            if ( qualityFactor > 1 )
+            {
+                minstep *= qualityFactor;
+                // maxstep *= qualityFactor;
+            }
+        }
+
+        REAL range= speed * lookahead;
+        eCoord scanDir = dir * range;
+
+        REAL frontFactor = .5;
+
+        Sensor front(owner_,pos,scanDir);
+        front.detect(frontFactor);
+        owner_->enemyInfluence.AddSensor( front, sg_enemyChatbotTimePenalty, owner_ );
+
+        REAL minMoveOn = 0, maxMoveOn = 0, moveOn = 0;
+
+        // get extra time we get through rubber usage
+        REAL rubberGranted, rubberEffectiveness;
+        sg_RubberValues( owner_->player, speed, rubberGranted, rubberEffectiveness );
+        REAL rubberTime = ( rubberGranted - owner_->GetRubber() )*rubberEffectiveness/speed;
+        REAL rubberRatio = owner_->GetRubber()/rubberGranted;
+
+        if ( front.ehit )
+        {
+            turnedRecently_ = false;
+
+            // these checks can hit our last wall and fail. Temporarily set it to NULL.
+            tJUST_CONTROLLED_PTR< gNetPlayerWall > lastWall = owner_->lastWall;
+            owner_->lastWall = NULL;
+
+            REAL narrowFront = 1;
+
+            // cast four diagonal rays
+            Sensor forwardLeft ( owner_, pos, scanDir.Turn(+1,+1 ) );
+            Sensor backwardLeft( owner_, pos, scanDir.Turn(-1,+narrowFront) );
+            forwardLeft.detect(1);
+            backwardLeft.detect(1);
+            Sensor forwardRight ( owner_, pos, scanDir.Turn(+1,-1 ) );
+            Sensor backwardRight( owner_, pos, scanDir.Turn(-1,-narrowFront) );
+            forwardRight.detect(1);
+            backwardRight.detect(1);
+
+            // do we have a hug replacement candiate? If so, take it.
+            if ( hugReplacement_.owner_ && !hugLeft_.owner_ && !hugRight_.owner_ )
+            {
+                // first time hugging? let the status quo decide.
+                int lr = 0;
+                if ( backwardLeft.hitOwner_ == hugReplacement_.owner_ )
+                    lr--;
+                if ( forwardLeft.hitOwner_ == hugReplacement_.owner_ )
+                    lr--;
+                if ( backwardRight.hitOwner_ == hugReplacement_.owner_ )
+                    lr++;
+                if ( forwardRight.hitOwner_ == hugReplacement_.owner_ )
+                    lr++;
+
+                if ( lr > 0 )
+                    hugRight_ = hugReplacement_;
+                if ( lr < 0 )
+                    hugLeft_ = hugReplacement_;
+
+                hugReplacement_.owner_ = 0;
+            }
+
+            if ( hugReplacement_.owner_ )
+            {
+                if( hugLeft_.lastTimeSeen_ < hugRight_.lastTimeSeen_ )
+                {
+                    if ( hugReplacement_.lastTimeSeen_ > hugLeft_.lastTimeSeen_ )
+                        hugLeft_ = hugReplacement_;
+                }
+                else
+                {
+                    if ( hugReplacement_.lastTimeSeen_ > hugRight_.lastTimeSeen_ )
+                        hugRight_ = hugReplacement_;
+                }
+                hugReplacement_.owner_ = 0;
+            }
+
+            FindHugReplacement( front );
+            FindHugReplacement( forwardLeft );
+            FindHugReplacement( forwardRight );
+            FindHugReplacement( backwardLeft );
+            FindHugReplacement( backwardRight );
+
+            // determine survival chances in the four directions
+            REAL frontOpen = Distance ( forwardLeft, forwardRight );
+            REAL leftOpen  = Distance ( forwardLeft, backwardLeft );
+            REAL rightOpen = Distance ( forwardRight, backwardRight );
+            REAL rearOpen = Distance ( backwardLeft, backwardRight );
+
+            Sensor self( owner_, pos, scanDir.Turn(-1, 0) );
+            // fake entries
+            self.before_hit = pos;
+            self.windingNumber_ = owner_->windingNumber_;
+            self.type = gSENSOR_SELF;
+            self.hitDistance_ = 0;
+            self.hitOwner_ = owner_;
+            self.hitTime_ = currentTime;
+            self.lr = -1;
+            REAL rearLeftOpen = Distance( backwardLeft, self );
+            self.lr = 1;
+            REAL rearRightOpen = Distance( backwardRight, self );
+
+            /*
+            // override: don't camp (too much)
+            if ( forwardRight.type == gSENSOR_SELF &&
+                    forwardLeft.type == gSENSOR_SELF &&
+                    backwardRight.type == gSENSOR_SELF &&
+                    backwardLeft.type == gSENSOR_SELF &&
+                    front.type == gSENSOR_SELF &&
+                    forwardRight.lr == front.lr &&
+                    forwardLeft.lr == front.lr &&
+                    backwardRight.lr == front.lr &&
+                    backwardLeft.lr == front.lr &&
+                    frontOpen + leftOpen + rightOpen < owner_->GetDistance() * .5 )
+            {
+                turnedRecently_ = true;
+                if ( front.lr > 0 )
+                {
+                    if ( leftOpen > minstep * speed )
+                        // force a turn to the left
+                        rightOpen = 0;
+                    else if ( front.hit * range < 2 * minstep )
+                        // force a preliminary turn to the right that will allow us to reverse
+                        frontOpen = 0;
+                }
+                else
+                {
+                    if ( rightOpen > minstep * speed )
+                        // force a turn to the right
+                        leftOpen = 0;
+                    else if ( front.hit * range < 2 * minstep )
+                        // force a preliminary turn to the left that will allow us to reverse
+                        frontOpen = 0;
+                }
+            }
+            */
+
+            // override rim hugging
+            if ( forwardRight.type == gSENSOR_SELF &&
+                    forwardLeft.type == gSENSOR_RIM &&
+                    backwardRight.type == gSENSOR_SELF &&
+                    backwardLeft.type == gSENSOR_RIM &&
+                    // backwardLeft.hit < .1 &&
+                    forwardRight.lr == -1 &&
+                    backwardRight.lr == -1 )
+            {
+                turnedRecently_ = true;
+                if ( rightOpen > speed * ( owner_->GetTurnDelay() - rubberTime * .8 ) )
+                {
+                    owner_->Act( &gCycle::se_turnRight, 1 );
+                    owner_->Act( &gCycle::se_turnRight, 1 );
+                }
+                else
+                {
+                    owner_->Act( &gCycle::se_turnLeft, 1 );
+                    owner_->Act( &gCycle::se_turnLeft, 1 );
+                }
+            }
+
+            if ( forwardLeft.type == gSENSOR_SELF &&
+                    forwardRight.type == gSENSOR_RIM &&
+                    backwardLeft.type == gSENSOR_SELF &&
+                    backwardRight.type == gSENSOR_RIM &&
+                    // backwardRight.hit < .1 &&
+                    forwardLeft.lr == 1 &&
+                    backwardLeft.lr == 1 )
+            {
+                turnedRecently_ = true;
+                if ( leftOpen > speed * ( owner_->GetTurnDelay() - rubberTime * .8 ) )
+                {
+                    owner_->Act( &gCycle::se_turnLeft, 1 );
+                    owner_->Act( &gCycle::se_turnLeft, 1 );
+                }
+                else
+                {
+                    owner_->Act( &gCycle::se_turnRight, 1 );
+                    owner_->Act( &gCycle::se_turnRight, 1 );
+                }
+            }
+
+            // get the best turn direction
+            uActionPlayer * bestAction = ( leftOpen > rightOpen ) ? &gCycle::se_turnLeft : &gCycle::se_turnRight;
+            int             bestDir      = ( leftOpen > rightOpen ) ? 1 : -1;
+            REAL            bestOpen     = ( leftOpen > rightOpen ) ? leftOpen : rightOpen;
+            Sensor &        bestForward  = ( leftOpen > rightOpen ) ? forwardLeft : forwardRight;
+            Sensor &        bestBackward = ( leftOpen > rightOpen ) ? backwardLeft : backwardRight;
+
+            Sensor direct ( owner_, pos, scanDir.Turn( 0, bestDir) );
+            direct.detect( 1 );
+
+            // restore last wall
+            owner_->lastWall = lastWall;
+
+            // only turn if the hole has a shape that allows better entry after we do a zig-zag, or if we're past the good turning point
+            // see how the survival chance is distributed between forward and backward half
+            REAL forwardHalf  = Distance ( direct, bestForward );
+            REAL backwardHalf = Distance ( direct, bestBackward );
+
+            REAL forwardOverhang  = bestForward.HitWallExtends( bestForward.Direction(), pos );
+            REAL backwardOverhang  = bestBackward.HitWallExtends( bestForward.Direction(), pos );
+
+            // we have to move forward this much before we can hope to turn
+            minMoveOn = bestBackward.HitWallExtends( dir, pos );
+
+            // maybe the direct to the side sensor is better?
+            REAL minMoveOnOther = direct.HitWallExtends( dir, pos );
+
+            // determine how far we can drive on
+            maxMoveOn      = bestForward.HitWallExtends( dir, pos );
+            REAL maxMoveOnOther = front.HitWallExtends( dir, pos );
+            if ( maxMoveOn > maxMoveOnOther )
+                maxMoveOn = maxMoveOnOther;
+
+            if ( maxMoveOn > minMoveOnOther && forwardHalf > backwardHalf && direct.hitOwner_ == bestBackward.hitOwner_ )
+            {
+                backwardOverhang  = direct.HitWallExtends( bestForward.Direction(), pos );
+                minMoveOn = minMoveOnOther;
+            }
+
+            // best place to turn
+            moveOn = .5 * ( minMoveOn * ( 1 + rubberRatio ) + maxMoveOn * ( 1 - rubberRatio ) );
+
+            // hit the brakes before you hit anything and if it's worth it
+            bool brake = sg_brakeCycle > 0 &&
+                         front.hit * lookahead * sg_cycleBrakeDeplete < owner_->GetBrakingReservoir() &&
+                         sg_brakeCycle * front.hit * lookahead < 2 * speed * owner_->GetBrakingReservoir() &&
+                         ( maxMoveOn - minMoveOn ) > 0 &&
+                         owner_->GetBrakingReservoir() * ( maxMoveOn - minMoveOn ) < speed * owner_->GetTurnDelay();
+            if ( frontOpen < bestOpen &&
+                    ( forwardOverhang <= backwardOverhang || ( minMoveOn < 0 && moveOn < minstep * speed ) ) )
+            {
+                // FindHugReplacement( direct );
+                // REAL expectedBackwardHalf = ( direct.before_hit - bestBackward.before_hit ).Norm();
+
+                // if ( ( ( forwardHalf + backwardHalf > bestOpen * 2 || backwardHalf > frontOpen * 10 || backwardHalf > expectedBackwardHalf * 1.01 ) && frontOpen < bestOpen ) ||
+                // rubberTime * .5 + minspace * lookahead < minstep )
+                //                {
+                turnedRecently_ = true;
+
+                minMoveOn = maxMoveOn = moveOn = 0;
+
+                /*
+                if (
+                    ( ( ( bestBackward.type == gSENSOR_ENEMY || bestBackward.type == gSENSOR_TEAMMATE ) && bestBackward.hitDistance_ < bestBackward.hit * lookahead * speed ) ||
+                      direct.hit * lookahead + rubberTime < owner_->GetTurnDelay() ) &&
+                    ( bestBackward.hit * lookahead + rubberTime < owner_->GetTurnDelay() ||
+                      bestForward.hit * lookahead + rubberTime < owner_->GetTurnDelay() )
+                )
+                {
+                    // override: stupid turn into certain death, turn it around if that makes it less stupid
+                    uActionPlayer * newBestAction = ( leftOpen > rightOpen ) ? &gCycle::se_turnLeft : &gCycle::se_turnRight;
+                    Sensor newDirect ( owner_, pos, scanDir.Turn( 0, -bestDir) );
+                    newDirect.detect( 1 );
+                    if ( newDirect.hit > direct.hit ||
+                            newDirect.hit * lookahead + rubberTime > owner_->GetTurnDelay() )
+                        owner_->Act( newBestAction, 1 );
+                }
+                else
+                */
+                {
+                    if ( !CanMakeTurn( bestAction ) )
+                    {
+                        nextChatAI_ = currentTime;
+                        return;
+                    }
+
+                    owner_->Act( bestAction, 1 );
+                }
+
+                brake = false;
+            }
+            else
+            {
+                // the best
+                REAL bestSoFar = frontOpen > bestOpen ? frontOpen : bestOpen;
+                bestSoFar *= ( 10 * ( 1 - rubberRatio ) + 1 );
+
+                if ( rearOpen > bestSoFar && ( rearLeftOpen > bestSoFar || rearRightOpen > bestSoFar ) )
+                {
+                    brake = false;
+                    turnedRecently_ = true;
+
+                    bool goLeft = rearLeftOpen > rearRightOpen;
+
+                    // dead end. reverse into the opposite direction of the front wall
+                    uActionPlayer * bestAction = goLeft ? &gCycle::se_turnLeft : &gCycle::se_turnRight;
+                    uActionPlayer * otherAction = !goLeft ? &gCycle::se_turnLeft : &gCycle::se_turnRight;
+                    Sensor &        bestForward  = goLeft ? forwardLeft : forwardRight;
+                    Sensor &        bestBackward  = goLeft ? backwardLeft : backwardRight;
+                    Sensor &        otherForward  = !goLeft ? forwardLeft : forwardRight;
+                    Sensor &        otherBackward  = !goLeft ? backwardLeft : backwardRight;
+
+                    // space in the two directions available for turns
+                    REAL bestHit = bestForward.hit > bestBackward.hit ? bestBackward.hit : bestForward.hit;
+                    REAL otherHit = otherForward.hit > otherBackward.hit ? otherBackward.hit : otherForward.hit;
+
+                    bool wait = false;
+
+                    if ( !CanMakeTurn( bestAction ) )
+                    {
+                        nextChatAI_ = currentTime;
+                        return;
+                    }
+
+                    // well, after a short turn to the right if space is tight
+                    if ( bestHit * lookahead < owner_->GetTurnDelay() + rubberTime )
+                    {
+                        if ( otherHit < bestForward.hit * 2 && front.hit * lookahead > owner_->GetTurnDelay() * 2 )
+                        {
+                            // wait a bit, perhaps there will be a better spot
+                            wait = true;
+                        }
+                        else
+                        {
+                            if ( !CanMakeTurn( otherAction ) )
+                            {
+                                nextChatAI_ = currentTime;
+                                return;
+                            }
+
+                            owner_->Act( otherAction, 1 );
+
+                            // there needs to be space ahead to finish the maneuver correctly
+                            if ( maxMoveOn < speed * owner_->GetTurnDelay() )
+                            {
+                                // there isn't. oh well, turn into the wrong direction completely, see if I care
+                                owner_->Act( otherAction, 1 );
+                                wait = true;
+                            }
+                        }
+                    }
+
+                    if ( !wait )
+                    {
+                        owner_->Act( bestAction, 1 );
+                        owner_->Act( bestAction, 1 );
+                    }
+
+                    minMoveOn = maxMoveOn = moveOn = 0;
+                }
+            }
+
+            // execute brake command
+            owner_->Act( &gCycle::s_brake, brake ? 1 : -1 );
+
+            // swap hugged walls if we're in fact grinding them the other way round
+            if ( hugLeft_.owner_ == backwardRight.hitOwner_ ||
+                    hugRight_.owner_ == backwardLeft.hitOwner_ )
+            {
+                WallHug swap = hugRight_;
+                hugRight_ = hugLeft_;
+                hugLeft_ = swap;
+            }
+        }
+
+        // REAL mintime = minspace * lookahead;
+
+        // try again soon
+        //        REAL newmintime = mintime * .5 - minstep * .2 * tReproducibleRandomizer::GetInstance().Get();
+
+        // clamp
+        // if ( newmintime < minstep )
+        // newmintime = minstep;
+
+        // add slack, acceleration and rubber
+        // if ( owner_->acceleration > 0 )
+        // mintime -= owner_->acceleration * mintime * mintime / speed;
+        // mintime -= .1 * minstep - rubberTime * .3;
+
+        // if the next step gets us too close to the wall to do anything useful,
+        // bring us really close right away.
+        // if ( mintime - newmintime > minstep )
+        // {
+        // mintime = newmintime;
+        // }
+
+        REAL space = moveOn;
+        REAL minTime = space/speed;
+
+        if ( turnedRecently_ )
+            minTime = owner_->GetTurnDelay();
+
+        if ( minTime < minstep )
+            minTime = minstep;
+        if ( minTime > maxstep + minstep * 1.5 )
+        {
+            minTime = maxstep;
+        }
+        // minTime = 0;
+
+        nextChatAI_ = currentTime + minTime;
+        timeOnChatAI_ += minTime;
+    }
+
+    REAL nextChatAI_;        //!< the next time the chat AI can be active
+private:
+    REAL timeOnChatAI_;      //!< the total time the player was on chat AI this round
+    short lastTurn_;         //!< the last turn the chat AI made
+    REAL nextTurn_;          //!< the next turn if one is planned
+    bool turnedRecently_;    //!< whether the cycle was turned or almost turned recently
+    gCycle * owner_;         //!< owner of chatbot
+
+    WallHug hugLeft_;              //!< the wall we like to have on our left side
+    WallHug hugRight_;             //!< the wall we like to have on our right side
+    WallHug hugReplacement_;       //!< a possible replacement candidate for one of the hugged walls
+};
 
 //  *****************************************************************
 
@@ -633,9 +1401,6 @@ bool gCycle::IsMe( eGameObject const * other ) const
 {
     return other == this || other == extrapolator_;
 }
-
-// from gCycleMovement.cpp
-extern void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness );
 
 #ifdef DELAYEDTURN_DEBUG
 double sg_turnReceivedTime = 0;
@@ -1430,8 +2195,6 @@ void gCycle::MyInitAfterCreation(){
         spawnTime_ = -1E+20;
     }
 
-    nextChatAI=lastTime;
-
     // add to game grid
     this->AddToList();
 
@@ -1752,49 +2515,22 @@ bool gCycle::Timestep(REAL currentTime){
     {
         ret = gCycleMovement::Timestep(currentTime);
     }
-    // no targets are given: activate chat AI
-    else if (!currentDestination && pendingTurns.empty()){
-        if (currentTime>nextChatAI && bool(player) &&
-                ((player->IsChatting()    && player->Owner() == sn_myNetID) ||
-                 (!player->IsActive() && sn_GetNetState() == nSERVER) )
-           ){
-            nextChatAI=currentTime+1;
-
-            gSensor front(this,pos,dir);
-            gSensor left(this,pos,dir.Turn(eCoord(0,1)));
-            gSensor right(this,pos,dir.Turn(eCoord(0,-1)));
-
-            REAL range=verletSpeed_*4;
-
-            front.detect(range);
-            left.detect(range);
-            right.detect(range);
-
-            enemyInfluence.AddSensor( front, sg_enemyChatbotTimePenalty, this );
-            enemyInfluence.AddSensor( right, sg_enemyChatbotTimePenalty, this );
-            enemyInfluence.AddSensor( left, sg_enemyChatbotTimePenalty, this );
-
-#ifdef DEBUG_X
-            if ( rand() > RAND_MAX / 4 )
-                left.hit *= .5f;
-            if ( rand() > RAND_MAX / 4 )
-                right.hit *= .5f;
-            if ( rand() > RAND_MAX / 4 )
-                front.hit *= .5f;
-#endif
-
-            if (front.hit<left.hit*.9 || front.hit<right.hit*.9){
-                REAL lr=front.lr;
-                if (front.type==gSENSOR_SELF) // NEVER close yourself in.
-                    lr*=-100;
-                lr-=left.hit-right.hit;
-                if (lr>0)
-                    Act(&se_turnRight,1);
-                else
-                    Act(&se_turnLeft,1);
-            }
+    // no targets are given
+    else if ( !currentDestination && pendingTurns.empty() )
+    {
+        // chatting? activate chatbot
+        if ( bool(player) &&
+                player->IsHuman() &&
+                ( sg_chatBotAlwaysActive || player->IsChatting() ) &&
+                player->Owner() == sn_myNetID )
+        {
+            gCycleChatBot & bot = gCycleChatBot::Get( this );
+            bot.Activate( currentTime );
         }
-
+        else if ( &(*chatBot_) )
+        {
+            chatBot_->nextChatAI_ = 0;
+        }
 
         bool simulate=Alive();
 
