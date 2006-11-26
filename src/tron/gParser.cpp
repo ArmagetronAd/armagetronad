@@ -1065,11 +1065,18 @@ gParser::LoadAndValidateMapXML(char const * uri, FILE* docfd, char const * fileP
                 {
                     pureFilePath = pureFilePath.SubStr( 0, paren );
                 }
+                int pos;
+                while((pos = rightFilePath.StrPos("//")) != -1) {
+                    rightFilePath.RemoveSubStr(pos, 1);
+                }
+                while((pos = pureFilePath.StrPos("//")) != -1) {
+                    pureFilePath.RemoveSubStr(pos, 1);
+                }
                 if ( rightFilePath != pureFilePath )
                 {
                     tOutput message( "$resource_file_wrong_place", pureFilePath, rightFilePath );
                     tOutput title( "$resource_file_wrong_place_title" );
-                    throw tGenericException( message, title );
+                    tERR_WARN(title << "\n" << message);
                 }
             }
         }
