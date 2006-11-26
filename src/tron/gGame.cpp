@@ -122,7 +122,10 @@ static void change_mapfile(std::istream &s)
 {
     // read new MAP_FILE value
     tString new_mapfile;
-    s >> new_mapfile;
+    new_mapfile.ReadLine(s, true);
+
+    if (new_mapfile == mapfile)
+        return;
 
     // verify the map loads
     try {
@@ -132,6 +135,17 @@ static void change_mapfile(std::istream &s)
         sg_ParseMap(aParser);	// is this necessary?
         return;
     }
+
+    if (printChange)
+    {
+        tOutput o;
+        o.SetTemplateParameter(1, "MAP_FILE");
+        o.SetTemplateParameter(2, mapfile);
+        o.SetTemplateParameter(3, new_mapfile);
+        o << "$config_value_changed";
+        con << o;
+    }
+
     mapfile = new_mapfile;
 }
 
