@@ -1076,7 +1076,7 @@ gParser::LoadAndValidateMapXML(char const * uri, FILE* docfd, char const * fileP
                 {
                     tOutput message( "$resource_file_wrong_place", pureFilePath, rightFilePath );
                     tOutput title( "$resource_file_wrong_place_title" );
-                    tERR_WARN(title << "\n" << message);
+					throw tGenericException( message, title );
                 }
             }
         }
