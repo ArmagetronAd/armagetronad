@@ -712,6 +712,11 @@ tString tPathScripts::GetDirPath()
     return st_DataDir + "/scripts";
 }
 
+void tPathScripts::Paths(tArray< tString >& paths) const {
+    paths.SetLen(0);
+    paths[0] = GetDirPath();
+}
+
 static const tPathScripts st_Scripts;
 
 bool tPath::Open    ( std::ifstream& f,

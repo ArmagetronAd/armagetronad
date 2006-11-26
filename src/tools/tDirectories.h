@@ -69,7 +69,9 @@ private:
 class tPathScripts: public tPath {
 public:
     static tString GetDirPath(); //!< returns the path to the included scripts
-}
+private:
+    void Paths ( tArray< tString >& paths ) const;
+};
 
 #ifdef DEDICATED
 class tPathWebroot: public tPath
