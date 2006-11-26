@@ -116,7 +116,7 @@ static nSettingItem<tString> conf_mapuri("MAP_URI",mapuri);
 
 #define DEFAULT_MAP "Anonymous/polygon/regular/square-1.0.1.aamap.xml"
 static tString mapfile(DEFAULT_MAP);
-
+/*
 static void sg_ParseMap ( gParser * aParser, tString map_file );
 static void change_mapfile(std::istream &s)
 {
@@ -148,8 +148,8 @@ static void change_mapfile(std::istream &s)
 
     mapfile = new_mapfile;
 }
-
-static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",&change_mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
+*/
+static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
 // bool globalingame=false;
 tString sg_GetCurrentTime( char *szFormat )
