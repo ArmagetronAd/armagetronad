@@ -1,14 +1,13 @@
 <!-- version="0.2.8.0" -->
-<!ELEMENT Resource (Map)>
+<!ENTITY % ResourceContents "Map" >
+<!ENTITY % ResourceType "aamap" >
 
-<!ATTLIST Resource
-       type (aamap) "aamap" 
-       name CDATA #REQUIRED
-       version CDATA #REQUIRED
-       author CDATA "Anonymous"
-       category CDATA "unsorted"
-       comissioner CDATA #IMPLIED
->
+<!-- syntax and naming loosely based on the XHTML 1.1 DTD -->
+<!ENTITY % resource.module "INCLUDE">
+<![%resource.module;[
+<!ENTITY % resource.mod
+	SYSTEM "resource.dtd">
+%resource.mod;]]>
 
 <!ELEMENT Map (Settings?, World)> 
 

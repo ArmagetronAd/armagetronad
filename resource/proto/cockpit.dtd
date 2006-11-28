@@ -1,14 +1,13 @@
 <!-- version="" -->
-<!ELEMENT Resource (Cockpit)>
+<!ENTITY % ResourceContents "Cockpit" >
+<!ENTITY % ResourceType "aacockpit" >
 
-<!ATTLIST Resource
-       type (aacockpit) "aacockpit"
-       name CDATA #REQUIRED
-       version CDATA "1.0"
-       author CDATA "Anonymous"
-       category CDATA "unsorted"
-       comissioner CDATA #IMPLIED
->
+<!-- syntax and naming loosely based on the XHTML 1.1 DTD -->
+<!ENTITY % resource.module "INCLUDE">
+<![%resource.module;[
+<!ENTITY % resource.mod
+	SYSTEM "resource.dtd">
+%resource.mod;]]>
 
 <!ENTITY % CommonWidgetAttributes "
     camera CDATA '*'
