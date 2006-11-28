@@ -1,0 +1,69 @@
+Command-line Switches
+=====================
+
+``-h``, ``--help``
+	print this message
+	
+``--doc``
+	print documentation for all console commands
+	
+``-v``, ``--version``
+	print version number
+
+``--record <filename>``
+	creates a DEBUG recording while running
+	
+``--playback <filename>``
+	plays back a DEBUG recording
+
+``-f``, ``--fullscreen``
+	start in fullscreen mode
+	
+``-w``, ``--window``, ``--windowed``
+	start in windowed mode
+
+``--connect <server>[:<port>]``
+	connect directly to SERVER, skipping all menus. default PORT=4534
+
+``--datadir <Directory>``
+	read game data (textures, sounds and texts) from this directory
+	
+``--userdatadir <Directory>``
+	read customized game data from this directory
+	
+``--configdir <Directory>``
+	read game configuration (.cfg-files) from this directory
+	
+``--userconfigdir <Directory>``
+	read user game configuration from this directory
+	
+``--vardir <Directory>``
+	save game logs and highscores in this directory
+
+``--resourcedir <Directory>``
+	look for resources in this directory
+
+``--autoresourcedir <Directory>``
+	download missing resources into this directory
+
+``--path-no-absolutecheck``
+	disables security check against absolute paths
+	
+``--path-no-hiddencheck``
+	disables security check against hidden paths
+	
+``--path-no-relativecheck``
+	disables security check against relative paths. Not recommended, this 
+	check is really important.
+
+``--prefix``
+	prints the prefix the game was installed to
+
+``--fastforward <time>``
+	lets time run very fast until the given time is reached
+	
+``--benchmark``
+	renders frames as they were recorded
+	
+``--videoout``
+	writes a raw video stream of frames to stdout
