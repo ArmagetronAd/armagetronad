@@ -2,7 +2,10 @@ include $(top_srcdir)/Makefile.paths
 
 # evil hack: some target in doc will reinvoke make here. For that to work,
 # doc needs to be the last subdirectory visited.
-SUBDIRS = first doc swig thirdparty
+SUBDIRS = first doc thirdparty
+if ENABLE_RUBY
+SUBDIRS += swig
+endif
 
 # target directory
 gamesdir=${bindir}

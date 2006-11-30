@@ -187,6 +187,7 @@ AC_ARG_ENABLE(ruby,
 		[enable ruby scripting api.  Requires ruby to be installed. (default=enabled)]),,
 enable_ruby=yes)
 AC_SUBST(enable_ruby)
+AM_CONDITIONAL(ENABLE_RUBY, test "x$enable_ruby" = "xyes")
 
 initdir=location
 AC_ARG_ENABLE(initscripts,
