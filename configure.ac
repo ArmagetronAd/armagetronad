@@ -328,7 +328,6 @@ if test ${HAVE_BASH} = no; then
 fi
 
 dnl Boost
-dnl m4_include(ax_boost_base.m4)
 AX_BOOST_BASE([1.33.1])
 
 dnl Ruby
@@ -665,7 +664,6 @@ export LIBS="${ruby_lib_dir} $LIBS"
 
 dnl SWIG
 
-dnl m4_include(ac_pkg_swig.m4)
 AC_PROG_SWIG(1.3.29)
 SWIG_ENABLE_CXX
 
