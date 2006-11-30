@@ -274,6 +274,7 @@
                     <Color r="1." g="1." b="1." alpha=".2" />
                 </Solid>
             </Background>
+			<MapMode toggleKey="1" defaultMode="cycle" allowedModes="*" />
         </Map>
 <!-- Lucifer's incam cockpit follows -->
         <BarGauge camera="in">

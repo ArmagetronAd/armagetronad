@@ -177,13 +177,13 @@ void rPerFrameTask::DoPerFrameTasks(){
 
 #ifdef HAVE_LIBRUBY
 rPerFrameTaskRuby::rPerFrameTaskRuby()
-	:tCallbackRuby(rPerFrameTaskRuby_anchor)
+        :tCallbackRuby(rPerFrameTaskRuby_anchor)
 {
 }
 
 void rPerFrameTaskRuby::DoPerFrameTasks(){
-   rNoAutoDisplayAtNewlineCallback noAutoDisplay( sr_True );
-   Exec(rPerFrameTaskRuby_anchor);
+    rNoAutoDisplayAtNewlineCallback noAutoDisplay( sr_True );
+    Exec(rPerFrameTaskRuby_anchor);
 }
 #endif
 

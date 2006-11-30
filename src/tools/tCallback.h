@@ -41,12 +41,12 @@ public:
 
 #ifdef HAVE_LIBRUBY
 class tCallbackRuby : public tListItem<tCallbackRuby> {
-	VALUE block;
+    VALUE block;
 protected:
-	static VALUE ExecProtect(VALUE);	
+    static VALUE ExecProtect(VALUE);
 public:
-	tCallbackRuby(tCallbackRuby *& anchor);
-	static void Exec(tCallbackRuby *anchor);
+    tCallbackRuby(tCallbackRuby *& anchor);
+    static void Exec(tCallbackRuby *anchor);
 };
 #endif // HAVE_LIBRUBY
 

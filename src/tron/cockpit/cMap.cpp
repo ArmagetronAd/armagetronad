@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "cockpit/cMap.h"
+#include "cockpit/cCockpit.h"
 #include "nConfig.h"
 #include "tCoord.h"
 
@@ -56,13 +57,60 @@ namespace cWidget {
 bool Map::Process(tXmlParser::node cur) {
     if (
         WithCoordinates ::Process(cur) ||
+        WithForeground ::Process(cur) ||
         WithBackground ::Process(cur))
         return true;
-    else {
-        DisplayError(cur);
-        return false;
+    if(cur.IsOfType("MapMode")) {
+        int toggleKey;
+        cur.GetProp("toggleKey", toggleKey);
+        m_toggleKey = toggleKey;
+        cCockpit::GetCockpit()->AddEventHandler(toggleKey, this);
+
+        tString mode = cur.GetProp("allowedModes");
+        std::map<tString, unsigned> modes;
+        modes[tString("full")] = MODE_STD;
+        modes[tString("closestZone")] = MODE_ZONE;
+        modes[tString("cycle")] = MODE_CYCLE;
+        modes[tString("all")] = MODE_ALL;
+        modes[tString("*")] = MODE_ALL;
+
+        m_allowedModes = 0;
+        bool invert=false;
+        if(mode(0) == '^') {
+            invert=true;
+            mode.erase(0,1);
+        }
+        mode += " ";
+
+        tString::size_type pos = 0, next;
+        while((next = mode.find(' ', pos)) != tString::npos) {
+            tString thismode = mode.SubStr(pos, next - pos);
+            if(modes.count(thismode)) {
+                m_allowedModes |= modes[thismode];
+            } else {
+                tERR_WARN(tString("Nothing known about map mode '") + thismode + "'.");
+            }
+            pos = next+1;
+        }
+        if(invert) {
+            m_allowedModes = ~m_allowedModes;
+        }
+        cur.GetProp("defaultMode", m_mode);
+        return true;
+    }
+    DisplayError(cur);
+    return false;
+}
+void Map::HandleEvent(bool state, int id) {
+    if(id == m_toggleKey) {
+        if(state) {
+            ToggleMode();
+        }
+    } else {
+        Base::HandleEvent(state, id);
     }
 }
+
 void Map::Render() {
     // I haven't checked possible initial matrix state, so init to identity and modelview
     if(stc_forbidHudMap) return; // the server doesn't want us to do that
@@ -83,6 +131,8 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
                   double cycleSize, double border,
                   double x, double y, double w, double h,
                   double rw, double rh, double ix, double iy) {
+    double pl_CurPosX, pl_CurPosY, pl_CurSpeed, min_dist2, dist2, rad;
+    cCockpit* cp = cCockpit::GetCockpit();
     if(!rimWalls && !cycleWalls && !cycles) return;
     const eRectangle &bounds = eWallRim::GetBounds();
     double lx = bounds.GetLow().x - border, hx = bounds.GetHigh().x + border;
@@ -95,6 +145,7 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
     double xpos, ypos, xscale, yscale;
     double xrat = (rw * mh) / (rh * mw);
     double yrat = (rh * mw) / (rw * mh);
+    // set scale and position
     if(xrat > yrat) {
         xscale = (w * rh) / (mh * rw);
         yscale = h / mh;
@@ -106,8 +157,53 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
         xpos = x;
         ypos = y + iy * (h - h * xrat);
     }
-    xpos -= lx * xscale;
-    ypos -= ly * yscale;
+    // manage mode
+    switch (m_mode) {
+    case MODE_ZONE:
+        pl_CurPosX = cp->GetFocusCycle()->Position().x;
+        pl_CurPosY = cp->GetFocusCycle()->Position().y;
+        min_dist2 = (mw*mw+mh*mh)*1000;
+        rad = 0;
+        for(std::deque<zZone *>::const_iterator i = sg_Zones.begin(); i != sg_Zones.end(); ++i) {
+            tASSERT(*i);
+            tCoord const &position = (*i)->GetPosition();
+            const float radius = (*i)->GetRadius();
+            dist2=(position.x-pl_CurPosX)*(position.x-pl_CurPosX)+(position.y-pl_CurPosY)*(position.y-pl_CurPosY);
+            if (dist2<min_dist2) {
+                min_dist2 = dist2;
+                m_centre = position;
+                rad = radius;
+            }
+        }
+        m_zoom = (w>h)?h/(yscale*3*rad):w/(xscale*3*rad);
+        m_zoom = (m_zoom<1)?1:m_zoom;
+        // check if at least 1 zone was found, if not, toggle to mode 2 ...
+        if (rad==0) {
+            m_mode = MODE_CYCLE;
+        } else {
+            break;
+        }
+    case MODE_CYCLE:
+        m_centre = cp->GetFocusCycle()->Position();
+        pl_CurSpeed = cp->GetFocusCycle()->Speed();
+        m_zoom = (w>h)?h/(yscale*3*pl_CurSpeed):w/(xscale*3*pl_CurSpeed);
+        break;
+    default :
+        m_zoom = 1;
+        m_centre.x = lx + mw / 2;
+        m_centre.y = ly + mh / 2;
+        break;
+    }
+    xscale *=m_zoom;
+    yscale *=m_zoom;
+    xpos -= m_centre.x * xscale - w / 2;
+    ypos -= m_centre.y * yscale - h / 2;
+    // set clipping frame in map coordinates
+    clp_lx = m_centre.x - w / xscale / 2 - 1;
+    clp_rx = m_centre.x + w / xscale / 2 + 1;
+    clp_ty = m_centre.y + h / yscale / 2 + 1;
+    clp_by = m_centre.y - h / yscale / 2 - 1;
+    // set projection matrix
     glPushMatrix();
     GLfloat m[16];
     glGetFloatv(GL_PROJECTION_MATRIX, m);
@@ -116,6 +212,21 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
     m[12] += xpos;
     m[13] += ypos;
     glLoadMatrixf(m);
+    // if needed, draw a frame
+    if (m_mode != MODE_STD) {
+        // Add frame ...
+        m_foreground.GetColor(tCoord(0.,0.)).Apply();
+        glBegin(GL_LINE_STRIP);
+        //TODO: this should use a function of the rGradient.
+        glVertex2f(clp_lx, clp_ty);
+        glVertex2f(clp_rx, clp_ty);
+        glVertex2f(clp_rx, clp_by);
+        glVertex2f(clp_lx, clp_by);
+        glVertex2f(clp_lx, clp_ty);
+        glEnd();
+        m_background.SetGradientEdges(tCoord(clp_lx, clp_ty), tCoord(clp_rx, clp_by));
+        m_background.DrawRect(tCoord(clp_lx, clp_ty), tCoord(clp_rx, clp_by));
+    }
     if(rimWalls)
         DrawRimWalls(se_rimWalls);
     if(cycleWalls) {
@@ -135,24 +246,27 @@ void Map::DrawRimWalls( tList<eWallRim> &list ) {
         for (int i=list.Len()-1; i >= 0; --i)
         {
             eWallRim *wall = list[i];
-            const eCoord &begin = wall->EndPoint(0), &end = wall->EndPoint(1);
-            glVertex2f(begin.x, begin.y);
-            glVertex2f(end.x, end.y);
+            eCoord begin = wall->EndPoint(0), end = wall->EndPoint(1);
+            if (ClipLine(begin,end)) {
+                glVertex2f(begin.x, begin.y);
+                glVertex2f(end.x, end.y);
+            }
         }
+
 
     }
     glEnd();
-	if(sr_alphaBlend) {
-		m_background.GetColor(tCoord(0.,0.)).Apply();
-		glBegin(GL_POLYGON);
-		//std::cerr << "===\n";
-		for(std::vector<tCoord>::iterator iter = se_rimWallRubberBand.begin(); iter != se_rimWallRubberBand.end(); ++iter) {
-			glVertex2f(iter->x, iter->y);
-			//std::cerr << "result: " << *iter << std::endl;
-		}
-		glVertex2f(se_rimWallRubberBand.front().x, se_rimWallRubberBand.front().y);
-		glEnd();
-	}
+    if(sr_alphaBlend && m_mode == MODE_STD) {
+        m_background.GetColor(tCoord(0.,0.)).Apply();
+        glBegin(GL_POLYGON);
+        //std::cerr << "===\n";
+        for(std::vector<tCoord>::iterator iter = se_rimWallRubberBand.begin(); iter != se_rimWallRubberBand.end(); ++iter) {
+            glVertex2f(iter->x, iter->y);
+            //std::cerr << "result: " << *iter << std::endl;
+        }
+        glVertex2f(se_rimWallRubberBand.front().x, se_rimWallRubberBand.front().y);
+        glEnd();
+    }
 }
 
 void Map::DrawWalls(tList<gNetPlayerWall> &list) {
@@ -181,16 +295,20 @@ void Map::DrawWalls(tList<gNetPlayerWall> &list) {
         unsigned j, numcoords = coords.Len();
         if(numcoords < 2) continue;
         bool prevDangerous = coords[0].IsDangerous;
-        double prevDist = coords[0].Pos;
+        float prevDist = coords[0].Pos;
         if(prevDist < minDist) prevDist = minDist;
         prevDist = (prevDist - begDist) / lenDist;
         for(j=1; j<numcoords; j++) {
             bool curDangerous = coords[j].IsDangerous;
-            double curDist = coords[j].Pos;
+            float curDist = coords[j].Pos;
             if(curDist < minDist) curDist = minDist;
             curDist = (curDist - begDist) / lenDist;
-            glVertex2f((1 - prevDist) * begPos.x + prevDist * endPos.x, (1 - prevDist) * begPos.y + prevDist * endPos.y);
-            glVertex2f((1 - curDist) * begPos.x + curDist * endPos.x, (1 - curDist) * begPos.y + curDist * endPos.y);
+            tCoord p1 = (1 - prevDist)* begPos + prevDist * endPos;
+            tCoord p2 = (1 - curDist) * begPos + curDist * endPos;
+            if (ClipLine(p1,p2)) {;
+                glVertex2f(p1.x, p1.y);
+                glVertex2f(p2.x, p2.y);
+            }
             prevDangerous = curDangerous;
             prevDist = curDist;
         }
@@ -211,20 +329,23 @@ void Map::DrawCycles(tList<ePlayerNetID> &list, double xscale, double yscale) {
             }
             glColor4f(cycle->color_.r, cycle->color_.g, cycle->color_.b, alpha);
             eCoord pos = cycle->PredictPosition(), dir = cycle->Direction();
-            glPushMatrix();
-            GLfloat m[16] = {
-                                xscale * dir.x, yscale * dir.y, 0, 0,
-                                -xscale * dir.y, yscale * dir.x, 0, 0,
-                                0, 0, 1, 0,
-                                pos.x, pos.y, 0, 1
-                            };
-            glMultMatrixf(m);
-            glBegin(GL_TRIANGLES);
-            glVertex2f(.5, 0);
-            glVertex2f(-.5, .5);
-            glVertex2f(-.5, -.5);
-            glEnd();
-            glPopMatrix();
+            tCoord p = pos;
+            if (ClipLine(p,p)) { // quite dirty, whatever ...
+                glPushMatrix();
+                GLfloat m[16] = {
+                                    xscale * dir.x, yscale * dir.y, 0, 0,
+                                    -xscale * dir.y, yscale * dir.x, 0, 0,
+                                    0, 0, 1, 0,
+                                    pos.x, pos.y, 0, 1
+                                };
+                glMultMatrixf(m);
+                glBegin(GL_TRIANGLES);
+                glVertex2f(.5, 0);
+                glVertex2f(-.5, .5);
+                glVertex2f(-.5, -.5);
+                glEnd();
+                glPopMatrix();
+            }
         }
     }
 }
@@ -245,13 +366,98 @@ void Map::DrawZones(std::deque<zZone *> const &list) {
 
         BeginLines();
         color.Apply();
-        for(int i = 0; i<steps; ++i) {
-            Vertex(currentPos.x + position.x, currentPos.y + position.y, 0.);
-            currentPos = currentPos.Turn(offset);
+        for(int i = 0; i<steps/2; ++i) {
+            tCoord p1 = currentPos.Turn(offset);
+            currentPos = p1.Turn(offset);
+            p1 += position;
+            tCoord p2 = currentPos + position;
+            if (i%2==1) {
+                if (ClipLine(p1, p2)) {;
+                    glBegin(GL_LINES);
+                    glVertex2f(p1.x, p1.y);
+                    glVertex2f(p2.x, p2.y);
+                    glEnd();
+                }
+            }
         }
         RenderEnd();
     }
 }
+
+// Liang-Barsky 2D Line clipping ...
+bool Map::ClipLine(tCoord &c1, tCoord &c2) const {
+    double m1, m2;
+    double p1, p2, p3, p4, q1, q2, q3, q4;
+
+    // first check if line is a point ...
+    if (c1 == c2) {
+        // line is a point, easy case ...
+        if ((c1.x>clp_lx)&&(c1.x<clp_rx)&&(c1.y>clp_by)&&(c1.y<clp_ty)) {
+            return true;
+        }
+    } else {
+        // apply Liang Barsky algorithm ...
+        m1 = 0;
+        m2 = 1;
+
+        tCoord d = c2 - c1;
+
+        p1=(-d.x);
+        p2=d.x;
+        p3=(-d.y);
+        p4=d.y;
+        q1=(c1.x-clp_lx);
+        q2=(clp_rx-c1.x);
+        q3=(c1.y-clp_by);
+        q4=(clp_ty-c1.y);
+
+        if(CheckEdge(p1,q1,m1,m2) && CheckEdge(p2,q2,m1,m2) &&
+                CheckEdge(p3,q3,m1,m2) && CheckEdge(p4,q4,m1,m2)) {
+            if(m2<1) {
+                c2 = c1+m2*d;
+            }
+            if(m1>0) {
+                c1 += m1*d;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Map::CheckEdge(double p,double q,double &m1,double &m2) const {
+    double r;
+
+    if(p<0) {
+        r=(q/p);
+        if(r>m2) return false;
+        else if(r>m1) m1=r;
+    } else if(p>0) {
+        r=(q/p);
+        if(r<m1) return false;
+        else if(r<m2) m2=r;
+    } else {
+        if(q<0) return false;
+    }
+    return true;
+}
+
+void Map::ToggleMode(void) {
+    if(m_allowedModes & MODE_ALL) {
+        do {
+            m_mode = m_mode << 1;
+            if(m_mode > MODE_ALL) {
+                m_mode = 1;
+            }
+        } while(!(m_mode & m_allowedModes));
+    }
+}
+
+Map::Map():
+        m_mode(MODE_STD),
+        m_allowedModes(MODE_ALL),
+        m_toggleKey(0)
+{}
 
 }
 

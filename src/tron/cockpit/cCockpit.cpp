@@ -459,10 +459,14 @@ void cCockpit::ProcessWidget(node cur, cWidget::Base &widget) {
     ProcessWidgetCamera(cur, widget);
     int num;
     cur.GetProp("toggle", num);
-    m_EventHandlers.insert(std::pair<int, cWidget::Base *>(num, &widget));
+    AddEventHandler(num, &widget);
     widget.SetDefaultState(cur.GetPropBool("toggleDefault"));
     widget.SetSticky(cur.GetPropBool("toggleSticky"));
     ProcessWidgetCore(cur, widget);
+}
+
+void cCockpit::AddEventHandler(int id, cWidget::Base *widget) {
+    m_EventHandlers.insert(std::pair<int, cWidget::Base *>(id, widget));
 }
 
 cWidget::Base_ptr cCockpit::ProcessWidgetType(node cur) {
@@ -704,7 +708,7 @@ bool cCockpit::ProcessKey5(float i) { return cCockpit::GetCockpit()->HandleEvent
 bool cCockpit::HandleEvent(int id, bool state) {
     if(m_EventHandlers.count(id)){
         for(std::multimap<int, cWidget::Base *>::iterator iter = m_EventHandlers.find(id); iter != m_EventHandlers.end() && iter->first == id; ++iter) {
-            iter->second->Toggle(state);
+            iter->second->HandleEvent(state, id);
         }
         return true;
     }
@@ -727,4 +731,7 @@ void cCockpit::Readjust(void) {
     }
 }
 
+gCycle* cCockpit::GetFocusCycle(void) {
+    return m_FocusCycle;
+}
 #endif

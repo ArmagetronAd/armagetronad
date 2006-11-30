@@ -546,9 +546,9 @@ static SDL_mutex * sr_netLock = NULL;
 void rSysDep::StartNetSyncThread( rNetIdler * idler )
 {
     sr_netIdler = idler;
-    
+
     return; // BUG This thread is crashing ruby
-    
+
     // can't use thrading trouble while recording
     if ( tRecorder::IsRunning() )
         return;
@@ -669,12 +669,12 @@ void rSysDep::SwapGL(){
 
         // in playback or recording mode, always execute frame tasks, they may be improtant for consistency
         if ( tRecorder::IsRunning() ) {
-	    	rPerFrameTask::DoPerFrameTasks();
+            rPerFrameTask::DoPerFrameTasks();
 #ifdef HAVE_LIBRUBY
-			rPerFrameTaskRuby::DoPerFrameTasks();
+            rPerFrameTaskRuby::DoPerFrameTasks();
 #endif
-		}
-        
+        }
+
 
         return;
     }
@@ -682,7 +682,7 @@ void rSysDep::SwapGL(){
 
     rPerFrameTask::DoPerFrameTasks();
 #ifdef HAVE_LIBRUBY
-	rPerFrameTaskRuby::DoPerFrameTasks();
+    rPerFrameTaskRuby::DoPerFrameTasks();
 #endif
 
     // unlock the mutex while waiting for the swap operation to finish

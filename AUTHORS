@@ -55,6 +55,9 @@ Christian Reitwiessner
 Edd Keefe
     contributed Mac OS X icon and the title screen
     
+Emmanuel Rollet
+    clipping and basic movement for the overhead map
+    
 Fabrice Holbe
     original Moviepack and font
     
@@ -62,7 +65,7 @@ hang3r
     skeleton for more accurate timer on Windows
     
 Jonathan
-    Headlight (needs activation) and overhead map (will be in 0.3.X)
+    Headlight (needs activation) and overhead map
     
 Meriton
     Replacement for the old buggy Lag-O-Meter and new camera glancing code

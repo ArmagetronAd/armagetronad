@@ -30,13 +30,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 void gRotation::HandleNewRound() {
     std::cerr << "round!\n";
 #ifdef HAVE_LIBRUBY
-	gRoundEventRuby::DoRoundEvents();
+    gRoundEventRuby::DoRoundEvents();
 #endif
 }
 void gRotation::HandleNewMatch() {
     std::cerr << "match!\n";
 #ifdef HAVE_LIBRUBY
-	gMatchEventRuby::DoMatchEvents();
+    gMatchEventRuby::DoMatchEvents();
 #endif
 }
 
@@ -44,25 +44,25 @@ void gRotation::HandleNewMatch() {
 
 static tCallbackRuby *roundEventRuby_anchor;
 gRoundEventRuby::gRoundEventRuby()
-	:tCallbackRuby(roundEventRuby_anchor)
-{	
+        :tCallbackRuby(roundEventRuby_anchor)
+{
 }
 
 void gRoundEventRuby::DoRoundEvents()
 {
-	Exec(roundEventRuby_anchor);
+    Exec(roundEventRuby_anchor);
 }
 
 static tCallbackRuby *matchEventRuby_anchor;
 
 gMatchEventRuby::gMatchEventRuby()
-	:tCallbackRuby(matchEventRuby_anchor)
-{	
+        :tCallbackRuby(matchEventRuby_anchor)
+{
 }
 
 void gMatchEventRuby::DoMatchEvents()
 {
-	Exec(matchEventRuby_anchor);
+    Exec(matchEventRuby_anchor);
 }
 #endif
 

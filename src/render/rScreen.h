@@ -150,8 +150,8 @@ public:
 #ifdef HAVE_LIBRUBY
 class rPerFrameTaskRuby : public tCallbackRuby {
 public:
-	rPerFrameTaskRuby();
-	static void DoPerFrameTasks();
+    rPerFrameTaskRuby();
+    static void DoPerFrameTasks();
 };
 #endif
 

@@ -48,7 +48,7 @@ class zZone;
 namespace cWidget {
 
 //! Processes and renders a map of the grid
-class Map : public WithCoordinates, public WithBackground {
+class Map : public WithCoordinates, public WithBackground, public WithForeground {
     void DrawRimWalls( tList<eWallRim> &list ); //!< Draws all the rim walls
     void DrawWalls(tList<gNetPlayerWall> &list); //!< Draws all player walls
     void DrawCycles(tList<ePlayerNetID> &list, double xscale, double yscale); //!< Draws all cycles as triangles
@@ -68,9 +68,33 @@ class Map : public WithCoordinates, public WithBackground {
                  double cycleSize, double border,
                  double x, double y, double w, double h,
                  double rw, double rh, double ix, double iy); //!< Draws the entire map
+
+    bool CheckEdge(double p,double q,double &m1,double &m2) const; // Test a clipping window edge
+    bool ClipLine(tCoord &p1, tCoord &p2) const; // Clip line (p1,p2) according to clipping window
+    //
+    //! mode is a var to manage minimap mode :
+    enum {
+        MODE_STD = 01, //!< the whole map
+        MODE_ZONE = 02, //!< using zoom factor and clipping centered on the closest zone, when there's no zone, switch to MODE_CYCLE
+        MODE_CYCLE = 04, //!< using zoom factor and clipping centered on the player position
+        MODE_ALL = 07
+    };
+    int m_mode;
+    int m_allowedModes;
+    tCoord m_centre; // minimap center position on overall map
+    float m_zoom; // vars to store zoom factor
+
+    float clp_lx, clp_rx, clp_ty, clp_by; // vars to store clipping window
+
+    int m_toggleKey; //key to toggle the mode
+
+    void ToggleMode(void); //!< Toggles the display mode.
 public:
+    void HandleEvent(bool state, int id);
     void Render(); //!< calls DrawMap()
     virtual bool Process(tXmlParser::node cur); //!< Passes on to all Process() functions of the base classes and calls Base::DisplayError() on failure
+
+    Map(); //!< default constructor
 };
 
 }

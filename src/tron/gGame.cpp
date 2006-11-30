@@ -2408,7 +2408,7 @@ void gGame::StateUpdate(){
             ePlayerNetID::LogScoreDifferences();
             se_SaveToLadderLog(tString("NEW_ROUND\n"));
             se_sendEventNotification(tString("New Round"), tString("Starting a new round"));
-            
+
             // kick spectators
             nMachine::KickSpectators();
 
@@ -3050,7 +3050,7 @@ void gGame::Analysis(REAL time){
 
                 if (rotationtype == 1)
                     rotate();
-                
+
                 gRotation::HandleNewRound();
 
                 if ( last_team_alive >= 0 )
@@ -3179,7 +3179,7 @@ void gGame::Analysis(REAL time){
                         tString notificationMessage( ePlayerNetID::FilterName( eTeam::teams[0]->Name() ) );
                         notificationMessage << " has won the match";
                         se_sendEventNotification(tString("Match winner"), notificationMessage);
-                        
+
 
                         message.SetTemplateParameter(1, name);
                         message << "$gamestate_champ_console";
@@ -3357,7 +3357,7 @@ void gGame::StartNewMatchNow(){
         se_SaveToLadderLog(tString("NEW_MATCH\n"));
         se_sendEventNotification(tString("New match"), tString("Starting a new match"));
     }
-        
+
 
     rounds=0;
     warning=0;

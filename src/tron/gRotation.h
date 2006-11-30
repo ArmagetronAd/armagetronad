@@ -34,24 +34,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifdef HAVE_LIBRUBY
 class gRoundEventRuby : public tCallbackRuby {
 public:
-	gRoundEventRuby();
-	static void DoRoundEvents();
+    gRoundEventRuby();
+    static void DoRoundEvents();
 };
 
 class gMatchEventRuby : public tCallbackRuby {
 public:
-	gMatchEventRuby();
-	static void DoMatchEvents();
+    gMatchEventRuby();
+    static void DoMatchEvents();
 };
 #endif // HAVE_LIBRUBY
 
 class gRotation
 {
 public:
-	gRotation() {}
-	virtual ~gRotation() {}
-	static void HandleNewRound();
-	static void HandleNewMatch();
+    gRotation() {}
+    virtual ~gRotation() {}
+    static void HandleNewRound();
+    static void HandleNewMatch();
 };
 
 

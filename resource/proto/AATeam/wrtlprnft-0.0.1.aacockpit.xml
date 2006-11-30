@@ -498,6 +498,7 @@
           <Color r="1." g="1." b="1." alpha="0."/>
         </Solid>
       </Background>
+	  <MapMode toggleKey="4" />
     </Map>
     <BarGauge>
       <DataSet>

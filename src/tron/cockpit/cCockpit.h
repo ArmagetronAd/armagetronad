@@ -80,6 +80,7 @@ public:
     //                  & cCockpit::server_custom);
     // See the top of this file for all modes
     void SetCam(int Cam) { m_Cam = Cam; }; //!< Sets the camera. The widget's Render() function only gets called if the cameras of the widget and HUD overlap
+    void AddEventHandler(int id, cWidget::Base *widget); //!< add a key event handler
 
     void RenderRootwindow(); //!< Renders the main viewport (all widgets that belong to the entire screen)
     void RenderPlayer(); //!< Renders all widgets that belong to the currently active player
@@ -87,6 +88,8 @@ public:
     void RenderCycle(gCycle const &cycle); //!< Render the cockpit elements above a cycle
 
     void ProcessCockpit(void); //!< Calls ClearWidgets(), then (re-) parses the cockpit file
+
+    gCycle *GetFocusCycle(void); //! the cycle that's being followed in the current view
 private:
     static cCockpit* _instance; //!< Stores a pointer to the current instance of the cockpit
 

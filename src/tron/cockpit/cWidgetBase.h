@@ -80,6 +80,10 @@ public:
             m_Render = state;
         }
     }
+    //! Overwrite if you need to handle custom events (other than toggling)
+    //! @param state true if the key was pressed, false if it was released
+    //! @param id key id of the event that was received
+    virtual void HandleEvent(bool state, int id) { Toggle(state); }
 };
 
 typedef std::auto_ptr<Base> Base_ptr; //!< simple shortcut; used in the derived classes

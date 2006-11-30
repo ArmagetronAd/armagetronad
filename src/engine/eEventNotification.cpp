@@ -64,7 +64,7 @@ void se_sendEventNotification( tString title, tString message )
                 *m << message;
                 m->Send( user );
             }
-            
+
         }
     }
 }

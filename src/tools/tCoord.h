@@ -153,6 +153,11 @@ inline std::istream &operator>> (std::istream &s,tCoord &c){
     return s;
 }
 
+//! stretches a coordinate by a factor from the center
+inline tCoord operator*(REAL a, tCoord const &c) {
+    return c*a;
+}
+
 //! @param in the standard container containing the tCoords to wrap into a rubber band. In will be modified!
 //! @param out the standard container to put the rubber band into, its contents will be erased
 template<typename T> void tCoord::GrahamScan(T &in, T &out) {
