@@ -2179,7 +2179,7 @@ void gCycle::MyInitAfterCreation(){
     */
 
 #ifdef DEBUG
-    //con << "Created cycle.\n";
+    con << "Created cycle.\n";
 #endif
     nextSyncOwner=nextSync=tSysTimeFloat()-1;
 
@@ -2194,6 +2194,7 @@ void gCycle::MyInitAfterCreation(){
     {
         spawnTime_ = -1E+20;
     }
+    dirSpawn = dirDrive;
 
     // add to game grid
     this->AddToList();
@@ -2776,6 +2777,7 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
                     spawnTime_ += -1E+20;
                     DropWall();
                     spawnTime_ = lastSpawn;
+                    dirSpawn = dirDrive;
                     lastTurnPos_ = pos; // hack last turn position to generate good wall
                 }
 
@@ -4546,6 +4548,8 @@ gCycle::gCycle(nMessage &m)
 
     deathTime = 0;
     spawnTime_ = se_GameTime() + 100;
+    dirSpawn = dirDrive;
+
 
     m >> color_.r;
     m >> color_.g;
@@ -5240,6 +5244,7 @@ void gCycle::ReadSync( nMessage &m )
         {
             spawnTime_ = -1E+20;
         }
+        dirSpawn = dirDrive;
 
         // reset position and direction
         predictPosition_ = pos;

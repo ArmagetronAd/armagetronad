@@ -498,7 +498,15 @@
           <Color r="1." g="1." b="1." alpha="0."/>
         </Solid>
       </Background>
-	  <MapMode toggleKey="4" />
+      <MapModes toggleKey="4">
+       <MapMode mode="full" rotation="spawn" />
+       <MapMode mode="closestZone" rotation="spawn" />
+       <MapMode mode="cycle" rotation="camera" zoomFactor="3" />
+       <MapMode mode="cycle" rotation="cycle" zoomFactor="3" />
+       <MapMode mode="cycle" rotation="spawn" zoomFactor="4" />
+       <MapMode mode="full" rotation="fixed" />
+      </MapModes>
+
     </Map>
     <BarGauge>
       <DataSet>

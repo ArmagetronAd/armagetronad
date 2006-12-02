@@ -734,4 +734,8 @@ void cCockpit::Readjust(void) {
 gCycle* cCockpit::GetFocusCycle(void) {
     return m_FocusCycle;
 }
+
+ePlayer *cCockpit::GetPlayer() {
+    return m_Player;
+}
 #endif

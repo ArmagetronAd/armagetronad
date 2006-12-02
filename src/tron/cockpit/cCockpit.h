@@ -89,7 +89,8 @@ public:
 
     void ProcessCockpit(void); //!< Calls ClearWidgets(), then (re-) parses the cockpit file
 
-    gCycle *GetFocusCycle(void); //! the cycle that's being followed in the current view
+    ePlayer *GetPlayer(); //!< The player the viewport belongs to
+    gCycle *GetFocusCycle(void); //!< the cycle that's being followed in the current view
 private:
     static cCockpit* _instance; //!< Stores a pointer to the current instance of the cockpit
 

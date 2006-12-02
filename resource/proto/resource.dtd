@@ -1,3 +1,4 @@
+<!-- version="0.3.1-a" -->
 <!ELEMENT Resource (%ResourceContents;)>
 <!ATTLIST Resource
 	type CDATA "%ResourceType;"

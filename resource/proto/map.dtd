@@ -1,4 +1,4 @@
-<!-- version="0.2.8.0" -->
+<!-- version="0.3.1-a" -->
 <!ENTITY % ResourceContents "Map" >
 <!ENTITY % ResourceType "aamap" >
 
@@ -6,7 +6,7 @@
 <!ENTITY % resource.module "INCLUDE">
 <![%resource.module;[
 <!ENTITY % resource.mod
-	SYSTEM "resource.dtd">
+	SYSTEM "resource-0.3.1-a.dtd">
 %resource.mod;]]>
 
 <!ELEMENT Map (Settings?, World)> 

@@ -31,7 +31,7 @@
                   Caption |
                   Background |
                   Foreground |
-                  MapMode
+                  MapModes
                   )*)>
 <!ATTLIST WidgetTemplate %CommonWidgetAttributes;>
 <!ATTLIST WidgetTemplate id CDATA #REQUIRED>
@@ -94,7 +94,7 @@
 <!ELEMENT Map ((   Position |
                    Size |
                    Background |
-                   MapMode
+                   MapModes
                   )*)>
 <!ATTLIST Map %CommonWidgetAttributes;>
 
@@ -190,10 +190,12 @@ file that contains more information on the image and may be a case of YouMightNe
 
 <!ELEMENT Cell (Text|GameData)*>
 
+<!ELEMENT MapModes (MapMode+)>
+<!ATTLIST MapModes toggleKey CDATA "0">
 <!ELEMENT MapMode EMPTY>
-<!ATTLIST MapMode toggleKey CDATA "0"
-                  defaultMode (full|closestZone|cycle) "full"
-                  allowedModes CDATA "*">
+<!ATTLIST MapMode mode (full | closestZone | cycle) "full"
+                  rotation (fixed | spawn | cycle | camera) "spawn"
+                  zoomFactor CDATA "3">
 
 <!-- GameData provides a textual display of game data -->
 <!ELEMENT GameData EMPTY>

@@ -42,6 +42,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gWall.h"
 #include "ePlayer.h"
 #include <deque>
+#include <vector>
 
 class zZone;
 
@@ -73,22 +74,39 @@ class Map : public WithCoordinates, public WithBackground, public WithForeground
     bool ClipLine(tCoord &p1, tCoord &p2) const; // Clip line (p1,p2) according to clipping window
     //
     //! mode is a var to manage minimap mode :
-    enum {
-        MODE_STD = 01, //!< the whole map
-        MODE_ZONE = 02, //!< using zoom factor and clipping centered on the closest zone, when there's no zone, switch to MODE_CYCLE
-        MODE_CYCLE = 04, //!< using zoom factor and clipping centered on the player position
-        MODE_ALL = 07
-    };
-    int m_mode;
-    int m_allowedModes;
+    typedef enum {
+        MODE_STD, //!< the whole map
+        MODE_ZONE, //!< using zoom factor and clipping centered on the closest zone, when there's no zone, switch to MODE_CYCLE
+        MODE_CYCLE //!< using zoom factor and clipping centered on the player position
+    } mode_t;
+    //! rotation mode
+    typedef enum {
+        ROTATION_FIXED, //!< default, no rotation
+        ROTATION_SPAWN, //!< fixed in the direction of the last spawn point
+        ROTATION_CYCLE, //!< always turn so the current cycle looks upwards
+        ROTATION_CAMERA //!< always look in the same direcion as the camera
+    } rotation_t;
+    mode_t m_mode;
     tCoord m_centre; // minimap center position on overall map
     float m_zoom; // vars to store zoom factor
+    rotation_t m_rotation;
 
     float clp_lx, clp_rx, clp_ty, clp_by; // vars to store clipping window
 
     int m_toggleKey; //key to toggle the mode
 
     void ToggleMode(void); //!< Toggles the display mode.
+
+    class Mode {
+    public:
+        mode_t m_mode;
+        rotation_t m_rotation;
+        float m_zoom;
+        Mode(tXmlParser::node cur);
+    };
+    std::vector<Mode> m_modes;
+    int m_currentMode;
+    void Apply(Mode const &mode);
 public:
     void HandleEvent(bool state, int id);
     void Render(); //!< calls DrawMap()

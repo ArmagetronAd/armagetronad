@@ -92,12 +92,13 @@ public:
     virtual REAL            Speed                   ()                                    const     ;   //!< returns the current speed
     virtual bool            Alive                   ()                                    const     ;   //!< returns whether the cycle is still alive
     virtual bool            Vulnerable              ()                                    const     ;   //!< returns whether the cycle can be killed
+    virtual eCoord          SpawnDirection         ()                                    const     ;   //!< returns the driving direction when the cycle was last spawned
 
-    bool                    CanMakeTurn             (int direction)                                    const     ;   //!< returns whether a turn is currently possible
-    bool                    CanMakeTurn             ( REAL time, int direction                         ) const     ;   //!< returns whether a turn is possible at the given time
+    bool                    CanMakeTurn             (int direction                      ) const     ;   //!< returns whether a turn is currently possible
+    bool                    CanMakeTurn             ( REAL time, int direction          ) const     ;   //!< returns whether a turn is possible at the given time
     inline  REAL            GetDistanceSinceLastTurn(                                   ) const     ;   //!< returns the distance since the last turn
     REAL                    GetTurnDelay            (                                   ) const     ;   //!< returns the time between turns in different directions
-    REAL                    GetTurnDelayDb            (                                   ) const     ;   //!< returns the time between turns in the same direcion
+    REAL                    GetTurnDelayDb          (                                   ) const     ;   //!< returns the time between turns in the same direcion
     REAL                    GetNextTurn             (int direction                                   ) const     ;   //!< returns the time of the next turn
 
     // destination handling
@@ -204,6 +205,7 @@ protected:
     gDestination*   lastDestination;            //!< the last destination that was passed
 
     eCoord          dirDrive;                   //!< the direction we are facing
+    eCoord          dirSpawn;                   //!< the direction we were facing on the last spawn
     eCoord          lastDirDrive;               //!< the direction we were facing before the last turn
     REAL            acceleration;               //!< current acceleration
 

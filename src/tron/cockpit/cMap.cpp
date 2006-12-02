@@ -38,6 +38,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eRectangle.h"
 #include "ePlayer.h"
 #include "eTimer.h"
+
+#include "rViewport.h"
+#include "eGrid.h"
+#include "eCamera.h"
+
 #endif
 
 #include <vector>
@@ -60,46 +65,43 @@ bool Map::Process(tXmlParser::node cur) {
         WithForeground ::Process(cur) ||
         WithBackground ::Process(cur))
         return true;
-    if(cur.IsOfType("MapMode")) {
+    if(cur.IsOfType("MapModes")) {
         int toggleKey;
         cur.GetProp("toggleKey", toggleKey);
-        m_toggleKey = toggleKey;
-        cCockpit::GetCockpit()->AddEventHandler(toggleKey, this);
-
-        tString mode = cur.GetProp("allowedModes");
-        std::map<tString, unsigned> modes;
-        modes[tString("full")] = MODE_STD;
-        modes[tString("closestZone")] = MODE_ZONE;
-        modes[tString("cycle")] = MODE_CYCLE;
-        modes[tString("all")] = MODE_ALL;
-        modes[tString("*")] = MODE_ALL;
-
-        m_allowedModes = 0;
-        bool invert=false;
-        if(mode(0) == '^') {
-            invert=true;
-            mode.erase(0,1);
+        if(toggleKey > 0) {
+            m_toggleKey = toggleKey;
+            cCockpit::GetCockpit()->AddEventHandler(toggleKey, this);
         }
-        mode += " ";
-
-        tString::size_type pos = 0, next;
-        while((next = mode.find(' ', pos)) != tString::npos) {
-            tString thismode = mode.SubStr(pos, next - pos);
-            if(modes.count(thismode)) {
-                m_allowedModes |= modes[thismode];
-            } else {
-                tERR_WARN(tString("Nothing known about map mode '") + thismode + "'.");
+        for(cur = cur.GetFirstChild(); cur; ++cur) {
+            if(cur.IsOfType("MapMode")) {
+                m_modes.push_back(Mode(cur));
+                if(m_modes.size() == 1) {
+                    Apply(m_modes[0]); // apply the first mode and get rid of the defaults
+                }
             }
-            pos = next+1;
         }
-        if(invert) {
-            m_allowedModes = ~m_allowedModes;
-        }
-        cur.GetProp("defaultMode", m_mode);
         return true;
     }
     DisplayError(cur);
     return false;
+}
+Map::Mode::Mode(tXmlParser::node cur) {
+    cur.GetProp("zoomFactor", m_zoom);
+    tString mode = cur.GetProp("mode");
+    if(mode == "closestZone") m_mode = MODE_ZONE;
+    else if(mode == "cycle") m_mode = MODE_CYCLE;
+    else m_mode = MODE_STD;
+
+    tString rotation = cur.GetProp("rotation");
+    if(rotation == "fixed") m_rotation = ROTATION_FIXED;
+    else if(rotation == "cycle") m_rotation = ROTATION_CYCLE;
+    else if(rotation == "camera") m_rotation = ROTATION_CAMERA;
+    else m_rotation = ROTATION_SPAWN;
+}
+void Map::Apply(Mode const &mode) {
+    m_mode = mode.m_mode;
+    m_rotation = mode.m_rotation;
+    m_zoom = mode.m_zoom;
 }
 void Map::HandleEvent(bool state, int id) {
     if(id == m_toggleKey) {
@@ -131,16 +133,13 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
                   double cycleSize, double border,
                   double x, double y, double w, double h,
                   double rw, double rh, double ix, double iy) {
-    double pl_CurPosX, pl_CurPosY, pl_CurSpeed, min_dist2, dist2, rad;
+    double pl_CurSpeed, min_dist2, dist2, rad, zoom;
+    tCoord pl_CurPos, rotate; // rotate will hold the cos and sin of the rotation to apply
     cCockpit* cp = cCockpit::GetCockpit();
     if(!rimWalls && !cycleWalls && !cycles) return;
     const eRectangle &bounds = eWallRim::GetBounds();
     double lx = bounds.GetLow().x - border, hx = bounds.GetHigh().x + border;
     double ly = bounds.GetLow().y - border, hy = bounds.GetHigh().y + border;
-    //std::cerr << "lx: " << lx << std::endl;
-    //std::cerr << "hx: " << hx << std::endl;
-    //std::cerr << "ly: " << ly << std::endl;
-    //std::cerr << "hy: " << hy << std::endl;
     double mw = hx - lx, mh = hy - ly;
     double xpos, ypos, xscale, yscale;
     double xrat = (rw * mh) / (rh * mw);
@@ -149,34 +148,59 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
     if(xrat > yrat) {
         xscale = (w * rh) / (mh * rw);
         yscale = h / mh;
-        xpos = x + ix * (w - w * yrat);
-        ypos = y;
     } else {
         xscale = w / mw;
         yscale = (h * rw) / (mw * rh);
-        xpos = x;
-        ypos = y + iy * (h - h * xrat);
     }
+    rotate.x = 1; // no rotation
+    rotate.y = 0;
+
+    //do the rotation
+    switch(m_rotation) {
+    case ROTATION_SPAWN:
+    if(!cp->GetFocusCycle()) { break; }
+        rotate = cp->GetFocusCycle()->SpawnDirection().Turn(0,-1);
+        break;
+    case ROTATION_CYCLE:
+    if(!cp->GetFocusCycle()) { break; }
+        rotate = cp->GetFocusCycle()->Direction().Turn(0,-1);
+        break;
+    case ROTATION_CAMERA:
+        {
+            eCamera const *cam = cp->GetPlayer()->cam;
+            if(cam) {
+                rotate = cam->CameraDir().Turn(0,-1);
+            } else {
+                rotate = tCoord(1, 0);
+            }
+        }
+        break;
+    default:
+        rotate = tCoord(1, 0);
+        break;
+    }
+
     // manage mode
     switch (m_mode) {
     case MODE_ZONE:
-        pl_CurPosX = cp->GetFocusCycle()->Position().x;
-        pl_CurPosY = cp->GetFocusCycle()->Position().y;
+    if(!cp->GetFocusCycle()) { break; }
+        pl_CurPos = cp->GetFocusCycle()->Position();
         min_dist2 = (mw*mw+mh*mh)*1000;
         rad = 0;
         for(std::deque<zZone *>::const_iterator i = sg_Zones.begin(); i != sg_Zones.end(); ++i) {
             tASSERT(*i);
             tCoord const &position = (*i)->GetPosition();
             const float radius = (*i)->GetRadius();
-            dist2=(position.x-pl_CurPosX)*(position.x-pl_CurPosX)+(position.y-pl_CurPosY)*(position.y-pl_CurPosY);
+            dist2 = (position-pl_CurPos).Norm();
             if (dist2<min_dist2) {
                 min_dist2 = dist2;
                 m_centre = position;
                 rad = radius;
             }
         }
-        m_zoom = (w>h)?h/(yscale*3*rad):w/(xscale*3*rad);
-        m_zoom = (m_zoom<1)?1:m_zoom;
+        rad = (rad<15)?15:rad;
+        zoom = (w>h)?h/(yscale*m_zoom*rad):w/(xscale*m_zoom*rad);
+        zoom = (zoom<1)?1:zoom;
         // check if at least 1 zone was found, if not, toggle to mode 2 ...
         if (rad==0) {
             m_mode = MODE_CYCLE;
@@ -184,20 +208,22 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
             break;
         }
     case MODE_CYCLE:
+    if(!cp->GetFocusCycle()) { break; }
         m_centre = cp->GetFocusCycle()->Position();
         pl_CurSpeed = cp->GetFocusCycle()->Speed();
-        m_zoom = (w>h)?h/(yscale*3*pl_CurSpeed):w/(xscale*3*pl_CurSpeed);
+        zoom = (w>h)?h/(yscale*m_zoom*pl_CurSpeed):w/(xscale*m_zoom*pl_CurSpeed);
+        zoom = (zoom<1)?1:zoom;
         break;
     default :
-        m_zoom = 1;
+        zoom = 1;
         m_centre.x = lx + mw / 2;
         m_centre.y = ly + mh / 2;
         break;
     }
-    xscale *=m_zoom;
-    yscale *=m_zoom;
-    xpos -= m_centre.x * xscale - w / 2;
-    ypos -= m_centre.y * yscale - h / 2;
+    xscale *=zoom;
+    yscale *=zoom;
+    xpos = x - m_centre.x * xscale + w / 2;
+    ypos = y - m_centre.y * yscale + h / 2;
     // set clipping frame in map coordinates
     clp_lx = m_centre.x - w / xscale / 2 - 1;
     clp_rx = m_centre.x + w / xscale / 2 + 1;
@@ -212,6 +238,15 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
     m[12] += xpos;
     m[13] += ypos;
     glLoadMatrixf(m);
+    glTranslatef(m_centre.x,m_centre.y,0);
+    GLfloat r[16];
+    glGetFloatv(GL_PROJECTION_MATRIX, r);
+    r[0]  = rotate.x;
+    r[1]  = -rotate.y;
+    r[4]  = rotate.y;
+    r[5]  = rotate.x;
+    glMultMatrixf(r);
+    glTranslatef(-m_centre.x,-m_centre.y,0);
     // if needed, draw a frame
     if (m_mode != MODE_STD) {
         // Add frame ...
@@ -240,6 +275,15 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
 }
 
 void Map::DrawRimWalls( tList<eWallRim> &list ) {
+    if(sr_alphaBlend && m_mode == MODE_STD) {
+        m_background.GetColor(tCoord(0.,0.)).Apply();
+        glBegin(GL_POLYGON);
+        for(std::vector<tCoord>::iterator iter = se_rimWallRubberBand.begin(); iter != se_rimWallRubberBand.end(); ++iter) {
+            glVertex2f(iter->x, iter->y);
+        }
+        glVertex2f(se_rimWallRubberBand.front().x, se_rimWallRubberBand.front().y);
+        glEnd();
+    }
     glColor4f(1, 1, 1, .5);
     glBegin(GL_LINES);
     {
@@ -256,17 +300,6 @@ void Map::DrawRimWalls( tList<eWallRim> &list ) {
 
     }
     glEnd();
-    if(sr_alphaBlend && m_mode == MODE_STD) {
-        m_background.GetColor(tCoord(0.,0.)).Apply();
-        glBegin(GL_POLYGON);
-        //std::cerr << "===\n";
-        for(std::vector<tCoord>::iterator iter = se_rimWallRubberBand.begin(); iter != se_rimWallRubberBand.end(); ++iter) {
-            glVertex2f(iter->x, iter->y);
-            //std::cerr << "result: " << *iter << std::endl;
-        }
-        glVertex2f(se_rimWallRubberBand.front().x, se_rimWallRubberBand.front().y);
-        glEnd();
-    }
 }
 
 void Map::DrawWalls(tList<gNetPlayerWall> &list) {
@@ -443,22 +476,18 @@ bool Map::CheckEdge(double p,double q,double &m1,double &m2) const {
 }
 
 void Map::ToggleMode(void) {
-    if(m_allowedModes & MODE_ALL) {
-        do {
-            m_mode = m_mode << 1;
-            if(m_mode > MODE_ALL) {
-                m_mode = 1;
-            }
-        } while(!(m_mode & m_allowedModes));
-    }
+    if(m_modes.empty()) return;
+    m_currentMode = (m_currentMode+1) % m_modes.size();
+    Apply(m_modes[m_currentMode]);
 }
 
 Map::Map():
         m_mode(MODE_STD),
-        m_allowedModes(MODE_ALL),
-        m_toggleKey(0)
+        m_zoom(3),
+        m_rotation(ROTATION_SPAWN),
+        m_toggleKey(0),
+        m_currentMode(0)
 {}
 
 }
-
 #endif

@@ -916,6 +916,12 @@ eCoord gCycleMovement::Direction( void ) const
     return dirDrive;
 }
 
+//! @returns the driving direction when the cycle was last spawned
+
+eCoord gCycleMovement::SpawnDirection() const {
+    return dirSpawn;
+}
+
 // *******************************************************************************************
 // *
 // *	LastDirection
