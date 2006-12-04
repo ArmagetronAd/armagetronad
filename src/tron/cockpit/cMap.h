@@ -70,8 +70,6 @@ class Map : public WithCoordinates, public WithBackground, public WithForeground
                  double x, double y, double w, double h,
                  double rw, double rh, double ix, double iy); //!< Draws the entire map
 
-    bool CheckEdge(double p,double q,double &m1,double &m2) const; // Test a clipping window edge
-    bool ClipLine(tCoord &p1, tCoord &p2) const; // Clip line (p1,p2) according to clipping window
     //
     //! mode is a var to manage minimap mode :
     typedef enum {
@@ -91,8 +89,6 @@ class Map : public WithCoordinates, public WithBackground, public WithForeground
     float m_zoom; // vars to store zoom factor
     rotation_t m_rotation;
 
-    float clp_lx, clp_rx, clp_ty, clp_by; // vars to store clipping window
-
     int m_toggleKey; //key to toggle the mode
 
     void ToggleMode(void); //!< Toggles the display mode.
@@ -107,6 +103,30 @@ class Map : public WithCoordinates, public WithBackground, public WithForeground
     std::vector<Mode> m_modes;
     int m_currentMode;
     void Apply(Mode const &mode);
+
+    class Clipper {
+    public:
+        virtual ~Clipper(){}
+        virtual void Begin(Map &map, tCoord const &e1, tCoord const &e2) = 0;
+        virtual void End() = 0;
+    };
+class ClipperRect : public Clipper {
+    public:
+        void Begin(Map &map, tCoord const &e1, tCoord const &e2);
+        void End();
+    };
+    friend class ClipperRect;
+    /* not done yet
+    class ClipperCircle : public Clipper {
+    	int m_edges;
+    public:
+    	ClipperCircle();
+    	void Begin(Map &map, tCoord const &e1, tCoord const &e2);
+    	void End();
+    };
+    friend class ClipperCircle;
+    */
+    std::auto_ptr<Clipper> m_clipper;
 public:
     void HandleEvent(bool state, int id);
     void Render(); //!< calls DrawMap()

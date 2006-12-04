@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***************************************************************************
 
 */
-
 #include "cockpit/cMap.h"
 #include "cockpit/cCockpit.h"
 #include "nConfig.h"
@@ -58,6 +57,63 @@ extern std::vector<tCoord> se_rimWallRubberBand;
 extern std::deque<zZone *> sg_Zones;
 
 namespace cWidget {
+
+void Map::ClipperRect::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
+    // set clipping frame in map coordinates
+    GLdouble pl0[4] = {1.0, 0.0, 0.0, -e1.x };
+    GLdouble pl1[4] = {-1.0, 0.0, 0.0, e2.x };
+    GLdouble pl2[4] = {0.0, 1.0, 0.0, -e1.y };
+    GLdouble pl3[4] = {0.0, -1.0, 0.0, e2.y };
+    glClipPlane(GL_CLIP_PLANE0, pl0);
+    glEnable(GL_CLIP_PLANE0);
+    glClipPlane(GL_CLIP_PLANE1, pl1);
+    glEnable(GL_CLIP_PLANE1);
+    glClipPlane(GL_CLIP_PLANE2, pl2);
+    glEnable(GL_CLIP_PLANE2);
+    glClipPlane(GL_CLIP_PLANE3, pl3);
+    glEnable(GL_CLIP_PLANE3);
+    // if needed, draw a frame
+    if (map.m_mode != MODE_STD) {
+        // Add frame ...
+        map.m_foreground.GetColor(tCoord(0.,0.)).Apply();
+        glBegin(GL_LINE_STRIP);
+        //TODO: this should use a function of the rGradient.
+        glVertex2f(e1.x, e1.y);
+        glVertex2f(e2.x, e1.y);
+        glVertex2f(e2.x, e2.y);
+        glVertex2f(e1.x, e2.y);
+        glVertex2f(e1.x, e1.y);
+        glEnd();
+        map.m_background.SetGradientEdges(e1, e2);
+        map.m_background.DrawRect(e1, e2);
+    }
+}
+
+void Map::ClipperRect::End() {
+    glDisable(GL_CLIP_PLANE0);
+    glDisable(GL_CLIP_PLANE1);
+    glDisable(GL_CLIP_PLANE2);
+    glDisable(GL_CLIP_PLANE3);
+}
+
+/*
+void Map::ClipperCircle::ClipperCircle() {
+	glGetIntegerv(GL_MAX_CLIP_PLANES, m_edges);
+	if(m_edges > 20) {
+		m_edges = 20;
+	}
+}
+void Map::ClipperCircle::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
+	for(int i = 0; i < m_edges; ++i) {
+		glEnable(GL_CLIP_PLANE0 + i); //according to the documentation you're allowed to do that
+	}
+}
+void Map::ClipperCircle::End() {
+	for(int i = 0; i < m_edges; ++i) {
+		glDisable(GL_CLIP_PLANE0 + i);
+	}
+}
+*/
 
 bool Map::Process(tXmlParser::node cur) {
     if (
@@ -224,11 +280,7 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
     yscale *=zoom;
     xpos = x - m_centre.x * xscale + w / 2;
     ypos = y - m_centre.y * yscale + h / 2;
-    // set clipping frame in map coordinates
-    clp_lx = m_centre.x - w / xscale / 2 - 1;
-    clp_rx = m_centre.x + w / xscale / 2 + 1;
-    clp_ty = m_centre.y + h / yscale / 2 + 1;
-    clp_by = m_centre.y - h / yscale / 2 - 1;
+    m_clipper->Begin(*this, tCoord(x,y), tCoord(x+w, y+h));
     // set projection matrix
     glPushMatrix();
     GLfloat m[16];
@@ -238,6 +290,7 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
     m[12] += xpos;
     m[13] += ypos;
     glLoadMatrixf(m);
+    // translate and rotate
     glTranslatef(m_centre.x,m_centre.y,0);
     GLfloat r[16];
     glGetFloatv(GL_PROJECTION_MATRIX, r);
@@ -247,21 +300,6 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
     r[5]  = rotate.x;
     glMultMatrixf(r);
     glTranslatef(-m_centre.x,-m_centre.y,0);
-    // if needed, draw a frame
-    if (m_mode != MODE_STD) {
-        // Add frame ...
-        m_foreground.GetColor(tCoord(0.,0.)).Apply();
-        glBegin(GL_LINE_STRIP);
-        //TODO: this should use a function of the rGradient.
-        glVertex2f(clp_lx, clp_ty);
-        glVertex2f(clp_rx, clp_ty);
-        glVertex2f(clp_rx, clp_by);
-        glVertex2f(clp_lx, clp_by);
-        glVertex2f(clp_lx, clp_ty);
-        glEnd();
-        m_background.SetGradientEdges(tCoord(clp_lx, clp_ty), tCoord(clp_rx, clp_by));
-        m_background.DrawRect(tCoord(clp_lx, clp_ty), tCoord(clp_rx, clp_by));
-    }
     if(rimWalls)
         DrawRimWalls(se_rimWalls);
     if(cycleWalls) {
@@ -272,6 +310,7 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
     if(cycles)
         DrawCycles(se_PlayerNetIDs, (cycleSize * w) / (rw * xscale), (cycleSize * h) / (rh * yscale));
     glPopMatrix();
+    m_clipper->End();
 }
 
 void Map::DrawRimWalls( tList<eWallRim> &list ) {
@@ -291,10 +330,8 @@ void Map::DrawRimWalls( tList<eWallRim> &list ) {
         {
             eWallRim *wall = list[i];
             eCoord begin = wall->EndPoint(0), end = wall->EndPoint(1);
-            if (ClipLine(begin,end)) {
-                glVertex2f(begin.x, begin.y);
-                glVertex2f(end.x, end.y);
-            }
+            glVertex2f(begin.x, begin.y);
+            glVertex2f(end.x, end.y);
         }
 
 
@@ -338,10 +375,8 @@ void Map::DrawWalls(tList<gNetPlayerWall> &list) {
             curDist = (curDist - begDist) / lenDist;
             tCoord p1 = (1 - prevDist)* begPos + prevDist * endPos;
             tCoord p2 = (1 - curDist) * begPos + curDist * endPos;
-            if (ClipLine(p1,p2)) {;
-                glVertex2f(p1.x, p1.y);
-                glVertex2f(p2.x, p2.y);
-            }
+            glVertex2f(p1.x, p1.y);
+            glVertex2f(p2.x, p2.y);
             prevDangerous = curDangerous;
             prevDist = curDist;
         }
@@ -363,22 +398,20 @@ void Map::DrawCycles(tList<ePlayerNetID> &list, double xscale, double yscale) {
             glColor4f(cycle->color_.r, cycle->color_.g, cycle->color_.b, alpha);
             eCoord pos = cycle->PredictPosition(), dir = cycle->Direction();
             tCoord p = pos;
-            if (ClipLine(p,p)) { // quite dirty, whatever ...
-                glPushMatrix();
-                GLfloat m[16] = {
-                                    xscale * dir.x, yscale * dir.y, 0, 0,
-                                    -xscale * dir.y, yscale * dir.x, 0, 0,
-                                    0, 0, 1, 0,
-                                    pos.x, pos.y, 0, 1
-                                };
-                glMultMatrixf(m);
-                glBegin(GL_TRIANGLES);
-                glVertex2f(.5, 0);
-                glVertex2f(-.5, .5);
-                glVertex2f(-.5, -.5);
-                glEnd();
-                glPopMatrix();
-            }
+            glPushMatrix();
+            GLfloat m[16] = {
+                                xscale * dir.x, yscale * dir.y, 0, 0,
+                                -xscale * dir.y, yscale * dir.x, 0, 0,
+                                0, 0, 1, 0,
+                                pos.x, pos.y, 0, 1
+                            };
+            glMultMatrixf(m);
+            glBegin(GL_TRIANGLES);
+            glVertex2f(.5, 0);
+            glVertex2f(-.5, .5);
+            glVertex2f(-.5, -.5);
+            glEnd();
+            glPopMatrix();
         }
     }
 }
@@ -405,74 +438,14 @@ void Map::DrawZones(std::deque<zZone *> const &list) {
             p1 += position;
             tCoord p2 = currentPos + position;
             if (i%2==1) {
-                if (ClipLine(p1, p2)) {;
-                    glBegin(GL_LINES);
-                    glVertex2f(p1.x, p1.y);
-                    glVertex2f(p2.x, p2.y);
-                    glEnd();
-                }
+                glBegin(GL_LINES);
+                glVertex2f(p1.x, p1.y);
+                glVertex2f(p2.x, p2.y);
+                glEnd();
             }
         }
         RenderEnd();
     }
-}
-
-// Liang-Barsky 2D Line clipping ...
-bool Map::ClipLine(tCoord &c1, tCoord &c2) const {
-    double m1, m2;
-    double p1, p2, p3, p4, q1, q2, q3, q4;
-
-    // first check if line is a point ...
-    if (c1 == c2) {
-        // line is a point, easy case ...
-        if ((c1.x>clp_lx)&&(c1.x<clp_rx)&&(c1.y>clp_by)&&(c1.y<clp_ty)) {
-            return true;
-        }
-    } else {
-        // apply Liang Barsky algorithm ...
-        m1 = 0;
-        m2 = 1;
-
-        tCoord d = c2 - c1;
-
-        p1=(-d.x);
-        p2=d.x;
-        p3=(-d.y);
-        p4=d.y;
-        q1=(c1.x-clp_lx);
-        q2=(clp_rx-c1.x);
-        q3=(c1.y-clp_by);
-        q4=(clp_ty-c1.y);
-
-        if(CheckEdge(p1,q1,m1,m2) && CheckEdge(p2,q2,m1,m2) &&
-                CheckEdge(p3,q3,m1,m2) && CheckEdge(p4,q4,m1,m2)) {
-            if(m2<1) {
-                c2 = c1+m2*d;
-            }
-            if(m1>0) {
-                c1 += m1*d;
-            }
-            return true;
-        }
-    }
-    return false;
-}
-
-bool Map::CheckEdge(double p,double q,double &m1,double &m2) const {
-    double r;
-
-    if(p<0) {
-        r=(q/p);
-        if(r>m2) return false;
-        else if(r>m1) m1=r;
-    } else if(p>0) {
-        r=(q/p);
-        if(r<m1) return false;
-        else if(r<m2) m2=r;
-    } else {
-        if(q<0) return false;
-    }
-    return true;
 }
 
 void Map::ToggleMode(void) {
@@ -486,7 +459,8 @@ Map::Map():
         m_zoom(3),
         m_rotation(ROTATION_SPAWN),
         m_toggleKey(0),
-        m_currentMode(0)
+        m_currentMode(0),
+        m_clipper(new ClipperRect())
 {}
 
 }
