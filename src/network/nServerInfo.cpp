@@ -2435,7 +2435,7 @@ void nServerInfoBase::NetReadThis( nMessage & m )
     m >> port_;                            // get the port
     sn_ReadFiltered( m, connectionName_ ); // get the connection name
 
-    if ( sn_AcceptingFromBroadcast || connectionName_.Len()<=1 ) // no valid name (must come directly from the server who does not know his own address)
+    if ( ( !sn_IsMaster && sn_AcceptingFromBroadcast ) || connectionName_.Len()<=1 ) // no valid name (must come directly from the server who does not know his own address)
     {
         {
             sn_GetAdr( m.SenderID(), connectionName_ );
