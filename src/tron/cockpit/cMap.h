@@ -93,17 +93,6 @@ class Map : public WithCoordinates, public WithBackground, public WithForeground
 
     void ToggleMode(void); //!< Toggles the display mode.
 
-    class Mode {
-    public:
-        mode_t m_mode;
-        rotation_t m_rotation;
-        float m_zoom;
-        Mode(tXmlParser::node cur);
-    };
-    std::vector<Mode> m_modes;
-    int m_currentMode;
-    void Apply(Mode const &mode);
-
     class Clipper {
     public:
         virtual ~Clipper(){}
@@ -112,21 +101,34 @@ class Map : public WithCoordinates, public WithBackground, public WithForeground
     };
 class ClipperRect : public Clipper {
     public:
+        static Clipper *create() {return new ClipperRect;}
         void Begin(Map &map, tCoord const &e1, tCoord const &e2);
         void End();
     };
     friend class ClipperRect;
-    /* not done yet
-    class ClipperCircle : public Clipper {
-    	int m_edges;
+class ClipperCircle : public Clipper {
+        int m_edges;
+        void Clip(int i, tCoord const &u, tCoord const &v);
     public:
-    	ClipperCircle();
-    	void Begin(Map &map, tCoord const &e1, tCoord const &e2);
-    	void End();
+        static Clipper *create() {return new ClipperCircle;}
+        ClipperCircle();
+        void Begin(Map &map, tCoord const &e1, tCoord const &e2);
+        void End();
     };
     friend class ClipperCircle;
-    */
     std::auto_ptr<Clipper> m_clipper;
+
+    class Mode {
+    public:
+        mode_t m_mode;
+        rotation_t m_rotation;
+        float m_zoom;
+        Clipper *(*m_clipper)(void);
+        Mode(tXmlParser::node cur);
+    };
+    std::vector<Mode> m_modes;
+    int m_currentMode;
+    void Apply(Mode const &mode);
 public:
     void HandleEvent(bool state, int id);
     void Render(); //!< calls DrawMap()

@@ -72,21 +72,18 @@ void Map::ClipperRect::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
     glEnable(GL_CLIP_PLANE2);
     glClipPlane(GL_CLIP_PLANE3, pl3);
     glEnable(GL_CLIP_PLANE3);
-    // if needed, draw a frame
-    if (map.m_mode != MODE_STD) {
-        // Add frame ...
-        map.m_foreground.GetColor(tCoord(0.,0.)).Apply();
-        glBegin(GL_LINE_STRIP);
-        //TODO: this should use a function of the rGradient.
-        glVertex2f(e1.x, e1.y);
-        glVertex2f(e2.x, e1.y);
-        glVertex2f(e2.x, e2.y);
-        glVertex2f(e1.x, e2.y);
-        glVertex2f(e1.x, e1.y);
-        glEnd();
-        map.m_background.SetGradientEdges(e1, e2);
-        map.m_background.DrawRect(e1, e2);
-    }
+    // Add frame ...
+    map.m_foreground.GetColor(tCoord(0.,0.)).Apply();
+    glBegin(GL_LINE_STRIP);
+    //TODO: this should use a function of the rGradient.
+    glVertex2f(e1.x, e1.y);
+    glVertex2f(e2.x, e1.y);
+    glVertex2f(e2.x, e2.y);
+    glVertex2f(e1.x, e2.y);
+    glVertex2f(e1.x, e1.y);
+    glEnd();
+    map.m_background.SetGradientEdges(e1, e2);
+    map.m_background.DrawRect(e1, e2);
 }
 
 void Map::ClipperRect::End() {
@@ -96,24 +93,70 @@ void Map::ClipperRect::End() {
     glDisable(GL_CLIP_PLANE3);
 }
 
-/*
-void Map::ClipperCircle::ClipperCircle() {
-	glGetIntegerv(GL_MAX_CLIP_PLANES, m_edges);
-	if(m_edges > 20) {
-		m_edges = 20;
-	}
+Map::ClipperCircle::ClipperCircle() {
+    glGetIntegerv(GL_MAX_CLIP_PLANES, &m_edges);
+    if(m_edges > 20) {
+        m_edges = 20;
+    }
+}
+//the visible area is on the "left side" of the line, if you go from u to v
+void Map::ClipperCircle::Clip(int i, tCoord const &u, tCoord const &v) {
+    //glBegin(GL_LINES);
+    //Color(1,0,0);
+    //Vertex(u.x, u.y);
+    //Color(0,1,0);
+    //Vertex(v.x, v.y);
+    //glEnd();
+    if(u.x == v.x) {
+        GLdouble factor = (u.y>v.y) ? 1 : -1;
+        GLdouble pl[4] = {factor*1.0, 0.0, 0.0, -factor*v.x };
+        glClipPlane(GL_CLIP_PLANE0+i, pl);
+        glEnable(GL_CLIP_PLANE0+i);
+    } else {
+        GLdouble factor = (u.x<v.x) ? -1 : 1;
+        GLdouble a = (v.y-u.y)/(v.x-u.x);
+        GLdouble pl[4] = {
+                             factor*-a,
+                             factor,
+                             0.,
+                             factor*-(u.y-a*u.x)
+                         };
+        glClipPlane(GL_CLIP_PLANE0+i, pl);
+        glEnable(GL_CLIP_PLANE0+i);
+    }
 }
 void Map::ClipperCircle::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
-	for(int i = 0; i < m_edges; ++i) {
-		glEnable(GL_CLIP_PLANE0 + i); //according to the documentation you're allowed to do that
-	}
+    //glBegin(GL_LINES);
+    //Color(0,0,1);
+    //Vertex(e1.x, e1.y);
+    //Color(1,0,0);
+    //Vertex(e2.x, e2.y);
+    //glEnd();
+    //Clip(0, tCoord((e1.x+e2.x)/2, e1.y), tCoord((e1.x+e2.x)/2,e2.y));
+    tCoord centre = .5*(e1+e2);
+    tCoord ab = .5*(e2-e1);
+    ab.x = fabs(ab.x); ab.y = fabs(ab.y);
+    float stepsize=M_PI*2/m_edges;
+    tCoord last = centre + tCoord(ab.x, 0);
+
+    for(int i = 0; i < m_edges; ++i) {
+        float t = (i+1)*stepsize;
+        tCoord next(centre.x+ab.x*cos(t), centre.y-ab.y*sin(t));
+        map.m_foreground.GetColor(tCoord(0.,0.)).Apply();
+        glBegin(GL_LINES);
+        //TODO: this should use a function of the rGradient.
+        glVertex2f(next.x, next.y);
+        glVertex2f(last.x, last.y);
+        glEnd();
+        Clip(i, last, next);
+        last = next;
+    }
 }
 void Map::ClipperCircle::End() {
-	for(int i = 0; i < m_edges; ++i) {
-		glDisable(GL_CLIP_PLANE0 + i);
-	}
+    for(int i = 0; i < m_edges; ++i) {
+        glDisable(GL_CLIP_PLANE0 + i); //according to the documentation you're allowed to do that
+    }
 }
-*/
 
 bool Map::Process(tXmlParser::node cur) {
     if (
@@ -153,11 +196,19 @@ Map::Mode::Mode(tXmlParser::node cur) {
     else if(rotation == "cycle") m_rotation = ROTATION_CYCLE;
     else if(rotation == "camera") m_rotation = ROTATION_CAMERA;
     else m_rotation = ROTATION_SPAWN;
+
+    tString clipper = cur.GetProp("clipMode");
+    if(clipper == "ellipse") {
+        m_clipper = ClipperCircle::create;
+    } else {
+        m_clipper = ClipperRect::create;
+    }
 }
 void Map::Apply(Mode const &mode) {
     m_mode = mode.m_mode;
     m_rotation = mode.m_rotation;
     m_zoom = mode.m_zoom;
+    m_clipper.reset((*mode.m_clipper)());
 }
 void Map::HandleEvent(bool state, int id) {
     if(id == m_toggleKey) {
@@ -280,7 +331,9 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
     yscale *=zoom;
     xpos = x - m_centre.x * xscale + w / 2;
     ypos = y - m_centre.y * yscale + h / 2;
-    m_clipper->Begin(*this, tCoord(x,y), tCoord(x+w, y+h));
+    if(m_mode != MODE_STD) {
+        m_clipper->Begin(*this, tCoord(x,y), tCoord(x+w, y+h));
+    }
     // set projection matrix
     glPushMatrix();
     GLfloat m[16];
@@ -310,7 +363,9 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
     if(cycles)
         DrawCycles(se_PlayerNetIDs, (cycleSize * w) / (rw * xscale), (cycleSize * h) / (rh * yscale));
     glPopMatrix();
-    m_clipper->End();
+    if(m_mode != MODE_STD) {
+        m_clipper->End();
+    }
 }
 
 void Map::DrawRimWalls( tList<eWallRim> &list ) {
@@ -459,8 +514,8 @@ Map::Map():
         m_zoom(3),
         m_rotation(ROTATION_SPAWN),
         m_toggleKey(0),
-        m_currentMode(0),
-        m_clipper(new ClipperRect())
+        m_clipper(new ClipperRect()),
+        m_currentMode(0)
 {}
 
 }

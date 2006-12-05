@@ -6,7 +6,7 @@
 <!ENTITY % resource.module "INCLUDE">
 <![%resource.module;[
 <!ENTITY % resource.mod
-	SYSTEM "resource.dtd">
+    SYSTEM "resource.dtd">
 %resource.mod;]]>
 
 <!ENTITY % CommonWidgetAttributes "
@@ -195,7 +195,8 @@ file that contains more information on the image and may be a case of YouMightNe
 <!ELEMENT MapMode EMPTY>
 <!ATTLIST MapMode mode (full | closestZone | cycle) "full"
                   rotation (fixed | spawn | cycle | camera) "spawn"
-                  zoomFactor CDATA "3">
+                  zoomFactor CDATA "3"
+                  clipMode (rectangle | ellipse) "rectangle">
 
 <!-- GameData provides a textual display of game data -->
 <!ELEMENT GameData EMPTY>

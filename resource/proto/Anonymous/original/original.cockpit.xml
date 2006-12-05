@@ -277,7 +277,7 @@
 			<MapModes toggleKey="1">
 				<MapMode mode="full" rotation="spawn" />
 				<MapMode mode="closestZone" rotation="spawn" />
-				<MapMode mode="cycle" rotation="camera" zoomFactor="3" />
+				<MapMode mode="cycle" rotation="camera" zoomFactor="3" clipMode="ellipse" />
 				<MapMode mode="cycle" rotation="cycle" zoomFactor="3" />
 				<MapMode mode="cycle" rotation="spawn" zoomFactor="4" />
 				<MapMode mode="full" rotation="fixed" />
