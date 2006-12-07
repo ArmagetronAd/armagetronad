@@ -109,7 +109,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #endif
 
 #if HAVE_UNISTD_H
-// #include <unistd.h>
+#include <unistd.h>
 #endif
 
 #include "tConfiguration.h"
