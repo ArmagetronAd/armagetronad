@@ -40,6 +40,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tCommandLine.h"
 #include "tMemManager.h"
 
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 // include definition for top source directory
 #ifndef MACOSX_XCODE
 #ifdef TOP_SOURCE_DIR
