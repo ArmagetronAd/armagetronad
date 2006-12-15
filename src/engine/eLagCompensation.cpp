@@ -33,7 +33,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nNetwork.h"
 #include "nConfig.h"
 
+#ifdef DEBUG
 #define DEBUG_LAG
+#endif
 
 // client side settings
 static REAL se_maxLagSpeedup=.2;        // maximal speed increase of timer while lag is compensated for
