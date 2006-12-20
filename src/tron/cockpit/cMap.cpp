@@ -94,7 +94,7 @@ void Map::ClipperRect::End() {
 }
 
 Map::ClipperCircle::ClipperCircle() {
-    glGetIntegerv(GL_MAX_CLIP_PLANES, &m_edges);
+    glGetIntegerv(GL_MAX_CLIP_PLANES, (GLint *)(&m_edges));
     if(m_edges > 20) {
         m_edges = 20;
     }

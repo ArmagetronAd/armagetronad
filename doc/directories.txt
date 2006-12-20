@@ -1,5 +1,6 @@
 .. TODO: edit me
 
+===========
 Directories
 ===========
 
@@ -8,9 +9,8 @@ loads and saves files. (Usually, you don't have to bother about it; there are
 reasonable defaults. But if you want to do some meddling with the data, these
 options are your ticket.)
 
-----
 Data
-----
+====
 
 Sounds, textures and models will be first looked for in the directory
 specified with ``--userdatadir``. If they are not found there or if
@@ -18,18 +18,15 @@ specified with ``--userdatadir``. If they are not found there or if
 with ``--datadir``. This directory defaults to the current directory if not
 specified.
 
--------------
 Configuration
--------------
+=============
 
 Configuration files are first looked for in ``--userconfigdir``, then
 ``--userdatadir/config`` (the dir passed to ``--userdatadir``, appended with
 /config), then ``--configdir`` and finally ``--datadir/config``.
 
-
----------------------------
 Logs and user configuration
----------------------------
+===========================
 
 Log files (game results, the settings made in the in game menu) are loaded
 from ``--vardir``, then, if not found there, from ``--userdatadir/var`` and

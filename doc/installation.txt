@@ -1,26 +1,24 @@
+============
 Installation
 ============
 
--------
 Windows
--------
+=======
 
 Run the executable, select a directory to install Armagetron Advanced into and
 enjoy. Start menu entries and a desktop shortcut will be created for you. To
 uninstall, start the uninstaller from the start menu.
 
---------
 Mac OS X
---------
+========
 
 1. Mount the armagetronad-*version*.macosx.dmg disk-image.
 
 2. Drag the “Armagetron Advanced” application to any location on you
 hard-drive.
 
------
 Linux
------
+=====
 
 All systemwide installation has to be carried out as root. Installation from a
 source archive is recommended, as Armagetron Advanced will be tailored for
@@ -38,6 +36,7 @@ compatibility with 3.4 and 4.0 regularly. Yes, theoretically the binary
 interface for C code (ABI) did not change, but be prepared for problems
 nevertheless.
 
+------------------
 Required libraries
 ------------------
 
@@ -79,6 +78,7 @@ how likely it is for Armagetron Advanced to work on your PC.
     http://wiki.armagetronad.net/index.php/Linux_Distribution_Field_Report
 
 
+-------------------------------
 Installation — Source archive
 -------------------------------
 
@@ -101,6 +101,7 @@ configure script. To change the installation path, use the option
     
 to uninstall.
     
+-------------------------
 Installation — Binary RPM
 -------------------------
 
@@ -112,9 +113,9 @@ The RPM build is quite untested, so it may be that it has registered too many
 dependencies and you are not allowed to install it; you may use the additional
 switch ``--nodeps``. However, you may then end up with a broken installation.
 
+-------------------------
 Installation — Source RPM
 -------------------------
-
 
 Type::
 
@@ -133,7 +134,7 @@ surely ignore all failed dependencies with ``--nodeps`` since the dependencies
 were all there when you built the package. (It is possible, if not likely,
 that the automatic dependency generation of RPM produces junk.
 
-
+----------------
 Non-Root install
 ----------------
 
@@ -147,6 +148,7 @@ You can then start the game with ``/home/username/usr/bin/armagetronad`` or,
 if you add ``/home/username/usr/bin`` to your executable search path, like
 normal.
 
+-----------------
 Multiple versions
 -----------------
 
@@ -156,6 +158,7 @@ suffix <GAME-VERSION>. Symbolic links will be created to your convenience.
 This allows to install multiple versions in parallel, where ``armagetronad``
 will always start the last installed version.
 
+--------------
 Binary archive
 --------------
 
@@ -163,6 +166,7 @@ Unpack the archive and change into the unpacked directory; type::
     
     ./install
 
+----------------
 Dedicated Server
 ----------------
 
