@@ -545,6 +545,7 @@ cCockpit* cCockpit::GetCockpit() {
 void cCockpit::RenderPlayer() {
     if(m_FocusPlayer != 0 && m_ViewportPlayer != 0) {
         sr_ResetRenderState(false);
+        glDisable(GL_DEPTH_TEST);
         Color(1,1,1);
         if(m_Player->cam) {
 
@@ -599,6 +600,7 @@ void cCockpit::RenderRootwindow() {
                 GLsizei(0),
                 GLsizei(sr_screenWidth),
                 GLsizei(sr_screenWidth));
+    glDisable(GL_DEPTH_TEST);
 
     //BeginLineLoop();
     //Color(1.,1.,1.,1.);
@@ -623,6 +625,7 @@ void cCockpit::RenderCycle(gCycle const &cycle) {
     }
     //if( m_Player == 0 ) return;
     if(m_ViewportPlayer == 0) return;
+    glDisable(GL_DEPTH_TEST);
 
     //sr_ResetRenderState(true);
     //glViewport (GLsizei(0),
