@@ -481,9 +481,8 @@ fi
 
 # if test x$armamain = xtrue; then
 AC_CHECK_LIB(xml2,xmlParseMemory,
-#export CXXFLAGS="$CXXFLAGS `$XML2_CONFIG --cflags`"
-export CPPFLAGS="$CPPFLAGS `$XML2_CONFIG --cflags`"
-export LIBS="`$XML2_CONFIG --libs` $LIBS"
+CPPFLAGS="$CPPFLAGS `$XML2_CONFIG --cflags`"
+LIBS="`$XML2_CONFIG --libs` $LIBS"
 AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the xml2 library (-lxml2).]),
 AC_MSG_ERROR([You need the library xml2 to compile Armagetron. Read the file doc/install_linux.html.])
 ,`$XML2_CONFIG --libs`)
@@ -541,36 +540,16 @@ dnl *************************************************
 
 AC_MSG_CHECKING(whether SDL is installed)
 if SDLLIBS=`${SDL_CONFIG} --libs`; then
-    AC_MSG_RESULT([yes, '${SDL_CONFIG} --libs' gave ${SDLLIBS}])
-    AC_MSG_CHECKING(what name the SDL library is know under)
-    SDLLIB=SDL`echo ${SDLLIBS} | sed -e "s,.*-lSDL,," -e "s, .*$,,"`
-    if test -z ${SDLLIB}; then
-        SDLLIB=`${SDLLIBS} | sed -e "s,.*-l,," -e "s, .*$,,"`
-        if test -z ${SDLLIB}; then
-            AC_MSG_RESULT([failed, taking default: SDL])
-            SDLLIB=SDL
-        else
-            AC_MSG_RESULT([failed, taking anything from ${SDL_CONFIG} output: ${SDLLIB}])
-        fi
-    else
-        AC_MSG_RESULT(${SDLLIB})
-    fi
-else
-    AC_MSG_RESULT(no, trying default name)
-    SDLLIBS=''
-    SDLLIB=SDL
+    AC_MSG_RESULT(yes)
 fi
 
-AC_CHECK_LIB($SDLLIB,SDL_Init,
-CXXFLAGS="$CXXFLAGS `${SDL_CONFIG} --cflags`"
 CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
-export CPPFLAGS
-export CXXFLAGS
 LIBS="${SDLLIBS} $LIBS"
-export LIBS
+
+AC_CHECK_FUNC(SDL_Init,
 AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
 AC_MSG_ERROR([You need the library SDL to compile Armagetron. Read the file doc/install_linux.html.])
-,${SDLLIBS})
+,)
 
 dnl *************************************************
 dnl         SDL_Mixer
@@ -606,14 +585,13 @@ AC_CHECK_LIB($SYS_GL_LIB, glVertex3f,,
  AC_MSG_RESULT([OpenGL not found. Maybe it needs X11 to compile? Checking that...])
  AC_CHECK_LIB(X11,main,
   LIBS="-lX11 -L/usr/X11R6/lib $LIBS"
-  export LIBS
   AC_DEFINE(HAVE_LIBX11, 1, [Define if you have the X11 library (-lX11).])
   ,
   AC_MSG_WARN([
   Standard X11 library needed by OpenGL not found.
   ]),-L/usr/X11R6/lib)
  AC_CHECK_LIB(Xext,main,-L/usr/X11R6/lib)
- AC_CHECK_LIB(Xt,main,-L/usr/X11R6/lib)
+  AC_CHECK_LIB(Xt,main,-L/usr/X11R6/lib)
  AC_CHECK_LIB(Xi,main,-L/usr/X11R6/lib)
  AC_CHECK_LIB(Xmu,main,-L/usr/X11R6/lib)
 AC_CHECK_LIB($SYS_GL_LIB, glBegin,,AC_MSG_ERROR([
@@ -652,7 +630,16 @@ dnl AC_MSG_WARN([C++ standard library not found. You can ignore this warning on 
 AC_CHECK_LIB(z, main,,
 AC_MSG_ERROR([You need libz to compile Armagetron.]))
 
-AC_CHECK_LIB(png, main,,
+AC_MSG_CHECKING(whether libpng is installed)
+if PNGLIBS=`libpng-config --libs`; then
+    AC_MSG_RESULT(yes)
+fi
+
+CPPFLAGS="$CPPFLAGS `libpng-config --cflags`"
+LIBS="$LIBS $PNGLIBS"
+
+AC_CHECK_FUNC(png_check_sig,
+,
 AC_MSG_ERROR([You need libpng to compile Armagetron.]))
 
 AC_CHECK_LIB(jpeg, main,,
@@ -712,7 +699,6 @@ about it. You will get the message \"I told you not to use PGCC!\")
 
 ])
 CXXFLAGS="$CXXFLAGS -fno-exceptions -DNOEXCEPT"
-export CXXFLAGS
 fi
 
 
@@ -734,8 +720,7 @@ AC_CHECK_FUNCS(wmemset)
 test -z "`$CXX --version | grep '(GCC)'`" || CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-Os,-O2,g' `" CFLAGS="`echo $CFLAGS | sed -e 's,-Os,-O2,g' `"
 
 dnl add current directories to include search path
-CXXFLAGS="-I. -I.. $CXXFLAGS"
-export CXXFLAGS
+CPPFLAGS="-I. -I.. $CPPFLAGS"
 
 # define
 AC_DEFINE_UNQUOTED(TOP_SOURCE_DIR,"${srcdir}", [Define the top source directory])
@@ -871,6 +856,10 @@ AC_SUBST_UNIVERSAL(relocatable)
 AC_USE_SUBST_UNIVERSAL
 AC_AA_REPLACEPATHS
 
+export CPPFLAGS
+export CXXFLAGS
+export LIBS
+
 AC_OUTPUT(src/Makefile
 src/first/Makefile
 Makefile
@@ -932,8 +921,11 @@ else
 fi
 echo "     Allow multiple versions: $enable_multiver$multiver_info"
 echo "     Use custom memory manager: $enable_memmanager"
-echo "     Debug level: $DEBUGLEVEL"
-echo "     Code level: $CODELEVEL"
+echo "     Debug level : $DEBUGLEVEL"
+echo "     Code level  : $CODELEVEL"
+echo "     CPPFLAGS    : $CPPFLAGS"
+echo "     CXXFLAGS    : $CXXFLAGS"
+echo "     LIBS        : $LIBS"
 
 # print warning about behavior deviating from automake's defaults
 SWITCHES=""

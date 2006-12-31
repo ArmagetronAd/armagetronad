@@ -2712,7 +2712,7 @@ void gCycleMovement::CalculateAcceleration()
         if (rear.ehit && rear.hit < sg_cycleWidth + .1f )
             blocks(rear, this, -d);
 
-        if ( rear.ehit )
+        if ( 0 != rear.ehit )
         {
             sg_ArchiveReal( rear.hit, 9 );
 
