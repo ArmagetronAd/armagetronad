@@ -120,6 +120,11 @@ AC_ARG_ENABLE(music,
 		[compile in support for background music (default=disabled)]),,
 enable_music=no)
 
+AC_ARG_ENABLE(respawn,
+	AC_HELP_STRING([--enable-respawn],
+		[enable support for deathmatch mode (default=enabled)]),,
+enable_respawn=yes)
+
 AC_ARG_ENABLE(krawall,
 	AC_HELP_STRING([--enable-krawall],
 		[enable special code for the krawall gaming network (user authentification...) (default=disabled)]),,
@@ -219,6 +224,10 @@ AC_ARG_ENABLE(enginecoredebug,
      esac],[enginecoredebug=true])
 	 
 AM_CONDITIONAL(ENGINECOREDEBUG, test x$enginecoredebug = xtrue)
+
+if test x$enable_respawn = xyes; then
+AC_DEFINE(RESPAWN_HACK,,enables support for deathmatch mode)
+fi
 
 if test x$enable_krawall = xyes; then
 AC_DEFINE(KRAWALL,,enables krawall)
