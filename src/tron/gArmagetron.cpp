@@ -700,13 +700,13 @@ int main(int argc,char **argv){
                     sn_bigBrotherString = renderer_identification + "VER=" + sn_programVersion + "\n\n";
 
 #ifdef HAVE_LIBRUBY      
-                    // try {
-                    //     tRuby::Load(tDirectories::Data(), "scripts/menu.rb");
-                    //     tRuby::Load(tDirectories::Data(), "scripts/rotator.rb");
-                    // }
-                    // catch (std::runtime_error & e) {
-                    //     std::cerr << e.what() << '\n';
-                    // }
+                    try {
+                        tRuby::Load(tDirectories::Data(), "scripts/menu.rb");
+                        // tRuby::Load(tDirectories::Data(), "scripts/rotator.rb");
+                    }
+                    catch (std::runtime_error & e) {
+                        std::cerr << e.what() << '\n';
+                    }
 #endif
 
                     MainMenu();
