@@ -60,61 +60,8 @@ module AAConfig
     "version" => version(),
     "year" => Time.now.strftime("%Y"),
     "progtitle" => "Armagetron Advanced",
-    "top_srcdir" => SRC_DIR,
-    "CPPFLAGS" => %{-I/Library/Frameworks/ArmagetronAdvanced/current/SDL.framework/Headers -I#{SRC_DIR}/src/macosx/client -I#{SRC_DIR}/src/macosx},
-    "top_builddir" => SRC_DIR + "/src"
   }
   
-end
-
-# ========
-# = SWIG =
-# ========
-
-namespace "swig" do
-  swig_file = "#{AAConfig::SRC_DIR}/src/swig/ext/armagetronad.i"
-  result_swig_file = "#{AAConfig::BUILD_DIR}/src/swig/ext/armagetronad_wrap.cxx"
-  swig_file_dependencies = FileList["#{AAConfig::SRC_DIR}/src/swig/ext/**/*"]
-  file(result_swig_file => [swig_file, *swig_file_dependencies]) do |t|
-    mkdir_p(File.dirname(t.name))
-    sh %{swig -c++ -ruby -autorename \\
-      -I#{AAConfig::SRC_DIR}/src/engine \\
-      -I#{AAConfig::SRC_DIR}/src/network \\
-      -I#{AAConfig::SRC_DIR}/src/render \\
-      -I#{AAConfig::SRC_DIR}/src/tools \\
-      -I#{AAConfig::SRC_DIR}/src/tron \\
-      -I#{AAConfig::SRC_DIR}/src/ui \\
-      -I#{AAConfig::SRC_DIR}/src/macosx/client \\
-      -I#{AAConfig::SRC_DIR}/src/macosx \\
-      -o #{t.name} \\
-      #{t.prerequisites[0]}
-    }
-  end
-  task "interface-file" => result_swig_file
-  
-  extconf_file = "#{AAConfig::SRC_DIR}/src/swig/ext/extconf.rb.in"
-  result_extconf_file = "#{AAConfig::BUILD_DIR}/src/swig/ext/extconf.rb"
-  file(result_extconf_file => extconf_file) do |t|
-    cp(t.prerequisites[0], t.name)
-    open(t.name, "r+") do |f|
-      data = f.read
-      AAConfig::TAG_MAPPINGS.each { |tag, value| data.gsub!("@#{tag}@", value) }
-      f.rewind
-      f.print(data)
-      f.truncate(f.pos)
-    end
-  end
-  task "extconf.rb" => result_extconf_file
-  
-  result_setup_file = "#{AAConfig::BUILD_DIR}/src/swig/setup.rb"
-  file(result_setup_file => "#{AAConfig::SRC_DIR}/src/swig/setup.rb") do |t|
-    cp(t.prerequisites[0], t.name)
-  end
-  task "setup.rb" => result_setup_file
-  
-  task "run" => %w[interface-file extconf.rb setup.rb] do
-    sh %{cd "#{AAConfig::BUILD_DIR}/src/swig" && ruby1.8 setup.rb}
-  end
 end
 
 # =========

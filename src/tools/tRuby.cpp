@@ -6,6 +6,10 @@
 #   include "AARuby.h"
 #endif
 
+extern "C" {
+    extern void Init_armagetronad(void);    
+}
+
 namespace tRuby
 {
 std::string GetExceptionInfo();
@@ -24,6 +28,7 @@ void InitializeInterpreter()
 #else
     ruby_init_loadpath();
 #endif
+    Init_armagetronad();
     ruby_script("Armagetron Advanced");
 }
 

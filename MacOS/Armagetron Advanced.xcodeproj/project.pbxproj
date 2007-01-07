@@ -258,6 +258,7 @@
 		9BAF03D90B07A4D100D984EA /* AARuby.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BAF03D70B07A4D100D984EA /* AARuby.mm */; };
 		9BAF04390B07A70C00D984EA /* libruby1.8.1.8.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */; };
 		9BAF04460B07A81E00D984EA /* libruby1.8.1.8.5.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */; };
+		9BC0011B0B51859F0041120B /* armagetronad.i in Sources */ = {isa = PBXBuildFile; fileRef = 9BC0F61F0B517AD90041120B /* armagetronad.i */; };
 		9BD56C4A0A8B899700AC1048 /* vCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C370A8B899700AC1048 /* vCollection.cpp */; };
 		9BD56C4C0A8B899700AC1048 /* vCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C390A8B899700AC1048 /* vCore.cpp */; };
 		9BD56C4F0A8B899700AC1048 /* vebLegacy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C3C0A8B899700AC1048 /* vebLegacy.cpp */; };
@@ -309,6 +310,18 @@
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).tab.cpp",
 			);
 			script = "${BISON} -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.tab.cpp\" \"${INPUT_FILE_PATH}\"";
+		};
+		9BC0F61A0B517A8B0041120B /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*/armagetronad.i";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE)_wrap.cxx",
+				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE)_wrap.h",
+			);
+			script = "/opt/local/bin/swig -c++ -ruby -autorename -I../src/engine -I../src/network -I../src/render -I../src/tools -I../src/tron -I../src/ui -I../src/macosx/client -I../src/macosx -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}_wrap.cxx\" \"${INPUT_FILE_PATH}\"";
 		};
 /* End PBXBuildRule section */
 
@@ -606,6 +619,12 @@
 		9BAF03D60B07A4D100D984EA /* AARuby.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AARuby.h; path = ../src/macosx/AARuby.h; sourceTree = SOURCE_ROOT; };
 		9BAF03D70B07A4D100D984EA /* AARuby.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AARuby.mm; path = ../src/macosx/AARuby.mm; sourceTree = SOURCE_ROOT; };
 		9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libruby1.8.1.8.5.dylib; path = ../../../../../../../../Library/ruby/1.8/lib/libruby1.8.1.8.5.dylib; sourceTree = SOURCE_ROOT; };
+		9BC0F61F0B517AD90041120B /* armagetronad.i */ = {isa = PBXFileReference; explicitFileType = sourcecode.interfacer; fileEncoding = 4; path = armagetronad.i; sourceTree = "<group>"; };
+		9BC0F6220B517AD90041120B /* tConfiguration.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = tConfiguration.i; sourceTree = "<group>"; };
+		9BC0F6230B517AD90041120B /* tDirectories.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = tDirectories.i; sourceTree = "<group>"; };
+		9BC0F6240B517AD90041120B /* tLocale.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = tLocale.i; sourceTree = "<group>"; };
+		9BC0F6250B517AD90041120B /* tString.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = tString.i; sourceTree = "<group>"; };
+		9BC0F6270B517AD90041120B /* armagetronad.rb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.ruby; path = armagetronad.rb; sourceTree = "<group>"; };
 		9BD56C370A8B899700AC1048 /* vCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vCollection.cpp; sourceTree = "<group>"; };
 		9BD56C380A8B899700AC1048 /* vCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vCollection.h; sourceTree = "<group>"; };
 		9BD56C390A8B899700AC1048 /* vCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vCore.cpp; sourceTree = "<group>"; };
@@ -729,6 +748,7 @@
 				8CBA5EC2089EEC7D007E21DC /* tron */,
 				8CBA5E75089EEC7D007E21DC /* thirdparty */,
 				8CBA5DFF089EEC0D007E21DC /* macosx */,
+				9BC0F61D0B517AD90041120B /* swig */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -1093,6 +1113,44 @@
 			path = mathexpr;
 			sourceTree = "<group>";
 		};
+		9BC0F61D0B517AD90041120B /* swig */ = {
+			isa = PBXGroup;
+			children = (
+				9BC0F61E0B517AD90041120B /* ext */,
+				9BC0F6260B517AD90041120B /* lib */,
+			);
+			name = swig;
+			path = ../src/swig;
+			sourceTree = SOURCE_ROOT;
+		};
+		9BC0F61E0B517AD90041120B /* ext */ = {
+			isa = PBXGroup;
+			children = (
+				9BC0F61F0B517AD90041120B /* armagetronad.i */,
+				9BC0F6210B517AD90041120B /* tools */,
+			);
+			path = ext;
+			sourceTree = "<group>";
+		};
+		9BC0F6210B517AD90041120B /* tools */ = {
+			isa = PBXGroup;
+			children = (
+				9BC0F6220B517AD90041120B /* tConfiguration.i */,
+				9BC0F6230B517AD90041120B /* tDirectories.i */,
+				9BC0F6240B517AD90041120B /* tLocale.i */,
+				9BC0F6250B517AD90041120B /* tString.i */,
+			);
+			path = tools;
+			sourceTree = "<group>";
+		};
+		9BC0F6260B517AD90041120B /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				9BC0F6270B517AD90041120B /* armagetronad.rb */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
 		9BD56C360A8B899700AC1048 /* values */ = {
 			isa = PBXGroup;
 			children = (
@@ -1235,6 +1293,7 @@
 				8CBA6203089F11BE007E21DC /* Run script: Cleanup */,
 			);
 			buildRules = (
+				9BC0F61A0B517A8B0041120B /* PBXBuildRule */,
 				9B9E248B0A82707C0067CCFA /* PBXBuildRule */,
 			);
 			dependencies = (
@@ -1350,7 +1409,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "rake swig:run";
+			shellScript = "#rake swig:run";
 		};
 		9BD7DB490A2CBA7A00D7033C /* Run script: Prepare */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1507,6 +1566,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9BC0011B0B51859F0041120B /* armagetronad.i in Sources */,
 				8CBA5E0A089EEC5B007E21DC /* SDLMain.mm in Sources */,
 				8CBA5EFD089EEC7E007E21DC /* eAdvWall.cpp in Sources */,
 				8CBA5EFF089EEC7E007E21DC /* eAuthentification.cpp in Sources */,
