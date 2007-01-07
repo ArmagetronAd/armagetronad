@@ -55,83 +55,14 @@ module AAConfig
       File.read("#{SRC_DIR}/src/macosx/version.h.in").scan(/#define VERSION "(.*)"/)[0][0]
     end
   end
-  
-  def self.swig_module(mod, dependencies)
-    swig_file = "#{AAConfig::SRC_DIR}/src/swig/ext/armagetronad/#{mod}/#{mod}.i"
-    result_file = swig_file.sub(AAConfig::SRC_DIR, AAConfig::BUILD_DIR).sub(/\.i$/, "_wrap.cxx")
     
-    swig_file_dependencies = dependencies.map { |d| Dir.glob("#{SRC_DIR}/src/swig/ext/armagetronad/#{d}/*.i") }
-    swig_file_dependencies.flatten!
-    header_files = swig_file_dependencies.map { |f| f.pathmap("%-1d/%n.h") }
-    
-    # reject some header files
-    dependencies.each do |depend|
-      # get rid of tools.h, network.h, etc…
-      header_files.reject! { |header| header.pathmap("%n") == depend }
-      
-      # get rid of typemaps headers
-      header_files.reject! { |header| %w[tTypemaps.h nTypemaps.h rTypemaps.h
-                                         uTypemaps.h eTypemaps.h gTypemaps.h].include?(header.pathmap("%f"))  }
-    end
-    
-    header_files.map! { |f| "#{SRC_DIR}/src/#{f}" }
-    depends = swig_file_dependencies + header_files
-
-    # build the swig module cxx file
-    file(result_file => [swig_file, *depends]) do |t|
-
-      # the include directories to pass to swig
-      include_directories = dependencies.map { |d|
-        ["#{SRC_DIR}/src/#{d}", "#{SRC_DIR}/src/swig/ext/armagetronad/#{d}"]
-      }.flatten
-      include_directories.map! { |d| "\t-I#{d} " }
-
-      mkdir_p(File.dirname(t.name))
-      sh %{swig -c++ -ruby -autorename \\
-        #{include_directories.join(" \\\n")} \\
-        -I#{SRC_DIR}/src/macosx/client \\
-        -I#{SRC_DIR}/src/macosx \\
-        -o #{t.name} \\
-        #{t.prerequisites[0]}}
-    end
-    
-    # creates all the swig cxx files
-    task "swig-module" => result_file
-    
-    result_extconf = BUILD_DIR + "/src/swig/ext/armagetronad/#{mod}/extconf.rb"
-    # create the extconf file for this module
-    file(result_extconf => ["#{SRC_DIR}/src/swig/ext/armagetronad/#{mod}/extconf.rb.in"]) do |t|
-      mkdir_p(File.dirname(t.name))
-      cp(t.prerequisites[0], t.name)
-      open(t.name, "r+") do |f|
-        data = f.read
-        data.gsub!("@top_srcdir@", SRC_DIR)
-        data.gsub!("@CPPFLAGS@", "-I/Library/Frameworks/ArmagetronAdvanced/current/SDL.framework/Headers -I#{SRC_DIR}/src/macosx/client -I#{SRC_DIR}/src/macosx")
-        f.rewind
-        f.print(data)
-        f.truncate(f.pos)
-      end    
-    end
-    
-    task "extconf.rb" => result_extconf
-    
-    result_setup = "#{BUILD_DIR}/src/swig/setup.rb"
-    file(result_setup => "#{SRC_DIR}/src/swig/setup.rb") do |t|
-      cp(t.prerequisites[0], t.name)
-    end
-    
-    task "setup.rb" => result_setup
-    
-    task "run" => ["swig-module", "extconf.rb", "setup.rb"] do
-      sh %{(cd "#{BUILD_DIR}/src/swig" && ruby1.8 setup.rb)}
-    end
-  end
-  
-  
   TAG_MAPPINGS = {
     "version" => version(),
     "year" => Time.now.strftime("%Y"),
-    "progtitle" => "Armagetron Advanced"
+    "progtitle" => "Armagetron Advanced",
+    "top_srcdir" => SRC_DIR,
+    "CPPFLAGS" => %{-I/Library/Frameworks/ArmagetronAdvanced/current/SDL.framework/Headers -I#{SRC_DIR}/src/macosx/client -I#{SRC_DIR}/src/macosx},
+    "top_builddir" => SRC_DIR + "/src"
   }
   
 end
@@ -141,24 +72,48 @@ end
 # ========
 
 namespace "swig" do
-  AAConfig.swig_module("tools", %w[tools])
-  AAConfig.swig_module("network", %w[tools network])
-  AAConfig.swig_module("render", %w[tools network render])
-  AAConfig.swig_module("ui", %w[tools network render ui])
-  AAConfig.swig_module("engine", %w[tools network render ui engine])
-  AAConfig.swig_module("tron", %w[tools network render ui engine tron])
+  swig_file = "#{AAConfig::SRC_DIR}/src/swig/ext/armagetronad.i"
+  result_swig_file = "#{AAConfig::BUILD_DIR}/src/swig/ext/armagetronad_wrap.cxx"
+  swig_file_dependencies = FileList["#{AAConfig::SRC_DIR}/src/swig/ext/**/*"]
+  file(result_swig_file => [swig_file, *swig_file_dependencies]) do |t|
+    mkdir_p(File.dirname(t.name))
+    sh %{swig -c++ -ruby -autorename \\
+      -I#{AAConfig::SRC_DIR}/src/engine \\
+      -I#{AAConfig::SRC_DIR}/src/network \\
+      -I#{AAConfig::SRC_DIR}/src/render \\
+      -I#{AAConfig::SRC_DIR}/src/tools \\
+      -I#{AAConfig::SRC_DIR}/src/tron \\
+      -I#{AAConfig::SRC_DIR}/src/ui \\
+      -I#{AAConfig::SRC_DIR}/src/macosx/client \\
+      -I#{AAConfig::SRC_DIR}/src/macosx \\
+      -o #{t.name} \\
+      #{t.prerequisites[0]}
+    }
+  end
+  task "interface-file" => result_swig_file
   
-  # Copy over the lib directory
-  FileList.new("#{AAConfig::SRC_DIR}/src/swig/lib/**/*").each do |lib|
-    result_lib = lib.sub(AAConfig::SRC_DIR, AAConfig::BUILD_DIR)
-    if File.directory?(lib)
-      directory(result_lib)
-    else
-      file result_lib => lib do
-        cp(lib, result_lib)
-      end
+  extconf_file = "#{AAConfig::SRC_DIR}/src/swig/ext/extconf.rb.in"
+  result_extconf_file = "#{AAConfig::BUILD_DIR}/src/swig/ext/extconf.rb"
+  file(result_extconf_file => extconf_file) do |t|
+    cp(t.prerequisites[0], t.name)
+    open(t.name, "r+") do |f|
+      data = f.read
+      AAConfig::TAG_MAPPINGS.each { |tag, value| data.gsub!("@#{tag}@", value) }
+      f.rewind
+      f.print(data)
+      f.truncate(f.pos)
     end
-    task "run" => result_lib
+  end
+  task "extconf.rb" => result_extconf_file
+  
+  result_setup_file = "#{AAConfig::BUILD_DIR}/src/swig/setup.rb"
+  file(result_setup_file => "#{AAConfig::SRC_DIR}/src/swig/setup.rb") do |t|
+    cp(t.prerequisites[0], t.name)
+  end
+  task "setup.rb" => result_setup_file
+  
+  task "run" => %w[interface-file extconf.rb setup.rb] do
+    sh %{cd "#{AAConfig::BUILD_DIR}/src/swig" && ruby1.8 setup.rb}
   end
 end
 
@@ -203,29 +158,29 @@ end
 # ==================
 
 desc "Uses project defaults and updates file timestamps"
-task :rebeautify do
+task "rebeautify" do
   #
   sh %{ARTISTIC_STYLE_OPTIONS="#{AAConfig::SRC_DIR}/config/astylerc" \\
        "#{AAConfig::SRC_DIR}/batch/make/beautify" -t "#{AAConfig::SRC_DIR}" "#{AAConfig::SRC_DIR}/.beautytag.re"}
 end
 
 desc "Switches between your settings (beautify-personal) to the project defaults and leaves timestamps untouched"
-task :beautify do
+task "beautify" do
   rm_f %{"#{AAConfig::SRC_DIR}/.beautytag.personal"}
   sh %{ARTISTIC_STYLE_OPTIONS="#{AAConfig::SRC_DIR}/config/astylerc" \\
        "#{AAConfig::SRC_DIR}/batch/make/beautify" "#{AAConfig::SRC_DIR}" "#{AAConfig::SRC_DIR}/.beautytag"}
 end
 
 desc "Uses your personal settings. Run “rake beautify” before commit!"
-task :beautify_personal do
+task "beautify-personal" do
   rm_f %{"#{AAConfig::SRC_DIR}/.beautytag"}, %{"#{AAConfig::SRC_DIR}/.beautytag.re"}
   sh %{ARTISTIC_STYLE_OPTIONS=$HOME/.astylerc \\
        "#{AAConfig::SRC_DIR}/batch/make/beautify" "#{AAConfig::SRC_DIR}" "#{AAConfig::SRC_DIR}/.beautytag.personal"}
 end
 
-task :remove_version do
+task "remove-version" do
   rm_rf("#{AAConfig::BUILD_DIR}/src/macosx")
 end
 
 desc "Update version"
-task :update_version => ["remove_version", "xcode:process_files"]
+task :update_version => ["remove-version", "xcode:process_files"]
