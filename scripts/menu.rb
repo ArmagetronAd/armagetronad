@@ -6,7 +6,6 @@ class MyMenu
     submenu = UMenu.new(TOutput.new("Submenu"))
     UMenuItemSubmenu.new(menu, submenu, TOutput.new("helo me"))
     
-    
     menu.enter
   end
 end

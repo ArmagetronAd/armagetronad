@@ -16,3 +16,10 @@ public:
     virtual void WriteVal(std::ostream &s)=0;
 };
 
+//template<class T>
+//class tConfItem:virtual public tConfItemBase{
+//public:
+//    tConfItem(const char *title,T& t, callbackFunc *cb=0);    
+//    virtual ~tConfItem(){}
+//};
+//%template(tConfItemValue) tConfItem<VALUE>;

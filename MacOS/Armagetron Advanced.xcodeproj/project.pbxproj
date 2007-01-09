@@ -296,6 +296,7 @@
 		9BD7DB3E0A2CAE4600D7033C /* textures in Resources */ = {isa = PBXBuildFile; fileRef = 9BD7DB270A2CAE4600D7033C /* textures */; };
 		9BD7DB770A2CE28500D7033C /* SDLMain.nib in Resources */ = {isa = PBXBuildFile; fileRef = 9BD7DB760A2CE28500D7033C /* SDLMain.nib */; };
 		9BD7DB7E0A2CE35600D7033C /* Armagetron Advanced.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9BD7DB7D0A2CE35600D7033C /* Armagetron Advanced.icns */; };
+		9BEF8F890B52C08200BFEC20 /* sstream.i in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BEF8F880B52C08200BFEC20 /* sstream.i */; };
 		9BFF72EA0A32238500F471CD /* eChannelSDLMixer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BFF72E50A32238500F471CD /* eChannelSDLMixer.cpp */; };
 		9BFF72EC0A32238500F471CD /* eMusicTrackSDLMixer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BFF72E70A32238500F471CD /* eMusicTrackSDLMixer.cpp */; };
 /* End PBXBuildFile section */
@@ -339,6 +340,7 @@
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
 				9BC001A60B5196620041120B /* uMenu.i in Copy Frameworks */,
+				9BEF8F890B52C08200BFEC20 /* sstream.i in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -665,6 +667,7 @@
 		9BD7DB270A2CAE4600D7033C /* textures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = textures; path = ../textures; sourceTree = SOURCE_ROOT; };
 		9BD7DB760A2CE28500D7033C /* SDLMain.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = SDLMain.nib; path = ../src/macosx/SDLMain.nib; sourceTree = SOURCE_ROOT; };
 		9BD7DB7D0A2CE35600D7033C /* Armagetron Advanced.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "Armagetron Advanced.icns"; sourceTree = "<group>"; };
+		9BEF8F880B52C08200BFEC20 /* sstream.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = sstream.i; sourceTree = "<group>"; };
 		9BFF72E10A32238500F471CD /* eChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eChannel.h; sourceTree = "<group>"; };
 		9BFF72E50A32238500F471CD /* eChannelSDLMixer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eChannelSDLMixer.cpp; sourceTree = "<group>"; };
 		9BFF72E60A32238500F471CD /* eChannelSDLMixer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eChannelSDLMixer.h; sourceTree = "<group>"; };
@@ -1138,6 +1141,7 @@
 			isa = PBXGroup;
 			children = (
 				9BC0F61F0B517AD90041120B /* armagetronad.i */,
+				9BEF8F810B52BEB100BFEC20 /* std */,
 				9BC0F6210B517AD90041120B /* tools */,
 				9BC001A40B5196570041120B /* ui */,
 			);
@@ -1225,6 +1229,14 @@
 				9BD7DB270A2CAE4600D7033C /* textures */,
 			);
 			name = Resources;
+			sourceTree = "<group>";
+		};
+		9BEF8F810B52BEB100BFEC20 /* std */ = {
+			isa = PBXGroup;
+			children = (
+				9BEF8F880B52C08200BFEC20 /* sstream.i */,
+			);
+			path = std;
 			sourceTree = "<group>";
 		};
 		9BFF72DF0A32238500F471CD /* sound */ = {
