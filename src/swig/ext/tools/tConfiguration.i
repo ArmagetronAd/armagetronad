@@ -12,6 +12,7 @@ public:
     virtual ~tConfItemBase();
     static void LoadAll(std::istream &s);
     static void LoadLine(std::istream &s);
+    static tConfItemBase *FindConfigItem(std::string const &name);
     
     %extend {
         static void LoadString(std::string str)
