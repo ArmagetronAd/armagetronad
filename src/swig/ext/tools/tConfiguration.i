@@ -12,6 +12,15 @@ public:
     virtual ~tConfItemBase();
     static void LoadAll(std::istream &s);
     static void LoadLine(std::istream &s);
+    
+    %extend {
+        static void LoadString(std::string str)
+        {
+            std::istringstream stream(str);
+            tConfItemBase::LoadAll(stream);
+        }
+    }
+    
     virtual void ReadVal(std::istream &s)=0;
     virtual void WriteVal(std::ostream &s)=0;
 };
