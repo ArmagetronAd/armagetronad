@@ -190,6 +190,12 @@ endif
 games_PROGRAMS = $(buildmain) $(buildthemaster)
 #EXTRA_PROGRAMS = armagetronad_main_master
 
+if ENABLE_RUBY
+librubywrap_a_SOURCES    = ${top_builddir}/src/swig/ext/armagetronad_wrap.cxx
+librubywrap_a_CXXFLAGS   = $(libtron_a_CXXFLAGS) -w
+else
+librubywrap_a_SOURCES    = 
+endif
 
 if BUILDFAKERELEASE
 BUILDFAKE=echo -e "\#!/bin/sh\necho Running FAKE \"\$$0\" \"\$$@\"\ntest \"\$$1\" = "--doc" || test \"\$$1\" = "--help" || sleep 5" > $@; chmod 755 $@
@@ -200,7 +206,7 @@ armagetronad_main_master$(EXEEXT): Makefile
 	${BUILDFAKE}
 else
 if BUILDMAIN
-noinst_LIBRARIES = libenginecore.a libengine.a librender.a  libtron.a libui.a libnetwork.a libtools.a
+noinst_LIBRARIES = libenginecore.a libengine.a librender.a  libtron.a libui.a libnetwork.a libtools.a librubywrap.a
 else
 noinst_LIBRARIES = libnetwork.a libtools.a
 endif
@@ -211,16 +217,9 @@ else
 extralibs= thirdparty/particles/libparticles.a
 endif
 
-if ENABLE_RUBY
-rubycxx = ${top_builddir}/src/swig/ext/armagetronad_wrap.cxx
-else
-rubycxx = 
-endif
-
-
-armagetronad_main_SOURCES = tron/gFloor.cpp tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp ${rubycxx}
+armagetronad_main_SOURCES = tron/gFloor.cpp tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a thirdparty/shttpd/libshttpd.a librender.a libtools.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
+armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a thirdparty/shttpd/libshttpd.a librender.a libtools.a librubywrap.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 # armagetronad_main_LDFLAGS=
 
 armagetronad_main_master_SOURCES = network/master.cpp
