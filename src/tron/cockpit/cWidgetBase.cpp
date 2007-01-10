@@ -253,7 +253,11 @@ tValue::Base *WithDataFunctions::ProcessAtomicData(tXmlParser::node cur) {
 }
 
 tValue::Base *WithDataFunctions::ProcessValue(tXmlParser::node cur) {
+#ifndef WIN32
     return tValueParser::parse(cur.GetProp("expr"));
+#else
+    return 0;
+#endif
 }
 
 void WithDataFunctions::ProcessDataTags(tXmlParser::node cur, tValue::Base &data) {
