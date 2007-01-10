@@ -880,7 +880,7 @@ input_instant_chat_help       Activa una macro rápida de chat
 #********************************************
 #********************************************
 
-main_menu_text                \g \v\1
+main_menu_text                \g v\1
 
 game_menu_text                Juego
 game_menu_main_help           Configuración e inicio del juego.
