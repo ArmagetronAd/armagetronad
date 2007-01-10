@@ -212,15 +212,15 @@ extralibs= thirdparty/particles/libparticles.a
 endif
 
 if ENABLE_RUBY
-rubylibs = ${top_builddir}/src/swig/ext/armagetronad_wrap.o
+rubycxx = ${top_builddir}/src/swig/ext/armagetronad_wrap.cxx
 else
-rubylibs = 
+rubycxx = 
 endif
 
 
-armagetronad_main_SOURCES = tron/gFloor.cpp tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp
+armagetronad_main_SOURCES = tron/gFloor.cpp tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp ${rubycxx}
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a thirdparty/shttpd/libshttpd.a librender.a libtools.a thirdparty/mathexpr/libmathexpr.a ${extralibs} ${rubylibs}
+armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a thirdparty/shttpd/libshttpd.a librender.a libtools.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 # armagetronad_main_LDFLAGS=
 
 armagetronad_main_master_SOURCES = network/master.cpp
