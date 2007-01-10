@@ -136,9 +136,7 @@ cCockpit::cCockpit() :
         m_Player(0),
         m_FocusPlayer(0),
         m_ViewportPlayer(0),
-        m_FocusCycle(0),
-        m_Widgets_perplayer(),
-m_Widgets_rootwindow() {
+m_FocusCycle(0) {
 }
 
 void cCockpit::ClearWidgets(void) {
@@ -550,7 +548,7 @@ void cCockpit::RenderPlayer() {
             if (m_FocusCycle && ( !m_Player->netPlayer || !m_Player->netPlayer->IsChatting()) && se_GameTime()>-2){
                 //h->Speed()>maxmeterspeed?maxmeterspeed+=10:1;
 
-                for(tAutoDeque<cWidget::Base>::const_iterator i=m_Widgets_perplayer.begin(); i!=m_Widgets_perplayer.end(); ++i)
+                for(widget_list_t::const_iterator i=m_Widgets_perplayer.begin(); i!=m_Widgets_perplayer.end(); ++i)
                 {
                     int cam = (*i)->GetCam();
                     switch(m_Player->cam->GetCamMode()) {
@@ -606,7 +604,7 @@ void cCockpit::RenderRootwindow() {
     //Vertex( .1, .1);
     //Vertex(-.1, .1);
     //RenderEnd();
-    for(tAutoDeque<cWidget::Base>::const_iterator i=m_Widgets_rootwindow.begin(); i!=m_Widgets_rootwindow.end(); ++i) {
+    for(widget_list_t::const_iterator i=m_Widgets_rootwindow.begin(); i!=m_Widgets_rootwindow.end(); ++i) {
         if((*i)->Active()) {
             (*i)->Render();
         }
@@ -623,18 +621,18 @@ void cCockpit::RenderCycle(gCycle const &cycle) {
     //if( m_Player == 0 ) return;
     if(m_ViewportPlayer == 0) return;
 
-	bool gl_depth_test = glIsEnabled(GL_DEPTH_TEST);
+    bool gl_depth_test = glIsEnabled(GL_DEPTH_TEST);
     glDisable(GL_DEPTH_TEST);
 
-    for(tAutoDeque<cWidget::Base>::const_iterator i=m_Widgets_cycles.begin(); i!=m_Widgets_cycles.end(); ++i) {
+    for(widget_list_t::const_iterator i=m_Widgets_cycles.begin(); i!=m_Widgets_cycles.end(); ++i) {
         if((*i)->Active()) {
             (*i)->Render();
         }
     }
-	
-	if(gl_depth_test) {
-		glEnable(GL_DEPTH_TEST);
-	}
+
+    if(gl_depth_test) {
+        glEnable(GL_DEPTH_TEST);
+    }
 }
 
 static void display_cockpit_lucifer() {
@@ -712,13 +710,13 @@ void cCockpit::Readjust(void) {
     if (sr_screenWidth == 0) return;
     float factor = 4./3. / (static_cast<float>(sr_screenWidth)/static_cast<float>(sr_screenHeight));
     //float factor = 2.;
-    for(tAutoDeque<cWidget::Base>::iterator iter = m_Widgets_perplayer.begin(); iter != m_Widgets_perplayer.end(); ++iter) {
-        if(cWidget::WithCoordinates *coordWidget = dynamic_cast<cWidget::WithCoordinates *>(*iter)) {
+    for(widget_list_t::iterator iter = m_Widgets_perplayer.begin(); iter != m_Widgets_perplayer.end(); ++iter) {
+        if(cWidget::WithCoordinates *coordWidget = dynamic_cast<cWidget::WithCoordinates *>(&(*(*iter)))) {
             coordWidget->SetFactor(factor);
         }
     }
-    for(tAutoDeque<cWidget::Base>::iterator iter = m_Widgets_rootwindow.begin(); iter != m_Widgets_rootwindow.end(); ++iter) {
-        if(cWidget::WithCoordinates *coordWidget = dynamic_cast<cWidget::WithCoordinates *>(*iter)) {
+    for(widget_list_t::iterator iter = m_Widgets_rootwindow.begin(); iter != m_Widgets_rootwindow.end(); ++iter) {
+        if(cWidget::WithCoordinates *coordWidget = dynamic_cast<cWidget::WithCoordinates *>(&(*(*iter)))) {
             coordWidget->SetFactor(factor);
         }
     }

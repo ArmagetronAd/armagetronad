@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //! the higher regions of the sources.
 
 #include "tXmlParser.h"
+#include "tSafePTR.h"
 #include <deque>
 #include <map>
 #include <set>
@@ -39,7 +40,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <memory>
 #include <typeinfo>
 
-#include "tAutoDeque.h"
 #include "tValue.h"
 
 #ifndef ARMAGETRON_COCKPIT_H
@@ -99,9 +99,10 @@ private:
     ePlayerNetID *m_FocusPlayer; //!< the player currently being watched
     ePlayerNetID *m_ViewportPlayer; //!< the player the viewport belongs to
     gCycle *m_FocusCycle; //!< The cycle currently being watched (the one that belongs to m_ViewportPlayer)
-    tAutoDeque<cWidget::Base> m_Widgets_perplayer; //!< All widgets that have to be rendered for every player
-    tAutoDeque<cWidget::Base> m_Widgets_rootwindow; //!< All widgets that have to be rendered only once for the root window
-    tAutoDeque<cWidget::Base> m_Widgets_cycles; //!< All widgets that have to be rendered above each cycle
+    typedef std::vector<tJUST_CONTROLLED_PTR< cWidget::Base> > widget_list_t;
+    widget_list_t m_Widgets_perplayer; //!< All widgets that have to be rendered for every player
+    widget_list_t m_Widgets_rootwindow; //!< All widgets that have to be rendered only once for the root window
+    widget_list_t m_Widgets_cycles; //!< All widgets that have to be rendered above each cycle
 
     void ProcessWidgets(node cur); //!< Processes all Widgets within the <Cockpit> node passed to it
     std::auto_ptr<cWidget::Base> ProcessWidgetType(node cur); //!< returns a new instance of the right widget class for the given node

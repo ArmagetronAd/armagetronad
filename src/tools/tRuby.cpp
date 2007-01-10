@@ -7,7 +7,7 @@
 #endif
 
 extern "C" {
-    extern void Init_armagetronad(void);    
+    extern void Init_armagetronad(void);
 }
 
 namespace tRuby

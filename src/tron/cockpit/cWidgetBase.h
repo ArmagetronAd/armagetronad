@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define DONTDOIT
 #include "rGradient.h"
 #include <memory>
+#include "tSafePTR.h"
 
 //! @file
 //! @brief Contains the classes the actual widgets are based on
@@ -52,7 +53,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 namespace cWidget {
 
 //! Offers basic functions and keeps the camera settings
-class Base {
+class Base : public tReferencable<Base> {
     int m_Cam; //!< The camera(s) the widget will be rendered for
 protected:
     void DisplayError(tXmlParser::node cur); //!< Displays a parsing error message
