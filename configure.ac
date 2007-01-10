@@ -122,8 +122,8 @@ enable_music=no)
 
 AC_ARG_ENABLE(respawn,
 	AC_HELP_STRING([--enable-respawn],
-		[enable support for deathmatch mode (default=enabled)]),,
-enable_respawn=yes)
+		[enable unsupported, hacky, impossible to deactivate at runtime, deathmatch mode. Use at your own risk. (default=disabled)]),,
+enable_respawn=no)
 
 AC_ARG_ENABLE(krawall,
 	AC_HELP_STRING([--enable-krawall],
@@ -226,7 +226,7 @@ AC_ARG_ENABLE(enginecoredebug,
 AM_CONDITIONAL(ENGINECOREDEBUG, test x$enginecoredebug = xtrue)
 
 if test x$enable_respawn = xyes; then
-AC_DEFINE(RESPAWN_HACK,,enables support for deathmatch mode)
+AC_DEFINE(RESPAWN_HACK,,enables hacky support for deathmatch mode)
 fi
 
 if test x$enable_krawall = xyes; then
