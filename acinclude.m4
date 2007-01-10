@@ -175,10 +175,9 @@ $1_enabled=no])
 # 2. the default value
 # 3. a description of the purpose of the directory
 # 4. human-form of the default value
-AC_DEFUN([AC_AA_PATH],
+AC_DEFUN([AC_AA_PATHOPT],
 [
 AC_ARG_DIR([$1],[$2],[$3],[$4])
-AC_AA_PATH_RAW([$1])
 AC_SUBST([$1])
 ]
 )
@@ -188,6 +187,19 @@ AC_ARG_WITH([$1],AC_HELP_STRING([--with-$1=DIR],[$3 (default: $1)]),[$1=${enable
 $1_enabled=no])
 AC_AA_PATH_RAW([$1])
 AC_SUBST([$1])
+]
+)
+
+AC_DEFUN([AC_AA_PATH_NOSUFFIX],
+[
+AC_AA_PATHOPT([$1],[$2],[$3],[$4])
+AC_AA_PATH_NOSUFFIX_RAW([$1])
+]
+)
+AC_DEFUN([AC_AA_PATH],
+[
+AC_AA_PATHOPT([$1],[$2],[$3],[$4])
+AC_AA_PATH_RAW([$1])
 ]
 )
 

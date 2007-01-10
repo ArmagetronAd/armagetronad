@@ -1,7 +1,7 @@
 # include $(top_srcdir)/Makefile.paths
 
 # script locations
-armascriptdir=$(aa_scriptdir)
+armascriptdir=$(scriptdir)
 
 # Handle which scripts to build
 basercScripts=rcd_config rcd_startstop
