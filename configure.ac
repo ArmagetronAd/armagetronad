@@ -352,18 +352,6 @@ AC_ARG_WITH(ruby,
 
 dnl
 
-case "$target" in
-	*-*-darwin*)
-		export WHOLE_ARCHIVE_FLAG="-Wl,-all_load"
-		export NO_WHOLE_ARCHIVE_FLAG=""
-		;;
-	*-*-linux* )
-		export WHOLE_ARCHIVE_FLAG="--whole-archive"
-		export NO_WHOLE_ARCHIVE_FLAG="--no-whole-archive"
-		;;
-esac
-
-
 dnl testing a nifty make feature: silent inclu[]des
 AC_SINCLUDE
 
