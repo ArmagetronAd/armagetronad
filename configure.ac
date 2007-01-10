@@ -629,46 +629,6 @@ AC_MSG_ERROR([You need the library SDL to compile Armagetron. Read the file doc/
 dnl ********************************************* OPTIONAL STUFF AFTER THIS POINT ***********************************
 
 dnl *************************************************
-dnl         Ruby
-dnl *************************************************
-
-if test "x$enable_ruby" = "xyes"; then
-AC_CHECK_PROG(RUBY, ruby, ruby, no)
-if test ${RUBY} = no || test -z ${RUBY}; then
-	AC_MSG_ERROR([Ruby 1.8 is required for compilation.])
-else
- AC_CHECK_LIB(ruby,ruby_run,
- AC_DEFINE(HAVE_LIBRUBY, 1, [Define if you have the Ruby library (-lruby).])
- LIBS="$LIBS",
- AC_MSG_ERROR([Ruby library not found.])
- ,)
-        export RUBY
-        ruby_include_dir=$(${RUBY} <<EOF
-require "rbconfig"
-print Config::CONFIG@<:@'prefix'@:>@ + '/lib/ruby/1.8/' + Config::CONFIG@<:@'arch'@:>@
-EOF)
-        
-        ruby_include_dir="-I${ruby_include_dir}"
-        
-        ruby_lib_dir=$(${RUBY} <<EOF
-require "rbconfig"
-print Config::CONFIG@<:@'libdir'@:>@
-EOF)
-        
-        ruby_lib_dir="-L${ruby_lib_dir} -l${RUBY}"
-    fi
-fi
-
-
-export CPPFLAGS="$CPPFLAGS  ${ruby_include_dir}"
-export LIBS="${ruby_lib_dir} $LIBS"
-
-dnl SWIG
-
-AC_PROG_SWIG(1.3.29)
-SWIG_ENABLE_CXX
-
-dnl *************************************************
 dnl         Sound
 dnl *************************************************
 
@@ -865,6 +825,53 @@ export CXXFLAGS
 
 fi dnl (dedicated server)
 
+
+
+dnl *************************************************
+dnl         Ruby
+dnl *************************************************
+
+if test "x$enable_ruby" = "xyes"; then
+AC_CHECK_PROG(RUBY, ruby, ruby, no)
+if test ${RUBY} = no || test -z ${RUBY}; then
+	AC_MSG_ERROR([Ruby 1.8 is required for compilation.])
+else
+ AC_CHECK_LIB(ruby,ruby_run,
+ AC_DEFINE(HAVE_LIBRUBY, 1, [Define if you have the Ruby library (-lruby).])
+ LIBS="$LIBS",
+ AC_MSG_ERROR([Ruby library not found.])
+ ,)
+        export RUBY
+        ruby_include_dir=$(${RUBY} <<EOF
+require "rbconfig"
+print Config::CONFIG@<:@'prefix'@:>@ + '/lib/ruby/1.8/' + Config::CONFIG@<:@'arch'@:>@
+EOF)
+        
+        ruby_include_dir="-I${ruby_include_dir}"
+        
+        ruby_lib_dir=$(${RUBY} <<EOF
+require "rbconfig"
+print Config::CONFIG@<:@'libdir'@:>@
+EOF)
+        
+        ruby_lib_dir="-L${ruby_lib_dir} -l${RUBY}"
+    fi
+fi
+
+
+export CPPFLAGS="$CPPFLAGS  ${ruby_include_dir}"
+export LIBS="${ruby_lib_dir} $LIBS"
+
+dnl SWIG
+
+AC_PROG_SWIG(1.3.29)
+SWIG_ENABLE_CXX
+
+dnl RUBY and SWIG end
+
+
+
+
 if test "`$CXX -v 2>&1 | grep -v executing | grep pgcc`"  ; then
 AC_MSG_WARN(
 [
@@ -1054,6 +1061,7 @@ src/thirdparty/Makefile
 src/thirdparty/particles/Makefile
 src/thirdparty/mathexpr/Makefile
 src/thirdparty/shttpd/Makefile
+src/swig/Makefile src/swig/ext/extconf.rb
 resource/Makefile
 config/Makefile
 desktop/Makefile
