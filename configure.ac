@@ -1062,7 +1062,7 @@ src/thirdparty/Makefile
 src/thirdparty/particles/Makefile
 src/thirdparty/mathexpr/Makefile
 src/thirdparty/shttpd/Makefile
-src/swig/Makefile src/swig/ext/extconf.rb
+src/swig/Makefile
 resource/Makefile
 config/Makefile
 desktop/Makefile
