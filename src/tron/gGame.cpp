@@ -120,6 +120,39 @@ static tSettingItem<REAL> sg_lastChatBreakTimeConf( "LAST_CHAT_BREAK_TIME", sg_l
 
 #define DEFAULT_MAP "Anonymous/polygon/regular/square-1.0.1.aamap.xml"
 static tString mapfile(DEFAULT_MAP);
+/*
+static void sg_ParseMap ( gParser * aParser, tString map_file );
+static void change_mapfile(std::istream &s)
+{
+    // read new MAP_FILE value
+    tString new_mapfile;
+    new_mapfile.ReadLine(s, true);
+
+    if (new_mapfile == mapfile)
+        return;
+
+    // verify the map loads
+    try {
+        sg_ParseMap(aParser, new_mapfile);
+    } catch (tGenericException &e) {
+        sn_ConsoleOut( e.GetName(), e.GetDescription(), 120000 );
+        sg_ParseMap(aParser);	// is this necessary?
+        return;
+    }
+
+    if (printChange)
+    {
+        tOutput o;
+        o.SetTemplateParameter(1, "MAP_FILE");
+        o.SetTemplateParameter(2, mapfile);
+        o.SetTemplateParameter(3, new_mapfile);
+        o << "$config_value_changed";
+        con << o;
+    }
+
+    mapfile = new_mapfile;
+}
+*/
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
 //it is a semi-colon deliminated list of maps, needs semi-colon at the end
@@ -2128,7 +2161,7 @@ private:
     }
 };
 
-static void sg_ParseMap ( gParser * aParser )
+static void sg_ParseMap ( gParser * aParser, tString mapfile )
 {
     {
         gMapLoadConsoleFilter consoleLog;
@@ -2158,6 +2191,11 @@ static void sg_ParseMap ( gParser * aParser )
             }
         }
     }
+}
+
+static void sg_ParseMap ( gParser * aParser )
+{
+    sg_ParseMap(aParser, mapfile);
 }
 
 void gGame::Verify()

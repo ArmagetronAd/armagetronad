@@ -33,7 +33,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nNetwork.h"
 #include "nConfig.h"
 
+#ifdef DEBUG
 #define DEBUG_LAG
+#endif
 
 // client side settings
 static REAL se_maxLagSpeedup=.2;        // maximal speed increase of timer while lag is compensated for

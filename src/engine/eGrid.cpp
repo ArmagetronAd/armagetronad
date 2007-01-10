@@ -751,6 +751,8 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
 
 #ifdef DEBUG
     bool foundCurrentEdge;
+    static const int laststarts_max = 10;
+    ePoint *laststarts[laststarts_max];
 #endif
 
     eCoord dir=eCoord(1,1); // the direction we are going
@@ -784,9 +786,7 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
         lastStart = start;
 
 #ifdef DEBUG
-        ePoint *laststarts[10];
-
-        for (int i = 9; i>=1; i--)
+        for (int i = laststarts_max-1; i>=1; i--)
             laststarts[i] = laststarts[i-1];
 
         laststarts[0] = start;
