@@ -1050,7 +1050,6 @@ language/languages.txt
 config/rc.config config/aiplayers.cfg
 src/doc/Makefile src/doc/net/Makefile src/doc/Doxyfile
 src/doc/html.m4
-src/swig/Makefile
 src/thirdparty/Makefile
 src/thirdparty/particles/Makefile
 src/thirdparty/mathexpr/Makefile
@@ -1061,12 +1060,6 @@ desktop/Makefile
 www-root/Makefile
 desktop/armagetronad.desktop
 desktop/armagetronad.protocol
-src/swig/ext/armagetronad/engine/extconf.rb
-src/swig/ext/armagetronad/network/extconf.rb
-src/swig/ext/armagetronad/render/extconf.rb
-src/swig/ext/armagetronad/tools/extconf.rb
-src/swig/ext/armagetronad/tron/extconf.rb
-src/swig/ext/armagetronad/ui/extconf.rb
 )
 
 # m4_define(FULLEVAL,stage1=`eval echo $1`; stage2
