@@ -35,4 +35,7 @@ https://svn.sourceforge.net/svnroot/armagetronad
 Note: Only directories that are already present will be updated.
       At the end you will get a status report about missing files.
 
+Note2: To get bison to work, you need to set the environment variable BISON_SIMPLE
+      to <path to code::blocks installation>/share/bison.simple .
+
 In case of problems, visit forums.armagetronad.net and ask for help.
