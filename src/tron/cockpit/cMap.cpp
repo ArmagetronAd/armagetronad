@@ -240,7 +240,7 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
                   double cycleSize, double border,
                   double x, double y, double w, double h,
                   double rw, double rh, double ix, double iy) {
-    double pl_CurSpeed, min_dist2, dist2, rad, zoom;
+    double pl_CurSpeed, min_dist2, dist2, rad, zoom = 1;
     tCoord pl_CurPos, rotate; // rotate will hold the cos and sin of the rotation to apply
     cCockpit* cp = cCockpit::GetCockpit();
     if(!rimWalls && !cycleWalls && !cycles) return;
