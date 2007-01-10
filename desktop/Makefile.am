@@ -2,7 +2,7 @@
 
 # desktop files location
 desktopfiledir=${aa_datadir}/desktop
-protocolfiledir=${prefix}/share/services
+protocolfiledir=${datadir}/services
 
 # files for desktop integration
 nobase_desktopfile_DATA=armagetronad.desktop icons/small/armagetronad.png icons/medium/armagetronad.png icons/large/armagetronad.png
