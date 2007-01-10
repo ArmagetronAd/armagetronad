@@ -26,7 +26,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */ // LoadLibrary
 
 // disable malloc replacement
+#ifndef NO_MALLOC_REPLACEMENT
 #define NO_MALLOC_REPLACEMENT
+#endif
 
 #include "defs.h"
 

@@ -26,7 +26,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
+#ifndef NO_MALLOC_REPLACEMENT
 #define NO_MALLOC_REPLACEMENT
+#endif
 
 #include "tMemManager.h"
 #include <iostream>
