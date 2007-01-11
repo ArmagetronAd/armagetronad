@@ -79,7 +79,7 @@ Prerequisites
 - ruby 1.8 (http://ruby-lang.org) configured with options:
     --program-suffix=1.8 --enable-shared --enable-pthreads \
         --prefix=$HOME/Library/ruby/1.8
-- SWIG (http://swig.org)
+- SWIG (http://www.swig.org)
 
 Building
 --------
