@@ -69,20 +69,22 @@ libtools_a_SOURCES=	${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallba
 	tools/tXmlParser.h tools/tXmlParser.cpp\
 	defs.h\
 	thirdparty/binreloc/prefix.c thirdparty/binreloc/prefix.h\
-	tools/values/vCore.cpp \
-	tools/values/vParser.ypp \
-	tools/values/vRegistry.cpp \
-	tools/values/vCollection.cpp \
-	tools/values/veComparison.cpp \
-	tools/values/veLogic.cpp \
-	tools/values/veMath.cpp \
-	tools/values/vebLegacy.cpp \
-	tools/values/vebMathExpr.cpp \
+	tools/values/vCore.cpp tools/values/vCore.h \
+	tools/values/vParser.ypp tools/values/vParser.h \
+	tools/values/vRegistry.cpp tools/values/vRegistry.h \
+	tools/values/vCollection.cpp tools/values/vCollection.h \
+	tools/values/veComparison.cpp tools/values/veComparison.h \
+	tools/values/veLogic.cpp tools/values/veLogic.h \
+	tools/values/veMath.cpp tools/values/veMath.h \
+	tools/values/vebLegacy.cpp tools/values/vebLegacy.h \
+	tools/values/vebMathExpr.cpp tools/values/vebMathExpr.h \
+	tools/values/vebCFunction.h \
 	tools/tMemManager.cpp tools/tMemManager.h\
 	tools/tStatFile.cpp tools/tStatFile.h\
 	tools/tStatEntry.h tools/tStatEntry.cpp\
 	tools/tPlayList.h tools/tPlayList.cpp\
-	tools/tCoord.h \
+	tools/tCoord.h\
+	tools/tValue.h tools/tValueParser.h\
 	tools/tFunction.h tools/tFunction.cpp\
         tools/tResource.h tools/tResource.cpp \
 	tools/tRuby.h tools/tRuby.cpp
@@ -144,6 +146,7 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/gStatList.h tron/gStatList.cpp\
 	tron/gCommandLineJumpStart.cpp tron/gCommandLineJumpStart.h \
 	tron/gRotation.h tron/gRotation.cpp \
+	tron/gVectorExtra.h \
 	tron/cockpit/cCockpit.h \
 	tron/cockpit/cWidgetBase.h tron/cockpit/cWidgetBase.cpp \
 	tron/cockpit/cMap.h tron/cockpit/cMap.cpp \
