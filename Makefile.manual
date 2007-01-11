@@ -50,7 +50,7 @@ installcheck_install.%:
 
 #	delete old configuration and prune empty directories
 	rm -rf ._$*@oldvardir@
-	for d in `find ._$* -type d -depth`; do rmdir $$d; done > /dev/null 2>&1 || true
+	for d in `find ._$* -depth -type d`; do rmdir $$d; done > /dev/null 2>&1 || true
 
 #   move to final destination
 	mv -f ._$*$(destdir.$*)/* ._$*/ || true

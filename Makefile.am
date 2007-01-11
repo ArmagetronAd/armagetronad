@@ -66,10 +66,10 @@ dist-hook:
 	cp -R ${srcdir}/MacOS ${distdir}
 
 #	clear CVS
-	find $(distdir) -name CVS -depth -exec rm -rf \{\} \;
+	find $(distdir) -depth -name CVS -exec rm -rf \{\} \;
 
 #	clear SVN
-	find $(distdir) -name .svn -depth -exec rm -rf \{\} \;
+	find $(distdir) -depth -name .svn -exec rm -rf \{\} \;
 
 #   strip comments from translated files
 	cd $(distdir)/language; python ./update.py --dist
