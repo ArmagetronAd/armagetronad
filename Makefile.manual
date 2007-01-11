@@ -1,5 +1,5 @@
 # Parts of the makefile that are not handled by automake
-
+# another spurious commit, hope this doesn't cause a conflict with the one in 0.2.8
 ##################
 # Beautification #
 ##################
