@@ -1,5 +1,5 @@
 # Parts of the makefile that are not handled by automake
-# another spurious commit, hope this doesn't cause a conflict with the one in 0.2.8
+
 ##################
 # Beautification #
 ##################
@@ -56,7 +56,9 @@ installcheck_install.%:
 	mv -f ._$*$(destdir.$*)/* ._$*/ || true
 	rmdir ._$*$(destdir.$*) || true
 
+if USE_SYSINSTALL
 	test -r	._$*/@aa_localstatedir@/users.txt
+endif
 
 installcheck_run_%: installcheck_install_%
 	@echo "Testing executable..."
@@ -124,6 +126,9 @@ installcheck: installcheck_uninstall.inst installcheck_uninstall.inst2
 devcheck: beautify installcheck
 fullcheck: beautify devcheck distcheck
 
+# run all that don't require a full rebuild
+test: installcheck
+
 ###############
 # Fingerprint #
 ###############
@@ -136,7 +141,7 @@ fullcheck: beautify devcheck distcheck
 fingerprint: .changetag
 # easy, just do svn info, that contains all the information needed
 	svn info ${top_srcdir} > $@
-	svn info ${top_srcdir}/.. >> $@
+	svn info `dirname ${top_srcdir}` >> $@
 	diff $@ .changetag > /dev/null 2>&1 || { cp $@ .changetag; rm $(srcdir)/ChangeLog;  touch -t 198001010000 $(srcdir)/ChangeLog; }
 
 ########################
