@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -1164,7 +1164,7 @@ nMessage& nMessage::operator>>(REAL &x){
       Read((unsigned short &)vorkomma);
       Read(nachkomma);
       x=vorkomma+nachkomma/60000.0;
-     
+
       Read(((unsigned short *)&x)[0]);
       Read(((unsigned short *)&x)[1]);
      */
@@ -1340,7 +1340,7 @@ void login_ignore_handler(nMessage &m){
           lo->Send(0);
 
           sn_Sync(10);
-          
+
           (new nMessage(login))->Send(0);
         */
     }
@@ -1910,7 +1910,7 @@ void nMessage::SendImmediately(int peer,bool ack){
         return;
     }
 
-#ifdef DEBUG  
+#ifdef DEBUG
     /*
     if (descriptor>1)
       con << "SMT " << descriptor << "\n";
@@ -1949,23 +1949,23 @@ void nMessage::SendImmediately(int peer,bool ack){
         /*
           if (sn_Connections[].rate_control[peer]>0)
           send_collected(peer);
-            
+
           unsigned short *b=new (unsigned short)[data.Len()+3];
-            
+
           b[0]=htons(descriptor);
           b[1]=htons(messageID);
           b[2]=htons(data.Len());
           int len=data.Len();
           for(int i=0;i<len;i++)
           b[3+i]=htons(data(i));
-            
-            
+
+
           ANET_Write(sn_Connections[].socket[peer],(int8 *)b,
           2*(data.Len()+3),&peers[peer]);
-            
+
           //std::cerr << "Sent " << 2*len+6 << " bytes.\n";
           sn_Connections[].rate_control[peer]-=2*(len+3)+OVERHEAD;
-            
+
           delete b;
         */
 
@@ -2042,8 +2042,8 @@ static void rec_peer(unsigned int peer){
     // the growing buffer we read messages into
     const int serverMaxAcceptedSize=2000;
     static tArray< unsigned short > storage(2000);
-    int maxrec = storage.Len();
-    unsigned short * buff = &storage[0];
+    int maxrec = 0; maxrec = storage.Len();
+    unsigned short * buff = 0; buff = &storage[0];
 
     // short buff[maxrec];
     if (sn_Connections[peer].socket){
@@ -2399,7 +2399,7 @@ void sn_SetNetState(nNetState x){
                 sn_Listen( net_hostport, tString( "ANY" ) ) ||         // second try: bind to generic IP
                 sn_Listen( net_hostport, tString( "ALL" ) );           // last try: bind to all available IPs
 
-#ifdef DEDICATED                
+#ifdef DEDICATED
                 // save host port that worked, otherwise it may change from the port sent to the master server
                 sn_serverPort = net_hostport;
 #endif
