@@ -53,6 +53,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "version.h"
 #endif // MACOSX_XCODE
 
+#ifdef WIN32
+#include "version.h"
+#endif // WIN32
+
 // debug watchs
 #ifdef DEBUG
 nMessage* sn_WatchMessage = NULL;
