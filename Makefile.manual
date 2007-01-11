@@ -56,7 +56,9 @@ installcheck_install.%:
 	mv -f ._$*$(destdir.$*)/* ._$*/ || true
 	rmdir ._$*$(destdir.$*) || true
 
+if USE_SYSINSTALL
 	test -r	._$*/@aa_localstatedir@/users.txt
+endif
 
 installcheck_run_%: installcheck_install_%
 	@echo "Testing executable..."
