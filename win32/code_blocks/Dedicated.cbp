@@ -47,6 +47,7 @@
 				<Option deps_output=".deps"/>
 				<Option type="1"/>
 				<Option compiler="0"/>
+				<Option includeInTargetAll="0"/>
 				<Option projectResourceIncludeDirsRelation="1"/>
 				<Compiler>
 					<Add option="-O2"/>
@@ -1948,6 +1949,14 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
+		<Unit filename="..\..\src\win32\aa_config.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
 		<Unit filename="..\..\src\win32\armagetron.rc">
 			<Option compilerVar="WINDRES"/>
 			<Option objectName="src\win32\armagetron.res"/>
@@ -1955,7 +1964,15 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
-		<Unit filename="..\..\src\win32_ded\config.h">
+		<Unit filename="..\..\src\win32\config_common.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\win32_ded\aa_config.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -1970,6 +1987,14 @@
 			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\win32_ded\dirent.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\win32_ded\strstream.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>

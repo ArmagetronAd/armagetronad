@@ -47,6 +47,7 @@
 				<Option deps_output=".deps"/>
 				<Option type="1"/>
 				<Option compiler="0"/>
+				<Option includeInTargetAll="0"/>
 				<Option projectResourceIncludeDirsRelation="1"/>
 				<Compiler>
 					<Add option="-O2"/>
