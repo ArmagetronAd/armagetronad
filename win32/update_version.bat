@@ -5,6 +5,8 @@ REM up from here where the release and debug binaries will be compiled to.
 
 SET AA_DIR=..
 SET AA_BUILD_DIR=%AA_DIR%\build\tmp
+mkdir %AA_BUILD_DIR%\tmp_124
+rmdir %AA_BUILD_DIR%\tmp_124
 
 SET /P MAJOR_VERSION= < %AA_DIR%\major_version
 SET /P MINOR_VERSION_TPL= < %AA_DIR%\minor_version
@@ -31,10 +33,12 @@ IF EXIST %AA_DIR%\.svn (
 	echo *** reading SVN repository and revision
 	SET URL=
 	SET REV=
-	FOR /F "tokens=1,2 delims=,>=</ " %%i in (%AA_DIR%\.svn\entries) do (
+	FOR /F "tokens=1,2 delims=,>=< " %%i in (%AA_DIR%\.svn\entries) do (
 		IF *%%i*==*url* (
 			SET URL=%%~j
 		)
+	)
+	FOR /F "tokens=1,2 delims=,>=</ " %%i in (%AA_DIR%\.svn\entries) do (
 		IF *%%i*==*revision* (
 			SET REV=%%~j
 		)
@@ -78,10 +82,14 @@ echo *%DATESTAMP%*
 echo *%DATESTAMP:~4%*
 echo *%HELP_FILE%*
 echo *** generating version.h...
-echo #define MAJOR_VERSION %MAJOR_VERSION:.=,%,%REV% ^> %HELP_FILE%
-echo #define MINOR_VERSION %MINOR_VERSION% ^>> %HELP_FILE%
-echo #define VERSION "%MAJOR_VERSION%%MINOR_VERSION%" ^>> %HELP_FILE%
-echo #define BUILD_DATE "%DATESTAMP%" ^>> %HELP_FILE%
+echo #define MAJOR_VERSION %MAJOR_VERSION:.=,%,%REV% > %HELP_FILE%
+
+echo #define MINOR_VERSION %MINOR_VERSION% >> %HELP_FILE%
+
+echo #define BUILD_DATE "%DATESTAMP%" >> %HELP_FILE%
+
+echo #define VERSION "%MAJOR_VERSION%%MINOR_VERSION%" >> %HELP_FILE%
+
 
 echo. - Detected: Armagetron Advanced %MAJOR_VERSION%%MINOR_VERSION%
 echo.
