@@ -4,7 +4,7 @@ INTERFACEFILES = ext/armagetronad.i ext/std/sstream.i ext/tools/tConfiguration.i
 	     ext/ui/uMenu.i
 
 # although they should not be needed for a plain build, the interfaces are the true sources.
-EXTRA_DIST = ${INTERFACEFILES}
+EXTRA_DIST = ${INTERFACEFILES} ext/armagetronad_wrap.cxx ext/armagetronad_wrap.h
 
 swig_all = ${top_builddir}/src/swig/ext/armagetronad_wrap.cxx
 swig_all_include = -I${srcdir}/.. -I${srcdir}/../tools -I${srcdir}/../network -I${srcdir}/../render -I${srcdir}/../ui -I${srcdir}/../tron -I${srcdir}/../engine
