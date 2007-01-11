@@ -71,7 +71,7 @@ dist-hook-scm:
 
 #   regenerate dependant files so they no longer reference to the file "version" which will be removed
 	cp @srcdir@/bootstrap.sh $(distdir)
-	cd $(distdir); rm version; sh ./bootstrap.sh; rm version
+	cd $(distdir); rm -f aa_config.h.in version; sh ./bootstrap.sh; rm version
 	rm -rf $(distdir)/autom4te.cache
 
 dist-hook:
