@@ -498,10 +498,9 @@ AC_MSG_ERROR([You need the library xml2 to compile Armagetron. Read the file doc
 
 AC_CHECK_FUNC(xmlParserInputBufferCreateFilenameDefault,
 ,
-AC_DEFINE(HAVE_LIBXML2_WO_PIBCREATE, 1, [Define if your xml2 library is obsolete (lacks xmlParserInputBufferCreateFilenameDefault).])
-AC_MSG_WARN([
+AC_MSG_ERROR([
 	Your xml2 library is obsolete!
-	Map validation will be insecure and may fail!
+	Please upgrade to 2.6.11 or later
 ])
 )
 # fi
