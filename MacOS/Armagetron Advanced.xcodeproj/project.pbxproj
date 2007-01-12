@@ -622,7 +622,7 @@
 		9BA7031F0B05FAEC00732923 /* tFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tFunction.h; sourceTree = "<group>"; };
 		9BAF03D60B07A4D100D984EA /* AARuby.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AARuby.h; path = ../src/macosx/AARuby.h; sourceTree = SOURCE_ROOT; };
 		9BAF03D70B07A4D100D984EA /* AARuby.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AARuby.mm; path = ../src/macosx/AARuby.mm; sourceTree = SOURCE_ROOT; };
-		9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libruby1.8.1.8.5.dylib; path = ../../../../../../../../Library/ruby/1.8/lib/libruby1.8.1.8.5.dylib; sourceTree = SOURCE_ROOT; };
+		9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libruby1.8.1.8.5.dylib; path = /Users/lee/Library/ruby/1.8/lib/libruby1.8.1.8.5.dylib; sourceTree = "<absolute>"; };
 		9BC001A50B5196620041120B /* uMenu.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = uMenu.i; sourceTree = "<group>"; };
 		9BC0F61F0B517AD90041120B /* armagetronad.i */ = {isa = PBXFileReference; explicitFileType = sourcecode.interfacer; fileEncoding = 4; path = armagetronad.i; sourceTree = "<group>"; };
 		9BC0F6220B517AD90041120B /* tConfiguration.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = tConfiguration.i; sourceTree = "<group>"; };
