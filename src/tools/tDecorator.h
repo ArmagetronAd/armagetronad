@@ -170,7 +170,7 @@ public:
         }
     }
 
-    //! reserve space for an object of class Decorated, prepended with space for its decorators
+    //! reserve space for an object of class Decorated, prepended with space for its decorators 
     void * Allocate( size_t size, const char * classn, const char * file, int line );
 
     //! frees space reserved by Reseve() again

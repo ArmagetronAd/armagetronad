@@ -53,7 +53,12 @@ void * tDecoratableManagerBase::Allocate( size_t size, const char * classn, cons
 
     // allocate requested space plus overhead for decorators
     size_t overhead = GetSize();
+#ifndef DONTUSEMEMMANAGER
+
     char * base = static_cast< char * > ( ::operator new( size + overhead, classn, file, line ) ) + overhead;
+#else
+    char * base = static_cast< char * > ( ::operator new( size + overhead ) ) + overhead;
+#endif
     
     // call decoration constructors
     ConstructAll( base);
@@ -86,7 +91,11 @@ void tDecoratableManagerBase::Free( void * ptr, const char * classn, const char 
     size_t overhead = GetSize();
     char * base = ( ( char * ) ptr ) - overhead;
 
+#ifndef DONTUSEMEMMANAGER
     ::operator delete( base, classn, file, line );
+#else
+    ::operator delete( base );
+#endif
 }
 
 // *******************************************************************************
