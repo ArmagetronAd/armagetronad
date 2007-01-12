@@ -255,6 +255,8 @@
 		9B83FF5E0B1227BD00878E8A /* AAGrowlBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B83FF5C0B1227BD00878E8A /* AAGrowlBridge.mm */; };
 		9B97FE600B053AC2005900E3 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 9B97FE5A0B053AC2005900E3 /* scripts */; };
 		9BA703200B05FAEC00732923 /* tFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BA7031E0B05FAEC00732923 /* tFunction.cpp */; };
+		9BAD56D30B57CAA800914844 /* tDecorator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BAD56D10B57CAA800914844 /* tDecorator.cpp */; };
+		9BAD56D40B57CAA800914844 /* tDecorator.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BAD56D20B57CAA800914844 /* tDecorator.h */; };
 		9BAF03D90B07A4D100D984EA /* AARuby.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BAF03D70B07A4D100D984EA /* AARuby.mm */; };
 		9BAF04390B07A70C00D984EA /* libruby1.8.1.8.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */; };
 		9BAF04460B07A81E00D984EA /* libruby1.8.1.8.5.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */; };
@@ -337,6 +339,7 @@
 				9BD7D9A70A2C7CCF00D7033C /* libpng.framework in Copy Frameworks */,
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
+				9BAD56D40B57CAA800914844 /* tDecorator.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -563,7 +566,7 @@
 		8CBA646108A065A8007E21DC /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
 		8CC3F046099D46AD0034B6B8 /* tRecorderInternal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tRecorderInternal.cpp; sourceTree = "<group>"; };
 		8CC3F047099D46AD0034B6B8 /* tRecorderInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tRecorderInternal.h; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B1EA46F0A20B20200FA3478 /* cCockpit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cCockpit.cpp; sourceTree = "<group>"; };
 		9B1EA4700A20B20200FA3478 /* cCockpit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cCockpit.h; sourceTree = "<group>"; };
 		9B1EA4710A20B20200FA3478 /* cGauges.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cGauges.cpp; sourceTree = "<group>"; };
@@ -615,6 +618,8 @@
 		9B9E23FA0A825FA90067CCFA /* tValueParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tValueParser.h; sourceTree = "<group>"; };
 		9BA7031E0B05FAEC00732923 /* tFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tFunction.cpp; sourceTree = "<group>"; };
 		9BA7031F0B05FAEC00732923 /* tFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tFunction.h; sourceTree = "<group>"; };
+		9BAD56D10B57CAA800914844 /* tDecorator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tDecorator.cpp; sourceTree = "<group>"; };
+		9BAD56D20B57CAA800914844 /* tDecorator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tDecorator.h; sourceTree = "<group>"; };
 		9BAF03D60B07A4D100D984EA /* AARuby.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AARuby.h; path = ../src/macosx/AARuby.h; sourceTree = SOURCE_ROOT; };
 		9BAF03D70B07A4D100D984EA /* AARuby.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AARuby.mm; path = ../src/macosx/AARuby.mm; sourceTree = SOURCE_ROOT; };
 		9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libruby1.8.1.8.5.dylib; path = /Library/Frameworks/ArmagetronAdvanced/current/libruby1.8.1.8.5.dylib; sourceTree = "<absolute>"; };
@@ -921,6 +926,8 @@
 				8CBA5E95089EEC7D007E21DC /* tConsole.h */,
 				8CBA5E96089EEC7D007E21DC /* tCrypt.cpp */,
 				8CBA5E97089EEC7D007E21DC /* tCrypt.h */,
+				9BAD56D10B57CAA800914844 /* tDecorator.cpp */,
+				9BAD56D20B57CAA800914844 /* tDecorator.h */,
 				8CBA5E98089EEC7D007E21DC /* tDirectories.cpp */,
 				8CBA5E99089EEC7D007E21DC /* tDirectories.h */,
 				8CBA5E9A089EEC7D007E21DC /* tError.cpp */,
@@ -1708,6 +1715,7 @@
 				9B30C74E0B111D66006D158D /* eEventNotification.cpp in Sources */,
 				9B83FF410B12248800878E8A /* AAGrowlPlugin.mm in Sources */,
 				9B83FF5E0B1227BD00878E8A /* AAGrowlBridge.mm in Sources */,
+				9BAD56D30B57CAA800914844 /* tDecorator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
