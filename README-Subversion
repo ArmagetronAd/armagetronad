@@ -76,9 +76,6 @@ Prerequisites
 - Bison 2.2 (http://www.gnu.org/software/bison/)
 - Other Libraries (http://generalconsumption.org/armagetron/libs)
  	- Unzip and install to /Libraries
-- ruby 1.8 (http://ruby-lang.org) configured with options:
-    --program-suffix=1.8 --enable-shared --enable-pthreads \
-        --prefix=$HOME/Library/ruby/1.8
 - SWIG (http://www.swig.org)
 
 Building
