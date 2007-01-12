@@ -83,6 +83,7 @@ libtools_a_SOURCES=	${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallba
 	tools/tStatFile.cpp tools/tStatFile.h\
 	tools/tStatEntry.h tools/tStatEntry.cpp\
 	tools/tPlayList.h tools/tPlayList.cpp\
+	tools/tDecorator.h tools/tDecorator.cpp\
 	tools/tCoord.h\
 	tools/tValue.h tools/tValueParser.h\
 	tools/tFunction.h tools/tFunction.cpp\
