@@ -49,7 +49,6 @@
 		8C11CA74095A2B6E007AE0EA /* gStuff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EEC089EEC7D007E21DC /* gStuff.cpp */; };
 		8C11CA75095A2B6E007AE0EA /* gTeam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EEE089EEC7D007E21DC /* gTeam.cpp */; };
 		8C11CA76095A2B6E007AE0EA /* gWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EF0089EEC7D007E21DC /* gWall.cpp */; };
-		8C11CA77095A2B6E007AE0EA /* gWinZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EF2089EEC7D007E21DC /* gWinZone.cpp */; };
 		8C11CA78095A2B6E007AE0EA /* md5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E41089EEC7D007E21DC /* md5.cpp */; };
 		8C11CA79095A2B6E007AE0EA /* nAuthentification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E43089EEC7D007E21DC /* nAuthentification.cpp */; };
 		8C11CA7A095A2B6E007AE0EA /* nConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E45089EEC7D007E21DC /* nConfig.cpp */; };
@@ -554,8 +553,6 @@
 		8CBA5EEF089EEC7D007E21DC /* gTeam.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = gTeam.h; sourceTree = "<group>"; };
 		8CBA5EF0089EEC7D007E21DC /* gWall.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = gWall.cpp; sourceTree = "<group>"; };
 		8CBA5EF1089EEC7D007E21DC /* gWall.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = gWall.h; sourceTree = "<group>"; };
-		8CBA5EF2089EEC7D007E21DC /* gWinZone.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = gWinZone.cpp; sourceTree = "<group>"; };
-		8CBA5EF3089EEC7D007E21DC /* gWinZone.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = gWinZone.h; sourceTree = "<group>"; };
 		8CBA5EF6089EEC7D007E21DC /* uInput.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = uInput.cpp; sourceTree = "<group>"; };
 		8CBA5EF7089EEC7E007E21DC /* uInput.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = uInput.h; sourceTree = "<group>"; };
 		8CBA5EF8089EEC7E007E21DC /* uInputQueue.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = uInputQueue.cpp; sourceTree = "<group>"; };
@@ -566,7 +563,7 @@
 		8CBA646108A065A8007E21DC /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
 		8CC3F046099D46AD0034B6B8 /* tRecorderInternal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tRecorderInternal.cpp; sourceTree = "<group>"; };
 		8CC3F047099D46AD0034B6B8 /* tRecorderInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tRecorderInternal.h; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B1EA46F0A20B20200FA3478 /* cCockpit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cCockpit.cpp; sourceTree = "<group>"; };
 		9B1EA4700A20B20200FA3478 /* cCockpit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cCockpit.h; sourceTree = "<group>"; };
 		9B1EA4710A20B20200FA3478 /* cGauges.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cGauges.cpp; sourceTree = "<group>"; };
@@ -1042,8 +1039,6 @@
 				9B4A19FA0A7A931B0070BE82 /* gVectorExtra.h */,
 				8CBA5EF0089EEC7D007E21DC /* gWall.cpp */,
 				8CBA5EF1089EEC7D007E21DC /* gWall.h */,
-				8CBA5EF2089EEC7D007E21DC /* gWinZone.cpp */,
-				8CBA5EF3089EEC7D007E21DC /* gWinZone.h */,
 				9B4A19C00A7A90620070BE82 /* zone */,
 			);
 			name = tron;
@@ -1483,7 +1478,6 @@
 				8C11CA74095A2B6E007AE0EA /* gStuff.cpp in Sources */,
 				8C11CA75095A2B6E007AE0EA /* gTeam.cpp in Sources */,
 				8C11CA76095A2B6E007AE0EA /* gWall.cpp in Sources */,
-				8C11CA77095A2B6E007AE0EA /* gWinZone.cpp in Sources */,
 				8C11CA78095A2B6E007AE0EA /* md5.cpp in Sources */,
 				8C11CA79095A2B6E007AE0EA /* nAuthentification.cpp in Sources */,
 				8C11CA7A095A2B6E007AE0EA /* nConfig.cpp in Sources */,
