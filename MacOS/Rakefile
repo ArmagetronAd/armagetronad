@@ -165,6 +165,12 @@ namespace "release" do
     sh("scp #{package_dir}/#{package_file} nemostultae@beta.armagetronad.net:/var/www/armagetron/distfiles/#{major}/#{rev}")
   end
   
+  task "update-releases.php" do
+    chdir(File.dirname(releases_file)) do
+      sh("svn update releases.php")
+    end
+  end
+  
   task "add-to-releases.php" do
     releases =  File.readlines(releases_file)
     insert_at = releases.index("// REPOSITORIES-- KEEP AT THE TOP\n")
@@ -194,7 +200,7 @@ namespace "release" do
     end
   end
   
-  task "deploy" => ["package", "upload-to-aabeta", "add-to-releases.php", "commit-releases.php"]
+  task "deploy" => ["package", "upload-to-aabeta", "update-releases.php", "add-to-releases.php", "commit-releases.php"]
 end
 
 
