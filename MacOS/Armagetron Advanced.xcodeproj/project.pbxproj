@@ -1824,6 +1824,7 @@
 					/Library/Frameworks/ArmagetronAdvanced/current/include/FTGL,
 					/Library/Frameworks/ArmagetronAdvanced/current/include,
 					"$(HOME)/Library/ruby/1.8/lib/ruby/1.8/powerpc-darwin8.7.0/",
+					/Library/Frameworks/ArmagetronAdvanced/current/include/ruby,
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -1889,6 +1890,7 @@
 					/Library/Frameworks/ArmagetronAdvanced/current/include/FTGL,
 					/Library/Frameworks/ArmagetronAdvanced/current/include,
 					"$(HOME)/Library/ruby/1.8/lib/ruby/1.8/powerpc-darwin8.7.0/",
+					/Library/Frameworks/ArmagetronAdvanced/current/include/ruby,
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -1983,6 +1985,7 @@
 					/Library/Frameworks/ArmagetronAdvanced/current/include/FTGL,
 					/Library/Frameworks/ArmagetronAdvanced/current/include,
 					"$(HOME)/Library/ruby/1.8/lib/ruby/1.8/powerpc-darwin8.7.0/",
+					/Library/Frameworks/ArmagetronAdvanced/current/include/ruby,
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
