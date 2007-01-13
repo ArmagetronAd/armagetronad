@@ -151,18 +151,22 @@ namespace "release" do
       puts "-" * 100
       exit(1)
     end
-    rm_rf(package_dir)
-    mkdir_p(package_dir)
-    cp_r("../../armagetronad-build/build/#{config}/Armagetron Advanced.app", package_dir)
-    chdir(package_dir) do
-      sh("hdiutil create -srcdir . -format UDIF package-uncompressed -volname 'Armagetron Advanced'")
-      sh("hdiutil convert -format UDZO -o #{package_file} package-uncompressed.dmg")
+    chdir(File.dirname(__FILE__)) do
+      rm_rf(package_dir)
+      mkdir_p(package_dir)
+      cp_r("../../armagetronad-build/build/#{config}/Armagetron Advanced.app", package_dir)      
+      chdir(package_dir) do
+        sh("hdiutil create -srcdir . -format UDIF package-uncompressed -volname 'Armagetron Advanced'")
+        sh("hdiutil convert -format UDZO -o #{package_file} package-uncompressed.dmg")
+      end
     end
   end
 
   task "upload-to-aabeta" do
-    sh("ssh nemostultae@beta.armagetronad.net mkdir -m 2775 -p /var/www/armagetron/distfiles/#{major}/#{rev}")
-    sh("scp #{package_dir}/#{package_file} nemostultae@beta.armagetronad.net:/var/www/armagetron/distfiles/#{major}/#{rev}")
+    chdir(File.dirname(__FILE__)) do
+      sh("ssh nemostultae@beta.armagetronad.net mkdir -m 2775 -p /var/www/armagetron/distfiles/#{major}/#{rev}")
+      sh("scp #{package_dir}/#{package_file} nemostultae@beta.armagetronad.net:/var/www/armagetron/distfiles/#{major}/#{rev}")
+    end
   end
   
   task "update-releases.php" do
