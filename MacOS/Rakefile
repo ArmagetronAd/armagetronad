@@ -179,19 +179,19 @@ namespace "release" do
     releases =  File.readlines(releases_file)
     insert_at = releases.index("// REPOSITORIES-- KEEP AT THE TOP\n")
     release =
-    "array(
-        'file'     => '#{major}/#{rev}/#{package_file}',
-        // 'source'   => 'sf_aa',
-        'branch'   => '#{major}',
-        'date'     => '#{Time.now.strftime("%Y-%m-%d")}',
-        'tag'      => '#{rev}',
-        'os'       => 'Mac OS X 10.3+',
-        'arch'     => 'ppc_32',
-        'format'   => '.dmg',
-        'packager' => 'nemostultae',
-        'server'   => false,
-    ),
-    "
+"array(
+    'file'     => '#{major}/#{rev}/#{package_file}',
+    // 'source'   => 'sf_aa',
+    'branch'   => '#{major}',
+    'date'     => '#{Time.now.strftime("%Y-%m-%d")}',
+    'tag'      => 'r#{rev}',
+    'os'       => 'Mac OS X 10.3+',
+    'arch'     => 'ppc_32',
+    'format'   => '.dmg',
+    'packager' => 'nemostultae',
+    'server'   => false,
+),
+"
     releases.insert(insert_at + 1, release)
     File.open(releases_file, 'w') do |f|
       f.write(releases.join)
