@@ -151,7 +151,7 @@ namespace "release" do
       puts "-" * 100
       exit(1)
     end
-    rm_r(package_dir)
+    rm_rf(package_dir)
     mkdir_p(package_dir)
     cp_r("../../armagetronad-build/build/#{config}/Armagetron Advanced.app", package_dir)
     chdir(package_dir) do
