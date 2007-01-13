@@ -1,6 +1,6 @@
 dnl I would like to do this to generate the version number...
 dnl AC_DEFUN([AUTOMATIC_VERSION],syscmd([sh batch/make/version .]))
-
+dnl this should triggr a build
 dnl but have to do this with version generated in bootstrap.sh instead for some reason
 m4_include(version)
 
