@@ -177,11 +177,10 @@ namespace "release" do
   
   task "add-to-releases.php" do
     releases =  File.readlines(releases_file)
-    insert_at = releases.index("// REPOSITORIES-- KEEP AT THE TOP\n")
+    insert_at = releases.index("),\n")
     release =
 "array(
     'file'     => '#{major}/#{rev}/#{package_file}',
-    // 'source'   => 'sf_aa',
     'branch'   => '#{major}',
     'date'     => '#{Time.now.strftime("%Y-%m-%d")}',
     'tag'      => 'r#{rev}',
