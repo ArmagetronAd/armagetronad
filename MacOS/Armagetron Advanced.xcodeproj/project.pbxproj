@@ -609,6 +609,7 @@
 		9B5B6FEA0B5A8ED0003DE8B6 /* eGameObject.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = eGameObject.i; sourceTree = "<group>"; };
 		9B5B70670B5A9399003DE8B6 /* eSensor.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = eSensor.i; sourceTree = "<group>"; };
 		9B5B708C0B5A946B003DE8B6 /* gSensor.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = gSensor.i; sourceTree = "<group>"; };
+		9B5B70AF0B5A9662003DE8B6 /* defs.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = defs.i; sourceTree = "<group>"; };
 		9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "Growl-WithInstaller.framework"; path = "/Library/Frameworks/ArmagetronAdvanced/current/Growl-WithInstaller.framework"; sourceTree = "<absolute>"; };
 		9B83FF3E0B12248800878E8A /* AAGrowlPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AAGrowlPlugin.h; path = ../src/macosx/AAGrowlPlugin.h; sourceTree = SOURCE_ROOT; };
 		9B83FF3F0B12248800878E8A /* AAGrowlPlugin.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AAGrowlPlugin.mm; path = ../src/macosx/AAGrowlPlugin.mm; sourceTree = SOURCE_ROOT; };
@@ -630,7 +631,6 @@
 		9BC0F6230B517AD90041120B /* tDirectories.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = tDirectories.i; sourceTree = "<group>"; };
 		9BC0F6240B517AD90041120B /* tLocale.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = tLocale.i; sourceTree = "<group>"; };
 		9BC0F6250B517AD90041120B /* tString.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = tString.i; sourceTree = "<group>"; };
-		9BC0F6270B517AD90041120B /* armagetronad.rb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.ruby; path = armagetronad.rb; sourceTree = "<group>"; };
 		9BD56C370A8B899700AC1048 /* vCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vCollection.cpp; sourceTree = "<group>"; };
 		9BD56C380A8B899700AC1048 /* vCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vCollection.h; sourceTree = "<group>"; };
 		9BD56C390A8B899700AC1048 /* vCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vCore.cpp; sourceTree = "<group>"; };
@@ -1149,7 +1149,6 @@
 			isa = PBXGroup;
 			children = (
 				9BC0F61E0B517AD90041120B /* ext */,
-				9BC0F6260B517AD90041120B /* lib */,
 			);
 			name = swig;
 			path = ../src/swig;
@@ -1159,6 +1158,7 @@
 			isa = PBXGroup;
 			children = (
 				9BC0F61F0B517AD90041120B /* armagetronad.i */,
+				9B5B70AF0B5A9662003DE8B6 /* defs.i */,
 				9BEF8F810B52BEB100BFEC20 /* std */,
 				9BC0F6210B517AD90041120B /* tools */,
 				9BC001A40B5196570041120B /* ui */,
@@ -1177,14 +1177,6 @@
 				9BC0F6250B517AD90041120B /* tString.i */,
 			);
 			path = tools;
-			sourceTree = "<group>";
-		};
-		9BC0F6260B517AD90041120B /* lib */ = {
-			isa = PBXGroup;
-			children = (
-				9BC0F6270B517AD90041120B /* armagetronad.rb */,
-			);
-			path = lib;
 			sourceTree = "<group>";
 		};
 		9BD56C360A8B899700AC1048 /* values */ = {

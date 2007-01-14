@@ -1,6 +1,7 @@
 %module(directors="1") armagetronad
 
 %include "stl.i"
+%include "defs.i"
 %include "std/sstream.i"
 %include "tools/tConfiguration.i"
 %include "tools/tLocale.i"
