@@ -7,3 +7,6 @@
 %include "tools/tDirectories.i"
 %include "tools/tString.i"
 %include "ui/uMenu.i"
+%include "engine/eGameObject.i"
+%include "engine/eSensor.i"
+%include "tron/gSensor.i"
