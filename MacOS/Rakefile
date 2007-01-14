@@ -177,7 +177,7 @@ namespace "release" do
   
   task "add-to-releases.php" do
     releases =  File.readlines(releases_file)
-    insert_at = releases.index("),\n")
+    insert_at = releases.index("/* === INSERT NEW RELEASES AFTER THIS LINE === */\n")
     release =
 "array(
     'file'     => '#{major}/#{rev}/#{package_file}',
