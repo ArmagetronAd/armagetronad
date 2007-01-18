@@ -249,11 +249,15 @@
 		9B4A19E70A7A90620070BE82 /* zZoneInfluence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19CF0A7A90620070BE82 /* zZoneInfluence.cpp */; };
 		9B4A1A280A7A95890070BE82 /* mathexpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A1A210A7A95890070BE82 /* mathexpr.cpp */; };
 		9B4A1A2E0A7A95890070BE82 /* mathexpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A1A210A7A95890070BE82 /* mathexpr.cpp */; };
+		9B61EBC30B5FEF010018DEA7 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 9B61EBBC0B5FEF010018DEA7 /* scripts */; };
+		9B61F17E0B600FA30018DEA7 /* nNetObject.i in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B61F17D0B600FA30018DEA7 /* nNetObject.i */; };
+		9B61F1AB0B6010E20018DEA7 /* eNetGameObject.i in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B61F1AA0B6010E20018DEA7 /* eNetGameObject.i */; };
+		9B61F1CE0B6011A90018DEA7 /* gCycleMovement.i in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B61F1CD0B6011A90018DEA7 /* gCycleMovement.i */; };
+		9B61F1E40B6012190018DEA7 /* gCycle.i in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B61F1E30B6012190018DEA7 /* gCycle.i */; };
 		9B83FE950B12161600878E8A /* Growl-WithInstaller.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9B83FF0F0B121B3100878E8A /* Growl-WithInstaller.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9B83FF410B12248800878E8A /* AAGrowlPlugin.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B83FF3F0B12248800878E8A /* AAGrowlPlugin.mm */; };
 		9B83FF5E0B1227BD00878E8A /* AAGrowlBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B83FF5C0B1227BD00878E8A /* AAGrowlBridge.mm */; };
-		9B97FE600B053AC2005900E3 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 9B97FE5A0B053AC2005900E3 /* scripts */; };
 		9BA703200B05FAEC00732923 /* tFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BA7031E0B05FAEC00732923 /* tFunction.cpp */; };
 		9BAD56D30B57CAA800914844 /* tDecorator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BAD56D10B57CAA800914844 /* tDecorator.cpp */; };
 		9BAF03D90B07A4D100D984EA /* AARuby.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BAF03D70B07A4D100D984EA /* AARuby.mm */; };
@@ -338,6 +342,10 @@
 				9BD7D9A70A2C7CCF00D7033C /* libpng.framework in Copy Frameworks */,
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
+				9B61F17E0B600FA30018DEA7 /* nNetObject.i in Copy Frameworks */,
+				9B61F1AB0B6010E20018DEA7 /* eNetGameObject.i in Copy Frameworks */,
+				9B61F1CE0B6011A90018DEA7 /* gCycleMovement.i in Copy Frameworks */,
+				9B61F1E40B6012190018DEA7 /* gCycle.i in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -610,13 +618,18 @@
 		9B5B70670B5A9399003DE8B6 /* eSensor.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = eSensor.i; sourceTree = "<group>"; };
 		9B5B708C0B5A946B003DE8B6 /* gSensor.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = gSensor.i; sourceTree = "<group>"; };
 		9B5B70AF0B5A9662003DE8B6 /* defs.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = defs.i; sourceTree = "<group>"; };
+		9B61EB760B5FEC360018DEA7 /* gAIBase.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = gAIBase.i; sourceTree = "<group>"; };
+		9B61EBBC0B5FEF010018DEA7 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = ../scripts; sourceTree = SOURCE_ROOT; };
+		9B61F17D0B600FA30018DEA7 /* nNetObject.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = nNetObject.i; sourceTree = "<group>"; };
+		9B61F1AA0B6010E20018DEA7 /* eNetGameObject.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = eNetGameObject.i; sourceTree = "<group>"; };
+		9B61F1CD0B6011A90018DEA7 /* gCycleMovement.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = gCycleMovement.i; sourceTree = "<group>"; };
+		9B61F1E30B6012190018DEA7 /* gCycle.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = gCycle.i; sourceTree = "<group>"; };
 		9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "Growl-WithInstaller.framework"; path = "/Library/Frameworks/ArmagetronAdvanced/current/Growl-WithInstaller.framework"; sourceTree = "<absolute>"; };
 		9B83FF3E0B12248800878E8A /* AAGrowlPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AAGrowlPlugin.h; path = ../src/macosx/AAGrowlPlugin.h; sourceTree = SOURCE_ROOT; };
 		9B83FF3F0B12248800878E8A /* AAGrowlPlugin.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AAGrowlPlugin.mm; path = ../src/macosx/AAGrowlPlugin.mm; sourceTree = SOURCE_ROOT; };
 		9B83FF5B0B1227BD00878E8A /* AAGrowlBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AAGrowlBridge.h; path = ../src/macosx/AAGrowlBridge.h; sourceTree = "<group>"; };
 		9B83FF5C0B1227BD00878E8A /* AAGrowlBridge.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AAGrowlBridge.mm; path = ../src/macosx/AAGrowlBridge.mm; sourceTree = "<group>"; };
 		9B86E63A0A2DFDA600D90F1C /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config_common.h; path = ../src/macosx/config_common.h; sourceTree = SOURCE_ROOT; };
-		9B97FE5A0B053AC2005900E3 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = ../scripts; sourceTree = SOURCE_ROOT; };
 		9B9E23FA0A825FA90067CCFA /* tValueParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tValueParser.h; sourceTree = "<group>"; };
 		9BA7031E0B05FAEC00732923 /* tFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tFunction.cpp; sourceTree = "<group>"; };
 		9BA7031F0B05FAEC00732923 /* tFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tFunction.h; sourceTree = "<group>"; };
@@ -1124,6 +1137,7 @@
 			isa = PBXGroup;
 			children = (
 				9B5B6FEA0B5A8ED0003DE8B6 /* eGameObject.i */,
+				9B61F1AA0B6010E20018DEA7 /* eNetGameObject.i */,
 				9B5B70670B5A9399003DE8B6 /* eSensor.i */,
 			);
 			path = engine;
@@ -1132,9 +1146,20 @@
 		9B5B708B0B5A9460003DE8B6 /* tron */ = {
 			isa = PBXGroup;
 			children = (
+				9B61EB760B5FEC360018DEA7 /* gAIBase.i */,
+				9B61F1E30B6012190018DEA7 /* gCycle.i */,
+				9B61F1CD0B6011A90018DEA7 /* gCycleMovement.i */,
 				9B5B708C0B5A946B003DE8B6 /* gSensor.i */,
 			);
 			path = tron;
+			sourceTree = "<group>";
+		};
+		9B61F17B0B600F910018DEA7 /* network */ = {
+			isa = PBXGroup;
+			children = (
+				9B61F17D0B600FA30018DEA7 /* nNetObject.i */,
+			);
+			path = network;
 			sourceTree = "<group>";
 		};
 		9BC001A40B5196570041120B /* ui */ = {
@@ -1161,6 +1186,7 @@
 				9B5B70AF0B5A9662003DE8B6 /* defs.i */,
 				9BEF8F810B52BEB100BFEC20 /* std */,
 				9BC0F6210B517AD90041120B /* tools */,
+				9B61F17B0B600F910018DEA7 /* network */,
 				9BC001A40B5196570041120B /* ui */,
 				9B5B6FE80B5A8EB1003DE8B6 /* engine */,
 				9B5B708B0B5A9460003DE8B6 /* tron */,
@@ -1230,8 +1256,8 @@
 		9BD7DADF0A2CAC6400D7033C /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				9B61EBBC0B5FEF010018DEA7 /* scripts */,
 				9B310B5C0B57543500708FCF /* ruby */,
-				9B97FE5A0B053AC2005900E3 /* scripts */,
 				9BD7DB7D0A2CE35600D7033C /* Armagetron Advanced.icns */,
 				9BD7DAE20A2CAE0700D7033C /* config */,
 				9BD7DAFE0A2CAE1D00D7033C /* language */,
@@ -1370,8 +1396,8 @@
 				9BD7DB3E0A2CAE4600D7033C /* textures in Resources */,
 				9BD7DB770A2CE28500D7033C /* SDLMain.nib in Resources */,
 				9BD7DB7E0A2CE35600D7033C /* Armagetron Advanced.icns in Resources */,
-				9B97FE600B053AC2005900E3 /* scripts in Resources */,
 				9B310E390B57543800708FCF /* ruby in Resources */,
+				9B61EBC30B5FEF010018DEA7 /* scripts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

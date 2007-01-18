@@ -52,12 +52,47 @@ typedef enum
 }
 gAI_STATE;
 
+class gSimpleAI
+{
+public:
+    gSimpleAI()
+    {
+    }
+    
+    // do the thinking
+    inline REAL Think()
+    {
+        return DoThink();
+    }
+    
+    virtual ~gSimpleAI(){}
+    
+    gCycle * Object(){ return object_; }
+    void SetObject( gCycle * cycle ){ object_ = cycle; }
+protected:
+    virtual REAL DoThink() = 0;
+private:
+    tJUST_CONTROLLED_PTR< gCycle > object_;
+};
+
+class gSimpleAIFactory: public tListItem< gSimpleAIFactory >
+{
+public:
+    gSimpleAI * Create( gCycle * object ) const;
+    static gSimpleAIFactory * Get();    
+    static void Set( gSimpleAIFactory * factory );
+protected:
+    virtual gSimpleAI * DoCreate() const = 0;
+private:
+    static gSimpleAIFactory *factory_;
+};
 
 class gAIPlayer: public ePlayerNetID{
     friend class gAITeam;
 
     tReproducibleRandomizer randomizer_;
 protected:
+    gSimpleAI *simpleAI_;
     gAICharacter*           character; // our specification of abilities
 
     // for all offensive modes:

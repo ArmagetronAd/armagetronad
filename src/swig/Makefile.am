@@ -2,7 +2,9 @@
 INTERFACEFILES = ext/armagetronad.i ext/std/sstream.i ext/tools/tConfiguration.i  \
                  ext/tools/tDirectories.i ext/tools/tLocale.i ext/tools/tString.i \
                  ext/ui/uMenu.i ext/engine/eGameObject.i ext/engine/eSensor.i     \
-                 ext/tron/gSensor.i ext/defs.i
+                 ext/tron/gSensor.i ext/defs.i ext/tron/gAIBase.i                 \
+                 ext/tron/gCycleMovement.i ext/tron/gCycle.i                      \
+                 ext/engine/eNetGameObject.i ext/network/nNetObject.i
 
 # although they should not be needed for a plain build, the interfaces are the true sources.
 EXTRA_DIST = ${INTERFACEFILES} ext/armagetronad_wrap.cxx ext/armagetronad_wrap.h

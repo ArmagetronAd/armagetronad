@@ -5,8 +5,7 @@
 class eSensor: public eGameObject{
 public:
     REAL            hit;            // where is the eWall?
-    // TODO
-    // tCHECKED_PTR_CONST(eHalfEdge) ehit;     // the eWall we sense
+    eHalfEdge *ehit;     // the eWall we sense
     int             lr;         // and direction it goes to (left/right)
     eCoord           before_hit; // a point shortly before that eWall
     

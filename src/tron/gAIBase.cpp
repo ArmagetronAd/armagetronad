@@ -68,6 +68,26 @@ static tReferenceHolder< gAIPlayer > sg_AIReferences;
 
 static tCONTROLLED_PTR(gAITeam) sg_AITeam = NULL;
 
+gSimpleAIFactory *gSimpleAIFactory::factory_ = NULL;
+
+gSimpleAI * gSimpleAIFactory::Create( gCycle * object ) const
+{
+    gSimpleAI * ai = DoCreate();
+    if ( ai )
+        ai->SetObject( object );
+    return ai;
+}
+
+gSimpleAIFactory * gSimpleAIFactory::Get()
+{
+    return factory_;
+}
+
+void gSimpleAIFactory::Set( gSimpleAIFactory * factory )
+{
+    factory_ = factory;
+}
+
 static gAITeam* AITeam()
 {
     if ( !sg_AITeam )
@@ -1075,7 +1095,8 @@ gAIPlayer::gAIPlayer():
         lastTime(se_GameTime()),
         nextTime(0),
         concentration(1),
-        log(NULL)
+        log(NULL),
+        simpleAI_(NULL)
 {
     character = NULL;
     ClearTarget();
@@ -2539,6 +2560,9 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
     if ( nCLIENT == sn_GetNetState() )
         return;
 
+    if ( simpleAI_ )
+        return;
+
     if (!character)
     {
         st_Breakpoint();
@@ -2692,6 +2716,20 @@ static gAISensor * sg_GetSensor( int currentDirectionNumber, gCycle const & obje
 }
 
 REAL gAIPlayer::Think(){
+    if ( !simpleAI_ )
+    {
+        gSimpleAIFactory * factory = gSimpleAIFactory::Get();
+        if ( factory )
+        {
+            simpleAI_ = factory->Create( Object() );
+        }
+    }
+    
+    if ( simpleAI_ )
+    {
+        return simpleAI_->Think();
+    }
+    
     // get the delay between two turns
     REAL delay = Delay();
 
