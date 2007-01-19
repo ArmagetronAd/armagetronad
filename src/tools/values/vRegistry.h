@@ -68,9 +68,10 @@ public:
     void reg(Registration *me);
     Expr::
     Base *create(std::vector<tString> flags, tString fname, arglist);
-};
 
-extern Registry theRegistry;
+    //! Singleton accessor
+    static Registry & theRegistry();
+};
 
 }
 }

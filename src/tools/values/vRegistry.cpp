@@ -37,7 +37,7 @@ Registration::Registration(std::vector<tString> flags, tString fname, int argc, 
         m_argc(argc),
         m_ctor(ctor)
 {
-    theRegistry.reg(this);
+    Registry::theRegistry().reg(this);
 }
 
 Registration::Registration(const char *flags, const char *fname, int argc, fptr ctor):
@@ -58,7 +58,7 @@ Registration::Registration(const char *flags, const char *fname, int argc, fptr 
         std::string s(ptr, ep - ptr);
         m_flags.push_back(s);
     }
-    theRegistry.reg(this);
+    Registry::theRegistry().reg(this);
 }
 
 Expr::
@@ -112,7 +112,11 @@ Registry::create(std::vector<tString> flags, tString fname, arglist args)
     return NULL;
 }
 
-Registry theRegistry;
+Registry & Registry::theRegistry()
+{
+    static Registry theRegistry;
+    return theRegistry;
+}
 
 }
 }

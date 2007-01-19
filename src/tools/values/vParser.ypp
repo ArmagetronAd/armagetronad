@@ -126,7 +126,7 @@ function:
 	  {
 		std::vector<tString> flags;
 		flags.push_back(tString("func"));
-		$$ = Registry::theRegistry.create(flags, *$1, *$3);
+		$$ = Registry::Registry::theRegistry().create(flags, *$1, *$3);
 		delete $1;
 		delete $3;
 	  }
