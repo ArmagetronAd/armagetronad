@@ -22,13 +22,15 @@ end
 class ScriptAIFactory < Armagetronad::GSimpleAIFactory
   def do_create
     ret = ScriptAI.new
-	ObjectSpace.define_finalizer( ret, slambda { puts "ai collected" } )
+	ObjectSpace.define_finalizer( ret, lambda { puts "ai collected" } )
 	ret
   end
 end
 
 factory = ScriptAIFactory.new
 Armagetronad::GSimpleAIFactory.set(factory)
-ObjectSpace.define_finalizer( factory, slambda { puts "factory collected" } )
-#factory = 1
-puts "ai"
+ObjectSpace.define_finalizer( factory, lambda { puts "factory collected" } )
+# keep the factory variable, it prevents the factory from getting collected.
+# the AIs get called in short intervals and should survive because of that
+# (ugly and not to be kept that way)
+puts "ai initialized"
