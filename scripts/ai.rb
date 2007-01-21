@@ -21,8 +21,14 @@ end
 
 class ScriptAIFactory < Armagetronad::GSimpleAIFactory
   def do_create
-    ScriptAI.new
+    ret = ScriptAI.new
+	ObjectSpace.define_finalizer( ret, slambda { puts "ai collected" } )
+	ret
   end
 end
 
-Armagetronad::GSimpleAIFactory.set(ScriptAIFactory.new)
+factory = ScriptAIFactory.new
+Armagetronad::GSimpleAIFactory.set(factory)
+ObjectSpace.define_finalizer( factory, slambda { puts "factory collected" } )
+#factory = 1
+puts "ai"
