@@ -229,8 +229,8 @@ public:
 
 
     void RemoveFromGame();
-    void ControlObject(eNetGameObject *c);
-    void ClearObject();
+    virtual void ControlObject(eNetGameObject *c);
+    virtual void ClearObject();
 
     void Greet();
     void Auth(); 										// make the authentification valid

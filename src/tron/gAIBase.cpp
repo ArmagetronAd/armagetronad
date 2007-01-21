@@ -70,6 +70,11 @@ static tCONTROLLED_PTR(gAITeam) sg_AITeam = NULL;
 
 gSimpleAIFactory *gSimpleAIFactory::factory_ = NULL;
 
+gSimpleAI::~gSimpleAI()
+{
+    con << "simple AI destroyed.\n";
+}
+
 gSimpleAI * gSimpleAIFactory::Create( gCycle * object ) const
 {
     gSimpleAI * ai = DoCreate();
@@ -1089,14 +1094,14 @@ gAIPlayer::gAIPlayer(nMessage &m) :
 
 
 gAIPlayer::gAIPlayer():
+        simpleAI_(NULL),
         character(NULL),
         //	target(NULL),
         lastPath(se_GameTime()-100),
         lastTime(se_GameTime()),
         nextTime(0),
         concentration(1),
-        log(NULL),
-        simpleAI_(NULL)
+        log(NULL)
 {
     character = NULL;
     ClearTarget();

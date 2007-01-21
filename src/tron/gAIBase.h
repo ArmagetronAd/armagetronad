@@ -65,7 +65,7 @@ public:
         return DoThink();
     }
     
-    virtual ~gSimpleAI(){}
+    virtual ~gSimpleAI();
     
     gCycle * Object(){ return object_; }
     void SetObject( gCycle * cycle ){ object_ = cycle; }
@@ -204,6 +204,9 @@ public:
     static void SetNumberOfAIs(int num, int minPlayers, int iq, int tries=3); // make sure this many AI players are in the game (with approximately the given IQ)
 
     void ClearTarget(){target=NULL;}
+
+    virtual void ControlObject(eNetGameObject *c){ ePlayerNetID::ControlObject( c ); simpleAI_ = NULL; }
+    virtual void ClearObject(){ ePlayerNetID::ClearObject(); simpleAI_ = NULL; }
 
     // do some thinking. Return value: time to think again
     virtual REAL Think();
