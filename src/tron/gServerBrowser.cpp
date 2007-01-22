@@ -568,7 +568,9 @@ void gServerMenuItem::RenderBackground()
         else
             players << tOutput( "$network_master_players_empty" );
         players << "\n" << tColoredString::ColorString(1,1,1);
-        players << tOutput( "$network_master_serverinfo", server->Release(), server->Url(), server->Options() );
+        tColoredString uri;
+        uri << server->Url() << tColoredString::ColorString(1,1,1);
+        players << tOutput( "$network_master_serverinfo", server->Release(), uri, server->Options() );
     }
 #endif
 }

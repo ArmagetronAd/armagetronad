@@ -1952,7 +1952,7 @@ network_master_upgrage        Une mise a jour est necessaire
 network_master_downgrage      Le serveur n'est plus a jour
 network_master_incompatible   Le serveur n'est pas compatible
 network_master_full           Le serveur est plein
-network_master_serverinfo     Version: \1\nURI    : \2\n
+network_master_serverinfo     Version: \1\nURI    : \2\nOptions: \3\n
 network_master_players        Joueurs: 
 network_master_players_empty  vide
 network_master_options        Options:\n

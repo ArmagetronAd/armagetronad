@@ -716,14 +716,14 @@ void exit_game_objects(eGrid *grid){
             tDESTROY(ePlayer::PlayerConfig(i)->cam);
     }
 
+    eGameObject::DeleteAll(grid);
+
     if (sn_GetNetState()!=nCLIENT)
         for(int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
             if(se_PlayerNetIDs(i))
                 se_PlayerNetIDs(i)->ClearObject();
 
     gNetPlayerWall::Clear();
-
-    eGameObject::DeleteAll(grid);
 
     exit_game_grid(grid);
 }
@@ -2423,6 +2423,7 @@ void gGame::StateUpdate(){
             //				for (unsigned short int mycy = 0; mycy > sg_roundConsoleMessage5.Len(); c++)
 
             exit_game_objects(grid);
+            nNetObject::ClearAllDeleted();
 
             if (goon)
                 SetState(GS_TRANSFER_SETTINGS,GS_CREATE_GRID);
