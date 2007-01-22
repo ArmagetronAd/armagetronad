@@ -701,7 +701,7 @@ int main(int argc,char **argv){
 
 #ifdef HAVE_LIBRUBY      
                     try {
-                        tRuby::Load(tDirectories::Data(), "scripts/menu.rb");
+                        // tRuby::Load(tDirectories::Data(), "scripts/menu.rb");
                         tRuby::Load(tDirectories::Data(), "scripts/ai.rb");
                     }
                     catch (std::runtime_error & e) {

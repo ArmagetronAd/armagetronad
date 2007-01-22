@@ -250,10 +250,6 @@
 		9B4A1A280A7A95890070BE82 /* mathexpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A1A210A7A95890070BE82 /* mathexpr.cpp */; };
 		9B4A1A2E0A7A95890070BE82 /* mathexpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A1A210A7A95890070BE82 /* mathexpr.cpp */; };
 		9B61EBC30B5FEF010018DEA7 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 9B61EBBC0B5FEF010018DEA7 /* scripts */; };
-		9B61F17E0B600FA30018DEA7 /* nNetObject.i in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B61F17D0B600FA30018DEA7 /* nNetObject.i */; };
-		9B61F1AB0B6010E20018DEA7 /* eNetGameObject.i in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B61F1AA0B6010E20018DEA7 /* eNetGameObject.i */; };
-		9B61F1CE0B6011A90018DEA7 /* gCycleMovement.i in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B61F1CD0B6011A90018DEA7 /* gCycleMovement.i */; };
-		9B61F1E40B6012190018DEA7 /* gCycle.i in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B61F1E30B6012190018DEA7 /* gCycle.i */; };
 		9B83FE950B12161600878E8A /* Growl-WithInstaller.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9B83FF0F0B121B3100878E8A /* Growl-WithInstaller.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9B83FF410B12248800878E8A /* AAGrowlPlugin.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B83FF3F0B12248800878E8A /* AAGrowlPlugin.mm */; };
@@ -342,10 +338,6 @@
 				9BD7D9A70A2C7CCF00D7033C /* libpng.framework in Copy Frameworks */,
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
-				9B61F17E0B600FA30018DEA7 /* nNetObject.i in Copy Frameworks */,
-				9B61F1AB0B6010E20018DEA7 /* eNetGameObject.i in Copy Frameworks */,
-				9B61F1CE0B6011A90018DEA7 /* gCycleMovement.i in Copy Frameworks */,
-				9B61F1E40B6012190018DEA7 /* gCycle.i in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
