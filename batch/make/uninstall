@@ -40,21 +40,9 @@ TMPBIN=${DESTDIR}${PREFIX}/armatempbin
 test -d ${TMPBIN} || mkdir ${TMPBIN} || exit 1
 RM=${TMPBIN}/rm
 
-# eek, that's horrible. For every call to rm, we need to record what is done, but we
-# have to revert the value of ${DESTDIR} with the literal ${DESTDIR}. A lot of
-# escaping is needed to get the literal through all the expansion layers.
-
 cat > ${RM} <<EOF
 #! /bin/sh
-ARGS=""
-for arg in "\$@"; do
- #echo \${arg}
- arg_trans=\`echo "\${arg}" | sed -e "s,^${DESTDIR},\\\\\\\${DESTDIR},"\`
- #echo \${arg_trans}
- ARGS="\${ARGS} \"\${arg_trans}\""
-done
-#echo "\${ARGS}"
-echo rm "\${ARGS}" >> ${UNINSTALL}
+echo rm "\$*" | sed -e s/DESTDIR_UNINSTALL/\\\${DESTDIR}/g >> ${UNINSTALL}
 EOF
 
 chmod 755 ${RM} || exit 1
@@ -63,7 +51,7 @@ chmod 755 ${RM} || exit 1
 OLDPATH=$PATH
 PATH=${TMPBIN}:$OLDPATH
 export PATH
-AA_FAKE_UNINSTALL="YES" ${MAKE} uninstall > /dev/null || exit 1
+AA_FAKE_UNINSTALL="YES" DESTDIR=DESTDIR_UNINSTALL ${MAKE} uninstall > /dev/null || exit 1
 
 # remove the wrapper
 PATH=$OLDPATH
