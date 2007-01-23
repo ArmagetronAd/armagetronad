@@ -33,3 +33,12 @@ key         0
 tna         0
 name        Master Server 4
 ServerEnd
+
+ServerBegin
+connection master5.armagetronad.net
+port       4533
+key        0
+key        0
+tna        0
+name       Master Server 5
+ServerEnd
