@@ -67,12 +67,12 @@ void rViewport::Perspective(REAL fov,REAL nnear,REAL ffar){
         return;
 
     // Jonathan's improved version
-    REAL aspectratio = (height * sr_screenHeight) / (width * sr_screenWidth * currentScreensetting.aspect); 
-     REAL ensureverticalfov = fmax((3.0 / 5.0) * aspectratio, 1.0); 
-     REAL xmul = ensureverticalfov * tan((M_PI / 360.0) * fov); 
-     REAL ymul = ensureverticalfov * aspectratio * xmul; 
-     glMatrixMode(GL_PROJECTION);
-     glFrustum(-nnear * xmul, nnear * xmul, -nnear * ymul, nnear * ymul, nnear, ffar); 
+    REAL aspectratio = (height * sr_screenHeight) / (width * sr_screenWidth * currentScreensetting.aspect);
+    REAL ensureverticalfov = fmax((3.0 / 5.0) * aspectratio, 1.0);
+    REAL xmul = ensureverticalfov * tan((M_PI / 360.0) * fov);
+    REAL ymul = ensureverticalfov * aspectratio * xmul;
+    glMatrixMode(GL_PROJECTION);
+    glFrustum(-nnear * xmul, nnear * xmul, -nnear * ymul, nnear * ymul, nnear, ffar);
 
 #if 0 // Z-Man's old and clumsy version
     REAL ratio=currentScreensetting.aspect*(width*sr_screenWidth)/(height*sr_screenHeight);
