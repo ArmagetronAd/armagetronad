@@ -1774,19 +1774,20 @@ gDestination* gCycleExtrapolator::GetCurrentDestination() const
 
 bool gCycleExtrapolator::EdgeIsDangerous(const eWall *ww, REAL time, REAL alpha ) const
 {
-    // ignore temporary walls, they may not be real
     const gPlayerWall *w = dynamic_cast<const gPlayerWall*>(ww);
     if (w)
     {
         gNetPlayerWall* nw = w->NetWall();
-        if ( nw && nw->Preliminary() && w->Cycle() == parent_ )
-            return false;
 
         // get time the wall was built
         REAL builtTime = w->Time(alpha);
 
         // is the wall built in the future ( happens during extrapolation )
         if ( builtTime > time )
+            return false;
+
+        // ignore temporary walls in some cases, they may not be real
+        if ( nw && nw->Preliminary() && w->Cycle() == parent_ && fabs( dirDrive * w->Vec() ) < EPS )
             return false;
 
         // ignore recent walls of parent cycle
