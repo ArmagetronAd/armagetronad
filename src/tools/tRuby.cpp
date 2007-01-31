@@ -23,11 +23,8 @@ VALUE EvalProtect(VALUE code);
 void InitializeInterpreter()
 {
     ruby_init();
-#ifdef MACOSX_XCODE
-    AARuby_init_loadpath();
-#else
-    ruby_init_loadpath();
-#endif
+    VALUE load_path = rb_gv_get("$LOAD_PATH");
+    rb_ary_push(load_path, rb_str_new2("."));
     Init_armagetronad();
     ruby_script("Armagetron Advanced");
 }

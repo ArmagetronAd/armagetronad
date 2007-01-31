@@ -232,7 +232,6 @@
 		9B26D98E0A64AE5400F9864B /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B26D98C0A64AE5400F9864B /* eLagCompensation.cpp */; };
 		9B26D9900A64AE5500F9864B /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B26D98C0A64AE5400F9864B /* eLagCompensation.cpp */; };
 		9B30C74E0B111D66006D158D /* eEventNotification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B30C74C0B111D66006D158D /* eEventNotification.cpp */; };
-		9B310E390B57543800708FCF /* ruby in Resources */ = {isa = PBXBuildFile; fileRef = 9B310B5C0B57543500708FCF /* ruby */; };
 		9B4A19D20A7A90620070BE82 /* zEffectGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C20A7A90620070BE82 /* zEffectGroup.cpp */; };
 		9B4A19D40A7A90620070BE82 /* zEffector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C40A7A90620070BE82 /* zEffector.cpp */; };
 		9B4A19D70A7A90620070BE82 /* zMonitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A19C70A7A90620070BE82 /* zMonitor.cpp */; };
@@ -254,11 +253,10 @@
 		9B83FF0F0B121B3100878E8A /* Growl-WithInstaller.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9B83FF410B12248800878E8A /* AAGrowlPlugin.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B83FF3F0B12248800878E8A /* AAGrowlPlugin.mm */; };
 		9B83FF5E0B1227BD00878E8A /* AAGrowlBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9B83FF5C0B1227BD00878E8A /* AAGrowlBridge.mm */; };
+		9BA6833F0B6BA4B1004FA157 /* libruby1.8-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BA6833E0B6BA4B1004FA157 /* libruby1.8-static.a */; };
 		9BA703200B05FAEC00732923 /* tFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BA7031E0B05FAEC00732923 /* tFunction.cpp */; };
 		9BAD56D30B57CAA800914844 /* tDecorator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BAD56D10B57CAA800914844 /* tDecorator.cpp */; };
 		9BAF03D90B07A4D100D984EA /* AARuby.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BAF03D70B07A4D100D984EA /* AARuby.mm */; };
-		9BAF04390B07A70C00D984EA /* libruby1.8.1.8.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */; };
-		9BAF04460B07A81E00D984EA /* libruby1.8.1.8.5.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */; };
 		9BC0011B0B51859F0041120B /* armagetronad.i in Sources */ = {isa = PBXBuildFile; fileRef = 9BC0F61F0B517AD90041120B /* armagetronad.i */; };
 		9BD56C4A0A8B899700AC1048 /* vCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C370A8B899700AC1048 /* vCollection.cpp */; };
 		9BD56C4C0A8B899700AC1048 /* vCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BD56C390A8B899700AC1048 /* vCore.cpp */; };
@@ -310,7 +308,7 @@
 			outputFiles = (
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).tab.cpp",
 			);
-			script = "${BISON} -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.tab.cpp\" \"${INPUT_FILE_PATH}\"";
+			script = "${BISON} -p aayy -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.tab.cpp\" \"${INPUT_FILE_PATH}\"";
 		};
 		9BC0F61A0B517A8B0041120B /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
@@ -334,7 +332,6 @@
 			dstSubfolderSpec = 10;
 			files = (
 				9B83FF0F0B121B3100878E8A /* Growl-WithInstaller.framework in Copy Frameworks */,
-				9BAF04460B07A81E00D984EA /* libruby1.8.1.8.5.dylib in Copy Frameworks */,
 				9BD7D9A70A2C7CCF00D7033C /* libpng.framework in Copy Frameworks */,
 				9BD7D9A80A2C7CCF00D7033C /* SDL_image.framework in Copy Frameworks */,
 				9BD7D9AA0A2C7CCF00D7033C /* SDL.framework in Copy Frameworks */,
@@ -586,7 +583,6 @@
 		9B26D98D0A64AE5400F9864B /* eLagCompensation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eLagCompensation.h; sourceTree = "<group>"; };
 		9B30C74C0B111D66006D158D /* eEventNotification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eEventNotification.cpp; sourceTree = "<group>"; };
 		9B30C74D0B111D66006D158D /* eEventNotification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eEventNotification.h; sourceTree = "<group>"; };
-		9B310B5C0B57543500708FCF /* ruby */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ruby; path = /Library/Frameworks/ArmagetronAdvanced/current/ruby; sourceTree = "<absolute>"; };
 		9B4A19C10A7A90620070BE82 /* shapeCircle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shapeCircle.h; sourceTree = "<group>"; };
 		9B4A19C20A7A90620070BE82 /* zEffectGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zEffectGroup.cpp; sourceTree = "<group>"; };
 		9B4A19C30A7A90620070BE82 /* zEffectGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zEffectGroup.h; sourceTree = "<group>"; };
@@ -623,13 +619,13 @@
 		9B83FF5C0B1227BD00878E8A /* AAGrowlBridge.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AAGrowlBridge.mm; path = ../src/macosx/AAGrowlBridge.mm; sourceTree = "<group>"; };
 		9B86E63A0A2DFDA600D90F1C /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config_common.h; path = ../src/macosx/config_common.h; sourceTree = SOURCE_ROOT; };
 		9B9E23FA0A825FA90067CCFA /* tValueParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tValueParser.h; sourceTree = "<group>"; };
+		9BA6833E0B6BA4B1004FA157 /* libruby1.8-static.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libruby1.8-static.a"; path = "/Library/Frameworks/ArmagetronAdvanced/current/libruby1.8-static.a"; sourceTree = "<absolute>"; };
 		9BA7031E0B05FAEC00732923 /* tFunction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tFunction.cpp; sourceTree = "<group>"; };
 		9BA7031F0B05FAEC00732923 /* tFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tFunction.h; sourceTree = "<group>"; };
 		9BAD56D10B57CAA800914844 /* tDecorator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tDecorator.cpp; sourceTree = "<group>"; };
 		9BAD56D20B57CAA800914844 /* tDecorator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tDecorator.h; sourceTree = "<group>"; };
 		9BAF03D60B07A4D100D984EA /* AARuby.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AARuby.h; path = ../src/macosx/AARuby.h; sourceTree = SOURCE_ROOT; };
 		9BAF03D70B07A4D100D984EA /* AARuby.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AARuby.mm; path = ../src/macosx/AARuby.mm; sourceTree = SOURCE_ROOT; };
-		9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libruby1.8.1.8.5.dylib; path = /Library/Frameworks/ArmagetronAdvanced/current/libruby1.8.1.8.5.dylib; sourceTree = "<absolute>"; };
 		9BC001A50B5196620041120B /* uMenu.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = uMenu.i; sourceTree = "<group>"; };
 		9BC0F61F0B517AD90041120B /* armagetronad.i */ = {isa = PBXFileReference; explicitFileType = sourcecode.interfacer; fileEncoding = 4; path = armagetronad.i; sourceTree = "<group>"; };
 		9BC0F6220B517AD90041120B /* tConfiguration.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.interfacer; path = tConfiguration.i; sourceTree = "<group>"; };
@@ -686,6 +682,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9BA6833F0B6BA4B1004FA157 /* libruby1.8-static.a in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				8CBA60B1089F00F2007E21DC /* OpenGL.framework in Frameworks */,
 				9BD7D9720A2C7CB400D7033C /* libfreetype.a in Frameworks */,
@@ -693,7 +690,6 @@
 				9BD7D9740A2C7CB400D7033C /* libpng.framework in Frameworks */,
 				9BD7D9750A2C7CB400D7033C /* SDL_image.framework in Frameworks */,
 				9BD7D9770A2C7CB400D7033C /* SDL.framework in Frameworks */,
-				9BAF04390B07A70C00D984EA /* libruby1.8.1.8.5.dylib in Frameworks */,
 				9B83FE950B12161600878E8A /* Growl-WithInstaller.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -724,7 +720,6 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				9BAF04380B07A70C00D984EA /* libruby1.8.1.8.5.dylib */,
 				9BD7D9680A2C7C7800D7033C /* Armagetron Advanced */,
 				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
@@ -1230,8 +1225,9 @@
 				9BD7D96B0A2C7CB400D7033C /* libfreetype.a */,
 				9BD7D96C0A2C7CB400D7033C /* libftgl.a */,
 				9BD7D96D0A2C7CB400D7033C /* libpng.framework */,
-				9BD7D96E0A2C7CB400D7033C /* SDL_image.framework */,
+				9BA6833E0B6BA4B1004FA157 /* libruby1.8-static.a */,
 				9BD7D9700A2C7CB400D7033C /* SDL.framework */,
+				9BD7D96E0A2C7CB400D7033C /* SDL_image.framework */,
 			);
 			name = "Armagetron Advanced";
 			sourceTree = "<group>";
@@ -1249,7 +1245,6 @@
 			isa = PBXGroup;
 			children = (
 				9B61EBBC0B5FEF010018DEA7 /* scripts */,
-				9B310B5C0B57543500708FCF /* ruby */,
 				9BD7DB7D0A2CE35600D7033C /* Armagetron Advanced.icns */,
 				9BD7DAE20A2CAE0700D7033C /* config */,
 				9BD7DAFE0A2CAE1D00D7033C /* language */,
@@ -1388,7 +1383,6 @@
 				9BD7DB3E0A2CAE4600D7033C /* textures in Resources */,
 				9BD7DB770A2CE28500D7033C /* SDLMain.nib in Resources */,
 				9BD7DB7E0A2CE35600D7033C /* Armagetron Advanced.icns in Resources */,
-				9B310E390B57543800708FCF /* ruby in Resources */,
 				9B61EBC30B5FEF010018DEA7 /* scripts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1450,7 +1444,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/zsh;
-			shellScript = "install_name_tool -change \\\n\t/Users/lee/Library/ruby/1.8/lib/libruby1.8.dylib \\\n\t@executable_path/../Frameworks/libruby1.8.dylib  \\\n\t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/MacOS/${PRODUCT_NAME}\"\n\nmv \\\n\t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Frameworks/libruby1.8.1.8.5.dylib\" \\\n\t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Frameworks/libruby1.8.dylib\"\n\n\n# rm -rf \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Resources/ruby\"\n# cp -r \"${HOME}/Library/ruby/1.8/lib/ruby\" \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Resources/ruby\"\n\nfor bundle in \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Resources/ruby/\"**/*.bundle\ndo\n\tchmod 777 \"${bundle}\"\n\tinstall_name_tool -change \\\n\t\t/Users/lee/Library/ruby/1.8/lib/libruby1.8.dylib \\\n\t\t@executable_path/../Frameworks/libruby1.8.dylib \\\n\t\t\"${bundle}\"\t\t\ndone\n";
+			shellScript = "# install_name_tool -change \\\n# \t/Users/lee/Library/ruby/1.8/lib/libruby1.8.dylib \\\n# \t@executable_path/../Frameworks/libruby1.8.dylib  \\\n# \t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/MacOS/${PRODUCT_NAME}\"\n# \n# mv \\\n# \t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Frameworks/libruby1.8.1.8.5.dylib\" \\\n# \t\"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Frameworks/libruby1.8.dylib\"\n# \n# \n# # rm -rf \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Resources/ruby\"\n# # cp -r \"${HOME}/Library/ruby/1.8/lib/ruby\" \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Resources/ruby\"\n# \n# for bundle in \"${CONFIGURATION_BUILD_DIR}/${PRODUCT_NAME}${WRAPPER_SUFFIX}/Contents/Resources/ruby/\"**/*.bundle\n# do\n# \tchmod 777 \"${bundle}\"\n# \tinstall_name_tool -change \\\n# \t\t/Users/lee/Library/ruby/1.8/lib/libruby1.8.dylib \\\n# \t\t@executable_path/../Frameworks/libruby1.8.dylib \\\n# \t\t\"${bundle}\"\t\t\n# done\n";
 		};
 		9BD7DB490A2CBA7A00D7033C /* Run script: Prepare */ = {
 			isa = PBXShellScriptBuildPhase;
