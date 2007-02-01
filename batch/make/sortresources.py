@@ -111,13 +111,15 @@ def getCanonicalPath(path):
 
 # scan for all XML files in the directory and rename them according to the rules
 def scanDir(sourceDir, destinationDir, function):
-    for directory in (os.walk(sourceDir)):
-        for file in directory[2]:
+    def visitor( arg, dirname, names ):
+        for file in names:
             if len(file) > 4 and file[-4:] == ".xml":
-                path = os.path.join(directory[0],file)
+                path = os.path.join(dirname,file)
                 newPath = getCanonicalPath(path)
                 # call the passed function
                 function(path, os.path.join(destinationDir, newPath), newPath)
+        
+    os.path.walk(sourceDir, visitor, visitor )
 
 # move file oldFile to newFile
 def Move(oldFile, newFile, canonicalPath ):
