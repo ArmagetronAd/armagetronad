@@ -22,7 +22,7 @@ endif
 
 %.dep: %.m4 Makefile
 	echo $*.dep ":\\" > $@
-	{ echo -n "define(include,$(srcdir)/\$$1\)" ; grep "include(" $<; }| m4 >> $@
+	grep "include(" $< | sed -e "s,include(\(.*\)),$(srcdir)/\1\\\," >> $@
 	echo "Makefile" >> $@
 endif
 
