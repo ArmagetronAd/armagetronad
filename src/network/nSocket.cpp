@@ -47,6 +47,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #ifndef WIN32
 #include <arpa/inet.h> 
+#include <netinet/in_systm.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netdb.h>
@@ -1508,11 +1509,7 @@ int nSocket::Create( void )
 #ifndef WIN32
     char tos = IPTOS_LOWDELAY;
 
-#   ifdef MACOSX
     int ret = setsockopt( socket_, IPPROTO_IP, IP_TOS, &tos, sizeof(char) );
-#   else
-    int ret = setsockopt( socket_, SOL_IP, IP_TOS, &tos, sizeof(char) );
-#   endif
 
     // remove this error reporting some time later, the success is not critical
     if ( ret != 0 )
