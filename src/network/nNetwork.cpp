@@ -984,7 +984,7 @@ nMessage& nMessage::operator << (const tColoredString &s){
 }
 
 nMessage& nMessage::operator << ( const tOutput &o ){
-    return *this << static_cast< tString >( o );
+    return *this << tString( static_cast< const char * >( o ) );
 }
 
 bool sn_filterColorStrings = false;
