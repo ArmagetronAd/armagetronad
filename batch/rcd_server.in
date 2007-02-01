@@ -1,29 +1,23 @@
 #! /bin/bash
-# 
-# script to be put in /etc/rc.d to start @progtitle@ server process
-# tested on Gentoo 2004.4
-# Author: Manuel Moos <manuel@moosnet.de>
-#
-
-# set -x
+# armagetronad start script
 
 # program installation directory
 PROGDIR=@scriptdir_reloc@
 
 # load configuration
-. $PROGDIR/rcd_config
+. ${PROGDIR}/rcd_config
 
 # files where PIDs are stored
-STARTERPIDFILE=$PIDDIR/@progname@-starter.pid
-MAINPIDFILE=$PIDDIR/@progname@.pid
+STARTERPIDFILE=${PIDDIR}/@progname@-starter.pid
+MAINPIDFILE=${PIDDIR}/@progname@.pid
 
 # program to run
 BINARY=serverstarter
-BINFILE=$PROGDIR/$BINARY
+BINFILE=${PROGDIR}/${BINARY}
 TYPE=server
 
 # log file
-LOGFILE=$LOGDIR/@prognamebase@.log
+LOGFILE=${LOGDIR}/@prognamebase@.log
 
 # delegate to common start/stop/status code
-. $RCDDIR/rcd_startstop
+. ${RCDDIR}/rcd_startstop
