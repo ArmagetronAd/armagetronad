@@ -42,7 +42,7 @@ case "$1" in
 	COUNT=10
 	while [ ${COUNT} -gt 0 ]; do
 		[ -s ${MAINPIDFILE} ] && COUNT=0 || sleep 1
-		COUNT=$((COUNT-1))
+		COUNT=`expr ${COUNT} - 1`
 	done
 	[ -s ${MAINPIDFILE} ] || return=${rc_failed}
 	echo -e "${return}"
