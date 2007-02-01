@@ -100,8 +100,8 @@ inline REAL fabsf( REAL x ) throw() { return REAL(fabs( x )); }
 inline REAL floorf( REAL x ) throw() { return REAL(floor( x )); }
 #endif
 
-#ifdef WIN32
-// this function does not seem to exist in windows...
+#ifndef HAVE_ISBLANK
+// this function does not seem to exist in windows and solaris 2.8
 inline bool isblank(int x){ return ((x == ' ') || (x == '\t')); }
 #endif
 
