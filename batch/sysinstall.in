@@ -48,7 +48,7 @@ PREFIX="$1"
 shift
 
 INSTALLING="Installing"
-test ${MODE} == install || INSTALLING="Uninstalling"
+test ${MODE} = install || INSTALLING="Uninstalling"
 
 # prefix in lowercase is the prefix the game was built with. For source
 # installations, this will be identical to PREFIX, but for binary installs
@@ -222,7 +222,7 @@ if test @enable_initscripts@ = yes ; then
     fi
 
     # install/uninstall scripts
-    if test @initdir@ == OpenBSD; then
+    if test @initdir@ = OpenBSD; then
         if test -z "${DESTDIR}${ROOTDIR}" && test -w /etc/rc.local; then
         # special code for OpenBSD, they don't use init script directories, but one huge
         # file where you have to add your startup stuff. The parts that work done
