@@ -662,7 +662,7 @@ static void display_cockpit_lucifer() {
         ePlayer* player = ePlayer::PlayerConfig( playerID );
 
         // select the corrected viewport
-        viewportConfiguration->Port( viewport )->CorrectAspectBottom().Select();
+        viewportConfiguration->Port( viewport )->EqualAspectBottom().Select();
 
         // delegate
         theCockpit->SetPlayer( player );
@@ -709,6 +709,7 @@ bool cCockpit::HandleEvent(int id, bool state) {
 void cCockpit::Readjust(void) {
     if (sr_screenWidth == 0) return;
     float factor = 4./3. / (static_cast<float>(sr_screenWidth)/static_cast<float>(sr_screenHeight));
+	std::cerr << "factor: " << factor << std::endl;
     //float factor = 2.;
     for(widget_list_t::iterator iter = m_Widgets_perplayer.begin(); iter != m_Widgets_perplayer.end(); ++iter) {
         if(cWidget::WithCoordinates *coordWidget = dynamic_cast<cWidget::WithCoordinates *>(&(*(*iter)))) {

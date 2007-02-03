@@ -58,6 +58,9 @@ public:
     //! returns a viewport with normal aspect ratio that coincides with this viewport in the bottom line
     rViewport CorrectAspectBottom() const;
 
+	//! returns a viewport that has the same scale horizontally and vertically
+    rViewport EqualAspectBottom() const;
+
     static rViewport s_viewportFullscreen,
     s_viewportLeft,s_viewportRight,
     s_viewportTop,s_viewportBottom,

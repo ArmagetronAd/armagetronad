@@ -306,4 +306,12 @@ rViewport rViewport::CorrectAspectBottom( void ) const
     return ret;
 }
 
+rViewport rViewport::EqualAspectBottom( void ) const
+{
+    rViewport ret( *this );
+    ret.height = width * sr_screenWidth / sr_screenHeight;
+
+    return ret;
+}
+
 
