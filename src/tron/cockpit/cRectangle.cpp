@@ -48,7 +48,7 @@ bool Rectangle::Process(tXmlParser::node cur) {
 }
 
 void Rectangle::Render() {
-    sr_ResetRenderState(0);
+    glDisable(GL_TEXTURE_2D);
     float val=m_data.GetVal().GetFloat();
     float min=m_data.GetMin().GetFloat();
     float max=m_data.GetMax().GetFloat();

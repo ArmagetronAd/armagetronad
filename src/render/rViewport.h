@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "defs.h"
 #include "tString.h"
+#include "tCoord.h"
 #include "tSafePTR.h"
 
 class rViewport{
@@ -58,8 +59,11 @@ public:
     //! returns a viewport with normal aspect ratio that coincides with this viewport in the bottom line
     rViewport CorrectAspectBottom() const;
 
-	//! returns a viewport that has the same scale horizontally and vertically
+    //! returns a viewport that has the same scale horizontally and vertically
     rViewport EqualAspectBottom() const;
+
+    //! returns the height and width of the viewport
+    tCoord GetDimensions() const {return tCoord(width, height);}
 
     static rViewport s_viewportFullscreen,
     s_viewportLeft,s_viewportRight,
@@ -71,6 +75,7 @@ public:
     static void CorrectViewports(int mp);
     static void SetDirectionOfCorrection(int vp, int dir);
     static void Update(int mp);
+
 };
 
 extern int      sr_viewportBelongsToPlayer[MAX_VIEWPORTS];

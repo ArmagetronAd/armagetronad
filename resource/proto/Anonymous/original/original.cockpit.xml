@@ -244,7 +244,7 @@
                 </Table>
             </Face>
         </Label>
-        <BarGauge camera="^in">
+        <BarGauge camera="^in" viewport="top">
             <DataSet>
                 <AtomicData field="source" source="current_framerate" />
                 <AtomicData field="minimum" source="0" />

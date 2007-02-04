@@ -540,7 +540,7 @@ cCockpit* cCockpit::GetCockpit() {
     return &theHud;
 }
 
-void cCockpit::RenderPlayer() {
+void cCockpit::RenderPlayer(float factor) {
     if(m_FocusPlayer != 0 && m_ViewportPlayer != 0) {
         Color(1,1,1);
         if(m_Player->cam) {
@@ -577,8 +577,12 @@ void cCockpit::RenderPlayer() {
                     case CAMERA_COUNT:
                         continue; //not handled, no sense?!
                     }
-                    if ((*i)->Active())
+                    if ((*i)->Active()) {
+                        if(cWidget::WithCoordinates *coordWidget = dynamic_cast<cWidget::WithCoordinates *>(&(*(*i)))) {
+                            coordWidget->SetFactor(factor);
+                        }
                         (*i)->Render();
+                    }
                 }
                 //  bool displayfastest = true;// put into global, set via menusytem... subby to do.make sr_DISPLAYFASTESTout
 
@@ -638,6 +642,7 @@ void cCockpit::RenderCycle(gCycle const &cycle) {
 static void display_cockpit_lucifer() {
     cCockpit* theCockpit = cCockpit::GetCockpit();
 
+    float factor = 4./3. / (static_cast<float>(sr_screenWidth)/static_cast<float>(sr_screenHeight));
     static bool loaded = false;
     if(!loaded) {
         theCockpit->ProcessCockpit();
@@ -661,12 +666,15 @@ static void display_cockpit_lucifer() {
         // get the player
         ePlayer* player = ePlayer::PlayerConfig( playerID );
 
+        rViewport *port = viewportConfiguration->Port( viewport );
+        tCoord dims = port->GetDimensions();
+
         // select the corrected viewport
-        viewportConfiguration->Port( viewport )->EqualAspectBottom().Select();
+        port->EqualAspectBottom().Select();
 
         // delegate
         theCockpit->SetPlayer( player );
-        theCockpit->RenderPlayer();
+        theCockpit->RenderPlayer( factor * dims.y / dims.x);
     }
 
     theCockpit->RenderRootwindow();

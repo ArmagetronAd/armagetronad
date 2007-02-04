@@ -83,7 +83,7 @@ public:
     void AddEventHandler(int id, cWidget::Base *widget); //!< add a key event handler
 
     void RenderRootwindow(); //!< Renders the main viewport (all widgets that belong to the entire screen)
-    void RenderPlayer(); //!< Renders all widgets that belong to the currently active player
+    void RenderPlayer(float factor); //!< Renders all widgets that belong to the currently active player
 
     void RenderCycle(gCycle const &cycle); //!< Render the cockpit elements above a cycle
 
