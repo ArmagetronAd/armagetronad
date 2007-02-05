@@ -169,7 +169,7 @@ bool Map::Process(tXmlParser::node cur) {
         cur.GetProp("toggleKey", toggleKey);
         if(toggleKey > 0) {
             m_toggleKey = toggleKey;
-            cCockpit::GetCockpit()->AddEventHandler(toggleKey, this);
+            m_Cockpit->AddEventHandler(toggleKey, this);
         }
         for(cur = cur.GetFirstChild(); cur; ++cur) {
             if(cur.IsOfType("MapMode")) {
@@ -242,7 +242,7 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
                   double rw, double rh, double ix, double iy) {
     double pl_CurSpeed, min_dist2, dist2, rad, zoom = 1;
     tCoord pl_CurPos, rotate; // rotate will hold the cos and sin of the rotation to apply
-    cCockpit* cp = cCockpit::GetCockpit();
+    cCockpit* cp = m_Cockpit;
     if(!rimWalls && !cycleWalls && !cycles) return;
     const eRectangle &bounds = eWallRim::GetBounds();
     double lx = bounds.GetLow().x - border, hx = bounds.GetHigh().x + border;

@@ -51,11 +51,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <time.h>
 
 static void parsecockpit () {
-    cCockpit::GetCockpit()->ProcessCockpit();
+    FOREACH_COCKPIT(i) {
+        (*i)->ProcessCockpit();
+    }
 }
 
 static void readjust_cockpit () {
-    cCockpit::GetCockpit()->Readjust();
+    FOREACH_COCKPIT(i) {
+        (*i)->Readjust();
+    }
 }
 
 static rCallbackAfterScreenModeChange reloadft(&readjust_cockpit);
@@ -103,6 +107,7 @@ std::set<tString> stc_forbiddenCallbacks;
 static tString stc_forbiddenCallbacksString;
 #ifndef DEDICATED
 
+std::list<cCockpit *> cCockpit::m_Cockpits;
 
 static void reparseforbiddencallbacks(void) {
     stc_forbiddenCallbacks.clear();
@@ -130,13 +135,17 @@ static nSettingItem<tString> fcs("FORBID_COCKPIT_DATA", stc_forbiddenCallbacksSt
 
 cCockpit::~cCockpit() {
     ClearWidgets();
+    std::remove_if(m_Cockpits.begin(), m_Cockpits.end(), std::bind2nd(std::equal_to<cCockpit *>(), this));
 }
-cCockpit::cCockpit() :
+cCockpit::cCockpit(cockpit_type type) :
+        m_Type(type),
         m_Cam(all),
         m_Player(0),
         m_FocusPlayer(0),
         m_ViewportPlayer(0),
 m_FocusCycle(0) {
+    m_Cockpits.push_back(this);
+    ProcessCockpit();
 }
 
 void cCockpit::ClearWidgets(void) {
@@ -148,9 +157,9 @@ void cCockpit::ClearWidgets(void) {
     //    delete m_Widgets_rootwindow.front();
     //    m_Widgets_rootwindow.pop_front();
     //}
-    m_Widgets_rootwindow.clear();
-    m_Widgets_perplayer.clear();
-    m_Widgets_cycles.clear();
+    m_Widgets.clear();
+    //m_Widgets_perplayer.clear();
+    //m_Widgets_cycles.clear();
     m_EventHandlers.clear();
 }
 
@@ -176,24 +185,31 @@ void cCockpit::SetPlayer(ePlayer *player) {
 
 //callbacks
 tValue::BasePtr cCockpit::cb_CurrentRubber(void) {
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     return tValue::BasePtr(new tValue::Float(m_FocusCycle->GetRubber()));
 }
 tValue::BasePtr cCockpit::cb_CurrentAcceleration(void) {
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     return tValue::BasePtr(new tValue::Float(m_FocusCycle->GetAcceleration()));
 }
 tValue::BasePtr cCockpit::cb_CurrentPing(void) {
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     return tValue::BasePtr(new tValue::Float(static_cast<int>(m_ViewportPlayer->ping*1000)));
 }
 tValue::BasePtr cCockpit::cb_CurrentSpeed(void) {
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     return tValue::BasePtr(new tValue::Float(m_FocusCycle->Speed()));
 }
 tValue::BasePtr cCockpit::cb_MaxSpeed(void) {
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     return tValue::BasePtr(new tValue::Int( static_cast<int>(ceil( m_FocusCycle->MaximalSpeed() / 10.) *10)));
 }
 tValue::BasePtr cCockpit::cb_CurrentBrakingReservoir(void) {
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     return tValue::BasePtr(new tValue::Float(m_FocusCycle->GetBrakingReservoir()));
 }
 tValue::BasePtr cCockpit::cb_AliveEnemies(void){
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     int aliveenemies=0;
     unsigned short int max = se_PlayerNetIDs.Len();
     if(m_ViewportPlayer)
@@ -207,6 +223,7 @@ tValue::BasePtr cCockpit::cb_AliveEnemies(void){
     return tValue::BasePtr(new tValue::Int(aliveenemies));
 }
 tValue::BasePtr cCockpit::cb_AliveTeammates(void){
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     int alivemates=0;
     unsigned short int max = se_PlayerNetIDs.Len();
     if(m_ViewportPlayer)
@@ -288,6 +305,7 @@ tString stc_fastestName;
 int stc_topScore;
 
 tValue::BasePtr cCockpit::cb_CurrentScore(void){
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     return tValue::BasePtr(new tValue::Int(m_ViewportPlayer->TotalScore()));
 }
 tValue::BasePtr cCockpit::cb_TopScore(void){
@@ -295,6 +313,7 @@ tValue::BasePtr cCockpit::cb_TopScore(void){
 }
 
 tValue::BasePtr cCockpit::cb_CurrentScoreTeam(void){
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     if(m_ViewportPlayer->CurrentTeam() == 0) {
         return tValue::BasePtr(new tValue::Base());
     }
@@ -350,16 +369,19 @@ tValue::BasePtr cCockpit::cb_FastestName(void){
 }
 
 tValue::BasePtr cCockpit::cb_TimeToImpactFront(void){
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     eSensor test(m_FocusCycle, m_FocusCycle->Position(), m_FocusCycle->Direction());
     test.detect(5.*m_FocusCycle->Speed());
     return tValue::BasePtr(new tValue::Float(test.hit/m_FocusCycle->Speed()));
 }
 tValue::BasePtr cCockpit::cb_TimeToImpactRight(void){
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     eSensor test(m_FocusCycle, m_FocusCycle->Position(), m_FocusCycle->Direction().Turn(0,-1));
     test.detect(5.*m_FocusCycle->Speed());
     return tValue::BasePtr(new tValue::Float(test.hit/m_FocusCycle->Speed()));
 }
 tValue::BasePtr cCockpit::cb_TimeToImpactLeft(void){
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     eSensor test(m_FocusCycle, m_FocusCycle->Position(), m_FocusCycle->Direction().Turn(0,1));
     test.detect(5.*m_FocusCycle->Speed());
     return tValue::BasePtr(new tValue::Float(test.hit/m_FocusCycle->Speed()));
@@ -370,20 +392,24 @@ tValue::BasePtr cCockpit::cb_CurrentSong(void){
 }
 
 tValue::BasePtr cCockpit::cb_CurrentName(void) {
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     return tValue::BasePtr(new tValue::String(tString(m_FocusPlayer->GetName())));
 }
 
 tValue::BasePtr cCockpit::cb_CurrentColoredName(void) {
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     tColoredString ret;
     ret << *m_FocusPlayer;
     return tValue::BasePtr(new tValue::String(ret));
 }
 
 tValue::BasePtr cCockpit::cb_CurrentPosX(void) {
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     return tValue::BasePtr(new tValue::Float(m_FocusCycle->Position().x));
 }
 
 tValue::BasePtr cCockpit::cb_CurrentPosY(void) {
+    if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
     return tValue::BasePtr(new tValue::Float(m_FocusCycle->Position().x));
 }
 
@@ -397,7 +423,7 @@ void cCockpit::ProcessCockpit(void) {
     if(!cur) {
         tERR_WARN("No Cockpit node found!");
     }
-    if (m_Type != "aacockpit") {
+    if (tXmlResource::m_Type != "aacockpit") {
         tERR_WARN("Type 'aacockpit' expected, found '" << cur.GetProp("type") << "' instead");
         return;
     }
@@ -419,12 +445,31 @@ void cCockpit::ProcessWidgets(node cur) {
             templates[cur.GetProp("id")] = cur;
             continue;
         }
+        switch (m_Type) {
+        case VIEWPORT_TOP:
+            if(cur.GetProp("viewport") != "top") {
+                continue;
+            }
+            break;
+        case VIEWPORT_CYCLE:
+            if(cur.GetProp("viewport") != "cycle") {
+                continue;
+            }
+            break;
+        case VIEWPORT_ALL:
+            if(cur.GetProp("viewport") != "all") {
+                continue;
+            }
+            break;
+        }
         cWidget::Base_ptr widget_ptr = ProcessWidgetType(cur);
         if(&*widget_ptr == 0) {
             tERR_WARN("Unknown Widget type '" + cur.GetName() + "'");
             continue;
         }
         cWidget::Base &widget = *widget_ptr;
+
+        widget.SetCockpit(this);
 
         //Process all templates first
         tString use(cur.GetProp("usetemplate"));
@@ -443,13 +488,7 @@ void cCockpit::ProcessWidgets(node cur) {
         }
 
         ProcessWidget(cur, widget);
-        if(cur.GetProp("viewport") == "all") {
-            m_Widgets_perplayer.push_back(widget_ptr.release());
-        } else if(cur.GetProp("viewport") == "cycle") {
-            m_Widgets_cycles.push_back(widget_ptr.release());
-        } else {
-            m_Widgets_rootwindow.push_back(widget_ptr.release());
-        }
+        m_Widgets.push_back(widget_ptr.release());
     }
 }
 
@@ -534,120 +573,198 @@ void cCockpit::ProcessWidgetCore(node cur, cWidget::Base &widget) {
 }
 
 
-cCockpit* cCockpit::GetCockpit() {
-    static cCockpit theHud;
+//void cCockpit::RenderPlayer(float factor) {
+//    if(m_FocusPlayer != 0 && m_ViewportPlayer != 0) {
+//        Color(1,1,1);
+//        if(m_Player->cam) {
+//
+//            if (m_FocusCycle && ( !m_Player->netPlayer || !m_Player->netPlayer->IsChatting()) && se_GameTime()>-2){
+//                //h->Speed()>maxmeterspeed?maxmeterspeed+=10:1;
+//
+//                for(widget_list_t::const_iterator i=m_Widgets.begin(); i!=m_Widgets.end(); ++i)
+//                {
+//                    int cam = (*i)->GetCam();
+//                    switch(m_Player->cam->GetCamMode()) {
+//                    case CAMERA_IN:
+//                    case CAMERA_SMART_IN:
+//                        if(!(cam & in)) continue;
+//                        break;
+//                    case CAMERA_CUSTOM:
+//                        if(!(cam & custom)) continue;
+//                        break;
+//                    case CAMERA_FREE:
+//                        if(!(cam & free)) continue;
+//                        break;
+//                    case CAMERA_FOLLOW:
+//                        if(!(cam & follow)) continue;
+//                        break;
+//                    case CAMERA_SMART:
+//                        if(!(cam & smart)) continue;
+//                        break;
+//                    case CAMERA_SERVER_CUSTOM:
+//                        if(!(cam & server_custom)) continue;
+//                        break;
+//                    case CAMERA_MER:
+//                        if(!(cam & mer)) continue;
+//                        break;
+//                    case CAMERA_COUNT:
+//                        continue; //not handled, no sense?!
+//                    }
+//                    if ((*i)->Active()) {
+//                        if(cWidget::WithCoordinates *coordWidget = dynamic_cast<cWidget::WithCoordinates *>(&(*(*i)))) {
+//                            coordWidget->SetFactor(factor);
+//                        }
+//                        (*i)->Render();
+//                    }
+//                }
+//                //  bool displayfastest = true;// put into global, set via menusytem... subby to do.make sr_DISPLAYFASTESTout
+//
+//            }
+//        }
+//    }
+//
+//}
+//void cCockpit::RenderRootwindow() {
+//    if( m_Player == 0 ) return;
+//    if(m_ViewportPlayer == 0) return;
+//
+//    sr_ResetRenderState(true);
+//    glViewport (GLsizei(0),
+//                GLsizei(0),
+//                GLsizei(sr_screenWidth),
+//                GLsizei(sr_screenWidth));
+//
+//    //BeginLineLoop();
+//    //Color(1.,1.,1.,1.);
+//    //Vertex(-.1,-.1);
+//    //Vertex( .1,-.1);
+//    //Vertex( .1, .1);
+//    //Vertex(-.1, .1);
+//    //RenderEnd();
+//    for(widget_list_t::const_iterator i=m_Widgets.begin(); i!=m_Widgets.end(); ++i) {
+//        if((*i)->Active()) {
+//            (*i)->Render();
+//        }
+//    }
+//}
+//
+//void cCockpit::RenderCycle(gCycle const &cycle) {
+//    m_ViewportPlayer = m_FocusPlayer = cycle.Player();
+//    if(m_FocusPlayer != 0) {
+//        m_FocusCycle = dynamic_cast<gCycle *>(m_FocusPlayer->Object());
+//    } else {
+//        m_FocusCycle = 0;
+//    }
+//    //if( m_Player == 0 ) return;
+//    if(m_ViewportPlayer == 0) return;
+//
+//    bool gl_depth_test = glIsEnabled(GL_DEPTH_TEST);
+//    glDisable(GL_DEPTH_TEST);
+//
+//    for(widget_list_t::const_iterator i=m_Widgets.begin(); i!=m_Widgets.end(); ++i) {
+//        if((*i)->Active()) {
+//            (*i)->Render();
+//        }
+//    }
+//
+//    if(gl_depth_test) {
+//        glEnable(GL_DEPTH_TEST);
+//    }
+//}
 
-    return &theHud;
-}
-
-void cCockpit::RenderPlayer(float factor) {
-    if(m_FocusPlayer != 0 && m_ViewportPlayer != 0) {
-        Color(1,1,1);
-        if(m_Player->cam) {
-
-            if (m_FocusCycle && ( !m_Player->netPlayer || !m_Player->netPlayer->IsChatting()) && se_GameTime()>-2){
-                //h->Speed()>maxmeterspeed?maxmeterspeed+=10:1;
-
-                for(widget_list_t::const_iterator i=m_Widgets_perplayer.begin(); i!=m_Widgets_perplayer.end(); ++i)
-                {
-                    int cam = (*i)->GetCam();
-                    switch(m_Player->cam->GetCamMode()) {
-                    case CAMERA_IN:
-                    case CAMERA_SMART_IN:
-                        if(!(cam & in)) continue;
-                        break;
-                    case CAMERA_CUSTOM:
-                        if(!(cam & custom)) continue;
-                        break;
-                    case CAMERA_FREE:
-                        if(!(cam & free)) continue;
-                        break;
-                    case CAMERA_FOLLOW:
-                        if(!(cam & follow)) continue;
-                        break;
-                    case CAMERA_SMART:
-                        if(!(cam & smart)) continue;
-                        break;
-                    case CAMERA_SERVER_CUSTOM:
-                        if(!(cam & server_custom)) continue;
-                        break;
-                    case CAMERA_MER:
-                        if(!(cam & mer)) continue;
-                        break;
-                    case CAMERA_COUNT:
-                        continue; //not handled, no sense?!
-                    }
-                    if ((*i)->Active()) {
-                        if(cWidget::WithCoordinates *coordWidget = dynamic_cast<cWidget::WithCoordinates *>(&(*(*i)))) {
-                            coordWidget->SetFactor(factor);
-                        }
-                        (*i)->Render();
-                    }
-                }
-                //  bool displayfastest = true;// put into global, set via menusytem... subby to do.make sr_DISPLAYFASTESTout
-
-            }
-        }
-    }
-
-}
-void cCockpit::RenderRootwindow() {
-    if( m_Player == 0 ) return;
-    if(m_ViewportPlayer == 0) return;
-
-    sr_ResetRenderState(true);
-    glViewport (GLsizei(0),
-                GLsizei(0),
-                GLsizei(sr_screenWidth),
-                GLsizei(sr_screenWidth));
-
-    //BeginLineLoop();
-    //Color(1.,1.,1.,1.);
-    //Vertex(-.1,-.1);
-    //Vertex( .1,-.1);
-    //Vertex( .1, .1);
-    //Vertex(-.1, .1);
-    //RenderEnd();
-    for(widget_list_t::const_iterator i=m_Widgets_rootwindow.begin(); i!=m_Widgets_rootwindow.end(); ++i) {
-        if((*i)->Active()) {
-            (*i)->Render();
-        }
-    }
-}
-
-void cCockpit::RenderCycle(gCycle const &cycle) {
+void cCockpit::SetCycle(gCycle const &cycle) {
     m_ViewportPlayer = m_FocusPlayer = cycle.Player();
     if(m_FocusPlayer != 0) {
         m_FocusCycle = dynamic_cast<gCycle *>(m_FocusPlayer->Object());
     } else {
         m_FocusCycle = 0;
     }
-    //if( m_Player == 0 ) return;
-    if(m_ViewportPlayer == 0) return;
+}
 
-    bool gl_depth_test = glIsEnabled(GL_DEPTH_TEST);
-    glDisable(GL_DEPTH_TEST);
+void cCockpit::Render() {
+    std::cerr << "m_Type: " << m_Type << std::endl;
+    switch(m_Type) {
+    case VIEWPORT_ALL:
+        if(m_FocusPlayer != 0 && m_ViewportPlayer != 0) {
+            Color(1,1,1);
+            if(m_Player->cam) {
 
-    for(widget_list_t::const_iterator i=m_Widgets_cycles.begin(); i!=m_Widgets_cycles.end(); ++i) {
-        if((*i)->Active()) {
-            (*i)->Render();
+                if (m_FocusCycle && ( !m_Player->netPlayer || !m_Player->netPlayer->IsChatting()) && se_GameTime()>-2){
+                    //h->Speed()>maxmeterspeed?maxmeterspeed+=10:1;
+
+                    for(widget_list_t::const_iterator i=m_Widgets.begin(); i!=m_Widgets.end(); ++i)
+                    {
+                        int cam = (*i)->GetCam();
+                        switch(m_Player->cam->GetCamMode()) {
+                        case CAMERA_IN:
+                        case CAMERA_SMART_IN:
+                            if(!(cam & in)) continue;
+                            break;
+                        case CAMERA_CUSTOM:
+                            if(!(cam & custom)) continue;
+                            break;
+                        case CAMERA_FREE:
+                            if(!(cam & free)) continue;
+                            break;
+                        case CAMERA_FOLLOW:
+                            if(!(cam & follow)) continue;
+                            break;
+                        case CAMERA_SMART:
+                            if(!(cam & smart)) continue;
+                            break;
+                        case CAMERA_SERVER_CUSTOM:
+                            if(!(cam & server_custom)) continue;
+                            break;
+                        case CAMERA_MER:
+                            if(!(cam & mer)) continue;
+                            break;
+                        case CAMERA_COUNT:
+                            continue; //not handled, no sense?!
+                        }
+                        if ((*i)->Active()) {
+                            (*i)->Render();
+                        }
+                    }
+                    //  bool displayfastest = true;// put into global, set via menusytem... subby to do.make sr_DISPLAYFASTESTout
+
+                }
+            }
         }
-    }
+        break;
+    case VIEWPORT_TOP:
+        sr_ResetRenderState(true);
+        glViewport (GLsizei(0),
+                    GLsizei(0),
+                    GLsizei(sr_screenWidth),
+                    GLsizei(sr_screenWidth));
 
-    if(gl_depth_test) {
-        glEnable(GL_DEPTH_TEST);
+        for(widget_list_t::const_iterator i=m_Widgets.begin(); i!=m_Widgets.end(); ++i) {
+            if((*i)->Active()) {
+                (*i)->Render();
+            }
+        }
+        break;
+    case VIEWPORT_CYCLE: {
+            if(m_ViewportPlayer == 0) return;
+
+            bool gl_depth_test = glIsEnabled(GL_DEPTH_TEST);
+            glDisable(GL_DEPTH_TEST);
+
+            for(widget_list_t::const_iterator i=m_Widgets.begin(); i!=m_Widgets.end(); ++i) {
+                if((*i)->Active()) {
+                    (*i)->Render();
+                }
+            }
+
+            if(gl_depth_test) {
+                glEnable(GL_DEPTH_TEST);
+            }
+        } break;
     }
 }
 
 static void display_cockpit_lucifer() {
-    cCockpit* theCockpit = cCockpit::GetCockpit();
-
-    float factor = 4./3. / (static_cast<float>(sr_screenWidth)/static_cast<float>(sr_screenHeight));
-    static bool loaded = false;
-    if(!loaded) {
-        theCockpit->ProcessCockpit();
-        loaded = true;
-    }
+    static cCockpit static_cockpit(cCockpit::VIEWPORT_TOP);
 
     sr_ResetRenderState(true);
 
@@ -672,12 +789,20 @@ static void display_cockpit_lucifer() {
         // select the corrected viewport
         port->EqualAspectBottom().Select();
 
+        cCockpit *player_cockpit;
+        if(!(player_cockpit = dynamic_cast<cCockpit *>(&*player->cockpit))) {
+            player_cockpit = new cCockpit(cCockpit::VIEWPORT_ALL);
+            player->cockpit = player_cockpit;
+            float factor = 4./3. / (static_cast<float>(sr_screenWidth)/static_cast<float>(sr_screenHeight));
+            player_cockpit->Readjust(factor * dims.y / dims.x);
+        }
+
+        player_cockpit->SetPlayer(player);
         // delegate
-        theCockpit->SetPlayer( player );
-        theCockpit->RenderPlayer( factor * dims.y / dims.x);
+        player_cockpit->Render();
     }
 
-    theCockpit->RenderRootwindow();
+    static_cockpit.Render();
 
 #if 0	// Testing ground :)
     vValue::Expr::Core::Base *test = vValue::Parser::parse(tString("10"));
@@ -698,11 +823,21 @@ static uActionGlobalFunc ck3(&cockpitKey3, &cCockpit::ProcessKey3, true);
 static uActionGlobalFunc ck4(&cockpitKey4, &cCockpit::ProcessKey4, true);
 static uActionGlobalFunc ck5(&cockpitKey5, &cCockpit::ProcessKey5, true);
 
-bool cCockpit::ProcessKey1(float i) { return cCockpit::GetCockpit()->HandleEvent(1, i>0); }
-bool cCockpit::ProcessKey2(float i) { return cCockpit::GetCockpit()->HandleEvent(2, i>0); }
-bool cCockpit::ProcessKey3(float i) { return cCockpit::GetCockpit()->HandleEvent(3, i>0); }
-bool cCockpit::ProcessKey4(float i) { return cCockpit::GetCockpit()->HandleEvent(4, i>0); }
-bool cCockpit::ProcessKey5(float i) { return cCockpit::GetCockpit()->HandleEvent(5, i>0); }
+bool ProcessKey(float i, int num) {
+    bool ret = false;
+    FOREACH_COCKPIT(j) {
+        if((*j)->HandleEvent(num, i>0)) {
+            ret = true;
+        }
+    }
+    return ret;
+}
+
+bool cCockpit::ProcessKey1(float i) { return ProcessKey(i, 1); }
+bool cCockpit::ProcessKey2(float i) { return ProcessKey(i, 2); }
+bool cCockpit::ProcessKey3(float i) { return ProcessKey(i, 3); }
+bool cCockpit::ProcessKey4(float i) { return ProcessKey(i, 4); }
+bool cCockpit::ProcessKey5(float i) { return ProcessKey(i, 5); }
 
 bool cCockpit::HandleEvent(int id, bool state) {
     if(m_EventHandlers.count(id)){
@@ -715,15 +850,16 @@ bool cCockpit::HandleEvent(int id, bool state) {
 }
 
 void cCockpit::Readjust(void) {
+    if(m_Type != VIEWPORT_TOP) return;
     if (sr_screenWidth == 0) return;
     float factor = 4./3. / (static_cast<float>(sr_screenWidth)/static_cast<float>(sr_screenHeight));
     //float factor = 2.;
-    for(widget_list_t::iterator iter = m_Widgets_perplayer.begin(); iter != m_Widgets_perplayer.end(); ++iter) {
-        if(cWidget::WithCoordinates *coordWidget = dynamic_cast<cWidget::WithCoordinates *>(&(*(*iter)))) {
-            coordWidget->SetFactor(factor);
-        }
-    }
-    for(widget_list_t::iterator iter = m_Widgets_rootwindow.begin(); iter != m_Widgets_rootwindow.end(); ++iter) {
+    Readjust(factor);
+}
+void cCockpit::Readjust(float factor) {
+    std::cerr << "this: " << this << std::endl;
+    std::cerr << "factor: " << factor << std::endl;
+    for(widget_list_t::iterator iter = m_Widgets.begin(); iter != m_Widgets.end(); ++iter) {
         if(cWidget::WithCoordinates *coordWidget = dynamic_cast<cWidget::WithCoordinates *>(&(*(*iter)))) {
             coordWidget->SetFactor(factor);
         }

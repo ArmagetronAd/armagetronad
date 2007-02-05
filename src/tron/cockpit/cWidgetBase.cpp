@@ -286,7 +286,7 @@ tValue::Base *WithDataFunctions::ProcessDataSource(tString const &data) {
     std::map<tString, tValue::Callback<cCockpit>::cb_ptr>::const_iterator iter;
     if((iter = stc_callbacks.find(data.ToLower())) != stc_callbacks.end()) {
         if(stc_forbiddenCallbacks.count(data.ToLower())) return new tValue::Base();
-        return new tValue::Callback<cCockpit>(iter->second, cCockpit::GetCockpit());
+        return new tValue::Callback<cCockpit>(iter->second, m_Cockpit);
     }
 
     //growing desperate... is this a configuration value maybe?

@@ -4404,7 +4404,9 @@ void gCycle::RenderName( const eCamera* cam ) {
             name << this->player->GetName();
         DisplayText(0, 0, rCHEIGHT_NORMAL, name, sr_fontCycleLabel, 0, 0);
     }
-    cCockpit::GetCockpit()->RenderCycle(*this);
+    static cCockpit cycleCockpit(cCockpit::VIEWPORT_CYCLE);
+    cycleCockpit.SetCycle(*this);
+    cycleCockpit.Render();
 
     ProjMatrix();
     glPopMatrix();

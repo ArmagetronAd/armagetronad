@@ -583,7 +583,7 @@ static const tString& se_UserName()
     return ret;
 }
 
-ePlayer::ePlayer(){
+ePlayer::ePlayer():cockpit(0){
     nAuthentification::SetUserPasswordCallback(&PasswordCallback);
     nAuthentification::SetLoginResultCallback (&ResultCallback);
 

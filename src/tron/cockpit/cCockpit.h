@@ -33,7 +33,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tXmlParser.h"
 #include "tSafePTR.h"
+#include "ePlayer.h"
 #include <deque>
+#include <list>
 #include <map>
 #include <set>
 
@@ -47,16 +49,30 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifndef DEDICATED
 
+#define FOREACH_COCKPIT(cockpit) for(std::list<cCockpit *>::const_iterator cockpit = cCockpit::Cockpits().begin(); cockpit != cCockpit::Cockpits().end(); ++cockpit)
+
 namespace cWidget {
 class Base;
 }
-class ePlayer;
 class ePlayerNetID;
 class gCycle;
 
 //! Cockpit class: keeps a list of widgets and delegates rendering and parsing to them
-class cCockpit : private tXmlResource {
+class cCockpit : private tXmlResource, public eCockpitPrototype {
+    static std::list<cCockpit *> m_Cockpits;
 public:
+    static std::list<cCockpit *> const &Cockpits() {return m_Cockpits;}
+
+    enum cockpit_type {
+        VIEWPORT_TOP,
+        VIEWPORT_CYCLE,
+        VIEWPORT_ALL
+    }; //!< modes for the cockpit, will only parse certain types of widgets
+
+private:
+    cockpit_type m_Type;
+public:
+
     enum cameras {
         custom        = 0001,
         follow        = 0002,
@@ -68,12 +84,11 @@ public:
         all           = 0177
     }; //!< the different cameras, can be combined via the | operator
 
-    cCockpit(); //!< default constructor
+    cCockpit(cockpit_type type); //!< default constructor
     ~cCockpit(); //!< destructor, calls ClearWidgets()
 
-    static cCockpit* GetCockpit(); //!< returns a pointer to the instance of this class
-
     void SetPlayer(ePlayer *player); //!< sets the player the currently rendered viewport belongs to
+    void SetCycle(gCycle const &cycle); //!< same as SetPlayer, but takes the information from a cycle
 
     // Example how to call this:
     // theHud.SetViewMode(cCockpit::custom
@@ -82,10 +97,11 @@ public:
     void SetCam(int Cam) { m_Cam = Cam; }; //!< Sets the camera. The widget's Render() function only gets called if the cameras of the widget and HUD overlap
     void AddEventHandler(int id, cWidget::Base *widget); //!< add a key event handler
 
-    void RenderRootwindow(); //!< Renders the main viewport (all widgets that belong to the entire screen)
-    void RenderPlayer(float factor); //!< Renders all widgets that belong to the currently active player
+    void Render(); //!< Renders the cockpit
+    //void RenderRootwindow(); //!< Renders the main viewport (all widgets that belong to the entire screen)
+    //void RenderPlayer(float factor); //!< Renders all widgets that belong to the currently active player
 
-    void RenderCycle(gCycle const &cycle); //!< Render the cockpit elements above a cycle
+    //void RenderCycle(gCycle const &cycle); //!< Render the cockpit elements above a cycle
 
     void ProcessCockpit(void); //!< Calls ClearWidgets(), then (re-) parses the cockpit file
 
@@ -100,9 +116,7 @@ private:
     ePlayerNetID *m_ViewportPlayer; //!< the player the viewport belongs to
     gCycle *m_FocusCycle; //!< The cycle currently being watched (the one that belongs to m_ViewportPlayer)
     typedef std::vector<tJUST_CONTROLLED_PTR< cWidget::Base> > widget_list_t;
-    widget_list_t m_Widgets_perplayer; //!< All widgets that have to be rendered for every player
-    widget_list_t m_Widgets_rootwindow; //!< All widgets that have to be rendered only once for the root window
-    widget_list_t m_Widgets_cycles; //!< All widgets that have to be rendered above each cycle
+    widget_list_t m_Widgets; //!< All widgets
 
     void ProcessWidgets(node cur); //!< Processes all Widgets within the <Cockpit> node passed to it
     std::auto_ptr<cWidget::Base> ProcessWidgetType(node cur); //!< returns a new instance of the right widget class for the given node
@@ -162,6 +176,7 @@ public:
     bool HandleEvent(int id, bool state);
 
     void Readjust(void); //!< Readjusts the cockpit to a new window height
+    void Readjust(float factor); //!< Readjusts the cockpit to a given factor
 };
 
 extern const std::map<tString, tValue::Callback<cCockpit>::cb_ptr> stc_callbacks;

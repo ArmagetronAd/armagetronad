@@ -39,6 +39,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <memory>
 #include "tSafePTR.h"
 
+class cCockpit;
+
 //! @file
 //! @brief Contains the classes the actual widgets are based on
 //!
@@ -60,6 +62,7 @@ protected:
     bool m_Render; //!< Should this Widget be rendered?
     bool m_RenderDefault; //!< Should this Widget be rendered by default?
     bool m_Sticky; //!< Should this Widget be sticky?
+    cCockpit *m_Cockpit; //!< the cockpit this widget belongs to
 public:
     Base() : m_Render(true), m_RenderDefault(true), m_Sticky(true) {}
     virtual ~Base() { }
@@ -69,6 +72,7 @@ public:
     int GetCam(void) { return m_Cam; } //!< Get the camera(s) this widget will be rendered for
     virtual bool Process(tXmlParser::node cur); //!< Process a node
     void SetDefaultState (bool state) { m_Render = m_RenderDefault = state; }
+    void SetCockpit(cCockpit *cockpit) {m_Cockpit = cockpit;} //!< Set the cockpit this widget belongs to
     void SetSticky (bool sticky) { m_Sticky = sticky; }
     bool Active() { return m_Render; } //!< Should we render this?
     //! Toggle activity

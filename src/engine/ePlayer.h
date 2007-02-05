@@ -52,6 +52,11 @@ class tOutput;
 class eTeam;
 class eVoter;
 
+class eCockpitPrototype : public tReferencable<eCockpitPrototype> {
+public:
+    virtual ~eCockpitPrototype(){};
+};
+
 class ePlayer: public uPlayerPrototype{
     friend class eMenuItemChat;
     static uActionPlayer s_chat;
@@ -79,6 +84,7 @@ public:
 
     tCHECKED_PTR(eCamera)           cam;
     tCONTROLLED_PTR(ePlayerNetID) netPlayer;
+    tJUST_CONTROLLED_PTR<eCockpitPrototype>	cockpit;
 
     int rgb[3]; // our color
 
