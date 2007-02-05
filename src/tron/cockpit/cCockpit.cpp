@@ -682,7 +682,6 @@ void cCockpit::SetCycle(gCycle const &cycle) {
 }
 
 void cCockpit::Render() {
-    std::cerr << "m_Type: " << m_Type << std::endl;
     switch(m_Type) {
     case VIEWPORT_ALL:
         if(m_FocusPlayer != 0 && m_ViewportPlayer != 0) {
@@ -857,8 +856,6 @@ void cCockpit::Readjust(void) {
     Readjust(factor);
 }
 void cCockpit::Readjust(float factor) {
-    std::cerr << "this: " << this << std::endl;
-    std::cerr << "factor: " << factor << std::endl;
     for(widget_list_t::iterator iter = m_Widgets.begin(); iter != m_Widgets.end(); ++iter) {
         if(cWidget::WithCoordinates *coordWidget = dynamic_cast<cWidget::WithCoordinates *>(&(*(*iter)))) {
             coordWidget->SetFactor(factor);
