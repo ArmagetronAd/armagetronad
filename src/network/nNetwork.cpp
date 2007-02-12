@@ -2918,11 +2918,13 @@ void sn_Receive(){
     //	new_id=0;
     sn_Connections[MAXCLIENTS+1].ping.Reset();
 
-    // create the ack messages
+    // create the ack messages (not required, is done on demand later)
+    /*
     int i;
     for(i=0;i<=MAXCLIENTS+1;i++)
         if(sn_Connections[i].ackMess==NULL)
             sn_Connections[i].ackMess=new nAckMessage();
+    */
 
 
     switch (current_state){
