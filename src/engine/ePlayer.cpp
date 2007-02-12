@@ -2322,7 +2322,13 @@ void ePlayerNetID::WriteSync(nMessage &m){
     m.Write(r);
     m.Write(g);
     m.Write(b);
-    m.Write(pingCharity);
+
+    // write ping charity; spectators get a fake (high) value
+    if ( currentTeam || nextTeam )
+        m.Write(pingCharity);
+    else
+        m.Write(1000);
+
     if ( sn_GetNetState() == nCLIENT )
     {
         m << nameFromClient_;
@@ -3038,6 +3044,13 @@ void ePlayerNetID::CompleteRebuild(){
     Update();
 }
 
+static nSettingItem<int> se_pingCharityServerConf("PING_CHARITY_SERVER",sn_pingCharityServer );
+static nVersionFeature   se_pingCharityServerControlled( 14 );
+
+static int se_pingCharityMax = 500, se_pingCharityMin = 0;
+static tSettingItem<int> se_pingCharityMaxConf( "PING_CHARITY_MAX", se_pingCharityMax );
+static tSettingItem<int> se_pingCharityMinConf( "PING_CHARITY_MIN", se_pingCharityMin );
+
 // Update the netPlayer_id list
 void ePlayerNetID::Update(){
 #ifdef DEDICATED
@@ -3097,34 +3110,62 @@ void ePlayerNetID::Update(){
         }
 
     }
-    // update the ping charity
-    int old_c=sn_pingCharityServer;
-    sg_ClampPingCharity();
-    sn_pingCharityServer=::pingCharity;
-#ifndef DEDICATED
-    if (sn_GetNetState()==nCLIENT)
-#endif
-        sn_pingCharityServer+=100000;
 
     int i;
-    for(i=se_PlayerNetIDs.Len()-1;i>=0;i--){
-        ePlayerNetID *pni=se_PlayerNetIDs(i);
-        pni->UpdateName();
-        int new_ps=pni->pingCharity;
-        new_ps+=int(pni->ping*500);
 
-        if (new_ps< sn_pingCharityServer)
-            sn_pingCharityServer=new_ps;
-    }
-    if (sn_pingCharityServer<0)
-        sn_pingCharityServer=0;
-    if (old_c!=sn_pingCharityServer)
+
+    // update the ping charity, but
+    // don't do so on the client if the server controls the ping charity completely
+    if ( sn_GetNetState() == nSERVER || !se_pingCharityServerControlled.Supported(0) )
     {
-        tOutput o;
-        o.SetTemplateParameter(1, old_c);
-        o.SetTemplateParameter(2, sn_pingCharityServer);
-        o << "$player_pingcharity_changed";
-        con << o;
+        int old_c=sn_pingCharityServer;
+        sg_ClampPingCharity();
+        sn_pingCharityServer=::pingCharity;
+
+#ifndef DEDICATED
+        if (sn_GetNetState()==nCLIENT)
+#endif
+            sn_pingCharityServer+=100000;
+
+        // set configurable maximum
+        if ( se_pingCharityServerControlled.Supported() )
+        {
+            sn_pingCharityServer = se_pingCharityMax;
+        }
+
+        for(i=se_PlayerNetIDs.Len()-1;i>=0;i--){
+            ePlayerNetID *pni=se_PlayerNetIDs(i);
+            pni->UpdateName();
+            int new_ps=pni->pingCharity;
+            new_ps+=int(pni->ping*500);
+
+            // only take ping charity into account for non-spectators
+            if ( sn_GetNetState() != nSERVER || pni->currentTeam || pni->nextTeam )
+                if (new_ps < sn_pingCharityServer)
+                    sn_pingCharityServer=new_ps;
+        }
+        if (sn_pingCharityServer<0)
+            sn_pingCharityServer=0;
+
+        // set configurable minimum
+        if ( se_pingCharityServerControlled.Supported() )
+        {
+            if ( sn_pingCharityServer < se_pingCharityMin )
+                sn_pingCharityServer = se_pingCharityMin;
+        }
+
+        if (old_c!=sn_pingCharityServer)
+        {
+            tOutput o;
+            o.SetTemplateParameter(1, old_c);
+            o.SetTemplateParameter(2, sn_pingCharityServer);
+            o << "$player_pingcharity_changed";
+            con << o;
+
+            // trigger transmission to the clients
+            if (sn_GetNetState()==nSERVER)
+                se_pingCharityServerConf.nConfItemBase::WasChanged(true);
+        }
     }
 
     // update team assignment

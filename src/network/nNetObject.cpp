@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tSysTime.h"
 #include "tToDo.h"
 #include "nObserver.h"
+#include "nConfig.h"
 #include "tRecorder.h"
 
 #include <deque>
@@ -49,7 +50,7 @@ extern nMessage* sn_WatchMessage;
 tDEFINE_REFOBJ( nNetObject )
 
 // max ping to equalize;
-int sn_pingCharityServer=100;
+int sn_pingCharityServer=0;
 
 // first, we need a mechanism to distribute the nNetObject id's
 // among the clients and the server.
