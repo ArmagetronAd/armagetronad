@@ -3012,8 +3012,14 @@ void gGame::StateUpdate(){
             if ( synced_ && sn_GetNetState() != nSERVER )
                 ePlayerNetID::Update();
 
+            // delete game objects again (in case new ones were spawned)
+            exit_game_objects(grid);
+
             nConfItemBase::s_SendConfig(false);
-            sn_Sync( sg_Timeout*.1, true );
+
+            // wait extra long for the clients to delete the grid; they really need to be
+            // synced this time
+            sn_Sync( sg_Timeout*.4, true );
 
             SetState(GS_CREATE_GRID,GS_CAMERA);
             break;

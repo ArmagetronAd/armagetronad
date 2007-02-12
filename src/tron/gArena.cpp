@@ -95,10 +95,7 @@ eCoord gArena::GetRandomPos(REAL factor) const
 
 void gArena::PrepareGrid(eGrid *grid, gParser *aParser)
 {
-    exit_game_objects(grid);
-    //BOP
     RemoveAllSpawn();
-    //EOP
 
     init_grid_in_process=true;
     grid->Create();
