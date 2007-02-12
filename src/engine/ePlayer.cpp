@@ -1236,6 +1236,11 @@ static bool se_allowShuffleUp=false;
 static tSettingItem<bool> se_allowShuffleUpConf("TEAM_ALLOW_SHUFFLE_UP",
         se_allowShuffleUp);
 
+static bool se_silenceAll = false;		// flag indicating whether everyone should be silenced
+
+static tSettingItem<bool> se_silAll("SILENCE_ALL",
+                                    se_silenceAll);
+
 void handle_chat(nMessage &m){
     nTimeRolling currentTime = tSysTimeFloat();
     unsigned short id;
@@ -1417,7 +1422,7 @@ void handle_chat(nMessage &m){
 
                     return;
                 }
-                else if (command == "/msg") {
+                else if (command == "/msg" ) {
                     int current_place=0; // current place in buffer_name.
 
                     // search for end of recipient and store recipient in buffer_name
@@ -1499,10 +1504,23 @@ void handle_chat(nMessage &m){
 #endif
             }
 
-            if ( spamLevel < nSpamProtection::Level_Mild && say.Len() <= se_SpamMaxLen+2 && ( !p->IsSilenced() ) && pass != true )
+            if ( spamLevel < nSpamProtection::Level_Mild && say.Len() <= se_SpamMaxLen+2 && pass != true )
             {
-                se_BroadcastChat( p, say );
-                se_DisplayChatLocally( p, say);
+                if ( se_silenceAll && ! p->isLoggedIn() )
+                {
+                    // everyone except the admins is silenced
+                    sn_ConsoleOut( tOutput( "$spam_protection_silenceall" ), m.SenderID() );
+                }
+                else if ( p->IsSilenced() )
+                {
+                    // player is specially silenced
+                    sn_ConsoleOut( tOutput( "$spam_protection_silenced" ), m.SenderID() );
+                }
+                else
+                {
+                    se_BroadcastChat( p, say );
+                    se_DisplayChatLocally( p, say);
+                }
             }
         }
     }
@@ -2051,11 +2069,6 @@ void ePlayerNetID::Activity()
     this->lastActivity_ = tSysTimeFloat();
 }
 
-static bool se_SilenceAll = false;		// flag indicating whether everyone should be silenced
-
-static tSettingItem<bool> se_silAll("SILENCE_ALL",
-                                    se_SilenceAll);
-
 static int se_maxPlayersPerIP = 4;
 static tSettingItem<int> se_maxPlayersPerIPConf( "MAX_PLAYERS_SAME_IP", se_maxPlayersPerIP );
 
@@ -2089,7 +2102,7 @@ void ePlayerNetID::MyInitAfterCreation()
 {
     this->CreateVoter();
 
-    this->silenced_ = se_SilenceAll;
+    this->silenced_ = ( sn_GetNetState() != nSERVER ) && se_silenceAll;
 
     // register with machine and kick user if too many players are present
     if ( Owner() != 0 && sn_GetNetState() == nSERVER )
@@ -4008,7 +4021,6 @@ static void se_KickConf(std::istream &s)
 
 static tConfItemFunc se_kickConf("KICK",&se_KickConf);
 
-
 static void se_BanConf(std::istream &s)
 {
     // get user ID
@@ -4038,7 +4050,7 @@ static void se_BanConf(std::istream &s)
 
 static tConfItemFunc se_banConf("BAN",&se_BanConf);
 
-static void Kill_conf(std::istream &s)
+static ePlayerNetID * ReadPlayer( std::istream & s, char const * error )
 {
     // read name of player to be killed
     tString name;
@@ -4060,20 +4072,47 @@ static void Kill_conf(std::istream &s)
         // kill the player's game object
         if ( itsHim )
         {
-            if ( p->Object() )
-                p->Object()->Kill();
-
-            return;
+            return p;
         }
     }
 
-    tOutput o;
-    o.SetTemplateParameter( 1, name );
-    o << "$network_kick_notfound";
-    con << o;
+    con << tOutput( error, name );
+
+    return 0;
+}
+
+static void Kill_conf(std::istream &s)
+{
+    ePlayerNetID * p = ReadPlayer( s, "$network_kick_notfound" );
+    if ( p && p->Object() )
+        p->Object()->Kill();
 }
 
 static tConfItemFunc kill_conf("KILL",&Kill_conf);
+
+static void Silence_conf(std::istream &s)
+{
+    ePlayerNetID * p = ReadPlayer( s, "$network_kick_notfound" );
+    if ( p )
+    {
+        sn_ConsoleOut( tOutput( "$player_silenced", p->GetName() ) );
+        p->SetSilenced( true );
+    }
+}
+
+static tConfItemFunc silence_conf("SILENCE",&Silence_conf);
+
+static void Voice_conf(std::istream &s)
+{
+    ePlayerNetID * p = ReadPlayer( s, "$network_kick_notfound" );
+    if ( p )
+    {
+        sn_ConsoleOut( tOutput( "$player_voiced", p->GetName() ) );
+        p->SetSilenced( false );
+    }
+}
+
+static tConfItemFunc voice_conf("VOICE",&Voice_conf);
 
 static void players_conf(std::istream &s)
 {

@@ -2044,6 +2044,10 @@ zone_collapse_harmless      \1's zone collapses harmlessly for lack of enemy con
 player_pingcharity_changed	Ping charity changed from \1 to \2.\n
 spam_protection_repeat  SPAM PROTECTION: you already said: \1\n
 spam_protection			SPAM PROTECTION: you are silenced for the next \1 seconds.\n
+spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
+spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
+player_silenced         \10xff7777 has been silenced.\n
+player_voiced           \10x77ff77 has been given his voice back.\n
 vote_spam_protection	VOTE SPAM PROTECTION: you are disallowed from issuing votes for the next \1 seconds.\n
 chat_title_text			Say:
 player_entered_game		\1 0x7fff7fentered the game.\n
