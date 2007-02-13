@@ -1241,6 +1241,25 @@ static bool se_silenceAll = false;		// flag indicating whether everyone should b
 static tSettingItem<bool> se_silAll("SILENCE_ALL",
                                     se_silenceAll);
 
+// checks whether a player is silenced, giving him appropriate warnings if he is
+bool IsSilencedWithWarning( ePlayerNetID const * p )
+{
+    if ( se_silenceAll && ! p->isLoggedIn() )
+    {
+        // everyone except the admins is silenced
+        sn_ConsoleOut( tOutput( "$spam_protection_silenceall" ), p->Owner() );
+        return true;
+    }
+    else if ( p->IsSilenced() )
+    {
+        // player is specially silenced
+        sn_ConsoleOut( tOutput( "$spam_protection_silenced" ), p->Owner() );
+        return true;
+    }
+
+    return false;
+}
+
 void handle_chat(nMessage &m){
     nTimeRolling currentTime = tSysTimeFloat();
     unsigned short id;
@@ -1304,6 +1323,9 @@ void handle_chat(nMessage &m){
                 tConfItemBase::EatWhitespace(s);
                 msg.ReadLine(s);
                 if (command == "/me") {
+                    if ( IsSilencedWithWarning(p) )
+                        return;
+
                     tColoredString console;
                     console << tColoredString::ColorString(1,1,1)  << "* ";
                     console << *p;
@@ -1454,12 +1476,16 @@ void handle_chat(nMessage &m){
                         // log locally
                         sn_ConsoleOut(toServer,0);
 
-                        // log to sender's console
-                        sn_ConsoleOut(toServer, p->Owner());
+                        if ( p->CurrentTeam() == receiver->CurrentTeam() || !IsSilencedWithWarning(p) )
+                        {
+                            // log to sender's console
+                            sn_ConsoleOut(toServer, p->Owner());
+                            
+                            // send to receiver
+                            if ( p->Owner() != receiver->Owner() )
+                                se_SendPrivateMessage( p, receiver, msg_core );
+                        }
 
-                        // send to receiver
-                        if ( p->Owner() != receiver->Owner())
-                            se_SendPrivateMessage( p, receiver, msg_core );
                         return;
                     }
                     // More than than one match for the current buffer. Complain about that.
@@ -1504,23 +1530,10 @@ void handle_chat(nMessage &m){
 #endif
             }
 
-            if ( spamLevel < nSpamProtection::Level_Mild && say.Len() <= se_SpamMaxLen+2 && pass != true )
+            if ( spamLevel < nSpamProtection::Level_Mild && say.Len() <= se_SpamMaxLen+2 && pass != true && !IsSilencedWithWarning(p) )
             {
-                if ( se_silenceAll && ! p->isLoggedIn() )
-                {
-                    // everyone except the admins is silenced
-                    sn_ConsoleOut( tOutput( "$spam_protection_silenceall" ), m.SenderID() );
-                }
-                else if ( p->IsSilenced() )
-                {
-                    // player is specially silenced
-                    sn_ConsoleOut( tOutput( "$spam_protection_silenced" ), m.SenderID() );
-                }
-                else
-                {
-                    se_BroadcastChat( p, say );
-                    se_DisplayChatLocally( p, say);
-                }
+                se_BroadcastChat( p, say );
+                se_DisplayChatLocally( p, say);
             }
         }
     }
