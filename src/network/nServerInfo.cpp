@@ -166,7 +166,8 @@ nServerInfo::nServerInfo()
         users(0),
         maxUsers_(MAXCLIENTS),
         score(-10000),
-        scoreBias_(0)
+        scoreBias_(0),
+        queryType_( QUERY_ALL )
 {
     if (sn_IsMaster)
     {
@@ -2295,7 +2296,7 @@ nServerInfoBase::~nServerInfoBase()
 
 bool nServerInfoBase::operator ==( const nServerInfoBase & other ) const
 {
-    return connectionName_ == other.connectionName_ && port_ == other.port_;
+    return GetAddress() == other.GetAddress() && port_ == other.port_;
 }
 
 // *******************************************************************************************
@@ -2435,26 +2436,31 @@ void nServerInfoBase::NetReadThis( nMessage & m )
     m >> port_;                            // get the port
     sn_ReadFiltered( m, connectionName_ ); // get the connection name
 
-    if ( ( !sn_IsMaster && sn_AcceptingFromBroadcast ) || connectionName_.Len()<=1 ) // no valid name (must come directly from the server who does not know his own address)
-    {
-        {
-            sn_GetAdr( m.SenderID(), connectionName_ );
-
-            // remove the port
-            for (int i=connectionName_.Len(); i>=0; i--)
-                if (':' == connectionName_[i])
-                {
-                    connectionName_[i] = '\0';
-                    connectionName_.SetLen(i+1);
-                }
-
-            S_GlobalizeName( connectionName_ );
-        }
-    }
-    else
+    if ( ( sn_IsMaster || sn_AcceptingFromBroadcast || sn_AcceptingFromMaster ) && connectionName_.Len()>1 ) // no valid name (must come directly from the server who does not know his own address)
     {
         // resolve DNS
         connectionName_ = S_LocalizeName( connectionName_ );
+    }
+    else
+    {
+#ifdef DEBUG_X
+        if ( connectionName_.Len() > 1 )
+        {
+            std::cout << "Overwriting source from " << connectionName_ << ".\n";
+        }
+#endif
+
+        sn_GetAdr( m.SenderID(), connectionName_ );
+        
+        // remove the port
+        for (int i=connectionName_.Len(); i>=0; i--)
+            if (':' == connectionName_[i])
+            {
+                connectionName_[i] = '\0';
+                connectionName_.SetLen(i+1);
+            }
+        
+        S_GlobalizeName( connectionName_ );
     }
 }
 
