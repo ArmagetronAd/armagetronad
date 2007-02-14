@@ -4686,6 +4686,9 @@ void gCycle::ResetExtrapolator()
     }
 
     extrapolator_->CopyFrom( lastSyncMessage_, *this );
+
+    // simulate a bit, only to get current rubberSpeedFactor and acceleration
+    extrapolator_->TimestepCore( extrapolator_->LastTime(), true );
 }
 
 // simulate the extrapolator at higher speed
@@ -4829,6 +4832,7 @@ void gCycle::SyncFromExtrapolator()
     if ( correctPosSmooth.NormSquared() > .1f )
     {
         std::cout << "Lag slide! " << correctPosSmooth << "\n";
+        resimulate_ = true;
     }
 #endif
 
