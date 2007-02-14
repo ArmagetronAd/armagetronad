@@ -3252,7 +3252,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
     tASSERT( rubber >= 0 );
 
     // TODO: solve smooth position correction trouble with rubber
-    if ( player && ( rubber_granted > rubber || sn_GetNetState() == nCLIENT || !Vulnerable() ) && sg_rubberCycleSpeed > 0 && step > 0 && ( sn_GetNetState() == nCLIENT || rubberEffectiveness > 0 ) )
+    if ( player && ( rubber_granted > rubber || sn_GetNetState() == nCLIENT || !Vulnerable() ) && sg_rubberCycleSpeed > 0 && step > -EPS && ( sn_GetNetState() == nCLIENT || rubberEffectiveness > 0 ) )
     {
         // ignore zero effectiveness, this happens only on the client
         if ( rubberEffectiveness <= 0 )
@@ -3260,11 +3260,20 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
 
         // formerly: rubberFactor = .5
         REAL beta = ts * sg_rubberCycleSpeed;
+        REAL neededSpace = 0;
         REAL rubberFactor;
         if ( beta > .001 )
+        {
             rubberFactor = 1 - exp( -beta );
+            neededSpace = step/rubberFactor;
+        }
         else
+        {
             rubberFactor = beta;        // better accuracy than the full formula
+
+            // a lot of factors can be cut out of this one (avoiding a division by zero for ts=0)
+            neededSpace = verletSpeed_/sg_rubberCycleSpeed;
+        }
 
         // rubberFactor must not be too close to 1, otherwise we get precision trouble
         if ( rubberFactor > .999 )
@@ -3275,8 +3284,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
             rubberFactor = .5f;
 
         // space we need to look ahead
-        REAL neededSpace = step/rubberFactor;
-        if ( neededSpace < step*3 || ts <= 0 )
+        if ( neededSpace < step*3 || ts < -EPS )
             neededSpace = step*3;
 
         // determine how long we can drive on
@@ -3467,7 +3475,15 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
             if ( numTriesSpace < numTries )
                 numTriesSpace = 0;
 
-            rubberSpeedFactor = 1 - rubberneeded/step;
+            if ( step > 0 )
+                rubberSpeedFactor = 1 - rubberneeded/step;
+            else
+                // better algorithm for zero steps
+                rubberSpeedFactor = space / neededSpace;
+
+            // clamp
+            if ( rubberSpeedFactor < 0 )
+                rubberSpeedFactor = 0;
 
             // correct the step to take, don't go backwards.
             step -= rubberneeded;
