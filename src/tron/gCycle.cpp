@@ -1119,6 +1119,9 @@ next(NULL),list(NULL){
     messageID = m.MessageID();
 
     turns = 0;
+
+    if ( !m.End() )
+        m.Read( turns );
 }
 
 void gDestination::CopyFrom(const gCycleMovement &other)
@@ -1230,6 +1233,8 @@ void gDestination::WriteCreate(nMessage &m){
 
     // store message ID for later reference
     messageID = m.MessageID();
+
+    m.Write( turns );
 }
 
 gDestination *gDestination::RightBefore(gDestination *list, REAL dist){

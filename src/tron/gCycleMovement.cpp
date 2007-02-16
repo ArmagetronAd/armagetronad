@@ -2017,6 +2017,10 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     }
                 }
 
+                // see if we missed a turn by, say, just counting?
+                if ( turns < currentDestination->turns - 1 )
+                    missed = true;
+
                 if ( turn )
                 {
                     // the direction we need to drive in
@@ -2135,22 +2139,25 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 }
                 else
                 {
-                    // Uh oh. One command is missing. We should wait as long as possible, perhaps
-                    // it already is on its way.
+
+                    // Uh oh. Turn commands are missing. We should wait as long as possible, it must
+                    // already be on its way.
                     if ( lastTime > currentTime - Lag()*sg_packetMissTolerance )
                         return !Alive();
 
-                    // OK, we missed a turn. Don't panic. Just turn
-                    // towards the destination:
-                    REAL side = (currentDestination->position - pos) * dirDrive;
-                    if ( fabs(side)>verletSpeed_ * GetTurnDelay() * .2 )
+                    if ( turns >= currentDestination->turns - 1 )
                     {
-                        gTurnDelayOverride override( overrideTurnDelay );
-                        Turn(turnTo);
+                        // OK, we missed exactly one turn. Don't panic. Just turn
+                        // towards the destination:
+                        REAL side = (currentDestination->position - pos) * dirDrive;
+                        if ( fabs(side)>verletSpeed_ * GetTurnDelay() * .2 )
+                        {
+                            gTurnDelayOverride override( overrideTurnDelay );
+                            Turn(turnTo);
+                        }
+                        else
+                            used = true;
                     }
-                    else
-                        used = true;
-
                     /*
                       con << "turning to   " << currentDestination->position << "," 
                       << currentDestination->direction << "," 
