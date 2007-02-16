@@ -1353,6 +1353,9 @@ static nDescriptor login_ignore(4,login_ignore_handler,"login_ignore");
 
 void first_fill_ids();
 
+// from nServerInfo.cpp
+extern bool sn_AcceptingFromMaster;
+
 void login_accept_handler(nMessage &m){
     if (sn_GetNetState()!=nSERVER && m.SenderID() == 0){
         login_succeeded=true;
@@ -1368,8 +1371,9 @@ void login_accept_handler(nMessage &m){
 #ifndef DEBUG
 #ifndef DEDICATED
             // expiration for public beta versions
-            if ( ( strstr( VERSION, "rc" ) || strstr( VERSION, "alpha" ) || strstr( VERSION, "beta" ) ) &&
-                    sn_Connections[0].version.Max() > sn_currentProtocolVersion + 1 )
+            if ( !sn_AcceptingFromMaster && 
+                 ( strstr( VERSION, "rc" ) || strstr( VERSION, "alpha" ) || strstr( VERSION, "beta" ) ) &&
+                 sn_Connections[0].version.Max() > sn_currentProtocolVersion + 1 )
             {
                 throw tGenericException( tOutput("$testing_version_expired"), tOutput("$testing_version_expired_title" ) );
             }

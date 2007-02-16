@@ -64,7 +64,7 @@ static nServerInfo*          sn_Requesting=NULL;
 static unsigned int          sn_NextTransactionNr = 0;
 
 static bool sn_AcceptingFromBroadcast = false;
-static bool sn_AcceptingFromMaster    = false;
+       bool sn_AcceptingFromMaster    = false;
 static bool sn_IsMaster               = false;
 
 static nServerInfo*           sn_QuerySoon =NULL;
@@ -552,6 +552,9 @@ void nServerInfo::Load(const tPath& path, const char *filename)
         nServerInfo *server = CreateServerInfo();
         while ( tRecorder::Playback( section, *server ) )
         {
+            // preemptively resolve DNS
+            server->GetAddress();
+
             tRecorder::Record( section, *server );
             server = CreateServerInfo();
         }
@@ -578,6 +581,9 @@ void nServerInfo::Load(const tPath& path, const char *filename)
 
             // record server
             tRecorder::Record( section, *server );
+
+            // preemptively resolve DNS
+            server->GetAddress();
 
             // remove double servers
             bool IsDouble = 0;
