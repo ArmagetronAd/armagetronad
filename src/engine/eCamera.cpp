@@ -1527,6 +1527,10 @@ void eCamera::Timestep(REAL ts){
 
     // update blending factor for smooth glancing
     {
+#define GLANCE_SPEED 20
+
+        glanceSmoothAbs/=(1+GLANCE_SPEED*ts);
+
         REAL abs = fabs(glanceSmooth);
         glanceSmoothAbs = abs > glanceSmoothAbs ? abs : glanceSmoothAbs;
 
@@ -1627,8 +1631,6 @@ void eCamera::Timestep(REAL ts){
 
     eCoord objdir=CenterCamDir();
 
-#define GLANCE_SPEED 20
-
     if (glancingLeft)
         glanceSmooth+=GLANCE_SPEED*ts;
 
@@ -1636,7 +1638,6 @@ void eCamera::Timestep(REAL ts){
         glanceSmooth-=GLANCE_SPEED*ts;
 
     glanceSmooth/=(1+GLANCE_SPEED*ts);
-    glanceSmoothAbs/=(1+GLANCE_SPEED*ts);
 
     glanceDir_ = eCoord(1,glanceSmooth).Turn(1,glanceSmooth);
     glanceDir_.Normalize();
