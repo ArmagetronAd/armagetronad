@@ -2451,7 +2451,7 @@ void nServerInfoBase::NetReadThis( nMessage & m )
 #endif
 
         sn_GetAdr( m.SenderID(), connectionName_ );
-        
+
         // remove the port
         for (int i=connectionName_.Len(); i>=0; i--)
             if (':' == connectionName_[i])
@@ -2459,7 +2459,7 @@ void nServerInfoBase::NetReadThis( nMessage & m )
                 connectionName_[i] = '\0';
                 connectionName_.SetLen(i+1);
             }
-        
+
         S_GlobalizeName( connectionName_ );
     }
 }

@@ -1480,7 +1480,7 @@ void handle_chat(nMessage &m){
                         {
                             // log to sender's console
                             sn_ConsoleOut(toServer, p->Owner());
-                            
+
                             // send to receiver
                             if ( p->Owner() != receiver->Owner() )
                                 se_SendPrivateMessage( p, receiver, msg_core );

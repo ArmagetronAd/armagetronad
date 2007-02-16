@@ -319,7 +319,7 @@ public:
     explicit gDestination(const gCycle &takeitfrom);
 
     // or from a message
-    explicit gDestination(nMessage &m);
+    explicit gDestination( nMessage &m, unsigned short & cycle_id );
 
     // take pos,dir and time from a cycle
     void CopyFrom(const gCycleMovement &other);
@@ -329,7 +329,7 @@ public:
     int CompareWith( const gDestination& other ) const;
 
     // write all the data into a nMessage
-    void WriteCreate(nMessage &m);
+    void WriteCreate( nMessage &m, unsigned short cycle_id );
 
     // insert yourself into a list ordered by distance
     void InsertIntoList(gDestination **list);
