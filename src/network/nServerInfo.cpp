@@ -64,7 +64,7 @@ static nServerInfo*          sn_Requesting=NULL;
 static unsigned int          sn_NextTransactionNr = 0;
 
 static bool sn_AcceptingFromBroadcast = false;
-       bool sn_AcceptingFromMaster    = false;
+bool sn_AcceptingFromMaster    = false;
 static bool sn_IsMaster               = false;
 
 static nServerInfo*           sn_QuerySoon =NULL;

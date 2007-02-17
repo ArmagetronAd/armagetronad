@@ -1371,9 +1371,9 @@ void login_accept_handler(nMessage &m){
 #ifndef DEBUG
 #ifndef DEDICATED
             // expiration for public beta versions
-            if ( !sn_AcceptingFromMaster && 
-                 ( strstr( VERSION, "rc" ) || strstr( VERSION, "alpha" ) || strstr( VERSION, "beta" ) ) &&
-                 sn_Connections[0].version.Max() > sn_currentProtocolVersion + 1 )
+            if ( !sn_AcceptingFromMaster &&
+                    ( strstr( VERSION, "rc" ) || strstr( VERSION, "alpha" ) || strstr( VERSION, "beta" ) ) &&
+                    sn_Connections[0].version.Max() > sn_currentProtocolVersion + 1 )
             {
                 throw tGenericException( tOutput("$testing_version_expired"), tOutput("$testing_version_expired_title" ) );
             }
