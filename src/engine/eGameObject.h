@@ -124,7 +124,7 @@ public:
     virtual REAL  Speed()const{return 20;}
 
     // position after FPS dependant extrapolation
-    virtual eCoord PredictPosition(){return pos;}
+    virtual eCoord PredictPosition() const {return pos;}
 
     // makes two gameObjects interact:
     virtual void InteractWith( eGameObject *target,REAL time,int recursion=1 );
@@ -175,11 +175,11 @@ public:
                           int viewer,REAL rvol,REAL lvol){};
 
     // internal camera
-    virtual eCoord CamDir(){return dir;}
-    virtual REAL  CamRise(){return 0;}
-    virtual eCoord CamPos() {return pos;}
-    virtual REAL  CamZ(){return z;}
-    virtual eCoord  CamTop(){return eCoord(0,0);}
+    virtual eCoord CamDir()  const {return dir;}
+    virtual REAL  CamRise()  const {return 0;}
+    virtual eCoord CamPos()  const {return pos;}
+    virtual REAL  CamZ()     const {return z;}
+    virtual eCoord  CamTop() const {return eCoord(0,0);}
 
     // sr_laggometer
     virtual REAL Lag() const{return 0;}          //!< expected average network latency
