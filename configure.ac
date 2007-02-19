@@ -732,7 +732,7 @@ dnl *************************************************
 dnl FTGL has this one in its dependencies and libraries it passes via pkg-config, but
 dnl they're in the wrong order for static linking. That's why we add freetype once again.
 
-AC_CHECK_LIB(freetype,FT_Free,
+AC_CHECK_LIB(freetype,FT_Init_FreeType,
 CPPFLAGS="$CPPFLAGS `$FREETYPE_CONFIG --cflags`"
 LIBS="$LIBS `$FREETYPE_CONFIG --libs`"
 ,
