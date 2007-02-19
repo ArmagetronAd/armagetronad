@@ -845,26 +845,29 @@ static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message
                 if(netPlayer == p) continue; //the same player who chatted, no point in hilighting
                 tString const &name = netPlayer->GetName();
 
-                //find all occureces of the name...
-                for(tString::size_type pos = actualMessage.find(name); pos != tString::npos; pos = actualMessage.find(name, pos+16)) {
-                    //find the last color code
-                    tString::size_type lastcolorpos = actualMessage.rfind("0x", pos);
-                    tString lastcolorstring;
-                    if(lastcolorpos != tString::npos) {
-                        lastcolorstring = actualMessage.SubStr(lastcolorpos, 8);
-                    } else {
-                        lastcolorstring = "0xffff7f";
-                    }
+                if ( name.size() > 0 )
+                {
+                    //find all occureces of the name...
+                    for(tString::size_type pos = actualMessage.find(name); pos != tString::npos; pos = actualMessage.find(name, pos+16)) {
+                        //find the last color code
+                        tString::size_type lastcolorpos = actualMessage.rfind("0x", pos);
+                        tString lastcolorstring;
+                        if(lastcolorpos != tString::npos) {
+                            lastcolorstring = actualMessage.SubStr(lastcolorpos, 8);
+                        } else {
+                            lastcolorstring = "0xffff7f";
+                        }
 
-                    if(lastcolorpos >= pos - 8) {
-                        //the name we matched is within a color code... bad idea to substitute it.
-                        pos -= 16 - name.size();
-                        continue;
-                    }
+                        if(lastcolorpos >= pos - 8) {
+                            //the name we matched is within a color code... bad idea to substitute it.
+                            pos -= 16 - name.size();
+                            continue;
+                        }
 
-                    //actually insert the color codes around the name
-                    actualMessage.insert(pos+name.size(), lastcolorstring);
-                    actualMessage.insert(pos, "0xff887f");
+                        //actually insert the color codes around the name
+                        actualMessage.insert(pos+name.size(), lastcolorstring);
+                        actualMessage.insert(pos, "0xff887f");
+                    }
                 }
             }
         }
