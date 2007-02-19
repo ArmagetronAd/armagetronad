@@ -563,6 +563,9 @@ talk_to_master_help		Announce this server on the internet?
 max_out_rate_help		Maximum network output rate
 max_in_rate_help		Maximum network input rate
 ping_charity_help		How much ping are you willing to take over from your opponent?
+ping_charity_max_help	Server option: maximum ping charity value. Set to 0 to avoid instant kills. Active only if all clients are 0.2.8.3 or better.
+ping_charity_min_help	Server option: minimum ping charity value. Use to enforce fairness. Active only if all clients are 0.2.8.3 or better.
+ping_charity_server_help Don't touch: the server says this is the maximal ping compensation.
 big_brother_help		Did we already send the big brother information?
 server_name_help		Name of this server
 server_options_help		Short description of the options on this server
@@ -773,6 +776,8 @@ exit_help					Shuts the dedicated server down and quits.
 # manning and kicking commands
 players_help                Prints list of currently active players
 kill_help                   Kill a specific player (as warning before a kick)
+silence_help                Silence a specific player so he can't use public chat any more (/msg and /team still work)
+voice_help                  Reverse of SILENCE
 kick_help					Kicks the specified player from the server.
 ban_help                    Bans the specified player from the server (kicks him first) for a variable time in minutes.
 ban_ip_help                 Bans the spedified IP address from the server for a variable time.
@@ -2093,6 +2098,10 @@ zone_collapse_harmless      \1's zone collapses harmlessly for lack of enemy con
 player_pingcharity_changed	Ping charity changed from \1 to \2.\n
 spam_protection_repeat  SPAM PROTECTION: you already said: \1\n
 spam_protection			SPAM PROTECTION: you are silenced for the next \1 seconds.\n
+spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
+spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
+player_silenced         \10xff7777 has been silenced.\n
+player_voiced           \10x77ff77 has been given his voice back.\n
 vote_spam_protection	VOTE SPAM PROTECTION: you are disallowed from issuing votes for the next \1 seconds.\n
 chat_title_text			Say:
 player_entered_game		\1 0x7fff7fentered the game.\n

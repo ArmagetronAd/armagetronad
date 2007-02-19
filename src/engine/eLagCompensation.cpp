@@ -393,6 +393,10 @@ REAL eLag::TakeCredit( int client, REAL lag )
 
 REAL eLag::Credit( int client )
 {
+    // don't give credit on the client
+    if ( sn_GetNetState() != nSERVER )
+        return 0;
+
     tVERIFY( 1 <= client && client <= MAXCLIENTS );
 
     // see how much total credit is left

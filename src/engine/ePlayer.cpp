@@ -1368,6 +1368,30 @@ static bool se_allowShuffleUp=false;
 static tSettingItem<bool> se_allowShuffleUpConf("TEAM_ALLOW_SHUFFLE_UP",
         se_allowShuffleUp);
 
+static bool se_silenceAll = false;		// flag indicating whether everyone should be silenced
+
+static tSettingItem<bool> se_silAll("SILENCE_ALL",
+                                    se_silenceAll);
+
+// checks whether a player is silenced, giving him appropriate warnings if he is
+bool IsSilencedWithWarning( ePlayerNetID const * p )
+{
+    if ( se_silenceAll && ! p->isLoggedIn() )
+    {
+        // everyone except the admins is silenced
+        sn_ConsoleOut( tOutput( "$spam_protection_silenceall" ), p->Owner() );
+        return true;
+    }
+    else if ( p->IsSilenced() )
+    {
+        // player is specially silenced
+        sn_ConsoleOut( tOutput( "$spam_protection_silenced" ), p->Owner() );
+        return true;
+    }
+
+    return false;
+}
+
 void handle_chat(nMessage &m){
     nTimeRolling currentTime = tSysTimeFloat();
     unsigned short id;
@@ -1431,6 +1455,9 @@ void handle_chat(nMessage &m){
                 tConfItemBase::EatWhitespace(s);
                 msg.ReadLine(s);
                 if (command == "/me") {
+                    if ( IsSilencedWithWarning(p) )
+                        return;
+
                     tColoredString console;
                     console << tColoredString::ColorString(1,1,1)  << "* ";
                     console << *p;
@@ -1528,7 +1555,7 @@ void handle_chat(nMessage &m){
 
                     return;
                 }
-                else if (command == "/msg") {
+                else if (command == "/msg" ) {
                     size_t current_place=0; // current place in buffer_name.
 
                     // search for end of recipient and store recipient in buffer_name
@@ -1559,12 +1586,16 @@ void handle_chat(nMessage &m){
                         // log locally
                         sn_ConsoleOut(toServer,0);
 
-                        // log to sender's console
-                        sn_ConsoleOut(toServer, p->Owner());
+                        if ( p->CurrentTeam() == receiver->CurrentTeam() || !IsSilencedWithWarning(p) )
+                        {
+                            // log to sender's console
+                            sn_ConsoleOut(toServer, p->Owner());
 
-                        // send to receiver
-                        if ( p->Owner() != receiver->Owner())
-                            se_SendPrivateMessage( p, receiver, msg_core );
+                            // send to receiver
+                            if ( p->Owner() != receiver->Owner() )
+                                se_SendPrivateMessage( p, receiver, msg_core );
+                        }
+
                         return;
                     }
                     // More than than one match for the current buffer. Complain about that.
@@ -1609,7 +1640,7 @@ void handle_chat(nMessage &m){
 #endif
             }
 
-            if ( spamLevel < nSpamProtection::Level_Mild && say.Len() <= se_SpamMaxLen+2 && ( !p->IsSilenced() ) && pass != true )
+            if ( spamLevel < nSpamProtection::Level_Mild && say.Len() <= se_SpamMaxLen+2 && pass != true && !IsSilencedWithWarning(p) )
             {
                 se_BroadcastChat( p, say );
                 se_DisplayChatLocally( p, say);
@@ -2240,11 +2271,6 @@ void ePlayerNetID::Activity()
     this->lastActivity_ = tSysTimeFloat();
 }
 
-static bool se_SilenceAll = false;		// flag indicating whether everyone should be silenced
-
-static tSettingItem<bool> se_silAll("SILENCE_ALL",
-                                    se_SilenceAll);
-
 static int se_maxPlayersPerIP = 4;
 static tSettingItem<int> se_maxPlayersPerIPConf( "MAX_PLAYERS_SAME_IP", se_maxPlayersPerIP );
 
@@ -2278,7 +2304,7 @@ void ePlayerNetID::MyInitAfterCreation()
 {
     this->CreateVoter();
 
-    this->silenced_ = se_SilenceAll;
+    this->silenced_ = ( sn_GetNetState() != nSERVER ) && se_silenceAll;
 
     // register with machine and kick user if too many players are present
     if ( Owner() != 0 && sn_GetNetState() == nSERVER )
@@ -2514,7 +2540,13 @@ void ePlayerNetID::WriteSync(nMessage &m){
     m.Write(r);
     m.Write(g);
     m.Write(b);
-    m.Write(pingCharity);
+
+    // write ping charity; spectators get a fake (high) value
+    if ( currentTeam || nextTeam )
+        m.Write(pingCharity);
+    else
+        m.Write(1000);
+
     if ( sn_GetNetState() == nCLIENT )
     {
         m << nameFromClient_;
@@ -3331,6 +3363,13 @@ void ePlayerNetID::CompleteRebuild(){
     Update();
 }
 
+static nSettingItem<int> se_pingCharityServerConf("PING_CHARITY_SERVER",sn_pingCharityServer );
+static nVersionFeature   se_pingCharityServerControlled( 14 );
+
+static int se_pingCharityMax = 500, se_pingCharityMin = 0;
+static tSettingItem<int> se_pingCharityMaxConf( "PING_CHARITY_MAX", se_pingCharityMax );
+static tSettingItem<int> se_pingCharityMinConf( "PING_CHARITY_MIN", se_pingCharityMin );
+
 // Update the netPlayer_id list
 void ePlayerNetID::Update(){
 #ifdef DEDICATED
@@ -3391,34 +3430,62 @@ void ePlayerNetID::Update(){
         }
 
     }
-    // update the ping charity
-    int old_c=sn_pingCharityServer;
-    sg_ClampPingCharity();
-    sn_pingCharityServer=::pingCharity;
-#ifndef DEDICATED
-    if (sn_GetNetState()==nCLIENT)
-#endif
-        sn_pingCharityServer+=100000;
 
     int i;
-    for(i=se_PlayerNetIDs.Len()-1;i>=0;i--){
-        ePlayerNetID *pni=se_PlayerNetIDs(i);
-        pni->UpdateName();
-        int new_ps=pni->pingCharity;
-        new_ps+=int(pni->ping*500);
 
-        if (new_ps< sn_pingCharityServer)
-            sn_pingCharityServer=new_ps;
-    }
-    if (sn_pingCharityServer<0)
-        sn_pingCharityServer=0;
-    if (old_c!=sn_pingCharityServer)
+
+    // update the ping charity, but
+    // don't do so on the client if the server controls the ping charity completely
+    if ( sn_GetNetState() == nSERVER || !se_pingCharityServerControlled.Supported(0) )
     {
-        tOutput o;
-        o.SetTemplateParameter(1, old_c);
-        o.SetTemplateParameter(2, sn_pingCharityServer);
-        o << "$player_pingcharity_changed";
-        con << o;
+        int old_c=sn_pingCharityServer;
+        sg_ClampPingCharity();
+        sn_pingCharityServer=::pingCharity;
+
+#ifndef DEDICATED
+        if (sn_GetNetState()==nCLIENT)
+#endif
+            sn_pingCharityServer+=100000;
+
+        // set configurable maximum
+        if ( se_pingCharityServerControlled.Supported() )
+        {
+            sn_pingCharityServer = se_pingCharityMax;
+        }
+
+        for(i=se_PlayerNetIDs.Len()-1;i>=0;i--){
+            ePlayerNetID *pni=se_PlayerNetIDs(i);
+            pni->UpdateName();
+            int new_ps=pni->pingCharity;
+            new_ps+=int(pni->ping*500);
+
+            // only take ping charity into account for non-spectators
+            if ( sn_GetNetState() != nSERVER || pni->currentTeam || pni->nextTeam )
+                if (new_ps < sn_pingCharityServer)
+                    sn_pingCharityServer=new_ps;
+        }
+        if (sn_pingCharityServer<0)
+            sn_pingCharityServer=0;
+
+        // set configurable minimum
+        if ( se_pingCharityServerControlled.Supported() )
+        {
+            if ( sn_pingCharityServer < se_pingCharityMin )
+                sn_pingCharityServer = se_pingCharityMin;
+        }
+
+        if (old_c!=sn_pingCharityServer)
+        {
+            tOutput o;
+            o.SetTemplateParameter(1, old_c);
+            o.SetTemplateParameter(2, sn_pingCharityServer);
+            o << "$player_pingcharity_changed";
+            con << o;
+
+            // trigger transmission to the clients
+            if (sn_GetNetState()==nSERVER)
+                se_pingCharityServerConf.nConfItemBase::WasChanged(true);
+        }
     }
 
     // update team assignment
@@ -4314,7 +4381,6 @@ static void se_KickConf(std::istream &s)
 
 static tConfItemFunc se_kickConf("KICK",&se_KickConf);
 
-
 static void se_BanConf(std::istream &s)
 {
     // get user ID
@@ -4344,7 +4410,7 @@ static void se_BanConf(std::istream &s)
 
 static tConfItemFunc se_banConf("BAN",&se_BanConf);
 
-static void Kill_conf(std::istream &s)
+static ePlayerNetID * ReadPlayer( std::istream & s, char const * error )
 {
     // read name of player to be killed
     tString name;
@@ -4358,40 +4424,47 @@ static void Kill_conf(std::istream &s)
         // check whether it's p who should be killed by comparing the name.
         if ( p->GetUserName() == name )
         {
-            // kill the player's game object
-            if ( p->Object() )
-                p->Object()->Kill();
-
-            return;
+            return p;
         }
     }
 
-    int num;
-    bool isNum = name.Convert( num );
-    if ( isNum )
-        for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
-        {
-            ePlayerNetID* p = se_PlayerNetIDs(i);
+    con << tOutput( error, name );
 
-            // check whether it's p who should be killed,
-            // by comparing the owner.
-            if ( p->Owner() == num )
-            {
-                // kill the player's game object
-                if ( p->Object() )
-                    p->Object()->Kill();
+    return 0;
+}
 
-                return;
-            }
-        }
-
-    tOutput o;
-    o.SetTemplateParameter( 1, name );
-    o << "$network_kick_notfound";
-    con << o;
+static void Kill_conf(std::istream &s)
+{
+    ePlayerNetID * p = ReadPlayer( s, "$network_kick_notfound" );
+    if ( p && p->Object() )
+        p->Object()->Kill();
 }
 
 static tConfItemFunc kill_conf("KILL",&Kill_conf);
+
+static void Silence_conf(std::istream &s)
+{
+    ePlayerNetID * p = ReadPlayer( s, "$network_kick_notfound" );
+    if ( p )
+    {
+        sn_ConsoleOut( tOutput( "$player_silenced", p->GetName() ) );
+        p->SetSilenced( true );
+    }
+}
+
+static tConfItemFunc silence_conf("SILENCE",&Silence_conf);
+
+static void Voice_conf(std::istream &s)
+{
+    ePlayerNetID * p = ReadPlayer( s, "$network_kick_notfound" );
+    if ( p )
+    {
+        sn_ConsoleOut( tOutput( "$player_voiced", p->GetName() ) );
+        p->SetSilenced( false );
+    }
+}
+
+static tConfItemFunc voice_conf("VOICE",&Voice_conf);
 
 static void players_conf(std::istream &s)
 {

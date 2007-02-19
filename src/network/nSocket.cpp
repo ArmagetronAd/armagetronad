@@ -56,6 +56,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #   define IPTOS_LOWDELAY 0x10 // http://www.tcpdump.org/cgi-bin/cvsweb/tcpdump/ip.h?rev=1.11
 #endif
 
+#include <netinet/in_systm.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <sys/param.h>
@@ -1520,11 +1521,7 @@ int nSocket::Create( void )
 #ifndef WIN32
     char tos = IPTOS_LOWDELAY;
 
-#   ifdef MACOSX
     int ret = setsockopt( socket_, IPPROTO_IP, IP_TOS, &tos, sizeof(char) );
-#   else
-    int ret = setsockopt( socket_, SOL_IP, IP_TOS, &tos, sizeof(char) );
-#   endif
 
     // remove this error reporting some time later, the success is not critical
     if ( ret != 0 )

@@ -1999,6 +1999,10 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     }
                 }
 
+                // see if we missed a turn by, say, just counting?
+                if ( turns < currentDestination->turns - 1 )
+                    missed = true;
+
                 if ( turn )
                 {
                     // the direction we need to drive in
@@ -2117,22 +2121,25 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 }
                 else
                 {
-                    // Uh oh. One command is missing. We should wait as long as possible, perhaps
-                    // it already is on its way.
+
+                    // Uh oh. Turn commands are missing. We should wait as long as possible, it must
+                    // already be on its way.
                     if ( lastTime > currentTime - Lag()*sg_packetMissTolerance )
                         return !Alive();
 
-                    // OK, we missed a turn. Don't panic. Just turn
-                    // towards the destination:
-                    REAL side = (currentDestination->position - pos) * dirDrive;
-                    if ( fabs(side)>verletSpeed_ * GetTurnDelay() * .2 )
+                    if ( turns >= currentDestination->turns - 1 )
                     {
-                        gTurnDelayOverride override( overrideTurnDelay );
-                        Turn(turnTo);
+                        // OK, we missed exactly one turn. Don't panic. Just turn
+                        // towards the destination:
+                        REAL side = (currentDestination->position - pos) * dirDrive;
+                        if ( fabs(side)>verletSpeed_ * GetTurnDelay() * .2 )
+                        {
+                            gTurnDelayOverride override( overrideTurnDelay );
+                            Turn(turnTo);
+                        }
+                        else
+                            used = true;
                     }
-                    else
-                        used = true;
-
                     /*
                       con << "turning to   " << currentDestination->position << "," 
                       << currentDestination->direction << "," 
@@ -3234,7 +3241,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
     tASSERT( rubber >= 0 );
 
     // TODO: solve smooth position correction trouble with rubber
-    if ( player && ( rubber_granted > rubber || sn_GetNetState() == nCLIENT || !Vulnerable() ) && sg_rubberCycleSpeed > 0 && step > 0 && ( sn_GetNetState() == nCLIENT || rubberEffectiveness > 0 ) )
+    if ( player && ( rubber_granted > rubber || sn_GetNetState() == nCLIENT || !Vulnerable() ) && sg_rubberCycleSpeed > 0 && step > -EPS && ( sn_GetNetState() == nCLIENT || rubberEffectiveness > 0 ) )
     {
         // ignore zero effectiveness, this happens only on the client
         if ( rubberEffectiveness <= 0 )
@@ -3242,11 +3249,20 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
 
         // formerly: rubberFactor = .5
         REAL beta = ts * sg_rubberCycleSpeed;
+        REAL neededSpace = 0;
         REAL rubberFactor;
         if ( beta > .001 )
+        {
             rubberFactor = 1 - exp( -beta );
+            neededSpace = step/rubberFactor;
+        }
         else
+        {
             rubberFactor = beta;        // better accuracy than the full formula
+
+            // a lot of factors can be cut out of this one (avoiding a division by zero for ts=0)
+            neededSpace = verletSpeed_/sg_rubberCycleSpeed;
+        }
 
         // rubberFactor must not be too close to 1, otherwise we get precision trouble
         if ( rubberFactor > .999 )
@@ -3257,8 +3273,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
             rubberFactor = .5f;
 
         // space we need to look ahead
-        REAL neededSpace = step/rubberFactor;
-        if ( neededSpace < step*3 || ts <= 0 )
+        if ( neededSpace < step*3 || ts < -EPS )
             neededSpace = step*3;
 
         // determine how long we can drive on
@@ -3449,7 +3464,15 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
             if ( numTriesSpace < numTries )
                 numTriesSpace = 0;
 
-            rubberSpeedFactor = 1 - rubberneeded/step;
+            if ( step > 0 )
+                rubberSpeedFactor = 1 - rubberneeded/step;
+            else
+                // better algorithm for zero steps
+                rubberSpeedFactor = space / neededSpace;
+
+            // clamp
+            if ( rubberSpeedFactor < 0 )
+                rubberSpeedFactor = 0;
 
             // correct the step to take, don't go backwards.
             step -= rubberneeded;

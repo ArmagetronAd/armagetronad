@@ -95,6 +95,18 @@ public:
     operator struct sockaddr *      ()       { return &addr_.addr; }   //!< conversion to sockaddr
     operator struct sockaddr const *() const { return &addr_.addr; }   //!< conversion to sockaddr
 
+    //! comparison operator
+    bool operator == ( nAddress const & other ) const
+    {
+        return Compare( *this, other ) == 0;
+    }
+
+    //! comparison operator
+    bool operator != ( nAddress const & other ) const
+    {
+        return Compare( *this, other ) != 0;
+    }
+
     enum{ size = sizeof( nAddressBase ) };
 
     unsigned int GetAddressLength( void ) const;	//!< Gets the length of the stored address

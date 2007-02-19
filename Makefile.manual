@@ -173,7 +173,7 @@ distprep:
 	echo "break st_Breakpoint()" > $@
 
 @progname@: all
-	ln -sf src/armagetronad_main $@
+	test -r $@ || ln -sf src/armagetronad_main $@
 
 DEBUGFILES=.gdbinit @progname@
 debug: $(DEBUGFILES)

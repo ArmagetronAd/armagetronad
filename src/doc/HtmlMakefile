@@ -15,14 +15,14 @@ $(htmlm4): $(top_builddir)/config.status Makefile $(top_srcdir)/src/doc/html.m4.
 if HAVE_M4
 %.html : $(srcdir)/%.html.m4 %.html.dep $(htmlm4) Makefile 
 if DATE_R
-	{ echo "define(CHANGEDATE,`date +"%b %d %Y" -r $<`) include($(htmlm4))" ; cat $< ; } | m4 -I ${srcdir} > $@
+	{ echo "define(CHANGEDATE,`date +"%b %d %Y" -r $<`) include($(htmlm4))" ; cat $< ; } | m4 -I ${srcdir} > $@ || cp $< $@
 else
-	{ echo "define(CHANGEDATE,`date +"%b %d %Y"`) include($(htmlm4))" ; cat $< ; } | m4 -I ${srcdir} > $@
+	{ echo "define(CHANGEDATE,`date +"%b %d %Y"`) include($(htmlm4))" ; cat $< ; } | m4 -I ${srcdir} > $@ || cp $< $@
 endif
 
 %.dep: %.m4 Makefile
 	echo $*.dep ":\\" > $@
-	{ echo -n "define(include,$(srcdir)/\$$1\)" ; grep "include(" $<; }| m4 >> $@
+	grep "include(" $< | sed -e "s,include(\(.*\)),$(srcdir)/\1\\\," >> $@
 	echo "Makefile" >> $@
 endif
 

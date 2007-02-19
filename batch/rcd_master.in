@@ -27,3 +27,4 @@ LOGFILE=$LOGDIR/@prognamebase@-master.log
 
 # delegate to common start/stop/status code
 . $RCDDIR/rcd_startstop
+

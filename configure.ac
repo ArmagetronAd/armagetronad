@@ -884,7 +884,7 @@ AC_C_CONST
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS(select)
-AC_CHECK_FUNCS(atan2f sinf cosf tanf sqrtf logf expf fabsf floorf pow10 pow10f)
+AC_CHECK_FUNCS(atan2f sinf cosf tanf sqrtf logf expf fabsf floorf pow10 pow10f isblank)
 AC_CHECK_FUNCS(wmemset)
 
 # if the compiler is GCC -Os produces faulty code (exceptions cause crashes), at least on AMD64. Replace it with -O2.

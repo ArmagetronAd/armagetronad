@@ -12,16 +12,18 @@ all: included
 
 linked_included.%: included
 	rm -rf $@
-	if test -d included; then\
-		ln -sf included $@;\
-	else\
-		ln -sf ${srcdir}/included $@;\
+	if test ! -r $@; then \
+		if test -d included; then\
+			ln -sf ./included $@;\
+		else\
+			ln -sf ${srcdir}/included $@;\
+		fi;\
 	fi
 
 install-data-local: linked_included.install
 #   copy processed included resources into target directory
 	mkdir -p ${DESTDIR}${resourcedir}/included
-	cp -LR $</* ${DESTDIR}${resourcedir}/included
+	cp -r $</* ${DESTDIR}${resourcedir}/included
 	find ${DESTDIR}${resourcedir} -type d -exec chmod 755 \{\} \;
 	find ${DESTDIR}${resourcedir} -type f -exec chmod 644 \{\} \;
 	rm -f $<	
@@ -33,7 +35,7 @@ uninstall-local:
 dist-hook: linked_included.dist
 #   copy processed included resources into distribution
 	mkdir -p $(distdir)/included
-	cp -LR $</* $(distdir)/included/
+	cp -r $</* $(distdir)/included/
 
 #	delete temporary files
 	rm -f $<

@@ -1089,7 +1089,7 @@ gDestination::gDestination(const gCycle &c)
 }
 
 // or from a message
-gDestination::gDestination(nMessage &m)
+gDestination::gDestination(nMessage &m, unsigned short & cycle_id )
         :gameTime(0),distance(0),speed(0),
         hasBeenUsed(false),
         messageID(1),
@@ -1107,6 +1107,18 @@ next(NULL),list(NULL){
     messageID = m.MessageID();
 
     turns = 0;
+
+    m.Read( cycle_id );
+
+    if ( !m.End() )
+        m >> gameTime;
+    else
+        gameTime = -1000;
+
+    if ( !m.End() )
+    {
+        m.Read( turns );
+    }
 }
 
 void gDestination::CopyFrom(const gCycleMovement &other)
@@ -1204,7 +1216,7 @@ const unsigned short gFloatCompressor::maxShort_ = 0xFFFF;
 static gFloatCompressor compressZeroOne( 0, 1 );
 
 // write all the data into a nMessage
-void gDestination::WriteCreate(nMessage &m){
+void gDestination::WriteCreate(nMessage &m, unsigned short cycle_id ){
     m << position;
     m << direction;
     m << distance;
@@ -1218,6 +1230,10 @@ void gDestination::WriteCreate(nMessage &m){
 
     // store message ID for later reference
     messageID = m.MessageID();
+
+    m.Write( cycle_id );
+    m << gameTime;
+    m.Write( turns );
 }
 
 gDestination *gDestination::RightBefore(gDestination *list, REAL dist){
@@ -1346,11 +1362,10 @@ gDestination & gDestination::SetGameTime( REAL gameTime )
 static void new_destination_handler(nMessage &m)
 {
     // read the destination
-    gDestination *dest=new gDestination(m);
+    unsigned short cycle_id;
+    gDestination *dest=new gDestination(m, cycle_id );
 
     // and the ID of the cycle the destination is added to
-    unsigned short cycle_id;
-    m.Read(cycle_id);
     nNetObject *o=nNetObject::ObjectDangerous(cycle_id);
     if (o && &o->CreatorDescriptor() == &cycle_init){
         if ((sn_GetNetState() == nSERVER) && (m.SenderID() != o->Owner()))
@@ -1366,15 +1381,9 @@ static void new_destination_handler(nMessage &m)
                     if ( c->Player() && !dest->Chatting() )
                         c->Player()->Activity();
 
-                    // read game time from message
-                    REAL gameTime = se_GameTime()+c->Lag()*3;
-                    if ( !m.End() )
-                        m >> gameTime;
-
-                    // uncomment to test sync error compensation code on client :)
-                    // gameTime += .2;
-
-                    dest->SetGameTime( gameTime );
+                    // fill default gametime
+                    if ( dest->GetGameTime() < -100 )
+                        dest->SetGameTime( se_GameTime()+c->Lag()*3 );
 
                     c->AddDestination(dest);
                     dest = 0;
@@ -1391,9 +1400,7 @@ static nDescriptor destination_descriptor(321,&new_destination_handler,"destinat
 
 static void BroadCastNewDestination(gCycleMovement *c, gDestination *dest){
     nMessage *m=new nMessage(destination_descriptor);
-    dest->WriteCreate(*m);
-    m->Write(c->ID());
-    *m << dest->GetGameTime();
+    dest->WriteCreate(*m, c->ID() );
     m->BroadCast();
 }
 
@@ -4705,6 +4712,9 @@ void gCycle::ResetExtrapolator()
     }
 
     extrapolator_->CopyFrom( lastSyncMessage_, *this );
+
+    // simulate a bit, only to get current rubberSpeedFactor and acceleration
+    extrapolator_->TimestepCore( extrapolator_->LastTime(), true );
 }
 
 // simulate the extrapolator at higher speed
@@ -4848,6 +4858,7 @@ void gCycle::SyncFromExtrapolator()
     if ( correctPosSmooth.NormSquared() > .1f )
     {
         std::cout << "Lag slide! " << correctPosSmooth << "\n";
+        resimulate_ = true;
     }
 #endif
 

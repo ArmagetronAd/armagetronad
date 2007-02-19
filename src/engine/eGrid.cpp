@@ -2566,17 +2566,20 @@ eFace * eGrid::FindSurroundingFace(const eCoord &pos, eFace *currentFace) const{
                 continue;
             }
 
-            eCoord vec=pos - (*run->Point()); // the vector to our destination
-
-            REAL score = run->Vec() * vec;
-
-            if (!first)
-                first = run;
-
-            if (score > bestScore)
+            if ( run->Other() && run->Other()->Face() )
             {
-                best      = run;
-                bestScore = score;
+                eCoord vec=pos - (*run->Point()); // the vector to our destination
+
+                REAL score = run->Vec() * vec;
+
+                if (!first)
+                    first = run;
+
+                if (score > bestScore)
+                {
+                    best      = run;
+                    bestScore = score;
+                }
             }
 
             run = run->Next();
