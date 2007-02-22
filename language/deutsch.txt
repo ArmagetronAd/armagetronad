@@ -2008,7 +2008,7 @@ network_message_abortconn_title Verbindung abgebrochen
 network_message_abortconn_inter Der Server hat die Verbindung abgebrochen.
 
 network_master_timeout_retry  Einer der Master-Server antwortet nicht. Nächster wird kontaktiert...\n
-network_master_timeout_title  Master-Server antwortet nicht
+network_master_timeout_title  Master-Server antworten nicht
 network_master_timeout_inter  Die Master-Server sind momentan nicht erreichbar und die Liste der Server konnte nicht aktualisiert werden. Wir versuchen es mit der alten Liste.\n\nWahrscheinlichster Grund für diesen Fehler ist ein lokales Netzwerkproblem. Überprufe bitte, ob der Internetzugang im Allgemeinen funktionniert, z.B. indem Du mit einem Web-Browser www.armagetronad.net besuchst.\nManchmal ist auch eine Firewall für Verbindungsprobleme verantwortlich. Am einfachsten testet man das, indem man die betreffende Firewall deaktiviert, und dann erneut ein Internet-Spiel zu starten versucht. Wenn es dann klappt, solltest Du die Firewall wieder aktivieren, aber speziefisch Armagetron den Zugang erlauben. Wir verwenden UDP, Ports 4533 bis 4540. Sorge auch dafür, dass armagetronad(.exe) nicht in der Liste der erlaubten Anwendungen ist.\nWenn Teile des Netzwerkes sich Deiner Kontrolle entziehen, z.B. weil Du an einem öffentlichen WLAN-Hotspot sitzt oder in einem Unternehmens- oder Schulnetzwerk, dann sprich mit dem Administrator des Netzwerks.\nUnwahrscheinlich, aber möglich, ist es auch, dass die Master-Server Infrastruktur gerade zusammengebrochen ist. Besuche das Forum auf forums.armagetronad.net oder den IRC-Kanal #armagetron auf irc.freenode.net für aktuelle Nachrichten.
 
 network_master_denied_title   Verbindung zum Master-Server abgelehnt
