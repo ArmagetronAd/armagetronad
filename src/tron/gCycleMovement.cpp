@@ -1508,6 +1508,10 @@ struct gMaxSpaceAheadHitInfo
     tJUST_CONTROLLED_PTR< eHalfEdge const > edge;    //!< the edge that was hit
     tJUST_CONTROLLED_PTR< gPlayerWall > playerWall;  //!< the player wall that was hit
     REAL wallAlpha;                                  //!< the wall alpha value of the hit
+
+    gMaxSpaceAheadHitInfo()
+    : offset(0), wallAlpha(.5)
+    {}
 };
 
 // clearer of that data
