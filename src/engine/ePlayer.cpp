@@ -2580,8 +2580,8 @@ static void se_CutString( tColoredString & string, int maxLen )
 {
     if (string.Len() > maxLen )
     {
-        string.SetLen(maxLen);
-        string[string.Len()-1]='\0';
+        string = string.SubStr(0, maxLen);
+        //string[string.Len()-1]='\0';
         string.RemoveTrailingColor();
     }
 }
