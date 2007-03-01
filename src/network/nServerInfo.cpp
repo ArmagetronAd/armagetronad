@@ -1452,7 +1452,7 @@ void nServerInfo::GetFromMaster(nServerInfo *masterInfo)
         }
         else
         {
-            tConsole::Message("$network_master_timeout_title", "$network_master_timeout_inter", 20);
+            tConsole::Message("$network_master_timeout_title", "$network_master_timeout_inter", 3600);
         }
         return;
         break;

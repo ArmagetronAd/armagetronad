@@ -3372,7 +3372,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                     }
                 }
 
-                if ( !saved )
+                if ( !saved && sn_GetNetState() != nCLIENT )
                 {
                     // err, trouble. Can't push the other guy back far enough. Better kill him.
                     if ( currentWall )
@@ -5074,6 +5074,12 @@ void gCycle::ReadSync( nMessage &m )
             }
         }
     }
+    else
+    {
+        // first sync. Accept the position without questioning it.
+        pos = sync.pos;
+        FindCurrentFace();
+    }
 
     // determine whether we can use the distance based interpolating sync method here
     bool distanceBased = aft && aft != &emergency_aft && Owner() == sn_myNetID;
@@ -5711,5 +5717,5 @@ REAL gCycleExtrapolator::DoGetDistanceSinceLastTurn( void ) const
 
 bool gCycle::Vulnerable() const
 {
-    return lastTime > spawnTime_ + sg_cycleInvulnerableTime;
+    return Alive() && lastTime > spawnTime_ + sg_cycleInvulnerableTime;
 }

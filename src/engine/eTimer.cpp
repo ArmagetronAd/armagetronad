@@ -335,9 +335,15 @@ bool eTimer::IsSynced() const
         return true;
 
     // the quality of the start time offset needs to be good enough (to .1 s, variance is the square of the expected)
-    if ( startTimeOffset_.GetAverageVariance() < .01 &&
-            fabs( startTimeOffset_.GetAverage() - startTimeSmoothedOffset_ ) < .01 )
+    bool synced = startTimeOffset_.GetAverageVariance() < .01 &&
+                  fabs( startTimeOffset_.GetAverage() - startTimeSmoothedOffset_ ) < .01;
+
+    static char const * section = "TIMER_SYNCED";
+
+    if ( tRecorder::IsPlayingBack() ? tRecorder::Playback( section ) : synced )
     {
+        tRecorder::Record( section );
+
         // and make sure the next calls also return true.
         creationSystemTime_ = smoothedSystemTime_ - 11;
         return true;

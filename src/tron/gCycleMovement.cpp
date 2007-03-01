@@ -1490,6 +1490,10 @@ struct gMaxSpaceAheadHitInfo
     tJUST_CONTROLLED_PTR< eHalfEdge const > edge;    //!< the edge that was hit
     tJUST_CONTROLLED_PTR< gPlayerWall > playerWall;  //!< the player wall that was hit
     REAL wallAlpha;                                  //!< the wall alpha value of the hit
+
+    gMaxSpaceAheadHitInfo()
+            : offset(0), wallAlpha(.5)
+    {}
 };
 
 // clearer of that data
@@ -3881,14 +3885,30 @@ bool gCycleMovement::RubberMalusActive( void )
 
 void gCycleMovement::MoveSafely( const eCoord & dest, REAL startTime, REAL endTime )
 {
-    try
+    static bool recursing = false;
+    if ( !recursing )
     {
-        // try a regular move
-        Move( dest, startTime, endTime );
+        recursing = true;
+        try
+        {
+            // try a regular move
+            Move( dest, startTime, endTime );
+        }
+        catch( eDeath & death )
+        {
+            // and play dead if that doesn't work right
+            short lastAlive = alive_;
+            alive_ = 0;
+            Move( dest, startTime, endTime );
+            alive_ = lastAlive;
+        }
     }
-    catch( eDeath & death )
+    else
     {
-        // and play dead if that doesn't work right
+        // play dead if another safe move is already in process. Sometimes,
+        // crossing a wall of a live cycle causes that cycle to be moved with
+        // this function, and "killing" it temporarily avoids an endless
+        // recursion in that case.
         short lastAlive = alive_;
         alive_ = 0;
         Move( dest, startTime, endTime );

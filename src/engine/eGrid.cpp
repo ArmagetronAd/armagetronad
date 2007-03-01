@@ -2572,15 +2572,15 @@ eFace * eGrid::FindSurroundingFace(const eCoord &pos, eFace *currentFace) const{
 
                 REAL score = run->Vec() * vec;
 
-                if (!first)
-                    first = run;
-
                 if (score > bestScore)
                 {
                     best      = run;
                     bestScore = score;
                 }
             }
+
+            if (!first)
+                first = run;
 
             run = run->Next();
         }
