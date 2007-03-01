@@ -72,8 +72,8 @@ static tOutput* PrepareTeamText(tOutput* text, eTeam* team, const ePlayerNetID* 
 
 class gMenuItemPlayerTeam: public uMenuItem
 {
-    ePlayerNetID* 	player;
-    eTeam*			team;
+    tJUST_CONTROLLED_PTR< ePlayerNetID > 	player;
+    tJUST_CONTROLLED_PTR< eTeam >			team;
 public:
     gMenuItemPlayerTeam(uMenu *M,ePlayerNetID* p, eTeam* t )
             : uMenuItem( M, tOutput("$team_menu_join_help", t->Name())),
