@@ -490,7 +490,7 @@
         </Solid>
       </Foreground>
     </BarGauge>
-    <Map viewport="top" toggle="1" toggleDefault="off">
+    <Map toggle="1" toggleDefault="off">
       <Position x="0" y="-.23"/>
       <Size height=".7" width="0.7"/>
       <Background>
