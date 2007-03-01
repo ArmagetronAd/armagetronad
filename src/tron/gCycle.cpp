@@ -3372,7 +3372,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                     }
                 }
 
-                if ( !saved )
+                if ( !saved && sn_GetNetState() != nCLIENT )
                 {
                     // err, trouble. Can't push the other guy back far enough. Better kill him.
                     if ( currentWall )
@@ -5691,5 +5691,5 @@ REAL gCycleExtrapolator::DoGetDistanceSinceLastTurn( void ) const
 
 bool gCycle::Vulnerable() const
 {
-    return lastTime > spawnTime_ + sg_cycleInvulnerableTime;
+    return Alive() && lastTime > spawnTime_ + sg_cycleInvulnerableTime;
 }
