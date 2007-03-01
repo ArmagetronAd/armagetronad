@@ -5055,6 +5055,12 @@ void gCycle::ReadSync( nMessage &m )
             }
         }
     }
+    else
+    {
+        // first sync. Accept the position without questioning it.
+        pos = sync.pos;
+        FindCurrentFace();
+    }
 
     // determine whether we can use the distance based interpolating sync method here
     bool distanceBased = aft && aft != &emergency_aft && Owner() == sn_myNetID;
