@@ -3036,6 +3036,7 @@ void gGame::StateUpdate(){
 
             tAdvanceFrame();
 
+            exit_game_grid(grid);
             init_game_grid(grid, aParser);
 
             nNetObject::ClearAllDeleted();
