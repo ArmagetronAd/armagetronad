@@ -577,6 +577,12 @@ void nDescriptor::HandleMessage(nMessage &message){
         con << tOutput("$network_error");
         sn_DisconnectUser(message.SenderID(), "$network_kill_error" );
     }
+    catch( tGenericException & e )
+    {
+        // relay generic errors to sender of message; don't do anything else bad. Especially, we don't
+        // want a harmless uncaught exception to bring down the server.
+        sn_ConsoleOut( e.GetName() + ": " + e.GetDescription() + '\n', message.SenderID() );
+    }
 
 #endif
 }
