@@ -2725,7 +2725,10 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
 
     if (!mapFD || !aParser->LoadAndValidateMapXML("", mapFD, mapfile))
     {
-        tOutput errorMessage( sn_GetNetState() == nCLIENT ? "$map_file_load_failure_server" : "$map_file_load_failure_self", mapfile );
+		if (mapFD)
+	        fclose(mapFD);
+
+		tOutput errorMessage( sn_GetNetState() == nCLIENT ? "$map_file_load_failure_server" : "$map_file_load_failure_self", mapfile );
 
 #ifndef DEDICATED
         errorMessage << "\nLog:\n" << consoleLog.message_;
@@ -2742,6 +2745,8 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
 
         mapFD = tResourceManager::openResource("", DEFAULT_MAP);
         if (!mapFD || !aParser->LoadAndValidateMapXML("", mapFD, DEFAULT_MAP)) {
+	    	if (mapFD)
+    	    	fclose(mapFD);
             errorMessage << "$map_file_load_failure_default";
             throw tGenericException( errorMessage, errorTitle );
         }
