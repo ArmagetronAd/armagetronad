@@ -2729,12 +2729,12 @@ REAL gAIPlayer::Think(){
             simpleAI_ = factory->Create( Object() );
         }
     }
-    
+
     if ( simpleAI_ )
     {
         return simpleAI_->Think();
     }
-    
+
     // get the delay between two turns
     REAL delay = Delay();
 

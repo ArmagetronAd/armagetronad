@@ -274,8 +274,8 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
         break;
     case ROTATION_CAMERA:
         {
-			ePlayer const *player = cp->GetPlayer();
-			if(!player) break;
+            ePlayer const *player = cp->GetPlayer();
+            if(!player) break;
             eCamera const *cam = player->cam;
             if(cam) {
                 rotate = cam->CameraDir().Turn(0,-1);

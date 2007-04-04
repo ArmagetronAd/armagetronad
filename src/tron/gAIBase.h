@@ -58,15 +58,15 @@ public:
     gSimpleAI()
     {
     }
-    
+
     // do the thinking
     inline REAL Think()
     {
         return DoThink();
     }
-    
+
     virtual ~gSimpleAI();
-    
+
     gCycle * Object(){ return object_; }
     void SetObject( gCycle * cycle ){ object_ = cycle; }
 protected:
@@ -79,7 +79,7 @@ class gSimpleAIFactory: public tListItem< gSimpleAIFactory >
 {
 public:
     gSimpleAI * Create( gCycle * object ) const;
-    static gSimpleAIFactory * Get();    
+    static gSimpleAIFactory * Get();
     static void Set( gSimpleAIFactory * factory );
 protected:
     virtual gSimpleAI * DoCreate() const = 0;

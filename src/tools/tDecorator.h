@@ -39,8 +39,8 @@ class tDecoratableIndicator{};
 //! compile time test class that determines whether a class is decoratable
 template <class Decorated> class tIsDecoratable
 {
-    private:
-struct Ret{ char a; char b; };
+private:
+    struct Ret{ char a; char b; };
     static char TestDecoratable(tDecoratableIndicator const &);
     static Decorated & decorated_;
 
@@ -81,8 +81,8 @@ class tDecoratableManagerBase
 {
 public:
     tDecoratableManagerBase()
-    : base_( 0 ), refCount_( 0 ), decorators_( 0 )
-    , updateRequired_( true ), offset_( 0 )
+            : base_( 0 ), refCount_( 0 ), decorators_( 0 )
+            , updateRequired_( true ), offset_( 0 )
     {
     }
 
@@ -170,14 +170,14 @@ public:
         }
     }
 
-    //! reserve space for an object of class Decorated, prepended with space for its decorators 
+    //! reserve space for an object of class Decorated, prepended with space for its decorators
     void * Allocate( size_t size, const char * classn, const char * file, int line );
 
     //! frees space reserved by Reseve() again
     void Free( void * ptr, const char * classn, const char * file, int line );
 protected:
     tDecoratableManagerBase * base_; //! manager of the base class
-    size_t refCount_;                //! number of objects of this 
+    size_t refCount_;                //! number of objects of this
 private:
     tDecoratableManagerBase( tDecoratableManagerBase const & );
     tDecoratableManagerBase & operator =( tDecoratableManagerBase const & );
@@ -263,7 +263,7 @@ public:
         char * endOfPointerSpace = static_cast< char * >( static_cast< void * >( &object ) );
         char * allocatedSlot     = endOfPointerSpace - offset_;
         Decoration * decoration = static_cast< Decoration * >( static_cast< void * >( allocatedSlot ) );
-    
+
         return * decoration;
     }
 private:
@@ -285,7 +285,7 @@ template< class DecoratedDerived, class Decoration > class tDecoratorPOD: public
 public:
     //! constructor, allocating the space
     tDecoratorPOD( Decoration const & value )
-    : value_ ( value )
+            : value_ ( value )
     {
     }
 
@@ -293,7 +293,7 @@ private:
     tDecoratorPOD();
 
     Decoration value_;
-    
+
     virtual void Construct( void * decoration ) const
     {
         new(decoration) Decoration;
@@ -335,17 +335,17 @@ public:
 #define DECORATABLE_BASE(CLASS) DECORATABLE(CLASS,int)
 
 // *******************************************************************************
-// *	
+// *
 // *	Allocate
-// *	
+// *
 // *******************************************************************************
-//!		
+//!
 //!		@param	size	size of the memory block to allocate
 //!		@param	classn	name of the class that is allocated
 //!		@param	file	name of the file this call comes from
 //!		@param	line	line in the file the call ocmes from
 //!		@return		    the newly allocated block of memory, with space for decorators
-//!		
+//!
 // *******************************************************************************
 
 template< class Decorate >
@@ -357,14 +357,14 @@ void * tDecoratableManager< Decorate >::Allocate( size_t size, const char * clas
 }
 
 // *******************************************************************************
-// *	
+// *
 // *	Allocate
-// *	
+// *
 // *******************************************************************************
-//!		
+//!
 //!		@param	size	size of the memory block to allocate
 //!		@return		    the newly allocated block of memory, with space for decorators
-//!		
+//!
 // *******************************************************************************
 
 template< class Decorate >
@@ -374,16 +374,16 @@ void * tDecoratableManager< Decorate >::Allocate( size_t size )
 }
 
 // *******************************************************************************
-// *	
+// *
 // *	Free
-// *	
+// *
 // *******************************************************************************
-//!		
+//!
 //!		@param	ptr	    pointer to the memory area to be freed
 //!		@param	classn	name of the class that is allocated
 //!		@param	file	name of the file this call comes from
 //!		@param	line	line in the file the call ocmes from
-//!		
+//!
 // *******************************************************************************
 
 template< class Decorate >
@@ -395,13 +395,13 @@ void tDecoratableManager< Decorate >::Free( void * ptr, const char * classn, con
 }
 
 // *******************************************************************************
-// *	
+// *
 // *	Free
-// *	
+// *
 // *******************************************************************************
-//!		
+//!
 //!		@param	ptr	    pointer to the memory area to be freed
-//!		
+//!
 // *******************************************************************************
 
 template< class Decorate >
