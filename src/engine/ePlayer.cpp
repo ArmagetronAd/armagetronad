@@ -1368,6 +1368,10 @@ static bool se_allowShuffleUp=false;
 static tSettingItem<bool> se_allowShuffleUpConf("TEAM_ALLOW_SHUFFLE_UP",
         se_allowShuffleUp);
 
+// help message printed out to whoever asks for it
+static tString se_helpMessage("");
+static tConfItemLine se_helpMessageConf("HELP_MESSAGE",se_helpMessage);
+
 static bool se_silenceAll = false;		// flag indicating whether everyone should be silenced
 
 static tSettingItem<bool> se_silAll("SILENCE_ALL",
@@ -1614,6 +1618,12 @@ void handle_chat(nMessage &m){
                         sn_ConsoleOut(toSender, p->Owner());
                         return;
                     }
+                }
+               else if (command == "/help")
+                {
+                    sn_ConsoleOut(se_helpMessage + "\n", p->Owner());
+                    se_DisplayChatLocally(p, say);
+                    return;
                 }
 #ifdef DEDICATED
                 else if (command == "/players") {
