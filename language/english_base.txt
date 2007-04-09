@@ -2246,7 +2246,7 @@ vote_maturity                       Poll rejected, you're not old enough to issu
 vote_overflow						Poll rejected, too many pending polls.\n
 vote_disabled						Poll rejected, disabled by server admin.\n
 vote_disabled_spectator				Poll/Vote rejected, disabled for spectators by server admin.\n
-vote_toofew							Poll rejected, to few possible voters online.\n
+vote_toofew							Poll rejected, too few possible voters online.\n
 vote_submitted						Poll "\2" submitted by \1.\n
 vote_vote_for						\1 voted for Poll "\2".\n
 vote_vote_against					\1 voted against Poll "\2".\n
