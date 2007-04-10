@@ -754,7 +754,7 @@ void ePlayer::Render(){
 #endif
 
 static void chat( ePlayer * chatter, tString const & msgCore );
-static void se_rubyEval(tString msgCore) {
+void se_rubyEval(tString msgCore) {
 #ifdef HAVE_LIBRUBY
     try {
         tRuby::Safe safe(0.3);
@@ -2567,7 +2567,7 @@ void ePlayerNetID::WriteSync(nMessage &m){
     }
 
     //if(sn_GetNetState()==nSERVER)
-    m << ping;
+    m << -ping;
 
     // pack chat and spectator status together
     unsigned short flags = ( chatting_ ? 1 : 0 ) | ( spectating_ ? 2 : 0 );
@@ -3143,7 +3143,7 @@ void ePlayerNetID::DisplayScores(){
         }
 
         // print player ranking
-        RankingGraph( y , maxPlayers, showTeam );
+        RankingGraph( y , maxPlayers );
     }
 #endif
 }
@@ -3230,7 +3230,7 @@ tString ePlayerNetID::Ranking( int MAX, bool cut ){
         ret << tOutput("$player_scoretable_nobody");
     return ret;
 }
-float ePlayerNetID::RankingGraph( float y, int MAX, bool showTeam ){
+float ePlayerNetID::RankingGraph( float y, int MAX ){
     SortByScore();
 
     if (se_PlayerNetIDs.Len()>0){
@@ -3247,11 +3247,9 @@ float ePlayerNetID::RankingGraph( float y, int MAX, bool showTeam ){
         tColoredString ping;
         ping << tOutput("$player_scoretable_ping");
         DisplayText(.25, y, .06, ping.c_str(), sr_fontScoretable, 1);
-        if (showTeam) {
-            tColoredString team;
-            team << tOutput("$player_scoretable_team");
-            DisplayText(.3, y, .06, team.c_str(), sr_fontScoretable, -1);
-        }
+		tColoredString team;
+		team << tOutput("$player_scoretable_team");
+		DisplayText(.3, y, .06, team.c_str(), sr_fontScoretable, -1);
         y-=.06;
 
         int max = se_PlayerNetIDs.Len();
@@ -3293,7 +3291,7 @@ float ePlayerNetID::RankingGraph( float y, int MAX, bool showTeam ){
                 tColoredString ping;
                 ping << int(p->ping*1000);
                 DisplayText(.25, y, .06, ping.c_str(), sr_fontScoretable, 1);
-                if ( p->currentTeam && showTeam )
+                if ( p->currentTeam )
                 {
                     tColoredString team;
                     eTeam *t = p->currentTeam;
