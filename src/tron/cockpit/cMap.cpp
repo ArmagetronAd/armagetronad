@@ -408,7 +408,7 @@ void Map::DrawWalls(tList<gNetPlayerWall> &list) {
         if(!cycle) continue;
         double wallsLength = cycle->ThisWallsLength();
         double alpha = 1;
-        if(!cycle->Alive()) {
+        if(!cycle->Alive() && wallsStayUpDelay >= 0) {
             alpha -= 2 * (currentTime - cycle->DeathTime() - wallsStayUpDelay);
             if(alpha <= 0) continue;
         }
@@ -422,18 +422,18 @@ void Map::DrawWalls(tList<gNetPlayerWall> &list) {
         unsigned j, numcoords = coords.Len();
         if(numcoords < 2) continue;
         bool prevDangerous = coords[0].IsDangerous;
-        float prevDist = coords[0].Pos;
+        double prevDist = coords[0].Pos;
         if(prevDist < minDist) prevDist = minDist;
         prevDist = (prevDist - begDist) / lenDist;
         for(j=1; j<numcoords; j++) {
             bool curDangerous = coords[j].IsDangerous;
-            float curDist = coords[j].Pos;
+            double curDist = coords[j].Pos;
             if(curDist < minDist) curDist = minDist;
             curDist = (curDist - begDist) / lenDist;
-            tCoord p1 = (1 - prevDist)* begPos + prevDist * endPos;
-            tCoord p2 = (1 - curDist) * begPos + curDist * endPos;
-            glVertex2f(p1.x, p1.y);
-            glVertex2f(p2.x, p2.y);
+            if(prevDangerous) {
+                glVertex2f(begPos.x + prevDist * (endPos.x - begPos.x), begPos.y + prevDist * (endPos.y - begPos.y));
+                glVertex2f(begPos.x +  curDist * (endPos.x - begPos.x), begPos.y +  curDist * (endPos.y - begPos.y));
+            }
             prevDangerous = curDangerous;
             prevDist = curDist;
         }
