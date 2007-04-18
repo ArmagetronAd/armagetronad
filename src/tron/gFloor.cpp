@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gLogo.h"
 #include "eFloor.h"
 #include "tConfiguration.h"
+#include "rScreen.h"
 
 
 // grid size
@@ -174,6 +175,8 @@ static void MenuBackground(){
 
         TexMatrix();
         glLoadMatrixf(&tm[0][0]);
+
+		glScalef((REAL)sr_screenWidth/sr_screenHeight/4. * 3., 1., 1.);
 
 
         BeginQuads();
