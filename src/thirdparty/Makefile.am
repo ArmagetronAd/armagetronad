@@ -2,10 +2,10 @@ if BUILDFAKERELEASE
 SUBDIRS=
 else
 if BUILDDEDICATED
-SUBDIRS=shttpd mathexpr
+SUBDIRS=mathexpr
 else
 if BUILDREGULAR
-SUBDIRS=shttpd particles mathexpr
+SUBDIRS=particles mathexpr
 endif
 endif
 endif

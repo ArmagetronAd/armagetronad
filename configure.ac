@@ -849,8 +849,10 @@ export LIBS="${ruby_lib_dir} $LIBS"
 
 dnl SWIG
 
-AC_PROG_SWIG(1.3.29)
-SWIG_ENABLE_CXX
+if test "x$enable_ruby" = "xyes"; then
+    AC_PROG_SWIG(1.3.29)
+    SWIG_ENABLE_CXX
+fi
 
 dnl RUBY and SWIG end
 
@@ -1048,7 +1050,6 @@ src/doc/html.m4
 src/thirdparty/Makefile
 src/thirdparty/particles/Makefile
 src/thirdparty/mathexpr/Makefile
-src/thirdparty/shttpd/Makefile
 src/swig/Makefile
 resource/Makefile
 config/Makefile

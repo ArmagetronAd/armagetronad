@@ -70,7 +70,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tXmlParser.h"
 #include "gParser.h"
 
-#include "uWebinterface.h"
+//#include "uWebinterface.h"
 
 #include "gRotation.h"
 
@@ -1336,8 +1336,6 @@ void sg_HostGame(){
 
     //#ifndef DEBUG
 #ifdef DEDICATED
-    if ( !tRecorder::IsPlayingBack() )
-        uWebInterface::Initialize();
     static double startTime=tSysTimeFloat();
 
     if ( sg_NumUsers() == 0)
@@ -1353,7 +1351,6 @@ void sg_HostGame(){
         while(numPlayers == 0 &&
                 (ded_idle<.0001 || tSysTimeFloat()<startTime + ded_idle * 3600 ) && !uMenu::quickexit ){
             sr_Read_stdin();
-            uWebInterface::PollNetwork(200);
             gGame::NetSyncIdle();
 
             sn_BasicNetworkSystem.Select( 1.0f );
@@ -1395,10 +1392,6 @@ void sg_HostGame(){
 
     //wrap up the stats
     delete gStats;
-
-#ifdef DEDICATED
-    uWebInterface::Shutdown();
-#endif
 }
 
 static tString sg_roundCenterMessage("");
@@ -3826,7 +3819,7 @@ void sg_EnterGameCore( nNetState enter_state ){
     while (bool(sg_currentGame) && goon && sn_GetNetState()==enter_state){
 #ifdef DEDICATED // read input
         sr_Read_stdin();
-        uWebInterface::PollNetwork(200);
+
         if ( sn_BasicNetworkSystem.Select( 1.0 / ( sg_dedicatedFPSIdleFactor * sg_dedicatedFPS )  ) )
         {
             // new network data arrived, do the most urgent work now

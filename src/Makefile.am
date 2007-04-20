@@ -155,8 +155,7 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/cockpit/cGauges.h tron/cockpit/cGauges.cpp \
 	tron/cockpit/cRectangle.h tron/cockpit/cRectangle.cpp
 
-libui_a_SOURCES=ui/uInput.cpp ui/uInput.h ui/uInputQueue.cpp ui/uInputQueue.h ui/uMenu.cpp ui/uMenu.h\
-    ui/uWebinterface.cpp ui/uWebinterface.h
+libui_a_SOURCES=ui/uInput.cpp ui/uInput.h ui/uInputQueue.cpp ui/uInputQueue.h ui/uMenu.cpp ui/uMenu.h
 endif
 
 # library include dependency structure. Watch out, don't create circular include dependencies.
