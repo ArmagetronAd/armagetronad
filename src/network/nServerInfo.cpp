@@ -1785,6 +1785,10 @@ void nServerInfo::QueryServer()                                  // start to get
         {
             con << "Lost contact with server: " <<  ToString( *this ) << "\n";
         }
+        else if ( sn_IsMaster && timesNotAnswered == 2 )
+        {
+            con << "Starting to lose contact with server: " <<  ToString( *this ) << ", name \"" << tColoredString::RemoveColors(name) << "\"\n";
+        }
     }
 
     queried++;
