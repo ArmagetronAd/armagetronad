@@ -144,6 +144,7 @@ class ePlayerNetID: public nNetObject{
     bool			spectating_; //!< are we currently spectating? Spectators don't get assigned to teams.
     bool			chatting_;   //!< are we currently chatting?
     int				chatFlags_;  //!< different types of reasons for beeing chatting
+    bool			allowTeamChange_; //!< allow team changes even if ALLOW_TEAM_CHANGE is disabled?
 
     //For improved remoteadmin
     bool            loggedIn;       //Is this user logged in?
@@ -193,6 +194,8 @@ public:
     bool IsSpectating() const { return spectating_; }
 
     // team management
+    bool TeamChangeAllowed() const; //!< is this player allowed to change teams?
+    void TeamChangeAllowed(bool allowed) {allowTeamChange_ = allowed;} //!< set if this player should always be allowed to change teams
     eTeam* NextTeam()    const { return nextTeam; }				// return the team I will be next round
     eTeam* CurrentTeam() const { return currentTeam; }		// return the team I am in
     int  TeamListID() const { return teamListID; }		// return my position in the team

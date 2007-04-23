@@ -27,6 +27,8 @@ Changes since 0.2.8.2:
   doublebinders get while not punishing players who press both left and
   right at the same time.
 - LAG_O_METER(TRESHOLD|BLEND|USE_OLD): Configure the minimal size of the Lag-O-Meter, its color and whether to scrap it all and stick with the old one.
+- ALLOW_TEAM_CHANGE: if set to 0 players won't be able to join a team, create a new team or change to another team.
+- ALLOW_TEAM_CHANGE_PLAYER/DISALLOW_TEAM_CHANGE_PLAYER: allow/disallow specific players to switch teams
 
   Featurelets:
 - The client now can hadle network traffic while it is waiting for the graphics

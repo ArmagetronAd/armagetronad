@@ -62,6 +62,9 @@ static ePlayer* se_Players = NULL;
 static bool se_assignTeamAutomatically = true;
 static tSettingItem< bool > se_assignTeamAutomaticallyConf( "AUTO_TEAM", se_assignTeamAutomatically );
 
+static bool se_allowTeamChanges = true;
+static tSettingItem< bool > se_allowTeamChangesConf( "ALLOW_TEAM_CHANGE", se_allowTeamChanges );
+
 static tReferenceHolder< ePlayerNetID > se_PlayerReferences;
 
 class PasswordStorage
@@ -1345,7 +1348,11 @@ void handle_chat(nMessage &m){
                 else if (command == "/teamleave") {
                     if ( se_assignTeamAutomatically )
                     {
-                        sn_ConsoleOut("Sorry, does not work with automatic team assignment.\n", p->Owner() );
+                        sn_ConsoleOut(tOutput("$player_teamleave_disallowed"), p->Owner() );
+                        return;
+                    }
+                    if(!p->TeamChangeAllowed()) {
+                        sn_ConsoleOut(tOutput("$player_disallowed_teamchange"), p->Owner() );
                         return;
                     }
 
@@ -1958,8 +1965,7 @@ static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
 static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT", tOutput("$spam_protection") );
 
-ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1)
-        ,registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings )
+ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings )
 {
     favoriteNumberOfPlayersPerTeam = 1;
 
@@ -2024,7 +2030,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1)
 
 
 ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
-        , registeredMachine_(0), chatSpam_( se_chatSpamSettings )
+        , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings )
 {
     greeted     =false;
     chatting_   =false;
@@ -3207,7 +3213,7 @@ void ePlayerNetID::Update(){
             ePlayerNetID* player = se_PlayerNetIDs(i);
 
             // only assign new team if it is possible
-            if ( player->NextTeam() != player->CurrentTeam() &&
+            if ( player->TeamChangeAllowed() && player->NextTeam() != player->CurrentTeam() &&
                     ( !player->NextTeam() || player->NextTeam()->PlayerMayJoin( player ) )
                )
             {
@@ -3225,7 +3231,7 @@ void ePlayerNetID::Update(){
                 ePlayerNetID* player = se_PlayerNetIDs(i);
 
                 // if the player is not currently on a team, but wants to join a specific team, let it join any, but keep the wish stored
-                if ( player->NextTeam() && !player->CurrentTeam() )
+                if ( player->TeamChangeAllowed() && player->NextTeam() && !player->CurrentTeam() )
                 {
                     eTeam * wish = player->NextTeam();
                     bool assignBack = se_assignTeamAutomatically;
@@ -3253,6 +3259,12 @@ void ePlayerNetID::Update(){
             // announce unfullfilled wishes
             if ( player->NextTeam() != player->CurrentTeam() && player->NextTeam() )
             {
+                //if the player can't change teams delete the team wish
+                if(!player->TeamChangeAllowed()) {
+                    player->SetTeam( player->CurrentTeam() );
+                    continue;
+                }
+
                 tOutput message( "$player_joins_team_wish",
                                  player->GetName(),
                                  player->NextTeam()->Name() );
@@ -3635,11 +3647,15 @@ void ePlayerNetID::SetChatting ( ChatFlags flag, bool chatting )
 // * team management *
 // *******************
 
+bool ePlayerNetID::TeamChangeAllowed() const {
+    return se_allowTeamChanges || allowTeamChange_;
+}
+
 // put a new player into a default team
 void ePlayerNetID::FindDefaultTeam( )
 {
     // only the server should do this, the client does not have the full information on how to do do it right.
-    if ( sn_GetNetState() == nCLIENT || !se_assignTeamAutomatically || spectating_ )
+    if ( sn_GetNetState() == nCLIENT || !se_assignTeamAutomatically || spectating_ || !TeamChangeAllowed() )
         return;
 
     static bool recursion = false;
@@ -3770,6 +3786,11 @@ void ePlayerNetID::CreateNewTeam()
     // check if the team change is legal
     tASSERT ( nCLIENT !=  sn_GetNetState() );
 
+    if(!TeamChangeAllowed()) {
+        sn_ConsoleOut(tOutput("$player_teamchanges_disallowed"));
+        return;
+    }
+
     if ( !eTeam::NewTeamAllowed() ||
             ( bool( currentTeam ) && ( currentTeam->NumHumanPlayers() == 1 ) ) ||
             IsSpectating() )
@@ -3864,6 +3885,11 @@ void ePlayerNetID::ReceiveControlNet(nMessage &m)
             eTeam *newTeam;
 
             m >> newTeam;
+
+            if(!TeamChangeAllowed()) {
+                sn_ConsoleOut( tOutput( "$player_teamchanges_disallowed" ), Owner() );
+                break;
+            }
 
             // annihilate team if it no longer is in the game
             if ( bool(newTeam) && newTeam->TeamID() < 0 )
@@ -4065,7 +4091,7 @@ static tConfItemFunc se_banConf("BAN",&se_BanConf);
 
 static ePlayerNetID * ReadPlayer( std::istream & s, char const * error )
 {
-    // read name of player to be killed
+    // read name of player to be returned
     tString name;
     name.ReadLine( s );
     int num = name.toInt();
@@ -4074,7 +4100,7 @@ static ePlayerNetID * ReadPlayer( std::istream & s, char const * error )
     {
         ePlayerNetID* p = se_PlayerNetIDs(i);
 
-        // check whether it's p who should be killed,
+        // check whether it's p who should be returned,
         // either by comparing the owner or the name.
         bool itsHim = false;
         if ( num > 0 )
@@ -4738,4 +4764,19 @@ void ePlayerNetID::LogScoreDifference( void )
     }
 }
 
-
+static void se_allowTeamChangesPlayer(bool allow, std::istream &s) {
+    ePlayerNetID * p = ReadPlayer( s, "$network_kick_notfound" );
+    if ( p )
+    {
+        sn_ConsoleOut( tOutput( (allow ? "$player_allowed_teamchange" : "$player_disallowed_teamchange"), p->GetName() ) );
+        p->TeamChangeAllowed( allow );
+    }
+}
+static void se_allowTeamChangesPlayer(std::istream &s) {
+    se_allowTeamChangesPlayer(true, s);
+}
+static void se_disallowTeamChangesPlayer(std::istream &s) {
+    se_allowTeamChangesPlayer(false, s);
+}
+static tConfItemFunc se_allowTeamChangesPlayerConf("ALLOW_TEAM_CHANGE_PLAYER", &se_allowTeamChangesPlayer);
+static tConfItemFunc se_disallowTeamChangesPlayerConf("DISALLOW_TEAM_CHANGE_PLAYER", &se_disallowTeamChangesPlayer);

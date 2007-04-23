@@ -358,6 +358,7 @@ spam_penalty_help					Number of seconds to silence a spammer.
 spam_maxlen_help					Maximal length of chat message.
 spam_autokick_help					Spam score that causes you to get kicked instantly.
 silence_all_help					If set to 1, all chat messages will be omitted.
+allow_team_change_help				If set to 1, all players can change teams. If set to 0, players can only change teams if they've been specifically allowed to by ALLOW_TEAM_CHANGE_PLAYER
 
 # spam kick messages
 spam_chat                   You chatted too much.
@@ -790,6 +791,8 @@ players_help                Prints list of currently active players
 kill_help                   Kill a specific player (as warning before a kick)
 silence_help                Silence a specific player so he can't use public chat any more (/msg and /team still work)
 voice_help                  Reverse of SILENCE
+allow_team_change_player_help Allow a specific player to change teams even if ALLOW_TEAM_CHANGE is disabled
+disallow_team_change_player_help Reverse of ALLOW_TEAM_CHANGE_PLAYER
 kick_help					Kicks the specified player from the server.
 ban_help                    Bans the specified player from the server (kicks him first) for a variable time in minutes.
 ban_ip_help                 Bans the spedified IP address from the server for a variable time.
@@ -2043,6 +2046,8 @@ zone_collapse_harmless      \1's zone collapses harmlessly for lack of enemy con
 #********************************************
 #********************************************
 
+player_teamleave_disallowed Sorry, does not work with automatic team assignment.\n
+player_teamchanges_disallowed Sorry, the administrator disabled team changes.\n
 player_pingcharity_changed	Ping charity changed from \1 to \2.\n
 spam_protection_repeat  SPAM PROTECTION: you already said: \1\n
 spam_protection			SPAM PROTECTION: you are silenced for the next \1 seconds.\n
@@ -2050,6 +2055,8 @@ spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
 spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
 player_silenced         \10xff7777 has been silenced.\n
 player_voiced           \10x77ff77 has been given his voice back.\n
+player_allowed_teamchange \10x77ff77 has been allowed to change his team.\n
+player_disallowed_teamchange \10xff7777 cannot change teams anymore.\n
 vote_spam_protection	VOTE SPAM PROTECTION: you are disallowed from issuing votes for the next \1 seconds.\n
 chat_title_text			Say:
 player_entered_game		\1 0x7fff7fentered the game.\n
