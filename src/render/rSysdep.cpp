@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -89,7 +89,7 @@ static GLXContext cx;
 Display *dpy=NULL;
 Window  win;
 
-#endif 
+#endif
 
 #ifdef DIRTY
 #include <SDL_syswm.h>
@@ -116,15 +116,15 @@ bool  rSysDep::InitGL(){
         std::cerr << "No 3Dfx hardware available.\n" << x << '\n';
         return(false);
       }
-      
+
       GLint attribs[]={FXMESA_DOUBLEBUFFER,FXMESA_DEPTH_SIZE,16,FXMESA_NONE};
       ctx=fxMesaCreateBestContext(0,sr_screenWidth,sr_screenHeight,attribs);
-      
+
       if (!ctx){
         std::cerr << "Could not create FX rendering context!\n";
         return(false);
       }
-      
+
       fxMesaMakeCurrent(ctx);
     }
     */
@@ -203,7 +203,7 @@ bool  rSysDep::InitGL(){
         }
     }
 
-#endif 
+#endif
 
     return true;
 }
@@ -244,7 +244,7 @@ void  rSysDep::ExitGL(){
         glXDestroyContext(dpy, cx );
         dpy=NULL;
     }
-#endif 
+#endif
 }
 #endif // DIRTY
 
@@ -486,14 +486,14 @@ static void sr_DelayFrame( int targetFPS )
     double thisFrame = tRealSysTimeFloat();
 
     int uSecsPassed = static_cast<int>( MILLION * ( thisFrame - lastFrame ) );
-    
+
 //    con << uSecsPassed << "\n";
 
     // wait
     int uSecsToWait = uSecsPerFrame - uSecsPassed;
     if ( uSecsToWait > 0 )
         tDelay( uSecsToWait );
-    
+
     // call glFinish to wait for GPU
     glFinish();
 }
@@ -503,7 +503,7 @@ rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_glFlush;
 //rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_60Hz;
 
 // buffer swap:
-#ifndef DEDICATED   
+#ifndef DEDICATED
 // for setting breakpoints in optimized mode, too
 static void breakpoint(){}
 
@@ -642,6 +642,12 @@ void sr_MotionBlurCore( REAL alpha )
     // blend the last frame and the current frame with the specified alpha value
     glDisable( GL_DEPTH_TEST );
     glDepthMask(0);
+
+    glMatrixMode( GL_PROJECTION );
+    glLoadIdentity();
+    glMatrixMode( GL_MODELVIEW );
+    glLoadIdentity();
+    glViewport(0,0,sr_screenWidth, sr_screenHeight);
 
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,
                     GL_NEAREST);
