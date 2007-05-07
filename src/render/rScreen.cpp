@@ -63,6 +63,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 tCONFIG_ENUM( rResolution );
 tCONFIG_ENUM( rColorDepth );
+tCONFIG_ENUM( rVSync );
 
 SDL_Surface *sr_screen=NULL; // our window
 
@@ -123,6 +124,9 @@ static tConfItem<rResolution> screenresLast("ARMAGETRON_LAST_SCREENMODE",lastSuc
 
 static tConfItem<rResolution> winsize("ARMAGETRON_WINDOWSIZE",currentScreensetting.windowSize.res);
 static tConfItem<rResolution> winsizeLast("ARMAGETRON_LAST_WINDOWSIZE",lastSuccess.windowSize.res);
+
+static tConfItem<rVSync> vSync("ARMAGETRON_VSYNC",currentScreensetting.vSync);
+static tConfItem<rVSync> vSyncLast("ARMAGETRON_VSYNC_LAST",lastSuccess.vSync);
 
 static tConfItem<int> screenres_w("ARMAGETRON_SCREENMODE_W",currentScreensetting.res.width);
 static tConfItem<int> screenresLast_w("ARMAGETRON_LAST_SCREENMODE_W", lastSuccess.res.width);
@@ -331,7 +335,7 @@ int rScreenSize::Compare( rScreenSize const & other ) const
 // *******************************************************************************************
 
 rScreenSettings::rScreenSettings( rResolution r, bool fs, rColorDepth cd, bool sdl, bool ce )
-        :res(r), windowSize(r), fullscreen(fs), colorDepth(cd), zDepth( ArmageTron_ColorDepth_Desktop ), useSDL(sdl), checkErrors(true), aspect (1)
+        :res(r), windowSize(r), fullscreen(fs), colorDepth(cd), zDepth( ArmageTron_ColorDepth_Desktop ), useSDL(sdl), checkErrors(true), vSync( ArmageTron_VSync_Default ), aspect (1)
 {
 }
 
@@ -377,6 +381,34 @@ static int countBits(unsigned int count)
     return ret;
 }
 #endif
+
+static void sr_SetGLAttributes( int rDepth, int gDepth, int bDepth, int zDepth )
+{
+    // SDL 1.1 required
+#ifdef SDL_OPENGL
+    SDL_GL_SetAttribute( SDL_GL_RED_SIZE, rDepth );
+    SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, gDepth );
+    SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, bDepth );
+    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, zDepth );
+    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+
+#if SDL_VERSION_ATLEAST(1, 2, 10)
+    // requires SDL 1.2.10
+    switch (currentScreensetting.vSync)
+    {
+    case ArmageTron_VSync_On:
+        SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 1 );
+        break;
+    case ArmageTron_VSync_Off:
+    case ArmageTron_VSync_MotionBlur:
+        SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 1 );
+        break;
+    case ArmageTron_VSync_Default:
+        break;
+    }
+#endif
+#endif
+}
 
 static bool lowlevel_sr_InitDisplay(){
 #ifndef DEDICATED
@@ -435,12 +467,7 @@ static bool lowlevel_sr_InitDisplay(){
 #ifdef SDL_OPENGL
         if (currentScreensetting.useSDL)
         {
-            // SDL 1.1 required
-            SDL_GL_SetAttribute( SDL_GL_RED_SIZE, singleCD_R );
-            SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, singleCD_G );
-            SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, singleCD_B );
-            SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, zDepth );
-            SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+            sr_SetGLAttributes( singleCD_R, singleCD_G, singleCD_B, zDepth );
         }
 #else
         currentScreensetting.useSDL = false;
@@ -519,12 +546,7 @@ static bool lowlevel_sr_InitDisplay(){
 #ifdef SDL_OPENGL
                 if (currentScreensetting.useSDL)
                 {
-                    // SDL 1.1 required
-                    SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 5 );
-                    SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 5 );
-                    SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 5 );
-                    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
-                    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+                    sr_SetGLAttributes( 5, 5, 5, 16 );
                 }
 #endif
             }

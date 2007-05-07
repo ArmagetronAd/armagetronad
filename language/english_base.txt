@@ -691,7 +691,10 @@ custom_screen_aspect_help	Custom screen aspect ratio ( pixel width/pixel height)
 armagetron_screenmode_help	Screen resolution
 armagetron_last_screenmode_help Last screen resolution
 armagetron_windowsize_help	Window size
-armagetron_last_windowsize_help Last Window size
+armagetron_last_windowsize_help Last Window sizea
+motion_blur_time_help       Time over which the last rendered frames are blended together
+armagetron_vsync_help       What to do with the monitor's vertical sync
+rmagetron_vsync_last_help  What to do with the monitor's vertical sync
 fullscreen_help			Fullscreen or windowed mode?
 last_fullscreen_help		Fullscreen or windowed mode, last successful init
 check_errors_help		Listen to errors claiming a video mode does not exist
@@ -1791,6 +1794,21 @@ screen_check_errors_help	Should we listen to the warnings about non-existent vid
 
 screen_use_sdl_text		Use SDL OpenGL:
 screen_use_sdl_help		Toggles use of the clean OpenGL initialisation routines; if disabled, \g will use the dirty method that was neccesary with SDL 1.0.
+
+screen_vsync_text		VSync:
+screen_vsync_help		What to do with the monitor's vertical sync signal.
+
+screen_vsync_on_text	Wait
+screen_vsync_on_help	Wait for it every frame. This usually results in very smooth animations at a frame rate limited by your monitor's refresh rate, and is the only way to make this game not use 100% CPU time. Recommended.
+
+screen_vsync_default_text	Default
+screen_vsync_default_help	Do not touch the system defaults.
+
+screen_vsync_off_text	Don't wait
+screen_vsync_off_help	Ignore the signal. This results in higher frame rates, but you won't see most of these frames; your monitor can't display them all. Usually a waste of resources and causes tearing artefacts.
+
+screen_vsync_motionblur_text	Motion Blur
+screen_vsync_motionblur_help	Ignore it and make use of the additional frames for motion blurring, which makes the tearing artefacts less prominent. Recommended for power gamers.
 
 screen_grab_mouse_text		Grab Mouse:
 screen_grab_mouse_help		If activated, the mouse pointer is centered after every move; thus, it is unable to leave the window. This option is only useful when you play \g in a window.

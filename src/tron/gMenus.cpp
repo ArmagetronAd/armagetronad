@@ -313,8 +313,21 @@ static void sg_ScreenModeMenu()
      "$screen_use_sdl_text",
      "$screen_use_sdl_help",
      currentScreensetting.useSDL);
-#endif
-#endif
+#endif // dirty
+
+#if SDL_VERSION_ATLEAST(1, 2, 10)
+    uMenuItemSelection<rVSync> zvs_t
+    (&screen_menu_mode,
+     "$screen_vsync_text",
+     "$screen_vsync_help",
+     currentScreensetting.vSync);
+
+    uSelectEntry<rVSync> zvs_on(zvs_t,"$screen_vsync_on_text","$screen_vsync_on_help",ArmageTron_VSync_On);
+    uSelectEntry<rVSync> zvs_d(zvs_t,"$screen_vsync_default_text","$screen_vsync_default_help",ArmageTron_VSync_Default);
+    uSelectEntry<rVSync> zvs_off(zvs_t,"$screen_vsync_off_text","$screen_vsync_off_help",ArmageTron_VSync_Off);
+    uSelectEntry<rVSync> zvs_blur(zvs_t,"$screen_vsync_motionblur_text","$screen_vsync_motionblur_help",ArmageTron_VSync_MotionBlur);
+#endif // SDL_GL_SWAP_CONTROL
+#endif // SDL_OPENGL
 
     uMenuItemToggle gm(
         &screen_menu_mode,
