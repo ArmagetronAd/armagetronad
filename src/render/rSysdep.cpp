@@ -589,10 +589,10 @@ void rSysDep::StopNetSyncThread()
     }
 }
 
-void sr_MotionBlur( REAL alpha )
+void sr_MotionBlurCore( REAL alpha )
 {
     if ( alpha < 0 )
-        return;
+        alpha = 0;
 
 #if 0
     GLenum error = glGetError();
@@ -622,7 +622,7 @@ void sr_MotionBlur( REAL alpha )
 
     glReadBuffer( GL_FRONT );
 
-    glCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, 
+    glCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGB,
                       0, 0,
                       tWidth, tHeight, 0 );
 
@@ -638,18 +638,22 @@ void sr_MotionBlur( REAL alpha )
 
     glEnable(GL_TEXTURE_2D);
 
-    
+
     // blend the last frame and the current frame with the specified alpha value
     glDisable( GL_DEPTH_TEST );
+    glDepthMask(0);
+
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,
-                        GL_NEAREST);
+                    GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,
-                        GL_NEAREST);
-    
+                    GL_NEAREST);
+
     glDisable(GL_ALPHA_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    
+
+    glDisable(GL_LIGHTING);
+
     glBegin( GL_QUADS );
     glColor4f( 1,1,1,alpha );
 
@@ -666,12 +670,62 @@ void sr_MotionBlur( REAL alpha )
     glVertex2f( -1, 1 );
     glEnd();
 
+    // clean up: destroy the texture
     glDeleteTextures(1, &target );
 }
 
+// frames from about this far apart get blended together
 static REAL sr_motionBlurTime = .01;
 static tSettingItem<REAL> c_mb( "MOTION_BLUR_TIME",
                                 sr_motionBlurTime );
+
+// blurs the motion, time is the current time
+void sr_MotionBlur( double time )
+{
+    if ( currentScreensetting.vSync == ArmageTron_VSync_MotionBlur )
+    {
+        // measure frame rendering time
+        static double lastTime = time;
+        REAL frameTime = time - lastTime;
+
+
+        // use hysteresis to autodisable motion blurring if rendering gets
+        // far too slow and reenable it if rendering gets fast enough again
+        static int hyster = 0;
+        static int thresh = 100;
+        static bool active = true;
+
+        if ( frameTime * 5 < sr_motionBlurTime )
+        {
+            if ( ++hyster > thresh )
+            {
+                active = true;
+                hyster = thresh;
+            }
+        }
+        else if ( frameTime > sr_motionBlurTime * 2 )
+        {
+            if ( --hyster < -thresh )
+            {
+                active = false;
+                hyster = -thresh;
+            }
+        }
+        else
+        {
+            if ( hyster < 0 )
+                ++hyster;
+            else
+                --hyster;
+        }
+
+        // really blur.
+        if ( active )
+            sr_MotionBlurCore( 1 - frameTime / sr_motionBlurTime );
+
+        lastTime = time;
+    }
+}
 
 void rSysDep::SwapGL(){
     if ( s_benchmark )
@@ -682,25 +736,6 @@ void rSysDep::SwapGL(){
 
     double time = tSysTimeFloat();
     double realTime = tRealSysTimeFloat();
-
-    if ( currentScreensetting.vSync == ArmageTron_VSync_MotionBlur )
-    {
-        static bool active = true;
-
-        static double lastTime = time;
-
-        REAL frameTime = time - lastTime;
-
-        if ( frameTime * 3 < sr_motionBlurTime )
-            active = true;
-        else if ( frameTime > sr_motionBlurTime )
-            active = false;
-
-        if ( active )
-            sr_MotionBlur( 1 - frameTime / sr_motionBlurTime );
-
-        lastTime = time;
-    }
 
     bool next_glOut = sr_glOut;
 
@@ -791,6 +826,9 @@ void rSysDep::SwapGL(){
     // unlock the mutex while waiting for the swap operation to finish
     SDL_mutexV(  sr_netLock );
     sr_LockSDL();
+
+    // actiate motion blur (does not use the game state, so it's OK to call here )
+    sr_MotionBlur( time );
 
     switch( swapMode_ )
     {
