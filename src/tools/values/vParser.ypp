@@ -6,7 +6,7 @@
     // Users of the tarball shouldn't be affected by this.
 
 	#include <stdlib.h>	// Works around a bug in BISON 2.1 non-pedantic
-
+	#define YYINCLUDED_STDLIB_H // tell Bison we did that
 
 	#include <vector>
 	
