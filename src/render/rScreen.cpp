@@ -382,10 +382,28 @@ static int countBits(unsigned int count)
 }
 #endif
 
+#ifndef DEDICATED
+#ifdef SDL_OPENGL
+// sets the number of vsync signals to wait for each frame
+static void sr_SetSwapControl( int frames )
+{
+    // use SDL
+    SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, frames );
+
+#ifdef LINUX
+    // set environment variable for the linux nvidia driver.
+    // darn, changes to this can't be made while the program is running,
+    // a restart is required.
+    char hack[2];
+    hack[0] = '0' + frames;
+    hack[1] = 0;
+    setenv( "__GL_SYNC_TO_VBLANK", hack, 1 );
+#endif
+}
+
 static void sr_SetGLAttributes( int rDepth, int gDepth, int bDepth, int zDepth )
 {
     // SDL 1.1 required
-#ifdef SDL_OPENGL
     SDL_GL_SetAttribute( SDL_GL_RED_SIZE, rDepth );
     SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, gDepth );
     SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, bDepth );
@@ -394,21 +412,30 @@ static void sr_SetGLAttributes( int rDepth, int gDepth, int bDepth, int zDepth )
 
 #if SDL_VERSION_ATLEAST(1, 2, 10)
     // requires SDL 1.2.10
-    switch (currentScreensetting.vSync)
+    if ( tRecorder::IsRecording() )
     {
-    case ArmageTron_VSync_On:
-        SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 1 );
-        break;
-    case ArmageTron_VSync_Off:
-    case ArmageTron_VSync_MotionBlur:
-        SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 1 );
-        break;
-    case ArmageTron_VSync_Default:
-        break;
+        // recordings are always done with VSync enabled
+        sr_SetSwapControl( 1 );
+    }
+    else
+    {
+        switch (currentScreensetting.vSync)
+        {
+        case ArmageTron_VSync_On:
+            sr_SetSwapControl( 1 );
+            break;
+        case ArmageTron_VSync_Off:
+        case ArmageTron_VSync_MotionBlur:
+            sr_SetSwapControl( 0 );
+            break;
+        case ArmageTron_VSync_Default:
+            break;
+        }
     }
 #endif
-#endif
 }
+#endif
+#endif
 
 static bool lowlevel_sr_InitDisplay(){
 #ifndef DEDICATED
