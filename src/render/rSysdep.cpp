@@ -672,6 +672,7 @@ void sr_MotionBlurCore( REAL alpha )
 
     // clean up: destroy the texture
     glDeleteTextures(1, &target );
+    glDepthMask(1);
 }
 
 // frames from about this far apart get blended together
