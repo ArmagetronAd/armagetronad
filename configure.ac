@@ -52,6 +52,7 @@ dnl a modern autoconf is required to process this
 AC_PREREQ(2.50)
 
 build_regular=true
+have_glew=true
 
 AC_ARG_ENABLE(glout,
      AC_HELP_STRING([--enable-glout],
@@ -679,6 +680,22 @@ You need GLU to compile Armagetron; it SHOULD have come with OpenGL.
 Read the file doc/install_linux.html.]))
 
 dnl *************************************************
+dnl         GLEW
+dnl *************************************************
+
+AC_CHECK_LIB(GLEW,glewInit,,
+ AC_MSG_WARN([OpenGL Extension Wrangler (GLEW) library not found. No fancy effects for you.])
+ have_glew=false
+)
+
+if test ${have_glew} = true; then
+AC_CHECK_HEADERS([GL/glew.h],,
+ AC_MSG_WARN([OpenGL Extension Wrangler (GLEW) headers not found. No fancy effects for you.])
+ have_glew=false
+)
+fi
+
+dnl *************************************************
 dnl         FTGL
 dnl *************************************************
 
@@ -1132,4 +1149,9 @@ if test "x$OUTSIDE_OF_PREFIX" = "xyes"; then
     echo "  after consulting \"configure --help\" for the effects; if you want to get rid"
     echo "  of this warning, pass the corresponding opposite switches."
     echo ""
+fi
+
+# print warnings about missing optional libraries that cause feature reduction
+if test ${have_glew} = false; then
+    echo "Warning: GLEW library (http://glew.sourceforge.net/) not found or not functional. Advanced graphics effects will be disabled. Ok, we don't have that many of them anyway, so this waring is safe to ignore for now."
 fi
