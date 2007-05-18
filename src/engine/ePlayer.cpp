@@ -65,6 +65,9 @@ static tSettingItem< bool > se_assignTeamAutomaticallyConf( "AUTO_TEAM", se_assi
 static bool se_allowTeamChanges = true;
 static tSettingItem< bool > se_allowTeamChangesConf( "ALLOW_TEAM_CHANGE", se_allowTeamChanges );
 
+static bool se_enableChat = true;	//flag indicating whether chat should be allowed at all (logged in players can always chat)
+static tSettingItem<bool> se_enaChat("ENABLE_CHAT", se_enableChat);
+
 static tReferenceHolder< ePlayerNetID > se_PlayerReferences;
 
 class PasswordStorage
@@ -732,7 +735,7 @@ static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
     }
 #endif
 
-    if ( p && !p->IsSilenced() )
+    if ( p && !p->IsSilenced() && se_enableChat )
     {
         //tColoredString say2( say );
         //say2.RemoveHex();
@@ -747,7 +750,7 @@ static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
 
 static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message )
 {
-    if ( p && !p->IsSilenced() )
+    if ( p && !p->IsSilenced() && se_enableChat )
     {
         con << message << "\n";
     }
@@ -1239,15 +1242,16 @@ static bool se_allowShuffleUp=false;
 static tSettingItem<bool> se_allowShuffleUpConf("TEAM_ALLOW_SHUFFLE_UP",
         se_allowShuffleUp);
 
-static bool se_silenceAll = false;		// flag indicating whether everyone should be silenced
+static bool se_silenceAll = false;		// flag indicating whether new players should be silenced
 
 static tSettingItem<bool> se_silAll("SILENCE_ALL",
                                     se_silenceAll);
 
+
 // checks whether a player is silenced, giving him appropriate warnings if he is
 bool IsSilencedWithWarning( ePlayerNetID const * p )
 {
-    if ( se_silenceAll && ! p->isLoggedIn() )
+    if ( !se_enableChat && ! p->isLoggedIn() )
     {
         // everyone except the admins is silenced
         sn_ConsoleOut( tOutput( "$spam_protection_silenceall" ), p->Owner() );
@@ -1255,8 +1259,13 @@ bool IsSilencedWithWarning( ePlayerNetID const * p )
     }
     else if ( p->IsSilenced() )
     {
-        // player is specially silenced
-        sn_ConsoleOut( tOutput( "$spam_protection_silenced" ), p->Owner() );
+        if(se_silenceAll) {
+            // player is silenced, but all players are silenced by default
+            sn_ConsoleOut( tOutput( "$spam_protection_silenced_default" ), p->Owner() );
+        } else {
+            // player is specially silenced
+            sn_ConsoleOut( tOutput( "$spam_protection_silenced" ), p->Owner() );
+        }
         return true;
     }
 
@@ -2121,7 +2130,7 @@ void ePlayerNetID::MyInitAfterCreation()
 {
     this->CreateVoter();
 
-    this->silenced_ = ( sn_GetNetState() != nSERVER ) && se_silenceAll;
+    this->silenced_ = se_silenceAll;
 
     // register with machine and kick user if too many players are present
     if ( Owner() != 0 && sn_GetNetState() == nSERVER )

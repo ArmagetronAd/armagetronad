@@ -3,7 +3,8 @@ Changes since 0.2.8.2:
   New settings and commands:
 - If all clients support it, PING_CHARITY_MIN/MAX can be used to constrain ping charity.
 - SILENCE and VOICE allow to control chat of annoying players.
-- SILENCE_ALL can be used on the server to inhibit all cross-team communication.
+- SILENCE_ALL can be used on the server to inhibit all cross-team communication unless specifically voiced.
+- ENABLE_CHAT can be set to 0 to disable all chat. If it is set on the server it only disables public chat and logged in players can still speak.
 - LAG_*: controls game level lag compensation.
 - FILTER_NAME_MIDDLE: collapses multiple whitespaces to one in player names.
 - FORTRESS_CONQEST_TIMEOUT: if an enemy contact with a zone happens longer ago than

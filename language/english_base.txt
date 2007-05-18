@@ -357,7 +357,8 @@ spam_protection_chat_help           Extra factor for SPAM_PROTECTION for chat me
 spam_penalty_help					Number of seconds to silence a spammer.
 spam_maxlen_help					Maximal length of chat message.
 spam_autokick_help					Spam score that causes you to get kicked instantly.
-silence_all_help					If set to 1, all chat messages will be omitted.
+silence_all_help					If set to 1, new players will be silenced
+enable_chat_help					If set to 0, all chat will be surpressed (if reset on the server, messages from logged in players and private/team messages are still shown)
 allow_team_change_help				If set to 1, all players can change teams. If set to 0, players can only change teams if they've been specifically allowed to by ALLOW_TEAM_CHANGE_PLAYER
 
 # spam kick messages
@@ -2053,6 +2054,7 @@ spam_protection_repeat  SPAM PROTECTION: you already said: \1\n
 spam_protection			SPAM PROTECTION: you are silenced for the next \1 seconds.\n
 spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
 spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
+spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in order to chat publically.\n
 player_silenced         \10xff7777 has been silenced.\n
 player_voiced           \10x77ff77 has been given his voice back.\n
 player_allowed_teamchange \10x77ff77 has been allowed to change his team.\n
