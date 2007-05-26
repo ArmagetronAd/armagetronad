@@ -1,4 +1,4 @@
-<!-- version="0.3.1-a" -->
+<!-- version="0.3.1-b" -->
 <!ELEMENT Resource (Map)>
 
 <!ATTLIST Resource
@@ -23,14 +23,15 @@
   - may have an axes declared
   - need at least one spawn
   - need at least one wall -->
-<!ELEMENT Field (Axes?, (Spawn | Wall | Monitor | Zone )*)>
+<!ELEMENT Field (Axes?, Ownership?, (Spawn | Wall | Monitor | Zone )*)>
 
 <!ELEMENT Axes (Axis*)>
+<!ELEMENT Ownership (TeamOwnership*)>
 <!ELEMENT Spawn EMPTY> 
 <!ELEMENT Wall (Point+) >
 <!ELEMENT Point EMPTY>
 <!ELEMENT Axis EMPTY>
-<!ELEMENT Zone (ShapeCircle, (Enter | Inside | Leave | Outside)+ ) >
+<!ELEMENT Zone ((ShapeCircle | ShapePolygon), (Enter | Inside | Leave | Outside)+ ) >
 
 <!ATTLIST Map version CDATA #REQUIRED>
 
@@ -82,8 +83,13 @@
 
 
 <!ELEMENT ShapeCircle (Point, Color)>
-<!ATTLIST ShapeCircle radius CDATA #REQUIRED>
+<!ATTLIST ShapeCircle scale CDATA #REQUIRED>
 <!ATTLIST ShapeCircle growth CDATA "0.0">
+
+<!ELEMENT ShapePolygon (Point, Color, Point+)>
+<!ATTLIST ShapePolygon scale CDATA #REQUIRED>
+<!ATTLIST ShapePolygon growth CDATA "0.0">
+<!ATTLIST ShapePolygon rotation CDATA "0.0">
 
 <!ELEMENT Color EMPTY>
 <!ATTLIST Color red   CDATA "1.0">
@@ -140,16 +146,19 @@ rubberrecharge | spawnplayer | setting ) "death" >
 <!ATTLIST MonitorInfluence influenceSet   CDATA #IMPLIED>
 
 
-<!ELEMENT ZoneInfluence (Rotation | Radius | Point | Color)+ >
+<!ELEMENT ZoneInfluence (Rotation | Scale | Point | Color)+ >
 <!ATTLIST ZoneInfluence name CDATA #IMPLIED>
 
 <!ELEMENT Rotation EMPTY>
 <!ATTLIST Rotation rotationSpeed CDATA "0.0">
 <!ATTLIST Rotation rotationAcceleration CDATA "0.0">
 
-<!ELEMENT Radius EMPTY>
-<!ATTLIST Radius radius CDATA "1.0">
+<!ELEMENT Scale EMPTY>
+<!ATTLIST Scale scale CDATA "1.0">
 
+<!ELEMENT TeamOwnership EMPTY>
+<!ATTLIST TeamOwnership teamId CDATA #REQUIRED>
+<!ATTLIST TeamOwnership playerId CDATA #IMPLIED>
 
 
 
