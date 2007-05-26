@@ -355,6 +355,7 @@ void zZone::ReadSync( nMessage & m )
     if (!m.End())
     {
         m >> referenceTime_;
+	shape->setReferenceTime(referenceTime_);
 	if (!m.End())
 	  {
 	    tFunction aFunc;
@@ -370,6 +371,7 @@ void zZone::ReadSync( nMessage & m )
     {
         // Uses values from the eNetGameObject
         referenceTime_ = createTime_;
+	shape->setReferenceTime(referenceTime_);
 
 	tFunction aFunc;
 	aFunc.SetOffset( pos.x );

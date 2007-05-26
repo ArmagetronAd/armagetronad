@@ -16,6 +16,7 @@ zShape::zShape(eGrid* grid, unsigned short idZone)
   rotationExpr(),
 #endif
   createdtime_(0.0),
+  referencetime_(0.0),
   lasttime_(0.0),
   idZone_(idZone)
 {}
@@ -27,8 +28,10 @@ zShape::zShape(nMessage &m):eNetGameObject(m)
 
     REAL time;
     m >> time;
-    setCreatedtime(time);
+    setCreatedTime(time);
 
+    m >> time;
+    setReferenceTime(time);
 #ifdef DADA
     tString str;
     m >> str;
@@ -74,7 +77,7 @@ zShape::zShape(nMessage &m):eNetGameObject(m)
 }
 
 
-void zShape::setCreatedtime(REAL time)
+void zShape::setCreatedTime(REAL time)
 {
     createdtime_ = time;
 
@@ -83,11 +86,16 @@ void zShape::setCreatedtime(REAL time)
       lasttime_ < createdtime_;
 }
 
+void zShape::setReferenceTime(REAL time)
+{
+    referencetime_ = time;
+    // Do not update lasttime_, referencetime_ might be set in the future for ease of equation writing.
+}
 
 void zShape::networkWrite(nMessage &m)
 {
 
-  m << createdtime_;
+  m << referencetime_;
 #ifdef DADA
   m << posxExpr;
   m << posyExpr;
@@ -116,6 +124,8 @@ void zShape::WriteCreate( nMessage & m )
     eNetGameObject::WriteCreate(m);
 
     m << tString("none");
+    m << createdtime_;
+
     networkWrite(m);
 }
 
@@ -191,6 +201,8 @@ void zShapeCircle::WriteCreate( nMessage & m )
   eNetGameObject::WriteCreate(m);
 
   m << tString("circle");
+  m << createdtime_;
+
   networkWrite(m);
 }
 
@@ -205,7 +217,7 @@ bool zShapeCircle::isInteracting(eGameObject * target)
 #ifdef DADA
             REAL r = scale_->GetFloat();
 #else
-            REAL r = scale_.Evaluate(lasttime_ - createdtime_);
+            REAL r = scale_.Evaluate(lasttime_ - referencetime_);
 #endif
             // Is the player inside or outside the zone
             if ( ( prey->Position() - Position() ).NormSquared() < r*r )
@@ -234,7 +246,7 @@ void zShapeCircle::render(const eCamera * cam )
 #ifdef DADA
     eCoord rot(cos(rotation_->GetFloat()) , sin(rotation_->GetFloat()));
 #else
-    eCoord rot(cos(rotation_.Evaluate(lasttime_ - createdtime_) ), sin(rotation_.Evaluate(lasttime_ - createdtime_)));
+    eCoord rot(cos(rotation_.Evaluate(lasttime_ - referencetime_) ), sin(rotation_.Evaluate(lasttime_ - referencetime_)));
 #endif
 
     GLfloat m[4][4]={{rot.x,rot.y,0,0},
@@ -243,7 +255,7 @@ void zShapeCircle::render(const eCamera * cam )
 #ifdef DADA
                      {posx_->GetFloat(),posy_->GetFloat(),0,1}};
 #else
-                     {posx_.Evaluate(lasttime_ - createdtime_), posy_.Evaluate(lasttime_ - createdtime_), 0,1}};
+                     {posx_.Evaluate(lasttime_ - referencetime_), posy_.Evaluate(lasttime_ - referencetime_), 0,1}};
 #endif
 
     ModelMatrix();
@@ -271,14 +283,14 @@ void zShapeCircle::render(const eCamera * cam )
 
     const REAL seglen = .2f;
     const REAL bot = 0.0f;
-    const REAL top = 5.0f; // + ( lastTime - createTime_ ) * .1f;
+    const REAL top = 5.0f; // + ( lastTime - referenceTime_ ) * .1f;
 
     color_.Apply();
 
 #ifdef DADA
     REAL r = scale_->GetFloat();
 #else
-    REAL r = scale_.Evaluate(lasttime_ - createdtime_);
+    REAL r = scale_.Evaluate(lasttime_ - referencetime_);
 #endif
     for ( int i = sg_segments - 1; i>=0; --i )
     {
@@ -361,6 +373,8 @@ void zShapePolygon::WriteCreate( nMessage & m )
   eNetGameObject::WriteCreate(m);
 
   m << tString("polygon");
+  m << createdtime_;
+
   networkWrite(m);
 
   int numPoints;
@@ -409,11 +423,11 @@ bool zShapePolygon::isInside(eCoord anECoord) {
     tCoord rotation = tCoord( cosf(rotation_->GetFloat()), sinf(rotation_->GetFloat()) );
     tCoord previous = tCoord(x_, y_).Turn( rotation )*scale_->GetFloat() + centerPos;
 #else
-    REAL x_ = (*iter).first.Evaluate(lasttime_ - createdtime_);
-    REAL y_ = (*iter).second.Evaluate(lasttime_ - createdtime_);
-    tCoord centerPos = tCoord(posx_.Evaluate(lasttime_ - createdtime_), posy_.Evaluate(lasttime_ - createdtime_));
-    tCoord rotation = tCoord( cosf(rotation_.Evaluate(lasttime_ - createdtime_)), sinf(rotation_.Evaluate(lasttime_ - createdtime_)) );
-    tCoord previous = tCoord(x_, y_).Turn( rotation )*scale_.Evaluate(lasttime_ - createdtime_) + centerPos;
+    REAL x_ = (*iter).first.Evaluate(lasttime_ - referencetime_);
+    REAL y_ = (*iter).second.Evaluate(lasttime_ - referencetime_);
+    tCoord centerPos = tCoord(posx_.Evaluate(lasttime_ - referencetime_), posy_.Evaluate(lasttime_ - referencetime_));
+    tCoord rotation = tCoord( cosf(rotation_.Evaluate(lasttime_ - referencetime_)), sinf(rotation_.Evaluate(lasttime_ - referencetime_)) );
+    tCoord previous = tCoord(x_, y_).Turn( rotation )*scale_.Evaluate(lasttime_ - referencetime_) + centerPos;
 #endif
     REAL xpp = previous.x;
     REAL ypp = previous.y;
@@ -427,9 +441,9 @@ bool zShapePolygon::isInside(eCoord anECoord) {
 	y_ = (*iter).second->GetFloat();
 	tCoord current = tCoord(x_, y_).Turn( rotation )*scale_->GetFloat() + centerPos;
 #else
-	x_ = (*iter).first.Evaluate(lasttime_ - createdtime_);
-	y_ = (*iter).second.Evaluate(lasttime_ - createdtime_);
-	tCoord current = tCoord(x_, y_).Turn( rotation )*scale_.Evaluate(lasttime_ - createdtime_) + centerPos;
+	x_ = (*iter).first.Evaluate(lasttime_ - referencetime_);
+	y_ = (*iter).second.Evaluate(lasttime_ - referencetime_);
+	tCoord current = tCoord(x_, y_).Turn( rotation )*scale_.Evaluate(lasttime_ - referencetime_) + centerPos;
 #endif
 	REAL xp = current.x;
 	REAL yp = current.y;
@@ -498,9 +512,9 @@ void zShapePolygon::render(const eCamera * cam )
 
     REAL r = scale_->GetFloat();
 #else
-    glTranslatef(posx_.Evaluate(lasttime_ - createdtime_), posy_.Evaluate(lasttime_ - createdtime_), 0);
+    glTranslatef(posx_.Evaluate(lasttime_ - referencetime_), posy_.Evaluate(lasttime_ - referencetime_), 0);
 
-    REAL r = scale_.Evaluate(lasttime_ - createdtime_);
+    REAL r = scale_.Evaluate(lasttime_ - referencetime_);
 #endif
 
     glScalef(r, r, 1.0);
@@ -508,7 +522,7 @@ void zShapePolygon::render(const eCamera * cam )
 #ifdef DADA
     glRotatef(rotation_->GetFloat()*180/M_PI, 0.0, 0.0, 1.0);
 #else
-    glRotatef(rotation_.Evaluate(lasttime_ - createdtime_)*180/M_PI, 0.0, 0.0, 1.0);
+    glRotatef(rotation_.Evaluate(lasttime_ - referencetime_)*180/M_PI, 0.0, 0.0, 1.0);
 #endif
 
     if ( sr_alphaBlend )
@@ -538,10 +552,10 @@ void zShapePolygon::render(const eCamera * cam )
 	REAL xpp = (*prevIter).first->GetFloat() ;
 	REAL ypp = (*prevIter).second->GetFloat() ;
 #else
-	REAL xp = (*iter).first.Evaluate( lasttime_ - createdtime_ ) ;
-	REAL yp = (*iter).second.Evaluate( lasttime_ - createdtime_ ) ;
-	REAL xpp = (*prevIter).first.Evaluate( lasttime_ - createdtime_ ) ;
-	REAL ypp = (*prevIter).second.Evaluate( lasttime_ - createdtime_ ) ;
+	REAL xp = (*iter).first.Evaluate( lasttime_ - referencetime_ ) ;
+	REAL yp = (*iter).second.Evaluate( lasttime_ - referencetime_ ) ;
+	REAL xpp = (*prevIter).first.Evaluate( lasttime_ - referencetime_ ) ;
+	REAL ypp = (*prevIter).second.Evaluate( lasttime_ - referencetime_ ) ;
 #endif
 
         glVertex3f(xp, yp, bot);

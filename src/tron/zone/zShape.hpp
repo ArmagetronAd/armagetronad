@@ -46,6 +46,7 @@ public:
 
     void TimeStep( REAL time ) { lasttime_ = time; };
     virtual bool isEmulatingOldZone() {return false;};
+    void setReferenceTime(REAL time);
 
 protected:
 #ifdef DADA
@@ -70,15 +71,16 @@ protected:
 #ifdef DADA
     eCoord Position() { return eCoord(posx_->GetFloat(), posy_->GetFloat()); };
 #else
-    eCoord Position() { return eCoord(posx_(lasttime_ - createdtime_), posy_(lasttime_ - createdtime_) ); };
+    eCoord Position() { return eCoord(posx_(lasttime_ - referencetime_), posy_(lasttime_ - referencetime_) ); };
 #endif
 
     static void networkRead(nMessage &m, zShape *aShape);
     void networkWrite(nMessage &m);
 
-    void setCreatedtime(REAL time);
+    void setCreatedTime(REAL time);
 
     REAL createdtime_; // The in-game time when this shape was first instantiated
+    REAL referencetime_; // The in-game time when this shape's data was updated, used for evaluation
     REAL lasttime_; // What is to be considered as the current time for this shape
 
     unsigned short idZone_;
