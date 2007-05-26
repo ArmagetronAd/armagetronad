@@ -44,7 +44,7 @@ public:
   rColor getColor() {return color_;};
 #endif
 
-    void TimeStep( REAL time ) { lasttime_ = time; };
+    void TimeStep( REAL time );
     virtual bool isEmulatingOldZone() {return false;};
     void setReferenceTime(REAL time);
 

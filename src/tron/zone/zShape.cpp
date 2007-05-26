@@ -175,6 +175,17 @@ void zShape::animate( REAL time ) {
   // Is this needed as the items are already animated?
 }
 
+void zShape::TimeStep( REAL time ) { 
+  lasttime_ = time;
+  /*
+  REAL scale = scale_.Evaluate(lasttime_ - referencetime_);
+  if (scale < -1.0) // Allow shapes to keep existing for a while even though they are not physical
+    {
+      // The shape has collapsed and should be removed
+    }
+  */
+}
+
 bool zShape::isInteracting(eGameObject * target) {
   return false;
 }
@@ -220,7 +231,7 @@ bool zShapeCircle::isInteracting(eGameObject * target)
             REAL r = scale_.Evaluate(lasttime_ - referencetime_);
 #endif
             // Is the player inside or outside the zone
-            if ( ( prey->Position() - Position() ).NormSquared() < r*r )
+            if ( (r >= 0.0) && ( prey->Position() - Position() ).NormSquared() < r*r )
             {
                 interact = true;
 	    }
@@ -292,28 +303,31 @@ void zShapeCircle::render(const eCamera * cam )
 #else
     REAL r = scale_.Evaluate(lasttime_ - referencetime_);
 #endif
-    for ( int i = sg_segments - 1; i>=0; --i )
-    {
-        REAL a = i * 2 * 3.14159 / REAL( sg_segments );
-        REAL b = a + seglen;
-
-        REAL sa = r * sin(a);
-        REAL ca = r * cos(a);
-        REAL sb = r * sin(b);
-        REAL cb = r * cos(b);
-
-        glVertex3f(sa, ca, bot);
-        glVertex3f(sa, ca, top);
-        glVertex3f(sb, cb, top);
-        glVertex3f(sb, cb, bot);
-
-        if ( !sr_alphaBlend )
-        {
-            glVertex3f(sa, ca, bot);
-            RenderEnd();
-            BeginLineStrip();
-        }
-    }
+    if (r >= 0.0)
+      {
+	for ( int i = sg_segments - 1; i>=0; --i )
+	  {
+	    REAL a = i * 2 * 3.14159 / REAL( sg_segments );
+	    REAL b = a + seglen;
+	    
+	    REAL sa = r * sin(a);
+	    REAL ca = r * cos(a);
+	    REAL sb = r * sin(b);
+	    REAL cb = r * cos(b);
+	    
+	    glVertex3f(sa, ca, bot);
+	    glVertex3f(sa, ca, top);
+	    glVertex3f(sb, cb, top);
+	    glVertex3f(sb, cb, bot);
+	    
+	    if ( !sr_alphaBlend )
+	      {
+		glVertex3f(sa, ca, bot);
+		RenderEnd();
+		BeginLineStrip();
+	      }
+	  }
+      }
 
     RenderEnd();
 
@@ -416,43 +430,49 @@ bool zShapePolygon::isInside(eCoord anECoord) {
 
     std::vector< myPoint >::const_iterator iter = points.end() - 1;
     // We need to position the prevIter to the last point.
+    REAL currentScale = 0.0;
 #ifdef DADA
     REAL x_ = (*iter).first->GetFloat();
     REAL y_ = (*iter).second->GetFloat();
     tCoord centerPos = tCoord(posx_->GetFloat(), posy_->GetFloat());
     tCoord rotation = tCoord( cosf(rotation_->GetFloat()), sinf(rotation_->GetFloat()) );
-    tCoord previous = tCoord(x_, y_).Turn( rotation )*scale_->GetFloat() + centerPos;
+    currentScale = scale_->GetFloat();
+    tCoord previous = tCoord(x_, y_).Turn( rotation )*currentScale + centerPos;
 #else
     REAL x_ = (*iter).first.Evaluate(lasttime_ - referencetime_);
     REAL y_ = (*iter).second.Evaluate(lasttime_ - referencetime_);
     tCoord centerPos = tCoord(posx_.Evaluate(lasttime_ - referencetime_), posy_.Evaluate(lasttime_ - referencetime_));
     tCoord rotation = tCoord( cosf(rotation_.Evaluate(lasttime_ - referencetime_)), sinf(rotation_.Evaluate(lasttime_ - referencetime_)) );
-    tCoord previous = tCoord(x_, y_).Turn( rotation )*scale_.Evaluate(lasttime_ - referencetime_) + centerPos;
+    currentScale = scale_.Evaluate(lasttime_ - referencetime_);
+    tCoord previous = tCoord(x_, y_).Turn( rotation )*currentScale + centerPos;
 #endif
     REAL xpp = previous.x;
     REAL ypp = previous.y;
 
-    for(iter = points.begin();
-	iter != points.end();
-	++iter)
+    if(currentScale > 0.0) 
       {
+	for(iter = points.begin();
+	    iter != points.end();
+	    ++iter)
+	  {
 #ifdef DADA
-	x_ = (*iter).first->GetFloat();
-	y_ = (*iter).second->GetFloat();
-	tCoord current = tCoord(x_, y_).Turn( rotation )*scale_->GetFloat() + centerPos;
+	    x_ = (*iter).first->GetFloat();
+	    y_ = (*iter).second->GetFloat();
+	    tCoord current = tCoord(x_, y_).Turn( rotation )*currentScale + centerPos;
 #else
-	x_ = (*iter).first.Evaluate(lasttime_ - referencetime_);
-	y_ = (*iter).second.Evaluate(lasttime_ - referencetime_);
-	tCoord current = tCoord(x_, y_).Turn( rotation )*scale_.Evaluate(lasttime_ - referencetime_) + centerPos;
+	    x_ = (*iter).first.Evaluate(lasttime_ - referencetime_);
+	    y_ = (*iter).second.Evaluate(lasttime_ - referencetime_);
+	    tCoord current = tCoord(x_, y_).Turn( rotation )*currentScale + centerPos;
 #endif
-	REAL xp = current.x;
-	REAL yp = current.y;
+	    REAL xp = current.x;
+	    REAL yp = current.y;
 
-        if ((((yp <= y) && (y < ypp)) || ((ypp <= y) && (y < yp))) &&
-            (x < (xpp - xp) * (y - yp) / (ypp - yp) + xp))
-          c = !c;
+	    if ((((yp <= y) && (y < ypp)) || ((ypp <= y) && (y < yp))) &&
+		(x < (xpp - xp) * (y - yp) / (ypp - yp) + xp))
+	      c = !c;
 
-	xpp = xp; ypp = yp;
+	    xpp = xp; ypp = yp;
+	  }
       }
 
     return c;
@@ -507,17 +527,20 @@ void zShapePolygon::render(const eCamera * cam )
 
     //    glMultMatrixf(&m[0][0]);
 
+    REAL currentScale = 0.0;
 #ifdef DADA
     glTranslatef(posx_->GetFloat(), posy_->GetFloat(), 0);
 
-    REAL r = scale_->GetFloat();
+    currentScale = scale_->GetFloat();
 #else
     glTranslatef(posx_.Evaluate(lasttime_ - referencetime_), posy_.Evaluate(lasttime_ - referencetime_), 0);
 
-    REAL r = scale_.Evaluate(lasttime_ - referencetime_);
+    currentScale = scale_.Evaluate(lasttime_ - referencetime_);
 #endif
 
-    glScalef(r, r, 1.0);
+    if(currentScale > 0.0)
+      {
+    glScalef(currentScale, currentScale, 1.0);
 
 #ifdef DADA
     glRotatef(rotation_->GetFloat()*180/M_PI, 0.0, 0.0, 1.0);
@@ -575,7 +598,7 @@ void zShapePolygon::render(const eCamera * cam )
 
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glDepthMask(GL_TRUE);
-
+      }
     glPopMatrix();
 #endif
 }
