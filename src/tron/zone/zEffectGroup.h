@@ -41,7 +41,7 @@ class zEffectGroup
 {
 public:
     zEffectGroup();
-    zEffectGroup(gVectorExtra<ePlayerNetID *> const owners, gVectorExtra<eTeam *> const teamOwners);
+    zEffectGroup(gVectorExtra< nNetObjectID > const owners, gVectorExtra< nNetObjectID > const teamOwners);
     zEffectGroup(zEffectGroup const &other);
     ~zEffectGroup();
     void operator=(zEffectGroup const &other);
@@ -55,15 +55,15 @@ public:
 
     //callback functions
     gCycle * cb_PossibleUser(void);           //!< Gets the used rubber for the currently watched cycle
-    gVectorExtra<ePlayerNetID *> cb_Owners(void);
-    gVectorExtra<eTeam *> cb_TeamOwners(void);
+    gVectorExtra< nNetObjectID > cb_Owners(void);
+    gVectorExtra< nNetObjectID > cb_TeamOwners(void);
     gVectorExtra<ePlayerNetID *> cb_Targets(void);
 
 protected:
     std::vector<zValidatorPtr> validators;
 
-    gVectorExtra<ePlayerNetID *> d_owners;
-    gVectorExtra<eTeam *> d_teamOwners;
+    gVectorExtra< nNetObjectID > d_owners;
+    gVectorExtra< nNetObjectID > d_teamOwners;
 
     gVectorExtra<ePlayerNetID *> d_calculatedTargets;
 

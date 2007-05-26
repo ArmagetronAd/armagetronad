@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "eEventNotification.h"
+#include "eEventNotification.h"
 #include "gStuff.h"
 #include "eSoundMixer.h"
 #include "eGrid.h"

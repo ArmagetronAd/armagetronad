@@ -52,35 +52,35 @@ zValidator *zValidator::copy(void) const {
 }
 
 bool
-zValidator::isOwner(ePlayerNetID *possibleOwner, gVectorExtra<ePlayerNetID *> &owners)
+zValidator::isOwner(ePlayerNetID *possibleOwner, gVectorExtra< nNetObjectID > &owners)
 {
-    gVectorExtra<ePlayerNetID *>::iterator iter;
+    gVectorExtra< nNetObjectID >::iterator iter;
     for(iter = owners.begin();
             iter != owners.end();
             ++iter)
     {
-        if (*iter == possibleOwner)
-            return true;
+      if (bool(sn_netObjects[(*iter)]) && (*iter == possibleOwner->ID()) )
+	  return true;
     }
     return false;
 }
 
 bool
-zValidator::isTeamOwner(eTeam *possibleTeamOwner, gVectorExtra<eTeam *> &teamOwners)
+zValidator::isTeamOwner(eTeam *possibleTeamOwner, gVectorExtra< nNetObjectID > &teamOwners)
 {
-    gVectorExtra<eTeam *>::iterator iter;
+    gVectorExtra< nNetObjectID >::iterator iter;
     for(iter = teamOwners.begin();
             iter != teamOwners.end();
             ++iter)
     {
-        if (*iter == possibleTeamOwner)
+        if (bool(sn_netObjects[(*iter)]) && (*iter == possibleTeamOwner->ID()) )
             return true;
     }
     return false;
 }
 
 void
-zValidator::validate(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, Triggerer possibleUser, miscDataPtr &miscData) {
+zValidator::validate(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, Triggerer possibleUser, miscDataPtr &miscData) {
     if(isValid(owners, teamOwners, possibleUser.who) && validateTriad(possibleUser.positive, positive) && validateTriad(possibleUser.marked, marked)) {
         zSelectorPtrs::const_iterator iterSelector;
         for(iterSelector=selectors.begin();
@@ -163,7 +163,7 @@ zValidator *zValidatorOwner::copy(void) const {
 }
 
 bool
-zValidatorOwner::isValid(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle* possibleUser)
+zValidatorOwner::isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser)
 {
     return isOwner(possibleUser->Player(), owners);
 }
@@ -194,7 +194,7 @@ zValidator *zValidatorOwnerTeam::copy(void) const {
 }
 
 bool
-zValidatorOwnerTeam::isValid(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle* possibleUser)
+zValidatorOwnerTeam::isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser)
 {
     return isTeamOwner(possibleUser->Player()->CurrentTeam(), teamOwners);
 }
@@ -225,7 +225,7 @@ zValidator *zValidatorAllButOwner::copy(void) const {
 }
 
 bool
-zValidatorAllButOwner::isValid(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle* possibleUser)
+zValidatorAllButOwner::isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser)
 {
     return !isOwner(possibleUser->Player(), owners);
 }

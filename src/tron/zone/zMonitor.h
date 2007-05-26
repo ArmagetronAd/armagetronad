@@ -174,7 +174,7 @@ public:
     { };
     ~zMonitorInfluence() { };
 
-    void apply(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle* triggerer);
+    void apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* triggerer);
 
     void setMarked(Triad mark) {marked = mark;};
     void setInfluenceSlide(REAL infl) {influenceSlide = infl; influenceSlideAvailable=true;};

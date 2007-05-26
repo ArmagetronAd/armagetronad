@@ -101,7 +101,6 @@ void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 
 void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
-    if (count == -1 || count > 0) {
         gVectorExtra<ePlayerNetID *>::iterator iter;
         for(iter = d_calculatedTargets.begin();
                 iter != d_calculatedTargets.end();
@@ -109,9 +108,6 @@ void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
         {
             static_cast<gCycle *>((*iter)->Object())->Kill();
         }
-        if (count > 0)
-            count --;
-    }
 }
 
 //
@@ -120,7 +116,6 @@ void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 
 void zEffectorPoint::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
-    if (count == -1 || count > 0) {
         gVectorExtra<ePlayerNetID *>::iterator iter;
         for(iter = d_calculatedTargets.begin();
                 iter != d_calculatedTargets.end();
@@ -129,9 +124,6 @@ void zEffectorPoint::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
             //	(*iter)->AddScore(d_score, tOutput(), "$player_lose_suicide");
             (*iter)->AddScore(d_score, tOutput(), message);
         }
-        if (count > 0)
-            count --;
-    }
 }
 
 //
@@ -140,7 +132,6 @@ void zEffectorPoint::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 
 void zEffectorCycleRubber::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
-    if (count == -1 || count > 0) {
         gVectorExtra<ePlayerNetID *>::iterator iter;
         for(iter = d_calculatedTargets.begin();
                 iter != d_calculatedTargets.end();
@@ -148,9 +139,6 @@ void zEffectorCycleRubber::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarg
         {
             static_cast<gCycle *>((*iter)->Object())->SetRubber(0.0);
         }
-        if (count > 0)
-            count --;
-    }
 }
 
 
@@ -160,7 +148,6 @@ void zEffectorCycleRubber::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarg
 
 void zEffectorCycleBrake::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
-    if (count == -1 || count > 0) {
         gVectorExtra<ePlayerNetID *>::iterator iter;
         for(iter = d_calculatedTargets.begin();
                 iter != d_calculatedTargets.end();
@@ -168,9 +155,6 @@ void zEffectorCycleBrake::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarge
         {
             static_cast<gCycle *>((*iter)->Object())->SetBrakingReservoir(1.0);
         }
-        if (count > 0)
-            count --;
-    }
 }
 
 //
@@ -179,7 +163,6 @@ void zEffectorCycleBrake::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarge
 
 void zEffectorSpawnPlayer::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
-    if (count == -1 || count > 0) {
         gVectorExtra<ePlayerNetID *>::iterator iter;
         for(iter = d_calculatedTargets.begin();
                 iter != d_calculatedTargets.end();
@@ -187,21 +170,14 @@ void zEffectorSpawnPlayer::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarg
         {
             sg_RespawnPlayer(grid, arena, (*iter));
         }
-        if (count > 0)
-            count --;
-    }
 }
 
 void zEffectorSetting::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
-    if (count == -1 || count > 0) {
         std::stringstream ss;
         ss << settingName  << " " << settingValue;
         tConfItemBase::LoadAll(ss);
 
-        if (count > 0)
-            count --;
-    }
 }
 
 

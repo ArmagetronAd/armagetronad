@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tFunction.h"
 #include <set>
 #include <vector>
+#include "zone/zShape.hpp"
 
 /*
 class zZone: public eNetGameObject
@@ -72,15 +73,19 @@ public:
 
     void SetReferenceTime();               //!< sets the reference time to the current time
 
-    zZone &         SetPosition         ( eCoord const & position );	//!< Sets the current position
     eCoord          GetPosition         ( void ) const;	                //!< Gets the current position
     zZone const &   GetPosition         ( eCoord & position ) const;	//!< Gets the current position
+    tCoord const    GetRotation         ( void ) const;	                //!< Gets the current rotation state
+    REAL            GetScale           ( void ) const;	                //!< Gets the current scale
+    rColor const    GetColor( void ) const;	//!< Gets the current color
+    /*
+    zZone &         SetPosition         ( eCoord const & position );	//!< Sets the current position
     zZone &         SetVelocity         ( eCoord const & velocity );	//!< Sets the current velocity
     eCoord          GetVelocity         ( void ) const;	                //!< Gets the current velocity
     zZone const &   GetVelocity         ( eCoord & velocity ) const;	//!< Gets the current velocity
-    zZone &         SetRadius           ( REAL radius );	            //!< Sets the current radius
-    REAL            GetRadius           ( void ) const;	                //!< Gets the current radius
-    zZone const &   GetRadius           ( REAL & radius ) const;	    //!< Gets the current radius
+    zZone &         SetScale           ( REAL scale );	            //!< Sets the current scale
+    REAL            GetScale           ( void ) const;	                //!< Gets the current scale
+    zZone const &   GetScale           ( REAL & scale ) const;	    //!< Gets the current scale
     zZone &         SetExpansionSpeed   ( REAL expansionSpeed );	    //!< Sets the current expansion speed
     REAL            GetExpansionSpeed   ( void ) const;	                //!< Gets the current expansion speed
     zZone const &   GetExpansionSpeed   ( REAL & expansionSpeed ) const;//!< Gets the current expansion speed
@@ -93,22 +98,40 @@ public:
     zZone const &   GetRotationAcceleration( REAL & rotationAcceleration ) const;	//!< Gets the current acceleration of the rotation
     rColor const &  GetColor( void ) const;	//!< Gets the current color
     void            SetColor( rColor const & color ); //!< Sets the current color
+*/
 
     void addEffectGroupEnter  (zEffectGroupPtr anEffectGroup) {effectGroupEnter.push_back  (anEffectGroup);};
     void addEffectGroupInside (zEffectGroupPtr anEffectGroup) {effectGroupInside.push_back (anEffectGroup);};
     void addEffectGroupLeave  (zEffectGroupPtr anEffectGroup) {effectGroupLeave.push_back  (anEffectGroup);};
     void addEffectGroupOutside(zEffectGroupPtr anEffectGroup) {effectGroupOutside.push_back(anEffectGroup);};
 
+    void setShape (zShapePtr aShape) {
+      shape = aShape; 
+#ifdef DADA
+#else
+      /*
+      posx_ = shape->getPosX();
+      posy_ = shape->getPosY();
+      scale_ = shape->getScale();
+      rotationSpeed_ = shape->getRotation();
+      color_ = shape->getColor();
+      */
+#endif
+    };
+
 protected:
-    rColor color_;           //!< the zone's color
+    //    rColor color_;           //!< the zone's color
     REAL createTime_;            //!< the time the zone was created at
+    zShapePtr shape; //!< the shape(s) of this zone
 
     REAL referenceTime_;         //!< reference time for function evaluations
+    /*
     tFunction posx_;             //!< time dependence of x component of position
     tFunction posy_;             //!< time dependence of y component of position
-    tFunction radius_;           //!< time dependence of radius
+    tFunction scale_;           //!< time dependence of scale
     tFunction rotationSpeed_;    //!< the zone's rotation speed
     eCoord    rotation_;         //!< the current rotation state
+    */
 
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
     virtual void OnVanish();                     //!< called when the zone vanishes
@@ -135,7 +158,7 @@ private:
 
     virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
 
-    REAL Radius() const;           //!< returns the current radius
+    //    REAL Scale() const;           //!< returns the current scale
 
     virtual void Render(const eCamera *cam);  //!< renders the zone
 

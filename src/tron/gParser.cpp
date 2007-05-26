@@ -43,6 +43,16 @@ monitorMap monitors;
 typedef std::map< string, zZonePtr > zoneMap;
 zoneMap mapZones;
 
+#include "nNetObject.h"
+typedef std::map< string, nNetObjectID > MapIdToGameId;
+MapIdToGameId teamAsso; // mapping between map's teamId and in-game team
+MapIdToGameId playerAsso; // mapping between map's playerId and in-game player
+
+#include "nConfig.h"
+#define DEFAULT_POLYGONAL_SHAPE_USED "FALSE"
+static tString polygonal_shape_used(DEFAULT_POLYGONAL_SHAPE_USED);
+static nSettingItemWatched<tString> safetymecanism_polygonal_shapeused("POLYGONAL_SHAPE_USED",polygonal_shape_used, nConfItemVersionWatcher::Group_Breaking, 21 );
+
 
 //! Warn about deprecated map format
 static void sg_Deprecated()
@@ -52,6 +62,31 @@ static void sg_Deprecated()
         con << "\n\n" << tColoredString::ColorString(1,.3,.3) << "WARNING: You are loading a map that is written in a deprecated format. It should work for now, but will stop to do so in one of the next releases. Have the map upgraded to an up-to-date version as soon as possible.\n\n";
 }
 
+#ifdef DEBUG_ZONE_SYNC
+// This code is to attempt to synchronize moving zones on the client and server
+// It just doesnt work ATM, nor it is close to any solution.
+static bool newGameRound; // Indicate that a round has just started when true (no not really, a bad approximation)
+
+// the following crash on the server as soon as the player being monitored dies!!!!
+float tSysTimeHack2(float x) 
+{
+    int playerID = sr_viewportBelongsToPlayer[ 0 ];
+    // get the player
+    ePlayer* player = ePlayer::PlayerConfig( playerID );
+
+    float asdf = player->netPlayer->ping;
+
+    static float basePing;
+    // preserve basePing only at the start of a new round
+    if (newGameRound == true) {
+      newGameRound = false;
+      basePing = asdf;
+    }
+
+    return static_cast<float> (tSysTimeFloat() /*+ (player->netPlayer->ping*2)*/ + basePing/2);
+}
+#endif // DEBUG_ZONE_SYNC
+
 gParser::gParser(gArena *anArena, eGrid *aGrid):
         theArena(anArena),
         theGrid(aGrid),
@@ -59,6 +94,21 @@ gParser::gParser(gArena *anArena, eGrid *aGrid):
         sizeMultiplier(0.0)
 {
     m_Doc = NULL;
+
+    // HACK - philippeqc
+    // This seems as inconvenient as any other place to load the 
+    // static tables of variables and functions available.
+    // It's run once per map loading, between round, so its basically 
+    // cost less vs the real structural mess that it cause ;)
+
+    //  vars[tString("sizeMultiplier")] = &sizeMultiplier; // BAD dont use other than as an example, non static content
+    
+    //    tValue::Expr::functions[tString("time")] = &tSysTimeHack; 
+#ifdef DEBUG_ZONE_SYNC
+    tValue::Expr::functions[tString("time2")] = &tSysTimeHack2; 
+#endif //DEBUG_ZONE_SYNC
+    //    tValue::Expr::functions[tString("sizeMultiplier")] = &gArena::GetSizeMultiplierHack; // static
+
 }
 
 bool
@@ -423,6 +473,11 @@ gParser::parseSpawn(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
     endElementAlternative(grid, cur, keyword);
 }
 
+/*
+  Extract all the color codes and build a rColor object.
+  Return: a rColor object.
+  
+ */
 rColor
 gParser::parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
@@ -435,24 +490,133 @@ gParser::parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
     return color;
 }
 
-void
-gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float &radius, float &growth, rColor & color, const xmlChar * keyword)
+zShapePtr
+gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, unsigned short idZone, const xmlChar * keyword)
 {
-    radius = myxmlGetPropFloat(cur, "radius");
-    growth = myxmlGetPropFloat(cur, "growth");
+    zShapePtr shape = zShapePtr( new zShapeCircle(grid, idZone) );
+    parseShape(grid, cur, keyword, shape);
+
+    return shape;
+}
+
+zShapePtr
+gParser::parseShapePolygon(eGrid *grid, xmlNodePtr cur, unsigned short idZone, const xmlChar * keyword)
+{
+    // Polygon shapes are not supported by older clients.
+    std::stringstream ss;
+    /* Yes it is ackward to generate a string that will be decifered on the other end*/
+    ss << "POLYGONAL_SHAPE_USED TRUE";
+    tConfItemBase::LoadLine(ss);
+
+    zShapePtr shape = zShapePtr( new zShapePolygon(grid, idZone) );
+    parseShape(grid, cur, keyword, shape);
+
+    return shape;
+}
+
+#ifndef DADA
+// Quick stub to allow to operate on tFunction
+// Remove when all that is variant has been ported to ruby
+void gParser::myCheapParameterSplitter(const string &str, tFunction &tf, bool addSizeMultiplier)
+{
+  REAL param[2] = {0.0, 0.0};
+  int bPos;
+  if( (bPos = str.find(',')) != -1)
+    {
+      param[0] = atof(str.substr(0, bPos).c_str());
+      param[1] = atof(str.substr(bPos + 1, str.length()).c_str());
+    }
+  else
+    {
+      param[0] = atof(str.c_str());
+    }
+
+  if(addSizeMultiplier)
+    {
+      param[0] = param[0] * sizeMultiplier;
+      param[1] = param[1] * sizeMultiplier;
+    }
+  tf.SetOffset(param[0]);
+  tf.SetSlope(param[1]);
+}
+#endif
+void
+gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShapePtr &shape) 
+{
+    tValue::BasePtr xp;
+    tValue::BasePtr yp;
+    bool centerLocationFound = false;
+
+    if (myxmlHasProp(cur, "scale")) {
+#ifdef DADA
+        tString str = tString("(") + tString(myxmlGetProp(cur, "scale")) + tString(")*sizeMultiplier()");
+        shape->setScale( tValue::BasePtr( new tValue::Expr (str, tValue::Expr::vars, tValue::Expr::functions)), str );
+#else
+        string str = string(myxmlGetProp(cur, "scale"));
+	tFunction tfScale;
+	myCheapParameterSplitter(str, tfScale, false);
+        shape->setScale( tfScale );
+#endif
+    }
+
+    if (myxmlHasProp(cur, "rotation")) {
+#ifdef DADA
+        tString str = tString(myxmlGetProp(cur, "rotation"));
+        shape->setRotation( tValue::BasePtr( new tValue::Expr (str, tValue::Expr::vars, tValue::Expr::functions)), str );
+#else
+        string str = string(myxmlGetProp(cur, "rotation"));
+	tFunction tfRotation;
+	myCheapParameterSplitter(str, tfRotation, false);
+        shape->setRotation( tfRotation );
+#endif
+    }
 
     cur = cur->xmlChildrenNode;
     while( cur != NULL) {
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
         else if (isElement(cur->name, (const xmlChar *)"Point", keyword)) {
             /* We need to multipy by sizeMultiper so the item are properly placed*/
-            x = myxmlGetPropFloat(cur, "x") *sizeMultiplier;
-            y = myxmlGetPropFloat(cur, "y") *sizeMultiplier;
+#ifdef DADA
+            tString strX = tString("(" + tString(myxmlGetProp(cur, "x")) + ")*sizeMultiplier()");
+            xp = tValue::BasePtr( new tValue::Expr (strX, tValue::Expr::vars, tValue::Expr::functions) );
+            tString strY = tString("(" + tString(myxmlGetProp(cur, "y")) + ")*sizeMultiplier()");
+            yp = tValue::BasePtr( new tValue::Expr (strY, tValue::Expr::vars, tValue::Expr::functions) );
+
+	    if(centerLocationFound == false) {
+                shape->setPosX( xp, strX );
+                shape->setPosY( yp, strY );
+                centerLocationFound = true;
+	    }
+	    else {
+	      zShapePolygon *tmpShapePolygon = dynamic_cast<zShapePolygon *>( shape.get() );
+	      if (tmpShapePolygon)
+                  tmpShapePolygon->addPoint( myPoint( xp, yp ), std::pair<tString, tString>(strX, strY) );
+	    }
+#else
+	    string strX = string(myxmlGetProp(cur, "x"));
+	    tFunction tfX;
+	    myCheapParameterSplitter(strX, tfX, true);
+	    string strY = string(myxmlGetProp(cur, "y"));
+	    tFunction tfY;
+	    myCheapParameterSplitter(strY, tfY, true);
+
+	    if(centerLocationFound == false) {
+                shape->setPosX( tfX );
+                shape->setPosY( tfY );
+                centerLocationFound = true;
+	    }
+	    else {
+	      zShapePolygon *tmpShapePolygon = dynamic_cast<zShapePolygon *>( (zShape*)shape );
+	      if (tmpShapePolygon)
+                  tmpShapePolygon->addPoint( myPoint( tfX, tfY ) );
+	    }
+#endif
 
             endElementAlternative(grid, cur, keyword);
         }
+
         else if (isElement(cur->name, (const xmlChar *)"Color", keyword)) {
-            color = parseColor(grid, cur, keyword);
+            shape->setColor( parseColor(grid, cur, keyword) );
 
             endElementAlternative(grid, cur, keyword);
         }
@@ -480,7 +644,9 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
     else {
         // make an empty zone and store under the right label
         // It should be populated later
-        refZone = zZonePtr(new zZone(grid));
+      
+      //  refZone = zZonePtr(new zZone(grid));
+      refZone = tNEW(zZone)(grid);
         if (!zoneName.empty())
             mapZones[zoneName] = refZone;
     }
@@ -494,9 +660,9 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
             b->set(myxmlGetPropFloat(cur, "rotationSpeed"), myxmlGetPropFloat(cur, "rotationAcceleration"));
             infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));
         }
-        else if (isElement(cur->name, (const xmlChar *)"Radius", keyword)) {
-            zZoneInfluenceItemRadius *b = new zZoneInfluenceItemRadius(refZone);
-            b->set(myxmlGetPropFloat(cur, "radius") *sizeMultiplier);
+        else if (isElement(cur->name, (const xmlChar *)"Scale", keyword)) {
+            zZoneInfluenceItemScale *b = new zZoneInfluenceItemScale(refZone);
+            b->set(myxmlGetPropFloat(cur, "scale") *sizeMultiplier);
             infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));
         }
         else if (isElement(cur->name, (const xmlChar *)"Color", keyword)) {
@@ -578,7 +744,7 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
 
     /*
       effectors[tString("event")] = zEffectorEvent::create;
-      effectors[tString("cleartrace")] = zEffectorClearTrace::create;
+      effectors[tString("cleartrace")] = zEffectorClearrace::create;
       effectors[tString("teleport")] = zEffectorTeleport::create;
     */
     effectors[tString("spawnplayer")] = zEffectorSpawnPlayer::create;
@@ -765,7 +931,7 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
     /*
       Store the owner information
     */
-    gVectorExtra< ePlayerNetID * > owners;
+    gVectorExtra< nNetObjectID > nidPlayerOwners;
 
     if(xmlHasProp(cur, (const xmlChar*)"owners"))
     {
@@ -779,11 +945,12 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
             /*
              * Map from map descriptor to in-game ids
              */
+	  /*
             for (int i=0; i<se_PlayerNetIDs.Len(); i++) {
                 // TODO: change this to a call to Joda's code
                 tString str(*iter);
                 if ( se_PlayerNetIDs(i)->GetName() == str ) {
-                    owners.push_back( se_PlayerNetIDs(i) );
+                    nidPlayerOwners.push_back( se_PlayerNetIDs(i) );
                 }
                 //Hack to support referring to players without knowing their names.
                 int id;
@@ -793,13 +960,47 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
                     }
                 }
             }
+	  */
+	  MapIdToGameId::iterator asdf = playerAsso.find(*iter);
+	  if(asdf != playerAsso.end()) {
+	    std::cout << "********** player matching " << (*iter) << std::endl;
+	    nidPlayerOwners.push_back( (*asdf).second );
+	  }
+	  else {
+	    std::cout << "********** player not matching " << (*iter) << " ***" <<std::endl;
+	  }
+        }
+    }
+
+    /*
+     * Store the teamOwners information
+     */
+    gVectorExtra< nNetObjectID > nidTeamOwners;
+
+    if(xmlHasProp(cur, (const xmlChar*)"teamOwners"))
+    {
+        string ownersDesc( myxmlGetProp(cur, "teamOwners"));
+        boost::tokenizer<> tok(ownersDesc);
+
+        for(boost::tokenizer<>::iterator iter=tok.begin();
+                iter!=tok.end();
+                ++iter)
+        {
+	  MapIdToGameId::iterator asdf = teamAsso.find(*iter);
+	  if(asdf != teamAsso.end()) {
+	    std::cout << "********** team  matching " << (*iter) << std::endl;
+	    nidTeamOwners.push_back( (*asdf).second );
+	  }
+	  else {
+	    std::cout << "********** team not matching " << (*iter) << " ***" <<std::endl;
+	  }
         }
     }
 
     /*
      * Prepare a new EffectGroup
      */
-    zEffectGroupPtr currentZoneEffect = zEffectGroupPtr(new zEffectGroup(owners, gVectorExtra<eTeam *>()));
+    zEffectGroupPtr currentZoneEffect = zEffectGroupPtr(new zEffectGroup(nidPlayerOwners, nidTeamOwners));
 
 
     cur = cur->xmlChildrenNode;
@@ -823,7 +1024,6 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
 void
 gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-    float x=0.0, y=0.0, radius=0.0, growth=0.0;
     string zoneName = "";
 
     if(myxmlHasProp(cur, "name"))
@@ -853,7 +1053,10 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         while(cur != NULL) {
             if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
             else if (isElement(cur->name, (const xmlChar *)"ShapeCircle", keyword)) {
-                parseShapeCircle(grid, cur, x, y, radius, growth, color, keyword);
+                zone->setShape( parseShapeCircle(grid, cur, zone->ID(), keyword) );
+            }
+	    else if (isElement(cur->name, (const xmlChar *)"ShapePolygon", keyword)) {
+                zone->setShape( parseShapePolygon(grid, cur, zone->ID(), keyword) );
             }
             else if (isElement(cur->name, (const xmlChar *)"Enter", keyword)) {
                 xmlNodePtr cur2 = cur->xmlChildrenNode;
@@ -906,11 +1109,6 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         // leaving zone undeleted is no memory leak here, the grid takes control of it
         if ( zone )
         {
-            zone->SetColor(color);
-            zone->SetPosition( eCoord(x, y) );
-            zone->SetRadius( radius * sizeMultiplier );
-            zone->SetExpansionSpeed( growth*sizeMultiplier );
-            zone->SetRotationSpeed( .3f );
             zone->RequestSync();
         }
     }
@@ -1251,6 +1449,10 @@ gParser::parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
         else if (isElement(cur->name, (const xmlChar *)"Axes", keyword)) {
             parseAxes(grid, cur, keyword);
         }
+        // Introduced in version 2, but no extra logic is required for it.
+	else if (isElement(cur->name, (const xmlChar *)"Ownership", keyword)) {
+	  parseOwnership(grid, cur, keyword);
+	}
         else if (isElement(cur->name, (const xmlChar *)"Spawn", keyword)) {
             parseSpawn(grid, cur, keyword);
         }
@@ -1281,9 +1483,119 @@ gParser::parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
     }
 }
 
+/**
+ * 
+ */
+const char * TEAM_ID_STR =  "teamId";
+const char * PLAYER_ID_STR = "playerId";
+
+void
+gParser::parseOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
+{
+  // Prepare the structures to store the ownership information
+  TeamOwnershipInfo mapIdOfTeamOwners;
+  std::cout << "############ about to clean" << std::endl;
+  playerAsso.erase(playerAsso.begin(), playerAsso.end());
+  teamAsso.erase(teamAsso.begin(), teamAsso.end());
+
+  cur = cur->xmlChildrenNode;
+  while (cur != NULL) {
+    if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
+    else if (isElement(cur->name, (const xmlChar *)"TeamOwnership", keyword)) {
+      parseTeamOwnership(grid, cur, keyword, mapIdOfTeamOwners);
+    }
+    cur = cur->next;
+  }
+
+  // BOP
+  // The association between teamId and in-game teams should be moved to its own class
+
+  std::cout << "###################" << std::endl;
+  std::cout << "number of teams " << eTeam::teams.Len() << std::endl;
+
+  TeamOwnershipInfo::iterator iterTeamOwnership = mapIdOfTeamOwners.begin();
+  for(int index=0; index<eTeam::teams.Len() && iterTeamOwnership != mapIdOfTeamOwners.end(); ) {
+    eTeam* ee = eTeam::teams[index];
+    string teamId = (*iterTeamOwnership).first;
+    std::cout << "associating " << teamId << " with " << ee->Name() << " net ID:" << ee->ID() << std::endl;
+    MapIdToGameId::value_type asdf(teamId, ee->ID());
+    
+    // Store the association between the map id and the in-game id
+    teamAsso.insert(asdf);
+
+    std::set<string> playerIdForThisTeam = (*iterTeamOwnership).second;
+    int indexPlayer=0;
+    for(std::set<string>::iterator iter = playerIdForThisTeam.begin();
+	iter != playerIdForThisTeam.end() && indexPlayer<ee->NumPlayers();
+	++iter, ++indexPlayer) {
+      ePlayerNetID *aa = ee->Player(indexPlayer);
+      string playerId = (*iter);
+      // TODO
+      // HACK
+      // BOP
+      // The following might produce unexpected results should the same playerId be associated in many team
+      MapIdToGameId::value_type jj(playerId, aa->ID());
+      std::cout << "associating in team " << teamId << " player: " << playerId << " with: " << aa->GetName() << std::endl;
+      playerAsso.insert(jj);
+    }
+    ++index; ++iterTeamOwnership;
+  }
+  // EOP
+}
+
+void
+gParser::parseTeamOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, TeamOwnershipInfo & mapIdOfTeamOwners)
+{
+   // Explore the teamId attribute
+  if(myxmlHasProp(cur, TEAM_ID_STR )) {
+    string tOwnersDesc( myxmlGetProp(cur, TEAM_ID_STR));
+    boost::tokenizer<> tokTeam(tOwnersDesc);
+
+    for(boost::tokenizer<>::iterator tokTeamIter=tokTeam.begin();
+	tokTeamIter!=tokTeam.end();
+	++tokTeamIter) {
+      tString aTeamId = tString(*tokTeamIter);
+      TeamOwnershipInfo::iterator teamIter = mapIdOfTeamOwners.find(aTeamId);
+      // Add the teamId to the list if abscent
+      if(teamIter == mapIdOfTeamOwners.end()) {
+	//	teamIter = team.insert(std::pair<string, std::set<string> >( aTeamId, std::set<string> ));
+	std::pair<string, std::set<string> > asdf( aTeamId, std::set<string>() );
+	teamIter = mapIdOfTeamOwners.insert(teamIter, asdf);
+      }
+
+      // Should the team receive playerId
+      if(myxmlHasProp(cur, PLAYER_ID_STR)) {
+	// Extract all the playerId for this team
+	string plOwnersDesc( myxmlGetProp(cur, PLAYER_ID_STR) );
+	boost::tokenizer<> tokPlayer(plOwnersDesc);
+	for(boost::tokenizer<>::iterator tokPlayerIter=tokPlayer.begin();
+	    tokPlayerIter!=tokPlayer.end();
+	    ++tokPlayerIter) {
+	  tString aPlayerId = tString(*tokPlayerIter);
+
+	  std::set<string> aa = (*teamIter).second;
+	  aa.insert(aPlayerId);
+	  (*teamIter).second = aa;
+	}
+      }
+    } 
+  }
+  else {
+    // TeamId is #REQUIRED, this should not happen
+  }
+}
+
 void
 gParser::parseWorld(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
+    // Polygon shapes are not supported by older clients.
+    // This mechanism assume that no polygonal shapes are used until one is found.
+    // Hopefully someone will come with a better solution.
+    std::stringstream ss;
+    /* Yes it is ackward to generate a string that will be decifered on the other end*/
+    ss << "POLYGONAL_SHAPE_USED FALSE";
+    tConfItemBase::LoadLine(ss);
+
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
@@ -1341,6 +1653,8 @@ gParser::parseSettings(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 void
 gParser::parseMap(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
+  
+
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
@@ -1375,7 +1689,9 @@ gParser::Parse()
     cur = xmlDocGetRootElement(m_Doc);
 
     monitors.clear();
-    mapZones.clear();
+#ifdef DEBUG_ZONE_SYNC
+    newGameRound = true;
+#endif //DEBUG_ZONE_SYNC
 
     if (cur == NULL) {
         con << "ERROR: Map file is blank\n";
@@ -1425,6 +1741,8 @@ gParser::Parse()
             cur = cur->next;
         }
     }
+
+    mapZones.clear();
 
     //        fprintf(stderr,"ERROR: Map file is missing root \'Resources\' node");
 

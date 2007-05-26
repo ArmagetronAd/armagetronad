@@ -11,7 +11,6 @@
 class zZone;
 //typedef boost::shared_ptr< zZone > zZonePtr;
 typedef tJUST_CONTROLLED_PTR< zZone> zZonePtr;
-//typedef zZone * zZonePtr;
 
 class zZoneInfluenceItem;
 typedef boost::shared_ptr<zZoneInfluenceItem> zZoneInfluenceItemPtr;
@@ -52,14 +51,14 @@ public:
     virtual void apply(REAL value);
 };
 
-class zZoneInfluenceItemRadius : public zZoneInfluenceItem {
+class zZoneInfluenceItemScale : public zZoneInfluenceItem {
 protected:
-    REAL radius;
+    REAL scale;
 public:
-    zZoneInfluenceItemRadius(zZonePtr aZone);
-    virtual ~zZoneInfluenceItemRadius() {};
+    zZoneInfluenceItemScale(zZonePtr aZone);
+    virtual ~zZoneInfluenceItemScale() {};
 
-    void set(REAL rad) {radius = rad;};
+    void set(REAL sca) { scale = sca; };
     virtual void apply(REAL value);
 };
 

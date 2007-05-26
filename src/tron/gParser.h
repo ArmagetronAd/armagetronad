@@ -6,6 +6,8 @@
 #include "tXmlParser.h"
 #include "eCoord.h"
 #include "tValue.h"
+#include <map>
+#include <string>
 
 class eGrid;
 class gArena;
@@ -69,7 +71,9 @@ protected:
 
     rColor parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
-    void parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float &radius, float &growth, rColor &color, const xmlChar * keyword);
+    zShapePtr parseShapeCircle(eGrid *grid, xmlNodePtr cur, short unsigned int idZone, const xmlChar * keyword);
+    zShapePtr parseShapePolygon(eGrid *grid, xmlNodePtr cur, short unsigned int idZone, const xmlChar * keyword);
+    void      parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShapePtr &shape);
     void                 parseMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
 
     zEffectGroupPtr      parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
@@ -80,6 +84,10 @@ protected:
     zZoneInfluencePtr    parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
 
 
+    typedef std::map<string, std::set<string> > TeamOwnershipInfo;
+    typedef std::map<string, std::set<string> >::value_type TeamOwnershipInfoType;
+    void parseOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
+    void parseTeamOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, TeamOwnershipInfo & team);
     void parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseWorld(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword = NULL);
     void parseMap(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword = NULL);
@@ -93,8 +101,16 @@ protected:
     void parseWallRect(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseObstacleWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
+#ifndef DADA
+    void myCheapParameterSplitter(const string &str, tFunction &tf, bool addSizeMultiplier=false);
+#endif
+
     /* This is a hack that will bring shame to my decendants for many generations: */
     float sizeMultiplier;
+    int currentFormat; // Store the format version of the map currently being parsed. Used to support different format.
+ public:
+    tValue::Expr::varmap_t vars;
+    tValue::Expr::funcmap_t functions;
 };
 
 #endif //ArmageTron_PARSER_H

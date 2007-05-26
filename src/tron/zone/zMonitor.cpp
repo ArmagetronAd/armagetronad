@@ -175,7 +175,7 @@ zMonitorRuleOutsideRange::isValid(float monitorValue) {
 }
 
 void
-zMonitorInfluence::apply(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * user) {
+zMonitorInfluence::apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * user) {
     // Currently, we discard ownership information
     if (influenceSlideAvailable == true)
         monitor->affectSlide(user, influenceSlide, marked);

@@ -61,7 +61,7 @@ public:
     virtual zValidator *copy(void) const;
     virtual ~zValidator() {};
 
-    void validate(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, Triggerer possibleUser, miscDataPtr &miscData);
+    void validate(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, Triggerer possibleUser, miscDataPtr &miscData);
 
     void addSelector(zSelectorPtr _selector) {selectors.push_back(_selector);};
     void addMonitorInfluence(zMonitorInfluencePtr newInfluence) {monitorInfluences.push_back( newInfluence );};
@@ -79,9 +79,9 @@ protected:
     Triad marked; // Should the possible user be "marked". ATM this is only for monitors. Anything else should use _ignore
 
 
-    bool isOwner(ePlayerNetID *possibleOwner, gVectorExtra<ePlayerNetID *> &owners);
-    bool isTeamOwner(eTeam *possibleTeamOwner, gVectorExtra<eTeam *> &teamOwners);
-    virtual bool isValid(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle* possibleUser) {return false;};
+    bool isOwner(ePlayerNetID *possibleOwner, gVectorExtra< nNetObjectID > &owners);
+    bool isTeamOwner(eTeam *possibleTeamOwner, gVectorExtra< nNetObjectID > &teamOwners);
+    virtual bool isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser) {return false;};
 };
 
 
@@ -95,7 +95,7 @@ public:
     virtual ~zValidatorAll() {};
     zValidator *copy(void) const;
 protected:
-    bool isValid(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle* possibleUser) { return true ;};
+    bool isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser) { return true ;};
 };
 
 class zValidatorOwner : public zValidator
@@ -108,7 +108,7 @@ public:
     virtual ~zValidatorOwner() {};
     zValidator *copy(void) const;
 protected:
-    bool isValid(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle* possibleUser);
+    bool isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser);
 };
 
 class zValidatorOwnerTeam : public zValidator
@@ -121,7 +121,7 @@ public:
     virtual ~zValidatorOwnerTeam() {};
     zValidator *copy(void) const;
 protected:
-    bool isValid(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle* possibleUser);
+    bool isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser);
 };
 
 class zValidatorAllButOwner : public zValidator
@@ -134,7 +134,7 @@ public:
     virtual ~zValidatorAllButOwner() {};
     zValidator *copy(void) const;
 protected:
-    bool isValid(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle* possibleUser);
+    bool isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser);
 };
 
 /*

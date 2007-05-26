@@ -31,18 +31,24 @@ zZoneInfluenceItemRotation::zZoneInfluenceItemRotation(zZonePtr aZone):
 
 void
 zZoneInfluenceItemRotation::apply(REAL value) {
-    zone->SetRotationSpeed(rotationSpeed*value);
-    zone->SetRotationAcceleration(rotationAcceleration);
+  // HACK:
+  // Need a solution that influence the shape, not the zone
+  //    zone->SetRotationSpeed(rotationSpeed*value);
+  //    zone->SetRotationAcceleration(rotationAcceleration);
+  std::cout << "This has not been implemented yet! Tell Philippeqc he forgot to do it!" << std::endl;
 }
 
-zZoneInfluenceItemRadius::zZoneInfluenceItemRadius(zZonePtr aZone):
-        zZoneInfluenceItem(aZone),
-        radius(0.0)
+zZoneInfluenceItemScale::zZoneInfluenceItemScale(zZonePtr aZone):
+  zZoneInfluenceItem(aZone),
+  scale(0.0) 
 {}
 
 void
-zZoneInfluenceItemRadius::apply(REAL value) {
-    zone->SetRadius(radius);
+zZoneInfluenceItemScale::apply(REAL value) {
+  // HACK:
+  // Need a solution that influence the shape, not the zone
+  //    zone->SetScale(scale);
+  std::cout << "This has not been implemented yet! Tell Philippeqc he forgot to do it!" << std::endl;
 }
 
 zZoneInfluenceItemPosition::zZoneInfluenceItemPosition(zZonePtr aZone):
@@ -52,7 +58,10 @@ zZoneInfluenceItemPosition::zZoneInfluenceItemPosition(zZonePtr aZone):
 
 void
 zZoneInfluenceItemPosition::apply(REAL value) {
-    zone->SetPosition(pos);
+  // HACK:
+  // Need a solution that influence the shape, not the zone
+  //    zone->SetPosition(pos);
+  std::cout << "This has not been implemented yet! Tell Philippeqc he forgot to do it!" << std::endl;
 }
 
 zZoneInfluenceItemColor::zZoneInfluenceItemColor(zZonePtr aZone):
@@ -62,6 +71,9 @@ zZoneInfluenceItemColor::zZoneInfluenceItemColor(zZonePtr aZone):
 
 void
 zZoneInfluenceItemColor::apply(REAL value) {
-    zone->SetColor(color);
+  // HACK:
+  // Need a solution that influence the shape, not the zone
+  //    zone->SetColor(color);
+  std::cout << "This has not been implemented yet! Tell Philippeqc he forgot to do it!" << std::endl;
 }
 

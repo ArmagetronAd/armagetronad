@@ -299,7 +299,7 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
         for(std::deque<zZone *>::const_iterator i = sg_Zones.begin(); i != sg_Zones.end(); ++i) {
             tASSERT(*i);
             tCoord const &position = (*i)->GetPosition();
-            const float radius = (*i)->GetRadius();
+            const float radius = (*i)->GetScale();
             dist2 = (position-pl_CurPos).Norm();
             if (dist2<min_dist2) {
                 min_dist2 = dist2;
@@ -479,9 +479,9 @@ void Map::DrawZones(std::deque<zZone *> const &list) {
         tCoord const &rotation = (*i)->GetRotation();
         tCoord const &position = (*i)->GetPosition();
         rColor const &color = (*i)->GetColor();
-        const float radius = (*i)->GetRadius();
+        const float scale = (*i)->GetScale();
 
-        tCoord currentPos = rotation*radius;
+        tCoord currentPos = rotation*scale;
 
         const int steps=20;
 

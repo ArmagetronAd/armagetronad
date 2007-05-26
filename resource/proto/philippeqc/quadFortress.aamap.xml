@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE Resource SYSTEM "map-0.3.1-a.dtd">
+<!--
+<Resource type="aamap" name="square" version="1.0.1" author="Anonymous" category="polygon/regular">
+-->
+<Resource type="aamap" version="a" name="quadFortress"  author="philippeqc" category="fortress">
+ <Map version="2">
+  <World>
+  <Field>
+   <Axes number="4" />
+<!--
+   <Axes number="4" >
+     <Axis xdir="-1" ydir="-1"/>
+     <Axis xdir="-1" ydir="1"/>
+     <Axis xdir="1"  ydir="1"/>
+     <Axis xdir="1"  ydir="-1"/>
+   </Axes>
+-->
+
+   <Ownership>
+     <TeamOwnership teamId="blue" playerId="azure,cobalt,midnight,royal"/>
+     <TeamOwnership teamId="red" playerId="cerise,mauve,rust,sangria"/>
+     <TeamOwnership teamId="green" playerId="emerald,jade,lime,olive"/>
+     <TeamOwnership teamId="yellow" playerId="amber,goldenrod,lemon,navajowhite"/>
+   </Ownership>
+
+   <Spawn x="50"  y="50"  angle="45"/>
+   <Spawn x="450" y="50"  angle="135"/>
+   <Spawn x="450" y="450" angle="225"/>
+   <Spawn x="50"  y="450" angle="315"/>
+
+
+
+   <Wall>
+    <Point x="0" y="0"/>
+    <Point x="500" y="0"/>
+    <Point x="500" y="500"/>
+    <Point x="0" y="500"/>
+    <Point x="0" y="0"/>
+   </Wall>
+
+
+   <Zone name="forAzurePlayer">
+     <ShapeCircle scale="50">
+       <Point x="100" y="100"/>
+       <Color red="0.0" green="0.027" blue="1.0"/>
+     </ShapeCircle>
+     <Enter>
+       <EffectGroup owners="azure,cobalt">
+         <User user="owner">
+	   <Target target="self">
+	     <Effect effect="point" score="3" count="4"/>
+	   </Target>
+	 </User>
+       </EffectGroup>
+     </Enter>
+   </Zone>
+
+   <Zone name="forBlueTeam">
+     <ShapeCircle scale="50">
+       <Point x="200" y="200"/>
+       <Color red="0.0" green="0.0" blue="1.0"/>
+     </ShapeCircle>
+     <Enter>
+       <EffectGroup teamOwners="blue">
+         <User user="ownerTeam">
+	   <Target target="self">
+	     <Effect effect="point" score="3" count="4"/>
+	   </Target>
+	 </User>
+       </EffectGroup>
+     </Enter>
+   </Zone>
+
+<!--
+   <Zone name="BigSquare">
+    <ShapePolygon scale="50" rotation="time()*3.14*2/5">
+     <Point x="250+50*cos(time()*3.14*2/5)"
+            y="250+50*sin(time()*3.14*2/5)"/>
+     <Point x="250"
+            y="250"/>
+     <Color red="0.5" green="0.0" blue="0.0"/>
+     <Point x= "0.5" y= "0.5" />
+     <Point x="-0.5" y= "0.5" />
+     <Point x="-0.5" y="-0.5" />
+     <Point x= "0.5" y="-0.5" />
+     <Point x= "0.5" y="-0.55" />
+     <Point x="-0.5" y="-0.55" />
+     <Point x="-0.5" y="0.55" />
+     <Point x= "0.5" y="0.55" />
+
+    </ShapePolygon>
+    <Enter>
+      <EffectGroup owners="">
+       <User user="all">
+        <Target target="self">
+         <Effect effect="death"/>
+        </Target>
+       </User>
+      </EffectGroup>
+    </Enter>
+   </Zone>
+-->
+
+   <!-- Experiment: A rotating zone. Totally unsynchronized when used over the network -->
+<!-- 
+   <Zone name="RotatingZone">
+    <ShapePolygon scale="50" rotation="time()*3.14*2/5">
+     <Point x="250"
+            y="250"/>
+     <Color red="0.5" green="0.0" blue="0.0"/>
+     <Point x= "0.05" y= "0.0" />
+     <Point x= "0.05" y= "0.5" />
+     <Point x="-0.05" y= "0.5" />
+     <Point x="-0.05" y= "0.0" />
+
+    </ShapePolygon>
+    <Enter>
+      <EffectGroup owners="">
+       <User user="all">
+        <Target target="self">
+         <Effect effect="death"/>
+        </Target>
+       </User>
+      </EffectGroup>
+    </Enter>
+   </Zone>
+-->
+
+  </Field>
+  </World>
+ </Map>
+</Resource>

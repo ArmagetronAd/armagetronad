@@ -78,14 +78,14 @@ zSelector * zSelector::copy(void) const
     return new zSelector(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelector::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelector::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     gVectorExtra<ePlayerNetID *> empty;
     return empty;
 }
 
 void
-zSelector::apply(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+zSelector::apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     if (count == -1 || count > 0)
     {
@@ -128,7 +128,7 @@ zSelectorSelf * zSelectorSelf::copy(void) const
     return new zSelectorSelf(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelectorSelf::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelectorSelf::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     gVectorExtra<ePlayerNetID *> self;
     ePlayerNetID* triggererPlayer =  triggerer->Player();
@@ -165,7 +165,7 @@ zSelectorTeammate * zSelectorTeammate::copy(void) const
     return new zSelectorTeammate(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelectorTeammate::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelectorTeammate::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     // A single, randomly selected player that is member of the team of
     // the player that triggered the Zone receives the effect. This
@@ -213,7 +213,7 @@ zSelectorTeam * zSelectorTeam::copy(void) const
     return new zSelectorTeam(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelectorTeam::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelectorTeam::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     // All the members of the team of the player triggering the
     // Zone will receive its effect.
@@ -254,7 +254,7 @@ zSelectorAll * zSelectorAll::copy(void) const
     return new zSelectorAll(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelectorAll::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelectorAll::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     // Everybody in the game receives the effect.
     gVectorExtra<ePlayerNetID *> everybody;
@@ -294,7 +294,7 @@ zSelectorAllButSelf * zSelectorAllButSelf::copy(void) const
     return new zSelectorAllButSelf(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelectorAllButSelf::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelectorAllButSelf::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     // Everybody in the game but the player who triggered the
     // Zone receives the effect. This excludes the player
@@ -344,7 +344,7 @@ zSelectorAllButTeam * zSelectorAllButTeam::copy(void) const
   return new zSelectorAllButTeam(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelectorAllButTeam::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelectorAllButTeam::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
 
 
@@ -394,7 +394,7 @@ zSelectorAnother * zSelectorAnother::copy(void) const
     return new zSelectorAnother(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelectorAnother::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelectorAnother::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     // Another single, randomly selected player that is the the one that
     // triggered the Zone receive the effect. This excludes the player
@@ -448,12 +448,24 @@ zSelectorOwner * zSelectorOwner::copy(void) const
     return new zSelectorOwner(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelectorOwner::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelectorOwner::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     // The owner of the Zone receives the effect upon trigger,
     // irrelevantly of the user who triggers it.
+  gVectorExtra<ePlayerNetID *> owningPlayers;
 
-    return owners;
+  for(gVectorExtra< nNetObjectID >::const_iterator iter=owners.begin();
+      iter!=owners.end();
+      ++iter) {
+    // Is the object still there
+    if(bool(sn_netObjects[(*iter)]))
+      {
+	ePlayerNetID * anOwner = static_cast< ePlayerNetID* >( static_cast< nNetObject* >( sn_netObjects[ (*iter) ] ) ) ;
+	if(anOwner != 0)
+	  owningPlayers.push_back( anOwner );
+      }
+  }
+    return owningPlayers;
 }
 
 //
@@ -483,19 +495,26 @@ zSelectorOwnerTeam * zSelectorOwnerTeam::copy(void) const
     return new zSelectorOwnerTeam(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelectorOwnerTeam::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelectorOwnerTeam::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     // The members of the team that owns the Zone receives the
     // effect upon trigger, irrelevantly of the user who triggers it.
 
     // Pick all the members of the teams
     gVectorExtra <ePlayerNetID *> allOwnerTeamMembers;
-    gVectorExtra<eTeam *>::const_iterator iter;
+    gVectorExtra< nNetObjectID >::const_iterator iter;
     for(iter = teamOwners.begin();
             iter != teamOwners.end();
             ++iter)
     {
-        allOwnerTeamMembers.insertAll((*iter)->GetAllMembers());
+    // Is the object still there
+    if(bool(sn_netObjects[(*iter)]))
+      {
+	eTeam * aTeam = static_cast< eTeam* >( static_cast< nNetObject* >( sn_netObjects[ (*iter) ] ) ) ;
+	if(aTeam != 0)
+	  allOwnerTeamMembers.insertAll(aTeam->GetAllMembers());
+	
+      }
     }
 
     // Keep only the valid ones
@@ -532,16 +551,22 @@ zSelectorOwnerTeamTeammate * zSelectorOwnerTeamTeammate::copy(void) const
     return new zSelectorOwnerTeamTeammate(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelectorOwnerTeamTeammate::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelectorOwnerTeamTeammate::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     // Pick all the members of the teams
     gVectorExtra <ePlayerNetID *> allTeammates;
-    gVectorExtra<eTeam *>::const_iterator iter;
+    gVectorExtra< nNetObjectID >::const_iterator iter;
     for(iter = teamOwners.begin();
             iter != teamOwners.end();
             ++iter)
     {
-        allTeammates.insertAll((*iter)->GetAllMembers());
+      // Is the object still there
+      if(bool(sn_netObjects[(*iter)]))
+	{
+	  eTeam * aTeam = static_cast< eTeam* >( static_cast< nNetObject* >( sn_netObjects[ (*iter) ] ) ) ;
+	  if(aTeam != 0)
+            allTeammates.insertAll(aTeam->GetAllMembers());
+	}
     }
 
     // Keep only the valid ones
@@ -581,7 +606,7 @@ zSelectorAnyDead * zSelectorAnyDead::copy(void) const
     return new zSelectorAnyDead(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelectorAnyDead::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelectorAnyDead::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     // A single, randomly selected dead player receives the
     // effect.
@@ -627,7 +652,7 @@ zSelectorAllDead * zSelectorAllDead::copy(void) const
     return new zSelectorAllDead(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelectorAllDead::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelectorAllDead::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     // All dead players receives the effect.
 
@@ -668,16 +693,31 @@ zSelectorSingleDeadOwner * zSelectorSingleDeadOwner::copy(void) const
     return new zSelectorSingleDeadOwner(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelectorSingleDeadOwner::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelectorSingleDeadOwner::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     // A single, randomly selected dead member of
     // the team of the player that triggered the Zone receives the
     // effect.
 
+    gVectorExtra <ePlayerNetID *> owningPlayers;
     gVectorExtra <ePlayerNetID *> deadOwners;
     gVectorExtra <ePlayerNetID *> singleDeadOwner;
 
-    getAllValid(deadOwners, owners, _dead);
+    // Transform the list of owners' id into a list of ePlayer
+    for(gVectorExtra< nNetObjectID >::const_iterator iter=owners.begin();
+	iter!=owners.end();
+	++iter) {
+      // Is the object still there
+      if(bool(sn_netObjects[(*iter)]))
+	{
+	  ePlayerNetID * aPlayer = static_cast< ePlayerNetID* >( static_cast< nNetObject* >( sn_netObjects[ (*iter) ] ) ) ;
+	  if(aPlayer != 0)
+	    owningPlayers.push_back( aPlayer );
+	}
+    }
+
+    // Preserve only the dead players
+    getAllValid(deadOwners, owningPlayers, _dead);
 
     // Who is our lucky candidate ?
     if(deadOwners.size() != 0)
@@ -714,7 +754,7 @@ zSelectorAnotherTeammateDead * zSelectorAnotherTeammateDead::copy(void) const
     return new zSelectorAnotherTeammateDead(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelectorAnotherTeammateDead::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelectorAnotherTeammateDead::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     // A single, randomly selected dead member of
     // the team of the player that triggered the Zone receives the
@@ -764,7 +804,7 @@ zSelectorAnotherNotTeammateDead * zSelectorAnotherNotTeammateDead::copy(void) co
     return new zSelectorAnotherNotTeammateDead(*this);
 }
 
-gVectorExtra<ePlayerNetID *> zSelectorAnotherNotTeammateDead::select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer)
+gVectorExtra<ePlayerNetID *> zSelectorAnotherNotTeammateDead::select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer)
 {
     // A single, randomly selected dead player receives the
     // effect.

@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "zone/zEffectGroup.h"
 
-zEffectGroup::zEffectGroup(gVectorExtra<ePlayerNetID *> const owners, gVectorExtra<eTeam *> const teamOwners):
+zEffectGroup::zEffectGroup(gVectorExtra< nNetObjectID > const owners, gVectorExtra< nNetObjectID > const teamOwners):
         validators(),
         d_owners(owners),
         d_teamOwners(teamOwners),

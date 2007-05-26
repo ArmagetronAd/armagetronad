@@ -116,6 +116,7 @@ libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentificati
 	engine/sound/sdl_mixer/eChannelSDLMixer.h \
 	engine/sound/sdl_mixer/eMusicTrackSDLMixer.cpp \
 	engine/sound/sdl_mixer/eMusicTrackSDLMixer.h \
+	engine/eEventNotification.h engine/eEventNotification.cpp \
 	engine/eLagCompensation.cpp engine/eLagCompensation.h \
 	engine/eSoundMixer.h engine/eSoundMixer.cpp \
 	engine/eEventNotification.h engine/eEventNotification.cpp
@@ -135,6 +136,7 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/gSpawn.cpp tron/gSpawn.h tron/gStuff.cpp tron/gStuff.h tron/gTeam.cpp tron/gTeam.h tron/gWall.cpp\
 	tron/gWall.h\
 	tron/zone/zZone.cpp        tron/zone/zZone.h\
+	tron/zone/zShape.cpp       tron/zone/zShape.hpp\
 	tron/zone/zMonitor.h       tron/zone/zMonitor.cpp\
 	tron/zone/zEffectGroup.cpp tron/zone/zEffectGroup.h\
 	tron/zone/zMisc.h\

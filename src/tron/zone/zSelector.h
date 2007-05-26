@@ -58,12 +58,12 @@ public:
     virtual zSelector *copy(void) const;
     virtual ~zSelector() {};
 
-    void apply(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    void apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
     void setCount(int _count) {count = _count;};
 
     void addEffector(zEffectorPtr newEffector) {effectors.push_back( newEffector );};
 protected:
-    virtual gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    virtual gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 protected:
     zEffectorPtrs effectors;
     int count;
@@ -89,7 +89,7 @@ public:
     virtual zSelectorSelf *copy(void) const;
     virtual ~zSelectorSelf() {};
 
-    gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 };
 
 /*
@@ -105,7 +105,7 @@ public:
     virtual zSelectorTeammate *copy(void) const;
     virtual ~zSelectorTeammate() {};
 
-    gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 };
 
 /*
@@ -121,7 +121,7 @@ public:
     virtual zSelectorTeam *copy(void) const;
     virtual ~zSelectorTeam() {};
 
-    gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 };
 
 /*
@@ -137,7 +137,7 @@ public:
     virtual zSelectorAll *copy(void) const;
     virtual ~zSelectorAll() {};
 
-    gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 };
 
 /*
@@ -153,7 +153,7 @@ public:
     virtual zSelectorAllButSelf *copy(void) const;
     virtual ~zSelectorAllButSelf() {};
 
-    gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 };
 
 /*
@@ -170,7 +170,7 @@ class zSelectorAllButTeam : public zSelector
   virtual zSelectorAllButTeam *copy(void) const;
   virtual ~zSelectorAllButTeam() {};
 
-  gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+  gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 };
 */
 
@@ -187,7 +187,7 @@ public:
     virtual zSelectorAnother *copy(void) const;
     virtual ~zSelectorAnother() {};
 
-    gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 };
 
 
@@ -210,7 +210,7 @@ public:
     virtual zSelectorOwner *copy(void) const;
     virtual ~zSelectorOwner() {};
 
-    gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 };
 
 /*
@@ -226,7 +226,7 @@ public:
     virtual zSelectorOwnerTeam *copy(void) const;
     virtual ~zSelectorOwnerTeam() {};
 
-    gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 };
 
 
@@ -246,7 +246,7 @@ public:
     virtual zSelectorOwnerTeamTeammate *copy(void) const;
     virtual ~zSelectorOwnerTeamTeammate() {};
 
-    gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 };
 
 /*
@@ -263,7 +263,7 @@ public:
     virtual zSelectorAnyDead *copy(void) const;
     virtual ~zSelectorAnyDead() {};
 
-    gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 };
 
 /*
@@ -280,7 +280,7 @@ public:
     virtual zSelectorAllDead *copy(void) const;
     virtual ~zSelectorAllDead() {};
 
-    gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 };
 
 /*
@@ -297,7 +297,7 @@ public:
     virtual zSelectorSingleDeadOwner *copy(void) const;
     virtual ~zSelectorSingleDeadOwner() {};
 
-    gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 };
 
 
@@ -315,7 +315,7 @@ public:
     virtual zSelectorAnotherTeammateDead *copy(void) const;
     virtual ~zSelectorAnotherTeammateDead() {};
 
-    gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 };
 
 /*
@@ -332,7 +332,7 @@ public:
     virtual zSelectorAnotherNotTeammateDead *copy(void) const;
     virtual ~zSelectorAnotherNotTeammateDead() {};
 
-    gVectorExtra<ePlayerNetID *> select(gVectorExtra<ePlayerNetID *> &owners, gVectorExtra<eTeam *> &teamOwners, gCycle * triggerer);
+    gVectorExtra<ePlayerNetID *> select(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * triggerer);
 };
 
 
