@@ -658,7 +658,7 @@ AC_CHECK_LIB(jpeg, main,,
 
 AC_CHECK_LIB(SDL_image, IMG_Load,,
 dnl AC_CHECK_LIB(IMG, main,,
-AC_MSG_ERROR([You need libIMG/SDL_image to compile Armagetron.]
+AC_MSG_ERROR([You need the library SDL_image to compile Armagetron.]
 dnl )
 ))
 
