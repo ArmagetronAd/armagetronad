@@ -503,20 +503,20 @@ gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, unsigned short id
 
     // Build up the scale information
     {
-        tFunction tfScale;
-        tfScale.SetOffset( myxmlGetPropFloat(cur, "radius") * sizeMultiplier );
-        tfScale.SetSlope( myxmlGetPropFloat(cur, "growth") * sizeMultiplier );
-        shape->setScale( tfScale );
+      tFunction tfScale;
+      tfScale.SetOffset( myxmlGetPropFloat(cur, "radius") * sizeMultiplier );
+      tfScale.SetSlope( myxmlGetPropFloat(cur, "growth") * sizeMultiplier );
+      shape->setScale( tfScale );
     }
 
     // Set up the default rotation speed
     {
-        tFunction tfRotation;
-        tfRotation.SetOffset( .3f );
-        shape->setRotation( tfRotation );
+      tFunction tfRotation;
+      tfRotation.SetOffset( .3f );
+      shape->setRotation( tfRotation );
     }
 
-    // Set up the location
+    // Set up the location 
     cur = cur->xmlChildrenNode;
     while( cur != NULL) {
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
@@ -524,12 +524,12 @@ gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, unsigned short id
             REAL x = myxmlGetPropFloat(cur, "x");
             REAL y = myxmlGetPropFloat(cur, "y");
 
-            tFunction tfPos;
-            tfPos.SetOffset( x * sizeMultiplier );
-            shape->setPosX( tfPos );
+	    tFunction tfPos;
+	    tfPos.SetOffset( x * sizeMultiplier );
+	    shape->setPosX( tfPos );
 
-            tfPos.SetOffset( y * sizeMultiplier );
-            shape->setPosY( tfPos );
+	    tfPos.SetOffset( y * sizeMultiplier );
+	    shape->setPosY( tfPos );
 
             endElementAlternative(grid, cur, keyword);
         }
@@ -987,28 +987,28 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
     gVectorExtra< nNetObjectID > nidPlayerOwners;
 
     if(xmlHasProp(cur, (const xmlChar*)"owners"))
-    {
+      {
         string ownersDesc( myxmlGetProp(cur, "owners"));
         boost::tokenizer<> tok(ownersDesc);
 
-        // For each owner listed
+	// For each owner listed
         for(boost::tokenizer<>::iterator iter=tok.begin();
                 iter!=tok.end();
                 ++iter)
-        {
-            // Map from map descriptor to in-game ids
+	  {
+	    // Map from map descriptor to in-game ids
             MapIdToGameId::iterator mapOwnerToInGameOwnerPairIter = playerAsso.find(*iter);
-            if(mapOwnerToInGameOwnerPairIter != playerAsso.end())
-            {
-                // Found a matching in-game owner
-                nidPlayerOwners.push_back( (*mapOwnerToInGameOwnerPairIter).second );
-            }
-            else
-            {
-                // No in-game owner matching, pass
-            }
-        }
-    }
+            if(mapOwnerToInGameOwnerPairIter != playerAsso.end()) 
+	      {
+		// Found a matching in-game owner
+		nidPlayerOwners.push_back( (*mapOwnerToInGameOwnerPairIter).second );
+	      }
+            else 
+	      {
+		// No in-game owner matching, pass
+	      }
+	  }
+      }
 
     /*
      * Store the teamOwners information
@@ -1025,13 +1025,13 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
                 ++iter)
         {
             MapIdToGameId::iterator mapTeamOwnerToInGameTeamOwnerPairIter = teamAsso.find(*iter);
-            if(mapTeamOwnerToInGameTeamOwnerPairIter != teamAsso.end())
-            {
-                // Found a matching in-game owning team
+            if(mapTeamOwnerToInGameTeamOwnerPairIter != teamAsso.end()) 
+	      {
+		// Found a matching in-game owning team
                 nidTeamOwners.push_back( (*mapTeamOwnerToInGameTeamOwnerPairIter).second );
             }
             else {
-                // No in-game owning team found. pass.
+	      // No in-game owning team found. pass.
             }
         }
     }
@@ -1060,123 +1060,123 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
     return currentZoneEffect;
 }
 
-void
+void 
 gParser::parseZoneArthemis(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-
-    if (sn_GetNetState() != nCLIENT )
+    
+  if (sn_GetNetState() != nCLIENT )
     {
-        rColor color;
+      rColor color;
 
-        // Create a new zone
-        zZonePtr zone = zZonePtr(new zZone(grid));
+      // Create a new zone
+      zZonePtr zone = zZonePtr(new zZone(grid));
 
-        // Insert the zone under a bogus name
-        string zoneName = "";
-        zoneMap::const_iterator iterZone;
-        do
-        {
-            // Fill the zone under the shortest available series of pound.
-            zoneName += "#";
-            iterZone = mapZones.find(zoneName);
+      // Insert the zone under a bogus name
+      string zoneName = "";
+      zoneMap::const_iterator iterZone;
+      do
+	{
+	  // Fill the zone under the shortest available series of pound.
+	  zoneName += "#";
+	  iterZone = mapZones.find(zoneName);
+	}
+      while (iterZone != mapZones.end());
+
+      // If a name was assigned to it, save the zone in a map so it can be refered to
+      if (!zoneName.empty())
+	mapZones[zoneName] = zone;
+      zone->setName(zoneName);
+
+
+      enum { win, death, fortress };
+      int effect = win;
+      if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"win")) {
+	effect = win;
+      }
+      else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"death")) {
+	effect = death;
+      }
+      else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"fortress")) {
+	effect = fortress;
+      }
+
+      if (sn_GetNetState() != nCLIENT )
+	{
+	  if (effect != fortress)
+	    {
+	      // Create an effect group without ownership
+	      zEffectGroupPtr currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), gVectorExtra< nNetObjectID >()));
+
+	      // Create a validator for everybody (i.e. All)
+	      zValidatorPtr validator = zValidatorPtr( new zValidatorAll(_ignore, _ignore) );
+
+	      zSelectorPtr selector = zSelectorPtr( new zSelectorSelf() );
+	      //selector->setCount( -1 ); // Give infinite usage
+
+	      zEffectorPtr effector;
+	      if (effect == win)
+		effector = zEffectorPtr( new zEffectorWin() );
+	      else
+		effector = zEffectorPtr( new zEffectorDeath() );
+
+	      effector->setCount( -1 );
+
+	      // Store all the objects
+	      selector->addEffector( effector );
+	      validator->addSelector( selector );
+	      currentZoneEffect->setValidator( validator );
+	      zone->addEffectGroupEnter( currentZoneEffect );
+	    }
+	  else {
+	    zMonitorPtr monitor = zMonitorPtr(new zMonitor(grid));
+	    // use the same name as the associated zone
+            monitors[zoneName] = monitor;
+	    monitor->setInit( 0.0f );
+	    monitor->setDrift( -1.0 * sg_conquestDecayRate );
+	    monitor->setClampLow ( 0.0f );
+	    monitor->setClampHigh( 1.0f );
+
+	    zMonitorRulePtr rule;
+	    rule = zMonitorRulePtr( new zMonitorRuleOver( 1.0f ) );
+
+	    zEffectGroupPtr currentZoneEffect;
+	    {
+	      // Create an effect group without ownership
+	      currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), gVectorExtra< nNetObjectID >()));
+
+	      // Create a validator for everybody (i.e. All)
+	      zValidatorPtr validator = zValidatorPtr( new zValidatorAll(_ignore, _ignore) );
+
+	      zZoneInfluencePtr infl = zZoneInfluencePtr(new zZoneInfluence(zone));
+	      zZoneInfluenceItemScale *b = new zZoneInfluenceItemScale(zone);
+	      b->set( -1.5f );
+	      infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));
+
+	      validator->addZoneInfluence( infl );
+	      currentZoneEffect->setValidator( validator );
+	      zone->addEffectGroupEnter( currentZoneEffect );
+	    }
+
+	    rule->addEffectGroup( currentZoneEffect );
+	    monitor->addRule(rule);
+	    zone->setOldFortressAutomaticAssignmentBehavior(true);
+	  }
+	}
+
+      cur = cur->xmlChildrenNode;
+
+      while(cur) {
+        if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
+        else if (isElement(cur->name, (const xmlChar *)"ShapeCircle", keyword)) {
+	  zone->setShape( parseShapeCircleArthemis(grid, cur, zone->ID(), keyword) );
         }
-        while (iterZone != mapZones.end());
-
-        // If a name was assigned to it, save the zone in a map so it can be refered to
-        if (!zoneName.empty())
-            mapZones[zoneName] = zone;
-        zone->setName(zoneName);
-
-
-        enum { win, death, fortress };
-        int effect = win;
-        if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"win")) {
-            effect = win;
+        else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
+	  if (isValidAlternative(cur, keyword)) {
+	    parseAlternativeContent(grid, cur);
+	  }
         }
-        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"death")) {
-            effect = death;
-        }
-        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"fortress")) {
-            effect = fortress;
-        }
-
-        if (sn_GetNetState() != nCLIENT )
-        {
-            if (effect != fortress)
-            {
-                // Create an effect group without ownership
-                zEffectGroupPtr currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), gVectorExtra< nNetObjectID >()));
-
-                // Create a validator for everybody (i.e. All)
-                zValidatorPtr validator = zValidatorPtr( new zValidatorAll(_ignore, _ignore) );
-
-                zSelectorPtr selector = zSelectorPtr( new zSelectorSelf() );
-                //selector->setCount( -1 ); // Give infinite usage
-
-                zEffectorPtr effector;
-                if (effect == win)
-                    effector = zEffectorPtr( new zEffectorWin() );
-                else
-                    effector = zEffectorPtr( new zEffectorDeath() );
-
-                effector->setCount( -1 );
-
-                // Store all the objects
-                selector->addEffector( effector );
-                validator->addSelector( selector );
-                currentZoneEffect->setValidator( validator );
-                zone->addEffectGroupEnter( currentZoneEffect );
-            }
-            else {
-                zMonitorPtr monitor = zMonitorPtr(new zMonitor(grid));
-                // use the same name as the associated zone
-                monitors[zoneName] = monitor;
-                monitor->setInit( 0.0f );
-                monitor->setDrift( -1.0 * sg_conquestDecayRate );
-                monitor->setClampLow ( 0.0f );
-                monitor->setClampHigh( 1.0f );
-
-                zMonitorRulePtr rule;
-                rule = zMonitorRulePtr( new zMonitorRuleOver( 1.0f ) );
-
-                zEffectGroupPtr currentZoneEffect;
-                {
-                    // Create an effect group without ownership
-                    currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), gVectorExtra< nNetObjectID >()));
-
-                    // Create a validator for everybody (i.e. All)
-                    zValidatorPtr validator = zValidatorPtr( new zValidatorAll(_ignore, _ignore) );
-
-                    zZoneInfluencePtr infl = zZoneInfluencePtr(new zZoneInfluence(zone));
-                    zZoneInfluenceItemScale *b = new zZoneInfluenceItemScale(zone);
-                    b->set( -1.5f );
-                    infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));
-
-                    validator->addZoneInfluence( infl );
-                    currentZoneEffect->setValidator( validator );
-                    zone->addEffectGroupEnter( currentZoneEffect );
-                }
-
-                rule->addEffectGroup( currentZoneEffect );
-                monitor->addRule(rule);
-                zone->setOldFortressAutomaticAssignmentBehavior(true);
-            }
-        }
-
-        cur = cur->xmlChildrenNode;
-
-        while(cur) {
-            if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
-            else if (isElement(cur->name, (const xmlChar *)"ShapeCircle", keyword)) {
-                zone->setShape( parseShapeCircleArthemis(grid, cur, zone->ID(), keyword) );
-            }
-            else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
-                if (isValidAlternative(cur, keyword)) {
-                    parseAlternativeContent(grid, cur);
-                }
-            }
-            cur = cur->next;
-        }
+        cur = cur->next;
+      }
 
 
     }
@@ -1209,7 +1209,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             // If a name was assigned to it, save the zone in a map so it can be refered to
             if (!zoneName.empty())
                 mapZones[zoneName] = zone;
-            zone->setName(zoneName);
+	    zone->setName(zoneName);
         }
 
         while(cur != NULL) {
@@ -1279,17 +1279,17 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 void
 gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-    switch(mapVersion)
+  switch(mapVersion)
     {
     case 1:
-        parseZoneArthemis(grid, cur, keyword);
-        break;
+      parseZoneArthemis(grid, cur, keyword);
+      break;
     case 2:
-        parseZoneBachus(grid, cur, keyword);
-        break;
+      parseZoneBachus(grid, cur, keyword);
+      break;
     default:
-        parseZoneBachus(grid, cur, keyword);
-        break;
+      parseZoneBachus(grid, cur, keyword);
+      break;
     }
 }
 
@@ -1829,7 +1829,6 @@ void
 gParser::parseMap(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
     mapVersion = myxmlGetPropInt(cur, "version");
-    mapVersion = 1; // for debug purpose
 
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
@@ -1927,5 +1926,5 @@ gParser::Parse()
 zMonitorPtr
 gParser::getMonitor(string monitorName)
 {
-    return monitors[monitorName];
+  return monitors[monitorName];
 }

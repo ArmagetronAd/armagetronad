@@ -31,24 +31,23 @@ zZoneInfluenceItemRotation::zZoneInfluenceItemRotation(zZonePtr aZone):
 
 void
 zZoneInfluenceItemRotation::apply(REAL value) {
-  // HACK:
-  // Need a solution that influence the shape, not the zone
-  //    zone->SetRotationSpeed(rotationSpeed*value);
-  //    zone->SetRotationAcceleration(rotationAcceleration);
-  std::cout << "This has not been implemented yet! Tell Philippeqc he forgot to do it!" << std::endl;
+    tFunction tfRotation;
+    tfRotation.SetOffset( rotationSpeed*value );
+    tfRotation.SetSlope( rotationAcceleration );
+    zone->getShape()->setRotation( tfRotation );
 }
 
 zZoneInfluenceItemScale::zZoneInfluenceItemScale(zZonePtr aZone):
-  zZoneInfluenceItem(aZone),
-  scale(0.0) 
+        zZoneInfluenceItem(aZone),
+        scale(0.0)
 {}
 
 void
 zZoneInfluenceItemScale::apply(REAL value) {
-  // HACK:
-  // Need a solution that influence the shape, not the zone
-  //    zone->SetScale(scale);
-  std::cout << "This has not been implemented yet! Tell Philippeqc he forgot to do it!" << std::endl;
+    tFunction tfScale;
+    tfScale.SetOffset( scale );
+    tfScale.SetSlope( 0.0f );
+    zone->getShape()->setScale( tfScale );
 }
 
 zZoneInfluenceItemPosition::zZoneInfluenceItemPosition(zZonePtr aZone):
@@ -58,10 +57,14 @@ zZoneInfluenceItemPosition::zZoneInfluenceItemPosition(zZonePtr aZone):
 
 void
 zZoneInfluenceItemPosition::apply(REAL value) {
-  // HACK:
-  // Need a solution that influence the shape, not the zone
-  //    zone->SetPosition(pos);
-  std::cout << "This has not been implemented yet! Tell Philippeqc he forgot to do it!" << std::endl;
+    tFunction tfPosition;
+
+    tfPosition.SetOffset( pos.x );
+    tfPosition.SetSlope( 0.0f );
+    zone->getShape()->setPosX( tfPosition );
+
+    tfPosition.SetOffset( pos.y );
+    zone->getShape()->setPosY( tfPosition );
 }
 
 zZoneInfluenceItemColor::zZoneInfluenceItemColor(zZonePtr aZone):
@@ -71,9 +74,6 @@ zZoneInfluenceItemColor::zZoneInfluenceItemColor(zZonePtr aZone):
 
 void
 zZoneInfluenceItemColor::apply(REAL value) {
-  // HACK:
-  // Need a solution that influence the shape, not the zone
-  //    zone->SetColor(color);
-  std::cout << "This has not been implemented yet! Tell Philippeqc he forgot to do it!" << std::endl;
+    zone->getShape()->setColor( color );
 }
 
