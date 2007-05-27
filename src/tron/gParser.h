@@ -18,6 +18,7 @@ class gWallRim;
 #include "zone/zZone.h"
 #include "zone/zMisc.h"
 
+
 /*
 Note to the reader: In the full World idea, the parser should, 
 when called, create a full world structure, from the Empire down,
@@ -43,6 +44,7 @@ public:
     //    gParser(const gGame *aGame, gArena *anArena, tControlledPTR<eGrid> aGrid);
     void setSizeMultiplier(REAL aSizeMultiplier);
     void Parse();
+    zMonitorPtr getMonitor(string monitorName);
 
 protected:
     bool trueOrFalse(char *str);
@@ -115,6 +117,7 @@ protected:
 public:
     tValue::Expr::varmap_t vars;
     tValue::Expr::funcmap_t functions;
+
 };
 
 #endif //ArmageTron_PARSER_H

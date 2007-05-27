@@ -10,7 +10,6 @@
 #include "zone/zMisc.h"
 #include "zone/zEffectGroup.h"
 
-
 class zMonitorRule;
 class zMonitor;
 

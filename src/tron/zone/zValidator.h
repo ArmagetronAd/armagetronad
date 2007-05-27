@@ -137,6 +137,21 @@ protected:
     bool isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser);
 };
 
+class zValidatorAllButOwnerTeam : public zValidator
+{
+public:
+    static zValidator* create(Triad _positive, Triad _marked);
+    zValidatorAllButOwnerTeam(Triad _positive, Triad _marked);
+    zValidatorAllButOwnerTeam(zValidatorAllButOwnerTeam const &other);
+    void operator=(zValidatorAllButOwnerTeam const &other); //!< overloaded assignment operator
+    virtual ~zValidatorAllButOwnerTeam() {};
+    zValidator *copy(void) const;
+protected:
+    bool isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser);
+};
+
+
+
 /*
  * ******** WARNING *********
  * This include has to be at the end of this file to break a cyclic referencing.

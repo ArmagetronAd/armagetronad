@@ -140,6 +140,7 @@ void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p);
 gArena * sg_GetArena();
 // END OF HACK
 
+void init_second_pass_zones(eGrid *grid, gParser *parser);
 
 class gGameSettings
 {
@@ -196,6 +197,7 @@ public:
 extern gGameSettings* sg_currentSettings;
 
 void rotate();
+
 
 #endif
 

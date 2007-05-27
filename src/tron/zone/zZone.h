@@ -98,26 +98,26 @@ public:
     zZone const &   GetRotationAcceleration( REAL & rotationAcceleration ) const;	//!< Gets the current acceleration of the rotation
     rColor const &  GetColor( void ) const;	//!< Gets the current color
     void            SetColor( rColor const & color ); //!< Sets the current color
-*/
+    */
 
     void addEffectGroupEnter  (zEffectGroupPtr anEffectGroup) {effectGroupEnter.push_back  (anEffectGroup);};
     void addEffectGroupInside (zEffectGroupPtr anEffectGroup) {effectGroupInside.push_back (anEffectGroup);};
     void addEffectGroupLeave  (zEffectGroupPtr anEffectGroup) {effectGroupLeave.push_back  (anEffectGroup);};
     void addEffectGroupOutside(zEffectGroupPtr anEffectGroup) {effectGroupOutside.push_back(anEffectGroup);};
 
-    void setShape (zShapePtr aShape) {
-      shape = aShape; 
-#ifdef DADA
-#else
-      /*
-      posx_ = shape->getPosX();
-      posy_ = shape->getPosY();
-      scale_ = shape->getScale();
-      rotationSpeed_ = shape->getRotation();
-      color_ = shape->getColor();
-      */
-#endif
+    void setShape (zShapePtr aShape) { shape = aShape; };
+    zShapePtr getShape() { return shape; };
+
+    // HACK
+    // Enables fortress described in maps from format 1 to be assigned to a team according to the old behavior
+    void setOldFortressAutomaticAssignmentBehavior(bool oldFortressAutomaticAssignmentBehavior)
+    {
+        oldFortressAutomaticAssignmentBehavior_ = oldFortressAutomaticAssignmentBehavior;
     };
+    bool getOldFortressAutomaticAssignmentBehavior() { return oldFortressAutomaticAssignmentBehavior_; };
+
+    void setName(string name) {name_ = name;};
+    string getName() { return name_; };
 
 protected:
     //    rColor color_;           //!< the zone's color
@@ -166,6 +166,10 @@ private:
     inline void SetFunctionNow( tFunction & f, REAL value ) const; //!< makes sure EvaluateFunctionNow() returns the given value
 
     void RemoveFromZoneList(void); //!< Removes the zone from the sg_Zones list if it's there
+
+    bool oldFortressAutomaticAssignmentBehavior_;
+
+    string name_;
 
 };
 

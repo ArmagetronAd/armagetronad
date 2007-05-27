@@ -60,8 +60,6 @@ static REAL sg_initialSize = 5.0f;
 static nSettingItem< REAL > sg_expansionSpeedConf( "WIN_ZONE_EXPANSION", sg_expansionSpeed );
 static nSettingItem< REAL > sg_initialSizeConf( "WIN_ZONE_INITIAL_SIZE", sg_initialSize );
 
-
-
 // *******************************************************************************
 // *
 // *   EvaluateFunctionNow
@@ -106,13 +104,15 @@ inline void zZone::SetFunctionNow( tFunction & f, REAL value ) const
 // *******************************************************************************
 zZone::zZone( eGrid * grid )
         :eNetGameObject( grid, eCoord(0,0), eCoord(0,0), NULL, true ),
-	 //        rotation_(1,0),
+        //        rotation_(1,0),
         effectGroupEnter(),
         effectGroupInside(),
         effectGroupLeave(),
         effectGroupOutside(),
         playersInside(),
-        playersOutside()
+        playersOutside(),
+        oldFortressAutomaticAssignmentBehavior_(false),
+        name_()
 {
     // store creation time
     referenceTime_ = createTime_ = lastTime = 0;
@@ -141,10 +141,12 @@ static nVersionFeature sz_ShapedZones(20);
 // *******************************************************************************
 
 zZone::zZone( nMessage & m )
-        :eNetGameObject( m ), 
-	 //rotation_(1,0),
+        :eNetGameObject( m ),
+        //rotation_(1,0),
         playersInside(),
-        playersOutside()
+        playersOutside(),
+        oldFortressAutomaticAssignmentBehavior_(false),
+        name_()
 {
     // read creation time
     m >> createTime_;
@@ -169,55 +171,55 @@ zZone::zZone( nMessage & m )
     tFunction asdf = tFunction();
     asdf.SetSlope(0.0);
     asdf.SetOffset(100.0);
-	shape->setPosX(asdf);
-	shape->setPosY(asdf);
-	shape->setScale(asdf);
-	shape->setRotation(asdf);
-	shape->setScale(asdf);
-	shape->setColor(rColor(0.7, 0.0, 0.7));
-        zShapeCircle *circle = dynamic_cast<zShapeCircle *>( (zShape*)shape );
-	
-	circle->emulatingOldZone_ = true;
+    shape->setPosX(asdf);
+    shape->setPosY(asdf);
+    shape->setScale(asdf);
+    shape->setRotation(asdf);
+    shape->setScale(asdf);
+    shape->setColor(rColor(0.7, 0.0, 0.7));
+    zShapeCircle *circle = dynamic_cast<zShapeCircle *>( (zShape*)shape );
 
-    /*    
+    circle->emulatingOldZone_ = true;
+
+    /*
     if (!m.End() && sz_ShapedZones.Supported() ) 
       {
-	// Factory to make the shapes
-	// HACK 
-	// This makes them static for the life of the zone
-	// rather than to re-send them all at each updates
-	typedef zShape* (*shapeFactory)(nMessage &);
-	std::map<tString, shapeFactory> shapes;
-	// Build the list of supported shapes
-	shapes[tString("circle")] = zShapeCircle::create;
-	shapes[tString("polygon")] = zShapePolygon::create;
+    // Factory to make the shapes
+    // HACK 
+    // This makes them static for the life of the zone
+    // rather than to re-send them all at each updates
+    typedef zShape* (*shapeFactory)(nMessage &);
+    std::map<tString, shapeFactory> shapes;
+    // Build the list of supported shapes
+    shapes[tString("circle")] = zShapeCircle::create;
+    shapes[tString("polygon")] = zShapePolygon::create;
 
-	// Get the name of the shape from the network
-	tString shapeName;
-	m >> shapeName;
+    // Get the name of the shape from the network
+    tString shapeName;
+    m >> shapeName;
 
-	std::map<tString, shapeFactory>::const_iterator iterShapeFactory;
-	// Build that shape if it is available
-	if((iterShapeFactory = shapes.find(shapeName)) != shapes.end()) 
-	  {
-	    shape = zShapePtr((*(iterShapeFactory->second))(m));
-	  }
+    std::map<tString, shapeFactory>::const_iterator iterShapeFactory;
+    // Build that shape if it is available
+    if((iterShapeFactory = shapes.find(shapeName)) != shapes.end()) 
+    {
+     shape = zShapePtr((*(iterShapeFactory->second))(m));
+    }
       }
     else
       {
-	// Didnt receive a shape information. Assume we are talking to a 0.2.8- server
-	shape = zShapePtr(new zShapeCircle());
-#ifdef DADA
-	// TODO: Fill this if and when we decide to with with xValue
-#else
-	shape->setPosX(posx_);
-	shape->setPosY(posy_);
-	shape->setScale(scale_);
-	shape->setRotation(rotationSpeed_);
-	shape->setScale(scale_);
-	shape->setColor(color_);
-#endif
-	emulateOldZoneShape = true;
+    // Didnt receive a shape information. Assume we are talking to a 0.2.8- server
+    shape = zShapePtr(new zShapeCircle());
+    #ifdef DADA
+    // TODO: Fill this if and when we decide to with with xValue
+    #else
+    shape->setPosX(posx_);
+    shape->setPosY(posy_);
+    shape->setScale(scale_);
+    shape->setRotation(rotationSpeed_);
+    shape->setScale(scale_);
+    shape->setColor(color_);
+    #endif
+    emulateOldZoneShape = true;
       }
     */
 }
@@ -338,75 +340,75 @@ void zZone::ReadSync( nMessage & m )
     eNetGameObject::ReadSync( m );
 
     if(shape->isEmulatingOldZone())
-      {
-
-    // read color
-      rColor aColor(0.0, 0.7, 0.5);
-    if (!m.End())
     {
-        m >> aColor.r_;
-        m >> aColor.g_;
-        m >> aColor.b_;
-    }
+
+        // read color
+        rColor aColor(0.0, 0.7, 0.5);
+        if (!m.End())
+        {
+            m >> aColor.r_;
+            m >> aColor.g_;
+            m >> aColor.b_;
+        }
         se_MakeColorValid(aColor.r_, aColor.g_, aColor.b_, 1.0f);
-	shape->setColor(aColor);
+        shape->setColor(aColor);
 
-    // read reference time and functions
-    if (!m.End())
-    {
-        m >> referenceTime_;
-	shape->setReferenceTime(referenceTime_);
-	if (!m.End())
-	  {
-	    tFunction aFunc;
-	    m >> aFunc;
-	    shape->setPosX(aFunc);
-	    m >> aFunc;
-	    shape->setPosY(aFunc);
-	    m >> aFunc;
-	    shape->setScale(aFunc);
-	  }
+        // read reference time and functions
+        if (!m.End())
+        {
+            m >> referenceTime_;
+            shape->setReferenceTime(referenceTime_);
+            if (!m.End())
+            {
+                tFunction aFunc;
+                m >> aFunc;
+                shape->setPosX(aFunc);
+                m >> aFunc;
+                shape->setPosY(aFunc);
+                m >> aFunc;
+                shape->setScale(aFunc);
+            }
+        }
+        else
+        {
+            // Uses values from the eNetGameObject
+            referenceTime_ = createTime_;
+            shape->setReferenceTime(referenceTime_);
+
+            tFunction aFunc;
+            aFunc.SetOffset( pos.x );
+            aFunc.SetSlope( 0 );
+            shape->setPosX( aFunc );
+
+            aFunc.SetOffset( pos.y );
+            aFunc.SetSlope( 0 );
+            shape->setPosY( aFunc );
+
+            aFunc.SetOffset( sg_initialSize );
+            aFunc.SetSlope( sg_expansionSpeed );
+            shape->setScale( aFunc );
+        }
+
+        // read rotation speed
+        tFunction rotationSpeed;
+        if (!m.End())
+        {
+            m >> rotationSpeed;
+        }
+        else
+        {
+            // set fixed values
+            rotationSpeed.SetOffset( .3f );
+            rotationSpeed.SetSlope( 0.0f );
+        }
+        shape->setRotation(rotationSpeed);
     }
     else
     {
-        // Uses values from the eNetGameObject
-        referenceTime_ = createTime_;
-	shape->setReferenceTime(referenceTime_);
-
-	tFunction aFunc;
-	aFunc.SetOffset( pos.x );
-	aFunc.SetSlope( 0 );
-	shape->setPosX( aFunc );
-
-	aFunc.SetOffset( pos.y );
-	aFunc.SetSlope( 0 );
-	shape->setPosY( aFunc );
-
-	aFunc.SetOffset( sg_initialSize );
-	aFunc.SetSlope( sg_expansionSpeed );
-	shape->setScale( aFunc );
+        bool b;
+        // Discard the information
+        while(!m.End()) { m >> b;}
     }
-
-    // read rotation speed
-	tFunction rotationSpeed;
-    if (!m.End())
-    {
-        m >> rotationSpeed;
-    }
-    else
-    {
-        // set fixed values
-	rotationSpeed.SetOffset( .3f );
-        rotationSpeed.SetSlope( 0.0f );
-    }
-	shape->setRotation(rotationSpeed);
-      }
-    else
-      {
-	bool b;
-	// Discard the information
-	while(!m.End()) { m >> b;}
-      }
 }
 
 // *******************************************************************************
@@ -421,32 +423,32 @@ void zZone::ReadSync( nMessage & m )
 
 bool zZone::Timestep( REAL time )
 {
-        shape->TimeStep( time );
-	/*
-    if(!emulateOldZoneShape) {
-        shape->TimeStep( time );
-    }
-    else { // Old representation of zone
-    // rotate
-    REAL speed = GetRotationSpeed();
-    REAL angle = ( time - lastTime ) * speed;
-    // angle /= ( 1 + 2 * 3.14159 * angle/sg_segments );
-    rotation_ = rotation_.Turn( cos( angle ), sin( angle ) );
+    shape->TimeStep( time );
+    /*
+       if(!emulateOldZoneShape) {
+           shape->TimeStep( time );
+       }
+       else { // Old representation of zone
+       // rotate
+       REAL speed = GetRotationSpeed();
+       REAL angle = ( time - lastTime ) * speed;
+       // angle /= ( 1 + 2 * 3.14159 * angle/sg_segments );
+       rotation_ = rotation_.Turn( cos( angle ), sin( angle ) );
 
-    // move to new position
-    REAL dt = time - referenceTime_;
-    Move( eCoord( posx_( dt ), posy_( dt ) ), lastTime, time );
-    
+       // move to new position
+       REAL dt = time - referenceTime_;
+       Move( eCoord( posx_( dt ), posy_( dt ) ), lastTime, time );
+       
 
-    // kill this zone if it shrunk down to zero scale
-    if ( GetExpansionSpeed() < 0 && GetScale() <= 0 )
-    {
-        OnVanish();
-        return true;
-    }
-    }
-    // update time
-    */
+       // kill this zone if it shrunk down to zero scale
+       if ( GetExpansionSpeed() < 0 && GetScale() <= 0 )
+       {
+           OnVanish();
+           return true;
+       }
+       }
+       // update time
+       */
     lastTime = time;
 
     return false;
@@ -491,15 +493,15 @@ void zZone::InteractWith( eGameObject * target, REAL time, int recursion )
                 std::set<ePlayerNetID *>::iterator iter;
                 if ((iter = playersInside.find(prey->Player()) ) == playersInside.end()) {
                     playersInside.insert(prey->Player());
-		    
-		    // Should the player not be marked as being outside
-		    // avoid the OnEnter transition. This happens at game 
-		    // start-up for example, when players are neither inside nor outside
-		    if( playersOutside.find(prey->Player()) != playersOutside.end() )
-		    {
-                    // Passing from outside to inside triggers the OnEnter event
-                    OnEnter( prey, time );
-		    }
+
+                    // Should the player not be marked as being outside
+                    // avoid the OnEnter transition. This happens at game
+                    // start-up for example, when players are neither inside nor outside
+                    if( playersOutside.find(prey->Player()) != playersOutside.end() )
+                    {
+                        // Passing from outside to inside triggers the OnEnter event
+                        OnEnter( prey, time );
+                    }
                     // The player is no longer outside
                     playersOutside.erase(prey->Player());
                 }
@@ -512,14 +514,14 @@ void zZone::InteractWith( eGameObject * target, REAL time, int recursion )
                 if ((iter = playersOutside.find(prey->Player())) == playersOutside.end()) {
                     playersOutside.insert(prey->Player());
 
-		    // Should the player not be marked as being inside
-		    // avoid OnLeave transition. This happens at game 
-		    // start-up for example, when players are neither inside nor outside
-		    if( playersInside.find(prey->Player()) != playersInside.end() )
-		    {
-                    // Passing from inside to outside triggers the OnLeave event
-                    OnLeave( prey, time );
-		    }
+                    // Should the player not be marked as being inside
+                    // avoid OnLeave transition. This happens at game
+                    // start-up for example, when players are neither inside nor outside
+                    if( playersInside.find(prey->Player()) != playersInside.end() )
+                    {
+                        // Passing from inside to outside triggers the OnLeave event
+                        OnLeave( prey, time );
+                    }
                     // The player is no longer inside
                     playersInside.erase(prey->Player());
                 }
@@ -666,8 +668,8 @@ void zZone::Render( const eCamera * cam )
 
 eCoord zZone::GetPosition( void ) const
 {
-  // HACK, to be implemented later and differently
-  // Should get this info from the shape, not the zone
+    // HACK, to be implemented later and differently
+    // Should get this info from the shape, not the zone
     eCoord ret;
     GetPosition( ret );
     return ret;
@@ -703,12 +705,12 @@ zZone const & zZone::GetPosition( eCoord & position ) const
 
 REAL zZone::GetScale( void ) const
 {
-  //    REAL ret = EvaluateFunctionNow( this->scale_ );
-  //    ret = ret > 0 ? ret : 0;
+    //    REAL ret = EvaluateFunctionNow( this->scale_ );
+    //    ret = ret > 0 ? ret : 0;
 
 
-  // HACK, to be implemented later and differently
-  // Should get this info from the shape, not the zone
+    // HACK, to be implemented later and differently
+    // Should get this info from the shape, not the zone
     return EvaluateFunctionNow( shape->getScale() );
 
 }
@@ -725,12 +727,12 @@ REAL zZone::GetScale( void ) const
 void zZone::SetReferenceTime( void )
 {
     // set offsets to current values
-  /*
-    this->posx_.SetOffset( EvaluateFunctionNow( this->posx_ ) );
-    this->posy_.SetOffset( EvaluateFunctionNow( this->posy_ ) );
-    this->scale_.SetOffset( EvaluateFunctionNow( this->scale_ ) );
-    this->rotationSpeed_.SetOffset( EvaluateFunctionNow( this->rotationSpeed_ ) );
-  */
+    /*
+      this->posx_.SetOffset( EvaluateFunctionNow( this->posx_ ) );
+      this->posy_.SetOffset( EvaluateFunctionNow( this->posy_ ) );
+      this->scale_.SetOffset( EvaluateFunctionNow( this->scale_ ) );
+      this->rotationSpeed_.SetOffset( EvaluateFunctionNow( this->rotationSpeed_ ) );
+    */
     // reset time
     this->referenceTime_ = lastTime;
 }
@@ -747,8 +749,8 @@ void zZone::SetReferenceTime( void )
 
 tCoord const zZone::GetRotation( void ) const
 {
-  // HACK, to be implemented later and differently
-  // Should get this info from the shape, not the zone
+    // HACK, to be implemented later and differently
+    // Should get this info from the shape, not the zone
     return tCoord(0.0, 0.0);
 }
 
