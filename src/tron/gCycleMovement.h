@@ -223,7 +223,10 @@ protected:
     int             windingNumber_;             //!< number that gets increased on every right turn and decreased on every left turn ( used by the AI )
     int             windingNumberWrapped_;      //!< winding number wrapped to be used as an index to the axes code
 
-    eCoord			lastTurnPos_;	            //! the location of the last turn
+    mutable REAL    gap_[2];                    //!< when driving towards a wall, this is set to the maximal distance we need to approach it so that when the cycle turns, it can squeeze through any gaps
+    mutable bool    keepLookingForGap_[2];      //!< flags telling the system whether it is worthwile to look for further, smaller, gaps
+
+    eCoord			lastTurnPos_;	            //!< the location of the last turn
     REAL            lastTurnTimeRight_;         //!< the time of the last turn right
     REAL            lastTurnTimeLeft_;          //!< the time of the last turn left
     REAL            lastTimeAlive_;             //!< the time of the last timestep where we would not have been killed

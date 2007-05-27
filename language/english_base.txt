@@ -96,6 +96,8 @@ cycle_rubber_legacy_help		Revert to old, framerate dependant and old-clients-rip
 cycle_rubber_timebased_help		Rubber usage is based on distance travelled if this is 0 (default) and the time passed if this is 1. Intermediate values and values out of these bounds are supported as well.
 cycle_rubber_speed_help             Logarithmic speed of wall approximation when rubber is in effect (every second, you get closer to the wall by a factor of ~0.4^{this value})
 cycle_rubber_mindistance_help		The minimal distance rubber code keeps you from the wall in front of you
+cycle_rubber_mindistance_gap_help		If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected gaps the cylce can squeeze through.
+cycle_rubber_mindistance_gap_side_help Gap detection only sees gaps that the cycle may reach in no less than this many seconds.
 cycle_rubber_mindistance_ratio_help	Additional distance to CYCLE_RUBBER_MINDISTANCE for every length unit of the wall you have in front of you
 cycle_rubber_mindistance_reservoir_help		Addidional distance if you have an empty rubber meter (gets faded out gradually as you use up all your rubber)
 cycle_rubber_mindistance_unprepared_help	Additional distance for unprepared grinds; it gets applied when the cycle's last turn was just a fraction of a second ago and faded out preparation times larger than CYCLE_RUBBER_MINDISTANCE_PREPARATION.

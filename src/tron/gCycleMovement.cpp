@@ -92,7 +92,6 @@ static void sg_ArchiveReal( REAL & real, int level )
 }
 
 //  *****************************************************************
-
 // version feature indicating that proper verlet integration should be used
 static nVersionFeature sg_verletIntegration( 7 );
 
@@ -1529,6 +1528,46 @@ gMaxSpaceAheadHitInfoClearer::~gMaxSpaceAheadHitInfoClearer()
     }
 }
 
+static REAL sg_Gap( gSensor const & front, gSensor const & side, eCoord const & dir, REAL norm, REAL def, REAL & tolerance )
+{
+    if ( side.ehit && side.ehit->Other() )
+    {
+        // determine the adistance of the two endpoints of the side edge
+        // to the wall in front of us
+        REAL gap1 = ( front.ehit->Vec()*( *side.ehit->Point() - *front.ehit->Point() ) )/norm;
+        REAL gap2 = ( front.ehit->Vec()*( *side.ehit->Other()->Point() - *front.ehit->Point() ) )/norm;
+
+        // correct for orientation using the current driving direction
+        REAL sign = (dir * front.ehit->Vec())/norm;
+        if ( sign != 0 )
+        {
+            sign = 1/sign;
+            gap1 *= sign;
+            gap2 *= sign;
+        }
+
+        // if both values are positive, update the cache with the smaller one
+        tolerance = ( fabs(gap1) + fabs(gap2) ) * EPS * 10;
+        REAL minGap = gap1 < gap2 ? gap1 : gap2;
+
+        return minGap;
+    }
+    else
+    {
+        // return something close to the front wall
+        tolerance = EPS * 10 * front.hit;
+        return def;
+    }
+}
+
+static REAL sg_rubberCycleMinDistanceGap = .0f;        // if != 0, CYCLE_RUBBER_MINDISTANCE effectively is never bigger than this value times the size of any detected gaps the cylce can squeeze through.
+static REAL sg_rubberCycleMinDistanceGapSide = .5f;   // Gaps may be detected only if the cycle is able to drive into them in this time
+
+static nSettingItemWatched<REAL> c_rcmdg("CYCLE_RUBBER_MINDISTANCE_GAP",
+        sg_rubberCycleMinDistanceGap, nConfItemVersionWatcher::Group_Bumpy, 14 );
+static nSettingItem<REAL> c_rcmdgs("CYCLE_RUBBER_MINDISTANCE_GAP_SIDE",
+                                   sg_rubberCycleMinDistanceGapSide);
+
 // *******************************************************************************************
 // *
 // *	MaxSpaceAhead
@@ -1655,8 +1694,113 @@ REAL gCycleMovement::GetMaxSpaceAhead( REAL maxReport ) const
                 stopDistance = mindistance + sg_rubberCycleMinDistanceRatio * norm;
 
                 ::sg_DropTempWall( this->Direction(), fr );
+
+                // enforce "open" play: every successive grind to a wall can get closer and closer.
+
+                REAL rubberCycleMinDistanceGapDistance = sg_rubberCycleMinDistanceGapSide * Speed();
+
+
+                if ( sg_rubberCycleMinDistanceGap > 0 )
+                {
+                    // determine the width of the gap previous grinders left
+                    for ( int dir = -1; dir < 2; dir += 2 )
+                    {
+                        // see if cached value is still good
+                        REAL & gapCache = gap_[(dir+1)/2];
+                        bool & keepLooking = keepLookingForGap_[(dir+1)/2];
+
+                        if ( gapCache > fr.hit && keepLooking )
+                        {
+                            // determine next direction when turning into dir
+                            int wn = windingNumberWrapped_;
+                            Grid()->Turn(wn, dir);
+                            eCoord dirCast = Grid()->GetDirection(wn);
+
+                            bool gapFound = false;
+                            for ( int back = -1; back <= 2; ++back )
+                            {
+                                // determine next direction when turning into dir
+                                int wn2 = wn;
+                                Grid()->Turn(wn2, back);
+                                eCoord dirCast2 = Grid()->GetDirection(wn2);
+
+                                // send out a side sensor
+                                gSensor side( const_cast< gCycleMovement * >( this ),
+                                              this->Position(),
+                                              ( dirCast + dirCast2 ) * .5 );
+
+                                side.detect( rubberCycleMinDistanceGapDistance );
+
+                                // only allow non-hit default search for the ray that goes straight to the side
+                                if ( back != 0 && !side.ehit )
+                                    continue;
+
+                                REAL tolerance;
+                                REAL minGap = sg_Gap( fr, side, dirDrive, norm, fr.hit * .5, tolerance );
+
+                                while ( minGap > tolerance )
+                                {
+                                    // last test: see if there really is a gap after that wall ends
+                                    gSensor side2( const_cast< gCycleMovement * >( this ),
+                                                   this->Position() + this->Direction() * ( fr.hit - minGap * .9 ),
+                                                   dirCast );
+                                    side2.detect( rubberCycleMinDistanceGapDistance );
+
+                                    // if this sensor did not hit or hit farther than the first sensor, the gap is real
+                                    if ( fabs(side2.hit - side.hit) < tolerance )
+                                    {
+                                        // true gap not found yet
+                                        REAL dumpTolerance;
+                                        REAL lastMinGap = minGap;
+                                        minGap = sg_Gap( fr, side2, dirDrive, norm, minGap * .5, dumpTolerance );
+                                        // no improvement? give up.
+                                        if ( minGap >= lastMinGap * .9 )
+                                            break;
+                                    }
+                                    else
+                                    {
+                                        gapFound = true;
+
+                                        // true gap found, is it smaller than the last one?
+                                        if ( minGap < gapCache )
+                                        {
+                                            gapCache = minGap;
+
+                                            // bail out of outer loop
+                                            back = 100;
+                                        }
+
+                                        // bail out of inner loop
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // no gap to see anywhere
+                            if ( ! gapFound )
+                            {
+                                // don't waste time looking from now on
+                                keepLooking = false;
+
+                                // if there was no gap detected so far, there is no gap.
+                                if ( gapCache > 5E+19 )
+                                    gapCache = 0;
+                            }
+                        }
+                    }
+
+                    // fetch cache, ignoring zeroes
+                    REAL gap = ( ( gap_[0] > 0 ? gap_[0] : 1E+30 ) < ( gap_[1] > 0 ? gap_[1] : 1E+30 ) ) ? gap_[0] : gap_[1];
+                    if ( gap > 0 )
+                    {
+                        REAL minDistanceGap = gap * sg_rubberCycleMinDistanceGap;
+                        if ( stopDistance > minDistanceGap )
+                            stopDistance = minDistanceGap;
+                    }
+                }
             }
             sg_ArchiveReal( stopDistance, 9 );
+
 
             // revert to almost old rubber logic if old clients are connected. This may cause rips, but we don't care.
             if ( sg_rubberCycleLegacy && !sg_nonRippable.Supported() && stopDistance > .001 )
@@ -2969,6 +3113,9 @@ bool gCycleMovement::DoTurn( int dir )
         verletSpeed_ *= sg_cycleTurnSpeedFactor;
         rubberMalus  += sg_rubberCycleMalusTurn;
 
+        gap_[0] = gap_[1] = 1E+30;
+        keepLookingForGap_[0] = keepLookingForGap_[1] = true;
+
         // turn winding numbers
         int wn = windingNumberWrapped_;
         Grid()->Turn(wn, dir);
@@ -3744,6 +3891,9 @@ void gCycleMovement::MyInitAfterCreation( void )
     rubber=0.0f;
     rubberMalus=0.0f;
     rubberSpeedFactor=1.0f;
+
+    gap_[0] = gap_[1] = 1E+30;
+    keepLookingForGap_[0] = keepLookingForGap_[1] = true;
 
     alive_ = 1;
 
