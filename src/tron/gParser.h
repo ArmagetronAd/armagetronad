@@ -67,11 +67,15 @@ protected:
     void parseAxes(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseSpawn(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseZone(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
+    void parseZoneArthemis(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
+    void parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
+
     void parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
     rColor parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
-    zShapePtr parseShapeCircle(eGrid *grid, xmlNodePtr cur, short unsigned int idZone, const xmlChar * keyword);
+    zShapePtr parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, short unsigned int idZone, const xmlChar * keyword);
+    zShapePtr parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, short unsigned int idZone, const xmlChar * keyword);
     zShapePtr parseShapePolygon(eGrid *grid, xmlNodePtr cur, short unsigned int idZone, const xmlChar * keyword);
     void      parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShapePtr &shape);
     void                 parseMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
@@ -108,7 +112,7 @@ protected:
     /* This is a hack that will bring shame to my decendants for many generations: */
     float sizeMultiplier;
     int currentFormat; // Store the format version of the map currently being parsed. Used to support different format.
- public:
+public:
     tValue::Expr::varmap_t vars;
     tValue::Expr::funcmap_t functions;
 };

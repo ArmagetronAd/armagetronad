@@ -53,6 +53,17 @@ MapIdToGameId playerAsso; // mapping between map's playerId and in-game player
 static tString polygonal_shape_used(DEFAULT_POLYGONAL_SHAPE_USED);
 static nSettingItemWatched<tString> safetymecanism_polygonal_shapeused("POLYGONAL_SHAPE_USED",polygonal_shape_used, nConfItemVersionWatcher::Group_Breaking, 21 );
 
+int mapVersion = 0; // The version of the map currently being parsed. Used to adapt parsing to support version specific features
+
+// The following are only relevant in the case of zones from maps using version 1
+static REAL sg_conquestRate = .5;
+static REAL sg_defendRate = .25;
+static REAL sg_conquestDecayRate = .1;
+
+static tSettingItem< REAL > sg_conquestRateConf( "FORTRESS_CONQUEST_RATE", sg_conquestRate );
+static tSettingItem< REAL > sg_defendRateConf( "FORTRESS_DEFEND_RATE", sg_defendRate );
+static tSettingItem< REAL > sg_conquestDecayRateConf( "FORTRESS_CONQUEST_DECAY_RATE", sg_conquestDecayRate );
+
 
 //! Warn about deprecated map format
 static void sg_Deprecated()
@@ -68,7 +79,7 @@ static void sg_Deprecated()
 static bool newGameRound; // Indicate that a round has just started when true (no not really, a bad approximation)
 
 // the following crash on the server as soon as the player being monitored dies!!!!
-float tSysTimeHack2(float x) 
+float tSysTimeHack2(float x)
 {
     int playerID = sr_viewportBelongsToPlayer[ 0 ];
     // get the player
@@ -79,8 +90,8 @@ float tSysTimeHack2(float x)
     static float basePing;
     // preserve basePing only at the start of a new round
     if (newGameRound == true) {
-      newGameRound = false;
-      basePing = asdf;
+        newGameRound = false;
+        basePing = asdf;
     }
 
     return static_cast<float> (tSysTimeFloat() /*+ (player->netPlayer->ping*2)*/ + basePing/2);
@@ -96,16 +107,16 @@ gParser::gParser(gArena *anArena, eGrid *aGrid):
     m_Doc = NULL;
 
     // HACK - philippeqc
-    // This seems as inconvenient as any other place to load the 
+    // This seems as inconvenient as any other place to load the
     // static tables of variables and functions available.
-    // It's run once per map loading, between round, so its basically 
+    // It's run once per map loading, between round, so its basically
     // cost less vs the real structural mess that it cause ;)
 
     //  vars[tString("sizeMultiplier")] = &sizeMultiplier; // BAD dont use other than as an example, non static content
-    
-    //    tValue::Expr::functions[tString("time")] = &tSysTimeHack; 
+
+    //    tValue::Expr::functions[tString("time")] = &tSysTimeHack;
 #ifdef DEBUG_ZONE_SYNC
-    tValue::Expr::functions[tString("time2")] = &tSysTimeHack2; 
+    tValue::Expr::functions[tString("time2")] = &tSysTimeHack2;
 #endif //DEBUG_ZONE_SYNC
     //    tValue::Expr::functions[tString("sizeMultiplier")] = &gArena::GetSizeMultiplierHack; // static
 
@@ -491,7 +502,54 @@ gParser::parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 }
 
 zShapePtr
-gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, unsigned short idZone, const xmlChar * keyword)
+gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, unsigned short idZone, const xmlChar * keyword)
+{
+    zShapePtr shape = zShapePtr( new zShapeCircle(grid, idZone) );
+
+    // Build up the scale information
+    {
+      tFunction tfScale;
+      tfScale.SetOffset( myxmlGetPropFloat(cur, "radius") * sizeMultiplier );
+      tfScale.SetSlope( myxmlGetPropFloat(cur, "growth") * sizeMultiplier );
+      shape->setScale( tfScale );
+    }
+
+    // Set up the default rotation speed
+    {
+      tFunction tfRotation;
+      tfRotation.SetOffset( .3f );
+      shape->setRotation( tfRotation );
+    }
+
+    // Set up the location 
+    cur = cur->xmlChildrenNode;
+    while( cur != NULL) {
+        if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
+        else if (isElement(cur->name, (const xmlChar *)"Point", keyword)) {
+            REAL x = myxmlGetPropFloat(cur, "x");
+            REAL y = myxmlGetPropFloat(cur, "y");
+
+	    tFunction tfPos;
+	    tfPos.SetOffset( x * sizeMultiplier );
+	    shape->setPosX( tfPos );
+
+	    tfPos.SetOffset( y * sizeMultiplier );
+	    shape->setPosY( tfPos );
+
+            endElementAlternative(grid, cur, keyword);
+        }
+        else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
+            if (isValidAlternative(cur, keyword)) {
+                parseAlternativeContent(grid, cur);
+            }
+        }
+        cur = cur->next;
+    }
+    return shape;
+}
+
+zShapePtr
+gParser::parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, unsigned short idZone, const xmlChar * keyword)
 {
     zShapePtr shape = zShapePtr( new zShapeCircle(grid, idZone) );
     parseShape(grid, cur, keyword, shape);
@@ -519,29 +577,29 @@ gParser::parseShapePolygon(eGrid *grid, xmlNodePtr cur, unsigned short idZone, c
 // Remove when all that is variant has been ported to ruby
 void gParser::myCheapParameterSplitter(const string &str, tFunction &tf, bool addSizeMultiplier)
 {
-  REAL param[2] = {0.0, 0.0};
-  int bPos;
-  if( (bPos = str.find(',')) != -1)
+    REAL param[2] = {0.0, 0.0};
+    int bPos;
+    if( (bPos = str.find(',')) != -1)
     {
-      param[0] = atof(str.substr(0, bPos).c_str());
-      param[1] = atof(str.substr(bPos + 1, str.length()).c_str());
+        param[0] = atof(str.substr(0, bPos).c_str());
+        param[1] = atof(str.substr(bPos + 1, str.length()).c_str());
     }
-  else
+    else
     {
-      param[0] = atof(str.c_str());
+        param[0] = atof(str.c_str());
     }
 
-  if(addSizeMultiplier)
+    if(addSizeMultiplier)
     {
-      param[0] = param[0] * sizeMultiplier;
-      param[1] = param[1] * sizeMultiplier;
+        param[0] = param[0] * sizeMultiplier;
+        param[1] = param[1] * sizeMultiplier;
     }
-  tf.SetOffset(param[0]);
-  tf.SetSlope(param[1]);
+    tf.SetOffset(param[0]);
+    tf.SetSlope(param[1]);
 }
 #endif
 void
-gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShapePtr &shape) 
+gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShapePtr &shape)
 {
     tValue::BasePtr xp;
     tValue::BasePtr yp;
@@ -553,8 +611,8 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
         shape->setScale( tValue::BasePtr( new tValue::Expr (str, tValue::Expr::vars, tValue::Expr::functions)), str );
 #else
         string str = string(myxmlGetProp(cur, "scale"));
-	tFunction tfScale;
-	myCheapParameterSplitter(str, tfScale, false);
+        tFunction tfScale;
+        myCheapParameterSplitter(str, tfScale, true);
         shape->setScale( tfScale );
 #endif
     }
@@ -565,8 +623,8 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
         shape->setRotation( tValue::BasePtr( new tValue::Expr (str, tValue::Expr::vars, tValue::Expr::functions)), str );
 #else
         string str = string(myxmlGetProp(cur, "rotation"));
-	tFunction tfRotation;
-	myCheapParameterSplitter(str, tfRotation, false);
+        tFunction tfRotation;
+        myCheapParameterSplitter(str, tfRotation, false);
         shape->setRotation( tfRotation );
 #endif
     }
@@ -582,34 +640,34 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
             tString strY = tString("(" + tString(myxmlGetProp(cur, "y")) + ")*sizeMultiplier()");
             yp = tValue::BasePtr( new tValue::Expr (strY, tValue::Expr::vars, tValue::Expr::functions) );
 
-	    if(centerLocationFound == false) {
+            if(centerLocationFound == false) {
                 shape->setPosX( xp, strX );
                 shape->setPosY( yp, strY );
                 centerLocationFound = true;
-	    }
-	    else {
-	      zShapePolygon *tmpShapePolygon = dynamic_cast<zShapePolygon *>( shape.get() );
-	      if (tmpShapePolygon)
-                  tmpShapePolygon->addPoint( myPoint( xp, yp ), std::pair<tString, tString>(strX, strY) );
-	    }
+            }
+            else {
+                zShapePolygon *tmpShapePolygon = dynamic_cast<zShapePolygon *>( shape.get() );
+                if (tmpShapePolygon)
+                    tmpShapePolygon->addPoint( myPoint( xp, yp ), std::pair<tString, tString>(strX, strY) );
+            }
 #else
-	    string strX = string(myxmlGetProp(cur, "x"));
-	    tFunction tfX;
-	    myCheapParameterSplitter(strX, tfX, true);
-	    string strY = string(myxmlGetProp(cur, "y"));
-	    tFunction tfY;
-	    myCheapParameterSplitter(strY, tfY, true);
+            string strX = string(myxmlGetProp(cur, "x"));
+            tFunction tfX;
+            myCheapParameterSplitter(strX, tfX, true);
+            string strY = string(myxmlGetProp(cur, "y"));
+            tFunction tfY;
+            myCheapParameterSplitter(strY, tfY, true);
 
-	    if(centerLocationFound == false) {
+            if(centerLocationFound == false) {
                 shape->setPosX( tfX );
                 shape->setPosY( tfY );
                 centerLocationFound = true;
-	    }
-	    else {
-	      zShapePolygon *tmpShapePolygon = dynamic_cast<zShapePolygon *>( (zShape*)shape );
-	      if (tmpShapePolygon)
-                  tmpShapePolygon->addPoint( myPoint( tfX, tfY ) );
-	    }
+            }
+            else {
+                zShapePolygon *tmpShapePolygon = dynamic_cast<zShapePolygon *>( (zShape*)shape );
+                if (tmpShapePolygon)
+                    tmpShapePolygon->addPoint( myPoint( tfX, tfY ) );
+            }
 #endif
 
             endElementAlternative(grid, cur, keyword);
@@ -644,9 +702,9 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
     else {
         // make an empty zone and store under the right label
         // It should be populated later
-      
-      //  refZone = zZonePtr(new zZone(grid));
-      refZone = tNEW(zZone)(grid);
+
+        //  refZone = zZonePtr(new zZone(grid));
+        refZone = tNEW(zZone)(grid);
         if (!zoneName.empty())
             mapZones[zoneName] = refZone;
     }
@@ -934,43 +992,28 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
     gVectorExtra< nNetObjectID > nidPlayerOwners;
 
     if(xmlHasProp(cur, (const xmlChar*)"owners"))
-    {
+      {
         string ownersDesc( myxmlGetProp(cur, "owners"));
         boost::tokenizer<> tok(ownersDesc);
 
+	// For each owner listed
         for(boost::tokenizer<>::iterator iter=tok.begin();
                 iter!=tok.end();
                 ++iter)
-        {
-            /*
-             * Map from map descriptor to in-game ids
-             */
-	  /*
-            for (int i=0; i<se_PlayerNetIDs.Len(); i++) {
-                // TODO: change this to a call to Joda's code
-                tString str(*iter);
-                if ( se_PlayerNetIDs(i)->GetName() == str ) {
-                    nidPlayerOwners.push_back( se_PlayerNetIDs(i) );
-                }
-                //Hack to support referring to players without knowing their names.
-                int id;
-                if(str.Convert(id)) {
-                    if(i == id) {
-                        owners.push_back( se_PlayerNetIDs(i) );
-                    }
-                }
-            }
-	  */
-	  MapIdToGameId::iterator asdf = playerAsso.find(*iter);
-	  if(asdf != playerAsso.end()) {
-	    std::cout << "********** player matching " << (*iter) << std::endl;
-	    nidPlayerOwners.push_back( (*asdf).second );
+	  {
+	    // Map from map descriptor to in-game ids
+            MapIdToGameId::iterator mapOwnerToInGameOwnerPairIter = playerAsso.find(*iter);
+            if(mapOwnerToInGameOwnerPairIter != playerAsso.end()) 
+	      {
+		// Found a matching in-game owner
+		nidPlayerOwners.push_back( (*mapOwnerToInGameOwnerPairIter).second );
+	      }
+            else 
+	      {
+		// No in-game owner matching, pass
+	      }
 	  }
-	  else {
-	    std::cout << "********** player not matching " << (*iter) << " ***" <<std::endl;
-	  }
-        }
-    }
+      }
 
     /*
      * Store the teamOwners information
@@ -986,14 +1029,15 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
                 iter!=tok.end();
                 ++iter)
         {
-	  MapIdToGameId::iterator asdf = teamAsso.find(*iter);
-	  if(asdf != teamAsso.end()) {
-	    std::cout << "********** team  matching " << (*iter) << std::endl;
-	    nidTeamOwners.push_back( (*asdf).second );
-	  }
-	  else {
-	    std::cout << "********** team not matching " << (*iter) << " ***" <<std::endl;
-	  }
+            MapIdToGameId::iterator mapTeamOwnerToInGameTeamOwnerPairIter = teamAsso.find(*iter);
+            if(mapTeamOwnerToInGameTeamOwnerPairIter != teamAsso.end()) 
+	      {
+		// Found a matching in-game owning team
+                nidTeamOwners.push_back( (*mapTeamOwnerToInGameTeamOwnerPairIter).second );
+            }
+            else {
+	      // No in-game owning team found. pass.
+            }
         }
     }
 
@@ -1021,8 +1065,130 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
     return currentZoneEffect;
 }
 
+void 
+gParser::parseZoneArthemis(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
+{
+    
+  if (sn_GetNetState() != nCLIENT )
+    {
+      rColor color;
+
+      // Create a new zone
+      zZonePtr zone = zZonePtr(new zZone(grid));
+
+      // Insert the zone under a bogus name
+      string zoneName = "";
+      zoneMap::const_iterator iterZone;
+      do
+	{
+	  // Fill the zone under the shortest available series of pound.
+	  zoneName += "#";
+	  iterZone = mapZones.find(zoneName);
+	}
+      while (iterZone != mapZones.end());
+
+      // If a name was assigned to it, save the zone in a map so it can be refered to
+      if (!zoneName.empty())
+	mapZones[zoneName] = zone;
+
+
+      enum odlEffect = { win, death, fortress };
+      int effect = win;
+      if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"win")) {
+	effect = win;
+      }
+      else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"death")) {
+	effect = death;
+      }
+      else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"fortress")) {
+	effect = fortress;
+      }
+
+      if (sn_GetNetState() != nCLIENT )
+	{
+	  if (effect != fortress)
+	    {
+	      // Create an effect group without ownership
+	      zEffectGroupPtr currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), gVectorExtra< nNetObjectID >()));
+
+	      // Create a validator for everybody (i.e. All)
+	      zValidatorPtr validator = zValidatorPtr( new zValidatorAll(_ignore, _ignore) );
+
+	      zSelectorPtr selector = zSelectorPtr( new zSelectorSelf() );
+	      //selector->setCount( -1 ); // Give infinite usage
+
+	      zEffectorPtr effector;
+	      if (effect == win)
+		effector = zEffectorPtr( new zEffectorWin() );
+	      else
+		effector = zEffectorPtr( new zEffectorDeath() );
+
+	      effector->setCount( -1 );
+
+	      // Store all the objects
+	      selector->addEffector( effector );
+	      validator->addSelector( selector );
+	      currentZoneEffect->setValidator( validator );
+	      zone->addEffectGroupEnter( currentZoneEffect );
+
+	    }
+	  else {
+	    /*
+	     * REALLY DOESNT WORK! JUST PRE-CODED. NEED TO ASSOCIATE ZONES TO TEAM AND SET THE CONQUEST
+	     */
+
+	    // Create an effect group without ownership
+	    zEffectGroupPtr currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), gVectorExtra< nNetObjectID >()));
+	    zone->addEffectGroupEnter( currentZoneEffect );
+
+	    // Create a validator for everybody (i.e. All)
+	    zValidatorPtr validator = zValidatorPtr( new zValidatorAll(_ignore, _ignore) );
+
+	    zMonitorPtr monitor = zMonitorPtr(new zMonitor(grid));
+	    // use the same name as the associated zone
+            monitors[zoneName] = monitor;
+	    monitor->setInit( 0.0f );
+	    monitor->setDrift( -1.0 * sg_conquestDecayRate );
+	    monitor->setClampLow ( 0.0f );
+	    monitor->setClampHigh( 1.0f );
+
+
+
+	    zMonitorInfluencePtr inflAttaquer = zMonitorInfluencePtr(new zMonitorInfluence( monitor ));
+	    inflAttaquer->setInfluenceSlide( sg_conquestRate );
+
+
+	    // sg_defendRate
+
+
+	    // Store all the objects
+            validator->addMonitorInfluence( inflAttaquer );
+            currentZoneEffect->setValidator( validator );
+
+	  }
+	}
+
+      cur = cur->xmlChildrenNode;
+
+      while(cur) {
+        if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
+        else if (isElement(cur->name, (const xmlChar *)"ShapeCircle", keyword)) {
+	  zone->setShape( parseShapeCircleArthemis(grid, cur, zone->ID(), keyword) );
+        }
+        else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
+	  if (isValidAlternative(cur, keyword)) {
+	    parseAlternativeContent(grid, cur);
+	  }
+        }
+        cur = cur->next;
+      }
+
+
+    }
+}
+
 void
-gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
+gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
     string zoneName = "";
 
@@ -1053,9 +1219,9 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         while(cur != NULL) {
             if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
             else if (isElement(cur->name, (const xmlChar *)"ShapeCircle", keyword)) {
-                zone->setShape( parseShapeCircle(grid, cur, zone->ID(), keyword) );
+                zone->setShape( parseShapeCircleBachus(grid, cur, zone->ID(), keyword) );
             }
-	    else if (isElement(cur->name, (const xmlChar *)"ShapePolygon", keyword)) {
+            else if (isElement(cur->name, (const xmlChar *)"ShapePolygon", keyword)) {
                 zone->setShape( parseShapePolygon(grid, cur, zone->ID(), keyword) );
             }
             else if (isElement(cur->name, (const xmlChar *)"Enter", keyword)) {
@@ -1111,6 +1277,23 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         {
             zone->RequestSync();
         }
+    }
+}
+
+void
+gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
+{
+  switch(mapVersion)
+    {
+    case 1:
+      parseZoneArthemis(grid, cur, keyword);
+      break;
+    case 2:
+      parseZoneBachus(grid, cur, keyword);
+      break;
+    default:
+      parseZoneBachus(grid, cur, keyword);
+      break;
     }
 }
 
@@ -1450,9 +1633,9 @@ gParser::parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
             parseAxes(grid, cur, keyword);
         }
         // Introduced in version 2, but no extra logic is required for it.
-	else if (isElement(cur->name, (const xmlChar *)"Ownership", keyword)) {
-	  parseOwnership(grid, cur, keyword);
-	}
+        else if (isElement(cur->name, (const xmlChar *)"Ownership", keyword)) {
+            parseOwnership(grid, cur, keyword);
+        }
         else if (isElement(cur->name, (const xmlChar *)"Spawn", keyword)) {
             parseSpawn(grid, cur, keyword);
         }
@@ -1492,97 +1675,97 @@ const char * PLAYER_ID_STR = "playerId";
 void
 gParser::parseOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-  // Prepare the structures to store the ownership information
-  TeamOwnershipInfo mapIdOfTeamOwners;
-  std::cout << "############ about to clean" << std::endl;
-  playerAsso.erase(playerAsso.begin(), playerAsso.end());
-  teamAsso.erase(teamAsso.begin(), teamAsso.end());
+    // Prepare the structures to store the ownership information
+    TeamOwnershipInfo mapIdOfTeamOwners;
 
-  cur = cur->xmlChildrenNode;
-  while (cur != NULL) {
-    if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
-    else if (isElement(cur->name, (const xmlChar *)"TeamOwnership", keyword)) {
-      parseTeamOwnership(grid, cur, keyword, mapIdOfTeamOwners);
+    // Remove previous ownership
+    playerAsso.erase(playerAsso.begin(), playerAsso.end());
+    teamAsso.erase(teamAsso.begin(), teamAsso.end());
+
+    cur = cur->xmlChildrenNode;
+    while (cur != NULL) {
+        if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
+        else if (isElement(cur->name, (const xmlChar *)"TeamOwnership", keyword)) {
+            parseTeamOwnership(grid, cur, keyword, mapIdOfTeamOwners);
+        }
+        cur = cur->next;
     }
-    cur = cur->next;
-  }
 
-  // BOP
-  // The association between teamId and in-game teams should be moved to its own class
+    // BOP
+    // The association between teamId and in-game teams should be moved to its own class
 
-  std::cout << "###################" << std::endl;
-  std::cout << "number of teams " << eTeam::teams.Len() << std::endl;
+    std::cout << "###################" << std::endl;
+    std::cout << "number of teams " << eTeam::teams.Len() << std::endl;
 
-  TeamOwnershipInfo::iterator iterTeamOwnership = mapIdOfTeamOwners.begin();
-  for(int index=0; index<eTeam::teams.Len() && iterTeamOwnership != mapIdOfTeamOwners.end(); ) {
-    eTeam* ee = eTeam::teams[index];
-    string teamId = (*iterTeamOwnership).first;
-    std::cout << "associating " << teamId << " with " << ee->Name() << " net ID:" << ee->ID() << std::endl;
-    MapIdToGameId::value_type asdf(teamId, ee->ID());
-    
-    // Store the association between the map id and the in-game id
-    teamAsso.insert(asdf);
+    TeamOwnershipInfo::iterator iterTeamOwnership = mapIdOfTeamOwners.begin();
+    for(int index=0; index<eTeam::teams.Len() && iterTeamOwnership != mapIdOfTeamOwners.end(); ) {
+        eTeam* ee = eTeam::teams[index];
+        string teamId = (*iterTeamOwnership).first;
+        std::cout << "associating " << teamId << " with " << ee->Name() << " net ID:" << ee->ID() << std::endl;
+        MapIdToGameId::value_type asdf(teamId, ee->ID());
 
-    std::set<string> playerIdForThisTeam = (*iterTeamOwnership).second;
-    int indexPlayer=0;
-    for(std::set<string>::iterator iter = playerIdForThisTeam.begin();
-	iter != playerIdForThisTeam.end() && indexPlayer<ee->NumPlayers();
-	++iter, ++indexPlayer) {
-      ePlayerNetID *aa = ee->Player(indexPlayer);
-      string playerId = (*iter);
-      // TODO
-      // HACK
-      // BOP
-      // The following might produce unexpected results should the same playerId be associated in many team
-      MapIdToGameId::value_type jj(playerId, aa->ID());
-      std::cout << "associating in team " << teamId << " player: " << playerId << " with: " << aa->GetName() << std::endl;
-      playerAsso.insert(jj);
+        // Store the association between the map id and the in-game id
+        teamAsso.insert(asdf);
+
+        std::set<string> playerIdForThisTeam = (*iterTeamOwnership).second;
+        int indexPlayer=0;
+        for(std::set<string>::iterator iter = playerIdForThisTeam.begin();
+                    iter != playerIdForThisTeam.end() && indexPlayer<ee->NumPlayers();
+                    ++iter, ++indexPlayer) {
+                ePlayerNetID *aa = ee->Player(indexPlayer);
+                string playerId = (*iter);
+                // TODO
+                // HACK
+                // BOP
+                // The following might produce unexpected results should the same playerId be associated in many team
+                MapIdToGameId::value_type mapOwnerToInGameOwnerPair(playerId, aa->ID());
+                playerAsso.insert(mapOwnerToInGameOwnerPair);
+            }
+        ++index; ++iterTeamOwnership;
     }
-    ++index; ++iterTeamOwnership;
-  }
-  // EOP
+    // EOP
 }
 
 void
 gParser::parseTeamOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, TeamOwnershipInfo & mapIdOfTeamOwners)
 {
-   // Explore the teamId attribute
-  if(myxmlHasProp(cur, TEAM_ID_STR )) {
-    string tOwnersDesc( myxmlGetProp(cur, TEAM_ID_STR));
-    boost::tokenizer<> tokTeam(tOwnersDesc);
+    // Explore the teamId attribute
+    if(myxmlHasProp(cur, TEAM_ID_STR )) {
+        string tOwnersDesc( myxmlGetProp(cur, TEAM_ID_STR));
+        boost::tokenizer<> tokTeam(tOwnersDesc);
 
-    for(boost::tokenizer<>::iterator tokTeamIter=tokTeam.begin();
-	tokTeamIter!=tokTeam.end();
-	++tokTeamIter) {
-      tString aTeamId = tString(*tokTeamIter);
-      TeamOwnershipInfo::iterator teamIter = mapIdOfTeamOwners.find(aTeamId);
-      // Add the teamId to the list if abscent
-      if(teamIter == mapIdOfTeamOwners.end()) {
-	//	teamIter = team.insert(std::pair<string, std::set<string> >( aTeamId, std::set<string> ));
-	std::pair<string, std::set<string> > asdf( aTeamId, std::set<string>() );
-	teamIter = mapIdOfTeamOwners.insert(teamIter, asdf);
-      }
+        for(boost::tokenizer<>::iterator tokTeamIter=tokTeam.begin();
+                tokTeamIter!=tokTeam.end();
+                ++tokTeamIter) {
+            tString aTeamId = tString(*tokTeamIter);
+            TeamOwnershipInfo::iterator teamIter = mapIdOfTeamOwners.find(aTeamId);
+            // Add the teamId to the list if abscent
+            if(teamIter == mapIdOfTeamOwners.end()) {
+                //	teamIter = team.insert(std::pair<string, std::set<string> >( aTeamId, std::set<string> ));
+                std::pair<string, std::set<string> > asdf( aTeamId, std::set<string>() );
+                teamIter = mapIdOfTeamOwners.insert(teamIter, asdf);
+            }
 
-      // Should the team receive playerId
-      if(myxmlHasProp(cur, PLAYER_ID_STR)) {
-	// Extract all the playerId for this team
-	string plOwnersDesc( myxmlGetProp(cur, PLAYER_ID_STR) );
-	boost::tokenizer<> tokPlayer(plOwnersDesc);
-	for(boost::tokenizer<>::iterator tokPlayerIter=tokPlayer.begin();
-	    tokPlayerIter!=tokPlayer.end();
-	    ++tokPlayerIter) {
-	  tString aPlayerId = tString(*tokPlayerIter);
+            // Should the team receive playerId
+            if(myxmlHasProp(cur, PLAYER_ID_STR)) {
+                // Extract all the playerId for this team
+                string plOwnersDesc( myxmlGetProp(cur, PLAYER_ID_STR) );
+                boost::tokenizer<> tokPlayer(plOwnersDesc);
+                for(boost::tokenizer<>::iterator tokPlayerIter=tokPlayer.begin();
+                        tokPlayerIter!=tokPlayer.end();
+                        ++tokPlayerIter) {
+                    tString aPlayerId = tString(*tokPlayerIter);
 
-	  std::set<string> aa = (*teamIter).second;
-	  aa.insert(aPlayerId);
-	  (*teamIter).second = aa;
-	}
-      }
-    } 
-  }
-  else {
-    // TeamId is #REQUIRED, this should not happen
-  }
+                    std::set<string> aa = (*teamIter).second;
+                    aa.insert(aPlayerId);
+                    (*teamIter).second = aa;
+                }
+            }
+        }
+    }
+    else {
+        // TeamId is #REQUIRED, this should not happen
+    }
 }
 
 void
@@ -1653,7 +1836,7 @@ gParser::parseSettings(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 void
 gParser::parseMap(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-  
+    mapVersion = myxmlGetPropInt(cur, "version");
 
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
