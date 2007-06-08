@@ -85,6 +85,7 @@
 <!ELEMENT ShapeCircle (Point, Color)>
 <!ATTLIST ShapeCircle scale CDATA #REQUIRED>
 <!ATTLIST ShapeCircle growth CDATA "0.0">
+<!ATTLIST ShapeCircle rotation CDATA "0.0">
 
 <!ELEMENT ShapePolygon (Point, Color, Point+)>
 <!ATTLIST ShapePolygon scale CDATA #REQUIRED>
@@ -95,7 +96,7 @@
 <!ATTLIST Color red   CDATA "1.0">
 <!ATTLIST Color green CDATA "0.0">
 <!ATTLIST Color blue  CDATA "0.0">
-<!ATTLIST Color alpha  CDATA "0.0">
+<!ATTLIST Color alpha  CDATA "1.0">
 
 <!ELEMENT Enter   (EffectGroup+) >
 <!ELEMENT Inside  (EffectGroup+) >
@@ -150,8 +151,9 @@ rubberrecharge | spawnplayer | setting ) "death" >
 <!ATTLIST ZoneInfluence name CDATA #IMPLIED>
 
 <!ELEMENT Rotation EMPTY>
+<!ATTLIST Rotation rotationAngle CDATA "0.0">
 <!ATTLIST Rotation rotationSpeed CDATA "0.0">
-<!ATTLIST Rotation rotationAcceleration CDATA "0.0">
+
 
 <!ELEMENT Scale EMPTY>
 <!ATTLIST Scale scale CDATA "1.0">
