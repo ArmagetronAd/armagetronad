@@ -9,6 +9,7 @@
 #include "gCycle.h"
 #include "zone/zMisc.h"
 #include "zone/zEffectGroup.h"
+#include "tFunction.h"
 
 class zMonitorRule;
 class zMonitor;
@@ -50,6 +51,7 @@ public:
         RemoveFromListsAll();
     };
 
+    void setName(string name) {this->name = name;};
     void addRule(zMonitorRulePtr aRule);
 
     void setInit(REAL v) {initialValue = v;};
@@ -80,6 +82,8 @@ protected:
 
     REAL minValue; //!< Low bound that value can take
     REAL maxValue; //!< High bound that value can take
+
+    string name;
 };
 
 
@@ -150,9 +154,9 @@ public:
  */
 class zMonitorInfluence {
     zMonitorPtr monitor;
-    REAL influenceSlide;
-    REAL influenceAdd;
-    REAL influenceSet;
+    tFunction influenceSlide;
+    tFunction influenceAdd;
+    tFunction influenceSet;
 
     bool influenceSlideAvailable;
     bool influenceAddAvailable;
@@ -163,9 +167,9 @@ class zMonitorInfluence {
 public:
     zMonitorInfluence(zMonitorPtr aMonitor):
             monitor(aMonitor),
-            influenceSlide(0),
-            influenceAdd(0),
-            influenceSet(0),
+            influenceSlide(),
+            influenceAdd(),
+            influenceSet(),
             influenceSlideAvailable(false),
             influenceAddAvailable(false),
             influenceSetAvailable(false),
@@ -173,12 +177,12 @@ public:
     { };
     ~zMonitorInfluence() { };
 
-    void apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* triggerer);
+    void apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* triggerer, REAL value);
 
     void setMarked(Triad mark) {marked = mark;};
-    void setInfluenceSlide(REAL infl) {influenceSlide = infl; influenceSlideAvailable=true;};
-    void setInfluenceAdd  (REAL infl) {influenceAdd   = infl; influenceAddAvailable  =true;};
-    void setInfluenceSet  (REAL infl) {influenceSet   = infl; influenceSetAvailable  =true;};
+    void setInfluenceSlide(tFunction infl) {influenceSlide = infl; influenceSlideAvailable=true;};
+    void setInfluenceAdd  (tFunction infl) {influenceAdd   = infl; influenceAddAvailable  =true;};
+    void setInfluenceSet  (tFunction infl) {influenceSet   = infl; influenceSetAvailable  =true;};
 
 };
 

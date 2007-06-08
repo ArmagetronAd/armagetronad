@@ -41,8 +41,5 @@ inline bool validateTriad(Triad a, Triad b) {
  * ATM: only the value from the monitor is passed 
  * We use an auto_ptr so we can control if there is a value or not 
 */
-typedef std::auto_ptr<REAL> miscDataPtr;
-
-
-
+typedef boost::shared_ptr<REAL> miscDataPtr;
 #endif

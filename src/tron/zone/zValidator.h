@@ -137,14 +137,14 @@ protected:
     bool isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser);
 };
 
-class zValidatorAllButOwnerTeam : public zValidator
+class zValidatorAllButTeamOwner : public zValidator
 {
 public:
     static zValidator* create(Triad _positive, Triad _marked);
-    zValidatorAllButOwnerTeam(Triad _positive, Triad _marked);
-    zValidatorAllButOwnerTeam(zValidatorAllButOwnerTeam const &other);
-    void operator=(zValidatorAllButOwnerTeam const &other); //!< overloaded assignment operator
-    virtual ~zValidatorAllButOwnerTeam() {};
+    zValidatorAllButTeamOwner(Triad _positive, Triad _marked);
+    zValidatorAllButTeamOwner(zValidatorAllButTeamOwner const &other);
+    void operator=(zValidatorAllButTeamOwner const &other); //!< overloaded assignment operator
+    virtual ~zValidatorAllButTeamOwner() {};
     zValidator *copy(void) const;
 protected:
     bool isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser);

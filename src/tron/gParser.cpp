@@ -632,7 +632,7 @@ void gParser::myCheapParameterSplitter(const string &str, tFunction &tf, bool ad
 {
     REAL param[2] = {0.0, 0.0};
     int bPos;
-    if( (bPos = str.find(',')) != -1)
+    if( (bPos = str.find(';')) != -1)
     {
         param[0] = atof(str.substr(0, bPos).c_str());
         param[1] = atof(str.substr(bPos + 1, str.length()).c_str());
@@ -824,23 +824,35 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
         // make an empty zone and store under the right label
         // It should be populated later
         ref = zMonitorPtr(new zMonitor(grid));
-        if (!monitorName.empty())
+        if (!monitorName.empty()) {
             monitors[monitorName] = ref;
+	    ref->setName(monitorName);
+	}
     }
 
     zMonitorInfluencePtr infl = zMonitorInfluencePtr(new zMonitorInfluence(ref));
     infl->setMarked(myxmlGetPropTriad(cur, "marked"));
 
-    if(xmlHasProp(cur, (const xmlChar*)"influenceSlide"))
-        infl->setInfluenceSlide(myxmlGetPropFloat(cur, "influenceSlide"));
+    if(xmlHasProp(cur, (const xmlChar*)"influenceSlide")) {
+        string str = string(myxmlGetProp(cur, "influenceSlide"));
+        tFunction tfInfluence;
+        myCheapParameterSplitter(str, tfInfluence, false);
+        infl->setInfluenceSlide( tfInfluence );
+    }
 
-    if(xmlHasProp(cur, (const xmlChar *)"influenceAdd"))
-        infl->setInfluenceAdd(myxmlGetPropFloat(cur, "influenceAdd"));
+    if(xmlHasProp(cur, (const xmlChar *)"influenceAdd")) {
+        string str = string(myxmlGetProp(cur, "influenceAdd"));
+        tFunction tfInfluence;
+        myCheapParameterSplitter(str, tfInfluence, false);
+        infl->setInfluenceAdd( tfInfluence );
+    }
 
-    if(xmlHasProp(cur, (const xmlChar *)"influenceSet"))
-        infl->setInfluenceSet(myxmlGetPropFloat(cur, "influenceSet"));
-
-
+    if(xmlHasProp(cur, (const xmlChar *)"influenceSet")) {
+        string str = string(myxmlGetProp(cur, "influenceSet"));
+        tFunction tfInfluence;
+        myCheapParameterSplitter(str, tfInfluence, false);
+        infl->setInfluenceSet( tfInfluence );
+    }
 
     return infl;
 }
@@ -995,8 +1007,8 @@ gParser::parseZoneEffectGroupValidator(eGrid * grid, xmlNodePtr cur, const xmlCh
     validators[tString("owner")] = zValidatorOwner::create;
     validators[tString("ownerteam")] = zValidatorOwnerTeam::create;
     validators[tString("allbutowner")] = zValidatorAllButOwner::create;
+    validators[tString("allbutteamowner")] = zValidatorAllButTeamOwner::create;
     /*
-      validators[tString("allbutteamowner")] = zValidatorAllButTeamOwner::create;
       validators[tString("anotherteammate")] = zValidatorTeammate::create;
     */
 
@@ -1401,8 +1413,10 @@ gParser::parseMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             // make an empty zone and store under the right label
             // It should be populated later
             monitor = zMonitorPtr(new zMonitor(grid));
-            if (!monitorName.empty())
+            if (!monitorName.empty()) {
                 monitors[monitorName] = monitor;
+		monitor->setName(monitorName);
+	    }
         }
 
         monitor->setInit(myxmlGetPropFloat(cur, "init"));

@@ -85,6 +85,10 @@ zValidator::isTeamOwner(eTeam *possibleTeamOwner, gVectorExtra< nNetObjectID > &
 
 void
 zValidator::validate(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, Triggerer possibleUser, miscDataPtr &miscData) {
+    REAL value = 0.0;
+    if ( miscData.get() != 0 )
+        value = *miscData;
+
     if(isValid(owners, teamOwners, possibleUser.who) && validateTriad(possibleUser.positive, positive) && validateTriad(possibleUser.marked, marked)) {
         zSelectorPtrs::const_iterator iterSelector;
         for(iterSelector=selectors.begin();
@@ -99,7 +103,7 @@ zValidator::validate(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObj
                 iterMonitorInfluence!=monitorInfluences.end();
                 ++iterMonitorInfluence)
         {
-            (*iterMonitorInfluence)->apply(owners, teamOwners, possibleUser.who);
+            (*iterMonitorInfluence)->apply(owners, teamOwners, possibleUser.who, value);
         }
 
         zZoneInfluencePtrs::const_iterator iterZoneInfluence;
@@ -107,10 +111,6 @@ zValidator::validate(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObj
                 iterZoneInfluence!=zoneInfluences.end();
                 ++iterZoneInfluence)
         {
-            REAL value = 0.0;
-            if ( miscData.get() != 0 )
-                value = *miscData;
-
             (*iterZoneInfluence)->apply(value);
         }
     }
@@ -235,32 +235,32 @@ zValidatorAllButOwner::isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtr
 }
 
 // *******************
-// zValidatorAllButOwnerTeam
+// zValidatorAllButTeamOwner
 // *******************
-zValidator * zValidatorAllButOwnerTeam::create(Triad _positive, Triad _marked)
+zValidator * zValidatorAllButTeamOwner::create(Triad _positive, Triad _marked)
 {
-    return new zValidatorAllButOwnerTeam(_positive, _marked);
+    return new zValidatorAllButTeamOwner(_positive, _marked);
 }
 
-zValidatorAllButOwnerTeam::zValidatorAllButOwnerTeam(Triad _positive, Triad _marked):
+zValidatorAllButTeamOwner::zValidatorAllButTeamOwner(Triad _positive, Triad _marked):
         zValidator(_positive, _marked)
 { }
 
-zValidatorAllButOwnerTeam::zValidatorAllButOwnerTeam(zValidatorAllButOwnerTeam const &other):
+zValidatorAllButTeamOwner::zValidatorAllButTeamOwner(zValidatorAllButTeamOwner const &other):
         zValidator(other)
 { }
 
-void zValidatorAllButOwnerTeam::operator=(zValidatorAllButOwnerTeam const &other)
+void zValidatorAllButTeamOwner::operator=(zValidatorAllButTeamOwner const &other)
 {
     this->zValidator::operator=(other);
 }
 
-zValidator *zValidatorAllButOwnerTeam::copy(void) const {
-    return new zValidatorAllButOwnerTeam(*this);
+zValidator *zValidatorAllButTeamOwner::copy(void) const {
+    return new zValidatorAllButTeamOwner(*this);
 }
 
 bool
-zValidatorAllButOwnerTeam::isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser)
+zValidatorAllButTeamOwner::isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser)
 {
     return !isTeamOwner(possibleUser->Player()->CurrentTeam(), teamOwners);
 }

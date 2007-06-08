@@ -38,7 +38,7 @@ zMonitor::affectSet(gCycle* user, REAL triggererInfluenceSet, Triad marked) {
     triggerer.marked = marked;
 
     contributorsSet.push_back(triggerer);
-    totalInfluenceSet = triggererInfluenceSet;
+    totalInfluenceSet += triggererInfluenceSet;
 }
 
 
@@ -172,12 +172,12 @@ zMonitorRuleOutsideRange::isValid(float monitorValue) {
 }
 
 void
-zMonitorInfluence::apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * user) {
+zMonitorInfluence::apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * user, REAL value) {
     // Currently, we discard ownership information
     if (influenceSlideAvailable == true)
-        monitor->affectSlide(user, influenceSlide, marked);
+        monitor->affectSlide(user, influenceSlide(value), marked);
     if (influenceAddAvailable == true)
-        monitor->affectAdd(user, influenceAdd, marked);
+        monitor->affectAdd(user, influenceAdd(value), marked);
     if (influenceSetAvailable == true)
-        monitor->affectSet(user, influenceSet, marked);
+        monitor->affectSet(user, influenceSet(value), marked);
 }

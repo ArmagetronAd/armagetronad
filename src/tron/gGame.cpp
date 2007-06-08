@@ -4242,7 +4242,7 @@ void oldFortressAutomaticAssignment(zZone *zone, zMonitorPtr monitor)
 		}
 
                 zMonitorInfluencePtr inflDefender = zMonitorInfluencePtr(new zMonitorInfluence( monitor ));
-                inflDefender->setInfluenceSlide( -1.0 * sg_defendRate );
+                inflDefender->setInfluenceSlide( tFunction(-1.0 * sg_defendRate, 0.0) );
 
                 // Store all the objects
                 validator->addMonitorInfluence( inflDefender );
@@ -4254,11 +4254,11 @@ void oldFortressAutomaticAssignment(zZone *zone, zMonitorPtr monitor)
 		  validator = zValidatorPtr( new zValidatorAllButOwner(_ignore, _ignore) );
 		}
 		else {
-		  validator = zValidatorPtr( new zValidatorAllButOwnerTeam(_ignore, _ignore) );
+		  validator = zValidatorPtr( new zValidatorAllButTeamOwner(_ignore, _ignore) );
 		}
 
                 zMonitorInfluencePtr inflAttaquer = zMonitorInfluencePtr(new zMonitorInfluence( monitor ));
-                inflAttaquer->setInfluenceSlide(  sg_conquestRate );
+                inflAttaquer->setInfluenceSlide(  tFunction(sg_conquestRate, 0.0) );
                 // Store all the objects
                 validator->addMonitorInfluence( inflAttaquer );
                 currentZoneEffect->addValidator( validator );

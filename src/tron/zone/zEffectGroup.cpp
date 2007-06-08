@@ -67,25 +67,4 @@ void zEffectGroup::apply( Triggerer possibleUser, REAL &time, miscDataPtr miscDa
     {
         (*iter)->validate(d_owners, d_teamOwners, possibleUser, miscData);
     }
-    /*
-    zMonitorInfluencePtrs::const_iterator iterMonitorInfluence;
-    for(iterMonitorInfluence=monitorInfluences.begin();
-	iterMonitorInfluence!=monitorInfluences.end();
-	++iterMonitorInfluence)
-      {
-	(*iterMonitorInfluence)->apply(d_owners, d_teamOwners, possibleUser.who);
-      }
-    
-    zZoneInfluencePtrs::const_iterator iterZoneInfluence;
-    for(iterZoneInfluence=zoneInfluences.begin();
-	iterZoneInfluence!=zoneInfluences.end();
-	++iterZoneInfluence)
-      {
-	REAL value = 0.0;
-	if ( miscData.get() != 0 )
-	  value = *miscData;
-	
-	(*iterZoneInfluence)->apply(value);
-      }
-    */
 }
