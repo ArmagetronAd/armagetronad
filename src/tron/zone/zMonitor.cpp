@@ -15,7 +15,6 @@ zMonitor::affectSlide(gCycle* user, REAL triggererInfluenceSlide, Triad marked) 
     triggerer.marked = marked;
 
     contributorsSlide.push_back(triggerer);
-
     totalInfluenceSlide += triggererInfluenceSlide;
 
 }
@@ -28,7 +27,6 @@ zMonitor::affectAdd(gCycle* user, REAL triggererInfluenceAdd, Triad marked) {
     triggerer.marked = marked;
 
     contributorsAdd.push_back(triggerer);
-
     totalInfluenceAdd += triggererInfluenceAdd;
 }
 
@@ -40,7 +38,6 @@ zMonitor::affectSet(gCycle* user, REAL triggererInfluenceSet, Triad marked) {
     triggerer.marked = marked;
 
     contributorsSet.push_back(triggerer);
-
     totalInfluenceSet = triggererInfluenceSet;
 }
 

@@ -29,6 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 zEffectGroup::zEffectGroup(gVectorExtra< nNetObjectID > const owners, gVectorExtra< nNetObjectID > const teamOwners):
         validators(),
+	//	monitorInfluences(), 
+	//	zoneInfluences(),
         d_owners(owners),
         d_teamOwners(teamOwners),
         d_calculatedTargets()
@@ -36,6 +38,8 @@ zEffectGroup::zEffectGroup(gVectorExtra< nNetObjectID > const owners, gVectorExt
 
 zEffectGroup::zEffectGroup(zEffectGroup const &other) :
         validators(other.validators),
+	//	monitorInfluences(other.monitorInfluences), 
+	//	zoneInfluences(other.zoneInfluences),
         d_owners(other.d_owners),
         d_teamOwners(other.d_teamOwners),
         d_calculatedTargets(other.d_calculatedTargets)
@@ -63,4 +67,25 @@ void zEffectGroup::apply( Triggerer possibleUser, REAL &time, miscDataPtr miscDa
     {
         (*iter)->validate(d_owners, d_teamOwners, possibleUser, miscData);
     }
+    /*
+    zMonitorInfluencePtrs::const_iterator iterMonitorInfluence;
+    for(iterMonitorInfluence=monitorInfluences.begin();
+	iterMonitorInfluence!=monitorInfluences.end();
+	++iterMonitorInfluence)
+      {
+	(*iterMonitorInfluence)->apply(d_owners, d_teamOwners, possibleUser.who);
+      }
+    
+    zZoneInfluencePtrs::const_iterator iterZoneInfluence;
+    for(iterZoneInfluence=zoneInfluences.begin();
+	iterZoneInfluence!=zoneInfluences.end();
+	++iterZoneInfluence)
+      {
+	REAL value = 0.0;
+	if ( miscData.get() != 0 )
+	  value = *miscData;
+	
+	(*iterZoneInfluence)->apply(value);
+      }
+    */
 }

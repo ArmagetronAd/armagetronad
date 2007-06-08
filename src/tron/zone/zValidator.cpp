@@ -30,12 +30,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
 
-zValidator::zValidator(Triad _positive, Triad _marked):positive(_positive), marked(_marked)
+zValidator::zValidator(Triad _positive, Triad _marked):positive(_positive), marked(_marked),
+						       selectors(), monitorInfluences(), zoneInfluences()
 { }
 
 zValidator::zValidator(zValidator const &other):
         positive( other.getPositive()),
-        marked( other.getMarked())
+        marked( other.getMarked()),
+	selectors(), monitorInfluences(), zoneInfluences()
 {  }
 
 
@@ -73,7 +75,9 @@ zValidator::isTeamOwner(eTeam *possibleTeamOwner, gVectorExtra< nNetObjectID > &
             iter != teamOwners.end();
             ++iter)
     {
-        if (bool(sn_netObjects[(*iter)]) && (*iter == possibleTeamOwner->ID()) )
+        // When in local game, the team id of all players is 0, which while not a valid reference, it still ok
+        bool isValidID = ( (*iter) == 0 || bool(sn_netObjects[(*iter)]));
+        if ( isValidID && (*iter == possibleTeamOwner->ID()) )
             return true;
     }
     return false;

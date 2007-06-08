@@ -4223,28 +4223,45 @@ void oldFortressAutomaticAssignment(zZone *zone, zMonitorPtr monitor)
 
 
                 //
-                gVectorExtra< nNetObjectID > teamOwners;
-                teamOwners.push_back(team->ID());
-                zEffectGroupPtr currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), teamOwners));
+                zEffectGroupPtr currentZoneEffect; 
 
                 // The part for the defender
-                zValidatorPtr validator = zValidatorPtr( new zValidatorOwnerTeam(_ignore, _ignore) );
+                zValidatorPtr validator; 
+		if (sg_singlePlayer) {
+		  // In single player mode, all the players teams have the ID 0, making team logic fail
+		  gVectorExtra< nNetObjectID > playerOwners;
+		  playerOwners.push_back(closest->Player()->ID());
+		  currentZoneEffect = zEffectGroupPtr(new zEffectGroup(playerOwners, gVectorExtra< nNetObjectID >()));
+		  validator = zValidatorPtr( new zValidatorOwner(_ignore, _ignore) );
+		}
+		else {
+		  gVectorExtra< nNetObjectID > teamOwners;
+		  teamOwners.push_back(team->ID());
+		  currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), teamOwners));
+		  validator = zValidatorPtr( new zValidatorOwnerTeam(_ignore, _ignore) );
+		}
 
                 zMonitorInfluencePtr inflDefender = zMonitorInfluencePtr(new zMonitorInfluence( monitor ));
-                inflDefender->setInfluenceSlide( sg_defendRate );
+                inflDefender->setInfluenceSlide( -1.0 * sg_defendRate );
 
                 // Store all the objects
                 validator->addMonitorInfluence( inflDefender );
-                currentZoneEffect->setValidator( validator );
+                currentZoneEffect->addValidator( validator );
 
                 // The part for the attaquer
-                validator = zValidatorPtr( new zValidatorAllButOwnerTeam(_ignore, _ignore) );
+		if (sg_singlePlayer) {
+		  // In single player mode, all the players teams have the ID 0, making team logic fail
+		  validator = zValidatorPtr( new zValidatorAllButOwner(_ignore, _ignore) );
+		}
+		else {
+		  validator = zValidatorPtr( new zValidatorAllButOwnerTeam(_ignore, _ignore) );
+		}
 
                 zMonitorInfluencePtr inflAttaquer = zMonitorInfluencePtr(new zMonitorInfluence( monitor ));
-                inflAttaquer->setInfluenceSlide( sg_conquestRate );
+                inflAttaquer->setInfluenceSlide(  sg_conquestRate );
                 // Store all the objects
                 validator->addMonitorInfluence( inflAttaquer );
-                currentZoneEffect->setValidator( validator );
+                currentZoneEffect->addValidator( validator );
 
 
 

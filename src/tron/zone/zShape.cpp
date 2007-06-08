@@ -257,7 +257,10 @@ void zShapeCircle::render(const eCamera * cam )
 #ifdef DADA
     eCoord rot(cos(rotation_->GetFloat()) , sin(rotation_->GetFloat()));
 #else
-    eCoord rot(cos(rotation_.Evaluate(lasttime_ - referencetime_) ), sin(rotation_.Evaluate(lasttime_ - referencetime_)));
+    //    eCoord rot(cos(rotation_.Evaluate(lasttime_ - referencetime_) ), sin(rotation_.Evaluate(lasttime_ - referencetime_)));
+    eCoord rot(1,0);
+    REAL currAngle = rotation_.Evaluate(lasttime_ - referencetime_);
+    rot = rot.Turn( cos(currAngle), sin(currAngle) );
 #endif
 
     GLfloat m[4][4]={{rot.x,rot.y,0,0},

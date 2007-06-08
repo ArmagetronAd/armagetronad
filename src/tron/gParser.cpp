@@ -493,8 +493,65 @@ gParser::parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
     color.b_ = myxmlGetPropFloat(cur, "blue");
     color.a_ = myxmlGetPropFloat(cur, "alpha");
 
+    /*
+    string colorName = myxmlGetProp(cur, "name");
+    
+
+    // Blue
+
+0xf0f8ff alice,
+0x007fff azure,
+0x007ba7 cerulean,
+0x0047ab cobalt
+0x6495ed cornflower
+0x0000c8 dark
+0x1560bd denim
+0x1e90ff dodger
+0x4b0082 indigo
+0x002fa7 internationalklein
+0xbdbbd7 lavender
+0x003366 midnight
+0x000080 navy
+0xccccff periwinkle
+0x32127a persian
+0x003399 powder
+0x003153 prussian
+0x4169e1 royal
+0x082567 sapphire
+0x4682b4 steel
+0x120a8f ultramarine
+
+
+
+  // RED
+
+0xe32636 alizarin,
+0x800020 burgundy,
+0xc41e3a cardinal,
+0x960018 carmine,
+0xde3163 cerise
+0xcd5c5c chestnut
+0xdc143c crimson
+0x801818 falu
+0xff00ff fuchsia
+0xff0090 magenta
+0x800000 maroon
+0x993366 mauve
+0xc71585 red-violet
+0xb7410e rust
+0xcc8899 puce
+0x92000a sangria
+0xff2400 scarlet
+0xe2725b terracotta
+0xcc4e5c darkterracotta
+0xe34234 vermilion
+    */
+
     return color;
 }
+
+
+
 
 zShapePtr
 gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, unsigned short idZone, const xmlChar * keyword)
@@ -512,7 +569,8 @@ gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, unsigned short id
     // Set up the default rotation speed
     {
       tFunction tfRotation;
-      tfRotation.SetOffset( .3f );
+      tfRotation.SetOffset( 0.0f );
+      tfRotation.SetSlope( .3f );
       shape->setRotation( tfRotation );
     }
 
@@ -710,7 +768,12 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
         else if (isElement(cur->name, (const xmlChar *)"Rotation", keyword)) {
             zZoneInfluenceItemRotation *b = new zZoneInfluenceItemRotation(refZone);
-            b->set(myxmlGetPropFloat(cur, "rotationSpeed"), myxmlGetPropFloat(cur, "rotationAcceleration"));
+            b->set(
+		   myxmlGetPropFloat(cur, "rotationBaseAngle"), 
+		   myxmlGetPropFloat(cur, "rotationValueAngle"), 
+		   myxmlGetPropFloat(cur, "rotationBaseSpeed"),
+		   myxmlGetPropFloat(cur, "rotationValueSpeed") 
+		   );
             infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));
         }
         else if (isElement(cur->name, (const xmlChar *)"Scale", keyword)) {
@@ -1046,7 +1109,7 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
     while( cur != NULL) {
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
         else if (isElement(cur->name, (const xmlChar *)"User", keyword)) {
-            currentZoneEffect->setValidator(parseZoneEffectGroupValidator(grid, cur, keyword));
+            currentZoneEffect->addValidator(parseZoneEffectGroupValidator(grid, cur, keyword));
         }
         else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
             if (isValidAlternative(cur, keyword)) {
@@ -1124,7 +1187,7 @@ gParser::parseZoneArthemis(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword
 	      // Store all the objects
 	      selector->addEffector( effector );
 	      validator->addSelector( selector );
-	      currentZoneEffect->setValidator( validator );
+	      currentZoneEffect->addValidator( validator );
 	      zone->addEffectGroupEnter( currentZoneEffect );
 	    }
 	  else {
@@ -1132,33 +1195,61 @@ gParser::parseZoneArthemis(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword
 	    // use the same name as the associated zone
             monitors[zoneName] = monitor;
 	    monitor->setInit( 0.0f );
-	    monitor->setDrift( -1.0 * sg_conquestDecayRate );
+	    monitor->setDrift( -1.0f * sg_conquestDecayRate );
 	    monitor->setClampLow ( 0.0f );
 	    monitor->setClampHigh( 1.0f );
 
 	    zMonitorRulePtr rule;
-	    rule = zMonitorRulePtr( new zMonitorRuleOver( 1.0f ) );
-
-	    zEffectGroupPtr currentZoneEffect;
 	    {
-	      // Create an effect group without ownership
-	      currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), gVectorExtra< nNetObjectID >()));
+              // All that happens once the zone is conquered
+	      rule = zMonitorRulePtr( new zMonitorRuleOver( 1.0f ) );
 
-	      // Create a validator for everybody (i.e. All)
-	      zValidatorPtr validator = zValidatorPtr( new zValidatorAll(_ignore, _ignore) );
+	      zEffectGroupPtr currentZoneEffect;
+	      {
+		// Create an effect group without ownership
+		currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), gVectorExtra< nNetObjectID >()));
 
-	      zZoneInfluencePtr infl = zZoneInfluencePtr(new zZoneInfluence(zone));
-	      zZoneInfluenceItemScale *b = new zZoneInfluenceItemScale(zone);
-	      b->set( -1.5f );
-	      infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));
+		// Create a validator for everybody (i.e. All)
+		zValidatorPtr validator = zValidatorPtr( new zValidatorAll(_ignore, _ignore) );
 
-	      validator->addZoneInfluence( infl );
-	      currentZoneEffect->setValidator( validator );
-	      zone->addEffectGroupEnter( currentZoneEffect );
+		// Once the zone is conquered, collapse the zhape
+		zZoneInfluenceItemScale *scaler = new zZoneInfluenceItemScale(zone);
+		scaler->set( -1.5f );
+
+		zZoneInfluencePtr infl = zZoneInfluencePtr(new zZoneInfluence(zone));
+		infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(scaler));
+
+		validator->addZoneInfluence( infl );
+		currentZoneEffect->addValidator( validator );
+	      }
+
+	      rule->addEffectGroup( currentZoneEffect );
+	      monitor->addRule(rule);
 	    }
 
-	    rule->addEffectGroup( currentZoneEffect );
-	    monitor->addRule(rule);
+	    {
+	      rule = zMonitorRulePtr( new zMonitorRuleUnder( 1.0f ) ); // i.e: Always
+	      zEffectGroupPtr currentZoneEffect;
+	      {
+		// Create an effect group without ownership
+		currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), gVectorExtra< nNetObjectID >()));
+
+		// Create a validator for everybody (i.e. All)
+		zValidatorPtr validator = zValidatorPtr( new zValidatorAll(_ignore, _ignore) );
+
+		zZoneInfluenceItemRotation *b = new zZoneInfluenceItemRotation(zone);
+		b->set( 0.0f, 0.0f, 0.3f, 2.0f * 3.141f / 11.0f);
+
+		zZoneInfluencePtr infl = zZoneInfluencePtr(new zZoneInfluence(zone));
+	        infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));
+
+		validator->addZoneInfluence( infl );
+		currentZoneEffect->addValidator( validator );
+	      }
+	      rule->addEffectGroup( currentZoneEffect );
+	      monitor->addRule(rule);
+	    }
+
 	    zone->setOldFortressAutomaticAssignmentBehavior(true);
 	  }
 	}

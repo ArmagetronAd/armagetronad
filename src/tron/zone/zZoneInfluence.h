@@ -41,13 +41,20 @@ public:
 
 class zZoneInfluenceItemRotation : public zZoneInfluenceItem {
 protected:
-    REAL rotationSpeed;
-    REAL rotationAcceleration;
+    REAL rotationBaseAngle; // The base component of the rotation speed
+    REAL rotationValueAngle; // This component of the speed is affected by "value"
+    REAL rotationBaseSpeed;
+    REAL rotationValueSpeed;
 public:
     zZoneInfluenceItemRotation(zZonePtr aZone);
     virtual ~zZoneInfluenceItemRotation() {};
 
-    void set(REAL rotSp, REAL rotAcc) {rotationSpeed = rotSp; rotationAcceleration = rotAcc;};
+    void set(REAL rotBaseAn, REAL rotValueAn, REAL rotBaseSp, REAL rotValueSp) {
+      rotationBaseAngle = rotBaseAn; 
+      rotationValueAngle = rotValueAn; 
+      rotationBaseSpeed = rotBaseSp;
+      rotationValueSpeed = rotValueSp;
+    };
     virtual void apply(REAL value);
 };
 

@@ -46,8 +46,11 @@ public:
     ~zEffectGroup();
     void operator=(zEffectGroup const &other);
 
-    void setValidator(zValidatorPtr _validator) {validators.push_back( _validator );};
-
+    void addValidator(zValidatorPtr _validator) {validators.push_back( _validator );};
+    /*
+    void addMonitorInfluence(zMonitorInfluencePtr newInfluence) {monitorInfluences.push_back( newInfluence );};
+    void addZoneInfluence(zZoneInfluencePtr newInfluence) {zoneInfluences.push_back( newInfluence );};
+    */
     bool isValidUser(gCycle *possibleUser);
     gVectorExtra <ePlayerNetID *> getCalculatedTarget( gCycle * triggerer );
 
@@ -61,6 +64,8 @@ public:
 
 protected:
     std::vector<zValidatorPtr> validators;
+    //    zMonitorInfluencePtrs monitorInfluences;
+    //    zZoneInfluencePtrs zoneInfluences;
 
     gVectorExtra< nNetObjectID > d_owners;
     gVectorExtra< nNetObjectID > d_teamOwners;
