@@ -36,6 +36,7 @@ class tFunction
 {
 public:
     tFunction();  //!< constructor
+    tFunction(REAL offset, REAL slope);  //!< constructor
     ~tFunction(); //!< destructor
 
     REAL Evaluate( REAL argument ) const; //!< evaluates the function
