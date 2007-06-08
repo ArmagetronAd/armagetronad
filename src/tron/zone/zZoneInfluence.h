@@ -7,6 +7,7 @@
 #include "eCoord.h"
 #include "tSafePTR.h"
 #include "rColor.h"
+#include "tFunction.h"
 
 class zZone;
 //typedef boost::shared_ptr< zZone > zZonePtr;
@@ -41,19 +42,15 @@ public:
 
 class zZoneInfluenceItemRotation : public zZoneInfluenceItem {
 protected:
-    REAL rotationBaseAngle; // The base component of the rotation speed
-    REAL rotationValueAngle; // This component of the speed is affected by "value"
-    REAL rotationBaseSpeed;
-    REAL rotationValueSpeed;
+    tFunction rotationAngle; // The base component of the rotation speed
+    tFunction rotationSpeed;
 public:
     zZoneInfluenceItemRotation(zZonePtr aZone);
     virtual ~zZoneInfluenceItemRotation() {};
 
-    void set(REAL rotBaseAn, REAL rotValueAn, REAL rotBaseSp, REAL rotValueSp) {
-      rotationBaseAngle = rotBaseAn; 
-      rotationValueAngle = rotValueAn; 
-      rotationBaseSpeed = rotBaseSp;
-      rotationValueSpeed = rotValueSp;
+    void set(tFunction rotAngle, tFunction rotSpeed) {
+      rotationAngle = rotAngle; 
+      rotationSpeed = rotSpeed; 
     };
     virtual void apply(REAL value);
 };

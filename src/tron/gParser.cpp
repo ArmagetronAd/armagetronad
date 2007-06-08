@@ -768,12 +768,16 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
         else if (isElement(cur->name, (const xmlChar *)"Rotation", keyword)) {
             zZoneInfluenceItemRotation *b = new zZoneInfluenceItemRotation(refZone);
-            b->set(
-		   myxmlGetPropFloat(cur, "rotationBaseAngle"), 
-		   myxmlGetPropFloat(cur, "rotationValueAngle"), 
-		   myxmlGetPropFloat(cur, "rotationBaseSpeed"),
-		   myxmlGetPropFloat(cur, "rotationValueSpeed") 
-		   );
+
+	    string str = string(myxmlGetProp(cur, "rotationAngle"));
+	    tFunction tfRotationAngle;
+	    myCheapParameterSplitter(str, tfRotationAngle, true);
+
+	    str = string(myxmlGetProp(cur, "rotationSpeed"));
+	    tFunction tfRotationSpeed;
+	    myCheapParameterSplitter(str, tfRotationSpeed, true);
+
+            b->set(tfRotationAngle, tfRotationSpeed);
             infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));
         }
         else if (isElement(cur->name, (const xmlChar *)"Scale", keyword)) {
@@ -1250,7 +1254,7 @@ gParser::parseZoneArthemis(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword
 		zValidatorPtr validator = zValidatorPtr( new zValidatorAll(_ignore, _ignore) );
 
 		zZoneInfluenceItemRotation *b = new zZoneInfluenceItemRotation(zone);
-		b->set( 0.0f, 0.0f, 0.3f, 2.0f * 3.141f / 11.0f);
+		b->set( tFunction(0.0f, 0.0f), tFunction(0.3f, 2.0f * 3.141f / 11.0f) );
 
 		zZoneInfluencePtr infl = zZoneInfluencePtr(new zZoneInfluence(zone));
 	        infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));

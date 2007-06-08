@@ -25,17 +25,15 @@ zZoneInfluenceItem::~zZoneInfluenceItem() {}
 
 zZoneInfluenceItemRotation::zZoneInfluenceItemRotation(zZonePtr aZone):
         zZoneInfluenceItem(aZone),
-        rotationBaseAngle(0.0),
-	rotationValueAngle(0.0),
-        rotationBaseSpeed(0.0),
-        rotationValueSpeed(0.0)
+        rotationAngle(),
+        rotationSpeed()
 {}
 
 void
 zZoneInfluenceItemRotation::apply(REAL value) {
     tFunction tfRotation;
-    tfRotation.SetOffset( rotationBaseAngle + rotationValueAngle*value );
-    tfRotation.SetSlope( rotationBaseSpeed + rotationValueSpeed*value*value );
+    tfRotation.SetOffset( rotationAngle(value) );
+    tfRotation.SetSlope( rotationSpeed(value*value) );
     zone->getShape()->setRotation( tfRotation );
 }
 
