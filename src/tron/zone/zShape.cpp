@@ -69,11 +69,6 @@ zShape::zShape(nMessage &m):eNetGameObject(m)
 
     m >> idZone_;
 
-    /*
-    zZone *aZone= static_cast<zZone *>(Object(idZone_));
-    aZone->setShape(zShapePtr(this));
-    std::cout << "zone for shape in constructor is " << (aZone==0?"found":"not found") << std::endl;
-    */
 }
 
 
@@ -159,7 +154,10 @@ void zShape::setPosY(const tFunction & y){
 }
 
 void zShape::setRotation(const tFunction & r){
-    rotation_ = r;
+  float pos = rotation_.Evaluate(lasttime_ - referencetime_);
+  rotation_.SetSlope(r.GetSlope() );
+  rotation_.SetOffset( pos + rotation_.GetSlope() * ( referencetime_ - lasttime_ ) );
+  //    rotation_ = r;
 }
 
 void zShape::setScale(const tFunction & s){

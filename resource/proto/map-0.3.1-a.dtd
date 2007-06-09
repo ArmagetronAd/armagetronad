@@ -67,17 +67,17 @@
 <!ATTLIST Monitor low   CDATA "0.0">
 <!ATTLIST Monitor high  CDATA "1.0">
 
-<!ELEMENT OnOver (EffectGroup+) >
+<!ELEMENT OnOver (EffectGroup | ZoneInfluence | MonitorInfluence)+ >
 <!ATTLIST OnOver value  CDATA #REQUIRED>
 
-<!ELEMENT OnUnder (EffectGroup+) >
+<!ELEMENT OnUnder (EffectGroup | ZoneInfluence | MonitorInfluence)+ >
 <!ATTLIST OnUnder value CDATA #REQUIRED>
 
-<!ELEMENT InRange (EffectGroup+) >
+<!ELEMENT InRange (EffectGroup | ZoneInfluence | MonitorInfluence)+ >
 <!ATTLIST InRange low   CDATA #REQUIRED>
 <!ATTLIST InRange high  CDATA #REQUIRED>
 
-<!ELEMENT OutsideRange (EffectGroup+) >
+<!ELEMENT OutsideRange (EffectGroup  | ZoneInfluence | MonitorInfluence)+ >
 <!ATTLIST OutsideRange low  CDATA #REQUIRED>
 <!ATTLIST OutsideRange high CDATA #REQUIRED>
 

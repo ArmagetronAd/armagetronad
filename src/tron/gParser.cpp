@@ -771,11 +771,11 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
 
 	    string str = string(myxmlGetProp(cur, "rotationAngle"));
 	    tFunction tfRotationAngle;
-	    myCheapParameterSplitter(str, tfRotationAngle, true);
+	    myCheapParameterSplitter(str, tfRotationAngle, false);
 
 	    str = string(myxmlGetProp(cur, "rotationSpeed"));
 	    tFunction tfRotationSpeed;
-	    myCheapParameterSplitter(str, tfRotationSpeed, true);
+	    myCheapParameterSplitter(str, tfRotationSpeed, false);
 
             b->set(tfRotationAngle, tfRotationSpeed);
             infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));
@@ -1433,62 +1433,50 @@ gParser::parseMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         if (sn_GetNetState() != nCLIENT )
         {
             zMonitorRulePtr rule;
+	    bool ruleFound = false;
 
             while(cur != NULL) {
                 if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
                 else if (isElement(cur->name, (const xmlChar *)"OnOver", keyword)) {
                     rule = zMonitorRulePtr(new zMonitorRuleOver(myxmlGetPropFloat(cur, "value")));
-                    xmlNodePtr cur2 = cur->xmlChildrenNode;
-                    while(cur2 != NULL) {
-                        if (!xmlStrcmp(cur2->name, (const xmlChar *)"text") || !xmlStrcmp(cur2->name, (const xmlChar *)"comment")) {}
-                        else if (isElement(cur2->name, (const xmlChar *)"EffectGroup", keyword)) {
-                            rule->addEffectGroup(parseZoneEffectGroup(grid, cur2, keyword));
-                        }
-                        cur2 = cur2->next;
-                    }
-                    monitor->addRule(rule);
-                }
+		    ruleFound = true;
+		}
                 else if (isElement(cur->name, (const xmlChar *)"OnUnder", keyword)) {
                     rule = zMonitorRulePtr(new zMonitorRuleUnder(myxmlGetPropFloat(cur, "value")));
-                    xmlNodePtr cur2 = cur->xmlChildrenNode;
-                    while(cur2 != NULL) {
-                        if (!xmlStrcmp(cur2->name, (const xmlChar *)"text") || !xmlStrcmp(cur2->name, (const xmlChar *)"comment")) {}
-                        else if (isElement(cur2->name, (const xmlChar *)"EffectGroup", keyword)) {
-                            rule->addEffectGroup(parseZoneEffectGroup(grid, cur2, keyword));
-                        }
-                        cur2 = cur2->next;
-                    }
-                    monitor->addRule(rule);
+		    ruleFound = true;
                 }
                 else if (isElement(cur->name, (const xmlChar *)"InRange", keyword)) {
                     rule = zMonitorRulePtr(new zMonitorRuleInRange(myxmlGetPropFloat(cur, "low"), myxmlGetPropFloat(cur, "high")));
-                    xmlNodePtr cur2 = cur->xmlChildrenNode;
-                    while(cur2 != NULL) {
-                        if (!xmlStrcmp(cur2->name, (const xmlChar *)"text") || !xmlStrcmp(cur2->name, (const xmlChar *)"comment")) {}
-                        else if (isElement(cur2->name, (const xmlChar *)"EffectGroup", keyword)) {
-                            rule->addEffectGroup(parseZoneEffectGroup(grid, cur2, keyword));
-                        }
-                        cur2 = cur2->next;
-                    }
-                    monitor->addRule(rule);
+		    ruleFound = true;
                 }
                 else if (isElement(cur->name, (const xmlChar *)"OutsideRange", keyword)) {
                     rule = zMonitorRulePtr(new zMonitorRuleOutsideRange(myxmlGetPropFloat(cur, "low"), myxmlGetPropFloat(cur, "high")));
-                    xmlNodePtr cur2 = cur->xmlChildrenNode;
-                    while(cur2 != NULL) {
-                        if (!xmlStrcmp(cur2->name, (const xmlChar *)"text") || !xmlStrcmp(cur2->name, (const xmlChar *)"comment")) {}
-                        else if (isElement(cur2->name, (const xmlChar *)"EffectGroup", keyword)) {
-                            rule->addEffectGroup(parseZoneEffectGroup(grid, cur2, keyword));
-                        }
-                        cur2 = cur2->next;
-                    }
-                    monitor->addRule(rule);
+		    ruleFound = true;
                 }
                 else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
                     if (isValidAlternative(cur, keyword)) {
                         parseAlternativeContent(grid, cur);
                     }
                 }
+		if (ruleFound == true ) {
+                    xmlNodePtr cur2 = cur->xmlChildrenNode;
+                    while(cur2 != NULL) {
+                        if (!xmlStrcmp(cur2->name, (const xmlChar *)"text") || !xmlStrcmp(cur2->name, (const xmlChar *)"comment")) {}
+                        else if (isElement(cur2->name, (const xmlChar *)"EffectGroup", keyword)) {
+                            rule->addEffectGroup(parseZoneEffectGroup(grid, cur2, keyword));
+                        }
+			else if (isElement(cur2->name, (const xmlChar *)"ZoneInfluence", keyword)) {
+                            rule->addZoneInfluence(parseZoneEffectGroupZone(grid, cur2, keyword));
+                        }
+			else if (isElement(cur2->name, (const xmlChar *)"MonitorInfluence", keyword)) {
+			    rule->addMonitorInfluence(parseZoneEffectGroupMonitor(grid, cur2, keyword));
+                        }
+                        cur2 = cur2->next;
+                    }
+		    ruleFound = false;
+                    monitor->addRule(rule);
+                }
+
                 cur = cur->next;
             }
         }

@@ -10,6 +10,7 @@
 #include "zone/zMisc.h"
 #include "zone/zEffectGroup.h"
 #include "tFunction.h"
+#include "zone/zZoneInfluence.h"
 
 class zMonitorRule;
 class zMonitor;
@@ -33,7 +34,6 @@ public:
             contributorsSet(),
             rules(),
             value(0.0),
-            initialValue(0.0),
             drift(0.0),
             minValue(0.0),
             maxValue(1.0)
@@ -54,7 +54,7 @@ public:
     void setName(string name) {this->name = name;};
     void addRule(zMonitorRulePtr aRule);
 
-    void setInit(REAL v) {initialValue = v;};
+    void setInit(REAL v) {value = v;};
     void setDrift(REAL d) {drift = d;};
     void setClampLow(REAL l)  {minValue = l;};
     void setClampHigh(REAL h) {maxValue = h;};
@@ -77,7 +77,6 @@ protected:
     zMonitorRulePtrs rules;
 
     REAL value; // The current value of the monitor
-    REAL initialValue; // When the monitor is instantiated, it should start at this value
     REAL drift; // How much the value of the monitor changes per second
 
     REAL minValue; //!< Low bound that value can take
@@ -96,9 +95,13 @@ public:
     void addEffectGroup(zEffectGroupPtr anEffectGroupPtr) {effectGroupList.push_back(anEffectGroupPtr);};
     void applyRule(triggerers &contributors, REAL time, REAL value) ;
 
+    void addMonitorInfluence(zMonitorInfluencePtr newInfluence) {monitorInfluences.push_back( newInfluence );};
+    void addZoneInfluence(zZoneInfluencePtr aZoneInfluencePtr) {zoneInfluences.push_back(aZoneInfluencePtr);};
 protected:
     zEffectGroupPtrs effectGroupList;
 
+    zMonitorInfluencePtrs monitorInfluences;
+    zZoneInfluencePtrs zoneInfluences;
 };
 
 /*

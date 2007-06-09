@@ -55,7 +55,7 @@ zMonitor::affectSet(gCycle* user, REAL triggererInfluenceSet, Triad marked) {
 bool zMonitor::Timestep( REAL time )
 {
     // Do we need to reset the value?
-    if (contributorsSet.size()!=0)
+    if (contributorsSet.size()!=0) 
         value = totalInfluenceSet;
 
     // Compute the sliding influence, ie: proportional to time
@@ -136,6 +136,25 @@ void zMonitorRule::applyRule(triggerers &contributors, REAL time, REAL _value) {
             (*iter)->apply(*iter2, time, value);
         }
     }
+    
+    gVectorExtra< nNetObjectID > owners;
+    gVectorExtra< nNetObjectID > teamOwners;
+
+    zMonitorInfluencePtrs::const_iterator iterMonitorInfluence;
+    for(iterMonitorInfluence=monitorInfluences.begin();
+	iterMonitorInfluence!=monitorInfluences.end();
+	++iterMonitorInfluence)
+      {
+	(*iterMonitorInfluence)->apply(owners, teamOwners, (gCycle*)0, _value);
+      }
+
+    zZoneInfluencePtrs::const_iterator iterZoneInfluence;
+    for(iterZoneInfluence=zoneInfluences.begin();
+	iterZoneInfluence!=zoneInfluences.end();
+	++iterZoneInfluence)
+      {
+	(*iterZoneInfluence)->apply(_value);
+      }
 }
 
 /*
