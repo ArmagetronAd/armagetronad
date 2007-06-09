@@ -138,6 +138,32 @@ gParser::myxmlGetPropInt(xmlNodePtr cur, const char *name) {
     return r;
 }
 
+rColor
+gParser::myxmlGetPropColorFromHex(xmlNodePtr cur, const char *name) {
+    char *v = myxmlGetProp(cur, name);
+    if (v == NULL)	return rColor();
+    int r = strtoul(v, NULL, 0);
+    rColor aColor;
+    if (strlen(v) >= 9) {
+      aColor.a_ = ((REAL)(r & 255)) / 255.0;
+      r /= 256;
+      if (aColor.a_ > 0.7)
+	aColor.a_ = 0.7;
+    }
+    else {
+      aColor.a_ = 0.7;
+    }
+    aColor.b_ = ((REAL)(r & 255)) / 255.0;
+    r /= 256;
+    aColor.g_ = ((REAL)(r & 255)) / 255.0;
+    r /= 256;
+    aColor.r_ = ((REAL)(r & 255)) / 255.0;
+    r /= 256;
+
+    xmlFree(v);
+    return aColor;
+}
+
 float
 gParser::myxmlGetPropFloat(xmlNodePtr cur, const char *name) {
     char *v = myxmlGetProp(cur, name);
@@ -487,14 +513,27 @@ gParser::parseSpawn(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 rColor
 gParser::parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-    rColor color;
-    color.r_ = myxmlGetPropFloat(cur, "red");
-    color.g_ = myxmlGetPropFloat(cur, "green");
-    color.b_ = myxmlGetPropFloat(cur, "blue");
-    color.a_ = myxmlGetPropFloat(cur, "alpha");
+  rColor color;
+  color.r_ = myxmlGetPropFloat(cur, "red");
+  color.g_ = myxmlGetPropFloat(cur, "green");
+  color.b_ = myxmlGetPropFloat(cur, "blue");
+  color.a_ = myxmlGetPropFloat(cur, "alpha");
+  
+  
+  if(myxmlHasProp(cur, "hexCode"))
+  {
+    color = myxmlGetPropColorFromHex(cur, "hexCode");
+  }
 
-    /*
+  /*
+  if(myxmlHasProp(cur, "name") {
     string colorName = myxmlGetProp(cur, "name");
+    
+  }
+  */
+    
+    
+    /*
     
 
     // Blue

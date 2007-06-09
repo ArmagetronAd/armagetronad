@@ -54,6 +54,7 @@ protected:
     bool myxmlGetPropBool(xmlNodePtr cur, const char *name);
     Triad myxmlGetPropTriad(xmlNodePtr cur, const char *name);
     void myxmlGetDirection(xmlNodePtr cur, float &x, float &y);
+    rColor myxmlGetPropColorFromHex(xmlNodePtr cur, const char *name);
 
     //    bool isElement(const xmlChar *elementName, const xmlChar *searchedElement);
     bool isElement(const xmlChar *elementName, const xmlChar *searchedElement, const xmlChar * keyword = NULL);

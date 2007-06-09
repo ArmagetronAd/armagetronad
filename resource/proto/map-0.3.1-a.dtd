@@ -97,6 +97,9 @@
 <!ATTLIST Color green CDATA "0.0">
 <!ATTLIST Color blue  CDATA "0.0">
 <!ATTLIST Color alpha  CDATA "1.0">
+<!ATTLIST Color hexCode CDATA #IMPLIED>
+<!ATTLIST Color name CDATA #IMPLIED>
+
 
 <!ELEMENT Enter   (EffectGroup+) >
 <!ELEMENT Inside  (EffectGroup+) >
