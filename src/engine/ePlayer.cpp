@@ -3796,7 +3796,7 @@ void ePlayerNetID::CreateNewTeam()
     tASSERT ( nCLIENT !=  sn_GetNetState() );
 
     if(!TeamChangeAllowed()) {
-        sn_ConsoleOut(tOutput("$player_teamchanges_disallowed"));
+        sn_ConsoleOut(tOutput("$player_teamchanges_disallowed"), Owner());
         return;
     }
 
