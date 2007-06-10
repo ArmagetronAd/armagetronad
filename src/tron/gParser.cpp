@@ -51,7 +51,7 @@ MapIdToGameId playerAsso; // mapping between map's playerId and in-game player
 #include "nConfig.h"
 #define DEFAULT_POLYGONAL_SHAPE_USED "FALSE"
 static tString polygonal_shape_used(DEFAULT_POLYGONAL_SHAPE_USED);
-static nSettingItemWatched<tString> safetymecanism_polygonal_shapeused("POLYGONAL_SHAPE_USED",polygonal_shape_used, nConfItemVersionWatcher::Group_Breaking, 21 );
+static nSettingItemWatched<tString> safetymecanism_polygonal_shapeused("POLYGONAL_SHAPE_USED",polygonal_shape_used, nConfItemVersionWatcher::Group_Breaking, 20 );
 
 int mapVersion = 0; // The version of the map currently being parsed. Used to adapt parsing to support version specific features
 

@@ -35,7 +35,7 @@ zValidator::zValidator(Triad _positive, Triad _marked)
     monitorInfluences(), 
     zoneInfluences(),
     positive(_positive), 
-    marked(_marked),
+    marked(_marked)
 { }
 
 zValidator::zValidator(zValidator const &other):
