@@ -643,7 +643,22 @@ gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, unsigned short id
 zShapePtr
 gParser::parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, unsigned short idZone, const xmlChar * keyword)
 {
-    zShapePtr shape = zShapePtr( new zShapeCircle(grid, idZone) );
+    zShapeCircle *shapePtr = new zShapeCircle(grid, idZone) ;
+
+    // The radius need to be handled separatly
+    tFunction tfRadius;
+    if (myxmlHasProp(cur, "radius")) {
+        string str = string(myxmlGetProp(cur, "radius"));
+        myCheapParameterSplitter(str, tfRadius, true);
+    }
+    else {
+      tfRadius.SetOffset( 1.0 * sizeMultiplier );
+      tfRadius.SetSlope( 0.0 );
+    }
+    shapePtr->setRadius( tfRadius );
+
+    zShapePtr shape = zShapePtr( shapePtr );
+
     parseShape(grid, cur, keyword, shape);
 
     return shape;
@@ -704,6 +719,7 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
 #else
         string str = string(myxmlGetProp(cur, "scale"));
         tFunction tfScale;
+
         myCheapParameterSplitter(str, tfScale, false);
         shape->setScale( tfScale );
 #endif
@@ -716,6 +732,7 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
 #else
         string str = string(myxmlGetProp(cur, "rotation"));
         tFunction tfRotation;
+
         myCheapParameterSplitter(str, tfRotation, false);
         shape->setRotation( tfRotation );
 #endif

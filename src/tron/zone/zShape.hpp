@@ -101,6 +101,11 @@ public :
 
     bool isEmulatingOldZone() {return emulatingOldZone_;}; 
     bool emulatingOldZone_;
+
+    void setRadius(tFunction radius) {this->radius = radius;};
+protected:
+    tFunction radius;
+
 private:
     virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
 };

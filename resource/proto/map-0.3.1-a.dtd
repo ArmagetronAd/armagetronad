@@ -83,12 +83,13 @@
 
 
 <!ELEMENT ShapeCircle (Point, Color)>
-<!ATTLIST ShapeCircle scale CDATA #REQUIRED>
+<!ATTLIST ShapeCircle scale CDATA "1.0">
 <!ATTLIST ShapeCircle growth CDATA "0.0">
 <!ATTLIST ShapeCircle rotation CDATA "0.0">
+<!ATTLIST ShapeCircle radius CDATA "1.0">
 
 <!ELEMENT ShapePolygon (Point, Color, Point+)>
-<!ATTLIST ShapePolygon scale CDATA #REQUIRED>
+<!ATTLIST ShapePolygon scale CDATA "1.0">
 <!ATTLIST ShapePolygon growth CDATA "0.0">
 <!ATTLIST ShapePolygon rotation CDATA "0.0">
 

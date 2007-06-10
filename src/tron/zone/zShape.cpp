@@ -223,13 +223,14 @@ bool zShapeCircle::isInteracting(eGameObject * target)
     {
         if ( prey->Player() && prey->Alive() )
         {
+	  REAL effectiveRadius;
 #ifdef DADA
-            REAL r = scale_->GetFloat();
+            effectiveRadius = scale_->GetFloat()  * radius.Evaluate(lasttime_ - referencetime_);
 #else
-            REAL r = scale_.Evaluate(lasttime_ - referencetime_);
+            effectiveRadius = scale_.Evaluate(lasttime_ - referencetime_) * radius.Evaluate(lasttime_ - referencetime_);
 #endif
             // Is the player inside or outside the zone
-            if ( (r >= 0.0) && ( prey->Position() - Position() ).NormSquared() < r*r )
+            if ( (effectiveRadius >= 0.0) && ( prey->Position() - Position() ).NormSquared() < effectiveRadius*effectiveRadius )
             {
                 interact = true;
             }
@@ -299,22 +300,23 @@ void zShapeCircle::render(const eCamera * cam )
 
     color_.Apply();
 
+    REAL effectiveRadius;
 #ifdef DADA
-    REAL r = scale_->GetFloat();
+    effectiveRadius = scale_->GetFloat()  * radius.Evaluate(lasttime_ - referencetime_);
 #else
-    REAL r = scale_.Evaluate(lasttime_ - referencetime_);
+    effectiveRadius = scale_.Evaluate(lasttime_ - referencetime_) * radius.Evaluate(lasttime_ - referencetime_);
 #endif
-    if (r >= 0.0)
+    if (effectiveRadius >= 0.0)
     {
         for ( int i = sg_segments - 1; i>=0; --i )
         {
             REAL a = i * 2 * 3.14159 / REAL( sg_segments );
             REAL b = a + seglen;
 
-            REAL sa = r * sin(a);
-            REAL ca = r * cos(a);
-            REAL sb = r * sin(b);
-            REAL cb = r * cos(b);
+            REAL sa = effectiveRadius * sin(a);
+            REAL ca = effectiveRadius * cos(a);
+            REAL sb = effectiveRadius * sin(b);
+            REAL cb = effectiveRadius * cos(b);
 
             glVertex3f(sa, ca, bot);
             glVertex3f(sa, ca, top);

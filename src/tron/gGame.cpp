@@ -4180,7 +4180,7 @@ void oldFortressAutomaticAssignment(zZone *zone, zMonitorPtr monitor)
 
             if (other )
             {
-                eTeam * otherTeam = other->Player()->CurrentTeam();
+	      // eTeam * otherTeam = other->Player()->CurrentTeam();
                 eCoord otherpos = other->Position() - zone->GetPosition();
                 REAL distance = otherpos.NormSquared();
                 if ( !closest || distance < closestDistance )
