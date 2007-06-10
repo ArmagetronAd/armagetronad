@@ -166,6 +166,7 @@ zZone::zZone( nMessage & m )
     mixer->PushButton(ZONE_SPAWN, pos);
 
 
+    /*
     shape = zShapePtr(new zShapeCircle(Grid(), ID()));
 
     tFunction asdf = tFunction();
@@ -180,6 +181,7 @@ zZone::zZone( nMessage & m )
     zShapeCircle *circle = dynamic_cast<zShapeCircle *>( (zShape*)shape );
 
     circle->emulatingOldZone_ = true;
+    */
 
     /*
     if (!m.End() && sz_ShapedZones.Supported() ) 
@@ -322,6 +324,7 @@ void zZone::WriteSync( nMessage & m )
     m << shape->getScale();
     m << shape->getRotation();
 
+    m << shape->ID();
 }
 
 // *******************************************************************************
@@ -339,7 +342,7 @@ void zZone::ReadSync( nMessage & m )
     // delegage
     eNetGameObject::ReadSync( m );
 
-    if(shape->isEmulatingOldZone())
+    if(shape && shape->isEmulatingOldZone())
     {
 
         // read color
@@ -406,8 +409,19 @@ void zZone::ReadSync( nMessage & m )
     else
     {
         bool b;
+
+	//        while(!m.End() ) { m >> b;}
+	
+	int count=44-16;
         // Discard the information
-        while(!m.End()) { m >> b;}
+        while(!m.End() && count-->0) { m >> b;}
+	unsigned short shapeID;
+	m >> shapeID;
+	if(sn_netObjects[shapeID]) {
+	  zShape *asdf = dynamic_cast<zShape*>(&*sn_netObjects[shapeID]);
+	  shape = zShapePtr( dynamic_cast<zShape*>(&*sn_netObjects[shapeID]) );
+	}
+	
     }
 }
 
@@ -652,6 +666,7 @@ REAL zZone::Scale( void ) const
 
 void zZone::Render( const eCamera * cam )
 {
+  if (shape)
     shape->render(cam);
 }
 

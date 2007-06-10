@@ -18,8 +18,11 @@ zShape::zShape(eGrid* grid, unsigned short idZone)
         createdtime_(0.0),
         referencetime_(0.0),
         lasttime_(0.0),
-        idZone_(idZone)
-{}
+        idZone_(idZone),
+        newIdZone_(false)
+{
+  joinWithZone();
+}
 
 zShape::zShape(nMessage &m):eNetGameObject(m)
 {
@@ -67,7 +70,13 @@ zShape::zShape(nMessage &m):eNetGameObject(m)
     m >> c.a_;
     setColor(c);
 
-    m >> idZone_;
+    unsigned short anIdZone;
+    m >> anIdZone;
+    if(anIdZone != idZone_) {
+      idZone_ = anIdZone;
+      newIdZone_ = true;
+      joinWithZone();
+    }
 
 }
 
@@ -182,6 +191,11 @@ void zShape::TimeStep( REAL time ) {
         // The shape has collapsed and should be removed
       }
     */
+
+    if(newIdZone_) {
+        joinWithZone();
+    }
+
 }
 
 bool zShape::isInteracting(eGameObject * target) {
@@ -193,16 +207,27 @@ void zShape::render(const eCamera *cam )
 void zShape::render2d(tCoord scale) const
     {}
 
+void zShape::joinWithZone() {
+  if(sn_netObjects[idZone_]) {
+    zZone *asdf = dynamic_cast<zZone*>(&*sn_netObjects[idZone_]);
+    asdf->setShape(zShapePtr(this));
+    newIdZone_ = false;
+  }
+}
 
 zShapeCircle::zShapeCircle(eGrid *grid, unsigned short idZone):
         zShape(grid, idZone),
-        emulatingOldZone_(false)
+        emulatingOldZone_(false),
+	radius(1.0, 0.0)
 {}
 
 zShapeCircle::zShapeCircle(nMessage &m):
         zShape(m),
-        emulatingOldZone_(false)
-{}
+        emulatingOldZone_(false),
+	radius(1.0, 0.0)
+{
+    m >> radius;
+}
 
 /*
  * to create a shape on the clients
@@ -215,6 +240,8 @@ void zShapeCircle::WriteCreate( nMessage & m )
     m << createdtime_;
 
     networkWrite(m);
+
+    m << radius;
 }
 
 bool zShapeCircle::isInteracting(eGameObject * target)

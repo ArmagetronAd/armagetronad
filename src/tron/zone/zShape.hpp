@@ -80,11 +80,14 @@ protected:
 
     void setCreatedTime(REAL time);
 
+    void joinWithZone();
+
     REAL createdtime_; // The in-game time when this shape was first instantiated
     REAL referencetime_; // The in-game time when this shape's data was updated, used for evaluation
     REAL lasttime_; // What is to be considered as the current time for this shape
 
     unsigned short idZone_;
+    bool newIdZone_;
 };
 
 class zShapeCircle : public zShape {
