@@ -704,7 +704,7 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
 #else
         string str = string(myxmlGetProp(cur, "scale"));
         tFunction tfScale;
-        myCheapParameterSplitter(str, tfScale, true);
+        myCheapParameterSplitter(str, tfScale, false);
         shape->setScale( tfScale );
 #endif
     }
