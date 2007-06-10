@@ -268,6 +268,7 @@ public:
 
 #ifndef DEDICATED
     virtual void Render(const eCamera *cam);
+    virtual void Render2D(tCoord scale) const;
 
     virtual void RenderName( const eCamera *cam );
 

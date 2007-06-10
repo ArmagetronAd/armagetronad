@@ -159,6 +159,9 @@ public:
     // draws it to the screen using OpenGL
     virtual void Render(const eCamera *cam);
 
+    // draws it to the screen in two dimensions using OpenGL (ie. for the HUD map)
+    virtual void Render2D(tCoord scale) const;
+
     // draws the cockpit or whatever is seen from the interior
     // in fixed perspective, called before the main rendering
     virtual bool RenderCockpitFixedBefore(bool primary=true);

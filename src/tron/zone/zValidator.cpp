@@ -31,19 +31,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
 zValidator::zValidator(Triad _positive, Triad _marked)
-  : selectors(), 
-    monitorInfluences(), 
-    zoneInfluences(),
-    positive(_positive), 
-    marked(_marked)
+        : selectors(),
+        monitorInfluences(),
+        zoneInfluences(),
+        positive(_positive),
+        marked(_marked)
 { }
 
 zValidator::zValidator(zValidator const &other):
-  selectors( other.selectors ), 
-  monitorInfluences( other.monitorInfluences ), 
-  zoneInfluences( other.zoneInfluences ),
-  positive( other.getPositive() ),
-  marked( other.getMarked() )
+        selectors( other.selectors ),
+        monitorInfluences( other.monitorInfluences ),
+        zoneInfluences( other.zoneInfluences ),
+        positive( other.getPositive() ),
+        marked( other.getMarked() )
 {  }
 
 

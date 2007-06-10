@@ -154,10 +154,10 @@ void zShape::setPosY(const tFunction & y){
 }
 
 void zShape::setRotation(const tFunction & r){
-  float pos = rotation_.Evaluate(lasttime_ - referencetime_);
-  rotation_.SetSlope(r.GetSlope() );
-  rotation_.SetOffset( pos + rotation_.GetSlope() * ( referencetime_ - lasttime_ ) );
-  //    rotation_ = r;
+    float pos = rotation_.Evaluate(lasttime_ - referencetime_);
+    rotation_.SetSlope(r.GetSlope() );
+    rotation_.SetOffset( pos + rotation_.GetSlope() * ( referencetime_ - lasttime_ ) );
+    //    rotation_ = r;
 }
 
 void zShape::setScale(const tFunction & s){
@@ -190,6 +190,8 @@ bool zShape::isInteracting(eGameObject * target) {
 
 void zShape::render(const eCamera *cam )
 {}
+void zShape::render2d(tCoord scale) const
+    {}
 
 
 zShapeCircle::zShapeCircle(eGrid *grid, unsigned short idZone):
@@ -223,7 +225,7 @@ bool zShapeCircle::isInteracting(eGameObject * target)
     {
         if ( prey->Player() && prey->Alive() )
         {
-	  REAL effectiveRadius;
+            REAL effectiveRadius;
 #ifdef DADA
             effectiveRadius = scale_->GetFloat()  * radius.Evaluate(lasttime_ - referencetime_);
 #else
@@ -340,6 +342,76 @@ void zShapeCircle::render(const eCamera * cam )
     glPopMatrix();
 #endif
 
+}
+
+//HACK: render2d and render should probably be merged somehow, too much copy and paste here
+
+void zShapeCircle::render2d(tCoord scale) const {
+#ifndef DEDICATED
+
+    // HACK
+    int sg_segments = 8;
+    // HACK
+
+    //if ( color_.a_ > .7f )
+    //    color_.a_ = .7f;
+    if ( color_.a_ <= 0 )
+        return;
+
+#ifdef DADA
+    eCoord rot(cos(rotation_->GetFloat()) , sin(rotation_->GetFloat()));
+#else
+    //    eCoord rot(cos(rotation_.Evaluate(lasttime_ - referencetime_) ), sin(rotation_.Evaluate(lasttime_ - referencetime_)));
+    eCoord rot(1,0);
+    REAL currAngle = rotation_.Evaluate(lasttime_ - referencetime_);
+    rot = rot.Turn( cos(currAngle), sin(currAngle) );
+#endif
+
+    GLfloat m[4][4]={{rot.x,rot.y,0,0},
+                     {-rot.y,rot.x,0,0},
+                     {0,0,1,0},
+#ifdef DADA
+                     {posx_->GetFloat(),posy_->GetFloat(),0,1}};
+#else
+                     {posx_.Evaluate(lasttime_ - referencetime_), posy_.Evaluate(lasttime_ - referencetime_), 0,1}};
+#endif
+
+    ModelMatrix();
+    glPushMatrix();
+
+    glMultMatrixf(&m[0][0]);
+
+    BeginLines();
+
+    const REAL seglen = M_PI / sg_segments;
+
+    color_.Apply();
+
+    REAL effectiveRadius;
+#ifdef DADA
+    effectiveRadius = scale_->GetFloat()  * radius.Evaluate(lasttime_ - referencetime_);
+#else
+    effectiveRadius = scale_.Evaluate(lasttime_ - referencetime_) * radius.Evaluate(lasttime_ - referencetime_);
+#endif
+    if (effectiveRadius >= 0.0)
+    {
+        for ( int i = sg_segments - 1; i>=0; --i )
+        {
+            REAL a = i * 2 * 3.14159 / REAL( sg_segments );
+            REAL b = a + seglen;
+
+            REAL sa = effectiveRadius * sin(a);
+            REAL ca = effectiveRadius * cos(a);
+            REAL sb = effectiveRadius * sin(b);
+            REAL cb = effectiveRadius * cos(b);
+
+            glVertex2f(sa, ca);
+            glVertex2f(sb, cb);
+        }
+    }
+	RenderEnd();
+    glPopMatrix();
+#endif
 }
 
 //
@@ -601,6 +673,73 @@ void zShapePolygon::render(const eCamera * cam )
 
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         glDepthMask(GL_TRUE);
+    }
+    glPopMatrix();
+#endif
+}
+void zShapePolygon::render2d(tCoord scale) const {
+#ifndef DEDICATED
+
+    //if ( color_.a_ > .7f )
+    //    color_.a_ = .7f;
+    if ( color_.a_ <= 0 )
+        return;
+
+
+    ModelMatrix();
+    glPushMatrix();
+
+    REAL currentScale = 0.0;
+#ifdef DADA
+    glTranslatef(posx_->GetFloat(), posy_->GetFloat(), 0);
+
+    currentScale = scale_->GetFloat();
+#else
+    glTranslatef(posx_.Evaluate(lasttime_ - referencetime_), posy_.Evaluate(lasttime_ - referencetime_), 0);
+
+    currentScale = scale_.Evaluate(lasttime_ - referencetime_);
+#endif
+
+    if(currentScale > 0.0)
+    {
+        glScalef(currentScale, currentScale, 1.0);
+
+#ifdef DADA
+        glRotatef(rotation_->GetFloat()*180/M_PI, 0.0, 0.0, 1.0);
+#else
+        glRotatef(rotation_.Evaluate(lasttime_ - referencetime_)*180/M_PI, 0.0, 0.0, 1.0);
+#endif
+
+        BeginLines();
+
+        //    const REAL seglen = .2f;
+
+        color_.Apply();
+
+        std::vector< myPoint >::const_iterator iter;
+        std::vector< myPoint >::const_iterator prevIter = points.end() - 1;
+
+        for(iter = points.begin();
+                iter != points.end();
+                prevIter = iter++)
+        {
+#ifdef DADA
+            REAL xp = (*iter).first->GetFloat() ;
+            REAL yp = (*iter).second->GetFloat() ;
+            REAL xpp = (*prevIter).first->GetFloat() ;
+            REAL ypp = (*prevIter).second->GetFloat() ;
+#else
+            REAL xp = (*iter).first.Evaluate( lasttime_ - referencetime_ ) ;
+            REAL yp = (*iter).second.Evaluate( lasttime_ - referencetime_ ) ;
+            REAL xpp = (*prevIter).first.Evaluate( lasttime_ - referencetime_ ) ;
+            REAL ypp = (*prevIter).second.Evaluate( lasttime_ - referencetime_ ) ;
+#endif
+
+            glVertex2f(xp, yp);
+            glVertex2f(xpp, ypp);
+        }
+
+        RenderEnd();
     }
     glPopMatrix();
 #endif

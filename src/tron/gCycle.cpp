@@ -4313,6 +4313,31 @@ void gCycle::Render(const eCamera *cam){
     }
 }
 
+void gCycle::Render2D(tCoord scale) const {
+    double alpha = 1;
+    if(!Alive()) {
+        alpha -= 2 * (se_GameTime() - DeathTime());
+        if(alpha <= 0) return;
+    }
+    glColor4f(color_.r, color_.g, color_.b, alpha);
+    eCoord pos = PredictPosition(), dir = Direction();
+    tCoord p = pos;
+    glPushMatrix();
+    GLfloat m[16] = {
+                        scale.x * dir.x, scale.y * dir.y, 0, 0,
+                        -scale.x * dir.y, scale.y * dir.x, 0, 0,
+                        0, 0, 1, 0,
+                        pos.x, pos.y, 0, 1
+                    };
+    glMultMatrixf(m);
+    glBegin(GL_TRIANGLES);
+    glVertex2f(.5, 0);
+    glVertex2f(-.5, .5);
+    glVertex2f(-.5, -.5);
+    glEnd();
+    glPopMatrix();
+}
+
 static REAL fadeOutNameAfter = 5.0f;	/* 0: never show, < 0 always show */
 //static int fadeOutNameMode = 1;			// 0: never show, 1: show for fadeOutNameAfter, 2: always show
 static bool showOwnName = 0;			// show name on own cycle?

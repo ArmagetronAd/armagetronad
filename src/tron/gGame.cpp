@@ -4180,7 +4180,7 @@ void oldFortressAutomaticAssignment(zZone *zone, zMonitorPtr monitor)
 
             if (other )
             {
-	      // eTeam * otherTeam = other->Player()->CurrentTeam();
+                // eTeam * otherTeam = other->Player()->CurrentTeam();
                 eCoord otherpos = other->Position() - zone->GetPosition();
                 REAL distance = otherpos.NormSquared();
                 if ( !closest || distance < closestDistance )
@@ -4223,23 +4223,23 @@ void oldFortressAutomaticAssignment(zZone *zone, zMonitorPtr monitor)
 
 
                 //
-                zEffectGroupPtr currentZoneEffect; 
+                zEffectGroupPtr currentZoneEffect;
 
                 // The part for the defender
-                zValidatorPtr validator; 
-		if (sg_singlePlayer) {
-		  // In single player mode, all the players teams have the ID 0, making team logic fail
-		  gVectorExtra< nNetObjectID > playerOwners;
-		  playerOwners.push_back(closest->Player()->ID());
-		  currentZoneEffect = zEffectGroupPtr(new zEffectGroup(playerOwners, gVectorExtra< nNetObjectID >()));
-		  validator = zValidatorPtr( new zValidatorOwner(_ignore, _ignore) );
-		}
-		else {
-		  gVectorExtra< nNetObjectID > teamOwners;
-		  teamOwners.push_back(team->ID());
-		  currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), teamOwners));
-		  validator = zValidatorPtr( new zValidatorOwnerTeam(_ignore, _ignore) );
-		}
+                zValidatorPtr validator;
+                if (sg_singlePlayer) {
+                    // In single player mode, all the players teams have the ID 0, making team logic fail
+                    gVectorExtra< nNetObjectID > playerOwners;
+                    playerOwners.push_back(closest->Player()->ID());
+                    currentZoneEffect = zEffectGroupPtr(new zEffectGroup(playerOwners, gVectorExtra< nNetObjectID >()));
+                    validator = zValidatorPtr( new zValidatorOwner(_ignore, _ignore) );
+                }
+                else {
+                    gVectorExtra< nNetObjectID > teamOwners;
+                    teamOwners.push_back(team->ID());
+                    currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), teamOwners));
+                    validator = zValidatorPtr( new zValidatorOwnerTeam(_ignore, _ignore) );
+                }
 
                 zMonitorInfluencePtr inflDefender = zMonitorInfluencePtr(new zMonitorInfluence( monitor ));
                 inflDefender->setInfluenceSlide( tFunction(-1.0 * sg_defendRate, 0.0) );
@@ -4249,13 +4249,13 @@ void oldFortressAutomaticAssignment(zZone *zone, zMonitorPtr monitor)
                 currentZoneEffect->addValidator( validator );
 
                 // The part for the attaquer
-		if (sg_singlePlayer) {
-		  // In single player mode, all the players teams have the ID 0, making team logic fail
-		  validator = zValidatorPtr( new zValidatorAllButOwner(_ignore, _ignore) );
-		}
-		else {
-		  validator = zValidatorPtr( new zValidatorAllButTeamOwner(_ignore, _ignore) );
-		}
+                if (sg_singlePlayer) {
+                    // In single player mode, all the players teams have the ID 0, making team logic fail
+                    validator = zValidatorPtr( new zValidatorAllButOwner(_ignore, _ignore) );
+                }
+                else {
+                    validator = zValidatorPtr( new zValidatorAllButTeamOwner(_ignore, _ignore) );
+                }
 
                 zMonitorInfluencePtr inflAttaquer = zMonitorInfluencePtr(new zMonitorInfluence( monitor ));
                 inflAttaquer->setInfluenceSlide(  tFunction(sg_conquestRate, 0.0) );

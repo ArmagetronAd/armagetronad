@@ -23,6 +23,7 @@ public:
     void animate( REAL time );
     virtual bool isInteracting(eGameObject * target);
     virtual void render(const eCamera * cam );
+	virtual void render2d(tCoord scale) const;
 
 #ifdef DADA
     void setPosX(const BasePtr & x, tString &exprStr);
@@ -98,6 +99,7 @@ public :
 
     bool isInteracting(eGameObject * target);
     void render(const eCamera * cam );
+	virtual void render2d(tCoord scale) const;
 
     bool isEmulatingOldZone() {return emulatingOldZone_;}; 
     bool emulatingOldZone_;
@@ -125,6 +127,7 @@ public :
 
     bool isInteracting(eGameObject * target);
     void render(const eCamera * cam );
+	virtual void render2d(tCoord scale) const;
 #ifdef DADA
     void addPoint( myPoint const &aPoint, std::pair<tString, tString> const & exprPair) { points.push_back(aPoint); exprs.push_back(exprPair);};
 #else

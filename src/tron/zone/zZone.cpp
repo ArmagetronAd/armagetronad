@@ -655,6 +655,10 @@ void zZone::Render( const eCamera * cam )
     shape->render(cam);
 }
 
+void zZone::Render2D( tCoord scale ) const {
+    shape->render2d(scale);
+}
+
 
 // *******************************************************************************
 // *

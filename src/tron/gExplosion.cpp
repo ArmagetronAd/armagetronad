@@ -432,6 +432,41 @@ void gExplosion::Render(const eCamera *cam){
     //std::cout << "Finishing render\n";
 }
 
+void gExplosion::Render2D(tCoord scale) const {
+#ifndef DEDICATED
+    if(sg_crashExplosion){
+        REAL a1=(lastTime-createTime)+.01f;//+.2;
+        REAL e=a1-1;
+
+        if (e<0) e=0;
+
+        REAL fade=(2-a1);
+        if (fade<0) fade=0;
+        if (fade>1) fade=1;
+
+        a1*=100;
+        e*=100;
+
+        ModelMatrix();
+        glPushMatrix();
+        glTranslatef(pos.x,pos.y,0);
+
+        //glDisable(GL_TEXTURE);
+        glDisable(GL_TEXTURE_2D);
+
+        glColor4f(explosion_r,explosion_g,explosion_b,fade);
+        BeginLines();
+        for(int i=expvec.Len()-1;i>=0;i--){
+            glVertex2f(a1*expvec[i].x[0],a1*expvec[i].x[1]);
+            glVertex2f( e*expvec[i].x[0], e*expvec[i].x[1]);
+        }
+        RenderEnd();
+        glPopMatrix();
+    }
+#endif
+    //std::cout << "Finishing render\n";
+}
+
 #if 0
 void gExplosion::SoundMix(Uint8 *dest,unsigned int len,
                           int viewer,REAL rvol,REAL lvol){

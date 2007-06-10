@@ -231,19 +231,19 @@ void Map::Render() {
     glDisable(GL_LIGHTING);
     glDisable(GL_LINE_SMOOTH);
     glHint (GL_LINE_SMOOTH_HINT, GL_FASTEST);
-    DrawMap(true, true, true,
+    DrawMap(true, true,
             5.5, 0.,
             m_position.x-m_size.x, m_position.y-m_size.y, 2.*m_size.x, 2.*m_size.y,
             sr_screenWidth*m_size.x, sr_screenWidth*m_size.y, .5, .5);
 }
-void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
+void Map::DrawMap(bool rimWalls, bool cycleWalls,
                   double cycleSize, double border,
                   double x, double y, double w, double h,
                   double rw, double rh, double ix, double iy) {
     double pl_CurSpeed, min_dist2, dist2, rad, zoom = 1;
     tCoord pl_CurPos, rotate; // rotate will hold the cos and sin of the rotation to apply
     cCockpit* cp = m_Cockpit;
-    if(!rimWalls && !cycleWalls && !cycles) return;
+    if(!rimWalls && !cycleWalls) return;
     const eRectangle &bounds = eWallRim::GetBounds();
     double lx = bounds.GetLow().x - border, hx = bounds.GetHigh().x + border;
     double ly = bounds.GetLow().y - border, hy = bounds.GetHigh().y + border;
@@ -361,9 +361,7 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
         DrawWalls(sg_netPlayerWallsGridded);
         DrawWalls(sg_netPlayerWalls);
     }
-    DrawZones(sg_Zones);
-    if(cycles)
-        DrawCycles(se_PlayerNetIDs, (cycleSize * w) / (rw * xscale), (cycleSize * h) / (rh * yscale));
+    DrawObjects(tCoord((cycleSize * w) / (rw * xscale), (cycleSize * h) / (rh * yscale)));
     glPopMatrix();
     if(m_mode != MODE_STD) {
         m_clipper->End();
@@ -441,67 +439,13 @@ void Map::DrawWalls(tList<gNetPlayerWall> &list) {
     glEnd();
 }
 
-void Map::DrawCycles(tList<ePlayerNetID> &list, double xscale, double yscale) {
-    unsigned i, len=list.Len();
-    double currentTime = se_GameTime();
-    for(i=0; i<len; i++) {
-        const gCycle *cycle = dynamic_cast<gCycle *>(list[i]->Object());
-        if(cycle) {
-            double alpha = 1;
-            if(!cycle->Alive()) {
-                alpha -= 2 * (currentTime - cycle->DeathTime());
-                if(alpha <= 0) continue;
-            }
-            glColor4f(cycle->color_.r, cycle->color_.g, cycle->color_.b, alpha);
-            eCoord pos = cycle->PredictPosition(), dir = cycle->Direction();
-            tCoord p = pos;
-            glPushMatrix();
-            GLfloat m[16] = {
-                                xscale * dir.x, yscale * dir.y, 0, 0,
-                                -xscale * dir.y, yscale * dir.x, 0, 0,
-                                0, 0, 1, 0,
-                                pos.x, pos.y, 0, 1
-                            };
-            glMultMatrixf(m);
-            glBegin(GL_TRIANGLES);
-            glVertex2f(.5, 0);
-            glVertex2f(-.5, .5);
-            glVertex2f(-.5, -.5);
-            glEnd();
-            glPopMatrix();
-        }
-    }
-}
-
-void Map::DrawZones(std::deque<zZone *> const &list) {
-    for(std::deque<zZone *>::const_iterator i = list.begin(); i != list.end(); ++i) {
-        tASSERT(*i);
-        tCoord const &rotation = (*i)->GetRotation();
-        tCoord const &position = (*i)->GetPosition();
-        rColor const &color = (*i)->GetColor();
-        const float scale = (*i)->GetScale();
-
-        tCoord currentPos = rotation*scale;
-
-        const int steps=20;
-
-        static tCoord offset(cos(M_PI*2./steps), sin(M_PI*2./steps));
-
-        BeginLines();
-        color.Apply();
-        for(int i = 0; i<steps/2; ++i) {
-            tCoord p1 = currentPos.Turn(offset);
-            currentPos = p1.Turn(offset);
-            p1 += position;
-            tCoord p2 = currentPos + position;
-            if (i%2==1) {
-                glBegin(GL_LINES);
-                glVertex2f(p1.x, p1.y);
-                glVertex2f(p2.x, p2.y);
-                glEnd();
-            }
-        }
-        RenderEnd();
+void Map::DrawObjects(tCoord scale) {
+    tList<eGameObject> const &gameObjects = eGrid::CurrentGrid()->GameObjects();
+    size_t len = gameObjects.Len();
+    for(size_t i = 0; i < len; ++i) {
+        eGameObject const *obj = gameObjects(i);
+        tASSERT(obj);
+        obj->Render2D(scale);
     }
 }
 

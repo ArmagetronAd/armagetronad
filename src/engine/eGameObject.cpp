@@ -568,6 +568,7 @@ void eGameObject::Kill(){}
 
 // draws it to the screen using OpenGL
 void eGameObject::Render(const eCamera *){}
+void eGameObject::Render2D(tCoord scale) const {}
 
 // Cockpit
 bool eGameObject::RenderCockpitFixedBefore(bool){return true;}

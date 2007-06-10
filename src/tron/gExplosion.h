@@ -47,6 +47,7 @@ public:
     virtual void Kill();
 #ifndef DEDICATED
     virtual void Render(const eCamera *cam);
+    virtual void Render2D(tCoord scale) const;
 
     //virtual void SoundMix(Uint8 *dest,unsigned int len,
     //                      int viewer,REAL rvol,REAL lvol);

@@ -52,8 +52,8 @@ namespace cWidget {
 class Map : public WithCoordinates, public WithBackground, public WithForeground {
     void DrawRimWalls( tList<eWallRim> &list ); //!< Draws all the rim walls
     void DrawWalls(tList<gNetPlayerWall> &list); //!< Draws all player walls
-    void DrawCycles(tList<ePlayerNetID> &list, double xscale, double yscale); //!< Draws all cycles as triangles
-    void DrawZones(std::deque<zZone *> const &list); //!< Draws all Zones
+
+    void DrawObjects(tCoord scale); //!< Draws all game objects
 
     /*
     * rimWalls    draw rim walls?
@@ -65,7 +65,7 @@ class Map : public WithCoordinates, public WithBackground, public WithForeground
     * rw rh       width and height of the rectangle in real-world units
     * ix iy       position where inside? (range [0, 1], used if there's room left due to nonmatching aspect ratio)
     */
-    void DrawMap(bool rimWalls, bool cycleWalls, bool cycles,
+    void DrawMap(bool rimWalls, bool cycleWalls,
                  double cycleSize, double border,
                  double x, double y, double w, double h,
                  double rw, double rh, double ix, double iy); //!< Draws the entire map
