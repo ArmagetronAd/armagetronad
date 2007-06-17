@@ -2567,7 +2567,7 @@ void ePlayerNetID::WriteSync(nMessage &m){
     }
 
     //if(sn_GetNetState()==nSERVER)
-    m << -ping;
+    m << ping;
 
     // pack chat and spectator status together
     unsigned short flags = ( chatting_ ? 1 : 0 ) | ( spectating_ ? 2 : 0 );
