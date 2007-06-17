@@ -1825,6 +1825,8 @@ const char * PLAYER_ID_STR = "playerId";
 void
 gParser::parseOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
+    if (sn_GetNetState() != nCLIENT )
+    {
     // Prepare the structures to store the ownership information
     TeamOwnershipInfo mapIdOfTeamOwners;
 
@@ -1874,6 +1876,7 @@ gParser::parseOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
         ++index; ++iterTeamOwnership;
     }
     // EOP
+    }
 }
 
 void
