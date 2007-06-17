@@ -21,61 +21,23 @@ zShape::zShape(eGrid* grid, unsigned short idZone)
         idZone_(idZone),
         newIdZone_(false)
 {
-  joinWithZone();
+    joinWithZone();
 }
 
 zShape::zShape(nMessage &m):eNetGameObject(m)
 {
-    tString name;
-    m >> name;
-
     REAL time;
     m >> time;
     setCreatedTime(time);
 
-    m >> time;
-    setReferenceTime(time);
-#ifdef DADA
-    tString str;
-    m >> str;
-    setPosX(BasePtr(new tValue::Expr(str, tValue::Expr::vars, tValue::Expr::functions)) , str);
-
-    m >> str;
-    setPosY(BasePtr(new tValue::Expr(str, tValue::Expr::vars, tValue::Expr::functions)) , str);
-
-    m >> str;
-    setScale(BasePtr(new tValue::Expr(str, tValue::Expr::vars, tValue::Expr::functions)) , str);
-
-    m >> str;
-    setRotation(BasePtr(new tValue::Expr(str, tValue::Expr::vars, tValue::Expr::functions)) , str);
-#else
-    tFunction tFunc;
-    m >> tFunc;
-    setPosX( tFunc );
-
-    m >> tFunc;
-    setPosY( tFunc );
-
-    m >> tFunc;
-    setScale( tFunc );
-
-    m >> tFunc;
-    setRotation( tFunc );
-#endif
-
-    rColor c;
-    m >> c.r_;
-    m >> c.g_;
-    m >> c.b_;
-    m >> c.a_;
-    setColor(c);
+    networkRead(m);
 
     unsigned short anIdZone;
     m >> anIdZone;
     if(anIdZone != idZone_) {
-      idZone_ = anIdZone;
-      newIdZone_ = true;
-      joinWithZone();
+        idZone_ = anIdZone;
+        newIdZone_ = true;
+        joinWithZone();
     }
 
 }
@@ -115,10 +77,38 @@ void zShape::networkWrite(nMessage &m)
     m << color_.g_;
     m << color_.b_;
     m << color_.a_;
-
-    m << idZone_;
 }
 
+void zShape::networkRead(nMessage &m)
+{
+    REAL time;
+    m >> time;
+    setReferenceTime(time);
+#ifdef DADA
+    tString str;
+    m >> str;
+    setPosX(BasePtr(new tValue::Expr(str, tValue::Expr::vars, tValue::Expr::functions)) , str);
+
+    m >> str;
+    setPosY(BasePtr(new tValue::Expr(str, tValue::Expr::vars, tValue::Expr::functions)) , str);
+
+    m >> str;
+    setScale(BasePtr(new tValue::Expr(str, tValue::Expr::vars, tValue::Expr::functions)) , str);
+
+    m >> str;
+    setRotation(BasePtr(new tValue::Expr(str, tValue::Expr::vars, tValue::Expr::functions)) , str);
+#else
+    m >> posx_;
+    m >> posy_;
+    m >> scale_;
+    m >> rotation_;
+#endif
+
+    m >> color_.r_;
+    m >> color_.g_;
+    m >> color_.b_;
+    m >> color_.a_;
+}
 
 /*
  * to create a shape on the clients
@@ -127,10 +117,21 @@ void zShape::WriteCreate( nMessage & m )
 {
     eNetGameObject::WriteCreate(m);
 
-    m << tString("none");
     m << createdtime_;
 
     networkWrite(m);
+
+    m << idZone_;
+}
+
+void zShape::WriteSync(nMessage &m)
+{
+    networkWrite(m);
+}
+
+void zShape::ReadSync(nMessage &m)
+{
+    networkRead(m);
 }
 
 #ifdef DADA
@@ -163,10 +164,18 @@ void zShape::setPosY(const tFunction & y){
 }
 
 void zShape::setRotation(const tFunction & r){
+    rotation_ = r;
+    if (sn_GetNetState()!=nCLIENT)
+        RequestSync();
+}
+
+void zShape::setRotationNow(const tFunction & r){
     float pos = rotation_.Evaluate(lasttime_ - referencetime_);
     rotation_.SetSlope(r.GetSlope() );
     rotation_.SetOffset( pos + rotation_.GetSlope() * ( referencetime_ - lasttime_ ) );
     //    rotation_ = r;
+    if (sn_GetNetState()!=nCLIENT)
+        RequestSync();
 }
 
 void zShape::setScale(const tFunction & s){
@@ -175,7 +184,16 @@ void zShape::setScale(const tFunction & s){
 #endif
 
 void zShape::setColor(const rColor &c){
-    color_ = c;
+    if(color_ != c) {
+        color_ = c;
+        if (sn_GetNetState()!=nCLIENT)
+            RequestSync();
+    }
+}
+
+void zShape::setColorNow(const rColor &c){
+    // TODO: make color slide with some fancy tFunc or something.
+    setColor(c);
 }
 
 void zShape::animate( REAL time ) {
@@ -208,23 +226,23 @@ void zShape::render2d(tCoord scale) const
     {}
 
 void zShape::joinWithZone() {
-  if(sn_netObjects[idZone_]) {
-    zZone *asdf = dynamic_cast<zZone*>(&*sn_netObjects[idZone_]);
-    asdf->setShape(zShapePtr(this));
-    newIdZone_ = false;
-  }
+    if(sn_netObjects[idZone_]) {
+        zZone *asdf = dynamic_cast<zZone*>(&*sn_netObjects[idZone_]);
+        asdf->setShape(zShapePtr(this));
+        newIdZone_ = false;
+    }
 }
 
 zShapeCircle::zShapeCircle(eGrid *grid, unsigned short idZone):
         zShape(grid, idZone),
         emulatingOldZone_(false),
-	radius(1.0, 0.0)
+        radius(1.0, 0.0)
 {}
 
 zShapeCircle::zShapeCircle(nMessage &m):
         zShape(m),
         emulatingOldZone_(false),
-	radius(1.0, 0.0)
+        radius(1.0, 0.0)
 {
     m >> radius;
 }
@@ -234,14 +252,21 @@ zShapeCircle::zShapeCircle(nMessage &m):
  */
 void zShapeCircle::WriteCreate( nMessage & m )
 {
-    eNetGameObject::WriteCreate(m);
-
-    m << tString("circle");
-    m << createdtime_;
-
-    networkWrite(m);
+    zShape::WriteCreate(m);
 
     m << radius;
+}
+
+void zShapeCircle::WriteSync(nMessage &m)
+{
+    zShape::WriteSync(m);
+    m << radius;
+}
+
+void zShapeCircle::ReadSync(nMessage &m)
+{
+    zShape::ReadSync(m);
+    m >> radius;
 }
 
 bool zShapeCircle::isInteracting(eGameObject * target)
@@ -436,7 +461,7 @@ void zShapeCircle::render2d(tCoord scale) const {
             glVertex2f(sb, cb);
         }
     }
-	RenderEnd();
+    RenderEnd();
     glPopMatrix();
 #endif
 }
@@ -486,12 +511,7 @@ zShapePolygon::zShapePolygon(eGrid *grid, unsigned short idZone):
  */
 void zShapePolygon::WriteCreate( nMessage & m )
 {
-    eNetGameObject::WriteCreate(m);
-
-    m << tString("polygon");
-    m << createdtime_;
-
-    networkWrite(m);
+    zShape::WriteCreate(m);
 
     int numPoints;
     numPoints = points.size();
@@ -516,6 +536,8 @@ void zShapePolygon::WriteCreate( nMessage & m )
         m << (*iter).second;
     }
 #endif
+
+    //    WriteSync( m );
 }
 
 bool zShapePolygon::isInside(eCoord anECoord) {

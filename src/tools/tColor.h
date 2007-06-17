@@ -41,6 +41,7 @@ public:
 
     // the colors are public because they are independent of each other
     REAL r_, g_, b_, a_;                    //!< Color values
+
 protected:
 private:
 };
@@ -48,6 +49,14 @@ private:
 inline std::ostream &operator<< (std::ostream &s,const tColor &c){
     s << "color(" << c.r_ << "," << c.g_ << "," << c.b_ << "," << c.a_ << ")";
     return s;
+}
+
+inline bool operator==(const tColor &lColor, const tColor &rColor) {
+    return ( (lColor.r_ == rColor.r_) && (lColor.g_ == rColor.g_) && (lColor.b_ == rColor.b_) && (lColor.a_ == rColor.a_));
+}
+
+inline bool operator!=(const tColor &lColor, const tColor &rColor) {
+    return !operator==(lColor, rColor);
 }
 
 #endif

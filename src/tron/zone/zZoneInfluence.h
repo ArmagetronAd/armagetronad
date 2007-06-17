@@ -49,8 +49,8 @@ public:
     virtual ~zZoneInfluenceItemRotation() {};
 
     void set(tFunction rotAngle, tFunction rotSpeed) {
-      rotationAngle = rotAngle; 
-      rotationSpeed = rotSpeed; 
+        rotationAngle = rotAngle;
+        rotationSpeed = rotSpeed;
     };
     virtual void apply(REAL value);
 };
@@ -84,7 +84,10 @@ public:
     zZoneInfluenceItemColor(zZonePtr aZone);
     virtual ~zZoneInfluenceItemColor() {};
 
-    void set(rColor const & col) {color = col;};
+    void set(rColor const & col) {
+        color = col;
+        color.a_ = color.a_ < 0.0?0.0:(color.a_>0.7?0.7:color.a_);
+    };
     virtual void apply(REAL value);
 };
 

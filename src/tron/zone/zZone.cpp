@@ -410,18 +410,18 @@ void zZone::ReadSync( nMessage & m )
     {
         bool b;
 
-	//        while(!m.End() ) { m >> b;}
-	
-	int count=44-16;
+        //        while(!m.End() ) { m >> b;}
+
+        int count=44-16;
         // Discard the information
         while(!m.End() && count-->0) { m >> b;}
-	unsigned short shapeID;
-	m >> shapeID;
-	if(sn_netObjects[shapeID]) {
-	  zShape *asdf = dynamic_cast<zShape*>(&*sn_netObjects[shapeID]);
-	  shape = zShapePtr( dynamic_cast<zShape*>(&*sn_netObjects[shapeID]) );
-	}
-	
+        unsigned short shapeID;
+        m >> shapeID;
+        if(sn_netObjects[shapeID]) {
+            zShape *asdf = dynamic_cast<zShape*>(&*sn_netObjects[shapeID]);
+            shape = zShapePtr( dynamic_cast<zShape*>(&*sn_netObjects[shapeID]) );
+        }
+
     }
 }
 
@@ -666,8 +666,8 @@ REAL zZone::Scale( void ) const
 
 void zZone::Render( const eCamera * cam )
 {
-  if (shape)
-    shape->render(cam);
+    if (shape)
+        shape->render(cam);
 }
 
 void zZone::Render2D( tCoord scale ) const {

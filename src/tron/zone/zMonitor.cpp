@@ -3,6 +3,7 @@
 
 #include "zMonitor.h"
 #include "tMath.h"
+#include "defs.h"
 
 /*
  * Keep track of everybody contributing to the monitor (for a tic atm)
@@ -55,7 +56,7 @@ zMonitor::affectSet(gCycle* user, REAL triggererInfluenceSet, Triad marked) {
 bool zMonitor::Timestep( REAL time )
 {
     // Do we need to reset the value?
-    if (contributorsSet.size()!=0) 
+    if (contributorsSet.size()!=0)
         value = totalInfluenceSet;
 
     // Compute the sliding influence, ie: proportional to time
@@ -83,21 +84,23 @@ bool zMonitor::Timestep( REAL time )
     totalInfluenceAdd   = 0.0;
     totalInfluenceSet   = 0.0;
 
-    // go through all the rules and find the ones to apply
-    zMonitorRulePtrs::const_iterator iter;
-    for(iter = rules.begin();
-            iter != rules.end();
-            ++iter)
-    {
-        // Go through all the rules of the monitor and see wich need to be activated
-        if ((*iter)->isValid(value)) {
-            (*iter)->applyRule(contributors, time, value);
-        }
-    }
-
     // bound the value
     clamp(value, minValue, maxValue);
 
+    // Only update if value has changed enough
+    if( value < previousValue - EPS || previousValue + EPS < value) {
+        // go through all the rules and find the ones to apply
+        zMonitorRulePtrs::const_iterator iter;
+        for(iter = rules.begin();
+                iter != rules.end();
+                ++iter)
+        {
+            // Go through all the rules of the monitor and see wich need to be activated
+            if ((*iter)->isValid(value)) {
+                (*iter)->applyRule(contributors, time, value);
+            }
+        }
+    }
 
     // update time
     lastTime = time;
@@ -136,25 +139,25 @@ void zMonitorRule::applyRule(triggerers &contributors, REAL time, REAL _value) {
             (*iter)->apply(*iter2, time, value);
         }
     }
-    
+
     gVectorExtra< nNetObjectID > owners;
     gVectorExtra< nNetObjectID > teamOwners;
 
     zMonitorInfluencePtrs::const_iterator iterMonitorInfluence;
     for(iterMonitorInfluence=monitorInfluences.begin();
-	iterMonitorInfluence!=monitorInfluences.end();
-	++iterMonitorInfluence)
-      {
-	(*iterMonitorInfluence)->apply(owners, teamOwners, (gCycle*)0, _value);
-      }
+            iterMonitorInfluence!=monitorInfluences.end();
+            ++iterMonitorInfluence)
+    {
+        (*iterMonitorInfluence)->apply(owners, teamOwners, (gCycle*)0, _value);
+    }
 
     zZoneInfluencePtrs::const_iterator iterZoneInfluence;
     for(iterZoneInfluence=zoneInfluences.begin();
-	iterZoneInfluence!=zoneInfluences.end();
-	++iterZoneInfluence)
-      {
-	(*iterZoneInfluence)->apply(_value);
-      }
+            iterZoneInfluence!=zoneInfluences.end();
+            ++iterZoneInfluence)
+    {
+        (*iterZoneInfluence)->apply(_value);
+    }
 }
 
 /*

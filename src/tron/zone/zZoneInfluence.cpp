@@ -34,7 +34,7 @@ zZoneInfluenceItemRotation::apply(REAL value) {
     tFunction tfRotation;
     tfRotation.SetOffset( rotationAngle(value) );
     tfRotation.SetSlope( rotationSpeed(value*value) );
-    zone->getShape()->setRotation( tfRotation );
+    zone->getShape()->setRotationNow( tfRotation );
 }
 
 zZoneInfluenceItemScale::zZoneInfluenceItemScale(zZonePtr aZone):
@@ -74,6 +74,6 @@ zZoneInfluenceItemColor::zZoneInfluenceItemColor(zZonePtr aZone):
 
 void
 zZoneInfluenceItemColor::apply(REAL value) {
-    zone->getShape()->setColor( color );
+    zone->getShape()->setColorNow( color );
 }
 

@@ -36,7 +36,10 @@ public:
             value(0.0),
             drift(0.0),
             minValue(0.0),
-            maxValue(1.0)
+            maxValue(1.0),
+            previousValue(0.0),
+            previousTotalInfluenceSlide(0.0),
+            previousTotalInfluenceAdd(0.0)
     {
         // add to game grid
         this->AddToList();
@@ -83,6 +86,12 @@ protected:
     REAL maxValue; //!< High bound that value can take
 
     string name;
+
+    // values used to reduce the update transmitted
+    REAL previousValue;
+    REAL previousTotalInfluenceSlide;
+    REAL previousTotalInfluenceAdd;
+
 };
 
 

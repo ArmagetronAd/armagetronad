@@ -519,11 +519,16 @@ gParser::parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
     color.b_ = myxmlGetPropFloat(cur, "blue");
     color.a_ = myxmlGetPropFloat(cur, "alpha");
 
-
     if(myxmlHasProp(cur, "hexCode"))
     {
         color = myxmlGetPropColorFromHex(cur, "hexCode");
     }
+
+    if (color.a_ > 0.7)
+        color.a_ = 0.7;
+    if (color.a_ < 0.0)
+        color.a_ = 0.0;
+
 
     /*
     if(myxmlHasProp(cur, "name") {

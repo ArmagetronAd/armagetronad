@@ -19,11 +19,13 @@ public:
     zShape(nMessage &m);
     virtual ~zShape() {};
     virtual void WriteCreate( nMessage & m );
+    virtual void WriteSync(nMessage &m);   //!< writes sync data
+    virtual void ReadSync(nMessage &m);    //!< reads sync data
 
     void animate( REAL time );
     virtual bool isInteracting(eGameObject * target);
     virtual void render(const eCamera * cam );
-	virtual void render2d(tCoord scale) const;
+    virtual void render2d(tCoord scale) const;
 
 #ifdef DADA
     void setPosX(const BasePtr & x, tString &exprStr);
@@ -37,6 +39,9 @@ public:
     void setRotation(const tFunction &r);
     void setScale(const tFunction &s);
     void setColor(const rColor &c);
+
+    void setRotationNow(const tFunction &r);
+    void setColorNow(const rColor &c);
 
   tFunction getPosX() {return posx_;};
   tFunction getPosY() {return posy_;};
@@ -75,7 +80,7 @@ protected:
     eCoord Position() { return eCoord(posx_(lasttime_ - referencetime_), posy_(lasttime_ - referencetime_) ); };
 #endif
 
-    static void networkRead(nMessage &m, zShape *aShape);
+    void networkRead(nMessage &m);
     void networkWrite(nMessage &m);
 
     void setCreatedTime(REAL time);
@@ -99,6 +104,8 @@ public :
     zShapeCircle(nMessage &m);
     ~zShapeCircle() {};
     void WriteCreate( nMessage & m );
+    void WriteSync(nMessage &m);   //!< writes sync data
+    void ReadSync(nMessage &m);    //!< reads sync data
 
     bool isInteracting(eGameObject * target);
     void render(const eCamera * cam );
@@ -127,6 +134,8 @@ public :
     zShapePolygon(nMessage &n);
     ~zShapePolygon() {};
     void WriteCreate( nMessage & m );
+  //    void WriteSync(nMessage &m);   //!< writes sync data
+  //    void ReadSync(nMessage &m);    //!< reads sync data
 
     bool isInteracting(eGameObject * target);
     void render(const eCamera * cam );
