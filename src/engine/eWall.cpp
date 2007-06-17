@@ -316,7 +316,7 @@ eWall *eWallView::Belongs()
 // *
 // *******************************************************************************************
 //!
-//! @param cam the camera that is blocked
+//! @param camera the camera that is blocked
 //! @param height the maximal height the wall would be allowed to have without blocking the view
 //!
 // *******************************************************************************************
