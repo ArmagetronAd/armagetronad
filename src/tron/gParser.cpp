@@ -943,6 +943,7 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
     effectors[tString("spawnplayer")] = zEffectorSpawnPlayer::create;
     effectors[tString("brakerecharge")] = zEffectorCycleBrake::create;
     effectors[tString("rubberrecharge")] = zEffectorCycleRubber::create;
+    effectors[tString("acceleration")] = zEffectorCycleAcceleration::create;
     effectors[tString("setting")] = zEffectorSetting::create;
 
 
@@ -965,6 +966,16 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
     effectorPoint = dynamic_cast<zEffectorPoint *>(effector.get());
     if (effectorPoint) {
         effectorPoint->setPoint(myxmlGetPropInt(cur, "score"));
+    }
+
+    // Should we load the acceleration
+    zEffectorCycleAcceleration *effectorAcceleration;
+    effectorAcceleration = dynamic_cast<zEffectorCycleAcceleration *>(effector.get());
+    if (effectorAcceleration) {
+        tFunction tfValue;
+        string str = string(myxmlGetProp(cur, "value"));
+        myCheapParameterSplitter(str, tfValue, false);
+        effectorAcceleration->setValue(tfValue);
     }
 
     // Should we set the grid and arena for respawning
@@ -1825,8 +1836,6 @@ const char * PLAYER_ID_STR = "playerId";
 void
 gParser::parseOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-    if (sn_GetNetState() != nCLIENT )
-    {
     // Prepare the structures to store the ownership information
     TeamOwnershipInfo mapIdOfTeamOwners;
 
@@ -1876,7 +1885,6 @@ gParser::parseOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
         ++index; ++iterTeamOwnership;
     }
     // EOP
-    }
 }
 
 void

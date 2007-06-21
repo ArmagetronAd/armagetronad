@@ -2341,6 +2341,7 @@ gCycleMovement::gCycleMovement( eGrid * grid, const eCoord & pos, const eCoord &
         destinationList(NULL),currentDestination(NULL),lastDestination(NULL),
         dirDrive(dir),
         acceleration(0),
+        totalZoneAcceleration(0),
         lastTimestep_(0),
         verletSpeed_(sg_speedCycleStart * SpeedMultiplier()),
         pendingTurns()
@@ -2365,6 +2366,7 @@ gCycleMovement::gCycleMovement( nMessage & message )
         destinationList(NULL),currentDestination(NULL),lastDestination(NULL),
         dirDrive(1,0),
         acceleration(0),
+        totalZoneAcceleration(0),
         lastTimestep_(0),
         verletSpeed_(5)
 {
@@ -2828,6 +2830,8 @@ void gCycleMovement::CalculateAcceleration()
 
     // apply wall acceleration
     acceleration += totalWallAcceleration;
+    acceleration += totalZoneAcceleration;
+    totalZoneAcceleration = 0.0; // This comes from external influence and should be applied only once per Timestep
 
     tASSERT( good( acceleration ) );
     sg_ArchiveReal( acceleration, 9 );
@@ -3948,4 +3952,7 @@ REAL gCycleMovement::NextInterestingTime( void ) const
     return ret;
 }
 
-
+void gCycleMovement::AddZoneAcceleration( REAL zoneAcceleration )
+{
+    totalZoneAcceleration += zoneAcceleration;
+}

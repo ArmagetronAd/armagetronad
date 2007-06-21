@@ -49,33 +49,33 @@ void zEffector::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 void
 zEffector::setMessage(tString unformated)
 {/*
-                          tString res;
-                          for (size_t i=0; i< unformated.Size(); i++)
-                            {
-                              char c = unformated(i);
-                              if (c != '\\')
-                        	res += c;
-                              else if (i < unformated.Size())
-                        	{
-                        	  switch (unformated(i+1))
-                        	    {
-                        	    case 'n':
-                        	      res += '\n';
-                        	      i++;
-                        	      break;
-                        	    case '1':
-                        	      res += '\1';
-                        	      i++;
-                        	      break;
-                        	    default:
-                        	      res += '\\';
-                        	      break;
-                        	    }
-                        	}
-                            }
+                              tString res;
+                              for (size_t i=0; i< unformated.Size(); i++)
+                                {
+                                  char c = unformated(i);
+                                  if (c != '\\')
+                            	res += c;
+                                  else if (i < unformated.Size())
+                            	{
+                            	  switch (unformated(i+1))
+                            	    {
+                            	    case 'n':
+                            	      res += '\n';
+                            	      i++;
+                            	      break;
+                            	    case '1':
+                            	      res += '\1';
+                            	      i++;
+                            	      break;
+                            	    default:
+                            	      res += '\\';
+                            	      break;
+                            	    }
+                            	}
+                                }
 
-                          message = res;
-                         */
+                              message = res;
+                             */
     message << unformated;
     /*
     message.Append( unformated );
@@ -154,6 +154,21 @@ void zEffectorCycleBrake::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarge
             ++iter)
     {
         static_cast<gCycle *>((*iter)->Object())->SetBrakingReservoir(1.0);
+    }
+}
+
+//
+//
+//
+
+void zEffectorCycleAcceleration::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
+{
+    gVectorExtra<ePlayerNetID *>::iterator iter;
+    for(iter = d_calculatedTargets.begin();
+            iter != d_calculatedTargets.end();
+            ++iter)
+    {
+        static_cast<gCycle *>((*iter)->Object())->AddZoneAcceleration(acceleration.GetOffset());
     }
 }
 

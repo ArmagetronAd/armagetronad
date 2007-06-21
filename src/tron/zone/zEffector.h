@@ -36,6 +36,7 @@ class gCycle;
 #include "gCycle.h"
 #include "eTeam.h"
 #include "tLocale.h"
+#include "tFunction.h"
 
 class zEffector
 {
@@ -131,6 +132,23 @@ public:
     virtual ~zEffectorCycleBrake() {};
 
     virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
+};
+
+class zEffectorCycleAcceleration : public zEffector
+{
+public:
+    static zEffector* create() { return new zEffectorCycleAcceleration(); };
+    zEffectorCycleAcceleration():zEffector(),acceleration(1.0, 1.0) { }; //<! Constructor
+    //zEffectorCycleAcceleration(zEffectorCycleAcceleration const &other):zEffector(other) { acceleration = other.acceleration};
+    //    void operator=(zEffectorCycleAcceleration const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+    virtual zEffectorCycleAcceleration *copy(void) const { return new zEffectorCycleAcceleration(*this); };
+    virtual ~zEffectorCycleAcceleration() {};
+
+    virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
+
+    virtual void setValue(tFunction const &accel) { acceleration = accel; };
+protected: 
+    tFunction acceleration;
 };
 
 class gArena;

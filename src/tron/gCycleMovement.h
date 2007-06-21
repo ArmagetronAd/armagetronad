@@ -208,6 +208,7 @@ protected:
     eCoord          dirSpawn;                   //!< the direction we were facing on the last spawn
     eCoord          lastDirDrive;               //!< the direction we were facing before the last turn
     REAL            acceleration;               //!< current acceleration
+    REAL            totalZoneAcceleration;      //!< current acceleration from the effect of zones and monitor
 
     REAL            lastTimestep_;              //!< the length of the last timestep
     REAL            verletSpeed_;               //!< object speed according to verlet (speed of half a frame ago)
@@ -261,6 +262,8 @@ public:
     inline REAL const & GetLastTurnTime( void ) const;	//!< Gets the time of the last turn
     inline gCycleMovement const & GetLastTurnTime( REAL & lastTurnTime ) const;	//!< Gets the time of the last turn
     REAL GetAcceleration(void) const  { return acceleration; };  //!< Gets the cycle's acceleration
+    virtual void            AddZoneAcceleration     ( REAL zoneAcceleration             )           ;
+
 protected:
     inline gCycleMovement & SetLastTurnPos( eCoord const & lastTurnPos );	//!< Sets the location of the last turn
     inline gCycleMovement & SetLastTurnTime( REAL const & lastTurnTime );	//!< Sets the time of the last turn
