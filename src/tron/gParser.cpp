@@ -986,7 +986,7 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
         effectorSpawnPlayer->setArena(sg_GetArena());
     }
 
-    // Should we set the grid and arena for respawning
+    // Should we set the setting name and value
     zEffectorSetting *effectorSetting;
     effectorSetting = dynamic_cast<zEffectorSetting *>(effector.get());
     if (effectorSetting) {
