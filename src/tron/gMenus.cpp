@@ -1153,6 +1153,7 @@ static bool con_func(REAL x){
 
 static bool toggle_fullscreen_func( REAL x )
 {
+#ifndef DEDICATED
 #ifdef DEBUG
     // don't toggle fullscreen while playing back in debug mode, that's annoying
     if ( tRecorder::IsPlayingBack() )
@@ -1165,6 +1166,7 @@ static bool toggle_fullscreen_func( REAL x )
         currentScreensetting.fullscreen = !currentScreensetting.fullscreen;
         sr_ReinitDisplay();
     }
+#endif
 
     return true;
 }
