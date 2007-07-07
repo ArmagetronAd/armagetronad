@@ -1159,7 +1159,8 @@ static bool toggle_fullscreen_func( REAL x )
         return true;
 #endif
 
-    if ( x > 0 )
+    // only do anything if the application is active (work around odd bug)
+    if ( x > 0 && ( SDL_GetAppState() & SDL_APPACTIVE ) )
     {
         currentScreensetting.fullscreen = !currentScreensetting.fullscreen;
         sr_ReinitDisplay();
