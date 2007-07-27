@@ -2137,7 +2137,7 @@ player_scoretable_inactive	Disconnected
 #********************************************
 #********************************************
 
-fullscreen_message_title        Sever Message
+fullscreen_message_title        Server Message
 
 network_message_timeout_title	Server does not answer
 network_message_timeout_inter	The server you wanted to connect to did not answer for ten seconds.\nIt is probably down or unreachable, or you mistyped its name in the "custom connect" menu.
