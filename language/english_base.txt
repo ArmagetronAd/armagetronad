@@ -547,6 +547,12 @@ camera_visibility_lower_wall_smart_help  Like CAMERA_VISIBILITY_LOWER_WALL, but 
 bug_transparency_help                    Unsupported: make all rim walls semi-transparent by rendering them without occlusion tests
 bug_transparency_demand_help             Unsupported: use transparency instead of lowering walls
 
+#red/green 3D rendering settings
+camera_eye_distance_help              The distance between the two eyes of the camera. Set this to 0 to disable 3D rendering
+camera_eye_1_color_help               The color mask of the first eye of the camera. 1 is red, 2 is green, 4 is blue, any sum of these values means more than one color
+camera_eye_2_color_help               The color mask of the second eye of the camera. 1 is red, 2 is green, 4 is blue, any sum of these values means more than one color
+camera_in_max_focus_distance_help     This, multiplied by the current speed, determines the maximum distance of the focus of the two eyes unless a wall is closer
+
 #********************************************
 #********************************************
 #

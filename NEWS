@@ -14,7 +14,9 @@ Changes since 0.3.0
   Match winner, and New match. Note that not all notifications are enabled by
   default — you can toggle notifications and do many more things in the Growl
   System Preferences panel.
-	
+- Red/Green or Red/Cyan 3D rendering. Activate it by setting
+  CAMERA_EYE_DISTANCE to something ≠ 0.
+
 Changes since 0.3.0_alpha4941
 =============================
 

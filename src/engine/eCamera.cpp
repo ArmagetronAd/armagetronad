@@ -1340,6 +1340,20 @@ static REAL se_cameraSmart =;
 static tSettingItem< REAL > se_confCameraSmart( "CAMERA_SMART", se_cameraSmart );
 */
 
+static float se_cameraEyeDistance = 0; // .1 to .5 appear to be good values
+static tConfItem<float> secced("CAMERA_EYE_DISTANCE", se_cameraEyeDistance);
+
+static int se_cameraEye1Color = 1; // 001b (bgR)
+static tConfItem<int> sece1ca("CAMERA_EYE_1_COLOR", se_cameraEye1Color);
+static tConfItem<int> sece1cb("CAMERA_EYE_1_COLOUR", se_cameraEye1Color);
+
+static int se_cameraEye2Color = 6; // 110b (BGr)
+static tConfItem<int> sece2ca("CAMERA_EYE_2_COLOR", se_cameraEye2Color);
+static tConfItem<int> sece2cb("CAMERA_EYE_2_COLOUR", se_cameraEye2Color);
+
+static float se_cameraInMaxFocusDistance = .5; //factor of the current speed
+static tConfItem<float> secimfd("CAMERA_IN_MAX_FOCUS_DISTANCE", se_cameraInMaxFocusDistance);
+
 #ifndef DEDICATED
 bool displaying=false;
 
@@ -1433,19 +1447,6 @@ void eCamera::Render(){
     if(CenterCockpitFixedBefore()){
         vp->Perspective(fov,zNear,1E+20);
 
-        /*
-          gluLookAt(pos.x,
-             pos.y,
-             z,
-
-             pos.x+dir.x,
-             pos.y+dir.y,
-             z+rise,
-
-             top.x,top.y,
-             1);
-        */
-
         gluLookAt(0,
                   0,
                   0,
@@ -1471,12 +1472,75 @@ void eCamera::Render(){
         if (zNear < -.1 )
             zNear = .1;
 
+        if(se_cameraEyeDistance) {
+            glColorMask(se_cameraEye1Color & 1, se_cameraEye1Color & 2, se_cameraEye1Color & 4, GL_TRUE);
+        }
         grid->Render( this, id, zNear );
 
         zNear *= .3f;
         if ( zNear < 0.0001f )
         {
             zNear = 0.0001f;
+        }
+
+        if(se_cameraEyeDistance) {
+            glClear(GL_DEPTH_BUFFER_BIT);
+            glColorMask(se_cameraEye2Color & 1, se_cameraEye2Color & 2, se_cameraEye2Color & 4, GL_TRUE);
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+
+            vp->Perspective(fov,zNear,1E+20);
+
+            float offset = 0;
+            if(mode == CAMERA_IN) {
+                eSensor test(Center(), Center()->Position(), Center()->Direction());
+                test.detect(se_cameraInMaxFocusDistance*Center()->Speed());
+                offset = test.hit;
+            }
+
+            tCoord unnormalzed_dir = dir * ((centerPosSmooth - pos).Norm() + offset);
+
+            tCoord perp = dir.Turn(tCoord(0,1))*se_cameraEyeDistance;
+            tCoord dir2 = unnormalzed_dir - perp;
+            dir2.Normalize();
+
+            gluLookAt(0,
+                      0,
+                      0,
+
+                      dir2.x,
+                      dir2.y,
+                      rise,
+
+                      top.x,top.y,
+                      1);
+
+            perp += pos;
+
+            glTranslatef(-perp.x,-perp.y,-z);
+            glMatrixMode(GL_MODELVIEW);
+
+            draw_center=((CenterPos()-pos).NormSquared()>1 ||
+                         fabs(CenterZ() - z)>1);
+
+            tJUST_CONTROLLED_PTR< eGameObject > c=Center();
+            if (!draw_center && c) c->RemoveFromList();
+
+            eCoord poscopy = pos;
+            zNear = - eWallRim::Bound( poscopy, 0.0f );
+            if (zNear < -.1 )
+                zNear = .1;
+
+            grid->Render( this, id, zNear );
+
+            zNear *= .3f;
+            if ( zNear < 0.0001f )
+            {
+                zNear = 0.0001f;
+            }
+            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         }
 
         if (c) c->RenderCockpitVirtual();
