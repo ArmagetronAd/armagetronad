@@ -137,7 +137,7 @@ void eGameObject::PassEdge(const eWall *w,REAL,REAL,int){
     if (w) Kill();
 }
 
-static int se_moveTimeout = 10;
+static int se_moveTimeout = 100;
 static tSettingItem<int> se_moveTimeoutC("GAMEOBJECT_MOVE_TIMEOUT", se_moveTimeout);
 
 // data structures for storing temp wall collisions
@@ -253,16 +253,20 @@ void eGameObject::Move( const eCoord &dest, REAL startTime, REAL endTime, bool u
             {
                 timeout--;
             }
-            if ( lastDistance > 1E+29 )
-                lastDistance = distance * 1.1;
-            lastDistance = .1 * lastDistance + distance * (.9 - EPS);
-
-            // check if the target has been reached within tolerance; it can only make matters
-            // worse then to continue, even if the current face claims we're not part of it.
-            if ( distance <= EPS * totalDistance )
+            else
             {
-                // st_Breakpoint();
-                break;
+                timeout = se_moveTimeout;
+                if ( lastDistance > 1E+29 )
+                    lastDistance = distance * 1.1;
+                lastDistance = .1 * lastDistance + distance * (.9 - EPS);
+
+                // check if the target has been reached within tolerance; it can only make matters
+                // worse then to continue, even if the current face claims we're not part of it.
+                if ( distance <= EPS * totalDistance )
+                {
+                    // st_Breakpoint();
+                    break;
+                }
             }
 #ifdef DEBUG_X
 rerun:
@@ -511,9 +515,28 @@ void eGameObject::FindCurrentFace(){
             static bool recurse = true;
             if ( recurse )
             {
+                class RecursionGuard
+                {
+                public:
+                    RecursionGuard( bool& recursion )
+                    :recursion_( recursion )
+                    {
+                        recursion = false;
+                    }
+
+                    ~RecursionGuard()
+                    {
+                        recursion_ = true;
+                    }
+
+                private:
+                    bool& recursion_;
+                };
+
+                RecursionGuard guard( recurse );
+
                 // warp to the known good position and move back to where the
                 // object should be
-                recurse = false;
                 eCoord oldPos = pos;
                 pos = center;
 #ifdef DEBUG
@@ -526,7 +549,7 @@ void eGameObject::FindCurrentFace(){
                 catch( eDeath & ) // ignore death exceptions and leave object where it would have died
                 {
 #ifdef DEBUG
-                    // try again
+                    // try again (yeah, this looks like a WTF, but it really helps in some cases because the situation has changed since the last try. /me blames floating points)
                     try
                     {
                         pos = center;
