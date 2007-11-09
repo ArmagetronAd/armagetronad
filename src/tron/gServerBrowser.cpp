@@ -57,7 +57,8 @@ static tSettingItem< int > sg_simultaneousConf( "BROWSER_QUERIES_SIMULTANEOUS", 
 static tOutput *sg_StartHelpText = NULL;
 
 nServerInfo::QueryType sg_queryType = nServerInfo::QUERY_OPTOUT;
-static tSettingItem< int > sg_query_type( "BROWSER_QUERY_FILTER", reinterpret_cast< int & >( sg_queryType ) );
+tCONFIG_ENUM( nServerInfo::QueryType );
+static tSettingItem< nServerInfo::QueryType > sg_query_type( "BROWSER_QUERY_FILTER", sg_queryType );
 
 class gServerMenuItem;
 
