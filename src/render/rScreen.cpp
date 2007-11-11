@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -117,12 +117,16 @@ rScreenSettings currentScreensetting(sr_DesktopScreensizeSupported() ? ArmageTro
 
 bool sr_DesktopScreensizeSupported()
 {
+#ifndef DEDICATED
     SDL_version const & sdlVersion = *SDL_Linked_Version();
 
-    return 
+    return
     sdlVersion.major > 1 || sdlVersion.major == 1 &&
     ( sdlVersion.minor > 2 || sdlVersion.minor == 2 &&
       ( sdlVersion.patch >= 10 ) );
+#else
+    return false;
+#endif
 }
 
 static int failed_attempts = 0;
@@ -540,9 +544,9 @@ static bool lowlevel_sr_InitDisplay(){
             // select sane defaults in case the following operation fails
             sr_desktopWidth = 640;
             sr_desktopHeight = 480;
-            
+
             if ( sr_DesktopScreensizeSupported() )
-            { 
+            {
                 sr_screen=SDL_SetVideoMode( 0, 0, CD, attrib );
                 if ( sr_screen )
                 {
@@ -582,12 +586,12 @@ static bool lowlevel_sr_InitDisplay(){
                 				sr_ExitDisplay();
 
                 				if ( (sr_screen=SDL_SetVideoMode
-                					  (sr_screenWidth, sr_screenHeight,   CD, 
+                					  (sr_screenWidth, sr_screenHeight,   CD,
                 					   attrib))
                 					 == NULL)
                 				{
                 					if((sr_screen=SDL_SetVideoMode
-                						(sr_screenWidth, sr_screenHeight,    CD, 
+                						(sr_screenWidth, sr_screenHeight,    CD,
                 						 attrib^SDL_FULLSCREEN))==NULL )
                 					{
                 						lastError.Clear();
