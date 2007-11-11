@@ -237,12 +237,16 @@ public:
         else
         {
             // add custom resolution
-            NewChoice( ArmageTron_Custom );//, "$screen_custom_text","$screen_custom_help" );
+            NewChoice( ArmageTron_Custom );
+            
+            // add desktop resolution
+            if ( sr_DesktopScreensizeSupported() && !addFixed )
+                NewChoice( ArmageTron_Desktop );
 
             // the maximal allowed screen size
             rScreenSize maxSize(0,0);
 
-            // fill in available modes (avoid dublicates)
+            // fill in available modes (avoid duplicates)
             for(i=0;modes[i];++i)
             {
                 // add mode (if it's new)
@@ -257,7 +261,7 @@ public:
             // add fixed resolutions (as window sizes)
             if ( addFixed )
             {
-                for ( i = ArmageTron_Custom; i>=0; --i )
+                for ( i = ArmageTron_Custom; i>=ArmageTron_Min; --i )
                 {
                     rScreenSize size( static_cast< rResolution >(i) );
 
@@ -274,7 +278,11 @@ public:
                 rScreenSize const & size = *iter;
 
                 std::stringstream s;
-                s << size.width << " x " << size.height;
+                if ( size.width + size.height > 0 )
+                    s << size.width << " x " << size.height;
+                else
+                    s << tOutput("$screen_size_desktop");
+
                 res_men.NewChoice( s.str().c_str(), help, size );
             }
 

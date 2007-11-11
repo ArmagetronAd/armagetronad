@@ -72,8 +72,8 @@ static int default_texturemode = GL_LINEAR_MIPMAP_LINEAR;
 bool sr_ZTrick=false;
 bool sr_useDisplayLists=false;
 
-static int width[]={320	,320,400,512,640,800,1024	,1280, 	1280 ,1280	,1600	,1680 ,2048	,800,320};
-static int height[]={200,240,300,384,480,600,768	,800, 	854  ,1024	,1200	,1050 ,1572	,600,200};
+static int width[]={0,320	,320,400,512,640,800,1024	,1280, 	1280 ,1280	,1600	,1680 ,2048	,800,320};
+static int height[]={0,200,240,300,384,480,600,768	,800, 	854  ,1024	,1200	,1050 ,1572	,600,200};
 static REAL aspect[]={1	,1	,1	,1	,1	,1    ,1	,1	,1    ,1	,1		,1,1	,1};
 
 int sr_screenWidth,sr_screenHeight;
@@ -110,10 +110,20 @@ static rScreenSettings *emergency[MAXEMERGENCY+2]={ &lastSuccess, &lastSuccess, 
 #endif
 
 #ifdef DEBUG
-rScreenSettings currentScreensetting(ArmageTron_320_200);
+rScreenSettings currentScreensetting(ArmageTron_640_480);
 #else
-rScreenSettings currentScreensetting(ArmageTron_640_480, true);
+rScreenSettings currentScreensetting(sr_DesktopScreensizeSupported() ? ArmageTron_Desktop : ArmageTron_800_600, true);
 #endif
+
+bool sr_DesktopScreensizeSupported()
+{
+    SDL_version const & sdlVersion = *SDL_Linked_Version();
+
+    return 
+    sdlVersion.major > 1 || sdlVersion.major == 1 &&
+    ( sdlVersion.minor > 2 || sdlVersion.minor == 2 &&
+      ( sdlVersion.patch >= 10 ) );
+}
 
 static int failed_attempts = 0;
 
@@ -277,6 +287,12 @@ bool rScreenSize::operator !=( rScreenSize const & other ) const
 
 int rScreenSize::Compare( rScreenSize const & other ) const
 {
+    // desktop size dominates all
+    if ( width == 0 && other.width != 0 )
+        return 1;
+    if ( other.width == 0 && width != 0 )
+        return -1;
+
     if ( width < other.width )
         return -1;
     else if ( width > other.width )
@@ -315,6 +331,11 @@ int rScreenSize::Compare( rScreenSize const & other ) const
 rScreenSettings::rScreenSettings( rResolution r, bool fs, rColorDepth cd, bool sdl, bool ce )
         :res(r), windowSize(r), fullscreen(fs), colorDepth(cd), zDepth( ArmageTron_ColorDepth_Desktop ), useSDL(sdl), checkErrors(true), aspect (1)
 {
+    // special case for desktop resolution: window size of 640x480
+    if ( r == ArmageTron_Desktop )
+    {
+        windowSize = rScreenSize( ArmageTron_640_480 );
+    }
 }
 
 void sr_ReinitDisplay(){
@@ -510,6 +531,29 @@ static bool lowlevel_sr_InitDisplay(){
                 }
 #endif
             }
+        }
+
+        // determine desktop resolution
+        static int sr_desktopWidth = 0, sr_desktopHeight = 0;
+        if ( sr_desktopWidth == 0 && sr_DesktopScreensizeSupported() )
+        {
+            // select sane defaults in case the following operation fails
+            sr_desktopWidth = 640;
+            sr_desktopHeight = 480;
+            
+            sr_screen=SDL_SetVideoMode( 0, 0, CD, attrib );
+            if ( sr_screen )
+            {
+                sr_desktopWidth = sr_screen->w;
+                sr_desktopHeight = sr_screen->h;
+            }
+        }
+
+        // if desktop resolution was selected, pick it
+        if ( sr_screenWidth + sr_screenHeight == 0 )
+        {
+            sr_screenWidth = sr_desktopWidth;
+            sr_screenHeight = sr_desktopHeight;
         }
 
         if ( (sr_screen=SDL_SetVideoMode

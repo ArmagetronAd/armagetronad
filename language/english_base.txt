@@ -715,7 +715,7 @@ filter_color_server_names_help	Filter color codes from server names in the serve
 custom_screen_height_help	Custom screen size
 custom_screen_width_help	Custom screen size
 custom_screen_aspect_help	Custom screen aspect ratio ( pixel width/pixel height)
-screen_size_desktop         Desktop (requires restart)
+screen_size_desktop         Desktop
 armagetron_screenmode_help	Screen resolution
 armagetron_last_screenmode_help Last screen resolution
 armagetron_windowsize_help	Window size
