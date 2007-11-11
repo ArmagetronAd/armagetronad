@@ -105,6 +105,33 @@ void GetTime( tTime & time )
         time.microseconds = ( ( mtime.QuadPart - time.seconds * frq.QuadPart ) * 1000000 ) / frq.QuadPart;
     }
 
+    /*
+
+    // get time with millisecond accuracy
+    int milliseconds = GetTickCount();
+    static int firstMilliseconds = milliseconds;
+    milliseconds -= firstMilliseconds;
+
+    
+    // count overflows
+    static int lastMilliseconds = 0;
+    static int overflows = 0;
+    if ( milliseconds < lastMilliseconds )
+    {
+        overflows++;
+    }
+    lastMilliseconds = milliseconds;
+
+    // fill regular time
+    time.seconds = milliseconds/1000;
+    milliseconds -= time.seconds * 1000;
+    time.microseconds = milliseconds * 1000;
+
+    // add overflows
+    time.seconds += overflows * ( 0x100000000ll / 1000 );
+    time.microseconds += overflows * ( 0x100000000ll % 1000 ) * 1000;
+
+    */
 
     time.Normalize();
 
