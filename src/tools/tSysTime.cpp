@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -80,68 +80,74 @@ struct tTime
 
 #ifdef WIN32
 #include <windows.h>
-#include <sys/timeb.h> 
+#include <sys/timeb.h>
 #ifndef DEDICATED
 #include "rSDL.h"
 #endif
 
-void GetTime( tTime & time )
+// flag indicating whether the HPC is reliable
+static bool st_hpcReliable = true;
+
+void GetTimeInner( tTime & time )
 {
-    struct _timeb tstruct;
     LARGE_INTEGER mtime,frq;
 
     // Check if high-resolution performance counter is supported
     if (!QueryPerformanceFrequency(&frq))
     {
-        // Nope, not supported, do it the old way.
-        _ftime( &tstruct );
-        time.microseconds = tstruct.millitm*1000;
-        time.seconds = tstruct.time;
+        st_hpcReliable = false;
     }
-    else
+
+    if (st_hpcReliable)
     {
         QueryPerformanceCounter(&mtime);
         time.seconds = mtime.QuadPart/frq.QuadPart;
         time.microseconds = ( ( mtime.QuadPart - time.seconds * frq.QuadPart ) * 1000000 ) / frq.QuadPart;
     }
-
-    /*
-
-    // get time with millisecond accuracy
-    int milliseconds = GetTickCount();
-    static int firstMilliseconds = milliseconds;
-    milliseconds -= firstMilliseconds;
-
-    
-    // count overflows
-    static int lastMilliseconds = 0;
-    static int overflows = 0;
-    if ( milliseconds < lastMilliseconds )
+    else
     {
-        overflows++;
+        // Nope, not supported, do it the old way.
+        struct _timeb tstruct;
+        _ftime( &tstruct );
+        time.microseconds = tstruct.millitm*1000;
+        time.seconds = tstruct.time;
     }
-    lastMilliseconds = milliseconds;
-
-    // fill regular time
-    time.seconds = milliseconds/1000;
-    milliseconds -= time.seconds * 1000;
-    time.microseconds = milliseconds * 1000;
-
-    // add overflows
-    time.seconds += overflows * ( 0x100000000ll / 1000 );
-    time.microseconds += overflows * ( 0x100000000ll % 1000 ) * 1000;
-
-    */
 
     time.Normalize();
+}
 
+void GetTime( tTime & relative )
+{
+    tTime time;
+    GetTimeInner( time );
+    static tTime start = time;
+    relative = time - start;
+
+    // detect timer trouble
+    if ( st_hpcReliable )
+    {
+        static struct tTime lastTime = relative;
+
+        // test transition
+        //if ( relative.seconds > 10 )
+        //    lastTime.seconds = lastTime.seconds+1;
+
+        if ( (time - lastTime).seconds < 0 )
+        {
+            st_hpcReliable = false;
+
+            GetTimeInner( time );
+            start = start + time - lastTime;
+            relative = time - start;
+        }
+        lastTime = time;
+    }
 }
 
 //! returns true if a timer with more than millisecond accuracy is available
 bool tTimerIsAccurate()
 {
-    LARGE_INTEGER dummy;
-    return QueryPerformanceFrequency(&dummy);
+    return st_hpcReliable;
 }
 
 /*
@@ -243,6 +249,12 @@ void tAdvanceFrameSys( tTime & start, tTime & relative )
     if ( start.microseconds == 0 && start.seconds == 0 )
         start = time;
     relative = time - start;
+
+    if ( relative.seconds > 20 )
+    {
+        int x;
+        x = 0;
+    }
 }
 
 static bool s_delayedInPlayback = false;
