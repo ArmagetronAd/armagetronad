@@ -535,17 +535,20 @@ static bool lowlevel_sr_InitDisplay(){
 
         // determine desktop resolution
         static int sr_desktopWidth = 0, sr_desktopHeight = 0;
-        if ( sr_desktopWidth == 0 && sr_DesktopScreensizeSupported() )
+        if ( sr_desktopWidth == 0 && !sr_screen )
         {
             // select sane defaults in case the following operation fails
             sr_desktopWidth = 640;
             sr_desktopHeight = 480;
             
-            sr_screen=SDL_SetVideoMode( 0, 0, CD, attrib );
-            if ( sr_screen )
-            {
-                sr_desktopWidth = sr_screen->w;
-                sr_desktopHeight = sr_screen->h;
+            if ( sr_DesktopScreensizeSupported() )
+            { 
+                sr_screen=SDL_SetVideoMode( 0, 0, CD, attrib );
+                if ( sr_screen )
+                {
+                    sr_desktopWidth = sr_screen->w;
+                    sr_desktopHeight = sr_screen->h;
+                }
             }
         }
 
