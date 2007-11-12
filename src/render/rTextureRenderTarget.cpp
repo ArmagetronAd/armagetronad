@@ -68,6 +68,7 @@ rTextureRenderTarget::~rTextureRenderTarget()
 
 rTextureRenderTarget::rTextureRenderTarget( int width, int height )
 {
+#ifndef DEDICATED
     sr_CheckGLError();
     
     width_ = width;
@@ -123,10 +124,12 @@ rTextureRenderTarget::rTextureRenderTarget( int width, int height )
     }
     
     throw tGenericException( "frame buffer extension not supported" );
+#endif
 }
 
 void rTextureRenderTarget::Push()
 {
+#ifndef DEDICATED
     previous = anchor;
     anchor = this;
     
@@ -135,10 +138,12 @@ void rTextureRenderTarget::Push()
     glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, frameBuffer_ );
     
     sr_CheckGLError();
+#endif
 }
 
 void rTextureRenderTarget::Pop()
 {
+#ifndef DEDICATED
     tASSERT( IsTarget() );
     
     sr_CheckGLError();
@@ -146,9 +151,12 @@ void rTextureRenderTarget::Pop()
     sr_CheckGLError();
     
     anchor = previous;
+#endif
 }
 
 void rTextureRenderTarget::OnSelect(bool)
 {
+#ifndef DEDICATED
     glBindTexture( GL_TEXTURE_2D, texture_ );
+#endif
 }
