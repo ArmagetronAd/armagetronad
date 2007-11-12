@@ -4055,6 +4055,27 @@ static unsigned short se_ReadUser( std::istream &s )
     return 0;
 }
 
+static void se_PlayerMessageConf(std::istream &s)
+{
+    int receiver = se_ReadUser( s );
+
+    tColoredString msg;
+    msg.ReadLine(s);
+
+    if ( receiver <= 0 || s.good() )
+    {
+        con << "Usage: PLAYER_MESSAGE <user ID or name> <Message>\n";
+        return;
+    }
+
+    msg << '\n';
+
+    sn_ConsoleOut(msg, 0);
+    sn_ConsoleOut(msg, receiver);
+}
+
+static tConfItemFunc se_PlayerMessage_c("PLAYER_MESSAGE", &se_PlayerMessageConf);
+
 static void se_KickConf(std::istream &s)
 {
     // get user ID
