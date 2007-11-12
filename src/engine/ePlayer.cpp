@@ -1156,6 +1156,17 @@ private:
     tColoredString message_; // the console message for the remote administrator
 };
 
+static tString se_InterceptCommands;
+static tConfItemLine se_InterceptCommandsConf( "INTERCEPT_COMMANDS", se_InterceptCommands );
+
+static bool se_interceptUnknownCommands = false;
+static tSettingItem<bool> se_interceptUnknownCommandsConf("INTERCEPT_UNKNOWN_COMMANDS",
+        se_interceptUnknownCommands);
+
+void handle_command_intercept(tJUST_CONTROLLED_PTR< ePlayerNetID > &p, tString say) {
+    con << "[cmd] " << *p << ": " << say << '\n';
+}
+
 void handle_chat_admin_commands(tJUST_CONTROLLED_PTR< ePlayerNetID > &p, tString say){
     if  (say.StartsWith("/login")) {
         tString params("");
@@ -1224,6 +1235,11 @@ void handle_chat_admin_commands(tJUST_CONTROLLED_PTR< ePlayerNetID > &p, tString
             std::stringstream s(static_cast< char const * >( params ) );
             tConfItemBase::LoadAll(s);
         }
+    }
+    else
+    if (se_interceptUnknownCommands)
+    {
+        handle_command_intercept(p, say);
     }
     else
     {
@@ -1334,6 +1350,12 @@ void handle_chat(nMessage &m){
                 tString msg;
                 tConfItemBase::EatWhitespace(s);
                 msg.ReadLine(s);
+                if (se_InterceptCommands.StrPos(command) != -1)
+                {
+                    handle_command_intercept(p, say);
+                    return;
+                }
+                else
                 if (command == "/me") {
                     if ( IsSilencedWithWarning(p) )
                         return;
