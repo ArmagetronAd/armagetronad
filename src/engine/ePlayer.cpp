@@ -2773,8 +2773,16 @@ eNetGameObject *ePlayerNetID::Object() const{
     return object;
 }
 
+static bool se_consoleLadderLog = false;
+static tSettingItem< bool > se_consoleLadderLogConf( "CONSOLE_LADDER_LOG", se_consoleLadderLog );
+
 void se_SaveToLadderLog( tOutput const & out )
 {
+    if (se_consoleLadderLog)
+    {
+        std::cout << "[L] " << out;
+        std::cout.flush();
+    }
     if (sn_GetNetState()!=nCLIENT && !tRecorder::IsPlayingBack())
     {
         std::ofstream o;
