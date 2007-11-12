@@ -778,20 +778,22 @@ static tSettingItem<REAL> c_mb( "MOTION_BLUR_TIME",
 // blurs the motion, time is the current time
 bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTarget )
 {
+    static bool lastActive = true;
+    bool active = false;
+
+    // measure frame rendering time
+    static double lastTime = time;
+    REAL frameTime = time - lastTime;
+
     if ( currentScreensetting.vSync == ArmageTron_VSync_MotionBlur )
     {
-        // measure frame rendering time
-        static double lastTime = time;
-        REAL frameTime = time - lastTime;
-
-
         // use hysteresis to autodisable motion blurring if rendering gets
         // far too slow and reenable it if rendering gets fast enough again
         static int hyster = 0;
         static int thresh = 100;
-        static bool active = true;
+        active = lastActive;
 
-        if ( frameTime * 5 < sr_motionBlurTime )
+        if ( frameTime * 2 < sr_motionBlurTime )
         {
             if ( ++hyster > thresh )
             {
@@ -816,29 +818,43 @@ bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTar
         }
 
         lastTime = time;
-
-        // really blur.
-        if ( active )
-        {
-            // determine blur texture size
-            int blurWidth = NextPowerOfTwo( sr_screenWidth );
-            int blurHeight = NextPowerOfTwo( sr_screenHeight );
-
-            // destroy existing blur texture if it is too small
-            if ( blurTarget.get() && ( blurTarget->GetWidth() < blurWidth || blurTarget->GetHeight() < blurHeight ) )
-            {
-                blurTarget = std::auto_ptr< rTextureRenderTarget >();
-            }
-
-            // create blur texture
-            if ( !blurTarget.get() )
-            {
-                blurTarget = std::auto_ptr< rTextureRenderTarget >( new rTextureRenderTarget( blurWidth, blurHeight  ) );
-            }
-
-            return sr_MotionBlurCore( 1 - frameTime / sr_motionBlurTime, *blurTarget );
-        }
     }
+
+    // really blur.
+    if ( lastActive )
+    {
+        // determine blur texture size
+        int blurWidth = NextPowerOfTwo( sr_screenWidth );
+        int blurHeight = NextPowerOfTwo( sr_screenHeight );
+        
+        // destroy existing blur texture if it is too small
+        if ( blurTarget.get() && ( blurTarget->GetWidth() < blurWidth || blurTarget->GetHeight() < blurHeight ) )
+        {
+            blurTarget = std::auto_ptr< rTextureRenderTarget >();
+        }
+        
+        // create blur texture
+        if ( !blurTarget.get() )
+        {
+            blurTarget = std::auto_ptr< rTextureRenderTarget >( new rTextureRenderTarget( blurWidth, blurHeight  ) );
+        }
+
+        // really blur
+        bool ret = sr_MotionBlurCore( 1 - frameTime / sr_motionBlurTime, *blurTarget );
+
+        // store active value for the next frame
+        lastActive = active;
+
+        // if the next frame won't be blurred, deactivate rendering to the texture
+        if ( !active )
+        {
+            blurTarget->Pop();
+        }
+        
+        return ret;
+    }
+
+    lastActive = active;
 
     // no motion blur happened when we got here
 	if ( blurTarget.get() && blurTarget->IsTarget() )
