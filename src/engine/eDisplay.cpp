@@ -298,6 +298,8 @@ void eGrid::display_simple( int viewer,bool floor,
                             REAL flooralpha,
                             bool eWalls,bool gameObjects,
                             REAL& zNear){
+	sr_CheckGLError();
+
     /*
     static GLfloat S[]={1,0,0,0};
     static GLfloat T[]={0,1,0,0};
@@ -505,6 +507,8 @@ void eGrid::display_simple( int viewer,bool floor,
     else
         glEnable(GL_DEPTH_TEST);
 
+	sr_CheckGLError();
+
     if (eWalls){
         glDisable(GL_CULL_FACE);
         draw_eWall(this,viewer,0,zNear,cameras(viewer));
@@ -535,6 +539,8 @@ void eGrid::display_simple( int viewer,bool floor,
         */
 
     }
+
+	sr_CheckGLError();
 
     if (gameObjects)
         eGameObject::RenderAll(this, cameras(viewer));

@@ -682,6 +682,19 @@ int main(int argc,char **argv){
 
                 try
                 {
+#ifdef HAVE_GLEW
+					// initialize GLEW
+					{
+						GLenum err = glewInit();
+						if (GLEW_OK != err)
+						{
+							// Problem: glewInit failed, something is seriously wrong
+							throw tGenericException( (const char *)glewGetErrorString(err), "GLEW Error" );
+						}
+						con << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << "\n";
+					}
+#endif // HAVE_GLEW
+
                     //std::cout << "init disp\n";
 
                     //std::cout << "init sound\n";

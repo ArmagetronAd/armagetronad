@@ -25,29 +25,51 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#include "rGL.h"
-#include "tConsole.h"
-#include "tError.h"
-#include <sstream>
-#include <iomanip>
+#include "rGLuintObject.h"
 
-#ifdef DEBUG
-void sr_CheckGLError()
-{	
-#ifndef DEDICATED
-	GLenum error = glGetError();
-	if ( error != GL_NO_ERROR )
-	{
-		std::stringstream s;
-		s << "GL error 0X" << std::hex << error << "\n";
-		con << s.str();
+// heh, no parameters to document :)
 
-		// catch a breakpoint
-		static bool reported = false;
-		if ( !reported )
-			st_Breakpoint();
-		reported = true;
-	}
-#endif
+rGLuintObject::rGLuintObject()
+	: object_(0)
+{
 }
-#endif
+
+//! @return the GLUint representing the object, always guaranteed to be valid
+rGLuintObject::operator GLuint()
+{
+	// auto-generate the object
+	Gen();
+	return object_;
+}
+
+//! @return true if the object is currently valid (meaning: Gen() has been called after Delete())
+bool rGLuintObject::IsValid() const
+{
+	return object_;
+}
+
+rGLuintObject::~rGLuintObject()
+{
+}
+
+void rGLuintObject::Gen()
+{
+	if ( !object_ )
+	{
+		sr_CheckGLError();
+		DoGen();
+		sr_CheckGLError();
+	}
+}
+
+void rGLuintObject::Delete()
+{
+	if ( object_ )
+	{
+		sr_CheckGLError();
+		DoDelete();	
+		sr_CheckGLError();
+	}
+	object_ = 0;
+}
+

@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eWall.h"
 #include "tConsole.h"
 #include "rScreen.h"
+#include "rGL.h"
 
 #include "eSoundMixer.h"
 
@@ -809,7 +810,9 @@ void eGameObject::RenderAll(eGrid *grid, const eCamera *cam){
 #ifdef DEBUG
             displayed_gameobject = grid->gameObjects(i);
 #endif
+			sr_CheckGLError();
             grid->gameObjects(i)->Render(cam);
+			sr_CheckGLError();
 #ifdef DEBUG
             displayed_gameobject = 0;
 #endif

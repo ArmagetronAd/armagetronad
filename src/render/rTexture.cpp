@@ -426,7 +426,7 @@ void rITexture::OnUnload( void )
 // ******************************************************************************************
 
 rISurfaceTexture::rISurfaceTexture( int group, bool repx, bool repy, bool storeAlpha )
-        : group_( group ), textureModeLast_( -1), tint_( 0 ), repx_( repx ), repy_( repy ), storeAlpha_( storeAlpha )
+        : group_( group ), textureModeLast_( -1), repx_( repx ), repy_( repy ), storeAlpha_( storeAlpha )
 {
 }
 
@@ -441,13 +441,6 @@ rISurfaceTexture::rISurfaceTexture( int group, bool repx, bool repy, bool storeA
 
 rISurfaceTexture::~rISurfaceTexture( void )
 {
-#ifndef DEDICATED
-    if (tint_ > 0)
-    {
-        glDeleteTextures(1,&tint_);
-        tint_ = 0;
-    }
-#endif
 }
 
 // ******************************************************************************************
@@ -535,15 +528,12 @@ void rISurfaceTexture::OnSelect( bool enforce )
         if(textureModeLast_!=texmod)
         {
             // unload texture if the mode changed
-            if ( tint_ > 0 )
-                Unload();
-            tASSERT( tint_ == 0 );
+            tint_.Delete();
             // std::cerr << "loading texture " << fileName << ':' << tint << "\n";
 
             if (texmod>0){
                 RenderEnd(true);
 
-                glGenTextures(1, &tint_);
                 glBindTexture(GL_TEXTURE_2D,tint_);
 
                 if (textureModeLast_<0)
@@ -622,13 +612,7 @@ void rISurfaceTexture::OnSelect()
 void rISurfaceTexture::OnUnload( void )
 {
 #ifndef DEDICATED
-    if (tint_ > 0)
-    {
-        // std::cerr << "unloading texture " << fileName << ':' << tint_ << "\n";
-        glDeleteTextures(1,&tint_);
-        tint_ = 0;
-    }
-
+	tint_.Delete();
     textureModeLast_=-100;
     rITexture::OnUnload();
 #endif

@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tString.h"
 #include "tList.h"
 #include "rGL.h"
+#include "rGLuintObject.h"
 
 struct SDL_Surface;
 
@@ -147,9 +148,9 @@ private:
 
     int textureModeLast_;   //!< the last texture storage mode this texture was used with
 
-    GLuint tint_;           //!< the OpenGL id of this texture
-    bool repx_,repy_;       //!< flags indicating whether the texture repeats in x and y direction
-    bool storeAlpha_;       //!< flag indicating whether the alpha value should be stored
+    rGLuintObjectTexture tint_;   //!< the OpenGL id of this texture
+    bool repx_,repy_;             //!< flags indicating whether the texture repeats in x and y direction
+    bool storeAlpha_;             //!< flag indicating whether the alpha value should be stored
 };
 
 // ******************************************************************************************

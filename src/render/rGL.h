@@ -1,3 +1,30 @@
+/*
+
+*************************************************************************
+
+ArmageTron -- Just another Tron Lightcycle Game in 3D.
+Copyright (C) 2006, Armagetron Advanced Development Team  
+
+**************************************************************************
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+  
+***************************************************************************
+
+*/
+
 #ifndef AT_GL_H
 #define AT_GL_H
 
@@ -7,30 +34,13 @@
 #include <windows.h>
 #endif
 
-#include <SDL_opengl.h>
+// GLEW, if active, needs to be included before gl.h
+#include "rGLEW.h"
 
-/*
-// include OpenGL header
-#ifdef HAVE_SDL_OPENGL_H
+// and we don't want the SDL extension definitions, they conflict with GLEW.
+#define NO_SDL_GLEXT
+
 #include <SDL_opengl.h>
-#else
-#ifdef HAVE_SDL_SDL_OPENGL_H
-#include <SDL/SDL_opengl.h>
-#else
-#ifdef HAVE_OPENGL_GL_H
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else
-#ifdef HAVE_GL_GL_H
-#include <GL/gl.h>
-#include <GL/glu.h>
-#else
-#error No suitable OpenGL header found by configure!
-#endif
-#endif
-#endif
-#endif
-*/
 
 #else
 
@@ -39,5 +49,16 @@ typedef unsigned char GLubyte;
 typedef unsigned int GLuint;
 typedef unsigned int GLenum;
 #endif
+
+#ifndef DEBUG
+inline
+#endif
+//! for debugging purposes: checks for OpenGL errors and prints them to the console.
+void sr_CheckGLError()
+#ifdef DEBUG
+;
+#else // DEBUG
+{}
+#endif // DEBUG
 
 #endif

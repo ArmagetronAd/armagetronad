@@ -37,7 +37,6 @@ version 1.2.x for the textures
 which itself needs the libs)
 ITEM(ELINK(www.libpng.org/pub/png/pngcode.html,pnglib and zlib)
 (they should be included in your distribution))
-ITEM(Optional: ELINK(www.libsdl.org/projects/SDL_mixer/,SDL_mixer))
 ITEM([Binary versions only: libstdc++ 5.0.7 (any 5.x.y or whatever came with
 your System if it uses GCC 3.2 or higher should do). Use 
 ELINK([rpmfind.net/linux/rpm2html/search.php?query=libstdc%2B%2B&submit=Search+...&system=&arch=],rpmfind)
@@ -46,6 +45,10 @@ ELINK([www.google.com/search?hl=en&lr=&q=libstdc%2B%2B+5.0.7&btnG=Search],google
 to find a RPM with that library for your system. Sorry, Debian users: I don't know what you need to do; use the
 source packages instead.])
 ])
+
+SECTION(Optional libraries,libs_opt)
+ITEM(ELINK(www.libsdl.org/projects/SDL_mixer/,SDL_mixer))
+ITEM(ELINK(glew.sourceforge.net,GLEW))
 
 PARAGRAPH(,[
 You may take a look at the ELINK(WEBBASE/compatibility.html,compatibility table)

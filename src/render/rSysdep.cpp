@@ -27,6 +27,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
 #include "defs.h"
+
+#include "rGL.h"
+
 #ifndef DEDICATED
 #include "rSDL.h"
 #endif
@@ -39,10 +42,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "aa_config.h"
 #include <iostream>
 #include "rScreen.h"
-#include "rGL.h"
+#include "rTexture.h"
 #include "tCommandLine.h"
 #include "tConfiguration.h"
 #include "tRecorder.h"
+#include "rTextureRenderTarget.h"
 
 #ifndef DEDICATED
 #include "SDL_thread.h"
@@ -589,10 +593,95 @@ void rSysDep::StopNetSyncThread()
     }
 }
 
-void sr_MotionBlurCore( REAL alpha )
+int NextPowerOfTwo( int in )
 {
+	int x = 1;
+	while ( x * 32 <= in )
+		x <<= 5;
+	while ( x < in )
+		x <<= 1;
+
+	return x;
+}
+
+bool sr_MotionBlurCore( REAL alpha, rTextureRenderTarget & blurTarget )
+{
+	sr_CheckGLError();
+
     if ( alpha < 0 )
         alpha = 0;
+
+	{
+		if ( blurTarget.IsTarget() )
+		{
+			blurTarget.Pop();
+			
+			blurTarget.Select();
+		
+			glDrawBuffer( GL_FRONT );
+
+			sr_CheckGLError();
+
+			// determine the texture coordinates of the lower right corner
+			REAL maxu = REAL(sr_screenWidth)/blurTarget.GetWidth();
+			REAL maxv = REAL(sr_screenHeight)/blurTarget.GetHeight();
+
+			glEnable(GL_TEXTURE_2D);
+
+			// blend the last frame and the current frame with the specified alpha value
+			glDisable( GL_DEPTH_TEST );
+			glDepthMask(0);
+
+			glMatrixMode( GL_PROJECTION );
+			glLoadIdentity();
+			glMatrixMode( GL_MODELVIEW );
+			glLoadIdentity();
+			glViewport(0,0,sr_screenWidth, sr_screenHeight);
+
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,
+							GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,
+							GL_NEAREST);
+
+			glDisable(GL_ALPHA_TEST);
+			// glDisable(GL_BLEND);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+
+			glDisable(GL_LIGHTING);
+
+			glBegin( GL_QUADS );
+			glColor4f( 1,1,1,alpha );
+
+			glTexCoord2f( 0, 0 );
+			glVertex2f( -1, -1 );
+
+			glTexCoord2f( maxu, 0 );
+			glVertex2f( 1, -1 );
+
+			glTexCoord2f( maxu, maxv );
+			glVertex2f( 1, 1 );
+
+			glTexCoord2f( 0, maxv );
+			glVertex2f( -1, 1 );
+			glEnd();
+
+			sr_CheckGLError();
+
+			// clean up
+			glDepthMask(1);
+
+			glDrawBuffer( GL_BACK );
+		}
+
+		blurTarget.Push();
+
+		sr_CheckGLError();
+
+		return false;
+	}
+
+	return true;
 
 #if 0
     GLenum error = glGetError();
@@ -682,12 +771,12 @@ void sr_MotionBlurCore( REAL alpha )
 }
 
 // frames from about this far apart get blended together
-static REAL sr_motionBlurTime = .01;
+static REAL sr_motionBlurTime = .0075;
 static tSettingItem<REAL> c_mb( "MOTION_BLUR_TIME",
                                 sr_motionBlurTime );
 
 // blurs the motion, time is the current time
-void sr_MotionBlur( double time )
+bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTarget )
 {
     if ( currentScreensetting.vSync == ArmageTron_VSync_MotionBlur )
     {
@@ -726,15 +815,43 @@ void sr_MotionBlur( double time )
                 --hyster;
         }
 
+        lastTime = time;
+
         // really blur.
         if ( active )
-            sr_MotionBlurCore( 1 - frameTime / sr_motionBlurTime );
+        {
+            // determine blur texture size
+            int blurWidth = NextPowerOfTwo( sr_screenWidth );
+            int blurHeight = NextPowerOfTwo( sr_screenHeight );
 
-        lastTime = time;
+            // destroy existing blur texture if it is too small
+            if ( blurTarget.get() && ( blurTarget->GetWidth() < blurWidth || blurTarget->GetHeight() < blurHeight ) )
+            {
+                blurTarget = std::auto_ptr< rTextureRenderTarget >();
+            }
+
+            // create blur texture
+            if ( !blurTarget.get() )
+            {
+                blurTarget = std::auto_ptr< rTextureRenderTarget >( new rTextureRenderTarget( blurWidth, blurHeight  ) );
+            }
+
+            return sr_MotionBlurCore( 1 - frameTime / sr_motionBlurTime, *blurTarget );
+        }
     }
+
+    // no motion blur happened when we got here
+	if ( blurTarget.get() && blurTarget->IsTarget() )
+    {
+		blurTarget->Pop();
+    }
+
+	return true;
 }
 
 void rSysDep::SwapGL(){
+	static std::auto_ptr< rTextureRenderTarget > blurTarget(0);
+
     if ( s_benchmark )
     {
         static PerformanceCounter counter;
@@ -835,7 +952,7 @@ void rSysDep::SwapGL(){
     sr_LockSDL();
 
     // actiate motion blur (does not use the game state, so it's OK to call here )
-    sr_MotionBlur( time );
+    bool shouldSwap = sr_MotionBlur( time, blurTarget );
 
     switch( swapMode_ )
     {
@@ -849,22 +966,25 @@ void rSysDep::SwapGL(){
         break;
     }
 
+	if ( shouldSwap )
+	{
 #if defined(SDL_OPENGL)
-    if (lastSuccess.useSDL)
-        SDL_GL_SwapBuffers();
-    //#elif defined(HAVE_FXMESA)
-    //fxMesaSwapBuffers();
+		if (lastSuccess.useSDL)
+			SDL_GL_SwapBuffers();
+		//#elif defined(HAVE_FXMESA)
+		//fxMesaSwapBuffers();
 #endif
 
 #ifdef DIRTY
-    if (!lastSuccess.useSDL){
+		if (!lastSuccess.useSDL){
 #if defined(WIN32)
-        SwapBuffers( hDC );
+			SwapBuffers( hDC );
 #elif defined(unix) || defined(__unix__)
-        glXSwapBuffers(dpy,win);
+			glXSwapBuffers(dpy,win);
 #endif
-    }
+		}
 #endif
+	}
 
     if (sr_screenshotIsPlanned){
         make_screenshot();

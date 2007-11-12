@@ -122,9 +122,10 @@ libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentificati
 	engine/eEventNotification.h engine/eEventNotification.cpp
 
 librender_a_SOURCES=render/rConsole.cpp render/rConsoleGraph.cpp render/rConsole.h render/rFont.cpp\
-	render/rFont.h render/rGL.h render/rGLRender.cpp render/rModel.cpp render/rModel.h render/rRender.cpp\
+	render/rFont.h render/rGL.cpp render/rGL.h render/rGLEW.h render/rGLRender.cpp render/rModel.cpp render/rModel.h render/rRender.cpp\
 	render/rRender.h render/rScreen.cpp render/rScreen.h render/rSDL.h render/rSysdep.cpp render/rSysdep.h\
-	render/rTexture.cpp render/rTexture.h render/rViewport.cpp render/rViewport.h render/rColor.h render/rGradient.cpp render/rGradient.h
+	render/rTexture.cpp render/rTexture.h render/rViewport.cpp render/rViewport.h render/rColor.h render/rGradient.cpp render/rGradient.h \
+	render/rTextureRenderTarget.cpp render/rTextureRenderTarget.h render/rGLuintObject.cpp render/rGLuintObject.h
 
 
 libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAICharacter.h tron/gArena.cpp tron/gArena.h\
