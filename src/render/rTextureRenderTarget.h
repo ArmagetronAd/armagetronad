@@ -3,7 +3,7 @@
 *************************************************************************
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
-Copyright (C) 2006, Armagetron Advanced Development Team  
+Copyright (C) 2006, Armagetron Advanced Development Team
 
 **************************************************************************
 
@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -36,24 +36,27 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 class rTextureRenderTarget: public rITexture
 {
 public:
-	//! clears the texture
-	void Clear();
+    //! clears the texture
+    void Clear();
 
-	~rTextureRenderTarget();
+    ~rTextureRenderTarget();
 
     //! creates a render target texture of the specified dimensions
-	rTextureRenderTarget( int width, int height );
+    rTextureRenderTarget( int width, int height );
 
     //! makes this texture the active render target
-	void Push();
+    void Push();
 
     //! removes this texture as the active render target
-	void Pop();
+    void Pop();
 
-	bool IsTarget() const
-	{
-		return anchor == this;
-	}
+    //! restores current render target if it was overwritten by an evil manual glBindFramebuffer call
+    static void Restore();
+
+    bool IsTarget() const
+    {
+        return anchor == this;
+    }
 
     int GetHeight() const
     {
@@ -65,21 +68,21 @@ public:
         return width_;
     }
 protected:
-	virtual void OnSelect(bool);
+    virtual void OnSelect(bool);
 
-	// nothing special to do here
-	virtual void OnUnload(){}
+    // nothing special to do here
+    virtual void OnUnload(){}
 private:
-	rGLuintObjectTexture texture_;           //!< the texture render target
-	rGLuintObjectRenderbuffer depthBuffer_;  //!< the depth buffer
-	rGLuintObjectFramebuffer frameBuffer_;   //!< the frame buffer
+    rGLuintObjectTexture texture_;           //!< the texture render target
+    rGLuintObjectRenderbuffer depthBuffer_;  //!< the depth buffer
+    rGLuintObjectFramebuffer frameBuffer_;   //!< the frame buffer
 
 
-	static rTextureRenderTarget * anchor;
-	rTextureRenderTarget * previous;
+    static rTextureRenderTarget * anchor;
+    rTextureRenderTarget * previous;
 
-	int width_, height_;
-	GLenum colorMode, depthMode;
+    int width_, height_;
+    GLenum colorMode, depthMode;
 public:
 };
 

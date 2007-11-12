@@ -80,9 +80,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #elif defined(WIN32)
 
- #include <windows.h>
- #include <windef.h>
- #include "rGL.h"
+#include <windows.h>
+#include <windef.h>
+#include "rGL.h"
 static HDC hDC=NULL;
 static HGLRC hRC=NULL;
 
@@ -172,7 +172,7 @@ bool  rSysDep::InitGL(){
         return false;
     }
 
-    if(!dpy){
+    if (!dpy){
 
         dpy=system.info.x11.display;
         win=system.info.x11.window;
@@ -184,11 +184,12 @@ bool  rSysDep::InitGL(){
         }
 
         int configuration[]={GLX_DOUBLEBUFFER,GLX_RGBA,GLX_DEPTH_SIZE ,12, GLX_RED_SIZE,1,
-                             GLX_BLUE_SIZE,1,GLX_GREEN_SIZE,1,None};
+                             GLX_BLUE_SIZE,1,GLX_GREEN_SIZE,1,None
+                            };
 
         XVisualInfo *vi=glXChooseVisual(dpy,DefaultScreen(dpy),configuration);
 
-        if(vi== NULL){
+        if (vi== NULL){
             std::cerr << "Could not initialize Visual.\n";
             return false;
         }
@@ -196,7 +197,7 @@ bool  rSysDep::InitGL(){
         cx=glXCreateContext(dpy,vi,
                             NULL,True);
 
-        if(cx== NULL){
+        if (cx== NULL){
             std::cerr << "Could not initialize GL context.\n";
             return false;
         }
@@ -231,7 +232,7 @@ void  rSysDep::ExitGL(){
 
     // windows GL cleanup stolen from
     // http://www.geocities.com/SiliconValley/Code/1219/opengl32.html
-    if(hRC){
+    if (hRC){
 
         wglMakeCurrent( NULL, NULL );
         wglDeleteContext( hRC );
@@ -241,7 +242,7 @@ void  rSysDep::ExitGL(){
         hDC=NULL;
     }
 #elif defined(unix) || defined(__unix__)
-    if(dpy){
+    if (dpy){
 
         //    glXReleaseBuffersMESA( dpy, win );
         glXMakeCurrent(dpy,None,NULL);
@@ -290,12 +291,12 @@ static void SDL_SavePNG(SDL_Surface *image, tString filename){
     png_write_info(png_ptr, info_ptr);
 
     // get pointers
-    if(!(row_ptrs = (png_byte**) malloc(sr_screenHeight * sizeof(png_byte*)))) {
+    if (!(row_ptrs = (png_byte**) malloc(sr_screenHeight * sizeof(png_byte*)))) {
         png_destroy_write_struct(&png_ptr, &info_ptr);
         return;
     }
 
-    for(i = 0; i < sr_screenHeight; i++) {
+    for (i = 0; i < sr_screenHeight; i++) {
         row_ptrs[i] = (png_byte *)image->pixels + (sr_screenHeight - i - 1)
                       * SCREENSHOT_BYTES_PER_PIXEL * sr_screenWidth;
     }
@@ -323,7 +324,8 @@ static void make_screenshot(){
     temp = SDL_CreateRGBSurface(SDL_SWSURFACE, sr_screenWidth, sr_screenHeight,
                                 24, 0x0000FF, 0x00FF00, 0xFF0000, 0);
 
-    // make upside down screenshot
+    // make upside down screenshot (make sure it comes from the screen)
+
     glReadPixels(0,0,sr_screenWidth, sr_screenHeight, GL_RGB,
                  GL_UNSIGNED_BYTE, image->pixels);
 
@@ -347,7 +349,7 @@ static void make_screenshot(){
             // generate filename
             tString fileName("screenshot_");
             fileName << number;
-            if(png_screenshot)
+            if (png_screenshot)
                 fileName << ".png";
             else
                 fileName << ".bmp";
@@ -362,7 +364,7 @@ static void make_screenshot(){
             }
 
             // save image
-            if(png_screenshot)
+            if (png_screenshot)
                 SDL_SavePNG(image, tDirectories::Screenshot().GetWritePath( fileName ));
             else
                 SDL_SaveBMP(temp, tDirectories::Screenshot().GetWritePath( fileName ) );
@@ -379,8 +381,12 @@ static void make_screenshot(){
 class PerformanceCounter
 {
 public:
-    PerformanceCounter(): count_(0){ tRealSysTimeFloat(); }
-    unsigned int Count(){ return count_++; }
+    PerformanceCounter(): count_(0){
+        tRealSysTimeFloat();
+    }
+    unsigned int Count(){
+        return count_++;
+    }
     ~PerformanceCounter()
     {
         double time = tRealSysTimeFloat();
@@ -595,179 +601,99 @@ void rSysDep::StopNetSyncThread()
 
 int NextPowerOfTwo( int in )
 {
-	int x = 1;
-	while ( x * 32 <= in )
-		x <<= 5;
-	while ( x < in )
-		x <<= 1;
+    int x = 1;
+    while ( x * 32 <= in )
+        x <<= 5;
+    while ( x < in )
+        x <<= 1;
 
-	return x;
+    return x;
 }
 
 bool sr_MotionBlurCore( REAL alpha, rTextureRenderTarget & blurTarget )
 {
-	sr_CheckGLError();
+    sr_CheckGLError();
 
     if ( alpha < 0 )
         alpha = 0;
 
-	{
-		if ( blurTarget.IsTarget() )
-		{
-			blurTarget.Pop();
-			
-			blurTarget.Select();
-		
-			glDrawBuffer( GL_FRONT );
+    {
+        if ( blurTarget.IsTarget() )
+        {
+            blurTarget.Pop();
 
-			sr_CheckGLError();
+            blurTarget.Select();
 
-			// determine the texture coordinates of the lower right corner
-			REAL maxu = REAL(sr_screenWidth)/blurTarget.GetWidth();
-			REAL maxv = REAL(sr_screenHeight)/blurTarget.GetHeight();
+            glDrawBuffer( GL_FRONT );
 
-			glEnable(GL_TEXTURE_2D);
+            sr_CheckGLError();
 
-			// blend the last frame and the current frame with the specified alpha value
-			glDisable( GL_DEPTH_TEST );
-			glDepthMask(0);
+            // determine the texture coordinates of the lower right corner
+            REAL maxu = REAL(sr_screenWidth)/blurTarget.GetWidth();
+            REAL maxv = REAL(sr_screenHeight)/blurTarget.GetHeight();
 
-			glMatrixMode( GL_PROJECTION );
-			glLoadIdentity();
-			glMatrixMode( GL_MODELVIEW );
-			glLoadIdentity();
-			glViewport(0,0,sr_screenWidth, sr_screenHeight);
+            glEnable(GL_TEXTURE_2D);
 
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,
-							GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,
-							GL_NEAREST);
+            // blend the last frame and the current frame with the specified alpha value
+            glDisable( GL_DEPTH_TEST );
+            glDepthMask(0);
 
-			glDisable(GL_ALPHA_TEST);
-			// glDisable(GL_BLEND);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
+            glMatrixMode( GL_PROJECTION );
+            glLoadIdentity();
+            glMatrixMode( GL_MODELVIEW );
+            glLoadIdentity();
+            glViewport(0,0,sr_screenWidth, sr_screenHeight);
 
-			glDisable(GL_LIGHTING);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,
+                            GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,
+                            GL_NEAREST);
 
-			glBegin( GL_QUADS );
-			glColor4f( 1,1,1,alpha );
+            glDisable(GL_ALPHA_TEST);
+            // glDisable(GL_BLEND);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
 
-			glTexCoord2f( 0, 0 );
-			glVertex2f( -1, -1 );
+            glDisable(GL_LIGHTING);
 
-			glTexCoord2f( maxu, 0 );
-			glVertex2f( 1, -1 );
+            glBegin( GL_QUADS );
+            glColor4f( 1,1,1,alpha );
 
-			glTexCoord2f( maxu, maxv );
-			glVertex2f( 1, 1 );
+            glTexCoord2f( 0, 0 );
+            glVertex2f( -1, -1 );
 
-			glTexCoord2f( 0, maxv );
-			glVertex2f( -1, 1 );
-			glEnd();
+            glTexCoord2f( maxu, 0 );
+            glVertex2f( 1, -1 );
 
-			sr_CheckGLError();
+            glTexCoord2f( maxu, maxv );
+            glVertex2f( 1, 1 );
 
-			// clean up
-			glDepthMask(1);
+            glTexCoord2f( 0, maxv );
+            glVertex2f( -1, 1 );
+            glEnd();
 
-			glDrawBuffer( GL_BACK );
-		}
+            sr_CheckGLError();
 
-		blurTarget.Push();
+            // clean up
+            glDepthMask(1);
 
-		sr_CheckGLError();
+            glDrawBuffer( GL_BACK );
+        }
 
-		return false;
-	}
+        blurTarget.Push();
 
-	return true;
+        sr_CheckGLError();
+
+        return false;
+    }
+
+    return true;
 
 #if 0
     GLenum error = glGetError();
     if ( error != GL_NO_ERROR )
         con << "GL error " << error << "\n";
 #endif
-
-    // determine best texture dimensions, fitting the screen resolution
-    int tWidth = 128;
-    while ( tWidth < sr_screenWidth )
-        tWidth *= 2;
-
-    int tHeight = 128;
-    while ( tHeight < sr_screenHeight )
-        tHeight *= 2;
-
-    // Read the current front buffer into a texture
-    GLenum target;
-    glGenTextures(1, &target );
-    glBindTexture(GL_TEXTURE_2D,target);
-
-#if 0
-    error = glGetError();
-    if ( error != GL_NO_ERROR )
-        con << "GL error2 " << error << "\n";
-#endif
-
-    glReadBuffer( GL_FRONT );
-
-    glCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGB,
-                      0, 0,
-                      tWidth, tHeight, 0 );
-
-#if 0
-    error = glGetError();
-    if ( error != GL_NO_ERROR )
-        con << "GL error3 " << error << "\n";
-#endif
-
-    // determine the texture coordinates of the lower right corner
-    REAL maxu = REAL(sr_screenWidth)/tWidth;
-    REAL maxv = REAL(sr_screenHeight)/tHeight;
-
-    glEnable(GL_TEXTURE_2D);
-
-
-    // blend the last frame and the current frame with the specified alpha value
-    glDisable( GL_DEPTH_TEST );
-    glDepthMask(0);
-
-    glMatrixMode( GL_PROJECTION );
-    glLoadIdentity();
-    glMatrixMode( GL_MODELVIEW );
-    glLoadIdentity();
-    glViewport(0,0,sr_screenWidth, sr_screenHeight);
-
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,
-                    GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,
-                    GL_NEAREST);
-
-    glDisable(GL_ALPHA_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-
-    glDisable(GL_LIGHTING);
-
-    glBegin( GL_QUADS );
-    glColor4f( 1,1,1,alpha );
-
-    glTexCoord2f( 0, 0 );
-    glVertex2f( -1, -1 );
-
-    glTexCoord2f( maxu, 0 );
-    glVertex2f( 1, -1 );
-
-    glTexCoord2f( maxu, maxv );
-    glVertex2f( 1, 1 );
-
-    glTexCoord2f( 0, maxv );
-    glVertex2f( -1, 1 );
-    glEnd();
-
-    // clean up: destroy the texture
-    glDeleteTextures(1, &target );
-    glDepthMask(1);
 }
 
 // frames from about this far apart get blended together
@@ -826,13 +752,13 @@ bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTar
         // determine blur texture size
         int blurWidth = NextPowerOfTwo( sr_screenWidth );
         int blurHeight = NextPowerOfTwo( sr_screenHeight );
-        
+
         // destroy existing blur texture if it is too small
         if ( blurTarget.get() && ( blurTarget->GetWidth() < blurWidth || blurTarget->GetHeight() < blurHeight ) )
         {
             blurTarget = std::auto_ptr< rTextureRenderTarget >();
         }
-        
+
         // create blur texture
         if ( !blurTarget.get() )
         {
@@ -850,23 +776,23 @@ bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTar
         {
             blurTarget->Pop();
         }
-        
+
         return ret;
     }
 
     lastActive = active;
 
     // no motion blur happened when we got here
-	if ( blurTarget.get() && blurTarget->IsTarget() )
+    if ( blurTarget.get() && blurTarget->IsTarget() )
     {
-		blurTarget->Pop();
+        blurTarget->Pop();
     }
 
-	return true;
+    return true;
 }
 
 void rSysDep::SwapGL(){
-	static std::auto_ptr< rTextureRenderTarget > blurTarget(0);
+    static std::auto_ptr< rTextureRenderTarget > blurTarget(0);
 
     if ( s_benchmark )
     {
@@ -970,7 +896,7 @@ void rSysDep::SwapGL(){
     // actiate motion blur (does not use the game state, so it's OK to call here )
     bool shouldSwap = sr_MotionBlur( time, blurTarget );
 
-    switch( swapMode_ )
+    switch ( swapMode_ )
     {
     case rSwap_Fastest:
         break;
@@ -982,25 +908,25 @@ void rSysDep::SwapGL(){
         break;
     }
 
-	if ( shouldSwap )
-	{
+    if ( shouldSwap )
+    {
 #if defined(SDL_OPENGL)
-		if (lastSuccess.useSDL)
-			SDL_GL_SwapBuffers();
-		//#elif defined(HAVE_FXMESA)
-		//fxMesaSwapBuffers();
+        if (lastSuccess.useSDL)
+            SDL_GL_SwapBuffers();
+        //#elif defined(HAVE_FXMESA)
+        //fxMesaSwapBuffers();
 #endif
 
 #ifdef DIRTY
-		if (!lastSuccess.useSDL){
+        if (!lastSuccess.useSDL){
 #if defined(WIN32)
-			SwapBuffers( hDC );
+            SwapBuffers( hDC );
 #elif defined(unix) || defined(__unix__)
-			glXSwapBuffers(dpy,win);
+            glXSwapBuffers(dpy,win);
 #endif
-		}
+        }
 #endif
-	}
+    }
 
     if (sr_screenshotIsPlanned){
         make_screenshot();
