@@ -418,7 +418,7 @@ void zZone::ReadSync( nMessage & m )
         unsigned short shapeID;
         m >> shapeID;
         if(sn_netObjects[shapeID]) {
-            zShape *asdf = dynamic_cast<zShape*>(&*sn_netObjects[shapeID]);
+            // zShape *asdf = dynamic_cast<zShape*>(&*sn_netObjects[shapeID]);
             shape = zShapePtr( dynamic_cast<zShape*>(&*sn_netObjects[shapeID]) );
         }
 
