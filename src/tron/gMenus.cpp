@@ -238,12 +238,16 @@ public:
         else
         {
             // add custom resolution
-            NewChoice( ArmageTron_Custom );//, "$screen_custom_text","$screen_custom_help" );
+            NewChoice( ArmageTron_Custom );
+
+            // add desktop resolution
+            if ( sr_DesktopScreensizeSupported() && !addFixed )
+                NewChoice( ArmageTron_Desktop );
 
             // the maximal allowed screen size
             rScreenSize maxSize(0,0);
 
-            // fill in available modes (avoid dublicates)
+            // fill in available modes (avoid duplicates)
             for(i=0;modes[i];++i)
             {
                 // add mode (if it's new)
@@ -258,7 +262,7 @@ public:
             // add fixed resolutions (as window sizes)
             if ( addFixed )
             {
-                for ( i = ArmageTron_Custom; i>=0; --i )
+                for ( i = ArmageTron_Custom; i>=ArmageTron_Min; --i )
                 {
                     rScreenSize size( static_cast< rResolution >(i) );
 
@@ -275,7 +279,11 @@ public:
                 rScreenSize const & size = *iter;
 
                 std::stringstream s;
-                s << size.width << " x " << size.height;
+                if ( size.width + size.height > 0 )
+                    s << size.width << " x " << size.height;
+                else
+                    s << tOutput("$screen_size_desktop");
+
                 res_men.NewChoice( s.str().c_str(), help, size );
             }
 
@@ -572,11 +580,11 @@ static uSelectEntry<rSysDep::rSwapMode> swapMode_80Hz(swapMode,"$swapmode_80hz_t
 static uSelectEntry<rSysDep::rSwapMode> swapMode_60Hz(swapMode,"$swapmode_60hz_text","$swapmode_60hz_help",rSysDep::rSwap_60Hz);
 */
 
-static tConfItem<int> swapModeCI("SWAP_MODE", reinterpret_cast< int & >( rSysDep::swapMode_ ) );
+tCONFIG_ENUM( rSysDep::rSwapMode );
+
+static tConfItem< rSysDep::rSwapMode > swapModeCI("SWAP_MODE", rSysDep::swapMode_ );
 
 static tConfItem<bool> WRAP("WRAP_MENU",uMenu::wrap);
-
-
 
 #ifndef DEDICATED
 
@@ -1124,17 +1132,20 @@ static bool con_func(REAL x){
 
 static bool toggle_fullscreen_func( REAL x )
 {
+#ifndef DEDICATED
 #ifdef DEBUG
     // don't toggle fullscreen while playing back in debug mode, that's annoying
     if ( tRecorder::IsPlayingBack() )
         return true;
 #endif
 
-    if ( x > 0 )
+    // only do anything if the application is active (work around odd bug)
+    if ( x > 0 && ( SDL_GetAppState() & SDL_APPACTIVE ) )
     {
         currentScreensetting.fullscreen = !currentScreensetting.fullscreen;
         sr_ReinitDisplay();
     }
+#endif
 
     return true;
 }

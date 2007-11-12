@@ -381,7 +381,7 @@ nConfItemVersionWatcher::nConfItemVersionWatcher( nConfItemBase & item, Group c,
         , reverted_( false )
         , group_( c )
         , overrideGroupBehavior_( Behavior_Default )
-        , overrideGroupBehaviorConf_( item.GetTitle() + "_OVERRIDE", reinterpret_cast< int & >( overrideGroupBehavior_ ) )
+        , overrideGroupBehaviorConf_( item.GetTitle() + "_OVERRIDE", overrideGroupBehavior_ )
 {
     sn_StrongWatchersAddRef();
     sn_GetStrongWatchers().insert(this);
@@ -598,18 +598,18 @@ void nConfItemVersionWatcher::OnVersionChange( nVersion const & version )
 
 static nConfItemVersionWatcher::Behavior sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Max ] =
     {
-        nConfItemVersionWatcher::Behavior_Block,
-        nConfItemVersionWatcher::Behavior_Block,
-        nConfItemVersionWatcher::Behavior_Nothing,
-        nConfItemVersionWatcher::Behavior_Block,
-        nConfItemVersionWatcher::Behavior_Nothing,
+        Behavior_Block,
+        Behavior_Block,
+        Behavior_Nothing,
+        Behavior_Block,
+        Behavior_Nothing,
     };
 
-static tSettingItem< int > sn_GroupBehaviorBreaks( "SETTING_LEGACY_BEHAVIOR_BREAKING", reinterpret_cast< int & >( sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Breaking] ) );
-static tSettingItem< int > sn_GroupBehaviorBumpy( "SETTING_LEGACY_BEHAVIOR_BUMPY", reinterpret_cast< int & >( sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Bumpy] ) );
-static tSettingItem< int > sn_GroupBehaviorAnnoyance( "SETTING_LEGACY_BEHAVIOR_ANNOYING", reinterpret_cast< int & >( sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Annoying] ) );
-static tSettingItem< int > sn_GroupBehaviorCheat( "SETTING_LEGACY_BEHAVIOR_CHEATING", reinterpret_cast< int & >( sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Cheating] ) );
-static tSettingItem< int > sn_GroupBehaviorDisplay( "SETTING_LEGACY_BEHAVIOR_VISUAL", reinterpret_cast< int & >( sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Visual] ) );
+static tSettingItem< nConfItemVersionWatcher::Behavior > sn_GroupBehaviorBreaks( "SETTING_LEGACY_BEHAVIOR_BREAKING", sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Breaking] );
+static tSettingItem< nConfItemVersionWatcher::Behavior > sn_GroupBehaviorBumpy( "SETTING_LEGACY_BEHAVIOR_BUMPY", sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Bumpy] );
+static tSettingItem< nConfItemVersionWatcher::Behavior > sn_GroupBehaviorAnnoyance( "SETTING_LEGACY_BEHAVIOR_ANNOYING", sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Annoying] );
+static tSettingItem< nConfItemVersionWatcher::Behavior > sn_GroupBehaviorCheat( "SETTING_LEGACY_BEHAVIOR_CHEATING", sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Cheating] );
+static tSettingItem< nConfItemVersionWatcher::Behavior > sn_GroupBehaviorDisplay( "SETTING_LEGACY_BEHAVIOR_VISUAL", sn_GroupBehaviors[ nConfItemVersionWatcher::Group_Visual] );
 
 // *******************************************************************************************
 // *

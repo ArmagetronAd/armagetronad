@@ -199,7 +199,8 @@ public:
     virtual void MultMatrix(REAL mdata[4][4]){
         End(true);
         tASSERT(sizeof(REAL) == sizeof(GLfloat));
-        glMultMatrixf(reinterpret_cast<GLfloat *>(&mdata));
+        REAL * mdat=&mdata[0][0];
+        glMultMatrixf(reinterpret_cast<GLfloat *>(mdat));
     };
 
     virtual void IdentityMatrix(){

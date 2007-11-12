@@ -23,6 +23,7 @@ cp -Rlf ${source}/* ${destination}/ > /dev/null 2>&1 || cp -Rsf ${source}/* ${de
 
 # remove CVS directories and backup files
 find ${destination}/ -depth -type d -name CVS -exec rm -rf \{\} \;
+find ${destination}/ -depth -type d -name .svn -exec rm -rf \{\} \;
 find ${destination}/ -name "*~" -exec rm -rf \{\} \;
 
 # rename them properly

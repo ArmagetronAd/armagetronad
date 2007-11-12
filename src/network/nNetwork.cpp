@@ -1391,7 +1391,11 @@ void login_accept_handler(nMessage &m){
         {
             m >> sn_Connections[0].version;
 
-#ifndef DEBUG
+#ifdef DEBUG
+#define NOEXPIRE
+#endif
+
+#ifndef NOEXPIRE
 #ifndef DEDICATED
             // expiration for public beta versions
             if ( !sn_AcceptingFromMaster &&

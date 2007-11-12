@@ -1812,6 +1812,10 @@ void nServerInfo::QueryServer()                                  // start to get
         {
             con << "Lost contact with server: " <<  ToString( *this ) << "\n";
         }
+        else if ( sn_IsMaster && timesNotAnswered == 2 )
+        {
+            con << "Starting to lose contact with server: " <<  ToString( *this ) << ", name \"" << tColoredString::RemoveColors(name) << "\"\n";
+        }
     }
 
     queried++;
@@ -2677,6 +2681,8 @@ void nServerInfo::NetWriteThis( nMessage & m ) const
 
 void nServerInfo::NetReadThis( nMessage & m )
 {
+    tString oldName = name;
+
     sn_ReadFiltered( m, name  ); // get the server name
     m >> users;                 // get the playing users
 
@@ -2733,8 +2739,15 @@ void nServerInfo::NetReadThis( nMessage & m )
         {
             if ( !advancedInfoSetEver )
             {
-                con << "Acknowledged server: " <<  ToString( *this ) << "\n";
+                con << "Acknowledged server: " <<  ToString( *this ) << ", name: \"" << tColoredString::RemoveColors(name) << "\"\n";
+                con << "\n";
                 Save();
+            }
+            else if ( name != oldName )
+            {
+                con << "Name of server " <<  ToString( *this )
+                << " changed from \"" << tColoredString::RemoveColors(oldName)
+                << "\" to \"" << tColoredString::RemoveColors(name) << "\"\n";
             }
 
             // broadcast the server to the other master servers

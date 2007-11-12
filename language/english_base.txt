@@ -49,6 +49,7 @@ doublebind_time_help    Time in seconds during which no two different keyboard e
 
 cycle_speed_help		        Basic speed of your cycle if you drive straight and not close to walls
 cycle_speed_min_help		    Minimal speed of your cycle, measured relative to CYCLE_SPEED
+cycle_speed_max_help		    Maximal speed of your cycle, measured relative to CYCLE_SPEED. A value of 0 means no top speed.
 cycle_speed_decay_below_help    Rate of cycle speed approaching the value of CYCLE_SPEED from below
 cycle_speed_decay_above_help    Rate of cycle speed approaching the value of CYCLE_SPEED from above
 cycle_start_speed_help		    Initial cycle speed
@@ -64,7 +65,7 @@ cycle_accel_tunnel_help         Multiplicator to the total effect of CYCLE_ACCEL
 cycle_accel_offset_help	        Minimum numeric wall distance, must be positive
 cycle_wall_near_help		    Maximum accelerating wall distance
 
-Cycle_boost_self_help           Speed boost when breaking from your own wall
+cycle_boost_self_help           Speed boost when breaking from your own wall
 cycle_boost_team_help           Speed boost when breaking from a teammate's wall
 cycle_boost_enemy_help          Speed boost when breaking from an enemy wall
 cycle_boost_rim_help            Speed boost when breaking from the rim wall
@@ -78,7 +79,6 @@ cycle_turn_memory_help          Number of pending turns a cycle will memorize ex
 cycle_delay_help		        Minimum time between turns (must be greater than 0)
 cycle_delay_bonus_help		    Extra fudge factor to CYCLE_DELAY applied on the dedicated server only.
 cycle_delay_timebased_help		Turn delays will be based on the time since the last turn if this is 1 (default) and the distance if this is 0. Intermediate values and values out of these bounds are supported as well.
-cycle_delay_help_doublebind_bonus       Factor to CYCLE_DELAY for two consecutive turns in the same direction
 cycle_turn_speed_factor_help    Factor the speed of a lightcycle is multiplied with when turning 
 cycle_delay_doublebind_bonus_help       Factor CYCLE_DELAY is multiplied with for consecutive turns in the same direction
 
@@ -96,6 +96,8 @@ cycle_rubber_legacy_help		Revert to old, framerate dependant and old-clients-rip
 cycle_rubber_timebased_help		Rubber usage is based on distance travelled if this is 0 (default) and the time passed if this is 1. Intermediate values and values out of these bounds are supported as well.
 cycle_rubber_speed_help             Logarithmic speed of wall approximation when rubber is in effect (every second, you get closer to the wall by a factor of ~0.4^{this value})
 cycle_rubber_mindistance_help		The minimal distance rubber code keeps you from the wall in front of you
+cycle_rubber_mindistance_gap_help		If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected gaps the cylce can squeeze through. For "Open" gameplay.
+cycle_rubber_mindistance_gap_side_help Gap detection only sees gaps that the cycle may reach in no less than this many seconds.
 cycle_rubber_mindistance_ratio_help	Additional distance to CYCLE_RUBBER_MINDISTANCE for every length unit of the wall you have in front of you
 cycle_rubber_mindistance_reservoir_help		Addidional distance if you have an empty rubber meter (gets faded out gradually as you use up all your rubber)
 cycle_rubber_mindistance_unprepared_help	Additional distance for unprepared grinds; it gets applied when the cycle's last turn was just a fraction of a second ago and faded out preparation times larger than CYCLE_RUBBER_MINDISTANCE_PREPARATION.
@@ -224,14 +226,14 @@ team_green_6_help green portion of team 6's color
 team_green_7_help green portion of team 7's color
 team_green_8_help green portion of team 8's color
 
-team_blue_1 blue portion of team 1's color
-team_blue_2 blue portion of team 2's color
-team_blue_3 blue portion of team 3's color
-team_blue_4 blue portion of team 4's color
-team_blue_5 blue portion of team 5's color
-team_blue_6 blue portion of team 6's color
-team_blue_7 blue portion of team 7's color
-team_blue_8 blue portion of team 8's color
+team_blue_1_help blue portion of team 1's color
+team_blue_2_help blue portion of team 2's color
+team_blue_3_help blue portion of team 3's color
+team_blue_4_help blue portion of team 4's color
+team_blue_5_help blue portion of team 5's color
+team_blue_6_help blue portion of team 6's color
+team_blue_7_help blue portion of team 7's color
+team_blue_8_help blue portion of team 8's color
 
 # wall length modification
 cycle_dist_wall_shrink_help        Distance multiplier in wall length calculation. All values are legal. See settings.cfg for full docs.
@@ -360,7 +362,9 @@ spam_protection_chat_help           Extra factor for SPAM_PROTECTION for chat me
 spam_penalty_help					Number of seconds to silence a spammer.
 spam_maxlen_help					Maximal length of chat message.
 spam_autokick_help					Spam score that causes you to get kicked instantly.
-silence_all_help					If set to 1, all chat messages will be omitted.
+silence_all_help					If set to 1, new players will be silenced
+enable_chat_help					If set to 0, all chat will be surpressed (if reset on the server, messages from logged in players and private/team messages are still shown)
+allow_team_change_help				If set to 1, all players can change teams. If set to 0, players can only change teams if they've been specifically allowed to by ALLOW_TEAM_CHANGE_PLAYER
 
 # spam kick messages
 spam_chat                   You chatted too much.
@@ -662,6 +666,7 @@ console_rows_help       Number of lines of console output without user intervent
 console_rows_max_help   Number of lines of console output when scrolling back
 console_decorate_id_help			Decorates every line of console output with the client ID
 console_decorate_ip_help			Decorates every line of console output with the client IP
+console_ladder_log_help			Sends ladder log output to the console
 show_fps_help			Enable fps display
 floor_mirror_help		Floor mirror mode
 floor_detail_help		Floor detail settings
@@ -694,6 +699,7 @@ filter_color_server_names_help	Filter color codes from server names in the serve
 custom_screen_height_help	Custom screen size
 custom_screen_width_help	Custom screen size
 custom_screen_aspect_help	Custom screen aspect ratio ( pixel width/pixel height)
+screen_size_desktop         Desktop
 armagetron_screenmode_help	Screen resolution
 armagetron_last_screenmode_help Last screen resolution
 armagetron_windowsize_help	Window size
@@ -787,6 +793,8 @@ players_help                Prints list of currently active players
 kill_help                   Kill a specific player (as warning before a kick)
 silence_help                Silence a specific player so he can't use public chat any more (/msg and /team still work)
 voice_help                  Reverse of SILENCE
+allow_team_change_player_help Allow a specific player to change teams even if ALLOW_TEAM_CHANGE is disabled
+disallow_team_change_player_help Reverse of ALLOW_TEAM_CHANGE_PLAYER
 kick_help					Kicks the specified player from the server.
 ban_help                    Bans the specified player from the server (kicks him first) for a variable time in minutes.
 ban_ip_help                 Bans the spedified IP address from the server for a variable time.
@@ -2119,13 +2127,18 @@ zone_collapse_harmless      \1's zone collapses harmlessly for lack of enemy con
 #********************************************
 #********************************************
 
+player_teamleave_disallowed Sorry, does not work with automatic team assignment.\n
+player_teamchanges_disallowed Sorry, the administrator disabled team changes.\n
 player_pingcharity_changed	Ping charity changed from \1 to \2.\n
 spam_protection_repeat  SPAM PROTECTION: you already said: \1\n
 spam_protection			SPAM PROTECTION: you are silenced for the next \1 seconds.\n
 spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
 spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
+spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in order to chat publically.\n
 player_silenced         \10xff7777 has been silenced.\n
 player_voiced           \10x77ff77 has been given his voice back.\n
+player_allowed_teamchange \10x77ff77 has been allowed to change his team.\n
+player_disallowed_teamchange \10xff7777 cannot change teams anymore.\n
 vote_spam_protection	VOTE SPAM PROTECTION: you are disallowed from issuing votes for the next \1 seconds.\n
 chat_title_text			Say:
 player_entered_game		\1 0x7fff7fentered the game.\n
@@ -2206,7 +2219,7 @@ player_scoretable_inactive	Disconnected
 #********************************************
 #********************************************
 
-fullscreen_message_title        Sever Message
+fullscreen_message_title        Server Message
 
 network_message_timeout_title	Server does not answer
 network_message_timeout_inter	The server you wanted to connect to did not answer for ten seconds.\nIt is probably down or unreachable, or you mistyped its name in the "custom connect" menu.
@@ -2329,7 +2342,7 @@ vote_maturity                       Poll rejected, you're not old enough to issu
 vote_overflow						Poll rejected, too many pending polls.\n
 vote_disabled						Poll rejected, disabled by server admin.\n
 vote_disabled_spectator				Poll/Vote rejected, disabled for spectators by server admin.\n
-vote_toofew							Poll rejected, to few possible voters online.\n
+vote_toofew							Poll rejected, too few possible voters online.\n
 vote_submitted						Poll "\2" submitted by \1.\n
 vote_vote_for						\1 voted for Poll "\2".\n
 vote_vote_against					\1 voted against Poll "\2".\n

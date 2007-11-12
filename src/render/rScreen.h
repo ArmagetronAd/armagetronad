@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tRuby.h"
 
 typedef enum {
-    ArmageTron_320_200=0,ArmageTron_320_240,ArmageTron_400_300,
+    ArmageTron_Desktop=0,ArmageTron_320_200,ArmageTron_Min=ArmageTron_320_200, ArmageTron_320_240,ArmageTron_400_300,
     ArmageTron_512_384,ArmageTron_640_480,ArmageTron_800_600,
     ArmageTron_1024_768,ArmageTron_1280_800,ArmageTron_1280_854,ArmageTron_1280_1024,
     ArmageTron_1600_1200,ArmageTron_1680_1050,ArmageTron_2048_1572,ArmageTron_Custom, ArmageTron_Invalid=-1
@@ -87,6 +87,8 @@ public:
                     bool sdl=true,
                     bool ce =true);
 };
+
+bool sr_DesktopScreensizeSupported();
 
 extern rScreenSettings currentScreensetting;
 extern rScreenSettings lastSuccess;

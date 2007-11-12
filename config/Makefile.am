@@ -11,6 +11,7 @@ nobase_config_DATA=default.cfg master.srv settings.cfg\
 	examples/fortress_soccer.cfg examples/death_zone.cfg\
 	examples/cvs_test/fortress_physics.cfg examples/cvs_test/fortress_scoring.cfg\
 	examples/cvs_test/fortress_politics.cfg\
-	examples/cvs_test/fortress_complete.cfg examples/cvs_test/sumo_complete.cfg
+	examples/cvs_test/fortress_complete.cfg examples/cvs_test/sumo_complete.cfg\
+	examples/teamsumo.cfg
 
 EXTRA_DIST=${nobase_config_DATA}
