@@ -55,6 +55,7 @@ doublebind_time_help          Zeit, die zwischen zwei verschiedenen Tastendrücke
 
 cycle_speed_help              Grundgeschwindigkeit der Vehikel im freien Raum
 cycle_speed_min_help          Minimalgeschwindigkeit der Vehikel im Verhältnis zu CYCLE_SPEED
+cycle_speed_max_help          Maximalgeschwindigkeit der Vehikel im Verhältnis zu CYCLE_SPEED. 0 als Wert bedeutet keine Geschwindigkeitsbegrenzung.
 cycle_speed_decay_below_help  Rate, mit der sich die Geschwindigkeit der Vehikel CYCLE_SPEED von unten nähert
 cycle_speed_decay_above_help  Rate, mit der sich die Geschwindigkeit der Vehikel CYCLE_SPEED von oben nähert
 cycle_start_speed_help        Startgeschwindigkeit der Vehikel
@@ -66,8 +67,18 @@ cycle_accel_team_help         Multiplikator für CYCLE_ACCEL für Wände von Teampa
 cycle_accel_enemy_help        Multiplikator für CYCLE_ACCEL für Wände von Feinden
 cycle_accel_rim_help          Multiplikator für CYCLE_ACCEL für Arenawände
 cycle_accel_slingshot_help    Multiplikator für den Gesamteffekt von CYCLE_ACCEL, wenn sich das Vehikel zwischen einer eigenen und einer beliebigen anderen Wand befindet
+cycle_accel_tunnel_help       Multiplikator für den Gesamteffekt von CYCLE_ACCEL, wenn sich das Vehikel zwischen zwei fremden Wänded befindet
 cycle_accel_offset_help       Minimaler effektiver Abstand zu einer Wand
 cycle_wall_near_help          Bei diesem Abstand setzt die Beschleunigung durch Wände ein
+
+cycle_boost_self_help         Geschwindigkeitsboost, wenn man sich von einer eigenen Wand löst
+cycle_boost_team_help         Geschwindigkeitsboost, wenn man sich von einer Wand eines Teammitglieds löst
+cycle_boost_enemy_help        Geschwindigkeitsboost, wenn man sich von der Wand eines Gegners löst
+cycle_boost_rim_help          Geschwindigkeitsboost, wenn man sich vom Rand löst
+cycle_boostfactor_self_help   Geschwindigkeitsmultiplikator, wenn man sich von einer eigenen Wand löst
+cycle_boostfactor_team_help   Geschwindigkeitsmultiplikator, wenn man sich von einer Wand eines Teammitglieds löst
+cycle_boostfactor_enemy_help  Geschwindigkeitsmultiplikator, wenn man sich von der Wand eines Gegners löst
+cycle_boostfactor_rim_help    Geschwindigkeitsmultiplikator, wenn man sich vom Rand löst
 
 cycle_turn_memory_help        Zahl der noch nicht ausgeführten Lenkvorgänge, die sich ein Vehikel exakt vormerkt
 
@@ -75,9 +86,15 @@ cycle_delay_help              Pause zwischen zwei Lenkvorgängen
 cycle_delay_bonus_help        Extrafaktor, mit dem CYCLE_DELAY auf dem Server multipliziert wird.
 cycle_delay_timebased_help    CYCLE_DELAY wird als Zeit interpretiert, wenn diese Variable 1 ist (Standard) und als Länge (gemessen an der Besisgeschwindigkeit) wenn dies 0 ist. Zwischenwerte und Werte außerhalb von 0 und 1 sind ebenfalls erlaubt.
 cycle_turn_speed_factor_help  Faktor, mit dem die Geschwindigkeit der Vehikel bei jedem Abbiegen multipliziert wird.
+cycle_delay_doublebind_bonus_help Faktor, mit dem CYCLE_DELAY für zwei Lenkvorgängen in dieselbe Richtung multipliziert wird.
 
 
 cycle_brake_help              Effizienz der Bremsen
+
+cycle_width_help              Breite der Vehikel in der Kollisionserkennung. Man kann sich nur schadlos durch Tunnel quetschen, die schmaler als dieser Wert sind.
+cycle_width_side_help         Kommt man näher als dieser Wert an eine Wand, kann man Schaden nehmen.
+cycle_width_rubber_min_help   Bestimmt, wieviel Rubber bei leichten Kollisionen verbraucht wird. Ein Wert von 1 verbraucht genau soviel Rubber, als ob man direkt vor einer Wand stehen würde.
+cycle_width_rubber_max_help   Bestimmt, wieviel Rubber bei schweren Kollisionen verbraucht wird. Ein Wert von 1 verbraucht genau soviel Rubber, als ob man direkt vor einer Wand stehen würde.
 
 cycle_rubber_help             Toleranz bei Kollisionen mit Wänden
 cycle_rubber_time_help        Zeit, in der der Rubber-Vorrat aufgefüllt wird.
@@ -85,6 +102,8 @@ cycle_rubber_legacy_help      Restauriert das alte, von der Darstellungsgeschwin
 cycle_rubber_timebased_help   Die Rate, mit der sich das Rubber-Meter füllt, wird von der Geschwindigkeit des Vehikels bestimmt, wenn diese Variable 0 ist. Bei einem Wert von 0 ist ist die Rate konstant. Zwischenwerte und Werte außerhalb von 0 und 1 sind ebenfalls erlaubt.
 cycle_rubber_speed_help       Maximale logarithmische Annäherungsgeschwindigket an Wände, wenn Kollisionstoleranz aktiv ist (pro Sekunde kann das Vehikel der Wand nur um den Faktor ca. 0.4^{dieser Wert} näher kommen)
 cycle_rubber_mindistance_help Die Kollisionstoleranz hält Vehikel mindestens in diesem Abstand zu Wänden
+cycle_rubber_mindistance_gap_help Wenn dies auf einen positiven Wert gesetzt wird, dann wirkt es als maximalwert für CYCLE_RUBBER_MINDISTANCE: Wenn ein kleines Loch der Breite x sichtbar ist, wird der effektive Wert von _MINDISTANCE nicht größer als x * CYCLE_RUBBER_MINDISTANCE_GAP. Nützlich für "offenes" Spiel.
+cycle_rubber_mindistance_gap_side_help Löcher für CYCLE_RUBBER_MINDISTANCE_GAP werden links und rechts in diesem Abstand gesucht.
 cycle_rubber_mindistance_ratio_help Zusatzwert zu CYCLE_RUBBER_MINDISTANCE, wächst mit der Länge der Wand an
 cycle_rubber_mindistance_reservoir_help Zusatzwert zu CYCLE_RUBBER_MINDISTANCE, der bei leerem Rubber-Meter voll und zum tragen kommt und mit steigendem Füllstand langsam ausgeblendet wird.
 cycle_rubber_mindistance_unprepared_help Zusatzwert zu CYCLE_RUBBER_MINDISTANCE für schlecht vorbereitete Annäherungen. Eine Annäherung zählt als schleicht vorbereitet, wenn die letzte Richtungsänderung des Vehikels weniger als CYCLE_RUBBER_MINDISTANCE_PREPARATION her ist.
@@ -106,6 +125,7 @@ cycle_packetloss_tolerance_help Solange ein fehlender Abbiegebefehl eines Spiele
 cycle_sync_ff_help            Geschwindigkeit der Simulation für die Extrapolation: bei kleineren Werten sinkt die Prozessorlast, aber dafür steigt die effektive Netzverzögerung.
 cycle_sync_ff_steps_help      Zahl der Extrapolationszeitschritte in jedem echten Zeitschritt: je mehr, desto genauer ist die Extrapolation
 topology_police_help          Die Topologiepolizei analysiert das Spielgeschehen im nachhinein und fängt verletzungen der Regeln ab. 1 hier aktiviert sie.
+topology_police_parallel_help Flag, das, wen aktiviert, der Topologiepolizei sagt, sie soll auch Fälle von exakt parallellen Wänden als Kollisionen melden.
 cycle_smooth_time_help        Zeitskala für Positionsglättungen. Höhere Werte lassen die animationen glatter aussehen, sind aber weniger genau. Zu niedrige Werte bewirken Sprünge in der Netzwerksynchronisation.
 cycle_smooth_min_speed_help   Minimale Geschwindigketi für Netzwerk-Positionskorrekturen (relativ zur Vehikelgeschwindigkeit angegeben)
 cycle_smooth_threshold_help   Nur Positonsupdates, die das Vehikel um mehr als diesen Wert (gemessen relativ zur Geschwindigkeit) korrigieren, werden geglättet, grössere Korrekturen werden direkt übernommen.
@@ -183,6 +203,42 @@ auto_team_help                Wenn dies auf 1 steht, werden Spieler automatisch 
 
 allow_team_name_color_help    Erlaubt es, ein Team nach einer Farbe zu benennen
 allow_team_name_player_help   Erlaubt es, ein Team nach dem Anführer zu benennen
+
+team_name_1_help              Name für Team 1
+team_name_2_help              Name für Team 2
+team_name_3_help              Name für Team 3
+team_name_4_help              Name für Team 4
+team_name_5_help              Name für Team 5
+team_name_6_help              Name für Team 6
+team_name_7_help              Name für Team 7
+team_name_8_help              Name für Team 8
+
+team_red_1_help               Rot-Komponente der Farbe von Team 1
+team_red_2_help               Rot-Komponente der Farbe von Team 2
+team_red_3_help               Rot-Komponente der Farbe von Team 3
+team_red_4_help               Rot-Komponente der Farbe von Team 4
+team_red_5_help               Rot-Komponente der Farbe von Team 5
+team_red_6_help               Rot-Komponente der Farbe von Team 6
+team_red_7_help               Rot-Komponente der Farbe von Team 7
+team_red_8_help               Rot-Komponente der Farbe von Team 8
+
+team_green_1_help             Grün-Komponente der Farbe von Team 1
+team_green_2_help             Grün-Komponente der Farbe von Team 2
+team_green_3_help             Grün-Komponente der Farbe von Team 3
+team_green_4_help             Grün-Komponente der Farbe von Team 4
+team_green_5_help             Grün-Komponente der Farbe von Team 5
+team_green_6_help             Grün-Komponente der Farbe von Team 6
+team_green_7_help             Grün-Komponente der Farbe von Team 7
+team_green_8_help             Grün-Komponente der Farbe von Team 8
+
+team_blue_1_help              Blau-Komponente der Farbe von Team 1
+team_blue_2_help              Blau-Komponente der Farbe von Team 2
+team_blue_3_help              Blau-Komponente der Farbe von Team 3
+team_blue_4_help              Blau-Komponente der Farbe von Team 4
+team_blue_5_help              Blau-Komponente der Farbe von Team 5
+team_blue_6_help              Blau-Komponente der Farbe von Team 6
+team_blue_7_help              Blau-Komponente der Farbe von Team 7
+team_blue_8_help              Blau-Komponente der Farbe von Team 8
 
 # wall length modification
 cycle_dist_wall_shrink_help   Entfernungsmultiplikator bei der Wandlängenberechnung. Genaue Anleitung in settings.cfg.
@@ -310,6 +366,14 @@ spam_penalty_help             Extrastrafe für eine erkanne Spam-Aktion
 spam_maxlen_help              Maximallänge für die Chat-Nachrichten.
 spam_autokick_help            Spamer-Wert, bei dem der Spieler automatisch vom Server geworfen wird.
 silence_all_help              Wenn dieser Wert auf 1 gesetzt ist, dann wird aller Chat unterbunden.
+enable_chat_help              Wenn dies auf 0 gesetzt wird, dann werden alle öffentlichen Chat-Nachrichten unterdrückt (Auf dem Server sind Nachrichten von Administratoren und /msg und /team-Nachrichten Ausnahmen).
+allow_team_change_help        Nur wenn dieser Wert 1 ist dürfen Spieler irh Team beliebig wählen. Wenn dieser Wert 0 ist, muss ein Administrator jeden Teamwechsel mit ALLOW_TEAM_CHANGE_PLAYER authorisieren.
+
+# spam kick messages
+spam_chat                     Du warst zu laut.
+spam_teamchage                Du hast zu oft das Team gewechselt.
+spam_vote_kick_issue          Du wolltest zu viele andere Spieler vom Server werfen.
+spam_vote_rejected            Zu viele deiner Abstimmungen sind fehlgeschlagen.
 
 #********************************************
 #********************************************
@@ -326,6 +390,29 @@ allow_control_during_chat_help Wenn dies auf 1 gesetzt wird, dürfen Spieler vom 
 
 allow_imposters_help          Wenn dies auf 1 gesetzt wird, dürfen zwei Spieler denselben Namen tragen. Sonst wird einer automatisch umbenannt.
 allow_impostors_help          Wenn dies auf 1 gesetzt wird, dürfen zwei Spieler denselben Namen tragen. Sonst wird einer automatisch umbenannt.
+
+#********************************************
+#********************************************
+#
+#       Lag compensation
+#
+#********************************************
+#********************************************
+
+lag_max_speedup_timer_help    Maximale Geschwindigkeitserhöhung der Uhr zu Lag-Kompensationszwecken.
+lag_slow_time_help            Zeitskala, über die die langame Lag-Messung gemittelt wird
+lag_fast_time_help            Zeitskala, über die die schnelle Lag-Messung gemittelt wird
+lag_slow_weight_help          Gewicht, mit dem Lag-Reports vom Server die langsame Lag-Messung beeinflussen
+lag_fast_weight_help          Gewicht, mit dem Lag-Reports vom Server die schnelle Lag-Messung beeinflussen
+
+lag_credit_help               Gesamtzeit des Lag-Kredits in Sekunden.
+lag_credit_single_help        Maximaler Lag-Kredits in Sekunden für ein einzelnes Lag-Event.
+lag_sweet_spot_help           "Sweet Spot" des Lag-Kredits. Es wird versucht, den Lag-Kredit auf diesem Füllstand zu halten.
+lag_credit_time_help          Zeitskala, auf der Lag-Kredit verfällt.
+
+lag_offset_client_help        Auf dem Client wählbar: Zusatzkompensation für Lag. Für sehr schlechte Verbindungen.
+lag_offset_server_help        Auf dem Server wählbar: Zusatzkompensation für Lag. Für sehr schlechte Verbindungen.
+lag_offset_legacy_help        Auf dem Server wählbar: Zusatzkompensation für Lag für Clients, die den Lag-Kredit-Automatismus noch nicht beherrschen. Für sehr schlechte Verbindungen.
 
 #********************************************
 #********************************************
@@ -366,6 +453,7 @@ voting_privacy_help           Kontrolliert die Ausgabe von Abstimmungen. 2: alle
 voting_spam_issue_help        Es wird als so nevig angesehen, eine Abstimmung zu beginnen.
 voting_spam_reject_help       Es wird als so nevig angesehen, wenn eine Abstimmung abgelehnt wird..
 voting_kick_time_help         Mindestzeit in Sekunden, die zwischen zwei Vertreibungsvorschlägen gegen denselben Spieler liegen muss.
+voting_maturity_help          Zeit in Sekunden, die ein Spieler auf dem Server anwesend sein muss, bevor er Abstimmungen starten darf.
 
 #********************************************
 #********************************************
@@ -406,6 +494,10 @@ camera_forbid_follow_help     Verbietet die Benutzung der dummen externen Kamera
 camera_forbid_custom_help     Verbietet die Benutzung der einstellbaren Kamera für alle Clients
 camera_forbid_server_custom_help Verbietet die Benutzung der serverbestimmten einstellbaren Kamera für alle Clients
 
+camera_forbid_custom_glance_help Verbieted die Benutzung der einstellbaren Kamera für das Umsehen.
+camera_override_custom_glance_help Ueberschreibt den Clientseitigen CAMERA_CUSTOM_GLANCE Wert.
+camera_override_custom_glance_server_custom_help Ueberschreibt den Clientseitigen CAMERA_CUSTOM_GLANCE Wert, aber nur für die serverbestimmte Kamera.
+
 camera_follow_start_x_help    Startposition der festen externen Kamera
 camera_follow_start_y_help    Startposition der festen externen Kamera
 camera_follow_start_z_help    Startposition der festen externen Kamera
@@ -430,13 +522,25 @@ camera_custom_turn_speed_help Geschwindigkeit, mit der sich die einstellbare Kam
 camera_custom_turn_speed_180_help Direkt nach einer Kehrtwende wird CAMERA_CUSTOM_TURN_SPEED mit diesem Wert multipliziert angewandt.
 camera_in_turn_speed_help     Geschwindigkeit, mit der sich die interne Kamera dreht
 
-camera_server_custom_back_help Position der einstellbaren Kamera: wie weit liegt sie hinter dem Vehikel?
-camera_server_custom_rise_help Position der einstellbaren Kamera: wie weit liegt sie über dem Vehikel?
+camera_server_custom_back_help Position der serverseitig einstellbaren Kamera: wie weit liegt sie hinter dem Vehikel?
+camera_server_custom_rise_help Position der serverseitig einstellbaren Kamera: wie weit liegt sie über dem Vehikel?
 camera_server_custom_back_fromspeed_help Dieser Wert wird mit der Geschwindigkeit des Vehikels multipliziert und auf CAMERA_SERVER_CUSTOM_BACK aufgeschlagen.
 camera_server_custom_rise_fromspeed_help Dieser Wert wird mit der Geschwindigkeit des Vehikels multipliziert und auf CAMERA_SERVER_CUSTOM_RISE aufgeschlagen.
-camera_server_custom_pitch_help Position der einstellbaren Kamera: wie weit sieht sie nach oben oder unten?
+camera_server_custom_pitch_help Position der serverseitig einstellbaren Kamera: wie weit sieht sie nach oben oder unten?
 camera_server_custom_turn_speed_help Geschwindigkeit, mit der sich die serverseitig einstellbare Kamera dreht; der Wert wird von den clientseitigen Einstellungen übernommen, wenn dieser Wert negativ ist.
 camera_server_custom_turn_speed_180_help Direkt nach einer Kehrtwende wird CAMERA_SERVER_CUSTOM_TURN_SPEED mit diesem Wert multipliziert angewandt.
+
+camera_glance_back_help       Position der Umschau-Kamera: wie weit liegt sie hinter dem Vehikel?
+camera_glance_rise_help       Position der Umschau-Kamera: wie weit liegt sie über dem Vehikel?
+camera_glance_back_fromspeed_help Dieser Wert wird mit der Geschwindigkeit des Vehikels multipliziert und auf CAMERA_GLANCE_BACK aufgeschlagen.
+camera_glance_rise_fromspeed_help Dieser Wert wird mit der Geschwindigkeit des Vehikels multipliziert und auf CAMERA_GLANCE_RISE aufgeschlagen.
+camera_glance_pitch_help      Position der Umschau-Kamera: wie weit sieht sie nach oben oder unten?
+
+camera_server_glance_back_help Position der serverseitigen Umschau-Kamera: wie weit liegt sie hinter dem Vehikel?
+camera_server_glance_rise_help Position der serverseitigen Umschau-Kamera: wie weit liegt sie über dem Vehikel?
+camera_server_glance_back_fromspeed_help Dieser Wert wird mit der Geschwindigkeit des Vehikels multipliziert und auf CAMERA_SERVER_GLANCE_BACK aufgeschlagen.
+camera_server_glance_rise_fromspeed_help Dieser Wert wird mit der Geschwindigkeit des Vehikels multipliziert und auf CAMERA_SERVER_GLANCE_RISE aufgeschlagen.
+camera_server_glance_pitch_help Position der serverseitigen Umschau-Kamera: wie weit sieht sie nach oben oder unten?
 
 camera_visibility_recovery_speed_help Die Geschwindigkeit, mit der die externen Kamera-Referenzpunkte sich nach außen bewegen
 camera_visibility_wall_distance_help Entfernung, die die Kamera-Referenzpunkte von Wänden halten
@@ -459,10 +563,14 @@ bug_transparency_demand_help  Wird nicht unterstützt: anstatt dass die Wände abg
 custom_server_name_help       Name des Servers, mit dem Verbindung aufgenommen werden soll
 dedicated_idle_help           Nach dieser Zeit (in Stunden) beendet sich der Dedicated Server bei der nächsten Gelegenheit selbst.
 dedicated_fps_help            Maximale Zahl der Simulationsschritte pro Sekunde, die der Server ausführen soll
+dedicated_fps_idle_factor_help Maximale Zahl der Simulationsschritte pro Sekunde, die der Server ausführen soll, währent gerade kein eingehender Netzwerkverkehr vorliegt
 talk_to_master_help           Soll dieser Server im Internet bekannt gemacht werden?
 max_out_rate_help             Maximale Netzwerkbandbreite (Ausgabe)
 max_in_rate_help              Maximale Netzwerkbandbreite (Eingabe)
 ping_charity_help             Ping-Spende: Wieviel Ping möchtest Du gerne von deinen minderbemittelten Mitspielern übernehmen?
+ping_charity_max_help         Serverseitig einstellbar: Maximale Ping-Spende, wird nur aktiv, wenn alle Clients Version 0.2.8.3 oder höher sind. Ein Wert von 0 sollte die gefürchteten Instant-Kills vermeiden.
+ping_charity_min_help         Serverseitig einstellbar: Minimale Ping-Spende, wird nur aktiv, wenn alle Clients Version 0.2.8.3 oder höher sind.
+ping_charity_server_help      Nicht selbst verändern: Der Server benutzt diesen Wert, um die aktuelle Ping-Spende den Clients mitzuteilen.
 big_brother_help              Wurde die Big-Brother information schon gesendet?
 server_name_help              Name dieses Servers
 server_options_help           Kurze Beschreibung der Einstellungen auf diesem Server.
@@ -581,6 +689,7 @@ console_rows_help             Anzahl der Zeilen der Textausgabe (normal)
 console_rows_max_help         Anzahl der Zeilen der Textausgabe (maximal beim Hochscrollen)
 console_decorate_id_help      Jede Ausgabezeile wird mit der ID-Nummer des Clients, der sie verursacht hat, dekoriert
 console_decorate_ip_help      Jede Ausgabezeile wird mit der IP-Adresse des Clients, der sie verursacht hat, dekoriert
+console_ladder_log_help       Schickt das Ladder-Log auch an die Standardausgabe
 show_fps_help                 Aktiviert Performance-Anzeige 
 floor_mirror_help             Spiegelung des Bodens
 floor_detail_help             Detail des Bodens
@@ -592,6 +701,10 @@ sky_wobble_help               Himmelsbewegung
 infinity_plane_help           Verwende unendlich ferne Punkte (funktionniert manchmal nicht)
 lag_o_meter_help              Zeichne das Lag-O-Meter im Netzwerkspiel
 lag_o_meter_scale_help        Größenfaktor des Lag-O-Meters. 1.0 wäre korrekt, aber ältere Versionen von AA waren durch einen Bug auf .5 fest eingestellt.
+lag_o_meter_threshold_help    Das Lag-O-Meter wird nur dann angezeigt, wenn es diese Größe übersteigt.
+lag_o_meter_blend_help        Bestimmt, wie stark die Farbe eines Spielers sein Lag-O-Meter beinflusst. Bei 1 wird das Lag-O-Meter ganz weiß, bei 0 nimmt es komplett die Farbe des Spielers an.
+lag_o_meter_use_old_help      Soll das alte, nicht wirklich korrekte Lag-O-Meter angezeigt werden?
+axes_indicator_help           Sollen Richtungshinweise gezeigt werden?
 predict_objects_help          Vorhersage der Vehikelbewegungen im Netzwerkspiel
 textures_hi_help              Verwende 32-Bit-Texturen
 sparks_help                   Lässt die Funken fliegen
@@ -602,12 +715,14 @@ color_strings_help            Markiere Texte farblich (z.B. Namen im Chat)
 filter_color_strings_help     Entferne Farbcodierungen aus allen Texten, die über das Netwerk empfangen werden.
 filter_color_names_help       Entferne Farbcodierungen aus Spielernamen.
 filter_name_ends_help         Entferne Leerzeichen und anderen Müll von Anfang und Ende der Spielernamen.
+filter_name_middle_help       Sollen extra-Freiräume und anderer Müll aus Spielernamen entfernt werden?
 filter_color_server_names_help Entferne Farbcodierungen aus Servernamen im Browser.
 
 #screen mode
 custom_screen_height_help     Benutzerdefinierte Bildschirmhöhe
 custom_screen_width_help      Benutzerdefinierte Bildschirmbreite
 custom_screen_aspect_help     Benutzerdefiniertes Verhältnis Pixelbreite/Pixelhöhe
+screen_size_desktop           Desktop
 armagetron_screenmode_help    Bildschirmauflösung
 armagetron_last_screenmode_help letzte Bildschirmauflösung
 armagetron_windowsize_help    Fenstergrösse
@@ -667,6 +782,8 @@ mouse_grab_help               Fängt den Mauszeiger ein, damit er das Fenster nic
 moviepack_help                Verwende das Moviepack, wenn es installiert ist
 armagetron_version_help       Aktuelle Version von \g
 message_of_day_help           Begrüssungstext für neue Benutzer
+title_of_day_help             Titel über MESSAGE_OF_DAY für Clients, die das unterstützen.
+message_of_day_timeout_help   Zeit, die MESSAGE_OF_DAY angezeigt bleibt
 round_console_message_help    Konsolennachricht, die jede Runde wiederholt wird
 round_center_message_help     Zentralnachricht, die jede Runde wiederholt wird
 
@@ -683,6 +800,10 @@ exit_help                     Beendet den Serverprozess.
 # manning and kicking commands
 players_help                  Gibt eine Liste der eingeloggten Spieler aus
 kill_help                     Tötet den angegebenen Spieler (als Warnung vor einem Rausschmiss)
+silence_help                  Verbietet einem bestimmten Spieler, öffentlich zu Reden
+voice_help                    Kehrt SILENCE um
+allow_team_change_player_help Erlaubt einem bestimmten Speiler, einmal das Team zu wechseln
+disallow_team_change_player_help Kehrt ALLOW_TEAM_CHANGE_PLAYER um
 kick_help                     Wirft den angegebenen Spieler vom Server.
 ban_help                      Wirft den angegebenen Spieler vom Server und verbannt ihn für eine variable Zeit in Minuten.
 ban_ip_help                   Verbannt spieler von der angegebenen IP-Adresse für die angegebene Zeit in Minuten vom Server.
@@ -692,6 +813,7 @@ unban_ip_help                 Hebt eine Verbannung auf.
 # communication
 console_message_help          Gibt eine Nachricht auf den Konsolen aller angeschlossenen Spieler aus.
 center_message_help           Gibt eine Nachricht in der Bildschirmmitte aller angeschlossenen Spieler aus.
+fullscreen_message_help       Unterbricht das Spiel mit einer bildschirmfüllenden Nachrict.
 say_help                      Lässt den Server-Administrator etwas sagen.
 
 #********************************************
@@ -906,6 +1028,9 @@ player_mainmenu_help          Spielernamen, Tastatureinstellung, Kameraoptionen.
 system_settings_menu_text     System konfigurieren
 system_settings_menu_help     Einstellungen für Sound, Graphik und allgemeines Erscheinungsbild
 
+main_menu_about_text          Über \g
+main_menu_about_help          Displays detailed information about this game.
+
 main_menu_exit_text           Spiel verlassen
 main_menu_exit_help           Auf Wiedersehen!
 
@@ -929,6 +1054,23 @@ game_menu_disconnect_text     Verbindung trennen
 game_menu_disconnect_help     Trennt die Verbindung zum Server und führt wieder zum Hauptmenü.
 
 
+#********************************************
+#********************************************
+#
+#             Version Info screen
+#
+#********************************************
+#********************************************
+version_info_title            Über diese Installation von \g
+version_info_version          Version von \g: \1
+version_info_misc_stuff       \n0xff8888Offizielle Website:0xRESETT http://armagetronad.net/\n0xff8888Offizielles Forum:0xRESETT http://forums.armagetronad.net/\n0xff8888Wiki (Strategie, Turniere, Dokumentation, ...):0xRESETT http://wiki.armagetronad.net/\n0xff8888Projektverwalter:0xRESETT z-man, Tank Program (guru3), Lucifer
+
+path_info_user_cfg            Pfad zu user.cfg:
+path_info_config              Konfigurationsverzeichnisse:
+path_info_resource            Resourcen:
+path_info_data                Daten-Verzeichnisse:
+path_info_screenshot          Screenshot-Verzeichnisse:
+path_info_var                 Verzeichnisse für Spieldaten:
 
 #********************************************
 #********************************************
@@ -1151,6 +1293,8 @@ network_opts_pingchar_help    Sei nett und stelle diesen Wert schön hoch ein! Da
 
 network_opts_lagometer_text   Lag-O-Meter:
 network_opts_lagometer_help   Zeichnet Umrisse dorthin, wo die Vehikel jetzt prinzipiell schon sein könnten (basierend auf dem Lag). Sehr nützlich!
+network_opts_axesindicator_text Richtungs-Anzeiger:
+network_opts_axesindicator_help Der Richtungsanzeiger gibt an, in welche Richtungen sich die Vehikel bewegen können. Praktisch für Server mit wechselnder Konfiguration.
 
 network_opts_predict_text     Vorhersage:
 network_opts_predict_help     Sagt die Bewegung der Vehikel im Spiel, basierend auf der Netzwerkverzögerung, voraus. Allerdings wirken die Bewegungen dadurch sehr eckig. Ich persönlich verlasse mich lieber auf das Lag-O-Meter.
@@ -1903,6 +2047,7 @@ player_win_conquest_specific  \1 bekam \2 Punkte für das erobern der Basis von \
 player_kill_collapse          \1 wurde von seiner kollabierenden Zone vernichtet.\n
 player_win_survive            \1 bekam \2 Punkte für das Halten der eigenen Basis.\n
 
+zone_collapse_harmless        \1s Zone verpufft harmlos wegen mangelden Feindkontakts.\n
 
 #********************************************
 #********************************************
@@ -1912,9 +2057,18 @@ player_win_survive            \1 bekam \2 Punkte für das Halten der eigenen Basi
 #********************************************
 #********************************************
 
+player_teamleave_disallowed   Sorry, /teamleave funktionniert nicht, wenn automatische Teamwahl aktiv ist.
+player_teamchanges_disallowed Sorry, der Administrator hat Teamwechsel verboten.\n
 player_pingcharity_changed    Ping-Spende ist nun \2 (vorher: \1).\n
 spam_protection_repeat        SPAM PROTECTION: du sagsest bereits: \1\n
 spam_protection               LABER-SCHUTZ: du bist für die nächsten \1 Sekunden geknebelt.\n
+spam_protection_silenceall    LABER-SCHUTZ: öffentliches Reden ist verboten.\n
+spam_protection_silenced      LABER-SCHUTZ: du wurdest vom Administrator geknebelt.\n
+spam_protection_silenced_default LABER-SCHUTZ: der Administrator hat dir dein Rederecht zurückgegeben.
+player_silenced               \10xff7777 wurde geknebelt.\n
+player_voiced                 \10x77ff77 hat seine Stimme wieder.\n
+player_allowed_teamchange     \10x77ff77 darf nun das Team wechseln.\n
+player_disallowed_teamchange  \10xff7777 darf nicht mehr das Team wechseln.\n
 vote_spam_protection          ABSTIMMUNGS-SPAMSCHUTZ: du darft die nächsten \1 Sekunden keine Abstimmung mehr initiieren.\n
 chat_title_text               Sage:
 player_entered_game           \1 0x7fff7fkommt ins Spiel.\n
@@ -1991,6 +2145,8 @@ player_scoretable_inactive    nicht aktiv
 #********************************************
 #********************************************
 
+fullscreen_message_title      Nachricht vom Server
+
 network_message_timeout_title Server antwortet nicht
 network_message_timeout_inter Der Server, mit dem Verbindung aufgebaut werden sollte, hat nicht geantwortet.\nDas könnte daran liegen, dass er momentan nicht aktiv oder nicht erreichbar ist; oder Du hast dich beim "Manuellen Verbindungsaufbau" vertippt.
 
@@ -2061,6 +2217,7 @@ network_login_relabeling      NetObjects werden neu geordnet...\n
 network_login_sync2           Nochmal Synchronisieren...\n
 network_login_done            Fertig!\n
 
+network_kill_log              User \1 vom Server geworfen, Grund: \2\n
 network_kill_preface          Vom Server angegebener Grund:
 network_kill_maxidgrabber     Keine ObjektIDs mehr frei; Dein Client hatte die meisten davon für sich selbst belegt ( Bug? ).
 network_kill_maxiduser        Keine ObjektIDs mehr frei; Dein Client hatte die meisten davon belegt ( Bug? ).
@@ -2104,6 +2261,7 @@ vote_rejected                 Vorschlag "\1" wurde abgelehnt.\n
 vote_timeout                  Abstimmung "\1" wurde ohne Ergebnis beendet.\n
 vote_new                      Neuer Abstimmungsvorschlag: "\1". Gib deine Stimme im Hauptmenu ab.\n
 vote_redundant                Vorschlag abgelehnt, ein identischer Vorschlag wurde bereits gemacht.\n
+vote_maturity                 Vorschlag abgelehnt, du bist noch nicht alt genug, warte \1 Sekunden.\n
 vote_overflow                 Vorschlag abgelehnt, es sind bereits zu viele Vorschläge aktiv.\n
 vote_disabled                 Abstimmungen wurden leider von Serveradministrator abgeschaltet.\n
 vote_disabled_spectator       Vorschlag abgelehnt, Zuschauer sind hier nicht Wahlberechtigt.\n
@@ -2292,6 +2450,6 @@ login_request_master          Der Master-Server erfordert ein Login.
 
 
 # Outdated:
-sp_team_max_imbalance_perm_help Höchste tolerierte Ungleichheit der Teams, dauerhaft
-player_joins_team_now         \1 0x7fff7fspielt nun für \2.\n
 team_max_imbalance_perm_help  Höchste tolerierte Ungleichheit der Teams, dauerhaft
+player_joins_team_now         \1 0x7fff7fspielt nun für \2.\n
+sp_team_max_imbalance_perm_help Höchste tolerierte Ungleichheit der Teams, dauerhaft
