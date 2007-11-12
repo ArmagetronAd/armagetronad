@@ -1350,12 +1350,14 @@ void handle_chat(nMessage &m){
                 tString msg;
                 tConfItemBase::EatWhitespace(s);
                 msg.ReadLine(s);
+#ifdef DEDICATED
                 if (se_InterceptCommands.StrPos(command) != -1)
                 {
                     handle_command_intercept(p, say);
                     return;
                 }
                 else
+#endif
                 if (command == "/me") {
                     if ( IsSilencedWithWarning(p) )
                         return;
