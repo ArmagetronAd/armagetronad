@@ -146,10 +146,17 @@ static nSettingItem<REAL> c_s("CYCLE_SPEED",sg_speedCycle);
 
 // minimal speed
 static REAL sg_speedCycleMin=.25;
-static nSettingItemWatched<REAL> c_sm("CYCLE_SPEED_MIN",
-                                      sg_speedCycleMin,
-                                      nConfItemVersionWatcher::Group_Bumpy,
-                                      9);
+static nSettingItemWatched<REAL> c_smin("CYCLE_SPEED_MIN",
+                                        sg_speedCycleMin,
+                                        nConfItemVersionWatcher::Group_Bumpy,
+                                        9);
+
+// minimal speed
+static REAL sg_speedCycleMax=0;
+static nSettingItemWatched<REAL> c_smax("CYCLE_SPEED_MAX",
+                                        sg_speedCycleMax,
+                                        nConfItemVersionWatcher::Group_Bumpy,
+                                        14);
 
 REAL sg_speedCycleDecayBelow = 5;
 static nSettingItemWatched<REAL> c_sdb("CYCLE_SPEED_DECAY_BELOW",
@@ -3063,6 +3070,10 @@ void gCycleMovement::ApplyAcceleration( REAL dt )
     // clamp speed
     REAL minSpeed = sg_speedCycle*SpeedMultiplier()*sg_speedCycleMin;
     REAL maxSpeed = ( 100 + sg_speedCycle*SpeedMultiplier() )* 100000;
+    if ( sg_speedCycleMax > 0 )
+    {
+        maxSpeed = sg_speedCycle*SpeedMultiplier()*sg_speedCycleMax;
+    }
 
     sg_ArchiveReal( minSpeed, 9 );
     sg_ArchiveReal( maxSpeed, 9 );

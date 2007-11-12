@@ -49,6 +49,7 @@ doublebind_time_help    Time in seconds during which no two different keyboard e
 
 cycle_speed_help		        Basic speed of your cycle if you drive straight and not close to walls
 cycle_speed_min_help		    Minimal speed of your cycle, measured relative to CYCLE_SPEED
+cycle_speed_max_help		    Maximal speed of your cycle, measured relative to CYCLE_SPEED. A value of 0 means no top speed.
 cycle_speed_decay_below_help    Rate of cycle speed approaching the value of CYCLE_SPEED from below
 cycle_speed_decay_above_help    Rate of cycle speed approaching the value of CYCLE_SPEED from above
 cycle_start_speed_help		    Initial cycle speed
