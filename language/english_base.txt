@@ -65,7 +65,7 @@ cycle_accel_tunnel_help         Multiplicator to the total effect of CYCLE_ACCEL
 cycle_accel_offset_help	        Minimum numeric wall distance, must be positive
 cycle_wall_near_help		    Maximum accelerating wall distance
 
-Cycle_boost_self_help           Speed boost when breaking from your own wall
+cycle_boost_self_help           Speed boost when breaking from your own wall
 cycle_boost_team_help           Speed boost when breaking from a teammate's wall
 cycle_boost_enemy_help          Speed boost when breaking from an enemy wall
 cycle_boost_rim_help            Speed boost when breaking from the rim wall
@@ -79,7 +79,6 @@ cycle_turn_memory_help          Number of pending turns a cycle will memorize ex
 cycle_delay_help		        Minimum time between turns (must be greater than 0)
 cycle_delay_bonus_help		    Extra fudge factor to CYCLE_DELAY applied on the dedicated server only.
 cycle_delay_timebased_help		Turn delays will be based on the time since the last turn if this is 1 (default) and the distance if this is 0. Intermediate values and values out of these bounds are supported as well.
-cycle_delay_help_doublebind_bonus       Factor to CYCLE_DELAY for two consecutive turns in the same direction
 cycle_turn_speed_factor_help    Factor the speed of a lightcycle is multiplied with when turning 
 cycle_delay_doublebind_bonus_help       Factor CYCLE_DELAY is multiplied with for consecutive turns in the same direction
 
@@ -97,7 +96,7 @@ cycle_rubber_legacy_help		Revert to old, framerate dependant and old-clients-rip
 cycle_rubber_timebased_help		Rubber usage is based on distance travelled if this is 0 (default) and the time passed if this is 1. Intermediate values and values out of these bounds are supported as well.
 cycle_rubber_speed_help             Logarithmic speed of wall approximation when rubber is in effect (every second, you get closer to the wall by a factor of ~0.4^{this value})
 cycle_rubber_mindistance_help		The minimal distance rubber code keeps you from the wall in front of you
-cycle_rubber_mindistance_gap_help		If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected gaps the cylce can squeeze through.
+cycle_rubber_mindistance_gap_help		If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected gaps the cylce can squeeze through. For "Open" gameplay.
 cycle_rubber_mindistance_gap_side_help Gap detection only sees gaps that the cycle may reach in no less than this many seconds.
 cycle_rubber_mindistance_ratio_help	Additional distance to CYCLE_RUBBER_MINDISTANCE for every length unit of the wall you have in front of you
 cycle_rubber_mindistance_reservoir_help		Addidional distance if you have an empty rubber meter (gets faded out gradually as you use up all your rubber)
@@ -226,14 +225,14 @@ team_green_6_help green portion of team 6's color
 team_green_7_help green portion of team 7's color
 team_green_8_help green portion of team 8's color
 
-team_blue_1 blue portion of team 1's color
-team_blue_2 blue portion of team 2's color
-team_blue_3 blue portion of team 3's color
-team_blue_4 blue portion of team 4's color
-team_blue_5 blue portion of team 5's color
-team_blue_6 blue portion of team 6's color
-team_blue_7 blue portion of team 7's color
-team_blue_8 blue portion of team 8's color
+team_blue_1_help blue portion of team 1's color
+team_blue_2_help blue portion of team 2's color
+team_blue_3_help blue portion of team 3's color
+team_blue_4_help blue portion of team 4's color
+team_blue_5_help blue portion of team 5's color
+team_blue_6_help blue portion of team 6's color
+team_blue_7_help blue portion of team 7's color
+team_blue_8_help blue portion of team 8's color
 
 # wall length modification
 cycle_dist_wall_shrink_help        Distance multiplier in wall length calculation. All values are legal. See settings.cfg for full docs.
