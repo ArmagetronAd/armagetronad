@@ -838,7 +838,7 @@ AC_CHECK_PROG(RUBY, ruby, ruby, no)
 if test ${RUBY} = no || test -z ${RUBY}; then
 	AC_MSG_ERROR([Ruby 1.8 is required for compilation.])
 else
- AC_CHECK_LIB(ruby,ruby_run,
+ AC_SEARCH_LIBS(ruby_run,ruby ruby1.8 ruby1.9,
  AC_DEFINE(HAVE_LIBRUBY, 1, [Define if you have the Ruby library (-lruby).])
  LIBS="$LIBS",
  AC_MSG_ERROR([Ruby library not found.])
@@ -856,7 +856,7 @@ require "rbconfig"
 print Config::CONFIG@<:@'libdir'@:>@
 EOF)
         
-        ruby_lib_dir="-L${ruby_lib_dir} -l${RUBY}"
+        ruby_lib_dir="-L${ruby_lib_dir}"
     fi
 fi
 
