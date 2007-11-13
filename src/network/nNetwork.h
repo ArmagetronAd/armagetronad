@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -118,10 +118,16 @@ public:
     bool Merge( const nVersion& a,
                 const nVersion& b);	// merges two versions to one; the new version supports only features both versions understand. false is returned if no common denominator could be found
 
-    int Min() const	{ return min_;}
-    int Max() const	{ return max_;}
+    int Min() const	{
+        return min_;
+    }
+    int Max() const	{
+        return max_;
+    }
 
-    bool operator != ( const nVersion& other ){ return !operator==(other); }
+    bool operator != ( const nVersion& other ){
+        return !operator==(other);
+    }
     bool operator == ( const nVersion& other );
     nVersion& operator = ( const nVersion& other );
 private:
@@ -155,7 +161,9 @@ class nBandwidthControl;
 class nSendBuffer
 {
 public:
-    int Len				() const { return sendBuffer_.Len(); }		// returns the length of the buffer
+    int Len				() const {
+        return sendBuffer_.Len();    // returns the length of the buffer
+    }
 
     void AddMessage		( nMessage&			message
                        , nBandwidthControl* control );				// adds a message to the buffer
@@ -185,14 +193,24 @@ public:
     ~nBandwidthControl();
     void Reset();
 
-    void			SetRate( unsigned short rate ){ rate_ = rate; }
-    unsigned short	Rate()	{ return rate_; }
+    void			SetRate( unsigned short rate ){
+        rate_ = rate;
+    }
+    unsigned short	Rate()	{
+        return rate_;
+    }
 
-REAL			Control( Usage planned ){ return Usage_Planning == planned ? rateControlPlanned_ : rateControl_;}
+    REAL			Control( Usage planned ){
+        return Usage_Planning == planned ? rateControlPlanned_ : rateControl_;
+    }
     void			Use( Usage planned, REAL bandwidth );
 
-    bool			CanSend(){ return rateControlPlanned_ > 0; }
-    REAL			Score(){ return rateControlPlanned_ / rate_; }
+    bool			CanSend(){
+        return rateControlPlanned_ > 0;
+    }
+    REAL			Score(){
+        return rateControlPlanned_ / rate_;
+    }
 
     void			Update( REAL ts);
 private:
@@ -306,7 +324,7 @@ struct nConnectionInfo     // everything that is needed to manage a connection
     void ReliableMessageSent();  //!< call whenever an an reliable message got sent
     void AckReceived();          //!< call whenever an ackownledgement message arrives
     REAL PacketLoss() const;     //!< returns the average packet loss ratio
-    private:
+private:
     // packet loss measurement
     nAverager              packetLoss_;
 
@@ -362,7 +380,9 @@ public:
     //		const char *name);
     static void HandleMessage(nMessage &message);
 
-    unsigned short ID(){return id;}
+    unsigned short ID(){
+        return id;
+    }
 };
 
 // register the routine that gives the peer the server/client information
@@ -452,8 +472,14 @@ public:
     nMessage& operator<< (const REAL &x);
     nMessage& operator>> (REAL &x);
 
-    nMessage& operator<< (const unsigned short &x){Write(x);return *this;}
-    nMessage& operator>> (unsigned short &x){Read(x);return *this;}
+    nMessage& operator<< (const unsigned short &x){
+        Write(x);
+        return *this;
+    }
+    nMessage& operator>> (unsigned short &x){
+        Read(x);
+        return *this;
+    }
 
     nMessage& operator<< (const double &x){
         return operator<<(REAL(x));
@@ -474,19 +500,27 @@ public:
     nMessage& operator << (const tOutput &o);
 
     template<class T> void BinWrite (const T &x){
-        for(unsigned int i=0;i<sizeof(T)/2;i++)
+        for (unsigned int i=0;i<sizeof(T)/2;i++)
             Write((reinterpret_cast<const unsigned short *>(&x))[i]);
         return *this;
     }
 
-bool End(){return readOut>=static_cast<unsigned int>(data.Len());}
+    bool End(){
+        return readOut>=static_cast<unsigned int>(data.Len());
+    }
 
-    void Reset(){readOut=0;}
+    void Reset(){
+        readOut=0;
+    }
+
+    int ReadSoFar(){
+        return readOut;
+    }
 
     void Read(unsigned short &x);
 
     template<class T> void BinRead (const T &x){
-        for(unsigned int i=0;i<sizeof(T)/2;i++)
+        for (unsigned int i=0;i<sizeof(T)/2;i++)
             Read(reinterpret_cast<unsigned short *>(&x)[i]);
         return *this;
     }
@@ -498,8 +532,14 @@ bool End(){return readOut>=static_cast<unsigned int>(data.Len());}
     nMessage& operator<< (const int &x);
     nMessage& operator>> (int &x);
 
-nMessage& operator<< (const unsigned int &x){operator<<(reinterpret_cast<const int&>(x));return *this;}
-    nMessage& operator>> (unsigned int &x){operator>>(reinterpret_cast<int&>(x));return *this;}
+    nMessage& operator<< (const unsigned int &x){
+        operator<<(reinterpret_cast<const int&>(x));
+        return *this;
+    }
+    nMessage& operator>> (unsigned int &x){
+        operator>>(reinterpret_cast<int&>(x));
+        return *this;
+    }
 
     nMessage& operator<< (const bool &x);
     nMessage& operator>> (bool &x);
@@ -607,8 +647,12 @@ class nCallbackLoginLogout: public tCallback{
     static int  user;
     static bool login;
 public:
-    static int User(){return user;}
-    static int Login(){return login;}
+    static int User(){
+        return user;
+    }
+    static int Login(){
+        return login;
+    }
 
     nCallbackLoginLogout(AA_VOIDFUNC *f);
     static void UserLoggedIn(int user);
@@ -618,7 +662,9 @@ public:
 class nCallbackAcceptPackedWithoutConnection: public tCallbackOr{
     static unsigned short descriptor;	// the descriptor of the incoming packet
 public:
-    static unsigned int Descriptor(){return descriptor;}
+    static unsigned int Descriptor(){
+        return descriptor;
+    }
 
     nCallbackAcceptPackedWithoutConnection(BOOLRETFUNC *f);
 
@@ -642,11 +688,19 @@ class nCurrentSenderID
 {
 public:
     nCurrentSenderID():lastSenderID_( currentSenderID_ ){}
-    nCurrentSenderID( int senderID ):lastSenderID_( currentSenderID_ ){ SetID( senderID ); }
-    ~nCurrentSenderID(){ currentSenderID_ = lastSenderID_; }
+    nCurrentSenderID( int senderID ):lastSenderID_( currentSenderID_ ){
+        SetID( senderID );
+    }
+    ~nCurrentSenderID(){
+        currentSenderID_ = lastSenderID_;
+    }
 
-    static int GetID(){ return currentSenderID_; }
-    void SetID( int senderID ){ currentSenderID_ = senderID; }
+    static int GetID(){
+        return currentSenderID_;
+    }
+    void SetID( int senderID ){
+        currentSenderID_ = senderID;
+    }
 private:
     int lastSenderID_;
     static int currentSenderID_;

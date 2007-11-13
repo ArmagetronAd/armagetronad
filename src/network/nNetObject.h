@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -73,11 +73,15 @@ private:
 public:
     class nKnowsAboutInfo{
     public:
-    bool knowsAboutExistence:1; // is the creation message through?
-    bool nextSyncAck:1;         // should the next sync message wait
+    bool knowsAboutExistence:
+        1; // is the creation message through?
+    bool nextSyncAck:
+        1;         // should the next sync message wait
         // for it's ack?
-    bool syncReq:1;              // should a sync message be sent?
-    int  acksPending:4;          // how many messages are underway?
+    bool syncReq:
+        1;              // should a sync message be sent?
+    int  acksPending:
+        4;          // how many messages are underway?
 
         nKnowsAboutInfo(){
             memset(this, 0, sizeof(nKnowsAboutInfo) );
@@ -119,7 +123,9 @@ public:
 
     virtual void ReleaseOwnership(); // release the object only if it was created on this machine
     virtual void TakeOwnership(); // treat an object like it was created locally
-    bool Owned(){ return createdLocally; } //!< returns whether the object is owned by this machine
+    bool Owned(){
+        return createdLocally;    //!< returns whether the object is owned by this machine
+    }
 
     nObserver& GetObserver() const;    // retunrs the observer of this object
 
@@ -193,22 +199,53 @@ public:
 
     // indicates whether this object is created at peer user.
     bool HasBeenTransmitted(int user) const;
-    bool syncRequested(int user) const{return knowsAbout[user].syncReq;}
+    bool syncRequested(int user) const{
+        return knowsAbout[user].syncReq;
+    }
 
     // we must not transmit an object that contains pointers
     // to non-transmitted objects. this function is supposed to check that.
     virtual bool ClearToTransmit(int user) const;
 
-    // syncronisation functions:
+    // syncronisation functions (old):
     virtual void WriteSync(nMessage &m); // store sync message in m
     virtual void ReadSync(nMessage &m); // guess what
-    virtual bool SyncIsNew(nMessage &m); // is the message newer
-    // than the last accepted sync
 
-    // the extra information sent on creation:
+    // new
+    virtual void WriteSync(nMessage &m, int run ); // store sync message in m
+    virtual void ReadSync(nMessage &m, int run ); // guess what
+
+    virtual bool SyncIsNew(nMessage &m); // is the pure sync message newer than the last accepted sync
+
+    // the extra information sent on creation (old):
     virtual void WriteCreate(nMessage &m); // store sync message in m
     // the information written by this function should
     // be read from the message in the "message"- connstructor
+
+    // new
+    virtual void WriteCreate(nMessage &m, int run );
+    virtual void ReadCreate(nMessage &m, int run );
+
+    // the "run" parameter in the new versions is intended to fix the
+    // compatibility problems when you want to extend the data written in
+    // WriteCreate(). The old method of writing a creation message was
+    //
+    // WriteCreate(m); WriteSync(m);
+    // and it was read by
+    // Constructor(m); ReadSync(m);
+    //
+    // the new sequence of calls is
+    // WriteCreate(m,0); WriteSync(m,0); WriteCreate(m,1),WriteSync(m,1)...
+    // and the new read sequence is
+    // Constructor(m); ReadSync(m,0), ReadCreate(m,1), ReadSync(m,1)...
+    // where the write operation continues until no data was written and
+    // the read operation continues until no data was read.
+    // the default of the new functions is to call the old ones if "run"
+    // equals to 0 and do nothing otherwise.
+
+    // these functions handle the process. Note that they are non-virtual.
+    void WriteAll( nMessage & m, bool create );
+    void ReadAll ( nMessage & m, bool create );
 
     // control functions:
 
@@ -330,7 +367,8 @@ template<class T> class nNOInitialisator:public nDescriptor{
                 //			nNetObject::RegisterRegistrar( registrar );
                 tJUST_CONTROLLED_PTR< T > n=new T(m);
                 n->InitAfterCreation();
-                ((nNetObject*)n)->ReadSync(m);
+                nNetObject * no = n;
+                no->ReadAll(m,true);
                 n->Register( registrar );
 
 #ifdef DEBUG
@@ -354,7 +392,7 @@ template<class T> class nNOInitialisator:public nDescriptor{
             }
 #ifndef NOEXCEPT
         }
-        catch(nKillHim)
+        catch (nKillHim)
         {
             con << "nKillHim signal caught.\n";
             Cheater(m.SenderID());

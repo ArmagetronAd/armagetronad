@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -478,7 +478,7 @@ unsigned short next_free(){
             }
 
             double timeout=tSysTimeFloat()+60;
-            while(sn_Connections[0].socket && distribute==request && tSysTimeFloat()<timeout){
+            while (sn_Connections[0].socket && distribute==request && tSysTimeFloat()<timeout){
                 // wait for new ids from the server
 #ifdef DEBUG
                 // con << distribute << ":" << request << '\n';
@@ -510,7 +510,7 @@ unsigned short next_free(){
             ret=0;
         }
 
-    }while(ret==0 && sn_Connections[0].socket);
+    }while (ret==0 && sn_Connections[0].socket);
 
     return ret;
 }
@@ -700,7 +700,7 @@ bool nNetObject::SyncIsNew(nMessage &m){
 */
 
 nNetObject::nNetObject(int own):lastSyncID_(0),
-id(0),refCtr_(0),owner(own){
+        id(0),refCtr_(0),owner(own){
 #ifdef DEBUG
     //con << "Netobject " << id  << " created.\n";
     //  if (id == 383)
@@ -987,7 +987,7 @@ nNetObject::~nNetObject(){
         this->observer_->SetObject( NULL );
     }
 
-#ifdef DEBUG    
+#ifdef DEBUG
     int extra=0;
 
     // account for the reference held by the creator of the object
@@ -1039,8 +1039,8 @@ nNetObject::~nNetObject(){
         tRecorderSync< int >::Archive( "_NETOBJECT_DESTROYED", 3, idsync );
 
         // con << "Destroying object " << id << '\n';
-        for(int user=MAXCLIENTS;user>=0;user--){
-            if(user!=sn_myNetID && knowsAbout[user].knowsAboutExistence ||
+        for (int user=MAXCLIENTS;user>=0;user--){
+            if (user!=sn_myNetID && knowsAbout[user].knowsAboutExistence ||
                     knowsAbout[user].acksPending){
                 if (destroyers[user]==NULL)
                 {
@@ -1202,6 +1202,73 @@ bool nNetObject::ClearToTransmit(int user) const{
     return true;
 }
 
+void nNetObject::WriteSync(nMessage &m, int run )
+{
+    if ( run == 0 )
+    {
+        WriteSync( m );
+    }
+}
+
+void nNetObject::ReadSync(nMessage &m, int run )
+{
+    if ( run == 0 )
+    {
+        ReadSync( m );
+    }
+}
+
+void nNetObject::WriteCreate(nMessage &m, int run )
+{
+    if ( run == 0 )
+    {
+        WriteCreate( m );
+    }
+}
+
+void nNetObject::ReadCreate(nMessage &m, int run )
+{
+    // run == 0 would call the constructor, but run == 0 never happens.
+    tASSERT( run > 0 );
+}
+
+void nNetObject::WriteAll( nMessage & m, bool create )
+{
+    int lastLen = -1;
+    int run = 0;
+
+    // write as long as the read functions do something
+    while ( m.DataLen() > lastLen )
+    {
+        lastLen = m.DataLen();
+        if ( create )
+        {
+            WriteCreate(m,run);
+        }
+
+        WriteSync(m,run);
+        ++run;
+    }
+}
+
+void nNetObject::ReadAll ( nMessage & m, bool create )
+{
+    int lastRead = -1;
+    int run = 0;
+
+    // read as long as the read functions do something
+    while ( m.ReadSoFar() > lastRead )
+    {
+        lastRead = m.ReadSoFar();
+        if ( create && run > 0 )
+        {
+            ReadCreate(m,run);
+        }
+
+        ReadSync(m,run);
+        ++run;
+    }
+}
 
 void nNetObject::WriteSync(nMessage &m){
 #ifdef DEBUG
@@ -1291,7 +1358,7 @@ void nNetObject::RequestSync(bool ack){
         tERR_ERROR("RequestSync should only be called server-side!");
 #endif
 
-    for(int i=MAXCLIENTS;i>=0;i--){
+    for (int i=MAXCLIENTS;i>=0;i--){
         knowsAbout[i].syncReq=true;
         knowsAbout[i].nextSyncAck |=ack;
     }
@@ -1345,7 +1412,7 @@ class nWaitForAckSync: public nWaitForAck{
 public:
     nWaitForAckSync(nMessage* m,int rec,unsigned short obj)
             :nWaitForAck(m,rec),netobj(obj){
-        if(sn_netObjects(obj)->knowsAbout[rec].acksPending<15)
+        if (sn_netObjects(obj)->knowsAbout[rec].acksPending<15)
         {
             sn_netObjects(obj)->knowsAbout[rec].acksPending++;
         }
@@ -1354,14 +1421,16 @@ public:
             st_Breakpoint();
         }
     }
-    virtual ~nWaitForAckSync(){tCHECK_DEST;}
+    virtual ~nWaitForAckSync(){
+        tCHECK_DEST;
+    }
 
     virtual void AckExtraAction()
     {
         nNetObject* obj = sn_netObjects[netobj];
         if ( obj )
         {
-            if( obj->knowsAbout[receiver].acksPending)
+            if ( obj->knowsAbout[receiver].acksPending)
             {
                 obj->knowsAbout[receiver].acksPending--;
             }
@@ -1413,7 +1482,7 @@ static void net_sync_handler(nMessage &m){
         else if (obj->SyncIsNew(m)){
             m.Reset();
             m.Read(id);
-            obj->ReadSync(m);
+            obj->ReadAll(m, false);
         }
     }
 }
@@ -1461,7 +1530,7 @@ void nNetObject::SyncAll(){
     }
 #endif
 
-    for(int user=MAXCLIENTS;user>=0;user--)
+    for (int user=MAXCLIENTS;user>=0;user--)
         if (is_ready_to_get_objects[user] &&
                 sn_Connections[user].socket && sn_netObjects.Len()>0 && user!=sn_myNetID){
 
@@ -1483,7 +1552,7 @@ void nNetObject::SyncAll(){
             // con << sn_SyncRequestedObject.Len() << "/" << sn_netObjects.Len() << "\n";
 
             int currentSync = sn_SyncRequestedObject.Len()-1;
-            while(sn_Connections[user].socket>0 &&
+            while (sn_Connections[user].socket>0 &&
                     sn_Connections[user].bandwidthControl_.CanSend() &&
                     sn_Connections[user].ackPending<sn_maxNoAck &&
                     currentSync >= 0){
@@ -1503,21 +1572,20 @@ void nNetObject::SyncAll(){
                             //con << "remotely creating object " << s << '\n';
 #endif
                             /*
-                              con << "creating object " << s << " at user " << user 
+                              con << "creating object " << s << " at user " << user
                               << " owned by " << sn_netObjects(s)->owner << '\n';
                             */
                             // send a creation message
 
                             tJUST_CONTROLLED_PTR< nMessage > m=new nMessage
-                                                               (nos->CreatorDescriptor());
+                            (nos->CreatorDescriptor());
 
 #ifdef DEBUG
                             if (s == sn_WatchNetID)
                                 sn_WatchMessage = m;
 #endif
 
-                            nos->WriteCreate(*m);
-                            nos->WriteSync(*m);
+                            nos->WriteAll(*m,true);
                             new nWaitForAckSync(m,user,s);
                             unsigned long id = m->MessageIDBig();
                             m->SendImmediately(user, false);
@@ -1543,14 +1611,14 @@ void nNetObject::SyncAll(){
                         tJUST_CONTROLLED_PTR< nMessage > m = new nMessage(net_sync);
 
                         m->Write(s);
-                        nos->WriteSync(*m);
+                        nos->WriteAll(*m,false);
                         nos->knowsAbout[user].syncReq=false;
 
-                        if(nos->knowsAbout[user].nextSyncAck){
+                        if (nos->knowsAbout[user].nextSyncAck){
                             new nWaitForAckSync(m,user,s);
                             nos->knowsAbout[user].nextSyncAck=false;
                         }
-#ifndef nSIMULATE_PING	    
+#ifndef nSIMULATE_PING
                         unsigned long id = m->MessageIDBig();
                         //m->Send(user,0,false);
                         m->SendImmediately(user,false);
@@ -1570,7 +1638,7 @@ void nNetObject::SyncAll(){
             static int warn=0;
             static int nextWarnOverflow=0;
             static int nextWarnAck=0;
-            if(sn_Connections[user].bandwidthControl_.Control( nBandwidthControl::Usage_Planning )<-100){
+            if (sn_Connections[user].bandwidthControl_.Control( nBandwidthControl::Usage_Planning )<-100){
                 if (warn>=nextWarnOverflow)
                 {
                     nextWarnOverflow = 2+(warn*17)/16;
@@ -1579,7 +1647,7 @@ void nNetObject::SyncAll(){
                 }
                 inc=true;
             }
-            if(sn_Connections[user].ackPending>=sn_maxNoAck){
+            if (sn_Connections[user].ackPending>=sn_maxNoAck){
                 if (warn>=nextWarnAck)
                 {
                     nextWarnAck = 2+(warn*17)/16;
@@ -1655,7 +1723,7 @@ void nNetObject::ClearAllDeleted()
     swap.clear();
 
     // send out object deletion messages
-    for( int i = MAXCLIENTS;i>=0;i--)
+    for ( int i = MAXCLIENTS;i>=0;i--)
     {
         if ( sn_Connections[i].socket && destroyers[i] )
         {
@@ -1694,7 +1762,7 @@ void nNetObject::ClearAll(){
 void nNetObject::ClearKnows(int user, bool clear){
     if (0<=user && user <=MAXCLIENTS){
         is_ready_to_get_objects[user]=false;
-        for(int i=sn_netObjects.Len()-1;i>=0;i--){
+        for (int i=sn_netObjects.Len()-1;i>=0;i--){
             nNetObject *no=sn_netObjects(i);
             if (no){
                 no->knowsAbout[user].Reset();
@@ -1723,8 +1791,8 @@ void ClearKnows(int user, bool clear){
     nNetObject::ClearKnows(user, clear);
 
     if (clear)
-        for(int i=sn_netObjectsOwner.Len()-1;i>=0;i--){
-            if(sn_netObjectsOwner(i)==user)
+        for (int i=sn_netObjectsOwner.Len()-1;i>=0;i--){
+            if (sn_netObjectsOwner(i)==user)
                 sn_netObjectsOwner(i)=0;
         }
 }
@@ -1741,14 +1809,14 @@ void nNetObject::RelabelOnConnect(){
 
         // transfer the sn_netObjects to sn_netObjects_old:
         int i;
-        for(i=sn_netObjects.Len()-1;i>=0;i--){
+        for (i=sn_netObjects.Len()-1;i>=0;i--){
             sn_netObjects_old[i]=sn_netObjects(i);
             sn_netObjects(i)=NULL;
             sn_netObjectsOwner[i]=0;
         }
 
         // assign new id's and transfer them back to sn_netObjects:
-        for(i=sn_netObjects_old.Len()-1;i>=0;i--){
+        for (i=sn_netObjects_old.Len()-1;i>=0;i--){
             nNetObject *no = sn_netObjects_old(i);
             if (no){
                 unsigned short id=next_free();
@@ -1763,7 +1831,7 @@ void nNetObject::RelabelOnConnect(){
                 no->id=id;
                 no->owner=::sn_myNetID;
                 sn_netObjectsOwner[id]=::sn_myNetID;
-                for(int j=MAXCLIENTS;j>=0;j--){
+                for (int j=MAXCLIENTS;j>=0;j--){
                     no->knowsAbout[j].Reset();
                     no->DoBroadcastExistence();
                 }
@@ -1876,9 +1944,9 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
         }
     }
     else if (sn_GetNetState()==nSERVER){
-        for(int user=MAXCLIENTS;user>0;user--){
+        for (int user=MAXCLIENTS;user>0;user--){
             sync_ack[user]=false;
-            if(sn_Connections[user].socket){
+            if (sn_Connections[user].socket){
                 tJUST_CONTROLLED_PTR< nMessage > m=new nMessage(sync_nd);
                 *m << timeout;
                 m->Write(sync_sn_netObjects);
@@ -1888,7 +1956,7 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
         }
 
         bool goon=true;
-        while(goon){
+        while (goon){
             sn_Delay();
             sn_Receive();
             if (sync_sn_netObjects)
@@ -1896,9 +1964,9 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
             sn_SendPlanned();
 
             goon=false;
-            for(int user=MAXCLIENTS;user>0;user--)
+            for (int user=MAXCLIENTS;user>0;user--)
             {
-                if(sn_Connections[user].socket &&
+                if (sn_Connections[user].socket &&
                         (!sync_ack[user] || sn_Connections[user].ackPending>0 || sn_QueueLen(user)))
                 {
                     goon=true;
@@ -1931,7 +1999,7 @@ static void sync_msg_handler(nMessage &m){
         unsigned short c_sync;
         m.Read(c_sync);
 
-        if(sn_GetNetState()!=nSERVER){
+        if (sn_GetNetState()!=nSERVER){
             sn_Sync(timeout+4,sync_sn_netObjects!=0,false);
             tJUST_CONTROLLED_PTR< nMessage > m=new nMessage(sync_ack_nd);
             m->Write(c_sync);
@@ -1951,7 +2019,7 @@ static void sync_msg_handler(nMessage &m){
 
 void clear_owners(){
     sn_freedIDs.clear();
-    for(int i=sn_netObjectsOwner.Len()-1;i>=0;i--)
+    for (int i=sn_netObjectsOwner.Len()-1;i>=0;i--)
         sn_netObjectsOwner(i)=0;
 }
 
@@ -1982,7 +2050,7 @@ int  nBandwidthTaskObject::DoEstimateSize() const
 void nBandwidthTaskSync::DoExecute( nSendBuffer& buffer, nBandwidthControl& control )
 {
     tJUST_CONTROLLED_PTR< nMessage > message = tNEW( nMessage )( net_sync );
-    Object().WriteSync( *message );
+    Object().WriteAll( *message, false );
     buffer.AddMessage( *message, &control );
 }
 
@@ -1990,8 +2058,7 @@ void nBandwidthTaskSync::DoExecute( nSendBuffer& buffer, nBandwidthControl& cont
 void nBandwidthTaskCreate::DoExecute( nSendBuffer& buffer, nBandwidthControl& control )
 {
     tJUST_CONTROLLED_PTR< nMessage > message = tNEW( nMessage )( Object().CreatorDescriptor() );
-    Object().WriteCreate( *message );
-    Object().WriteSync( *message );
+    Object().WriteAll( *message, true );
 
     buffer.AddMessage( *message, &control );
 }
