@@ -3,7 +3,7 @@
 *************************************************************************
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
-Copyright (C) 2006, Armagetron Advanced Development Team  
+Copyright (C) 2006, Armagetron Advanced Development Team
 
 **************************************************************************
 
@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -33,21 +33,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifdef DEBUG
 void sr_CheckGLError()
-{	
+{
+#ifdef DEBUG_X
 #ifndef DEDICATED
-	GLenum error = glGetError();
-	if ( error != GL_NO_ERROR )
-	{
-		std::stringstream s;
-		s << "GL error 0X" << std::hex << error << "\n";
-		con << s.str();
+    GLenum error = glGetError();
+    if ( error != GL_NO_ERROR )
+    {
+        std::stringstream s;
+        s << "GL error 0X" << std::hex << error << "\n";
+        con << s.str();
 
-		// catch a breakpoint
-		static bool reported = false;
-		if ( !reported )
-			st_Breakpoint();
-		reported = true;
-	}
+        // catch a breakpoint
+        static bool reported = false;
+        if ( !reported )
+            st_Breakpoint();
+        reported = true;
+    }
+#endif
 #endif
 }
 #endif
