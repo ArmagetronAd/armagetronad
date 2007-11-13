@@ -187,7 +187,7 @@ public:
 #define MOUSE_BUTTONS 7
 
 // one key_action for every keysym
-extern tJUST_CONTROLLED_PTR< uBind > keymap[SDLK_MAX];
+// extern tJUST_CONTROLLED_PTR< uBind > keymap[SDLK_MAX];
 
 // *****************
 // Player binds

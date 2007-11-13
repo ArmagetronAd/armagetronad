@@ -104,6 +104,13 @@ uAction * uAction::Find( char const * name )
     return 0;
 }
 
+// ***************************
+//    the generic keymaps
+// ***************************
+
+tJUST_CONTROLLED_PTR< uBind > keymap[SDLK_MAX];
+bool                          pressed[SDLK_MAX];
+
 // ****************************************
 // a configuration class for keyboard binds
 // ****************************************
@@ -229,13 +236,6 @@ bool uActionGlobal::IsBreakingGlobalBind(int sym){
 
     return uActionGlobalFunc::IsBreakingGlobalBind(act);
 }
-
-// ***************************
-//    the generic keymaps
-// ***************************
-
-tJUST_CONTROLLED_PTR< uBind > keymap[SDLK_MAX];
-bool                          pressed[SDLK_MAX];
 
 static void keyboard_init(){
     for(int i=0;i<sdlk_dynlast;i++)
