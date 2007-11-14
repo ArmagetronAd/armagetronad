@@ -238,7 +238,7 @@ public:
         {
             // add custom resolution
             NewChoice( ArmageTron_Custom );
-            
+
             // add desktop resolution
             if ( sr_DesktopScreensizeSupported() && !addFixed )
                 NewChoice( ArmageTron_Desktop );

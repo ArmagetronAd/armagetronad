@@ -519,7 +519,7 @@ void eGameObject::FindCurrentFace(){
                 {
                 public:
                     RecursionGuard( bool& recursion )
-                    :recursion_( recursion )
+                            :recursion_( recursion )
                     {
                         recursion = false;
                     }

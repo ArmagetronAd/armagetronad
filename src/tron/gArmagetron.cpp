@@ -715,7 +715,7 @@ int main(int argc,char **argv){
 #pragma warning ( disable : 4286 )
     // GRR. Visual C++ dones not handle generic exceptions with the above general statement.
     // A specialized version is needed. The best part: it warns about the code below being redundant.
-    catch ( tException const & e )
+    catch ( tGenericException const & e )
     {
         try
         {

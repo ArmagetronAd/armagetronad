@@ -121,9 +121,9 @@ bool sr_DesktopScreensizeSupported()
     SDL_version const & sdlVersion = *SDL_Linked_Version();
 
     return
-    sdlVersion.major > 1 || sdlVersion.major == 1 &&
-    ( sdlVersion.minor > 2 || sdlVersion.minor == 2 &&
-      ( sdlVersion.patch >= 10 ) );
+        sdlVersion.major > 1 || sdlVersion.major == 1 &&
+        ( sdlVersion.minor > 2 || sdlVersion.minor == 2 &&
+          ( sdlVersion.patch >= 10 ) );
 #else
     return false;
 #endif

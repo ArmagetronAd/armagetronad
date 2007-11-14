@@ -176,7 +176,7 @@ static void MenuBackground(){
         TexMatrix();
         glLoadMatrixf(&tm[0][0]);
 
-		glScalef((REAL)sr_screenWidth/sr_screenHeight/4. * 3., 1., 1.);
+        glScalef((REAL)sr_screenWidth/sr_screenHeight/4. * 3., 1., 1.);
 
 
         BeginQuads();

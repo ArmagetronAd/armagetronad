@@ -2700,9 +2700,9 @@ void nServerInfo::NetReadThis( nMessage & m )
             }
             else if ( name != oldName )
             {
-                con << "Name of server " <<  ToString( *this ) 
-                    << " changed from \"" << tColoredString::RemoveColors(oldName) 
-                    << "\" to \"" << tColoredString::RemoveColors(name) << "\"\n";
+                con << "Name of server " <<  ToString( *this )
+                << " changed from \"" << tColoredString::RemoveColors(oldName)
+                << "\" to \"" << tColoredString::RemoveColors(name) << "\"\n";
             }
 
             // broadcast the server to the other master servers

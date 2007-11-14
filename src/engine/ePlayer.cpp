@@ -1237,14 +1237,14 @@ void handle_chat_admin_commands(tJUST_CONTROLLED_PTR< ePlayerNetID > &p, tString
         }
     }
     else
-    if (se_interceptUnknownCommands)
-    {
-        handle_command_intercept(p, say);
-    }
-    else
-    {
-        sn_ConsoleOut("Unknown chat command.\n",p->Owner());
-    }
+        if (se_interceptUnknownCommands)
+        {
+            handle_command_intercept(p, say);
+        }
+        else
+        {
+            sn_ConsoleOut("Unknown chat command.\n",p->Owner());
+        }
 }
 #endif
 
@@ -1358,215 +1358,215 @@ void handle_chat(nMessage &m){
                 }
                 else
 #endif
-                if (command == "/me") {
-                    if ( IsSilencedWithWarning(p) )
-                        return;
+                    if (command == "/me") {
+                        if ( IsSilencedWithWarning(p) )
+                            return;
 
-                    tColoredString console;
-                    console << tColoredString::ColorString(1,1,1)  << "* ";
-                    console << *p;
-                    console << tColoredString::ColorString(1,1,.5) << " " << msg;
-                    console << tColoredString::ColorString(1,1,1)  << " *";
+                        tColoredString console;
+                        console << tColoredString::ColorString(1,1,1)  << "* ";
+                        console << *p;
+                        console << tColoredString::ColorString(1,1,.5) << " " << msg;
+                        console << tColoredString::ColorString(1,1,1)  << " *";
 
-                    tColoredString forOldClients;
-                    forOldClients << tColoredString::ColorString(1,1,1)  << "*"
-                    << tColoredString::ColorString(1,1,.5) << msg
-                    << tColoredString::ColorString(1,1,1)  << "*";
+                        tColoredString forOldClients;
+                        forOldClients << tColoredString::ColorString(1,1,1)  << "*"
+                        << tColoredString::ColorString(1,1,.5) << msg
+                        << tColoredString::ColorString(1,1,1)  << "*";
 
-                    se_BroadcastChatLine( p, console, forOldClients );
-                    console << "\n";
-                    sn_ConsoleOut(console,0);
-                    return;
-                }
-                else if (command == "/teamleave") {
-                    if ( se_assignTeamAutomatically )
-                    {
-                        sn_ConsoleOut(tOutput("$player_teamleave_disallowed"), p->Owner() );
+                        se_BroadcastChatLine( p, console, forOldClients );
+                        console << "\n";
+                        sn_ConsoleOut(console,0);
                         return;
                     }
-                    if(!p->TeamChangeAllowed()) {
-                        sn_ConsoleOut(tOutput("$player_disallowed_teamchange"), p->Owner() );
-                        return;
-                    }
-
-                    eTeam * leftTeam = p->NextTeam();
-                    if ( leftTeam )
-                    {
-                        if ( !leftTeam )
-                            leftTeam = p->CurrentTeam();
-
-                        if ( leftTeam->NumPlayers() > 1 )
+                    else if (command == "/teamleave") {
+                        if ( se_assignTeamAutomatically )
                         {
-                            sn_ConsoleOut( tOutput( "$player_leave_team_wish",
-                                                    tColoredString::RemoveColors(p->GetName()),
-                                                    tColoredString::RemoveColors(leftTeam->Name()) ) );
+                            sn_ConsoleOut(tOutput("$player_teamleave_disallowed"), p->Owner() );
+                            return;
                         }
-                        else
+                        if(!p->TeamChangeAllowed()) {
+                            sn_ConsoleOut(tOutput("$player_disallowed_teamchange"), p->Owner() );
+                            return;
+                        }
+
+                        eTeam * leftTeam = p->NextTeam();
+                        if ( leftTeam )
                         {
-                            sn_ConsoleOut( tOutput( "$player_leave_game_wish",
-                                                    tColoredString::RemoveColors(p->GetName()) ) );
+                            if ( !leftTeam )
+                                leftTeam = p->CurrentTeam();
+
+                            if ( leftTeam->NumPlayers() > 1 )
+                            {
+                                sn_ConsoleOut( tOutput( "$player_leave_team_wish",
+                                                        tColoredString::RemoveColors(p->GetName()),
+                                                        tColoredString::RemoveColors(leftTeam->Name()) ) );
+                            }
+                            else
+                            {
+                                sn_ConsoleOut( tOutput( "$player_leave_game_wish",
+                                                        tColoredString::RemoveColors(p->GetName()) ) );
+                            }
                         }
-                    }
 
-                    p->SetTeamWish(0);
-                    return;
-                }
-                else if (command == "/teamshuffle" || command == "/shuffle") {
-                    // team position shuffling. Allow players to change their team setup.
-                    // syntax:
-                    // /teamshuffle: shuffles you all the way to the outside.
-                    // /teamshuffle <pos>: shuffles you to position pos
-                    // /teamshuffle +/-<dist>: shuffles you dist to the outside/inside
-                    // con << msgRest << "\n";
-                    int IDNow = p->TeamListID();
-                    if (!p->CurrentTeam())
-                    {
-                        sn_ConsoleOut(tOutput("$player_not_on_team"), p->Owner());
+                        p->SetTeamWish(0);
                         return;
                     }
-                    int len = p->CurrentTeam()->NumPlayers();
-                    int IDWish = len-1; // default to shuffle to the outside
+                    else if (command == "/teamshuffle" || command == "/shuffle") {
+                        // team position shuffling. Allow players to change their team setup.
+                        // syntax:
+                        // /teamshuffle: shuffles you all the way to the outside.
+                        // /teamshuffle <pos>: shuffles you to position pos
+                        // /teamshuffle +/-<dist>: shuffles you dist to the outside/inside
+                        // con << msgRest << "\n";
+                        int IDNow = p->TeamListID();
+                        if (!p->CurrentTeam())
+                        {
+                            sn_ConsoleOut(tOutput("$player_not_on_team"), p->Owner());
+                            return;
+                        }
+                        int len = p->CurrentTeam()->NumPlayers();
+                        int IDWish = len-1; // default to shuffle to the outside
 
-                    // but read the target position as additional parameter
-                    if (msg.Len() > 1)
-                    {
-                        IDWish = IDNow;
-                        if ( msg[0] == '+' )
-                            IDWish += msg.toInt(1);
-                        else if ( msg[0] == '-' )
-                            IDWish -= msg.toInt(1);
-                        else
-                            IDWish = msg.toInt()-1;
-                    }
+                        // but read the target position as additional parameter
+                        if (msg.Len() > 1)
+                        {
+                            IDWish = IDNow;
+                            if ( msg[0] == '+' )
+                                IDWish += msg.toInt(1);
+                            else if ( msg[0] == '-' )
+                                IDWish -= msg.toInt(1);
+                            else
+                                IDWish = msg.toInt()-1;
+                        }
 
-                    if (IDWish < 0)
-                        IDWish = 0;
-                    if (IDWish >= len)
-                        IDWish = len-1;
+                        if (IDWish < 0)
+                            IDWish = 0;
+                        if (IDWish >= len)
+                            IDWish = len-1;
 
-                    if ( !se_allowShuffleUp && IDWish < IDNow )
-                    {
-                        sn_ConsoleOut(tOutput("$player_noshuffleup"), p->Owner());
+                        if ( !se_allowShuffleUp && IDWish < IDNow )
+                        {
+                            sn_ConsoleOut(tOutput("$player_noshuffleup"), p->Owner());
+                            return;
+                        }
+
+                        if( IDNow == IDWish )
+                        {
+                            sn_ConsoleOut(tOutput("$player_noshuffle"), p->Owner());
+                        }
+
+                        p->CurrentTeam()->Shuffle( IDNow, IDWish );
                         return;
                     }
-
-                    if( IDNow == IDWish )
-                    {
-                        sn_ConsoleOut(tOutput("$player_noshuffle"), p->Owner());
-                    }
-
-                    p->CurrentTeam()->Shuffle( IDNow, IDWish );
-                    return;
-                }
                 // Send a message to your team
-                else if (command == "/team") {
-                    eTeam *currentTeam = p->CurrentTeam();
+                    else if (command == "/team") {
+                        eTeam *currentTeam = p->CurrentTeam();
 
-                    if (currentTeam != NULL) // If a player has just joined the game, he is not yet on a team. Sending a /team message will crash the server
-                    {
-                        // Log message to server and sender
-                        tColoredString messageForServerAndSender = se_BuildChatString(currentTeam, p, msg);
-                        messageForServerAndSender << "\n";
-                        sn_ConsoleOut(messageForServerAndSender, 0);
-                        sn_ConsoleOut(messageForServerAndSender, p->Owner());
-
-                        // Send message to team-mates
-                        int numTeamPlayers = currentTeam->NumPlayers();
-                        for (int teamPlayerIndex = 0; teamPlayerIndex < numTeamPlayers; teamPlayerIndex++) {
-                            if (currentTeam->Player(teamPlayerIndex)->Owner() != p->Owner()) // Do not resend the message to yourself
-                                se_SendTeamMessage(currentTeam, p, currentTeam->Player(teamPlayerIndex), msg);
-                        }
-                    }
-                    else
-                    {
-                        sn_ConsoleOut(tOutput("$player_not_on_team"), p->Owner());
-                    }
-
-                    return;
-                }
-                else if (command == "/msg" ) {
-                    int current_place=0; // current place in buffer_name.
-
-                    // search for end of recipient and store recipient in buffer_name
-                    tString buffer_name;
-                    while (current_place < msg.Len() && !isblank(msg[current_place])) {
-                        buffer_name[current_place]=msg[current_place];
-                        current_place++;
-                    }
-                    buffer_name[current_place] = '\0';
-                    buffer_name = ePlayerNetID::FilterName(buffer_name);
-
-                    // Check for match
-                    int num_matches=-1;
-                    ePlayerNetID * receiver = CompareBufferToPlayerNames(buffer_name, num_matches);
-
-                    // One match, send it.
-                    if (num_matches == 1) {
-                        // extract rest of message: it is the true message to send
-                        tString msg_core;
-                        while (current_place < msg.Len()-1) {
-                            current_place++;
-                            msg_core += msg[current_place];
-                        }
-
-                        // build chat string
-                        tColoredString toServer = se_BuildChatString( p, receiver, msg_core );
-                        toServer << '\n';
-
-                        // log locally
-                        sn_ConsoleOut(toServer,0);
-
-                        if ( p->CurrentTeam() == receiver->CurrentTeam() || !IsSilencedWithWarning(p) )
+                        if (currentTeam != NULL) // If a player has just joined the game, he is not yet on a team. Sending a /team message will crash the server
                         {
-                            // log to sender's console
-                            sn_ConsoleOut(toServer, p->Owner());
+                            // Log message to server and sender
+                            tColoredString messageForServerAndSender = se_BuildChatString(currentTeam, p, msg);
+                            messageForServerAndSender << "\n";
+                            sn_ConsoleOut(messageForServerAndSender, 0);
+                            sn_ConsoleOut(messageForServerAndSender, p->Owner());
 
-                            // send to receiver
-                            if ( p->Owner() != receiver->Owner() )
-                                se_SendPrivateMessage( p, receiver, msg_core );
+                            // Send message to team-mates
+                            int numTeamPlayers = currentTeam->NumPlayers();
+                            for (int teamPlayerIndex = 0; teamPlayerIndex < numTeamPlayers; teamPlayerIndex++) {
+                                if (currentTeam->Player(teamPlayerIndex)->Owner() != p->Owner()) // Do not resend the message to yourself
+                                    se_SendTeamMessage(currentTeam, p, currentTeam->Player(teamPlayerIndex), msg);
+                            }
+                        }
+                        else
+                        {
+                            sn_ConsoleOut(tOutput("$player_not_on_team"), p->Owner());
                         }
 
                         return;
                     }
-                    // More than than one match for the current buffer. Complain about that.
-                    else if (num_matches > 1) {
-                        tOutput toSender;
-                        toSender.SetTemplateParameter(1, buffer_name);
-                        toSender << "$msg_toomanymatches";
-                        sn_ConsoleOut(toSender,p->Owner());
-                        return;
+                    else if (command == "/msg" ) {
+                        int current_place=0; // current place in buffer_name.
+
+                        // search for end of recipient and store recipient in buffer_name
+                        tString buffer_name;
+                        while (current_place < msg.Len() && !isblank(msg[current_place])) {
+                            buffer_name[current_place]=msg[current_place];
+                            current_place++;
+                        }
+                        buffer_name[current_place] = '\0';
+                        buffer_name = ePlayerNetID::FilterName(buffer_name);
+
+                        // Check for match
+                        int num_matches=-1;
+                        ePlayerNetID * receiver = CompareBufferToPlayerNames(buffer_name, num_matches);
+
+                        // One match, send it.
+                        if (num_matches == 1) {
+                            // extract rest of message: it is the true message to send
+                            tString msg_core;
+                            while (current_place < msg.Len()-1) {
+                                current_place++;
+                                msg_core += msg[current_place];
+                            }
+
+                            // build chat string
+                            tColoredString toServer = se_BuildChatString( p, receiver, msg_core );
+                            toServer << '\n';
+
+                            // log locally
+                            sn_ConsoleOut(toServer,0);
+
+                            if ( p->CurrentTeam() == receiver->CurrentTeam() || !IsSilencedWithWarning(p) )
+                            {
+                                // log to sender's console
+                                sn_ConsoleOut(toServer, p->Owner());
+
+                                // send to receiver
+                                if ( p->Owner() != receiver->Owner() )
+                                    se_SendPrivateMessage( p, receiver, msg_core );
+                            }
+
+                            return;
+                        }
+                        // More than than one match for the current buffer. Complain about that.
+                        else if (num_matches > 1) {
+                            tOutput toSender;
+                            toSender.SetTemplateParameter(1, buffer_name);
+                            toSender << "$msg_toomanymatches";
+                            sn_ConsoleOut(toSender,p->Owner());
+                            return;
+                        }
+                        // 0 matches. The user can't spell. Complain about that, too.
+                        else {
+                            tOutput toSender;
+                            toSender.SetTemplateParameter(1, buffer_name);
+                            toSender << "$msg_nomatch";
+                            sn_ConsoleOut(toSender, p->Owner());
+                            return;
+                        }
                     }
-                    // 0 matches. The user can't spell. Complain about that, too.
-                    else {
-                        tOutput toSender;
-                        toSender.SetTemplateParameter(1, buffer_name);
-                        toSender << "$msg_nomatch";
-                        sn_ConsoleOut(toSender, p->Owner());
-                        return;
-                    }
-                }
 #ifdef DEDICATED
-                else if (command == "/players") {
-                    for ( int i2 = se_PlayerNetIDs.Len()-1; i2>=0; --i2 )
-                    {
-                        ePlayerNetID* p2 = se_PlayerNetIDs(i2);
-                        tString tos;
-                        tos << p2->Owner();
-                        tos << ": ";
-                        tos << p2->GetUserName();
-                        if (p2->isLoggedIn())
-                            tos << " (logged in)";
-                        else
-                            tos << " (logged out)";
-                        tos << "\n";
-                        sn_ConsoleOut(tos, p->Owner());
+                    else if (command == "/players") {
+                        for ( int i2 = se_PlayerNetIDs.Len()-1; i2>=0; --i2 )
+                        {
+                            ePlayerNetID* p2 = se_PlayerNetIDs(i2);
+                            tString tos;
+                            tos << p2->Owner();
+                            tos << ": ";
+                            tos << p2->GetUserName();
+                            if (p2->isLoggedIn())
+                                tos << " (logged in)";
+                            else
+                                tos << " (logged out)";
+                            tos << "\n";
+                            sn_ConsoleOut(tos, p->Owner());
+                        }
+                        return;
                     }
-                    return;
-                }
-                else {
-                    handle_chat_admin_commands(p, say);
-                    return;
-                }
+                    else {
+                        handle_chat_admin_commands(p, say);
+                        return;
+                    }
 #endif
             }
 
