@@ -2,6 +2,8 @@
 #define AT_GLEW_H
 
 #include "aa_config.h"
+#include "tException.h"
+#include "tString.h"
 
 // check whether GLEW is available
 #ifndef DEDICATED
@@ -17,5 +19,20 @@
 #endif
 #endif
 #endif
+
+//! Exception for GLEW (also defined when we don't have GLEW)
+class rExceptionGLEW: public tException
+{
+public:
+    rExceptionGLEW( char const * description )
+    : description_( description )
+    {
+    }
+private:
+    virtual tString DoGetName() const { return tString("GLEW Exception"); }
+
+    virtual tString DoGetDescription() const { return description_; }
+    tString description_;
+};
 
 #endif

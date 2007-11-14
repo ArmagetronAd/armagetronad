@@ -704,7 +704,7 @@ static tSettingItem<REAL> c_mb( "MOTION_BLUR_TIME",
 // blurs the motion, time is the current time
 bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTarget )
 {
-    static bool lastActive = true;
+    static bool lastActive = false;
     bool active = false;
 
     // measure frame rendering time
@@ -762,7 +762,20 @@ bool sr_MotionBlur( double time, std::auto_ptr< rTextureRenderTarget > & blurTar
         // create blur texture
         if ( !blurTarget.get() )
         {
-            blurTarget = std::auto_ptr< rTextureRenderTarget >( new rTextureRenderTarget( blurWidth, blurHeight  ) );
+            try
+            {
+                blurTarget = std::auto_ptr< rTextureRenderTarget >( new rTextureRenderTarget( blurWidth, blurHeight  ) );
+            }
+            catch( rExceptionGLEW const & e )
+            {
+                // unsupported. Disable motion blur.
+                currentScreensetting.vSync = ArmageTron_VSync_Off;
+                lastActive = false;
+
+                con << tOutput("$screen_vsync_motionblur_unsupported");
+
+                return true;
+            }
         }
 
         // really blur

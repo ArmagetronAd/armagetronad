@@ -1824,6 +1824,8 @@ screen_vsync_off_help	Ignore the signal. This results in higher frame rates, but
 screen_vsync_motionblur_text	Motion Blur
 screen_vsync_motionblur_help	Ignore it and make use of the additional frames for motion blurring, which makes the tearing artefacts less prominent. Recommended for power gamers.
 
+screen_vsync_motionblur_unsupported	Motion Blur unsupported on your system, disabling it.\n
+
 screen_grab_mouse_text		Grab Mouse:
 screen_grab_mouse_help		If activated, the mouse pointer is centered after every move; thus, it is unable to leave the window. This option is only useful when you play \g in a window.
 

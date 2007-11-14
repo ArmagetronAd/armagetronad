@@ -52,7 +52,6 @@ dnl a modern autoconf is required to process this
 AC_PREREQ(2.50)
 
 build_regular=true
-have_glew=true
 
 AC_ARG_ENABLE(glout,
      AC_HELP_STRING([--enable-glout],
@@ -349,6 +348,16 @@ AC_ARG_WITH(ruby,
     if test ! -z "${withval}"; then
         RUBY="${withval}"
     fi
+)
+
+dnl glew
+
+have_glew=true
+
+AC_ARG_WITH(glew,
+    AC_HELP_STRING([--with-glew],
+        [Use GLEW and the OpenGL extensions it provides]),
+        test "${withval}" == "yes" || have_glew=false
 )
 
 dnl
@@ -683,16 +692,18 @@ dnl *************************************************
 dnl         GLEW
 dnl *************************************************
 
-AC_CHECK_LIB(GLEW,glewInit,,
- AC_MSG_WARN([OpenGL Extension Wrangler (GLEW) library not found. No fancy effects for you.])
- have_glew=false
-)
+if test have_glew=true; then
+  AC_CHECK_LIB(GLEW,glewInit,,
+   AC_MSG_WARN([OpenGL Extension Wrangler (GLEW) library not found. No fancy effects for you.])
+   have_glew=false
+  )
 
-if test ${have_glew} = true; then
-AC_CHECK_HEADERS([GL/glew.h],,
- AC_MSG_WARN([OpenGL Extension Wrangler (GLEW) headers not found. No fancy effects for you.])
- have_glew=false
-)
+  if test ${have_glew} = true; then
+   AC_CHECK_HEADERS([GL/glew.h],,
+   AC_MSG_WARN([OpenGL Extension Wrangler (GLEW) headers not found. No fancy effects for you.])
+   have_glew=false
+  )
+  fi
 fi
 
 dnl *************************************************

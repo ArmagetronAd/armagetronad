@@ -75,6 +75,7 @@ rTextureRenderTarget::rTextureRenderTarget( int width, int height )
     height_ = height;
     previous = 0;
 
+#ifdef HAVE_GLEW
     if ( GLEW_EXT_framebuffer_object )
     {
         Push();
@@ -111,7 +112,7 @@ rTextureRenderTarget::rTextureRenderTarget( int width, int height )
         case GL_FRAMEBUFFER_COMPLETE_EXT:
             break;
         case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
-            throw tGenericException( "Unsupported frame buffer operation" );
+            throw rExceptionGLEW( "Unsupported frame buffer operation" );
         default:
             tASSERT( 0 );
         }
@@ -122,8 +123,9 @@ rTextureRenderTarget::rTextureRenderTarget( int width, int height )
 
         return;
     }
+#endif
 
-    throw tGenericException( "frame buffer extension not supported" );
+    throw rExceptionGLEW( "frame buffer extension not supported" );
 #endif
 }
 
@@ -133,11 +135,13 @@ void rTextureRenderTarget::Push()
     previous = anchor;
     anchor = this;
 
+#ifdef HAVE_GLEW
     sr_CheckGLError();
 
     glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, frameBuffer_ );
 
     sr_CheckGLError();
+#endif
 #endif
 }
 
@@ -155,9 +159,11 @@ void rTextureRenderTarget::Pop()
 void rTextureRenderTarget::Restore()
 {
 #ifndef DEDICATED
+#ifdef HAVE_GLEW
     sr_CheckGLError();
     glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, anchor ? anchor->frameBuffer_ : 0 );
     sr_CheckGLError();
+#endif
 #endif
 }
 
