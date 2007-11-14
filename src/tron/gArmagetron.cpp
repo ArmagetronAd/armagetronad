@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -51,7 +51,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gCycle.h"
 //#include <unistd>
 #include <stdio.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <fstream>
 
 #include "nServerInfo.h"
@@ -132,7 +132,7 @@ private:
         s << "-d, --daemon                 : allow the dedicated server to run as a daemon\n"
         << "                               (will not poll for input on stdin)\n";
 #endif
-#endif              
+#endif
     }
 };
 
@@ -207,7 +207,7 @@ static void welcome(){
             timeout = tSysTimeFloat() + 6;
 
             uInputProcessGuard inputProcessGuard;
-            while((!su_GetSDLInput(tEvent) || tEvent.type!=SDL_KEYDOWN) &&
+            while ((!su_GetSDLInput(tEvent) || tEvent.type!=SDL_KEYDOWN) &&
                     tSysTimeFloat() < timeout)
             {
                 if ( sr_glOut )
@@ -258,7 +258,7 @@ static void welcome(){
 
     sr_UnlockSDL();
     uInputProcessGuard inputProcessGuard;
-    while((!su_GetSDLInput(tEvent) || tEvent.type!=SDL_KEYDOWN) &&
+    while ((!su_GetSDLInput(tEvent) || tEvent.type!=SDL_KEYDOWN) &&
             tSysTimeFloat() < timeout){
 
         sr_ResetRenderState(true);
@@ -403,8 +403,8 @@ int filter(const SDL_Event *tEvent){
             return false;
         }
 
-        if(tEvent->type==SDL_MOUSEMOTION)
-            if(tEvent->motion.x==sr_screenWidth/2 && tEvent->motion.y==sr_screenHeight/2)
+        if (tEvent->type==SDL_MOUSEMOTION)
+            if (tEvent->motion.x==sr_screenWidth/2 && tEvent->motion.y==sr_screenHeight/2)
                 return 0;
         if (su_mouseGrab &&
                 tEvent->type!=SDL_MOUSEBUTTONDOWN &&
@@ -418,9 +418,9 @@ int filter(const SDL_Event *tEvent){
         if (tEvent->type==SDL_ACTIVEEVENT)
         {
             // Jonathans fullscreen bugfix.
-#ifdef MACOSX 
-            if(currentScreensetting.fullscreen ^ lastSuccess.fullscreen) return false;
-#endif 
+#ifdef MACOSX
+            if (currentScreensetting.fullscreen ^ lastSuccess.fullscreen) return false;
+#endif
             int flags = SDL_APPINPUTFOCUS;
             if ( tEvent->active.gain && tEvent->active.state & flags )
                 Activate(true);
@@ -487,7 +487,7 @@ int main(int argc,char **argv){
             const char * dedicatedSection = "DEDICATED";
             if ( !tRecorder::PlaybackStrict( dedicatedSection, dedicatedServer ) )
             {
-#ifdef DEDICATED          
+#ifdef DEDICATED
                 dedicatedServer = true;
 #endif
             }
@@ -541,11 +541,11 @@ int main(int argc,char **argv){
                 if (! tDirectories::Var().Open( s, "scorelog.txt", std::ios::app ) )
                 {
                     char const * error = "var directory not writable or does not exist. It should reside inside your user data directory and should have been created automatically on first start, but something must have gone wrong."
-                    #ifdef WIN32
+#ifdef WIN32
                                          " You can access your user data directory over one of the start menu entries we installed."
-                    #else
+#else
                                          " Your user data directory is subdirectory named .armagetronad in your home directory."
-                    #endif
+#endif
                                          ;
 
                     tERR_ERROR( error );
@@ -561,42 +561,42 @@ int main(int argc,char **argv){
                 }
             }
 
-		#ifndef DEDICATED
+#ifndef DEDICATED
             sr_glOut=1;
-		#endif
+#endif
 
             //std::cout << "checked mp\n";
 
             // while DGA mouse is buggy in XFree 4.0:
-		#ifdef linux
+#ifdef linux
             // Sam 5/23 - Don't ever use DGA, we don't need it for this game.
             if ( ! getenv("SDL_VIDEO_X11_DGAMOUSE") ) {
                 putenv("SDL_VIDEO_X11_DGAMOUSE=0");
             }
-		#endif
+#endif
 
-		#ifdef WIN32
+#ifdef WIN32
             // disable DirectX by default; it causes problems with some boards.
             if (!use_directx && !getenv("SDL_VIDEODRIVER") ) {
                 putenv("SDL_VIDEODRIVER=windib");
             }
-		#endif
+#endif
 
             // atexit(ANET_Shutdown);
 
-		#ifndef WIN32
-		#ifdef DEBUG
-            #define NOSOUND
-		#endif
-		#endif
+#ifndef WIN32
+#ifdef DEBUG
+#define NOSOUND
+#endif
+#endif
 
-		#ifndef DEDICATED
+#ifndef DEDICATED
             if (
-		#ifndef NOSOUND
-        #ifndef DEFAULT_SDL_AUDIODRIVER
+#ifndef NOSOUND
+#ifndef DEFAULT_SDL_AUDIODRIVER
                 SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0 &&
-        #endif
-		#endif
+#endif
+#endif
                 SDL_Init(SDL_INIT_VIDEO) < 0 )            {
                 tERR_ERROR("Couldn't initialize SDL: " << SDL_GetError());
             }
@@ -612,15 +612,15 @@ int main(int argc,char **argv){
 
             tConsole::RegisterMessageCallback(&uMenu::Message);
 
-		#ifndef NOSOUND
+#ifndef NOSOUND
             se_SoundInit();
             atexit(se_SoundExit);
-		#ifndef DEBUG
+#ifndef DEBUG
             // double sound initialisation for dodgy cards
             se_SoundExit();
             se_SoundInit();
-		#endif
-		#endif
+#endif
+#endif
 
             if (sr_InitDisplay()){
 
@@ -679,7 +679,7 @@ int main(int argc,char **argv){
             }
             se_SoundExit();
             SDL_Quit();
-		#else
+#else
             if (!commandLineAnalyzer.daemon_)
                 sr_Unblock_stdin();
 
@@ -689,7 +689,7 @@ int main(int argc,char **argv){
 
             while (!uMenu::quickexit)
                 sg_HostGame();
-		#endif
+#endif
             nNetObject::ClearAll();
             nServerInfo::DeleteAll();
         }
@@ -699,13 +699,13 @@ int main(int argc,char **argv){
 
         //	tLocale::Clear();
     }
-    catch( tException const & e )
+    catch ( tException const & e )
     {
         try
         {
             st_PresentError( e.GetName(), e.GetDescription() );
         }
-        catch(...)
+        catch (...)
         {
         }
 
@@ -715,20 +715,20 @@ int main(int argc,char **argv){
 #pragma warning ( disable : 4286 )
     // GRR. Visual C++ dones not handle generic exceptions with the above general statement.
     // A specialized version is needed. The best part: it warns about the code below being redundant.
-    catch( tGenericException const & e )
+    catch ( tException const & e )
     {
         try
         {
             st_PresentError( e.GetName(), e.GetDescription() );
         }
-        catch(...)
+        catch (...)
         {
         }
 
         return 1;
     }
 #endif
-    catch(...)
+    catch (...)
     {
         return 1;
     }
@@ -738,7 +738,10 @@ int main(int argc,char **argv){
 
 #ifdef DEDICATED
 // settings missing in the dedicated server
-static void st_Dummy(std::istream &s){tString rest; rest.ReadLine(s);}
+static void st_Dummy(std::istream &s){
+    tString rest;
+    rest.ReadLine(s);
+}
 static tConfItemFunc st_Dummy10("MASTER_QUERY_INTERVAL", &st_Dummy);
 static tConfItemFunc st_Dummy11("MASTER_SAVE_INTERVAL", &st_Dummy);
 static tConfItemFunc st_Dummy12("MASTER_IDLE", &st_Dummy);
