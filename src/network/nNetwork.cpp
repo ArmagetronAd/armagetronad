@@ -1406,7 +1406,7 @@ int CountSameIP( int user, bool reset=false )
     if ( reset )
     {
         int count = 0;
-        for(int user2=1;user2<=sn_maxClients;++user2)
+        for(int user2=1;user2<=MAXCLIENTS;++user2)
         {
             if(!sn_Connections[user2].socket)
                 continue;
@@ -1427,7 +1427,7 @@ int CountSameIP( int user, bool reset=false )
 int CountSameConnection( int user )
 {
     int count = 0;
-    for(int user2=1;user2<=sn_maxClients;++user2)
+    for(int user2=1;user2<=MAXCLIENTS;++user2)
     {
         if( NULL == sn_Connections[user2].socket )
             continue;
@@ -1444,42 +1444,29 @@ int CountSameConnection( int user )
 // determine a free connection slot or at least one where the user won't be missed
 int GetFreeSlot()
 {
-    int user;
+   int user;
 
     // level 1: look for free slot
-    for(user=1;user<=sn_maxClients;++user)
+    if ( sn_NumUsers() < sn_maxClients )
     {
-        // look for empty slot
-        if(!sn_Connections[user].socket)
+        for(user=1;user<=sn_maxClients;++user)
         {
-            return user;
+            // look for empty slot
+            if(!sn_Connections[user].socket)
+            {
+                return user;
+            }
         }
     }
 
     int best = -1;
 
-    // level 2: look for slot timing out anyway
-    // z-man: not a good idea after all, causes unjustified kicks...
-    /*
-    //int bestTimeout = kickOnDemandTimeout;
-
-       for(user=1;user<=sn_maxClients;++user)
-       {
-           int timeout = timeouts[user];
-           if ( timeout > bestTimeout )
-           {
-               bestTimeout = timeout;
-               best = user;
-           }
-       }
-       if ( best > 0 )
-           return best;
-    */
+    // level 2 kicked out users who were timing out and was not a good idea.
 
     int bestCount = sn_allowSameIPCountSoft-1;
 
     // level 3: look for dublicate IPs
-    for(user=1;user<=sn_maxClients;++user)
+    for(user=1;user<=MAXCLIENTS;++user)
     {
         int count = CountSameIP( user );
         if ( count > bestCount )
@@ -1729,8 +1716,10 @@ void logout_handler(nMessage &m){
     }
     nWaitForAck::AckAllPeer(id);
 
-    if (0<id && id<=sn_maxClients)
+    if (0<id && id<=MAXCLIENTS)
+    {
         sn_DisconnectUser(id, "$network_kill_logout");
+    }
 }
 
 
