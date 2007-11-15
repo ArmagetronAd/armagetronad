@@ -692,18 +692,18 @@ dnl *************************************************
 dnl         GLEW
 dnl *************************************************
 
-if test have_glew=true; then
+if test ${have_glew} = true; then
   AC_CHECK_LIB(GLEW,glewInit,,
-   AC_MSG_WARN([OpenGL Extension Wrangler (GLEW) library not found. No fancy effects for you.])
-   have_glew=false
+  AC_MSG_WARN([OpenGL Extension Wrangler (GLEW) library not found. No fancy effects for you.])
+  have_glew=false
   )
+fi
 
-  if test ${have_glew} = true; then
-   AC_CHECK_HEADERS([GL/glew.h],,
-   AC_MSG_WARN([OpenGL Extension Wrangler (GLEW) headers not found. No fancy effects for you.])
-   have_glew=false
+if test ${have_glew} = true; then
+  AC_CHECK_HEADERS([GL/glew.h],,
+  AC_MSG_WARN([OpenGL Extension Wrangler (GLEW) headers not found. No fancy effects for you.])
+  have_glew=false
   )
-  fi
 fi
 
 dnl *************************************************
