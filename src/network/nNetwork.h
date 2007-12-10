@@ -586,6 +586,12 @@ void sn_Delay();
 // process the messages from all hosts and send acks
 void sn_Receive();
 
+// receive and process data from control socket (used on master server to ping servers)
+extern void sn_ReceiveFromControlSocket();
+
+// receive and discard data from control socket (used on regular servers to keep the pipe clean)
+extern void sn_DiscardFromControlSocket();
+
 // attempts to sync with server/all clients (<=> wait for all acks)
 // sync_netObjects: if set, network objects are synced as well
 // otherEnd: if set, the client instructs the server to send all packets and waits for completion.

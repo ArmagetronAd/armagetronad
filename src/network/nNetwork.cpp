@@ -2277,9 +2277,23 @@ static void rec_peer(unsigned int peer){
     }
 }
 
+// receives and processes data from control socket
 void sn_ReceiveFromControlSocket()
 {
     rec_peer(0);
+}
+
+// discards data from control socket
+void sn_DiscardFromControlSocket()
+{
+    // new facts: pending incoming data on the control socket causes the idle loops
+    // to use 100% CPU time, we need to fetch and discard the data instead of ignoring it.
+    if ( sn_Connections[0].socket )
+    {
+        int8 buff[2];
+        nAddress addrFrom;
+        sn_Connections[0].socket->Read( reinterpret_cast<int8 *>(buff),0, addrFrom);
+    }
 }
 
 
