@@ -47,8 +47,6 @@ static tSettingItem< int > mp( "MASTER_PORT", master_port );
 REAL master_idle = 2;
 static tSettingItem< REAL > mi( "MASTER_IDLE", master_idle );
 
-extern void sn_ReceiveFromControlSocket();
-
 // console with filter for better machine readable log format
 class nConsoleDateFilter:public tConsoleFilter{
 private:

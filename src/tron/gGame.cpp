@@ -1446,6 +1446,18 @@ public:
     }
 };
 
+// receive network data
+void sg_Receive()
+{
+    sn_Receive();
+    if ( sn_GetNetState() == nSERVER )
+    {
+        // servers should ignore data sent to the control socket. It probably would be better
+        // to close the socket altogether, but that opens another can of worms.
+        sn_DiscardFromControlSocket();
+    }
+}
+
 void ConnectToServer(nServerInfoBase *server)
 {
     tASSERT( server );
@@ -1510,7 +1522,7 @@ void ConnectToServer(nServerInfoBase *server)
         con << tOutput("$network_connecting_gamestate");
         while (!sg_currentGame && tSysTimeFloat()<endTime && (sn_GetNetState() != nSTANDALONE)){
             tAdvanceFrame();
-            sn_Receive();
+            sg_Receive();
             nNetObject::SyncAll();
             tAdvanceFrame();
             sn_SendPlanned();
@@ -1717,7 +1729,7 @@ public:
     virtual void Do()  //!< do the work.
     {
         tAdvanceFrame();
-        sn_Receive();
+        sg_Receive();
         tAdvanceFrame();
         sn_SendPlanned();
     }
@@ -2279,7 +2291,7 @@ void gGame::NetSync(){
     if (!sr_glOut && ePlayer::PlayerConfig(0)->cam)
         tERR_ERROR_INT("Someone messed with the camera!");
 #endif
-    sn_Receive();
+    sg_Receive();
     nNetObject::SyncAll();
     tAdvanceFrame();
     sn_SendPlanned();
@@ -3797,7 +3809,7 @@ bool GameLoop(bool input=true){
 void gameloop_idle()
 {
     se_UserShowScores( false );
-    sn_Receive();
+    sg_Receive();
     nNetObject::SyncAll();
     sn_SendPlanned();
     GameLoop(false);
@@ -3834,7 +3846,7 @@ void sg_EnterGameCore( nNetState enter_state ){
         {
             // new network data arrived, do the most urgent work now
             tAdvanceFrame();
-            sn_Receive();
+            sg_Receive();
             se_SyncGameTimer();
             REAL time=se_GameTime();
             sg_currentGame->StateUpdate();
@@ -3854,7 +3866,7 @@ void sg_EnterGameCore( nNetState enter_state ){
         // do the regular simulation
         tAdvanceFrame();
 
-        sn_Receive();
+        sg_Receive();
 
         goon=GameLoop();
 
