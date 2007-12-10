@@ -2957,16 +2957,6 @@ void sn_Receive(){
         // z-man: after much thought, the server does also need to listen to the
         // network control socket. .... Thinking again, it's only important for the master
         // servers, and they call rec_peer(0) separately.
-
-        // new facts: pending incoming data on the control socket causes the idle loops
-        // to use 100% CPU time, we need to fetch and discard the data instead of ignoring it.
-        if ( sn_Connections[0].socket )
-        {
-            int8 buff[2];
-            nAddress addrFrom;
-            sn_Connections[0].socket->Read( reinterpret_cast<int8 *>(buff),0, addrFrom);
-        }
-
         break;
 
     case nCLIENT:
