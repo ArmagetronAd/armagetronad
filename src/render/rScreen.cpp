@@ -707,7 +707,10 @@ static bool lowlevel_sr_InitDisplay(){
 
     // wait for activation if we were ALT-Tabbed away:
     while ( (SDL_GetAppState() & SDL_APPACTIVE) == 0)
+    {
         SDL_Delay(100);
+        SDL_PumpEvents();
+    }
 
     if (software_renderer && !last_software_renderer)
         sr_LoadDefaultConfig();
@@ -717,7 +720,10 @@ static bool lowlevel_sr_InitDisplay(){
 
     // wait for activation if we were ALT-Tabbed away:
     while ( (SDL_GetAppState() & SDL_APPACTIVE) == 0)
+    {
         SDL_Delay(100);
+        SDL_PumpEvents();
+    }
 
     sr_ResetRenderState(true);
 
