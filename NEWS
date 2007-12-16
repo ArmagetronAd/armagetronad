@@ -32,7 +32,7 @@ Changes since 0.2.8.2:
 - ALLOW_TEAM_CHANGE_PLAYER/DISALLOW_TEAM_CHANGE_PLAYER: allow/disallow specific players to switch teams
 
   Featurelets:
-- The client now can hadle network traffic while it is waiting for the graphics
+- The client now can handle network traffic while it is waiting for the graphics
   card to swap buffers.
 - The dedicated server no longer uses a fixed delay, but a select() call (that
   returns when network data arrives) to idle. When data arrives, it does 
