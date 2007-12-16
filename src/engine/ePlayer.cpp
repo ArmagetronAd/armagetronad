@@ -2529,7 +2529,9 @@ static void se_OptionalNameFilters( tString & remoteName )
 {
     // filter colors
     if ( se_filterColorNames )
+    {
         remoteName = tColoredString::RemoveColors( remoteName );
+    }
 
     // don't do the fancy stuff on the client, it only makes names on score tables and
     // console messages go out of sync.

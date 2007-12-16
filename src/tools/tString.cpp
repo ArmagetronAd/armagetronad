@@ -1080,17 +1080,21 @@ tString tColoredString::RemoveColors( const char * c )
 {
     tString ret;
 
+    bool removed = false;
+
     // walk through string
     while (*c!='\0'){
         // skip color codes
         if (*c=='0' && strlen(c)>=8 && c[1]=='x')
         {
             c+=8;
+            removed = true;
         }
         else
             ret << (*(c++));
     }
-    return ret;
+
+    return removed ? RemoveColors( ret ) : ret;
 }
 
 // helper function: removes trailing color of string and returns number of chars
