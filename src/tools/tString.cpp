@@ -1078,19 +1078,15 @@ tString & tColoredString::operator =( const tOutput & s )
 
 tString tColoredString::RemoveColors( const char * c )
 {
-    // exploit non-polimorphicity of t(Colored)String. We want to use the tString
-    // code for concatenation (tColoredString::operator << is slower and removes trailing 
-    // color codes right away) and
-    // tColoredString::RemoveTrailingColor on the same object.
-    tColoredString realRet;
-    tString & ret = realRet;
+    tString ret;
 
     bool removed = false;
 
     // walk through string
     while (*c!='\0'){
         // skip color codes
-        if (*c=='0' && strnlen(c,8) >= 8 && c[1]=='x')
+		int len;
+        if (*c=='0' && (len = strlen(c))>=2 && c[1]=='x')
         {
 			if(len >= 8)
 			{
@@ -1104,23 +1100,10 @@ tString tColoredString::RemoveColors( const char * c )
 			}
         }
         else
-        {
             ret << (*(c++));
-        }
     }
 
-    // if something was removed, new color codes may have emerged; remove them again.
-    if ( removed )
-    {
-        ret = RemoveColors( ret );
-    }
-    else
-    {
-        // there may be an incomplete color code lingering around, get rid of it
-        realRet.RemoveTrailingColor();
-    }
-
-    return ret;
+    return removed ? RemoveColors( ret ) : ret;
 }
 
 // helper function: removes trailing color of string and returns number of chars
