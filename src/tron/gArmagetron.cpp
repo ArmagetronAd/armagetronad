@@ -539,6 +539,58 @@ int main(int argc,char **argv){
             tRecorder::Record( dedicatedSection, dedicatedServer );
         }
 
+
+        // while DGA mouse is buggy in XFree 4.0:
+#ifdef linux
+        // Sam 5/23 - Don't ever use DGA, we don't need it for this game.
+        // no longer needed, the bug this compensated was fixed a long time
+        // ago.
+        /*
+        if ( ! getenv("SDL_VIDEO_X11_DGAMOUSE") ) {
+            putenv("SDL_VIDEO_X11_DGAMOUSE=0");
+        }
+        */
+#endif
+        
+#ifdef WIN32
+        // disable DirectX by default; it causes problems with some boards.
+        if (!use_directx && !getenv("SDL_VIDEODRIVER") ) {
+            putenv("SDL_VIDEODRIVER=windib");
+        }
+#endif
+        
+        // atexit(ANET_Shutdown);
+        
+#ifndef WIN32
+#ifdef DEBUG
+#define NOSOUND
+#endif
+#endif
+        
+#ifndef DEDICATED
+        Uint32 flags = SDL_INIT_VIDEO;
+#ifdef DEBUG
+        flags |= SDL_INIT_NOPARACHUTE;
+#endif // DEBUG
+        if (SDL_Init(flags) < 0) {
+            tERR_ERROR("Couldn't initialize SDL: " << SDL_GetError());
+        }
+        atexit(SDL_Quit);
+        su_KeyInit();
+
+#ifndef NOJOYSTICK
+        if (SDL_InitSubSystem(SDL_INIT_JOYSTICK))
+            std::cout << "Error initializing joystick subsystem\n";
+        else
+        {
+#ifdef DEBUG
+            std::cout << "Joystick(s) initialized\n";
+#endif // DEBUG
+            su_JoystickInit();
+        }
+#endif // NOJOYSTICK
+#endif // DEDICATED
+
         // tERR_MESSAGE( "Initializing player data." );
         ePlayer::Init();
 
@@ -617,58 +669,11 @@ int main(int argc,char **argv){
                 }
             }
 
-		#ifndef DEDICATED
+#ifndef DEDICATED
             sr_glOut=1;
-		#endif
-
             //std::cout << "checked mp\n";
 
-            // while DGA mouse is buggy in XFree 4.0:
-		#ifdef linux
-            // Sam 5/23 - Don't ever use DGA, we don't need it for this game.
-            if ( ! getenv("SDL_VIDEO_X11_DGAMOUSE") ) {
-                putenv("SDL_VIDEO_X11_DGAMOUSE=0");
-            }
-		#endif
-
-		#ifdef WIN32
-            // disable DirectX by default; it causes problems with some boards.
-            if (!use_directx && !getenv("SDL_VIDEODRIVER") ) {
-                putenv("SDL_VIDEODRIVER=windib");
-            }
-		#endif
-
-            // atexit(ANET_Shutdown);
-
-		#ifndef WIN32
-		#ifdef DEBUG
-            #define NOSOUND
-		#endif
-		#endif
-
-		#ifndef DEDICATED
-            Uint32 flags = SDL_INIT_VIDEO;
-#ifdef DEBUG
-            flags |= SDL_INIT_NOPARACHUTE;
-#endif
-            if (SDL_Init(flags) < 0) {
-                tERR_ERROR("Couldn't initialize SDL: " << SDL_GetError());
-            }
-            atexit(SDL_Quit);
-
             sr_glRendererInit();
-
-		#ifndef NOJOYSTICK
-            if (SDL_InitSubSystem(SDL_INIT_JOYSTICK))
-                std::cout << "Error initializing joystick subsystem\n";
-            else
-            {
-#ifdef DEBUG
-                std::cout << "Joystick(s) initialized\n";
-#endif
-                su_JoystickInit();
-            }
-		#endif
 
             SDL_SetEventFilter(&filter);
 
@@ -758,7 +763,7 @@ int main(int argc,char **argv){
             eSoundMixer::ShutDown();
 
             SDL_Quit();
-		#else
+#else // DEDICATED
             if (!commandLineAnalyzer.daemon_)
                 sr_Unblock_stdin();
 
@@ -768,7 +773,7 @@ int main(int argc,char **argv){
 
             while (!uMenu::quickexit)
                 sg_HostGame();
-		#endif
+#endif // DEDICATED
             nNetObject::ClearAll();
             nServerInfo::DeleteAll();
         }
