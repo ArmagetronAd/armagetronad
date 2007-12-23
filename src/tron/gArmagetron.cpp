@@ -576,7 +576,7 @@ int main(int argc,char **argv){
             tERR_ERROR("Couldn't initialize SDL: " << SDL_GetError());
         }
         atexit(SDL_Quit);
-        su_KeyInit();
+        // su_KeyInit();
 
 #ifndef NOJOYSTICK
         if (SDL_InitSubSystem(SDL_INIT_JOYSTICK))
