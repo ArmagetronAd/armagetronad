@@ -29,8 +29,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "tSysTime.h"
 #include "tRecorder.h"
-
-// Both implementations are stolen from Q1.
+#include "tConsole.h"
+#include "tLocale.h"
 
 //! time structure
 struct tTime
@@ -246,9 +246,35 @@ void tAdvanceFrameSys( tTime & start, tTime & relative )
 
     // get time from OS
     GetTime( time );
+
+    // test hickupery
+    // time.seconds -= time.seconds/10;
+
+    // record starting point
     if ( start.microseconds == 0 && start.seconds == 0 )
+    {
         start = time;
-    relative = time - start;
+    }
+
+    // detect and counter timer hickups
+    tTime newRelative = time - start;
+    tTime timeStep = newRelative - relative;
+    if ( timeStep.seconds < 0 || timeStep.seconds > 10 )
+    {
+        static bool warn = true;
+        if ( warn )
+        {
+            warn = false;
+            con << tOutput( "$timer_hickup", float( timeStep.seconds + timeStep.microseconds * 1E-6  ) );
+        }
+
+        start = start + timeStep;
+    }
+    else
+    {
+        relative = newRelative;
+    }
+
 
     if ( relative.seconds > 20 )
     {
@@ -290,7 +316,7 @@ void tAdvanceFrame( int usecdelay )
     if ( usecdelay > 0 )
         tDelay( usecdelay );
 
-    tTime timeNewRelative;
+    static tTime timeNewRelative;
     tAdvanceFrameSys( timeStart, timeNewRelative );
 
     // try to fetch time from playback
@@ -326,18 +352,18 @@ void tAdvanceFrame( int usecdelay )
 double tSysTimeFloat ()
 {
 #ifdef DEBUG
-    if ( ! tRecorder::IsPlayingBack() )
-    {
-        tTime time;
-        tAdvanceFrameSys( timeStart, time );
-        time = time - timeRelative;
-        //        if ( time.seconds > 5 )
+    // if ( ! tRecorder::IsPlayingBack() )
+    // {
+        // static tTime time;
+        // tAdvanceFrameSys( timeStart, time );
+        // tTime timeStep = time - timeRelative;
+        //        if ( timeStep.seconds > 5 )
         //        {
         //            std::cout << "tAdvanceFrame not called often enough!\n";
         //            st_Breakpoint();
         //            tAdvanceFrameSys( timeRealRelative );
         //        }
-    }
+     // }
 #endif
 
     return timeRelative.seconds + timeRelative.microseconds*0.000001;

@@ -1914,6 +1914,8 @@ menuitem_toggle_off		Off
 #********************************************
 #********************************************
 
+timer_hickup                Timer hickup of \1 seconds detected and compensated. If this happens frequently, you should check whether your system timer is operating correctly.\n
+
 #********************************************
 #********************************************
 #
