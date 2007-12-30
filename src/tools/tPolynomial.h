@@ -59,7 +59,6 @@ public:
     tPolynomial<T> const operator+( REAL value ) const ;
     tPolynomial<T> const operator+( const tPolynomial<T> &tfRight ) const ;
 
-    void setBaseArgument(REAL value) {baseArgument = value;}
     void addConstant(REAL value) {coefs[0] += value;}
 
     void reevaluateCoefsAt(REAL argument);
@@ -73,6 +72,11 @@ public:
 template<typename D> 
 friend bool operator == (const tPolynomial<D> & left, const tPolynomial<D> & right);
  protected:
+    void setBaseArgument(REAL value) {baseArgument = value;}
+
+
+    // Variables
+
     int length;
     REAL baseArgument; //!< the evaluation is always done on (argument - baseArgument) rather than (argument)
     REAL *coefs;
@@ -104,7 +108,7 @@ tPolynomial<T>::tPolynomial()  //!< constructor
 
 template <typename T>
 tPolynomial<T>::tPolynomial(REAL value)  //!< constructor
-: length(0),
+: length(1),
   baseArgument(0.0)
 { 
   coefs = new REAL[MAX_LENGTH];
@@ -205,21 +209,36 @@ template<typename T>
 bool operator == (const tPolynomial<T> & left, const tPolynomial<T> & right)
 {
   // float/double equality doesnt exist. Accept small difference as equal.
-    bool res = ( 
-	      (left.length == right.length)
-	      && ( fabs(left.baseArgument       - right.baseArgument) < DELTA)
-	       );
+    bool res = ( fabs(left.baseArgument - right.baseArgument) < DELTA);
 
-    // If we havent found a difference yet, inspect the coefficients
-    if(true == res) {
-      for(int i=0; i<left.length; i++) {
-	if ( fabs(left.coefs - right.coefs) >= DELTA ) {
+    // If the length of the coefs array differ, then the extra elements should be 0
+    int maxLength = left.length>right.length?left.length:right.length;
+    int minLength = left.length<right.length?left.length:right.length;
+
+    // Inspect the common coefficients (ie defined for both polynomial)
+
+    for(int i=0; i<minLength; i++) {
+      if ( fabs(left.coefs[i] - right.coefs[i]) >= DELTA ) {
+	res = false;
+	break;
+      }
+    }
+
+    for(int i=minLength; i<maxLength; i++) {
+      // The polynomial that is defined up to that length should have its elements set to 0.0
+      if(left.length>right.length) {
+	if(fabs(left.coefs[i]) >= DELTA) {
+	  res = false;
+	  break;
+	}
+      }
+      else {
+	if(fabs(right.coefs[i]) >= DELTA) {
 	  res = false;
 	  break;
 	}
       }
     }
-
     return res;
 }
 
@@ -248,7 +267,7 @@ void tPolynomial<T>::reevaluateCoefsAt(REAL argument)
   for(int coefIndex=0; coefIndex<length; coefIndex++) {
     REAL newCoefValue = 0.0;
     for(int j=length; j>coefIndex; j--) {
-      newCoefValue = (newCoefValue + coefs[j]/j) * arg;
+      newCoefValue = (newCoefValue + coefs[j]/(j - coefIndex) ) * arg;
     }
     coefs[coefIndex] += newCoefValue;
   }
@@ -334,7 +353,11 @@ T & tPolynomial<T>::ReadSync( T & m )
 
     for(int i=0; i<MAX_LENGTH; i++)
       {
-	m >> coefs[i];
+	float x;
+	m >> x;
+	coefs[i] = x;
+
+	//	m >> coefs[i];
       }
 
     return m;
@@ -352,10 +375,18 @@ tPolynomial<T> const tPolynomial<T>::operator*( REAL value ) const {
 template <typename T>
 tPolynomial<T> const tPolynomial<T>::operator*( const tPolynomial<T> & tfRight ) const {
   tPolynomial<T> tf;
-  for(int i=0; i<this->length; i++) {
-    for(int j=0; j<tfRight.length; j++) {
-      tf.coefs[i+j] += (this->coefs[i]) * tfRight.coefs[j];
+
+  if(0 == this->length || 0 == tfRight.length) {
+    // Special case, initialise all to 0 
+    tf.length = 0;
+  }
+  else {
+    for(int i=0; i<this->length; i++) {
+      for(int j=0; j<tfRight.length; j++) {
+	tf.coefs[i+j] += (this->coefs[i]) * tfRight.coefs[j];
+      }
     }
+    tf.length = this->length + tfRight.length - 1;
   }
   return tf;
 }
