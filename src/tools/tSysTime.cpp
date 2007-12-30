@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tSysTime.h"
 #include "tRecorder.h"
 #include "tConsole.h"
+#include "tConfiguration.h"
 #include "tLocale.h"
 
 //! time structure
@@ -349,6 +350,9 @@ void tAdvanceFrame( int usecdelay )
 #endif
 }
 
+static float st_timeFactor = 1.0;
+static tSettingItem< float > st_timeFactorConf( "TIME_FACTOR", st_timeFactor );
+
 double tSysTimeFloat ()
 {
 #ifdef DEBUG
@@ -366,7 +370,7 @@ double tSysTimeFloat ()
      // }
 #endif
 
-    return timeRelative.seconds + timeRelative.microseconds*0.000001;
+    return ( timeRelative.seconds + timeRelative.microseconds*1E-6 ) * st_timeFactor;
 }
 
 static struct tTime timeRealStart;    // the real time at the start of the program
@@ -376,5 +380,5 @@ double tRealSysTimeFloat ()
 {
     // get real time from real OS
     tAdvanceFrameSys( timeRealStart, timeRealRelative );
-    return timeRealRelative.seconds + timeRealRelative.microseconds*0.000001;
+    return ( timeRealRelative.seconds + timeRealRelative.microseconds*1E-6 ) * st_timeFactor;
 }

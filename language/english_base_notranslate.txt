@@ -7,6 +7,7 @@
 #********************************************
 #********************************************
 
+time_factor_help UNDOCUMENTED
 network_lock_out_028_test_help UNDOCUMENTED
 arena_wall_shadow_dist_help UNDOCUMENTED
 arena_wall_shadow_near_help UNDOCUMENTED
