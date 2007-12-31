@@ -2164,6 +2164,10 @@ void ePlayerNetID::MyInitAfterCreation()
         {
             // kill them
             sn_DisconnectUser( Owner(), "$network_kill_too_many_players" );
+
+            // technically has the same effect as the above function, but we also want
+            // to abort registering this player object and this exception will do that as well.
+            throw nKillHim();
         }
 
         // clear old legacy spectator that may be lurking around

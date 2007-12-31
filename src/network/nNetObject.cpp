@@ -529,9 +529,14 @@ void first_fill_ids(){
 
 void Cheater(int i)
 {
+    // anything to do at all?
+    if (i != 0 && !sn_Connections[i].socket)
+    {
+        return;
+    }
+
     con << "User " << i << " tried to cheat.\n";
     //	st_Breakpoint();
-
 
     if ( i == 0 )
         // terminate connection to server
