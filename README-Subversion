@@ -86,8 +86,11 @@ To build:
 
 == Armagetron Advanced 10.2.8
 * Change the target to Armagetron Advanced 10.2.8
-* In config_common.h un-comment "#define MACOSX_VERSION_10_2 1"
+* (No longer required) In config_common.h un-comment "#define MACOSX_VERSION_10_2 1"
 * Build
+* This build should be superior to the regular Armagetron Advanced build; it should
+  be compatible with all versions of OSX from 10.2.8 on and still run natively on
+  Intel Macs.
 
 == Armagetron Advanced Dedicated
 * Change to the dedicated target.
