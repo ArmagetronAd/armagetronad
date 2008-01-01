@@ -1001,6 +1001,10 @@ static REAL ladder_gain_extra=1;
 static tSettingItem<REAL> ldd_ga("LADDER_GAIN_EXTRA",
                                  ladder_gain_extra);
 
+static float sg_gameTimeInterval=-1;
+static tSettingItem<float> sggti("LADDERLOG_GAME_TIME_INTERVAL",
+                                 sg_gameTimeInterval);
+
 
 class ladder: public highscores<REAL>{
 public:
@@ -3071,6 +3075,8 @@ void gGame::StateUpdate(){
 
             init_game_objects(grid);
 
+            ePlayerNetID::RankingLadderLog();
+
             // do the first analysis of the round, now is the time to get it used to the number of teams
             Analysis( -1000 );
 
@@ -4055,6 +4061,15 @@ bool gGame::GameLoop(bool input){
         // synced finally. Send our player info over so we can join the game.
         ePlayerNetID::Update();
         synced_ = true;
+    }
+
+    static float lastTime = -1;
+
+    if(sg_gameTimeInterval >= 0 && (gtime >= lastTime + sg_gameTimeInterval || (gtime < lastTime && gtime >= 0))) {
+        tOutput out;
+        out << "GAME_TIME " << gtime << '\n';
+        se_SaveToLadderLog(out);
+        lastTime = gtime;
     }
 
     if (state==GS_PLAY){

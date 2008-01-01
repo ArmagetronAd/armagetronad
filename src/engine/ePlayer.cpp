@@ -3073,6 +3073,35 @@ tString ePlayerNetID::Ranking( int MAX, bool cut ){
     return ret;
 }
 
+void ePlayerNetID::RankingLadderLog() {
+    SortByScore();
+
+    int num_humans = 0;
+    int max = se_PlayerNetIDs.Len();
+    for(int i = 0; i < max; ++i) {
+        ePlayerNetID *p = se_PlayerNetIDs(i);
+        if(p->Owner() == 0) continue; // ignore AIs
+
+        tString line("ONLINE_PLAYER ");
+
+        line << p->GetUserName();
+
+        if(p->IsActive()) {
+            line << " " << p->ping;
+            if(p->currentTeam) {
+                line << " " << FilterName(p->currentTeam->Name());
+                ++num_humans;
+            }
+        }
+
+        line << '\n';
+        se_SaveToLadderLog(line);
+    }
+    tString line("NUM_HUMANS ");
+    line << num_humans << '\n';
+    se_SaveToLadderLog(line);
+}
+
 
 
 tColoredString & operator << (tColoredString &s,const ePlayer &p){
@@ -4826,7 +4855,7 @@ void ePlayerNetID::LogScoreDifference( void )
         lastScore_ = IMPOSSIBLY_LOW_SCORE;
         ret << "ROUND_SCORE " << scoreDifference << " " << GetUserName();
         if ( currentTeam )
-            ret << " " << FilterName( currentTeam->Name() );
+            ret << " " << FilterName( currentTeam->Name() ) << " " << currentTeam->Score();
         ret << "\n";
         se_SaveToLadderLog( ret );
     }

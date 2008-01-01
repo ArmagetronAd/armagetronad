@@ -980,6 +980,27 @@ void gBaseZoneHack::OnVanish( void )
 
 void gBaseZoneHack::OnConquest( void )
 {
+    tString log;
+    log << "BASEZONE_CONQUERED " << ePlayerNetID::FilterName(team->Name()) << " " << GetPosition().x << " " << GetPosition().y << '\n';
+    se_SaveToLadderLog(log);
+    float rr = GetRadius();
+    rr *= rr;
+    for(int i = 0; i < MAXCLIENTS; ++i) {
+        ePlayerNetID *player = se_PlayerNetIDs(i);
+        if(!player) {
+            continue;
+        }
+        gCycle *cycle = dynamic_cast<gCycle *>(player->Object());
+        if(!cycle) {
+            continue;
+        }
+        if(cycle->Alive() && (cycle->Position() - Position()).NormSquared() < rr) {
+            tString log;
+            log << "BASEZONE_CONQUERER " << player->GetUserName() << '\n';
+            se_SaveToLadderLog(log);
+        }
+    }
+
     // calculate score. If nobody really was inside the zone any more, half it.
     int totalScore = sg_onConquestScore;
     if ( 0 == enemiesInside_ )

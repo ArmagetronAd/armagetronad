@@ -1089,20 +1089,20 @@ tString tColoredString::RemoveColors( const char * c )
         // skip color codes
         if (*c=='0' && len >= 2 && c[1]=='x')
         {
-			if(len >= 8)
-			{
-				c   += 8;
-				len -= 8;
-				removed = true;
-			}
-			else
-			{
-				// skip incomplete color codes, too
-				return RemoveColors( ret );
-			}
+            if(len >= 8)
+            {
+                c   += 8;
+                len -= 8;
+                removed = true;
+            }
+            else
+            {
+                // skip incomplete color codes, too
+                return RemoveColors( ret );
+            }
         }
         else
-		{
+        {
             ret << (*(c++));
             len--;
         }

@@ -358,16 +358,16 @@ double tSysTimeFloat ()
 #ifdef DEBUG
     // if ( ! tRecorder::IsPlayingBack() )
     // {
-        // static tTime time;
-        // tAdvanceFrameSys( timeStart, time );
-        // tTime timeStep = time - timeRelative;
-        //        if ( timeStep.seconds > 5 )
-        //        {
-        //            std::cout << "tAdvanceFrame not called often enough!\n";
-        //            st_Breakpoint();
-        //            tAdvanceFrameSys( timeRealRelative );
-        //        }
-     // }
+    // static tTime time;
+    // tAdvanceFrameSys( timeStart, time );
+    // tTime timeStep = time - timeRelative;
+    //        if ( timeStep.seconds > 5 )
+    //        {
+    //            std::cout << "tAdvanceFrame not called often enough!\n";
+    //            st_Breakpoint();
+    //            tAdvanceFrameSys( timeRealRelative );
+    //        }
+    // }
 #endif
 
     return ( timeRelative.seconds + timeRelative.microseconds*1E-6 ) * st_timeFactor;

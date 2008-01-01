@@ -684,6 +684,7 @@ console_rows_max_help   Number of lines of console output when scrolling back
 console_decorate_id_help			Decorates every line of console output with the client ID
 console_decorate_ip_help			Decorates every line of console output with the client IP
 console_ladder_log_help			Sends ladder log output to the console
+ladderlog_game_time_interval If nonnegative, write a line with the current game time to the ladder log every n seconds.
 show_fps_help			Enable fps display
 floor_mirror_help		Floor mirror mode
 floor_detail_help		Floor detail settings
