@@ -1769,7 +1769,7 @@
 					/Library/Frameworks/ArmagetronAdvanced/current/libpng.framework/Headers,
 					/Library/Frameworks/ArmagetronAdvanced/10.2.8/libxml,
 				);
-				INFOPLIST_FILE = /Users/dharple/armagetronad/MacOS/../src/macosx/Info.plist;
+				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/10.2.8;
 				OTHER_LDFLAGS = (
