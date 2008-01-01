@@ -163,7 +163,7 @@
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION @version@
+#define VERSION "SVN"
 
 /* Windows 9x/NT/2k/XP */
 /* #undef WIN32 */
