@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6459A1320D2AE2B40042EFE8 /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414A20A45C78200745CE6 /* libpng.framework */; };
 		8C11CA49095A2B6E007AE0EA /* action_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E7D089EEC7D007E21DC /* action_api.cpp */; };
 		8C11CA4A095A2B6E007AE0EA /* actions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E7E089EEC7D007E21DC /* actions.cpp */; };
 		8C11CA4B095A2B6E007AE0EA /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E10089EEC7C007E21DC /* eAdvWall.cpp */; };
@@ -218,9 +219,7 @@
 		8CB97B23096265A800AE8BCD /* uMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EFA089EEC7E007E21DC /* uMenu.cpp */; };
 		8CB97B25096265A800AE8BCD /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		8CB97B29096265A800AE8BCD /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA60B0089F00F2007E21DC /* OpenGL.framework */; };
-		8CB97B400962676B00AE8BCD /* libxml2.2.6.22.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CB97B3F0962676B00AE8BCD /* libxml2.2.6.22.dylib */; };
 		8CB97B450962677F00AE8BCD /* libxml2.2.6.22.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 8CB97B3F0962676B00AE8BCD /* libxml2.2.6.22.dylib */; };
-		8CB97BAB0962719600AE8BCD /* libpng12.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CB97BAA0962719600AE8BCD /* libpng12.0.dylib */; };
 		8CB97BAC096271B000AE8BCD /* libpng12.0.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 8CB97BAA0962719600AE8BCD /* libpng12.0.dylib */; };
 		8CBA5E0A089EEC5B007E21DC /* SDLMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E08089EEC5B007E21DC /* SDLMain.mm */; };
 		8CBA5EFD089EEC7E007E21DC /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E10089EEC7C007E21DC /* eAdvWall.cpp */; };
@@ -636,10 +635,9 @@
 			files = (
 				8CB97B25096265A800AE8BCD /* Cocoa.framework in Frameworks */,
 				8CB97B29096265A800AE8BCD /* OpenGL.framework in Frameworks */,
-				8CB97B400962676B00AE8BCD /* libxml2.2.6.22.dylib in Frameworks */,
-				8CB97BAB0962719600AE8BCD /* libpng12.0.dylib in Frameworks */,
 				9B5414E90A45C7CB00745CE6 /* SDL_image.framework in Frameworks */,
 				9B5414EA0A45C7CB00745CE6 /* SDL.framework in Frameworks */,
+				6459A1320D2AE2B40042EFE8 /* libpng.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1753,7 +1751,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/10.2.8;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/ArmagetronAdvanced/current\"";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -1767,11 +1769,15 @@
 					/Library/Frameworks/ArmagetronAdvanced/10.2.8/SDL.framework/Headers,
 					/Library/Frameworks/ArmagetronAdvanced/10.2.8/SDL_image.framework/Headers,
 					/Library/Frameworks/ArmagetronAdvanced/current/libpng.framework/Headers,
-					/Library/Frameworks/ArmagetronAdvanced/10.2.8/libxml,
+					/Library/Frameworks/ArmagetronAdvanced/10.2.8/,
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/10.2.8;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../Library/Frameworks/Platforms/10.2\"";
 				OTHER_LDFLAGS = (
 					"$(OTHER_LDFLAGS_QUOTED_1)",
 					"$(OTHER_LDFLAGS_QUOTED_2)",
@@ -1783,10 +1789,11 @@
 				OTHER_LDFLAGS_QUOTED_1 = "-framework\\ SDL";
 				OTHER_LDFLAGS_QUOTED_2 = "-framework\\ SDL_image";
 				OTHER_LDFLAGS_QUOTED_3 = "-framework\\ SDL_mixer";
+				OTHER_LDFLAGS_i386 = "-L/usr/lib -L/Library/Frameworks/ArmagetronAdvanced/current -F/Library/Frameworks/ArmagetronAdvanced/current/ -lxml2";
+				OTHER_LDFLAGS_ppc = "-L/Library/Frameworks/ArmagetronAdvanced/10.2.8 -F/Library/Frameworks/ArmagetronAdvanced/10.2.8 -lxml2.2.6.22";
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
 				SDKROOT = /Developer/SDKs/MacOSX10.2.8.sdk;
-				SDK_ROOT = /Developer/SDKs/MacOSX10.2.8.sdk;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
 			};
@@ -1796,7 +1803,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/10.2.8;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(LOCAL_LIBRARY_DIR)/Frameworks/ArmagetronAdvanced/current\"";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
@@ -1810,11 +1821,15 @@
 					/Library/Frameworks/ArmagetronAdvanced/10.2.8/SDL.framework/Headers,
 					/Library/Frameworks/ArmagetronAdvanced/10.2.8/SDL_image.framework/Headers,
 					/Library/Frameworks/ArmagetronAdvanced/current/libpng.framework/Headers,
-					/Library/Frameworks/ArmagetronAdvanced/10.2.8/libxml,
+					/Library/Frameworks/ArmagetronAdvanced/10.2.8/,
 				);
 				INFOPLIST_FILE = ../src/macosx/Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/10.2.8;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../../Library/Frameworks/Platforms/10.2\"";
 				MACOSX_DEPLOYMENT_TARGET = 10.2;
 				OTHER_LDFLAGS = (
 					"$(OTHER_LDFLAGS_QUOTED_1)",
@@ -1827,10 +1842,11 @@
 				OTHER_LDFLAGS_QUOTED_1 = "-framework\\ SDL";
 				OTHER_LDFLAGS_QUOTED_2 = "-framework\\ SDL_image";
 				OTHER_LDFLAGS_QUOTED_3 = "-framework\\ SDL_mixer";
+				OTHER_LDFLAGS_i386 = "-L/usr/lib -L/Library/Frameworks/ArmagetronAdvanced/current -F/Library/Frameworks/ArmagetronAdvanced/current/ -lxml2";
+				OTHER_LDFLAGS_ppc = "-L/Library/Frameworks/ArmagetronAdvanced/10.2.8 -F/Library/Frameworks/ArmagetronAdvanced/10.2.8 -lxml2.2.6.22";
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
 				SDKROOT = /Developer/SDKs/MacOSX10.2.8.sdk;
-				SDK_ROOT = /Developer/SDKs/MacOSX10.2.8.sdk;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
@@ -1847,7 +1863,6 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../src/macosx/Armagetron Advanced_Prefix.pch";
-				GCC_VERSION = 3.3;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -1885,6 +1900,10 @@
 		8CBA5D46089EE60D007E21DC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/current/;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
@@ -1893,7 +1912,6 @@
 				GCC_OPTIMIZATION_LEVEL = 2;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../src/macosx/Armagetron Advanced_Prefix.pch";
-				GCC_VERSION = 3.3;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -1932,12 +1950,27 @@
 		8CBA5D49089EE60D007E21DC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					i386,
+					ppc,
+				);
+				GCC_VERSION_i386 = 4.0;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT_i386 = "$(DEVELOPER_SDK_DIR)/MacOSX10.4u.sdk";
 			};
 			name = Debug;
 		};
 		8CBA5D4A089EE60D007E21DC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					i386,
+					ppc,
+				);
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_VERSION_i386 = 4.0;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT_i386 = "$(DEVELOPER_SDK_DIR)/MacOSX10.4u.sdk";
 			};
 			name = Release;
 		};
