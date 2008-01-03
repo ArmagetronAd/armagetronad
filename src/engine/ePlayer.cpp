@@ -4338,7 +4338,7 @@ static gServerInfoAdmin sg_serverAdmin;
 void ePlayerNetID::UpdateName( void )
 {
     // don't do a thing if we're not fully synced
-    if ( this->ID() == 0 && nameFromClient_.Len() <= 1 )
+    if ( this->ID() == 0 && nameFromClient_.Len() <= 1 && sn_GetNetState() == nSERVER )
         return;
 
     // store old name for password re-request and name change message
