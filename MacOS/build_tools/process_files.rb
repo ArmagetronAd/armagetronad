@@ -12,7 +12,7 @@ require 'fileutils'
 files = [
   {
     :file => "/src/macosx/config_common.h.in",
-    :tags => "version" 
+    :tags => "version",
     :in   => true
   },
   {
@@ -108,14 +108,14 @@ module BuildTools
     
     # If this is a release source we must extract the version from the config file
     def determine_version_release
-      open(TOP_LEVEL+"/src/macosx/config_common.h",'r') do |f|
+      open(TOP_LEVEL+"/src/macosx/config_common.h.in",'r') do |f|
           f.read.scan(/^#define VERSION "(.*)"/) { |version| @build_information[:version] = version }
       end
     end
     
     # Replace a tag, ex. @tag@, with replace_with in a given file
     def replace_tag(file, tag, replace_with)
-      replace_with = "\"#{replace_with}\"" if file =~ /config_common.h/ && tag == "version"
+      replace_with = "\"#{replace_with}\"" if file =~ /config_common.h.in/ && tag == "version"
       
       open(file,'r+') do |f|
         text = f.read
