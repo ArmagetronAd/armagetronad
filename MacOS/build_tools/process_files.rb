@@ -11,8 +11,9 @@ require 'fileutils'
 # :in moves the file from :file to :file minus the ".in" extension
 files = [
   {
-    :file => "/src/macosx/config_common.h",
+    :file => "/src/macosx/config_common.h.in",
     :tags => "version" 
+    :in   => true
   },
   {
     :file => "/src/macosx/English.lproj/InfoPlist.strings.in",
