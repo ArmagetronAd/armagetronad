@@ -108,7 +108,7 @@ module BuildTools
     
     # If this is a release source we must extract the version from the config file
     def determine_version_release
-      open(TOP_LEVEL+"/src/macosx/config_common.h",'r') do |f|
+      open(TOP_LEVEL+"/src/macosx/config_common.h.in",'r') do |f|
           f.read.scan(/^#define VERSION "(.*)"/) { |version| @build_information[:version] = version }
       end
     end
