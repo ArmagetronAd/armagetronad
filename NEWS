@@ -30,6 +30,14 @@ Changes since 0.2.8.2:
 - LAG_O_METER(TRESHOLD|BLEND|USE_OLD): Configure the minimal size of the Lag-O-Meter, its color and whether to scrap it all and stick with the old one.
 - ALLOW_TEAM_CHANGE: if set to 0 players won't be able to join a team, create a new team or change to another team.
 - ALLOW_TEAM_CHANGE_PLAYER/DISALLOW_TEAM_CHANGE_PLAYER: allow/disallow specific players to switch teams
+- INTERCEPT_COMMANDS is a space-delimited list of chat commands that shall be
+  intercepted by an external script. Example value: /login /admin /teamleave
+  /teamshuffle /shuffle /team 
+- INTERCEPT_UNKNOWN_COMMANDS is a boolean specifying if an external script
+  wishes to handle unrecognized chat commands. This would allow hooking
+  arbitrary things like /foobarz or /mode ctf 
+- CONSOLE_LADDER_LOG boolean places the ladderlog on stdout prefixed with
+  "[L] "
 
   Featurelets:
 - The client now can handle network traffic while it is waiting for the graphics
@@ -68,8 +76,8 @@ Changes since 0.2.8.2:
     message, <player> has been in the conquered zone
   - ONLINE_PLAYER <player> [<ping [<team>]]: At the beginning of the round,
     <player> had <ping> and was on <team>. This line is not printed for bots
-  - NUM_HUMANS <n>: There are <n> players that are not AIs and are part of 
-    a team.
+  - NUM_HUMANS <n>: There are <n> players that are not AIs and are part of a
+    team.
   - ROUND_SCORE has the player's team's score appended.
 
   Bugfixes:
