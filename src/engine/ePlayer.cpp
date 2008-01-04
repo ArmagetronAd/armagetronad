@@ -2392,6 +2392,10 @@ void ePlayerNetID::MyInitAfterCreation()
         {
             // kill them
             sn_DisconnectUser( Owner(), "$network_kill_too_many_players" );
+
+            // technically has the same effect as the above function, but we also want
+            // to abort registering this player object and this exception will do that as well.
+            throw nKillHim();
         }
 
         // clear old legacy spectator that may be lurking around
@@ -2762,7 +2766,9 @@ static void se_OptionalNameFilters( tString & remoteName )
 {
     // filter colors
     if ( se_filterColorNames )
+    {
         remoteName = tColoredString::RemoveColors( remoteName );
+    }
 
     // don't do the fancy stuff on the client, it only makes names on score tables and
     // console messages go out of sync.
@@ -3397,7 +3403,34 @@ float ePlayerNetID::RankingGraph( float y, int MAX ){
     return y;
 }
 
+void ePlayerNetID::RankingLadderLog() {
+    SortByScore();
 
+    int num_humans = 0;
+    int max = se_PlayerNetIDs.Len();
+    for(int i = 0; i < max; ++i) {
+        ePlayerNetID *p = se_PlayerNetIDs(i);
+        if(p->Owner() == 0) continue; // ignore AIs
+
+        tString line("ONLINE_PLAYER ");
+
+        line << p->GetUserName();
+
+        if(p->IsActive()) {
+            line << " " << p->ping;
+            if(p->currentTeam) {
+                line << " " << FilterName(p->currentTeam->Name());
+                ++num_humans;
+            }
+        }
+
+        line << '\n';
+        se_SaveToLadderLog(line);
+    }
+    tString line("NUM_HUMANS ");
+    line << num_humans << '\n';
+    se_SaveToLadderLog(line);
+}
 
 tColoredString & operator << (tColoredString &s,const ePlayer &p){
     return s << tColoredString::ColorString(p.rgb[0]/15.0,
@@ -4688,7 +4721,7 @@ static gServerInfoAdmin sg_serverAdmin;
 void ePlayerNetID::UpdateName( void )
 {
     // don't do a thing if we're not fully synced
-    if ( this->ID() == 0 && nameFromClient_.Len() <= 1 )
+    if ( this->ID() == 0 && nameFromClient_.Len() <= 1 && sn_GetNetState() == nSERVER )
         return;
 
     // store old name for password re-request and name change message
@@ -5211,7 +5244,7 @@ void ePlayerNetID::LogScoreDifference( void )
         lastScore_ = IMPOSSIBLY_LOW_SCORE;
         ret << "ROUND_SCORE " << scoreDifference << " " << GetUserName();
         if ( currentTeam )
-            ret << " " << FilterName( currentTeam->Name() );
+            ret << " " << FilterName( currentTeam->Name() ) << " " << currentTeam->Score();
         ret << "\n";
         se_SaveToLadderLog( ret );
     }

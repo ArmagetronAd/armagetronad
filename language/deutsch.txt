@@ -1952,6 +1952,8 @@ menuitem_toggle_off           Aus
 #********************************************
 #********************************************
 
+timer_hickup                 Die Systemuhr scheint gerade um \1 Sekunden gesprungen zu sein. Wenn das häufger vorkommt, solltest Du ihre Funktion ueberpruefen.
+
 #********************************************
 #********************************************
 #

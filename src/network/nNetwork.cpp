@@ -3028,6 +3028,12 @@ void sn_DisconnectUser(int i, const tOutput& reason )
         return;
     }
 
+    // anything to do at all?
+    if (!sn_Connections[i].socket)
+    {
+        return;
+    }
+
     sn_DisconnectUserNoWarn( i, reason );
 }
 

@@ -122,7 +122,7 @@ New settings
 Featurelets
 -----------
 
-- The client now can hadle network traffic while it is waiting for the graphics
+- The client now can handle network traffic while it is waiting for the graphics
   card to swap buffers.
 - The dedicated server no longer uses a fixed delay, but a select() call (that
   returns when network data arrives) to idle. When data arrives, it does 
@@ -149,6 +149,18 @@ Featurelets
 - New "About" menu item in the main menu displays the version of
   Armagetron Advanced, the paths it uses, links to the main site, wiki
   and forums and the names of the project admins.
+- New entries in ladderlog.txt:
+  - GAME_TIME <time> (only if enabled via the LADDERLOG_GAME_TIME_INTERVAL
+    setting): The time that has passed since the last start of a round
+  - BASEZONE_CONQUERED <team> <x> <y>: A fortress zone belonging to <team>
+    at the coordinates (<x>, <y>) has been conquered
+  - BASEZONE_CONQUERER <player>: at the time of the last BASEZONE_CONQUERED
+    message, <player> has been in the conquered zone
+  - ONLINE_PLAYER <player> [<ping [<team>]]: At the beginning of the round,
+    <player> had <ping> and was on <team>. This line is not printed for bots
+  - NUM_HUMANS <n>: There are <n> players that are not AIs and are part of 
+    a team.
+  - ROUND_SCORE has the player's team's score appended.
 
 Bugfixes
 --------

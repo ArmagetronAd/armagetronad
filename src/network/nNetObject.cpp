@@ -529,9 +529,14 @@ void first_fill_ids(){
 
 void Cheater(int i)
 {
+    // anything to do at all?
+    if (i != 0 && !sn_Connections[i].socket)
+    {
+        return;
+    }
+
     con << "User " << i << " tried to cheat.\n";
     //	st_Breakpoint();
-
 
     if ( i == 0 )
         // terminate connection to server
@@ -700,7 +705,7 @@ bool nNetObject::SyncIsNew(nMessage &m){
 */
 
 nNetObject::nNetObject(int own):lastSyncID_(0),
-        id(0),refCtr_(0),owner(own){
+id(0),refCtr_(0),owner(own){
 #ifdef DEBUG
     //con << "Netobject " << id  << " created.\n";
     //  if (id == 383)
@@ -1578,7 +1583,7 @@ void nNetObject::SyncAll(){
                             // send a creation message
 
                             tJUST_CONTROLLED_PTR< nMessage > m=new nMessage
-                            (nos->CreatorDescriptor());
+                                                               (nos->CreatorDescriptor());
 
 #ifdef DEBUG
                             if (s == sn_WatchNetID)

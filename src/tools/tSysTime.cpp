@@ -30,6 +30,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tSysTime.h"
 #include "tRecorder.h"
 #include "tError.h"
+#include "tConsole.h"
+#include "tConfiguration.h"
+#include "tLocale.h"
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -251,9 +254,35 @@ void tAdvanceFrameSys( tTime & start, tTime & relative )
 
     // get time from OS
     GetTime( time );
+
+    // test hickupery
+    // time.seconds -= time.seconds/10;
+
+    // record starting point
     if ( start.microseconds == 0 && start.seconds == 0 )
+    {
         start = time;
-    relative = time - start;
+    }
+
+    // detect and counter timer hickups
+    tTime newRelative = time - start;
+    tTime timeStep = newRelative - relative;
+    if ( timeStep.seconds < 0 || timeStep.seconds > 10 )
+    {
+        static bool warn = true;
+        if ( warn )
+        {
+            warn = false;
+            con << tOutput( "$timer_hickup", float( timeStep.seconds + timeStep.microseconds * 1E-6  ) );
+        }
+
+        start = start + timeStep;
+    }
+    else
+    {
+        relative = newRelative;
+    }
+
 
     if ( relative.seconds > 20 )
     {
@@ -295,7 +324,7 @@ void tAdvanceFrame( int usecdelay )
     if ( usecdelay > 0 )
         tDelay( usecdelay );
 
-    tTime timeNewRelative;
+    static tTime timeNewRelative;
     tAdvanceFrameSys( timeStart, timeNewRelative );
 
     // try to fetch time from playback
@@ -351,24 +380,27 @@ void tAdvanceFrame( int usecdelay )
 #endif
 }
 
+static float st_timeFactor = 1.0;
+static tSettingItem< float > st_timeFactorConf( "TIME_FACTOR", st_timeFactor );
+
 double tSysTimeFloat ()
 {
 #ifdef DEBUG
-    if ( ! tRecorder::IsPlayingBack() )
-    {
-        tTime time;
-        tAdvanceFrameSys( timeStart, time );
-        time = time - timeRelative;
-        //        if ( time.seconds > 5 )
-        //        {
-        //            std::cout << "tAdvanceFrame not called often enough!\n";
-        //            st_Breakpoint();
-        //            tAdvanceFrameSys( timeRealRelative );
-        //        }
-    }
+    // if ( ! tRecorder::IsPlayingBack() )
+    // {
+    // static tTime time;
+    // tAdvanceFrameSys( timeStart, time );
+    // tTime timeStep = time - timeRelative;
+    //        if ( timeStep.seconds > 5 )
+    //        {
+    //            std::cout << "tAdvanceFrame not called often enough!\n";
+    //            st_Breakpoint();
+    //            tAdvanceFrameSys( timeRealRelative );
+    //        }
+    // }
 #endif
 
-    return timeRelative.seconds + timeRelative.microseconds*0.000001;
+    return ( timeRelative.seconds + timeRelative.microseconds*1E-6 ) * st_timeFactor;
 }
 
 static struct tTime timeRealStart;    // the real time at the start of the program
@@ -378,5 +410,5 @@ double tRealSysTimeFloat ()
 {
     // get real time from real OS
     tAdvanceFrameSys( timeRealStart, timeRealRelative );
-    return timeRealRelative.seconds + timeRealRelative.microseconds*0.000001;
+    return ( timeRealRelative.seconds + timeRealRelative.microseconds*1E-6 ) * st_timeFactor;
 }

@@ -90,7 +90,6 @@ Building
 
 Windows + VisualC
 =================
-
 You'll need to check out the additional module build_visualc parallel to this
 module. In it, you'll find a README describing how to proceed; you'll need to
 download some libraries and put them in the right place.
