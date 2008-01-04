@@ -9,7 +9,7 @@ Changes since 0.2.8.2:
 - FILTER_NAME_MIDDLE: collapses multiple whitespaces to one in player names.
 - FORTRESS_CONQEST_TIMEOUT: if an enemy contact with a zone happens longer ago than
   this value, it is discarded from zone memory.
-- TOPOLOGY_POLICE_PARALLEL, extra topology police flag to control the checks 
+- TOPOLOGY_POLICE_PARALLEL, extra topology police flag to control the checks
   for walls getting copied into the grid in exactly the same place.
 - CAMERA_GLANCE_*: separate settings for the glancing camera, work like CAMERA_CUSTOM_*.
   Likewise, CAMERA_SERVER_GLANCE_* can replace CAMERA_SERVER_CUSTOM_* when glancing.
@@ -27,15 +27,19 @@ Changes since 0.2.8.2:
   for turns in the same direction. Can be used to limit the advantage
   doublebinders get while not punishing players who press both left and
   right at the same time.
-- LAG_O_METER(TRESHOLD|BLEND|USE_OLD): Configure the minimal size of the Lag-O-Meter, its color and whether to scrap it all and stick with the old one.
-- ALLOW_TEAM_CHANGE: if set to 0 players won't be able to join a team, create a new team or change to another team.
-- ALLOW_TEAM_CHANGE_PLAYER/DISALLOW_TEAM_CHANGE_PLAYER: allow/disallow specific players to switch teams
+- LAG_O_METER_(TRESHOLD|BLEND|USE_OLD): Configure the minimal size of the
+  Lag-O-Meter, its color and whether to scrap it all and stick with the old
+  one.
+- ALLOW_TEAM_CHANGE: if set to 0 players won't be able to join a team, create
+  a new team or change to another team.
+- ALLOW_TEAM_CHANGE_PLAYER/DISALLOW_TEAM_CHANGE_PLAYER: allow/disallow specific
+  players to switch teams
 - INTERCEPT_COMMANDS is a space-delimited list of chat commands that shall be
   intercepted by an external script. Example value: /login /admin /teamleave
-  /teamshuffle /shuffle /team 
+  /teamshuffle /shuffle /team
 - INTERCEPT_UNKNOWN_COMMANDS is a boolean specifying if an external script
   wishes to handle unrecognized chat commands. This would allow hooking
-  arbitrary things like /foobarz or /mode ctf 
+  arbitrary things like /foobarz or /mode ctf
 - CONSOLE_LADDER_LOG boolean places the ladderlog on stdout prefixed with
   "[L] "
 
