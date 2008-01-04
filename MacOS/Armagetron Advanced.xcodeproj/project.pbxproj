@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		6459A1320D2AE2B40042EFE8 /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414A20A45C78200745CE6 /* libpng.framework */; };
+		64C038B70D2E84E500810BB1 /* config_common.h.in in Resources */ = {isa = PBXBuildFile; fileRef = 64C038B60D2E84E500810BB1 /* config_common.h.in */; };
+		64C038B80D2E84E500810BB1 /* config_common.h.in in Resources */ = {isa = PBXBuildFile; fileRef = 64C038B60D2E84E500810BB1 /* config_common.h.in */; };
 		8C11CA49095A2B6E007AE0EA /* action_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E7D089EEC7D007E21DC /* action_api.cpp */; };
 		8C11CA4A095A2B6E007AE0EA /* actions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E7E089EEC7D007E21DC /* actions.cpp */; };
 		8C11CA4B095A2B6E007AE0EA /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E10089EEC7C007E21DC /* eAdvWall.cpp */; };
@@ -388,6 +390,7 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Armagetron Advanced_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Armagetron Advanced_Prefix.pch"; path = "../src/macosx/Armagetron Advanced_Prefix.pch"; sourceTree = "<group>"; };
+		64C038B60D2E84E500810BB1 /* config_common.h.in */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = config_common.h.in; path = ../src/macosx/config_common.h.in; sourceTree = SOURCE_ROOT; };
 		8C11CA38095A264A007AE0EA /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config_common.h; path = ../src/macosx/config_common.h; sourceTree = SOURCE_ROOT; };
 		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C6EF51C08A32A0500816348 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; name = English; path = InfoPlist.strings; sourceTree = "<group>"; };
@@ -755,6 +758,7 @@
 				8CAD912A095A33AF00DA0ECC /* dedicated */,
 				32CA4F630368D1EE00C91783 /* Armagetron Advanced_Prefix.pch */,
 				8C11CA38095A264A007AE0EA /* config_common.h */,
+				64C038B60D2E84E500810BB1 /* config_common.h.in */,
 				8CBA5E0B089EEC66007E21DC /* defs.h */,
 				8CBA646108A065A8007E21DC /* Info.plist */,
 				8CBA5E07089EEC5B007E21DC /* SDLMain.h */,
@@ -1173,6 +1177,7 @@
 				8CB97AB8096265A800AE8BCD /* Armagetron Advanced.icns in Resources */,
 				8CB97AB9096265A800AE8BCD /* Info.plist in Resources */,
 				8CB97ABA096265A800AE8BCD /* InfoPlist.strings in Resources */,
+				64C038B70D2E84E500810BB1 /* config_common.h.in in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1191,6 +1196,7 @@
 				8CBA62E108A01A55007E21DC /* Armagetron Advanced.icns in Resources */,
 				8CBA646208A065A8007E21DC /* Info.plist in Resources */,
 				8C6EF51D08A32A0500816348 /* InfoPlist.strings in Resources */,
+				64C038B80D2E84E500810BB1 /* config_common.h.in in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
