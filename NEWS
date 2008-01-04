@@ -42,6 +42,8 @@ Changes since 0.2.8.2:
   arbitrary things like /foobarz or /mode ctf
 - CONSOLE_LADDER_LOG boolean places the ladderlog on stdout prefixed with
   "[L] "
+- PLAYER_MESSAGE <user ID or name> <Message>: Like /msg, but from the 
+  console
 
   Featurelets:
 - The client now can handle network traffic while it is waiting for the graphics
