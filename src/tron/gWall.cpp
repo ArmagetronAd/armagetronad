@@ -881,12 +881,12 @@ void gNetPlayerWall::RenderList(bool list){
     }
 #endif
 
-	sr_CheckGLError();
+    sr_CheckGLError();
     if (displayList_ && cycle_->Alive() && list)
         glCallList(displayList_);
     else
     {
-		sr_CheckGLError();
+        sr_CheckGLError();
         dir_eWall_select();
 
         REAL r,g,b;
@@ -983,31 +983,31 @@ void gNetPlayerWall::RenderList(bool list){
                 		glEndList();
                 		}
                 		else */
-				sr_CheckGLError();
+                sr_CheckGLError();
                 RenderNormal(p1,p2,ta,te,r,g,b,a);
-				sr_CheckGLError();
+                sr_CheckGLError();
             }
 
             else{ // complicated
                 if (ta+gBEG_LEN>=time){
-					sr_CheckGLError();
+                    sr_CheckGLError();
                     RenderBegin(p1,p2,ta,te,
                                 1+(ta-time)/gBEG_LEN,
                                 1+(te-time)/gBEG_LEN,
                                 r,g,b,a);
-					sr_CheckGLError();
+                    sr_CheckGLError();
                 }
                 else{
-					sr_CheckGLError();
+                    sr_CheckGLError();
                     REAL s=((time-gBEG_LEN)-ta)/(te-ta);
                     eCoord pm=p1+(p2-p1)*s;
                     RenderBegin(pm,p2,
                                 ta+(te-ta)*s,te,0,
                                 1+(te-time)/gBEG_LEN,
                                 r,g,b,a);
-					sr_CheckGLError();
+                    sr_CheckGLError();
                     RenderNormal(p1,pm,ta,ta+(te-ta)*s,r,g,b,a);
-					sr_CheckGLError();
+                    sr_CheckGLError();
                 }
             }
         }
@@ -1016,7 +1016,7 @@ void gNetPlayerWall::RenderList(bool list){
 
 
 bool upperlinecolor(REAL r,REAL g,REAL b, REAL a){
-	sr_CheckGLError();
+    sr_CheckGLError();
     if (rTextureGroups::TextureMode[rTextureGroups::TEX_WALL]<0)
         glColor4f(1,1,1,a);
     else{
@@ -1031,11 +1031,11 @@ bool upperlinecolor(REAL r,REAL g,REAL b, REAL a){
         */
         //glDisable(GL_TEXTURE);
         glDisable(GL_TEXTURE_2D);
-		sr_CheckGLError();
+        sr_CheckGLError();
         glColor4f(r,g,b,a);
     }
 
-	sr_CheckGLError();
+    sr_CheckGLError();
     return true;
 }
 
@@ -1159,14 +1159,14 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
     eCoord ppos=cycle_->PredictPosition() - cycle_->dir*REAL(gCYCLE_LEN);
 
     if ( hfrac>0 ){
-		sr_CheckGLError();
+        sr_CheckGLError();
         sr_DepthOffset(true);
-		sr_CheckGLError();
+        sr_CheckGLError();
         //REAL H=h*hfrac;
 #define segs 5
         upperlinecolor(r,g,b,a);//a*afunc(rat));
         BeginLineStrip();
-		sr_CheckGLError();
+        sr_CheckGLError();
 
         for(int i=0;i<=segs;i++){
             REAL frag=i/float(segs);
@@ -1176,22 +1176,22 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
 
             REAL H=h*hfrac*hfunc(rat);
             upperlinecolor(r,g,b,a*afunc(rat));
-			sr_CheckGLError();
+            sr_CheckGLError();
             glVertex3f(x+H*cycle_->skew*sfunc(rat)*cycle_->dir.y,
                        y-H*cycle_->skew*sfunc(rat)*cycle_->dir.x,
                        H);//+se_cameraZ*.005);
-			sr_CheckGLError();
+            sr_CheckGLError();
         }
         RenderEnd();
-		sr_CheckGLError();
+        sr_CheckGLError();
         sr_DepthOffset(false);
-		sr_CheckGLError();
+        sr_CheckGLError();
     }
 
     dir_eWall_select();
 
 
-	sr_CheckGLError();
+    sr_CheckGLError();
     BeginQuadStrip();
 
 
@@ -1207,30 +1207,30 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
         REAL y=(p1.y+frag*(p2.y-p1.y))*(1-xfunc(rat))+ppos.y*xfunc(rat);
 
         // bottom
-		sr_CheckGLError();
-		glEdgeFlag(GL_FALSE);
+        sr_CheckGLError();
+        glEdgeFlag(GL_FALSE);
         glColor4f(r+cfunc(rat),g+cfunc(rat),b+cfunc(rat),a*afunc(rat));
-		sr_CheckGLError();
+        sr_CheckGLError();
         glTexCoord2f(ta+(te-ta)*frag,hfrac);
-		sr_CheckGLError();
+        sr_CheckGLError();
         glVertex3f(x,y,0);
-		sr_CheckGLError();
+        sr_CheckGLError();
 
         // top
 
         glEdgeFlag(GL_TRUE);
         //glTexCoord2f(ta+(te-ta)*frag,hfrac*(1-hfunc(rat)));
-		sr_CheckGLError();
+        sr_CheckGLError();
         glTexCoord2f(ta+(te-ta)*frag,0);
-		sr_CheckGLError();
+        sr_CheckGLError();
         REAL H=h*hfrac*hfunc(rat);
         glVertex3f(x+H*cycle_->skew*sfunc(rat)*cycle_->dir.y,
                    y-H*cycle_->skew*sfunc(rat)*cycle_->dir.x,
                    H);
-		sr_CheckGLError();
+        sr_CheckGLError();
     }
     RenderEnd();
-	sr_CheckGLError();
+    sr_CheckGLError();
 }
 #endif
 

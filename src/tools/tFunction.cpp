@@ -25,7 +25,7 @@ tFunction::tFunction( void )
 // *******************************************************************************
 
 tFunction::tFunction(REAL offset, REAL slope)
-        : offset_(offset), slope_(slope) 
+        : offset_(offset), slope_(slope)
 {
 }
 

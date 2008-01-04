@@ -810,9 +810,9 @@ void eGameObject::RenderAll(eGrid *grid, const eCamera *cam){
 #ifdef DEBUG
             displayed_gameobject = grid->gameObjects(i);
 #endif
-			sr_CheckGLError();
+            sr_CheckGLError();
             grid->gameObjects(i)->Render(cam);
-			sr_CheckGLError();
+            sr_CheckGLError();
 #ifdef DEBUG
             displayed_gameobject = 0;
 #endif

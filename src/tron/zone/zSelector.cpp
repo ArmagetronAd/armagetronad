@@ -452,19 +452,19 @@ gVectorExtra<ePlayerNetID *> zSelectorOwner::select(gVectorExtra< nNetObjectID >
 {
     // The owner of the Zone receives the effect upon trigger,
     // irrelevantly of the user who triggers it.
-  gVectorExtra<ePlayerNetID *> owningPlayers;
+    gVectorExtra<ePlayerNetID *> owningPlayers;
 
-  for(gVectorExtra< nNetObjectID >::const_iterator iter=owners.begin();
-      iter!=owners.end();
-      ++iter) {
-    // Is the object still there
-    if(bool(sn_netObjects[(*iter)]))
-      {
-	ePlayerNetID * anOwner = static_cast< ePlayerNetID* >( static_cast< nNetObject* >( sn_netObjects[ (*iter) ] ) ) ;
-	if(anOwner != 0)
-	  owningPlayers.push_back( anOwner );
-      }
-  }
+    for(gVectorExtra< nNetObjectID >::const_iterator iter=owners.begin();
+            iter!=owners.end();
+            ++iter) {
+        // Is the object still there
+        if(bool(sn_netObjects[(*iter)]))
+        {
+            ePlayerNetID * anOwner = static_cast< ePlayerNetID* >( static_cast< nNetObject* >( sn_netObjects[ (*iter) ] ) ) ;
+            if(anOwner != 0)
+                owningPlayers.push_back( anOwner );
+        }
+    }
     return owningPlayers;
 }
 
@@ -507,14 +507,14 @@ gVectorExtra<ePlayerNetID *> zSelectorOwnerTeam::select(gVectorExtra< nNetObject
             iter != teamOwners.end();
             ++iter)
     {
-    // Is the object still there
-    if(bool(sn_netObjects[(*iter)]))
-      {
-	eTeam * aTeam = static_cast< eTeam* >( static_cast< nNetObject* >( sn_netObjects[ (*iter) ] ) ) ;
-	if(aTeam != 0)
-	  allOwnerTeamMembers.insertAll(aTeam->GetAllMembers());
-	
-      }
+        // Is the object still there
+        if(bool(sn_netObjects[(*iter)]))
+        {
+            eTeam * aTeam = static_cast< eTeam* >( static_cast< nNetObject* >( sn_netObjects[ (*iter) ] ) ) ;
+            if(aTeam != 0)
+                allOwnerTeamMembers.insertAll(aTeam->GetAllMembers());
+
+        }
     }
 
     // Keep only the valid ones
@@ -560,13 +560,13 @@ gVectorExtra<ePlayerNetID *> zSelectorOwnerTeamTeammate::select(gVectorExtra< nN
             iter != teamOwners.end();
             ++iter)
     {
-      // Is the object still there
-      if(bool(sn_netObjects[(*iter)]))
-	{
-	  eTeam * aTeam = static_cast< eTeam* >( static_cast< nNetObject* >( sn_netObjects[ (*iter) ] ) ) ;
-	  if(aTeam != 0)
-            allTeammates.insertAll(aTeam->GetAllMembers());
-	}
+        // Is the object still there
+        if(bool(sn_netObjects[(*iter)]))
+        {
+            eTeam * aTeam = static_cast< eTeam* >( static_cast< nNetObject* >( sn_netObjects[ (*iter) ] ) ) ;
+            if(aTeam != 0)
+                allTeammates.insertAll(aTeam->GetAllMembers());
+        }
     }
 
     // Keep only the valid ones
@@ -705,15 +705,15 @@ gVectorExtra<ePlayerNetID *> zSelectorSingleDeadOwner::select(gVectorExtra< nNet
 
     // Transform the list of owners' id into a list of ePlayer
     for(gVectorExtra< nNetObjectID >::const_iterator iter=owners.begin();
-	iter!=owners.end();
-	++iter) {
-      // Is the object still there
-      if(bool(sn_netObjects[(*iter)]))
-	{
-	  ePlayerNetID * aPlayer = static_cast< ePlayerNetID* >( static_cast< nNetObject* >( sn_netObjects[ (*iter) ] ) ) ;
-	  if(aPlayer != 0)
-	    owningPlayers.push_back( aPlayer );
-	}
+            iter!=owners.end();
+            ++iter) {
+        // Is the object still there
+        if(bool(sn_netObjects[(*iter)]))
+        {
+            ePlayerNetID * aPlayer = static_cast< ePlayerNetID* >( static_cast< nNetObject* >( sn_netObjects[ (*iter) ] ) ) ;
+            if(aPlayer != 0)
+                owningPlayers.push_back( aPlayer );
+        }
     }
 
     // Preserve only the dead players

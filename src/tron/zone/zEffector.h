@@ -147,7 +147,7 @@ public:
     virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
 
     virtual void setValue(tFunction const &accel) { acceleration = accel; };
-protected: 
+protected:
     tFunction acceleration;
 };
 

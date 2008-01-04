@@ -25,7 +25,7 @@ class rExceptionGLEW: public tException
 {
 public:
     rExceptionGLEW( char const * description )
-    : description_( description )
+            : description_( description )
     {
     }
 private:

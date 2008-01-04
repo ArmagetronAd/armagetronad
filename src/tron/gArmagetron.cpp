@@ -551,22 +551,22 @@ int main(int argc,char **argv){
         }
         */
 #endif
-        
+
 #ifdef WIN32
         // disable DirectX by default; it causes problems with some boards.
         if (!use_directx && !getenv("SDL_VIDEODRIVER") ) {
             putenv("SDL_VIDEODRIVER=windib");
         }
 #endif
-        
+
         // atexit(ANET_Shutdown);
-        
+
 #ifndef WIN32
 #ifdef DEBUG
 #define NOSOUND
 #endif
 #endif
-        
+
 #ifndef DEDICATED
         Uint32 flags = SDL_INIT_VIDEO;
 #ifdef DEBUG
@@ -590,6 +590,8 @@ int main(int argc,char **argv){
         }
 #endif // NOJOYSTICK
 #endif // DEDICATED
+
+        su_KeyInit();
 
         // tERR_MESSAGE( "Initializing player data." );
         ePlayer::Init();
@@ -688,16 +690,16 @@ int main(int argc,char **argv){
                 try
                 {
 #ifdef HAVE_GLEW
-					// initialize GLEW
-					{
-						GLenum err = glewInit();
-						if (GLEW_OK != err)
-						{
-							// Problem: glewInit failed, something is seriously wrong
-							throw tGenericException( (const char *)glewGetErrorString(err), "GLEW Error" );
-						}
-						con << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << "\n";
-					}
+                    // initialize GLEW
+                    {
+                        GLenum err = glewInit();
+                        if (GLEW_OK != err)
+                        {
+                            // Problem: glewInit failed, something is seriously wrong
+                            throw tGenericException( (const char *)glewGetErrorString(err), "GLEW Error" );
+                        }
+                        con << "Status: Using GLEW " << glewGetString(GLEW_VERSION) << "\n";
+                    }
 #endif // HAVE_GLEW
 
                     //std::cout << "init disp\n";

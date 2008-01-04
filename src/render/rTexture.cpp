@@ -612,7 +612,7 @@ void rISurfaceTexture::OnSelect()
 void rISurfaceTexture::OnUnload( void )
 {
 #ifndef DEDICATED
-	tint_.Delete();
+    tint_.Delete();
     textureModeLast_=-100;
     rITexture::OnUnload();
 #endif

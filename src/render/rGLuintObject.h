@@ -35,34 +35,34 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 class rGLuintObject
 {
 public:
-	rGLuintObject(); 	    //!< default constructor
+    rGLuintObject(); 	    //!< default constructor
 
-	operator GLuint(); 	    //!< implicit conversion to GLuints, auto-creating the object
-	bool IsValid() const; 	//!< checks whether the object is valid
+    operator GLuint(); 	    //!< implicit conversion to GLuints, auto-creating the object
+    bool IsValid() const; 	//!< checks whether the object is valid
 
-	virtual ~rGLuintObject();  //!< NOTE: the destructor of a derived class needs to call Delete() itself
+    virtual ~rGLuintObject();  //!< NOTE: the destructor of a derived class needs to call Delete() itself
 
-	void Gen();     //!< reserve the object
-	void Delete(); 	//!< free the object
+    void Gen();     //!< reserve the object
+    void Delete(); 	//!< free the object
 protected:
-	rGLuintObject( rGLuintObject const & );                 //!< forbidden copy construcor
-	rGLuintObject & operator =( rGLuintObject const & );    //! forbidden copy operator
+    rGLuintObject( rGLuintObject const & );                 //!< forbidden copy construcor
+    rGLuintObject & operator =( rGLuintObject const & );    //! forbidden copy operator
 
-	GLuint object_;                 //!< the wrapped "object"
+    GLuint object_;                 //!< the wrapped "object"
 private:
-	virtual void DoGen() = 0;       //!< really reserves the object
-	virtual void DoDelete() = 0;    //!< really frees the object
+    virtual void DoGen() = 0;       //!< really reserves the object
+    virtual void DoDelete() = 0;    //!< really frees the object
 };
 
 //! unusable dummy wrapper
 class rGluintObjectDummy: public rGLuintObject
 {
 public:
-	~rGluintObjectDummy(){ Delete(); }
+    ~rGluintObjectDummy(){ Delete(); }
 private:
-	// the following operations are not supported, wrap your code in #ifdef HAVE_GLEW
-	virtual void DoGen(){ tASSERT(0); }
-	virtual void DoDelete(){  tASSERT(0); }
+    // the following operations are not supported, wrap your code in #ifdef HAVE_GLEW
+    virtual void DoGen(){ tASSERT(0); }
+    virtual void DoDelete(){  tASSERT(0); }
 };
 
 //! declare safe wrapper classes for GL objects handled by GLuints.

@@ -35,16 +35,31 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "uMenu.h"
 #include "tSysTime.h"
 
+#include <vector>
+#include <map>
+
+// extra binds for mouse (and joystick, as soon as SDL supports it) movement:
+#define SDLK_MOUSE_X_PLUS   (SDLK_LAST+1)
+#define SDLK_MOUSE_X_MINUS  (SDLK_LAST+2)
+#define SDLK_MOUSE_Y_PLUS   (SDLK_LAST+3)
+#define SDLK_MOUSE_Y_MINUS  (SDLK_LAST+4)
+#define SDLK_MOUSE_Z_PLUS   (SDLK_LAST+5)
+#define SDLK_MOUSE_Z_MINUS  (SDLK_LAST+6)
+#define SDLK_MOUSE_BUTTON_1 (SDLK_LAST+7)
+#define SDLK_MOUSE_BUTTON_2 (SDLK_LAST+8)
+#define SDLK_MOUSE_BUTTON_3 (SDLK_LAST+9)
+#define SDLK_MOUSE_BUTTON_4 (SDLK_LAST+10)
+#define SDLK_MOUSE_BUTTON_5 (SDLK_LAST+11)
+#define SDLK_MOUSE_BUTTON_6 (SDLK_LAST+12)
+#define SDLK_MOUSE_BUTTON_7 (SDLK_LAST+13)
+#define SDLK_NEWLAST        (SDLK_LAST+14)
+#define SDLK_MAX            512 /* Enough? */
+#define MOUSE_BUTTONS 7
+
 bool su_mouseGrab = false;
 
 static uAction* su_allActions[uMAX_ACTIONS];
 static int     su_allActionsLen = 0;
-
-static int sdlk_dynlast = SDLK_NEWLAST;
-
-#ifndef DEDICATED
-static const char *sdlk_dynnames[SDLK_MAX - SDLK_NEWLAST];
-#endif
 
 #ifndef NOJOYSTICK
 #define JOYSTICK_MAX 16
@@ -104,12 +119,177 @@ uAction * uAction::Find( char const * name )
     return 0;
 }
 
-// ***************************
-//    the generic keymaps
-// ***************************
+// ****************************************
+// uInput
+// ****************************************
 
-tJUST_CONTROLLED_PTR< uBind > keymap[SDLK_MAX];
-bool                          pressed[SDLK_MAX];
+typedef std::vector< uInput * > uInputs;
+uInputs su_inputs;
+std::map< std::string, uInput * > su_inputMap;
+
+uInput::uInput( tString const & persistentID, tString const & name )
+        : persistentID_( persistentID ), name_( name )
+        , pressed_( 0 )
+{
+    ID_ = su_inputs.size();
+    su_inputs.push_back( this );
+    su_inputMap[ persistentID ] = this;
+}
+
+uInput::~uInput()
+{
+    su_inputs[ID_] = 0;
+    su_inputMap.erase( su_inputMap.find( persistentID_ ) );
+}
+
+static uInput * su_GetInput( tString const & persistentID )
+{
+    try
+    {
+        return su_inputMap[ persistentID ];
+    }
+    catch(...)
+    {
+        return NULL;
+    }
+}
+
+// class that manages unknown input
+class uAutoDeleteInput
+{
+public:
+    uAutoDeleteInput()
+    {
+    }
+
+    ~uAutoDeleteInput()
+    {
+        for ( uInputs::iterator iter = unknowns.begin(); iter != unknowns.end(); ++iter )
+        {
+            delete(*iter);
+            *iter = 0;
+        }
+    }
+
+    uInput * Create( tString const & persistentID, tString const & name )
+    {
+        uInput * input = new uInput( persistentID, name );
+        unknowns.push_back( input );
+        return input;
+    }
+
+    // array of unknown inputs that should be deleted afterwards
+    uInputs unknowns;
+};
+
+static uAutoDeleteInput & su_GetAutoDeleteInput()
+{
+    static uAutoDeleteInput filler;
+    return filler;
+}
+
+// class that manages keyboard input
+class uKeyInput
+{
+public:
+    uKeyInput()
+    {
+        for( int i = 0; i <= SDLK_LAST; ++i )
+        {
+#ifndef DEDICATED
+            char const * ID_Raw = SDL_GetKeyName(static_cast< SDLKey >( i ) );
+#else
+            char const * ID_Raw = "unknown key";
+#endif
+            std::ostringstream id;
+            id << "KEY_";
+            if ( strcmp( ID_Raw, "unknown key" ) == 0 )
+            {
+                id << "UNKNONW_" << i;
+            }
+            else
+            {
+                for ( char const * c = ID_Raw; *c; ++c )
+                {
+                    if ( isblank( *c ) )
+                    {
+                        id << "_";
+                    }
+                    else
+                    {
+                        id << char(toupper( *c ));
+                    }
+                }
+            }
+
+            // store new input key
+            sdl_keys[i] = su_GetAutoDeleteInput().Create( id.str(), tString(ID_Raw) );
+        }
+    }
+
+    ~uKeyInput()
+    {
+    }
+
+    uInput * sdl_keys[SDLK_LAST+1];
+};
+
+static uKeyInput const & su_GetKeyInput()
+{
+    static uKeyInput filler;
+    return filler;
+}
+
+# define MOUSE_BUTTONS 7
+
+static uInput * su_NewInput( char const * ID, char const * name )
+{
+    return su_GetAutoDeleteInput().Create( tString( ID ), tString( name ) );
+}
+
+// class that manages mouse inout
+class uMouseInput
+{
+public:
+    uMouseInput()
+    {
+        x_plus = su_NewInput( "MOUSE_X_PLUS", "mouse right" );
+        x_minus = su_NewInput( "MOUSE_X_MINUS", "mouse left" );
+        y_plus = su_NewInput( "MOUSE_Y_PLUS", "mouse up" );
+        y_minus = su_NewInput( "MOUSE_Y_MINUS", "mouse down" );
+        z_plus = su_NewInput( "MOUSE_Z_PLUS", "mouse z up" );
+        z_minus = su_NewInput( "MOUSE_Z_MINUS", "mouse z down" );
+
+        for ( int i = 0; i < MOUSE_BUTTONS; ++i )
+        {
+            std::ostringstream id;
+            id << "MOUSE_BUTTON_" << i+1;
+            std::ostringstream name;
+            name << "mouse button " << i+1;
+            button[i] = su_GetAutoDeleteInput().Create( id.str(), name.str() );
+        }
+    }
+
+    uInput * x_plus;
+    uInput * x_minus;
+    uInput * y_plus;
+    uInput * y_minus;
+    uInput * z_plus;
+    uInput * z_minus;
+    uInput * button[MOUSE_BUTTONS];
+};
+
+static uMouseInput const & su_GetMouseInput()
+{
+    static uMouseInput filler;
+    return filler;
+}
+
+void su_KeyInit()
+{
+    su_GetKeyInput();
+    su_GetMouseInput();
+}
 
 // ****************************************
 // a configuration class for keyboard binds
@@ -123,45 +303,68 @@ public:
     // write the complete keymap
     virtual void WriteVal(std::ostream &s){
         int first=1;
-        for(int keysym=sdlk_dynlast-1;keysym>=0;keysym--){
-            if (keymap[keysym]){
+        for( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
+        {
+            if ( !(*i)->GetBind() )
+                continue;
 
-                if (!first)
-                    s << "\nKEYBOARD\t";
-                else
-                    first=0;
+            std::string const & id = (*i)->PersistentID();
 
-                s << keysym << '\t';
-                keymap[keysym]->Write(s);
-            }
+            if (!first)
+                s << "\nKEYBOARD\t";
+            else
+                first=0;
+
+            s << id << '\t';
+            (*i)->GetBind()->Write(s);
         }
         if (first)
             s << "-1";
     }
 
     // read one keybind
-    virtual void ReadVal(std::istream &s){
+    virtual void ReadVal(std::istream &s)
+    {
         tString in;
-        int keysym;
-        s >> keysym;
-        if (keysym>=0){
-            // ignore invalid keysyms
-#ifndef DEDICATED
-            tASSERT( keysym < sdlk_dynlast);
-#endif
-            if (keysym >= sdlk_dynlast)
-                return;
+        std::string id;
+        s >> id;
+        if ( id != "-1" )
+        {
+            // try to fetch the uInput belonging to the id
+            uInput * input = su_GetInput( id );
+
+            if ( !input )
+            {
+                // if the id is a number, the setting is in a legacy format.
+                std::istringstream readValue( id );
+                int value = -1;
+                readValue >> value;
+
+                if ( value >= 0 && value < (int)su_inputs.size() )
+                {
+                    input = su_inputs[ value ];
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            if ( !input )
+            {
+                input = su_GetAutoDeleteInput().Create( id, tString("unknown") );
+            }
+
+            tASSERT( input );
+
             s >> in;
             if (uBindPlayer::IsKeyWord(in))
             {
-                keymap[keysym] = NULL;
-                keymap[keysym]=uBindPlayer::NewBind(s);
-                if (!keymap[keysym]->act)
+                tJUST_CONTROLLED_PTR< uBind > bind = uBindPlayer::NewBind(s);
+                if ( bind->act )
                 {
-                    keymap[keysym]=NULL;
+                    input->SetBind( bind );
                 }
-                /* if (global_bind::IsKeyWord(in))
-                   keymap[keysym]=new global_bind(s); */
             }
         }
         char c=' ';
@@ -228,27 +431,30 @@ bool uActionGlobal::operator==(const uActionGlobal &x){
     return x.globalID == globalID;}
 
 bool uActionGlobal::IsBreakingGlobalBind(int sym){
-    if (!keymap[sym])
+    if ( sym >= (int)su_inputs.size() || sym < 0 )
         return false;
-    uAction *act=keymap[sym]->act;
+
+    uInput * input = su_inputs[ sym ];
+    if ( !input )
+        return false;
+
+    uBind * bind = input->GetBind();
+    if ( !bind )
+        return false;
+
+    uAction *act = bind->act;
     if (!act)
         return false;
 
     return uActionGlobalFunc::IsBreakingGlobalBind(act);
 }
 
-static void keyboard_init(){
-    for(int i=0;i<sdlk_dynlast;i++)
-        keymap[i]=NULL;
-    //uBindPlayer::Init();
-    //global_bind::Init();
+static void keyboard_init()
+{
 }
 
-static void keyboard_exit(){
-    for(int i=0;i<sdlk_dynlast;i++)
-        keymap[i] = 0;
-    //uBindPlayer::Init();
-    //global_bind::Init();
+static void keyboard_exit()
+{
 }
 
 #ifndef NOJOYSTICK
@@ -307,9 +513,9 @@ static tInitExit keyboard_ie(&keyboard_init, &keyboard_exit);
 
 uBind::~uBind(){}
 
-uBind::uBind(uAction *a ):lastValue_(0), delayedValue_(0), lastSym_(-1), lastTime_(-1), act(a){}
+uBind::uBind(uAction *a ):lastValue_(0), delayedValue_(0), lastInput_(0), lastTime_(-1), act(a){}
 
-uBind::uBind(std::istream &s): lastValue_(0), delayedValue_(0), lastSym_(-1), lastTime_(-1), act(NULL)
+uBind::uBind(std::istream &s): lastValue_(0), delayedValue_(0), lastInput_(0), lastTime_(-1), act(NULL)
 {
     std::string name;
     s >> name;
@@ -348,15 +554,15 @@ void uBind::HanldeDelayed()
 
 REAL su_doubleBindTimeout=-10.0f;
 
-bool uBind::IsDoubleBind( int sym )
+bool uBind::IsDoubleBind( uInput const * input )
 {
     double currentTime = tSysTimeFloat();
 
     // if a different key was used for this action a short while ago, give alarm.
-    bool ret = ( su_doubleBindTimeout > 0 && sym != lastSym_ && currentTime - lastTime_ < su_doubleBindTimeout );
+    bool ret = ( su_doubleBindTimeout > 0 && input != lastInput_ && currentTime - lastTime_ < su_doubleBindTimeout );
 
     // store last usage
-    lastSym_ = sym;
+    lastInput_ = input;
     lastTime_ = currentTime;
 
     // return result
@@ -404,36 +610,140 @@ int uPlayerPrototype::Num(){return nextid;}
 // Input configuration
 // *******************
 
+REAL mouse_sensitivity=REAL(.1);
+
+// number of transformed events per SDL event
+#define su_TRANSFORM_PASSES 2
+
+struct uTransformEventInfo
+{
+    float value;      // the strenght of the event
+    bool needsRepeat; // if the event should trigger a continuous action (camera movement), should it be repeated?
+
+    uTransformEventInfo(): value(0), needsRepeat(false){}
+};
+
+// transform SDL event into uInput pointer
+#ifndef DEDICATED
+static uInput * su_TransformEvent( SDL_Event & e, int count, uTransformEventInfo & info )
+{
+    uInput * input = NULL;
+
+    info.needsRepeat = true;
+    info.value = 0;
+
+    switch (e.type)
+    {
+    case SDL_MOUSEMOTION:
+        info.needsRepeat = false;
+
+        // ignore events generated by mouse grabbing
+        if ( su_mouseGrab &&
+                e.motion.x==sr_screenWidth/2 && e.motion.x==sr_screenHeight/2)
+        {
+            return NULL;
+        }
+
+        if ( count == 0 )
+        {
+            REAL xrel=e.motion.xrel;
+            if (xrel > 0) // left
+            {
+                input = su_GetMouseInput().x_plus;
+                info.value = xrel * mouse_sensitivity;
+                su_GetMouseInput().x_minus->SetPressed( 0 );
+            }
+
+            if (xrel < 0) // left
+            {
+                input = su_GetMouseInput().x_minus;
+                info.value = -xrel * mouse_sensitivity;
+                su_GetMouseInput().x_plus->SetPressed( 0 );
+            }
+        }
+
+        if ( count == 1 )
+        {
+            REAL yrel=-e.motion.yrel;
+            if (yrel>0) // down
+            {
+                input = su_GetMouseInput().y_minus;
+                info.value = -yrel * mouse_sensitivity;
+                su_GetMouseInput().y_plus->SetPressed( 0 );
+            }
+            if (yrel<0) // up
+            {
+                input = su_GetMouseInput().y_plus;
+                info.value = yrel * mouse_sensitivity;
+                su_GetMouseInput().y_minus->SetPressed( 0 );
+            }
+        }
+        break;
+    case SDL_MOUSEBUTTONDOWN:
+    case SDL_MOUSEBUTTONUP:
+        {
+            if ( count != 0 )
+                break;
+
+            int button=e.button.button;
+            if (button<=MOUSE_BUTTONS)
+            {
+                input = su_GetMouseInput().button[ button ];
+                info.value = ( e.type == SDL_MOUSEBUTTONDOWN ) ? 1 : -1;
+            }
+        }
+        break;
+    case SDL_KEYDOWN:
+    case SDL_KEYUP:
+        {
+            if ( count != 0 )
+                break;
+
+            SDL_keysym &c = e.key.keysym;
+
+            input = su_GetKeyInput().sdl_keys[ c.sym ];
+            info.value = ( e.type == SDL_KEYDOWN ) ? 1 : -1;
+        }
+
+        break;
+#ifndef NOJOYSTICK
+    case SDL_JOYAXISMOTION:
+        if ( count != 0 )
+            break;
+
+        if (e.jaxis.value > -16384 && e.jaxis.value < 16384) {
+#if DEBUG
+            std::cout << "JS: Ignoring value of " << e.jaxis.value << "\n";
+#endif
+            return false;
+        }
+        sym = joystick_sdlk[e.jaxis.which][0] + (e.jaxis.axis * 2) + ((e.jaxis.value > 0) ? 1 : 0);
+        active = 0;
+#if DEBUG
+        printf("JS: %d,%d,%d is %s\n", e.jaxis.which, e.jaxis.axis, e.jaxis.value, keyname(sym));
+        fflush(stdout);
+#endif
+        break;
+    case SDL_JOYBUTTONDOWN:
+    case SDL_JOYBUTTONUP:
+        if ( count != 0 )
+            break;
+
+        sym = joystick_sdlk[e.jbutton.which][1] + e.jbutton.button;
+        active = 0;
+        break;
+#endif
+    default:
+        break;
+    }
+
+    return input;
+}
+#endif // DEDICATED
 
 // *****************************************************
 //  Menuitem for input selection
 // *****************************************************
-
-static const char *keyname(int sym){
-#ifndef DEDICATED
-    if (sym<=SDLK_LAST)
-        return SDL_GetKeyName(static_cast<SDLKey>(sym));
-    else if (sym > sdlk_dynlast)
-        return "Unknown";
-    else switch (sym){
-        case SDLK_MOUSE_X_PLUS: return "Mouse right";
-        case SDLK_MOUSE_X_MINUS: return "Mouse left";
-        case SDLK_MOUSE_Y_PLUS: return "Mouse up";
-        case SDLK_MOUSE_Y_MINUS: return "Mouse down";
-        case SDLK_MOUSE_Z_PLUS: return "Mouse z up";
-        case SDLK_MOUSE_Z_MINUS: return "Mouse z down";
-        case SDLK_MOUSE_BUTTON_1: return "Mousebutton 1";
-        case SDLK_MOUSE_BUTTON_2: return "Mousebutton 2";
-        case SDLK_MOUSE_BUTTON_3: return "Mousebutton 3";
-        case SDLK_MOUSE_BUTTON_4: return "Mousebutton 4";
-        case SDLK_MOUSE_BUTTON_5: return "Mousebutton 5";
-        case SDLK_MOUSE_BUTTON_6: return "Mousebutton 6";
-        case SDLK_MOUSE_BUTTON_7: return "Mousebutton 7";
-        default: return sdlk_dynnames[sym - SDLK_NEWLAST];
-        }
-#endif
-    return "";
-}
 
 class uMenuItemInput: uMenuItem{
     uAction      *act;
@@ -446,7 +756,8 @@ public:
 
     virtual ~uMenuItemInput(){}
 
-    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0){
+    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0)
+    {
         DisplayText(REAL(x-.02),y,act->description,selected,alpha,1);
 
         if (active)
@@ -455,30 +766,40 @@ public:
             s << tOutput("$input_press_any_key");
             DisplayText(REAL(x+.02),y,s,selected,alpha,-1);
         }
-        else{
+        else
+        {
             tString s;
 
             bool first=1;
 
-            for(int keysym=sdlk_dynlast-1;keysym>=0;keysym--)
-                if(keymap[keysym] &&
-                        keymap[keysym]->act==act &&
-                        keymap[keysym]->CheckPlayer(ePlayer)){
+            for( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
+            {
+                uBind * bind = (*i)->GetBind();
+                if( bind &&
+                        bind->act==act &&
+                        bind->CheckPlayer(ePlayer) )
+                {
                     if (!first)
                         s << ", ";
                     else
                         first=0;
 
-                    s << keyname(keysym);
+                    s << (*i)->Name();
                 }
+            }
             if(!first)
+            {
                 DisplayText(REAL(x+.02),y,s,selected,alpha,-1);
+            }
             else
+            {
                 DisplayText(REAL(x+.02),y,tOutput("$input_items_unbound"),selected,alpha,-1);
+            }
         }
     }
 
-    virtual void Enter(){
+    virtual void Enter()
+    {
         active=1;
     }
 
@@ -488,101 +809,58 @@ public:
 #ifndef DEDICATED
 
     virtual bool Event(SDL_Event &e){
-        int sym=-1;
-        switch (e.type){
-        case SDL_MOUSEMOTION:
-            if(active){
-                REAL xrel=e.motion.xrel;
-                REAL yrel=-e.motion.yrel;
-
-                if (fabs(xrel)>MREL*fabs(yrel)){ // x motion
-                    if (xrel>MTHRESH) // left
-                        sym=SDLK_MOUSE_X_PLUS;
-                    if (xrel<-MTHRESH) // left
-                        sym=SDLK_MOUSE_X_MINUS;
-                }
-
-                if (fabs(yrel)>MREL*fabs(xrel)){ // x motion
-                    if (yrel>MTHRESH) // left
-                        sym=SDLK_MOUSE_Y_PLUS;
-                    if (yrel<-MTHRESH) // left
-                        sym=SDLK_MOUSE_Y_MINUS;
-                }
-
-                if (sym>0)
-                    active=0;
-            }
-
-            break;
-        case SDL_MOUSEBUTTONDOWN:
-            if(active){
-                int button=e.button.button;
-                if (button<=MOUSE_BUTTONS)
-                    sym=SDLK_MOUSE_BUTTON_1+button-1;
-
-                active=0;
-            }
-            break;
-
-        case SDL_KEYDOWN:{
-                SDL_keysym &c=e.key.keysym;
-                if(!active){
-                    if (c.sym==SDLK_DELETE || c.sym==SDLK_BACKSPACE)
+        if ( e.type == SDL_KEYDOWN )
+        {
+            SDL_keysym &c = e.key.keysym;
+            if(!active)
+            {
+                if (c.sym==SDLK_DELETE || c.sym==SDLK_BACKSPACE)
+                {
+                    // clear all bindings
+                    for( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
                     {
-                        for(int keysym=sdlk_dynlast-1;keysym>=0;keysym--)
-                            if(keymap[keysym] &&
-                                    keymap[keysym]->act==act &&
-                                    keymap[keysym]->CheckPlayer(ePlayer)){
-                                keymap[keysym]=NULL;
-                            }
+                        uBind * bind = (*i)->GetBind();
+                        if( bind &&
+                                bind->act==act &&
+                                bind->CheckPlayer(ePlayer) )
+                        {
+                            (*i)->SetBind( NULL );
+                        }
                         return true;
                     }
-                    return false;
                 }
-
-                active=0;
-
-                if (c.sym!=SDLK_ESCAPE)
-                    sym=c.sym;
-                else
-                    return true;
-            }
-            break;
-#ifndef NOJOYSTICK
-        case SDL_JOYAXISMOTION:
-            if (e.jaxis.value > -16384 && e.jaxis.value < 16384) {
-#if DEBUG
-                std::cout << "JS: Ignoring value of " << e.jaxis.value << "\n";
-#endif
                 return false;
             }
-            sym = joystick_sdlk[e.jaxis.which][0] + (e.jaxis.axis * 2) + ((e.jaxis.value > 0) ? 1 : 0);
-            active = 0;
-#if DEBUG
-            printf("JS: %d,%d,%d is %s\n", e.jaxis.which, e.jaxis.axis, e.jaxis.value, keyname(sym));
-            fflush(stdout);
-#endif
-            break;
-        case SDL_JOYBUTTONDOWN:
-            sym = joystick_sdlk[e.jbutton.which][1] + e.jbutton.button;
-            active = 0;
-            break;
-#endif
-        default:
-            return(false);
+
+            // ignore escape
+            if ( c.sym == SDLK_ESCAPE )
+            {
+                return false;
+            }
         }
 
-        if(sym>=0){
-            if(keymap[sym] &&
-                    keymap[sym]->act==act &&
-                    keymap[sym]->CheckPlayer(ePlayer)){
-                keymap[sym]=NULL;
+        for ( int pass = su_TRANSFORM_PASSES-1; pass >= 0; --pass )
+        {
+            uTransformEventInfo info;
+            uInput * input = su_TransformEvent( e, pass, info );
+
+            if( input && info.value > 0.1 && active )
+            {
+                uBind * bind = input->GetBind();
+                if( bind &&
+                        bind->act==act &&
+                        bind->CheckPlayer(ePlayer))
+                {
+                    input->SetBind( NULL );
+                }
+                else
+                {
+                    input->SetBind( uBindPlayer::NewBind(act,ePlayer) );
+                }
+
+                active = false;
+                return true;
             }
-            else{
-                keymap[sym]=NULL;
-                keymap[sym]=uBindPlayer::NewBind(act,ePlayer);
-            }
-            return true;
         }
         return false;
     }
@@ -669,7 +947,6 @@ void su_InputConfigGlobal(){
 }
 
 
-REAL mouse_sensitivity=REAL(.1);
 REAL key_sensitivity=40;
 static double lastTime=0;
 static REAL ts=0;
@@ -686,20 +963,18 @@ void su_HandleDelayedEvents ()
 
     su_delayed = false;
 
-    for ( int i = sdlk_dynlast - 1; i>=0; --i )
+    for( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
     {
-        if ( keymap[i] )
+        uBind * bind = (*i)->GetBind();
+        if ( bind )
         {
-            keymap[i]->HanldeDelayed();
+            bind->HanldeDelayed();
         }
     }
 }
 
 bool su_HandleEvent(SDL_Event &e, bool delayed ){
 #ifndef DEDICATED
-    int sym=-1;
-    REAL pm=0;
-
     if ( su_delayed && !delayed )
     {
         su_HandleDelayedEvents();
@@ -707,87 +982,43 @@ bool su_HandleEvent(SDL_Event &e, bool delayed ){
 
     su_delayed = delayed;
 
-    // there is nearly alllways a mouse motion tEvent:
-    int xrel=e.motion.xrel;
-    int yrel=-e.motion.yrel;
+    // transform events
+    bool ret = false;
+    for ( int pass = su_TRANSFORM_PASSES-1; pass >= 0; --pass )
+    {
+        uTransformEventInfo info;
+        uInput * input = su_TransformEvent( e, pass, info );
 
-
-    switch (e.type){
-    case SDL_MOUSEMOTION:
-        if ( !su_mouseGrab ||
-                e.motion.x!=sr_screenWidth/2 || e.motion.x!=sr_screenHeight/2)
+        if ( input )
         {
-            if (keymap[SDLK_MOUSE_X_PLUS])
-                keymap[SDLK_MOUSE_X_PLUS]->Activate(xrel*mouse_sensitivity, delayed );
+            // store input state for later repeat
+            if ( info.needsRepeat )
+            {
+                input->SetPressed( info.value > 0 ? info.value : 0 );
+            }
 
-            if (keymap[SDLK_MOUSE_X_MINUS])
-                keymap[SDLK_MOUSE_X_MINUS]->Activate(-xrel*mouse_sensitivity, delayed );
+            // activate binding
+            uBind * bind = input->GetBind();
+            if ( bind )
+            {
+                if ( bind->IsDoubleBind( input ) )
+                {
+                    return true;
+                }
 
-            if (keymap[SDLK_MOUSE_Y_PLUS])
-                keymap[SDLK_MOUSE_Y_PLUS]->Activate(yrel*mouse_sensitivity, delayed );
+                if ( info.needsRepeat && bind->act && bind->act->type == uAction::uINPUT_ANALOG )
+                {
+                    info.value *= ts*key_sensitivity;
+                }
 
-            if (keymap[SDLK_MOUSE_Y_MINUS])
-                keymap[SDLK_MOUSE_Y_MINUS]->Activate(-yrel*mouse_sensitivity, delayed );
-        }
-
-
-        return true; // no fuss: allways pretend to have handled this.
-        break;
-
-    case SDL_MOUSEBUTTONDOWN:
-    case SDL_MOUSEBUTTONUP:{
-            int button=e.button.button;
-            if (button<=MOUSE_BUTTONS){
-                sym=SDLK_MOUSE_BUTTON_1+button-1;
+                ret |= bind->Activate( info.value, delayed );
             }
         }
-        if (e.type==SDL_MOUSEBUTTONDOWN)
-            pm=1;
-        else
-            pm=-1;
-        break;
-
-    case SDL_KEYDOWN:
-        sym=e.key.keysym.sym;
-        pm=1;
-        break;
-
-    case SDL_KEYUP:
-        sym=e.key.keysym.sym;
-        pm=-1;
-        break;
-
-#ifndef NOJOYSTICK
-    case SDL_JOYAXISMOTION:
-        pm = 1;
-        if (e.jaxis.value > -16384 && e.jaxis.value < 16384)
-            pm = -1;
-        sym = joystick_sdlk[e.jaxis.which][0] + (e.jaxis.axis * 2) + ((e.jaxis.value > 0) ? 1 : 0);
-        break;
-
-    case SDL_JOYBUTTONDOWN:
-    case SDL_JOYBUTTONUP:
-        pm = (e.type == SDL_JOYBUTTONDOWN) ? 1 : -1;
-        sym = joystick_sdlk[e.jbutton.which][1] + e.jbutton.button;
-        break;
-#endif
-
-    default:
-        break;
     }
-    if (sym>=0 && keymap[sym]){
-        REAL realpm=pm;
-        if (keymap[sym]->act->type==uAction::uINPUT_ANALOG)
-            pm*=ts*key_sensitivity;
-        pressed[sym]=(realpm>0);
-        if ( keymap[sym]->IsDoubleBind( sym ) )
-            return true;
-        return (keymap[sym]->Activate(pm, delayed ));
 
-    }
-    else
+    return ret;
 #endif
-        return false;
+    return false;
 }
 
 void su_InputSync(){
@@ -799,19 +1030,31 @@ void su_InputSync(){
     //tsSmooth/=REAL(1.1);
     lastTime=time;
 
-    for(int sym=sdlk_dynlast-1;sym>=0;sym--)
-        if (pressed[sym] && keymap[sym] &&
-                keymap[sym]->act->type==uAction::uINPUT_ANALOG)
-            keymap[sym]->Activate(ts*key_sensitivity, su_delayed );
+    // key repeat
+    for( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
+    {
+        uInput * input = *i;
+        uBind * bind = input->GetBind();
+        if( input->GetPressed() > 0 && bind &&
+                bind->act && bind->act->type == uAction::uINPUT_ANALOG )
+        {
+            bind->Activate( ts * key_sensitivity * input->GetPressed(), su_delayed );
+        }
+    }
 }
 
 void su_ClearKeys()
 {
-    for(int sym=sdlk_dynlast-1;sym>=0;sym--)
+    // clears stored keypresses
+    for( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
     {
-        if (pressed[sym] && keymap[sym] )
-            keymap[sym]->Activate(-1, su_delayed );
-        pressed[sym] = false;
+        uInput * input = *i;
+        uBind * bind = input->GetBind();
+        if( input->GetPressed() > 0 && bind )
+        {
+            bind->Activate( -1, su_delayed );
+            input->SetPressed( 0 );
+        }
     }
 }
 
@@ -843,10 +1086,12 @@ uBindPlayer * uBindPlayer::NewBind(std::istream &s)
 uBindPlayer * uBindPlayer::NewBind( uAction * action, int player )
 {
     // see if the bind has an alias
-    for ( int i = sdlk_dynlast-1; i >= 0; --i )
+    for( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
     {
+        uInput * input = *i;
+        uBind * old = input->GetBind();
+
         // compare action
-        uBind * old = keymap[i];
         if ( old && old->act == action )
         {
             uBindPlayer * oldPlayer = dynamic_cast< uBindPlayer * >( old );

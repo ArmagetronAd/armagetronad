@@ -83,7 +83,6 @@ public:
     unsigned short ID() const{return globalID;}
 };
 
-
 // player actions (move,shoot) and global actions (stop game, pause..)
 
 class uActionPlayer:public uAction{
@@ -138,6 +137,8 @@ public:
 // generic keypress/mouse movement binding class
 // *********************************************
 
+class uInput;
+
 class uBind: public tReferencable< uBind >
 {
     friend class uMenuItemInput;
@@ -147,8 +148,8 @@ class uBind: public tReferencable< uBind >
     REAL lastValue_;
     REAL delayedValue_;
 
-    int lastSym_;     //! the last keysym used to activate this
-    double lastTime_; //! the time of the last usage
+    uInput const * lastInput_;     //! the last input used to activate this
+    double lastTime_;              //! the time of the last usage
 
 public:
     uAction *act;
@@ -165,29 +166,37 @@ public:
     void HanldeDelayed();
 
     //! checks if the sym is used for double binding, return true
-    bool IsDoubleBind( int sym );
+    bool IsDoubleBind( uInput const * input );
 };
 
-// extra binds for mouse (and joystick, as soon as SDL supports it) movement:
-#define SDLK_MOUSE_X_PLUS   (SDLK_LAST+1)
-#define SDLK_MOUSE_X_MINUS  (SDLK_LAST+2)
-#define SDLK_MOUSE_Y_PLUS   (SDLK_LAST+3)
-#define SDLK_MOUSE_Y_MINUS  (SDLK_LAST+4)
-#define SDLK_MOUSE_Z_PLUS   (SDLK_LAST+5)
-#define SDLK_MOUSE_Z_MINUS  (SDLK_LAST+6)
-#define SDLK_MOUSE_BUTTON_1 (SDLK_LAST+7)
-#define SDLK_MOUSE_BUTTON_2 (SDLK_LAST+8)
-#define SDLK_MOUSE_BUTTON_3 (SDLK_LAST+9)
-#define SDLK_MOUSE_BUTTON_4 (SDLK_LAST+10)
-#define SDLK_MOUSE_BUTTON_5 (SDLK_LAST+11)
-#define SDLK_MOUSE_BUTTON_6 (SDLK_LAST+12)
-#define SDLK_MOUSE_BUTTON_7 (SDLK_LAST+13)
-#define SDLK_NEWLAST        (SDLK_LAST+14)
-#define SDLK_MAX            512 /* Enough? */
-#define MOUSE_BUTTONS 7
+//! possible input channels (keys, mouse movement/buttons, joystick)
+class uInput
+{
+public:
+    uInput( tString const & persistentID, tString const & name );
+    ~uInput();
 
-// one key_action for every keysym
-// extern tJUST_CONTROLLED_PTR< uBind > keymap[SDLK_MAX];
+    int ID(){ return ID_; }
+    tString const & PersistentID(){ return persistentID_; }
+
+    // the binding of this key
+    void SetBind( uBind * bound ){ bound_ = bound; }
+    uBind * GetBind() const { return bound_; }
+
+    // the pressed status
+    void SetPressed( float pressed ){ pressed_ = pressed; }
+    float GetPressed() const { return pressed_; }
+
+    // a human readable name
+    std::string const Name(){ return name_; }
+private:
+    int ID_;               //!< local ID for this program run
+    tString persistentID_; //!< global ID that does not change over program runs
+    tString name_;         //!< human readable name
+
+    tJUST_CONTROLLED_PTR< uBind > bound_; //!< the binding
+    float pressed_;                       //!< analogue flag indicating whether the key/button was pressed
+};
 
 // *****************
 // Player binds
@@ -264,6 +273,10 @@ void su_InputSync(); // tells the input system that a new frame has been drawn;
 // autorepeat functions may be called.
 void su_ClearKeys(); // clears all keys into the unpressed state.
 
+// initialize keys (and mouse)
+void su_KeyInit();
+
+// initialize joysticks
 void su_JoystickInit();
 
 #endif

@@ -30,22 +30,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // heh, no parameters to document :)
 
 rGLuintObject::rGLuintObject()
-	: object_(0)
+        : object_(0)
 {
 }
 
 //! @return the GLUint representing the object, always guaranteed to be valid
 rGLuintObject::operator GLuint()
 {
-	// auto-generate the object
-	Gen();
-	return object_;
+    // auto-generate the object
+    Gen();
+    return object_;
 }
 
 //! @return true if the object is currently valid (meaning: Gen() has been called after Delete())
 bool rGLuintObject::IsValid() const
 {
-	return object_;
+    return object_;
 }
 
 rGLuintObject::~rGLuintObject()
@@ -54,22 +54,22 @@ rGLuintObject::~rGLuintObject()
 
 void rGLuintObject::Gen()
 {
-	if ( !object_ )
-	{
-		sr_CheckGLError();
-		DoGen();
-		sr_CheckGLError();
-	}
+    if ( !object_ )
+    {
+        sr_CheckGLError();
+        DoGen();
+        sr_CheckGLError();
+    }
 }
 
 void rGLuintObject::Delete()
 {
-	if ( object_ )
-	{
-		sr_CheckGLError();
-		DoDelete();	
-		sr_CheckGLError();
-	}
-	object_ = 0;
+    if ( object_ )
+    {
+        sr_CheckGLError();
+        DoDelete();
+        sr_CheckGLError();
+    }
+    object_ = 0;
 }
 
