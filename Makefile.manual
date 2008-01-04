@@ -1,5 +1,4 @@
 # Parts of the makefile that are not handled by automake
-# spurious commit
 ##################
 # Beautification #
 ##################
