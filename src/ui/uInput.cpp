@@ -61,11 +61,6 @@ bool su_mouseGrab = false;
 static uAction* su_allActions[uMAX_ACTIONS];
 static int     su_allActionsLen = 0;
 
-#ifndef NOJOYSTICK
-#define JOYSTICK_MAX 16
-static int joystick_sdlk[JOYSTICK_MAX][4];
-#endif
-
 uAction::uAction(uAction *&anchor,const char* name,
                  int priority_,
                  uInputType t)
@@ -188,6 +183,16 @@ static uAutoDeleteInput & su_GetAutoDeleteInput()
     return filler;
 }
 
+static uInput * su_NewInput( tString const & ID, tString const & name )
+{
+    return su_GetAutoDeleteInput().Create( ID, name );
+}
+
+static uInput * su_NewInput( char const * ID, char const * name )
+{
+    return su_GetAutoDeleteInput().Create( tString( ID ), tString( name ) );
+}
+
 // class that manages keyboard input
 class uKeyInput
 {
@@ -223,7 +228,7 @@ public:
             }
 
             // store new input key
-            sdl_keys[i] = su_GetAutoDeleteInput().Create( id.str(), tString(ID_Raw) );
+            sdl_keys[i] = su_NewInput( id.str(), tString(ID_Raw) );
         }
     }
 
@@ -241,11 +246,6 @@ static uKeyInput const & su_GetKeyInput()
 }
 
 # define MOUSE_BUTTONS 7
-
-static uInput * su_NewInput( char const * ID, char const * name )
-{
-    return su_GetAutoDeleteInput().Create( tString( ID ), tString( name ) );
-}
 
 // class that manages mouse inout
 class uMouseInput
@@ -266,7 +266,7 @@ public:
             id << "MOUSE_BUTTON_" << i+1;
             std::ostringstream name;
             name << "mouse button " << i+1;
-            button[i] = su_GetAutoDeleteInput().Create( id.str(), name.str() );
+            button[i] = su_NewInput( id.str(), name.str() );
         }
     }
 
@@ -352,7 +352,7 @@ public:
 
             if ( !input )
             {
-                input = su_GetAutoDeleteInput().Create( id, tString("unknown") );
+                input = su_NewInput( id, tString("unknown") );
             }
 
             tASSERT( input );
@@ -458,50 +458,211 @@ static void keyboard_exit()
 }
 
 #ifndef NOJOYSTICK
-static int add_sdlk(const char *desc, ...) {
-    char *mycopy;
-    va_list va;
-    int mclen;
 
-    if (sdlk_dynlast == SDLK_MAX)
-        return -1; /* Too many already! */
+#ifndef DEDICATED
+class uJoystick
+{
+public:
+    // joystick name
+    tString name, internalName;
 
-    va_start(va, desc);
-    mycopy = (char *)malloc(mclen = 1 + vsnprintf(NULL, 0, desc, va));
-    va_end(va);
-    va_start(va, desc);
-    vsnprintf(mycopy, mclen, desc, va);
-    va_end(va);
-    sdlk_dynnames[sdlk_dynlast - SDLK_NEWLAST] = mycopy;
-    return sdlk_dynlast++;
+    // number of compotents
+    int numAxes, numButtons, numBalls, numHats;
+
+    enum Direction
+    {
+        Left = 0,
+        Right = 1,
+        Up = 2,
+        Down = 3
+    };
+
+    uJoystick( int id )
+    {
+        tASSERT( id >= 0 && id < SDL_NumJoysticks() );
+
+        name = SDL_JoystickName( id );
+
+        std::ostringstream iName;
+        iName << "JOYSTICK_";
+        for ( char const * c = name.c_str(); *c; ++c )
+        {
+            if ( isblank( *c ) )
+            {
+                iName << "_";
+            }
+            else
+            {
+                iName << char(toupper( *c ));
+            }
+        }
+
+        internalName = iName.str();
+
+        SDL_Joystick * stick = SDL_JoystickOpen( id );
+        numAxes = SDL_JoystickNumAxes( stick );
+        numButtons = SDL_JoystickNumButtons( stick );
+        numBalls = SDL_JoystickNumBalls( stick );
+        numHats = SDL_JoystickNumHats( stick );
+
+        // populate input types
+        if ( numAxes >= 1 )
+        {
+            axes[0].push_back( su_NewInput( GetPersistentID( "AXIS", 0, "-" ), GetName( "left" ) ) );
+            axes[1].push_back( su_NewInput( GetPersistentID( "AXIS", 0, "+" ), GetName( "right" ) ) );
+        }
+
+        if ( numAxes >= 2 )
+        {
+            axes[0].push_back( su_NewInput( GetPersistentID( "AXIS", 1, "-" ), GetName( "up" ) ) );
+            axes[1].push_back( su_NewInput( GetPersistentID( "AXIS", 1, "+" ), GetName( "down" ) ) );
+        }
+
+        for( int axis = 2; axis < numAxes; ++axis )
+        {
+            axes[0].push_back( su_NewInput( GetPersistentID( "AXIS", axis, "-" ), GetName( "axis", axis, "-" ) ) );
+            axes[1].push_back( su_NewInput( GetPersistentID( "AXIS", axis, "+" ), GetName( "axis", axis, "+" ) ) );
+        }
+
+        for( int button = 0; button < numButtons; ++button )
+        {
+            buttons.push_back( su_NewInput( GetPersistentID( "BUTTON", button ), GetName( "button", button ) ) );
+        }
+
+        char const * directionInternal[] = { "LEFT", "RIGHT", "UP", "DOWN" };
+        char const * directionHuman[] = { "left", "right", "up", "down" };
+
+        for ( int dir = 0; dir < 4; ++dir )
+        {
+            char const * internal = directionInternal[dir];
+            char const * human = directionHuman[dir];
+            
+            for( int ball = 0; ball < numBalls; ++ball )
+            {
+                balls[dir].push_back( su_NewInput( GetPersistentID( "BALL", ball, internal ), GetName( "ball", ball, human ) ) );
+            }
+
+            for( int hat = 0; hat < numHats; ++hat )
+            {
+                hats[dir].push_back( su_NewInput( GetPersistentID( "HAT", hat, internal ), GetName( "hat", hat, human ) ) );
+            }
+        }
+    }
+
+    uInput * GetAxis( int index, int dir )
+    {
+        tASSERT( index >= 0 && index < numAxes );
+        tASSERT( 0 == dir || 1 == dir );
+        
+        axes[1-dir][index]->SetPressed(0);
+        return axes[dir][index];
+    }
+
+    uInput * GetButton( int index )
+    {
+        tASSERT( index >= 0 && index < numButtons );
+        
+        return buttons[index];
+    }
+
+    uInput * GetBall( int index, Direction dir )
+    {
+        tASSERT( index >= 0 && index < numBalls );
+        
+        balls[dir ^ 1][index]->SetPressed(0);
+        return balls[dir][index];
+    }
+
+    uInput * GetHat( int index, Direction dir )
+    {
+        tASSERT( index >= 0 && index < numHats );
+
+        hats[dir ^ 1][index]->SetPressed(0);
+        return hats[dir][index];
+    }
+private:
+    // various input arrays 
+    uInputs axes[2], buttons, balls[4], hats[4];
+    
+    // returns an uInput unique name
+    tString GetPersistentID( char const * type, int subID, char const * suffix = NULL ) const
+    {
+        std::ostringstream o;
+        o << internalName << "_" << type << "_" << subID;
+        if ( suffix )
+        {
+            o << "_" << suffix;
+        }
+        return o.str();
+    }
+
+    // same for the public name
+    tString GetName( char const * type, int subID, char const * suffix = NULL ) const
+    {
+        std::ostringstream o;
+        o << name << " " << type << " " << subID;
+        if ( suffix )
+        {
+            o << " " << suffix;
+        }
+        return o.str();
+    }
+
+    // special axes: x and y
+    tString GetName( char const * type ) const
+    {
+        std::ostringstream o;
+        o << name << " " << type;
+        return o.str();
+    }
+};
+#endif
+
+// class that manages joysticks
+class uJoystickInput
+{
+public:
+    uJoystickInput()
+    {
+        // create joysticks
+        int numJoysticks = SDL_NumJoysticks();
+        for ( int i = 0; i < numJoysticks; ++i )
+        {
+            joysticks.push_back( new uJoystick( i ) );
+        }
+    }
+
+    ~uJoystickInput()
+    {
+        // delete joysticks
+        for ( std::vector< uJoystick * >::iterator iter = joysticks.begin(); iter != joysticks.end(); ++iter )
+        {
+            delete(*iter);
+            *iter = 0;
+        }
+    }
+
+    // array of joysticks
+    std::vector< uJoystick * > joysticks;
+};
+
+static uJoystickInput & su_GetJoystickInput()
+{
+    static uJoystickInput filler;
+    return filler;
 }
 
-void su_JoystickInit() {
-    int joycount = SDL_NumJoysticks(), i, j, na;
-    SDL_Joystick *cur;
+static uJoystick * su_GetJoystick( int id )
+{
+    uJoystickInput & joysticks = su_GetJoystickInput();
+    tASSERT( id >= 0 && id < (int)joysticks.joysticks.size() );
 
-    if (joycount > JOYSTICK_MAX)
-        joycount = JOYSTICK_MAX;
+    return joysticks.joysticks[id];
+}
 
-    SDL_JoystickEventState(SDL_ENABLE);
-    for (i = 0; i < joycount; ++i) {
-        cur = SDL_JoystickOpen(i);
-        na = SDL_JoystickNumAxes(cur);
-        joystick_sdlk[i][0] = sdlk_dynlast;
-        for (j = 0; j < na; ++j) {
-            add_sdlk("Joystick %d Axis %d Decrease", i, j);
-            add_sdlk("Joystick %d Axis %d Increase", i, j);
-        }
-        na = SDL_JoystickNumButtons(cur);
-        joystick_sdlk[i][1] = sdlk_dynlast;
-        for (j = 0; j < na; ++j) {
-            add_sdlk("Joystick %d Button %d", i, j);
-        }
-        /* TODO: Balls, Hats, Buttons */
-    }
-#ifdef DEBUG
-    std::cout << joycount << " joystick" << (joycount == 1 ? "" : "s") << " initialized\n";
-#endif
+void su_JoystickInit()
+{
+    su_GetJoystickInput();
 }
 #endif
 
@@ -711,26 +872,18 @@ static uInput * su_TransformEvent( SDL_Event & e, int count, uTransformEventInfo
         if ( count != 0 )
             break;
 
-        if (e.jaxis.value > -16384 && e.jaxis.value < 16384) {
-#if DEBUG
-            std::cout << "JS: Ignoring value of " << e.jaxis.value << "\n";
-#endif
-            return false;
-        }
-        sym = joystick_sdlk[e.jaxis.which][0] + (e.jaxis.axis * 2) + ((e.jaxis.value > 0) ? 1 : 0);
-        active = 0;
-#if DEBUG
-        printf("JS: %d,%d,%d is %s\n", e.jaxis.which, e.jaxis.axis, e.jaxis.value, keyname(sym));
-        fflush(stdout);
-#endif
+        input = su_GetJoystick( e.jaxis.which )->GetAxis( e.jaxis.axis, e.jaxis.value > 0 ? 1 : 0 );
+        info.value = fabs( e.jaxis.value )/32768;
+
         break;
     case SDL_JOYBUTTONDOWN:
     case SDL_JOYBUTTONUP:
         if ( count != 0 )
             break;
+        
+        input = su_GetJoystick( e.jbutton.which )->GetButton( e.jbutton.button );
+        info.value = ( e.type == SDL_JOYBUTTONDOWN ) ? 1 : -1;
 
-        sym = joystick_sdlk[e.jbutton.which][1] + e.jbutton.button;
-        active = 0;
         break;
 #endif
     default:
