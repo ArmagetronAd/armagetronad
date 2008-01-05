@@ -946,11 +946,13 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
                                         joystick->GetHat( hat, uJoystick::Right ),
                                         1 ) );
                 }
+
+                lastDir = newDir;
             }
 
             // up/down hat motion
             {
-                int & lastDir = joystick->GetHatDirection( hat, 0 );
+                int & lastDir = joystick->GetHatDirection( hat, 1 );
                 int newDir = 
                 ( ( hatDirection & SDL_HAT_UP ) ? 1 : 0 ) + 
                 ( ( hatDirection & SDL_HAT_DOWN ) ? -1 : 0 );
@@ -984,6 +986,8 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
                                         joystick->GetHat( hat, uJoystick::Down ),
                                         1 ) );
                 }
+
+                lastDir = newDir;
             }
         }
         break;
