@@ -1813,7 +1813,7 @@ void eCamera::Timestep(REAL ts){
             // fetch the relevant turning speed
             REAL turnSpeed = ( newmode == CAMERA_IN || newmode == CAMERA_SMART_IN ) ? s_inTurnSpeed : customTurnSpeed;
 
-            eCoord cycleDir = CenterCycleDir();
+            eCoord cycleDir = CenterCamDir();
             newdir=dir+cycleDir*(turnSpeed*ts);
 
             // test if we're looking against the current driving direction

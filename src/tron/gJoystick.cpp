@@ -41,17 +41,20 @@ static uActionPlayer sg_JoyGlance("JOY_GLANCE", -2);
 //! process input events
 bool gJoystick::Act( uActionPlayer * act, REAL value )
 {
+    if ( joyDirection_.NormSquared() > .5 )
+    {
+        lastCommand_ = tSysTimeFloat();
+    }
+
     if ( ActInternal( act, value ) )
     {
         // update directions
         if ( joyDirection_.NormSquared() > .5 )
         {
-            lastCommand_ = tSysTimeFloat();
-
             // fetch driving direction if required
             if ( driveDirection_.NormSquared() < .1 )
             {
-                con << joyDirection_ << "\n";
+                // con << joyDirection_ << "\n";
 
                 driveDirection_ = cycle_->Direction();
                 driveDirection_.Normalize();
@@ -93,8 +96,8 @@ void gJoystick::Turn()
 {
     if ( joyDirection_.NormSquared() < .1 && lastCommand_ < tSysTimeFloat() - .03 )
     {
-        if ( driveDirection_.NormSquared() > .5 )
-            con << joyDirection_ << "\n";
+        // if ( driveDirection_.NormSquared() > .5 )
+        // con << joyDirection_ << "\n";
 
         // joystick was released, reeset driving direction and camera direction.
         driveDirection_ = tCoord();
@@ -129,24 +132,27 @@ void gJoystick::Turn()
     REAL straight = ( straightOn - driveDirection_ ).NormSquared();
 
     // possibly turn
-    if ( left < right && left < straight *.9 )
+    if ( left < right && left < straight * ( lastTurn_ != 1 ? 2 : .8 ) )
     {
         if ( cycle_->CanMakeTurn( -1 ) )
         {
             cycle_->Turn( -1 );
+            lastTurn_ = -1;
         }
     }
-    else if ( left > right && right < straight * .9  )
+    else if ( left > right && right < straight * ( lastTurn_ != -1 ? 2 : .8 )  )
     {
         if( cycle_->CanMakeTurn( +1 ) )
         {
             cycle_->Turn( +1 );
+            lastTurn_ = +1;
         }
     }
     else
     {
         // not much use repeating this calculation until new input arrives
         turnRequested_ = false;
+        lastTurn_ = 0;
     }
 }
 

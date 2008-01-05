@@ -3433,18 +3433,18 @@ REAL gCycle::PathfindingModifier( const eWall *w ) const
 
 
 bool gCycle::Act(uActionPlayer *Act, REAL x){
+    // delegate to joystick
+    if ( joystick_ && joystick_->Act( Act, x ) )
+    {
+        return true;
+    }
+
     // don't accept premature input
     if (se_mainGameTimer && ( se_mainGameTimer->speed <= 0 || se_mainGameTimer->Time() < -1 ) )
         return false;
 
     if (!Alive() && sn_GetNetState()==nSERVER)
         RequestSync(false);
-
-    // delegate to joystick
-    if ( joystick_ && joystick_->Act( Act, x ) )
-    {
-        return true;
-    }
 
     if(se_turnLeft==*Act && x>.5){
         //SendControl(lastTime,&se_turnLeft,1);
@@ -4563,6 +4563,8 @@ eCoord gCycle::CamDir() const
 
 eCoord gCycle::Direction() const
 {
+    return gCycleMovement::Direction();
+
     if ( joystick_ && joystick_->cameraDirection_.NormSquared() > .25 )
     {
         return joystick_->cameraDirection_;

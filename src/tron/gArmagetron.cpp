@@ -578,6 +578,8 @@ int main(int argc,char **argv){
         atexit(SDL_Quit);
         // su_KeyInit();
 
+        su_KeyInit();
+
 #ifndef NOJOYSTICK
         if (SDL_InitSubSystem(SDL_INIT_JOYSTICK))
             std::cout << "Error initializing joystick subsystem\n";
@@ -590,8 +592,6 @@ int main(int argc,char **argv){
         }
 #endif // NOJOYSTICK
 #endif // DEDICATED
-
-        su_KeyInit();
 
         // tERR_MESSAGE( "Initializing player data." );
         ePlayer::Init();

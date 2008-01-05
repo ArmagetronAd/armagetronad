@@ -116,7 +116,7 @@ uInput::uInput( tString const & persistentID, tString const & name )
 uInput::~uInput()
 {
     su_inputs[ID_] = 0;
-    su_inputMap.erase( su_inputMap.find( persistentID_ ) );
+    // su_inputMap.erase( su_inputMap.find( persistentID_ ) );
 }
 
 static uInput * su_GetInput( tString const & persistentID )
@@ -211,6 +211,8 @@ public:
 
             // store new input key
             sdl_keys[i] = su_NewInput( id.str(), tString(ID_Raw) );
+
+            tASSERT( sdl_keys[i]->ID() == i );
         }
     }
 
