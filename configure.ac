@@ -136,8 +136,8 @@ fi
 
 AC_ARG_ENABLE(joystick,
 	AC_HELP_STRING([--enable-joystick],
-		[enable joystick support (default=disabled)]),,
-enable_joystick=no)
+		[enable joystick support (default=enabled)]),,
+enable_joystick=yes)
 
 AC_ARG_ENABLE(respawn,
 	AC_HELP_STRING([--enable-respawn],

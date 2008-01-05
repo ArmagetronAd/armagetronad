@@ -600,7 +600,7 @@ private:
     tString GetName( char const * type, int subID, char const * suffix = NULL ) const
     {
         std::ostringstream o;
-        o << name << " " << type << " " << subID;
+        o << name << " " << type << " " << subID+1;
         if ( suffix )
         {
             o << " " << suffix;
@@ -663,6 +663,7 @@ static uJoystick * su_GetJoystick( int id )
 void su_JoystickInit()
 {
     su_GetJoystickInput();
+    SDL_JoystickEventState( SDL_ENABLE );
 }
 #endif
 
