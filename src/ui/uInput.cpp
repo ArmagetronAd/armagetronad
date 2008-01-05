@@ -463,6 +463,8 @@ static void keyboard_exit()
 class uJoystick
 {
 public:
+    int id;
+
     // joystick name
     tString name, internalName;
 
@@ -477,7 +479,7 @@ public:
         Down = 3
     };
 
-    uJoystick( int id )
+    uJoystick( int id_ ): id( id_ )
     {
         tASSERT( id >= 0 && id < SDL_NumJoysticks() );
 
@@ -600,7 +602,7 @@ private:
     tString GetName( char const * type, int subID, char const * suffix = NULL ) const
     {
         std::ostringstream o;
-        o << name << " " << type << " " << subID+1;
+        o << "Joystick " << id+1 << " " << type << " " << subID+1;
         if ( suffix )
         {
             o << " " << suffix;
@@ -612,7 +614,7 @@ private:
     tString GetName( char const * type ) const
     {
         std::ostringstream o;
-        o << name << " " << type;
+        o << "Joystick " << id+1 << " " << type;
         return o.str();
     }
 };
