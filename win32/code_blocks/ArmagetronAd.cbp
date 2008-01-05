@@ -41,7 +41,6 @@
 				<Option compiler="0"/>
 				<Option projectResourceIncludeDirsRelation="0"/>
 				<Compiler>
-					<Add option="-O2"/>
 					<Add option="-W"/>
 					<Add option="-g"/>
 					<Add option="-DDEBUG"/>
@@ -1010,12 +1009,6 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
-		<Unit filename="..\..\src\thirdparty\shttpd\shttpd.c">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
-		</Unit>
 		<Unit filename="..\..\src\thirdparty\shttpd\shttpd.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
@@ -1875,6 +1868,20 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
+		<Unit filename="..\..\src\tron\gJoystick.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tron\gJoystick.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
 		<Unit filename="..\..\src\tron\gLanguageMenu.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
@@ -2232,9 +2239,6 @@
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
-			<Breakpoint line="510" enabled="1" pass="0" />
-			<Breakpoint line="670" enabled="1" pass="0" />
-			<Breakpoint line="684" enabled="1" pass="0" />
 		</Unit>
 		<Unit filename="..\..\src\ui\uInput.h">
 			<Option compilerVar=""/>
@@ -2268,12 +2272,6 @@
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
-		</Unit>
-		<Unit filename="..\..\src\ui\uWebinterface.cpp">
-			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
