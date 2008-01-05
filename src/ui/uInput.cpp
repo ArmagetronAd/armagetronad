@@ -326,15 +326,11 @@ public:
                 {
                     input = su_inputs[ value ];
                 }
-                else
-                {
-                    return;
-                }
             }
 
             if ( !input )
             {
-                input = su_NewInput( id, tString("unknown") );
+                input = su_NewInput( id, tString("") );
             }
 
             tASSERT( input );
@@ -914,8 +910,8 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
             {
                 int & lastDir = joystick->GetHatDirection( hat, 0 );
                 int newDir =
-                ( ( hatDirection & SDL_HAT_LEFT ) ? 1 : 0 ) +
-                ( ( hatDirection & SDL_HAT_RIGHT ) ? -1 : 0 );
+                ( ( hatDirection & SDL_HAT_LEFT ) ? +1 : 0 ) +
+                ( ( hatDirection & SDL_HAT_RIGHT ) ? 1 : 0 );
 
                 // negate previous events
                 if ( lastDir < 0 && newDir >= 0 )
@@ -954,8 +950,8 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
             {
                 int & lastDir = joystick->GetHatDirection( hat, 1 );
                 int newDir =
-                ( ( hatDirection & SDL_HAT_UP ) ? 1 : 0 ) +
-                ( ( hatDirection & SDL_HAT_DOWN ) ? -1 : 0 );
+                ( ( hatDirection & SDL_HAT_UP ) ? -1 : 0 ) +
+                ( ( hatDirection & SDL_HAT_DOWN ) ? 1 : 0 );
 
                 // negate previous events
                 if ( lastDir < 0 && newDir >= 0 )
@@ -1032,7 +1028,7 @@ public:
             for( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
             {
                 uBind * bind = (*i)->GetBind();
-                if( bind &&
+                if( bind && (*i)->Name().size() > 0 &&
                         bind->act==act &&
                         bind->CheckPlayer(ePlayer) )
                 {
