@@ -538,7 +538,7 @@ public:
         {
             char const * internal = directionInternal[dir];
             char const * human = directionHuman[dir];
-            
+
             for( int ball = 0; ball < numBalls; ++ball )
             {
                 balls[dir].push_back( su_NewInput( GetPersistentID( "BALL", ball, internal ), GetName( "ball", ball, human ) ) );
@@ -557,7 +557,7 @@ public:
     {
         tASSERT( index >= 0 && index < numAxes );
         tASSERT( 0 == dir || 1 == dir );
-        
+
         axes[1-dir][index]->SetPressed(0);
         return axes[dir][index];
     }
@@ -565,14 +565,14 @@ public:
     uInput * GetButton( int index )
     {
         tASSERT( index >= 0 && index < numButtons );
-        
+
         return buttons[index];
     }
 
     uInput * GetBall( int index, Direction dir )
     {
         tASSERT( index >= 0 && index < numBalls );
-        
+
         balls[dir ^ 1][index]->SetPressed(0);
         return balls[dir][index];
     }
@@ -593,7 +593,7 @@ public:
         return hatDirection[index].dir[axis];
     }
 private:
-    // various input arrays 
+    // various input arrays
     uInputs axes[2], buttons, balls[4], hats[4];
 
     struct HatDirections
@@ -636,7 +636,6 @@ private:
         return o.str();
     }
 };
-#endif
 
 // class that manages joysticks
 class uJoystickInput
@@ -685,6 +684,7 @@ void su_JoystickInit()
     su_GetJoystickInput();
     SDL_JoystickEventState( SDL_ENABLE );
 }
+#endif
 #endif
 
 static tInitExit keyboard_ie(&keyboard_init, &keyboard_exit);
@@ -901,7 +901,7 @@ static uInput * su_TransformEvent( SDL_Event & e, int count, uTransformEventInfo
     case SDL_JOYBUTTONUP:
         if ( count != 0 )
             break;
-        
+
         input = su_GetJoystick( e.jbutton.which )->GetButton( e.jbutton.button );
         info.value = ( e.type == SDL_JOYBUTTONDOWN ) ? 1 : -1;
 
