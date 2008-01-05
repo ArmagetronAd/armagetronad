@@ -7,11 +7,11 @@
 		<Project filename="..\..\..\winlibs\win32\code_blocks\SDL.cbp"/>
 		<Project filename="..\..\..\winlibs\win32\code_blocks\SDL_image.cbp"/>
 		<Project filename="..\..\..\winlibs\win32\code_blocks\mikmod.cbp"/>
-		<Project filename="..\..\..\winlibs\win32\code_blocks\libogg.cbp" active="1"/>
+		<Project filename="..\..\..\winlibs\win32\code_blocks\libogg.cbp"/>
 		<Project filename="..\..\..\winlibs\win32\code_blocks\libvorbis.cbp"/>
 		<Project filename="..\..\..\winlibs\win32\code_blocks\libvorbisfile.cbp"/>
 		<Project filename="..\..\..\winlibs\win32\code_blocks\FTGL.cbp"/>
 		<Project filename="..\..\..\winlibs\win32\code_blocks\SDL_mixer.cbp"/>
-		<Project filename="ArmagetronAd.cbp"/>
+		<Project filename="ArmagetronAd.cbp" active="1"/>
 	</Workspace>
 </CodeBlocks_workspace_file>

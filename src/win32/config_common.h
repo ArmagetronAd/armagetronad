@@ -43,7 +43,7 @@
 #endif
 
 // for now, no joystick support in Windows
-#define NOJOYSTICK 1
+// #define NOJOYSTICK 1
 
 // Define this for the particle library
 #define PARTICLEDLL_EXPORTS
