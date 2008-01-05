@@ -21,7 +21,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -42,7 +42,7 @@ class gJoystick
     friend class gCycle;
 public:
     gJoystick( gCycleMovement * cycle )
-    : cycle_( cycle ), glance_( false ), turnRequested_( false )
+    : cycle_( cycle ), lastCommand_( 0 ), glance_( false ), turnRequested_( false )
     {
     }
 
@@ -58,6 +58,8 @@ private:
     tCoord cameraDirection_; //!< the direction the camera is supposed to look in
     tCoord driveDirection_;  //!< the direction the cycle is supposed to drive in
     tCoord joyDirection_;    //!< direction the joystick is currently pointing in
+
+    double lastCommand_;     //!< last time the joystick was clearly pushed into some direction
 
     bool glance_;            //!< whether the glance button is pressed
     bool turnRequested_;     //!< internal flag indicating further turns may be required

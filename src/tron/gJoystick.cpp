@@ -21,7 +21,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gCycleMovement.h"
 #include "uInput.h"
 #include "eGrid.h"
+#include "tSysTime.h"
 
 static uActionPlayer sg_JoyLeft("JOY_LEFT", -4);
 static uActionPlayer sg_JoyRight("JOY_RIGHT", -4);
@@ -42,23 +43,27 @@ bool gJoystick::Act( uActionPlayer * act, REAL value )
 {
     if ( ActInternal( act, value ) )
     {
-        // fetch driving direction if required
-        if ( driveDirection_.NormSquared() < .25 )
-        {
-            driveDirection_ = cycle_->Direction();
-            driveDirection_.Normalize();
-        }
-
-        // fetch camera direction if required
-        if ( cameraDirection_.NormSquared() < .25 )
-        {
-            cameraDirection_ = cycle_->CamDir();
-            cameraDirection_.Normalize();
-        }
-                
         // update directions
-        if ( joyDirection_.NormSquared() > .25 )
+        if ( joyDirection_.NormSquared() > .5 )
         {
+            lastCommand_ = tSysTimeFloat();
+
+            // fetch driving direction if required
+            if ( driveDirection_.NormSquared() < .1 )
+            {
+                con << joyDirection_ << "\n";
+
+                driveDirection_ = cycle_->Direction();
+                driveDirection_.Normalize();
+            }
+
+            // fetch camera direction if required
+            if ( cameraDirection_.NormSquared() < .1 )
+            {
+                cameraDirection_ = cycle_->CamDir();
+                cameraDirection_.Normalize();
+            }
+
             tCoord dir = joyDirection_;
             dir.Normalize();
             if ( glance_ )
@@ -70,17 +75,11 @@ bool gJoystick::Act( uActionPlayer * act, REAL value )
             {
                 // adapt driving direction to view direction
                 driveDirection_ = cameraDirection_.Turn( dir );
-
-                // possibly turn
-                turnRequested_ = true;
-                Turn();
             }
-        }
-        else
-        {
-            // joystick was released, reeset driving direction and camera direction.
-            driveDirection_ = tCoord();
-            cameraDirection_ = tCoord();
+
+            // possibly turn
+            turnRequested_ = true;
+            // Turn();
         }
 
         return true;
@@ -92,6 +91,17 @@ bool gJoystick::Act( uActionPlayer * act, REAL value )
 //! turn the cycle
 void gJoystick::Turn()
 {
+    if ( joyDirection_.NormSquared() < .1 && lastCommand_ < tSysTimeFloat() - .03 )
+    {
+        if ( driveDirection_.NormSquared() > .5 )
+            con << joyDirection_ << "\n";
+
+        // joystick was released, reeset driving direction and camera direction.
+        driveDirection_ = tCoord();
+        cameraDirection_ = tCoord();
+        return;
+    }
+
     // nothing to do
     if ( !turnRequested_ )
     {
@@ -107,17 +117,17 @@ void gJoystick::Turn()
     eCoord leftTurn = grid->GetDirection( windingLeft );
     eCoord rightTurn = grid->GetDirection( windingRight );
     eCoord straightOn = grid->GetDirection( winding );
-    
+
     // normalize them (axes may be unnormalized)
     leftTurn.Normalize();
     rightTurn.Normalize();
     straightOn.Normalize();
-    
+
     // calculate distances between desired and possible driving directions
     REAL left     = ( leftTurn - driveDirection_ ).NormSquared();
     REAL right    = ( rightTurn - driveDirection_ ).NormSquared();
     REAL straight = ( straightOn - driveDirection_ ).NormSquared();
-    
+
     // possibly turn
     if ( left < right && left < straight *.9 )
     {

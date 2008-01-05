@@ -810,11 +810,11 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
             REAL xrel=e.motion.xrel;
             if (xrel > 0) // right
             {
-                info.push_back( uTransformEventInfo( 
+                info.push_back( uTransformEventInfo(
                                     su_GetMouseInput().x_minus,
                                     0,
                                     false ) );
-                info.push_back( uTransformEventInfo( 
+                info.push_back( uTransformEventInfo(
                                     su_GetMouseInput().x_plus,
                                     xrel * mouse_sensitivity,
                                     false ) );
@@ -822,11 +822,11 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
 
             if (xrel < 0) // left
             {
-                info.push_back( uTransformEventInfo( 
+                info.push_back( uTransformEventInfo(
                                     su_GetMouseInput().x_plus,
                                     0,
                                     false ) );
-                info.push_back( uTransformEventInfo( 
+                info.push_back( uTransformEventInfo(
                                     su_GetMouseInput().x_minus,
                                     -xrel * mouse_sensitivity,
                                     false ) );
@@ -836,22 +836,22 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
             REAL yrel=-e.motion.yrel;
             if (yrel>0) // up
             {
-                info.push_back( uTransformEventInfo( 
+                info.push_back( uTransformEventInfo(
                                     su_GetMouseInput().y_minus,
                                     0,
                                     false ) );
-                info.push_back( uTransformEventInfo( 
+                info.push_back( uTransformEventInfo(
                                     su_GetMouseInput().y_plus,
                                     yrel * mouse_sensitivity,
                                     false ) );
             }
             if (yrel<0) // down
             {
-                info.push_back( uTransformEventInfo( 
+                info.push_back( uTransformEventInfo(
                                     su_GetMouseInput().y_plus,
                                     0,
                                     false ) );
-                info.push_back( uTransformEventInfo( 
+                info.push_back( uTransformEventInfo(
                                     su_GetMouseInput().y_minus,
                                     -yrel * mouse_sensitivity,
                                     false ) );
@@ -864,7 +864,7 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
             int button=e.button.button;
             if (button<=MOUSE_BUTTONS)
             {
-                info.push_back( uTransformEventInfo( 
+                info.push_back( uTransformEventInfo(
                                     su_GetMouseInput().button[ button ],
                                     ( e.type == SDL_MOUSEBUTTONDOWN ) ? 1 : 0 ) );
             }
@@ -874,11 +874,11 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
     case SDL_KEYUP:
     {
         SDL_keysym &c = e.key.keysym;
-        
-        info.push_back( uTransformEventInfo( 
+
+        info.push_back( uTransformEventInfo(
                             su_GetKeyInput().sdl_keys[ c.sym ],
                             ( e.type == SDL_KEYDOWN ) ? 1 : 0 ) );
-        
+
         break;
     }
 #ifndef NOJOYSTICK
@@ -887,10 +887,10 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
         uJoystick * joystick = su_GetJoystick( e.jaxis.which );
         int dir = e.jaxis.value > 0 ? 1 : 0;
 
-        info.push_back( uTransformEventInfo( 
+        info.push_back( uTransformEventInfo(
                             joystick->GetAxis( e.jaxis.axis, 1-dir ),
                             0 ) );
-        info.push_back( uTransformEventInfo( 
+        info.push_back( uTransformEventInfo(
                             joystick->GetAxis( e.jaxis.axis, dir ),
                             fabs( e.jaxis.value )/32768 ) );
 
@@ -898,7 +898,7 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
     }
     case SDL_JOYBUTTONDOWN:
     case SDL_JOYBUTTONUP:
-        info.push_back( uTransformEventInfo( 
+        info.push_back( uTransformEventInfo(
                             su_GetJoystick( e.jbutton.which )->GetButton( e.jbutton.button ),
                             ( e.type == SDL_JOYBUTTONDOWN ) ? 1 : 0 ) );
         break;
@@ -909,25 +909,25 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
             uJoystick * joystick = su_GetJoystick( e.jhat.which );
             int hat = e.jhat.hat;
             int hatDirection = e.jhat.value;
-            
+
             // left/right hat motion
             {
                 int & lastDir = joystick->GetHatDirection( hat, 0 );
-                int newDir = 
-                ( ( hatDirection & SDL_HAT_LEFT ) ? 1 : 0 ) + 
+                int newDir =
+                ( ( hatDirection & SDL_HAT_LEFT ) ? 1 : 0 ) +
                 ( ( hatDirection & SDL_HAT_RIGHT ) ? -1 : 0 );
 
                 // negate previous events
                 if ( lastDir < 0 && newDir >= 0 )
                 {
-                    info.push_back( uTransformEventInfo( 
+                    info.push_back( uTransformEventInfo(
                                         joystick->GetHat( hat, uJoystick::Left ),
                                         0 ) );
                 }
 
                 if ( lastDir > 0 && newDir <= 0 )
                 {
-                    info.push_back( uTransformEventInfo( 
+                    info.push_back( uTransformEventInfo(
                                         joystick->GetHat( hat, uJoystick::Right ),
                                         0 ) );
                 }
@@ -935,14 +935,14 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
                 // create new events
                 if ( lastDir >= 0 && newDir < 0 )
                 {
-                    info.push_back( uTransformEventInfo( 
+                    info.push_back( uTransformEventInfo(
                                         joystick->GetHat( hat, uJoystick::Left ),
                                         1 ) );
                 }
 
                 if ( lastDir <= 0 && newDir > 0 )
                 {
-                    info.push_back( uTransformEventInfo( 
+                    info.push_back( uTransformEventInfo(
                                         joystick->GetHat( hat, uJoystick::Right ),
                                         1 ) );
                 }
@@ -953,21 +953,21 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
             // up/down hat motion
             {
                 int & lastDir = joystick->GetHatDirection( hat, 1 );
-                int newDir = 
-                ( ( hatDirection & SDL_HAT_UP ) ? 1 : 0 ) + 
+                int newDir =
+                ( ( hatDirection & SDL_HAT_UP ) ? 1 : 0 ) +
                 ( ( hatDirection & SDL_HAT_DOWN ) ? -1 : 0 );
 
                 // negate previous events
                 if ( lastDir < 0 && newDir >= 0 )
                 {
-                    info.push_back( uTransformEventInfo( 
+                    info.push_back( uTransformEventInfo(
                                         joystick->GetHat( hat, uJoystick::Up ),
                                         0 ) );
                 }
 
                 if ( lastDir > 0 && newDir <= 0 )
                 {
-                    info.push_back( uTransformEventInfo( 
+                    info.push_back( uTransformEventInfo(
                                         joystick->GetHat( hat, uJoystick::Down ),
                                         0 ) );
                 }
@@ -975,14 +975,14 @@ static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo >
                 // create new events
                 if ( lastDir >= 0 && newDir < 0 )
                 {
-                    info.push_back( uTransformEventInfo( 
+                    info.push_back( uTransformEventInfo(
                                         joystick->GetHat( hat, uJoystick::Up ),
                                         1 ) );
                 }
 
                 if ( lastDir <= 0 && newDir > 0 )
                 {
-                    info.push_back( uTransformEventInfo( 
+                    info.push_back( uTransformEventInfo(
                                         joystick->GetHat( hat, uJoystick::Down ),
                                         1 ) );
                 }
@@ -1083,8 +1083,8 @@ public:
                         {
                             (*i)->SetBind( NULL );
                         }
-                        return true;
                     }
+                    return true;
                 }
                 return false;
             }
@@ -1103,7 +1103,7 @@ public:
         for ( std::vector< uTransformEventInfo >::const_iterator i = events.begin(); i != events.end(); ++i )
         {
             uTransformEventInfo const & info = *i;
-            if( info.input && info.value > 0.1 && active )
+            if( info.input && info.value > 0.5 && active )
             {
                 uBind * bind = info.input->GetBind();
                 if( bind &&
@@ -1116,7 +1116,7 @@ public:
                 {
                     info.input->SetBind( uBindPlayer::NewBind(act,ePlayer) );
                 }
-                
+
                 active = false;
                 return true;
             }
@@ -1247,11 +1247,11 @@ bool su_HandleEvent(SDL_Event &e, bool delayed ){
 
     std::vector< uTransformEventInfo > events;
     su_TransformEvent( e, events );
-    
+
     for ( std::vector< uTransformEventInfo >::const_iterator i = events.begin(); i != events.end(); ++i )
     {
         uTransformEventInfo info = *i;
-        
+
         if ( info.input )
         {
             // store input state for later repeat
