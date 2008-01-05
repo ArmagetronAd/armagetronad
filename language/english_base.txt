@@ -934,6 +934,19 @@ input_cycle_turn_right_help	Makes a 90 degrees turn to the right
 input_cycle_turn_left_text	Turn left
 input_cycle_turn_left_help	Makes a 90 degrees turn to the left
 
+input_cycle_turn_left_text	Turn left
+input_cycle_turn_left_help	Makes a 90 degrees turn to the left
+
+input_joy_left_text         Joystick left
+input_joy_left_help         Lets the cycle drive left relative to the current view
+input_joy_right_text        Joystick right
+input_joy_right_help        Lets the cycle drive right relative to the current view
+input_joy_up_text           Joystick up
+input_joy_up_help           Lets the cycle drive up relative to the current view
+input_joy_down_text         Joystick down
+input_joy_down_help         Lets the cycle drive down relative to the current view
+input_joy_glance_text       Joystick glance
+input_joy_glance_help       When held, joystick motions will turn the camera and not the cyle
 
 #********************************************
 #********************************************

@@ -45,6 +45,7 @@ class gSensor;
 class gNetPlayerWall;
 class gPlayerWall;
 class eTempEdge;
+class gJoystick;
 struct gPredictPositionData;
 
 // minimum time between two cycle turns
@@ -281,6 +282,8 @@ public:
     virtual eCoord CamPos() const;
     virtual eCoord PredictPosition() const;
     virtual eCoord  CamTop() const;
+    virtual eCoord CamDir()  const;
+    virtual eCoord Direction()  const;
 
     virtual void RightBeforeDeath( int numTries );
 
@@ -297,7 +300,7 @@ private:
     static	REAL	wallsStayUpDelay;			//!< the time the cycle walls stay up ( negative values: they stay up forever )
     static	REAL	wallsLength;				//!< the maximum total length of the walls
     static	REAL	explosionRadius;			//!< the radius of the holes blewn in by an explosion
-
+    gJoystick *     joystick_;                  //!< joystick control
 protected:
     virtual 	bool 			DoIsDestinationUsed		( const gDestination *	dest		) const		;	//!< returns whether the given destination is in active use
 };

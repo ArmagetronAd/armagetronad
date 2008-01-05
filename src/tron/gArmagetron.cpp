@@ -584,7 +584,7 @@ int main(int argc,char **argv){
         else
         {
 #ifdef DEBUG
-            std::cout << "Joystick(s) initialized\n";
+            // std::cout << "Joystick(s) initialized\n";
 #endif // DEBUG
             su_JoystickInit();
         }

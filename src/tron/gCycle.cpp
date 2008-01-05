@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rScreen.h"
 #include "rFont.h"
 #include "gSensor.h"
+#include "gJoystick.h"
 #include "ePlayer.h"
 
 #include "eSoundMixer.h"
@@ -2052,6 +2053,12 @@ struct gCycleVisuals
 #endif
 
 void gCycle::MyInitAfterCreation(){
+#ifndef DEDICATED
+    joystick_ = tNEW( gJoystick( this ) );
+#else
+    joystick_ = NULL;
+#endif
+
     dropWallRequested_ = false;
     lastGoodPosition_ = pos;
 
@@ -2318,6 +2325,9 @@ void gCycle::RemoveFromGame()
     lastWall=NULL;
 
     gCycleMovement::RemoveFromGame();
+
+    delete joystick_;
+    joystick_ = NULL;
 }
 
 static inline void rotate(eCoord &r,REAL angle){
@@ -2663,6 +2673,12 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
         skewDot=0;
 
     eCoord oldpos=pos;
+
+    // let the joystick execute delayed turns
+    if ( joystick_ )
+    {
+        joystick_->Turn();
+    }
 
     // archive rubber speed for later comparison
     REAL rubberSpeedFactorBack = rubberSpeedFactor;
@@ -3423,6 +3439,12 @@ bool gCycle::Act(uActionPlayer *Act, REAL x){
 
     if (!Alive() && sn_GetNetState()==nSERVER)
         RequestSync(false);
+
+    // delegate to joystick
+    if ( joystick_ && joystick_->Act( Act, x ) )
+    {
+        return true;
+    }
 
     if(se_turnLeft==*Act && x>.5){
         //SendControl(lastTime,&se_turnLeft,1);
@@ -4527,6 +4549,29 @@ eCoord  gCycle::CamTop() const
     return dir.Turn(0,-skew);
 }
 
+eCoord gCycle::CamDir() const
+{
+    if ( joystick_ && joystick_->cameraDirection_.NormSquared() > .25 )
+    {
+        return joystick_->cameraDirection_;
+    }
+    else
+    {
+        return dir;
+    }
+}
+
+eCoord gCycle::Direction() const
+{
+    if ( joystick_ && joystick_->cameraDirection_.NormSquared() > .25 )
+    {
+        return joystick_->cameraDirection_;
+    }
+    else
+    {
+        return dirDrive;
+    }
+}
 
 #ifdef POWERPAK_DEB
 void gCycle::PPDisplay(){
