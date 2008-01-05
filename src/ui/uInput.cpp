@@ -549,6 +549,8 @@ public:
                 hats[dir].push_back( su_NewInput( GetPersistentID( "HAT", hat, internal ), GetName( "hat", hat, human ) ) );
             }
         }
+
+        hatDirection.resize( numHats );
     }
 
     uInput * GetAxis( int index, int dir )
@@ -582,10 +584,26 @@ public:
         hats[dir ^ 1][index]->SetPressed(0);
         return hats[dir][index];
     }
+
+    int & GetHatDirection( int index, int axis )
+    {
+        tASSERT( index >= 0 && index < numHats );
+        tASSERT( 0 == axis || 1 == axis );
+
+        return hatDirection[index].dir[axis];
+    }
 private:
     // various input arrays 
     uInputs axes[2], buttons, balls[4], hats[4];
-    
+
+    struct HatDirections
+    {
+        int dir[2];
+        HatDirections(){ dir[0] = dir[1] = 0; }
+    };
+
+    std::vector< HatDirections > hatDirection;
+
     // returns an uInput unique name
     tString GetPersistentID( char const * type, int subID, char const * suffix = NULL ) const
     {
@@ -886,6 +904,61 @@ static uInput * su_TransformEvent( SDL_Event & e, int count, uTransformEventInfo
         
         input = su_GetJoystick( e.jbutton.which )->GetButton( e.jbutton.button );
         info.value = ( e.type == SDL_JOYBUTTONDOWN ) ? 1 : -1;
+
+    case SDL_JOYHATMOTION:
+        if ( count == 0 )
+        {
+            uJoystick * joystick = su_GetJoystick( e.jhat.which );
+            int & lastDir = joystick->GetHatDirection( e.jhat.which, 0 );
+
+            // left/right hat motion
+            if ( e.jhat.value & SDL_HAT_RIGHT && lastDir >= 0 )
+            {
+                input = joystick->GetHat( e.jhat.hat, uJoystick::Right );
+                info.value = 1;
+                lastDir = -1;
+            }
+            else if ( e.jhat.value & SDL_HAT_LEFT && lastDir <= 0 )
+            {
+                input = joystick->GetHat( e.jhat.hat, uJoystick::Left );
+                info.value = 1;
+                lastDir = +1;
+            }
+            else if ( lastDir )
+            {
+                // back to normal position
+                input = joystick->GetHat( e.jhat.hat, lastDir > 0 ? uJoystick::Left : uJoystick::Right );
+                info.value = 0;
+                lastDir = 0;
+            }
+        }
+
+        if ( count == 1 )
+        {
+            uJoystick * joystick = su_GetJoystick( e.jbutton.which );
+            int & lastDir = joystick->GetHatDirection( e.jhat.which, 1 );
+
+            // up/down hat motion
+            if ( e.jhat.value & SDL_HAT_UP && lastDir <= 0 )
+            {
+                input = joystick->GetHat( e.jhat.hat, uJoystick::Up );
+                info.value = 1;
+                lastDir = +1;
+            }
+            else if ( e.jhat.value & SDL_HAT_DOWN && lastDir >= 0 )
+            {
+                input = joystick->GetHat( e.jhat.hat, uJoystick::Down );
+                info.value = 1;
+                lastDir = -1;
+            }
+            else if ( lastDir )
+            {
+                // back to normal position
+                input = joystick->GetHat( e.jhat.hat, lastDir > 0 ? uJoystick::Up : uJoystick::Down );
+                info.value = 0;
+                lastDir = 0;
+            }
+        }
 
         break;
 #endif
