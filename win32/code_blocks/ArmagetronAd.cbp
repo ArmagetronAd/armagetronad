@@ -7,6 +7,7 @@
 		<Option makefile="Makefile"/>
 		<Option makefile_is_custom="0"/>
 		<Option default_target="1"/>
+		<Option active_target="1"/>
 		<Option compiler="0"/>
 		<Build>
 			<Target title="Win32 Release">
@@ -761,6 +762,12 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
+		<Unit filename="..\..\src\render\rGL.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
 		<Unit filename="..\..\src\render\rGL.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
@@ -771,6 +778,20 @@
 		</Unit>
 		<Unit filename="..\..\src\render\rGLRender.cpp">
 			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\render\rGLuintObject.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\render\rGLuintObject.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
@@ -860,6 +881,20 @@
 			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\render\rTexture.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\render\rTextureRenderTarget.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\render\rTextureRenderTarget.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -2064,6 +2099,14 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
+		<Unit filename="..\..\src\tron\zone\shapeCircle.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
 		<Unit filename="..\..\src\tron\zone\zEffectGroup.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
@@ -2128,6 +2171,20 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
+		<Unit filename="..\..\src\tron\zone\zShape.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tron\zone\zShape.hpp">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
 		<Unit filename="..\..\src\tron\zone\zValidator.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
@@ -2175,6 +2232,9 @@
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
+			<Breakpoint line="510" enabled="1" pass="0" />
+			<Breakpoint line="670" enabled="1" pass="0" />
+			<Breakpoint line="684" enabled="1" pass="0" />
 		</Unit>
 		<Unit filename="..\..\src\ui\uInput.h">
 			<Option compilerVar=""/>
@@ -2226,17 +2286,17 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
-		<Unit filename="..\..\src\win32\armagetron.rc">
-			<Option compilerVar="WINDRES"/>
-			<Option objectName="armagetronad\src\win32\armagetron.res"/>
+		<Unit filename="..\..\src\win32\aa_config.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
-		<Unit filename="..\..\src\win32\config.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
+		<Unit filename="..\..\src\win32\armagetron.rc">
+			<Option compilerVar="WINDRES"/>
+			<Option objectName="armagetronad\src\win32\armagetron.res"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
@@ -2255,7 +2315,7 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
-		<Unit filename="..\..\..\winlibs\SDL\src\main\win32\SDL_win32_main.c">
+		<Unit filename="..\..\..\winlibs\sdl\src\main\win32\SDL_win32_main.c">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
