@@ -186,44 +186,45 @@ zZone::zZone( nMessage & m )
     /*
     if (!m.End() && sz_ShapedZones.Supported() ) 
       {
-    // Factory to make the shapes
-    // HACK 
-    // This makes them static for the life of the zone
-    // rather than to re-send them all at each updates
-    typedef zShape* (*shapeFactory)(nMessage &);
-    std::map<tString, shapeFactory> shapes;
-    // Build the list of supported shapes
-    shapes[tString("circle")] = zShapeCircle::create;
-    shapes[tString("polygon")] = zShapePolygon::create;
+	// Factory to make the shapes
+	// HACK 
+	// This makes them static for the life of the zone
+	// rather than to re-send them all at each updates
+	typedef zShape* (*shapeFactory)(nMessage &);
+	std::map<tString, shapeFactory> shapes;
+	// Build the list of supported shapes
+	shapes[tString("circle")] = zShapeCircle::create;
+	shapes[tString("polygon")] = zShapePolygon::create;
 
-    // Get the name of the shape from the network
-    tString shapeName;
-    m >> shapeName;
-
-    std::map<tString, shapeFactory>::const_iterator iterShapeFactory;
-    // Build that shape if it is available
-    if((iterShapeFactory = shapes.find(shapeName)) != shapes.end()) 
-    {
-     shape = zShapePtr((*(iterShapeFactory->second))(m));
-    }
+	// Get the name of the shape from the network
+	tString shapeName;
+	m >> shapeName;
+	
+	std::map<tString, shapeFactory>::const_iterator iterShapeFactory;
+	// Build that shape if it is available
+	if((iterShapeFactory = shapes.find(shapeName)) != shapes.end()) 
+	  {
+	    shape = zShapePtr((*(iterShapeFactory->second))(m));
+	  }
       }
     else
       {
-    // Didnt receive a shape information. Assume we are talking to a 0.2.8- server
-    shape = zShapePtr(new zShapeCircle());
-    #ifdef DADA
-    // TODO: Fill this if and when we decide to with with xValue
-    #else
-    shape->setPosX(posx_);
-    shape->setPosY(posy_);
-    shape->setScale(scale_);
-    shape->setRotation(rotationSpeed_);
-    shape->setScale(scale_);
-    shape->setColor(color_);
-    #endif
-    emulateOldZoneShape = true;
+	// Didnt receive a shape information. Assume we are talking to a 0.2.8- server
+	shape = zShapePtr(new zShapeCircle());
+	shape->setPosX(posx_);
+	shape->setPosY(posy_);
+	shape->setScale(scale_);
+	tPolynomial<nMessage> tpRotationSpeed(2);
+	tpRotationSpeed[0] = rotationSpeed_.GetOffset();
+	tpRotationSpeed[0] = rotationSpeed_.GetOffset();
+	shape->setRotation2(tpRotationSpeed);
+	shape->setScale(scale_);
+	shape->setColor(color_);
+	
+	emulateOldZoneShape = true;
       }
-    */
+*/
+
 }
 
 // *******************************************************************************
@@ -346,7 +347,6 @@ void zZone::ReadSync( nMessage & m )
 
     if(shape && shape->isEmulatingOldZone())
     {
-
         // read color
         rColor aColor(0.0, 0.7, 0.5);
         if (!m.End())
@@ -442,7 +442,9 @@ void zZone::ReadSync( nMessage & m )
 
 bool zZone::Timestep( REAL time )
 {
-    shape->TimeStep( time );
+    if(0 != shape) {
+        shape->TimeStep( time );
+    }
     /*
        if(!emulateOldZoneShape) {
            shape->TimeStep( time );
@@ -501,7 +503,7 @@ void zZone::OnVanish( void )
 void zZone::InteractWith( eGameObject * target, REAL time, int recursion )
 {
     gCycle* prey = dynamic_cast< gCycle* >( target );
-    if ( prey )
+    if ( prey && 0 != shape)
     {
         if ( prey->Player() && prey->Alive() )
         {
@@ -676,7 +678,8 @@ void zZone::Render( const eCamera * cam )
 }
 
 void zZone::Render2D( tCoord scale ) const {
-    shape->render2d(scale);
+    if (shape)
+        shape->render2d(scale);
 }
 
 
@@ -712,8 +715,10 @@ eCoord zZone::GetPosition( void ) const
 
 zZone const & zZone::GetPosition( eCoord & position ) const
 {
-    position.x = EvaluateFunctionNow( shape->getPosX() );
-    position.y = EvaluateFunctionNow( shape->getPosY() );
+    if(0 != shape) {
+        position.x = EvaluateFunctionNow( shape->getPosX() );
+	position.y = EvaluateFunctionNow( shape->getPosY() );
+    }
     return *this;
 }
 
@@ -735,8 +740,11 @@ REAL zZone::GetScale( void ) const
 
     // HACK, to be implemented later and differently
     // Should get this info from the shape, not the zone
-    return EvaluateFunctionNow( shape->getScale() );
-
+    REAL scale = 0.0;
+    if(0 != shape) {
+        scale = EvaluateFunctionNow( shape->getScale() ) ;
+    }
+    return scale;
 }
 
 // *******************************************************************************
@@ -790,6 +798,10 @@ tCoord const zZone::GetRotation( void ) const
 
 rColor const  zZone::GetColor( void ) const
 {
-    return shape->getColor();
+    rColor color;
+    if(0 != shape) {
+        color = shape->getColor();
+    }
+    return color;
 }
 

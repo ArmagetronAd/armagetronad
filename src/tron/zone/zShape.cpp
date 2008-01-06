@@ -33,7 +33,6 @@ zShape::zShape(nMessage &m):eNetGameObject(m)
         newIdZone_ = true;
         joinWithZone();
     }
-
 }
 
 
