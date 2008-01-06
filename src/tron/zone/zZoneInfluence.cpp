@@ -5,7 +5,7 @@ zZoneInfluence::zZoneInfluence(zZonePtr _zone) : zone(_zone), zoneInfluenceItems
 zZoneInfluence::~zZoneInfluence() { }
 
 void
-zZoneInfluence::apply(REAL value)
+zZoneInfluence::apply(const tPolynomial<nMessage> &value)
 {
     zZoneInfluenceItemList::const_iterator iter;
     for(iter=zoneInfluenceItems.begin();
@@ -30,11 +30,25 @@ zZoneInfluenceItemRotation::zZoneInfluenceItemRotation(zZonePtr aZone):
 {}
 
 void
-zZoneInfluenceItemRotation::apply(REAL value) {
-    tFunction tfRotation;
-    tfRotation.SetOffset( rotationAngle(value) );
-    tfRotation.SetSlope( rotationSpeed(value*value) );
-    zone->getShape()->setRotationNow( tfRotation );
+zZoneInfluenceItemRotation::apply(const tPolynomial<nMessage> &valueEq) {
+    // x is the influence from the monitor value
+    // t is the influence from the current time
+    // tf = (a +b*x) + (c + d*x)*t
+
+    // The following should improve readability
+    REAL tData[] = {0.0, 1.0};
+    tPolynomial<nMessage> t(tData, sizeof(tData)/sizeof(tData[0]));
+
+    REAL a = rotationAngle.GetOffset();
+    REAL b = rotationAngle.GetSlope();
+    REAL c = rotationSpeed.GetOffset();
+    REAL d = rotationSpeed.GetSlope();
+
+    tPolynomial<nMessage> tf = 
+      ( (valueEq * b) + a)
+      + t * ( (valueEq * d) + c);
+
+    zone->getShape()->setRotation2( tf );
 }
 
 zZoneInfluenceItemScale::zZoneInfluenceItemScale(zZonePtr aZone):
@@ -43,7 +57,7 @@ zZoneInfluenceItemScale::zZoneInfluenceItemScale(zZonePtr aZone):
 {}
 
 void
-zZoneInfluenceItemScale::apply(REAL value) {
+zZoneInfluenceItemScale::apply(const tPolynomial<nMessage> &value) {
     tFunction tfScale;
     tfScale.SetOffset( scale );
     tfScale.SetSlope( 0.0f );
@@ -56,7 +70,7 @@ zZoneInfluenceItemPosition::zZoneInfluenceItemPosition(zZonePtr aZone):
 {}
 
 void
-zZoneInfluenceItemPosition::apply(REAL value) {
+zZoneInfluenceItemPosition::apply(const tPolynomial<nMessage> &value) {
     tFunction tfPosition;
 
     tfPosition.SetOffset( pos.x );
@@ -73,7 +87,7 @@ zZoneInfluenceItemColor::zZoneInfluenceItemColor(zZonePtr aZone):
 {}
 
 void
-zZoneInfluenceItemColor::apply(REAL value) {
+zZoneInfluenceItemColor::apply(const tPolynomial<nMessage> &value) {
     zone->getShape()->setColorNow( color );
 }
 

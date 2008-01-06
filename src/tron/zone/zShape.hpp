@@ -4,11 +4,8 @@
 #include "eNetGameObject.h"
 #include "tSysTime.h"
 
-#ifdef DADA
-using namespace tValue;
-#else
 #include "tFunction.h"
-#endif
+#include "tPolynomial.h"
 
 #ifndef Z_SHAPE_H
 #define Z_SHAPE_H
@@ -27,58 +24,32 @@ public:
     virtual void render(const eCamera * cam );
     virtual void render2d(tCoord scale) const;
 
-#ifdef DADA
-    void setPosX(const BasePtr & x, tString &exprStr);
-    void setPosY(const BasePtr & y, tString &exprStr);
-    void setRotation(const BasePtr & r, tString &exprStr);
-    void setScale(const BasePtr & s, tString &exprStr);
-    void setColor(const rColor &c);
-#else
     void setPosX(const tFunction &x);
     void setPosY(const tFunction &y);
-    void setRotation(const tFunction &r);
+    void setRotation2(const tPolynomial<nMessage> & r);
+
     void setScale(const tFunction &s);
     void setColor(const rColor &c);
 
-    void setRotationNow(const tFunction &r);
     void setColorNow(const rColor &c);
 
   tFunction getPosX() {return posx_;};
   tFunction getPosY() {return posy_;};
   tFunction getScale() {return scale_;};
-  tFunction getRotation() {return rotation_;};
   rColor getColor() {return color_;};
-#endif
 
     void TimeStep( REAL time );
     virtual bool isEmulatingOldZone() {return false;};
     void setReferenceTime(REAL time);
 
 protected:
-#ifdef DADA
-    BasePtr posx_; //!< position need not be inside the shape.
-    BasePtr posy_; //!< positoin need not be inside the shape.
-    BasePtr scale_; //!< Used to affect the contour and not the position
-    BasePtr rotation_; //!< Rotate the contour around the position at this rate.
-    rColor color_;
-
-    tString posxExpr;
-    tString posyExpr;
-    tString scaleExpr;
-    tString rotationExpr;
-#else
     tFunction posx_; //!< position need not be inside the shape.
     tFunction posy_; //!< positoin need not be inside the shape.
     tFunction scale_; //!< Used to affect the contour and not the position
-    tFunction rotation_; //!< Rotate the contour around the position at this rate.
+    tPolynomial<nMessage> rotation2; //!< Rotate the contour around the position at this rate.
     rColor color_;
-#endif
 
-#ifdef DADA
-    eCoord Position() { return eCoord(posx_->GetFloat(), posy_->GetFloat()); };
-#else
     eCoord Position() { return eCoord(posx_(lasttime_ - referencetime_), posy_(lasttime_ - referencetime_) ); };
-#endif
 
     void networkRead(nMessage &m);
     void networkWrite(nMessage &m);
@@ -122,11 +93,7 @@ private:
     virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
 };
 
-#ifdef DADA
-typedef std::pair<BasePtr, BasePtr> myPoint;
-#else
 typedef std::pair<tFunction, tFunction> myPoint;
-#endif
 
 class zShapePolygon : public zShape {
 public :
@@ -139,22 +106,13 @@ public :
 
     bool isInteracting(eGameObject * target);
     void render(const eCamera * cam );
-	virtual void render2d(tCoord scale) const;
-#ifdef DADA
-    void addPoint( myPoint const &aPoint, std::pair<tString, tString> const & exprPair) { points.push_back(aPoint); exprs.push_back(exprPair);};
-#else
+    virtual void render2d(tCoord scale) const;
     void addPoint( myPoint const &aPoint) { points.push_back(aPoint);};
-#endif
 
   bool isEmulatingOldZone() {return false;}; // zShapePolygon cant be used for emulation of old zones
 
 protected:
-#ifdef DADA
     std::vector< myPoint > points;
-    std::vector< std::pair<tString, tString> > exprs;
-#else
-    std::vector< myPoint > points;
-#endif
     bool isInside (eCoord anECoord);
     static void networkRead(nMessage &m, zShape *aShape);
 private:

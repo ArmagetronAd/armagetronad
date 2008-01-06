@@ -10,6 +10,7 @@
 #include "zone/zMisc.h"
 #include "zone/zEffectGroup.h"
 #include "tFunction.h"
+#include "tPolynomial.h"
 #include "zone/zZoneInfluence.h"
 
 class zMonitorRule;
@@ -33,11 +34,10 @@ public:
             contributorsAdd(),
             contributorsSet(),
             rules(),
-            value(0.0),
+            valueEq(),
             drift(0.0),
             minValue(0.0),
             maxValue(1.0),
-            previousValue(0.0),
             previousTotalInfluenceSlide(0.0),
             previousTotalInfluenceAdd(0.0)
     {
@@ -57,7 +57,7 @@ public:
     void setName(string name) {this->name = name;};
     void addRule(zMonitorRulePtr aRule);
 
-    void setInit(REAL v) {value = v;};
+    void setInit(tPolynomial<nMessage> v) {valueEq = v;};
     void setDrift(REAL d) {drift = d;};
     void setClampLow(REAL l)  {minValue = l;};
     void setClampHigh(REAL h) {maxValue = h;};
@@ -79,7 +79,7 @@ protected:
 
     zMonitorRulePtrs rules;
 
-    REAL value; // The current value of the monitor
+    tPolynomial<nMessage> valueEq; // The current value of the monitor
     REAL drift; // How much the value of the monitor changes per second
 
     REAL minValue; //!< Low bound that value can take
@@ -88,7 +88,7 @@ protected:
     string name;
 
     // values used to reduce the update transmitted
-    REAL previousValue;
+    tPolynomial<nMessage> previousValue;
     REAL previousTotalInfluenceSlide;
     REAL previousTotalInfluenceAdd;
 
@@ -102,7 +102,7 @@ public:
     virtual ~zMonitorRule() { };
 
     void addEffectGroup(zEffectGroupPtr anEffectGroupPtr) {effectGroupList.push_back(anEffectGroupPtr);};
-    void applyRule(triggerers &contributors, REAL time, REAL value) ;
+    void applyRule(triggerers &contributors, REAL time, const tPolynomial<nMessage> &valueEq) ;
 
     void addMonitorInfluence(zMonitorInfluencePtr newInfluence) {monitorInfluences.push_back( newInfluence );};
     void addZoneInfluence(zZoneInfluencePtr aZoneInfluencePtr) {zoneInfluences.push_back(aZoneInfluencePtr);};

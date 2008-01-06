@@ -8,6 +8,8 @@
 #include "tSafePTR.h"
 #include "rColor.h"
 #include "tFunction.h"
+#include "tPolynomial.h"
+#include "nNetwork.h"
 
 class zZone;
 //typedef boost::shared_ptr< zZone > zZonePtr;
@@ -25,7 +27,7 @@ protected:
 public:
     zZoneInfluence(zZonePtr _zone);
     ~zZoneInfluence();
-    void apply(REAL value);
+    void apply(const tPolynomial<nMessage> &value);
 
     void addZoneInfluenceRule(zZoneInfluenceItemPtr aRule) {zoneInfluenceItems.push_back(aRule);};
 };
@@ -37,7 +39,7 @@ public:
     zZoneInfluenceItem(zZonePtr aZone);
     virtual ~zZoneInfluenceItem();
 
-    virtual void apply(REAL value) {};
+    virtual void apply(const tPolynomial<nMessage> &value) {};
 };
 
 class zZoneInfluenceItemRotation : public zZoneInfluenceItem {
@@ -52,7 +54,7 @@ public:
         rotationAngle = rotAngle;
         rotationSpeed = rotSpeed;
     };
-    virtual void apply(REAL value);
+    virtual void apply(const tPolynomial<nMessage> &value);
 };
 
 class zZoneInfluenceItemScale : public zZoneInfluenceItem {
@@ -63,7 +65,7 @@ public:
     virtual ~zZoneInfluenceItemScale() {};
 
     void set(REAL sca) { scale = sca; };
-    virtual void apply(REAL value);
+    virtual void apply(const tPolynomial<nMessage> &value);
 };
 
 class zZoneInfluenceItemPosition : public zZoneInfluenceItem {
@@ -74,7 +76,7 @@ public:
     virtual ~zZoneInfluenceItemPosition() {};
 
     void set(eCoord const & p) {pos = p;};
-    virtual void apply(REAL value);
+    virtual void apply(const tPolynomial<nMessage> &value);
 };
 
 class zZoneInfluenceItemColor : public zZoneInfluenceItem {
@@ -88,7 +90,7 @@ public:
         color = col;
         color.a_ = color.a_ < 0.0?0.0:(color.a_>0.7?0.7:color.a_);
     };
-    virtual void apply(REAL value);
+    virtual void apply(const tPolynomial<nMessage> &value);
 };
 
 #include "zZone.h"

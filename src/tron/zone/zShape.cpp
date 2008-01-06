@@ -7,14 +7,8 @@ zShape::zShape(eGrid* grid, unsigned short idZone)
         posx_(),
         posy_(),
         scale_(),
-        rotation_(),
+        rotation2(),
         color_(),
-#ifdef DADA
-        posxExpr(),
-        posyExpr(),
-        scaleExpr(),
-        rotationExpr(),
-#endif
         createdtime_(0.0),
         referencetime_(0.0),
         lasttime_(0.0),
@@ -62,17 +56,10 @@ void zShape::networkWrite(nMessage &m)
 {
 
     m << referencetime_;
-#ifdef DADA
-    m << posxExpr;
-    m << posyExpr;
-    m << scaleExpr;
-    m << rotationExpr;
-#else
     m << posx_;
     m << posy_;
     m << scale_;
-    m << rotation_;
-#endif
+    m << rotation2;
     m << color_.r_;
     m << color_.g_;
     m << color_.b_;
@@ -84,25 +71,10 @@ void zShape::networkRead(nMessage &m)
     REAL time;
     m >> time;
     setReferenceTime(time);
-#ifdef DADA
-    tString str;
-    m >> str;
-    setPosX(BasePtr(new tValue::Expr(str, tValue::Expr::vars, tValue::Expr::functions)) , str);
-
-    m >> str;
-    setPosY(BasePtr(new tValue::Expr(str, tValue::Expr::vars, tValue::Expr::functions)) , str);
-
-    m >> str;
-    setScale(BasePtr(new tValue::Expr(str, tValue::Expr::vars, tValue::Expr::functions)) , str);
-
-    m >> str;
-    setRotation(BasePtr(new tValue::Expr(str, tValue::Expr::vars, tValue::Expr::functions)) , str);
-#else
     m >> posx_;
     m >> posy_;
     m >> scale_;
-    m >> rotation_;
-#endif
+    m >> rotation2;
 
     m >> color_.r_;
     m >> color_.g_;
@@ -134,27 +106,6 @@ void zShape::ReadSync(nMessage &m)
     networkRead(m);
 }
 
-#ifdef DADA
-void zShape::setPosX(const BasePtr & x, tString &exprStr){
-    posx_ = x;
-    posxExpr = exprStr;
-}
-
-void zShape::setPosY(const BasePtr & y, tString &exprStr){
-    posy_ = y;
-    posyExpr = exprStr;
-}
-
-void zShape::setRotation(const BasePtr & r, tString &exprStr){
-    rotation_ = r;
-    rotationExpr = exprStr;
-}
-
-void zShape::setScale(const BasePtr & s, tString &exprStr){
-    scale_ = s;
-    scaleExpr = exprStr;
-}
-#else
 void zShape::setPosX(const tFunction & x){
     posx_ = x;
 }
@@ -163,25 +114,20 @@ void zShape::setPosY(const tFunction & y){
     posy_ = y;
 }
 
-void zShape::setRotation(const tFunction & r){
-    rotation_ = r;
+void zShape::setRotation2(const tPolynomial<nMessage> & r) {
+  if(rotation2 == r) {
+    // Empty: Nothing to do, no need to send an update
+  }
+  else {
+    rotation2 = r;
     if (sn_GetNetState()!=nCLIENT)
         RequestSync();
-}
-
-void zShape::setRotationNow(const tFunction & r){
-    float pos = rotation_.Evaluate(lasttime_ - referencetime_);
-    rotation_.SetSlope(r.GetSlope() );
-    rotation_.SetOffset( pos + rotation_.GetSlope() * ( referencetime_ - lasttime_ ) );
-    //    rotation_ = r;
-    if (sn_GetNetState()!=nCLIENT)
-        RequestSync();
+  }
 }
 
 void zShape::setScale(const tFunction & s){
     scale_ = s;
 }
-#endif
 
 void zShape::setColor(const rColor &c){
     if(color_ != c) {
@@ -278,11 +224,7 @@ bool zShapeCircle::isInteracting(eGameObject * target)
         if ( prey->Player() && prey->Alive() )
         {
             REAL effectiveRadius;
-#ifdef DADA
-            effectiveRadius = scale_->GetFloat()  * radius.Evaluate(lasttime_ - referencetime_);
-#else
             effectiveRadius = scale_.Evaluate(lasttime_ - referencetime_) * radius.Evaluate(lasttime_ - referencetime_);
-#endif
             // Is the player inside or outside the zone
             if ( (effectiveRadius >= 0.0) && ( prey->Position() - Position() ).NormSquared() < effectiveRadius*effectiveRadius )
             {
@@ -307,23 +249,13 @@ void zShapeCircle::render(const eCamera * cam )
     if ( color_.a_ <= 0 )
         return;
 
-#ifdef DADA
-    eCoord rot(cos(rotation_->GetFloat()) , sin(rotation_->GetFloat()));
-#else
-    //    eCoord rot(cos(rotation_.Evaluate(lasttime_ - referencetime_) ), sin(rotation_.Evaluate(lasttime_ - referencetime_)));
-    eCoord rot(1,0);
-    REAL currAngle = rotation_.Evaluate(lasttime_ - referencetime_);
-    rot = rot.Turn( cos(currAngle), sin(currAngle) );
-#endif
+    REAL currAngle = rotation2.evaluate(lasttime_);
+    eCoord rot( cos(currAngle), sin(currAngle) );
 
     GLfloat m[4][4]={{rot.x,rot.y,0,0},
                      {-rot.y,rot.x,0,0},
                      {0,0,1,0},
-#ifdef DADA
-                     {posx_->GetFloat(),posy_->GetFloat(),0,1}};
-#else
                      {posx_.Evaluate(lasttime_ - referencetime_), posy_.Evaluate(lasttime_ - referencetime_), 0,1}};
-#endif
 
     ModelMatrix();
     glPushMatrix();
@@ -355,11 +287,7 @@ void zShapeCircle::render(const eCamera * cam )
     color_.Apply();
 
     REAL effectiveRadius;
-#ifdef DADA
-    effectiveRadius = scale_->GetFloat()  * radius.Evaluate(lasttime_ - referencetime_);
-#else
     effectiveRadius = scale_.Evaluate(lasttime_ - referencetime_) * radius.Evaluate(lasttime_ - referencetime_);
-#endif
     if (effectiveRadius >= 0.0)
     {
         for ( int i = sg_segments - 1; i>=0; --i )
@@ -410,23 +338,13 @@ void zShapeCircle::render2d(tCoord scale) const {
     if ( color_.a_ <= 0 )
         return;
 
-#ifdef DADA
-    eCoord rot(cos(rotation_->GetFloat()) , sin(rotation_->GetFloat()));
-#else
-    //    eCoord rot(cos(rotation_.Evaluate(lasttime_ - referencetime_) ), sin(rotation_.Evaluate(lasttime_ - referencetime_)));
-    eCoord rot(1,0);
-    REAL currAngle = rotation_.Evaluate(lasttime_ - referencetime_);
-    rot = rot.Turn( cos(currAngle), sin(currAngle) );
-#endif
+    REAL currAngle = rotation2.evaluate(lasttime_);
+    eCoord rot( cos(currAngle), sin(currAngle) );
 
     GLfloat m[4][4]={{rot.x,rot.y,0,0},
                      {-rot.y,rot.x,0,0},
                      {0,0,1,0},
-#ifdef DADA
-                     {posx_->GetFloat(),posy_->GetFloat(),0,1}};
-#else
                      {posx_.Evaluate(lasttime_ - referencetime_), posy_.Evaluate(lasttime_ - referencetime_), 0,1}};
-#endif
 
     ModelMatrix();
     glPushMatrix();
@@ -440,11 +358,7 @@ void zShapeCircle::render2d(tCoord scale) const {
     color_.Apply();
 
     REAL effectiveRadius;
-#ifdef DADA
-    effectiveRadius = scale_->GetFloat()  * radius.Evaluate(lasttime_ - referencetime_);
-#else
     effectiveRadius = scale_.Evaluate(lasttime_ - referencetime_) * radius.Evaluate(lasttime_ - referencetime_);
-#endif
     if (effectiveRadius >= 0.0)
     {
         for ( int i = sg_segments - 1; i>=0; --i )
@@ -468,9 +382,6 @@ void zShapeCircle::render2d(tCoord scale) const {
 
 //
 zShapePolygon::zShapePolygon(nMessage &m):zShape(m),
-#ifdef DADA
-        exprs(),
-#endif
         points()
 {
     int numPoints;
@@ -479,30 +390,16 @@ zShapePolygon::zShapePolygon(nMessage &m):zShape(m),
     // read the polygon shape
     for( ; numPoints>0 && !m.End(); numPoints-- )
     {
-#ifdef DADA
-        tString strX, strY;
-        m >> strX;
-        m >> strY;
-
-        tValue::BasePtr xp = tValue::BasePtr( new tValue::Expr (strX, tValue::Expr::vars, tValue::Expr::functions) );
-        tValue::BasePtr yp = tValue::BasePtr( new tValue::Expr (strY, tValue::Expr::vars, tValue::Expr::functions) );
-
-        addPoint( myPoint( xp, yp ), std::pair<tString, tString>(strX, strY) );
-#else
         tFunction tfX, tfY;
         m >> tfX;
         m >> tfY;
 
         addPoint( myPoint( tfX, tfY ) );
-#endif
     }
 }
 
 zShapePolygon::zShapePolygon(eGrid *grid, unsigned short idZone):
         zShape(grid, idZone),
-#ifdef DADA
-        exprs(),
-#endif
         points()
 {}
 
@@ -517,16 +414,6 @@ void zShapePolygon::WriteCreate( nMessage & m )
     numPoints = points.size();
     m << numPoints;
 
-#ifdef DADA
-    std::vector< std::pair<tString, tString> >::const_iterator iter;
-    for(iter = exprs.begin();
-            iter != exprs.end();
-            ++iter)
-    {
-        m << (*iter).first;
-        m << (*iter).second;
-    }
-#else
     std::vector< myPoint >::const_iterator iter;
     for(iter = points.begin();
             iter != points.end();
@@ -535,7 +422,6 @@ void zShapePolygon::WriteCreate( nMessage & m )
         m << (*iter).first;
         m << (*iter).second;
     }
-#endif
 
     //    WriteSync( m );
 }
@@ -555,21 +441,14 @@ bool zShapePolygon::isInside(eCoord anECoord) {
     std::vector< myPoint >::const_iterator iter = points.end() - 1;
     // We need to position the prevIter to the last point.
     REAL currentScale = 0.0;
-#ifdef DADA
-    REAL x_ = (*iter).first->GetFloat();
-    REAL y_ = (*iter).second->GetFloat();
-    tCoord centerPos = tCoord(posx_->GetFloat(), posy_->GetFloat());
-    tCoord rotation = tCoord( cosf(rotation_->GetFloat()), sinf(rotation_->GetFloat()) );
-    currentScale = scale_->GetFloat();
-    tCoord previous = tCoord(x_, y_).Turn( rotation )*currentScale + centerPos;
-#else
     REAL x_ = (*iter).first.Evaluate(lasttime_ - referencetime_);
     REAL y_ = (*iter).second.Evaluate(lasttime_ - referencetime_);
     tCoord centerPos = tCoord(posx_.Evaluate(lasttime_ - referencetime_), posy_.Evaluate(lasttime_ - referencetime_));
-    tCoord rotation = tCoord( cosf(rotation_.Evaluate(lasttime_ - referencetime_)), sinf(rotation_.Evaluate(lasttime_ - referencetime_)) );
+    //    tCoord rotation = tCoord( cosf(rotation_.Evaluate(lasttime_ - referencetime_)), sinf(rotation_.Evaluate(lasttime_ - referencetime_)) );
+    tCoord rotation = tCoord( cosf(rotation2.evaluate(lasttime_)), sinf(rotation2.evaluate(lasttime_)) );
     currentScale = scale_.Evaluate(lasttime_ - referencetime_);
     tCoord previous = tCoord(x_, y_).Turn( rotation )*currentScale + centerPos;
-#endif
+
     REAL xpp = previous.x;
     REAL ypp = previous.y;
 
@@ -579,15 +458,10 @@ bool zShapePolygon::isInside(eCoord anECoord) {
                 iter != points.end();
                 ++iter)
         {
-#ifdef DADA
-            x_ = (*iter).first->GetFloat();
-            y_ = (*iter).second->GetFloat();
-            tCoord current = tCoord(x_, y_).Turn( rotation )*currentScale + centerPos;
-#else
             x_ = (*iter).first.Evaluate(lasttime_ - referencetime_);
             y_ = (*iter).second.Evaluate(lasttime_ - referencetime_);
             tCoord current = tCoord(x_, y_).Turn( rotation )*currentScale + centerPos;
-#endif
+
             REAL xp = current.x;
             REAL yp = current.y;
 
@@ -652,25 +526,14 @@ void zShapePolygon::render(const eCamera * cam )
     //    glMultMatrixf(&m[0][0]);
 
     REAL currentScale = 0.0;
-#ifdef DADA
-    glTranslatef(posx_->GetFloat(), posy_->GetFloat(), 0);
-
-    currentScale = scale_->GetFloat();
-#else
     glTranslatef(posx_.Evaluate(lasttime_ - referencetime_), posy_.Evaluate(lasttime_ - referencetime_), 0);
-
     currentScale = scale_.Evaluate(lasttime_ - referencetime_);
-#endif
 
     if(currentScale > 0.0)
     {
         glScalef(currentScale, currentScale, 1.0);
 
-#ifdef DADA
-        glRotatef(rotation_->GetFloat()*180/M_PI, 0.0, 0.0, 1.0);
-#else
-        glRotatef(rotation_.Evaluate(lasttime_ - referencetime_)*180/M_PI, 0.0, 0.0, 1.0);
-#endif
+        glRotatef(rotation2.evaluate(lasttime_)*180/M_PI, 0.0, 0.0, 1.0);
 
         if ( sr_alphaBlend )
             BeginQuads();
@@ -693,17 +556,10 @@ void zShapePolygon::render(const eCamera * cam )
                 iter != points.end();
                 prevIter = iter++)
         {
-#ifdef DADA
-            REAL xp = (*iter).first->GetFloat() ;
-            REAL yp = (*iter).second->GetFloat() ;
-            REAL xpp = (*prevIter).first->GetFloat() ;
-            REAL ypp = (*prevIter).second->GetFloat() ;
-#else
             REAL xp = (*iter).first.Evaluate( lasttime_ - referencetime_ ) ;
             REAL yp = (*iter).second.Evaluate( lasttime_ - referencetime_ ) ;
             REAL xpp = (*prevIter).first.Evaluate( lasttime_ - referencetime_ ) ;
             REAL ypp = (*prevIter).second.Evaluate( lasttime_ - referencetime_ ) ;
-#endif
 
             glVertex3f(xp, yp, bot);
             glVertex3f(xp, yp, top);
@@ -739,25 +595,15 @@ void zShapePolygon::render2d(tCoord scale) const {
     glPushMatrix();
 
     REAL currentScale = 0.0;
-#ifdef DADA
-    glTranslatef(posx_->GetFloat(), posy_->GetFloat(), 0);
-
-    currentScale = scale_->GetFloat();
-#else
     glTranslatef(posx_.Evaluate(lasttime_ - referencetime_), posy_.Evaluate(lasttime_ - referencetime_), 0);
 
     currentScale = scale_.Evaluate(lasttime_ - referencetime_);
-#endif
 
     if(currentScale > 0.0)
     {
         glScalef(currentScale, currentScale, 1.0);
 
-#ifdef DADA
-        glRotatef(rotation_->GetFloat()*180/M_PI, 0.0, 0.0, 1.0);
-#else
-        glRotatef(rotation_.Evaluate(lasttime_ - referencetime_)*180/M_PI, 0.0, 0.0, 1.0);
-#endif
+        glRotatef(rotation2.evaluate(lasttime_)*180/M_PI, 0.0, 0.0, 1.0);
 
         BeginLines();
 
@@ -772,17 +618,10 @@ void zShapePolygon::render2d(tCoord scale) const {
                 iter != points.end();
                 prevIter = iter++)
         {
-#ifdef DADA
-            REAL xp = (*iter).first->GetFloat() ;
-            REAL yp = (*iter).second->GetFloat() ;
-            REAL xpp = (*prevIter).first->GetFloat() ;
-            REAL ypp = (*prevIter).second->GetFloat() ;
-#else
             REAL xp = (*iter).first.Evaluate( lasttime_ - referencetime_ ) ;
             REAL yp = (*iter).second.Evaluate( lasttime_ - referencetime_ ) ;
             REAL xpp = (*prevIter).first.Evaluate( lasttime_ - referencetime_ ) ;
             REAL ypp = (*prevIter).second.Evaluate( lasttime_ - referencetime_ ) ;
-#endif
 
             glVertex2f(xp, yp);
             glVertex2f(xpp, ypp);

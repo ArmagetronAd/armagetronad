@@ -322,7 +322,9 @@ void zZone::WriteSync( nMessage & m )
     m << shape->getPosX();
     m << shape->getPosY();
     m << shape->getScale();
-    m << shape->getRotation();
+    // shape->getRotation no longer exist. Fake it!
+    tFunction tfFakedRotation;
+    m << tfFakedRotation;
 
     m << shape->ID();
 }
@@ -404,7 +406,10 @@ void zZone::ReadSync( nMessage & m )
             rotationSpeed.SetOffset( .3f );
             rotationSpeed.SetSlope( 0.0f );
         }
-        shape->setRotation(rotationSpeed);
+	tPolynomial<nMessage> tpRotationSpeed(2);
+	tpRotationSpeed[0] = rotationSpeed.GetOffset();
+	tpRotationSpeed[1] = rotationSpeed.GetSlope();
+        shape->setRotation2(tpRotationSpeed);
     }
     else
     {

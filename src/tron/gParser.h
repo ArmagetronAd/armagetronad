@@ -108,9 +108,8 @@ protected:
     void parseWallRect(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseObstacleWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
-#ifndef DADA
     void myCheapParameterSplitter(const string &str, tFunction &tf, bool addSizeMultiplier=false);
-#endif
+    void myCheapParameterSplitter2(const string &str, tPolynomial<nMessage> &tp, bool addSizeMultiplier=false);
 
     /* This is a hack that will bring shame to my decendants for many generations: */
     float sizeMultiplier;

@@ -21,6 +21,7 @@
 #include "tResourceManager.h"
 #include "tRecorder.h"
 #include "tConfiguration.h"
+#include "tPolynomial.h"
 
 #include "gGame.h"
 
@@ -612,10 +613,10 @@ gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, unsigned short id
 
     // Set up the default rotation speed
     {
-        tFunction tfRotation;
-        tfRotation.SetOffset( 0.0f );
-        tfRotation.SetSlope( .3f );
-        shape->setRotation( tfRotation );
+      tPolynomial<nMessage> tpRotation(2);
+        tpRotation[0] = 0.0f;
+        tpRotation[1] = .3f;
+        shape->setRotation2( tpRotation );
     }
 
     // Set up the location
@@ -684,7 +685,6 @@ gParser::parseShapePolygon(eGrid *grid, xmlNodePtr cur, unsigned short idZone, c
     return shape;
 }
 
-#ifndef DADA
 // Quick stub to allow to operate on tFunction
 // Remove when all that is variant has been ported to ruby
 void gParser::myCheapParameterSplitter(const string &str, tFunction &tf, bool addSizeMultiplier)
@@ -709,7 +709,33 @@ void gParser::myCheapParameterSplitter(const string &str, tFunction &tf, bool ad
     tf.SetOffset(param[0]);
     tf.SetSlope(param[1]);
 }
-#endif
+
+// Quick stub to allow to operate on tFunction
+// Remove when all that is variant has been ported to ruby
+void gParser::myCheapParameterSplitter2(const string &str, tPolynomial<nMessage> &tp, bool addSizeMultiplier)
+{
+    REAL param[2] = {0.0, 0.0};
+    int bPos;
+    if( (bPos = str.find(';')) != -1)
+    {
+        param[0] = atof(str.substr(0, bPos).c_str());
+        param[1] = atof(str.substr(bPos + 1, str.length()).c_str());
+    }
+    else
+    {
+        param[0] = atof(str.c_str());
+    }
+
+    if(addSizeMultiplier)
+    {
+        param[0] = param[0] * sizeMultiplier;
+        param[1] = param[1] * sizeMultiplier;
+    }
+   
+    tp[0] = param[0];
+    tp[1] = param[1];
+}
+
 void
 gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShapePtr &shape)
 {
@@ -718,29 +744,19 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
     bool centerLocationFound = false;
 
     if (myxmlHasProp(cur, "scale")) {
-#ifdef DADA
-        tString str = tString("(") + tString(myxmlGetProp(cur, "scale")) + tString(")*sizeMultiplier()");
-        shape->setScale( tValue::BasePtr( new tValue::Expr (str, tValue::Expr::vars, tValue::Expr::functions)), str );
-#else
         string str = string(myxmlGetProp(cur, "scale"));
         tFunction tfScale;
 
         myCheapParameterSplitter(str, tfScale, false);
         shape->setScale( tfScale );
-#endif
     }
 
     if (myxmlHasProp(cur, "rotation")) {
-#ifdef DADA
-        tString str = tString(myxmlGetProp(cur, "rotation"));
-        shape->setRotation( tValue::BasePtr( new tValue::Expr (str, tValue::Expr::vars, tValue::Expr::functions)), str );
-#else
         string str = string(myxmlGetProp(cur, "rotation"));
-        tFunction tfRotation;
+        tPolynomial<nMessage> tpRotation;
 
-        myCheapParameterSplitter(str, tfRotation, false);
-        shape->setRotation( tfRotation );
-#endif
+        myCheapParameterSplitter2(str, tpRotation, false);
+        shape->setRotation2( tpRotation );
     }
 
     cur = cur->xmlChildrenNode;
@@ -748,23 +764,6 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
         else if (isElement(cur->name, (const xmlChar *)"Point", keyword)) {
             /* We need to multipy by sizeMultiper so the item are properly placed*/
-#ifdef DADA
-            tString strX = tString("(" + tString(myxmlGetProp(cur, "x")) + ")*sizeMultiplier()");
-            xp = tValue::BasePtr( new tValue::Expr (strX, tValue::Expr::vars, tValue::Expr::functions) );
-            tString strY = tString("(" + tString(myxmlGetProp(cur, "y")) + ")*sizeMultiplier()");
-            yp = tValue::BasePtr( new tValue::Expr (strY, tValue::Expr::vars, tValue::Expr::functions) );
-
-            if(centerLocationFound == false) {
-                shape->setPosX( xp, strX );
-                shape->setPosY( yp, strY );
-                centerLocationFound = true;
-            }
-            else {
-                zShapePolygon *tmpShapePolygon = dynamic_cast<zShapePolygon *>( shape.get() );
-                if (tmpShapePolygon)
-                    tmpShapePolygon->addPoint( myPoint( xp, yp ), std::pair<tString, tString>(strX, strY) );
-            }
-#else
             string strX = string(myxmlGetProp(cur, "x"));
             tFunction tfX;
             myCheapParameterSplitter(strX, tfX, true);
@@ -782,7 +781,6 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
                 if (tmpShapePolygon)
                     tmpShapePolygon->addPoint( myPoint( tfX, tfY ) );
             }
-#endif
 
             endElementAlternative(grid, cur, keyword);
         }
@@ -1282,7 +1280,9 @@ gParser::parseZoneArthemis(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword
                 zMonitorPtr monitor = zMonitorPtr(new zMonitor(grid));
                 // use the same name as the associated zone
                 monitors[zoneName] = monitor;
-                monitor->setInit( 0.0f );
+		// TODO: read data and populate t
+		tPolynomial<nMessage> t;
+                monitor->setInit( t );
                 monitor->setDrift( -1.0f * sg_conquestDecayRate );
                 monitor->setClampLow ( 0.0f );
                 monitor->setClampHigh( 1.0f );
@@ -1495,7 +1495,10 @@ gParser::parseMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             }
         }
 
-        monitor->setInit(myxmlGetPropFloat(cur, "init"));
+	// TODO: read data and populate t
+	tPolynomial<nMessage> t;
+	//        monitor->setInit(myxmlGetPropFloat(cur, "init"));
+        monitor->setInit( t );
         monitor->setDrift(myxmlGetPropFloat(cur, "drift"));
         monitor->setClampLow (myxmlGetPropFloat(cur, "low"));
         monitor->setClampHigh(myxmlGetPropFloat(cur, "high"));

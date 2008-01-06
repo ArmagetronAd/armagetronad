@@ -4,6 +4,7 @@
 #include "zMonitor.h"
 #include "tMath.h"
 #include "defs.h"
+#include "nNetwork.h"
 
 /*
  * Keep track of everybody contributing to the monitor (for a tic atm)
@@ -55,16 +56,45 @@ zMonitor::affectSet(gCycle* user, REAL triggererInfluenceSet, Triad marked) {
 
 bool zMonitor::Timestep( REAL time )
 {
+    tPolynomial<nMessage> prevValueEq = valueEq;
+    
     // Do we need to reset the value?
-    if (contributorsSet.size()!=0)
-        value = totalInfluenceSet;
-
-    // Compute the sliding influence, ie: proportional to time
-    totalInfluenceSlide += drift;
-    value += totalInfluenceSlide * (time - lastTime);
+    // TODO: Re-enable those 2 lines
+    //    if (contributorsSet.size()!=0)
+    //        valueEq.setUnadjustableOffset(totalInfluenceSet);
 
     // Computer the non-sliding influence
-    value += totalInfluenceAdd;
+    if( fabs(totalInfluenceAdd - previousTotalInfluenceAdd) > 0.01) {
+      valueEq.addConstant(totalInfluenceAdd);
+      std::cout << "totalIncluenceAdd " << totalInfluenceAdd << std::endl;
+
+      previousTotalInfluenceAdd = totalInfluenceAdd;
+    }
+
+    // TODO:
+    // Find a way to make that darn constant, well, more constant all over the code!!!
+    if( fabs(totalInfluenceSlide - previousTotalInfluenceSlide) > 1e-10) {
+      valueEq.changeRate(totalInfluenceSlide, 1, time);
+
+      previousTotalInfluenceSlide = totalInfluenceSlide;
+    }
+
+    { // Clamp
+      REAL currentValue = valueEq.evaluate(time);
+
+      if(currentValue < minValue) {
+	valueEq.changeRate(minValue, 0, time);
+	if(totalInfluenceSlide < 0) {
+	  valueEq.changeRate(0.0, 1, time);
+	}
+      }
+      if(currentValue > maxValue) {
+	valueEq.changeRate(maxValue, 0, time);
+	if(totalInfluenceSlide > 0) {
+	  valueEq.changeRate(0.0, 1, time);
+	}
+      }
+    }
 
     // Assemble all the contributors in a single list
     // Nota: this also protect the list for further modification
@@ -80,15 +110,18 @@ bool zMonitor::Timestep( REAL time )
     contributorsAdd.erase(contributorsAdd.begin(), contributorsAdd.end());
     contributorsSet.erase(contributorsSet.begin(), contributorsSet.end());
 
-    totalInfluenceSlide = 0.0;
+    totalInfluenceSlide = drift;
     totalInfluenceAdd   = 0.0;
     totalInfluenceSet   = 0.0;
 
     // bound the value
+    REAL value = valueEq.evaluate(time);
+
     clamp(value, minValue, maxValue);
 
     // Only update if value has changed enough
-    if( value < previousValue - EPS || previousValue + EPS < value) {
+    // TODO:
+    //    if( value < previousValue - EPS || previousValue + EPS < value) {
         // go through all the rules and find the ones to apply
         zMonitorRulePtrs::const_iterator iter;
         for(iter = rules.begin();
@@ -96,11 +129,11 @@ bool zMonitor::Timestep( REAL time )
                 ++iter)
         {
             // Go through all the rules of the monitor and see wich need to be activated
-            if ((*iter)->isValid(value)) {
-                (*iter)->applyRule(contributors, time, value);
+	  if ((*iter)->isValid(valueEq.evaluate(time))) {
+                (*iter)->applyRule(contributors, time, valueEq);
             }
         }
-    }
+	  //    }
 
     // update time
     lastTime = time;
@@ -121,16 +154,18 @@ zMonitor::addRule(zMonitorRulePtr aRule) {
 
 
 
-void zMonitorRule::applyRule(triggerers &contributors, REAL time, REAL _value) {
+void zMonitorRule::applyRule(triggerers &contributors, REAL time, const tPolynomial<nMessage> &valueEq) {
     /* We take all the contributors */
     /* And apply the proper effect */
-    miscDataPtr value = miscDataPtr(new REAL(_value));
+    miscDataPtr value = miscDataPtr(new REAL(valueEq.evaluate(time)));
 
+    // Go through all effectgroups (owners of some action)
     std::vector<zEffectGroupPtr>::iterator iter;
     for (iter = effectGroupList.begin();
             iter != effectGroupList.end();
             ++iter)
     {
+        // Go through all the categories of triggerer (ie: people who have right to trigger an action)
         triggerers::const_iterator iter2;
         for (iter2 = contributors.begin();
                 iter2 != contributors.end();
@@ -148,7 +183,8 @@ void zMonitorRule::applyRule(triggerers &contributors, REAL time, REAL _value) {
             iterMonitorInfluence!=monitorInfluences.end();
             ++iterMonitorInfluence)
     {
-        (*iterMonitorInfluence)->apply(owners, teamOwners, (gCycle*)0, _value);
+      // TODO: pass the whole valueEq
+        (*iterMonitorInfluence)->apply(owners, teamOwners, (gCycle*)0, valueEq.evaluate(time));
     }
 
     zZoneInfluencePtrs::const_iterator iterZoneInfluence;
@@ -156,7 +192,7 @@ void zMonitorRule::applyRule(triggerers &contributors, REAL time, REAL _value) {
             iterZoneInfluence!=zoneInfluences.end();
             ++iterZoneInfluence)
     {
-        (*iterZoneInfluence)->apply(_value);
+        (*iterZoneInfluence)->apply(valueEq);
     }
 }
 

@@ -117,7 +117,8 @@ zValidator::validate(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObj
                 iterZoneInfluence!=zoneInfluences.end();
                 ++iterZoneInfluence)
         {
-            (*iterZoneInfluence)->apply(value);
+	  // TODO: 
+	  (*iterZoneInfluence)->apply(tPolynomial<nMessage>(value) );
         }
     }
 }
