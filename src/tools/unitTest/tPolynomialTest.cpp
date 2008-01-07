@@ -5,7 +5,7 @@
 
 class tPolynomialTest : public CppUnit::TestFixture {
 private:
-    tPolynomial<nMessageMock> tpEmpty, tpOne, tpZero, tpTwo;
+    tPolynomial<nMessageMock> *tpEmpty, *tpOne, *tpZero, *tpTwo;
 
 public:
     CPPUNIT_TEST_SUITE( tPolynomialTest );
@@ -13,80 +13,59 @@ public:
     CPPUNIT_TEST( testAddition );
     CPPUNIT_TEST( testMultiplication );
     CPPUNIT_TEST( testEvaluateAndBaseArgument );
-  //    CPPUNIT_TEST( testWriteAndReadToStream );
+    CPPUNIT_TEST( testWriteAndReadToStream );
     CPPUNIT_TEST_SUITE_END();
+
+private:
+    tPolynomial<nMessageMock> *tpEmpty, *tpOne, *tpZero, *tpTwo;
 
 public:
     void setUp() {
-      //        tpEmpty = tPolynomial<nMessageMock> ;
-        tpZero  = tPolynomial<nMessageMock>(1);
-        tpZero[(unsigned)0] = 0.0;
-        tpOne   = tPolynomial<nMessageMock>(1);
-	tpOne[0] = 1.0;
-        tpTwo   = tPolynomial<nMessageMock>(1);
-	tpTwo[0] = 2.0;
+        tpEmpty = new tPolynomial<nMessageMock>();
+        tpZero  = new tPolynomial<nMessageMock>(0.0);
+        tpOne   = new tPolynomial<nMessageMock>(1.0);
+        tpTwo   = new tPolynomial<nMessageMock>(2.0);
     }
 
     void tearDown() {
-      // Empty
+        delete tpEmpty;
+        delete tpZero;
+        delete tpOne;
+        delete tpTwo;
     }
 
     void testEquality() {
-        CPPUNIT_ASSERT( tpEmpty == tpEmpty );
-        CPPUNIT_ASSERT( tpOne == tpOne );
-        CPPUNIT_ASSERT( tpEmpty == tpZero );
-        CPPUNIT_ASSERT( !(tpZero == tpOne) );
+        CPPUNIT_ASSERT( *tpEmpty == *tpEmpty );
+        CPPUNIT_ASSERT( *tpOne == *tpOne );
+        CPPUNIT_ASSERT( *tpEmpty == *tpZero );
+        CPPUNIT_ASSERT( !(*tpZero == *tpOne) );
         // testing the copy constructor
-        CPPUNIT_ASSERT( tpOne == tPolynomial<nMessageMock>(tpOne) );
-
-	// testing the tArray constructor
-	float values[] = {1, 3, 5, 7};
-	int size = sizeof(values)/sizeof(values[0]);
-	tArray<float> tValues(size);
-	for(int i=0; i<size; i++) {
-	  tValues[i] = values[i];
-	}
-	tPolynomial<nMessageMock> tpByArray(values, size);
-	tPolynomial<nMessageMock> tpBytArray(tValues);
-
-	CPPUNIT_ASSERT(tpByArray == tpBytArray);
-
-	// Testing the assignment operator
-	float randomData[] = {3, 5, 7};
-	tPolynomial<nMessageMock> initiated(randomData, sizeof(randomData)/sizeof(randomData[0]));
-	tPolynomial<nMessageMock> uninitiated;
-
-	initiated = tpTwo;
-	uninitiated = tpTwo;
-	CPPUNIT_ASSERT( 2.0 == tpTwo[0] ); 
-	CPPUNIT_ASSERT( 2.0 == initiated[0] ); 
-	CPPUNIT_ASSERT( tpTwo == initiated );
-	CPPUNIT_ASSERT( tpTwo == uninitiated );
+        CPPUNIT_ASSERT( *tpOne == tPolynomial<nMessageMock>(*tpOne) );
     }
 
     void testAddition() {
         // {0} = {-} + {0}
-        CPPUNIT_ASSERT( tpZero == tpEmpty + tpZero );
+        CPPUNIT_ASSERT( *tpZero == *tpEmpty + *tpZero );
         // {1} = {0} + {1}
-        CPPUNIT_ASSERT( tpOne == tpZero + tpOne );
+        CPPUNIT_ASSERT( *tpOne == *tpZero + *tpOne );
         // {2} = {1} + {1}
-        CPPUNIT_ASSERT( tpTwo == tpOne + tpOne );
+        CPPUNIT_ASSERT( *tpTwo == *tpOne + *tpOne );
         // a = b + c
         float a[] = {3, 5, 7, 11};
         float b[] = {0, 5, 3, -5};
         float c[] = {3, 0, 4, 16};
-        tPolynomial<nMessageMock> tpA(a, sizeof(a)/sizeof(a[0]));
-        tPolynomial<nMessageMock> tpB(b, sizeof(b)/sizeof(b[0]));
-        tPolynomial<nMessageMock> tpC(c, sizeof(c)/sizeof(c[0]));
+        tPolynomial<nMessageMock> tpA(a);
+        tPolynomial<nMessageMock> tpB(b);
+        tPolynomial<nMessageMock> tpC(c);
 
         CPPUNIT_ASSERT( tpA == tpB + tpC );
 
         // {0} = {-} + 0
-        CPPUNIT_ASSERT( tpZero == tpEmpty + 0.0 );
+        CPPUNIT_ASSERT( *tpZero == *tpEmpty + 0.0 );
         // {1} = {0} + 1
-        CPPUNIT_ASSERT( tpOne == tpZero + 1.0 );
+        CPPUNIT_ASSERT( *tpOne == *tpZero + 1.0 );
         // {2} = {1} + 1
-        CPPUNIT_ASSERT( tpTwo == tpOne + 1.0 );
+        CPPUNIT_ASSERT( *tpTwo == *tpOne + 1.0 );
 
         // {a} + 1 == ({b} + 2) + {c} + -1
         CPPUNIT_ASSERT( (tpA + 1.0) == (tpB + 2.0) + tpC + -1.0);
@@ -94,16 +73,32 @@ public:
 
     void testMultiplication() {
         // {0} = {-} * {0}
-        CPPUNIT_ASSERT( tpZero == tpEmpty * tpZero );
+        CPPUNIT_ASSERT( *tpZero == *tpEmpty * *tpZero );
         // {0} = {0} * {1}
-        CPPUNIT_ASSERT( tpZero == tpZero * tpOne );
+        CPPUNIT_ASSERT( *tpZero == *tpZero * *tpOne );
         // {1} = {1} * {1}
-        CPPUNIT_ASSERT( tpOne == tpOne * tpOne );
-	// {1,0,0} = {1,0} * {1,0}
-	float onePower2[] = {0, 1};
-	tPolynomial<nMessageMock> tpOnePower2( onePower2, sizeof(onePower2)/sizeof(onePower2[0]) );
-	float onePower3[] = {0, 0, 1};
-	tPolynomial<nMessageMock> tpOnePower3( onePower3, sizeof(onePower3)/sizeof(onePower3[0]) );
+        CPPUNIT_ASSERT( *tpOne == *tpOne * *tpOne );
+
+        // a = b * c
+        float a[] = {3.0, 2.5, -6.0, -17, -5, 12, 12};
+        float b[] = {1, 0.0, -2, -2};
+        float c[] = {3, 2.5, 0, -6};
+        tPolynomial<nMessageMock> tpA(a);
+        tPolynomial<nMessageMock> tpB(b);
+        tPolynomial<nMessageMock> tpC(c);
+
+        CPPUNIT_ASSERT( tpA == tpB * tpC );
+
+        // {0} = {-} * 0
+        CPPUNIT_ASSERT( *tpZero == *tpEmpty * 0.0 );
+        // {0} = {0} * 1
+        CPPUNIT_ASSERT( *tpZero == *tpZero * 1.0 );
+        // {1} = {1} * 1
+        CPPUNIT_ASSERT( *tpOne == *tpOne * 1.0 );
+
+        // {a} * -2 == ({b} * 2) * ({c} * -1)
+        CPPUNIT_ASSERT( (tpA * -2.0) == (tpB * 2.0) * (tpC * -1.0));
+    }
 
 	CPPUNIT_ASSERT( tpOnePower3 == (tpOnePower2 * tpOnePower2) );
 
@@ -174,8 +169,8 @@ public:
         float accelB = -10.0;
         float a[] = {0, 0, accelA};
         float b[] = {50, 45, accelB};
-        tPolynomial<nMessageMock> tfA(a, sizeof(a)/sizeof(a[0]));
-        tPolynomial<nMessageMock> tfB(b, sizeof(b)/sizeof(b[0]));
+        tPolynomial<nMessageMock> tfA(a);
+        tPolynomial<nMessageMock> tfB(b);
 
         CPPUNIT_ASSERT_DOUBLES_EQUAL( 0.0, tfA.evaluate(0), DELTA);
         CPPUNIT_ASSERT_DOUBLES_EQUAL( 125.0, tfA.evaluate(5), DELTA);
@@ -206,12 +201,11 @@ public:
         CPPUNIT_ASSERT_DOUBLES_EQUAL( 150.0 - 5*5 - 20.0/2.0*5*5, tfB.evaluate(10), DELTA);
     }
 
-  /*
     void testWriteAndReadToStream() {
         float a[] = {1.0, 2.0, 10.0};
         float b[] = {50, 45, -10.0};
-        tPolynomial<nMessageMock> tfA(a, sizeof(a)/sizeof(a[0]));
-        tPolynomial<nMessageMock> tfB(b, sizeof(b)/sizeof(b[0]));
+        tPolynomial<nMessageMock> tfA(a);
+        tPolynomial<nMessageMock> tfB(b);
         tPolynomial<nMessageMock> tfC;
 
         nMessageMock messageMock;
@@ -224,7 +218,6 @@ public:
 
         CPPUNIT_ASSERT( tfA == tfB );
     }
-  */
 
 };
 

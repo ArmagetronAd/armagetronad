@@ -38,10 +38,33 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <vector>
 #include <map>
 
+// extra binds for mouse (and joystick, as soon as SDL supports it) movement:
+#define SDLK_MOUSE_X_PLUS   (SDLK_LAST+1)
+#define SDLK_MOUSE_X_MINUS  (SDLK_LAST+2)
+#define SDLK_MOUSE_Y_PLUS   (SDLK_LAST+3)
+#define SDLK_MOUSE_Y_MINUS  (SDLK_LAST+4)
+#define SDLK_MOUSE_Z_PLUS   (SDLK_LAST+5)
+#define SDLK_MOUSE_Z_MINUS  (SDLK_LAST+6)
+#define SDLK_MOUSE_BUTTON_1 (SDLK_LAST+7)
+#define SDLK_MOUSE_BUTTON_2 (SDLK_LAST+8)
+#define SDLK_MOUSE_BUTTON_3 (SDLK_LAST+9)
+#define SDLK_MOUSE_BUTTON_4 (SDLK_LAST+10)
+#define SDLK_MOUSE_BUTTON_5 (SDLK_LAST+11)
+#define SDLK_MOUSE_BUTTON_6 (SDLK_LAST+12)
+#define SDLK_MOUSE_BUTTON_7 (SDLK_LAST+13)
+#define SDLK_NEWLAST        (SDLK_LAST+14)
+#define SDLK_MAX            512 /* Enough? */
+#define MOUSE_BUTTONS 7
+
 bool su_mouseGrab = false;
 
 static uAction* su_allActions[uMAX_ACTIONS];
 static int     su_allActionsLen = 0;
+
+#ifndef NOJOYSTICK
+#define JOYSTICK_MAX 16
+static int joystick_sdlk[JOYSTICK_MAX][4];
+#endif
 
 uAction::uAction(uAction *&anchor,const char* name,
                  int priority_,
@@ -116,7 +139,7 @@ uInput::uInput( tString const & persistentID, tString const & name )
 uInput::~uInput()
 {
     su_inputs[ID_] = 0;
-    // su_inputMap.erase( su_inputMap.find( persistentID_ ) );
+    su_inputMap.erase( su_inputMap.find( persistentID_ ) );
 }
 
 static uInput * su_GetInput( tString const & persistentID )
@@ -125,7 +148,7 @@ static uInput * su_GetInput( tString const & persistentID )
     {
         return su_inputMap[ persistentID ];
     }
-    catch (...)
+    catch(...)
     {
         return NULL;
     }
@@ -165,23 +188,13 @@ static uAutoDeleteInput & su_GetAutoDeleteInput()
     return filler;
 }
 
-static uInput * su_NewInput( tString const & ID, tString const & name )
-{
-    return su_GetAutoDeleteInput().Create( ID, name );
-}
-
-static uInput * su_NewInput( char const * ID, char const * name )
-{
-    return su_GetAutoDeleteInput().Create( tString( ID ), tString( name ) );
-}
-
 // class that manages keyboard input
 class uKeyInput
 {
 public:
     uKeyInput()
     {
-        for ( int i = 0; i <= SDLK_LAST; ++i )
+        for( int i = 0; i <= SDLK_LAST; ++i )
         {
 #ifndef DEDICATED
             char const * ID_Raw = SDL_GetKeyName(static_cast< SDLKey >( i ) );
@@ -210,9 +223,7 @@ public:
             }
 
             // store new input key
-            sdl_keys[i] = su_NewInput( id.str(), tString(ID_Raw) );
-
-            tASSERT( sdl_keys[i]->ID() == i );
+            sdl_keys[i] = su_GetAutoDeleteInput().Create( id.str(), tString(ID_Raw) );
         }
     }
 
@@ -230,6 +241,11 @@ static uKeyInput const & su_GetKeyInput()
 }
 
 # define MOUSE_BUTTONS 7
+
+static uInput * su_NewInput( char const * ID, char const * name )
+{
+    return su_GetAutoDeleteInput().Create( tString( ID ), tString( name ) );
+}
 
 // class that manages mouse inout
 class uMouseInput
@@ -250,7 +266,7 @@ public:
             id << "MOUSE_BUTTON_" << i+1;
             std::ostringstream name;
             name << "mouse button " << i+1;
-            button[i] = su_NewInput( id.str(), name.str() );
+            button[i] = su_GetAutoDeleteInput().Create( id.str(), name.str() );
         }
     }
 
@@ -287,7 +303,7 @@ public:
     // write the complete keymap
     virtual void WriteVal(std::ostream &s){
         int first=1;
-        for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
+        for( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
         {
             if ( !(*i)->GetBind() )
                 continue;
@@ -328,11 +344,15 @@ public:
                 {
                     input = su_inputs[ value ];
                 }
+                else
+                {
+                    return;
+                }
             }
 
             if ( !input )
             {
-                input = su_NewInput( id, tString("") );
+                input = su_GetAutoDeleteInput().Create( id, tString("unknown") );
             }
 
             tASSERT( input );
@@ -786,278 +806,127 @@ REAL mouse_sensitivity=REAL(.1);
 
 struct uTransformEventInfo
 {
-    uInput * input;   // the input event type received
     float value;      // the strenght of the event
     bool needsRepeat; // if the event should trigger a continuous action (camera movement), should it be repeated?
 
-    uTransformEventInfo(): input(0), value(0), needsRepeat(false){}
-    uTransformEventInfo( uInput * input_, float value_ = 1 , bool needsRepeat_ = true ): input(input_), value(value_), needsRepeat(needsRepeat_){}
+    uTransformEventInfo(): value(0), needsRepeat(false){}
 };
 
-// transform SDL event into vector of abstract events
+// transform SDL event into uInput pointer
 #ifndef DEDICATED
-static void su_TransformEvent( SDL_Event & e, std::vector< uTransformEventInfo > & info )
+static uInput * su_TransformEvent( SDL_Event & e, int count, uTransformEventInfo & info )
 {
+    uInput * input = NULL;
+
+    info.needsRepeat = true;
+    info.value = 0;
+
     switch (e.type)
     {
     case SDL_MOUSEMOTION:
-    {
+        info.needsRepeat = false;
+
         // ignore events generated by mouse grabbing
         if ( su_mouseGrab &&
                 e.motion.x==sr_screenWidth/2 && e.motion.x==sr_screenHeight/2)
         {
-            return;
+            return NULL;
         }
 
-        // we generate up to four events per mouse movement
-        info.reserve(4);
-
-        REAL xrel=e.motion.xrel;
-        if (xrel > 0) // right
+        if ( count == 0 )
         {
-            info.push_back( uTransformEventInfo(
-                                su_GetMouseInput().x_minus,
-                                0,
-                                false ) );
-            info.push_back( uTransformEventInfo(
-                                su_GetMouseInput().x_plus,
-                                xrel * mouse_sensitivity,
-                                false ) );
-        }
+            REAL xrel=e.motion.xrel;
+            if (xrel > 0) // left
+            {
+                input = su_GetMouseInput().x_plus;
+                info.value = xrel * mouse_sensitivity;
+                su_GetMouseInput().x_minus->SetPressed( 0 );
+            }
 
-        if (xrel < 0) // left
-        {
-            info.push_back( uTransformEventInfo(
-                                su_GetMouseInput().x_plus,
-                                0,
-                                false ) );
-            info.push_back( uTransformEventInfo(
-                                su_GetMouseInput().x_minus,
-                                -xrel * mouse_sensitivity,
-                                false ) );
+            if (xrel < 0) // left
+            {
+                input = su_GetMouseInput().x_minus;
+                info.value = -xrel * mouse_sensitivity;
+                su_GetMouseInput().x_plus->SetPressed( 0 );
+            }
         }
 
-        // invert mouse movement
-        REAL yrel=-e.motion.yrel;
-        if (yrel>0) // up
+        if ( count == 1 )
         {
-            info.push_back( uTransformEventInfo(
-                                su_GetMouseInput().y_minus,
-                                0,
-                                false ) );
-            info.push_back( uTransformEventInfo(
-                                su_GetMouseInput().y_plus,
-                                yrel * mouse_sensitivity,
-                                false ) );
+            REAL yrel=-e.motion.yrel;
+            if (yrel>0) // down
+            {
+                input = su_GetMouseInput().y_minus;
+                info.value = -yrel * mouse_sensitivity;
+                su_GetMouseInput().y_plus->SetPressed( 0 );
+            }
+            if (yrel<0) // up
+            {
+                input = su_GetMouseInput().y_plus;
+                info.value = yrel * mouse_sensitivity;
+                su_GetMouseInput().y_minus->SetPressed( 0 );
+            }
         }
-        if (yrel<0) // down
-        {
-            info.push_back( uTransformEventInfo(
-                                su_GetMouseInput().y_plus,
-                                0,
-                                false ) );
-            info.push_back( uTransformEventInfo(
-                                su_GetMouseInput().y_minus,
-                                -yrel * mouse_sensitivity,
-                                false ) );
-        }
-    }
-    break;
+        break;
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:
-    {
-        int button=e.button.button;
-        if (button<=MOUSE_BUTTONS)
         {
-            info.push_back( uTransformEventInfo(
-                                su_GetMouseInput().button[ button ],
-                                ( e.type == SDL_MOUSEBUTTONDOWN ) ? 1 : 0 ) );
+            if ( count != 0 )
+                break;
+
+            int button=e.button.button;
+            if (button<=MOUSE_BUTTONS)
+            {
+                input = su_GetMouseInput().button[ button ];
+                info.value = ( e.type == SDL_MOUSEBUTTONDOWN ) ? 1 : -1;
+            }
         }
-    }
-    break;
+        break;
     case SDL_KEYDOWN:
     case SDL_KEYUP:
-    {
-        SDL_keysym &c = e.key.keysym;
+        {
+            if ( count != 0 )
+                break;
 
-        info.push_back( uTransformEventInfo(
-                            su_GetKeyInput().sdl_keys[ c.sym ],
-                            ( e.type == SDL_KEYDOWN ) ? 1 : 0 ) );
+            SDL_keysym &c = e.key.keysym;
+
+            input = su_GetKeyInput().sdl_keys[ c.sym ];
+            info.value = ( e.type == SDL_KEYDOWN ) ? 1 : -1;
+        }
 
         break;
-    }
 #ifndef NOJOYSTICK
     case SDL_JOYAXISMOTION:
-    {
-        uJoystick * joystick = su_GetJoystick( e.jaxis.which );
-        int dir = e.jaxis.value > 0 ? 1 : 0;
+        if ( count != 0 )
+            break;
 
-        info.push_back( uTransformEventInfo(
-                            joystick->GetAxis( e.jaxis.axis, 1-dir ),
-                            0 ) );
-        info.push_back( uTransformEventInfo(
-                            joystick->GetAxis( e.jaxis.axis, dir ),
-                            fabs( e.jaxis.value )/32768 ) );
-
+        if (e.jaxis.value > -16384 && e.jaxis.value < 16384) {
+#if DEBUG
+            std::cout << "JS: Ignoring value of " << e.jaxis.value << "\n";
+#endif
+            return false;
+        }
+        sym = joystick_sdlk[e.jaxis.which][0] + (e.jaxis.axis * 2) + ((e.jaxis.value > 0) ? 1 : 0);
+        active = 0;
+#if DEBUG
+        printf("JS: %d,%d,%d is %s\n", e.jaxis.which, e.jaxis.axis, e.jaxis.value, keyname(sym));
+        fflush(stdout);
+#endif
         break;
-    }
     case SDL_JOYBUTTONDOWN:
     case SDL_JOYBUTTONUP:
-        info.push_back( uTransformEventInfo(
-                            su_GetJoystick( e.jbutton.which )->GetButton( e.jbutton.button ),
-                            ( e.type == SDL_JOYBUTTONDOWN ) ? 1 : 0 ) );
+        if ( count != 0 )
+            break;
+
+        sym = joystick_sdlk[e.jbutton.which][1] + e.jbutton.button;
+        active = 0;
         break;
-    case SDL_JOYHATMOTION:
-    {
-        info.reserve(4);
-
-        uJoystick * joystick = su_GetJoystick( e.jhat.which );
-        int hat = e.jhat.hat;
-        int hatDirection = e.jhat.value;
-
-        // left/right hat motion
-        {
-            int & lastDir = joystick->GetHatDirection( hat, 0 );
-            int newDir =
-                ( ( hatDirection & SDL_HAT_LEFT ) ? -1 : 0 ) +
-                ( ( hatDirection & SDL_HAT_RIGHT ) ? +1 : 0 );
-
-            // negate previous events
-            if ( lastDir < 0 && newDir >= 0 )
-            {
-                info.push_back( uTransformEventInfo(
-                                    joystick->GetHat( hat, uJoystick::Left ),
-                                    0 ) );
-            }
-
-            if ( lastDir > 0 && newDir <= 0 )
-            {
-                info.push_back( uTransformEventInfo(
-                                    joystick->GetHat( hat, uJoystick::Right ),
-                                    0 ) );
-            }
-
-            // create new events
-            if ( lastDir >= 0 && newDir < 0 )
-            {
-                info.push_back( uTransformEventInfo(
-                                    joystick->GetHat( hat, uJoystick::Left ),
-                                    1 ) );
-            }
-
-            if ( lastDir <= 0 && newDir > 0 )
-            {
-                info.push_back( uTransformEventInfo(
-                                    joystick->GetHat( hat, uJoystick::Right ),
-                                    1 ) );
-            }
-
-            lastDir = newDir;
-        }
-
-        // up/down hat motion
-        {
-            int & lastDir = joystick->GetHatDirection( hat, 1 );
-            int newDir =
-                ( ( hatDirection & SDL_HAT_UP ) ? -1 : 0 ) +
-                ( ( hatDirection & SDL_HAT_DOWN ) ? +1 : 0 );
-
-            // negate previous events
-            if ( lastDir < 0 && newDir >= 0 )
-            {
-                info.push_back( uTransformEventInfo(
-                                    joystick->GetHat( hat, uJoystick::Up ),
-                                    0 ) );
-            }
-
-            if ( lastDir > 0 && newDir <= 0 )
-            {
-                info.push_back( uTransformEventInfo(
-                                    joystick->GetHat( hat, uJoystick::Down ),
-                                    0 ) );
-            }
-
-            // create new events
-            if ( lastDir >= 0 && newDir < 0 )
-            {
-                info.push_back( uTransformEventInfo(
-                                    joystick->GetHat( hat, uJoystick::Up ),
-                                    1 ) );
-            }
-
-            if ( lastDir <= 0 && newDir > 0 )
-            {
-                info.push_back( uTransformEventInfo(
-                                    joystick->GetHat( hat, uJoystick::Down ),
-                                    1 ) );
-            }
-
-            lastDir = newDir;
-        }
-    }
-    break;
-    case SDL_JOYBALLMOTION:
-    {
-        info.reserve(4);
-
-        uJoystick * joystick = su_GetJoystick( e.jball.which );
-        int ball = e.jball.ball;
-
-        REAL xrel=e.jball.xrel;
-        if (xrel > 0) // right
-        {
-            info.push_back( uTransformEventInfo(
-                                joystick->GetBall( ball, uJoystick::Left ),
-                                0,
-                                false ) );
-            info.push_back( uTransformEventInfo(
-                                joystick->GetBall( ball, uJoystick::Right ),
-                                xrel,
-                                false ) );
-        }
-
-        if (xrel < 0) // left
-        {
-            info.push_back( uTransformEventInfo(
-                                joystick->GetBall( ball, uJoystick::Right ),
-                                0,
-                                false ) );
-            info.push_back( uTransformEventInfo(
-                                joystick->GetBall( ball, uJoystick::Left ),
-                                -xrel,
-                                false ) );
-        }
-
-        // invert ball movement
-        REAL yrel=-e.jball.yrel;
-        if (yrel>0) // up
-        {
-            info.push_back( uTransformEventInfo(
-                                joystick->GetBall( ball, uJoystick::Down ),
-                                0,
-                                false ) );
-            info.push_back( uTransformEventInfo(
-                                joystick->GetBall( ball, uJoystick::Up ),
-                                yrel,
-                                false ) );
-        }
-        if (yrel<0) // down
-        {
-            info.push_back( uTransformEventInfo(
-                                joystick->GetBall( ball, uJoystick::Up ),
-                                0,
-                                false ) );
-            info.push_back( uTransformEventInfo(
-                                joystick->GetBall( ball, uJoystick::Down ),
-                                -yrel,
-                                false ) );
-        }
-    }
-    break;
 #endif
     default:
         break;
     }
+
+    return input;
 }
 #endif // DEDICATED
 
@@ -1092,10 +961,10 @@ public:
 
             bool first=1;
 
-            for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
+            for( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
             {
                 uBind * bind = (*i)->GetBind();
-                if ( bind && (*i)->Name().size() > 0 &&
+                if( bind &&
                         bind->act==act &&
                         bind->CheckPlayer(ePlayer) )
                 {
@@ -1107,7 +976,7 @@ public:
                     s << (*i)->Name();
                 }
             }
-            if (!first)
+            if(!first)
             {
                 DisplayText(REAL(x+.02),y,s,selected,alpha,-1);
             }
@@ -1132,22 +1001,22 @@ public:
         if ( e.type == SDL_KEYDOWN )
         {
             SDL_keysym &c = e.key.keysym;
-            if (!active)
+            if(!active)
             {
                 if (c.sym==SDLK_DELETE || c.sym==SDLK_BACKSPACE)
                 {
                     // clear all bindings
-                    for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
+                    for( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
                     {
                         uBind * bind = (*i)->GetBind();
-                        if ( bind &&
+                        if( bind &&
                                 bind->act==act &&
                                 bind->CheckPlayer(ePlayer) )
                         {
                             (*i)->SetBind( NULL );
                         }
+                        return true;
                     }
-                    return true;
                 }
                 return false;
             }
@@ -1159,32 +1028,29 @@ public:
             }
         }
 
-        // transform events
-        std::vector< uTransformEventInfo > events;
-        su_TransformEvent( e, events );
-
-        for ( std::vector< uTransformEventInfo >::const_iterator i = events.begin(); i != events.end(); ++i )
+        for ( int pass = su_TRANSFORM_PASSES-1; pass >= 0; --pass )
         {
-            uTransformEventInfo const & info = *i;
-            if ( info.input && info.value > 0.5 && active )
+            uTransformEventInfo info;
+            uInput * input = su_TransformEvent( e, pass, info );
+
+            if( input && info.value > 0.1 && active )
             {
-                uBind * bind = info.input->GetBind();
-                if ( bind &&
+                uBind * bind = input->GetBind();
+                if( bind &&
                         bind->act==act &&
                         bind->CheckPlayer(ePlayer))
                 {
-                    info.input->SetBind( NULL );
+                    input->SetBind( NULL );
                 }
                 else
                 {
-                    info.input->SetBind( uBindPlayer::NewBind(act,ePlayer) );
+                    input->SetBind( uBindPlayer::NewBind(act,ePlayer) );
                 }
 
                 active = false;
                 return true;
             }
         }
-
         return false;
     }
 #endif
@@ -1286,7 +1152,7 @@ void su_HandleDelayedEvents ()
 
     su_delayed = false;
 
-    for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
+    for( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
     {
         uBind * bind = (*i)->GetBind();
         if ( bind )
@@ -1307,27 +1173,24 @@ bool su_HandleEvent(SDL_Event &e, bool delayed ){
 
     // transform events
     bool ret = false;
-
-    std::vector< uTransformEventInfo > events;
-    su_TransformEvent( e, events );
-
-    for ( std::vector< uTransformEventInfo >::const_iterator i = events.begin(); i != events.end(); ++i )
+    for ( int pass = su_TRANSFORM_PASSES-1; pass >= 0; --pass )
     {
-        uTransformEventInfo info = *i;
+        uTransformEventInfo info;
+        uInput * input = su_TransformEvent( e, pass, info );
 
-        if ( info.input )
+        if ( input )
         {
             // store input state for later repeat
             if ( info.needsRepeat )
             {
-                info.input->SetPressed( info.value > 0 ? info.value : 0 );
+                input->SetPressed( info.value > 0 ? info.value : 0 );
             }
 
             // activate binding
-            uBind * bind = info.input->GetBind();
+            uBind * bind = input->GetBind();
             if ( bind )
             {
-                if ( bind->IsDoubleBind( info.input ) )
+                if ( bind->IsDoubleBind( input ) )
                 {
                     return true;
                 }
@@ -1357,11 +1220,11 @@ void su_InputSync(){
     lastTime=time;
 
     // key repeat
-    for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
+    for( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
     {
         uInput * input = *i;
         uBind * bind = input->GetBind();
-        if ( input->GetPressed() > 0 && bind &&
+        if( input->GetPressed() > 0 && bind &&
                 bind->act && bind->act->type == uAction::uINPUT_ANALOG )
         {
             bind->Activate( ts * key_sensitivity * input->GetPressed(), su_delayed );
@@ -1372,11 +1235,11 @@ void su_InputSync(){
 void su_ClearKeys()
 {
     // clears stored keypresses
-    for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
+    for( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
     {
         uInput * input = *i;
         uBind * bind = input->GetBind();
-        if ( input->GetPressed() > 0 && bind )
+        if( input->GetPressed() > 0 && bind )
         {
             bind->Activate( -1, su_delayed );
             input->SetPressed( 0 );
@@ -1412,7 +1275,7 @@ uBindPlayer * uBindPlayer::NewBind(std::istream &s)
 uBindPlayer * uBindPlayer::NewBind( uAction * action, int player )
 {
     // see if the bind has an alias
-    for ( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
+    for( uInputs::const_iterator i = su_inputs.begin(); i != su_inputs.end(); ++i )
     {
         uInput * input = *i;
         uBind * old = input->GetBind();

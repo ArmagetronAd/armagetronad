@@ -593,6 +593,8 @@ int main(int argc,char **argv){
 #endif // NOJOYSTICK
 #endif // DEDICATED
 
+        su_KeyInit();
+
         // tERR_MESSAGE( "Initializing player data." );
         ePlayer::Init();
 
