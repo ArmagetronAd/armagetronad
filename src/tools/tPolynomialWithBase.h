@@ -151,6 +151,56 @@ T & tPolynomialWithBase<T>::WriteSync( T & m ) const
 {
     tPolynomial<T>::WriteSync( m );
 
+    reevaluateCoefsAt(argument);
+
+    coefs[newRateIndex] = newRate;
+
+    // Grow the polynomial if required
+    if(newRateIndex > length) {
+        for(int i=length; i<newRateIndex; i++) {
+            coefs[i] = 0.0;
+        }
+        length = newRateIndex;
+    }
+}
+
+/**
+ * This perform a hard setting of all the coefficients
+ */
+template <typename T>
+void tPolynomial<T>::setRates(REAL newValues[], REAL argument)
+{
+    int newLength = sizeof(newValues)/sizeof(REAL);
+    assert(MAX_LENGTH >= newLength);
+
+    setBaseArgument(argument);
+
+    for (int i=0; i<newLength; i++) {
+        coefs[i] = newValues[i];
+    }
+    length = newLength;
+}
+
+template <typename T>
+REAL tPolynomial<T>::evaluate( REAL argument ) const
+{
+    REAL arg = (argument - baseArgument);
+
+    REAL res = 0.0;
+
+    // Compute res = unadjustableOffset + c[0] + c[1]*arg + (c[2]/2)*arg^2 + ... + (c[N]/N)*arg^N
+    for (int i=length; 0<i; i--) {
+        res = (res + coefs[i]/i) * arg;
+    }
+    res += (coefs[0] + unadjustableOffset); // length 0
+    return res;
+}
+
+template <typename T>
+T & tPolynomialWithBase<T>::WriteSync( T & m ) const
+{
+    tPolynomial<T>::WriteSync( m );
+
     // write unadjustableOffset
     m << unadjustableOffset;
 
