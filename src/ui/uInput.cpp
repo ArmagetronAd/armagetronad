@@ -61,11 +61,6 @@ bool su_mouseGrab = false;
 static uAction* su_allActions[uMAX_ACTIONS];
 static int     su_allActionsLen = 0;
 
-#ifndef NOJOYSTICK
-#define JOYSTICK_MAX 16
-static int joystick_sdlk[JOYSTICK_MAX][4];
-#endif
-
 uAction::uAction(uAction *&anchor,const char* name,
                  int priority_,
                  uInputType t)
@@ -188,6 +183,16 @@ static uAutoDeleteInput & su_GetAutoDeleteInput()
     return filler;
 }
 
+static uInput * su_NewInput( tString const & ID, tString const & name )
+{
+    return su_GetAutoDeleteInput().Create( ID, name );
+}
+
+static uInput * su_NewInput( char const * ID, char const * name )
+{
+    return su_GetAutoDeleteInput().Create( tString( ID ), tString( name ) );
+}
+
 // class that manages keyboard input
 class uKeyInput
 {
@@ -223,7 +228,7 @@ public:
             }
 
             // store new input key
-            sdl_keys[i] = su_GetAutoDeleteInput().Create( id.str(), tString(ID_Raw) );
+            sdl_keys[i] = su_NewInput( id.str(), tString(ID_Raw) );
         }
     }
 
@@ -241,11 +246,6 @@ static uKeyInput const & su_GetKeyInput()
 }
 
 # define MOUSE_BUTTONS 7
-
-static uInput * su_NewInput( char const * ID, char const * name )
-{
-    return su_GetAutoDeleteInput().Create( tString( ID ), tString( name ) );
-}
 
 // class that manages mouse inout
 class uMouseInput
@@ -266,7 +266,7 @@ public:
             id << "MOUSE_BUTTON_" << i+1;
             std::ostringstream name;
             name << "mouse button " << i+1;
-            button[i] = su_GetAutoDeleteInput().Create( id.str(), name.str() );
+            button[i] = su_NewInput( id.str(), name.str() );
         }
     }
 
@@ -352,7 +352,7 @@ public:
 
             if ( !input )
             {
-                input = su_GetAutoDeleteInput().Create( id, tString("unknown") );
+                input = su_NewInput( id, tString("unknown") );
             }
 
             tASSERT( input );
@@ -466,8 +466,6 @@ static void keyboard_exit()
 class uJoystick
 {
 public:
-    int id;
-
     // joystick name
     tString name, internalName;
 
@@ -482,7 +480,7 @@ public:
         Down = 3
     };
 
-    uJoystick( int id_ ): id( id_ )
+    uJoystick( int id )
     {
         tASSERT( id >= 0 && id < SDL_NumJoysticks() );
 
@@ -523,13 +521,13 @@ public:
             axes[1].push_back( su_NewInput( GetPersistentID( "AXIS", 1, "+" ), GetName( "down" ) ) );
         }
 
-        for ( int axis = 2; axis < numAxes; ++axis )
+        for( int axis = 2; axis < numAxes; ++axis )
         {
             axes[0].push_back( su_NewInput( GetPersistentID( "AXIS", axis, "-" ), GetName( "axis", axis, "-" ) ) );
             axes[1].push_back( su_NewInput( GetPersistentID( "AXIS", axis, "+" ), GetName( "axis", axis, "+" ) ) );
         }
 
-        for ( int button = 0; button < numButtons; ++button )
+        for( int button = 0; button < numButtons; ++button )
         {
             buttons.push_back( su_NewInput( GetPersistentID( "BUTTON", button ), GetName( "button", button ) ) );
         }
@@ -541,26 +539,24 @@ public:
         {
             char const * internal = directionInternal[dir];
             char const * human = directionHuman[dir];
-
-            for ( int ball = 0; ball < numBalls; ++ball )
+            
+            for( int ball = 0; ball < numBalls; ++ball )
             {
                 balls[dir].push_back( su_NewInput( GetPersistentID( "BALL", ball, internal ), GetName( "ball", ball, human ) ) );
             }
 
-            for ( int hat = 0; hat < numHats; ++hat )
+            for( int hat = 0; hat < numHats; ++hat )
             {
                 hats[dir].push_back( su_NewInput( GetPersistentID( "HAT", hat, internal ), GetName( "hat", hat, human ) ) );
             }
         }
-
-        hatDirection.resize( numHats );
     }
 
     uInput * GetAxis( int index, int dir )
     {
         tASSERT( index >= 0 && index < numAxes );
         tASSERT( 0 == dir || 1 == dir );
-
+        
         axes[1-dir][index]->SetPressed(0);
         return axes[dir][index];
     }
@@ -568,14 +564,14 @@ public:
     uInput * GetButton( int index )
     {
         tASSERT( index >= 0 && index < numButtons );
-
+        
         return buttons[index];
     }
 
     uInput * GetBall( int index, Direction dir )
     {
         tASSERT( index >= 0 && index < numBalls );
-
+        
         balls[dir ^ 1][index]->SetPressed(0);
         return balls[dir][index];
     }
@@ -587,28 +583,10 @@ public:
         hats[dir ^ 1][index]->SetPressed(0);
         return hats[dir][index];
     }
-
-    int & GetHatDirection( int index, int axis )
-    {
-        tASSERT( index >= 0 && index < numHats );
-        tASSERT( 0 == axis || 1 == axis );
-
-        return hatDirection[index].dir[axis];
-    }
 private:
-    // various input arrays
+    // various input arrays 
     uInputs axes[2], buttons, balls[4], hats[4];
-
-    struct HatDirections
-    {
-        int dir[2];
-        HatDirections(){
-            dir[0] = dir[1] = 0;
-        }
-    };
-
-    std::vector< HatDirections > hatDirection;
-
+    
     // returns an uInput unique name
     tString GetPersistentID( char const * type, int subID, char const * suffix = NULL ) const
     {
@@ -625,7 +603,7 @@ private:
     tString GetName( char const * type, int subID, char const * suffix = NULL ) const
     {
         std::ostringstream o;
-        o << "Joystick " << id+1 << " " << type << " " << subID+1;
+        o << name << " " << type << " " << subID;
         if ( suffix )
         {
             o << " " << suffix;
@@ -637,10 +615,11 @@ private:
     tString GetName( char const * type ) const
     {
         std::ostringstream o;
-        o << "Joystick " << id+1 << " " << type;
+        o << name << " " << type;
         return o.str();
     }
 };
+#endif
 
 // class that manages joysticks
 class uJoystickInput
@@ -687,7 +666,6 @@ static uJoystick * su_GetJoystick( int id )
 void su_JoystickInit()
 {
     su_GetJoystickInput();
-    SDL_JoystickEventState( SDL_ENABLE );
 }
 #endif
 #endif
@@ -900,26 +878,18 @@ static uInput * su_TransformEvent( SDL_Event & e, int count, uTransformEventInfo
         if ( count != 0 )
             break;
 
-        if (e.jaxis.value > -16384 && e.jaxis.value < 16384) {
-#if DEBUG
-            std::cout << "JS: Ignoring value of " << e.jaxis.value << "\n";
-#endif
-            return false;
-        }
-        sym = joystick_sdlk[e.jaxis.which][0] + (e.jaxis.axis * 2) + ((e.jaxis.value > 0) ? 1 : 0);
-        active = 0;
-#if DEBUG
-        printf("JS: %d,%d,%d is %s\n", e.jaxis.which, e.jaxis.axis, e.jaxis.value, keyname(sym));
-        fflush(stdout);
-#endif
+        input = su_GetJoystick( e.jaxis.which )->GetAxis( e.jaxis.axis, e.jaxis.value > 0 ? 1 : 0 );
+        info.value = fabs( e.jaxis.value )/32768;
+
         break;
     case SDL_JOYBUTTONDOWN:
     case SDL_JOYBUTTONUP:
         if ( count != 0 )
             break;
+        
+        input = su_GetJoystick( e.jbutton.which )->GetButton( e.jbutton.button );
+        info.value = ( e.type == SDL_JOYBUTTONDOWN ) ? 1 : -1;
 
-        sym = joystick_sdlk[e.jbutton.which][1] + e.jbutton.button;
-        active = 0;
         break;
 #endif
     default:
