@@ -329,8 +329,6 @@ REAL tPolynomial<T>::evaluate( REAL argument ) const
 
     return res;
 
-    return res;
-
 }
 
 template <typename T>

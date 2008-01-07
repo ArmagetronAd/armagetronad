@@ -167,68 +167,6 @@ public:
 	}
     }
 
-	CPPUNIT_ASSERT( tpOnePower3 == (tpOnePower2 * tpOnePower2) );
-
-	{
-	  // a = b * c
-	  float a[] = {3.0, 2.5, -6.0, -17, -5, 12, 12};
-	  float b[] = {1, 0.0, -2, -2};
-	  float c[] = {3, 2.5, 0, -6};
-	  tPolynomial<nMessageMock> tpA(a, sizeof(a)/sizeof(a[0]));
-	  tPolynomial<nMessageMock> tpB(b, sizeof(b)/sizeof(b[0]));
-	  tPolynomial<nMessageMock> tpC(c, sizeof(c)/sizeof(c[0]));
-	  
-	  CPPUNIT_ASSERT( tpA == tpB * tpC );
-	  
-	  // {0} = {-} * 0
-	  CPPUNIT_ASSERT( tpZero == tpEmpty * 0.0 );
-	  // {0} = {0} * 1
-	  CPPUNIT_ASSERT( tpZero == tpZero * 1.0 );
-	  // {1} = {1} * 1
-	  CPPUNIT_ASSERT( tpOne == tpOne * 1.0 );
-	  // {a} * -2 == ({b} * 2) * ({c} * -1)
-	  CPPUNIT_ASSERT( (tpA * -2.0) == (tpB * 2.0) * (tpC * -1.0));
-	}
-
-	// Can a tPolynomial be used to make a zone shape turn?
-	// Zone rotation are described by 4 term:
-	// a : basic orientation angle
-	// b : orientation angle in function of the conquest state
-	// c : basic rotation speed
-	// d : rotation speed in function of the conquest state
-	//
-	// The polynomial used to describe the actual rotation gets computed from both
-	// a + conquestRate * b + t * (c + conquestRate * d)
-	// 
-	{
-	  float a = 1.0;
-	  float b = 2.0;
-	  float c = 3.0;
-	  float d = 4.0;
-	  float conquestState[] = {3, 5, 7};
-	  // Manually resolving the following:
-	  // a + conquestRate * b + t * (c + conquestRate * d)
-	  // 1 + {3, 5, 7} * 2 + t * ( 3 + {3, 5, 7} * 4 }
-	  // 1 + {6, 10, 14} + t * ( 3 + {12, 20, 28} }
-	  // {7, 10, 14} + t * ( {15, 20, 28} }
-	  // {7, 10, 14} + {0, 15, 20, 28}
-	  // {7, 25, 34, 28}
-	  // 
-	  float resValue[] = {7, 25, 34, 28};
-	  tPolynomial<nMessageMock> res(resValue, sizeof(resValue)/sizeof(resValue[0]));
-
-	  float t[] = {0.0, 1.0};
-	  tPolynomial<nMessageMock> tpT( t, sizeof(t)/sizeof(t[0]) );
-	  tPolynomial<nMessageMock> tpConquestState( conquestState, sizeof(conquestState)/sizeof(conquestState[0])  );
-	  
-	  tPolynomial<nMessageMock> tf = 
-	    ( (tpConquestState * b) + a)
-	    + tpT * ( (tpConquestState * d) + c);
-	  tf.toString();
-	  CPPUNIT_ASSERT(res == tf);
-	}
-    }
-
 #define DELTA 1e-10
 
     void testEvaluateAndBaseArgument() {

@@ -654,39 +654,6 @@ static uJoystickInput & su_GetJoystickInput()
 {
     static uJoystickInput filler;
     return filler;
-
-// class that manages joysticks
-class uJoystickInput
-{
-public:
-    uJoystickInput()
-    {
-        // create joysticks
-        int numJoysticks = SDL_NumJoysticks();
-        for ( int i = 0; i < numJoysticks; ++i )
-        {
-            joysticks.push_back( new uJoystick( i ) );
-        }
-    }
-
-    ~uJoystickInput()
-    {
-        // delete joysticks
-        for ( std::vector< uJoystick * >::iterator iter = joysticks.begin(); iter != joysticks.end(); ++iter )
-        {
-            delete(*iter);
-            *iter = 0;
-        }
-    }
-
-    // array of joysticks
-    std::vector< uJoystick * > joysticks;
-};
-
-static uJoystickInput & su_GetJoystickInput()
-{
-    static uJoystickInput filler;
-    return filler;
 }
 
 static uJoystick * su_GetJoystick( int id )
