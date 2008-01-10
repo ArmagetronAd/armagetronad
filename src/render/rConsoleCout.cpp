@@ -66,6 +66,7 @@ void sr_Unblock_stdin(){
 }
 
 
+
 #define MAXLINE 1000
 static char line_in[MAXLINE+2];
 static int currentIn=0;
@@ -121,12 +122,24 @@ void sr_Read_stdin(){
 
 
 #else
-    while (read(stdin_descriptor,&line_in[currentIn],1)>0){
-        if (line_in[currentIn]=='\n' || currentIn>=MAXLINE-1){
+    // unblock stdin before every read. SIGSTOP blocks it.
+    if ( unblocked )
+    {
+        sr_Unblock_stdin();
+    }
+
+    while ( read(stdin_descriptor,&line_in[currentIn],1)>0){
+        if (line_in[currentIn]=='\n' || currentIn>=MAXLINE-1)
+        {
             line_in[currentIn+1]='\0';
             std::stringstream s(line_in);
             tConfItemBase::LoadAll(s);
             currentIn=0;
+
+            if ( unblocked )
+            {
+                sr_Unblock_stdin();
+            }
         }
         else
             currentIn++;
