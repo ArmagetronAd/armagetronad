@@ -944,6 +944,7 @@ nPingAverager & nPingAverager::SetFastAverager( nAverager const & fast )
 void nMachineDecorator::Destroy( void )
 {
     this->OnDestroy();
+    delete this;
 }
 
 // *******************************************************************************
