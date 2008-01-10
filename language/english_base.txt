@@ -2389,6 +2389,7 @@ sound_error_unsupported		Sound file \1 has unsupported format. Sorry!
 #********************************************
 
 config_include_not_found    Configuration file "\1" to be included not found.\n
+config_rinclude_not_found   Configuration resource "\1" to be included not found.\n
 config_command_unknown		Command \1 unknown.\n
 config_command_other		You probably want:\n
 config_command_more		    There are more commands containing your search string that were left out to avoid flooding your terminal.\n
