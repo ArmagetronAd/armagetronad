@@ -40,6 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class nSocket;
 class nAddress;
 class nBasicNetworkSystem;
+class nServerInfoBase;
 
 extern nBasicNetworkSystem sn_BasicNetworkSystem;
 
@@ -98,8 +99,8 @@ typedef enum {nOK, nTIMEOUT, nDENIED}      nConnectError;
 nConnectError sn_GetLastError();
 nNetState sn_GetNetState();
 void sn_SetNetState(nNetState x);
-void sn_DisconnectUser(int i, const tOutput& reason ); //!< terminate connection with user i (peacefully)
-void sn_KickUser(int i, const tOutput& reason, REAL severity = 1 );   //!< throw out user i (violently)
+void sn_DisconnectUser(int i, const tOutput& reason, nServerInfoBase * redirectTo = 0 ); //!< terminate connection with user i (peacefully)
+void sn_KickUser(int i, const tOutput& reason, REAL severity = 1, nServerInfoBase * redirectTo = 0 );   //!< throw out user i (violently)
 
 void sn_GetAdr(int user,  tString& name);
 unsigned int sn_GetPort(int user);
@@ -741,6 +742,13 @@ public:
     ~nSocketResetInhibitor();
 };
 
+// on disconnection, this returns a server we should be redirected to (or NULL if we should not be redirected)
+std::auto_ptr< nServerInfoBase > sn_GetRedirectTo();
+
+// take a peek at the same info
+nServerInfoBase * sn_PeekRedirectTo();
+
+
 // *******************************************************************************************
 // *
 // *	GetWeight
@@ -944,7 +952,6 @@ nPingAverager & nPingAverager::SetFastAverager( nAverager const & fast )
 void nMachineDecorator::Destroy( void )
 {
     this->OnDestroy();
-    delete this;
 }
 
 // *******************************************************************************

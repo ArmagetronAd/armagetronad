@@ -4135,13 +4135,17 @@ static void se_PlayerMessageConf(std::istream &s)
 
 static tConfItemFunc se_PlayerMessage_c("PLAYER_MESSAGE", &se_PlayerMessageConf);
 
+static tString se_defaultKickReason("");
+static tConfItemLine se_defaultKickReasonConf( "DEFAULT_KICK_REASON", se_defaultKickReason );
+
 static void se_KickConf(std::istream &s)
 {
     // get user ID
     int num = se_ReadUser( s );
 
-    tString reason;
-    reason.ReadLine(s);
+    tString reason = se_defaultKickReason;
+    if ( !s.eof() )
+        reason.ReadLine(s);
 
     // and kick.
     if ( num > 0 && !s.good() )
@@ -4156,6 +4160,62 @@ static void se_KickConf(std::istream &s)
 }
 
 static tConfItemFunc se_kickConf("KICK",&se_KickConf);
+
+static tString se_defaultKickToServer("");
+static int se_defaultKickToPort = 4534;
+static tString se_defaultKickToReason("");
+
+static tSettingItem< tString > se_defaultKickToServerConf( "DEFAULT_KICK_TO_SERVER", se_defaultKickToServer );
+static tSettingItem< int > se_defaultKickToPortConf( "DEFAULT_KICK_TO_PORT", se_defaultKickToPort );
+static tConfItemLine se_defaultKickToReasonConf( "DEFAULT_KICK_TO_REASON", se_defaultKickToReason );
+
+static void se_MoveToConf(std::istream &s, REAL severity )
+{
+    // get user ID
+    int num = se_ReadUser( s );
+
+    // read redirection target
+    tString server = se_defaultKickToServer;
+    if ( !s.eof() )
+    {
+        s >> server;
+    }
+
+    int port = se_defaultKickToPort;
+    if ( !s.eof() )
+        s >> port;
+
+    nServerInfoRedirect redirect( server, port );
+
+    tString reason = se_defaultKickToReason;
+    if ( !s.eof() )
+        reason.ReadLine(s);
+
+    // and kick.
+    if ( num > 0 && !s.good() )
+    {
+        sn_KickUser( num ,  reason.Len() > 1 ? static_cast< char const *>( reason ) : "$network_kill_kick", severity, &redirect );
+    }
+    else
+    {
+        con << "Usage: KICK_TO <user ID or name> <server IP to kick to>:<server port to kick to> <Reason>\n";
+        return;
+    }
+}
+
+static void se_KickToConf(std::istream &s )
+{
+    se_MoveToConf( s, 1 );
+}
+
+static tConfItemFunc se_kickToConf("KICK_TO",&se_KickToConf);
+
+static void se_MoveToConf(std::istream &s )
+{
+    se_MoveToConf( s, 0 );
+}
+
+static tConfItemFunc se_moveToConf("MOVE_TO",&se_MoveToConf);
 
 static void se_BanConf(std::istream &s)
 {

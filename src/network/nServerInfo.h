@@ -95,6 +95,18 @@ protected:
     inline nServerInfoBase & SetPort( unsigned int port );	                                 //!< Sets the network port the server listens on
 };
 
+//! server information, just to redirect and for other immediate applications
+class nServerInfoRedirect: public nServerInfoBase
+{
+public:
+    // construct a server directly with connection name and port
+    nServerInfoRedirect( tString const & connectionName, unsigned int port )
+    {
+        nServerInfoBase::SetConnectionName( connectionName );
+        nServerInfoBase::SetPort( port );
+    };
+};
+
 //! Full server information
 class nServerInfo: public tListItem<nServerInfo>, public nServerInfoBase
 {

@@ -1,6 +1,9 @@
 Changes since 0.2.8.2:
 
   New settings and commands:
+- KICK_TO and MOVE_TO: redirect a client to a different server
+- DEFAULT_KICK(_TO)_MESSAGE: default reason given to players for a kick
+- DEFAULT_KICK_TO_SERVER/PORT: default redirection target for KICK/MOVE_TO.
 - If all clients support it, PING_CHARITY_MIN/MAX can be used to constrain ping charity.
 - SILENCE and VOICE allow to control chat of annoying players.
 - SILENCE_ALL can be used on the server to inhibit all cross-team communication unless specifically voiced.

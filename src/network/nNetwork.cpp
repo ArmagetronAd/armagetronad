@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nSimulatePing.h"
 #include "nConfig.h"
 #include "nNetwork.h"
+#include "nServerInfo.h"
 #include "tConsole.h"
 #include "tDirectories.h"
 #include "nSocket.h"
@@ -87,7 +88,7 @@ static tConfItem<int> sn_sport("SERVER_PORT",reinterpret_cast<int&>(sn_serverPor
 
 static tConfItemLine sn_sbtip("SERVER_IP", net_hostip);
 
-void sn_DisconnectUserNoWarn(int i, const tOutput& reason );
+void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * redirectTo = 0 );
 
 int sn_defaultDelay=10000;
 
@@ -1292,6 +1293,17 @@ void RequestInfoHandler(nHandler *handle){
     real_req_info_handler=handle;
 }
 
+// the server we are redirected to
+static std::auto_ptr< nServerInfoBase > sn_redirectTo;
+std::auto_ptr< nServerInfoBase > sn_GetRedirectTo()
+{
+    return sn_redirectTo;
+}
+
+nServerInfoBase * sn_PeekRedirectTo()
+{
+    return sn_redirectTo.get();
+}
 
 void login_deny_handler(nMessage &m){
     if ( !m.End() )
@@ -1304,6 +1316,21 @@ void login_deny_handler(nMessage &m){
     else
     {
         sn_DenyReason = tOutput( "$network_kill_unknown" );
+    }
+
+    if ( !m.End() )
+    {
+        // read redirection data from message
+        tString connectionName;
+        m >> connectionName;
+        int port;
+        m >> port;
+
+        if ( connectionName.Len() > 1 )
+        {
+            // create server info and fill it with data
+            sn_redirectTo = std::auto_ptr< nServerInfoBase>( new nServerInfoRedirect( connectionName, port ) );
+        }
     }
 
     if (!login_failed)
@@ -2481,6 +2508,9 @@ void sn_Bend( tString const & server, unsigned int port)
 nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket const * socket ){
     sn_DenyReason = "";
 
+    // reset redirection
+    sn_redirectTo.release();
+
     // pings in the beginning of the login are not really representative
     nPingAverager::SetWeight(.0001);
 
@@ -2977,7 +3007,7 @@ void sn_Receive(){
     */
 }
 
-void sn_KickUser(int i, const tOutput& reason, REAL severity )
+void sn_KickUser(int i, const tOutput& reason, REAL severity, nServerInfoBase * redirectTo )
 {
     // print it
     con << tOutput( "$network_kill_log", i, reason );
@@ -2986,10 +3016,10 @@ void sn_KickUser(int i, const tOutput& reason, REAL severity )
     nMachine::GetMachine(i).OnKick( severity );
 
     // do it
-    sn_DisconnectUser( i, reason );
+    sn_DisconnectUser( i, reason, redirectTo );
 }
 
-void sn_DisconnectUser(int i, const tOutput& reason )
+void sn_DisconnectUser(int i, const tOutput& reason, nServerInfoBase * redirectTo )
 {
     // don't be daft and kill yourself, server!
     if ( i == 0 && sn_GetNetState() == nSERVER )
@@ -3011,10 +3041,10 @@ void sn_DisconnectUser(int i, const tOutput& reason )
         return;
     }
 
-    sn_DisconnectUserNoWarn( i, reason );
+    sn_DisconnectUserNoWarn( i, reason, redirectTo );
 }
 
-void sn_DisconnectUserNoWarn(int i, const tOutput& reason )
+void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * redirectTo )
 {
     nCurrentSenderID senderID( i );
 
@@ -3037,6 +3067,18 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason )
             for(int j=2;j>=0;j--){
                 nMessage* mess = (new nMessage(login_deny));
                 *mess << tString( reason );
+
+                // write redirection
+                tString redirection;
+                int port;
+                if ( redirectTo )
+                {
+                    redirection = redirectTo->GetConnectionName();
+                    port        = redirectTo->GetPort();
+                }
+                *mess << redirection;
+                *mess << port;
+
                 mess->SendImmediately(i, false);
                 nMessage::SendCollected(i);
             }

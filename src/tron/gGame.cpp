@@ -1951,19 +1951,23 @@ static bool sg_RequestedDisconnection = false;
 
 static void sg_NetworkError( const tOutput& title, const tOutput& message, REAL timeout )
 {
+    tOutput message2 ( message );
+
     if ( sn_DenyReason.Len() > 2 )
     {
-        tOutput message2 ( message );
         message2.AddLiteral("\n\n");
         message2.AddLocale("network_kill_preface");
         message2.AddLiteral("\n");
         message2.AddLiteral(sn_DenyReason);
-        tConsole::Message( title, message2, timeout );
     }
-    else
+
+    nServerInfoBase * redirect = sn_PeekRedirectTo();
+    if ( redirect )
     {
-        tConsole::Message( title, message, timeout );
+        message2.Append( tOutput( "$network_redirect", redirect->GetConnectionName(), (int)redirect->GetPort() ) );
     }
+
+    tConsole::Message( title, message2, timeout );
 }
 
 // revert settings to defaults in the current scope
@@ -1996,7 +2000,7 @@ void sg_Receive()
     }
 }
 
-void ConnectToServer(nServerInfoBase *server)
+void ConnectToServerCore(nServerInfoBase *server)
 {
     tASSERT( server );
 
@@ -2097,7 +2101,6 @@ void ConnectToServer(nServerInfoBase *server)
         }
     }
 
-
     if (!sg_RequestedDisconnection && !uMenu::quickexit)
         switch (sn_GetLastError())
         {
@@ -2121,6 +2124,46 @@ void ConnectToServer(nServerInfoBase *server)
     ePlayerNetID::ClearAll();
 
     sr_textOut=to;
+}
+
+void ConnectToServer(nServerInfoBase *server)
+{
+    ConnectToServerCore( server );
+
+    REAL redirections = 0;
+    double lastTime = tSysTimeFloat();
+    
+    // check for redirection
+    while( true )
+    {
+        std::auto_ptr< nServerInfoBase > redirectTo( sn_GetRedirectTo() );
+
+        // abort loop
+        if ( !(&(*redirectTo)) )
+        {
+            break;
+        }
+
+        ConnectToServerCore( redirectTo.get() );
+
+        // redirection spam chain protection, allow one redirection every 30 seconds. Should
+        // be short enough to allow hacky applications (server-to-server teleport), but
+        // long enough to allow players to escape via the menu or at least shift-esc.
+        static const REAL timeout = 30;
+        static const REAL maxRedirections = 5;
+
+        redirections = redirections + 1;
+        if ( redirections > maxRedirections )
+        {
+            break;
+        }
+
+        // decay spam protection
+        double newTime = tSysTimeFloat();
+        REAL dt = newTime - lastTime;
+        lastTime = newTime;
+        redirections *= 1/(1 + dt * maxRedirections * timeout );
+    }
 }
 
 static tConfItem<int> mor("MAX_OUT_RATE",sn_maxRateOut);
