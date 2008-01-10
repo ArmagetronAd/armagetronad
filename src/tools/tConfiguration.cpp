@@ -759,7 +759,7 @@ static void RInclude(std::istream& s)
         con << tOutput( "$config_rinclude_not_found", file );
 }
 
-static tConfItemFunc s_RInclude("RINCLUDE",  &Include);
+static tConfItemFunc s_RInclude("RINCLUDE",  &RInclude);
 
 // obsoleted settings that still are around in some distruted configuration files
 static void st_Dummy(std::istream &s){tString rest; rest.ReadLine(s);}
