@@ -1411,6 +1411,9 @@ void update_settings()
                 // wait for network messages
                 sn_BasicNetworkSystem.Select( 0.1f );
                 gGame::NetSyncIdle();
+
+                // handle console input
+                sr_Read_stdin();
             }
         }
 
