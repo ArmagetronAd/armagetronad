@@ -5,6 +5,7 @@ Changes since 0.2.8.2:
 - DEFAULT_KICK(_TO)_MESSAGE: default reason given to players for a kick
 - DEFAULT_KICK_TO_SERVER/PORT: default redirection target for KICK/MOVE_TO.
 - If all clients support it, PING_CHARITY_MIN/MAX can be used to constrain ping charity.
+- VOTE_KICK_TO_SERVER/PORT: redirection target for vote kicks.
 - SILENCE and VOICE allow to control chat of annoying players.
 - SILENCE_ALL can be used on the server to inhibit all cross-team communication unless specifically voiced.
 - ENABLE_CHAT can be set to 0 to disable all chat. If it is set on the server it only disables public chat and logged in players can still speak.
