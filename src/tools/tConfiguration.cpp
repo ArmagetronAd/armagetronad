@@ -40,6 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tDirectories.h"
 #include "tRecorder.h"
 #include "tCommandLine.h"
+#include "tResourceManager.h"
 
 #include <vector>
 
@@ -742,6 +743,23 @@ static void SInclude(std::istream& s )
 
 static tConfItemFunc s_Include("INCLUDE",  &Include);
 static tConfItemFunc s_SInclude("SINCLUDE",  &SInclude);
+
+static void RInclude(std::istream& s)
+{
+    tString file;
+    s >> file;
+
+    tString rclcl = tResourceManager::locateResource(NULL, file);
+    if ( rclcl ) {
+        std::ifstream rc(rclcl);
+        tConfItemBase::LoadAll(rc);
+        return;
+    }
+
+        con << tOutput( "$config_rinclude_not_found", file );
+}
+
+static tConfItemFunc s_RInclude("RINCLUDE",  &Include);
 
 // obsoleted settings that still are around in some distruted configuration files
 static void st_Dummy(std::istream &s){tString rest; rest.ReadLine(s);}
