@@ -41,6 +41,8 @@ public:
     /*Sorry, I just cant figure when you'd want to load without
       validating, or revalidate a document. So I joined both 
       toghether */
+    ~gParser();
+
     bool LoadAndValidateMapXML(char const *uri, FILE* docfd, char const * filepath );
     void InstantiateMap(float sizeMultiplier);
 

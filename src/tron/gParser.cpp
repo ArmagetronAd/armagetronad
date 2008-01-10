@@ -58,6 +58,15 @@ gParser::gParser(gArena *anArena, eGrid *aGrid)
     rimTexture = 0;
 }
 
+gParser::~gParser()
+{
+    if (doc)
+    {
+        xmlFreeDoc(doc);
+        doc=NULL;
+    }
+}
+
 bool
 gParser::trueOrFalse(char *str)
 {
