@@ -260,7 +260,7 @@ void tAdvanceFrameSys( tTime & start, tTime & relative )
     // detect and counter timer hickups
     tTime newRelative = time - start;
     tTime timeStep = newRelative - relative;
-    if ( timeStep.seconds < 0 || timeStep.seconds > 10 )
+    if ( !tRecorder::IsPlayingBack() && ( timeStep.seconds < 0 || timeStep.seconds > 10 ) )
     {
         static bool warn = true;
         if ( warn )
