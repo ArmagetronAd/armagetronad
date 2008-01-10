@@ -42,6 +42,40 @@
 #	include "tDirectories.h"
 #endif
 
+// lean auto-deleting wrapper class for xmlChar * return values the user has to clean after use
+class gXMLCharReturn
+{
+public:
+    gXMLCharReturn( xmlChar * string = NULL ): string_( string ){}
+    ~gXMLCharReturn(){ Destroy(); }
+
+    //! auto_ptrish copy constructor
+    gXMLCharReturn( gXMLCharReturn const & other ): string_( const_cast< gXMLCharReturn & >( other ).Release() ){}
+
+    //! auto_ptrish assignment operator
+    gXMLCharReturn & operator = ( gXMLCharReturn & other ){ string_ = other.Release(); return *this; }
+    
+    //! conversion to char *
+    operator char * () const{ return reinterpret_cast< char * >( string_ ); }
+
+    //! conversion to xmlChar *( bad idea, causes overload trouble )
+    // operator xmlChar * () const{ return string_; }
+
+    //! releases ownership of the string and returns it
+    xmlChar * Release(){ xmlChar * ret = string_; string_ = 0; return ret; }
+
+    //! returns the xml string without modifying it
+    xmlChar * GetXML() const { return string_; }
+
+    //! returns the string without modifying it
+    char * Get() const { return *this; }
+
+    //! destroys the string
+    void Destroy(){ xmlFree(string_); string_ = 0; }
+private:
+    xmlChar * string_; //!< the string storage
+};
+
 //! Warn about deprecated map format
 static void sg_Deprecated()
 {
@@ -53,6 +87,7 @@ static void sg_Deprecated()
 gParser::gParser(gArena *anArena, eGrid *aGrid)
 {
     theArena = anArena;
+
     theGrid = aGrid;
     doc = NULL;
     rimTexture = 0;
@@ -74,35 +109,32 @@ gParser::trueOrFalse(char *str)
     return (!strncasecmp(str, "t", 1) || !strncasecmp(str, "y", 1) || atoi(str));
 }
 
-char *
+gXMLCharReturn
 gParser::myxmlGetProp(xmlNodePtr cur, const char *name) {
-    return (char *)xmlGetProp(cur, (const xmlChar *)name);
+    return gXMLCharReturn( xmlGetProp(cur, (const xmlChar *)name) );
 }
 
 int
 gParser::myxmlGetPropInt(xmlNodePtr cur, const char *name) {
-    char *v = myxmlGetProp(cur, name);
-    if (v == NULL)	return 0;
+    gXMLCharReturn v ( myxmlGetProp(cur, name) );
+    if (v.Get() == NULL)	return 0;
     int r = atoi(v);
-    xmlFree(v);
     return r;
 }
 
 float
 gParser::myxmlGetPropFloat(xmlNodePtr cur, const char *name) {
-    char *v = myxmlGetProp(cur, name);
-    if (v == NULL)	return 0.;
+    gXMLCharReturn v = myxmlGetProp(cur, name);
+    if (v.Get() == NULL)	return 0.;
     float r = atof(v);
-    xmlFree(v);
     return r;
 }
 
 bool
 gParser::myxmlGetPropBool(xmlNodePtr cur, const char *name) {
-    char *v = myxmlGetProp(cur, name);
-    if (v == NULL)	return false;
+    gXMLCharReturn v = myxmlGetProp(cur, name);
+    if (v.Get() == NULL)	return false;
     bool r = trueOrFalse(v);
-    xmlFree(v);
     return r;
 }
 
@@ -141,13 +173,13 @@ gParser::isElement(const xmlChar *elementName, const xmlChar *searchedElement, c
  */
 bool
 gParser::isValidAlternative(xmlNodePtr cur, const xmlChar * keyword) {
-    xmlChar *version = xmlGetProp(cur, (const xmlChar *) "version");
+    gXMLCharReturn version = myxmlGetProp(cur, "version");
     /*
      * Find non empty version and
      * Alternative element, ie those having a name starting by "Alternative" and
      * only the Alternative elements that are for our version, ie Arthemis
      */
-    return ((version != NULL) && isElement(cur->name, (const xmlChar *)"Alternative", keyword) && validateVersionRange(version, (const xmlChar*)"Artemis", (const xmlChar*)"0.2.8.0") );
+    return ((version.Get() != NULL) && isElement(cur->name, (const xmlChar *)"Alternative", keyword) && validateVersionRange(version.GetXML(), (const xmlChar*)"Artemis", (const xmlChar*)"0.2.8.0") );
 }
 
 bool
@@ -466,13 +498,13 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
     gZone * zone = NULL;
     if (sn_GetNetState() != nCLIENT )
     {
-        if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"win")) {
+        if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"win")) {
             zone = tNEW( gWinZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
-        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"death")) {
+        else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"death")) {
             zone = tNEW( gDeathZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
-        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"fortress")) {
+        else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"fortress")) {
             zone = tNEW( gBaseZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
 
@@ -641,7 +673,8 @@ gParser::processSubAlt(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword) {
 void
 gParser::parseAlternativeContent(eGrid *grid, xmlNodePtr cur)
 {
-    const xmlChar * keyword = xmlGetProp(cur, (const xmlChar *) "keyword");
+    gXMLCharReturn keywordStore = myxmlGetProp(cur, "keyword");
+    xmlChar * keyword = keywordStore.GetXML();
 
     cur = cur->xmlChildrenNode;
 
@@ -846,8 +879,8 @@ gParser::InstantiateMap(float aSizeMultiplier)
     }
 
     if (isElement(cur->name, (const xmlChar *) "Resource")) {
-        if (xmlStrcmp((const xmlChar *) "aamap", xmlGetProp(cur, (const xmlChar *) "type"))) {
-            con << "Type aamap expected, found " << xmlGetProp(cur, (const xmlChar *) "type") << " instead\n";
+        if (xmlStrcmp((const xmlChar *) "aamap", myxmlGetProp(cur,"type").GetXML())) {
+            con << "Type aamap expected, found " << myxmlGetProp(cur, "type") << " instead\n";
             con << "formalise this message\n";
         }
         else {
@@ -1062,11 +1095,11 @@ gParser::LoadAndValidateMapXML(char const * uri, FILE* docfd, char const * fileP
         if (root) {
             if (isElement(root->name, (const xmlChar *) "Resource"))
             {
-                tString rightFilePath = tString( (char const *)xmlGetProp(root, (const xmlChar *) "author") ) + "/" +
-                                        tString( (char const *)xmlGetProp(root, (const xmlChar *) "category") ) + "/" +
-                                        tString( (char const *)xmlGetProp(root, (const xmlChar *) "name") ) + "-" +
-                                        tString( (char const *)xmlGetProp(root, (const xmlChar *) "version") ) + "." +
-                                        tString( (char const *)xmlGetProp(root, (const xmlChar *) "type") ) + ".xml";
+                tString rightFilePath = tString( (char const *)myxmlGetProp(root, "author") ) + "/" +
+                                        tString( (char const *)myxmlGetProp(root, "category") ) + "/" +
+                                        tString( (char const *)myxmlGetProp(root, "name") ) + "-" +
+                                        tString( (char const *)myxmlGetProp(root, "version") ) + "." +
+                                        tString( (char const *)myxmlGetProp(root, "type") ) + ".xml";
 
                 tString pureFilePath( filePath );
                 int paren = pureFilePath.StrPos( "(" );

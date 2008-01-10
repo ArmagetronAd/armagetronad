@@ -12,6 +12,7 @@ class eCoord;
 class ePoint;
 class gGame;
 class gWallRim;
+class gXMLCharReturn;
 
 /*
 Note to the reader: In the full World idea, the parser should, 
@@ -48,7 +49,7 @@ public:
 
 protected:
     bool trueOrFalse(char *str);
-    char *myxmlGetProp(xmlNodePtr cur, const char *name);
+    gXMLCharReturn myxmlGetProp(xmlNodePtr cur, const char *name);
     int myxmlGetPropInt(xmlNodePtr cur, const char *name);
     float myxmlGetPropFloat(xmlNodePtr cur, const char *name);
     bool myxmlGetPropBool(xmlNodePtr cur, const char *name);
