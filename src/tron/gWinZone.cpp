@@ -985,7 +985,7 @@ void gBaseZoneHack::OnConquest( void )
     se_SaveToLadderLog(log);
     float rr = GetRadius();
     rr *= rr;
-    for(int i = 0; i < MAXCLIENTS; ++i) {
+    for(int i = se_PlayerNetIDs.Len()-1; i >=0; --i) {
         ePlayerNetID *player = se_PlayerNetIDs(i);
         if(!player) {
             continue;
