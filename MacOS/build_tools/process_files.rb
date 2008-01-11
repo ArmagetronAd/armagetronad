@@ -89,7 +89,7 @@ module BuildTools
     
     # Determine if the source is checked out from CVS or it is a Release source
     def determine_source_kind
-      if FileTest.directory?("#{TOP_LEVEL}/CVS")
+      if FileTest.directory?("#{TOP_LEVEL}/.svn")
         @build_information[:kind] = "CVS"
       else
         @build_information[:kind] = "Release"
