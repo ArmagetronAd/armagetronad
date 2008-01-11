@@ -395,21 +395,21 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8D1107260486CEB800E47090 /* Armagetron Advanced */;
+			remoteGlobalIDString = 8D1107260486CEB800E47090;
 			remoteInfo = "Armagetron Advanced";
 		};
 		9B8A49FC0D374AC90094FB81 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 9B8A49C20D3709170094FB81 /* Create Client Release */;
+			remoteGlobalIDString = 9B8A49C20D3709170094FB81;
 			remoteInfo = "Create Client Release";
 		};
 		9B8A49FE0D374ACD0094FB81 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 9B8A49B90D3708A30094FB81 /* Create Dedicated Release */;
+			remoteGlobalIDString = 9B8A49B90D3708A30094FB81;
 			remoteInfo = "Create Dedicated Release";
 		};
 /* End PBXContainerItemProxy section */
@@ -1420,7 +1420,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "TMPDIR=\"${TEMP_FILES_DIR}\"\nto_package_dir=$(mktemp -dt armagetronad)\nversion=$(ruby -ryaml -e \"print YAML.load_file('../macosx_build_information.yml')[:version]\")\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/armagetronad-dedicated-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\nprog_dir=\"${to_package_dir}/Armagetron Advanced Dedicated\"\nmkdir \"${prog_dir}\"\n\ncp \"${TARGET_BUILD_DIR}/armagetronad-dedicated\" \"${prog_dir}\"\nfor copy_me in \"../config\" \"../language\" \"../resource\"\ndo\n\tcp -R \"${copy_me}\" \"${prog_dir}\"\ndone\n\n\nrm -rf \"${prog_dir}/resource/proto\"\nfind \"${prog_dir}\" -depth -type d -name .svn -exec rm -rf \\{\\} \\;\nfor a in \"*.am\" \"*.in\" \"*.h\" \"astylerc\"\ndo\n\tfind \"${prog_dir}\" -name \"${a}\" -exec rm -f \\{\\} \\;\ndone\n\n\nuncompressed_dmg=$(./build_tools/dmg-create \"${to_package_dir}\" \"Armagetron Advanced Dedicated\")\n\n./build_tools/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${prog_dir}\"\n";
+			shellScript = "TMPDIR=\"${TEMP_FILES_DIR}\"\nto_package_dir=$(mktemp -dt armagetronad)\nversion=$(ruby -ryaml -e \"print YAML.load_file('../macosx_build_information.yml')[:version]\")\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/armagetronad-dedicated-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\nprog_dir=\"${to_package_dir}/Armagetron Advanced Dedicated\"\nmkdir \"${prog_dir}\"\n\ncp \"${TARGET_BUILD_DIR}/armagetronad-dedicated\" \"${prog_dir}\"\nfor copy_me in \"../config\" \"../language\" \"../resource\"\ndo\n\tcp -R \"${copy_me}\" \"${prog_dir}\"\ndone\n\n\nrm -rf \"${prog_dir}/resource/proto\"\nfind \"${prog_dir}\" -depth -type d -name .svn -exec rm -rf \\{\\} \\;\nfor a in \"*.am\" \"*.in\" \"*.h\" \"astylerc\"\ndo\n\tfind \"${prog_dir}\" -name \"${a}\" -exec rm -f \\{\\} \\;\ndone\n\n\nuncompressed_dmg=$(./build_tools/dmg-create \"${to_package_dir}\" \"Armagetron Advanced Dedicated\")\n\n./build_tools/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${to_package_dir}\"\n";
 		};
 		9B8A49C10D3709170094FB81 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1433,7 +1433,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "TMPDIR=\"${TEMP_FILES_DIR}\"\nto_package_dir=$(mktemp -dt armagetronad)\nversion=$(ruby -ryaml -e \"print YAML.load_file('../macosx_build_information.yml')[:version]\")\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/armagetronad-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\ncp -R \"${BUILT_PRODUCTS_DIR}/Armagetron Advanced.app\" \"${to_package_dir}\"\n\nif [ -n \"${AA_RECORDER_APP}\" ]\nthen\n\tcp -R \"${AA_RECORDER_APP}\" \"${to_package_dir}\"\nfi\n\nuncompressed_dmg=$(./build_tools/dmg-create \"${to_package_dir}\" \"Armagetron Advanced\")\n\n./build_tools/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"";
+			shellScript = "TMPDIR=\"${TEMP_FILES_DIR}\"\nto_package_dir=$(mktemp -dt armagetronad)\nversion=$(ruby -ryaml -e \"print YAML.load_file('../macosx_build_information.yml')[:version]\")\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/armagetronad-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\ncp -R \"${BUILT_PRODUCTS_DIR}/Armagetron Advanced.app\" \"${to_package_dir}\"\n\nif [ -n \"${AA_RECORDER_APP}\" ]\nthen\n\tcp -R \"${AA_RECORDER_APP}\" \"${to_package_dir}\"\nfi\n\nuncompressed_dmg=$(./build_tools/dmg-create \"${to_package_dir}\" \"Armagetron Advanced\")\n\n./build_tools/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${to_package_dir}\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
