@@ -1863,6 +1863,7 @@
 		8CBA5D45089EE60D007E21DC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH)";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/current/;
 				GCC_DYNAMIC_NO_PIC = NO;
