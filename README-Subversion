@@ -62,10 +62,16 @@ This is the old project. If you would like to build on Xcode < 2.1 or Project Bu
 
 == Armagetron Advanced.xcodeproj
 
-This will only open in Xcode >= 2.1. It has three targets:
+This will only open in Xcode >= 2.1. It has these targets:
 * Armagetron Advanced -- The client
 * Armagetron Advanced 10.2.8 -- The client for Mac OS X 10.2.8
 * Armagetron Advanced Dedicated -- Dedicated Server
+* Create Client Release -- Create a distributable disk image of the client. This target checks to see if you have an $AA_RECORDER_APP environment variable set, and if you do the recorder app will be included in the disk image. For example I have in my .bash_profile:
+
+    AA_RECORDER_APP="/Users/Shared/Applications/Games/Armagetron Advanced Recorder.app"
+
+* Create Dedicated Release -- Create a distributable disk image of the dedicated server.
+* Create Full Release -- Runs both "Create Client Release" and "Create Dedicated Release"
 
 Armagetron Advanced requires:
 * SDL.framework
