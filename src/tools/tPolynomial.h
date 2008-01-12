@@ -86,7 +86,7 @@ public:
     virtual void toString() const;
     tPolynomial<T> clamp(REAL min, REAL max, REAL valueOfVariable);
 
-    int Len() {
+    int Len() const{
         return coefs.Len();
     };
 protected:
