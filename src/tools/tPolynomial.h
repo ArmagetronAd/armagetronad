@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -50,37 +50,53 @@ public:
     {
     }
 
-    virtual REAL evaluate( REAL argument ) const; //!< evaluates the function
-    inline REAL operator()( REAL argument ) const; //!< evaluation operator
-    tPolynomial<T> const operator*( REAL argument ) const;
+    virtual REAL evaluate( REAL valueOfVariable ) const; //!< evaluates the function
+    inline REAL operator()( REAL valueOfVariable ) const; //!< evaluation operator
+    tPolynomial<T> const operator*( REAL constant ) const;
     tPolynomial<T> const operator*( const tPolynomial<T> & tfRight ) const ;
-    tPolynomial<T> const operator+( REAL value ) const ;
+    tPolynomial<T> const operator+( REAL constant ) const ;
     tPolynomial<T> const operator+( const tPolynomial<T> &tfRight ) const ;
+    tPolynomial<T> & operator+=( const tPolynomial<T> &tfRight ) ;
+
     REAL &operator[](int index); // Allow both reading and writing of element
     REAL const &operator[](int index) const; // Allow reading of element even when the object is const
     void operator=(tPolynomial<T> const &other);
 
-    void addConstant(REAL value) {if(coefs.Len()==0) {coefs.SetLen(1); coefs[0] = 0;} coefs[0] += value;}
+    void addConstant(REAL constant) {
+        if (coefs.Len()==0) {
+            coefs.SetLen(1);
+            coefs[0] = 0;
+        } coefs[0] += constant;
+    }
 
-    void reevaluateCoefsAt(REAL argument);
-    void changeRate(REAL newRate, int newRateLength, REAL argument);
+    tPolynomial<T> evaluateCoefsAt(REAL valueOfVariable) const;
+    void changeRate(REAL newRate, int newRateLength, REAL valueOfVariable);
 
-    void setRates(REAL newValues[], int newValuesLength, REAL argument);
-    void setRates(tArray<REAL> newValues, REAL argument);
+    void setRates(REAL newValues[], int newValuesLength, REAL valueOfVariable);
+    void setRates(tArray<REAL> newValues, REAL valueOfVariable);
 
     virtual T & ReadSync( T & m );
     virtual T & WriteSync( T & m ) const;
 
-    template<typename D> 
+    template<typename D>
     friend bool operator == (const tPolynomial<D> & left, const tPolynomial<D> & right);
+    template<typename D>
+    friend bool operator != (const tPolynomial<D> & left, const tPolynomial<D> & right);
 
-    virtual void toString();
- protected:
-    void setBaseArgument(REAL value) {baseArgument = value;}
+    virtual void toString() const;
+    tPolynomial<T> clamp(REAL min, REAL max, REAL valueOfVariable);
+
+    int Len() {
+        return coefs.Len();
+    };
+protected:
+    void setBaseValueOfVariable(REAL newBaseValueOfVariable) {
+        baseValueOfVariable = newBaseValueOfVariable;
+    }
     void growCoefsArray(int newLength);
 
     // Variables
-    REAL baseArgument; //!< the evaluation is always done on (argument - baseArgument) rather than (argument)
+    REAL baseValueOfVariable; //!< the evaluation is always done on (valueOfVariable - baseValueOfVariable) rather than (valueOfVariable)
     tArray<REAL> coefs;
 };
 
@@ -96,48 +112,50 @@ template<typename T>
 T & operator >> ( T & m, tPolynomial<T> & f );       //! function network message reading operator
 template<typename T>
 bool operator == (const tPolynomial<T> & left, const tPolynomial<T> & right);
+template<typename T>
+bool operator != (const tPolynomial<T> & left, const tPolynomial<T> & right);
 
 template <typename T>
 tPolynomial<T>::tPolynomial(int count)  //!< constructor
-: baseArgument(0.0),
-  coefs(count)
+        : baseValueOfVariable(0.0),
+        coefs(count)
 {
     // Initialise to all 0's
-    for(int i=0; i<coefs.Len(); i++)
+    for (int i=0; i<coefs.Len(); i++)
         coefs[i] = 0.0f;
 }
 
 template <typename T>
 tPolynomial<T>::tPolynomial()  //!< constructor
-: baseArgument(0.0),
-  coefs(0)
+        : baseValueOfVariable(0.0),
+        coefs(0)
 {
-  // Empty
+    // Empty
 }
 
 template <typename T>
 tPolynomial<T>::tPolynomial(REAL newCoefs[], int count)  //!< constructor
-: baseArgument(0.0),
-  coefs(count)
+        : baseValueOfVariable(0.0),
+        coefs(count)
 {
-    for(int i=0; i<coefs.Len(); i++)
+    for (int i=0; i<coefs.Len(); i++)
         coefs[i] = newCoefs[i];
 }
 
 template <typename T>
 tPolynomial<T>::tPolynomial(tArray<REAL> newCoefs)  //!< constructor
-: baseArgument(0.0),
-  coefs(newCoefs)
+        : baseValueOfVariable(0.0),
+        coefs(newCoefs)
 {
-  // Empty
+    // Empty
 }
 
 template <typename T>
 tPolynomial<T>::tPolynomial(const tPolynomial<T> &tf)  //!< constructor
-: baseArgument(tf.baseArgument),
-  coefs(tf.coefs)
+        : baseValueOfVariable(tf.baseValueOfVariable),
+        coefs(tf.coefs)
 {
-  // Empty
+    // Empty
 }
 
 // *******************************************************************************
@@ -151,9 +169,9 @@ tPolynomial<T>::tPolynomial(const tPolynomial<T> &tf)  //!< constructor
 // *******************************************************************************
 
 template <typename T>
-REAL tPolynomial<T>::operator ( )( REAL argument ) const
+REAL tPolynomial<T>::operator ( )( REAL valueOfVariable ) const
 {
-    return evaluate( argument );
+    return evaluate( valueOfVariable );
 }
 
 // *******************************************************************************
@@ -202,37 +220,48 @@ template<typename T> T & operator >> ( T & m, tPolynomial<T> & f )
 /**
  *
  */
-#define DELTA 1e-10
+#define DELTA 1e-3
 
 template<typename T>
 bool operator == (const tPolynomial<T> & left, const tPolynomial<T> & right)
 {
-    // float/double equality doesnt exist. Accept small difference as equal.
-    bool res = ( fabs(left.baseArgument - right.baseArgument) < DELTA);
+    tPolynomial<T> tRebasedRight;
+
+    // Do both polynomial have the same baseValue?
+    if (false == ( fabs(left.baseValueOfVariable - right.baseValueOfVariable) < DELTA)) {
+        // Bring back both polynomial to the same baseValue for easy comparision
+        tRebasedRight = right.evaluateCoefsAt(left.baseValueOfVariable);
+    }
+    else {
+        // They have similar baseValue, no need to adjust.
+        tRebasedRight = right;
+    }
+
 
     // If the length of the coefs array differ, then the extra elements should be 0
     int maxLength = left.coefs.Len()>right.coefs.Len()?left.coefs.Len():right.coefs.Len();
     int minLength = left.coefs.Len()<right.coefs.Len()?left.coefs.Len():right.coefs.Len();
 
-    // Inspect the common coefficients (ie defined for both polynomial)
+    bool res = true;
 
-    for(int i=0; i<minLength; i++) {
-        if ( fabs(left[i] - right[i]) >= DELTA ) {
+    // Inspect the common coefficients (ie defined for both polynomial)
+    for (int i=0; i<minLength; i++) {
+        if ( fabs(left[i] - tRebasedRight[i]) >= DELTA ) {
             res = false;
             break;
         }
     }
 
-    for(int i=minLength; i<maxLength; i++) {
+    for (int i=minLength; i<maxLength; i++) {
         // The polynomial that is defined up to that length should have its elements set to 0.0
-        if(left.coefs.Len()>right.coefs.Len()) {
-            if(fabs(left[i]) >= DELTA) {
+        if (left.coefs.Len()>tRebasedRight.coefs.Len()) {
+            if (fabs(left[i]) >= DELTA) {
                 res = false;
                 break;
             }
         }
         else {
-            if(fabs(right[i]) >= DELTA) {
+            if (fabs(tRebasedRight[i]) >= DELTA) {
                 res = false;
                 break;
             }
@@ -241,50 +270,63 @@ bool operator == (const tPolynomial<T> & left, const tPolynomial<T> & right)
     return res;
 }
 
+template<typename T>
+bool operator != (const tPolynomial<T> & left, const tPolynomial<T> & right)
+{
+    return !(left == right);
+}
+
 
 /**
  *
  */
 template <typename T>
-void tPolynomial<T>::reevaluateCoefsAt(REAL argument)
+tPolynomial<T> tPolynomial<T>::evaluateCoefsAt(REAL valueOfVariable) const
 {
-    // Compute the coefficients at "argument"
-    // c0' = c0 + c1*arg + (c2/2)*arg^2 + ... + (c[N]/N)*arg^N
-    // c1' = c1 + c2*arg + ... + (c[N]/(N-1))*arg^(N-1)
-    // c2' = c2 + ... + (c[N]/(N-2))*arg^(N-2)
+    tPolynomial<T> tf(*this);
+
+    // Compute the coefficients at "valueOfVariable" (var for short)
+    // c0' = c0 + (c1/sum(1))*var + (c2/sum(2))*var^2 + ... + (c[N]/sum(N))*var^N
+    // c1' = c1 + (c2/sum(1))*var + ... + (c[N]/sum(N-1))*var^(N-1)
+    // c2' = c2 + ... + (c[N]/sum(N-2))*var^(N-2)
     // ...
-    // c[N-1] = c[N-1] + c[N]*arg
+    // c[N-1] = c[N-1] + (c[N]/sum(1))*var
     // c[N] = c[N]
     //
     // so:
-    // [0   , 0 , a] at argument=0 will become
-    // [9a/2, 3a, a] at argument=3
+    // [0   , 0 , a] at valueOfVariable=0 will become
+    // [9a/2, 3a, a] at valueOfVariable=3
 
-    REAL arg = argument - baseArgument;
+    REAL deltaVariableValue = valueOfVariable - baseValueOfVariable;
 
     // Compute for each coefficient their new value
-    for(int coefIndex=0; coefIndex<coefs.Len(); coefIndex++) {
+    for (int coefIndex=0; coefIndex<coefs.Len(); coefIndex++) {
         REAL newCoefValue = 0.0;
-        for(int j=coefs.Len()-1; j>coefIndex; j--) {
-            newCoefValue = (newCoefValue + coefs[j]/(j - coefIndex) ) * arg;
+        for (int j=coefs.Len()-1; j>coefIndex; j--) {
+            newCoefValue = (newCoefValue + coefs[j] ) * deltaVariableValue /(j - coefIndex);
         }
-        coefs[coefIndex] += newCoefValue;
+        tf.coefs[coefIndex] += newCoefValue;
     }
 
-    setBaseArgument(argument);
+    tf.setBaseValueOfVariable(valueOfVariable);
+    return tf;
 }
 
 /**
  *
  */
 template <typename T>
-void tPolynomial<T>::changeRate(REAL newRate, int newRateIndex, REAL argument)
+void tPolynomial<T>::changeRate(REAL newRate, int newRateIndex, REAL valueOfVariable)
 {
-    if(coefs.Len() <= newRateIndex) {
+    if (coefs.Len() <= newRateIndex) {
+        int oldLength = coefs.Len();
         coefs.SetLen(newRateIndex + 1);
+        for (int i=oldLength; i<newRateIndex; i++) {
+            coefs[i] = 0.0;
+        }
     }
 
-    reevaluateCoefsAt(argument);
+    *this = evaluateCoefsAt(valueOfVariable);
 
     coefs[newRateIndex] = newRate;
 }
@@ -293,13 +335,17 @@ void tPolynomial<T>::changeRate(REAL newRate, int newRateIndex, REAL argument)
  * This perform a hard setting of all the coefficients
  */
 template <typename T>
-void tPolynomial<T>::setRates(REAL newValues[], int newValuesLength, REAL argument)
+void tPolynomial<T>::setRates(REAL newValues[], int newValuesLength, REAL valueOfVariable)
 {
-    if(coefs.Len() < newValuesLength) {
+    if (coefs.Len() < newValuesLength) {
+        int oldLength = coefs.Len();
         coefs.SetLen(newValuesLength + 1);
+        for (int i=oldLength; i<newValuesLength; i++) {
+            coefs[i] = 0.0;
+        }
     }
 
-    setBaseArgument(argument);
+    setBaseValueOfVariable(valueOfVariable);
 
     for (int i=0; i<newValuesLength; i++) {
         coefs[i] = newValues[i];
@@ -307,25 +353,25 @@ void tPolynomial<T>::setRates(REAL newValues[], int newValuesLength, REAL argume
 }
 
 template <typename T>
-void tPolynomial<T>::setRates(tArray<REAL> newValues, REAL argument)
+void tPolynomial<T>::setRates(tArray<REAL> newValues, REAL valueOfVariable)
 {
     coefs = newValues;
-    setBaseArgument(argument);
+    setBaseValueOfVariable(valueOfVariable);
 }
 
 template <typename T>
-REAL tPolynomial<T>::evaluate( REAL argument ) const
+REAL tPolynomial<T>::evaluate( REAL valueOfVariable ) const
 {
-    REAL arg = (argument - baseArgument);
+    REAL deltaVariableValue = (valueOfVariable - baseValueOfVariable);
 
     REAL res = 0.0;
 
-    // Compute res = c[0] + c[1]*arg + (c[2]/2)*arg^2 + ... + (c[N]/N)*arg^N
+    // Compute res = c[0] + c[1]*var + (c[2]/2)*var^2 + ... + (c[N]/N)*var^N
     for (int i=coefs.Len()-1; i>0; i--) {
-        res = (res + coefs[i]/i) * arg;
+        res = (res + coefs[i]/i) * deltaVariableValue;
     }
-    if(coefs.Len()!=0)
-      res += (coefs[0]);
+    if (coefs.Len()!=0)
+        res += (coefs[0]);
 
     return res;
 
@@ -334,11 +380,11 @@ REAL tPolynomial<T>::evaluate( REAL argument ) const
 template <typename T>
 T & tPolynomial<T>::WriteSync( T & m ) const
 {
-    m << baseArgument;
+    m << baseValueOfVariable;
     // write length
     m << coefs.Len();
 
-    for(int i=0; i<coefs.Len(); i++)
+    for (int i=0; i<coefs.Len(); i++)
     {
         m << coefs[i];
     }
@@ -349,14 +395,14 @@ T & tPolynomial<T>::WriteSync( T & m ) const
 template <typename T>
 T & tPolynomial<T>::ReadSync( T & m )
 {
-    m >> baseArgument;
+    m >> baseValueOfVariable;
 
     // Read the length
     int newLength = 0;
     m >> newLength;
     coefs.SetLen(newLength);
 
-    for(int i=0; i<coefs.Len(); i++)
+    for (int i=0; i<coefs.Len(); i++)
     {
         m >> coefs[i];
     }
@@ -365,10 +411,11 @@ T & tPolynomial<T>::ReadSync( T & m )
 }
 
 template <typename T>
-tPolynomial<T> const tPolynomial<T>::operator*( REAL value ) const {
+tPolynomial<T> const tPolynomial<T>::operator*( REAL constant ) const {
     tPolynomial<T> tf(*this);
-    for(int i=0; i<coefs.Len(); i++) {
-        tf[i] *= value;
+
+    for (int i=0; i<coefs.Len(); i++) {
+        tf[i] *= constant;
     }
     return tf;
 }
@@ -379,20 +426,24 @@ tPolynomial<T> const tPolynomial<T>::operator*( const tPolynomial<T> & tfRight )
 
     // If any Polygonial is of size 0, then the resulting one is too
     // Otherwise, it is the sum of both lenght, minus 1.
-    int newLength = 
-      (0 == this->coefs.Len() || 0 == tfRight.coefs.Len())
-      ? 0 
-      : (this->coefs.Len() + tfRight.coefs.Len() - 1);
+    int newLength =
+        (0 == this->coefs.Len() || 0 == tfRight.coefs.Len())
+        ? 0
+        : (this->coefs.Len() + tfRight.coefs.Len() - 1);
 
+    int oldLength = tf.coefs.Len();
     tf.coefs.SetLen(newLength);
+    for (int i=oldLength; i<newLength; i++) {
+        tf[i] = 0.0;
+    }
 
-    if(0 == newLength) {
+    if (0 == newLength) {
         // Special case, nothing needs to be done
     }
     else {
-        for(int i=0; i<this->coefs.Len(); i++) {
-            for(int j=0; j<tfRight.coefs.Len(); j++) {
-	      tf[i+j] += (this->coefs[i]) * tfRight[j];
+        for (int i=0; i<this->coefs.Len(); i++) {
+            for (int j=0; j<tfRight.coefs.Len(); j++) {
+                tf[i+j] += (this->coefs[i]) * tfRight[j];
             }
         }
     }
@@ -400,61 +451,115 @@ tPolynomial<T> const tPolynomial<T>::operator*( const tPolynomial<T> & tfRight )
 }
 
 template <typename T>
-tPolynomial<T> const tPolynomial<T>::operator+( REAL value ) const {
+tPolynomial<T> const tPolynomial<T>::operator+( REAL constant ) const {
     tPolynomial<T> tf(*this);
-    tf[0] += value;
+    tf[0] += constant;
     return tf;
 }
 
 template <typename T>
 tPolynomial<T> const tPolynomial<T>::operator+( const tPolynomial<T> &tfRight ) const {
-    tPolynomial<T> tf(*this);
+    // Bring the polynomial to the same baseValue, so that the terms mean the same thing
+    tPolynomial<T> tRebasedRight(tfRight.evaluateCoefsAt(this->baseValueOfVariable));
+
+    int maxLength = this->coefs.Len()>tfRight.coefs.Len()?this->coefs.Len():tfRight.coefs.Len();
+    int minLength = this->coefs.Len()<tfRight.coefs.Len()?this->coefs.Len():tfRight.coefs.Len();
+
+    // Set the lenght to the longest member of the addition
+    tRebasedRight.coefs.SetLen(maxLength);
+    for (int i=tfRight.Len(); i<maxLength; i++) {
+        tRebasedRight[i] = 0.0;
+    }
+
+    for (int i=0; i<minLength; i++) {
+        tRebasedRight[i] += coefs[i];
+    }
+
+    return tRebasedRight;
+}
+
+template <typename T>
+tPolynomial<T> & tPolynomial<T>::operator+=( const tPolynomial<T> &tfRight ) {
+    // Bring the polynomial to the same baseValue, so that the terms mean the same thing
+    tPolynomial<T> tRebasedRight = tfRight.evaluateCoefsAt(this->baseValueOfVariable);
+
     int maxLength = this->coefs.Len()>tfRight.coefs.Len()?this->coefs.Len():tfRight.coefs.Len();
     // Set the lenght to the longest member of the addition
-    tf.coefs.SetLen(maxLength);
+    coefs.SetLen(maxLength);
 
-    for(int i=0; i<maxLength; i++) {
-        tf[i] += tfRight[i];
+    for (int i=0; i<maxLength; i++) {
+        coefs[i] += tRebasedRight[i];
     }
-    return tf;
+
+    return *this;
 }
 
 template<typename T>
 REAL &tPolynomial<T>::operator[](int index) // Allow both reading and writing of element
 {
-  // Manually growing the array to set all new elements to 0
-  if(index >= coefs.Len()) {
-    int previousLength = coefs.Len();
-    coefs.SetLen(index + 1);
-    for(int i=previousLength; i<coefs.Len(); i++) {
-      coefs[i] = 0.0;
+    // Manually growing the array to set all new elements to 0
+    if (index >= coefs.Len()) {
+        int previousLength = coefs.Len();
+        coefs.SetLen(index + 1);
+        for (int i=previousLength; i<coefs.Len(); i++) {
+            coefs[i] = 0.0;
+        }
     }
-  }
 
-  return coefs[index];
+    return coefs[index];
 }
 
 template <typename T>
 REAL const &tPolynomial<T>::operator[](int index) const // Allow reading of element even when the object is const
 {
-  return coefs[index];
+    return coefs[index];
 }
 
 template <typename T>
-void tPolynomial<T>::operator=(tPolynomial<T> const &other) 
+void tPolynomial<T>::operator=(tPolynomial<T> const &other)
 {
     coefs = other.coefs;
-    baseArgument = other.baseArgument;
+    baseValueOfVariable = other.baseValueOfVariable;
 }
 
 template <typename T>
-void tPolynomial<T>::toString() {
-    std::cout << "base :" << baseArgument << " lenght:" << coefs.Len();
+void tPolynomial<T>::toString() const {
+    std::cout << "base :" << baseValueOfVariable << " lenght:" << coefs.Len();
 
-    for(int i=0; i<coefs.Len(); i++) {
-      std::cout << " c[" << i << "]:" << coefs[i];
+    for (int i=0; i<coefs.Len(); i++) {
+        std::cout << " c[" << i << "]:" << coefs[i];
     }
     std::cout << std::endl;
+}
+
+/**
+ * If the current polynomial is within the range, return a copy of itself
+ * Otherwise, return a new polynomial that is bound by the range
+ */
+template <typename T>
+tPolynomial<T> tPolynomial<T>::clamp(REAL minValue, REAL maxValue, REAL valueOfVariable)
+{
+    tPolynomial<T> tf(*this);
+
+    REAL valueAt = evaluate(valueOfVariable);
+    if (valueAt < minValue) {
+        tf[0] = minValue;
+        for (int i=1; i<coefs.Len(); i++) {
+            if (tf[i] < 0) {
+                tf[i] = 0.0;
+            }
+        }
+    }
+    if (maxValue < valueAt) {
+        tf[0] = maxValue;
+        for (int i=1; i<coefs.Len(); i++) {
+            if (tf[i] > 0) {
+                tf[i] = 0.0;
+            }
+        }
+    }
+
+    return tf;
 }
 
 #endif

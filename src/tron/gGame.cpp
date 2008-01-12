@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -724,7 +724,7 @@ void exit_game_objects(eGrid *grid){
     su_prefetchInput=false;
 
     int i;
-    for(i=ePlayer::Num()-1;i>=0;i--){
+    for (i=ePlayer::Num()-1;i>=0;i--){
         if (ePlayer::PlayerConfig(i))
             tDESTROY(ePlayer::PlayerConfig(i)->cam);
     }
@@ -732,8 +732,8 @@ void exit_game_objects(eGrid *grid){
     eGameObject::DeleteAll(grid);
 
     if (sn_GetNetState()!=nCLIENT)
-        for(int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
-            if(se_PlayerNetIDs(i))
+        for (int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
+            if (se_PlayerNetIDs(i))
                 se_PlayerNetIDs(i)->ClearObject();
 
     gNetPlayerWall::Clear();
@@ -790,7 +790,7 @@ void init_game_grid(eGrid *grid, gParser *aParser){
     /*
       if(!speedup)
       SDL_Delay(1000);
-    */   
+    */
 
     Arena.PrepareGrid(grid, aParser);
 
@@ -925,7 +925,7 @@ void init_game_objects(eGrid *grid){
                                   sg_currentSettings->AI_IQ);
 
         int spawnPointsUsed = 0;
-        for(int t=eTeam::teams.Len()-1;t>=0;t--)
+        for (int t=eTeam::teams.Len()-1;t>=0;t--)
         {
             eTeam *team = eTeam::teams(t);
             team->Update();
@@ -993,7 +993,7 @@ void init_game_objects(eGrid *grid){
 
 
 #ifdef ALLOW_NO_TEAM
-        for(int p=se_PlayerNetIDs.Len()-1;p>=0;p--){
+        for (int p=se_PlayerNetIDs.Len()-1;p>=0;p--){
             ePlayerNetID *pni=se_PlayerNetIDs(p);
 
             gSpawnPoint *spawn=Arena.LeastDangerousSpawnPoint();
@@ -1105,13 +1105,13 @@ void init_game_objects(eGrid *grid){
       {1,1,.2},
       {1,.2,1},
       {.2,1,1},
-      {1,.6,.2},      
-      {.2,1,.6},      
-      {.6,.2,1},      
-      {1,.2,.6},      
-      {.6,1,.2},      
-      {1,1,1},      
-      {.2,.2,.2}       
+      {1,.6,.2},
+      {.2,1,.6},
+      {.6,.2,1},
+      {1,.2,.6},
+      {.6,1,.2},
+      {1,1,1},
+      {.2,.2,.2}
     };
     */
 
@@ -1130,7 +1130,7 @@ void init_game_objects(eGrid *grid){
 
 void init_game_camera(eGrid *grid){
 #ifndef DEDICATED
-    for(int i=ePlayer::Num()-1;i>=0;i--)
+    for (int i=ePlayer::Num()-1;i>=0;i--)
         if (ePlayer::PlayerIsInGame(i)){
             ePlayerNetID *p=ePlayer::PlayerConfig(i)->netPlayer;
 
@@ -1142,10 +1142,10 @@ void init_game_camera(eGrid *grid){
             // se_PauseGameTimer(true);
 
             ePlayer::PlayerConfig(i)->cam=new gCamera(grid,
-                                          ePlayer::PlayerViewport(i),
-                                          p,
-                                          ePlayer::PlayerConfig(i),
-                                          CAMERA_SMART);
+                    ePlayer::PlayerViewport(i),
+                    p,
+                    ePlayer::PlayerConfig(i),
+                    CAMERA_SMART);
 
             lastTime_gameloop=lastTimeTimestep=0;
         }
@@ -1200,7 +1200,7 @@ void s_Timestep(eGrid *grid, REAL time,bool cam){
 void RenderAllViewports(eGrid *grid){
     rViewportConfiguration *conf=rViewportConfiguration::CurrentViewportConfiguration();
 
-    if(sr_glOut){
+    if (sr_glOut){
         sr_ResetRenderState();
 
         // enable distance based fog
@@ -1214,7 +1214,7 @@ void RenderAllViewports(eGrid *grid){
 
         const tList<eCamera>& cameras = grid->Cameras();
 
-        for(int i=cameras.Len()-1;i>=0;i--){
+        for (int i=cameras.Len()-1;i>=0;i--){
             int p=sr_viewportBelongsToPlayer[i];
             conf->Select(i);
             rViewport *act=conf->Port(i);
@@ -1252,7 +1252,7 @@ void Render(eGrid *grid, REAL time, bool swap=true){
         if (swap){
             rSysDep::SwapGL();
 
-            if(!sr_ZTrick ||
+            if (!sr_ZTrick ||
                     (!sr_highRim && !sr_lowerSky && !sr_upperSky) ||
                     sr_floorDetail<rFLOOR_TEXTURE ||
                     sr_floorMirror==rMIRROR_OBJECTS){
@@ -1281,7 +1281,7 @@ static void cp(){
             tOutput o;
 
             int count=0;
-            for(int i=MAXCLIENTS;i>0;i--)
+            for (int i=MAXCLIENTS;i>0;i--)
                 if (sn_Connections[i].socket)
                     count++;
             if (count==0)
@@ -1361,7 +1361,7 @@ void sg_HostGame(){
 
         int numPlayers = 0;
 
-        while(numPlayers == 0 &&
+        while (numPlayers == 0 &&
                 (ded_idle<.0001 || tSysTimeFloat()<startTime + ded_idle * 3600 ) && !uMenu::quickexit ){
             sr_Read_stdin();
             gGame::NetSyncIdle();
@@ -1600,7 +1600,7 @@ void ret_to_MainMenu(){
     sr_con.fullscreen=true;
     sr_con.autoDisplayAtNewline=true;
 
-    if(sg_currentGame)
+    if (sg_currentGame)
         sg_currentGame->NoLongerGoOn();
 
     sn_SetNetState(nSTANDALONE);
@@ -1841,11 +1841,11 @@ void MainMenu(bool ingame){
 
     uMenuItemFunction *reset=NULL;
 
-    if(ingame && sn_GetNetState()!=nCLIENT){
+    if (ingame && sn_GetNetState()!=nCLIENT){
         reset=new uMenuItemFunction
-              (&game_menu,"$game_menu_reset_text",
-               "$game_menu_reset_help",
-               &StartNewMatch);
+        (&game_menu,"$game_menu_reset_text",
+         "$game_menu_reset_help",
+         &StartNewMatch);
     }
 
     uMenuItemFunction *settings1=NULL;
@@ -1867,10 +1867,10 @@ void MainMenu(bool ingame){
 
     if (!ingame){
         connect=new uMenuItemFunction
-                (&game_menu,
-                 "$network_menu_text",
-                 "$network_menu_help",
-                 &net_game);
+        (&game_menu,
+         "$network_menu_text",
+         "$network_menu_help",
+         &net_game);
 
         start= new uMenuItemFunction(&game_menu,"$game_menu_start_text",
                                      "$game_menu_start_help",&singlePlayer_game);
@@ -1912,20 +1912,20 @@ void MainMenu(bool ingame){
     if (ingame){
         if (sn_GetNetState()==nSTANDALONE)
             return_to_main=new uMenuItemFunction
-                           (&MainMenu,"$game_menu_exit_text",
-                            "$game_menu_exit_help",
-                            &ret_to_MainMenu);
+            (&MainMenu,"$game_menu_exit_text",
+             "$game_menu_exit_help",
+             &ret_to_MainMenu);
         else if (sn_GetNetState()==nCLIENT)
             return_to_main=new uMenuItemFunction
-                           (&MainMenu,"$game_menu_disconnect_text",
-                            "$game_menu_disconnect_help",
-                            &ret_to_MainMenu);
+            (&MainMenu,"$game_menu_disconnect_text",
+             "$game_menu_disconnect_help",
+             &ret_to_MainMenu);
         else
             return_to_main=new uMenuItemFunction
-                           (&MainMenu,
-                            "$game_menu_shutdown_text",
-                            "game_menu_shutdown_help",
-                            &ret_to_MainMenu);
+            (&MainMenu,
+             "$game_menu_shutdown_text",
+             "game_menu_shutdown_help",
+             &ret_to_MainMenu);
     }
 
 
@@ -1950,9 +1950,9 @@ void MainMenu(bool ingame){
 
     //   if (!ingame)
     se_PlayerMenu= new uMenuItemFunction
-                   (&MainMenu,"$player_mainmenu_text",
-                    "$player_mainmenu_help",
-                    &sg_PlayerMenu);
+    (&MainMenu,"$player_mainmenu_text",
+     "$player_mainmenu_help",
+     &sg_PlayerMenu);
 
     uMenuItemFunction *player_police=NULL;
     uMenuItemFunction *voting=NULL;
@@ -1999,8 +1999,8 @@ void MainMenu(bool ingame){
      "$misc_menu_help");
 
     sound = new uMenuItemFunction
-            (&Settings,"$sound_menu_text",
-             "$sound_menu_help",&se_SoundMenu);
+    (&Settings,"$sound_menu_text",
+     "$sound_menu_help",&se_SoundMenu);
 
     uMenuItemSubmenu subm
     (&Settings,&sg_screenMenu,
@@ -2068,7 +2068,7 @@ void MainMenu(bool ingame){
 
 #define GS_CREATED 0        // newborn baby
 #define GS_TRANSFER_SETTINGS	7
-#define GS_CREATE_GRID			10       
+#define GS_CREATE_GRID			10
 #define GS_CREATE_OBJECTS		20
 #define GS_TRANSFER_OBJECTS		30
 #define GS_CAMERA				35
@@ -2097,7 +2097,7 @@ static void ingame_menu()
             se_PauseGameTimer(true);
         MainMenu(true);
     }
-    catch( ... )
+    catch ( ... )
     {
         ingame_menu_cleanup();
         ret_to_MainMenu();
@@ -2170,7 +2170,9 @@ public:
     tColoredString message_; // the console log for the error message
 private:
     // we want to come first
-    virtual int DoGetPriority() const{ return -100; }
+    virtual int DoGetPriority() const{
+        return -100;
+    }
 
     // don't actually filter; take line and add it to the potential error message
     virtual void DoFilterLine( tString &line )
@@ -2183,9 +2185,9 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
 {
     {
         gMapLoadConsoleFilter consoleLog;
-#ifdef DEBUG      
+#ifdef DEBUG
         con << "Loading map " << mapfile << "...\n";
-#endif      
+#endif
         if (!aParser->LoadWithoutParsing(mapfile))
         {
             tOutput errorMessage( sn_GetNetState() == nCLIENT ? "$map_file_load_failure_server" : "$map_file_load_failure_self", mapfile );
@@ -2312,9 +2314,9 @@ static void client_gamestate_handler(nMessage &m){
     unsigned short state;
     m.Read( state );
     client_gamestate[m.SenderID()] = state;
-	#ifdef DEBUG
+#ifdef DEBUG
     //	con << "User " << m.SenderID() << " is in Mode " << state << '\n';
-	#endif
+#endif
 }
 
 static nDescriptor client_gs(311,client_gamestate_handler,"client_gamestate");
@@ -2331,7 +2333,7 @@ void gGame::SyncState(unsigned short state){
         sn_Sync(sg_Timeout*.1,true);
         NetSyncIdle();
 
-        while(goon && tSysTimeFloat()<timeout){
+        while (goon && tSysTimeFloat()<timeout){
             /*
               if (sg_currentGame)
               sg_currentGame->RequestSync();
@@ -2341,7 +2343,7 @@ void gGame::SyncState(unsigned short state){
             NetSyncIdle();
 
             goon=false;
-            for(int i=MAXCLIENTS;i>0;i--)
+            for (int i=MAXCLIENTS;i>0;i--)
                 if ( sn_Connections[i].socket )
                 {
                     int clientState = client_gamestate[i];
@@ -2356,7 +2358,7 @@ void gGame::SyncState(unsigned short state){
                 con << "Waiting for users to enter gamestate " << state << '\n';
                 if (sn_Connections[1].ackPending>2)
                     con << "Ack_pending=" << sn_Connections[1].ackPending << ".\n";
-#endif	  
+#endif
             }
         }
     }
@@ -2412,7 +2414,7 @@ void gGame::StateUpdate(){
 
     while ( sg_AbeforeB( state, stateNext ) && goon )
     {
-	#ifdef CONNECTION_STRESS
+#ifdef CONNECTION_STRESS
         if ( sg_ConnectionStress )
         {
             tRandomizer & randomizer = tRandomizer::GetInstance();
@@ -2426,11 +2428,11 @@ void gGame::StateUpdate(){
 
             se_ChatState( ePlayerNetID::ChatFlags_Away, 1 );
         }
-	#endif
+#endif
 
         // unsigned short int mes1 = 1, mes2 = 1, mes3 = 1, mes4 = 1, mes5 = 1;
 
-        switch(state){
+        switch (state){
         case GS_DELETE_GRID:
             // sr_con.autoDisplayAtNewline=true;
 
@@ -2538,15 +2540,15 @@ void gGame::StateUpdate(){
 
 
             // push all data
-            if(sn_GetNetState()==nSERVER){
+            if (sn_GetNetState()==nSERVER){
                 bool goon=true;
                 double timeout=tSysTimeFloat()+sg_Timeout*.4;
-                while(goon && tSysTimeFloat()<timeout){
+                while (goon && tSysTimeFloat()<timeout){
                     NetSyncIdle();
                     goon=false;
-                    for(int i=MAXCLIENTS;i>0;i--)
+                    for (int i=MAXCLIENTS;i>0;i--)
                         if (sn_Connections[i].socket)
-                            for(int j=sn_netObjects.Len()-1;j>=0;j--)
+                            for (int j=sn_netObjects.Len()-1;j>=0;j--)
                                 if (sn_netObjects(j) &&
                                         !sn_netObjects(j)->HasBeenTransmitted(i) &&
                                         sn_netObjects(j)->syncRequested(i))
@@ -2556,9 +2558,9 @@ void gGame::StateUpdate(){
                     con << tOutput("$gamestate_done");
                 else{
                     con << tOutput("$gamestate_timeout_intro");
-                    for(int i=MAXCLIENTS;i>0;i--)
+                    for (int i=MAXCLIENTS;i>0;i--)
                         if (sn_Connections[i].socket)
-                            for(int j=sn_netObjects.Len()-1;j>=0;j--)
+                            for (int j=sn_netObjects.Len()-1;j>=0;j--)
                                 if (sn_netObjects(j) && !sn_netObjects(j)->HasBeenTransmitted(i))
                                 {
                                     tOutput o;
@@ -2795,7 +2797,7 @@ void gGame::Timestep(REAL time,bool cam){
     }
 
     // chop
-    for(int i=1;i<=number_of_steps;i++)
+    for (int i=1;i<=number_of_steps;i++)
     {
         REAL stepTime = lt + i * dt/number_of_steps;
         s_Timestep(grid, stepTime, cam);
@@ -2886,7 +2888,7 @@ void gGame::Analysis(REAL time){
     // count active players
     int active = 0;
     int i;
-    for(i=se_PlayerNetIDs.Len()-1;i>=0;i--){
+    for (i=se_PlayerNetIDs.Len()-1;i>=0;i--){
         ePlayerNetID *pni=se_PlayerNetIDs(i);
         if (pni->IsActive())
             active ++;
@@ -2908,7 +2910,7 @@ void gGame::Analysis(REAL time){
 
     bool notyetloggedin = true;  // are all current users not yet logged in?
 
-    for(i=eTeam::teams.Len()-1;i>=0;i--){
+    for (i=eTeam::teams.Len()-1;i>=0;i--){
         eTeam *t = eTeam::teams(i);
 
         humans += t->NumHumanPlayers();
@@ -2931,10 +2933,10 @@ void gGame::Analysis(REAL time){
                     active_humans++;
 
                 gCycle *g=dynamic_cast<gCycle *>(p->Object());
-                if(g){
+                if (g){
                     notyetloggedin = false;
 
-                    if(g->Alive())
+                    if (g->Alive())
                     {
 
                         if ( p->IsHuman() )
@@ -2969,8 +2971,8 @@ void gGame::Analysis(REAL time){
                 ePlayerNetID* p = t->Player(j);
 
                 gCycle *g=dynamic_cast<gCycle *>(p->Object());
-                if(g){
-                    if(g->Alive())
+                if (g){
+                    if (g->Alive())
                     {
                         ai_alive++;
                     }
@@ -2992,10 +2994,10 @@ void gGame::Analysis(REAL time){
     // kill all disconnected players if they are the only reason the round goes on:
     if ( alive_and_not_disconnected <= 1 && alive > alive_and_not_disconnected )
     {
-        for(int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
+        for (int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
         {
             gCycle *g=dynamic_cast<gCycle *>(se_PlayerNetIDs(i)->Object());
-            if(g && !se_PlayerNetIDs(i)->IsActive())
+            if (g && !se_PlayerNetIDs(i)->IsActive())
             {
                 g->Kill();
             }
@@ -3069,7 +3071,7 @@ void gGame::Analysis(REAL time){
         holdBackNextRound = true;
     }
     else if (winner==0 && absolute_winner==0 ){
-        if( teams_alive <= 1 )
+        if ( teams_alive <= 1 )
         {
             if ( sg_currentSettings->gameType!=gFREESTYLE )
             {
@@ -3316,7 +3318,7 @@ void gGame::Analysis(REAL time){
     if (sg_currentSettings->finishType==gFINISH_EXPRESS)
         fintime=2.5;
 
-    if(( ( winner || absolute_winner ) && wintimer+fintime < time)
+    if (( ( winner || absolute_winner ) && wintimer+fintime < time)
             || (((alive==0 && eTeam::teams.Len()>=
 #ifndef DEDICATED
                   1
@@ -3350,7 +3352,7 @@ void gGame::Analysis(REAL time){
         if ( !winner && !absolute_winner && sg_currentSettings->finishType==gFINISH_SPEEDUP && se_mainGameTimer)
         {
             se_mainGameTimer->speed*=1.01;
-            if(se_mainGameTimer->speed>16)
+            if (se_mainGameTimer->speed>16)
                 se_mainGameTimer->speed=16;
         }
 
@@ -3433,7 +3435,7 @@ void gGame::StartNewMatchNow(){
     ePlayerNetID::ResetScore();
 }
 
-#ifdef DEBUG	      
+#ifdef DEBUG
 extern bool debug_grid;
 // from display.cpp
 bool simplify_grid=1;
@@ -3525,7 +3527,7 @@ bool gGame::GameLoop(bool input){
             tString s;
             s << cd;
 
-            switch(cd) {
+            switch (cd) {
             case 3:
                 m_Mixer->PushButton(ANNOUNCER_3);
                 break;
@@ -3551,9 +3553,9 @@ bool gGame::GameLoop(bool input){
         SDL_Event tEvent;
 
         uInputProcessGuard inputProcessGuard;
-        while(su_GetSDLInput(tEvent,time)){
+        while (su_GetSDLInput(tEvent,time)){
             if (time>gtime) time=gtime;
-            if(time>lastTime_gameloop){
+            if (time>lastTime_gameloop){
                 Timestep(time);
                 lastTime_gameloop=time;
             }
@@ -3570,7 +3572,7 @@ bool gGame::GameLoop(bool input){
                                     //                                case('q'):
                                     st_ToDo(&ingame_menu);
                         break;
-#ifdef DEBUG	      
+#ifdef DEBUG
                     case('d'):
                                     debug_grid=!debug_grid;
                         break;
@@ -3595,7 +3597,7 @@ bool gGame::GameLoop(bool input){
                            fullscreen=(!fullscreen);
                            con << fullscreen << "x!\n";
                            XMesaSetFXmode(fullscreen ? XMESA_FX_FULLSCREEN : XMESA_FX_WINDOW);
-                           break;        
+                           break;
                            #endif */
 #endif
 
@@ -3647,7 +3649,7 @@ bool gGame::GameLoop(bool input){
 
     static float lastTime = -1;
 
-    if(sg_gameTimeInterval >= 0 && (gtime >= lastTime + sg_gameTimeInterval || (gtime < lastTime && gtime >= 0))) {
+    if (sg_gameTimeInterval >= 0 && (gtime >= lastTime + sg_gameTimeInterval || (gtime < lastTime && gtime >= 0))) {
         tOutput out;
         out << "GAME_TIME " << gtime << '\n';
         se_SaveToLadderLog(out);
@@ -3663,7 +3665,7 @@ bool gGame::GameLoop(bool input){
 
             if (gtime>=lastTime_gameloop){
 
- 				#ifdef CONNECTION_STRESS
+#ifdef CONNECTION_STRESS
                 if ( sg_ConnectionStress )
                 {
                     tRandomizer & randomizer = tRandomizer::GetInstance();
@@ -3675,7 +3677,7 @@ bool gGame::GameLoop(bool input){
                         goon = false;
                     }
                 }
-				#endif
+#endif
 
 
                 Timestep(gtime,true);
@@ -3691,7 +3693,7 @@ bool gGame::GameLoop(bool input){
         if (sn_GetNetState()!=nCLIENT)
         {
             // simulate IAs
-            for(int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
+            for (int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
             {
                 gAIPlayer *ai = dynamic_cast<gAIPlayer*>(se_PlayerNetIDs(i));
                 if (ai && think)
@@ -3759,9 +3761,9 @@ bool gGame::GridIsReady(int client){
             client_gamestate[client]<=GS_DELETE_OBJECTS);
 }
 
-#include <fcntl.h> 
-#include <stdio.h> 
-#include <errno.h> 
+#include <fcntl.h>
+#include <stdio.h>
+#include <errno.h>
 
 bool GameLoop(bool input=true){
     /*
@@ -3784,9 +3786,9 @@ bool GameLoop(bool input=true){
      */
 
     // see if pings have dramatically changed
-    if(sn_GetNetState()==nSERVER){
+    if (sn_GetNetState()==nSERVER){
         REAL t=tSysTimeFloat();
-        for(int i=se_PlayerNetIDs.Len()-1;i>=0;i--){
+        for (int i=se_PlayerNetIDs.Len()-1;i>=0;i--){
             ePlayerNetID *p=se_PlayerNetIDs(i);
 
             // get average and variance (increased a bit) of this player's ping
@@ -3813,7 +3815,7 @@ bool GameLoop(bool input=true){
     }
 
     bool goon=false;
-    if(sg_currentGame){
+    if (sg_currentGame){
         tControlledPTR< nNetObject > keep( sg_currentGame );
         sg_currentGame->StateUpdate();
         goon=!uMenu::quickexit && bool(sg_currentGame) && sg_currentGame->GameLoop(input);
@@ -4014,7 +4016,7 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     uMenu::Message( title, message, timeout );
 
     // and print it to the console
-#ifndef DEDICATED    
+#ifndef DEDICATED
     con <<  title << "\n" << message << "\n";
 #endif
 
@@ -4060,7 +4062,7 @@ void sg_FullscreenMessage(tOutput const & title, tOutput const & message, REAL t
             m->BroadCast();
         else
         {
-            for(int c = MAXCLIENTS; c > 0; --c)
+            for (int c = MAXCLIENTS; c > 0; --c)
             {
                 if ( sn_Connections[c].socket )
                 {
@@ -4085,7 +4087,7 @@ void sg_FullscreenMessage(tOutput const & title, tOutput const & message, REAL t
 
             // wait for players to see it
             bool goon = true;
-            while( goon && waitTo > tSysTimeFloat() )
+            while ( goon && waitTo > tSysTimeFloat() )
             {
                 sg_FullscreenIdle();
                 gameloop_idle();
@@ -4269,7 +4271,11 @@ void oldFortressAutomaticAssignment(zZone *zone, zMonitorPtr monitor)
                 }
 
                 zMonitorInfluencePtr inflDefender = zMonitorInfluencePtr(new zMonitorInfluence( monitor ));
-                inflDefender->setInfluenceSlide( tFunction(-1.0 * sg_defendRate, 0.0) );
+
+                tPolynomial<nMessage> tpInfluenceSlide(2);
+                tpInfluenceSlide[0] = -1.0 * sg_defendRate;
+                inflDefender->setInfluenceSlide( tpInfluenceSlide );
+                //                inflDefender->setInfluenceSlide( tFunction(-1.0 * sg_defendRate, 0.0) );
 
                 // Store all the objects
                 validator->addMonitorInfluence( inflDefender );
@@ -4285,7 +4291,10 @@ void oldFortressAutomaticAssignment(zZone *zone, zMonitorPtr monitor)
                 }
 
                 zMonitorInfluencePtr inflAttaquer = zMonitorInfluencePtr(new zMonitorInfluence( monitor ));
-                inflAttaquer->setInfluenceSlide(  tFunction(sg_conquestRate, 0.0) );
+
+                tpInfluenceSlide[0] = -1.0 * sg_defendRate;
+                inflAttaquer->setInfluenceSlide( tpInfluenceSlide );
+                //                inflAttaquer->setInfluenceSlide(  tFunction(sg_conquestRate, 0.0) );
                 // Store all the objects
                 validator->addMonitorInfluence( inflAttaquer );
                 currentZoneEffect->addValidator( validator );

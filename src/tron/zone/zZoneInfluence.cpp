@@ -8,7 +8,7 @@ void
 zZoneInfluence::apply(const tPolynomial<nMessage> &value)
 {
     zZoneInfluenceItemList::const_iterator iter;
-    for(iter=zoneInfluenceItems.begin();
+    for (iter=zoneInfluenceItems.begin();
             iter!=zoneInfluenceItems.end();
             ++iter)
     {
@@ -44,9 +44,9 @@ zZoneInfluenceItemRotation::apply(const tPolynomial<nMessage> &valueEq) {
     REAL c = rotationSpeed.GetOffset();
     REAL d = rotationSpeed.GetSlope();
 
-    tPolynomial<nMessage> tf = 
-      ( (valueEq * b) + a)
-      + t * ( (valueEq * d) + c);
+    tPolynomial<nMessage> tf =
+        ( (valueEq * b) + a)
+        + t * ( (valueEq * d) + c);
 
     zone->getShape()->setRotation2( tf );
 }
