@@ -45,7 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rRender.h"
 #include "rFont.h"
 #include "rSysdep.h"
-#include "nAuthentification.h"
+#include "nAuthentication.h"
 #include "tDirectories.h"
 #include "eTeam.h"
 #include "eVoter.h"
@@ -410,7 +410,7 @@ static void ResultCallback(const tString& usernameUnfiltered,
     else
     {
         if (sn_GetNetState() == nSERVER  && user != sn_myNetID )
-            nAuthentification::RequestLogin(username, user, "$login_request_failed", true);
+            nAuthentication::RequestLogin(username, user, "$login_request_failed", true);
     }
 }
 
@@ -590,8 +590,8 @@ static const tString& se_UserName()
 }
 
 ePlayer::ePlayer():cockpit(0){
-    nAuthentification::SetUserPasswordCallback(&PasswordCallback);
-    nAuthentification::SetLoginResultCallback (&ResultCallback);
+    nAuthentication::SetUserPasswordCallback(&PasswordCallback);
+    nAuthentication::SetLoginResultCallback (&ResultCallback);
 
     nameTeamAfterMe = false;
     favoriteNumberOfPlayersPerTeam = 3;
@@ -2598,7 +2598,7 @@ void ePlayerNetID::Auth(){
 bool ePlayerNetID::IsAuth() const{
 #ifdef KRAWALL_SERVER
     if (!auth && sn_GetNetState() == nSERVER && Owner() != sn_myNetID )
-        nAuthentification::RequestLogin(GetUserName(), Owner(), "$login_request_first");
+        nAuthentication::RequestLogin(GetUserName(), Owner(), "$login_request_first");
 #endif
 
     return auth;
@@ -4823,7 +4823,7 @@ void ePlayerNetID::UpdateName( void )
                 if (sn_GetNetState() == nSERVER && Owner() != sn_myNetID )
                 {
                     auth = false;
-                    nAuthentification::RequestLogin(GetUserName(), Owner(), "$login_request_first");
+                    nAuthentication::RequestLogin(GetUserName(), Owner(), "$login_request_first");
                 }
 #endif
 
@@ -4851,7 +4851,7 @@ void ePlayerNetID::UpdateName( void )
 #ifdef KRAWALL_SERVER
                 if (sn_GetNetState() == nSERVER && Owner() != sn_myNetID )
                 {
-                    nAuthentification::RequestLogin(GetUserName(), Owner(), "$login_request_namechange");
+                    nAuthentication::RequestLogin(GetUserName(), Owner(), "$login_request_namechange");
                     auth = false;
                     userName_ = oldUserName; // restore the old name until the new one is authenticated
                 }

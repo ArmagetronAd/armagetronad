@@ -565,13 +565,13 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
-		<Unit filename="..\..\src\network\nAuthentification.cpp">
+		<Unit filename="..\..\src\network\nAuthentication.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
-		<Unit filename="..\..\src\network\nAuthentification.h">
+		<Unit filename="..\..\src\network\nAuthentication.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
