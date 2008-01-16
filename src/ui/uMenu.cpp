@@ -67,7 +67,7 @@ uMenu::uMenu(const char *t="",bool exit_item)
     menuTop=.7;
     menuBot=-.7;
     yOffset=0;
-    selected = -1;
+    selected = 10000000;
 }
 #endif
 
@@ -78,7 +78,7 @@ uMenu::uMenu(const tOutput &t,bool exit_item)
     menuTop=.7;
     menuBot=-.7;
     yOffset=0;
-    selected = -1;
+    selected = 100000000;
 }
 
 uMenu::~uMenu(){
