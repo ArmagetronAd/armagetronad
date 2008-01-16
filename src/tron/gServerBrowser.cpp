@@ -94,6 +94,8 @@ class gServerMenu: public uMenu
     int sortKey_;
 
 public:
+    virtual void OnRender();
+
     void Update(); // sort the server view by score
     gServerMenu(const char *title);
     ~gServerMenu();
@@ -301,6 +303,19 @@ void gServerMenu::HandleEvent( SDL_Event event )
     uMenu::HandleEvent( event );
 }
 
+void gServerMenu::OnRender()
+{
+    uMenu::OnRender();
+
+    // next time the server list is to be resorted
+    static double sg_serverMenuRefreshTimeout=-1E+32f;
+
+    if (sg_serverMenuRefreshTimeout < tSysTimeFloat())
+    {
+        Update();
+        sg_serverMenuRefreshTimeout = tSysTimeFloat()+2.0f;
+    }
+}
 
 void gServerMenu::Update()
 {
@@ -344,7 +359,7 @@ void gServerMenu::Update()
     ReverseItems();
 
     // set cursor to currently selected server
-    if ( info )
+    if ( info && info->menuItem )
     {
         selected = info->menuItem->GetID();
     }
@@ -716,14 +731,6 @@ void gBrowserMenuItem::RenderBackground()
         continuePoll = nServerInfo::DoQueryAll(sg_simultaneous);
         sn_Receive();
         sn_SendPlanned();
-    }
-
-    static double timeout=-1E+32f;
-
-    if (timeout < tSysTimeFloat())
-    {
-        (static_cast<gServerMenu*>(menu))->Update();
-        timeout = tSysTimeFloat()+2.0f;
     }
 
 #ifndef DEDICATED
