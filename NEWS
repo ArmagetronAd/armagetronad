@@ -89,7 +89,11 @@ New settings
 ------------
 
   New settings and commands:
+- KICK_TO and MOVE_TO: redirect a client to a different server
+- DEFAULT_KICK(_TO)_MESSAGE: default reason given to players for a kick
+- DEFAULT_KICK_TO_SERVER/PORT: default redirection target for KICK/MOVE_TO.
 - If all clients support it, PING_CHARITY_MIN/MAX can be used to constrain ping charity.
+- VOTE_KICK_TO_SERVER/PORT: redirection target for vote kicks.
 - SILENCE and VOICE allow to control chat of annoying players.
 - SILENCE_ALL can be used on the server to inhibit all cross-team communication unless specifically voiced.
 - ENABLE_CHAT can be set to 0 to disable all chat. If it is set on the server it only disables public chat and logged in players can still speak.
@@ -97,7 +101,7 @@ New settings
 - FILTER_NAME_MIDDLE: collapses multiple whitespaces to one in player names.
 - FORTRESS_CONQEST_TIMEOUT: if an enemy contact with a zone happens longer ago than
   this value, it is discarded from zone memory.
-- TOPOLOGY_POLICE_PARALLEL, extra topology police flag to control the checks 
+- TOPOLOGY_POLICE_PARALLEL, extra topology police flag to control the checks
   for walls getting copied into the grid in exactly the same place.
 - CAMERA_GLANCE_*: separate settings for the glancing camera, work like CAMERA_CUSTOM_*.
   Likewise, CAMERA_SERVER_GLANCE_* can replace CAMERA_SERVER_CUSTOM_* when glancing.
@@ -115,9 +119,23 @@ New settings
   for turns in the same direction. Can be used to limit the advantage
   doublebinders get while not punishing players who press both left and
   right at the same time.
-- LAG_O_METER(TRESHOLD|BLEND|USE_OLD): Configure the minimal size of the Lag-O-Meter, its color and whether to scrap it all and stick with the old one.
-- ALLOW_TEAM_CHANGE: if set to 0 players won't be able to join a team, create a new team or change to another team.
-- ALLOW_TEAM_CHANGE_PLAYER/DISALLOW_TEAM_CHANGE_PLAYER: allow/disallow specific players to switch teams
+- LAG_O_METER_(TRESHOLD|BLEND|USE_OLD): Configure the minimal size of the
+  Lag-O-Meter, its color and whether to scrap it all and stick with the old
+  one.
+- ALLOW_TEAM_CHANGE: if set to 0 players won't be able to join a team, create
+  a new team or change to another team.
+- ALLOW_TEAM_CHANGE_PLAYER/DISALLOW_TEAM_CHANGE_PLAYER: allow/disallow specific
+  players to switch teams
+- INTERCEPT_COMMANDS is a space-delimited list of chat commands that shall be
+  intercepted by an external script. Example value: /login /admin /teamleave
+  /teamshuffle /shuffle /team
+- INTERCEPT_UNKNOWN_COMMANDS is a boolean specifying if an external script
+  wishes to handle unrecognized chat commands. This would allow hooking
+  arbitrary things like /foobarz or /mode ctf
+- CONSOLE_LADDER_LOG boolean places the ladderlog on stdout prefixed with
+  "[L] "
+- PLAYER_MESSAGE <user ID or name> <Message>: Like /msg, but from the 
+  console
 
 Featurelets
 -----------
@@ -158,8 +176,8 @@ Featurelets
     message, <player> has been in the conquered zone
   - ONLINE_PLAYER <player> [<ping [<team>]]: At the beginning of the round,
     <player> had <ping> and was on <team>. This line is not printed for bots
-  - NUM_HUMANS <n>: There are <n> players that are not AIs and are part of 
-    a team.
+  - NUM_HUMANS <n>: There are <n> players that are not AIs and are part of a
+    team.
   - ROUND_SCORE has the player's team's score appended.
 
 Bugfixes

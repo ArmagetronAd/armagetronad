@@ -54,7 +54,7 @@ public:
     void Connect();
 private:
     bool _shouldConnect;
-    gServerInfoFavorite _server;
+    tString _raw;
     virtual bool DoAnalyze( tCommandLineParser & parser );
     virtual void DoHelp( std::ostream & s );
 };

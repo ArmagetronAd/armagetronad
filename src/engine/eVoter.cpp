@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "uMenu.h"
 
 #include "nConfig.h"
+#include "nServerInfo.h"
 
 #include "rConsole.h"
 
@@ -731,10 +732,31 @@ protected:
     virtual void OnDestroy()
     {
         machine_ = 0;
+
+        delete this;
     }
 private:
     nMachine * machine_;
 };
+
+static tString se_voteKickToServer("");
+static int se_voteKickToPort = 4534;
+static tSettingItem< tString > se_voteKickToServerConf( "VOTE_KICK_TO_SERVER", se_voteKickToServer );
+static tSettingItem< int > se_voteKickToPortConf( "VOTE_KICK_TO_PORT", se_voteKickToPort );
+
+void se_VoteKickUser( int user )
+{
+    if ( se_voteKickToServer.Len() < 2 )
+    {
+        sn_KickUser( user, tOutput("$voted_kill_kick") );
+    }
+    else
+    {
+        // kick player to default destination
+        nServerInfoRedirect redirect( se_voteKickToServer, se_voteKickToPort );
+        sn_KickUser( user, tOutput("$voted_kill_kick"), 1, &redirect );
+    }
+}
 
 // something to vote on
 class eVoteItemKick: public virtual eVoteItem
@@ -842,7 +864,7 @@ protected:
             // kick the player, he is online
             int user = player_->Owner();
             if ( user > 0 )
-                sn_KickUser( user, tOutput("$voted_kill_kick") );
+                se_VoteKickUser( user );
         }
         else if ( machine_ )
         {
@@ -856,7 +878,7 @@ protected:
                 {
                     if ( &nMachine::GetMachine( user ) == machine )
                     {
-                        sn_KickUser( user, tOutput("$voted_kill_kick")  );
+                        se_VoteKickUser( user );
                         kick = true;
                     }
                 }
@@ -987,7 +1009,7 @@ public:
         if(sn_GetNetState()==nSERVER)
         {
             // kill user directly
-            sn_KickUser( player_->Owner(), tOutput("$voted_kill_kick") );
+            se_VoteKickUser( player_->Owner() );
         }
         {
             // issue kick vote

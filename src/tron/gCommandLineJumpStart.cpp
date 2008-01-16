@@ -39,15 +39,8 @@
 
 bool gCommandLineJumpStartAnalyzer::DoAnalyze( tCommandLineParser & parser )
 {
-    tString raw;
-    tString server;
-    tString port;
-
-    if ( parser.GetOption( raw, "--connect" ) )
+    if ( parser.GetOption( _raw, "--connect" ) )
     {
-        ExtractConnectionInformation( raw, server, port );
-        _server.SetPort( port.ToInt() );
-        _server.SetConnectionName( server );
         _shouldConnect = true;
 
         return true;
@@ -67,7 +60,14 @@ void gCommandLineJumpStartAnalyzer::DoHelp( std::ostream & s )
 
 void gCommandLineJumpStartAnalyzer::Connect()
 {
-    ConnectToServer( &_server );
+    tString server;
+    tString port;
+
+    ExtractConnectionInformation( _raw, server, port );
+
+    nServerInfoRedirect connectTo( server, port.ToInt() );
+
+    ConnectToServer( &connectTo );
 }
 
 // *****************************************************************************

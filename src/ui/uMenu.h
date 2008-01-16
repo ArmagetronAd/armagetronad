@@ -122,6 +122,9 @@ protected:
 
     int GetNextSelectable(int start);
     int GetPrevSelectable(int start);
+
+    //! called every frame before the menu is rendered
+    virtual void OnRender();
 };
 
 

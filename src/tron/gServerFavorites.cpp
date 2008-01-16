@@ -47,11 +47,16 @@ static bool sg_ConnectionStress = false;
 
 enum { NUM_FAVORITES = 10 };
 
+/*
+//! favorite server information, just to connect
 gServerInfoFavorite::gServerInfoFavorite( tString const & connectionName, unsigned int port )
 {
     nServerInfoBase::SetConnectionName( connectionName );
     nServerInfoBase::SetPort( port );
 }
+*/
+
+typedef nServerInfoRedirect gServerInfoFavorite;
 
 //********************************************************************************
 //********************************************************************************

@@ -240,7 +240,11 @@ void tXmlParser::startElement(tString &element, tAttributeList &attributes) {
 }
 
 tXmlParser::~tXmlParser() {
-    // do nothing
+    if (m_Doc)
+    {
+        xmlFreeDoc(m_Doc);
+        m_Doc=0;
+    }
 }
 
 void tXmlParser::cb_endElement(const xmlChar *name) {

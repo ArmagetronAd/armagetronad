@@ -797,6 +797,15 @@ voice_help                  Reverse of SILENCE
 allow_team_change_player_help Allow a specific player to change teams even if ALLOW_TEAM_CHANGE is disabled
 disallow_team_change_player_help Reverse of ALLOW_TEAM_CHANGE_PLAYER
 kick_help					Kicks the specified player from the server.
+default_kick_reason_help    The reason given to a player kicked by KICK if none is specified.
+kick_to_help    			Kicks the specified player from the server and, if the client supports it, redirects him to a different server.
+move_to_help    			Kicks the specified player from the server and, if the client supports it, redirects him to a different server. Does not imply an autoban penalty.
+default_kick_to_reason_help The reason given to a player kicked by KICK_TO or MOVE_TO if none is specified.
+default_kick_to_server      Default server IP/name a player is redirected to by KICK_TO and MOVE_TO.
+default_kick_to_port        Default server port a player is redirected to by KICK_TO and MOVE_TO.
+vote_kick_to_server         Server IP/name a player is redirected to by vote kicks.
+vote_kick_to_port           Default server port a player is redirected to by vote kicks.
+
 ban_help                    Bans the specified player from the server (kicks him first) for a variable time in minutes.
 ban_ip_help                 Bans the spedified IP address from the server for a variable time.
 ban_list_help               Prints a list of currently banned IPs.
@@ -2313,6 +2322,7 @@ network_login_sync2		Syncing again...\n
 network_login_done		Done!\n
 
 network_kill_log            User \1 kicked, reason given to him: \2\n
+network_redirect            \n\nYou will now be redirected to the server \1:\2.\n
 network_kill_preface		Reason given by server:
 network_kill_maxidgrabber	It ran out of IDs; your client was the one occupying most of them for himself. The reason for this can be a bug.
 network_kill_maxiduser		It ran out of IDs; your client was the one occupying most of them.
@@ -2488,6 +2498,7 @@ sound_error_unknown			File \1 could not be loaded: \2
 #********************************************
 
 config_include_not_found    Configuration file "\1" to be included not found.\n
+config_rinclude_not_found   Configuration resource "\1" to be included not found.\n
 config_command_unknown		Command \1 unknown.\n
 config_command_other		You probably want:\n
 config_command_more		    There are more commands containing your search string that were left out to avoid flooding your terminal.\n

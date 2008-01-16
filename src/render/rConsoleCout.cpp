@@ -42,8 +42,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <windows.h>
 //#define fileno _fileno
 //#define fcntl _fcntl
+#else
+#include <signal.h>
 #endif
-
 
 void rConsole::DoCenterDisplay(const tString &s,REAL timeout,REAL r,REAL g,REAL b){
     std::cout << tColoredString::RemoveColors(s) << '\n';
@@ -53,7 +54,20 @@ void rConsole::DoCenterDisplay(const tString &s,REAL timeout,REAL r,REAL g,REAL 
 static int stdin_descriptor;
 static bool unblocked = false;
 
+static void sr_HandleSigCont( int signal )
+{
+    // con << "Continuing.\n";
+
+    // unblock stdin again
+    sr_Unblock_stdin();
+}
+
 void sr_Unblock_stdin(){
+    if ( !unblocked )
+    {
+        signal( SIGCONT, &sr_HandleSigCont );
+    }
+
     unblocked = true;
     stdin_descriptor=fileno(stdin);
 #ifndef WIN32
@@ -64,6 +78,7 @@ void sr_Unblock_stdin(){
     }
 #endif
 }
+
 
 
 #define MAXLINE 1000
@@ -121,8 +136,9 @@ void sr_Read_stdin(){
 
 
 #else
-    while (read(stdin_descriptor,&line_in[currentIn],1)>0){
-        if (line_in[currentIn]=='\n' || currentIn>=MAXLINE-1){
+    while ( read(stdin_descriptor,&line_in[currentIn],1)>0){
+        if (line_in[currentIn]=='\n' || currentIn>=MAXLINE-1)
+        {
             line_in[currentIn+1]='\0';
             std::stringstream s(line_in);
             tConfItemBase::LoadAll(s);
