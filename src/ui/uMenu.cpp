@@ -355,13 +355,13 @@ void uMenu::HandleEvent( SDL_Event event )
                 switch (event.key.keysym.sym){
 
                 case(SDLK_ESCAPE):
-                    repeat = false;
+                                repeat = false;
                     lastkey=tSysTimeFloat();
                     Exit();
                     break;
 
                 case(SDLK_UP):
-                    lastkey=tSysTimeFloat();
+                                lastkey=tSysTimeFloat();
                     selected++;
                     if (selected>=items.Len())
                         if (wrap)

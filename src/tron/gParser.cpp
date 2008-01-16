@@ -54,7 +54,7 @@ public:
 
     //! auto_ptrish assignment operator
     gXMLCharReturn & operator = ( gXMLCharReturn & other ){ string_ = other.Release(); return *this; }
-    
+
     //! conversion to char *
     operator char * () const{ return reinterpret_cast< char * >( string_ ); }
 

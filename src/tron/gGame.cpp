@@ -2132,7 +2132,7 @@ void ConnectToServer(nServerInfoBase *server)
 
     REAL redirections = 0;
     double lastTime = tSysTimeFloat();
-    
+
     // check for redirection
     while( true )
     {
