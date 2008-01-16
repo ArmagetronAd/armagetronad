@@ -1145,10 +1145,10 @@ void init_game_camera(eGrid *grid){
             // se_PauseGameTimer(true);
 
             ePlayer::PlayerConfig(i)->cam=new gCamera(grid,
-                    ePlayer::PlayerViewport(i),
-                    p,
-                    ePlayer::PlayerConfig(i),
-                    CAMERA_SMART);
+                                          ePlayer::PlayerViewport(i),
+                                          p,
+                                          ePlayer::PlayerConfig(i),
+                                          CAMERA_SMART);
 
             lastTime_gameloop=lastTimeTimestep=0;
         }
@@ -1590,7 +1590,7 @@ void ConnectToServer(nServerInfoBase *server)
 
     REAL redirections = 0;
     double lastTime = tSysTimeFloat();
-    
+
     // check for redirection
     while( true )
     {
@@ -1889,9 +1889,9 @@ void MainMenu(bool ingame){
 
     if (ingame && sn_GetNetState()!=nCLIENT){
         reset=new uMenuItemFunction
-        (&game_menu,"$game_menu_reset_text",
-         "$game_menu_reset_help",
-         &StartNewMatch);
+              (&game_menu,"$game_menu_reset_text",
+               "$game_menu_reset_help",
+               &StartNewMatch);
     }
 
     uMenuItemFunction *settings1=NULL;
@@ -1913,10 +1913,10 @@ void MainMenu(bool ingame){
 
     if (!ingame){
         connect=new uMenuItemFunction
-        (&game_menu,
-         "$network_menu_text",
-         "$network_menu_help",
-         &net_game);
+                (&game_menu,
+                 "$network_menu_text",
+                 "$network_menu_help",
+                 &net_game);
 
         start= new uMenuItemFunction(&game_menu,"$game_menu_start_text",
                                      "$game_menu_start_help",&singlePlayer_game);
@@ -1958,20 +1958,20 @@ void MainMenu(bool ingame){
     if (ingame){
         if (sn_GetNetState()==nSTANDALONE)
             return_to_main=new uMenuItemFunction
-            (&MainMenu,"$game_menu_exit_text",
-             "$game_menu_exit_help",
-             &ret_to_MainMenu);
+                           (&MainMenu,"$game_menu_exit_text",
+                            "$game_menu_exit_help",
+                            &ret_to_MainMenu);
         else if (sn_GetNetState()==nCLIENT)
             return_to_main=new uMenuItemFunction
-            (&MainMenu,"$game_menu_disconnect_text",
-             "$game_menu_disconnect_help",
-             &ret_to_MainMenu);
+                           (&MainMenu,"$game_menu_disconnect_text",
+                            "$game_menu_disconnect_help",
+                            &ret_to_MainMenu);
         else
             return_to_main=new uMenuItemFunction
-            (&MainMenu,
-             "$game_menu_shutdown_text",
-             "game_menu_shutdown_help",
-             &ret_to_MainMenu);
+                           (&MainMenu,
+                            "$game_menu_shutdown_text",
+                            "game_menu_shutdown_help",
+                            &ret_to_MainMenu);
     }
 
 
@@ -1996,9 +1996,9 @@ void MainMenu(bool ingame){
 
     //   if (!ingame)
     se_PlayerMenu= new uMenuItemFunction
-    (&MainMenu,"$player_mainmenu_text",
-     "$player_mainmenu_help",
-     &sg_PlayerMenu);
+                   (&MainMenu,"$player_mainmenu_text",
+                    "$player_mainmenu_help",
+                    &sg_PlayerMenu);
 
     uMenuItemFunction *player_police=NULL;
     uMenuItemFunction *voting=NULL;
@@ -2045,8 +2045,8 @@ void MainMenu(bool ingame){
      "$misc_menu_help");
 
     sound = new uMenuItemFunction
-    (&Settings,"$sound_menu_text",
-     "$sound_menu_help",&se_SoundMenu);
+            (&Settings,"$sound_menu_text",
+             "$sound_menu_help",&se_SoundMenu);
 
     uMenuItemSubmenu subm
     (&Settings,&sg_screenMenu,

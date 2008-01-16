@@ -691,7 +691,7 @@ static void RInclude(std::istream& s)
         return;
     }
 
-        con << tOutput( "$config_rinclude_not_found", file );
+    con << tOutput( "$config_rinclude_not_found", file );
 }
 
 static tConfItemFunc s_RInclude("RINCLUDE",  &RInclude);

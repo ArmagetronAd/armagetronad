@@ -1885,17 +1885,17 @@ gParser::parseOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
         std::set<string> playerIdForThisTeam = (*iterTeamOwnership).second;
         int indexPlayer=0;
         for (std::set<string>::iterator iter = playerIdForThisTeam.begin();
-                iter != playerIdForThisTeam.end() && indexPlayer<ee->NumPlayers();
-                ++iter, ++indexPlayer) {
-            ePlayerNetID *aa = ee->Player(indexPlayer);
-            string playerId = (*iter);
-            // TODO
-            // HACK
-            // BOP
-            // The following might produce unexpected results should the same playerId be associated in many team
-            MapIdToGameId::value_type mapOwnerToInGameOwnerPair(playerId, aa->ID());
-            playerAsso.insert(mapOwnerToInGameOwnerPair);
-        }
+                    iter != playerIdForThisTeam.end() && indexPlayer<ee->NumPlayers();
+                    ++iter, ++indexPlayer) {
+                ePlayerNetID *aa = ee->Player(indexPlayer);
+                string playerId = (*iter);
+                // TODO
+                // HACK
+                // BOP
+                // The following might produce unexpected results should the same playerId be associated in many team
+                MapIdToGameId::value_type mapOwnerToInGameOwnerPair(playerId, aa->ID());
+                playerAsso.insert(mapOwnerToInGameOwnerPair);
+            }
         ++index;
         ++iterTeamOwnership;
     }
