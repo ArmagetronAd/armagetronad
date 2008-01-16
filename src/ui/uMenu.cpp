@@ -259,6 +259,11 @@ void uMenu::OnEnter(){
             yOffset+=menuTop-smallborder-YPos(menuentries-1);
 
 #ifndef DEDICATED
+        OnRender();
+
+        if (selected < 0 || selected >= items.Len())
+            selected = items.Len()-1;
+
         sr_ResetRenderState(true);
         items[selected]->RenderBackground();
 
@@ -468,6 +473,11 @@ void uMenu::GenericBackground(){
 // marks the menu for exit
 void uMenu::OnExit(){
     exitFlag=1;
+}
+
+//! called every frame before the menu is rendered
+void uMenu::OnRender()
+{
 }
 
 // *****************************************************

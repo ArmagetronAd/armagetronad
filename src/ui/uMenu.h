@@ -119,6 +119,9 @@ protected:
 
     //! marks the menu for exit
     virtual void OnExit();
+
+    //! called every frame before the menu is rendered
+    virtual void OnRender();
 };
 
 
