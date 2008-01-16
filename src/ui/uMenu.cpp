@@ -177,9 +177,6 @@ void uMenu::OnEnter(){
         st_DoToDo();
         tAdvanceFrame();
 
-        if (selected < 0 || selected >= items.Len())
-            selected = items.Len()-1;
-
         ts=tSysTimeFloat()-lastt;
         lastt=tSysTimeFloat();
         if (ts>.2) ts=.2;
@@ -225,6 +222,15 @@ void uMenu::OnEnter(){
                 nextrepeat = tSysTimeFloat() + repeatrate;
             }
         }
+
+        // we're about to render, last chance to make changes to the menu
+        OnRender();
+
+        // clamp cursor
+        if (selected < 0 )
+            selected = 0;
+        if ( selected >= items.Len())
+            selected = items.Len()-1;
 #endif
         // quit shortcut
         if ( quickexit )
@@ -259,11 +265,6 @@ void uMenu::OnEnter(){
             yOffset+=menuTop-smallborder-YPos(menuentries-1);
 
 #ifndef DEDICATED
-        OnRender();
-
-        if (selected < 0 || selected >= items.Len())
-            selected = items.Len()-1;
-
         sr_ResetRenderState(true);
         items[selected]->RenderBackground();
 
@@ -354,13 +355,13 @@ void uMenu::HandleEvent( SDL_Event event )
                 switch (event.key.keysym.sym){
 
                 case(SDLK_ESCAPE):
-                                repeat = false;
+                    repeat = false;
                     lastkey=tSysTimeFloat();
                     Exit();
                     break;
 
                 case(SDLK_UP):
-                                lastkey=tSysTimeFloat();
+                    lastkey=tSysTimeFloat();
                     selected++;
                     if (selected>=items.Len())
                         if (wrap)
