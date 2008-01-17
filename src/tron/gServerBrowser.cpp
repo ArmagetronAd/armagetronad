@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gGame.h"
 #include "gLogo.h"
 #include "gServerFavorites.h"
+#include "gFriends.h"
 
 #include "nServerInfo.h"
 #include "nNetwork.h"
@@ -67,12 +68,24 @@ class gServerInfo: public nServerInfo
 {
 public:
     gServerMenuItem *menuItem;
+	bool show; //for server browser hiding
 
-    gServerInfo():menuItem(NULL)
+    gServerInfo():menuItem(NULL), show(true)
     {
     };
 
     virtual ~gServerInfo();
+
+    // during browsing, the whole server list consists of gServerInfos
+    static gServerInfo * GetFirstServer()
+    {
+        return dynamic_cast< gServerInfo * >( nServerInfo::GetFirstServer() );
+    }
+
+    gServerInfo * Next()
+    {
+        return dynamic_cast< gServerInfo * >( nServerInfo::Next() );
+    }
 };
 
 nServerInfo* CreateGServer()
@@ -285,15 +298,20 @@ void gServerMenu::HandleEvent( SDL_Event event )
         switch (event.key.keysym.sym)
         {
         case(SDLK_LEFT):
-                        sortKey_ = ( sortKey_ + nServerInfo::KEY_MAX-1 ) % nServerInfo::KEY_MAX;
+            sortKey_ = ( sortKey_ + nServerInfo::KEY_MAX-1 ) % nServerInfo::KEY_MAX;
             Update();
             return;
             break;
         case(SDLK_RIGHT):
-                        sortKey_ = ( sortKey_ + 1 ) % nServerInfo::KEY_MAX;
+            sortKey_ = ( sortKey_ + 1 ) % nServerInfo::KEY_MAX;
             Update();
             return;
             break;
+		case(SDLK_m):
+			FriendsToggle();
+            Update();
+			return;
+			break;
         default:
             break;
         }
@@ -322,12 +340,17 @@ void gServerMenu::Update()
     // get currently selected server
     gServerMenuItem *item = NULL;
     if ( selected < items.Len() )
+    {
         item = dynamic_cast<gServerMenuItem*>(items(selected));
+    }
     gServerInfo* info = NULL;
     if ( item )
     {
         info = item->GetServer();
     }
+
+    // keep the cursor position relative to the top, if possible
+    int selectedFromTop = items.Len() - selected;
 
     ReverseItems();
 
@@ -335,16 +358,44 @@ void gServerMenu::Update()
     nServerInfo::Sort( nServerInfo::PrimaryKey( sortKey_ ) );
 
     int mi = 1;
-    nServerInfo *run = nServerInfo::GetFirstServer();
+    gServerInfo *run = gServerInfo::GetFirstServer();
+	bool oneFound = false; //so we can display all if none were found
     while (run)
     {
-        if (mi >= items.Len())
-            tNEW(gServerMenuItem)(this);
-
-        gServerMenuItem *item = dynamic_cast<gServerMenuItem*>(items(mi));
-        item->SetServer(run);
+		//check friend filter
+		if (getFriendsEnabled())
+		{
+			run->show = false;
+			int i;
+			tString userNames = run->UserNames();
+			tString* friends = getFriends();
+			for (i = MAX_FRIENDS; i>=0; i--)
+			{
+				if (run->Users() > 0 && friends[i].Len() > 1 && userNames.StrPos(friends[i]) >= 0)
+				{
+					oneFound = true;
+					run->show = true;
+				}
+			}
+		}
         run = run->Next();
-        mi ++;
+	}
+
+	run = gServerInfo::GetFirstServer();
+	{
+   		while (run)
+    	{
+			if (run->show || oneFound == false)
+			{
+	        	if (mi >= items.Len())
+    		        tNEW(gServerMenuItem)(this);
+
+    	    	gServerMenuItem *item = dynamic_cast<gServerMenuItem*>(items(mi));
+    	    	item->SetServer(run);
+	    	    mi++;
+			}
+        	run = run->Next();
+		}
     }
 
     if (items.Len() == 1)
@@ -358,7 +409,10 @@ void gServerMenu::Update()
 
     ReverseItems();
 
-    // set cursor to currently selected server
+    // keep the cursor position relative to the top, if possible ( calling function will handle the clamping )
+    selected = items.Len() - selectedFromTop;
+
+    // set cursor to currently selected server, if possible
     if ( info && info->menuItem )
     {
         selected = info->menuItem->GetID();

@@ -1361,6 +1361,13 @@ bookmarks_menu_name         Name
 bookmarks_menu_name_help    The name of the server. This is used only for display, not functional purposes.
 bookmarks_menu_connect      Connect to \1
 
+friends_menu				Mates
+friends_menu_help			Edit your mates.
+friends_enable				Mates Enabled
+friends_enable_help			Turn on/off friends mates filtering.
+friend_word					Mate
+friend_help					If a server has this name on its players list, it will show when filtering is on.
+
 #********************************************
 #********************************************
 #
@@ -2294,7 +2301,7 @@ network_master_servername	Server Name
 network_master_score		Score
 network_master_users		Users
 network_master_ping		Ping
-network_master_browserhelp	Press "Enter" to connect to this server, "p" to refresh a single server, "r" to refresh the whole list, "+/-" to set the score bias for this server, "cursor left/right" to change the sorting key, or "b" to add the server to your bookmarks.
+network_master_browserhelp	Press "Enter" to connect to this server, "p" to refresh a single server, "r" to refresh the whole list, "+/-" to set the score bias for this server, "cursor left/right" to change the sorting key, or "b" to add the server to your bookmarks. "m" toggles mates filtering.
 network_master_connecting	Connecting to \1...\n
 network_master_send		Sending my server info...\n
 network_master_reqlist		Requesting server list...\n

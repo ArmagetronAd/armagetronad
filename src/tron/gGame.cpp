@@ -57,6 +57,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gCamera.h"
 #include "gServerBrowser.h"
 #include "gServerFavorites.h"
+#include "gFriends.h"
 #include "gLogo.h"
 #include "gLanguageMenu.h"
 #include "nServerInfo.h"
@@ -2341,6 +2342,10 @@ void net_game(){
     uMenuItemFunction fav
     (&net_menu,"$bookmarks_menu",
      "$bookmarks_menu_help",&gServerFavorites::FavoritesMenu);
+
+    uMenuItemFunction bud
+    (&net_menu,"$friends_menu",
+     "$friends_menu_help",&gFriends::FriendsMenu);
 
     uMenuItemFunction opt
     (&net_menu,"$network_opts_text",
