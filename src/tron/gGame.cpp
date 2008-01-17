@@ -180,7 +180,7 @@ static int rotationtype = 0;
 static tSettingItem<int> conf_rotationtype("ROTATION_TYPE",rotationtype);
 
 // bool globalingame=false;
-tString sg_GetCurrentTime( char *szFormat )
+tString sg_GetCurrentTime( char const * szFormat )
 {
     char szTemp[128];
     time_t     now;
@@ -191,7 +191,7 @@ tString sg_GetCurrentTime( char *szFormat )
     return tString(szTemp);
 }
 
-void sg_PrintCurrentTime( char *szFormat )
+void sg_PrintCurrentTime( char const * szFormat )
 {
     con << sg_GetCurrentTime(szFormat);
 }
@@ -1823,7 +1823,7 @@ void net_game(){
      "$network_menu_lan_help",&gServerBrowser::BrowseLAN);
 
     gNetIdler idler;
-    rSysDep::StartNetSyncThread( &idler );
+    // rSysDep::StartNetSyncThread( &idler );
     net_menu.Enter();
     rSysDep::StopNetSyncThread();
 #endif
@@ -1939,7 +1939,7 @@ void MainMenu(bool ingame){
     if (ingame)
         sg_IngameMenu = &MainMenu;
 
-    char *extitle,*exhelp;
+    char const * extitle,* exhelp;
     if (!ingame){
         extitle="$main_menu_exit_text";
         exhelp="$main_menu_exit_help";
@@ -2060,7 +2060,7 @@ void MainMenu(bool ingame){
     uMenuItemSubmenu *gamemenuitem = NULL;
     if (sn_GetNetState() != nCLIENT)
     {
-        char *gamehelp;
+        char const * gamehelp;
         if (!ingame)
             gamehelp="$game_menu_main_help";
         else

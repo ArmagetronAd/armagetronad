@@ -68,7 +68,7 @@ class gServerInfo: public nServerInfo
 {
 public:
     gServerMenuItem *menuItem;
-	bool show; //for server browser hiding
+    bool show; //for server browser hiding
 
     gServerInfo():menuItem(NULL), show(true)
     {
@@ -298,20 +298,20 @@ void gServerMenu::HandleEvent( SDL_Event event )
         switch (event.key.keysym.sym)
         {
         case(SDLK_LEFT):
-            sortKey_ = ( sortKey_ + nServerInfo::KEY_MAX-1 ) % nServerInfo::KEY_MAX;
+                        sortKey_ = ( sortKey_ + nServerInfo::KEY_MAX-1 ) % nServerInfo::KEY_MAX;
             Update();
             return;
             break;
         case(SDLK_RIGHT):
-            sortKey_ = ( sortKey_ + 1 ) % nServerInfo::KEY_MAX;
+                        sortKey_ = ( sortKey_ + 1 ) % nServerInfo::KEY_MAX;
             Update();
             return;
             break;
-		case(SDLK_m):
-			FriendsToggle();
+        case(SDLK_m):
+                        FriendsToggle();
             Update();
-			return;
-			break;
+            return;
+            break;
         default:
             break;
         }
@@ -359,43 +359,43 @@ void gServerMenu::Update()
 
     int mi = 1;
     gServerInfo *run = gServerInfo::GetFirstServer();
-	bool oneFound = false; //so we can display all if none were found
+    bool oneFound = false; //so we can display all if none were found
     while (run)
     {
-		//check friend filter
-		if (getFriendsEnabled())
-		{
-			run->show = false;
-			int i;
-			tString userNames = run->UserNames();
-			tString* friends = getFriends();
-			for (i = MAX_FRIENDS; i>=0; i--)
-			{
-				if (run->Users() > 0 && friends[i].Len() > 1 && userNames.StrPos(friends[i]) >= 0)
-				{
-					oneFound = true;
-					run->show = true;
-				}
-			}
-		}
+        //check friend filter
+        if (getFriendsEnabled())
+        {
+            run->show = false;
+            int i;
+            tString userNames = run->UserNames();
+            tString* friends = getFriends();
+            for (i = MAX_FRIENDS; i>=0; i--)
+            {
+                if (run->Users() > 0 && friends[i].Len() > 1 && userNames.StrPos(friends[i]) >= 0)
+                {
+                    oneFound = true;
+                    run->show = true;
+                }
+            }
+        }
         run = run->Next();
-	}
+    }
 
-	run = gServerInfo::GetFirstServer();
-	{
-   		while (run)
-    	{
-			if (run->show || oneFound == false)
-			{
-	        	if (mi >= items.Len())
-    		        tNEW(gServerMenuItem)(this);
+    run = gServerInfo::GetFirstServer();
+    {
+        while (run)
+        {
+            if (run->show || oneFound == false)
+            {
+                if (mi >= items.Len())
+                    tNEW(gServerMenuItem)(this);
 
-    	    	gServerMenuItem *item = dynamic_cast<gServerMenuItem*>(items(mi));
-    	    	item->SetServer(run);
-	    	    mi++;
-			}
-        	run = run->Next();
-		}
+                gServerMenuItem *item = dynamic_cast<gServerMenuItem*>(items(mi));
+                item->SetServer(run);
+                mi++;
+            }
+            run = run->Next();
+        }
     }
 
     if (items.Len() == 1)
@@ -760,9 +760,9 @@ void gBrowserMenuItem::RenderBackground()
 #ifndef DEDICATED
     rTextField::SetDefaultColor( tColor(.8,.3,.3,1) );
 
-	tString sn2 = tString(tOutput("$network_master_servername"));
-	if (getFriendsEnabled()) //display that friends filter is on
-		sn2 << " - " << tOutput("$friends_enable");
+    tString sn2 = tString(tOutput("$network_master_servername"));
+    if (getFriendsEnabled()) //display that friends filter is on
+        sn2 << " - " << tOutput("$friends_enable");
 
     static_cast<gServerMenu*>(menu)->Render(.62,
                                             sn2,
@@ -813,7 +813,7 @@ gServerInfo *gServerMenuItem::GetServer()
     return server;
 }
 
-static char *sg_HelpText = "$network_master_browserhelp";
+static char const * sg_HelpText = "$network_master_browserhelp";
 
 gServerMenuItem::gServerMenuItem(gServerMenu *men)
         :gBrowserMenuItem(men, sg_HelpText), server(NULL), lastPing_(-100), favorite_(false)

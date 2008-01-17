@@ -739,7 +739,7 @@ tString tString::SubStr( const int start ) const
 }
 
 // helper for ToInt and ToFloat
-template< class T > void ToT( tString const & source, T & target, tString::size_type pos, char * name )
+template< class T > void ToT( tString const & source, T & target, tString::size_type pos, char const * name )
 {
     if ( pos > source.Size() )
         pos = source.Size();

@@ -40,7 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // #include <unistd.h>
 #endif
 
-#define tVERIFY( x ) { if ( !( x ) ){ char* mess = "Assertion " #x " failed";  tERR_ERROR_INT( mess ); } }
+#define tVERIFY( x ) { if ( !( x ) ){ char const * mess = "Assertion " #x " failed";  tERR_ERROR_INT( mess ); } }
 
 #ifdef DEBUG
 
@@ -60,9 +60,9 @@ int st_debugValid(tLevel l,tChannel c);
 
 #define tERR_FLOW_LOW() if(st_debugValid(very_low,flow)) std::cout  <<  std::setw(30) << __PRETTY_FUNCTION__  << '\n'
 
-#define tASSERT( x ) { if ( !( x ) ){ char* mess = "Assertion " #x " failed";  tERR_ERROR_INT( mess ); } }
+#define tASSERT( x ) { if ( !( x ) ){ char const * mess = "Assertion " #x " failed";  tERR_ERROR_INT( mess ); } }
 
-#define tASSERT_EVAL( x ) { if ( !( x ) ){ char* mess = "Assertion " #x " failed";  tERR_ERROR_INT( mess ); } }
+#define tASSERT_EVAL( x ) { if ( !( x ) ){ char const * mess = "Assertion " #x " failed";  tERR_ERROR_INT( mess ); } }
 
 #else  /* DEBUG */
 #define tERR_DUMP(level,stream,stuff) 

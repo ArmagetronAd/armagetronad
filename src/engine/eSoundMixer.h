@@ -72,8 +72,8 @@ enum SoundEffect {
     CYCLE_GRIND_WALL
 };
 
-extern char* MusicModeString[];
-extern char* SoundEffectString[];
+extern char const * MusicModeString[];
+extern char const * SoundEffectString[];
 
 // Forward declarations from other files
 class eGameObject;

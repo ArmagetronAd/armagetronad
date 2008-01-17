@@ -80,7 +80,7 @@ public:
         // for it's ack?
     bool syncReq:
         1;              // should a sync message be sent?
-    int  acksPending:
+    unsigned int  acksPending:
         4;          // how many messages are underway?
 
         nKnowsAboutInfo(){

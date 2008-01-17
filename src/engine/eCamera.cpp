@@ -185,7 +185,7 @@ uActionCamera eCamera::se_zoomIn("ZOOM_IN",
 class uGlanceAction : public uActionCamera {
 public:
     eCoord const relDir;
-    uGlanceAction(char* const name, int priority, eCoord const relativeDirection)
+    uGlanceAction(char const * name, int priority, eCoord const relativeDirection)
             : uActionCamera(name, priority), relDir(relativeDirection) {}
 };
 

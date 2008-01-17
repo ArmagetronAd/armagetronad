@@ -175,7 +175,7 @@ static rViewportConfiguration four_vp(&rViewport::s_viewportTopLeft,
 rViewportConfiguration *rViewportConfiguration::s_viewportConfigurations[]={
             &single_vp,&two_vp,&two_b,&three_a,&three_b,&four_vp};
 
-char *rViewportConfiguration::s_viewportConfigurationNames[]=
+char const * rViewportConfiguration::s_viewportConfigurationNames[]=
     {"$viewport_conf_name_0",
      "$viewport_conf_name_1",
      "$viewport_conf_name_2",

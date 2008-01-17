@@ -756,7 +756,7 @@ tList<rITexture> rITexture::s_textures_;
 
 int rTextureGroups::TextureMode[rTextureGroups::TEX_GROUPS];
 
-char *rTextureGroups::TextureGroupDescription[rTextureGroups::TEX_GROUPS]=
+char const * rTextureGroups::TextureGroupDescription[rTextureGroups::TEX_GROUPS]=
     {
         "$texture_mode_0_help",
         "$texture_mode_1_help",

@@ -631,7 +631,8 @@ nWaitForAck::nWaitForAck(nMessage* m,int rec)
     if (message->Descriptor()!=s_Acknowledge.ID())
         sn_Connections[receiver].ackPending++;
     else
-        tASSERT(false);
+        tERR_ERROR("Should not wait for ack of an ack message itself.");
+
     //    sn_ackAckPending[receiver]++;
 #ifdef NET_DEBUG
     acks++;
@@ -677,7 +678,9 @@ nWaitForAck::~nWaitForAck(){
         sn_Connections[receiver].ReliableMessageSent();
     }
     else
-        tASSERT(false);
+    {
+        tERR_ERROR( "No message." );
+    }
     //    sn_ackAckPending[receiver]--;
 
     sn_pendingAcks.Remove(this,id);

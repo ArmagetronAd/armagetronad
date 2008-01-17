@@ -69,7 +69,7 @@ eSoundMixer by Dave Fancella
 // MusicModes mapped to strings
 // These need to appear in the exact order shown in the MusicMode enum!
 
-char* MusicModeString[] = {
+char const * MusicModeString[] = {
                               "Title track",
                               "GUI track",
                               "In-game track"
@@ -78,7 +78,7 @@ char* MusicModeString[] = {
 // Sound effects mapped to strings.  These need to appear in the exact order shown
 //   in the SoundEffect enum!
 
-char* SoundEffectString[] = {
+char const * SoundEffectString[] = {
                                 "Cycle turn",
                                 "Cycle explosion",
                                 "Announcer says 1",

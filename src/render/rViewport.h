@@ -102,7 +102,7 @@ public:
 
     static rViewportConfiguration *s_viewportConfigurations[];
     static const int               s_viewportNumConfigurations;
-    static char                   *s_viewportConfigurationNames[];
+    static char const *            s_viewportConfigurationNames[];
 
     static rViewportConfiguration *CurrentViewportConfiguration();
 

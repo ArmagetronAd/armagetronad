@@ -539,7 +539,7 @@ static tExtraConfigCommandLineAnalyzer s_extraAnalyzer;
 // configuration files to load. The first one found will be loaded, and
 // only the very first one will be written to. Use it to protect stable client's
 // config from the experimental client's wrath.
-char *st_userConfigs[] = { "user_3_0.cfg", "user.cfg", 0 };
+char const * st_userConfigs[] = { "user_3_0.cfg", "user.cfg", 0 };
 
 void st_LoadConfig()
 {
@@ -553,7 +553,7 @@ void st_LoadConfig()
 #endif
     {
         // load the first available user configuration file
-        char ** userConfig = st_userConfigs;
+        char const * const * userConfig = st_userConfigs;
         while ( *userConfig && !Load( var, *userConfig ) )
             userConfig++;
     }
