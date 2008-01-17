@@ -49,7 +49,7 @@ public:
     };
 
     static int TextureMode[TEX_GROUPS];                 //!< the OpenGL texture modes for the groubs
-    static char *TextureGroupDescription[TEX_GROUPS];   //!< descriptions for the groups
+    static char const * TextureGroupDescription[TEX_GROUPS];   //!< descriptions for the groups
 };
 
 //! wrapper for SDL surface

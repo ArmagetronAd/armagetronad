@@ -344,7 +344,7 @@ int uPlayerPrototype::Num(){return nextid;}
 //  Menuitem for input selection
 // *****************************************************
 
-static char *keyname(int sym){
+static char const * keyname(int sym){
 #ifndef DEDICATED
     if (sym<=SDLK_LAST)
         return SDL_GetKeyName(static_cast<SDLKey>(sym));
@@ -716,7 +716,7 @@ void su_ClearKeys()
 // Player binds
 // *****************
 
-static char *Player_keyword="PLAYER_BIND";
+static char const * Player_keyword="PLAYER_BIND";
 
 uBindPlayer::uBindPlayer(uAction *a,int p):uBind(a),ePlayer(p){}
 

@@ -219,7 +219,7 @@ bool tCommandLineData::Execute()
 //!
 // *******************************************************************************************
 
-bool tCommandLineParser::GetSwitch( char const * option, char * option_short )
+bool tCommandLineParser::GetSwitch( char const * option, char const * option_short )
 {
     if ( End() )
         return false;
@@ -248,7 +248,7 @@ bool tCommandLineParser::GetSwitch( char const * option, char * option_short )
 //!
 // *******************************************************************************************
 
-bool tCommandLineParser::GetOption( tString & target, char const * option, char * option_short )
+bool tCommandLineParser::GetOption( tString & target, char const * option, char const * option_short )
 {
     if ( End() )
         return false;

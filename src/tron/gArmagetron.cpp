@@ -453,6 +453,35 @@ void sg_SetIcon()
 #endif
 }
 
+class gAutoStringArray
+{
+public:
+    ~gAutoStringArray()
+    {
+        for ( std::vector< char * >::iterator i = strings.begin(); i != strings.end(); ++i )
+        {
+            free( *i );
+        }
+    }
+
+    char * Store( char const * s )
+    {
+        char * ret = strdup( s );
+        strings.push_back( ret );
+        return ret;
+    }
+private:
+    std::vector< char * > strings; // the stored raw C strings
+};
+
+// wrapper for putenv, taking care of the peculiarity that the argument
+// is kept in use for the rest of the program's lifetime
+void sg_PutEnv( char const * s )
+{
+    static gAutoStringArray store;
+    putenv( store.Store( s ) );
+}
+
 int main(int argc,char **argv){
     //std::cout << "enter\n";
     //  net_test();
@@ -571,14 +600,14 @@ int main(int argc,char **argv){
 #ifdef linux
             // Sam 5/23 - Don't ever use DGA, we don't need it for this game.
             if ( ! getenv("SDL_VIDEO_X11_DGAMOUSE") ) {
-                putenv("SDL_VIDEO_X11_DGAMOUSE=0");
+                sg_PutEnv( "SDL_VIDEO_X11_DGAMOUSE=0" );
             }
 #endif
 
 #ifdef WIN32
             // disable DirectX by default; it causes problems with some boards.
-            if (!use_directx && !getenv("SDL_VIDEODRIVER") ) {
-                putenv("SDL_VIDEODRIVER=windib");
+            if (!use_directx && !getenv( "SDL_VIDEODRIVER") ) {
+                sg_PutEnv( "SDL_VIDEODRIVER=windib" );
             }
 #endif
 

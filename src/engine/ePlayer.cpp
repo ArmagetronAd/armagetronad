@@ -503,7 +503,7 @@ void ePlayerNetID::PoliceMenu()
 
 #ifndef DEDICATED
 
-static char *default_instant_chat[]=
+static char const * default_instant_chat[]=
     {"/team \\",
      "/msg \\",
      "/me \\",

@@ -90,7 +90,7 @@ class ArmageTron_feature_menuitem: public uMenuItemSelection<int>{
     void NewChoice(uSelectItem<bool> *){};
     void NewChoice(char *,bool ){};
 public:
-    ArmageTron_feature_menuitem(uMenu *m,char *tit,const char *help,int &targ)
+    ArmageTron_feature_menuitem(uMenu *m,char const * tit,char const * help,int &targ)
             :uMenuItemSelection<int>(m,tit,help,targ){
         uMenuItemSelection<int>::NewChoice(
             "$feature_disabled_text",
@@ -114,7 +114,7 @@ class ArmageTron_texmode_menuitem: public uMenuItemSelection<int>{
     void NewChoice(uSelectItem<bool> *){};
     void NewChoice(char *,bool ){};
 public:
-    ArmageTron_texmode_menuitem(uMenu *m,char *tit,int &targ,
+    ArmageTron_texmode_menuitem(uMenu *m,char const * tit,int &targ,
                                 bool font=false)
             :uMenuItemSelection<int>
     (m,tit,"$texture_menuitem_help",targ){

@@ -77,7 +77,7 @@ public:
     bool nextSyncAck:1;         // should the next sync message wait
         // for it's ack?
     bool syncReq:1;              // should a sync message be sent?
-    int  acksPending:4;          // how many messages are underway?
+    unsigned int acksPending:4;  // how many messages are underway?
 
         nKnowsAboutInfo(){
             memset(this, 0, sizeof(nKnowsAboutInfo) );

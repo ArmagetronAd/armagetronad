@@ -843,7 +843,7 @@ gServerInfo *gServerMenuItem::GetServer()
     return server;
 }
 
-static char *sg_HelpText = "$network_master_browserhelp";
+static char const * sg_HelpText = "$network_master_browserhelp";
 
 gServerMenuItem::gServerMenuItem(gServerMenu *men)
         :gBrowserMenuItem(men, sg_HelpText), server(NULL), lastPing_(-100), favorite_(false)

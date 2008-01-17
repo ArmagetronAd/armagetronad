@@ -197,7 +197,7 @@ static int         checksum_bytes[MAXCHECKSUM];
 #endif
 
 
-static char *leakname="leak.log";
+static char const *leakname="leak.log";
 static bool checkleaks=true;
 static const char *fileName="XXX";
 static const char *classname="XXX";
