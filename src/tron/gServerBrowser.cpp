@@ -116,7 +116,7 @@ public:
     virtual void HandleEvent( SDL_Event event );
 
     void Render(REAL y,
-                const tOutput &servername, const tOutput &score,
+                const tString &servername, const tOutput &score,
                 const tOutput &users     , const tOutput &ping);
 
     void Render(REAL y,
@@ -515,7 +515,7 @@ void gServerMenu::Render(REAL y,
 }
 
 void gServerMenu::Render(REAL y,
-                         const tOutput &servername, const tOutput &score,
+                         const tString &servername, const tOutput &score,
                          const tOutput &users     , const tOutput &ping)
 {
     tColoredString highlight, normal;
@@ -790,8 +790,12 @@ void gBrowserMenuItem::RenderBackground()
 #ifndef DEDICATED
     rTextField::SetDefaultColor( tColor(.8,.3,.3,1) );
 
+	tString sn2 = tString(tOutput("$network_master_servername"));
+	if (getFriendsEnabled()) //display that friends filter is on
+		sn2 << " - " << tOutput("$friends_enable");
+
     static_cast<gServerMenu*>(menu)->Render(.62,
-                                            tOutput("$network_master_servername"),
+                                            sn2,
                                             tOutput("$network_master_score"),
                                             tOutput("$network_master_users"),
                                             tOutput("$network_master_ping"));
