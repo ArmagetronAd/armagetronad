@@ -1950,7 +1950,7 @@ static tConfItemLine sn_roundCcM1_ci("ROUND_CONSOLE_MESSAGE",sg_roundConsoleMess
 
 static bool sg_RequestedDisconnection = false;
 
-static void sg_NetworkError( const tOutput& title, const tOutput& message, REAL timeout )
+static bool sg_NetworkError( const tOutput& title, const tOutput& message, REAL timeout )
 {
     tOutput message2 ( message );
 
@@ -1968,7 +1968,7 @@ static void sg_NetworkError( const tOutput& title, const tOutput& message, REAL 
         message2.Append( tOutput( "$network_redirect", redirect->GetConnectionName(), (int)redirect->GetPort() ) );
     }
 
-    tConsole::Message( title, message2, timeout );
+    return tConsole::Message( title, message2, timeout );
 }
 
 // revert settings to defaults in the current scope
@@ -2001,7 +2001,8 @@ void sg_Receive()
     }
 }
 
-void ConnectToServerCore(nServerInfoBase *server)
+// return code: false if there was an error or abort
+bool ConnectToServerCore(nServerInfoBase *server)
 {
     tASSERT( server );
 
@@ -2053,7 +2054,7 @@ void ConnectToServerCore(nServerInfoBase *server)
 #ifndef DEDICATED
         se_SoundUnlock();
 #endif
-        return;
+        return false;
         break;
 
     case nDENIED:
@@ -2061,7 +2062,7 @@ void ConnectToServerCore(nServerInfoBase *server)
 #ifndef DEDICATED
         se_SoundUnlock();
 #endif
-        return;
+        return false;
         break;
     }
 
@@ -2102,16 +2103,18 @@ void ConnectToServerCore(nServerInfoBase *server)
         }
     }
 
+    bool ret = true;
+
     if (!sg_RequestedDisconnection && !uMenu::quickexit)
         switch (sn_GetLastError())
         {
         case nOK:
-            sg_NetworkError("$network_message_abortconn_title",
-                            "$network_message_abortconn_inter", 20);
+            ret = sg_NetworkError("$network_message_abortconn_title",
+                                  "$network_message_abortconn_inter", 20);
             break;
         default:
-            sg_NetworkError("$network_message_lostconn_title",
-                            "$network_message_lostconn_inter", 20);
+            ret = sg_NetworkError("$network_message_lostconn_title",
+                                  "$network_message_lostconn_inter", 20);
             break;
         }
 
@@ -2125,17 +2128,19 @@ void ConnectToServerCore(nServerInfoBase *server)
     ePlayerNetID::ClearAll();
 
     sr_textOut=to;
+
+    return ret;
 }
 
 void ConnectToServer(nServerInfoBase *server)
 {
-    ConnectToServerCore( server );
+    bool okToRedirect = ConnectToServerCore( server );
 
-    REAL redirections = 0;
-    double lastTime = tSysTimeFloat();
+    // REAL redirections = 0;
+    // double lastTime = tSysTimeFloat();
 
     // check for redirection
-    while( true )
+    while( okToRedirect )
     {
         std::auto_ptr< nServerInfoBase > redirectTo( sn_GetRedirectTo() );
 
@@ -2145,8 +2150,9 @@ void ConnectToServer(nServerInfoBase *server)
             break;
         }
 
-        ConnectToServerCore( redirectTo.get() );
+        okToRedirect = ConnectToServerCore( redirectTo.get() );
 
+        /*
         // redirection spam chain protection, allow one redirection every 30 seconds. Should
         // be short enough to allow hacky applications (server-to-server teleport), but
         // long enough to allow players to escape via the menu or at least shift-esc.
@@ -2164,6 +2170,7 @@ void ConnectToServer(nServerInfoBase *server)
         REAL dt = newTime - lastTime;
         lastTime = newTime;
         redirections *= 1/(1 + dt * maxRedirections * timeout );
+        */
     }
 }
 

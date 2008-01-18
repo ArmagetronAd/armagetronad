@@ -1037,8 +1037,8 @@ void uCallbackMenuBackground::MenuBackground(){
 }
 
 
-
-void uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL to){
+// return value: false only if the user pressed ESC
+bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL to){
 #ifdef DEDICATED
     con << message << ":\n";
     con << interpretation << '\n';
@@ -1103,6 +1103,8 @@ void uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 case SDLK_DOWN:
                     offset += 1;
                     continue;
+                case SDLK_ESCAPE:
+                    return false;
                 default:
                     break;
                 }
@@ -1163,5 +1165,7 @@ void uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
 
     sr_textOut = textOutBack;
 #endif
+
+    return true;
 }
 

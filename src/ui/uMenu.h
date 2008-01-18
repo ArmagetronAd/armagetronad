@@ -106,7 +106,7 @@ public:
     }
 
     // print a big message and a small interpretation
-    static void Message(const tOutput& message, const tOutput& interpretation, REAL timeout = -1);
+    static bool Message(const tOutput& message, const tOutput& interpretation, REAL timeout = -1);
 
     //! returns whether there is currently an active menu
     static bool MenuActive();

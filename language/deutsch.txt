@@ -2237,7 +2237,7 @@ network_login_sync2           Nochmal Synchronisieren...\n
 network_login_done            Fertig!\n
 
 network_kill_log              User \1 vom Server geworfen, Grund: \2\n
-network_redirect              \n\nDu wirst nun auf den Server \1:\2 weitergeleitet.\n
+network_redirect              \n\nDu wirst nun auf den Server \1:\2 weitergeleitet; du kannst das durch einen Druck auf ESC verhindern.\n
 network_kill_preface          Vom Server angegebener Grund:
 network_kill_maxidgrabber     Keine ObjektIDs mehr frei; Dein Client hatte die meisten davon für sich selbst belegt ( Bug? ).
 network_kill_maxiduser        Keine ObjektIDs mehr frei; Dein Client hatte die meisten davon belegt ( Bug? ).
