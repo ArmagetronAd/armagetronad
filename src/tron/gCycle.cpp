@@ -60,6 +60,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tMath.h"
 #include <stdlib.h>
 #include <fstream>
+#include <memory>
 
 #ifndef DEDICATED
 #define DONTDOIT

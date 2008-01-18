@@ -43,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tResourceManager.h"
 
 #include <vector>
+#include <string.h>
 
 bool           tConfItemBase::printChange=true;
 bool           tConfItemBase::printErrors=true;

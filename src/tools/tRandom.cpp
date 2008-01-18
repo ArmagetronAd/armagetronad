@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include    "tError.h"
 #include    "tRecorder.h"
+#include    <cstdlib>
 
 #undef 	INLINE_DEF
 #define INLINE_DEF

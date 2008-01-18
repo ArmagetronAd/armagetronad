@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConsole.h"
 #include "tSysTime.h"
 #include <set>
+#include <string.h>
 
 nConfItemBase::nConfItemBase()
         :tConfItemBase(""), lastChangeTime_(-10000), lastChangeMessage_(0), watcher_(0){}

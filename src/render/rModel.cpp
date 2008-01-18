@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConfiguration.h"
 #include "tLocale.h"
 #include "rGL.h"
-
+#include <string.h>
 
 static rModel *sr_ModelAnchor;
 

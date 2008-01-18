@@ -35,7 +35,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <memory>
 #include <string>
-
+#include <string.h>
+  
 static nAuthentication::UserPasswordCallback* S_UserPasswordCallback = NULL;
 static nAuthentication::LoginResultCallback*  S_LoginResultCallback  = NULL;
 

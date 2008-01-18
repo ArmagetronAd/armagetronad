@@ -27,6 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "aa_config.h"
 #include <iostream>
+#include <string.h>
+#include <cstdlib>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif

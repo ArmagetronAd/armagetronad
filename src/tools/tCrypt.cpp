@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tMemManager.h"
 
 #include <string>
+#include <string.h>
 
 class tCryptDummy: public tCrypt
 {

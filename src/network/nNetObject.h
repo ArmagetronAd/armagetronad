@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nNetwork.h"
 #include "tArray.h"
 #include "tConsole.h"
+#include <string.h>
 
 class nObserver;
 

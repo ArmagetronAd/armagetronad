@@ -44,6 +44,7 @@ the executable is not distributed).
 
 #include <stdlib.h>
 #include <string>
+#include <string.h>
 
 bool nKrawall::MayRequirePassword(tString& adress, unsigned int port)
 {

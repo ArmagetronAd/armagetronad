@@ -43,6 +43,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tRandom.h"
 #include "tRecorder.h"
 #include <stdlib.h>
+#include <cstdlib>
+#include <memory>
 
 #define AI_REACTION          0 
 #define AI_EMERGENCY         1 
