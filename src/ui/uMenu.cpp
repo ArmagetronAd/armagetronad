@@ -183,6 +183,11 @@ void uMenu::OnEnter(){
 
         menuentries=items.Len();
 
+        // clamp cursor
+        if (selected < 0 )
+            selected = 0;
+        if ( selected >= items.Len())
+            selected = items.Len()-1;
 
 #ifndef DEDICATED
         {
