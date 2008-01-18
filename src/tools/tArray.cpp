@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdlib.h>
 #include <string>
 #include "tArray.h"
+#include <string.h>
 
 void GrowingArrayBase::ComplainIfFull(){
     if (Len()>0)

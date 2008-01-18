@@ -43,6 +43,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRandom.h"
 #include "tRecorder.h"
 #include <stdlib.h>
+#include <cstdlib>
+#include <memory>
 
 #define AI_REACTION          0 
 #define AI_EMERGENCY         1 
