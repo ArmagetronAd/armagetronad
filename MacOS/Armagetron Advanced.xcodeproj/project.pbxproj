@@ -14,6 +14,7 @@
 				9B8A49B80D3708A30094FB81 /* ShellScript */,
 			);
 			dependencies = (
+				64956B850D4112C700C501B8 /* PBXTargetDependency */,
 			);
 			name = "Create Dedicated Release";
 			productName = "Create Release";
@@ -397,6 +398,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		64956B840D4112C700C501B8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8C11CA41095A268E007AE0EA /* Armagetron Advanced Dedicated */;
+			remoteInfo = "Armagetron Advanced Dedicated";
+		};
 		9B8A49C50D3709270094FB81 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -1776,6 +1784,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		64956B850D4112C700C501B8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8C11CA41095A268E007AE0EA /* Armagetron Advanced Dedicated */;
+			targetProxy = 64956B840D4112C700C501B8 /* PBXContainerItemProxy */;
+		};
 		9B8A49C60D3709270094FB81 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8D1107260486CEB800E47090 /* Armagetron Advanced */;
