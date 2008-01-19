@@ -507,6 +507,19 @@ AC_MSG_ERROR([
 
 fi
 
+dnl *************************************************
+dnl         math
+dnl *************************************************
+
+if test $MATHLIB ; then
+AC_CHECK_LIB($MATHLIB, exp,,
+	AC_MSG_WARN([
+	You do not have the standard math library libm. Check
+	config.log for error messages and fix that.]
+	)
+)
+fi
+
 if test x$build_regular = xfalse; then
  AC_MSG_RESULT([
  
@@ -527,20 +540,6 @@ if test x$enable_dirty = xyes; then
   initialization method])
 fi
 
-
-
-dnl *************************************************
-dnl         math
-dnl *************************************************
-
-if test $MATHLIB ; then
-AC_CHECK_LIB($MATHLIB, exp,,
-	AC_MSG_WARN([
-	You do not have the standard math library libm. Check
-	config.log for error messages and fix that.]
-	)
-)
-fi
 
 dnl *************************************************
 dnl         SDL
