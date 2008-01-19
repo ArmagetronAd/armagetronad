@@ -50,6 +50,9 @@ Changes since 0.2.8.2:
   console
 
   Featurelets:
+- A subculture list for server groups that are not managed by our main master servers
+- A friends list and filter for the server browser that shows you only servers with
+  your friends on them.
 - The client now can handle network traffic while it is waiting for the graphics
   card to swap buffers.
 - The dedicated server no longer uses a fixed delay, but a select() call (that
