@@ -247,7 +247,26 @@ static INTFUNCPTR sg_Connect = &sg_ConnectFavorite;
 static gServerFavoritesHolder * sg_holder = &sg_favoriteHolder;
 // current minimal port accessible in the menu
 static int sg_lowPort = gServerBrowser::lowPort;
+// current language id prefix
+static char * sg_languageIDPrefix = "$bookmarks_";
 // yeah, this could all be more elegant.
+
+// generates a language string item fitting the current situation
+static void sg_AddBookmarkString( char const * suffix, tOutput & addTo )
+{
+    std::ostringstream s;
+    s << sg_languageIDPrefix;
+    s << suffix;
+    addTo << s.str().c_str();
+}
+
+// generates a language string item fitting the current situation
+static tOutput sg_GetBookmarkString( char const * suffix )
+{
+    tOutput ret;
+    sg_AddBookmarkString( suffix, ret );
+    return ret;
+}
 
 //! conglomerate of menus and entries for custom connect
 class gCustomConnectEntries
@@ -257,9 +276,9 @@ public:
     {
         // prepare output reading "Edit <server name>"
         // create menu items (autodeleted when the edit menu is killed)
-        tNEW(uMenuItemFunctionInt) ( menu,"$network_custjoin_connect_text" ,"$network_custjoin_connect_help", sg_Connect, fav.GetIndex() );
+        tNEW(uMenuItemFunctionInt) ( menu, sg_GetBookmarkString( "menu_edit_connect_text" ), sg_GetBookmarkString( "menu_edit_connect_help" ), sg_Connect, fav.GetIndex() );
         tNEW(uMenuItemInt)         ( menu,"$network_custjoin_port_text","$network_custjoin_port_help", fav.port_, sg_lowPort, gServerBrowser::highPort );
-        tNEW(uMenuItemString)      ( menu,"$bookmarks_menu_address","$bookmarks_menu_address_help",fav.address_);
+        tNEW(uMenuItemString)      ( menu,sg_GetBookmarkString( "menu_address" ),sg_GetBookmarkString( "menu_address_help" ),fav.address_);
     }
 
     gCustomConnectEntries()
@@ -285,7 +304,6 @@ public:
     gServerFavoriteMenuEntries( gServerFavorite & fav, uMenu & edit_menu )
     {
         // prepare output reading "Edit <server name>"
-        tOutput fe;
         tString serverName = tColoredString::RemoveColors(fav.name_);
         if ( serverName == "" || serverName == "Empty" )
         {
@@ -294,8 +312,10 @@ public:
 
             serverName = s.str().c_str();
         }
+
+        tOutput fe;
         fe.SetTemplateParameter(1, serverName);
-        fe << "$bookmarks_menu_edit_slot";
+        sg_AddBookmarkString( "menu_edit_slot", fe );
 
         // create edit menu
         edit_     = tNEW(uMenu)                (fe);
@@ -303,7 +323,7 @@ public:
 
         Generate( fav, edit_ );
 
-        tNEW(uMenuItemString)      ( edit_,"$bookmarks_menu_name","$bookmarks_menu_name_help",fav.name_);
+        tNEW(uMenuItemString)      ( edit_,sg_GetBookmarkString( "menu_name" ),sg_GetBookmarkString( "menu_name_help" ),fav.name_);
     }
 
     ~gServerFavoriteMenuEntries()
@@ -325,7 +345,7 @@ static void sg_EditServers()
     int i;
 
     // create menu
-    uMenu edit_menu("$bookmarks_menu_edit");
+    uMenu edit_menu(sg_GetBookmarkString( "menu_edit" ) );
 
     // create menu entries
     gServerFavoriteMenuEntries * entries[ NUM_FAVORITES ];
@@ -372,11 +392,11 @@ static void sg_GenerateConnectionItems()
 
         if (fav.name_ != "" && fav.name_ != "Empty" && fav.address_ != "")
         {
-            tOutput fc; // Connect to "favn_name"
+            tOutput fc;
             fc.SetTemplateParameter(1,tColoredString::RemoveColors(fav.name_) );
-            fc << "$bookmarks_menu_connect";
+            sg_AddBookmarkString( "menu_connect", fc );
 
-            tNEW(uMenuItemFunctionInt)(sg_connectionMenu ,fc ,"$network_custjoin_connect_help" , sg_Connect, i );
+            tNEW(uMenuItemFunctionInt)(sg_connectionMenu ,fc ,sg_GetBookmarkString( "menu_edit_connect_help" ) , sg_Connect, i );
         }
     }
 }
@@ -409,10 +429,10 @@ static void sg_FavoritesMenu( INTFUNCPTR connect, gServerFavoritesHolder & holde
 
     sg_TransferCustomServer();
 
-    uMenu net_menu("$bookmarks_menu");
+    uMenu net_menu(sg_GetBookmarkString( "menu" ) );
     sg_connectionMenu = & net_menu;
 
-    uMenuItemFunction edit(&net_menu,"$bookmarks_menu_edit", "$bookmarks_menu_edit_help",&sg_EditServers);
+    uMenuItemFunction edit(&net_menu,sg_GetBookmarkString( "menu_edit" ), sg_GetBookmarkString( "menu_edit_help" ),&sg_EditServers);
     sg_connectionMenuItemKeep = & edit;
 
     sg_GenerateConnectionItems();
@@ -434,6 +454,7 @@ static void sg_FavoritesMenu( INTFUNCPTR connect, gServerFavoritesHolder & holde
 
 void gServerFavorites::FavoritesMenu( void )
 {
+    sg_languageIDPrefix = "$bookmarks_";
     sg_FavoritesMenu( &sg_ConnectFavorite, sg_favoriteHolder, gServerBrowser::lowPort );
 }
 
@@ -466,6 +487,7 @@ void gServerFavorites::AlternativesMenu( void )
 
     nServerInfo::DeleteAll();
 
+    sg_languageIDPrefix = "$masters_";
     sg_FavoritesMenu( &sg_AlternativeMaster, sg_masterHolder, gServerBrowser::lowPort - 10 );
 }
 

@@ -1334,9 +1334,6 @@ network_custjoin_port_help	The network port the server listens on; must match th
 network_custjoin_name_text	Server Name:
 network_custjoin_name_help	The name or IP adress of the server you wish to join
 
-network_custjoin_connect_text	Connect To Server
-network_custjoin_connect_help	Enter the game grid!
-
 #network host menu
 network_host_text		Host Network Game
 network_host_help		Start a server.
@@ -1352,17 +1349,30 @@ network_host_host_help		Enter the game grid! Other players are allowed to join y
 
 bookmarks_menu              Server Bookmarks
 bookmarks_menu_help         Add, edit, and connect to your server bookmarks.
-bookmarks_menu_edit         Edit
-bookmarks_menu_edit_help    Edit and add servers.
+bookmarks_menu_edit         Edit Bookmarks
+bookmarks_menu_edit_help    Edit and add favorite servers.
 bookmarks_menu_edit_slot    Edit \1
 bookmarks_menu_address      Address
 bookmarks_menu_address_help The address of the server to connect to.
 bookmarks_menu_name         Name
 bookmarks_menu_name_help    The name of the server. This is used only for display, not functional purposes.
 bookmarks_menu_connect      Connect to \1
+bookmarks_menu_edit_connect_text	Connect To Server
+bookmarks_menu_edit_connect_help	Enter the game grid!
+
 
 masters_menu                Subcultures
 masters_menu_help           Add, edit, and connect to alternative master servers for special purposes.
+masters_menu_edit           Edit Subcultures
+masters_menu_edit_help      Edit and add subcultures.
+masters_menu_edit_slot      Edit \1
+masters_menu_address        Address
+masters_menu_address_help   The address of the master server managing the subculture.
+masters_menu_name           Name
+masters_menu_name_help      The name of the subculture. This is used only for display, not functional purposes.
+masters_menu_connect        Browse \1
+masters_menu_edit_connect_text	Browse Subculture
+masters_menu_edit_connect_help	Opens a master server like server browser specialized for servers of this subculture.
 
 friends_menu				Mates
 friends_menu_help			Edit your mates.

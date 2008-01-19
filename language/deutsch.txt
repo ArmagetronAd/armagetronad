@@ -1340,9 +1340,6 @@ network_custjoin_port_help    Der Netzwerkport auf den der Server eingestellt is
 network_custjoin_name_text    Servername:
 network_custjoin_name_help    Der Rechnername oder die IP-Adresse des Rechners, auf dem der Server läuft
 
-network_custjoin_connect_text Verbindung aufbauen
-network_custjoin_connect_help Teleport zum Spieleraster!
-
 #network host menu
 network_host_text             Spiel leiten
 network_host_help             Startet einen Server; andere Spieler können sich dann verbinden.
@@ -1367,8 +1364,22 @@ bookmarks_menu_name           Name
 bookmarks_menu_name_help      Der Name des Servers. Wird nur für die Anzeige verwendet und hat keine Funktion, ist also frei wählbar.
 bookmarks_menu_connect        Verbindung zu \1 aufbauen
 
+bookmarks_menu_edit_connect_text Verbindung aufbauen
+bookmarks_menu_edit_connect_help Teleport zum Spieleraster!
+
 masters_menu                  Subkulturen
 masters_menu_help             Verbinde dich mit alternativen Gemeinschaften von Servern
+masters_menu_edit           Verwaltung
+masters_menu_edit_help      Verwaltet die Subkulturen
+masters_menu_edit_slot      Bearbeite \1
+masters_menu_address        Adresse
+masters_menu_address_help   Die Adresse des Master-Servers, der die Subkultur verwaltet
+masters_menu_name           Name
+masters_menu_name_help      Der Name der Subkultur. Wird nur für die Anzeige verwendet und hat keine Funktion, ist also frei wählbar.
+masters_menu_connect        Mit Subkultur \1 verbinden
+
+masters_menu_edit_connect_text Subkultur Betreten
+masters_menu_edit_connect_help Öffnet ein Master-Server-Browser-ähliches Menu mit allen Servern dieser Subkultur
 
 friends_menu                  Meine Freunde
 friends_menu_help             Trage hier deine Freude ein.
