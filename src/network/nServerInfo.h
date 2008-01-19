@@ -235,9 +235,9 @@ public:
     static nServerInfo* GetMasters();              //!< get the list of master servers
     static nServerInfo* GetRandomMaster();         //!< gets a random master server
 
-    static void GetFromMaster(nServerInfo *masterInfo=NULL);  // get all the basic infos from the master server
+    static void GetFromMaster(nServerInfoBase *masterInfo=NULL, char const * fileSuffix = NULL );  // get all the basic infos from the master server, stored in the server info file of the given suffix
 
-    static void TellMasterAboutMe(nServerInfo *masterInfo=NULL);  // dedicated server: tell master server about my existence
+    static void TellMasterAboutMe(nServerInfoBase *masterInfo=NULL);  // dedicated server: tell master server about my existence
 
     static void GetFromLAN(unsigned int pollBeginPort=4534, unsigned int pollEndPort=4544);                            // get all the basic infos from a LAN broadcast
 

@@ -1876,7 +1876,9 @@ void sg_HostGame(){
     }
 
     if (sg_TalkToMaster)
-        nServerInfo::TellMasterAboutMe();
+    {
+        nServerInfo::TellMasterAboutMe( gServerBrowser::CurrentMaster() );
+    }
 
     sn_SetNetState(nSERVER);
 
@@ -2345,6 +2347,9 @@ void net_game(){
     (&net_menu,"$network_custjoin_text",
      "$network_custjoin_help",&gServerFavorites::CustomConnectMenu);
 
+    uMenuItemFunction mas
+    (&net_menu,"$masters_menu",
+     "$masters_menu_help",&gServerFavorites::AlternativesMenu);
 
     uMenuItemFunction fav
     (&net_menu,"$bookmarks_menu",

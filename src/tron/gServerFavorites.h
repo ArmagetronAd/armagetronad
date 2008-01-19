@@ -35,6 +35,9 @@ class nServerInfoBase;
 class gServerFavorites
 {
 public:
+    //! open the alternative masters
+    static void AlternativesMenu();
+
     //! open the favorites menu
     static void FavoritesMenu();
 

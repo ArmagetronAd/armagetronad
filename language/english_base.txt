@@ -1352,14 +1352,17 @@ network_host_host_help		Enter the game grid! Other players are allowed to join y
 
 bookmarks_menu              Server Bookmarks
 bookmarks_menu_help         Add, edit, and connect to your server bookmarks.
-bookmarks_menu_edit         Edit Bookmarks
-bookmarks_menu_edit_help    Edit and add server bookmarks.
+bookmarks_menu_edit         Edit
+bookmarks_menu_edit_help    Edit and add servers.
 bookmarks_menu_edit_slot    Edit \1
 bookmarks_menu_address      Address
 bookmarks_menu_address_help The address of the server to connect to.
 bookmarks_menu_name         Name
 bookmarks_menu_name_help    The name of the server. This is used only for display, not functional purposes.
 bookmarks_menu_connect      Connect to \1
+
+masters_menu                Subcultures
+masters_menu_help           Add, edit, and connect to alternative master servers for special purposes.
 
 friends_menu				Mates
 friends_menu_help			Edit your mates.

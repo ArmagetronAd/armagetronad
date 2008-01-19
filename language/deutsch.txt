@@ -1359,13 +1359,16 @@ network_host_host_help        Teleport zum Spieleraster! Andere Spieler können s
 bookmarks_menu                Lieblings-Server
 bookmarks_menu_help           Verwaltet die Lieblingsserver und initiiert Verbindungen.
 bookmarks_menu_edit           Verwaltung
-bookmarks_menu_edit_help      Verwaltet die Lieblingsserver
+bookmarks_menu_edit_help      Verwaltet die Server
 bookmarks_menu_edit_slot      Bearbeite \1
 bookmarks_menu_address        Adresse
 bookmarks_menu_address_help   Die Adresse des Servers
 bookmarks_menu_name           Name
 bookmarks_menu_name_help      Der Name des Servers. Wird nur für die Anzeige verwendet und hat keine Funktion, ist also frei wählbar.
 bookmarks_menu_connect        Verbindung zu \1 aufbauen
+
+masters_menu                  Subkulturen
+masters_menu_help             Verbinde dich mit alternativen Gemeinschaften von Servern
 
 friends_menu                  Meine Freunde
 friends_menu_help             Trage hier deine Freude ein.

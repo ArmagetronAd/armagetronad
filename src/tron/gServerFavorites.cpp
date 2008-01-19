@@ -62,10 +62,10 @@ public:
 */
 typedef nServerInfoRedirect gServerInfoFavorite;
 
-static tString sg_ConfName( int ID, char const * name )
+static tString sg_ConfName( int ID, char const * prefix, char const * name )
 {
     std::stringstream s;
-    s << "BOOKMARK_" << ID+1 << name;
+    s << "BOOKMARK_" << prefix << ID+1 << name;
 
     return tString( s.str().c_str() );
 }
@@ -77,13 +77,13 @@ public:
     friend class gServerFavoritesHolder;
 
     //! constructor
-    gServerFavorite( int ID )
+    gServerFavorite( int ID, char const * prefix )
             : name_( "" )
             , port_( sn_defaultPort )
             , index_( ID )
-            , confName_( sg_ConfName( ID, "_NAME") ,name_ )
-            , confAddress_( sg_ConfName( ID, "_ADDRESS"), address_ )
-            , confPort( sg_ConfName( ID, "_PORT"), port_ )
+            , confName_( sg_ConfName( ID, prefix, "_NAME") ,name_ )
+            , confAddress_( sg_ConfName( ID, prefix, "_ADDRESS"), address_ )
+            , confPort( sg_ConfName( ID, prefix, "_PORT"), port_ )
     {
     };
 
@@ -119,12 +119,12 @@ private:
 class gServerFavoritesHolder
 {
 public:
-    gServerFavoritesHolder()
-            :custom(-1)
+    gServerFavoritesHolder( char const * prefix )
+    :custom(-1, prefix)
     {
         // generate favorites
         for (int i = NUM_FAVORITES-1; i>=0; --i )
-            favorites[i] = new gServerFavorite( i );
+            favorites[i] = new gServerFavorite( i, prefix );
     }
 
     ~gServerFavoritesHolder()
@@ -153,7 +153,10 @@ private:
 };
 
 // server bookmarks
-static gServerFavoritesHolder sg_holder;
+static gServerFavoritesHolder sg_favoriteHolder("");
+
+// alternative master servers
+static gServerFavoritesHolder sg_masterHolder("_MASTER");
 
 //! edit submenu item quitting the parent menu when it's done
 class gMenuItemEditSubmenu: public uMenuItemSubmenu
@@ -178,8 +181,31 @@ public:
 //! connect to a favorite server
 static void sg_ConnectFavorite( int ID )
 {
-    sg_holder.GetFavorite(ID).Connect();
+    sg_favoriteHolder.GetFavorite(ID).Connect();
 }
+
+//! browse servers on alternative master server
+static void sg_AlternativeMaster( int ID )
+{
+    // generate suffix for filename
+    std::stringstream suffix;
+    suffix << "_" << ID;
+
+    // fetch server info
+    gServerFavorite & favorite = sg_masterHolder.GetFavorite(ID);
+    gServerInfoFavorite fav( favorite.address_, favorite.port_ );
+
+    // browse master info
+    gServerBrowser::BrowseSpecialMaster( &fav, suffix.str().c_str() );
+}
+
+// current connection function
+static INTFUNCPTR sg_Connect = &sg_ConnectFavorite;
+// current server holder
+static gServerFavoritesHolder * sg_holder = &sg_favoriteHolder;
+// current minimal port accessible in the menu
+static int sg_lowPort = gServerBrowser::lowPort;
+// yeah, this could all be more elegant.
 
 //! conglomerate of menus and entries for custom connect
 class gCustomConnectEntries
@@ -189,8 +215,8 @@ public:
     {
         // prepare output reading "Edit <server name>"
         // create menu items (autodeleted when the edit menu is killed)
-        tNEW(uMenuItemFunctionInt) ( menu,"$network_custjoin_connect_text" ,"$network_custjoin_connect_help" ,&sg_ConnectFavorite, fav.GetIndex() );
-        tNEW(uMenuItemInt)         ( menu,"$network_custjoin_port_text","$network_custjoin_port_help", fav.port_, gServerBrowser::lowPort, gServerBrowser::highPort);
+        tNEW(uMenuItemFunctionInt) ( menu,"$network_custjoin_connect_text" ,"$network_custjoin_connect_help", sg_Connect, fav.GetIndex() );
+        tNEW(uMenuItemInt)         ( menu,"$network_custjoin_port_text","$network_custjoin_port_help", fav.port_, sg_lowPort, gServerBrowser::highPort );
         tNEW(uMenuItemString)      ( menu,"$bookmarks_menu_address","$bookmarks_menu_address_help",fav.address_);
     }
 
@@ -262,7 +288,7 @@ static void sg_EditServers()
     // create menu entries
     gServerFavoriteMenuEntries * entries[ NUM_FAVORITES ];
     for ( i = NUM_FAVORITES-1; i>=0; --i )
-        entries[i] = tNEW( gServerFavoriteMenuEntries )( sg_holder.GetFavorite(i), edit_menu );
+        entries[i] = tNEW( gServerFavoriteMenuEntries )( sg_holder->GetFavorite(i), edit_menu );
 
     // enter menu
     edit_menu.Enter();
@@ -300,7 +326,7 @@ static void sg_GenerateConnectionItems()
     // create new connection items
     for ( int i = NUM_FAVORITES-1; i>=0; --i )
     {
-        gServerFavorite & fav = sg_holder.GetFavorite(i);
+        gServerFavorite & fav = sg_holder->GetFavorite(i);
 
         if (fav.name_ != "" && fav.name_ != "Empty" && fav.address_ != "")
         {
@@ -308,7 +334,7 @@ static void sg_GenerateConnectionItems()
             fc.SetTemplateParameter(1,tColoredString::RemoveColors(fav.name_) );
             fc << "$bookmarks_menu_connect";
 
-            tNEW(uMenuItemFunctionInt)(sg_connectionMenu ,fc ,"$network_custjoin_connect_help" ,&sg_ConnectFavorite, i );
+            tNEW(uMenuItemFunctionInt)(sg_connectionMenu ,fc ,"$network_custjoin_connect_help" , sg_Connect, i );
         }
     }
 }
@@ -333,17 +359,12 @@ static void sg_TransferCustomServer()
     }
 }
 
-// *********************************************************************************************
-// *
-// *	FavoritesMenu
-// *
-// *********************************************************************************************
-//!
-//!
-// *********************************************************************************************
-
-void gServerFavorites::FavoritesMenu( void )
+static void sg_FavoritesMenu( INTFUNCPTR connect, gServerFavoritesHolder & holder, int lowPort )
 {
+    sg_Connect = connect;
+    sg_holder  = &holder;
+    sg_lowPort = lowPort;
+
     sg_TransferCustomServer();
 
     uMenu net_menu("$bookmarks_menu");
@@ -362,6 +383,34 @@ void gServerFavorites::FavoritesMenu( void )
 
 // *********************************************************************************************
 // *
+// *	FavoritesMenu
+// *
+// *********************************************************************************************
+//!
+//!
+// *********************************************************************************************
+
+void gServerFavorites::FavoritesMenu( void )
+{
+    sg_FavoritesMenu( &sg_ConnectFavorite, sg_favoriteHolder, gServerBrowser::lowPort );
+}
+
+// *********************************************************************************************
+// *
+// *	AlternativesMenu
+// *
+// *********************************************************************************************
+//!
+//!
+// *********************************************************************************************
+
+void gServerFavorites::AlternativesMenu( void )
+{
+    sg_FavoritesMenu( &sg_AlternativeMaster, sg_masterHolder, gServerBrowser::lowPort - 10 );
+}
+
+// *********************************************************************************************
+// *
 // *	CustomConnectMenu
 // *
 // *********************************************************************************************
@@ -376,7 +425,7 @@ void gServerFavorites::CustomConnectMenu( void )
     uMenu net_menu("$network_custjoin_text");
     sg_connectionMenu = & net_menu;
 
-    gServerFavorite & fav = sg_holder.GetFavorite(-1);
+    gServerFavorite & fav = sg_favoriteHolder.GetFavorite(-1);
 
     // create menu entries
     gCustomConnectEntries submenu( fav, &net_menu );
@@ -402,7 +451,7 @@ bool gServerFavorites::AddFavorite( nServerInfoBase const * server )
 
     for ( int i = NUM_FAVORITES-1; i>=0; --i )
     {
-        gServerFavorite & fav = sg_holder.GetFavorite(i);
+        gServerFavorite & fav = sg_favoriteHolder.GetFavorite(i);
 
         if (fav.name_ == "" || fav.name_ == "Empty")
         {
@@ -435,7 +484,7 @@ bool gServerFavorites::IsFavorite( nServerInfoBase const * server )
 
     for ( int i = NUM_FAVORITES-1; i>=0; --i )
     {
-        gServerFavorite & fav = sg_holder.GetFavorite(i);
+        gServerFavorite & fav = sg_favoriteHolder.GetFavorite(i);
 
         if (fav.name_ != "" && fav.name_ != "Empty" && fav.address_ == server->GetConnectionName() && fav.port_ == static_cast< int >( server->GetPort() ) )
         {

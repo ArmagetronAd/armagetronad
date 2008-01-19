@@ -1372,18 +1372,26 @@ nConnectError nServerInfo::Connect( nLoginType loginType, const nSocket * socket
 }
 */
 
-tString MasterFile()
+tString MasterFile( char const * suffix )
 {
-    tString ret ( "frommaster.srv" );
-    return ret;
+    std::ostringstream filename;
+    filename << "frommaster" << suffix << ".srv";
+    return tString( filename.str().c_str() );
 }
 
-void nServerInfo::GetFromMaster(nServerInfo *masterInfo)
+void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSuffix )
 {
     sn_AcceptingFromMaster = true;
 
+    if ( !fileSuffix )
+    {
+        fileSuffix = "";
+    }
+
+    bool multiMaster = false;
     if (!masterInfo)
     {
+        multiMaster = true;
         masterInfo = GetRandomMaster();
     }
 
@@ -1393,7 +1401,7 @@ void nServerInfo::GetFromMaster(nServerInfo *masterInfo)
     DeleteAll();
 
     // load all the servers we know
-    Load( tDirectories::Var(), MasterFile() );
+    Load( tDirectories::Var(), MasterFile( fileSuffix ) );
 
     // find the latest server we know about
     unsigned int latest=0;
@@ -1418,8 +1426,16 @@ void nServerInfo::GetFromMaster(nServerInfo *masterInfo)
         break;
     case nTIMEOUT:
         // delete the master and select a new one
-        delete masterInfo;
-        masterInfo = sn_masterList;
+        if ( multiMaster )
+        {
+            delete masterInfo;
+            masterInfo = sn_masterList;
+        }
+        else
+        {
+            masterInfo = 0;
+        }
+
         if ( masterInfo )
         {
             con << tOutput( "$network_master_timeout_retry" );
@@ -1474,7 +1490,7 @@ void nServerInfo::GetFromMaster(nServerInfo *masterInfo)
     o << "$network_master_finish";
     con << o;
 
-    Save(tDirectories::Var(), MasterFile());
+    Save(tDirectories::Var(), MasterFile( fileSuffix ));
 
     sn_SetNetState(nSTANDALONE);
 
@@ -1563,7 +1579,7 @@ void nServerInfo::GetFromLANContinuouslyStop()
     sn_SetNetState(nSTANDALONE);
 }
 
-void nServerInfo::TellMasterAboutMe(nServerInfo *masterInfo)
+void nServerInfo::TellMasterAboutMe(nServerInfoBase *masterInfo)
 {
     // don't reinitialize the network system
     nSocketResetInhibitor inhibitor;
@@ -1583,12 +1599,12 @@ void nServerInfo::TellMasterAboutMe(nServerInfo *masterInfo)
     if (!masterInfo)
     {
         // recurse, logging in to all masters
-        masterInfo = GetMasters();
+        nServerInfo * run = GetMasters();
 
-        while ( masterInfo )
+        while ( run )
         {
-            TellMasterAboutMe( masterInfo );
-            masterInfo = masterInfo->Next();
+            TellMasterAboutMe( run );
+            run = run->Next();
         }
 
         return;

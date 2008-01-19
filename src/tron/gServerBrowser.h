@@ -29,15 +29,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ArmageTron_ServerBrowser_H
 
 class nServerInfo;
+class nServerInfoBase;
 
 class gServerBrowser
 {
 public:
     static void BrowseFavorites();      // browse favorite servers
-    static void BrowseMaster();         // browse servers from master server
+    static void BrowseMaster();         // browse servers from the central master servers
+    static void BrowseSpecialMaster( nServerInfoBase * master, char const * prefix );    // browse servers from a special master server
     static void BrowseLAN();            // browse servers in the LAN
     static void BrowseServers();        // browse the servers currently in the list
     static void ConfigurationMenu();    // browser configuration menu
+
+    static nServerInfoBase * CurrentMaster(); // the currently active master server
 
     static int lowPort, highPort;
 };
