@@ -1,0 +1,8 @@
+ServerBegin
+connection  master1.armagetronad.net
+port        4532
+method      0
+key         0  
+tna         0
+name        Competitions
+ServerEnd

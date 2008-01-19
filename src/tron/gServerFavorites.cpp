@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "uMenu.h"
 
 #include "tConfiguration.h"
+#include "tDirectories.h"
 
 #include "gServerBrowser.h"
 #include "nServerInfo.h"
@@ -144,6 +145,47 @@ public:
         tASSERT( favorites[index] );
         return *favorites[index];
     }
+
+    bool AddFavorite( nServerInfoBase const * server )
+    {
+        if ( !server )
+            return false;
+        
+        for ( int i = NUM_FAVORITES-1; i>=0; --i )
+        {
+            gServerFavorite & fav = GetFavorite(i);
+            
+            if (fav.name_ == "" || fav.name_ == "Empty")
+            {
+                fav.name_ = tColoredString::RemoveColors(server->GetName());
+                fav.address_ = server->GetConnectionName();
+                fav.port_ = server->GetPort();
+                
+                return true;
+            }
+        }
+        
+        return false;
+}
+
+    bool IsFavorite( nServerInfoBase const * server )
+    {
+        if ( !server )
+            return false;
+        
+        for ( int i = NUM_FAVORITES-1; i>=0; --i )
+        {
+            gServerFavorite & fav = GetFavorite(i);
+            
+            if (fav.name_ != "" && fav.name_ != "Empty" && fav.address_ == server->GetConnectionName() && fav.port_ == static_cast< int >( server->GetPort() ) )
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
 private:
     // regular bookmarks
     gServerFavorite * favorites[NUM_FAVORITES];
@@ -406,6 +448,23 @@ void gServerFavorites::FavoritesMenu( void )
 
 void gServerFavorites::AlternativesMenu( void )
 {
+    // load default subcultures
+    nServerInfo::Load( tDirectories::Config(), "subcultures.srv" );
+
+    // add them
+    nServerInfo * run = nServerInfo::GetFirstServer();
+    while( run )
+    {
+        if ( !sg_masterHolder.IsFavorite( run ) )
+        {
+            sg_masterHolder.AddFavorite( run );
+        }
+
+        run = run->Next();
+    }
+
+    nServerInfo::DeleteAll();
+
     sg_FavoritesMenu( &sg_AlternativeMaster, sg_masterHolder, gServerBrowser::lowPort - 10 );
 }
 
@@ -446,24 +505,7 @@ void gServerFavorites::CustomConnectMenu( void )
 
 bool gServerFavorites::AddFavorite( nServerInfoBase const * server )
 {
-    if ( !server )
-        return false;
-
-    for ( int i = NUM_FAVORITES-1; i>=0; --i )
-    {
-        gServerFavorite & fav = sg_favoriteHolder.GetFavorite(i);
-
-        if (fav.name_ == "" || fav.name_ == "Empty")
-        {
-            fav.name_ = tColoredString::RemoveColors(server->GetName());
-            fav.address_ = server->GetConnectionName();
-            fav.port_ = server->GetPort();
-
-            return true;
-        }
-    }
-
-    return false;
+    return sg_favoriteHolder.AddFavorite( server );
 }
 
 // *********************************************************************************************
@@ -479,20 +521,7 @@ bool gServerFavorites::AddFavorite( nServerInfoBase const * server )
 
 bool gServerFavorites::IsFavorite( nServerInfoBase const * server )
 {
-    if ( !server )
-        return false;
-
-    for ( int i = NUM_FAVORITES-1; i>=0; --i )
-    {
-        gServerFavorite & fav = sg_favoriteHolder.GetFavorite(i);
-
-        if (fav.name_ != "" && fav.name_ != "Empty" && fav.address_ == server->GetConnectionName() && fav.port_ == static_cast< int >( server->GetPort() ) )
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return sg_favoriteHolder.IsFavorite( server );
 }
 
 
