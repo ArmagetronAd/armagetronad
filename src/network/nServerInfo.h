@@ -132,6 +132,7 @@ protected:
     bool		login2_;		// flag indicating whether the second version of the logic can be tried
 
     int     timesNotAnswered; // number of times the server did not answer to information queries recently
+    bool    stillOnMasterServer; // flag indicating whether the server is still listed on the master
 
     // human information
     tString name;             // the human name of the server ("Z-Man's Armagetron Server");

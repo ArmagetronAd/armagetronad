@@ -162,6 +162,7 @@ nServerInfo::nServerInfo()
         release_("pre_0.2.5"),
         login2_(true),
         timesNotAnswered(5),
+        stillOnMasterServer(false),
         name(""),
         users(0),
         maxUsers_(MAXCLIENTS),
@@ -1032,7 +1033,7 @@ void nServerInfo::GetSmallServerInfo(nMessage &m){
     }
 
     n->nServerInfoBase::CopyFrom( baseInfo );
-    //	n->timesNotAnswered = 1;
+    n->stillOnMasterServer = true;
 
     if (n->name.Len() <= 1)
         n->name <<  ToString( baseInfo );
@@ -1489,6 +1490,27 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
     o.SetTemplateParameter(1, sn_ServerCount);
     o << "$network_master_finish";
     con << o;
+
+    // remove servers that are no longer listed on the master
+    run = GetFirstServer();
+    while (run)
+    {
+        nServerInfo * next = run->Next();
+        if ( !run->stillOnMasterServer )
+        {
+            // if the server has still positive score bias, just reduce that
+            if ( run->scoreBias_ > 0 )
+            {
+                run->scoreBias_ -= 10;
+            }
+            else
+            {
+                // kill it
+                delete run;
+            }
+        }
+        run = next;
+    }
 
     Save(tDirectories::Var(), MasterFile( fileSuffix ));
 
@@ -2296,7 +2318,7 @@ nServerInfoAdmin* nServerInfoAdmin::GetAdmin()
 
 nServerInfoBase::nServerInfoBase()
         : connectionName_(""),
-        port_(0)
+          port_(0)
 {
 }
 
