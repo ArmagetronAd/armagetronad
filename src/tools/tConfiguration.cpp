@@ -745,23 +745,6 @@ static void SInclude(std::istream& s )
 static tConfItemFunc s_Include("INCLUDE",  &Include);
 static tConfItemFunc s_SInclude("SINCLUDE",  &SInclude);
 
-static void RInclude(std::istream& s)
-{
-    tString file;
-    s >> file;
-
-    tString rclcl = tResourceManager::locateResource(NULL, file);
-    if ( rclcl ) {
-        std::ifstream rc(rclcl);
-        tConfItemBase::LoadAll(rc);
-        return;
-    }
-
-    con << tOutput( "$config_rinclude_not_found", file );
-}
-
-static tConfItemFunc s_RInclude("RINCLUDE",  &RInclude);
-
 // obsoleted settings that still are around in some distruted configuration files
 static void st_Dummy(std::istream &s){tString rest; rest.ReadLine(s);}
 static tConfItemFunc st_DummyMpHack("MOVIEPACK_HACK",&st_Dummy);

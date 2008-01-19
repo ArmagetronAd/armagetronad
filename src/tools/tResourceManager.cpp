@@ -196,3 +196,21 @@ FILE* tResourceManager::openResource(const char *uri, const char *file) {
         return NULL;
     return fopen((const char *)filepath, "r");
 }
+
+static void RInclude(std::istream& s)
+{
+    tString file;
+    s >> file;
+
+    tString rclcl = tResourceManager::locateResource(NULL, file);
+    if ( rclcl ) {
+        std::ifstream rc(rclcl);
+        tConfItemBase::LoadAll(rc);
+        return;
+    }
+
+    con << tOutput( "$config_rinclude_not_found", file );
+}
+
+static tConfItemFunc s_RInclude("RINCLUDE",  &RInclude);
+
