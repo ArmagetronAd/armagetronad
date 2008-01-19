@@ -449,6 +449,7 @@ void gServerFavorites::FavoritesMenu( void )
 void gServerFavorites::AlternativesMenu( void )
 {
     // load default subcultures
+    nServerInfo::DeleteAll();
     nServerInfo::Load( tDirectories::Config(), "subcultures.srv" );
 
     // add them

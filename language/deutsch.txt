@@ -2310,7 +2310,7 @@ network_master_servername     Servername
 network_master_score          Bewertung
 network_master_users          Benutzer
 network_master_ping           Ping
-network_master_browserhelp    Drücke Return/Enter, um eine Verbindung zu diesem Server aufzubauen, "p" um diesen Server anzuPingen, "r", um die gesamte Liste aufzufRischen, "+/-" um dem Server einen Bewertungsbonus/malus zu geben, "Pfeiltaste Links/Rechts" um die Sortierung zu ändern, oder "b", um den Server zu den LieBlingsservern hinzuzufügen. 
+network_master_browserhelp    Drücke Return/Enter, um eine Verbindung aufzubauen, "p" um diesen Server anzuPingen, "r", um die Liste aufzufRischen, "+/-" um dem Server einen Bewertungsbonus/malus zu geben, "Pfeiltaste Links/Rechts" um die Sortierung zu ändern, "m", um den Meine-Freude-Filter ein/auszuschalten, oder "b", um den Server zu den LieBlingsservern hinzuzufügen. 
 network_master_connecting     Verbindung mit \1 wird aufgebaut...\n
 network_master_send           Schicke meine Daten...\n
 network_master_reqlist        Fordere Server-Liste an...\n
