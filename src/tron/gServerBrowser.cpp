@@ -511,7 +511,12 @@ void gServerMenu::Render(REAL y,
         if (ping.Len() > 1)
         {
             text.SetPos(static_cast<int>(1.35/c.GetCWidth())  - tColoredString::RemoveColors( ping ).Len() - 1, true );
+            text << "0xRESETT";
             text << " " << ping;
+        }
+        else
+        {
+            text << "0xRESETT";
         }
 
         if (users.Len() > 1)
