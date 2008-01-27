@@ -2071,6 +2071,7 @@ instant_death_activated		Death zone activated! Avoid it!\n
 player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
 player_win_held_fortress	\1 was awarded \2 points for holding the base.\n
+player_win_held_fortress_penalty	\1 lost \2 points for being too defensive.\n
 player_win_conquest_specific \1 was awarded \2 points for conquering \3's base.\n
 player_kill_collapse        \1 was eradicated by its collapsing zone.\n
 player_win_survive			\1 was awarded \2 points for holding the base.\n

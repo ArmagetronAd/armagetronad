@@ -1110,9 +1110,9 @@ void gBaseZoneHack::OnRoundEnd( void )
     if ( currentState_ == State_Safe )
     {
         // award owning team
-        if ( team )
+        if ( team && team->Alive() )
         {
-            team->AddScore( sg_onSurviveScore, tOutput("$player_win_held_fortress"), tOutput() );
+            team->AddScore( sg_onSurviveScore, tOutput("$player_win_held_fortress"), tOutput("$player_win_held_fortress_penalty") );
         }
     }
 }
