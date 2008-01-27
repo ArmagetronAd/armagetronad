@@ -1,6 +1,8 @@
 Changes since 0.2.8.2:
 
   New settings and commands:
+- SCORE_SURVIVE for player survival and FORTRESS_HELD_SCORE for not losing
+  each fortress zone.
 - KICK_TO and MOVE_TO: redirect a client to a different server
 - DEFAULT_KICK(_TO)_MESSAGE: default reason given to players for a kick
 - DEFAULT_KICK_TO_SERVER/PORT: default redirection target for KICK/MOVE_TO.

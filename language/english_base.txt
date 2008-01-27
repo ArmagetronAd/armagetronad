@@ -139,6 +139,7 @@ enemy_chatbot_penalty_help        Penalty in seconds if the victim is in chatbot
 enemy_currenttime_influence_help  If set to 1, not the build time of the encountered wall, but the current time enters the comparison of enemy influences. Arbitrary blending values are allowed.
 enemy_suicide_timeout_help        If no enemy influence can be found for the last this many seconds, a player's death counts as a suicide.
 score_die_help			What you get for dying
+score_survive_help      What you get for surviving
 score_kill_help			What you get for killing someone
 score_suicide_help		What you get for stupidly dying
 score_win_help			What you get for winning a round
@@ -2069,6 +2070,7 @@ instant_death_activated		Death zone activated! Avoid it!\n
 
 player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
+player_win_held_fortress	\1 was awarded \2 points for holding the base.\n
 player_win_conquest_specific \1 was awarded \2 points for conquering \3's base.\n
 player_kill_collapse        \1 was eradicated by its collapsing zone.\n
 player_win_survive			\1 was awarded \2 points for holding the base.\n
@@ -2110,6 +2112,7 @@ player_lose_default		\1 lost \2 points for a very strange reason.\n
 player_lose_suicide		\1 committed suicide and lost \2 points.\n
 player_free_suicide		\1 committed suicide.\n
 player_win_frag			\1 core dumped \3 for \2 points.\n
+player_win_survive		\1 got \2 points for surviving.\n
 player_free_frag		\1 core dumped \2.\n
 player_teamkill			\1 core dumped teammate \2! Boo! No points for that!\n
 player_win_frag_ai		\1 got \2 points for core dumping an AI player.\n

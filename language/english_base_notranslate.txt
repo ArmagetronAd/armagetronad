@@ -100,6 +100,7 @@ camera_smart_glance_back_help     Horizontal distance of the smartcam from the c
 camera_smart_glance_height_help   Elevation of the smartcam when glancing 
 
 # preliminary settings for fortress dynamics
+fortress_held_score_help          Score you get for holding your fortress.
 fortress_conquest_decay_rate_help Rate a fortress zone "recovers" from being conquered 
 fortress_conquest_rate_help       Rate a fortress zone gets conquered with for each enemy in it 
 fortress_defend_rate_help         Rate a fortress zone "recovers" for each defending player 

@@ -204,7 +204,8 @@ static REAL sg_GetSyncIntervalSelf( gCycle* cycle )
 //static bool moviepack_hack=false;       // do we use it?
 //static tSettingItem<bool> ump("MOVIEPACK_HACK",moviepack_hack);
 
-
+static int score_survive=0;
+static tSettingItem<int> s_sur("SCORE_SURVIVE",score_survive);
 
 static int score_die=-2;
 static tSettingItem<int> s_d("SCORE_DIE",score_die);
@@ -2341,6 +2342,17 @@ void gCycle::RemoveFromGame()
 
     gCycleMovement::RemoveFromGame();
 }
+
+// called when the round ends
+void gCycle::OnRoundEnd()
+{
+    // give survival bonus
+    if ( Alive() && player )
+    {
+        player->AddScore( score_survive, tOutput("$player_win_survive"), tOutput() );
+    }
+}
+
 
 static inline void rotate(eCoord &r,REAL angle){
     REAL x=r.x;

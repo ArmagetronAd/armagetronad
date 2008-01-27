@@ -1091,6 +1091,32 @@ void gBaseZoneHack::CheckSurvivor( void )
     }
 }
 
+static int sg_onSurviveScore = 0;
+static tSettingItem< int > sg_onSurviveConquestScoreConfig( "FORTRESS_HELD_SCORE", sg_onSurviveScore );
+
+
+// *******************************************************************************
+// *
+// *   OnRoundEnd
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+void gBaseZoneHack::OnRoundEnd( void )
+{
+    // survived?
+    if ( currentState_ == State_Safe )
+    {
+        // award owning team
+        if ( team )
+        {
+            team->AddScore( sg_onSurviveScore, tOutput("$player_win_held_fortress"), tOutput() );
+        }
+    }
+}
+
 // *******************************************************************************
 // *
 // *	OnEnter

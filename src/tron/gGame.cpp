@@ -3018,6 +3018,7 @@ extern REAL planned_rate_control[MAXCLIENTS+2];
 extern REAL sent_per_messid[100];
 
 static REAL lastdeath=0;
+static bool roundOver=false;   // flag set when the round winner is declared
 
 static void sg_VoteMenuIdle()
 {
@@ -3131,6 +3132,7 @@ void gGame::StateUpdate(){
             // con << "Creating objects...\n";
 
             lastdeath = -100;
+            roundOver = false;
 
             // rename players as per request
             if ( synced_ )
@@ -3768,6 +3770,23 @@ void gGame::Analysis(REAL time){
     }
 
     int winnerExtraRound = ( winner != 0 || alive == 0 ) ? 1 : 0;
+
+
+    // do round end stuff one second after a winner was declared
+    if ( winner && !roundOver && time-lastdeath >= 2.0f )
+    {
+        roundOver = true;
+
+        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+        for (int i=gameObjects.Len()-1;i>=0;i--)
+        {
+            eGameObject * e = gameObjects(i);
+            if ( e )
+            {
+                e->OnRoundEnd();
+            }
+        }
+    }
 
     // analyze the ranking list
     if ( time-lastdeath < 2.0f )
