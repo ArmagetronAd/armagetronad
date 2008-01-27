@@ -50,9 +50,7 @@
 		64956AEB0D410F6A00C501B8 /* gFriends.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64956AE90D410F6A00C501B8 /* gFriends.cpp */; };
 		64956AEC0D410F6A00C501B8 /* gFriends.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 64956AEA0D410F6A00C501B8 /* gFriends.h */; };
 		64956AED0D410F6A00C501B8 /* gFriends.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64956AE90D410F6A00C501B8 /* gFriends.cpp */; };
-		64956AEE0D410F6A00C501B8 /* gFriends.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 64956AEA0D410F6A00C501B8 /* gFriends.h */; };
 		64956AEF0D410F6A00C501B8 /* gFriends.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64956AE90D410F6A00C501B8 /* gFriends.cpp */; };
-		64956AF00D410F6A00C501B8 /* gFriends.h in Headers */ = {isa = PBXBuildFile; fileRef = 64956AEA0D410F6A00C501B8 /* gFriends.h */; };
 		64C038B70D2E84E500810BB1 /* config_common.h.in in Resources */ = {isa = PBXBuildFile; fileRef = 64C038B60D2E84E500810BB1 /* config_common.h.in */; };
 		64C038B80D2E84E500810BB1 /* config_common.h.in in Resources */ = {isa = PBXBuildFile; fileRef = 64C038B60D2E84E500810BB1 /* config_common.h.in */; };
 		8C11CA49095A2B6E007AE0EA /* action_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E7D089EEC7D007E21DC /* action_api.cpp */; };
@@ -153,7 +151,6 @@
 		8C11CAAB095A2B6E007AE0EA /* uMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EFA089EEC7E007E21DC /* uMenu.cpp */; };
 		8C6EF51D08A32A0500816348 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8C6EF51B08A32A0500816348 /* InfoPlist.strings */; };
 		8CAD9141095A37DD00DA0ECC /* rConsoleCout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CAD9140095A37DD00DA0ECC /* rConsoleCout.cpp */; };
-		8CAD914A095A391A00DA0ECC /* config.h in Headers */ = {isa = PBXBuildFile; fileRef = 8CAD9136095A379B00DA0ECC /* config.h */; };
 		8CB97AB0096265A800AE8BCD /* SDLMain.nib in Resources */ = {isa = PBXBuildFile; fileRef = 8CBA6032089EF32F007E21DC /* SDLMain.nib */; };
 		8CB97AB1096265A800AE8BCD /* AUTHORS in Resources */ = {isa = PBXBuildFile; fileRef = 8CBA6039089EF359007E21DC /* AUTHORS */; };
 		8CB97AB2096265A800AE8BCD /* config in Resources */ = {isa = PBXBuildFile; fileRef = 8CBA603B089EF359007E21DC /* config */; };
@@ -390,11 +387,9 @@
 		9B54150F0A45C7D700745CE6 /* SDL_image.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414E70A45C7CB00745CE6 /* SDL_image.framework */; };
 		9B5415100A45C7D700745CE6 /* SDL.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414E80A45C7CB00745CE6 /* SDL.framework */; };
 		9B69F6230A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */; };
-		9B69F6240A63E1A700F5F2E4 /* eLagCompensation.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */; };
 		9B69F6250A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */; };
 		9B69F6260A63E1A700F5F2E4 /* eLagCompensation.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */; };
 		9B69F6270A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */; };
-		9B69F6280A63E1A700F5F2E4 /* eLagCompensation.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -402,7 +397,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8C11CA41095A268E007AE0EA /* Armagetron Advanced Dedicated */;
+			remoteGlobalIDString = 8C11CA41095A268E007AE0EA;
 			remoteInfo = "Armagetron Advanced Dedicated";
 		};
 		9B8A49C50D3709270094FB81 /* PBXContainerItemProxy */ = {
@@ -454,8 +449,6 @@
 				9B5414DB0A45C78D00745CE6 /* libpng.framework in Copy Frameworks */,
 				9B5414DC0A45C78D00745CE6 /* SDL_image.framework in Copy Frameworks */,
 				9B5414DD0A45C78D00745CE6 /* SDL.framework in Copy Frameworks */,
-				9B69F6240A63E1A700F5F2E4 /* eLagCompensation.h in Copy Frameworks */,
-				64956AEE0D410F6A00C501B8 /* gFriends.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -468,11 +461,11 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Armagetron Advanced_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Armagetron Advanced_Prefix.pch"; path = "../src/macosx/Armagetron Advanced_Prefix.pch"; sourceTree = "<group>"; };
-		64956AE90D410F6A00C501B8 /* gFriends.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = gFriends.cpp; path = ../src/tron/gFriends.cpp; sourceTree = SOURCE_ROOT; };
-		64956AEA0D410F6A00C501B8 /* gFriends.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = gFriends.h; path = ../src/tron/gFriends.h; sourceTree = SOURCE_ROOT; };
+		64956AE90D410F6A00C501B8 /* gFriends.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = gFriends.cpp; sourceTree = "<group>"; };
+		64956AEA0D410F6A00C501B8 /* gFriends.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = gFriends.h; sourceTree = "<group>"; };
 		64C038B60D2E84E500810BB1 /* config_common.h.in */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = config_common.h.in; path = ../src/macosx/config_common.h.in; sourceTree = SOURCE_ROOT; };
 		8C11CA38095A264A007AE0EA /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config_common.h; path = ../src/macosx/config_common.h; sourceTree = SOURCE_ROOT; };
-		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C6EF51C08A32A0500816348 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; name = English; path = InfoPlist.strings; sourceTree = "<group>"; };
 		8CAD9136095A379B00DA0ECC /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../src/macosx/dedicated/config.h; sourceTree = SOURCE_ROOT; };
 		8CAD9140095A37DD00DA0ECC /* rConsoleCout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rConsoleCout.cpp; sourceTree = "<group>"; };
@@ -819,8 +812,6 @@
 		8CBA5DFE089EEBF7007E21DC /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				64956AE90D410F6A00C501B8 /* gFriends.cpp */,
-				64956AEA0D410F6A00C501B8 /* gFriends.h */,
 				8CBA5E0E089EEC7C007E21DC /* engine */,
 				8CBA5DFF089EEC0D007E21DC /* Miscellaneous */,
 				8CBA5E3B089EEC7D007E21DC /* network */,
@@ -1073,6 +1064,8 @@
 				8CBA5ED1089EEC7D007E21DC /* gExplosion.cpp */,
 				8CBA5ED2089EEC7D007E21DC /* gExplosion.h */,
 				8CBA5ED3089EEC7D007E21DC /* gFloor.cpp */,
+				64956AE90D410F6A00C501B8 /* gFriends.cpp */,
+				64956AEA0D410F6A00C501B8 /* gFriends.h */,
 				8CBA5ED4089EEC7D007E21DC /* gGame.cpp */,
 				8CBA5ED5089EEC7D007E21DC /* gGame.h */,
 				8CBA5ED6089EEC7D007E21DC /* gHud.cpp */,
@@ -1147,19 +1140,6 @@
 		};
 /* End PBXGroup section */
 
-/* Begin PBXHeadersBuildPhase section */
-		8CAD914E095A392A00DA0ECC /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				8CAD914A095A391A00DA0ECC /* config.h in Headers */,
-				9B69F6280A63E1A700F5F2E4 /* eLagCompensation.h in Headers */,
-				64956AF00D410F6A00C501B8 /* gFriends.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXHeadersBuildPhase section */
-
 /* Begin PBXNativeTarget section */
 		8C11CA41095A268E007AE0EA /* Armagetron Advanced Dedicated */ = {
 			isa = PBXNativeTarget;
@@ -1167,7 +1147,6 @@
 			buildPhases = (
 				8CAD9172095A3BB700DA0ECC /* Process Files */,
 				8CAD917A095A3BD000DA0ECC /* Sort Resources */,
-				8CAD914E095A392A00DA0ECC /* Headers */,
 				8C11CA3F095A268E007AE0EA /* Sources */,
 				8C11CA40095A268E007AE0EA /* Frameworks */,
 			);
