@@ -21,7 +21,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -79,7 +79,7 @@ uMenu::uMenu(const tOutput &t,bool exit_item)
 }
 
 uMenu::~uMenu(){
-    for(int i=items.Len()-1;i>=0;i--)
+    for (int i=items.Len()-1;i>=0;i--)
         delete items[i];
 }
 
@@ -168,7 +168,7 @@ void uMenu::OnEnter(){
     REAL lastt=0;
     REAL ts=0;
 
-#ifndef DEDICATED  
+#ifndef DEDICATED
     lastkey=tSysTimeFloat();
     static const REAL timeout=3;
 #endif
@@ -193,7 +193,7 @@ void uMenu::OnEnter(){
         {
             SDL_Event tEvent;
             uInputProcessGuard inputProcessGuard;
-            while(su_GetSDLInput(tEvent))
+            while (su_GetSDLInput(tEvent))
             {
                 REAL entertime = tSysTimeFloat();
 
@@ -280,14 +280,14 @@ void uMenu::OnEnter(){
         if (sr_glOut && !exitFlag && !quickexit){
             items[selected]->Render(center,YPos(selected),1,true);
 
-            for(int i=items.Len()-1;i>=0;i--)
-                if(i!=selected){
+            for (int i=items.Len()-1;i>=0;i--)
+                if (i!=selected){
                     REAL y=YPos(i);
                     REAL alpha=1;
                     const REAL b=.1;
-                    if(y<menuBot+b)
+                    if (y<menuBot+b)
                         alpha=(y-menuBot)/b;
-                    if(y>menuTop-b)
+                    if (y>menuTop-b)
                         alpha=(menuTop-y)/b;
                     if (y>menuBot && y<menuTop)
                     {
@@ -354,90 +354,90 @@ void uMenu::HandleEvent( SDL_Event event )
     {
         switch (event.type){
         case SDL_KEYDOWN:
-            {
-                if (!disphelp)
-                    lastkey=tSysTimeFloat();
-                switch (event.key.keysym.sym){
+        {
+            if (!disphelp)
+                lastkey=tSysTimeFloat();
+            switch (event.key.keysym.sym){
 
-                case(SDLK_ESCAPE):
-                                repeat = false;
-                    lastkey=tSysTimeFloat();
-                    Exit();
-                    break;
+            case(SDLK_ESCAPE):
+                            repeat = false;
+                lastkey=tSysTimeFloat();
+                Exit();
+                break;
 
-                case(SDLK_UP):
-                                lastkey=tSysTimeFloat();
-                    selected++;
-                    if (selected>=items.Len())
-                        if (wrap)
-                            selected=0;
-                        else
-                            selected=items.Len()-1;
-                    break;
+            case(SDLK_UP):
+                            lastkey=tSysTimeFloat();
+                selected++;
+                if (selected>=items.Len())
+                    if (wrap)
+                        selected=0;
+                    else
+                        selected=items.Len()-1;
+                break;
 
-                case(SDLK_DOWN):
-                                lastkey=tSysTimeFloat();
-                    selected--;
-                    if (selected<0)
-                        if(wrap)
-                            selected=items.Len()-1;
-                        else
-                            selected=0;
+            case(SDLK_DOWN):
+                            lastkey=tSysTimeFloat();
+                selected--;
+                if (selected<0)
+                    if (wrap)
+                        selected=items.Len()-1;
+                    else
+                        selected=0;
 
-                    break;
+                break;
 
-                case(SDLK_LEFT):
-                                items[selected]->LeftRight(-1);
-                    break;
-                case(SDLK_RIGHT):
-                                items[selected]->LeftRight(1);
-                    break;
+            case(SDLK_LEFT):
+                            items[selected]->LeftRight(-1);
+                break;
+            case(SDLK_RIGHT):
+                            items[selected]->LeftRight(1);
+                break;
 
-                case(SDLK_SPACE):
-                            case(SDLK_KP_ENTER):
-                                case(SDLK_RETURN):
-                                        repeat = false;
-                    try
-            {
-                        su_inMenu = false;
-                        items[selected]->Enter();
-                    }
-                    catch (tException const & e)
-                    {
-                        uMenu::SetIdle(NULL);
+            case(SDLK_SPACE):
+                        case(SDLK_KP_ENTER):
+                            case(SDLK_RETURN):
+                                    repeat = false;
+                try
+        {
+                    su_inMenu = false;
+                    items[selected]->Enter();
+                }
+                catch (tException const & e)
+                {
+                    uMenu::SetIdle(NULL);
 
-                        // inform user of generic errors
-                        tConsole::Message( e.GetName(), e.GetDescription(), 20 );
-                    }
+                    // inform user of generic errors
+                    tConsole::Message( e.GetName(), e.GetDescription(), 20 );
+                }
 #ifdef _MSC_VER
 #pragma warning ( disable : 4286 )
-                    // GRR. Visual C++ dones not handle generic exceptions with the above general statement.
-                    // A specialized version is needed. The best part: it warns about the code below being redundant.
-                    catch( tGenericException const & e )
+                // GRR. Visual C++ dones not handle generic exceptions with the above general statement.
+                // A specialized version is needed. The best part: it warns about the code below being redundant.
+                catch ( tGenericException const & e )
+                {
+                    try
                     {
-                        try
-                        {
-                            tConsole::Message( e.GetName(), e.GetDescription(), 20 );
-                        }
-                        catch(...)
-                        {
-                        }
+                        tConsole::Message( e.GetName(), e.GetDescription(), 20 );
                     }
+                    catch (...)
+                    {
+                    }
+                }
 #endif
 
-                    su_inMenu = true;
+                su_inMenu = true;
 
-                    repeat = false;
-                    lastkey=tSysTimeFloat();
-                    break;
+                repeat = false;
+                lastkey=tSysTimeFloat();
+                break;
 
-                default:
-                    // let the input subsystem handle events for later processing
-                    su_HandleEvent( event, true );
-                    break;
-                }
+            default:
+                // let the input subsystem handle events for later processing
+                su_HandleEvent( event, true );
+                break;
             }
-            break;
+        }
+        break;
         default:
             // let the input subsystem handle events for later processing
             su_HandleEvent( event, true );
@@ -460,7 +460,7 @@ void uMenu::GenericBackground(){
             // throw tGenericException("test"); // (test exception throw to see if error handling works right)
             (*idle)();
         }
-        catch( ... )
+        catch ( ... )
         {
             // the idle background function is broken. Disable it and rethrow.
             idle = 0;
@@ -504,7 +504,7 @@ void uMenuItem::SetColor( bool selected, REAL alpha )
     //   rTextField::SetBlendColor( tColor(.8+.2*sin(time),.3-.1*sin(time),.3-.1*sin(time),alpha) );
     rTextField::SetDefaultColor( tColor(1,1,1,alpha) );
 
-    if(selected)
+    if (selected)
     {
         REAL time=tSysTimeFloat()*10;
         REAL intensity = 1+.3*sin(time);
@@ -614,7 +614,7 @@ uMenuItemInt::uMenuItemInt
 (uMenu *m,const char *tit,const char *help,int &targ,
  int mi,int ma,int step)
         :uMenuItem(m,help),title(tit),target(targ),Min(mi),Max(ma),
-Step(step){
+        Step(step){
     if (target<Min) target=Min;
     if (target>Max) target=Max;
 }
@@ -624,7 +624,7 @@ uMenuItemInt::uMenuItemInt
 (uMenu *m,const tOutput &tit,const tOutput &help,int &targ,
  int mi,int ma,int step)
         :uMenuItem(m,help),title(tit),target(targ),Min(mi),Max(ma),
-Step(step){
+        Step(step){
     if (target<Min) target=Min;
     if (target>Max) target=Max;
 }
@@ -804,7 +804,7 @@ bool uMenuItemString::Event(SDL_Event &e){
             // insert character if there is room
             if (content->Len() < maxLength_)
             {
-                for(int i=content->Len()-1;i>=cursorPos;i--)
+                for (int i=content->Len()-1;i>=cursorPos;i--)
                     (*content)[i+1]=(*content)[i];
 
                 // guarantee proper null termination
@@ -818,11 +818,11 @@ bool uMenuItemString::Event(SDL_Event &e){
         }
     }
 
-    if(cursorPos<0)    cursorPos=0;
-    if(cursorPos > content->Len()-1) cursorPos=content->Len()-1;
+    if (cursorPos<0)    cursorPos=0;
+    if (cursorPos > content->Len()-1) cursorPos=content->Len()-1;
 
     return ret;
-#else  
+#else
     return false;
 #endif
 }
@@ -914,7 +914,7 @@ bool uMenuItemStringWithHistory::Event(SDL_Event &e)
 uMenuItemSubmenu::uMenuItemSubmenu(uMenu *M,
                                    uMenu *s,
                                    const tOutput& help)
-    :uMenuItem(M,help),submenu(s){}
+        :uMenuItem(M,help),submenu(s){}
 
 
 void uMenuItemSubmenu::Render(REAL x,REAL y,REAL alpha,bool selected){
@@ -1016,7 +1016,7 @@ void uMenuItemFileSelection::AddFile( const char *fileName, const char *filePath
 static tCallback *enter_anchor=NULL,*leave_anchor=NULL, *background_anchor=NULL;
 
 uCallbackMenuEnter::uCallbackMenuEnter(VOIDFUNC *f)
-    :tCallback(enter_anchor,f){}
+        :tCallback(enter_anchor,f){}
 
 void uCallbackMenuEnter::MenuEnter(){
     Exec(enter_anchor);
@@ -1039,6 +1039,7 @@ void uCallbackMenuBackground::MenuBackground(){
 
 // return value: false only if the user pressed ESC
 bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL to){
+    bool ret = true;
 #ifdef DEDICATED
     con << message << ":\n";
     con << interpretation << '\n';
@@ -1072,7 +1073,7 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
     // catch some keyboard input
     {
         uInputProcessGuard inputProcessGuard;
-        while(su_GetSDLInput(tEvent));
+        while (su_GetSDLInput(tEvent));
     }
 
     {
@@ -1084,27 +1085,28 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
         interpretationString << interpretation << "\n";
         std::vector<tString> lines;
         int lastNewline = 0;
-        for(int i = 0; i < interpretationString.Len() - 1; ++i) {
+        for (int i = 0; i < interpretationString.Len() - 1; ++i) {
             if (interpretationString[i] == '\n' && i != 0) {
                 lines.push_back(interpretationString.SubStr(lastNewline, i - lastNewline));
                 lastNewline = i + 1;
             }
         }
-        while(  !quickexit &&
-                (to < 0 || tSysTimeFloat() < timeout)){
+        while (  !quickexit &&
+                 (to < 0 || tSysTimeFloat() < timeout)){
             //while(  !quickexit && ( !su_GetSDLInput(tEvent) || tEvent.type!=SDL_KEYDOWN) &&
             //        (to < 0 || tSysTimeFloat() < timeout)){
-            if( su_GetSDLInput(tEvent) && tEvent.type==SDL_KEYDOWN) {
-                switch(tEvent.key.keysym.sym) {
+            if ( su_GetSDLInput(tEvent) && tEvent.type==SDL_KEYDOWN) {
+                switch (tEvent.key.keysym.sym) {
                 case SDLK_UP:
-                    if(offset > 0)
+                    if (offset > 0)
                         offset -= 1;
                     continue;
                 case SDLK_DOWN:
                     offset += 1;
                     continue;
                 case SDLK_ESCAPE:
-                    return false;
+                    ret = false;
+                    break;
                 default:
                     break;
                 }
@@ -1139,11 +1141,11 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
                 w = 16/640.0;
                 h = 32/480.0;
 
-                if(offset >= lines.size()) offset = lines.size() - 1;
+                if (offset >= lines.size()) offset = lines.size() - 1;
                 {
                     rTextField c(-.8,.6, w, h);
 
-                    for(unsigned i = offset; i < lines.size(); ++i)
+                    for (unsigned i = offset; i < lines.size(); ++i)
                         c << lines[i] << "\n";
                 }
             }
@@ -1166,6 +1168,6 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
     sr_textOut = textOutBack;
 #endif
 
-    return true;
+    return ret;
 }
 
