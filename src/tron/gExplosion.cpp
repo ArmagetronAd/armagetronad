@@ -216,7 +216,7 @@ bool gExplosion::Timestep(REAL currentTime){
         s_explosionCoord  = pos;
         REAL factor = expansion / REAL( expansionSteps );
         s_explosionRadius = gCycle::ExplosionRadius() * sqrt(factor);
-        s_explosionTime = createTime;
+        s_explosionTime = currentTime;
         s_holer = this;
 
         if ( s_explosionRadius > 0 && (currentTime < createTime+4) )
