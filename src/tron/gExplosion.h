@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -32,12 +32,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eGameObject.h"
 #include "gParticles.h"
 
+class gCycle;
 struct gRealColor;
 
 class gExplosion: virtual public eGameObject
 { // Boom!
 public:
-    gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color);
+    gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color, gCycle * owner );
     virtual ~gExplosion();
 
     virtual bool Timestep(REAL currentTime);
@@ -73,5 +74,7 @@ private:
     static REAL expansionTime;
 
     int 		listID;
+
+    tJUST_CONTROLLED_PTR< gCycle > owner_; // the owner/victim of the explosion
 };
 #endif

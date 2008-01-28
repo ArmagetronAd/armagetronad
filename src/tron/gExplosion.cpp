@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -57,6 +57,7 @@ REAL gExplosion::expansionTime = 0.2f;
 static eCoord s_explosionCoord;
 static REAL   s_explosionRadius;
 static REAL	  s_explosionTime;
+static gCycle * s_holer = 0;
 
 // blow a hole centered at s_explosionCoord with radius s_explosionRadius into wall w
 static void S_BlowHoles( eWall * w )
@@ -117,7 +118,7 @@ static void S_BlowHoles( eWall * w )
 
     if ( end > start )
     {
-        wall->BlowHole ( start, end );
+        wall->BlowHole ( start, end, s_holer );
     }
 }
 
@@ -134,13 +135,17 @@ static void S_Sync( eWall * w )
 }
 */
 
-gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color)
+gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color, gCycle * owner )
         :eGameObject(grid, pos, eCoord(0,0), NULL, true),
         sound(explode),
         createTime(time),
         expansion(0),
-        listID(-1)
+        listID(-1),
+        owner_(owner) 
 {
+    if ( owner )
+        owner->holeAccountedFor_ = false;
+
     lastTime = time;
     explosion_r = color.r;
     explosion_g = color.g;
@@ -213,6 +218,7 @@ bool gExplosion::Timestep(REAL currentTime){
         REAL factor = expansion / REAL( expansionSteps );
         s_explosionRadius = gCycle::ExplosionRadius() * sqrt(factor);
         s_explosionTime = createTime;
+        s_holer = owner_;
 
         if ( s_explosionRadius > 0 && (currentTime < createTime+4) )
         {
@@ -222,6 +228,7 @@ bool gExplosion::Timestep(REAL currentTime){
                                        this->CurrentFace() );
         }
 
+        s_holer = 0;
     }
 
     /*
@@ -246,7 +253,7 @@ bool gExplosion::Timestep(REAL currentTime){
     				const gPlayerWall* w = c->CurrentWall();
 
     				if ( !w	|| w->BegTime() < time || w->EndTime() < time )
-    				{	
+    				{
     					// c has not made a turn; we need to stay around some more
     					return false;
     				}
@@ -268,7 +275,9 @@ void gExplosion::InteractWith(eGameObject *,REAL ,int){}
 
 void gExplosion::PassEdge(const eWall *,REAL ,REAL ,int){}
 
-void gExplosion::Kill(){createTime=lastTime-100;}
+void gExplosion::Kill(){
+    createTime=lastTime-100;
+}
 
 void gExplosion::OnNewWall( eWall* w )
 {
@@ -305,7 +314,7 @@ static void init_exp(){
 
     tRandomizer & randomizer = tRandomizer::GetInstance();
 
-    for(int j=i;j<40;j++){
+    for (int j=i;j<40;j++){
         expvec[i++]=Vec3(fak*( randomizer.Get() -.5f ),
                          fak*( randomizer.Get() -.5f ),
                          1);
@@ -314,7 +323,7 @@ static void init_exp(){
         //                         1);
     }
 
-    for(int k=expvec.Len()-1;k>=0;k--)
+    for (int k=expvec.Len()-1;k>=0;k--)
         expvec[k]=expvec[k]*(1/expvec[k].Norm());
 }
 
@@ -325,11 +334,11 @@ bool sg_crashExplosion = true;
 #ifndef DEDICATED
 void gExplosion::Render(const eCamera *cam){
 #ifdef USE_PARTICLES
-    if(sg_crashExplosion){
+    if (sg_crashExplosion){
         theExplosion->Render(cam);
     }
-#else	
-    if(sg_crashExplosion){
+#else
+    if (sg_crashExplosion){
         REAL a1=(lastTime-createTime)+.01f;//+.2;
         REAL e=a1-1;
 
@@ -351,7 +360,7 @@ void gExplosion::Render(const eCamera *cam){
 
         glColor4f(explosion_r,explosion_g,explosion_b,fade);
         BeginLines();
-        for(int i=expvec.Len()-1;i>=0;i--){
+        for (int i=expvec.Len()-1;i>=0;i--){
             glVertex3f(a1*expvec[i].x[0],a1*expvec[i].x[1],a1*expvec[i].x[2]);
             glVertex3f( e*expvec[i].x[0], e*expvec[i].x[1], e*expvec[i].x[2]);
         }

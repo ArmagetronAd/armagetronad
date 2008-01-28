@@ -907,7 +907,7 @@ bool gBaseZoneHack::Timestep( REAL time )
     // reward survival
     if ( !ret && onlySurvivor_ )
     {
-        const char* message= ( eTeam::teams.Len() > 2 || sg_onConquestScore ) ? "$player_win_survive" : "$player_win_conquest";
+        const char* message= ( eTeam::teams.Len() > 2 || sg_onConquestScore ) ? "$player_win_held_fortress" : "$player_win_conquest";
         sg_DeclareWinner( team, message );
     }
 
@@ -1112,7 +1112,7 @@ void gBaseZoneHack::OnRoundEnd( void )
         // award owning team
         if ( team && team->Alive() )
         {
-            team->AddScore( sg_onSurviveScore, tOutput("$player_win_held_fortress"), tOutput("$player_win_held_fortress_penalty") );
+            team->AddScore( sg_onSurviveScore, tOutput("$player_win_held_fortress"), tOutput("$player_lose_held_fortress") );
         }
     }
 }

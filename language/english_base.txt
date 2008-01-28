@@ -140,6 +140,7 @@ enemy_currenttime_influence_help  If set to 1, not the build time of the encount
 enemy_suicide_timeout_help        If no enemy influence can be found for the last this many seconds, a player's death counts as a suicide.
 score_die_help			What you get for dying
 score_survive_help      What you get for surviving
+score_hole_help			What you get for making a hole for your teammates
 score_kill_help			What you get for killing someone
 score_suicide_help		What you get for stupidly dying
 score_win_help			What you get for winning a round
@@ -2071,10 +2072,11 @@ instant_death_activated		Death zone activated! Avoid it!\n
 player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
 player_win_held_fortress	\1 was awarded \2 points for holding the base.\n
-player_win_held_fortress_penalty	\1 lost \2 points for being too defensive.\n
+player_lose_held_fortress	\1 lost \2 points for being too defensive.\n
 player_win_conquest_specific \1 was awarded \2 points for conquering \3's base.\n
 player_kill_collapse        \1 was eradicated by its collapsing zone.\n
-player_win_survive			\1 was awarded \2 points for holding the base.\n
+player_win_hole             \1 got \2 points for a sacrifice for the good of the team.\n
+player_lose_hole            0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
 
 zone_collapse_harmless      \1's zone collapses harmlessly for lack of enemy contacts.\n
 

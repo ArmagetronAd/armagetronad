@@ -1888,7 +1888,7 @@ player_win_conquest           \1 consigue \2 puntos por conquistar la base enemi
 #ORIGINAL TEXT:               \1 was awarded \2 points for conquering \3's base.\n
 #player_win_conquest_specific UNTRANSLATED
 player_kill_collapse          \1 fue suprimido al derrumbarse su zona.\n
-player_win_survive            \1 consigue \2 puntos por mantener la base.\n
+player_win_held_fortress      \1 consigue \2 puntos por mantener la base.\n
 
 
 #********************************************

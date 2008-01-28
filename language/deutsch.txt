@@ -2078,7 +2078,7 @@ player_win_instant            \1 bekam \2 Punkte durch das Erreichen der Siegzon
 player_win_conquest           \1 bekam \2 Punkte für das erobern der Basis des Feindes.\n
 player_win_conquest_specific  \1 bekam \2 Punkte für das erobern der Basis von \3.\n
 player_kill_collapse          \1 wurde von seiner kollabierenden Zone vernichtet.\n
-player_win_survive            \1 bekam \2 Punkte für das Halten der eigenen Basis.\n
+player_win_held_fortress      \1 bekam \2 Punkte für das Halten der eigenen Basis.\n
 
 zone_collapse_harmless        \1s Zone verpufft harmlos wegen mangelden Feindkontakts.\n
 

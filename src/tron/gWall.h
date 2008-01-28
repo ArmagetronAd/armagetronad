@@ -5,7 +5,7 @@
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
 Copyright (C) 2000  Manuel Moos (manuel@moosnet.de)
 #include <stdio>
-#include <stdlib.h> 
+#include <stdlib.h>
 **************************************************************************
 
 This program is free software; you can redistribute it and/or
@@ -21,7 +21,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -63,11 +63,14 @@ private:
     REAL tBeg_, tEnd_;          //!< begin and end texture coordinates
 };
 
+//! a coordinate entry for wall points, where walls turn into holes
+//! or vice versa
 class gPlayerWallCoord{
 public:
-    REAL Pos;
-    REAL Time;
-    bool IsDangerous;
+    REAL Pos;             //!< the start position, measured relative to the point where the cycle started driving
+    REAL Time;            //!< the time this point was created
+    bool IsDangerous;     //!< true iff the segment AFTER this point is a true wall (and not a hole)
+    tJUST_CONTROLLED_PTR< gCycle > holer; //< if it is a hole, store who made it here.
 };
 
 class gPlayerWall:public eWall{
@@ -106,8 +109,9 @@ public:
     REAL Alpha(REAL pos) const;
     bool IsDangerousAnywhere( REAL time ) const;
     bool IsDangerous( REAL a, REAL time ) const;
+    gCycle * Holer( REAL a, REAL time ) const; // returns the guy who holed here
 
-    void BlowHole	( REAL dbeg, REAL dend ); // blow a hole into the wall form distance dbeg to dend
+    void BlowHole	( REAL dbeg, REAL dend, gCycle * holer ); // blow a hole into the wall form distance dbeg to dend, created by holer
 
     REAL BegPos() const;
     REAL EndPos() const;
@@ -195,9 +199,11 @@ public:
     REAL Pos(REAL a) const;
     REAL Alpha(REAL pos) const;
     bool IsDangerousAnywhere( REAL time ) const;
-    bool IsDangerous( REAL a, REAL time ) const;
+    bool IsDangerousApartFromHoles( REAL a, REAL time ) const; // checks all danger signs, except hooles
+    bool IsDangerous( REAL a, REAL time ) const;               // checks all danger signs
+    gCycle * Holer( REAL a, REAL time ) const;                 // returns the cycle responsible for a hole
 
-    void BlowHole	( REAL dbeg, REAL dend ); // blow a hole into the wall form distance dbeg to dend
+    void BlowHole	( REAL dbeg, REAL dend, gCycle * holer ); // blow a hole into the wall form distance dbeg to dend
 
     REAL BegPos() const;
     REAL EndPos() const;
@@ -238,7 +244,7 @@ public:
     virtual bool SyncIsNew(nMessage &m);
 
 
-eTempEdge   *Edge(){return this->edge_;}
+    eTempEdge   *Edge(){return this->edge_;}
     gPlayerWall *Wall();
     gCycle *Cycle() const {return this->cycle_;}
     gCycleMovement *CycleMovement() const;
