@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class gCycle;
 struct gRealColor;
 
-class gExplosion: virtual public eGameObject
+class gExplosion: virtual public eGameObject, public tReferencable< gExplosion >
 { // Boom!
 public:
     gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color, gCycle * owner );
@@ -55,7 +55,19 @@ public:
                           int viewer,REAL rvol,REAL lvol);
 #endif
 
+    bool AccountForHole(); // will return true exactly once per explosion; to be used to make the holing score only count once.
+
     static void OnNewWall( eWall* w );	// blow holes into a new wall
+
+    // returns the owner
+    gCycle * GetOwner() const
+    {
+        return owner_;
+    }
+
+    virtual void AddRef(){tReferencable< gExplosion >::AddRef();}
+    virtual void Release(){tReferencable< gExplosion >::Release();}
+    virtual void RemoveFromGame();
 private:
     eSoundPlayer sound;
 
@@ -72,6 +84,8 @@ private:
 
     static int	expansionSteps;
     static REAL expansionTime;
+
+    bool holeAccountedFor_;  //!< flag indicating whether we already gave the player credit for making a hole for his teammates
 
     int 		listID;
 

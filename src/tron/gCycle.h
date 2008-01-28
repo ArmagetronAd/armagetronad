@@ -121,7 +121,6 @@ class gCycle: public gCycleMovement
     friend class gPlayerWall;
     friend class gNetPlayerWall;
     friend class gDestination;
-    friend class gExplosion;
 
     eSoundPlayer *engine;
     eSoundPlayer *turning;
@@ -135,7 +134,6 @@ class gCycle: public gCycleMovement
     std::auto_ptr< gCycleChatBot > chatBot_;
 
     bool dropWallRequested_; //!< flag indicating that someone requested a wall drop
-    bool holeAccountedFor_;  //!< flag indicating whether we already gave the player credit for making a hole for his teammates
 public:
     eCoord            lastGoodPosition_;    // the location of the last known good position
 

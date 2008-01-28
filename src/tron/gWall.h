@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eAdvWall.h"
 #include "nNetObject.h"
 //#include "nObserver.h"
+class gExplosion;
 class gCycle;
 class gCycleMovement;
 class gNetPlayerWall;
@@ -70,7 +71,7 @@ public:
     REAL Pos;             //!< the start position, measured relative to the point where the cycle started driving
     REAL Time;            //!< the time this point was created
     bool IsDangerous;     //!< true iff the segment AFTER this point is a true wall (and not a hole)
-    tJUST_CONTROLLED_PTR< gCycle > holer; //< if it is a hole, store who made it here.
+    tJUST_CONTROLLED_PTR< gExplosion > holer; //< if it is a hole, store who made it here.
 };
 
 class gPlayerWall:public eWall{
@@ -109,9 +110,9 @@ public:
     REAL Alpha(REAL pos) const;
     bool IsDangerousAnywhere( REAL time ) const;
     bool IsDangerous( REAL a, REAL time ) const;
-    gCycle * Holer( REAL a, REAL time ) const; // returns the guy who holed here
+    gExplosion * Holer( REAL a, REAL time ) const; // returns the guy who holed here
 
-    void BlowHole	( REAL dbeg, REAL dend, gCycle * holer ); // blow a hole into the wall form distance dbeg to dend, created by holer
+    void BlowHole	( REAL dbeg, REAL dend, gExplosion * holer ); // blow a hole into the wall form distance dbeg to dend, created by holer
 
     REAL BegPos() const;
     REAL EndPos() const;
@@ -158,9 +159,8 @@ class gNetPlayerWall: public nNetObject{
 
     unsigned short inGrid;   // are we planned to be insite the grid?
     REAL           gridding; // when are we going to enter the grid?
-
-bool           preliminary:1; // is it a eWall preliminary installed?
-    REAL       obsoleted_;    // the game time this preliminary wall got obsoleted by a final wall (negative if it is not yet obsolete)
+    bool           preliminary:1; // is it a eWall preliminary installed?
+    REAL           obsoleted_;    // the game time this preliminary wall got obsoleted by a final wall (negative if it is not yet obsolete)
     // by the client while it is waiting for the real eWall from the server?
 
     void CreateEdge();
@@ -201,9 +201,9 @@ public:
     bool IsDangerousAnywhere( REAL time ) const;
     bool IsDangerousApartFromHoles( REAL a, REAL time ) const; // checks all danger signs, except hooles
     bool IsDangerous( REAL a, REAL time ) const;               // checks all danger signs
-    gCycle * Holer( REAL a, REAL time ) const;                 // returns the cycle responsible for a hole
+    gExplosion * Holer( REAL a, REAL time ) const;                 // returns the cycle responsible for a hole
 
-    void BlowHole	( REAL dbeg, REAL dend, gCycle * holer ); // blow a hole into the wall form distance dbeg to dend
+    void BlowHole	( REAL dbeg, REAL dend, gExplosion * holer ); // blow a hole into the wall form distance dbeg to dend
 
     REAL BegPos() const;
     REAL EndPos() const;

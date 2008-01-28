@@ -57,7 +57,7 @@ REAL gExplosion::expansionTime = 0.2f;
 static eCoord s_explosionCoord;
 static REAL   s_explosionRadius;
 static REAL	  s_explosionTime;
-static gCycle * s_holer = 0;
+static gExplosion * s_holer = 0;
 
 // blow a hole centered at s_explosionCoord with radius s_explosionRadius into wall w
 static void S_BlowHoles( eWall * w )
@@ -143,8 +143,7 @@ gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& col
         listID(-1),
         owner_(owner) 
 {
-    if ( owner )
-        owner->holeAccountedFor_ = false;
+    holeAccountedFor_ = false;
 
     lastTime = time;
     explosion_r = color.r;
@@ -218,7 +217,7 @@ bool gExplosion::Timestep(REAL currentTime){
         REAL factor = expansion / REAL( expansionSteps );
         s_explosionRadius = gCycle::ExplosionRadius() * sqrt(factor);
         s_explosionTime = createTime;
-        s_holer = owner_;
+        s_holer = this;
 
         if ( s_explosionRadius > 0 && (currentTime < createTime+4) )
         {
@@ -277,6 +276,13 @@ void gExplosion::PassEdge(const eWall *,REAL ,REAL ,int){}
 
 void gExplosion::Kill(){
     createTime=lastTime-100;
+}
+
+bool gExplosion::AccountForHole()
+{
+    bool ret = !holeAccountedFor_;
+    holeAccountedFor_ = true;
+    return ret;
 }
 
 void gExplosion::OnNewWall( eWall* w )
@@ -399,4 +405,10 @@ void gExplosion::SoundMix(Uint8 *dest,unsigned int len,
     sound.Mix(dest,len,viewer,rvol*4,lvol*4);
 }
 #endif
+
+void gExplosion::RemoveFromGame()
+{
+    sg_Explosions.Remove( this, listID );
+    RemoveFromList();
+}
 

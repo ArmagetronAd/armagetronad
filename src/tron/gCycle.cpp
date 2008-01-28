@@ -2071,7 +2071,6 @@ struct gCycleVisuals
 void gCycle::MyInitAfterCreation(){
     dropWallRequested_ = false;
     lastGoodPosition_ = pos;
-    holeAccountedFor_ = false;
 
 #ifdef DEBUG
     // con << "creating cycle.\n";
@@ -3271,17 +3270,23 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
             gPlayerWall const * w = dynamic_cast< gPlayerWall const * >( ww );
             if ( w )
             {
-                gCycle * holer = w->Holer( a, time );
-                if ( holer && !holer->holeAccountedFor_ && 
-                     holer->Player() &&
-                     Player() &&
-                     holer->Player()->CurrentTeam() == Player()->CurrentTeam() &&
-                     w->Cycle() && w->Cycle()->Player() &&
-                     w->Cycle()->Player()->CurrentTeam() != Player()->CurrentTeam()
-                    )
+                gExplosion * explosion = w->Holer( a, time );
+                if ( explosion )
                 {
-                    holer->holeAccountedFor_ = true;
-                    holer->Player()->AddScore( score_hole, tOutput("$player_win_hole"), tOutput("$player_lose_hole") );
+                    gCycle * holer = explosion->GetOwner();
+                    if ( holer && holer->Player() &&
+                         Player() &&
+                         w->Cycle() && w->Cycle()->Player() &&
+                         holer->Player()->CurrentTeam() == Player()->CurrentTeam() &&       // holer must have been a teammate 
+                         w->Cycle()->Player()->CurrentTeam() != Player()->CurrentTeam()  // wall must have been an enemy
+                        )
+                    {
+                        // this test must come last, it resets the flag.
+                        if ( explosion->AccountForHole() )
+                        {
+                            holer->Player()->AddScore( score_hole, tOutput("$player_win_hole"), tOutput("$player_lose_hole") );
+                        }
+                    }
                 }
             }
 

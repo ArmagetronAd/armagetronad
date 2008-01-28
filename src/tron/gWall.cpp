@@ -1352,7 +1352,7 @@ bool gPlayerWall::IsDangerous( REAL a, REAL time ) const
 }
 
 // returns the guy who holed here
-gCycle * gPlayerWall::Holer( REAL a, REAL time ) const
+gExplosion * gPlayerWall::Holer( REAL a, REAL time ) const
 {
     CHECKWALL;
 
@@ -1387,7 +1387,7 @@ REAL gPlayerWall::BegTime() const
     return netWall_->Time( netWall_->Alpha( this->begDist_ ) );
 }
 
-void gPlayerWall::BlowHole	( REAL beg, REAL end, gCycle * holer )
+void gPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
 {
     CHECKWALL;
 
@@ -2378,7 +2378,7 @@ bool gNetPlayerWall::IsDangerous( REAL a, REAL time ) const
 }
 
 // returns the guy who holed here
-gCycle * gNetPlayerWall::Holer( REAL a, REAL time ) const
+gExplosion * gNetPlayerWall::Holer( REAL a, REAL time ) const
 {
     CHECKWALL;
 
@@ -2421,7 +2421,7 @@ REAL gNetPlayerWall::BegTime() const
     return coords_(0).Time;
 }
 
-void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gCycle * holer )
+void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
 {
     CHECKWALL;
 
