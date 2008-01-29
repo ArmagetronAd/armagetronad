@@ -181,6 +181,21 @@ static bool sg_RequestLANcontinuously = false;
 
 void gServerBrowser::BrowseMaster()
 {
+    BrowseSpecialMaster(0,"");
+}
+
+// the currently active master
+static nServerInfoBase * sg_currentMaster = 0;
+nServerInfoBase * gServerBrowser::CurrentMaster()
+{
+    return sg_currentMaster;
+}
+
+
+void gServerBrowser::BrowseSpecialMaster( nServerInfoBase * master, char const * prefix )
+{
+    sg_currentMaster = master;
+
     sg_RequestLANcontinuously = false;
 
     sn_ServerInfoCreator *cback = nServerInfo::SetCreator(&CreateGServer);
@@ -199,7 +214,7 @@ void gServerBrowser::BrowseMaster()
     sr_textOut=true;
 
     nServerInfo::DeleteAll();
-    nServerInfo::GetFromMaster();
+    nServerInfo::GetFromMaster( master, prefix );
     nServerInfo::Save();
 
     //  gLogo::SetBig(true);
@@ -218,8 +233,9 @@ void gServerBrowser::BrowseMaster()
     sg_TalkToMaster = false;
 
     nServerInfo::SetCreator(cback);
-}
 
+    sg_currentMaster = master;
+}
 
 void gServerBrowser::BrowseLAN()
 {

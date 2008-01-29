@@ -150,13 +150,16 @@ public:
         return w;
     }
 
-    // destroys the gameobject (in the game)
+    //! called when the round ends
+    virtual void OnRoundEnd();
+
+    //! destroys the gameobject (in the game)
     virtual void Kill();
 
-    // tells whether the object is alive
+    //! tells whether the object is alive
     virtual bool Alive() const {return false;}
 
-    // draws it to the screen using OpenGL
+    //! draws object to the screen using OpenGL
     virtual void Render(const eCamera *cam);
 
     // draws it to the screen in two dimensions using OpenGL (ie. for the HUD map)

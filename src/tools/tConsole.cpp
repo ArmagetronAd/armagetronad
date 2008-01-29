@@ -230,13 +230,14 @@ void tConsole::RegisterMessageCallback(MessageCallback *a_callback)
     s_callback = a_callback;
 }
 
-void tConsole::Message(const tOutput& message, const tOutput& interpretation, REAL timeout){
+bool tConsole::Message(const tOutput& message, const tOutput& interpretation, REAL timeout){
     if (s_callback)
-        (*s_callback)(message, interpretation, timeout);
+        return (*s_callback)(message, interpretation, timeout);
     else
     {
         con << tString(message) << ":\n";
         con << tString(interpretation) << '\n';
+        return true;
     }
 }
 

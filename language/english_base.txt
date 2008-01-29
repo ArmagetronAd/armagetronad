@@ -139,10 +139,13 @@ enemy_chatbot_penalty_help        Penalty in seconds if the victim is in chatbot
 enemy_currenttime_influence_help  If set to 1, not the build time of the encountered wall, but the current time enters the comparison of enemy influences. Arbitrary blending values are allowed.
 enemy_suicide_timeout_help        If no enemy influence can be found for the last this many seconds, a player's death counts as a suicide.
 score_die_help                      Amount of points you get for dying
+score_survive_help                  What you get for surviving
+score_hole_help                     What you get for making a hole for your teammates
 score_kill_help                     Amount of points you get for killing someone
 score_suicide_help                  Amount of points you get for stupidly dying
 score_win_help                      Amount of points you get for winning a round
 score_deathzone_help                Amount of points you get for hitting the Death Zone
+
 sp_score_win_help			What you get for winning a round in single player mode
 sp_walls_stay_up_delay_help	Number of seconds the walls stay up after a player died; negative values will keep them up forever.
 sp_walls_length_help		Length of the cycle walls in meters; negative values will make the walls infinite.
@@ -695,6 +698,9 @@ filter_color_names_help		    Filter color codes from player names.
 filter_name_ends_help           Filter whitespace and other junk from beginnings and ends of player names.
 filter_name_middle_help         Filter excess whitespace and other junk from the middle of player names.
 filter_color_server_names_help	Filter color codes from server names in the server browser.
+
+zone_alpha_help             Transparency factor for zone rendering. 1.0 gives full strength.
+zone_alpha_server_help      Transparency factor for zone rendering, controlled by the server. 1.0 gives full strength.
 
 #screen mode
 custom_screen_height_help	Custom screen size
@@ -1388,9 +1394,6 @@ network_custjoin_port_help	The network port the server listens on; must match th
 network_custjoin_name_text	Server Name:
 network_custjoin_name_help	The name or IP adress of the server you wish to join
 
-network_custjoin_connect_text	Connect To Server
-network_custjoin_connect_help	Enter the game grid!
-
 #network host menu
 network_host_text		Host Network Game
 network_host_help		Start a server.
@@ -1407,13 +1410,29 @@ network_host_host_help		Enter the game grid! Other players are allowed to join y
 bookmarks_menu              Server Bookmarks
 bookmarks_menu_help         Add, edit, and connect to your server bookmarks.
 bookmarks_menu_edit         Edit Bookmarks
-bookmarks_menu_edit_help    Edit and add server bookmarks.
+bookmarks_menu_edit_help    Edit and add favorite servers.
 bookmarks_menu_edit_slot    Edit \1
 bookmarks_menu_address      Address
 bookmarks_menu_address_help The address of the server to connect to.
 bookmarks_menu_name         Name
 bookmarks_menu_name_help    The name of the server. This is used only for display, not functional purposes.
 bookmarks_menu_connect      Connect to \1
+bookmarks_menu_edit_connect_text	Connect To Server
+bookmarks_menu_edit_connect_help	Enter the game grid!
+
+
+masters_menu                Subcultures
+masters_menu_help           Add, edit, and connect to alternative master servers for special purposes.
+masters_menu_edit           Edit Subcultures
+masters_menu_edit_help      Edit and add subcultures.
+masters_menu_edit_slot      Edit \1
+masters_menu_address        Address
+masters_menu_address_help   The address of the master server managing the subculture.
+masters_menu_name           Name
+masters_menu_name_help      The name of the subculture. This is used only for display, not functional purposes.
+masters_menu_connect        Browse \1
+masters_menu_edit_connect_text	Browse Subculture
+masters_menu_edit_connect_help	Opens a master server like server browser specialized for servers of this subculture.
 
 friends_menu				Mates
 friends_menu_help			Edit your mates.
@@ -2147,9 +2166,12 @@ instant_death_activated		Death zone activated! Avoid it!\n
 
 player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
+player_win_held_fortress	\1 was awarded \2 points for holding the base.\n
+player_lose_held_fortress	\1 lost \2 points for being too defensive.\n
 player_win_conquest_specific \1 was awarded \2 points for conquering \3's base.\n
 player_kill_collapse        \1 was eradicated by its collapsing zone.\n
-player_win_survive			\1 was awarded \2 points for holding the base.\n
+player_win_hole             \1 got \2 points for a sacrifice for the good of the team.\n
+player_lose_hole            0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
 
 zone_collapse_harmless      \1's zone collapses harmlessly for lack of enemy contacts.\n
 
@@ -2189,6 +2211,7 @@ player_lose_default		\1 lost \2 points for a very strange reason.\n
 player_lose_suicide		\1 committed suicide and lost \2 points.\n
 player_free_suicide		\1 committed suicide.\n
 player_win_frag			\1 core dumped \3 for \2 points.\n
+player_win_survive		\1 got \2 points for surviving.\n
 player_free_frag		\1 core dumped \2.\n
 player_teamkill			\1 core dumped teammate \2! Boo! No points for that!\n
 player_win_frag_ai		\1 got \2 points for core dumping an AI player.\n
@@ -2329,7 +2352,7 @@ network_login_sync2		Syncing again...\n
 network_login_done		Done!\n
 
 network_kill_log            User \1 kicked, reason given to him: \2\n
-network_redirect            \n\nYou will now be redirected to the server \1:\2.\n
+network_redirect            \n\nYou will now be redirected to the server \1:\2. You can prevent that by pressing ESC.\n
 network_kill_preface		Reason given by server:
 network_kill_maxidgrabber	It ran out of IDs; your client was the one occupying most of them for himself. The reason for this can be a bug.
 network_kill_maxiduser		It ran out of IDs; your client was the one occupying most of them.
@@ -2513,6 +2536,7 @@ config_file_write_error		Could not write configuratrion file!\n
 config_value_changed		\1 changed from \2 to \3.\n
 config_error_read		Input error reading \1: invalid format.\n
 config_message_info		\1 is currently set to \2.\n
+config_sighup           SIGHUP received, reloading configuration.\n
 
 nconfig_errror_protected	No way. Only the server can change \1.\n
 nconfig_error_unknown		Got conf message for unknown setting \1.\n\nYOU PROBABLY SHOULD UPGRADE ARMAGETRON ADVANCED!!!\n

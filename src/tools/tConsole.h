@@ -70,7 +70,7 @@ class tConsole
 {
 public:
     // callback for messages the user should read
-    typedef void MessageCallback(const tOutput& message, const tOutput& interpretation, REAL timeout);
+    typedef bool MessageCallback(const tOutput& message, const tOutput& interpretation, REAL timeout);
 
     virtual ~tConsole();
 
@@ -85,7 +85,7 @@ public:
     void CenterDisplay(tString s,REAL timeout=5,REAL r=1,REAL g=1,REAL b=1);
 
     // give a message to the user
-    static void Message(const tOutput& message, const tOutput& interpetation, REAL timeout = -1);
+    static bool Message(const tOutput& message, const tOutput& interpetation, REAL timeout = -1);
 
     virtual tString ColorString(REAL r, REAL g, REAL b) const;
 

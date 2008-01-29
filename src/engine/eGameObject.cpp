@@ -588,6 +588,8 @@ bool eGameObject::Timestep(REAL t){
 }
 // return value: shall this object be destroyed?
 
+void eGameObject::OnRoundEnd(){}
+
 void eGameObject::Kill(){}
 
 // draws it to the screen using OpenGL

@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -213,7 +213,7 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
         tBeg-=t;
         tEnd-=t;
         t=t%4;
-        while(t<0)
+        while (t<0)
             t+=4;
         gWallRim_mp[t]->Select();
     }
@@ -262,7 +262,7 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
 
 #ifndef WIN32
         Vertex(0,0,1,0);
-#else  
+#else
         Vertex(0.001f,0.001f,1,0); // Windows OpenGL has problems with
         // infitite points perpenticular to the viewing direction
 #endif
@@ -294,7 +294,7 @@ void gWallRim::RenderReal(const eCamera *cam){
         const eCoord *p1=&EndPoint(0);
         const eCoord *p2=&EndPoint(1);
 
-        if(bf_cull)
+        if (bf_cull)
             glDisable(GL_CULL_FACE);
 
         REAL X_SCALE=sg_RimStretchX;
@@ -470,7 +470,7 @@ void gWallRim::RenderReal(const eCamera *cam){
 
             REAL ta=tBeg;
             eCoord ca=P1;
-            for(int i=int(ceil(tBeg));i<tEnd;i++){
+            for (int i=int(ceil(tBeg));i<tEnd;i++){
                 eCoord cb=P1+(P2-P1)*((i-tBeg)/(tEnd-tBeg));
                 gWallRim_helper(ca,cb,ta,i,h,Z_SCALE,sw);
                 ca=cb;
@@ -495,7 +495,7 @@ void gWallRim::RenderReal(const eCamera *cam){
 
         //eWall::Render_helper(edge,(p1->x+p1->y)/SCALE,(p2->x+p2->y)/SCALE,40,height);
 
-        if(bf_cull)
+        if (bf_cull)
             glEnable(GL_CULL_FACE);
 
         if ( transparency )
@@ -582,7 +582,7 @@ REAL gWallRim::SeeHeight( void )
 #ifdef DEBUG
 #define CHECKWALL this->Check();
 #else
-#define CHECKWALL 
+#define CHECKWALL
 #endif
 
 gPlayerWall::gPlayerWall(gNetPlayerWall*w, gCycle *p)
@@ -820,7 +820,7 @@ void gPlayerWall::Split(eWall *& w1,eWall *& w2,REAL a){
     	for ( i = coords_.Len() - divindex - 1 ; i>=0; --i )
     		W2->coords_(i) = coords_( divindex + i );
 
-    	W2->coords_(0).Pos  = mp;	
+    	W2->coords_(0).Pos  = mp;
     	W2->coords_(0).Time = mt;
 
     	if ( flipped )
@@ -1063,7 +1063,7 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
 
 
     if (hfrac>0){
-        if(upperlinecolor(r,g,b,a)){
+        if (upperlinecolor(r,g,b,a)){
 
             // draw additional upper line
             sr_DepthOffset(true);
@@ -1088,7 +1088,7 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
         }
 #else
         static const REAL extrarise = 0;
-#endif 
+#endif
         BeginQuads();
         glEdgeFlag(GL_FALSE);
         glTexCoord2f(ta,hfrac);
@@ -1168,7 +1168,7 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
         BeginLineStrip();
         sr_CheckGLError();
 
-        for(int i=0;i<=segs;i++){
+        for (int i=0;i<=segs;i++){
             REAL frag=i/float(segs);
             REAL rat=ra+frag*(re-ra);
             REAL x=(p1.x+frag*(p2.x-p1.x))*(1-xfunc(rat))+ppos.x*xfunc(rat);
@@ -1200,7 +1200,7 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
 
     //ppos=ePlayer->pos-ePlayer->dir*gCYCLE__LEN;
 
-    for(int i=0;i<=segs;i++){
+    for (int i=0;i<=segs;i++){
         REAL frag=i/float(segs);
         REAL rat=ra+frag*(re-ra);
         REAL x=(p1.x+frag*(p2.x-p1.x))*(1-xfunc(rat))+ppos.x*xfunc(rat);
@@ -1380,6 +1380,14 @@ bool gPlayerWall::IsDangerous( REAL a, REAL time ) const
     return netWall_->IsDangerous( LocalToGlobal( a ), time );
 }
 
+// returns the guy who holed here
+gExplosion * gPlayerWall::Holer( REAL a, REAL time ) const
+{
+    CHECKWALL;
+
+    return netWall_->Holer( LocalToGlobal( a ), time );
+}
+
 REAL gPlayerWall::EndPos() const
 {
     CHECKWALL;
@@ -1408,11 +1416,11 @@ REAL gPlayerWall::BegTime() const
     return netWall_->Time( netWall_->Alpha( this->begDist_ ) );
 }
 
-void gPlayerWall::BlowHole	( REAL beg, REAL end )
+void gPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
 {
     CHECKWALL;
 
-    this->netWall_->BlowHole( beg, end );
+    this->netWall_->BlowHole( beg, end, holer );
 }
 
 /*
@@ -1429,7 +1437,7 @@ void gPlayerWall::Clamp	(  )
 	int end = IndexAlpha(1.0f);
 	gPlayerWallCoord* ecoord = &coords[end];
 	S_Mix( ecoord, 1.0f, ecoord[1] );
-	
+
 	// useful coordinates now lie between begin and end+1
 
 	// throw away junk at the beginning
@@ -1531,7 +1539,7 @@ void gNetPlayerWall::MyInitAfterCreation()
         return;
     tASSERT( Wall()->Splittable() );
 
-    for(int i=MAX_VIEWERS-1;i>=0;i--)
+    for (int i=MAX_VIEWERS-1;i>=0;i--)
         Wall()->SetVisHeight(i,0);
 
     Wall()->Remove();
@@ -1546,7 +1554,7 @@ gNetPlayerWall::gNetPlayerWall(gCycle *cyc,
         id(-1),griddedid(-1),
         cycle_(cyc),lastWall_(NULL),dir(d),dbegin(dbeg),
         beg(begi),end(begi),tBeg(tBegi),tEnd(tBegi),
-inGrid(false){
+        inGrid(false){
     dir=dir; // Don't normalize: *REAL(1/sqrt(dir.NormSquared()));
     preliminary=(sn_GetNetState()==nCLIENT);
     obsoleted_=-100;
@@ -1665,7 +1673,9 @@ void gNetPlayerWall::Checkpoint()
 
     // copy the last coordinate entry
     int len = coords_.Len();
-    coords_[len] = coords_[len-1];
+
+    // temporary is required to compensate for growing array nightmare
+    coords_[len] = gPlayerWallCoord( coords_[len-1] );
 
     CHECKWALL;
 }
@@ -1713,7 +1723,7 @@ void gNetPlayerWall::real_CopyIntoGrid(eGrid *grid){
     grid->Check();
 #endif
 
-    if(griddedid<0){
+    if (griddedid<0){
         if ( this->cycle_ )
         {
             tASSERT( static_cast< bool >(this->edge_) );
@@ -1757,7 +1767,7 @@ void gNetPlayerWall::PartialCopyIntoGrid(eGrid *grid){
     grid->Check();
 #endif
 
-    if(griddedid<0 && bool(this->cycle_) && !preliminary ){
+    if (griddedid<0 && bool(this->cycle_) && !preliminary ){
 
         // just copy the current edge into the grid
         if ( this->edge_ ){
@@ -1799,7 +1809,7 @@ void gNetPlayerWall::s_CopyIntoGrid()
         con << "Many walls: " << (maxw=sg_netPlayerWalls.Len()) << '\n';
 #endif
 
-    for(int i=sg_netPlayerWalls.Len()-1;i>=0;i--){
+    for (int i=sg_netPlayerWalls.Len()-1;i>=0;i--){
         gNetPlayerWall *w=sg_netPlayerWalls(i);
         if (w->inGrid && w->griddedid<0 && se_GameTime()>w->gridding)
             w->real_CopyIntoGrid(w->cycle_->Grid());
@@ -1936,7 +1946,8 @@ gNetPlayerWall::gNetPlayerWall(nMessage &m)
 
 eCoord gNetPlayerWall::Vec()
 {
-    if ( edge_ ) return edge_->Vec(); else return eCoord();
+    if ( edge_ ) return edge_->Vec();
+    else return eCoord();
 }
 
 gPlayerWall *gNetPlayerWall::Wall(){
@@ -1986,7 +1997,7 @@ gNetPlayerWall::~gNetPlayerWall()
     ReleaseData();
 
 #ifndef DEDICATED
-    if(this->displayList_!=0)
+    if (this->displayList_!=0)
         glDeleteLists(this->displayList_,1);
 #endif
 }
@@ -2107,7 +2118,7 @@ void gNetPlayerWall::ReadSync(nMessage &m){
 
     real_Update(tEnd_new,end_new, true);
 
-    if(Wall() && new_inGrid && !inGrid)
+    if (Wall() && new_inGrid && !inGrid)
     {
         /*
         		if ( ( beg - end ).NormSquared() > 0.01f )
@@ -2165,7 +2176,9 @@ void gNetPlayerWall::PrintName(tString &s) const
     }
 }
 
-gCycleMovement *gNetPlayerWall::CycleMovement() const {return cycle_;}
+gCycleMovement *gNetPlayerWall::CycleMovement() const {
+    return cycle_;
+}
 
 void gNetPlayerWall::Clear()
 {
@@ -2173,7 +2186,7 @@ void gNetPlayerWall::Clear()
     //	return;
 
     int i;
-    for(i=sg_netPlayerWalls.Len()-1;i>=0;i--){
+    for (i=sg_netPlayerWalls.Len()-1;i>=0;i--){
         // sg_netPlayerWalls(i)->owner=sn_myNetID;
         //delete sg_netPlayerWalls(i);
         gNetPlayerWall* w = sg_netPlayerWalls(i);
@@ -2186,7 +2199,7 @@ void gNetPlayerWall::Clear()
             w->edge_->Wall()->Insert();
 
     }
-    for(i=sg_netPlayerWallsGridded.Len()-1;i>=0;i--){
+    for (i=sg_netPlayerWallsGridded.Len()-1;i>=0;i--){
         // sg_netPlayerWallsGridded(i)->owner=sn_myNetID;
         gNetPlayerWall* w = sg_netPlayerWallsGridded(i);
         tControlledPTR< nNetObject > bounce( w );
@@ -2199,7 +2212,7 @@ void gNetPlayerWall::Clear()
 
 void gNetPlayerWall::Check() const
 {
-#ifdef DEBUG	
+#ifdef DEBUG
     int i;
     for ( i = coords_.Len() -2 ; i>=0; --i )
     {
@@ -2324,7 +2337,7 @@ bool gNetPlayerWall::IsDangerousAnywhere( REAL time ) const
     return true;
 }
 
-bool gNetPlayerWall::IsDangerous( REAL a, REAL time ) const
+bool gNetPlayerWall::IsDangerousApartFromHoles( REAL a, REAL time ) const
 {
     CHECKWALL;
 
@@ -2377,8 +2390,36 @@ bool gNetPlayerWall::IsDangerous( REAL a, REAL time ) const
             return false;
     }
 
+    return true;
+}
+
+bool gNetPlayerWall::IsDangerous( REAL a, REAL time ) const
+{
+    CHECKWALL;
+
+    if ( !IsDangerousApartFromHoles( a, time ) )
+    {
+        return false;
+    }
+
     const gPlayerWallCoord* coord = &coords_(IndexAlpha(a));
     return coord->IsDangerous;
+}
+
+// returns the guy who holed here
+gExplosion * gNetPlayerWall::Holer( REAL a, REAL time ) const
+{
+    CHECKWALL;
+
+    // it does not count as a hole if the wall has expired already
+    // for other reasons
+    if ( !IsDangerousApartFromHoles( a, time ) )
+    {
+        return false;
+    }
+
+    const gPlayerWallCoord* coord = &coords_(IndexAlpha(a));
+    return coord->holer;
 }
 
 REAL gNetPlayerWall::EndPos() const
@@ -2409,7 +2450,7 @@ REAL gNetPlayerWall::BegTime() const
     return coords_(0).Time;
 }
 
-void gNetPlayerWall::BlowHole	( REAL beg, REAL end )
+void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
 {
     CHECKWALL;
 
@@ -2514,6 +2555,7 @@ void gNetPlayerWall::BlowHole	( REAL beg, REAL end )
     // enter the hole
     coords_(begind+1).IsDangerous = false;
     coords_(begind+1).Time        = begtime;
+    coords_(begind+1).holer       = holer;
     coords_(begind+1).Pos         = beg;
     coords_(begind+2).Time        = endtime;
     coords_(begind+2).Pos         = end;

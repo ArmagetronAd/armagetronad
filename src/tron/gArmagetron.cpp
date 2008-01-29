@@ -75,7 +75,6 @@ static gCommandLineJumpStartAnalyzer sg_jumpStartAnalyzer;
 #endif
 #endif
 
-
 // data structure for command line parsing
 class gMainCommandLineAnalyzer: public tCommandLineAnalyzer
 {

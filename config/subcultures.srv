@@ -1,17 +1,8 @@
 ServerBegin
-connection  armagetron.kicks-ass.net
+connection  master1.armagetronad.net
 port        4532
 method      0
 key         0  
 tna         0
 name        Competitions
-ServerEnd
-
-ServerBegin
-connection  generalconsumption.org
-port        4533
-method      0
-key         0  
-tna         0
-name        Ladle Servers
 ServerEnd

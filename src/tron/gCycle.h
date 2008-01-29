@@ -197,6 +197,8 @@ protected:
 
     virtual void RemoveFromGame(); // call this instead of the destructor
 
+    virtual void OnRoundEnd();    //!< called when the round ends
+
     // virtual REAL            DoGetDistanceSinceLastTurn  (                               ) const     ;   //!< returns the distance since the last turn
 public:
     virtual void Die ( REAL time )  ;  //!< dies at the specified time

@@ -34,10 +34,27 @@ void st_ToDo(tTODO_FUNC *td){ // postpone something
     tToDos[tToDos.Len()]=td;
 }
 
+// a lone (but relatively safe) function pointer for things to do triggered by signals.
+static tTODO_FUNC * st_toDoFromSignal = 0;
+
 void st_DoToDo(){ // do the things that have been postponed
+    if ( st_toDoFromSignal )
+    {
+        st_ToDo( st_toDoFromSignal );
+        st_toDoFromSignal = 0;
+    }
     while (tToDos.Len()){
         tTODO_FUNC *td=tToDos[tToDos.Len()-1];
         tToDos.SetLen(tToDos.Len()-1);
         (*td)();
     }
+}
+
+void st_ToDo_Signal(tTODO_FUNC *td){ // postpone something
+    // simply ignore double todos from signals.
+    if ( st_toDoFromSignal )
+    {
+        return;
+    }
+    st_toDoFromSignal = td;
 }

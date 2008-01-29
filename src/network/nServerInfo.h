@@ -132,6 +132,7 @@ protected:
     bool		login2_;		// flag indicating whether the second version of the logic can be tried
 
     int     timesNotAnswered; // number of times the server did not answer to information queries recently
+    bool    stillOnMasterServer; // flag indicating whether the server is still listed on the master
 
     // human information
     tString name;             // the human name of the server ("Z-Man's Armagetron Server");
@@ -235,9 +236,9 @@ public:
     static nServerInfo* GetMasters();              //!< get the list of master servers
     static nServerInfo* GetRandomMaster();         //!< gets a random master server
 
-    static void GetFromMaster(nServerInfo *masterInfo=NULL);  // get all the basic infos from the master server
+    static void GetFromMaster(nServerInfoBase *masterInfo=NULL, char const * fileSuffix = NULL );  // get all the basic infos from the master server, stored in the server info file of the given suffix
 
-    static void TellMasterAboutMe(nServerInfo *masterInfo=NULL);  // dedicated server: tell master server about my existence
+    static void TellMasterAboutMe(nServerInfoBase *masterInfo=NULL);  // dedicated server: tell master server about my existence
 
     static void GetFromLAN(unsigned int pollBeginPort=4534, unsigned int pollEndPort=4544);                            // get all the basic infos from a LAN broadcast
 

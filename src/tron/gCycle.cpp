@@ -197,7 +197,11 @@ static REAL sg_GetSyncIntervalSelf( gCycle* cycle )
 //static bool moviepack_hack=false;       // do we use it?
 //static tSettingItem<bool> ump("MOVIEPACK_HACK",moviepack_hack);
 
+static int score_hole=0;
+static tSettingItem<int> s_h("SCORE_HOLE",score_hole);
 
+static int score_survive=0;
+static tSettingItem<int> s_sur("SCORE_SURVIVE",score_survive);
 
 static int score_die=-2;
 static tSettingItem<int> s_d("SCORE_DIE",score_die);
@@ -2313,7 +2317,7 @@ void gCycle::RemoveFromGame()
         if ( this->Alive() && lastTime < se_GameTime() + 10.0f )
         {
             Die( lastTime );
-            tNEW(gExplosion)(grid, pos, lastTime, color_);
+            tNEW(gExplosion)(grid, pos, lastTime, color_, this);
         }
 
         if ( sn_GetNetState() == nSERVER )
@@ -2330,6 +2334,17 @@ void gCycle::RemoveFromGame()
     delete joystick_;
     joystick_ = NULL;
 }
+
+// called when the round ends
+void gCycle::OnRoundEnd()
+{
+    // give survival bonus
+    if ( Alive() && player )
+    {
+        Player()->AddScore( score_survive, tOutput("$player_win_survive"), tOutput() );
+    }
+}
+
 
 static inline void rotate(eCoord &r,REAL angle){
     REAL x=r.x;
@@ -3228,12 +3243,12 @@ bool gCycle::EdgeIsDangerous(const eWall* ww, REAL time, REAL a) const{
     return gCycleMovement::EdgeIsDangerous( ww, time, a );
 }
 
-// turn one future walls of a cycle into gaping holes of nothingness if it inteed belongs to the cycle
+// turn future walls of a cycle into gaping holes of nothingness if it indeed belongs to the cycle
 static void sg_KillFutureWall( gCycle * cycle, gNetPlayerWall * wall )
 {
     if ( cycle && wall && wall->Cycle() == cycle && wall->Pos(1) > cycle->GetDistance() )
     {
-        wall->BlowHole( cycle->GetDistance(), wall->Pos(1) + 100 );
+        wall->BlowHole( cycle->GetDistance(), wall->Pos(1) + 100, 0 );
     }
 }
 
@@ -3266,6 +3281,30 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
             // request a sync for everyone if this is a non-bogus wall passage, maybe not all clients know the wall is passable
             if ( ( !currentWall || ww != currentWall->Wall() ) && ( !lastWall || ww != lastWall->Wall() ) )
                 RequestSyncAll();
+            
+            // check whether we drove through a hole in an enemy wall made by a teammate
+            gPlayerWall const * w = dynamic_cast< gPlayerWall const * >( ww );
+            if ( w )
+            {
+                gExplosion * explosion = w->Holer( a, time );
+                if ( explosion )
+                {
+                    gCycle * holer = explosion->GetOwner();
+                    if ( holer && holer->Player() &&
+                         Player() &&
+                         w->Cycle() && w->Cycle()->Player() &&
+                         holer->Player()->CurrentTeam() == Player()->CurrentTeam() &&       // holer must have been a teammate 
+                         w->Cycle()->Player()->CurrentTeam() != Player()->CurrentTeam()  // wall must have been an enemy
+                        )
+                    {
+                        // this test must come last, it resets the flag.
+                        if ( explosion->AccountForHole() )
+                        {
+                            holer->Player()->AddScore( score_hole, tOutput("$player_win_hole"), tOutput("$player_lose_hole") );
+                        }
+                    }
+                }
+            }
 
             return;
         }
@@ -3613,7 +3652,7 @@ void gCycle::Kill(){
         RequestSync(true);
         if (Alive()){
             Die( lastTime );
-            tNEW(gExplosion)(grid, pos,lastTime, color_);
+            tNEW(gExplosion)(grid, pos,lastTime, color_, this );
             //	 eEdge::SeethroughHasChanged();
 
             if ( currentWall )
@@ -5101,7 +5140,7 @@ void gCycle::ReadSync( nMessage &m )
         correctDistanceSmooth=0;
         DropWall( false );
 
-        tNEW(gExplosion)( grid, lastSyncMessage_.pos, lastSyncMessage_.time ,color_ );
+        tNEW(gExplosion)( grid, lastSyncMessage_.pos, lastSyncMessage_.time ,color_, this );
 
         return;
     }

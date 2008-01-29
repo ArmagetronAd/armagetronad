@@ -30,12 +30,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "eGameObject.h"
 
+class gCycle;
 struct gRealColor;
 
-class gExplosion: virtual public eGameObject
+class gExplosion: virtual public eGameObject, public tReferencable< gExplosion >
 { // Boom!
 public:
-    gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color);
+    gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color, gCycle * owner );
     virtual ~gExplosion();
 
     virtual bool Timestep(REAL currentTime);
@@ -53,11 +54,25 @@ public:
     //                      int viewer,REAL rvol,REAL lvol);
 #endif
 
+    bool AccountForHole(); // will return true exactly once per explosion; to be used to make the holing score only count once.
+
     static void OnNewWall( eWall* w );	// blow holes into a new wall
+
     //#ifdef USEPARTICLES
     int particle_handle_circle;
     int particle_handle_cylinder;
     //#endif
+
+    // returns the owner
+    gCycle * GetOwner() const
+    {
+        return owner_;
+    }
+
+    virtual void AddRef(){tReferencable< gExplosion >::AddRef();}
+    virtual void Release(){tReferencable< gExplosion >::Release();}
+    virtual void RemoveFromGame();
+
 private:
     REAL        createTime;
 
@@ -71,6 +86,10 @@ private:
     static int	expansionSteps;
     static REAL expansionTime;
 
+    bool holeAccountedFor_;  //!< flag indicating whether we already gave the player credit for making a hole for his teammates
+
     int 		listID;
+
+    tJUST_CONTROLLED_PTR< gCycle > owner_; // the owner/victim of the explosion
 };
 #endif

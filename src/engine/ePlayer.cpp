@@ -3480,6 +3480,72 @@ void ePlayerNetID::CompleteRebuild(){
     Update();
 }
 
+static int se_ColorDistance( int a[3], int b[3] )
+{
+    int distance = 0;
+    for( int i = 2; i >= 0; --i )
+    {
+        int diff = a[i] - b[i];
+        diff = diff < 0 ? -diff : diff;
+        if ( diff > distance )
+        {
+            distance = diff;
+        }
+    }
+
+    return distance;
+}
+
+bool se_randomizeColor = true;
+static tSettingItem< bool > se_randomizeColorConf( "PLAYER_RANDOM_COLOR", se_randomizeColor );
+
+static void se_RandomizeColor( ePlayer * l, ePlayerNetID * p )
+{
+    int currentRGB[3];
+    int newRGB[3];
+    int nullRGB[3]={0,0,0};
+
+    static tReproducibleRandomizer randomizer;
+
+    for( int i = 2; i >= 0; --i )
+    {
+        currentRGB[i] = l->rgb[i];
+        newRGB[i] = randomizer.Get(15);
+    }
+
+    int currentMinDiff = se_ColorDistance( currentRGB, nullRGB ) * 2;
+    int newMinDiff = se_ColorDistance( newRGB, nullRGB ) * 2;
+
+    // check the minimal distance of the new random color with all players
+    for ( int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
+    {
+        ePlayerNetID * other = se_PlayerNetIDs(i);
+        if ( other != p )
+        {
+            int color[3] = { other->r, other->g, other->b };
+            int currentDiff = se_ColorDistance( currentRGB, color );
+            int newDiff     = se_ColorDistance( newRGB, color );
+            if ( currentDiff < currentMinDiff )
+            {
+                currentMinDiff = currentDiff;
+            }
+            if ( newDiff < newMinDiff )
+            {
+                newMinDiff = newDiff;
+            }
+        }
+    }
+
+    // update current color
+    if ( currentMinDiff < newMinDiff )
+    {
+        for( int i = 2; i >= 0; --i )
+        {
+            l->rgb[i] = newRGB[i];
+        }
+    }
+}
+
 static nSettingItem<int> se_pingCharityServerConf("PING_CHARITY_SERVER",sn_pingCharityServer );
 static nVersionFeature   se_pingCharityServerControlled( 14 );
 
@@ -3521,6 +3587,12 @@ void ePlayerNetID::Update(){
             if (bool(p) && in_game){ // update
                 p->favoriteNumberOfPlayersPerTeam=ePlayer::PlayerConfig(i)->favoriteNumberOfPlayersPerTeam;
                 p->nameTeamAfterMe=ePlayer::PlayerConfig(i)->nameTeamAfterMe;
+
+                if ( se_randomizeColor )
+                {
+                    se_RandomizeColor(local_p,p);
+                }
+
                 p->r=ePlayer::PlayerConfig(i)->rgb[0];
                 p->g=ePlayer::PlayerConfig(i)->rgb[1];
                 p->b=ePlayer::PlayerConfig(i)->rgb[2];

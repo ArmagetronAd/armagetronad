@@ -7,20 +7,20 @@
 # use this target if you're OK with the project's defaults and
 # want updated file timestamps
 rebeautify:
-	ARTISTIC_STYLE_OPTIONS=$(srcdir)/config/astylerc sh $(srcdir)/batch/make/beautify -t $(srcdir) .beautytag.re
+#	ARTISTIC_STYLE_OPTIONS=$(srcdir)/config/astylerc sh $(srcdir)/batch/make/beautify -t $(srcdir) .beautytag.re
 
 # use this target if you want to switch between your settings
 # (beautify-personal) and the project defaults to get back to
 # the defaults (timestamps stay untouched)
 beautify:
 	rm -f $(srcdir)/.beautytag.personal
-	ARTISTIC_STYLE_OPTIONS=$(srcdir)/config/astylerc sh $(srcdir)/batch/make/beautify $(srcdir) .beautytag
+#	ARTISTIC_STYLE_OPTIONS=$(srcdir)/config/astylerc sh $(srcdir)/batch/make/beautify $(srcdir) .beautytag
 
 # use this target to run astyle with your personal settings for
 # it (but remember to do "make beautify" before comitting to Subversion!)
 beautify-personal:
 	rm -f $(srcdir)/.beautytag $(srcdir)/.beautytag.re
-	ARTISTIC_STYLE_OPTIONS=~/.astylerc sh $(srcdir)/batch/make/beautify $(srcdir) .beautytag.personal 
+#	ARTISTIC_STYLE_OPTIONS=~/.astylerc sh $(srcdir)/batch/make/beautify $(srcdir) .beautytag.personal 
 
 ##########
 # Checks #

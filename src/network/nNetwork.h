@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nObserver.h"
 //#include "tCrypt.h"
 #include "tException.h"
+#include <memory>
 
 class nSocket;
 class nAddress;

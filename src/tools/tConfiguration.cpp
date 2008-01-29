@@ -45,6 +45,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <vector>
 #include <string.h>
 
+#ifndef WIN32
+#include <signal.h>
+#endif
+
 bool           tConfItemBase::printChange=true;
 bool           tConfItemBase::printErrors=true;
 
@@ -542,13 +546,17 @@ static tExtraConfigCommandLineAnalyzer s_extraAnalyzer;
 // config from the experimental client's wrath.
 char const * st_userConfigs[] = { "user_3_0.cfg", "user.cfg", 0 };
 
-void st_LoadConfig()
+static void st_InstallSigHupHandler();
+
+void st_LoadConfig( bool printChange )
 {
+    st_InstallSigHupHandler();
+
     const tPath& var = tDirectories::Var();
     const tPath& config = tDirectories::Config();
     const tPath& data = tDirectories::Data();
 
-    tConfItemBase::printChange=false;
+    tConfItemBase::printChange=printChange;
 #ifdef DEDICATED
     tConfItemBase::printErrors=false;
 #endif
@@ -604,6 +612,34 @@ void st_SaveConfig()
     }
 }
 
+void st_LoadConfig()
+{
+    st_LoadConfig( false );
+}
+
+static void st_DoHandleSigHup()
+{
+    con << tOutput("$config_sighup");
+    st_SaveConfig();
+    st_LoadConfig();
+}
+
+static void st_HandleSigHup( int signal )
+{
+    st_ToDo_Signal( st_DoHandleSigHup );
+}
+
+static void st_InstallSigHupHandler()
+{
+#ifndef WIN32
+    static bool installed = false;
+    if ( !installed )
+    {
+        signal( SIGHUP, &st_HandleSigHup );
+        installed = true;
+    }
+#endif
+}
 
 void tConfItemLine::ReadVal(std::istream &s){
     tString dummy;
@@ -679,23 +715,6 @@ static void SInclude(std::istream& s )
 
 static tConfItemFunc s_Include("INCLUDE",  &Include);
 static tConfItemFunc s_SInclude("SINCLUDE",  &SInclude);
-
-static void RInclude(std::istream& s)
-{
-    tString file;
-    s >> file;
-
-    tString rclcl = tResourceManager::locateResource(NULL, file);
-    if ( rclcl ) {
-        std::ifstream rc(rclcl);
-        tConfItemBase::LoadAll(rc);
-        return;
-    }
-
-    con << tOutput( "$config_rinclude_not_found", file );
-}
-
-static tConfItemFunc s_RInclude("RINCLUDE",  &RInclude);
 
 // obsoleted settings that still are around in some distruted configuration files
 static void st_Dummy(std::istream &s){tString rest; rest.ReadLine(s);}

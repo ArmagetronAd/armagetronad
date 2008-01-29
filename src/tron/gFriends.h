@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tString.h"
 #include "tList.h"
 #include "tConfiguration.h"
+#include <memory>
 
 #define MAX_FRIENDS 10
 
@@ -36,10 +37,10 @@ class gFriends
 private:
 
 public:
-	tString friends[MAX_FRIENDS];
+    tString friends[MAX_FRIENDS];
     std::auto_ptr< tConfItemLine > confItems[MAX_FRIENDS];
 
-	gFriends();
+    gFriends();
     static void FriendsMenu();
 };
 

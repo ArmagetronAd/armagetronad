@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 typedef void tTODO_FUNC();
 
+void st_ToDo_Signal(tTODO_FUNC *td); // postpone something, callable from a signal handler
 void st_ToDo(tTODO_FUNC *td); // postpone something
 void st_DoToDo(); // do the things that have been postponed
 

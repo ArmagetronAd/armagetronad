@@ -690,6 +690,7 @@ console_rows_max_help         Anzahl der Zeilen der Textausgabe (maximal beim Ho
 console_decorate_id_help      Jede Ausgabezeile wird mit der ID-Nummer des Clients, der sie verursacht hat, dekoriert
 console_decorate_ip_help      Jede Ausgabezeile wird mit der IP-Adresse des Clients, der sie verursacht hat, dekoriert
 console_ladder_log_help       Schickt das Ladder-Log auch an die Standardausgabe
+ladderlog_game_time_interval  Wenn dies auf einen positiven Wert gesetz wird, so wird alle n Sekunden eine Statusmeldung ins Ladder-Log geschrieben.
 show_fps_help                 Aktiviert Performance-Anzeige 
 floor_mirror_help             Spiegelung des Bodens
 floor_detail_help             Detail des Bodens
@@ -816,6 +817,15 @@ voice_help                    Kehrt SILENCE um
 allow_team_change_player_help Erlaubt einem bestimmten Speiler, einmal das Team zu wechseln
 disallow_team_change_player_help Kehrt ALLOW_TEAM_CHANGE_PLAYER um
 kick_help                     Wirft den angegebenen Spieler vom Server.
+default_kick_reason_help      Standardgrund für ein KICK-Kommando.
+kick_to_help                  Wirft den angegebenen Spieler vom Server, und, falls möglich, leitet ihn auf einen anderen Server weiter.
+move_to_help                  Wirft den angegebenen Spieler vom Server, und, falls möglich, leitet ihn auf einen anderen Server weiter. Hat keine schädlichen Nebenwirkungen.
+default_kick_to_reason_help   Standardgrund für ein KICK_TO/MOVE_TO-Kommando.
+default_kick_to_server        Standard-IP bzw. Name des Servers, auf den per KICK_TO oder MOVE_TO weitergeleitet wird.
+default_kick_to_port          Standard-Port des Servers, auf den per KICK_TO oder MOVE_TO weitergeleitet wird.
+vote_kick_to_server           IP bzw. Name des Servers, auf den per Abstimmungs-Rausschmiss weitergeleitet wird.
+vote_kick_to_port             Port des Servers, auf den per Abstimmungs-Rausschmiss weitergeleitet wird.
+
 ban_help                      Wirft den angegebenen Spieler vom Server und verbannt ihn für eine variable Zeit in Minuten.
 ban_ip_help                   Verbannt spieler von der angegebenen IP-Adresse für die angegebene Zeit in Minuten vom Server.
 ban_list_help                 Gibt die Liste der Verbannten IP-Adressen aus.
@@ -1362,9 +1372,6 @@ network_custjoin_port_help    Der Netzwerkport auf den der Server eingestellt is
 network_custjoin_name_text    Servername:
 network_custjoin_name_help    Der Rechnername oder die IP-Adresse des Rechners, auf dem der Server läuft
 
-network_custjoin_connect_text Verbindung aufbauen
-network_custjoin_connect_help Teleport zum Spieleraster!
-
 #network host menu
 network_host_text             Spiel leiten
 network_host_help             Startet einen Server; andere Spieler können sich dann verbinden.
@@ -1381,13 +1388,37 @@ network_host_host_help        Teleport zum Spieleraster! Andere Spieler können s
 bookmarks_menu                Lieblings-Server
 bookmarks_menu_help           Verwaltet die Lieblingsserver und initiiert Verbindungen.
 bookmarks_menu_edit           Verwaltung
-bookmarks_menu_edit_help      Verwaltet die Lieblingsserver
+bookmarks_menu_edit_help      Verwaltet die Server
 bookmarks_menu_edit_slot      Bearbeite \1
 bookmarks_menu_address        Adresse
 bookmarks_menu_address_help   Die Adresse des Servers
 bookmarks_menu_name           Name
 bookmarks_menu_name_help      Der Name des Servers. Wird nur für die Anzeige verwendet und hat keine Funktion, ist also frei wählbar.
 bookmarks_menu_connect        Verbindung zu \1 aufbauen
+
+bookmarks_menu_edit_connect_text Verbindung aufbauen
+bookmarks_menu_edit_connect_help Teleport zum Spieleraster!
+
+masters_menu                  Subkulturen
+masters_menu_help             Verbinde dich mit alternativen Gemeinschaften von Servern
+masters_menu_edit           Verwaltung
+masters_menu_edit_help      Verwaltet die Subkulturen
+masters_menu_edit_slot      Bearbeite \1
+masters_menu_address        Adresse
+masters_menu_address_help   Die Adresse des Master-Servers, der die Subkultur verwaltet
+masters_menu_name           Name
+masters_menu_name_help      Der Name der Subkultur. Wird nur für die Anzeige verwendet und hat keine Funktion, ist also frei wählbar.
+masters_menu_connect        Mit Subkultur \1 verbinden
+
+masters_menu_edit_connect_text Subkultur Betreten
+masters_menu_edit_connect_help Öffnet ein Master-Server-Browser-ähliches Menu mit allen Servern dieser Subkultur
+
+friends_menu                  Meine Freunde
+friends_menu_help             Trage hier deine Freude ein.
+friends_enable                Meine Freude
+friends_enable_help           Schaltet den Freunde-Filter an oder aus.
+friend_word                   Freund
+friend_help                   Server mit diesem Spieler werden angezeigt, wenn der Freunde-Filter aktiv ist.
 
 #********************************************
 #********************************************
@@ -1952,7 +1983,7 @@ menuitem_toggle_off           Aus
 #********************************************
 #********************************************
 
-timer_hickup                 Die Systemuhr scheint gerade um \1 Sekunden gesprungen zu sein. Wenn das hÃ¤ufger vorkommt, solltest Du ihre Funktion ueberpruefen.
+timer_hickup                  Die Systemuhr scheint gerade um \1 Sekunden gesprungen zu sein. Wenn das hÃ¤ufger vorkommt, solltest Du ihre Funktion ueberpruefen.
 
 #********************************************
 #********************************************
@@ -2079,7 +2110,7 @@ player_win_instant            \1 bekam \2 Punkte durch das Erreichen der Siegzon
 player_win_conquest           \1 bekam \2 Punkte für das erobern der Basis des Feindes.\n
 player_win_conquest_specific  \1 bekam \2 Punkte für das erobern der Basis von \3.\n
 player_kill_collapse          \1 wurde von seiner kollabierenden Zone vernichtet.\n
-player_win_survive            \1 bekam \2 Punkte für das Halten der eigenen Basis.\n
+player_win_held_fortress      \1 bekam \2 Punkte für das Halten der eigenen Basis.\n
 
 zone_collapse_harmless        \1s Zone verpufft harmlos wegen mangelden Feindkontakts.\n
 
@@ -2255,6 +2286,7 @@ network_login_sync2           Nochmal Synchronisieren...\n
 network_login_done            Fertig!\n
 
 network_kill_log              User \1 vom Server geworfen, Grund: \2\n
+network_redirect              \n\nDu wirst nun auf den Server \1:\2 weitergeleitet; du kannst das durch einen Druck auf ESC verhindern.\n
 network_kill_preface          Vom Server angegebener Grund:
 network_kill_maxidgrabber     Keine ObjektIDs mehr frei; Dein Client hatte die meisten davon für sich selbst belegt ( Bug? ).
 network_kill_maxiduser        Keine ObjektIDs mehr frei; Dein Client hatte die meisten davon belegt ( Bug? ).
@@ -2324,7 +2356,7 @@ network_master_servername     Servername
 network_master_score          Bewertung
 network_master_users          Benutzer
 network_master_ping           Ping
-network_master_browserhelp    Drücke Return/Enter, um eine Verbindung zu diesem Server aufzubauen, "p" um diesen Server anzuPingen, "r", um die gesamte Liste aufzufRischen, "+/-" um dem Server einen Bewertungsbonus/malus zu geben, "Pfeiltaste Links/Rechts" um die Sortierung zu ändern, oder "b", um den Server zu den LieBlingsservern hinzuzufügen. 
+network_master_browserhelp    Drücke Return/Enter, um eine Verbindung aufzubauen, "p" um diesen Server anzuPingen, "r", um die Liste aufzufRischen, "+/-" um dem Server einen Bewertungsbonus/malus zu geben, "Pfeiltaste Links/Rechts" um die Sortierung zu ändern, "m", um den Meine-Freude-Filter ein/auszuschalten, oder "b", um den Server zu den LieBlingsservern hinzuzufügen. 
 network_master_connecting     Verbindung mit \1 wird aufgebaut...\n
 network_master_send           Schicke meine Daten...\n
 network_master_reqlist        Fordere Server-Liste an...\n
@@ -2429,6 +2461,7 @@ sound_error_unsupported       Sound-Datei \1 ist leider in einem nicht unterstüt
 #********************************************
 
 config_include_not_found      Zu ladende Konfigurationsdatei "\1" nicht gefunden.\n
+config_rinclude_not_found     ZU ladende Konfigurations-Resource "\1" nicht gefunden.\n
 config_command_unknown        Kommando \1 unbekannt.\n
 config_command_other          Wahrscheinlich war in deinem Sinn:\n
 config_command_more           Es gibt noch weitere Kommandos, aber die wurden weggelassen, um die Konsole nicht zu überfluten.

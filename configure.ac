@@ -47,6 +47,8 @@ AC_ARG_VAR(CXXFLAGS,Flags passed to the C++ compiler)
 AC_ARG_VAR(DEBUGLEVEL,[Debug level for developers, normal users can safely ignore it. Accepted values go from 0 to 5. See README-DEVELOPER for details.])
 AC_ARG_VAR(CODELEVEL,[Code checking strictness level for developers, normal users can safely ignore it. Accepted values go from 0 to 4. See README-DEVELOPER for details.])
 AC_ARG_VAR(docstyle,[Documentation style for cross-building of documentation. Possible values: unix, web and windows.])
+AC_ARG_VAR(progname,[Program short name, default: armagetronad.])
+AC_ARG_VAR(progtitle,[Program long name, default: Armagetron Advanced.])
 
 dnl a modern autoconf is required to process this
 AC_PREREQ(2.50)
@@ -552,6 +554,19 @@ AC_MSG_ERROR([
 
 fi
 
+dnl *************************************************
+dnl         math
+dnl *************************************************
+
+if test $MATHLIB ; then
+AC_CHECK_LIB($MATHLIB, exp,,
+	AC_MSG_WARN([
+	You do not have the standard math library libm. Check
+	config.log for error messages and fix that.]
+	)
+)
+fi
+
 if test x$build_regular = xfalse; then
  AC_MSG_RESULT([
 
@@ -579,20 +594,6 @@ if test x$enable_dirty = xyes; then
   initialization method])
 fi
 
-
-
-dnl *************************************************
-dnl         math
-dnl *************************************************
-
-if test $MATHLIB ; then
-AC_CHECK_LIB($MATHLIB, exp,,
-	AC_MSG_WARN([
-	You do not have the standard math library libm. Check
-	config.log for error messages and fix that.]
-	)
-)
-fi
 
 dnl *************************************************
 dnl         SDL
