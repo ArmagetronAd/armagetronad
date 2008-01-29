@@ -39,6 +39,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 #include <iosfwd>
 
+// Includes required for GCC 4.3 only. Remove them as soon as some of 
+// us developers have GCC 4.3, then it is of course better to only put them
+// where they are needed.
+#include <string.h>
+#include <memory>
+#include <typeinfo>
+#include <cstdlib>
+// end of GCC 4.3 includes
+
 // maximum number of supported viewports
 #ifndef MAX_VIEWERS
 #define MAX_VIEWERS 4
