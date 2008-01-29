@@ -404,6 +404,11 @@ REAL gZone::Radius( void ) const
     return GetRadius();
 }
 
+// extra alpha blending factors
+static REAL sg_zoneAlpha = 1.0, sg_zoneAlphaServer = 1.0;
+static tSettingItem< REAL > sg_zoneAlphaConf( "ZONE_ALPHA", sg_zoneAlpha );
+static nSettingItem< REAL > sg_zoneAlphaConfServer( "ZONE_ALPHA_SERVER", sg_zoneAlphaServer );
+
 // *******************************************************************************
 // *
 // *	Render
@@ -423,6 +428,8 @@ void gZone::Render( const eCamera * cam )
         alpha = .7f;
     if ( alpha <= 0 )
         return;
+
+    alpha *= sg_zoneAlpha * sg_zoneAlphaServer;
 
     GLfloat m[4][4]={{rotation_.x,rotation_.y,0,0},
                      {-rotation_.y,rotation_.x,0,0},

@@ -715,6 +715,9 @@ filter_name_ends_help           Filter whitespace and other junk from beginnings
 filter_name_middle_help         Filter excess whitespace and other junk from the middle of player names.
 filter_color_server_names_help	Filter color codes from server names in the server browser.
 
+zone_alpha_help             Transparency factor for zone rendering. 1.0 gives full strength.
+zone_alpha_server_help      Transparency factor for zone rendering, controlled by the server. 1.0 gives full strength.
+
 #screen mode
 custom_screen_height_help	Custom screen size
 custom_screen_width_help	Custom screen size
