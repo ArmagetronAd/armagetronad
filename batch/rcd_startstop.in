@@ -64,6 +64,9 @@ case "$1" in
 
 	echo -e "${return}"
 	;;
+    reload)
+    kill -HUP `cat ${MAINPIDFILE}`
+    ;;
     restart)
 	$0 stop  ;  sleep 1 ; $0 start  || return=${rc_failed}
 	;;
@@ -84,7 +87,7 @@ case "$1" in
 	tail -f ${LOGFILE}
 	;;
     *)
-	echo "Usage: $0 {start|stop|status|restart|log}"
+	echo "Usage: $0 {start|stop|reload|status|restart|log}"
 	exit 1
 esac
 
