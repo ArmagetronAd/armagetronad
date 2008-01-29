@@ -891,6 +891,7 @@ void sg_PlayerMenu(int Player){
     uMenu camera_menu("$player_camera_text");
     uMenu chat_menu("$player_chat_text");
     //  name.Clear();
+    chat_menu.SetCenter(-.5);
 
     uMenuItemString *ic[MAX_INSTANT_CHAT];
 
