@@ -41,7 +41,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRecorder.h"
 #include "tCommandLine.h"
 #include "tResourceManager.h"
-#include "tToDo.h"
 
 #include <vector>
 #include <string.h>
@@ -694,7 +693,7 @@ static void st_DoHandleSigHup()
 
 static void st_HandleSigHup( int signal )
 {
-    st_ToDo( st_DoHandleSigHup );
+    st_ToDo_Signal( st_DoHandleSigHup );
 }
 
 static void st_InstallSigHupHandler()
