@@ -13,6 +13,7 @@
 #include <algorithm>
 // For dumping errors
 #include <sstream>
+#include <typeinfo>
 
 // Compute the inverse matrix of the plane basis.
 static inline void NewBasis(const pVec &u, const pVec &v, pVec &s1, pVec &s2)

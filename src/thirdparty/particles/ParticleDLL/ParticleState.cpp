@@ -15,6 +15,7 @@
 #include "papi.h"
 
 #include <iostream>
+#include <typeinfo>
 
 // This is global just as a cheezy way to change dt for all actions easily.
 float PActionBase::dt;

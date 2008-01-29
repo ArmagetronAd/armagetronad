@@ -11,6 +11,7 @@
 #define PVEC_H_INCLUDED
 
 #include <iostream>
+#include <cstdlib>
 
 #include <math.h>
 

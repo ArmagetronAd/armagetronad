@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "gFriends.h"
 #include "uMenu.h"
+#include <memory>
 
 static bool sg_enableFriends = false;
 static tConfItem< bool > sg_enableFriendsConf( "ENABLE_FRIENDS", sg_enableFriends );

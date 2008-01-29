@@ -47,6 +47,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConfiguration.h"
 #include "tRecorder.h"
 #include "rTextureRenderTarget.h"
+#include <memory>
 
 #ifndef DEDICATED
 #include "SDL_thread.h"
