@@ -1904,6 +1904,7 @@ void sg_HostGame(){
         while(numPlayers == 0 &&
                 (ded_idle<.0001 || tSysTimeFloat()<startTime + ded_idle * 3600 ) && !uMenu::quickexit ){
             sr_Read_stdin();
+            st_DoToDo();
             gGame::NetSyncIdle();
 
             sn_BasicNetworkSystem.Select( 1.0f );
