@@ -165,15 +165,80 @@ static void change_mapfile(std::istream &s)
 */
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
-//it is a semi-colon deliminated list of maps, needs semi-colon at the end
-//ie, original/map-1.0.1.xml;original/map-1.0.1.xml;
-int maprotationpos = 0;
-static tString maprotation("");
-static tSettingItem<tString> conf_maprotation("MAP_ROTATION",maprotation);
+// config item for semi-colon deliminated list of maps/configs, needs semi-colon at the end
+// ie, original/map-1.0.1.xml;original/map-1.0.1.xml;
+class tSettingRotation: public tConfItemBase
+{
+public:
+    tSettingRotation( char const * name )
+    : tConfItemBase( name ),
+      current_(0)
+    {
+    }
 
-int configrotationpos = 0;
-static tString configrotation("");
-static tSettingItem<tString> conf_configrotation("CONFIG_ROTATION",configrotation);
+    // the number of items
+    int Size() const
+    {
+        return items_.Len();
+    }
+
+    // returns the current value
+    tString const & Current() const
+    {
+        tASSERT( Size() > 0 && current_ >= 0 && current_ < Size() );
+
+        return items_[current_];
+    }
+
+    // rotates
+    void Rotate()
+    {
+        if ( ++current_ >= items_.Len() )
+        {
+            current_ = 0;
+        }
+    }
+private:
+    virtual void ReadVal( std::istream &is )
+    {
+        tString mapsT;
+        mapsT.ReadLine (is);
+        items_.SetLen (0);
+        
+        int strpos = 0;
+        int nextsemicolon = mapsT.StrPos(";");
+        
+        if (nextsemicolon != -1)
+        {
+            do
+            {
+                tString const &map = mapsT.SubStr(strpos, nextsemicolon - strpos);
+                
+                strpos = nextsemicolon + 1;
+                nextsemicolon = mapsT.StrPos(strpos, ";");
+                
+                items_.Insert(map);
+            }
+            while ((nextsemicolon = mapsT.StrPos(strpos, ";")) != -1);
+        }
+
+        // make sure the current value is correct
+        if ( current_ >= items_.Len() )
+        {
+            current_ = 0;
+        }
+    }
+
+    virtual void WriteVal(std::ostream &s){}
+    virtual bool Writable(){return false;}
+    virtual bool Save(){return false;}
+
+    tArray<tString> items_; // the various values the rotating config can take
+    int current_;           // the index of the current 
+};
+
+static tSettingRotation sg_mapRotation("MAP_ROTATION");
+static tSettingRotation sg_configRotation("CONFIG_ROTATION");
 
 //0 = never, 1 = round, 2 = match
 static int rotationtype = 0;
@@ -1795,7 +1860,6 @@ void net_game(){
     (&net_menu,"$network_custjoin_text",
      "$network_custjoin_help",&gServerFavorites::CustomConnectMenu);
 
-
     uMenuItemFunction fav
     (&net_menu,"$bookmarks_menu",
      "$bookmarks_menu_help",&gServerFavorites::FavoritesMenu);
@@ -2715,6 +2779,11 @@ void gGame::StateUpdate(){
 
             se_UserShowScores(false);
 
+            // rotate, if rotate is once per round
+            if (rotationtype == 1)
+                rotate();
+            gRotation::HandleNewRound();
+
             //con.autoDisplayAtNewline=true;
             sr_con.fullscreen=true;
             SetState(GS_DELETE_OBJECTS,GS_DELETE_GRID);
@@ -3167,11 +3236,6 @@ void gGame::Analysis(REAL time){
                 tOutput message;
                 message << "$gamestate_winner_winner";
 
-                if (rotationtype == 1)
-                    rotate();
-
-                gRotation::HandleNewRound();
-
                 if ( last_team_alive >= 0 )
                     sg_currentSettings->AutoAI( eTeam::teams( last_team_alive )->NumHumanPlayers() > 0 );
 
@@ -3412,51 +3476,22 @@ void gGame::Analysis(REAL time){
 
 void rotate()
 {
-    //map && || config rotation
-    if (maprotation.StrPos(";") != -1)
+    if ( sg_mapRotation.Size() > 0 )
     {
-        tString mapsT(maprotation);
-        tArray<tString> maps;
-        int nummaps = 0;
-        while (mapsT.StrPos(";") != -1)
-        {
-            maps.Insert(mapsT.SubStr(0, mapsT.StrPos(";")));
-            mapsT = mapsT.SubStr(mapsT.StrPos(";") + 1);
-            nummaps++;
-        }
-        if (maprotationpos > nummaps)
-            maprotationpos = 0;
-
-        tString output;
-        output << "MAP_FILE " << maps[maprotationpos];
-        std::stringstream s(static_cast< char const * >( output ) );
-        tConfItemBase::LoadLine(s);
-
-        maprotationpos++;
+        conf_mapfile.Set( sg_mapRotation.Current() );
+        sg_mapRotation.Rotate();
     }
 
-    if (configrotation.StrPos(";") != -1)
+    if ( sg_configRotation.Size() > 0 )
     {
-        tString configsT(configrotation);
-        tArray<tString> configs;
-        int numconfigs = 0;
-        while (configsT.StrPos(";") != -1)
-        {
-            configs.Insert(configsT.SubStr(0, configsT.StrPos(";")));
-            configsT = configsT.SubStr(configsT.StrPos(";") + 1);
-            numconfigs++;
-        }
-        if (configrotationpos > numconfigs)
-            configrotationpos = 0;
-
         const tPath& config = tDirectories::Config();
         std::ifstream s;
-        if ( config.Open( s, configs[configrotationpos] ) )
+        if ( config.Open( s, sg_configRotation.Current() ) )
         {
             tConfItemBase::LoadAll( s );
         }
 
-        configrotationpos++;
+        sg_configRotation.Rotate();
     }
 }
 
@@ -3899,6 +3934,11 @@ void sg_EnterGameCore( nNetState enter_state ){
     {
         sg_currentSettings = &singlePlayer;
         sg_copySettings();
+
+        // initiate rotation
+        rotate();
+        gRotation::HandleNewRound();
+        gRotation::HandleNewMatch();
     }
 
     //gStatistics - original load call
