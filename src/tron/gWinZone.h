@@ -172,6 +172,8 @@ private:
     virtual void CheckSurvivor();                      //!< checks for the only surviving zone
     virtual void OnRoundEnd();                         //!< called on the end of the round
 
+    void ZoneWasHeld();                                //!< call when the zone was held as long as possible with the set game rules
+
     static void CountZonesOfTeam( eGrid const * grid, eTeam * otherTeam, int & count, gBaseZoneHack * & farthest ); //!< counts the zones belonging to the given team.
 
     REAL conquered_;                       //!< conquest status; zero if it is free, 1 if it has been completely conquered by the enemy

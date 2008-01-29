@@ -740,6 +740,8 @@ void gBaseZoneHack::CountZonesOfTeam( eGrid const * grid, eTeam * otherTeam, int
     }
 }
 
+static int sg_onSurviveScore = 0;
+static tSettingItem< int > sg_onSurviveConquestScoreConfig( "FORTRESS_HELD_SCORE", sg_onSurviveScore );
 
 // *******************************************************************************
 // *
@@ -815,7 +817,17 @@ bool gBaseZoneHack::Timestep( REAL time )
             if ( sg_conquestDecayRate < 0 )
             {
                 if ( team )
-                    sn_ConsoleOut( tOutput( "$zone_collapse_harmless", team->Name()  ) );
+                {
+                    if ( sg_onSurviveScore != 0 )
+                    {
+                        // give player the survive score bonus right now, they deserve it
+                        ZoneWasHeld();
+                    }
+                    else
+                    {
+                        sn_ConsoleOut( tOutput( "$zone_collapse_harmless", team->Name()  ) );
+                    }
+                }
                 conquered_ = 1.0;
             }
         }
@@ -1091,9 +1103,29 @@ void gBaseZoneHack::CheckSurvivor( void )
     }
 }
 
-static int sg_onSurviveScore = 0;
-static tSettingItem< int > sg_onSurviveConquestScoreConfig( "FORTRESS_HELD_SCORE", sg_onSurviveScore );
+// *******************************************************************************
+// *
+// *   ZoneWasHeld
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
 
+void gBaseZoneHack::ZoneWasHeld( void )
+{
+    // survived?
+    if ( currentState_ == State_Safe )
+    {
+        // award owning team
+        if ( team && team->Alive() )
+        {
+            team->AddScore( sg_onSurviveScore, tOutput("$player_win_held_fortress"), tOutput("$player_lose_held_fortress") );
+        }
+
+        currentState_ = State_Conquering;
+    }
+}
 
 // *******************************************************************************
 // *
@@ -1109,11 +1141,7 @@ void gBaseZoneHack::OnRoundEnd( void )
     // survived?
     if ( currentState_ == State_Safe )
     {
-        // award owning team
-        if ( team && team->Alive() )
-        {
-            team->AddScore( sg_onSurviveScore, tOutput("$player_win_held_fortress"), tOutput("$player_lose_held_fortress") );
-        }
+        ZoneWasHeld();
     }
 }
 
