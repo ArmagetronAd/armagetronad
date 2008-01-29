@@ -41,9 +41,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRecorder.h"
 #include "tCommandLine.h"
 #include "tResourceManager.h"
+#include "tToDo.h"
 
 #include <vector>
 #include <string.h>
+
+#ifndef WIN32
+#include <signal.h>
+#endif
 
 /***********************************************************************
  * The new Configuration interface, currently not completely implemented
@@ -612,13 +617,17 @@ private:
 static tExtraConfigCommandLineAnalyzer s_extraAnalyzer;
 #endif
 
-void st_LoadConfig()
+static void st_InstallSigHupHandler();
+
+void st_LoadConfig( bool printChange )
 {
+    st_InstallSigHupHandler();
+
     const tPath& var = tDirectories::Var();
     const tPath& config = tDirectories::Config();
     const tPath& data = tDirectories::Data();
 
-    tConfItemBase::printChange=false;
+    tConfItemBase::printChange=printChange;
 #ifdef DEDICATED
     tConfItemBase::printErrors=false;
 #endif
@@ -671,6 +680,34 @@ void st_SaveConfig()
     }
 }
 
+void st_LoadConfig()
+{
+    st_LoadConfig( false );
+}
+
+static void st_DoHandleSigHup()
+{
+    con << tOutput("$config_sighup");
+    st_SaveConfig();
+    st_LoadConfig();
+}
+
+static void st_HandleSigHup( int signal )
+{
+    st_ToDo( st_DoHandleSigHup );
+}
+
+static void st_InstallSigHupHandler()
+{
+#ifndef WIN32
+    static bool installed = false;
+    if ( !installed )
+    {
+        signal( SIGHUP, &st_HandleSigHup );
+        installed = true;
+    }
+#endif
+}
 
 void tConfItemLine::ReadVal(std::istream &s){
     tString dummy;

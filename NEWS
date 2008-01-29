@@ -54,6 +54,7 @@ Changes since 0.2.8.2:
   console
 
   Featurelets:
+- Configuration files get reloaded on SIGHUP
 - A subculture list for server groups that are not managed by our main master servers
 - A friends list and filter for the server browser that shows you only servers with
   your friends on them.
