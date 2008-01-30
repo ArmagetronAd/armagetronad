@@ -1131,6 +1131,7 @@ void gBaseZoneHack::ZoneWasHeld( void )
         }
 
         currentState_ = State_Conquering;
+        enemies_.clear();
     }
 }
 
