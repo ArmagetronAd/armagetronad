@@ -436,6 +436,11 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
                 // no. Skip to the next line
                 WriteChar('\n');
                 c++;
+                for ( int i = parIndent-1; i >= 0; --i )
+                {
+                    WriteChar(' ');
+                    cursorPos++;
+                }
                 continue;
             }
         }

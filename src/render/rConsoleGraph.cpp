@@ -111,6 +111,7 @@ void rConsole::Render(){
 
             rTextField out(-.95f,.99f,rCWIDTH_CON,rCHEIGHT_CON);//,&rFont::s_defaultFontSmall);
             out.SetWidth(static_cast<int>(1.9f/rCWIDTH_CON));
+            out.SetIndent(3);
 
             int i;
             for(i=currentTop;i<=currentIn && i<=currentTop+MaxHeight();i++)
