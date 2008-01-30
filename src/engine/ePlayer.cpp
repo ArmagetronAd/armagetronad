@@ -3202,8 +3202,8 @@ static void se_RandomizeColor( ePlayer * l, ePlayerNetID * p )
         newRGB[i] = randomizer.Get(15);
     }
 
-    int currentMinDiff = se_ColorDistance( currentRGB, nullRGB ) * 2;
-    int newMinDiff = se_ColorDistance( newRGB, nullRGB ) * 2;
+    int currentMinDiff = se_ColorDistance( currentRGB, nullRGB )/2;
+    int newMinDiff = se_ColorDistance( newRGB, nullRGB )/2;
 
     // check the minimal distance of the new random color with all players
     for ( int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
