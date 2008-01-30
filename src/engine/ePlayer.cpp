@@ -80,7 +80,12 @@ public:
     PasswordStorage(): save(false){};
 };
 
-
+static bool operator == ( PasswordStorage const & a, PasswordStorage const & b )
+{
+    return
+    a.username == b.username;
+}
+    
 static tArray<PasswordStorage> S_passwords;
 
 void se_DeletePasswords(){
@@ -155,7 +160,19 @@ public:
             PasswordStorage &storage = S_passwords[S_passwords.Len()];
             nKrawall::ReadScrambledPassword(s, storage.password);
             storage.username.ReadLine(s);
+
             storage.save = true;
+
+            // check for duplicates
+            for( int i = S_passwords.Len() - 2; i >= 0; --i )
+            {
+                PasswordStorage &other = S_passwords[i];
+                if ( other == storage )
+                {
+                    storage.save = false;
+                    break;
+                }
+            }
         }
     }
 };
