@@ -1122,7 +1122,7 @@ void gBaseZoneHack::CheckSurvivor( void )
 void gBaseZoneHack::ZoneWasHeld( void )
 {
     // survived?
-    if ( currentState_ == State_Safe )
+    if ( currentState_ == State_Safe && sg_onSurviveScore != 0 )
     {
         // award owning team
         if ( team && team->Alive() )
