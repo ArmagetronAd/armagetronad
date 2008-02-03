@@ -191,8 +191,8 @@ AC_SUBST(enable_desktop)
 
 AC_ARG_ENABLE(ruby,
 	AC_HELP_STRING([--enable-ruby],
-		[enable ruby scripting api.  Requires ruby to be installed. (default=enabled)]),,
-enable_ruby=yes)
+		[enable ruby scripting api.  Requires ruby to be installed. (default=disabled)]),,
+enable_ruby=no)
 AC_SUBST(enable_ruby)
 AM_CONDITIONAL(ENABLE_RUBY, test "x$enable_ruby" = "xyes")
 
