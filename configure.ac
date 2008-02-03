@@ -614,7 +614,7 @@ AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
 AC_MSG_ERROR([You need the library SDL to compile Armagetron. Read the file doc/install_linux.html.])
 ,)
 
-dnl ********************************************* OPTIONAL STUFF AFTER THIS POINT ***********************************
+dnl ***************** OPTIONAL STUFF AFTER THIS POINT **********************
 
 dnl *************************************************
 dnl         Sound
