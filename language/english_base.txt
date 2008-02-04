@@ -2539,6 +2539,7 @@ access_level_ips_help          Minimal access level you need for seeing IPs of p
 access_level_spy_team_help     Minimal access level you need for seeing /team messages as a spectator.
 access_level_spy_msg_help      Minimal access level you need for seeing /msg messages directed to others.
 access_level_play_help         Minimal access level for playing
+access_level_shuffle_up_help   Minimal access level for shuffling up
 access_level_play_sliding_help Sliding minimal access level for playing; if enough players of a higher access level than given by ACCESS_LEVEL_PLAY are online, their level will be the minimal level for play; however, it will never be higher than ACCESS_LEVEL_PLAY_SLIDING.
 access_level_play_sliders_help The access level required to play will only slide up if at least this many players of a higher level are online.
 access_level_play_changed      Access level required to play changed from \1 to \2.\n
