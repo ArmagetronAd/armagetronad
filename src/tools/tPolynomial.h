@@ -41,8 +41,9 @@ class tPolynomial
 public:
 
     tPolynomial();  //!< constructor
-    tPolynomial(int count);  //!< constructor
+    explicit tPolynomial(int count);  //!< constructor
     tPolynomial(REAL newCoefs[], int count);  //!< constructor
+    tPolynomial(REAL value);  //!< constructor for constant polynomial
     tPolynomial(tArray<REAL> newCoefs);  //!< constructor
     tPolynomial(const tPolynomial<T> &tf);  //!< constructor
 
@@ -140,6 +141,14 @@ tPolynomial<T>::tPolynomial(REAL newCoefs[], int count)  //!< constructor
 {
     for (int i=0; i<coefs.Len(); i++)
         coefs[i] = newCoefs[i];
+}
+
+template <typename T>
+tPolynomial<T>::tPolynomial(REAL value)  //!< constructor for constant polynomial
+        : baseValueOfVariable(0.0),
+        coefs(1)
+{
+    coefs[0] = value;
 }
 
 template <typename T>
