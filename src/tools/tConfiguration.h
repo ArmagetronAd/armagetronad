@@ -270,6 +270,9 @@ public:
     virtual bool Save();
 };
 
+// includes a single configuration file by name, searches in var and config directories
+void st_Include( tString const & file, bool reportError = true );
+
 void st_LoadConfig();
 void st_SaveConfig();
 

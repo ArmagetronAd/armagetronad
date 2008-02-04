@@ -685,22 +685,27 @@ void tConfItemFunc::WriteVal(std::ostream &){}
 
 bool tConfItemFunc::Save(){return false;}
 
-static void Include(std::istream& s, bool error )
+void st_Include( tString const & file, bool reportError )
 {
-    tString file;
-    s >> file;
-
     // refuse to load illegal paths
     if( !tPath::IsValidPath( file ) )
         return;
 
     if ( !Load( tDirectories::Var(), file ) )
     {
-        if (!Load( tDirectories::Config(), file ) && error )
+        if (!Load( tDirectories::Config(), file ) && reportError )
         {
             con << tOutput( "$config_include_not_found", file );
         }
     }
+}
+
+static void Include(std::istream& s, bool error )
+{
+    tString file;
+    s >> file;
+
+    st_Include( file, error );
 }
 
 static void Include(std::istream& s )

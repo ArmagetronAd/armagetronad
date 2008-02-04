@@ -3517,13 +3517,7 @@ void rotate()
 
     if ( sg_configRotation.Size() > 0 )
     {
-        const tPath& config = tDirectories::Config();
-        std::ifstream s;
-        if ( config.Open( s, sg_configRotation.Current() ) )
-        {
-            tConfItemBase::LoadAll( s );
-        }
-
+        st_Include( sg_configRotation.Current() );
         sg_configRotation.Rotate();
     }
 }
