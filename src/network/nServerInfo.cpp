@@ -41,7 +41,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nServerInfo.h"
 #include "nNetObject.h"
 #ifdef KRAWALL_SERVER
-#include "nAuthentification.h"
+#include "nAuthentication.h"
 #endif
 
 #include <fstream>
@@ -132,7 +132,7 @@ void ResultCallback(const tString& username,
         sn_Transmitting[user] = nServerInfo::GetFirstServer();
     }
     else
-        nAuthentification::RequestLogin(username, user, tOutput("$login_request_failed"), true);
+        nAuthentication::RequestLogin(username, user, tOutput("$login_request_failed"), true);
 }
 #endif // KRAWALL_SERVER_LEAGUE
 
@@ -1087,8 +1087,8 @@ void nServerInfo::GiveSmallServerInfo(nMessage &m)
         sn_GetAdr(m.SenderID(), adr);
         if (nKrawall::RequireMasterLogin(adr, port))
         {
-            nAuthentification::SetLoginResultCallback(&ResultCallback);
-            nAuthentification::RequestLogin(tString(""), m.SenderID(), tOutput("$login_request_master"));
+            nAuthentication::SetLoginResultCallback(&ResultCallback);
+            nAuthentication::RequestLogin(tString(""), m.SenderID(), tOutput("$login_request_master"));
         }
         else
         {

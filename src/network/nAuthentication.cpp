@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include "nAuthentification.h"
+#include "nAuthentication.h"
 #include "tMemManager.h"
 #include "tToDo.h"
 #include "tLocale.h"
@@ -68,25 +68,25 @@ static tString sn_AuthorityNoCheck;
 tConfItemLine  sn_AuthorityNoCheckConf( "AUTHORITY_NO_CHECK", sn_AuthorityNoCheck );
 #endif
 
-static nAuthentification::UserPasswordCallback* S_UserPasswordCallback = NULL;
-static nAuthentification::LoginResultCallback*  S_LoginResultCallback  = NULL;
+static nAuthentication::UserPasswordCallback* S_UserPasswordCallback = NULL;
+static nAuthentication::LoginResultCallback*  S_LoginResultCallback  = NULL;
 
 // let the game register the callbacks
-void nAuthentification::SetUserPasswordCallback(nAuthentification::UserPasswordCallback* callback)
+void nAuthentication::SetUserPasswordCallback(nAuthentication::UserPasswordCallback* callback)
 {
     S_UserPasswordCallback = callback;
 }
 
-void nAuthentification::SetLoginResultCallback (nAuthentification::LoginResultCallback* callback)
+void nAuthentication::SetLoginResultCallback (nAuthentication::LoginResultCallback* callback)
 {
     S_LoginResultCallback = callback;
 }
 
 // network handler declarations
 
-static nDescriptor nPasswordRequest(40, &nAuthentification::HandlePasswordRequest, "password_request");
+static nDescriptor nPasswordRequest(40, &nAuthentication::HandlePasswordRequest, "password_request");
 
-static nDescriptor nPasswordAnswer(41, &nAuthentification::HandlePasswordAnswer, "password_answer");
+static nDescriptor nPasswordAnswer(41, &nAuthentication::HandlePasswordAnswer, "password_answer");
 
 // password request and answer
 static nKrawall::nPasswordRequest sn_request;
@@ -126,7 +126,7 @@ static void FinishHandlePasswordRequest()
 }
 
 // receive a password request
-void nAuthentification::HandlePasswordRequest(nMessage& m)
+void nAuthentication::HandlePasswordRequest(nMessage& m)
 {
     if (m.SenderID() > 0 || sn_GetNetState() != nCLIENT)
         Cheater(m.SenderID());
@@ -980,7 +980,7 @@ static nCallbackLoginLogout reset(&sn_Reset);
 
 #endif // KRAWALL_SERVER
     
-void nAuthentification::HandlePasswordAnswer(nMessage& m)
+void nAuthentication::HandlePasswordAnswer(nMessage& m)
 {
 #ifdef KRAWALL_SERVER
     // find login pricess
@@ -995,7 +995,7 @@ void nAuthentification::HandlePasswordAnswer(nMessage& m)
 }
         
 // on the server: request user authentification from login slot
-bool nAuthentification::RequestLogin(const tString & authority, const tString& username, nNetObject & user, const tOutput& message )
+bool nAuthentication::RequestLogin(const tString & authority, const tString& username, nNetObject & user, const tOutput& message )
 {
 #ifdef KRAWALL_SERVER
     int userID = user.Owner();
@@ -1020,7 +1020,7 @@ bool nAuthentification::RequestLogin(const tString & authority, const tString& u
 }
 
 //! call when you have some time for lengthy authentication queries to servers
-void nAuthentification::OnBreak()
+void nAuthentication::OnBreak()
 {
 #ifdef KRAWALL_SERVER
     nMemberFunctionRunnerTemplate< nLoginProcess >::OnBreak();

@@ -43,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <deque>
 #include "rRender.h"
 #include "rSysdep.h"
-#include "nAuthentification.h"
+#include "nAuthentication.h"
 #include "tDirectories.h"
 #include "eTeam.h"
 #include "eVoter.h"
@@ -788,7 +788,7 @@ static void ResultCallback( nKrawall::nCheckResult const & result )
             // redo automatic logins immedeately
             if ( result.automatic )
             {
-                nAuthentification::RequestLogin( authority ,username , *player, "$login_request_failed" );
+                nAuthentication::RequestLogin( authority ,username , *player, "$login_request_failed" );
             }
         }
     }
@@ -971,9 +971,9 @@ static const tString& se_UserName()
 }
 
 ePlayer::ePlayer(){
-    nAuthentification::SetUserPasswordCallback(&PasswordCallback);
+    nAuthentication::SetUserPasswordCallback(&PasswordCallback);
 #ifdef KRAWALL_SERVER
-    nAuthentification::SetLoginResultCallback (&ResultCallback);
+    nAuthentication::SetLoginResultCallback (&ResultCallback);
 #endif
 
     nameTeamAfterMe = false;
@@ -1257,10 +1257,10 @@ static void se_RequestLogin( ePlayerNetID * p )
         }
 
         p->loginWanted = 
-        !nAuthentification::RequestLogin( authority, 
-                                          userName, 
-                                          *p, 
-                                          authority.Len() > 1 ? tOutput( "$login_request", authority ) : tOutput( "$login_request_local" ) );
+        !nAuthentication::RequestLogin( authority, 
+                                        userName, 
+                                        *p, 
+                                        authority.Len() > 1 ? tOutput( "$login_request", authority ) : tOutput( "$login_request_local" ) );
 #endif
     }
 }

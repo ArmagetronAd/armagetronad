@@ -66,8 +66,8 @@ libtools_a_SOURCES=	${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallba
 	tools/tMemManager.cpp tools/tMemManager.h
 
 #tools/tCommandLine.cpp tools/tCommandLine.h
-libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentification.cpp\
-	network/nAuthentification.h network/nConfig.cpp network/nConfig.h\
+libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentication.cpp\
+	network/nAuthentication.h network/nConfig.cpp network/nConfig.h\
 	network/nKrawall.cpp network/nKrawall.h network/nKrawallPrivate.cpp\
 	network/nNetObject.cpp network/nNetObject.h network/nNetwork.cpp network/nNetwork.h\
 	network/nObserver.cpp network/nObserver.h network/nPriorizing.cpp network/nPriorizing.h\

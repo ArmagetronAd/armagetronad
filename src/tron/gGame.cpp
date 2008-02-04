@@ -70,7 +70,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "gParser.h"
 #include "tResourceManager.h"
-#include "nAuthentification.h"
+#include "nAuthentication.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -3081,7 +3081,7 @@ void gGame::StateUpdate(){
         // unsigned short int mes1 = 1, mes2 = 1, mes3 = 1, mes4 = 1, mes5 = 1;
 
         // now would be a good time to tend for pending tasks
-        nAuthentification::OnBreak();
+        nAuthentication::OnBreak();
 
         switch(state){
         case GS_DELETE_GRID:
