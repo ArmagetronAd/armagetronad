@@ -71,7 +71,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tXmlParser.h"
 #include "gParser.h"
-#include "nAuthentification.h"
+#include "nAuthentication.h"
 
 //#include "uWebinterface.h"
 
