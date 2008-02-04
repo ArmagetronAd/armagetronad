@@ -406,9 +406,8 @@ void gExplosion::SoundMix(Uint8 *dest,unsigned int len,
 }
 #endif
 
-void gExplosion::RemoveFromGame()
+void gExplosion::DoRemoveFromGame()
 {
     sg_Explosions.Remove( this, listID );
-    RemoveFromList();
 }
 

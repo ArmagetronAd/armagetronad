@@ -2568,12 +2568,12 @@ gCycleMovement::~gCycleMovement( void )
     maxSpaceHit_ = NULL;
 }
 
-void gCycleMovement::RemoveFromGame()
+void gCycleMovement::OnRemoveFromGame()
 {
     delete maxSpaceHit_;
     maxSpaceHit_ = NULL;
 
-    eNetGameObject::RemoveFromGame();
+    eNetGameObject::OnRemoveFromGame();
 }
 
 // *******************************************************************************************

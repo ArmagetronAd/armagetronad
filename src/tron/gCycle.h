@@ -199,7 +199,7 @@ private:
 protected:
     virtual ~gCycle();
 
-    virtual void RemoveFromGame(); // call this instead of the destructor
+    virtual void OnRemoveFromGame(); // called when the cycle is physically removed from the game
 
     virtual void OnRoundEnd();    //!< called when the round ends
 

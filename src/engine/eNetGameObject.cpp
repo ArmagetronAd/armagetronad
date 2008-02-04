@@ -111,13 +111,11 @@ nNetObject(m){
     pingOverflow=0;
 }
 
-void eNetGameObject::RemoveFromGame(){
+void eNetGameObject::DoRemoveFromGame(){
     // let the object get deleted on exit if nobody else is interested
     tControlledPTR< eNetGameObject > bounce;
     if ( this->GetRefcount() >= 0 )
         bounce = this;
-
-    RemoveFromListsAll();
 
     // unregister from player
     if ( player && this == player->object )
@@ -126,8 +124,6 @@ void eNetGameObject::RemoveFromGame(){
     }
 
     team = NULL;
-
-    currentFace = 0;
 }
 
 eNetGameObject::~eNetGameObject(){

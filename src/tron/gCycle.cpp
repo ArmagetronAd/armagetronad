@@ -2315,7 +2315,7 @@ gCycle::~gCycle(){
     */
 }
 
-void gCycle::RemoveFromGame()
+void gCycle::OnRemoveFromGame()
 {
     // keep this cycle alive
     tJUST_CONTROLLED_PTR< gCycle > keep;
@@ -2343,7 +2343,7 @@ void gCycle::RemoveFromGame()
     currentWall=NULL;
     lastWall=NULL;
 
-    gCycleMovement::RemoveFromGame();
+    gCycleMovement::OnRemoveFromGame();
 }
 
 // called when the round ends
