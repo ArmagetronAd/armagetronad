@@ -2567,6 +2567,7 @@ trust_lan_help              If set to 1, the server assumes that your LAN is saf
 hash_method_blacklist_help  List of hash authentication methods to disable support for.
 
 login_message_requested     User \1 requests authentication as "\2@\3".\n
+login_message_delayed       Your login process will be delayed because the server configuration makes it impossible to be processed immedeately in the background. We're sorry for the inconvenience.\n
 login_message_responded     Password request sent to user \1, username "\2", method \3, message "\4".\n
 login_message               \3\1 has been logged in as \2.\n
 login_message_byorder       Order of \1: 

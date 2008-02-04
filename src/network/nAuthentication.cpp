@@ -390,6 +390,16 @@ public:
     {
         // install self reference to keep this object alive
         selfReference_ = this;
+
+    // inform the user about delays
+        bool delays = false;
+#ifdef HAVE_LIBZTHREAD
+        delays = tRecorder::IsRunning();
+#endif
+        if ( delays )
+        {
+            sn_ConsoleOut( tOutput( "$login_message_delayed" ), userID );
+        }
     }
 
     ~nLoginProcess()
