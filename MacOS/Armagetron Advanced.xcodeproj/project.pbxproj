@@ -101,7 +101,6 @@
 		8C11CA76095A2B6E007AE0EA /* gWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EF0089EEC7D007E21DC /* gWall.cpp */; };
 		8C11CA77095A2B6E007AE0EA /* gWinZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5EF2089EEC7D007E21DC /* gWinZone.cpp */; };
 		8C11CA78095A2B6E007AE0EA /* md5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E41089EEC7D007E21DC /* md5.cpp */; };
-		8C11CA79095A2B6E007AE0EA /* nAuthentification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E43089EEC7D007E21DC /* nAuthentification.cpp */; };
 		8C11CA7A095A2B6E007AE0EA /* nConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E45089EEC7D007E21DC /* nConfig.cpp */; };
 		8C11CA7B095A2B6E007AE0EA /* nKrawall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E49089EEC7D007E21DC /* nKrawall.cpp */; };
 		8C11CA7C095A2B6E007AE0EA /* nKrawallPrivate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E4B089EEC7D007E21DC /* nKrawallPrivate.cpp */; };
@@ -184,7 +183,6 @@
 		8CB97AD4096265A800AE8BCD /* eVoter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E35089EEC7D007E21DC /* eVoter.cpp */; };
 		8CB97AD5096265A800AE8BCD /* eWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E37089EEC7D007E21DC /* eWall.cpp */; };
 		8CB97AD6096265A800AE8BCD /* md5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E41089EEC7D007E21DC /* md5.cpp */; };
-		8CB97AD7096265A800AE8BCD /* nAuthentification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E43089EEC7D007E21DC /* nAuthentification.cpp */; };
 		8CB97AD8096265A800AE8BCD /* nConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E45089EEC7D007E21DC /* nConfig.cpp */; };
 		8CB97AD9096265A800AE8BCD /* nKrawall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E49089EEC7D007E21DC /* nKrawall.cpp */; };
 		8CB97ADA096265A800AE8BCD /* nKrawallPrivate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E4B089EEC7D007E21DC /* nKrawallPrivate.cpp */; };
@@ -287,7 +285,6 @@
 		8CBA5F22089EEC7E007E21DC /* eVoter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E35089EEC7D007E21DC /* eVoter.cpp */; };
 		8CBA5F24089EEC7E007E21DC /* eWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E37089EEC7D007E21DC /* eWall.cpp */; };
 		8CBA5F2D089EEC7E007E21DC /* md5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E41089EEC7D007E21DC /* md5.cpp */; };
-		8CBA5F2F089EEC7E007E21DC /* nAuthentification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E43089EEC7D007E21DC /* nAuthentification.cpp */; };
 		8CBA5F31089EEC7E007E21DC /* nConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E45089EEC7D007E21DC /* nConfig.cpp */; };
 		8CBA5F35089EEC7E007E21DC /* nKrawall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E49089EEC7D007E21DC /* nKrawall.cpp */; };
 		8CBA5F37089EEC7E007E21DC /* nKrawallPrivate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E4B089EEC7D007E21DC /* nKrawallPrivate.cpp */; };
@@ -386,6 +383,9 @@
 		9B5414EA0A45C7CB00745CE6 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414E80A45C7CB00745CE6 /* SDL.framework */; };
 		9B54150F0A45C7D700745CE6 /* SDL_image.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414E70A45C7CB00745CE6 /* SDL_image.framework */; };
 		9B5415100A45C7D700745CE6 /* SDL.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414E80A45C7CB00745CE6 /* SDL.framework */; };
+		9B5FE82F0D57B2FC004AC137 /* nAuthentication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5FE82E0D57B2FC004AC137 /* nAuthentication.cpp */; };
+		9B5FE8300D57B2FC004AC137 /* nAuthentication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5FE82E0D57B2FC004AC137 /* nAuthentication.cpp */; };
+		9B5FE8310D57B2FC004AC137 /* nAuthentication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B5FE82E0D57B2FC004AC137 /* nAuthentication.cpp */; };
 		9B69F6230A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */; };
 		9B69F6250A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */; };
 		9B69F6260A63E1A700F5F2E4 /* eLagCompensation.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */; };
@@ -518,8 +518,6 @@
 		8CBA5E38089EEC7D007E21DC /* eWall.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = eWall.h; sourceTree = "<group>"; };
 		8CBA5E41089EEC7D007E21DC /* md5.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = md5.cpp; sourceTree = "<group>"; };
 		8CBA5E42089EEC7D007E21DC /* md5.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = md5.h; sourceTree = "<group>"; };
-		8CBA5E43089EEC7D007E21DC /* nAuthentification.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = nAuthentification.cpp; sourceTree = "<group>"; };
-		8CBA5E44089EEC7D007E21DC /* nAuthentification.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = nAuthentification.h; sourceTree = "<group>"; };
 		8CBA5E45089EEC7D007E21DC /* nConfig.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = nConfig.cpp; sourceTree = "<group>"; };
 		8CBA5E46089EEC7D007E21DC /* nConfig.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = nConfig.h; sourceTree = "<group>"; };
 		8CBA5E49089EEC7D007E21DC /* nKrawall.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = nKrawall.cpp; sourceTree = "<group>"; };
@@ -693,6 +691,8 @@
 		9B5414A40A45C78200745CE6 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = /Library/Frameworks/ArmagetronAdvanced/current/SDL.framework; sourceTree = "<absolute>"; };
 		9B5414E70A45C7CB00745CE6 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = /Library/Frameworks/ArmagetronAdvanced/10.2.8/SDL_image.framework; sourceTree = "<absolute>"; };
 		9B5414E80A45C7CB00745CE6 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = /Library/Frameworks/ArmagetronAdvanced/10.2.8/SDL.framework; sourceTree = "<absolute>"; };
+		9B5FE82D0D57B2FC004AC137 /* nAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nAuthentication.h; sourceTree = "<group>"; };
+		9B5FE82E0D57B2FC004AC137 /* nAuthentication.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nAuthentication.cpp; sourceTree = "<group>"; };
 		9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eLagCompensation.cpp; sourceTree = "<group>"; };
 		9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eLagCompensation.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -896,8 +896,8 @@
 			children = (
 				8CBA5E41089EEC7D007E21DC /* md5.cpp */,
 				8CBA5E42089EEC7D007E21DC /* md5.h */,
-				8CBA5E43089EEC7D007E21DC /* nAuthentification.cpp */,
-				8CBA5E44089EEC7D007E21DC /* nAuthentification.h */,
+				9B5FE82E0D57B2FC004AC137 /* nAuthentication.cpp */,
+				9B5FE82D0D57B2FC004AC137 /* nAuthentication.h */,
 				8CBA5E45089EEC7D007E21DC /* nConfig.cpp */,
 				8CBA5E46089EEC7D007E21DC /* nConfig.h */,
 				8CBA5E49089EEC7D007E21DC /* nKrawall.cpp */,
@@ -1490,7 +1490,6 @@
 				8C11CA76095A2B6E007AE0EA /* gWall.cpp in Sources */,
 				8C11CA77095A2B6E007AE0EA /* gWinZone.cpp in Sources */,
 				8C11CA78095A2B6E007AE0EA /* md5.cpp in Sources */,
-				8C11CA79095A2B6E007AE0EA /* nAuthentification.cpp in Sources */,
 				8C11CA7A095A2B6E007AE0EA /* nConfig.cpp in Sources */,
 				8C11CA7B095A2B6E007AE0EA /* nKrawall.cpp in Sources */,
 				8C11CA7C095A2B6E007AE0EA /* nKrawallPrivate.cpp in Sources */,
@@ -1541,6 +1540,7 @@
 				8CAD9141095A37DD00DA0ECC /* rConsoleCout.cpp in Sources */,
 				9B69F6270A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */,
 				64956AEF0D410F6A00C501B8 /* gFriends.cpp in Sources */,
+				9B5FE8310D57B2FC004AC137 /* nAuthentication.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1570,7 +1570,6 @@
 				8CB97AD4096265A800AE8BCD /* eVoter.cpp in Sources */,
 				8CB97AD5096265A800AE8BCD /* eWall.cpp in Sources */,
 				8CB97AD6096265A800AE8BCD /* md5.cpp in Sources */,
-				8CB97AD7096265A800AE8BCD /* nAuthentification.cpp in Sources */,
 				8CB97AD8096265A800AE8BCD /* nConfig.cpp in Sources */,
 				8CB97AD9096265A800AE8BCD /* nKrawall.cpp in Sources */,
 				8CB97ADA096265A800AE8BCD /* nKrawallPrivate.cpp in Sources */,
@@ -1649,6 +1648,7 @@
 				8CB97B23096265A800AE8BCD /* uMenu.cpp in Sources */,
 				9B69F6250A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */,
 				64956AEB0D410F6A00C501B8 /* gFriends.cpp in Sources */,
+				9B5FE8300D57B2FC004AC137 /* nAuthentication.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1678,7 +1678,6 @@
 				8CBA5F22089EEC7E007E21DC /* eVoter.cpp in Sources */,
 				8CBA5F24089EEC7E007E21DC /* eWall.cpp in Sources */,
 				8CBA5F2D089EEC7E007E21DC /* md5.cpp in Sources */,
-				8CBA5F2F089EEC7E007E21DC /* nAuthentification.cpp in Sources */,
 				8CBA5F31089EEC7E007E21DC /* nConfig.cpp in Sources */,
 				8CBA5F35089EEC7E007E21DC /* nKrawall.cpp in Sources */,
 				8CBA5F37089EEC7E007E21DC /* nKrawallPrivate.cpp in Sources */,
@@ -1757,6 +1756,7 @@
 				8CBA5FDF089EEC7E007E21DC /* uMenu.cpp in Sources */,
 				9B69F6230A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */,
 				64956AED0D410F6A00C501B8 /* gFriends.cpp in Sources */,
+				9B5FE82F0D57B2FC004AC137 /* nAuthentication.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
