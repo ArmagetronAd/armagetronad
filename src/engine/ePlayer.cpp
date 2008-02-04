@@ -83,7 +83,12 @@ public:
     PasswordStorage(): save(false){};
 };
 
-
+static bool operator == ( PasswordStorage const & a, PasswordStorage const & b )
+{
+    return
+    a.username == b.username;
+}
+    
 static tArray<PasswordStorage> S_passwords;
 
 void se_DeletePasswords(){
@@ -158,7 +163,19 @@ public:
             PasswordStorage &storage = S_passwords[S_passwords.Len()];
             nKrawall::ReadScrambledPassword(s, storage.password);
             storage.username.ReadLine(s);
+
             storage.save = true;
+
+            // check for duplicates
+            for( int i = S_passwords.Len() - 2; i >= 0; --i )
+            {
+                PasswordStorage &other = S_passwords[i];
+                if ( other == storage )
+                {
+                    storage.save = false;
+                    break;
+                }
+            }
         }
     }
 };
@@ -3513,8 +3530,8 @@ static void se_RandomizeColor( ePlayer * l, ePlayerNetID * p )
         newRGB[i] = randomizer.Get(15);
     }
 
-    int currentMinDiff = se_ColorDistance( currentRGB, nullRGB ) * 2;
-    int newMinDiff = se_ColorDistance( newRGB, nullRGB ) * 2;
+    int currentMinDiff = se_ColorDistance( currentRGB, nullRGB )/2;
+    int newMinDiff = se_ColorDistance( newRGB, nullRGB )/2;
 
     // check the minimal distance of the new random color with all players
     for ( int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )

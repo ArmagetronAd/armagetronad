@@ -732,8 +732,6 @@ protected:
     virtual void OnDestroy()
     {
         machine_ = 0;
-
-        delete this;
     }
 private:
     nMachine * machine_;

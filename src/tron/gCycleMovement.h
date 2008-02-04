@@ -139,7 +139,7 @@ public:
                     ,                                 bool                  autodelete=1 )          ;   //!< local constructor
     gCycleMovement                                  ( nMessage &            message      )          ;   //!< remote constructor
     virtual ~gCycleMovement                         ()                                              ;   //!< destructor
-    virtual void RemoveFromGame(); // call this instead of the destructor
+    virtual void OnRemoveFromGame(); // called when the cycle is physically removed from the game
 protected:
     //! data from sync message
     struct SyncData

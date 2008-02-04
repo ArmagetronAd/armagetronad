@@ -618,7 +618,14 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
             {
                 WriteChar('\n');
                 c++;
-                if (wordWidth >= maxWidth) {
+
+                for ( int i = parIndent-1; i >= 0; --i )
+                {
+                    WriteChar(' ');
+                    cursorPos++;
+                }
+
+	        if (wordWidth >= maxWidth) {
                     trouble = true;
                     currentWidth = 0.;
                 } else {

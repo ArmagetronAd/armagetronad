@@ -2301,7 +2301,7 @@ gCycle::~gCycle(){
     */
 }
 
-void gCycle::RemoveFromGame()
+void gCycle::OnRemoveFromGame()
 {
     // keep this cycle alive
     tJUST_CONTROLLED_PTR< gCycle > keep;
@@ -2329,7 +2329,7 @@ void gCycle::RemoveFromGame()
     currentWall=NULL;
     lastWall=NULL;
 
-    gCycleMovement::RemoveFromGame();
+    gCycleMovement::OnRemoveFromGame();
 
     delete joystick_;
     joystick_ = NULL;
@@ -3271,6 +3271,11 @@ static void sg_KillFutureWalls( gCycle * cycle )
     }
 }
 
+static void sg_HoleScore( gCycle & cycle )
+{
+    cycle.Player()->AddScore( score_hole, tOutput("$player_win_hole"), tOutput("$player_lose_hole") );
+}
+
 void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
     {
         // deactivate time check
@@ -3284,7 +3289,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
             
             // check whether we drove through a hole in an enemy wall made by a teammate
             gPlayerWall const * w = dynamic_cast< gPlayerWall const * >( ww );
-            if ( w )
+            if ( w && score_hole )
             {
                 gExplosion * explosion = w->Holer( a, time );
                 if ( explosion )
@@ -3300,8 +3305,18 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                         // this test must come last, it resets the flag.
                         if ( explosion->AccountForHole() )
                         {
-                            holer->Player()->AddScore( score_hole, tOutput("$player_win_hole"), tOutput("$player_lose_hole") );
-                        }
+                            if ( score_hole > 0 )
+                            {
+                                // positive hole score goes to the holer
+                                sg_HoleScore( *holer );
+                            }
+                            else
+                            {
+                                // negative hole score to the driver
+                                sg_HoleScore( *this );
+
+                            }
+                       }
                     }
                 }
             }

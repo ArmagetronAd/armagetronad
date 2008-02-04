@@ -2991,7 +2991,6 @@ void gGame::Analysis(REAL time){
             tOutput o("$gamestate_30seconds_warn");
             sn_CenterMessage(o);
             sn_ConsoleOut(o);
-            warning=6;
             warning=5;
         }
 

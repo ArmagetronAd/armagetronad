@@ -108,7 +108,13 @@ public:
     void AddToList();
     void RemoveFromList();
     void RemoveFromListsAll();
-    virtual void RemoveFromGame(); // call this instead of the destructor
+    void RemoveFromGame(); //!< removes the object physically from the game
+
+protected:
+    virtual void OnRemoveFromGame(); //!< called on RemoveFromGame(). Call base class implementation, too, in your implementation. Must keep the object alive.
+private:
+    virtual void DoRemoveFromGame(); //!< called on RemoveFromGame() after OnRemoveFromGame(). Do not call base class implementation of this function, don't expect to get called from subclasses.
+public:
 
     int GOID() const {return id;}
     REAL LastTime() const {return lastTime;}

@@ -80,12 +80,41 @@ void eGameObject::RemoveFromListsAll(){
 
 }
 
-void eGameObject::RemoveFromGame(){
-    RemoveFromListsAll();
+void eGameObject::RemoveFromGame()
+{
+    int oldID = id;
+    if ( oldID >= 0 )
+    {
+        AddRef();
+    }
 
-    delete this;
+    OnRemoveFromGame();
+    DoRemoveFromGame();
+
+    if ( oldID >= 0 )
+    {
+        Release();
+    }
 }
 
+
+// called on RemoveFromGame(). Call base class implementation, too, in your implementation.
+void eGameObject::OnRemoveFromGame()
+{
+    // remove from lists
+    RemoveFromListsAll();
+
+    // remove from grid
+    currentFace = 0;
+}
+
+
+// called on RemoveFromGame(). Do not call base class implementation of this function, don't expect to get called from subclasses.
+void eGameObject::DoRemoveFromGame()
+{
+    // simply delete
+    delete this;
+}
 
 
 eGameObject::eGameObject(eGrid *g,const eCoord &p,const eCoord &d,eFace *currentface,bool autodel)

@@ -71,7 +71,7 @@ public:
 
     virtual void AddRef(){tReferencable< gExplosion >::AddRef();}
     virtual void Release(){tReferencable< gExplosion >::Release();}
-    virtual void RemoveFromGame();
+    virtual void DoRemoveFromGame(); // called last when the object is removed from the game
 
 private:
     REAL        createTime;
