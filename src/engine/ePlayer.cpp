@@ -2342,7 +2342,7 @@ static bool se_allowShuffleUp=false;
 static tSettingItem<bool> se_allowShuffleUpConf("TEAM_ALLOW_SHUFFLE_UP",
         se_allowShuffleUp);
 #else
-static tAccessLevel se_shuffleUpAccessLevel = tAccessLevelTeamMember;
+static tAccessLevel se_shuffleUpAccessLevel = tAccessLevel_TeamMember;
 static tSettingItem< tAccessLevel > se_shuffleUpAccessLevelConf( "ACCESS_LEVEL_SHUFFLE_UP", se_shuffleUpAccessLevel );
 #endif
 
