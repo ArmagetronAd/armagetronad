@@ -1,5 +1,5 @@
 /*
-  
+
 *************************************************************************
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -91,7 +91,9 @@ public:
     //	static void   MakeTempStringLonger();
     //	static void   FreeTempString();
 
-    void Clear(){tArray<char>::Clear(); }
+    void Clear(){
+        tArray<char>::Clear();
+    }
 
     //! makes this string exactly of length len.
     void SetPos( int len, bool cut );
@@ -127,6 +129,8 @@ public:
 
     //! Truncate a string
     tString Truncate( int truncateAt ) const;
+
+    void NetFilter();                           //!< filters strings from the net for strange things like newlines
 };
 
 //! proxy class for inserting color markings
@@ -159,7 +163,6 @@ public:
     void SetPos( int len, bool cut=false );                 //!< Makes sure string has length len when color codes are removed
 
     void RemoveTrailingColor();                             //!< Removes trailing, unfinished color code
-    void NetFilter();                                       //!< filters strings from the net for strange things like newlinesa
 
     void RemoveHex();                                       //!< ?
 
@@ -172,6 +175,15 @@ public:
 
 std::ostream & operator<< (std::ostream &s,const tString &x);
 std::istream & operator>> (std::istream &s,tString &x);
+
+//! check whether item is in a comma or whitespace separated list
+bool tIsInList( tString const & list, tString const & item );
+
+//! converts a string to lowercase
+void tToLower( tString & toTransform );
+
+//! converts a string to uppercase
+void tToUpper( tString & toTransform );
 
 //#define tMAX_STRING_OUTPUT 1000
 //extern char st_stringOutputBuffer[tMAX_STRING_OUTPUT];

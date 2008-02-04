@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -53,6 +53,8 @@ protected:							// protected attributes
     unsigned short r,g,b;			// team color
     tString	name;					// our name
 
+    bool locked_;                   //!< if set, only invited players may join
+
     static void UpdateStaticFlags();// update all internal information
 
 public:							// public configuration options
@@ -69,6 +71,13 @@ public:							// public configuration options
     void UpdateProperties();		// update internal properties ( player count )
     void UpdateAppearance();		// update name and color
     void Update();					// update all properties
+
+    void SetLocked( bool locked );  // sets the lock status (whether invitations are required)
+    bool IsLocked() const;          // returns the lock status
+
+    void Invite( ePlayerNetID * player );                // invite the player to join
+    void UnInvite( ePlayerNetID * player );              // revoke an invitation
+    bool IsInvited( ePlayerNetID const * player ) const; // check if a player is invited
 
     static bool Enemies( eTeam const * team, ePlayerNetID const * player ); //!< determines whether the player is an enemy of the team
     static bool Enemies( eTeam const * team1, eTeam const * team2 ); //!< determines whether two teams are enemies
@@ -95,12 +104,20 @@ public:												// public methods
 
     void            Shuffle         ( int startID, int stopID ); //!< shuffles the player at team postion startID to stopID
 
-    virtual bool BalanceThisTeam() const { return true; } // care about this team when balancing teams
-    virtual bool IsHuman() const { return true; } // does this team consist of humans?
+    virtual bool BalanceThisTeam() const {
+        return true;    // care about this team when balancing teams
+    }
+    virtual bool IsHuman() const {
+        return true;    // does this team consist of humans?
+    }
 
-    int				TeamID			( void  ) const { return listID; }
+    int				TeamID			( void  ) const {
+        return listID;
+    }
 
-    int				Score			(		) const { return score; }
+    int				Score			(		) const {
+        return score;
+    }
     void			AddScore		( int s );
     void			ResetScore		(		);
     void			SetScore		( int s );
@@ -110,8 +127,12 @@ public:												// public methods
                         const tOutput& reasonlose );
 
     // player inquiry
-    int	 			NumPlayers		(		) const { return players.Len(); }	// total number of players
-    ePlayerNetID*	Player			( int i ) const { return players(i); 	}	// player of index i
+    int	 			NumPlayers		(		) const {
+        return players.Len();    // total number of players
+    }
+    ePlayerNetID*	Player			( int i ) const {
+        return players(i); 	   // player of index i
+    }
 
     int	 			NumHumanPlayers	(		) const; 							// number of human players
     int	 			NumAIPlayers	(		) const; 							// number of human players
@@ -124,10 +145,18 @@ public:												// public methods
     bool			Alive			(		) const;							// is any of the players currently alive?
 
     // name and color
-    unsigned short	R() 	const { return r; }
-    unsigned short	G() 	const { return g; }
-    unsigned short	B() 	const { return b; }
-    const tString& 	Name() 	const { return name; }
+    unsigned short	R() 	const {
+        return r;
+    }
+    unsigned short	G() 	const {
+        return g;
+    }
+    unsigned short	B() 	const {
+        return b;
+    }
+    const tString& 	Name() 	const {
+        return name;
+    }
 
     virtual void PrintName(tString &s) const;					// print out an understandable name in to s
 
@@ -151,7 +180,9 @@ public:												// public methods
     // by *NewControlMessage() can be read directly from m.
 
     // shall the server accept sync messages from the clients?
-    virtual bool AcceptClientSync() const	{ return false; }
+    virtual bool AcceptClientSync() const	{
+        return false;
+    }
 
     // con/desstruction
     eTeam();											// default constructor

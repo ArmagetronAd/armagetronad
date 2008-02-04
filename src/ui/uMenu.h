@@ -137,7 +137,7 @@ protected:
     tOutput helpText;
 
     void DisplayText(REAL x,REAL y,const char *text,bool selected,
-                     REAL alpha=1,int center=0,int cursor=0,int cursorPos=0);
+                     REAL alpha=1,int center=0,int cursor=0,int cursorPos=0, rTextField::ColorMode colorMode = rTextField::COLOR_USE );
     void DisplayTextSpecial(REAL x,REAL y,const char *text,bool selected,
                             REAL alpha=1,int center=0);
 public:
@@ -372,6 +372,9 @@ protected:
     tString *content;
     int      cursorPos;
     int		maxLength_;
+
+    // color mode used for rendering
+    rTextField::ColorMode colorMode_;
 public:
     uMenuItemString(uMenu *M,const tOutput& desc,
                     const tOutput& help,tString &c, int maxLength = 1024 );
@@ -382,6 +385,16 @@ public:
     virtual bool Event(SDL_Event &e);
 
     uMenu *MyMenu(){return menu;}
+
+    void SetColorMode( rTextField::ColorMode colorMode )
+    {
+        colorMode_ = colorMode;
+    }
+
+    rTextField::ColorMode GetColorMode() const
+    {
+        return colorMode_;
+    }
 };
 
 class uMenuItemStringWithHistory : protected uMenuItemString {

@@ -53,10 +53,35 @@ Changes since 0.2.8.2:
 - PLAYER_MESSAGE <user ID or name> <Message>: Like /msg, but from the 
   console
 
+If --enable-armathentication was activated:
+- /lock, /unlock, /invite and /uninvite team management chat for players of
+  access level ACCESS_LEVEL_TEAM or better.
+- /teams chat command that rougly prints team layout.
+- ACCESS_LEVEL_IPS to let admins see IPs of players in the list.
+- ACCESS_LEVEL_SPY_MSG/TEAM to let admins spy on team/private messages.
+- CASACL to temporarily raise the access level
+- ACCESS_LEVEL to modify the required access level to change settings
+- AUTHORITY_WHITELIST and AUTHORITY_BLACKLIST to filter authorities you want on your server.
+- GLOBAL_ID_ENABLED to toggle remote accounts
+- LOCAL_USER, LOCAL_TEAM for local login accounts
+- MD5_PREFIX/MD5_SUFFIX for additional password scrambling
+- USER_LEVEL to grant users various access levels
+- RESERVE_SCREEN_NAME to reserve a screen name to a certain player
+- USER_ALIAS to bend authentication names around 
+- (UN)BAN_USER to ban really stupid users based on their global user ID, 
+  BAN_USER_LIST to show a list.
+- ACCESS_LEVEL_OP/ADMIN/CHAT/PLAY/PLAY_SLIDING to control who can do which things
+- /login chat command then uses the more secure hashed base logins
+- new chat commands /op, /deop, /promote and /demote to change other players' access rights
+
   Featurelets:
 - Added PLAYER_RANDOM_COLOR for lazy people who just want to have a
   color that differs from everyone else on the server.
 - Configuration files get reloaded on SIGHUP
+- all admin commands now also accept partial name matches, like /msg, and check for case sensitive
+  matches in the screen name first, then the user name, then case insensitive matches in the two.
+- --enable-krawallserver has been actually implemented now, and it enables secure logins
+  to accounts local to the server and not-so-secure logins managed by authentication servers.
 - A subculture list for server groups that are not managed by our main master servers
 - A friends list and filter for the server browser that shows you only servers with
   your friends on them.
@@ -101,6 +126,10 @@ Changes since 0.2.8.2:
   - ROUND_SCORE has the player's team's score appended.
 
   Bugfixes:
+- Text input fields now let the text wrap correctly and make use of the space allocated
+  for them in a not-completely-dumb way. And *sigh* depending on the text field, color
+  codes are either ignored (for the usernames) or both displayed in text and rendered.
+- "KICK 2pack" no longer kicks user 2 instead of player 2pack.
 - Fixed various trail end related extrapolation/simulation inaccuracies that looked
   like lag.
 - When extrapolating, the game's sensors never detected own or teammates' walls,

@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -65,13 +65,17 @@ rFont::rFont(const char *fileName,int Offset,REAL CWidth,REAL CHeight,REAL op, r
         rFileTexture(rTextureGroups::TEX_FONT,fileName,0,0),
         offset(Offset),cwidth(CWidth),cheight(CHeight),
         onepixel(op),lowerPart(lower)
-{StoreAlpha();}
+{
+    StoreAlpha();
+}
 
 rFont::rFont(const char *fileName, rFont *lower):
         rFileTexture(rTextureGroups::TEX_FONT,fileName,0,0),
         offset(0),cwidth(1/16.0),cheight(1/8.0),
         onepixel(1/256.0),lowerPart(lower)
-{StoreAlpha();}
+{
+    StoreAlpha();
+}
 
 rFont::~rFont(){}
 
@@ -94,18 +98,18 @@ void rFont::ProcessImage( SDL_Surface * surface )
     // pre-blend alpha values
     GLubyte *pixels =reinterpret_cast<GLubyte *>(surface->pixels);
 
-    if(surface->format->BytesPerPixel == 4)
+    if (surface->format->BytesPerPixel == 4)
     {
-        for(int i=surface->w*surface->h-1;i>=0;i--){
+        for (int i=surface->w*surface->h-1;i>=0;i--){
             GLubyte alpha=pixels[4*i+3];
             pixels[4*i  ] = (alpha * pixels[4*i  ]) >> 8;
             pixels[4*i+1] = (alpha * pixels[4*i+1]) >> 8;
             pixels[4*i+2] = (alpha * pixels[4*i+2]) >> 8;
         }
     }
-    else if(surface->format->BytesPerPixel == 2)
+    else if (surface->format->BytesPerPixel == 2)
     {
-        for(int i=surface->w*surface->h-1;i>=0;i--){
+        for (int i=surface->w*surface->h-1;i>=0;i--){
             GLubyte alpha=pixels[2*i+1];
             pixels[2*i  ] = (alpha * pixels[2*i  ]) >> 8;
         }
@@ -180,18 +184,34 @@ static REAL sr_bigFontThresholdHeight = 24;
 static tSettingItem< REAL > sr_bigFontThresholdWidthConf(  "FONT_BIG_THRESHOLD_WIDTH", sr_bigFontThresholdWidth );
 static tSettingItem< REAL > sr_bigFontThresholdHeightConf( "FONT_BIG_THRESHOLD_HEIGHT", sr_bigFontThresholdHeight );
 
+static REAL sr_smallFontThresholdWidth  = 5;
+static REAL sr_smallFontThresholdHeight = 8;
+
+static tSettingItem< REAL > sr_smallFontThresholdWidthConf(  "FONT_SMALL_THRESHOLD_WIDTH", sr_smallFontThresholdWidth );
+static tSettingItem< REAL > sr_smallFontThresholdHeightConf( "FONT_SMALL_THRESHOLD_HEIGHT", sr_smallFontThresholdHeight );
+
 rTextField::rTextField(REAL Left,REAL Top,
                        REAL Cwidth,REAL Cheight,
                        rFont *f)
         :parIndent(0),
         left(Left),top(Top),cwidth(Cwidth),cheight(Cheight),
-F(f),x(0),y(0),realx(0),cursor(0),cursorPos(0){
+        F(f),x(0),y(0),realx(0),cursor(0),cursorPos(0){
     if ( cwidth*sr_screenWidth < sr_bigFontThresholdWidth*2 || cheight*sr_screenHeight < sr_bigFontThresholdHeight*2 )
         F=&rFont::s_defaultFontSmall;
-    if (cwidth*sr_screenWidth<10)
-        cwidth=10/REAL(sr_screenWidth);
-    if (cheight*sr_screenHeight<18)
-        cheight=18/REAL(sr_screenHeight);
+    if (cwidth*sr_screenWidth<sr_smallFontThresholdWidth*2)
+    {
+        cwidth=sr_smallFontThresholdWidth*2/REAL(sr_screenWidth);
+
+        // try to place font at exact pixels
+        // left = ( int( ( 1 + left ) * sr_screenWidth -.5 ) +.5 )/REAL(sr_screenWidth) - 1;
+    }
+    if (cheight*sr_screenHeight<sr_smallFontThresholdHeight*2)
+    {
+        cheight=sr_smallFontThresholdHeight*2/REAL(sr_screenHeight);
+
+        // try to place font at exact pixels
+        // top = ( int( ( 1 + top ) * sr_screenHeight - .5 ) + .5)/REAL(sr_screenHeight) - 1;
+    }
 
     color_ = defaultColor_;
 
@@ -199,7 +219,7 @@ F(f),x(0),y(0),realx(0),cursor(0),cursorPos(0){
 
     buffer.SetLen(0);
     /*
-    top=(int(top*sr_screenHeight)+.5)/REAL(sr_screenHeight);  
+    top=(int(top*sr_screenHeight)+.5)/REAL(sr_screenHeight);
     left=(int(left*sr_screenWidth)+.5)/REAL(sr_screenWidth);
     */
 
@@ -295,7 +315,7 @@ void rTextField::FlushLine(int len,bool newline){
         glColor4f(r * blendColor_.r_,g * blendColor_.g_,b * blendColor_.b_,a * blendColor_.a_);
     }
 
-    for(i=0;i<=len;i++){
+    for (i=0;i<=len;i++){
         REAL l=left+realx*cwidth;
         REAL t=top-y*cheight;
 
@@ -335,7 +355,7 @@ void rTextField::FlushLine(bool newline){
 
 inline void rTextField::WriteChar(unsigned char c)
 {
-    switch(c){
+    switch (c){
     case('\n'):
                     FlushLine();
         buffer.SetLen(0);
@@ -398,13 +418,13 @@ char int_to_hex(int i){
 
 int hex_to_int(char c){
     int ret=0;
-    for(int i=15;i>=0;i--)
+    for (int i=15;i>=0;i--)
         if (hex_array[i]==c)
             ret=i;
     return ret;
 }
 
-rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
+rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
 {
     // run through string
     while (*c!='\0')
@@ -449,26 +469,29 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
         if ( x >= width )
         {
             WriteChar('\n');
+            cursorPos += 1;
         }
 
         // detect presence of color code
         if (*c=='0' && strlen(c)>=8 && c[1]=='x' && colorMode != COLOR_IGNORE )
         {
+            tColor color;
+            bool use = false;
+
             if ( 0 ==strncmp(c,"0xRESETT",8) )
             {
                 // color reset to default requested
-                ResetColor();
+                color = defaultColor_;
+                use = true;
             }
             else
             {
                 // found! extract colors
-                FlushLine(false);
-
-                cursorPos-=7;
-
-                color_.r_=CTR(hex_to_int(c[2])*16+hex_to_int(c[3]));
-                color_.g_=CTR(hex_to_int(c[4])*16+hex_to_int(c[5]));
-                color_.b_=CTR(hex_to_int(c[6])*16+hex_to_int(c[7]));
+                cursorPos-=8;
+                color.r_=CTR(hex_to_int(c[2])*16+hex_to_int(c[3]));
+                color.g_=CTR(hex_to_int(c[4])*16+hex_to_int(c[5]));
+                color.b_=CTR(hex_to_int(c[6])*16+hex_to_int(c[7]));
+                use = true;
             }
 
             // advance
@@ -478,7 +501,18 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
             }
             else
             {
-                c++;
+                // write color code out
+                cursorPos+=8;
+                for(int i=7; i>=0;--i)
+                    WriteChar(*(c++));
+            }
+
+            // apply color
+            if ( use )
+            {
+                FlushLine(false);
+                cursorPos++;
+                color_ = color;
             }
         }
         else
@@ -488,32 +522,47 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
     return *this;
 }
 
-void DisplayText(REAL x,REAL y,REAL w,REAL h,const char *text,int center,int cursor,int cursorPos){
+void DisplayText(REAL x,REAL y,REAL w,REAL h,const char *text,int center,int cursor,int cursorPos, rTextField::ColorMode colorMode ){
     int colorlen = strlen(text);
-    for (unsigned int i=0; i<strlen(text); i++)
+
+    if ( colorMode == rTextField::COLOR_USE )
     {
-        if (text[i] == '0' && text[i+1] == 'x')
-            colorlen=colorlen-8;
+        for (unsigned int i=0; i<strlen(text); i++)
+        {
+            if (text[i] == '0' && text[i+1] == 'x')
+                colorlen=colorlen-8;
+        }
     }
 
+    // calculate top position so that does not move when we shrink the font
+    REAL top = y + h*.5;
+
     // shrink fields that don't fit the screen
-    REAL maxw = 1.95;
-    if ( colorlen * w > maxw )
+    REAL availw = 1.9f;
+    if (center < 0) availw = (.9f-x);
+    if (center > 0) availw = (x + .9f);
+    if ( colorlen * w > availw )
     {
-        h *= maxw/(colorlen * w);
-        w = maxw/REAL(colorlen);
+        h *= availw/(colorlen * w);
+        w = availw/REAL(colorlen);
     }
 
     rTextField c(x-(center+1)*colorlen*.5*w,y+h*.5,w,h);
     if (center==-1)
-        c.SetWidth(int((1-x)/w));
+        c.SetWidth(int((.95-x)/c.GetCWidth()));
     else
         c.SetWidth(10000);
+
+    // did the text field enlarge the font? If yes, there will be wrapping; better make some more room
+    if ( c.GetWidth() < colorlen )
+    {
+        c.SetTop( top );
+    }
 
     c.SetIndent(5);
     if (cursor)
         c.SetCursor(cursor,cursorPos);
-    c << text;
+    c.StringOutput(text, colorMode );
 }
 // *******************************************************************************************
 // *

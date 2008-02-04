@@ -515,7 +515,7 @@ void uMenuItem::SetColor( bool selected, REAL alpha )
 
 void uMenuItem::DisplayText(REAL x,REAL y,const char *text,
                             bool selected,REAL alpha,
-                            int center,int c,int cp){
+                            int center,int c,int cp, rTextField::ColorMode colorMode ){
 #ifndef DEDICATED
     if (sr_glOut){
         SetColor( selected, alpha );
@@ -523,6 +523,9 @@ void uMenuItem::DisplayText(REAL x,REAL y,const char *text,
         REAL tw = text_width;
         REAL th = text_height;
 
+        
+#if 0
+        // the function that is called takes care of that
         REAL availw = 1.9f;
         if (center < 0) availw = (.9f-x);
         if (center > 0) availw = (x + .9f);
@@ -533,8 +536,9 @@ void uMenuItem::DisplayText(REAL x,REAL y,const char *text,
             th *= availw/(len * tw);
             tw  = availw/len;
         }
+#endif
 
-        ::DisplayText(x,y,tw,th,text,center,c,cp);
+        ::DisplayText(x,y,tw,th,text,center,c,cp, colorMode );
     }
 #endif
 }
@@ -658,6 +662,7 @@ uMenuItemString::uMenuItemString(uMenu *M,
     if (len==0 || (*content)(len-1)!=0)
         (*content)[len]=0;
     cursorPos=content->Len()-1;
+    colorMode_ = rTextField::COLOR_SHOW;
 }
 
 void uMenuItemString::Render(REAL x,REAL y,
@@ -672,8 +677,13 @@ void uMenuItemString::Render(REAL x,REAL y,
         if (counter & 32) cmode=2;
     }
 
+    // unslected items with COLOR_SHOW should be rendered with COLOR_USE
+    rTextField::ColorMode colorMode = colorMode_;
+    if ( colorMode == rTextField::COLOR_SHOW && !selected )
+        colorMode = rTextField::COLOR_USE;
+
     DisplayText(x-.02,y,description,selected,alpha,1);
-    DisplayText(x+.02,y,&((*content)[0]),selected,alpha,-1,cmode,cursorPos);
+    DisplayText(x+.02,y,&((*content)[0]),selected,alpha,-1,cmode,cursorPos, colorMode );
 #endif
 }
 

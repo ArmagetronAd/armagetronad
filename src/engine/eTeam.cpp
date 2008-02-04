@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -35,27 +35,27 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define TEAMCOLORS 8
 
 static unsigned short se_team_rgb[TEAMCOLORS][3]=
-    { {  4,  8, 15 } , // blue
-      { 15, 15,  4 } , // gold
-      { 15,  4,  4 } , // red
-      {  4, 15,  4 } , // green
-      { 15,  4, 15 } , // violet
-      {  4, 15, 15 } , // ugly green
-      { 15, 15, 15 } , // white
-      {  7,  7,  7 }   // black
-    };
+{ {  4,  8, 15 } , // blue
+    { 15, 15,  4 } , // gold
+    { 15,  4,  4 } , // red
+    {  4, 15,  4 } , // green
+    { 15,  4, 15 } , // violet
+    {  4, 15, 15 } , // ugly green
+    { 15, 15, 15 } , // white
+    {  7,  7,  7 }   // black
+};
 
 static tString se_team_name[TEAMCOLORS]=
-    {
-        tString("$team_name_blue"),
-        tString("$team_name_gold"),
-        tString("$team_name_red"),
-        tString("$team_name_green"),
-        tString("$team_name_violet"),
-        tString("$team_name_ugly"),
-        tString("$team_name_white"),
-        tString("$team_name_black")
-    };
+{
+    tString("$team_name_blue"),
+    tString("$team_name_gold"),
+    tString("$team_name_red"),
+    tString("$team_name_green"),
+    tString("$team_name_violet"),
+    tString("$team_name_ugly"),
+    tString("$team_name_white"),
+    tString("$team_name_black")
+};
 
 // class that creates config items for one team
 // TEAM_(NAME|RED|GREEN|BLUE)_X
@@ -307,6 +307,60 @@ void eTeam::Update()
     UpdateAppearance();
 }
 
+// sets the lock status
+void eTeam::SetLocked( bool locked )
+{
+    if ( locked && !locked_ )
+    {
+        sn_ConsoleOut( tOutput( "$invite_team_locked", Name() ) );
+    }
+    if ( !locked && locked_ )
+    {
+        sn_ConsoleOut( tOutput( "$invite_team_unlocked", Name() ) );
+    }
+
+    locked_ = locked;
+}
+
+// returns the lock status
+bool eTeam::IsLocked() const
+{
+    return locked_;
+}
+
+// invite the player to join
+void eTeam::Invite( ePlayerNetID * player )
+{
+    tASSERT( player );
+    if ( !IsInvited( player ) )
+    {
+        sn_ConsoleOut( tOutput( "$invite_team_invite", player->GetColoredName(), Name() ) );
+    }
+    player->invitations_.insert( this );
+}
+
+// revoke an invitation
+void eTeam::UnInvite( ePlayerNetID * player )
+{
+    tASSERT( player );
+    if ( player->CurrentTeam() == this )
+    {
+        sn_ConsoleOut( tOutput( "$invite_team_kick", player->GetColoredName(), Name() ) );
+        player->SetTeam(0);
+    }
+    else
+    {
+        sn_ConsoleOut( tOutput( "$invite_team_uninvite", player->GetColoredName(), Name() ) );
+    }
+    player->invitations_.erase( this );
+}
+
+// check if a player is invited
+bool eTeam::IsInvited( ePlayerNetID const * player ) const
+{
+    return player->invitations_.find( const_cast< eTeam * >( this ) ) != player->invitations_.end();
+}
+
 void eTeam::AddScore ( int s )
 {
     score += s;
@@ -396,7 +450,7 @@ void eTeam::SortByScore(){
     while (!inorder){
         inorder=true;
         int i;
-        for(i=teams.Len()-2;i>=0;i--)
+        for (i=teams.Len()-2;i>=0;i--)
             if (teams(i)->score < teams(i+1)->score){
                 SwapTeamsNo(i,i+1);
                 inorder=false;
@@ -422,7 +476,7 @@ tString eTeam::Ranking( int MAX, bool cut ){
         {
             max = MAX ;
         }
-        for(int i=0;i<max;i++){
+        for (int i=0;i<max;i++){
             tColoredString line;
             eTeam *t = teams(i);
             line << ColorString(t);
@@ -514,6 +568,7 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
         // find the max and min number of players per team and the
         eTeam *max = NULL, *min = NULL, *ai = NULL;
         int    maxP = minPlayers, minP = 100000;
+        bool minLocked = false;
 
         int numTeams = 0;
         int numHumanTeams = 0;
@@ -540,10 +595,12 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
                     max  = t;
                 }
 
-                if ( ( humans > 0 || t->NumPlayers() == 0 ) && humans < minP )
+                // prefer unlocked teams as elimination victims, and of course smaller teams
+                if ( ( humans > 0 || t->NumPlayers() == 0 ) && humans < minP && ( minLocked || !t->IsLocked() ) )
                 {
                     minP = humans;
                     min  = t;
+                    minLocked = t->IsLocked();
                 }
             }
         }
@@ -590,6 +647,8 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
                     // put the player into the second smallest team, overriding balancing settings (they're likely to be in the way )
                     int imbBackup = second->maxImbalanceLocal;
                     second->maxImbalanceLocal = 99999;
+                    pni->SetTeamForce( 0 );
+                    pni->UpdateTeamForce();
                     pni->SetTeamForce( second );
                     pni->UpdateTeamForce();
                     second->maxImbalanceLocal = imbBackup;
@@ -861,6 +920,17 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
 {
     int i;
 
+    // AI players are always allowed to join, the logic that tries to put the AI into
+    // this team is responsible for checking
+    if ( !player->IsHuman() )
+        return true;
+
+    // check for invitations. Not with those shoes!
+    if ( IsLocked() && !IsInvited( player ) )
+    {
+        return false;
+    }
+
     int maxInb = maxImbalanceLocal;
 
     int minP = 10000; // minimum number of humans in a team after the player left
@@ -890,11 +960,6 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
 
     int maxPlayers = maxPlayersLocal;
 
-    // AI players are always allowed to join, the logic that tries to put the AI into
-    // this team is responsible for checking
-    if ( !player->IsHuman() )
-        return true;
-
     // we must have room           and the joining must not cause huge imbalance
     if ( numHumans < maxPlayers && ( sn_GetNetState() != nSERVER || minP + maxInb > numHumans ) )
         return true;
@@ -909,23 +974,23 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
         {
             goon = false;
             for ( std::set< eTeam const * >::iterator iter = swapTargets.begin(); iter != swapTargets.end(); ++iter )
+            {
+                eTeam const * team = *iter;
+                for ( i = team->players.Len()-1; i>=0; --i )
                 {
-                    eTeam const * team = *iter;
-                    for ( i = team->players.Len()-1; i>=0; --i )
+                    ePlayerNetID * otherPlayer = team->players(i);
+                    eTeam * swapTeam = otherPlayer->NextTeam();
+                    if ( swapTeam && swapTeam != otherPlayer->CurrentTeam() && swapTargets.find( swapTeam ) == swapTargets.end() )
                     {
-                        ePlayerNetID * otherPlayer = team->players(i);
-                        eTeam * swapTeam = otherPlayer->NextTeam();
-                        if ( swapTeam && swapTeam != otherPlayer->CurrentTeam() && swapTargets.find( swapTeam ) == swapTargets.end() )
-                        {
-                            goon = true;
-                            swapTargets.insert( swapTeam );
+                        goon = true;
+                        swapTargets.insert( swapTeam );
 
-                            // early return if we find a closed swap chain
-                            if ( swapTeam == player->CurrentTeam() )
-                                return true;
-                        }
+                        // early return if we find a closed swap chain
+                        if ( swapTeam == player->CurrentTeam() )
+                            return true;
                     }
                 }
+            }
         }
     }
 
@@ -1148,6 +1213,7 @@ eTeam::eTeam()
         :colorID(-1),listID(-1)
 {
     score = 0;
+    locked_ = false;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;
     r = g = b = 32; // initialize color so it will be updated, guaranteed
@@ -1161,6 +1227,7 @@ eTeam::eTeam(nMessage &m)
         colorID(-1),listID(-1)
 {
     score = 0;
+    locked_ = false;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;
     Update();
@@ -1176,6 +1243,12 @@ eTeam::~eTeam()
     {
         se_ColoredTeams[ colorID ] = 0;
         colorID = -1;
+    }
+
+    // revoke all invitations
+    for ( int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
+    {
+        se_PlayerNetIDs(i)->invitations_.erase( this );
     }
 }
 // *******************************************************************************

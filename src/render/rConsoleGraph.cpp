@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -90,10 +90,6 @@ void rConsole::Render(){
     // of columns in it
     rCWIDTH_CON=1.9/sr_columns;
 
-    // but don't shrink the small font.
-    if (rCWIDTH_CON < 10/W)
-        rCWIDTH_CON = 10/W;
-
     // get corresponding character height
     rCHEIGHT_CON=rCWIDTH_CON*W*9/(5*H);
 
@@ -101,7 +97,7 @@ void rConsole::Render(){
         Time=tSysTimeFloat();
 
         if (sr_textOut || rForceTextCallback::ForceText()){
-            if(lastCustomTimeout<Time-5 &&
+            if (lastCustomTimeout<Time-5 &&
                     lastTimeout+timeout<Time && currentTop<currentIn){
                 currentTop++;
                 lastTimeout=Time;
@@ -110,11 +106,11 @@ void rConsole::Render(){
             rTextField::SetDefaultColor( tColor(1,1,1) );
 
             rTextField out(-.95f,.99f,rCWIDTH_CON,rCHEIGHT_CON);//,&rFont::s_defaultFontSmall);
-            out.SetWidth(static_cast<int>(1.9f/rCWIDTH_CON));
+            out.SetWidth(static_cast<int>(1.9f/out.GetCWidth()));
             out.SetIndent(3);
 
             int i;
-            for(i=currentTop;i<=currentIn && i<=currentTop+MaxHeight();i++)
+            for (i=currentTop;i<=currentIn && i<=currentTop+MaxHeight();i++)
                 if (lines[i].Len()>1){
                     rTextField::SetDefaultColor( tColor(1,1,1) );
                     out << lines[i];

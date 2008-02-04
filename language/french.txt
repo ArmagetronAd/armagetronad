@@ -1963,7 +1963,7 @@ network_syncing_gamestate     Recu! Synchronisation du statut de jeu...\n
 network_warn_unknowndescriptor \n\n\nMessage inconnu recu, avec l'ID \1 \n\nVOUS DEVEZ SANS DOUTE METTRE ARMAGETRON A JOUR!!!!\n
 network_error                 Erreur de reseau.\n
 network_error_timeout         Le temps de l'utilisateur \1 est ecoule.\n
-network_error_shortmessage    Le message de l'utilisateur \1 est trop court. Destruction de celui-ci.\n
+network_error_shortmessage    Le message de l'utilisateur \1 est trop court.\n
 network_error_overflow        L'utilisateur \1 ne sait pas suivre le trafic du reseau.\n
 network_killuser              Fin de l'utilisateur \1, ping \2.\n
 network_statistics1           Duree:     \1 secondes\n

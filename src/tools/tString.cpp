@@ -84,6 +84,7 @@ static bool st_ReadEscapeSequence( char & c, char & c2, std::istream & s )
             c = '\n';
             return true;
         case '"':
+        case ' ':
         case '\'':
         case '\n':
             // include quoting character as literal
@@ -261,6 +262,12 @@ std::istream & operator>> (std::istream &s,tString &x){
                 break;
             }
         }
+        else if ( isblank( c ) )
+        {
+            // include escaped spaces
+            x[i++]=c;
+            c=s.get();
+        }
 
     }
     s.putback(c);
@@ -436,14 +443,13 @@ int tString::toInt( int pos ) const
         pos++;
     }
 
-    if ( ret > 0 )
-    {
-        return ret;
-    }
-    else
+    // check whether the last character read was not whitespace or the end of the string
+    if ( pos < Len() && !isblank((*this)(pos-1)) )
     {
         return 0;
     }
+
+    return ret;
 }
 
 int tString::toInt() const {
@@ -1264,7 +1270,7 @@ private:
 //!
 // *******************************************************************************************
 
-void tColoredString::NetFilter( void )
+void tString::NetFilter( void )
 {
     static tCharacterFilter filter;
 
@@ -1568,4 +1574,86 @@ tString tString::Truncate( int truncateAt ) const
         return *this;
 
     return SubStr( 0, truncateAt ) << "...";
+}
+
+// *******************************************************************************************
+// *
+// *	tIsInList
+// *
+// *******************************************************************************************
+//!
+//!    @param      list       The string representation of the list
+//!    @param      item       The item to look for
+//!    @return     true if the list contains the item
+//!
+//!    Example: tIsInList( "ab, cd", "ab" ) -> true
+//!
+// *******************************************************************************************
+//! check whether item is in a comma or whitespace separated list
+bool tIsInList( tString const & list_, tString const & item )
+{
+    tString list = list_;
+
+    while( list != "" )
+    {
+        // find the item
+        int pos = list.StrPos( item );
+
+        // no traditional match? shoot.
+        if ( pos < 0 )
+        {
+            return false;
+        }
+
+        // check whether the match is a true list match
+        if ( 
+            ( pos == 0 || list[pos-1] == ',' || isblank(list[pos-1]) )
+            &&
+            ( pos + item.Len() >= list.Len() || list[pos+item.Len()-1] == ',' || isblank(list[pos+item.Len()-1]) )
+            )
+        {
+            return true;
+        }
+        else
+        {
+            // no? truncate the list and go on.
+            list = list.SubStr( pos + 1 );
+        }
+    }
+    
+    return false;
+}
+
+// **********************************************************************
+// *
+// *	tToLower
+// *
+// **********************************************************************
+//!
+//!    @param      toTransform   The string to transform
+//!
+// **********************************************************************
+void tToLower( tString & toTransform )
+{
+    for( int i = toTransform.Len()-2; i >= 0; --i )
+    {
+        toTransform[i] = tolower( toTransform[i] );
+    }
+}
+
+// **********************************************************************
+// *
+// *	tToUpper
+// *
+// **********************************************************************
+//!
+//!    @param      toTransform   The string to transform
+//!
+// **********************************************************************
+void tToUpper( tString & toTransform )
+{
+    for( int i = toTransform.Len()-2; i >= 0; --i )
+    {
+        toTransform[i] = toupper( toTransform[i] );
+    }
 }

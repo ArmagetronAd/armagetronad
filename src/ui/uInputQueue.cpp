@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -81,7 +81,7 @@ void su_FetchAndStoreSDLInput()
 #ifndef DEDICATED
 #ifndef WIN32
 #ifndef MACOSX
-    if(!tRecorder::IsRunning() )
+    if (!tRecorder::IsRunning() )
         SDL_PumpEvents();
 #endif
 #endif
@@ -102,8 +102,8 @@ bool su_StoreSDLEvent(const SDL_Event &tEvent){
     return true;
 }
 
-// read and write operators for keysyms
 #ifndef DEDICATED
+// read and write operators for keysyms
 tRECORDING_ENUM( SDLKey );
 tRECORDING_ENUM( SDLMod );
 #endif
@@ -114,6 +114,13 @@ static char const * recordingSection = "INPUT";
 template< class Archiver > class EventArchiver
 {
 public:
+#ifndef DEDICATED
+    static void ArchiveKey( Archiver & archive, SDL_KeyboardEvent & key )
+    {
+        archive.Archive(key.state).Archive(key.keysym.scancode).Archive(key.keysym.sym).Archive(key.keysym.mod).Archive(key.keysym.unicode);
+    }
+#endif
+
     static bool Archive( SDL_Event & event, REAL & time, bool & ret )
     {
         // start archive block if archiving is active
@@ -127,38 +134,37 @@ public:
 
             // write or read data
             archive.Archive(time).Archive(event.type);
-            switch( event.type )
+            switch ( event.type )
             {
             case SDL_ACTIVEEVENT:
-                {
-                    SDL_ActiveEvent & active = event.active;
+            {
+                SDL_ActiveEvent & active = event.active;
 
-                    archive.Archive(active.gain).Archive(active.state);
-                }
-                break;
+                archive.Archive(active.gain).Archive(active.state);
+            }
+            break;
             case SDL_KEYDOWN:
             case SDL_KEYUP:
-                {
-                    SDL_KeyboardEvent & key = event.key;
-
-                    archive.Archive(key.state).Archive(key.keysym.scancode).Archive(key.keysym.sym).Archive(key.keysym.mod).Archive(key.keysym.unicode);
-                }
-                break;
+            {
+                SDL_KeyboardEvent & key = event.key;
+                ArchiveKey( archive, key );
+            }
+            break;
             case SDL_MOUSEMOTION:
-                {
-                    SDL_MouseMotionEvent & motion = event.motion;
+            {
+                SDL_MouseMotionEvent & motion = event.motion;
 
-                    archive.Archive(motion.state).Archive(motion.x).Archive(motion.y).Archive(motion.xrel).Archive(motion.yrel);
-                }
-                break;
+                archive.Archive(motion.state).Archive(motion.x).Archive(motion.y).Archive(motion.xrel).Archive(motion.yrel);
+            }
+            break;
             case SDL_MOUSEBUTTONUP:
             case SDL_MOUSEBUTTONDOWN:
-                {
-                    SDL_MouseButtonEvent & button = event.button;
+            {
+                SDL_MouseButtonEvent & button = event.button;
 
-                    archive.Archive(button.button).Archive(button.state).Archive(button.x).Archive(button.y);
-                }
-                break;
+                archive.Archive(button.button).Archive(button.state).Archive(button.x).Archive(button.y);
+            }
+            break;
             default:
                 // do nothing
                 break;
@@ -172,6 +178,39 @@ public:
         return false;
     }
 };
+
+#ifndef DEDICATED
+//! Read or write event data
+template<>
+void EventArchiver< tRecordingBlock >::ArchiveKey( tRecordingBlock & archive, SDL_KeyboardEvent & orig )
+{
+    SDL_KeyboardEvent key = orig;
+    if ( uInputScrambler::Scrambled() )
+    {
+        switch( key.keysym.sym )
+        {
+        case SDLK_ESCAPE:
+        case SDLK_SPACE:
+        case SDLK_KP_ENTER:
+        case SDLK_RETURN:
+        case SDLK_UP:
+        case SDLK_DOWN:
+        case SDLK_LEFT:
+        case SDLK_RIGHT:
+        case SDLK_BACKSPACE:
+        case SDLK_DELETE:
+            break;
+        default:
+            key.keysym.mod = KMOD_NONE;
+            key.keysym.sym = SDLK_x;
+            key.keysym.scancode = 0;
+            key.keysym.unicode = '*';
+        }
+    }
+
+    archive.Archive(key.state).Archive(key.keysym.scancode).Archive(key.keysym.sym).Archive(key.keysym.mod).Archive(key.keysym.unicode);
+}
+#endif
 
 static const char * su_end = "END";
 static const char * su_endInput = "ENDINPUT";
@@ -195,6 +234,23 @@ uInputProcessGuard::uInputProcessGuard()
 uInputProcessGuard::~uInputProcessGuard()
 {
     su_EndGetSDLInput();
+}
+
+int uInputScrambler::scrambled_ = 0;
+
+uInputScrambler::uInputScrambler()
+{
+    scrambled_ ++;
+}
+
+uInputScrambler::~uInputScrambler()
+{
+    --scrambled_;
+}
+
+bool uInputScrambler::Scrambled()
+{
+    return scrambled_ > 0;
 }
 
 bool su_GetSDLInput(SDL_Event &tEvent,REAL &time){
@@ -238,7 +294,7 @@ bool su_GetSDLInput(SDL_Event &tEvent,REAL &time){
     su_markerRequired |= ret;
 
     // store event in recording
-    if( ret )
+    if ( ret )
         EventArchiver< tRecordingBlock >::Archive( tEvent, time, ret );
 
     return ret;

@@ -3096,7 +3096,7 @@ void gCycle::KillAt( const eCoord& deathPos){
     if (!Alive() || sn_GetNetState()==nCLIENT)
         return;
 
-#ifdef KRAWALL_SERVER
+#ifdef KRAWALL_SERVER_LEAGUE
     if (    hunter           && Player()          &&
             !dynamic_cast<gAIPlayer*>(hunter)     &&
             !dynamic_cast<gAIPlayer*>(Player())             &&

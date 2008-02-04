@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -61,6 +61,8 @@ public:
     static eVoter* GetVoter ( nMachine & machine );	            // find or create the voter for the specified machine
     static bool VotingPossible();								// returns whether voting is currently possible
     tString Name(int senderID = -1) const;						// returns the name of the voter
+
+    REAL Age() const;                                           //!< how long does this voter exist?
 
     bool AllowNameChange() const;  //!< determines whether the player belonging to this voter should be allowed to change names
 protected:

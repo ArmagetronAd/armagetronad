@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tDirectories.h"
 #include "nSocket.h"
 #include "nConfig.h"
+#include "nKrawall.h"
 #include "tSysTime.h"
 #include "tRecorder.h"
 #include "tRandom.h"
@@ -51,7 +52,36 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <deque>
 
-// debug watchs
+// my IP address. Master server/game server hopefully tell me a correct one.
+static tString sn_myAddress ("*.*.*.*:*");
+tString const & sn_GetMyAddress()
+{
+    return sn_myAddress;
+}
+
+//! checks wheter a given address is on the user's LAN (or on loopback).
+bool sn_IsLANAddress( tString const & address )
+{
+    if ( address.StartsWith("127.") || address.StartsWith("10.") || address.StartsWith("192.168.") )
+    {
+        // easy LANs. Accept the client sent IP, we don't know our own LAN address.
+        return true;
+    }
+
+    if( address.StartsWith( "172." ) && address[6] == '.' )
+    {
+        // more complicated LAN :)
+        int second = address.SubStr(4,2).toInt();
+        if ( 16 <= second && second < 32 )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// debug watches
 #ifdef DEBUG
 nMessage* sn_WatchMessage = NULL;
 unsigned int sn_WatchMessageID = 76;
@@ -566,7 +596,10 @@ void nDescriptor::HandleMessage(nMessage &message){
             }
 #ifndef NOEXCEPT
     }
-    catch(nKillHim){
+    catch(nIgnore const &){
+        // well, do nothing.
+    }
+    catch(nKillHim const &){
         // st_Breakpoint();
         con << tOutput("$network_error");
         sn_DisconnectUser(message.SenderID(), "$network_kill_error" );
@@ -995,7 +1028,7 @@ nMessage& nMessage::operator << ( const tOutput &o ){
 bool sn_filterColorStrings = false;
 static tConfItem<bool> cs("FILTER_COLOR_STRINGS",sn_filterColorStrings);
 
-nMessage& nMessage::operator >> (tColoredString &s )
+nMessage& nMessage::ReadRaw(tString &s )
 {
     s.Clear();
     unsigned short w,len;
@@ -1010,6 +1043,14 @@ nMessage& nMessage::operator >> (tColoredString &s )
                 s[i+1]=(w-s[i]) >> 8;
         }
     }
+
+    return *this;
+}
+
+nMessage& nMessage::operator >> (tColoredString &s )
+{
+    // read the raw data
+    ReadRaw( s );
 
     // filter client string messages
     if ( sn_GetNetState() == nSERVER )
@@ -1267,8 +1308,8 @@ void nMessage::Read(unsigned short &x){
         o.SetTemplateParameter(1, senderID);
         o << "$network_error_shortmessage";
         con << o;
-        sn_DisconnectUser(senderID, "$network_kill_error");
-        nReadError();
+        // sn_DisconnectUser(senderID, "$network_kill_error");
+        nReadError( false );
     }
     else
         x=data(readOut++);
@@ -1281,6 +1322,11 @@ void nMessage::Read(unsigned short &x){
 
 static bool login_failed=false;
 static bool login_succeeded=false;
+
+// salt value sent as past login tokens. They are returned by
+// the server as you sent them, and make sure you only accept
+// the right answer.
+static nKrawall::nSalt loginSalt;
 
 static nHandler *real_req_info_handler=NULL;
 
@@ -1389,10 +1435,8 @@ extern bool sn_AcceptingFromMaster;
 
 void login_accept_handler(nMessage &m){
     if (sn_GetNetState()!=nSERVER && m.SenderID() == 0){
-        login_succeeded=true;
         unsigned short id=0;
         m.Read(id);
-        sn_myNetID=id;
 
         // read or reset server version info
         if ( !m.End() )
@@ -1417,6 +1461,38 @@ void login_accept_handler(nMessage &m){
         }
         else
             sn_Connections[0].version = nVersion( 0, 0);
+        
+        // read my public IP
+        if ( !m.End() )
+        {
+            // only accept it if it is not a LAN address
+            tString address;
+            m >> address;
+            if ( !sn_IsLANAddress( address ) )
+            {
+                sn_myAddress = address;
+            }
+
+            // read salt reply and compare it to what we sent
+            nKrawall::nSalt replySalt;
+            nKrawall::ReadScrambledPassword( m, replySalt );
+
+            int compare = memcmp( &loginSalt,&replySalt, sizeof(replySalt) );
+
+            // since we generate a different random salt on playback, record the comparison result
+            static const char * section = "LOGIN_SALT";
+            tRecorder::Playback( section, compare );
+            tRecorder::Record( section, compare );
+            
+            if ( compare != 0 )
+            {
+                nReadError( false );
+            }
+        }
+
+        // only now, login can be considered a success
+        login_succeeded=true;
+        sn_myNetID=id;
 
         first_fill_ids();
     }
@@ -1522,8 +1598,31 @@ extern bool FloodProtection( nMessage const & m );
 static bool sn_lockOut028tTest = true;
 static tSettingItem< bool > sn_lockOut028TestConf( "NETWORK_LOCK_OUT_028_TEST", sn_lockOut028tTest );
 
-int login_handler(const nMessage &m, const nVersion& version, unsigned short rate ){
+int login_handler( nMessage &m, unsigned short rate ){
     nCurrentSenderID senderID;
+
+    // read version and suppored authentication methods
+    nVersion version;
+    tString supportedAuthenticationMethods("");
+    nKrawall::nSalt salt; // it's OK that this may stay uninitialized
+    if ( !m.End() )
+    {
+        // read version
+        m >> version;
+
+        // ok, clients that send a version do have at lesat basic authentication.
+        supportedAuthenticationMethods = "bmd5";
+    }
+    if ( !m.End() )
+    {
+        // read authentication methods
+        m >> supportedAuthenticationMethods;
+    }
+    if ( !m.End() )
+    {
+        // also read a login salt, the client expects to get it returned verbatim
+        nKrawall::ReadScrambledPassword( m, salt );
+    }
 
     // don't accept logins in client mode
     if (sn_GetNetState() != nSERVER)
@@ -1574,7 +1673,7 @@ int login_handler(const nMessage &m, const nVersion& version, unsigned short rat
     // expire 0.2.8 test versions, they have a security flaw
     if ( sn_lockOut028tTest && version.Max() >= 5 && version.Max() <= 10 )
     {
-        sn_DisconnectUser(m.SenderID(), "0.2.8_beta and 0.2.8.0_rc versions have a dangerous security flaw and are obsoleted, please upgrade to 0.2.8.0.");
+        sn_DisconnectUser(m.SenderID(), "0.2.8_beta and 0.2.8.0_rc versions have a dangerous security flaw and are obsoleted, please upgrade to 0.2.8.2.1.");
     }
 
     if (m.SenderID()!=MAXCLIENTS+1)
@@ -1608,6 +1707,8 @@ int login_handler(const nMessage &m, const nVersion& version, unsigned short rat
                 // sn_Connections	[ MAXCLIENTS+1 ].socket		= NULL;
                 // peers			[ MAXCLIENTS+1 ].sa_family	= 0;
                 //				nCallbackLoginLogout::UserLoggedIn(i);
+
+                sn_Connections	[ new_id ].supportedAuthenticationMethods_ = supportedAuthenticationMethods;
 
                 // recount doublicate IPs
                 CountSameIP( new_id, true );
@@ -1651,6 +1752,9 @@ int login_handler(const nMessage &m, const nVersion& version, unsigned short rat
         nMessage *rep=new nMessage(login_accept);
         rep->Write(new_id);
         (*rep) << sn_myVersion;
+        (*rep) << peers[m.SenderID()].ToString();
+        nKrawall::WriteScrambledPassword( salt, *rep );
+
         rep->Send(new_id, -killTimeout);
 
         nMessage::SendCollected( new_id );
@@ -1679,7 +1783,6 @@ int login_handler(const nMessage &m, const nVersion& version, unsigned short rat
 
 void login_handler_1(nMessage& m)
 {
-    nVersion version;
     unsigned short rate;
 
     m.Read( rate );
@@ -1689,13 +1792,7 @@ void login_handler_1(nMessage& m)
         m >> rem_bb;
     }
 
-    if ( !m.End() )
-    {
-        // version!
-        m >> version;
-    }
-
-    login_handler( m, version, rate );
+    login_handler( m, rate );
 }
 
 void login_handler_2(nMessage& m)
@@ -1712,10 +1809,7 @@ void login_handler_2(nMessage& m)
         m >> rem_bb;
     }
 
-    nVersion ver;
-    m >> ver;
-
-    int new_ID = login_handler( m, ver , rate );
+    int new_ID = login_handler( m, rate );
 
     if ( new_ID > 0 )
     {
@@ -2297,7 +2391,7 @@ static void rec_peer(unsigned int peer){
 	#ifndef NOEXCEPT
             }
 
-            catch(nKillHim)
+            catch(nKillHim const &)
             {
                 con << "nKillHim signal caught.\n";
                 sn_DisconnectUser(peer, "$network_kill_error");
@@ -2563,8 +2657,6 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
             (*mess) << sn_bigBrotherString;
             big_brother=false;
         }
-
-        (*mess) << sn_MyVersion();
     }
     else
     {
@@ -2581,10 +2673,18 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
             (*mess) << tString("");
         }
 
-        (*mess) << sn_MyVersion();
-
         big_brother=false;
     }
+
+    // write our version
+    (*mess) << sn_MyVersion();
+    
+    // write our supported authentication methods
+    (*mess) << nKrawall::nMethod::SupportedMethods();
+    
+    // write a random salt
+    nKrawall::RandomSalt( loginSalt );
+    nKrawall::WriteScrambledPassword( loginSalt, *mess );
 
     mess->ClearMessageID();
     mess->SendImmediately(0,false);
@@ -2653,11 +2753,14 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
 }
 
 
-void nReadError()
+void nReadError( bool critical )
 {
     // st_Breakpoint();
 #ifndef NOEXCEPT
-    throw nKillHim();
+    if ( critical )
+        throw nKillHim();
+    else
+        throw nIgnore();
 #else
     con << "\nI told you not to use PGCC! Now we need to leave the\n"
     << "system in an undefined state. The progam will crash now.\n"
@@ -2798,6 +2901,7 @@ static void ConsoleOut_conf(std::istream &s)
 }
 
 static tConfItemFunc ConsoleOut_c("CONSOLE_MESSAGE",&ConsoleOut_conf);
+static tAccessLevelSetter sn_ConsoleConfLevel( ConsoleOut_c, tAccessLevel_Moderator );
 
 static void CeterMessage_conf(std::istream &s)
 {
@@ -2810,8 +2914,7 @@ static void CeterMessage_conf(std::istream &s)
 }
 
 static tConfItemFunc CenterMessage_c("CENTER_MESSAGE",&CeterMessage_conf);
-
-
+static tAccessLevelSetter sn_CenterConfLevel( CenterMessage_c, tAccessLevel_Moderator );
 
 // ****************************************************************
 //                    Send Queue
@@ -3237,7 +3340,9 @@ void nConnectionInfo::Clear(){
     socket     = NULL;
     ackPending = 0;
     ping.Reset();
-    crypt      = NULL;
+    // crypt      = NULL;
+
+    supportedAuthenticationMethods_ = "";
 
     sendBuffer_.Clear();
 
@@ -3245,7 +3350,7 @@ void nConnectionInfo::Clear(){
 
     ackMess = NULL;
 
-    userName.SetLen(0);
+    // userName.SetLen(0);
 
     // start with 10% packet loss with low statistical weight
     packetLoss_.Reset();
@@ -3385,6 +3490,62 @@ tString nKillHim::DoGetName( void ) const
 tString nKillHim::DoGetDescription( void ) const
 {
     return tString( "The currently handled peer must have done something illegal, so it should be terminated." );
+}
+
+// *******************************************************************************************
+// *
+// *	nIgnore
+// *
+// *******************************************************************************************
+//!
+//!
+// *******************************************************************************************
+
+nIgnore::nIgnore( void )
+{
+}
+
+// *******************************************************************************************
+// *
+// *	~nIgnore
+// *
+// *******************************************************************************************
+//!
+//!
+// *******************************************************************************************
+
+nIgnore::~nIgnore( void )
+{
+}
+
+// *******************************************************************************************
+// *
+// *	DoGetName
+// *
+// *******************************************************************************************
+//!
+//!		@return		short name
+//!
+// *******************************************************************************************
+
+tString nIgnore::DoGetName( void ) const
+{
+    return tString( "Packet ignore request" );
+}
+
+// *******************************************************************************************
+// *
+// *	DoGetDescription
+// *
+// *******************************************************************************************
+//!
+//!		@return		description
+//!
+// *******************************************************************************************
+
+tString nIgnore::DoGetDescription( void ) const
+{
+    return tString( "An error that should lead to the current message getting ingored was detected." );
 }
 
 // *******************************************************************************************

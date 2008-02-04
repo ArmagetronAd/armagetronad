@@ -38,9 +38,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tToDo.h"
 #include "tConsole.h"
 #include "tDirectories.h"
+#include "tLocale.h"
 #include "tRecorder.h"
 #include "tCommandLine.h"
 #include "tResourceManager.h"
+#include "tError.h"
 
 #include <vector>
 #include <string.h>
@@ -148,6 +150,55 @@ const tConfiguration* tConfiguration::GetConfiguration() {
 bool           tConfItemBase::printChange=true;
 bool           tConfItemBase::printErrors=true;
 
+
+//! @param newLevel         the new access level to set over the course of the lifetime of this object
+//! @param allowElevation   only if set to true, getting higher access rights is possible. Use with extreme care.
+tCurrentAccessLevel::tCurrentAccessLevel( tAccessLevel newLevel, bool allowElevation )
+{
+    // prevent elevation
+    if ( !allowElevation && newLevel < currentLevel_ )
+    {
+        // you probably want to know when this happens in the debugger
+        st_Breakpoint();
+        newLevel = currentLevel_;
+    }
+
+    lastLevel_ = currentLevel_;
+    currentLevel_ = newLevel;
+}
+
+
+tCurrentAccessLevel::tCurrentAccessLevel()
+{
+    lastLevel_ = currentLevel_;
+}
+
+tCurrentAccessLevel::~tCurrentAccessLevel()
+{
+    currentLevel_ = lastLevel_;
+}
+
+//! returns the current access level
+tAccessLevel tCurrentAccessLevel::GetAccessLevel()
+{
+    return currentLevel_;
+}
+
+// returns the name of an access level
+tString tCurrentAccessLevel::GetName( tAccessLevel level )
+{
+    std::ostringstream s;
+    s << "$config_accesslevel_" << level;
+    return tString( tOutput( s.str().c_str() ) );
+}
+
+tAccessLevel tCurrentAccessLevel::currentLevel_ = tAccessLevel_Owner; //!< the current access level
+
+tAccessLevelSetter::tAccessLevelSetter( tConfItemBase & item, tAccessLevel level )
+{
+    item.requiredLevel = level;
+}
+
 static std::map< tString, tConfItemBase * > * st_confMap = 0;
 tConfItemBase::tConfItemMap & tConfItemBase::ConfItemMap()
 {
@@ -156,9 +207,152 @@ tConfItemBase::tConfItemMap & tConfItemBase::ConfItemMap()
     return *st_confMap;
 }
 
+#ifdef KRAWALL_SERVER
+
+// changes the access level of a configuration item
+class tConfItemLevel: public tConfItemBase
+{
+public:
+    tConfItemLevel()
+    : tConfItemBase( "ACCESS_LEVEL" )
+    {
+        requiredLevel = tAccessLevel_Owner;
+    }
+
+    virtual void ReadVal(std::istream &s)
+    {
+        // read name and access level
+        tString name;
+        s >> name;
+
+        int levelInt;
+        s >> levelInt;
+        tAccessLevel level = static_cast< tAccessLevel >( levelInt );
+
+        if ( s.fail() )
+        {
+            con << tOutput( "$access_level_usage" );
+            return;
+        }
+
+        // make name uppercase:
+        tToUpper( name );
+
+        // find the item
+        tConfItemMap & confmap = ConfItemMap();
+        tConfItemMap::iterator iter = confmap.find( name );
+        if ( iter != confmap.end() )
+        {
+            // and change the level
+            tConfItemBase * ci = (*iter).second;
+            if ( ci->requiredLevel != level )
+            {
+                ci->requiredLevel = level;
+                con << tOutput( "$access_level_change", name, tCurrentAccessLevel::GetName( level ) );
+            }
+        }
+        else
+        {
+            con << tOutput( "$config_command_unknown", name );
+        }
+    }
+
+    virtual void WriteVal(std::ostream &s)
+    {
+        tASSERT(0);
+    }
+
+    virtual bool Writable(){
+        return false;
+    }
+
+    virtual bool Save(){
+        return false;
+    }
+};
+
+static tConfItemLevel st_confLevel;
+
+static char const *st_casacl = "CASACL";
+
+//! casacl (Check And Set ACcess Level) command: elevates the access level for the context of the current configuration file
+class tCasacl: tConfItemBase
+{
+public:
+    tCasacl()
+    : tConfItemBase( st_casacl )
+    {
+        requiredLevel = tAccessLevel_Program;
+    }
+
+    virtual void ReadVal( std::istream & s )
+    {
+        int required_int = 0, elevated_int = 20;
+
+        // read required and elevated access levels
+        s >> required_int;
+        s >> elevated_int;
+
+        tAccessLevel elevated = static_cast< tAccessLevel >( elevated_int );
+        tAccessLevel required = static_cast< tAccessLevel >( required_int );
+
+        if ( s.fail() )
+        {
+            con << tOutput( "$sudo_usage" );
+            throw tAbortLoading( st_casacl );
+        }
+        else if ( tCurrentAccessLevel::GetAccessLevel() > required )
+        {
+            con << tOutput( "$access_level_error",
+                            "SUDO",  
+                            tCurrentAccessLevel::GetName( required ),
+                            tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() )
+                );
+            throw tAbortLoading( st_casacl );
+        }
+        else
+        {
+            tCurrentAccessLevel::currentLevel_ = elevated;
+        }
+    }
+
+    virtual void WriteVal(std::ostream &s)
+    {
+        tASSERT(0);
+    }
+
+    virtual bool Writable(){
+        return false;
+    }
+
+    virtual bool Save(){
+        return false;
+    }
+};
+
+static tCasacl st_sudo;
+
+#endif
+
 bool st_FirstUse=true;
 static tConfItem<bool> fu("FIRST_USE",st_FirstUse);
 //static tConfItem<bool> fu("FIRST_USE","help_first_use",st_FirstUse);
+
+
+tAbortLoading::tAbortLoading( char const * command )
+: command_( command )
+{
+}
+
+tString tAbortLoading::DoGetName() const
+{
+    return tString(tOutput( "$abort_loading_name"));
+}
+
+tString tAbortLoading::DoGetDescription() const
+{
+    return tString(tOutput( "$abort_loading_description", command_ ));
+}
 
 tConfItemBase::tConfItemBase(const char *t)
         :id(-1),title(t),
@@ -171,12 +365,13 @@ changed(false){
     // compose help name
     tString helpname;
     helpname << title << "_help";
-    for(int i=helpname.Len()-1;i>=0;i--)
-        helpname[i]=tolower(helpname[i]);
+    tToLower( helpname );
 
     const_cast<tOutput&>(help).AddLocale(helpname);
 
     confmap[title] = this;
+
+    requiredLevel = tAccessLevel_Admin;
 }
 
 tConfItemBase::tConfItemBase(const char *t, const tOutput& h)
@@ -188,6 +383,8 @@ changed(false){
         tERR_ERROR_INT("Two tConfItems with the same name " << t << "!");
 
     confmap[title] = this;
+
+    requiredLevel = tAccessLevel_Admin;
 }
 
 tConfItemBase::~tConfItemBase()
@@ -230,14 +427,11 @@ int tConfItemBase::EatWhitespace(std::istream &s){
 
 void tConfItemBase::LoadLine(std::istream &s){
     while(!s.eof() && s.good()){
-        int i;
-
         tString name;
         s >> name;
 
         // make name uppercase:
-        for(i=name.Len()-1;i>=0;i--)
-            name[i]=toupper(name[i]);
+        tToUpper( name );
 
         bool found=false;
 
@@ -258,11 +452,27 @@ void tConfItemBase::LoadLine(std::istream &s){
 
             bool cb=ci->changed;
             ci->changed=false;
-            ci->ReadVal(s);
-            if (ci->changed)
-                ci->WasChanged();
+
+            if ( ci->requiredLevel >= tCurrentAccessLevel::GetAccessLevel() )
+            {
+                ci->ReadVal(s);
+                if (ci->changed)
+                    ci->WasChanged();
+                else
+                    ci->changed=cb;
+            }
             else
-                ci->changed=cb;
+            {
+                tString discard;
+                discard.ReadLine(s);
+                
+                con << tOutput( "$access_level_error",
+                                name,  
+                                tCurrentAccessLevel::GetName( ci->requiredLevel ),
+                                tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() )
+                    );
+                return;
+            }
 
             found=true;
         }
@@ -363,8 +573,7 @@ bool LoadAllHelper(std::istream * s)
 static bool s_Veto( tString line_in, std::vector< tString > const & vetos )
 {
     // make name uppercase:
-    for(int i=line_in.Len()-1;i>=0;i--)
-        line_in[i]=toupper(line_in[i]);
+    tToUpper( line_in );
 
     // eat whitespace at the beginning
     char const * test = line_in;
@@ -440,7 +649,7 @@ static bool s_VetoPlayback( tString const & line )
 static bool s_VetoRecording( tString const & line )
 {
     static char const * vetos_char[]=
-        { "PASSWORD", "ADMIN_PASS",
+        { "#", "PASSWORD", "ADMIN_PASS", "LOCAL_USER", "LOCAL_TEAM",
           0 };
 
     static std::vector< tString > vetos = st_Stringify( vetos_char );
@@ -450,6 +659,10 @@ static bool s_VetoRecording( tString const & line )
 }
 
 void tConfItemBase::LoadAll(std::istream &s){
+    tCurrentAccessLevel levelResetter;
+
+    try{
+
     while(!s.eof() && s.good())
     {
         tString line;
@@ -504,6 +717,12 @@ void tConfItemBase::LoadAll(std::istream &s){
             tConfItemBase::LoadLine(str);
             // std::cout << line << '\n';
         }
+    }
+    }
+    catch( tAbortLoading const & e )
+    {
+        // loading was aborted
+        con << e.GetDescription() << "\n";
     }
 }
 

@@ -86,6 +86,35 @@ static CRITICAL_SECTION  mutex;
 
 static bool reported=false;
 
+#ifdef HAVE_LIBZTHREAD
+#include <zthread/FastRecursiveMutex.h>
+
+static ZThread::FastRecursiveMutex st_mutex;
+#else
+class tMockMutex
+{
+public:
+    void acquire(){};
+    void release(){};
+};
+
+static tMockMutex st_mutex;
+#endif
+
+class tBottleNeck
+{
+public:
+    tBottleNeck()
+    {
+        st_mutex.acquire();
+    }
+
+    ~tBottleNeck()
+    {
+        st_mutex.release();
+    }
+};
+
 // replacement for wmemset function
 #ifndef HAVE_WMEMSET
 static inline wchar_t *wmemset(wchar_t *wcs, wchar_t wc, size_t n) throw()
@@ -111,7 +140,7 @@ void leak(){
         std::cerr << "\n\nMemory leak detected!\n\n";
 #endif
 #endif
-        tMemMan::Profile();
+        tMemManBase::Profile();
     }
 }
 
@@ -128,6 +157,38 @@ class memblock;
 #endif
 #define PAD 197
 
+// information about allocation in process
+struct tAllocationInfo
+{
+#ifdef LEAKFINDER
+    const char *filename;
+    const char *classname;
+    int checksum;
+    int line;
+    bool array;
+#endif
+
+    tAllocationInfo( bool 
+#ifdef LEAKFINDER
+                     array_ 
+#endif
+        )
+#ifdef LEAKFINDER
+    : filename( "XXX" ), classname( "XXX" ), checksum(-1), line(0), array( array_ )
+#endif
+    {
+    }
+};
+
+class tMemMan: public tMemManBase
+{
+public:
+    static void *Alloc(tAllocationInfo const & info, size_t s);
+    static void  Dispose(tAllocationInfo const & info, void *p);
+    static void  DisposeButKeep(tAllocationInfo const & info, void *p);
+};
+
+
 class tMemManager{
     friend class memblock;
 public:
@@ -135,9 +196,9 @@ public:
     tMemManager(int size);
     ~tMemManager();
 
-    void *      Alloc();
-    static void * AllocDefault(size_t size);
-    static void Dispose(void *p, bool keep=false);
+    void *      Alloc( tAllocationInfo const & info );
+    static void * AllocDefault(tAllocationInfo const & info, size_t size);
+    static void Dispose(tAllocationInfo const & info, void *p, bool keep=false);
     void        complete_Dispose(memblock *m);
     void        Check(); // check integrity
 
@@ -185,11 +246,10 @@ static bool inited=false;
 #ifdef LEAKFINDER
 #include <fstream>
 #define MAXCHECKSUM 100001
-static int checksum=-1;
 static int counter[MAXCHECKSUM];
 static int leaks[MAXCHECKSUM];
 #ifdef PROFILER
-static const char *checksum_fileName[MAXCHECKSUM];
+static const char *checksum_filename[MAXCHECKSUM];
 static const char *checksum_classname[MAXCHECKSUM];
 static int         checksum_line[MAXCHECKSUM];
 static int         checksum_blocks[MAXCHECKSUM];
@@ -199,10 +259,6 @@ static int         checksum_bytes[MAXCHECKSUM];
 
 static char const *leakname="leak.log";
 static bool checkleaks=true;
-static const char *fileName="XXX";
-static const char *classname="XXX";
-static int line;
-static bool array;
 #endif
 
 void begin_checkleaks(){
@@ -303,7 +359,7 @@ public: // everything is local to this file anyway...
     }
 
 
-    void *Alloc(){
+    void *Alloc( tAllocationInfo const & info ){
 #ifdef MEM_DEB_SMALL
         Check();
 #endif
@@ -338,25 +394,25 @@ public: // everything is local to this file anyway...
         //   tASSERT(_CrtCheckMemory());
 
 #ifdef LEAKFINDER
-        if (checksum >= 0){
-            tASSERT(checksum < MAXCHECKSUM);
+        if (info.checksum >= 0){
+            tASSERT(info.checksum < MAXCHECKSUM);
 
 #ifdef PROFILER
-            if (!counter[checksum]){
-                checksum_fileName [checksum] = fileName;
-                checksum_classname[checksum] = classname;
-                checksum_line     [checksum] = line;
+            if (!counter[info.checksum]){
+                checksum_filename [info.checksum] = info.filename;
+                checksum_classname[info.checksum] = info.classname;
+                checksum_line     [info.checksum] = info.line;
             }
-            checksum_blocks[checksum]++;
-            checksum_bytes[checksum]+=size;
+            checksum_blocks[info.checksum]++;
+            checksum_bytes[info.checksum]+=size;
             chunk(ret).realSize = size;
 #endif
-            chunk(ret).array=array;
-            chunk(ret).checksum=checksum;
-            chunk(ret).counter =++counter[checksum];
+            chunk(ret).array=info.array;
+            chunk(ret).checksum=info.checksum;
+            chunk(ret).counter =++counter[info.checksum];
 
             static int count =0;
-            if (checkleaks && counter[checksum] == leaks[checksum]){
+            if (checkleaks && counter[info.checksum] == leaks[info.checksum]){
                 count ++;
                 if (count <= 0)
                 {
@@ -381,6 +437,14 @@ public: // everything is local to this file anyway...
         }
 #endif
 
+#ifdef LEAKFINDER
+#ifdef PROFILER
+        chunk(ret).realSize = size;
+#endif
+        chunk(ret).array=info.array;
+        chunk(ret).checksum=info.checksum;
+#endif
+
 #ifdef DEBUG
         wmemset(static_cast< wchar_t * >( data(ret) ), wchar_t(0xfedabeef), size / sizeof( wchar_t ));
 #else
@@ -397,7 +461,7 @@ public: // everything is local to this file anyway...
         return NULL;
     }
 
-    static memblock * Dispose(void *p, int &size,bool keep=false){
+    static memblock * Dispose(void *p, int &size, tAllocationInfo const & info, bool keep=false){
         chunkinfo &c=((chunkinfo *)p)[-1];
         size=c.size_in_dwords*4;
 
@@ -413,7 +477,7 @@ public: // everything is local to this file anyway...
 #endif
 
 #ifndef WIN32 // grr. on windows, this assertion fails on calls from STL.
-        tASSERT( c.array == array );
+        tASSERT( c.array == info.array );
 #endif
 
         if (size==0){
@@ -502,7 +566,7 @@ public: // everything is local to this file anyway...
 #ifdef LEAKFINDER
     void dumpleaks(std::ostream &s){
         for (int i=myman->blocksize-1;i>=0;i--)
-            if (chunk(i).occupied){
+            if (chunk(i).occupied && chunk(i).checksum >= 0 ){
                 s << chunk(i).checksum << " " << chunk(i).counter << '\n';
                 leak();
             }
@@ -537,6 +601,11 @@ bool tMemManager::SwapIf(int i,int j){
 
 tMemManager::~tMemManager(){
 #ifdef LEAKFINDER
+    bool warn = true;
+#ifdef HAVE_LIBZTHREAD
+    warn = false;
+#endif
+
     if (inited){
         // l???sche das ding
         std::ofstream lw(leakname);
@@ -559,10 +628,10 @@ tMemManager::~tMemManager(){
             memblock::destroy(blocks(i));
         else{
 #ifdef LEAKFINDER
-            static bool warn = true;
             if ( warn )
             {
                 std::cout << "Memmanager warning: leaving block untouched.\n";
+                warn = false;
             }
             std::ofstream l(leakname,std::ios::app);
             blocks(i)->dumpleaks(l);
@@ -575,7 +644,11 @@ tMemManager::~tMemManager(){
             memblock::destroy(full_blocks(i));
         else{
 #ifdef LEAKFINDER
-            std::cout << "Memmanager warning: leaving block untouched.\n";
+            if ( warn )
+            {
+                std::cout << "Memmanager warning: leaving block untouched.\n";
+                warn = false;
+            }
             std::ofstream l(leakname,std::ios::app);
             full_blocks(i)->dumpleaks(l);
 #endif
@@ -590,6 +663,8 @@ tMemManager::tMemManager(int s,int bs):size(s),blocksize(s){
         blocksize=255;
     semaphore = 1;
 
+    tBottleNeck neck;
+
 #ifdef WIN32
     if (!inited)
         InitializeCriticalSection(&mutex);
@@ -599,6 +674,8 @@ tMemManager::tMemManager(int s,int bs):size(s),blocksize(s){
 }
 
 tMemManager::tMemManager(int s):size(s){//,blocks(1000),full_blocks(1000){
+    tBottleNeck neck;
+
     inited = false;
 
     blocks.SetLen(0);
@@ -616,7 +693,7 @@ tMemManager::tMemManager(int s):size(s){//,blocks(1000),full_blocks(1000){
             leaks[i] = 0;
             counter[i] = 0;
 #ifdef PROFILER
-            checksum_fileName[i] = 0;
+            checksum_filename[i] = 0;
             checksum_classname[i] = 0;
             checksum_line[i] = 0;
             checksum_blocks[i] = 0;
@@ -778,11 +855,11 @@ memblock * tMemManager::Remove(int i){
     return NULL;
 }
 
-void * tMemManager::Alloc(){
+void * tMemManager::Alloc( tAllocationInfo const & info ){
     semaphore--;
     if (semaphore<0 || size == 0){
         semaphore++;
-        return AllocDefault(size);
+        return AllocDefault(info, size);
     }
 
 #ifdef WIN32
@@ -795,7 +872,7 @@ void * tMemManager::Alloc(){
 
     memblock *block=blocks(0);
     tASSERT (block->size == size);
-    void *mem = block->Alloc();
+    void *mem = block->Alloc( info );
     //tASSERT(_CrtCheckMemory());
     if (block->value == 0){
         Remove(block);
@@ -977,15 +1054,16 @@ static tMemManager memman[MAX_SIZE+1]={
                                       };
 
 
-void tMemManager::Dispose(void *p,bool keep){
+void tMemManager::Dispose(tAllocationInfo const & info, void *p, bool keep){
     int size;
 
     if (!p)
         return;
 
-    memblock *block = memblock::Dispose(p,size,keep);
+    memblock *block = memblock::Dispose(p,size,info, keep);
 #ifndef DOUBLEFREEFINDER
     if (inited && block){
+        tBottleNeck neck;
         memman[size >> 2].complete_Dispose(block);
 #ifdef WIN32
         LeaveCriticalSection(&mutex);
@@ -996,20 +1074,23 @@ void tMemManager::Dispose(void *p,bool keep){
 #endif
 }
 
-void *tMemManager::AllocDefault(size_t s){
+void *tMemManager::AllocDefault(tAllocationInfo const & info, size_t s){
 #ifdef LEAKFINDER
     void *ret=malloc(s+sizeof(chunkinfo));//,classname,fileName,line);
-    ((chunkinfo *)ret)->checksum=checksum;
-    ((chunkinfo *)ret)->array=array;
+    ((chunkinfo *)ret)->checksum=info.checksum;
+    ((chunkinfo *)ret)->array=info.array;
 #ifdef PROFILER
     ((chunkinfo *)ret)->realSize=s;
-    if (!counter[checksum]){
-        checksum_fileName [checksum] = fileName;
-        checksum_classname[checksum] = classname;
-        checksum_line     [checksum] = line;
+    if ( info.checksum >= 0 )
+    {
+        if (!counter[info.checksum]){
+            checksum_filename [info.checksum] = info.filename;
+            checksum_classname[info.checksum] = info.classname;
+            checksum_line     [info.checksum] = info.line;
+        }
+        checksum_blocks[info.checksum]++;
+        checksum_bytes[info.checksum]+=s;
     }
-    checksum_blocks[checksum]++;
-    checksum_bytes[checksum]+=s;
 #endif
 #else
     void *ret=malloc(s+sizeof(chunkinfo));
@@ -1020,7 +1101,7 @@ void *tMemManager::AllocDefault(size_t s){
     return ret;
 }
 
-void *tMemMan::Alloc(size_t s){
+void *tMemMan::Alloc(tAllocationInfo const & info, size_t s){
 #ifndef DONTUSEMEMMANAGER
 #ifdef MEM_DEB
 #ifdef WIN32
@@ -1030,9 +1111,13 @@ void *tMemMan::Alloc(size_t s){
 #endif
     void *ret;
     if (inited && s < (MAX_SIZE << 2))
-        ret=memman[((s+3)>>2)].Alloc();
-    else{
-        ret=tMemManager::AllocDefault(s);
+    {
+        tBottleNeck neck;
+        ret=memman[((s+3)>>2)].Alloc( info );
+    }
+    else
+    {
+        ret=tMemManager::AllocDefault(info, s);
     }
 #ifdef MEM_DEB
     Check();
@@ -1048,7 +1133,7 @@ void *tMemMan::Alloc(size_t s){
 
 }
 
-void tMemMan::DisposeButKeep(void *p){
+void tMemMan::DisposeButKeep( tAllocationInfo const & info, void *p){
 #ifndef DONTUSEMEMMANAGER
 #ifdef MEM_DEB
 #ifdef WIN32
@@ -1056,7 +1141,7 @@ void tMemMan::DisposeButKeep(void *p){
 #endif
     Check();
 #endif
-    tMemManager::Dispose(p,true);
+    tMemManager::Dispose(info, p, true);
 #ifdef MEM_DEB
     Check();
 #ifdef WIN32
@@ -1066,7 +1151,7 @@ void tMemMan::DisposeButKeep(void *p){
 #endif
 }
 
-void tMemMan::Dispose(void *p){
+void tMemMan::Dispose(tAllocationInfo const & info, void *p){
 #ifndef DONTUSEMEMMANAGER
 #ifdef MEM_DEB
 #ifdef WIN32
@@ -1074,7 +1159,7 @@ void tMemMan::Dispose(void *p){
 #endif
     Check();
 #endif
-    tMemManager::Dispose(p);
+    tMemManager::Dispose(info, p );
 #ifdef MEM_DEB
     Check();
 #ifdef WIN32
@@ -1087,9 +1172,10 @@ void tMemMan::Dispose(void *p){
 }
 
 
-void tMemMan::Check(){
+void tMemManBase::Check(){
     if (!inited)
         return;
+
 #ifdef WIN32
     EnterCriticalSection(&mutex);
 #endif
@@ -1173,139 +1259,135 @@ void * operator new(
 
 
 void* _cdecl operator new	(size_t size) THROW_BADALLOC{
+    tAllocationInfo info( false );
+
 #ifdef LEAKFINDER
-    checksum = size;
-    array = false;
+#ifndef HAVE_LIBZTHREAD
+    info.checksum = size;
 #endif
-    return tMemMan::Alloc(size);
+#endif
+    return tMemMan::Alloc(info, size);
 }
 
 void  _cdecl operator delete(void *ptr) THROW_NOTHING{
-#ifdef LEAKFINDER
-    checksum = -1;
-    array = false;
-#endif
+    tAllocationInfo info( false );
+
     if (ptr)
-    tMemMan::Dispose(ptr);
+        tMemMan::Dispose(info, ptr);
 }
 
 void  operator delete(void *ptr,bool keep) THROW_NOTHING{
-#ifdef LEAKFINDER
-        checksum = -1;
-        array = false;
-#endif
-        if (ptr){
-        if (keep)
-                tMemMan::DisposeButKeep(ptr);
-            else
-                tMemMan::Dispose(ptr);
+    tAllocationInfo info( false );
 
-        }
+    if (ptr){
+        if (keep)
+            tMemMan::DisposeButKeep(info, ptr);
+        else
+            tMemMan::Dispose(info, ptr);
+        
+    }
 }
 
 
 
 void* operator new	(size_t size,const char *classn,const char *file,int l) THROW_BADALLOC{
+    tAllocationInfo info( false );
 #ifdef LEAKFINDER
-    fileName=file;
-    classname=classn;
-    line=l;
-    array = false;
+    info.filename=file;
+    info.classname=classn;
+    info.line=l;
 
-    checksum =
+    info.checksum =
 #ifndef PROFILER 
         size +
 #endif 
-        line * 19671;
+        info.line * 19671;
 
     int c=1379;
     while (*file){
-    checksum = (checksum + (*file)*c) % MAXCHECKSUM;
-        c        = (c * 79              ) % MAXCHECKSUM;
+        info.checksum = (info.checksum + (*file)*c) % MAXCHECKSUM;
+        c             = (c * 79              ) % MAXCHECKSUM;
         file++;
     }
     while (*classn){
-    checksum = (checksum + (*classn)*c) % MAXCHECKSUM;
-        c        = (c * 79                ) % MAXCHECKSUM;
+        info.checksum = (info.checksum + (*classn)*c) % MAXCHECKSUM;
+        c             = (c * 79                ) % MAXCHECKSUM;
         classn++;
     }
 
 #ifdef PROFILER
-    while (checksum_fileName[checksum] && (checksum_fileName[checksum] != fileName || checksum_line[checksum] != line))
-    checksum = (checksum+1) % MAXCHECKSUM;
+    while (checksum_filename[info.checksum] && (checksum_filename[info.checksum] != info.filename || checksum_line[info.checksum] != info.line))
+    info.checksum = (info.checksum+1) % MAXCHECKSUM;
 #endif
 
 #endif
-    return tMemMan::Alloc(size);
+    return tMemMan::Alloc(info, size);
 }
 
 void  operator delete   (void *ptr,const char *classname,const char *file,int line)  THROW_NOTHING{
+    tAllocationInfo info( false );
+
+    if (ptr) tMemMan::Dispose(info, ptr);
+}
+
+void* operator new[]	(size_t size) THROW_BADALLOC{
+    tAllocationInfo info( true );
 #ifdef LEAKFINDER
-        checksum = 0;
-        array = false;
+#ifndef HAVE_LIBZTHREAD
+    info.checksum = size;
 #endif
-        if (ptr) tMemMan::Dispose(ptr);
-    }
-    void* operator new[]	(size_t size) THROW_BADALLOC{
-#ifdef LEAKFINDER
-            checksum = size;
-            array = true;
 #endif
-            return tMemMan::Alloc(size);
-        }
+    return tMemMan::Alloc(info, size);
+}
 
-        void  operator delete[](void *ptr) THROW_NOTHING {
+void  operator delete[](void *ptr) THROW_NOTHING {
+    tAllocationInfo info( true );
+
+    if (ptr)
+        tMemMan::Dispose(info, ptr);
+}
+
+
+
+void* operator new[]	(size_t size,const char *classn,const char *file,int l)  THROW_BADALLOC{
+    tAllocationInfo info( true );
 #ifdef LEAKFINDER
-            checksum = -1;
-            array = true;
-#endif
-            if (ptr)
-            tMemMan::Dispose(ptr);
-        }
+    info.filename=file;
+    info.classname=classn;
+    info.line=l;
 
-
-
-        void* operator new[]	(size_t size,const char *classn,const char *file,int l)  THROW_BADALLOC{
-#ifdef LEAKFINDER
-                fileName=file;
-                classname=classn;
-                line=l;
-                array = true;
-
-                checksum =
+    info.checksum =
 #ifndef PROFILER 
-                    size +
+    size +
 #endif 
-                    line * 19671;
-
-                int c=1379;
-                while (*file){
-                checksum = (checksum + (*file)*c) % MAXCHECKSUM;
-                    c        = (c * 79              ) % MAXCHECKSUM;
-                    file++;
-                }
+    info.line * 19671;
+    
+    int c=1379;
+    while (*file){
+        info.checksum = (info.checksum + (*file)*c) % MAXCHECKSUM;
+        c             = (c * 79              ) % MAXCHECKSUM;
+        file++;
+    }
     while (*classn){
-    checksum = (checksum + (*classn)*c) % MAXCHECKSUM;
-        c        = (c * 79                ) % MAXCHECKSUM;
+        info.checksum = (info.checksum + (*classn)*c) % MAXCHECKSUM;
+        c             = (c * 79                ) % MAXCHECKSUM;
         classn++;
     }
-
+    
 #ifdef PROFILER
-    while (checksum_fileName[checksum] && (checksum_fileName[checksum] != fileName || checksum_line[checksum] != line))
-    checksum = (checksum+1) % MAXCHECKSUM;
+    while (checksum_filename[info.checksum] && (checksum_filename[info.checksum] != info.filename || checksum_line[info.checksum] != info.line))
+    info.checksum = (info.checksum+1) % MAXCHECKSUM;
 #endif
 
 #endif
-    return tMemMan::Alloc(size);
+    return tMemMan::Alloc(info, size);
 }
 
 void  operator delete[]   (void *ptr,const char *classname,const char *file,int line)   THROW_NOTHING{
-#ifdef LEAKFINDER
-        checksum = 0;
-        array = true;
-#endif
-        if (ptr) tMemMan::Dispose(ptr);
-    }
+    tAllocationInfo info( true );
+
+    if (ptr) tMemMan::Dispose(info, ptr);
+}
 
 #endif
 
@@ -1336,7 +1418,8 @@ void  operator delete[]   (void *ptr,const char *classname,const char *file,int 
 #define snprintf _snprintf
 #endif
 
-void  tMemMan::Profile(){
+void  tMemManBase::Profile(){
+    tBottleNeck neck;
 #ifdef PROFILER
 
     int sort_checksum[MAXCHECKSUM];
@@ -1365,7 +1448,7 @@ void  tMemMan::Profile(){
     for (i=size-1; i>=0; i--)
     {
         int cs = sort_checksum[i];
-        const char *fn = checksum_fileName[cs];
+        const char *fn = checksum_filename[cs];
         const char *cn = checksum_classname[cs];
 
         if (!fn)
