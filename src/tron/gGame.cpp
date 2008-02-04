@@ -71,6 +71,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tXmlParser.h"
 #include "gParser.h"
+#include "nAuthentification.h"
 
 //#include "uWebinterface.h"
 
@@ -930,6 +931,8 @@ void update_settings()
                     sn_ConsoleOut(o2);
 
                     timeout = tSysTimeFloat() + 10.0f;
+
+                    st_DoToDo();
                 }
 
                 // kick spectators and chatbots
@@ -1030,12 +1033,6 @@ void init_game_objects(eGrid *grid){
                 }
 
                 //			bool isHuman = pni->IsHuman();
-
-#ifdef KRAWALL_SERVER
-                // don't allow unknown players to play
-                if (!pni->IsAuth())
-                    continue;
-#endif
 
                 // don't give inactive players a cycle
                 if (!pni->IsActive())
@@ -1944,6 +1941,18 @@ static tConfItemFunc exit_conf("EXIT",&Quit_conf);
 
 void st_PrintPathInfo(tOutput &buf);
 
+static void PlayerLogIn()
+{
+    ePlayer::LogIn();
+
+    if ( sg_IngameMenu )
+    {
+        sg_IngameMenu->Exit();
+    }
+
+    con << tOutput( "$player_authenticate_action" );
+}
+
 void sg_DisplayVersionInfo() {
     tOutput versionInfo;
     versionInfo << "$version_info_version" << "\n";
@@ -2029,6 +2038,16 @@ void MainMenu(bool ingame){
 
     uMenuItemExit exx(&MainMenu,extitle,
                       exhelp);
+
+    uMenuItemFunction * auth = 0;
+    static nVersionFeature authentication( 15 );
+    if ( sn_GetNetState() == nCLIENT && ingame && authentication.Supported(0) )
+    {
+        auth =tNEW(uMenuItemFunction)(&MainMenu,
+                                      "$player_authenticate_text",
+                                      "$player_authenticate_help",
+                                      &PlayerLogIn );
+    }
 
     uMenuItemFunction abb(&MainMenu,
                           "$main_menu_about_text",
@@ -2188,6 +2207,11 @@ void MainMenu(bool ingame){
     {
         gLogo::SetDisplayed(false);
         sr_con.SetHeight(7);
+    }
+
+    if ( auth )
+    {
+        delete auth;
     }
 }
 
@@ -2562,6 +2586,9 @@ void gGame::StateUpdate(){
 
         // unsigned short int mes1 = 1, mes2 = 1, mes3 = 1, mes4 = 1, mes5 = 1;
 
+       // now would be a good time to tend for pending tasks
+        nAuthentication::OnBreak();
+
         switch (state){
         case GS_DELETE_GRID:
             // sr_con.autoDisplayAtNewline=true;
@@ -2910,7 +2937,7 @@ static tSettingItem<int> sg_timestepMaxCountConf( "TIMESTEP_MAX_COUNT", sg_times
 
 void gGame::Timestep(REAL time,bool cam){
 #ifdef DEBUG
-    tMemMan::Check();
+    tMemManBase::Check();
 #endif
 
 #ifdef RESPAWN_HACK
@@ -3095,8 +3122,10 @@ void gGame::Analysis(REAL time){
                             deathTime=dt;
                     }
                 }
-                else if (p->IsAuth())
+#ifdef KRAWALL_SERVER
+                else if (p->IsAuthenticated())
                     notyetloggedin = false;
+#endif
             }
         }
         else
@@ -3260,7 +3289,7 @@ void gGame::Analysis(REAL time){
                     // check if the win was legitimate: at least one enemy team needs to be online
                     if ( sg_EnemyExists( winner-1 ) || sg_currentSettings->gameType==gFREESTYLE )
                     {
-#ifdef KRAWALL_SERVER
+#ifdef KRAWALL_SERVER_LEAGUE
                         // send the result to the master server
                         if (!dynamic_cast<gAIPlayer*>(eTeam::teams(winner-1)))
                         {
@@ -3756,6 +3785,10 @@ bool gGame::GameLoop(bool input){
     {
         // synced finally. Send our player info over so we can join the game.
         ePlayerNetID::Update();
+
+        // and trigger the scheduled auto-logons.
+        ePlayer::SendAuthNames();
+
         synced_ = true;
     }
 

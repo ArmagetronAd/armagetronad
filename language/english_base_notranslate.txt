@@ -178,3 +178,19 @@ cycle_first_spawn_protection_override_help  UNDOCUMENTED
 cycle_invulnerable_time_override_help  UNDOCUMENTED
 cycle_wall_time_override_help  UNDOCUMENTED
 
+# yet undefined access levels, reserved for future use (we only want them to pop up for
+# translators then)
+
+config_accesslevel_3        Moderator-2
+config_accesslevel_4        Moderator-3
+config_accesslevel_5        Moderator-4
+config_accesslevel_6        Moderator-5
+config_accesslevel_9        Recruit
+config_accesslevel_10       Recruit-1
+config_accesslevel_11       Recruit-2
+config_accesslevel_13       OP-ed
+config_accesslevel_14       OP-ed-2
+config_accesslevel_16       OP-ed-3
+config_accesslevel_17       OP-ed-4
+config_accesslevel_18       OP-ed-5
+config_accesslevel_19       OP-ed-6

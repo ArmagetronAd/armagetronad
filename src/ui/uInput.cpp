@@ -49,23 +49,19 @@ uAction::uAction(uAction *&anchor,const char* name,
         :tListItem<uAction>(anchor),type(t),priority(priority_),internalName(name){
     globalID = localID = su_allActionsLen++;
 
-    int i;
-
     tASSERT(localID < uMAX_ACTIONS);
 
     su_allActions[localID] = this;
 
     tString descname;
     descname << "input_" << name << "_text";
-    for (i=descname.Size()-1;i>=0;i--)
-        descname[i]=tolower(descname[i]);
+    tToLower( descname );
 
     const_cast<tOutput&>(description).AddLocale(descname);
 
     tString helpname;
     helpname << "input_" << name << "_help";
-    for (i=helpname.Size()-1;i>=0;i--)
-        helpname[i]=tolower(helpname[i]);
+    tToLower( helpname );
 
     const_cast<tOutput&>(helpText).AddLocale(helpname);
 }

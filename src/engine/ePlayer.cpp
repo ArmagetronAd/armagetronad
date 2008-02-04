@@ -51,11 +51,48 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eVoter.h"
 #include "tReferenceHolder.h"
 #include "tRandom.h"
+#include "uInputQueue.h"
 #include "nServerInfo.h"
 #include "tRecorder.h"
 #include "nConfig.h"
 #include <time.h>
 #include "tRuby.h"
+
+tColoredString & operator << (tColoredString &s,const ePlayer &p){
+    return s << tColoredString::ColorString(p.rgb[0]/15.0,
+                                            p.rgb[1]/15.0,
+                                            p.rgb[2]/15.0)
+           << p.Name();
+}
+
+tColoredString & operator << (tColoredString &s,const ePlayerNetID &p){
+    return s << p.GetColoredName();
+}
+
+std::ostream & operator << (std::ostream &s,const ePlayerNetID &p){
+    return s << p.GetColoredName();
+}
+
+eAccessLevelHolder::eAccessLevelHolder()
+{
+    accessLevel = tAccessLevel_Default;
+}
+
+void eAccessLevelHolder::SetAccessLevel( tAccessLevel level )
+{
+    // sanity check. The access level must not be set higher than that of the current context.
+    // since accessLevel is private, all access level changes need to run over this function;
+    // it is therefore impossible to get access level escalation bugs without memory overwrites
+    // or, of course, evil intentions.
+    if ( level < tCurrentAccessLevel::GetAccessLevel() )
+    {
+        con << "INTERNAL ERROR, security violation attempted. Clamping it.\n";
+        st_Breakpoint();
+        accessLevel = tCurrentAccessLevel::GetAccessLevel();
+    }
+
+    accessLevel = level;
+}
 
 tCONFIG_ENUM( eCamMode );
 
@@ -76,7 +113,8 @@ static tReferenceHolder< ePlayerNetID > se_PlayerReferences;
 class PasswordStorage
 {
 public:
-    tString username;
+    tString username; // name of the user the password belongs to
+    tString methodCongested;   // method of scrambling
     nKrawall::nScrambledPassword password;
     bool save;
 
@@ -86,10 +124,141 @@ public:
 static bool operator == ( PasswordStorage const & a, PasswordStorage const & b )
 {
     return
-    a.username == b.username;
+    a.username == b.username &&
+    a.methodCongested == b.methodCongested;
 }
     
 static tArray<PasswordStorage> S_passwords;
+
+// if set, user names of non-authenticated players are left as they are,
+// and usernames of authenticated players get a 0: prepended.
+// if unsed, usernames of non-authenticated players get all special characters escaped (especially all @)
+// and usernames of authenticated players get left as they are (with all special characters except the last
+// escaped.)
+bool se_legacyLogNames = false;
+static tSettingItem<bool> se_llnConf("LEGACY_LOG_NAMES", se_legacyLogNames );
+
+// transform special characters in name to escape sequences
+static std::string se_EscapeName( tString const & original, bool keepAt = true )
+{
+    std::ostringstream filter; 
+
+    int lastC = 'x';
+    for( int i = 0; i < original.Len()-1; ++i )
+    {
+        unsigned int c = static_cast< unsigned char >( original[i] );
+
+        // a valid character
+        switch (c)
+        {
+            // characters to escape
+        case ' ':
+            filter << "\\_";
+            break;
+        case '@':
+            if ( keepAt )
+            {
+                filter << '@';
+            }
+            else
+            {
+                filter << "\\@";
+            }
+            break;
+        case '\\':
+        case '%':
+        case ':':
+            filter.put('\\');
+            filter.put(c);
+            break;
+        case 'x':
+            // color codes?
+            if ( lastC == '0' )
+            {
+                filter << "\\x";
+                break;
+            }    
+        default:
+            if ( 0x20 < c && 0x7f >= c )
+            {
+                // normal ascii, print 
+                filter.put(c);
+            }
+            else
+            {
+                // encode as hexcode
+                filter << '%' << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << c;
+            }
+        }
+        
+        lastC = c;
+    }
+
+    // done! wrap up stream as string.
+    return filter.str();
+}
+
+#ifdef KRAWALL_SERVER
+// reverses se_EscapeName (left inverse only, UnEscape(Escape(x)) == x, but not Escape(UnEscape(y)) == y. )
+static std::string se_UnEscapeName( tString const & original )
+{
+    std::ostringstream filter; 
+
+    int lastC = 'x';
+    for( int i = 0; i < original.Len()-1; ++i )
+    {
+        int c = original[i];
+
+        if ( lastC == '\\' )
+        {
+            if ( c == '_' )
+            {
+                c = ' ';
+            }
+            filter.put(c);
+        }
+        else if ( c == '%' )
+        {
+            // decode hex code
+            char hex[3];
+            hex[0] = original[i+1];
+            hex[1] = original[i+2];
+            hex[2] = 0;
+            i += 2;
+
+            int decoded;
+            std::istringstream s(hex);
+            s >> std::hex >> decoded;
+            tASSERT( !s.fail() );
+            filter.put(decoded);
+        }
+        else if ( c != '\\' )
+        {
+            filter.put(c);
+        }
+
+        lastC = c;
+    }
+
+    // done! wrap up stream as string.
+    return filter.str();
+}
+#endif
+
+// generate the user name for an unauthenticated user
+static tString se_UnauthenticatedUserName( tString const & name )
+{
+    tString ret;
+    ePlayerNetID::FilterName( name, ret );
+    if ( se_legacyLogNames )
+    {
+        return ret;
+    }
+    else
+    {
+        return tString( se_EscapeName( ret, false ).c_str() );
+    }
+}
 
 void se_DeletePasswords(){
     S_passwords.SetLen(0);
@@ -138,7 +307,7 @@ public:
         for (i = S_passwords.Len()-1; i>=0; i--)
         {
             PasswordStorage &storage = S_passwords[i];
-            if (storage.save)
+            if (storage.save )
             {
                 if (!first)
                     s << "\nPASSWORD\t";
@@ -146,6 +315,7 @@ public:
 
                 s << "1 ";
                 nKrawall::WriteScrambledPassword(storage.password, s);
+                s << '\t' << storage.methodCongested;
                 s << '\t' << storage.username;
             }
         }
@@ -162,6 +332,7 @@ public:
         {
             PasswordStorage &storage = S_passwords[S_passwords.Len()];
             nKrawall::ReadScrambledPassword(s, storage.password);
+            s >> storage.methodCongested;
             storage.username.ReadLine(s);
 
             storage.save = true;
@@ -180,14 +351,42 @@ public:
     }
 };
 
-static tConfItemPassword p;
+static tConfItemPassword se_p;
 
-// password request menu
+// username menu item
+class eMenuItemUserName: public uMenuItemString
+{
+public:
+    eMenuItemUserName(uMenu *M,tString &c):
+    uMenuItemString(M,"$login_username","$login_username_help",c){}
+    virtual ~eMenuItemUserName(){}
+
+    virtual bool Event(SDL_Event &e){
+#ifndef DEDICATED
+        if (e.type==SDL_KEYDOWN &&
+                (e.key.keysym.sym==SDLK_KP_ENTER || e.key.keysym.sym==SDLK_RETURN)){
+
+            // move on to password menu item
+            MyMenu()->SetSelected(0);
+            return true;
+        }
+        else
+#endif
+            return uMenuItemString::Event(e);
+    }
+};
+
+// password request menu item, with *** display
 class eMenuItemPassword: public uMenuItemString
 {
 public:
+    static bool entered;
+
     eMenuItemPassword(uMenu *M,tString &c):
-    uMenuItemString(M,"$login_password_title","$login_password_help",c){}
+    uMenuItemString(M,"$login_password_title","$login_password_help",c)
+    {
+        entered = false;
+    }
     virtual ~eMenuItemPassword(){}
 
     virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0)
@@ -206,29 +405,19 @@ public:
         if (e.type==SDL_KEYDOWN &&
                 (e.key.keysym.sym==SDLK_KP_ENTER || e.key.keysym.sym==SDLK_RETURN)){
 
+            entered = true;
             MyMenu()->Exit();
             return true;
         }
-        //    else if (e.type==SDL_KEYDOWN &&
-        //	     uActionGlobal::IsBreakingGlobalBind(e.key.keysym.sym))
-        //      return su_HandleEvent(e);
         else
 #endif
             return uMenuItemString::Event(e);
     }
 };
 
+bool eMenuItemPassword::entered;
 
 static bool tr(){return true;}
-
-static uMenu *S_login=NULL;
-
-static void cancelLogin()
-{
-    if (S_login)
-        S_login->Exit();
-    S_login = NULL;
-}
 
 // password storage mode
 int se_PasswordStorageMode = 0; // 0: store in memory, -1: don't store, 1: store on file
@@ -236,14 +425,25 @@ static tConfItem<int> pws("PASSWORD_STORAGE",
                           "$password_storage_help",
                           se_PasswordStorageMode);
 
-static void PasswordCallback(tString& username,
-                             const tString& message,
-                             nKrawall::nScrambledPassword& scrambled,
-                             bool failure)
+static void PasswordCallback( nKrawall::nPasswordRequest const & request,
+                              nKrawall::nPasswordAnswer & answer )
 {
     int i;
 
+    tString& username = answer.username;
+    const tString& message = request.message;
+    nKrawall::nScrambledPassword& scrambled = answer.scrambled;
+    bool failure = request.failureOnLastTry;
+
+    if ( request.method != "md5" && request.method != "bmd5" )
+    {
+        con << "Unknown password scrambling method requested.";
+        answer.aborted = true;
+        return;
+    }
+
     // find the player with the given username:
+    /*
     ePlayer* p = NULL;
     for (i = MAX_PLAYERS-1; i>=0 && !p; i--)
     {
@@ -265,12 +465,20 @@ static void PasswordCallback(tString& username,
     // or just any player, what the heck.
     if (!p)
         p = ePlayer::PlayerConfig(0);
+    */
 
-    // try to find the username in the saved passwords:
+    // try to find the username in the saved passwords
+    tString methodCongested = request.method + '|' + request.prefix + '|' + request.suffix;
+
     PasswordStorage *storage = NULL;
     for (i = S_passwords.Len()-1; i>=0; i--)
-        if (p->name == S_passwords(i).username)
-            storage = &S_passwords(i);
+    {
+        PasswordStorage & candidate = S_passwords(i); 
+        if (answer.username == candidate.username && 
+            methodCongested  == candidate.methodCongested
+            )
+            storage = &candidate;
+    }
 
     if (!storage)
     {
@@ -285,27 +493,38 @@ static void PasswordCallback(tString& username,
         failure = true;
     }
 
+    static char const * section = "PASSWORD_MENU";
+    tRecorder::Playback( section, failure );
+    tRecorder::Record( section, failure );
+
     // immediately return the stored password if it was not marked as wrong:
     if (!failure)
     {
-        username = storage->username;
-        memcpy(scrambled, storage->password, sizeof(nKrawall::nScrambledPassword));
+        if ( storage )
+        {
+            answer.username = storage->username;
+            answer.scrambled = storage->password;
+        }
+        answer.automatic = true;
+
         return;
     }
     else
         storage->username.Clear();
 
-    // password was not stored. Request it from user:
+    // scramble input for recording
+    uInputScrambler scrambler;
 
+    // password was not stored. Request it from user:
     uMenu login(message, false);
 
     // password storage;
     tString password;
 
-
     eMenuItemPassword pw(&login, password);
-    uMenuItemString us(&login, "$login_username","$login_username_help", p->name);
-
+    eMenuItemUserName us(&login, username);
+    us.SetColorMode( rTextField::COLOR_IGNORE );
+    
     uMenuItemSelection<int> storepw(&login,
                                     "$login_storepw_text",
                                     "$login_storepw_help",
@@ -320,21 +539,22 @@ static void PasswordCallback(tString& username,
                       "$login_storepw_disk_help",
                       1);
 
-    uMenuItemFunction cl(&login, "$login_cancel", "$login_cancel_help", &cancelLogin);
+    uMenuItemExit cl(&login, "$login_cancel", "$login_cancel_help" );
 
     login.SetSelected(1);
 
     // force a small console while we are in here
     rSmallConsoleCallback cb(&tr);
 
-    S_login = &login;
     login.Enter();
 
     // return username/scrambled password
-    if (S_login)
     {
-        username = p->name;
-        nKrawall::ScramblePassword(password, scrambled);
+        // scramble password
+        request.ScramblePassword( nKrawall::nScrambleInfo( username ), password, scrambled );
+
+        // if S_login still exists, we were not canceled
+        answer.aborted = !eMenuItemPassword::entered;
 
         // clear the PW from memory
         for (i = password.Len()-2; i>=0; i--)
@@ -342,95 +562,266 @@ static void PasswordCallback(tString& username,
 
         if (se_PasswordStorageMode >= 0)
         {
-            storage->username = p->name;
-            memcpy(storage->password, scrambled, sizeof(nKrawall::nScrambledPassword));
+            storage->username = username;
+            storage->methodCongested = methodCongested;
+            storage->password = scrambled;
             storage->save = (se_PasswordStorageMode > 0);
         }
     }
-    else // or log out
-        sn_SetNetState(nSTANDALONE);
-
-    S_login = NULL;
 }
 
-
-
-static void ResultCallback(const tString& usernameUnfiltered,
-                           const tString& origUsername,
-                           int user, bool success)
+#ifdef DEDICATED
+#ifndef KRAWALL_SERVER
+// the following function really is only supposed to be called from here and nowhere else
+// (access right escalation risk):
+static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p )
 {
-    int i;
-
-    // filter the user name
-    tString username;
-    ePlayerNetID::FilterName( usernameUnfiltered, username );
-
-    // record and playback result (required because on playback, a new
-    // salt is generated and this way, a recoding does not contain ANY
-    // exploitable information for password theft: the scrambled password
-    // stored in the incoming network stream has an unknown salt value. )
-    static char const * section = "AUTH";
-    tRecorder::Playback( section, success );
-    tRecorder::Record( section, success );
-
-    if (success)
+    // elevate access rights. We are currently in the context of player chat,
+    // therefore in his security context, but we need to log the player on, 
+    // and that requires superior rights.
     {
-        bool found = false;
+        tCurrentAccessLevel elevator( tAccessLevel_Owner, true );
+        p->BeLoggedIn();
+    }
 
-        // authenticate the user that logged in and change his name
-        for (i = se_PlayerNetIDs.Len()-1; i>=0 && !found; i--)
+    sn_ConsoleOut("You have been logged in!\n",p->Owner());
+    tString serverLoginMessage;
+    serverLoginMessage << "Remote admin login for user \"" << p->GetUserName() << "\" accepted.\n";
+    sn_ConsoleOut(serverLoginMessage, 0);
+}
+#endif
+#endif
+
+#ifdef KRAWALL_SERVER
+// minimal access level to play
+static tAccessLevel se_playAccessLevel = tAccessLevel_Program;
+static tSettingItem< tAccessLevel > se_playAccessLevelConf( "ACCESS_LEVEL_PLAY", se_playAccessLevel );
+
+// minimal sliding access level to play (slides up as soon as enoughpeople of higher access level get authenticated )
+static tAccessLevel se_playAccessLevelSliding = tAccessLevel_Program;
+static tSettingItem< tAccessLevel > se_playAccessLevelSlidingConf( "ACCESS_LEVEL_PLAY_SLIDING", se_playAccessLevelSliding );
+
+// that many high level players are reuqired to drag the access level up
+static int se_playAccessLevelSliders = 4;
+static tSettingItem< int > se_playAccessLevelSlidersConf( "ACCESS_LEVEL_PLAY_SLIDERS", se_playAccessLevelSliders );
+
+static tAccessLevel se_accessLevelRequiredToPlay = tAccessLevel_Program;
+static void UpdateAccessLevelRequiredToPlay()
+{
+    int newAccessLevel = se_accessLevelRequiredToPlay;
+
+    // clamp to bounds
+    if ( newAccessLevel < se_playAccessLevelSliding )
+        newAccessLevel = se_playAccessLevelSliding;
+
+    if ( newAccessLevel > se_playAccessLevel )
+        newAccessLevel = se_playAccessLevel;
+
+    bool changed = true;
+    while ( changed )
+    {
+        changed = false;
+
+        // count players above and on the current access level
+        int countAbove = 0, countOn = 0;
+        
+        for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
         {
-            ePlayerNetID *p = se_PlayerNetIDs(i);
-            if (p->Owner() == user && p->GetUserName() == origUsername)
+            ePlayerNetID* player = se_PlayerNetIDs(i);
+
+            // don't count AIs and spectators
+            if ( !player->IsHuman() || !player->NextTeam() )
+                continue;
+            
+            if ( player->GetAccessLevel() < newAccessLevel )
             {
-                p->SetUserName(username);
-                // right now, user name and player name should match. Take care of that.
-                // the next line is scheduled to be removed for real authentication.
-                p->SetName(username);
-                p->Auth();
-                found = true;
+                countAbove++;
+            }
+            else if ( player->GetAccessLevel() == newAccessLevel )
+            {
+                countOn++;
             }
         }
 
-        // if the first step was not successful,
-        // authenticate the player from that client with the new user name (maybe he renamed?)
-        for (i = se_PlayerNetIDs.Len()-1; i>=0 && !found; i--)
+        if ( countAbove >= se_playAccessLevelSliders && newAccessLevel > se_playAccessLevelSliding )
         {
-            ePlayerNetID *p = se_PlayerNetIDs(i);
-            if (p->Owner() == user && p->GetUserName() == username)
-            {
-                p->Auth();
-                found = true;
-            }
+            // if enough players are above the current level, increase it
+            newAccessLevel --;
+            changed = true;
         }
+        else if ( countOn + countAbove < se_playAccessLevelSliders && newAccessLevel < se_playAccessLevel )
+        {
+            // if not enough players are on or above the current level to support it, decrease it
+            newAccessLevel ++;
+            changed = true;
+        }
+    }
 
-        // last attempt: authenticate any player from that client.
-        //!TODO: think about whether we actually want that.
-        for (i = se_PlayerNetIDs.Len()-1; i>=0 && !found; i--)
-        {
-            ePlayerNetID *p = se_PlayerNetIDs(i);
-            if (p->Owner() == user)
-            {
-                p->SetUserName( username );
-                p->Auth();
-                found = true;
-            }
-        }
+    if ( se_accessLevelRequiredToPlay != newAccessLevel )
+    {
+        sn_ConsoleOut( tOutput( "$access_level_play_changed",
+                                tCurrentAccessLevel::GetName( se_accessLevelRequiredToPlay ),
+                                tCurrentAccessLevel::GetName( static_cast< tAccessLevel >( newAccessLevel ) ) ) );
 
-        // request other logins
-        for (i = se_PlayerNetIDs.Len()-1; i>=0; i--)
-        {
-            ePlayerNetID *p = se_PlayerNetIDs(i);
-            p->IsAuth();
-        }
+        se_accessLevelRequiredToPlay = static_cast< tAccessLevel >( newAccessLevel );
+    }
+}
+
+tAccessLevel ePlayerNetID::AccessLevelRequiredToPlay()
+{
+    return se_accessLevelRequiredToPlay;
+}
+
+// maximal user level whose accounts are hidden from other users
+static tAccessLevel se_hideAccessLevelOf = tAccessLevel_Program;
+static tSettingItem< tAccessLevel > se_hideAccessLevelOfConf( "ACCESS_LEVEL_HIDE_OF", se_hideAccessLevelOf );
+
+// but they are only hidden to players with a lower access level than this
+static tAccessLevel se_hideAccessLevelTo = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_hideAccessLevelToConf( "ACCESS_LEVEL_HIDE_TO", se_hideAccessLevelTo );
+
+// determines whether hider can hide from seeker
+static bool se_Hide( ePlayerNetID const * hider, tAccessLevel currentLevel )
+{
+    tASSERT( hider );
+
+    return 
+    hider->GetAccessLevel() >= se_hideAccessLevelOf &&
+    currentLevel            >  se_hideAccessLevelTo;
+}
+
+// determines whether hider can hide from seeker
+static bool se_Hide( ePlayerNetID const * hider, ePlayerNetID const * seeker )
+{
+    if ( !seeker )
+    {
+        return se_Hide( hider, tCurrentAccessLevel::GetAccessLevel() );
+    }
+
+    if ( seeker == hider )
+    {
+        return false;
+    }
+
+    return se_Hide( hider, seeker->GetAccessLevel() );
+}
+
+// console messages for players who can see users of access level hider; the two exceptions get a message anyway.
+void se_SecretConsoleOut( tOutput const & message, tAccessLevel hider, ePlayerNetID const * exception1, ePlayerNetID const * exception2 = 0 )
+{
+    // high enough access levels are never secret
+    if ( hider < se_hideAccessLevelOf )
+    {
+        sn_ConsoleOut( message );
     }
     else
     {
-        if (sn_GetNetState() == nSERVER  && user != sn_myNetID )
-            nAuthentication::RequestLogin(username, user, "$login_request_failed", true);
+        bool canSee[ MAXCLIENTS+1 ];
+        for( int i = MAXCLIENTS; i>=0; --i )
+        {
+            canSee[i] = false;
+        }
+
+        // look which clients have someone who can see the message
+        for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+        {
+            ePlayerNetID* player = se_PlayerNetIDs(i);
+            if ( player->GetAccessLevel() <= se_hideAccessLevelTo || player == exception1 || player == exception2 )
+            {
+                canSee[ player->Owner() ] = true;
+            }
+        }
+
+        // and send it
+        for( int i = MAXCLIENTS; i>=0; --i )
+        {
+            if ( canSee[i] )
+            {
+                sn_ConsoleOut( message, i );
+            }
+        }
     }
 }
 
+// console messages for players who can see the user object.
+void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, ePlayerNetID const * admin = 0 )
+{
+    tASSERT( hider );
+    se_SecretConsoleOut( message, hider->GetAccessLevel(), hider, admin );
+}
+
+static void ResultCallback( nKrawall::nCheckResult const & result )
+{
+    tString username = result.username;
+    tString authority = result.authority;
+    bool success = result.success;    
+
+    ePlayerNetID * player = dynamic_cast< ePlayerNetID * >( static_cast< nNetObject * >( result.user ) );
+    if ( !player || player->Owner() <= 0 )
+    {
+        // nobody to authenticate
+        return;
+    }
+
+    tString authName = username + "@" + authority;
+
+    // seach for double login
+    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+    {
+        ePlayerNetID* player = se_PlayerNetIDs(i);
+        if ( player->IsAuthenticated() && player->GetRawAuthenticatedName() == authName )
+        {
+            sn_ConsoleOut( tOutput("$login_request_failed_dup"), player->Owner() );
+            return;
+        }
+    }
+
+    if (success)
+    {
+        player->Authenticate( authName, result.accessLevel );
+    }
+    else
+    {
+        if ( sn_GetNetState() == nSERVER )
+        {
+            tOutput out( tOutput("$login_failed_message", result.error ) );
+            sn_ConsoleOut( out, player->Owner() );
+            con << out;
+
+            // redo automatic logins immedeately
+            if ( result.automatic )
+            {
+                nAuthentication::RequestLogin( authority ,username , *player, "$login_request_failed" );
+            }
+        }
+    }
+
+    // continue with scheduled logon messages
+    ePlayerNetID::RequestScheduledLogins();
+}
+#else
+/*
+static bool se_Hide( ePlayerNetID const * hider, tAccessLevel currentLevel )
+{
+    return false;
+}
+*/
+
+static bool se_Hide( ePlayerNetID const * hider, ePlayerNetID const * seeker )
+{
+    return false;
+}
+#endif
+
+// determines whether hider can hide from seeker
+/*
+static bool se_Hide( ePlayerNetID const * hider )
+{
+    tASSERT( hider );
+
+    return se_Hide( hider, tCurrentAccessLevel::GetAccessLevel() );
+}
+*/
 
 
 
@@ -608,7 +999,9 @@ static const tString& se_UserName()
 
 ePlayer::ePlayer():cockpit(0){
     nAuthentication::SetUserPasswordCallback(&PasswordCallback);
+#ifdef KRAWALL_SERVER
     nAuthentication::SetLoginResultCallback (&ResultCallback);
+#endif
 
     nameTeamAfterMe = false;
     favoriteNumberOfPlayersPerTeam = 3;
@@ -633,12 +1026,28 @@ ePlayer::ePlayer():cockpit(0){
                                        name));
 
     confname.Clear();
+
     confname << "TEAMNAME_"<< id+1;
     StoreConfitem(tNEW(tConfItemLine) (confname,
                                        "$team_name_confitem_help",
                                        teamname));
 
     confname.Clear();
+
+    confname << "USER_"<< id+1;
+    StoreConfitem(tNEW(tConfItemLine) (confname,
+                                       "$player_user_confitem_help",
+                                       globalID));
+    
+    confname.Clear();
+    confname << "AUTO_LOGIN_"<< id+1;
+    StoreConfitem(tNEW(tConfItem<bool>)(confname,
+                                        "$auto_login_help",
+                                        autoLogin));
+    autoLogin = false;
+
+    confname.Clear();
+
     confname << "CAMCENTER_"<< id+1;
     centerIncamOnTurn=true;
     StoreConfitem(tNEW(tConfItem<bool>)
@@ -815,6 +1224,150 @@ void se_rubyEval(tString msgCore) {
 #endif
 }
 
+static void se_RequestLogin( ePlayerNetID * p );
+
+// check whether a special username is banned
+#ifdef KRAWALL_SERVER
+static bool se_IsUserBanned( ePlayerNetID * p, tString const & name );
+#endif
+
+// receive a "login wanted" message from client
+static void se_LoginWanted( nMessage & m )
+{
+#ifdef KRAWALL_SERVER
+
+    // read player
+    ePlayerNetID * p;
+    m >> p;
+
+    if ( p && m.SenderID() == p->Owner() && !p->IsAuthenticated() )
+    {
+        // read wanted flag
+        m >> p->loginWanted;
+        tString authName;
+
+        // read authentication name
+        m >> authName;
+        p->SetRawAuthenticatedName( authName );
+
+        // check for stupid bans
+        if ( se_IsUserBanned( p, authName ) )
+        {
+            return;
+        }
+
+        se_RequestLogin( p );
+    }
+#else
+    sn_ConsoleOut( tOutput( "$login_not_supported" ), m.SenderID() );
+#endif
+}
+
+static nDescriptor se_loginWanted(204,se_LoginWanted,"AuthWanted");
+
+// request authentication initiation from the client (if p->loginWanted is set)
+static void se_WantLogin( ePlayer * lp )
+{
+    // only meaningful on client
+    if( sn_GetNetState() != nCLIENT )
+    {
+        return;
+    }
+
+    // don't send if the server won't understand anyway
+    static nVersionFeature authentication( 15 );
+    if( !authentication.Supported(0) )
+    {
+        return;
+    }
+
+    tASSERT(lp);
+    ePlayerNetID *p = lp->netPlayer;
+    if ( !p )
+    {
+        return;
+    }
+    
+    nMessage *m = new nMessage( se_loginWanted );
+
+    // write player
+    *m << p;
+    
+    // write flag and name
+    *m << p->loginWanted;
+
+    // write authentication name
+    *m << lp->globalID;
+
+    m->Send( 0 );
+
+    // reset flag
+    p->loginWanted = false;
+}
+
+void ePlayer::SendAuthNames()
+{
+    // only meaningful on client
+    if( sn_GetNetState() != nCLIENT )
+    {
+        return;
+    }
+    for(int i=MAX_PLAYERS-1;i>=0;i--)
+    {
+        se_WantLogin( ePlayer::PlayerConfig(i) );
+    }
+}
+
+// on the server, this should request logins from all players who registered.
+static void se_RequestLogin( ePlayerNetID * p )
+{
+    tString userName = p->GetUserName();
+    tString authority;
+    if ( p->Owner() != 0 &&  p->loginWanted )
+    {
+#ifdef KRAWALL_SERVER
+        if ( p->GetRawAuthenticatedName().Len() > 1 )
+        {
+            nKrawall::SplitUserName( p->GetRawAuthenticatedName(), userName, authority );
+        }
+
+        p->loginWanted = 
+        !nAuthentication::RequestLogin( authority, 
+                                        userName, 
+                                        *p, 
+                                        authority.Len() > 1 ? tOutput( "$login_request", authority ) : tOutput( "$login_request_local" ) );
+#endif
+    }
+}
+
+void ePlayerNetID::RequestScheduledLogins()
+{
+    for( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+    {
+        se_RequestLogin( se_PlayerNetIDs(i) );
+    }
+}
+
+void ePlayer::LogIn()
+{
+    // only meaningful on client
+    if( sn_GetNetState() != nCLIENT )
+    {
+        return;
+    }
+
+    // mark all players as wanting to log in
+    for(int i=MAX_PLAYERS-1;i>=0;i--)
+    {
+        ePlayer * lp = ePlayer::PlayerConfig(i); 
+        if ( lp && lp->netPlayer )
+        {
+            lp->netPlayer->loginWanted = true;
+            se_WantLogin( lp );
+        }
+    }
+}
+
 static void se_DisplayChatLocally( ePlayerNetID* p, const tString& say )
 {
 #ifdef DEBUG_X
@@ -914,6 +1467,178 @@ static nVersionFeature se_chatHandlerClient( 6 );
 void handle_chat( nMessage& );
 static nDescriptor chat_handler(200,handle_chat,"Chat");
 
+// checks whether text_to_search contains search_for_text
+bool Contains( const tString & search_for_text, const tString & text_to_search ) {
+    int m = strlen(search_for_text);
+    int n = strlen(text_to_search);
+    int a, b;
+    for (b=0; b<=n-m; ++b) {
+        for (a=0; a<m && search_for_text[a] == text_to_search[a+b]; ++a)
+            ;
+        if (a>=m)
+            // a match has been found
+            return true;
+    }
+    return false;
+}
+
+// function that returns one of the player names
+typedef tString const & (ePlayerNetID::*SE_NameGetter)() const;
+
+// function that filters strings
+typedef tString (*SE_NameFilter)( tString const & );
+
+// identity filter
+static tString se_NameFilterID( tString const & name )
+{
+    return name;
+}
+
+// function that filters players
+typedef bool (*SE_NameHider)( ePlayerNetID const * hider, ePlayerNetID const * seeker );
+
+// non-hider
+static bool se_NonHide( ePlayerNetID const * hider, ePlayerNetID const * seeker  )
+{
+    return false;
+}
+
+// the other filter is ePlayerNetID::FilterName
+
+// search for exact or partial matches in player names
+ePlayerNetID * CompareBufferToPlayerNames
+  ( const tString & nameRaw, 
+    int & num_matches, 
+    ePlayerNetID * requester, 
+    SE_NameGetter GetName, // = &ePlayerNetID::GetName, 
+    SE_NameFilter Filter, // = &se_NameFilterID, 
+    SE_NameHider Hider )// = &se_NonHide )
+{
+    num_matches = 0;
+    ePlayerNetID * match = 0;
+
+    // also filter input string
+    tString name = (*Filter)( nameRaw );
+
+    // run through all players and look for a match
+    for ( int a = se_PlayerNetIDs.Len()-1; a>=0; --a ) {
+        ePlayerNetID* toMessage = se_PlayerNetIDs(a);
+
+        if ( (*Hider)( toMessage, requester ) )
+        {
+            continue;
+        }
+
+        tString playerName = (*Filter)( (toMessage->*GetName)() );
+
+        // exact match?
+        if ( playerName == name )
+        {
+            num_matches = 1;
+            return toMessage;
+        }
+
+        if ( Contains(name, playerName)) {
+            match= toMessage; // Doesn't matter that this is wrote over everytime, when we only have one match it will be there.
+            num_matches+=1;
+        }
+    }
+
+    // return result
+    return match;
+}
+
+
+ePlayerNetID * se_FindPlayerByName( tString const & name, ePlayerNetID * requester = 0 )
+{
+   int num_matches = 0;
+
+    // look for matches in the exact player names first
+   ePlayerNetID * ret = CompareBufferToPlayerNames( name, num_matches, requester, &ePlayerNetID::GetName, &se_NameFilterID, &se_NonHide );
+    if ( ret && num_matches == 1 )
+    {
+        return ret;
+    }
+
+    // ok, next round: try filtering the names before comparing them, this makes the matching case-insensitive
+    SE_NameFilter Filter = &ePlayerNetID::FilterName;
+
+    // look for matches in the screen names again
+    if ( !ret )
+    {
+        ret = CompareBufferToPlayerNames( name, num_matches, requester, &ePlayerNetID::GetName, Filter, &se_NonHide );
+    }
+    if ( ret && num_matches == 1 )
+    {
+        return ret;
+    }
+
+#ifdef KRAWALL_SERVER
+    // nothing found? try the user names.
+    if ( !ret )
+    {
+        ret = CompareBufferToPlayerNames( name, num_matches, requester, &ePlayerNetID::GetUserName, &se_NameFilterID, &se_Hide  );
+    }
+    if ( ret && num_matches == 1 )
+    {
+        return ret;
+    }
+
+    // still nothing found? user names again
+    if ( !ret )
+    {
+        ret = CompareBufferToPlayerNames( name, num_matches, requester, &ePlayerNetID::GetUserName, Filter, &se_Hide );
+    }
+    if ( ret && num_matches == 1 )
+    {
+        return ret;
+    }
+#endif
+
+    // More than than one match for the current buffer. Complain about that.
+    else if (num_matches > 1) {
+        tOutput toSender( "$msg_toomanymatches", name );
+        if ( requester )
+        { 
+            sn_ConsoleOut(toSender,requester->Owner() );
+        }
+        else
+        {
+            con << toSender;
+        }
+        return NULL;
+    }
+    // 0 matches. The user can't spell. Complain about that, too.
+    else {
+        tOutput toSender( "$msg_nomatch", name );
+        if ( requester )
+        { 
+            sn_ConsoleOut(toSender,requester->Owner() );
+        }
+        else
+        {
+            con << toSender;
+        }
+        return NULL;
+    }
+
+    return 0;
+}
+
+static ePlayerNetID * se_FindPlayerInChatCommand( ePlayerNetID * sender, char const * command, std::istream & s )
+{
+    tString player;
+    s >> player;
+
+    if (player == "" )
+    {
+        sn_ConsoleOut( tOutput( "$chatcommand_requires_player", command ), sender->Owner() );
+        return 0;
+    }
+    
+    return se_FindPlayerByName( player, sender );
+}
+
 // chat message from server to client
 void handle_chat_client( nMessage & );
 static nDescriptor chat_handler_client(203,handle_chat_client,"Chat Client");
@@ -964,7 +1689,7 @@ static tColoredString se_BuildChatString( eTeam const *team, ePlayerNetID const 
     tColoredString console;
     console << *sender;
 
-    if (sender->CurrentTeam() == team) {
+    if (sender->CurrentTeam() == team || !sender->CurrentTeam() ) {
         // foo --> Teammates: some message here
         console << tColoredString::ColorString(1,1,.5) << " --> ";
         console << tColoredString::ColorString(team->R(),team->G(),team->B()) << "Teammates";
@@ -1110,14 +1835,14 @@ void se_BroadcastChatLine( ePlayerNetID* p, const tString& line, const tString& 
     }
 }
 
-// sends a private message from sender to receiver
-void se_SendPrivateMessage( ePlayerNetID const * sender, ePlayerNetID const * receiver, tString const & message )
+// sends a private message from sender to receiver, and really sends it to eavesdropper (will usually be equal to receiver)
+void se_SendPrivateMessage( ePlayerNetID const * sender, ePlayerNetID const * receiver, ePlayerNetID const * eavesdropper, tString const & message )
 {
     tASSERT( sender );
     tASSERT( receiver );
 
     // determine receiver client id
-    int cid = receiver->Owner();
+    int cid = eavesdropper->Owner();
 
     // determine wheter the receiver knows about the server controlled chat message
     if ( se_chatHandlerClient.Supported( cid ) )
@@ -1189,46 +1914,6 @@ void se_SendTeamMessage( eTeam const * team, ePlayerNetID const * sender ,ePlaye
             // send console out message
             se_OldChatMessage( sender, say )->Send( clientID );
     }
-}
-
-// checks whether text_to_search contains search_for_text
-bool Contains( const tString & search_for_text, const tString & text_to_search ) {
-    int m = strlen(search_for_text);
-    int n = strlen(text_to_search);
-    int a, b;
-    for (b=0; b<=n-m; ++b) {
-        for (a=0; a<m && search_for_text[a] == text_to_search[a+b]; ++a)
-            ;
-        if (a>=m)
-            // a match has been found
-            return true;
-    }
-    return false;
-}
-
-ePlayerNetID * CompareBufferToPlayerNames( const tString & current_buffer, int & num_matches ) {
-    num_matches = 0;
-    ePlayerNetID * match = 0;
-
-    // run through all players and look for a match
-    for ( int a = se_PlayerNetIDs.Len()-1; a>=0; --a ) {
-        ePlayerNetID* toMessage = se_PlayerNetIDs(a);
-
-        // exact match?
-        if ( current_buffer == toMessage->GetUserName() )
-        {
-            num_matches = 1;
-            return toMessage;
-        }
-
-        if ( Contains(current_buffer, toMessage->GetUserName())) {
-            match= toMessage; // Doesn't matter that this is wrote over everytime, when we only have one match it will be there.
-            num_matches+=1;
-        }
-    }
-
-    // return result
-    return match;
 }
 
 // returns a player ( not THE player, there may be more ) belonging to a user ID
@@ -1312,78 +1997,456 @@ static bool se_interceptUnknownCommands = false;
 static tSettingItem<bool> se_interceptUnknownCommandsConf("INTERCEPT_UNKNOWN_COMMANDS",
         se_interceptUnknownCommands);
 
-void handle_command_intercept(tJUST_CONTROLLED_PTR< ePlayerNetID > &p, tString say) {
+// minimal access level for /admin
+static tAccessLevel se_adminAccessLevel = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_adminAccessLevelConf( "ACCESS_LEVEL_ADMIN", se_adminAccessLevel );
+
+void handle_command_intercept(ePlayerNetID *p, tString say) {
     con << "[cmd] " << *p << ": " << say << '\n';
 }
 
-void handle_chat_admin_commands(tJUST_CONTROLLED_PTR< ePlayerNetID > &p, tString say){
-    if  (say.StartsWith("/login")) {
-        tString params("");
-        if (say.StrPos(" ") == -1)
-            return;
-        else
-            params = say.SubStr(say.StrPos(" ") + 1);
+#ifdef KRAWALL_SERVER
 
-        // the password is not stored in the recording, hence we have to store the
-        // result of the password test
-        bool accept = true;
-        static const char * section = "REMOTE_LOGIN";
-        if ( !tRecorder::Playback( section, accept ) )
-            accept = ( params == sg_adminPass && sg_adminPass != "NONE" );
-        tRecorder::Record( section, accept );
+// minimal access level for /op/deop
+static tAccessLevel se_opAccessLevel = tAccessLevel_TeamLeader;
+static tSettingItem< tAccessLevel > se_opAccessLevelConf( "ACCESS_LEVEL_OP", se_opAccessLevel );
 
-        //change this later to read from a password file or something...
-        //or integrate it with auth if we ever get that done...
-        if ( accept ) {
-            p->beLoggedIn();
-            p->setAccessLevel(1);
-            sn_ConsoleOut("You have been logged in!\n",p->Owner());
-            tString serverLoginMessage;
-            serverLoginMessage << "Remote admin login for user \"" << p->GetUserName() << "\" accepted.\n";
-            sn_ConsoleOut(serverLoginMessage, 0);
-        }
-        else
+// maximal result thereof
+static tAccessLevel se_opAccessLevelMax = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_opAccessLevelMaxConf( "ACCESS_LEVEL_OP_MAX", se_opAccessLevelMax );
+
+// an operation that changes the access level of another player
+typedef void (*OPFUNC)( ePlayerNetID * admin, ePlayerNetID * victim, int level );
+static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const * command, OPFUNC F )
+{
+    if ( admin->GetAccessLevel() <= se_opAccessLevel )
+    {
+        ePlayerNetID * victim = se_FindPlayerInChatCommand( admin, command, s );
+        if ( victim )
         {
-            tString failedLogin;
-            sn_ConsoleOut("Login denied!\n",p->Owner());
-            failedLogin << "Remote admin login for user \"" << p->GetUserName();
-            failedLogin << "\" using password \"" << params << "\" rejected.\n";
-            sn_ConsoleOut(failedLogin, 0);
+            if ( victim == admin )
+            {
+                sn_ConsoleOut( tOutput( "$access_level_op_self", command ), admin->Owner() );
+            }
+            else if ( victim->GetAccessLevel() < admin->GetAccessLevel() )
+            {
+                sn_ConsoleOut( tOutput( "$access_level_op_overpowered", command ), admin->Owner() );
+            }
+            else
+            {
+                // read optional access level
+                int level = 1;
+                s >> level;
+
+                (*F)( admin, victim, static_cast< tAccessLevel >( level ) );
+            }
         }
     }
-    else  if (say.StartsWith("/logout")) {
-        if ( p->isLoggedIn() )
-        {
-            sn_ConsoleOut("You have been logged out!\n",p->Owner());
-        }
-        p->beNotLoggedIn();
-        p->setAccessLevel(0);
+    else
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_denied", command ), admin->Owner() );
     }
-    else  if (say.StartsWith("/admin")) {
-        if (!p->isLoggedIn())
+}
+
+// our operations of this kind: op grants access
+void se_OpBase( ePlayerNetID * admin, ePlayerNetID * victim, char const * command, int accessLevel )
+{
+    tString authName = victim->GetUserName() + "@L_OP";
+    if ( victim->IsAuthenticated() )
+    {
+        authName = victim->GetRawAuthenticatedName();
+    }
+
+    if ( accessLevel < se_opAccessLevelMax )
+        accessLevel = se_opAccessLevelMax;
+
+    // no use authenticating an AI :)
+    if ( !victim->IsHuman() )
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_denied_ai", command ), admin->Owner() );
+    }
+
+    if ( accessLevel > admin->GetAccessLevel() )
+    {
+        victim->Authenticate( authName, static_cast< tAccessLevel >( accessLevel ), admin );
+    }
+    else
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_denied_max", command ), admin->Owner() );
+    }
+}
+
+void se_Op( ePlayerNetID * admin, ePlayerNetID * victim, int level )
+{
+    int accessLevel = admin->GetAccessLevel() + 1;
+
+    // respect passed in level
+    if ( accessLevel < level )
+    {
+        accessLevel = level;
+    }
+    
+    se_OpBase( admin, victim, "/op", accessLevel );
+}
+
+// DeOp takes it away
+void se_DeOp( ePlayerNetID * admin, ePlayerNetID * victim, int )
+{
+    if ( victim->IsAuthenticated() )
+    {
+        victim->DeAuthenticate( admin );
+    }
+}
+
+void se_Demote( ePlayerNetID * admin, ePlayerNetID * victim, int level );
+
+// Promote elevates the access rights
+void se_Promote( ePlayerNetID * admin, ePlayerNetID * victim, int level )
+{
+    if ( level < 0 )
+    {
+        se_Demote( admin, victim, -level );
+        return;
+    }
+
+    int accessLevelInt = victim->GetAccessLevel() - level;
+    tAccessLevel accessLevel = static_cast< tAccessLevel >( accessLevelInt );
+    if ( accessLevel > tAccessLevel_Authenticated )
+    {
+        accessLevel = tAccessLevel_Authenticated;
+    }
+    if ( accessLevel < tCurrentAccessLevel::GetAccessLevel() + 1 )
+    {
+        accessLevel = static_cast< tAccessLevel >( tCurrentAccessLevel::GetAccessLevel() + 1 );
+    }
+
+    if ( victim->IsAuthenticated() )
+    {
+        victim->SetAccessLevel( accessLevel );
+
+        se_SecretConsoleOut( tOutput( "$access_level_promote", 
+                                      victim->GetLogName(),
+                                      tCurrentAccessLevel::GetName( accessLevel ),
+                                      admin->GetLogName() ), victim, admin );
+    }
+    else
+    {
+        se_OpBase( admin, victim, "/promote", accessLevel );
+    }
+}
+
+// Deomote reduces the access rights
+void se_Demote( ePlayerNetID * admin, ePlayerNetID * victim, int level )
+{
+    // for people who think they are smart :)
+    if ( level < 0 )
+    {
+        se_Promote( admin, victim, -level );
+        return;
+    }
+
+    int accessLevelInt = victim->GetAccessLevel() + level;
+    tAccessLevel accessLevel = static_cast< tAccessLevel >( accessLevelInt );
+
+    if ( accessLevel <= tAccessLevel_Authenticated )
+    {
+        se_SecretConsoleOut( tOutput( "$access_level_demote", 
+                                      victim->GetLogName(),
+                                      tCurrentAccessLevel::GetName( accessLevel ),
+                                      admin->GetLogName() ), victim, admin );
+
+        victim->SetAccessLevel( accessLevel );
+    }
+    else if ( victim->IsAuthenticated() )
+    {
+        victim->DeAuthenticate( admin );
+    }
+}
+
+// minimal access level for /team management
+static tAccessLevel se_teamAccessLevel = tAccessLevel_TeamLeader;
+static tSettingItem< tAccessLevel > se_teamAccessLevelConf( "ACCESS_LEVEL_TEAM", se_teamAccessLevel );
+
+// returns the team managed by an admin
+static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
+{
+    // the team to invite to is, of course, the team the admin is in.
+    eTeam * team = admin->CurrentTeam();
+    ePlayerNetID::eTeamSet const & invitations = admin->GetInvitations();
+    
+    // unless, of course, he is in no team, then let him relay the one invitation
+    // he has.
+    if ( !team && invitations.size() == 1 )
+    {
+        team = *invitations.begin();
+    }
+
+    return team;
+}
+
+// checks
+static bool se_CanManageTeam( ePlayerNetID * admin, bool emergency )
+{
+    // check regular access level 
+    if ( admin->GetAccessLevel() <= se_teamAccessLevel )
+    {
+        return true;
+    }
+
+    // check emergency
+    if ( !emergency )
+    {
+        return false;
+    }
+
+    // emergency: /invite and /unlock must be available to a player with
+    // maximal access rights on the team, otherwise teams may become
+    // locked and orphaned, without a chance to get new members.
+
+    // no team? Nothing to manage
+    eTeam * team = admin->CurrentTeam();
+    if ( !team )
+    {
+        return false;
+    }
+
+    // check for players of a higher level
+    for( int i = team->NumPlayers()-1; i >= 0; --i )
+    {
+        ePlayerNetID * otherPlayer = team->Player(i);
+        if ( otherPlayer->IsHuman() && otherPlayer->GetAccessLevel() < admin->GetAccessLevel() )
         {
-            sn_ConsoleOut("You are not logged in.\n",p->Owner());
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// invite/uninvite a player
+typedef void (eTeam::*INVITE)( ePlayerNetID * victim );
+static void se_Invite( char const * command, ePlayerNetID * admin, std::istream & s, INVITE invite )
+{
+    if ( se_CanManageTeam( admin, invite == &eTeam::Invite ) )
+    {
+        // get the team the admin can manage
+        eTeam * team = se_GetManagedTeam( admin );
+
+        if ( team )
+        {
+            ePlayerNetID * victim = se_FindPlayerInChatCommand( admin, command, s );
+            if ( victim )
+            {
+                // invite/uninvite him
+                (team->*invite)( victim );
+            }
+        }
+        else
+        {
+            sn_ConsoleOut( tOutput( "$invite_no_team", command ), admin->Owner() );
+        }
+    }
+    else
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_denied", command ), admin->Owner() );
+    }
+}
+
+// changes private party status of a team
+static void se_Lock( char const * command, ePlayerNetID * admin, std::istream & s, bool lock )
+{
+    if ( se_CanManageTeam( admin, !lock ) )
+    {
+        // get the team the admin can manage
+        eTeam * team = se_GetManagedTeam( admin );
+
+        if ( team )
+        {
+            team->SetLocked( lock );
+        }
+        else
+        {
+            sn_ConsoleOut( tOutput( "$invite_no_team", command ), admin->Owner() );
+        }
+    }
+    else
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_denied", command ), admin->Owner() );
+    }
+}
+
+#else // KRAWALL
+// returns the team managed by an admin
+static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
+{
+    return admin->CurrentTeam();
+}
+#endif // KRAWALL
+
+// the following function really is only supposed to be called from here and nowhere else
+// (access right escalation risk):
+// log in (via admin password or hash based login)
+static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p, tString const & say )
+{
+    tString params("");
+    if (say.StrPos(" ") == -1)
+    {
+#ifndef KRAWALL_SERVER
+        return;
+#endif
+    }
+    else
+    {
+        params = say.SubStr(say.StrPos(" ") + 1);
+    }
+    
+#ifndef KRAWALL_SERVER
+    // the password is not stored in the recording, hence we have to store the
+    // result of the password test
+    bool accept = true;
+    static const char * section = "REMOTE_LOGIN";
+    if ( !tRecorder::Playback( section, accept ) )
+        accept = ( params == sg_adminPass && sg_adminPass != "NONE" );
+    tRecorder::Record( section, accept );
+    
+    //change this later to read from a password file or something...
+    //or integrate it with auth if we ever get that done...
+    if ( accept ) {
+        // the following function really is only supposed to be called from here and nowhere else
+        // (access right escalation risk)
+        se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( p );
+    }
+    else
+    {
+        tString failedLogin;
+        sn_ConsoleOut("Login denied!\n",p->Owner());
+        failedLogin << "Remote admin login for user \"" << p->GetUserName();
+        failedLogin << "\" using password \"" << params << "\" rejected.\n";
+        sn_ConsoleOut(failedLogin, 0);
+    }
+#else
+    if ( sn_GetNetState() == nSERVER && p->Owner() != sn_myNetID )
+    {
+        if ( p->IsAuthenticated() )
+        {
+            sn_ConsoleOut( "$login_request_redundant", p->Owner() );
             return;
         }
-
-        tString params("");
-        if (say.StrPos(" ") == -1)
+        
+        if ( p->GetRawAuthenticatedName().Len() <= 1 || params.StrPos("@") >= 0 )
+        {
+            if ( params.StrPos( "@" ) >= 0 )
+            {
+                p->SetRawAuthenticatedName( params );
+            }
+            else
+            {
+                p->SetRawAuthenticatedName( p->GetUserName() + "@" + params );
+            }
+        }
+        
+        // check for stupid bans
+        if ( se_IsUserBanned( p, p->GetRawAuthenticatedName() ) )
+        {
             return;
-        else
-            params = say.SubStr(say.StrPos(" ") + 1);
-
-        // install filter
-        eAdminConsoleFilter consoleFilter( p->Owner() );
-
-        if ( tRecorder::IsPlayingBack() )
-        {
-            tConfItemBase::LoadPlayback();
         }
-        else
-        {
-            std::stringstream s(static_cast< char const * >( params ) );
-            tConfItemBase::LoadAll(s);
-        }
+        
+        p->loginWanted = true;
+        
+        se_RequestLogin( p );
+    }
+#endif
+}
+
+// log out
+static void se_AdminLogout( ePlayerNetID * p )
+{
+#ifdef KRAWALL_SERVER
+    // revoke the other kind of authentication as well
+    if ( p->IsAuthenticated() )
+    {
+        p->DeAuthenticate();
+    }
+#else
+    if ( p->IsLoggedIn() )
+    {
+        sn_ConsoleOut("You have been logged out!\n",p->Owner());
+    }
+    p->BeNotLoggedIn();
+#endif
+}
+
+// /admin chat command
+static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
+{
+    if ( p->GetAccessLevel() > se_adminAccessLevel )
+    {
+        sn_ConsoleOut( tOutput( "$access_level_admin_denied" ), p->Owner() );
+        return;
+    }
+    
+    // install filter
+    eAdminConsoleFilter consoleFilter( p->Owner() );
+    
+    if ( tRecorder::IsPlayingBack() )
+    {
+        tConfItemBase::LoadPlayback();
+    }
+    else
+    {
+        tConfItemBase::LoadAll(s);
+    }
+}
+
+static void handle_chat_admin_commands( ePlayerNetID * p, tString const & command, tString const & say, std::istream & s )
+{
+    if  (command == "/login")
+    {
+        // the following function really is only supposed to be called from here and nowhere else
+        // (access right escalation risk)
+        se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( p, say );
+    }
+    else  if (command == "/logout")
+    {
+        se_AdminLogout( p );
+    }
+#ifdef KRAWALL_SERVER
+    else if ( command == "/op" ) 
+    {
+        se_ChangeAccess( p, s, "/op", &se_Op );
+    }
+    else if ( command == "/deop" ) 
+    {
+        se_ChangeAccess( p, s, "/deop", &se_DeOp );
+    }
+    else if ( command == "/promote" ) 
+    {
+        se_ChangeAccess( p, s, "/promote", &se_Promote );
+    }
+    else if ( command == "/demote" ) 
+    {
+        se_ChangeAccess( p, s, "/demote", &se_Demote );
+    }
+    else if ( command == "/invite" )
+    {
+        se_Invite( command, p, s, &eTeam::Invite );
+    }
+    else if ( command == "/uninvite" )
+    {
+        se_Invite( command, p, s, &eTeam::UnInvite );
+    }
+    else if ( command == "/lock" )
+    {
+        se_Lock( command, p, s, true );
+    }
+    else if ( command == "/unlock" )
+    {
+        se_Lock( command, p, s, false );
+    }
+#endif
+    else  if ( command == "/admin" )
+    {
+        se_AdminAdmin( p, s );
     }
     else
         if (se_interceptUnknownCommands)
@@ -1392,10 +2455,16 @@ void handle_chat_admin_commands(tJUST_CONTROLLED_PTR< ePlayerNetID > &p, tString
         }
         else
         {
-            sn_ConsoleOut("Unknown chat command.\n",p->Owner());
+            sn_ConsoleOut( tOutput( "$chat_command_unknown", command ), p->Owner() );
         }
 }
-#endif
+#else // DEDICATED
+// returns the team managed by an admin
+static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
+{
+    return admin->CurrentTeam();
+}
+#endif // DEDICATED
 
 // time during which no repeaded chat messages are printed
 static REAL se_alreadySaidTimeout=5.0;
@@ -1413,14 +2482,119 @@ static tConfItemLine se_helpMessageConf("HELP_MESSAGE",se_helpMessage);
 
 static bool se_silenceAll = false;		// flag indicating whether everyone should be silenced
 
+// minimal access level for chat
+static tAccessLevel se_chatAccessLevel = tAccessLevel_Program;
+static tSettingItem< tAccessLevel > se_chatAccessLevelConf( "ACCESS_LEVEL_CHAT", se_chatAccessLevel );
+
+// time between public chat requests, set to 0 to disable
+REAL se_chatRequestTimeout = 60;
+static tSettingItem< REAL > se_chatRequestTimeoutConf( "ACCESS_LEVEL_CHAT_TIMEOUT", se_chatRequestTimeout );
+
+// access level a spectator has to have to be able to listen to /team messages
+static tAccessLevel se_teamSpyAccessLevel = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_teamSpyAccessLevelConf( "ACCESS_LEVEL_SPY_TEAM", se_teamSpyAccessLevel );
+
+// access level a user to have to be able to listen to /msg messages
+static tAccessLevel se_msgSpyAccessLevel = tAccessLevel_Owner;
+static tSettingItem< tAccessLevel > se_msgSpyAccessLevelConf( "ACCESS_LEVEL_SPY_MSG", se_msgSpyAccessLevel );
+
+// access level a user has to have to get IP addresses in /players output
+static tAccessLevel se_ipAccessLevel = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_ipAccessLevelConf( "ACCESS_LEVEL_IPS", se_ipAccessLevel );
+
 static tSettingItem<bool> se_silAll("SILENCE_ALL",
                                     se_silenceAll);
 
+// handles spam checking at the right time
+class eChatSpamTester
+{
+public:
+    eChatSpamTester( ePlayerNetID * p, tString const & say )
+    : tested_( false ), shouldBlock_( false ), player_( p ), say_( say )
+    {
+    }
+
+    bool Block()
+    {
+        if ( !tested_ )
+        {
+            shouldBlock_ = Check();
+            tested_ = true;
+        }
+
+        return shouldBlock_;
+    }
+
+    bool Check()
+    {
+        nTimeRolling currentTime = tSysTimeFloat();
+
+        // check if the player already said the same thing not too long ago
+        for (short c = 0; c < player_->lastSaid.Len(); c++)
+        {
+            if( (say_.StripWhitespace() == player_->lastSaid[c].StripWhitespace()) && ( (currentTime - player_->lastSaidTimes[c]) < se_alreadySaidTimeout) )
+            {
+                sn_ConsoleOut( tOutput("$spam_protection_repeat", say_ ), player_->Owner() );
+                return true;
+            }
+        }
+
+        REAL lengthMalus = say_.Len() / 20.0;
+        if ( lengthMalus > 4.0 )
+        {
+            lengthMalus = 4.0;
+        }
+            
+        if ( nSpamProtection::Level_Mild <= player_->chatSpam_.CheckSpam( 1+lengthMalus, player_->Owner(), tOutput("$spam_chat") ) )
+        {
+            return true;
+        }
+
+#ifdef KRAWALL_SERVER
+        if ( player_->GetAccessLevel() > se_chatAccessLevel )
+        {
+            // every once in a while, remind the public that someone has something to say
+            static double nextRequest = 0;
+            double now = tSysTimeFloat();
+            if ( now > nextRequest && se_chatRequestTimeout > 0 )
+            {
+                sn_ConsoleOut( tOutput("$access_level_chat_request", player_->GetColoredName(), player_->GetLogName() ), player_->Owner() );
+                nextRequest = now + se_chatRequestTimeout;
+            }
+            else
+            {
+                sn_ConsoleOut( tOutput("$access_level_chat_denied" ), player_->Owner() );
+            }
+            
+            return true;
+        }
+#endif
+            
+        // update last said record
+        {
+            for( short zz = 12; zz>=1; zz-- )
+            {
+                player_->lastSaid[zz] = player_->lastSaid[zz-1];
+                player_->lastSaidTimes[zz] = player_->lastSaidTimes[zz-1];
+            }
+            
+            player_->lastSaid[0] = say_;
+            player_->lastSaidTimes[0] = currentTime;
+        }
+        
+        return false;
+    }
+
+    bool tested_;
+    bool shouldBlock_;
+    ePlayerNetID * player_;
+    tString say_;
+};
 
 // checks whether a player is silenced, giving him appropriate warnings if he is
 bool IsSilencedWithWarning( ePlayerNetID const * p )
 {
-    if ( !se_enableChat && ! p->isLoggedIn() )
+    if ( !se_enableChat && ! p->IsLoggedIn() )
     {
         // everyone except the admins is silenced
         sn_ConsoleOut( tOutput( "$spam_protection_silenceall" ), p->Owner() );
@@ -1441,7 +2615,368 @@ bool IsSilencedWithWarning( ePlayerNetID const * p )
     return false;
 }
 
-void handle_chat(nMessage &m){
+// /me chat commant
+static void se_ChatMe( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
+{
+    if ( IsSilencedWithWarning(p) || spam.Block() )
+    {
+        return;
+    }
+    
+    tString msg;
+    msg.ReadLine( s );
+
+    tColoredString console;
+    console << tColoredString::ColorString(1,1,1)  << "* ";
+    console << *p;
+    console << tColoredString::ColorString(1,1,.5) << " " << msg;
+    console << tColoredString::ColorString(1,1,1)  << " *";
+    
+    tColoredString forOldClients;
+    forOldClients << tColoredString::ColorString(1,1,1)  << "*"
+                  << tColoredString::ColorString(1,1,.5) << msg
+                  << tColoredString::ColorString(1,1,1)  << "*";
+    
+    se_BroadcastChatLine( p, console, forOldClients );
+    console << "\n";
+    sn_ConsoleOut(console,0);
+    return;
+}
+
+// /teamleave chat command: leaves the current team
+static void se_ChatTeamLeave( ePlayerNetID * p )
+{
+    if ( se_assignTeamAutomatically )
+    {
+        sn_ConsoleOut(tOutput("$player_teamleave_disallowed"), p->Owner() );
+        return;
+    }
+    if(!p->TeamChangeAllowed()) {
+        sn_ConsoleOut(tOutput("$player_disallowed_teamchange"), p->Owner() );
+        return;
+    }
+    
+    eTeam * leftTeam = p->NextTeam();
+    if ( leftTeam )
+    {
+        if ( !leftTeam )
+            leftTeam = p->CurrentTeam();
+        
+        if ( leftTeam->NumPlayers() > 1 )
+        {
+            sn_ConsoleOut( tOutput( "$player_leave_team_wish",
+                                    tColoredString::RemoveColors(p->GetName()),
+                                    tColoredString::RemoveColors(leftTeam->Name()) ) );
+        }
+        else
+        {
+            sn_ConsoleOut( tOutput( "$player_leave_game_wish",
+                                    tColoredString::RemoveColors(p->GetName()) ) );
+        }
+    }
+    
+    p->SetTeamWish(0);
+}
+
+// /team chat commant: talk to your team
+static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
+{
+    // odd, the refactored original did not check for silence. Probably by design.
+    if ( /* IsSilencedWithWarning(player) || */ spam.Block() )
+    {
+        return;
+    }
+    
+    tString msg;
+    msg.ReadLine( s );
+
+    eTeam *currentTeam = se_GetManagedTeam( p );
+
+    if (currentTeam != NULL) // If a player has just joined the game, he is not yet on a team. Sending a /team message will crash the server
+    {
+        // Log message to server and sender
+        tColoredString messageForServerAndSender = se_BuildChatString(currentTeam, p, msg);
+        messageForServerAndSender << "\n";
+        sn_ConsoleOut(messageForServerAndSender, 0);
+        sn_ConsoleOut(messageForServerAndSender, p->Owner());
+        
+        // Send message to team-mates
+        int numTeamPlayers = currentTeam->NumPlayers();
+        for (int teamPlayerIndex = 0; teamPlayerIndex < numTeamPlayers; teamPlayerIndex++) {
+            if (currentTeam->Player(teamPlayerIndex)->Owner() != p->Owner()) // Do not resend the message to yourself
+                se_SendTeamMessage(currentTeam, p, currentTeam->Player(teamPlayerIndex), msg);
+        }
+
+        // check for other players who are authorized to hear the message
+        for( int i = se_PlayerNetIDs.Len() - 1; i >=0; --i )
+        {
+            ePlayerNetID * admin = se_PlayerNetIDs(i);
+            
+            if (
+                // well, you have to be a spectator. No spying on the enemy.
+                se_GetManagedTeam( admin ) == 0 && admin != p &&
+                (
+                    // let spectating admins of sufficient rights eavesdrop
+                    admin->GetAccessLevel() <=  se_teamSpyAccessLevel ||
+                    // invited players are also authorized
+                    currentTeam->IsInvited( admin )
+                    )
+                )
+            {
+                se_SendTeamMessage(currentTeam, p, admin, msg);
+            }
+        }
+    }
+    else
+    {
+        sn_ConsoleOut(tOutput("$player_not_on_team"), p->Owner());
+    }
+}
+
+// /msg chat commant: talk to anyone team
+static void se_ChatMsg( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
+{
+    // odd, the refactored original did not check for silence. Probably by design.
+    if ( /* IsSilencedWithWarning(player) || */ spam.Block() )
+    {
+        return;
+    }
+    
+    // Check for player
+    ePlayerNetID * receiver =  se_FindPlayerInChatCommand( p, "/msg", s );
+    
+    // One match, send it.
+    if ( receiver ) {
+        // extract rest of message: it is the true message to send
+        std::ws(s);
+
+        // read the rest of the message
+        tString msg_core;
+        msg_core.ReadLine(s);
+        
+        // build chat string
+        tColoredString toServer = se_BuildChatString( p, receiver, msg_core );
+        toServer << '\n';
+        
+        // log locally
+        sn_ConsoleOut(toServer,0);
+        
+        if ( p->CurrentTeam() == receiver->CurrentTeam() || !IsSilencedWithWarning(p) )
+        {
+            // log to sender's console
+            sn_ConsoleOut(toServer, p->Owner());
+            
+            // send to receiver
+            if ( p->Owner() != receiver->Owner() )
+                se_SendPrivateMessage( p, receiver, receiver, msg_core );
+        }
+
+        // let admins of sufficient rights eavesdrop
+        for( int i = se_PlayerNetIDs.Len() - 1; i >=0; --i )
+        {
+            ePlayerNetID * admin = se_PlayerNetIDs(i);
+            
+            if ( admin != receiver && admin != p && admin->GetAccessLevel() <=  se_msgSpyAccessLevel )
+            {
+                se_SendPrivateMessage( p, receiver, admin, msg_core );
+            }
+        }
+    }
+}
+
+static void se_SendTo( std::string const & message, ePlayerNetID * receiver )
+{
+    if ( receiver )
+    {
+        sn_ConsoleOut(message.c_str(), receiver->Owner());
+    }
+    else
+    {
+        con << message;
+    }
+}
+
+// prints an indented team member
+static void se_SendTeamMember( ePlayerNetID const * player, int indent, std::ostream & tos )
+{
+    // send team name
+    for( int i = indent-1; i >= 0; --i )
+    {
+        tos << ' ';
+    }
+
+    tos << *player << "\n";
+}
+
+// list teams with their formation
+static void se_ListTeam( ePlayerNetID * receiver, eTeam * team )
+{
+    std::ostringstream tos;
+    
+    // send team name
+    tColoredString teamName;
+    teamName << tColoredStringProxy( team->R()/15.0f, team->G()/15.0f, team->B()/15.0f ) << team->Name();
+    tos << teamName << "0xRESETT";
+    if ( team->IsLocked() )
+    {
+        tos << " " << tOutput( "$invite_team_locked_list" );
+    }
+    tos << ":\n";
+    
+    // send team members
+    int teamMembers = team->NumPlayers();
+    
+    int indent = 0;
+    // print left wing, the odd team members
+    for( int i = (teamMembers/2)*2-1; i>=0; i -= 2 )
+    {
+        se_SendTeamMember( team->Player(i), indent, tos );
+        indent += 2;
+    }
+    // print right wing, the even team members
+    for( int i = 0; i < teamMembers; i += 2 )
+    {
+        se_SendTeamMember( team->Player(i), indent, tos );
+        indent -= 2;
+    }
+    
+    tos << "\n";
+    
+    se_SendTo( tos.str(), receiver );
+}
+
+static void se_ListTeams( ePlayerNetID * receiver )
+{
+    int numTeams = 0;
+    
+    for ( int i = eTeam::teams.Len() - 1; i >= 0; --i )
+    {
+        eTeam * team = eTeam::teams[i];
+        if ( team->NumPlayers() > 1 || team->IsLocked() )
+        {
+            numTeams++;
+            se_ListTeam( receiver, team );
+        }
+    }
+
+    if ( numTeams == 0 )
+    {
+        se_SendTo( std::string( tString( tOutput("$no_real_teams") ) ), receiver );
+    }
+}
+
+static void teams_conf(std::istream &s)
+{
+    se_ListTeams( 0 );
+}
+
+static tConfItemFunc teams("TEAMS",&teams_conf);
+
+// /teams gives a teams list
+static void se_ChatTeams( ePlayerNetID * p )
+{
+    se_ListTeams( p );
+}
+
+static void se_ListPlayers( ePlayerNetID * receiver )
+{
+    for ( int i2 = se_PlayerNetIDs.Len()-1; i2>=0; --i2 )
+    {
+        ePlayerNetID* p2 = se_PlayerNetIDs(i2);
+        std::ostringstream tos;
+        tos << p2->Owner();
+        tos << ": ";
+        if ( p2->GetLastAccessLevel() < tAccessLevel_Default && !se_Hide( p2, receiver ) )
+        {
+            // player username comes from authentication name and may be much different from
+            // the screen name
+            tos << p2->GetUserName() << " ( " << p2->GetName() << ", " 
+                << tCurrentAccessLevel::GetName( p2->GetAccessLevel() )
+                << " )";
+        }
+        else
+        {
+            tos << p2->GetName();
+        }
+        if ( tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel )
+        {
+            tos << ", IP = " << p2->GetMachine().GetIP();
+        }
+        tos << "\n";
+
+        se_SendTo( tos.str(), receiver );
+    }
+}
+
+static void players_conf(std::istream &s)
+{
+    se_ListPlayers( 0 );
+}
+
+static tConfItemFunc players("PLAYERS",&players_conf);
+
+// /players gives a player list
+static void se_ChatPlayers( ePlayerNetID * p )
+{
+    se_ListPlayers( p );
+}
+
+// team shuffling: reorders team formation
+static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
+{
+    tString msg;
+    msg.ReadLine( s );
+
+    // team position shuffling. Allow players to change their team setup.
+    // syntax:
+    // /teamshuffle: shuffles you all the way to the outside.
+    // /teamshuffle <pos>: shuffles you to position pos
+    // /teamshuffle +/-<dist>: shuffles you dist to the outside/inside
+    // con << msgRest << "\n";
+    int IDNow = p->TeamListID();
+    if (!p->CurrentTeam())
+    {
+        sn_ConsoleOut(tOutput("$player_not_on_team"), p->Owner());
+        return;
+    }
+    int len = p->CurrentTeam()->NumPlayers();
+    int IDWish = len-1; // default to shuffle to the outside
+    
+                        // but read the target position as additional parameter
+    if (msg.Len() > 1)
+    {
+        IDWish = IDNow;
+        if ( msg[0] == '+' )
+            IDWish += msg.ToInt(1);
+        else if ( msg[0] == '-' )
+            IDWish -= msg.ToInt(1);
+        else
+            IDWish = msg.ToInt()-1;
+    }
+    
+    if (IDWish < 0)
+        IDWish = 0;
+    if (IDWish >= len)
+        IDWish = len-1;
+    
+    if ( !se_allowShuffleUp && IDWish < IDNow )
+    {
+        sn_ConsoleOut(tOutput("$player_noshuffleup"), p->Owner());
+        return;
+    }
+    
+    if( IDNow == IDWish )
+    {
+        sn_ConsoleOut(tOutput("$player_noshuffle"), p->Owner());
+        return;
+    }
+    
+    p->CurrentTeam()->Shuffle( IDNow, IDWish );
+    se_ListTeam( p, p->CurrentTeam() );
+}
+
+void handle_chat( nMessage &m )
+{
     nTimeRolling currentTime = tSysTimeFloat();
     unsigned short id;
     m.Read(id);
@@ -1457,6 +2992,9 @@ void handle_chat(nMessage &m){
     if(sn_GetNetState()==nSERVER){
         if (p)
         {
+            // for the duration of this function, set the access level to the level of the user.
+            tCurrentAccessLevel levelOverride( p->GetAccessLevel() );
+
             // check if the player is owned by the sender to avoid cheating
             if( p->Owner() != m.SenderID() )
             {
@@ -1465,44 +3003,21 @@ void handle_chat(nMessage &m){
                 return;
             }
 
-            // spam protection:
-            REAL lengthMalus = say.Len() / 20.0;
-            if ( lengthMalus > 4.0 )
-            {
-                lengthMalus = 4.0;
-            }
-
-            // check if the player already said the same thing not too long ago
-            for (short c = 0; c < p->lastSaid.Len(); c++) {
-                if( (say.StripWhitespace() == p->lastSaid[c].StripWhitespace()) && ( (currentTime - p->lastSaidTimes[c]) < se_alreadySaidTimeout) ) {
-                    sn_ConsoleOut( tOutput("$spam_protection_repeat", say ), m.SenderID() );
-                    return;
-                }
-            }
-
-            // update last said record
-            {
-                for( short zz = 12; zz>=1; zz-- )
-                {
-                    p->lastSaid[zz] = p->lastSaid[zz-1];
-                    p->lastSaidTimes[zz] = p->lastSaidTimes[zz-1];
-                }
-
-                p->lastSaid[0] = say;
-                p->lastSaidTimes[0] = currentTime;
-            }
-
-            nSpamProtection::Level spamLevel = p->chatSpam_.CheckSpam( 1.0f + lengthMalus, m.SenderID(), tOutput("$spam_chat") );
-            bool pass = false;
-
+            eChatSpamTester spam( p, say );
+            
             if (say.StartsWith("/")) {
                 std::string sayStr(say);
                 std::istringstream s(sayStr);
+
                 tString command;
                 s >> command;
-                tString msg;
+
+                // filter to lowercase
+                tToLower( command );
+
                 tConfItemBase::EatWhitespace(s);
-                msg.ReadLine(s);
+
+                // now, s is ready for reading the rest of the message.
 #ifdef DEDICATED
                 if (se_InterceptCommands.StrPos(command) != -1)
                 {
@@ -1512,60 +3027,17 @@ void handle_chat(nMessage &m){
                 else
 #endif
                     if (command == "/me") {
-                        if ( IsSilencedWithWarning(p) )
-                            return;
-
-                        tColoredString console;
-                        console << tColoredString::ColorString(1,1,1)  << "* ";
-                        console << *p;
-                        console << tColoredString::ColorString(1,1,.5) << " " << msg;
-                        console << tColoredString::ColorString(1,1,1)  << " *";
-
-                        tColoredString forOldClients;
-                        forOldClients << tColoredString::ColorString(1,1,1)  << "*"
-                        << tColoredString::ColorString(1,1,.5) << msg
-                        << tColoredString::ColorString(1,1,1)  << "*";
-
-                        se_BroadcastChatLine( p, console, forOldClients );
-                        console << "\n";
-                        sn_ConsoleOut(console,0);
+                        se_ChatMe( p, s, spam );
                         return;
                     }
                     else if (command == "/teamname") {
+                        tString msg;
+                        msg.ReadLine( s );
                         p->SetTeamname(msg);
                         return;
                     }
                     else if (command == "/teamleave") {
-                        if ( se_assignTeamAutomatically )
-                        {
-                            sn_ConsoleOut(tOutput("$player_teamleave_disallowed"), p->Owner() );
-                            return;
-                        }
-                        if(!p->TeamChangeAllowed()) {
-                            sn_ConsoleOut(tOutput("$player_disallowed_teamchange"), p->Owner() );
-                            return;
-                        }
-
-                        eTeam * leftTeam = p->NextTeam();
-                        if ( leftTeam )
-                        {
-                            if ( !leftTeam )
-                                leftTeam = p->CurrentTeam();
-
-                            if ( leftTeam->NumPlayers() > 1 )
-                            {
-                                sn_ConsoleOut( tOutput( "$player_leave_team_wish",
-                                                        tColoredString::RemoveColors(p->GetName()),
-                                                        tColoredString::RemoveColors(leftTeam->Name()) ) );
-                            }
-                            else
-                            {
-                                sn_ConsoleOut( tOutput( "$player_leave_game_wish",
-                                                        tColoredString::RemoveColors(p->GetName()) ) );
-                            }
-                        }
-
-                        p->SetTeamWish(0);
+                        se_ChatTeamLeave( p );
                         return;
                     }
                     else if (command == "/teamleave" || command=="/spectate") {
@@ -1573,137 +3045,17 @@ void handle_chat(nMessage &m){
                         return;
                     }
                     else if (command == "/teamshuffle" || command == "/shuffle") {
-                        // team position shuffling. Allow players to change their team setup.
-                        // syntax:
-                        // /teamshuffle: shuffles you all the way to the outside.
-                        // /teamshuffle <pos>: shuffles you to position pos
-                        // /teamshuffle +/-<dist>: shuffles you dist to the outside/inside
-                        // con << msgRest << "\n";
-                        int IDNow = p->TeamListID();
-                        if (!p->CurrentTeam())
-                        {
-                            sn_ConsoleOut(tOutput("$player_not_on_team"), p->Owner());
-                            return;
-                        }
-                        int len = p->CurrentTeam()->NumPlayers();
-                        int IDWish = len-1; // default to shuffle to the outside
-
-                        // but read the target position as additional parameter
-                        if (msg.Len() > 1)
-                        {
-                            IDWish = IDNow;
-                            if ( msg[0] == '+' )
-                                IDWish += msg.ToInt(1);
-                            else if ( msg[0] == '-' )
-                                IDWish -= msg.ToInt(1);
-                            else
-                                IDWish = msg.ToInt()-1;
-                        }
-
-                        if (IDWish < 0)
-                            IDWish = 0;
-                        if (IDWish >= len)
-                            IDWish = len-1;
-
-                        if ( !se_allowShuffleUp && IDWish < IDNow )
-                        {
-                            sn_ConsoleOut(tOutput("$player_noshuffleup"), p->Owner());
-                            return;
-                        }
-
-                        if( IDNow == IDWish )
-                        {
-                            sn_ConsoleOut(tOutput("$player_noshuffle"), p->Owner());
-                        }
-
-                        p->CurrentTeam()->Shuffle( IDNow, IDWish );
+                        se_ChatShuffle( p, s );
                         return;
                     }
-                // Send a message to your team
-                    else if (command == "/team") {
-                        eTeam *currentTeam = p->CurrentTeam();
-
-                        if (currentTeam != NULL) // If a player has just joined the game, he is not yet on a team. Sending a /team message will crash the server
-                        {
-                            // Log message to server and sender
-                            tColoredString messageForServerAndSender = se_BuildChatString(currentTeam, p, msg);
-                            messageForServerAndSender << "\n";
-                            sn_ConsoleOut(messageForServerAndSender, 0);
-                            sn_ConsoleOut(messageForServerAndSender, p->Owner());
-
-                            // Send message to team-mates
-                            int numTeamPlayers = currentTeam->NumPlayers();
-                            for (int teamPlayerIndex = 0; teamPlayerIndex < numTeamPlayers; teamPlayerIndex++) {
-                                if (currentTeam->Player(teamPlayerIndex)->Owner() != p->Owner()) // Do not resend the message to yourself
-                                    se_SendTeamMessage(currentTeam, p, currentTeam->Player(teamPlayerIndex), msg);
-                            }
-                        }
-                        else
-                        {
-                            sn_ConsoleOut(tOutput("$player_not_on_team"), p->Owner());
-                        }
-
+                    else if (command == "/team")
+                    {
+                        se_ChatTeam( p, s, spam );
                         return;
                     }
                     else if (command == "/msg" ) {
-                        size_t current_place=0; // current place in buffer_name.
-
-                        // search for end of recipient and store recipient in buffer_name
-                        tString buffer_name;
-                        while (current_place < msg.size() && !isblank(msg[current_place])) {
-                            buffer_name+=msg[current_place];
-                            current_place++;
-                        }
-                        buffer_name = ePlayerNetID::FilterName(buffer_name);
-
-                        // Check for match
-                        int num_matches=-1;
-                        ePlayerNetID * receiver = CompareBufferToPlayerNames(buffer_name, num_matches);
-
-                        // One match, send it.
-                        if (num_matches == 1) {
-                            // extract rest of message: it is the true message to send
-                            tString msg_core;
-                            while (current_place < msg.size() - 1) {
-                                current_place++;
-                                msg_core += msg[current_place];
-                            }
-
-                            // build chat string
-                            tColoredString toServer = se_BuildChatString( p, receiver, msg_core );
-                            toServer << '\n';
-
-                            // log locally
-                            sn_ConsoleOut(toServer,0);
-
-                            if ( p->CurrentTeam() == receiver->CurrentTeam() || !IsSilencedWithWarning(p) )
-                            {
-                                // log to sender's console
-                                sn_ConsoleOut(toServer, p->Owner());
-
-                                // send to receiver
-                                if ( p->Owner() != receiver->Owner() )
-                                    se_SendPrivateMessage( p, receiver, msg_core );
-                            }
-
-                            return;
-                        }
-                        // More than than one match for the current buffer. Complain about that.
-                        else if (num_matches > 1) {
-                            tOutput toSender;
-                            toSender.SetTemplateParameter(1, buffer_name);
-                            toSender << "$msg_toomanymatches";
-                            sn_ConsoleOut(toSender,p->Owner());
-                            return;
-                        }
-                        // 0 matches. The user can't spell. Complain about that, too.
-                        else {
-                            tOutput toSender;
-                            toSender.SetTemplateParameter(1, buffer_name);
-                            toSender << "$msg_nomatch";
-                            sn_ConsoleOut(toSender, p->Owner());
-                            return;
-                        }
+                        se_ChatMsg( p, s, spam );
+                        return;
                     }
                     else if (command == "/help")
                     {
@@ -1711,32 +3063,30 @@ void handle_chat(nMessage &m){
                         se_DisplayChatLocally(p, say);
                         return;
                     }
-#ifdef DEDICATED
                     else if (command == "/players") {
-                        for ( int i2 = se_PlayerNetIDs.Len()-1; i2>=0; --i2 )
-                        {
-                            ePlayerNetID* p2 = se_PlayerNetIDs(i2);
-                            tString tos;
-                            tos << p2->Owner();
-                            tos << ": ";
-                            tos << p2->GetUserName();
-                            if (p2->isLoggedIn())
-                                tos << " (logged in)";
-                            else
-                                tos << " (logged out)";
-                            tos << "\n";
-                            sn_ConsoleOut(tos, p->Owner());
-                        }
+                        se_ChatPlayers( p );
                         return;
                     }
+                    else if (command == "/teams") {
+                        se_ChatTeams( p );
+                        return;
+                    }
+#ifdef DEDICATED
                     else {
-                        handle_chat_admin_commands(p, say);
+                        handle_chat_admin_commands( p, command, say, s );
                         return;
                     }
 #endif
             }
 
-            if ( spamLevel < nSpamProtection::Level_Mild && say.Len() <= se_SpamMaxLen+2 && pass != true && !IsSilencedWithWarning(p) )
+            // check for spam
+            if ( spam.Block() )
+            {
+                return;
+            }
+
+            // well, that leaves only regular, boring chat.
+            if ( say.Len() <= se_SpamMaxLen+2 && !IsSilencedWithWarning(p) )
             {
                 se_BroadcastChat( p, say );
                 se_DisplayChatLocally( p, say);
@@ -2240,6 +3590,9 @@ static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT"
 
 ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings )
 {
+    // default access level
+    lastAccessLevel = tAccessLevel_Default;
+
     favoriteNumberOfPlayersPerTeam = 1;
 
     nameTeamAfterMe = false;
@@ -2247,11 +3600,13 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
     r = g = b = 15;
 
     greeted				= true;
-    auth				= true;
     chatting_			= false;
     spectating_         = false;
     chatFlags_			= 0;
     disconnected		= false;
+
+    loginWanted = false;
+    
 
     if (p>=0){
         ePlayer *P = ePlayer::PlayerConfig(p);
@@ -2264,6 +3619,8 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
 
             sg_ClampPingCharity();
             pingCharity=::pingCharity;
+
+            loginWanted = P->autoLogin;
         }
     }
     /*
@@ -2293,10 +3650,6 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
     lastScore_=IMPOSSIBLY_LOW_SCORE;
     // rubberstatus=0;
 
-    //Remote Addmin add-ins...
-    loggedIn = false;
-    accessLevel = 0;
-
     MyInitAfterCreation();
 
     if(sn_GetNetState()==nSERVER)
@@ -2309,6 +3662,9 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
 ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
         , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings )
 {
+    // default access level
+    lastAccessLevel = tAccessLevel_Default;
+
     greeted     =false;
     chatting_   =false;
     spectating_ =false;
@@ -2328,20 +3684,12 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     object=NULL;
     ping=sn_Connections[m.SenderID()].ping;
     lastSync=tSysTimeFloat();
+ 
+    loginWanted = false;
 
     score=0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;
     // rubberstatus=0;
-
-    //Remote Addmin add-ins...
-    loggedIn = false;
-    accessLevel = 0;
-
-#ifdef KRAWALL_SERVER
-    auth=false;
-#else
-    auth=true;
-#endif
 }
 
 void ePlayerNetID::Activity()
@@ -2607,19 +3955,381 @@ bool ePlayerNetID::AcceptClientSync() const{
     return true;
 }
 
-void ePlayerNetID::Auth(){
-    auth = true;
+#ifdef KRAWALL_SERVER
+
+// changes various user aspects
+template< class P > class eUserConfig: public tConfItemBase
+{
+public:
+    P Get(tString const & name ) const
+    {
+        typename Properties::const_iterator iter = properties.find( name );
+        if ( iter != properties.end() )
+        {
+            return (*iter).second;
+        }
+        
+        return GetDefault();
+    }
+protected:
+    typedef std::map< tString, P > Properties;
+
+   eUserConfig( char const * name )
+    : tConfItemBase( name )
+    {
+        requiredLevel = tAccessLevel_Owner;
+    }
+
+    virtual P ReadRawVal(tString const & name, std::istream &s) const = 0;
+    virtual P GetDefault() const = 0;
+    virtual void TransformName( tString & name ) const {};
+
+    virtual void ReadVal(std::istream &s)
+    {
+        tString name;
+        s >> name;
+        
+        TransformName( name );
+        
+        P value = ReadRawVal(name, s);
+        
+        properties[name] = value;
+    }
+    
+    Properties properties;
+private:
+
+    virtual void WriteVal(std::ostream &s)
+    {
+        tASSERT(0);
+    }
+    
+    virtual bool Writable(){
+        return false;
+    }
+
+    virtual bool Save(){
+        return false;
+    }
+};
+
+// changes the access level of a player
+class eUserLevel: public eUserConfig< tAccessLevel >
+{
+public:
+    eUserLevel()
+    : eUserConfig< tAccessLevel >( "USER_LEVEL" )
+    {
+    }
+
+    tAccessLevel GetDefault() const
+    {
+        return tAccessLevel_Authenticated;
+    }
+
+    virtual tAccessLevel ReadRawVal(tString const & name, std::istream &s) const
+    {
+        int levelInt;
+        s >> levelInt;
+        tAccessLevel level = static_cast< tAccessLevel >( levelInt );
+        
+        if ( s.fail() )
+        {
+            con << tOutput( "$user_level_usage" );
+            return GetDefault();
+        }
+
+        con << tOutput( "$user_level_change", name, tCurrentAccessLevel::GetName( level ) );
+
+        return level;
+    }
+};
+
+static eUserLevel se_userLevel;
+
+// reserves a nickname
+class eReserveNick: public eUserConfig< tString >
+{
+#ifdef DEBUG
+    static void TestEscape()
+    {
+#ifdef KRAWALL_SERVER
+        tString test("ä@%bla:");
+        tString esc(se_EscapeName( test, false ).c_str());
+        tString rev(se_UnEscapeName( esc ).c_str());
+        tASSERT( test == rev );
+#endif
+    }
+#endif
+public:
+    eReserveNick()
+    : eUserConfig< tString >( "RESERVE_SCREEN_NAME" )
+    {
+#ifdef DEBUG
+        TestEscape();
+#endif
+    }
+    
+    // filter the name so it is compatible with old school user names; those
+    // will be used later for comparison
+    virtual void TransformName( tString & name ) const
+    {
+        name = ePlayerNetID::FilterName( name );
+    }
+
+    tString GetDefault() const
+    {
+        return tString();
+    }
+
+    virtual tString ReadRawVal(tString const & name, std::istream &s) const
+    {
+        tString user;
+        s >> user;
+
+        if ( user == "" )
+        {
+            con << tOutput( "$reserve_screen_name_usage" );
+            return GetDefault();
+        }
+
+        user = se_UnEscapeName( user ).c_str();
+
+        con << tOutput( "$reserve_screen_name_change", name, user );
+
+        return user;
+    }
+};
+
+static eReserveNick se_reserveNick;
+
+// authentication alias to map a local account to a global one
+class eAlias: public eUserConfig< tString >
+{
+public:
+    eAlias()
+    : eUserConfig< tString >( "USER_ALIAS" )
+    {
+    }
+
+    tString GetDefault() const
+    {
+        return tString();
+    }
+
+    virtual tString ReadRawVal(tString const & name, std::istream &s) const
+    {
+        tString alias;
+        s >> alias;
+
+        if ( alias == "" )
+        {
+            con << tOutput( "$alias_usage" );
+            return GetDefault();
+        }
+
+        alias = se_UnEscapeName( alias ).c_str();
+
+        con << tOutput( "$alias_change", name, alias );
+
+        return alias;
+    }
+};
+
+static eAlias se_alias;
+
+// bans for players too stupid to disable autologin
+class eBanUser: public eUserConfig< bool >
+{
+public:
+    eBanUser()
+    : eUserConfig< bool >( "BAN_USER" )
+    {
+    }
+
+    // unbans the user again
+    void UnBan( tString const & name )
+    {
+        properties[name] = false;
+        con << tOutput( "$unban_user_message", name );
+    }
+
+    void List()
+    {
+        bool one = false;
+        for ( Properties::iterator i = properties.begin(); i != properties.end(); ++i )
+        {
+            if ( (*i).second )
+            {
+                if ( one )
+                {
+                    con << ", ";
+                }
+                con << (*i).first;
+                one = true;
+            }
+        }
+        if ( one )
+        {
+            con << "\n";
+        }
+    }
+
+    bool GetDefault() const
+    {
+        return false;
+    }
+
+    virtual bool ReadRawVal(tString const & name, std::istream &s) const
+    {
+        con << tOutput( "$ban_user_message", name );
+        return true;
+    }
+};
+
+static eBanUser se_banUser;
+
+// check whether a special username is banned
+static bool se_IsUserBanned( ePlayerNetID * p, tString const & name )
+{
+    if( se_banUser.Get( name ) )
+    {
+        sn_KickUser( p->Owner(), tOutput( "$network_kill_banned", 60, "" ) );
+        return true;
+    }
+
+    return false;
+}
+
+class eUnBanUser: public eUserConfig< bool >
+{
+public:
+    eUnBanUser( )
+    : eUserConfig< bool >( "UNBAN_USER" )
+    {
+    }
+
+    bool GetDefault() const
+    {
+        return false;
+    }
+
+    virtual bool ReadRawVal(tString const & name, std::istream &s) const
+    {
+        se_banUser.UnBan(name);
+        return false;
+    }
+};
+
+static eUnBanUser se_unBanUser;
+
+static void se_ListBannedUsers( std::istream & )
+{
+    se_banUser.List();
+}
+
+static tConfItemFunc sn_listBanConf("BAN_USER_LIST",&se_ListBannedUsers);
+
+static void se_CheckAccessLevel( tAccessLevel & level, tString const & authName )
+{
+    tAccessLevel newLevel = se_userLevel.Get( authName );
+    if ( newLevel < level )
+    {
+        level = newLevel;
+    }
+}
+
+void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLevel_, ePlayerNetID const * admin )
+{
+    tString newAuthenticatedName( se_EscapeName( authName ).c_str() );
+
+    // no use authenticating an AI :)
+    if ( !IsHuman() )
+    {
+        return;
+    }
+
+    if ( !IsAuthenticated() )
+    {
+        // elevate access level for registered users
+        se_CheckAccessLevel( accessLevel_, newAuthenticatedName );
+
+        rawAuthenticatedName_ = authName;
+        tString alias = se_alias.Get( newAuthenticatedName );
+        if ( alias != "" )
+        {
+            rawAuthenticatedName_ = alias;
+            newAuthenticatedName = se_EscapeName( rawAuthenticatedName_ ).c_str();
+
+            // elevate access level again according to the new alias
+            se_CheckAccessLevel( accessLevel_, newAuthenticatedName );
+        }
+
+        // check for stupid bans
+        if ( se_IsUserBanned( this, newAuthenticatedName ) )
+        {
+            return;
+        }
+
+        // minimal access level
+        if ( accessLevel_ > tAccessLevel_Authenticated )
+        {
+            accessLevel_ = tAccessLevel_Authenticated;
+        }
+
+        // take over the access level
+        SetAccessLevel( accessLevel_ );
+
+        tString order( "" );
+        if ( admin )
+        {
+            order = tOutput( "$login_message_byorder", 
+                             admin->GetLogName() );
+        }
+
+        if ( IsHuman() )
+        {
+            if ( GetAccessLevel() < tAccessLevel_Authenticated )
+            {
+                se_SecretConsoleOut( tOutput( "$login_message_special", 
+                                              GetName(), 
+                                              newAuthenticatedName,
+                                              tCurrentAccessLevel::GetName( GetAccessLevel() ),
+                                              order ), this, admin );
+            }
+            else
+            {
+                se_SecretConsoleOut( tOutput( "$login_message", GetName(), newAuthenticatedName, order ), this, admin );
+            }
+
+        }
+    }
+
     GetScoreFromDisconnectedCopy();
 }
 
-bool ePlayerNetID::IsAuth() const{
-#ifdef KRAWALL_SERVER
-    if (!auth && sn_GetNetState() == nSERVER && Owner() != sn_myNetID )
-        nAuthentication::RequestLogin(GetUserName(), Owner(), "$login_request_first");
-#endif
+void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin ){
+    if ( IsAuthenticated() )
+    {
+        if ( admin )
+        {
+            se_SecretConsoleOut( tOutput( "$logout_message_deop", GetName(), se_EscapeName( rawAuthenticatedName_ ).c_str(), admin->GetLogName() ), this, admin );
+        }
+        else
+        {
+            se_SecretConsoleOut( tOutput( "$logout_message", GetName(), se_EscapeName( rawAuthenticatedName_ ).c_str()  ), this );
+        }
+    }
 
-    return auth;
+    // force falling back to regular user name on next update
+    SetAccessLevel( tAccessLevel_Default );
 }
+
+bool ePlayerNetID::IsAuthenticated() const
+{
+    return int(GetAccessLevel()) <= int(tAccessLevel_Authenticated);
+}
+#endif
 
 // create our voter or find it
 void ePlayerNetID::CreateVoter()
@@ -2754,15 +4464,30 @@ static bool se_IsNameTaken( tString const & name, ePlayerNetID const * exception
     if ( name.Len() <= 1 )
         return false;
 
+    // check for other players with the same name
     for (int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
     {
         ePlayerNetID * player = se_PlayerNetIDs(i);
         if ( player != exception )
         {
-            if ( name == player->GetUserName() )
+            if ( name == player->GetUserName() || name == ePlayerNetID::FilterName( player->GetName() ) )
                 return true;
         }
     }
+
+#ifdef KRAWALL_SERVER
+    // check for reserved nicknames
+    if ( !exception )
+    {
+        tString reservedFor = se_reserveNick.Get( name );
+        if ( reservedFor != "" && 
+             ( !exception || exception->GetAccessLevel() >= tAccessLevel_Default ||
+               exception->GetRawAuthenticatedName() != reservedFor ) )
+        {
+            return true;
+        }
+    }
+#endif
 
     return false;
 }
@@ -3431,7 +5156,7 @@ void ePlayerNetID::RankingLadderLog() {
 
         tString line("ONLINE_PLAYER ");
 
-        line << p->GetUserName();
+        line << p->GetLogName();
 
         if(p->IsActive()) {
             line << " " << p->ping;
@@ -3447,17 +5172,6 @@ void ePlayerNetID::RankingLadderLog() {
     tString line("NUM_HUMANS ");
     line << num_humans << '\n';
     se_SaveToLadderLog(line);
-}
-
-tColoredString & operator << (tColoredString &s,const ePlayer &p){
-    return s << tColoredString::ColorString(p.rgb[0]/15.0,
-                                            p.rgb[1]/15.0,
-                                            p.rgb[2]/15.0)
-           << p.Name();
-}
-
-tColoredString & operator << (tColoredString &s,const ePlayerNetID &p){
-    return s << p.GetColoredName();
 }
 
 void ePlayerNetID::ClearAll(){
@@ -3572,6 +5286,22 @@ static tSettingItem<int> se_pingCharityMinConf( "PING_CHARITY_MIN", se_pingChari
 
 // Update the netPlayer_id list
 void ePlayerNetID::Update(){
+#ifdef KRAWALL_SERVER
+        // update access level
+        UpdateAccessLevelRequiredToPlay();
+
+        // remove players with insufficient access rights
+        tAccessLevel required = AccessLevelRequiredToPlay();
+        for( int i=se_PlayerNetIDs.Len()-1; i >= 0; --i )
+        {
+            ePlayerNetID* player = se_PlayerNetIDs(i);
+            if ( player->GetAccessLevel() > required && player->IsHuman() )
+            {
+                player->SetTeamWish(0);
+            }
+        }
+#endif
+
 #ifdef DEDICATED
     if (sr_glOut)
 #endif
@@ -3700,14 +5430,15 @@ void ePlayerNetID::Update(){
     {
         assigned = false;
 
-        // start with the players that came in earlier
         int players = se_PlayerNetIDs.Len();
+
+        // start with the players that came in earlier
         for( i=0; i<players; ++i )
         {
             ePlayerNetID* player = se_PlayerNetIDs(i);
 
             // only assign new team if it is possible
-            if ( player->TeamChangeAllowed() && player->NextTeam() != player->CurrentTeam() &&
+            if ( player->NextTeam() != player->CurrentTeam() && player->TeamChangeAllowed() && 
                     ( !player->NextTeam() || player->NextTeam()->PlayerMayJoin( player ) )
                )
             {
@@ -3725,7 +5456,7 @@ void ePlayerNetID::Update(){
                 ePlayerNetID* player = se_PlayerNetIDs(i);
 
                 // if the player is not currently on a team, but wants to join a specific team, let it join any, but keep the wish stored
-                if ( player->TeamChangeAllowed() && player->NextTeam() && !player->CurrentTeam() )
+                if ( player->NextTeam() && !player->CurrentTeam() && player->TeamChangeAllowed() )
                 {
                     eTeam * wish = player->NextTeam();
                     bool assignBack = se_assignTeamAutomatically;
@@ -3918,6 +5649,11 @@ void ePlayerNetID::RemoveChatbots()
     if ( nCLIENT == sn_GetNetState() )
         return;
 
+#ifdef KRAWALL_SERVER
+    // update access level
+    UpdateAccessLevelRequiredToPlay();
+#endif
+
     // determine the length of the last round
     static double lastTime = 0;
     double currentTime = tSysTimeFloat();
@@ -3993,7 +5729,7 @@ void ePlayerNetID::GetScoreFromDisconnectedCopy()
     // find a copy
     for(i=se_PlayerNetIDs.Len()-1;i>=0;i--){
         ePlayerNetID *pni=se_PlayerNetIDs(i);
-        if (pni->disconnected && pni->GetName() == GetName() && pni->Owner() == 0)
+        if (pni->disconnected && pni->GetUserName() == GetUserName() && pni->Owner() == 0)
         {
 #ifdef DEBUG
             con << GetName() << " reconnected.\n";
@@ -4142,7 +5878,12 @@ void ePlayerNetID::SetChatting ( ChatFlags flag, bool chatting )
 // *******************
 
 bool ePlayerNetID::TeamChangeAllowed() const {
-    return se_allowTeamChanges || allowTeamChange_;
+    return ( allowTeamChange_ || se_allowTeamChanges )
+#ifdef KRAWALL_SERVER
+       // only allow players with enough access level to enter the game, everyone is free to leave, though
+       && ( GetAccessLevel() <= AccessLevelRequiredToPlay() || CurrentTeam() )
+#endif
+    ;
 }
 
 // put a new player into a default team
@@ -4290,6 +6031,12 @@ void ePlayerNetID::UpdateTeamForce()
     {
         RequestSync();
     }
+}
+
+// teams this player is invited to
+ePlayerNetID::eTeamSet const & ePlayerNetID::GetInvitations() const
+{
+    return invitations_;
 }
 
 // create a new team and join it (on the server)
@@ -4551,7 +6298,7 @@ void ePlayerNetID::Release()
 */
 
 // reads a network ID from the stream, either the number or my user name
-static unsigned short se_ReadUser( std::istream &s )
+static unsigned short se_ReadUser( std::istream &s, ePlayerNetID * requester = 0 )
 {
     // read name of player to be kicked
     tString name;
@@ -4565,20 +6312,11 @@ static unsigned short se_ReadUser( std::istream &s )
     }
     else
     {
-        // compare the read name with the players' user names
-        for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+        // standard name lookup
+        ePlayerNetID * p = se_FindPlayerByName( name, requester );
+        if ( p )
         {
-            ePlayerNetID* p = se_PlayerNetIDs(i);
-            if ( p && p->GetUserName() == name )
-            {
-                int owner = p->Owner();
-                if ( owner > 0 )
-                {
-                    return owner;
-                }
-
-                con << tOutput( "$network_kick_notfound", name );
-            }
+            return p->Owner();
         }
     }
 
@@ -4605,6 +6343,7 @@ static void se_PlayerMessageConf(std::istream &s)
 }
 
 static tConfItemFunc se_PlayerMessage_c("PLAYER_MESSAGE", &se_PlayerMessageConf);
+static tAccessLevelSetter se_messConfLevel( se_PlayerMessage_c, tAccessLevel_Moderator );
 
 static tString se_defaultKickReason("");
 static tConfItemLine se_defaultKickReasonConf( "DEFAULT_KICK_REASON", se_defaultKickReason );
@@ -4631,6 +6370,7 @@ static void se_KickConf(std::istream &s)
 }
 
 static tConfItemFunc se_kickConf("KICK",&se_KickConf);
+static tAccessLevelSetter se_kickConfLevel( se_kickConf, tAccessLevel_Moderator );
 
 static tString se_defaultKickToServer("");
 static int se_defaultKickToPort = 4534;
@@ -4680,6 +6420,7 @@ static void se_KickToConf(std::istream &s )
 }
 
 static tConfItemFunc se_kickToConf("KICK_TO",&se_KickToConf);
+static tAccessLevelSetter se_kickToConfLevel( se_kickToConf, tAccessLevel_Moderator );
 
 static void se_MoveToConf(std::istream &s )
 {
@@ -4687,6 +6428,7 @@ static void se_MoveToConf(std::istream &s )
 }
 
 static tConfItemFunc se_moveToConf("MOVE_TO",&se_MoveToConf);
+static tAccessLevelSetter se_moveConfLevel( se_moveToConf, tAccessLevel_Moderator );
 
 static void se_BanConf(std::istream &s)
 {
@@ -4716,51 +6458,46 @@ static void se_BanConf(std::istream &s)
 }
 
 static tConfItemFunc se_banConf("BAN",&se_BanConf);
+static tAccessLevelSetter se_banConfLevel( se_banConf, tAccessLevel_Moderator );
 
-static ePlayerNetID * ReadPlayer( std::istream & s, char const * error )
+static ePlayerNetID * ReadPlayer( std::istream & s )
 {
     // read name of player to be returned
     tString name;
-    name.ReadLine( s );
+    s >> name;
+
     int num = name.ToInt();
-
-    int i;
-    for ( i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+    if ( num > 0 )
     {
-        ePlayerNetID* p = se_PlayerNetIDs(i);
-
-        // check whether it's p who should be returned,
-        // either by comparing the owner or the name.
-        bool itsHim = false;
-        if ( num > 0 )
-            itsHim = ( p->Owner() == num );
-        else
-            itsHim = ( p->GetUserName() == name );
-
-        // kill the player's game object
-        if ( itsHim )
+        // look for a player from that client
+        for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
         {
-            return p;
+            ePlayerNetID* p = se_PlayerNetIDs(i);
+
+            // check whether it's p who should be returned
+            if ( p->Owner() == num )
+            {
+                return p;
+            }
         }
     }
 
-    con << tOutput( error, name );
-
-    return 0;
+    return se_FindPlayerByName( name );
 }
 
 static void Kill_conf(std::istream &s)
 {
-    ePlayerNetID * p = ReadPlayer( s, "$network_kick_notfound" );
+    ePlayerNetID * p = ReadPlayer( s );
     if ( p && p->Object() )
         p->Object()->Kill();
 }
 
 static tConfItemFunc kill_conf("KILL",&Kill_conf);
+static tAccessLevelSetter se_killConfLevel( kill_conf, tAccessLevel_Moderator );
 
 static void Silence_conf(std::istream &s)
 {
-    ePlayerNetID * p = ReadPlayer( s, "$network_kick_notfound" );
+    ePlayerNetID * p = ReadPlayer( s );
     if ( p )
     {
         sn_ConsoleOut( tOutput( "$player_silenced", p->GetName() ) );
@@ -4769,10 +6506,11 @@ static void Silence_conf(std::istream &s)
 }
 
 static tConfItemFunc silence_conf("SILENCE",&Silence_conf);
+static tAccessLevelSetter se_silenceConfLevel( silence_conf, tAccessLevel_Moderator );
 
 static void Voice_conf(std::istream &s)
 {
-    ePlayerNetID * p = ReadPlayer( s, "$network_kick_notfound" );
+    ePlayerNetID * p = ReadPlayer( s );
     if ( p )
     {
         sn_ConsoleOut( tOutput( "$player_voiced", p->GetName() ) );
@@ -4781,37 +6519,7 @@ static void Voice_conf(std::istream &s)
 }
 
 static tConfItemFunc voice_conf("VOICE",&Voice_conf);
-
-static void players_conf(std::istream &s)
-{
-    /*    for ( int i=0; i < se_PlayerNetIDs.Len(); i++ )
-        {
-            ePlayerNetID* p = se_PlayerNetIDs(i);
-            tOutput o;
-            o << "Player " << p->Owner() << ": " << p->name;
-            if (p->isLoggedIn())
-                o << " (logged in)\n";
-            else
-                o << " (logged out)\n";
-            con << o;
-        } */
-    for ( int i2 = se_PlayerNetIDs.Len()-1; i2>=0; --i2 )
-    {
-        ePlayerNetID* p2 = se_PlayerNetIDs(i2);
-        tOutput tos;
-        tos << p2->Owner();
-        tos << ": ";
-        tos << p2->GetUserName();
-        if (p2->isLoggedIn())
-            tos << " (logged in)";
-        else
-            tos << " (logged out)";
-        tos << "\n";
-        con << tos;
-    }
-}
-
-static tConfItemFunc players("PLAYERS",&players_conf);
+static tAccessLevelSetter se_voiceConfLevel( voice_conf, tAccessLevel_Moderator );
 
 static tString sg_url;
 static tSettingItem< tString > sg_urlConf( "URL", sg_url );
@@ -4858,6 +6566,82 @@ private:
 
 static gServerInfoAdmin sg_serverAdmin;
 
+class eNameMessenger
+{
+public:
+    eNameMessenger( ePlayerNetID & player )
+    : player_( player )
+    , oldScreenName_( player.GetName() )
+    , oldLogName_( player.GetLogName() )
+    {
+        // store old name for password re-request and name change message
+        oldPrintName_ << player_ << tColoredString::ColorString(.5,1,.5);
+    }
+
+    ~eNameMessenger()
+    {
+        if ( sn_GetNetState() == nCLIENT )
+        {
+            return;
+        }
+
+        tString logName = player_.GetLogName();
+        tString const & screenName = player_.GetName();
+
+        // messages for the users
+        tColoredString printName;
+        printName << player_ << tColoredString::ColorString(.5,1,.5);
+
+        tOutput mess;
+        
+        mess.SetTemplateParameter(1, printName);
+        mess.SetTemplateParameter(2, oldPrintName_);
+        
+        // is the player new?
+        if ( oldLogName_.Len() <= 1 && logName.Len() > 0 )
+        {
+            if ( player_.IsHuman() )
+            {
+                tString ladder;
+                ladder << "PLAYER_ENTERED " << logName << " " << nMachine::GetMachine(player_.Owner()).GetIP() << " " << screenName << "\n";
+                se_SaveToLadderLog(ladder);
+                
+                player_.Greet();
+
+                // print spectating join message (regular join messages are handled by eTeam)
+                if ( player_.IsSpectating() || !se_assignTeamAutomatically )
+                {
+                    mess << "$player_entered_spectator";
+                    sn_ConsoleOut(mess);
+                }
+            }
+        }
+        else if ( logName != oldLogName_ || screenName != oldScreenName_ )
+        {
+            tString ladder;
+            ladder << "PLAYER_RENAMED " << oldLogName_  << " "  << logName << " " << nMachine::GetMachine(player_.Owner()).GetIP() << " " << screenName << "\n";
+            se_SaveToLadderLog(ladder);
+
+
+            if ( bool(player_.GetVoter() ) )
+            {
+                player_.GetVoter()->PlayerChanged();
+            }
+
+            if ( oldPrintName_ != printName )
+            {
+                mess << "$player_renamed";
+
+                sn_ConsoleOut(mess);
+            }
+        }
+    }
+
+    ePlayerNetID & player_;
+    tString oldScreenName_, oldLogName_;
+    tColoredString oldPrintName_;
+};
+
 // ******************************************************************************************
 // *
 // *	UpdateName
@@ -4872,11 +6656,9 @@ void ePlayerNetID::UpdateName( void )
     // don't do a thing if we're not fully synced
     if ( this->ID() == 0 && nameFromClient_.Len() <= 1 && sn_GetNetState() == nSERVER )
         return;
-
-    // store old name for password re-request and name change message
-    tColoredString oldprintname;
-    tString oldUserName( GetUserName() );
-    oldprintname << *this << tColoredString::ColorString(.5,1,.5);
+    
+    // monitor name changes
+    eNameMessenger messenger( *this );
 
     // apply client change, stripping excess spaces
     if ( sn_GetNetState() != nCLIENT )
@@ -4904,8 +6686,7 @@ void ePlayerNetID::UpdateName( void )
 
     // remove colors from name
     tString newName = tColoredString::RemoveColors( nameFromServer_ );
-    tString newUserName;
-    FilterName( newName, newUserName );
+    tString newUserName = se_UnauthenticatedUserName( newName );
 
     // test if it is already taken, find an alternative name if so.
     if ( sn_GetNetState() != nCLIENT && !se_allowImposters && se_IsNameTaken( newUserName, this ) )
@@ -4926,7 +6707,7 @@ void ePlayerNetID::UpdateName( void )
             if ( testName.Len() > 17 )
                 testName = testName.SubStr( testName.Len() - 17 );
 
-            FilterName( testName, newUserName );
+            newUserName = se_UnauthenticatedUserName( testName );
 
             if ( !se_IsNameTaken( newUserName, this ) )
             {
@@ -4945,86 +6726,39 @@ void ePlayerNetID::UpdateName( void )
     Color(r,g,b);
     coloredName_ << tColoredString::ColorString(r,g,b) << nameFromServer_;
 
-    if ( name_ != newName )
+    if ( name_ != newName || lastAccessLevel != GetAccessLevel() )
     {
         // copy it to the name, removing colors of course
         name_ = newName;
 
         // remove spaces and possibly other nasties for the user name
-        FilterName( name_, userName_ );
+        userName_ = se_UnauthenticatedUserName( name_ );
 
         if (sn_GetNetState()!=nCLIENT)
         {
             // sync the new name
             RequestSync();
-
-            tOutput mess;
-
-            tColoredString printname;
-            printname << *this << tColoredString::ColorString(.5,1,.5);
-
-            mess.SetTemplateParameter(1, printname);
-            mess.SetTemplateParameter(2, oldprintname);
-
-            if (oldUserName.Len()<=1 && GetUserName().Len()>=1){
-
-#ifdef KRAWALL_SERVER
-                if (sn_GetNetState() == nSERVER && Owner() != sn_myNetID )
-                {
-                    auth = false;
-                    nAuthentication::RequestLogin(GetUserName(), Owner(), "$login_request_first");
-                }
-#endif
-
-                // print spectating join message (regular join messages are handled by eTeam)
-                if ( IsSpectating() || !se_assignTeamAutomatically )
-                {
-                    mess << "$player_entered_spectator";
-                    sn_ConsoleOut(mess);
-                }
-
-                if ( IsHuman() )
-                {
-                    tString ladder;
-                    ladder << "PLAYER_ENTERED " << userName_ << " " << nMachine::GetMachine(Owner()).GetIP() << "\n";
-                    se_SaveToLadderLog(ladder);
-                    tString notificationMessage(userName_);
-                    notificationMessage << " entered the grid";
-                    se_sendEventNotification(tString("Player entered"), notificationMessage);
-
-                    Greet();
-                }
-            }
-            else if (strcmp(oldUserName,GetUserName()))
-            {
-#ifdef KRAWALL_SERVER
-                if (sn_GetNetState() == nSERVER && Owner() != sn_myNetID )
-                {
-                    nAuthentication::RequestLogin(GetUserName(), Owner(), "$login_request_namechange");
-                    auth = false;
-                    userName_ = oldUserName; // restore the old name until the new one is authenticated
-                }
-#endif
-                mess << "$player_renamed";
-
-                if ( bool(this->voter_) )
-                {
-                    this->voter_->PlayerChanged();
-                }
-
-                sn_ConsoleOut(mess);
-
-                {
-                    tString ladder;
-                    ladder << "PLAYER_RENAMED " <<  oldUserName << " "  << userName_ << " " << nMachine::GetMachine(Owner()).GetIP() << "\n";
-                    se_SaveToLadderLog(ladder);
-                    tString notificationMessage(oldUserName);
-                    notificationMessage << " renamed to " << userName_;
-                    se_sendEventNotification(tString("Player renamed"), notificationMessage);
-                }
-            }
         }
     }
+
+    // store access level for next update
+    lastAccessLevel = GetAccessLevel();
+
+#ifdef KRAWALL_SERVER
+    // take the user name to be the authenticated name
+    if ( IsAuthenticated() )
+    {
+        userName_ = se_EscapeName( rawAuthenticatedName_ ).c_str();
+        if ( se_legacyLogNames )
+        {
+            userName_ = tString( "0:" ) + userName_;
+        }
+    }
+    else
+    {
+        rawAuthenticatedName_ = "";
+    }
+#endif
 }
 
 // filters illegal player characters
@@ -5150,7 +6884,7 @@ void ePlayerNetID::FilterName( tString const & in, tString & out )
     int i;
     static ePlayerCharacterFilter filter;
     out = tColoredString::RemoveColors( in );
-
+    
     // filter out illegal characters
     for ( i = out.Size()-1; i>=0; --i )
     {
@@ -5400,7 +7134,7 @@ void ePlayerNetID::LogScoreDifference( void )
 }
 
 static void se_allowTeamChangesPlayer(bool allow, std::istream &s) {
-    ePlayerNetID * p = ReadPlayer( s, "$network_kick_notfound" );
+    ePlayerNetID * p = ReadPlayer( s );
     if ( p )
     {
         sn_ConsoleOut( tOutput( (allow ? "$player_allowed_teamchange" : "$player_disallowed_teamchange"), p->GetName() ) );
@@ -5415,3 +7149,6 @@ static void se_disallowTeamChangesPlayer(std::istream &s) {
 }
 static tConfItemFunc se_allowTeamChangesPlayerConf("ALLOW_TEAM_CHANGE_PLAYER", &se_allowTeamChangesPlayer);
 static tConfItemFunc se_disallowTeamChangesPlayerConf("DISALLOW_TEAM_CHANGE_PLAYER", &se_disallowTeamChangesPlayer);
+static tAccessLevelSetter se_atcConfLevel( se_allowTeamChangesPlayerConf, tAccessLevel_TeamLeader );
+static tAccessLevelSetter se_dtcConfLevel( se_disallowTeamChangesPlayerConf, tAccessLevel_TeamLeader );
+

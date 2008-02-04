@@ -870,6 +870,16 @@ void sg_PlayerMenu(int Player){
                p->instantChatString[i], se_SpamMaxLen);
     }
 
+    uMenuItemToggle al
+    (&playerMenu,"$player_autologin_text",
+     "$player_autologin_help",
+     p->autoLogin);
+
+    uMenuItemString gid(&playerMenu,
+                      "$player_global_id_text",
+                      "$player_global_id_help",
+                      p->globalID, 400);
+    gid.SetColorMode( rTextField::COLOR_IGNORE );
 
     uMenuItemToggle sp
     (&playerMenu,"$player_spectator_text",
@@ -1020,7 +1030,10 @@ void sg_PlayerMenu(int Player){
     // request network synchronisation if the server can handle it
     static nVersionFeature inGameRenames( 5 );
     if ( inGameRenames.Supported() )
+    {
         ePlayerNetID::Update();
+        ePlayer::SendAuthNames();
+    }
 
     /*
     for (i=MAX_PLAYERS-1; i>=0; i--)

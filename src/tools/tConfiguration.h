@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tList.h"
 #include "tString.h"
 #include "tLinkedList.h"
+#include "tException.h"
 #include "tLocale.h"
 #include "tConsole.h"
 #include "tLocale.h"
@@ -40,15 +41,77 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <deque>
 #include <map>
 
+//! access levels for admin interfaces; lower numeric values are better
+enum tAccessLevel
+{
+    tAccessLevel_Owner = 0,        // the server owner
+    tAccessLevel_Admin = 1,        // one of his admins
+    tAccessLevel_Moderator = 2,    // one of the moderators
+    tAccessLevel_3 = 3,            // reserved
+    tAccessLevel_4 = 4,            // reserved
+    tAccessLevel_5 = 5,            // reserved
+    tAccessLevel_6 = 6,            // reserved
+    tAccessLevel_TeamLeader = 7,   // a team leader
+    tAccessLevel_TeamMember = 8,   // a team member
+    tAccessLevel_9 = 9,            // reserved
+    tAccessLevel_10 = 10,          // reserved
+    tAccessLevel_11 = 11,          // reserved
+    tAccessLevel_Local      = 12,  // any user with a local account
+    tAccessLevel_13 = 13,          // reserved
+    tAccessLevel_14 = 14,          // reserved
+    tAccessLevel_Authenticated = 15,// any user with a an account anywhere
+    tAccessLevel_15 = 15,          // reserved
+    tAccessLevel_16 = 16,          // reserved
+    tAccessLevel_17 = 17,          // reserved
+    tAccessLevel_18 = 18,          // reserved
+    tAccessLevel_19 = 19,          // reserved
+    tAccessLevel_Program = 20,     // a regular player
+    tAccessLevel_21 = 21,          // reserved
+    tAccessLevel_22 = 22,          // reserved
+    tAccessLevel_23 = 23,          // reserved
+    tAccessLevel_24 = 24,          // reserved
+    tAccessLevel_25 = 25,          // reserved
+    tAccessLevel_Default = 20
+};
+
+//! class managing the current access level
+class tCurrentAccessLevel
+{
+    friend class tCasacl;
+public:
+    //! for the lifetime of this object, change the user's admit level to the passed one.
+    tCurrentAccessLevel( tAccessLevel newLevel, bool allowElevation = false );
+
+    //! does not change the access level on construction, but resets it on destruction
+    tCurrentAccessLevel();
+    ~tCurrentAccessLevel();
+
+    //! returns the current access level
+    static tAccessLevel GetAccessLevel();
+
+    //! returns the name of an access level
+    static tString GetName( tAccessLevel level );
+private:
+    tCurrentAccessLevel( tCurrentAccessLevel const & );
+    tCurrentAccessLevel & operator = ( tCurrentAccessLevel const & );
+
+    tAccessLevel lastLevel_; //!< used to restore the last admin level when the object goes out of scope
+    static tAccessLevel currentLevel_; //!< the current access level
+};
+
 class tConfItemBase
 {
     friend class tCheckedPTRBase;
+    friend class tConfItemLevel;
+    friend class tAccessLevelSetter;
 
     int id;
 protected:
     const tString title;
     const tOutput help;
     bool changed;
+    tAccessLevel requiredLevel;
+
     typedef std::map< tString, tConfItemBase * > tConfItemMap;
     static tConfItemMap & ConfItemMap();
 
@@ -69,7 +132,9 @@ public:
     tConfItemBase(const char *title, callbackFunc *cb=0);
     virtual ~tConfItemBase();
 
-    tString const & GetTitle() const { return title; }
+    tString const & GetTitle() const {
+        return title;
+    }
 
     static int EatWhitespace(std::istream &s); // eat whitespace from stream; return: first non-whitespace char
 
@@ -86,9 +151,21 @@ public:
 
     virtual void WasChanged(){} // what to do if a read changed the thing
 
-    virtual bool Writable(){return true;}
+    virtual bool Writable(){
+        return true;
+    }
 
-    virtual bool Save(){return true;}
+    virtual bool Save(){
+        return true;
+    }
+};
+
+//! just to do some work in static initializers, to modify default access levels:
+class tAccessLevelSetter
+{
+public:
+    //! modifies the access level of <item> to <level>
+    tAccessLevelSetter( tConfItemBase & item, tAccessLevel level );
 };
 
 // Arg! Msvc++ could not handle bool IO. Seems to be fine now.
@@ -123,9 +200,23 @@ template<> struct tTypeToConfig< TYPE > \
     typedef STREAM TOSTREAM; \
   typedef int * DUMMYREQUIRED; \
 } \
-
+ 
 //! macro for configuration enums: convert them to int.
 #define tCONFIG_ENUM( TYPE ) tCONFIG_AS( TYPE, int )
+
+tCONFIG_ENUM( tAccessLevel );
+
+//! exception to be thrown when the current script should be aborted
+class tAbortLoading: public tException
+{
+public:
+    tAbortLoading( char const * command );
+private:
+    tString command_; //!< the command responsible for the abort
+
+    virtual tString DoGetName() const;
+    virtual tString DoGetDescription() const;
+};
 
 template<class T> class tConfItem:virtual public tConfItemBase{
 protected:
@@ -220,7 +311,7 @@ public:
 
         // read the rest of the line
         c=' ';
-        while(c!='\n' && s.good() && !s.eof()) c=s.get();
+        while (c!='\n' && s.good() && !s.eof()) c=s.get();
     }
 
     virtual void WriteVal(std::ostream &s){
@@ -238,7 +329,9 @@ public:
 
     virtual ~tSettingItem(){}
 
-    virtual bool Save(){return false;}
+    virtual bool Save(){
+        return false;
+    }
 };
 
 

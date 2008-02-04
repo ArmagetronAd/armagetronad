@@ -148,13 +148,13 @@ enable_respawn=no)
 
 AC_ARG_ENABLE(krawall,
 	AC_HELP_STRING([--enable-krawall],
-		[enable special code for the krawall gaming network (user authentification...) (default=disabled)]),,
+		[enable special visuals for the krawall gaming network (default=disabled)]),,
 enable_krawall=no)
 
-AC_ARG_ENABLE(krawallserver,
-	AC_HELP_STRING([--enable-krawallserver],
-		[enable special code for the krawall gaming network SERVER (user database query...). dont't touch this! (default=disabled)]),,
-enable_krawallserver=no)
+AC_ARG_ENABLE(armathentication,
+	AC_HELP_STRING([--enable-armathentication],
+		[enable server side code for the krawall style user authentication (default=disabled)]),,
+enable_armathentication=no)
 
 AC_ARG_ENABLE(automakedefaults,
 	AC_HELP_STRING([--enable-automakedefaults],
@@ -261,7 +261,7 @@ if test x$enable_krawall = xyes; then
 AC_DEFINE(KRAWALL,,enables krawall)
 fi
 
-if test x$enable_krawallserver = xyes; then
+if test x$enable_armathentication = xyes; then
 AC_DEFINE(KRAWALL_SERVER,,enables krawall server)
 fi
 
@@ -552,7 +552,27 @@ AC_MSG_ERROR([
 )
 # fi
 
+dnl *************************************************
+dnl         ZThread
+dnl *************************************************
+
+if test x$enable_armathentication = xyes; then
+
+test -z "$ZTHREAD_CONFIG" && ZTHREAD_CONFIG=zthread-config
+
+if $ZTHREAD_CONFIG --libs > /dev/null; then
+  CPPFLAGS="$CPPFLAGS `$ZTHREAD_CONFIG --cflags`"
+  LIBS="`$ZTHREAD_CONFIG --libs` $LIBS"
+  AC_CHECK_LIB(ZThread,xmlParseMemory,
+  AC_DEFINE(HAVE_LIBZTHREAD,,[Define if you have the ZThread library]),
+  AC_MSG_WARN([ZThread library not found; $ZTHREAD_CONFIG gave non-working linker flags.])
+  ,)
+else
+  AC_MSG_WARN([ZThread library not found; $ZTHREAD_CONFIG does not work/exist.])
 fi
+
+fi # krawall
+fi # armamain
 
 dnl *************************************************
 dnl         math
@@ -1102,7 +1122,7 @@ echo "     Prefix: $prefix"
 echo ""
 if test x$build_dedicated = xtrue -o x$armamaster = xtrue ;
 then
-echo "     Build with Krawall authentication support (server): $enable_krawallserver"
+echo "     Build with Armathentication support (server): $enable_armathentication"
 echo "     Init scripts will be installed in  : $initdir"
 echo "     Dynamic data will be kept in       : `eval echo ${aa_localstatedir}`"
 echo "     PID files will be kept in          : `eval echo ${rundir}`"

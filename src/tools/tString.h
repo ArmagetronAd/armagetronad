@@ -1,6 +1,6 @@
 
 /*
-  
+
 *************************************************************************
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
@@ -21,7 +21,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -173,6 +173,8 @@ private:
     int Len() const; //!< returns the lenghth PLUS ONE (the allocated length)
 
     void SetLen( int len ); //!< sets the allocated length
+
+    void NetFilter();                           //!< filters strings from the net for strange things like newlines
 };
 
 //! proxy class for inserting color markings
@@ -208,7 +210,6 @@ public:
     void SetPos( int len, bool cut=false );                 //!< Makes sure string has length len when color codes are removed
 
     void RemoveTrailingColor();                             //!< Removes trailing, unfinished color code
-    void NetFilter();                                       //!< filters strings from the net for strange things like newlinesa
 
     // void RemoveHex();                                       //!< ?
 
@@ -220,6 +221,15 @@ public:
         return tColoredStringProxy( r, g, b );
     }
 };
+
+//! check whether item is in a comma or whitespace separated list
+bool tIsInList( tString const & list, tString const & item );
+
+//! converts a string to lowercase
+void tToLower( tString & toTransform );
+
+//! converts a string to uppercase
+void tToUpper( tString & toTransform );
 
 //! string building streaming operator
 template<class T> tString & operator <<(tString &s,const T &c)

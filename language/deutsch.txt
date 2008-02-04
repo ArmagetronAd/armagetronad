@@ -2256,7 +2256,7 @@ network_syncing_gamestate     Erhalten! Synchronisiere Spielstand...\n
 network_warn_unknowndescriptor \n\n\nUnbekannte Nachricht (ID \1) erhalten.\n\nES IST RATSAM, EINE NEUE VERSION VON ARMAGETRON ZU BESORGEN!!!!\n
 network_error                 Netzwerkfehler.\n
 network_error_timeout         Verbindung zu Benutzer \1 verloren.\n
-network_error_shortmessage    Benutzer \1 sendet eine unzulässige (zu kurze) Nachricht. Er wird beseitigt.\n
+network_error_shortmessage    Benutzer \1 sendet eine unzulässige (zu kurze) Nachricht.\n
 network_error_overflow        Benutzer \1 kommt mit dem Netzwerkverkehr nicht hinterher.\n
 network_killuser              Beseitige Benutzer \1, Ping \2.\n
 network_statistics1           Zeit:      \1 Sekunden\n
@@ -2487,13 +2487,13 @@ nconfig_value_changed         \1 wurde auf Befehl des Servers von \2 auf \3 verä
 
 #login texts
 login_password_title          Passwort :
-login_password_help           Trage hier Dein Krawall-Passwort ein (zu erhalten unter www.krawall.de). Zum Login hier einfach Return drücken.
+login_password_help           Trage hier Dein Passwort ein. Zum Login hier einfach Return drücken.
 
 login_cancel                  Login abbrechen
 login_cancel_help             Hiermit wird die Loginprozedur beendet und zum Netzwerk-Menu zurückgekehrt.
 
 login_username                Kennung :
-login_username_help           Trage hier Deine Krawall-Benutzerkennung ein (zu erhalten unter www.krawall.de).
+login_username_help           Trage hier Deine Benutzerkennung ein.
 
 login_storepw_text            Passwörter speichern :
 login_storepw_help            Bestimmt, was mit einmal eingegebenen Passwörtern geschiet

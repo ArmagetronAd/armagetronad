@@ -35,30 +35,26 @@ class tOutput;
 class nAuthentication: public nKrawall
 {
 public:
-    // callback where the game can register the password request/
-    // lookup
-    typedef void UserPasswordCallback(tString& username,
-                                      const tString& message,
-                                      nScrambledPassword &scrambled,
-                                      bool failureOnLastTry);
+    //! callback where the game can register the password request/lookup
+    typedef void UserPasswordCallback( nPasswordRequest const & request,
+                                       nPasswordAnswer & answer );
 
-    // callback where the game can register the login success
-    // lookup
-    typedef void LoginResultCallback(const tString& username,
-                                     const tString& origUsername,
-                                     int user, bool success);
+    //! callback where the game can register the login success
+    typedef void LoginResultCallback( nCheckResult const & result );
 
-
-    // let the game register the callbacks
+    //! let the game register the callbacks
     static void SetUserPasswordCallback(UserPasswordCallback* callback);
     static void SetLoginResultCallback (LoginResultCallback* callback);
 
-    // network handlers
+    //! network handlers
     static void HandlePasswordRequest(nMessage& m);
     static void HandlePasswordAnswer (nMessage& m);
 
-    // on the server: request user authentification from login slot
-    static void RequestLogin(const tString& username, int user, const tOutput& message, bool failureOnLastTry = false);
+    //! on the server: request user authentification from login slot
+    static bool RequestLogin(const tString& authority, const tString& username, nNetObject & user, const tOutput& message );
+
+    //! call when you have some time for lengthy authentication queries to servers
+    static void OnBreak();
 };
 
 #endif

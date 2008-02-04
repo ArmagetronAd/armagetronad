@@ -421,7 +421,14 @@ void st_AddRefBreakpint( void const * object );
 void st_ReleaseBreakpint( void const * object );
 #endif
 
-template< class T> class tReferencable
+// not thread-safe mutex
+struct tNonMutex
+{
+    void acquire(){};
+    void release(){};
+};
+
+template< class T, class MUTEX = tNonMutex > class tReferencable
 {
     friend class tStackObject< T >;
 
@@ -436,7 +443,9 @@ public:
         st_AddRefBreakpint( this );
 #endif        
         tASSERT( this && refCtr_ >= 0 );
+        mutex_.acquire();
         ++refCtr_;
+        mutex_.release();
         tASSERT( this && refCtr_ >= 0 );
     }
 
@@ -447,7 +456,11 @@ public:
 #endif        
 
         tASSERT ( this && refCtr_ >= 0 );
-        if ( --refCtr_ <= 0 )
+        mutex_.acquire();
+        --refCtr_;
+        mutex_.release();
+
+        if ( refCtr_ <= 0 )
         {
             refCtr_ = -1000;
             delete static_cast< const T* >( this );
@@ -467,6 +480,7 @@ protected:
     }
 private:
     mutable int refCtr_;
+    mutable MUTEX mutex_;
 };
 
 

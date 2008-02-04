@@ -317,6 +317,8 @@ idle_kick_time_help                 Time in seconds after which an inactive play
 
 player_name_confitem_help	    Player name
 player_teamname_confitem_help	Team name
+player_user_confitem_help	Global player ID
+auto_login_confitem_help	Schould this player automatically request authentication?
 camcenter_help			Center internal camera on driving direction
 start_cam_help			Initial Camera
 start_fov_help			Initial field of vision
@@ -1561,14 +1563,20 @@ viewport_belongs_text		Viewport \1 belongs to player \2 (\3)
 viewport_assign_text		Assign Viewports to Players
 viewport_assign_help		Which player's game is seen on which part of the screen?
 
+player_authenticate_text    Authentication
+player_authenticate_help    If you have a global ID, activating this menuitem will make you log in with it. You'll be prompted for a password, naturally.
+player_authenticate_action  Authentication requests have been sent to the server. You should be prompted for a password shortly.\n
 
 #player setup
 
 player_name_text		Name:
 player_name_help		The ... in "Winner: ... ". Use cursor <left>/<right>, delete, backspace and all the other keys.
 
-player_teamname_text	Teamname:
-player_teamname_help	Use cursor <left>/<right>, delete, backspace and all the other keys.
+player_teamname_text            Teamname:
+player_teamname_help            Use cursor <left>/<right>, delete, backspace and all the other keys.
+
+player_global_id_text		Global ID:
+player_global_id_help		If you have one, enter your global player ID here. If you have an account on the forums at forums.armagetronad.net, your ID will be your account name, followed by "@forums". Accounts on other community sites may give you a different ID.
 
 player_input_text		Input Configuration
 player_input_help		Setup keyboard and mouse controls for this player.
@@ -1596,6 +1604,9 @@ player_green_help		Lets you choose the green component of your colour.
 
 player_red_text			Red:
 player_red_help			Lets you choose the red component of your colour.
+
+player_autologin_text		Auto Login:
+player_autologin_help		When enabled, you will automatically initiate the (usually completely optional) login procedure as soon as you enter a server.
 
 player_spectator_text		Spectator Mode:
 player_spectator_help		In spectator mode, you do not control a cycle; you just watch the game as if you were already dead. The other players will see you on the score table and you can chat with them, but you won't be spawned at the beginng of a round.
@@ -2231,12 +2242,21 @@ player_creates_team		\1 founded \2.\n
 player_nocreate_team	\1 cannot currently create a new team.\n
 player_nojoin_team		\1 cannot currently join \2.\n
 player_not_on_team      You are not on a team.\n
-team_renamed			\1 renamed its team to \2.\n
+team_renamed            \1 renamed its team to \2.\n
+no_real_teams           No teams with more than one player.\n
 player_topologypolice	Order from Topology Police: \1
 
 team_shuffle            \1 gets shuffled from rank \2 to \3.\n
 player_noshuffleup      You are not allowed to shuffle up.\n
 player_noshuffle        Your shuffling wish has no effect.\n
+
+invite_no_team          Can't use \1 if you're not on a team.\n
+invite_team_locked      \1 locked, you'll need an invitation from a team leader via the /invite command to join from now on.\n
+invite_team_unlocked    \1 unlocked, you can join it freely again.\n
+invite_team_invite      \10xRESETT has been invited to join \2.\n
+invite_team_kick        \10xRESETT has been kicked from \2.\n
+invite_team_uninvite    \10xRESETT has been uninvited from \2.\n
+invite_team_locked_list (locked)
 
 msg_toomanymatches 0xff0000Too many matches found for the search term \1. Be more specific.\n
 msg_nomatch 0xff0000No matches were found that contained \1.\n
@@ -2322,7 +2342,7 @@ network_syncing_gamestate	Received! Syncing gamestate...\n
 network_warn_unknowndescriptor	\n\n\nGot unknown nMessage with descriptor id \1 \n\nYOU SHOULD PROBABLY UPGRADE ARMAGETRON ADVANCED!!!!\n
 network_error			Network error.\n
 network_error_timeout		User \1 timed out.\n
-network_error_shortmessage	User \1's message was too short. Killing him.\n
+network_error_shortmessage	User \1's message was too short.\n
 network_error_overflow		User \1 is unable to keep up with the network traffic.\n
 network_killuser		Killing user \1, ping \2.\n
 network_statistics1		Time:     \1 seconds\n
@@ -2373,8 +2393,6 @@ network_kill_unknown		No reason was given.
 network_kill_spamkick		You have been auto-kicked for spamming.
 voted_kill_kick				You have been kicked by an angry mob of players; please stay away.
 network_kill_spectator      You have been sitting in spectator mode for too long.
-
-network_kick_notfound		Player \1 not found. Remember that the matching is case sensitive.\n
 
 network_ban_kph             Kicks per hour of IP \1 are now \2.\n
 network_ban                 Players from IP \1 are banned for \2 minutes. Reason: \3\n
@@ -2544,6 +2562,29 @@ nconfig_error_nonet         Got conf message for  setting \1 which is not networ
 nconfig_error_ignoreold		Ignoring old conf message for setting \1.\n
 nconfig_value_changed		\1 changed from \2 to \3 on server order.\n
 
+config_accesslevel_0        Owner
+config_accesslevel_1        Administrator
+config_accesslevel_2        Moderator
+config_accesslevel_7        Team Leader
+config_accesslevel_8        Team Member
+config_accesslevel_12       Local User
+config_accesslevel_15       Authenticated
+config_accesslevel_20       Program
+
+access_level_help           Changes the access level of a configuration item to make it available to lower ranked users
+access_level_usage          usage: ACCESS_LEVEL <config command> <required minimal access level (numerical)>\n
+access_level_change         Required access level of command \1 changed to "\2".\n
+access_level_error          Required access level of command \1 is "\2", you only have "\3".\n
+
+casacl_help                   For the duratioon of the rest of the configuration file  thiss directive appears in, elevate the access level.
+casacl_usage                  Usage: CASACL <required access levell> <elevated access level>\n
+
+abort_loading_name          Loading Abort
+abort_loading_description   Current config file/stream loading was aborted by command \1.
+
+user_level_help             Changes the access level of a user.
+user_level_usage            usage: USER_LEVEL <authenticated name> <user access level (numerical)>\n
+user_level_change           Access level of user \1 changed to "\2".\n
 
 #*************************************
 #*************************************
@@ -2555,13 +2596,13 @@ nconfig_value_changed		\1 changed from \2 to \3 on server order.\n
 
 #login texts
 login_password_title		Password
-login_password_help		Enter your Krawall-Password here. If you don't have one yet, get it at www.krawall.de (only available for players in Germany and neighbouring countries.). Pressing Enter here will log you in.
+login_password_help		Enter your login password here. Pressing Enter here will log you in.
 
 login_cancel			Cancel Login
 login_cancel_help		This will abort the login procedure.
 
 login_username			Username
-login_username_help		Enter your Krawall-Username here.  If you don't have one yet, get it at www.krawall.de (only available for players in Germany and neighbouring countries.)
+login_username_help		Enter your login username here.
 
 login_storepw_text		Store Passwords:
 login_storepw_help		Determines the password security policy.
@@ -2577,8 +2618,12 @@ login_storepw_disk_help		Lazy: store the password on the harddisk so you won't h
 
 password_help			Password setting
 
+login_request_redundant		Already logged in.\n
 login_request_failed		Login failed. Try again!
-login_request_first		Login required on this server.
+login_request_failed_dup	Two logins with the same account are not permitted.\n
+login_not_supported         This server does not support authentication of the type you requested, sorry.\n
+login_request               Login with Authority \1
+login_request_local         Login with Local Account
 login_request_namechange	Name changed. Login required.
 login_request_master		Master server requires Login.
 
@@ -2590,6 +2635,112 @@ hud_enemies_alive Enemies:
 hud_teammates_alive Friends:
 hud_ping Ping:
 hud_rubber Rubber
+
+# access level messages
+access_level_hide_of_help      Hide user account information of players with at most this access level.
+access_level_hide_to_help      Hide user account information to players with less than this access level.
+access_level_team_help         Minimal access level for /lock, /unlock, /invite and /uninvite team management.
+access_level_op_help           Minimal access level for /op, /deop, /promote and /demote co-admin management commands commands.
+access_level_op_max_help       Maximal access level attainable by /op and /promote commands.
+access_level_admin_help        Minimal access level for /admin command.
+access_level_chat_help         Minimal access level for chatting.
+access_level_ips_help          Minimal access level you need for seeing IPs of players in the /players command.
+access_level_spy_team_help     Minimal access level you need for seeing /team messages as a spectator.
+access_level_spy_msg_help      Minimal access level you need for seeing /msg messages directed to others.
+access_level_play_help         Minimal access level for playing
+access_level_play_sliding_help Sliding minimal access level for playing; if enough players of a higher access level than given by ACCESS_LEVEL_PLAY are online, their level will be the minimal level for play; however, it will never be higher than ACCESS_LEVEL_PLAY_SLIDING.
+access_level_play_sliders_help The access level required to play will only slide up if at least this many players of a higher level are online.
+access_level_play_changed      Access level required to play changed from \1 to \2.\n
+
+access_level_chat_timeout_help   Time in seconds between public announcements that someone wants to chat, but can't. Set to 0 to disable the public wanrings.
+access_level_chat_request   \10xRESETT would like to chat, but is not authorized yet. Would someone be so kind and say "/op \2" or "/promote \2"?\n
+access_level_chat_denied    0xff7f7fChat denied,0xffffff insufficient access level.\n
+access_level_op_denied      0xff7f7f\1 denied,0xffffff insufficient access level.\n
+access_level_op_overpowered 0xff7f7f\1 denied,0xffffff your need higher access righrs than your victim.\n
+access_level_op_self        0xff7f7f\1 denied,0xffffff can't do that to yourself :).\n
+access_level_op_denied_max  0xff7f7f\1 denied,0xffffff your victim already has maximal rights.\n
+access_level_op_denied_ai   0xff7f7f\1 denied,0xffffff your victim is an AI.\n
+
+access_level_demote         \1 has been demoted to "\2" by order of \3.\n
+access_level_promote        \1 has been promoted to "\2" by order of \3.\n
+
+access_level_admin_denied   0xff7f7f/admin denied,0xffffff insufficient access level.\n
+
+chat_command_unknown        Unknown chat command "\1".\n
+
+authority_blacklist_help    Comma separated list of authorities your server should refuse to query.
+authority_whitelist_help    If non-empty, only authorities on this comma separated list will be queried by your server.
+trust_lan_help              If set to 1, the server assumes that your LAN is safe and that nobody can run a pharming server on it.
+hash_method_blacklist_help  List of hash authentication methods to disable support for.
+
+login_message_requested     User \1 requests authentication as "\2@\3".\n
+login_message_responded     Password request sent to user \1, username "\2", method \3, message "\4".\n
+login_message               \3\1 has been logged in as \2.\n
+login_message_byorder       Order of \1: 
+login_message_special       \4\1 has been logged in as \2 at access level "\3".\n
+logout_message              \1 has been logged out as \2.\n
+logout_message_deop         \1 has been logged out as \2 by order of \3.\n
+login_failed_message        0xff7f7fLogin failed,0xffffff reason: \1\n
+
+# various reasons for logins to fail
+login_error_aborted         Login aborted.
+login_error_invalidurl_illegal_hostname   Authentication URL \1 invalid, illegal characters in hostname part (only ASCII letters, numbers and dots allowed).
+login_error_invalidurl_illegal_path   Authentication URL \1 invalid, illegal characters in path part (only ASCII letters, numbers, dots and slashes allowed).
+login_error_invalidurl_illegal_port   Authentication URL \1 invalid, illegal characters in port (only numbers are allowed).
+login_error_invalidurl_defaultport   Authentication URL \1 invalid. Just leave away the default port, please :).
+login_error_invalidurl_slash         Authentication URL \1 invalid, double slash or ending with slash.
+login_error_invalidurl_rawip         Authentication URL \1 invalid, it contains a raw IP address.
+login_error_invalidurl_notfound      Authentication URL \1 invalid, it was not found.
+login_error_noremote                 Authentication via Global ID not available on this server.
+login_error_blacklist                Authority \1 is on this server's blacklist.
+login_error_whitelist                Authority \1 is not on this server's whitelist.
+login_error_pharm                    Server adress mismatch, \1 (sent by client) != \2 (our address). Pharming suspected. If  you are connecting from the LAN and get this error, either set "TRUST_LAN" on the server (only if your LAN can be fully trusted, of course) or use "SERVER_IP" to make the local IP known to the server.
+login_error_methodmismatch  The local method used for auhtentication has been modified since your password was set. In the server's config files, put all commands that define authentication methods before all local password definitions.
+login_error_nomethod        No authentication method could be found. Your client supports \1, this server supports \2, and the authentication server supports \3.
+login_error_nomethodlist    Authentication URL \1 does not return a list of supported methods, got error code \2, content "\3".
+login_error_nomethodproperties    Authentication URL \1 does not return a list of methods properties, got error code \2, content "\3".
+login_error_nouser          User does not exist, authentication server returned "\1".
+login_error_password        Wrong password supplied, authentication server  returned "\1".
+login_error_unknown         Unknown error code \1 returned, content "\2".
+login_error_unexpected_answer Answer "\1" expected from server, but got \2 instead.
+
+login_error_local_nouser    Local user \1 not found.
+login_error_local_password  Supplied password for local user \1 incorrect.
+
+chatcommand_requires_player  \1 requires a player username as additional paramenter.\n
+
+local_user_help   Adds a local user account from a name/password pair.
+local_user_syntax Usage: LOCAL_USER <user name> <password>\n
+
+local_team_help          Adds a local account for an entire team (team tags are compared).
+local_team_syntax        Usage: LOCAL_TEAM <team tag> <password>\n
+
+md5_password_teamleader_help   Adds an account over the md5-hash based login system for a team leader. Team leaders can pick up players into the game.
+md5_password_teamleader_syntax Usage: MD5_PASSWORD_TEAMLEADER <user name> <password>\n
+
+md5_user_remove_help   Removes an password account for a user or team.
+md5_password_remove_syntax Usage: USER_REMOVE <user name/team tag>\n
+md5_password_removed        User name/team tag \1 removed.\n
+md5_password_remove_notfound User name/team tag \1 to remove not found.\n
+
+reserve_screen_name_help      Reserves a screen name to a registered user
+reserve_screen_namne_usage   Usage: RESERVE_SCREEN_NAME <screen name (in quotes if it contains spaces)> <user>
+reserve_screen_name_change   Screen name "\1" reserved for user \2.\n
+
+user_alias_help               Allows bending authenticated names around: a player authenticated as X originally can appear as y.
+alias_usage                   Usage: USER_ALIAS <user> <alias of user>
+alias_change                  User \1 will be known as \2.\n
+
+ban_user_help                 Allows to ban players based on their authentication ID.
+ban_user_message              User \1 has been banned.\n
+unban_user_help               Undoes BAN_USER.
+unban_user_message            User \1 has been unbanned.\n
+ban_user_list_help            Gives a list of banned users.
+
+md5_prefix_help               Extra hash prefix for local accounts used to scramble the password
+md5_suffix_help               Extra hash suffix for local accounts used to scramble the password
+
+global_id_help                If set to 1, Global IDs (Armathentication) will be enabled on this server.
 
 # items that should not be translated
 include english_base_notranslate.txt

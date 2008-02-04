@@ -50,11 +50,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <stdlib.h>
 
-class tMemMan{
+class tMemManBase{
 public:
-    static void *Alloc(size_t s);
-    static void  Dispose(void *p);
-    static void  DisposeButKeep(void *p);
     static void  Check();
     static void  Profile();
 };

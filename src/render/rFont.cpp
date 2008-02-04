@@ -77,13 +77,17 @@ rFont::rFont(const char *fileName,int Offset,REAL CWidth,REAL CHeight,REAL op, r
         rFileTexture(rTextureGroups::TEX_FONT,fileName,0,0),
         offset(Offset),cwidth(CWidth),cheight(CHeight),
         onepixel(op),lowerPart(lower)
-{StoreAlpha();}
+{
+    StoreAlpha();
+}
 
 rFont::rFont(const char *fileName, rFont *lower):
         rFileTexture(rTextureGroups::TEX_FONT,fileName,0,0),
         offset(0),cwidth(1/16.0),cheight(1/8.0),
         onepixel(1/256.0),lowerPart(lower)
-{StoreAlpha();}
+{
+    StoreAlpha();
+}
 
 rFont::~rFont(){}
 
@@ -106,18 +110,18 @@ void rFont::ProcessImage( SDL_Surface * surface )
     // pre-blend alpha values
     GLubyte *pixels =reinterpret_cast<GLubyte *>(surface->pixels);
 
-    if(surface->format->BytesPerPixel == 4)
+    if (surface->format->BytesPerPixel == 4)
     {
-        for(int i=surface->w*surface->h-1;i>=0;i--){
+        for (int i=surface->w*surface->h-1;i>=0;i--){
             GLubyte alpha=pixels[4*i+3];
             pixels[4*i  ] = (alpha * pixels[4*i  ]) >> 8;
             pixels[4*i+1] = (alpha * pixels[4*i+1]) >> 8;
             pixels[4*i+2] = (alpha * pixels[4*i+2]) >> 8;
         }
     }
-    else if(surface->format->BytesPerPixel == 2)
+    else if (surface->format->BytesPerPixel == 2)
     {
-        for(int i=surface->w*surface->h-1;i>=0;i--){
+        for (int i=surface->w*surface->h-1;i>=0;i--){
             GLubyte alpha=pixels[2*i+1];
             pixels[2*i  ] = (alpha * pixels[2*i  ]) >> 8;
         }
@@ -362,7 +366,9 @@ rTextField::rTextField(REAL Left,REAL Top,
         :parIndent(0),
 left(Left),top(Top),cheight(Cheight),x(0),y(0),realx(0),nextx(Left),currentWidth(0),multiline(false),type(Type),cursor(0),cursorPos(0){
     if (cheight*sr_screenHeight<18)
+    {
         cheight=18/REAL(sr_screenHeight);
+    }
 
     color_ = defaultColor_;
 
@@ -494,7 +500,7 @@ void rTextField::FlushLine(bool newline){
 
 inline void rTextField::WriteChar(unsigned char c)
 {
-    switch(c){
+    switch (c){
     case('\n'):
                     FlushLine();
         buffer.Clear();
@@ -560,13 +566,13 @@ char int_to_hex(int i){
 
 int hex_to_int(char c){
     int ret=0;
-    for(int i=15;i>=0;i--)
+    for (int i=15;i>=0;i--)
         if (hex_array[i]==c)
             ret=i;
     return ret;
 }
 
-rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
+rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
 {
 #ifndef DEDICATED
     //float currentWidth = nextx - left;
@@ -637,6 +643,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
         if ( *c == '\n' ) {
             lastIsNewline = true;
             currentWidth = 0.;
+            cursorPos += 1;
         }
 
         //// linebreak if line has gotten too long anyway
@@ -649,21 +656,23 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
         // detect presence of color code
         if (*c=='0' && strlen(c)>=8 && c[1]=='x' && colorMode != COLOR_IGNORE )
         {
+            tColor color;
+            bool use = false;
+
             if ( 0 ==strncmp(c,"0xRESETT",8) )
             {
                 // color reset to default requested
-                ResetColor();
+                color = defaultColor_;
+                use = true;
             }
             else
             {
                 // found! extract colors
-                FlushLine(false);
-
-                cursorPos-=7;
-
-                color_.r_=CTR(hex_to_int(c[2])*16+hex_to_int(c[3]));
-                color_.g_=CTR(hex_to_int(c[4])*16+hex_to_int(c[5]));
-                color_.b_=CTR(hex_to_int(c[6])*16+hex_to_int(c[7]));
+                cursorPos-=8;
+                color.r_=CTR(hex_to_int(c[2])*16+hex_to_int(c[3]));
+                color.g_=CTR(hex_to_int(c[4])*16+hex_to_int(c[5]));
+                color.b_=CTR(hex_to_int(c[6])*16+hex_to_int(c[7]));
+                use = true;
             }
 
             // advance
@@ -673,7 +682,18 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
             }
             else
             {
-                c++;
+                // write color code out
+                cursorPos+=8;
+                for(int i=7; i>=0;--i)
+                    WriteChar(*(c++));
+            }
+
+            // apply color
+            if ( use )
+            {
+                FlushLine(false);
+                cursorPos++;
+                color_ = color;
             }
         }
         else
@@ -684,7 +704,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode)
     return *this;
 }
 
-void DisplayText(REAL x,REAL y,REAL h,const char *text,sr_fontClass type,int center,int cursor,int cursorPos){
+void DisplayText(REAL x,REAL y,REAL h,const char *text,sr_fontClass type,int center,int cursor,int cursorPos, rTextField::ColorMode colorMode){
 #ifndef DEDICATED
     float height;
     float width = rTextField::GetTextLength(tString(text), h, true, true, &height);
@@ -706,7 +726,7 @@ void DisplayText(REAL x,REAL y,REAL h,const char *text,sr_fontClass type,int cen
     c.SetIndent(5);
     if (cursor)
         c.SetCursor(cursor,cursorPos);
-    c << text;
+    c.StringOutput(text, colorMode );
 #endif
 }
 // *******************************************************************************************

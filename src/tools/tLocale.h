@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 **************************************************************************
 */
 
@@ -54,7 +54,9 @@ public:
     static tLanguage* FindStrict(tString const & name); //!< finds a language with the specified name. Aborts if the language is not found.
     static tLanguage* FindSloppy(tString const & name); //!< finds a language with the specified name. Returns NULL if the language is not found.
 
-    const tString& Name(){return name;}
+    const tString& Name(){
+        return name;
+    }
 };
 
 
@@ -140,12 +142,28 @@ public:
         *this << identifier;
     }
 
+    template< class T1, class T2, class T3, class T4 >
+    tOutput( char const * identifier, T1 const & template1, T2 const & template2, T3 const & template3, T4 const & template4 )
+            :anchor(NULL)
+    {
+        tASSERT( identifier && identifier[0] == '$' );
+
+        SetTemplateParameter(1, template1);
+        SetTemplateParameter(2, template2);
+        SetTemplateParameter(3, template3);
+        SetTemplateParameter(4, template4);
+
+        *this << identifier;
+    }
+
     tOutput(const tOutput &o); // copy constructor
     tOutput& operator=(const tOutput &o); // copy operator
 
     void Append(const tOutput &o);
 
-    bool IsEmpty()const { return !anchor; }
+    bool IsEmpty()const {
+        return !anchor;
+    }
 };
 
 class tOutputItemBase: public tListItem<tOutputItemBase>
@@ -162,9 +180,13 @@ template <class T>class tOutputItem: public tOutputItemBase
 {
     T element;
     public:
-    tOutputItem(tOutput& o, const T& e): tOutputItemBase(o), element(e){};
-    virtual void Print(tString& target) const {target << element;}
-    virtual void Clone(tOutput& o)      const {tNEW(tOutputItem<T>)(o, element);}
+tOutputItem(tOutput& o, const T& e): tOutputItemBase(o), element(e){};
+virtual void Print(tString& target) const {
+    target << element;
+}
+virtual void Clone(tOutput& o)      const {
+    tNEW(tOutputItem<T>)(o, element);
+}
 };
 
 

@@ -1181,9 +1181,6 @@ gAIPlayer::gAIPlayer():
     pingCharity = 300;
 
     NewObject();
-
-    // AI players don't need to log in
-    Auth();
 }
 
 void gAIPlayer::ConfigureAIs()  // ai configuration menu

@@ -44,6 +44,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tCallbackString.h"
 #include "nSpamProtection.h"
 
+#include <set>
+
 #define PLAYER_CONFITEMS (30+MAX_INSTANT_CHAT)
 
 class tConfItemBase;
@@ -66,13 +68,16 @@ class ePlayer: public uPlayerPrototype{
     void   StoreConfitem(tConfItemBase *c);
     void   DeleteConfitems();
 public:
-    tString    name;
+    tString    name;                 // the player's screen name
+    tString    globalID;             // the global ID of the player in user@authority form
     // REAL	   rubberstatus;
     tString     teamname;
     bool       centerIncamOnTurn;
     bool       wobbleIncam;
     bool       autoSwitchIncam;
-    bool       spectate;
+
+    bool       spectate;              // shall this player always spectate?
+    bool       autoLogin;             // should the player always request authentication on servers?
 
     bool 		nameTeamAfterMe; // player prefers to call his team after his name
     int			favoriteNumberOfPlayersPerTeam;
@@ -112,16 +117,36 @@ public:
 
     static rViewport * PlayerViewport(int p);
 
+    static void LogIn();          //!< sends authentication login messages for all local players
+    static void SendAuthNames();  //!< sends authentication names and authentication wishes for all local players
+
     static void Init();
     static void Exit();
 };
 
+//! class managing access levels.
+class eAccessLevelHolder
+{
+public:
+    eAccessLevelHolder();
+
+    tAccessLevel GetAccessLevel() const { return accessLevel; }
+    void SetAccessLevel( tAccessLevel level );
+
+private:
+    tAccessLevel     accessLevel;    //!< admin access level of the current user
+};
+
 // the class that identifies players across the network
-class ePlayerNetID: public nNetObject{
+class ePlayerNetID: public nNetObject, public eAccessLevelHolder{
     friend class ePlayer;
     friend class eTeam;
     friend class eNetGameObject;
     friend class tControlledPTR< ePlayerNetID >;
+    // access level. lower numeric values are better.
+public:
+    typedef std::set< eTeam * > eTeamSet;
+private:
 
     int listID;                          // ID in the list of all players
     int teamListID;                      // ID in the list of the team
@@ -131,6 +156,7 @@ class ePlayerNetID: public nNetObject{
     nTimeAbsolute					timeJoinedTeam; // the time the player joined the team he is in now
     tCONTROLLED_PTR(eTeam)			nextTeam;		// the team we're in ( logically )
     tCONTROLLED_PTR(eTeam)			currentTeam;	// the team we currently are spawned for
+    eTeamSet                        invitations_;   // teams this player is invited to
     tCONTROLLED_PTR(eVoter)			voter_;			// voter assigned to this player
 
     tCHECKED_PTR(eNetGameObject) object; // the object this player is
@@ -141,7 +167,6 @@ class ePlayerNetID: public nNetObject{
 
     int favoriteNumberOfPlayersPerTeam;		// join team if number of players on it is less than this; create new team otherwise
     bool nameTeamAfterMe; 					// player prefers to call his team after his name
-    bool auth;            					// is this user valid?
     bool greeted;        					// did the server already greet him?
     bool disconnected;   					// did he disconnect from the game?
 
@@ -155,9 +180,7 @@ class ePlayerNetID: public nNetObject{
     bool			allowTeamChange_; //!< allow team changes even if ALLOW_TEAM_CHANGE is disabled?
 
     //For improved remoteadmin
-    bool            loggedIn;       //Is this user logged in?
-    int             accessLevel;    //If so, what can they do? 0 is default, aka, guest
-    //but if they are not logged in, this should never be an issue
+    tAccessLevel     lastAccessLevel;//!< access level at the time of the last name update
 
     nMachine *      registeredMachine_; //!< the machine the player is registered with
     void RegisterWithMachine();         //!< registers with a machine
@@ -185,6 +208,8 @@ public:
 
     double lastSync;         //!< time of the last sync request
     double lastActivity_;    //!< time of the last activity
+
+    bool loginWanted;        //!< flag indicating whether this player currently wants to log on
 
     nSpamProtection chatSpam_;
 
@@ -218,6 +243,8 @@ public:
     void UpdateTeamForce();						// update team membership without checks
     void UpdateTeam();							// update team membership
 
+    eTeamSet const & GetInvitations() const ;   //!< teams this player is invited to
+
     void CreateNewTeam(); 	    				// create a new team and join it (on the server)
     void CreateNewTeamWish();	 				// express the wish to create a new team and join it
     virtual void ReceiveControlNet(nMessage &m);// receive the team control wish
@@ -243,14 +270,24 @@ public:
     virtual void ClearObject();
 
     void Greet();
-    void Auth(); 										// make the authentification valid
-    bool IsAuth() const; 								// is the authentification valid?
+
+#ifdef KRAWALL_SERVER
+    void Authenticate( tString const & authName, 
+                       tAccessLevel accessLevel = tAccessLevel_Authenticated,
+                       ePlayerNetID const * admin = 0 );    //!< make the authentification valid
+    void DeAuthenticate( ePlayerNetID const * admin = 0 );  //!< make the authentification invalid
+    bool IsAuthenticated() const;                     //!< is the authentification valid?
+#endif
+
+    static void RequestScheduledLogins();  //!< initiates login processes for all pending wishes
+
     bool IsActive() const { return !disconnected; }
 
     bool IsSilenced( void ) const { return silenced_; }
     void SetSilenced( bool silenced ) { silenced_ = silenced; }
     bool& AccessSilenced( void ) { return silenced_; }
 
+    eVoter * GetVoter(){return voter_;}     // returns our voter
     void CreateVoter();						// create our voter or find it
     static void SilenceMenu();				// menu where you can silence players
     static void PoliceMenu();				// menu where you can silence and kick players
@@ -287,6 +324,10 @@ public:
     static void Update();           // creates ePlayerNetIDs for new players
     // and destroys those of players that have left
 
+#ifdef KRAWALL_SERVER
+    static tAccessLevel AccessLevelRequiredToPlay(); // is authentication required to play on this server?
+#endif
+
     static bool WaitToLeaveChat(); //!< waits for players to leave chat state. Returns true if the caller should wait to proceed with whatever he wants to do.
 
     static void RemoveChatbots(); //!< removes chatbots and idling players from the game
@@ -305,11 +346,10 @@ public:
     virtual void TrailColor( REAL&r, REAL&g, REAL&b ) const;
 
     //Remote Admin add-ins...
-    bool isLoggedIn() const { return loggedIn; }
-    void beLoggedIn() { loggedIn = true; }
-    void beNotLoggedIn() { loggedIn = false; }
-    int getAccessLevel() const { return accessLevel; }
-    void setAccessLevel(int in) { accessLevel = in; }
+    bool IsLoggedIn() const { return GetAccessLevel() < tAccessLevel_Moderator; }
+    void BeLoggedIn() { SetAccessLevel( tAccessLevel_Admin ); }
+    void BeNotLoggedIn() { SetAccessLevel( tAccessLevel_Program ); }
+    tAccessLevel GetLastAccessLevel() const { return lastAccessLevel; }
 
     void UpdateName();                                           //! update the player name from the client's wishes
     static void FilterName( tString const & in, tString & out ); //! filters a name (removes unprintables, color codes and spaces)
@@ -320,6 +360,10 @@ private:
     tColoredString  coloredName_;           //! this player's name, cleared by the server. Use this for onscreen screen display.
     tString         name_;                  //! this player's name without colors.
     tString         userName_;              //! this player's name, cleared for system logs. Use for writing to files or comparing with admin input.
+
+#ifdef KRAWALL_SERVER
+    tString         rawAuthenticatedName_;  //! the raw authenticated name in user@authority form.
+#endif
 
     REAL            wait_;                  //! time in seconds WaitToLeaveChat() will wait for this player
 
@@ -340,8 +384,15 @@ public:
     inline ePlayerNetID const & GetColoredName( tColoredString & coloredName ) const;	//!< Gets this player's name, cleared by the server. Use this for onscreen screen display.
     inline tString const & GetName( void ) const;	//!< Gets this player's name without colors.
     inline ePlayerNetID const & GetName( tString & name ) const;	//!< Gets this player's name without colors.
-    inline tString const & GetUserName( void ) const;	//!< Gets this player's name, cleared for system logs. Use for writing to files or comparing with admin input.
+
+    inline tString const & GetUserName( void ) const;	//!< Gets this player's full name. Use for writing to files or comparing with admin input.
     inline ePlayerNetID const & GetUserName( tString & userName ) const;	//!< Gets this player's name, cleared for system logs. Use for writing to files or comparing with admin input.
+
+    tString const & GetLogName( void ) const{ return GetUserName(); }	//!< Gets this player's name, cleared for system logs (with escaped special characters). Use for writing to files.
+#ifdef KRAWALL_SERVER
+    tString const & GetRawAuthenticatedName( void ) const{ return rawAuthenticatedName_; }	//!< Gets the raw, unescaped authentication name
+    void SetRawAuthenticatedName( tString const & name ){ if ( !IsAuthenticated()) rawAuthenticatedName_ = name; }	//!< Sets the raw, unescaped authentication name
+#endif
 
     ePlayerNetID & SetName( tString const & name ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
     ePlayerNetID & SetName( char    const * name ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.

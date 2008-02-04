@@ -69,6 +69,7 @@ static bool st_ReadEscapeSequence( char & c, char & c2, std::istream & s )
             c2 = 0;
             return true;
         case '"':
+        case ' ':
         case '\'':
         case '\n':
             // include quoting character as literal
@@ -139,6 +140,12 @@ std::istream & operator>> (std::istream &s,tString &x)
                 c = s.get();
                 break;
             }
+        }
+        else if ( isblank( c ) )
+        {
+            // include escaped spaces
+            x += c;
+            c=s.get();
         }
 
     }
@@ -437,6 +444,7 @@ void tString::ReadLine( std::istream & s, bool enableEscapeSequences )
                 continue;
             }
         }
+
         *this += c;
     }
 }
@@ -1635,7 +1643,7 @@ void tColoredString::RemoveTrailingColor( void )
 //!
 // *******************************************************************************************
 
-void tColoredString::NetFilter( void )
+void tString::NetFilter( void )
 {
     static tCharacterFilter filter;
 
@@ -2141,3 +2149,84 @@ void testconversion()
 */
 
 
+// *******************************************************************************************
+// *
+// *	tIsInList
+// *
+// *******************************************************************************************
+//!
+//!    @param      list       The string representation of the list
+//!    @param      item       The item to look for
+//!    @return     true if the list contains the item
+//!
+//!    Example: tIsInList( "ab, cd", "ab" ) -> true
+//!
+// *******************************************************************************************
+//! check whether item is in a comma or whitespace separated list
+bool tIsInList( tString const & list_, tString const & item )
+{
+    tString list = list_;
+
+    while( list != "" )
+    {
+        // find the item
+        int pos = list.StrPos( item );
+
+        // no traditional match? shoot.
+        if ( pos < 0 )
+        {
+            return false;
+        }
+
+        // check whether the match is a true list match
+        if ( 
+            ( pos == 0 || list[pos-1] == ',' || isblank(list[pos-1]) )
+            &&
+            ( pos + item.Len() >= list.Len() || list[pos+item.Len()-1] == ',' || isblank(list[pos+item.Len()-1]) )
+            )
+        {
+            return true;
+        }
+        else
+        {
+            // no? truncate the list and go on.
+            list = list.SubStr( pos + 1 );
+        }
+    }
+    
+    return false;
+}
+
+// **********************************************************************
+// *
+// *	tToLower
+// *
+// **********************************************************************
+//!
+//!    @param      toTransform   The string to transform
+//!
+// **********************************************************************
+void tToLower( tString & toTransform )
+{
+    for( int i = toTransform.Len()-2; i >= 0; --i )
+    {
+        toTransform[i] = tolower( toTransform[i] );
+    }
+}
+
+// **********************************************************************
+// *
+// *	tToUpper
+// *
+// **********************************************************************
+//!
+//!    @param      toTransform   The string to transform
+//!
+// **********************************************************************
+void tToUpper( tString & toTransform )
+{
+    for( int i = toTransform.Len()-2; i >= 0; --i )
+    {
+        toTransform[i] = toupper( toTransform[i] );
+    }
+}

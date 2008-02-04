@@ -121,7 +121,7 @@ tString ToString( const nServerInfoBase & info )
 }
 
 // authentification stuff
-#ifdef KRAWALL_SERVER
+#ifdef KRAWALL_SERVER_LEAGUE
 void ResultCallback(const tString& username,
                     const tString& origUsername,
                     int user, bool success)
@@ -134,7 +134,7 @@ void ResultCallback(const tString& username,
     else
         nAuthentication::RequestLogin(username, user, tOutput("$login_request_failed"), true);
 }
-#endif // KRAWALL_SERVER
+#endif // KRAWALL_SERVER_LEAGUE
 
 
 
@@ -1080,7 +1080,7 @@ void nServerInfo::GiveSmallServerInfo(nMessage &m)
         con << "Giving server info to user " << m.SenderID() << "\n";
 
         sn_Requested[m.SenderID()] = true;
-#ifdef KRAWALL_SERVER
+#ifdef KRAWALL_SERVER_LEAGUE
         // one moment! check if we need authentification
         tString adr;
         unsigned int port = sn_GetPort(m.SenderID());

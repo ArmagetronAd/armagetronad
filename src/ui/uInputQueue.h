@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -43,6 +43,17 @@ class uInputProcessGuard
 public:
     uInputProcessGuard();  //!< constructor initializing input processing
     ~uInputProcessGuard(); //!< destructor deinitializing input processing
+};
+
+//! have one object of this class around while processing sensitive input; non-control key presses will be scrambled for the recording then.
+class uInputScrambler
+{
+    static int scrambled_;
+public:
+    uInputScrambler();  //!< constructor initializing input record scrambling
+    ~uInputScrambler(); //!< destructor deinitializing input record scrambling
+
+    static bool Scrambled();
 };
 
 inline bool su_GetSDLInput(SDL_Event &tEvent){

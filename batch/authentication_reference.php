@@ -72,8 +72,7 @@ function getPassword( $user )
     // of users, you may just get away with expanding this
     // array.
     $passwords= array (
-        'test' => 'password', // clever choice there, test
-        'z-män' => 'passwörd' // test for utf8 usernames and passwords
+        'test' => 'password' // clever choice there, test
         );
 
     $password = $passwords[ $user ];
@@ -262,20 +261,7 @@ case "check":
     if (strcasecmp($hash, $correctHash) === 0)
     {
         // he did! Return OK, followed by the user's full name.
-	// You can also append "blurb" messages in subsequent lines.
-	// Those messages will be transformed a little (the first word gets
-	// AUTHORITY_BLURB_ prepended to it and the user's authenticated name
-	// is added as a second token) and written to the server's ladder log.
-        conclude(200, 'PASSWORD_OK ' . $trueUser . '@' . $authority . "\nFOO baz" ); 
-
-	// A useful blurb example would be a line containing:
-	// ALIAS oldusername@oldauthority
-	// It would get logged as 
-	// AUTHORITY_BLURB_ALIAS user@authority oldusername@oldauthority
-	// and nice ladder log parsing scripts can choose to believe your
-	// authority and assume user@authority and oldusername@oldauthority
-	// are the same person. It is a matter between ladderlog parser writers
-	// and authority implementers to define more useful standard blurb messages.
+        conclude(200, 'PASSWORD_OK ' . $trueUser . '@' . $authority ); 
     }
 
     // he didn't.

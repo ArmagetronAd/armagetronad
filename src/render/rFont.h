@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -94,22 +94,48 @@ class rTextField{
     void FlushLine(int len,bool newline=true);
     void FlushLine(bool newline=true);
 public:
- #define  rCWIDTH_NORMAL  (16/640.0)
- #define  rCHEIGHT_NORMAL (32/480.0)
+#define  rCWIDTH_NORMAL  (16/640.0)
+#define  rCHEIGHT_NORMAL (32/480.0)
 
     rTextField(REAL Left,REAL Top,
                REAL Cheight, sr_fontClass Type);
 
     virtual ~rTextField(); // for future extensions (buffered console?)
 
-    REAL GetCHeight(){ return cheight; }
+    REAL GetCHeight() const {
+        return cheight;
+    }
+
+   void SetTop( REAL t ){
+        top = t;
+    }
+
+    void SetLeft( REAL l ){
+        top = l;
+    }
+    
+    REAL GetTop() const{
+        return top;
+    }
+
+    REAL GetLeft() const{
+        return left;
+    }
 
     void SetWidth(float w){
         width=w;
     }
 
+    float GetWidth() const {
+        return width;
+    }
+
     void SetIndent(int i){
         parIndent=i;
+    }
+
+    int GetIndent(int i) const {
+        return parIndent;
     }
 
     void SetCursor(int c,int p){
@@ -136,7 +162,9 @@ public:
 
     rTextField & StringOutput(const char *c, ColorMode colorMode = COLOR_USE );
 
-    int Lines(){return y;}
+    int Lines(){
+        return y;
+    }
 
     inline rTextField & SetColor( tColor const & color );	//!< Sets current color
     inline tColor const & GetColor( void ) const;	//!< Gets current color
@@ -161,7 +189,7 @@ template<class T> rTextField & operator<<(rTextField &c,const T &x){
 }
 
 void DisplayText(REAL x,REAL y,REAL h,const char *text, sr_fontClass type,int center=0,
-                 int cursor=0,int cursorPos=0);
+                 int cursor=0,int cursorPos=0, rTextField::ColorMode colorMode = rTextField::COLOR_USE );
 
 // *******************************************************************************************
 // *

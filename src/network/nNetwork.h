@@ -69,10 +69,9 @@ extern tString sn_DenyReason;		// the reason the server gave for sending a login
 // rate control
 extern int sn_maxRateIn,sn_maxRateOut;
 
-// exception that is thrown on any unexpected network error;
-// causes the owner of the current nNetObject or the sender of
-// the currently processed netmessage to be killed.
-
+//! exception that is thrown on any unexpected network error;
+//! causes the owner of the current nNetObject or the sender of
+//! the currently processed netmessage to be killed.
 class nKillHim: public tException
 {
 public:
@@ -84,8 +83,21 @@ private:
     virtual tString DoGetDescription()  const;              //!< returns a detailed description
 };
 
+//! exception that is thrown on errors where it is safe to just ignore the
+//! offending packet. 
+class nIgnore: public nKillHim
+{
+public:
+    nIgnore();
+    ~nIgnore();
+
+private:
+    virtual tString DoGetName()         const;              //!< returns the name of the exception
+    virtual tString DoGetDescription()  const;              //!< returns a detailed description
+};
+
 // call this function on any error occuring while reading a message:
-void nReadError();
+void nReadError( bool critical = true );
 
 #ifndef MAXCLIENTS
 #define MAXCLIENTS 16
@@ -300,7 +312,7 @@ struct nConnectionInfo     // everything that is needed to manage a connection
 
     nPingAverager          ping;
 
-    tCrypt*                crypt;
+    // tCrypt*                crypt;
 
     // rate control
     nBandwidthControl		bandwidthControl_;
@@ -315,7 +327,10 @@ struct nConnectionInfo     // everything that is needed to manage a connection
     tJUST_CONTROLLED_PTR< nMessage >          ackMess;
 
     // authentication
-    tString                userName;
+    // tString                userName;
+
+    // supported authentication methods of the client in a comma separated list
+    tString                 supportedAuthenticationMethods_;
 
     nConnectionInfo();
     ~nConnectionInfo();
@@ -494,6 +509,9 @@ public:
 
         return *this;
     }
+
+    // read a string without any kind of filtering
+    nMessage& ReadRaw(tString &s);
 
     nMessage& operator >> (tString &s);
     nMessage& operator >> (tColoredString &s);
@@ -691,6 +709,12 @@ int sn_QueueLen(int user);
 
 void sn_Statistics();
 
+//! return the public IP address and port of this machine, or "*.*.*.*:*" if it is unknown..
+tString const & sn_GetMyAddress();
+
+//! checks wheter a given address is on the user's LAN (or on loopback).
+bool sn_IsLANAddress( tString const & address );
+
 // the SenderID of the currently handled message is stored here for reference
 class nCurrentSenderID
 {
@@ -784,6 +808,28 @@ public:
     nMachine const & GetBanReason( tString & reason )const;//!< Gets the reason of the ban
     inline nMachineDecorator * GetDecorators( void ) const;	//!< Gets list of decorators
     inline nMachine const & GetDecorators( nMachineDecorator * & decorators ) const;	//!< Gets list of decorators
+
+    //! returns the next machine decorator of a given type
+    template< class T > static T * GetNextDecorator( nMachineDecorator * run )
+    {
+        while ( run )
+        {
+            T * ret = dynamic_cast< T * >( run );
+            if ( ret )
+            {
+                return ret;
+            }
+            run = run->Next();
+        }
+
+        return 0;
+    }
+
+    //! returns the first machine decorator of a given type
+    template< class T > T * GetDecorator()
+    {
+        return GetNextDecorator< T >( GetDecorators() );
+    }
 protected:
 private:
     inline nMachine & SetDecorators( nMachineDecorator * decorators );	//!< Sets list of decorators
