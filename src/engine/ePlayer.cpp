@@ -2336,10 +2336,15 @@ static REAL se_alreadySaidTimeout=5.0;
 static tSettingItem<REAL> se_alreadySaidTimeoutConf("SPAM_PROTECTION_REPEAT",
         se_alreadySaidTimeout);
 
+#ifndef KRAWALL_SERVER
 // flag set to allow players to shuffle themselves up in a team
 static bool se_allowShuffleUp=false;
 static tSettingItem<bool> se_allowShuffleUpConf("TEAM_ALLOW_SHUFFLE_UP",
         se_allowShuffleUp);
+#else
+static tAccessLevel se_shuffleUpAccessLevel = tAccessLevelTeamMember;
+static tSettingItem< tAccessLevel > se_shuffleUpAccessLevelConf( "ACCESS_LEVEL_SHUFFLE_UP", se_shuffleUpAccessLevel );
+#endif
 
 static bool se_silenceAll = false;		// flag indicating whether new players should be silenced
 
@@ -2814,24 +2819,35 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
         else
             IDWish = msg.toInt()-1;
     }
-    
+
     if (IDWish < 0)
         IDWish = 0;
     if (IDWish >= len)
         IDWish = len-1;
-    
-    if ( !se_allowShuffleUp && IDWish < IDNow )
-    {
-        sn_ConsoleOut(tOutput("$player_noshuffleup"), p->Owner());
-        return;
-    }
-    
+
+	if(IDWish < IDNow)
+	{
+#ifndef KRAWALL_SERVER
+		if ( !se_allowShuffleUp )
+		{
+			sn_ConsoleOut(tOutput("$player_noshuffleup"), p->Owner());
+			return;
+		}
+#else
+		if ( !p->GetAccessLevel() > se_shuffleUpAccessLevel )
+		{
+			sn_ConsoleOut(tOutput("$access_level_shuffle_up_denied"), p->Owner());
+			return;
+		}
+#endif
+	}
+
     if( IDNow == IDWish )
     {
         sn_ConsoleOut(tOutput("$player_noshuffle"), p->Owner());
         return;
     }
-    
+
     p->CurrentTeam()->Shuffle( IDNow, IDWish );
     se_ListTeam( p, p->CurrentTeam() );
 }
