@@ -36,17 +36,6 @@
           <Point  x="500"  y="0"  />
           <Point  x="0"  y="0"  />
         </Wall>
-<Zone effect="win">
-<ShapeCircle radius="10">
-<Point x="450" y="450"/>
-</ShapeCircle>
-</Zone>
-
-<Zone effect="win">
-<ShapeCircle radius="10">
-<Point x="50" y="50"/>
-</ShapeCircle>
-</Zone>
       </Field>
     </World>
   </Map>
