@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tList.h"
 // #include "eGrid.h"
 #include "eCoord.h"
+#include "tSafePTR.h"
 
 class eGrid;
 class uActionPlayer;
@@ -102,8 +103,8 @@ public:
     eGrid* Grid()        const { return grid;        }
     eFace* CurrentFace() const { return currentFace; }
 
-    virtual void AddRef(){};          //!< adds a reference
-    virtual void Release(){};         //!< removes a reference
+    virtual void AddRef()  = 0;          //!< adds a reference
+    virtual void Release() = 0;         //!< removes a reference
 
     void AddToList();
     void RemoveFromList();
@@ -210,6 +211,34 @@ public:
 
     // kills everything:
     static void DeleteAll(eGrid *grid);
+};
+
+// game object to be created on the heap
+class eReferencableGameObject: public eGameObject, public tReferencable< eReferencableGameObject >
+{
+public:
+    eReferencableGameObject(eGrid *grid, const eCoord &p,const eCoord &d, eFace *currentface, bool autodelete=1);
+
+    // real reference counting
+    virtual void AddRef();          //!< adds a reference
+    virtual void Release();         //!< removes a reference
+
+private:
+    virtual void DoRemoveFromGame(); //!< called when removed from the game
+};
+
+// game object of temporary lifetime on the stack
+class eStackGameObject: public eGameObject
+{
+public:
+    eStackGameObject(eGrid *grid, const eCoord &p,const eCoord &d, eFace *currentface);
+
+    // dummy reference counting
+    virtual void AddRef();          //!< adds a reference
+    virtual void Release();         //!< removes a reference
+
+private:
+    virtual void DoRemoveFromGame(); //!< called when removed from the game
 };
 
 //! Exception to throw when a gameobject dies during movement
