@@ -1,0 +1,172 @@
+<!-- version="0.3.1-b" -->
+<!ELEMENT Resource (Map)>
+
+<!ATTLIST Resource
+       type (aamap) "aamap" 
+       name CDATA #REQUIRED
+       version CDATA "1.0"
+       author CDATA "Anonymous"
+       category CDATA "unsorted"
+       comissioner CDATA #IMPLIED
+>
+
+<!ELEMENT Map (Settings?, World)> 
+
+<!ELEMENT Settings (Setting*)>
+<!ELEMENT Setting EMPTY>
+<!ATTLIST Setting name CDATA #REQUIRED>
+<!ATTLIST Setting value CDATA #REQUIRED>
+
+<!-- ATM, a map contain only one Field -->
+<!ELEMENT World (Field)>
+<!-- a field 
+  - may have an axes declared
+  - need at least one spawn
+  - need at least one wall -->
+<!ELEMENT Field (Axes?, Ownership?, (Spawn | Wall | Monitor | Zone | Zone_v1 )*)>
+
+<!ELEMENT Axes (Axis*)>
+<!ELEMENT Ownership (TeamOwnership*)>
+<!ELEMENT Spawn EMPTY> 
+<!ELEMENT Wall (Point+) >
+<!ELEMENT Point EMPTY>
+<!ELEMENT Axis EMPTY>
+<!ELEMENT Zone ((ShapeCircle | ShapePolygon), (Enter | Inside | Leave | Outside)+ ) >
+
+<!ATTLIST Map version CDATA #REQUIRED>
+
+<!ATTLIST Field logicalBox (true | false) "true">
+
+<!ATTLIST Axes number CDATA "4">
+<!ATTLIST Axes normalize (true | false) "true">
+
+<!ATTLIST Spawn x CDATA #REQUIRED>
+<!ATTLIST Spawn y CDATA #REQUIRED>
+<!ATTLIST Spawn xdir CDATA #IMPLIED>
+<!ATTLIST Spawn ydir CDATA #IMPLIED>
+<!ATTLIST Spawn angle CDATA #IMPLIED>
+<!ATTLIST Spawn length CDATA "1.0">
+
+<!ATTLIST Wall height CDATA #IMPLIED>
+
+<!ATTLIST Point x CDATA #REQUIRED>
+<!ATTLIST Point y CDATA #REQUIRED>
+
+<!ATTLIST Axis xdir CDATA #IMPLIED>
+<!ATTLIST Axis ydir CDATA #IMPLIED>
+<!ATTLIST Axis angle CDATA #IMPLIED>
+<!ATTLIST Axis length CDATA "1.0">
+
+
+<!ATTLIST Zone name CDATA "">
+
+<!ELEMENT Monitor (OnOver | OnUnder | InRange | OutsideRange)+ >
+<!ATTLIST Monitor name  CDATA #REQUIRED>
+<!ATTLIST Monitor init  CDATA "0.0">
+<!ATTLIST Monitor drift CDATA "0.0">
+<!ATTLIST Monitor low   CDATA "0.0">
+<!ATTLIST Monitor high  CDATA "1.0">
+
+<!ELEMENT OnOver (EffectGroup | ZoneInfluence | MonitorInfluence)+ >
+<!ATTLIST OnOver value  CDATA #REQUIRED>
+
+<!ELEMENT OnUnder (EffectGroup | ZoneInfluence | MonitorInfluence)+ >
+<!ATTLIST OnUnder value CDATA #REQUIRED>
+
+<!ELEMENT InRange (EffectGroup | ZoneInfluence | MonitorInfluence)+ >
+<!ATTLIST InRange low   CDATA #REQUIRED>
+<!ATTLIST InRange high  CDATA #REQUIRED>
+
+<!ELEMENT OutsideRange (EffectGroup  | ZoneInfluence | MonitorInfluence)+ >
+<!ATTLIST OutsideRange low  CDATA #REQUIRED>
+<!ATTLIST OutsideRange high CDATA #REQUIRED>
+
+
+<!ELEMENT ShapeCircle (Point, Color?)>
+<!ATTLIST ShapeCircle scale CDATA "1.0">
+<!ATTLIST ShapeCircle growth CDATA "0.0">
+<!ATTLIST ShapeCircle rotation CDATA "0.0">
+<!ATTLIST ShapeCircle radius CDATA "1.0">
+
+<!ELEMENT ShapePolygon (Point, Color, Point+)>
+<!ATTLIST ShapePolygon scale CDATA "1.0">
+<!ATTLIST ShapePolygon growth CDATA "0.0">
+<!ATTLIST ShapePolygon rotation CDATA "0.0">
+
+<!ELEMENT Color EMPTY>
+<!ATTLIST Color red   CDATA "1.0">
+<!ATTLIST Color green CDATA "0.0">
+<!ATTLIST Color blue  CDATA "0.0">
+<!ATTLIST Color alpha  CDATA "0.7">
+<!ATTLIST Color hexCode CDATA #IMPLIED>
+<!ATTLIST Color name CDATA #IMPLIED>
+
+
+<!ELEMENT Enter   (EffectGroup+) >
+<!ELEMENT Inside  (EffectGroup+) >
+<!ELEMENT Leave   (EffectGroup+) >
+<!ELEMENT Outside (EffectGroup+) >
+
+<!ELEMENT EffectGroup (User)>
+<!ATTLIST EffectGroup owners CDATA #IMPLIED>
+<!ATTLIST EffectGroup teamOwners CDATA #IMPLIED>
+
+<!ELEMENT User (Target | MonitorInfluence | ZoneInfluence)+ >
+<!ATTLIST User user (all | owner | ownerTeam | allButOwner | allButTeamOwner | anotherTeammate) "all" >
+<!ATTLIST User positive (true | false | ignore) "ignore" >
+<!ATTLIST User marked   (true | false | ignore) "ignore" >
+
+
+<!ELEMENT Target (Effect)+ >
+<!ATTLIST Target target (self | teammate | team | all | allButSelf |
+ another | 
+owner | ownerTeam | ownerTeamTeammate | anyDead |
+allDead | anotherTeammateDead | anotherNotTeammateDead |
+singleDeadOwner
+) "self" >
+<!-- 
+<!ATTLIST Target target (self | teammate | team | all | allButSelf |
+allButTeam | another | anotherTeam | anotherTeammate |
+anotherNotTeammate | owner | ownerTeam | ownerTeamTeammate | anyDead |
+allDead | AnotherTeammateDead | anotherNotTeammateDead) "self" >
+-->
+<!ATTLIST Target count CDATA "-1">
+
+
+<!ELEMENT Effect EMPTY>
+<!ATTLIST Effect effect (win | death | point | brakerecharge |
+rubberrecharge | acceleration | spawnplayer | setting ) "death" >
+<!ATTLIST Effect count CDATA "-1">
+<!ATTLIST Effect description CDATA #IMPLIED>
+<!ATTLIST Effect score CDATA "1"> <!-- only for point -->
+<!ATTLIST Effect settingName CDATA #IMPLIED> <!-- only for setting -->
+<!ATTLIST Effect settingValue CDATA #IMPLIED><!-- only for setting -->
+<!ATTLIST Effect value CDATA "0"> <!-- only for acceleration atm, but should be for nearly all -->
+
+<!ELEMENT MonitorInfluence EMPTY>
+<!ATTLIST MonitorInfluence name CDATA #IMPLIED>
+<!ATTLIST MonitorInfluence marked (true | false | ignore) "ignore">
+<!ATTLIST MonitorInfluence influenceSlide CDATA #IMPLIED>
+<!ATTLIST MonitorInfluence influenceAdd   CDATA #IMPLIED>
+<!ATTLIST MonitorInfluence influenceSet   CDATA #IMPLIED>
+
+
+<!ELEMENT ZoneInfluence (Rotation | Scale | Point | Color)+ >
+<!ATTLIST ZoneInfluence name CDATA #IMPLIED>
+
+<!ELEMENT Rotation EMPTY>
+<!ATTLIST Rotation rotationAngle CDATA "0.0">
+<!ATTLIST Rotation rotationSpeed CDATA "0.0">
+
+
+<!ELEMENT Scale EMPTY>
+<!ATTLIST Scale scale CDATA "1.0">
+
+<!ELEMENT TeamOwnership EMPTY>
+<!ATTLIST TeamOwnership teamId CDATA #REQUIRED>
+<!ATTLIST TeamOwnership playerId CDATA #IMPLIED>
+
+<!ELEMENT Zone_v1 (ShapeCircle) >
+<!ATTLIST Zone_v1 effect (win | death | fortress ) "death" >
+
+

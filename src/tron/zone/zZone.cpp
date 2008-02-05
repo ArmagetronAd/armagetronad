@@ -49,16 +49,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <deque>
 #include <iterator>
 
-std::deque<zZone *> sg_Zones;
+#include "gWinZone.h"
+
+std::deque<zZone *> sz_Zones;
 
 // number of segments to render a zone with
 static const int sg_segments = 11;
-
-static REAL sg_expansionSpeed = 1.0f;
-static REAL sg_initialSize = 5.0f;
-
-static nSettingItem< REAL > sg_expansionSpeedConf( "WIN_ZONE_EXPANSION", sg_expansionSpeed );
-static nSettingItem< REAL > sg_initialSizeConf( "WIN_ZONE_INITIAL_SIZE", sg_initialSize );
 
 // *******************************************************************************
 // *
@@ -120,7 +116,7 @@ zZone::zZone( eGrid * grid )
     // add to game grid
     this->AddToList();
 
-    sg_Zones.push_back(this);
+    sz_Zones.push_back(this);
 
     // initialize position functions
     //    SetPosition( pos );
@@ -158,7 +154,7 @@ zZone::zZone( nMessage & m )
     // add to game grid
     this->AddToList();
 
-    sg_Zones.push_back(this);
+    sz_Zones.push_back(this);
 
     // initialize position functions
     //    SetPosition( pos );
@@ -249,14 +245,14 @@ void zZone::RemoveFromGame(void) {
 void zZone::RemoveFromZoneList(void) {
     std::deque<zZone *>::iterator pos_found =
         std::find_if(
-            sg_Zones.begin(),
-            sg_Zones.end(),
+            sz_Zones.begin(),
+            sz_Zones.end(),
             std::bind2nd(
                 std::equal_to<zZone *>(),
                 this)
         );
-    if(pos_found != sg_Zones.end())
-        sg_Zones.erase(pos_found);
+    if(pos_found != sz_Zones.end())
+        sz_Zones.erase(pos_found);
 }
 
 // *******************************************************************************
@@ -626,7 +622,7 @@ void zZone::OnOutside( gCycle * target, REAL time )
 }
 
 // the zone's network initializator
-static nNOInitialisator<zZone> zone_init(340,"zone");
+static nNOInitialisator<zZone> zone_init(341,"zonev2");
 
 // *******************************************************************************
 // *

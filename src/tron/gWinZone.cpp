@@ -51,8 +51,8 @@ std::deque<gZone *> sg_Zones;
 static int sg_zoneDeath = 1;
 static tSettingItem<int> sg_zoneDeathConf( "WIN_ZONE_DEATHS", sg_zoneDeath );
 
-static REAL sg_expansionSpeed = 1.0f;
-static REAL sg_initialSize = 5.0f;
+REAL sg_expansionSpeed = 1.0f;
+REAL sg_initialSize = 5.0f;
 
 static nSettingItem< REAL > sg_expansionSpeedConf( "WIN_ZONE_EXPANSION", sg_expansionSpeed );
 static nSettingItem< REAL > sg_initialSizeConf( "WIN_ZONE_INITIAL_SIZE", sg_initialSize );
@@ -754,9 +754,9 @@ gBaseZoneHack::~gBaseZoneHack( void )
 {
 }
 
-static REAL sg_conquestRate = .5;
-static REAL sg_defendRate = .25;
-static REAL sg_conquestDecayRate = .1;
+REAL sg_conquestRate = .5;
+REAL sg_defendRate = .25;
+REAL sg_conquestDecayRate = .1;
 
 static tSettingItem< REAL > sg_conquestRateConf( "FORTRESS_CONQUEST_RATE", sg_conquestRate );
 static tSettingItem< REAL > sg_defendRateConf( "FORTRESS_DEFEND_RATE", sg_defendRate );

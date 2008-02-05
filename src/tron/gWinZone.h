@@ -36,6 +36,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rColor.h"
 #include "tFunction.h"
 
+// zone expansion speed and size
+extern REAL sg_expansionSpeed;
+extern REAL sg_initialSize;
+
+// fortress conquest rates
+extern REAL sg_conquestDecayRate;
+extern REAL sg_conquestRate;
+extern REAL sg_defendRate;
+
 class eTeam;
 
 //! basic zone class: handles rendering and entwork syncing

@@ -66,9 +66,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gTeam.h"
 #ifdef ENABLE_ZONESV2
 #include "zone/zZone.h"
-#else
-#include "gWinZone.cpp"
 #endif
+#include "gWinZone.cpp"
 #include "eVoter.h"
 #include "tRecorder.h"
 #include "gStatistics.h"
@@ -127,15 +126,6 @@ static tSettingItem<REAL> sg_lastChatBreakTimeConf( "LAST_CHAT_BREAK_TIME", sg_l
 
 #define DEFAULT_MAP "Anonymous/polygon/regular/square-1.0.1.aamap.xml"
 static tString mapfile(DEFAULT_MAP);
-
-#ifdef ENABLE_ZONESV2
-// The following are only relevant in the case of zones from maps using version 1
-static REAL sg_conquestRate = .5;
-static REAL sg_defendRate = .25;
-
-static tSettingItem< REAL > sg_conquestRateConf( "FORTRESS_CONQUEST_RATE", sg_conquestRate );
-static tSettingItem< REAL > sg_defendRateConf( "FORTRESS_DEFEND_RATE", sg_defendRate );
-#endif
 
 /*
 static void sg_ParseMap ( gParser * aParser, tString map_file );

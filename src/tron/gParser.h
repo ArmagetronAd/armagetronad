@@ -76,8 +76,9 @@ protected:
     void parseAxes(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseSpawn(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseZone(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
+    bool parseZoneArthemis_v1(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
 #ifdef ENABLE_ZONESV2
-    void parseZoneArthemis(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
+    void parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
     rColor parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 #endif
@@ -102,9 +103,9 @@ protected:
     typedef std::map<string, std::set<string> >::value_type TeamOwnershipInfoType;
     void parseOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseTeamOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, TeamOwnershipInfo & team);
-#else
-	bool parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float &radius, float &growth, const xmlChar *keyword);
 #endif
+	bool parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float &radius, float &growth, const xmlChar *keyword);
+
     void parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseWorld(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword = NULL);
     void parseMap(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword = NULL);

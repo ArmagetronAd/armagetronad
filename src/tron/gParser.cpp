@@ -31,9 +31,9 @@
 #ifdef ENABLE_ZONESV2
 #include <boost/tokenizer.hpp> // to support splitting a string on ","
 #include <boost/shared_ptr.hpp>
-#else
-#include "gWinZone.h"
 #endif
+
+#include "gWinZone.h"
 
 #ifdef __MINGW32__
 #define xmlFree(x) free(x)
@@ -60,9 +60,6 @@ MapIdToGameId playerAsso; // mapping between map's playerId and in-game player
 static tString polygonal_shape_used(DEFAULT_POLYGONAL_SHAPE_USED);
 static nSettingItemWatched<tString> safetymecanism_polygonal_shapeused("POLYGONAL_SHAPE_USED",polygonal_shape_used, nConfItemVersionWatcher::Group_Breaking, 20 );
 
-// The following are only relevant in the case of zones from maps using version 1
-static REAL sg_conquestDecayRate = .1;
-static tSettingItem< REAL > sg_conquestDecayRateConf( "FORTRESS_CONQUEST_DECAY_RATE", sg_conquestDecayRate );
 #endif
 int mapVersion = 0; // The version of the map currently being parsed. Used to adapt parsing to support version specific features
 
@@ -535,8 +532,8 @@ gParser::parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
         color = myxmlGetPropColorFromHex(cur, "hexCode");
     }
 
-    if (color.a_ > 0.7)
-        color.a_ = 0.7;
+    if (color.a_ > 1.0)
+        color.a_ = 1.0;
     if (color.a_ < 0.0)
         color.a_ = 0.0;
 
@@ -1217,13 +1214,13 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
     return currentZoneEffect;
 }
 
+// emulate v1 zone behavior with v2 zones
 void
-gParser::parseZoneArthemis(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
+gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-
     if (sn_GetNetState() != nCLIENT )
     {
-        rColor color;
+        rColor color( 1, 0, 0, .7 );
 
         // Create a new zone
         zZonePtr zone = zZonePtr(new zZone(grid));
@@ -1383,7 +1380,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 
     if (sn_GetNetState() != nCLIENT )
     {
-        rColor color;
+        rColor color( 1, 0, 0, .7 );
 
         zZonePtr zone;
         zoneMap::const_iterator iterZone;
@@ -1464,7 +1461,8 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         }
     }
 }
-#else
+#endif
+
 bool
 gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float &radius, float& growth, const xmlChar * keyword)
 {
@@ -1490,25 +1488,11 @@ gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float
     }
     return false;
 }
-#endif
 
-void
-gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
+// original v1 zone parsing code. Return value: was it a success?
+bool
+gParser::parseZoneArthemis_v1(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-#ifdef ENABLE_ZONESV2
-    switch (mapVersion)
-    {
-    case 1:
-        parseZoneArthemis(grid, cur, keyword);
-        break;
-    case 2:
-        parseZoneBachus(grid, cur, keyword);
-        break;
-    default:
-        parseZoneBachus(grid, cur, keyword);
-        break;
-    }
-#else
     float x, y, radius, growth;
     bool shapeFound = false;
     xmlNodePtr shape = cur->xmlChildrenNode;
@@ -1526,6 +1510,11 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         shape = shape->next;
     }
 
+    if ( !shapeFound )
+    {
+        return false;
+    }
+
     gZone * zone = NULL;
     if (sn_GetNetState() != nCLIENT )
     {
@@ -1539,7 +1528,7 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             zone = tNEW( gBaseZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
 
-        // leaving zone undeleted is no memory leak here, the gid takes control of it
+        // leaving zone undeleted is no memory leak here, the grid takes control of it
         if ( zone )
         {
             zone->SetRadius( radius*sizeMultiplier );
@@ -1548,6 +1537,39 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             zone->RequestSync();
         }
     }
+
+    return zone;
+}
+
+void
+gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
+{
+#ifdef ENABLE_ZONESV2
+    switch (mapVersion)
+    {
+    case 1:
+        // was, technically, without zones IIRC. But let's parse it anyway
+    case 2:
+        // switch to v2 when some sort of emulation layer is ready
+        // we should probably check for the DTD, too; v1 zones are only possible
+        // for 0.2.x dtds and 0.3.1-b and later, and v2 zones only for 0.3.1-a and
+        // later.
+        if( !parseZoneArthemis_v1(grid, cur, keyword) )
+        {
+            parseZoneBachus(grid, cur, keyword);
+        }
+        break;
+    case 3:
+        // well, the above is a really ugly hack to keep things working, better
+        // let users of pure zone v2 maps upgrade them to map version 3.
+        parseZoneBachus(grid, cur, keyword);
+        break;
+    default:
+        parseZoneBachus(grid, cur, keyword);
+        break;
+    }
+#else
+    parseZoneArthemis_v1(grid, cur, keyword);
 #endif
 }
 
@@ -1820,6 +1842,9 @@ gParser::parseAlternativeContent(eGrid *grid, xmlNodePtr cur)
         else if (isElement(cur->name, (const xmlChar *)"Zone", keyword)) {
             parseZone(grid, cur, keyword);
         }
+        else if (isElement(cur->name, (const xmlChar *)"Zone_v1", keyword)) {
+            parseZoneArthemis_v1(grid, cur, keyword);
+        }
         else if (isElement(cur->name, (const xmlChar *)"Wall", keyword)) {
             parseWall(grid, cur, keyword);
         }
@@ -1899,6 +1924,9 @@ gParser::parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 #endif
         else if (isElement(cur->name, (const xmlChar *)"Zone", keyword)) {
             parseZone(grid, cur, keyword);
+        }
+        else if (isElement(cur->name, (const xmlChar *)"Zone_v1", keyword)) {
+            parseZoneArthemis_v1(grid, cur, keyword);
         }
         else if (isElement(cur->name, (const xmlChar *)"Wall", keyword)) {
             parseWall(grid, cur, keyword);

@@ -1337,7 +1337,7 @@ void* operator new[]	(size_t size) THROW_BADALLOC{
     tAllocationInfo info( true );
 #ifdef LEAKFINDER
 #ifndef HAVE_LIBZTHREAD
-    info.checksum = size;
+    info.checksum = size % MAXCHECKSUM;
 #endif
 #endif
     return tMemMan::Alloc(info, size);

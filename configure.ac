@@ -158,8 +158,8 @@ enable_armathentication=no)
 
 AC_ARG_ENABLE(zonesv2,
 	AC_HELP_STRING([--enable-zonesv2],
-		[enable experimental zonesv2 code (default=disabled)]),,
-enable_zonesv2=no)
+		[enable experimental zonesv2 code (default=enabled)]),,
+enable_zonesv2=yes)
 
 AC_ARG_ENABLE(automakedefaults,
 	AC_HELP_STRING([--enable-automakedefaults],
