@@ -34,37 +34,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "gCycle.h"
 #include "rColor.h"
-
+#include "tFunction.h"
 
 class eTeam;
-
-//! mathematical function (to be moved into tools sometime, and currently limited to linear functions)
-class tFunction
-{
-public:
-    tFunction();  //!< constructor
-    ~tFunction(); //!< destructor
-
-    REAL Evaluate( REAL argument ) const; //!< evaluates the function
-    inline REAL operator()( REAL argument ) const; //!< evaluation operator
-
-    // function parameters: currently limited to offset_ + slope_ * argument
-    REAL offset_; //!< offset value
-    REAL slope_;  //!< function slope
-
-public:
-    inline tFunction & SetOffset( REAL const & offset );	//!< Sets offset value
-    inline REAL const & GetOffset( void ) const;	//!< Gets offset value
-    inline tFunction const & GetOffset( REAL & offset ) const;	//!< Gets offset value
-    inline tFunction & SetSlope( REAL const & slope );	//!< Sets function slope
-    inline REAL const & GetSlope( void ) const;	//!< Gets function slope
-    inline tFunction const & GetSlope( REAL & slope ) const;	//!< Gets function slope
-protected:
-private:
-};
-
-nMessage & operator << ( nMessage & m, tFunction const & f ); //! function network message writing operator
-nMessage & operator >> ( nMessage & m, tFunction & f );       //! function network message reading operator
 
 //! basic zone class: handles rendering and entwork syncing
 class gZone: public eNetGameObject
@@ -202,118 +174,5 @@ private:
 
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos );
-
-// *******************************************************************************
-// *
-// *	operator ( )
-// *
-// *******************************************************************************
-//!
-//!		@return		the function value
-//!
-// *******************************************************************************
-
-REAL tFunction::operator ( )( REAL argument ) const
-{
-    return Evaluate( argument );
-}
-
-// *******************************************************************************
-// *
-// *	GetOffset
-// *
-// *******************************************************************************
-//!
-//!		@return		offset value
-//!
-// *******************************************************************************
-
-REAL const & tFunction::GetOffset( void ) const
-{
-    return this->offset_;
-}
-
-// *******************************************************************************
-// *
-// *	GetOffset
-// *
-// *******************************************************************************
-//!
-//!		@param	offset	offset value to fill
-//!		@return		A reference to this to allow chaining
-//!
-// *******************************************************************************
-
-tFunction const & tFunction::GetOffset( REAL & offset ) const
-{
-    offset = this->offset_;
-    return *this;
-}
-
-// *******************************************************************************
-// *
-// *	SetOffset
-// *
-// *******************************************************************************
-//!
-//!		@param	offset	offset value to set
-//!		@return		A reference to this to allow chaining
-//!
-// *******************************************************************************
-
-tFunction & tFunction::SetOffset( REAL const & offset )
-{
-    this->offset_ = offset;
-    return *this;
-}
-
-// *******************************************************************************
-// *
-// *	GetSlope
-// *
-// *******************************************************************************
-//!
-//!		@return		function slope
-//!
-// *******************************************************************************
-
-REAL const & tFunction::GetSlope( void ) const
-{
-    return this->slope_;
-}
-
-// *******************************************************************************
-// *
-// *	GetSlope
-// *
-// *******************************************************************************
-//!
-//!		@param	slope	function slope to fill
-//!		@return		A reference to this to allow chaining
-//!
-// *******************************************************************************
-
-tFunction const & tFunction::GetSlope( REAL & slope ) const
-{
-    slope = this->slope_;
-    return *this;
-}
-
-// *******************************************************************************
-// *
-// *	SetSlope
-// *
-// *******************************************************************************
-//!
-//!		@param	slope	function slope to set
-//!		@return		A reference to this to allow chaining
-//!
-// *******************************************************************************
-
-tFunction & tFunction::SetSlope( REAL const & slope )
-{
-    this->slope_ = slope;
-    return *this;
-}
 
 #endif
