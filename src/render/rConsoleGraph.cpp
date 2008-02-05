@@ -67,6 +67,9 @@ static tConfItem<REAL> cmlocy("CM_LOCY",centerMessageY);
 static int sr_columns = 78;
 static tConfItem<int> sr_columnsConf("CONSOLE_COLUMNS",sr_columns);
 
+static int sr_indent = 3;
+static tConfItem<int> sr_indentConf("CONSOLE_INDENT",sr_indent);
+
 void rConsole::Render(){
     if (!sr_glOut)
         return;
@@ -107,7 +110,7 @@ void rConsole::Render(){
 
             rTextField out(-.95f,.99f,rCWIDTH_CON,rCHEIGHT_CON);//,&rFont::s_defaultFontSmall);
             out.SetWidth(static_cast<int>(1.9f/out.GetCWidth()));
-            out.SetIndent(3);
+            out.SetIndent(sr_indent);
 
             int i;
             for (i=currentTop;i<=currentIn && i<=currentTop+MaxHeight();i++)

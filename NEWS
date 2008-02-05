@@ -124,6 +124,8 @@ If --enable-armathentication was activated:
   - NUM_HUMANS <n>: There are <n> players that are not AIs and are part of a
     team.
   - ROUND_SCORE has the player's team's score appended.
+- Wrapped console lines are indented by an amount of spaces that can be 
+  specified using the setting CONSOLE_INDENT.
 
   Bugfixes:
 - Text input fields now let the text wrap correctly and make use of the space allocated
