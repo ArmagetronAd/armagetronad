@@ -664,11 +664,13 @@ line_antialias_help		Enable line antialiasing
 poly_antialias_help		Enable polygon antialiasing
 persp_correct_help		Enable perspective correction
 alpha_blend_help		Enable alpha blending
+zone_alpha_toggle_help		This is XORd with ALPHA_BLEND to determine the way to draw zones
 smooth_shading_help		Enable smooth shading
 text_out_help			Enable console text output
 console_columns_help    Number of characters in each line of console output
 console_rows_help       Number of lines of console output without user intervention
 console_rows_max_help   Number of lines of console output when scrolling back
+console_indent_help     Number of spaces each continuation of a wrapped console line is indented by
 console_decorate_id_help			Decorates every line of console output with the client ID
 console_decorate_ip_help			Decorates every line of console output with the client IP
 console_ladder_log_help			Sends ladder log output to the console
@@ -2676,6 +2678,7 @@ trust_lan_help              If set to 1, the server assumes that your LAN is saf
 hash_method_blacklist_help  List of hash authentication methods to disable support for.
 
 login_message_requested     User \1 requests authentication as "\2@\3".\n
+login_message_delayed       Your login process will be delayed because the server configuration makes it impossible to be processed immedeately in the background. We're sorry for the inconvenience.\n
 login_message_responded     Password request sent to user \1, username "\2", method \3, message "\4".\n
 login_message               \3\1 has been logged in as \2.\n
 login_message_byorder       Order of \1: 

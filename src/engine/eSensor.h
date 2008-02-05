@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 class eSensorFinished{};
 
 // sensor sent out to detect near eWalls
-class eSensor: public eGameObject{
+class eSensor: public eStackGameObject{
 public:
     REAL            hit;            // where is the eWall?
     tCHECKED_PTR_CONST(eHalfEdge) ehit;     // the eWall we sense

@@ -1453,6 +1453,8 @@ void sg_HostGame(){
         if (sg_NumUsers() <= 0 && ded_idle>0.0001 &&
                 tSysTimeFloat()>= startTime + ded_idle * 3600 )
         {
+            sg_Timestamp();
+            con << "Server exiting due to DEDICATED_IDLE after " << (tSysTimeFloat() - startTime)/3600 << " hours.\n";
             uMenu::quickexit = true;
         }
     }

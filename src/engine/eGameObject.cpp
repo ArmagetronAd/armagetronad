@@ -82,30 +82,23 @@ void eGameObject::RemoveFromListsAll(){
 
 void eGameObject::RemoveFromGame()
 {
-    int oldID = id;
-    if ( oldID >= 0 )
-    {
-        AddRef();
-    }
+    tJUST_CONTROLLED_PTR< eGameObject > keepAlive;
+    if ( id >= 0 )
+        keepAlive = this;
 
     OnRemoveFromGame();
     DoRemoveFromGame();
-
-    if ( oldID >= 0 )
-    {
-        Release();
-    }
 }
 
 
 // called on RemoveFromGame(). Call base class implementation, too, in your implementation.
 void eGameObject::OnRemoveFromGame()
 {
-    // remove from lists
-    RemoveFromListsAll();
-
     // remove from grid
     currentFace = 0;
+
+    // remove from lists
+    RemoveFromListsAll();
 }
 
 
@@ -874,5 +867,44 @@ void eGameObject::DeleteAll(eGrid *grid){
     }
 }
 
+eReferencableGameObject::eReferencableGameObject(eGrid *grid, const eCoord &p,const eCoord &d, eFace *currentface, bool autodelete)
+: eGameObject( grid, p, d, currentface, autodelete )
+{
+}
+
+// delegate real reference counting
+void eReferencableGameObject::AddRef()
+{
+    tReferencable< eReferencableGameObject >::AddRef();
+}
+
+void eReferencableGameObject::Release()
+{
+    tReferencable< eReferencableGameObject >::Release();
+}
+
+void eReferencableGameObject::DoRemoveFromGame()
+{
+    // nothing needs to be done, the reference counting takes care of the destruction
+}
+
+eStackGameObject::eStackGameObject(eGrid *grid, const eCoord &p,const eCoord &d, eFace *currentface)
+: eGameObject( grid, p, d, currentface, false )
+{
+}
+
+void eStackGameObject::AddRef()
+{
+}
+
+void eStackGameObject::Release()
+{
+}
+
+void eStackGameObject::DoRemoveFromGame()
+{
+    // must not get called
+    tERR_ERROR("Stack game object removed from game.");
+}
 
 

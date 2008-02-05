@@ -2286,20 +2286,33 @@ static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
 // the following function really is only supposed to be called from here and nowhere else
 // (access right escalation risk):
 // log in (via admin password or hash based login)
-static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p, tString const & say )
+static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p, std::istream & s )
 {
     tString params("");
-    if (say.StrPos(" ") == -1)
-    {
+    params.ReadLine( s );
 #ifndef KRAWALL_SERVER
+    if ( params == "" )
         return;
 #endif
-    }
-    else
-    {
-        params = say.SubStr(say.StrPos(" ") + 1);
-    }
     
+    // trim whitespace
+
+    // for the trunk:
+    // params.Trim();
+    // here,we have to do the work manually
+    {
+        int lastNonSpace = params.Len() - 2;
+        while ( lastNonSpace >= 0 && isblank(params[lastNonSpace]) )
+        {
+            --lastNonSpace;
+        }
+
+        if ( lastNonSpace < params.Len() - 2 )
+        {
+            params = params.SubStr( 0, lastNonSpace + 1 );
+        }
+    }
+
 #ifndef KRAWALL_SERVER
     // the password is not stored in the recording, hence we have to store the
     // result of the password test
@@ -2404,7 +2417,7 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     {
         // the following function really is only supposed to be called from here and nowhere else
         // (access right escalation risk)
-        se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( p, say );
+        se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( p, s );
     }
     else  if (command == "/logout")
     {

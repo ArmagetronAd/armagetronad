@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eGameObject.h"
 #include "rModel.h"
 
-class gSpark: public eGameObject{ // When the player nearly hits a eWall
+class gSpark: public eReferencableGameObject{ // When the player nearly hits a eWall
     REAL createTime;
 
 #ifndef USEPARTICLES

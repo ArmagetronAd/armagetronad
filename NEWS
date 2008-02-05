@@ -138,8 +138,10 @@ New settings
   arbitrary things like /foobarz or /mode ctf
 - CONSOLE_LADDER_LOG boolean places the ladderlog on stdout prefixed with
   "[L] "
-- PLAYER_MESSAGE <user ID or name> <Message>: Like /msg, but from the 
+- PLAYER_MESSAGE <user ID or name> <Message>: Like /msg, but from the
   console
+- ZONE_ALPHA_TOGGLE: When rendering zones ZONE_ALPHA_TOGGLE xor ALPHA_BLEND
+  determines whether to render zones as filled rectangles
 
 If --enable-armathentication was activated:
 - ACCESS_LEVEL_IPS to let admins see IPs of players in the list.
@@ -213,6 +215,8 @@ Featurelets
   - NUM_HUMANS <n>: There are <n> players that are not AIs and are part of a
     team.
   - ROUND_SCORE has the player's team's score appended.
+- Wrapped console lines are indented by an amount of spaces that can be 
+  specified using the setting CONSOLE_INDENT.
 
 Bugfixes
 --------

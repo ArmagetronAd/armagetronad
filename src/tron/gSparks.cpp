@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 bool white_sparks=false;
 
 gSpark::gSpark(eGrid *grid, const eCoord &pos,const eCoord &dir,REAL time,REAL ocolor_r,REAL ocolor_g,REAL ocolor_b,REAL ecolor_r,REAL ecolor_g,REAL ecolor_b)
-        :eGameObject(grid, pos, dir , NULL, true),
+        :eReferencableGameObject(grid, pos, dir , NULL, true),
         //   sound(scrap),
 createTime(time){
     lastTime=createTime;
