@@ -43,6 +43,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 #include <algorithm>
 
+static int sg_zoneAlphaToggle = 0;
+static tSettingItem<int> sg_zoneAlphaToggleConf( "ZONE_ALPHA_TOGGLE", sg_zoneAlphaToggle );
+
 static int sg_zoneDeath = 1;
 static tSettingItem<int> sg_zoneDeathConf( "WIN_ZONE_DEATHS", sg_zoneDeath );
 
@@ -454,7 +457,7 @@ void gZone::Render( const eCamera * cam )
     glMultMatrixf(&m[0][0]);
     //	glScalef(.5,.5,.5);
 
-    if ( sr_alphaBlend )
+	if ( sr_alphaBlend ? !sg_zoneAlphaToggle : sg_zoneAlphaToggle )
         BeginQuads();
     else
         BeginLineStrip();
@@ -481,7 +484,7 @@ void gZone::Render( const eCamera * cam )
         glVertex3f(sb, cb, top);
         glVertex3f(sb, cb, bot);
 
-        if ( !sr_alphaBlend )
+        if ( sr_alphaBlend ? sg_zoneAlphaToggle : !sg_zoneAlphaToggle )
         {
             glVertex3f(sa, ca, bot);
             RenderEnd();
