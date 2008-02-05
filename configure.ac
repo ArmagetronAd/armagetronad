@@ -156,6 +156,11 @@ AC_ARG_ENABLE(armathentication,
 		[enable server side code for the krawall style user authentication (default=disabled)]),,
 enable_armathentication=no)
 
+AC_ARG_ENABLE(zonesv2,
+	AC_HELP_STRING([--enable-zonesv2],
+		[enable experimental zonesv2 code (default=disabled)]),,
+enable_zonesv2=no)
+
 AC_ARG_ENABLE(automakedefaults,
 	AC_HELP_STRING([--enable-automakedefaults],
 		[enforce the default installation directories as set by automake. localstatedir=prefix/var violates the FHS, so this is off by default.]),,
@@ -264,6 +269,12 @@ fi
 if test x$enable_armathentication = xyes; then
 AC_DEFINE(KRAWALL_SERVER,,enables krawall server)
 fi
+
+if test x$enable_zonesv2 = xyes; then
+AC_DEFINE(ENABLE_ZONESV2,,enables zonesv2)
+fi
+
+AM_CONDITIONAL(BUILDZONESV2, test x$enable_zonesv2 = xyes)
 
 dnl developer CXXFLAGS
 test -z "$DEBUGLEVEL" && DEBUGLEVEL=0

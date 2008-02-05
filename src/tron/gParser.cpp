@@ -27,8 +27,13 @@
 
 #include "tConfiguration.h"
 #include "gGame.h"
+
+#ifdef ENABLE_ZONESV2
 #include <boost/tokenizer.hpp> // to support splitting a string on ","
 #include <boost/shared_ptr.hpp>
+#else
+#include "gWinZone.h"
+#endif
 
 #ifdef __MINGW32__
 #define xmlFree(x) free(x)
@@ -38,6 +43,7 @@
 #	include "tDirectories.h"
 #endif
 
+#ifdef ENABLE_ZONESV2
 typedef std::map< string, zMonitorPtr > monitorMap;
 monitorMap monitors;
 
@@ -54,12 +60,11 @@ MapIdToGameId playerAsso; // mapping between map's playerId and in-game player
 static tString polygonal_shape_used(DEFAULT_POLYGONAL_SHAPE_USED);
 static nSettingItemWatched<tString> safetymecanism_polygonal_shapeused("POLYGONAL_SHAPE_USED",polygonal_shape_used, nConfItemVersionWatcher::Group_Breaking, 20 );
 
-int mapVersion = 0; // The version of the map currently being parsed. Used to adapt parsing to support version specific features
-
 // The following are only relevant in the case of zones from maps using version 1
 static REAL sg_conquestDecayRate = .1;
 static tSettingItem< REAL > sg_conquestDecayRateConf( "FORTRESS_CONQUEST_DECAY_RATE", sg_conquestDecayRate );
-
+#endif
+int mapVersion = 0; // The version of the map currently being parsed. Used to adapt parsing to support version specific features
 
 //! Warn about deprecated map format
 static void sg_Deprecated()
@@ -139,6 +144,7 @@ gParser::myxmlGetPropInt(xmlNodePtr cur, const char *name) {
     return r;
 }
 
+#ifdef ENABLE_ZONESV2
 rColor
 gParser::myxmlGetPropColorFromHex(xmlNodePtr cur, const char *name) {
     char *v = myxmlGetProp(cur, name);
@@ -164,6 +170,7 @@ gParser::myxmlGetPropColorFromHex(xmlNodePtr cur, const char *name) {
     xmlFree(v);
     return aColor;
 }
+#endif
 
 float
 gParser::myxmlGetPropFloat(xmlNodePtr cur, const char *name) {
@@ -183,6 +190,7 @@ gParser::myxmlGetPropBool(xmlNodePtr cur, const char *name) {
     return r;
 }
 
+#ifdef ENABLE_ZONESV2
 Triad
 gParser::myxmlGetPropTriad(xmlNodePtr cur, const char *name) {
     Triad res = _ignore;
@@ -194,6 +202,7 @@ gParser::myxmlGetPropTriad(xmlNodePtr cur, const char *name) {
     xmlFree(v);
     return res;
 }
+#endif
 
 #define myxmlHasProp(cur, name)	xmlHasProp(cur, reinterpret_cast<const xmlChar *>(name))
 
@@ -506,6 +515,7 @@ gParser::parseSpawn(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
     endElementAlternative(grid, cur, keyword);
 }
 
+#ifdef ENABLE_ZONESV2
 /*
   Extract all the color codes and build a rColor object.
   Return: a rColor object.
@@ -594,9 +604,6 @@ gParser::parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 
     return color;
 }
-
-
-
 
 zShapePtr
 gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, unsigned short idZone, const xmlChar * keyword)
@@ -1457,10 +1464,38 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         }
     }
 }
+#else
+bool
+gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float &radius, float& growth, const xmlChar * keyword)
+{
+    radius = myxmlGetPropFloat(cur, "radius");
+    growth = myxmlGetPropFloat(cur, "growth");
+
+    cur = cur->xmlChildrenNode;
+    while( cur != NULL) {
+        if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
+        else if (isElement(cur->name, (const xmlChar *)"Point", keyword)) {
+            x = myxmlGetPropFloat(cur, "x");
+            y = myxmlGetPropFloat(cur, "y");
+
+            endElementAlternative(grid, cur, keyword);
+            return true;
+        }
+        else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
+            if (isValidAlternative(cur, keyword)) {
+                parseAlternativeContent(grid, cur);
+            }
+        }
+        cur = cur->next;
+    }
+    return false;
+}
+#endif
 
 void
 gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
+#ifdef ENABLE_ZONESV2
     switch (mapVersion)
     {
     case 1:
@@ -1473,8 +1508,50 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         parseZoneBachus(grid, cur, keyword);
         break;
     }
+#else
+    float x, y, radius, growth;
+    bool shapeFound = false;
+    xmlNodePtr shape = cur->xmlChildrenNode;
+
+    while(shape != NULL && shapeFound==false) {
+        if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
+        else if (isElement(shape->name, (const xmlChar *)"ShapeCircle", keyword)) {
+            shapeFound = parseShapeCircle(grid, shape, x, y, radius, growth, keyword);
+        }
+        else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
+            if (isValidAlternative(cur, keyword)) {
+                parseAlternativeContent(grid, cur);
+            }
+        }
+        shape = shape->next;
+    }
+
+    gZone * zone = NULL;
+    if (sn_GetNetState() != nCLIENT )
+    {
+        if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"win")) {
+            zone = tNEW( gWinZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
+        }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"death")) {
+            zone = tNEW( gDeathZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
+        }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"fortress")) {
+            zone = tNEW( gBaseZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
+        }
+
+        // leaving zone undeleted is no memory leak here, the gid takes control of it
+        if ( zone )
+        {
+            zone->SetRadius( radius*sizeMultiplier );
+            zone->SetExpansionSpeed( growth*sizeMultiplier );
+            zone->SetRotationSpeed( .3f );
+            zone->RequestSync();
+        }
+    }
+#endif
 }
 
+#ifdef ENABLE_ZONESV2
 void
 gParser::parseMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
@@ -1562,6 +1639,7 @@ gParser::parseMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         }
     }
 }
+#endif
 
 ePoint * gParser::DrawRim( eGrid * grid, ePoint * start, eCoord const & stop, REAL h )
 {
@@ -1807,16 +1885,18 @@ gParser::parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
         else if (isElement(cur->name, (const xmlChar *)"Axes", keyword)) {
             parseAxes(grid, cur, keyword);
         }
+        else if (isElement(cur->name, (const xmlChar *)"Spawn", keyword)) {
+            parseSpawn(grid, cur, keyword);
+        }
+#ifdef ENABLE_ZONESV2
         // Introduced in version 2, but no extra logic is required for it.
         else if (isElement(cur->name, (const xmlChar *)"Ownership", keyword)) {
             parseOwnership(grid, cur, keyword);
         }
-        else if (isElement(cur->name, (const xmlChar *)"Spawn", keyword)) {
-            parseSpawn(grid, cur, keyword);
-        }
         else if (isElement(cur->name, (const xmlChar *)"Monitor", keyword)) {
             parseMonitor(grid, cur, keyword);
         }
+#endif
         else if (isElement(cur->name, (const xmlChar *)"Zone", keyword)) {
             parseZone(grid, cur, keyword);
         }
@@ -1841,6 +1921,7 @@ gParser::parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
     }
 }
 
+#ifdef ENABLE_ZONESV2
 /**
  *
  */
@@ -1943,6 +2024,7 @@ gParser::parseTeamOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword
         // TeamId is #REQUIRED, this should not happen
     }
 }
+#endif
 
 void
 gParser::parseWorld(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
@@ -2047,7 +2129,9 @@ gParser::Parse()
     xmlNodePtr cur;
     cur = xmlDocGetRootElement(m_Doc);
 
+#ifdef ENABLE_ZONESV2
     monitors.clear();
+#endif
 #ifdef DEBUG_ZONE_SYNC
     newGameRound = true;
 #endif //DEBUG_ZONE_SYNC
@@ -2101,14 +2185,18 @@ gParser::Parse()
         }
     }
 
+#ifdef ENABLE_ZONESV2
     mapZones.clear();
+#endif
 
     //        fprintf(stderr,"ERROR: Map file is missing root \'Resources\' node");
 
 }
 
+#ifdef ENABLE_ZONESV2
 zMonitorPtr
 gParser::getMonitor(string monitorName)
 {
     return monitors[monitorName];
 }
+#endif

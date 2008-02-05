@@ -44,8 +44,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <deque>
 #include <vector>
 
-class zZone;
-
 namespace cWidget {
 
 //! Processes and renders a map of the grid

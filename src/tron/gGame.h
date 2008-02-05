@@ -50,7 +50,11 @@ extern bool      sg_TalkToMaster;  // should this server be known on the interne
 typedef enum{gFINISH_EXPRESS,gFINISH_IMMEDIATELY,gFINISH_SPEEDUP,gFINISH_NORMAL}
 gFinishType;
 
+#ifdef ENABLE_ZONESV2
 class zZone;
+#else
+class gZone;
+#endif
 
 //extern gFinishType sg_finishType;
 
@@ -58,7 +62,11 @@ class gGame:public nNetObject{
     unsigned short state;      // the gamestate we are currently in
     unsigned short stateNext; // if a state change has been requested
 
+#ifdef ENABLE_ZONESV2
     tJUST_CONTROLLED_PTR< zZone > winDeathZone_; // the win zone
+#else
+    tJUST_CONTROLLED_PTR< gZone > winDeathZone_; // the win zone
+#endif
 
     bool goon;
 

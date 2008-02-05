@@ -64,7 +64,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gAICharacter.h"
 #include "tDirectories.h"
 #include "gTeam.h"
+#ifdef ENABLE_ZONESV2
 #include "zone/zZone.h"
+#else
+#include "gWinZone.cpp"
+#endif
 #include "eVoter.h"
 #include "tRecorder.h"
 #include "gStatistics.h"
@@ -124,12 +128,14 @@ static tSettingItem<REAL> sg_lastChatBreakTimeConf( "LAST_CHAT_BREAK_TIME", sg_l
 #define DEFAULT_MAP "Anonymous/polygon/regular/square-1.0.1.aamap.xml"
 static tString mapfile(DEFAULT_MAP);
 
+#ifdef ENABLE_ZONESV2
 // The following are only relevant in the case of zones from maps using version 1
 static REAL sg_conquestRate = .5;
 static REAL sg_defendRate = .25;
 
 static tSettingItem< REAL > sg_conquestRateConf( "FORTRESS_CONQUEST_RATE", sg_conquestRate );
 static tSettingItem< REAL > sg_defendRateConf( "FORTRESS_DEFEND_RATE", sg_defendRate );
+#endif
 
 /*
 static void sg_ParseMap ( gParser * aParser, tString map_file );
@@ -2688,7 +2694,9 @@ void gGame::StateUpdate(){
             }
             just_connected=false;
 
+#ifdef ENABLE_ZONESV2
             init_second_pass_zones(grid, aParser);
+#endif
             break;
         case GS_TRANSFER_OBJECTS:
             // con << "Transferring objects...\n";
@@ -3193,12 +3201,14 @@ void gGame::Analysis(REAL time){
     THIS HAS SIMPLY BEEN DEACTIVATED.
     IT SHOULD BE REACTIVATED WITH THE NEW ZONE CODE
     ***************** ===================== ********************
+    */
+#ifndef ENABLE_ZONESV2
     // activate instant win zone
     if ( winZone.Supported() && !bool( winDeathZone_ ) && winner == 0 && time - lastdeath > sg_currentSettings->winZoneMinLastDeath && time > sg_currentSettings->winZoneMinRoundTime )
     {
         winDeathZone_ = sg_CreateWinDeathZone( grid, Arena.GetRandomPos( sg_winZoneRandomness ) );
     }
-    */
+#endif
 
     bool holdBackNextRound = false;
 
@@ -4323,6 +4333,7 @@ static void LoginCallback(){
     }
 }
 
+#ifdef ENABLE_ZONESV2
 void oldFortressAutomaticAssignment(zZone *zone, zMonitorPtr monitor);
 
 void init_second_pass_zones(eGrid *grid, gParser *parser)
@@ -4480,6 +4491,7 @@ void oldFortressAutomaticAssignment(zZone *zone, zMonitorPtr monitor)
         */
     }
 }
+#endif
 
 
 static nCallbackLoginLogout lc(LoginCallback);

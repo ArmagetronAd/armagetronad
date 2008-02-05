@@ -33,7 +33,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "rRender.h"
 #include "rScreen.h"
+#ifdef ENABLE_ZONESV2
 #include "zone/zZone.h"
+#else
+#include "gWinZone.h"
+#endif
 #include "eRectangle.h"
 #include "ePlayer.h"
 #include "eTimer.h"
@@ -41,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rViewport.h"
 #include "eGrid.h"
 #include "eCamera.h"
+#include "gCycle.h"
 
 #endif
 
@@ -54,6 +59,9 @@ extern std::vector<tCoord> se_rimWallRubberBand;
 
 #ifndef DEDICATED
 
+#ifndef ENABLE_ZONESV2
+typedef gZone zZone;
+#endif
 extern std::deque<zZone *> sg_Zones;
 
 namespace cWidget {
@@ -299,7 +307,11 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls,
         for(std::deque<zZone *>::const_iterator i = sg_Zones.begin(); i != sg_Zones.end(); ++i) {
             tASSERT(*i);
             tCoord const &position = (*i)->GetPosition();
+#ifdef ENABLE_ZONESV2
             const float radius = (*i)->GetScale();
+#else
+            const float radius = (*i)->GetRadius();
+#endif
             dist2 = (position-pl_CurPos).Norm();
             if (dist2<min_dist2) {
                 min_dist2 = dist2;

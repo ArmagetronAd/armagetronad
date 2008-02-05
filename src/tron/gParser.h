@@ -15,8 +15,10 @@ class ePoint;
 class gGame;
 class gWallRim;
 
+#ifdef ENABLE_ZONESV2
 #include "zone/zZone.h"
 #include "zone/zMisc.h"
+#endif
 
 
 /*
@@ -44,7 +46,9 @@ public:
     //    gParser(const gGame *aGame, gArena *anArena, tControlledPTR<eGrid> aGrid);
     void setSizeMultiplier(REAL aSizeMultiplier);
     void Parse();
+#ifdef ENABLE_ZONESV2
     zMonitorPtr getMonitor(string monitorName);
+#endif
 
 protected:
     bool trueOrFalse(char *str);
@@ -52,9 +56,11 @@ protected:
     int myxmlGetPropInt(xmlNodePtr cur, const char *name);
     float myxmlGetPropFloat(xmlNodePtr cur, const char *name);
     bool myxmlGetPropBool(xmlNodePtr cur, const char *name);
+#ifdef ENABLE_ZONESV2
     Triad myxmlGetPropTriad(xmlNodePtr cur, const char *name);
-    void myxmlGetDirection(xmlNodePtr cur, float &x, float &y);
     rColor myxmlGetPropColorFromHex(xmlNodePtr cur, const char *name);
+#endif
+    void myxmlGetDirection(xmlNodePtr cur, float &x, float &y);
 
     //    bool isElement(const xmlChar *elementName, const xmlChar *searchedElement);
     bool isElement(const xmlChar *elementName, const xmlChar *searchedElement, const xmlChar * keyword = NULL);
@@ -70,13 +76,15 @@ protected:
     void parseAxes(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseSpawn(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseZone(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
+#ifdef ENABLE_ZONESV2
     void parseZoneArthemis(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
+    rColor parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
+#endif
 
     void parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
-    rColor parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
-
+#ifdef ENABLE_ZONESV2
     zShapePtr parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, short unsigned int idZone, const xmlChar * keyword);
     zShapePtr parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, short unsigned int idZone, const xmlChar * keyword);
     zShapePtr parseShapePolygon(eGrid *grid, xmlNodePtr cur, short unsigned int idZone, const xmlChar * keyword);
@@ -90,11 +98,13 @@ protected:
     zValidatorPtr        parseZoneEffectGroupValidator(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
     zZoneInfluencePtr    parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
 
-
     typedef std::map<string, std::set<string> > TeamOwnershipInfo;
     typedef std::map<string, std::set<string> >::value_type TeamOwnershipInfoType;
     void parseOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseTeamOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, TeamOwnershipInfo & team);
+#else
+	bool parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float &radius, float &growth, const xmlChar *keyword);
+#endif
     void parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseWorld(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword = NULL);
     void parseMap(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword = NULL);
@@ -108,16 +118,19 @@ protected:
     void parseWallRect(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
     void parseObstacleWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
+#ifdef ENABLE_ZONESV2
     void myCheapParameterSplitter(const string &str, tFunction &tf, bool addSizeMultiplier=false);
     void myCheapParameterSplitter2(const string &str, tPolynomial<nMessage> &tp, bool addSizeMultiplier=false);
+#endif
 
     /* This is a hack that will bring shame to my decendants for many generations: */
     float sizeMultiplier;
+#ifdef ENABLE_ZONESV2
     int currentFormat; // Store the format version of the map currently being parsed. Used to support different format.
 public:
     tValue::Expr::varmap_t vars;
     tValue::Expr::funcmap_t functions;
-
+#endif
 };
 
 #endif //ArmageTron_PARSER_H
