@@ -23,10 +23,10 @@ typedef std::vector<zMonitorRulePtr> zMonitorRulePtrs;
 
 typedef gVectorExtra<Triggerer> triggerers;
 
-class zMonitor: public eGameObject {
+class zMonitor: public eReferencableGameObject {
 public:
     zMonitor(eGrid * _grid):
-            eGameObject( _grid, eCoord( 1,1 ), eCoord( 0,0 ), NULL, true ),
+            eReferencableGameObject( _grid, eCoord( 1,1 ), eCoord( 0,0 ), NULL, true ),
             totalInfluenceSlide(0),
             totalInfluenceAdd(0.0),
             totalInfluenceSet(0.0),
