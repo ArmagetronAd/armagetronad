@@ -546,7 +546,6 @@ static void PasswordCallback( nKrawall::nPasswordRequest const & request,
     for(int i = 0; i < MAX_PLAYERS; ++i) {
         tString const &id = se_Players[i].globalID;
         if(id.Len() <= username.Len() || id(username.Len() - 1) != '@') {
-            std::cerr << "?!\n";
             continue;
         }
         bool match = true;
