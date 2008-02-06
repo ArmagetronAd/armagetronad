@@ -340,6 +340,7 @@ dnl Modified ZThread test follows. This one works, AM_PATH_ZTHREAD alone does no
 dnl Changes: hacked compiler temporarily to use CXX instead of CC
 dnl          added zthread/ to include path
 dnl          added #include "zthread/Task.h" and #include "zthread/Thread.h"
+dnl          added HAVE_LIBZTHREAD define
 
 dnl Copyright (c) 2005, Eric Crahen
 dnl
@@ -483,6 +484,7 @@ int main (int argc, char *argv[]) {
 
   if test "x$no_zthread" = x ; then
 
+     AC_DEFINE(HAVE_LIBZTHREAD)
      AC_MSG_RESULT(yes)
      ifelse([$2], , :, [$2])     
 
