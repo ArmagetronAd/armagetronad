@@ -54,8 +54,6 @@ Changes since 0.2.8.2:
   "[L] "
 - PLAYER_MESSAGE <user ID or name> <Message>: Like /msg, but from the
   console
-- ZONE_ALPHA_TOGGLE: When rendering zones ZONE_ALPHA_TOGGLE xor ALPHA_BLEND
-  determines whether to render zones as filled rectangles
 
 If --enable-armathentication was activated:
 - /lock, /unlock, /invite and /uninvite team management chat for players of
