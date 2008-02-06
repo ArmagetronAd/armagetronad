@@ -521,7 +521,7 @@ static void PasswordCallback( nKrawall::nPasswordRequest const & request,
     eMenuItemPassword pw(&login, password);
     eMenuItemUserName us(&login, username);
     us.SetColorMode( rTextField::COLOR_IGNORE );
-    
+
     uMenuItemSelection<int> storepw(&login,
                                     "$login_storepw_text",
                                     "$login_storepw_help",
@@ -539,6 +539,27 @@ static void PasswordCallback( nKrawall::nPasswordRequest const & request,
     uMenuItemExit cl(&login, "$login_cancel", "$login_cancel_help" );
 
     login.SetSelected(1);
+
+    // check if the username the server sent us matches one of the players'
+    // global IDs. If it does we can directly select the password menu
+    // menu entry since the user probably just wants to enter the password.
+    for(int i = 0; i < MAX_PLAYERS; ++i) {
+        tString const &id = se_Players[i].globalID;
+        if(id.Len() <= username.Len() || id(username.Len() - 1) != '@') {
+            std::cerr << "?!\n";
+            continue;
+        }
+        bool match = true;
+        for(int j = username.Len() - 2; j >= 0; --j) {
+            if(username(j) != id(j)) {
+                match = false;
+                break;
+            }
+        }
+        if(match) {
+            login.SetSelected(0);
+        }
+    }
 
     // force a small console while we are in here
     rSmallConsoleCallback cb(&tr);
