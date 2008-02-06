@@ -127,7 +127,7 @@ public:
         parIndent=i;
     }
 
-    int GetIndent(int i) const {
+    int GetIndent() const {
         return parIndent;
     }
 
