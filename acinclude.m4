@@ -483,8 +483,8 @@ int main (int argc, char *argv[]) {
   fi
 
   if test "x$no_zthread" = x ; then
-
-     AC_DEFINE(HAVE_LIBZTHREAD)
+    
+     AC_DEFINE(HAVE_LIBZTHREAD,[], [Define if you have the library ZThread.])
      AC_MSG_RESULT(yes)
      ifelse([$2], , :, [$2])     
 

@@ -514,6 +514,8 @@ dnl *************************************************
 if test x$enable_armathentication = xyes; then
 
 AM_PATH_ZTHREAD_AA
+CXXFLAGS="${CXXFLAGS} ${ZTHREAD_CXXFLAGS}"
+LIBS="${LIBS} ${ZTHREAD_LIBS}"
 
 fi # krawall
 fi # armamain
