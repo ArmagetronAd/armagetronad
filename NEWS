@@ -1,6 +1,8 @@
 Changes since 0.2.8.2:
 
   New settings and commands:
+- ZONE_ALPHA_TOGGLE to override the systemwide alpha blendings setting and
+  have zones rendered in wireframe mode even when alpha blending is on.
 - ZONE_ALPHA(_SERVER) to control intensity of zone rendering.
 - SCORE_HOLE for awarding sacrifice.
 - SCORE_SURVIVE for player survival and FORTRESS_HELD_SCORE for not losing
