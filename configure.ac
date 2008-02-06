@@ -295,7 +295,7 @@ AC_CONFIG_HEADER(config.h)
 dnl Checks for programs.
 
 dnl C Compiler:
-dnl AC_PROG_CC
+AC_PROG_CC
 AC_PROG_CPP
 
 dnl C++ Compiler:
@@ -513,18 +513,7 @@ dnl *************************************************
 
 if test x$enable_armathentication = xyes; then
 
-test -z "$ZTHREAD_CONFIG" && ZTHREAD_CONFIG=zthread-config
-
-if $ZTHREAD_CONFIG --libs > /dev/null; then
-  CPPFLAGS="$CPPFLAGS `$ZTHREAD_CONFIG --cflags`"
-  LIBS="`$ZTHREAD_CONFIG --libs` $LIBS"
-  AC_CHECK_LIB(ZThread,xmlParseMemory,
-  AC_DEFINE(HAVE_LIBZTHREAD,,[Define if you have the ZThread library]),
-  AC_MSG_WARN([ZThread library not found; $ZTHREAD_CONFIG gave non-working linker flags.])
-  ,)
-else
-  AC_MSG_WARN([ZThread library not found; $ZTHREAD_CONFIG does not work/exist.])
-fi
+AM_PATH_ZTHREAD_AA
 
 fi # krawall
 fi # armamain
