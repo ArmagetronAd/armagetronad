@@ -579,6 +579,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
     float const &maxWidth = width;
     bool lastIsNewline = true;
     bool trouble = false; // Do we have a word that won't fit on a line?
+    static tString spaces;
     // run through string
     while (*c!='\0')
     {
@@ -590,8 +591,14 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
                 trouble = false;
             } else if ( currentWidth >= maxWidth) {
                 WriteChar('\n');
-                //c++;
-                currentWidth = 0.;
+                spaces.clear();
+                for ( int i = parIndent-1; i >= 0; --i )
+                {
+                    WriteChar(' ');
+                    spaces << ' ';
+                    cursorPos++;
+                }
+                currentWidth = sr_Font.GetWidth(spaces, cheight);
             }
         }
         // break line if next space character is too far away
@@ -625,17 +632,20 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
                 WriteChar('\n');
                 c++;
 
+                spaces.clear();
                 for ( int i = parIndent-1; i >= 0; --i )
                 {
                     WriteChar(' ');
+                    spaces << ' ';
                     cursorPos++;
                 }
+                float spaceWidth = sr_Font.GetWidth(spaces, cheight);
 
-	        if (wordWidth >= maxWidth) {
+                if (wordWidth >= maxWidth) {
                     trouble = true;
-                    currentWidth = 0.;
+                    currentWidth = spaceWidth;
                 } else {
-                    currentWidth = wordWidth;
+                    currentWidth = wordWidth + spaceWidth;
                 }
                 continue;
             }
