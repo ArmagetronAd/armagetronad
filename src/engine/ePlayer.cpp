@@ -702,7 +702,7 @@ static bool se_Hide( ePlayerNetID const * hider, tAccessLevel currentLevel )
 {
     tASSERT( hider );
 
-    return 
+    return
     hider->GetAccessLevel() >= se_hideAccessLevelOf &&
     currentLevel            >  se_hideAccessLevelTo;
 }
@@ -4930,11 +4930,12 @@ static int se_ColorDistance( int a[3], int b[3] )
     for( int i = 2; i >= 0; --i )
     {
         int diff = a[i] - b[i];
-        diff = diff < 0 ? -diff : diff;
-        if ( diff > distance )
-        {
-            distance = diff;
-        }
+        distance += diff * diff;
+        //diff = diff < 0 ? -diff : diff;
+        //if ( diff > distance )
+        //{
+        //    distance = diff;
+        //}
     }
 
     return distance;
