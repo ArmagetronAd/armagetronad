@@ -56,7 +56,7 @@
 		8C11CA49095A2B6E007AE0EA /* action_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E7D089EEC7D007E21DC /* action_api.cpp */; };
 		8C11CA4A095A2B6E007AE0EA /* actions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E7E089EEC7D007E21DC /* actions.cpp */; };
 		8C11CA4B095A2B6E007AE0EA /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E10089EEC7C007E21DC /* eAdvWall.cpp */; };
-		8C11CA4C095A2B6E007AE0EA /* eAuthentification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E12089EEC7C007E21DC /* eAuthentification.cpp */; };
+		8C11CA4C095A2B6E007AE0EA /* eAuthentication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E12089EEC7C007E21DC /* eAuthentication.cpp */; };
 		8C11CA4D095A2B6E007AE0EA /* eAxis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E14089EEC7C007E21DC /* eAxis.cpp */; };
 		8C11CA4E095A2B6E007AE0EA /* eCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E16089EEC7C007E21DC /* eCamera.cpp */; };
 		8C11CA4F095A2B6E007AE0EA /* eDebugLine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E19089EEC7C007E21DC /* eDebugLine.cpp */; };
@@ -163,7 +163,7 @@
 		8CB97ABA096265A800AE8BCD /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8C6EF51B08A32A0500816348 /* InfoPlist.strings */; };
 		8CB97AC1096265A800AE8BCD /* SDLMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E08089EEC5B007E21DC /* SDLMain.mm */; };
 		8CB97AC2096265A800AE8BCD /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E10089EEC7C007E21DC /* eAdvWall.cpp */; };
-		8CB97AC3096265A800AE8BCD /* eAuthentification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E12089EEC7C007E21DC /* eAuthentification.cpp */; };
+		8CB97AC3096265A800AE8BCD /* eAuthentication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E12089EEC7C007E21DC /* eAuthentication.cpp */; };
 		8CB97AC4096265A800AE8BCD /* eAxis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E14089EEC7C007E21DC /* eAxis.cpp */; };
 		8CB97AC5096265A800AE8BCD /* eCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E16089EEC7C007E21DC /* eCamera.cpp */; };
 		8CB97AC6096265A800AE8BCD /* eDebugLine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E19089EEC7C007E21DC /* eDebugLine.cpp */; };
@@ -265,7 +265,7 @@
 		8CB97BAC096271B000AE8BCD /* libpng12.0.dylib in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 8CB97BAA0962719600AE8BCD /* libpng12.0.dylib */; };
 		8CBA5E0A089EEC5B007E21DC /* SDLMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E08089EEC5B007E21DC /* SDLMain.mm */; };
 		8CBA5EFD089EEC7E007E21DC /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E10089EEC7C007E21DC /* eAdvWall.cpp */; };
-		8CBA5EFF089EEC7E007E21DC /* eAuthentification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E12089EEC7C007E21DC /* eAuthentification.cpp */; };
+		8CBA5EFF089EEC7E007E21DC /* eAuthentication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E12089EEC7C007E21DC /* eAuthentication.cpp */; };
 		8CBA5F01089EEC7E007E21DC /* eAxis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E14089EEC7C007E21DC /* eAxis.cpp */; };
 		8CBA5F03089EEC7E007E21DC /* eCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E16089EEC7C007E21DC /* eCamera.cpp */; };
 		8CBA5F06089EEC7E007E21DC /* eDebugLine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E19089EEC7C007E21DC /* eDebugLine.cpp */; };
@@ -477,8 +477,8 @@
 		8CBA5E0B089EEC66007E21DC /* defs.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = defs.h; path = ../src/defs.h; sourceTree = SOURCE_ROOT; };
 		8CBA5E10089EEC7C007E21DC /* eAdvWall.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = eAdvWall.cpp; sourceTree = "<group>"; };
 		8CBA5E11089EEC7C007E21DC /* eAdvWall.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = eAdvWall.h; sourceTree = "<group>"; };
-		8CBA5E12089EEC7C007E21DC /* eAuthentification.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = eAuthentification.cpp; sourceTree = "<group>"; };
-		8CBA5E13089EEC7C007E21DC /* eAuthentification.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = eAuthentification.h; sourceTree = "<group>"; };
+		8CBA5E12089EEC7C007E21DC /* eAuthentication.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = eAuthentication.cpp; sourceTree = "<group>"; };
+		8CBA5E13089EEC7C007E21DC /* eAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = eAuthentication.h; sourceTree = "<group>"; };
 		8CBA5E14089EEC7C007E21DC /* eAxis.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = eAxis.cpp; sourceTree = "<group>"; };
 		8CBA5E15089EEC7C007E21DC /* eAxis.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = eAxis.h; sourceTree = "<group>"; };
 		8CBA5E16089EEC7C007E21DC /* eCamera.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = eCamera.cpp; sourceTree = "<group>"; };
@@ -845,8 +845,8 @@
 			children = (
 				8CBA5E10089EEC7C007E21DC /* eAdvWall.cpp */,
 				8CBA5E11089EEC7C007E21DC /* eAdvWall.h */,
-				8CBA5E12089EEC7C007E21DC /* eAuthentification.cpp */,
-				8CBA5E13089EEC7C007E21DC /* eAuthentification.h */,
+				8CBA5E12089EEC7C007E21DC /* eAuthentication.cpp */,
+				8CBA5E13089EEC7C007E21DC /* eAuthentication.h */,
 				8CBA5E14089EEC7C007E21DC /* eAxis.cpp */,
 				8CBA5E15089EEC7C007E21DC /* eAxis.h */,
 				8CBA5E16089EEC7C007E21DC /* eCamera.cpp */,
@@ -1445,7 +1445,7 @@
 				8C11CA49095A2B6E007AE0EA /* action_api.cpp in Sources */,
 				8C11CA4A095A2B6E007AE0EA /* actions.cpp in Sources */,
 				8C11CA4B095A2B6E007AE0EA /* eAdvWall.cpp in Sources */,
-				8C11CA4C095A2B6E007AE0EA /* eAuthentification.cpp in Sources */,
+				8C11CA4C095A2B6E007AE0EA /* eAuthentication.cpp in Sources */,
 				8C11CA4D095A2B6E007AE0EA /* eAxis.cpp in Sources */,
 				8C11CA4E095A2B6E007AE0EA /* eCamera.cpp in Sources */,
 				8C11CA4F095A2B6E007AE0EA /* eDebugLine.cpp in Sources */,
@@ -1550,7 +1550,7 @@
 			files = (
 				8CB97AC1096265A800AE8BCD /* SDLMain.mm in Sources */,
 				8CB97AC2096265A800AE8BCD /* eAdvWall.cpp in Sources */,
-				8CB97AC3096265A800AE8BCD /* eAuthentification.cpp in Sources */,
+				8CB97AC3096265A800AE8BCD /* eAuthentication.cpp in Sources */,
 				8CB97AC4096265A800AE8BCD /* eAxis.cpp in Sources */,
 				8CB97AC5096265A800AE8BCD /* eCamera.cpp in Sources */,
 				8CB97AC6096265A800AE8BCD /* eDebugLine.cpp in Sources */,
@@ -1658,7 +1658,7 @@
 			files = (
 				8CBA5E0A089EEC5B007E21DC /* SDLMain.mm in Sources */,
 				8CBA5EFD089EEC7E007E21DC /* eAdvWall.cpp in Sources */,
-				8CBA5EFF089EEC7E007E21DC /* eAuthentification.cpp in Sources */,
+				8CBA5EFF089EEC7E007E21DC /* eAuthentication.cpp in Sources */,
 				8CBA5F01089EEC7E007E21DC /* eAxis.cpp in Sources */,
 				8CBA5F03089EEC7E007E21DC /* eCamera.cpp in Sources */,
 				8CBA5F06089EEC7E007E21DC /* eDebugLine.cpp in Sources */,
