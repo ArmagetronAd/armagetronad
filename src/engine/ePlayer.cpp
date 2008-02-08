@@ -2785,11 +2785,11 @@ static void se_ListPlayers( ePlayerNetID * receiver )
         std::ostringstream tos;
         tos << p2->Owner();
         tos << ": ";
-        if ( p2->GetLastAccessLevel() < tAccessLevel_Default && !se_Hide( p2, receiver ) )
+        if ( p2->GetAccessLevel() < tAccessLevel_Default && !se_Hide( p2, receiver ) )
         {
             // player username comes from authentication name and may be much different from
             // the screen name
-            tos << p2->GetUserName() << " ( " << p2->GetName() << ", " 
+            tos << se_EscapeName( p2->GetRawAuthenticatedName() ) << " ( " << p2->GetName() << ", " 
                 << tCurrentAccessLevel::GetName( p2->GetAccessLevel() )
                 << " )";
         }
@@ -4135,6 +4135,8 @@ void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin ){
 
     // force falling back to regular user name on next update
     SetAccessLevel( tAccessLevel_Default );
+
+    rawAuthenticatedName_ = "";
 }
 
 bool ePlayerNetID::IsAuthenticated() const
