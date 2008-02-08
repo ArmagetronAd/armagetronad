@@ -2789,7 +2789,7 @@ static void se_ListPlayers( ePlayerNetID * receiver )
         {
             // player username comes from authentication name and may be much different from
             // the screen name
-            tos << se_EscapeName( p2->GetRawAuthenticatedName() ) << " ( " << p2->GetName() << ", " 
+            tos << p2->GetFilteredAuthenticatedName() << " ( " << p2->GetName() << ", " 
                 << tCurrentAccessLevel::GetName( p2->GetAccessLevel() )
                 << " )";
         }
@@ -4071,7 +4071,7 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
         if ( alias != "" )
         {
             rawAuthenticatedName_ = alias;
-            newAuthenticatedName = se_EscapeName( rawAuthenticatedName_ ).c_str();
+            newAuthenticatedName = GetFilteredAuthenticatedName();
 
             // elevate access level again according to the new alias
             se_CheckAccessLevel( accessLevel_, newAuthenticatedName );
@@ -4125,11 +4125,11 @@ void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin ){
     {
         if ( admin )
         {
-            se_SecretConsoleOut( tOutput( "$logout_message_deop", GetName(), se_EscapeName( rawAuthenticatedName_ ).c_str(), admin->GetLogName() ), this, admin );
+            se_SecretConsoleOut( tOutput( "$logout_message_deop", GetName(), GetFilteredAuthenticatedName(), admin->GetLogName() ), this, admin );
         }
         else
         {
-            se_SecretConsoleOut( tOutput( "$logout_message", GetName(), se_EscapeName( rawAuthenticatedName_ ).c_str()  ), this );
+            se_SecretConsoleOut( tOutput( "$logout_message", GetName(), GetFilteredAuthenticatedName() ), this );
         }
     }
 
@@ -6410,7 +6410,7 @@ void ePlayerNetID::UpdateName( void )
     // take the user name to be the authenticated name
     if ( IsAuthenticated() )
     {
-        userName_ = se_EscapeName( rawAuthenticatedName_ ).c_str();
+        userName_ = GetFilteredAuthenticatedName();
         if ( se_legacyLogNames )
         {
             userName_ = tString( "0:" ) + userName_;
@@ -6620,6 +6620,25 @@ ePlayerNetID & ePlayerNetID::SetName( char const * name )
 {
     SetName( tString( name ) );
     return *this;
+}
+
+// ******************************************************************************************
+// *
+// * GetFilteredAuthenticatedName
+// *
+// ******************************************************************************************
+//!
+//!       @return     The filtered authentication name, or "" if no authentication is supported or the player is not authenticated
+//!
+// ******************************************************************************************
+
+tString ePlayerNetID::GetFilteredAuthenticatedName( void ) const
+{
+#ifdef KRAWALL_SERVER
+    return se_EscapeName( GetRawAuthenticatedName() ).c_str();
+#else
+    return tString("");
+#endif
 }
 
 // allow enemies from the same IP?

@@ -373,6 +373,7 @@ public:
     inline ePlayerNetID const & GetUserName( tString & userName ) const;	//!< Gets this player's name, cleared for system logs. Use for writing to files or comparing with admin input.
 
     tString const & GetLogName( void ) const{ return GetUserName(); }	//!< Gets this player's name, cleared for system logs (with escaped special characters). Use for writing to files.
+    tString GetFilteredAuthenticatedName( void ) const;	//!< Gets the filtered, ecaped authentication name
 #ifdef KRAWALL_SERVER
     tString const & GetRawAuthenticatedName( void ) const{ return rawAuthenticatedName_; }	//!< Gets the raw, unescaped authentication name
     void SetRawAuthenticatedName( tString const & name ){ if ( !IsAuthenticated()) rawAuthenticatedName_ = name; }	//!< Sets the raw, unescaped authentication name
