@@ -6635,7 +6635,7 @@ ePlayerNetID & ePlayerNetID::SetName( char const * name )
 tString ePlayerNetID::GetFilteredAuthenticatedName( void ) const
 {
 #ifdef KRAWALL_SERVER
-    return se_EscapeName( GetRawAuthenticatedName() ).c_str();
+    return tString( se_EscapeName( GetRawAuthenticatedName() ).c_str() );
 #else
     return tString("");
 #endif
