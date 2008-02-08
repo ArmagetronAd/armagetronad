@@ -513,7 +513,7 @@ dnl *************************************************
 
 if test x$enable_armathentication = xyes; then
 
-AM_PATH_ZTHREAD_AA
+AM_PATH_ZTHREAD_AA(2.3.2)
 CXXFLAGS="${CXXFLAGS} ${ZTHREAD_CXXFLAGS}"
 LIBS="${LIBS} ${ZTHREAD_LIBS}"
 

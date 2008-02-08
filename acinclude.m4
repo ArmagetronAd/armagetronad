@@ -417,8 +417,10 @@ AC_ARG_ENABLE(zthreadtest, [  --disable-zthreadtest       Do not try to compile 
            sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
     if test "x$enable_zthreadtest" = "xyes" ; then
       ac_save_CXXFLAGS="$CXXFLAGS"
+      ac_save_CFLAGS="$CXXFLAGS"
       ac_save_LIBS="$LIBS"
       CXXFLAGS="$CXXFLAGS $ZTHREAD_CXXFLAGS"
+      CFLAGS="$CFLAGS $ZTHREAD_CXXFLAGS"
       LIBS="$LIBS $ZTHREAD_LIBS"
 
 dnl
@@ -428,7 +430,14 @@ dnl
       rm -f conf.zthreadtest
       CC_OLD=${CC}
       CC=${CXX}
-      AC_TRY_RUN([
+      for extra_flags in "NONE" "-fpermissive"; do
+        if test NONE != ${extra_flags}; then
+          ZTHREAD_CXXFLAGS="$ZTHREAD_CXXFLAGS ${extra_flags}"
+          CXXFLAGS="$CXXFLAGS ${extra_flags}"
+          CFLAGS="$CFLAGS ${extra_flags}"
+        fi
+        if test "x$no_zthread" = x || test NONE == ${extra_flags} ; then
+        AC_TRY_RUN([
 
 
 #include <stdio.h>
@@ -476,6 +485,8 @@ int main (int argc, char *argv[]) {
 }
 
 ],, no_zthread=yes,[echo $ac_n "cross compiling; assumed OK... $ac_c"])
+      fi
+    done
     CC=${CC_OLD}
     CXXFLAGS="$ac_save_CXXFLAGS"
     LIBS="$ac_save_LIBS"
@@ -525,6 +536,7 @@ int main (int argc, char *argv[]) {
           echo "*** exact error that occured. This usually means ZThread was incorrectly installed"
           echo "*** or that you have moved ZThread since it was installed. In the latter case, you"
           echo "*** may want to edit the zthread-config script: $ZTHREAD_CONFIG" ])
+          CFLAGS="$ac_save_CXXFLAGS"
           CXXFLAGS="$ac_save_CXXFLAGS"
           LIBS="$ac_save_LIBS"
        fi
