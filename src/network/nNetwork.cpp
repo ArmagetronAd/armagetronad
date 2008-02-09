@@ -3120,7 +3120,10 @@ void sn_KickUser(int i, const tOutput& reason, REAL severity, nServerInfoBase * 
     con << tOutput( "$network_kill_log", i, reason );
 
     // log it
-    nMachine::GetMachine(i).OnKick( severity );
+    if ( severity > 0 )
+    {
+        nMachine::GetMachine(i).OnKick( severity );
+    }
 
     // do it
     sn_DisconnectUser( i, reason, redirectTo );
