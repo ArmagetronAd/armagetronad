@@ -3849,13 +3849,13 @@ public:
 }
 
 void gCycle::Render(const eCamera *cam){
+    bool blinking = false;
     if ( lastTime > spawnTime_ && !Vulnerable() )
     {
         double time = tSysTimeFloat();
         double wrap = time - floor(time);
         int pulse = int ( 2 * wrap * sg_blinkFrequency );
-        if ( ( pulse & 1 ) == 0 )
-            return;
+        blinking = pulse & 1;
     }
 
 #ifdef USE_HEADLIGHT
@@ -3955,7 +3955,7 @@ void gCycle::Render(const eCamera *cam){
         TexMatrix();
         IdentityMatrix();
 
-        if (mp){
+        if (mp && !blinking){
 
             ModelMatrix();
             glPushMatrix();
@@ -3989,7 +3989,7 @@ void gCycle::Render(const eCamera *cam){
             glPopMatrix();
             glTranslatef(-1.5,0,0);
         }
-        else{
+        else if ( !blinking ){
             /*
               glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
               glEnable(GL_TEXTURE_GEN_S);
@@ -4253,7 +4253,7 @@ void gCycle::Render(const eCamera *cam){
 
         glEnable(GL_CULL_FACE);
 
-        if(sr_floorDetail>rFLOOR_GRID && rTextureGroups::TextureMode[rTextureGroups::TEX_FLOOR]>0 && sr_alphaBlend){
+        if(!blinking && sr_floorDetail>rFLOOR_GRID && rTextureGroups::TextureMode[rTextureGroups::TEX_FLOOR]>0 && sr_alphaBlend){
             glColor3f(0,0,0);
             cycle_shad.Select();
             BeginQuads();
