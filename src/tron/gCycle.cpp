@@ -3955,121 +3955,62 @@ void gCycle::Render(const eCamera *cam){
         TexMatrix();
         IdentityMatrix();
 
-        if (mp && !blinking){
+        if (mp){
 
             ModelMatrix();
-            glPushMatrix();
-            /*
-              GLfloat sk[4][4]={{0,.1,0,0},
-              {-.1,0,0,0},
-              {0,0,.1,0},
-              {1,.2,-1.05,1}};
+            if ( !blinking )
+            {
+                glPushMatrix();
+                customTexture->Select();
+                glColor3f(1,1,1);
+                customModel->Render();
+                glPopMatrix();
+            }
 
-              if (moviepack_hack)
-              glMultMatrixf(&sk[0][0]);
-            */
-
-            customTexture->Select();
-            //glDisable(GL_TEXTURE_2D);
-            //glDisable(GL_TEXTURE);
-            glColor3f(1,1,1);
-
-            //glPolygonMode(GL_FRONT, GL_FILL);
-            //glDepthFunc(GL_LESS);
-            //glCullFace(GL_BACK);
-            customModel->Render();
-            //glLineWidth(2);
-            //glPolygonMode(GL_BACK,GL_LINE);
-            //glDepthFunc(GL_LEQUAL);
-            //glCullFace(GL_FRONT);
-            //customModel->Render();
-            //sr_ResetRenderState();
-
-            glPopMatrix();
             glPopMatrix();
             glTranslatef(-1.5,0,0);
         }
-        else if ( !blinking ){
-            /*
-              glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
-              glEnable(GL_TEXTURE_GEN_S);
-                
-              glTexGeni(GL_T,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
-              glEnable(GL_TEXTURE_GEN_T);
-                
-              glTexGeni(GL_R,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
-              glEnable(GL_TEXTURE_GEN_R);
-                
-              glTexGeni(GL_Q,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
-              glEnable(GL_TEXTURE_GEN_Q);
-            */
-
+        else{
             glEnable(GL_TEXTURE_2D);
 
-            /*
-            		 static    GLfloat tswap[4][4]={{1,0,0,0},
-            		 {0,0,1,0},
-            		 {0,-1,0,0},
-            		 {.5,.5,0,1}};
-                
-            		 static    GLfloat tswapb[4][4]={{1,0,0,0},
-            		 {0,0,1,0},
-            		 {0,-1,0,0},
-            		 {.2,1.2,0,1}};
-            */
-
-            //       TexMatrix();
-            //       glLoadMatrixf(&tswapb[0][0]);
-            //       glScalef(.4,.4,.8);
             ModelMatrix();
 
+            if ( !blinking )
+            {
+                bodyTex->Select();
+                body->Render();
 
-            bodyTex->Select();
-            body->Render();
+                wheelTex->Select();
+                
+                glPushMatrix();
+                glTranslatef(0,0,.73);
+                
+                GLfloat mr[4][4]={{rotationRearWheel.x,0,rotationRearWheel.y,0},
+                                  {0,1,0,0},
+                                  {-rotationRearWheel.y,0,rotationRearWheel.x,0},
+                                  {0,0,0,1}};
+                
+                
+                glMultMatrixf(&mr[0][0]);
+                
+                rear->Render();
+                glPopMatrix();
 
-            wheelTex->Select();
+                glPushMatrix();
+                glTranslatef(1.84,0,.43);
 
-            glPushMatrix();
-            glTranslatef(0,0,.73);
+                GLfloat mf[4][4]={{rotationFrontWheel.x,0,rotationFrontWheel.y,0},
+                                  {0,1,0,0},
+                                  {-rotationFrontWheel.y,0,rotationFrontWheel.x,0},
+                                  {0,0,0,1}};
+                
+                glMultMatrixf(&mf[0][0]);
 
-            GLfloat mr[4][4]={{rotationRearWheel.x,0,rotationRearWheel.y,0},
-                              {0,1,0,0},
-                              {-rotationRearWheel.y,0,rotationRearWheel.x,0},
-                              {0,0,0,1}};
-
-
-            glMultMatrixf(&mr[0][0]);
-
-
-            //       TexMatrix();
-            //       glLoadMatrixf(&tswap[0][0]);
-            //       glScalef(.65,.65,.65);
-            //       ModelMatrix();
-
-            rear->Render();
+                front->Render();
+                glPopMatrix();
+            }
+            
             glPopMatrix();
-
-            glPushMatrix();
-            glTranslatef(1.84,0,.43);
-
-            GLfloat mf[4][4]={{rotationFrontWheel.x,0,rotationFrontWheel.y,0},
-                              {0,1,0,0},
-                              {-rotationFrontWheel.y,0,rotationFrontWheel.x,0},
-                              {0,0,0,1}};
-
-            glMultMatrixf(&mf[0][0]);
-
-
-            //       TexMatrix();
-            //       glLoadMatrixf(&tswap[0][0]);
-            //       glScalef(1.2,1.2,1.2);
-            //       ModelMatrix();
-
-            front->Render();
-            glPopMatrix();
-            glPopMatrix();
-
-
         }
 
 
