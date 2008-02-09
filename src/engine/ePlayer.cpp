@@ -689,8 +689,8 @@ tAccessLevel ePlayerNetID::AccessLevelRequiredToPlay()
     return se_accessLevelRequiredToPlay;
 }
 
-// maximal user level whose accounts are hidden from other users
-static tAccessLevel se_hideAccessLevelOf = tAccessLevel_Program;
+// maximal user level whose accounts can be hidden from other users
+static tAccessLevel se_hideAccessLevelOf = tAccessLevel_TeamLeader;
 static tSettingItem< tAccessLevel > se_hideAccessLevelOfConf( "ACCESS_LEVEL_HIDE_OF", se_hideAccessLevelOf );
 
 // but they are only hidden to players with a lower access level than this
@@ -704,6 +704,7 @@ static bool se_Hide( ePlayerNetID const * hider, tAccessLevel currentLevel )
 
     return
     hider->GetAccessLevel() >= se_hideAccessLevelOf &&
+    hider->StealthMode() &&
     currentLevel            >  se_hideAccessLevelTo;
 }
 
@@ -1092,6 +1093,13 @@ ePlayer::ePlayer(){
                                         "$spectator_mode_help",
                                         spectate));
     spectate=false;
+    confname.Clear();
+
+    confname << "HIDE_IDENTITY_"<< id+1;
+    StoreConfitem(tNEW(tConfItem<bool>)(confname,
+                                        "$hide_identity_help",
+                                        stealth));
+    stealth=false;
     confname.Clear();
 
     confname << "NAME_TEAM_AFTER_PLAYER_"<< id+1;
@@ -3422,6 +3430,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
     greeted				= true;
     chatting_			= false;
     spectating_         = false;
+    stealth_            = false;
     chatFlags_			= 0;
     disconnected		= false;
 
@@ -4182,8 +4191,8 @@ void ePlayerNetID::WriteSync(nMessage &m){
     //if(sn_GetNetState()==nSERVER)
     m << ping;
 
-    // pack chat and spectator status together
-    unsigned short flags = ( chatting_ ? 1 : 0 ) | ( spectating_ ? 2 : 0 );
+    // pack chat, spectator and stealth status together
+    unsigned short flags = ( chatting_ ? 1 : 0 ) | ( spectating_ ? 2 : 0 ) | ( stealth_ ? 4 : 0 );
     m << flags;
 
     m << score;
@@ -4440,11 +4449,13 @@ void ePlayerNetID::ReadSync(nMessage &m){
         {
             bool newChat = ( ( flags & 1 ) != 0 );
             bool newSpectate = ( ( flags & 2 ) != 0 );
+            bool newStealth = ( ( flags & 4 ) != 0 );
 
-            if ( chatting_ != newChat || spectating_ != newSpectate )
+            if ( chatting_ != newChat || spectating_ != newSpectate || newStealth != stealth_ )
                 lastActivity_ = tSysTimeFloat();
             chatting_   = newChat;
             spectating_ = newSpectate;
+            stealth_    = newStealth;
         }
     }
 
@@ -5067,6 +5078,11 @@ void ePlayerNetID::Update(){
                 if ( p->spectating_ != local_p->spectate )
                     p->RequestSync();
                 p->spectating_ = local_p->spectate;
+
+                // update stealth status
+                if ( p->stealth_ != local_p->stealth )
+                    p->RequestSync();
+                p->stealth_ = local_p->stealth;
 
                 // update name
                 tString newName( ePlayer::PlayerConfig(i)->Name() );

@@ -71,6 +71,7 @@ public:
     bool       autoSwitchIncam;
 
     bool       spectate;              // shall this player always spectate?
+    bool       stealth;               // does this player wish to hide his/her identity?
     bool       autoLogin;             // should the player always request authentication on servers?
 
     bool 		nameTeamAfterMe; // player prefers to call his team after his name
@@ -167,6 +168,7 @@ private:
     ePlayerNetID& operator= (const ePlayerNetID&); // forbid copy constructor
 
     bool			spectating_; //!< are we currently spectating? Spectators don't get assigned to teams.
+    bool			stealth_; //!< does this player want to hide his/her identity?
     bool			chatting_;   //!< are we currently chatting?
     int				chatFlags_;  //!< different types of reasons for beeing chatting
     bool			allowTeamChange_; //!< allow team changes even if ALLOW_TEAM_CHANGE is disabled?
@@ -217,6 +219,8 @@ public:
 
     // spectating
     bool IsSpectating() const { return spectating_; }
+
+    bool StealthMode() const { return stealth_; }
 
     // team management
     bool TeamChangeAllowed() const; //!< is this player allowed to change teams?

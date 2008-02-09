@@ -921,6 +921,11 @@ void sg_PlayerMenu(int Player){
                       p->globalID, 400);
     gid.SetColorMode( rTextField::COLOR_IGNORE );
 
+    uMenuItemToggle st
+    (&playerMenu,"$player_stealth_text",
+     "$player_stealth_help",
+     p->stealth);
+
     uMenuItemToggle sp
     (&playerMenu,"$player_spectator_text",
      "$player_spectator_help",
