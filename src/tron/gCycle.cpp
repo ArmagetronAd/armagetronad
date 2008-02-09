@@ -3289,6 +3289,9 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                         // this test must come last, it resets the flag.
                         if ( explosion->AccountForHole() )
                         {
+                            tString ladderLog;
+                            ladderLog << "SACRIFICE " << Player()->GetUserName() << " " << holer->Player()->GetUserName() << " " << w->Cycle()->Player()->GetUserName() << "\n";
+                            se_SaveToLadderLog( ladderLog );
                             if ( score_hole > 0 )
                             {
                                 // positive hole score goes to the holer
