@@ -436,7 +436,8 @@ dnl
           CXXFLAGS="$CXXFLAGS ${extra_flags}"
           CFLAGS="$CFLAGS ${extra_flags}"
         fi
-        if test "x$no_zthread" = x || test NONE == ${extra_flags} ; then
+        if test "x$no_zthread" = xyes || test NONE = ${extra_flags} ; then
+        no_zthread=""
         AC_TRY_RUN([
 
 
