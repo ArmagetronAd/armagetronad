@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class gCycle;
 struct gRealColor;
 
-class gExplosion: virtual public eGameObject, public tReferencable< gExplosion >
+class gExplosion: virtual public eReferencableGameObject
 { // Boom!
 public:
     gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color, gCycle * owner );
@@ -65,9 +65,8 @@ public:
         return owner_;
     }
 
-    virtual void AddRef(){tReferencable< gExplosion >::AddRef();}
-    virtual void Release(){tReferencable< gExplosion >::Release();}
-    virtual void DoRemoveFromGame(); // called last when the object is removed from the game
+protected:
+    virtual void OnRemoveFromGame(); // called last when the object is removed from the game
 private:
     eSoundPlayer sound;
 
