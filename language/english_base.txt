@@ -792,6 +792,7 @@ round_console_message_help	Message sent to clients after every round
 round_center_message_help	Big message sent to clients after every round
 
 password_storage_help			Determines where your passwords are stored: 1 means on harddisk (dangerous), 0 in memory and -1 means they are not stored at all.
+protect_sensitive_files_help Try to protect user.cfg from read access by other users?
 admin_pass_help			Password for the basic in game admin
 
 backward_compatibility_help	Maximum number of old protocol versions to support.

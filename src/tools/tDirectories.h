@@ -41,7 +41,8 @@ public:
 
     bool Open    ( std::ofstream& f,
                    const char* filename,
-                   std::ios::openmode mode = std::ios::out ) const; // opens a file to write
+                   std::ios::openmode mode = std::ios::out,
+                   bool sensitive = false ) const; // opens a file to write
 
     tString GetReadPath   ( const char* filename   ) const; // finds the full path to a file to read
     tString GetWritePath  ( const char* filename   ) const; // finds the full path to a file to write

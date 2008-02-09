@@ -30,6 +30,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <errno.h>
 #include <sys/types.h>
+#ifndef WIN32
+#include <sys/stat.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -675,9 +678,13 @@ bool tPath::Open    ( std::ifstream& f,
     return false;
 }
 
+static bool st_protectFiles = true;
+tSettingItem<bool> st_protectFilesConf("PROTECT_SENSITIVE_FILES", st_protectFiles);
+
 bool tPath::Open    ( std::ofstream& f,
                       const char* filename,
-                      std::ios::openmode mode ) const
+                      std::ios::openmode mode,
+                      bool sensitive) const
 {
     if ( !tPath::IsValidPath( filename ) )
         return false;
@@ -687,7 +694,21 @@ bool tPath::Open    ( std::ofstream& f,
 
     tString fullname = GetWritePath(filename);
 
+#ifndef WIN32
+    mode_t oldmask;
+    if(sensitive && st_protectFiles)
+    {
+        oldmask = umask(0600);
+    }
+#endif
     f.open( fullname, mode );
+#ifndef WIN32
+    if(sensitive && st_protectFiles)
+    {
+        chmod( &fullname(0), 0600 );
+        umask(oldmask);
+    }
+#endif
 
     return ( f && f.good() );
 }

@@ -886,7 +886,7 @@ void st_SaveConfig()
     }
 
     std::ofstream s;
-    if ( tDirectories::Var().Open( s, "user.cfg" ) )
+    if ( tDirectories::Var().Open( s, "user.cfg", std::ios::out, true ) )
     {
         tConfItemBase::SaveAll(s);
     }
