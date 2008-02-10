@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<!DOCTYPE Resource SYSTEM "Your_mom/dtd/map-0.2.8.0_pig2.dtd">
+<!DOCTYPE Resource SYSTEM "AATeam/map-0.2.8.0_pig2.dtd">
 <Resource type="aamap" name="ctfsty" version="0.0.2" author="Your_mom" category="clever">
 <!-- Smooth version of soccersty more or less -->
 	<Map version="2">
