@@ -2319,27 +2319,19 @@ void gCycle::OnRemoveFromGame()
 {
     // keep this cycle alive
     tJUST_CONTROLLED_PTR< gCycle > keep;
-
+    
     if ( this->GetRefcount() > 0 )
     {
         keep = this;
 
         this->Turn(0);
-        this->Kill();
-
-        // really kill the cycle even on the client
-        if ( this->Alive() && lastTime < se_GameTime() + 10.0f )
-        {
-            Die( lastTime );
-            tNEW(gExplosion)(grid, pos, lastTime, color_, this);
-        }
 
         if ( sn_GetNetState() == nSERVER )
             RequestSync();
     }
 
     if (currentWall)
-        currentWall->CopyIntoGrid( grid );
+        currentWall->CopyIntoGrid(0);
     currentWall=NULL;
     lastWall=NULL;
 
@@ -3646,7 +3638,7 @@ void gCycle::Kill(){
 
     if (sn_GetNetState()!=nCLIENT){
         RequestSync(true);
-        if (Alive()){
+        if (Alive() && grid && GOID() >= 0 ){
             Die( lastTime );
             tNEW(gExplosion)(grid, pos,lastTime, color_, this );
             //	 eEdge::SeethroughHasChanged();
@@ -5000,7 +4992,7 @@ void gCycle::ReadSync( nMessage &m )
     }
 
     // killed?
-    if (Alive() && sync_alive!=1)
+    if (Alive() && sync_alive!=1 && GOID() >= 0 && grid )
     {
         Die( lastSyncMessage_.time );
         MoveSafely( lastSyncMessage_.pos, lastTime, deathTime );

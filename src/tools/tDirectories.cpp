@@ -695,7 +695,7 @@ bool tPath::Open    ( std::ofstream& f,
     tString fullname = GetWritePath(filename);
 
 #ifndef WIN32
-    mode_t oldmask;
+    mode_t oldmask=0;
     if(sensitive && st_protectFiles)
     {
         oldmask = umask(0600);
