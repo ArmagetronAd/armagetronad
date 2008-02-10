@@ -1,4 +1,4 @@
-<!-- version="0.2.8.0" -->
+<!-- version="0.2.8.0_pig2" -->
 <!ELEMENT Resource (Map)>
 
 <!ATTLIST Resource
