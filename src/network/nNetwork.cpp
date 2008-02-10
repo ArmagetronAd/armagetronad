@@ -2876,7 +2876,7 @@ static nDescriptor client_cen_nd(9,client_cen_handler,"client_cen");
 void sn_CenterMessage(const tOutput &o,int client){
     tString message(o);
 
-    nMessage *m=new nMessage(client_cen_nd);
+    tJUST_CONTROLLED_PTR< nMessage > m=new nMessage(client_cen_nd);
     *m << message;
     if (client<0){
         m->BroadCast();
