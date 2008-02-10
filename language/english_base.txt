@@ -1553,11 +1553,11 @@ player_red_help			Lets you choose the red component of your colour.
 player_autologin_text		Auto Login:
 player_autologin_help		When enabled, you will automatically initiate the (usually completely optional) login procedure as soon as you enter a server.
 
-player_spectator_text		Hide Global ID:
-player_spectator_help		Usually your global ID is shown to everyone when you log in or when someone uses the /players chat command. Enabling this tells the server that you prefer to remain anonymous. The server may still show your ID to moderators and administrators on the server or even decide to ignore your request.
+player_stealth_text		Hide Global ID:
+player_stealth_help		Usually your global ID is shown to everyone when you log in or when someone uses the /players chat command. Enabling this tells the server that you prefer to remain anonymous. The server may still show your ID to moderators and administrators on the server or even decide to ignore your request.
 
-player_stealth_text		Spectator Mode:
-player_stealth_help		In spectator mode, you do not control a cycle; you just watch the game as if you were already dead. The other players will see you on the score table and you can chat with them, but you won't be spawned at the beginng of a round.
+player_spectator_text		Spectator Mode:
+player_spectator_help		In spectator mode, you do not control a cycle; you just watch the game as if you were already dead. The other players will see you on the score table and you can chat with them, but you won't be spawned at the beginng of a round.
 
 player_name_team_text		Name Team after Player:
 player_name_team_help		You can set your prefered method for naming your team here: On indicates you want the team to be named after its most senior player, Off means you want a simple colour label.
