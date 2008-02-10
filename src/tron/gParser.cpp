@@ -29,7 +29,7 @@
 
 // This fixes stupid crappy OS-wannabe Windoze
 // Someday, autoconf-ize this stuff...
-#ifdef WIN32 
+#ifdef WIN32
 #	define strncasecmp strnicmp
 #	define vsnprintf _vsnprintf
 #endif
@@ -141,8 +141,8 @@ gParser::myxmlGetPropBool(xmlNodePtr cur, const char *name) {
 #define myxmlHasProp(cur, name)	xmlHasProp(cur, reinterpret_cast<const xmlChar *>(name))
 
 /*
- * Determine if elementName is the same as searchedElement, or any of its valid syntax. 
- * Anything sharing the same start counts as a valid syntax. This allow for variation 
+ * Determine if elementName is the same as searchedElement, or any of its valid syntax.
+ * Anything sharing the same start counts as a valid syntax. This allow for variation
  * on the name to reduce DTD conflicts.
  */
 bool
@@ -166,7 +166,7 @@ gParser::isElement(const xmlChar *elementName, const xmlChar *searchedElement, c
 }
 
 /*
- * Determine if this is an alternative for us. To be an alternative for us, the 
+ * Determine if this is an alternative for us. To be an alternative for us, the
  * current element's name must starts with Alternative, and the version attribute
  * has a version that is ours ("Arthemis", "0.2.8" or "0_2_8"). If both conditions
  * are met, it return true.
@@ -338,10 +338,10 @@ gParser::validateVersionRange(xmlChar *version, const xmlChar * codeName, const 
 }
 
 /*
- * This method allows for elements that are at the bottom of the 
+ * This method allows for elements that are at the bottom of the
  * hierarchy, such as Spawn, Point, Setting and Axis, to verify if sub element
  * havent been added in future version(s)
- */ 
+ */
 void
 gParser::endElementAlternative(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword) {
     /* Verify if any sub elements are included, and if they contain any Alt
@@ -506,6 +506,12 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         }
         else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"fortress")) {
             zone = tNEW( gBaseZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
+        }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"flag")) {
+            zone = tNEW( gFlagZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
+        }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"ball")) {
+            zone = tNEW( gBallZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
 
         // leaving zone undeleted is no memory leak here, the gid takes control of it

@@ -2257,6 +2257,41 @@ player_team_message     Teammates
 player_spectator_message Spectators
 no_real_teams           No teams with more than one player.\n
 player_topologypolice	Order from Topology Police: \1
+player_win_shot			\1 shot \3 for \2 points.\n
+player_free_shot		\1 shot \2.\n
+player_shot_suicide		\1 shot itself in the foot and lost \2 points.\n
+player_free_shot_suicide	\1 shot itself in the foot.\n
+player_win_death_shot		\1 got \3 with a death shot for \2 points.\n
+player_free_death_shot		\1 got \2 with a death shot.\n
+player_win_self_destruct	\1 self destructed and blasted \3 for \2 points.\n
+player_free_self_destruct	\1 self destructed and blasted \2.\n
+player_win_zombie_zone_revenge	Zombie \1 ate \3 for revenge, brains, and \2 points.\n
+player_free_zombie_zone_revenge	Zombie \1 ate \2 for revenge and brains.\n
+player_win_zombie_zone		Zombie \1 ate \3 for \2 points and yummy brains.\n
+player_free_zombie_zone		Zombie \1 ate \2 for their yummy brains.\n
+player_free_zombie_zone_die	\1 killed zombie \2, no brains for them.\n
+player_score_goal		\1 scored a goal for \2 points!  Great ball handling!\n
+player_score_own_goal		\1 scored on themselves.  Boo!\n
+
+player_flag_timeout		\1 lost the flag because they held it too long...\n
+player_flag_return		\1 returned the flag, well done!\n
+player_flag_take		\1 stole the flag, get them!\n
+player_flag_drop		\1 dropped the flag, get it!\n
+player_flag_score		\1 took the flag home for \2 points, nice flag handling!\n
+player_flag_cant_score		\1 took the flag home, but their flag isn't back yet. Get it!\n
+player_flag_hold_score_win	\1 got \2 points for holding the flag!\n
+player_flag_hold_score_lose	\1 lost \2 points for holding the flag!\n
+
+player_base_respawn		\1 was respawned by \2.\n
+player_base_enemy_respawn	\1 was respawned by their enemy \2.\n
+player_base_enemy_kill		\1 forgot which team they're on...\n
+
+player_respawn_center_message	You've been respawned\n
+
+player_base_respawn_reminder	0xff4444Reminder: 0xffffffRespawn 0x44ff44\1 0xffffffteammates by hitting your base.\n
+player_base_respawn_reminder_alone	0xff4444Reminder (Last Player): 0xffffffRespawn 0x44ff44\1 0xffffffteammates by hitting your base.\n
+
+msg_deadsilenced		Chat discarded, the dead cannot speak...\n
 
 team_shuffle            \1 gets shuffled from rank \2 to \3.\n
 player_noshuffleup      You are not allowed to shuffle up.\n

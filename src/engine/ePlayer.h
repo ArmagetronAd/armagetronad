@@ -193,6 +193,9 @@ public:
         ChatFlags_Console = 4
     };
 
+    bool flagOverrideChat;
+    bool flagChatState;
+
     int    pID;
     // REAL	rubberstatus;
     tArray<tString> lastSaid;
@@ -358,6 +361,8 @@ public:
     static tString FilterName( tString const & in );             //!< filters a name (removes unprintables, color codes and spaces)
     bool IsAllowedToRename ( void );                             //!< tells if the user can rename or not, takes care about everything
     void AllowRename( bool allow );                              //!< Allows a player to rename (or not)
+
+    void DropFlag();
 
 private:
     tColoredString  nameFromClient_;        //!< this player's name as the client wants it to be. Avoid using it when possilbe.

@@ -196,7 +196,8 @@ private:
     gCycleMovement                                  ( gCycleMovement const & other      )           ;   //!< copy constructor
     gCycleMovement& operator =                      ( gCycleMovement const & other      )           ;   //!< copy operator
 
-private:
+//private:
+protected:
     short           alive_;                     //!< status: 1: cycle is alive, -1: cycle just died, 0: cycle is dead
 
 protected:

@@ -57,6 +57,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nConfig.h"
 #include "nNetwork.h"
 #include <time.h>
+#include "../tron/gCycle.h"
+#include "../tron/gWinZone.h"
 
 // call on commands that only work on the server; quit if it returns true
 bool se_NeedsServer(char const * command, std::istream & s, bool strict )
@@ -2511,6 +2513,13 @@ static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
 }
 #endif // DEDICATED
 
+// help message printed out to whoever asks for it
+static tString se_helpMessage("");
+static tConfItemLine se_helpMessageConf("HELP_MESSAGE",se_helpMessage);
+ 
+static bool se_silenceDead = false;
+static tSettingItem<bool> se_silenceDeadConf("SILENCE_DEAD", se_silenceDead);
+
 // time during which no repeaded chat messages are printed
 static REAL se_alreadySaidTimeout=5.0;
 static tSettingItem<REAL> se_alreadySaidTimeoutConf("SPAM_PROTECTION_REPEAT",
@@ -2583,6 +2592,22 @@ public:
 
     bool Check()
     {
+        // death silence chekc
+        if (se_silenceDead)
+        {
+            gCycle *cycle = dynamic_cast<gCycle *>(player_->Object());
+            
+            if ((!cycle) ||
+                ((cycle) && (!cycle->Alive())))
+            {
+                tOutput toSender;
+                toSender << "$msg_deadsilenced";
+                sn_ConsoleOut(toSender, player_->Owner());
+                sn_ConsoleOut(toSender, 0);
+                return true;
+            }
+        }
+            
         nTimeRolling currentTime = tSysTimeFloat();
 
         // check if the player already said the same thing not too long ago
@@ -3454,6 +3479,17 @@ void handle_chat( nMessage &m )
                         eVoter::HandleChat( p, s );
                         return;
                     }
+                    else if (command == "/help")
+                    {
+                        sn_ConsoleOut(se_helpMessage + "\n", p->Owner());
+                        se_DisplayChatLocally(p, say);
+                        return;
+                    }
+                    else if (command == "/drop")
+                    {
+                        p->DropFlag();
+                        return;
+                    }
                     else if (command == "/teams") {
                         se_ChatTeams( p );
                         return;
@@ -3916,7 +3952,10 @@ static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT"
 
 ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings )
 {
-    // default access level
+    flagOverrideChat = false;
+    flagChatState = false;
+
+   // default access level
     lastAccessLevel = tAccessLevel_Default;
 
     favoriteNumberOfPlayersPerTeam = 1;
@@ -3986,6 +4025,9 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
 ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
         , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings )
 {
+    flagOverrideChat = false;
+    flagChatState = false;
+
     // default access level
     lastAccessLevel = tAccessLevel_Default;
 
@@ -4799,8 +4841,15 @@ void ePlayerNetID::WriteSync(nMessage &m){
     //if(sn_GetNetState()==nSERVER)
     m << ping;
 
+    bool tempChat = chatting_;
+ 
+    if (flagOverrideChat)
+    {
+        tempChat = flagChatState;
+    }
+ 
     // pack chat, spectator and stealth status together
-    unsigned short flags = ( chatting_ ? 1 : 0 ) | ( spectating_ ? 2 : 0 ) | ( stealth_ ? 4 : 0 );
+    unsigned short flags = ( tempChat ? 1 : 0 ) | ( spectating_ ? 2 : 0 ) | ( stealth_ ? 4 : 0 );
     m << flags;
 
     m << score;
@@ -4811,6 +4860,26 @@ void ePlayerNetID::WriteSync(nMessage &m){
 
     m << favoriteNumberOfPlayersPerTeam;
     m << nameTeamAfterMe;
+}
+
+extern float sg_flagDropTime;
+
+void ePlayerNetID::DropFlag()
+{
+    if (sg_flagDropTime < 0)
+    {
+        return;
+    }
+
+    gCycle *cycle = dynamic_cast<gCycle *>(object);
+
+    if (cycle)
+    {
+        if (cycle->flag_)
+        {
+            cycle->flag_->OwnerDropped();
+        }
+    }
 }
 
 // makes sure the passed string is not longer than the given maximum
@@ -6910,6 +6979,9 @@ static void se_KickConf(std::istream &s)
     // and kick.
     if ( num > 0 && !s.good() )
     {
+        // output to console so we can detect
+        con << "ADMIN command KICK issued for "<< num << " " << reason << "\n";
+
         sn_KickUser( num ,  reason.Len() > 1 ? static_cast< char const *>( reason ) : "$network_kill_kick" );
     }
     else
@@ -7008,6 +7080,9 @@ static void se_BanConf(std::istream &s)
 
     tString reason;
     reason.ReadLine(s);
+
+    // output to console so we can detect
+    con << "ADMIN command BAN issued for "<< num << " " << banTime << " " << reason << "\n";
 
     // and ban.
     if ( num > 0 )

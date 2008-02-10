@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -624,6 +624,7 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
             {
             case nServerInfo::Compat_Upgrade:
                 score << tOutput( "$network_master_upgrage" );
+                score << " " << nServerInfo::Compat_Ok << " " << server->Compatibility() << '\n';
                 break;
             case nServerInfo::Compat_Downgrade:
                 score << tOutput( "$network_master_downgrage" );

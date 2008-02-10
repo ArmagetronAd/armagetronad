@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // get rid of this include (it's needed for gColor)
 #include "gCycle.h"
+#include "eTeam.h"
 
 
 class eTeam;
@@ -70,7 +71,7 @@ nMessage & operator >> ( nMessage & m, tFunction & f );       //! function netwo
 class gZone: public eNetGameObject
 {
 public:
-    gZone(eGrid *grid, const eCoord &pos); //!< local constructor
+    gZone(eGrid *grid, const eCoord &pos, bool dynamicCreation = false); //!< local constructor
     gZone(nMessage &m);                    //!< network constructor
     ~gZone();                              //!< destructor
 
@@ -94,7 +95,34 @@ public:
     gZone &         SetRotationAcceleration( REAL rotationAcceleration );	        //!< Sets the current acceleration of the rotation
     REAL            GetRotationAcceleration( void ) const;	                        //!< Gets the current acceleration of the rotation
     gZone const &   GetRotationAcceleration( REAL & rotationAcceleration ) const;	//!< Gets the current acceleration of the rotation
+
+    gZone &         SetColor            (gRealColor color) {color_ = color; return *this;}      //!< Sets the current color
+    gRealColor &    GetColor            () {return color_;}             //!< Gets the current color
+    gZone &         GetColor            (gRealColor & color) {color = color_; return *this;}    //!< Gets the current color
+    gZone &         SetOwner            (ePlayerNetID *pOwner) {pOwner_ = pOwner; return *this;}  //!< Sets the current owner
+    ePlayerNetID *  GetOwner            () {return pOwner_;}  //!< Sets the current owner
+    gZone &         SetSeekingCycle     (gCycle *pCycle) {if (pCycle) {seeking_ = true;} else {seeking_ = false;} pSeekingCycle_ = pCycle; return *this;}  //!< Sets the current seeking cycle
+    gCycle *        GetSeekingCycle     () {return pSeekingCycle_;}  //!< Sets the current seeking cycle
+    gZone &         SetTargetRadius     (REAL radius) {targetRadius_ = radius; return *this;}      //!< Sets the target radius
+    gZone &         SetFallSpeed        (REAL speed) {fallSpeed_ = speed; return *this;}      //!< Sets the fall speed
+    void BounceOffPoint(eCoord dest, eCoord collide, REAL mod);
+
+    void Destroy();
+    bool destroyed_;
+
 protected:
+    bool wallInteract_;
+    int wallBouncesLeft_;
+    eWall *pLastWall_;
+
+    bool dynamicCreation_;  //??? remove
+    ePlayerNetID *pOwner_;
+    gCycle *pSeekingCycle_;       //!< cycle owner of this zone
+    bool seeking_;
+    REAL targetRadius_;
+    REAL fallSpeed_;
+    REAL lastSeekTime_;
+
     gRealColor color_;           //!< the zone's color
     REAL createTime_;            //!< the time the zone was created at
 
@@ -116,6 +144,7 @@ private:
     virtual void InteractWith( eGameObject *target,REAL time,int recursion=1 ); //!< looks for objects inzide the zone and reacts on them
 
     virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone
+    virtual void OnEnter( gZone *target, REAL time );  //!< reacts on objects inside the zone
 
     virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
 
@@ -149,13 +178,38 @@ private:
 class gDeathZoneHack: public gZone
 {
 public:
-    gDeathZoneHack(eGrid *grid, const eCoord &pos );              //!< local constructor
+
+    enum
+    {
+        TYPE_NORMAL,
+        TYPE_SHOT,
+        TYPE_DEATH_SHOT,
+        TYPE_SELF_DESTRUCT,
+        TYPE_ZOMBIE_ZONE,
+
+        NUM_DEATH_ZONE_TYPES
+    };
+
+    gDeathZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false );              //!< local constructor
     gDeathZoneHack(nMessage &m);                                  //!< network constructor
     ~gDeathZoneHack();                                            //!< destructor
 
+    gDeathZoneHack *pLastShotCollision;
+
+    gZone &         SetType            (int type);                //!< Sets the current type
+    int             GetType            () {return (deathZoneType);}
+
+    virtual void OnEnter( gDeathZoneHack *target, REAL time ); //!< reacts on objects inside the zone
+
 protected:
+    virtual void OnVanish();                     //!< called when the zone vanishes
+
+    int deathZoneType;
+
 private:
     virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone (kills them)
+
+    gCycle * getPlayerCycle(ePlayerNetID *pPlayer);
 };
 
 //! base zone: belongs to a team, enemy players who manage to stay inside win the round (will be replaced
@@ -170,6 +224,7 @@ private:
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
 
     virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone
+    virtual void OnEnter( gZone *target, REAL time );  //!< reacts on objects inside the zone
     virtual void OnVanish();                           //!< called when the zone vanishes
     virtual void OnConquest();                         //!< called when the zone gets conquered
     virtual void CheckSurvivor();                      //!< checks for the only surviving zone
@@ -182,7 +237,10 @@ private:
 
     REAL conquered_;                       //!< conquest status; zero if it is free, 1 if it has been completely conquered by the enemy
     int enemiesInside_;                     //!< count of enemies currently inside the zone
+    tColoredString enemyPlayerName_;        //!< name of the first enemy player that was inside us
+
     int ownersInside_;                      //!< count of owners currently inside the zone
+    tColoredString teamPlayerName_;         //!< name of the first team player that was inside us
 
     bool onlySurvivor_;                     //!< flag set if this zone is the only survivor
 
@@ -204,6 +262,66 @@ private:
     State currentState_;   //!< the current state
 
     REAL lastSync_;        //!< time of the last sync request
+
+    REAL lastRespawnRemindTime_;
+    int lastRespawnRemindWaiting_;
+};
+
+class gBallZoneHack: public gZone
+{
+public:
+    gBallZoneHack(eGrid *grid, const eCoord &pos );              //!< local constructor
+    gBallZoneHack(nMessage &m);                                  //!< network constructor
+    ~gBallZoneHack();                                            //!< destructor
+
+    void RemoveCycle(gCycle *cycle);
+    gCycle * GetLastCycle();
+    void GoHome();
+
+protected:
+    eCoord originalPosition_;
+
+private:
+    virtual void OnVanish();                           //!< called when the zone vanishes
+    virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone (kills them)
+
+    gCycle *lastCycle_;
+};
+
+class gFlagZoneHack: public gZone
+{
+public:
+    gFlagZoneHack(eGrid *grid, const eCoord &pos );              //!< local constructor
+    gFlagZoneHack(nMessage &m);                                  //!< network constructor
+    ~gFlagZoneHack();                                            //!< destructor
+
+    void SetTeam(tJUST_CONTROLLED_PTR< eTeam > team) { this->team = team; }
+
+    void WarnFlagNotHome();
+    bool IsHome();
+    void GoHome();
+    void RemoveOwner();
+    void OwnerDropped();
+
+protected:
+    bool init_;
+    eCoord originalPosition_;
+    eCoord homePosition_;
+    REAL originalRadius_;
+    gCycle *owner_;
+    REAL ownerTime_;
+    bool ownerWarnedNotHome_;
+    REAL chatBlinkUpdateTime_;
+    REAL blinkUpdateTime_;
+    REAL blinkTrackUpdateTime_;
+    gCycle *ownerDropped_;
+    REAL ownerDroppedTime_;
+    REAL lastHoldScoreTime_;
+    bool positionUpdatePending_;
+
+private:
+    virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
+    virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone (kills them)
 };
 
 //! creates a win or death zone (according to configuration) at the specified position
