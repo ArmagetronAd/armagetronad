@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE Resource SYSTEM "AATeam/map-0.2.8.0_pig.dtd">
+<Resource type="aamap" name="soccersty" version="0.2.0" author="Your_mom" category="clever">
+	<Map version="2">
+		<World>
+			<Field>
+				<Axes number="4"/>
+
+				<Spawn x="195" y="100" xdir="0" ydir="1" />
+				<Spawn x="205" y="600" xdir="0" ydir="-1" />
+
+				<Wall>
+					<Point x="0" y="40" />
+					<Point x="150" y="40" />
+					<Point x="150" y="0" />
+					<Point x="250" y="0" />
+					<Point x="250" y="40" />
+					<Point x="400" y="40" />
+					<Point x="400" y="660" />
+					<Point x="250" y="660" />
+					<Point x="250" y="700" />
+					<Point x="150" y="700" />
+					<Point x="150" y="660" />
+					<Point x="0" y="660" />
+					<Point x="0" y="40" />
+				</Wall>
+
+        			<Zone effect="ball">
+        			    <ShapeCircle radius="10">
+        			        <Point x="200" y="350"/>
+        			    </ShapeCircle>
+        			</Zone>
+
+
+        			<Zone effect="fortress">
+        			    <ShapeCircle radius="39">
+        			        <Point x="200" y="699"/>
+        			    </ShapeCircle>
+        			</Zone>
+
+        			<Zone effect="fortress">
+        			    <ShapeCircle radius="39">
+        			        <Point x="200" y="1"/>
+        			    </ShapeCircle>
+	 	      		</Zone>
+			</Field>
+		</World>
+	</Map>
+</Resource>
+

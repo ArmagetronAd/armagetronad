@@ -48,6 +48,7 @@ class gNetPlayerWall;
 class gPlayerWall;
 class eTempEdge;
 struct gPredictPositionData;
+class gFlagZoneHack;
 
 // minimum time between two cycle turns
 extern REAL sg_delayCycle;
@@ -151,6 +152,14 @@ public:
     REAL   heightFrontWheel,heightRearWheel;  		// wheel (suspension)
 public:
     //REAL	brakingReservoir; // reservoir for braking. 1 means full, 0 is empty
+
+    gFlagZoneHack *flag_;
+
+    REAL lastShotTime;
+    REAL shotStarted;
+    REAL shotReservoir;
+    void ProcessShoot(bool deathShot);
+    void Killed(gCycle *pKiller, int type = 0);
 
     static uActionPlayer s_brake;
     gCycleMemory memory;

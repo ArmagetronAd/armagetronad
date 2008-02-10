@@ -3361,13 +3361,21 @@ void gGame::StateUpdate(){
     }
 }
 
+static float sg_respawnTime = -1;
+static tSettingItem<float> sg_respawnTimeConfig( "RESPAWN_TIME", sg_respawnTime );
+
 // uncomment to activate respawning
-// #define RESPAWN_HACK
+#define RESPAWN_HACK
 
 #ifdef RESPAWN_HACK
 // Respawns cycles (crude test)
 static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 {
+    if (sg_respawnTime < 0)
+    {
+        return;
+    }
+
     for ( int i = se_PlayerNetIDs.Len()-1; i >= 0; --i )
     {
         ePlayerNetID *p = se_PlayerNetIDs(i);
@@ -3377,9 +3385,10 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 
         eGameObject *e=p->Object();
 
-        if ( ( !e || !e->Alive() && e->DeathTime() < time - .5 ) && sn_GetNetState() != nCLIENT )
+        if ( ( (!e) || ((!e->Alive()) && (e->DeathTime() < (time - sg_respawnTime)) ) && (sn_GetNetState() != nCLIENT )))
         {
             eCoord pos,dir;
+#if 0
             if ( e )
             {
                 dir = e->Direction();
@@ -3393,6 +3402,7 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
                 }
             }
             else
+#endif
                 arena.LeastDangerousSpawnPoint()->Spawn( pos, dir );
 #ifdef DEBUG
             //                std::cout << "spawning player " << pni->name << '\n';

@@ -188,6 +188,9 @@ public:
         ChatFlags_Console = 4
     };
 
+    bool flagOverrideChat;
+    bool flagChatState;
+
     int    pID;
     // REAL	rubberstatus;
     tArray<tString> lastSaid;
@@ -342,6 +345,9 @@ public:
     void UpdateName();                                           //! update the player name from the client's wishes
     static void FilterName( tString const & in, tString & out ); //! filters a name (removes unprintables, color codes and spaces)
     static tString FilterName( tString const & in );             //! filters a name (removes unprintables, color codes and spaces)
+
+    void DropFlag();
+
 private:
     tColoredString  nameFromClient_;        //! this player's name as the client wants it to be. Avoid using it when possilbe.
     tColoredString  nameFromServer_;        //! this player's name as the server wants it to be. Avoid using it when possilbe.

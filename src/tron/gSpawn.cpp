@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -38,6 +38,11 @@ static REAL sg_spawnSide = 2.75362;
 static tSettingItem< REAL > sg_spawnBackConf( "SPAWN_WINGMEN_BACK", sg_spawnBack );
 static tSettingItem< REAL > sg_spawnSideConf( "SPAWN_WINGMEN_SIDE", sg_spawnSide );
 
+// number of spawns after which to start wrapping new spawns at the beginning
+// without this, respawning eventually starts happening outside of walls...
+static int sg_spawnWrap = 9;
+static tSettingItem< int > sg_spawnWrapConf( "SPAWN_WRAP", sg_spawnWrap );
+
 gSpawnPoint::gSpawnPoint(const eCoord &loc,const eCoord &dir)
         :id(-1),location(loc),direction(dir),
 lastTimeUsed(se_GameTime()-1000000),numberOfUses(0){}
@@ -50,13 +55,15 @@ void gSpawnPoint::Spawn(eCoord &loc,eCoord &dir){
     */
 
     int d,away;
-    if (numberOfUses%2==1){
+    int wrappedNumberOfUses = numberOfUses % sg_spawnWrap;
+
+    if (wrappedNumberOfUses%2==1){
         d=1;
-        away=(numberOfUses+1)/2;
+        away=(wrappedNumberOfUses+1)/2;
     }
     else{
         d=-1;
-        away=numberOfUses/2;
+        away=wrappedNumberOfUses/2;
     }
 
     dir=direction;

@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -49,6 +49,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eDebugLine.h"
 #include "eLagCompensation.h"
 #include "gArena.h"
+#include "gWinZone.h"
 
 #include "tMath.h"
 #include <stdlib.h>
@@ -148,7 +149,7 @@ static nSettingItemWatched<REAL>
 sg_cycleWallTimeConf("CYCLE_WALL_TIME",
                      sg_cycleWallTime,
                      nConfItemVersionWatcher::Group_Bumpy,
-                     14);
+                     12);
 
 // time after spawning during which a cycle can't be killed
 static REAL sg_cycleInvulnerableTime=0.0;
@@ -210,13 +211,13 @@ static tSettingItem<int> s_h("SCORE_HOLE",score_hole);
 static int score_survive=0;
 static tSettingItem<int> s_sur("SCORE_SURVIVE",score_survive);
 
-static int score_die=-2;
+int score_die=-2;
 static tSettingItem<int> s_d("SCORE_DIE",score_die);
 
-static int score_kill=3;
+int score_kill=3;
 static tSettingItem<int> s_k("SCORE_KILL",score_kill);
 
-static int score_suicide=-4;
+int score_suicide=-4;
 static tSettingItem<int> s_s("SCORE_SUICIDE",score_suicide);
 
 // input control
@@ -1310,7 +1311,7 @@ void gDestination::RemoveFromList(){
        (*list) = next;
        next=NULL;
        list=NULL;
-       
+
       */
 
     // z-man: HUH? I don't understand the code above any more and it seems to be leaky.
@@ -2072,6 +2073,10 @@ void gCycle::MyInitAfterCreation(){
     dropWallRequested_ = false;
     lastGoodPosition_ = pos;
 
+    lastShotTime = 0;
+    shotStarted = 0;
+    shotReservoir = 1.0;
+
 #ifdef DEBUG
     // con << "creating cycle.\n";
 #endif
@@ -2281,6 +2286,8 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p,bo
     sg_ArchiveCoord( this->dir, 1 );
     sg_ArchiveCoord( this->pos, 1 );
     sg_ArchiveReal( this->verletSpeed_, 1 );
+
+    flag_ = NULL;
 }
 
 gCycle::~gCycle(){
@@ -2288,6 +2295,29 @@ gCycle::~gCycle(){
     //  con << "deleting cylce...\n";
 #endif
     // clear the destination list
+
+    //Search the list for zones that could be referencing us
+    const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+    gZone *zone = NULL;
+    for (int i=gameObjects.Len()-1;i>=0;i--)
+    {
+        zone = dynamic_cast<gZone *>(gameObjects(i));
+
+        if (zone)
+        {
+            if (zone->GetSeekingCycle() == this)
+            {
+                zone->SetSeekingCycle(NULL);
+            }
+
+            gBallZoneHack *ballZone = dynamic_cast<gBallZoneHack *>(zone);
+
+            if (ballZone)
+            {
+                ballZone->RemoveCycle(this);
+            }
+        }
+    }
 
     tDESTROY(engine);
     tDESTROY(turning);
@@ -2492,6 +2522,10 @@ bool gCycle::Timestep(REAL currentTime){
         f << pos.x << " " << pos.y << "\n";
     }
 #endif
+
+    // save old braking status
+    short oldBraking = braking;
+
     // timewarp test debug code
     //if ( Player() && Player()->IsHuman() )
     //    currentTime -= .1;
@@ -2626,6 +2660,15 @@ bool gCycle::Timestep(REAL currentTime){
 
         // but using the predicted position which halts at walls may work
         currentWall->Update(predictTime, PredictPosition() );
+    }
+
+    //check for brake change (probably not the best place to do this)
+    if (sn_GetNetState()!=nCLIENT)
+    {
+        if (braking != oldBraking)
+        {
+            ProcessShoot(false);
+        }
     }
 
     return ret;
@@ -3155,6 +3198,28 @@ void gCycle::KillAt( const eCoord& deathPos){
                 win << "$player_win_frag_ai";
                 hunter->AddScore(score_kill, win, lose);
             }
+
+            // find the cycle we were killed by
+            const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+            gCycle * pHunterCycle = NULL;
+            for (int i=gameObjects.Len()-1;i>=0;i--)
+            {
+                gCycle *pCycle=dynamic_cast<gCycle *>(gameObjects(i));
+
+                if (pCycle)
+                {
+                    if (pCycle->Player() == hunter)
+                    {
+                        pHunterCycle = pCycle;
+                        break;
+                    }
+                }
+            }
+
+            if (pHunterCycle)
+            {
+                Killed(pHunterCycle);
+            }
         }
         //	if (prey->player && (prey->player->CurrentTeam() != hunter->player->CurrentTeam()))
         if (Player())
@@ -3492,6 +3557,12 @@ bool gCycle::Act(uActionPlayer *Act, REAL x){
             AccelerationDiscontinuity();
             braking = newBraking;
             AddDestination();
+
+            // brake changed, process shooting
+            if (sn_GetNetState()!=nCLIENT)
+            {
+                ProcessShoot(false);
+            }
         }
         return true;
     }
@@ -3501,6 +3572,12 @@ bool gCycle::Act(uActionPlayer *Act, REAL x){
             AccelerationDiscontinuity();
             braking = !braking;
             AddDestination();
+
+            // brake changed, process shooting
+            if (sn_GetNetState()!=nCLIENT)
+            {
+                ProcessShoot(false);
+            }
         }
         return true;
     }
@@ -3632,13 +3709,140 @@ void gCycle::DropWall( bool buildNew )
     dropWallRequested_ = false;
 }
 
+static bool sg_deathShot = true;
+static tSettingItem<bool> conf_deathShot ("DEATH_SHOT", sg_deathShot);
+
+static bool sg_selfDestruct = false;
+static tSettingItem<bool> conf_selfDestruct ("SELF_DESTRUCT", sg_selfDestruct);
+
+static float sg_selfDestructRadius = 1;
+static tSettingItem<float> conf_selfDestructRadius ("SELF_DESTRUCT_RADIUS", sg_selfDestructRadius);
+
+static float sg_selfDestructRotation = 5;
+static tSettingItem<float> conf_selfDestructRotation ("SELF_DESTRUCT_ROT", sg_selfDestructRotation);
+
+static float sg_selfDestructRise = 1;
+static tSettingItem<float> conf_selfDestructRise ("SELF_DESTRUCT_RISE", sg_selfDestructRise);
+
+static float sg_selfDestructFall = 1;
+static tSettingItem<float> conf_selfDestructFall ("SELF_DESTRUCT_FALL", sg_selfDestructFall);
+
+static bool sg_zombieZone = false;
+static tSettingItem<bool> conf_zombieZone ("ZOMBIE_ZONE", sg_zombieZone);
+
+static float sg_zombieZoneRadius = 1;
+static tSettingItem<float> conf_zombieZoneRadius ("ZOMBIE_ZONE_RADIUS", sg_zombieZoneRadius);
+
+static float sg_zombieZoneRotation = 5;
+static tSettingItem<float> conf_zombieZoneRotation ("ZOMBIE_ZONE_ROT", sg_zombieZoneRotation);
+
+static float sg_zombieZoneRise = 1;
+static tSettingItem<float> conf_zombieZoneRise ("ZOMBIE_ZONE_RISE", sg_zombieZoneRise);
+
+static float sg_zombieZoneFall = 1;
+static tSettingItem<float> conf_zombieZoneFall ("ZOMBIE_ZONE_FALL", sg_zombieZoneFall);
+
+void gCycle::Killed(gCycle *pKiller, int type)
+{
+    if ((sg_zombieZone) &&
+        (pKiller) &&
+        (pKiller->Player()) &&
+        (pKiller->Alive()) &&
+        (pKiller != this) &&
+        (pKiller->Player()->CurrentTeam() != Player()->CurrentTeam()))
+    {
+        //Someone killed us - rise from the dead and eat their brains
+        gDeathZoneHack *pZone = new gDeathZoneHack(grid, pos, true);
+        if (pZone)
+        {
+            if (sg_zombieZoneRise > 0)
+            {
+                pZone->SetRadius(0);
+                pZone->SetExpansionSpeed(sg_zombieZoneRise);
+            }
+            else
+            {
+                pZone->SetRadius(sg_zombieZoneRadius);
+
+                if (sg_zombieZoneFall > 0)
+                {
+                    pZone->SetExpansionSpeed(-sg_zombieZoneFall);
+                }
+            }
+
+            pZone->SetRotationSpeed(sg_zombieZoneRotation);
+            pZone->SetColor(color_);
+
+            pZone->SetOwner(Player());
+            pZone->SetSeekingCycle(pKiller);
+            pZone->SetType(gDeathZoneHack::TYPE_ZOMBIE_ZONE);
+            pZone->SetTargetRadius(sg_zombieZoneRadius);
+            pZone->SetFallSpeed(sg_zombieZoneFall);
+            pZone->RequestSync();
+        }
+    }
+
+    if ((sg_selfDestruct) &&
+        (sg_selfDestructRadius > 0) &&
+        (sg_selfDestructRise >= 0) &&
+        (sg_selfDestructFall >= 0))
+    {
+        gDeathZoneHack *pZone = new gDeathZoneHack(grid, pos, true);
+        if (pZone)
+        {
+            if (sg_selfDestructRise > 0)
+            {
+                pZone->SetRadius(0);
+                pZone->SetExpansionSpeed(sg_selfDestructRise);
+            }
+            else
+            {
+                pZone->SetRadius(sg_selfDestructRadius);
+
+                if (sg_selfDestructFall > 0)
+                {
+                    pZone->SetExpansionSpeed(-sg_selfDestructFall);
+                }
+            }
+
+            pZone->SetRotationSpeed(sg_selfDestructRotation);
+            pZone->SetColor(color_);
+            pZone->SetOwner(Player());
+            pZone->SetType(gDeathZoneHack::TYPE_SELF_DESTRUCT);
+            pZone->SetTargetRadius(sg_selfDestructRadius);
+            pZone->SetFallSpeed(sg_selfDestructFall);
+            pZone->RequestSync();
+        }
+    }
+}
+ 
 void gCycle::Kill(){
     // keep this cycle alive
     tJUST_CONTROLLED_PTR< gCycle > keep( this->GetRefcount()>0 ? this : 0 );
 
     if (sn_GetNetState()!=nCLIENT){
         RequestSync(true);
+ 
+        // check if we own a flag
+        if (flag_)
+        {
+            // tell the flag we dropped it
+            flag_->OwnerDropped();
+        }
+        
         if (Alive() && grid && GOID() >= 0 ){
+            if (sg_deathShot)
+            {
+                if (braking)
+                {
+                    braking = 0;
+                    ProcessShoot(true);
+                }
+            }
+            lastShotTime = 0;
+            shotStarted = 0;
+            shotReservoir = 1.0;
+
             Die( lastTime );
             tNEW(gExplosion)(grid, pos,lastTime, color_, this );
             //	 eEdge::SeethroughHasChanged();
@@ -3864,7 +4068,7 @@ void gCycle::Render(const eCamera *cam){
     glProgramStringARB_ptr = (glProgramStringARB_Func) SDL_GL_GetProcAddress("glProgramStringARB");
     glProgramLocalParameter4fARB_ptr = (glProgramLocalParameter4fARB_Func) SDL_GL_GetProcAddress("glProgramLocalParameter4fARB");
 #endif
-#endif    
+#endif
     if (!finite(z) || !finite(pos.x) ||!finite(pos.y)||!finite(dir.x)||!finite(dir.y)
             || !finite(skew))
         st_Breakpoint();
@@ -4118,7 +4322,7 @@ void gCycle::Render(const eCamera *cam){
             }
 #ifdef LINUX
             glProgramLocalParameter4fARB_ptr(GL_FRAGMENT_PROGRAM_ARB, 0, 0, 0, verletSpeed_ * verletSpeed_, 0);
-#else			
+#else
             glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0, 0, 0, verletSpeed_ * verletSpeed_, 0);
 #endif
             glPushAttrib(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // blend func and depth mask. Efficient or not, glPushAttrib/glPopAttrib is a quick way to manage state.
@@ -4546,6 +4750,8 @@ gCycle::gCycle(nMessage &m)
     lastTimeAnim = lastTime = -EPS;
 
     nextSync = nextSyncOwner = -1;
+
+    flag_ = NULL;
 }
 
 
@@ -5529,7 +5735,7 @@ void gCycle::old_ReadSync(nMessage &m){
     correctPosSmooth=pos-oldpos;
     pos=oldpos;
   }
-  
+
 
 
 #ifdef DEBUG
@@ -5690,3 +5896,217 @@ bool gCycle::Vulnerable() const
 {
     return Alive() && lastTime > spawnTime_ + sg_cycleInvulnerableTime;
 }
+
+static float sg_shotThreshold = 2.0f;
+static tSettingItem<float> conf_shotThreshold ("SHOT_THRESH", sg_shotThreshold);
+//static nSettingItemWatched<float> conf_shotThreshold("SHOT_THRESH", sg_shotThreshold, nConfItemVersionWatcher::Group_Breaking, 8);
+
+static float sg_shotDiscardTime = 0.0f;
+static tSettingItem<float> conf_shotDiscardTime ("SHOT_DISCARD_TIME", sg_shotDiscardTime);
+
+static float sg_shotStartDistance = 1.0f;
+static tSettingItem<float> conf_shotStartDistance ("SHOT_START_DIST", sg_shotStartDistance);
+
+static float sg_shotVelocityMultiplier = 1.4f;
+static tSettingItem<float> conf_shotVelocityMultiplier ("SHOT_VELOCITY_MULT", sg_shotVelocityMultiplier);
+
+static float sg_shotRadiusMin = 0.75f;
+static tSettingItem<float> conf_shotRadiusMin ("SHOT_RADIUS_MIN", sg_shotRadiusMin);
+
+static float sg_shotRadiusMax = 6.0f;
+static tSettingItem<float> conf_shotRadiusMax ("SHOT_RADIUS_MAX", sg_shotRadiusMax);
+
+static float sg_shotRotationMin = 1.0f;
+static tSettingItem<float> conf_shotRotationMin ("SHOT_ROT_MIN", sg_shotRotationMin);
+
+static float sg_shotRotationMax = 5.0f;
+static tSettingItem<float> conf_shotRotationMax ("SHOT_ROT_MAX", sg_shotRotationMax);
+
+static int sg_shotExplosion = 0;
+static tSettingItem<int> conf_shotExplosion ("SHOT_EXPLOSION", sg_shotExplosion);
+
+static float sg_megashotThreshold = 0.95f;
+static tSettingItem<float> conf_megashotThreshold ("MEGA_SHOT_THRESH", sg_megashotThreshold);
+
+static float sg_megashotMultiplier = 0.5f;
+static tSettingItem<float> conf_megashotMultiplier ("MEGA_SHOT_MULT", sg_megashotMultiplier);
+
+static int sg_megashotDirections = 3;
+static tSettingItem<int> conf_megashotDirections ("MEGA_SHOT_DIR", sg_megashotDirections);
+
+static int sg_megashotExplosion = 1;
+static tSettingItem<int> conf_megashotExplosion ("MEGA_SHOT_EXPLOSION", sg_megashotExplosion);
+
+#define FIX_BRAKE_BUG
+
+void gCycle::ProcessShoot(bool deathShot)
+{
+    if (Alive())
+    {
+        if (braking)
+        {
+#ifndef FIX_BRAKE_BUG
+            //Shoot pressed, save the reservoir
+            shotStarted = brakingReservoir;
+#else
+            //Shoot pressed, save the time
+            shotStarted = se_mainGameTimer->Time();
+#endif
+        }
+        else
+        {
+            //Shoot let go
+
+            //Check if the shot should be discarded
+            REAL newTime = se_mainGameTimer->Time();
+
+            if ((lastShotTime) &&
+                (newTime >= lastShotTime) &&
+                (newTime < (lastShotTime + sg_shotDiscardTime)))
+            {
+                return;
+            }
+
+#ifndef FIX_BRAKE_BUG
+            //Check the strength from the reservoir
+            REAL shotStrength = shotStarted - brakingReservoir;
+#else
+            //Refill the reservoir
+            if (lastShotTime)
+            {
+                REAL refillTime = shotStarted - lastShotTime;
+                if (refillTime < 0.0)
+                {
+                    return;
+                }
+                shotReservoir += refillTime * sg_cycleBrakeRefill;
+            }
+            if (shotReservoir > 1.0)
+            {
+                shotReservoir = 1.0;
+            }
+
+            //Get the deplete time
+            REAL depleteTime = newTime - shotStarted;
+            if (depleteTime <= 0.0)
+            {
+                return;
+            }
+
+            REAL shotStrength = depleteTime * sg_cycleBrakeDeplete;
+            if ((shotReservoir - shotStrength) < 0.0)
+            {
+                shotStrength = shotReservoir;
+                shotReservoir = 0.0;
+            }
+            else
+            {
+                shotReservoir -= shotStrength;
+            }
+#endif
+
+            //Save the new shot time
+            lastShotTime = newTime;
+
+            //Get the type of shot
+            int type = gDeathZoneHack::TYPE_SHOT;
+            if (deathShot)
+            {
+                type = gDeathZoneHack::TYPE_DEATH_SHOT;
+            }
+
+            //Check if color_ is too dark
+            gRealColor shotColor = color_;
+            REAL colorTotal = shotColor.r + shotColor.g + shotColor.b;
+            REAL colorLimit = 0.3;
+
+            if (colorTotal < colorLimit)
+            {
+                //This could be much improved....
+                REAL toAdd = (colorLimit - colorTotal) / 3;
+                shotColor.r += toAdd;
+                shotColor.g += toAdd;
+                shotColor.b += toAdd;
+            }
+
+            if ((shotStrength < 0.0) ||
+                (shotStrength < sg_shotThreshold))
+            {
+                return;
+            }
+            else if (shotStrength < sg_megashotThreshold)
+            {
+                REAL shotRadius = (shotStrength * (sg_shotRadiusMax - sg_shotRadiusMin)) + sg_shotRadiusMin;
+                REAL shotRotation = (shotStrength * (sg_shotRotationMax - sg_shotRotationMin)) + sg_shotRotationMin;
+
+                eCoord shotPos = pos + (dirDrive * (shotRadius + sg_shotStartDistance));
+                eCoord shotVelocity = dirDrive * Speed() * sg_shotVelocityMultiplier;
+
+                gDeathZoneHack *pZone = new gDeathZoneHack(grid, shotPos, true);
+                pZone->SetRadius(shotRadius);
+                pZone->SetVelocity(shotVelocity);
+                pZone->SetRotationSpeed(shotRotation);
+                pZone->SetColor(shotColor);
+                pZone->SetOwner(Player());
+                pZone->SetType(type);
+
+                if (sg_shotExplosion == 1)
+                {
+                    new gExplosion(grid, pos, lastTime, color_, 0 );
+                }
+                else if (sg_shotExplosion >= 2)
+                {
+                    new gExplosion(grid, shotPos, lastTime, color_, 0 );
+                }
+            }
+            else
+            {
+                //Megashot
+                REAL shotRadius = (sg_megashotMultiplier * shotStrength *
+                                   (sg_shotRadiusMax - sg_shotRadiusMin)) + sg_shotRadiusMin;
+                REAL shotRotation = (sg_megashotMultiplier * shotStrength *
+                                     (sg_shotRotationMax - sg_shotRotationMin)) + sg_shotRotationMin;
+
+                eCoord tempDirection = dirDrive;
+
+                //Don't shoot if directions are 0
+                if (sg_megashotDirections > 0)
+                {
+                    REAL a,b;
+                    REAL radians = 2 * 3.14159265 / sg_megashotDirections;
+                    a = cos(radians);
+                    b = sin(radians);
+
+                    int i;
+                    for (i = 0; i < sg_megashotDirections; i++)
+                    {
+                        eCoord shotPos = pos + (tempDirection * (shotRadius + sg_shotStartDistance));
+                        eCoord shotVelocity = tempDirection * Speed() * sg_shotVelocityMultiplier;
+
+                        gDeathZoneHack *pZone = new gDeathZoneHack(grid, shotPos, true);
+                        pZone->SetRadius(shotRadius);
+                        pZone->SetVelocity(shotVelocity);
+                        pZone->SetRotationSpeed(shotRotation);
+                        pZone->SetColor(shotColor);
+                        pZone->SetOwner(Player());
+                        pZone->SetType(type);
+
+                        if (sg_megashotExplosion >= 2)
+                        {
+                            new gExplosion(grid, shotPos, lastTime, color_, 0 );
+                        }
+
+                        tempDirection = tempDirection.Turn(a, b);
+                    }
+                }
+
+                if ((sg_megashotExplosion == 1) ||
+                    (sg_megashotExplosion >= 3))
+                {
+                    new gExplosion(grid, pos, lastTime, color_, 0 );
+                }
+            }
+        }
+    }
+}
+
