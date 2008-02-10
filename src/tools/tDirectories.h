@@ -41,7 +41,8 @@ public:
 
     bool Open    ( std::ofstream& f,
                    const char* filename,
-                   std::ios::openmode mode = std::ios::out ) const; // opens a file to write
+                   std::ios::openmode mode = std::ios::out,
+                   bool sensitive = false ) const; // opens a file to write
 
     bool Open    ( std::fstream& f,
                    const char* filename   ) const; // let's read and write at the same time shall we?

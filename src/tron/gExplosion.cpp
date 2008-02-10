@@ -139,7 +139,7 @@ static void S_Sync( eWall * w )
 */
 
 gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color, gCycle * owner )
-        :eGameObject(grid, pos, eCoord(0,0), NULL, true),
+        :eReferencableGameObject(grid, pos, eCoord(0,0), NULL, true),
         createTime(time),
         expansion(0),
         listID(-1),
@@ -493,7 +493,11 @@ void gExplosion::SoundMix(Uint8 *dest,unsigned int len,
 
 #endif
 
-void gExplosion::DoRemoveFromGame()
+void gExplosion::OnRemoveFromGame()
 {
+    // remove from list to avoid costy checks whenever a new wall appears
     sg_Explosions.Remove( this, listID );
+
+    // delegate to base
+    eReferencableGameObject::OnRemoveFromGame();
 }

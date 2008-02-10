@@ -77,6 +77,7 @@ public:
     bool       autoSwitchIncam;
 
     bool       spectate;              // shall this player always spectate?
+    bool       stealth;               // does this player wish to hide his/her identity?
     bool       autoLogin;             // should the player always request authentication on servers?
 
     bool 		nameTeamAfterMe; // player prefers to call his team after his name
@@ -175,6 +176,7 @@ private:
     ePlayerNetID& operator= (const ePlayerNetID&); // forbid copy constructor
 
     bool			spectating_; //!< are we currently spectating? Spectators don't get assigned to teams.
+    bool			stealth_; //!< does this player want to hide his/her identity?
     bool			chatting_;   //!< are we currently chatting?
     int				chatFlags_;  //!< different types of reasons for beeing chatting
     bool			allowTeamChange_; //!< allow team changes even if ALLOW_TEAM_CHANGE is disabled?
@@ -226,6 +228,8 @@ public:
 
     // spectating
     bool IsSpectating() const { return spectating_; }
+
+    bool StealthMode() const { return stealth_; }
 
     // team management
     bool TeamChangeAllowed() const; //!< is this player allowed to change teams?
@@ -389,6 +393,7 @@ public:
     inline ePlayerNetID const & GetUserName( tString & userName ) const;	//!< Gets this player's name, cleared for system logs. Use for writing to files or comparing with admin input.
 
     tString const & GetLogName( void ) const{ return GetUserName(); }	//!< Gets this player's name, cleared for system logs (with escaped special characters). Use for writing to files.
+    tString GetFilteredAuthenticatedName( void ) const;	//!< Gets the filtered, ecaped authentication name
 #ifdef KRAWALL_SERVER
     tString const & GetRawAuthenticatedName( void ) const{ return rawAuthenticatedName_; }	//!< Gets the raw, unescaped authentication name
     void SetRawAuthenticatedName( tString const & name ){ if ( !IsAuthenticated()) rawAuthenticatedName_ = name; }	//!< Sets the raw, unescaped authentication name

@@ -858,9 +858,7 @@ void eGameObject::DeleteAll(eGrid *grid){
     for(i=grid->gameObjects.Len()-1;i>=0;i--)
     {
         eGameObject* o = grid->gameObjects(i);
-        o->Kill();
-        if (o->autodelete)
-            o->RemoveFromGame();
+        o->RemoveFromGame();
 #ifdef POWERPAK_DEB
         if (pp_out) o->PPDisplay();
 #endif

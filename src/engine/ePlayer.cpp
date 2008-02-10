@@ -524,7 +524,7 @@ static void PasswordCallback( nKrawall::nPasswordRequest const & request,
     eMenuItemPassword pw(&login, password);
     eMenuItemUserName us(&login, username);
     us.SetColorMode( rTextField::COLOR_IGNORE );
-    
+
     uMenuItemSelection<int> storepw(&login,
                                     "$login_storepw_text",
                                     "$login_storepw_help",
@@ -542,6 +542,26 @@ static void PasswordCallback( nKrawall::nPasswordRequest const & request,
     uMenuItemExit cl(&login, "$login_cancel", "$login_cancel_help" );
 
     login.SetSelected(1);
+
+    // check if the username the server sent us matches one of the players'
+    // global IDs. If it does we can directly select the password menu
+    // menu entry since the user probably just wants to enter the password.
+    for(int i = 0; i < MAX_PLAYERS; ++i) {
+        tString const &id = se_Players[i].globalID;
+        if(id.Len() <= username.Len() || id(username.Len() - 1) != '@') {
+            continue;
+        }
+        bool match = true;
+        for(int j = username.Len() - 2; j >= 0; --j) {
+            if(username(j) != id(j)) {
+                match = false;
+                break;
+            }
+        }
+        if(match) {
+            login.SetSelected(0);
+        }
+    }
 
     // force a small console while we are in here
     rSmallConsoleCallback cb(&tr);
@@ -672,8 +692,8 @@ tAccessLevel ePlayerNetID::AccessLevelRequiredToPlay()
     return se_accessLevelRequiredToPlay;
 }
 
-// maximal user level whose accounts are hidden from other users
-static tAccessLevel se_hideAccessLevelOf = tAccessLevel_Program;
+// maximal user level whose accounts can be hidden from other users
+static tAccessLevel se_hideAccessLevelOf = tAccessLevel_TeamLeader;
 static tSettingItem< tAccessLevel > se_hideAccessLevelOfConf( "ACCESS_LEVEL_HIDE_OF", se_hideAccessLevelOf );
 
 // but they are only hidden to players with a lower access level than this
@@ -685,8 +705,9 @@ static bool se_Hide( ePlayerNetID const * hider, tAccessLevel currentLevel )
 {
     tASSERT( hider );
 
-    return 
+    return
     hider->GetAccessLevel() >= se_hideAccessLevelOf &&
+    hider->StealthMode() &&
     currentLevel            >  se_hideAccessLevelTo;
 }
 
@@ -1108,6 +1129,13 @@ ePlayer::ePlayer():cockpit(0){
                                         "$spectator_mode_help",
                                         spectate));
     spectate=false;
+    confname.Clear();
+
+    confname << "HIDE_IDENTITY_"<< id+1;
+    StoreConfitem(tNEW(tConfItem<bool>)(confname,
+                                        "$hide_identity_help",
+                                        stealth));
+    stealth=false;
     confname.Clear();
 
     confname << "NAME_TEAM_AFTER_PLAYER_"<< id+1;
@@ -2904,11 +2932,11 @@ static void se_ListPlayers( ePlayerNetID * receiver )
         std::ostringstream tos;
         tos << p2->Owner();
         tos << ": ";
-        if ( p2->GetLastAccessLevel() < tAccessLevel_Default && !se_Hide( p2, receiver ) )
+        if ( p2->GetAccessLevel() < tAccessLevel_Default && !se_Hide( p2, receiver ) )
         {
             // player username comes from authentication name and may be much different from
             // the screen name
-            tos << p2->GetUserName() << " ( " << p2->GetName() << ", " 
+            tos << p2->GetFilteredAuthenticatedName() << " ( " << p2->GetName() << ", " 
                 << tCurrentAccessLevel::GetName( p2->GetAccessLevel() )
                 << " )";
         }
@@ -3631,6 +3659,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
     greeted				= true;
     chatting_			= false;
     spectating_         = false;
+    stealth_            = false;
     chatFlags_			= 0;
     disconnected		= false;
 
@@ -4288,7 +4317,7 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
         if ( alias != "" )
         {
             rawAuthenticatedName_ = alias;
-            newAuthenticatedName = se_EscapeName( rawAuthenticatedName_ ).c_str();
+            newAuthenticatedName = GetFilteredAuthenticatedName();
 
             // elevate access level again according to the new alias
             se_CheckAccessLevel( accessLevel_, newAuthenticatedName );
@@ -4342,16 +4371,18 @@ void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin ){
     {
         if ( admin )
         {
-            se_SecretConsoleOut( tOutput( "$logout_message_deop", GetName(), se_EscapeName( rawAuthenticatedName_ ).c_str(), admin->GetLogName() ), this, admin );
+            se_SecretConsoleOut( tOutput( "$logout_message_deop", GetName(), GetFilteredAuthenticatedName(), admin->GetLogName() ), this, admin );
         }
         else
         {
-            se_SecretConsoleOut( tOutput( "$logout_message", GetName(), se_EscapeName( rawAuthenticatedName_ ).c_str()  ), this );
+            se_SecretConsoleOut( tOutput( "$logout_message", GetName(), GetFilteredAuthenticatedName() ), this );
         }
     }
 
     // force falling back to regular user name on next update
     SetAccessLevel( tAccessLevel_Default );
+
+    rawAuthenticatedName_ = "";
 }
 
 bool ePlayerNetID::IsAuthenticated() const
@@ -4397,8 +4428,8 @@ void ePlayerNetID::WriteSync(nMessage &m){
     //if(sn_GetNetState()==nSERVER)
     m << ping;
 
-    // pack chat and spectator status together
-    unsigned short flags = ( chatting_ ? 1 : 0 ) | ( spectating_ ? 2 : 0 );
+    // pack chat, spectator and stealth status together
+    unsigned short flags = ( chatting_ ? 1 : 0 ) | ( spectating_ ? 2 : 0 ) | ( stealth_ ? 4 : 0 );
     m << flags;
 
     m << score;
@@ -4658,11 +4689,13 @@ void ePlayerNetID::ReadSync(nMessage &m){
         {
             bool newChat = ( ( flags & 1 ) != 0 );
             bool newSpectate = ( ( flags & 2 ) != 0 );
+            bool newStealth = ( ( flags & 4 ) != 0 );
 
-            if ( chatting_ != newChat || spectating_ != newSpectate )
+            if ( chatting_ != newChat || spectating_ != newSpectate || newStealth != stealth_ )
                 lastActivity_ = tSysTimeFloat();
             chatting_   = newChat;
             spectating_ = newSpectate;
+            stealth_    = newStealth;
         }
     }
 
@@ -5246,11 +5279,12 @@ static int se_ColorDistance( int a[3], int b[3] )
     for( int i = 2; i >= 0; --i )
     {
         int diff = a[i] - b[i];
-        diff = diff < 0 ? -diff : diff;
-        if ( diff > distance )
-        {
-            distance = diff;
-        }
+        distance += diff * diff;
+        //diff = diff < 0 ? -diff : diff;
+        //if ( diff > distance )
+        //{
+        //    distance = diff;
+        //}
     }
 
     return distance;
@@ -5381,6 +5415,11 @@ void ePlayerNetID::Update(){
                 if ( p->spectating_ != local_p->spectate )
                     p->RequestSync();
                 p->spectating_ = local_p->spectate;
+
+                // update stealth status
+                if ( p->stealth_ != local_p->stealth )
+                    p->RequestSync();
+                p->stealth_ = local_p->stealth;
 
                 // update name
                 tString newName( ePlayer::PlayerConfig(i)->Name() );
@@ -6777,7 +6816,7 @@ void ePlayerNetID::UpdateName( void )
     // take the user name to be the authenticated name
     if ( IsAuthenticated() )
     {
-        userName_ = se_EscapeName( rawAuthenticatedName_ ).c_str();
+        userName_ = GetFilteredAuthenticatedName();
         if ( se_legacyLogNames )
         {
             userName_ = tString( "0:" ) + userName_;
@@ -6987,6 +7026,25 @@ ePlayerNetID & ePlayerNetID::SetName( char const * name )
 {
     SetName( tString( name ) );
     return *this;
+}
+
+// ******************************************************************************************
+// *
+// * GetFilteredAuthenticatedName
+// *
+// ******************************************************************************************
+//!
+//!       @return     The filtered authentication name, or "" if no authentication is supported or the player is not authenticated
+//!
+// ******************************************************************************************
+
+tString ePlayerNetID::GetFilteredAuthenticatedName( void ) const
+{
+#ifdef KRAWALL_SERVER
+    return tString( se_EscapeName( GetRawAuthenticatedName() ).c_str() );
+#else
+    return tString("");
+#endif
 }
 
 // allow enemies from the same IP?

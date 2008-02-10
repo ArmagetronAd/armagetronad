@@ -2305,27 +2305,19 @@ void gCycle::OnRemoveFromGame()
 {
     // keep this cycle alive
     tJUST_CONTROLLED_PTR< gCycle > keep;
-
+    
     if ( this->GetRefcount() > 0 )
     {
         keep = this;
 
         this->Turn(0);
-        this->Kill();
-
-        // really kill the cycle even on the client
-        if ( this->Alive() && lastTime < se_GameTime() + 10.0f )
-        {
-            Die( lastTime );
-            tNEW(gExplosion)(grid, pos, lastTime, color_, this);
-        }
 
         if ( sn_GetNetState() == nSERVER )
             RequestSync();
     }
 
     if (currentWall)
-        currentWall->CopyIntoGrid( grid );
+        currentWall->CopyIntoGrid(0);
     currentWall=NULL;
     lastWall=NULL;
 
@@ -3305,6 +3297,9 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                         // this test must come last, it resets the flag.
                         if ( explosion->AccountForHole() )
                         {
+                            tString ladderLog;
+                            ladderLog << "SACRIFICE " << Player()->GetUserName() << " " << holer->Player()->GetUserName() << " " << w->Cycle()->Player()->GetUserName() << "\n";
+                            se_SaveToLadderLog( ladderLog );
                             if ( score_hole > 0 )
                             {
                                 // positive hole score goes to the holer
@@ -3665,7 +3660,7 @@ void gCycle::Kill(){
 
     if (sn_GetNetState()!=nCLIENT){
         RequestSync(true);
-        if (Alive()){
+        if (Alive() && grid && GOID() >= 0 ){
             Die( lastTime );
             tNEW(gExplosion)(grid, pos,lastTime, color_, this );
             //	 eEdge::SeethroughHasChanged();
@@ -3871,13 +3866,13 @@ public:
 }
 
 void gCycle::Render(const eCamera *cam){
+    bool blinking = false;
     if ( lastTime > spawnTime_ && !Vulnerable() )
     {
         double time = tSysTimeFloat();
         double wrap = time - floor(time);
         int pulse = int ( 2 * wrap * sg_blinkFrequency );
-        if ( ( pulse & 1 ) == 0 )
-            return;
+        blinking = pulse & 1;
     }
 
 #ifdef USE_HEADLIGHT
@@ -3980,118 +3975,59 @@ void gCycle::Render(const eCamera *cam){
         if (mp){
 
             ModelMatrix();
-            glPushMatrix();
-            /*
-              GLfloat sk[4][4]={{0,.1,0,0},
-              {-.1,0,0,0},
-              {0,0,.1,0},
-              {1,.2,-1.05,1}};
+            if ( !blinking )
+            {
+                glPushMatrix();
+                customTexture->Select();
+                glColor3f(1,1,1);
+                customModel->Render();
+                glPopMatrix();
+            }
 
-              if (moviepack_hack)
-              glMultMatrixf(&sk[0][0]);
-            */
-
-            customTexture->Select();
-            //glDisable(GL_TEXTURE_2D);
-            //glDisable(GL_TEXTURE);
-            glColor3f(1,1,1);
-
-            //glPolygonMode(GL_FRONT, GL_FILL);
-            //glDepthFunc(GL_LESS);
-            //glCullFace(GL_BACK);
-            customModel->Render();
-            //glLineWidth(2);
-            //glPolygonMode(GL_BACK,GL_LINE);
-            //glDepthFunc(GL_LEQUAL);
-            //glCullFace(GL_FRONT);
-            //customModel->Render();
-            //sr_ResetRenderState();
-
-            glPopMatrix();
             glPopMatrix();
             glTranslatef(-1.5,0,0);
         }
         else{
-            /*
-              glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
-              glEnable(GL_TEXTURE_GEN_S);
-                
-              glTexGeni(GL_T,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
-              glEnable(GL_TEXTURE_GEN_T);
-                
-              glTexGeni(GL_R,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
-              glEnable(GL_TEXTURE_GEN_R);
-                
-              glTexGeni(GL_Q,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
-              glEnable(GL_TEXTURE_GEN_Q);
-            */
-
             glEnable(GL_TEXTURE_2D);
 
-            /*
-            		 static    GLfloat tswap[4][4]={{1,0,0,0},
-            		 {0,0,1,0},
-            		 {0,-1,0,0},
-            		 {.5,.5,0,1}};
-                
-            		 static    GLfloat tswapb[4][4]={{1,0,0,0},
-            		 {0,0,1,0},
-            		 {0,-1,0,0},
-            		 {.2,1.2,0,1}};
-            */
-
-            //       TexMatrix();
-            //       glLoadMatrixf(&tswapb[0][0]);
-            //       glScalef(.4,.4,.8);
             ModelMatrix();
 
+            if ( !blinking )
+            {
+                bodyTex->Select();
+                body->Render();
 
-            bodyTex->Select();
-            body->Render();
+                wheelTex->Select();
+                
+                glPushMatrix();
+                glTranslatef(0,0,.73);
+                
+                GLfloat mr[4][4]={{rotationRearWheel.x,0,rotationRearWheel.y,0},
+                                  {0,1,0,0},
+                                  {-rotationRearWheel.y,0,rotationRearWheel.x,0},
+                                  {0,0,0,1}};
+                
+                
+                glMultMatrixf(&mr[0][0]);
+                
+                rear->Render();
+                glPopMatrix();
 
-            wheelTex->Select();
+                glPushMatrix();
+                glTranslatef(1.84,0,.43);
 
-            glPushMatrix();
-            glTranslatef(0,0,.73);
+                GLfloat mf[4][4]={{rotationFrontWheel.x,0,rotationFrontWheel.y,0},
+                                  {0,1,0,0},
+                                  {-rotationFrontWheel.y,0,rotationFrontWheel.x,0},
+                                  {0,0,0,1}};
+                
+                glMultMatrixf(&mf[0][0]);
 
-            GLfloat mr[4][4]={{rotationRearWheel.x,0,rotationRearWheel.y,0},
-                              {0,1,0,0},
-                              {-rotationRearWheel.y,0,rotationRearWheel.x,0},
-                              {0,0,0,1}};
-
-
-            glMultMatrixf(&mr[0][0]);
-
-
-            //       TexMatrix();
-            //       glLoadMatrixf(&tswap[0][0]);
-            //       glScalef(.65,.65,.65);
-            //       ModelMatrix();
-
-            rear->Render();
+                front->Render();
+                glPopMatrix();
+            }
+            
             glPopMatrix();
-
-            glPushMatrix();
-            glTranslatef(1.84,0,.43);
-
-            GLfloat mf[4][4]={{rotationFrontWheel.x,0,rotationFrontWheel.y,0},
-                              {0,1,0,0},
-                              {-rotationFrontWheel.y,0,rotationFrontWheel.x,0},
-                              {0,0,0,1}};
-
-            glMultMatrixf(&mf[0][0]);
-
-
-            //       TexMatrix();
-            //       glLoadMatrixf(&tswap[0][0]);
-            //       glScalef(1.2,1.2,1.2);
-            //       ModelMatrix();
-
-            front->Render();
-            glPopMatrix();
-            glPopMatrix();
-
-
         }
 
 
@@ -4275,7 +4211,7 @@ void gCycle::Render(const eCamera *cam){
 
         glEnable(GL_CULL_FACE);
 
-        if(sr_floorDetail>rFLOOR_GRID && rTextureGroups::TextureMode[rTextureGroups::TEX_FLOOR]>0 && sr_alphaBlend){
+        if(!blinking && sr_floorDetail>rFLOOR_GRID && rTextureGroups::TextureMode[rTextureGroups::TEX_FLOOR]>0 && sr_alphaBlend){
             glColor3f(0,0,0);
             cycle_shad.Select();
             BeginQuads();
@@ -5147,7 +5083,7 @@ void gCycle::ReadSync( nMessage &m )
     }
 
     // killed?
-    if (Alive() && sync_alive!=1)
+    if (Alive() && sync_alive!=1 && GOID() >= 0 && grid )
     {
         Die( lastSyncMessage_.time );
         MoveSafely( lastSyncMessage_.pos, lastTime, deathTime );

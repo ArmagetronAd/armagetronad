@@ -74,9 +74,9 @@ static int default_texturemode = GL_LINEAR_MIPMAP_LINEAR;
 bool sr_ZTrick=false;
 bool sr_useDisplayLists=false;
 
-static int width[]={0,320	,320,400,512,640,800,1024	,1280, 	1280 ,1280	,1600	,1680 ,2048	,800,320};
-static int height[]={0,200,240,300,384,480,600,768	,800, 	854  ,1024	,1200	,1050 ,1572	,600,200};
-static REAL aspect[]={1	,1	,1	,1	,1	,1    ,1	,1	,1    ,1	,1		,1,1	,1};
+static int width[ArmageTron_Custom+2]  = {0, 320, 320, 400, 512, 640, 800, 1024	, 1280, 1280, 1280, 1600, 1680, 2048,800,320};
+static int height[ArmageTron_Custom+2] = {0, 200, 240, 300, 384, 480, 600,  768	,  800,  854, 1024, 1200, 1050, 1572,600,200};
+static REAL aspect[ArmageTron_Custom+2]= {1, 1	, 1  , 1  , 1  , 1  , 1	 , 1	,    1,    1, 1   ,    1,    1,    1,1,  1};
 
 int sr_screenWidth,sr_screenHeight;
 
@@ -244,7 +244,7 @@ rScreenSize::rScreenSize( int w, int h )
 // *******************************************************************************************
 
 rScreenSize::rScreenSize( rResolution r )
-        :res( r )
+        :res( r ), width(0), height(0)
 {
     UpdateSize();
 }

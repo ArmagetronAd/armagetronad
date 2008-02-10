@@ -89,6 +89,8 @@ New settings
 ------------
 
   New settings and commands:
+- ZONE_ALPHA_TOGGLE to override the systemwide alpha blendings setting and
+  have zones rendered in wireframe mode even when alpha blending is on.
 - ZONE_ALPHA(_SERVER) to control intensity of zone rendering.
 - SCORE_HOLE for awarding sacrifice.
 - SCORE_SURVIVE for player survival and FORTRESS_HELD_SCORE for not losing
@@ -140,8 +142,6 @@ New settings
   "[L] "
 - PLAYER_MESSAGE <user ID or name> <Message>: Like /msg, but from the
   console
-- ZONE_ALPHA_TOGGLE: When rendering zones ZONE_ALPHA_TOGGLE xor ALPHA_BLEND
-  determines whether to render zones as filled rectangles
 
 If --enable-armathentication was activated:
 - ACCESS_LEVEL_IPS to let admins see IPs of players in the list.

@@ -104,8 +104,8 @@ if BUILDMAIN
 libenginecore_a_SOURCES=engine/eGameObject.cpp engine/eGameObject.h \
 	engine/eGrid.cpp engine/eGrid.h
 
-libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentification.cpp\
-	engine/eAuthentification.h engine/eAxis.cpp	engine/eAxis.h engine/eCamera.cpp engine/eCamera.h\
+libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentication.cpp\
+	engine/eAuthentication.h engine/eAxis.cpp	engine/eAxis.h engine/eCamera.cpp engine/eCamera.h\
 	engine/eCoord.h engine/eDebugLine.cpp engine/eDebugLine.h engine/eDisplay.cpp engine/eFloor.cpp\
 	engine/eFloor.h \
 	engine/eKrawall.cpp engine/eKrawall.h engine/eNetGameObject.cpp engine/eNetGameObject.h\

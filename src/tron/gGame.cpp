@@ -928,7 +928,9 @@ void update_settings()
 
                     timeout = tSysTimeFloat() + 10.0f;
 
+                    // do tasks
                     st_DoToDo();
+                    nAuthentication::OnBreak();
                 }
 
                 // kick spectators and chatbots
