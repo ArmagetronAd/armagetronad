@@ -129,6 +129,7 @@ void rFont::OnSelect( bool enforce )
 
 // displays c
 #ifndef DEDICATED
+static rFont * sr_lastSelected = 0;
 void rFont::Render(unsigned char c,REAL left,REAL top,REAL right,REAL bot){
     //  if (c > 128 && this == &rFont::s_defaultFont)
     //rFont::s_defaultFontSmall.Render(c, left, top, right, bot);
@@ -157,9 +158,14 @@ void rFont::Render(unsigned char c,REAL left,REAL top,REAL right,REAL bot){
             ttop -= 1;
             select = select->lowerPart;
         }
-        select->Select(true);
+        if ( sr_lastSelected != select )
+        {
+            sr_lastSelected = select;
+            RenderEnd();
+            select->Select(true);
+            BeginQuads();
+        }
 
-        BeginQuads();
         glTexCoord2f(tleft,ttop);
         glVertex2f(   left, top);
 
@@ -171,7 +177,6 @@ void rFont::Render(unsigned char c,REAL left,REAL top,REAL right,REAL bot){
 
         glTexCoord2f(tleft,tbot);
         glVertex2f(   left, bot);
-        RenderEnd();
     }
 }
 #endif
@@ -279,14 +284,14 @@ void rTextField::FlushLine(int len,bool newline){
 
     if (sr_glOut)
     {
+        BeginQuads();
+                
         // render bright background
         if ( r < sr_minR && g < sr_minG && b < sr_minG || r+g+b < sr_minTotal )
         {
+            glDisable(GL_TEXTURE_2D);
             if ( sr_alphaBlend )
             {
-
-                glDisable(GL_TEXTURE_2D);
-
                 glColor4f( blendColor_.r_, blendColor_.g_, blendColor_.b_, a * blendColor_.a_ );
 
                 REAL l=left+realx*cwidth;
@@ -294,7 +299,6 @@ void rTextField::FlushLine(int len,bool newline){
                 REAL r=l + cwidth * len;
                 REAL b=t - cheight;
 
-                BeginQuads();
                 glVertex2f(   l, t);
 
                 glVertex2f(   r ,t);
@@ -302,7 +306,6 @@ void rTextField::FlushLine(int len,bool newline){
                 glVertex2f(   r, b);
 
                 glVertex2f(   l, b);
-                RenderEnd();
             }
             else
             {
@@ -312,21 +315,25 @@ void rTextField::FlushLine(int len,bool newline){
             }
         }
 
+        glEnable(GL_TEXTURE_2D);
+
         glColor4f(r * blendColor_.r_,g * blendColor_.g_,b * blendColor_.b_,a * blendColor_.a_);
-    }
+        sr_lastSelected = 0;
 
-    for (i=0;i<=len;i++){
-        REAL l=left+realx*cwidth;
-        REAL t=top-y*cheight;
-
-        if (0 <= cursorPos--){
-            cursor_x=l;
-            cursor_y=t;
+        for (i=0;i<=len;i++){
+            REAL l=left+realx*cwidth;
+            REAL t=top-y*cheight;
+            
+            if (0 <= cursorPos--){
+                cursor_x=l;
+                cursor_y=t;
+            }
+            if (i<len){
+                F->Render(buffer[realx],l,t,l+cwidth,t-cheight);
+                realx++;
+            }
         }
-        if (i<len){
-            F->Render(buffer[realx],l,t,l+cwidth,t-cheight);
-            realx++;
-        }
+        RenderEnd();
     }
 
 #endif
