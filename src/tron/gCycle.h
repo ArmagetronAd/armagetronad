@@ -116,6 +116,7 @@ private:
 
 class gCycleChatBot;
 
+#ifndef DEDICATED
 class gCycleWallsDisplayListManager
 {
     friend class gNetPlayerWall;
@@ -142,6 +143,7 @@ private:
     rDisplayList                    displayList_;                   //!< combined display list
     REAL                            wallsWithDisplayListMinDistance_; //!< minimal distance of the walls with display list
 };
+#endif
 
 // a complete lightcycle
 class gCycle: public gCycleMovement
@@ -198,7 +200,9 @@ public:
 private:
     void TransferPositionCorrectionToDistanceCorrection();
 
-    class gCycleWallsDisplayListManager displayList_;               //!< display list manager
+#ifndef DEDICATED
+    gCycleWallsDisplayListManager displayList_;                     //!< display list manager
+#endif
 
     tCHECKED_PTR(gNetPlayerWall)	currentWall;                    //!< the wall that currenly is attached to the cycle
     tCHECKED_PTR(gNetPlayerWall)	lastWall;                       //!< the last wall that was attached to this cycle
