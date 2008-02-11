@@ -37,7 +37,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rGL.h"
 #include <string.h>
 
-static tConfItem<bool> mod_udl("USE_DISPLAYLISTS", sr_useDisplayLists);
+tCONFIG_ENUM(rDisplayListUsage);
+
+static tConfItem<rDisplayListUsage> mod_udl("USE_DISPLAYLISTS", sr_useDisplayLists);
 
 #ifndef DEDICATED
 

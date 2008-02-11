@@ -52,6 +52,14 @@ rDisplayList::~rDisplayList()
 #endif
 }
 
+static bool sr_isRecording = false;
+
+//! check whether a displaylist is currently being recorded.
+bool rDisplayList::IsRecording()
+{
+    return sr_isRecording;
+}
+
 // calls the display list, returns true if there was a list to call
 bool rDisplayList::Call()
 {
@@ -61,7 +69,6 @@ bool rDisplayList::Call()
     if ( inhibit_ > 0 )
     {
         Clear();
-        --inhibit_;
         return false;
     }
 
@@ -115,11 +122,6 @@ void rDisplayList::ClearAll()
 #endif
 }
 
-#ifndef DEDICATED
-// set if you want the display lists to be compiled only, then executed.
-static bool sr_compileOnly = false;
-#endif
-
 //! constructor, automatically starting to fill teh list
 rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
 #ifndef DEDICATED
@@ -127,15 +129,19 @@ rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
 #endif
 {
 #ifndef DEDICATED
-    bool useList = sr_useDisplayLists && list_.inhibit_ == 0;
+    bool useList = sr_useDisplayLists != rDisplayList_Off && list_.inhibit_ == 0 && !sr_isRecording;
     if ( useList )
     {
         if ( !list_.list_ )
         {
             list_.list_=glGenLists(1);
         }
-        glNewList(list_.list_, sr_compileOnly ? GL_COMPILE : GL_COMPILE_AND_EXECUTE );
+        glNewList(list_.list_, sr_useDisplayLists == rDisplayList_CAC ? GL_COMPILE : GL_COMPILE_AND_EXECUTE );
         list_.filling_ = true;
+    }
+    else if ( list_.inhibit_ > 0 )
+    {
+        --list_.inhibit_;
     }
 #endif
 }
@@ -154,7 +160,7 @@ void rDisplayListFiller::Stop()
         list_.filling_ = false;
         glEndList();
 
-        if ( sr_compileOnly )
+        if ( sr_useDisplayLists == rDisplayList_CAC )
         {
             list_.Call();
         }

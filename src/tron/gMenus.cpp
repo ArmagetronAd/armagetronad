@@ -530,9 +530,12 @@ static uMenuItemToggle cs
  "$pref_sparks_help",
  crash_sparks);
 
-static uMenuItemToggle dl
+static uMenuItemSelection<rDisplayListUsage> dl
 (&screen_menu_tweaks,"$tweaks_displaylists_text",
  "$tweaks_displaylists_help", sr_useDisplayLists);
+static uSelectEntry<rDisplayListUsage> dl_off(dl,"$tweaks_displaylists_off_text","$tweaks_displaylists_off_help",rDisplayList_Off);
+static uSelectEntry<rDisplayListUsage> dl_cac(dl,"$tweaks_displaylists_cac_text","$tweaks_displaylists_cac_help",rDisplayList_CAC);
+static uSelectEntry<rDisplayListUsage> dl_cae(dl,"$tweaks_displaylists_cae_text","$tweaks_displaylists_cae_help",rDisplayList_CAE);
 
 static uMenuItemToggle zt
 (&screen_menu_tweaks,"$tweaks_ztrick_text",

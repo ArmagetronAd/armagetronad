@@ -68,6 +68,9 @@ public:
         return false;
 #endif
     }
+
+    //! check whether a displaylist is currently being recorded.
+    static bool IsRecording();
     
     //! calls the display list, returns true if there was a list to call
     bool Call();
