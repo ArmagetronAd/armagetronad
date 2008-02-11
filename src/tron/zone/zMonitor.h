@@ -16,7 +16,7 @@
 class zMonitorRule;
 class zMonitor;
 
-typedef boost::shared_ptr<zMonitor> zMonitorPtr;
+typedef tJUST_CONTROLLED_PTR<zMonitor> zMonitorPtr;
 
 typedef boost::shared_ptr<zMonitorRule> zMonitorRulePtr;
 typedef std::vector<zMonitorRulePtr> zMonitorRulePtrs;
