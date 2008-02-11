@@ -1282,11 +1282,13 @@ REAL gPlayerWall::LocalToGlobal( REAL a ) const
 
 void gNetPlayerWall::ClearDisplayList()
 {
+#ifndef DEDICATED
     if ( HasDisplayList() && cycle_ )
     {
         cycle_->displayList_.Clear();
     }
     displayList_.Clear();
+#endif
 }
 
 REAL gPlayerWall::GlobalToLocal( REAL a ) const
