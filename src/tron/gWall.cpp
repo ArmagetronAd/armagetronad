@@ -884,11 +884,7 @@ void gNetPlayerWall::RenderList(bool list){
     if ( gCycleWallsDisplayListManager::CannotHaveList( dbegin, cycle_ ) ||
          this == cycle_->currentWall )
     {
-        if ( displayList_.IsSet() )
-        {
-            cycle_->displayList_.Clear();
-        }
-        displayList_.Clear(2);
+        ClearDisplayList();
     }
 
     if ( !displayList_.Call() )
@@ -988,7 +984,7 @@ void gNetPlayerWall::RenderList(bool list){
 
             else{ // complicated
                 // can't squeeze that into a display list
-                displayList_.Clear();
+                ClearDisplayList();
 
                 if (ta+gBEG_LEN>=time){
                     RenderBegin(p1,p2,ta,te,
@@ -1282,6 +1278,15 @@ REAL gPlayerWall::LocalToGlobal( REAL a ) const
     tASSERT( good( ret ) );
 
     return ret;
+}
+
+void gNetPlayerWall::ClearDisplayList()
+{
+    if ( HasDisplayList() && cycle_ )
+    {
+        cycle_->displayList_.Clear();
+    }
+    displayList_.Clear();
 }
 
 REAL gPlayerWall::GlobalToLocal( REAL a ) const
@@ -1974,6 +1979,7 @@ void gNetPlayerWall::ReleaseData()
 gNetPlayerWall::~gNetPlayerWall()
 {
     ReleaseData();
+    ClearDisplayList();
 }
 
 bool gNetPlayerWall::ActionOnQuit()
@@ -2054,6 +2060,8 @@ static bool sg_ServerSentHoles = false;
 
 void gNetPlayerWall::ReadSync(nMessage &m){
     nNetObject::ReadSync(m);
+
+    ClearDisplayList();
 
     REAL tEnd_new;
     eCoord end_new;
@@ -2429,11 +2437,7 @@ void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
     CHECKWALL;
 
 #ifndef DEDICATED
-    displayList_.Clear();
-    if ( cycle_ )
-    {
-        cycle_->displayList_.Clear();
-    }
+    ClearDisplayList();
 #endif
 
 #ifdef DEBUG

@@ -261,6 +261,9 @@ public:
     {
         return displayList_.IsSet();
     }
+
+    //! clears the display list
+    void ClearDisplayList();
 private:
     tArray<gPlayerWallCoord> coords_;
 

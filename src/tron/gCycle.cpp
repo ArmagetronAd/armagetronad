@@ -2315,11 +2315,16 @@ gCycle::~gCycle(){
     */
 }
 
+#ifndef DEDICATED
+// manager for walls not belonging to any cycle
+static gCycleWallsDisplayListManager lostWalls_;
+#endif
+
 void gCycle::OnRemoveFromGame()
 {
     // keep this cycle alive
     tJUST_CONTROLLED_PTR< gCycle > keep;
-    
+
     if ( this->GetRefcount() > 0 )
     {
         keep = this;
@@ -2335,7 +2340,15 @@ void gCycle::OnRemoveFromGame()
     currentWall=NULL;
     lastWall=NULL;
 
-    gCycleMovement::OnRemoveFromGame();
+    // only really leave if we have no walls left
+    if ( !displayList_.Walls() )
+    {
+        gCycleMovement::OnRemoveFromGame();
+    }
+    else
+    {
+        Die( lastTime );
+    }
 }
 
 // called when the round ends
