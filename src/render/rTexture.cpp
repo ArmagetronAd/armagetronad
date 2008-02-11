@@ -96,10 +96,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //!
 // ******************************************************************************************
 
-rSurface::rSurface( char const * fileName )
+rSurface::rSurface( char const * fileName, tPath const * path )
 {
     Init();
-    Create( fileName );
+    Create( fileName, path );
 }
 
 // ******************************************************************************************
@@ -213,18 +213,22 @@ void rSurface::Clear( void )
 //!
 // ******************************************************************************************
 
-void rSurface::Create( char const * fileName )
+void rSurface::Create( char const * fileName, tPath const *path )
 {
 #ifndef DEDICATED
     sr_LockSDL();
 
-    // find path of image
-    // tString s = tResourceManager::locateResource("", fileName);
-    tString s = tDirectories::Data().GetReadPath( fileName );
-
-    // Load image
     IMG_InvertAlpha(true);
-    Create( IMG_Load(s) );
+
+    // find path of image and load it
+    SDL_Surface *surface;
+    if(path) {
+        tString s = path->GetReadPath( fileName );
+        surface = IMG_Load(s);
+    } else {
+        surface = IMG_Load(fileName);
+    }
+    Create(surface);
 
     //if ( surface_ )
     //    std::cerr << "loaded surface " << fileName << "\n";
@@ -650,9 +654,10 @@ void rISurfaceTexture::StoreAlpha( void )
 //!
 // ******************************************************************************************
 
-rFileTexture::rFileTexture( int group, char const * fileName, bool repx, bool repy, bool storeAlpha )
+rFileTexture::rFileTexture( int group, char const * fileName, bool repx, bool repy, bool storeAlpha, tPath const *path )
         : rISurfaceTexture( group, repx, repy, storeAlpha )
         ,  fileName_( fileName )
+        ,  path_(path)
 {
 }
 
@@ -682,7 +687,7 @@ void rFileTexture::OnSelect()
 {
 #ifndef DEDICATED
     // std::cerr << "loading texture " << fileName_ << "\n";
-    rSurface surface( fileName_ );
+    rSurface surface( fileName_, path_ );
     if ( surface.GetSurface() )
     {
         this->Upload( surface );
@@ -773,3 +778,46 @@ bool rISurfaceTexture::storageHack_ = false;
 static rCallbackBeforeScreenModeChange unload(&rITexture::UnloadAll);
 
 // static rCallbackAfterScreenModeChange load(&rITexture::LoadAll);
+
+rResourceTexture::texlist_t rResourceTexture::textures;
+
+rResourceTexture rResourceTexture::GetTexture(tResourcePath const &path) {
+    for(texlist_t::iterator iter = textures.begin(); iter != textures.end(); ++iter) {
+        if((*iter)->path_ == path) {
+            ++(*iter)->use_;
+            return *iter;
+        }
+    }
+    return new tex_t(path);
+}
+
+rResourceTexture::InternalTex::InternalTex(tResourcePath const &path) : rFileTexture(rTextureGroups::TEX_OBJ, tResourceManager::locateResource(path.Path().c_str()).c_str(), true, true, true, 0), use_(0), path_(path) {
+    textures.push_back(this);
+}
+
+void rResourceTexture::InternalTex::Release() {
+    if(--use_ < 1) {
+        for(texlist_t::iterator iter = textures.begin(); iter != textures.end(); ++iter) {
+            if((*iter)->path_ == path_) {
+                textures.erase(iter);
+                break;
+            }
+        }
+        Unload();
+        delete this;
+    }
+}
+
+rResourceTexture &rResourceTexture::operator=(rResourceTexture const &other) {
+    if(tex_ != other.tex_) {
+        if(tex_) {
+            tex_->Release();
+        }
+        tex_ = other.tex_;
+        if(tex_) {
+            tex_->Use();
+        }
+    }
+    return *this;
+}
+

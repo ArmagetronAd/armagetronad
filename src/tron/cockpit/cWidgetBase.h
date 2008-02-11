@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tXmlParser.h"
 #define DONTDOIT
 #include "rGradient.h"
+#include "rTexture.h"
 #include <memory>
 #include "tSafePTR.h"
 
@@ -156,6 +157,7 @@ class WithColorFunctions : virtual public Base {
 protected:
     rGradient ProcessGradient(tXmlParser::node cur); //!< Processes the inside of a nodes like Foreground or Background
     void ProcessGradientCore(tXmlParser::node cur, rGradient &gradient); //!< Processes the inside of a Solid or Gradient nodes
+    void ProcessImage(tXmlParser::node cur, rGradient &gradient); //!< Processes the inside of an Image node
 public:
     bool Process(tXmlParser::node cur); //!< just passes on to Base::Process()
 };

@@ -45,4 +45,37 @@ public:
     static void RegisterLoader();
 };
 
+//! helper class to construct a resource path
+class tResourcePath
+{
+    tString m_Author;   //!< the author of the resource
+    tString m_Category; //!< the category of the resource
+    tString m_Name;     //!< the name of the resource
+    tString m_Version;  //!< the version of the resource
+    tString m_Type;     //!< the type of the resource
+    tString m_Extension;//!< the extension (like xml or png)
+    tString m_URI;      //!< the URI to the file, if any
+    tString m_Path;     //!< the full path of the resource
+public:
+    tString const &Author   () const {return m_Author   ;} //!< get the author of the resource
+    tString const &Category () const {return m_Category ;} //!< get the category of the resource
+    tString const &Name     () const {return m_Name     ;} //!< get the name of the resource
+    tString const &Version  () const {return m_Version  ;} //!< get the version of the resource
+    tString const &Type     () const {return m_Type     ;} //!< get the type of the resource
+    tString const &Extension() const {return m_Extension;} //!< get the extension (like xml or png)
+    tString const &URI      () const {return m_URI      ;} //!< get the URI to the file, if any
+    tString const &Path     () const {return m_Path     ;} //!< get the full path of the resource
+
+    //! construct the path from the given arguments
+    tResourcePath(tString const &Author,
+                  tString const &Category,
+                  tString const &Name,
+                  tString const &Version,
+                  tString const &Type,
+                  tString const &Extension,
+                  tString const &URI);
+
+    bool operator==(tResourcePath const &other) const;
+};
+
 #endif //ArmageTron_RESOURCEMANAGER_H

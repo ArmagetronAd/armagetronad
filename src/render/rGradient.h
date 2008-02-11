@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "defs.h"
 #include "rColor.h"
 #include "tCoord.h"
+#include "rTexture.h"
 #include <map>
 #include <deque>
 #include <utility>
@@ -41,14 +42,18 @@ class rGradient: public std::map<float, rColor> {
     float m_at; //!< current value, used when m_dir == value
     tCoord m_origin; //!< bottom-left point of the gradient
     tCoord m_dimensions; //!< width and height of it
+    tCoord m_texScale; //!< scale factor of the texture
 
     //! return the relevant value (x, y or m_at) depending on m_dir
     float GetGradientPt(tCoord const &where);
     //! get the color for a given point on the gradient, using only
     //! the relevant coordinate (as returned by GetGradientPt)
     rColor GetColor(float where);
+
+    rResourceTexture m_tex;
 public:
     rGradient(); //!< Constructor
+    ~rGradient(); //!< Destructor
 
     //! Enum for describing the direction of the gradient
     enum direction {
@@ -58,24 +63,30 @@ public:
     };
     //! Sets the type/direction of the gradient
     //! @param dir the desired type/direction
-    void SetDir(direction dir) { m_dir = dir; };
+    void SetDir(direction dir) { m_dir = dir; }
     //! set the value, only used when the type is "value"
     //! @param at the value, 1 should be the maximum and 0 the minimum
-    void SetValue(float at) { m_at = at; };
+    void SetValue(float at) { m_at = at; }
     //! set the boundaries of the gradient
     void SetGradientEdges(tCoord const &edge1, tCoord const edge2);
 
-    //! get the color at a certain point
+    //! set the color and texture coordinate at the given point
     //! @param where the point in the gradient. If it lies outside the edges of the gradient the nearest possible point will be used
-    //! @returns the color at the specific point
-    rColor GetColor(tCoord const &where) { return GetColor(GetGradientPt(where)); };
+    void DrawAt(tCoord const &where);
 
     //! Draw a rectangle using only the colors of the edges
     void DrawAtomicRect(tCoord const &edge1, tCoord const &edge2);
     //!Draw a rectangle, but split it up into multiple rectangles if necessary
     void DrawRect(tCoord const &edge1, tCoord const &edge2);
-    //! call Color() with the color at the given coordinate and then call Vertex() on it
+    //! Send a single vertex with the correct color and texture information to OpenGL
     void DrawPoint(tCoord const &where);
+
+    //! Initialize OpenGL for drawing with this gradient
+    void BeginDraw();
+
+    //! Set the texture to be overlaid with the gradient
+    void SetTexture(rResourceTexture const &tex) {m_tex = tex;}
+    void SetTextureScale(tCoord const &scale) {m_texScale = scale;}
 };
 
 #endif

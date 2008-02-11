@@ -32,9 +32,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <deque>
 #include <utility>
 
-rGradient::rGradient() : m_dir(value) {
+rGradient::rGradient() : m_dir(value), m_texScale(1,1), m_tex() {
     //(*this)[0.]=rColor(); //make sure the beginning and end are defined
     //(*this)[1.]=rColor();
+}
+rGradient::~rGradient() {
 }
 
 //! @param edge1 the first edge of the gradient (preferably bottom- left)
@@ -107,16 +109,21 @@ rColor rGradient::GetColor(float where) {
 #endif
 }
 
+void rGradient::DrawAt(tCoord const &where) {
+    GetColor(GetGradientPt(where)).Apply();
+    if(m_tex.Tex()) {
+        glTexCoord2f((where.x-m_origin.x)/m_dimensions.x/m_texScale.x, (where.y-m_origin.y)/m_dimensions.y/m_texScale.y);
+    }
+}
+
 //! @param edge1 one edge of the rectangle
 //! @param edge2 the opposite edge
 void rGradient::DrawAtomicRect(tCoord const &edge1, tCoord const &edge2) {
 #ifndef DEDICATED
-    BeginQuads();
     DrawPoint(edge1);
     DrawPoint(tCoord(edge1.x, edge2.y));
     DrawPoint(edge2);
     DrawPoint(tCoord(edge2.x, edge1.y));
-    RenderEnd();
 #endif
 }
 
@@ -126,6 +133,8 @@ void rGradient::DrawRect(tCoord const &edge1, tCoord const &edge2) {
 #ifndef DEDICATED
     float tCoord::*x; //those are correct for horizontal gradients,
     float tCoord::*y; //vertical ones just get turned around
+	BeginDraw();
+    BeginQuads();
     switch(m_dir) {
     case horizontal:
         x = &tCoord::x;
@@ -137,6 +146,7 @@ void rGradient::DrawRect(tCoord const &edge1, tCoord const &edge2) {
         break;
     default:
         DrawAtomicRect(edge1, edge2);
+        RenderEnd();
         return;
     }
     tCoord const &left = (edge1.*x < edge2.*x) ? edge1 : edge2;
@@ -161,13 +171,21 @@ void rGradient::DrawRect(tCoord const &edge1, tCoord const &edge2) {
     todraw.*x = last;
     todraw.*y = left.*y;
     DrawAtomicRect(todraw, right);
+    RenderEnd();
 #endif
+}
+
+void se_glFloorTexture();
+void rGradient::BeginDraw() {
+    if(m_tex.Tex()) {
+        m_tex.Tex()->Select();
+    }
 }
 
 //! @param where the point the color should be taken from and drawn
 void rGradient::DrawPoint(tCoord const &where) {
 #ifndef DEDICATED
-    GetColor(where).Apply();
+    DrawAt(where);
     Vertex(where.x, where.y);
 #endif
 }

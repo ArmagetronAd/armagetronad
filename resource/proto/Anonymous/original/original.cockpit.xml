@@ -270,8 +270,11 @@
             <Position x="0.73" y="-0.72" />
             <Size height="0.25" width="0.25" />
             <Background>
+                <Image scale_x="2" scale_y="2">
+                    <Graphic category="" author="wrtlprnft" version="1" name="wood_512" extension="jpg" uri="http://wrtlprnft.ath.cx/wood512.jpg" />
+                </Image>
                 <Solid>
-                    <Color r="1." g="1." b="1." alpha=".2" />
+                    <Color r="1." g="1." b="1." alpha=".5" />
                 </Solid>
             </Background>
 			<MapModes toggleKey="1">

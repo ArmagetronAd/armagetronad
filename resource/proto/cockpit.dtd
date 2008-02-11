@@ -166,12 +166,24 @@
 <!-- Graphic is a regular graphic file, like something.png.  ResourceGraphic is a resource xml
 file that contains more information on the image and may be a case of YouMightNeedThis -->
 <!ELEMENT Image (Graphic?,ResourceGraphic?)>
+<!ATTLIST Image
+    scale_x CDATA '1'
+    scale_y CDATA '1'
+>
+
+<!ELEMENT Graphic EMPTY>
+<!ATTLIST Graphic
+    name CDATA #REQUIRED
+    author CDATA 'Anonymous'
+    version CDATA #REQUIRED
+    category CDATA 'unsorted'
+    extension CDATA 'png'
+    uri CDATA ""
+>
 
 <!ELEMENT Solid (Color?)>
 <!ELEMENT Gradient (Color+)>
 <!ATTLIST Gradient orientation (horizontal | vertical | value) "value">
-
-<!ELEMENT Graphic (Location?)>
 
 <!ELEMENT ResourceGraphic (Location?)>
 

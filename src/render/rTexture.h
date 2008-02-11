@@ -29,9 +29,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ArmageTron_TEXTURE_H
 
 #include "tString.h"
+#include "tResourceManager.h"
+#include "tDirectories.h"
 #include "tList.h"
 #include "rGL.h"
 #include "rGLuintObject.h"
+#include <list>
 
 struct SDL_Surface;
 
@@ -57,7 +60,7 @@ public:
 class rSurface
 {
 public:
-    explicit rSurface( char const * fileName );       //!< constructor creating the surface from a file
+    explicit rSurface( char const * fileName, tPath const *path = &tDirectories::Data() );       //!< constructor creating the surface from a file
     ~rSurface();                                      //!< destructor
     rSurface( rSurface const & other );               //!< copy constructor
     rSurface & operator = ( rSurface const & other ); //!< copy operator
@@ -65,7 +68,7 @@ protected:
     rSurface();                             //!< default constructor, not creating a real surface
     void Init();                            //!< initialize data members
     void Clear();                           //!< destroys data members
-    void Create( char const * fileName );   //!< create surface from file
+    void Create( char const * fileName, tPath const *path = &tDirectories::Data() );   //!< create surface from file
     void Create( SDL_Surface * surface );   //!< take ownership of surface
 
 private:
@@ -160,13 +163,14 @@ class rFileTexture: public rISurfaceTexture
 {
 public:
     rFileTexture(int group, char const * fileName, bool repx=0, bool repy=0,
-                 bool storeAlpha=false);    //!< constructor setting flags
+                 bool storeAlpha=false, tPath const *path = &tDirectories::Data());    //!< constructor setting flags
     virtual ~rFileTexture();                //!< destructor
 
 protected:
     virtual void OnSelect();                //!< Selects the texture for rendering (core part)
 private:
     tString fileName_;                      //!< the texture's filename
+    tPath const *path_;
 
 public:
     inline tString const & GetFileName( void ) const;	                  //!< Gets the texture's filename
@@ -174,6 +178,49 @@ public:
 protected:
 private:
     inline rFileTexture & SetFileName( tString const & fileName );	      //!< Sets the texture's filename
+};
+
+class rResourceTextureWrapper;
+
+//! Class that implements fetching and caching textures from resource paths.
+//!
+//! This class manages its own usecount and is therefore safe to copy and move around.
+class rResourceTexture
+{
+    class InternalTex;
+    friend class InternalTex;
+    class InternalTex : public rFileTexture
+    {
+    public:
+        int use_;
+        tResourcePath path_;
+
+        InternalTex(tResourcePath const &path);
+
+        void Release();
+        void Use() {++use_;}
+    };
+    typedef InternalTex tex_t; // don't ask me why this is needed. InteralTex just won't cut it in some places
+    typedef std::list<InternalTex *> texlist_t;
+    static texlist_t textures;
+    InternalTex *tex_;
+    rResourceTexture(InternalTex *tex) : tex_(tex) { tex->Use();}
+public:
+    //! Use this if you want to create an empty texture object (ie if you're not sure if you actually want to store a texture)
+    rResourceTexture() : tex_(0) {}
+    //! Copy constructor
+    rResourceTexture(rResourceTexture const &other) : tex_(other.tex_) {if(tex_) tex_->Use();}
+    //! Assignment is safe
+    rResourceTexture &operator=(rResourceTexture const &other);
+    //! This releases the texture if it's not used anymore
+    ~rResourceTexture() {if(tex_) tex_->Release();}
+    //! Get the actual texture. This object retains ownership of the texture, though
+    rFileTexture *Tex() {return tex_;}
+    //! Get the path this texture was fetched from
+    tResourcePath const &Path() {return tex_->path_;}
+
+    //! Get a resource from a path. This is the only way to obtain a new rResourceTexture
+    static rResourceTexture GetTexture(tResourcePath const &path);
 };
 
 // ******************************************************************************************
@@ -389,5 +436,3 @@ const rSurface & rSurfaceTexture::GetSurface( void ) const
 }
 
 #endif
-
-

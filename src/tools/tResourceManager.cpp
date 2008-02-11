@@ -242,3 +242,36 @@ static void RInclude(std::istream& s)
 
 static tConfItemFunc s_RInclude("RINCLUDE",  &RInclude);
 
+tResourcePath::tResourcePath(tString const &Author,
+                             tString const &Category,
+                             tString const &Name,
+                             tString const &Version,
+                             tString const &Type,
+                             tString const &Extension,
+                             tString const &URI) :
+    m_Author   (Author   ),
+    m_Category (Category ),
+    m_Name     (Name     ),
+    m_Version  (Version  ),
+    m_Type     (Type     ),
+    m_Extension(Extension),
+    m_URI      (URI      ) {
+    // TODO: check for illegal characters
+    m_Path << Author << '/';
+    if(!Category.empty()) {
+        m_Path << Category << '/';
+    }
+    m_Path << Name << '-' << Version << '.' << Type << '.' << Extension;
+    if(!URI.empty()) {
+        m_Path << '(' << URI << ')';
+    }
+}
+
+bool tResourcePath::operator==(tResourcePath const &other) const {
+    return m_Author    == other.m_Author    &&
+           m_Category  == other.m_Category  &&
+           m_Name      == other.m_Name      &&
+           m_Version   == other.m_Version   &&
+           m_Type      == other.m_Type      &&
+           m_Extension == other.m_Extension;
+}

@@ -3,8 +3,8 @@
 <!ATTLIST Resource
 	type CDATA "%ResourceType;"
 	name CDATA #REQUIRED
-	author CDATA #REQUIRED
-	version CDATA 'Anonymous'
+	author CDATA 'Anonymous'
+	version CDATA #REQUIRED
 	category CDATA 'unsorted'
 	commissioner CDATA #IMPLIED
 >

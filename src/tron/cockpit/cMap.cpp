@@ -81,14 +81,14 @@ void Map::ClipperRect::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
     glClipPlane(GL_CLIP_PLANE3, pl3);
     glEnable(GL_CLIP_PLANE3);
     // Add frame ...
-    map.m_foreground.GetColor(tCoord(0.,0.)).Apply();
+    map.m_foreground.BeginDraw();
     glBegin(GL_LINE_STRIP);
     //TODO: this should use a function of the rGradient.
-    glVertex2f(e1.x, e1.y);
-    glVertex2f(e2.x, e1.y);
-    glVertex2f(e2.x, e2.y);
-    glVertex2f(e1.x, e2.y);
-    glVertex2f(e1.x, e1.y);
+    map.m_foreground.DrawPoint(e1);
+    map.m_foreground.DrawPoint(tCoord(e2.x, e1.y));
+    map.m_foreground.DrawPoint(e2);
+    map.m_foreground.DrawPoint(tCoord(e1.x, e2.y));
+    map.m_foreground.DrawPoint(e1);
     glEnd();
     map.m_background.SetGradientEdges(e1, e2);
     map.m_background.DrawRect(e1, e2);
@@ -150,7 +150,7 @@ void Map::ClipperCircle::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
     for(int i = 0; i < m_edges; ++i) {
         float t = (i+1)*stepsize;
         tCoord next(centre.x+ab.x*cos(t), centre.y-ab.y*sin(t));
-        map.m_foreground.GetColor(tCoord(0.,0.)).Apply();
+        map.m_foreground.DrawAt(tCoord(0.,0.));
         glBegin(GL_LINES);
         //TODO: this should use a function of the rGradient.
         glVertex2f(next.x, next.y);
@@ -382,12 +382,14 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls,
 
 void Map::DrawRimWalls( tList<eWallRim> &list ) {
     if(sr_alphaBlend && m_mode == MODE_STD) {
-        m_background.GetColor(tCoord(0.,0.)).Apply();
+        const eRectangle &bounds = eWallRim::GetBounds();
+        m_background.SetGradientEdges(bounds.GetLow(), bounds.GetHigh());
+        m_background.BeginDraw();
         glBegin(GL_POLYGON);
         for(std::vector<tCoord>::iterator iter = se_rimWallRubberBand.begin(); iter != se_rimWallRubberBand.end(); ++iter) {
-            glVertex2f(iter->x, iter->y);
+            m_background.DrawPoint(*iter);
         }
-        glVertex2f(se_rimWallRubberBand.front().x, se_rimWallRubberBand.front().y);
+        m_background.DrawPoint(se_rimWallRubberBand.front());
         glEnd();
     }
     glColor4f(1, 1, 1, .5);

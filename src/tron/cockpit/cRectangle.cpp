@@ -64,6 +64,7 @@ void Rectangle::Render() {
     m_foreground.SetValue(where);
     m_background.SetValue(where);
 
+    m_background.BeginDraw();
     m_background.DrawRect(edge1, edge2);
 }
 

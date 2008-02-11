@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "cockpit/cWidgetBase.h"
 #include "cockpit/cCockpit.h"
 #include "tValueParser.h"
+#include "tResourceManager.h"
 
 #ifndef DEDICATED
 
@@ -397,6 +398,12 @@ rGradient WithColorFunctions::ProcessGradient(tXmlParser::node cur) {
                 tERR_WARN("Gradient orientation '" + cur.GetProp("orientation") + "' unknown!");
             }
             ProcessGradientCore(cur, ret);
+        } else if(name == "Image") {
+            tCoord scale;
+            cur.GetProp("scale_x", scale.x);
+            cur.GetProp("scale_y", scale.y);
+            ret.SetTextureScale(scale);
+            ProcessImage(cur, ret);
         }
     }
     return ret;
@@ -412,6 +419,23 @@ void WithColorFunctions::ProcessGradientCore(tXmlParser::node cur, rGradient &gr
             cur.GetProp("alpha", a);
             cur.GetProp("at", at);
             gradient[at] = rColor(r ,g ,b ,a);
+        }
+    }
+}
+
+void WithColorFunctions::ProcessImage(tXmlParser::node cur, rGradient &gradient) {
+    for(cur = cur.GetFirstChild(); cur; ++cur) {
+        if(cur.IsOfType("Graphic")) {
+            tResourcePath path(
+                cur.GetProp("author"),
+                cur.GetProp("category"),
+                cur.GetProp("name"),
+                cur.GetProp("version"),
+                tString("aatex"),
+                cur.GetProp("extension"),
+                cur.GetProp("uri")
+            );
+            gradient.SetTexture(rResourceTexture::GetTexture(path));
         }
     }
 }

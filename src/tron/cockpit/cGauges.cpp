@@ -200,7 +200,7 @@ void NeedleGauge::RenderGraph(float min, float max, float val, float factor, tVa
 
     BeginLines();
     m_foreground.SetValue((factor * ((val-min)/(max-min)*2. - 1.)+1.)/2.);
-    m_foreground.GetColor(tCoord(0.,0.)).Apply();
+    m_foreground.DrawAt(tCoord(0.,0.));
     Vertex(-.1*x*m_size.x+m_position.x,.1*y*m_size.y+m_position.y,0);
     Vertex(-x*m_size.x+m_position.x,y*m_size.y+m_position.y,0);
     RenderEnd();
