@@ -2341,13 +2341,15 @@ void gCycle::OnRemoveFromGame()
     lastWall=NULL;
 
     // only really leave if we have no walls left
-    if ( !displayList_.Walls() )
-    {
-        gCycleMovement::OnRemoveFromGame();
-    }
-    else
+#ifndef DEDICATED
+    if ( displayList_.Walls() )
     {
         Die( lastTime );
+    }
+    else
+#endif
+    {
+        gCycleMovement::OnRemoveFromGame();
     }
 }
 
