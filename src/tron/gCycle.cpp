@@ -3878,14 +3878,17 @@ static void dir_eWall_select()
 }
 
 void gCycle::Render(const eCamera *cam){
-    dir_eWall_select();
-
-    // render walls
-    gNetPlayerWall * run = wallList_;
-    while( run )
     {
-        run->Render( cam );
-        run = run->Next();
+        dir_eWall_select();
+        glDisable(GL_CULL_FACE);
+        
+        // render walls
+        gNetPlayerWall * run = wallList_;
+        while( run )
+        {
+            run->Render( cam );
+            run = run->Next();
+        }
     }
 
     // are we blinking from invulnerability?
