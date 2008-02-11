@@ -2264,7 +2264,6 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p,bo
         turning(NULL),
         skew(0),skewDot(0),
         rotationFrontWheel(1,0),rotationRearWheel(1,0),heightFrontWheel(0),heightRearWheel(0),
-        wallList_(NULL),
         currentWall(NULL),
         lastWall(NULL)
 {
@@ -2456,7 +2455,7 @@ REAL gCycle::CalculatePredictPosition( gPredictPositionData & data )
 
 bool gCycle::Timestep(REAL currentTime){
     // keep cycle in list for rendering as long as walls are active
-    if ( !Alive() && wallList_ )
+    if ( !Alive() && displayList_.Walls() )
     {
         return false;
     }
@@ -2636,7 +2635,7 @@ bool gCycle::Timestep(REAL currentTime){
     }
 
     // keep cycle in list for rendering as long as walls are active
-    if ( wallList_ )
+    if ( displayList_.Walls() )
     {
         return false;
     }
@@ -3877,19 +3876,95 @@ static void dir_eWall_select()
     }
 }
 
-void gCycle::Render(const eCamera *cam){
+gCycleWallsDisplayListManager::gCycleWallsDisplayListManager()
+    : wallList_(0)
+    , wallsWithDisplayList_(0)
+    , wallsWithDisplayListMinDistance_(0)
+{
+}
+
+bool gCycleWallsDisplayListManager::CannotHaveList( REAL distance, gCycle const * cycle )
+{
+    return
+            ( !cycle->Alive() && gCycle::WallsStayUpDelay() >= 0 && se_GameTime()-cycle->DeathTime()-gCycle::WallsStayUpDelay() > 0 ) 
+
+            ||
+
+            ( cycle->ThisWallsLength() > 0 && cycle->GetDistance() - cycle->ThisWallsLength() > distance );
+}
+
+void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * cycle )
+{
+    dir_eWall_select();
+
+    glDisable(GL_CULL_FACE);
+    
+    gNetPlayerWall * run = 0;
+    // transfer walls with display list into their list
+
+    run = wallList_;
+    while( run )
     {
-        dir_eWall_select();
-        glDisable(GL_CULL_FACE);
-        
-        // render walls
-        gNetPlayerWall * run = wallList_;
-        while( run )
+        gNetPlayerWall * next = run->Next();
+        if ( run->HasDisplayList() )
         {
-            run->Render( cam );
-            run = run->Next();
+            run->Insert( wallsWithDisplayList_ );
+            displayList_.Clear();
         }
+        else
+        {
+            // render walls that have no display list
+            run->Render( camera );
+        }
+        run = next;
     }
+
+    // clear display list if needed
+    if ( CannotHaveList( wallsWithDisplayListMinDistance_, cycle ) )
+    {
+        displayList_.Clear();
+    }
+
+    // call display list
+    if ( displayList_.Call() )
+    {
+        return;
+    }
+
+    // remove and render walls without display list
+    run = wallsWithDisplayList_;
+    while( run )
+    {
+        gNetPlayerWall * next = run->Next();
+        if ( !run->HasDisplayList() )
+        {
+            run->Render( camera );
+            run->Insert( wallList_ );
+        }
+        run = next;
+    }
+    
+    // fill display list
+    rDisplayListFiller filler( displayList_ );
+
+    wallsWithDisplayListMinDistance_ = 1E+30;
+
+    // render walls
+    run = wallsWithDisplayList_;
+    while( run )
+    {
+        if ( run->BegPos() < wallsWithDisplayListMinDistance_ )
+        {
+            wallsWithDisplayListMinDistance_ = run->BegPos();
+        }
+
+        run->Render( camera );
+        run = run->Next();
+    }
+}
+
+void gCycle::Render(const eCamera *cam){
+    displayList_.RenderAll( cam, this );
 
     // are we blinking from invulnerability?
     bool blinking = false;
@@ -4564,7 +4639,6 @@ gCycle::gCycle(nMessage &m)
         spark(NULL),
         skew(0),skewDot(0),
         rotationFrontWheel(1,0),rotationRearWheel(1,0),heightFrontWheel(0),heightRearWheel(0),
-        wallList_(NULL),
         currentWall(NULL),
         lastWall(NULL)
 {

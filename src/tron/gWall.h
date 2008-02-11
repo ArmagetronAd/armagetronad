@@ -256,6 +256,11 @@ public:
     static void Clear(); // delete all sg_netPlayerWalls.
 
     void Check() const;
+
+    bool HasDisplayList()
+    {
+        return displayList_.IsSet();
+    }
 private:
     tArray<gPlayerWallCoord> coords_;
 

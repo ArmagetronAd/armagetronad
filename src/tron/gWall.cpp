@@ -859,12 +859,11 @@ void gNetPlayerWall::RenderList(bool list){
     // clear list if walls are vanishing
     // or if the wall end was reached
     // or this is the cycle's first wall
-    if ( ( !cycle_->Alive() && gCycle::WallsStayUpDelay() >= 0 && se_GameTime()-cycle_->deathTime-gCycle::WallsStayUpDelay() > 0 ) ||
-         ( cycle_->ThisWallsLength() > 0 && cycle_->GetDistance() - cycle_->ThisWallsLength() > dbegin ) ||
-         this == cycle_->currentWall
-        )
+    if ( gCycleWallsDisplayListManager::CannotHaveList( dbegin, cycle_ ) ||
+         this == cycle_->currentWall )
     {
-        displayList_.Clear(5);
+        displayList_.Clear(2);
+        cycle_->displayList_.Clear();
     }
 
     if ( !displayList_.Call() )
@@ -1463,7 +1462,7 @@ void gNetPlayerWall::MyInitAfterCreation()
     // put yourself into rendering list
     if ( cycle_ )
     {
-        Insert( cycle_->wallList_ );
+        Insert( cycle_->displayList_.wallList_ );
     }
 #endif
 
@@ -2402,6 +2401,10 @@ void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
     CHECKWALL;
 
     displayList_.Clear();
+    if ( cycle_ )
+    {
+        cycle_->displayList_.Clear();
+    }
 
 #ifdef DEBUG
     // std::cout << beg << ',' << end << '(' << BegPos() << ',' << EndPos() << ")\n";

@@ -166,7 +166,9 @@ void eWallRim::RenderAll( eCamera * camera )
 // *******************************************************************************************
 void eWallRim::DestroyDisplayList()
 {
+#ifndef DEDICATED
     se_rimDisplayList.Clear( 3 );
+#endif
 }
 
 static rCallbackBeforeScreenModeChange unload(&eWallRim::DestroyDisplayList);
