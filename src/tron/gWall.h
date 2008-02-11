@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "eAdvWall.h"
 #include "nNetObject.h"
+#include "rDisplayList.h"
 //#include "nObserver.h"
 class gExplosion;
 class gCycle;
@@ -258,7 +259,7 @@ public:
 private:
     tArray<gPlayerWallCoord> coords_;
 
-    unsigned int displayList_;
+    rDisplayList displayList_;
 };
 
 extern tList<gNetPlayerWall> sg_netPlayerWalls;

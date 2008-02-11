@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eWall.h"
 #include "math.h"
 #include "rTexture.h"
+#include "rDisplayList.h"
 #include "eTimer.h"
 #include "rScreen.h"
 #include "eAdvWall.h"
@@ -50,7 +51,7 @@ eWallRim::eWallRim(eGrid *grid, bool backface_cull, REAL h)
 
     //  if(bf_cull && sr_ZTrick)
     se_rimWalls.Add(this,rim_id);
-    PlanDestroyDisplayList();}
+    DestroyDisplayList();}
 
 
 eWallRim::~eWallRim()
@@ -112,8 +113,7 @@ bool eWallRim::IsBound(const eCoord &x, REAL offset)
 }
 
 #ifndef DEDICATED
-static GLuint se_rimDisplayList=0;
-static int se_destroyDisplayList=0;
+static rDisplayList se_rimDisplayList;
 
 extern bool sg_MoviePack();
 
@@ -136,31 +136,12 @@ static rFileTexture se_RimWallWrap(rTextureGroups::TEX_WALL,"textures/rim_wall.p
 void eWallRim::RenderAll( eCamera * camera )
 {
 #ifndef DEDICATED
-    bool useDisplayList = sr_useDisplayLists && se_destroyDisplayList == 0;
-
-    if ( se_rimDisplayList )
+    // call or fill display list
+    if ( se_rimDisplayList.Call() )
     {
-        if ( useDisplayList )
-        {
-            glCallList( se_rimDisplayList );
-            return;
-        }
-        else
-        {
-            DestroyDisplayList();
-        }
+        return;
     }
-
-    if (useDisplayList)
-    {
-        se_rimDisplayList=glGenLists(1);
-        glNewList(se_rimDisplayList,GL_COMPILE_AND_EXECUTE);
-    }
-
-    if ( se_destroyDisplayList > 0 )
-    {
-        se_destroyDisplayList--;
-    }
+    rDisplayListFiller filler( se_rimDisplayList );
 
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
@@ -175,11 +156,6 @@ void eWallRim::RenderAll( eCamera * camera )
     }
     
     glEnable(GL_CULL_FACE);
-
-    if (useDisplayList)
-    {
-        glEndList();
-    }
 #endif
 }
 
@@ -190,26 +166,7 @@ void eWallRim::RenderAll( eCamera * camera )
 // *******************************************************************************************
 void eWallRim::DestroyDisplayList()
 {
-#ifndef DEDICATED
-    if ( se_rimDisplayList )
-    {   
-        glDeleteLists(se_rimDisplayList,1);
-    }
-    se_rimDisplayList = 0;
-#endif
-}
-
-// *******************************************************************************************
-// *
-// *    PlanDestroyDisplayList
-// *
-// *******************************************************************************************
-void eWallRim::PlanDestroyDisplayList()
-{
-#ifndef DEDICATED
-    // destroy the playlist and don't generate it again for 10 frames.
-    se_destroyDisplayList = 10;
-#endif
+    se_rimDisplayList.Clear( 3 );
 }
 
 static rCallbackBeforeScreenModeChange unload(&eWallRim::DestroyDisplayList);

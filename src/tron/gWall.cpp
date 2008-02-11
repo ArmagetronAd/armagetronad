@@ -489,7 +489,7 @@ void gWallRim::RenderReal(const eCamera *cam){
 
         if ( renderHeight_ < height )
         {
-            PlanDestroyDisplayList();
+            DestroyDisplayList();
         }
     }
 }
@@ -507,7 +507,7 @@ void gWallRim::RenderReal(const eCamera *cam){
 
 void gWallRim::OnBlocksCamera( eCamera * camera, REAL height ) const
 {
-    PlanDestroyDisplayList();
+    DestroyDisplayList();
 
     // lower the wall so it now longer blocks the view
     if ( height < renderHeight_ )
@@ -856,10 +856,21 @@ void gNetPlayerWall::RenderList(bool list){
     }
 #endif
 
-    if (displayList_ && cycle_->Alive() && list)
-        glCallList(displayList_);
-    else
+    // clear list if walls are vanishing
+    // or if the wall end was reached
+    // or this is the cycle's first wall
+    if ( ( !cycle_->Alive() && gCycle::WallsStayUpDelay() >= 0 && se_GameTime()-cycle_->deathTime-gCycle::WallsStayUpDelay() > 0 ) ||
+         ( cycle_->ThisWallsLength() > 0 && cycle_->GetDistance() - cycle_->ThisWallsLength() > dbegin ) ||
+         this == cycle_->currentWall
+        )
     {
+        displayList_.Clear(5);
+    }
+
+    if ( !displayList_.Call() )
+    {   
+        rDisplayListFiller filler( displayList_ );
+
         REAL r,g,b;
         if (cycle_){
             r=cycle_->trailColor_.r;
@@ -945,19 +956,13 @@ void gNetPlayerWall::RenderList(bool list){
             }
 
             if (te+gBEG_LEN<=time){
-                /*      if (!ePlayer->Alive())
-                		RenderNormal(p1,p2,ta,te,r,g,b,a);
-                		else if (list){
-                		displayList=glGenLists(1);
-                		glNewList(displayList,GL_COMPILE_AND_EXECUTE);
-                		RenderNormal(p1,p2,ta,te,r,g,b,a);
-                		glEndList();
-                		}
-                		else */
                 RenderNormal(p1,p2,ta,te,r,g,b,a);
             }
 
             else{ // complicated
+                // can't squeeze that into a display list
+                displayList_.Clear();
+
                 if (ta+gBEG_LEN>=time){
                     RenderBegin(p1,p2,ta,te,
                                 1+(ta-time)/gBEG_LEN,
@@ -1476,8 +1481,6 @@ void gNetPlayerWall::MyInitAfterCreation()
         InitArray();
     }
 
-    displayList_ = 0;
-
     CreateEdge();
 
     id=-1;
@@ -1944,11 +1947,6 @@ void gNetPlayerWall::ReleaseData()
 gNetPlayerWall::~gNetPlayerWall()
 {
     ReleaseData();
-
-#ifndef DEDICATED
-    if (this->displayList_!=0)
-        glDeleteLists(this->displayList_,1);
-#endif
 }
 
 bool gNetPlayerWall::ActionOnQuit()
@@ -2402,6 +2400,8 @@ REAL gNetPlayerWall::BegTime() const
 void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
 {
     CHECKWALL;
+
+    displayList_.Clear();
 
 #ifdef DEBUG
     // std::cout << beg << ',' << end << '(' << BegPos() << ',' << EndPos() << ")\n";

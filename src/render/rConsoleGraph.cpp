@@ -36,11 +36,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rScreen.h"
 #include "rGL.h"
 #include "tConfiguration.h"
+#include "rDisplayList.h"
 
 static tString sr_centerString;
 static REAL center_r,center_g,center_b,center_fadetime;
 
 static REAL Time;
+
+static rDisplayList sr_consoleDisplayList;
 
 static void sr_ConsolePerFrame(){
     if (sr_con.autoDisplayAtSwap)
@@ -99,6 +102,21 @@ void rConsole::Render(){
     if (sr_screen){
         Time=tSysTimeFloat();
 
+        if (Time-center_fadetime<2){
+            REAL alpha=center_fadetime-Time+1;
+            if (alpha>1) alpha=1;
+            if (alpha<0) alpha=0;
+            rTextField::SetDefaultColor( tColor(center_r,center_g,center_b,alpha) );
+
+            REAL space = 1.6;
+            REAL needed = rCWIDTH_CON * 4 * sr_centerString.Len();
+            REAL fak = 1;
+            if (needed > space)
+                fak = space/needed;
+
+            DisplayText(0,centerMessageY,rCWIDTH_CON*4*fak,rCHEIGHT_CON*4*fak,sr_centerString);
+        }
+
         if (sr_textOut || rForceTextCallback::ForceText()){
             if (lastCustomTimeout<Time-5 &&
                     lastTimeout+timeout<Time && currentTop<currentIn){
@@ -106,7 +124,22 @@ void rConsole::Render(){
                 lastTimeout=Time;
             }
 
+            static int lastTop = currentTop;
+            static int lastIn  = currentIn;
+            if ( lastTop != currentTop || lastIn != currentIn )
+            {
+                lastTop = currentTop;
+                lastIn  = currentIn;
+                sr_consoleDisplayList.Clear();
+            }
+
             rTextField::SetDefaultColor( tColor(1,1,1) );
+
+            if ( sr_consoleDisplayList.Call() )
+            {
+                return;
+            }
+            rDisplayListFiller filler( sr_consoleDisplayList );
 
             rTextField out(-.95f,.99f,rCWIDTH_CON,rCHEIGHT_CON);//,&rFont::s_defaultFontSmall);
             out.SetWidth(static_cast<int>(1.9f/out.GetCWidth()));
@@ -130,21 +163,6 @@ void rConsole::Render(){
                 lastTimeout=Time;
                 currentTop+=(over+1)/2;
             }
-        }
-
-        if (Time-center_fadetime<2){
-            REAL alpha=center_fadetime-Time+1;
-            if (alpha>1) alpha=1;
-            if (alpha<0) alpha=0;
-            rTextField::SetDefaultColor( tColor(center_r,center_g,center_b,alpha) );
-
-            REAL space = 1.6;
-            REAL needed = rCWIDTH_CON * 4 * sr_centerString.Len();
-            REAL fak = 1;
-            if (needed > space)
-                fak = space/needed;
-
-            DisplayText(0,centerMessageY,rCWIDTH_CON*4*fak,rCHEIGHT_CON*4*fak,sr_centerString);
         }
 
         rTextField::SetDefaultColor( tColor(1,1,1) );
