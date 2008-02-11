@@ -115,6 +115,11 @@ void rDisplayList::ClearAll()
 #endif
 }
 
+#ifndef DEDICATED
+// set if you want the display lists to be compiled only, then executed.
+static bool sr_compileOnly = false;
+#endif
+
 //! constructor, automatically starting to fill teh list
 rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
 #ifndef DEDICATED
@@ -129,7 +134,7 @@ rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
         {
             list_.list_=glGenLists(1);
         }
-        glNewList(list_.list_,GL_COMPILE_AND_EXECUTE);
+        glNewList(list_.list_, sr_compileOnly ? GL_COMPILE : GL_COMPILE_AND_EXECUTE );
         list_.filling_ = true;
     }
 #endif
@@ -148,6 +153,11 @@ void rDisplayListFiller::Stop()
     {
         list_.filling_ = false;
         glEndList();
+
+        if ( sr_compileOnly )
+        {
+            list_.Call();
+        }
     }
 #endif
 }
