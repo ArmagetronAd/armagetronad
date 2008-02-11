@@ -71,7 +71,7 @@ static int myHTTPFetch(const char *URI, const char *filename, const char *savepa
         return 2;
     }
 
-    fd = fopen(savepath, "w");
+    fd = fopen(savepath, "wb");
     if (fd < 0) {
         xmlNanoHTTPClose(ctxt);
         con << tOutput( "$resource_no_write", savepath );
