@@ -28,6 +28,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef ArmageTron_DISPLAYLIST_H
 #define ArmageTron_DISPLAYLIST_H
 
+#include "config.h"
+
 #include "rGL.h"
 #include "tLinkedList.h"
 
@@ -57,6 +59,11 @@ class rDisplayList: public tListItem< rDisplayList >
 public:
     rDisplayList();
     ~rDisplayList();
+
+    bool IsSet() const
+    {
+        return list_ && !inhibit_;
+    }
     
     //! calls the display list, returns true if there was a list to call
     bool Call();

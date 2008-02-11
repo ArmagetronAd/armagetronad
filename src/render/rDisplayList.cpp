@@ -51,6 +51,7 @@ bool rDisplayList::Call()
 {
     tASSERT( !filling_ );
 
+#ifndef DEDICATED
     if ( inhibit_ > 0 )
     {
         Clear();
@@ -63,6 +64,7 @@ bool rDisplayList::Call()
         glCallList( list_ );
         return true;
     }
+#endif
 
     return false;
 }
@@ -70,6 +72,7 @@ bool rDisplayList::Call()
 //! clears the display list and don't regenerate it for the next few calls
 void rDisplayList::Clear( int inhibitGeneration )
 {
+#ifndef DEDICATED
     // clear the list
     if ( !filling_ && list_ )
     {
@@ -90,6 +93,7 @@ void rDisplayList::Clear( int inhibitGeneration )
     {
         inhibit_ = inhibitGeneration;
     }
+#endif
 }
 
 // clears all display lists
@@ -109,6 +113,7 @@ void rDisplayList::ClearAll()
 rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
     : list_( list )
 {
+#ifndef DEDICATED
     bool useList = sr_useDisplayLists && list_.inhibit_ == 0;
     if ( useList )
     {
@@ -119,6 +124,7 @@ rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
         glNewList(list_.list_,GL_COMPILE_AND_EXECUTE);
         list_.filling_ = true;
     }
+#endif
 }
 
 rDisplayListFiller::~rDisplayListFiller()
@@ -129,11 +135,13 @@ rDisplayListFiller::~rDisplayListFiller()
 //! stops filling the display list (done automatically on destruction)
 void rDisplayListFiller::Stop()
 {
+#ifndef DEDICATED
     if ( list_.filling_ )
     {
         list_.filling_ = false;
         glEndList();
     }
+#endif
 }
 
 static rCallbackBeforeScreenModeChange sr_unload( &rDisplayList::ClearAll );
