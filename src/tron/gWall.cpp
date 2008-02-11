@@ -884,14 +884,17 @@ void gNetPlayerWall::RenderList(bool list){
     if ( gCycleWallsDisplayListManager::CannotHaveList( dbegin, cycle_ ) ||
          this == cycle_->currentWall )
     {
+        if ( displayList_.IsSet() )
+        {
+            cycle_->displayList_.Clear();
+        }
         displayList_.Clear(2);
-        cycle_->displayList_.Clear();
     }
 
     if ( !displayList_.Call() )
     {   
-        // static gPerformanceCounter counter;
-        // counter.Count();
+        //static gPerformanceCounter counter;
+        //counter.Count();
 
         rDisplayListFiller filler( displayList_ );
 
