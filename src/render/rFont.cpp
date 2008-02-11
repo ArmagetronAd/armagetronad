@@ -234,9 +234,11 @@ rTextField::rTextField(REAL Left,REAL Top,
 
 
 rTextField::~rTextField(){
-    FlushLine();
-
 #ifndef DEDICATED
+    BeginQuads();
+    FlushLine();
+    RenderEnd();
+
     if (cursor && sr_glOut){
         if (cursor==2)
             glColor4f(1,1,1,.5);
@@ -284,8 +286,7 @@ void rTextField::FlushLine(int len,bool newline){
 
     if (sr_glOut)
     {
-        BeginQuads();
-                
+               
         // render bright background
         if ( r < sr_minR && g < sr_minG && b < sr_minG || r+g+b < sr_minTotal )
         {
@@ -333,7 +334,6 @@ void rTextField::FlushLine(int len,bool newline){
                 realx++;
             }
         }
-        RenderEnd();
     }
 
 #endif
@@ -410,9 +410,11 @@ rTextField & rTextField::operator<<(unsigned char c){
 }
 */
 
+#ifndef DEDICATED
 static REAL CTR(int x){
     return x/255.0;
 }
+#endif
 
 static char hex_array[]="0123456789abcdef";
 
@@ -433,6 +435,9 @@ int hex_to_int(char c){
 
 rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
 {
+#ifndef DEDICATED
+    bool begun = false;
+
     // run through string
     while (*c!='\0')
     {
@@ -517,6 +522,11 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
             // apply color
             if ( use )
             {
+                if ( !begun )
+                {
+                    BeginQuads();
+                    begun = true;
+                }
                 FlushLine(false);
                 cursorPos++;
                 color_ = color;
@@ -526,6 +536,13 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
             // normal operation: add char
             WriteChar(*(c++));
     }
+
+    if ( begun )
+    {
+        RenderEnd();
+    }
+#endif
+
     return *this;
 }
 
