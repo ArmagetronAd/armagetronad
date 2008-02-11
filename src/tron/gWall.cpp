@@ -507,11 +507,12 @@ void gWallRim::RenderReal(const eCamera *cam){
 
 void gWallRim::OnBlocksCamera( eCamera * camera, REAL height ) const
 {
+    PlanDestroyDisplayList();
+
     // lower the wall so it now longer blocks the view
     if ( height < renderHeight_ )
     {
         renderHeight_ = height;
-        PlanDestroyDisplayList();
    }
     if ( renderHeight_ < .25 )
         renderHeight_ = .25;

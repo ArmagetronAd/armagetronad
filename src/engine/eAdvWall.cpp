@@ -50,7 +50,7 @@ eWallRim::eWallRim(eGrid *grid, bool backface_cull, REAL h)
 
     //  if(bf_cull && sr_ZTrick)
     se_rimWalls.Add(this,rim_id);
-    DestroyDisplayList();}
+    PlanDestroyDisplayList();}
 
 
 eWallRim::~eWallRim()
