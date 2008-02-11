@@ -56,9 +56,9 @@ MapIdToGameId teamAsso; // mapping between map's teamId and in-game team
 MapIdToGameId playerAsso; // mapping between map's playerId and in-game player
 
 #include "nConfig.h"
-#define DEFAULT_POLYGONAL_SHAPE_USED "FALSE"
-static tString polygonal_shape_used(DEFAULT_POLYGONAL_SHAPE_USED);
-static nSettingItemWatched<tString> safetymecanism_polygonal_shapeused("POLYGONAL_SHAPE_USED",polygonal_shape_used, nConfItemVersionWatcher::Group_Breaking, 20 );
+
+static bool polygonal_shape_used(false);
+static nSettingItemWatched<bool> safetymecanism_polygonal_shapeused("POLYGONAL_SHAPE_USED_EVER",polygonal_shape_used, nConfItemVersionWatcher::Group_Breaking, 20 );
 
 #endif
 int mapVersion = 0; // The version of the map currently being parsed. Used to adapt parsing to support version specific features
@@ -678,10 +678,11 @@ zShapePtr
 gParser::parseShapePolygon(eGrid *grid, xmlNodePtr cur, unsigned short idZone, const xmlChar * keyword)
 {
     // Polygon shapes are not supported by older clients.
-    std::stringstream ss;
-    /* Yes it is ackward to generate a string that will be decifered on the other end*/
-    ss << "POLYGONAL_SHAPE_USED TRUE";
-    tConfItemBase::LoadLine(ss);
+    // Yes, it is on purpose that this item is set and never reset once polygonial shapes
+    // are used. That way, a single map with polygonial shapes in the rotation will
+    // lock out old clients for good. We can remove this only when we have a compatibility
+    // plan for polygonial shapes, probably never.
+    safetymecanism_polygonal_shapeused.Set(true);
 
     zShapePtr shape = zShapePtr( new zShapePolygon(grid, idZone) );
     parseShape(grid, cur, keyword, shape);
@@ -1218,6 +1219,11 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
 void
 gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
+    // Currently, we have no compatibility plan for any v2 zone type. When we have one,
+    // remove the lines that look like this (apart from the one where really
+    // polugonal shapes are parsed)
+    safetymecanism_polygonal_shapeused.Set(true);
+
     if (sn_GetNetState() != nCLIENT )
     {
         rColor color( 1, 0, 0, .7 );
@@ -1371,6 +1377,11 @@ gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
 void
 gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
+    // Currently, we have no compatibility plan for any v2 zone type. When we have one,
+    // remove the lines that look like this (apart from the one where really
+    // polugonal shapes are parsed)
+    safetymecanism_polygonal_shapeused.Set(true);
+
     string zoneName = "";
 
     if (myxmlHasProp(cur, "name"))
@@ -2057,14 +2068,6 @@ gParser::parseTeamOwnership(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword
 void
 gParser::parseWorld(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-    // Polygon shapes are not supported by older clients.
-    // This mechanism assume that no polygonal shapes are used until one is found.
-    // Hopefully someone will come with a better solution.
-    std::stringstream ss;
-    /* Yes it is ackward to generate a string that will be decifered on the other end*/
-    ss << "POLYGONAL_SHAPE_USED FALSE";
-    tConfItemBase::LoadLine(ss);
-
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
