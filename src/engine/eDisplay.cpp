@@ -293,6 +293,13 @@ void paint_sr_lowerSky(eGrid *grid, int viewer,bool sr_upperSky, eCoord const & 
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 }
 
+static bool se_RimWrapY=true;
+static tSettingItem<bool> se_RimWrapYConf
+("RIM_WALL_WRAP_Y",se_RimWrapY);
+
+static rFileTexture se_RimWallNoWrap(rTextureGroups::TEX_WALL,"textures/rim_wall.png",1,0);
+static rFileTexture se_RimWallWrap(rTextureGroups::TEX_WALL,"textures/rim_wall.png",1,1);
+
 void eGrid::display_simple( int viewer,bool floor,
                             bool sr_upperSky,bool sr_lowerSky,
                             REAL flooralpha,
@@ -474,12 +481,22 @@ void eGrid::display_simple( int viewer,bool floor,
     //  glDisable(GL_TEXTURE_GEN_Q);
     //  glDisable(GL_TEXTURE_GEN_R);
 
-    glEnable(GL_DEPTH_TEST);
-
     if(eWalls){
-        for(int i=se_rimWalls.Len()-1;i>=0;i--){
-            su_FetchAndStoreSDLInput();
-            se_rimWalls(i)->RenderReal(cameras(viewer));
+        {
+            glEnable(GL_DEPTH_TEST);
+            glDisable(GL_CULL_FACE);
+
+            if ( !sg_MoviePack() )
+            {
+                ( se_RimWrapY ? se_RimWallWrap : se_RimWallNoWrap).Select();
+            }
+
+            for(int i=se_rimWalls.Len()-1;i>=0;i--){
+                su_FetchAndStoreSDLInput();
+                se_rimWalls(i)->RenderReal(cameras(viewer));
+            }
+
+            glEnable(GL_CULL_FACE);
         }
 
         if (sr_lowerSky && sr_highRim){

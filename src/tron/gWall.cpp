@@ -84,9 +84,6 @@ static nSettingItem<tString> lalala_mp_wallRimD("TEXTURE_MP_WALLRIM_D", lala_mp_
 rFileTexture gWallRim_d(rTextureGroups::TEX_WALL, lala_mp_wallRimD, 0,0);
 */
 
-static rFileTexture sg_RimWallNoWrap(rTextureGroups::TEX_WALL,"textures/rim_wall.png",1,0);
-static rFileTexture sg_RimWallWrap(rTextureGroups::TEX_WALL,"textures/rim_wall.png",1,1);
-
 //static rTexture gWallRim_text_moviepack(rTEX_WALL,"moviepack/gWallRim2.png",1,0);
 static rFileTexture gWallRim_a(rTextureGroups::TEX_WALL,"moviepack/rim_wall_a.png",0,0);
 static rFileTexture gWallRim_b(rTextureGroups::TEX_WALL,"moviepack/rim_wall_b.png",0,0);
@@ -113,9 +110,6 @@ static tSettingItem<REAL> sg_RimStretchXConf
 static REAL sg_RimStretchY=100;
 static tSettingItem<REAL> sg_RimStretchYConf
 ("RIM_WALL_STRETCH_Y",sg_RimStretchY);
-static bool sg_RimWrapY=true;
-static tSettingItem<bool> sg_RimWrapYConf
-("RIM_WALL_WRAP_Y",sg_RimWrapY);
 
 static REAL sg_MPRimStretchX=50;
 static tSettingItem<REAL> sg_MPRimStretchXConf
@@ -271,9 +265,6 @@ void gWallRim::RenderReal(const eCamera *cam){
         const eCoord *p1=&EndPoint(0);
         const eCoord *p2=&EndPoint(1);
 
-        if (bf_cull)
-            glDisable(GL_CULL_FACE);
-
         REAL X_SCALE=sg_RimStretchX;
         REAL Z_SCALE=sg_RimStretchY;
 
@@ -283,7 +274,7 @@ void gWallRim::RenderReal(const eCamera *cam){
         if ( transparency )
             glDisable( GL_DEPTH_TEST );
 
-        if (sg_MoviePack()){
+      if (sg_MoviePack()){
             X_SCALE=sg_MPRimStretchX;
             Z_SCALE=sg_MPRimStretchY;
         }
@@ -466,15 +457,11 @@ void gWallRim::RenderReal(const eCamera *cam){
             tBeg += offset;
             tEnd += offset;
 
-            ( sg_RimWrapY ? sg_RimWallWrap : sg_RimWallNoWrap).Select();
             gWallRim_helper(*p1,*p2,tBeg,tEnd,h,Z_SCALE,false);
         }
 
         //eWall::Render_helper(edge,(p1->x+p1->y)/SCALE,(p2->x+p2->y)/SCALE,40,height);
-
-        if (bf_cull)
-            glEnable(GL_CULL_FACE);
-
+            
         if ( transparency )
             glEnable( GL_DEPTH_TEST );
     }

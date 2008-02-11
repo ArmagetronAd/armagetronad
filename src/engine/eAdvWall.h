@@ -45,7 +45,6 @@ public:
 
     virtual bool Splittable() const;
 
-
     //  virtual void Split(eWall *& w1,eWall *& w2,REAL a);
 
 #ifndef DEDICATED
