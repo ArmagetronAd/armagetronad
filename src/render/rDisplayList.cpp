@@ -29,29 +29,35 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "rScreen.h"
 
+#ifndef DEDICATED
 static rDisplayList * se_displayListAnchor = NULL;
+#endif
 
 rDisplayList::rDisplayList()
+#ifndef DEDICATED
     : tListItem< rDisplayList >( se_displayListAnchor )
     , list_( 0 )
     , inhibit_( 0 )
     , filling_( false )
+#endif
 {
 }
 
 rDisplayList::~rDisplayList()
 {
+#ifndef DEDICATED
     Clear();
 
     tASSERT( !list_ );
+#endif
 }
 
 // calls the display list, returns true if there was a list to call
 bool rDisplayList::Call()
 {
+#ifndef DEDICATED
     tASSERT( !filling_ );
 
-#ifndef DEDICATED
     if ( inhibit_ > 0 )
     {
         Clear();
@@ -111,7 +117,9 @@ void rDisplayList::ClearAll()
 
 //! constructor, automatically starting to fill teh list
 rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
+#ifndef DEDICATED
     : list_( list )
+#endif
 {
 #ifndef DEDICATED
     bool useList = sr_useDisplayLists && list_.inhibit_ == 0;

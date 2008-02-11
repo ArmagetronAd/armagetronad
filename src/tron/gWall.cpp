@@ -837,6 +837,28 @@ void gNetPlayerWall::Render(const eCamera *cam){
     RenderList(true);
 }
 
+/*
+class gPerformanceCounter
+{
+public:
+    gPerformanceCounter(): count_(0){ tRealSysTimeFloat(); }
+    unsigned int Count(){ return count_++; }
+    ~gPerformanceCounter()
+    {
+        double time = tRealSysTimeFloat();
+        std::stringstream s;
+        s << count_ << " walls in " << time << " seconds: " << count_ / time << " wps.\n";
+#ifdef WIN32
+        MessageBox (NULL, s.str().c_str() , "Performance", MB_OK);
+#else
+        std::cout << s.str();
+#endif
+    }
+private:
+    unsigned int count_;
+};
+*/
+
 void gPlayerWall::RenderList(bool list)
 {
     netWall_->RenderList( list );
@@ -868,6 +890,9 @@ void gNetPlayerWall::RenderList(bool list){
 
     if ( !displayList_.Call() )
     {   
+        // static gPerformanceCounter counter;
+        // counter.Count();
+
         rDisplayListFiller filler( displayList_ );
 
         REAL r,g,b;
@@ -2400,11 +2425,13 @@ void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
 {
     CHECKWALL;
 
+#ifndef DEDICATED
     displayList_.Clear();
     if ( cycle_ )
     {
         cycle_->displayList_.Clear();
     }
+#endif
 
 #ifdef DEBUG
     // std::cout << beg << ',' << end << '(' << BegPos() << ',' << EndPos() << ")\n";

@@ -62,7 +62,11 @@ public:
 
     bool IsSet() const
     {
+#ifndef DEDICATED
         return list_ && !inhibit_;
+#else
+        return false;
+#endif
     }
     
     //! calls the display list, returns true if there was a list to call
@@ -77,9 +81,11 @@ private:
     rDisplayList( rDisplayList const & );
     rDisplayList & operator = ( rDisplayList const & );
 
+#ifndef DEDICATED
     GLuint list_;   //!< the display list
     int inhibit_;   //!< inhibit display list generation for a while
     bool filling_;  //!< set if we're just filling the list
+#endif
 };
 
 //! create an object of this type to fill a display list while you render
@@ -97,8 +103,10 @@ private:
     rDisplayListFiller( rDisplayListFiller const & );
     rDisplayListFiller & operator = ( rDisplayListFiller const & );
 
+#ifndef DEDICATED
     //! the list
     rDisplayList & list_;
+#endif
 };
 
 #endif

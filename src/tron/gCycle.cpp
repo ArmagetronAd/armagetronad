@@ -2455,10 +2455,12 @@ REAL gCycle::CalculatePredictPosition( gPredictPositionData & data )
 
 bool gCycle::Timestep(REAL currentTime){
     // keep cycle in list for rendering as long as walls are active
+#ifndef DEDICATED
     if ( !Alive() && displayList_.Walls() )
     {
         return false;
     }
+#endif
 
     // clear out dangerous info when we're done
     gMaxSpaceAheadHitInfoClearer hitInfoClearer( maxSpaceHit_ );
@@ -2635,10 +2637,12 @@ bool gCycle::Timestep(REAL currentTime){
     }
 
     // keep cycle in list for rendering as long as walls are active
+#ifndef DEDICATED
     if ( displayList_.Walls() )
     {
         return false;
     }
+#endif
 
     return ret;
 }
