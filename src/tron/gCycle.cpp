@@ -2264,6 +2264,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p,bo
         turning(NULL),
         skew(0),skewDot(0),
         rotationFrontWheel(1,0),rotationRearWheel(1,0),heightFrontWheel(0),heightRearWheel(0),
+        wallList_(NULL),
         currentWall(NULL),
         lastWall(NULL)
 {
@@ -2454,6 +2455,12 @@ REAL gCycle::CalculatePredictPosition( gPredictPositionData & data )
 }
 
 bool gCycle::Timestep(REAL currentTime){
+    // keep cycle in list for rendering as long as walls are active
+    if ( !Alive() && wallList_ )
+    {
+        return false;
+    }
+
     // clear out dangerous info when we're done
     gMaxSpaceAheadHitInfoClearer hitInfoClearer( maxSpaceHit_ );
 
@@ -2626,6 +2633,12 @@ bool gCycle::Timestep(REAL currentTime){
 
         // but using the predicted position which halts at walls may work
         currentWall->Update(predictTime, PredictPosition() );
+    }
+
+    // keep cycle in list for rendering as long as walls are active
+    if ( wallList_ )
+    {
+        return false;
     }
 
     return ret;
@@ -3843,7 +3856,39 @@ public:
 
 }
 
+static REAL mp_eWall_stretch=4;
+static tSettingItem<REAL> mpws
+("MOVIEPACK_WALL_STRETCH",mp_eWall_stretch);
+
+static rFileTexture dir_eWall(rTextureGroups::TEX_WALL,"textures/dir_wall.png",1,0,1);
+static rFileTexture dir_eWall_moviepack(rTextureGroups::TEX_WALL,"moviepack/dir_wall.png",1,0,1);
+
+static void dir_eWall_select()
+{
+    if (sg_MoviePack()){
+        TexMatrix();
+        IdentityMatrix();
+        ScaleMatrix(1/mp_eWall_stretch,1,1);
+        dir_eWall_moviepack.Select();
+    }
+    else
+    {
+        dir_eWall.Select();
+    }
+}
+
 void gCycle::Render(const eCamera *cam){
+    dir_eWall_select();
+
+    // render walls
+    gNetPlayerWall * run = wallList_;
+    while( run )
+    {
+        run->Render( cam );
+        run = run->Next();
+    }
+
+    // are we blinking from invulnerability?
     bool blinking = false;
     if ( lastTime > spawnTime_ && !Vulnerable() )
     {
@@ -4516,6 +4561,7 @@ gCycle::gCycle(nMessage &m)
         spark(NULL),
         skew(0),skewDot(0),
         rotationFrontWheel(1,0),rotationRearWheel(1,0),heightFrontWheel(0),heightRearWheel(0),
+        wallList_(NULL),
         currentWall(NULL),
         lastWall(NULL)
 {

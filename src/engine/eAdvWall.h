@@ -57,7 +57,7 @@ public:
     }
 #endif
 
-virtual REAL Height() const{return height;}
+    virtual REAL Height() const{return height;}
 
     virtual REAL SeeHeight() const{return height*40;}
 

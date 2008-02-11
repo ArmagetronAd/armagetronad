@@ -170,6 +170,7 @@ public:
 private:
     void TransferPositionCorrectionToDistanceCorrection();
 
+    gNetPlayerWall *                wallList_;                      //!< linked list of all walls
     tCHECKED_PTR(gNetPlayerWall)	currentWall;                    //!< the wall that currenly is attached to the cycle
     tCHECKED_PTR(gNetPlayerWall)	lastWall;                       //!< the last wall that was attached to this cycle
     tCHECKED_PTR(gNetPlayerWall)	lastNetWall;                    //!< the last wall received over the network

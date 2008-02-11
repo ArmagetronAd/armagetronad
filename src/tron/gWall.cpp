@@ -105,10 +105,6 @@ static tString lala_mp_dir_eWall("Anonymous/original/moviepack/dir_wall.png");
 static nSettingItem<tString> lalala_mp_dir_eWall("TEXTURE_MP_DIR_WALL", lala_mp_dir_eWall);
 rFileTexture dir_eWall_moviepack(rTextureGroups::TEX_WALL, lala_mp_dir_eWall, 1,0);
 */
-
-static rFileTexture dir_eWall(rTextureGroups::TEX_WALL,"textures/dir_wall.png",1,0,1);
-static rFileTexture dir_eWall_moviepack(rTextureGroups::TEX_WALL,"moviepack/dir_wall.png",1,0,1);
-
 #endif
 
 static REAL sg_RimStretchX=100;
@@ -127,25 +123,6 @@ static tSettingItem<REAL> sg_MPRimStretchXConf
 static REAL sg_MPRimStretchY=50;
 static tSettingItem<REAL> sg_MPRimStretchYConf
 ("MOVIEPACK_RIM_WALL_STRETCH_Y",sg_MPRimStretchY);
-
-static REAL mp_eWall_stretch=4;
-static tSettingItem<REAL> mpws
-("MOVIEPACK_WALL_STRETCH",mp_eWall_stretch);
-
-#ifndef DEDICATED
-static void dir_eWall_select(){
-    if (sg_MoviePack()){
-        TexMatrix();
-        IdentityMatrix();
-        ScaleMatrix(1/mp_eWall_stretch,1,1);
-        dir_eWall_moviepack.Select();
-    }
-    else
-        dir_eWall.Select();
-}
-
-
-#endif
 
 /* **********************************************
    RimWall
@@ -885,8 +862,6 @@ void gNetPlayerWall::RenderList(bool list){
         glCallList(displayList_);
     else
     {
-        dir_eWall_select();
-
         REAL r,g,b;
         if (cycle_){
             r=cycle_->trailColor_.r;
@@ -1059,11 +1034,11 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
             glVertex3f(p2.x,p2.y,h*hfrac);
             RenderEnd();
             sr_DepthOffset(false);
+            if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
+                glEnable(GL_TEXTURE_2D);
         }
 
         //glColor4f(r,g,b,a);
-
-        dir_eWall_select();
 
         glColor3f(r,g,b);
 
@@ -1166,14 +1141,11 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
         }
         RenderEnd();
         sr_DepthOffset(false);
+        if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
+            glEnable(GL_TEXTURE_2D);
     }
 
-    dir_eWall_select();
-
-
     BeginQuadStrip();
-
-
 
     //REAL H=h*hfrac;
 
@@ -1484,6 +1456,14 @@ void gNetPlayerWall::InitArray()
 
 void gNetPlayerWall::MyInitAfterCreation()
 {
+#ifndef DEDICATED
+    // put yourself into rendering list
+    if ( cycle_ )
+    {
+        Insert( cycle_->wallList_ );
+    }
+#endif
+
     //w=
 #ifdef DEBUG
     if (!finite(end.x) || !finite(end.y))

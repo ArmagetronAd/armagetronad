@@ -506,8 +506,8 @@ void eGrid::display_simple( int viewer,bool floor,
         glEnable(GL_DEPTH_TEST);
 
     if (eWalls){
-        glDisable(GL_CULL_FACE);
-        draw_eWall(this,viewer,0,zNear,cameras(viewer));
+        // glDisable(GL_CULL_FACE);
+        // draw_eWall(this,viewer,0,zNear,cameras(viewer));
 
         /*
         #ifdef DEBUG

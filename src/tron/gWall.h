@@ -144,7 +144,7 @@ private:
 
 
 // the sn_netObjects that represents eWalls across the network.
-class gNetPlayerWall: public nNetObject{
+class gNetPlayerWall: public tListItem< gNetPlayerWall >, public nNetObject{
     friend class gCycle;
     int id,griddedid;
 
