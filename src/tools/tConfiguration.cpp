@@ -761,7 +761,7 @@ static tExtraConfigCommandLineAnalyzer s_extraAnalyzer;
 // configuration files to load. The first one found will be loaded, and
 // only the very first one will be written to. Use it to protect stable client's
 // config from the experimental client's wrath.
-char const * st_userConfigs[] = { "user_3_0.cfg", "user.cfg", 0 };
+char const * st_userConfigs[] = { "user_3_1.cfg", "user_3_0.cfg", "user.cfg", 0 };
 
 static void st_InstallSigHupHandler();
 
