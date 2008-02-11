@@ -12,6 +12,9 @@
 // them later, though.
 #define _CRT_SECURE_NO_DEPRECATE 1
 
+// activate zones v2 support
+#define ENABLE_ZONESV2 1
+
 // include of windows.h needed for consistency of silly windows #defines ( SetPort -> SetPortA, GetUserName -> GetUserNameA )
 #include  <windows.h>
 
