@@ -201,8 +201,6 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
     }
 
     if (h<9000 || !sr_infinityPlane){
-        BeginQuads();
-
         IsEdge(false);
         TexVertex(p1.x, p1.y, 0,
                   tBeg      , 1);
@@ -217,13 +215,9 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
 
         TexVertex(p2.x, p2.y, 0,
                   tEnd      , 1);
-
-        RenderEnd();
     }
 
     else{
-        BeginTriangles();
-
         IsEdge(false);
         TexVertex(p1.x, p1.y, 0,
                   tBeg,       1);
@@ -233,14 +227,15 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
 
 #ifndef WIN32
         Vertex(0,0,1,0);
+        Vertex(0,0,1,0);
 #else
         Vertex(0.001f,0.001f,1,0); // Windows OpenGL has problems with
         // infitite points perpenticular to the viewing direction
+        Vertex(0.001f,0.001f,1,0);
 #endif
 
         TexVertex(p2.x, p2.y, 0,
                   tEnd,       1);
-        RenderEnd();
     }
 }
 
@@ -409,13 +404,11 @@ void gWallRim::RenderReal(const eCamera *cam){
                 eCoord P4=P2+normal*extension;
 
                 // render shadow
-                BeginQuads();
                 Color(0,0,0);
                 Vertex(P1.x, P1.y, 0);
                 Vertex(P2.x, P2.y, 0);
                 Vertex(P4.x, P4.y, 0);
                 Vertex(P3.x, P3.y, 0);
-                RenderEnd();
             }
         }
 

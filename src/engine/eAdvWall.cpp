@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eCamera.h"
 #include "tConfiguration.h"
 #include "eRectangle.h"
+#include "rRender.h"
 
 /* **********************************************
    RimWall
@@ -150,10 +151,12 @@ void eWallRim::RenderAll( eCamera * camera )
     {
         ( se_RimWrapY ? se_RimWallWrap : se_RimWallNoWrap).Select();
     }
-    
+
+    BeginQuads();
     for(int i=se_rimWalls.Len()-1;i>=0;i--){
         se_rimWalls(i)->RenderReal( camera );
     }
+    RenderEnd();
     
     glEnable(GL_CULL_FACE);
 #endif
