@@ -69,6 +69,13 @@ public:
 
     //! is x by offset inside the bounds of the rim eWalls?
     static bool IsBound(const eCoord &x,REAL offset=0);
+
+    //! renders all rim walls
+    static void RenderAll( eCamera * camera ); 
+    //! destroys the display list (call when geometry is updated)
+    static void DestroyDisplayList();
+    //! destroys the display list on the next possible opportunity
+    static void PlanDestroyDisplayList();
     //! brings x into the bounds of the rim eWalls with a min distance of offset
     static REAL Bound(eCoord &x,REAL offset=0);
     //! brings out inside the bounds of the rim walls, moving it closer to in.

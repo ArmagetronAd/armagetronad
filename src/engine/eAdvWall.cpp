@@ -50,11 +50,13 @@ eWallRim::eWallRim(eGrid *grid, bool backface_cull, REAL h)
 
     //  if(bf_cull && sr_ZTrick)
     se_rimWalls.Add(this,rim_id);
-}
+    DestroyDisplayList();}
+
 
 eWallRim::~eWallRim()
 {
     se_rimWalls.Remove(this,rim_id);
+    DestroyDisplayList();
 }
 
 //ArmageTron_eWalltype gWallRim::type(){return ArmageTron_RIM;}
@@ -108,6 +110,109 @@ bool eWallRim::IsBound(const eCoord &x, REAL offset)
     // return true;
     return se_OffsetBounds( offset ).Contains( x );
 }
+
+#ifndef DEDICATED
+static GLuint se_rimDisplayList=0;
+static int se_destroyDisplayList=0;
+
+extern bool sg_MoviePack();
+
+static bool se_RimWrapY=true;
+static tSettingItem<bool> se_RimWrapYConf
+("RIM_WALL_WRAP_Y",se_RimWrapY);
+
+static rFileTexture se_RimWallNoWrap(rTextureGroups::TEX_WALL,"textures/rim_wall.png",1,0);
+static rFileTexture se_RimWallWrap(rTextureGroups::TEX_WALL,"textures/rim_wall.png",1,1);
+
+#endif
+
+// *******************************************************************************************
+// *
+// *    RenderAll
+// *
+// *******************************************************************************************
+//!        @param  camera  camera used for rendering
+// *******************************************************************************************
+void eWallRim::RenderAll( eCamera * camera )
+{
+#ifndef DEDICATED
+    bool useDisplayList = sr_useDisplayLists && se_destroyDisplayList == 0;
+
+    if ( se_rimDisplayList )
+    {
+        if ( useDisplayList )
+        {
+            glCallList( se_rimDisplayList );
+            return;
+        }
+        else
+        {
+            DestroyDisplayList();
+        }
+    }
+
+    if (useDisplayList)
+    {
+        se_rimDisplayList=glGenLists(1);
+        glNewList(se_rimDisplayList,GL_COMPILE_AND_EXECUTE);
+    }
+
+    if ( se_destroyDisplayList > 0 )
+    {
+        se_destroyDisplayList--;
+    }
+
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    
+    if ( !sg_MoviePack() )
+    {
+        ( se_RimWrapY ? se_RimWallWrap : se_RimWallNoWrap).Select();
+    }
+    
+    for(int i=se_rimWalls.Len()-1;i>=0;i--){
+        se_rimWalls(i)->RenderReal( camera );
+    }
+    
+    glEnable(GL_CULL_FACE);
+
+    if (useDisplayList)
+    {
+        glEndList();
+    }
+#endif
+}
+
+// *******************************************************************************************
+// *
+// *    DestroyDisplayList
+// *
+// *******************************************************************************************
+void eWallRim::DestroyDisplayList()
+{
+#ifndef DEDICATED
+    if ( se_rimDisplayList )
+    {   
+        glDeleteLists(se_rimDisplayList,1);
+    }
+    se_rimDisplayList = 0;
+#endif
+}
+
+// *******************************************************************************************
+// *
+// *    PlanDestroyDisplayList
+// *
+// *******************************************************************************************
+void eWallRim::PlanDestroyDisplayList()
+{
+#ifndef DEDICATED
+    // destroy the playlist and don't generate it again for 10 frames.
+    se_destroyDisplayList = 10;
+#endif
+}
+
+static rCallbackBeforeScreenModeChange unload(&eWallRim::DestroyDisplayList);
 
 // *******************************************************************************************
 // *
