@@ -3984,13 +3984,14 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     run = wallsWithDisplayList_;
     while( run )
     {
+        gNetPlayerWall * next = run->Next();
         if ( run->BegPos() < wallsWithDisplayListMinDistance_ )
         {
             wallsWithDisplayListMinDistance_ = run->BegPos();
         }
 
         run->RenderList( true, gNetPlayerWall::gWallRenderMode_Lines );
-        run = run->Next();
+        run = next;
     }
 
     RenderEnd();
@@ -4004,8 +4005,9 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     run = wallsWithDisplayList_;
     while( run )
     {
+        gNetPlayerWall * next = run->Next();
         run->RenderList( true, gNetPlayerWall::gWallRenderMode_Quads );
-        run = run->Next();
+        run = next;
     }
 
     RenderEnd();

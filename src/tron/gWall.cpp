@@ -1026,7 +1026,14 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
 
     if (bool(cycle_) && !cycle_->Alive() && gCycle::WallsStayUpDelay() >= 0 ){
         REAL dt=(se_GameTime()-cycle_->deathTime-gCycle::WallsStayUpDelay())*2;
-        if (dt>1) dt=1;
+
+        if (dt>1)
+        {
+            // remove from rendering lists
+            Remove();
+            return;
+        }
+
         if (dt>=0)
         {
             REAL ca=REAL(.5/(dt+.5));
