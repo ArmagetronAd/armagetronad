@@ -270,7 +270,7 @@
             <Position x="0.73" y="-0.72" />
             <Size height="0.25" width="0.25" />
             <Background>
-                <Image scale_x="2" scale_y="2">
+                <Image scale_x="1" scale_y="1" repeat="both">
                     <Graphic category="" author="wrtlprnft" version="1" name="wood_512" extension="jpg" uri="http://wrtlprnft.ath.cx/wood512.jpg" />
                 </Image>
                 <Solid>

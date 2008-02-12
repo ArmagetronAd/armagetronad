@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rScreen.h"
 #include "tDirectories.h"
 #include "tLocale.h"
+#include "tConsole.h"
 #include "tException.h"
 #include "tResourceManager.h"
 
@@ -781,17 +782,18 @@ static rCallbackBeforeScreenModeChange unload(&rITexture::UnloadAll);
 
 rResourceTexture::texlist_t rResourceTexture::textures;
 
-rResourceTexture rResourceTexture::GetTexture(tResourcePath const &path) {
+rResourceTexture::rResourceTexture(tResourcePath const &path, bool repx, bool repy) : repx_(repx), repy_(repy) {
     for(texlist_t::iterator iter = textures.begin(); iter != textures.end(); ++iter) {
         if((*iter)->path_ == path) {
-            ++(*iter)->use_;
-            return *iter;
+            tex_ = *iter;
+            tex_->Use();
+            return;
         }
     }
-    return new tex_t(path);
+    tex_ = new tex_t(path);
 }
 
-rResourceTexture::InternalTex::InternalTex(tResourcePath const &path) : rFileTexture(rTextureGroups::TEX_OBJ, tResourceManager::locateResource(path.Path().c_str()).c_str(), true, true, true, 0), use_(0), path_(path) {
+rResourceTexture::InternalTex::InternalTex(tResourcePath const &path) : rFileTexture(rTextureGroups::TEX_OBJ, tResourceManager::locateResource(path.Path().c_str()).c_str(), true, true, true, 0), use_(1), path_(path) {
     textures.push_back(this);
 }
 
@@ -810,6 +812,8 @@ void rResourceTexture::InternalTex::Release() {
 
 rResourceTexture &rResourceTexture::operator=(rResourceTexture const &other) {
     if(tex_ != other.tex_) {
+        repx_ = other.repx_;
+        repy_ = other.repy_;
         if(tex_) {
             tex_->Release();
         }
@@ -821,3 +825,19 @@ rResourceTexture &rResourceTexture::operator=(rResourceTexture const &other) {
     return *this;
 }
 
+void rResourceTexture::Select() {
+    if(tex_) {
+        tex_->Select();
+        // Override the actual tecture's settings
+        if(repx_)
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+        else
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+        if(repy_)
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+        else
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+    } else {
+        tERR_WARN("Trying to select a resource texture that's not loaded");
+    }
+}

@@ -132,7 +132,6 @@ public:
 
     //! when set, this flag inhibits storage of the alpha channel (for compatibility with some cards)
     static bool storageHack_;
-
 protected:
     virtual void ProcessImage(SDL_Surface *);       //!< process the surface before uploading it to GL
 
@@ -204,23 +203,27 @@ class rResourceTexture
     typedef std::list<InternalTex *> texlist_t;
     static texlist_t textures;
     InternalTex *tex_;
-    rResourceTexture(InternalTex *tex) : tex_(tex) { tex->Use();}
+
+    bool repx_, repy_;
 public:
     //! Use this if you want to create an empty texture object (ie if you're not sure if you actually want to store a texture)
     rResourceTexture() : tex_(0) {}
+    //! Get a resource from the repository
+    rResourceTexture(tResourcePath const &path, bool repx=false, bool repy=false);
+
     //! Copy constructor
     rResourceTexture(rResourceTexture const &other) : tex_(other.tex_) {if(tex_) tex_->Use();}
     //! Assignment is safe
     rResourceTexture &operator=(rResourceTexture const &other);
     //! This releases the texture if it's not used anymore
     ~rResourceTexture() {if(tex_) tex_->Release();}
+	//! Check if this object stores a texture
+    bool Valid() {return tex_;}
+	//! Use this texture in OpenGL
+	void Select();
     //! Get the actual texture. This object retains ownership of the texture, though
-    rFileTexture *Tex() {return tex_;}
     //! Get the path this texture was fetched from
     tResourcePath const &Path() {return tex_->path_;}
-
-    //! Get a resource from a path. This is the only way to obtain a new rResourceTexture
-    static rResourceTexture GetTexture(tResourcePath const &path);
 };
 
 // ******************************************************************************************

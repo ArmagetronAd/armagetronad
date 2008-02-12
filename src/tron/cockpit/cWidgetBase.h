@@ -157,7 +157,7 @@ class WithColorFunctions : virtual public Base {
 protected:
     rGradient ProcessGradient(tXmlParser::node cur); //!< Processes the inside of a nodes like Foreground or Background
     void ProcessGradientCore(tXmlParser::node cur, rGradient &gradient); //!< Processes the inside of a Solid or Gradient nodes
-    void ProcessImage(tXmlParser::node cur, rGradient &gradient); //!< Processes the inside of an Image node
+    void ProcessImage(tXmlParser::node cur, rGradient &gradient, int repeat); //!< Processes the inside of an Image node
 public:
     bool Process(tXmlParser::node cur); //!< just passes on to Base::Process()
 };

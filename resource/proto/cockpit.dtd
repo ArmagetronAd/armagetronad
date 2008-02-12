@@ -169,6 +169,7 @@ file that contains more information on the image and may be a case of YouMightNe
 <!ATTLIST Image
     scale_x CDATA '1'
     scale_y CDATA '1'
+    repeat (none | x | y | both) 'both'
 >
 
 <!ELEMENT Graphic EMPTY>

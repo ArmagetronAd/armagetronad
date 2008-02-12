@@ -399,11 +399,23 @@ rGradient WithColorFunctions::ProcessGradient(tXmlParser::node cur) {
             }
             ProcessGradientCore(cur, ret);
         } else if(name == "Image") {
+            int rep = 0;
+            std::map<tString, int> repeat;
+            repeat[tString("none")] = 0;
+            repeat[tString("x")] = 1;
+            repeat[tString("y")] = 2;
+            repeat[tString("both")] = 3;
+            std::map<tString, int>::iterator iter;
+            if((iter = repeat.find(cur.GetProp("repeat"))) != repeat.end()) {
+                rep = iter->second;
+            } else {
+                tERR_WARN("Repeat setting '" + cur.GetProp("repeat") + "' unknown!");
+            }
             tCoord scale;
             cur.GetProp("scale_x", scale.x);
             cur.GetProp("scale_y", scale.y);
             ret.SetTextureScale(scale);
-            ProcessImage(cur, ret);
+            ProcessImage(cur, ret, rep);
         }
     }
     return ret;
@@ -423,7 +435,7 @@ void WithColorFunctions::ProcessGradientCore(tXmlParser::node cur, rGradient &gr
     }
 }
 
-void WithColorFunctions::ProcessImage(tXmlParser::node cur, rGradient &gradient) {
+void WithColorFunctions::ProcessImage(tXmlParser::node cur, rGradient &gradient, int repeat) {
     for(cur = cur.GetFirstChild(); cur; ++cur) {
         if(cur.IsOfType("Graphic")) {
             tResourcePath path(
@@ -435,7 +447,8 @@ void WithColorFunctions::ProcessImage(tXmlParser::node cur, rGradient &gradient)
                 cur.GetProp("extension"),
                 cur.GetProp("uri")
             );
-            gradient.SetTexture(rResourceTexture::GetTexture(path));
+std::cerr << "repeat: " << repeat << std::endl;
+            gradient.SetTexture(rResourceTexture(path, repeat & 1, repeat & 2));
         }
     }
 }
