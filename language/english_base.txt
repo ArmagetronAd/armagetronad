@@ -2477,7 +2477,7 @@ access_level_change         Required access level of command \1 changed to "\2".
 access_level_error          Required access level of command \1 is "\2", you only have "\3".\n
 
 casacl_help                   For the duratioon of the rest of the configuration file  thiss directive appears in, elevate the access level.
-casacl_usage                  Usage: CASACL <required access levell> <elevated access level>\n
+casacl_usage                  Usage: CASACL <required access level> <elevated access level>\n
 
 abort_loading_name          Loading Abort
 abort_loading_description   Current config file/stream loading was aborted by command \1.
