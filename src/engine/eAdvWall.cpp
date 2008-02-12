@@ -154,7 +154,7 @@ void eWallRim::RenderAll( eCamera * camera )
 
     BeginQuads();
     for(int i=se_rimWalls.Len()-1;i>=0;i--){
-        se_rimWalls(i)->RenderReal( camera );
+        se_rimWalls(i)->RenderReal( rDisplayList::IsRecording() ? 0 : camera );
     }
     RenderEnd();
     
