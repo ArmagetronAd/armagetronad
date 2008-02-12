@@ -3932,8 +3932,16 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
         }
         else
         {
-            // render walls that have no display list
-            run->Render( camera );
+            // wall has expired, remove it
+            if ( cycle->ThisWallsLength() > 0 && cycle->GetDistance() - cycle->MaxWallsLength() > run->EndPos() )
+
+            {
+                run->Remove();
+            }
+            else
+            {
+                run->Render( camera );
+            }
         }
         run = next;
     }
