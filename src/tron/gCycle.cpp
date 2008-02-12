@@ -3979,7 +3979,6 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     // render walls;
     // first, render all lines
     sr_DepthOffset(true);
-    BeginLines();
     
     run = wallsWithDisplayList_;
     while( run )
@@ -3999,9 +3998,6 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
         glEnable(GL_TEXTURE_2D);
     
-    // then, all the quads
-    BeginQuads();
-
     run = wallsWithDisplayList_;
     while( run )
     {

@@ -1015,7 +1015,6 @@ bool upperlinecolor(REAL r,REAL g,REAL b, REAL a){
           glColor4f(r,g,b,upperline_alpha);
         */
         //glDisable(GL_TEXTURE);
-        glDisable(GL_TEXTURE_2D);
         glColor4f(r,g,b,a);
     }
     return true;
@@ -1058,11 +1057,15 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
             if ( mode == gWallRenderMode_All )
             {
                 sr_DepthOffset(true);
-                BeginLines();
             }
+
+            BeginLines();
+
             glVertex3f(p1.x,p1.y,h*hfrac);
             glVertex3f(p2.x,p2.y,h*hfrac);
 
+            // in the other modes, the caller is responsible for
+            // calling RenderEnd() and resetting the states.
             if ( mode == gWallRenderMode_All )
             {
                 RenderEnd();
@@ -1087,10 +1090,8 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
 #endif
         if ( mode & gWallRenderMode_Quads )
         {
-            if ( mode == gWallRenderMode_All )
-            {
-                BeginQuads();
-            }
+            BeginQuads();
+
             glEdgeFlag(GL_FALSE);
             glTexCoord2f(ta,hfrac);
             glVertex3f(p1.x,p1.y,extrarise);
@@ -1105,9 +1106,10 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
             
             glTexCoord2f(te,hfrac);
             glVertex3f(p2.x,p2.y,extrarise);
-
         }
 
+        // in the other modes, the caller is responsible for
+        // calling RenderEnd().
         if ( mode == gWallRenderMode_All )
         {
             RenderEnd();
@@ -1170,8 +1172,11 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
         //REAL H=h*hfrac;
 #define segs 5
         upperlinecolor(r,g,b,a);//a*afunc(rat));
-        BeginLineStrip();
 
+        if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
+            glDisable(GL_TEXTURE_2D);
+        
+        BeginLineStrip();
         for (int i=0;i<=segs;i++){
             REAL frag=i/float(segs);
             REAL rat=ra+frag*(re-ra);

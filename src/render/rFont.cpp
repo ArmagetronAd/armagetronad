@@ -160,11 +160,12 @@ void rFont::Render(unsigned char c,REAL left,REAL top,REAL right,REAL bot){
         }
         if ( sr_lastSelected != select )
         {
-            sr_lastSelected = select;
-            RenderEnd();
+            RenderEnd(true);
             select->Select(true);
-            BeginQuads();
+            sr_lastSelected = select;
         }
+
+        BeginQuads();
 
         glTexCoord2f(tleft,ttop);
         glVertex2f(   left, top);
@@ -235,7 +236,6 @@ rTextField::rTextField(REAL Left,REAL Top,
 
 rTextField::~rTextField(){
 #ifndef DEDICATED
-    BeginQuads();
     FlushLine();
     RenderEnd();
 
@@ -314,9 +314,9 @@ void rTextField::FlushLine(int len,bool newline){
                 if ( g < .5 ) g = .5;
                 if ( b < .5 ) b = .5;
             }
+            glEnable(GL_TEXTURE_2D);
         }
 
-        glEnable(GL_TEXTURE_2D);
 
         glColor4f(r * blendColor_.r_,g * blendColor_.g_,b * blendColor_.b_,a * blendColor_.a_);
         sr_lastSelected = 0;
@@ -436,8 +436,6 @@ int hex_to_int(char c){
 rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
 {
 #ifndef DEDICATED
-    bool begun = false;
-
     // run through string
     while (*c!='\0')
     {
@@ -522,11 +520,6 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
             // apply color
             if ( use )
             {
-                if ( !begun )
-                {
-                    BeginQuads();
-                    begun = true;
-                }
                 FlushLine(false);
                 cursorPos++;
                 color_ = color;
@@ -537,10 +530,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
             WriteChar(*(c++));
     }
 
-    if ( begun )
-    {
-        RenderEnd();
-    }
+    RenderEnd( true );
 #endif
 
     return *this;

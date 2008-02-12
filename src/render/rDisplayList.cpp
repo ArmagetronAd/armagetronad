@@ -98,6 +98,13 @@ bool rDisplayList::Call()
 #ifndef DEDICATED
     tASSERT( !filling_ );
 
+    // no playback while another list is recorded; this
+    // gives us a chance to agglomerate primitives.
+    if ( IsRecording() )
+    {
+        return false;
+    }
+
     if ( inhibit_ > 0 )
     {
         Clear();

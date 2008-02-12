@@ -57,7 +57,7 @@ public:
     virtual void Color(REAL r, REAL g, REAL b)        = 0;
     virtual void Color(REAL r, REAL g, REAL b,REAL a) = 0;
 
-    virtual void End(bool force=false)   = 0;
+    virtual void End(bool force=true)   = 0;
 
     virtual void BeginLines()      = 0;
     virtual void BeginTriangles()  = 0;
@@ -152,7 +152,7 @@ inline void Color(REAL r, REAL g, REAL b,REAL a){
     renderer->Color(r,g,b,a);
 }
 
-inline void RenderEnd(bool force=false){
+inline void RenderEnd(bool force=true){
     renderer->End(force);
 }
 

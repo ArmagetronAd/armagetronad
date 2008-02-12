@@ -46,10 +46,17 @@ class glRenderer: public rRenderer{
         //  return;
 
         if (lastPrimitive != p && lastPrimitive != GL_FALSE)
+        {
             glEnd();
+            sr_CheckGLError();
+        }
+
+        if ( lastPrimitive != p )
+        {
+            glBegin(p);
+        }
 
         lastPrimitive = p;
-        glBegin(p);
 
         forceglEnd = forceEnd;
     }
@@ -113,14 +120,15 @@ public:
     };
 
 
-    virtual void End(bool force=false){
+    virtual void End(bool force=true){
         //    glEnd();
         //    return;
 
-        if ((forceglEnd || force || true) && lastPrimitive!=GL_FALSE)
+        if ((forceglEnd || force ) && lastPrimitive!=GL_FALSE)
         {
             forceglEnd = false;
             glEnd();
+            sr_CheckGLError();
             lastPrimitive = GL_FALSE;
         }
     }
