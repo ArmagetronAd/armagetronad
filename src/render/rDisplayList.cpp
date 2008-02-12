@@ -48,7 +48,10 @@ public:
     };
 
     rListCounter(){ count_[Use] = count_[Create] = count_[Not] = 0; }
-    void Count( Type type ){ count_[type]++; }
+    void Count( Type type )
+    {
+        count_[type]++;
+    }
     ~rListCounter()
     {
         std::cout << "Display Lists Created: " << count_[Create] << ", used: " << count_[Use]
@@ -159,6 +162,8 @@ void rDisplayList::Clear( int inhibitGeneration )
 void rDisplayList::ClearAll()
 {
 #ifndef DEDICATED
+    tASSERT(!IsRecording());
+
     rDisplayList *run = se_displayListAnchor;
     while (run)
     {
@@ -229,6 +234,9 @@ void rDisplayListFiller::Stop()
             list_.inhibit_ = inhibit;
         }
     }
+
+    // to debug, clearing every display list may be useful:
+    // list_.Clear(0);
 #endif
 }
 
