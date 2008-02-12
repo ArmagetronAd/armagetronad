@@ -466,17 +466,16 @@ void gZone::Render( const eCamera * cam )
         glDisable(GL_CULL_FACE);
         glDepthMask(GL_FALSE);
         glBlendFunc( GL_SRC_ALPHA, GL_ONE );
-        
-        //glDisable(GL_TEXTURE);
         glDisable(GL_TEXTURE_2D);
-        
-        //	glTranslatef(pos.x,pos.y,0);
         
         if ( useAlpha )
             BeginQuads();
         else
+        {
+            sr_DepthOffset(true);
             BeginLineStrip();
-        
+        }
+
         for ( int i = sg_segments - 1; i>=0; --i )
         {
             REAL a = i * 2 * 3.14159 / REAL( sg_segments );
@@ -494,14 +493,15 @@ void gZone::Render( const eCamera * cam )
             
             if ( !useAlpha )
             {
-                glVertex3f(sa, ca, bot);
+                glVertex3f(sa, ca, 0);
                 RenderEnd();
                 BeginLineStrip();
             }
         }
         
         RenderEnd();
-        
+
+        sr_DepthOffset(false);
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
         glDepthMask(GL_TRUE);
     }

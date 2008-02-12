@@ -2460,7 +2460,7 @@ void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
     CHECKWALL;
 
 #ifndef DEDICATED
-    ClearDisplayList(5,6);
+    ClearDisplayList();
 #endif
 
 #ifdef DEBUG

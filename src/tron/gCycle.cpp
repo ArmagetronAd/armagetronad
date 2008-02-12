@@ -3958,11 +3958,6 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
         return;
     }
 
-    if ( !wallsWithDisplayList_ )
-    {
-        return;
-    }
-
     // remove and render walls without display list
     run = wallsWithDisplayList_;
     while( run )
@@ -3975,7 +3970,12 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
         }
         run = next;
     }
-    
+
+    if ( !wallsWithDisplayList_ )
+    {
+        return;
+    }
+
     // fill display list
     rDisplayListFiller filler( displayList_ );
 

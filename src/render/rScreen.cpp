@@ -996,12 +996,13 @@ void sr_DepthOffset(bool offset){
     if (offset){
         //glMatrixMode(GL_PROJECTION);
         //glScalef(.9,.9,.9);
-        glPolygonOffset(0,-5);
+        glPolygonOffset(-2,-5);
         glEnable(GL_POLYGON_OFFSET_LINE);
         glEnable(GL_POLYGON_OFFSET_POINT);
         glEnable(GL_POLYGON_OFFSET_FILL);
     }
     else{
+        glPolygonOffset(0,0);
         glDisable(GL_POLYGON_OFFSET_POINT);
         glDisable(GL_POLYGON_OFFSET_LINE);
         glDisable(GL_POLYGON_OFFSET_FILL);

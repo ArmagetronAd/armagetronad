@@ -321,7 +321,8 @@ void eGrid::display_simple( int viewer,bool floor,
     */
 
 
-    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
 
     glDisable(GL_CULL_FACE);
 
@@ -359,6 +360,8 @@ void eGrid::display_simple( int viewer,bool floor,
     }
 
     if (floor){
+        sr_DepthOffset(false);
+
         su_FetchAndStoreSDLInput();
         int floorDetail = sr_floorDetail;
 
@@ -460,6 +463,9 @@ void eGrid::display_simple( int viewer,bool floor,
             break;
         }
     }
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
 
     TexMatrix();
     glLoadIdentity();

@@ -88,6 +88,7 @@ private:
     GLuint list_;   //!< the display list
     int inhibit_;   //!< inhibit display list generation for a while
     bool filling_;  //!< set if we're just filling the list
+    bool lastAlpha_; //!< the last alpha blending value
 #endif
 };
 

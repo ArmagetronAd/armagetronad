@@ -74,6 +74,7 @@ rDisplayList::rDisplayList()
     , list_( 0 )
     , inhibit_( 0 )
     , filling_( false )
+    , lastAlpha_( false )
 #endif
 {
 }
@@ -107,6 +108,13 @@ bool rDisplayList::Call()
     // gives us a chance to agglomerate primitives.
     if ( IsRecording() )
     {
+        return false;
+    }
+
+    // check whether crucial settings changed
+    if ( sr_alphaBlend != lastAlpha_ )
+    {
+        lastAlpha_ = sr_alphaBlend;
         return false;
     }
 

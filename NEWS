@@ -77,6 +77,9 @@ If --enable-armathentication was activated:
 - new chat commands /op, /deop, /promote and /demote to change other players' access rights
 
   Featurelets:
+- Performance optimizations. Using OpenGL display lists to cache geometry.
+- Removed ztrick, antialiasing and perspective correction settings. They all had only one right
+  setting and caused us some interesting bug reports.
 - Added PLAYER_RANDOM_COLOR for lazy people who just want to have a
   color that differs from everyone else on the server.
 - Configuration files get reloaded on SIGHUP
