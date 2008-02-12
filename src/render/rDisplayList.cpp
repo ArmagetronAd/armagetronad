@@ -230,6 +230,7 @@ void rDisplayListFiller::Stop()
         {
             // call the list, making sure it really gets executed
             int inhibit = list_.inhibit_;
+            list_.inhibit_ = 0;
             list_.Call();
             list_.inhibit_ = inhibit;
         }
