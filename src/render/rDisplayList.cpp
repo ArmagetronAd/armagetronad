@@ -29,6 +29,38 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "rScreen.h"
 
+#ifdef DEBUG
+#define LIST_STATS
+#endif
+
+#define LIST_STATS
+
+#ifdef LIST_STATS
+class rListCounter
+{
+public:
+    enum Type
+    {
+        Use,    // display list used
+        Create, // created
+        Not,    // not used
+        COUNT
+    };
+
+    rListCounter(){ count_[Use] = count_[Create] = count_[Not] = 0; }
+    void Count( Type type ){ count_[type]++; }
+    ~rListCounter()
+    {
+        std::cout << "Display Lists Created: " << count_[Create] << ", used: " << count_[Use]
+                  << " and passed: " << count_[Not] << ".\n";
+    }
+private:
+    unsigned int count_[COUNT];
+};
+
+static rListCounter sr_counter;
+#endif
+
 #ifndef DEDICATED
 static rDisplayList * se_displayListAnchor = NULL;
 #endif
@@ -74,6 +106,9 @@ bool rDisplayList::Call()
 
     if ( list_ )
     {
+#ifdef LIST_STATS
+        sr_counter.Count( rListCounter::Use );
+#endif
         glCallList( list_ );
         return true;
     }
@@ -132,6 +167,9 @@ rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
     bool useList = sr_useDisplayLists != rDisplayList_Off && list_.inhibit_ == 0 && !sr_isRecording;
     if ( useList )
     {
+#ifdef LIST_STATS
+        sr_counter.Count( rListCounter::Create );
+#endif
         if ( !list_.list_ )
         {
             list_.list_=glGenLists(1);
@@ -143,6 +181,13 @@ rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
     {
         --list_.inhibit_;
     }
+
+#ifdef LIST_STATS
+    if ( !useList )
+    {
+        sr_counter.Count( rListCounter::Not );
+    }
+#endif
 #endif
 }
 
