@@ -425,7 +425,6 @@ static nSettingItem< REAL > sg_zoneAlphaConfServer( "ZONE_ALPHA_SERVER", sg_zone
 void gZone::Render( const eCamera * cam )
 {
 #ifndef DEDICATED
-
     REAL alpha = ( lastTime - createTime_ ) * .2f;
     if ( alpha > .7f )
         alpha = .7f;
@@ -434,68 +433,78 @@ void gZone::Render( const eCamera * cam )
 
     alpha *= sg_zoneAlpha * sg_zoneAlphaServer;
 
-    GLfloat m[4][4]={{rotation_.x,rotation_.y,0,0},
-                     {-rotation_.y,rotation_.x,0,0},
-                     {0,0,1,0},
-                     {pos.x,pos.y,0,1}};
-
     ModelMatrix();
     glPushMatrix();
-
-    glDisable(GL_LIGHT0);
-    glDisable(GL_LIGHT1);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_CULL_FACE);
-    glDepthMask(GL_FALSE);
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE );
-
-    //glDisable(GL_TEXTURE);
-    glDisable(GL_TEXTURE_2D);
-
-    //	glTranslatef(pos.x,pos.y,0);
-
-    glMultMatrixf(&m[0][0]);
-    //	glScalef(.5,.5,.5);
-
-	if ( sr_alphaBlend ? !sg_zoneAlphaToggle : sg_zoneAlphaToggle )
-        BeginQuads();
-    else
-        BeginLineStrip();
 
     const REAL seglen = .2f;
     const REAL bot = 0.0f;
     const REAL top = 5.0f; // + ( lastTime - createTime_ ) * .1f;
 
+    REAL r = Radius();
+    GLfloat m[4][4]={{r*rotation_.x,r*rotation_.y,0,0},
+                     {-r*rotation_.y,r*rotation_.x,0,0},
+                     {0,0,top,0},
+                     {pos.x,pos.y,bot,1}};
+
+    glMultMatrixf(&m[0][0]);
+
     glColor4f( color_.r ,color_.g,color_.b, alpha );
 
-    REAL r = Radius();
-    for ( int i = sg_segments - 1; i>=0; --i )
+	bool useAlpha = sr_alphaBlend ? !sg_zoneAlphaToggle : sg_zoneAlphaToggle;
+    static bool lastAlpha = useAlpha;
+
+    static rDisplayList zoneList;
+    if ( lastAlpha != useAlpha || !zoneList.Call() )
     {
-        REAL a = i * 2 * 3.14159 / REAL( sg_segments );
-        REAL b = a + seglen;
+        lastAlpha = useAlpha;
 
-        REAL sa = r * sin(a);
-        REAL ca = r * cos(a);
-        REAL sb = r * sin(b);
-        REAL cb = r * cos(b);
-
-        glVertex3f(sa, ca, bot);
-        glVertex3f(sa, ca, top);
-        glVertex3f(sb, cb, top);
-        glVertex3f(sb, cb, bot);
-
-        if ( sr_alphaBlend ? sg_zoneAlphaToggle : !sg_zoneAlphaToggle )
-        {
-            glVertex3f(sa, ca, bot);
-            RenderEnd();
+        rDisplayListFiller filler( zoneList );
+        
+        glDisable(GL_LIGHT0);
+        glDisable(GL_LIGHT1);
+        glDisable(GL_LIGHTING);
+        glDisable(GL_CULL_FACE);
+        glDepthMask(GL_FALSE);
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE );
+        
+        //glDisable(GL_TEXTURE);
+        glDisable(GL_TEXTURE_2D);
+        
+        //	glTranslatef(pos.x,pos.y,0);
+        
+        if ( useAlpha )
+            BeginQuads();
+        else
             BeginLineStrip();
+        
+        for ( int i = sg_segments - 1; i>=0; --i )
+        {
+            REAL a = i * 2 * 3.14159 / REAL( sg_segments );
+            REAL b = a + seglen;
+            
+            REAL sa = sin(a);
+            REAL ca = cos(a);
+            REAL sb = sin(b);
+            REAL cb = cos(b);
+            
+            glVertex3f(sa, ca, 0);
+            glVertex3f(sa, ca, 1);
+            glVertex3f(sb, cb, 1);
+            glVertex3f(sb, cb, 0);
+            
+            if ( !useAlpha )
+            {
+                glVertex3f(sa, ca, bot);
+                RenderEnd();
+                BeginLineStrip();
+            }
         }
+        
+        RenderEnd();
+        
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glDepthMask(GL_TRUE);
     }
-
-    RenderEnd();
-
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glDepthMask(GL_TRUE);
 
     glPopMatrix();
 #endif
