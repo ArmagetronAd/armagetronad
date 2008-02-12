@@ -78,6 +78,8 @@ rDisplayList::rDisplayList()
 rDisplayList::~rDisplayList()
 {
 #ifndef DEDICATED
+    tASSERT( !filling_ );
+
     Clear();
 
     tASSERT( !list_ );
@@ -182,6 +184,7 @@ rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
         if ( !list_.list_ )
         {
             list_.list_=glGenLists(1);
+            tASSERT( list_.list_ );
         }
         glNewList(list_.list_, sr_useDisplayLists == rDisplayList_CAC ? GL_COMPILE : GL_COMPILE_AND_EXECUTE );
         list_.filling_ = true;
@@ -212,6 +215,8 @@ void rDisplayListFiller::Stop()
 #ifndef DEDICATED
     if ( list_.filling_ )
     {
+        tASSERT( list_.list_ );
+
         sr_isRecording = false;
         list_.filling_ = false;
         glEndList();
