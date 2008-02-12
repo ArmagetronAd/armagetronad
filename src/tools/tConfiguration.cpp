@@ -298,7 +298,7 @@ public:
 
         if ( s.fail() )
         {
-            con << tOutput( "$sudo_usage" );
+            con << tOutput( "$casacl_usage" );
             throw tAbortLoading( st_casacl );
         }
         else if ( tCurrentAccessLevel::GetAccessLevel() > required )
@@ -312,6 +312,7 @@ public:
         }
         else
         {
+            tString().ReadLine(s); // prevent commands following this one without a newline
             tCurrentAccessLevel::currentLevel_ = elevated;
         }
     }
