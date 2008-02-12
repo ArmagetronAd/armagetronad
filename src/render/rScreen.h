@@ -131,10 +131,6 @@ extern int sr_floorDetail;
 #define rFEAT_DEFAULT 0
 #define rFEAT_ON      1
 
-extern int     sr_lineAntialias;
-extern int     sr_polygonAntialias;
-extern int     sr_perspectiveCorrection;
-
 extern bool sr_highRim;
 extern bool sr_upperSky,sr_lowerSky;
 extern bool sr_skyWobble;

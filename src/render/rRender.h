@@ -67,8 +67,6 @@ public:
     virtual void BeginTriangleStrip()  = 0;
     virtual void BeginQuadStrip()      = 0;
 
-    virtual void IsEdge(bool ie)  = 0;
-
     virtual void BeginTriangleFan()    = 0;
     virtual void BeginLineLoop()      = 0;
 
@@ -183,12 +181,6 @@ inline void BeginTriangleStrip(){
 inline void BeginQuadStrip(){
     renderer->BeginQuadStrip();
 }
-
-
-inline void IsEdge(bool ie){
-    renderer->IsEdge(ie);
-}
-
 
 inline void BeginTriangleFan(){
     renderer->BeginTriangleFan();

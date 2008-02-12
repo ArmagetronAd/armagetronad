@@ -145,10 +145,6 @@ public:
         BeginPrimitive(GL_QUADS);
     }
 
-    virtual void IsEdge(bool ie){
-        glEdgeFlag(ie ? GL_TRUE : GL_FALSE);
-    };
-
     virtual void BeginLineStrip(){
         BeginPrimitive(GL_LINE_STRIP, true);
     };

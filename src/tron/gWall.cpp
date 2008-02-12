@@ -201,15 +201,12 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
     }
 
     if (h<9000 || !sr_infinityPlane){
-        IsEdge(false);
         TexVertex(p1.x, p1.y, 0,
                   tBeg      , 1);
 
-        IsEdge(true);
         TexVertex(p1.x, p1.y, h,
                   tBeg,       1-h/Z_SCALE);
 
-        IsEdge(false);
         TexVertex(p2.x, p2.y, h,
                   tEnd,       1-h/Z_SCALE);
 
@@ -218,11 +215,9 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
     }
 
     else{
-        IsEdge(false);
         TexVertex(p1.x, p1.y, 0,
                   tBeg,       1);
 
-        IsEdge(true);
         TexCoord(0,-1/REAL(Z_SCALE),0,0);
 
 #ifndef WIN32
@@ -1077,8 +1072,6 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
 
         //glColor4f(r,g,b,a);
 
-        glColor3f(r,g,b);
-
 #ifdef XDEBUG
         REAL extrarise = 0;
         if ( this->id >= 0 )
@@ -1092,18 +1085,19 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
         {
             BeginQuads();
 
-            glEdgeFlag(GL_FALSE);
+            glColor3f(r,g,b);
             glTexCoord2f(ta,hfrac);
             glVertex3f(p1.x,p1.y,extrarise);
             
-            glEdgeFlag(GL_TRUE);
+            glColor3f(r,g,b);
             glTexCoord2f(ta,0);
             glVertex3f(p1.x,p1.y,extrarise + h*hfrac);
             
-            glEdgeFlag(GL_FALSE);
+            glColor3f(r,g,b);
             glTexCoord2f(te,0);
             glVertex3f(p2.x,p2.y,extrarise + h*hfrac);
             
+            glColor3f(r,g,b);
             glTexCoord2f(te,hfrac);
             glVertex3f(p2.x,p2.y,extrarise);
         }
@@ -1208,14 +1202,12 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
         REAL y=(p1.y+frag*(p2.y-p1.y))*(1-xfunc(rat))+ppos.y*xfunc(rat);
 
         // bottom
-        glEdgeFlag(GL_FALSE);
         glColor4f(r+cfunc(rat),g+cfunc(rat),b+cfunc(rat),a*afunc(rat));
         glTexCoord2f(ta+(te-ta)*frag,hfrac);
         glVertex3f(x,y,0);
 
         // top
 
-        glEdgeFlag(GL_TRUE);
         //glTexCoord2f(ta+(te-ta)*frag,hfrac*(1-hfunc(rat)));
         glTexCoord2f(ta+(te-ta)*frag,0);
         REAL H=h*hfrac*hfunc(rat);
