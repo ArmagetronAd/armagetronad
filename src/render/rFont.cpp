@@ -290,6 +290,7 @@ void rTextField::FlushLine(int len,bool newline){
         // render bright background
         if ( r < sr_minR && g < sr_minG && b < sr_minG || r+g+b < sr_minTotal )
         {
+            RenderEnd(true);
             glDisable(GL_TEXTURE_2D);
             if ( sr_alphaBlend )
             {
@@ -300,6 +301,7 @@ void rTextField::FlushLine(int len,bool newline){
                 REAL r=l + cwidth * len;
                 REAL b=t - cheight;
 
+                BeginQuads();
                 glVertex2f(   l, t);
 
                 glVertex2f(   r ,t);
@@ -314,6 +316,7 @@ void rTextField::FlushLine(int len,bool newline){
                 if ( g < .5 ) g = .5;
                 if ( b < .5 ) b = .5;
             }
+            RenderEnd(true);
             glEnable(GL_TEXTURE_2D);
         }
 
