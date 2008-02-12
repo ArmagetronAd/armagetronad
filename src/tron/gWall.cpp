@@ -1052,6 +1052,11 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
             if ( mode == gWallRenderMode_All )
             {
                 sr_DepthOffset(true);
+                if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
+                {
+                    RenderEnd();
+                    glDisable(GL_TEXTURE_2D);
+                }
             }
 
             BeginLines();

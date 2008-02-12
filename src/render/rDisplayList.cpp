@@ -223,7 +223,10 @@ void rDisplayListFiller::Stop()
 
         if ( sr_useDisplayLists == rDisplayList_CAC )
         {
+            // call the list, making sure it really gets executed
+            int inhibit = list_.inhibit_;
             list_.Call();
+            list_.inhibit_ = inhibit;
         }
     }
 #endif

@@ -3998,6 +3998,8 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     // render walls;
     // first, render all lines
     sr_DepthOffset(true);
+    if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
+        glDisable(GL_TEXTURE_2D);
     
     run = wallsWithDisplayList_;
     while( run )
