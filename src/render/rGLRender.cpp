@@ -70,7 +70,7 @@ class glRenderer: public rRenderer{
     }
 
 public:
-    glRenderer():lastPrimitive(GL_FALSE), lastMatrix(GL_FALSE){
+    glRenderer():lastPrimitive(GL_FALSE), forceglEnd(false), lastMatrix(GL_FALSE){
         ChangeFlags(0xffffffff,0);
     };
 

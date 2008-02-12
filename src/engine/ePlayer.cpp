@@ -3493,6 +3493,7 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     greeted     =false;
     chatting_   =false;
     spectating_ =false;
+    stealth_    =false;
     disconnected=false;
     chatFlags_	=0;
 
