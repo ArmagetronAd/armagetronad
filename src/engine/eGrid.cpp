@@ -2135,6 +2135,8 @@ void eGrid::Clear(){
     A=B=C=NULL;
     a=b=c=NULL;
 
+    eGameObject::DeleteAll( this );
+
     //	se_faceReplacements.clear();
 }
 

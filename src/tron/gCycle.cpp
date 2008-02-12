@@ -2345,11 +2345,16 @@ gCycle::~gCycle(){
     */
 }
 
+#ifndef DEDICATED
+// manager for walls not belonging to any cycle
+static gCycleWallsDisplayListManager lostWalls_;
+#endif
+
 void gCycle::OnRemoveFromGame()
 {
     // keep this cycle alive
     tJUST_CONTROLLED_PTR< gCycle > keep;
-    
+
     if ( this->GetRefcount() > 0 )
     {
         keep = this;
@@ -2365,7 +2370,17 @@ void gCycle::OnRemoveFromGame()
     currentWall=NULL;
     lastWall=NULL;
 
-    gCycleMovement::OnRemoveFromGame();
+    // only really leave if we have no walls left
+#ifndef DEDICATED
+    if ( displayList_.Walls() )
+    {
+        Die( lastTime );
+    }
+    else
+#endif
+    {
+        gCycleMovement::OnRemoveFromGame();
+    }
 }
 
 // called when the round ends
@@ -2484,6 +2499,14 @@ REAL gCycle::CalculatePredictPosition( gPredictPositionData & data )
 }
 
 bool gCycle::Timestep(REAL currentTime){
+    // keep cycle in list for rendering as long as walls are active
+#ifndef DEDICATED
+    if ( !Alive() && displayList_.Walls() )
+    {
+        return false;
+    }
+#endif
+
     // clear out dangerous info when we're done
     gMaxSpaceAheadHitInfoClearer hitInfoClearer( maxSpaceHit_ );
 
@@ -2670,6 +2693,14 @@ bool gCycle::Timestep(REAL currentTime){
             ProcessShoot(false);
         }
     }
+
+    // keep cycle in list for rendering as long as walls are active
+#ifndef DEDICATED
+    if ( displayList_.Walls() )
+    {
+        return false;
+    }
+#endif
 
     return ret;
 }
@@ -4047,7 +4078,147 @@ public:
 
 }
 
+static REAL mp_eWall_stretch=4;
+static tSettingItem<REAL> mpws
+("MOVIEPACK_WALL_STRETCH",mp_eWall_stretch);
+
+static rFileTexture dir_eWall(rTextureGroups::TEX_WALL,"textures/dir_wall.png",1,0,1);
+static rFileTexture dir_eWall_moviepack(rTextureGroups::TEX_WALL,"moviepack/dir_wall.png",1,0,1);
+
+static void dir_eWall_select()
+{
+    if (sg_MoviePack()){
+        TexMatrix();
+        IdentityMatrix();
+        ScaleMatrix(1/mp_eWall_stretch,1,1);
+        dir_eWall_moviepack.Select();
+    }
+    else
+    {
+        dir_eWall.Select();
+    }
+}
+
+gCycleWallsDisplayListManager::gCycleWallsDisplayListManager()
+    : wallList_(0)
+    , wallsWithDisplayList_(0)
+    , wallsWithDisplayListMinDistance_(0)
+{
+}
+
+bool gCycleWallsDisplayListManager::CannotHaveList( REAL distance, gCycle const * cycle )
+{
+    return
+            ( !cycle->Alive() && gCycle::WallsStayUpDelay() >= 0 && se_GameTime()-cycle->DeathTime()-gCycle::WallsStayUpDelay() > 0 ) 
+
+            ||
+
+            ( cycle->ThisWallsLength() > 0 && cycle->GetDistance() - cycle->ThisWallsLength() > distance );
+}
+
+void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * cycle )
+{
+    dir_eWall_select();
+
+    glDisable(GL_CULL_FACE);
+    
+    gNetPlayerWall * run = 0;
+    // transfer walls with display list into their list
+
+    run = wallList_;
+    while( run )
+    {
+        gNetPlayerWall * next = run->Next();
+        if ( run->HasDisplayList() )
+        {
+            run->Insert( wallsWithDisplayList_ );
+            displayList_.Clear();
+        }
+        else
+        {
+            // wall has expired, remove it
+            if ( cycle->ThisWallsLength() > 0 && cycle->GetDistance() - cycle->MaxWallsLength() > run->EndPos() )
+
+            {
+                run->Remove();
+            }
+            else
+            {
+                run->Render( camera );
+            }
+        }
+        run = next;
+    }
+
+    // clear display list if needed
+    if ( CannotHaveList( wallsWithDisplayListMinDistance_, cycle ) )
+    {
+        displayList_.Clear();
+    }
+
+    // call display list
+    if ( displayList_.Call() )
+    {
+        return;
+    }
+
+    // remove and render walls without display list
+    run = wallsWithDisplayList_;
+    while( run )
+    {
+        gNetPlayerWall * next = run->Next();
+        if ( !run->HasDisplayList() )
+        {
+            run->Render( camera );
+            run->Insert( wallList_ );
+        }
+        run = next;
+    }
+    
+    // fill display list
+    rDisplayListFiller filler( displayList_ );
+
+    wallsWithDisplayListMinDistance_ = 1E+30;
+
+    // render walls;
+    // first, render all lines
+    sr_DepthOffset(true);
+    BeginLines();
+    
+    run = wallsWithDisplayList_;
+    while( run )
+    {
+        if ( run->BegPos() < wallsWithDisplayListMinDistance_ )
+        {
+            wallsWithDisplayListMinDistance_ = run->BegPos();
+        }
+
+        run->RenderList( true, gNetPlayerWall::gWallRenderMode_Lines );
+        run = run->Next();
+    }
+
+    RenderEnd();
+    sr_DepthOffset(false);
+    if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
+        glEnable(GL_TEXTURE_2D);
+    
+    // then, all the quads
+    BeginQuads();
+
+    run = wallsWithDisplayList_;
+    while( run )
+    {
+        run->RenderList( true, gNetPlayerWall::gWallRenderMode_Quads );
+        run = run->Next();
+    }
+
+    RenderEnd();
+}
+
 void gCycle::Render(const eCamera *cam){
+    displayList_.RenderAll( cam, this );
+
+    // are we blinking from invulnerability?
     bool blinking = false;
     if ( lastTime > spawnTime_ && !Vulnerable() )
     {

@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "eAdvWall.h"
 #include "nNetObject.h"
+#include "rDisplayList.h"
 //#include "nObserver.h"
 class gExplosion;
 class gCycle;
@@ -144,7 +145,7 @@ private:
 
 
 // the sn_netObjects that represents eWalls across the network.
-class gNetPlayerWall: public nNetObject{
+class gNetPlayerWall: public tListItem< gNetPlayerWall >, public nNetObject{
     friend class gCycle;
     int id,griddedid;
 
@@ -224,9 +225,18 @@ public:
 
 
 #ifndef DEDICATED
+    //! should the whole wall be rendered or just the line/quad segnemts?
+    //! indivisual segments will be rendered without the glBegin/End block.
+    enum gWallRenderMode
+    {
+        gWallRenderMode_Lines = 1,
+        gWallRenderMode_Quads = 2,
+        gWallRenderMode_All =   3
+    };
+
     virtual void Render(const eCamera *cam);
-    void RenderList(bool list);
-    virtual void RenderNormal(const eCoord &x1,const eCoord &x2,REAL ta,REAL te,REAL r,REAL g,REAL b,REAL a);
+    void RenderList(bool list, gWallRenderMode mode = gWallRenderMode_All );
+    virtual void RenderNormal(const eCoord &x1,const eCoord &x2,REAL ta,REAL te,REAL r,REAL g,REAL b,REAL a, gWallRenderMode mode );
     virtual void RenderBegin(const eCoord &x1,const eCoord &x2,REAL ta,REAL te,REAL ra,REAL rb,REAL r,REAL g,REAL b,REAL a);
 #endif
 
@@ -255,10 +265,18 @@ public:
     static void Clear(); // delete all sg_netPlayerWalls.
 
     void Check() const;
+
+    bool HasDisplayList()
+    {
+        return displayList_.IsSet();
+    }
+
+    //! clears the display list
+    void ClearDisplayList();
 private:
     tArray<gPlayerWallCoord> coords_;
 
-    unsigned int displayList_;
+    rDisplayList displayList_;
 };
 
 extern tList<gNetPlayerWall> sg_netPlayerWalls;

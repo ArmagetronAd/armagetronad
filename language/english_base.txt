@@ -1918,7 +1918,13 @@ misc_fps_help			Toggles the display of the current FPS (frames per secon) rate i
 
 #tweaks menu
 tweaks_displaylists_text	Display Lists:
-tweaks_displaylists_help	Display lists are a feature of OpenGL for rendering the same thing many times; it is normally used for the cycles. Some implementations are broken however; if you do no see the cycles, you should disable this feature.
+tweaks_displaylists_help	Display lists are a feature of OpenGL for rendering the same thing many times; it is normally used for the cycles and other geometry. Some implementations are broken however; if you do no see the cycles, you should disable this feature.
+tweaks_displaylists_off_text Off
+tweaks_displaylists_off_help Don't use display lists at all.
+tweaks_displaylists_cac_text Create and Call
+tweaks_displaylists_cac_help Use displaylists; Create them and call them directly. This is the recommended way.
+tweaks_displaylists_cae_text Create and Execute
+tweaks_displaylists_cae_help Use displaylists; Create them let them be executed while they are filled. The expers say this is slower than Create and Call.
 
 tweaks_ztrick_text		ZTrick:
 tweaks_ztrick_help		A speedup that probably only works on old 3dfx cards: instead of clearing the screen after each frame, we just draw the backgroud (floor and rim walls).

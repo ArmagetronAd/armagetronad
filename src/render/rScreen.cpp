@@ -70,7 +70,7 @@ static int default_texturemode = GL_LINEAR_MIPMAP_LINEAR;
 #endif
 
 bool sr_ZTrick=false;
-bool sr_useDisplayLists=false;
+rDisplayListUsage sr_useDisplayLists=rDisplayList_Off;
 
 static int width[ArmageTron_Custom+2]  = {0, 320, 320, 400, 512, 640, 800, 1024	, 1280, 1280, 1280, 1600, 1680, 2048,800,320};
 static int height[ArmageTron_Custom+2] = {0, 200, 240, 300, 384, 480, 600,  768	,  800,  854, 1024, 1200, 1050, 1572,600,200};
@@ -863,7 +863,7 @@ void sr_LoadDefaultConfig(){
     sr_perspectiveCorrection=rFEAT_DEFAULT;
     sr_alphaBlend=true;
     sr_ZTrick=false;
-    sr_useDisplayLists=false;
+    sr_useDisplayLists=rDisplayList_Off;
     sr_textOut=true;
     sr_dither=true;
     sr_smoothShading=true;
@@ -913,7 +913,7 @@ void sr_LoadDefaultConfig(){
     else if(strstr(gl_vendor,"NVIDIA")){
         // infinity , display lists and glFlush swapping work for NVIDIA
         sr_infinityPlane=true;
-        sr_useDisplayLists=true;
+        sr_useDisplayLists=rDisplayList_CAC;
         rSysDep::swapMode_=rSysDep::rSwap_glFlush;
     }
 #ifdef MACOSX

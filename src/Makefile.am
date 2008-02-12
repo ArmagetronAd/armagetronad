@@ -92,6 +92,7 @@ libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentication
 
 librender_a_SOURCES=render/rConsole.cpp render/rConsoleGraph.cpp render/rConsole.h render/rFont.cpp\
 	render/rFont.h render/rGL.h render/rGLRender.cpp render/rModel.cpp render/rModel.h render/rRender.cpp\
+    render/rDisplayList.h render/rDisplayList.cpp \
 	render/rRender.h render/rScreen.cpp render/rScreen.h render/rSDL.h render/rSysdep.cpp render/rSysdep.h\
 	render/rTexture.cpp render/rTexture.h render/rViewport.cpp render/rViewport.h
 

@@ -37,6 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eNetGameObject.h"
 #include "tList.h"
 #include "nObserver.h"
+#include "rDisplayList.h"
 
 #include "gCycleMovement.h"
 
@@ -116,6 +117,35 @@ private:
 
 class gCycleChatBot;
 
+#ifndef DEDICATED
+class gCycleWallsDisplayListManager
+{
+    friend class gNetPlayerWall;
+
+public:
+    gCycleWallsDisplayListManager();
+
+    //! checks whether a wall at a certain distance can have a display list
+    static bool CannotHaveList( REAL distance, gCycle const * cycle );
+
+    void RenderAll( eCamera const * camera, gCycle * cycle );
+    bool Walls() const
+    {
+        return wallList_ || wallsWithDisplayList_;
+    }
+
+    void Clear()
+    {
+        displayList_.Clear();
+    }
+private:
+    gNetPlayerWall *                wallList_;                      //!< linked list of all walls
+    gNetPlayerWall *                wallsWithDisplayList_;          //!< linked list of all walls with display list    
+    rDisplayList                    displayList_;                   //!< combined display list
+    REAL                            wallsWithDisplayListMinDistance_; //!< minimal distance of the walls with display list
+};
+#endif
+
 // a complete lightcycle
 class gCycle: public gCycleMovement
 {
@@ -178,6 +208,10 @@ public:
 
 private:
     void TransferPositionCorrectionToDistanceCorrection();
+
+#ifndef DEDICATED
+    gCycleWallsDisplayListManager displayList_;                     //!< display list manager
+#endif
 
     tCHECKED_PTR(gNetPlayerWall)	currentWall;                    //!< the wall that currenly is attached to the cycle
     tCHECKED_PTR(gNetPlayerWall)	lastWall;                       //!< the last wall that was attached to this cycle

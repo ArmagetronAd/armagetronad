@@ -474,12 +474,11 @@ void eGrid::display_simple( int viewer,bool floor,
     //  glDisable(GL_TEXTURE_GEN_Q);
     //  glDisable(GL_TEXTURE_GEN_R);
 
-    glEnable(GL_DEPTH_TEST);
-
     if(eWalls){
-        for(int i=se_rimWalls.Len()-1;i>=0;i--){
+        {
             su_FetchAndStoreSDLInput();
-            se_rimWalls(i)->RenderReal(cameras(viewer));
+    
+            eWallRim::RenderAll( cameras(viewer) );
         }
 
         if (sr_lowerSky && sr_highRim){
@@ -506,8 +505,8 @@ void eGrid::display_simple( int viewer,bool floor,
         glEnable(GL_DEPTH_TEST);
 
     if (eWalls){
-        glDisable(GL_CULL_FACE);
-        draw_eWall(this,viewer,0,zNear,cameras(viewer));
+        // glDisable(GL_CULL_FACE);
+        // draw_eWall(this,viewer,0,zNear,cameras(viewer));
 
         /*
         #ifdef DEBUG

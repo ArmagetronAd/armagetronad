@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tLinkedList.h"
 #include <math.h>
 #include "rGL.h"
+#include "rDisplayList.h"
 
 class Vec3{
 public:
@@ -56,8 +57,9 @@ public:
     ~rModelFace(){};
 };
 
-class rModel: public tListItem<rModel>{
-    GLuint displayList;
+class rModel
+{
+    rDisplayList displayList_;
 
     tArray<Vec3> vertices;
     tArray<Vec3> texVert;
@@ -70,8 +72,6 @@ public:
     ~rModel();
 
     void Render();
-
-    static void UnloadAllDisplayLists();
 };
 
 #endif

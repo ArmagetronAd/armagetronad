@@ -304,7 +304,7 @@ public:
         else if ( tCurrentAccessLevel::GetAccessLevel() > required )
         {
             con << tOutput( "$access_level_error",
-                            "SUDO",  
+                            "SUDO",
                             tCurrentAccessLevel::GetName( required ),
                             tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() )
                 );
@@ -933,10 +933,14 @@ void tConfItemLine::ReadVal(std::istream &s){
     if(strcmp(dummy,*target)){
         if (printChange)
         {
+            tColoredString oldval;
+            oldval << *target << tColoredString::ColorString(1,1,1);
+            tColoredString newval;
+            newval << dummy << tColoredString::ColorString(1,1,1);
             tOutput o;
             o.SetTemplateParameter(1, title);
-            o.SetTemplateParameter(2, *target);
-            o.SetTemplateParameter(3, dummy);
+            o.SetTemplateParameter(2, oldval);
+            o.SetTemplateParameter(3, newval);
             o << "$config_value_changed";
             con << o;
         }

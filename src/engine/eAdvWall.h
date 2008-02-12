@@ -45,7 +45,6 @@ public:
 
     virtual bool Splittable() const;
 
-
     //  virtual void Split(eWall *& w1,eWall *& w2,REAL a);
 
 #ifndef DEDICATED
@@ -57,7 +56,7 @@ public:
     }
 #endif
 
-virtual REAL Height() const{return height;}
+    virtual REAL Height() const{return height;}
 
     virtual REAL SeeHeight() const{return height*40;}
 
@@ -70,6 +69,11 @@ virtual REAL Height() const{return height;}
 
     //! is x by offset inside the bounds of the rim eWalls?
     static bool IsBound(const eCoord &x,REAL offset=0);
+
+    //! renders all rim walls
+    static void RenderAll( eCamera * camera ); 
+    //! destroys the display list (call when geometry is updated)
+    static void DestroyDisplayList();
     //! brings x into the bounds of the rim eWalls with a min distance of offset
     static REAL Bound(eCoord &x,REAL offset=0);
     //! brings out inside the bounds of the rim walls, moving it closer to in.
