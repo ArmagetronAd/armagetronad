@@ -1794,13 +1794,7 @@ void Render(eGrid *grid, REAL time, bool swap=true){
 
         if (swap){
             rSysDep::SwapGL();
-
-            if(!sr_ZTrick ||
-                    (!sr_highRim && !sr_lowerSky && !sr_upperSky) ||
-                    sr_floorDetail<rFLOOR_TEXTURE ||
-                    sr_floorMirror==rMIRROR_OBJECTS){
-                rSysDep::ClearGL();
-            }
+            rSysDep::ClearGL();
         }
     }
     else

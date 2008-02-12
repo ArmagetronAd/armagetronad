@@ -666,7 +666,6 @@ swapmode_glfinish_text  Finish
 swapmode_glfinish_help  Calls glFinish() to sync graphics output. This is guaranteed to prevent graphics lagging behind input, but causes loss of framerate on some systems and full CPU load on others. Use if Flush does not work.
 swap_mode_help          Determines the commands used to sync graphics and input. 0: do nothing, 1: call glFlush(), 2: call glFinish().
 
-ztrick_help			    Performance tweak; does not work on most Windows systems
 texture_mode_0_help		Floor Texture:
 texture_mode_1_help		Wall Textures:
 texture_mode_2_help		Object Textures:
@@ -1913,9 +1912,6 @@ tweaks_displaylists_cac_text Create and Call
 tweaks_displaylists_cac_help Use displaylists; Create them and call them directly. This is the recommended way.
 tweaks_displaylists_cae_text Create and Execute
 tweaks_displaylists_cae_help Use displaylists; Create them let them be executed while they are filled. The expers say this is slower than Create and Call.
-
-tweaks_ztrick_text		ZTrick:
-tweaks_ztrick_help		A speedup that probably only works on old 3dfx cards: instead of clearing the screen after each frame, we just draw the backgroud (floor and rim walls).
 
 tweaks_infinity_text		Infinity:
 tweaks_infinity_help		Some planes (grid, sky...) have an infinite extension; if this feature is enabled, they are really drawn as infinite planes. Some OpenGL renderers do not seem to like this (all Windows versions I have seen...); disable it if the floor or sky textures are screwed up.

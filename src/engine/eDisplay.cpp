@@ -321,7 +321,7 @@ void eGrid::display_simple( int viewer,bool floor,
     */
 
 
-    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 
     glDisable(GL_CULL_FACE);
 
@@ -494,11 +494,7 @@ void eGrid::display_simple( int viewer,bool floor,
             glLoadIdentity();
             ModelMatrix();
         }
-
-        glEnable(GL_DEPTH_TEST);
     }
-    else
-        glEnable(GL_DEPTH_TEST);
 
     if (eWalls){
         // glDisable(GL_CULL_FACE);

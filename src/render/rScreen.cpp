@@ -69,7 +69,6 @@ SDL_Surface *sr_screen=NULL; // our window
 static int default_texturemode = GL_LINEAR_MIPMAP_LINEAR;
 #endif
 
-bool sr_ZTrick=false;
 rDisplayListUsage sr_useDisplayLists=rDisplayList_Off;
 
 static int width[ArmageTron_Custom+2]  = {0, 320, 320, 400, 512, 640, 800, 1024	, 1280, 1280, 1280, 1600, 1680, 2048,800,320};
@@ -854,7 +853,6 @@ void sr_LoadDefaultConfig(){
 
     // High detail defaults; no problem for your ordinary 3d-card.
     sr_alphaBlend=true;
-    sr_ZTrick=false;
     sr_useDisplayLists=rDisplayList_Off;
     sr_textOut=true;
     sr_dither=true;

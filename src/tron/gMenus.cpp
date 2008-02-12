@@ -518,10 +518,6 @@ static uSelectEntry<rDisplayListUsage> dl_off(dl,"$tweaks_displaylists_off_text"
 static uSelectEntry<rDisplayListUsage> dl_cac(dl,"$tweaks_displaylists_cac_text","$tweaks_displaylists_cac_help",rDisplayList_CAC);
 static uSelectEntry<rDisplayListUsage> dl_cae(dl,"$tweaks_displaylists_cae_text","$tweaks_displaylists_cae_help",rDisplayList_CAE);
 
-static uMenuItemToggle zt
-(&screen_menu_tweaks,"$tweaks_ztrick_text",
- "$tweaks_ztrick_help",sr_ZTrick);
-
 static uMenuItemToggle infp
 (&screen_menu_tweaks,"$tweaks_infinity_text",
  "$tweaks_infinity_help"
