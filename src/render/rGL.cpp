@@ -31,11 +31,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <sstream>
 #include <iomanip>
 
-#ifdef DEBUG
+#ifdef AA_GL_ERROR_CHECKING
 void sr_CheckGLError()
 {
-#ifdef DEBUG
-#ifndef DEDICATED
     GLenum error = glGetError();
     if ( error != GL_NO_ERROR )
     {
@@ -49,7 +47,5 @@ void sr_CheckGLError()
             st_Breakpoint();
         reported = true;
     }
-#endif
-#endif
 }
 #endif
