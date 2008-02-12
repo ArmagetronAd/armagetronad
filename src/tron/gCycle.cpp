@@ -3968,7 +3968,11 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
 
     wallsWithDisplayListMinDistance_ = 1E+30;
 
-    // render walls
+    // render walls;
+    // first, render all lines
+    sr_DepthOffset(true);
+    BeginLines();
+    
     run = wallsWithDisplayList_;
     while( run )
     {
@@ -3977,9 +3981,26 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
             wallsWithDisplayListMinDistance_ = run->BegPos();
         }
 
-        run->Render( camera );
+        run->RenderList( true, gNetPlayerWall::gWallRenderMode_Lines );
         run = run->Next();
     }
+
+    RenderEnd();
+    sr_DepthOffset(false);
+    if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
+        glEnable(GL_TEXTURE_2D);
+    
+    // then, all the quads
+    BeginQuads();
+
+    run = wallsWithDisplayList_;
+    while( run )
+    {
+        run->RenderList( true, gNetPlayerWall::gWallRenderMode_Quads );
+        run = run->Next();
+    }
+
+    RenderEnd();
 }
 
 void gCycle::Render(const eCamera *cam){

@@ -225,9 +225,18 @@ public:
 
 
 #ifndef DEDICATED
+    //! should the whole wall be rendered or just the line/quad segnemts?
+    //! indivisual segments will be rendered without the glBegin/End block.
+    enum gWallRenderMode
+    {
+        gWallRenderMode_Lines = 1,
+        gWallRenderMode_Quads = 2,
+        gWallRenderMode_All =   3
+    };
+
     virtual void Render(const eCamera *cam);
-    void RenderList(bool list);
-    virtual void RenderNormal(const eCoord &x1,const eCoord &x2,REAL ta,REAL te,REAL r,REAL g,REAL b,REAL a);
+    void RenderList(bool list, gWallRenderMode mode = gWallRenderMode_All );
+    virtual void RenderNormal(const eCoord &x1,const eCoord &x2,REAL ta,REAL te,REAL r,REAL g,REAL b,REAL a, gWallRenderMode mode );
     virtual void RenderBegin(const eCoord &x1,const eCoord &x2,REAL ta,REAL te,REAL ra,REAL rb,REAL r,REAL g,REAL b,REAL a);
 #endif
 

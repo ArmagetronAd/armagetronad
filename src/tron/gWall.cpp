@@ -824,7 +824,7 @@ void gPlayerWall::Render(const eCamera *cam){
     RenderList(true);
 }
 
-void gNetPlayerWall::Render(const eCamera *cam){
+void gNetPlayerWall::Render(const eCamera *cam ){
     if (!cycle_)
         return;
     RenderList(true);
@@ -857,7 +857,7 @@ void gPlayerWall::RenderList(bool list)
     netWall_->RenderList( list );
 }
 
-void gNetPlayerWall::RenderList(bool list){
+void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
     if ( !cycle_ )
     {
         return;
@@ -972,12 +972,13 @@ void gNetPlayerWall::RenderList(bool list){
             }
 
             if (te+gBEG_LEN<=time){
-                RenderNormal(p1,p2,ta,te,r,g,b,a);
+                RenderNormal(p1,p2,ta,te,r,g,b,a,renderMode);
             }
 
             else{ // complicated
                 // can't squeeze that into a display list
                 ClearDisplayList();
+                tASSERT( renderMode == gWallRenderMode_All );
 
                 if (ta+gBEG_LEN>=time){
                     RenderBegin(p1,p2,ta,te,
@@ -992,7 +993,7 @@ void gNetPlayerWall::RenderList(bool list){
                                 ta+(te-ta)*s,te,0,
                                 1+(te-time)/gBEG_LEN,
                                 r,g,b,a);
-                    RenderNormal(p1,pm,ta,ta+(te-ta)*s,r,g,b,a);
+                    RenderNormal(p1,pm,ta,ta+(te-ta)*s,r,g,b,a, gWallRenderMode_All );
                 }
             }
         }
@@ -1020,7 +1021,7 @@ bool upperlinecolor(REAL r,REAL g,REAL b, REAL a){
     return true;
 }
 
-void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL te,REAL r,REAL g,REAL b,REAL a){
+void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL te,REAL r,REAL g,REAL b,REAL a, gWallRenderMode mode ){
     REAL hfrac=1;
 
     if (bool(cycle_) && !cycle_->Alive() && gCycle::WallsStayUpDelay() >= 0 ){
@@ -1044,17 +1045,24 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
 
 
     if (hfrac>0){
-        if (upperlinecolor(r,g,b,a)){
+        if (upperlinecolor(r,g,b,a) && ( mode & gWallRenderMode_Lines ) ){
 
             // draw additional upper line
-            sr_DepthOffset(true);
-            BeginLines();
+            if ( mode == gWallRenderMode_All )
+            {
+                sr_DepthOffset(true);
+                BeginLines();
+            }
             glVertex3f(p1.x,p1.y,h*hfrac);
             glVertex3f(p2.x,p2.y,h*hfrac);
-            RenderEnd();
-            sr_DepthOffset(false);
-            if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
-                glEnable(GL_TEXTURE_2D);
+
+            if ( mode == gWallRenderMode_All )
+            {
+                RenderEnd();
+                sr_DepthOffset(false);
+                if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
+                    glEnable(GL_TEXTURE_2D);
+            }
         }
 
         //glColor4f(r,g,b,a);
@@ -1070,22 +1078,33 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
 #else
         static const REAL extrarise = 0;
 #endif
-        BeginQuads();
-        glEdgeFlag(GL_FALSE);
-        glTexCoord2f(ta,hfrac);
-        glVertex3f(p1.x,p1.y,extrarise);
+        if ( mode & gWallRenderMode_Quads )
+        {
+            if ( mode == gWallRenderMode_All )
+            {
+                BeginQuads();
+            }
+            glEdgeFlag(GL_FALSE);
+            glTexCoord2f(ta,hfrac);
+            glVertex3f(p1.x,p1.y,extrarise);
+            
+            glEdgeFlag(GL_TRUE);
+            glTexCoord2f(ta,0);
+            glVertex3f(p1.x,p1.y,extrarise + h*hfrac);
+            
+            glEdgeFlag(GL_FALSE);
+            glTexCoord2f(te,0);
+            glVertex3f(p2.x,p2.y,extrarise + h*hfrac);
+            
+            glTexCoord2f(te,hfrac);
+            glVertex3f(p2.x,p2.y,extrarise);
 
-        glEdgeFlag(GL_TRUE);
-        glTexCoord2f(ta,0);
-        glVertex3f(p1.x,p1.y,extrarise + h*hfrac);
+        }
 
-        glEdgeFlag(GL_FALSE);
-        glTexCoord2f(te,0);
-        glVertex3f(p2.x,p2.y,extrarise + h*hfrac);
-
-        glTexCoord2f(te,hfrac);
-        glVertex3f(p2.x,p2.y,extrarise);
-        RenderEnd();
+        if ( mode == gWallRenderMode_All )
+        {
+            RenderEnd();
+        }
     }
 }
 
