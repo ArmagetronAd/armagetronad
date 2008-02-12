@@ -1304,14 +1304,14 @@ REAL gPlayerWall::LocalToGlobal( REAL a ) const
     return ret;
 }
 
-void gNetPlayerWall::ClearDisplayList()
+void gNetPlayerWall::ClearDisplayList( int inhibitThis, int inhibitCycle )
 {
 #ifndef DEDICATED
     if ( HasDisplayList() && cycle_ )
     {
-        cycle_->displayList_.Clear();
+        cycle_->displayList_.Clear( inhibitCycle );
     }
-    displayList_.Clear();
+    displayList_.Clear( inhibitThis );
 #endif
 }
 
@@ -2463,7 +2463,7 @@ void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
     CHECKWALL;
 
 #ifndef DEDICATED
-    ClearDisplayList();
+    ClearDisplayList(5,6);
 #endif
 
 #ifdef DEBUG

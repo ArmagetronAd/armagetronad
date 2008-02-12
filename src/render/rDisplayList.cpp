@@ -105,9 +105,10 @@ bool rDisplayList::Call()
         return false;
     }
 
-    if ( inhibit_ > 0 )
+    if ( inhibit_ > 0 && list_ )
     {
         Clear();
+        --inhibit_;
         return false;
     }
 
@@ -128,6 +129,7 @@ bool rDisplayList::Call()
 void rDisplayList::Clear( int inhibitGeneration )
 {
 #ifndef DEDICATED
+
     // clear the list
     if ( !filling_ && list_ )
     {
@@ -137,7 +139,7 @@ void rDisplayList::Clear( int inhibitGeneration )
     else
     {
         // clear it later
-        if ( inhibitGeneration < 1 )
+        if ( list_ && inhibitGeneration < 1 )
         {
             inhibitGeneration = 1;
         }
@@ -183,6 +185,7 @@ rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
         }
         glNewList(list_.list_, sr_useDisplayLists == rDisplayList_CAC ? GL_COMPILE : GL_COMPILE_AND_EXECUTE );
         list_.filling_ = true;
+        sr_isRecording = true;
     }
     else if ( list_.inhibit_ > 0 )
     {
@@ -209,6 +212,7 @@ void rDisplayListFiller::Stop()
 #ifndef DEDICATED
     if ( list_.filling_ )
     {
+        sr_isRecording = false;
         list_.filling_ = false;
         glEndList();
 

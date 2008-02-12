@@ -3928,7 +3928,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
         if ( run->HasDisplayList() )
         {
             run->Insert( wallsWithDisplayList_ );
-            displayList_.Clear();
+            displayList_.Clear(0);
         }
         else
         {
@@ -3949,11 +3949,16 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     // clear display list if needed
     if ( CannotHaveList( wallsWithDisplayListMinDistance_, cycle ) )
     {
-        displayList_.Clear();
+        displayList_.Clear(0);
     }
 
     // call display list
     if ( displayList_.Call() )
+    {
+        return;
+    }
+
+    if ( !wallsWithDisplayList_ )
     {
         return;
     }
@@ -3973,6 +3978,20 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     
     // fill display list
     rDisplayListFiller filler( displayList_ );
+
+    if ( !rDisplayList::IsRecording() )
+    {
+        // display list recording did not start; render traditionally
+        run = wallsWithDisplayList_;
+        while( run )
+        {   
+            gNetPlayerWall * next = run->Next();
+            run->Render( camera );
+            run = next;
+        }
+
+        return;
+    }
 
     wallsWithDisplayListMinDistance_ = 1E+30;
 

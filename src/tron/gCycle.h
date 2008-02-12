@@ -133,9 +133,9 @@ public:
         return wallList_ || wallsWithDisplayList_;
     }
 
-    void Clear()
+    void Clear( int inhibit = 0 )
     {
-        displayList_.Clear();
+        displayList_.Clear( inhibit );
     }
 private:
     gNetPlayerWall *                wallList_;                      //!< linked list of all walls
