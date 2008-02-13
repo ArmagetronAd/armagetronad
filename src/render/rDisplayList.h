@@ -73,13 +73,20 @@ public:
     static bool IsRecording();
     
     //! calls the display list, returns true if there was a list to call
-    bool Call();
+    bool Call()
+    {
+        return OnCall();
+    }
 
     //! clears the display list and don't regenerate it for the next few calls
     void Clear( int inhibitGeneration = 1 );
 
     //! clears all display lists
     static void ClearAll();
+
+protected:
+    //! calls the display list, returns true if there was a list to call
+    virtual bool OnCall();
 private:
     rDisplayList( rDisplayList const & );
     rDisplayList & operator = ( rDisplayList const & );
@@ -88,8 +95,20 @@ private:
     GLuint list_;   //!< the display list
     int inhibit_;   //!< inhibit display list generation for a while
     bool filling_;  //!< set if we're just filling the list
-    bool lastAlpha_; //!< the last alpha blending value
 #endif
+};
+
+//! display list wrapper for display lists changing when the alpha blending setting changes
+class rDisplayListAlphaSensitive: public rDisplayList
+{
+public:
+    rDisplayListAlphaSensitive();
+
+protected:
+    //! calls the display list, returns true if there was a list to call
+    virtual bool OnCall();
+private:
+    bool lastAlpha_; //!< the last alpha blending value
 };
 
 //! create an object of this type to fill a display list while you render

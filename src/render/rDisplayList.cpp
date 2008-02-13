@@ -74,7 +74,6 @@ rDisplayList::rDisplayList()
     , list_( 0 )
     , inhibit_( 0 )
     , filling_( false )
-    , lastAlpha_( false )
 #endif
 {
 }
@@ -99,7 +98,7 @@ bool rDisplayList::IsRecording()
 }
 
 // calls the display list, returns true if there was a list to call
-bool rDisplayList::Call()
+bool rDisplayList::OnCall()
 {
 #ifndef DEDICATED
     tASSERT( !filling_ );
@@ -108,13 +107,6 @@ bool rDisplayList::Call()
     // gives us a chance to agglomerate primitives.
     if ( IsRecording() )
     {
-        return false;
-    }
-
-    // check whether crucial settings changed
-    if ( sr_alphaBlend != lastAlpha_ )
-    {
-        lastAlpha_ = sr_alphaBlend;
         return false;
     }
 
@@ -179,6 +171,22 @@ void rDisplayList::ClearAll()
         run = run->Next();
     }
 #endif
+}
+
+rDisplayListAlphaSensitive::rDisplayListAlphaSensitive()
+: lastAlpha_( sr_alphaBlend )
+{}
+
+bool rDisplayListAlphaSensitive::OnCall()
+{
+    // check whether crucial settings changed
+    if ( sr_alphaBlend != lastAlpha_ )
+    {
+        lastAlpha_ = sr_alphaBlend;
+        return false;
+    }
+
+    return rDisplayList::OnCall();
 }
 
 //! constructor, automatically starting to fill teh list
