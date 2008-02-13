@@ -151,6 +151,7 @@ class gCycle: public gCycleMovement
     friend class gPlayerWall;
     friend class gNetPlayerWall;
     friend class gDestination;
+    friend class gCycleRenderer;
 
     eSoundPlayer *engine;
     eSoundPlayer *turning;
@@ -249,7 +250,7 @@ public:
     // bool CanMakeTurn() const { return pendingTurns <= 0 && lastTime >= nextTurn; }
 
     virtual void InitAfterCreation();
-    gCycle(eGrid *grid, const eCoord &pos,const eCoord &dir,ePlayerNetID *p=NULL,bool autodelete=1);
+    gCycle(eGrid *grid, const eCoord &pos,const eCoord &dir,ePlayerNetID *p=NULL);
 
     static	void 	SetWallsStayUpDelay		( REAL delay );				//!< the time the cycle walls stay up ( negative values: they stay up forever )
     static	void 	SetWallsLength			( REAL length);				//!< the maximum total length of the walls

@@ -2258,8 +2258,8 @@ void gCycle::InitAfterCreation(){
     MyInitAfterCreation();
 }
 
-gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p,bool autodelete)
-        :gCycleMovement(grid, pos,d,p,autodelete),
+gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
+        :gCycleMovement(grid, pos,d,p,false),
         engine(NULL),
         turning(NULL),
         skew(0),skewDot(0),
@@ -2316,13 +2316,42 @@ gCycle::~gCycle(){
 }
 
 #ifndef DEDICATED
-// manager for walls not belonging to any cycle
-static gCycleWallsDisplayListManager lostWalls_;
+// renders a cycle even after it died
+class gCycleRenderer: public eReferencableGameObject
+{
+public:
+    gCycleRenderer( gCycle * cycle )
+    : eReferencableGameObject( cycle->Grid(), cycle->Position(), cycle->Direction(), cycle->CurrentFace(), true )
+    , cycle_( cycle )
+    {
+        AddToList();
+    }
+private:
+    virtual void Render( eCamera const * camera )
+    {
+        cycle_->Render( camera );
+    }
+
+    virtual bool Timestep( REAL currentTime )
+    {
+        return !cycle_->displayList_.Walls();
+    }
+
+    tJUST_CONTROLLED_PTR< gCycle > cycle_;
+};
 #endif
 
 void gCycle::OnRemoveFromGame()
 {
-    // keep this cycle alive
+#ifndef DEDICATED
+    // keep rendering the cycle
+    if ( GOID() >= 0 )
+    {
+        tNEW( gCycleRenderer( this ) );
+    }
+#endif
+
+    // keep this cycle alive during this function
     tJUST_CONTROLLED_PTR< gCycle > keep;
 
     if ( this->GetRefcount() > 0 )
@@ -2340,17 +2369,7 @@ void gCycle::OnRemoveFromGame()
     currentWall=NULL;
     lastWall=NULL;
 
-    // only really leave if we have no walls left
-#ifndef DEDICATED
-    if ( displayList_.Walls() )
-    {
-        Die( lastTime );
-    }
-    else
-#endif
-    {
-        gCycleMovement::OnRemoveFromGame();
-    }
+    gCycleMovement::OnRemoveFromGame();
 }
 
 // called when the round ends
@@ -2469,14 +2488,6 @@ REAL gCycle::CalculatePredictPosition( gPredictPositionData & data )
 }
 
 bool gCycle::Timestep(REAL currentTime){
-    // keep cycle in list for rendering as long as walls are active
-#ifndef DEDICATED
-    if ( !Alive() && displayList_.Walls() )
-    {
-        return false;
-    }
-#endif
-
     // clear out dangerous info when we're done
     gMaxSpaceAheadHitInfoClearer hitInfoClearer( maxSpaceHit_ );
 
@@ -2527,6 +2538,14 @@ bool gCycle::Timestep(REAL currentTime){
 
         // die completely
         Die( lastTime );
+
+#ifndef DEDICATED
+        // keep rendering the cycle
+        if ( GOID() >= 0 )
+        {
+            tNEW( gCycleRenderer( this ) );
+        }
+#endif
 
         // and let yourself be removed from the lists so we don't have to go
         // through this again.
@@ -2651,14 +2670,13 @@ bool gCycle::Timestep(REAL currentTime){
         currentWall->Update(predictTime, PredictPosition() );
     }
 
-    // keep cycle in list for rendering as long as walls are active
 #ifndef DEDICATED
-    if ( displayList_.Walls() )
+    // keep rendering the cycle
+    if ( ret && GOID() >= 0 )
     {
-        return false;
+        tNEW( gCycleRenderer( this ) );
     }
 #endif
-
     return ret;
 }
 
