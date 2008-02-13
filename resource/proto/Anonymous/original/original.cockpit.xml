@@ -265,11 +265,17 @@
             <ShowMaximum value="false" />
             <ShowMinimum value="false" />
             <Background>
+                <Image>
+                    <Graphic category="" author="wrtlprnft" version="1" name="gauge_horizontal_filled" uri="http://wrtlprnft.ath.cx/gauge_horizontal_filled.png" />
+                </Image>
                 <Solid>
                     <Color r="1." g="0." b="0." alpha="1." />
                 </Solid>
             </Background>
             <Foreground>
+                <Image>
+                    <Graphic category="" author="wrtlprnft" version="1" name="gauge_horizontal_filled" uri="http://wrtlprnft.ath.cx/gauge_horizontal_filled.png" />
+                </Image>
                 <Solid>
                     <Color r="0." g="1." b="0." alpha="1." />
                 </Solid>
