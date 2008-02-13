@@ -423,7 +423,7 @@ void cCockpit::ProcessCockpit(void) {
     if(!cur) {
         tERR_WARN("No Cockpit node found!");
     }
-    if (tXmlResource::m_Type != "aacockpit") {
+    if (m_Path.Type() != "aacockpit") {
         tERR_WARN("Type 'aacockpit' expected, found '" << cur.GetProp("type") << "' instead");
         return;
     }

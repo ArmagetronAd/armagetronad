@@ -336,17 +336,6 @@ bool tXmlParser::ParseSax() {
         return true;
 }
 
-// gets a path segment from a string, appending a "/" if none is there and the path is not empty
-static tString st_GetPathSegment( tString const &segment )
-{
-    tString ret(segment);
-
-    if ( ret.Size() > 0 && ret[ ret.Size()-1 ] != '/' )
-        ret += '/';
-
-    return ret;
-}
-
 #ifndef DEDICATED
 static tString st_errorLeadIn("");
 
@@ -477,19 +466,16 @@ bool tXmlResource::ValidateXml(FILE* docfd, const char* uri, const char* filepat
             con << "Empty document\n";
             return false;
         } else if (root.IsOfType("Resource")) {
-            m_Author   = root.GetProp("author");
-            m_Category = root.GetProp("category");
-            m_Name     = root.GetProp("name");
-            m_Version  = root.GetProp("version");
-            m_Type     = root.GetProp("type");
-            tString rightFilepath = st_GetPathSegment(m_Author);
-            rightFilepath << st_GetPathSegment(m_Category)
-            << m_Name << "-"
-            << m_Version << "."
-            << m_Type << ".xml";
-
-            /* remove extra double // */
-
+            m_Path = tResourcePath (
+                root.GetProp("author"),
+                root.GetProp("category"),
+                root.GetProp("name"),
+                root.GetProp("version"),
+                root.GetProp("type"),
+                tString("xml"),
+                tString("")
+            );
+            tString rightFilepath( m_Path.Path() );
             tString pureFilepath( filepath );
             int paren = pureFilepath.StrPos( "(" );
             if ( paren > 0 )
@@ -546,6 +532,16 @@ bool tXmlParser::node::IsOfType(CHAR const *name) const {
 tString tXmlParser::node::GetName(void) const {
     tASSERT(m_cur);
     return tString(reinterpret_cast<const char *>(m_cur->name));
+}
+
+//! @param prop The name of the property to be checked
+//! @returns true if the property exists
+bool tXmlParser::node::HasProp(CHAR const *prop) const {
+    tASSERT(m_cur);
+    return xmlHasProp(m_cur,
+                      reinterpret_cast<const xmlChar *>
+                      (prop)
+                     );
 }
 
 //! This function prints a warning if the attribute doesn't exist

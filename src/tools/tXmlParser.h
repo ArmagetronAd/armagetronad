@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tString.h"
 #include "tError.h"
 #include "tConsole.h"
+#include "tResourceManager.h"
 
 #include <map>
 #include <typeinfo>
@@ -59,6 +60,7 @@ public:
         node() : m_cur(0) {} //!< Dummy constructor, only of use for stl containers
         bool IsOfType(CHAR const *name) const; //!< Checks the type (name) of a node
         tString GetName(void) const; //!< Gets the type (name) of the node
+        bool HasProp(CHAR const *prop) const; //!< Check if a property of the given name exists
         tString GetProp(CHAR const *prop) const; //!< Get a property of this node as a raw string
         bool GetPropBool(CHAR const *prop) const; //!< Get a boolean value out of a property
 #ifndef _MSC_VER
@@ -71,6 +73,7 @@ public:
 #endif
 
         bool IsOfType(tString const &name) const { return IsOfType(name.c_str());} //!< Checks the type (name) of a node
+        bool HasProp(tString const &prop) const { return HasProp(prop.c_str()); } //!< Check if a property of the given name exists
         tString GetProp(tString const &prop) const { return GetProp(prop.c_str()); } //!< Get a property of this node as a raw string
         bool GetPropBool(tString const &prop) const { return GetPropBool(prop.c_str()); } //!< Get a boolean value out of a property
         template<typename T> void GetProp(tString const &prop, T &target) const {GetProp(prop.c_str(), target);} //!< Get a property, convert to any type
@@ -141,13 +144,10 @@ protected:
 class tXmlResource : public tXmlParser {
 public:
     bool LoadFile(const char* filename, const char* uri="");
+	tResourcePath const &Path() const {return m_Path;} //!< get the resource path this file was loaded from
 protected:
     bool ValidateXml(FILE* docfd, const char* uri, const char* filepath);
-    tString m_Author;   //!< the author of the resource
-    tString m_Category; //!< the category of the resource
-    tString m_Name;     //!< the name of the resource
-    tString m_Version;  //!< the version of the resource
-    tString m_Type;     //!< the type of the resource
+    tResourcePath m_Path; //!< the resource identifier of this resource
     node GetFileContents(void); //!< Returns the node the "real" file contents are within
 };
 

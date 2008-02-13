@@ -58,7 +58,7 @@ class ePlayerNetID;
 class gCycle;
 
 //! Cockpit class: keeps a list of widgets and delegates rendering and parsing to them
-class cCockpit : private tXmlResource, public eCockpitPrototype {
+class cCockpit : public tXmlResource, public eCockpitPrototype {
     static std::list<cCockpit *> m_Cockpits;
 public:
     static std::list<cCockpit *> const &Cockpits() {return m_Cockpits;}

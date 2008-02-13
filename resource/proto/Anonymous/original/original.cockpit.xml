@@ -42,7 +42,7 @@
             </Caption>
             <Background>
                 <Image>
-                    <Graphic category="" author="wrtlprnft" version="1" name="gauge_horizontal" uri="http://wrtlprnft.ath.cx/gauge_horizontal.png" />
+                    <Graphic author="wrtlprnft" version="1" name="gauge_horizontal" uri="http://wrtlprnft.ath.cx/gauge_horizontal.png" />
                 </Image>
                 <Solid>
                     <Color r="1." g="1." b="1." alpha=".5" />
@@ -50,7 +50,7 @@
             </Background>
             <Foreground>
                 <Image>
-                    <Graphic category="" author="wrtlprnft" version="1" name="gauge_horizontal_filled" uri="http://wrtlprnft.ath.cx/gauge_horizontal_filled.png" />
+                    <Graphic author="wrtlprnft" version="1" name="gauge_horizontal_filled" uri="http://wrtlprnft.ath.cx/gauge_horizontal_filled.png" />
                 </Image>
                 <Gradient orientation="value">
                     <Color r="0." g="1." b="0." alpha=".9" at="0." />
@@ -77,7 +77,7 @@
             </Caption>
             <Background>
                 <Image>
-                    <Graphic category="" author="wrtlprnft" version="1" name="gauge_horizontal" uri="http://wrtlprnft.ath.cx/gauge_horizontal.png" />
+                    <Graphic author="wrtlprnft" version="1" name="gauge_horizontal" uri="http://wrtlprnft.ath.cx/gauge_horizontal.png" />
                 </Image>
                 <Solid>
                     <Color r="1." g="1." b="1." alpha=".5" />
@@ -85,7 +85,7 @@
             </Background>
             <Foreground>
                 <Image>
-                    <Graphic category="" author="wrtlprnft" version="1" name="gauge_horizontal_filled" uri="http://wrtlprnft.ath.cx/gauge_horizontal_filled.png" />
+                    <Graphic author="wrtlprnft" version="1" name="gauge_horizontal_filled" uri="http://wrtlprnft.ath.cx/gauge_horizontal_filled.png" />
                 </Image>
                 <Gradient orientation="value">
                     <Color r="1." g="0." b="0." alpha=".9" at="0." />
@@ -266,7 +266,7 @@
             <ShowMinimum value="false" />
             <Background>
                 <Image>
-                    <Graphic category="" author="wrtlprnft" version="1" name="gauge_horizontal_filled" uri="http://wrtlprnft.ath.cx/gauge_horizontal_filled.png" />
+                    <Graphic author="wrtlprnft" version="1" name="gauge_horizontal_filled" uri="http://wrtlprnft.ath.cx/gauge_horizontal_filled.png" />
                 </Image>
                 <Solid>
                     <Color r="1." g="0." b="0." alpha="1." />
@@ -274,7 +274,7 @@
             </Background>
             <Foreground>
                 <Image>
-                    <Graphic category="" author="wrtlprnft" version="1" name="gauge_horizontal_filled" uri="http://wrtlprnft.ath.cx/gauge_horizontal_filled.png" />
+                    <Graphic author="wrtlprnft" version="1" name="gauge_horizontal_filled" uri="http://wrtlprnft.ath.cx/gauge_horizontal_filled.png" />
                 </Image>
                 <Solid>
                     <Color r="0." g="1." b="0." alpha="1." />
@@ -286,7 +286,7 @@
             <Size height="0.25" width="0.25" />
             <Background>
                 <Image scale_x=".075" scale_y=".075" repeat="both">
-                    <Graphic category="" author="wrtlprnft" version="1" name="floor" extension="png" uri="http://wrtlprnft.ath.cx/floor.png" />
+                    <Graphic author="wrtlprnft" version="1" name="floor" extension="png" uri="http://wrtlprnft.ath.cx/floor.png" />
                 </Image>
                 <Solid>
                     <Color r=".5" g="1." b=".5" alpha="1." />

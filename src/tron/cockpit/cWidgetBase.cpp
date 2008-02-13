@@ -439,8 +439,8 @@ void WithColorFunctions::ProcessImage(tXmlParser::node cur, rGradient &gradient,
     for(cur = cur.GetFirstChild(); cur; ++cur) {
         if(cur.IsOfType("Graphic")) {
             tResourcePath path(
-                cur.GetProp("author"),
-                cur.GetProp("category"),
+                cur.HasProp("author") ? cur.GetProp("author") : m_Cockpit->Path().Author(),
+                cur.HasProp("category") ? cur.GetProp("category") : m_Cockpit->Path().Category(),
                 cur.GetProp("name"),
                 cur.GetProp("version"),
                 tString("aatex"),

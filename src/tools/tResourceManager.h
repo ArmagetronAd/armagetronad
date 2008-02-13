@@ -66,6 +66,11 @@ public:
     tString const &URI      () const {return m_URI      ;} //!< get the URI to the file, if any
     tString const &Path     () const {return m_Path     ;} //!< get the full path of the resource
 
+    bool Valid() const {return !m_Path.empty();} //!< is this a valid resource path?
+
+    //! default constructor. Valid() will return false if called on an object constructed this way.
+    tResourcePath(){}
+
     //! construct the path from the given arguments
     tResourcePath(tString const &Author,
                   tString const &Category,

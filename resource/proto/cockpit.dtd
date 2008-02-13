@@ -175,9 +175,9 @@ file that contains more information on the image and may be a case of YouMightNe
 <!ELEMENT Graphic EMPTY>
 <!ATTLIST Graphic
     name CDATA #REQUIRED
-    author CDATA 'Anonymous'
+    author CDATA #IMPLIED
     version CDATA #REQUIRED
-    category CDATA 'unsorted'
+    category CDATA #IMPLIED
     extension CDATA 'png'
     uri CDATA ""
 >
