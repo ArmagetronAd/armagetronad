@@ -2145,6 +2145,8 @@ player_creates_team		\1 founded \2.\n
 player_nocreate_team		\1 cannot currently create a new team.\n
 player_nojoin_team		\1 cannot currently join \2.\n
 player_not_on_team      You are not on a team.\n
+player_team_message     Teammates
+player_spectator_message Spectators
 no_real_teams           No teams with more than one player.\n
 player_topologypolice	Order from Topology Police: \1
 
