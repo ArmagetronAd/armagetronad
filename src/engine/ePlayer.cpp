@@ -2300,7 +2300,7 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     }
     else
     {
-        tConfItemBase::LoadAll(s);
+        tConfItemBase::LoadLine(s);
     }
 }
 

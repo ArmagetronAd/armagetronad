@@ -427,7 +427,7 @@ int tConfItemBase::EatWhitespace(std::istream &s){
 }
 
 void tConfItemBase::LoadLine(std::istream &s){
-    while(!s.eof() && s.good()){
+    if(!s.eof() && s.good()){
         tString name;
         s >> name;
 
