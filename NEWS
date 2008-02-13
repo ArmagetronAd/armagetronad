@@ -77,6 +77,7 @@ If --enable-armathentication was activated:
 - new chat commands /op, /deop, /promote and /demote to change other players' access rights
 
   Featurelets:
+- /team messages can be used by spectators to chat with other spectators only.
 - Performance optimizations. Using OpenGL display lists to cache geometry.
 - Removed ztrick, antialiasing and perspective correction settings. They all had only one right
   setting and caused us some interesting bug reports.
