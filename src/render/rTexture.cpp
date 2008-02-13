@@ -826,6 +826,7 @@ rResourceTexture &rResourceTexture::operator=(rResourceTexture const &other) {
 }
 
 void rResourceTexture::Select() {
+#ifndef DEDICATED
     if(tex_) {
         tex_->Select();
         // Override the actual tecture's settings
@@ -840,4 +841,5 @@ void rResourceTexture::Select() {
     } else {
         tERR_WARN("Trying to select a resource texture that's not loaded");
     }
+#endif
 }
