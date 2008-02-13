@@ -200,7 +200,8 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
         if (sr_upperSky && !sg_MoviePack()) h=upper_height;
     }
 
-    if (h<9000 || !sr_infinityPlane){
+    // NOTE: display lists on nvidia cards don't like infinite points
+    if (h<9000 || !sr_infinityPlane || rDisplayList::IsRecording() ){
         TexVertex(p1.x, p1.y, 0,
                   tBeg      , 1);
 
