@@ -134,31 +134,39 @@ void Map::ClipperCircle::Clip(int i, tCoord const &u, tCoord const &v) {
     }
 }
 void Map::ClipperCircle::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
-    //glBegin(GL_LINES);
-    //Color(0,0,1);
-    //Vertex(e1.x, e1.y);
-    //Color(1,0,0);
-    //Vertex(e2.x, e2.y);
-    //glEnd();
-    //Clip(0, tCoord((e1.x+e2.x)/2, e1.y), tCoord((e1.x+e2.x)/2,e2.y));
     tCoord centre = .5*(e1+e2);
     tCoord ab = .5*(e2-e1);
     ab.x = fabs(ab.x); ab.y = fabs(ab.y);
     float stepsize=M_PI*2/m_edges;
     tCoord last = centre + tCoord(ab.x, 0);
 
+	map.m_background.BeginDraw();
+	map.m_background.SetGradientEdges(centre - ab, centre + ab);
+	glBegin(GL_POLYGON);
     for(int i = 0; i < m_edges; ++i) {
         float t = (i+1)*stepsize;
         tCoord next(centre.x+ab.x*cos(t), centre.y-ab.y*sin(t));
-        map.m_foreground.DrawAt(tCoord(0.,0.));
-        glBegin(GL_LINES);
-        //TODO: this should use a function of the rGradient.
+        map.m_background.DrawPoint(next);
+        map.m_background.DrawPoint(last);
+        last = next;
+    }
+	glEnd();
+    last = centre + tCoord(ab.x, 0);
+	map.m_foreground.SetGradientEdges(centre - ab, centre + ab);
+	map.m_foreground.BeginDraw();
+    for(int i = 0; i < m_edges; ++i) {
+        float t = (i+1)*stepsize;
+        tCoord next(centre.x+ab.x*cos(t), centre.y-ab.y*sin(t));
+		glBegin(GL_LINES);
         glVertex2f(next.x, next.y);
         glVertex2f(last.x, last.y);
-        glEnd();
+        map.m_foreground.DrawPoint(next);
+        map.m_foreground.DrawPoint(last);
+		glEnd();
         Clip(i, last, next);
         last = next;
     }
+	glDisable(GL_TEXTURE_2D);
 }
 void Map::ClipperCircle::End() {
     for(int i = 0; i < m_edges; ++i) {
@@ -383,7 +391,9 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls,
 void Map::DrawRimWalls( tList<eWallRim> &list ) {
     if(sr_alphaBlend && m_mode == MODE_STD) {
         const eRectangle &bounds = eWallRim::GetBounds();
-        m_background.SetGradientEdges(bounds.GetLow(), bounds.GetHigh());
+        const tCoord dims = bounds.GetHigh() - bounds.GetLow();
+        const float max = fmax(dims.x, dims.y); // make sure we get a square
+        m_background.SetGradientEdges(bounds.GetLow(), tCoord(bounds.GetLow().x + max, bounds.GetLow().y + max));
         m_background.BeginDraw();
         glBegin(GL_POLYGON);
         for(std::vector<tCoord>::iterator iter = se_rimWallRubberBand.begin(); iter != se_rimWallRubberBand.end(); ++iter) {
@@ -392,6 +402,7 @@ void Map::DrawRimWalls( tList<eWallRim> &list ) {
         m_background.DrawPoint(se_rimWallRubberBand.front());
         glEnd();
     }
+    glDisable(GL_TEXTURE_2D);
     glColor4f(1, 1, 1, .5);
     glBegin(GL_LINES);
     {

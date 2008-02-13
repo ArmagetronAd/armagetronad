@@ -74,6 +74,9 @@ public:
     //! @param where the point in the gradient. If it lies outside the edges of the gradient the nearest possible point will be used
     void DrawAt(tCoord const &where);
 
+    //! set the values you'd use for glDrawElements()
+    void SetValues(tCoord const &where, float *position, float *color, float *texcoords);
+
     //! Draw a rectangle using only the colors of the edges
     void DrawAtomicRect(tCoord const &edge1, tCoord const &edge2);
     //!Draw a rectangle, but split it up into multiple rectangles if necessary

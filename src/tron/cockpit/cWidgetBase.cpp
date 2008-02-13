@@ -447,7 +447,6 @@ void WithColorFunctions::ProcessImage(tXmlParser::node cur, rGradient &gradient,
                 cur.GetProp("extension"),
                 cur.GetProp("uri")
             );
-std::cerr << "repeat: " << repeat << std::endl;
             gradient.SetTexture(rResourceTexture(path, repeat & 1, repeat & 2));
         }
     }

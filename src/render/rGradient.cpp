@@ -109,6 +109,17 @@ rColor rGradient::GetColor(float where) {
 #endif
 }
 
+void rGradient::SetValues(tCoord const &where, float *position, float *color, float *texcoords) {
+    position[0] = where.x;
+    position[1] = where.y;
+    rColor c = GetColor(GetGradientPt(where));
+    color[0] = c.r_;
+    color[1] = c.g_;
+    color[2] = c.b_;
+    texcoords[0] = (where.x-m_origin.x)/m_dimensions.x/m_texScale.x,
+    texcoords[1] = (where.y-m_origin.y)/m_dimensions.y/m_texScale.y;
+}
+
 void rGradient::DrawAt(tCoord const &where) {
     GetColor(GetGradientPt(where)).Apply();
     if(m_tex.Valid()) {
