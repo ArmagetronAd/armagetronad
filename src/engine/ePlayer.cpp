@@ -3331,10 +3331,9 @@ public:
     eAutoCompleterChat(std::deque<tString> &words):uAutoCompleter(words) {};
     int DoFullCompletion(tString &string, int pos, int len, tString &match) {
         tString actualString;
-        if(pos - len == 0) {
+        if(pos - len == 0 || pos - len == 6 && string.StartsWith("/team ")) {
             actualString = match + ": ";
         } else if(pos - len == 5 && string.StartsWith("/msg ") || string.StartsWith("/admin ")) {
-        } else if(pos - len == 6 && string.StartsWith("/team ")) {
             actualString = Simplify(match) + " ";
         } else {
             actualString = match + " ";
