@@ -2600,7 +2600,7 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
     eTeam *currentTeam = se_GetManagedTeam( p );
 
     // silencing only affects spectators here
-    if ( ( !currentTeam && IsSilencedWithWarning(player) ) || spam.Block() )
+    if ( ( !currentTeam && IsSilencedWithWarning(p) ) || spam.Block() )
     {
         return;
     }
