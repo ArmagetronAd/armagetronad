@@ -797,6 +797,22 @@ static void ResultCallback( nKrawall::nCheckResult const & result )
     if (success)
     {
         player->Authenticate( authName, result.accessLevel );
+
+        // log blurb to ladderlog. This is not important for debug playback,
+        // so we just don't record it. Once more is done with the blurb, 
+        // we need to change that.
+        for ( std::deque< tString >::const_iterator i = result.blurb.begin(); i != result.blurb.end(); ++i )
+        {
+            std::istringstream s( static_cast< char const * >( *i ) );
+            tString token, rest;
+            s >> token;
+            rest.ReadLine( s );
+
+            std::ostringstream o;
+            o << "AUTHORITY_BLURB_" << token << " " << player->GetFilteredAuthenticatedName() << " " << rest << std::endl;
+
+            se_SaveToLadderLog( o.str().c_str() );
+        }
     }
     else
     {

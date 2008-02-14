@@ -422,6 +422,18 @@ void nKrawall::CheckScrambledPassword( nCheckResultBase & result,
             }
         }
 
+        // read additional data, let caller handle it
+        while( true )
+        {
+            tString blurb;
+            blurb.ReadLine( content );
+            if ( content.eof() || content.fail() )
+            {
+                break;
+            }
+            result.blurb.push_back( blurb );
+        }
+
         result.success = true;
         return;
     }
