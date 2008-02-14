@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "aa_config.h"
 
 #include "rTexture.h"
+#include "rDisplayList.h"
 #include "tString.h"
 #include "rScreen.h"
 #include "tDirectories.h"
@@ -450,6 +451,10 @@ rISurfaceTexture::rISurfaceTexture( int group, bool repx, bool repy, bool storeA
 
 rISurfaceTexture::~rISurfaceTexture( void )
 {
+    if (tint_.IsValid() )
+    {
+        rDisplayList::ClearAll();
+    }
 }
 
 // ******************************************************************************************
@@ -537,7 +542,7 @@ void rISurfaceTexture::OnSelect( bool enforce )
         if(textureModeLast_!=texmod)
         {
             // unload texture if the mode changed
-            tint_.Delete();
+            Unload();
             // std::cerr << "loading texture " << fileName << ':' << tint << "\n";
 
             if (texmod>0){
@@ -621,6 +626,11 @@ void rISurfaceTexture::OnSelect()
 void rISurfaceTexture::OnUnload( void )
 {
 #ifndef DEDICATED
+    if ( tint_.IsValid() )
+    {
+        rDisplayList::ClearAll();
+    }
+
     tint_.Delete();
     textureModeLast_=-100;
     rITexture::OnUnload();
