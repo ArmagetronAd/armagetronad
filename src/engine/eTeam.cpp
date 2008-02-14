@@ -1343,6 +1343,7 @@ eTeam::eTeam(nMessage &m)
     locked_ = false;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;
+    r = g = b = 32; // initialize color so it will be updated, guaranteed
     Update();
 }
 

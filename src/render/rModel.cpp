@@ -37,9 +37,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rGL.h"
 #include <string.h>
 
-static rModel *sr_ModelAnchor;
+tCONFIG_ENUM(rDisplayListUsage);
 
-static tConfItem<bool> mod_udl("USE_DISPLAYLISTS", sr_useDisplayLists);
+static tConfItem<rDisplayListUsage> mod_udl("USE_DISPLAYLISTS", sr_useDisplayLists);
 
 #ifndef DEDICATED
 
@@ -238,8 +238,6 @@ void rModel::Load(std::istream &in,const char *fileName){
 }
 
 rModel::rModel(const char *fileName,const char *fileName_alt)
-        :tListItem<rModel>(sr_ModelAnchor), displayList(0)
-        // ,vertices(0),normals(0),modelFaces(0)
 {
 #ifndef DEDICATED
     //	tString s;
@@ -275,16 +273,10 @@ rModel::rModel(const char *fileName,const char *fileName_alt)
 void rModel::Render(){
     if (!sr_glOut)
         return;
-    if(displayList)
-        glCallList(displayList);
-    else
+    if ( !displayList_.Call() )
     {
-        if (sr_useDisplayLists)
-        {
-            displayList=glGenLists(1);
-            glNewList(displayList,GL_COMPILE_AND_EXECUTE);
-        }
-
+        rDisplayListFiller filler( displayList_ );
+            
         if (normals.Len()>=vertices.Len()){
             glNormalPointer(GL_FLOAT,0,&normals[0]);
             glEnableClientState(GL_NORMAL_ARRAY);
@@ -324,39 +316,15 @@ void rModel::Render(){
         glDisableClientState(GL_NORMAL_ARRAY);
 
         glDisable(GL_CULL_FACE);
-
-        if (sr_useDisplayLists)
-        {
-            glEndList();
-        }
     }
 }
 #endif
 
 rModel::~rModel(){
-#ifndef DEDICATED
-    if (displayList) glDeleteLists(displayList,1);
-#endif
     tCHECK_DEST;
 }
 
 
-void rModel::UnloadAllDisplayLists()
-{
-#ifndef DEDICATED
-    rModel *run = sr_ModelAnchor;
-    while (run)
-    {
-        if (run->displayList && sr_glOut)
-        {
-            glDeleteLists(run->displayList, 1);
-            run->displayList = 0;
-        }
-        run = run->Next();
-    }
-#endif
-}
 
 
-static rCallbackBeforeScreenModeChange unload(&rModel::UnloadAllDisplayLists);
 

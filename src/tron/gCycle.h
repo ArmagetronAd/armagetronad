@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eNetGameObject.h"
 #include "tList.h"
 #include "nObserver.h"
+#include "rDisplayList.h"
 
 #include "gCycleMovement.h"
 
@@ -114,12 +115,42 @@ private:
 
 class gCycleChatBot;
 
+#ifndef DEDICATED
+class gCycleWallsDisplayListManager
+{
+    friend class gNetPlayerWall;
+
+public:
+    gCycleWallsDisplayListManager();
+
+    //! checks whether a wall at a certain distance can have a display list
+    static bool CannotHaveList( REAL distance, gCycle const * cycle );
+
+    void RenderAll( eCamera const * camera, gCycle * cycle );
+    bool Walls() const
+    {
+        return wallList_ || wallsWithDisplayList_;
+    }
+
+    void Clear( int inhibit = 0 )
+    {
+        displayList_.Clear( inhibit );
+    }
+private:
+    gNetPlayerWall *                wallList_;                      //!< linked list of all walls
+    gNetPlayerWall *                wallsWithDisplayList_;          //!< linked list of all walls with display list    
+    rDisplayList                    displayList_;                   //!< combined display list
+    REAL                            wallsWithDisplayListMinDistance_; //!< minimal distance of the walls with display list
+};
+#endif
+
 // a complete lightcycle
 class gCycle: public gCycleMovement
 {
     friend class gPlayerWall;
     friend class gNetPlayerWall;
     friend class gDestination;
+    friend class gCycleRenderer;
 
     REAL spawnTime_;    //!< time the cycle spawned at
     REAL lastTimeAnim;  //!< last time animation was simulated at
@@ -166,6 +197,10 @@ public:
 private:
     void TransferPositionCorrectionToDistanceCorrection();
 
+#ifndef DEDICATED
+    gCycleWallsDisplayListManager displayList_;                     //!< display list manager
+#endif
+
     tCHECKED_PTR(gNetPlayerWall)	currentWall;                    //!< the wall that currenly is attached to the cycle
     tCHECKED_PTR(gNetPlayerWall)	lastWall;                       //!< the last wall that was attached to this cycle
     tCHECKED_PTR(gNetPlayerWall)	lastNetWall;                    //!< the last wall received over the network
@@ -211,7 +246,7 @@ public:
     // bool CanMakeTurn() const { return pendingTurns <= 0 && lastTime >= nextTurn; }
 
     virtual void InitAfterCreation();
-    gCycle(eGrid *grid, const eCoord &pos,const eCoord &dir,ePlayerNetID *p=NULL,bool autodelete=1);
+    gCycle(eGrid *grid, const eCoord &pos,const eCoord &dir,ePlayerNetID *p=NULL);
 
     static	void 	SetWallsStayUpDelay		( REAL delay );				//!< the time the cycle walls stay up ( negative values: they stay up forever )
     static	void 	SetWallsLength			( REAL length);				//!< the maximum total length of the walls

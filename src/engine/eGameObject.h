@@ -230,7 +230,7 @@ private:
     virtual void DoRemoveFromGame(); //!< called when removed from the game
 };
 
-// game object of temporary lifetime on the stack
+// game object of temporary lifetime on the stack. Don't dynamically allocate this.
 class eStackGameObject: public eGameObject
 {
 public:

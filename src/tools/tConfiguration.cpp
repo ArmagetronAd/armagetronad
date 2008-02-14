@@ -202,13 +202,13 @@ public:
 
         if ( s.fail() )
         {
-            con << tOutput( "$sudo_usage" );
+            con << tOutput( "$casacl_usage" );
             throw tAbortLoading( st_casacl );
         }
         else if ( tCurrentAccessLevel::GetAccessLevel() > required )
         {
             con << tOutput( "$access_level_error",
-                            "SUDO",  
+                            "SUDO",
                             tCurrentAccessLevel::GetName( required ),
                             tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() )
                 );
@@ -216,6 +216,7 @@ public:
         }
         else
         {
+            tString().ReadLine(s); // prevent commands following this one without a newline
             tCurrentAccessLevel::currentLevel_ = elevated;
         }
     }
@@ -328,7 +329,7 @@ int tConfItemBase::EatWhitespace(std::istream &s){
 }
 
 void tConfItemBase::LoadLine(std::istream &s){
-    while(!s.eof() && s.good()){
+    if(!s.eof() && s.good()){
         tString name;
         s >> name;
 
@@ -864,10 +865,14 @@ void tConfItemLine::ReadVal(std::istream &s){
     if(strcmp(dummy,*target)){
         if (printChange)
         {
+            tColoredString oldval;
+            oldval << *target << tColoredString::ColorString(1,1,1);
+            tColoredString newval;
+            newval << dummy << tColoredString::ColorString(1,1,1);
             tOutput o;
             o.SetTemplateParameter(1, title);
-            o.SetTemplateParameter(2, *target);
-            o.SetTemplateParameter(3, dummy);
+            o.SetTemplateParameter(2, oldval);
+            o.SetTemplateParameter(3, newval);
             o << "$config_value_changed";
             con << o;
         }

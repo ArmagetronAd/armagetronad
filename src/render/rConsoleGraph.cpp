@@ -36,11 +36,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rScreen.h"
 #include "rGL.h"
 #include "tConfiguration.h"
+#include "rDisplayList.h"
 
 static tColoredString sr_centerString;
 static REAL center_r,center_g,center_b,center_fadetime;
 
 static REAL Time;
+
+static rDisplayListAlphaSensitive sr_consoleDisplayList;
 
 static void sr_ConsolePerFrame(){
     if (sr_con.autoDisplayAtSwap)
@@ -99,40 +102,6 @@ void rConsole::Render(){
     if (sr_screen){
         Time=tSysTimeFloat();
 
-        if (sr_textOut || rForceTextCallback::ForceText()){
-            if (lastCustomTimeout<Time-5 &&
-                    lastTimeout+timeout<Time && currentTop<currentIn){
-                currentTop++;
-                lastTimeout=Time;
-            }
-
-            rTextField::SetDefaultColor( tColor(1,1,1) );
-
-            rTextField out(-.95f,.99f,rCHEIGHT_CON, sr_fontConsole);//,&rFont::s_defaultFontSmall);
-            out.SetWidth(1.9f);
-            out.EnableLineWrap();
-            out.SetIndent(sr_indent);
-
-            int i;
-            for (i=currentTop;i<=currentIn && i<=currentTop+MaxHeight();i++)
-                if (lines[i].Len()>1){
-                    rTextField::SetDefaultColor( tColor(1,1,1) );
-                    out << lines[i];
-                    out.ResetColor();
-                }
-            if (i<currentIn){
-                // rTextField::SetDefaultColor( tColor(1,.8,.5) );
-                out << tColoredString::ColorString( 1,.8,.5) << "       v   v   v   v   v   v   v   v   v\n";
-            }
-
-
-            int over=out.Lines()-Height();
-            if (over>0 && (rSmallConsoleCallback::SmallColsole() || lastCustomTimeout<tSysTimeFloat()-15)){
-                lastTimeout=Time;
-                currentTop+=(over+1)/2;
-            }
-        }
-
         if (Time-center_fadetime<2){
             REAL alpha=center_fadetime-Time+1;
             if (alpha>1) alpha=1;
@@ -159,6 +128,55 @@ void rConsole::Render(){
 
             DisplayText(0,centerMessageY,height,sr_centerString,sr_fontCenterMessage);
             //std::cerr << "DisplayText(0," << centerMessageY << "," << (rCWIDTH_CON*4*fak) << "," << (rCHEIGHT_CON*4*fak) << "," <<sr_centerString << ");\n";
+        }
+
+        if (sr_textOut || rForceTextCallback::ForceText()){
+            if (lastCustomTimeout<Time-5 &&
+                    lastTimeout+timeout<Time && currentTop<currentIn){
+                currentTop++;
+                lastTimeout=Time;
+            }
+
+            static int lastTop = currentTop;
+            static int lastIn  = currentIn;
+            if ( lastTop != currentTop || lastIn != currentIn )
+            {
+                lastTop = currentTop;
+                lastIn  = currentIn;
+                sr_consoleDisplayList.Clear();
+            }
+
+            rTextField::SetDefaultColor( tColor(1,1,1) );
+
+            if ( sr_consoleDisplayList.Call() )
+            {
+                return;
+            }
+            rDisplayListFiller filler( sr_consoleDisplayList );
+
+            rTextField out(-.95f,.99f,rCHEIGHT_CON, sr_fontConsole);//,&rFont::s_defaultFontSmall);
+            out.SetWidth(1.9f);
+            out.EnableLineWrap();
+            out.SetIndent(sr_indent);
+
+            int i;
+            for (i=currentTop;i<=currentIn && i<=currentTop+MaxHeight();i++)
+                if (lines[i].Len()>1){
+                    rTextField::SetDefaultColor( tColor(1,1,1) );
+                    out << lines[i];
+                    out.ResetColor();
+                }
+            if (i<currentIn){
+                // rTextField::SetDefaultColor( tColor(1,.8,.5) );
+                out << tColoredString::ColorString( 1,.8,.5) << "       v   v   v   v   v   v   v   v   v\n";
+            }
+
+
+            int over=out.Lines()-Height();
+            if (over>0 && (rSmallConsoleCallback::SmallColsole() || lastCustomTimeout<tSysTimeFloat()-15)){
+                lastTimeout=Time;
+                currentTop+=(over+1)/2;
+            }
         }
 
         rTextField::SetDefaultColor( tColor(1,1,1) );

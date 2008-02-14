@@ -30,12 +30,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rScreen.h"
 
 #ifdef DEBUG
-#ifndef DEDICATED
 #define LIST_STATS
 #endif
-#endif
 
-#include "rRender.h"
+#define LIST_STATS
 
 #ifdef LIST_STATS
 class rListCounter
@@ -91,12 +89,12 @@ rDisplayList::~rDisplayList()
 #endif
 }
 
-static rDisplayListFiller * sr_currentFiller = NULL;
+static bool sr_isRecording = false;
 
 //! check whether a displaylist is currently being recorded.
 bool rDisplayList::IsRecording()
 {
-    return sr_currentFiller;
+    return sr_isRecording;
 }
 
 // calls the display list, returns true if there was a list to call
@@ -104,9 +102,6 @@ bool rDisplayList::OnCall()
 {
 #ifndef DEDICATED
     tASSERT( !filling_ );
-
-    // abort previous glBegin block
-    RenderEnd();
 
     // no playback while another list is recorded; this
     // gives us a chance to agglomerate primitives.
@@ -139,15 +134,10 @@ bool rDisplayList::OnCall()
 void rDisplayList::Clear( int inhibitGeneration )
 {
 #ifndef DEDICATED
+
     // clear the list
     if ( !filling_ && list_ )
     {
-        // abort previous glBegin block
-        if ( renderer )
-        {
-            RenderEnd();
-        }
-
         glDeleteLists( list_, 1 );
         list_ = 0;
     }
@@ -172,28 +162,13 @@ void rDisplayList::Clear( int inhibitGeneration )
 void rDisplayList::ClearAll()
 {
 #ifndef DEDICATED
-    Cancel();
     tASSERT(!IsRecording());
 
     rDisplayList *run = se_displayListAnchor;
     while (run)
     {
-        tASSERT( !run->filling_ );
         run->Clear();
-        tASSERT( !run->list_ );
         run = run->Next();
-    }
-#endif
-}
-
-// cancels recording of current display list
-void rDisplayList::Cancel()
-{
-#ifndef DEDICATED
-    if ( sr_currentFiller )
-    {
-        sr_currentFiller->list_.Clear(0);
-        sr_currentFiller->Stop();
     }
 #endif
 }
@@ -215,28 +190,13 @@ bool rDisplayListAlphaSensitive::OnCall()
 }
 
 //! constructor, automatically starting to fill teh list
-rDisplayListFiller::rDisplayListFiller( rDisplayList & list, bool respectBlacklist )
+rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
 #ifndef DEDICATED
     : list_( list )
 #endif
 {
-    Start( respectBlacklist );
-}
-
-// starts filling the display list
-void rDisplayListFiller::Start( bool respectBlacklist )
-{
 #ifndef DEDICATED
-    bool useList = sr_useDisplayLists != rDisplayList_Off && list_.inhibit_ == 0 && !sr_currentFiller;
-
-    // don't ever use display lists if they are blacklisted
-#ifndef DEBUG_X
-    if ( sr_blacklistDisplayLists && respectBlacklist )
-    {
-        useList = false;
-    }
-#endif
-
+    bool useList = sr_useDisplayLists != rDisplayList_Off && list_.inhibit_ == 0 && !sr_isRecording;
     if ( useList )
     {
 #ifdef LIST_STATS
@@ -249,7 +209,7 @@ void rDisplayListFiller::Start( bool respectBlacklist )
         }
         glNewList(list_.list_, sr_useDisplayLists == rDisplayList_CAC ? GL_COMPILE : GL_COMPILE_AND_EXECUTE );
         list_.filling_ = true;
-        sr_currentFiller = this;
+        sr_isRecording = true;
     }
     else if ( list_.inhibit_ > 0 )
     {
@@ -257,7 +217,7 @@ void rDisplayListFiller::Start( bool respectBlacklist )
     }
 
 #ifdef LIST_STATS
-    if ( !useList && !sr_currentFiller )
+    if ( !useList )
     {
         sr_counter.Count( rListCounter::Not );
     }
@@ -277,12 +237,8 @@ void rDisplayListFiller::Stop()
     if ( list_.filling_ )
     {
         tASSERT( list_.list_ );
-        tASSERT( sr_currentFiller == this );
 
-        // close previous glBegin block
-        RenderEnd();
-
-        sr_currentFiller = 0;
+        sr_isRecording = false;
         list_.filling_ = false;
         glEndList();
 

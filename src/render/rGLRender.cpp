@@ -46,10 +46,17 @@ class glRenderer: public rRenderer{
         //  return;
 
         if (lastPrimitive != p && lastPrimitive != GL_FALSE)
+        {
             glEnd();
+            sr_CheckGLError();
+        }
+
+        if ( lastPrimitive != p )
+        {
+            glBegin(p);
+        }
 
         lastPrimitive = p;
-        glBegin(p);
 
         forceglEnd = forceEnd;
     }
@@ -63,7 +70,7 @@ class glRenderer: public rRenderer{
     }
 
 public:
-    glRenderer():lastPrimitive(GL_FALSE), lastMatrix(GL_FALSE){
+    glRenderer():lastPrimitive(GL_FALSE), forceglEnd(false), lastMatrix(GL_FALSE){
         ChangeFlags(0xffffffff,0);
     };
 
@@ -113,14 +120,15 @@ public:
     };
 
 
-    virtual void End(bool force=false){
+    virtual void End(bool force=true){
         //    glEnd();
         //    return;
 
-        if ((forceglEnd || force || true) && lastPrimitive!=GL_FALSE)
+        if ((forceglEnd || force ) && lastPrimitive!=GL_FALSE)
         {
             forceglEnd = false;
             glEnd();
+            sr_CheckGLError();
             lastPrimitive = GL_FALSE;
         }
     }
@@ -136,10 +144,6 @@ public:
     virtual void BeginQuads(){
         BeginPrimitive(GL_QUADS);
     }
-
-    virtual void IsEdge(bool ie){
-        glEdgeFlag(ie ? GL_TRUE : GL_FALSE);
-    };
 
     virtual void BeginLineStrip(){
         BeginPrimitive(GL_LINE_STRIP, true);

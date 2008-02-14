@@ -48,7 +48,6 @@ bool pp_tess_deb=0;
 static nSettingItem<tString> conf_res_repo("RESOURCE_REPOSITORY_SERVER", tResourceManager::AccessRepoServer());
 
 static tConfItem<bool> grab("MOUSE_GRAB",su_mouseGrab);
-static tConfItem<bool> zt("ZTRICK",sr_ZTrick);
 
 bool sg_moviepackInstalled=false; // do we have the mp on disk?
 bool sg_moviepackUse=true;       // do we use it?

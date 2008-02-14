@@ -151,9 +151,6 @@ public:
     ~ArmageTron_texmode_menuitem(){};
 };
 
-static tConfItem<int>     la("LINE_ANTIALIAS",sr_lineAntialias);
-static tConfItem<int>     pa("POLY_ANTIALIAS",sr_polygonAntialias);
-static tConfItem<int>     pc("PERSP_CORRECT",sr_perspectiveCorrection);
 static tConfItem<bool>    ab("ALPHA_BLEND",sr_alphaBlend);
 static tConfItem<bool>    ss("SMOOTH_SHADING",sr_smoothShading);
 static tConfItem<bool>    to("TEXT_OUT",sr_textOut);
@@ -445,17 +442,6 @@ static uSelectEntry<int> mfdd(mfd,"$detail_floor_2tex_text",
                               "$detail_floor_2tex_help",
                               rFLOOR_TWOTEXTURE);
 
-
-static ArmageTron_feature_menuitem pam
-(&screen_menu_detail,"$detail_polyantialias_text",
- "$detail_polyantialias_help",
- sr_polygonAntialias);
-
-static ArmageTron_feature_menuitem lam
-(&screen_menu_detail,"$detail_lineantialias_text",
- "$detail_lineantialias_help",
- sr_lineAntialias);
-
 static uMenuItemToggle  abm
 (&screen_menu_detail,"$detail_alpha_text",
  "$detail_alpha_help",
@@ -465,11 +451,6 @@ static uMenuItemToggle  ssm
 (&screen_menu_detail,"$detail_smooth_text",
  "$detail_smooth_help",
  sr_smoothShading);
-
-static ArmageTron_feature_menuitem pcm
-(&screen_menu_detail,"$detail_persp_text",
- "$detail_persp_help",
- sr_perspectiveCorrection);
 
 extern bool crash_sparks;		// from gCycle.cpp
 extern bool white_sparks;		// from gSparks.cpp
@@ -546,13 +527,12 @@ static uMenuItemToggle cs
  "$pref_sparks_help",
  crash_sparks);
 
-static uMenuItemToggle dl
+static uMenuItemSelection<rDisplayListUsage> dl
 (&screen_menu_tweaks,"$tweaks_displaylists_text",
  "$tweaks_displaylists_help", sr_useDisplayLists);
-
-static uMenuItemToggle zt
-(&screen_menu_tweaks,"$tweaks_ztrick_text",
- "$tweaks_ztrick_help",sr_ZTrick);
+static uSelectEntry<rDisplayListUsage> dl_off(dl,"$tweaks_displaylists_off_text","$tweaks_displaylists_off_help",rDisplayList_Off);
+static uSelectEntry<rDisplayListUsage> dl_cac(dl,"$tweaks_displaylists_cac_text","$tweaks_displaylists_cac_help",rDisplayList_CAC);
+static uSelectEntry<rDisplayListUsage> dl_cae(dl,"$tweaks_displaylists_cae_text","$tweaks_displaylists_cae_help",rDisplayList_CAE);
 
 static uMenuItemToggle infp
 (&screen_menu_tweaks,"$tweaks_infinity_text",

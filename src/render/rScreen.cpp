@@ -71,8 +71,7 @@ SDL_Surface *sr_screen=NULL; // our window
 static int default_texturemode = GL_LINEAR_MIPMAP_LINEAR;
     #endif
 
-bool sr_ZTrick=false;
-bool sr_useDisplayLists=false;
+rDisplayListUsage sr_useDisplayLists=rDisplayList_Off;
 
 static int width[ArmageTron_Custom+2]  = {0, 320, 320, 400, 512, 640, 800, 1024	, 1280, 1280, 1280, 1600, 1680, 2048,800,320};
 static int height[ArmageTron_Custom+2] = {0, 200, 240, 300, 384, 480, 600,  768	,  800,  854, 1024, 1200, 1050, 1572,600,200};
@@ -910,11 +909,6 @@ void sr_ExitDisplay(){
     #endif
 }
 
-
-
-int     sr_lineAntialias=rFEAT_DEFAULT;
-int     sr_polygonAntialias=rFEAT_DEFAULT;
-int     sr_perspectiveCorrection=rFEAT_DEFAULT;
 bool    sr_alphaBlend=true;
 bool    sr_glOut=true;
 bool    sr_smoothShading=true;
@@ -942,12 +936,8 @@ tString renderer_identification;
 void sr_LoadDefaultConfig(){
 
     // High detail defaults; no problem for your ordinary 3d-card.
-    sr_lineAntialias=rFEAT_DEFAULT;
-    sr_polygonAntialias=rFEAT_DEFAULT;
-    sr_perspectiveCorrection=rFEAT_DEFAULT;
     sr_alphaBlend=true;
-    sr_ZTrick=false;
-    sr_useDisplayLists=false;
+    sr_useDisplayLists=rDisplayList_Off;
     sr_textOut=true;
     sr_dither=true;
     sr_smoothShading=true;
@@ -977,9 +967,6 @@ void sr_LoadDefaultConfig(){
         rTextureGroups::TextureMode[rTextureGroups::TEX_FONT]=GL_NEAREST_MIPMAP_NEAREST;
     #endif
 
-        sr_lineAntialias=rFEAT_OFF;
-        sr_polygonAntialias=rFEAT_OFF;
-        sr_perspectiveCorrection=rFEAT_OFF;
         sr_highRim=false;
         sr_dither=false;
         sr_alphaBlend=false;
@@ -991,13 +978,11 @@ void sr_LoadDefaultConfig(){
     else if(strstr(gl_vendor,"3Dfx")){
         //workaround for 3dfx renderer: aliasing must be turned on
         //sr_lineAntialias=rFEAT_OFF;
-        sr_polygonAntialias=rFEAT_ON;
-        sr_perspectiveCorrection=rFEAT_ON;
     }
     else if(strstr(gl_vendor,"NVIDIA")){
         // infinity , display lists and glFlush swapping work for NVIDIA
         sr_infinityPlane=true;
-        sr_useDisplayLists=true;
+        sr_useDisplayLists=rDisplayList_CAC;
         rSysDep::swapMode_=rSysDep::rSwap_glFlush;
     }
     #ifdef MACOSX
@@ -1026,17 +1011,6 @@ void sr_ResetRenderState(bool menu){
     else{
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
-        switch(sr_perspectiveCorrection){
-        case rFEAT_ON:
-            glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-            break;
-        case rFEAT_OFF:
-            glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-            break;
-        case rFEAT_DEFAULT:
-            glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_DONT_CARE);
-            break;
-        }
     }
 
     if (sr_dither)
@@ -1057,33 +1031,6 @@ void sr_ResetRenderState(bool menu){
         glShadeModel(GL_SMOOTH);
     else
         glShadeModel(GL_FLAT);
-
-    // antialiasing for lines
-    switch(sr_lineAntialias){
-    case rFEAT_OFF:
-        glDisable(GL_LINE_SMOOTH);
-        glHint (GL_LINE_SMOOTH_HINT, GL_FASTEST);
-        break;
-    case rFEAT_ON:
-        glEnable(GL_LINE_SMOOTH);
-        glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-        break;
-    default:
-        glHint (GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
-    }
-
-    // and polygons
-    switch(sr_polygonAntialias){
-    case rFEAT_OFF:
-        glDisable(GL_POLYGON_SMOOTH);
-        glHint (GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
-        break;
-    case rFEAT_ON:
-        glEnable(GL_POLYGON_SMOOTH);
-        glHint (GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-    default:
-        glHint (GL_POLYGON_SMOOTH_HINT, GL_DONT_CARE);
-    }
 
     // alpha blending
     if (sr_alphaBlend){
@@ -1133,12 +1080,13 @@ void sr_DepthOffset(bool offset){
     if (offset){
         //glMatrixMode(GL_PROJECTION);
         //glScalef(.9,.9,.9);
-        glPolygonOffset(0,-5);
+        glPolygonOffset(-2,-5);
         glEnable(GL_POLYGON_OFFSET_LINE);
         glEnable(GL_POLYGON_OFFSET_POINT);
         glEnable(GL_POLYGON_OFFSET_FILL);
     }
     else{
+        glPolygonOffset(0,0);
         glDisable(GL_POLYGON_OFFSET_POINT);
         glDisable(GL_POLYGON_OFFSET_LINE);
         glDisable(GL_POLYGON_OFFSET_FILL);

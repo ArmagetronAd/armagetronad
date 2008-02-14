@@ -105,8 +105,17 @@ extern bool sr_smoothShading;
 extern bool sr_glOut;           // do we have gl-output at all?
 extern bool sr_textOut;          // display game text graphically?
 extern bool sr_FPSOut;           // display frame counter?
-extern bool sr_ZTrick;            // Quake-Style z-buffer trick: do
-extern bool sr_useDisplayLists;   // use GL display lists
+
+//! how should caching display lists be used?
+enum rDisplayListUsage
+{
+    rDisplayList_Off=0, // not at all
+    rDisplayList_CAC,   // yes, with GL_COMPILE, then glCallList.
+    rDisplayList_CAE,   // yes, with GL_COMPILE_AND_EXECUTE
+    rDisplayList_Count
+};
+
+extern rDisplayListUsage sr_useDisplayLists;   // use GL display lists
 // not delete the screen, just pait the background with depth test
 // disabled. Gives 20% speedup.
 
@@ -128,10 +137,6 @@ extern int sr_floorDetail;
 #define rFEAT_OFF    -1
 #define rFEAT_DEFAULT 0
 #define rFEAT_ON      1
-
-extern int     sr_lineAntialias;
-extern int     sr_polygonAntialias;
-extern int     sr_perspectiveCorrection;
 
 extern bool sr_highRim;
 extern bool sr_upperSky,sr_lowerSky;
