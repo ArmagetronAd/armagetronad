@@ -1745,6 +1745,7 @@ void gNetPlayerWall::real_CopyIntoGrid(eGrid *grid){
                 sg_netPlayerWallsGridded.Add(this,griddedid);
                 Wall()->Insert();
                 this->ReleaseData();
+                ClearDisplayList();
             }
             else{
                 sg_netPlayerWallsGridded.Add(this,griddedid);
