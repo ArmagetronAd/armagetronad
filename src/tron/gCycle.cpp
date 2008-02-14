@@ -3976,7 +3976,14 @@ public:
         cp[2]=b;
     }
     Colour(ePlayerNetID* player) {
-        player->Color(cp[0], cp[1], cp[2]);
+        if ( player )
+        {
+            player->Color(cp[0], cp[1], cp[2]);
+        }
+        else
+        {
+            cp[0]=cp[1]=cp[2]=1;
+        }
     }
     void blend(REAL factor, const Colour& target) {
         for (int i=0; i<3; i++) {

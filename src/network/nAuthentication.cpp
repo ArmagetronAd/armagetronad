@@ -273,7 +273,7 @@ public:
     static void ScheduleForeground( T & object, void (T::*function)()  )
     {
 #ifdef HAVE_LIBZTHREAD
-        pending_.add( nMemberFunctionRunnerTemplate( object, function ) );
+        Pending().add( nMemberFunctionRunnerTemplate( object, function ) );
         st_ToDo( FinishAll );
 #else
         // execute it immedeately
@@ -305,15 +305,19 @@ private:
 
 #ifdef HAVE_LIBZTHREAD
     // queue of foreground tasks
-     static ZThread::LockedQueue< nMemberFunctionRunnerTemplate, ZThread::FastMutex > pending_;
+     static ZThread::LockedQueue< nMemberFunctionRunnerTemplate, ZThread::FastMutex > & Pending()
+     {
+         static ZThread::LockedQueue< nMemberFunctionRunnerTemplate, ZThread::FastMutex > pending;
+         return pending;
+     }
     
     // function that calls them
     static void FinishAll()
     {
         // finish all pending tasks
-        while( pending_.size() > 0 )
+        while( Pending().size() > 0 )
         {
-            nMemberFunctionRunnerTemplate next = pending_.next();
+            nMemberFunctionRunnerTemplate next = Pending().next();
             next.run();
         }
     }
@@ -324,13 +328,6 @@ template< class T >
 std::deque< nMemberFunctionRunnerTemplate<T> > 
 nMemberFunctionRunnerTemplate<T>::pendingForBreak_;
 
-#ifdef HAVE_LIBZTHREAD
-// static queue
-template< class T >
-ZThread::LockedQueue< nMemberFunctionRunnerTemplate<T>, ZThread::FastMutex > 
-nMemberFunctionRunnerTemplate<T>::pending_;
-#endif
- 
 // convenience wrapper
 class nMemberFunctionRunner
 {
