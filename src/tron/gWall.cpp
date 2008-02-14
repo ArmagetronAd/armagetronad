@@ -1002,7 +1002,6 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
 
 
 bool upperlinecolor(REAL r,REAL g,REAL b, REAL a){
-    sr_CheckGLError();
     if (rTextureGroups::TextureMode[rTextureGroups::TEX_WALL]<0)
         glColor4f(1,1,1,a);
     else{
@@ -1016,11 +1015,9 @@ bool upperlinecolor(REAL r,REAL g,REAL b, REAL a){
           glColor4f(r,g,b,upperline_alpha);
         */
         //glDisable(GL_TEXTURE);
-        sr_CheckGLError();
         glColor4f(r,g,b,a);
     }
 
-    sr_CheckGLError();
     return true;
 }
 
@@ -1176,9 +1173,7 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
     eCoord ppos=cycle_->PredictPosition() - cycle_->dir*REAL(gCYCLE_LEN);
 
     if ( hfrac>0 ){
-        sr_CheckGLError();
-        sr_DepthOffset(true);
-        sr_CheckGLError();
+        sr_DepthOffset(true);  
         //REAL H=h*hfrac;
 #define segs 5
         upperlinecolor(r,g,b,a);//a*afunc(rat));
@@ -1196,14 +1191,12 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
 
             REAL H=h*hfrac*hfunc(rat);
             upperlinecolor(r,g,b,a*afunc(rat));
-            sr_CheckGLError();
             glVertex3f(x+H*cycle_->skew*sfunc(rat)*cycle_->dir.y,
                        y-H*cycle_->skew*sfunc(rat)*cycle_->dir.x,
                        H);//+se_cameraZ*.005);
-            sr_CheckGLError();
         }
         RenderEnd();
-        sr_CheckGLError();
+
         sr_DepthOffset(false);
         if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
             glEnable(GL_TEXTURE_2D);
@@ -1224,23 +1217,17 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
 
         // bottom
         glColor4f(r+cfunc(rat),g+cfunc(rat),b+cfunc(rat),a*afunc(rat));
-        sr_CheckGLError();
         glTexCoord2f(ta+(te-ta)*frag,hfrac);
-        sr_CheckGLError();
         glVertex3f(x,y,0);
-        sr_CheckGLError();
 
         // top
 
         //glTexCoord2f(ta+(te-ta)*frag,hfrac*(1-hfunc(rat)));
-        sr_CheckGLError();
         glTexCoord2f(ta+(te-ta)*frag,0);
-        sr_CheckGLError();
         REAL H=h*hfrac*hfunc(rat);
         glVertex3f(x+H*cycle_->skew*sfunc(rat)*cycle_->dir.y,
                    y-H*cycle_->skew*sfunc(rat)*cycle_->dir.x,
                    H);
-        sr_CheckGLError();
     }
     RenderEnd();
     sr_CheckGLError();
