@@ -1771,7 +1771,7 @@ bool gBaseZoneHack::Timestep( REAL time )
 
                     pSpawn->Spawn(pos, dir);
 
-                    gCycle *pCycle = new gCycle(grid, pos, dir, pPlayer, 0);
+                    gCycle *pCycle = new gCycle(grid, pos, dir, pPlayer);
                     pPlayer->ControlObject(pCycle);
 
                     tColoredString playerName;

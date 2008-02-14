@@ -3401,7 +3401,7 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 #ifdef DEBUG
             //                std::cout << "spawning player " << pni->name << '\n';
 #endif
-            gCycle * cycle = new gCycle(grid, pos, dir, p, 0);
+            gCycle * cycle = new gCycle(grid, pos, dir, p);
             p->ControlObject(cycle);
 
             sg_Timestamp();
