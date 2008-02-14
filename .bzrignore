@@ -41,3 +41,5 @@ src/doc/Doxyfile
 *.html
 html.m4
 *.dep
+aa_config.h.in
+./aa_config.h
