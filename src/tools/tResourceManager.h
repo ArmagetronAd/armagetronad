@@ -56,6 +56,8 @@ class tResourcePath
     tString m_Extension;//!< the extension (like xml or png)
     tString m_URI;      //!< the URI to the file, if any
     tString m_Path;     //!< the full path of the resource
+
+    bool m_Valid;
 public:
     tString const &Author   () const {return m_Author   ;} //!< get the author of the resource
     tString const &Category () const {return m_Category ;} //!< get the category of the resource
@@ -66,10 +68,10 @@ public:
     tString const &URI      () const {return m_URI      ;} //!< get the URI to the file, if any
     tString const &Path     () const {return m_Path     ;} //!< get the full path of the resource
 
-    bool Valid() const {return !m_Path.empty();} //!< is this a valid resource path?
+    bool Valid() const {return m_Valid;} //!< is this a valid resource path?
 
     //! default constructor. Valid() will return false if called on an object constructed this way.
-    tResourcePath(){}
+    tResourcePath():m_Valid(false){}
 
     //! construct the path from the given arguments
     tResourcePath(tString const &Author,
@@ -80,7 +82,11 @@ public:
                   tString const &Extension,
                   tString const &URI);
 
+    //! construct a path from a resource location
+    tResourcePath(tString const &path);
+
     bool operator==(tResourcePath const &other) const;
+    bool operator!=(tResourcePath const &other) const;
 };
 
 #endif //ArmageTron_RESOURCEMANAGER_H

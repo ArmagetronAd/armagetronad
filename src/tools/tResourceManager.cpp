@@ -242,6 +242,49 @@ static void RInclude(std::istream& s)
 
 static tConfItemFunc s_RInclude("RINCLUDE",  &RInclude);
 
+static bool st_checkAuthor(tString const &Author) {
+    if(Author.empty() || Author[0] < 'A' || Author[0] > 'z' || Author[0] > 'Z' && Author[0] < 'a' || Author.find('/') != tString::npos) {
+        tERR_WARN("Resource authors must start with a letter and may not contain slashes");
+        return false;
+    }
+    return true;
+}
+static bool st_checkCategory(tString const &Category) {
+    if(Category[0] == '/' || *Category.rbegin() == '/' || Category.find("/.") != tString::npos) {
+        tERR_WARN("Resource categories must not start or end with a slash or dot or contain the sequence \"./\".");
+        return false;
+    }
+    return true;
+}
+static bool st_checkName(tString const &Name) {
+    if(Name.empty() || Name[0] == '.' || Name.find_first_of("-/") != tString::npos) {
+        tERR_WARN("Resource names must not start with a dot or contain slashes or minus signs");
+        return false;
+    }
+    return true;
+}
+static bool st_checkExtension(tString const &Extension) {
+    if(Extension.empty() || Extension.find_first_of("/.") != tString::npos) {
+        tERR_WARN("Resource extensions must not contain slashes or dots");
+        return false;
+    }
+    return true;
+}
+static bool st_checkType(tString const &Type) {
+    if(Type.empty() || Type.find_first_of("/.") != tString::npos) {
+        tERR_WARN("Resource types must not contain slashes or dots");
+        return false;
+    }
+    return true;
+}
+static bool st_checkVersion(tString const &Version) {
+    if(Version.empty() || Version.find('/') != tString::npos) {
+        tERR_WARN("Resource versions must not contain slashes");
+        return false;
+    }
+    return true;
+}
+
 tResourcePath::tResourcePath(tString const &Author,
                              tString const &Category,
                              tString const &Name,
@@ -255,16 +298,79 @@ tResourcePath::tResourcePath(tString const &Author,
     m_Version  (Version  ),
     m_Type     (Type     ),
     m_Extension(Extension),
-    m_URI      (URI      ) {
-    // TODO: check for illegal characters
+    m_URI      (URI      ),
+    m_Valid(false) {
     m_Path << Author << '/';
+    if(!st_checkAuthor(Author)) return;
     if(!Category.empty()) {
+        if(!st_checkCategory(Category)) return;
         m_Path << Category << '/';
     }
+    if(!st_checkName(Name)) return;
+    if(!st_checkExtension(Extension)) return;
+    if(!st_checkType(Extension)) return;
+    if(!st_checkVersion(Version)) return;
     m_Path << Name << '-' << Version << '.' << Type << '.' << Extension;
     if(!URI.empty()) {
         m_Path << '(' << URI << ')';
     }
+    m_Valid = true;
+}
+
+tResourcePath::tResourcePath(tString const &Path) : m_Path(Path), m_Valid(false) {
+    // check if an URI is attached
+    tString::size_type uridelim = m_Path.find('(');
+    if(uridelim != tString::npos) {
+        // find the corresponding opening bracket
+        if(*m_Path.rbegin() != ')') {
+            tERR_WARN("Incomplete URI specification");
+            return;
+        }
+        m_URI = m_Path.substr(uridelim + 1, m_Path.size() - uridelim - 2);
+        --uridelim;
+    } else {
+        uridelim = m_Path.size() - 1;
+    }
+
+    tString::size_type authordelim = Path.find('/');
+    if(authordelim == tString::npos || authordelim >= uridelim) {
+        tERR_WARN("Resource paths need to contain at least one slash");
+        return;
+    }
+    m_Author = Path.substr(0, authordelim);
+    if(!st_checkAuthor(m_Author)) return;
+    tString::size_type categorydelim = Path.rfind('/', uridelim);
+    if(categorydelim != authordelim) {
+        m_Category = Path.substr(authordelim + 1, categorydelim - authordelim - 1);
+        if(!st_checkCategory(m_Category)) return;
+    }
+    tString::size_type namedelim = Path.find('-', categorydelim);
+    if(namedelim == tString::npos || namedelim >= uridelim) {
+        tERR_WARN("Resource path is missing the version delimiter ('-')");
+        return;
+    }
+    m_Name = Path.substr(categorydelim+1, namedelim - categorydelim - 1);
+    if(!st_checkName(m_Name)) return;
+
+    // now parse from the back to the front to find the version (which can
+    // contain dots)
+    tString::size_type extensiondelim = Path.rfind('.', uridelim);
+    if(extensiondelim == tString::npos || extensiondelim <= namedelim || extensiondelim >= Path.size() - 1) {
+        tERR_WARN("Resource path is missing the extension delimiter ('.')");
+    }
+    m_Extension = Path.substr(extensiondelim + 1, uridelim - extensiondelim);
+    if(!st_checkExtension(m_Extension)) return;
+    tString::size_type typedelim = Path.rfind('.', extensiondelim - 1);
+    if(typedelim == tString::npos || typedelim <= namedelim) {
+        tERR_WARN("Resource path is missing the type delimiter ('.')");
+    }
+    m_Type = Path.substr(typedelim + 1, extensiondelim - typedelim - 1);
+    if(!st_checkType(m_Type)) return;
+
+    // the rest is (hopefully) the version, now...
+    m_Version = Path.substr(namedelim + 1, typedelim - namedelim - 1);
+    if(!st_checkVersion(m_Version)) return;
+    m_Valid=true;
 }
 
 bool tResourcePath::operator==(tResourcePath const &other) const {
@@ -274,4 +380,14 @@ bool tResourcePath::operator==(tResourcePath const &other) const {
            m_Version   == other.m_Version   &&
            m_Type      == other.m_Type      &&
            m_Extension == other.m_Extension;
+}
+
+// separate implementation to exploit lazy condition evaluation
+bool tResourcePath::operator!=(tResourcePath const &other) const {
+    return m_Author    != other.m_Author    ||
+           m_Category  != other.m_Category  ||
+           m_Name      != other.m_Name      ||
+           m_Version   != other.m_Version   ||
+           m_Type      != other.m_Type      ||
+           m_Extension != other.m_Extension;
 }

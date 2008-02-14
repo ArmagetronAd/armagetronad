@@ -477,19 +477,12 @@ bool tXmlResource::ValidateXml(FILE* docfd, const char* uri, const char* filepat
             );
             tString rightFilepath( m_Path.Path() );
             tString pureFilepath( filepath );
-            int paren = pureFilepath.StrPos( "(" );
-            if ( paren > 0 )
-            {
-                pureFilepath = pureFilepath.SubStr( 0, paren );
-            }
             int pos;
-            while((pos = rightFilepath.StrPos("//")) != -1) {
-                rightFilepath.RemoveSubStr(pos, 1);
-            }
             while((pos = pureFilepath.StrPos("//")) != -1) {
                 pureFilepath.RemoveSubStr(pos, 1);
             }
-            if ( rightFilepath != pureFilepath )
+	    tResourcePath purepath(pureFilepath);
+            if ( purepath != m_Path )
             {
                 con << "\nWARNING: incorrect filepath. The resource wants to be at \"" << rightFilepath << "\", but was loaded from \"" << filepath << "\".\n\n";
             }

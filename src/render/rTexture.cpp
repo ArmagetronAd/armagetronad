@@ -793,6 +793,10 @@ static rCallbackBeforeScreenModeChange unload(&rITexture::UnloadAll);
 rResourceTexture::texlist_t rResourceTexture::textures;
 
 rResourceTexture::rResourceTexture(tResourcePath const &path, bool repx, bool repy) : repx_(repx), repy_(repy) {
+    if(!path.Valid()) {
+        tex_ = 0;
+        return;
+    }
     for(texlist_t::iterator iter = textures.begin(); iter != textures.end(); ++iter) {
         if((*iter)->path_ == path) {
             tex_ = *iter;
