@@ -272,7 +272,7 @@ public:
     }
 
     //! clears the display list
-    void ClearDisplayList();
+    void ClearDisplayList( int inhibitThis = 1, int inhibitCycle = 0 );
 private:
     tArray<gPlayerWallCoord> coords_;
 

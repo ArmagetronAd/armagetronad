@@ -799,6 +799,22 @@ static void ResultCallback( nKrawall::nCheckResult const & result )
     if (success)
     {
         player->Authenticate( authName, result.accessLevel );
+
+        // log blurb to ladderlog. This is not important for debug playback,
+        // so we just don't record it. Once more is done with the blurb, 
+        // we need to change that.
+        for ( std::deque< tString >::const_iterator i = result.blurb.begin(); i != result.blurb.end(); ++i )
+        {
+            std::istringstream s( static_cast< char const * >( *i ) );
+            tString token, rest;
+            s >> token;
+            rest.ReadLine( s );
+
+            std::ostringstream o;
+            o << "AUTHORITY_BLURB_" << token << " " << player->GetFilteredAuthenticatedName() << " " << rest << std::endl;
+
+            se_SaveToLadderLog( o.str().c_str() );
+        }
     }
     else
     {
@@ -1584,10 +1600,16 @@ static tColoredString se_BuildChatString( eTeam const *team, ePlayerNetID const 
     tColoredString console;
     console << *sender;
 
-    if (sender->CurrentTeam() == team || !sender->CurrentTeam() ) {
+    if( !sender->CurrentTeam() )
+    {
+        // foo --> Spectatos: message
+        console << tColoredString::ColorString(1,1,.5) << " --> " << tOutput("$player_spectator_message");
+    }
+    else if (sender->CurrentTeam() == team)
+    {
         // foo --> Teammates: some message here
         console << tColoredString::ColorString(1,1,.5) << " --> ";
-        console << tColoredString::ColorString(team->R(),team->G(),team->B()) << "Teammates";
+        console << tColoredString::ColorString(team->R(),team->G(),team->B()) << tOutput("$player_team_message");
     }
     else {
         // foo (Red Team) --> Blue Team: some message here
@@ -1650,7 +1672,6 @@ static nMessage* se_ServerControlledChatMessage( ePlayerNetID const * sender, eP
 // prepares a chat message with a chat message originating from the given player to the given team
 static nMessage* se_ServerControlledChatMessage(  eTeam const * team, ePlayerNetID const * sender, tString const & message )
 {
-    tASSERT( team );
     tASSERT( sender );
 
     return se_ServerControlledChatMessageConsole( sender, se_BuildChatString(team, sender, message) );
@@ -1770,7 +1791,6 @@ void se_SendPrivateMessage( ePlayerNetID const * sender, ePlayerNetID const * re
 // Sends a /team message
 void se_SendTeamMessage( eTeam const * team, ePlayerNetID const * sender ,ePlayerNetID const * receiver, tString const & message )
 {
-    tASSERT( team );
     tASSERT( receiver );
     tASSERT( sender );
 
@@ -1785,10 +1805,15 @@ void se_SendTeamMessage( eTeam const * team, ePlayerNetID const * sender ,ePlaye
         tColoredString say;
         say << tColoredString::ColorString(1,1,.5) << "( " << *sender;
 
-        // ( foo --> Teammates ) some message here
-        if (sender->CurrentTeam() == team) {
+        if( !sender->CurrentTeam() )
+        {
+            // foo --> Spectatos: message
+            say << tColoredString::ColorString(1,1,.5) << " --> " << tOutput("$player_spectator_message");
+        }
+        else if (sender->CurrentTeam() == team) {
+            // ( foo --> Teammates ) some message here
             say << tColoredString::ColorString(1,1,.5) << " --> ";
-            say << tColoredString::ColorString(team->R(),team->G(),team->B()) << "Teammates";
+            say << tColoredString::ColorString(team->R(),team->G(),team->B()) << tOutput("$player_team_message");;
         }
         // ( foo (Blue Team) --> Red Team ) some message
         else {
@@ -2302,7 +2327,7 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     }
     else
     {
-        tConfItemBase::LoadAll(s);
+        tConfItemBase::LoadLine(s);
     }
 }
 
@@ -2613,8 +2638,10 @@ static void se_ChatTeamLeave( ePlayerNetID * p )
 // /team chat commant: talk to your team
 static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
 {
-    // odd, the refactored original did not check for silence. Probably by design.
-    if ( /* IsSilencedWithWarning(player) || */ spam.Block() )
+    eTeam *currentTeam = se_GetManagedTeam( p );
+
+    // silencing only affects spectators here
+    if ( ( !currentTeam && IsSilencedWithWarning(p) ) || spam.Block() )
     {
         return;
     }
@@ -2622,16 +2649,15 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
     tString msg;
     msg.ReadLine( s );
 
-    eTeam *currentTeam = se_GetManagedTeam( p );
-
+    // Log message to server and sender
+    tColoredString messageForServerAndSender = se_BuildChatString(currentTeam, p, msg);
+    messageForServerAndSender << "\n";
+    
     if (currentTeam != NULL) // If a player has just joined the game, he is not yet on a team. Sending a /team message will crash the server
     {
-        // Log message to server and sender
-        tColoredString messageForServerAndSender = se_BuildChatString(currentTeam, p, msg);
-        messageForServerAndSender << "\n";
         sn_ConsoleOut(messageForServerAndSender, 0);
         sn_ConsoleOut(messageForServerAndSender, p->Owner());
-        
+
         // Send message to team-mates
         int numTeamPlayers = currentTeam->NumPlayers();
         for (int teamPlayerIndex = 0; teamPlayerIndex < numTeamPlayers; teamPlayerIndex++) {
@@ -2661,7 +2687,19 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
     }
     else
     {
-        sn_ConsoleOut(tOutput("$player_not_on_team"), p->Owner());
+        sn_ConsoleOut(messageForServerAndSender, 0);
+        sn_ConsoleOut(messageForServerAndSender, p->Owner());
+
+        // check for other spectators
+        for( int i = se_PlayerNetIDs.Len() - 1; i >=0; --i )
+        {
+            ePlayerNetID * spectator = se_PlayerNetIDs(i);
+            
+            if ( se_GetManagedTeam( spectator ) == 0 && spectator != p )
+            {
+                se_SendTeamMessage(currentTeam, p, spectator, msg);
+            }
+        }
     }
 }
 
@@ -3535,6 +3573,7 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     greeted     =false;
     chatting_   =false;
     spectating_ =false;
+    stealth_    =false;
     disconnected=false;
     chatFlags_	=0;
 

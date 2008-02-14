@@ -1521,7 +1521,7 @@ void init_game_objects(eGrid *grid){
 #endif
                     spawn->Spawn(pos,dir);
                     pni->Greet();
-                    cycle = new gCycle(grid, pos, dir, pni, 0);
+                    cycle = new gCycle(grid, pos, dir, pni);
                     pni->ControlObject(cycle);
                     nNetObject::SyncAll();
                 }
@@ -1794,13 +1794,7 @@ void Render(eGrid *grid, REAL time, bool swap=true){
 
         if (swap){
             rSysDep::SwapGL();
-
-            if(!sr_ZTrick ||
-                    (!sr_highRim && !sr_lowerSky && !sr_upperSky) ||
-                    sr_floorDetail<rFLOOR_TEXTURE ||
-                    sr_floorMirror==rMIRROR_OBJECTS){
-                rSysDep::ClearGL();
-            }
+            rSysDep::ClearGL();
         }
     }
     else

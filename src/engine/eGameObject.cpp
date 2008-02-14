@@ -624,6 +624,17 @@ void eGameObject::Kill(){}
 // draws it to the screen using OpenGL
 void eGameObject::Render(const eCamera *){}
 
+// *******************************************************************************
+// *
+// *	RendersAlpha
+// *
+// *******************************************************************************
+//!
+//!		@return	True if alpha blending is used
+//!
+// *******************************************************************************
+bool eGameObject::RendersAlpha() const{return false;}
+
 // Cockpit
 bool eGameObject::RenderCockpitFixedBefore(bool){return true;}
 // return value: draw everything else?
@@ -833,14 +844,47 @@ eGameObject *displayed_gameobject = 0;
 void eGameObject::RenderAll(eGrid *grid, const eCamera *cam){
     //if (!sr_glOut)
     //    return;
-
+    
+    // first, we need to render all the non-alpha blended objects.
+    // if we encounter non-alpha blended objects after alpha blended objects
+    // have already been rendered, we need to re-sort them to the back.
+    eGameObject * firstAlpha = NULL;
     for(int i=grid->gameObjects.Len()-1;i>=0;i--){
         su_FetchAndStoreSDLInput();
         if (sr_glOut){
+            eGameObject * object = grid->gameObjects(i);
 #ifdef DEBUG
-            displayed_gameobject = grid->gameObjects(i);
+            displayed_gameobject = object;
 #endif
-            grid->gameObjects(i)->Render(cam);
+            object->Render(cam);
+
+            bool thisAlpha = object->RendersAlpha();
+            if ( !thisAlpha && firstAlpha )
+            {
+                // resort the object, switch places with the first alpha blended one.
+                // This will only have an effect in the next frame,
+                // but the small flickering error is to be tolerated, especially
+                // since alpha blended game objects tend to gently fade in.
+                int firstAlphaID = firstAlpha->id;
+                grid->gameObjects.Remove(firstAlpha,firstAlpha->id);
+                grid->gameObjects.Add(firstAlpha,firstAlpha->id);
+                grid->gameObjects.Remove(object,object->id);
+                grid->gameObjects.Add(object,object->id);
+                
+                // the first alpha blended object no longer is the first. Look for
+                // a replacement, only one object is a candidate.
+                firstAlpha = 0;
+                if ( firstAlphaID > 0 )
+                {   
+                    firstAlpha = grid->gameObjects(firstAlphaID - 1);
+                    tASSERT( firstAlpha->RendersAlpha() );
+                }
+            }
+            if ( thisAlpha && !firstAlpha )
+            {
+                // store first known alpha blending object
+                firstAlpha = object;
+            }
 #ifdef DEBUG
             displayed_gameobject = 0;
 #endif

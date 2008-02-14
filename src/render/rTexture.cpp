@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 
 #include "rTexture.h"
+#include "rDisplayList.h"
 #include "tString.h"
 #include "rScreen.h"
 #include "tDirectories.h"
@@ -444,6 +445,8 @@ rISurfaceTexture::~rISurfaceTexture( void )
 #ifndef DEDICATED
     if (tint_ > 0)
     {
+        rDisplayList::ClearAll();
+
         glDeleteTextures(1,&tint_);
         tint_ = 0;
     }
@@ -624,6 +627,8 @@ void rISurfaceTexture::OnUnload( void )
 #ifndef DEDICATED
     if (tint_ > 0)
     {
+        rDisplayList::ClearAll();
+
         // std::cerr << "unloading texture " << fileName << ':' << tint_ << "\n";
         glDeleteTextures(1,&tint_);
         tint_ = 0;

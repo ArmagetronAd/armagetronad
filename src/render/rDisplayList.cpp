@@ -48,7 +48,10 @@ public:
     };
 
     rListCounter(){ count_[Use] = count_[Create] = count_[Not] = 0; }
-    void Count( Type type ){ count_[type]++; }
+    void Count( Type type )
+    {
+        count_[type]++;
+    }
     ~rListCounter()
     {
         std::cout << "Display Lists Created: " << count_[Create] << ", used: " << count_[Use]
@@ -78,6 +81,8 @@ rDisplayList::rDisplayList()
 rDisplayList::~rDisplayList()
 {
 #ifndef DEDICATED
+    tASSERT( !filling_ );
+
     Clear();
 
     tASSERT( !list_ );
@@ -93,14 +98,22 @@ bool rDisplayList::IsRecording()
 }
 
 // calls the display list, returns true if there was a list to call
-bool rDisplayList::Call()
+bool rDisplayList::OnCall()
 {
 #ifndef DEDICATED
     tASSERT( !filling_ );
 
-    if ( inhibit_ > 0 )
+    // no playback while another list is recorded; this
+    // gives us a chance to agglomerate primitives.
+    if ( IsRecording() )
+    {
+        return false;
+    }
+
+    if ( inhibit_ > 0 && list_ )
     {
         Clear();
+        --inhibit_;
         return false;
     }
 
@@ -121,6 +134,7 @@ bool rDisplayList::Call()
 void rDisplayList::Clear( int inhibitGeneration )
 {
 #ifndef DEDICATED
+
     // clear the list
     if ( !filling_ && list_ )
     {
@@ -130,7 +144,7 @@ void rDisplayList::Clear( int inhibitGeneration )
     else
     {
         // clear it later
-        if ( inhibitGeneration < 1 )
+        if ( list_ && inhibitGeneration < 1 )
         {
             inhibitGeneration = 1;
         }
@@ -148,6 +162,8 @@ void rDisplayList::Clear( int inhibitGeneration )
 void rDisplayList::ClearAll()
 {
 #ifndef DEDICATED
+    tASSERT(!IsRecording());
+
     rDisplayList *run = se_displayListAnchor;
     while (run)
     {
@@ -155,6 +171,22 @@ void rDisplayList::ClearAll()
         run = run->Next();
     }
 #endif
+}
+
+rDisplayListAlphaSensitive::rDisplayListAlphaSensitive()
+: lastAlpha_( sr_alphaBlend )
+{}
+
+bool rDisplayListAlphaSensitive::OnCall()
+{
+    // check whether crucial settings changed
+    if ( sr_alphaBlend != lastAlpha_ )
+    {
+        lastAlpha_ = sr_alphaBlend;
+        return false;
+    }
+
+    return rDisplayList::OnCall();
 }
 
 //! constructor, automatically starting to fill teh list
@@ -173,9 +205,11 @@ rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
         if ( !list_.list_ )
         {
             list_.list_=glGenLists(1);
+            tASSERT( list_.list_ );
         }
         glNewList(list_.list_, sr_useDisplayLists == rDisplayList_CAC ? GL_COMPILE : GL_COMPILE_AND_EXECUTE );
         list_.filling_ = true;
+        sr_isRecording = true;
     }
     else if ( list_.inhibit_ > 0 )
     {
@@ -202,14 +236,24 @@ void rDisplayListFiller::Stop()
 #ifndef DEDICATED
     if ( list_.filling_ )
     {
+        tASSERT( list_.list_ );
+
+        sr_isRecording = false;
         list_.filling_ = false;
         glEndList();
 
         if ( sr_useDisplayLists == rDisplayList_CAC )
         {
+            // call the list, making sure it really gets executed
+            int inhibit = list_.inhibit_;
+            list_.inhibit_ = 0;
             list_.Call();
+            list_.inhibit_ = inhibit;
         }
     }
+
+    // to debug, clearing every display list may be useful:
+    // list_.Clear(0);
 #endif
 }
 

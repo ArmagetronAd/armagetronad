@@ -113,14 +113,14 @@ bool eWallRim::IsBound(const eCoord &x, REAL offset)
     return se_OffsetBounds( offset ).Contains( x );
 }
 
+static bool se_RimWrapY=true;
+static tSettingItem<bool> se_RimWrapYConf
+("RIM_WALL_WRAP_Y",se_RimWrapY);
+
 #ifndef DEDICATED
 static rDisplayList se_rimDisplayList;
 
 extern bool sg_MoviePack();
-
-static bool se_RimWrapY=true;
-static tSettingItem<bool> se_RimWrapYConf
-("RIM_WALL_WRAP_Y",se_RimWrapY);
 
 static rFileTexture se_RimWallNoWrap(rTextureGroups::TEX_WALL,"textures/rim_wall.png",1,0);
 static rFileTexture se_RimWallWrap(rTextureGroups::TEX_WALL,"textures/rim_wall.png",1,1);
@@ -154,7 +154,7 @@ void eWallRim::RenderAll( eCamera * camera )
 
     BeginQuads();
     for(int i=se_rimWalls.Len()-1;i>=0;i--){
-        se_rimWalls(i)->RenderReal( camera );
+        se_rimWalls(i)->RenderReal( rDisplayList::IsRecording() ? 0 : camera );
     }
     RenderEnd();
     

@@ -40,4 +40,18 @@ typedef unsigned int GLuint;
 typedef unsigned int GLenum;
 #endif
 
+
+#ifdef DEBUG
+#ifndef DEDICATED
+#define AA_GL_ERROR_CHECKING
+#endif
+#endif
+
+#ifdef AA_GL_ERROR_CHECKING
+//! for debugging purposes: checks for OpenGL errors and prints them to the console.
+void sr_CheckGLError();
+#else
+inline void sr_CheckGLError(){}
+#endif
+
 #endif

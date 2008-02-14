@@ -2263,8 +2263,8 @@ void gCycle::InitAfterCreation(){
     MyInitAfterCreation();
 }
 
-gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p,bool autodelete)
-        :gCycleMovement(grid, pos,d,p,autodelete),
+gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
+        :gCycleMovement(grid, pos,d,p,false),
         engine(NULL),
         turning(NULL),
         skew(0),skewDot(0),
@@ -2346,13 +2346,42 @@ gCycle::~gCycle(){
 }
 
 #ifndef DEDICATED
-// manager for walls not belonging to any cycle
-static gCycleWallsDisplayListManager lostWalls_;
+// renders a cycle even after it died
+class gCycleRenderer: public eReferencableGameObject
+{
+public:
+    gCycleRenderer( gCycle * cycle )
+    : eReferencableGameObject( cycle->Grid(), cycle->Position(), cycle->Direction(), cycle->CurrentFace(), true )
+    , cycle_( cycle )
+    {
+        AddToList();
+    }
+private:
+    virtual void Render( eCamera const * camera )
+    {
+        cycle_->Render( camera );
+    }
+
+    virtual bool Timestep( REAL currentTime )
+    {
+        return !cycle_->displayList_.Walls();
+    }
+
+    tJUST_CONTROLLED_PTR< gCycle > cycle_;
+};
 #endif
 
 void gCycle::OnRemoveFromGame()
 {
-    // keep this cycle alive
+#ifndef DEDICATED
+    // keep rendering the cycle
+    if ( GOID() >= 0 )
+    {
+        tNEW( gCycleRenderer( this ) );
+    }
+#endif
+
+    // keep this cycle alive during this function
     tJUST_CONTROLLED_PTR< gCycle > keep;
 
     if ( this->GetRefcount() > 0 )
@@ -2370,17 +2399,7 @@ void gCycle::OnRemoveFromGame()
     currentWall=NULL;
     lastWall=NULL;
 
-    // only really leave if we have no walls left
-#ifndef DEDICATED
-    if ( displayList_.Walls() )
-    {
-        Die( lastTime );
-    }
-    else
-#endif
-    {
-        gCycleMovement::OnRemoveFromGame();
-    }
+    gCycleMovement::OnRemoveFromGame();
 }
 
 // called when the round ends
@@ -2499,14 +2518,6 @@ REAL gCycle::CalculatePredictPosition( gPredictPositionData & data )
 }
 
 bool gCycle::Timestep(REAL currentTime){
-    // keep cycle in list for rendering as long as walls are active
-#ifndef DEDICATED
-    if ( !Alive() && displayList_.Walls() )
-    {
-        return false;
-    }
-#endif
-
     // clear out dangerous info when we're done
     gMaxSpaceAheadHitInfoClearer hitInfoClearer( maxSpaceHit_ );
 
@@ -2561,6 +2572,14 @@ bool gCycle::Timestep(REAL currentTime){
 
         // die completely
         Die( lastTime );
+
+#ifndef DEDICATED
+        // keep rendering the cycle
+        if ( GOID() >= 0 )
+        {
+            tNEW( gCycleRenderer( this ) );
+        }
+#endif
 
         // and let yourself be removed from the lists so we don't have to go
         // through this again.
@@ -2694,14 +2713,13 @@ bool gCycle::Timestep(REAL currentTime){
         }
     }
 
-    // keep cycle in list for rendering as long as walls are active
 #ifndef DEDICATED
-    if ( displayList_.Walls() )
+    // keep rendering the cycle
+    if ( ret && GOID() >= 0 )
     {
-        return false;
+        tNEW( gCycleRenderer( this ) );
     }
 #endif
-
     return ret;
 }
 
@@ -4132,7 +4150,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
         if ( run->HasDisplayList() )
         {
             run->Insert( wallsWithDisplayList_ );
-            displayList_.Clear();
+            displayList_.Clear(0);
         }
         else
         {
@@ -4153,7 +4171,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     // clear display list if needed
     if ( CannotHaveList( wallsWithDisplayListMinDistance_, cycle ) )
     {
-        displayList_.Clear();
+        displayList_.Clear(0);
     }
 
     // call display list
@@ -4174,27 +4192,48 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
         }
         run = next;
     }
-    
+
+    if ( !wallsWithDisplayList_ )
+    {
+        return;
+    }
+
     // fill display list
     rDisplayListFiller filler( displayList_ );
+
+    if ( !rDisplayList::IsRecording() )
+    {
+        // display list recording did not start; render traditionally
+        run = wallsWithDisplayList_;
+        while( run )
+        {   
+            gNetPlayerWall * next = run->Next();
+            run->Render( camera );
+            run = next;
+        }
+
+        return;
+    }
 
     wallsWithDisplayListMinDistance_ = 1E+30;
 
     // render walls;
     // first, render all lines
     sr_DepthOffset(true);
-    BeginLines();
+    if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
+        glDisable(GL_TEXTURE_2D);
     
     run = wallsWithDisplayList_;
     while( run )
     {
+        gNetPlayerWall * next = run->Next();
         if ( run->BegPos() < wallsWithDisplayListMinDistance_ )
         {
             wallsWithDisplayListMinDistance_ = run->BegPos();
         }
 
         run->RenderList( true, gNetPlayerWall::gWallRenderMode_Lines );
-        run = run->Next();
+        run = next;
     }
 
     RenderEnd();
@@ -4202,14 +4241,12 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
         glEnable(GL_TEXTURE_2D);
     
-    // then, all the quads
-    BeginQuads();
-
     run = wallsWithDisplayList_;
     while( run )
     {
+        gNetPlayerWall * next = run->Next();
         run->RenderList( true, gNetPlayerWall::gWallRenderMode_Quads );
-        run = run->Next();
+        run = next;
     }
 
     RenderEnd();

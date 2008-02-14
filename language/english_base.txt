@@ -666,7 +666,6 @@ swapmode_glfinish_text  Finish
 swapmode_glfinish_help  Calls glFinish() to sync graphics output. This is guaranteed to prevent graphics lagging behind input, but causes loss of framerate on some systems and full CPU load on others. Use if Flush does not work.
 swap_mode_help          Determines the commands used to sync graphics and input. 0: do nothing, 1: call glFlush(), 2: call glFinish().
 
-ztrick_help			    Performance tweak; does not work on most Windows systems
 texture_mode_0_help		Floor Texture:
 texture_mode_1_help		Wall Textures:
 texture_mode_2_help		Object Textures:
@@ -676,9 +675,6 @@ gl_extensions_help		OpenGL system information
 gl_version_help			OpenGL system information
 gl_renderer_help		OpenGL system information
 gl_vendor_help			OpenGL system information
-line_antialias_help		Enable line antialiasing
-poly_antialias_help		Enable polygon antialiasing
-persp_correct_help		Enable perspective correction
 alpha_blend_help		Enable alpha blending
 zone_alpha_toggle_help		This is XORd with ALPHA_BLEND to determine the way to draw zones
 smooth_shading_help		Enable smooth shading
@@ -1843,20 +1839,11 @@ detail_floor_tex_help		An infinite plane is drawn, with the texture of the grid 
 detail_floor_2tex_text		Dual Texture Plane
 detail_floor_2tex_help		Just as in "Textured Plane", the floor is an infinite textured plane. But here, the two groups of lines are drawn in two separate rendering steps, resulting in a much sharper image.
 
-detail_polyantialias_text	Polygon Antial.:
-detail_polyantialias_help	Shall the contours of objects be smoothed to avoid ugly pixel stairs? Not implemented on most systems.
-
-detail_lineantialias_text	Line Antialiasing:
-detail_lineantialias_help	Should lines be smoothed to avoid pixel stairs?
-
 detail_alpha_text		Alpha Blending:
 detail_alpha_help		Alpha blending is used to display half-transparent objects such as explosions and the walls rising behind the cycles. It does not cost extra with most 3D-cards, but slows software rendering down quite a bit.
 
 detail_smooth_text		Smooth Shading:
 detail_smooth_help		Makes edges appear "round" by adding a colour gradient to the surfaces. Even software rendering is not slowed down by activating this.
-
-detail_persp_text		Persp. Correction:
-detail_persp_help		Most renderers ignore this feature; if really turned off, the wall and floor textures will be displayed horribly deformed. I really don't know why I let you choose this... :)
 
 detail_text_truecolor_text	TrueColour Textures:
 detail_text_truecolor_help	Stores the textures with 32 bit colour depth instead of the default of 16 bit.
@@ -1925,9 +1912,6 @@ tweaks_displaylists_cac_text Create and Call
 tweaks_displaylists_cac_help Use displaylists; Create them and call them directly. This is the recommended way.
 tweaks_displaylists_cae_text Create and Execute
 tweaks_displaylists_cae_help Use displaylists; Create them let them be executed while they are filled. The expers say this is slower than Create and Call.
-
-tweaks_ztrick_text		ZTrick:
-tweaks_ztrick_help		A speedup that probably only works on old 3dfx cards: instead of clearing the screen after each frame, we just draw the backgroud (floor and rim walls).
 
 tweaks_infinity_text		Infinity:
 tweaks_infinity_help		Some planes (grid, sky...) have an infinite extension; if this feature is enabled, they are really drawn as infinite planes. Some OpenGL renderers do not seem to like this (all Windows versions I have seen...); disable it if the floor or sky textures are screwed up.
@@ -2161,6 +2145,8 @@ player_creates_team		\1 founded \2.\n
 player_nocreate_team		\1 cannot currently create a new team.\n
 player_nojoin_team		\1 cannot currently join \2.\n
 player_not_on_team      You are not on a team.\n
+player_team_message     Teammates
+player_spectator_message Spectators
 no_real_teams           No teams with more than one player.\n
 player_topologypolice	Order from Topology Police: \1
 player_win_shot			\1 shot \3 for \2 points.\n
@@ -2524,7 +2510,7 @@ access_level_change         Required access level of command \1 changed to "\2".
 access_level_error          Required access level of command \1 is "\2", you only have "\3".\n
 
 casacl_help                   For the duratioon of the rest of the configuration file  thiss directive appears in, elevate the access level.
-casacl_usage                  Usage: CASACL <required access levell> <elevated access level>\n
+casacl_usage                  Usage: CASACL <required access level> <elevated access level>\n
 
 abort_loading_name          Loading Abort
 abort_loading_description   Current config file/stream loading was aborted by command \1.

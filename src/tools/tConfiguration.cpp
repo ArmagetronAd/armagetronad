@@ -298,7 +298,7 @@ public:
 
         if ( s.fail() )
         {
-            con << tOutput( "$sudo_usage" );
+            con << tOutput( "$casacl_usage" );
             throw tAbortLoading( st_casacl );
         }
         else if ( tCurrentAccessLevel::GetAccessLevel() > required )
@@ -312,6 +312,7 @@ public:
         }
         else
         {
+            tString().ReadLine(s); // prevent commands following this one without a newline
             tCurrentAccessLevel::currentLevel_ = elevated;
         }
     }
@@ -426,7 +427,7 @@ int tConfItemBase::EatWhitespace(std::istream &s){
 }
 
 void tConfItemBase::LoadLine(std::istream &s){
-    while(!s.eof() && s.good()){
+    if(!s.eof() && s.good()){
         tString name;
         s >> name;
 

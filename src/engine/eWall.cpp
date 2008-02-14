@@ -105,17 +105,12 @@ void eWall::Render_helper(eWall *w,REAL tBeg,REAL tEnd,REAL h,REAL hfrac,REAL bo
     const eCoord *p2 = &w->EndPoint(1);
 
     BeginQuads();
-    IsEdge(false);
     TexVertex(p1->x, p1->y, bot,
               tBeg        , hfrac);
 
-
-    IsEdge(false);
     TexVertex(p1->x, p1->y, h*hfrac,
               tBeg        , 0);
 
-
-    IsEdge(false);
     TexVertex(p2->x, p2->y, h*hfrac,
               0           , 0);
 

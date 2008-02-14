@@ -200,16 +200,14 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
         if (sr_upperSky && !sg_MoviePack()) h=upper_height;
     }
 
-    if (h<9000 || !sr_infinityPlane){
-        IsEdge(false);
+    // NOTE: display lists on nvidia cards don't like infinite points
+    if (h<9000 || !sr_infinityPlane || rDisplayList::IsRecording() ){
         TexVertex(p1.x, p1.y, 0,
                   tBeg      , 1);
 
-        IsEdge(true);
         TexVertex(p1.x, p1.y, h,
                   tBeg,       1-h/Z_SCALE);
 
-        IsEdge(false);
         TexVertex(p2.x, p2.y, h,
                   tEnd,       1-h/Z_SCALE);
 
@@ -218,11 +216,9 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
     }
 
     else{
-        IsEdge(false);
         TexVertex(p1.x, p1.y, 0,
                   tBeg,       1);
 
-        IsEdge(true);
         TexCoord(0,-1/REAL(Z_SCALE),0,0);
 
 #ifndef WIN32
@@ -978,7 +974,6 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
             else{ // complicated
                 // can't squeeze that into a display list
                 ClearDisplayList();
-                tASSERT( renderMode == gWallRenderMode_All );
 
                 if (ta+gBEG_LEN>=time){
                     RenderBegin(p1,p2,ta,te,
@@ -1015,7 +1010,6 @@ bool upperlinecolor(REAL r,REAL g,REAL b, REAL a){
           glColor4f(r,g,b,upperline_alpha);
         */
         //glDisable(GL_TEXTURE);
-        glDisable(GL_TEXTURE_2D);
         glColor4f(r,g,b,a);
     }
     return true;
@@ -1026,7 +1020,14 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
 
     if (bool(cycle_) && !cycle_->Alive() && gCycle::WallsStayUpDelay() >= 0 ){
         REAL dt=(se_GameTime()-cycle_->deathTime-gCycle::WallsStayUpDelay())*2;
-        if (dt>1) dt=1;
+
+        if (dt>1)
+        {
+            // remove from rendering lists
+            Remove();
+            return;
+        }
+
         if (dt>=0)
         {
             REAL ca=REAL(.5/(dt+.5));
@@ -1051,11 +1052,20 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
             if ( mode == gWallRenderMode_All )
             {
                 sr_DepthOffset(true);
-                BeginLines();
+                if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
+                {
+                    RenderEnd();
+                    glDisable(GL_TEXTURE_2D);
+                }
             }
+
+            BeginLines();
+
             glVertex3f(p1.x,p1.y,h*hfrac);
             glVertex3f(p2.x,p2.y,h*hfrac);
 
+            // in the other modes, the caller is responsible for
+            // calling RenderEnd() and resetting the states.
             if ( mode == gWallRenderMode_All )
             {
                 RenderEnd();
@@ -1066,8 +1076,6 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
         }
 
         //glColor4f(r,g,b,a);
-
-        glColor3f(r,g,b);
 
 #ifdef XDEBUG
         REAL extrarise = 0;
@@ -1080,27 +1088,27 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
 #endif
         if ( mode & gWallRenderMode_Quads )
         {
-            if ( mode == gWallRenderMode_All )
-            {
-                BeginQuads();
-            }
-            glEdgeFlag(GL_FALSE);
+            BeginQuads();
+
+            glColor3f(r,g,b);
             glTexCoord2f(ta,hfrac);
             glVertex3f(p1.x,p1.y,extrarise);
             
-            glEdgeFlag(GL_TRUE);
+            glColor3f(r,g,b);
             glTexCoord2f(ta,0);
             glVertex3f(p1.x,p1.y,extrarise + h*hfrac);
             
-            glEdgeFlag(GL_FALSE);
+            glColor3f(r,g,b);
             glTexCoord2f(te,0);
             glVertex3f(p2.x,p2.y,extrarise + h*hfrac);
             
+            glColor3f(r,g,b);
             glTexCoord2f(te,hfrac);
             glVertex3f(p2.x,p2.y,extrarise);
-
         }
 
+        // in the other modes, the caller is responsible for
+        // calling RenderEnd().
         if ( mode == gWallRenderMode_All )
         {
             RenderEnd();
@@ -1163,8 +1171,11 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
         //REAL H=h*hfrac;
 #define segs 5
         upperlinecolor(r,g,b,a);//a*afunc(rat));
-        BeginLineStrip();
 
+        if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
+            glDisable(GL_TEXTURE_2D);
+        
+        BeginLineStrip();
         for (int i=0;i<=segs;i++){
             REAL frag=i/float(segs);
             REAL rat=ra+frag*(re-ra);
@@ -1196,14 +1207,12 @@ void gNetPlayerWall::RenderBegin(const eCoord &p1,const eCoord &pp2,REAL ta,REAL
         REAL y=(p1.y+frag*(p2.y-p1.y))*(1-xfunc(rat))+ppos.y*xfunc(rat);
 
         // bottom
-        glEdgeFlag(GL_FALSE);
         glColor4f(r+cfunc(rat),g+cfunc(rat),b+cfunc(rat),a*afunc(rat));
         glTexCoord2f(ta+(te-ta)*frag,hfrac);
         glVertex3f(x,y,0);
 
         // top
 
-        glEdgeFlag(GL_TRUE);
         //glTexCoord2f(ta+(te-ta)*frag,hfrac*(1-hfunc(rat)));
         glTexCoord2f(ta+(te-ta)*frag,0);
         REAL H=h*hfrac*hfunc(rat);
@@ -1292,14 +1301,14 @@ REAL gPlayerWall::LocalToGlobal( REAL a ) const
     return ret;
 }
 
-void gNetPlayerWall::ClearDisplayList()
+void gNetPlayerWall::ClearDisplayList( int inhibitThis, int inhibitCycle )
 {
 #ifndef DEDICATED
     if ( HasDisplayList() && cycle_ )
     {
-        cycle_->displayList_.Clear();
+        cycle_->displayList_.Clear( inhibitCycle );
     }
-    displayList_.Clear();
+    displayList_.Clear( inhibitThis );
 #endif
 }
 

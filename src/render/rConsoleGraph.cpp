@@ -43,7 +43,7 @@ static REAL center_r,center_g,center_b,center_fadetime;
 
 static REAL Time;
 
-static rDisplayList sr_consoleDisplayList;
+static rDisplayListAlphaSensitive sr_consoleDisplayList;
 
 static void sr_ConsolePerFrame(){
     if (sr_con.autoDisplayAtSwap)

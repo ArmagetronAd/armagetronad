@@ -123,8 +123,6 @@ static void finite_xy_plane( const eCoord &pos,const eCoord &dir,REAL h, eRectan
 }
 
 static void infinity_xy_plane(eCoord const & pos, const eCoord &dir,REAL h=0){
-    glEdgeFlag(GL_FALSE);
-
     bool use_rim=false;
     REAL zero=0;
 
@@ -323,9 +321,8 @@ void eGrid::display_simple( int viewer,bool floor,
     */
 
 
-    glEdgeFlag(GL_FALSE);
-
     glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
 
     glDisable(GL_CULL_FACE);
 
@@ -363,6 +360,8 @@ void eGrid::display_simple( int viewer,bool floor,
     }
 
     if (floor){
+        sr_DepthOffset(false);
+
         su_FetchAndStoreSDLInput();
         int floorDetail = sr_floorDetail;
 
@@ -465,6 +464,9 @@ void eGrid::display_simple( int viewer,bool floor,
         }
     }
 
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+
     TexMatrix();
     glLoadIdentity();
     ModelMatrix();
@@ -498,11 +500,7 @@ void eGrid::display_simple( int viewer,bool floor,
             glLoadIdentity();
             ModelMatrix();
         }
-
-        glEnable(GL_DEPTH_TEST);
     }
-    else
-        glEnable(GL_DEPTH_TEST);
 
     if (eWalls){
         // glDisable(GL_CULL_FACE);
