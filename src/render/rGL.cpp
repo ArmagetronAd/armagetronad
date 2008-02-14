@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tError.h"
 #include <sstream>
 #include <iomanip>
+#include "rGL.h"
 
 #ifdef AA_GL_ERROR_CHECKING
 void sr_CheckGLError()
