@@ -974,7 +974,6 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
             else{ // complicated
                 // can't squeeze that into a display list
                 ClearDisplayList();
-                tASSERT( renderMode == gWallRenderMode_All );
 
                 if (ta+gBEG_LEN>=time){
                     RenderBegin(p1,p2,ta,te,

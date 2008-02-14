@@ -169,6 +169,9 @@ public:
     //! draws object to the screen using OpenGL
     virtual void Render(const eCamera *cam);
 
+    //! returns whether the rendering uses alpha blending (massively, so sorting errors would show)
+    virtual bool RendersAlpha() const;
+
     // draws the cockpit or whatever is seen from the interior
     // in fixed perspective, called before the main rendering
     virtual bool RenderCockpitFixedBefore(bool primary=true);
