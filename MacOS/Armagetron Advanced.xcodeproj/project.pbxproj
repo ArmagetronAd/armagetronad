@@ -53,6 +53,15 @@
 		64956AEF0D410F6A00C501B8 /* gFriends.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64956AE90D410F6A00C501B8 /* gFriends.cpp */; };
 		64C038B70D2E84E500810BB1 /* config_common.h.in in Resources */ = {isa = PBXBuildFile; fileRef = 64C038B60D2E84E500810BB1 /* config_common.h.in */; };
 		64C038B80D2E84E500810BB1 /* config_common.h.in in Resources */ = {isa = PBXBuildFile; fileRef = 64C038B60D2E84E500810BB1 /* config_common.h.in */; };
+		64E439260D64FC4100CA7EC4 /* rDisplayList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64E439230D64FC4100CA7EC4 /* rDisplayList.cpp */; };
+		64E439270D64FC4100CA7EC4 /* rDisplayList.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 64E439240D64FC4100CA7EC4 /* rDisplayList.h */; };
+		64E439280D64FC4100CA7EC4 /* rGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64E439250D64FC4100CA7EC4 /* rGL.cpp */; };
+		64E439290D64FC4100CA7EC4 /* rDisplayList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64E439230D64FC4100CA7EC4 /* rDisplayList.cpp */; };
+		64E4392A0D64FC4100CA7EC4 /* rDisplayList.h in Headers */ = {isa = PBXBuildFile; fileRef = 64E439240D64FC4100CA7EC4 /* rDisplayList.h */; };
+		64E4392B0D64FC4100CA7EC4 /* rGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64E439250D64FC4100CA7EC4 /* rGL.cpp */; };
+		64E4392C0D64FC4100CA7EC4 /* rDisplayList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64E439230D64FC4100CA7EC4 /* rDisplayList.cpp */; };
+		64E4392D0D64FC4100CA7EC4 /* rDisplayList.h in Headers */ = {isa = PBXBuildFile; fileRef = 64E439240D64FC4100CA7EC4 /* rDisplayList.h */; };
+		64E4392E0D64FC4100CA7EC4 /* rGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64E439250D64FC4100CA7EC4 /* rGL.cpp */; };
 		8C11CA49095A2B6E007AE0EA /* action_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E7D089EEC7D007E21DC /* action_api.cpp */; };
 		8C11CA4A095A2B6E007AE0EA /* actions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E7E089EEC7D007E21DC /* actions.cpp */; };
 		8C11CA4B095A2B6E007AE0EA /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E10089EEC7C007E21DC /* eAdvWall.cpp */; };
@@ -444,6 +453,7 @@
 				8CB97B450962677F00AE8BCD /* libxml2.2.6.22.dylib in Copy Frameworks */,
 				9B69F6260A63E1A700F5F2E4 /* eLagCompensation.h in Copy Frameworks */,
 				64956AEC0D410F6A00C501B8 /* gFriends.h in Copy Frameworks */,
+				64E439270D64FC4100CA7EC4 /* rDisplayList.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -472,6 +482,9 @@
 		64956AE90D410F6A00C501B8 /* gFriends.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = gFriends.cpp; sourceTree = "<group>"; };
 		64956AEA0D410F6A00C501B8 /* gFriends.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = gFriends.h; sourceTree = "<group>"; };
 		64C038B60D2E84E500810BB1 /* config_common.h.in */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = config_common.h.in; path = ../src/macosx/config_common.h.in; sourceTree = SOURCE_ROOT; };
+		64E439230D64FC4100CA7EC4 /* rDisplayList.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = rDisplayList.cpp; path = ../src/render/rDisplayList.cpp; sourceTree = SOURCE_ROOT; };
+		64E439240D64FC4100CA7EC4 /* rDisplayList.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = rDisplayList.h; path = ../src/render/rDisplayList.h; sourceTree = SOURCE_ROOT; };
+		64E439250D64FC4100CA7EC4 /* rGL.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = rGL.cpp; path = ../src/render/rGL.cpp; sourceTree = SOURCE_ROOT; };
 		8C11CA38095A264A007AE0EA /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config_common.h; path = ../src/macosx/config_common.h; sourceTree = SOURCE_ROOT; };
 		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C6EF51C08A32A0500816348 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; name = English; path = InfoPlist.strings; sourceTree = "<group>"; };
@@ -761,6 +774,9 @@
 		29B97314FDCFA39411CA2CEA /* Armagetron Advanced */ = {
 			isa = PBXGroup;
 			children = (
+				64E439230D64FC4100CA7EC4 /* rDisplayList.cpp */,
+				64E439240D64FC4100CA7EC4 /* rDisplayList.h */,
+				64E439250D64FC4100CA7EC4 /* rGL.cpp */,
 				8CBA5DFE089EEBF7007E21DC /* Source */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -1164,6 +1180,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B5E119F0D5EBCD700175ABB /* config.h in Headers */,
+				64E4392A0D64FC4100CA7EC4 /* rDisplayList.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1172,6 +1189,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B5E11AA0D5EBD1600175ABB /* config.h in Headers */,
+				64E4392D0D64FC4100CA7EC4 /* rDisplayList.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1580,6 +1598,8 @@
 				9B69F6270A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */,
 				64956AEF0D410F6A00C501B8 /* gFriends.cpp in Sources */,
 				9B5FE8310D57B2FC004AC137 /* nAuthentication.cpp in Sources */,
+				64E4392C0D64FC4100CA7EC4 /* rDisplayList.cpp in Sources */,
+				64E4392E0D64FC4100CA7EC4 /* rGL.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1688,6 +1708,8 @@
 				9B69F6250A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */,
 				64956AEB0D410F6A00C501B8 /* gFriends.cpp in Sources */,
 				9B5FE8300D57B2FC004AC137 /* nAuthentication.cpp in Sources */,
+				64E439260D64FC4100CA7EC4 /* rDisplayList.cpp in Sources */,
+				64E439280D64FC4100CA7EC4 /* rGL.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1796,6 +1818,8 @@
 				9B69F6230A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */,
 				64956AED0D410F6A00C501B8 /* gFriends.cpp in Sources */,
 				9B5FE82F0D57B2FC004AC137 /* nAuthentication.cpp in Sources */,
+				64E439290D64FC4100CA7EC4 /* rDisplayList.cpp in Sources */,
+				64E4392B0D64FC4100CA7EC4 /* rGL.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
