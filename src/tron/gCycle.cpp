@@ -2068,7 +2068,40 @@ struct gCycleVisuals
 };
 #endif
 
+#ifndef DEDICATED
+// renders a cycle even after it died
+class gCycleWallRenderer: public eReferencableGameObject
+{
+public:
+    gCycleWallRenderer( gCycle * cycle )
+    : eReferencableGameObject( cycle->Grid(), cycle->Position(), cycle->Direction(), cycle->CurrentFace(), true )
+    , cycle_( cycle )
+    {
+        AddToList();
+    }
+private:
+    virtual void Render( eCamera const * camera )
+    {
+        cycle_->displayList_.RenderAll( camera, cycle_ );
+    }
+
+    virtual bool Timestep( REAL currentTime )
+    {
+        Move( cycle_->Position(), lastTime, currentTime );
+
+        return !cycle_->displayList_.Walls();
+    }
+
+    tJUST_CONTROLLED_PTR< gCycle > cycle_;
+};
+#endif
+
 void gCycle::MyInitAfterCreation(){
+// create wall renderer
+#ifndef DEDICATED
+    new gCycleWallRenderer( this );
+#endif
+
     dropWallRequested_ = false;
     lastGoodPosition_ = pos;
 
@@ -2315,42 +2348,8 @@ gCycle::~gCycle(){
     */
 }
 
-#ifndef DEDICATED
-// renders a cycle even after it died
-class gCycleRenderer: public eReferencableGameObject
-{
-public:
-    gCycleRenderer( gCycle * cycle )
-    : eReferencableGameObject( cycle->Grid(), cycle->Position(), cycle->Direction(), cycle->CurrentFace(), true )
-    , cycle_( cycle )
-    {
-        AddToList();
-    }
-private:
-    virtual void Render( eCamera const * camera )
-    {
-        cycle_->Render( camera );
-    }
-
-    virtual bool Timestep( REAL currentTime )
-    {
-        return !cycle_->displayList_.Walls();
-    }
-
-    tJUST_CONTROLLED_PTR< gCycle > cycle_;
-};
-#endif
-
 void gCycle::OnRemoveFromGame()
 {
-#ifndef DEDICATED
-    // keep rendering the cycle
-    if ( GOID() >= 0 )
-    {
-        tNEW( gCycleRenderer( this ) );
-    }
-#endif
-
     // keep this cycle alive during this function
     tJUST_CONTROLLED_PTR< gCycle > keep;
 
@@ -2539,14 +2538,6 @@ bool gCycle::Timestep(REAL currentTime){
         // die completely
         Die( lastTime );
 
-#ifndef DEDICATED
-        // keep rendering the cycle
-        if ( GOID() >= 0 )
-        {
-            tNEW( gCycleRenderer( this ) );
-        }
-#endif
-
         // and let yourself be removed from the lists so we don't have to go
         // through this again.
         return true;
@@ -2670,13 +2661,6 @@ bool gCycle::Timestep(REAL currentTime){
         currentWall->Update(predictTime, PredictPosition() );
     }
 
-#ifndef DEDICATED
-    // keep rendering the cycle
-    if ( ret && GOID() >= 0 )
-    {
-        tNEW( gCycleRenderer( this ) );
-    }
-#endif
     return ret;
 }
 
@@ -4102,8 +4086,6 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
 }
 
 void gCycle::Render(const eCamera *cam){
-    displayList_.RenderAll( cam, this );
-
     // are we blinking from invulnerability?
     bool blinking = false;
     if ( lastTime > spawnTime_ && !Vulnerable() )

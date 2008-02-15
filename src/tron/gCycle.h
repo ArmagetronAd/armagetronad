@@ -152,7 +152,7 @@ class gCycle: public gCycleMovement
     friend class gPlayerWall;
     friend class gNetPlayerWall;
     friend class gDestination;
-    friend class gCycleRenderer;
+    friend class gCycleWallRenderer;
 
     eSoundPlayer *engine;
     eSoundPlayer *turning;
