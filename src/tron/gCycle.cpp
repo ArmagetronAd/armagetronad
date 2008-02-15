@@ -3924,6 +3924,7 @@ gCycleWallsDisplayListManager::gCycleWallsDisplayListManager()
     : wallList_(0)
     , wallsWithDisplayList_(0)
     , wallsWithDisplayListMinDistance_(0)
+    , wallsInDisplayList_(0)
 {
 }
 
@@ -3946,20 +3947,20 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     gNetPlayerWall * run = 0;
     // transfer walls with display list into their list
 
+    int wallsWithPossibleDisplayList = 0;
     run = wallList_;
     while( run )
     {
         gNetPlayerWall * next = run->Next();
-        if ( run->HasDisplayList() )
+        if ( run->CanHaveDisplayList() )
         {
-            run->Insert( wallsWithDisplayList_ );
-            displayList_.Clear(0);
+            wallsWithPossibleDisplayList++;
         }
         else
         {
             // wall has expired, remove it
             if ( cycle->ThisWallsLength() > 0 && cycle->GetDistance() - cycle->MaxWallsLength() > run->EndPos() )
-
+                
             {
                 run->Remove();
             }
@@ -3972,9 +3973,33 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     }
 
     // clear display list if needed
+    bool tailExpired=false;
     if ( CannotHaveList( wallsWithDisplayListMinDistance_, cycle ) )
     {
+        tailExpired=true;
         displayList_.Clear(0);
+    }
+    // check if enough new walls are present to warrant altering the display list
+    else if ( wallsWithPossibleDisplayList >= 3 ||
+         wallsWithPossibleDisplayList * 5 > wallsInDisplayList_ )
+    {
+        // yes? Ok, rebuild the list in this case, too
+        displayList_.Clear(0);
+    }
+    else if ( wallsWithPossibleDisplayList )
+    {
+        // oops, at least render the newcomers normally
+        run = wallList_;
+        while( run )
+        {
+            gNetPlayerWall * next = run->Next();
+            if ( run->CanHaveDisplayList() )
+            {
+                run->Render( camera );
+            }
+
+            run = next;
+        }
     }
 
     // call display list
@@ -3988,12 +4013,30 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     while( run )
     {
         gNetPlayerWall * next = run->Next();
-        if ( !run->HasDisplayList() )
+        if ( !run->CanHaveDisplayList() || ( tailExpired && wallsWithDisplayListMinDistance_ >= run->BegPos() ) )
         {
             run->Render( camera );
             run->Insert( wallList_ );
         }
         run = next;
+    }
+
+    if ( wallsWithPossibleDisplayList > 0 )
+    {
+        run = wallList_;
+        while( run )
+        {
+            gNetPlayerWall * next = run->Next();
+            if ( run->CanHaveDisplayList() )
+            {
+                run->Insert( wallsWithDisplayList_ );
+            
+                // clear the wall's own display list, it will no longer be needed
+                run->ClearDisplayList(0, -1);
+            }
+        
+            run = next;
+        }
     }
 
     if ( !wallsWithDisplayList_ )
@@ -4019,6 +4062,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     }
 
     wallsWithDisplayListMinDistance_ = 1E+30;
+    wallsInDisplayList_ = 0;
 
     // render walls;
     // first, render all lines
@@ -4034,6 +4078,8 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
         {
             wallsWithDisplayListMinDistance_ = run->BegPos();
         }
+
+        wallsInDisplayList_++;
 
         run->RenderList( true, gNetPlayerWall::gWallRenderMode_Lines );
         run = next;

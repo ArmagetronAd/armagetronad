@@ -873,7 +873,7 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
     if ( gCycleWallsDisplayListManager::CannotHaveList( dbegin, cycle_ ) ||
          this == cycle_->currentWall )
     {
-        ClearDisplayList();
+        ClearDisplayList(2);
     }
 
     if ( !displayList_.Call() )
@@ -1305,7 +1305,7 @@ REAL gPlayerWall::LocalToGlobal( REAL a ) const
 void gNetPlayerWall::ClearDisplayList( int inhibitThis, int inhibitCycle )
 {
 #ifndef DEDICATED
-    if ( HasDisplayList() && cycle_ )
+    if ( CanHaveDisplayList() && cycle_ && inhibitCycle >= 0 )
     {
         cycle_->displayList_.Clear( inhibitCycle );
     }
@@ -1551,6 +1551,8 @@ void gNetPlayerWall::MyInitAfterCreation()
         Wall()->SetVisHeight(i,0);
 
     Wall()->Remove();
+
+    displayList_.Clear(2);
 }
 
 
@@ -2462,7 +2464,7 @@ void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
     CHECKWALL;
 
 #ifndef DEDICATED
-    ClearDisplayList();
+    ClearDisplayList(60);
 #endif
 
 #ifdef DEBUG

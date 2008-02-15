@@ -69,6 +69,15 @@ public:
 #endif
     }
 
+    bool IsInhibited() const
+    {
+#ifndef DEDICATED
+        return inhibit_;
+#else
+        return false;
+#endif
+    }
+
     //! check whether a displaylist is currently being recorded.
     static bool IsRecording();
     
@@ -118,6 +127,9 @@ public:
     //! constructor, automatically starting to fill teh list
     explicit rDisplayListFiller( rDisplayList & list );
     ~rDisplayListFiller();
+
+    //! starts filling the display list (done automatically on construction)
+    void Start();
     
     //! stops filling the display list (done automatically on destruction)
     void Stop();
