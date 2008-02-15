@@ -204,6 +204,8 @@
 		<Unit filename="..\..\src\render\rConsole.cpp" />
 		<Unit filename="..\..\src\render\rConsole.h" />
 		<Unit filename="..\..\src\render\rConsoleGraph.cpp" />
+		<Unit filename="..\..\src\render\rDisplayList.cpp" />
+		<Unit filename="..\..\src\render\rDisplayList.h" />
 		<Unit filename="..\..\src\render\rFont.cpp" />
 		<Unit filename="..\..\src\render\rFont.h" />
 		<Unit filename="..\..\src\render\rGL.cpp" />
