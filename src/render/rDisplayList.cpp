@@ -33,8 +33,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define LIST_STATS
 #endif
 
-#define LIST_STATS
-
 #ifdef LIST_STATS
 class rListCounter
 {
