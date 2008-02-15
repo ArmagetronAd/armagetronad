@@ -1109,10 +1109,7 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
 
 			// in the other modes, the caller is responsible for
 			// calling RenderEnd().
-#ifndef MACOSX
-			// on the mac, putting all walls into one Quads() seems to cause problems.
 			if ( mode == gWallRenderMode_All )
-#endif
 			{
 				RenderEnd();
 			}
