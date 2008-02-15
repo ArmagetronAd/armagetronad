@@ -50,6 +50,11 @@ void example()
         // + rendering code
     }
 }
+
+// Things we have found to be problematic in certain OpenGL
+// implementations:
+// - Redundant color settings (glColor3f(1,1,1);glColor3f(1,1,1);)
+// - Infinite points (glVertex4f(1,1,0,0);)
 #endif
 
 //! display list wrapper
