@@ -536,6 +536,8 @@ void rISurfaceTexture::OnSelect( bool enforce )
 #ifndef DEDICATED
     if(sr_glOut)
     {
+        sr_CheckGLError();
+
         int texmod=rTextureGroups::TextureMode[group_];
         if (enforce && texmod<0) texmod=GL_NEAREST_MIPMAP_NEAREST;
 

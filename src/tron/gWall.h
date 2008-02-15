@@ -277,8 +277,13 @@ public:
         return displayList_.IsSet();
     }
 
+    bool CanHaveDisplayList()
+    {
+        return !displayList_.IsInhibited();
+    }
+
     //! clears the display list
-    void ClearDisplayList( int inhibitThis = 1, int inhibitCycle = 0 );
+    void ClearDisplayList( int inhibitThis = 2, int inhibitCycle = 0 );
 private:
     tArray<gPlayerWallCoord> coords_;
 

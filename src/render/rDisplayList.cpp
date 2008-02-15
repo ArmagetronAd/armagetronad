@@ -195,6 +195,12 @@ rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
     : list_( list )
 #endif
 {
+    Start();
+}
+
+// starts filling the display list
+void rDisplayListFiller::Start()
+{
 #ifndef DEDICATED
     bool useList = sr_useDisplayLists != rDisplayList_Off && list_.inhibit_ == 0 && !sr_isRecording;
     if ( useList )
@@ -217,7 +223,7 @@ rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
     }
 
 #ifdef LIST_STATS
-    if ( !useList )
+    if ( !useList && !sr_isRecording )
     {
         sr_counter.Count( rListCounter::Not );
     }

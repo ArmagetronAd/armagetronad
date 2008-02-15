@@ -2057,11 +2057,44 @@ struct gCycleVisuals
 };
 #endif
 
+#ifndef DEDICATED
+// renders a cycle even after it died
+class gCycleWallRenderer: public eReferencableGameObject
+{
+public:
+    gCycleWallRenderer( gCycle * cycle )
+    : eReferencableGameObject( cycle->Grid(), cycle->Position(), cycle->Direction(), cycle->CurrentFace(), true )
+    , cycle_( cycle )
+    {
+        AddToList();
+    }
+private:
+    virtual void Render( eCamera const * camera )
+    {
+        cycle_->displayList_.RenderAll( camera, cycle_ );
+    }
+
+    virtual bool Timestep( REAL currentTime )
+    {
+        Move( cycle_->Position(), lastTime, currentTime );
+
+        return !cycle_->displayList_.Walls();
+    }
+
+    tJUST_CONTROLLED_PTR< gCycle > cycle_;
+};
+#endif
+
 void gCycle::MyInitAfterCreation(){
 #ifndef DEDICATED
     joystick_ = tNEW( gJoystick( this ) );
 #else
     joystick_ = NULL;
+#endif
+
+// create wall renderer
+#ifndef DEDICATED
+    new gCycleWallRenderer( this );
 #endif
 
     dropWallRequested_ = false;
@@ -2301,42 +2334,8 @@ gCycle::~gCycle(){
     */
 }
 
-#ifndef DEDICATED
-// renders a cycle even after it died
-class gCycleRenderer: public eReferencableGameObject
-{
-public:
-    gCycleRenderer( gCycle * cycle )
-    : eReferencableGameObject( cycle->Grid(), cycle->Position(), cycle->Direction(), cycle->CurrentFace(), true )
-    , cycle_( cycle )
-    {
-        AddToList();
-    }
-private:
-    virtual void Render( eCamera const * camera )
-    {
-        cycle_->Render( camera );
-    }
-
-    virtual bool Timestep( REAL currentTime )
-    {
-        return !cycle_->displayList_.Walls();
-    }
-
-    tJUST_CONTROLLED_PTR< gCycle > cycle_;
-};
-#endif
-
 void gCycle::OnRemoveFromGame()
 {
-#ifndef DEDICATED
-    // keep rendering the cycle
-    if ( GOID() >= 0 )
-    {
-        tNEW( gCycleRenderer( this ) );
-    }
-#endif
-
     // keep this cycle alive during this function
     tJUST_CONTROLLED_PTR< gCycle > keep;
 
@@ -2528,14 +2527,6 @@ bool gCycle::Timestep(REAL currentTime){
         // die completely
         Die( lastTime );
 
-#ifndef DEDICATED
-        // keep rendering the cycle
-        if ( GOID() >= 0 )
-        {
-            tNEW( gCycleRenderer( this ) );
-        }
-#endif
-
         // and let yourself be removed from the lists so we don't have to go
         // through this again.
         return true;
@@ -2659,13 +2650,6 @@ bool gCycle::Timestep(REAL currentTime){
         currentWall->Update(predictTime, PredictPosition() );
     }
 
-#ifndef DEDICATED
-    // keep rendering the cycle
-    if ( ret && GOID() >= 0 )
-    {
-        tNEW( gCycleRenderer( this ) );
-    }
-#endif
     return ret;
 }
 
@@ -3794,7 +3778,14 @@ public:
         cp[2]=b;
     }
     Colour(ePlayerNetID* player) {
-        player->Color(cp[0], cp[1], cp[2]);
+        if ( player )
+        {
+            player->Color(cp[0], cp[1], cp[2]);
+        }
+        else
+        {
+            cp[0]=cp[1]=cp[2]=1;
+        }
     }
     void blend(REAL factor, const Colour& target) {
         for (int i=0; i<3; i++) {
@@ -3939,6 +3930,7 @@ gCycleWallsDisplayListManager::gCycleWallsDisplayListManager()
     : wallList_(0)
     , wallsWithDisplayList_(0)
     , wallsWithDisplayListMinDistance_(0)
+    , wallsInDisplayList_(0)
 {
 }
 
@@ -3961,20 +3953,20 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     gNetPlayerWall * run = 0;
     // transfer walls with display list into their list
 
+    int wallsWithPossibleDisplayList = 0;
     run = wallList_;
     while( run )
     {
         gNetPlayerWall * next = run->Next();
-        if ( run->HasDisplayList() )
+        if ( run->CanHaveDisplayList() )
         {
-            run->Insert( wallsWithDisplayList_ );
-            displayList_.Clear(0);
+            wallsWithPossibleDisplayList++;
         }
         else
         {
             // wall has expired, remove it
             if ( cycle->ThisWallsLength() > 0 && cycle->GetDistance() - cycle->MaxWallsLength() > run->EndPos() )
-
+                
             {
                 run->Remove();
             }
@@ -3987,9 +3979,33 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     }
 
     // clear display list if needed
+    bool tailExpired=false;
     if ( CannotHaveList( wallsWithDisplayListMinDistance_, cycle ) )
     {
+        tailExpired=true;
         displayList_.Clear(0);
+    }
+    // check if enough new walls are present to warrant altering the display list
+    else if ( wallsWithPossibleDisplayList >= 3 ||
+         wallsWithPossibleDisplayList * 5 > wallsInDisplayList_ )
+    {
+        // yes? Ok, rebuild the list in this case, too
+        displayList_.Clear(0);
+    }
+    else if ( wallsWithPossibleDisplayList )
+    {
+        // oops, at least render the newcomers normally
+        run = wallList_;
+        while( run )
+        {
+            gNetPlayerWall * next = run->Next();
+            if ( run->CanHaveDisplayList() )
+            {
+                run->Render( camera );
+            }
+
+            run = next;
+        }
     }
 
     // call display list
@@ -4003,12 +4019,30 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     while( run )
     {
         gNetPlayerWall * next = run->Next();
-        if ( !run->HasDisplayList() )
+        if ( !run->CanHaveDisplayList() || ( tailExpired && wallsWithDisplayListMinDistance_ >= run->BegPos() ) )
         {
             run->Render( camera );
             run->Insert( wallList_ );
         }
         run = next;
+    }
+
+    if ( wallsWithPossibleDisplayList > 0 )
+    {
+        run = wallList_;
+        while( run )
+        {
+            gNetPlayerWall * next = run->Next();
+            if ( run->CanHaveDisplayList() )
+            {
+                run->Insert( wallsWithDisplayList_ );
+            
+                // clear the wall's own display list, it will no longer be needed
+                run->ClearDisplayList(0, -1);
+            }
+        
+            run = next;
+        }
     }
 
     if ( !wallsWithDisplayList_ )
@@ -4034,6 +4068,7 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     }
 
     wallsWithDisplayListMinDistance_ = 1E+30;
+    wallsInDisplayList_ = 0;
 
     // render walls;
     // first, render all lines
@@ -4049,6 +4084,8 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
         {
             wallsWithDisplayListMinDistance_ = run->BegPos();
         }
+
+        wallsInDisplayList_++;
 
         run->RenderList( true, gNetPlayerWall::gWallRenderMode_Lines );
         run = next;
@@ -4071,8 +4108,6 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
 }
 
 void gCycle::Render(const eCamera *cam){
-    displayList_.RenderAll( cam, this );
-
     // are we blinking from invulnerability?
     bool blinking = false;
     if ( lastTime > spawnTime_ && !Vulnerable() )

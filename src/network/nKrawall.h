@@ -45,6 +45,8 @@ the executable is not distributed).
 // #include "nNetObject.h"
 #include "tConfiguration.h"
 
+#include <deque>
+
 class nNetObject;
 
 #ifndef _IOSFWD_
@@ -176,6 +178,7 @@ public:
         tString authority;       // authority (shorthand version allowed); authenticated name is username@authority
         bool success;            // was the operation successful?
         tString error;           // potential error message
+        std::deque< tString > blurb; // additional blurb data the authority may give on successful login
 
         tAccessLevel accessLevel;// access level of user
 

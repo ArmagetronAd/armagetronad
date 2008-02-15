@@ -872,7 +872,7 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
     if ( gCycleWallsDisplayListManager::CannotHaveList( dbegin, cycle_ ) ||
          this == cycle_->currentWall )
     {
-       displayList_.Clear();
+        ClearDisplayList(2);
     }
 
     if ( !displayList_.Call() )
@@ -974,7 +974,6 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
             else{ // complicated
                 // can't squeeze that into a display list
                 ClearDisplayList();
-                tASSERT( renderMode == gWallRenderMode_All );
 
                 if (ta+gBEG_LEN>=time){
                     sr_CheckGLError();
@@ -1001,7 +1000,7 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
 }
 
 
-bool upperlinecolor(REAL r,REAL g,REAL b, REAL a){
+inline bool upperlinecolor(REAL r,REAL g,REAL b, REAL a){
     if (rTextureGroups::TextureMode[rTextureGroups::TEX_WALL]<0)
         glColor4f(1,1,1,a);
     else{
@@ -1052,7 +1051,7 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
 
 
     if (hfrac>0){
-        if (upperlinecolor(r,g,b,a) && ( mode & gWallRenderMode_Lines ) ){
+        if ( ( mode & gWallRenderMode_Lines ) ){
 
             // draw additional upper line
             if ( mode == gWallRenderMode_All )
@@ -1066,8 +1065,9 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
             }
 
             BeginLines();
-
+            upperlinecolor(r,g,b,a);
             glVertex3f(p1.x,p1.y,h*hfrac);
+            upperlinecolor(r,g,b,a);
             glVertex3f(p2.x,p2.y,h*hfrac);
 
             // in the other modes, the caller is responsible for
@@ -1111,13 +1111,13 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
             glColor3f(r,g,b);
             glTexCoord2f(te,hfrac);
             glVertex3f(p2.x,p2.y,extrarise);
-        }
 
-        // in the other modes, the caller is responsible for
-        // calling RenderEnd().
-        if ( mode == gWallRenderMode_All )
-        {
-            RenderEnd();
+			// in the other modes, the caller is responsible for
+			// calling RenderEnd().
+			if ( mode == gWallRenderMode_All )
+			{
+				RenderEnd();
+			}
         }
     }
 }
@@ -1314,7 +1314,7 @@ REAL gPlayerWall::LocalToGlobal( REAL a ) const
 void gNetPlayerWall::ClearDisplayList( int inhibitThis, int inhibitCycle )
 {
 #ifndef DEDICATED
-    if ( HasDisplayList() && cycle_ )
+    if ( CanHaveDisplayList() && cycle_ && inhibitCycle >= 0 )
     {
         cycle_->displayList_.Clear( inhibitCycle );
     }
@@ -1560,6 +1560,8 @@ void gNetPlayerWall::MyInitAfterCreation()
         Wall()->SetVisHeight(i,0);
 
     Wall()->Remove();
+
+    displayList_.Clear(2);
 }
 
 
@@ -1755,6 +1757,7 @@ void gNetPlayerWall::real_CopyIntoGrid(eGrid *grid){
                 sg_netPlayerWallsGridded.Add(this,griddedid);
                 Wall()->Insert();
                 this->ReleaseData();
+                ClearDisplayList();
             }
             else{
                 sg_netPlayerWallsGridded.Add(this,griddedid);
@@ -2470,7 +2473,7 @@ void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
     CHECKWALL;
 
 #ifndef DEDICATED
-    ClearDisplayList();
+    ClearDisplayList(60);
 #endif
 
 #ifdef DEBUG

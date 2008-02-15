@@ -107,6 +107,9 @@ private:
     virtual void Render(const eCamera *cam);  //!< renders the zone
     virtual void Render2D(tCoord scale) const;  //!< renders the zone
 
+    //! returns whether the rendering uses alpha blending (massively, so sorting errors would show)
+    virtual bool RendersAlpha() const;
+
     inline REAL EvaluateFunctionNow( tFunction const & f ) const;  //!< evaluates the given function with lastTime - referenceTime_ as argument
     inline void SetFunctionNow( tFunction & f, REAL value ) const; //!< makes sure EvaluateFunctionNow() returns the given value
 };
