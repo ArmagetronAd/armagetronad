@@ -321,9 +321,11 @@ void rTextField::FlushLine(int len,bool newline){
         }
 
 
-        glColor4f(r * blendColor_.r_,g * blendColor_.g_,b * blendColor_.b_,a * blendColor_.a_);
-        sr_lastSelected = 0;
-
+        if ( len > 0 )
+        {
+            glColor4f(r * blendColor_.r_,g * blendColor_.g_,b * blendColor_.b_,a * blendColor_.a_);
+            sr_lastSelected = 0;
+        }
         for (i=0;i<=len;i++){
             REAL l=left+realx*cwidth;
             REAL t=top-y*cheight;
