@@ -68,8 +68,6 @@ void GLmeter_subby(float value,float max, float locx, float locy, float size, co
 {
     tString title( t );
 
-    sr_ResetRenderState(0); //needs this because rFont has bugs i presume.. Ie I have problems as soon as rTextFirld is used
-    // z-man: actually, it is needed because per-frame-tasks get called without rendering context, so it has to be set.
     float x, y;
     char string[50];
     value>max?value=max:1;
@@ -94,8 +92,9 @@ void GLmeter_subby(float value,float max, float locx, float locy, float size, co
 
     	RenderEnd();*/
 
-    BeginLines();
+    glDisable(GL_TEXTURE_2D);
     Color(r,g, b);
+    BeginLines();
     Vertex(-.1*x*size+locx,.1*y*size+locy,0);
     Vertex(-x*size+locx,y*size+locy,0);
     RenderEnd();
@@ -210,7 +209,6 @@ static void tank_display_hud( ePlayerNetID* me ){
             lastTime = newtime;
         }
 
-        sr_ResetRenderState(false);
         Color(1,1,1);
         rTextField c(-.9,-.6);
 
@@ -304,7 +302,6 @@ static void display_hud_subby( ePlayer* player ){
             se_mainGameTimer->speed < 1.1 &&
             se_mainGameTimer->IsSynced() )
     {
-        sr_ResetRenderState(false);
         Color(1,1,1);
         rTextField c(-.9,-.85);
         rTextField t(.6,.98);
