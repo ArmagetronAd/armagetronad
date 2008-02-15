@@ -6040,8 +6040,28 @@ static unsigned short se_ReadUser( std::istream &s, ePlayerNetID * requester = 0
     return 0;
 }
 
+
+// call on commands that only work on the server; quit if it returns true
+static bool se_NeedsServer(char const * command, std::istream & s, bool strict = true )
+{
+    if ( sn_GetNetState() != nSERVER && ( strict || sn_GetNetState() != nSTANDALONE ) )
+    {
+        tString rest;
+        rest.ReadLine( s );
+        con << tOutput("$only_works_on_server", command, rest );
+        return true;
+    }
+
+    return false;
+}
+
 static void se_PlayerMessageConf(std::istream &s)
 {
+    if ( se_NeedsServer( "PLAYER_MESSAGE", s ) )
+    {
+        return;
+    }
+
     int receiver = se_ReadUser( s );
 
     tColoredString msg;
@@ -6067,6 +6087,11 @@ static tConfItemLine se_defaultKickReasonConf( "DEFAULT_KICK_REASON", se_default
 
 static void se_KickConf(std::istream &s)
 {
+    if ( se_NeedsServer( "KICK", s ) )
+    {
+        return;
+    }
+
     // get user ID
     int num = se_ReadUser( s );
 
@@ -6099,6 +6124,11 @@ static tConfItemLine se_defaultKickToReasonConf( "DEFAULT_KICK_TO_REASON", se_de
 
 static void se_MoveToConf(std::istream &s, REAL severity )
 {
+    if ( se_NeedsServer( "KICK/MOVE_TO", s ) )
+    {
+        return;
+    }
+
     // get user ID
     int num = se_ReadUser( s );
 
@@ -6149,6 +6179,11 @@ static tAccessLevelSetter se_moveConfLevel( se_moveToConf, tAccessLevel_Moderato
 
 static void se_BanConf(std::istream &s)
 {
+    if ( se_NeedsServer( "BAN", s ) )
+    {
+        return;
+    }
+
     // get user ID
     int num = se_ReadUser( s );
 
@@ -6204,6 +6239,11 @@ static ePlayerNetID * ReadPlayer( std::istream & s )
 
 static void Kill_conf(std::istream &s)
 {
+    if ( se_NeedsServer( "KILL", s, false ) )
+    {
+        return;
+    }
+
     ePlayerNetID * p = ReadPlayer( s );
     if ( p && p->Object() )
         p->Object()->Kill();
@@ -6214,6 +6254,11 @@ static tAccessLevelSetter se_killConfLevel( kill_conf, tAccessLevel_Moderator );
 
 static void Silence_conf(std::istream &s)
 {
+    if ( se_NeedsServer( "SILENCE", s ) )
+    {
+        return;
+    }
+
     ePlayerNetID * p = ReadPlayer( s );
     if ( p )
     {
@@ -6227,6 +6272,11 @@ static tAccessLevelSetter se_silenceConfLevel( silence_conf, tAccessLevel_Modera
 
 static void Voice_conf(std::istream &s)
 {
+    if ( se_NeedsServer( "VOICE", s ) )
+    {
+        return;
+    }
+
     ePlayerNetID * p = ReadPlayer( s );
     if ( p )
     {
@@ -6870,6 +6920,11 @@ void ePlayerNetID::LogScoreDifference( void )
 }
 
 static void se_allowTeamChangesPlayer(bool allow, std::istream &s) {
+    if ( se_NeedsServer( "(DIS)ALLOW_TEAM_CHANGE_PLAYER", s ) )
+    {
+        return;
+    }
+
     ePlayerNetID * p = ReadPlayer( s );
     if ( p )
     {

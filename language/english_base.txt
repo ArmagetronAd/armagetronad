@@ -799,6 +799,7 @@ quit_help					Shuts the dedicated server down and quits.
 exit_help					Shuts the dedicated server down and quits.
 
 # manning and kicking commands
+only_works_on_server        The console command \1 only works on the server. You probably want to say "/admin \1 \2".\n
 players_help                Prints list of currently active players
 kill_help                   Kill a specific player (as warning before a kick)
 silence_help                Silence a specific player so he can't use public chat any more (/msg and /team still work)
