@@ -66,6 +66,12 @@ REAL max_player_speed=0;
 
 void GLmeter_subby(float value,float max, float locx, float locy, float size, const char * t,bool displayvalue = true, bool reverse = false, REAL r=.5, REAL g=.5, REAL b=1)
 {
+
+#ifndef DEDICATED
+    if (!sr_glOut)
+        return;
+#endif
+
     tString title( t );
 
     float x, y;
@@ -116,13 +122,6 @@ void GLmeter_subby(float value,float max, float locx, float locy, float size, co
         rTextField titletext(locx-((.15*size*(length-1.5))/2.0),locy,.12*size,.24*size); //centre  -1.0 for null char and -.5 for half a char width = -1.5
         titletext << "0xff3333" << title;
     }
-
-#ifndef DEDICATED
-    if (!sr_glOut)
-        return;
-
-    glColor3f(1,1,1);
-#endif
 }
 
 class gGLMeter
