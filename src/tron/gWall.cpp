@@ -996,7 +996,7 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
 }
 
 
-bool upperlinecolor(REAL r,REAL g,REAL b, REAL a){
+inline bool upperlinecolor(REAL r,REAL g,REAL b, REAL a){
     if (rTextureGroups::TextureMode[rTextureGroups::TEX_WALL]<0)
         glColor4f(1,1,1,a);
     else{
@@ -1046,7 +1046,7 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
 
 
     if (hfrac>0){
-        if (upperlinecolor(r,g,b,a) && ( mode & gWallRenderMode_Lines ) ){
+        if ( ( mode & gWallRenderMode_Lines ) ){
 
             // draw additional upper line
             if ( mode == gWallRenderMode_All )
@@ -1060,8 +1060,9 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
             }
 
             BeginLines();
-
+            upperlinecolor(r,g,b,a);
             glVertex3f(p1.x,p1.y,h*hfrac);
+            upperlinecolor(r,g,b,a);
             glVertex3f(p2.x,p2.y,h*hfrac);
 
             // in the other modes, the caller is responsible for
