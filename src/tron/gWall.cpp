@@ -1105,13 +1105,16 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
             glColor3f(r,g,b);
             glTexCoord2f(te,hfrac);
             glVertex3f(p2.x,p2.y,extrarise);
-        }
 
-        // in the other modes, the caller is responsible for
-        // calling RenderEnd().
-        if ( mode == gWallRenderMode_All )
-        {
-            RenderEnd();
+			// in the other modes, the caller is responsible for
+			// calling RenderEnd().
+#ifndef MACOSX
+			// on the mac, putting all walls into one Quads() seems to cause problems.
+			if ( mode == gWallRenderMode_All )
+#endif
+			{
+				RenderEnd();
+			}
         }
     }
 }
