@@ -6920,7 +6920,7 @@ void ePlayerNetID::LogScoreDifference( void )
 }
 
 static void se_allowTeamChangesPlayer(bool allow, std::istream &s) {
-    if ( se_NeedsServer( "(DIS)ALLOW_TEAM_CHANGE_PLAYER", s ) )
+    if ( se_NeedsServer( "(DIS)ALLOW_TEAM_CHANGE_PLAYER", s, false ) )
     {
         return;
     }
