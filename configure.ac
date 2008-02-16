@@ -10,6 +10,10 @@ m4_include(accustomdir.m4)
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(Armagetronad,AUTOMATIC_VERSION)
 
+#set
+#echo args : "$@"
+#exit 1
+
 dnl flag telling the status message whether some files will be installed outside of prefix
 OUTSIDE_OF_PREFIX=no
 
@@ -44,6 +48,11 @@ AC_ARG_VAR(CODELEVEL,[Code checking strictness level for developers, normal user
 AC_ARG_VAR(docstyle,[Documentation style for cross-building of documentation. Possible values: unix, web and windows.])
 AC_ARG_VAR(progname,[Program short name, default: armagetronad.])
 AC_ARG_VAR(progtitle,[Program long name, default: Armagetron Advanced.])
+AC_ARG_VAR(APBUILD_CXX1,[Autopackage ABI 1 C++ compiler.])
+AC_ARG_VAR(APBUILD_CXX2,[Autopackage ABI 2 C++ compiler.])
+AC_ARG_VAR(APBUILD_CC,[Autopackage C compiler.])
+AC_ARG_VAR(CXX_ABI,[Autopackage C++ ABI version.])
+AC_ARG_VAR(APBUILD_STATIC,[Autopackage static libraries.])
 
 dnl a modern autoconf is required to process this
 AC_PREREQ(2.50)
