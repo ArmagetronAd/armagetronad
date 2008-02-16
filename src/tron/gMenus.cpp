@@ -459,6 +459,8 @@ static tConfItem<bool> wsp("WHITE_SPARKS",white_sparks);
 
 extern bool sg_crashExplosion;   // from gExplosion.cpp
 static tConfItem<bool> crexp("EXPLOSION",sg_crashExplosion);
+extern bool sg_crashExplosionHud;   // from gExplosion.cpp
+static tConfItem<bool> crexph("EXPLOSION_HUD",sg_crashExplosionHud);
 
 #ifndef DEDICATED
 //extern bool png_screenshot;		// from rSysdep.cpp
@@ -516,6 +518,11 @@ static uMenuItemToggle ws2
 (&screen_menu_prefs,"$pref_skymove_text",
  "$pref_skymove_help",
  sr_skyWobble);
+
+static uMenuItemToggle crexph2
+(&screen_menu_prefs,"$pref_explosion_hud_text",
+ "$pref_explosion_hud_help",
+ sg_crashExplosionHud);
 
 static uMenuItemToggle crexp2
 (&screen_menu_prefs,"$pref_explosion_text",

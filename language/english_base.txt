@@ -1948,6 +1948,9 @@ pref_sparks_help		Glowing sparks fly from your vehicle whenever you nearly crash
 pref_explosion_text		Explosion:
 pref_explosion_help		Toggles the explosion animation when a cycle crashes.
 
+pref_explosion_hud_text		Explosion (minimap):
+pref_explosion_hud_help		Toggles the display of the explosion animation on the minimap.
+
 pref_skymove_text		Sky Movement:
 pref_skymove_help		Toggles the animation of the lower sky plane.
 

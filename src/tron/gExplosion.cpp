@@ -359,6 +359,7 @@ static void init_exp(){
 static tInitExit ie_exp(&init_exp);
 
 bool sg_crashExplosion = true;
+bool sg_crashExplosionHud = true;
 
 #ifndef DEDICATED
 void gExplosion::Render(const eCamera *cam){
@@ -449,7 +450,7 @@ void gExplosion::Render(const eCamera *cam){
 
 void gExplosion::Render2D(tCoord scale) const {
 #ifndef DEDICATED
-    if(sg_crashExplosion){
+    if(sg_crashExplosionHud){
         REAL a1=(lastTime-createTime)+.01f;//+.2;
         REAL e=a1-1;
 
@@ -466,7 +467,6 @@ void gExplosion::Render2D(tCoord scale) const {
         glPushMatrix();
         glTranslatef(pos.x,pos.y,0);
 
-        //glDisable(GL_TEXTURE);
         glDisable(GL_TEXTURE_2D);
 
         glColor4f(explosion_r,explosion_g,explosion_b,fade);
