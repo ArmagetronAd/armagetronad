@@ -925,6 +925,10 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
     if ( !player->IsHuman() )
         return true;
 
+    // suspended players cannot join
+    if ( player->suspended_ > 0 )
+        return true;
+
     // check for invitations. Not with those shoes!
     if ( IsLocked() && !IsInvited( player ) )
     {

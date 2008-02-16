@@ -167,6 +167,7 @@ private:
 
     ePlayerNetID& operator= (const ePlayerNetID&); // forbid copy constructor
 
+    int             suspended_;  //! number of rounds the player is currently suspended from playing
     bool			spectating_; //!< are we currently spectating? Spectators don't get assigned to teams.
     bool			stealth_; //!< does this player want to hide his/her identity?
     bool			chatting_;   //!< are we currently chatting?
@@ -263,6 +264,8 @@ public:
 
     void Greet();
 
+    // suspend the player from playing, forcing him to spectate
+    void Suspend( int rounds = 5 );
 #ifdef KRAWALL_SERVER
     void Authenticate( tString const & authName, 
                        tAccessLevel accessLevel = tAccessLevel_Authenticated,

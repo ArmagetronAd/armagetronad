@@ -3465,6 +3465,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
 
     r = g = b = 15;
 
+    suspended_          = 0;
     greeted				= true;
     chatting_			= false;
     spectating_         = false;
@@ -3528,6 +3529,7 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     // default access level
     lastAccessLevel = tAccessLevel_Default;
 
+    suspended_  = 0;
     greeted     =false;
     chatting_   =false;
     spectating_ =false;
@@ -5648,7 +5650,7 @@ void ePlayerNetID::SetChatting ( ChatFlags flag, bool chatting )
 // *******************
 
 bool ePlayerNetID::TeamChangeAllowed() const {
-    return ( allowTeamChange_ || se_allowTeamChanges )
+    return ( allowTeamChange_ || se_allowTeamChanges ) && ( suspended_ == 0 )
 #ifdef KRAWALL_SERVER
        // only allow players with enough access level to enter the game, everyone is free to leave, though
        && ( GetAccessLevel() <= AccessLevelRequiredToPlay() || CurrentTeam() )
@@ -6251,6 +6253,27 @@ static void Kill_conf(std::istream &s)
 
 static tConfItemFunc kill_conf("KILL",&Kill_conf);
 static tAccessLevelSetter se_killConfLevel( kill_conf, tAccessLevel_Moderator );
+
+static void Suspend_conf(std::istream &s)
+{
+    if ( se_NeedsServer( "SUSPEND", s, false ) )
+    {
+        return;
+    }
+
+    ePlayerNetID * p = ReadPlayer( s );
+
+    int num = 5;
+    s >> num;
+
+    if ( p )
+    {
+        p->Suspend( num );
+    }
+}
+
+static tConfItemFunc suspend_conf("SUSPEND",&Suspend_conf);
+static tAccessLevelSetter se_suspendConfLevel( suspend_conf, tAccessLevel_Moderator );
 
 static void Silence_conf(std::istream &s)
 {
@@ -6879,6 +6902,28 @@ void ePlayerNetID::ResetScoreDifferences( void )
 
 // *******************************************************************************
 // *
+// *    Suspend
+// *
+// *******************************************************************************
+//!
+//!  @param rounds number of rounds to suspend
+//!
+// *******************************************************************************
+
+void ePlayerNetID::Suspend( int rounds )
+{
+    if ( suspended_ < rounds )
+    {
+        suspended_ = rounds;
+    }
+
+    sn_ConsoleOut( tOutput( "$player_suspended", GetName(), suspended_ ) );
+
+    SetTeam( NULL );
+}
+
+// *******************************************************************************
+// *
 // *	LogScoreDifferences
 // *
 // *******************************************************************************
@@ -6892,6 +6937,28 @@ void ePlayerNetID::LogScoreDifferences( void )
     {
         ePlayerNetID* p = se_PlayerNetIDs(i);
         p->LogScoreDifference();
+        
+        // update suspension count
+        if ( p->suspended_ > 0 )
+        {
+            if ( p->CurrentTeam() && !p->NextTeam() )
+            {
+                p->UpdateTeam();
+            }
+            else
+            {
+                p->suspended_ --;
+                if ( p->suspended_ == 0 )
+                {
+                    sn_ConsoleOut( tOutput( "$player_no_longer_suspended", p->GetName() ) );
+                    p->FindDefaultTeam();
+                }
+                else
+                {
+                    sn_ConsoleOut( tOutput( "$player_suspended", p->GetName(), p->suspended_ ) );
+                }
+            }
+        }
     }
 }
 

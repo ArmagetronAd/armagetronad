@@ -803,6 +803,8 @@ only_works_on_server        The console command \1 only works on the server. You
 players_help                Prints list of currently active players
 kill_help                   Kill a specific player (as warning before a kick)
 silence_help                Silence a specific player so he can't use public chat any more (/msg and /team still work)
+suspend_help                Suspend a player from playing for the following N rounds (default: 5)
+
 voice_help                  Reverse of SILENCE
 allow_team_change_player_help Allow a specific player to change teams even if ALLOW_TEAM_CHANGE is disabled
 disallow_team_change_player_help Reverse of ALLOW_TEAM_CHANGE_PLAYER
@@ -2088,6 +2090,9 @@ player_win_conquest_specific \1 was awarded \2 points for conquering \3's base.\
 player_kill_collapse        \1 was eradicated by its collapsing zone.\n
 player_win_hole             \1 got \2 points for a sacrifice for the good of the team.\n
 player_lose_hole            0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
+
+player_no_longer_suspended  \1 0xRESETTis allowed to play again.\n
+player_suspended            \1 0xRESETTis banned to spectator mode for \2 round(s).\n
 
 zone_collapse_harmless      \1's zone collapses harmlessly for lack of enemy contacts.\n
 
