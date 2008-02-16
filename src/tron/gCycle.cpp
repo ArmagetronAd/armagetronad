@@ -2068,6 +2068,17 @@ public:
     {
         AddToList();
     }
+
+#if 0 // not required
+    virtual ~gCycleWallRenderer()
+    {
+    }
+
+    virtual void OnRemoveFromGame()
+    {
+        eReferencableGameObject::OnRemoveFromGame();
+    }
+#endif
 private:
     virtual void Render( eCamera const * camera )
     {
@@ -2076,9 +2087,14 @@ private:
 
     virtual bool Timestep( REAL currentTime )
     {
+        if ( !cycle_ )
+        {
+            return true;
+        }
+
         Move( cycle_->Position(), lastTime, currentTime );
 
-        return !cycle_->displayList_.Walls();
+        return !cycle_->Alive() && !cycle_->displayList_.Walls();
     }
 
     tJUST_CONTROLLED_PTR< gCycle > cycle_;
