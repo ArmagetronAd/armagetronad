@@ -131,7 +131,6 @@ void Map::ClipperCircle::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
     tCoord ab = .5*(e2-e1);
     ab.x = fabs(ab.x); ab.y = fabs(ab.y);
     float stepsize=M_PI*2/m_edges;
-    tCoord last = centre + tCoord(ab.x, 0);
 
 	map.m_background.BeginDraw();
 	map.m_background.SetGradientEdges(centre - ab, centre + ab);
@@ -140,11 +139,10 @@ void Map::ClipperCircle::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
         float t = (i+1)*stepsize;
         tCoord next(centre.x+ab.x*cos(t), centre.y-ab.y*sin(t));
         map.m_background.DrawPoint(next);
-        map.m_background.DrawPoint(last);
-        last = next;
     }
 	glEnd();
-    last = centre + tCoord(ab.x, 0);
+	glDisable(GL_TEXTURE_2D);
+    tCoord last = centre + tCoord(ab.x, 0);
 	map.m_foreground.SetGradientEdges(centre - ab, centre + ab);
 	map.m_foreground.BeginDraw();
     for(int i = 0; i < m_edges; ++i) {
@@ -347,21 +345,14 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls,
     }
     // set projection matrix
     glPushMatrix();
-    GLfloat m[16];
-    glGetFloatv(GL_PROJECTION_MATRIX, m);
-    m[0]  *= xscale;
-    m[5]  *= yscale;
-    m[12] += xpos;
-    m[13] += ypos;
-    glLoadMatrixf(m);
+    glTranslatef(xpos, ypos, 0);
+    glScalef(xscale, yscale, 1);
     // translate and rotate
-    glTranslatef(m_centre.x,m_centre.y,0);
-    GLfloat r[16];
-    glGetFloatv(GL_PROJECTION_MATRIX, r);
-    r[0]  = rotate.x;
-    r[1]  = -rotate.y;
-    r[4]  = rotate.y;
-    r[5]  = rotate.x;
+    GLfloat r[16] = {
+          rotate.x,  -rotate.y, 0, 0,
+          rotate.y,   rotate.x, 0, 0,
+                 0,          0, 1, 0,
+        m_centre.x, m_centre.y, 0, 1};
     glMultMatrixf(r);
     glTranslatef(-m_centre.x,-m_centre.y,0);
     if(rimWalls)
