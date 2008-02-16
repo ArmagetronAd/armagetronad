@@ -276,7 +276,9 @@ void rModel::Render(){
     if ( !displayList_.Call() )
     {
         rDisplayListFiller filler( displayList_ );
-            
+
+        glEnable(GL_CULL_FACE);
+           
         if (normals.Len()>=vertices.Len()){
             glNormalPointer(GL_FLOAT,0,&normals[0]);
             glEnableClientState(GL_NORMAL_ARRAY);
@@ -284,34 +286,43 @@ void rModel::Render(){
         glVertexPointer(3,GL_FLOAT,0,&vertices[0]);
         glEnableClientState(GL_VERTEX_ARRAY);
 
-
         bool texcoord=true;
         if (texVert.Len()<0)
             texcoord=false;
         if (modelTexFaces.Len()!=modelFaces.Len())
             texcoord=false;
 
+        if (texcoord)
+        {
+            glTexCoordPointer(3,GL_FLOAT,0,&texVert[0]);
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        }
 
-        glEnable(GL_CULL_FACE);
-
-        if (texcoord){
-            glBegin(GL_TRIANGLES);
-            for(int i=modelFaces.Len()-1;i>=0;i--){
-                for(int j=0;j<=2;j++){
-                    glTexCoord3fv(reinterpret_cast<REAL *>(&(texVert(modelTexFaces(i).A[j]))));
+        #if 0
+        if( 0 )
+        {
+            // dead code, but maybe glDrawElements does not work for someone,
+            // so we keep it
+            glBegin( GL_TRIANGLES );
+            for(int i=modelFaces.Len()-1;i>=0;i--)
+            {
+                for(int j=0;j<=2;j++)
+                {
+                    // glTexCoord3fv(reinterpret_cast<REAL *>(&(texVert(modelTexFaces(i).A[j]))));
                     glArrayElement(modelFaces(i).A[j]);
                 }
             }
-
             glEnd();
+
         }
-        else
-            glDrawElements(GL_TRIANGLES,
-                           modelFaces.Len()*3,
-                           GL_UNSIGNED_INT,
-                           &modelFaces(0));
+        #endif
 
+        glDrawElements(GL_TRIANGLES,
+                       modelFaces.Len()*3,
+                       GL_UNSIGNED_INT,
+                       &modelFaces(0));
 
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         glDisableClientState(GL_VERTEX_ARRAY);
         glDisableClientState(GL_NORMAL_ARRAY);
 
