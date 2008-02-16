@@ -557,13 +557,12 @@ void uMenuItem::DisplayText(REAL x,REAL y,const char *text,
 
         REAL th = text_height;
 
-        
         REAL availw = 1.9f;
         if (center < 0) availw = (.9f-x);
         if (center > 0) availw = (x + .9f);
         if (availw > maxWidth) availw = maxWidth;
 
-        float usedwidth=rTextField::GetTextLength(tString(text), th, true);
+        float usedwidth=rTextField::GetTextLength(tString(text), th, colorMode == rTextField::COLOR_USE);
         if (usedwidth > availw)
         {
             th *= availw/(usedwidth);
