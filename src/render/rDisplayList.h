@@ -98,6 +98,8 @@ public:
     //! clears all display lists
     static void ClearAll();
 
+    //! cancels recording of the current display list
+    static void Cancel();
 protected:
     //! calls the display list, returns true if there was a list to call
     virtual bool OnCall();
@@ -128,6 +130,7 @@ private:
 //! create an object of this type to fill a display list while you render
 class rDisplayListFiller
 {
+    friend class rDisplayList;
 public:
     //! constructor, automatically starting to fill teh list
     explicit rDisplayListFiller( rDisplayList & list );

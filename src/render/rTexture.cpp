@@ -548,6 +548,9 @@ void rISurfaceTexture::OnSelect( bool enforce )
             if (texmod>0){
                 RenderEnd(true);
 
+                // don't generate textures inside display lists
+                rDisplayList::Cancel();
+
                 glGenTextures(1, &tint_);
                 glBindTexture(GL_TEXTURE_2D,tint_);
 

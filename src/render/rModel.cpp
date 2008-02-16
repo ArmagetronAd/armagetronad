@@ -275,10 +275,9 @@ void rModel::Render(){
         return;
     if ( !displayList_.Call() )
     {
-        rDisplayListFiller filler( displayList_ );
+        // model display lists should definitely be compiled before other lists
+        rDisplayList::Cancel();
 
-        glEnable(GL_CULL_FACE);
-           
         if (normals.Len()>=vertices.Len()){
             glNormalPointer(GL_FLOAT,0,&normals[0]);
             glEnableClientState(GL_NORMAL_ARRAY);
@@ -297,6 +296,10 @@ void rModel::Render(){
             glTexCoordPointer(3,GL_FLOAT,0,&texVert[0]);
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         }
+
+        rDisplayListFiller filler( displayList_ );
+           
+        glEnable(GL_CULL_FACE);
 
         #if 0
         if( 0 )
