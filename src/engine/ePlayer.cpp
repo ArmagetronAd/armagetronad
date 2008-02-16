@@ -6254,7 +6254,7 @@ static void Kill_conf(std::istream &s)
 static tConfItemFunc kill_conf("KILL",&Kill_conf);
 static tAccessLevelSetter se_killConfLevel( kill_conf, tAccessLevel_Moderator );
 
-static void Suspend_conf(std::istream &s)
+static void Suspend_conf_base(std::istream &s, int rounds )
 {
     if ( se_NeedsServer( "SUSPEND", s, false ) )
     {
@@ -6263,17 +6263,33 @@ static void Suspend_conf(std::istream &s)
 
     ePlayerNetID * p = ReadPlayer( s );
 
-    int num = 5;
-    s >> num;
-
+    if ( rounds > 0 )
+    {
+        s >> rounds;
+    }
+        
     if ( p )
     {
-        p->Suspend( num );
+        p->Suspend( rounds );
     }
+}
+
+static void Suspend_conf(std::istream &s )
+{
+    Suspend_conf_base( s, 5 );
+}
+
+
+static void UnSuspend_conf(std::istream &s )
+{
+    Suspend_conf_base( s, 5 );
 }
 
 static tConfItemFunc suspend_conf("SUSPEND",&Suspend_conf);
 static tAccessLevelSetter se_suspendConfLevel( suspend_conf, tAccessLevel_Moderator );
+
+static tConfItemFunc unsuspend_conf("UNSUSPEND",&UnSuspend_conf);
+static tAccessLevelSetter se_unsuspendConfLevel( unsuspend_conf, tAccessLevel_Moderator );
 
 static void Silence_conf(std::istream &s)
 {
@@ -6912,14 +6928,28 @@ void ePlayerNetID::ResetScoreDifferences( void )
 
 void ePlayerNetID::Suspend( int rounds )
 {
-    if ( suspended_ < rounds )
+    if ( rounds < 0 )
     {
-        suspended_ = rounds;
+        rounds = 0;
     }
 
-    sn_ConsoleOut( tOutput( "$player_suspended", GetName(), suspended_ ) );
+    if ( suspended_ == rounds )
+    {
+        return;
+    }
 
-    SetTeam( NULL );
+    suspended_ = rounds;
+
+    if ( suspended_ == 0 )
+    {
+        sn_ConsoleOut( tOutput( "$player_no_longer_suspended", GetName() ) );
+        FindDefaultTeam();
+    }
+    else
+    {
+        sn_ConsoleOut( tOutput( "$player_suspended", GetName(), suspended_ ) );
+        SetTeam( NULL );
+    }
 }
 
 // *******************************************************************************
@@ -6947,16 +6977,7 @@ void ePlayerNetID::LogScoreDifferences( void )
             }
             else
             {
-                p->suspended_ --;
-                if ( p->suspended_ == 0 )
-                {
-                    sn_ConsoleOut( tOutput( "$player_no_longer_suspended", p->GetName() ) );
-                    p->FindDefaultTeam();
-                }
-                else
-                {
-                    sn_ConsoleOut( tOutput( "$player_suspended", p->GetName(), p->suspended_ ) );
-                }
+                p->Suspend( p->suspended_ - 1 );
             }
         }
     }
