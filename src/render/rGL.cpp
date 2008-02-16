@@ -39,7 +39,7 @@ void sr_CheckGLError()
     if ( error != GL_NO_ERROR )
     {
         std::stringstream s;
-        s << "GL error 0X" << std::hex << error << "\n";
+        s << "GL error 0X" << std::hex << error << " (" << (char const *)gluErrorString(error) << ")\n";
         con << s.str();
 
         // catch a breakpoint
