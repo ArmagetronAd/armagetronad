@@ -2083,6 +2083,7 @@ gamestate_winner_humans		Humans.
 instant_win_activated		Instant win zone activated! Enter it to win the round.\n
 instant_death_activated		Death zone activated! Avoid it!\n
 
+player_admin_kill			\1 0xRESETTwas smitten by an administrator.\n
 player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
 player_win_held_fortress	\1 was awarded \2 points for holding the base.\n
@@ -2318,6 +2319,7 @@ network_ban_noreason        None given.
 vote_accepted						Poll "\1" has been accepted.\n
 vote_rejected						Poll "\1" has been rejected.\n
 vote_timeout						Poll "\1" timed out.\n
+vote_cancel_all                     All polls have been canceled by an administrator.\n
 vote_new							New poll: "\1". Enter the main menu vote on it.\n
 vote_redundant                      Poll rejected, same suggestion was made already.\n
 vote_maturity                       Poll rejected, you're not old enough to issue votes, wait \1 seconds.\n

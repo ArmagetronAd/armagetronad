@@ -1,6 +1,9 @@
 Changes since 0.2.8.2:
 
   New settings and commands:
+- (UN)SUSPEND kicks a player to spectator mode with a timeout. Intended to
+  let new players watch before they play.
+- VOTES_CANCEL cancels all running polls.
 - ZONE_ALPHA_TOGGLE to override the systemwide alpha blendings setting and
   have zones rendered in wireframe mode even when alpha blending is on.
 - ZONE_ALPHA(_SERVER) to control intensity of zone rendering.

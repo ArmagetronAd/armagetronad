@@ -476,6 +476,25 @@ private:
 
 tList< eVoteItem > eVoteItem::items_;				// list of vote items
 
+void se_CancelAllVotes( std::istream & )
+{
+    if ( sn_GetNetState() == nCLIENT )
+    {
+        return;
+    }
+
+    sn_ConsoleOut( tOutput( "$vote_cancel_all" ) );
+
+    tList< eVoteItem > const & items = eVoteItem::GetItems();
+    
+    while ( items.Len() )
+    {
+        delete items(0);
+    }
+}
+
+static tConfItemFunc se_cancelAllVotes_conf( "VOTES_CANCEL", &se_CancelAllVotes );
+
 static nDescriptor vote_handler(230,eVoteItem::GetControlMessage,"vote cast");
 
 // called on the clients to accept or decline the vote

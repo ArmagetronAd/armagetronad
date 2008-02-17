@@ -6248,7 +6248,10 @@ static void Kill_conf(std::istream &s)
 
     ePlayerNetID * p = ReadPlayer( s );
     if ( p && p->Object() )
+    {
         p->Object()->Kill();
+        sn_ConsoleOut( tOutput( "$player_admin_kill", p->GetColoredName() ) );
+    }
 }
 
 static tConfItemFunc kill_conf("KILL",&Kill_conf);
@@ -6942,12 +6945,12 @@ void ePlayerNetID::Suspend( int rounds )
 
     if ( suspended_ == 0 )
     {
-        sn_ConsoleOut( tOutput( "$player_no_longer_suspended", GetName() ) );
+        sn_ConsoleOut( tOutput( "$player_no_longer_suspended", GetColoredName() ) );
         FindDefaultTeam();
     }
     else
     {
-        sn_ConsoleOut( tOutput( "$player_suspended", GetName(), suspended_ ) );
+        sn_ConsoleOut( tOutput( "$player_suspended", GetColoredName(), suspended_ ) );
         SetTeam( NULL );
     }
 }
