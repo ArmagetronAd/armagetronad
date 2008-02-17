@@ -3,6 +3,18 @@
 
 <Resource type="aacockpit" name="standard" version="0.0.1" author="Anonymous" category="">
     <Cockpit version="0.0.1">
+        <WidgetTemplate id="Clock">
+            <Position x=".3" y=".4" />
+            <Size height="0.075" width="0.075" />
+            <Foreground>
+                <Solid>
+                    <Color r="1." g="1." b="1." alpha="1." />
+                </Solid>
+            </Foreground>
+            <ShowCurrent value="false" />
+            <ShowMaximum value="false" />
+            <ShowMinimum value="false" />
+        </WidgetTemplate>
         <!-- Example configuration for an old speed meter -->
         <NeedleGauge camera="^in">
             <DataSet>
@@ -10,7 +22,6 @@
                 <AtomicData field="minimum" source="0" />
                 <AtomicData field="maximum" source="max_speed" />
             </DataSet>
-            <Angles min="85" max="95" />
             <Position x="-0.165" y="-0.9" />
             <Size height="0.15" width="0.15" />
             <ShowCurrent value="true" />
@@ -202,28 +213,27 @@
                 </Table>
             </Face>
         </Label>
-        <NeedleGauge viewport="top">
+        <Rectangle viewport="top" usetemplate="Clock">
+            <Size height="1" width="1" />
+            <Background>
+                <Image>
+                    <Graphic author="wrtlprnft" version="1" name="benboisclock" uri="http://wrtlprnft.ath.cx/benboisclock.png" />
+                </Image>
+                <Solid>
+                    <Color r="1." g="1." b="1." alpha=".8" />
+                </Solid>
+            </Background>
+        </Rectangle>
+        <NeedleGauge viewport="top" usetemplate="Clock">
             <DataSet>
                 <AtomicData field="source" source="current_seconds" />
                 <AtomicData field="minimum" source="0" />
                 <AtomicData field="maximum" source="60" />
             </DataSet>
             <Angles min="-270" max="90" />
-            <Position x=".85" y=".2" />
-            <Size height="0.075" width="0.075" />
-            <ShowCurrent value="false" />
-            <ShowMaximum value="false" />
-            <ShowMinimum value="false" />
-            <Caption location="off">
-                <Text value="Time" />
-            </Caption>
-            <Foreground>
-                <Solid>
-                    <Color r="1." g="0." b="0." alpha="1." />
-                </Solid>
-            </Foreground>
+            <Size height="0.75" width="0.75" />
         </NeedleGauge>
-        <NeedleGauge viewport="top">
+        <NeedleGauge viewport="top" usetemplate="Clock">
             <DataSet>
                 <Math lvalue="current_minutes" type="sum" field="source">
                      <RValue>
@@ -234,44 +244,20 @@
                 <AtomicData field="maximum" source="60" />
             </DataSet>
             <Angles min="-270" max="90" />
-            <Position x=".85" y=".2" />
-            <Size height="0.075" width="0.075" />
-            <ShowCurrent value="false" />
-            <ShowMaximum value="false" />
-            <ShowMinimum value="false" />
-            <Caption location="off">
-                <Text value="Time" />
-            </Caption>
-            <Foreground>
-                <Solid>
-                    <Color r="0." g="1." b="0." alpha="1." />
-                </Solid>
-            </Foreground>
+            <Size height="0.75" width="0.75" />
         </NeedleGauge>
-        <NeedleGauge viewport="top">
+        <NeedleGauge viewport="top" usetemplate="Clock">
             <DataSet>
                 <Math lvalue="current_hours12h" type="sum" field="source">
                      <RValue>
                           <Math rvalue="0.01666666" type="product" lvalue="current_minutes" />
                      </RValue>
                 </Math>
-                <AtomicData field="minimum" source="0" />
-                <AtomicData field="maximum" source="12" />
+                <AtomicData field="minimum" source="1" />
+                <AtomicData field="maximum" source="13" />
             </DataSet>
-            <Angles min="-270" max="90" />
-            <Position x=".85" y=".2" />
-            <Size height="0.05" width="0.05" />
-            <ShowCurrent value="false" />
-            <ShowMaximum value="false" />
-            <ShowMinimum value="false" />
-            <Caption location="off">
-                <Text value="Time" />
-            </Caption>
-            <Foreground>
-                <Solid>
-                    <Color r="0." g="0." b="1." alpha="1." />
-                </Solid>
-            </Foreground>
+            <Angles min="-240" max="120" />
+            <Size height="0.5" width="0.5" />
         </NeedleGauge>
         <Label camera="^in" viewport="top">
             <DataSet id="hours">
