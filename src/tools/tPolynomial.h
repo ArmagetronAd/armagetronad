@@ -32,7 +32,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <math.h>
 #include "tArray.h"
 
+#include <iostream>
+#include <string>
+
 #define REAL float
+#define MAX(a, b) ((a>b)?a:b)
+#define MIN(a, b) ((a<b)?a:b)
+
 
 //! mathematical function (to be moved into tools sometime, and currently limited to linear functions)
 template <typename T>
@@ -85,7 +91,7 @@ public:
     friend bool operator != (const tPolynomial<D> & left, const tPolynomial<D> & right);
 
     virtual void toString() const;
-    tPolynomial<T> clamp(REAL min, REAL max, REAL valueOfVariable);
+    tPolynomial<T> const clamp(REAL min, REAL max, REAL valueOfVariable);
 
     int Len() const{
         return coefs.Len();
@@ -99,6 +105,40 @@ protected:
     // Variables
     REAL baseValueOfVariable; //!< the evaluation is always done on (valueOfVariable - baseValueOfVariable) rather than (valueOfVariable)
     tArray<REAL> coefs;
+};
+
+/*! \brief Marshal a tPolynomial as an input value (var) for "a + b*var + (c + d*var)*t"
+ *
+ *
+ */
+class tPolynomialMarshaler 
+{
+ public:
+    tPolynomialMarshaler(); //!< Default constructor
+    tPolynomialMarshaler(std::string str); //!< Parsing constructor
+    tPolynomialMarshaler(const tPolynomialMarshaler & other); //!< Copy constructor
+    
+    void setConstant(REAL value, int index);
+    void setVariant(REAL value, int index);
+    
+    void parse(std::string str);
+
+    template<typename D>
+    tPolynomial<D> const marshal(const tPolynomial<D> & other);
+
+    std::string toString();
+
+    friend bool operator == (const tPolynomialMarshaler & left, const tPolynomialMarshaler & right);
+    //    template<typename D>
+    friend bool operator != (const tPolynomialMarshaler & left, const tPolynomialMarshaler & right);
+ protected:
+    void parsePart(std::string str, tArray<REAL> &array);
+    void grow(tArray<REAL> &array, int newSize); //!< grows and initialise to 0 the new elements for the passed array to the new length
+    int getLenConstant() const {return constants.Len();};
+    int getLenVariant()const {return variants.Len();};
+
+    tArray<REAL> constants;
+    tArray<REAL> variants;
 };
 
 //These templates are probably only useable with nMessage as parameter.
@@ -248,8 +288,8 @@ bool operator == (const tPolynomial<T> & left, const tPolynomial<T> & right)
 
 
     // If the length of the coefs array differ, then the extra elements should be 0
-    int maxLength = left.coefs.Len()>right.coefs.Len()?left.coefs.Len():right.coefs.Len();
-    int minLength = left.coefs.Len()<right.coefs.Len()?left.coefs.Len():right.coefs.Len();
+    int maxLength = MAX(left.coefs.Len(), right.coefs.Len());
+    int minLength = MIN(left.coefs.Len(), right.coefs.Len());
 
     bool res = true;
 
@@ -471,16 +511,12 @@ tPolynomial<T> const tPolynomial<T>::operator+( const tPolynomial<T> &tfRight ) 
     // Bring the polynomial to the same baseValue, so that the terms mean the same thing
     tPolynomial<T> tRebasedRight(tfRight.evaluateCoefsAt(this->baseValueOfVariable));
 
-    int maxLength = this->coefs.Len()>tfRight.coefs.Len()?this->coefs.Len():tfRight.coefs.Len();
-    int minLength = this->coefs.Len()<tfRight.coefs.Len()?this->coefs.Len():tfRight.coefs.Len();
+    int maxLength = MAX(this->coefs.Len(), tfRight.coefs.Len());
 
     // Set the lenght to the longest member of the addition
     tRebasedRight.coefs.SetLen(maxLength);
-    for (int i=tfRight.Len(); i<maxLength; i++) {
-        tRebasedRight[i] = 0.0;
-    }
 
-    for (int i=0; i<minLength; i++) {
+    for (int i=0; i<this->coefs.Len(); i++) {
         tRebasedRight[i] += coefs[i];
     }
 
@@ -492,7 +528,7 @@ tPolynomial<T> & tPolynomial<T>::operator+=( const tPolynomial<T> &tfRight ) {
     // Bring the polynomial to the same baseValue, so that the terms mean the same thing
     tPolynomial<T> tRebasedRight = tfRight.evaluateCoefsAt(this->baseValueOfVariable);
 
-    int maxLength = this->coefs.Len()>tfRight.coefs.Len()?this->coefs.Len():tfRight.coefs.Len();
+    int maxLength = MAX(this->coefs.Len(), tfRight.coefs.Len());
     // Set the lenght to the longest member of the addition
     coefs.SetLen(maxLength);
 
@@ -546,7 +582,7 @@ void tPolynomial<T>::toString() const {
  * Otherwise, return a new polynomial that is bound by the range
  */
 template <typename T>
-tPolynomial<T> tPolynomial<T>::clamp(REAL minValue, REAL maxValue, REAL valueOfVariable)
+tPolynomial<T> const tPolynomial<T>::clamp(REAL minValue, REAL maxValue, REAL valueOfVariable)
 {
     tPolynomial<T> tf(*this);
 
@@ -570,6 +606,60 @@ tPolynomial<T> tPolynomial<T>::clamp(REAL minValue, REAL maxValue, REAL valueOfV
 
     return tf;
 }
+
+
+// *******************************************************
+// *******************************************************
+// *******************************************************
+// *******************************************************
+
+bool operator == (const tPolynomialMarshaler & left, const tPolynomialMarshaler & right);
+bool operator != (const tPolynomialMarshaler & left, const tPolynomialMarshaler & right);
+
+// *******************************************************
+// *******************************************************
+// *******************************************************
+// *******************************************************
+
+template<typename D>
+tPolynomial<D> const tPolynomialMarshaler::marshal(const tPolynomial<D> & other)
+{
+    tPolynomial<D> tf(0);
+    tPolynomial<D> res(0);
+
+    for(int i=variants.Len()-1; i>0; i--) {
+      tf = (tf + variants[i]) * other;
+    }
+    if(0 != variants.Len()) {
+      tf = tf + variants[0];
+    }
+
+    {
+      REAL tData[] = {0.0, 1.0};
+      tPolynomial<D> t(tData, sizeof(tData)/sizeof(tData[0]));
+
+      res = tf * t;
+    }
+
+    // Reset tf for further computation
+    tf = tPolynomial<D>(0);
+
+    for(int i=constants.Len()-1; i>0; i--) {
+      tf = (tf + constants[i]) * other;
+    }
+    if(0 != constants.Len()) {
+      tf = tf + constants[0];
+    }
+
+    res += tf;
+
+
+    return res;
+}
+
+
+
+
 
 #endif
 
