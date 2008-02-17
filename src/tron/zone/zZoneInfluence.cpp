@@ -25,29 +25,14 @@ zZoneInfluenceItem::~zZoneInfluenceItem() {}
 
 zZoneInfluenceItemRotation::zZoneInfluenceItemRotation(zZonePtr aZone):
         zZoneInfluenceItem(aZone),
-        rotationAngle(),
-        rotationSpeed()
+        rotation()
 {}
 
 void
 zZoneInfluenceItemRotation::apply(const tPolynomial<nMessage> &valueEq) {
-    // x is the influence from the monitor value
-    // t is the influence from the current time
-    // tf = (a +b*x) + (c + d*x)*t
 
-    // The following should improve readability
-    REAL tData[] = {0.0, 1.0};
-    tPolynomial<nMessage> t(tData, sizeof(tData)/sizeof(tData[0]));
-
-    REAL a = rotationAngle.GetOffset();
-    REAL b = rotationAngle.GetSlope();
-    REAL c = rotationSpeed.GetOffset();
-    REAL d = rotationSpeed.GetSlope();
-
-    tPolynomial<nMessage> tf =
-        ( (valueEq * b) + a)
-        + t * ( (valueEq * d) + c);
-
+    tPolynomial<nMessage> tf = rotation.marshal(valueEq);
+    
     zone->getShape()->setRotation2( tf );
 }
 

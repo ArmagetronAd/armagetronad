@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eTeam.h"
 #include "zone/zMisc.h"
 #include <boost/shared_ptr.hpp>
-
+#include "tPolynomial.h"
 
 class zSelector;
 typedef boost::shared_ptr<zSelector> zSelectorPtr;
@@ -61,14 +61,24 @@ public:
     virtual zValidator *copy(void) const;
     virtual ~zValidator() {};
 
-    void validate(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, Triggerer possibleUser, miscDataPtr &miscData);
+    void validate(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, Triggerer possibleUser, const tPolynomial<nMessage> &tp);
 
-    void addSelector(zSelectorPtr _selector) {selectors.push_back(_selector);};
-    void addMonitorInfluence(zMonitorInfluencePtr newInfluence) {monitorInfluences.push_back( newInfluence );};
-    void addZoneInfluence(zZoneInfluencePtr newInfluence) {zoneInfluences.push_back( newInfluence );};
+    void addSelector(zSelectorPtr _selector) {
+        selectors.push_back(_selector);
+    };
+    void addMonitorInfluence(zMonitorInfluencePtr newInfluence) {
+        monitorInfluences.push_back( newInfluence );
+    };
+    void addZoneInfluence(zZoneInfluencePtr newInfluence) {
+        zoneInfluences.push_back( newInfluence );
+    };
 
-    Triad getPositive(void) const {return positive;};
-    Triad getMarked(void) const {return marked;};
+    Triad getPositive(void) const {
+        return positive;
+    };
+    Triad getMarked(void) const {
+        return marked;
+    };
 
 protected:
     zSelectorPtrs selectors;
@@ -81,7 +91,9 @@ protected:
 
     bool isOwner(ePlayerNetID *possibleOwner, gVectorExtra< nNetObjectID > &owners);
     bool isTeamOwner(eTeam *possibleTeamOwner, gVectorExtra< nNetObjectID > &teamOwners);
-    virtual bool isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser) {return false;};
+    virtual bool isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser) {
+        return false;
+    };
 };
 
 
@@ -95,7 +107,9 @@ public:
     virtual ~zValidatorAll() {};
     zValidator *copy(void) const;
 protected:
-    bool isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser) { return true ;};
+    bool isValid(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* possibleUser) {
+        return true ;
+    };
 };
 
 class zValidatorOwner : public zValidator
@@ -156,7 +170,7 @@ protected:
  * ******** WARNING *********
  * This include has to be at the end of this file to break a cyclic referencing.
  * The classes involved are, in order:
- * 
+ *
  * zMonitorRule
  * zEffectGroup
  * zValidator

@@ -145,7 +145,6 @@ zMonitor::addRule(zMonitorRulePtr aRule) {
 void zMonitorRule::applyRule(triggerers &contributors, REAL time, const tPolynomial<nMessage> &valueEq) {
     /* We take all the contributors */
     /* And apply the proper effect */
-    miscDataPtr value = miscDataPtr(new REAL(valueEq.evaluate(time)));
 
     // Go through all effectgroups (owners of some action)
     std::vector<zEffectGroupPtr>::iterator iter;
@@ -159,7 +158,7 @@ void zMonitorRule::applyRule(triggerers &contributors, REAL time, const tPolynom
                 iter2 != contributors.end();
                 ++iter2)
         {
-            (*iter)->apply(*iter2, time, value);
+            (*iter)->apply(*iter2, time, valueEq);
         }
     }
 
@@ -218,10 +217,13 @@ zMonitorRuleOutsideRange::isValid(float monitorValue) {
 }
 
 void
-zMonitorInfluence::apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * user, tPolynomial<nMessage> valueEq) {
+zMonitorInfluence::apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * user, const tPolynomial<nMessage> &valueEq) {
     // Currently, we discard ownership information
-    if (influenceSlideAvailable == true)
-        monitor->affectSlide(user, influenceSlide, marked);
+
+    tPolynomial<nMessage> tf = influence.marshal(valueEq);
+    monitor->affectSlide(user, tf, marked);
+
+
     // TODO:
     //    if (influenceAddAvailable == true)
     //        monitor->affectAdd(user, influenceAdd(value), marked);

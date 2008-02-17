@@ -18,6 +18,7 @@ public:
     CPPUNIT_TEST( testParsing );
     CPPUNIT_TEST( testConstructor );
     CPPUNIT_TEST( testMarshaling );
+    CPPUNIT_TEST( testMarshalingWithBase );
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -149,9 +150,9 @@ public:
 
     std::cout << std::endl;
     std::cout << "manually generated expected output for case B : " << std::endl;
-    out2.toString();
+    std::cout << out2.toString() << std::endl;
     std::cout << "marshaled output for case B : " << std::endl;
-    marshalerB.marshal(inputPolynomial).toString();
+    std::cout << marshalerB.marshal(inputPolynomial).toString() << std::endl;
     */
 
     /*
@@ -169,14 +170,33 @@ public:
 
     std::cout << std::endl;
     std::cout << "manually generated expected output for case C : " << std::endl;
-    out3.toString();
+    std::cout << out3.toString() << std::endl;
     std::cout << "marshaled output for case C : " << std::endl;
-    marshalerC.marshal(inputPolynomial).toString();
+    std::cout << marshalerC.marshal(inputPolynomial).toString() << std::endl;
     */
 
     CPPUNIT_ASSERT ( expectedA == marshalerA.marshal(inputPolynomial) );
     CPPUNIT_ASSERT ( expectedB == marshalerB.marshal(inputPolynomial) );
     CPPUNIT_ASSERT ( expectedC == marshalerC.marshal(inputPolynomial) );
+  }
+
+  /**
+   * The same logical input, transformed to 2 different reference value, and then marshalled
+   * should produce the same value at a given current value.
+   */ 
+  void testMarshalingWithBase()
+  {
+    float inputData[] = {7, 5, 3};
+    tPolynomial<nMessageMock> inputPolynomialAt0(inputData, sizeof(inputData)/sizeof(inputData[0]));
+    tPolynomial<nMessageMock> inputPolynomialAt3(inputPolynomialAt0.adaptToNewReferenceVarValue(3));
+
+    tPolynomial<nMessageMock> marshaledResultAt0 = marshalerB.marshal(inputPolynomialAt0);
+    tPolynomial<nMessageMock> marshaledResultAt3 = marshalerB.marshal(inputPolynomialAt3);
+
+    //    CPPUNIT_ASSERT ( marshaledResultAt0 == marshaledResultAt3 );
+    std::cout << "at 0 : " << marshaledResultAt0(5) << " at 3 " << marshaledResultAt3(5) << std::endl;
+    CPPUNIT_ASSERT ( marshaledResultAt0(5) == marshaledResultAt3(5) );
+
   }
 
 };

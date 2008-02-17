@@ -29,7 +29,9 @@ public:
     ~zZoneInfluence();
     void apply(const tPolynomial<nMessage> &value);
 
-    void addZoneInfluenceRule(zZoneInfluenceItemPtr aRule) {zoneInfluenceItems.push_back(aRule);};
+    void addZoneInfluenceRule(zZoneInfluenceItemPtr aRule) {
+        zoneInfluenceItems.push_back(aRule);
+    };
 };
 
 class zZoneInfluenceItem {
@@ -44,16 +46,16 @@ public:
 
 class zZoneInfluenceItemRotation : public zZoneInfluenceItem {
 protected:
-    tFunction rotationAngle; // The base component of the rotation speed
-    tFunction rotationSpeed;
+    tPolynomialMarshaler rotation;
 public:
     zZoneInfluenceItemRotation(zZonePtr aZone);
     virtual ~zZoneInfluenceItemRotation() {};
 
-    void set(tFunction rotAngle, tFunction rotSpeed) {
-        rotationAngle = rotAngle;
-        rotationSpeed = rotSpeed;
-    };
+    void set(const tPolynomialMarshaler & other)
+    {
+	rotation = other;
+    }
+
     virtual void apply(const tPolynomial<nMessage> &value);
 };
 
@@ -64,7 +66,9 @@ public:
     zZoneInfluenceItemScale(zZonePtr aZone);
     virtual ~zZoneInfluenceItemScale() {};
 
-    void set(REAL sca) { scale = sca; };
+    void set(REAL sca) {
+        scale = sca;
+    };
     virtual void apply(const tPolynomial<nMessage> &value);
 };
 
@@ -75,7 +79,9 @@ public:
     zZoneInfluenceItemPosition(zZonePtr aZone);
     virtual ~zZoneInfluenceItemPosition() {};
 
-    void set(eCoord const & p) {pos = p;};
+    void set(eCoord const & p) {
+        pos = p;
+    };
     virtual void apply(const tPolynomial<nMessage> &value);
 };
 

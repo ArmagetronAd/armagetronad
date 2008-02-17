@@ -184,6 +184,7 @@ public:
  */
 class zMonitorInfluence {
     zMonitorPtr monitor;
+    tPolynomialMarshaler influence;
     tPolynomial<nMessage> influenceSlide;
     tFunction influenceAdd;
     tFunction influenceSet;
@@ -197,6 +198,7 @@ class zMonitorInfluence {
 public:
     zMonitorInfluence(zMonitorPtr aMonitor):
             monitor(aMonitor),
+            influence(),
             influenceSlide(),
             influenceAdd(),
             influenceSet(),
@@ -207,11 +209,15 @@ public:
     { };
     ~zMonitorInfluence() { };
 
-    void apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* triggerer, tPolynomial<nMessage> valueEq);
+    void apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* triggerer, const tPolynomial<nMessage> &valueEq);
 
     void setMarked(Triad mark) {
         marked = mark;
     };
+    void setInfluence(tPolynomialMarshaler infl) {
+      influence = infl;
+    }
+
     void setInfluenceSlide(tPolynomial<nMessage> infl) {
         influenceSlide = infl;
         influenceSlideAvailable=true;

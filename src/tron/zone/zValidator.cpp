@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -49,7 +49,7 @@ zValidator::zValidator(zValidator const &other):
 
 void zValidator::operator=(zValidator const &other)
 {
-    if(this != &other) {
+    if (this != &other) {
         positive = other.getPositive();
         marked   = other.getMarked();
     }
@@ -63,7 +63,7 @@ bool
 zValidator::isOwner(ePlayerNetID *possibleOwner, gVectorExtra< nNetObjectID > &owners)
 {
     gVectorExtra< nNetObjectID >::iterator iter;
-    for(iter = owners.begin();
+    for (iter = owners.begin();
             iter != owners.end();
             ++iter)
     {
@@ -77,7 +77,7 @@ bool
 zValidator::isTeamOwner(eTeam *possibleTeamOwner, gVectorExtra< nNetObjectID > &teamOwners)
 {
     gVectorExtra< nNetObjectID >::iterator iter;
-    for(iter = teamOwners.begin();
+    for (iter = teamOwners.begin();
             iter != teamOwners.end();
             ++iter)
     {
@@ -90,14 +90,11 @@ zValidator::isTeamOwner(eTeam *possibleTeamOwner, gVectorExtra< nNetObjectID > &
 }
 
 void
-zValidator::validate(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, Triggerer possibleUser, miscDataPtr &miscData) {
-    REAL value = 0.0;
-    if ( miscData.get() != 0 )
-        value = *miscData;
+zValidator::validate(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, Triggerer possibleUser, const tPolynomial<nMessage> &tpValue) {
 
-    if(isValid(owners, teamOwners, possibleUser.who) && validateTriad(possibleUser.positive, positive) && validateTriad(possibleUser.marked, marked)) {
+    if (isValid(owners, teamOwners, possibleUser.who) && validateTriad(possibleUser.positive, positive) && validateTriad(possibleUser.marked, marked)) {
         zSelectorPtrs::const_iterator iterSelector;
-        for(iterSelector=selectors.begin();
+        for (iterSelector=selectors.begin();
                 iterSelector!=selectors.end();
                 ++iterSelector)
         {
@@ -105,20 +102,20 @@ zValidator::validate(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObj
         }
 
         zMonitorInfluencePtrs::const_iterator iterMonitorInfluence;
-        for(iterMonitorInfluence=monitorInfluences.begin();
+        for (iterMonitorInfluence=monitorInfluences.begin();
                 iterMonitorInfluence!=monitorInfluences.end();
                 ++iterMonitorInfluence)
         {
-            (*iterMonitorInfluence)->apply(owners, teamOwners, possibleUser.who, value);
+            (*iterMonitorInfluence)->apply(owners, teamOwners, possibleUser.who, tpValue);
         }
 
         zZoneInfluencePtrs::const_iterator iterZoneInfluence;
-        for(iterZoneInfluence=zoneInfluences.begin();
+        for (iterZoneInfluence=zoneInfluences.begin();
                 iterZoneInfluence!=zoneInfluences.end();
                 ++iterZoneInfluence)
         {
-	  // TODO: 
-	  (*iterZoneInfluence)->apply(tPolynomial<nMessage>(value) );
+            // TODO:
+            (*iterZoneInfluence)->apply( tpValue );
         }
     }
 }
@@ -283,37 +280,37 @@ bool
 {
     switch(d_userType)
     {
-    case UserAll: 
+    case UserAll:
 // Everybody, irrevelantly of any settings, is allowed to
 // trigger this Zone. This will be the default behavior.
 	return true;
     break;
-    case UserOwner: 
+    case UserOwner:
 // Only a player that has its id in the owner field of the
 // Zone can trigger it (revisit this when a decision is made about
 // multiple owners)
 	return isOwner(possibleUser->Player());
     break;
-    case UserOwnerTeam: 
+    case UserOwnerTeam:
 // Only a player member of a team that has its id in the
 // ownerTeam field can trigger this Zone. Thus the Zone can be
 // triggered by any of the members of a team.
 	return isTeamOwner(possibleUser->Player()->CurrentTeam());
     break;
-    case UserAllButOwner: 
+    case UserAllButOwner:
 // Only the player that has its id in the owner field is
 // denied triggering the Zone. This is the opposite effect as
 // Owner. It is synonymous to "everybody but the owner of the Zone".
 	return !isOwner(possibleUser->Player());
     break;
-    case UserAllButTeamOwner: 
+    case UserAllButTeamOwner:
 // Only players that are members of the team that
 // has its id in the ownerTeam field are denied triggering this
 // Zone. This is the opposite of OwnerTeam. It is synonymous to
 // "everybody but the team owner of the Zone".
 	return !isTeamOwner(possibleUser->Player()->CurrentTeam());
     break;
-    case UserAnotherTeammate: 
+    case UserAnotherTeammate:
 // This Zone is restricted to players that are
 // member of the same team as the player which id is stored in the
 // owner field. The triggering of the Zone is itself denied to the

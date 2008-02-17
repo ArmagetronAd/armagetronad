@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gCycle.h"
 #include <boost/shared_ptr.hpp>
 #include "zone/zMisc.h"
+#include "tPolynomial.h"
 
 class zValidator;
 typedef boost::shared_ptr<zValidator> zValidatorPtr;
@@ -46,12 +47,14 @@ public:
     ~zEffectGroup();
     void operator=(zEffectGroup const &other);
 
-    void addValidator(zValidatorPtr _validator) {validators.push_back( _validator );};
+    void addValidator(zValidatorPtr _validator) {
+        validators.push_back( _validator );
+    };
 
     bool isValidUser(gCycle *possibleUser);
     gVectorExtra <ePlayerNetID *> getCalculatedTarget( gCycle * triggerer );
 
-    void apply( Triggerer target, REAL &time, miscDataPtr miscData = miscDataPtr() ); //!< reacts on objects interacting with  the zone
+    void apply( Triggerer target, REAL &time, const tPolynomial<nMessage> & tp ); //!< reacts on objects interacting with  the zone
 
     //callback functions
     gCycle * cb_PossibleUser(void);           //!< Gets the used rubber for the currently watched cycle

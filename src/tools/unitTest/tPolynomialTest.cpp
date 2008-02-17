@@ -92,20 +92,20 @@ public:
         CPPUNIT_ASSERT( (tpA + 1.0) == (tpB + 2.0) + tpC + -1.0);
 
 
-        tPolynomial<nMessageMock> tpAat5 = tpA.evaluateCoefsAt(5.0);
-        tPolynomial<nMessageMock> tpBat5 = tpB.evaluateCoefsAt(5.0);
-        tPolynomial<nMessageMock> tpCat5 = tpC.evaluateCoefsAt(5.0);
+        tPolynomial<nMessageMock> tpAat5 = tpA.adaptToNewReferenceVarValue(5.0);
+        tPolynomial<nMessageMock> tpBat5 = tpB.adaptToNewReferenceVarValue(5.0);
+        tPolynomial<nMessageMock> tpCat5 = tpC.adaptToNewReferenceVarValue(5.0);
         CPPUNIT_ASSERT( tpAat5 == tpBat5 + tpCat5 );
 
         //
-        // Adding 2 polynomial having different baseValueOfVariable
+        // Adding 2 polynomial having different referenceVarValue
         //
-        tPolynomial<nMessageMock> tpAat3 = tpA.evaluateCoefsAt(3.0);
-        tPolynomial<nMessageMock> tpCat7 = tpC.evaluateCoefsAt(7.0);
+        tPolynomial<nMessageMock> tpAat3 = tpA.adaptToNewReferenceVarValue(3.0);
+        tPolynomial<nMessageMock> tpCat7 = tpC.adaptToNewReferenceVarValue(7.0);
 
         // Addition
-        tPolynomial<nMessageMock> tpAat3at5 = tpAat3.evaluateCoefsAt(5.0);
-        tPolynomial<nMessageMock> tpCat7at5 = tpCat7.evaluateCoefsAt(5.0);
+        tPolynomial<nMessageMock> tpAat3at5 = tpAat3.adaptToNewReferenceVarValue(5.0);
+        tPolynomial<nMessageMock> tpCat7at5 = tpCat7.adaptToNewReferenceVarValue(5.0);
         tPolynomial<nMessageMock> sum = (tpBat5 + tpCat7);
         CPPUNIT_ASSERT( tpAat3 == tpBat5 + tpCat7 );
 
@@ -207,8 +207,8 @@ public:
 
         // change the base argument and adjust the coefs to time 5
         float NEW_REFERENCE_TIME = 5.0;
-        tfA = tfA.evaluateCoefsAt(NEW_REFERENCE_TIME);
-        tfB = tfB.evaluateCoefsAt(NEW_REFERENCE_TIME);
+        tfA = tfA.adaptToNewReferenceVarValue(NEW_REFERENCE_TIME);
+        tfB = tfB.adaptToNewReferenceVarValue(NEW_REFERENCE_TIME);
 
         // These should still be true
         CPPUNIT_ASSERT_DOUBLES_EQUAL( 0.0, tfA.evaluate(0), DELTA);

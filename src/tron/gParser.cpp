@@ -833,6 +833,13 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
         else if (isElement(cur->name, (const xmlChar *)"Rotation", keyword)) {
             zZoneInfluenceItemRotation *b = new zZoneInfluenceItemRotation(refZone);
 
+	    tPolynomialMarshaler tpm;
+	    
+            string str = string(myxmlGetProp(cur, "rotation"));
+	    tpm.parse(str);
+	    b->set(tpm);
+
+	    /*
             string str = string(myxmlGetProp(cur, "rotationAngle"));
             tFunction tfRotationAngle;
             myCheapParameterSplitter(str, tfRotationAngle, false);
@@ -842,6 +849,7 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
             myCheapParameterSplitter(str, tfRotationSpeed, false);
 
             b->set(tfRotationAngle, tfRotationSpeed);
+	    */
             infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));
         }
         else if (isElement(cur->name, (const xmlChar *)"Scale", keyword)) {
@@ -900,6 +908,15 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
 
     zMonitorInfluencePtr infl = zMonitorInfluencePtr(new zMonitorInfluence(ref));
     infl->setMarked(myxmlGetPropTriad(cur, "marked"));
+
+
+    if (xmlHasProp(cur, (const xmlChar*)"influence")) {
+        string str = string(myxmlGetProp(cur, "influence"));
+        tPolynomialMarshaler tpmInfluence;
+	tpmInfluence.parse(str);
+
+        infl->setInfluence( tpmInfluence );
+    }
 
     if (xmlHasProp(cur, (const xmlChar*)"influenceSlide")) {
         string str = string(myxmlGetProp(cur, "influenceSlide"));
@@ -1339,7 +1356,14 @@ gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
                         zValidatorPtr validator = zValidatorPtr( new zValidatorAll(_ignore, _ignore) );
 
                         zZoneInfluenceItemRotation *b = new zZoneInfluenceItemRotation(zone);
-                        b->set( tFunction(0.0f, 0.0f), tFunction(0.3f, 2.0f * 3.141f / 11.0f) );
+
+			tPolynomialMarshaler tpm;
+	    
+			string str = string(myxmlGetProp(cur, "rotation"));
+			tpm.parse(str);
+			b->set(tpm);
+			
+			//                        b->set( tFunction(0.0f, 0.0f), tFunction(0.3f, 2.0f * 3.141f / 11.0f) );
 
                         zZoneInfluencePtr infl = zZoneInfluencePtr(new zZoneInfluence(zone));
                         infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));

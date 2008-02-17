@@ -118,7 +118,7 @@ void tPolynomialMarshaler::grow(tArray<REAL> &array, int newLength)
 }
 
 
-std::string tPolynomialMarshaler::toString()
+std::string tPolynomialMarshaler::toString() const
 {
   std::ostringstream ostr("");
 

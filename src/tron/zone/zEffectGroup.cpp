@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -50,7 +50,7 @@ zEffectGroup::~zEffectGroup()
 
 void zEffectGroup::operator=(zEffectGroup const &other)
 {
-    if(this != &other) {
+    if (this != &other) {
         validators = other.validators;
         d_owners = other.d_owners;
         d_teamOwners = other.d_teamOwners;
@@ -58,13 +58,13 @@ void zEffectGroup::operator=(zEffectGroup const &other)
     }
 }
 
-void zEffectGroup::apply( Triggerer possibleUser, REAL &time, miscDataPtr miscData )
+void zEffectGroup::apply( Triggerer possibleUser, REAL &time, const tPolynomial<nMessage> & tp )
 {
     std::vector<zValidatorPtr>::const_iterator iter;
-    for(iter=validators.begin();
+    for (iter=validators.begin();
             iter!=validators.end();
             ++iter)
     {
-        (*iter)->validate(d_owners, d_teamOwners, possibleUser, miscData);
+        (*iter)->validate(d_owners, d_teamOwners, possibleUser, tp);
     }
 }

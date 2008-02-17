@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tString.h"
 #include "rScreen.h"
 #include "eSoundMixer.h"
+#include "tPolynomial.h"
 
 
 #include <time.h>
@@ -549,6 +550,8 @@ void zZone::InteractWith( eGameObject * target, REAL time, int recursion )
     }
 }
 
+REAL asdf[] = {0, 1};
+tPolynomial<nMessage> tpOne(asdf, sizeof(asdf)/sizeof(asdf[0]));
 // *******************************************************************************
 // *
 // *	OnEnter
@@ -571,7 +574,7 @@ void zZone::OnEnter( gCycle * target, REAL time )
             iter != effectGroupEnter.end();
             ++iter)
     {
-        (*iter)->apply(triggerer, time, miscDataPtr());
+        (*iter)->apply(triggerer, time, tpOne);
     }
 }
 
@@ -587,7 +590,7 @@ void zZone::OnInside( gCycle * target, REAL time )
             iter != effectGroupInside.end();
             ++iter)
     {
-        (*iter)->apply(triggerer, time);
+        (*iter)->apply(triggerer, time, tpOne);
     }
 }
 void zZone::OnLeave( gCycle * target, REAL time )
@@ -602,7 +605,7 @@ void zZone::OnLeave( gCycle * target, REAL time )
             iter != effectGroupLeave.end();
             ++iter)
     {
-        (*iter)->apply(triggerer, time);
+        (*iter)->apply(triggerer, time, tpOne);
     }
 }
 void zZone::OnOutside( gCycle * target, REAL time )
@@ -617,7 +620,7 @@ void zZone::OnOutside( gCycle * target, REAL time )
             iter != effectGroupOutside.end();
             ++iter)
     {
-        (*iter)->apply(triggerer, time);
+        (*iter)->apply(triggerer, time, tpOne);
     }
 }
 
