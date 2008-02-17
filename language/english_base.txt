@@ -443,6 +443,7 @@ allow_voting_help					If set to 1, voting will be allowed for players.
 allow_voting_spectator_help			If set to 1, voting will be allowed for spectators.
 min_voters_help						Number of voters that need to be online to enable voting.
 max_votes_help                      The maximum number of total votes that can be active at any given moment.
+votes_cancel_help                   Cancels all running polls.
 max_votes_per_voter_help            The maximum number of votes suggested by each voter that can be active at any given moment.
 voting_start_decay_help				Number of seconds after that the non-voters start to get ignored.
 voting_decay_help					One non-voter is ignored everytime this many secons pass.
