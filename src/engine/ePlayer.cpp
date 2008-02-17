@@ -6285,7 +6285,7 @@ static void Suspend_conf(std::istream &s )
 
 static void UnSuspend_conf(std::istream &s )
 {
-    Suspend_conf_base( s, 5 );
+    Suspend_conf_base( s, 0 );
 }
 
 static tConfItemFunc suspend_conf("SUSPEND",&Suspend_conf);
