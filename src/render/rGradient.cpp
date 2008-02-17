@@ -123,7 +123,7 @@ void rGradient::DrawAt(tCoord const &where) {
 #ifndef DEDICATED
     GetColor(GetGradientPt(where)).Apply();
     if(m_tex.Valid()) {
-        glTexCoord2f((where.x-m_origin.x)/m_dimensions.x/m_texScale.x, (where.y-m_origin.y)/m_dimensions.y/m_texScale.y);
+        glTexCoord2f((where.x-m_origin.x)/m_dimensions.x/m_texScale.x, (m_origin.y-where.y)/m_dimensions.y/m_texScale.y);
     }
 #endif
 }
