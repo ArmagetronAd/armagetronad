@@ -28,6 +28,7 @@
                   ShowMaximum |
                   ShowMinimum |
                   Reverse |
+                  Angles |
                   Caption |
                   Background |
                   Foreground |
@@ -77,6 +78,7 @@
                   ShowMaximum |
                   ShowMinimum |
                   Reverse |
+                  Angles |
                   Caption |
                   Background |
                   Foreground
@@ -153,6 +155,10 @@
 
 <!ELEMENT Reverse EMPTY>
 <!ATTLIST Reverse value (true | false) "true">
+
+<!ELEMENT Angles EMPTY>
+<!ATTLIST Angles min CDATA "0">
+<!ATTLIST Angles max CDATA "180">
 
 <!ELEMENT Caption (Text?) >
 <!ATTLIST Caption location (top | bottom | off) "bottom">

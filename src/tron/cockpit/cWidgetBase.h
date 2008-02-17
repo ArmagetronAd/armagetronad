@@ -204,6 +204,16 @@ public:
     bool Process(tXmlParser::node cur); //!< Processes a Reverse node or passes on to Base::Process
 };
 
+//! Able to parse and store an Angles node
+class WithAngles : virtual public Base{
+protected:
+    float m_angle_min; //!< Stores the angle at the minimum value
+    float m_angle_max; //!< Stores the angle at the minimum value
+    WithAngles() : m_angle_min(0), m_angle_max(M_PI){}; //!< Default constructor
+public:
+    bool Process(tXmlParser::node cur); //!< Processes an Angles node or passes on to Base::Process
+};
+
 //! Able to parse and store ShowMinimum, ShowMaximum or ShowValue nodes
 class WithShowSettings : virtual public Base{
 protected:

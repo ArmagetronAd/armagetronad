@@ -508,6 +508,17 @@ bool WithReverse::Process(tXmlParser::node cur) {
     return Base::Process(cur);
 }
 
+bool WithAngles::Process(tXmlParser::node cur) {
+    if(cur.IsOfType("Angles")) {
+        cur.GetProp("min", m_angle_min);
+        cur.GetProp("max", m_angle_max);
+        m_angle_min *= M_PI / 180.;
+        m_angle_max *= M_PI / 180.;
+        return true;
+    }
+    return Base::Process(cur);
+}
+
 bool WithShowSettings::Process(tXmlParser::node cur) {
     if(cur.IsOfType("ShowMinimum")) {
         m_showmin = cur.GetPropBool("value");

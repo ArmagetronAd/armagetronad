@@ -36,6 +36,7 @@ namespace cWidget {
 
 bool BarGauge::Process(tXmlParser::node cur) {
     if (
+        WithAngles      ::Process(cur) ||
         WithSingleData  ::Process(cur) ||
         WithBackground  ::Process(cur) ||
         WithForeground  ::Process(cur) ||
@@ -178,9 +179,11 @@ void VerticalBarGauge::RenderGraph(float min, float max, float val, float factor
 
 
 void NeedleGauge::RenderGraph(float min, float max, float val, float factor, tValue::Base const &val_s) {
-    float x, y=0.0;
-    x= (m_reverse?-1:1) * cos(M_PI*val/max);
-    y= sin(M_PI*val/max);
+    float x, y;
+    float t = m_reverse ? (val - max) / (min - max) : (val - min) / (max - min);
+    float a = m_angle_min * (1 - t) + m_angle_max * t;
+    x= cos(a);
+    y= sin(a);
 
     /* Draws an ugly background on the gauge
     BeginQuads();
