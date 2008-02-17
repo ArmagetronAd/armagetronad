@@ -4225,7 +4225,6 @@ void nMachine::Expire( void )
     // iterate over known machines
     nMachineMap & map = sn_GetMachineMap();
     nMachineMap::iterator toErase = map.end();
-    int size = map.size();
     for( nMachineMap::iterator iter = map.begin(); iter != map.end(); ++iter )
     {
         // erase last deleted machine
@@ -4241,7 +4240,7 @@ void nMachine::Expire( void )
         }
 
         // if the machine is no longer in use, mark it for deletion
-        if ( machine.players_ == 0 && machine.lastUsed_ < time - 300.0/size && machine.banned_ < time && machine.kph_.GetAverage() < 0.5 )
+        if ( machine.players_ == 0 && machine.lastUsed_ < time - 300.0 && machine.banned_ < time && machine.kph_.GetAverage() < 0.5 )
             toErase = iter;
 
     }

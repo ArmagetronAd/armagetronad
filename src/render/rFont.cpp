@@ -170,16 +170,16 @@ void rFont::Render(unsigned char c,REAL left,REAL top,REAL right,REAL bot){
             select = select->lowerPart;
         }
         select->Select(true);
-
+        
         BeginQuads();
-        glTexCoord2f(tleft,ttop);
-        glVertex2f(   left, top);
+        glTexCoord2f(tright,tbot);
+        glVertex2f(   right, bot);
 
         glTexCoord2f(tright,ttop);
         glVertex2f(   right ,top);
 
-        glTexCoord2f(tright,tbot);
-        glVertex2f(   right, bot);
+        glTexCoord2f(tleft,ttop);
+        glVertex2f(   left, top);
 
         glTexCoord2f(tleft,tbot);
         glVertex2f(   left, bot);
@@ -448,13 +448,14 @@ void rTextField::FlushLine(int len,bool newline){
                 //sr_ResetRenderState(true);
 
                 BeginQuads();
-                glVertex2f(   l, t);
 
-                glVertex2f(   r ,t);
+                glVertex2f(   l, b);
 
                 glVertex2f(   r, b);
 
-                glVertex2f(   l, b);
+                glVertex2f(   r ,t);
+
+                glVertex2f(   l, t);
                 RenderEnd();
             }
             else

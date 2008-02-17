@@ -55,6 +55,7 @@ void Vec3::RenderNormal(){
 void rModel::Load(std::istream &in,const char *fileName){
 
 #ifndef DEDICATED
+    modelTexFacesCoherent = false;
     bool calc_normals=true;
 
     if (strstr(fileName,".mod")){ // old loader
@@ -102,6 +103,7 @@ void rModel::Load(std::istream &in,const char *fileName){
             Vec3 &v = vertices[i];
             texVert[i] = Vec3((v.x[0]-xmin)/(xmax-xmin), (zmax-v.x[2])/(zmax-zmin), 0);
         }
+        modelTexFacesCoherent = true;
         for (i = modelFaces.Len()-1; i>=0; i--)
         {
             modelTexFaces[i] = modelFaces[i];
@@ -275,21 +277,15 @@ void rModel::Render(){
         return;
     if ( !displayList_.Call() )
     {
-        rDisplayListFiller filler( displayList_ );
-
-        glEnable(GL_CULL_FACE);
-           
-        if (normals.Len()>=vertices.Len()){
-            glNormalPointer(GL_FLOAT,0,&normals[0]);
-            glEnableClientState(GL_NORMAL_ARRAY);
-        }
-        glVertexPointer(3,GL_FLOAT,0,&vertices[0]);
-        glEnableClientState(GL_VERTEX_ARRAY);
+        // model display lists should definitely be compiled before other lists
+        rDisplayList::Cancel();
 
         bool texcoord=true;
         if (texVert.Len()<0)
             texcoord=false;
         if (modelTexFaces.Len()!=modelFaces.Len())
+            texcoord=false;
+        if ( !modelTexFacesCoherent )
             texcoord=false;
 
         if (texcoord)
@@ -298,29 +294,42 @@ void rModel::Render(){
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         }
 
-        #if 0
-        if( 0 )
+        rDisplayListFiller filler( displayList_ );
+           
+        glEnable(GL_CULL_FACE);
+
+        if ( !modelTexFacesCoherent )
         {
-            // dead code, but maybe glDrawElements does not work for someone,
-            // so we keep it
+            // sigh, we need to do it the complicated way
             glBegin( GL_TRIANGLES );
             for(int i=modelFaces.Len()-1;i>=0;i--)
             {
                 for(int j=0;j<=2;j++)
                 {
-                    // glTexCoord3fv(reinterpret_cast<REAL *>(&(texVert(modelTexFaces(i).A[j]))));
-                    glArrayElement(modelFaces(i).A[j]);
+                    glTexCoord3fv(reinterpret_cast<REAL *>(&(texVert(modelTexFaces(i).A[j]))));
+                    glNormal3fv(reinterpret_cast<REAL *>(&(normals(modelFaces(i).A[j]))));
+                    glVertex3fv(reinterpret_cast<REAL *>(&(vertices(modelFaces(i).A[j]))));
                 }
             }
             glEnd();
 
         }
-        #endif
+        else
+        {
+            // glDrawElements works
+            if (normals.Len()>=vertices.Len())
+            {
+                glNormalPointer(GL_FLOAT,0,&normals[0]);
+                glEnableClientState(GL_NORMAL_ARRAY);
+            }
+            glVertexPointer(3,GL_FLOAT,0,&vertices[0]);
+            glEnableClientState(GL_VERTEX_ARRAY);
 
-        glDrawElements(GL_TRIANGLES,
-                       modelFaces.Len()*3,
-                       GL_UNSIGNED_INT,
-                       &modelFaces(0));
+            glDrawElements(GL_TRIANGLES,
+                           modelFaces.Len()*3,
+                           GL_UNSIGNED_INT,
+                           &modelFaces(0));
+        }
 
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         glDisableClientState(GL_VERTEX_ARRAY);
