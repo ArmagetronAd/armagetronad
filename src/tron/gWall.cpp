@@ -200,6 +200,8 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
         if (sr_upperSky && !sg_MoviePack()) h=upper_height;
     }
 
+    BeginQuads();
+
     // NOTE: display lists on nvidia cards don't like infinite points
     if (h<9000 || !sr_infinityPlane || rDisplayList::IsRecording() ){
         TexVertex(p1.x, p1.y, 0,
@@ -401,6 +403,7 @@ void gWallRim::RenderReal(const eCamera *cam){
 
                 // render shadow
                 Color(0,0,0);
+                BeginQuads();
                 Vertex(P1.x, P1.y, 0);
                 Vertex(P2.x, P2.y, 0);
                 Vertex(P4.x, P4.y, 0);

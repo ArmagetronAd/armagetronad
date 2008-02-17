@@ -532,7 +532,7 @@ void rISurfaceTexture::OnSelect( bool enforce )
 #ifndef DEDICATED
     if(sr_glOut)
     {
-        sr_CheckGLError();
+        RenderEnd(true);
 
         int texmod=rTextureGroups::TextureMode[group_];
         if (enforce && texmod<0) texmod=GL_NEAREST_MIPMAP_NEAREST;
@@ -546,8 +546,6 @@ void rISurfaceTexture::OnSelect( bool enforce )
             // std::cerr << "loading texture " << fileName << ':' << tint << "\n";
 
             if (texmod>0){
-                RenderEnd(true);
-
                 // don't generate textures inside display lists
                 rDisplayList::Cancel();
 
