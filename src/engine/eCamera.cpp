@@ -1499,12 +1499,6 @@ void eCamera::Render(){
                 offset = test.hit;
             }
 
-            tCoord unnormalzed_dir = dir * ((centerPosSmooth - pos).Norm() + offset);
-
-            tCoord perp = dir.Turn(tCoord(0,1))*se_cameraEyeDistance;
-            tCoord dir2 = unnormalzed_dir - perp;
-            dir2.Normalize();
-
             gluLookAt(0,
                       0,
                       0,
@@ -1515,8 +1509,6 @@ void eCamera::Render(){
 
                       top.x,top.y,
                       1);
-
-            perp += pos;
 
             glTranslatef(-pos.x,-pos.y,-z);
             glMatrixMode(GL_MODELVIEW);
