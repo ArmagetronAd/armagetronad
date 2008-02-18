@@ -61,7 +61,7 @@ REAL rViewport::UpDownFOV(REAL fov){
     return 360*atan(tan(M_PI*fov/360)/ratio)/M_PI;
 }
 
-void rViewport::Perspective(REAL fov,REAL nnear,REAL ffar){
+void rViewport::Perspective(REAL fov,REAL nnear,REAL ffar,REAL xshift){
 #ifndef DEDICATED
     if (!sr_glOut)
         return;
@@ -72,7 +72,9 @@ void rViewport::Perspective(REAL fov,REAL nnear,REAL ffar){
     REAL xmul = ensureverticalfov * tan((M_PI / 360.0) * fov);
     REAL ymul = ensureverticalfov * aspectratio * xmul;
     glMatrixMode(GL_PROJECTION);
-    glFrustum(-nnear * xmul, nnear * xmul, -nnear * ymul, nnear * ymul, nnear, ffar);
+    xshift *= nnear;
+    glFrustum(-nnear * xmul + xshift, nnear * xmul + xshift, -nnear * ymul, nnear * ymul, nnear, ffar);
+    glTranslatef(xshift, 0.f, 0.f);
 
 #if 0 // Z-Man's old and clumsy version
     REAL ratio=currentScreensetting.aspect*(width*sr_screenWidth)/(height*sr_screenHeight);

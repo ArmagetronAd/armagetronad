@@ -187,7 +187,6 @@ void rGradient::DrawRect(tCoord const &edge1, tCoord const &edge2) {
 #endif
 }
 
-void se_glFloorTexture();
 void rGradient::BeginDraw() {
     if(m_tex.Valid()) {
         m_tex.Select();

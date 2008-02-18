@@ -52,7 +52,7 @@ public:
     void Select();
 #endif
 
-    void Perspective(REAL fov,REAL zNear=1,REAL zFar=10000000);
+    void Perspective(REAL fov,REAL zNear=1,REAL zFar=10000000,REAL xShift = 0);
 
     REAL UpDownFOV(REAL fov);
 

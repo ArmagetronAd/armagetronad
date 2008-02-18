@@ -1443,9 +1443,8 @@ void eCamera::Render(){
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-
     if(CenterCockpitFixedBefore()){
-        vp->Perspective(fov,zNear,1E+20);
+        vp->Perspective(fov,zNear,1E+20,se_cameraEyeDistance/2.);
 
         gluLookAt(0,
                   0,
@@ -1491,7 +1490,7 @@ void eCamera::Render(){
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
 
-            vp->Perspective(fov,zNear,1E+20);
+            vp->Perspective(fov,zNear,1E+20,-se_cameraEyeDistance/2.);
 
             float offset = 0;
             if(mode == CAMERA_IN) {
@@ -1510,8 +1509,8 @@ void eCamera::Render(){
                       0,
                       0,
 
-                      dir2.x,
-                      dir2.y,
+                      dir.x,
+                      dir.y,
                       rise,
 
                       top.x,top.y,
@@ -1519,7 +1518,7 @@ void eCamera::Render(){
 
             perp += pos;
 
-            glTranslatef(-perp.x,-perp.y,-z);
+            glTranslatef(-pos.x,-pos.y,-z);
             glMatrixMode(GL_MODELVIEW);
 
             draw_center=((CenterPos()-pos).NormSquared()>1 ||
