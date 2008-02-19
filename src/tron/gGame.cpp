@@ -2033,24 +2033,7 @@ void MainMenu(bool ingame){
     uMenuItemExit exx(&MainMenu,extitle,
                       exhelp);
 
-    uMenuItemFunction * auth = 0;
-    static nVersionFeature authentication( 15 );
-    if ( sn_GetNetState() == nCLIENT && ingame && authentication.Supported(0) )
-    {
-        auth =tNEW(uMenuItemFunction)(&MainMenu,
-                                      "$player_authenticate_text",
-                                      "$player_authenticate_help",
-                                      &PlayerLogIn );
-    }
-
-    uMenuItemFunction abb(&MainMenu,
-                          "$main_menu_about_text",
-                          "$main_menu_about_help",
-                          &sg_DisplayVersionInfo);
-
-
     uMenuItemFunction *return_to_main=NULL;
-
     if (ingame){
         if (sn_GetNetState()==nSTANDALONE)
             return_to_main=new uMenuItemFunction
@@ -2070,6 +2053,20 @@ void MainMenu(bool ingame){
                             &ret_to_MainMenu);
     }
 
+    uMenuItemFunction * auth = 0;
+    static nVersionFeature authentication( 15 );
+    if ( sn_GetNetState() == nCLIENT && ingame && authentication.Supported(0) )
+    {
+        auth =tNEW(uMenuItemFunction)(&MainMenu,
+                                      "$player_authenticate_text",
+                                      "$player_authenticate_help",
+                                      &PlayerLogIn );
+    }
+
+    uMenuItemFunction abb(&MainMenu,
+                          "$main_menu_about_text",
+                          "$main_menu_about_help",
+                          &sg_DisplayVersionInfo);
 
 
     uMenu Settings("$system_settings_menu_text");

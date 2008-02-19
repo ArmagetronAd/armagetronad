@@ -2365,6 +2365,12 @@ void gCycle::OnRemoveFromGame()
             RequestSync();
     }
 
+    // make sure we're dead, so our walls know they need to time out.
+    if ( Alive() )
+    {
+        Die( lastTime );
+    }
+
     if (currentWall)
         currentWall->CopyIntoGrid(0);
     currentWall=NULL;
