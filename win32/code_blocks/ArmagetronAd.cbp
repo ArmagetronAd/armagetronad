@@ -286,6 +286,9 @@
 		<Unit filename="..\..\src\tools\tMemStack.h" />
 		<Unit filename="..\..\src\tools\tPlayList.cpp" />
 		<Unit filename="..\..\src\tools\tPlayList.h" />
+		<Unit filename="..\..\src\tools\tPolynomial.cpp" />
+		<Unit filename="..\..\src\tools\tPolynomial.h" />
+		<Unit filename="..\..\src\tools\tPolynomialWithBase.h" />
 		<Unit filename="..\..\src\tools\tRandom.cpp" />
 		<Unit filename="..\..\src\tools\tRandom.h" />
 		<Unit filename="..\..\src\tools\tRecorder.cpp" />
