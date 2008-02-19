@@ -470,6 +470,7 @@ void cCockpit::ProcessWidgets(node cur) {
         cWidget::Base &widget = *widget_ptr;
 
         widget.SetCockpit(this);
+        widget.ParseTemplate(true);
 
         //Process all templates first
         tString use(cur.GetProp("usetemplate"));
@@ -487,6 +488,7 @@ void cCockpit::ProcessWidgets(node cur) {
             pos = next+1;
         }
 
+        widget.ParseTemplate(false);
         ProcessWidget(cur, widget);
         m_Widgets.push_back(widget_ptr.release());
     }

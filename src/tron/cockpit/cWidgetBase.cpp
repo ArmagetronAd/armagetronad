@@ -45,7 +45,9 @@ void Base::SetCam(int Cam) {
 //! This should be called by derived classes if parsing a setting fails.
 //! @param cur the node that's being attempted to parse
 void Base::DisplayError(tXmlParser::node cur) {
-    tERR_WARN("Element of type '" + cur.GetName() + "' not processable in this context: '" + typeid(*this).name() + "'");
+    if(!m_ParsingTemplate) {
+        tERR_WARN("Element of type '" + cur.GetName() + "' not processable in this context: '" + typeid(*this).name() + "'");
+    }
 }
 
 //! This needs to be overwritten if the derived class has anyting to parse or can be derived from.

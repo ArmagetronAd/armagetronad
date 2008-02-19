@@ -58,6 +58,7 @@ namespace cWidget {
 //! Offers basic functions and keeps the camera settings
 class Base : public tReferencable<Base> {
     int m_Cam; //!< The camera(s) the widget will be rendered for
+    bool m_ParsingTemplate;
 protected:
     void DisplayError(tXmlParser::node cur); //!< Displays a parsing error message
     bool m_Render; //!< Should this Widget be rendered?
@@ -65,7 +66,7 @@ protected:
     bool m_Sticky; //!< Should this Widget be sticky?
     cCockpit *m_Cockpit; //!< the cockpit this widget belongs to
 public:
-    Base() : m_Render(true), m_RenderDefault(true), m_Sticky(true) {}
+    Base() : m_ParsingTemplate(false), m_Render(true), m_RenderDefault(true), m_Sticky(true) {}
     virtual ~Base() { }
     virtual void Render() = 0; //!< Needs to be owerwritten for all widgets that can be rendered (and therefore created)
     void SetCam(int Cam); //!< Set the camera(s) this widget will be rendered for
@@ -90,6 +91,9 @@ public:
     //! @param state true if the key was pressed, false if it was released
     //! @param id key id of the event that was received
     virtual void HandleEvent(bool state, int id) { Toggle(state); }
+    //! Call this to surpress warnings about unknown tags
+    //! @param state whether to surpress warnings
+    void ParseTemplate(bool state) {m_ParsingTemplate = state;}
 };
 
 typedef std::auto_ptr<Base> Base_ptr; //!< simple shortcut; used in the derived classes
