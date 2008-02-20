@@ -3899,14 +3899,20 @@ public:
         int levelInt;
         s >> levelInt;
         tAccessLevel level = static_cast< tAccessLevel >( levelInt );
-        
+
         if ( s.fail() )
         {
-            con << tOutput( "$user_level_usage" );
+            if(printErrors)
+            {
+                con << tOutput( "$user_level_usage" );
+            }
             return GetDefault();
         }
 
-        con << tOutput( "$user_level_change", name, tCurrentAccessLevel::GetName( level ) );
+        if(printChange)
+        {
+            con << tOutput( "$user_level_change", name, tCurrentAccessLevel::GetName( level ) );
+        }
 
         return level;
     }

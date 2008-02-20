@@ -231,7 +231,10 @@ public:
 
         if ( s.fail() )
         {
-            con << tOutput( "$access_level_usage" );
+            if(printErrors)
+            {
+                con << tOutput( "$access_level_usage" );
+            }
             return;
         }
 
@@ -248,10 +251,13 @@ public:
             if ( ci->requiredLevel != level )
             {
                 ci->requiredLevel = level;
-                con << tOutput( "$access_level_change", name, tCurrentAccessLevel::GetName( level ) );
+                if(printChange)
+                {
+                    con << tOutput( "$access_level_change", name, tCurrentAccessLevel::GetName( level ) );
+                }
             }
         }
-        else
+        else if(printErrors)
         {
             con << tOutput( "$config_command_unknown", name );
         }
