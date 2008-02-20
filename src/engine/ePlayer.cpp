@@ -2315,6 +2315,11 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
         sn_ConsoleOut( tOutput( "$access_level_admin_denied" ), p->Owner() );
         return;
     }
+
+    tString str;
+    str.ReadLine(s);
+    con << "Remote admin command by " << *p << "0xRESETT: " << str << "\n";
+    std::istringstream stream(&str(0));
     
     // install filter
     eAdminConsoleFilter consoleFilter( p->Owner() );
@@ -2325,7 +2330,7 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     }
     else
     {
-        tConfItemBase::LoadLine(s);
+        tConfItemBase::LoadLine(stream);
     }
 }
 
