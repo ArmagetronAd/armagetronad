@@ -48,7 +48,6 @@ bool Rectangle::Process(tXmlParser::node cur) {
 }
 
 void Rectangle::Render() {
-    glDisable(GL_TEXTURE_2D);
     float val=m_data.GetVal().GetFloat();
     float min=m_data.GetMin().GetFloat();
     float max=m_data.GetMax().GetFloat();
@@ -60,6 +59,8 @@ void Rectangle::Render() {
     m_foreground.SetGradientEdges(edge1, edge2);
     m_background.SetGradientEdges(edge1, edge2);
 
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER,0);
 
     m_foreground.SetValue(where);
     m_background.SetValue(where);
