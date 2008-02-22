@@ -72,6 +72,11 @@
                     <Color r="1." g="0." b="0." alpha=".9" at="1." />
                 </Gradient>
             </Foreground>
+            <LineColor>
+                <Solid>
+                    <Color r="0" g="0" b="0" alpha="0" />
+                </Solid>
+            </LineColor>
         </BarGauge>
         <BarGauge camera="^in">
             <DataSet>
@@ -105,6 +110,11 @@
                     <Color r="0." g="1." b="0." alpha=".9" at="1." />
                 </Gradient>
             </Foreground>
+            <LineColor>
+                <Solid>
+                    <Color r="0" g="0" b="0" alpha="0" />
+                </Solid>
+            </LineColor>
         </BarGauge>
 
         <!-- Example configuration for a Enemies: x Mates: y display -->
@@ -338,6 +348,11 @@
                     <Color r="0." g="1." b="0." alpha="1." />
                 </Solid>
             </Foreground>
+            <LineColor>
+                <Solid>
+                    <Color r="0" g="0" b="0" alpha="0" />
+                </Solid>
+            </LineColor>
         </BarGauge>
         <Map camera="^in">
             <Position x="0.73" y="-0.72" />

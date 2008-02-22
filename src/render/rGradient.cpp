@@ -145,7 +145,7 @@ void rGradient::DrawRect(tCoord const &edge1, tCoord const &edge2) {
 #ifndef DEDICATED
     float tCoord::*x; //those are correct for horizontal gradients,
     float tCoord::*y; //vertical ones just get turned around
-	BeginDraw();
+    BeginDraw();
     BeginQuads();
     switch(m_dir) {
     case horizontal:
@@ -190,6 +190,8 @@ void rGradient::DrawRect(tCoord const &edge1, tCoord const &edge2) {
 void rGradient::BeginDraw() {
     if(m_tex.Valid()) {
         m_tex.Select();
+    } else {
+        glDisable(GL_TEXTURE_2D);
     }
 }
 

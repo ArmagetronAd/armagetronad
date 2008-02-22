@@ -179,7 +179,15 @@ class WithBackground : virtual public WithColorFunctions {
 protected:
     rGradient m_background; //!< Stores the resulting background
 public:
-    bool Process(tXmlParser::node cur); //!< Calls WithColorFunctions::ProcessGradient() for Foreground nodes or passes on to WithColorFunctions::Process()
+    bool Process(tXmlParser::node cur); //!< Calls WithColorFunctions::ProcessGradient() for Background nodes or passes on to WithColorFunctions::Process()
+};
+
+//! Able to parse and store LineColor nodes
+class WithLineColor : virtual public WithColorFunctions {
+protected:
+    rGradient m_line_color; //!< Stores the resulting background
+public:
+    bool Process(tXmlParser::node cur); //!< Calls WithColorFunctions::ProcessGradient() for LineColor nodes or passes on to WithColorFunctions::Process()
 };
 
 //! Able to parse and store a Caption node

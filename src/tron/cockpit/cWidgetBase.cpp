@@ -470,6 +470,14 @@ bool WithBackground::Process(tXmlParser::node cur) {
     return WithColorFunctions::Process(cur);
 }
 
+bool WithLineColor::Process(tXmlParser::node cur) {
+    if(cur.IsOfType("LineColor")) {
+        m_line_color = ProcessGradient(cur);
+        return true;
+    }
+    return WithColorFunctions::Process(cur);
+}
+
 bool WithCaption::Process(tXmlParser::node cur) {
     if(cur.IsOfType("Caption")) {
         ProcessCaption(cur);

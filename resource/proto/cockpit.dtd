@@ -32,6 +32,7 @@
                   Caption |
                   Background |
                   Foreground |
+                  LineColor |
                   MapModes
                   )*)>
 <!ATTLIST WidgetTemplate %CommonWidgetAttributes;>
@@ -46,7 +47,8 @@
                   Reverse |
                   Caption |
                   Background |
-                  Foreground
+                  Foreground |
+                  LineColor
                   )*)>
 <!ATTLIST BarGauge %CommonWidgetAttributes;>
 
@@ -59,7 +61,8 @@
                   Reverse |
                   Caption |
                   Background |
-                  Foreground
+                  Foreground |
+                  LineColor
                   )*)>
 <!ATTLIST VerticalBarGauge %CommonWidgetAttributes;>
 
@@ -168,6 +171,7 @@
 
 <!ELEMENT Background (Image?,Solid?,Gradient?)>
 <!ELEMENT Foreground (Image?,Solid?,Gradient?)>
+<!ELEMENT LineColor (Image?,Solid?,Gradient?)>
 
 <!-- Graphic is a regular graphic file, like something.png.  ResourceGraphic is a resource xml
 file that contains more information on the image and may be a case of YouMightNeedThis -->

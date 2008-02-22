@@ -40,6 +40,7 @@ bool BarGauge::Process(tXmlParser::node cur) {
         WithSingleData  ::Process(cur) ||
         WithBackground  ::Process(cur) ||
         WithForeground  ::Process(cur) ||
+        WithLineColor   ::Process(cur) ||
         WithCoordinates ::Process(cur) ||
         WithCaption     ::Process(cur) ||
         WithShowSettings::Process(cur) ||
@@ -121,9 +122,11 @@ void BarGauge::RenderGraph(float min, float max, float val, float factor, tValue
 
     left.SetGradientEdges(edge1, edge2);
     right.SetGradientEdges(edge1, edge2);
+    m_line_color.SetGradientEdges(edge1, edge2);
 
     left.SetValue(y);
     right.SetValue(y);
+    m_line_color.SetValue(y);
 
     right.DrawRect(
         tCoord(m_size.x*x+m_position.x, m_position.y),
@@ -133,10 +136,10 @@ void BarGauge::RenderGraph(float min, float max, float val, float factor, tValue
         tCoord(m_size.x*x+m_position.x, m_position.y),
         tCoord(m_position.x-m_size.x, m_position.y+m_size.y));
 
+    m_line_color.BeginDraw();
     BeginLines();
-    Color(1.,1.,1.);
-    Vertex(m_size.x*x+m_position.x,m_position.y,0);
-    Vertex(m_size.x*x+m_position.x, m_size.y+m_position.y,0);
+    m_line_color.DrawPoint(tCoord(m_size.x*x+m_position.x,m_position.y));
+    m_line_color.DrawPoint(tCoord(m_size.x*x+m_position.x,m_size.y+m_position.y));
     RenderEnd();
 
     //Value
@@ -154,9 +157,11 @@ void VerticalBarGauge::RenderGraph(float min, float max, float val, float factor
 
     m_foreground.SetGradientEdges(edge1, edge2);
     m_background.SetGradientEdges(edge1, edge2);
+    m_line_color.SetGradientEdges(edge1, edge2);
 
     m_foreground.SetValue(y);
     m_background.SetValue(y);
+    m_line_color.SetValue(y);
 
     m_background.DrawRect(
         tCoord(m_position.x+m_size.x, m_position.y+m_size.y*x),
@@ -166,10 +171,10 @@ void VerticalBarGauge::RenderGraph(float min, float max, float val, float factor
         tCoord(m_position.x+m_size.x, m_position.y-m_size.y),
         tCoord(m_position.x-m_size.x, m_position.y+m_size.y*x));
 
+    m_line_color.BeginDraw();
     BeginLines();
-    Color(1.,1.,1.);
-    Vertex(m_position.x+m_size.x,m_position.y+m_size.y*x,0);
-    Vertex(m_position.x-m_size.x,m_position.y+m_size.y*x,0);
+    m_line_color.DrawPoint(tCoord(m_position.x+m_size.x,m_position.y+m_size.y*x));
+    m_line_color.DrawPoint(tCoord(m_position.x-m_size.x,m_position.y+m_size.y*x));
     RenderEnd();
 
     //Value

@@ -263,7 +263,6 @@ void zShapeCircle::render(const eCamera * cam )
     glDisable(GL_LIGHT1);
     glDisable(GL_LIGHTING);
     glDisable(GL_CULL_FACE);
-    glDepthMask(GL_FALSE);
     glBlendFunc( GL_SRC_ALPHA, GL_ONE );
 
     //glDisable(GL_TEXTURE);
@@ -274,10 +273,13 @@ void zShapeCircle::render(const eCamera * cam )
     glMultMatrixf(&m[0][0]);
     //	glScalef(.5,.5,.5);
 
-    if ( sr_alphaBlend )
+    if ( sr_alphaBlend ) {
+        glDepthMask(GL_FALSE);
         BeginQuads();
-    else
+    } else {
+        glDepthMask(GL_TRUE);
         BeginLineStrip();
+    }
 
     const REAL seglen = .2f;
     const REAL bot = 0.0f;
@@ -516,7 +518,6 @@ void zShapePolygon::render(const eCamera * cam )
     glDisable(GL_LIGHT1);
     glDisable(GL_LIGHTING);
     glDisable(GL_CULL_FACE);
-    glDepthMask(GL_FALSE);
     glBlendFunc( GL_SRC_ALPHA, GL_ONE );
 
     //glDisable(GL_TEXTURE);
@@ -534,10 +535,14 @@ void zShapePolygon::render(const eCamera * cam )
 
         glRotatef(rotation2.evaluate(lasttime_)*180/M_PI, 0.0, 0.0, 1.0);
 
-        if ( sr_alphaBlend )
+        if ( sr_alphaBlend ) {
+            glDepthMask(GL_FALSE);
             BeginQuads();
-        else
+        } else {
+            RenderEnd();
+            glDepthMask(GL_TRUE);
             BeginLineStrip();
+        }
 
         //    const REAL seglen = .2f;
         const REAL bot = 0.0f;

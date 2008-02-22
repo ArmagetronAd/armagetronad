@@ -40,7 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 namespace cWidget {
 
 //! Processes and renders a bar gauge
-class BarGauge : public WithSingleData, public WithBackground, public WithForeground, public WithCoordinates, public WithShowSettings, public WithCaption, public WithReverse, public WithAngles {
+class BarGauge : public WithSingleData, public WithBackground, public WithForeground, public WithLineColor, public WithCoordinates, public WithShowSettings, public WithCaption, public WithReverse, public WithAngles {
 public:
     virtual ~BarGauge() { }; //!< Do- nothing destructor
     void Render(); //!< Renders the gauge
