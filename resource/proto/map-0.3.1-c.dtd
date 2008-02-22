@@ -23,7 +23,7 @@
   - may have an axes declared
   - need at least one spawn
   - need at least one wall -->
-<!ELEMENT Field (Axes?, Ownership?, (Spawn | Wall | Monitor | Zone )*)>
+<!ELEMENT Field (Axes?, Ownership?, (Spawn | Wall | Monitor | Zone | Zone_v1 )*)>
 
 <!ELEMENT Axes (Axis*)>
 <!ELEMENT Ownership (TeamOwnership*)>
@@ -82,7 +82,7 @@
 <!ATTLIST OutsideRange high CDATA #REQUIRED>
 
 
-<!ELEMENT ShapeCircle (Point, Color)>
+<!ELEMENT ShapeCircle (Point, Color?)>
 <!ATTLIST ShapeCircle scale CDATA "1.0">
 <!ATTLIST ShapeCircle growth CDATA "0.0">
 <!ATTLIST ShapeCircle rotation CDATA "0.0">
@@ -146,6 +146,7 @@ rubberrecharge | acceleration | spawnplayer | setting ) "death" >
 <!ELEMENT MonitorInfluence EMPTY>
 <!ATTLIST MonitorInfluence name CDATA #IMPLIED>
 <!ATTLIST MonitorInfluence marked (true | false | ignore) "ignore">
+<!ATTLIST MonitorInfluence influence CDATA #IMPLIED>
 <!ATTLIST MonitorInfluence influenceSlide CDATA #IMPLIED>
 <!ATTLIST MonitorInfluence influenceAdd   CDATA #IMPLIED>
 <!ATTLIST MonitorInfluence influenceSet   CDATA #IMPLIED>
@@ -157,6 +158,7 @@ rubberrecharge | acceleration | spawnplayer | setting ) "death" >
 <!ELEMENT Rotation EMPTY>
 <!ATTLIST Rotation rotationAngle CDATA "0.0">
 <!ATTLIST Rotation rotationSpeed CDATA "0.0">
+<!ATTLIST Rotation rotation CDATA "0.0">
 
 
 <!ELEMENT Scale EMPTY>
@@ -165,6 +167,9 @@ rubberrecharge | acceleration | spawnplayer | setting ) "death" >
 <!ELEMENT TeamOwnership EMPTY>
 <!ATTLIST TeamOwnership teamId CDATA #REQUIRED>
 <!ATTLIST TeamOwnership playerId CDATA #IMPLIED>
+
+<!ELEMENT Zone_v1 (ShapeCircle) >
+<!ATTLIST Zone_v1 effect (win | death | fortress ) "death" >
 
 
 
