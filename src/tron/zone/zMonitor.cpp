@@ -10,38 +10,16 @@
  * Keep track of everybody contributing to the monitor (for a tic atm)
  */
 void
-zMonitor::affectSlide(gCycle* user, tPolynomial<nMessage> triggererInfluenceSlide, Triad marked) {
+zMonitor::affectSlide(gCycle* user, tPolynomial<nMessage> triggererInfluence, Triad marked) {
     Triggerer triggerer;
     triggerer.who = user;
     // TODO:
-    //triggerer.positive = triggererInfluenceSlide > 0.0 ? _true : _false;
+    //triggerer.positive = triggererInfluence > 0.0 ? _true : _false;
     triggerer.marked = marked;
 
-    contributorsSlide.push_back(triggerer);
-    totalInfluenceSlide += triggererInfluenceSlide;
+    contributors.push_back(triggerer);
+    totalInfluence += triggererInfluence;
 
-}
-
-void
-zMonitor::affectAdd(gCycle* user, REAL triggererInfluenceAdd, Triad marked) {
-    Triggerer triggerer;
-    triggerer.who = user;
-    triggerer.positive = triggererInfluenceAdd > 0.0 ? _true : _false;
-    triggerer.marked = marked;
-
-    contributorsAdd.push_back(triggerer);
-    totalInfluenceAdd += triggererInfluenceAdd;
-}
-
-void
-zMonitor::affectSet(gCycle* user, REAL triggererInfluenceSet, Triad marked) {
-    Triggerer triggerer;
-    triggerer.who = user;
-    triggerer.positive = triggererInfluenceSet > 0.0 ? _true : _false;
-    triggerer.marked = marked;
-
-    contributorsSet.push_back(triggerer);
-    totalInfluenceSet += triggererInfluenceSet;
 }
 
 
@@ -59,32 +37,17 @@ bool zMonitor::Timestep( REAL time )
 {
     tPolynomial<nMessage> prevValueEq = valueEq;
 
-    // Do we need to reset the value?
-    // TODO: Re-enable those 2 lines
-    //    if (contributorsSet.size()!=0)
-    //        valueEq.setUnadjustableOffset(totalInfluenceSet);
+    if ( totalInfluence != previousTotalInfluenceSlide ) {
 
-    // Computer the non-sliding influence
-    if ( fabs(totalInfluenceAdd - previousTotalInfluenceAdd) > 0.01) {
-        valueEq.addConstant(totalInfluenceAdd);
-
-        previousTotalInfluenceAdd = totalInfluenceAdd;
-    }
-
-    // TODO:
-    //    if( fabs(totalInfluenceSlide - previousTotalInfluenceSlide) > 1e-10) {
-    if ( totalInfluenceSlide != previousTotalInfluenceSlide ) {
-        //      valueEq.addConstant(totalInfluenceSlide[0]);
-
-        for (int i=1; i<totalInfluenceSlide.Len(); i++) {
-            valueEq.changeRate(totalInfluenceSlide[i], i, time);
+        for (int i=1; i<totalInfluence.Len(); i++) {
+            valueEq.changeRate(totalInfluence[i], i, time);
         }
         // Set to null any remainding elements not reassigned in the previous loop
-        for (int i=totalInfluenceSlide.Len(); i<valueEq.Len(); i++) {
+        for (int i=totalInfluence.Len(); i<valueEq.Len(); i++) {
             valueEq.changeRate(0.0, i, time);
         }
 
-        previousTotalInfluenceSlide = totalInfluenceSlide;
+        previousTotalInfluenceSlide = totalInfluence;
     }
 
     valueEq = valueEq.clamp(minValue, maxValue, time);
@@ -93,19 +56,9 @@ bool zMonitor::Timestep( REAL time )
     // Nota: this also protect the list for further modification
     // by recursives rules. Should all list be merged in a later version
     // still do make a copy at this step
-    triggerers contributors = contributorsSlide;
-    contributors.insertAll(contributorsAdd);
-    contributors.insertAll(contributorsSet);
 
 
-    // Remove the information about who contributed in the last tic
-    contributorsSlide.erase(contributorsSlide.begin(), contributorsSlide.end());
-    contributorsAdd.erase(contributorsAdd.begin(), contributorsAdd.end());
-    contributorsSet.erase(contributorsSet.begin(), contributorsSet.end());
-
-    totalInfluenceSlide = drift;
-    totalInfluenceAdd   = 0.0;
-    totalInfluenceSet   = 0.0;
+    totalInfluence = drift;
 
     // Only update if value has changed enough
     // TODO:
@@ -122,6 +75,9 @@ bool zMonitor::Timestep( REAL time )
         }
     }
     //    }
+
+    // Remove the information about who contributed in the last tic
+    contributors.erase(contributors.begin(), contributors.end());
 
     // update time
     lastTime = time;
@@ -223,10 +179,4 @@ zMonitorInfluence::apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNe
     tPolynomial<nMessage> tf = influence.marshal(valueEq);
     monitor->affectSlide(user, tf, marked);
 
-
-    // TODO:
-    //    if (influenceAddAvailable == true)
-    //        monitor->affectAdd(user, influenceAdd(value), marked);
-    //    if (influenceSetAvailable == true)
-    //        monitor->affectSet(user, influenceSet(value), marked);
 }

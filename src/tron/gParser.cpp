@@ -839,17 +839,6 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
 	    tpm.parse(str);
 	    b->set(tpm);
 
-	    /*
-            string str = string(myxmlGetProp(cur, "rotationAngle"));
-            tFunction tfRotationAngle;
-            myCheapParameterSplitter(str, tfRotationAngle, false);
-
-            str = string(myxmlGetProp(cur, "rotationSpeed"));
-            tFunction tfRotationSpeed;
-            myCheapParameterSplitter(str, tfRotationSpeed, false);
-
-            b->set(tfRotationAngle, tfRotationSpeed);
-	    */
             infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));
         }
         else if (isElement(cur->name, (const xmlChar *)"Scale", keyword)) {
@@ -916,28 +905,6 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
 	tpmInfluence.parse(str);
 
         infl->setInfluence( tpmInfluence );
-    }
-
-    if (xmlHasProp(cur, (const xmlChar*)"influenceSlide")) {
-        string str = string(myxmlGetProp(cur, "influenceSlide"));
-        tPolynomial<nMessage> tpInfluenceSlide(2);
-        myCheapParameterSplitter2(str, tpInfluenceSlide, false);
-
-        infl->setInfluenceSlide( tpInfluenceSlide );
-    }
-
-    if (xmlHasProp(cur, (const xmlChar *)"influenceAdd")) {
-        string str = string(myxmlGetProp(cur, "influenceAdd"));
-        tFunction tfInfluence;
-        myCheapParameterSplitter(str, tfInfluence, false);
-        infl->setInfluenceAdd( tfInfluence );
-    }
-
-    if (xmlHasProp(cur, (const xmlChar *)"influenceSet")) {
-        string str = string(myxmlGetProp(cur, "influenceSet"));
-        tFunction tfInfluence;
-        myCheapParameterSplitter(str, tfInfluence, false);
-        infl->setInfluenceSet( tfInfluence );
     }
 
     return infl;

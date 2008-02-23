@@ -27,19 +27,14 @@ class zMonitor: public eReferencableGameObject {
 public:
     zMonitor(eGrid * _grid):
             eReferencableGameObject( _grid, eCoord( 1,1 ), eCoord( 0,0 ), NULL, true ),
-            totalInfluenceSlide(0),
-            totalInfluenceAdd(0.0),
-            totalInfluenceSet(0.0),
-            contributorsSlide(),
-            contributorsAdd(),
-            contributorsSet(),
+            totalInfluence(0),
+            contributors(),
             rules(),
             valueEq(),
             drift(0),
             minValue(0.0),
             maxValue(1.0),
-            previousTotalInfluenceSlide(0),
-            previousTotalInfluenceAdd(0.0)
+            previousTotalInfluenceSlide(0)
     {
         // add to game grid
         this->AddToList();
@@ -73,19 +68,13 @@ public:
     };
 
     void affectSlide(gCycle* user, tPolynomial<nMessage> triggererInfluenceSlide, Triad marked);
-    void affectAdd(gCycle* user, REAL triggererInfluenceAdd, Triad marked);
-    void affectSet(gCycle* user, REAL triggererInfluenceSet, Triad marked);
 
 protected:
-    tPolynomial<nMessage> totalInfluenceSlide; //!< The sum of all the individual contributions in one, to be scaled in time
-    REAL totalInfluenceAdd; //!< The sum of all the individual contributions, NOT to be scaled in time
-    REAL totalInfluenceSet; //!< The new value to overwrite the value of the monitor
+    tPolynomial<nMessage> totalInfluence; //!< The sum of all the individual contributions in one, to be scaled in time
 
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
 
-    triggerers contributorsSlide;  //!< All the players that contributed to the sliding (ie proportional to time)
-    triggerers contributorsAdd;    //!< All the players that contributed to the unscaled chaning of the value
-    triggerers contributorsSet;    //!< All the players that contributed to the resetting of the value
+    triggerers contributors;  //!< All the players that contributed to the sliding (ie proportional to time)
 
     zMonitorRulePtrs rules;
 
@@ -100,7 +89,7 @@ protected:
     // values used to reduce the update transmitted
     tPolynomial<nMessage> previousValue;
     tPolynomial<nMessage> previousTotalInfluenceSlide;
-    REAL previousTotalInfluenceAdd;
+
 
 };
 
@@ -186,12 +175,8 @@ class zMonitorInfluence {
     zMonitorPtr monitor;
     tPolynomialMarshaler influence;
     tPolynomial<nMessage> influenceSlide;
-    tFunction influenceAdd;
-    tFunction influenceSet;
 
     bool influenceSlideAvailable;
-    bool influenceAddAvailable;
-    bool influenceSetAvailable;
 
     Triad marked;
 
@@ -200,11 +185,7 @@ public:
             monitor(aMonitor),
             influence(),
             influenceSlide(),
-            influenceAdd(),
-            influenceSet(),
             influenceSlideAvailable(false),
-            influenceAddAvailable(false),
-            influenceSetAvailable(false),
             marked(_ignore)
     { };
     ~zMonitorInfluence() { };
@@ -221,14 +202,6 @@ public:
     void setInfluenceSlide(tPolynomial<nMessage> infl) {
         influenceSlide = infl;
         influenceSlideAvailable=true;
-    };
-    void setInfluenceAdd  (tFunction infl) {
-        influenceAdd   = infl;
-        influenceAddAvailable  =true;
-    };
-    void setInfluenceSet  (tFunction infl) {
-        influenceSet   = infl;
-        influenceSetAvailable  =true;
     };
 
 };
