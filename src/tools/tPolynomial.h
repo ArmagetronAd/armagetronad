@@ -52,6 +52,7 @@ public:
     tPolynomial(REAL value);  //!< constructor for constant polynomial
     tPolynomial(tArray<REAL> newCoefs);  //!< constructor
     tPolynomial(const tPolynomial<T> &tf);  //!< constructor
+    tPolynomial(std::string str);  //!< constructor
 
     virtual ~tPolynomial() //!< destructor
     {
@@ -78,7 +79,8 @@ public:
         if (coefs.Len()==0) {
             coefs.SetLen(1);
             coefs[0] = 0;
-        } coefs[0] += constant;
+        } 
+	coefs[0] += constant;
     }
 
     tPolynomial<T> adaptToNewReferenceVarValue(REAL currentVarValue) const;
@@ -112,40 +114,6 @@ protected:
     // Variables
     REAL referenceVarValue; //!< the evaluation is always done on (currentVarValue - referenceVarValue) rather than (currentVarValue)
     tArray<REAL> coefs;
-};
-
-/*! \brief Marshal a tPolynomial as an input value (var) for "a + b*var + (c + d*var)*t"
- *
- *
- */
-class tPolynomialMarshaler 
-{
- public:
-    tPolynomialMarshaler(); //!< Default constructor
-    tPolynomialMarshaler(std::string str); //!< Parsing constructor
-    tPolynomialMarshaler(const tPolynomialMarshaler & other); //!< Copy constructor
-    
-    void setConstant(REAL value, int index);
-    void setVariant(REAL value, int index);
-    
-    void parse(std::string str);
-
-    template<typename D>
-    tPolynomial<D> const marshal(const tPolynomial<D> & other);
-
-    std::string toString() const;
-
-    friend bool operator == (const tPolynomialMarshaler & left, const tPolynomialMarshaler & right);
-    //    template<typename D>
-    friend bool operator != (const tPolynomialMarshaler & left, const tPolynomialMarshaler & right);
- protected:
-    void parsePart(std::string str, tArray<REAL> &array);
-    void grow(tArray<REAL> &array, int newSize); //!< grows and initialise to 0 the new elements for the passed array to the new length
-    int getLenConstant() const {return constants.Len();};
-    int getLenVariant()const {return variants.Len();};
-
-    tArray<REAL> constants;
-    tArray<REAL> variants;
 };
 
 //These templates are probably only useable with nMessage as parameter.
@@ -593,6 +561,14 @@ void tPolynomial<T>::operator=(tPolynomial<T> const &other)
 }
 
 template <typename T>
+tPolynomial<T>::tPolynomial(std::string str)
+  : referenceVarValue(0.0),
+     coefs(0)
+{
+  parse(str);
+}
+
+template <typename T>
 void tPolynomial<T>::parse(std::string str)
 {
     int pos;
@@ -680,54 +656,6 @@ void tPolynomial<T>::setAtSameReferenceVarValue(tPolynomial<T> const &other)
 // *******************************************************
 // *******************************************************
 // *******************************************************
-
-bool operator == (const tPolynomialMarshaler & left, const tPolynomialMarshaler & right);
-bool operator != (const tPolynomialMarshaler & left, const tPolynomialMarshaler & right);
-
-// *******************************************************
-// *******************************************************
-// *******************************************************
-// *******************************************************
-
-template<typename D>
-tPolynomial<D> const tPolynomialMarshaler::marshal(const tPolynomial<D> & other)
-{
-    tPolynomial<D> tf(0);
-    tPolynomial<D> res(0);
-
-    tf.setAtSameReferenceVarValue(other);
-    res.setAtSameReferenceVarValue(other);
-
-    for(int i=variants.Len()-1; i>0; i--) {
-      tf = (tf + variants[i]) * other;
-    }
-    if(0 != variants.Len()) {
-      tf = tf + variants[0];
-    }
-
-    {
-      REAL tData[] = {0.0, 1.0};
-      tPolynomial<D> t(tData, sizeof(tData)/sizeof(tData[0]));
-      t.setAtSameReferenceVarValue(other);
-
-      res = tf * t;
-    }
-
-    // Reset tf for further computation
-    tf = tPolynomial<D>(0);
-    tf.setAtSameReferenceVarValue(other);
-
-    for(int i=constants.Len()-1; i>0; i--) {
-      tf = (tf + constants[i]) * other;
-    }
-    if(0 != constants.Len()) {
-      tf = tf + constants[0];
-    }
-
-    res += tf;
-
-    return res;
-}
 
 
 
