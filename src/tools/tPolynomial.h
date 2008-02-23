@@ -57,6 +57,8 @@ public:
     {
     }
 
+    void parse(std::string str);
+
     virtual REAL evaluate( REAL currentVarValue ) const; //!< evaluates the function
     inline REAL operator()( REAL currentVarValue ) const; //!< evaluation operator
 
@@ -65,6 +67,8 @@ public:
     tPolynomial<T> const operator+( REAL constant ) const ;
     tPolynomial<T> const operator+( const tPolynomial<T> &tfRight ) const ;
     tPolynomial<T> & operator+=( const tPolynomial<T> &tfRight ) ;
+
+    tPolynomial<T> const substitute( const tPolynomial<T> &other ) const;
 
     REAL &operator[](int index); // Allow both reading and writing of element
     REAL const &operator[](int index) const; // Allow reading of element even when the object is const
@@ -543,6 +547,23 @@ tPolynomial<T> & tPolynomial<T>::operator+=( const tPolynomial<T> &tfRight ) {
     return *this;
 }
 
+/*! \brief Evaluate this(x) where x is another polynomial
+ *
+ */
+template <typename T>
+tPolynomial<T> const tPolynomial<T>::substitute( const tPolynomial<T> &other ) const {
+  tPolynomial<T> tf(0);
+  tf.setAtSameReferenceVarValue(other);
+  for(int i=this->Len()-1; i>0; i--) {
+    tf = (tf + (*this)[i]) * other;
+  }
+  if(0 != this->Len()) {
+    tf = tf + (*this)[0];
+  }
+
+  return tf;
+}
+
 template<typename T>
 REAL &tPolynomial<T>::operator[](int index) // Allow both reading and writing of element
 {
@@ -569,6 +590,36 @@ void tPolynomial<T>::operator=(tPolynomial<T> const &other)
 {
     coefs = other.coefs;
     referenceVarValue = other.referenceVarValue;
+}
+
+template <typename T>
+void tPolynomial<T>::parse(std::string str)
+{
+    int pos;
+    int prevPos = 0;
+    int index = 0;
+
+#define TPOLYNOMIAL_DELIMITER ';'
+
+    pos = str.find(TPOLYNOMIAL_DELIMITER, 0);
+    if(-1 != pos) {
+      do{
+	REAL value = atof(str.substr(prevPos, pos).c_str());
+	coefs.SetLen(index + 2); // +1 because to write at index n, the len must be n+1. +1 to allocate a place for the element after the last ':'
+	coefs[index] = value;
+	
+	prevPos = pos + 1;
+	index ++;
+      }
+      while ( (pos = str.find(TPOLYNOMIAL_DELIMITER, prevPos)) != -1) ;
+
+      coefs[index] = atof(str.substr(prevPos, pos).c_str());
+
+    }
+    else {
+      coefs.SetLen(1);
+      coefs[0] = atof(str.c_str());
+    }
 }
 
 template <typename T>

@@ -14,6 +14,8 @@ public:
     CPPUNIT_TEST( testMultiplication );
     CPPUNIT_TEST( testEvaluateAndBaseArgument );
     //    CPPUNIT_TEST( testWriteAndReadToStream );
+    CPPUNIT_TEST( testParse );
+    CPPUNIT_TEST( testSubstitute );
     CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -247,6 +249,111 @@ public:
           CPPUNIT_ASSERT( tfA == tfB );
       }
     */
+
+  /*! \brief validate the parsing mechanism
+   *
+   * Validate the parsing mechanism by loading different strings.
+   */
+  void testParse() {
+    tPolynomial<nMessageMock> tp;
+
+    // Happy sunshine flow
+    {
+      tp.parse("");
+      CPPUNIT_ASSERT( tpEmpty == tp );
+      
+      tp.parse("2");
+      CPPUNIT_ASSERT( tpTwo == tp );
+      
+      tp.parse("3;5;7;11");
+      float b[] = {3, 5, 7, 11};
+      tPolynomial<nMessageMock> tpB(b, sizeof(b)/sizeof(b[0]));
+      CPPUNIT_ASSERT( tpB == tp );
+      
+      // Try with a smaller polynomial now, ensuring that there is no leakage
+      tp.parse("3;5");
+      float a[] = {3, 5};
+      tPolynomial<nMessageMock> tpA(a, sizeof(a)/sizeof(a[0]));
+      CPPUNIT_ASSERT( tpA == tp );
+
+      // Quick notation
+      tp.parse(";;3;5");
+      float c[] = {0, 0, 3, 5};
+      tPolynomial<nMessageMock> tpC(c, sizeof(c)/sizeof(c[0]));
+      CPPUNIT_ASSERT( tpC == tp );
+
+    }
+
+    // not the happy sunshine flow
+    {
+      // no elements should be created
+      tp.parse(";;;;;");
+      CPPUNIT_ASSERT( tpEmpty == tp );
+      
+      // quick notation with extra delimiters
+      tp.parse(";;3;5;;");
+      float a[] = {0, 0, 3, 5};
+      tPolynomial<nMessageMock> tpA(a, sizeof(a)/sizeof(a[0]));
+      CPPUNIT_ASSERT( tpA == tp );
+
+      // non-numerical information
+      tp.parse("Hello world!;0;");
+      CPPUNIT_ASSERT( tpEmpty == tp );
+    }
+  }
+
+
+  void testSubstitute() {
+    // This test will use the following notation:
+    // tpResultat == tpTransformer.substitute(tpValue);
+    tPolynomial<nMessageMock> tpValue;
+    tPolynomial<nMessageMock> tpTransformer;
+    tPolynomial<nMessageMock> tpResultat;
+
+
+    // Similar size
+    tpValue.parse("3;5");
+    tpTransformer.parse("7;9");
+    // V(x) = {3, 5}
+    // T(y) = {7, 9}
+    // T(V(x)) :
+    // a + b*y
+    // 7 + 9*y
+    // 7 + 9*(3 + 5*x)
+    // 7 + 27 + 45*x
+    // 34 + 45*x
+    tpResultat.parse("34;45");
+    CPPUNIT_ASSERT( tpResultat == tpTransformer.substitute(tpValue) );
+
+    // Different size : Much longer value
+    tpValue.parse("3;5;7;11;13;17");
+    tpTransformer.parse("7;11");
+    // V(x) = {3, 5, 7, 11, 13, 17}
+    // T(y) = {7, 11}
+    // T(V(x)) :
+    // a + b*y
+    // 7 + 11*y
+    // 7 + 11*(3 + 5*x + 7*x^2 + 11*x^3 + 13*x^4 + 17*x^5)
+    // 7 + 33 + 55*x + 77*x^2 + 121*x^3 + 143*x^4 + 187*x^5
+    // 40 + 55*x + 77*x^2 + 121*x^3 + 143*x^4 + 187*x^5
+    tpResultat.parse("40;55;77;121;143;187");
+    CPPUNIT_ASSERT( tpResultat == tpTransformer.substitute(tpValue) );
+
+    // Different size : Much longer transformer
+    tpValue.parse("3;5");
+    tpTransformer.parse("3;5;7;11;13;17");
+    // V(x) = {3, 5}
+    // T(y) = {3, 5, 7, 11, 13, 17}
+    // T(V(x)) :
+    // a + b*y + c*y^2 + d*y^3 + e*y^4 + f*y^5
+    // 3 + 5*y + 7*y^2 + 11*y^3 + 13*y^4 + 17*y^5
+    // 3 + 5*(3 + 5*x) + 7*(3 + 5*x)^2 + 11*(3 + 5*x)^3 + 13*(3 + 5*x)^4 + 17*(3 + 5*x)^5
+    // computed using yacas:
+    // In> Expand(3 + 5*(3 + 5*x) + 7*(3 + 5*x)^2 + 11*(3 + 5*x)^3 + 13*(3 + 5*x)^4 + 17*(3 + 5*x)^5)
+    // Out> 53125*x^5+167500*x^4+212125*x^3+134950*x^2+43165*x+5562
+    tpResultat.parse("5562;43165;134950;212125;167500;53125");
+    CPPUNIT_ASSERT( tpResultat == tpTransformer.substitute(tpValue) );
+  }
 
 };
 
