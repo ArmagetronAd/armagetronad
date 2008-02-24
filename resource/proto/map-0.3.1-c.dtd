@@ -147,12 +147,17 @@ rubberrecharge | acceleration | spawnplayer | setting ) "death" >
 <!ATTLIST MonitorInfluence name CDATA #IMPLIED>
 <!ATTLIST MonitorInfluence marked (true | false | ignore) "ignore">
 <!ATTLIST MonitorInfluence influence CDATA #IMPLIED>
+<!ATTLIST MonitorInfluence influenceSlide CDATA "0.0"> <!-- deprecated as of rev 8042 -->
+<!ATTLIST MonitorInfluence influenceAdd   CDATA "0.0"> <!-- deprecated as of rev 8042 -->
+<!ATTLIST MonitorInfluence influenceSet   CDATA "0.0"> <!-- deprecated as of rev 8042 -->
 
 <!ELEMENT ZoneInfluence (Rotation | Scale | Point | Color)+ >
 <!ATTLIST ZoneInfluence name CDATA #IMPLIED>
 
 <!ELEMENT Rotation EMPTY>
-<!ATTLIST Rotation rotation CDATA "0.0">
+<!ATTLIST Rotation rotation CDATA #IMPLIED>
+<!ATTLIST Rotation rotationAngle CDATA "0.0"> <!-- deprecated as of rev 8042 -->
+<!ATTLIST Rotation rotationSpeed CDATA "0.0"> <!-- deprecated as of rev 8042 -->
 
 <!ELEMENT Scale EMPTY>
 <!ATTLIST Scale scale CDATA "1.0">

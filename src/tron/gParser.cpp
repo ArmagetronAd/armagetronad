@@ -810,9 +810,11 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
 
 	    tPolynomialMarshaler<nMessage> tpm;
 
+	    std::cout << "about to read a rotation " << std::endl;
 	    if( myxmlHasProp(cur, "rotation") ) {
 	      // new notation, superseed the previous notation
 	      string str = string(myxmlGetProp(cur, "rotation"));
+
 	      tpm.parse(str);
 	    }
 	    else {
@@ -830,6 +832,7 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
 	      sg_Deprecated();
 	    }
 
+	    std::cout << "rotation read " << std::endl;
 	    b->set(tpm);
 
             infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));
@@ -891,17 +894,22 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
     zMonitorInfluencePtr infl = zMonitorInfluencePtr(new zMonitorInfluence(ref));
     infl->setMarked(myxmlGetPropTriad(cur, "marked"));
 
-
     tPolynomialMarshaler<nMessage> tpmInfluence;
 
-    if (xmlHasProp(cur, (const xmlChar*)"influence")) {
-      // new notation, superseed the previous notation
+    if (myxmlHasProp(cur, (const xmlChar*)"influence")) {
+        // new notation, superseed the previous notation
         string str = string(myxmlGetProp(cur, "influence"));
 	tpmInfluence.parse(str);
     }
     else {
-      tPolynomial<nMessage> tpInfluenceConstant( string(myxmlGetProp(cur, "influenceAdd")) );
-      tPolynomial<nMessage> tpInfluenceVariant( string(myxmlGetProp(cur, "influenceSlide")) );
+      tPolynomial<nMessage> tpInfluenceConstant;
+      tPolynomial<nMessage> tpInfluenceVariant;
+      if(myxmlHasProp(cur, "influenceAdd")) {
+        tpInfluenceConstant.parse( string(myxmlGetProp(cur, "influenceAdd")) );
+      }
+      if(myxmlHasProp(cur, "influenceSlide")) {
+	tpInfluenceVariant.parse( string(myxmlGetProp(cur, "influenceSlide")) );
+      }
 
       /*
       if (xmlHasProp(cur, (const xmlChar *)"influenceSet")) {
@@ -917,6 +925,7 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
 
       sg_Deprecated();
     }
+    std::cout << "influence read" << std::endl;
 
     infl->setInfluence( tpmInfluence );
 
