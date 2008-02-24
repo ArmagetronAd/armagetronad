@@ -87,7 +87,7 @@ libtools_a_SOURCES=	${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallba
 	tools/tCoord.h\
 	tools/tValue.h tools/tValueParser.h\
 	tools/tFunction.h tools/tFunction.cpp\
-	tools/tPolynomial.h tools/tPolynomial.cpp tools/tPolynomialWithBase.h \
+	tools/tPolynomial.h tools/tPolynomialMarshaler.h tools/tPolynomialWithBase.h \
         tools/tResource.h tools/tResource.cpp \
 	tools/tRuby.h tools/tRuby.cpp
 

@@ -193,6 +193,15 @@ public:
     CPPUNIT_ASSERT ( expectedA == marshalerA.marshal(inputPolynomial) );
     CPPUNIT_ASSERT ( expectedB == marshalerB.marshal(inputPolynomial) );
     CPPUNIT_ASSERT ( expectedC == marshalerC.marshal(inputPolynomial) );
+    tPolynomial<nMessageMock> tp3 = inputPolynomial.adaptToNewReferenceVarValue(4);
+
+    std::cout << std::endl;
+    std::cout << tp3.toString() << std::endl;
+    std::cout << marshalerB.toString()  << std::endl;
+    std::cout << expectedB.adaptToNewReferenceVarValue(4).toString()  << std::endl;
+    std::cout << marshalerB.marshal(tp3).toString() << std::endl;
+    CPPUNIT_ASSERT ( expectedB.adaptToNewReferenceVarValue(4) == marshalerB.marshal(tp3) );
+
   }
 
   /**

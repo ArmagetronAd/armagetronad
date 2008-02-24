@@ -9,6 +9,7 @@
 #include "rColor.h"
 #include "tFunction.h"
 #include "tPolynomial.h"
+#include "tPolynomialMarshaler.h"
 #include "nNetwork.h"
 
 class zZone;
@@ -46,12 +47,12 @@ public:
 
 class zZoneInfluenceItemRotation : public zZoneInfluenceItem {
 protected:
-    tPolynomialMarshaler rotation;
+    tPolynomialMarshaler<nMessage> rotation;
 public:
     zZoneInfluenceItemRotation(zZonePtr aZone);
     virtual ~zZoneInfluenceItemRotation() {};
 
-    void set(const tPolynomialMarshaler & other)
+    void set(const tPolynomialMarshaler<nMessage> & other)
     {
 	rotation = other;
     }

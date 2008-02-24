@@ -15,6 +15,7 @@ public:
     CPPUNIT_TEST( testEvaluateAndBaseArgument );
     //    CPPUNIT_TEST( testWriteAndReadToStream );
     CPPUNIT_TEST( testParse );
+    CPPUNIT_TEST( testTranslate );
     CPPUNIT_TEST( testSubstitute );
     CPPUNIT_TEST_SUITE_END();
 
@@ -303,6 +304,17 @@ public:
   }
 
 
+  void testTranslate() {
+    tPolynomial<nMessageMock> tpSource("0;0;1");
+    tPolynomial<nMessageMock> tpRes("9;6;1");
+    std::cout << std::endl;
+    std::cout << "translate" << std::endl;
+    std::cout << tpSource.toString() << std::endl;
+    std::cout << tpSource.translate(3).toString() << std::endl;
+    std::cout << tpRes.toString() << std::endl;
+    CPPUNIT_ASSERT( tpRes == tpSource.translate(3) );
+  }
+
   void testSubstitute() {
     // This test will use the following notation:
     // tpResultat == tpTransformer.substitute(tpValue);
@@ -353,6 +365,22 @@ public:
     // Out> 53125*x^5+167500*x^4+212125*x^3+134950*x^2+43165*x+5562
     tpResultat.parse("5562;43165;134950;212125;167500;53125");
     CPPUNIT_ASSERT( tpResultat == tpTransformer.substitute(tpValue) );
+
+    // Substitution on a polynomial which reference point has been moved:
+    // Source@t=0 : {0; 1} ;; both are equivalent, only the ref point has been moved
+    // Source@t=3 : {3; 1}
+    // Transform  : {0;0;1} ;; the transform shouldn't have any ref point
+    tPolynomial<nMessageMock> tpSourceA("0;1");
+    tPolynomial<nMessageMock> tpSourceB = tpSourceA.adaptToNewReferenceVarValue(3);
+    tPolynomial<nMessageMock> tpTransform("0;0;1");
+
+    std::cout << std::endl << "#######"  << std::endl;
+    std::cout << tpSourceA.toString() << std::endl;
+    std::cout << tpSourceB.toString() << std::endl;
+    std::cout << tpTransform.substitute(tpSourceA).toString() << std::endl;
+    std::cout << tpTransform.substitute(tpSourceB).toString() << std::endl;
+    std::cout << tpTransform.substitute(tpSourceA).adaptToNewReferenceVarValue(3).toString() << std::endl;
+
   }
 
 };

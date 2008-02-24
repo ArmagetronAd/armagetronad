@@ -84,6 +84,7 @@ public:
     }
 
     tPolynomial<T> adaptToNewReferenceVarValue(REAL currentVarValue) const;
+    tPolynomial<T> translate(REAL currentVarValue) const;
     void changeRate(REAL newRate, int newRateLength, REAL currentVarValue);
 
     void setRates(REAL newValues[], int newValuesLength, REAL currentVarValue);
@@ -328,6 +329,41 @@ tPolynomial<T> tPolynomial<T>::adaptToNewReferenceVarValue(REAL currentVarValue)
         REAL newCoefValue = 0.0;
         for (int j=coefs.Len()-1; j>coefIndex; j--) {
             newCoefValue = (newCoefValue + coefs[j] ) * deltaVariableValue /(j - coefIndex);
+        }
+        tf.coefs[coefIndex] += newCoefValue;
+    }
+
+    tf.setReferenceVarValue(currentVarValue);
+    return tf;
+}
+
+/**
+ *
+ */
+template <typename T>
+tPolynomial<T> tPolynomial<T>::translate(REAL currentVarValue) const
+{
+    tPolynomial<T> tf(*this);
+
+    // Compute the coefficients at "currentVarValue" (var for short)
+    // c0' = c0 + (c1)*var + (c2)*var^2 + ... + (c[N])*var^N
+    // c1' = c1 + (c2)*var + ... + (c[N])*var^(N-1)
+    // c2' = c2 + ... + (c[N])*var^(N-2)
+    // ...
+    // c[N-1] = c[N-1] + (c[N])*var
+    // c[N] = c[N]
+    //
+    // so:
+    // [0   , 0 , a] at currentVarValue=0 will become
+    // [9a, 6a, a] at currentVarValue=3
+
+    REAL deltaVariableValue = currentVarValue - referenceVarValue;
+
+    // Compute for each coefficient their new value
+    for (int coefIndex=0; coefIndex<coefs.Len(); coefIndex++) {
+        REAL newCoefValue = 0.0;
+        for (int j=coefs.Len()-1; j>coefIndex; j--) {
+            newCoefValue = (newCoefValue + coefs[j] ) * deltaVariableValue;
         }
         tf.coefs[coefIndex] += newCoefValue;
     }

@@ -22,6 +22,7 @@
 #include "tRecorder.h"
 #include "tConfiguration.h"
 #include "tPolynomial.h"
+#include "tPolynomialMarshaler.h"
 
 #include "gGame.h"
 
@@ -715,32 +716,6 @@ void gParser::myCheapParameterSplitter(const string &str, tFunction &tf, bool ad
     tf.SetSlope(param[1]);
 }
 
-// Quick stub to allow to operate on tFunction
-// Remove when all that is variant has been ported to ruby
-void gParser::myCheapParameterSplitter2(const string &str, tPolynomial<nMessage> &tp, bool addSizeMultiplier)
-{
-    REAL param[2] = {0.0, 0.0};
-    int bPos;
-    if ( (bPos = str.find(';')) != -1)
-    {
-        param[0] = atof(str.substr(0, bPos).c_str());
-        param[1] = atof(str.substr(bPos + 1, str.length()).c_str());
-    }
-    else
-    {
-        param[0] = atof(str.c_str());
-    }
-
-    if (addSizeMultiplier)
-    {
-        param[0] = param[0] * sizeMultiplier;
-        param[1] = param[1] * sizeMultiplier;
-    }
-
-    tp[0] = param[0];
-    tp[1] = param[1];
-}
-
 void
 gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShapePtr &shape)
 {
@@ -760,7 +735,7 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
         string str = string(myxmlGetProp(cur, "rotation"));
         tPolynomial<nMessage> tpRotation;
 
-        myCheapParameterSplitter2(str, tpRotation, false);
+	tpRotation.parse(str);
         shape->setRotation2( tpRotation );
     }
 
@@ -833,10 +808,28 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
         else if (isElement(cur->name, (const xmlChar *)"Rotation", keyword)) {
             zZoneInfluenceItemRotation *b = new zZoneInfluenceItemRotation(refZone);
 
-	    tPolynomialMarshaler tpm;
-	    
-            string str = string(myxmlGetProp(cur, "rotation"));
-	    tpm.parse(str);
+	    tPolynomialMarshaler<nMessage> tpm;
+
+	    if( myxmlHasProp(cur, "rotation") ) {
+	      // new notation, superseed the previous notation
+	      string str = string(myxmlGetProp(cur, "rotation"));
+	      tpm.parse(str);
+	    }
+	    else {
+	      // read the parameters from the old notation
+	      string str = string(myxmlGetProp(cur, "rotationAngle"));
+	      tPolynomial<nMessage> tpRotationAngle(str);
+
+	      str = string(myxmlGetProp(cur, "rotationSpeed"));
+	      tPolynomial<nMessage> tpRotationSpeed(str);
+
+	      // generate the equivalent polynomial marsaller
+	      tpm.setConstant(tpRotationAngle);
+	      tpm.setVariant(tpRotationSpeed);
+
+	      sg_Deprecated();
+	    }
+
 	    b->set(tpm);
 
             infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));
@@ -899,13 +892,33 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
     infl->setMarked(myxmlGetPropTriad(cur, "marked"));
 
 
-    if (xmlHasProp(cur, (const xmlChar*)"influence")) {
-        string str = string(myxmlGetProp(cur, "influence"));
-        tPolynomialMarshaler tpmInfluence;
-	tpmInfluence.parse(str);
+    tPolynomialMarshaler<nMessage> tpmInfluence;
 
-        infl->setInfluence( tpmInfluence );
+    if (xmlHasProp(cur, (const xmlChar*)"influence")) {
+      // new notation, superseed the previous notation
+        string str = string(myxmlGetProp(cur, "influence"));
+	tpmInfluence.parse(str);
     }
+    else {
+      tPolynomial<nMessage> tpInfluenceConstant( string(myxmlGetProp(cur, "influenceAdd")) );
+      tPolynomial<nMessage> tpInfluenceVariant( string(myxmlGetProp(cur, "influenceSlide")) );
+
+      /*
+      if (xmlHasProp(cur, (const xmlChar *)"influenceSet")) {
+	string str = string(myxmlGetProp(cur, "influenceSet"));
+        tFunction tfInfluence;
+        myCheapParameterSplitter(str, tfInfluence, false);
+        infl->setInfluenceSet( tfInfluence );
+      }
+      */
+
+      tpmInfluence.setConstant(tpInfluenceConstant);
+      tpmInfluence.setVariant(tpInfluenceVariant);
+
+      sg_Deprecated();
+    }
+
+    infl->setInfluence( tpmInfluence );
 
     return infl;
 }
@@ -1324,8 +1337,8 @@ gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
 
                         zZoneInfluenceItemRotation *b = new zZoneInfluenceItemRotation(zone);
 
-			tPolynomialMarshaler tpm;
-	    
+			tPolynomialMarshaler<nMessage> tpm;
+
 			string str = string(myxmlGetProp(cur, "rotation"));
 			tpm.parse(str);
 			b->set(tpm);

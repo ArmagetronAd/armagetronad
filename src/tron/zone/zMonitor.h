@@ -11,6 +11,7 @@
 #include "zone/zEffectGroup.h"
 #include "tFunction.h"
 #include "tPolynomial.h"
+#include "tPolynomialMarshaler.h"
 #include "zone/zZoneInfluence.h"
 
 class zMonitorRule;
@@ -173,7 +174,7 @@ public:
  */
 class zMonitorInfluence {
     zMonitorPtr monitor;
-    tPolynomialMarshaler influence;
+    tPolynomialMarshaler<nMessage> influence;
     tPolynomial<nMessage> influenceSlide;
 
     bool influenceSlideAvailable;
@@ -195,7 +196,7 @@ public:
     void setMarked(Triad mark) {
         marked = mark;
     };
-    void setInfluence(tPolynomialMarshaler infl) {
+    void setInfluence(tPolynomialMarshaler<nMessage> infl) {
       influence = infl;
     }
 

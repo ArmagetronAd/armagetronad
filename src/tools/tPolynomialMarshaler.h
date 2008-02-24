@@ -46,6 +46,8 @@ class tPolynomialMarshaler
 
     void setConstant(REAL value, int index);
     void setVariant(REAL value, int index);
+    void setConstant(const tPolynomial<T> & tpConstant);
+    void setVariant(const tPolynomial<T> & tpVariant);
     
     void parse(std::string str);
 
@@ -174,6 +176,18 @@ template<typename T>
 void tPolynomialMarshaler<T>::setVariant(REAL value, int index)
 {
   variant[index] = value;
+}
+
+template<typename T>
+void tPolynomialMarshaler<T>::setConstant(const tPolynomial<T> & tpConstant)
+{
+  constant = tpConstant;
+}
+
+template<typename T>
+void tPolynomialMarshaler<T>::setVariant(const tPolynomial<T> & tpVariant)
+{
+  variant = tpVariant;
 }
 
 // friend
