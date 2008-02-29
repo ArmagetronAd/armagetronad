@@ -570,7 +570,7 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
             std::ostringstream outShort; // stream for shorthand authority
             std::ostringstream outFull;  // stream for full authority URL that is to be used for lookups     
             int c = in.get();
-            
+
             // is the authority an abreviation?
             bool shortcut = true;
 
@@ -611,7 +611,7 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                         slash = true;
                         inHostName = false;
                     }
-                    else if !sn_IsLegalSpecialChar(c) )
+                    else if ( !sn_IsLegalSpecialChar(c) )
                     {
                         return ReportAuthorityError( tOutput( "$login_error_invalidurl_illegal_hostname", authority ) );
                     }
@@ -660,7 +660,7 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                 outShort.put(tolower(c));
 
                 outFull.put(c);
-                
+
                 c = in.get();
             }
             if ( slash )
