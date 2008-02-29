@@ -533,6 +533,21 @@ void nLoginProcess::FetchInfoFromAuthority()
 static bool sn_supportRemoteLogins = false;
 static tSettingItem< bool > sn_supportRemoteLoginsConf( "GLOBAL_ID", sn_supportRemoteLogins );
 
+// legal characters in authority hostnames(besides alnum and dots)
+static bool sn_IsLegalSpecialChar( char c )
+{
+    switch (c)
+    {
+    case '-': // well, ok, this character actually happens to be in many URLs :)
+    case '+': // these not, but let's consider them legal.
+    case '=':
+    case '_':
+        return true;
+    default:
+        return false;
+    }
+}
+
 // fetches info from remote authority
 bool nLoginProcess::FetchInfoFromAuthorityRemote()
 {
@@ -596,7 +611,7 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                         slash = true;
                         inHostName = false;
                     }
-                    else
+                    else if !sn_IsLegalSpecialChar(c) )
                     {
                         return ReportAuthorityError( tOutput( "$login_error_invalidurl_illegal_hostname", authority ) );
                     }
@@ -632,7 +647,7 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                     }
                     else
                     {
-                        if (!isalnum(c) && c != '.' && c != '~' )
+                        if (!isalnum(c) && c != '.' && c != '~' && !sn_IsLegalSpecialChar(c) )
                         {
                             return ReportAuthorityError( tOutput( "$login_error_invalidurl_illegal_path", authority )  );
                         }

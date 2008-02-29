@@ -2586,8 +2586,8 @@ login_failed_message        0xff7f7fLogin failed,0xffffff reason: \1\n
 
 # various reasons for logins to fail
 login_error_aborted         Login aborted.
-login_error_invalidurl_illegal_hostname   Authentication URL \1 invalid, illegal characters in hostname part (only ASCII letters, numbers and dots allowed).
-login_error_invalidurl_illegal_path   Authentication URL \1 invalid, illegal characters in path part (only ASCII letters, numbers, dots and slashes allowed).
+login_error_invalidurl_illegal_hostname   Authentication URL \1 invalid, illegal characters in hostname part (only ASCII letters, numbers and a fine selection of other characters are allowed).
+login_error_invalidurl_illegal_path   Authentication URL \1 invalid, illegal characters in path part (only ASCII letters, numbers, dots, slashes and a fine selection of other characters are allowed).
 login_error_invalidurl_illegal_port   Authentication URL \1 invalid, illegal characters in port (only numbers are allowed).
 login_error_invalidurl_defaultport   Authentication URL \1 invalid. Just leave away the default port, please :).
 login_error_invalidurl_slash         Authentication URL \1 invalid, double slash or ending with slash.
