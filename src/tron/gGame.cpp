@@ -3975,6 +3975,8 @@ void gameloop_idle()
 static void sg_EnterGameCleanup();
 
 void sg_EnterGameCore( nNetState enter_state ){
+    gLogo::SetBig(false);
+
     sg_RequestedDisconnection = false;
 
     sr_con.SetHeight(7);
