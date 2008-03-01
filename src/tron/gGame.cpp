@@ -4512,6 +4512,18 @@ void Activate(bool act){
 #ifdef DEBUG
     return;
 #endif
+
+// another fullscreen fix ammendmend: avoid the short screen flicker
+// by ignoring deactivation events in fullscreen mode completely.
+#ifndef WIN32
+#ifndef MACOSX
+    if ( currentScreensetting.fullscreen && !act )
+    {
+        return;
+    }
+#endif
+#endif
+
     sr_Activate( act );
 
     se_SoundPause(!act);
