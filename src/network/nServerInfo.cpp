@@ -1625,7 +1625,10 @@ void nServerInfo::TellMasterAboutMe(nServerInfoBase *masterInfo)
 
         while ( run )
         {
-            TellMasterAboutMe( run );
+            if ( run->GetAddress().IsSet() )
+            {
+                TellMasterAboutMe( run );
+            }
             run = run->Next();
         }
 
