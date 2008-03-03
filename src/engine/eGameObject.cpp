@@ -63,6 +63,8 @@ void eGameObject::RemoveFromList(){
 
     int oldID = id;
 
+    currentFace = 0;
+
     grid->gameObjects.Remove(this,id);
     grid->gameObjectsInactive.Add(this,inactiveID);
 
@@ -76,6 +78,8 @@ void eGameObject::RemoveFromListsAll(){
     se_SoundLock();
 
     int oldID = id;
+
+    currentFace = 0;
 
     grid->gameObjects.Remove(this,id);
     grid->gameObjectsInactive.Remove(this,inactiveID);
@@ -125,19 +129,8 @@ eGameObject::eGameObject(eGrid *g,const eCoord &p,const eCoord &d,eFace *current
     id=-1;
     interestingID=-1;
     inactiveID=-1;
-    //if (grid)
-    //{
-    // AddToList();
-    // FindCurrentFace();
-    //}
     if ( lastTime < 0 )
         lastTime=0;
-
-    if ( !currentFace )
-    {
-        FindCurrentFace();
-    }
-
     team = 0;
 }
 
@@ -451,7 +444,11 @@ rerun:
             PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
             ++ currentTempCollision;
         }
-
+    }
+    else // !currentFace
+    {
+        // just move.
+        pos = dest;
     }
 
     // not if the movement timed out
@@ -506,6 +503,16 @@ void eGameObject::FindCurrentFace(){
             // allow tunneling through walls
             currentFace = NULL;
         }
+    }
+
+    // don't fetch a new current face if you're out of the game
+    if ( !currentFace && GOID() < 0 )
+    {
+#ifdef DEBUG
+        con << "Attempting to get a current face, but object is not in game.\n";
+        st_Breakpoint();
+        return;
+#endif        
     }
 
     // did that do the trick? If no, use brute force.
