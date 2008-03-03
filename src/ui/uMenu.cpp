@@ -1049,6 +1049,7 @@ void uCallbackMenuBackground::MenuBackground(){
 // poll input, return true if ESC was pressed
 bool uMenu::IdleInput()
 {
+#ifndef DEDICATED
     SDL_Event event;
     uInputProcessGuard inputProcessGuard;
     while (su_GetSDLInput(event))
@@ -1070,6 +1071,7 @@ bool uMenu::IdleInput()
             break;
         }
     }   
+#endif
 
     return false;
 }
