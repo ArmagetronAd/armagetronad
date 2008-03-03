@@ -416,6 +416,7 @@ void gWallRim::RenderReal(const eCamera *cam){
             REAL xs = vec.x*vec.x;
             REAL ys = vec.y*vec.y;
             REAL intensity = .7 + .3 * xs/(xs+ys);
+            RenderEnd( true );
             Color(intensity, intensity, intensity);
         }
 

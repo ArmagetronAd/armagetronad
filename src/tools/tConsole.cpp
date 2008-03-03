@@ -224,20 +224,37 @@ tString tConsole::ColorString(REAL r, REAL g, REAL b) const{
 }
 
 
-static tConsole::MessageCallback *s_callback = NULL;
+static tConsole::MessageCallback *s_messageCallback = NULL;
 void tConsole::RegisterMessageCallback(MessageCallback *a_callback)
 {
-    s_callback = a_callback;
+    s_messageCallback = a_callback;
 }
 
 bool tConsole::Message(const tOutput& message, const tOutput& interpretation, REAL timeout){
-    if (s_callback)
-        return (*s_callback)(message, interpretation, timeout);
+    if (s_messageCallback)
+        return (*s_messageCallback)(message, interpretation, timeout);
     else
     {
         con << tString(message) << ":\n";
         con << tString(interpretation) << '\n';
         return true;
+    }
+}
+
+static tConsole::IdleCallback *s_idleCallback = NULL;
+void tConsole::RegisterIdleCallback(IdleCallback *a_callback)
+{
+    s_idleCallback = a_callback;
+}
+
+bool tConsole::Idle(){
+    if (s_idleCallback)
+    {
+        return (*s_idleCallback)();
+    }
+    else
+    {
+        return false;
     }
 }
 

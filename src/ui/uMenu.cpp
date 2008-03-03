@@ -1325,6 +1325,35 @@ void uCallbackMenuBackground::MenuBackground(){
     Exec(background_anchor);
 }
 
+// poll input, return true if ESC was pressed
+bool uMenu::IdleInput()
+{
+#ifndef DEDICATED
+    SDL_Event event;
+    uInputProcessGuard inputProcessGuard;
+    while (su_GetSDLInput(event))
+    {   
+        switch (event.type)
+        {
+        case SDL_KEYDOWN:
+            switch (event.key.keysym.sym)
+            {
+            case(SDLK_ESCAPE):
+                repeat = false;
+                lastkey=tSysTimeFloat();
+                return true;
+                break;
+            default:
+                break;
+            }   
+        default:
+            break;
+        }
+    }   
+#endif
+
+    return false;
+}
 
 // return value: false only if the user pressed ESC
 bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL to){

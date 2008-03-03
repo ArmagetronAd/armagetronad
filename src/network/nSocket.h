@@ -90,6 +90,8 @@ public:
     int 				GetPort		( void ) const               ; //!< Gets the port of the address
     nAddress const & 	GetPort		( int & port ) const         ; //!< Gets the port of the address
 
+    bool                IsSet       () const                     ; //!< returns true only if address is not INETADDR_ANY
+
     static int 	Compare ( const nAddress & a1, const nAddress & a2 );	//!< compares two addresses
 
     operator struct sockaddr *      ()       { return &addr_.addr; }   //!< conversion to sockaddr

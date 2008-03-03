@@ -188,11 +188,13 @@ void rGradient::DrawRect(tCoord const &edge1, tCoord const &edge2) {
 }
 
 void rGradient::BeginDraw() {
+#ifndef DEDICATED
     if(m_tex.Valid()) {
         m_tex.Select();
     } else {
         glDisable(GL_TEXTURE_2D);
     }
+#endif
 }
 
 //! @param where the point the color should be taken from and drawn

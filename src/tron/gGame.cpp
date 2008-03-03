@@ -1574,6 +1574,9 @@ bool ConnectToServerCore(nServerInfoBase *server)
 
     switch (error)
     {
+    case nABORT:
+        return false;
+        break;
     case nOK:
         break;
     case nTIMEOUT:

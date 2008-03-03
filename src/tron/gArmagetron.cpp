@@ -712,6 +712,7 @@ int main(int argc,char **argv){
             sg_SetIcon();
 
             tConsole::RegisterMessageCallback(&uMenu::Message);
+            tConsole::RegisterIdleCallback(&uMenu::IdleInput);
 
             if (sr_InitDisplay()){
 

@@ -72,6 +72,10 @@ public:
     // callback for messages the user should read
     typedef bool MessageCallback(const tOutput& message, const tOutput& interpretation, REAL timeout);
 
+    // idle callback; called from various spots when the progam is waiting.
+    // return true if the waiting should be aborted
+    typedef bool IdleCallback();
+
     virtual ~tConsole();
 
     tConsole & Print(tString s);
@@ -87,9 +91,13 @@ public:
     // give a message to the user
     static bool Message(const tOutput& message, const tOutput& interpetation, REAL timeout = -1);
 
+    // idle around a bit (return value true: abort whatever you're doing)
+    static bool Idle();
+
     virtual tString ColorString(REAL r, REAL g, REAL b) const;
 
     static void RegisterMessageCallback(MessageCallback *callback);
+    static void RegisterIdleCallback(IdleCallback *callback);
 
 protected:
     static void RegisterBetterConsole(tConsole *better);

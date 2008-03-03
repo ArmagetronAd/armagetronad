@@ -1753,7 +1753,11 @@ gCycleExtrapolator::gCycleExtrapolator(eGrid *grid, const eCoord &pos,const eCoo
         ,parent_( 0 )
 {
     // an extrapolator should not be visible as a gameobject from the outside
+    eFace * currentFaceBack = currentFace;
     RemoveFromList();
+    currentFace = currentFaceBack;
+    if ( !currentFace )
+        currentFace = grid->FindSurroundingFace( pos, currentFace );
 }
 
 // gCycleExtrapolator::gCycleExtrapolator(nMessage &m);
@@ -2543,9 +2547,6 @@ bool gCycle::Timestep(REAL currentTime){
     // don't timestep when you're dead
     if ( !Alive() )
     {
-        if ( sn_GetNetState() == nSERVER )
-            RequestSync();
-
         // die completely
         Die( lastTime );
 
@@ -3090,6 +3091,12 @@ void gCycle::InteractWith(eGameObject *target,REAL,int){
 
 void gCycle::Die( REAL time )
 {
+    if ( sn_GetNetState() == nSERVER )
+    {
+        // request one last sync
+        RequestSync( true );
+    }
+
     gCycleMovement::Die( time );
 
     // reset smoothing
@@ -3736,9 +3743,6 @@ void gCycle::Kill(){
 
                 currentWall = NULL;
             }
-
-            // request a new sync
-            RequestSync();
         }
     }
     // z-man: another stupid idea. Why would we need a destination when we're dead?
@@ -5002,6 +5006,12 @@ bool gCycle::SyncIsNew(nMessage &m){
 
 void gCycle::RequestSyncOwner()
 {
+    // no more syncs when you're dead
+    if ( !Alive() )
+    {
+        return;
+    }
+
     // nothing to do on the client or if the cycle belongs to an AI
     if ( sn_GetNetState() != nSERVER || Owner() == 0 )
         return;
@@ -5017,6 +5027,12 @@ void gCycle::RequestSyncOwner()
 
 void gCycle::RequestSyncAll()
 {
+    // no more syncs when you're dead
+    if ( !Alive() )
+    {
+        return;
+    }
+
     // nothing to do on the client or if the cycle belongs to an AI
     if ( sn_GetNetState() != nSERVER || Owner() == 0 )
         return;
@@ -5358,6 +5374,15 @@ void gCycle::ReadSync( nMessage &m )
 
         tNEW(gExplosion)( grid, lastSyncMessage_.pos, lastSyncMessage_.time ,color_, this );
 
+        return;
+    }
+
+    // no point going on if you're not alive
+    if (!Alive())
+    {
+#ifdef DEBUG
+        con << "Received duplicate death sync message; those things confuse old clients!\n";
+#endif
         return;
     }
 

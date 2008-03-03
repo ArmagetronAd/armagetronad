@@ -1452,6 +1452,10 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
     {
     case nOK:
         break;
+    case nABORT:
+    {
+        return;
+    }
     case nTIMEOUT:
         // delete the master and select a new one
         if ( multiMaster )
@@ -1652,7 +1656,10 @@ void nServerInfo::TellMasterAboutMe(nServerInfoBase *masterInfo)
 
         while ( run )
         {
-            TellMasterAboutMe( run );
+            if ( run->GetAddress().IsSet() )
+            {
+                TellMasterAboutMe( run );
+            }
             run = run->Next();
         }
 
@@ -2416,6 +2423,13 @@ bool nServerInfoBase::operator !=( const nServerInfoBase & other ) const
 
 nConnectError nServerInfoBase::Connect( nLoginType loginType, const nSocket * socket )
 {
+    // refuse to connect without address
+    if ( !GetAddress().IsSet() )
+    {
+        // well, not really a timeout. But we would timeout if we tried to connect.
+        return nTIMEOUT;
+    }
+
     //unsigned int portBack = sn_clientPort;
     //sn_clientPort = port_;
     if ( GetAddress().ToString().StartsWith( "*.*.*.*" ) )
