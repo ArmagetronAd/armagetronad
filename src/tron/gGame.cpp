@@ -2045,6 +2045,12 @@ bool ConnectToServerCore(nServerInfoBase *server)
 
     switch (error)
     {
+    case nABORT:
+        return false;
+#ifndef DEDICATED
+        se_SoundUnlock();
+#endif
+        break;
     case nOK:
         break;
     case nTIMEOUT:

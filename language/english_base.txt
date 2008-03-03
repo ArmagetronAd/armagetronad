@@ -2273,6 +2273,7 @@ network_login_process		Login information sent. Waiting for reply...\n
 network_login_failed        Login failed.\n
 network_login_failed_full	Login failed: Server is full.\n
 network_login_failed_timeout	Login failed: Timeout.\n
+network_login_failed_abort	Login failed: Aborted.\n
 network_login_success		Login Succeeded. User Nr. \1 \n
 network_login_sync		Syncing with server...\n
 network_login_relabeling	Relabeling NetObjects...\n

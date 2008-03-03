@@ -74,6 +74,10 @@ public:
 
     FUNCPTR IdleFunc(){return idle;}
     static void SetIdle(FUNCPTR idle_func) {idle=idle_func;}
+
+    // poll input, return true if ESC was pressed
+    static bool IdleInput();
+
     void SetCenter(REAL c) {center=c;}
     void SetTop(REAL t) {menuTop=t;}
     void SetBot(REAL b) {menuBot=b;spaceBelow=1+menuBot;}

@@ -2712,6 +2712,14 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
         tAdvanceFrame(10000);
         sn_Receive();
         sn_SendPlanned();
+
+        // check for user abort
+        if ( tConsole::Idle() )
+        {
+            con << tOutput("$network_login_failed_abort");
+            sn_SetNetState(nSTANDALONE);
+            return nABORT;
+        }
     }
     if (login_failed)
     {

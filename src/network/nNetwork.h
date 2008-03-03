@@ -105,7 +105,7 @@ void nReadError( bool critical = true );
 
 // We can be single player, multiplayer server/client.
 typedef enum {nSTANDALONE,nSERVER,nCLIENT} nNetState;
-typedef enum {nOK, nTIMEOUT, nDENIED}      nConnectError;
+typedef enum {nOK, nTIMEOUT, nDENIED, nABORT}   nConnectError;
 
 
 // set/get the state
