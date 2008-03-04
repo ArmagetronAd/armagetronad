@@ -1458,7 +1458,7 @@ ePlayerNetID * CompareBufferToPlayerNames
 }
 
 
-ePlayerNetID * se_FindPlayerByName( tString const & name, ePlayerNetID * requester = 0 )
+ePlayerNetID * ePlayerNetID::FindPlayerByName( tString const & name, ePlayerNetID * requester )
 {
    int num_matches = 0;
 
@@ -1545,7 +1545,7 @@ static ePlayerNetID * se_FindPlayerInChatCommand( ePlayerNetID * sender, char co
         return 0;
     }
     
-    return se_FindPlayerByName( player, sender );
+    return ePlayerNetID::FindPlayerByName( player, sender );
 }
 
 // chat message from server to client
@@ -3010,6 +3010,10 @@ void handle_chat( nMessage &m )
                     }
                     else if (command == "/players") {
                         se_ChatPlayers( p );
+                        return;
+                    }
+                    else if (command == "/vote") {
+                        eVoter::HandleChat( p, s );
                         return;
                     }
                     else if (command == "/teams") {
@@ -6043,7 +6047,7 @@ static unsigned short se_ReadUser( std::istream &s, ePlayerNetID * requester = 0
     else
     {
         // standard name lookup
-        ePlayerNetID * p = se_FindPlayerByName( name, requester );
+        ePlayerNetID * p = ePlayerNetID::FindPlayerByName( name, requester );
         if ( p )
         {
             return p->Owner();
@@ -6247,7 +6251,7 @@ static ePlayerNetID * ReadPlayer( std::istream & s )
         }
     }
 
-    return se_FindPlayerByName( name );
+    return ePlayerNetID::FindPlayerByName( name );
 }
 
 static void Kill_conf(std::istream &s)

@@ -342,21 +342,23 @@ public:
     void BeNotLoggedIn() { SetAccessLevel( tAccessLevel_Program ); }
     tAccessLevel GetLastAccessLevel() const { return lastAccessLevel; }
 
-    void UpdateName();                                           //! update the player name from the client's wishes
-    static void FilterName( tString const & in, tString & out ); //! filters a name (removes unprintables, color codes and spaces)
-    static tString FilterName( tString const & in );             //! filters a name (removes unprintables, color codes and spaces)
+    static ePlayerNetID * FindPlayerByName( tString const & name, ePlayerNetID * requester = 0 ); //!< finds a player by name using lax name matching. Reports errors to the console or to the requesting player.
+
+    void UpdateName();                                           //!< update the player name from the client's wishes
+    static void FilterName( tString const & in, tString & out ); //!< filters a name (removes unprintables, color codes and spaces)
+    static tString FilterName( tString const & in );             //!< filters a name (removes unprintables, color codes and spaces)
 private:
-    tColoredString  nameFromClient_;        //! this player's name as the client wants it to be. Avoid using it when possilbe.
-    tColoredString  nameFromServer_;        //! this player's name as the server wants it to be. Avoid using it when possilbe.
-    tColoredString  coloredName_;           //! this player's name, cleared by the server. Use this for onscreen screen display.
-    tString         name_;                  //! this player's name without colors.
-    tString         userName_;              //! this player's name, cleared for system logs. Use for writing to files or comparing with admin input.
+    tColoredString  nameFromClient_;        //!< this player's name as the client wants it to be. Avoid using it when possilbe.
+    tColoredString  nameFromServer_;        //!< this player's name as the server wants it to be. Avoid using it when possilbe.
+    tColoredString  coloredName_;           //!< this player's name, cleared by the server. Use this for onscreen screen display.
+    tString         name_;                  //!< this player's name without colors.
+    tString         userName_;              //!< this player's name, cleared for system logs. Use for writing to files or comparing with admin input.
 
 #ifdef KRAWALL_SERVER
-    tString         rawAuthenticatedName_;  //! the raw authenticated name in user@authority form.
+    tString         rawAuthenticatedName_;  //!< the raw authenticated name in user@authority form.
 #endif
 
-    REAL            wait_;                  //! time in seconds WaitToLeaveChat() will wait for this player
+    REAL            wait_;                  //!< time in seconds WaitToLeaveChat() will wait for this player
 
     void			MyInitAfterCreation();
 

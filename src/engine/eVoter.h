@@ -60,6 +60,9 @@ public:
     static eVoter* GetVoter ( int ID, bool complain = false );	// find or create the voter for the specified user ID
     static eVoter* GetVoter ( nMachine & machine );	            // find or create the voter for the specified machine
     static bool VotingPossible();								// returns whether voting is currently possible
+
+    static void HandleChat( ePlayerNetID * p, std::istream & message ); //!< handles player "/vote" command.
+
     tString Name(int senderID = -1) const;						// returns the name of the voter
 
     REAL Age() const;                                           //!< how long does this voter exist?

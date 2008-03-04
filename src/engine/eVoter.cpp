@@ -1405,4 +1405,34 @@ void eVoter::PlayerChanged( void )
     this->lastChange_ = tSysTimeFloat();
 }
 
+// *******************************************************************************
+// *
+// *	HandleChat
+// *
+// *******************************************************************************
+//! @param p the player chatting
+//! @param message the rest of the message after "/vote"
+// *******************************************************************************
+
+void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles player "/vote" command.
+{
+    return;
+
+    // read command part (kick, remove, include)
+    tString command;
+    message >> command;
+    tToLower( command );
+
+    if ( command == "kick" )
+    {
+        tString name;
+        name.ReadLine( message );
+        ePlayerNetID * toKick = ePlayerNetID::FindPlayerByName( name, p );
+        if ( toKick )
+        {
+            // accept message
+            se_useServerControlledKick ? tNEW( eVoteItemKickServerControlled )( toKick ) : tNEW( eVoteItemKick )( toKick );
+        }
+    }
+}
 
