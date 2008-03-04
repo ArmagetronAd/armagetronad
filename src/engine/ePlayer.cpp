@@ -3012,7 +3012,7 @@ void handle_chat( nMessage &m )
                         se_ChatPlayers( p );
                         return;
                     }
-                    else if (command == "/vote") {
+                    else if (command == "/vote" || command == "/callvote") {
                         eVoter::HandleChat( p, s );
                         return;
                     }
