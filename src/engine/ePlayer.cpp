@@ -5675,7 +5675,7 @@ bool ePlayerNetID::TeamChangeAllowed( bool informPlayer ) const {
     }
         
 
-    if ( suspended_ >= 0 )
+    if ( suspended_ > 0 )
     {
         if ( informPlayer )
         {
