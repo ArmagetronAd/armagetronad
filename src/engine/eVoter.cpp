@@ -75,6 +75,10 @@ static tSettingItem< bool > se_av( "ALLOW_VOTING", se_allowVoting );
 static bool se_allowVotingSpectator = false;
 static tSettingItem< bool > se_avo( "ALLOW_VOTING_SPECTATOR", se_allowVotingSpectator );
 
+// number of rounds to suspend
+static int se_suspendRounds = 5;
+static tSettingItem< int > se_sr( "VOTING_SUSPEND_ROUNDS", se_suspendRounds );
+
 static int se_minVoters = 3;
 static tSettingItem< int > se_mv( "MIN_VOTERS", se_minVoters );
 
@@ -1103,7 +1107,7 @@ protected:
         ePlayerNetID * player = GetPlayer();
         if ( player )
         {
-            player->Suspend();
+            player->Suspend( se_suspendRounds );
         }
     }
 };

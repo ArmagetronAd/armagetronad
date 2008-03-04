@@ -453,6 +453,7 @@ voting_spam_issue_help              The spam level of issuing a vote.
 voting_spam_reject_help             The spam level of getting your vote rejected.
 voting_kick_time_help               The minimum time in seconds between two kick votes against the same player.
 voting_maturity_help                The minimum time in seconds a player needs to be online with the same name before he can issue votes.
+voting_suspend_rounds_help          The number of rounds "/vote suspend <player>" suspends a player for.
 
 #********************************************
 #********************************************
