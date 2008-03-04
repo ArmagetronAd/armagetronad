@@ -130,6 +130,16 @@ public:
         if ( !DoFillFromMessage( m ) )
             return false;
 
+        if ( !CheckValid( m.SenderID() ) )
+            return false;
+
+        ReBroadcast( m.SenderID() );
+        return true;
+    }
+
+    
+    void ReBroadcast( int exceptTo = -1 )
+    {
         // rebroadcast message to all non-voters that may be able to vote
         if ( sn_GetNetState() == nSERVER )
         {
@@ -148,7 +158,7 @@ public:
             tJUST_CONTROLLED_PTR< nMessage > ret = this->CreateMessage();
             for ( int i = MAXCLIENTS; i > 0; --i )
             {
-                if ( sn_Connections[ i ].socket && i != m.SenderID() && 0 != eVoter::GetVoter( i ) )
+                if ( sn_Connections[ i ].socket && i != exceptTo && 0 != eVoter::GetVoter( i ) )
                 {
                     ret->Send( i );
                 }
@@ -159,8 +169,6 @@ public:
         con << tOutput( "$vote_new", GetDescription() );
 
         this->Evaluate();
-
-        return true;
     };
 
     nMessage* CreateMessage( void ) const
@@ -178,7 +186,7 @@ public:
     // message sending
     void Vote( bool accept );														// called on the clients to accept or decline the vote
 
-    static bool AcceptNewVote( nMessage& m )										// check if a new voting item should be accepted
+    static bool AcceptNewVote( eVoter * voter, int senderID )										// check if a new voting item should be accepted
     {
         // cloak the ID of the sener for privacy
         nCurrentSenderID cloak;
@@ -197,7 +205,6 @@ public:
         if ( sn_GetNetState() == nCLIENT )
             return true;
 
-        eVoter* voter = se_GetVoter( m );
         // check if voting is allowed
         if ( !voter )
         {
@@ -208,7 +215,7 @@ public:
         if ( !se_allowVoting )
         {
             tOutput message("$vote_disabled");
-            sn_ConsoleOut( message, m.SenderID() );
+            sn_ConsoleOut( message, senderID );
             return false;
         }
 
@@ -223,12 +230,12 @@ public:
         if ( eVoter::voters_.Len() < se_minVoters )
         {
             tOutput message("$vote_toofew");
-            sn_ConsoleOut( message, m.SenderID() );
+            sn_ConsoleOut( message, senderID );
             return false;
         }
 
         // check for spam
-        if ( voter->IsSpamming( m.SenderID() ) )
+        if ( voter->IsSpamming( senderID ) )
         {
             return false;
         }
@@ -244,21 +251,26 @@ public:
         if ( voteCount >= se_maxVotesPerVoter )
         {
             tOutput message("$vote_overflow");
-            sn_ConsoleOut( message, m.SenderID() );
+            sn_ConsoleOut( message, senderID );
             return false;
         }
 
         if ( items_.Len() < se_maxVotes )
         {
-            voter->Spam( m.SenderID(), se_votingSpamIssue, tOutput("$spam_vote_kick_issue") );
+            voter->Spam( senderID, se_votingSpamIssue, tOutput("$spam_vote_kick_issue") );
             return true;
         }
         else
         {
             tOutput message("$vote_overflow");
-            sn_ConsoleOut( message, m.SenderID() );
+            sn_ConsoleOut( message, senderID );
             return false;
         }
+    }
+
+    static bool AcceptNewVote( nMessage const & m )										// check if a new voting item should be accepted
+    {
+        return AcceptNewVote( se_GetVoter( m ), m.SenderID() );
     }
 
     void RemoveVoter( eVoter* voter )
@@ -415,6 +427,12 @@ public:
 
     unsigned short GetID(){ return id_; }
     void UpdateMenuItem();                // update the menu item about a status change
+
+    // checks whether the vote is a valid vote to make
+    bool CheckValid( int senderID )
+    {
+        return DoCheckValid( senderID );
+    }
 protected:
     virtual bool DoFillFromMessage( nMessage& m )
     {
@@ -438,6 +456,8 @@ protected:
 
         return true;
     };
+
+    virtual bool DoCheckValid( int senderID ){ return true; }
 
     virtual void DoFillToMessage( nMessage& m  ) const
     {
@@ -784,15 +804,27 @@ public:
 protected:
     virtual bool DoFillFromMessage( nMessage& m )
     {
+        // read player ID
+        unsigned short id;
+        m.Read(id);
+        tJUST_CONTROLLED_PTR< ePlayerNetID > p=dynamic_cast<ePlayerNetID *>(nNetObject::ObjectDangerous(id));
+        player_ = p;
+
+        return eVoteItem::DoFillFromMessage( m );
+    }
+
+    virtual bool DoCheckValid( int senderID )
+    {
+        eVoter * sender = eVoter::GetVoter( senderID  );
+
         double time = tSysTimeFloat();
 
         // check whether the issuer is allowed to start a vote
-        eVoter * sender = eVoter::GetVoter( m.SenderID() );
         if ( sender && sender->lastChange_ + se_votingMaturity > tSysTimeFloat() && sender->lastChange_ * 2 > tSysTimeFloat() )
         {
             REAL time = sender->lastChange_ + se_votingMaturity - tSysTimeFloat();
             tOutput message( "$vote_maturity", time );
-            sn_ConsoleOut( message, m.SenderID() );
+            sn_ConsoleOut( message, senderID );
             return false;
         }
 
@@ -800,17 +832,11 @@ protected:
         if ( sender )
             sender->lastNameChangePreventor_ = time;
 
-        // read player ID
-        unsigned short id;
-        m.Read(id);
-        tJUST_CONTROLLED_PTR< ePlayerNetID > p=dynamic_cast<ePlayerNetID *>(nNetObject::ObjectDangerous(id));
-        player_ = p;
-
         // check if player is protected from kicking
-        if ( p && sn_GetNetState() != nCLIENT )
+        if ( player_ && sn_GetNetState() != nCLIENT )
         {
-            name_ = p->GetName();
-            eVoter * voter = eVoter::GetVoter( p->Owner() );
+            name_ = player_->GetName();
+            eVoter * voter = eVoter::GetVoter( player_->Owner() );
             if ( voter )
             {
                 machine_ = tNEW( nMachineObserver )( voter->machine_ );
@@ -818,7 +844,7 @@ protected:
                 if ( time < voter->lastKickVote_ + se_minTimeBetweenKicks )
                 {
                     tOutput message("$vote_redundant");
-                    sn_ConsoleOut( message, m.SenderID() );
+                    sn_ConsoleOut( message, senderID );
                     return false;
                 }
                 else
@@ -829,9 +855,7 @@ protected:
             }
         }
 
-        eVoteItem::DoFillFromMessage( m );
-
-        return true;
+        return eVoteItem::DoCheckValid( senderID );
     };
 
     virtual void DoFillToMessage( nMessage& m  ) const
@@ -1416,12 +1440,28 @@ void eVoter::PlayerChanged( void )
 
 void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles player "/vote" command.
 {
-    return;
+    // cloak the ID of the sener for privacy
+    nCurrentSenderID cloak;
+    if ( se_votingPrivacy > 1 )
+        cloak.SetID(0);
+
+    if ( !p )
+    {
+        return;
+    }
 
     // read command part (kick, remove, include)
     tString command;
     message >> command;
     tToLower( command );
+
+    eVoter * voter = p->GetVoter();
+    if ( !eVoteItem::AcceptNewVote( voter, p->Owner() ) )
+    {
+        return;
+    }
+
+    eVoteItem * item = 0;
 
     if ( command == "kick" )
     {
@@ -1431,8 +1471,28 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
         if ( toKick )
         {
             // accept message
-            se_useServerControlledKick ? tNEW( eVoteItemKickServerControlled )( toKick ) : tNEW( eVoteItemKick )( toKick );
+            item = se_useServerControlledKick ? tNEW( eVoteItemKickServerControlled )( toKick ) : tNEW( eVoteItemKick )( toKick );
         }
     }
+    else
+    {
+        sn_ConsoleOut( tOutput("$vote_unknown_command", command ), p->Owner() );
+    }
+
+    // nothing created
+    if ( !item )
+    {
+        return;
+    }
+
+    // let item check its validity
+    if ( !item->CheckValid( p->Owner() ) )
+    {
+        delete item;
+        return;
+    }
+
+    // no objection? Broadcast it to everyone.
+    item->ReBroadcast();
 }
 
