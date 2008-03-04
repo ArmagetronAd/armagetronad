@@ -2115,6 +2115,8 @@ zone_collapse_harmless      \1's zone collapses harmlessly for lack of enemy con
 
 player_teamleave_disallowed Sorry, does not work with automatic team assignment.\n
 player_teamchanges_disallowed Sorry, the administrator disabled team changes.\n
+player_teamchanges_suspended Sorry, you are still suspended from playing for the next \1 round(s).\n
+player_teamchanges_accesslevel Sorry, your access level is not high enough to play. You're \1, required would be \2.\n
 player_pingcharity_changed	Ping charity changed from \1 to \2.\n
 spam_protection_repeat  SPAM PROTECTION: you already said: \1\n
 spam_protection			SPAM PROTECTION: you are silenced for the next \1 seconds.\n

@@ -5664,13 +5664,42 @@ void ePlayerNetID::SetChatting ( ChatFlags flag, bool chatting )
 // * team management *
 // *******************
 
-bool ePlayerNetID::TeamChangeAllowed() const {
-    return ( allowTeamChange_ || se_allowTeamChanges ) && ( suspended_ == 0 )
+bool ePlayerNetID::TeamChangeAllowed( bool informPlayer ) const {
+    if (!( allowTeamChange_ || se_allowTeamChanges ))
+    {
+        if ( informPlayer )
+        {
+            sn_ConsoleOut(tOutput("$player_teamchanges_disallowed"), Owner());
+        }
+        return false;
+    }
+        
+
+    if ( suspended_ >= 0 )
+    {
+        if ( informPlayer )
+        {
+            sn_ConsoleOut(tOutput("$player_teamchanges_suspended", suspended_ ), Owner());
+        }
+        return false;
+    }
+
 #ifdef KRAWALL_SERVER
        // only allow players with enough access level to enter the game, everyone is free to leave, though
-       && ( GetAccessLevel() <= AccessLevelRequiredToPlay() || CurrentTeam() )
+    if (!( GetAccessLevel() <= AccessLevelRequiredToPlay() || CurrentTeam() ))
+    {
+        if ( informPlayer )
+        {
+            sn_ConsoleOut(tOutput("$player_teamchanges_accesslevel",
+                                  tCurrentAccessLevel.GetName( GetAccessLevel() ),
+                                  tCurrentAccessLevel.GetName( AccessLevelRequiredToPlay() ) ),
+                          Owner());
+        }
+        return false;
+    }
 #endif
-    ;
+
+    return true;
 }
 
 // put a new player into a default team
@@ -5814,8 +5843,7 @@ void ePlayerNetID::CreateNewTeam()
     // check if the team change is legal
     tASSERT ( nCLIENT !=  sn_GetNetState() );
 
-    if(!TeamChangeAllowed()) {
-        sn_ConsoleOut(tOutput("$player_teamchanges_disallowed"), Owner());
+    if(!TeamChangeAllowed( true )) {
         return;
     }
 
@@ -5914,8 +5942,7 @@ void ePlayerNetID::ReceiveControlNet(nMessage &m)
 
             m >> newTeam;
 
-            if(!TeamChangeAllowed()) {
-                sn_ConsoleOut( tOutput( "$player_teamchanges_disallowed" ), Owner() );
+            if(!TeamChangeAllowed( true )) {
                 break;
             }
 
@@ -7035,7 +7062,7 @@ static void se_allowTeamChangesPlayer(bool allow, std::istream &s) {
     if ( p )
     {
         sn_ConsoleOut( tOutput( (allow ? "$player_allowed_teamchange" : "$player_disallowed_teamchange"), p->GetName() ) );
-        p->TeamChangeAllowed( allow );
+        p->SetTeamChangeAllowed( allow );
     }
 }
 static void se_allowTeamChangesPlayer(std::istream &s) {

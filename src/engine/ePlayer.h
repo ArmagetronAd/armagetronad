@@ -224,8 +224,8 @@ public:
     bool StealthMode() const { return stealth_; }
 
     // team management
-    bool TeamChangeAllowed() const; //!< is this player allowed to change teams?
-    void TeamChangeAllowed(bool allowed) {allowTeamChange_ = allowed;} //!< set if this player should always be allowed to change teams
+    bool TeamChangeAllowed( bool informPlayer = false ) const; //!< is this player allowed to change teams?
+    void SetTeamChangeAllowed(bool allowed) {allowTeamChange_ = allowed;} //!< set if this player should always be allowed to change teams
     eTeam* NextTeam()    const { return nextTeam; }				// return the team I will be next round
     eTeam* CurrentTeam() const { return currentTeam; }		// return the team I am in
     int  TeamListID() const { return teamListID; }		// return my position in the team
