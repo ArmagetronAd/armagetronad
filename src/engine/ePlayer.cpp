@@ -5689,8 +5689,8 @@ bool ePlayerNetID::TeamChangeAllowed( bool informPlayer ) const {
         if ( informPlayer )
         {
             sn_ConsoleOut(tOutput("$player_teamchanges_accesslevel",
-                                  tCurrentAccessLevel.GetName( GetAccessLevel() ),
-                                  tCurrentAccessLevel.GetName( AccessLevelRequiredToPlay() ) ),
+                                  tCurrentAccessLevel::GetName( GetAccessLevel() ),
+                                  tCurrentAccessLevel::GetName( AccessLevelRequiredToPlay() ) ),
                           Owner());
         }
         return false;
