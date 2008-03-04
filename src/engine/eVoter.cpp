@@ -446,6 +446,9 @@ public:
 
         return DoCheckValid( senderID );
     }
+
+    virtual void Update() //!< update description and details
+    {}
 protected:
     virtual bool DoFillFromMessage( nMessage& m )
     {
@@ -672,8 +675,6 @@ public:
         m->BroadCast();
     }
 protected:
-    virtual void Update() //!< update description and details
-    {}
 
     virtual bool DoFillFromMessage( nMessage& m )
     {
@@ -789,18 +790,18 @@ void se_VoteKickUser( int user )
     }
 }
 
-// something to vote on
-class eVoteItemKick: public virtual eVoteItem
+// something to vote on: harming a player
+class eVoteItemHarm: public virtual eVoteItem
 {
 public:
     // constructors/destructor
-    eVoteItemKick( ePlayerNetID* player = 0 )
+    eVoteItemHarm( ePlayerNetID* player = 0 )
             : player_( player )
             , machine_(NULL)
             , name_( "(Player who already left)" )
     {}
 
-    ~eVoteItemKick()
+    ~eVoteItemHarm()
     {
         delete machine_;
         machine_ = NULL;
@@ -887,13 +888,16 @@ protected:
 protected:
     virtual nDescriptor& DoGetDescriptor() const;	// returns the creation descriptor
 
+    // get the language string prefix
+    virtual char const * DoGetPrefix() const = 0;
+
     virtual tString DoGetDescription() const		// returns the description of the voting item
     {
         // get name from player
         if ( player_ )
             name_ = player_->GetName();
 
-        return tString( tOutput( "$kick_player_text", name_ ) );
+        return tString( tOutput( tString("$") + DoGetPrefix() + "_player_text", name_ ) );
     }
 
     virtual tString DoGetDetails() const		    // returns the detailed description of the voting item
@@ -902,59 +906,94 @@ protected:
         if ( player_ )
             name_ = player_->GetName();
 
-        return eVoteItem::DoGetDetails() + tString( tOutput( "$kick_player_details_text", name_ ) );
+        return eVoteItem::DoGetDetails() + tString( tOutput( tString("$") + DoGetPrefix() + "_player_details_text", name_ ) );
     }
 
-    virtual void DoExecute()						// called when the voting was successful
+    // returns the player that is to be harmed
+    ePlayerNetID * GetPlayer() const
     {
-        if ( player_ )
-        {
-            // kick the player, he is online
-            int user = player_->Owner();
-            if ( user > 0 )
-                se_VoteKickUser( user );
-        }
-        else if ( machine_ )
-        {
-            // the player left. Inform the machine that he would have gotten kicked.
-            nMachine * machine = machine_->GetMachine();
-            if ( machine )
-            {
-                // kick all players that connected from that machine
-                bool kick = false;
-                for ( int user = MAXCLIENTS; user > 0; --user )
-                {
-                    if ( &nMachine::GetMachine( user ) == machine )
-                    {
-                        se_VoteKickUser( user );
-                        kick = true;
-                    }
-                }
-
-                // if no user could be kicked, notify at least the machine that
-                // somebody would have been kicked.
-                if ( !kick )
-                    machine->OnKick();
-            }
-        }
+        ePlayerNetID const * player = player_;
+        return const_cast< ePlayerNetID * >( player );
     }
 
+    nMachine * GetMachine() const
+    {
+        if ( !machine_ )
+        {
+            return 0;
+        }
+        else
+        {
+            return machine_->GetMachine();
+        }
+    }
 private:
     nObserverPtr< ePlayerNetID > player_;		// keep player referenced
     nMachineObserver * machine_;                // pointer to the machine of the player to be kicked
     mutable tString name_;                      // the name of the player to be kicked
 };
 
-// something to vote on
-class eVoteItemKickServerControlled: public virtual eVoteItemServerControlled, public virtual eVoteItemKick
+// something to vote on: kicking a player
+class eVoteItemKick: public virtual eVoteItemHarm
 {
 public:
     // constructors/destructor
-    eVoteItemKickServerControlled( ePlayerNetID* player = 0 )
-            : eVoteItemKick( player )
+    eVoteItemKick( ePlayerNetID* player = 0 )
+        : eVoteItemHarm( player )
     {}
 
-    ~eVoteItemKickServerControlled()
+    ~eVoteItemKick()
+    {}
+
+protected:
+    // get the language string prefix
+    virtual char const * DoGetPrefix() const{ return "kick"; }
+
+    virtual void DoExecute()						// called when the voting was successful
+    {
+        ePlayerNetID const * player = GetPlayer();
+        nMachine * machine = GetMachine();
+        if ( player )
+        {
+            // kick the player, he is online
+            int user = player->Owner();
+            if ( user > 0 )
+                se_VoteKickUser( user );
+        }
+        else if ( machine )
+        {
+            // the player left. Inform the machine that he would have gotten kicked.
+            // kick all players that connected from that machine
+            bool kick = false;
+            for ( int user = MAXCLIENTS; user > 0; --user )
+            {
+                if ( &nMachine::GetMachine( user ) == machine )
+                {
+                    se_VoteKickUser( user );
+                    kick = true;
+                }
+            }
+            
+            // if no user could be kicked, notify at least the machine that
+            // somebody would have been kicked.
+            if ( !kick )
+            {
+                machine->OnKick();
+            }
+        }
+    }
+};
+
+// harming vote items, server controlled
+class eVoteItemHarmServerControlled: public virtual eVoteItemServerControlled, public virtual eVoteItemHarm
+{
+public:
+    // constructors/destructor
+    eVoteItemHarmServerControlled( ePlayerNetID* player = 0 )
+            : eVoteItemHarm( player )
+    {}
+
+    ~eVoteItemHarmServerControlled()
     {}
 protected:
     virtual bool DoFillFromMessage( nMessage& m )
@@ -963,7 +1002,7 @@ protected:
         tASSERT( sn_GetNetState() != nCLIENT );
 
         // deletage
-        bool ret = eVoteItemKick::DoFillFromMessage( m );
+        bool ret = eVoteItemHarm::DoFillFromMessage( m );
 
         // fill in description
         Update();
@@ -981,8 +1020,8 @@ protected:
 private:
     virtual void Update() //!< update description and details
     {
-        description_ = eVoteItemKick::DoGetDescription();
-        details_ = eVoteItemKick::DoGetDetails();
+        description_ = eVoteItemHarm::DoGetDescription();
+        details_ = eVoteItemHarm::DoGetDetails();
     }
 
     virtual nDescriptor& DoGetDescriptor() const	// returns the creation descriptor
@@ -999,7 +1038,20 @@ private:
     {
         return eVoteItemServerControlled::DoGetDetails();
     }
+};
 
+// kick vote items, server controlled
+class eVoteItemKickServerControlled: public virtual eVoteItemHarmServerControlled, public virtual eVoteItemKick
+{
+public:
+    // constructors/destructor
+    eVoteItemKickServerControlled( ePlayerNetID* player = 0 )
+            : eVoteItemHarm( player )
+    {}
+
+    ~eVoteItemKickServerControlled()
+    {}
+protected:
     virtual void DoExecute()						// called when the voting was successful
     {
         eVoteItemKick::DoExecute();
@@ -1020,7 +1072,7 @@ static void se_HandleKickVote( nMessage& m )
 static nDescriptor kill_vote_handler(231,se_HandleKickVote,"Kick vote");
 
 // returns the creation descriptor
-nDescriptor& eVoteItemKick::DoGetDescriptor() const
+nDescriptor& eVoteItemHarm::DoGetDescriptor() const
 {
     return kill_vote_handler;
 }
@@ -1030,6 +1082,31 @@ static void se_SendKick( ePlayerNetID* p )
     eVoteItemKick kick( p );
     kick.SendMessage();
 }
+
+// remove vote items, server controlled
+class eVoteItemSuspend: public virtual eVoteItemHarmServerControlled
+{
+public:
+    // constructors/destructor
+    eVoteItemSuspend( ePlayerNetID* player = 0 )
+        : eVoteItemHarm( player )
+        {}
+
+    ~eVoteItemSuspend()
+    {}
+protected:
+    // get the language string prefix
+    virtual char const * DoGetPrefix() const{ return "suspend"; }
+
+    virtual void DoExecute()						// called when the voting was successful
+    {
+        ePlayerNetID * player = GetPlayer();
+        if ( player )
+        {
+            player->Suspend();
+        }
+    }
+};
 
 // **************************************************************************************
 // **************************************************************************************
@@ -1491,6 +1568,17 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
             item = se_useServerControlledKick ? tNEW( eVoteItemKickServerControlled )( toKick ) : tNEW( eVoteItemKick )( toKick );
         }
     }
+    else if ( command == "suspend" )
+    {
+        tString name;
+        name.ReadLine( message );
+        ePlayerNetID * toSuspend = ePlayerNetID::FindPlayerByName( name, p );
+        if ( toSuspend )
+        {
+            // accept message
+            item = tNEW( eVoteItemSuspend )( toSuspend );
+        }
+    }
     else
     {
         sn_ConsoleOut( tOutput("$vote_unknown_command", command ), p->Owner() );
@@ -1510,6 +1598,7 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
     }
 
     // no objection? Broadcast it to everyone.
+    item->Update();
     item->ReBroadcast( p->Owner() );
 }
 

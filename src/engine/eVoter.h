@@ -44,7 +44,7 @@ class eMenuItemVote;
 class eVoter: public tReferencable< eVoter >, public tListMember, public nMachineDecorator
 {
     friend class eVoteItem;
-    friend class eVoteItemKick;
+    friend class eVoteItemHarm;
 public:
     eVoter( nMachine & machine );
     ~eVoter();

@@ -1460,6 +1460,9 @@ kick_player_details_text			If accepted, \1 will be removed from the server.
 kick_player_text					Kick \1
 kick_player_help					Pressing enter or space on this menu item will issue a kick vote on that player.
 
+suspend_player_details_text			If accepted, \1 will be suspended for some rounds.
+suspend_player_text					Suspend \1
+
 #*************************************
 #*************************************
 #
