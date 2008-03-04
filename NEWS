@@ -1,6 +1,12 @@
 Changes since 0.2.8.2:
 
   New settings and commands:
+- "/vote" chat interface to votes; "/vote kick <player>" issues a kick vote.
+- new vote type "/vote suspend <player>" suspends a player for 
+  VOTING_SUSPEND_ROUNDS rounds.
+- VOTING_HARM_TIME: time between all harmful votes against a player
+- VOTING_KICK_MINHARM: auto-transform the first few menu issued kick 
+  votes to suspensions
 - (UN)SUSPEND kicks a player to spectator mode with a timeout. Intended to
   let new players watch before they play.
 - VOTES_CANCEL cancels all running polls.
