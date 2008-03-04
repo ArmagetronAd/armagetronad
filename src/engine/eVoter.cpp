@@ -431,6 +431,19 @@ public:
     // checks whether the vote is a valid vote to make
     bool CheckValid( int senderID )
     {
+        // fill suggestor
+        if ( !suggestor_ )
+        {
+            suggestor_ = eVoter::GetVoter( senderID );
+            if ( !suggestor_ )
+                return false;
+
+            // add suggestor to supporters
+            this->voters_[1].Insert( suggestor_ );
+
+            user_ = senderID;
+        }
+
         return DoCheckValid( senderID );
     }
 protected:
@@ -440,16 +453,7 @@ protected:
         user_ = m.SenderID();
 
         // get originator of vote
-        if(sn_GetNetState()==nSERVER)
-        {
-            suggestor_ = se_GetVoter( m );
-            if ( !suggestor_ )
-                return false;
-
-            // add suggestor to supporters
-            this->voters_[1].Insert( suggestor_ );
-        }
-        else
+        if(sn_GetNetState()!=nSERVER)
         {
             m.Read( id_ );
         }
@@ -815,6 +819,12 @@ protected:
 
     virtual bool DoCheckValid( int senderID )
     {
+        // always accept votes from server
+        if ( sn_GetNetState() == nCLIENT && senderID == 0 )
+        {
+            return true;
+        }
+
         eVoter * sender = eVoter::GetVoter( senderID  );
 
         double time = tSysTimeFloat();
@@ -835,6 +845,13 @@ protected:
         // check if player is protected from kicking
         if ( player_ && sn_GetNetState() != nCLIENT )
         {
+            // check whether the player is on the server
+            if ( player_->Owner() == 0 )
+            {
+                sn_ConsoleOut( tOutput( "$vote_kick_local", player_->GetName() ), senderID );
+                return false;
+            }
+
             name_ = player_->GetName();
             eVoter * voter = eVoter::GetVoter( player_->Owner() );
             if ( voter )
@@ -1493,6 +1510,6 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
     }
 
     // no objection? Broadcast it to everyone.
-    item->ReBroadcast();
+    item->ReBroadcast( p->Owner() );
 }
 

@@ -2333,6 +2333,7 @@ vote_submitted						Poll "\2" submitted by \1.\n
 vote_vote_for						\1 voted for Poll "\2".\n
 vote_vote_against					\1 voted against Poll "\2".\n
 vote_unknown_command                Unknown /vote command \1.\n
+vote_kick_local                     Can't vote against local player/AI \1.\n
 
 #********************************************
 #********************************************
