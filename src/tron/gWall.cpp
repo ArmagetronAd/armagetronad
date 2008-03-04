@@ -1614,6 +1614,12 @@ void gNetPlayerWall::Update(REAL Tend,const eCoord &pend)
 
 void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
 {
+    // duplicate last coords entry if its dangerousness disagrees with the previous entry.
+    if ( coords_.Len() >= 2 && coords_[ coords_.Len()-2 ].IsDangerous != coords_[ coords_.Len()-1 ].IsDangerous )
+    {
+        Checkpoint();
+    }
+
     tEnd=Tend;
     end=pend;
 
@@ -2488,8 +2494,22 @@ void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
     // find the last index that will stay before the hole:
     int begind = IndexPos( beg );
 
+    // skip ahead if the holing would create redunant non-dangerous blocks
+    while ( begind >= 1 && !coords_[begind].IsDangerous )
+    {
+        begind--;
+        beg = coords_[begind].Pos;
+    }
+
     // find the last index in the hole:
     int endind = IndexPos( end );
+
+    // skip ahead if the holing would create redunant non-dangerous blocks
+    while ( endind < coords_.Len() - 2 && !coords_[endind].IsDangerous )
+    {
+        endind++;
+        end = coords_[endind].Pos;
+    }
 
     if ( beg < BegPos() )
     {
