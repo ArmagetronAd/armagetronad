@@ -1,6 +1,7 @@
 Changes since 0.2.8.2:
 
   New settings and commands:
+- VOTE_KICK_REASON: default reason given on kick votes.
 - "/vote" chat interface to votes; "/vote kick <player>" issues a kick vote.
 - new vote type "/vote suspend <player>" suspends a player for 
   VOTING_SUSPEND_ROUNDS rounds.

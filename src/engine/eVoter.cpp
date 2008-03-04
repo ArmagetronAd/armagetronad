@@ -792,6 +792,9 @@ static tSettingItem< int > se_voteKickToPortConf( "VOTE_KICK_TO_PORT", se_voteKi
 static int se_kickMinHarm = 0;
 static tSettingItem< int > se_kickMinHarmSI( "VOTING_KICK_MINHARM", se_kickMinHarm );
 
+// reason given on vote kicks
+static tString se_voteKickReason("");
+static tConfItemLine se_voteKickReasonConf( "VOTE_KICK_REASON", se_voteKickReason );
 
 void se_VoteKickUser( int user )
 {
@@ -800,15 +803,25 @@ void se_VoteKickUser( int user )
         return;
     }
 
+    tString reason;
+    if ( se_voteKickReason.Len() >= 2 )
+    {
+        reason = se_voteKickReason;
+    }
+    else
+    {
+        reason = tOutput("$voted_kill_kick");
+    }
+
     if ( se_voteKickToServer.Len() < 2 )
     {
-        sn_KickUser( user, tOutput("$voted_kill_kick") );
+        sn_KickUser( user, reason );
     }
     else
     {
         // kick player to default destination
         nServerInfoRedirect redirect( se_voteKickToServer, se_voteKickToPort );
-        sn_KickUser( user, tOutput("$voted_kill_kick"), 1, &redirect );
+        sn_KickUser( user, reason, 1, &redirect );
     }
 }
 
