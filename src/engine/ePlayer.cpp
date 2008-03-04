@@ -3474,7 +3474,6 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
 
     r = g = b = 15;
 
-    suspended_          = 0;
     greeted				= true;
     chatting_			= false;
     spectating_         = false;
@@ -3538,7 +3537,6 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     // default access level
     lastAccessLevel = tAccessLevel_Default;
 
-    suspended_  = 0;
     greeted     =false;
     chatting_   =false;
     spectating_ =false;
@@ -5674,12 +5672,12 @@ bool ePlayerNetID::TeamChangeAllowed( bool informPlayer ) const {
         return false;
     }
         
-
-    if ( suspended_ > 0 )
+    int suspended = GetSuspended();
+    if ( suspended > 0 )
     {
         if ( informPlayer )
         {
-            sn_ConsoleOut(tOutput("$player_teamchanges_suspended", suspended_ ), Owner());
+            sn_ConsoleOut(tOutput("$player_teamchanges_suspended", suspended ), Owner());
         }
         return false;
     }
@@ -6978,21 +6976,23 @@ void ePlayerNetID::Suspend( int rounds )
         rounds = 0;
     }
 
-    if ( suspended_ == rounds )
+    int & suspended = AccessSuspended();
+
+    if ( suspended == rounds )
     {
         return;
     }
 
-    suspended_ = rounds;
+    suspended = rounds;
 
-    if ( suspended_ == 0 )
+    if ( suspended == 0 )
     {
         sn_ConsoleOut( tOutput( "$player_no_longer_suspended", GetColoredName() ) );
         FindDefaultTeam();
     }
     else
     {
-        sn_ConsoleOut( tOutput( "$player_suspended", GetColoredName(), suspended_ ) );
+        sn_ConsoleOut( tOutput( "$player_suspended", GetColoredName(), suspended ) );
         SetTeam( NULL );
     }
 }
@@ -7012,9 +7012,11 @@ void ePlayerNetID::LogScoreDifferences( void )
     {
         ePlayerNetID* p = se_PlayerNetIDs(i);
         p->LogScoreDifference();
+
+        int suspended = p->GetSuspended();
         
         // update suspension count
-        if ( p->suspended_ > 0 )
+        if ( suspended > 0 )
         {
             if ( p->CurrentTeam() && !p->NextTeam() )
             {
@@ -7022,7 +7024,7 @@ void ePlayerNetID::LogScoreDifferences( void )
             }
             else
             {
-                p->Suspend( p->suspended_ - 1 );
+                p->Suspend( suspended - 1 );
             }
         }
     }
@@ -7076,3 +7078,29 @@ static tConfItemFunc se_disallowTeamChangesPlayerConf("DISALLOW_TEAM_CHANGE_PLAY
 static tAccessLevelSetter se_atcConfLevel( se_allowTeamChangesPlayerConf, tAccessLevel_TeamLeader );
 static tAccessLevelSetter se_dtcConfLevel( se_disallowTeamChangesPlayerConf, tAccessLevel_TeamLeader );
 
+//! accesses the suspension count
+int & ePlayerNetID::AccessSuspended()
+{
+    static int dummy;
+    dummy = 0;
+
+    if ( Owner() == 0 || !GetVoter() )
+    {
+        return dummy;
+    }
+
+    return GetVoter()->suspended_;
+}
+
+//! returns the suspension count
+int ePlayerNetID::GetSuspended() const
+{
+    int dummy = 0;
+
+    if ( Owner() == 0 || !GetVoter() )
+    {
+        return dummy;
+    }
+
+    return GetVoter()->suspended_;
+}

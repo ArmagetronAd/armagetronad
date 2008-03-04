@@ -115,6 +115,8 @@ static eVoter* se_GetVoter( const nMessage& m )
     return eVoter::GetVoter( m.SenderID(), true );
 }
 
+eVoterPlayerInfo::eVoterPlayerInfo(): suspended_(0){}
+
 // something to vote on
 class eVoteItem: public tListMember
 {

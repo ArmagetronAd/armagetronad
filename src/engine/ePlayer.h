@@ -167,7 +167,6 @@ private:
 
     ePlayerNetID& operator= (const ePlayerNetID&); // forbid copy constructor
 
-    int             suspended_;  //! number of rounds the player is currently suspended from playing
     bool			spectating_; //!< are we currently spectating? Spectators don't get assigned to teams.
     bool			stealth_; //!< does this player want to hide his/her identity?
     bool			chatting_;   //!< are we currently chatting?
@@ -282,7 +281,7 @@ public:
     void SetSilenced( bool silenced ) { silenced_ = silenced; }
     bool& AccessSilenced( void ) { return silenced_; }
 
-    eVoter * GetVoter(){return voter_;}     // returns our voter
+    eVoter * GetVoter() const {return voter_;}     // returns our voter
     void CreateVoter();						// create our voter or find it
     static void SilenceMenu();				// menu where you can silence players
     static void PoliceMenu();				// menu where you can silence and kick players
@@ -394,6 +393,12 @@ public:
 private:
     inline ePlayerNetID & SetNameFromClient( tColoredString const & nameFromClient );   //!< Sets this player's name as the client wants it to be. Avoid using it when possilbe.
     inline ePlayerNetID & SetColoredName( tColoredString const & coloredName ); //!< Sets this player's name, cleared by the server. Use this for onscreen screen display.
+
+    //! accesses the suspension count
+    int & AccessSuspended();
+
+    //! returns the suspension count
+    int GetSuspended() const;
 };
 
 extern tList<ePlayerNetID> se_PlayerNetIDs;

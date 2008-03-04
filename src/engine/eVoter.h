@@ -40,8 +40,19 @@ class eMenuItemVote;
 
 #include "nSpamProtection.h"
 
+// information in eVoter accessible for ePlayer only
+class eVoterPlayerInfo
+{
+public:
+    friend class ePlayerNetID;
+
+    eVoterPlayerInfo();
+private:
+    int             suspended_;  //! number of rounds the player is currently suspended from playing
+};
+
 // class identifying a voter; all players coming from the same IP share the same voter.
-class eVoter: public tReferencable< eVoter >, public tListMember, public nMachineDecorator
+class eVoter: public tReferencable< eVoter >, public tListMember, public nMachineDecorator, public eVoterPlayerInfo
 {
     friend class eVoteItem;
     friend class eVoteItemHarm;
