@@ -455,7 +455,7 @@ voting_harm_time_help               The minimum time in seconds between two harm
 voting_kick_time_help               The minimum time in seconds between two kick votes against the same player.
 voting_maturity_help                The minimum time in seconds a player needs to be online with the same name before he can issue votes.
 voting_suspend_rounds_help          The number of rounds "/vote suspend <player>" suspends a player for.
-voting_kick_minharm_help            Minimal number of harmful votes (suspension, kick,..) that need to have been issued (success is not required) against a player before a kick vote really results in a kick; otherwise, the result is a simple suspension.
+voting_kick_minharm_help            Minimal number of harmful votes (suspension, kick,..) that need to have been issued (success is not required) against a player before a kick vote issued via the menu really results in a kick; otherwise, the result is a simple suspension.
 
 #********************************************
 #********************************************

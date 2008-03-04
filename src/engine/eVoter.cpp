@@ -810,14 +810,14 @@ void se_VoteKickUser( int user )
     }
 }
 
-void se_VoteKickPlayer( ePlayerNetID * p )
+void se_VoteKickPlayer( ePlayerNetID * p, bool fromMenu )
 {
     if ( !p )
     {
         return;
     }
 
-    if ( p->GetVoter()->HarmCount() - 1 < se_kickMinHarm )
+    if ( fromMenu && p->GetVoter()->HarmCount() - 1 < se_kickMinHarm )
     {
         // transfor the vote
         p->Suspend( se_suspendRounds );
@@ -979,8 +979,8 @@ class eVoteItemKick: public virtual eVoteItemHarm
 {
 public:
     // constructors/destructor
-    eVoteItemKick( ePlayerNetID* player = 0 )
-        : eVoteItemHarm( player )
+    eVoteItemKick( bool fromMenu, ePlayerNetID* player )
+        : eVoteItemHarm( player ), fromMenu_( fromMenu )
     {}
 
     ~eVoteItemKick()
@@ -1025,7 +1025,7 @@ protected:
         if ( player )
         {
             // kick the player, he is online
-            se_VoteKickPlayer( player );
+            se_VoteKickPlayer( player, fromMenu_ );
         }
         else if ( machine )
         {
@@ -1049,6 +1049,9 @@ protected:
             }
         }
     }
+
+private:
+    bool fromMenu_; // did this kick come from the menu?
 };
 
 // harming vote items, server controlled
@@ -1112,8 +1115,8 @@ class eVoteItemKickServerControlled: public virtual eVoteItemHarmServerControlle
 {
 public:
     // constructors/destructor
-    eVoteItemKickServerControlled( ePlayerNetID* player = 0 )
-            : eVoteItemHarm( player )
+    eVoteItemKickServerControlled( bool fromMenu, ePlayerNetID* player )
+        : eVoteItemHarm( player ), eVoteItemKick( fromMenu, player )
     {}
 
     ~eVoteItemKickServerControlled()
@@ -1130,7 +1133,7 @@ static void se_HandleKickVote( nMessage& m )
     if ( eVoteItem::AcceptNewVote( m ) )
     {
         // accept message
-        eVoteItem* item = se_useServerControlledKick ? tNEW( eVoteItemKickServerControlled )() : tNEW( eVoteItemKick )();
+        eVoteItem* item = se_useServerControlledKick ? tNEW( eVoteItemKickServerControlled )(true, 0) : tNEW( eVoteItemKick )(true, 0);
         if ( !item->FillFromMessage( m ) )
             delete item;
     }
@@ -1146,7 +1149,7 @@ nDescriptor& eVoteItemHarm::DoGetDescriptor() const
 
 static void se_SendKick( ePlayerNetID* p )
 {
-    eVoteItemKick kick( p );
+    eVoteItemKick kick( true, p );
     kick.SendMessage();
 }
 
@@ -1201,7 +1204,7 @@ public:
         if(sn_GetNetState()==nSERVER)
         {
             // kill user directly
-            se_VoteKickPlayer( player_ );
+            se_VoteKickPlayer( player_, false );
         }
         {
             // issue kick vote
@@ -1634,7 +1637,7 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
         if ( toKick )
         {
             // accept message
-            item = se_useServerControlledKick ? tNEW( eVoteItemKickServerControlled )( toKick ) : tNEW( eVoteItemKick )( toKick );
+            item = se_useServerControlledKick ? tNEW( eVoteItemKickServerControlled )( false, toKick ) : tNEW( eVoteItemKick )( false, toKick );
         }
     }
     else if ( command == "suspend" )
