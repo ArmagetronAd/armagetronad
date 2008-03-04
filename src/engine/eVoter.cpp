@@ -102,6 +102,10 @@ static tSettingItem< int > se_maxVotesPerVoterSI( "MAX_VOTES_PER_VOTER", se_maxV
 static int se_minTimeBetweenKicks = 300;
 static tSettingItem< int > se_minTimeBetweenKicksSI( "VOTING_KICK_TIME", se_minTimeBetweenKicks );
 
+// time between harmful votes against the same target in seconds
+static int se_minTimeBetweenHarms = 180;
+static tSettingItem< int > se_minTimeBetweenHarmsSI( "VOTING_HARM_TIME", se_minTimeBetweenHarms );
+
 // time between name changes and you being allowed to issue votes again
 static int se_votingMaturity = 300;
 static tSettingItem< int > se_votingMaturitySI( "VOTING_MATURITY", se_votingMaturity );
@@ -780,8 +784,20 @@ static int se_voteKickToPort = 4534;
 static tSettingItem< tString > se_voteKickToServerConf( "VOTE_KICK_TO_SERVER", se_voteKickToServer );
 static tSettingItem< int > se_voteKickToPortConf( "VOTE_KICK_TO_PORT", se_voteKickToPort );
 
+// minimal previous harmful votes (kick, silence, suspend) before
+// a successful kick vote really results in a kick. Before that, the result is a
+// suspension.
+static int se_kickMinHarm = 0;
+static tSettingItem< int > se_kickMinHarmSI( "VOTING_KICK_MINHARM", se_kickMinHarm );
+
+
 void se_VoteKickUser( int user )
 {
+    if ( user == 0 )
+    {
+        return;
+    }
+
     if ( se_voteKickToServer.Len() < 2 )
     {
         sn_KickUser( user, tOutput("$voted_kill_kick") );
@@ -791,6 +807,24 @@ void se_VoteKickUser( int user )
         // kick player to default destination
         nServerInfoRedirect redirect( se_voteKickToServer, se_voteKickToPort );
         sn_KickUser( user, tOutput("$voted_kill_kick"), 1, &redirect );
+    }
+}
+
+void se_VoteKickPlayer( ePlayerNetID * p )
+{
+    if ( !p )
+    {
+        return;
+    }
+
+    if ( p->GetVoter()->HarmCount() - 1 < se_kickMinHarm )
+    {
+        // transfor the vote
+        p->Suspend( se_suspendRounds );
+    }
+    else
+    {
+        se_VoteKickUser( p->Owner() );
     }
 }
 
@@ -863,7 +897,7 @@ protected:
             {
                 machine_ = tNEW( nMachineObserver )( voter->machine_ );
 
-                if ( time < voter->lastKickVote_ + se_minTimeBetweenKicks )
+                if ( time < voter->lastHarmVote_ + se_minTimeBetweenHarms )
                 {
                     tOutput message("$vote_redundant");
                     sn_ConsoleOut( message, senderID );
@@ -871,9 +905,12 @@ protected:
                 }
                 else
                 {
-                    voter->lastKickVote_ = time;
+                    voter->lastHarmVote_ = time;
                     voter->lastNameChangePreventor_ = time;
                 }
+
+                // count harmful votes
+                voter->harmCount_++;
             }
         }
 
@@ -953,16 +990,42 @@ protected:
     // get the language string prefix
     virtual char const * DoGetPrefix() const{ return "kick"; }
 
+    virtual bool DoCheckValid( int senderID )
+    {
+        ePlayerNetID * player = GetPlayer();
+
+        // check if player is protected from kicking
+        if ( player && sn_GetNetState() != nCLIENT )
+        {
+            eVoter * voter = eVoter::GetVoter( player->Owner() );
+            if ( voter )
+            {
+                double time = tSysTimeFloat();
+                if ( time < voter->lastKickVote_ + se_minTimeBetweenKicks )
+                {
+                    tOutput message("$vote_redundant");
+                    sn_ConsoleOut( message, senderID );
+                    return false;
+                }
+                else
+                {
+                    voter->lastKickVote_ = time;
+                    voter->lastNameChangePreventor_ = time;
+                }
+            }
+        }
+
+        return eVoteItemHarm::DoCheckValid( senderID );
+    };
+
     virtual void DoExecute()						// called when the voting was successful
     {
-        ePlayerNetID const * player = GetPlayer();
+        ePlayerNetID * player = GetPlayer();
         nMachine * machine = GetMachine();
         if ( player )
         {
             // kick the player, he is online
-            int user = player->Owner();
-            if ( user > 0 )
-                se_VoteKickUser( user );
+            se_VoteKickPlayer( player );
         }
         else if ( machine )
         {
@@ -1138,7 +1201,7 @@ public:
         if(sn_GetNetState()==nSERVER)
         {
             // kill user directly
-            se_VoteKickUser( player_->Owner() );
+            se_VoteKickPlayer( player_ );
         }
         {
             // issue kick vote
@@ -1163,7 +1226,9 @@ eVoter::eVoter( nMachine & machine )
 {
     selfReference_ = this;
     voters_.Add( this );
+    harmCount_ = 0;
     lastKickVote_ = -1E+40;
+    lastHarmVote_ = -1E+40;
     lastNameChangePreventor_ = -1E+40;
     lastChange_ = tSysTimeFloat();
 }

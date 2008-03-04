@@ -45,6 +45,7 @@ class eVoter: public tReferencable< eVoter >, public tListMember, public nMachin
 {
     friend class eVoteItem;
     friend class eVoteItemHarm;
+    friend class eVoteItemKick;
 public:
     eVoter( nMachine & machine );
     ~eVoter();
@@ -68,6 +69,12 @@ public:
     REAL Age() const;                                           //!< how long does this voter exist?
 
     bool AllowNameChange() const;  //!< determines whether the player belonging to this voter should be allowed to change names
+
+    //! returns the number of harmful votes against this player
+    int HarmCount() const
+    {
+        return harmCount_;
+    }
 protected:
     virtual void OnDestroy();      //!< called when machine gets destroyed
 
@@ -78,6 +85,8 @@ private:
     static tList< eVoter > voters_;					// list of all voters
     nSpamProtection votingSpam_;					// spam control
     tJUST_CONTROLLED_PTR< eVoter > selfReference_;  //!< reference to self
+    int harmCount_;                                 //!< counts the number of harmful votes issued against this player
+    double lastHarmVote_;                           //!< the last time a harmful vote was issued for this player
     double lastKickVote_;                           //!< the last time a kick vote was issued for this player
     double lastNameChangePreventor_;                //!< the last time something happened that should prevent the voter from changing names
     double lastChange_;                             //!< the last time a player assigned to this voter changed
