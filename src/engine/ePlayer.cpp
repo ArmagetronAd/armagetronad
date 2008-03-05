@@ -4108,7 +4108,7 @@ static tConfItemFunc sn_listBanConf("BAN_USER_LIST",&se_ListBannedUsers);
 static void se_CheckAccessLevel( tAccessLevel & level, tString const & authName )
 {
     tAccessLevel newLevel = se_userLevel.Get( authName );
-    if ( newLevel < level )
+    if ( newLevel < level || newLevel > tAccessLevel_Authenticated )
     {
         level = newLevel;
     }

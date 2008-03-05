@@ -171,9 +171,8 @@ enum tAccessLevel
     tAccessLevel_13 = 13,          // reserved
     tAccessLevel_14 = 14,          // reserved
     tAccessLevel_Authenticated = 15,// any user with a an account anywhere
-    tAccessLevel_15 = 15,          // reserved
-    tAccessLevel_16 = 16,          // reserved
-    tAccessLevel_17 = 17,          // reserved
+    tAccessLevel_FallenFromGrace = 16,          // authenticated, but not liked
+    tAccessLevel_Shunned = 17,          // authenticated, but disliked
     tAccessLevel_18 = 18,          // reserved
     tAccessLevel_19 = 19,          // reserved
     tAccessLevel_Program = 20,     // a regular player

@@ -190,7 +190,5 @@ config_accesslevel_10       Recruit-1
 config_accesslevel_11       Recruit-2
 config_accesslevel_13       OP-ed
 config_accesslevel_14       OP-ed-2
-config_accesslevel_16       OP-ed-3
-config_accesslevel_17       OP-ed-4
 config_accesslevel_18       OP-ed-5
 config_accesslevel_19       OP-ed-6
