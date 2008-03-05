@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "tMemManager.h"
 #include "tSysTime.h"
+#include "tDirectories.h"
 
 #include "uMenu.h"
 
@@ -534,6 +535,11 @@ public:
 
         // check access level
         tAccessLevel accessLevel = se_GetAccessLevel( senderID );
+        if ( accessLevel < tCurrentAccessLevel::GetAccessLevel() )
+        {
+            accessLevel = tCurrentAccessLevel::GetAccessLevel();
+        }
+
         tAccessLevel required = DoGetAccessLevel();
         if ( accessLevel > required )
         {
@@ -1312,6 +1318,199 @@ protected:
     }
 };
 
+#ifdef KRAWALL_SERVER
+
+// console with filter for redirection to anyone with a certain access level
+class eAccessConsoleFilter: public tConsoleFilter
+{
+public:
+    eAccessConsoleFilter( tAccessLevel level )
+            :level_( level )
+    {
+    }
+
+    void Send()
+    {
+        bool canSee[ MAXCLIENTS+1 ];
+        for( int i = MAXCLIENTS; i>=0; --i )
+        {
+            canSee[i] = false;
+        }
+
+        // look which clients have someone who can see the message
+        for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+        {
+            ePlayerNetID* player = se_PlayerNetIDs(i);
+            if ( player->GetAccessLevel() <= level_ )
+            {
+                canSee[ player->Owner() ] = true;
+            }
+        }
+
+        // and send it
+        for( int i = MAXCLIENTS; i>=0; --i )
+        {
+            if ( canSee[i] )
+            {
+                sn_ConsoleOut( message_, i );
+            }
+        }
+
+        message_.Clear();
+    }
+
+    ~eAccessConsoleFilter()
+    {
+        Send();
+    }
+private:
+    // we want to come first, the admins should get unfiltered output
+    virtual int DoGetPriority() const{ return -100; }
+
+    // don't actually filter; take line and add it to the message sent to the admin
+    virtual void DoFilterLine( tString &line )
+    {
+        //tColoredString message;
+        message_ << tColoredString::ColorString(1,.3,.3) << "RA: " << tColoredString::ColorString(1,1,1) << line << "\n";
+
+        // don't let message grow indefinitely
+        if (message_.Len() > 600)
+        {            Send();
+        }
+    }
+
+    tAccessLevel level_;     // the access level required 
+    tColoredString message_; // the console message for the remote administrator
+};
+
+// include vote items
+class eVoteItemInclude: public eVoteItemServerControlled
+{
+public:
+    // constructors/destructor
+    eVoteItemInclude( tString const & file, tAccessLevel submitterLevel )
+    : eVoteItemServerControlled()
+    , file_( file )
+    {
+        description_ = tOutput( "$vote_include_text", file );
+        file_ = tString( "vote/" ) + file_;
+        details_ = tOutput( "$vote_include_details_text", file_ );
+
+        if ( submitterLevel > se_accessLevelVoteIncludeExecute )
+        {
+            submitterLevel = se_accessLevelVoteIncludeExecute;
+        }
+        level_ = submitterLevel;
+    }
+
+    ~eVoteItemInclude()
+    {}
+protected:
+    // access level required for this kind of vote
+    virtual tAccessLevel DoGetAccessLevel() const
+    {
+        return se_accessLevelVoteInclude;
+    }
+
+    // return vote-specific extra bias
+    virtual int DoGetExtraBias() const
+    {
+        return se_votingBiasInclude;
+    }
+
+    bool Open( std::ifstream & s, int userToNotify )
+    {
+        if ( tDirectories::Config().Open(s, file_ ) || tDirectories::Var().Open(s, file_ ) )
+        {
+            return true;
+        }
+        else
+        {
+            con << tOutput( "$vote_include_error", file_ );
+            sn_ConsoleOut( tOutput( "$vote_include_error", file_ ), userToNotify );
+            return false;
+        }
+    }
+
+    virtual bool DoCheckValid( int senderID )
+    { 
+        std::ifstream s;
+        return ( Open( s, senderID ) && eVoteItemServerControlled::DoCheckValid( senderID ) );
+    }
+
+    virtual void DoExecute()						// called when the voting was successful
+    {
+        // set the access level for the following operation
+        tCurrentAccessLevel accessLevel( level_, true );
+
+        // load contents of everytime.cfg for real
+        std::ifstream s;
+        if ( Open( s, 0 ) )
+        {
+            sn_ConsoleOut( tOutput( "$vote_include_message", file_ ) );
+            eAccessConsoleFilter filter( level_ );
+            tConfItemBase::LoadAll(s);
+            tConfItemBase::LoadPlayback();
+        }
+    }
+
+    tString file_;       //!< the file to include (inside the vote/ subdirectory)
+    tAccessLevel level_; //!< the level to execute the file with
+};
+
+// command vote items
+class eVoteItemCommand: public eVoteItemServerControlled
+{
+public:
+    // constructors/destructor
+    eVoteItemCommand( tString const & command, tAccessLevel submitterLevel )
+    : eVoteItemServerControlled()
+    , command_( command )
+    {
+        description_ = tOutput( "$vote_command_text", command );
+        details_ = tOutput( "$vote_command_details_text", command );
+
+        if ( submitterLevel > se_accessLevelVoteCommandExecute )
+        {
+            submitterLevel = se_accessLevelVoteCommandExecute;
+        }
+        level_ = submitterLevel;
+    }
+
+    ~eVoteItemCommand()
+    {}
+protected:
+    // access level required for this kind of vote
+    virtual tAccessLevel DoGetAccessLevel() const
+    {
+        return se_accessLevelVoteCommand;
+    }
+
+    // return vote-specific extra bias
+    virtual int DoGetExtraBias() const
+    {
+        return se_votingBiasCommand;
+    }
+
+    virtual void DoExecute()						// called when the voting was successful
+    {
+        // set the access level for the following operation
+        tCurrentAccessLevel accessLevel( level_, true );
+
+        // load contents of everytime.cfg for real
+        std::istringstream s( static_cast< char const * >( command_ ) );
+        sn_ConsoleOut( tOutput( "$vote_command_message" ) );
+        eAccessConsoleFilter filter( tAccessLevel_Default );
+        tConfItemBase::LoadLine(s);
+        tConfItemBase::LoadPlayback();
+    }
+
+    tString command_;    //!< the command to execute
+    tAccessLevel level_; //!< the level to execute the file with
+};
+
+#endif
+
 // **************************************************************************************
 // **************************************************************************************
 
@@ -1785,9 +1984,33 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
             item = tNEW( eVoteItemSuspend )( toSuspend );
         }
     }
+#ifdef KRAWALL_SERVER
+    else if ( command == "include" )
+    {
+        tString file;
+        file.ReadLine( message );
+        {
+            // accept message
+            item = tNEW( eVoteItemInclude )( file, p->GetAccessLevel() );
+        }
+    }
+    else if ( command == "command" )
+    {
+        tString console;
+        console.ReadLine( message );
+        {
+            // accept message
+            item = tNEW( eVoteItemCommand )( console, p->GetAccessLevel() );
+        }
+    }
+#endif
     else
     {
-        sn_ConsoleOut( tOutput("$vote_unknown_command", command ), p->Owner() );
+#ifdef KRAWALL_SERVER
+        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "suspend, kick, include, command" ), p->Owner() );
+#else
+        sn_ConsoleOut( tOutput("$vote_unknown_command", command, "suspend, kick" ), p->Owner() );
+#endif
     }
 
     // nothing created
