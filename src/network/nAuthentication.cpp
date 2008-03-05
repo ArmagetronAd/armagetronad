@@ -1047,5 +1047,6 @@ void nAuthentication::OnBreak()
 #ifdef KRAWALL_SERVER
     nMemberFunctionRunnerTemplate< nLoginProcess >::OnBreak();
 #endif
+    st_DoToDo();
 }
 
