@@ -297,6 +297,12 @@ extern REAL sg_cycleBrakeDeplete;
 
 // in release mode, default values should always be used. in debug mode, we want to experiment :)
 #ifdef DEBUG
+#ifndef DEDICATED
+#define DEBUGCHATBOT
+#endif
+#endif
+
+#ifdef DEBUGCHATBOT
 typedef tSettingItem<REAL> gChatBotSetting;
 typedef tSettingItem<bool> gChatBotSwitch;
 #else
