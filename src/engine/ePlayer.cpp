@@ -734,6 +734,9 @@ void se_SecretConsoleOut( tOutput const & message, tAccessLevel hider, ePlayerNe
     }
     else
     {
+        // well, the admin will want to see it.
+        con << message;
+
         bool canSee[ MAXCLIENTS+1 ];
         for( int i = MAXCLIENTS; i>=0; --i )
         {
@@ -3893,7 +3896,7 @@ public:
 
     tAccessLevel GetDefault() const
     {
-        return tAccessLevel_Authenticated;
+        return tAccessLevel_DefaultAuthenticated;
     }
 
     virtual tAccessLevel ReadRawVal(tString const & name, std::istream &s) const
@@ -4108,7 +4111,7 @@ static tConfItemFunc sn_listBanConf("BAN_USER_LIST",&se_ListBannedUsers);
 static void se_CheckAccessLevel( tAccessLevel & level, tString const & authName )
 {
     tAccessLevel newLevel = se_userLevel.Get( authName );
-    if ( newLevel < level || newLevel > tAccessLevel_Authenticated )
+    if ( newLevel < level || newLevel > tAccessLevel_DefaultAuthenticated )
     {
         level = newLevel;
     }
@@ -4149,7 +4152,7 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
         // minimal access level
         if ( accessLevel_ > tAccessLevel_Authenticated )
         {
-            accessLevel_ = tAccessLevel_Authenticated;
+            accessLevel_ = static_cast< tAccessLevel >( tAccessLevel_Program - 1 );
         }
 
         // take over the access level
@@ -4164,7 +4167,7 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
 
         if ( IsHuman() )
         {
-            if ( GetAccessLevel() < tAccessLevel_Authenticated )
+            if ( GetAccessLevel() != tAccessLevel_Default )
             {
                 se_SecretConsoleOut( tOutput( "$login_message_special", 
                                               GetName(), 

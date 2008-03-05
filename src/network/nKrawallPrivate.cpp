@@ -434,6 +434,7 @@ void nKrawall::CheckScrambledPassword( nCheckResultBase & result,
             result.blurb.push_back( blurb );
         }
 
+        result.accessLevel = tAccessLevel_Remote;
         result.success = true;
         return;
     }

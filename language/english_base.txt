@@ -2487,9 +2487,10 @@ config_accesslevel_2        Moderator
 config_accesslevel_7        Team Leader
 config_accesslevel_8        Team Member
 config_accesslevel_12       Local User
-config_accesslevel_15       Authenticated
+config_accesslevel_15       Remote User
 config_accesslevel_16       Fallen from Grace
 config_accesslevel_17       Shunned
+config_accesslevel_19       Authenticated
 config_accesslevel_20       Program
 
 access_level_help           Changes the access level of a configuration item to make it available to lower ranked users
