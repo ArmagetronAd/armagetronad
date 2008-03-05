@@ -690,7 +690,7 @@ tAccessLevel ePlayerNetID::AccessLevelRequiredToPlay()
 }
 
 // maximal user level whose accounts can be hidden from other users
-static tAccessLevel se_hideAccessLevelOf = tAccessLevel_TeamLeader;
+static tAccessLevel se_hideAccessLevelOf = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_hideAccessLevelOfConf( "ACCESS_LEVEL_HIDE_OF", se_hideAccessLevelOf );
 
 // but they are only hidden to players with a lower access level than this
