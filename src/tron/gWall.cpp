@@ -2478,7 +2478,17 @@ void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
 #endif
 
 #ifdef DEBUG
-    // std::cout << beg << ',' << end << '(' << BegPos() << ',' << EndPos() << ")\n";
+    /*
+    for ( int i = 0; i < coords_.Len(); ++i )
+    {
+        std::cout << "[" << coords_(i).IsDangerous << ',' << coords_(i).Pos << "]";
+    }
+
+    static int count=0;
+    ++count;
+
+    std::cout << " hole " << count << " : " << beg << ',' << end << '(' << BegPos() << ',' << EndPos() << ")\n";
+    */
 #endif
 
     // don't touch anything if the server concluded it is his business
@@ -2497,8 +2507,8 @@ void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
     // skip ahead if the holing would create redunant non-dangerous blocks
     while ( begind >= 1 && !coords_[begind].IsDangerous )
     {
-        begind--;
         beg = coords_[begind].Pos;
+        begind--;
     }
 
     // find the last index in the hole:
@@ -2596,6 +2606,16 @@ void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
     coords_(begind+1).Pos         = beg;
     coords_(begind+2).Time        = endtime;
     coords_(begind+2).Pos         = end;
+
+#ifdef DEBUG
+    /*
+    for ( int i = 0; i < coords_.Len(); ++i )
+    {
+        std::cout << "[" << coords_(i).IsDangerous << ',' << coords_(i).Pos << "]";
+    }
+    std::cout << "\n";
+    */
+#endif
 
     CHECKWALL;
 }
