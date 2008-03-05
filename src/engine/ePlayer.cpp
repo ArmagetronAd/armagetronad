@@ -3892,6 +3892,7 @@ public:
     eUserLevel()
     : eUserConfig< tAccessLevel >( "USER_LEVEL" )
     {
+        requiredLevel = tAccessLevel_Owner;
     }
 
     tAccessLevel GetDefault() const

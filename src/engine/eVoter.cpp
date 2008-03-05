@@ -86,6 +86,22 @@ static tSettingItem< int > se_mv( "MIN_VOTERS", se_minVoters );
 static int se_votingBias = 0;
 static tSettingItem< int > se_vb( "VOTING_BIAS", se_votingBias );
 
+// the number set here always acts as additional votes against a kick vote.
+static int se_votingBiasKick = 0;
+static tSettingItem< int > se_vbKick( "VOTING_BIAS_KICK", se_votingBiasKick );
+
+// the number set here always acts as additional votes against a suspend vote.
+static int se_votingBiasSuspend = 0;
+static tSettingItem< int > se_vbSuspend( "VOTING_BIAS_SUSPEND", se_votingBiasSuspend );
+
+// the number set here always acts as additional votes against a suspend vote.
+static int se_votingBiasInclude = 0;
+static tSettingItem< int > se_vbInclude( "VOTING_BIAS_INCLUDE", se_votingBiasInclude );
+
+// the number set here always acts as additional votes against a command vote.
+static int se_votingBiasCommand = 0;
+static tSettingItem< int > se_vbCommand( "VOTING_BIAS_COMMAND", se_votingBiasCommand );
+
 // voting privacy level. -2 means total disclosure, +2 total secrecy.
 static int se_votingPrivacy = 1;
 static tSettingItem< int > se_vp( "VOTING_PRIVACY", se_votingPrivacy );
@@ -110,12 +126,60 @@ static tSettingItem< int > se_minTimeBetweenHarmsSI( "VOTING_HARM_TIME", se_minT
 static int se_votingMaturity = 300;
 static tSettingItem< int > se_votingMaturitySI( "VOTING_MATURITY", se_votingMaturity );
 
+#ifdef KRAWALL_SERVER
+// minimal access level for kick votes
+static tAccessLevel se_accessLevelVoteKick = tAccessLevel_Program;
+static tSettingItem< tAccessLevel > se_accessLevelVoteKickSI( "ACCESS_LEVEL_VOTE_KICK", se_accessLevelVoteKick );
+
+// minimal access level for suspend votes
+static tAccessLevel se_accessLevelVoteSuspend = tAccessLevel_Program;
+static tSettingItem< tAccessLevel > se_accessLevelVoteSuspendSI( "ACCESS_LEVEL_VOTE_SUSPEND", se_accessLevelVoteSuspend );
+
+// minimal access level for include votes
+static tAccessLevel se_accessLevelVoteInclude = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_accessLevelVoteIncludeSI( "ACCESS_LEVEL_VOTE_INCLUDE", se_accessLevelVoteInclude );
+
+// minimal access level for include votes
+static tAccessLevel se_accessLevelVoteIncludeExecute = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_accessLevelVoteIncludeExecuteSI( "ACCESS_LEVEL_VOTE_INCLUDE_EXECUTE", se_accessLevelVoteIncludeExecute );
+
+// minimal access level for direct command votes
+static tAccessLevel se_accessLevelVoteCommand = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_accessLevelVoteCommandSI( "ACCESS_LEVEL_VOTE_COMMAND", se_accessLevelVoteCommand );
+
+// access level direct command votes will be executed with (minimal level is,
+// however, the access level of the vote submitter)
+static tAccessLevel se_accessLevelVoteCommandExecute = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_accessLevelVoteCommandExecuteSI( "ACCESS_LEVEL_VOTE_COMMAND_EXECUTE", se_accessLevelVoteCommandExecute );
+#endif
+
 static eVoter* se_GetVoter( const nMessage& m )
 {
     return eVoter::GetVoter( m.SenderID(), true );
 }
 
 eVoterPlayerInfo::eVoterPlayerInfo(): suspended_(0){}
+
+static tAccessLevel se_GetAccessLevel( int userID )
+{
+    tAccessLevel ret = tAccessLevel_Default;
+
+    // scan players of given user ID
+    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+    {
+        ePlayerNetID* p = se_PlayerNetIDs(i);
+        
+        if ( p->Owner() == userID )
+        {
+            if( p->GetAccessLevel() < ret )
+            {
+                ret = p->GetAccessLevel();
+            }
+        }
+    }
+    
+    return ret;
+}
 
 // something to vote on
 class eVoteItem: public tListMember
@@ -372,6 +436,18 @@ public:
         }
     }
 
+    // access level required for this kind of vote
+    virtual tAccessLevel DoGetAccessLevel() const
+    {
+        return tAccessLevel_Default;
+    }
+
+    // return vote-specific extra bias
+    virtual int DoGetExtraBias() const
+    {
+        return 0;
+    }
+
     // evaluation
     virtual void Evaluate()																	// check if this voting item is to be kept around
     {
@@ -379,9 +455,11 @@ public:
 
         GetStats( pro, con, total );
 
+        int bias = se_votingBias + DoGetExtraBias();
+
         // apply bias
-        con 	+= se_votingBias;
-        total 	+= se_votingBias;
+        con 	+= bias;
+        total 	+= bias;
 
         // reduce number of total voters
         if ( se_votingDecay > 0 )
@@ -452,6 +530,19 @@ public:
             this->voters_[1].Insert( suggestor_ );
 
             user_ = senderID;
+        }
+
+        // check access level
+        tAccessLevel accessLevel = se_GetAccessLevel( senderID );
+        tAccessLevel required = DoGetAccessLevel();
+        if ( accessLevel > required )
+        {
+            sn_ConsoleOut(tOutput("$player_vote_accesslevel",
+                                  tCurrentAccessLevel::GetName( accessLevel ),
+                                  tCurrentAccessLevel::GetName( required ) ),
+                          senderID );
+            
+            return false;
         }
 
         return DoCheckValid( senderID );
@@ -1005,6 +1096,20 @@ protected:
     // get the language string prefix
     virtual char const * DoGetPrefix() const{ return "kick"; }
 
+#ifdef KRAWALL_SERVER
+    // access level required for this kind of vote
+    virtual tAccessLevel DoGetAccessLevel() const
+    {
+        return se_accessLevelVoteKick;
+    }
+#endif
+
+    // return vote-specific extra bias
+    virtual int DoGetExtraBias() const
+    {
+        return se_votingBiasKick;
+    }
+
     virtual bool DoCheckValid( int senderID )
     {
         ePlayerNetID * player = GetPlayer();
@@ -1182,6 +1287,20 @@ public:
 protected:
     // get the language string prefix
     virtual char const * DoGetPrefix() const{ return "suspend"; }
+
+#ifdef KRAWALL_SERVER
+    // access level required for this kind of vote
+    virtual tAccessLevel DoGetAccessLevel() const
+    {
+        return se_accessLevelVoteSuspend;
+    }
+#endif
+
+    // return vote-specific extra bias
+    virtual int DoGetExtraBias() const
+    {
+        return se_votingBiasSuspend;
+    }
 
     virtual void DoExecute()						// called when the voting was successful
     {

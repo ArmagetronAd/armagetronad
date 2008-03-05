@@ -198,6 +198,7 @@ static void sn_ReadPassword( std::istream & s )
 }
 
 static tConfItemFunc sn_kpa( "LOCAL_USER", sn_ReadPassword );
+static tAccessLevelSetter sn_kpal( sn_kpa, tAccessLevel_Owner );
 
 // add team account
 static void sn_ReadTeamPassword( std::istream & s )
@@ -221,6 +222,7 @@ static void sn_ReadTeamPassword( std::istream & s )
 }
 
 static tConfItemFunc sn_kta( "LOCAL_TEAM", sn_ReadTeamPassword );
+static tAccessLevelSetter sn_ktal( sn_kta, tAccessLevel_Owner );
 
 // finds a login element as iterator
 nLoginMap::iterator sn_FindLoginIterator( tString const & username, nLoginMap * & map, bool exact = false )
