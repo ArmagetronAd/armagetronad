@@ -685,6 +685,7 @@ gBaseZoneHack::gBaseZoneHack( eGrid * grid, const eCoord & pos )
     lastSync_ = -10;
     teamDistance_ = 0;
     lastEnemyContact_ = se_GameTime();
+    touchy_ = false;
 }
 
 // *******************************************************************************
@@ -705,6 +706,7 @@ gBaseZoneHack::gBaseZoneHack( nMessage & m )
     lastSync_ = -10;
     teamDistance_ = 0;
     lastEnemyContact_ = se_GameTime();
+    touchy_ = false;
 }
 
 // *******************************************************************************
@@ -805,6 +807,11 @@ bool gBaseZoneHack::Timestep( REAL time )
     // conquest going on
     REAL conquest = sg_conquestRate * enemiesInside_ - sg_defendRate * ownersInside_ - sg_conquestDecayRate;
     conquered_ += dt * conquest;
+
+    if ( touchy_ && enemiesInside_ > 0 )
+    {
+        conquered_ = 1.01;
+    }
 
     // clamp
     if ( conquered_ < 0 )
@@ -1155,10 +1162,16 @@ void gBaseZoneHack::ZoneWasHeld( void )
         if ( team && team->Alive() )
         {
             team->AddScore( sg_onSurviveScore, tOutput("$player_win_held_fortress"), tOutput("$player_lose_held_fortress") );
-        }
 
-        currentState_ = State_Conquering;
-        enemies_.clear();
+            currentState_ = State_Conquering;
+            enemies_.clear();
+        }
+        else
+        {
+            // give a little conquering help. The round is almost over, if
+            // an enemy actually made it into the zone by now, it should be his.
+            touchy_ = true;
+        }
     }
 }
 
