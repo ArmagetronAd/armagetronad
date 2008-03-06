@@ -948,8 +948,10 @@ void nLoginProcess::Authorize()
         static char const * section = "AUTH_RESULT";
         tRecorder::Playback( section, success );
         tRecorder::Playback( section, authority );
+        tRecorder::Playback( section, error );
         tRecorder::Record( section, success );
         tRecorder::Record( section, authority );
+        tRecorder::Record( section, error );
     }
     
     Abort();
