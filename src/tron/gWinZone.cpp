@@ -779,6 +779,10 @@ void gBaseZoneHack::CountZonesOfTeam( eGrid const * grid, eTeam * otherTeam, int
 static int sg_onSurviveScore = 0;
 static tSettingItem< int > sg_onSurviveConquestScoreConfig( "FORTRESS_HELD_SCORE", sg_onSurviveScore );
 
+static REAL sg_collapseSpeed = .5;
+static tSettingItem< REAL > sg_collapseSpeedConfig( "FORTRESS_COLLAPSE_SPEED", sg_collapseSpeed );
+
+
 // *******************************************************************************
 // *
 // *	Timestep
@@ -795,11 +799,19 @@ bool gBaseZoneHack::Timestep( REAL time )
     {
         // let zone vanish
         SetReferenceTime();
-        SetExpansionSpeed( -GetRadius()*.5 );
+        SetExpansionSpeed( -GetRadius()*sg_collapseSpeed );
         SetRotationAcceleration( -GetRotationSpeed()*.4 );
         RequestSync();
 
         currentState_ = State_Conquered;
+    }
+    else if ( currentState_ == State_Conquered && GetRotationSpeed() < -.3 )
+    {
+        // let zone vanish
+        SetReferenceTime();
+        SetRotationSpeed( -.3 );
+        SetRotationAcceleration( 0 );
+        RequestSync();
     }
 
     REAL dt = time - lastTime;
