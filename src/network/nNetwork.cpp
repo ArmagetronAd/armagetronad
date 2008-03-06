@@ -1003,6 +1003,13 @@ nMessage& nMessage::operator << (const tString &s){
     }
 
     unsigned short len=s.Len();
+
+    // clamp away excess zeroes
+    while(len > 1 && s(len-2)==0)
+    {
+        --len;
+    }
+
     Write(len);
     int i;
 
