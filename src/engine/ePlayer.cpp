@@ -4356,7 +4356,6 @@ static bool se_IsNameTaken( tString const & name, ePlayerNetID const * exception
 
 #ifdef KRAWALL_SERVER
     // check for reserved nicknames
-    if ( !exception )
     {
         tString reservedFor = se_reserveNick.Get( name );
         if ( reservedFor != "" && 
