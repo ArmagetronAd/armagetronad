@@ -1315,8 +1315,8 @@ class eVoteItemKickServerControlled: public virtual eVoteItemHarmServerControlle
 {
 public:
     // constructors/destructor
-    eVoteItemKickServerControlled( ePlayerNetID* player = 0 )
-        : eVoteItemHarm( player ), eVoteItemKick( player )
+    eVoteItemKickServerControlled( bool fromMenu, ePlayerNetID* player )
+    : eVoteItemHarm( player ), eVoteItemKick( player ), fromMenu_( fromMenu )
     {}
 
     ~eVoteItemKickServerControlled()
@@ -1326,7 +1326,7 @@ protected:
     {
         // check whether enough harmful votes were collected already
         ePlayerNetID * p = GetPlayer();
-        if ( p && p->GetVoter()->HarmCount() - 1 < se_kickMinHarm )
+        if ( fromMenu_ && p && p->GetVoter()->HarmCount() - 1 < se_kickMinHarm )
         {
             // try to transfor the vote to a suspension
             eVoteItem * item = tNEW ( eVoteItemSuspend )( p );
@@ -1355,6 +1355,8 @@ protected:
     {
         eVoteItemKick::DoExecute();
     }
+private:
+    bool fromMenu_; // flag set if the vote came from the menu
 };
 
 static void se_HandleKickVote( nMessage& m )
@@ -1362,7 +1364,7 @@ static void se_HandleKickVote( nMessage& m )
     // accept message
     if ( eVoteItem::AcceptNewVote( m ) )
     {
-        eVoteItemHarm* item = tNEW( eVoteItemKickServerControlled )();
+        eVoteItemHarm* item = tNEW( eVoteItemKickServerControlled )( true, 0 );
         if ( !item->FillFromMessage( m ) )
         {
             delete item;
@@ -2037,7 +2039,7 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
         if ( toKick )
         {
             // accept message
-            item = tNEW( eVoteItemKickServerControlled )( toKick );
+            item = tNEW( eVoteItemKickServerControlled )( false, toKick );
         }
     }
     else if ( command == "suspend" )
