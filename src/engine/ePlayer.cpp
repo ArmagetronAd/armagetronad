@@ -6475,14 +6475,13 @@ public:
             ladder << "PLAYER_RENAMED " << oldLogName_  << " "  << logName << " " << nMachine::GetMachine(player_.Owner()).GetIP() << " " << screenName << "\n";
             se_SaveToLadderLog(ladder);
 
-
-            if ( bool(player_.GetVoter() ) )
+            if ( oldScreenName_ != screenName )
             {
-                player_.GetVoter()->PlayerChanged();
-            }
+                if ( bool(player_.GetVoter() ) )
+                {
+                    player_.GetVoter()->PlayerChanged();
+                }
 
-            if ( oldPrintName_ != printName )
-            {
                 mess << "$player_renamed";
 
                 sn_ConsoleOut(mess);
