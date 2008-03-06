@@ -43,10 +43,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ePlayer.h"
 #include "eGrid.h"
 
-// use server controlled votes
-static bool se_useServerControlledKick = false;
-static nSettingItemWatched< bool > se_usc( "VOTE_USE_SERVER_CONTROLLED_KICK", se_useServerControlledKick, nConfItemVersionWatcher::Group_Annoying, 10 );
-
 // basic vote timeout value
 static unsigned short se_votingItemID = 0;
 static float se_votingTimeout = 300.0f;
@@ -230,12 +226,23 @@ public:
             else if ( se_votingPrivacy <= 1 )
                 con << voteMessage;				// print it for the server admin
 
-            tJUST_CONTROLLED_PTR< nMessage > ret = this->CreateMessage();
+            static nVersionFeature serverControlledVotes( 10 );
+
+            // create messages for old and new clients
+            tJUST_CONTROLLED_PTR< nMessage > retNew = this->CreateMessage();
+            tJUST_CONTROLLED_PTR< nMessage > retLegacy = this->CreateMessageLegacy();
             for ( int i = MAXCLIENTS; i > 0; --i )
             {
                 if ( sn_Connections[ i ].socket && i != exceptTo && 0 != eVoter::GetVoter( i ) )
                 {
-                    ret->Send( i );
+                    if ( serverControlledVotes.Supported( i ) )
+                    {
+                        retNew->Send( i );
+                    }
+                    else if ( retLegacy )
+                    {
+                        retLegacy->Send( i );
+                    }
                 }
             }
             //			item->SendMessage();
@@ -251,6 +258,21 @@ public:
         nMessage* m = tNEW( nMessage )( this->DoGetDescriptor() );
         this->DoFillToMessage( *m );
         return m;
+    }
+
+    nMessage* CreateMessageLegacy( void ) const
+    {
+        nDescriptor * descriptor = this->DoGetDescriptorLegacy();
+        if ( descriptor )
+        {
+            nMessage* m = tNEW( nMessage )( *descriptor );
+            this->DoFillToMessageLegacy( *m );
+            return m;
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     void SendMessage( void ) const
@@ -573,7 +595,7 @@ protected:
 
     virtual bool DoCheckValid( int senderID ){ return true; }
 
-    virtual void DoFillToMessage( nMessage& m  ) const
+    virtual void DoFillToMessage( nMessage& m ) const
     {
         if(sn_GetNetState()==nSERVER)
         {
@@ -593,6 +615,16 @@ protected:
     }
     static tList< eVoteItem > items_;				// list of vote items
 private:
+    virtual nDescriptor * DoGetDescriptorLegacy() const	// returns the creation descriptor
+    {
+        return 0;
+    }
+
+    virtual void DoFillToMessageLegacy( nMessage& m ) const
+    {
+        return DoFillToMessage( m );
+    };
+
     virtual nDescriptor& DoGetDescriptor() const = 0;	// returns the creation descriptor
     virtual tString DoGetDescription() const = 0;		// returns the description of the voting item
     virtual void DoExecute() = 0;						// called when the voting was successful
@@ -922,22 +954,14 @@ void se_VoteKickUser( int user )
     }
 }
 
-void se_VoteKickPlayer( ePlayerNetID * p, bool fromMenu )
+void se_VoteKickPlayer( ePlayerNetID * p )
 {
     if ( !p )
     {
         return;
     }
 
-    if ( fromMenu && p->GetVoter()->HarmCount() - 1 < se_kickMinHarm )
-    {
-        // transfor the vote
-        p->Suspend( se_suspendRounds );
-    }
-    else
-    {
-        se_VoteKickUser( p->Owner() );
-    }
+    se_VoteKickUser( p->Owner() );
 }
 
 // something to vote on: harming a player
@@ -956,7 +980,25 @@ public:
         delete machine_;
         machine_ = NULL;
     }
+
+    // returns the player that is to be harmed
+    ePlayerNetID * GetPlayer() const
+    {
+        ePlayerNetID const * player = player_;
+        return const_cast< ePlayerNetID * >( player );
+    }
 protected:
+    // this is a good spot to put in legacy hooks
+    virtual nDescriptor * DoGetDescriptorLegacy() const
+    {
+        return &eVoteItemHarm::DoGetDescriptor();
+    }
+
+    virtual void DoFillToMessageLegacy( nMessage& m ) const
+    {
+        return eVoteItemHarm::DoFillToMessage( m );
+    };
+
     virtual bool DoFillFromMessage( nMessage& m )
     {
         // read player ID
@@ -1038,6 +1080,7 @@ protected:
 
         eVoteItem::DoFillToMessage( m );
     };
+
 protected:
     virtual nDescriptor& DoGetDescriptor() const;	// returns the creation descriptor
 
@@ -1062,13 +1105,6 @@ protected:
         return eVoteItem::DoGetDetails() + tString( tOutput( tString("$") + DoGetPrefix() + "_player_details_text", name_ ) );
     }
 
-    // returns the player that is to be harmed
-    ePlayerNetID * GetPlayer() const
-    {
-        ePlayerNetID const * player = player_;
-        return const_cast< ePlayerNetID * >( player );
-    }
-
     nMachine * GetMachine() const
     {
         if ( !machine_ )
@@ -1091,8 +1127,8 @@ class eVoteItemKick: public virtual eVoteItemHarm
 {
 public:
     // constructors/destructor
-    eVoteItemKick( bool fromMenu, ePlayerNetID* player )
-        : eVoteItemHarm( player ), fromMenu_( fromMenu )
+    eVoteItemKick( ePlayerNetID* player )
+        : eVoteItemHarm( player )
     {}
 
     ~eVoteItemKick()
@@ -1151,7 +1187,7 @@ protected:
         if ( player )
         {
             // kick the player, he is online
-            se_VoteKickPlayer( player, fromMenu_ );
+            se_VoteKickPlayer( player );
         }
         else if ( machine )
         {
@@ -1177,7 +1213,6 @@ protected:
     }
 
 private:
-    bool fromMenu_; // did this kick come from the menu?
 };
 
 // harming vote items, server controlled
@@ -1236,49 +1271,6 @@ private:
     }
 };
 
-// kick vote items, server controlled
-class eVoteItemKickServerControlled: public virtual eVoteItemHarmServerControlled, public virtual eVoteItemKick
-{
-public:
-    // constructors/destructor
-    eVoteItemKickServerControlled( bool fromMenu, ePlayerNetID* player )
-        : eVoteItemHarm( player ), eVoteItemKick( fromMenu, player )
-    {}
-
-    ~eVoteItemKickServerControlled()
-    {}
-protected:
-    virtual void DoExecute()						// called when the voting was successful
-    {
-        eVoteItemKick::DoExecute();
-    }
-};
-
-static void se_HandleKickVote( nMessage& m )
-{
-    if ( eVoteItem::AcceptNewVote( m ) )
-    {
-        // accept message
-        eVoteItem* item = se_useServerControlledKick ? tNEW( eVoteItemKickServerControlled )(true, 0) : tNEW( eVoteItemKick )(true, 0);
-        if ( !item->FillFromMessage( m ) )
-            delete item;
-    }
-}
-
-static nDescriptor kill_vote_handler(231,se_HandleKickVote,"Kick vote");
-
-// returns the creation descriptor
-nDescriptor& eVoteItemHarm::DoGetDescriptor() const
-{
-    return kill_vote_handler;
-}
-
-static void se_SendKick( ePlayerNetID* p )
-{
-    eVoteItemKick kick( true, p );
-    kick.SendMessage();
-}
-
 // remove vote items, server controlled
 class eVoteItemSuspend: public virtual eVoteItemHarmServerControlled
 {
@@ -1317,6 +1309,81 @@ protected:
         }
     }
 };
+
+// kick vote items, server controlled
+class eVoteItemKickServerControlled: public virtual eVoteItemHarmServerControlled, public virtual eVoteItemKick
+{
+public:
+    // constructors/destructor
+    eVoteItemKickServerControlled( ePlayerNetID* player = 0 )
+        : eVoteItemHarm( player ), eVoteItemKick( player )
+    {}
+
+    ~eVoteItemKickServerControlled()
+    {}
+protected:
+    virtual bool DoCheckValid( int senderID )
+    {
+        // check whether enough harmful votes were collected already
+        ePlayerNetID * p = GetPlayer();
+        if ( p && p->GetVoter()->HarmCount() - 1 < se_kickMinHarm )
+        {
+            // try to transfor the vote to a suspension
+            eVoteItem * item = tNEW ( eVoteItemSuspend )( p );
+            
+            // let item check its validity
+            if ( !item->CheckValid( senderID ) )
+            {
+                delete item;
+            }
+            else
+            {
+                // no objection? Broadcast it to everyone.
+                item->Update();
+                item->ReBroadcast( p->Owner() );
+            }
+
+            // and cancel this item here.
+            return false;
+        }
+
+        // no transformation needed or transformation failed. Proceed as usual.
+        return eVoteItemHarm::DoCheckValid( senderID );
+    };
+
+    virtual void DoExecute()						// called when the voting was successful
+    {
+        eVoteItemKick::DoExecute();
+    }
+};
+
+static void se_HandleKickVote( nMessage& m )
+{
+    // accept message
+    if ( eVoteItem::AcceptNewVote( m ) )
+    {
+        eVoteItemHarm* item = tNEW( eVoteItemKickServerControlled )();
+        if ( !item->FillFromMessage( m ) )
+        {
+            delete item;
+            return;
+        }
+    }
+}
+
+static nDescriptor kill_vote_handler(231,se_HandleKickVote,"Kick vote");
+
+// returns the creation descriptor
+nDescriptor& eVoteItemHarm::DoGetDescriptor() const
+{
+    return kill_vote_handler;
+}
+
+static void se_SendKick( ePlayerNetID* p )
+{
+    eVoteItemKick kick( p );
+    kick.SendMessage();
+}
 
 #ifdef KRAWALL_SERVER
 
@@ -1537,7 +1604,7 @@ public:
         if(sn_GetNetState()==nSERVER)
         {
             // kill user directly
-            se_VoteKickPlayer( player_, false );
+            se_VoteKickPlayer( player_ );
         }
         {
             // issue kick vote
@@ -1970,7 +2037,7 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
         if ( toKick )
         {
             // accept message
-            item = se_useServerControlledKick ? tNEW( eVoteItemKickServerControlled )( false, toKick ) : tNEW( eVoteItemKick )( false, toKick );
+            item = tNEW( eVoteItemKickServerControlled )( toKick );
         }
     }
     else if ( command == "suspend" )

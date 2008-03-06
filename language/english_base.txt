@@ -1477,7 +1477,7 @@ vote_include_error					Include file \1 not found or not readable.\n
 vote_include_message				Including file \1. Only users of access level \2 or higher will receive the output.\n
 
 vote_command_details_text			If accepted, the console command "\1" will be executed on the server.
-vote_command_text					Command "\1"
+vote_command_text					Command \1
 vote_command_message				Executing command "\1".\n
 
 #*************************************
