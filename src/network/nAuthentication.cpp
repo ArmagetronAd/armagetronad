@@ -516,9 +516,13 @@ void nLoginProcess::FetchInfoFromAuthority()
     static char const * section = "AUTH_INFO";
     tRecorder::Playback( section, ret );
     tRecorder::Playback( section, method.method );
+    tRecorder::Playback( section, method.prefix );
+    tRecorder::Playback( section, method.suffix );
     tRecorder::Playback( section, authority );
     tRecorder::Record( section, ret );
     tRecorder::Record( section, method.method );
+    tRecorder::Record( section, method.prefix );
+    tRecorder::Record( section, method.suffix );
     tRecorder::Record( section, authority );
 
     if ( !ret )
