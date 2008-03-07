@@ -686,6 +686,8 @@ gBaseZoneHack::gBaseZoneHack( eGrid * grid, const eCoord & pos )
     teamDistance_ = 0;
     lastEnemyContact_ = se_GameTime();
     touchy_ = false;
+
+    color_.r = color_.g = color_.b = 0;
 }
 
 // *******************************************************************************
@@ -795,6 +797,12 @@ static tSettingItem< REAL > sg_collapseSpeedConfig( "FORTRESS_COLLAPSE_SPEED", s
 
 bool gBaseZoneHack::Timestep( REAL time )
 {
+    // no team?!? Get rid of this zone ASAP.
+    if ( !team )
+    {
+        return true;
+    }
+
     if ( currentState_ == State_Conquering )
     {
         // let zone vanish
@@ -893,89 +901,19 @@ bool gBaseZoneHack::Timestep( REAL time )
         }
     }
 
-
     // reset counts
     enemiesInside_ = ownersInside_ = 0;
-
-    // determine the owning team: the one that has a player spawned closest
-
-    // find the closest player
-    if ( !team )
-    {
-        teamDistance_ = 0;
-        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
-        gCycle * closest = NULL;
-        REAL closestDistance = 0;
-        for (int i=gameObjects.Len()-1;i>=0;i--)
-        {
-            gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
-
-            if (other )
-            {
-                eTeam * otherTeam = other->Player()->CurrentTeam();
-                eCoord otherpos = other->Position() - pos;
-                REAL distance = otherpos.NormSquared();
-                if ( !closest || distance < closestDistance )
-                {
-                    // check whether other zones are already registered to that team
-                    gBaseZoneHack * farthest = NULL;
-                    int count = 0;
-                    if ( sg_baseZonesPerTeam > 0 )
-                        CountZonesOfTeam( Grid(), otherTeam, count, farthest );
-
-                    // only set team if not too many closer other zones are registered
-                    if ( sg_baseZonesPerTeam == 0 || count < sg_baseZonesPerTeam || farthest->teamDistance_ > distance )
-                    {
-                        closest = other;
-                        closestDistance = distance;
-                    }
-                }
-            }
-        }
-
-        if ( closest )
-        {
-            // take over team and color
-            team = closest->Player()->CurrentTeam();
-            color_.r = team->R()/15.0;
-            color_.g = team->G()/15.0;
-            color_.b = team->B()/15.0;
-            teamDistance_ = closestDistance;
-
-            RequestSync();
-        }
-
-        // if this zone does not belong to a team, discard it.
-        if ( !team )
-        {
-            return true;
-        }
-
-        // check other zones owned by the same team. Discard the one farthest away
-        // if the max count is exceeded
-        if ( team && sg_baseZonesPerTeam > 0 )
-        {
-            gBaseZoneHack * farthest = 0;
-            int count = 0;
-            CountZonesOfTeam( Grid(), team, count, farthest );
-
-            // discard team of farthest zone
-            if ( count > sg_baseZonesPerTeam )
-                farthest->team = NULL;
-        }
-    }
-
 
     // delegate
     bool ret = gZone::Timestep( time );
 
     // reward survival
-    if ( !ret && onlySurvivor_ )
+    if ( team && !ret && onlySurvivor_ )
     {
         const char* message= ( eTeam::teams.Len() > 2 || sg_onConquestScore ) ? "$player_win_held_fortress" : "$player_win_conquest";
         sg_DeclareWinner( team, message );
     }
-
+    
     return ret;
 }
 
@@ -1046,7 +984,10 @@ void gBaseZoneHack::OnVanish( void )
 void gBaseZoneHack::OnConquest( void )
 {
     tString log;
-    log << "BASEZONE_CONQUERED " << ePlayerNetID::FilterName(team->Name()) << " " << GetPosition().x << " " << GetPosition().y << '\n';
+    if ( team )
+    {
+        log << "BASEZONE_CONQUERED " << ePlayerNetID::FilterName(team->Name()) << " " << GetPosition().x << " " << GetPosition().y << '\n';
+    }
     se_SaveToLadderLog(log);
     float rr = GetRadius();
     rr *= rr;
@@ -1183,6 +1124,90 @@ void gBaseZoneHack::ZoneWasHeld( void )
             // give a little conquering help. The round is almost over, if
             // an enemy actually made it into the zone by now, it should be his.
             touchy_ = true;
+        }
+    }
+}
+
+// *******************************************************************************
+// *
+// *   OnRoundBegin
+// *
+// *******************************************************************************
+//!
+//! @return shall the hole process be repeated?
+//!
+// *******************************************************************************
+
+void gBaseZoneHack::OnRoundBegin( void )
+{
+    // determine the owning team: the one that has a player spawned closest
+    // find the closest player
+    if ( !team )
+    {
+        teamDistance_ = 0;
+        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+        gCycle * closest = NULL;
+        REAL closestDistance = 0;
+        for (int i=gameObjects.Len()-1;i>=0;i--)
+        {
+            gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
+
+            if (other )
+            {
+                eTeam * otherTeam = other->Player()->CurrentTeam();
+                eCoord otherpos = other->Position() - pos;
+                REAL distance = otherpos.NormSquared();
+                if ( !closest || distance < closestDistance )
+                {
+                    // check whether other zones are already registered to that team
+                    gBaseZoneHack * farthest = NULL;
+                    int count = 0;
+                    if ( sg_baseZonesPerTeam > 0 )
+                        CountZonesOfTeam( Grid(), otherTeam, count, farthest );
+
+                    // only set team if not too many closer other zones are registered
+                    if ( sg_baseZonesPerTeam == 0 || count < sg_baseZonesPerTeam || farthest->teamDistance_ > distance )
+                    {
+                        closest = other;
+                        closestDistance = distance;
+                    }
+                }
+            }
+        }
+
+        if ( closest )
+        {
+            // take over team and color
+            team = closest->Player()->CurrentTeam();
+            color_.r = team->R()/15.0;
+            color_.g = team->G()/15.0;
+            color_.b = team->B()/15.0;
+            teamDistance_ = closestDistance;
+
+            RequestSync();
+        }
+
+        // if this zone does not belong to a team, discard it.
+        if ( !team )
+        {
+            RemoveFromGame();
+            return;
+        }
+
+        // check other zones owned by the same team. Discard the one farthest away
+        // if the max count is exceeded
+        if ( team && sg_baseZonesPerTeam > 0 )
+        {
+            gBaseZoneHack * farthest = 0;
+            int count = 0;
+            CountZonesOfTeam( Grid(), team, count, farthest );
+
+            // discard team of farthest zone
+            if ( count > sg_baseZonesPerTeam )
+            {
+                farthest->team = NULL;
+                farthest->RemoveFromGame();
+            }
         }
     }
 }

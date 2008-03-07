@@ -173,6 +173,7 @@ private:
     virtual void OnVanish();                           //!< called when the zone vanishes
     virtual void OnConquest();                         //!< called when the zone gets conquered
     virtual void CheckSurvivor();                      //!< checks for the only surviving zone
+    virtual void OnRoundBegin();                       //!< called on the beginning of the round
     virtual void OnRoundEnd();                         //!< called on the end of the round
 
     void ZoneWasHeld();                                //!< call when the zone was held as long as possible with the set game rules

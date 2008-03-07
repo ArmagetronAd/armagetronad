@@ -3170,6 +3170,19 @@ void gGame::StateUpdate(){
 
             ePlayerNetID::RankingLadderLog();
 
+            // do round begin stuff
+            {
+                const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+                for (int i=gameObjects.Len()-1;i>=0;i--)
+                {
+                    eGameObject * e = gameObjects(i);
+                    if ( e )
+                    {
+                        e->OnRoundBegin();
+                    }
+                }
+            }
+
             // do the first analysis of the round, now is the time to get it used to the number of teams
             Analysis( -1000 );
 
