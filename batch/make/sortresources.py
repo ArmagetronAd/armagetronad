@@ -66,10 +66,12 @@ def parseResource(filename, data):
               self.data.type = string.split(sysid,"-")[0]
 
               # look in current and parent directories for dtds
-              while len(path) > 0:
+              while len(path) > 0 and path != "/":
                   fullfile = os.path.join(path, sysid)
-                  try:    return open( fullfile )
-                  except: pass
+                  try:
+                      return open( fullfile )
+                  except:
+                      pass
                   # go to "parent" directory
                   path = os.path.split(path)[0]
 
@@ -114,9 +116,9 @@ def getCanonicalPath(path):
 # scan for all XML files in the directory and rename them according to the rules
 def scanDir(sourceDir, destinationDir, function):
     def visitor( arg, dirname, names ):
-        for file in names:
-            if len(file) > 4 and file[-4:] == ".xml":
-                path = os.path.join(dirname,file)
+        for filename in names:
+            if filename.endswith(".xml"):
+                path = os.path.join(dirname, filename)
                 newPath = getCanonicalPath(path)
                 # call the passed function
                 function(path, os.path.join(destinationDir, newPath), newPath)
