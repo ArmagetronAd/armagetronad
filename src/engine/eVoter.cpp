@@ -1340,7 +1340,7 @@ protected:
             {
                 // no objection? Broadcast it to everyone.
                 item->Update();
-                item->ReBroadcast( p->Owner() );
+                item->ReBroadcast( senderID );
             }
 
             // and cancel this item here.
