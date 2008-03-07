@@ -693,7 +693,7 @@ tAccessLevel ePlayerNetID::AccessLevelRequiredToPlay()
 }
 
 // maximal user level whose accounts can be hidden from other users
-static tAccessLevel se_hideAccessLevelOf = tAccessLevel_TeamLeader;
+static tAccessLevel se_hideAccessLevelOf = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_hideAccessLevelOfConf( "ACCESS_LEVEL_HIDE_OF", se_hideAccessLevelOf );
 
 // but they are only hidden to players with a lower access level than this
@@ -737,6 +737,9 @@ void se_SecretConsoleOut( tOutput const & message, tAccessLevel hider, ePlayerNe
     }
     else
     {
+        // well, the admin will want to see it.
+        con << message;
+
         bool canSee[ MAXCLIENTS+1 ];
         for( int i = MAXCLIENTS; i>=0; --i )
         {
@@ -1593,7 +1596,7 @@ ePlayerNetID * CompareBufferToPlayerNames
 }
 
 
-ePlayerNetID * se_FindPlayerByName( tString const & name, ePlayerNetID * requester = 0 )
+ePlayerNetID * ePlayerNetID::FindPlayerByName( tString const & name, ePlayerNetID * requester )
 {
    int num_matches = 0;
 
@@ -1680,7 +1683,7 @@ static ePlayerNetID * se_FindPlayerInChatCommand( ePlayerNetID * sender, char co
         return 0;
     }
     
-    return se_FindPlayerByName( player, sender );
+    return ePlayerNetID::FindPlayerByName( player, sender );
 }
 
 // chat message from server to client
@@ -3167,6 +3170,10 @@ void handle_chat( nMessage &m )
                         se_ChatPlayers( p );
                         return;
                     }
+                    else if (command == "/vote" || command == "/callvote") {
+                        eVoter::HandleChat( p, s );
+                        return;
+                    }
                     else if (command == "/teams") {
                         se_ChatTeams( p );
                         return;
@@ -3699,7 +3706,6 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
 
     r = g = b = 15;
 
-    suspended_          = 0;
     greeted				= true;
     chatting_			= false;
     spectating_         = false;
@@ -3767,7 +3773,6 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     // default access level
     lastAccessLevel = tAccessLevel_Default;
 
-    suspended_  = 0;
     greeted     =false;
     chatting_   =false;
     spectating_ =false;
@@ -4124,11 +4129,12 @@ public:
     eUserLevel()
     : eUserConfig< tAccessLevel >( "USER_LEVEL" )
     {
+        requiredLevel = tAccessLevel_Owner;
     }
 
     tAccessLevel GetDefault() const
     {
-        return tAccessLevel_Authenticated;
+        return tAccessLevel_DefaultAuthenticated;
     }
 
     virtual tAccessLevel ReadRawVal(tString const & name, std::istream &s) const
@@ -4343,7 +4349,7 @@ static tConfItemFunc sn_listBanConf("BAN_USER_LIST",&se_ListBannedUsers);
 static void se_CheckAccessLevel( tAccessLevel & level, tString const & authName )
 {
     tAccessLevel newLevel = se_userLevel.Get( authName );
-    if ( newLevel < level )
+    if ( newLevel < level || newLevel > tAccessLevel_DefaultAuthenticated )
     {
         level = newLevel;
     }
@@ -4384,7 +4390,7 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
         // minimal access level
         if ( accessLevel_ > tAccessLevel_Authenticated )
         {
-            accessLevel_ = tAccessLevel_Authenticated;
+            accessLevel_ = static_cast< tAccessLevel >( tAccessLevel_Program - 1 );
         }
 
         // take over the access level
@@ -4399,7 +4405,7 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
 
         if ( IsHuman() )
         {
-            if ( GetAccessLevel() < tAccessLevel_Authenticated )
+            if ( GetAccessLevel() != tAccessLevel_Default )
             {
                 se_SecretConsoleOut( tOutput( "$login_message_special", 
                                               GetName(), 
@@ -4589,7 +4595,6 @@ static bool se_IsNameTaken( tString const & name, ePlayerNetID const * exception
 
 #ifdef KRAWALL_SERVER
     // check for reserved nicknames
-    if ( !exception )
     {
         tString reservedFor = se_reserveNick.Get( name );
         if ( reservedFor != "" && 
@@ -5997,13 +6002,42 @@ void ePlayerNetID::SetChatting ( ChatFlags flag, bool chatting )
 // * team management *
 // *******************
 
-bool ePlayerNetID::TeamChangeAllowed() const {
-    return ( allowTeamChange_ || se_allowTeamChanges ) && ( suspended_ == 0 )
+bool ePlayerNetID::TeamChangeAllowed( bool informPlayer ) const {
+    if (!( allowTeamChange_ || se_allowTeamChanges ))
+    {
+        if ( informPlayer )
+        {
+            sn_ConsoleOut(tOutput("$player_teamchanges_disallowed"), Owner());
+        }
+        return false;
+    }
+        
+    int suspended = GetSuspended();
+    if ( suspended > 0 )
+    {
+        if ( informPlayer )
+        {
+            sn_ConsoleOut(tOutput("$player_teamchanges_suspended", suspended ), Owner());
+        }
+        return false;
+    }
+
 #ifdef KRAWALL_SERVER
        // only allow players with enough access level to enter the game, everyone is free to leave, though
-       && ( GetAccessLevel() <= AccessLevelRequiredToPlay() || CurrentTeam() )
+    if (!( GetAccessLevel() <= AccessLevelRequiredToPlay() || CurrentTeam() ))
+    {
+        if ( informPlayer )
+        {
+            sn_ConsoleOut(tOutput("$player_teamchanges_accesslevel",
+                                  tCurrentAccessLevel::GetName( GetAccessLevel() ),
+                                  tCurrentAccessLevel::GetName( AccessLevelRequiredToPlay() ) ),
+                          Owner());
+        }
+        return false;
+    }
 #endif
-    ;
+
+    return true;
 }
 
 // put a new player into a default team
@@ -6165,8 +6199,7 @@ void ePlayerNetID::CreateNewTeam()
     // check if the team change is legal
     tASSERT ( nCLIENT !=  sn_GetNetState() );
 
-    if(!TeamChangeAllowed()) {
-        sn_ConsoleOut(tOutput("$player_teamchanges_disallowed"), Owner());
+    if(!TeamChangeAllowed( true )) {
         return;
     }
 
@@ -6300,8 +6333,7 @@ void ePlayerNetID::ReceiveControlNet(nMessage &m)
 
             m >> newTeam;
 
-            if(!TeamChangeAllowed()) {
-                sn_ConsoleOut( tOutput( "$player_teamchanges_disallowed" ), Owner() );
+            if(!TeamChangeAllowed( true )) {
                 break;
             }
 
@@ -6433,7 +6465,7 @@ static unsigned short se_ReadUser( std::istream &s, ePlayerNetID * requester = 0
     else
     {
         // standard name lookup
-        ePlayerNetID * p = se_FindPlayerByName( name, requester );
+        ePlayerNetID * p = ePlayerNetID::FindPlayerByName( name, requester );
         if ( p )
         {
             return p->Owner();
@@ -6637,7 +6669,7 @@ static ePlayerNetID * ReadPlayer( std::istream & s )
         }
     }
 
-    return se_FindPlayerByName( name );
+    return ePlayerNetID::FindPlayerByName( name );
 }
 
 static void Kill_conf(std::istream &s)
@@ -6832,14 +6864,13 @@ public:
             ladder << "PLAYER_RENAMED " << oldLogName_  << " "  << logName << " " << nMachine::GetMachine(player_.Owner()).GetIP() << " " << screenName << "\n";
             se_SaveToLadderLog(ladder);
 
-
-            if ( bool(player_.GetVoter() ) )
+            if ( oldScreenName_ != screenName )
             {
-                player_.GetVoter()->PlayerChanged();
-            }
+                if ( bool(player_.GetVoter() ) )
+                {
+                    player_.GetVoter()->PlayerChanged();
+                }
 
-            if ( oldPrintName_ != printName )
-            {
                 mess << "$player_renamed";
 
                 sn_ConsoleOut(mess);
@@ -7337,21 +7368,23 @@ void ePlayerNetID::Suspend( int rounds )
         rounds = 0;
     }
 
-    if ( suspended_ == rounds )
+    int & suspended = AccessSuspended();
+
+    if ( suspended == rounds )
     {
         return;
     }
 
-    suspended_ = rounds;
+    suspended = rounds;
 
-    if ( suspended_ == 0 )
+    if ( suspended == 0 )
     {
         sn_ConsoleOut( tOutput( "$player_no_longer_suspended", GetColoredName() ) );
         FindDefaultTeam();
     }
     else
     {
-        sn_ConsoleOut( tOutput( "$player_suspended", GetColoredName(), suspended_ ) );
+        sn_ConsoleOut( tOutput( "$player_suspended", GetColoredName(), suspended ) );
         SetTeam( NULL );
     }
 }
@@ -7371,9 +7404,11 @@ void ePlayerNetID::LogScoreDifferences( void )
     {
         ePlayerNetID* p = se_PlayerNetIDs(i);
         p->LogScoreDifference();
+
+        int suspended = p->GetSuspended();
         
         // update suspension count
-        if ( p->suspended_ > 0 )
+        if ( suspended > 0 )
         {
             if ( p->CurrentTeam() && !p->NextTeam() )
             {
@@ -7381,7 +7416,7 @@ void ePlayerNetID::LogScoreDifferences( void )
             }
             else
             {
-                p->Suspend( p->suspended_ - 1 );
+                p->Suspend( suspended - 1 );
             }
         }
     }
@@ -7421,7 +7456,7 @@ static void se_allowTeamChangesPlayer(bool allow, std::istream &s) {
     if ( p )
     {
         sn_ConsoleOut( tOutput( (allow ? "$player_allowed_teamchange" : "$player_disallowed_teamchange"), p->GetName() ) );
-        p->TeamChangeAllowed( allow );
+        p->SetTeamChangeAllowed( allow );
     }
 }
 static void se_allowTeamChangesPlayer(std::istream &s) {
@@ -7435,3 +7470,29 @@ static tConfItemFunc se_disallowTeamChangesPlayerConf("DISALLOW_TEAM_CHANGE_PLAY
 static tAccessLevelSetter se_atcConfLevel( se_allowTeamChangesPlayerConf, tAccessLevel_TeamLeader );
 static tAccessLevelSetter se_dtcConfLevel( se_disallowTeamChangesPlayerConf, tAccessLevel_TeamLeader );
 
+//! accesses the suspension count
+int & ePlayerNetID::AccessSuspended()
+{
+    static int dummy;
+    dummy = 0;
+
+    if ( Owner() == 0 || !GetVoter() )
+    {
+        return dummy;
+    }
+
+    return GetVoter()->suspended_;
+}
+
+//! returns the suspension count
+int ePlayerNetID::GetSuspended() const
+{
+    int dummy = 0;
+
+    if ( Owner() == 0 || !GetVoter() )
+    {
+        return dummy;
+    }
+
+    return GetVoter()->suspended_;
+}

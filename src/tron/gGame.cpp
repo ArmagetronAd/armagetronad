@@ -1842,7 +1842,7 @@ void sg_HostGameMenu(){
 class gNetIdler: public rSysDep::rNetIdler
 {
 public:
-    virtual bool Wait() //!< wait for something to do, return true fi there is work
+    virtual bool Wait() //!< wait for something to do, return true if there is work
     {
         return sn_BasicNetworkSystem.Select( 0.1 );
     }
@@ -1850,7 +1850,6 @@ public:
     {
         tAdvanceFrame();
         sg_Receive();
-        tAdvanceFrame();
         sn_SendPlanned();
     }
 };
@@ -3755,9 +3754,13 @@ bool gGame::GameLoop(bool input){
 #endif
 
     if ( netstate != sn_GetNetState() )
-{
+    {
         return false;
     }
+
+    // do basic network receiving and sending. This pushes out all input the player makes as fast as possible.
+    sg_Receive();
+    sn_SendPlanned();
 
     bool synced = se_mainGameTimer && ( se_mainGameTimer->IsSynced() || ( stateNext >= GS_DELETE_OBJECTS || stateNext <= GS_CREATE_GRID ) );
 
@@ -3850,6 +3853,10 @@ bool gGame::GameLoop(bool input){
                 se_PauseGameTimer( gtime < sg_lastChatBreakTime && ePlayerNetID::WaitToLeaveChat() );
         }
 
+        // send game object updates
+        nNetObject::SyncAll();
+        sn_SendPlanned();
+
         if ( gtime<=-PREPARE_TIME+.5 || !goon || !synced )
         {
 #ifndef DEDICATED
@@ -3885,6 +3892,10 @@ bool gGame::GameLoop(bool input){
         // synced_ = true;
 
 #ifndef DEDICATED
+        // send game object updates
+        nNetObject::SyncAll();
+        sn_SendPlanned();
+
         if (input)
         {
             if (sr_glOut)
@@ -4033,13 +4044,7 @@ void sg_EnterGameCore( nNetState enter_state ){
         // do the regular simulation
         tAdvanceFrame();
 
-        sg_Receive();
-
         goon=GameLoop();
-
-        nNetObject::SyncAll();
-        tAdvanceFrame();
-        sn_SendPlanned();
 
         st_DoToDo();
     }
@@ -4126,6 +4131,18 @@ void Activate(bool act){
 #ifdef DEBUG
     return;
 #endif
+
+// another fullscreen fix ammendmend: avoid the short screen flicker
+// by ignoring deactivation events in fullscreen mode completely.
+#ifndef WIN32
+#ifndef MACOSX
+    if ( currentScreensetting.fullscreen && !act )
+    {
+        return;
+    }
+#endif
+#endif
+
     sr_Activate( act );
 
     if (!tRecorder::IsRunning() )

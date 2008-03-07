@@ -452,11 +452,19 @@ max_votes_per_voter_help            The maximum number of votes suggested by eac
 voting_start_decay_help				Number of seconds after that the non-voters start to get ignored.
 voting_decay_help					One non-voter is ignored everytime this many secons pass.
 voting_bias_help					Add virtual voters that oppose every change.
+voting_bias_kick_help				Add virtual voters that oppose every kick vote.
+voting_bias_suspend_help			Add virtual voters that oppose every suspend vote.
+voting_bias_include_help			Add virtual voters that oppose every include vote.
+voting_bias_command_help			Add virtual voters that oppose every command vote.
+
 voting_privacy_help					Controls logging of voting process. 2: nothing gets logged 1: vote submission is logged for the server admin 0: voting is logged for the server admin -1: vote submission is made public -2: everything is made public
 voting_spam_issue_help              The spam level of issuing a vote.
 voting_spam_reject_help             The spam level of getting your vote rejected.
+voting_harm_time_help               The minimum time in seconds between two harmful votes against the same player.
 voting_kick_time_help               The minimum time in seconds between two kick votes against the same player.
 voting_maturity_help                The minimum time in seconds a player needs to be online with the same name before he can issue votes.
+voting_suspend_rounds_help          The number of rounds "/vote suspend <player>" suspends a player for.
+voting_kick_minharm_help            Minimal number of harmful votes (suspension, kick,..) that need to have been issued (success is not required) against a player before a kick vote issued via the menu really results in a kick; otherwise, the result is a simple suspension.
 
 #********************************************
 #********************************************
@@ -1515,6 +1523,18 @@ kick_player_details_text			If accepted, \1 will be removed from the server.
 kick_player_text					Kick \1
 kick_player_help					Pressing enter or space on this menu item will issue a kick vote on that player.
 
+suspend_player_details_text			If accepted, \1 will be suspended for some rounds.
+suspend_player_text					Suspend \1
+
+vote_include_details_text			If accepted, the file \1 will be included as a configuration file.
+vote_include_text					Include \1
+vote_include_error					Include file \1 not found or not readable.\n
+vote_include_message				Including file \1. Only users of access level \2 or higher will receive the output.\n
+
+vote_command_details_text			If accepted, the console command "\1" will be executed on the server.
+vote_command_text					Command \1
+vote_command_message				Executing command "\1".\n
+
 #*************************************
 #*************************************
 #
@@ -2204,6 +2224,9 @@ zone_collapse_harmless      \1's zone collapses harmlessly for lack of enemy con
 
 player_teamleave_disallowed Sorry, does not work with automatic team assignment.\n
 player_teamchanges_disallowed Sorry, the administrator disabled team changes.\n
+player_teamchanges_suspended Sorry, you are still suspended from playing for the next \1 round(s).\n
+player_teamchanges_accesslevel Sorry, your access level is not high enough to play. You're \1, required would be \2.\n
+player_vote_accesslevel Sorry, your access level is not high enough to issue a vote of this type. You're \1, required would be \2.\n
 player_pingcharity_changed	Ping charity changed from \1 to \2.\n
 spam_protection_repeat  SPAM PROTECTION: you already said: \1\n
 spam_protection			SPAM PROTECTION: you are silenced for the next \1 seconds.\n
@@ -2434,6 +2457,8 @@ vote_toofew							Poll rejected, too few possible voters online.\n
 vote_submitted						Poll "\2" submitted by \1.\n
 vote_vote_for						\1 voted for Poll "\2".\n
 vote_vote_against					\1 voted against Poll "\2".\n
+vote_unknown_command                Unknown /vote command \1, available are: \2\n
+vote_kick_local                     Can't vote against local player/AI \1.\n
 
 #********************************************
 #********************************************
@@ -2580,7 +2605,10 @@ config_accesslevel_2        Moderator
 config_accesslevel_7        Team Leader
 config_accesslevel_8        Team Member
 config_accesslevel_12       Local User
-config_accesslevel_15       Authenticated
+config_accesslevel_15       Remote User
+config_accesslevel_16       Fallen from Grace
+config_accesslevel_17       Shunned
+config_accesslevel_19       Authenticated
 config_accesslevel_20       Program
 
 access_level_help           Changes the access level of a configuration item to make it available to lower ranked users
@@ -2665,7 +2693,14 @@ access_level_play_sliding_help Sliding minimal access level for playing; if enou
 access_level_play_sliders_help The access level required to play will only slide up if at least this many players of a higher level are online.
 access_level_play_changed      Access level required to play changed from \1 to \2.\n
 
-access_level_chat_timeout_help   Time in seconds between public announcements that someone wants to chat, but can't. Set to 0 to disable the public wanrings.
+access_level_vote_suspend_help    Minimal access level required to issue suspend votes.
+access_level_vote_kick_help    Minimal access level required to issue kick votes.
+access_level_vote_inclue_help    Minimal access level required to issue inclue votes.
+access_level_vote_include_execute_help    Minimal access level successful include votes will be executed at.
+access_level_vote_command_help    Minimal access level required to issue command votes.
+access_level_vote_command_execute_help    Minimal access level successful command votes will be executed at.
+
+access_level_chat_timeout_help   Time in seconds between public announcements that someone wants to chat, but can't. Set to 0 to disable the public warnings.
 access_level_chat_request   \10xRESETT would like to chat, but is not authorized yet. Would someone be so kind and say "/op \2" or "/promote \2"?\n
 access_level_chat_denied    0xff7f7fChat denied,0xffffff insufficient access level.\n
 access_level_op_denied      0xff7f7f\1 denied,0xffffff insufficient access level.\n

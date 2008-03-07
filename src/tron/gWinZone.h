@@ -172,6 +172,8 @@ private:
 
     REAL teamDistance_;                     //!< distance to the closest member of the owning team
 
+    bool touchy_;                           //!< flag set when the zone is "touchy", which makes it get conquered on the slightest enemy touch
+
     //! possible states
     enum State
     {

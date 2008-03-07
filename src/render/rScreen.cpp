@@ -1115,7 +1115,11 @@ void sr_Activate(bool active)
         rCallbackBeforeScreenModeChange::Exec();
 
     // Jonathans fullscreen bugfix.
-    #ifndef MACOSX
+    // z-man's ammendmend: apparently, doing this in Linux is painful as well.
+    // Only on Windows, you get a deactivation event when you ALT-TAB away
+    // from th application, then iconification is the right thing to do.
+    // On Linux at least, there is no standard alt-tab for fullscreen applications.
+#ifdef WIN32
     if ( currentScreensetting.fullscreen && !active )
     {
         SDL_WM_IconifyWindow();

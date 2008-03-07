@@ -175,7 +175,6 @@ private:
 
     ePlayerNetID& operator= (const ePlayerNetID&); // forbid copy constructor
 
-    int             suspended_;  //! number of rounds the player is currently suspended from playing
     bool			spectating_; //!< are we currently spectating? Spectators don't get assigned to teams.
     bool			stealth_; //!< does this player want to hide his/her identity?
     bool			chatting_;   //!< are we currently chatting?
@@ -233,8 +232,8 @@ public:
     bool StealthMode() const { return stealth_; }
 
     // team management
-    bool TeamChangeAllowed() const; //!< is this player allowed to change teams?
-    void TeamChangeAllowed(bool allowed) {allowTeamChange_ = allowed;} //!< set if this player should always be allowed to change teams
+    bool TeamChangeAllowed( bool informPlayer = false ) const; //!< is this player allowed to change teams?
+    void SetTeamChangeAllowed(bool allowed) {allowTeamChange_ = allowed;} //!< set if this player should always be allowed to change teams
 
     eTeam* NextTeam()    const { return nextTeam; }		// return the team I will be next round
     eTeam* CurrentTeam() const { return currentTeam; }	// return the team I am in
@@ -294,7 +293,7 @@ public:
     void SetSilenced( bool silenced ) { silenced_ = silenced; }
     bool& AccessSilenced( void ) { return silenced_; }
 
-    eVoter * GetVoter(){return voter_;}     // returns our voter
+    eVoter * GetVoter() const {return voter_;}     // returns our voter
     void CreateVoter();						// create our voter or find it
     static void SilenceMenu();				// menu where you can silence players
     static void PoliceMenu();				// menu where you can silence and kick players
@@ -358,21 +357,23 @@ public:
     void BeNotLoggedIn() { SetAccessLevel( tAccessLevel_Program ); }
     tAccessLevel GetLastAccessLevel() const { return lastAccessLevel; }
 
-    void UpdateName();                                           //! update the player name from the client's wishes
-    static void FilterName( tString const & in, tString & out ); //! filters a name (removes unprintables, color codes and spaces)
-    static tString FilterName( tString const & in );             //! filters a name (removes unprintables, color codes and spaces)
+    static ePlayerNetID * FindPlayerByName( tString const & name, ePlayerNetID * requester = 0 ); //!< finds a player by name using lax name matching. Reports errors to the console or to the requesting player.
+
+    void UpdateName();                                           //!< update the player name from the client's wishes
+    static void FilterName( tString const & in, tString & out ); //!< filters a name (removes unprintables, color codes and spaces)
+    static tString FilterName( tString const & in );             //!< filters a name (removes unprintables, color codes and spaces)
 private:
-    tColoredString  nameFromClient_;        //! this player's name as the client wants it to be. Avoid using it when possilbe.
-    tColoredString  nameFromServer_;        //! this player's name as the server wants it to be. Avoid using it when possilbe.
-    tColoredString  coloredName_;           //! this player's name, cleared by the server. Use this for onscreen screen display.
-    tString         name_;                  //! this player's name without colors.
-    tString         userName_;              //! this player's name, cleared for system logs. Use for writing to files or comparing with admin input.
+    tColoredString  nameFromClient_;        //!< this player's name as the client wants it to be. Avoid using it when possilbe.
+    tColoredString  nameFromServer_;        //!< this player's name as the server wants it to be. Avoid using it when possilbe.
+    tColoredString  coloredName_;           //!< this player's name, cleared by the server. Use this for onscreen screen display.
+    tString         name_;                  //!< this player's name without colors.
+    tString         userName_;              //!< this player's name, cleared for system logs. Use for writing to files or comparing with admin input.
 
 #ifdef KRAWALL_SERVER
-    tString         rawAuthenticatedName_;  //! the raw authenticated name in user@authority form.
+    tString         rawAuthenticatedName_;  //!< the raw authenticated name in user@authority form.
 #endif
 
-    REAL            wait_;                  //! time in seconds WaitToLeaveChat() will wait for this player
+    REAL            wait_;                  //!< time in seconds WaitToLeaveChat() will wait for this player
 
     void			MyInitAfterCreation();
 
@@ -408,6 +409,12 @@ public:
 private:
     inline ePlayerNetID & SetNameFromClient( tColoredString const & nameFromClient );   //!< Sets this player's name as the client wants it to be. Avoid using it when possilbe.
     inline ePlayerNetID & SetColoredName( tColoredString const & coloredName ); //!< Sets this player's name, cleared by the server. Use this for onscreen screen display.
+
+    //! accesses the suspension count
+    int & AccessSuspended();
+
+    //! returns the suspension count
+    int GetSuspended() const;
 };
 
 extern tList<ePlayerNetID> se_PlayerNetIDs;
