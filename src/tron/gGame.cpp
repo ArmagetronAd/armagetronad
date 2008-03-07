@@ -3080,9 +3080,6 @@ void gGame::StateUpdate(){
 
         // unsigned short int mes1 = 1, mes2 = 1, mes3 = 1, mes4 = 1, mes5 = 1;
 
-        // now would be a good time to tend for pending tasks
-        nAuthentication::OnBreak();
-
         switch(state){
         case GS_DELETE_GRID:
             // sr_con.autoDisplayAtNewline=true;
@@ -3352,6 +3349,10 @@ void gGame::StateUpdate(){
         default:
             break;
         }
+
+        // now would be a good time to tend for pending tasks
+        nAuthentication::OnBreak();
+
         if (sn_GetNetState()==nSERVER){
             NetSyncIdle();
             RequestSync();
