@@ -2853,7 +2853,11 @@ static void se_ListPlayers( ePlayerNetID * receiver )
         }
         if ( tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel )
         {
-            tos << ", IP = " << p2->GetMachine().GetIP();
+            tString IP = p2->GetMachine().GetIP();
+            if ( IP.Len() > 1 )
+            {
+                tos << ", IP = " << IP;
+            }
         }
         tos << "\n";
 
