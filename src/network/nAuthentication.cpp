@@ -950,9 +950,11 @@ void nLoginProcess::Authorize()
         // exploitable information for password theft: the scrambled password
         // stored in the incoming network stream has an unknown salt value. )
         static char const * section = "AUTH_RESULT";
+        tRecorder::Playback( section, username );
         tRecorder::Playback( section, success );
         tRecorder::Playback( section, authority );
         tRecorder::Playback( section, error );
+        tRecorder::Record( section, username );
         tRecorder::Record( section, success );
         tRecorder::Record( section, authority );
         tRecorder::Record( section, error );
