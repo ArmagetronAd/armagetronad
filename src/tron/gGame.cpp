@@ -67,7 +67,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifdef ENABLE_ZONESV2
 #include "zone/zZone.h"
 #endif
-#include "gWinZone.cpp"
+#include "gWinZone.h"
 #include "eVoter.h"
 #include "tRecorder.h"
 #include "gStatistics.h"
