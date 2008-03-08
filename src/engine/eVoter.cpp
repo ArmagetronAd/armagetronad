@@ -43,6 +43,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ePlayer.h"
 #include "eGrid.h"
 
+#ifndef DEDICATED
+// use server controlled votes (just for the client, to avoid UPGRADE messages)
+static bool se_useServerControlledKick = false;
+static nSettingItem< bool > se_usc( "VOTE_USE_SERVER_CONTROLLED_KICK", se_useServerControlledKick );
+#endif
+
 // basic vote timeout value
 static unsigned short se_votingItemID = 0;
 static float se_votingTimeout = 300.0f;
@@ -201,10 +207,13 @@ public:
         if ( !DoFillFromMessage( m ) )
             return false;
 
-        if ( !CheckValid( m.SenderID() ) )
-            return false;
+        if ( sn_GetNetState() == nSERVER )
+        {
+            if ( !CheckValid( m.SenderID() ) )
+                return false;
 
-        ReBroadcast( m.SenderID() );
+            ReBroadcast( m.SenderID() );
+        }
         return true;
     }
 
@@ -552,6 +561,11 @@ public:
     // checks whether the vote is a valid vote to make
     bool CheckValid( int senderID )
     {
+        if ( sn_GetNetState() != nSERVER )
+        {
+            return true;
+        }
+
         // fill suggestor
         if ( !suggestor_ )
         {
@@ -829,7 +843,7 @@ protected:
     {
         m >> description_;
         m >> details_;
-        return true;
+        return eVoteItem::DoFillFromMessage( m );
     };
 
     virtual void DoFillToMessage( nMessage& m ) const
@@ -881,7 +895,7 @@ static void se_HandleServerVoteChanged( nMessage& m )
 
 static void se_HandleNewServerVote( nMessage& m )
 {
-    if ( eVoteItem::AcceptNewVote( m ) )
+    if ( sn_GetNetState() != nCLIENT ||  eVoteItem::AcceptNewVote( m ) )
     {
         // accept message
         eVoteItem* item = tNEW( eVoteItemServerControlled )();
@@ -1350,7 +1364,7 @@ protected:
             {
                 // no objection? Broadcast it to everyone.
                 item->Update();
-                item->ReBroadcast( p->Owner() );
+                item->ReBroadcast( senderID );
             }
 
             // and cancel this item here.

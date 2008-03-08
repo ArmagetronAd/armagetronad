@@ -2579,9 +2579,6 @@ void gGame::StateUpdate(){
 
         // unsigned short int mes1 = 1, mes2 = 1, mes3 = 1, mes4 = 1, mes5 = 1;
 
-       // now would be a good time to tend for pending tasks
-        nAuthentication::OnBreak();
-
         switch (state){
         case GS_DELETE_GRID:
             // sr_con.autoDisplayAtNewline=true;
@@ -2668,6 +2665,19 @@ void gGame::StateUpdate(){
             init_game_objects(grid);
 
             ePlayerNetID::RankingLadderLog();
+
+            // do round begin stuff
+            {
+                const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+                for (int i=gameObjects.Len()-1;i>=0;i--)
+                {
+                    eGameObject * e = gameObjects(i);
+                    if ( e )
+                    {
+                        e->OnRoundBegin();
+                    }
+                }
+            }
 
             // do the first analysis of the round, now is the time to get it used to the number of teams
             Analysis( -1000 );
@@ -2847,6 +2857,10 @@ void gGame::StateUpdate(){
         default:
             break;
         }
+
+        // now would be a good time to tend for pending tasks
+        nAuthentication::OnBreak();
+
         if (sn_GetNetState()==nSERVER){
             NetSyncIdle();
             RequestSync();

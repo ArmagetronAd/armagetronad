@@ -157,6 +157,10 @@ public:
         return w;
     }
 
+    //! called when the round begins, after all game objects have been created,
+    //! before the first network sync is sent out.
+    virtual void OnRoundBegin();
+
     //! called when the round ends
     virtual void OnRoundEnd();
 
