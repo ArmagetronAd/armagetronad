@@ -43,6 +43,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ePlayer.h"
 #include "eGrid.h"
 
+#ifndef DEDICATED
+// use server controlled votes (just for the client, to avoid UPGRADE messages)
+static bool se_useServerControlledKick = false;
+static nSettingItem< bool > se_usc( "VOTE_USE_SERVER_CONTROLLED_KICK", se_useServerControlledKick );
+#endif
+
 // basic vote timeout value
 static unsigned short se_votingItemID = 0;
 static float se_votingTimeout = 300.0f;
