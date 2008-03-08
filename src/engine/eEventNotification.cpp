@@ -33,7 +33,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nNetwork.h"
 #include "tString.h"
 #ifdef MACOSX_XCODE
+#ifndef DEDICATED
 #   include "AAGrowlBridge.h"
+#endif
 #endif
 
 void se_eventNotificationHandle( nMessage &m );
@@ -47,7 +49,9 @@ void se_eventNotificationHandle( nMessage &m )
     m >> title;
     m >> message;
 #ifdef MACOSX_XCODE
+#ifndef DEDICATED
     Growl(title, message);
+#endif
 #endif
 }
 
