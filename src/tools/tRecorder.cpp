@@ -218,7 +218,7 @@ std::istream & operator >> ( std::istream & s, tLineString & line )
     line.Clear();
 
     // copy line, replacing "\n" with real newline
-    for(int i=0; i<read.Len(); ++i)
+    for(int i=0; i<read.Len()-1; ++i)
     {
         char c = read[i];
         if ( c != '\\' || i+1 == read.Len() || ( read[i+1] != 'n' && read[i+1] != '\\' ) )
