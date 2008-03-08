@@ -807,18 +807,26 @@ bool gBaseZoneHack::Timestep( REAL time )
     {
         // let zone vanish
         SetReferenceTime();
+
+        // let it light up in agony
+        if ( sg_collapseSpeed < .4 )
+        {
+            color_.r = color_.g = color_.b = 1;
+        }
+
         SetExpansionSpeed( -GetRadius()*sg_collapseSpeed );
         SetRotationAcceleration( -GetRotationSpeed()*.4 );
         RequestSync();
 
         currentState_ = State_Conquered;
     }
-    else if ( currentState_ == State_Conquered && GetRotationSpeed() < -.3 )
+    else if ( currentState_ == State_Conquered && GetRotationSpeed() < 0 )
     {
         // let zone vanish
         SetReferenceTime();
-        SetRotationSpeed( -.3 );
+        SetRotationSpeed( 0 );
         SetRotationAcceleration( 0 );
+        color_.r = color_.g = color_.b = .5;
         RequestSync();
     }
 
