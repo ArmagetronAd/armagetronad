@@ -201,10 +201,13 @@ public:
         if ( !DoFillFromMessage( m ) )
             return false;
 
-        if ( !CheckValid( m.SenderID() ) )
-            return false;
+        if ( sn_GetNetState() == nSERVER )
+        {
+            if ( !CheckValid( m.SenderID() ) )
+                return false;
 
-        ReBroadcast( m.SenderID() );
+            ReBroadcast( m.SenderID() );
+        }
         return true;
     }
 
@@ -542,6 +545,11 @@ public:
     // checks whether the vote is a valid vote to make
     bool CheckValid( int senderID )
     {
+        if ( sn_GetNetState() != nSERVER )
+        {
+            return true;
+        }
+
         // fill suggestor
         if ( !suggestor_ )
         {
@@ -819,7 +827,7 @@ protected:
     {
         m >> description_;
         m >> details_;
-        return true;
+        return eVoteItem::DoFillFromMessage( m );
     };
 
     virtual void DoFillToMessage( nMessage& m ) const
@@ -871,7 +879,7 @@ static void se_HandleServerVoteChanged( nMessage& m )
 
 static void se_HandleNewServerVote( nMessage& m )
 {
-    if ( eVoteItem::AcceptNewVote( m ) )
+    if ( sn_GetNetState() != nCLIENT ||  eVoteItem::AcceptNewVote( m ) )
     {
         // accept message
         eVoteItem* item = tNEW( eVoteItemServerControlled )();
