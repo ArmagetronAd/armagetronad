@@ -145,6 +145,7 @@ private:
     int teamListID;                      // ID in the list of the team
 
     bool							silenced_;		// flag indicating whether the player has been silenced
+    int                             suspended_;     //! number of rounds the player is currently suspended from playing
 
     nTimeAbsolute					timeJoinedTeam; // the time the player joined the team he is in now
     tCONTROLLED_PTR(eTeam)			nextTeam;		// the team we're in ( logically )

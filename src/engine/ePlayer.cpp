@@ -3487,6 +3487,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
     stealth_            = false;
     chatFlags_			= 0;
     disconnected		= false;
+    suspended_          = 0;
 
     loginWanted = false;
     
@@ -3549,6 +3550,7 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     spectating_ =false;
     stealth_    =false;
     disconnected=false;
+    suspended_  = 0;
     chatFlags_	=0;
 
     r = g = b = 15;
@@ -3644,6 +3646,12 @@ void ePlayerNetID::MyInitAfterCreation()
 
         // clear old legacy spectator that may be lurking around
         se_ClearLegacySpectator( Owner() );
+
+        // get suspension count
+        if ( GetVoter() )
+        {
+            suspended_ = GetVoter()->suspended_;
+        }
     }
 
     this->wait_ = 0;
@@ -6907,6 +6915,12 @@ void ePlayerNetID::UnregisterWithMachine( void )
 {
     if ( registeredMachine_ )
     {
+        // store suspension count
+        if ( GetVoter() )
+        {
+            GetVoter()->suspended_ = suspended_;
+        }
+
         registeredMachine_->RemovePlayer();
         registeredMachine_ = 0;
     }
@@ -7087,26 +7101,11 @@ static tAccessLevelSetter se_dtcConfLevel( se_disallowTeamChangesPlayerConf, tAc
 //! accesses the suspension count
 int & ePlayerNetID::AccessSuspended()
 {
-    static int dummy;
-    dummy = 0;
-
-    if ( Owner() == 0 || !GetVoter() )
-    {
-        return dummy;
-    }
-
-    return GetVoter()->suspended_;
+    return suspended_;
 }
 
 //! returns the suspension count
 int ePlayerNetID::GetSuspended() const
 {
-    int dummy = 0;
-
-    if ( Owner() == 0 || !GetVoter() )
-    {
-        return dummy;
-    }
-
-    return GetVoter()->suspended_;
+    return suspended_;
 }
