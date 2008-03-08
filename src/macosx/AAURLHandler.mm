@@ -28,7 +28,7 @@
 
 #include "AAURLHandler.h"
 #include "tString.h"
-#include "gServerFavorites.h"
+#include "nServerInfo.h"
 #include "gCommandLineJumpStart.h"
 
 @interface AAURLHandler : NSObject
@@ -64,7 +64,7 @@
         tString servername;
         tString port;
         ExtractConnectionInformation( raw, servername, port );
-        gServerInfoFavorite server( servername, port.ToInt() );
+        nServerInfoRedirect server( servername, port.ToInt() );
         AAURLHandlerConnect( &server );
     }
 }
