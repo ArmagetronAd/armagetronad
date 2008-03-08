@@ -1,10 +1,16 @@
 Changes since 0.2.8.2:
 
   New settings and commands:
+- FORTRESS_COLLAPSE_SPEED: tune the collapse speed of fortress zones.
 - VOTE_KICK_REASON: default reason given on kick votes.
 - "/vote" chat interface to votes; "/vote kick <player>" issues a kick vote.
 - new vote type "/vote suspend <player>" suspends a player for 
   VOTING_SUSPEND_ROUNDS rounds.
+- new vote type "/vote include <file>", includes configuration file
+  vote/<file>.
+- new vote type "/vote command <command>" executes console command
+  <command>. (Both that and /vote include are by default only available
+  to moderators).
 - VOTING_HARM_TIME: time between all harmful votes against a player
 - VOTING_KICK_MINHARM: auto-transform the first few menu issued kick 
   votes to suspensions
