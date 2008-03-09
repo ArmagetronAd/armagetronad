@@ -3295,7 +3295,7 @@ void gGame::StateUpdate(){
             sr_con.autoDisplayAtNewline=false;
 #ifdef DEDICATED
             {
-                // safe current players in a file
+                // save current players into a file
                 cp();
 
                 if ( sg_NumUsers() <= 0 )
