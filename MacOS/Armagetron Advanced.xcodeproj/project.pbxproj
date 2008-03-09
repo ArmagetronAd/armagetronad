@@ -12,6 +12,7 @@
 		9B61EBC30B5FEF010018DEA7 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 9B61EBBC0B5FEF010018DEA7 /* scripts */; };
 		9B83FE950B12161600878E8A /* Growl-WithInstaller.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9B83FF0F0B121B3100878E8A /* Growl-WithInstaller.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
+		9BB5B9280D84605700BF5F1C /* InfoPlist.strings.in in Resources */ = {isa = PBXBuildFile; fileRef = 9BB5B9260D84605700BF5F1C /* InfoPlist.strings.in */; };
 		9BB7B3FF0D8246A2004FE8C3 /* scripts in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9B61EBBC0B5FEF010018DEA7 /* scripts */; };
 		9BB7B4000D8246A2004FE8C3 /* config in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAE20A2CAE0700D7033C /* config */; };
 		9BB7B4010D8246A2004FE8C3 /* language in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAFE0A2CAE1D00D7033C /* language */; };
@@ -67,10 +68,8 @@
 		9BB7B6650D830322004FE8C3 /* AAGrowlPlugin.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6500D830321004FE8C3 /* AAGrowlPlugin.mm */; };
 		9BB7B6670D830322004FE8C3 /* AARuby.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6520D830321004FE8C3 /* AARuby.mm */; };
 		9BB7B6690D830322004FE8C3 /* AAURLHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6540D830321004FE8C3 /* AAURLHandler.mm */; };
-		9BB7B66F0D830322004FE8C3 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9BB7B65D0D830321004FE8C3 /* Info.plist */; };
 		9BB7B6710D830322004FE8C3 /* SDLMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B65F0D830321004FE8C3 /* SDLMain.mm */; };
 		9BB7B6730D830322004FE8C3 /* version.h.in in Resources */ = {isa = PBXBuildFile; fileRef = 9BB7B6610D830322004FE8C3 /* version.h.in */; };
-		9BB7B6890D830352004FE8C3 /* InfoPlist.strings.in in Resources */ = {isa = PBXBuildFile; fileRef = 9BB7B6870D830352004FE8C3 /* InfoPlist.strings.in */; };
 		9BB7B6AF0D830366004FE8C3 /* md5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6900D830365004FE8C3 /* md5.cpp */; };
 		9BB7B6B10D830366004FE8C3 /* nAuthentication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6920D830365004FE8C3 /* nAuthentication.cpp */; };
 		9BB7B6B30D830366004FE8C3 /* nConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6940D830365004FE8C3 /* nConfig.cpp */; };
@@ -401,6 +400,8 @@
 		9B61EBBC0B5FEF010018DEA7 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = ../scripts; sourceTree = SOURCE_ROOT; };
 		9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "Growl-WithInstaller.framework"; path = "/Library/Frameworks/ArmagetronAdvanced/current/Growl-WithInstaller.framework"; sourceTree = "<absolute>"; };
 		9B9E56300D81D962008DD17D /* shared.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = shared.xcconfig; sourceTree = "<group>"; };
+		9BB5B9240D84604400BF5F1C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
+		9BB5B9270D84605700BF5F1C /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = English; path = InfoPlist.strings.in; sourceTree = "<group>"; };
 		9BB7B5A60D8302FA004FE8C3 /* eAdvWall.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eAdvWall.cpp; sourceTree = "<group>"; };
 		9BB7B5A70D8302FA004FE8C3 /* eAdvWall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eAdvWall.h; sourceTree = "<group>"; };
 		9BB7B5A80D8302FA004FE8C3 /* eAuthentication.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eAuthentication.cpp; sourceTree = "<group>"; };
@@ -467,7 +468,6 @@
 		9BB7B65E0D830321004FE8C3 /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDLMain.h; sourceTree = "<group>"; };
 		9BB7B65F0D830321004FE8C3 /* SDLMain.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SDLMain.mm; sourceTree = "<group>"; };
 		9BB7B6610D830322004FE8C3 /* version.h.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = version.h.in; sourceTree = "<group>"; };
-		9BB7B6880D830352004FE8C3 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = English; path = InfoPlist.strings.in; sourceTree = "<group>"; };
 		9BB7B6900D830365004FE8C3 /* md5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = md5.cpp; sourceTree = "<group>"; };
 		9BB7B6910D830365004FE8C3 /* md5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = md5.h; sourceTree = "<group>"; };
 		9BB7B6920D830365004FE8C3 /* nAuthentication.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nAuthentication.cpp; sourceTree = "<group>"; };
@@ -942,7 +942,7 @@
 		9BB7B6860D830352004FE8C3 /* English.lproj */ = {
 			isa = PBXGroup;
 			children = (
-				9BB7B6870D830352004FE8C3 /* InfoPlist.strings.in */,
+				9BB5B9260D84605700BF5F1C /* InfoPlist.strings.in */,
 			);
 			name = English.lproj;
 			path = ../src/macosx/English.lproj;
@@ -1293,6 +1293,7 @@
 		9BD7DADF0A2CAC6400D7033C /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				9BB5B9240D84604400BF5F1C /* Info.plist */,
 				9BB7B6860D830352004FE8C3 /* English.lproj */,
 				9B61EBBC0B5FEF010018DEA7 /* scripts */,
 				9BD7DB7D0A2CE35600D7033C /* Armagetron Advanced.icns */,
@@ -1405,9 +1406,8 @@
 				9BD7DB770A2CE28500D7033C /* SDLMain.nib in Resources */,
 				9BD7DB7E0A2CE35600D7033C /* Armagetron Advanced.icns in Resources */,
 				9B61EBC30B5FEF010018DEA7 /* scripts in Resources */,
-				9BB7B66F0D830322004FE8C3 /* Info.plist in Resources */,
 				9BB7B6730D830322004FE8C3 /* version.h.in in Resources */,
-				9BB7B6890D830352004FE8C3 /* InfoPlist.strings.in in Resources */,
+				9BB5B9280D84605700BF5F1C /* InfoPlist.strings.in in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1777,10 +1777,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		9BB7B6870D830352004FE8C3 /* InfoPlist.strings.in */ = {
+		9BB5B9260D84605700BF5F1C /* InfoPlist.strings.in */ = {
 			isa = PBXVariantGroup;
 			children = (
-				9BB7B6880D830352004FE8C3 /* English */,
+				9BB5B9270D84605700BF5F1C /* English */,
 			);
 			name = InfoPlist.strings.in;
 			sourceTree = "<group>";
