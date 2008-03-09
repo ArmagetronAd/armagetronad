@@ -6977,6 +6977,8 @@ void ePlayerNetID::ResetScoreDifferences( void )
         if ( bool(p->Object()) && p->IsHuman() )
             p->lastScore_ = p->score;
     }
+
+    eTeam::ResetScoreDifferences();
 }
 
 // *******************************************************************************
@@ -7048,6 +7050,8 @@ void ePlayerNetID::LogScoreDifferences( void )
             }
         }
     }
+
+    eTeam::LogScoreDifferences();
 }
 
 // *******************************************************************************
@@ -7068,7 +7072,7 @@ void ePlayerNetID::LogScoreDifference( void )
         lastScore_ = IMPOSSIBLY_LOW_SCORE;
         ret << "ROUND_SCORE " << scoreDifference << " " << GetUserName();
         if ( currentTeam )
-            ret << " " << FilterName( currentTeam->Name() ) << " " << currentTeam->Score();
+            ret << " " << FilterName( currentTeam->Name() );
         ret << "\n";
         se_SaveToLadderLog( ret );
     }
