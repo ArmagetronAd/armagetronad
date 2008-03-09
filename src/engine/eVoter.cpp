@@ -155,13 +155,11 @@ static tSettingItem< tAccessLevel > se_accessLevelVoteCommandSI( "ACCESS_LEVEL_V
 static tAccessLevel se_accessLevelVoteCommandExecute = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_accessLevelVoteCommandExecuteSI( "ACCESS_LEVEL_VOTE_COMMAND_EXECUTE", se_accessLevelVoteCommandExecute );
 
+#endif
+
 static REAL se_defaultVotesSuspendLength = 3;
 static tSettingItem< REAL > se_defaultVotesSuspendLenght_Conf( "VOTING_SUSPEND_DEFAULT", se_defaultVotesSuspendLength );
 static REAL se_votesSuspendTimeout = 0;
-
-#endif
-
-
 
 static eVoter* se_GetVoter( const nMessage& m )
 {
