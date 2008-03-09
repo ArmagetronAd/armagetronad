@@ -3314,7 +3314,7 @@ void gGame::StateUpdate(){
                 if ( sg_waitForExternalScript )
                 {
                     se_SaveToLadderLog("WAIT_FOR_EXTERNAL_SCRIPT\n");
-                    REAL waitingSince = tSysTimeFloat();
+                    // REAL waitingSince = tSysTimeFloat();
                 }
                 while ( sg_waitForExternalScript && timeout > tSysTimeFloat())
                 {
