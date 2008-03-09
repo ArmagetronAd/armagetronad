@@ -219,6 +219,9 @@ win_zone_initial_size_help    Taille initiale de la "Instant Win Zone"
 
 game_timeout_help             Donne approximativement le temps maximum entre les rounds
 
+wait_for_external_script_help Let the server wait for an external script between two rounds until the script switches this setting back to 0.
+wait_for_external_script_timeout_help If the server has been paused by WAIT_FOR_EXTERNAL_SCRIPT for more seconds than this, kickstart the game.
+
 #********************************************
 #********************************************
 #

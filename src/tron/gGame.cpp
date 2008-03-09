@@ -118,6 +118,12 @@ static nSettingItem<tString> conf_mapuri("MAP_URI",mapuri);
 
 #define DEFAULT_MAP "Anonymous/polygon/regular/square-1.0.1.aamap.xml"
 static tString mapfile(DEFAULT_MAP);
+
+static bool sg_waitForExternalScript = false;
+static tSettingItem< bool > sg_waitForExternalScriptConf( "WAIT_FOR_EXTERNAL_SCRIPT", sg_waitForExternalScript );
+
+static REAL sg_waitForExternalScriptTimeout = 3;
+static tSettingItem<REAL> sg_waitForExternalScriptTimeoutConf( "WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT", sg_waitForExternalScriptTimeout );
 /*
 static void sg_ParseMap ( gParser * aParser, tString map_file );
 static void change_mapfile(std::istream &s)
@@ -3302,6 +3308,22 @@ void gGame::StateUpdate(){
                     goon = 0;
 
                 Analysis(0);
+
+                // wait for external script to end its work if needed
+                REAL timeout = tSysTimeFloat() + sg_waitForExternalScriptTimeout;
+                if ( sg_waitForExternalScript )
+                {
+                    se_SaveToLadderLog("WAIT_FOR_EXTERNAL_SCRIPT\n");
+                    REAL waitingSince = tSysTimeFloat();
+                }
+                while ( sg_waitForExternalScript && timeout > tSysTimeFloat())
+                {
+                    sr_Read_stdin();
+
+                    // wait for network messages
+                    sn_BasicNetworkSystem.Select( 0.1f );
+                    gGame::NetSyncIdle();
+                }
 
                 {
                     std::ifstream s;
