@@ -154,7 +154,14 @@ static tSettingItem< tAccessLevel > se_accessLevelVoteCommandSI( "ACCESS_LEVEL_V
 // however, the access level of the vote submitter)
 static tAccessLevel se_accessLevelVoteCommandExecute = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_accessLevelVoteCommandExecuteSI( "ACCESS_LEVEL_VOTE_COMMAND_EXECUTE", se_accessLevelVoteCommandExecute );
+
+static REAL se_defaultVotesSuspendLength = 3;
+static tSettingItem< REAL > se_defaultVotesSuspendLenght_Conf( "VOTING_SUSPEND_DEFAULT", se_defaultVotesSuspendLength );
+static REAL se_votesSuspendTimeout = 0;
+
 #endif
+
+
 
 static eVoter* se_GetVoter( const nMessage& m )
 {
@@ -234,7 +241,7 @@ public:
                 sn_ConsoleOut( voteMessage );	// broadcast it
             else if ( se_votingPrivacy <= 1 )
                 con << voteMessage;				// print it for the server admin
-
+		
             static nVersionFeature serverControlledVotes( 10 );
 
             // create messages for old and new clients
@@ -556,6 +563,14 @@ public:
             return true;
         }
 
+	if ( se_votesSuspendTimeout > tSysTimeFloat() )
+	{
+		sn_ConsoleOut(tOutput("$vote_rejected_voting_suspended"),
+                          senderID );
+
+		return false;
+	}
+
         // fill suggestor
         if ( !suggestor_ )
         {
@@ -656,14 +671,17 @@ private:
 
 tList< eVoteItem > eVoteItem::items_;				// list of vote items
 
-void se_CancelAllVotes( std::istream & )
+void se_CancelAllVotes( bool announce )
 {
     if ( sn_GetNetState() == nCLIENT )
     {
         return;
     }
 
-    sn_ConsoleOut( tOutput( "$vote_cancel_all" ) );
+    if (announce)
+    {
+        sn_ConsoleOut( tOutput( "$vote_cancel_all" ) );
+    }
 
     tList< eVoteItem > const & items = eVoteItem::GetItems();
     
@@ -673,7 +691,56 @@ void se_CancelAllVotes( std::istream & )
     }
 }
 
+void se_CancelAllVotes( std::istream & )
+{
+	se_CancelAllVotes ( true );
+}
+
 static tConfItemFunc se_cancelAllVotes_conf( "VOTES_CANCEL", &se_CancelAllVotes );
+
+
+
+
+
+void se_votesSuspend( REAL minutes, bool announce, std::istream & s )
+{
+    if ( sn_GetNetState() == nCLIENT )
+    {
+        return;
+    }
+
+    if ( minutes > 0)
+    {
+        s >> minutes;
+    }
+
+    se_CancelAllVotes( false );
+
+    se_votesSuspendTimeout = tSysTimeFloat() + ( minutes * 60 );
+
+    if ( announce && minutes > 0 )
+    {
+        sn_ConsoleOut( tOutput( "$voting_suspended", minutes ) );
+    }
+    else if ( announce && minutes <= 0 )
+    {
+    	sn_ConsoleOut( tOutput( "$voting_unsuspended" ) );
+    }
+
+}
+
+void se_SuspendVotes( std::istream & s )
+{
+    se_votesSuspend(  se_defaultVotesSuspendLength, true, s );
+}
+void se_UnSuspendVotes( std::istream & s )
+{
+    se_votesSuspend( 0, true, s );
+}
+
+static tConfItemFunc se_suspendVotes_conf( "VOTING_SUSPEND", &se_SuspendVotes );
+static tConfItemFunc se_unSuspendVotes_conf( "VOTING_UNSUSPEND", &se_UnSuspendVotes );
+
 
 static nDescriptor vote_handler(230,eVoteItem::GetControlMessage,"vote cast");
 
