@@ -1383,7 +1383,7 @@ static void sg_copySettings()
     gArena::SetSizeMultiplier 	( exponent( sg_currentSettings->sizeFactor ) );
 }
 
-void update_settings()
+void update_settings( bool const * goon )
 {
     if (sn_GetNetState()!=nCLIENT)
     {
@@ -1393,7 +1393,7 @@ void update_settings()
             bool restarted = false;
 
             REAL timeout = tSysTimeFloat() + 3.0f;
-            while ( sg_NumHumans() <= 0 && sg_NumUsers() > 0 )
+            while ( sg_NumHumans() <= 0 && sg_NumUsers() > 0 && ( !goon || *goon ) )
             {
                 if ( !restarted && bool(sg_currentGame) )
                 {
@@ -1410,11 +1410,11 @@ void update_settings()
                     sn_ConsoleOut(o2);
 
                     timeout = tSysTimeFloat() + 10.0f;
-
-                    // do tasks
-                    st_DoToDo();
-                    nAuthentication::OnBreak();
                 }
+
+                // do tasks
+                st_DoToDo();
+                nAuthentication::OnBreak();
 
                 // kick spectators and chatbots
                 nMachine::KickSpectators();
@@ -3111,7 +3111,7 @@ void gGame::StateUpdate(){
             // transfer game settings
             if ( nCLIENT != sn_GetNetState() )
             {
-                update_settings();
+                update_settings( &goon );
                 ePlayerNetID::RemoveChatbots();
             }
 
