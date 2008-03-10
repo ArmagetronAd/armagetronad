@@ -1568,7 +1568,9 @@ protected:
 
     bool Open( std::ifstream & s, int userToNotify )
     {
-        if ( tDirectories::Config().Open(s, file_ ) || tDirectories::Var().Open(s, file_ ) )
+        bool ret = tConfItemBase::OpenFile( s, file_, tConfItemBase::All );
+
+        if ( ret )
         {
             return true;
         }
@@ -1591,14 +1593,13 @@ protected:
         // set the access level for the following operation
         tCurrentAccessLevel accessLevel( level_, true );
 
-        // load contents of everytime.cfg for real
+        // load contents of voted file for real
         std::ifstream s;
         if ( Open( s, 0 ) )
         {
             sn_ConsoleOut( tOutput( "$vote_include_message", file_ ) );
             eAccessConsoleFilter filter( level_ );
-            tConfItemBase::LoadAll(s);
-            tConfItemBase::LoadPlayback();
+            tConfItemBase::ReadFile( s );
         }
     }
 
@@ -1650,7 +1651,6 @@ protected:
         sn_ConsoleOut( tOutput( "$vote_command_message" ) );
         eAccessConsoleFilter filter( tAccessLevel_Default );
         tConfItemBase::LoadLine(s);
-        tConfItemBase::LoadPlayback();
     }
 
     tString command_;    //!< the command to execute

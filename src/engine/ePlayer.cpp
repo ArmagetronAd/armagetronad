@@ -2326,15 +2326,7 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     
     // install filter
     eAdminConsoleFilter consoleFilter( p->Owner() );
-    
-    if ( tRecorder::IsPlayingBack() )
-    {
-        tConfItemBase::LoadPlayback();
-    }
-    else
-    {
-        tConfItemBase::LoadLine(stream);
-    }
+    tConfItemBase::LoadLine(stream);
 }
 
 static void handle_chat_admin_commands( ePlayerNetID * p, tString const & command, tString const & say, std::istream & s )
@@ -2711,27 +2703,27 @@ static void se_ChatMsg( ePlayerNetID * p, std::istream & s, eChatSpamTester & sp
         tColoredString toServer = se_BuildChatString( p, receiver, msg_core );
         toServer << '\n';
         
-        // log locally
-        sn_ConsoleOut(toServer,0);
-        
         if ( p->CurrentTeam() == receiver->CurrentTeam() || !IsSilencedWithWarning(p) )
         {
+            // log locally
+            sn_ConsoleOut(toServer,0);
+        
             // log to sender's console
             sn_ConsoleOut(toServer, p->Owner());
             
             // send to receiver
             if ( p->Owner() != receiver->Owner() )
                 se_SendPrivateMessage( p, receiver, receiver, msg_core );
-        }
 
-        // let admins of sufficient rights eavesdrop
-        for( int i = se_PlayerNetIDs.Len() - 1; i >=0; --i )
-        {
-            ePlayerNetID * admin = se_PlayerNetIDs(i);
-            
-            if ( admin != receiver && admin != p && admin->GetAccessLevel() <=  se_msgSpyAccessLevel )
+            // let admins of sufficient rights eavesdrop
+            for( int i = se_PlayerNetIDs.Len() - 1; i >=0; --i )
             {
-                se_SendPrivateMessage( p, receiver, admin, msg_core );
+                ePlayerNetID * admin = se_PlayerNetIDs(i);
+            
+                if ( admin != receiver && admin != p && admin->GetAccessLevel() <=  se_msgSpyAccessLevel )
+                {
+                    se_SendPrivateMessage( p, receiver, admin, msg_core );
+                }
             }
         }
     }

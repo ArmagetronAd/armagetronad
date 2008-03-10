@@ -205,7 +205,7 @@ static void RInclude(std::istream& s)
     tString rclcl = tResourceManager::locateResource(NULL, file);
     if ( rclcl ) {
         std::ifstream rc(rclcl);
-        tConfItemBase::LoadAll(rc);
+        tConfItemBase::LoadAll(rc, false );
         return;
     }
 

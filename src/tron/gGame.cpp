@@ -3329,16 +3329,14 @@ void gGame::StateUpdate(){
                     std::ifstream s;
 
                     // load contents of everytime.cfg for real
-                    if ( tDirectories::Config().Open(s, "everytime.cfg" ) )
-                        tConfItemBase::LoadAll(s);
+                    static const tString everytime("everytime.cfg");
+                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Config ) )
+                        tConfItemBase::ReadFile(s);
 
                     s.close();
 
-                    if ( tDirectories::Var().Open(s, "everytime.cfg" ) )
-                        tConfItemBase::LoadAll(s);
-
-                    // load contents of everytime.cfg from playback
-                    tConfItemBase::LoadPlayback();
+                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Var ) )
+                        tConfItemBase::ReadFile(s);
                 }
             }
 #endif

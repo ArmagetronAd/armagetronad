@@ -665,7 +665,10 @@ static bool s_VetoRecording( tString const & line )
     return s_Veto( line, vetos );
 }
 
-void tConfItemBase::LoadAll(std::istream &s){
+
+//! @param s        stream to read from
+//! @param record   set to true if the configuration is to be recorded and played back. That's usually only required if s is a file stream.
+void tConfItemBase::LoadAll(std::istream &s, bool record ){
     tCurrentAccessLevel levelResetter;
 
     try{
@@ -698,7 +701,7 @@ void tConfItemBase::LoadAll(std::istream &s){
             continue;
 
         // write line to recording
-        if ( !s_VetoRecording( line ) )
+        if ( record && !s_VetoRecording( line ) )
         {
             // don't record supid admins' instant chat logins
             static tString instantChat("INSTANT_CHAT_STRING");
@@ -718,7 +721,7 @@ void tConfItemBase::LoadAll(std::istream &s){
 
         // process line
         // line << '\n';
-        if ( !tRecorder::IsPlayingBack() || s_VetoPlayback( line ) )
+        if ( !record || !tRecorder::IsPlayingBack() || s_VetoPlayback( line ) )
         {
             std::stringstream str(static_cast< char const * >( line ) );
             tConfItemBase::LoadLine(str);
@@ -748,6 +751,43 @@ void tConfItemBase::DocAll(std::ostream &s){
             line << help;
             s << line << '\n';
         }
+    }
+}
+
+//! @param s        stream to read from
+//! @param record   set to true if the configuration is to be recorded and played back. That's usually only required if s is a file stream, so it defaults to true here.
+void tConfItemBase::LoadAll(std::ifstream &s, bool record )
+{
+    std::istream &ss(s);
+    LoadAll( ss, record );
+}
+
+
+//! @param s        file stream to be used for reading later
+//! @param filename name of the file to open
+//! @param var      whether to look in var directory
+//! @return success flag
+bool tConfItemBase::OpenFile( std::ifstream & s, tString const & filename, SearchPath path )
+{
+    bool ret = ( ( path & Config ) && tDirectories::Config().Open(s, filename ) ) || ( ( path & Var ) && tDirectories::Var().Open(s, filename ) );
+    
+    static char const * section = "INCLUDE_VOTE";
+    tRecorder::Playback( section, ret );
+    tRecorder::Record( section, ret );
+    
+    return ret;
+}
+
+//! @param s        file to read from
+void tConfItemBase::ReadFile( std::ifstream & s )
+{
+    if ( !tRecorder::IsPlayingBack() )
+    {
+        tConfItemBase::LoadAll(s, true );
+    }
+    else
+    {
+        tConfItemBase::LoadPlayback();
     }
 }
 
@@ -809,7 +849,7 @@ static bool Load( const tPath& path, const char* filename )
     std::ifstream s;
     if ( path.Open( s, filename ) )
     {
-        tConfItemBase::LoadAll( s );
+        tConfItemBase::LoadAll( s, true );
         return true;
     }
     else

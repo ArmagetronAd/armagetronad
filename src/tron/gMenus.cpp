@@ -652,18 +652,9 @@ public:
 
             con << tColoredString::ColorString(.5,.5,1) << " > " << *content << '\n';
 
-            if ( tRecorder::IsPlayingBack() )
-            {
-                // the command was also recorded; better play it back,
-                // or the playback gets out of sync
-                tConfItemBase::LoadPlayback( false );
-            }
-            else
-            {
-                // pass the console command to the configuration system
-                std::stringstream s(&((*content)[0]));
-                tConfItemBase::LoadAll(s);
-            }
+            // pass the console command to the configuration system
+            std::stringstream s(&((*content)[0]));
+            tConfItemBase::LoadAll( s, false );
 
             MyMenu()->Exit();
             return true;
