@@ -30,7 +30,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rScreen.h"
 
 #ifdef DEBUG
+#ifndef DEDICATED
 #define LIST_STATS
+#endif
 #endif
 
 #ifdef LIST_STATS
