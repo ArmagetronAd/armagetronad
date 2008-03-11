@@ -398,6 +398,8 @@
 		8CBA60B0089F00F2007E21DC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B61EBBC0B5FEF010018DEA7 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = ../scripts; sourceTree = SOURCE_ROOT; };
+		9B77E6C80D8618B90022FDF2 /* xcode.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; path = xcode.rake; sourceTree = "<group>"; };
+		9B77E6C90D8618B90022FDF2 /* rakefile.rb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.ruby; path = rakefile.rb; sourceTree = "<group>"; };
 		9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "Growl-WithInstaller.framework"; path = "/Library/Frameworks/ArmagetronAdvanced/current/Growl-WithInstaller.framework"; sourceTree = "<absolute>"; };
 		9B9E56300D81D962008DD17D /* shared.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = shared.xcconfig; sourceTree = "<group>"; };
 		9BB5B9240D84604400BF5F1C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
@@ -764,7 +766,7 @@
 		29B97314FDCFA39411CA2CEA /* Armagetron Advanced */ = {
 			isa = PBXGroup;
 			children = (
-				9B9E56300D81D962008DD17D /* shared.xcconfig */,
+				9B77E6C30D8618970022FDF2 /* MacOS */,
 				9BB7B5A30D8302DF004FE8C3 /* Source */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
@@ -783,6 +785,24 @@
 				8CBA60B0089F00F2007E21DC /* OpenGL.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		9B77E6C30D8618970022FDF2 /* MacOS */ = {
+			isa = PBXGroup;
+			children = (
+				9B77E6C90D8618B90022FDF2 /* rakefile.rb */,
+				9B77E6C70D8618B90022FDF2 /* rakelib */,
+				9B9E56300D81D962008DD17D /* shared.xcconfig */,
+			);
+			name = MacOS;
+			sourceTree = "<group>";
+		};
+		9B77E6C70D8618B90022FDF2 /* rakelib */ = {
+			isa = PBXGroup;
+			children = (
+				9B77E6C80D8618B90022FDF2 /* xcode.rake */,
+			);
+			path = rakelib;
 			sourceTree = "<group>";
 		};
 		9BB7B5A30D8302DF004FE8C3 /* Source */ = {
