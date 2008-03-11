@@ -2610,7 +2610,7 @@ access_level_demote         \1 has been demoted to "\2" by order of \3.\n
 access_level_promote        \1 has been promoted to "\2" by order of \3.\n
 
 access_level_admin_denied   0xff7f7f/admin denied,0xffffff insufficient access level.\n
-access_level_shuffle_up_denied You have an insufficient access level to shuffle up.\n
+access_level_shuffle_up_denied Required access level to shuffle up is "\1", you only have "\2".\n
 
 chat_command_unknown        Unknown chat command "\1".\n
 
