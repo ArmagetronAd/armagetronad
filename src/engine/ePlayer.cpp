@@ -2917,7 +2917,7 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
 			return;
 		}
 #else
-		if ( !p->GetAccessLevel() > se_shuffleUpAccessLevel )
+		if ( p->GetAccessLevel() > se_shuffleUpAccessLevel )
 		{
 			sn_ConsoleOut(tOutput("$access_level_shuffle_up_denied"), p->Owner());
 			return;
