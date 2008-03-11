@@ -6528,7 +6528,7 @@ void ePlayerNetID::UpdateName( void )
     // apply client change, stripping excess spaces
     if ( sn_GetNetState() != nCLIENT )
     {
-        if( !IsHuman() || ( nameFromServer_ != nameFromClient_ && this->IsAllowedToRename() ) )
+        if( !IsHuman() || ( nameFromServer_ != nameFromClient_ && !messenger.adminRename_ ) )
         {
             // apply name filters only on remote players
             if ( Owner() != 0 )
@@ -6954,7 +6954,7 @@ ePlayerNetID & ePlayerNetID::ForceName( tString const & name )
         // crappiest line ever :-/
         newName << tColoredString::ColorString( r/15.0, g/15.0, b/15.0 ) << this->nameFromAdmin_ << tColoredString::ColorString( 1, 1, 1 );
  
-        con << tOutput("$player_got_renamed", newName, oldName);
+        con << tOutput("$player_will_be_renamed", newName, oldName);
 
         AllowRename ( false );
     }

@@ -2163,6 +2163,7 @@ player_left_game		\1 was discarded with \2 points.\n
 player_leaving_game		\1 0xff7f7fleft the game.\n
 player_renamed			\2 renamed to \1.\n
 player_got_renamed		\2 has been renamed to \1.\n
+player_will_be_renamed		\2 will be renamed to \1.\n
 player_rename_rejected_votekick  \1 0xffffffis not allowed to rename to \2 0xffffffright now to avoid confusion with kick votes.\n
 player_rename_rejected_admin    \1 0xffffffis not allowed to rename to \20xffffff, as its name was locked by the administrator.\n
 player_allowed_rename		\1 0x7fff7fis allowed to rename again.\n
