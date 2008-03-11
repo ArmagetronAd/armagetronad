@@ -847,6 +847,9 @@ console_message_help		Prints a message on the console of all connected clients.
 center_message_help			Prints a big message on the screen of all connected clients.
 fullscreen_message_help     Prints a big message all over the screen, interrupting gameplay for a configurable timeout. Use with care.
 say_help					Dedicated server only: let the server administator say something.
+rename_help		    Renames the given player.
+allow_rename_player_help    Gives the given player the ability to rename.
+disallow_rename_player_help Prevents the given player from renameing.
 
 #********************************************
 #********************************************
@@ -2159,7 +2162,11 @@ player_left_spectator    0xff7f7fSpectator \1 0xff7f7fleft.\n
 player_left_game		\1 was discarded with \2 points.\n
 player_leaving_game		\1 0xff7f7fleft the game.\n
 player_renamed			\2 renamed to \1.\n
-player_rename_rejected  \1 0xffffffis not allowed to rename to \2 0xffffffright now to avoid confusion with kick votes.\n
+player_got_renamed		\2 has been renamed to \1.\n
+player_rename_rejected_votekick  \1 0xffffffis not allowed to rename to \2 0xffffffright now to avoid confusion with kick votes.\n
+player_rename_rejected_admin    \1 0xffffffis not allowed to rename to \20xffffff, as its name was locked by the administrator.\n
+player_allowed_rename		\1 0x7fff7fis allowed to rename again.\n
+player_disallowed_rename	\1 0xff7f7fis not allowed to rename anymore.\n
 player_welcome			\n\nWelcome \1! This server is running version \2.\n
 player_win_default		\1 got \2 points for a very strange reason.\n
 player_lose_default		\1 lost \2 points for a very strange reason.\n

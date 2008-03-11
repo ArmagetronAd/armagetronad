@@ -205,6 +205,8 @@ public:
 
     bool loginWanted;        //!< flag indicating whether this player currently wants to log on
 
+    bool renameAllowed_;     //!< specifies if the player is allowed to rename or not, does not know about votes.
+
     nSpamProtection chatSpam_;
 
     ePlayerNetID(int p=-1);
@@ -344,12 +346,16 @@ public:
 
     static ePlayerNetID * FindPlayerByName( tString const & name, ePlayerNetID * requester = 0 ); //!< finds a player by name using lax name matching. Reports errors to the console or to the requesting player.
 
-    void UpdateName();                                           //!< update the player name from the client's wishes
+    void UpdateName();                                           //!< update the player name from either the client's wishes, either the admin's wishes.
     static void FilterName( tString const & in, tString & out ); //!< filters a name (removes unprintables, color codes and spaces)
     static tString FilterName( tString const & in );             //!< filters a name (removes unprintables, color codes and spaces)
+    bool IsAllowedToRename ( void );                             //!< tells if the user can rename or not, takes care about everything
+    void AllowRename( bool allow );                              //!< Allows a player to rename (or not)
+
 private:
     tColoredString  nameFromClient_;        //!< this player's name as the client wants it to be. Avoid using it when possilbe.
     tColoredString  nameFromServer_;        //!< this player's name as the server wants it to be. Avoid using it when possilbe.
+    tColoredString  nameFromAdmin_;         //!< this player's name as the admin wants it to be. Avoid using it when possilbe.
     tColoredString  coloredName_;           //!< this player's name, cleared by the server. Use this for onscreen screen display.
     tString         name_;                  //!< this player's name without colors.
     tString         userName_;              //!< this player's name, cleared for system logs. Use for writing to files or comparing with admin input.
@@ -390,6 +396,9 @@ public:
 
     ePlayerNetID & SetName( tString const & name ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
     ePlayerNetID & SetName( char    const * name ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
+    ePlayerNetID & SetName( tString const & name , bool force ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
+    ePlayerNetID & ForceName( tString const & name ); //!< Forces this player's name. Forces processed names (colored, username, nameFromCLient) as well.    
+
     inline ePlayerNetID & SetUserName( tString const & userName );  //!< Sets this player's name, cleared for system logs. Use for writing to files or comparing with admin input. The other names stay unaffected.
 private:
     inline ePlayerNetID & SetNameFromClient( tColoredString const & nameFromClient );   //!< Sets this player's name as the client wants it to be. Avoid using it when possilbe.

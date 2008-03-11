@@ -103,7 +103,7 @@ static bool se_allowTeamChanges = true;
 static tSettingItem< bool > se_allowTeamChangesConf( "ALLOW_TEAM_CHANGE", se_allowTeamChanges );
 
 static bool se_enableChat = true;	//flag indicating whether chat should be allowed at all (logged in players can always chat)
-static tSettingItem<bool> se_enaChat("ENABLE_CHAT", se_enableChat);
+static tSettingItem< bool > se_enaChat("ENABLE_CHAT", se_enableChat);
 
 static tReferenceHolder< ePlayerNetID > se_PlayerReferences;
 
@@ -3482,7 +3482,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
     suspended_          = 0;
 
     loginWanted = false;
-    
+
 
     if (p>=0){
         ePlayer *P = ePlayer::PlayerConfig(p);
@@ -3621,6 +3621,7 @@ void ePlayerNetID::MyInitAfterCreation()
     this->CreateVoter();
 
     this->silenced_ = se_silenceAll;
+    this->renameAllowed_ = true;
 
     // register with machine and kick user if too many players are present
     if ( Owner() != 0 && sn_GetNetState() == nSERVER )
@@ -6429,6 +6430,7 @@ public:
     : player_( player )
     , oldScreenName_( player.GetName() )
     , oldLogName_( player.GetLogName() )
+    , adminRename_( !player.IsAllowedToRename() )
     {
         // store old name for password re-request and name change message
         oldPrintName_ << player_ << tColoredString::ColorString(.5,1,.5);
@@ -6485,8 +6487,15 @@ public:
                     player_.GetVoter()->PlayerChanged();
                 }
 
-                mess << "$player_renamed";
-
+                if ( adminRename_ )
+                {
+                    // if our player isn't able to rename, he didn't do it alone, did he ? :)
+                    mess << "$player_got_renamed";
+                }
+                else
+                {
+                    mess << "$player_renamed";
+                }
                 sn_ConsoleOut(mess);
             }
         }
@@ -6495,6 +6504,7 @@ public:
     ePlayerNetID & player_;
     tString oldScreenName_, oldLogName_;
     tColoredString oldPrintName_;
+    bool adminRename_;
 };
 
 // ******************************************************************************************
@@ -6518,24 +6528,19 @@ void ePlayerNetID::UpdateName( void )
     // apply client change, stripping excess spaces
     if ( sn_GetNetState() != nCLIENT )
     {
-        // apply name filters only on remote players
-        if ( Owner() != 0 )
-            se_OptionalNameFilters( nameFromClient_ );
-
-        // disallow name changes if there was a kick vote recently
-        if ( !bool(this->voter_) || voter_->AllowNameChange() || nameFromServer_.Len() <= 1 )
+        if( !IsHuman() || ( nameFromServer_ != nameFromClient_ && this->IsAllowedToRename() ) )
         {
-            nameFromServer_ = nameFromClient_;
+            // apply name filters only on remote players
+            if ( Owner() != 0 )
+                se_OptionalNameFilters( nameFromClient_ );
+
+            // nothing wrong ? proceed to renaming
+            nameFromAdmin_ = nameFromServer_ = nameFromClient_;
         }
-        else if ( nameFromServer_ != nameFromClient_ )
+        else
         {
-            // inform victim to avoid complaints
-            tOutput message( "$player_rename_rejected", nameFromServer_, nameFromClient_ );
-            sn_ConsoleOut( message, Owner() );
-            con << message;
-
             // revert name
-            nameFromClient_ = nameFromServer_;
+            nameFromClient_ = nameFromServer_ = nameFromAdmin_;
         }
     }
 
@@ -6615,6 +6620,114 @@ void ePlayerNetID::UpdateName( void )
     }
 #endif
 }
+
+// ******************************************************************************************
+// *
+// *	AllowRename
+// *
+// ******************************************************************************************
+//!
+//!		@param	allow  let the player rename or not ?
+//!
+// ******************************************************************************************
+
+void ePlayerNetID::AllowRename( bool allow )
+{
+    // simple eh ? :-)
+    renameAllowed_ = allow;
+}
+// Now we're here, set commands for it
+static void AllowRename( std::istream & s , bool allow , bool announce )
+{
+    if ( se_NeedsServer( "(DIS)ALLOW_RENAME_PLAYER", s ) )
+    {
+        return;
+    }
+    ePlayerNetID * p;
+    p = ReadPlayer( s );
+    if ( p )
+    {
+//      announce it?
+        if ( announce && allow )
+        {
+            sn_ConsoleOut( tOutput("$player_allowed_rename", p->GetColoredName() ) );
+        }
+        else if ( announce && !allow )
+        {
+            sn_ConsoleOut( tOutput("$player_disallowed_rename", p->GetColoredName() ) );
+        }
+
+        p->AllowRename ( allow );
+    }
+}
+static void AllowRename( std::istream & s )
+{
+    if ( se_NeedsServer( "ALLOW_RENAME_PLAYER", s ) )
+    {
+        return;
+    }
+    AllowRename( s , true, true );
+}
+static tConfItemFunc AllowRename_conf("ALLOW_RENAME_PLAYER", &AllowRename);
+static tAccessLevelSetter AllowRename_confLevel( AllowRename_conf, tAccessLevel_Moderator );
+
+static void DisAllowRename( std::istream & s )
+{
+    if ( se_NeedsServer( "DISALLOW_RENAME_PLAYER", s ) )
+    {
+        return;
+    }
+    AllowRename( s , false, true );    
+}
+static tConfItemFunc DisAllowRename_conf("DISALLOW_RENAME_PLAYER", &DisAllowRename);
+static tAccessLevelSetter DisAllowRename_confLevel( DisAllowRename_conf, tAccessLevel_Moderator );
+
+
+// ******************************************************************************************
+// *
+// *	IsAllowedToRename
+// *
+// ******************************************************************************************
+//!
+//!
+// ******************************************************************************************
+
+
+bool ePlayerNetID::IsAllowedToRename ( void )
+{
+    if ( !IsHuman() || ( nameFromServer_ == nameFromClient_ && nameFromServer_ == nameFromAdmin_ ) || nameFromServer_.Len() < 1 )
+    {
+        // Don't complain about people who either are bots, doesn't change name, or are entering the grid
+        return true;
+    }
+    if ( nameFromServer_ != nameFromAdmin_ )
+    {
+        // We are going to rename this player, so, no need to tell him he's trying to rename from his old name to his old name :-P
+        // Just return false so the server thinks the player can't be renamed in any other way than admin-rename.
+        return false;
+    }
+    // didn't be disallow this player to rename via a command ?
+    if ( !this->renameAllowed_ )
+    {
+        tOutput message( "$player_rename_rejected_admin", nameFromServer_, nameFromClient_ );
+        sn_ConsoleOut( message, Owner() );
+        con << message;
+        return false;
+    }
+    // disallow name changes if there was a kick vote recently
+    if ( !( !bool(this->voter_) || voter_->AllowNameChange() || nameFromServer_.Len() <= 1 ) && nameFromServer_ != nameFromClient_ )
+    {
+        // inform victim to avoid complaints
+        tOutput message( "$player_rename_rejected_kickvote", nameFromServer_, nameFromClient_ );
+        sn_ConsoleOut( message, Owner() );
+        con << message;
+        return false;
+    }
+
+    // Nothing to complain about ? fine, he can rename
+    return true;
+}
+
 
 // filters illegal player characters
 class ePlayerCharacterFilter
@@ -6814,6 +6927,55 @@ ePlayerNetID & ePlayerNetID::SetName( char const * name )
     SetName( tString( name ) );
     return *this;
 }
+
+// ******************************************************************************************
+// *
+// * ForceName
+// *
+// ******************************************************************************************
+//!
+//!      @param  name    this player's name without colors. to set
+//!
+// ******************************************************************************************
+ePlayerNetID & ePlayerNetID::ForceName( tString const & name )
+{
+    // This just sets nameFromAdmin_ waiting for the server to look at it next round (this->UpdateName())
+    // Also forbid the player from renameing then, because it would be useless :-P
+    if ( sn_GetNetState() != nCLIENT )
+    {
+        tColoredString oldName;
+        tColoredString newName;
+
+        oldName << this->GetColoredName() << tColoredString::ColorString( 1, 1, 1 );
+
+        this->nameFromAdmin_ = name;
+        this->nameFromAdmin_.NetFilter();
+
+        // crappiest line ever :-/
+        newName << tColoredString::ColorString( r/15.0, g/15.0, b/15.0 ) << this->nameFromAdmin_ << tColoredString::ColorString( 1, 1, 1 );
+ 
+        con << tOutput("$player_got_renamed", newName, oldName);
+
+        AllowRename ( false );
+    }
+
+    return *this;
+}
+
+// Set an admin command for it
+static void ForceName ( std::istream & s )
+{
+    ePlayerNetID * p;
+    p = ReadPlayer( s );
+    if ( p )
+    {
+        tString newname;
+        newname.ReadLine( s );
+        p->ForceName ( newname );
+    }
+}
+static tConfItemFunc Rename_conf("RENAME", &ForceName);
+static tAccessLevelSetter Rename_confLevel( Rename_conf, tAccessLevel_Moderator );
 
 // ******************************************************************************************
 // *
