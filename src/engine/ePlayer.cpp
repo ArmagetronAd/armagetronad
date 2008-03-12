@@ -2873,9 +2873,6 @@ static void se_ChatPlayers( ePlayerNetID * p )
 // team shuffling: reorders team formation
 static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
 {
-    tString msg;
-    msg.ReadLine( s );
-
     // team position shuffling. Allow players to change their team setup.
     // syntax:
     // /teamshuffle: shuffles you all the way to the outside.
@@ -2889,18 +2886,35 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
         return;
     }
     int len = p->CurrentTeam()->NumPlayers();
+   
+    // but read the target position as additional parameter
     int IDWish = len-1; // default to shuffle to the outside
-    
-                        // but read the target position as additional parameter
-    if (msg.Len() > 1)
+
+    // peek at the first nonwhite character
+    std::ws( s );
+    char first = s.get();
+    if ( !s.eof() && !s.fail() )
     {
-        IDWish = IDNow;
-        if ( msg[0] == '+' )
-            IDWish += msg.toInt(1);
-        else if ( msg[0] == '-' )
-            IDWish -= msg.toInt(1);
+        s.unget();
+
+        int shuffle = 0;
+        s >> shuffle;
+
+        if ( s.fail() )
+        {
+            sn_ConsoleOut( tOutput("$player_shuffle_error"), p->Owner() );
+            return;
+        }
+
+        if ( first == '+' || first == '-' )
+        {
+            IDWish = IDNow;
+            IDWish += shuffle;
+        }
         else
-            IDWish = msg.toInt()-1;
+        {
+            IDWish = shuffle-1;
+        }
     }
 
     if (IDWish < 0)
