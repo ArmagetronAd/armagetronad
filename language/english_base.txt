@@ -2299,8 +2299,10 @@ network_statistics2		Sent:     \2 bytes in \3 packets (\4 bytes/s)\n
 network_statistics3		Received: \5 bytes in \6 packets (\7 bytes/s)\n
 
 network_login_denial		Got login denial...\n
-network_server_login		Received login from \1 via socket \2.\n
+network_server_login		Received login from \1 via socket \2, network version: \3 (ID: \4).\n
+network_unknown_version	unknown
 network_server_login_success	New user: \1\n
+
 
 network_toomanyservers		\n\n\nWarning: too many servers open on this computer.\nLeaving the port range that is scanned by clients with default settings.\n\n\n
 

@@ -360,5 +360,7 @@ bool nIConfItemWatcher::Writable( void ) const
     return this->DoWritable();
 }
 
+tOutput sn_GetClientVersionString(int version);
+
 #endif
 

@@ -1726,6 +1726,8 @@ int login_handler( nMessage &m, unsigned short rate ){
         tOutput o;
         o.SetTemplateParameter(1, peers[m.SenderID()].ToString() );
         o.SetTemplateParameter(2, sn_Connections[m.SenderID()].socket->GetAddress().ToString() );
+        o.SetTemplateParameter(3, sn_GetClientVersionString(version.Max()) );
+        o.SetTemplateParameter(4, version.Max() );
         o << "$network_server_login";
         con << o;
     }
