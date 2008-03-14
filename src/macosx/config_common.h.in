@@ -5,8 +5,6 @@
 #define MACOSX_VERSION_10_2 1
 #endif
 
-#define HAVE_LIBZTHREAD 1
-
 /* AIX */
 /* #undef AIX */
 
