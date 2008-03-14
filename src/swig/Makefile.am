@@ -1,3 +1,4 @@
+if ENABLE_RUBY
 # all the SWIG interface files
 INTERFACEFILES = ext/armagetronad.i ext/std/sstream.i ext/tools/tConfiguration.i  \
                  ext/tools/tDirectories.i ext/tools/tLocale.i ext/tools/tString.i \
@@ -17,3 +18,4 @@ $(swig_all): ${INTERFACEFILES}
 	$(SWIG) -c++ -ruby -autorename $(swig_all_include) -o $@ $<
 
 all-local: $(swig_all)
+endif
