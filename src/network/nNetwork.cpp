@@ -4180,7 +4180,7 @@ nMachine & nMachine::GetMachine( unsigned short userID )
     peers[ userID ].GetAddress( address );
 
 #ifdef DEBUG_X
-    // add client ID so multiple connects from one machine are distinquished
+    // add client ID so multiple connects from one machine are distinguished
     tString newIP;
     newIP << address << " " << userID;
     address = newIP;
