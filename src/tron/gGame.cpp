@@ -124,39 +124,7 @@ static tSettingItem< bool > sg_waitForExternalScriptConf( "WAIT_FOR_EXTERNAL_SCR
 
 static REAL sg_waitForExternalScriptTimeout = 3;
 static tSettingItem<REAL> sg_waitForExternalScriptTimeoutConf( "WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT", sg_waitForExternalScriptTimeout );
-/*
-static void sg_ParseMap ( gParser * aParser, tString map_file );
-static void change_mapfile(std::istream &s)
-{
-    // read new MAP_FILE value
-    tString new_mapfile;
-    new_mapfile.ReadLine(s, true);
 
-    if (new_mapfile == mapfile)
-        return;
-
-    // verify the map loads
-    try {
-        sg_ParseMap(aParser, new_mapfile);
-    } catch (tGenericException &e) {
-        sn_ConsoleOut( e.GetName(), e.GetDescription(), 120000 );
-        sg_ParseMap(aParser);	// is this necessary?
-        return;
-    }
-
-    if (printChange)
-    {
-        tOutput o;
-        o.SetTemplateParameter(1, "MAP_FILE");
-        o.SetTemplateParameter(2, mapfile);
-        o.SetTemplateParameter(3, new_mapfile);
-        o << "$config_value_changed";
-        con << o;
-    }
-
-    mapfile = new_mapfile;
-}
-*/
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
 // bool globalingame=false;
@@ -2829,7 +2797,7 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
       }
     */
 
-    con << "Loading map " << mapfile << "...\n";
+    con << tOutput( "$map_file_loading", mapfile );
 #endif
     mapFD = tResourceManager::openResource(mapuri, mapfile);
 
@@ -2843,8 +2811,6 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
 #ifndef DEDICATED
         errorMessage << "\nLog:\n" << consoleLog.message_;
 #endif
-
-        con << errorMessage;
 
         tOutput errorTitle("$map_file_load_failure_title");
 
@@ -2876,6 +2842,7 @@ void gGame::Verify()
     // test map and load map settings
     sg_ParseMap( aParser );
     init_game_grid(grid, aParser);
+    Arena.LeastDangerousSpawnPoint();
     exit_game_grid(grid);
 }
 
@@ -3130,6 +3097,28 @@ void gGame::StateUpdate(){
 
             // delete game objects again (in case new ones were spawned)
             exit_game_objects(grid);
+
+            // if the map has changed on the server side, verify it
+            static tString lastMapfile( DEFAULT_MAP );
+            if ( nCLIENT != sn_GetNetState() && mapfile != lastMapfile )
+            {
+                try
+                {
+                    Verify();
+                }
+                catch (tException const & e)
+                {
+                    // clean up
+                    exit_game_grid( grid );
+
+                    // inform user of generic errors
+                    tConsole::Message( e.GetName(), e.GetDescription(), 120000 );
+
+                    // revert map
+                    con << tOutput( "$map_file_reverting", lastMapfile );
+                    conf_mapfile.Set( lastMapfile );
+                }
+            }
 
             nConfItemBase::s_SendConfig(false);
 

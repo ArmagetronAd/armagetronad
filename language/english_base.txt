@@ -2445,11 +2445,14 @@ directory_path_hidden     ERROR: User given path "\1" contains a hidden componen
 #********************************************
 #********************************************
 
+# printed on loading a map
+map_file_loading             Loading map \1 ...\n
+
 # title of map error message
 map_file_load_failure_title  Map load failure
 
 # printed when a map can't be loaded, and the user can do something about it
-map_file_load_failure_self   The map \1 could not be loaded or parsed; please check your configuration and the log below.\n
+map_file_load_failure_self   The map \1 could not be loaded or parsed; please check your configuration and the log.\n
 
 # printed when a map can't be loaded, and  the failure is the server admin's fault
 map_file_load_failure_server  The map \1 could not be loaded.\nThe server you tried to connect to may have a broken configuration; you should inform the server administrator of this error.\n
@@ -2460,6 +2463,8 @@ map_file_load_failure_default \nFallback to default map did not work either. Ple
 # resource at the wrong place
 resource_file_wrong_place_title Incorrect File Path
 resource_file_wrong_place     The resource file loaded from "\1" wants to be at "\2". Possible resolutions:\na) If you are not the author of the resource, you should move it to the right place given above and adapt the reference pointing to it.\nb) If you are the author and want the file to stay where it is, you can modify its <Resource> tag so it wants to be where you put it. Consult the documentation on how to do that.\n
+
+map_file_reverting           Reverting to last known working map \1.\n
 
 #********************************************
 #********************************************
