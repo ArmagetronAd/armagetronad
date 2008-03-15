@@ -238,8 +238,14 @@ public:
             if ( se_votingPrivacy <= -1 )
                 sn_ConsoleOut( voteMessage );	// broadcast it
             else if ( se_votingPrivacy <= 1 )
+            {
                 con << voteMessage;				// print it for the server admin
-		
+            }
+            else if ( exceptTo > 0 )
+            {
+                sn_ConsoleOut( voteMessage, exceptTo );
+            }
+
             static nVersionFeature serverControlledVotes( 10 );
 
             // create messages for old and new clients
@@ -436,6 +442,10 @@ public:
                             sn_ConsoleOut( voteMessage );	// broadcast it
                         else if ( se_votingPrivacy <= 0 )
                             con << voteMessage;				// print it for the server admin
+                        else
+                        {
+                            sn_ConsoleOut( voteMessage, m.SenderID() );
+                        }
 
                         // remove him from the lists
                         vote->RemoveVoter( voter );
