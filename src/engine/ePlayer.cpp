@@ -6539,24 +6539,20 @@ void ePlayerNetID::UpdateName( void )
     eNameMessenger messenger( *this );
 
     // apply client change, stripping excess spaces
-    if ( sn_GetNetState() != nCLIENT )
+    if( sn_GetNetState() != nSERVER || !IsHuman() || ( nameFromServer_ != nameFromClient_ && !messenger.adminRename_ ) )
     {
-        if( !IsHuman() || ( nameFromServer_ != nameFromClient_ && !messenger.adminRename_ ) )
-        {
-            // apply name filters only on remote players
-            if ( Owner() != 0 )
-                se_OptionalNameFilters( nameFromClient_ );
+        // apply name filters only on remote players
+        if ( Owner() != 0 )
+            se_OptionalNameFilters( nameFromClient_ );
 
-            // nothing wrong ? proceed to renaming
-            nameFromAdmin_ = nameFromServer_ = nameFromClient_;
-        }
-        else
-        {
-            // revert name
-            nameFromClient_ = nameFromServer_ = nameFromAdmin_;
-        }
+        // nothing wrong ? proceed to renaming
+        nameFromAdmin_ = nameFromServer_ = nameFromClient_;
     }
-
+    else
+    {
+        // revert name
+        nameFromClient_ = nameFromServer_ = nameFromAdmin_;
+    }
     // remove colors from name
     tString newName = tColoredString::RemoveColors( nameFromServer_ );
     tString newUserName = se_UnauthenticatedUserName( newName );

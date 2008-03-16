@@ -17,6 +17,7 @@ Changes since 0.2.8.2:
 - (UN)SUSPEND kicks a player to spectator mode with a timeout. Intended to
   let new players watch before they play.
 - VOTES_CANCEL cancels all running polls.
+- VOTING_SUSPEND [<minutes>] disallows voting during a specified amount of time.
 - ZONE_ALPHA_TOGGLE to override the systemwide alpha blendings setting and
   have zones rendered in wireframe mode even when alpha blending is on.
 - ZONE_ALPHA(_SERVER) to control intensity of zone rendering.
@@ -26,6 +27,7 @@ Changes since 0.2.8.2:
 - KICK_TO and MOVE_TO: redirect a client to a different server
 - DEFAULT_KICK(_TO)_MESSAGE: default reason given to players for a kick
 - DEFAULT_KICK_TO_SERVER/PORT: default redirection target for KICK/MOVE_TO.
+- RENAME renames a player.
 - If all clients support it, PING_CHARITY_MIN/MAX can be used to constrain ping charity.
 - VOTE_KICK_TO_SERVER/PORT: redirection target for vote kicks.
 - SILENCE and VOICE allow to control chat of annoying players.
