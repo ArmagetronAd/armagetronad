@@ -1465,21 +1465,20 @@ ePlayerNetID * ePlayerNetID::FindPlayerByName( tString const & name, ePlayerNetI
 {
    int num_matches = 0;
 
-    // look for matches in the exact player names first
-   ePlayerNetID * ret = CompareBufferToPlayerNames( name, num_matches, requester, &ePlayerNetID::GetName, &se_NameFilterID, &se_NonHide );
+    // try filtering the names before comparing them, this makes the matching case-insensitive
+    SE_NameFilter Filter = &ePlayerNetID::FilterName;
+
+    // look for matches in the filtered screen names
+    ePlayerNetID * ret = CompareBufferToPlayerNames( name, num_matches, requester, &ePlayerNetID::GetName, Filter, &se_NonHide );
     if ( ret && num_matches == 1 )
     {
         return ret;
     }
 
-    // ok, next round: try filtering the names before comparing them, this makes the matching case-insensitive
-    SE_NameFilter Filter = &ePlayerNetID::FilterName;
-
-    // look for matches in the screen names again
-    if ( !ret )
-    {
-        ret = CompareBufferToPlayerNames( name, num_matches, requester, &ePlayerNetID::GetName, Filter, &se_NonHide );
-    }
+    // look for matches in the exact screen names.
+    // No check for prior matches here, because the previous
+    // search was less specific.
+    ret = CompareBufferToPlayerNames( name, num_matches, requester, &ePlayerNetID::GetName, &se_NameFilterID, &se_NonHide );
     if ( ret && num_matches == 1 )
     {
         return ret;
