@@ -1226,6 +1226,7 @@ void nServerInfo::SetFromMaster()
     ping = .999;
     users = 0;
     userNames_ = userNamesOneLine_ = "Sever polled over master server, no reliable user data available.";
+    userGlobalIDs_ = "";
     advancedInfoSet = true;
 
     CalcScore();
@@ -2640,6 +2641,7 @@ void nServerInfo::DoGetFrom( nSocket const * socket )
     if ( nServerInfoAdmin::GetAdmin() )
     {
         userNames_  = nServerInfoAdmin::GetAdmin()->GetUsers();
+        userGlobalIDs_  = nServerInfoAdmin::GetAdmin()->GetGlobalIDs();
         options_    = nServerInfoAdmin::GetAdmin()->GetOptions();
         url_        = nServerInfoAdmin::GetAdmin()->GetUrl();
     }
@@ -2650,6 +2652,7 @@ void nServerInfo::DoGetFrom( nSocket const * socket )
         userNames_  = str;
         options_    = str;
         url_        = str;
+        userGlobalIDs_ = "";
     }
 }
 
@@ -2676,6 +2679,8 @@ void nServerInfo::NetWriteThis( nMessage & m ) const
     m << userNames_;
     m << options_;
     m << url_;
+
+    m << userGlobalIDs_;
 }
 
 // *******************************************************************************************
@@ -2729,13 +2734,36 @@ void nServerInfo::NetReadThis( nMessage & m )
         options_ = "No Info\n";
         url_ = "No Info\n";
     }
+    if ( !m.End() )
+    {
+        m >> userGlobalIDs_;
+    }
+    else
+    {
+        userGlobalIDs_ = "";
+    }
 
     userNamesOneLine_.Clear();
-    for ( int i = 0; i < userNames_.Len()-2 ; ++i )
+    for ( int i = 0, j = 0; i < userNames_.Len()-1 ; ++i )
     {
         char c = userNames_[i];
         if ( c == '\n' )
-            userNamesOneLine_ << "0xffffff, ";
+        {
+            userNamesOneLine_ << "0xffffff";
+            if( j < userGlobalIDs_.Len()-2 && userGlobalIDs_[j] != '\n' ) {
+                userNamesOneLine_ << " (";
+                do
+                {
+                    userNamesOneLine_ << userGlobalIDs_[j];
+                }
+                while ( ++j < userGlobalIDs_.Len()-1 && userGlobalIDs_[j] != '\n' );
+                userNamesOneLine_ << ")";
+            }
+            else
+                ++j;
+            if ( i < userNames_.Len()-2 )
+                userNamesOneLine_ << ", ";
+        }
         else
             userNamesOneLine_ << c;
     }

@@ -6410,14 +6410,40 @@ private:
         tString ret;
 
         for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
-    {
-        ePlayerNetID* p = se_PlayerNetIDs(i);
+        {
+            ePlayerNetID* p = se_PlayerNetIDs(i);
             if ( p->IsHuman() )
             {
                 ret << p->GetName() << "\n";
             }
         }
 
+        return ret;
+    }
+
+    virtual tString GetGlobalIDs()		const
+    {
+        tString ret;
+#ifdef KRAWALL_SERVER
+        int count = 0;
+
+        for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+        {
+            ePlayerNetID* p = se_PlayerNetIDs(i);
+            if ( p->IsHuman() )
+            {
+                if( p->IsAuthenticated() && !se_Hide(p, tAccessLevel_Default) )
+                {
+                    for(; count > 0; --count)
+                    {
+                        ret << "\n";
+                    }
+                    ret << p->GetFilteredAuthenticatedName();
+                }
+                ++count;
+            }
+        }
+#endif
         return ret;
     }
 
