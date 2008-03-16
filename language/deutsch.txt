@@ -2072,6 +2072,7 @@ gamestate_winner_ai           Computer.
 gamestate_winner_humans       Menschen.
 
 instant_win_activated         Die Siegzone wurde aktiviert! Finde sie und fahre hinein um zu gewinnen.\n
+instant_round_end_activated   Die Rundenendzone wurde aktiviert! Finde sie und fahre hinein um die Runde zu beenden.\n
 instant_death_activated       Die Todeszone wurde aktiviert! Vermeide sie!\n
 
 player_win_instant            \1 bekam \2 Punkte durch das Erreichen der Siegzone.\n

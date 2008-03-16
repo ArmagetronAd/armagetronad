@@ -2114,6 +2114,7 @@ gamestate_winner_ai		AI.
 gamestate_winner_humans		Humans.
 
 instant_win_activated		Instant win zone activated! Enter it to win the round.\n
+instant_round_end_activated	Round end zone activated! Enter it to end the round.\n
 instant_death_activated		Death zone activated! Avoid it!\n
 
 player_admin_kill			\1 0xRESETTwas smitten by an administrator.\n

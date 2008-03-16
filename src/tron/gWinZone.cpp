@@ -67,7 +67,14 @@ gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
     else
     {
         ret = tNEW( gWinZoneHack( grid, pos ) );
-        sn_ConsoleOut( "$instant_win_activated" );
+        if ( sg_currentSettings->gameType != gFREESTYLE )
+        {
+            sn_ConsoleOut( "$instant_win_activated" );
+        }
+        else
+        {
+            sn_ConsoleOut( "$instant_round_end_activated" );
+        }
     }
 
     // initialize radius and expansion speed
