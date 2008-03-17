@@ -28,19 +28,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef ArmageTron_tCOLOR_H
 #define ArmageTron_tCOLOR_H
 
+#include "tString.h"
 #include "defs.h"
 
 //! rgba color represented by floats between 0 and 1
-struct tColor
+class tColor
 {
 public:
-    tColor():r_(1), g_(1), b_(1), a_(1) {}       //!< Constructor
-    tColor( REAL r, REAL g, REAL b, REAL a = 1 )      //!< Constructor
-            :r_(r), g_(g), b_(b), a_(a) {}
+    tColor();       //!< Constructor
+    tColor( REAL r, REAL g, REAL b, REAL a = 1 );     //!< Constructor
+    tColor( const char * c );		//!< Creates a tColor from a color code string
+    tColor( tString c );		//!< Creates a tColor from a color code string
     ~tColor(){}                         //!< Destructor
 
     // the colors are public because they are independent of each other
     REAL r_, g_, b_, a_;                    //!< Color values
+
+    bool IsDark( void );	//!< Has this color to be rendered on a bright background ?
+
 protected:
 private:
 };

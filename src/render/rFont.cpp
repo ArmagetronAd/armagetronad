@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rFont.h"
 #include "rScreen.h"
 #include "tConfiguration.h"
+#include "tColor.h"
 #include <ctype.h>
 
 #ifndef DEDICATED
@@ -256,13 +257,6 @@ rTextField::~rTextField(){
 #endif
 }
 
-// minimal tolerated values of font color before a white background is rendered
-static REAL sr_minR = .5, sr_minG = .5, sr_minB =.5, sr_minTotal = .7;
-tSettingItem< REAL > sr_minRConf( "FONT_MIN_R", sr_minR );
-tSettingItem< REAL > sr_minGConf( "FONT_MIN_G", sr_minG );
-tSettingItem< REAL > sr_minBConf( "FONT_MIN_B", sr_minB );
-tSettingItem< REAL > sr_minTotalConf( "FONT_MIN_TOTAL", sr_minTotal );
-
 void rTextField::FlushLine(int len,bool newline){
 #ifndef DEDICATED
     // reload textures if alpha blending changed
@@ -279,16 +273,16 @@ void rTextField::FlushLine(int len,bool newline){
 
     int i;
 
-    REAL r = color_.r_;
+/*    REAL r = color_.r_;
     REAL g = color_.g_;
     REAL b = color_.b_;
-    REAL a = color_.a_;
+    REAL a = color_.a_; */ // Not sure if we still need it
 
     if (sr_glOut)
     {
                
         // render bright background
-        if ( r < sr_minR && g < sr_minG && b < sr_minG || r+g+b < sr_minTotal )
+        if ( color_.IsDark() )
         {
             RenderEnd(true);
             glDisable(GL_TEXTURE_2D);
@@ -417,29 +411,6 @@ rTextField & rTextField::operator<<(unsigned char c){
 }
 */
 
-#ifndef DEDICATED
-static REAL CTR(int x){
-    return x/255.0;
-}
-#endif
-
-static char hex_array[]="0123456789abcdef";
-
-char int_to_hex(int i){
-    if (i<0 || i >15)
-        return 'Q';
-    else
-        return hex_array[i];
-}
-
-int hex_to_int(char c){
-    int ret=0;
-    for (int i=15;i>=0;i--)
-        if (hex_array[i]==c)
-            ret=i;
-    return ret;
-}
-
 rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
 {
 #ifndef DEDICATED
@@ -505,9 +476,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
             {
                 // found! extract colors
                 cursorPos-=8;
-                color.r_=CTR(hex_to_int(c[2])*16+hex_to_int(c[3]));
-                color.g_=CTR(hex_to_int(c[4])*16+hex_to_int(c[5]));
-                color.b_=CTR(hex_to_int(c[6])*16+hex_to_int(c[7]));
+		color = tColor( tString( c ).SubStr( 0, 8 ) );
                 use = true;
             }
 
