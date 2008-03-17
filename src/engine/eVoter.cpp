@@ -216,9 +216,10 @@ public:
         {
             if ( !CheckValid( m.SenderID() ) )
                 return false;
-
-            ReBroadcast( m.SenderID() );
         }
+
+        ReBroadcast( m.SenderID() );
+
         return true;
     }
 
@@ -236,14 +237,20 @@ public:
 
             // print it
             if ( se_votingPrivacy <= -1 )
+            {
                 sn_ConsoleOut( voteMessage );	// broadcast it
-            else if ( se_votingPrivacy <= 1 )
-            {
-                con << voteMessage;				// print it for the server admin
             }
-            else if ( exceptTo > 0 )
+            else
             {
-                sn_ConsoleOut( voteMessage, exceptTo );
+                if ( exceptTo > 0 )
+                {
+                    sn_ConsoleOut( voteMessage, exceptTo );	// inform submitter
+                }
+
+                if ( se_votingPrivacy <= 1 )
+                {
+                    con << voteMessage;				// print it for the server admin
+                }
             }
 
             static nVersionFeature serverControlledVotes( 10 );
