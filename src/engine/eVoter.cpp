@@ -1607,7 +1607,7 @@ protected:
         std::ifstream s;
         if ( Open( s, 0 ) )
         {
-            sn_ConsoleOut( tOutput( "$vote_include_message", file_ ) );
+            sn_ConsoleOut( tOutput( "$vote_include_message", file_, level_ ) );
             eAccessConsoleFilter filter( level_ );
             tConfItemBase::ReadFile( s );
         }
