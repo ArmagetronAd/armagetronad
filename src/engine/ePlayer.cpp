@@ -2950,7 +2950,9 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
 
 class eHelpTopic {
     tString m_shortdesc, m_text;
-    static std::map<tString, eHelpTopic> s_helpTopics;
+
+    // singleton accessor
+    static std::map<tString, eHelpTopic> & GetHelpTopics();
 public:
     eHelpTopic() {};
     eHelpTopic(tString const &shortdesc, tString const &text) : m_shortdesc(shortdesc), m_text(text) {
@@ -2970,7 +2972,7 @@ public:
             return;
         }
         s >> text;
-        s_helpTopics[name] = eHelpTopic(shortdesc, text);
+        GetHelpTopics()[name] = eHelpTopic(shortdesc, text);
         if(tConfItemBase::printChange) {
             con << tOutput("$add_help_topic_success", name);
         }
@@ -2979,7 +2981,7 @@ public:
     static void removeHelpTopic(std::istream &s) {
         tString name;
         s >> name;
-        if(s_helpTopics.erase(name)) {
+        if(GetHelpTopics().erase(name)) {
             if(tConfItemBase::printChange) {
                 con << tOutput("$remove_help_topic_success", name);
             }
@@ -3014,12 +3016,12 @@ private:
 public:
 
     static void listTopics(tColoredString &s, tString const &base=tString()) {
-        listTopics(s, base, s_helpTopics.begin(), s_helpTopics.end());
+        listTopics(s, base, GetHelpTopics().begin(), GetHelpTopics().end());
     }
 
     static void printTopic(tColoredString &s, tString const &name) {
-        std::map<tString, eHelpTopic>::const_iterator iter = s_helpTopics.find(name);
-        if(iter != s_helpTopics.end()) {
+        std::map<tString, eHelpTopic>::const_iterator iter = GetHelpTopics().find(name);
+        if(iter != GetHelpTopics().end()) {
             iter->second.write(s);
             listTopics(s, name + "_");
         } else {
@@ -3027,26 +3029,40 @@ public:
         }
     }
 };
-static std::pair<tString, eHelpTopic> se_makeDefaultHelpTopic(char const *topic) {
+
+static void se_makeDefaultHelpTopic(  std::map<tString, eHelpTopic> & helpTopics, char const *topic) {
     tString topicStr(topic);
     tString helpTopic(tString("$help_") + topicStr);
-    return std::pair<tString, eHelpTopic>(topicStr, eHelpTopic(helpTopic + "_shortdesc", helpTopic + "_text"));
+    helpTopics[topicStr] = eHelpTopic(helpTopic + "_shortdesc", helpTopic + "_text");
 }
-static std::pair<tString, eHelpTopic> se_defaultHelpTopics[] = {
-    se_makeDefaultHelpTopic("commands"),
-    se_makeDefaultHelpTopic("commands_chat"),
-    se_makeDefaultHelpTopic("commands_team"),
+
+// singleton accessor implementation
+static std::map<tString, eHelpTopic> & FillHelpTopics()
+{
+    static std::map<tString, eHelpTopic> helpTopics;
+
+    se_makeDefaultHelpTopic(helpTopics, "commands");
+    se_makeDefaultHelpTopic(helpTopics, "commands_chat");
+    se_makeDefaultHelpTopic(helpTopics, "commands_team");
 #ifdef KRAWALL_SERVER
-    se_makeDefaultHelpTopic("commands_auth"),
-    se_makeDefaultHelpTopic("commands_auth_levels"),
-    se_makeDefaultHelpTopic("commands_tourney"),
+    se_makeDefaultHelpTopic(helpTopics, "commands_auth");
+    se_makeDefaultHelpTopic(helpTopics, "commands_auth_levels");
+    se_makeDefaultHelpTopic(helpTopics, "commands_tourney");
 #else
-    se_makeDefaultHelpTopic("commands_ra"),
+    se_makeDefaultHelpTopic(helpTopics, "commands_ra");
 #endif
-    se_makeDefaultHelpTopic("commands_misc"),
-    se_makeDefaultHelpTopic("commands_pp")
-};
-std::map<tString, eHelpTopic> eHelpTopic::s_helpTopics(se_defaultHelpTopics, se_defaultHelpTopics + sizeof(se_defaultHelpTopics)/sizeof(eHelpTopic));
+    se_makeDefaultHelpTopic(helpTopics, "commands_misc");
+    se_makeDefaultHelpTopic(helpTopics, "commands_pp");
+
+    return helpTopics;
+}
+
+// singleton accessor implementation
+std::map<tString, eHelpTopic> & eHelpTopic::GetHelpTopics()
+{
+    static std::map<tString, eHelpTopic> & helpTopics = FillHelpTopics();
+    return helpTopics;
+}
 
 static tConfItemFunc add_help_topic_conf("ADD_HELP_TOPIC",&eHelpTopic::addHelpTopic);
 static tConfItemFunc remove_help_topic_conf("REMOVE_HELP_TOPIC",&eHelpTopic::removeHelpTopic);
