@@ -2328,6 +2328,8 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     tConfItemBase::LoadLine(stream);
 }
 
+static void se_Rtfm( tString const &command, ePlayerNetID * p, std::istream & s );
+
 static void handle_chat_admin_commands( ePlayerNetID * p, tString const & command, tString const & say, std::istream & s )
 {
     if  (command == "/login")
@@ -2377,6 +2379,10 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     else  if ( command == "/admin" )
     {
         se_AdminAdmin( p, s );
+    }
+    else  if ( command == "/rtfm" || command == "/teach" )
+    {
+        se_Rtfm( command, p, s );
     }
     else
         if (se_interceptUnknownCommands)
@@ -3083,6 +3089,30 @@ static void se_Help( ePlayerNetID * p, std::istream & s ) {
         eHelpTopic::printTopic(reply, name);
     }
     sn_ConsoleOut(reply, p->Owner());
+}
+
+static tAccessLevel se_rtfmAccessLevel = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_rtfmAccessLevelConf( "ACCESS_LEVEL_RTFM", se_rtfmAccessLevel );
+
+static void se_Rtfm( tString const &command, ePlayerNetID * p, std::istream & s ) {
+#ifdef KRAWALL_SERVER
+    if ( p->GetAccessLevel() > se_rtfmAccessLevel ) {
+        sn_ConsoleOut(tOutput("$access_level_rtfm_denied", tCurrentAccessLevel::GetName(se_shuffleUpAccessLevel), tCurrentAccessLevel::GetName(p->GetAccessLevel())), p->Owner());
+        return;
+    }
+#else
+	if (!p->IsLoggedIn()) {
+		sn_ConsoleOut(tOutput("$rtfm_denied"));
+		return;
+	}
+#endif
+	ePlayerNetID *newbie = se_FindPlayerInChatCommand(p, command, s);
+	if(newbie) {
+		tColoredString name;
+		name << *p << tColoredString::ColorString(1,1,1);
+		sn_ConsoleOut(tOutput("$rtfm_announcement", name), newbie->Owner());
+		se_Help(newbie, s);
+	}
 }
 
 void handle_chat( nMessage &m )

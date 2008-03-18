@@ -157,6 +157,7 @@ If --enable-armathentication was activated:
   specified using the setting CONSOLE_INDENT.
 - /help command that supports multiple help topics. Use
   HELP_INTRODUCTORY_BLURB and ADD_HELP_TOPIC to control its contents
+- /rtfm command that allows moderators to send help messages to newbies
 
   Bugfixes:
 - Text input fields now let the text wrap correctly and make use of the space allocated
