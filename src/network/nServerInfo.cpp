@@ -2759,8 +2759,7 @@ void nServerInfo::NetReadThis( nMessage & m )
                 while ( ++j < userGlobalIDs_.Len()-1 && userGlobalIDs_[j] != '\n' );
                 userNamesOneLine_ << ")";
             }
-            else
-                ++j;
+            ++j;
             if ( i < userNames_.Len()-2 )
                 userNamesOneLine_ << ", ";
         }
