@@ -2328,7 +2328,9 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     tConfItemBase::LoadLine(stream);
 }
 
+#ifdef DEDICATED
 static void se_Rtfm( tString const &command, ePlayerNetID * p, std::istream & s );
+#endif
 
 static void handle_chat_admin_commands( ePlayerNetID * p, tString const & command, tString const & say, std::istream & s )
 {
@@ -2938,22 +2940,22 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
     if (IDWish >= len)
         IDWish = len-1;
 
-	if(IDWish < IDNow)
-	{
+    if(IDWish < IDNow)
+    {
 #ifndef KRAWALL_SERVER
-		if ( !se_allowShuffleUp )
-		{
-			sn_ConsoleOut(tOutput("$player_noshuffleup"), p->Owner());
-			return;
-		}
+        if ( !se_allowShuffleUp )
+        {
+            sn_ConsoleOut(tOutput("$player_noshuffleup"), p->Owner());
+            return;
+        }
 #else
-		if ( p->GetAccessLevel() > se_shuffleUpAccessLevel )
-		{
-			sn_ConsoleOut(tOutput("$access_level_shuffle_up_denied", tCurrentAccessLevel::GetName(se_shuffleUpAccessLevel), tCurrentAccessLevel::GetName(p->GetAccessLevel())), p->Owner());
-			return;
-		}
+        if ( p->GetAccessLevel() > se_shuffleUpAccessLevel )
+        {
+            sn_ConsoleOut(tOutput("$access_level_shuffle_up_denied", tCurrentAccessLevel::GetName(se_shuffleUpAccessLevel), tCurrentAccessLevel::GetName(p->GetAccessLevel())), p->Owner());
+            return;
+        }
 #endif
-	}
+    }
 
     if( IDNow == IDWish )
     {
@@ -3105,6 +3107,7 @@ static void se_Help( ePlayerNetID * p, std::istream & s ) {
 static tAccessLevel se_rtfmAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_rtfmAccessLevelConf( "ACCESS_LEVEL_RTFM", se_rtfmAccessLevel );
 
+#ifdef DEDICATED
 static void se_Rtfm( tString const &command, ePlayerNetID * p, std::istream & s ) {
 #ifdef KRAWALL_SERVER
     if ( p->GetAccessLevel() > se_rtfmAccessLevel ) {
@@ -3112,19 +3115,26 @@ static void se_Rtfm( tString const &command, ePlayerNetID * p, std::istream & s 
         return;
     }
 #else
-	if (!p->IsLoggedIn()) {
-		sn_ConsoleOut(tOutput("$rtfm_denied"));
-		return;
-	}
+    if (!p->IsLoggedIn()) {
+        sn_ConsoleOut(tOutput("$rtfm_denied"));
+        return;
+    }
 #endif
-	ePlayerNetID *newbie = se_FindPlayerInChatCommand(p, command, s);
-	if(newbie) {
-		tColoredString name;
-		name << *p << tColoredString::ColorString(1,1,1);
-		sn_ConsoleOut(tOutput("$rtfm_announcement", name), newbie->Owner());
-		se_Help(newbie, s);
-	}
+    ePlayerNetID *newbie = se_FindPlayerInChatCommand(p, command, s);
+    if(newbie) {
+        // somewhat hacky, but what the hack...
+        tString str;
+        str.ReadLine(s);
+        std::istringstream s1(&str(0)), s2(&str(0));
+        tColoredString name;
+        name << *p << tColoredString::ColorString(1,1,1);
+        sn_ConsoleOut(tOutput("$rtfm_announcement", name), newbie->Owner());
+        se_Help(newbie, s1);
+        sn_ConsoleOut(tOutput("$rtfm_success", name), newbie->Owner());
+        se_Help(p, s2);
+    }
 }
+#endif
 
 void handle_chat( nMessage &m )
 {
@@ -6765,8 +6775,8 @@ void ePlayerNetID::UpdateName( void )
     }
     else if ( sn_GetNetState() == nCLIENT )
     {
-	// If we are in client mode, just follow our leader the server :)
-	nameFromAdmin_ = nameFromClient_ = nameFromServer_;
+        // If we are in client mode, just follow our leader the server :)
+        nameFromAdmin_ = nameFromClient_ = nameFromServer_;
     }
     else
     {
