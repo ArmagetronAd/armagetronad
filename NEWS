@@ -153,8 +153,10 @@ If --enable-armathentication was activated:
     enabled. In this case the server will delay the start of the next round
     until WAIT_FOR_EXTENAL_SCRIPT_TIMEOUT is reached or the setting is
     disabled.
-- Wrapped console lines are indented by an amount of spaces that can be 
+- Wrapped console lines are indented by an amount of spaces that can be
   specified using the setting CONSOLE_INDENT.
+- /help command that supports multiple help topics. Use
+  HELP_INTRODUCTORY_BLURB and ADD_HELP_TOPIC to control its contents
 
   Bugfixes:
 - Text input fields now let the text wrap correctly and make use of the space allocated

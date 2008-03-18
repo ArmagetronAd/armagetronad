@@ -2205,6 +2205,45 @@ player_noshuffleup      You are not allowed to shuffle up.\n
 player_noshuffle        Your shuffling wish has no effect.\n
 player_shuffle_error    /shuffle expects a number as argument; an explicit sign (+/-) will change your position by the indicated number of steps, no sign will shuffle you to the given position.\n
 
+add_help_topic_help     Add a new help topic to be used with /help. Usage: ADD_HELP_TOPIC <topic> <short description> <text>
+add_help_topic_usage    Usage: ADD_HELP_TOPIC <topic> <short description> <text>\n
+add_help_topic_success  Added help topic "\1".\n
+remove_help_topic_help  Remove a help topic.
+remove_help_topic_success Removed help topic "\1".\n
+remove_help_topic_notfound Help topic "\1" doesn't exist.\n
+
+help_introductory_blurb_help Message that is displayed before the list of help topics if someone uses /help without arguments
+
+help_topics_list_start  Say /help TOPIC to get help on the following topics.\n
+help_topic_not_found    Help topic \1 not found. Try /help with no arguments to see a list of available topics.\n
+
+help_commands_shortdesc List of all chat commands
+help_commands_text      This help topic is empty. Use one of the following sub-topics instead:
+
+help_commands_chat_shortdesc Basic chat commands
+help_commands_chat_text      0x88ff88/me <message>0xffff88: Transmit an action, as in "/me is a noob."\n0x88ff88/msg <part of a nickname> <message>0xffff88: Send a private message that only a specific player can see\n0x88ff88/team <message>0xffff88: Send a message to your teammates, or to all spectators if you're not on a team
+
+help_commands_team_shortdesc Basic team management commands
+help_commands_team_text 0x88ff88/teamshuffle0xffff88: Shuffle yourself to be at the outside of your team's wingmen formation\n0x88ff88/teamshuffle <position>0xffff88: Shuffle yourself to be at a specific position\n0x88ff88/teamshuffle [+|-]<offset>0xffff88: Shuffle yourself up/down by a certain number of ranks\n0x88ff88/teamleave0xffff88: Leave your current team. Only works on some servers\n0x88ff88/teams0xffff88: Get a list of all teams with a somewhat graphic representation of their formation
+
+help_commands_pp_shortdesc Player police commands
+help_commands_pp_text 0x88ff88/players0xffff88: Get a list of all players, along with some other information\n0x88ff88/vote kick|suspend <player>0xffff88: Start a poll to kick or suspend a player
+
+help_commands_auth_shortdesc Authentication related commands
+help_commands_auth_text 0x88ff88/login @<authority>0xffff88: Authenticate yourself using a given authority. Try @forums if you have an account at http://forums.armagetronad.net\n0x88ff88/logout0xffff88: Log out so you can log back in as another player\n0x88ff88/vote include <file>0xffff88: Start a poll to include a given file\n0x88ff88/vote command <command>0xffff88: Start a poll to execute an admin command\n0x88ff88/admin <command>0xffff88: Execute a console command on the server if you have sufficient access rights\n0x88ff88/op <player> <optional access level>0xffff88: Gives another player a higher access level; the level defaults to the level one lower than you access level, which is also the maximal possible level\n0x88ff88/deop <player>0xffff88: Reverses /op; it takes away a player's access level, effectively making him unauthenticated again. Only works on players of lower access level than yours, of course.\n0x88ff88/promote <player> <optional steps>0xffff88: elevates a player's access level the given number of steps (default: one)\n0x88ff88/demote <player> <optional steps>0xffff88: lowers a player's access level the given number of steps (default: one)
+
+help_commands_auth_levels_shortdesc List of all access levels
+help_commands_auth_levels_text 0x88ff880 (Owner)0xffff88: The owner of the server. Commands entered on the server console are executed with these rights.\n0x88ff881 (Admin)0xffff88: A server administrator. By default, almost as powerful as the owner himself.\n0x88ff882 (Moderator)0xffff88: A server moderator. Is still allowed to use /admin, but is restricted to player management commands.\n0x88ff887 (Team Leader)0xffff88: Leader of a team. By default, no admin rights at all.\n0x88ff888 (Team Member)0xffff88: Member of a team. Local team accounts get this level.\n0x88ff8812 (Local User)0xffff88: Players with local accounts get this level.\n0x88ff8815 (Remote User)0xffff88: Players with remote accounts get this level by default.\n0x88ff8816 (Fallen from Grace)0xffff88: Authenticated players who abused default rights given to them.\n0x88ff8817 (Shunned)0xffff88: Same, only worse :)\n0x88ff8819 (Authenticated)0xffff88: Minimal level authenticated players can get.\n0x88ff8820 (Program)0xffff88: Unauthenticated players.
+
+help_commands_ra_shortdesc Remote admin commands
+help_commands_ra_text 0x88ff88/login <password>0xffff88: Log in as the server administrator using the server-specific password\n0x88ff88/logout0xffff88: Drop your logged in status so that other players can't see that you're an administrator\n0x88ff88/admin <command>0xffff88: Execute a console command as if it were entered on the server
+
+help_commands_misc_shortdesc Miscellaneous commands
+help_commands_misc_text 0x88ff88/help0xffff88: You just found out about this one :-)\n0x88ff88/command <command>0xffff88: Execute a command on your own client. Useful for instant chats
+
+help_commands_tourney_shortdesc Tourney related commands
+help_commands_tourney_text 0x88ff88/lock0xffff88: Locks your current team. Nobody can join it any more on their own. To let someone in, you need to invoke\n0x88ff88/invite <player>0xffff88: From that moment on, the player is allowed to join you. Another effect of /invite, even if your team is not locked, is that the invited player can read all of your team's /team messages. Invitations are permanent until revoked. That means a player who is invited into your team can join and leave it freely without further need to /invite him again. Players who were on the team when you /locked it are not automatically invited when they leave on their own account.\n0x88ff88/uninvite <player>0xffff88: reverses /invite. The invitation is revoked, the player can no longer join you, and if he currently is on your team, he will be thrown out.\n0x88ff88/unlock0xffff88: makes your team available for everyone to join again.
+
 invite_no_team          Can't use \1 if you're not on a team.\n
 invite_team_locked      \1 locked, you'll need an invitation from a team leader via the /invite command to join from now on.\n
 invite_team_unlocked    \1 unlocked, you can join it freely again.\n

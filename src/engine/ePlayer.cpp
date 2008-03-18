@@ -2948,6 +2948,127 @@ static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
     se_ListTeam( p, p->CurrentTeam() );
 }
 
+class eHelpTopic {
+    tString m_shortdesc, m_text;
+    static std::map<tString, eHelpTopic> s_helpTopics;
+public:
+    eHelpTopic() {};
+    eHelpTopic(tString const &shortdesc, tString const &text) : m_shortdesc(shortdesc), m_text(text) {
+    }
+
+    void write(tColoredString &s) const {
+        s << tColoredString::ColorString(.5,.5,1.) << tOutput(&m_shortdesc[0]) << ":\n" << tOutput(&m_text[0]) << '\n';
+    }
+
+    static void addHelpTopic(std::istream &s) {
+        tString name, shortdesc, text;
+        s >> name >> shortdesc;
+        if(s.fail()) {
+            if(tConfItemBase::printErrors) {
+                con << tOutput("$add_help_topic_usage");
+            }
+            return;
+        }
+        s >> text;
+        s_helpTopics[name] = eHelpTopic(shortdesc, text);
+        if(tConfItemBase::printChange) {
+            con << tOutput("$add_help_topic_success", name);
+        }
+    }
+
+    static void removeHelpTopic(std::istream &s) {
+        tString name;
+        s >> name;
+        if(s_helpTopics.erase(name)) {
+            if(tConfItemBase::printChange) {
+                con << tOutput("$remove_help_topic_success", name);
+            }
+        } else {
+            if(tConfItemBase::printErrors) {
+                con << tOutput("$remove_help_topic_notfound", name);
+            }
+        }
+    }
+
+private:
+
+    static void listTopics(tColoredString &s, tString const &base, std::map<tString, eHelpTopic>::const_iterator begin, std::map<tString, eHelpTopic>::const_iterator const &end) {
+        bool printed_start = false;
+        for(;begin != end; ++begin) {
+            if(!begin->first.StartsWith(base)) {
+                continue;
+            }
+            // would be easier with std::string...
+            if(begin->first.SubStr(base.Len() - 1).StrPos("_") >= 0) {
+                // don't print subcommands
+                continue;
+            }
+            if(!printed_start) {
+                printed_start = true;
+                s << tOutput("$help_topics_list_start");
+            }
+            s << tColoredString::ColorString(.5,.5,1.) << begin->first << tColoredString::ColorString(1.,1.,.5) << ": " << tOutput(&begin->second.m_shortdesc[0]) << "\n";
+        }
+    }
+
+public:
+
+    static void listTopics(tColoredString &s, tString const &base=tString()) {
+        listTopics(s, base, s_helpTopics.begin(), s_helpTopics.end());
+    }
+
+    static void printTopic(tColoredString &s, tString const &name) {
+        std::map<tString, eHelpTopic>::const_iterator iter = s_helpTopics.find(name);
+        if(iter != s_helpTopics.end()) {
+            iter->second.write(s);
+            listTopics(s, name + "_");
+        } else {
+            s << tOutput("$help_topic_not_found", name);
+        }
+    }
+};
+static std::pair<tString, eHelpTopic> se_makeDefaultHelpTopic(char const *topic) {
+    tString topicStr(topic);
+    tString helpTopic(tString("$help_") + topicStr);
+    return std::pair<tString, eHelpTopic>(topicStr, eHelpTopic(helpTopic + "_shortdesc", helpTopic + "_text"));
+}
+static std::pair<tString, eHelpTopic> se_defaultHelpTopics[] = {
+    se_makeDefaultHelpTopic("commands"),
+    se_makeDefaultHelpTopic("commands_chat"),
+    se_makeDefaultHelpTopic("commands_team"),
+#ifdef KRAWALL_SERVER
+    se_makeDefaultHelpTopic("commands_auth"),
+    se_makeDefaultHelpTopic("commands_auth_levels"),
+    se_makeDefaultHelpTopic("commands_tourney"),
+#else
+    se_makeDefaultHelpTopic("commands_ra"),
+#endif
+    se_makeDefaultHelpTopic("commands_misc"),
+    se_makeDefaultHelpTopic("commands_pp")
+};
+std::map<tString, eHelpTopic> eHelpTopic::s_helpTopics(se_defaultHelpTopics, se_defaultHelpTopics + sizeof(se_defaultHelpTopics)/sizeof(eHelpTopic));
+
+static tConfItemFunc add_help_topic_conf("ADD_HELP_TOPIC",&eHelpTopic::addHelpTopic);
+static tConfItemFunc remove_help_topic_conf("REMOVE_HELP_TOPIC",&eHelpTopic::removeHelpTopic);
+static tString se_helpIntroductoryBlurb;
+static tConfItemLine se_helpIntroductoryBlurbConf("HELP_INTRODUCTORY_BLURB",se_helpIntroductoryBlurb);
+
+static void se_Help( ePlayerNetID * p, std::istream & s ) {
+    std::ws(s);
+    tColoredString reply;
+    if(s.eof() || s.fail()) {
+        if(se_helpIntroductoryBlurb.Len() > 1) {
+            reply << se_helpIntroductoryBlurb << "\n\n";
+        }
+        eHelpTopic::listTopics(reply);
+    } else {
+        tString name;
+        s >> name;
+        eHelpTopic::printTopic(reply, name);
+    }
+    sn_ConsoleOut(reply, p->Owner());
+}
+
 void handle_chat( nMessage &m )
 {
     nTimeRolling currentTime = tSysTimeFloat();
@@ -3030,6 +3151,10 @@ void handle_chat( nMessage &m )
                     }
                     else if (command == "/teams") {
                         se_ChatTeams( p );
+                        return;
+                    }
+                    else if (command == "/help") {
+                        se_Help( p, s );
                         return;
                     }
 #ifdef DEDICATED
