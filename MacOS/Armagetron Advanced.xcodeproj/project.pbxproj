@@ -405,6 +405,9 @@
 		9B69F6260A63E1A700F5F2E4 /* eLagCompensation.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */; };
 		9B69F6270A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */; };
 		9B78706A0D5E4FD20088A96F /* libZThread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B7870670D5E4FD20088A96F /* libZThread.a */; };
+		D01641340D904A6600FC0A23 /* tColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01641330D904A6600FC0A23 /* tColor.cpp */; };
+		D01641350D904A6600FC0A23 /* tColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01641330D904A6600FC0A23 /* tColor.cpp */; };
+		D01641360D904A6600FC0A23 /* tColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01641330D904A6600FC0A23 /* tColor.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -716,6 +719,7 @@
 		9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eLagCompensation.cpp; sourceTree = "<group>"; };
 		9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eLagCompensation.h; sourceTree = "<group>"; };
 		9B7870670D5E4FD20088A96F /* libZThread.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libZThread.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libZThread.a; sourceTree = "<absolute>"; };
+		D01641330D904A6600FC0A23 /* tColor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tColor.cpp; path = ../src/tools/tColor.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -770,6 +774,7 @@
 		29B97314FDCFA39411CA2CEA /* Armagetron Advanced */ = {
 			isa = PBXGroup;
 			children = (
+				D01641330D904A6600FC0A23 /* tColor.cpp */,
 				8CBA5DFE089EEBF7007E21DC /* Source */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -1596,6 +1601,7 @@
 				9B5FE8310D57B2FC004AC137 /* nAuthentication.cpp in Sources */,
 				64E4392C0D64FC4100CA7EC4 /* rDisplayList.cpp in Sources */,
 				64E4392E0D64FC4100CA7EC4 /* rGL.cpp in Sources */,
+				D01641360D904A6600FC0A23 /* tColor.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1706,6 +1712,7 @@
 				9B5FE8300D57B2FC004AC137 /* nAuthentication.cpp in Sources */,
 				64E439260D64FC4100CA7EC4 /* rDisplayList.cpp in Sources */,
 				64E439280D64FC4100CA7EC4 /* rGL.cpp in Sources */,
+				D01641350D904A6600FC0A23 /* tColor.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1816,6 +1823,7 @@
 				9B5FE82F0D57B2FC004AC137 /* nAuthentication.cpp in Sources */,
 				64E439290D64FC4100CA7EC4 /* rDisplayList.cpp in Sources */,
 				64E4392B0D64FC4100CA7EC4 /* rGL.cpp in Sources */,
+				D01641340D904A6600FC0A23 /* tColor.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
