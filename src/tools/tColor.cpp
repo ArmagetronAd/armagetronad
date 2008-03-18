@@ -96,14 +96,7 @@ tColor::tColor( REAL r, REAL g, REAL b, REAL a )
 
 tColor::tColor( const tString c )
 {
-    if( c.Len() <= 8 )
-    {
-	r_ = g_ = b_ = 0;
-    }
-
-    r_ = CTR( hex_to_int( c[2] ) *16 + hex_to_int( c[3] ) );
-    g_ = CTR( hex_to_int( c[4] ) *16 + hex_to_int( c[5] ) );
-    b_ = CTR( hex_to_int( c[6] ) *16 + hex_to_int( c[7] ) );
+    FillFrom( c );
 }
 
 // *******************************************************************************************
@@ -118,7 +111,34 @@ tColor::tColor( const tString c )
 
 tColor::tColor( const char * c )
 {
-    tColor( tString( c ) );
+    FillFrom( c );
+}
+
+// *******************************************************************************************
+// *
+// *	tColor
+// *
+// *******************************************************************************************
+//!
+//!		@param	c	Color code string to read the color from
+//!
+// *******************************************************************************************
+
+void tColor::FillFrom( const char * c )
+{
+    // check whether the passed string is too short
+    for( int i = 0; i < 8; ++i )
+    {
+        if( !c[i] )
+        {
+            r_ = g_ = b_ = 0;
+            return;
+        }
+    }
+
+    r_ = CTR( hex_to_int( c[2] ) *16 + hex_to_int( c[3] ) );
+    g_ = CTR( hex_to_int( c[4] ) *16 + hex_to_int( c[5] ) );
+    b_ = CTR( hex_to_int( c[6] ) *16 + hex_to_int( c[7] ) );
 }
 
 // *******************************************************************************************

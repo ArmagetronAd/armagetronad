@@ -273,14 +273,13 @@ void rTextField::FlushLine(int len,bool newline){
 
     int i;
 
-/*    REAL r = color_.r_;
+    REAL r = color_.r_;
     REAL g = color_.g_;
     REAL b = color_.b_;
-    REAL a = color_.a_; */ // Not sure if we still need it
+    REAL a = color_.a_;
 
     if (sr_glOut)
     {
-               
         // render bright background
         if ( color_.IsDark() )
         {
@@ -476,7 +475,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
             {
                 // found! extract colors
                 cursorPos-=8;
-		color = tColor( tString( c ).SubStr( 0, 8 ) );
+                color = tColor( c );
                 use = true;
             }
 

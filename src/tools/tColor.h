@@ -41,6 +41,8 @@ public:
     tColor( tString c );		//!< Creates a tColor from a color code string
     ~tColor(){}                         //!< Destructor
 
+    void FillFrom( const char * c );		//!< Fills this color object from a color code string
+
     // the colors are public because they are independent of each other
     REAL r_, g_, b_, a_;                    //!< Color values
 
