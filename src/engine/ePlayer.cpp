@@ -2615,6 +2615,11 @@ static void se_ChatTeamLeave( ePlayerNetID * p )
     p->SetTeamWish(0);
 }
 
+static bool se_filterColorTeam=false;
+tSettingItem< bool > se_coloredTeamConf( "FILTER_COLOR_TEAM", se_filterColorTeam );
+static bool se_filterDarkColorTeam=false;
+tSettingItem< bool > se_coloredDarkTeamConf( "FILTER_DARK_COLOR_TEAM", se_filterDarkColorTeam );
+
 // /team chat commant: talk to your team
 static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
 {
@@ -2628,6 +2633,12 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
 
     tString msg;
     msg.ReadLine( s );
+
+    // Apply filters if we don't already
+    if ( se_filterColorTeam )
+        msg = tColoredString::RemoveColors ( msg, false );
+    else if ( se_filterDarkColorTeam )
+	msg = tColoredString::RemoveColors ( msg, true );
 
     // Log message to server and sender
     tColoredString messageForServerAndSender = se_BuildChatString(currentTeam, p, msg);
@@ -4565,6 +4576,9 @@ static tSettingItem< bool > se_allowImposters2( "ALLOW_IMPOSTORS", se_allowImpos
 
 static bool se_filterColorNames=false;
 tSettingItem< bool > se_coloredNamesConf( "FILTER_COLOR_NAMES", se_filterColorNames );
+static bool se_filterDarkColorNames=false;
+tSettingItem< bool > se_coloredDarkNamesConf( "FILTER_DARK_COLOR_NAMES", se_filterDarkColorNames );
+
 static bool se_stripNames=true;
 tSettingItem< bool > se_stripConf( "FILTER_NAME_ENDS", se_stripNames );
 static bool se_stripMiddle=true;
@@ -4576,7 +4590,11 @@ static void se_OptionalNameFilters( tString & remoteName )
     // filter colors
     if ( se_filterColorNames )
     {
-        remoteName = tColoredString::RemoveColors( remoteName );
+        remoteName = tColoredString::RemoveColors( remoteName, false );
+    }
+    else if ( se_filterDarkColorNames )
+    {
+        remoteName = tColoredString::RemoveColors( remoteName, true );	
     }
 
     // don't do the fancy stuff on the client, it only makes names on score tables and
@@ -6747,6 +6765,7 @@ void ePlayerNetID::UpdateName( void )
     }
     else if ( sn_GetNetState() == nCLIENT )
     {
+	// If we are in client mode, just follow our leader the server :)
 	nameFromAdmin_ = nameFromClient_ = nameFromServer_;
     }
     else
