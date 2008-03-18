@@ -38,7 +38,7 @@ public:
     tColor();       //!< Constructor
     tColor( REAL r, REAL g, REAL b, REAL a = 1 );     //!< Constructor
     tColor( const char * c );		//!< Creates a tColor from a color code string
-    tColor( tString c );		//!< Creates a tColor from a color code string
+//    tColor( const tString * c );		//!< Creates a tColor from a color code string
     ~tColor(){}                         //!< Destructor
 
     void FillFrom( const char * c );		//!< Fills this color object from a color code string
