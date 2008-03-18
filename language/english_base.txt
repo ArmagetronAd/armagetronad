@@ -728,10 +728,15 @@ wrap_menu_help			If set, you leave a menu to the top and reenter it at the botto
 floor_mirror_int_help   Intensity of the floor mirror effect
 color_strings_help		Generate strings that will be rendered with color effects.
 filter_color_strings_help		Filter color codes from strings coming in over the network.
+filter_dark_color_strings_help		Filter dark color codes from strings coming in over the network.
 filter_color_names_help		    Filter color codes from player names.
+filter_dark_color_names_help		    Filter dark color codes from player names.
 filter_name_ends_help           Filter whitespace and other junk from beginnings and ends of player names.
 filter_name_middle_help         Filter excess whitespace and other junk from the middle of player names.
 filter_color_server_names_help	Filter color codes from server names in the server browser.
+filter_dark_color_server_names_help	Filter dark color codes from server names in the server browser.
+filter_color_team_help	Filter color codes from /team messages.
+filter_dark_color_team_help	Filter dark color codes from /team messages.
 
 zone_alpha_help             Transparency factor for zone rendering. 1.0 gives full strength.
 zone_alpha_server_help      Transparency factor for zone rendering, controlled by the server. 1.0 gives full strength.
