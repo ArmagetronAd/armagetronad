@@ -3377,6 +3377,20 @@ static uMenuItemStringWithHistory::history_t &se_chatHistory() {
 static int se_chatHistoryMaxSize=10; // maximal size of chat history
 static tSettingItem< int > se_chatHistoryMaxSizeConf("HISTORY_SIZE_CHAT",se_chatHistoryMaxSize);
 
+static char const * const se_simplifiedCommands[] = {
+    "/msg ",
+    "/invite ",
+    "/uninvite ",
+    "/teach ",
+    "/rtfm ",
+    "/op ",
+    "/deop ",
+    "/promote ",
+    "/demote ",
+    "/vote kick ",
+    "/vote suspend "
+};
+
 //! Completer with the addition that it adds a : to a fully completed name if it's at the beginning of the line
 class eAutoCompleterChat : public uAutoCompleter{
 public:
@@ -3387,10 +3401,19 @@ public:
         tString actualString;
         if(pos - len == 0 || pos - len == 6 && string.StartsWith("/team ")) {
             actualString = match + ": ";
-        } else if(pos - len == 5 && string.StartsWith("/msg ") || string.StartsWith("/admin ")) {
+        } else if(string.StartsWith("/admin ")) {
             actualString = Simplify(match) + " ";
         } else {
-            actualString = match + " ";
+            int i;
+            for(i = sizeof(se_simplifiedCommands)/sizeof(se_simplifiedCommands[0]) - 1; i >= 0; --i) {
+                if(pos - len == (int)strlen(se_simplifiedCommands[i]) && string.StartsWith(se_simplifiedCommands[i])) {
+                    actualString = Simplify(match) + " ";
+                    break;
+                }
+            }
+            if(i < 0) {
+                actualString = match + " ";
+            }
         }
         return DoCompletion(string, pos, len, actualString);
     }
