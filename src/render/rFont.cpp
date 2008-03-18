@@ -475,7 +475,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
             {
                 // found! extract colors
                 cursorPos-=8;
-                color = tColor( c );
+		color = tColor( c );
                 use = true;
             }
 

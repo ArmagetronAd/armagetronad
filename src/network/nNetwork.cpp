@@ -1032,9 +1032,6 @@ nMessage& nMessage::operator << ( const tOutput &o ){
     return *this << tString( static_cast< const char * >( o ) );
 }
 
-bool sn_filterColorStrings = false;
-static tConfItem<bool> cs("FILTER_COLOR_STRINGS",sn_filterColorStrings);
-
 nMessage& nMessage::ReadRaw(tString &s )
 {
     s.Clear();
@@ -1054,6 +1051,11 @@ nMessage& nMessage::ReadRaw(tString &s )
     return *this;
 }
 
+bool sn_filterColorStrings = false;
+static tConfItem<bool> sn_filterColorStringsConf("FILTER_COLOR_STRINGS",sn_filterColorStrings);
+bool sn_filterDarkColorStrings = false;
+static tConfItem<bool> sn_filterDarkColorStringsConf("FILTER_DARK_COLOR_STRINGS",sn_filterDarkColorStrings);
+
 nMessage& nMessage::operator >> (tColoredString &s )
 {
     // read the raw data
@@ -1068,7 +1070,9 @@ nMessage& nMessage::operator >> (tColoredString &s )
 
     // filter color codes away
     if ( sn_filterColorStrings )
-        s = tColoredString::RemoveColors( s );
+        s = tColoredString::RemoveColors( s, false );
+    else if ( sn_filterDarkColorStrings )
+        s = tColoredString::RemoveColors( s, true );	
 
     return *this;
 }
