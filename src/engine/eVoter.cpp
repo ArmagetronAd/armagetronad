@@ -578,13 +578,13 @@ public:
             return true;
         }
 
-	if ( se_votesSuspendTimeout > tSysTimeFloat() )
-	{
-		sn_ConsoleOut(tOutput("$vote_rejected_voting_suspended"),
+        if ( se_votesSuspendTimeout > tSysTimeFloat() )
+        {
+            sn_ConsoleOut(tOutput("$vote_rejected_voting_suspended"),
                           senderID );
 
-		return false;
-	}
+            return false;
+        }
 
         // fill suggestor
         if ( !suggestor_ )
@@ -1422,7 +1422,7 @@ protected:
     {
         // check whether enough harmful votes were collected already
         ePlayerNetID * p = GetPlayer();
-        if ( fromMenu_ && p && p->GetVoter()->HarmCount() - 1 < se_kickMinHarm )
+        if ( fromMenu_ && p && p->GetVoter()->HarmCount() < se_kickMinHarm )
         {
             // try to transfor the vote to a suspension
             eVoteItem * item = tNEW ( eVoteItemSuspend )( p );
