@@ -189,13 +189,17 @@ static tAccessLevel se_GetAccessLevel( int userID )
     return ret;
 }
 
+static nVersionFeature serverControlledVotesBroken( 10 );
+static nVersionFeature serverControlledVotes( 15 );
+
+
 // something to vote on
 class eVoteItem: public tListMember
 {
     friend class eMenuItemVote;
 public:
     // constructors/destructor
-    eVoteItem( void ): creationTime_( tSysTimeFloat() ), user_( 0 ), id_( ++se_votingItemID ), menuItem_( 0 )
+    eVoteItem( void ): creationTime_( tSysTimeFloat() ), user_( 0 ), id_( ++se_votingItemID ), menuItem_( 0 ), total_( 0 )
     {
         items_.Add( this );
     };
@@ -253,22 +257,32 @@ public:
                 }
             }
 
-            static nVersionFeature serverControlledVotes( 10 );
-
             // create messages for old and new clients
             tJUST_CONTROLLED_PTR< nMessage > retNew = this->CreateMessage();
             tJUST_CONTROLLED_PTR< nMessage > retLegacy = this->CreateMessageLegacy();
+
+            // set so every voter ony gets each vote once
+            std::set< eVoter * > sentTo;
+            total_ = 0;
+
             for ( int i = MAXCLIENTS; i > 0; --i )
             {
-                if ( sn_Connections[ i ].socket && i != exceptTo && 0 != eVoter::GetVoter( i ) )
+                eVoter * voter = eVoter::GetVoter( i );
+                if ( sn_Connections[ i ].socket && i != exceptTo && 0 != voter && 
+                     sentTo.find(voter) == sentTo.end() )
                 {
+
                     if ( serverControlledVotes.Supported( i ) )
                     {
+                        sentTo.insert(voter);
                         retNew->Send( i );
+                        total_++;
                     }
                     else if ( retLegacy )
                     {
+                        sentTo.insert(voter);
                         retLegacy->Send( i );
+                        total_++;
                     }
                 }
             }
@@ -474,7 +488,7 @@ public:
     {
         pro = voters_[1].Len();
         con = voters_[0].Len();
-        total = eVoter::voters_.Len();
+        total = total_;
     }
 
     // message
@@ -679,6 +693,7 @@ private:
     tArray< tCONTROLLED_PTR( eVoter ) > voters_[2];	// array of voters approving or disapproving of the vote
     unsigned short id_;								// running id of voting item
     eMenuItemVote *menuItem_;						// menu item
+    int total_;                                     // total number of voters aware of this item
 
     eVoteItem& operator=( const eVoteItem& );
     eVoteItem( const eVoteItem& );
