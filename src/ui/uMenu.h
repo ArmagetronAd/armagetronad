@@ -380,7 +380,9 @@ protected:
     tOutput  description;
     tString *content;
     int      cursorPos;
-    int		maxLength_;
+    int      maxLength_;
+
+    bool InsertChar(int unicode);
 
     // color mode used for rendering
     rTextField::ColorMode colorMode_;

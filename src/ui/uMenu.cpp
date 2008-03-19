@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  
 */
 
+#include "scrap.h"
 #include "tSysTime.h"
 #include "uMenu.h"
 #include "rSysdep.h"
@@ -836,25 +837,33 @@ bool uMenuItemString::Event(SDL_Event &e){
         ret = false;
         //        c.sym = SDLK_DOWN;
     }
-    else {
-        if (32 <= c.unicode  && c.unicode < 256)
-        {
-            ret=true;
+    else if (c.sym == SDLK_v && mod & KMOD_CTRL) {
+        char *scrap = 0;
+        int scraplen;
+        static bool initialized_scrap = false;
 
-            // insert character if there is room
-            if (content->Len() < maxLength_)
-            {
-                tString beg = content->SubStr(0,cursorPos);
-                tString end = content->SubStr(cursorPos);
-                *content = beg;
-                *content += tString::CHAR(c.unicode);
-                *content += end;
-                cursorPos++;
+        ret = false;
+
+        if(!initialized_scrap && init_scrap() >= 0) {
+            initialized_scrap = true;
+        }
+        if(initialized_scrap) {
+            get_scrap(SCRAP_TEXT, &scraplen, &scrap);
+            if(scraplen > 0) {
+                std::cerr << "scrap: " << scrap << std::endl;
+                for(unsigned char *c = (unsigned char *)scrap; *c; ++c) {
+                    if(!InsertChar(*c)) {
+                        break; // we hit a newline or were trying to
+                              // paste binary stuff
+                    }
+                    ret = true;
+                }
+                //free(scrap);
             }
         }
-        else {
-            ret=false;
-        }
+    }
+    else {
+        ret = InsertChar(c.unicode);
     }
 
     if (cursorPos<0)    cursorPos=0;
@@ -863,6 +872,29 @@ bool uMenuItemString::Event(SDL_Event &e){
     return ret;
 #else
     return false;
+#endif
+}
+
+bool uMenuItemString::InsertChar(int unicode) {
+#ifndef DEDICATED
+    if (32 <= unicode  && unicode < 256)
+    {
+        // insert character if there is room
+        if (content->Len() < maxLength_)
+        {
+            tString beg = content->SubStr(0,cursorPos);
+            tString end = content->SubStr(cursorPos);
+            *content = beg;
+            *content += tString::CHAR(unicode);
+            *content += end;
+            cursorPos++;
+        }
+
+        return true;
+    }
+    else {
+        return false;
+    }
 #endif
 }
 

@@ -1110,6 +1110,7 @@ src/doc/html.m4
 src/thirdparty/Makefile
 src/thirdparty/particles/Makefile
 src/thirdparty/mathexpr/Makefile
+src/thirdparty/scrap/Makefile
 src/swig/Makefile
 resource/Makefile
 config/Makefile

@@ -5,7 +5,7 @@ if BUILDDEDICATED
 SUBDIRS=mathexpr
 else
 if BUILDREGULAR
-SUBDIRS=particles mathexpr
+SUBDIRS=particles scrap mathexpr
 endif
 endif
 endif
