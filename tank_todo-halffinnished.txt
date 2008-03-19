@@ -10,8 +10,6 @@ There are some new commands that have been added...
     MESSAGE_OF_DAY_5
 They need to have some help written up for them, probably not a bad idea to add to config files either.
 
-test commit 1
-
 The instant winzone has been changed into an instant deathzone, this needs a switch of some sort, and some more help to go with it.
 
 Very primitive completly different remote admin has been added consiting of like 5 commands...
@@ -34,8 +32,6 @@ Also the scoretable has undergone some repair work, the above being part of that
 Also, the text file output has greater spacing or something like that, and a new column to show if someone is alive or dead has been added.
 That needs the appropriate fill-ins in the language files.
 New (040609): Added options to language file...
-
-test from svn.
 
 There was also a small issue with killing teamates to get points, this has been fixed, but still needs the language file addins.
 
