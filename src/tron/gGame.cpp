@@ -127,39 +127,12 @@ static tSettingItem<REAL> sg_lastChatBreakTimeConf( "LAST_CHAT_BREAK_TIME", sg_l
 #define DEFAULT_MAP "Anonymous/polygon/regular/square-1.0.1.aamap.xml"
 static tString mapfile(DEFAULT_MAP);
 
-/*
-static void sg_ParseMap ( gParser * aParser, tString map_file );
-static void change_mapfile(std::istream &s)
-{
-    // read new MAP_FILE value
-    tString new_mapfile;
-    new_mapfile.ReadLine(s, true);
+static bool sg_waitForExternalScript = false;
+static tSettingItem< bool > sg_waitForExternalScriptConf( "WAIT_FOR_EXTERNAL_SCRIPT", sg_waitForExternalScript );
 
-    if (new_mapfile == mapfile)
-        return;
+static REAL sg_waitForExternalScriptTimeout = 3;
+static tSettingItem<REAL> sg_waitForExternalScriptTimeoutConf( "WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT", sg_waitForExternalScriptTimeout );
 
-    // verify the map loads
-    try {
-        sg_ParseMap(aParser, new_mapfile);
-    } catch (tGenericException &e) {
-        sn_ConsoleOut( e.GetName(), e.GetDescription(), 120000 );
-        sg_ParseMap(aParser);	// is this necessary?
-        return;
-    }
-
-    if (printChange)
-    {
-        tOutput o;
-        o.SetTemplateParameter(1, "MAP_FILE");
-        o.SetTemplateParameter(2, mapfile);
-        o.SetTemplateParameter(3, new_mapfile);
-        o << "$config_value_changed";
-        con << o;
-    }
-
-    mapfile = new_mapfile;
-}
-*/
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
 // config item for semi-colon deliminated list of maps/configs, needs semi-colon at the end
@@ -900,7 +873,7 @@ static void sg_copySettings()
     gArena::SetSizeMultiplier 	( exponent( sg_currentSettings->sizeFactor ) );
 }
 
-void update_settings()
+void update_settings( bool const * goon )
 {
     if (sn_GetNetState()!=nCLIENT)
     {
@@ -910,7 +883,7 @@ void update_settings()
             bool restarted = false;
 
             REAL timeout = tSysTimeFloat() + 3.0f;
-            while ( sg_NumHumans() <= 0 && sg_NumUsers() > 0 )
+            while ( sg_NumHumans() <= 0 && sg_NumUsers() > 0 && ( !goon || *goon ) )
             {
                 if ( !restarted && bool(sg_currentGame) )
                 {
@@ -927,11 +900,11 @@ void update_settings()
                     sn_ConsoleOut(o2);
 
                     timeout = tSysTimeFloat() + 10.0f;
-
-                    // do tasks
-                    st_DoToDo();
-                    nAuthentication::OnBreak();
                 }
+
+                // do tasks
+                st_DoToDo();
+                nAuthentication::OnBreak();
 
                 // kick spectators and chatbots
                 nMachine::KickSpectators();
@@ -2332,7 +2305,7 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
     {
         gMapLoadConsoleFilter consoleLog;
 #ifdef DEBUG
-        con << "Loading map " << mapfile << "...\n";
+       con << tOutput( "$map_file_loading", mapfile );
 #endif
         if (!aParser->LoadWithoutParsing(mapfile))
         {
@@ -2341,9 +2314,7 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
 #ifndef DEDICATED
             errorMessage << "\nLog:\n" << consoleLog.message_;
 #endif
-
-            con << errorMessage;
-
+	   
             tOutput errorTitle("$map_file_load_failure_title");
 
             if ( sn_GetNetState() != nSTANDALONE )
@@ -2369,6 +2340,7 @@ void gGame::Verify()
     // test map and load map settings
     sg_ParseMap( aParser );
     init_game_grid(grid, aParser);
+    Arena.LeastDangerousSpawnPoint();
     exit_game_grid(grid);
 }
 
@@ -2604,7 +2576,7 @@ void gGame::StateUpdate(){
             // transfer game settings
             if ( nCLIENT != sn_GetNetState() )
             {
-                update_settings();
+                update_settings( &goon );
                 ePlayerNetID::RemoveChatbots();
             }
 
@@ -2624,6 +2596,28 @@ void gGame::StateUpdate(){
 
             // delete game objects again (in case new ones were spawned)
             exit_game_objects(grid);
+
+            // if the map has changed on the server side, verify it
+            static tString lastMapfile( DEFAULT_MAP );
+            if ( nCLIENT != sn_GetNetState() && mapfile != lastMapfile )
+            {
+                try
+                {
+                    Verify();
+                }
+                catch (tException const & e)
+                {
+                    // clean up
+                    exit_game_grid( grid );
+
+                    // inform user of generic errors
+                    tConsole::Message( e.GetName(), e.GetDescription(), 120000 );
+
+                    // revert map
+                    con << tOutput( "$map_file_reverting", lastMapfile );
+                    conf_mapfile.Set( lastMapfile );
+                }
+            }
 
             nConfItemBase::s_SendConfig(false);
 
@@ -2797,7 +2791,7 @@ void gGame::StateUpdate(){
             sr_con.autoDisplayAtNewline=false;
 #ifdef DEDICATED
             {
-                // safe current players in a file
+                // save current players into a file
                 cp();
 
                 if ( sg_NumUsers() <= 0 )
@@ -2805,20 +2799,34 @@ void gGame::StateUpdate(){
 
                 Analysis(0);
 
+                // wait for external script to end its work if needed
+                REAL timeout = tSysTimeFloat() + sg_waitForExternalScriptTimeout;
+                if ( sg_waitForExternalScript )
+                {
+                    se_SaveToLadderLog("WAIT_FOR_EXTERNAL_SCRIPT\n");
+                    // REAL waitingSince = tSysTimeFloat();
+                }
+                while ( sg_waitForExternalScript && timeout > tSysTimeFloat())
+                {
+                    sr_Read_stdin();
+
+                    // wait for network messages
+                    sn_BasicNetworkSystem.Select( 0.1f );
+                    gGame::NetSyncIdle();
+                }
+
                 {
                     std::ifstream s;
 
                     // load contents of everytime.cfg for real
-                    if ( tDirectories::Config().Open(s, "everytime.cfg" ) )
-                        tConfItemBase::LoadAll(s);
+                    static const tString everytime("everytime.cfg");
+                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Config ) )
+                        tConfItemBase::ReadFile(s);
 
                     s.close();
 
-                    if ( tDirectories::Var().Open(s, "everytime.cfg" ) )
-                        tConfItemBase::LoadAll(s);
-
-                    // load contents of everytime.cfg from playback
-                    tConfItemBase::LoadPlayback();
+                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Var ) )
+                        tConfItemBase::ReadFile(s);
                 }
             }
 #endif

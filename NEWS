@@ -89,16 +89,23 @@ New settings
 ------------
 
   New settings and commands:
+- FORTRESS_COLLAPSE_SPEED: tune the collapse speed of fortress zones.
 - VOTE_KICK_REASON: default reason given on kick votes.
 - "/vote" chat interface to votes; "/vote kick <player>" issues a kick vote.
 - new vote type "/vote suspend <player>" suspends a player for 
   VOTING_SUSPEND_ROUNDS rounds.
+- new vote type "/vote include <file>", includes configuration file
+  vote/<file>.
+- new vote type "/vote command <command>" executes console command
+  <command>. (Both that and /vote include are by default only available
+  to moderators).
 - VOTING_HARM_TIME: time between all harmful votes against a player
 - VOTING_KICK_MINHARM: auto-transform the first few menu issued kick 
   votes to suspensions
 - (UN)SUSPEND kicks a player to spectator mode with a timeout. Intended to
   let new players watch before they play.
 - VOTES_CANCEL cancels all running polls.
+- VOTING_SUSPEND [<minutes>] disallows voting during a specified amount of time.
 - ZONE_ALPHA_TOGGLE to override the systemwide alpha blendings setting and
   have zones rendered in wireframe mode even when alpha blending is on.
 - ZONE_ALPHA(_SERVER) to control intensity of zone rendering.
@@ -108,6 +115,7 @@ New settings
 - KICK_TO and MOVE_TO: redirect a client to a different server
 - DEFAULT_KICK(_TO)_MESSAGE: default reason given to players for a kick
 - DEFAULT_KICK_TO_SERVER/PORT: default redirection target for KICK/MOVE_TO.
+- RENAME renames a player.
 - If all clients support it, PING_CHARITY_MIN/MAX can be used to constrain ping charity.
 - VOTE_KICK_TO_SERVER/PORT: redirection target for vote kicks.
 - SILENCE and VOICE allow to control chat of annoying players.
@@ -228,9 +236,17 @@ Featurelets
     <player> had <ping> and was on <team>. This line is not printed for bots
   - NUM_HUMANS <n>: There are <n> players that are not AIs and are part of a
     team.
-  - ROUND_SCORE has the player's team's score appended.
-- Wrapped console lines are indented by an amount of spaces that can be 
+  - ROUND_SCORE has the player's team name appended.
+  - ROUND_SCORE_TEAM: score a team accumulated during the last round.
+  - WAIT_FOR_EXTENAL_SCRIPT: printed if the setting of the same name is
+    enabled. In this case the server will delay the start of the next round
+    until WAIT_FOR_EXTENAL_SCRIPT_TIMEOUT is reached or the setting is
+    disabled.
+- Wrapped console lines are indented by an amount of spaces that can be
   specified using the setting CONSOLE_INDENT.
+- /help command that supports multiple help topics. Use
+  HELP_INTRODUCTORY_BLURB and ADD_HELP_TOPIC to control its contents
+- /rtfm command that allows moderators to send help messages to newbies
 
 Bugfixes
 --------

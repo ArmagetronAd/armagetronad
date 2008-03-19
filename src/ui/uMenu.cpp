@@ -896,6 +896,7 @@ bool uMenuItemString::InsertChar(int unicode) {
         return false;
     }
 #endif
+    return false;
 }
 
 //! @param words a deque containing the possible words that can be used for completion

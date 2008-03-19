@@ -219,6 +219,9 @@ win_zone_initial_size_help    Taille initiale de la "Instant Win Zone"
 
 game_timeout_help             Donne approximativement le temps maximum entre les rounds
 
+wait_for_external_script_help Let the server wait for an external script between two rounds until the script switches this setting back to 0.
+wait_for_external_script_timeout_help If the server has been paused by WAIT_FOR_EXTERNAL_SCRIPT for more seconds than this, kickstart the game.
+
 #********************************************
 #********************************************
 #
@@ -323,6 +326,12 @@ voting_privacy_help           controls logging of voting process. 2: nothing get
 
 #ORIGINAL TEXT:               The spam level of getting your vote rejected.
 #voting_spam_reject_help      UNTRANSLATED
+voting_suspend_help		    Arrête les votes pour n minutes.
+voting_suspend_default_help	    Valeur par défaut de VOTING_SUSPEND.
+voting_unsuspend_help		    Autorise les votes à nouveau.
+voting_suspended		    Les votes ont été suspendus pour les prochaines \1 minutes.\n
+voting_unsuspended		    Les votes sont à nouveau autorisés.\n
+vote_rejected_voting_suspended		Les votes ont été suspendus par l'Administrateur.\n
 
 #********************************************
 #********************************************

@@ -1048,9 +1048,6 @@ nMessage& nMessage::operator << ( const tOutput &o ){
     return *this << tString( static_cast< const char * >( o ) );
 }
 
-bool sn_filterColorStrings = false;
-static tConfItem<bool> cs("FILTER_COLOR_STRINGS",sn_filterColorStrings);
-
 static void sn_AddToString( tString & s, tString::CHAR c )
 {
     if ( c )
@@ -1077,6 +1074,11 @@ nMessage& nMessage::ReadRaw(tString &s )
     return *this;
 }
 
+bool sn_filterColorStrings = false;
+static tConfItem<bool> sn_filterColorStringsConf("FILTER_COLOR_STRINGS",sn_filterColorStrings);
+bool sn_filterDarkColorStrings = false;
+static tConfItem<bool> sn_filterDarkColorStringsConf("FILTER_DARK_COLOR_STRINGS",sn_filterDarkColorStrings);
+
 nMessage& nMessage::operator >> (tColoredString &s )
 {
     // read the raw data
@@ -1091,7 +1093,9 @@ nMessage& nMessage::operator >> (tColoredString &s )
 
     // filter color codes away
     if ( sn_filterColorStrings )
-        s = tColoredString::RemoveColors( s );
+        s = tColoredString::RemoveColors( s, false );
+    else if ( sn_filterDarkColorStrings )
+        s = tColoredString::RemoveColors( s, true );	
 
     return *this;
 }
@@ -1749,6 +1753,8 @@ int login_handler( nMessage &m, unsigned short rate ){
         tOutput o;
         o.SetTemplateParameter(1, peers[m.SenderID()].ToString() );
         o.SetTemplateParameter(2, sn_Connections[m.SenderID()].socket->GetAddress().ToString() );
+        o.SetTemplateParameter(3, sn_GetClientVersionString(version.Max()) );
+        o.SetTemplateParameter(4, version.Max() );
         o << "$network_server_login";
         con << o;
     }
@@ -4199,7 +4205,7 @@ nMachine & nMachine::GetMachine( unsigned short userID )
     peers[ userID ].GetAddress( address );
 
 #ifdef DEBUG_X
-    // add client ID so multiple connects from one machine are distinquished
+    // add client ID so multiple connects from one machine are distinguished
     tString newIP;
     newIP << address << " " << userID;
     address = newIP;

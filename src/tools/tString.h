@@ -207,6 +207,7 @@ public:
     WRAP_MUTATING_OPERATOR(=,tOutput const &) // assignment from output collector
 
     static tString RemoveColors( const CHAR *c );           //!< Removes the color codes from a string
+    static tString RemoveColors( const char *c, bool darkonly );           //!< Removes the color codes from a string
     void SetPos( int len, bool cut=false );                 //!< Makes sure string has length len when color codes are removed
 
     void RemoveTrailingColor();                             //!< Removes trailing, unfinished color code

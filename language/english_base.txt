@@ -303,6 +303,9 @@ player_chat_wait_fraction_help      Maximum fraction of time to wait for a singl
 player_chat_wait_single_help        Set to 1 if only one player should get his chat wait time reduced at any given time.
 player_chat_wait_teamleader_help    Set to 1 if only team leaders, and 0 if all players, should be allowed to pause the timer.
 
+wait_for_external_script_help Let the server wait for an external script between two rounds until the script switches this setting back to 0.
+wait_for_external_script_timeout_help If the server has been paused by WAIT_FOR_EXTERNAL_SCRIPT for more seconds than this, kickstart the game.
+
 chatter_remove_time_help            Time in seconds after which a permanent chatter is removed from the game
 idle_remove_time_help               Time in seconds after which an inactive player is removed from the game
 idle_kick_time_help                 Time in seconds after which an inactive player is kicked
@@ -465,6 +468,12 @@ voting_kick_time_help               The minimum time in seconds between two kick
 voting_maturity_help                The minimum time in seconds a player needs to be online with the same name before he can issue votes.
 voting_suspend_rounds_help          The number of rounds "/vote suspend <player>" suspends a player for.
 voting_kick_minharm_help            Minimal number of harmful votes (suspension, kick,..) that need to have been issued (success is not required) against a player before a kick vote issued via the menu really results in a kick; otherwise, the result is a simple suspension.
+voting_suspend_help		    Suspends voting for n minutes.
+voting_suspend_default_help	    Default value for VOTING_SUSPEND.
+voting_unsuspend_help		    Allows voting again.
+voting_suspended		    Voting has been suspended for the next \1 minutes.\n
+voting_unsuspended		    Voting is allowed again.\n
+vote_rejected_voting_suspended		    Voting has been suspended by the Administrator.\n
 
 #********************************************
 #********************************************
@@ -703,10 +712,15 @@ wrap_menu_help			If set, you leave a menu to the top and reenter it at the botto
 floor_mirror_int_help   Intensity of the floor mirror effect
 color_strings_help		Generate strings that will be rendered with color effects.
 filter_color_strings_help		Filter color codes from strings coming in over the network.
+filter_dark_color_strings_help		Filter dark color codes from strings coming in over the network.
 filter_color_names_help		    Filter color codes from player names.
+filter_dark_color_names_help		    Filter dark color codes from player names.
 filter_name_ends_help           Filter whitespace and other junk from beginnings and ends of player names.
 filter_name_middle_help         Filter excess whitespace and other junk from the middle of player names.
 filter_color_server_names_help	Filter color codes from server names in the server browser.
+filter_dark_color_server_names_help	Filter dark color codes from server names in the server browser.
+filter_color_team_help	Filter color codes from /team messages.
+filter_dark_color_team_help	Filter dark color codes from /team messages.
 
 zone_alpha_help             Transparency factor for zone rendering. 1.0 gives full strength.
 zone_alpha_server_help      Transparency factor for zone rendering, controlled by the server. 1.0 gives full strength.
@@ -836,6 +850,9 @@ console_message_help		Prints a message on the console of all connected clients.
 center_message_help			Prints a big message on the screen of all connected clients.
 fullscreen_message_help     Prints a big message all over the screen, interrupting gameplay for a configurable timeout. Use with care.
 say_help					Dedicated server only: let the server administator say something.
+rename_help		    Renames the given player.
+allow_rename_player_help    Gives the given player the ability to rename.
+disallow_rename_player_help Prevents the given player from renameing.
 
 #********************************************
 #********************************************
@@ -2197,6 +2214,7 @@ gamestate_winner_ai		AI.
 gamestate_winner_humans		Humans.
 
 instant_win_activated		Instant win zone activated! Enter it to win the round.\n
+instant_round_end_activated	Round end zone activated! Enter it to end the round.\n
 instant_death_activated		Death zone activated! Avoid it!\n
 
 player_admin_kill			\1 0xRESETTwas smitten by an administrator.\n
@@ -2246,7 +2264,12 @@ player_left_game		\1 was discarded with \2 points.\n
 player_leaving_game		\1 0xff7f7fleft the game.\n
 player_renamed			\2 renamed to \1.\n
 player_renamed_teamname	\2 changed teamname to \1.\n
-player_rename_rejected  \1 0xffffffis not allowed to rename to \2 0xffffffright now to avoid confusion with kick votes.\n
+player_got_renamed		\2 has been renamed to \1.\n
+player_will_be_renamed		\2 will be renamed to \1.\n
+player_rename_rejected_votekick  \1 0xffffffis not allowed to rename to \2 0xffffffright now to avoid confusion with kick votes.\n
+player_rename_rejected_admin    \1 0xffffffis not allowed to rename to \20xffffff, as its name was locked by the administrator.\n
+player_allowed_rename		\1 0x7fff7fis allowed to rename again.\n
+player_disallowed_rename	\1 0xff7f7fis not allowed to rename anymore.\n
 player_welcome			\n\nWelcome \1! This server is running version \2.\n
 player_win_default		\1 got \2 points for a very strange reason.\n
 player_lose_default		\1 lost \2 points for a very strange reason.\n
@@ -2282,6 +2305,49 @@ player_topologypolice	Order from Topology Police: \1
 team_shuffle            \1 gets shuffled from rank \2 to \3.\n
 player_noshuffleup      You are not allowed to shuffle up.\n
 player_noshuffle        Your shuffling wish has no effect.\n
+player_shuffle_error    /shuffle expects a number as argument; an explicit sign (+/-) will change your position by the indicated number of steps, no sign will shuffle you to the given position.\n
+
+add_help_topic_help     Add a new help topic to be used with /help. Usage: ADD_HELP_TOPIC <topic> <short description> <text>
+add_help_topic_usage    Usage: ADD_HELP_TOPIC <topic> <short description> <text>\n
+add_help_topic_success  Added help topic "\1".\n
+remove_help_topic_help  Remove a help topic.
+remove_help_topic_success Removed help topic "\1".\n
+remove_help_topic_notfound Help topic "\1" doesn't exist.\n
+
+rtfm_announcement \1 wants you to know about the following help topic:\n
+rtfm_success \1 got the following message:\n
+
+help_introductory_blurb_help Message that is displayed before the list of help topics if someone uses /help without arguments
+
+help_topics_list_start  Say /help TOPIC to get help on the following topics.\n
+help_topic_not_found    Help topic \1 not found. Try /help with no arguments to see a list of available topics.\n
+
+help_commands_shortdesc List of all chat commands
+help_commands_text      This help topic is empty. Use one of the following sub-topics instead:
+
+help_commands_chat_shortdesc Basic chat commands
+help_commands_chat_text      0x88ff88/me <message>0xffff88: Transmit an action, as in "/me is a noob."\n0x88ff88/msg <part of a nickname> <message>0xffff88: Send a private message that only a specific player can see\n0x88ff88/team <message>0xffff88: Send a message to your teammates, or to all spectators if you're not on a team
+
+help_commands_team_shortdesc Basic team management commands
+help_commands_team_text 0x88ff88/teamshuffle0xffff88: Shuffle yourself to be at the outside of your team's wingmen formation\n0x88ff88/teamshuffle <position>0xffff88: Shuffle yourself to be at a specific position\n0x88ff88/teamshuffle [+|-]<offset>0xffff88: Shuffle yourself up/down by a certain number of ranks\n0x88ff88/teamleave0xffff88: Leave your current team. Only works on some servers\n0x88ff88/teams0xffff88: Get a list of all teams with a somewhat graphic representation of their formation
+
+help_commands_pp_shortdesc Player police commands
+help_commands_pp_text 0x88ff88/players0xffff88: Get a list of all players, along with some other information\n0x88ff88/vote kick|suspend <player>0xffff88: Start a poll to kick or suspend a player
+
+help_commands_auth_shortdesc Authentication related commands
+help_commands_auth_text 0x88ff88/login [<user>]@<authority>0xffff88: Authenticate yourself using a given authority. Try @forums if you have an account at http://forums.armagetronad.net/\n0x88ff88/logout0xffff88: Log out so you can log back in as another player\n0x88ff88/vote include <file>0xffff88: Start a poll to include a given file\n0x88ff88/vote command <command>0xffff88: Start a poll to execute an admin command\n0x88ff88/admin <command>0xffff88: Execute a console command on the server if you have sufficient access rights\n0x88ff88/op <player> <optional access level>0xffff88: Gives another player a higher access level; the level defaults to the level one lower than you access level, which is also the maximal possible level\n0x88ff88/deop <player>0xffff88: Reverses /op; it takes away a player's access level, effectively making him unauthenticated again. Only works on players of lower access level than yours, of course.\n0x88ff88/promote <player> <optional steps>0xffff88: elevates a player's access level the given number of steps (default: one)\n0x88ff88/demote <player> <optional steps>0xffff88: lowers a player's access level the given number of steps (default: one)
+
+help_commands_auth_levels_shortdesc List of all access levels
+help_commands_auth_levels_text 0x88ff880 (Owner)0xffff88: The owner of the server. Commands entered on the server console are executed with these rights.\n0x88ff881 (Admin)0xffff88: A server administrator. By default, almost as powerful as the owner himself.\n0x88ff882 (Moderator)0xffff88: A server moderator. Is still allowed to use /admin, but is restricted to player management commands.\n0x88ff887 (Team Leader)0xffff88: Leader of a team. By default, no admin rights at all.\n0x88ff888 (Team Member)0xffff88: Member of a team. Local team accounts get this level.\n0x88ff8812 (Local User)0xffff88: Players with local accounts get this level.\n0x88ff8815 (Remote User)0xffff88: Players with remote accounts get this level by default.\n0x88ff8816 (Fallen from Grace)0xffff88: Authenticated players who abused default rights given to them.\n0x88ff8817 (Shunned)0xffff88: Same, only worse :)\n0x88ff8819 (Authenticated)0xffff88: Minimal level authenticated players can get.\n0x88ff8820 (Program)0xffff88: Unauthenticated players.
+
+help_commands_ra_shortdesc Remote admin commands
+help_commands_ra_text 0x88ff88/login <password>0xffff88: Log in as the server administrator using the server-specific password\n0x88ff88/logout0xffff88: Drop your logged in status so that other players can't see that you're an administrator\n0x88ff88/admin <command>0xffff88: Execute a console command as if it were entered on the server
+
+help_commands_misc_shortdesc Miscellaneous commands
+help_commands_misc_text 0x88ff88/help0xffff88: You just found out about this one :-)\n0x88ff88/teach <player> <topic>0xffff88: same as /help, but the the output gets sent to another player.\n0x88ff88/rtfm0xffff88: alias for /teach\n0x88ff88/command <command>0xffff88: Execute a command on your own client. Useful for instant chats
+
+help_commands_tourney_shortdesc Tourney related commands
+help_commands_tourney_text 0x88ff88/lock0xffff88: Locks your current team. Nobody can join it any more on their own. To let someone in, you need to invoke\n0x88ff88/invite <player>0xffff88: From that moment on, the player is allowed to join you. Another effect of /invite, even if your team is not locked, is that the invited player can read all of your team's /team messages. Invitations are permanent until revoked. That means a player who is invited into your team can join and leave it freely without further need to /invite him again. Players who were on the team when you /locked it are not automatically invited when they leave on their own account.\n0x88ff88/uninvite <player>0xffff88: reverses /invite. The invitation is revoked, the player can no longer join you, and if he currently is on your team, he will be thrown out.\n0x88ff88/unlock0xffff88: makes your team available for everyone to join again.
 
 invite_no_team          Can't use \1 if you're not on a team.\n
 invite_team_locked      \1 locked, you'll need an invitation from a team leader via the /invite command to join from now on.\n
@@ -2383,8 +2449,10 @@ network_statistics2		Sent:     \2 bytes in \3 packets (\4 bytes/s)\n
 network_statistics3		Received: \5 bytes in \6 packets (\7 bytes/s)\n
 
 network_login_denial		Got login denial...\n
-network_server_login		Received login from \1 via socket \2.\n
+network_server_login		Received login from \1 via socket \2, network version: \3 (ID: \4).\n
+network_unknown_version	unknown
 network_server_login_success	New user: \1\n
+
 
 network_toomanyservers		\n\n\nWarning: too many servers open on this computer.\nLeaving the port range that is scanned by clients with default settings.\n\n\n
 
@@ -2527,11 +2595,14 @@ directory_path_hidden     ERROR: User given path "\1" contains a hidden componen
 #********************************************
 #********************************************
 
+# printed on loading a map
+map_file_loading             Loading map \1 ...\n
+
 # title of map error message
 map_file_load_failure_title  Map load failure
 
 # printed when a map can't be loaded, and the user can do something about it
-map_file_load_failure_self   The map \1 could not be loaded or parsed; please check your configuration and the log below.\n
+map_file_load_failure_self   The map \1 could not be loaded or parsed; please check your configuration and the log.\n
 
 # printed when a map can't be loaded, and  the failure is the server admin's fault
 map_file_load_failure_server  The map \1 could not be loaded.\nThe server you tried to connect to may have a broken configuration; you should inform the server administrator of this error.\n
@@ -2542,6 +2613,8 @@ map_file_load_failure_default \nFallback to default map did not work either. Ple
 # resource at the wrong place
 resource_file_wrong_place_title Incorrect File Path
 resource_file_wrong_place     The resource file loaded from "\1" wants to be at "\2". Possible resolutions:\na) If you are not the author of the resource, you should move it to the right place given above and adapt the reference pointing to it.\nb) If you are the author and want the file to stay where it is, you can modify its <Resource> tag so it wants to be where you put it. Consult the documentation on how to do that.\n
+
+map_file_reverting           Reverting to last known working map \1.\n
 
 #********************************************
 #********************************************
@@ -2683,6 +2756,7 @@ access_level_team_help         Minimal access level for /lock, /unlock, /invite 
 access_level_op_help           Minimal access level for /op, /deop, /promote and /demote co-admin management commands commands.
 access_level_op_max_help       Maximal access level attainable by /op and /promote commands.
 access_level_admin_help        Minimal access level for /admin command.
+access_level_rtfm_help        Minimal access level for /teach or /rtfm command.
 access_level_chat_help         Minimal access level for chatting.
 access_level_ips_help          Minimal access level you need for seeing IPs of players in the /players command.
 access_level_spy_team_help     Minimal access level you need for seeing /team messages as a spectator.
@@ -2713,7 +2787,9 @@ access_level_demote         \1 has been demoted to "\2" by order of \3.\n
 access_level_promote        \1 has been promoted to "\2" by order of \3.\n
 
 access_level_admin_denied   0xff7f7f/admin denied,0xffffff insufficient access level.\n
-access_level_shuffle_up_denied You have an insufficient access level to shuffle up.\n
+access_level_shuffle_up_denied Required access level to shuffle up is "\1", you only have "\2".\n
+access_level_rtfm_denied    Required access level to teach others is "\1", you only have "\2".\n
+rtfm_denied                 You need to be logged in to teach others.\n
 
 chat_command_unknown        Unknown chat command "\1".\n
 

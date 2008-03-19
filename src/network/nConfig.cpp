@@ -473,6 +473,15 @@ static char const * sn_GetVersionString( int version )
     return sn_versionString[ version ];
 }
 
+tOutput sn_GetClientVersionString(int version) {
+    if(version >= 0 && version * sizeof(char *) < sizeof(sn_versionString)) {
+        tOutput ret;
+        ret.AddLiteral(sn_GetVersionString(version));
+        return ret;
+    }
+    return tOutput("$network_unknown_version", version);
+}
+
 // *******************************************************************************************
 // *
 // *	AdaptVersion

@@ -140,6 +140,7 @@ protected:
     int	  maxUsers_;		// maximum number of users allowed
 
     tString userNames_;		// names of the connected users
+    tString userGlobalIDs_;		// IDs of the connected users
     tString userNamesOneLine_;// names of the connected users in one line
     tString options_;			// description of non-default options
     tString url_;				// url asociated with the server
@@ -327,6 +328,7 @@ protected:
 
 private:
     virtual tString GetUsers()		const = 0;
+    virtual tString GetGlobalIDs()	const = 0;
     virtual tString	GetOptions()	const = 0;
     virtual tString GetUrl()		const = 0;
 

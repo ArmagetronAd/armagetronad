@@ -57,6 +57,8 @@ static tString se_team_name[TEAMCOLORS]=
     tString("$team_name_black")
 };
 
+static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
+
 // class that creates config items for one team
 // TEAM_(NAME|RED|GREEN|BLUE)_X
 class eTeamColorConfig {
@@ -456,6 +458,65 @@ void eTeam::AddScore(int points,
     RequestSync(true);
 
     se_SaveToScoreFile(message);
+}
+
+// *******************************************************************************
+// *
+// *	ResetScoreDifferences
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+void eTeam::ResetScoreDifferences( void )
+{
+    for ( int i = teams.Len()-1; i>=0; --i )
+    {
+        eTeam* t = teams(i);
+        if ( t->IsHuman() )
+            t->lastScore_ = t->score;
+    }
+}
+
+// *******************************************************************************
+// *
+// *	LogScoreDifferences
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+void eTeam::LogScoreDifferences( void )
+{
+    for ( int i = teams.Len()-1; i>=0; --i )
+    {
+        eTeam* t = teams(i);
+        t->LogScoreDifference();
+    }
+}
+
+// *******************************************************************************
+// *
+// *	LogScoreDifference
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+void eTeam::LogScoreDifference( void )
+{
+    if ( lastScore_ > IMPOSSIBLY_LOW_SCORE && IsHuman() )
+    {
+        tString ret;
+        int scoreDifference = score - lastScore_;
+        lastScore_ = IMPOSSIBLY_LOW_SCORE;
+        ret << "ROUND_SCORE_TEAM " << scoreDifference << " " << ePlayerNetID::FilterName( Name() );
+        ret << "\n";
+        se_SaveToLadderLog( ret );
+    }
 }
 
 void eTeam::SwapTeamsNo(int a,int b){
@@ -1330,6 +1391,7 @@ eTeam::eTeam()
         :colorID(-1),listID(-1)
 {
     score = 0;
+    lastScore_=IMPOSSIBLY_LOW_SCORE;
     locked_ = false;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;
@@ -1344,6 +1406,7 @@ eTeam::eTeam(nMessage &m)
         colorID(-1),listID(-1)
 {
     score = 0;
+    lastScore_=IMPOSSIBLY_LOW_SCORE;
     locked_ = false;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;

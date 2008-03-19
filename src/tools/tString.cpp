@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tMemManager.h"
 #include "tString.h"
+#include "tColor.h"
 #include "tLocale.h"
 #include "tConfiguration.h"
 #include "tException.h"
@@ -1517,13 +1518,14 @@ tColoredString::tColoredString( const tOutput & other )
 // *
 // *******************************************************************************************
 //!
-//!		@param	c	C style string to clear of color codes
+//!		@param	c	C style string or tString to clear of color codes
 //!		@return   	cleared string
 //!
 // *******************************************************************************************
 
-tString tColoredString::RemoveColors( const char * c )
+tString tColoredString::RemoveColors( const char * c, bool darkonly )
 {
+    // st_Breakpoint();
     tString ret;
 
     int len = strlen(c);
@@ -1535,7 +1537,22 @@ tString tColoredString::RemoveColors( const char * c )
         // skip color codes
         if (*c=='0' && len >= 2 && c[1]=='x')
         {
-            if(len >= 8)
+	    if( len >= 8 && darkonly )
+	    {
+		tColor colorToFilter;
+		colorToFilter = tColor( c );
+		if ( !colorToFilter.IsDark() )
+		{
+	            ret << c[0] << c[1] << c[2] << c[3] << c[4] << c[5] << c[6] << c[7];
+		}
+		else
+		{
+                    removed = true;
+		}
+		c   += 8;
+		len -= 8;	
+	    }
+	    else if( len >= 8 )
             {
                 c   += 8;
                 len -= 8;
@@ -1544,8 +1561,9 @@ tString tColoredString::RemoveColors( const char * c )
             else
             {
                 // skip incomplete color codes, too
-                return RemoveColors( ret );
+                return RemoveColors( ret, darkonly );
             }
+	    // st_Breakpoint();
         }
         else
         {
@@ -1554,7 +1572,25 @@ tString tColoredString::RemoveColors( const char * c )
         }
     }
 
-    return removed ? RemoveColors( ret ) : ret;
+    // st_Breakpoint();
+
+    return removed ? RemoveColors( ret, darkonly ) : ret;
+}
+
+// *******************************************************************************************
+// *
+// *	RemoveColors
+// *
+// *******************************************************************************************
+//!
+//!		@param	c	C style string to clear of color codes
+//!		@return   	cleared string
+//!
+// *******************************************************************************************
+
+tString tColoredString::RemoveColors( const char * c )
+{
+    return RemoveColors ( c, false );
 }
 
 // helper function: removes trailing color of string and returns number of chars

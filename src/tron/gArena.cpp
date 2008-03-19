@@ -131,7 +131,9 @@ gSpawnPoint * gArena::LeastDangerousSpawnPoint()
     }
 
     if (!ret)
-        tERR_ERROR("No spawnpoint available!");
+    {
+        throw tGenericException( "No spawnpoint available." );
+    }
 
 #ifdef DEBUG
     //	std::cout << "Spawn at " << ret->location << "\n";

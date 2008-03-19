@@ -2104,10 +2104,7 @@ gParser::parseSetting(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
         std::stringstream ss;
         /* Yes it is ackward to generate a string that will be decifered on the other end*/
         ss << myxmlGetProp(cur, "name")  << " " << myxmlGetProp(cur, "value");
-        if ( tRecorder::IsPlayingBack() )
-            tConfItemBase::LoadPlayback( true );
-        else
-            tConfItemBase::LoadAll(ss);
+        tConfItemBase::LoadAll(ss, false );
     }
     /* Verify if any sub elements are included, and if they contain any Alt
        Sub elements of Point arent defined in the current version*/

@@ -65,25 +65,29 @@ KDevelop 3.0
 If all goes smoothly, you can now edit Armagetron Advanced and run it.
 
 Mac OS X
-========
-This will only open in Xcode >= 2.1. It has these targets:
+=======
+This will only open in Xcode >= 2.4. It has these targets:
 * Armagetron Advanced -- The client
 * Armagetron Advanced 10.2.8 -- The client for Mac OS X 10.2.8
 * Armagetron Advanced Dedicated -- Dedicated Server
-* Create Client Release -- Create a distributable disk image of the client. This target checks to see if you have an $AA_RECORDER_APP environment variable set, and if you do the recorder app will be included in the disk image. For example I have in my .bash_profile:
+* Create Client Release -- Create a distributable disk image of the client.
+  This target checks to see if you have an $AA_RECORDER_APP environment
+  variable set, and if you do the recorder app will be included in the disk
+  image. For example I have in my .bash_profile:
 
 Prerequisites
 -------------
     AA_RECORDER_APP="/Users/Shared/Applications/Games/Armagetron Advanced Recorder.app"
 
-* Create Dedicated Release -- Create a distributable disk image of the dedicated server.
-* Create Full Release -- Runs both "Create Client Release" and "Create Dedicated Release"
+* Create Dedicated Release -- Create a distributable disk image of the
+  dedicated server.
+* Create Full Release -- Runs both "Create Client Release" and "Create  
+  Dedicated Release"
+  
+All required libraries required to build Armagetron Advanced for Mac OS X may
+be download from the the Sourceforge project page:
 
-Armagetron Advanced requires:
-* SDL.framework
-* SDL_mixer.framework
-* SDL_image.framework
-* libpng.framework
+https://sf.net/project/showfiles.php?group_id=110997&package_id=266788
 
 - Apple developer tools (http://developer.apple.com)
 	- Xcode 2.4 or greater is required.

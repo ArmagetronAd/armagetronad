@@ -154,7 +154,12 @@ static tSettingItem< tAccessLevel > se_accessLevelVoteCommandSI( "ACCESS_LEVEL_V
 // however, the access level of the vote submitter)
 static tAccessLevel se_accessLevelVoteCommandExecute = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_accessLevelVoteCommandExecuteSI( "ACCESS_LEVEL_VOTE_COMMAND_EXECUTE", se_accessLevelVoteCommandExecute );
+
 #endif
+
+static REAL se_defaultVotesSuspendLength = 3;
+static tSettingItem< REAL > se_defaultVotesSuspendLenght_Conf( "VOTING_SUSPEND_DEFAULT", se_defaultVotesSuspendLength );
+static REAL se_votesSuspendTimeout = 0;
 
 static eVoter* se_GetVoter( const nMessage& m )
 {
@@ -184,13 +189,17 @@ static tAccessLevel se_GetAccessLevel( int userID )
     return ret;
 }
 
+static nVersionFeature serverControlledVotesBroken( 10 );
+static nVersionFeature serverControlledVotes( 15 );
+
+
 // something to vote on
 class eVoteItem: public tListMember
 {
     friend class eMenuItemVote;
 public:
     // constructors/destructor
-    eVoteItem( void ): creationTime_( tSysTimeFloat() ), user_( 0 ), id_( ++se_votingItemID ), menuItem_( 0 )
+    eVoteItem( void ): creationTime_( tSysTimeFloat() ), user_( 0 ), id_( ++se_votingItemID ), menuItem_( 0 ), total_( 0 )
     {
         items_.Add( this );
     };
@@ -211,9 +220,10 @@ public:
         {
             if ( !CheckValid( m.SenderID() ) )
                 return false;
-
-            ReBroadcast( m.SenderID() );
         }
+
+        ReBroadcast( m.SenderID() );
+
         return true;
     }
 
@@ -231,26 +241,48 @@ public:
 
             // print it
             if ( se_votingPrivacy <= -1 )
+            {
                 sn_ConsoleOut( voteMessage );	// broadcast it
-            else if ( se_votingPrivacy <= 1 )
-                con << voteMessage;				// print it for the server admin
+            }
+            else
+            {
+                if ( exceptTo > 0 )
+                {
+                    sn_ConsoleOut( voteMessage, exceptTo );	// inform submitter
+                }
 
-            static nVersionFeature serverControlledVotes( 10 );
+                if ( se_votingPrivacy <= 1 )
+                {
+                    con << voteMessage;				// print it for the server admin
+                }
+            }
 
             // create messages for old and new clients
             tJUST_CONTROLLED_PTR< nMessage > retNew = this->CreateMessage();
             tJUST_CONTROLLED_PTR< nMessage > retLegacy = this->CreateMessageLegacy();
+
+            // set so every voter ony gets each vote once
+            std::set< eVoter * > sentTo;
+            total_ = 0;
+
             for ( int i = MAXCLIENTS; i > 0; --i )
             {
-                if ( sn_Connections[ i ].socket && i != exceptTo && 0 != eVoter::GetVoter( i ) )
+                eVoter * voter = eVoter::GetVoter( i );
+                if ( sn_Connections[ i ].socket && i != exceptTo && 0 != voter && 
+                     sentTo.find(voter) == sentTo.end() )
                 {
+
                     if ( serverControlledVotes.Supported( i ) )
                     {
+                        sentTo.insert(voter);
                         retNew->Send( i );
+                        total_++;
                     }
                     else if ( retLegacy )
                     {
+                        sentTo.insert(voter);
                         retLegacy->Send( i );
+                        total_++;
                     }
                 }
             }
@@ -431,6 +463,10 @@ public:
                             sn_ConsoleOut( voteMessage );	// broadcast it
                         else if ( se_votingPrivacy <= 0 )
                             con << voteMessage;				// print it for the server admin
+                        else
+                        {
+                            sn_ConsoleOut( voteMessage, m.SenderID() );
+                        }
 
                         // remove him from the lists
                         vote->RemoveVoter( voter );
@@ -452,7 +488,7 @@ public:
     {
         pro = voters_[1].Len();
         con = voters_[0].Len();
-        total = eVoter::voters_.Len();
+        total = total_;
     }
 
     // message
@@ -566,6 +602,14 @@ public:
             return true;
         }
 
+        if ( se_votesSuspendTimeout > tSysTimeFloat() )
+        {
+            sn_ConsoleOut(tOutput("$vote_rejected_voting_suspended"),
+                          senderID );
+
+            return false;
+        }
+
         // fill suggestor
         if ( !suggestor_ )
         {
@@ -659,6 +703,7 @@ private:
     tArray< tCONTROLLED_PTR( eVoter ) > voters_[2];	// array of voters approving or disapproving of the vote
     unsigned short id_;								// running id of voting item
     eMenuItemVote *menuItem_;						// menu item
+    int total_;                                     // total number of voters aware of this item
 
     eVoteItem& operator=( const eVoteItem& );
     eVoteItem( const eVoteItem& );
@@ -666,14 +711,17 @@ private:
 
 tList< eVoteItem > eVoteItem::items_;				// list of vote items
 
-void se_CancelAllVotes( std::istream & )
+void se_CancelAllVotes( bool announce )
 {
     if ( sn_GetNetState() == nCLIENT )
     {
         return;
     }
 
-    sn_ConsoleOut( tOutput( "$vote_cancel_all" ) );
+    if (announce)
+    {
+        sn_ConsoleOut( tOutput( "$vote_cancel_all" ) );
+    }
 
     tList< eVoteItem > const & items = eVoteItem::GetItems();
     
@@ -683,7 +731,56 @@ void se_CancelAllVotes( std::istream & )
     }
 }
 
+void se_CancelAllVotes( std::istream & )
+{
+	se_CancelAllVotes ( true );
+}
+
 static tConfItemFunc se_cancelAllVotes_conf( "VOTES_CANCEL", &se_CancelAllVotes );
+
+
+
+
+
+void se_votesSuspend( REAL minutes, bool announce, std::istream & s )
+{
+    if ( sn_GetNetState() == nCLIENT )
+    {
+        return;
+    }
+
+    if ( minutes > 0)
+    {
+        s >> minutes;
+    }
+
+    se_CancelAllVotes( false );
+
+    se_votesSuspendTimeout = tSysTimeFloat() + ( minutes * 60 );
+
+    if ( announce && minutes > 0 )
+    {
+        sn_ConsoleOut( tOutput( "$voting_suspended", minutes ) );
+    }
+    else if ( announce && minutes <= 0 )
+    {
+    	sn_ConsoleOut( tOutput( "$voting_unsuspended" ) );
+    }
+
+}
+
+void se_SuspendVotes( std::istream & s )
+{
+    se_votesSuspend(  se_defaultVotesSuspendLength, true, s );
+}
+void se_UnSuspendVotes( std::istream & s )
+{
+    se_votesSuspend( 0, true, s );
+}
+
+static tConfItemFunc se_suspendVotes_conf( "VOTING_SUSPEND", &se_SuspendVotes );
+static tConfItemFunc se_unSuspendVotes_conf( "VOTING_UNSUSPEND", &se_UnSuspendVotes );
+
 
 static nDescriptor vote_handler(230,eVoteItem::GetControlMessage,"vote cast");
 
@@ -1350,7 +1447,7 @@ protected:
     {
         // check whether enough harmful votes were collected already
         ePlayerNetID * p = GetPlayer();
-        if ( fromMenu_ && p && p->GetVoter()->HarmCount() - 1 < se_kickMinHarm )
+        if ( fromMenu_ && p && p->GetVoter()->HarmCount() < se_kickMinHarm )
         {
             // try to transfor the vote to a suspension
             eVoteItem * item = tNEW ( eVoteItemSuspend )( p );
@@ -1513,7 +1610,9 @@ protected:
 
     bool Open( std::ifstream & s, int userToNotify )
     {
-        if ( tDirectories::Config().Open(s, file_ ) || tDirectories::Var().Open(s, file_ ) )
+        bool ret = tConfItemBase::OpenFile( s, file_, tConfItemBase::All );
+
+        if ( ret )
         {
             return true;
         }
@@ -1536,14 +1635,13 @@ protected:
         // set the access level for the following operation
         tCurrentAccessLevel accessLevel( level_, true );
 
-        // load contents of everytime.cfg for real
+        // load contents of voted file for real
         std::ifstream s;
         if ( Open( s, 0 ) )
         {
-            sn_ConsoleOut( tOutput( "$vote_include_message", file_ ) );
+            sn_ConsoleOut( tOutput( "$vote_include_message", file_, tCurrentAccessLevel::GetName( level_ ) ) );
             eAccessConsoleFilter filter( level_ );
-            tConfItemBase::LoadAll(s);
-            tConfItemBase::LoadPlayback();
+            tConfItemBase::ReadFile( s );
         }
     }
 
@@ -1595,7 +1693,6 @@ protected:
         sn_ConsoleOut( tOutput( "$vote_command_message" ) );
         eAccessConsoleFilter filter( tAccessLevel_Default );
         tConfItemBase::LoadLine(s);
-        tConfItemBase::LoadPlayback();
     }
 
     tString command_;    //!< the command to execute
