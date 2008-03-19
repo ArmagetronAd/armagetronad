@@ -1085,7 +1085,6 @@ tString & tColoredString::operator =( const tOutput & s )
 
 tString tColoredString::RemoveColors( const char * c, bool darkonly )
 {
-    st_Breakpoint();
     tString ret;
 
     int len = strlen(c);
@@ -1123,7 +1122,6 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
                 // skip incomplete color codes, too
                 return RemoveColors( ret, darkonly );
             }
-	    st_Breakpoint();
         }
         else
         {
@@ -1132,7 +1130,6 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
         }
     }
 
-    st_Breakpoint();
 
     return removed ? RemoveColors( ret, darkonly ) : ret;
 }
