@@ -6764,7 +6764,7 @@ void ePlayerNetID::UpdateName( void )
     eNameMessenger messenger( *this );
 
     // apply client change, stripping excess spaces
-    if ( sn_GetNetState() == nSTANDALONE || !IsHuman() || ( nameFromServer_ != nameFromClient_ && !messenger.adminRename_ ) )
+    if ( sn_GetNetState() == nSTANDALONE || !IsHuman() && sn_GetNetState() != nCLIENT || IsHuman() && ( nameFromServer_ != nameFromClient_ && !messenger.adminRename_ ) )
     {
         // apply name filters only on remote players
         if ( Owner() != 0 )
