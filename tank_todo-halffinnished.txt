@@ -33,6 +33,8 @@ Also, the text file output has greater spacing or something like that, and a new
 That needs the appropriate fill-ins in the language files.
 New (040609): Added options to language file...
 
+test from svn.
+
 There was also a small issue with killing teamates to get points, this has been fixed, but still needs the language file addins.
 
 Finally, to the best of everyone's enjoyment, spam protection has done some work on it.
