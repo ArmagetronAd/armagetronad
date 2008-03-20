@@ -306,6 +306,14 @@
 		9BB7BA060D830473004FE8C3 /* uMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B9F90D830473004FE8C3 /* uMenu.cpp */; };
 		9BB7BA120D8304FD004FE8C3 /* aa_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 9BB7B6570D830321004FE8C3 /* aa_config.h */; };
 		9BB7BA240D830669004FE8C3 /* aa_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 9BB7B65A0D830321004FE8C3 /* aa_config.h */; };
+		9BCBDE120D91F6D90022855B /* tColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BCBDE110D91F6D90022855B /* tColor.cpp */; };
+		9BCBDE440D91F7F30022855B /* tColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BCBDE110D91F6D90022855B /* tColor.cpp */; };
+		9BCBDF890D9210E10022855B /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BCBDF880D9210E10022855B /* ApplicationServices.framework */; };
+		9BCBE1E30D9214420022855B /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BCBE1E20D9214420022855B /* CoreFoundation.framework */; };
+		9BCBE30D0D922EAE0022855B /* AAPaste.h in Headers */ = {isa = PBXBuildFile; fileRef = 9BCBE30B0D922EAE0022855B /* AAPaste.h */; };
+		9BCBE30E0D922EAE0022855B /* AAPaste.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BCBE30C0D922EAE0022855B /* AAPaste.cpp */; };
+		9BCBE30F0D922EAE0022855B /* AAPaste.h in Headers */ = {isa = PBXBuildFile; fileRef = 9BCBE30B0D922EAE0022855B /* AAPaste.h */; };
+		9BCBE3100D922EAE0022855B /* AAPaste.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BCBE30C0D922EAE0022855B /* AAPaste.cpp */; };
 		9BD7D9720A2C7CB400D7033C /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96B0A2C7CB400D7033C /* libfreetype.a */; };
 		9BD7D9730A2C7CB400D7033C /* libftgl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96C0A2C7CB400D7033C /* libftgl.a */; };
 		9BD7D9740A2C7CB400D7033C /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96D0A2C7CB400D7033C /* libpng.framework */; };
@@ -720,6 +728,11 @@
 		9BB7B9F90D830473004FE8C3 /* uMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uMenu.cpp; sourceTree = "<group>"; };
 		9BB7B9FA0D830473004FE8C3 /* uMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uMenu.h; sourceTree = "<group>"; };
 		9BB7BA0E0D8304E4004FE8C3 /* defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = defs.h; path = ../src/defs.h; sourceTree = SOURCE_ROOT; };
+		9BCBDE110D91F6D90022855B /* tColor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tColor.cpp; sourceTree = "<group>"; };
+		9BCBDF880D9210E10022855B /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
+		9BCBE1E20D9214420022855B /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
+		9BCBE30B0D922EAE0022855B /* AAPaste.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AAPaste.h; sourceTree = "<group>"; };
+		9BCBE30C0D922EAE0022855B /* AAPaste.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AAPaste.cpp; sourceTree = "<group>"; };
 		9BD7D96B0A2C7CB400D7033C /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libfreetype.a; sourceTree = "<absolute>"; };
 		9BD7D96C0A2C7CB400D7033C /* libftgl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libftgl.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libftgl.a; sourceTree = "<absolute>"; };
 		9BD7D96D0A2C7CB400D7033C /* libpng.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libpng.framework; path = /Library/Frameworks/ArmagetronAdvanced/current/libpng.framework; sourceTree = "<absolute>"; };
@@ -748,6 +761,8 @@
 				9BD7D9750A2C7CB400D7033C /* SDL_image.framework in Frameworks */,
 				9BD7D9770A2C7CB400D7033C /* SDL.framework in Frameworks */,
 				9B83FE950B12161600878E8A /* Growl-WithInstaller.framework in Frameworks */,
+				9BCBDF890D9210E10022855B /* ApplicationServices.framework in Frameworks */,
+				9BCBE1E30D9214420022855B /* CoreFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -778,9 +793,11 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				9BD7D9680A2C7C7800D7033C /* Armagetron Advanced */,
 				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
+				9BCBDF880D9210E10022855B /* ApplicationServices.framework */,
+				9BD7D9680A2C7C7800D7033C /* Armagetron Advanced */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
+				9BCBE1E20D9214420022855B /* CoreFoundation.framework */,
 				29B97325FDCFA39411CA2CEA /* Foundation.framework */,
 				8CBA60B0089F00F2007E21DC /* OpenGL.framework */,
 			);
@@ -926,6 +943,8 @@
 				9BB7B64E0D830321004FE8C3 /* AAGrowlBridge.mm */,
 				9BB7B64F0D830321004FE8C3 /* AAGrowlPlugin.h */,
 				9BB7B6500D830321004FE8C3 /* AAGrowlPlugin.mm */,
+				9BCBE30C0D922EAE0022855B /* AAPaste.cpp */,
+				9BCBE30B0D922EAE0022855B /* AAPaste.h */,
 				9BB7B6510D830321004FE8C3 /* AARuby.h */,
 				9BB7B6520D830321004FE8C3 /* AARuby.mm */,
 				9BB7B6530D830321004FE8C3 /* AAURLHandler.h */,
@@ -1065,6 +1084,7 @@
 				9BB7B7A50D830422004FE8C3 /* tCallback.cpp */,
 				9BB7B7A60D830422004FE8C3 /* tCallback.h */,
 				9BB7B7A70D830422004FE8C3 /* tCallbackString.h */,
+				9BCBDE110D91F6D90022855B /* tColor.cpp */,
 				9BB7B7A80D830422004FE8C3 /* tColor.h */,
 				9BB7B7A90D830422004FE8C3 /* tCommandLine.cpp */,
 				9BB7B7AA0D830422004FE8C3 /* tCommandLine.h */,
@@ -1336,6 +1356,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9BB7BA120D8304FD004FE8C3 /* aa_config.h in Headers */,
+				9BCBE30D0D922EAE0022855B /* AAPaste.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1344,6 +1365,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9BB7BA240D830669004FE8C3 /* aa_config.h in Headers */,
+				9BCBE30F0D922EAE0022855B /* AAPaste.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1638,6 +1660,8 @@
 				9BB7BA020D830473004FE8C3 /* uInput.cpp in Sources */,
 				9BB7BA040D830473004FE8C3 /* uInputQueue.cpp in Sources */,
 				9BB7BA060D830473004FE8C3 /* uMenu.cpp in Sources */,
+				9BCBDE440D91F7F30022855B /* tColor.cpp in Sources */,
+				9BCBE3100D922EAE0022855B /* AAPaste.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1791,6 +1815,8 @@
 				9BB7B9FC0D830473004FE8C3 /* uInput.cpp in Sources */,
 				9BB7B9FE0D830473004FE8C3 /* uInputQueue.cpp in Sources */,
 				9BB7BA000D830473004FE8C3 /* uMenu.cpp in Sources */,
+				9BCBDE120D91F6D90022855B /* tColor.cpp in Sources */,
+				9BCBE30E0D922EAE0022855B /* AAPaste.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
