@@ -848,19 +848,20 @@ bool uMenuItemString::Event(SDL_Event &e){
 #ifdef MACOSX
     else if (c.sym == SDLK_v && mod & KMOD_META) {
         CFDataRef data;
-        if (!AAPastePasteboardData(data))
-            return false;
-        
-        const UInt8 *bytes = CFDataGetBytePtr(data);
-        CFIndex bytesLength = CFDataGetLength(data);
-        
-        for (int i = 0; i < bytesLength; i++) {
-            if (!InsertChar(bytes[i]))
-                break;
+        if (AAPastePasteboardData(data)) {
+            const UInt8 *bytes = CFDataGetBytePtr(data);
+            CFIndex bytesLength = CFDataGetLength(data);
+            
+            for (int i = 0; i < bytesLength; i++) {
+                if (!InsertChar(bytes[i]))
+                    break;
+            }
+            
+            CFRelease(data);
         }
-        
-        CFRelease(data);
-        ret = true;
+        else {
+            ret = false;
+        }
     }
 #else
     else if (c.sym == SDLK_v && mod & KMOD_CTRL) {
