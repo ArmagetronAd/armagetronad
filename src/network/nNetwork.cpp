@@ -988,7 +988,7 @@ void nMessage::BroadCast(bool ack){
     if (sn_GetNetState()==nSERVER){
         for(int i=MAXCLIENTS;i>0;i--){
             if (sn_Connections[i].socket)
-                Send(i,ack);
+                Send(i,0,ack);
         }
     }
 }
