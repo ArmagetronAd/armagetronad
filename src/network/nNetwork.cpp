@@ -2851,23 +2851,23 @@ static void sn_ConsoleOut_handler(nMessage &m){
 
 static nDescriptor sn_ConsoleOut_nd(8,sn_ConsoleOut_handler,"sn_ConsoleOut");
 
-// causes the connected clients to print a message
-nMessage* sn_ConsoleOutMessage( const tOutput& o )
-{
-    tString message(o);
-    message  << "0xffffff";
+// rough maximal packet size, better send nothig bigger, or it will
+// get fragmented.
+#define MTU 1400
 
-    // truncate message to 1.4K, a safe size for all UDP packets
-    static const int maxLen = 1400;
+// causes the connected clients to print a message
+nMessage* sn_ConsoleOutMessage( tString const & message )
+{
+    // truncate message to about 1.5K, a safe size for all UDP packets
+    static const int maxLen = MTU+100;
     static bool recurse = true;
     if ( message.Len() > maxLen && recurse )
     {
         recurse = false;
         tERR_WARN( "Long console message truncated.");
-
-        message.SetLen( maxLen+1 );
-        message[maxLen]='\0';
-        recurse = false;
+        nMessage * m = sn_ConsoleOutMessage( message.SubStr( 0, MTU ) );
+        recurse = true;
+        return m;
     }
 
     nMessage* m=new nMessage(sn_ConsoleOut_nd);
@@ -2876,21 +2876,59 @@ nMessage* sn_ConsoleOutMessage( const tOutput& o )
     return m;
 }
 
-void sn_ConsoleOut(const tOutput& o,int client){
-    //	tString message(o);
-
-    tJUST_CONTROLLED_PTR< nMessage > m = sn_ConsoleOutMessage( o );
+void sn_ConsoleOutRaw( tString & message,int client){
+    tJUST_CONTROLLED_PTR< nMessage > m = sn_ConsoleOutMessage( message );
 
     if (client<0){
         m->BroadCast();
-        con << o;
+        con << message;
     }
     else if (client==sn_myNetID)
     {
-        con << o;
+        con << message;
     }
     else
+    {
         m->Send(client);
+    }
+}
+
+void sn_ConsoleOutString( tString & message,int client){
+    // check if string is too long
+    if ( message.Len() <= MTU )
+    {
+        // no? Fine, just send it in one go.
+        message  << "0xffffff";
+        sn_ConsoleOutRaw( message, client );
+
+        return;
+    }
+
+    // darn, it is too long. Try to find a good spot to cut it
+    int cut = MTU;
+    while ( cut > 0 && message(cut) != '\n' )
+    {
+        --cut;
+    }
+    if ( cut == 0 )
+    {
+        // no suitable spot found, just cut anywhere.
+        cut = MTU;
+    }
+
+    // split the string
+    tString beginning = message.SubStr( 0, cut ) + "0xffffff";
+    tString rest = message.SubStr( cut );
+
+    // and send the bits
+    sn_ConsoleOutRaw( beginning, client );
+    sn_ConsoleOutString( rest, client );
+}
+
+void sn_ConsoleOut(const tOutput& o,int client){
+    // transform message to string
+    tString message( o );
+    sn_ConsoleOutString( message, client );
 }
 
 static void client_cen_handler(nMessage &m){
