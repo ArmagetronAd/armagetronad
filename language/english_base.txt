@@ -1671,6 +1671,9 @@ team_menu_join_help		Let the current player join the specified team
 team_menu_create		create new team/join any
 team_menu_create_help		Creates a new team and lets the current player join it, or, if that is not possible, joins any team.
 
+team_menu_spectate          spectate
+team_menu_spectate_help		Quits the game and enters spectator mode.
+
 team_owned_by			\1's team
 team_ai				AI team
 team_empty			Empty team

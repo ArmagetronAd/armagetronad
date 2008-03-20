@@ -30,6 +30,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ePlayer.h"
 #include "eTeam.h"
 
+// sets the spectator mode of a local player
+static void SetSpectator( ePlayerNetID * player, bool spectate )
+{
+    for ( int i = MAX_PLAYERS; i>=0; --i )
+    {
+        if ( ePlayer::PlayerIsInGame(i))
+        {
+            ePlayer* localPlayer = ePlayer::PlayerConfig( i );
+            ePlayerNetID* pni = localPlayer->netPlayer;
+            if ( pni == player && localPlayer->spectate != spectate )
+            {
+                localPlayer->spectate = spectate;
+                con << tOutput( spectate ? "$player_toggle_spectator_on" : "$player_toggle_spectator_off", localPlayer->name );
+                ePlayerNetID::Update();
+            }
+        }
+    }
+}
+
+
 class gMenuItemPlayerTeam: public uMenuItem
 {
     ePlayerNetID* 	player;
@@ -52,6 +72,7 @@ public:
 
     virtual void Enter()
     {
+        SetSpectator( player, false );
         player->SetTeamWish( team );
         menu->Exit();
     }
@@ -74,7 +95,30 @@ public:
 
     virtual void Enter()
     {
+        SetSpectator( player, false );
         player->CreateNewTeamWish();
+        menu->Exit();
+    }
+};
+
+class gMenuItemSpectate: public uMenuItem
+{
+    ePlayerNetID* 	player;
+public:
+    gMenuItemSpectate( uMenu *M,ePlayerNetID* p )
+            : uMenuItem( M, tOutput("$team_menu_spectate_help") ),
+            player ( p )
+    {
+    }
+
+    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0)
+    {
+        DisplayTextSpecial( x, y, tOutput("$team_menu_spectate"), selected, alpha );
+    }
+
+    virtual void Enter()
+    {
+        SetSpectator( player, true );
         menu->Exit();
     }
 };
@@ -105,20 +149,9 @@ public:
         uMenu playerMenu( title );
         tArray<uMenuItem*> items;
 
-        // quit from spectator mode, the player would be trown out of the team again otherwise
-        for ( i = MAX_PLAYERS; i>=0; --i )
+        if ( !player->IsSpectating() )
         {
-            if ( ePlayer::PlayerIsInGame(i))
-            {
-                ePlayer* localPlayer = ePlayer::PlayerConfig( i );
-                ePlayerNetID* pni = localPlayer->netPlayer;
-                if ( pni == this->player && localPlayer->spectate )
-                {
-                    localPlayer->spectate = false;
-                    con << tOutput("$player_toggle_spectator_off", localPlayer->name );
-                    ePlayerNetID::Update();
-                }
-            }
+            items[ items.Len() ] = tNEW( gMenuItemSpectate ) ( &playerMenu, player );
         }
 
         for ( i = eTeam::teams.Len()-1; i>=0; --i )
@@ -136,7 +169,6 @@ public:
         )
         {
             items[ items.Len() ] = tNEW( gMenuItemNewTeam ) ( &playerMenu, player );
-
         }
 
         playerMenu.Enter();
