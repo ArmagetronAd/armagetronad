@@ -997,17 +997,27 @@ void nMessage::BroadCast(bool ack){
 static nVersionFeature sn_ZeroMessageCrashfix( 1 );
 
 nMessage& nMessage::operator << (const tString &s){
-    if ( !sn_ZeroMessageCrashfix.Supported() && s.Len() <= 0 )
-    {
-        return this->operator<<( s + " " );
-    }
-
     unsigned short len=s.Len();
 
     // clamp away excess zeroes
     while(len > 1 && s(len-2)==0)
     {
         --len;
+    }
+
+    // check whether all clients support zero length strings
+    if ( !sn_ZeroMessageCrashfix.Supported() )
+    {
+        if ( len <= 0 )
+        {
+            static tString replacement("");
+            return this->operator<<( replacement );
+        }
+    }
+    else if ( len == 1 && s(0) == 0 )
+    {
+        // do away with the the trailing zero in zero length strings.
+        len = 0;
     }
 
     Write(len);
