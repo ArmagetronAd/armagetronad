@@ -163,7 +163,7 @@ public:
             }
         }
 
-        if ( /* eTeam::NewTeamAllowed() && */
+        if ( player->IsSpectating() ||
             !( player->NextTeam() && player->NextTeam()->NumHumanPlayers() == 1 &&
                player->CurrentTeam() && player->CurrentTeam()->NumHumanPlayers() == 1 )
         )
