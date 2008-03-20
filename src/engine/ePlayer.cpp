@@ -4761,9 +4761,9 @@ void ePlayerNetID::ReadSync(nMessage &m){
             m >> newCurrentTeam;
 
             // update team
+            tJUST_CONTROLLED_PTR< eTeam > oldTeam( currentTeam );
             if ( newCurrentTeam != currentTeam )
             {
-                tJUST_CONTROLLED_PTR< eTeam > oldTeam( currentTeam );
                 if ( newCurrentTeam )
                 {
                     newCurrentTeam->AddPlayerDirty( this );
@@ -4773,14 +4773,15 @@ void ePlayerNetID::ReadSync(nMessage &m){
                 {
                     currentTeam->RemovePlayer( this );
                 } 
-                
-                if ( oldTeam )
-                {
-                    oldTeam->UpdateProperties();
-                }
             }
-
+            
             nextTeam = newNextTeam;
+
+            // update properties of the old current team in all cases
+            if ( oldTeam )
+            {
+                oldTeam->UpdateProperties();
+            }
         }
         else
         {
