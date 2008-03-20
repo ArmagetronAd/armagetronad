@@ -733,7 +733,7 @@ screen_size_desktop         Desktop
 armagetron_screenmode_help	Screen resolution
 armagetron_last_screenmode_help Last screen resolution
 armagetron_windowsize_help	Window size
-armagetron_last_windowsize_help Last Window sizea
+armagetron_last_windowsize_help Last Window size
 motion_blur_time_help       Time over which the last rendered frames are blended together
 armagetron_vsync_help       What to do with the monitor's vertical sync
 rmagetron_vsync_last_help  What to do with the monitor's vertical sync
