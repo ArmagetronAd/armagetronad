@@ -4778,7 +4778,7 @@ void ePlayerNetID::ReadSync(nMessage &m){
                 {
                     oldTeam->UpdateProperties();
                 }
-           }
+            }
 
             nextTeam = newNextTeam;
         }
