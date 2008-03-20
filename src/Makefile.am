@@ -231,12 +231,12 @@ endif
 if BUILDDEDICATED
 extralibs=
 else
-extralibs= thirdparty/particles/libparticles.a
+extralibs= thirdparty/particles/libparticles.a thirdparty/scrap/libscrap.a
 endif
 
 armagetronad_main_SOURCES = tron/gFloor.cpp tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a librubywrap.a thirdparty/mathexpr/libmathexpr.a thirdparty/scrap/libscrap.a ${extralibs}
+armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a librubywrap.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 # armagetronad_main_LDFLAGS=
 
 armagetronad_main_master_SOURCES = network/master.cpp
