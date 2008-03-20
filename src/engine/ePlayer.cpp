@@ -6068,6 +6068,17 @@ ePlayerNetID::eTeamSet const & ePlayerNetID::GetInvitations() const
     return invitations_;
 }
 
+// sends a team change notification message to everyone's console
+static void se_TeamChangeMessage( ePlayerNetID const & player )
+{
+    // send notification
+    tOutput message;
+    message.SetTemplateParameter(1, tColoredString::RemoveColors(player.GetName()));
+    message.SetTemplateParameter(2, tColoredString::RemoveColors(player.NextTeam()->Name()) );
+    message << "$player_joins_team";
+    sn_ConsoleOut( message );
+}
+
 // create a new team and join it (on the server)
 void ePlayerNetID::CreateNewTeam()
 {
@@ -6108,6 +6119,10 @@ void ePlayerNetID::CreateNewTeam()
     if ( !currentTeam )
     {
         UpdateTeam();
+    }
+    else
+    {
+        se_TeamChangeMessage( *this );
     }
 }
 
@@ -6199,12 +6214,7 @@ void ePlayerNetID::ReceiveControlNet(nMessage &m)
             // announce the change
             if ( bool(nextTeam) && !redundant )
             {
-                tOutput message;
-                message.SetTemplateParameter(1, tColoredString::RemoveColors(GetName()));
-                message.SetTemplateParameter(2, tColoredString::RemoveColors(nextTeam->Name()) );
-                message << "$player_joins_team";
-
-                sn_ConsoleOut( message );
+                se_TeamChangeMessage( *this );
 
                 // count it as spam if it is obnoxious
                 if ( obnoxious )
