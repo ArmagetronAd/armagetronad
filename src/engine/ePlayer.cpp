@@ -6071,12 +6071,25 @@ ePlayerNetID::eTeamSet const & ePlayerNetID::GetInvitations() const
 // sends a team change notification message to everyone's console
 static void se_TeamChangeMessage( ePlayerNetID const & player )
 {
-    // send notification
-    tOutput message;
-    message.SetTemplateParameter(1, tColoredString::RemoveColors(player.GetName()));
-    message.SetTemplateParameter(2, tColoredString::RemoveColors(player.NextTeam()->Name()) );
-    message << "$player_joins_team";
-    sn_ConsoleOut( message );
+    if ( player.NextTeam() )
+    {
+        // send notification
+        tOutput message;
+        tString playerName = tColoredString::RemoveColors(player.GetName());
+        tString teamName = tColoredString::RemoveColors(player.NextTeam()->Name());
+        message.SetTemplateParameter(1, playerName );
+        if ( playerName != teamName )
+        {
+            message.SetTemplateParameter(2, teamName );
+            message << "$player_joins_team";
+        }
+        else
+        {
+            message << "$player_joins_team_solo";
+        }
+
+        sn_ConsoleOut( message );
+    }
 }
 
 // create a new team and join it (on the server)
@@ -6122,6 +6135,7 @@ void ePlayerNetID::CreateNewTeam()
     }
     else
     {
+        nextTeam->UpdateAppearance();
         se_TeamChangeMessage( *this );
     }
 }

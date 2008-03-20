@@ -279,23 +279,6 @@ void eTeam::UpdateAppearance()
         r = g = b = 7;
     }
 
-    /* z-man: no longer required
-    // make the oldest player spawn in front
-    if ( oldest )
-    {
-        int max = players.Len()-1;
-        int real = oldest->teamListID;
-        if ( real < max )
-        {
-            players(max)->teamListID = real;
-            oldest->teamListID = max;
-
-            players(real) = players(max);
-            players(max) = oldest;
-        }
-    }
-    */
-
     if ( nSERVER == sn_GetNetState() )
         RequestSync();
 
@@ -1110,6 +1093,20 @@ ePlayerNetID*	eTeam::OldestHumanPlayer(		) const
         if ( p->IsHuman() && ( !ret || ret->timeJoinedTeam > p->timeJoinedTeam || se_centerPlayerIsBoss ) )
         {
             ret = p;
+        }
+    }
+
+    if ( !ret )
+    {
+        // nobody? Darn. Look for a player that has this team set as next team.
+        
+        for (int i= se_PlayerNetIDs.Len()-1; i>=0; i--)
+        {   
+            ePlayerNetID* p = se_PlayerNetIDs(i);
+            if ( p->NextTeam() == this && p->IsHuman() && ( !ret || ret->timeJoinedTeam > p->timeJoinedTeam || se_centerPlayerIsBoss ) )
+            {
+                ret = p;
+            }
         }
     }
 
