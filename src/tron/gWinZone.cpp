@@ -1597,6 +1597,7 @@ static tSettingItem< int > sg_onConquestConquestWinConfig( "FORTRESS_CONQUERED_W
 
 // maximal number of base zones ownable by a team
 static int sg_baseZonesPerTeam = 0;
+static tSettingItem< int > sg_baseZonesPerTeamConfig( "FORTRESS_MAX_PER_TEAM", sg_baseZonesPerTeam );
 // flag indicating whether base will respawn team if a team player enters it
 static bool sg_baseRespawn = false;
 static tSettingItem<bool> sg_baseRespawnConfig ("BASE_RESPAWN", sg_baseRespawn);
@@ -2420,23 +2421,22 @@ void gBaseZoneHack::OnEnter( gZone * target, REAL time )
 
     if (ball)
     {
-        // the ball entered the goal, figure out who shot it
-        gCycle *lastCycle = ball->GetLastCycle();
-
-        if ((lastCycle) && (!lastCycle->Player()))
+        if(currentState_ == State_Conquering || currentState_ == State_Conquered)
         {
-            return;
+            return; // the zone is already being conquered, no more points
         }
+        // the ball entered the goal, figure out who shot it
+        ePlayerNetID *lastPlayer_ = ball->GetLastPlayer();
 
-        if (lastCycle)
+        if (lastPlayer_)
         {
-            eTeam *lastTeam = lastCycle->Player()->CurrentTeam();
+            eTeam *lastTeam = lastPlayer_->CurrentTeam();
 
             if (lastTeam == team)
             {
                 // own team hit it in
                 tColoredString playerName;
-                playerName << *lastCycle->Player() << tColoredString::ColorString(1,1,1);
+                playerName << *lastPlayer_ << tColoredString::ColorString(1,1,1);
                 sn_ConsoleOut( tOutput( "$player_score_own_goal", playerName ) );
 
                 // search through the teams and add a point to each
@@ -2455,19 +2455,21 @@ void gBaseZoneHack::OnEnter( gZone * target, REAL time )
                 tOutput lose;
                 tOutput win;
                 int score = sg_scoreGoal;
-            
+
                 win << "$player_score_goal";
-                lastCycle->Player()->AddScore(score, win, lose);
+                lastPlayer_->AddScore(score, win, lose);
             }
 
             // check if the round should end or we should respawn the ball
             if (sg_goalRoundEnd)
             {
-                static const char* message="$player_win_instant";
-                sg_DeclareWinner( lastTeam, message );
+                //static const char* message="$player_win_instant";
+                //sg_DeclareWinner( lastTeam, message );
 
                 // destroy the ball
-                ball->Destroy();
+                //ball->Destroy();
+                OnConquest();
+                currentState_ = State_Conquering;
             }
             else
             {
@@ -2940,7 +2942,7 @@ gBallZoneHack::gBallZoneHack( eGrid * grid, const eCoord & pos )
 
     wallInteract_ = true;
     wallBouncesLeft_ = -1;
-    lastCycle_ = NULL;
+    lastPlayer_ = NULL;
     originalPosition_ = pos;
 
     grid->AddGameObjectInteresting(this);
@@ -2960,7 +2962,7 @@ gBallZoneHack::gBallZoneHack( eGrid * grid, const eCoord & pos )
 gBallZoneHack::gBallZoneHack( nMessage & m )
         : gZone( m )
 {
-    lastCycle_ = NULL;
+    lastPlayer_ = NULL;
     originalPosition_ = pos;
 }
 
@@ -3001,7 +3003,7 @@ void gBallZoneHack::OnEnter( gCycle * target, REAL time )
     }
 
     // save the last cycle to enter even if we're discarding this hit
-    lastCycle_ = target;
+    lastPlayer_ = target->Player();
 
     //Only process the cycle kick if there is no wall inside the zone
     s_zoneWallInteractionFound = false;
@@ -3029,27 +3031,27 @@ void gBallZoneHack::OnEnter( gCycle * target, REAL time )
 
 // *******************************************************************************
 // *
-// *	RemoveCycle
+// *	RemovePlayer
 // *
 // *******************************************************************************
 
-void gBallZoneHack::RemoveCycle( gCycle *cycle )
+void gBallZoneHack::RemovePlayer( ePlayerNetID *player )
 {
-    if (lastCycle_ == cycle)
+    if (&*lastPlayer_ == player)
     {
-        lastCycle_ = NULL;
+        lastPlayer_ = NULL;
     }
 }
 
 // *******************************************************************************
 // *
-// *	GetLastCycle
+// *	GetLastPlayer
 // *
 // *******************************************************************************
 
-gCycle * gBallZoneHack::GetLastCycle()
+ePlayerNetID * gBallZoneHack::GetLastPlayer()
 {
-    return (lastCycle_);
+    return lastPlayer_;
 }
 
 // *******************************************************************************
@@ -3061,7 +3063,7 @@ gCycle * gBallZoneHack::GetLastCycle()
 void gBallZoneHack::GoHome()
 {
     // remove the last cycle
-    lastCycle_ = NULL;
+    lastPlayer_ = NULL;
 
     // put the ball at home
     SetReferenceTime();
