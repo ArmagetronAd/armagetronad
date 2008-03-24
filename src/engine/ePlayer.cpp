@@ -2328,10 +2328,6 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     tConfItemBase::LoadLine(stream);
 }
 
-#ifdef DEDICATED
-static void se_Rtfm( tString const &command, ePlayerNetID * p, std::istream & s );
-#endif
-
 static void handle_chat_admin_commands( ePlayerNetID * p, tString const & command, tString const & say, std::istream & s )
 {
     if  (command == "/login")
@@ -2381,10 +2377,6 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     else  if ( command == "/admin" )
     {
         se_AdminAdmin( p, s );
-    }
-    else  if ( command == "/rtfm" || command == "/teach" )
-    {
-        se_Rtfm( command, p, s );
     }
     else
         if (se_interceptUnknownCommands)
@@ -3108,7 +3100,7 @@ static tAccessLevel se_rtfmAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_rtfmAccessLevelConf( "ACCESS_LEVEL_RTFM", se_rtfmAccessLevel );
 
 #ifdef DEDICATED
-static void se_Rtfm( tString const &command, ePlayerNetID * p, std::istream & s ) {
+static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, eChatSpamTester &spam ) {
 #ifdef KRAWALL_SERVER
     if ( p->GetAccessLevel() > se_rtfmAccessLevel ) {
         sn_ConsoleOut(tOutput("$access_level_rtfm_denied", tCurrentAccessLevel::GetName(se_shuffleUpAccessLevel), tCurrentAccessLevel::GetName(p->GetAccessLevel())), p->Owner());
@@ -3120,6 +3112,12 @@ static void se_Rtfm( tString const &command, ePlayerNetID * p, std::istream & s 
         return;
     }
 #endif
+    if(IsSilencedWithWarning(p)) {
+        return;
+    }
+    if(spam.Block()) {
+        return;
+    }
     ePlayerNetID *newbie = se_FindPlayerInChatCommand(p, command, s);
     if(newbie) {
         // somewhat hacky, but what the hack...
@@ -3128,9 +3126,10 @@ static void se_Rtfm( tString const &command, ePlayerNetID * p, std::istream & s 
         std::istringstream s1(&str(0)), s2(&str(0));
         tColoredString name;
         name << *p << tColoredString::ColorString(1,1,1);
-        sn_ConsoleOut(tOutput("$rtfm_announcement", name), newbie->Owner());
+        tColoredString newbie_name;
+        newbie_name << *newbie << tColoredString::ColorString(1,1,1);
+        sn_ConsoleOut(tOutput("$rtfm_announcement", str, name, newbie_name));
         se_Help(newbie, s1);
-        sn_ConsoleOut(tOutput("$rtfm_success", name), newbie->Owner());
         se_Help(p, s2);
     }
 }
@@ -3225,6 +3224,11 @@ void handle_chat( nMessage &m )
                         return;
                     }
 #ifdef DEDICATED
+                    else  if ( command == "/rtfm" || command == "/teach" )
+                    {
+                        se_Rtfm( command, p, s, spam );
+                        return;
+                    }
                     else {
                         handle_chat_admin_commands( p, command, say, s );
                         return;

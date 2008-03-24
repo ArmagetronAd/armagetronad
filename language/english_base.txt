@@ -2220,8 +2220,7 @@ remove_help_topic_help  Remove a help topic.
 remove_help_topic_success Removed help topic "\1".\n
 remove_help_topic_notfound Help topic "\1" doesn't exist.\n
 
-rtfm_announcement \1 wants you to know about the following help topic:\n
-rtfm_success \1 got the following message:\n
+rtfm_announcement \2 wants \3 to know about /help \1.\n
 
 help_introductory_blurb_help Message that is displayed before the list of help topics if someone uses /help without arguments
 
