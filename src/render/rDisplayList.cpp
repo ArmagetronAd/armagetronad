@@ -30,10 +30,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rScreen.h"
 
 #ifdef DEBUG
+#ifndef DEDICATED
 #define LIST_STATS
 #endif
-
-#define LIST_STATS
+#endif
 
 #ifdef LIST_STATS
 class rListCounter
@@ -89,12 +89,12 @@ rDisplayList::~rDisplayList()
 #endif
 }
 
-static bool sr_isRecording = false;
+static rDisplayListFiller * sr_currentFiller = NULL;
 
 //! check whether a displaylist is currently being recorded.
 bool rDisplayList::IsRecording()
 {
-    return sr_isRecording;
+    return sr_currentFiller;
 }
 
 // calls the display list, returns true if there was a list to call
@@ -173,6 +173,18 @@ void rDisplayList::ClearAll()
 #endif
 }
 
+// cancels recording of current display list
+void rDisplayList::Cancel()
+{
+#ifndef DEDICATED
+    if ( sr_currentFiller )
+    {
+        sr_currentFiller->list_.Clear(0);
+        sr_currentFiller->Stop();
+    }
+#endif
+}
+
 rDisplayListAlphaSensitive::rDisplayListAlphaSensitive()
 : lastAlpha_( sr_alphaBlend )
 {}
@@ -195,8 +207,14 @@ rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
     : list_( list )
 #endif
 {
+    Start();
+}
+
+// starts filling the display list
+void rDisplayListFiller::Start()
+{
 #ifndef DEDICATED
-    bool useList = sr_useDisplayLists != rDisplayList_Off && list_.inhibit_ == 0 && !sr_isRecording;
+    bool useList = sr_useDisplayLists != rDisplayList_Off && list_.inhibit_ == 0 && !sr_currentFiller;
     if ( useList )
     {
 #ifdef LIST_STATS
@@ -209,7 +227,7 @@ rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
         }
         glNewList(list_.list_, sr_useDisplayLists == rDisplayList_CAC ? GL_COMPILE : GL_COMPILE_AND_EXECUTE );
         list_.filling_ = true;
-        sr_isRecording = true;
+        sr_currentFiller = this;
     }
     else if ( list_.inhibit_ > 0 )
     {
@@ -217,7 +235,7 @@ rDisplayListFiller::rDisplayListFiller( rDisplayList & list )
     }
 
 #ifdef LIST_STATS
-    if ( !useList )
+    if ( !useList && !sr_currentFiller )
     {
         sr_counter.Count( rListCounter::Not );
     }
@@ -237,8 +255,9 @@ void rDisplayListFiller::Stop()
     if ( list_.filling_ )
     {
         tASSERT( list_.list_ );
+        tASSERT( sr_currentFiller == this );
 
-        sr_isRecording = false;
+        sr_currentFiller = 0;
         list_.filling_ = false;
         glEndList();
 

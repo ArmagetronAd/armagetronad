@@ -66,10 +66,14 @@ REAL max_player_speed=0;
 
 void GLmeter_subby(float value,float max, float locx, float locy, float size, const char * t,bool displayvalue = true, bool reverse = false, REAL r=.5, REAL g=.5, REAL b=1)
 {
+
+#ifndef DEDICATED
+    if (!sr_glOut)
+        return;
+#endif
+
     tString title( t );
 
-    sr_ResetRenderState(0); //needs this because rFont has bugs i presume.. Ie I have problems as soon as rTextFirld is used
-    // z-man: actually, it is needed because per-frame-tasks get called without rendering context, so it has to be set.
     float x, y;
     char string[50];
     value>max?value=max:1;
@@ -94,8 +98,9 @@ void GLmeter_subby(float value,float max, float locx, float locy, float size, co
 
     	RenderEnd();*/
 
-    BeginLines();
+    glDisable(GL_TEXTURE_2D);
     Color(r,g, b);
+    BeginLines();
     Vertex(-.1*x*size+locx,.1*y*size+locy,0);
     Vertex(-x*size+locx,y*size+locy,0);
     RenderEnd();
@@ -117,15 +122,71 @@ void GLmeter_subby(float value,float max, float locx, float locy, float size, co
         rTextField titletext(locx-((.15*size*(length-1.5))/2.0),locy,.12*size,.24*size); //centre  -1.0 for null char and -.5 for half a char width = -1.5
         titletext << "0xff3333" << title;
     }
-
-#ifndef DEDICATED
-    if (!sr_glOut)
-        return;
-
-    glColor3f(1,1,1);
-#endif
-
 }
+
+class gGLMeter
+{
+public:
+    gGLMeter()
+    : oldTime_( -100 ), oldRel_( -100 )
+    {
+    }
+
+    void Display( float value,float max, float locx, float locy, float size, const char * t,bool displayvalue = true, bool reverse = false, REAL r=.5, REAL g=.5, REAL b=1)
+    {
+        REAL rel = value/max;
+        REAL time = se_GameTime();
+        REAL change = rel - oldRel_;
+
+        // see if the gauge change is enough to warrant an update
+        if ( change * change * ( time - oldTime_ ) > .000001 || time < oldTime_ )
+        {
+            list_.Clear();
+        }
+
+        if ( !list_.Call() )
+        {
+            oldRel_ = rel;
+            oldTime_ = time;
+
+            rDisplayListFiller filler( list_ );
+            GLmeter_subby(value, max,  locx, locy, size, t, displayvalue, reverse, r, g, b );
+        }
+    }
+private:
+    REAL oldTime_;      // last rendered game time
+    REAL oldRel_;       // last rendered gauge position
+    rDisplayList list_; // caching display list
+};
+
+// caches stuff based on two float properties
+class gTextCache
+{
+public:
+    gTextCache()
+    : propa_(-1), propb_(-1)
+    {
+    }
+
+    bool Call( REAL propa, REAL propb )
+    {
+        if ( propa != propa_ || propb != propb_ )
+        {
+            propa_ = propa;
+            propb_ = propb;
+            list_.Clear();
+            return false;
+        }
+        else
+        {
+            return list_.Call();
+        }
+    }
+    
+    rDisplayList list_;
+private:
+    REAL propa_, propb_;
+};
 
 static int alivepeople, alivemates, thetopscore, hudfpscount;
 
@@ -147,7 +208,6 @@ static void tank_display_hud( ePlayerNetID* me ){
             lastTime = newtime;
         }
 
-        sr_ResetRenderState(false);
         Color(1,1,1);
         rTextField c(-.9,-.6);
 
@@ -241,7 +301,6 @@ static void display_hud_subby( ePlayer* player ){
             se_mainGameTimer->speed < 1.1 &&
             se_mainGameTimer->IsSynced() )
     {
-        sr_ResetRenderState(false);
         Color(1,1,1);
         rTextField c(-.9,-.85);
         rTextField t(.6,.98);
@@ -331,72 +390,106 @@ static void display_hud_subby( ePlayer* player ){
                         myping = me->ping;
 
                         if(subby_ShowSpeedMeter)
-                            GLmeter_subby(h->Speed(),maxmeterspeed,subby_SpeedGaugeLocX,subby_SpeedGaugeLocY,subby_SpeedGaugeSize,"Speed");  // easy to use configurable meters
+                        {
+                            static gGLMeter meter[MAX_PLAYERS];
+                            meter[player->ID()].Display(h->Speed(),maxmeterspeed,subby_SpeedGaugeLocX,subby_SpeedGaugeLocY,subby_SpeedGaugeSize,"Speed");  // easy to use configurable meters
+                        }
                         if(subby_ShowRubberMeter)
                         {
-                            GLmeter_subby(h->GetRubber(),sg_rubberCycle,subby_RubberGaugeLocX,subby_RubberGaugeLocY,subby_RubberGaugeSize," Rubber Used");
+                            static gGLMeter meter[MAX_PLAYERS];
+                            meter[player->ID()].Display(h->GetRubber(),sg_rubberCycle,subby_RubberGaugeLocX,subby_RubberGaugeLocY,subby_RubberGaugeSize," Rubber Used");
                             if ( gCycle::RubberMalusActive() )
-                                GLmeter_subby(100/(1+h->GetRubberMalus()),100,subby_RubberGaugeLocX,subby_RubberGaugeLocY,subby_RubberGaugeSize,"",true, false, 1,.5,.5);
+                            {
+                                static gGLMeter meter2[MAX_PLAYERS];
+                                meter2[player->ID()].Display(100/(1+h->GetRubberMalus()),100,subby_RubberGaugeLocX,subby_RubberGaugeLocY,subby_RubberGaugeSize,"",true, false, 1,.5,.5);
+                            }
                         }
                         if(subby_ShowBrakeMeter)
-                            GLmeter_subby(h->GetBrakingReservoir(), 1.0,subby_BrakeGaugeLocX,subby_BrakeGaugeLocY,subby_BrakeGaugeSize, " Brakes");
+                        {
+                            static gGLMeter meter[MAX_PLAYERS];
+                            meter[player->ID()].Display(h->GetBrakingReservoir(), 1.0,subby_BrakeGaugeLocX,subby_BrakeGaugeLocY,subby_BrakeGaugeSize, " Brakes");
+                        }
 
                         //  bool displayfastest = true;// put into global, set via menusytem... subby to do.make sr_DISPLAYFASTESTout
 
                         if(subby_ShowSpeedFastest)
                         {
+                            static gTextCache cacheArray[MAX_PLAYERS];
+                            gTextCache & cache = cacheArray[player->ID()];
+                            if ( !cache.Call( max, 0 ) )
+                            {
+                                rDisplayListFiller filler( cache.list_ );
 
-                            float size= subby_FastestSize;
-                            tColoredString message,messageColor;
-                            messageColor << "0xbf9d50";
+                                float size= subby_FastestSize;
+                                tColoredString message,messageColor;
+                                messageColor << "0xbf9d50";
 
-                            sprintf(fasteststring,"%.1f",max);
-                            message << "  Fastest: " << name << " " << fasteststring;
-                            message.RemoveHex(); //cheers tank;
-                            int length = message.Len();
+                                sprintf(fasteststring,"%.1f",max);
+                                message << "  Fastest: " << name << " " << fasteststring;
+                                message.RemoveHex(); //cheers tank;
+                                int length = message.Len();
 
-                            rTextField speed_fastest(subby_FastestLocX-((.15*size*(length-1.5))/2.0),subby_FastestLocY,.15*size,.3*size);
+                                rTextField speed_fastest(subby_FastestLocX-((.15*size*(length-1.5))/2.0),subby_FastestLocY,.15*size,.3*size);
                             /*   rTextField speed_fastest(.7-((.15*size*(length-1.5))/2.0),.65,.15*size,.3*size); */
 
-                            speed_fastest << messageColor << message;
-
-
-
+                                speed_fastest << messageColor << message;
+                            }
                         }
 
                         if(subby_ShowScore){
-                            tString colour;
-                            if(myscore==topscore){
-                                colour = "0xff9d50";
-                            }else if (myscore > topscore){
-                                colour = "0x11ff11";
-                            }else{
-                                colour = "0x11ffff";
-                            }
+                            static gTextCache cacheArray[MAX_PLAYERS];
+                            gTextCache & cache = cacheArray[player->ID()];
+                            if ( !cache.Call( topscore, myscore ) )
+                            {
+                                rDisplayListFiller filler( cache.list_ );
 
-                            float size = subby_ScoreSize;
-                            rTextField score(subby_ScoreLocX,subby_ScoreLocY,.15*size,.3*size);
-                            score <<               " Scores\n";
-                            score << "0xefefef" << "Me:  Top:\n";
-                            score << colour << myscore << "     0xffff00" << topscore ;
+                                tString colour;
+                                if(myscore==topscore){
+                                    colour = "0xff9d50";
+                                }else if (myscore > topscore){
+                                    colour = "0x11ff11";
+                                }else{
+                                    colour = "0x11ffff";
+                                }
+
+                                float size = subby_ScoreSize;
+                                rTextField score(subby_ScoreLocX,subby_ScoreLocY,.15*size,.3*size);
+                                score <<               " Scores\n";
+                                score << "0xefefef" << "Me:  Top:\n";
+                                score << colour << myscore << "     0xffff00" << topscore ;
+                            }
                         }
 
                         if(subby_ShowAlivePeople){
-                            tString message;
-                            message << "Enemies: " << alivepeople << " Friends: " << alivemates;
-                            int length = message.Len();
-                            float size = subby_AlivePeopleSize;
-                            rTextField enemies_alive(subby_AlivePeopleLocX-((.15*size*(length-1.5))/2.0),subby_AlivePeopleLocY,.15*size,.3*size);
-                            enemies_alive << "0xfefefe" << message;
+                            static gTextCache cacheArray[MAX_PLAYERS];
+                            gTextCache & cache = cacheArray[player->ID()];
+                            if ( !cache.Call( alivepeople, alivemates ) )
+                            {
+                                rDisplayListFiller filler( cache.list_ );
+
+                                tString message;
+                                message << "Enemies: " << alivepeople << " Friends: " << alivemates;
+                                int length = message.Len();
+                                float size = subby_AlivePeopleSize;
+                                rTextField enemies_alive(subby_AlivePeopleLocX-((.15*size*(length-1.5))/2.0),subby_AlivePeopleLocY,.15*size,.3*size);
+                                enemies_alive << "0xfefefe" << message;
+                            }
                         }
 
                         if(subby_ShowPing){
-                            tString message;
-                            message << "Ping: " << int(myping * 1000) << " ms" ;
-                            int length = message.Len();
-                            float size = subby_PingSize;
-                            rTextField ping(subby_PingLocX-((.15*size*(length-1.5))/2.0),subby_PingLocY,.15*size,.3*size);
-                            ping << "0xfefefe" << message;
+                            static gTextCache cacheArray[MAX_PLAYERS];
+                            gTextCache & cache = cacheArray[player->ID()];
+                            if ( !cache.Call( 0, myping ) )
+                            {
+                                rDisplayListFiller filler( cache.list_ );
+
+                                tString message;
+                                message << "Ping: " << int(myping * 1000) << " ms" ;
+                                int length = message.Len();
+                                float size = subby_PingSize;
+                                rTextField ping(subby_PingLocX-((.15*size*(length-1.5))/2.0),subby_PingLocY,.15*size,.3*size);
+                                ping << "0xfefefe" << message;
+                            }
                         }
                     }
                 }
@@ -421,6 +514,17 @@ static void display_fps_subby()
 
     REAL newtime = tSysTimeFloat();
     REAL ts      = newtime - lastTime;
+
+    static gTextCache cache;
+    if ( cache.Call( fps, (int)tSysTimeFloat() ) )
+    {
+        return;
+    }
+    if ( tRecorder::IsRunning() )
+    {
+        cache.list_.Clear();
+    }
+    rDisplayListFiller filler( cache.list_ );
 
     float size =.15;
     rTextField c2(.7,.85,.15*size, .3*size);

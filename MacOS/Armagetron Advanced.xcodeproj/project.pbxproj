@@ -52,7 +52,13 @@
 		64956AED0D410F6A00C501B8 /* gFriends.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64956AE90D410F6A00C501B8 /* gFriends.cpp */; };
 		64956AEF0D410F6A00C501B8 /* gFriends.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64956AE90D410F6A00C501B8 /* gFriends.cpp */; };
 		64C038B70D2E84E500810BB1 /* config_common.h.in in Resources */ = {isa = PBXBuildFile; fileRef = 64C038B60D2E84E500810BB1 /* config_common.h.in */; };
-		64C038B80D2E84E500810BB1 /* config_common.h.in in Resources */ = {isa = PBXBuildFile; fileRef = 64C038B60D2E84E500810BB1 /* config_common.h.in */; };
+		64E439260D64FC4100CA7EC4 /* rDisplayList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64E439230D64FC4100CA7EC4 /* rDisplayList.cpp */; };
+		64E439270D64FC4100CA7EC4 /* rDisplayList.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 64E439240D64FC4100CA7EC4 /* rDisplayList.h */; };
+		64E439280D64FC4100CA7EC4 /* rGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64E439250D64FC4100CA7EC4 /* rGL.cpp */; };
+		64E439290D64FC4100CA7EC4 /* rDisplayList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64E439230D64FC4100CA7EC4 /* rDisplayList.cpp */; };
+		64E4392B0D64FC4100CA7EC4 /* rGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64E439250D64FC4100CA7EC4 /* rGL.cpp */; };
+		64E4392C0D64FC4100CA7EC4 /* rDisplayList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64E439230D64FC4100CA7EC4 /* rDisplayList.cpp */; };
+		64E4392E0D64FC4100CA7EC4 /* rGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 64E439250D64FC4100CA7EC4 /* rGL.cpp */; };
 		8C11CA49095A2B6E007AE0EA /* action_api.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E7D089EEC7D007E21DC /* action_api.cpp */; };
 		8C11CA4A095A2B6E007AE0EA /* actions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E7E089EEC7D007E21DC /* actions.cpp */; };
 		8C11CA4B095A2B6E007AE0EA /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8CBA5E10089EEC7C007E21DC /* eAdvWall.cpp */; };
@@ -395,9 +401,10 @@
 		9B69F6250A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */; };
 		9B69F6260A63E1A700F5F2E4 /* eLagCompensation.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */; };
 		9B69F6270A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */; };
-		9B7870680D5E4FD20088A96F /* libZThread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B7870670D5E4FD20088A96F /* libZThread.a */; };
-		9B7870690D5E4FD20088A96F /* libZThread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B7870670D5E4FD20088A96F /* libZThread.a */; };
 		9B78706A0D5E4FD20088A96F /* libZThread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B7870670D5E4FD20088A96F /* libZThread.a */; };
+		D01641340D904A6600FC0A23 /* tColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01641330D904A6600FC0A23 /* tColor.cpp */; };
+		D01641350D904A6600FC0A23 /* tColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01641330D904A6600FC0A23 /* tColor.cpp */; };
+		D01641360D904A6600FC0A23 /* tColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01641330D904A6600FC0A23 /* tColor.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -444,6 +451,7 @@
 				8CB97B450962677F00AE8BCD /* libxml2.2.6.22.dylib in Copy Frameworks */,
 				9B69F6260A63E1A700F5F2E4 /* eLagCompensation.h in Copy Frameworks */,
 				64956AEC0D410F6A00C501B8 /* gFriends.h in Copy Frameworks */,
+				64E439270D64FC4100CA7EC4 /* rDisplayList.h in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -472,6 +480,9 @@
 		64956AE90D410F6A00C501B8 /* gFriends.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = gFriends.cpp; sourceTree = "<group>"; };
 		64956AEA0D410F6A00C501B8 /* gFriends.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = gFriends.h; sourceTree = "<group>"; };
 		64C038B60D2E84E500810BB1 /* config_common.h.in */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = config_common.h.in; path = ../src/macosx/config_common.h.in; sourceTree = SOURCE_ROOT; };
+		64E439230D64FC4100CA7EC4 /* rDisplayList.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = rDisplayList.cpp; sourceTree = "<group>"; };
+		64E439240D64FC4100CA7EC4 /* rDisplayList.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = rDisplayList.h; sourceTree = "<group>"; };
+		64E439250D64FC4100CA7EC4 /* rGL.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = rGL.cpp; sourceTree = "<group>"; };
 		8C11CA38095A264A007AE0EA /* config_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config_common.h; path = ../src/macosx/config_common.h; sourceTree = SOURCE_ROOT; };
 		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C6EF51C08A32A0500816348 /* English */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; name = English; path = InfoPlist.strings; sourceTree = "<group>"; };
@@ -705,6 +716,7 @@
 		9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eLagCompensation.cpp; sourceTree = "<group>"; };
 		9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eLagCompensation.h; sourceTree = "<group>"; };
 		9B7870670D5E4FD20088A96F /* libZThread.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libZThread.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libZThread.a; sourceTree = "<absolute>"; };
+		D01641330D904A6600FC0A23 /* tColor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tColor.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -726,7 +738,6 @@
 				9B5414E90A45C7CB00745CE6 /* SDL_image.framework in Frameworks */,
 				9B5414EA0A45C7CB00745CE6 /* SDL.framework in Frameworks */,
 				6459A1320D2AE2B40042EFE8 /* libpng.framework in Frameworks */,
-				9B7870690D5E4FD20088A96F /* libZThread.a in Frameworks */,
 				9B5E11C00D5EC32500175ABB /* CoreServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -740,7 +751,6 @@
 				9B5414A50A45C78200745CE6 /* libpng.framework in Frameworks */,
 				9B5414A60A45C78200745CE6 /* SDL_image.framework in Frameworks */,
 				9B5414A70A45C78200745CE6 /* SDL.framework in Frameworks */,
-				9B7870680D5E4FD20088A96F /* libZThread.a in Frameworks */,
 				9B5E11BF0D5EC32500175ABB /* CoreServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -943,6 +953,9 @@
 		8CBA5E5D089EEC7D007E21DC /* render */ = {
 			isa = PBXGroup;
 			children = (
+				64E439250D64FC4100CA7EC4 /* rGL.cpp */,
+				64E439230D64FC4100CA7EC4 /* rDisplayList.cpp */,
+				64E439240D64FC4100CA7EC4 /* rDisplayList.h */,
 				8CBA5E5F089EEC7D007E21DC /* rConsole.cpp */,
 				8CBA5E60089EEC7D007E21DC /* rConsole.h */,
 				8CAD9140095A37DD00DA0ECC /* rConsoleCout.cpp */,
@@ -1008,6 +1021,7 @@
 				8CBA5E8C089EEC7D007E21DC /* tCallback.cpp */,
 				8CBA5E8D089EEC7D007E21DC /* tCallback.h */,
 				8CBA5E8E089EEC7D007E21DC /* tCallbackString.h */,
+				D01641330D904A6600FC0A23 /* tColor.cpp */,
 				8CBA5E8F089EEC7D007E21DC /* tColor.h */,
 				8CBA5E90089EEC7D007E21DC /* tCommandLine.cpp */,
 				8CBA5E91089EEC7D007E21DC /* tCommandLine.h */,
@@ -1301,7 +1315,6 @@
 				8CBA62E108A01A55007E21DC /* Armagetron Advanced.icns in Resources */,
 				8CBA646208A065A8007E21DC /* Info.plist in Resources */,
 				8C6EF51D08A32A0500816348 /* InfoPlist.strings in Resources */,
-				64C038B80D2E84E500810BB1 /* config_common.h.in in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1580,6 +1593,9 @@
 				9B69F6270A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */,
 				64956AEF0D410F6A00C501B8 /* gFriends.cpp in Sources */,
 				9B5FE8310D57B2FC004AC137 /* nAuthentication.cpp in Sources */,
+				64E4392C0D64FC4100CA7EC4 /* rDisplayList.cpp in Sources */,
+				64E4392E0D64FC4100CA7EC4 /* rGL.cpp in Sources */,
+				D01641360D904A6600FC0A23 /* tColor.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1688,6 +1704,9 @@
 				9B69F6250A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */,
 				64956AEB0D410F6A00C501B8 /* gFriends.cpp in Sources */,
 				9B5FE8300D57B2FC004AC137 /* nAuthentication.cpp in Sources */,
+				64E439260D64FC4100CA7EC4 /* rDisplayList.cpp in Sources */,
+				64E439280D64FC4100CA7EC4 /* rGL.cpp in Sources */,
+				D01641350D904A6600FC0A23 /* tColor.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1796,6 +1815,9 @@
 				9B69F6230A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */,
 				64956AED0D410F6A00C501B8 /* gFriends.cpp in Sources */,
 				9B5FE82F0D57B2FC004AC137 /* nAuthentication.cpp in Sources */,
+				64E439290D64FC4100CA7EC4 /* rDisplayList.cpp in Sources */,
+				64E4392B0D64FC4100CA7EC4 /* rGL.cpp in Sources */,
+				D01641340D904A6600FC0A23 /* tColor.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

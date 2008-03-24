@@ -2072,6 +2072,7 @@ gamestate_winner_ai           Computer.
 gamestate_winner_humans       Menschen.
 
 instant_win_activated         Die Siegzone wurde aktiviert! Finde sie und fahre hinein um zu gewinnen.\n
+instant_round_end_activated   Die Rundenendzone wurde aktiviert! Finde sie und fahre hinein um die Runde zu beenden.\n
 instant_death_activated       Die Todeszone wurde aktiviert! Vermeide sie!\n
 
 player_win_instant            \1 bekam \2 Punkte durch das Erreichen der Siegzone.\n
@@ -2110,7 +2111,7 @@ player_left_spectator         0xff7f7fZuschauer \1 0xff7f7fis weg.\n
 player_left_game              \1 0xff7f7fwurde mit \2 Punkten endgültig gelöscht.\n
 player_leaving_game           \1 0xff7f7fhat das Spiel verlassen.\n
 player_renamed                \2 hat sich auf \1 umbenannt.\n
-player_rename_rejected        \1 0xffffffdarf sich nicht in \2 0xffffffumbenennen, das könnte die Abstimmenden verwirren.\n
+player_rename_rejected_votekick  \1 0xffffffdarf sich nicht in \2 0xffffffumbenennen, das könnte die Abstimmenden verwirren.\n
 player_welcome                \n\nWilkommen \1! Auf diesem Server läuft Version \2.\n
 player_win_default            \1 erhält aus sehr seltsamen Gründen \2 Punkte.\n
 player_lose_default           \1 verliert aus sehr seltsamen Gründen \2 Punkte.\n

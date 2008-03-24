@@ -40,10 +40,22 @@ class eMenuItemVote;
 
 #include "nSpamProtection.h"
 
+// information in eVoter accessible for ePlayer only
+class eVoterPlayerInfo
+{
+public:
+    friend class ePlayerNetID;
+
+    eVoterPlayerInfo();
+private:
+    int             suspended_;  //! number of rounds the player is currently suspended from playing
+};
+
 // class identifying a voter; all players coming from the same IP share the same voter.
-class eVoter: public tReferencable< eVoter >, public tListMember, public nMachineDecorator
+class eVoter: public tReferencable< eVoter >, public tListMember, public nMachineDecorator, public eVoterPlayerInfo
 {
     friend class eVoteItem;
+    friend class eVoteItemHarm;
     friend class eVoteItemKick;
 public:
     eVoter( nMachine & machine );
@@ -60,11 +72,20 @@ public:
     static eVoter* GetVoter ( int ID, bool complain = false );	// find or create the voter for the specified user ID
     static eVoter* GetVoter ( nMachine & machine );	            // find or create the voter for the specified machine
     static bool VotingPossible();								// returns whether voting is currently possible
+
+    static void HandleChat( ePlayerNetID * p, std::istream & message ); //!< handles player "/vote" command.
+
     tString Name(int senderID = -1) const;						// returns the name of the voter
 
     REAL Age() const;                                           //!< how long does this voter exist?
 
     bool AllowNameChange() const;  //!< determines whether the player belonging to this voter should be allowed to change names
+
+    //! returns the number of harmful votes against this player
+    int HarmCount() const
+    {
+        return harmCount_;
+    }
 protected:
     virtual void OnDestroy();      //!< called when machine gets destroyed
 
@@ -75,6 +96,8 @@ private:
     static tList< eVoter > voters_;					// list of all voters
     nSpamProtection votingSpam_;					// spam control
     tJUST_CONTROLLED_PTR< eVoter > selfReference_;  //!< reference to self
+    int harmCount_;                                 //!< counts the number of harmful votes issued against this player
+    double lastHarmVote_;                           //!< the last time a harmful vote was issued for this player
     double lastKickVote_;                           //!< the last time a kick vote was issued for this player
     double lastNameChangePreventor_;                //!< the last time something happened that should prevent the voter from changing names
     double lastChange_;                             //!< the last time a player assigned to this voter changed

@@ -639,6 +639,7 @@ int main(int argc,char **argv){
             sg_SetIcon();
 
             tConsole::RegisterMessageCallback(&uMenu::Message);
+            tConsole::RegisterIdleCallback(&uMenu::IdleInput);
 
 #ifndef NOSOUND
             se_SoundInit();

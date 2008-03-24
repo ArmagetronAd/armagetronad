@@ -231,7 +231,10 @@ public:
 
         if ( s.fail() )
         {
-            con << tOutput( "$access_level_usage" );
+            if(printErrors)
+            {
+                con << tOutput( "$access_level_usage" );
+            }
             return;
         }
 
@@ -248,10 +251,13 @@ public:
             if ( ci->requiredLevel != level )
             {
                 ci->requiredLevel = level;
-                con << tOutput( "$access_level_change", name, tCurrentAccessLevel::GetName( level ) );
+                if(printChange)
+                {
+                    con << tOutput( "$access_level_change", name, tCurrentAccessLevel::GetName( level ) );
+                }
             }
         }
-        else
+        else if(printErrors)
         {
             con << tOutput( "$config_command_unknown", name );
         }
@@ -636,7 +642,7 @@ static bool s_VetoPlayback( tString const & line )
           "SKY_WOBBLE", "LOWER_SKY", "UPPER_SKY", "DITHER", "HIGH_RIM", "FLOOR_DETAIL",
           "FLOOR_MIRROR", "SHOW_FPS", "TEXT_OUT", "SMOOTH_SHADING", "ALPHA_BLEND",
           "PERSP_CORRECT", "POLY_ANTIALIAS", "LINE_ANTIALIAS", "FAST_FORWARD_MAXSTEP",
-          "DEBUG_GNUPLOT", "FLOOR_", "MOVIEPACK_", "RIM_WALL_", "INCLUDE", "SINCLUDE",
+          "DEBUG_GNUPLOT", "FLOOR_", "MOVIEPACK_", "RIM_WALL_",
           0 };
 
     static std::vector< tString > vetos = st_Stringify( vetos_char );
@@ -659,7 +665,10 @@ static bool s_VetoRecording( tString const & line )
     return s_Veto( line, vetos );
 }
 
-void tConfItemBase::LoadAll(std::istream &s){
+
+//! @param s        stream to read from
+//! @param record   set to true if the configuration is to be recorded and played back. That's usually only required if s is a file stream.
+void tConfItemBase::LoadAll(std::istream &s, bool record ){
     tCurrentAccessLevel levelResetter;
 
     try{
@@ -692,7 +701,7 @@ void tConfItemBase::LoadAll(std::istream &s){
             continue;
 
         // write line to recording
-        if ( !s_VetoRecording( line ) )
+        if ( record && !s_VetoRecording( line ) )
         {
             // don't record supid admins' instant chat logins
             static tString instantChat("INSTANT_CHAT_STRING");
@@ -712,7 +721,7 @@ void tConfItemBase::LoadAll(std::istream &s){
 
         // process line
         // line << '\n';
-        if ( !tRecorder::IsPlayingBack() || s_VetoPlayback( line ) )
+        if ( !record || !tRecorder::IsPlayingBack() || s_VetoPlayback( line ) )
         {
             std::stringstream str(static_cast< char const * >( line ) );
             tConfItemBase::LoadLine(str);
@@ -742,6 +751,43 @@ void tConfItemBase::DocAll(std::ostream &s){
             line << help;
             s << line << '\n';
         }
+    }
+}
+
+//! @param s        stream to read from
+//! @param record   set to true if the configuration is to be recorded and played back. That's usually only required if s is a file stream, so it defaults to true here.
+void tConfItemBase::LoadAll(std::ifstream &s, bool record )
+{
+    std::istream &ss(s);
+    LoadAll( ss, record );
+}
+
+
+//! @param s        file stream to be used for reading later
+//! @param filename name of the file to open
+//! @param var      whether to look in var directory
+//! @return success flag
+bool tConfItemBase::OpenFile( std::ifstream & s, tString const & filename, SearchPath path )
+{
+    bool ret = ( ( path & Config ) && tDirectories::Config().Open(s, filename ) ) || ( ( path & Var ) && tDirectories::Var().Open(s, filename ) );
+    
+    static char const * section = "INCLUDE_VOTE";
+    tRecorder::Playback( section, ret );
+    tRecorder::Record( section, ret );
+    
+    return ret;
+}
+
+//! @param s        file to read from
+void tConfItemBase::ReadFile( std::ifstream & s )
+{
+    if ( !tRecorder::IsPlayingBack() )
+    {
+        tConfItemBase::LoadAll(s, true );
+    }
+    else
+    {
+        tConfItemBase::LoadPlayback();
     }
 }
 
@@ -803,7 +849,7 @@ static bool Load( const tPath& path, const char* filename )
     std::ifstream s;
     if ( path.Open( s, filename ) )
     {
-        tConfItemBase::LoadAll( s );
+        tConfItemBase::LoadAll( s, true );
         return true;
     }
     else
@@ -983,13 +1029,29 @@ static void Include(std::istream& s, bool error )
     if( !tPath::IsValidPath( file ) )
         return;
 
-    if ( !Load( tDirectories::Var(), file ) )
+    if ( !tRecorder::IsPlayingBack() )
     {
-        if (!Load( tDirectories::Config(), file ) && error )
+        // really load include file
+        if ( !Load( tDirectories::Var(), file ) )
         {
-            con << tOutput( "$config_include_not_found", file );
+            if (!Load( tDirectories::Config(), file ) && error )
+            {
+                con << tOutput( "$config_include_not_found", file );
+            }
         }
     }
+    else
+    {
+        // just read configuration, and don't forget to reset the config level
+        tCurrentAccessLevel levelResetter;
+        tConfItemBase::LoadPlayback();
+    }
+
+    // mark section
+    char const * section = "INCLUDE_END";
+    tRecorder::Record( section );
+    tRecorder::PlaybackStrict( section );
+
 }
 
 static void Include(std::istream& s )

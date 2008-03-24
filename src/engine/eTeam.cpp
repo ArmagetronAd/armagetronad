@@ -57,6 +57,8 @@ static tString se_team_name[TEAMCOLORS]=
     tString("$team_name_black")
 };
 
+static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
+
 // class that creates config items for one team
 // TEAM_(NAME|RED|GREEN|BLUE)_X
 class eTeamColorConfig {
@@ -164,13 +166,20 @@ void eTeam::UpdateProperties()
     int i;
     for ( i = players.Len()-1; i>=0; --i )
     {
-        if ( players(i)->IsHuman() )
+        ePlayerNetID * player = players(i);
+
+        // on the client, don't count players who already expressed their wish
+        // to leave a team as active players.
+        if ( sn_GetNetState() != nCLIENT || player->nextTeam == this )
         {
-            if ( players(i)->IsActive() )
-                ++numHumans;
+            if ( player->IsHuman() )
+            {
+                if ( player->IsActive() )
+                    ++numHumans;
+            }
+            else
+                ++numAIs;
         }
-        else
-            ++numAIs;
     }
 
     if ( nSERVER == sn_GetNetState() )
@@ -269,23 +278,6 @@ void eTeam::UpdateAppearance()
         name = tOutput("$team_empty");
         r = g = b = 7;
     }
-
-    /* z-man: no longer required
-    // make the oldest player spawn in front
-    if ( oldest )
-    {
-        int max = players.Len()-1;
-        int real = oldest->teamListID;
-        if ( real < max )
-        {
-            players(max)->teamListID = real;
-            oldest->teamListID = max;
-
-            players(real) = players(max);
-            players(max) = oldest;
-        }
-    }
-    */
 
     if ( nSERVER == sn_GetNetState() )
         RequestSync();
@@ -424,6 +416,65 @@ void eTeam::AddScore(int points,
     RequestSync(true);
 
     se_SaveToScoreFile(message);
+}
+
+// *******************************************************************************
+// *
+// *	ResetScoreDifferences
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+void eTeam::ResetScoreDifferences( void )
+{
+    for ( int i = teams.Len()-1; i>=0; --i )
+    {
+        eTeam* t = teams(i);
+        if ( t->IsHuman() )
+            t->lastScore_ = t->score;
+    }
+}
+
+// *******************************************************************************
+// *
+// *	LogScoreDifferences
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+void eTeam::LogScoreDifferences( void )
+{
+    for ( int i = teams.Len()-1; i>=0; --i )
+    {
+        eTeam* t = teams(i);
+        t->LogScoreDifference();
+    }
+}
+
+// *******************************************************************************
+// *
+// *	LogScoreDifference
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+void eTeam::LogScoreDifference( void )
+{
+    if ( lastScore_ > IMPOSSIBLY_LOW_SCORE && IsHuman() )
+    {
+        tString ret;
+        int scoreDifference = score - lastScore_;
+        lastScore_ = IMPOSSIBLY_LOW_SCORE;
+        ret << "ROUND_SCORE_TEAM " << scoreDifference << " " << ePlayerNetID::FilterName( Name() );
+        ret << "\n";
+        se_SaveToLadderLog( ret );
+    }
 }
 
 void eTeam::SwapTeamsNo(int a,int b){
@@ -925,6 +976,10 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
     if ( !player->IsHuman() )
         return true;
 
+    // suspended players cannot join
+    if ( player->GetSuspended() > 0 )
+        return false;
+
     // check for invitations. Not with those shoes!
     if ( IsLocked() && !IsInvited( player ) )
     {
@@ -1038,6 +1093,20 @@ ePlayerNetID*	eTeam::OldestHumanPlayer(		) const
         if ( p->IsHuman() && ( !ret || ret->timeJoinedTeam > p->timeJoinedTeam || se_centerPlayerIsBoss ) )
         {
             ret = p;
+        }
+    }
+
+    if ( !ret )
+    {
+        // nobody? Darn. Look for a player that has this team set as next team.
+        
+        for (int i= se_PlayerNetIDs.Len()-1; i>=0; i--)
+        {   
+            ePlayerNetID* p = se_PlayerNetIDs(i);
+            if ( p->NextTeam() == this && p->IsHuman() && ( !ret || ret->timeJoinedTeam > p->timeJoinedTeam || se_centerPlayerIsBoss ) )
+            {
+                ret = p;
+            }
         }
     }
 
@@ -1213,6 +1282,7 @@ eTeam::eTeam()
         :colorID(-1),listID(-1)
 {
     score = 0;
+    lastScore_=IMPOSSIBLY_LOW_SCORE;
     locked_ = false;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;
@@ -1227,6 +1297,7 @@ eTeam::eTeam(nMessage &m)
         colorID(-1),listID(-1)
 {
     score = 0;
+    lastScore_=IMPOSSIBLY_LOW_SCORE;
     locked_ = false;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;

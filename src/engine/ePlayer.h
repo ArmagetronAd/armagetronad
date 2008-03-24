@@ -145,6 +145,7 @@ private:
     int teamListID;                      // ID in the list of the team
 
     bool							silenced_;		// flag indicating whether the player has been silenced
+    int                             suspended_;     //! number of rounds the player is currently suspended from playing
 
     nTimeAbsolute					timeJoinedTeam; // the time the player joined the team he is in now
     tCONTROLLED_PTR(eTeam)			nextTeam;		// the team we're in ( logically )
@@ -207,6 +208,8 @@ public:
 
     bool loginWanted;        //!< flag indicating whether this player currently wants to log on
 
+    bool renameAllowed_;     //!< specifies if the player is allowed to rename or not, does not know about votes.
+
     nSpamProtection chatSpam_;
 
     ePlayerNetID(int p=-1);
@@ -226,8 +229,8 @@ public:
     bool StealthMode() const { return stealth_; }
 
     // team management
-    bool TeamChangeAllowed() const; //!< is this player allowed to change teams?
-    void TeamChangeAllowed(bool allowed) {allowTeamChange_ = allowed;} //!< set if this player should always be allowed to change teams
+    bool TeamChangeAllowed( bool informPlayer = false ) const; //!< is this player allowed to change teams?
+    void SetTeamChangeAllowed(bool allowed) {allowTeamChange_ = allowed;} //!< set if this player should always be allowed to change teams
     eTeam* NextTeam()    const { return nextTeam; }				// return the team I will be next round
     eTeam* CurrentTeam() const { return currentTeam; }		// return the team I am in
     int  TeamListID() const { return teamListID; }		// return my position in the team
@@ -266,6 +269,8 @@ public:
 
     void Greet();
 
+    // suspend the player from playing, forcing him to spectate
+    void Suspend( int rounds = 5 );
 #ifdef KRAWALL_SERVER
     void Authenticate( tString const & authName, 
                        tAccessLevel accessLevel = tAccessLevel_Authenticated,
@@ -282,7 +287,7 @@ public:
     void SetSilenced( bool silenced ) { silenced_ = silenced; }
     bool& AccessSilenced( void ) { return silenced_; }
 
-    eVoter * GetVoter(){return voter_;}     // returns our voter
+    eVoter * GetVoter() const {return voter_;}     // returns our voter
     void CreateVoter();						// create our voter or find it
     static void SilenceMenu();				// menu where you can silence players
     static void PoliceMenu();				// menu where you can silence and kick players
@@ -342,24 +347,29 @@ public:
     void BeNotLoggedIn() { SetAccessLevel( tAccessLevel_Program ); }
     tAccessLevel GetLastAccessLevel() const { return lastAccessLevel; }
 
-    void UpdateName();                                           //! update the player name from the client's wishes
-    static void FilterName( tString const & in, tString & out ); //! filters a name (removes unprintables, color codes and spaces)
-    static tString FilterName( tString const & in );             //! filters a name (removes unprintables, color codes and spaces)
-
     void DropFlag();
 
+    static ePlayerNetID * FindPlayerByName( tString const & name, ePlayerNetID * requester = 0 ); //!< finds a player by name using lax name matching. Reports errors to the console or to the requesting player.
+
+    void UpdateName();                                           //!< update the player name from either the client's wishes, either the admin's wishes.
+    static void FilterName( tString const & in, tString & out ); //!< filters a name (removes unprintables, color codes and spaces)
+    static tString FilterName( tString const & in );             //!< filters a name (removes unprintables, color codes and spaces)
+    bool IsAllowedToRename ( void );                             //!< tells if the user can rename or not, takes care about everything
+    void AllowRename( bool allow );                              //!< Allows a player to rename (or not)
+
 private:
-    tColoredString  nameFromClient_;        //! this player's name as the client wants it to be. Avoid using it when possilbe.
-    tColoredString  nameFromServer_;        //! this player's name as the server wants it to be. Avoid using it when possilbe.
-    tColoredString  coloredName_;           //! this player's name, cleared by the server. Use this for onscreen screen display.
-    tString         name_;                  //! this player's name without colors.
-    tString         userName_;              //! this player's name, cleared for system logs. Use for writing to files or comparing with admin input.
+    tColoredString  nameFromClient_;        //!< this player's name as the client wants it to be. Avoid using it when possilbe.
+    tColoredString  nameFromServer_;        //!< this player's name as the server wants it to be. Avoid using it when possilbe.
+    tColoredString  nameFromAdmin_;         //!< this player's name as the admin wants it to be. Avoid using it when possilbe.
+    tColoredString  coloredName_;           //!< this player's name, cleared by the server. Use this for onscreen screen display.
+    tString         name_;                  //!< this player's name without colors.
+    tString         userName_;              //!< this player's name, cleared for system logs. Use for writing to files or comparing with admin input.
 
 #ifdef KRAWALL_SERVER
-    tString         rawAuthenticatedName_;  //! the raw authenticated name in user@authority form.
+    tString         rawAuthenticatedName_;  //!< the raw authenticated name in user@authority form.
 #endif
 
-    REAL            wait_;                  //! time in seconds WaitToLeaveChat() will wait for this player
+    REAL            wait_;                  //!< time in seconds WaitToLeaveChat() will wait for this player
 
     void			MyInitAfterCreation();
 
@@ -391,10 +401,19 @@ public:
 
     ePlayerNetID & SetName( tString const & name ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
     ePlayerNetID & SetName( char    const * name ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
+    ePlayerNetID & SetName( tString const & name , bool force ); //!< Sets this player's name. Sets processed names (colored, username, nameFromCLient) as well.
+    ePlayerNetID & ForceName( tString const & name ); //!< Forces this player's name. Forces processed names (colored, username, nameFromCLient) as well.    
+
     inline ePlayerNetID & SetUserName( tString const & userName );  //!< Sets this player's name, cleared for system logs. Use for writing to files or comparing with admin input. The other names stay unaffected.
 private:
     inline ePlayerNetID & SetNameFromClient( tColoredString const & nameFromClient );   //!< Sets this player's name as the client wants it to be. Avoid using it when possilbe.
     inline ePlayerNetID & SetColoredName( tColoredString const & coloredName ); //!< Sets this player's name, cleared by the server. Use this for onscreen screen display.
+
+    //! accesses the suspension count
+    int & AccessSuspended();
+
+    //! returns the suspension count
+    int GetSuspended() const;
 };
 
 extern tList<ePlayerNetID> se_PlayerNetIDs;

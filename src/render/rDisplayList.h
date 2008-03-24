@@ -50,6 +50,11 @@ void example()
         // + rendering code
     }
 }
+
+// Things we have found to be problematic in certain OpenGL
+// implementations:
+// - Redundant color settings (glColor3f(1,1,1);glColor3f(1,1,1);)
+// - Infinite points (glVertex4f(1,1,0,0);)
 #endif
 
 //! display list wrapper
@@ -64,6 +69,15 @@ public:
     {
 #ifndef DEDICATED
         return list_ && !inhibit_;
+#else
+        return false;
+#endif
+    }
+
+    bool IsInhibited() const
+    {
+#ifndef DEDICATED
+        return inhibit_;
 #else
         return false;
 #endif
@@ -84,6 +98,8 @@ public:
     //! clears all display lists
     static void ClearAll();
 
+    //! cancels recording of the current display list
+    static void Cancel();
 protected:
     //! calls the display list, returns true if there was a list to call
     virtual bool OnCall();
@@ -114,10 +130,14 @@ private:
 //! create an object of this type to fill a display list while you render
 class rDisplayListFiller
 {
+    friend class rDisplayList;
 public:
     //! constructor, automatically starting to fill teh list
     explicit rDisplayListFiller( rDisplayList & list );
     ~rDisplayListFiller();
+
+    //! starts filling the display list (done automatically on construction)
+    void Start();
     
     //! stops filling the display list (done automatically on destruction)
     void Stop();

@@ -121,9 +121,9 @@ void sr_Read_stdin(){
                     if (key == 13 || currentIn>=MAXLINE-1){
                         line_in[currentIn]='\n';
                         line_in[currentIn+1]='\0';
-                        std::stringstream s(line_in);
+                        std::istringstream s(line_in);
                         WriteConsole(stdouthandle, "\n", 1, &written, NULL);
-                        tConfItemBase::LoadAll(s);
+                        tConfItemBase::LoadAll(s, true);
                         currentIn=0;
                     }
                     else
@@ -142,8 +142,8 @@ void sr_Read_stdin(){
         if (line_in[currentIn]=='\n' || currentIn>=MAXLINE-1)
         {
             line_in[currentIn+1]='\0';
-            std::stringstream s(line_in);
-            tConfItemBase::LoadAll(s);
+            std::istringstream s(line_in);
+            tConfItemBase::LoadAll(s, true);
             currentIn=0;
         }
         else

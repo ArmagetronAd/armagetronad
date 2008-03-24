@@ -53,6 +53,7 @@ class glRenderer: public rRenderer{
 
         if ( lastPrimitive != p )
         {
+            sr_CheckGLError();
             glBegin(p);
         }
 

@@ -579,6 +579,8 @@ void gServerMenu::Render(REAL y,
 #endif /* DEDICATED */
 static bool sg_filterServernameColorStrings = true;
 static tSettingItem< bool > removeServerNameColors("FILTER_COLOR_SERVER_NAMES", sg_filterServernameColorStrings);
+static bool sg_filterServernameDarkColorStrings = true;
+static tSettingItem< bool > removeServerNameDarkColors("FILTER_DARK_COLOR_SERVER_NAMES", sg_filterServernameDarkColorStrings);
 
 void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
 {
@@ -650,7 +652,9 @@ void gServerMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
         }
 
         if ( sg_filterServernameColorStrings )
-            name << tColoredString::RemoveColors( server->GetName() );
+            name << tColoredString::RemoveColors( server->GetName(), false );
+	else if ( sg_filterServernameDarkColorStrings )
+            name << tColoredString::RemoveColors( server->GetName(), true );
         else
         {
             name << server->GetName();

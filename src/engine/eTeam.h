@@ -41,6 +41,7 @@ protected:							// protected attributes
     int colorID;					// ID of the team predefined color
     int listID; 					// ID in the list of all teams
     int score;						// score the team has accumulated
+    int lastScore_;                 //!< score from the beginning of the round
 
     int numHumans;					// number of human players on the team
     int numAIs;						// number of AI players on the team
@@ -125,6 +126,10 @@ public:												// public methods
     void 			AddScore		( int points,
                         const tOutput& reasonwin,
                         const tOutput& reasonlose );
+
+    static void ResetScoreDifferences(); //<! Resets the last stored score so ScoreDifferences takes this as a reference time
+    static void LogScoreDifferences();   //<! Logs accumulated scores of all players since the last call to ResetScoreDifferences() to ladderlog.txt
+    void LogScoreDifference();           //<! Logs accumulated scores since the last call to ResetScoreDifferences() to ladderlog.txt
 
     // player inquiry
     int	 			NumPlayers		(		) const {

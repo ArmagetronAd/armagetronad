@@ -275,6 +275,11 @@ public:
             , watcher_( setting_, group, min, max )
     {
     }
+
+    void Set( T const & value )
+    {
+        this->setting_.Set( value );
+    }
 private:
     nSettingItem< T > setting_;
     nConfItemVersionWatcher watcher_;
@@ -359,6 +364,8 @@ bool nIConfItemWatcher::Writable( void ) const
 {
     return this->DoWritable();
 }
+
+tOutput sn_GetClientVersionString(int version);
 
 #endif
 

@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rFont.h"
 #include "rScreen.h"
 #include "tConfiguration.h"
+#include "tColor.h"
 #include <ctype.h>
 
 #ifndef DEDICATED
@@ -164,17 +165,17 @@ void rFont::Render(unsigned char c,REAL left,REAL top,REAL right,REAL bot){
             select->Select(true);
             sr_lastSelected = select;
         }
-
+        
         BeginQuads();
 
-        glTexCoord2f(tleft,ttop);
-        glVertex2f(   left, top);
+        glTexCoord2f(tright,tbot);
+        glVertex2f(   right, bot);
 
         glTexCoord2f(tright,ttop);
         glVertex2f(   right ,top);
 
-        glTexCoord2f(tright,tbot);
-        glVertex2f(   right, bot);
+        glTexCoord2f(tleft,ttop);
+        glVertex2f(   left, top);
 
         glTexCoord2f(tleft,tbot);
         glVertex2f(   left, bot);
@@ -256,13 +257,6 @@ rTextField::~rTextField(){
 #endif
 }
 
-// minimal tolerated values of font color before a white background is rendered
-static REAL sr_minR = .5, sr_minG = .5, sr_minB =.5, sr_minTotal = .7;
-tSettingItem< REAL > sr_minRConf( "FONT_MIN_R", sr_minR );
-tSettingItem< REAL > sr_minGConf( "FONT_MIN_G", sr_minG );
-tSettingItem< REAL > sr_minBConf( "FONT_MIN_B", sr_minB );
-tSettingItem< REAL > sr_minTotalConf( "FONT_MIN_TOTAL", sr_minTotal );
-
 void rTextField::FlushLine(int len,bool newline){
 #ifndef DEDICATED
     // reload textures if alpha blending changed
@@ -286,9 +280,8 @@ void rTextField::FlushLine(int len,bool newline){
 
     if (sr_glOut)
     {
-               
         // render bright background
-        if ( r < sr_minR && g < sr_minG && b < sr_minG || r+g+b < sr_minTotal )
+        if ( color_.IsDark() )
         {
             RenderEnd(true);
             glDisable(GL_TEXTURE_2D);
@@ -302,13 +295,14 @@ void rTextField::FlushLine(int len,bool newline){
                 REAL b=t - cheight;
 
                 BeginQuads();
-                glVertex2f(   l, t);
 
-                glVertex2f(   r ,t);
+                glVertex2f(   l, b);
 
                 glVertex2f(   r, b);
 
-                glVertex2f(   l, b);
+                glVertex2f(   r ,t);
+
+                glVertex2f(   l, t);
             }
             else
             {
@@ -321,9 +315,12 @@ void rTextField::FlushLine(int len,bool newline){
         }
 
 
-        glColor4f(r * blendColor_.r_,g * blendColor_.g_,b * blendColor_.b_,a * blendColor_.a_);
-        sr_lastSelected = 0;
-
+        if ( len > 0 )
+        {
+            RenderEnd(true);
+            glColor4f(r * blendColor_.r_,g * blendColor_.g_,b * blendColor_.b_,a * blendColor_.a_);
+            sr_lastSelected = 0;
+        }
         for (i=0;i<=len;i++){
             REAL l=left+realx*cwidth;
             REAL t=top-y*cheight;
@@ -413,29 +410,6 @@ rTextField & rTextField::operator<<(unsigned char c){
 }
 */
 
-#ifndef DEDICATED
-static REAL CTR(int x){
-    return x/255.0;
-}
-#endif
-
-static char hex_array[]="0123456789abcdef";
-
-char int_to_hex(int i){
-    if (i<0 || i >15)
-        return 'Q';
-    else
-        return hex_array[i];
-}
-
-int hex_to_int(char c){
-    int ret=0;
-    for (int i=15;i>=0;i--)
-        if (hex_array[i]==c)
-            ret=i;
-    return ret;
-}
-
 rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
 {
 #ifndef DEDICATED
@@ -501,9 +475,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
             {
                 // found! extract colors
                 cursorPos-=8;
-                color.r_=CTR(hex_to_int(c[2])*16+hex_to_int(c[3]));
-                color.g_=CTR(hex_to_int(c[4])*16+hex_to_int(c[5]));
-                color.b_=CTR(hex_to_int(c[6])*16+hex_to_int(c[7]));
+		color = tColor( c );
                 use = true;
             }
 

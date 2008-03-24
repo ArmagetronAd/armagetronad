@@ -143,6 +143,7 @@ private:
     gNetPlayerWall *                wallsWithDisplayList_;          //!< linked list of all walls with display list    
     rDisplayList                    displayList_;                   //!< combined display list
     REAL                            wallsWithDisplayListMinDistance_; //!< minimal distance of the walls with display list
+    int                             wallsInDisplayList_;            //!< number of walls in the current display list
 };
 #endif
 
@@ -152,7 +153,7 @@ class gCycle: public gCycleMovement
     friend class gPlayerWall;
     friend class gNetPlayerWall;
     friend class gDestination;
-    friend class gCycleRenderer;
+    friend class gCycleWallRenderer;
 
     eSoundPlayer *engine;
     eSoundPlayer *turning;

@@ -2568,6 +2568,30 @@ gCycleMovement::~gCycleMovement( void )
     maxSpaceHit_ = NULL;
 }
 
+void gCycleMovement::RequestSync(bool ack)
+{
+    // no more syncs when you're dead
+    if ( !Alive() )
+    { 
+       return;
+    }
+
+    // delegate
+    eNetGameObject::RequestSync( ack );
+}
+
+void gCycleMovement::RequestSync(int user,bool ack)
+{
+    // no more syncs when you're dead
+    if ( !Alive() )
+    {
+        return;
+    }
+
+    // delegate
+    eNetGameObject::RequestSync( user, ack );
+}
+
 void gCycleMovement::OnRemoveFromGame()
 {
     delete maxSpaceHit_;

@@ -228,6 +228,7 @@ private:
     virtual void OnVanish();                           //!< called when the zone vanishes
     virtual void OnConquest();                         //!< called when the zone gets conquered
     virtual void CheckSurvivor();                      //!< checks for the only surviving zone
+    virtual void OnRoundBegin();                       //!< called on the beginning of the round
     virtual void OnRoundEnd();                         //!< called on the end of the round
 
     void ZoneWasHeld();                                //!< call when the zone was held as long as possible with the set game rules
@@ -248,6 +249,8 @@ private:
     REAL lastEnemyContact_;                 //!< last time an enemy player was in the zone
 
     REAL teamDistance_;                     //!< distance to the closest member of the owning team
+
+    bool touchy_;                           //!< flag set when the zone is "touchy", which makes it get conquered on the slightest enemy touch
 
     //! possible states
     enum State

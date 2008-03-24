@@ -167,15 +167,15 @@ enum tAccessLevel
     tAccessLevel_9 = 9,            // reserved
     tAccessLevel_10 = 10,          // reserved
     tAccessLevel_11 = 11,          // reserved
-    tAccessLevel_Local      = 12,  // any user with a local account
+    tAccessLevel_Local      = 12,  // user with a local account
     tAccessLevel_13 = 13,          // reserved
     tAccessLevel_14 = 14,          // reserved
-    tAccessLevel_Authenticated = 15,// any user with a an account anywhere
-    tAccessLevel_15 = 15,          // reserved
-    tAccessLevel_16 = 16,          // reserved
-    tAccessLevel_17 = 17,          // reserved
+    tAccessLevel_Remote = 15,      // user with remote account
+    tAccessLevel_DefaultAuthenticated = 15,     // default access level for authenticated users
+    tAccessLevel_FallenFromGrace = 16,          // authenticated, but not liked
+    tAccessLevel_Shunned = 17,          // authenticated, but disliked
     tAccessLevel_18 = 18,          // reserved
-    tAccessLevel_19 = 19,          // reserved
+    tAccessLevel_Authenticated = 19,// any authenticated player
     tAccessLevel_Program = 20,     // a regular player
     tAccessLevel_21 = 21,          // reserved
     tAccessLevel_22 = 22,          // reserved
@@ -244,10 +244,22 @@ public:
     static int EatWhitespace(std::istream &s); // eat whitespace from stream; return: first non-whitespace char
 
     static void SaveAll(std::ostream &s);
-    static void LoadAll(std::istream &s);  //! loads configuration from file
+    static void LoadAll(std::istream &s, bool record = false );  //! loads configuration from stream
+    static void LoadAll(std::ifstream &s, bool record = false );  //! loads configuration from file
     static void LoadLine(std::istream &s); //! loads one configuration line
     static bool LoadPlayback( bool print = false ); //! loads configuration from playback
     static void DocAll(std::ostream &s);
+
+    // helper functions for files (use these, they manage recording and playback properly)
+    enum SearchPath
+    {
+        Config = 1,
+        Var    = 2,
+        All    = 3
+    };
+
+    static bool OpenFile( std::ifstream & s, tString const & filename, SearchPath path ); //! opens a file stream for configuration reading
+    static void ReadFile( std::ifstream & s ); //! loads configuration from a file
 
     virtual void ReadVal(std::istream &s)=0;
     virtual void WriteVal(std::ostream &s)=0;

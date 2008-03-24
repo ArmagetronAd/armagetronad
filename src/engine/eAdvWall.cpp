@@ -152,7 +152,6 @@ void eWallRim::RenderAll( eCamera * camera )
         ( se_RimWrapY ? se_RimWallWrap : se_RimWallNoWrap).Select();
     }
 
-    BeginQuads();
     for(int i=se_rimWalls.Len()-1;i>=0;i--){
         se_rimWalls(i)->RenderReal( rDisplayList::IsRecording() ? 0 : camera );
     }

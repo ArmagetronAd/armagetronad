@@ -109,7 +109,7 @@ public:
     void StartNewMatchNow();
 };
 
-void update_settings();
+void update_settings( bool const * goon = 0 );
 
 void ConnectToServer(nServerInfoBase *server);
 

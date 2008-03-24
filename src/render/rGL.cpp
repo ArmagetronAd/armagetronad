@@ -35,11 +35,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifdef AA_GL_ERROR_CHECKING
 void sr_CheckGLError()
 {
-    GLenum error = glGetError();
-    if ( error != GL_NO_ERROR )
+    GLenum error;
+    while ( (error = glGetError()) != GL_NO_ERROR )
     {
         std::stringstream s;
-        s << "GL error 0X" << std::hex << error << "\n";
+        s << "GL error 0X" << std::hex << error << " (" << (char const *)gluErrorString(error) << ")\n";
         con << s.str();
 
         // catch a breakpoint

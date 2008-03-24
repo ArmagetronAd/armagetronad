@@ -66,6 +66,7 @@ class rModel
     tArray<Vec3> normals;
     tArray<rModelFace> modelFaces;
     tArray<rModelFace> modelTexFaces;
+    bool modelTexFacesCoherent; // if modelFaces and modelTexFaces are identical
     void Load(std::istream &s,const char *fileName);
 public:
     rModel(const char *fileName,const char *fileName_alt="");

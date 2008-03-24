@@ -118,39 +118,13 @@ static nSettingItem<tString> conf_mapuri("MAP_URI",mapuri);
 
 #define DEFAULT_MAP "Anonymous/polygon/regular/square-1.0.1.aamap.xml"
 static tString mapfile(DEFAULT_MAP);
-/*
-static void sg_ParseMap ( gParser * aParser, tString map_file );
-static void change_mapfile(std::istream &s)
-{
-    // read new MAP_FILE value
-    tString new_mapfile;
-    new_mapfile.ReadLine(s, true);
 
-    if (new_mapfile == mapfile)
-        return;
+static bool sg_waitForExternalScript = false;
+static tSettingItem< bool > sg_waitForExternalScriptConf( "WAIT_FOR_EXTERNAL_SCRIPT", sg_waitForExternalScript );
 
-    // verify the map loads
-    try {
-        sg_ParseMap(aParser, new_mapfile);
-    } catch (tGenericException &e) {
-        sn_ConsoleOut( e.GetName(), e.GetDescription(), 120000 );
-        sg_ParseMap(aParser);	// is this necessary?
-        return;
-    }
+static REAL sg_waitForExternalScriptTimeout = 3;
+static tSettingItem<REAL> sg_waitForExternalScriptTimeoutConf( "WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT", sg_waitForExternalScriptTimeout );
 
-    if (printChange)
-    {
-        tOutput o;
-        o.SetTemplateParameter(1, "MAP_FILE");
-        o.SetTemplateParameter(2, mapfile);
-        o.SetTemplateParameter(3, new_mapfile);
-        o << "$config_value_changed";
-        con << o;
-    }
-
-    mapfile = new_mapfile;
-}
-*/
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
 // bool globalingame=false;
@@ -1377,7 +1351,7 @@ static void sg_copySettings()
     gArena::SetSizeMultiplier 	( exponent( sg_currentSettings->sizeFactor ) );
 }
 
-void update_settings()
+void update_settings( bool const * goon )
 {
     if (sn_GetNetState()!=nCLIENT)
     {
@@ -1387,7 +1361,7 @@ void update_settings()
             bool restarted = false;
 
             REAL timeout = tSysTimeFloat() + 3.0f;
-            while ( sg_NumHumans() <= 0 && sg_NumUsers() > 0 )
+            while ( sg_NumHumans() <= 0 && sg_NumUsers() > 0 && ( !goon || *goon ) )
             {
                 if ( !restarted && bool(sg_currentGame) )
                 {
@@ -1404,11 +1378,11 @@ void update_settings()
                     sn_ConsoleOut(o2);
 
                     timeout = tSysTimeFloat() + 10.0f;
-
-                    // do tasks
-                    st_DoToDo();
-                    nAuthentication::OnBreak();
                 }
+
+                // do tasks
+                st_DoToDo();
+                nAuthentication::OnBreak();
 
                 // kick spectators and chatbots
                 nMachine::KickSpectators();
@@ -2045,6 +2019,12 @@ bool ConnectToServerCore(nServerInfoBase *server)
 
     switch (error)
     {
+    case nABORT:
+        return false;
+#ifndef DEDICATED
+        se_SoundUnlock();
+#endif
+        break;
     case nOK:
         break;
     case nTIMEOUT:
@@ -2321,7 +2301,7 @@ void sg_HostGameMenu(){
 class gNetIdler: public rSysDep::rNetIdler
 {
 public:
-    virtual bool Wait() //!< wait for something to do, return true fi there is work
+    virtual bool Wait() //!< wait for something to do, return true if there is work
     {
         return sn_BasicNetworkSystem.Select( 0.1 );
     }
@@ -2329,7 +2309,6 @@ public:
     {
         tAdvanceFrame();
         sg_Receive();
-        tAdvanceFrame();
         sn_SendPlanned();
     }
 };
@@ -2515,24 +2494,7 @@ void MainMenu(bool ingame){
     uMenuItemExit exx(&MainMenu,extitle,
                       exhelp);
 
-    uMenuItemFunction * auth = 0;
-    static nVersionFeature authentication( 15 );
-    if ( sn_GetNetState() == nCLIENT && ingame && authentication.Supported(0) )
-    {
-        auth =tNEW(uMenuItemFunction)(&MainMenu,
-                                      "$player_authenticate_text",
-                                      "$player_authenticate_help",
-                                      &PlayerLogIn );
-    }
-
-    uMenuItemFunction abb(&MainMenu,
-                          "$main_menu_about_text",
-                          "$main_menu_about_help",
-                          &sg_DisplayVersionInfo);
-
-
     uMenuItemFunction *return_to_main=NULL;
-
     if (ingame){
         if (sn_GetNetState()==nSTANDALONE)
             return_to_main=new uMenuItemFunction
@@ -2552,6 +2514,20 @@ void MainMenu(bool ingame){
                             &ret_to_MainMenu);
     }
 
+    uMenuItemFunction * auth = 0;
+    static nVersionFeature authentication( 15 );
+    if ( sn_GetNetState() == nCLIENT && ingame && authentication.Supported(0) )
+    {
+        auth =tNEW(uMenuItemFunction)(&MainMenu,
+                                      "$player_authenticate_text",
+                                      "$player_authenticate_help",
+                                      &PlayerLogIn );
+    }
+
+    uMenuItemFunction abb(&MainMenu,
+                          "$main_menu_about_text",
+                          "$main_menu_about_help",
+                          &sg_DisplayVersionInfo);
 
 
     uMenu Settings("$system_settings_menu_text");
@@ -2821,7 +2797,7 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
       }
     */
 
-    con << "Loading map " << mapfile << "...\n";
+    con << tOutput( "$map_file_loading", mapfile );
 #endif
     mapFD = tResourceManager::openResource(mapuri, mapfile);
 
@@ -2835,8 +2811,6 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
 #ifndef DEDICATED
         errorMessage << "\nLog:\n" << consoleLog.message_;
 #endif
-
-        con << errorMessage;
 
         tOutput errorTitle("$map_file_load_failure_title");
 
@@ -2868,6 +2842,7 @@ void gGame::Verify()
     // test map and load map settings
     sg_ParseMap( aParser );
     init_game_grid(grid, aParser);
+    Arena.LeastDangerousSpawnPoint();
     exit_game_grid(grid);
 }
 
@@ -3078,9 +3053,6 @@ void gGame::StateUpdate(){
 
         // unsigned short int mes1 = 1, mes2 = 1, mes3 = 1, mes4 = 1, mes5 = 1;
 
-        // now would be a good time to tend for pending tasks
-        nAuthentication::OnBreak();
-
         switch(state){
         case GS_DELETE_GRID:
             // sr_con.autoDisplayAtNewline=true;
@@ -3106,7 +3078,7 @@ void gGame::StateUpdate(){
             // transfer game settings
             if ( nCLIENT != sn_GetNetState() )
             {
-                update_settings();
+                update_settings( &goon );
                 ePlayerNetID::RemoveChatbots();
             }
 
@@ -3125,6 +3097,28 @@ void gGame::StateUpdate(){
 
             // delete game objects again (in case new ones were spawned)
             exit_game_objects(grid);
+
+            // if the map has changed on the server side, verify it
+            static tString lastMapfile( DEFAULT_MAP );
+            if ( nCLIENT != sn_GetNetState() && mapfile != lastMapfile )
+            {
+                try
+                {
+                    Verify();
+                }
+                catch (tException const & e)
+                {
+                    // clean up
+                    exit_game_grid( grid );
+
+                    // inform user of generic errors
+                    tConsole::Message( e.GetName(), e.GetDescription(), 120000 );
+
+                    // revert map
+                    con << tOutput( "$map_file_reverting", lastMapfile );
+                    conf_mapfile.Set( lastMapfile );
+                }
+            }
 
             nConfItemBase::s_SendConfig(false);
 
@@ -3167,6 +3161,19 @@ void gGame::StateUpdate(){
             init_game_objects(grid);
 
             ePlayerNetID::RankingLadderLog();
+
+            // do round begin stuff
+            {
+                const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+                for (int i=gameObjects.Len()-1;i>=0;i--)
+                {
+                    eGameObject * e = gameObjects(i);
+                    if ( e )
+                    {
+                        e->OnRoundBegin();
+                    }
+                }
+            }
 
             // do the first analysis of the round, now is the time to get it used to the number of teams
             Analysis( -1000 );
@@ -3283,7 +3290,7 @@ void gGame::StateUpdate(){
             sr_con.autoDisplayAtNewline=false;
 #ifdef DEDICATED
             {
-                // safe current players in a file
+                // save current players into a file
                 cp();
 
                 if ( sg_NumUsers() <= 0 )
@@ -3291,20 +3298,34 @@ void gGame::StateUpdate(){
 
                 Analysis(0);
 
+                // wait for external script to end its work if needed
+                REAL timeout = tSysTimeFloat() + sg_waitForExternalScriptTimeout;
+                if ( sg_waitForExternalScript )
+                {
+                    se_SaveToLadderLog("WAIT_FOR_EXTERNAL_SCRIPT\n");
+                    // REAL waitingSince = tSysTimeFloat();
+                }
+                while ( sg_waitForExternalScript && timeout > tSysTimeFloat())
+                {
+                    sr_Read_stdin();
+
+                    // wait for network messages
+                    sn_BasicNetworkSystem.Select( 0.1f );
+                    gGame::NetSyncIdle();
+                }
+
                 {
                     std::ifstream s;
 
                     // load contents of everytime.cfg for real
-                    if ( tDirectories::Config().Open(s, "everytime.cfg" ) )
-                        tConfItemBase::LoadAll(s);
+                    static const tString everytime("everytime.cfg");
+                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Config ) )
+                        tConfItemBase::ReadFile(s);
 
                     s.close();
 
-                    if ( tDirectories::Var().Open(s, "everytime.cfg" ) )
-                        tConfItemBase::LoadAll(s);
-
-                    // load contents of everytime.cfg from playback
-                    tConfItemBase::LoadPlayback();
+                    if ( tConfItemBase::OpenFile(s, everytime, tConfItemBase::Var ) )
+                        tConfItemBase::ReadFile(s);
                 }
             }
 #endif
@@ -3337,6 +3358,10 @@ void gGame::StateUpdate(){
         default:
             break;
         }
+
+        // now would be a good time to tend for pending tasks
+        nAuthentication::OnBreak();
+
         if (sn_GetNetState()==nSERVER){
             NetSyncIdle();
             RequestSync();
@@ -4151,9 +4176,13 @@ bool gGame::GameLoop(bool input){
 #endif
 
     if ( netstate != sn_GetNetState() )
-{
+    {
         return false;
     }
+
+    // do basic network receiving and sending. This pushes out all input the player makes as fast as possible.
+    sg_Receive();
+    sn_SendPlanned();
 
     bool synced = se_mainGameTimer && ( se_mainGameTimer->IsSynced() || ( stateNext >= GS_DELETE_OBJECTS || stateNext <= GS_CREATE_GRID ) );
 
@@ -4246,6 +4275,10 @@ bool gGame::GameLoop(bool input){
                 se_PauseGameTimer( gtime < sg_lastChatBreakTime && ePlayerNetID::WaitToLeaveChat() );
         }
 
+        // send game object updates
+        nNetObject::SyncAll();
+        sn_SendPlanned();
+
         if ( gtime<=-PREPARE_TIME+.5 || !goon || !synced )
         {
 #ifndef DEDICATED
@@ -4281,6 +4314,10 @@ bool gGame::GameLoop(bool input){
         // synced_ = true;
 
 #ifndef DEDICATED
+        // send game object updates
+        nNetObject::SyncAll();
+        sn_SendPlanned();
+
         if (input)
         {
             if (sr_glOut)
@@ -4426,13 +4463,7 @@ void sg_EnterGameCore( nNetState enter_state ){
         // do the regular simulation
         tAdvanceFrame();
 
-        sg_Receive();
-
         goon=GameLoop();
-
-        nNetObject::SyncAll();
-        tAdvanceFrame();
-        sn_SendPlanned();
 
         st_DoToDo();
     }
@@ -4519,6 +4550,18 @@ void Activate(bool act){
 #ifdef DEBUG
     return;
 #endif
+
+// another fullscreen fix ammendmend: avoid the short screen flicker
+// by ignoring deactivation events in fullscreen mode completely.
+#ifndef WIN32
+#ifndef MACOSX
+    if ( currentScreensetting.fullscreen && !act )
+    {
+        return;
+    }
+#endif
+#endif
+
     sr_Activate( act );
 
     se_SoundPause(!act);

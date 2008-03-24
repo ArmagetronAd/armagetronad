@@ -200,6 +200,8 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
         if (sr_upperSky && !sg_MoviePack()) h=upper_height;
     }
 
+    BeginQuads();
+
     // NOTE: display lists on nvidia cards don't like infinite points
     if (h<9000 || !sr_infinityPlane || rDisplayList::IsRecording() ){
         TexVertex(p1.x, p1.y, 0,
@@ -401,6 +403,7 @@ void gWallRim::RenderReal(const eCamera *cam){
 
                 // render shadow
                 Color(0,0,0);
+                BeginQuads();
                 Vertex(P1.x, P1.y, 0);
                 Vertex(P2.x, P2.y, 0);
                 Vertex(P4.x, P4.y, 0);
@@ -413,6 +416,7 @@ void gWallRim::RenderReal(const eCamera *cam){
             REAL xs = vec.x*vec.x;
             REAL ys = vec.y*vec.y;
             REAL intensity = .7 + .3 * xs/(xs+ys);
+            RenderEnd( true );
             Color(intensity, intensity, intensity);
         }
 
@@ -873,7 +877,7 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
     if ( gCycleWallsDisplayListManager::CannotHaveList( dbegin, cycle_ ) ||
          this == cycle_->currentWall )
     {
-        ClearDisplayList();
+        ClearDisplayList(2);
     }
 
     if ( !displayList_.Call() )
@@ -996,7 +1000,7 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
 }
 
 
-bool upperlinecolor(REAL r,REAL g,REAL b, REAL a){
+inline bool upperlinecolor(REAL r,REAL g,REAL b, REAL a){
     if (rTextureGroups::TextureMode[rTextureGroups::TEX_WALL]<0)
         glColor4f(1,1,1,a);
     else{
@@ -1046,7 +1050,7 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
 
 
     if (hfrac>0){
-        if (upperlinecolor(r,g,b,a) && ( mode & gWallRenderMode_Lines ) ){
+        if ( ( mode & gWallRenderMode_Lines ) ){
 
             // draw additional upper line
             if ( mode == gWallRenderMode_All )
@@ -1060,8 +1064,9 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
             }
 
             BeginLines();
-
+            upperlinecolor(r,g,b,a);
             glVertex3f(p1.x,p1.y,h*hfrac);
+            upperlinecolor(r,g,b,a);
             glVertex3f(p2.x,p2.y,h*hfrac);
 
             // in the other modes, the caller is responsible for
@@ -1105,13 +1110,13 @@ void gNetPlayerWall::RenderNormal(const eCoord &p1,const eCoord &p2,REAL ta,REAL
             glColor3f(r,g,b);
             glTexCoord2f(te,hfrac);
             glVertex3f(p2.x,p2.y,extrarise);
-        }
 
-        // in the other modes, the caller is responsible for
-        // calling RenderEnd().
-        if ( mode == gWallRenderMode_All )
-        {
-            RenderEnd();
+			// in the other modes, the caller is responsible for
+			// calling RenderEnd().
+			if ( mode == gWallRenderMode_All )
+			{
+				RenderEnd();
+			}
         }
     }
 }
@@ -1304,7 +1309,7 @@ REAL gPlayerWall::LocalToGlobal( REAL a ) const
 void gNetPlayerWall::ClearDisplayList( int inhibitThis, int inhibitCycle )
 {
 #ifndef DEDICATED
-    if ( HasDisplayList() && cycle_ )
+    if ( CanHaveDisplayList() && cycle_ && inhibitCycle >= 0 )
     {
         cycle_->displayList_.Clear( inhibitCycle );
     }
@@ -1550,6 +1555,8 @@ void gNetPlayerWall::MyInitAfterCreation()
         Wall()->SetVisHeight(i,0);
 
     Wall()->Remove();
+
+    displayList_.Clear(2);
 }
 
 
@@ -1607,6 +1614,12 @@ void gNetPlayerWall::Update(REAL Tend,const eCoord &pend)
 
 void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
 {
+    // duplicate last coords entry if its dangerousness disagrees with the previous entry.
+    if ( coords_.Len() >= 2 && coords_[ coords_.Len()-2 ].IsDangerous != coords_[ coords_.Len()-1 ].IsDangerous )
+    {
+        Checkpoint();
+    }
+
     tEnd=Tend;
     end=pend;
 
@@ -2461,11 +2474,21 @@ void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
     CHECKWALL;
 
 #ifndef DEDICATED
-    ClearDisplayList();
+    ClearDisplayList(60);
 #endif
 
 #ifdef DEBUG
-    // std::cout << beg << ',' << end << '(' << BegPos() << ',' << EndPos() << ")\n";
+    /*
+    for ( int i = 0; i < coords_.Len(); ++i )
+    {
+        std::cout << "[" << coords_(i).IsDangerous << ',' << coords_(i).Pos << "]";
+    }
+
+    static int count=0;
+    ++count;
+
+    std::cout << " hole " << count << " : " << beg << ',' << end << '(' << BegPos() << ',' << EndPos() << ")\n";
+    */
 #endif
 
     // don't touch anything if the server concluded it is his business
@@ -2481,8 +2504,22 @@ void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
     // find the last index that will stay before the hole:
     int begind = IndexPos( beg );
 
+    // skip ahead if the holing would create redunant non-dangerous blocks
+    while ( begind >= 1 && !coords_[begind].IsDangerous )
+    {
+        beg = coords_[begind].Pos;
+        begind--;
+    }
+
     // find the last index in the hole:
     int endind = IndexPos( end );
+
+    // skip ahead if the holing would create redunant non-dangerous blocks
+    while ( endind < coords_.Len() - 2 && !coords_[endind].IsDangerous )
+    {
+        endind++;
+        end = coords_[endind].Pos;
+    }
 
     if ( beg < BegPos() )
     {
@@ -2569,6 +2606,16 @@ void gNetPlayerWall::BlowHole	( REAL beg, REAL end, gExplosion * holer )
     coords_(begind+1).Pos         = beg;
     coords_(begind+2).Time        = endtime;
     coords_(begind+2).Pos         = end;
+
+#ifdef DEBUG
+    /*
+    for ( int i = 0; i < coords_.Len(); ++i )
+    {
+        std::cout << "[" << coords_(i).IsDangerous << ',' << coords_(i).Pos << "]";
+    }
+    std::cout << "\n";
+    */
+#endif
 
     CHECKWALL;
 }

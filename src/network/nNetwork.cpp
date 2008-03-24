@@ -988,7 +988,7 @@ void nMessage::BroadCast(bool ack){
     if (sn_GetNetState()==nSERVER){
         for(int i=MAXCLIENTS;i>0;i--){
             if (sn_Connections[i].socket)
-                Send(i,ack);
+                Send(i,0,ack);
         }
     }
 }
@@ -997,12 +997,29 @@ void nMessage::BroadCast(bool ack){
 static nVersionFeature sn_ZeroMessageCrashfix( 1 );
 
 nMessage& nMessage::operator << (const tString &s){
-    if ( !sn_ZeroMessageCrashfix.Supported() && s.Len() <= 0 )
+    unsigned short len=s.Len();
+
+    // clamp away excess zeroes
+    while(len > 1 && s(len-2)==0)
     {
-        return this->operator<<( s + " " );
+        --len;
     }
 
-    unsigned short len=s.Len();
+    // check whether all clients support zero length strings
+    if ( !sn_ZeroMessageCrashfix.Supported() )
+    {
+        if ( len <= 0 )
+        {
+            static tString replacement("");
+            return this->operator<<( replacement );
+        }
+    }
+    else if ( len == 1 && s(0) == 0 )
+    {
+        // do away with the the trailing zero in zero length strings.
+        len = 0;
+    }
+
     Write(len);
     int i;
 
@@ -1025,9 +1042,6 @@ nMessage& nMessage::operator << ( const tOutput &o ){
     return *this << tString( static_cast< const char * >( o ) );
 }
 
-bool sn_filterColorStrings = false;
-static tConfItem<bool> cs("FILTER_COLOR_STRINGS",sn_filterColorStrings);
-
 nMessage& nMessage::ReadRaw(tString &s )
 {
     s.Clear();
@@ -1047,6 +1061,11 @@ nMessage& nMessage::ReadRaw(tString &s )
     return *this;
 }
 
+bool sn_filterColorStrings = false;
+static tConfItem<bool> sn_filterColorStringsConf("FILTER_COLOR_STRINGS",sn_filterColorStrings);
+bool sn_filterDarkColorStrings = false;
+static tConfItem<bool> sn_filterDarkColorStringsConf("FILTER_DARK_COLOR_STRINGS",sn_filterDarkColorStrings);
+
 nMessage& nMessage::operator >> (tColoredString &s )
 {
     // read the raw data
@@ -1061,7 +1080,9 @@ nMessage& nMessage::operator >> (tColoredString &s )
 
     // filter color codes away
     if ( sn_filterColorStrings )
-        s = tColoredString::RemoveColors( s );
+        s = tColoredString::RemoveColors( s, false );
+    else if ( sn_filterDarkColorStrings )
+        s = tColoredString::RemoveColors( s, true );	
 
     return *this;
 }
@@ -1719,6 +1740,8 @@ int login_handler( nMessage &m, unsigned short rate ){
         tOutput o;
         o.SetTemplateParameter(1, peers[m.SenderID()].ToString() );
         o.SetTemplateParameter(2, sn_Connections[m.SenderID()].socket->GetAddress().ToString() );
+        o.SetTemplateParameter(3, sn_GetClientVersionString(version.Max()) );
+        o.SetTemplateParameter(4, version.Max() );
         o << "$network_server_login";
         con << o;
     }
@@ -2712,6 +2735,14 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
         tAdvanceFrame(10000);
         sn_Receive();
         sn_SendPlanned();
+
+        // check for user abort
+        if ( tConsole::Idle() )
+        {
+            con << tOutput("$network_login_failed_abort");
+            sn_SetNetState(nSTANDALONE);
+            return nABORT;
+        }
     }
     if (login_failed)
     {
@@ -2820,23 +2851,23 @@ static void sn_ConsoleOut_handler(nMessage &m){
 
 static nDescriptor sn_ConsoleOut_nd(8,sn_ConsoleOut_handler,"sn_ConsoleOut");
 
-// causes the connected clients to print a message
-nMessage* sn_ConsoleOutMessage( const tOutput& o )
-{
-    tString message(o);
-    message  << "0xffffff";
+// rough maximal packet size, better send nothig bigger, or it will
+// get fragmented.
+#define MTU 1400
 
-    // truncate message to 1.4K, a safe size for all UDP packets
-    static const int maxLen = 1400;
+// causes the connected clients to print a message
+nMessage* sn_ConsoleOutMessage( tString const & message )
+{
+    // truncate message to about 1.5K, a safe size for all UDP packets
+    static const int maxLen = MTU+100;
     static bool recurse = true;
     if ( message.Len() > maxLen && recurse )
     {
         recurse = false;
         tERR_WARN( "Long console message truncated.");
-
-        message.SetLen( maxLen+1 );
-        message[maxLen]='\0';
-        recurse = false;
+        nMessage * m = sn_ConsoleOutMessage( message.SubStr( 0, MTU ) );
+        recurse = true;
+        return m;
     }
 
     nMessage* m=new nMessage(sn_ConsoleOut_nd);
@@ -2845,21 +2876,59 @@ nMessage* sn_ConsoleOutMessage( const tOutput& o )
     return m;
 }
 
-void sn_ConsoleOut(const tOutput& o,int client){
-    //	tString message(o);
-
-    tJUST_CONTROLLED_PTR< nMessage > m = sn_ConsoleOutMessage( o );
+void sn_ConsoleOutRaw( tString & message,int client){
+    tJUST_CONTROLLED_PTR< nMessage > m = sn_ConsoleOutMessage( message );
 
     if (client<0){
         m->BroadCast();
-        con << o;
+        con << message;
     }
     else if (client==sn_myNetID)
     {
-        con << o;
+        con << message;
     }
     else
+    {
         m->Send(client);
+    }
+}
+
+void sn_ConsoleOutString( tString & message,int client){
+    // check if string is too long
+    if ( message.Len() <= MTU )
+    {
+        // no? Fine, just send it in one go.
+        message  << "0xffffff";
+        sn_ConsoleOutRaw( message, client );
+
+        return;
+    }
+
+    // darn, it is too long. Try to find a good spot to cut it
+    int cut = MTU;
+    while ( cut > 0 && message(cut) != '\n' )
+    {
+        --cut;
+    }
+    if ( cut == 0 )
+    {
+        // no suitable spot found, just cut anywhere.
+        cut = MTU;
+    }
+
+    // split the string
+    tString beginning = message.SubStr( 0, cut ) + "0xffffff";
+    tString rest = message.SubStr( cut );
+
+    // and send the bits
+    sn_ConsoleOutRaw( beginning, client );
+    sn_ConsoleOutString( rest, client );
+}
+
+void sn_ConsoleOut(const tOutput& o,int client){
+    // transform message to string
+    tString message( o );
+    sn_ConsoleOutString( message, client );
 }
 
 static void client_cen_handler(nMessage &m){
@@ -4163,7 +4232,7 @@ nMachine & nMachine::GetMachine( unsigned short userID )
     peers[ userID ].GetAddress( address );
 
 #ifdef DEBUG_X
-    // add client ID so multiple connects from one machine are distinquished
+    // add client ID so multiple connects from one machine are distinguished
     tString newIP;
     newIP << address << " " << userID;
     address = newIP;
@@ -4204,7 +4273,6 @@ void nMachine::Expire( void )
     // iterate over known machines
     nMachineMap & map = sn_GetMachineMap();
     nMachineMap::iterator toErase = map.end();
-    int size = map.size();
     for( nMachineMap::iterator iter = map.begin(); iter != map.end(); ++iter )
     {
         // erase last deleted machine
@@ -4220,7 +4288,7 @@ void nMachine::Expire( void )
         }
 
         // if the machine is no longer in use, mark it for deletion
-        if ( machine.players_ == 0 && machine.lastUsed_ < time - 300.0/size && machine.banned_ < time && machine.kph_.GetAverage() < 0.5 )
+        if ( machine.players_ == 0 && machine.lastUsed_ < time - 300.0 && machine.banned_ < time && machine.kph_.GetAverage() < 0.5 )
             toErase = iter;
 
     }
