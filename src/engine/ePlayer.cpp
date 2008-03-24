@@ -789,8 +789,8 @@ static void ResultCallback( nKrawall::nCheckResult const & result )
     // seach for double login
     for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
     {
-        ePlayerNetID* player = se_PlayerNetIDs(i);
-        if ( player->IsAuthenticated() && player->GetRawAuthenticatedName() == authName )
+        ePlayerNetID* player2 = se_PlayerNetIDs(i);
+        if ( player2->IsAuthenticated() && player2->GetRawAuthenticatedName() == authName )
         {
             sn_ConsoleOut( tOutput("$login_request_failed_dup"), player->Owner() );
             return;
