@@ -274,8 +274,8 @@ public:
     gBallZoneHack(nMessage &m);                                  //!< network constructor
     ~gBallZoneHack();                                            //!< destructor
 
-    void RemoveCycle(gCycle *cycle);
-    gCycle * GetLastCycle();
+    void RemovePlayer(ePlayerNetID *player);
+    ePlayerNetID * GetLastPlayer();
     void GoHome();
 
 protected:
@@ -285,7 +285,7 @@ private:
     virtual void OnVanish();                           //!< called when the zone vanishes
     virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone (kills them)
 
-    gCycle *lastCycle_;
+    tJUST_CONTROLLED_PTR<ePlayerNetID> lastPlayer_;
 };
 
 class gFlagZoneHack: public gZone

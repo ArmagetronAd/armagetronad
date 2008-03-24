@@ -2368,13 +2368,6 @@ gCycle::~gCycle(){
             {
                 zone->SetSeekingCycle(NULL);
             }
-
-            gBallZoneHack *ballZone = dynamic_cast<gBallZoneHack *>(zone);
-
-            if (ballZone)
-            {
-                ballZone->RemoveCycle(this);
-            }
         }
     }
 
