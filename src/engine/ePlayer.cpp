@@ -3103,7 +3103,7 @@ static tSettingItem< tAccessLevel > se_rtfmAccessLevelConf( "ACCESS_LEVEL_RTFM",
 static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, eChatSpamTester &spam ) {
 #ifdef KRAWALL_SERVER
     if ( p->GetAccessLevel() > se_rtfmAccessLevel ) {
-        sn_ConsoleOut(tOutput("$access_level_rtfm_denied", tCurrentAccessLevel::GetName(se_shuffleUpAccessLevel), tCurrentAccessLevel::GetName(p->GetAccessLevel())), p->Owner());
+        sn_ConsoleOut(tOutput("$access_level_rtfm_denied", tCurrentAccessLevel::GetName(se_rtfmUpAccessLevel), tCurrentAccessLevel::GetName(p->GetAccessLevel())), p->Owner());
         return;
     }
 #else
