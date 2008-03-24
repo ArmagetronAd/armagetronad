@@ -1573,7 +1573,7 @@ void handle_chat_client(nMessage &m)
 template< class TARGET >
 void se_AppendChat( TARGET & out, tString const & message )
 {
-    if ( message.Len() <= se_SpamMaxLen*2 )
+    if ( message.Len() <= se_SpamMaxLen*2 || se_SpamMaxLen == 0 )
         out << message;
     else
     {
@@ -1703,37 +1703,42 @@ static nMessage* se_OldChatMessage( ePlayerNetID const * player, tString const &
     return se_OldChatMessage( se_BuildChatString( player, message ) );
 }
 
-// send the chat of player p to all connected clients after properly formatting it
-// ( the clients will see <player>: <say>
-void se_BroadcastChat( ePlayerNetID* p, const tString& say )
+// sends the full chat line to receiver, marked as originating from <sender> so
+// it can be silenced.
+// ( the client will see <fullLine> resp. <sender name> : <forOldClients> if it is pre-0.2.8 and at least 0.2.6 )
+void se_SendChatLine( ePlayerNetID* sender, const tString& fullLine, const tString& forOldClients, int receiver )
 {
     // create chat messages
-    tJUST_CONTROLLED_PTR< nMessage > mServerControlled = se_ServerControlledChatMessage( p, say );
-    tJUST_CONTROLLED_PTR< nMessage > mNew = se_NewChatMessage( p, say );
-    tJUST_CONTROLLED_PTR< nMessage > mOld = se_OldChatMessage( p, say );
 
     // send them to the users, depending on what they understand
-    for ( int user = MAXCLIENTS; user > 0; --user )
+    if ( sn_Connections[ receiver ].socket )
     {
-        if ( sn_Connections[ user ].socket )
+        if ( se_chatHandlerClient.Supported( receiver ) )
         {
-            if ( se_chatHandlerClient.Supported( user ) )
-                mServerControlled->Send( user );
-            else if ( se_chatRelay.Supported( user ) )
-                mNew->Send( user );
-            else
-                mOld->Send( user );
+            tJUST_CONTROLLED_PTR< nMessage > mServerControlled = se_ServerControlledChatMessageConsole( sender, fullLine );
+            mServerControlled->Send( receiver );
+        }
+        else if ( se_chatRelay.Supported( receiver ) )
+        {
+            tJUST_CONTROLLED_PTR< nMessage > mNew = se_NewChatMessage( sender, forOldClients );
+            mNew->Send( receiver );
+        }
+        else
+        {
+            tJUST_CONTROLLED_PTR< nMessage > mOld = se_OldChatMessage( fullLine );
+            mOld->Send( receiver );
         }
     }
 }
 
-// sends the full chat line  to all connected players
-// ( the clients will see <line> )
-void se_BroadcastChatLine( ePlayerNetID* p, const tString& line, const tString& forOldClients )
+// sends the full chat line to all connected clients, marked as originating from <sender> so
+// it can be silenced.
+// ( the client will see <fullLine> resp. <sender name> : <forOldClients> if it is pre-0.2.8 and at least 0.2.6 )
+void se_BroadcastChatLine( ePlayerNetID* sender, const tString& line, const tString& forOldClients )
 {
     // create chat messages
-    tJUST_CONTROLLED_PTR< nMessage > mServerControlled = se_ServerControlledChatMessageConsole( p, line );
-    tJUST_CONTROLLED_PTR< nMessage > mNew = se_NewChatMessage( p, forOldClients );
+    tJUST_CONTROLLED_PTR< nMessage > mServerControlled = se_ServerControlledChatMessageConsole( sender, line );
+    tJUST_CONTROLLED_PTR< nMessage > mNew = se_NewChatMessage( sender, forOldClients );
     tJUST_CONTROLLED_PTR< nMessage > mOld = se_OldChatMessage( line );
 
     // send them to the users, depending on what they understand
@@ -1750,6 +1755,31 @@ void se_BroadcastChatLine( ePlayerNetID* p, const tString& line, const tString& 
         }
     }
 }
+
+// send the chat of player p to all connected clients after properly formatting it
+// ( the clients will see <player>: <say>
+void se_BroadcastChat( ePlayerNetID* sender, const tString& say )
+{
+    // create chat messages
+    tJUST_CONTROLLED_PTR< nMessage > mServerControlled = se_ServerControlledChatMessage( sender, say );
+    tJUST_CONTROLLED_PTR< nMessage > mNew = se_NewChatMessage( sender, say );
+    tJUST_CONTROLLED_PTR< nMessage > mOld = se_OldChatMessage( sender, say );
+
+    // send them to the users, depending on what they understand
+    for ( int user = MAXCLIENTS; user > 0; --user )
+    {
+        if ( sn_Connections[ user ].socket )
+        {
+            if ( se_chatHandlerClient.Supported( user ) )
+                mServerControlled->Send( user );
+            else if ( se_chatRelay.Supported( user ) )
+                mNew->Send( user );
+            else
+                mOld->Send( user );
+        }
+    }
+}
+
 
 // sends a private message from sender to receiver, and really sends it to eavesdropper (will usually be equal to receiver)
 void se_SendPrivateMessage( ePlayerNetID const * sender, ePlayerNetID const * receiver, ePlayerNetID const * eavesdropper, tString const & message )
@@ -3080,7 +3110,7 @@ static tConfItemFunc remove_help_topic_conf("REMOVE_HELP_TOPIC",&eHelpTopic::rem
 static tString se_helpIntroductoryBlurb;
 static tConfItemLine se_helpIntroductoryBlurbConf("HELP_INTRODUCTORY_BLURB",se_helpIntroductoryBlurb);
 
-static void se_Help( ePlayerNetID * p, std::istream & s ) {
+static void se_Help( ePlayerNetID * sender, ePlayerNetID * receiver, std::istream & s ) {
     std::ws(s);
     tColoredString reply;
     if(s.eof() || s.fail()) {
@@ -3093,7 +3123,19 @@ static void se_Help( ePlayerNetID * p, std::istream & s ) {
         s >> name;
         eHelpTopic::printTopic(reply, name);
     }
-    sn_ConsoleOut(reply, p->Owner());
+    if ( sender == receiver )
+    {
+        // just send a console message, the player asked for help himself
+        sn_ConsoleOut(reply, receiver->Owner());
+    }
+    else
+    {
+        // send help disguised as a chat message (with disabled spam limit)
+        int spamMaxLenBack = se_SpamMaxLen;
+        se_SpamMaxLen = 0;
+        se_SendChatLine(sender, reply, reply, receiver->Owner());
+        se_SpamMaxLen = spamMaxLenBack;
+    }
 }
 
 static tAccessLevel se_rtfmAccessLevel = tAccessLevel_Moderator;
@@ -3103,7 +3145,7 @@ static tSettingItem< tAccessLevel > se_rtfmAccessLevelConf( "ACCESS_LEVEL_RTFM",
 static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, eChatSpamTester &spam ) {
 #ifdef KRAWALL_SERVER
     if ( p->GetAccessLevel() > se_rtfmAccessLevel ) {
-        sn_ConsoleOut(tOutput("$access_level_rtfm_denied", tCurrentAccessLevel::GetName(se_rtfmUpAccessLevel), tCurrentAccessLevel::GetName(p->GetAccessLevel())), p->Owner());
+        sn_ConsoleOut(tOutput("$access_level_rtfm_denied", tCurrentAccessLevel::GetName(se_rtfmAccessLevel), tCurrentAccessLevel::GetName(p->GetAccessLevel())), p->Owner());
         return;
     }
 #else
@@ -3128,9 +3170,18 @@ static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, e
         name << *p << tColoredString::ColorString(1,1,1);
         tColoredString newbie_name;
         newbie_name << *newbie << tColoredString::ColorString(1,1,1);
-        sn_ConsoleOut(tOutput("$rtfm_announcement", str, name, newbie_name));
-        se_Help(newbie, s1);
-        se_Help(p, s2);
+
+        tString announcement( tOutput("$rtfm_announcement", str, name, newbie_name) );
+        se_BroadcastChatLine( p, announcement, announcement );
+        con << announcement;
+
+        se_Help(p, newbie, s1);
+
+        // avoid sending you the same doc twice if you tell yourself to rtfm :)
+        if ( newbie != p )
+        {
+            se_Help(p, p, s2);
+        }
     }
 }
 #endif
@@ -3220,7 +3271,7 @@ void handle_chat( nMessage &m )
                         return;
                     }
                     else if (command == "/help") {
-                        se_Help( p, s );
+                        se_Help( p, p, s );
                         return;
                     }
 #ifdef DEDICATED
