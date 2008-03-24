@@ -2471,8 +2471,9 @@ class eChatSpamTester
 {
 public:
     eChatSpamTester( ePlayerNetID * p, tString const & say )
-    : tested_( false ), shouldBlock_( false ), player_( p ), say_( say )
+    : tested_( false ), shouldBlock_( false ), player_( p ), say_( say ), factor_( 1 )
     {
+        say_.RemoveTrailingColor();
     }
 
     bool Block()
@@ -2506,7 +2507,18 @@ public:
             lengthMalus = 4.0;
         }
 
-        if ( nSpamProtection::Level_Mild <= player_->chatSpam_.CheckSpam( 1+lengthMalus, player_->Owner(), tOutput("$spam_chat") ) )
+        // extra spam severity factor
+        REAL factor = factor_;
+
+        // count color codes. We hate them. We really do. (Yeah, this is inefficient.)
+        int colorCodes = (say_.Len() - tColoredString::RemoveColors( say_ ).Len())/8;
+        if ( colorCodes < 0 ) colorCodes = 0;
+        
+        // apply them to the spam severity factor. Burn in hell, color code abusers.
+        static const double log2 = log(2);
+        factor *= log( 2 + colorCodes )/log2;
+
+        if ( nSpamProtection::Level_Mild <= player_->chatSpam_.CheckSpam( (1+lengthMalus)*factor, player_->Owner(), tOutput("$spam_chat") ) )
         {
             return true;
         }
@@ -2546,10 +2558,11 @@ public:
         return false;
     }
 
-    bool tested_;
-    bool shouldBlock_;
-    ePlayerNetID * player_;
-    tString say_;
+    bool tested_;             //!< flag indicating whether the chat line has already been checked fro spam
+    bool shouldBlock_;        //!< true if the message should be blocked for spam
+    ePlayerNetID * player_;   //!< the chatting player
+    tColoredString say_;      //!< the chat line
+    REAL factor_;             //!< extra spam weight factor
 };
 
 // checks whether a player is silenced, giving him appropriate warnings if he is
