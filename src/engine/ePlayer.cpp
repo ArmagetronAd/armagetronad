@@ -2494,7 +2494,7 @@ public:
         // check if the player already said the same thing not too long ago
         for (short c = 0; c < player_->lastSaid.Len(); c++)
         {
-            if( (say_.StripWhitespace() == player_->lastSaid[c].StripWhitespace()) && ( (currentTime - player_->lastSaidTimes[c]) < se_alreadySaidTimeout) )
+            if( (say_.StripWhitespace() == player_->lastSaid[c].StripWhitespace()) && ( (currentTime - player_->lastSaidTimes[c]) < se_alreadySaidTimeout * factor_ ) )
             {
                 sn_ConsoleOut( tOutput("$spam_protection_repeat", say_ ), player_->Owner() );
                 return true;
@@ -2510,7 +2510,7 @@ public:
         // extra spam severity factor
         REAL factor = factor_;
 
-        // count color codes. We hate them. We really do. (Yeah, this is inefficient.)
+        // count color codes. We hate them. We really do. (Yeah, this calculation is inefficient.)
         int colorCodes = (say_.Len() - tColoredString::RemoveColors( say_ ).Len())/8;
         if ( colorCodes < 0 ) colorCodes = 0;
         
@@ -2661,6 +2661,10 @@ tSettingItem< bool > se_coloredDarkTeamConf( "FILTER_DARK_COLOR_TEAM", se_filter
 static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
 {
     eTeam *currentTeam = se_GetManagedTeam( p );
+    
+    // team messages are less spammy than public chat, take care of that.
+    // we don't care too much about AI players (but don't remove them from the denominator because we're too lazy to count the total number of human players).
+    spam.factor_ = ( currentTeam ? currentTeam->NumHumanPlayers() : 1 )/REAL( se_PlayerNetIDs.Len() );
 
     // silencing only affects spectators here
     if ( ( !currentTeam && IsSilencedWithWarning(p) ) || spam.Block() )
