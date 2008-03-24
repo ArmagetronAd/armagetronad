@@ -1,6 +1,7 @@
 Changes since 0.2.8.2:
 
   New settings and commands:
+- SPAM_AUTOKICK_COUNT: minimal number of spam warning messages you get in a row before you get kicked.
 - FORTRESS_COLLAPSE_SPEED: tune the collapse speed of fortress zones.
 - VOTE_KICK_REASON: default reason given on kick votes.
 - "/vote" chat interface to votes; "/vote kick <player>" issues a kick vote.
@@ -95,6 +96,9 @@ If --enable-armathentication was activated:
 - new chat commands /op, /deop, /promote and /demote to change other players' access rights
 
   Featurelets:
+- color codes in chat increase the spam level logarithmically.
+- /team messages get a reduced spam level; reduction factor is given by 
+  (team size)/(number of total players).
 - /team messages can be used by spectators to chat with other spectators only.
 - Performance optimizations. Using OpenGL display lists to cache geometry.
 - Removed ztrick, antialiasing and perspective correction settings. They all had only one right
