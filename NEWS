@@ -1,6 +1,7 @@
 Changes since 0.2.8.2:
 
   New settings and commands:
+- MIN_PLAY_TIME_*: minimal play time required before you are allowed to play on this server.
 - SPAM_AUTOKICK_COUNT: minimal number of spam warning messages you get in a row before you get kicked.
 - FORTRESS_COLLAPSE_SPEED: tune the collapse speed of fortress zones.
 - VOTE_KICK_REASON: default reason given on kick votes.
@@ -96,6 +97,8 @@ If --enable-armathentication was activated:
 - new chat commands /op, /deop, /promote and /demote to change other players' access rights
 
   Featurelets:
+- clientside play time tracking and server controlled minimal required experience
+  to be allowed to play.
 - color codes in chat increase the spam level logarithmically.
 - /team messages get a reduced spam level; reduction factor is given by 
   (team size)/(number of total players).

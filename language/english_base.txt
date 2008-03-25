@@ -200,6 +200,16 @@ auto_team_help          Flag indicating whether players should be put into teams
 allow_team_name_color_help   Allow a team to be named after a color
 allow_team_name_player_help  Allow a team to be named after the leading player
 
+play_time_total_help         Total time in minutes someone has played with this client
+play_time_online_help        Total time in minutes someone has played with this client online
+play_time_team_help          Total time in minutes someone has played with this client in a team
+min_play_time_total_help     Total play time in minutes required to play here
+min_play_time_online_help    Online play time in minutes required to play here
+min_play_time_team_help      Team play time in minutes required to play here
+play_time_total_lacking      You cannot play here; first, you need to get more general experience. Play somewhere else (local games count) for \1 minutes, then you can come back here and play.\n
+play_time_online_lacking     You cannot play here; first, you need to get more online experience. Play on other servers for \1 minutes, then you can come back here and play.\n
+play_time_team_lacking       You cannot play here; first, you need to get more team play experience. Play on other team servers for \1 minutes, then you can come back here and play.\n
+
 team_name_1_help name of team 1
 team_name_2_help name of team 2
 team_name_3_help name of team 3

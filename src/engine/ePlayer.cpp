@@ -55,6 +55,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nConfig.h"
 #include <time.h>
 
+
 tColoredString & operator << (tColoredString &s,const ePlayer &p){
     return s << tColoredString::ColorString(p.rgb[0]/15.0,
                                             p.rgb[1]/15.0,
@@ -95,6 +96,32 @@ tCONFIG_ENUM( eCamMode );
 
 tList<ePlayerNetID> se_PlayerNetIDs;
 static ePlayer* se_Players = NULL;
+
+// tracking play time (in minutes). These times are tracked on the client and yes, you can "cheat" and increase them to get access to servers you are not ready for.
+
+// total play time, network or not
+static REAL se_playTimeTotal = 60*8;
+static tConfItem< REAL > se_playTimeTotalConf( "PLAY_TIME_TOTAL", se_playTimeTotal );
+
+// total online time
+static REAL se_playTimeOnline = 60*8;
+static tConfItem< REAL > se_playTimeOnlineConf( "PLAY_TIME_ONLINE", se_playTimeOnline );
+
+// total online team time
+static REAL se_playTimeTeam = 60*8;
+static tConfItem< REAL > se_playTimeTeamConf( "PLAY_TIME_TEAM", se_playTimeTeam );
+
+// total play time, network or not
+static REAL se_minPlayTimeTotal = 0;
+static nSettingItem< REAL > se_minPlayTimeTotalConf( "MIN_PLAY_TIME_TOTAL", se_minPlayTimeTotal );
+
+// total online time
+static REAL se_minPlayTimeOnline = 0;
+static nSettingItem< REAL > se_minPlayTimeOnlineConf( "MIN_PLAY_TIME_ONLINE", se_minPlayTimeOnline );
+
+// total online team time
+static REAL se_minPlayTimeTeam = 0;
+static nSettingItem< REAL > se_minPlayTimeTeamConf( "MIN_PLAY_TIME_TEAM", se_minPlayTimeTeam );
 
 static bool se_assignTeamAutomatically = true;
 static tSettingItem< bool > se_assignTeamAutomaticallyConf( "AUTO_TEAM", se_assignTeamAutomatically );
@@ -5370,28 +5397,59 @@ static int se_pingCharityMax = 500, se_pingCharityMin = 0;
 static tSettingItem<int> se_pingCharityMaxConf( "PING_CHARITY_MAX", se_pingCharityMax );
 static tSettingItem<int> se_pingCharityMinConf( "PING_CHARITY_MIN", se_pingCharityMin );
 
+static bool se_ForceSpectate( REAL time, REAL minTime, char const * message, char const * & cantPlayMessage, int & experienceNeeded )
+{
+    if ( time >= minTime )
+    {
+        return false;
+    }
+    else
+    {
+        // store message. The player should be presented with a single
+        // message telling him the easyest way to gain the required experience;
+        // if 10 minutes of total play time are needed and 5 minutes of online play time,
+        // we tell the player 10 more minutes of online play are required.
+        int needed = int( minTime - time + 2 );
+        if ( needed > experienceNeeded )
+        {
+            experienceNeeded = needed;
+        }
+        cantPlayMessage = message;
+
+        return true;
+    }
+}
+
 // Update the netPlayer_id list
 void ePlayerNetID::Update(){
 #ifdef KRAWALL_SERVER
-        // update access level
-        UpdateAccessLevelRequiredToPlay();
+    // update access level
+    UpdateAccessLevelRequiredToPlay();
 
-        // remove players with insufficient access rights
-        tAccessLevel required = AccessLevelRequiredToPlay();
-        for( int i=se_PlayerNetIDs.Len()-1; i >= 0; --i )
+    // remove players with insufficient access rights
+    tAccessLevel required = AccessLevelRequiredToPlay();
+    for( int i=se_PlayerNetIDs.Len()-1; i >= 0; --i )
+    {
+        ePlayerNetID* player = se_PlayerNetIDs(i);
+        if ( player->GetAccessLevel() > required && player->IsHuman() )
         {
-            ePlayerNetID* player = se_PlayerNetIDs(i);
-            if ( player->GetAccessLevel() > required && player->IsHuman() )
-            {
-                player->SetTeamWish(0);
-            }
+            player->SetTeamWish(0);
         }
+    }
 #endif
 
 #ifdef DEDICATED
     if (sr_glOut)
 #endif
     {
+        // the last update time
+        static nTimeRolling lastTime = tSysTimeFloat();
+        bool playing = false; // set to true if someone is playing
+        bool teamPlay = false; // set to true if someone is playing in a team
+
+        char const * cantPlayMessage = NULL;
+        int experienceNeeded = 0;
+
         for(int i=0; i<MAX_PLAYERS; ++i ){
             bool in_game=ePlayer::PlayerIsInGame(i);
             ePlayer *local_p=ePlayer::PlayerConfig(i);
@@ -5400,6 +5458,9 @@ void ePlayerNetID::Update(){
 
             if (!p && in_game && ( !local_p->spectate || se_VisibleSpectatorsSupported() ) ) // insert new player
             {
+                // reset last time so idle time in the menus does not count as play time
+                lastTime = tSysTimeFloat();
+
                 p=tNEW(ePlayerNetID) (i);
                 p->FindDefaultTeam();
                 p->RequestSync();
@@ -5434,9 +5495,44 @@ void ePlayerNetID::Update(){
                 p->pingCharity=::pingCharity;
 
                 // update spectator status
-                if ( p->spectating_ != local_p->spectate )
+                bool spectate = local_p->spectate;
+                
+                // force to spectator mode if the player lacks experience
+                if ( !spectate )
+                {
+                    se_ForceSpectate( se_playTimeTotal, se_minPlayTimeTotal, "$play_time_total_lacking", cantPlayMessage, experienceNeeded );
+                    se_ForceSpectate( se_playTimeOnline, se_minPlayTimeOnline, "$play_time_online_lacking", cantPlayMessage, experienceNeeded  );
+                    se_ForceSpectate( se_playTimeTeam, se_minPlayTimeTeam, "$play_time_team_lacking", cantPlayMessage, experienceNeeded );
+                    if ( cantPlayMessage )
+                    {
+                        spectate = true;
+
+                        // print message to console (but don't spam)
+                        static nTimeRolling lastTime = -100;
+                        nTimeRolling now = tSysTimeFloat();
+                        if ( now - lastTime > 30 )
+                        {
+                            lastTime = now;
+                            con << tOutput( cantPlayMessage, experienceNeeded );
+                        }
+                    }
+                }
+
+                if ( p->spectating_ != spectate )
                     p->RequestSync();
-                p->spectating_ = local_p->spectate;
+                p->spectating_ = spectate;
+
+                // set playing flags
+                if ( !spectate )
+                {
+                    playing = true;
+                }
+
+
+                if ( p->CurrentTeam() && p->CurrentTeam()->NumHumanPlayers() > 1 )
+                {
+                    teamPlay = true;
+                }
 
                 // update stealth status
                 if ( p->stealth_ != local_p->stealth )
@@ -5451,10 +5547,32 @@ void ePlayerNetID::Update(){
                     p->RequestSync();
                 }
 
-                p->SetName( ePlayer::PlayerConfig(i)->Name() );
+                p->SetName( local_p->Name() );
             }
         }
 
+        // account for play time
+        nTimeRolling now = tSysTimeFloat();
+        REAL time = (now - lastTime)/60.0f;
+        lastTime = now;
+
+        if ( playing )
+        {
+            // all activity gets logged here
+            se_playTimeTotal += time;
+        
+            if ( sn_GetNetState() == nCLIENT )
+            {
+                // all online activity counts here
+                se_playTimeOnline += time;
+
+                if ( teamPlay )
+                {
+                    // all online team play counts here
+                    se_playTimeTeam += time;
+                }
+            }
+        }
     }
 
     int i;
