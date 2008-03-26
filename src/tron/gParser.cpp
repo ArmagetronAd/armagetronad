@@ -1571,8 +1571,9 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 #ifdef ENABLE_ZONESV2
     switch (mapVersion)
     {
+    case 0:
     case 1:
-        // was, technically, without zones IIRC. But let's parse it anyway
+        // were, technically, without zones IIRC. But let's parse it anyway
     case 2:
         // switch to v2 when some sort of emulation layer is ready
         // we should probably check for the DTD, too; v1 zones are only possible
