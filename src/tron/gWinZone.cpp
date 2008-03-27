@@ -46,6 +46,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <functional>
 #include <deque>
 
+static int sg_zoneAlphaToggle = 0;
+static tSettingItem<int> sg_zoneAlphaToggleConf( "ZONE_ALPHA_TOGGLE", sg_zoneAlphaToggle );
+
 std::deque<gZone *> sg_Zones;
 
 static int sg_zoneDeath = 1;
@@ -467,6 +470,7 @@ void gZone::Render( const eCamera * cam )
     glDisable(GL_CULL_FACE);
     glDepthMask(GL_FALSE);
     glBlendFunc( GL_SRC_ALPHA, GL_ONE );
+    
 
     //glDisable(GL_TEXTURE);
     glDisable(GL_TEXTURE_2D);
@@ -476,7 +480,9 @@ void gZone::Render( const eCamera * cam )
     glMultMatrixf(&m[0][0]);
     //	glScalef(.5,.5,.5);
 
-    if ( sr_alphaBlend )
+    bool useAlpha = sr_alphaBlend ? !sg_zoneAlphaToggle : sg_zoneAlphaToggle;
+
+    if ( useAlpha )
         BeginQuads();
     else
         BeginLineStrip();
@@ -503,7 +509,7 @@ void gZone::Render( const eCamera * cam )
         glVertex3f(sb, cb, top);
         glVertex3f(sb, cb, bot);
 
-        if ( !sr_alphaBlend )
+        if ( !useAlpha )
         {
             glVertex3f(sa, ca, bot);
             RenderEnd();
