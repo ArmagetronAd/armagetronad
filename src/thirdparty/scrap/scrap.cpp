@@ -467,9 +467,10 @@ void get_scrap(int type, int *dstlen, char **dst)
           }
       }
     Lock_Display();
+    char **srcp = &src;
     if ( XGetWindowProperty(SDL_Display, owner, selection, 0, INT_MAX/4,
                             False, format, &seln_type, &seln_format,
-                       &nbytes, &overflow, (unsigned char **)&src) == Success )
+                       &nbytes, &overflow, (unsigned char **)srcp) == Success )
       {
         if ( seln_type == format )
           {
