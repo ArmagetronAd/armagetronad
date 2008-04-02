@@ -2871,7 +2871,6 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
                     spawnTime_ += -1E+20;
                     DropWall();
                     spawnTime_ = lastSpawn;
-                    dirSpawn = dirDrive;
                     lastTurnPos_ = pos; // hack last turn position to generate good wall
                 }
 
