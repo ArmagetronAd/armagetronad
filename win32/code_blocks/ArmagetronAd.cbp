@@ -252,6 +252,7 @@
 		<Unit filename="..\..\src\tools\tCallback.cpp" />
 		<Unit filename="..\..\src\tools\tCallback.h" />
 		<Unit filename="..\..\src\tools\tCallbackString.h" />
+		<Unit filename="..\..\src\tools\tColor.cpp" />
 		<Unit filename="..\..\src\tools\tColor.h" />
 		<Unit filename="..\..\src\tools\tCommandLine.cpp" />
 		<Unit filename="..\..\src\tools\tCommandLine.h" />
