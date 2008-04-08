@@ -1002,7 +1002,7 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
     {
         eTeam *t = teams(i);
 
-        if ( t->BalanceThisTeam() )
+        if ( !t->IsLocked() && t->BalanceThisTeam() )
         {
             int humans = t->NumHumanPlayers();
 

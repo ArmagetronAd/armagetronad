@@ -6149,7 +6149,7 @@ void ePlayerNetID::FindDefaultTeam( )
     for ( int i=eTeam::teams.Len()-1; i>=0; --i )
     {
         eTeam *t = eTeam::teams( i );
-        if ( t->IsHuman()  && ( !min || min->NumHumanPlayers() > t->NumHumanPlayers() ) )
+        if ( t->IsHuman() && !t->IsLocked() && ( !min || min->NumHumanPlayers() > t->NumHumanPlayers() ) )
             min = t;
     }
 
