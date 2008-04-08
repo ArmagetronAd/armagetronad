@@ -2522,6 +2522,9 @@ bool gCycle::Timestep(REAL currentTime){
     // clear out dangerous info when we're done
     gMaxSpaceAheadHitInfoClearer hitInfoClearer( maxSpaceHit_ );
 
+    // archive rubber speed for later comparison
+    REAL rubberSpeedFactorBack = rubberSpeedFactor;
+
     // if ( Owner() == sn_myNetID )
     //    con << pos << ',' << distance << ',' << eCoord::F( dirDrive, pos ) - distance << '\n';
 
@@ -2690,6 +2693,36 @@ bool gCycle::Timestep(REAL currentTime){
         currentWall->Update(predictTime, PredictPosition() );
     }
 
+    // checkpoint wall when rubber starts to get used
+    if ( currentWall )
+    {
+        if ( rubberSpeedFactor >= .99 && rubberSpeedFactorBack < .99 )
+        {
+            currentWall->Checkpoint();
+        }
+        else if ( rubberSpeedFactor < .99 && rubberSpeedFactorBack >= .99 )
+        {
+            currentWall->Checkpoint();
+        }
+        else if ( rubberSpeedFactor < .1 && rubberSpeedFactorBack >= .1 )
+        {
+            currentWall->Checkpoint();
+        }
+        else if ( rubberSpeedFactor < .01 && rubberSpeedFactorBack >= .01 )
+        {
+            currentWall->Checkpoint();
+        }
+    }
+
+    if ( sn_GetNetState()==nSERVER )
+    {
+        // do an emergency sync when rubber starts to get used, it may come unexpected to clients
+        if ( rubberSpeedFactor < .99 && rubberSpeedFactorBack >= .99 )
+        {
+            RequestSyncOwner();
+        }
+    }
+
     return ret;
 }
 
@@ -2754,9 +2787,6 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
         skewDot=0;
 
     eCoord oldpos=pos;
-
-    // archive rubber speed for later comparison
-    REAL rubberSpeedFactorBack = rubberSpeedFactor;
 
     REAL ts=(currentTime-lastTime);
 
@@ -3010,39 +3040,8 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
         skewDot=0;
     }
 
-    // checkpoint wall when rubber starts to get used
-    if ( currentWall )
-    {
-        if ( rubberSpeedFactor >= .99 && rubberSpeedFactorBack < .99 )
-        {
-            currentWall->Checkpoint();
-        }
-
-        if ( rubberSpeedFactor < .99 && rubberSpeedFactorBack >= .99 )
-        {
-            currentWall->Checkpoint();
-        }
-
-        if ( rubberSpeedFactor < .1 && rubberSpeedFactorBack >= .1 )
-        {
-            currentWall->Checkpoint();
-        }
-
-        if ( rubberSpeedFactor < .01 && rubberSpeedFactorBack >= .01 )
-        {
-            currentWall->Checkpoint();
-        }
-    }
-
-
     if ( sn_GetNetState()==nSERVER )
     {
-        // do an emergency sync when rubber starts to get used, it may come unexpected to clients
-        if ( rubberSpeedFactor < .99 && rubberSpeedFactorBack >= .99 )
-        {
-            RequestSyncOwner();
-        }
-
         if (nextSync < tSysTimeFloat() )
         {
             // delay syncs for old clients when there is a wall ahead; they would tunnel locally
