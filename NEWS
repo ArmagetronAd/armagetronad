@@ -94,7 +94,7 @@ If --enable-armathentication was activated:
   BAN_USER_LIST to show a list.
 - ACCESS_LEVEL_OP/ADMIN/CHAT/PLAY/PLAY_SLIDING to control who can do which things
 - /login chat command then uses the more secure hashed base logins
-- new chat commands /op, /deop, /promote and /demote to change other players' access rights
+- new chat commands /op and /deop to change other players' access rights
 
   Featurelets:
 - clientside play time tracking and server controlled minimal required experience
