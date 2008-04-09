@@ -2011,8 +2011,32 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
             }
             else
             {
-                // read optional access level
-                int level = 1;
+                // read optional access level, this part is merly a copypaste from the /shuffle code
+                int level = se_opAccessLevelMax;
+		if ( victim->IsAuthenticated() )
+		{
+		    level = victim->GetAccessLevel();
+		}
+		char first;
+		s >> first;
+
+		if ( !s.eof() && !s.fail() )
+	        {
+	            s.unget();
+
+	            int newLevel = 0;
+		    s >> newLevel;
+
+	            if ( first == '+' || first == '-' )
+	            {
+	                level += newLevel;
+	            }
+	            else
+	            {
+			level = newLevel;
+	            }
+	        }
+		
                 s >> level;
 
                 (*F)( admin, victim, static_cast< tAccessLevel >( level ) );
@@ -2022,6 +2046,42 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
     else
     {
         sn_ConsoleOut( tOutput( "$access_level_op_denied", command ), admin->Owner() );
+    }
+}
+
+// Promote changes the access rights of an already authed player
+void se_Promote( ePlayerNetID * admin, ePlayerNetID * victim, int level )
+{
+    tAccessLevel accessLevel = static_cast< tAccessLevel >( level );
+    if ( accessLevel > tAccessLevel_Authenticated )
+    {
+        accessLevel = tAccessLevel_Authenticated;
+    }
+    if ( accessLevel < tCurrentAccessLevel::GetAccessLevel() + 1 )
+    {
+        accessLevel = static_cast< tAccessLevel >( tCurrentAccessLevel::GetAccessLevel() + 1 );
+    }
+
+    if ( victim->IsAuthenticated() )
+    {
+        tAccessLevel oldAccessLevel = victim->GetAccessLevel();
+	victim->SetAccessLevel( accessLevel );
+
+        if ( accessLevel < oldAccessLevel )
+	{
+	    se_SecretConsoleOut( tOutput( "$access_level_promote",
+                                          victim->GetLogName(),
+                                          tCurrentAccessLevel::GetName( accessLevel ),
+	                                  admin->GetLogName() ), victim, admin );
+	}
+	else if ( accessLevel > oldAccessLevel )
+	{
+	    se_SecretConsoleOut( tOutput( "$access_level_demote",
+					  victim->GetLogName(),
+				          tCurrentAccessLevel::GetName( accessLevel ),
+                                          admin->GetLogName() ), victim, admin );
+
+	}
     }
 }
 
@@ -2063,78 +2123,20 @@ void se_Op( ePlayerNetID * admin, ePlayerNetID * victim, int level )
         accessLevel = level;
     }
 
-    se_OpBase( admin, victim, "/op", accessLevel );
+    if ( victim->IsAuthenticated() )
+    {
+	se_Promote( admin, victim, accessLevel );
+    }
+    else
+    {
+	se_OpBase( admin, victim, "/op", accessLevel );
+    }
 }
 
 // DeOp takes it away
 void se_DeOp( ePlayerNetID * admin, ePlayerNetID * victim, int )
 {
     if ( victim->IsAuthenticated() )
-    {
-        victim->DeAuthenticate( admin );
-    }
-}
-
-void se_Demote( ePlayerNetID * admin, ePlayerNetID * victim, int level );
-
-// Promote elevates the access rights
-void se_Promote( ePlayerNetID * admin, ePlayerNetID * victim, int level )
-{
-    if ( level < 0 )
-    {
-        se_Demote( admin, victim, -level );
-        return;
-    }
-
-    int accessLevelInt = victim->GetAccessLevel() - level;
-    tAccessLevel accessLevel = static_cast< tAccessLevel >( accessLevelInt );
-    if ( accessLevel > tAccessLevel_Authenticated )
-    {
-        accessLevel = tAccessLevel_Authenticated;
-    }
-    if ( accessLevel < tCurrentAccessLevel::GetAccessLevel() + 1 )
-    {
-        accessLevel = static_cast< tAccessLevel >( tCurrentAccessLevel::GetAccessLevel() + 1 );
-    }
-
-    if ( victim->IsAuthenticated() )
-    {
-        victim->SetAccessLevel( accessLevel );
-
-        se_SecretConsoleOut( tOutput( "$access_level_promote",
-                                      victim->GetLogName(),
-                                      tCurrentAccessLevel::GetName( accessLevel ),
-                                      admin->GetLogName() ), victim, admin );
-    }
-    else
-    {
-        se_OpBase( admin, victim, "/promote", accessLevel );
-    }
-}
-
-// Deomote reduces the access rights
-void se_Demote( ePlayerNetID * admin, ePlayerNetID * victim, int level )
-{
-    // for people who think they are smart :)
-    if ( level < 0 )
-    {
-        se_Promote( admin, victim, -level );
-        return;
-    }
-
-    int accessLevelInt = victim->GetAccessLevel() + level;
-    tAccessLevel accessLevel = static_cast< tAccessLevel >( accessLevelInt );
-
-    if ( accessLevel <= tAccessLevel_Authenticated )
-    {
-        se_SecretConsoleOut( tOutput( "$access_level_demote",
-                                      victim->GetLogName(),
-                                      tCurrentAccessLevel::GetName( accessLevel ),
-                                      admin->GetLogName() ), victim, admin );
-
-        victim->SetAccessLevel( accessLevel );
-    }
-    else if ( victim->IsAuthenticated() )
     {
         victim->DeAuthenticate( admin );
     }
@@ -2405,14 +2407,6 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     else if ( command == "/deop" )
     {
         se_ChangeAccess( p, s, "/deop", &se_DeOp );
-    }
-    else if ( command == "/promote" )
-    {
-        se_ChangeAccess( p, s, "/promote", &se_Promote );
-    }
-    else if ( command == "/demote" )
-    {
-        se_ChangeAccess( p, s, "/demote", &se_Demote );
     }
     else if ( command == "/invite" )
     {
