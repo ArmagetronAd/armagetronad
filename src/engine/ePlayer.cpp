@@ -2901,25 +2901,34 @@ static void se_ChatTeams( ePlayerNetID * p )
     se_ListTeams( p );
 }
 
-static void se_ListPlayers( ePlayerNetID * receiver )
+static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
 {
+    tString search;
+    bool doSearch = false;
+    search.ReadLine( s );
+
+    if ( search.Len() > 1 )
+	doSearch = true;
+
     for ( int i2 = se_PlayerNetIDs.Len()-1; i2>=0; --i2 )
     {
         ePlayerNetID* p2 = se_PlayerNetIDs(i2);
-        std::ostringstream tos;
+        tColoredString tos;
         tos << p2->Owner();
         tos << ": ";
         if ( p2->GetAccessLevel() < tAccessLevel_Default && !se_Hide( p2, receiver ) )
         {
             // player username comes from authentication name and may be much different from
             // the screen name
-            tos << p2->GetFilteredAuthenticatedName() << " ( " << p2->GetName() << ", "
+            tos << p2->GetColoredName()
+	        << tColoredString::ColorString(1,1,1)
+	        << " ( " << p2->GetFilteredAuthenticatedName() << ", "
                 << tCurrentAccessLevel::GetName( p2->GetAccessLevel() )
                 << " )";
         }
         else
         {
-            tos << p2->GetName();
+            tos << p2->GetColoredName() << tColoredString::ColorString(1,1,1) << " ( " << tCurrentAccessLevel::GetName( p2->GetAccessLevel() ) << " )";
         }
         if ( tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel )
         {
@@ -2931,21 +2940,31 @@ static void se_ListPlayers( ePlayerNetID * receiver )
         }
         tos << "\n";
 
-        se_SendTo( tos.str(), receiver );
+        if ( !doSearch )
+	    sn_ConsoleOut( tos, receiver->Owner() );
+	else
+	{
+	    tString tosLowercase(tos);
+	    tToLower( tosLowercase );
+	    tToLower( search );
+	    if ( tosLowercase.StrPos( search ) != -1 )
+		sn_ConsoleOut( tos, receiver->Owner() );
+		// looks quite like a hack, but i guess it's faster( esp. for me :) ) than checking on each parameter individually
+	}
     }
 }
 
 static void players_conf(std::istream &s)
 {
-    se_ListPlayers( 0 );
+    se_ListPlayers( 0, s );
 }
 
 static tConfItemFunc players("PLAYERS",&players_conf);
 
 // /players gives a player list
-static void se_ChatPlayers( ePlayerNetID * p )
+static void se_ChatPlayers( ePlayerNetID * p, std::istream &s )
 {
-    se_ListPlayers( p );
+    se_ListPlayers( p, s );
 }
 
 // team shuffling: reorders team formation
@@ -3297,7 +3316,7 @@ void handle_chat( nMessage &m )
                         return;
                     }
                     else if (command == "/players") {
-                        se_ChatPlayers( p );
+                        se_ChatPlayers( p, s );
                         return;
                     }
                     else if (command == "/vote" || command == "/callvote") {
