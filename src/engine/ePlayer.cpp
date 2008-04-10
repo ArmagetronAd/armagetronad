@@ -2905,7 +2905,9 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
 {
     tString search;
     bool doSearch = false;
+
     search.ReadLine( s );
+    tToLower( search );
 
     if ( search.Len() > 1 )
 	doSearch = true;
@@ -2928,7 +2930,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
         }
         else
         {
-            tos << p2->GetColoredName() << tColoredString::ColorString(1,1,1) << " ( " << tCurrentAccessLevel::GetName( p2->GetAccessLevel() ) << " )";
+            tos << p2->GetColoredName() << tColoredString::ColorString(1,1,1) << " ( )";
         }
         if ( tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel )
         {
@@ -2944,9 +2946,8 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
 	    sn_ConsoleOut( tos, receiver->Owner() );
 	else
 	{
-	    tString tosLowercase(tos);
+	    tString tosLowercase( tColoredString::RemoveColors(tos) );
 	    tToLower( tosLowercase );
-	    tToLower( search );
 	    if ( tosLowercase.StrPos( search ) != -1 )
 		sn_ConsoleOut( tos, receiver->Owner() );
 		// looks quite like a hack, but i guess it's faster( esp. for me :) ) than checking on each parameter individually
