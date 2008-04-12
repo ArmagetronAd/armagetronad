@@ -1993,7 +1993,7 @@ static tAccessLevel se_opAccessLevelMax = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_opAccessLevelMaxConf( "ACCESS_LEVEL_OP_MAX", se_opAccessLevelMax );
 
 // an operation that changes the access level of another player
-typedef void (*OPFUNC)( ePlayerNetID * admin, ePlayerNetID * victim, int level );
+typedef void (*OPFUNC)( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel accessLevel );
 static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const * command, OPFUNC F )
 {
     if ( admin->GetAccessLevel() <= se_opAccessLevel )
@@ -2039,7 +2039,17 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
 		
                 s >> level;
 
-                (*F)( admin, victim, static_cast< tAccessLevel >( level ) );
+		tAccessLevel accessLevel;
+		accessLevel = static_cast< tAccessLevel >( level );
+
+	        if ( accessLevel > admin->GetAccessLevel() )
+		{
+                    (*F)( admin, victim, accessLevel );
+		}
+		else
+		{
+		    sn_ConsoleOut( tOutput( "$access_level_op_denied_max", command ), admin->Owner() );
+		}
             }
         }
     }
@@ -2050,9 +2060,8 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
 }
 
 // Promote changes the access rights of an already authed player
-void se_Promote( ePlayerNetID * admin, ePlayerNetID * victim, int level )
+void se_Promote( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel accessLevel )
 {
-    tAccessLevel accessLevel = static_cast< tAccessLevel >( level );
     if ( accessLevel > tAccessLevel_Authenticated )
     {
         accessLevel = tAccessLevel_Authenticated;
@@ -2086,7 +2095,7 @@ void se_Promote( ePlayerNetID * admin, ePlayerNetID * victim, int level )
 }
 
 // our operations of this kind: op grants access
-void se_OpBase( ePlayerNetID * admin, ePlayerNetID * victim, char const * command, int accessLevel )
+void se_OpBase( ePlayerNetID * admin, ePlayerNetID * victim, char const * command, tAccessLevel accessLevel )
 {
     tString authName = victim->GetUserName() + "@L_OP";
     if ( victim->IsAuthenticated() )
@@ -2103,17 +2112,10 @@ void se_OpBase( ePlayerNetID * admin, ePlayerNetID * victim, char const * comman
         sn_ConsoleOut( tOutput( "$access_level_op_denied_ai", command ), admin->Owner() );
     }
 
-    if ( accessLevel > admin->GetAccessLevel() )
-    {
-        victim->Authenticate( authName, static_cast< tAccessLevel >( accessLevel ), admin );
-    }
-    else
-    {
-        sn_ConsoleOut( tOutput( "$access_level_op_denied_max", command ), admin->Owner() );
-    }
+    victim->Authenticate( authName, accessLevel, admin );
 }
 
-void se_Op( ePlayerNetID * admin, ePlayerNetID * victim, int level )
+void se_Op( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel level )
 {
     int accessLevel = admin->GetAccessLevel() + 1;
 
@@ -2125,16 +2127,16 @@ void se_Op( ePlayerNetID * admin, ePlayerNetID * victim, int level )
 
     if ( victim->IsAuthenticated() )
     {
-	se_Promote( admin, victim, accessLevel );
+	se_Promote( admin, victim, static_cast< tAccessLevel >( accessLevel ) );
     }
     else
     {
-	se_OpBase( admin, victim, "/op", accessLevel );
+	se_OpBase( admin, victim, "/op", static_cast< tAccessLevel >( accessLevel ) );
     }
 }
 
 // DeOp takes it away
-void se_DeOp( ePlayerNetID * admin, ePlayerNetID * victim, int )
+void se_DeOp( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel )
 {
     if ( victim->IsAuthenticated() )
     {
