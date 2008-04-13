@@ -2005,7 +2005,7 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
             {
                 sn_ConsoleOut( tOutput( "$access_level_op_self", command ), admin->Owner() );
             }
-            else if ( victim->GetAccessLevel() < admin->GetAccessLevel() )
+            else if ( admin->GetAccessLevel() > victim->GetAccessLevel() )
             {
                 sn_ConsoleOut( tOutput( "$access_level_op_overpowered", command ), admin->Owner() );
             }
