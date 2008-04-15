@@ -336,7 +336,7 @@ AC_DEFUN([AM_BINRELOC],
 	AC_SUBST(BINRELOC_LIBS)
 ])
 
-dnl Modified ZThread test follows. This one works, AM_PATH_ZTHREAD alone does not.
+dnl Modified ZThread test follows. This one works, the official one alone does not.
 dnl Changes: hacked compiler temporarily to use CXX instead of CC
 dnl          added zthread/ to include path
 dnl          added #include "zthread/Task.h" and #include "zthread/Thread.h"
