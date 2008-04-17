@@ -1694,6 +1694,13 @@ void gNetPlayerWall::Checkpoint()
     // copy the last coordinate entry
     int len = coords_.Len();
 
+#ifdef DEBUG
+    if ( len > 100 )
+    {
+        st_Breakpoint();
+    }
+#endif
+
     // temporary is required to compensate for growing array nightmare
     coords_[len] = gPlayerWallCoord( coords_[len-1] );
 

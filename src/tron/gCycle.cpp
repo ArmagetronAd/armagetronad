@@ -2545,6 +2545,9 @@ bool gCycle::Timestep(REAL currentTime){
     // clear out dangerous info when we're done
     gMaxSpaceAheadHitInfoClearer hitInfoClearer( maxSpaceHit_ );
 
+    // archive rubber speed for later comparison
+    REAL rubberSpeedFactorBack = rubberSpeedFactor;
+
     // if ( Owner() == sn_myNetID )
     //    con << pos << ',' << distance << ',' << eCoord::F( dirDrive, pos ) - distance << '\n';
 
@@ -2733,6 +2736,37 @@ bool gCycle::Timestep(REAL currentTime){
         tNEW( gCycleRenderer( this ) );
     }
 #endif
+
+    // checkpoint wall when rubber starts to get used
+    if ( currentWall )
+    {
+        if ( rubberSpeedFactor >= .99 && rubberSpeedFactorBack < .99 )
+        {
+            currentWall->Checkpoint();
+        }
+        else if ( rubberSpeedFactor < .99 && rubberSpeedFactorBack >= .99 )
+        {
+            currentWall->Checkpoint();
+        }
+        else if ( rubberSpeedFactor < .1 && rubberSpeedFactorBack >= .1 )
+        {
+            currentWall->Checkpoint();
+        }
+        else if ( rubberSpeedFactor < .01 && rubberSpeedFactorBack >= .01 )
+        {
+            currentWall->Checkpoint();
+        }
+    }
+
+    if ( sn_GetNetState()==nSERVER )
+    {
+        // do an emergency sync when rubber starts to get used, it may come unexpected to clients
+        if ( rubberSpeedFactor < .99 && rubberSpeedFactorBack >= .99 )
+        {
+            RequestSyncOwner();
+        }
+    }
+
     return ret;
 }
 
@@ -2797,9 +2831,6 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
         skewDot=0;
 
     eCoord oldpos=pos;
-
-    // archive rubber speed for later comparison
-    REAL rubberSpeedFactorBack = rubberSpeedFactor;
 
     REAL ts=(currentTime-lastTime);
 
@@ -3053,39 +3084,8 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
         skewDot=0;
     }
 
-    // checkpoint wall when rubber starts to get used
-    if ( currentWall )
-    {
-        if ( rubberSpeedFactor >= .99 && rubberSpeedFactorBack < .99 )
-        {
-            currentWall->Checkpoint();
-        }
-
-        if ( rubberSpeedFactor < .99 && rubberSpeedFactorBack >= .99 )
-        {
-            currentWall->Checkpoint();
-        }
-
-        if ( rubberSpeedFactor < .1 && rubberSpeedFactorBack >= .1 )
-        {
-            currentWall->Checkpoint();
-        }
-
-        if ( rubberSpeedFactor < .01 && rubberSpeedFactorBack >= .01 )
-        {
-            currentWall->Checkpoint();
-        }
-    }
-
-
     if ( sn_GetNetState()==nSERVER )
     {
-        // do an emergency sync when rubber starts to get used, it may come unexpected to clients
-        if ( rubberSpeedFactor < .99 && rubberSpeedFactorBack >= .99 )
-        {
-            RequestSyncOwner();
-        }
-
         if (nextSync < tSysTimeFloat() )
         {
             // delay syncs for old clients when there is a wall ahead; they would tunnel locally
@@ -3398,13 +3398,13 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
             
             // check whether we drove through a hole in an enemy wall made by a teammate
             gPlayerWall const * w = dynamic_cast< gPlayerWall const * >( ww );
-            if ( w && score_hole )
+            if ( Alive() && w && score_hole )
             {
                 gExplosion * explosion = w->Holer( a, time );
                 if ( explosion )
                 {
                     gCycle * holer = explosion->GetOwner();
-                    if ( holer && holer->Player() &&
+                    if ( holer && holer != this && holer->Player() &&
                          Player() &&
                          w->Cycle() && w->Cycle()->Player() &&
                          holer->Player()->CurrentTeam() == Player()->CurrentTeam() &&       // holer must have been a teammate 
