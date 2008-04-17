@@ -3332,13 +3332,13 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
             
             // check whether we drove through a hole in an enemy wall made by a teammate
             gPlayerWall const * w = dynamic_cast< gPlayerWall const * >( ww );
-            if ( w && score_hole )
+            if ( Alive() && w && score_hole )
             {
                 gExplosion * explosion = w->Holer( a, time );
                 if ( explosion )
                 {
                     gCycle * holer = explosion->GetOwner();
-                    if ( holer && holer->Player() &&
+                    if ( holer && holer != this && holer->Player() &&
                          Player() &&
                          w->Cycle() && w->Cycle()->Player() &&
                          holer->Player()->CurrentTeam() == Player()->CurrentTeam() &&       // holer must have been a teammate 
