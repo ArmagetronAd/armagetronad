@@ -25,8 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#ifndef ARMAGETRON_COCKPIT_H
-#define ARMAGETRON_COCKPIT_H
+#ifndef ARMAGETRON_G_ROTATION_H
+#define ARMAGETRON_G_ROTATION_H
 
 #include "tCallback.h"
 #include "tLinkedList.h"
