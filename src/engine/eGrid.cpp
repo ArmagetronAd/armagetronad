@@ -2636,7 +2636,6 @@ void eGrid::RemoveGameObjectInactive    (eGameObject *o){
 
 /*
 
-
 void eEdge::calc_Len() const{
   REAL len2=(*p[0] - *p[1]).NormSquared();
   *reinterpret_cast<REAL *>(reinterpret_cast<void *>(&len))=sqrt(len2);
