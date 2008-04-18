@@ -177,6 +177,7 @@ static void infinity_xy_plane(eCoord const & pos, const eCoord &dir,REAL h=0){
         glTexCoord4f(-1,0.1,zero*h,zero);
         glVertex4f  (-1,0.1,zero*h,zero);
 
+
         glTexCoord4f(0.1,-1.1,zero*h,zero);
         glVertex4f  (0.1,-1.1,zero*h,zero);
 
@@ -189,13 +190,13 @@ static void infinity_xy_plane(eCoord const & pos, const eCoord &dir,REAL h=0){
 
 static REAL z=0;
 
-
+/* Try to get ride of these functions as it seems useless to use them instead of the cam parameter itself
 int           eGrid::NumberOfCameras(){return cameras.Len();}
 const eCoord& eGrid::CameraPos(int i){return cameras(i)->CameraPos();}
 eCoord eGrid::CameraGlancePos(int i){return cameras(i)->CameraGlancePos();}
 const eCoord& eGrid::CameraDir(int i){return cameras(i)->CameraDir();}
 REAL          eGrid::CameraHeight(int i){return cameras(i)->CameraZ();}
-
+*/
 
 
 
@@ -217,8 +218,8 @@ void draw_eWall(eGrid* grid, int v,int i, REAL& zNear, eCamera const * cam)
                 REAL zDist = z - displayed_eWall->Height();
                 if ( zDist < zNear )
                 {
-                    const eCoord& camPos = grid->CameraPos( v );
-                    const eCoord& camDir = grid->CameraDir( v );
+                    const eCoord& camPos = cam->CameraPos();
+                    const eCoord& camDir = cam->CameraDir();
                     eCoord base = displayed_eWall->EndPoint(0);
                     eCoord end = displayed_eWall->EndPoint(1);
 
@@ -262,7 +263,7 @@ void draw_eWall(eGrid* grid, int v,int i, REAL& zNear, eCamera const * cam)
 }
 
 
-void paint_sr_lowerSky(eGrid *grid, int viewer,bool sr_upperSky, eCoord const & camPos){
+void paint_sr_lowerSky(eGrid *grid, int viewer,bool sr_upperSky, eCamera* cam ){
     TexMatrix();
     glLoadIdentity();
     glScalef(.005,.005,.005);
@@ -285,13 +286,13 @@ void paint_sr_lowerSky(eGrid *grid, int viewer,bool sr_upperSky, eCoord const & 
     }
     if (sa>0){
         glColor4f(1,1,1,sa);
-        infinity_xy_plane(camPos,grid->CameraDir(viewer),lower_height);
+        infinity_xy_plane(cam->CameraPos(),cam->CameraDir(),lower_height);
     }
     if (!sr_upperSky && sr_alphaBlend)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void eGrid::display_simple( int viewer,bool floor,
+void eGrid::display_simple( eCamera* cam, int viewer,bool floor,
                             bool sr_upperSky,bool sr_lowerSky,
                             REAL flooralpha,
                             bool eWalls,bool gameObjects,
@@ -328,7 +329,7 @@ void eGrid::display_simple( int viewer,bool floor,
 
     glDisable(GL_CULL_FACE);
 
-    eCoord camPos = CameraGlancePos( viewer );
+    eCoord camPos = cam->CameraGlancePos(); 
     // eWallRim::Bound( camPos, 10 );
 
     if (sr_upperSky || se_BlackSky()){
@@ -339,7 +340,7 @@ void eGrid::display_simple( int viewer,bool floor,
             glColor3f(0,0,0);
 
             if ( z < lower_height )
-                infinity_xy_plane(camPos, this->CameraDir(viewer),lower_height);
+                infinity_xy_plane(cam->CameraPos(), cam->CameraDir(), lower_height);
 
             glEnable(GL_TEXTURE_2D);
         }
@@ -353,12 +354,12 @@ void eGrid::display_simple( int viewer,bool floor,
             glColor3f(.5,.5,1);
 
             if ( z < upper_height )
-                infinity_xy_plane(camPos, this->CameraDir(viewer),upper_height);
+                infinity_xy_plane(cam->CameraPos(), cam->CameraDir(), upper_height);
         }
     }
 
     if (sr_lowerSky && !sr_highRim){
-        paint_sr_lowerSky(this, viewer,sr_upperSky, camPos);
+        paint_sr_lowerSky(this, viewer,sr_upperSky, cam);
     }
 
     if (floor){
@@ -379,7 +380,7 @@ void eGrid::display_simple( int viewer,bool floor,
 	#define SIDELEN   (se_GridSize())
 	#define EXTENSION 10
 
-                eCoord center = CameraPos(viewer) + CameraDir(viewer) * (SIDELEN * EXTENSION * .8);
+                eCoord center = cam->CameraPos() + cam->CameraDir() * (SIDELEN * EXTENSION * .8);
 
                 REAL x=center.x;
                 REAL y=center.y;
@@ -420,7 +421,7 @@ void eGrid::display_simple( int viewer,bool floor,
             se_glFloorTexture();
             se_glFloorColor(flooralpha);
 
-            infinity_xy_plane( camPos, CameraDir(viewer) );
+            infinity_xy_plane( cam->CameraPos(), cam->CameraDir()); 
 
             /* old way: draw every triangle
             for(int i=eFace::faces.Len()-1;i>=0;i--){
@@ -447,7 +448,7 @@ void eGrid::display_simple( int viewer,bool floor,
             glScalef(0.01*gs,gs,1.);
 
             se_glFloorTexture_a();
-            infinity_xy_plane( camPos, CameraDir(viewer) );
+            infinity_xy_plane( cam->CameraPos(), cam->CameraDir()); 
 
             se_glFloorColor(flooralpha);
 
@@ -459,7 +460,7 @@ void eGrid::display_simple( int viewer,bool floor,
 
             glDepthFunc(GL_LEQUAL);
             glBlendFunc(GL_SRC_ALPHA,GL_ONE);
-            infinity_xy_plane( camPos, CameraDir(viewer) );
+            infinity_xy_plane( cam->CameraPos(), cam->CameraDir() );
             glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
             break;
@@ -468,7 +469,7 @@ void eGrid::display_simple( int viewer,bool floor,
 
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
-
+	
     TexMatrix();
     glLoadIdentity();
     ModelMatrix();
@@ -482,7 +483,7 @@ void eGrid::display_simple( int viewer,bool floor,
         {
             su_FetchAndStoreSDLInput();
     
-            eWallRim::RenderAll( cameras(viewer) );
+            eWallRim::RenderAll( cam );
         }
 
         if (sr_lowerSky && sr_highRim){
@@ -491,7 +492,7 @@ void eGrid::display_simple( int viewer,bool floor,
             //      glEnable(GL_TEXTURE_GEN_Q);
             //      glEnable(GL_TEXTURE_GEN_R);
 
-            paint_sr_lowerSky(this, viewer,sr_upperSky, camPos);
+            paint_sr_lowerSky(this, viewer,sr_upperSky, cam);
 
             //      glDisable(GL_TEXTURE_GEN_S);
             //      glDisable(GL_TEXTURE_GEN_T);
@@ -508,7 +509,7 @@ void eGrid::display_simple( int viewer,bool floor,
 
     if (eWalls){
         // glDisable(GL_CULL_FACE);
-        // draw_eWall(this,viewer,0,zNear,cameras(viewer));
+        // draw_eWall(this,viewer,0,zNear,cam);
 
         /*
         #ifdef DEBUG
@@ -540,7 +541,7 @@ void eGrid::display_simple( int viewer,bool floor,
     sr_CheckGLError();
 
     if (gameObjects)
-        eGameObject::RenderAll(this, cameras(viewer));
+        eGameObject::RenderAll(this, cam);
 
     eDebugLine::Render();
 #ifdef DEBUG
@@ -602,63 +603,63 @@ void eGrid::Render( eCamera* cam, int viewer, REAL& zNear ){
 #ifndef DEDICATED
     ProjMatrix();
 
-    z=CameraHeight(viewer);
+    z=cam->CameraZ();
     if ( zNear > z )
     {
         zNear = z;
     }
 
-    if (sr_floorMirror){
-        ModelMatrix();
-        glScalef(1,1,-1);
+	if (sr_floorMirror){
+		ModelMatrix();
+		glScalef(1,1,-1);
 
-        if (z>10) z=10;
-        glFrontFace(GL_CW);
+		if (z>10) z=10;
+		glFrontFace((cam->MirrorView())?GL_CCW:GL_CW);
 
-        bool us=false;
-        bool ls=false;
+		bool us=false;
+		bool ls=false;
 
-        if (sr_floorMirror>=rMIRROR_ALL){
-            us=sr_upperSky;
-            ls=sr_lowerSky;
-        }
-        else if (sr_floorMirror>=rMIRROR_WALLS){
-            if (sr_lowerSky)
-                ls=true;
-            else if (sr_upperSky)
-                us=true;
-        }
+		if (sr_floorMirror>=rMIRROR_ALL){
+			us=sr_upperSky;
+			ls=sr_lowerSky;
+		}
+		else if (sr_floorMirror>=rMIRROR_WALLS){
+			if (sr_lowerSky)
+				ls=true;
+			else if (sr_upperSky)
+				us=true;
+		}
 
-        cam->SetRenderingMain(false);
-        display_simple(viewer,false,
-                       us,ls,
-                       0,
-                       sr_floorMirror>=rMIRROR_WALLS,
-                       sr_floorMirror>=rMIRROR_OBJECTS,
-                       zNear);
-        z=CameraHeight(viewer);
-        glFrontFace(GL_CCW);
-        ModelMatrix();
-        glScalef(1,1,-1);
-
-
-        cam->SetRenderingMain(true);
-        display_simple(viewer,true,
-                       sr_upperSky,sr_lowerSky,
-                       1-sr_floorMirror_strength,
-                       true,true,zNear);
-
-    }
-    else
-    {
-        cam->SetRenderingMain(true);
-        display_simple(viewer,true,
-                       sr_upperSky,sr_lowerSky,
-                       1,
-                       true,true,zNear);
-    }
+		cam->SetRenderingMain(false && cam->CameraMain());
+		display_simple(cam, viewer,false,
+					   us,ls,
+					   0,
+					   sr_floorMirror>=rMIRROR_WALLS,
+					   sr_floorMirror>=rMIRROR_OBJECTS,
+					   zNear);
+		z=cam->CameraZ();
+		glFrontFace((cam->MirrorView())?GL_CW:GL_CCW);
+		ModelMatrix();
+		glScalef(1,1,-1);
 
 
+		cam->SetRenderingMain(true && cam->CameraMain());
+		display_simple(cam, viewer,true,
+					   sr_upperSky,sr_lowerSky,
+					   1-sr_floorMirror_strength,
+					   true,true,zNear);
+
+	}
+	else
+	{
+		glFrontFace((cam->MirrorView())?GL_CW:GL_CCW);
+		cam->SetRenderingMain(true && cam->CameraMain());
+		display_simple(cam, viewer,true,
+					   sr_upperSky,sr_lowerSky,
+					   1,
+					   true,true,zNear);
+	}
+	
 #ifdef EVENT_DEB
     //  for(int i=eEdge_crossing.Len()-1;i>=0;i--){
     //    eEdge_crossing(i)->Render();

@@ -40,7 +40,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "rViewport.h"
 #include "eGrid.h"
-#include "eCamera.h"
 #include "gCycle.h"
 
 #endif
@@ -467,7 +466,8 @@ Map::Map():
         m_toggleKey(0),
         m_clipper(new ClipperRect()),
         m_currentMode(0)
-{}
+{
+}
 
 }
 #endif

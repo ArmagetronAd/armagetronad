@@ -98,6 +98,9 @@ public:
     void AddEventHandler(int id, cWidget::Base *widget); //!< add a key event handler
 
     void Render(); //!< Renders the cockpit
+    static void BeforeRoundProcess(); //!< prepare cockpit before round
+    static void AfterRoundProcess();  //!< Clean cockpit after a round
+    
     //void RenderRootwindow(); //!< Renders the main viewport (all widgets that belong to the entire screen)
     //void RenderPlayer(float factor); //!< Renders all widgets that belong to the currently active player
 

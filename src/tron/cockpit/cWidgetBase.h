@@ -69,6 +69,9 @@ public:
     Base() : m_ParsingTemplate(false), m_Render(true), m_RenderDefault(true), m_Sticky(true) {}
     virtual ~Base() { }
     virtual void Render() = 0; //!< Needs to be owerwritten for all widgets that can be rendered (and therefore created)
+    virtual void PostParsingProcess() {};
+    virtual void BeforeRoundProcess() {};
+    virtual void AfterRoundProcess() {};
     void SetCam(int Cam); //!< Set the camera(s) this widget will be rendered for
 
     int GetCam(void) { return m_Cam; } //!< Get the camera(s) this widget will be rendered for

@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "cockpit/cGauges.h"
 #include "cockpit/cLabel.h"
 #include "cockpit/cMap.h"
+#include "cockpit/cCamview.h"
 #include "cockpit/cRectangle.h"
 #include "nConfig.h"
 
@@ -502,6 +503,7 @@ void cCockpit::ProcessWidget(node cur, cWidget::Base &widget) {
     widget.SetDefaultState(cur.GetPropBool("toggleDefault"));
     widget.SetSticky(cur.GetPropBool("toggleSticky"));
     ProcessWidgetCore(cur, widget);
+    widget.PostParsingProcess();
 }
 
 void cCockpit::AddEventHandler(int id, cWidget::Base *widget) {
@@ -519,6 +521,11 @@ cWidget::Base_ptr cCockpit::ProcessWidgetType(node cur) {
         return cWidget::Base_ptr(new cWidget::Label());
     if(cur.IsOfType("Map"))
         return cWidget::Base_ptr(new cWidget::Map());
+    if(cur.IsOfType("Camview")) {
+    	cWidget::Camview *w = new cWidget::Camview();
+    	w->Process(cur);
+        return cWidget::Base_ptr(w);
+    }
     if(cur.IsOfType("Rectangle"))
         return cWidget::Base_ptr(new cWidget::Rectangle());
     return cWidget::Base_ptr();
@@ -761,6 +768,22 @@ void cCockpit::Render() {
                 glEnable(GL_DEPTH_TEST);
             }
         } break;
+    }
+}
+
+void cCockpit::BeforeRoundProcess() {
+	FOREACH_COCKPIT(i) {
+		for(widget_list_t::const_iterator w=(*i)->m_Widgets.begin(); w!=(*i)->m_Widgets.end(); ++w) {
+			(*w)->BeforeRoundProcess();
+    	}
+    }
+}
+
+void cCockpit::AfterRoundProcess() {
+	FOREACH_COCKPIT(i) {
+	    for(widget_list_t::iterator iter = (*i)->m_Widgets.begin(); iter != (*i)->m_Widgets.end(); ++iter) {
+			(*iter)->AfterRoundProcess();
+    	}
     }
 }
 
