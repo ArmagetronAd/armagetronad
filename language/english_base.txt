@@ -2143,6 +2143,9 @@ instant_round_end_activated	Round end zone activated! Enter it to end the round.
 instant_death_activated		Death zone activated! Avoid it!\n
 
 player_admin_kill			\1 0xRESETTwas smitten by an administrator.\n
+player_admin_slap_free			\1 0xRESETThas been slapped by an administrator.\n
+player_admin_slap_win			\1 0xRESETThas been hugged by an administrator and got \2 points.\n
+player_admin_slap_lose			\1 0xRESETThas been slapped by an administrator and lost \2 points.\n
 player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
 player_win_held_fortress	\1 was awarded \2 points for holding the base.\n
