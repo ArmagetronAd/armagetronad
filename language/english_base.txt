@@ -862,6 +862,8 @@ ban_ip_help                 Bans the spedified IP address from the server for a 
 ban_list_help               Prints a list of currently banned IPs.
 unban_ip_help               Revokes the ban of the specified IP address.
 
+player_list_hidden_player_prefix_help	The prefix that is shown on hidden players' Global ID and access level when we can see it.
+
 # communication
 console_message_help		Prints a message on the console of all connected clients.
 center_message_help			Prints a big message on the screen of all connected clients.
@@ -2271,9 +2273,10 @@ help_commands_tourney_text 0x88ff88/lock0xffff88: Locks your current team. Nobod
 invite_no_team          Can't use \1 if you're not on a team.\n
 invite_team_locked      \1 locked, you'll need an invitation from a team leader via the /invite command to join from now on.\n
 invite_team_unlocked    \1 unlocked, you can join it freely again.\n
+invite_team_can_join      \10xRESETT can now join \2.\n
 invite_team_invite      \10xRESETT has been invited to join \2.\n
 invite_team_kick        \10xRESETT has been kicked from \2.\n
-invite_team_uninvite    \10xRESETT has been uninvited from \2.\n
+invite_team_uninvite    \10xRESETT got his invitation to join \2 cancelled.\n
 invite_team_locked_list (locked)
 
 msg_toomanymatches 0xff0000Too many matches found for the search term \1. Be more specific.\n
@@ -2654,8 +2657,8 @@ login_request_namechange	Name changed. Login required.
 login_request_master		Master server requires Login.
 
 # access level messages
-access_level_hide_of_help      Hide user account information of players with at most this access level.
-access_level_hide_to_help      Hide user account information to players with less than this access level.
+access_level_hide_of_help      Minimal access level to be able to hide it's own user account information.
+access_level_hide_to_help      Minimal access level to see everyone's user account information.
 access_level_team_help         Minimal access level for /lock, /unlock, /invite and /uninvite team management.
 access_level_op_help           Minimal access level for /op, /deop, /promote and /demote co-admin management commands commands.
 access_level_op_max_help       Maximal access level attainable by /op and /promote commands.

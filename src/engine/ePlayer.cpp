@@ -133,6 +133,9 @@ static tSettingItem< bool > se_allowTeamChangesConf( "ALLOW_TEAM_CHANGE", se_all
 static bool se_enableChat = true;	//flag indicating whether chat should be allowed at all (logged in players can always chat)
 static tSettingItem< bool > se_enaChat("ENABLE_CHAT", se_enableChat);
 
+static tString se_hiddenPlayerPrefix ("0xaaaaaa");
+static tConfItemLine se_hiddenPlayerPrefixConf( "PLAYER_LIST_HIDDEN_PLAYER_PREFIX", se_hiddenPlayerPrefix );
+
 static tReferenceHolder< ePlayerNetID > se_PlayerReferences;
 
 class PasswordStorage
@@ -731,7 +734,7 @@ static bool se_Hide( ePlayerNetID const * hider, tAccessLevel currentLevel )
     tASSERT( hider );
 
     return
-    hider->GetAccessLevel() >= se_hideAccessLevelOf &&
+    hider->GetAccessLevel() <= se_hideAccessLevelOf &&
     hider->StealthMode() &&
     currentLevel            >  se_hideAccessLevelTo;
 }
@@ -2915,6 +2918,8 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
     if ( search.Len() > 1 )
 	doSearch = true;
 
+    bool hidden = false;
+
     for ( int i2 = se_PlayerNetIDs.Len()-1; i2>=0; --i2 )
     {
         ePlayerNetID* p2 = se_PlayerNetIDs(i2);
@@ -2923,13 +2928,23 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
         tos << ": ";
         if ( p2->GetAccessLevel() < tAccessLevel_Default && !se_Hide( p2, receiver ) )
         {
-            // player username comes from authentication name and may be much different from
-            // the screen name
-            tos << p2->GetColoredName()
-	        << tColoredString::ColorString(1,1,1)
-	        << " ( " << p2->GetFilteredAuthenticatedName() << ", "
-                << tCurrentAccessLevel::GetName( p2->GetAccessLevel() )
-                << " )";
+            hidden = p2->GetAccessLevel() <= se_hideAccessLevelOf && p2->StealthMode();
+	    tos << p2->GetColoredName()
+	        << tColoredString::ColorString( -1, -1, -1)
+		<< " ( ";
+	    if ( hidden )
+		tos << se_hiddenPlayerPrefix;
+	    tos << p2->GetFilteredAuthenticatedName();
+	    if ( hidden )
+		tos << tColoredString::ColorString( -1 ,-1 ,-1 )
+		    << ", "
+		    << se_hiddenPlayerPrefix;
+	    else
+		tos << ", ";
+            tos << tCurrentAccessLevel::GetName( p2->GetAccessLevel() );
+            if ( hidden )
+		tos << tColoredString::ColorString( -1 ,-1 ,-1 );
+	    tos << " )";
         }
         else
         {
