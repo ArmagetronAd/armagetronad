@@ -41,6 +41,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <fstream>
 #include <iostream>
 #include <deque>
+#include <algorithm>
 #include "rRender.h"
 #include "rSysdep.h"
 #include "nAuthentication.h"
@@ -798,6 +799,8 @@ void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, e
     se_SecretConsoleOut( message, hider->GetAccessLevel(), hider, admin );
 }
 
+static eLadderLogWriter se_authorityBlurbWriter("AUTHORITY_BLURB", true);
+
 static void ResultCallback( nKrawall::nCheckResult const & result )
 {
     tString username = result.username;
@@ -838,10 +841,8 @@ static void ResultCallback( nKrawall::nCheckResult const & result )
             s >> token;
             rest.ReadLine( s );
 
-            std::ostringstream o;
-            o << "AUTHORITY_BLURB_" << token << " " << player->GetFilteredAuthenticatedName() << " " << rest << std::endl;
-
-            se_SaveToLadderLog( o.str().c_str() );
+            se_authorityBlurbWriter << token << player->GetFilteredAuthenticatedName() << rest;
+            se_authorityBlurbWriter.write();
         }
     }
     else
@@ -4034,6 +4035,8 @@ static void player_removed_from_game_handler(nMessage &m)
 
 static nDescriptor player_removed_from_game(202,&player_removed_from_game_handler,"player_removed_from_game");
 
+static eLadderLogWriter se_playerLeftWriter("PLAYER_LEFT", true);
+
 void ePlayerNetID::RemoveFromGame()
 {
     // unregister with the machine
@@ -4069,8 +4072,8 @@ void ePlayerNetID::RemoveFromGame()
             if ( IsHuman() && sn_GetNetState() == nSERVER && NULL != sn_Connections[Owner()].socket )
             {
                 tString ladder;
-                ladder << "PLAYER_LEFT " << userName_ << " " << nMachine::GetMachine(Owner()).GetIP() << "\n";
-                se_SaveToLadderLog(ladder);
+                se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
+                se_playerLeftWriter.write();
             }
         }
     }
@@ -5010,16 +5013,75 @@ void se_SaveToLadderLog( tOutput const & out )
 {
     if (se_consoleLadderLog)
     {
-        std::cout << "[L] " << out;
-        std::cout.flush();
+        std::cout << "[L] " << out << std::endl;
     }
     if (sn_GetNetState()!=nCLIENT && !tRecorder::IsPlayingBack())
     {
         std::ofstream o;
         if ( tDirectories::Var().Open(o, "ladderlog.txt", std::ios::app) )
-            o << out;
+            o << out << std::endl;;
     }
 }
+
+std::list<eLadderLogWriter *> &eLadderLogWriter::writers() {
+    static std::list<eLadderLogWriter *> list;
+    return list;
+}
+
+eLadderLogWriter::eLadderLogWriter(char const *ID, bool enabledByDefault) :
+    id(ID),
+    enabled(enabledByDefault),
+    conf(new tSettingItem<bool>(&(tString("LADDERLOG_WRITE_") + id)(0),
+    enabled)),
+    cache(id) {
+    writers().push_back(this);
+}
+
+eLadderLogWriter::~eLadderLogWriter() {
+    if(conf) {
+        delete conf;
+    }
+    // generic algorithms aren't exactly easier to understand than regular
+    // code, but anyways, let's try one...
+    std::list<eLadderLogWriter *> list = writers();
+    list.erase(std::find_if(list.begin(), list.end(), std::bind2nd(std::equal_to<eLadderLogWriter *>(), this)));
+}
+
+void eLadderLogWriter::write() {
+    if(enabled) {
+        se_SaveToLadderLog(cache);
+    }
+    cache = id;
+}
+
+void eLadderLogWriter::setAll(bool enabled) {
+    std::list<eLadderLogWriter *> list = writers();
+    std::list<eLadderLogWriter *>::iterator end = list.end();
+    for(std::list<eLadderLogWriter *>::iterator iter = list.begin(); iter != end; ++iter) {
+        (*iter)->enabled = enabled;
+    }
+}
+
+static void LadderLogWriteAll(std::istream &s) {
+    bool enabled;
+    s >> enabled;
+    if(s.fail()) {
+        if(tConfItemBase::printErrors) {
+            con << tOutput("$ladderlog_write_all_usage") << '\n';
+        }
+        return;
+    }
+    if(tConfItemBase::printChange) {
+        if(enabled) {
+            con << tOutput("$ladderlog_write_all_enabled") << '\n';
+        } else {
+            con << tOutput("$ladderlog_write_all_disabled") << '\n';
+        }
+    }
+    eLadderLogWriter::setAll(enabled);
+}
+
+static tConfItemFunc LadderLogWriteAllConf("LADDERLOG_WRITE_ALL", &LadderLogWriteAll);
 
 void se_SaveToScoreFile(const tOutput &o){
     tString s(o);
@@ -5273,6 +5335,9 @@ tString ePlayerNetID::Ranking( int MAX, bool cut ){
     return ret;
 }
 
+static eLadderLogWriter se_onlinePlayerWriter("ONLINE_PLAYER", false);
+static eLadderLogWriter se_numHumansWriter("NUM_HUMANS", false);
+
 void ePlayerNetID::RankingLadderLog() {
     SortByScore();
 
@@ -5282,24 +5347,19 @@ void ePlayerNetID::RankingLadderLog() {
         ePlayerNetID *p = se_PlayerNetIDs(i);
         if(p->Owner() == 0) continue; // ignore AIs
 
-        tString line("ONLINE_PLAYER ");
-
-        line << p->GetLogName();
+        se_onlinePlayerWriter << p->GetLogName();
 
         if(p->IsActive()) {
-            line << " " << p->ping;
+            se_onlinePlayerWriter << p->ping;
             if(p->currentTeam) {
-                line << " " << FilterName(p->currentTeam->Name());
+                se_onlinePlayerWriter << FilterName(p->currentTeam->Name());
                 ++num_humans;
             }
         }
-
-        line << '\n';
-        se_SaveToLadderLog(line);
+        se_onlinePlayerWriter.write();
     }
-    tString line("NUM_HUMANS ");
-    line << num_humans << '\n';
-    se_SaveToLadderLog(line);
+    se_numHumansWriter << num_humans;
+    se_numHumansWriter.write();
 }
 
 void ePlayerNetID::ClearAll(){
@@ -6904,6 +6964,9 @@ private:
 
 static gServerInfoAdmin sg_serverAdmin;
 
+static eLadderLogWriter se_playerEnteredWriter("PLAYER_ENTERED", true);
+static eLadderLogWriter se_playerRenamedWriter("PLAYER_RENAMED", true);
+
 class eNameMessenger
 {
 public:
@@ -6941,9 +7004,8 @@ public:
         {
             if ( player_.IsHuman() )
             {
-                tString ladder;
-                ladder << "PLAYER_ENTERED " << logName << " " << nMachine::GetMachine(player_.Owner()).GetIP() << " " << screenName << "\n";
-                se_SaveToLadderLog(ladder);
+                se_playerEnteredWriter << logName << nMachine::GetMachine(player_.Owner()).GetIP() << screenName;
+                se_playerEnteredWriter.write();
 
                 player_.Greet();
 
@@ -6957,9 +7019,8 @@ public:
         }
         else if ( logName != oldLogName_ || screenName != oldScreenName_ )
         {
-            tString ladder;
-            ladder << "PLAYER_RENAMED " << oldLogName_  << " "  << logName << " " << nMachine::GetMachine(player_.Owner()).GetIP() << " " << screenName << "\n";
-            se_SaveToLadderLog(ladder);
+            se_playerRenamedWriter << oldLogName_ << logName << nMachine::GetMachine(player_.Owner()).GetIP() << screenName;
+            se_playerRenamedWriter.write();
 
             if ( oldScreenName_ != screenName )
             {
@@ -7699,18 +7760,18 @@ void ePlayerNetID::LogScoreDifferences( void )
 //!
 // *******************************************************************************
 
+static eLadderLogWriter se_roundScoreWriter("ROUND_SCORE", true);
+
 void ePlayerNetID::LogScoreDifference( void )
 {
     if ( lastScore_ > IMPOSSIBLY_LOW_SCORE && IsHuman() )
     {
-        tString ret;
         int scoreDifference = score - lastScore_;
         lastScore_ = IMPOSSIBLY_LOW_SCORE;
-        ret << "ROUND_SCORE " << scoreDifference << " " << GetUserName();
+        se_roundScoreWriter << scoreDifference << GetUserName();
         if ( currentTeam )
-            ret << " " << FilterName( currentTeam->Name() );
-        ret << "\n";
-        se_SaveToLadderLog( ret );
+            se_roundScoreWriter << FilterName( currentTeam->Name() );
+        se_roundScoreWriter.write();
     }
 }
 

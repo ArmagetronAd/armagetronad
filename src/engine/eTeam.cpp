@@ -464,6 +464,8 @@ void eTeam::LogScoreDifferences( void )
 //!
 // *******************************************************************************
 
+static eLadderLogWriter se_roundScoreTeamWriter("ROUND_SCORE_TEAM", true);
+
 void eTeam::LogScoreDifference( void )
 {
     if ( lastScore_ > IMPOSSIBLY_LOW_SCORE && IsHuman() )
@@ -471,9 +473,8 @@ void eTeam::LogScoreDifference( void )
         tString ret;
         int scoreDifference = score - lastScore_;
         lastScore_ = IMPOSSIBLY_LOW_SCORE;
-        ret << "ROUND_SCORE_TEAM " << scoreDifference << " " << ePlayerNetID::FilterName( Name() );
-        ret << "\n";
-        se_SaveToLadderLog( ret );
+        se_roundScoreTeamWriter << scoreDifference << ePlayerNetID::FilterName( Name() );
+        se_roundScoreTeamWriter.write();
     }
 }
 

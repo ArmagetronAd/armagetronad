@@ -715,6 +715,10 @@ console_indent_help     Number of spaces each continuation of a wrapped console 
 console_decorate_id_help			Decorates every line of console output with the client ID
 console_decorate_ip_help			Decorates every line of console output with the client IP
 console_ladder_log_help			Sends ladder log output to the console
+ladderlog_write_all_help Set all the LADDER_LOG_WRITE_* settings to the same value
+ladderlog_write_all_usage Usage: LADDER_LOG_WRITE_ALL 1|0
+ladderlog_write_all_enabled Enabled full ladderlog output.
+ladderlog_write_all_disabled Disabled ladderlog output.
 ladderlog_game_time_interval If nonnegative, write a line with the current game time to the ladder log every n seconds.
 show_fps_help			Enable fps display
 floor_mirror_help		Floor mirror mode

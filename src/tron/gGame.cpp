@@ -1811,6 +1811,7 @@ static void cp(){
 }
 #endif
 
+static eLadderLogWriter sg_gameEndWriter("GAME_END", true);
 
 static void own_game( nNetState enter_state ){
     tNEW(gGame);
@@ -1820,7 +1821,7 @@ static void own_game( nNetState enter_state ){
 
     // write scores one last time
     ePlayerNetID::LogScoreDifferences();
-    se_SaveToLadderLog(tString("GAME_END\n"));
+    sg_gameEndWriter.write();
 
     sg_currentGame=NULL;
     se_KillGameTimer();
@@ -3028,6 +3029,10 @@ static void sg_VoteMenuIdle()
     }
 }
 
+static eLadderLogWriter sg_newRoundWriter("NEW_ROUND", true);
+static eLadderLogWriter sg_newMatchWriter("NEW_MATCH", true);
+static eLadderLogWriter sg_waitForExternalScriptWriter("WAIT_FOR_EXTERNAL_SCRIPT", true);
+
 void gGame::StateUpdate(){
 
     //	if (state==GS_CREATED)
@@ -3086,7 +3091,7 @@ void gGame::StateUpdate(){
 
             // log scores before players get renamed
             ePlayerNetID::LogScoreDifferences();
-            se_SaveToLadderLog(tString("NEW_ROUND\n"));
+            sg_newRoundWriter.write();
 
             // kick spectators
             nMachine::KickSpectators();
@@ -3302,7 +3307,7 @@ void gGame::StateUpdate(){
                 REAL timeout = tSysTimeFloat() + sg_waitForExternalScriptTimeout;
                 if ( sg_waitForExternalScript )
                 {
-                    se_SaveToLadderLog("WAIT_FOR_EXTERNAL_SCRIPT\n");
+                    sg_waitForExternalScriptWriter.write();
                     // REAL waitingSince = tSysTimeFloat();
                 }
                 while ( sg_waitForExternalScript && timeout > tSysTimeFloat())
@@ -3477,6 +3482,9 @@ static bool sg_EnemyExists( int team )
 
 static REAL sg_winZoneRandomness = .8;
 static tSettingItem< REAL > sg_winZoneSpreadConf( "WIN_ZONE_RANDOMNESS", sg_winZoneRandomness );
+
+static eLadderLogWriter sg_roundWinnerWriter("ROUND_WINNER", true);
+static eLadderLogWriter sg_matchWinnerWriter("MATCH_WINNER", true);
 
 void gGame::Analysis(REAL time){
     if ( nCLIENT == sn_GetNetState() )
@@ -3811,9 +3819,8 @@ void gGame::Analysis(REAL time){
                         message << '\n';
                         se_SaveToScoreFile(message);
 
-                        tString ladderLog;
-                        ladderLog << "ROUND_WINNER " << ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() ) << "\n";
-                        se_SaveToLadderLog( ladderLog );
+                        sg_roundWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() );
+                        sg_roundWinnerWriter.write();
                     }
                 }
                 check_hs();
@@ -3883,9 +3890,8 @@ void gGame::Analysis(REAL time){
                         name << eTeam::teams[0]->Name();
                         name << tColoredString::ColorString(1,1,1);
 
-                        tString ladderLog;
-                        ladderLog << "MATCH_WINNER " << ePlayerNetID::FilterName( eTeam::teams[0]->Name() ) << "\n";
-                        se_SaveToLadderLog( ladderLog );
+                        sg_matchWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[0]->Name() );
+                        sg_matchWinnerWriter.write();
 
                         message.SetTemplateParameter(1, name);
                         message << "$gamestate_champ_console";
@@ -3990,7 +3996,7 @@ void gGame::StartNewMatch(){
 
 void gGame::StartNewMatchNow(){
     if ( rounds != 0 )
-        se_SaveToLadderLog(tString("NEW_MATCH\n"));
+        sg_newMatchWriter.write();
 
     rounds=0;
     warning=0;
@@ -4054,6 +4060,8 @@ static bool ingamemenu_func(REAL x){
 }
 static uActionGlobalFunc ingamemenu_action(&ingamemenu,&ingamemenu_func, true );
 #endif // dedicated
+
+static eLadderLogWriter sg_gameTimeWriter("GAME_TIME", true);
 
 bool gGame::GameLoop(bool input){
     nNetState netstate = sn_GetNetState();
@@ -4208,9 +4216,8 @@ bool gGame::GameLoop(bool input){
     static float lastTime = -1;
 
     if(sg_gameTimeInterval >= 0 && (gtime >= lastTime + sg_gameTimeInterval || (gtime < lastTime && gtime >= 0))) {
-        tOutput out;
-        out << "GAME_TIME " << gtime << '\n';
-        se_SaveToLadderLog(out);
+        sg_gameTimeWriter << gtime;
+        sg_gameTimeWriter.write();
         lastTime = gtime;
     }
 

@@ -45,6 +45,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nSpamProtection.h"
 
 #include <set>
+#include <list>
 
 #define PLAYER_CONFITEMS (30+MAX_INSTANT_CHAT)
 
@@ -417,7 +418,28 @@ extern int    sr_viewportBelongsToPlayer[MAX_VIEWPORTS];
 void se_ChatState( ePlayerNetID::ChatFlags flag, bool cs);
 
 void se_SaveToScoreFile( tOutput const & out );  //!< writes something to scorelog.txt
-void se_SaveToLadderLog( tOutput const & out );  //!< writes something to ladderlog.txt
+
+//! create a global instance of this to write stuff to ladderlog.txt
+class eLadderLogWriter {
+    static std::list<eLadderLogWriter *> &writers();
+    tString id;
+    bool enabled;
+    tSettingItem<bool> *conf;
+    tColoredString cache;
+public:
+    eLadderLogWriter(char const *ID, bool enabledByDefault);
+    ~eLadderLogWriter();
+    //! append a field to the current message. Spaces are added automatically.
+    template<typename T> eLadderLogWriter &operator<<(T const &s) {
+        if(enabled) {
+            cache << ' ' << s;
+        }
+        return *this;
+    }
+    void write(); //!< send to ladderlog and clear message
+
+    static void setAll(bool enabled); //!< enable or disable all writers
+};
 
 tColoredString & operator << (tColoredString &s,const ePlayer &p);
 tColoredString & operator << (tColoredString &s,const ePlayerNetID &p);
