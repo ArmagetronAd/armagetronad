@@ -127,6 +127,9 @@ static nSettingItem< REAL > se_minPlayTimeTeamConf( "MIN_PLAY_TIME_TEAM", se_min
 static bool se_assignTeamAutomatically = true;
 static tSettingItem< bool > se_assignTeamAutomaticallyConf( "AUTO_TEAM", se_assignTeamAutomatically );
 
+static bool se_specSpam = true;
+static tSettingItem< bool > se_specSpamConf( "AUTO_TEAM_SPEC_SPAM", se_specSpam );
+
 static bool se_allowTeamChanges = true;
 static tSettingItem< bool > se_allowTeamChangesConf( "ALLOW_TEAM_CHANGE", se_allowTeamChanges );
 
@@ -4075,7 +4078,7 @@ void ePlayerNetID::RemoveFromGame()
         m->BroadCast();
 
         if ( listID >= 0 ){
-            if ( ( IsSpectating() || !se_assignTeamAutomatically || IsSuspended() ) && CurrentTeam() == NULL )
+            if ( ( IsSpectating() || IsSuspended() || !se_assignTeamAutomatically ) && ( se_assignTeamAutomatically || se_specSpam ) && CurrentTeam() == NULL )
             {
                 // get colored player name
                 tColoredString playerName;
@@ -7060,7 +7063,7 @@ public:
                 player_.Greet();
 
                 // print spectating join message (regular join messages are handled by eTeam)
-                if ( player_.IsSpectating() || player_.IsSuspended() || !se_assignTeamAutomatically )
+                if ( ( player_.IsSpectating() || player_.IsSuspended() || !se_assignTeamAutomatically ) && ( se_assignTeamAutomatically || se_specSpam ) )
                 {
                     mess << "$player_entered_spectator";
                     sn_ConsoleOut(mess);
