@@ -1,8 +1,10 @@
 Changes since 0.2.8.2:
 
   New settings and commands:
-- MIN_PLAY_TIME_*: minimal play time required before you are allowed to play on this server.
-- SPAM_AUTOKICK_COUNT: minimal number of spam warning messages you get in a row before you get kicked.
+- MIN_PLAY_TIME_*: minimal play time required before you are allowed to
+  play on this server.
+- SPAM_AUTOKICK_COUNT: minimal number of spam warning messages you get in a
+  row before you get kicked.
 - FORTRESS_COLLAPSE_SPEED: tune the collapse speed of fortress zones.
 - VOTE_KICK_REASON: default reason given on kick votes.
 - "/vote" chat interface to votes; "/vote kick <player>" issues a kick vote.
@@ -74,6 +76,14 @@ Changes since 0.2.8.2:
   "[L] "
 - PLAYER_MESSAGE <user ID or name> <Message>: Like /msg, but from the
   console
+- All ladderlog outputs can be enabled or disabled separately by using
+  LADDERLOG_WRITE_*. LADDERLOG_WRITE_ALL enables or disables all ladderlog
+  output alltogether.
+- SLAP <player> [points] sends a message to everyone and subtracts a number
+  of points (default: 1) from <player>'s score. Negative points are
+  supported.
+- AUTO_TEAM_SPEC_SPAM to disable the spectator join/leave messages you get
+  when AUTO_TEAM is enabled
 
 If --enable-armathentication was activated:
 - /lock, /unlock, /invite and /uninvite team management chat for players of

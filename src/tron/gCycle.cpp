@@ -3171,6 +3171,10 @@ void gCycle::Die( REAL time )
     }
 }
 
+static eLadderLogWriter sg_deathFragWriter("DEATH_FRAG", true);
+static eLadderLogWriter sg_deathSuicideWriter("DEATH_SUICIDE", true);
+static eLadderLogWriter sg_deathTeamkillWriter("DEATH_TEAMKILL", true);
+
 void gCycle::KillAt( const eCoord& deathPos){
     // don't kill invulnerable cycles
     if ( !Vulnerable() )
@@ -3211,9 +3215,8 @@ void gCycle::KillAt( const eCoord& deathPos){
     {
         if (hunter)
         {
-            tString ladderLog;
-            ladderLog << "DEATH_SUICIDE " << hunter->GetUserName() << "\n";
-            se_SaveToLadderLog( ladderLog );
+            sg_deathSuicideWriter << hunter->GetUserName();
+            sg_deathSuicideWriter.write();
 
             if ( score_suicide )
                 hunter->AddScore(score_suicide, tOutput(), "$player_lose_suicide" );
@@ -3236,9 +3239,8 @@ void gCycle::KillAt( const eCoord& deathPos){
                 preyName << *Player();
                 preyName << tColoredString::ColorString(1,1,1);
                 if (Player()->CurrentTeam() != hunter->CurrentTeam()) {
-                    tString ladderLog;
-                    ladderLog << "DEATH_FRAG " << Player()->GetUserName() << " " << hunter->GetUserName()  << "\n";
-                    se_SaveToLadderLog( ladderLog );
+                    sg_deathFragWriter << Player()->GetUserName() << hunter->GetUserName();
+                    sg_deathFragWriter.write();
 
                     win.SetTemplateParameter(3, preyName);
                     win << "$player_win_frag";
@@ -3252,9 +3254,8 @@ void gCycle::KillAt( const eCoord& deathPos){
                     }
                 }
                 else {
-                    tString ladderLog;
-                    ladderLog << "DEATH_TEAMKILL " << Player()->GetUserName() << " " << hunter->GetUserName()  << "\n";
-                    se_SaveToLadderLog( ladderLog );
+                    sg_deathTeamkillWriter << Player()->GetUserName() << hunter->GetUserName();
+                    sg_deathTeamkillWriter.write();
 
                     tColoredString hunterName;
                     hunterName << *hunter << tColoredString::ColorString(1,1,1);
@@ -3385,6 +3386,8 @@ static void sg_HoleScore( gCycle & cycle )
     cycle.Player()->AddScore( score_hole, tOutput("$player_win_hole"), tOutput("$player_lose_hole") );
 }
 
+static eLadderLogWriter sg_sacrificeWriter("SACRIFICE", true);
+
 void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
     {
         // deactivate time check
@@ -3414,9 +3417,8 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                         // this test must come last, it resets the flag.
                         if ( explosion->AccountForHole() )
                         {
-                            tString ladderLog;
-                            ladderLog << "SACRIFICE " << Player()->GetUserName() << " " << holer->Player()->GetUserName() << " " << w->Cycle()->Player()->GetUserName() << "\n";
-                            se_SaveToLadderLog( ladderLog );
+                            sg_sacrificeWriter << Player()->GetUserName() << holer->Player()->GetUserName() << w->Cycle()->Player()->GetUserName();
+                            sg_sacrificeWriter.write();
                             if ( score_hole > 0 )
                             {
                                 // positive hole score goes to the holer

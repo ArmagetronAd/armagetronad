@@ -1097,7 +1097,7 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
         // skip color codes
         if (*c=='0' && len >= 2 && c[1]=='x')
         {
-	    if( len >= 8 && darkonly )
+	    if( len >= 8 && darkonly && strncmp( c, "0xRESETT", 8 ) != 0 )
 	    {
 		tColor colorToFilter;
 		colorToFilter = tColor( c );
@@ -1396,6 +1396,12 @@ tColoredString & operator <<(tColoredString &s, const tColoredStringProxy &color
 {
     if (st_colorStrings)
     {
+        if ( colorCode.r_ == -1 || colorCode.g_ == -1 || colorCode.b_ == -1 )
+        {
+            s << "0xRESETT";
+            return s;
+        }
+
         char cs[9];
         cs[0]='0';
         cs[1]='x';

@@ -424,7 +424,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
             int wordLen = 0;
             while ( *nextSpace != '\0' && *nextSpace != '\n' && !isblank(*nextSpace) )
             {
-                if (*nextSpace=='0' && strlen(nextSpace)>=8 && nextSpace[1]=='x' && colorMode != COLOR_IGNORE )
+                if (*nextSpace=='0' && strnlen(nextSpace, 8)>=8 && nextSpace[1]=='x' && colorMode != COLOR_IGNORE )
                 {
                     // skip color code
                     nextSpace += 8;
@@ -460,7 +460,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
         }
 
         // detect presence of color code
-        if (*c=='0' && strlen(c)>=8 && c[1]=='x' && colorMode != COLOR_IGNORE )
+        if (*c=='0' && strnlen(c, 8)>=8 && c[1]=='x' && colorMode != COLOR_IGNORE )
         {
             tColor color;
             bool use = false;
@@ -516,10 +516,10 @@ void DisplayText(REAL x,REAL y,REAL w,REAL h,const char *text,int center,int cur
 
     if ( colorMode == rTextField::COLOR_USE )
     {
-        for (unsigned int i=0; i<strlen(text); i++)
+        for(char const *c = text; *c != 0; ++c)
         {
-            if (text[i] == '0' && text[i+1] == 'x')
-                colorlen=colorlen-8;
+            if(*c == '0' && c[1] == 'x')
+                colorlen -= 8;
         }
     }
 

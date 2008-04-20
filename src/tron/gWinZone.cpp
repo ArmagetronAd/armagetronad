@@ -2043,14 +2043,16 @@ void gBaseZoneHack::OnVanish( void )
 //!
 // *******************************************************************************
 
+static eLadderLogWriter sg_basezoneConqueredWriter("BASEZONE_CONQUERED", true);
+static eLadderLogWriter sg_basezoneConquererWriter("BASEZONE_CONQUERER", true);
+
 void gBaseZoneHack::OnConquest( void )
 {
-    tString log;
     if ( team )
     {
-        log << "BASEZONE_CONQUERED " << ePlayerNetID::FilterName(team->Name()) << " " << GetPosition().x << " " << GetPosition().y << '\n';
+        sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << GetPosition().x << GetPosition().y;
+        sg_basezoneConqueredWriter.write();
     }
-    se_SaveToLadderLog(log);
     float rr = GetRadius();
     rr *= rr;
     for(int i = se_PlayerNetIDs.Len()-1; i >=0; --i) {
@@ -2063,9 +2065,8 @@ void gBaseZoneHack::OnConquest( void )
             continue;
         }
         if(cycle->Alive() && (cycle->Position() - Position()).NormSquared() < rr) {
-            tString log;
-            log << "BASEZONE_CONQUERER " << player->GetUserName() << '\n';
-            se_SaveToLadderLog(log);
+            sg_basezoneConquererWriter << player->GetUserName();
+            sg_basezoneConquererWriter.write();
         }
     }
 

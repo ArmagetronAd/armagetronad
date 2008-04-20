@@ -324,7 +324,11 @@ bool eTeam::IsLocked() const
 void eTeam::Invite( ePlayerNetID * player )
 {
     tASSERT( player );
-    if ( !IsInvited( player ) )
+    if ( !IsInvited( player ) && this->IsLocked() )
+    {
+	sn_ConsoleOut( tOutput( "$invite_team_can_join", player->GetColoredName(), Name() ) );
+    }
+    else if ( !IsInvited( player ) )
     {
         sn_ConsoleOut( tOutput( "$invite_team_invite", player->GetColoredName(), Name() ) );
     }
@@ -335,7 +339,7 @@ void eTeam::Invite( ePlayerNetID * player )
 void eTeam::UnInvite( ePlayerNetID * player )
 {
     tASSERT( player );
-    if ( player->CurrentTeam() == this )
+    if ( player->CurrentTeam() == this && this->IsLocked() )
     {
         sn_ConsoleOut( tOutput( "$invite_team_kick", player->GetColoredName(), Name() ) );
         player->SetTeam(0);
@@ -464,6 +468,8 @@ void eTeam::LogScoreDifferences( void )
 //!
 // *******************************************************************************
 
+static eLadderLogWriter se_roundScoreTeamWriter("ROUND_SCORE_TEAM", true);
+
 void eTeam::LogScoreDifference( void )
 {
     if ( lastScore_ > IMPOSSIBLY_LOW_SCORE && IsHuman() )
@@ -471,9 +477,8 @@ void eTeam::LogScoreDifference( void )
         tString ret;
         int scoreDifference = score - lastScore_;
         lastScore_ = IMPOSSIBLY_LOW_SCORE;
-        ret << "ROUND_SCORE_TEAM " << scoreDifference << " " << ePlayerNetID::FilterName( Name() );
-        ret << "\n";
-        se_SaveToLadderLog( ret );
+        se_roundScoreTeamWriter << scoreDifference << ePlayerNetID::FilterName( Name() );
+        se_roundScoreTeamWriter.write();
     }
 }
 
