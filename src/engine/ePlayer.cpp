@@ -762,7 +762,7 @@ static bool se_Hide( ePlayerNetID const * hider, ePlayerNetID const * seeker )
 void se_SecretConsoleOut( tOutput const & message, tAccessLevel hider, ePlayerNetID const * exception1, ePlayerNetID const * exception2 = 0 )
 {
     // high enough access levels are never secret
-    if ( hider < se_hideAccessLevelOf )
+    if ( hider > se_hideAccessLevelOf )
     {
         sn_ConsoleOut( message );
     }
