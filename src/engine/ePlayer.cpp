@@ -6916,9 +6916,9 @@ static void Silence_conf(std::istream &s)
     }
 
     ePlayerNetID * p = ReadPlayer( s );
-    if ( p )
+    if ( p && !p->IsSilenced() )
     {
-        sn_ConsoleOut( tOutput( "$player_silenced", p->GetName() ) );
+        sn_ConsoleOut( tOutput( "$player_silenced", p->GetColoredName() ) );
         p->SetSilenced( true );
     }
 }
@@ -6934,9 +6934,9 @@ static void Voice_conf(std::istream &s)
     }
 
     ePlayerNetID * p = ReadPlayer( s );
-    if ( p )
+    if ( p && p->IsSilenced() )
     {
-        sn_ConsoleOut( tOutput( "$player_voiced", p->GetName() ) );
+        sn_ConsoleOut( tOutput( "$player_voiced", p->GetColoredName() ) );
         p->SetSilenced( false );
     }
 }
