@@ -6870,8 +6870,6 @@ static void Slap_conf(std::istream &s)
 }
 
 static tConfItemFunc slap_conf("SLAP", &Slap_conf);
-static tAccessLevelSetter se_slapConfLevel( slap_conf, tAccessLevel_Admin );
-
 
 static void Suspend_conf_base(std::istream &s, int rounds )
 {

@@ -196,7 +196,7 @@ limit_rounds_help		End the match after this number of rounds
 limit_time_help			End the match after this number of minutes 
 
 auto_team_help          Flag indicating whether players should be put into teams automatically.
-auto_team_spec_spam_help    If set to 0, spectators won't be announced when joining or leaving, providen auto_team is set to 0.
+auto_team_spec_spam_help    If set to 0, spectators won't be announced when joining or leaving, provided AUTO_TEAM is set to 0.
 
 allow_team_name_color_help   Allow a team to be named after a color
 allow_team_name_player_help  Allow a team to be named after the leading player
@@ -2145,8 +2145,8 @@ instant_death_activated		Death zone activated! Avoid it!\n
 
 player_admin_kill			\1 0xRESETTwas smitten by an administrator.\n
 player_admin_slap_free			\1 0xRESETThas been slapped by an administrator.\n
-player_admin_slap_win			\1 0xRESETThas been hugged by an administrator and got \2 points.\n
-player_admin_slap_lose			\1 0xRESETThas been slapped by an administrator and lost \2 points.\n
+player_admin_slap_win			\1 has been hugged by an administrator and got \2 points.\n
+player_admin_slap_lose			\1 has been slapped by an administrator and lost \2 points.\n
 player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
 player_win_held_fortress	\1 was awarded \2 points for holding the base.\n
