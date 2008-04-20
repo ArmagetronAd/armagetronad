@@ -2931,7 +2931,11 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
         tos << ": ";
         if ( p2->GetAccessLevel() < tAccessLevel_Default && !se_Hide( p2, receiver ) )
         {
-            hidden = p2->GetAccessLevel() <= se_hideAccessLevelOf && p2->StealthMode();
+#ifdef KRAWALL_SERVER
+	    hidden = p2->GetAccessLevel() <= se_hideAccessLevelOf && p2->StealthMode();
+#else
+	    hidden = false;
+#endif
             tos << p2->GetColoredName()
                 << tColoredString::ColorString( -1, -1, -1)
                 << " ( ";
