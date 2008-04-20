@@ -2008,55 +2008,55 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
         ePlayerNetID * victim = se_FindPlayerInChatCommand( admin, command, s );
         if ( victim )
         {
-            if ( victim == admin )
-            {
-                sn_ConsoleOut( tOutput( "$access_level_op_self", command ), admin->Owner() );
-            }
-            else if ( admin->GetAccessLevel() > victim->GetAccessLevel() )
-            {
-                sn_ConsoleOut( tOutput( "$access_level_op_overpowered", command ), admin->Owner() );
-            }
-            else
-            {
-                // read optional access level, this part is merly a copypaste from the /shuffle code
-                int level = se_opAccessLevelMax;
-		if ( victim->IsAuthenticated() )
-		{
-		    level = victim->GetAccessLevel();
-		}
-		char first;
-		s >> first;
+             if ( victim == admin )
+             {
+                 sn_ConsoleOut( tOutput( "$access_level_op_self", command ), admin->Owner() );
+             }
+             else if ( admin->GetAccessLevel() > victim->GetAccessLevel() )
+             {
+                 sn_ConsoleOut( tOutput( "$access_level_op_overpowered", command ), admin->Owner() );
+             }
+             else
+             {
+                 // read optional access level, this part is merly a copypaste from the /shuffle code
+                 int level = se_opAccessLevelMax;
+                 if ( victim->IsAuthenticated() )
+                 {
+                     level = victim->GetAccessLevel();
+                 }
+                 char first;
+                 s >> first;
+             
+                 if ( !s.eof() && !s.fail() )
+                 {
+                     s.unget();
+             
+                     int newLevel = 0;
+                     s >> newLevel;
 
-		if ( !s.eof() && !s.fail() )
-	        {
-	            s.unget();
+                     if ( first == '+' || first == '-' )
+                     {
+                         level += newLevel;
+                     }
+                     else
+                     {
+                         level = newLevel;
+                     }
+                 }
 
-	            int newLevel = 0;
-		    s >> newLevel;
+                 s >> level;
 
-	            if ( first == '+' || first == '-' )
-	            {
-	                level += newLevel;
-	            }
-	            else
-	            {
-			level = newLevel;
-	            }
-	        }
-		
-                s >> level;
+                 tAccessLevel accessLevel;
+                 accessLevel = static_cast< tAccessLevel >( level );
 
-		tAccessLevel accessLevel;
-		accessLevel = static_cast< tAccessLevel >( level );
-
-	        if ( accessLevel > admin->GetAccessLevel() )
-		{
-                    (*F)( admin, victim, accessLevel );
-		}
-		else
-		{
-		    sn_ConsoleOut( tOutput( "$access_level_op_denied_max", command ), admin->Owner() );
-		}
+                if ( accessLevel > admin->GetAccessLevel() )
+                {
+                     (*F)( admin, victim, accessLevel );
+                }
+                else
+                {
+                     sn_ConsoleOut( tOutput( "$access_level_op_denied_max", command ), admin->Owner() );
+                }
             }
         }
     }
@@ -2081,23 +2081,23 @@ void se_Promote( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel acces
     if ( victim->IsAuthenticated() )
     {
         tAccessLevel oldAccessLevel = victim->GetAccessLevel();
-	victim->SetAccessLevel( accessLevel );
+        victim->SetAccessLevel( accessLevel );
 
         if ( accessLevel < oldAccessLevel )
-	{
-	    se_SecretConsoleOut( tOutput( "$access_level_promote",
+        {
+            se_SecretConsoleOut( tOutput( "$access_level_promote",
                                           victim->GetLogName(),
                                           tCurrentAccessLevel::GetName( accessLevel ),
-	                                  admin->GetLogName() ), victim, admin );
-	}
-	else if ( accessLevel > oldAccessLevel )
-	{
-	    se_SecretConsoleOut( tOutput( "$access_level_demote",
-					  victim->GetLogName(),
-				          tCurrentAccessLevel::GetName( accessLevel ),
                                           admin->GetLogName() ), victim, admin );
+        }
+        else if ( accessLevel > oldAccessLevel )
+        {
+            se_SecretConsoleOut( tOutput( "$access_level_demote",
+                                 victim->GetLogName(),
+                                 tCurrentAccessLevel::GetName( accessLevel ),
+                                 admin->GetLogName() ), victim, admin );
 
-	}
+        }
     }
 }
 
@@ -2134,11 +2134,11 @@ void se_Op( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel level )
 
     if ( victim->IsAuthenticated() )
     {
-	se_Promote( admin, victim, static_cast< tAccessLevel >( accessLevel ) );
+        se_Promote( admin, victim, static_cast< tAccessLevel >( accessLevel ) );
     }
     else
     {
-	se_OpBase( admin, victim, "/op", static_cast< tAccessLevel >( accessLevel ) );
+        se_OpBase( admin, victim, "/op", static_cast< tAccessLevel >( accessLevel ) );
     }
 }
 
@@ -2709,7 +2709,7 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
     if ( se_filterColorTeam )
         msg = tColoredString::RemoveColors ( msg, false );
     else if ( se_filterDarkColorTeam )
-	msg = tColoredString::RemoveColors ( msg, true );
+        msg = tColoredString::RemoveColors ( msg, true );
 
     // Log message to server and sender
     tColoredString messageForServerAndSender = se_BuildChatString(currentTeam, p, msg);
@@ -2919,7 +2919,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
     tToLower( search );
 
     if ( search.Len() > 1 )
-	doSearch = true;
+    doSearch = true;
 
     bool hidden = false;
 
@@ -2932,22 +2932,22 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
         if ( p2->GetAccessLevel() < tAccessLevel_Default && !se_Hide( p2, receiver ) )
         {
             hidden = p2->GetAccessLevel() <= se_hideAccessLevelOf && p2->StealthMode();
-	    tos << p2->GetColoredName()
-	        << tColoredString::ColorString( -1, -1, -1)
-		<< " ( ";
-	    if ( hidden )
-		tos << se_hiddenPlayerPrefix;
-	    tos << p2->GetFilteredAuthenticatedName();
-	    if ( hidden )
-		tos << tColoredString::ColorString( -1 ,-1 ,-1 )
-		    << ", "
-		    << se_hiddenPlayerPrefix;
-	    else
-		tos << ", ";
+            tos << p2->GetColoredName()
+                << tColoredString::ColorString( -1, -1, -1)
+                << " ( ";
+            if ( hidden )
+                tos << se_hiddenPlayerPrefix;
+            tos << p2->GetFilteredAuthenticatedName();
+            if ( hidden )
+                tos << tColoredString::ColorString( -1 ,-1 ,-1 )
+                    << ", "
+                    << se_hiddenPlayerPrefix;
+            else
+                tos << ", ";
             tos << tCurrentAccessLevel::GetName( p2->GetAccessLevel() );
             if ( hidden )
-		tos << tColoredString::ColorString( -1 ,-1 ,-1 );
-	    tos << " )";
+                tos << tColoredString::ColorString( -1 ,-1 ,-1 );
+                tos << " )";
         }
         else
         {
@@ -2964,15 +2964,15 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
         tos << "\n";
 
         if ( !doSearch )
-	    sn_ConsoleOut( tos, receiver->Owner() );
-	else
-	{
-	    tString tosLowercase( tColoredString::RemoveColors(tos) );
-	    tToLower( tosLowercase );
-	    if ( tosLowercase.StrPos( search ) != -1 )
-		sn_ConsoleOut( tos, receiver->Owner() );
-		// looks quite like a hack, but i guess it's faster( esp. for me :) ) than checking on each parameter individually
-	}
+            sn_ConsoleOut( tos, receiver->Owner() );
+        else
+        {
+            tString tosLowercase( tColoredString::RemoveColors(tos) );
+            tToLower( tosLowercase );
+            // looks quite like a hack, but i guess it's faster( esp. for me :) ) than checking on each parameter individually
+            if ( tosLowercase.StrPos( search ) != -1 )
+                sn_ConsoleOut( tos, receiver->Owner() );
+        }
     }
 }
 
@@ -3812,12 +3812,12 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
 
     r = g = b = 15;
 
-    greeted				= true;
-    chatting_			= false;
+    greeted             = true;
+    chatting_           = false;
     spectating_         = false;
     stealth_            = false;
-    chatFlags_			= 0;
-    disconnected		= false;
+    chatFlags_          = 0;
+    disconnected        = false;
     suspended_          = 0;
 
     loginWanted = false;
@@ -3882,7 +3882,7 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     stealth_    =false;
     disconnected=false;
     suspended_  = 0;
-    chatFlags_	=0;
+    chatFlags_  =0;
 
     r = g = b = 15;
 
@@ -3983,7 +3983,7 @@ void ePlayerNetID::MyInitAfterCreation()
         if ( GetVoter() )
         {
             suspended_ = GetVoter()->suspended_;
-	    silenced_ = GetVoter()->silenced_;
+            silenced_ = GetVoter()->silenced_;
         }
     }
 
@@ -4004,7 +4004,7 @@ bool ePlayerNetID::ClearToTransmit(int user) const{
 
 ePlayerNetID::~ePlayerNetID()
 {
-    //	se_PlayerNetIDs.Remove(this,listID);
+    // se_PlayerNetIDs.Remove(this,listID);
     if ( sn_GetNetState() == nSERVER && disconnected )
     {
         tOutput mess;
@@ -4102,7 +4102,7 @@ void ePlayerNetID::RemoveFromGame()
     SetTeam( NULL );
     UpdateTeam();
     ControlObject( NULL );
-    //	currentTeam = NULL;
+    // currentTeam = NULL;
 }
 
 bool ePlayerNetID::ActionOnQuit()
@@ -4741,7 +4741,7 @@ static void se_OptionalNameFilters( tString & remoteName )
     }
     else if ( se_filterDarkColorNames )
     {
-        remoteName = tColoredString::RemoveColors( remoteName, true );	
+        remoteName = tColoredString::RemoveColors( remoteName, true );
     }
 
     // don't do the fancy stuff on the client, it only makes names on score tables and
@@ -5135,7 +5135,7 @@ void ePlayerNetID::AddScore(int points,
         currentTeam->AddScore( points );
 
     tColoredString name;
-    name << *this << tColoredString::ColorString(1,1,1);
+    name << *this << tColoredString::ColorString(-1,-1,-1);
 
     tOutput message;
     message.SetTemplateParameter(1, name);
@@ -5278,7 +5278,7 @@ tString ePlayerNetID::Ranking( int MAX, bool cut ){
     if (se_PlayerNetIDs.Len()>0){
         ret << tColoredString::ColorString(1,.5,.5);
         ret << tOutput("$player_scoretable_name");
-        ret << tColoredString::ColorString(1,1,1);
+        ret << tColoredString::ColorString(-1,-1,-1);
         ret.SetPos(17, cut );
         ret << tOutput("$player_scoretable_alive");
         ret.SetPos(24, cut );
@@ -5308,7 +5308,7 @@ tString ePlayerNetID::Ranking( int MAX, bool cut ){
             // tColoredString name( p->GetColoredName() );
             // name.SetPos(16, cut );
 
-            //	This line is example of how we manually get the player color... could come in useful.
+            // This line is example of how we manually get the player color... could come in useful.
             // line << tColoredString::ColorString( p->r/15.0, p->g/15.0, p->b/15.0 ) << name << tColoredString::ColorString(1,1,1);
 
             // however, using the streaming operator is a lot cleaner. The example is left, as it really can be usefull in some situations.
@@ -5316,11 +5316,11 @@ tString ePlayerNetID::Ranking( int MAX, bool cut ){
             line.SetPos(17, false );
             if ( p->Object() && p->Object()->Alive() )
             {
-                line << tColoredString::ColorString(0,1,0) << tOutput("$player_scoretable_alive_yes") << tColoredString::ColorString(1,1,1);
+                line << tColoredString::ColorString(0,1,0) << tOutput("$player_scoretable_alive_yes") << tColoredString::ColorString(-1,-1,-1);
             }
             else
             {
-                line << tColoredString::ColorString(1,0,0) << tOutput("$player_scoretable_alive_no") << tColoredString::ColorString(1,1,1);
+                line << tColoredString::ColorString(1,0,0) << tOutput("$player_scoretable_alive_no") << tColoredString::ColorString(-1,-1,-1);
             }
             line.SetPos(24, cut );
             line << p->score;
@@ -6044,7 +6044,7 @@ void ePlayerNetID::GetScoreFromDisconnectedCopy()
             score = pni->score;
 
             ControlObject(pni->Object());
-            //	 object->ePlayer = this;
+            // object->ePlayer = this;
             pni->object = NULL;
 
             if (bool(object))
@@ -6851,20 +6851,20 @@ static void Slap_conf(std::istream &s)
 
     if ( victim )
     {
-	int points = 1;
+        int points = 1;
 
-	s >> points;
+        s >> points;
 
-	if ( points == 0)
-	{
-	    // oh well :)
-	    sn_ConsoleOut( tOutput("$player_admin_slap_free", victim->GetColoredName() ) );
-	}
+        if ( points == 0)
+        {
+            // oh well :)
+            sn_ConsoleOut( tOutput("$player_admin_slap_free", victim->GetColoredName() ) );
+        }
 
-	tOutput win;
-	tOutput lose;
-	win << "$player_admin_slap_win";
-	lose << "$player_admin_slap_lose";
+        tOutput win;
+        tOutput lose;
+        win << "$player_admin_slap_win";
+        lose << "$player_admin_slap_lose";
         victim->AddScore( -points, win, lose );
     }
 }
@@ -7540,13 +7540,13 @@ ePlayerNetID & ePlayerNetID::ForceName( tString const & name )
         tColoredString oldName;
         tColoredString newName;
 
-        oldName << this->GetColoredName() << tColoredString::ColorString( 1, 1, 1 );
+        oldName << this->GetColoredName() << tColoredString::ColorString( -1, -1, -1 );
 
         this->nameFromAdmin_ = name;
         this->nameFromAdmin_.NetFilter();
 
         // crappiest line ever :-/
-        newName << tColoredString::ColorString( r/15.0, g/15.0, b/15.0 ) << this->nameFromAdmin_ << tColoredString::ColorString( 1, 1, 1 );
+        newName << tColoredString::ColorString( r/15.0, g/15.0, b/15.0 ) << this->nameFromAdmin_ << tColoredString::ColorString( -1, -1, -1 );
 
         con << tOutput("$player_will_be_renamed", newName, oldName);
 
@@ -7667,7 +7667,7 @@ void ePlayerNetID::UnregisterWithMachine( void )
         if ( GetVoter() )
         {
             GetVoter()->suspended_ = suspended_;
-	    GetVoter()->silenced_ = silenced_;
+            GetVoter()->silenced_ = silenced_;
         }
 
         registeredMachine_->RemovePlayer();

@@ -1397,16 +1397,16 @@ tColoredString & operator <<(tColoredString &s, const tColoredStringProxy &color
     if (st_colorStrings)
     {
         if ( colorCode.r_ == -1 || colorCode.g_ == -1 || colorCode.b_ == -1 )
-	{
-	    s << "0xRESETT";
-	    return s;
-	}
+        {
+            s << "0xRESETT";
+            return s;
+        }
 
-	char cs[9];
+        char cs[9];
         cs[0]='0';
         cs[1]='x';
-	
-	int RGB[3];
+
+        int RGB[3];
         RGB[0]=RTC(colorCode.r_);
         RGB[1]=RTC(colorCode.g_);
         RGB[2]=RTC(colorCode.b_);
