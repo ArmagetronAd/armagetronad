@@ -49,6 +49,7 @@ public:
     eVoterPlayerInfo();
 private:
     int             suspended_;  //! number of rounds the player is currently suspended from playing
+    bool	    silenced_; //! is he silenced?
 };
 
 // class identifying a voter; all players coming from the same IP share the same voter.

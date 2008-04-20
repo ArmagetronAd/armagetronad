@@ -285,6 +285,8 @@ public:
     void SetSilenced( bool silenced ) { silenced_ = silenced; }
     bool& AccessSilenced( void ) { return silenced_; }
 
+    bool IsSuspended ( void ) { return suspended_ > 0; }
+
     eVoter * GetVoter() const {return voter_;}     // returns our voter
     void CreateVoter();						// create our voter or find it
     static void SilenceMenu();				// menu where you can silence players
@@ -401,6 +403,7 @@ public:
     ePlayerNetID & ForceName( tString const & name ); //!< Forces this player's name. Forces processed names (colored, username, nameFromCLient) as well.    
 
     inline ePlayerNetID & SetUserName( tString const & userName );  //!< Sets this player's name, cleared for system logs. Use for writing to files or comparing with admin input. The other names stay unaffected.
+
 private:
     inline ePlayerNetID & SetNameFromClient( tColoredString const & nameFromClient );   //!< Sets this player's name as the client wants it to be. Avoid using it when possilbe.
     inline ePlayerNetID & SetColoredName( tColoredString const & coloredName ); //!< Sets this player's name, cleared by the server. Use this for onscreen screen display.

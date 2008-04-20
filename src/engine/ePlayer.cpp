@@ -3980,6 +3980,7 @@ void ePlayerNetID::MyInitAfterCreation()
         if ( GetVoter() )
         {
             suspended_ = GetVoter()->suspended_;
+	    silenced_ = GetVoter()->silenced_;
         }
     }
 
@@ -4074,7 +4075,7 @@ void ePlayerNetID::RemoveFromGame()
         m->BroadCast();
 
         if ( listID >= 0 ){
-            if ( ( IsSpectating() || !se_assignTeamAutomatically ) && CurrentTeam() == NULL )
+            if ( ( IsSpectating() || !se_assignTeamAutomatically || IsSuspended() ) && CurrentTeam() == NULL )
             {
                 // get colored player name
                 tColoredString playerName;
@@ -7059,7 +7060,7 @@ public:
                 player_.Greet();
 
                 // print spectating join message (regular join messages are handled by eTeam)
-                if ( player_.IsSpectating() || !se_assignTeamAutomatically )
+                if ( player_.IsSpectating() || player_.IsSuspended() || !se_assignTeamAutomatically )
                 {
                     mess << "$player_entered_spectator";
                     sn_ConsoleOut(mess);
@@ -7665,6 +7666,7 @@ void ePlayerNetID::UnregisterWithMachine( void )
         if ( GetVoter() )
         {
             GetVoter()->suspended_ = suspended_;
+	    GetVoter()->silenced_ = silenced_;
         }
 
         registeredMachine_->RemovePlayer();
