@@ -2493,6 +2493,9 @@ static tSettingItem< tAccessLevel > se_msgSpyAccessLevelConf( "ACCESS_LEVEL_SPY_
 static tAccessLevel se_ipAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_ipAccessLevelConf( "ACCESS_LEVEL_IPS", se_ipAccessLevel );
 
+static tAccessLevel se_nVerAccessLevel = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_nVerAccessLevelConf( "ACCESS_LEVEL_NVER", se_nVerAccessLevel );
+
 static tSettingItem<bool> se_silAll("SILENCE_ALL",
                                     se_silenceAll);
 
@@ -2957,7 +2960,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
         {
             tos << p2->GetColoredName() << tColoredString::ColorString(1,1,1) << " ( )";
         }
-        if ( tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel )
+        if ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel )
         {
             tString IP = p2->GetMachine().GetIP();
             if ( IP.Len() > 1 )
@@ -2965,6 +2968,11 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
                 tos << ", IP = " << IP;
             }
         }
+	if ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_nVerAccessLevel )
+	{
+	    tos << ", " << sn_GetClientVersionString( sn_Connections[ p2->Owner() ].version.Max() ) << " (ID: " << sn_Connections[ p2->Owner() ].version.Max() << ")";
+	}
+
         tos << "\n";
 
         if ( !doSearch )
