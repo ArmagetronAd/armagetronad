@@ -324,6 +324,41 @@ private:
     virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone (kills them)
 };
 
+class gTargetZoneHack: public gZone
+{
+public:
+    gTargetZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false );              //!< local constructor
+    gTargetZoneHack(nMessage &m);                                  //!< network constructor
+    ~gTargetZoneHack();                                            //!< destructor
+
+
+protected:
+
+private:
+    virtual bool Timestep(REAL currentTime);           //!< simulates behaviour up to currentTime
+    virtual void OnVanish();                           //!< called when the zone vanishes
+    virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone
+
+    static int TargetZoneCounter_;			//!< count check zone on grid
+    static REAL winnerTime_;				//!< game time when a winner can be declared if nothing happens soon
+    static ePlayerNetID *winner_;			//!< first player entering the last zone to be declare winner
+    ePlayerNetID *firstPlayer_;				//!< first player entering the zone
+    int playersFlags[MAXCLIENTS+1];			//!< flags for players who already use the zone
+    int zoneInitialScore_;				//!< score to give to the first player entering the zone
+    int zoneScore_;					//!< score to give to the next player entering the zone
+    int zoneScoreDeplete_;				//!< value to substract from score each time a player enter the zone
+    REAL timeFirstEntry_;				//!< game time of the first player entering the zone
+    REAL targetEmptyTime_;				//!< game time of the last points granted ...
+    //! possible states
+    enum State
+    {
+        State_Safe,        //!< not yet conquered
+        State_Conquering,  //!< conquering in this frame
+        State_Conquered    //!< conquered
+    };
+    State currentState_;   //!< the current state
+};
+
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos );
 

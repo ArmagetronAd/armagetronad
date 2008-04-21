@@ -513,6 +513,9 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"ball")) {
             zone = tNEW( gBallZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"target")) {
+            zone = tNEW( gTargetZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
+        }
 
         // leaving zone undeleted is no memory leak here, the gid takes control of it
         if ( zone )

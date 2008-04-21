@@ -3706,3 +3706,289 @@ void gFlagZoneHack::OwnerDropped()
         }
     }
 }
+
+
+// *******************************************************************************
+// *
+// *	gTargetZoneHack settings
+// *
+// *******************************************************************************
+
+// time in sec before the zone vanished. -1 for infinite
+static int sg_targetTimeBeforeVanish = -1;
+static tSettingItem<int> sg_targetTimeBeforeVanishConf( "TARGET_LIFETIME", sg_targetTimeBeforeVanish );
+
+// time in sec before the zone vanished once a player entered. -1 for infinite
+static int sg_targetTimeBeforeVanishOnceConquered = 10;
+static tSettingItem<int> sg_targetTimeBeforeVanishOnceConqueredConf( "TARGET_SURVIVE_TIME", sg_targetTimeBeforeVanishOnceConquered );
+
+// score for the first player entering the zone
+static int sg_targetInitScore = 10;
+static tSettingItem<int> sg_targetInitScoreConf( "TARGET_INITIAL_SCORE", sg_targetInitScore );
+
+// score suppress to the zone score each time a player entered
+static int sg_targetScoreDeplete = 2;
+static tSettingItem<int> sg_targetScoreDepleteConf( "TARGET_SCORE_DEPLETE", sg_targetScoreDeplete );
+
+// last target zone is a winzone ?;
+static int sg_targetIsWinzone = 1;
+static tSettingItem<int> sg_targetIsWinzoneConf( "TARGET_DECLARE_WINNER", sg_targetIsWinzone );
+
+int gTargetZoneHack::TargetZoneCounter_ = 0;		//!< count check zone on grid
+REAL gTargetZoneHack::winnerTime_ = 0;			//!< game time when a winner can be declared if nothing happens soon
+ePlayerNetID *gTargetZoneHack::winner_ = 0;		//!< first player entering the last zone to be declare winner
+
+// *******************************************************************************
+// *
+// *	gTargetZoneHack
+// *
+// *******************************************************************************
+//!
+//!		@param	grid Grid to put the zone into
+//!		@param	pos	 Position to spawn the zone at
+//!
+// *******************************************************************************
+
+
+gTargetZoneHack::gTargetZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation)
+        :gZone( grid, pos, dynamicCreation )
+{
+    color_.r = 0.0f;
+    color_.g = 1.0f;
+    color_.b = 0.0f;
+
+    TargetZoneCounter_++;
+    winnerTime_ = -1;
+    winner_ = 0;
+    firstPlayer_ = 0;
+    zoneInitialScore_ = sg_targetInitScore;
+    zoneScore_ = sg_targetInitScore;
+    zoneScoreDeplete_ = sg_targetScoreDeplete;
+    timeFirstEntry_ = -1.0;
+    targetEmptyTime_ = -1.0;
+    currentState_ = State_Safe;
+    for(int i=0; i<MAXCLIENTS; i++) playersFlags[i] = 0;
+
+    grid->AddGameObjectInteresting(this);
+
+    SetExpansionSpeed(0);
+    SetRotationSpeed( .3f );
+    RequestSync();
+}
+
+// *******************************************************************************
+// *
+// *	gTargetZoneHack
+// *
+// *******************************************************************************
+//!
+//!		@param	m Message to read creation data from
+//!		@param	null
+//!
+// *******************************************************************************
+
+gTargetZoneHack::gTargetZoneHack( nMessage & m )
+        : gZone( m )
+{
+    TargetZoneCounter_++;
+    winnerTime_ = -1;
+    winner_ = 0;
+    firstPlayer_ = 0;
+    zoneInitialScore_ = sg_targetInitScore;
+    zoneScore_ = sg_targetInitScore;
+    zoneScoreDeplete_ = sg_targetScoreDeplete;
+    timeFirstEntry_ = -1.0;
+    targetEmptyTime_ = -1.0;
+    currentState_ = State_Safe;
+    for(int i=0; i<MAXCLIENTS; i++) playersFlags[i] = 0;
+}
+
+// *******************************************************************************
+// *
+// *	~gTargetZoneHack
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+gTargetZoneHack::~gTargetZoneHack( void )
+{
+}
+
+// *******************************************************************************
+// *
+// *	Timestep
+// *
+// *******************************************************************************
+//!
+//!		@param	time    the current time
+//!
+// *******************************************************************************
+
+bool gTargetZoneHack::Timestep( REAL time )
+{
+    // check if the zone must collapse ...
+    if ( (currentState_ != State_Conquered) && (currentState_ != State_Conquering) && (sg_targetTimeBeforeVanish>0) && ((time - createTime_ - 3.5)>sg_targetTimeBeforeVanish) ) {
+        // zone is conquered, make the zone collapse ...
+        currentState_ = State_Conquered;
+        SetReferenceTime();
+        SetExpansionSpeed( -GetRadius()*.5 );
+        RequestSync();
+        // send message to edlog file ...
+        tString edLog;
+        edLog << "TARGETZONE_TIMEOUT " << eGameObject::GOID() << " " << name_ <<" " << GetPosition().x << " " << GetPosition().y << "\n";
+        se_SaveToEdLog( edLog );
+    }
+
+    if ( ((currentState_ == State_Conquering) && (sg_targetTimeBeforeVanishOnceConquered>0) && (time - timeFirstEntry_>sg_targetTimeBeforeVanishOnceConquered))
+       ||((currentState_ != State_Conquered) && (zoneScore_<=0) && (zoneScore_!=zoneInitialScore_)) ) 
+    {
+        // zone is conquered, make the zone collapse ...
+        currentState_ = State_Conquered;
+        SetReferenceTime();
+        SetExpansionSpeed( -GetRadius()*.5 );
+        RequestSync();
+        // send message to edlog file ...
+        tString edLog;
+        edLog << "TARGETZONE_CONQUERED " << eGameObject::GOID() << " " << name_ << " " << GetPosition().x << " " << GetPosition().y;
+        if (firstPlayer_) {
+	    edLog << " " << firstPlayer_->GetUserName();
+            if ( firstPlayer_->CurrentTeam() ) {
+                edLog << " " << ePlayerNetID::FilterName( firstPlayer_->CurrentTeam()->Name() );
+            }
+        }
+        edLog << "\n";
+        se_SaveToEdLog( edLog );
+    }
+
+    for (int i=0; i<MAXCLIENTS; i++) {
+	if (playersFlags[i]==2) {
+            tString edLog;
+            ePlayerNetID* p = se_PlayerNetIDs(i);
+            if (p) {
+                gCycle* prey = dynamic_cast< gCycle* >( p->Object() );
+                if ( prey ) {
+                    REAL r = this->GetRadius();
+                    if (!prey->Alive() || (( prey->Position() - this->Position() ).NormSquared() >= r*r)) {
+            		edLog << "PLAYER_LEFT_TARGET " << this->GOID() << " " << name_ << " " << GetPosition().x << " " << GetPosition().y << " " << p->GetUserName() << "\n";
+                	se_SaveToEdLog( edLog );
+			playersFlags[i] = 1;
+		    }
+		} else playersFlags[i] = 1;
+	    } else playersFlags[i] = 1;
+	}
+    } 
+
+    // manage rotation speed
+    REAL omega;
+    REAL omegaDot;
+    REAL maxSpeed = 10 * ( 2 * 3.141 ) / sg_segments;
+    if (currentState_ != State_Conquered) {
+        // set rotation speed accordingly to remaining points ...
+        REAL conquered = (zoneInitialScore_==0?0:(REAL)(zoneInitialScore_ - zoneScore_) / (REAL)zoneInitialScore_);
+        omega = .3 + conquered * conquered * maxSpeed;
+        omegaDot = 2 * conquered * maxSpeed;
+    } else {
+        omega = .3 + maxSpeed;
+        omegaDot = 2 * maxSpeed;
+    }
+    REAL timeStep = lastTime;
+    if ( sn_GetNetState() != nSERVER )
+        timeStep *= 100;
+
+    if ( sn_GetNetState() != nCLIENT &&
+            ( ( fabs( omega - GetRotationSpeed() ) + fabs( omegaDot - GetRotationAcceleration() ) ) * timeStep > .5 ) )
+    {
+        SetRotationSpeed( omega );
+        SetRotationAcceleration( omegaDot );
+        SetReferenceTime();
+        RequestSync();
+    }
+
+    // delegate
+    bool returnStatus = gZone::Timestep( time );
+
+    return (returnStatus);
+}
+
+// *******************************************************************************
+// *
+// *	OnEnter
+// *
+// *******************************************************************************
+//!
+//!		@param	target  the cycle that has been found inside the zone
+//!		@param	time    the current time
+//!
+// *******************************************************************************
+
+void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
+{
+    // make sure target and player are OK
+    if ((!target) ||
+        (!target->Player()) ||
+         (currentState_ == State_Conquered))
+    {
+        return;
+    }
+
+    // keep first player in memory, if it's the last zone, he is the winner ...
+    if (!firstPlayer_) {
+        firstPlayer_= target->Player();
+        timeFirstEntry_ = time;
+        currentState_ = State_Conquering;
+	// keep winner ...
+        winnerTime_ = timeFirstEntry_;
+        winner_ = firstPlayer_;
+    }
+
+    // Check if player already entered this zone
+    // If not ...
+    if (!playersFlags[target->Player()->ListID()]) {
+        if (zoneScore_>0) {
+            //  flag the player
+            playersFlags[target->Player()->ListID()]=1;
+	    // grant the player
+            tOutput win;
+            tOutput lose;
+            win << "$player_target_score_win";
+            lose << "$player_target_score_lose";
+            target->Player()->AddScore(zoneScore_, win, lose);
+        }
+        // and decrease zone score value
+        zoneScore_-=zoneScoreDeplete_;
+        if (zoneScore_<=0) {
+	    zoneScore_=0;
+	    targetEmptyTime_=time;
+	}
+    }
+
+    // message in edlog
+    if (playersFlags[target->Player()->ListID()] != 2) {
+        tString edLog;
+        edLog << "PLAYER_ENTER_TARGET " << this->GOID() << " " << name_ << " " << GetPosition().x << " " << GetPosition().y << " " << target->Player()->GetUserName() << "\n";
+        se_SaveToEdLog( edLog );
+	playersFlags[target->Player()->ListID()] = 2;
+    }
+}
+
+// *******************************************************************************
+// *
+// *	OnVanish
+// *
+// *******************************************************************************
+
+void gTargetZoneHack::OnVanish( void )
+{
+    // check if we have a winner ...
+    if (sg_targetIsWinzone && (TargetZoneCounter_==1) && firstPlayer_) {
+        winnerTime_ = timeFirstEntry_;
+        winner_ = firstPlayer_;
+        static const char* message="$player_target_win_conquest";
+        sg_DeclareWinner( firstPlayer_->CurrentTeam(), message );
+    }
+    // decrement target zone counter
+    TargetZoneCounter_--;
+}
+
