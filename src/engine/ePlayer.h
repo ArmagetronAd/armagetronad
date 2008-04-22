@@ -235,6 +235,7 @@ public:
     eTeam* NextTeam()    const { return nextTeam; }				// return the team I will be next round
     eTeam* CurrentTeam() const { return currentTeam; }		// return the team I am in
     int  TeamListID() const { return teamListID; }		// return my position in the team
+    int  ListID() const { return listID; }              // return my position in the player's list 
     void FindDefaultTeam();									// look for a good default team for us
     void SetTeamForce(eTeam* team );                 	// register me in the given team without checks
     void SetTeam(eTeam* team);          	// register me in the given team (callable on the server)

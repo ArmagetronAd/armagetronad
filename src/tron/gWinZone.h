@@ -110,6 +110,10 @@ public:
     void Destroy();
     bool destroyed_;
 
+    tString             GetName() {return name_;}
+    void                SetName(tString name) {name_ = name;}
+    static int          FindFirst(tString name);
+    static int          FindNext(tString name, int prev_pos);
 protected:
     bool wallInteract_;
     int wallBouncesLeft_;
@@ -123,6 +127,7 @@ protected:
     REAL fallSpeed_;
     REAL lastSeekTime_;
 
+    tString         name_;
     gRealColor color_;           //!< the zone's color
     REAL createTime_;            //!< the time the zone was created at
 

@@ -138,6 +138,51 @@ inline void gZone::SetFunctionNow( tFunction & f, REAL value ) const
 
 // *******************************************************************************
 // *
+// *   FindFirst / FindNext
+// *
+// *******************************************************************************
+//!
+//!        @param  name      name of the zone or group of zones
+//!        @param  prev_pos  value of a previous result
+//!
+// *******************************************************************************
+
+int gZone::FindFirst(tString name)
+{
+    eGrid *grid = eGrid::CurrentGrid();
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
+    for (int j=gameObjects.Len()-1;j>=0;j--) {
+        gZone *zone=dynamic_cast<gZone *>(gameObjects(j));
+        // for all active base zone ...
+        if ( zone ) {
+            if (zone->name_ == name) {
+                return j;
+            }
+        }
+    }
+    // if no zone has been found ...
+    return -1;
+}
+
+int gZone::FindNext(tString name, int prev_pos)
+{
+    eGrid *grid = eGrid::CurrentGrid();
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
+    for (int j=prev_pos-1;j>=0;j--) {
+        gZone *zone=dynamic_cast<gZone *>(gameObjects(j));
+        // for all active base zone ...
+        if ( zone ) {
+            if (zone->name_ == name) {
+                return j;
+            }
+        }
+    }
+    // if no zone has been found ...
+    return -1;
+}
+
+// *******************************************************************************
+// *
 // *	gZone
 // *
 // *******************************************************************************
@@ -3838,7 +3883,7 @@ bool gTargetZoneHack::Timestep( REAL time )
         // send message to edlog file ...
         tString edLog;
         edLog << "TARGETZONE_TIMEOUT " << eGameObject::GOID() << " " << name_ <<" " << GetPosition().x << " " << GetPosition().y << "\n";
-        se_SaveToEdLog( edLog );
+//        se_SaveToEdLog( edLog );
     }
 
     if ( ((currentState_ == State_Conquering) && (sg_targetTimeBeforeVanishOnceConquered>0) && (time - timeFirstEntry_>sg_targetTimeBeforeVanishOnceConquered))
@@ -3859,7 +3904,7 @@ bool gTargetZoneHack::Timestep( REAL time )
             }
         }
         edLog << "\n";
-        se_SaveToEdLog( edLog );
+//        se_SaveToEdLog( edLog );
     }
 
     for (int i=0; i<MAXCLIENTS; i++) {
@@ -3872,7 +3917,7 @@ bool gTargetZoneHack::Timestep( REAL time )
                     REAL r = this->GetRadius();
                     if (!prey->Alive() || (( prey->Position() - this->Position() ).NormSquared() >= r*r)) {
             		edLog << "PLAYER_LEFT_TARGET " << this->GOID() << " " << name_ << " " << GetPosition().x << " " << GetPosition().y << " " << p->GetUserName() << "\n";
-                	se_SaveToEdLog( edLog );
+//                	se_SaveToEdLog( edLog );
 			playersFlags[i] = 1;
 		    }
 		} else playersFlags[i] = 1;
@@ -3968,7 +4013,7 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
     if (playersFlags[target->Player()->ListID()] != 2) {
         tString edLog;
         edLog << "PLAYER_ENTER_TARGET " << this->GOID() << " " << name_ << " " << GetPosition().x << " " << GetPosition().y << " " << target->Player()->GetUserName() << "\n";
-        se_SaveToEdLog( edLog );
+//        se_SaveToEdLog( edLog );
 	playersFlags[target->Player()->ListID()] = 2;
     }
 }
