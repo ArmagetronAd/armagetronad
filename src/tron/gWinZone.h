@@ -383,6 +383,22 @@ private:
     State currentState_;   //!< the current state
 };
 
+class gBlastZoneHack: public gZone
+{
+public:
+    gBlastZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false );              //!< local constructor
+    gBlastZoneHack(nMessage &m);                                  //!< network constructor
+    ~gBlastZoneHack();                                            //!< destructor
+
+
+protected:
+
+private:
+    virtual bool Timestep(REAL currentTime);           //!< simulates behaviour up to currentTime
+    virtual void OnVanish();                           //!< called when the zone vanishes
+    virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone 
+};
+
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos );
 

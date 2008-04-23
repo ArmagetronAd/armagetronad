@@ -4482,6 +4482,173 @@ void gTargetZoneHack::OnVanish( void )
 
 // *******************************************************************************
 // *
+// *	gBlastZoneHack
+// *
+// *******************************************************************************
+//!
+//!		@param	grid Grid to put the zone into
+//!		@param	pos	 Position to spawn the zone at
+//!
+// *******************************************************************************
+
+
+gBlastZoneHack::gBlastZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation)
+        :gZone( grid, pos, dynamicCreation )
+{
+    color_.r = 0.0f;
+    color_.g = 1.0f;
+    color_.b = 0.0f;
+
+    grid->AddGameObjectInteresting(this);
+
+    SetExpansionSpeed(0);
+    SetRotationSpeed( .3f );
+    RequestSync();
+}
+
+// *******************************************************************************
+// *
+// *	gBlastZoneHack
+// *
+// *******************************************************************************
+//!
+//!		@param	m Message to read creation data from
+//!		@param	null
+//!
+// *******************************************************************************
+
+gBlastZoneHack::gBlastZoneHack( nMessage & m )
+        : gZone( m )
+{
+}
+
+// *******************************************************************************
+// *
+// *	~gBlastZoneHack
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+gBlastZoneHack::~gBlastZoneHack( void )
+{
+}
+
+// *******************************************************************************
+// *
+// *	Timestep
+// *
+// *******************************************************************************
+//!
+//!		@param	time    the current time
+//!
+// *******************************************************************************
+
+eCoord s_blastCoord;
+REAL   s_blastRadius;
+extern void clamp01(REAL &c);
+
+// remove walls in the blast zone ...
+void S_BlastWalls( eWall * w )
+{
+    // determine the point closest to s_blastCoord
+    eCoord normal = w->Vec().Conj();
+    normal.Normalize();
+
+    eCoord Pos1 = normal.Turn( w->EndPoint(0) - s_blastCoord );
+    eCoord Pos2 = normal.Turn( w->EndPoint(1) - s_blastCoord );
+
+    tASSERT( fabs( Pos1.y - Pos2.y ) <= fabs( Pos1.y + Pos2.y + .1f ) * .1f );
+
+    REAL alpha = .5f;
+    if ( Pos1.x != Pos2.x)
+        alpha = Pos1.x / ( Pos1.x - Pos2.x );
+
+    REAL radius = s_blastRadius * s_blastRadius - Pos1.y * Pos2.y;
+
+    // wall too far away
+    if ( radius < 0 )
+        return;
+
+    radius = sqrt( radius );
+
+    // works only for player walls
+    gPlayerWall* wall = dynamic_cast<gPlayerWall*>( w );
+    if ( ! wall )
+        return;
+
+    REAL closestPos = wall->Pos( alpha );
+
+    REAL start = closestPos - radius;
+    REAL end = closestPos + radius;
+
+    // cut away walls in the zone (if they are not reduced to a point) 
+    REAL wallEnd = wall->EndPos();
+    REAL wallBeg = wall->BegPos();
+    if ( wallEnd <= wallBeg )
+    {
+        return;
+    }
+    REAL endAlpha = ( end - wallBeg ) / ( wallEnd - wallBeg );
+    // std::cout << wall->BegTime() << "\n";
+    clamp01( endAlpha );
+    end = wall->Pos( endAlpha );
+
+    if ( end > start )
+    {
+        wall->BlowHole ( start, end, NULL );
+        wall->NetWall()->RequestSync ();
+    }
+}
+
+bool gBlastZoneHack::Timestep( REAL time )
+{
+    s_blastCoord  = GetPosition();
+    s_blastRadius = GetRadius();
+
+    if ( s_blastRadius > 0 )
+    {
+        grid->ProcessWallsInRange( &S_BlastWalls,
+                                   s_blastCoord,
+                                   s_blastRadius,
+                                   CurrentFace() );
+    }
+
+    // delegate
+    bool returnStatus = gZone::Timestep( time );
+
+    return (returnStatus);
+}
+
+// *******************************************************************************
+// *
+// *	OnEnter
+// *
+// *******************************************************************************
+//!
+//!		@param	target  the cycle that has been found inside the zone
+//!		@param	time    the current time
+//!
+// *******************************************************************************
+
+void gBlastZoneHack::OnEnter( gCycle * target, REAL time )
+{
+}
+
+// *******************************************************************************
+// *
+// *	OnVanish
+// *
+// *******************************************************************************
+
+void gBlastZoneHack::OnVanish( void )
+{
+}
+
+
+// *******************************************************************************
+// *
 // *	Spawn_Zone
 // *
 // *******************************************************************************

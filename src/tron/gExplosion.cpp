@@ -34,12 +34,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eGrid.h"
 #include "tRandom.h"
 #include "tMath.h"
+#include "nConfig.h"
 
 static eWavData explode("moviesounds/dietron.wav","sound/expl.wav");
 
 static tList< gExplosion > sg_Explosions;
 
-static void clamp01(REAL &c)
+void clamp01(REAL &c)
 {
     if (!finite(c))
         c = 0.5;
@@ -135,7 +136,7 @@ static void S_Sync( eWall * w )
 }
 */
 
-gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color, gCycle * owner )
+gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color, gCycle * owner, REAL radius )
         :eReferencableGameObject(grid, pos, eCoord(0,0), NULL, true),
         sound(explode),
         createTime(time),
@@ -149,6 +150,7 @@ gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& col
     explosion_r = color.r;
     explosion_g = color.g;
     explosion_b = color.b;
+    radius_ = radius;
     sound.Reset();
     sg_Explosions.Add( this, listID );
     z=0;
@@ -188,7 +190,7 @@ gExplosion::~gExplosion(){
     {
         /*
         s_explosionCoord  = pos;
-        s_explosionRadius = gCycle::ExplosionRadius()*1.5f;
+        s_explosionRadius = ((radius_==0)?gCycle::ExplosionRadius():radius_)*1.5f;
 
         grid->ProcessWallsInRange( &S_Sync,
         						   s_explosionCoord,
@@ -215,7 +217,7 @@ bool gExplosion::Timestep(REAL currentTime){
 
         s_explosionCoord  = pos;
         REAL factor = expansion / REAL( expansionSteps );
-        s_explosionRadius = gCycle::ExplosionRadius() * sqrt(factor);
+        s_explosionRadius = ((radius_==0)?gCycle::ExplosionRadius():radius_) * sqrt(factor);
         s_explosionTime = currentTime;
         s_holer = this;
 
@@ -414,4 +416,40 @@ void gExplosion::OnRemoveFromGame()
     // delegate to base
     eReferencableGameObject::OnRemoveFromGame();
 }
+
+extern REAL se_GameTime();
+
+static void sg_SetExplosion(std::istream &s)
+{
+        eGrid *grid = eGrid::CurrentGrid();
+        if(!grid) {
+                con << "Must be called while a grid exists!\n";
+                return;
+        }
+
+        tString params;
+        params.ReadLine( s, true );
+
+        // parse the line to get the param : x y radius
+        int pos = 0; //
+        const tString x = params.ExtractNonBlankSubString(pos);
+        const tString y = params.ExtractNonBlankSubString(pos);
+	eCoord epos = eCoord(atof(x), atof(y));
+        const tString radius_str = params.ExtractNonBlankSubString(pos);
+        int radius = atoi(radius_str);
+	if (radius<=0) return;
+
+	// extra parameters for explosion init ...
+        gRealColor ecolor;
+        ecolor.r = 1.0;
+        ecolor.g = 1.0;
+        ecolor.b = 1.0;
+	REAL time = se_GameTime();
+
+        gExplosion *explosion = NULL;
+        explosion = tNEW( gExplosion( grid, epos, time, ecolor, NULL, radius) );
+}
+
+static tConfItemFunc sg_SetExplosion_conf("SPAWN_EXPLOSION",&sg_SetExplosion);
+
 

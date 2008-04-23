@@ -6408,3 +6408,61 @@ void gCycle::ProcessShoot(bool deathShot)
     }
 }
 
+static void sg_RespawnPlayer(std::istream &s)
+{
+        eGrid *grid = eGrid::CurrentGrid();
+        if(!grid) {
+                con << "Must be called while a grid exists!\n";
+                return;
+        }
+
+        tString params;
+        params.ReadLine( s, true );
+
+        // first parse the line to get the params : <player name> <message flag> <x> <y> <dirx> <diry>
+        int pos = 0; //
+        tString PlayerName = ePlayerNetID::FilterName(params.ExtractNonBlankSubString(pos));
+        ePlayerNetID *pPlayer = 0;
+        pPlayer = ePlayerNetID::FindPlayerByName(PlayerName, NULL);
+        if(!pPlayer) {
+            return;
+        }
+        const tString message_str = params.ExtractNonBlankSubString(pos);
+        int message = atoi(message_str);
+        const tString x_str = params.ExtractNonBlankSubString(pos);
+        REAL x = atof(x_str);
+        const tString y_str = params.ExtractNonBlankSubString(pos);
+        REAL y = atof(y_str);
+        const tString dirx_str = params.ExtractNonBlankSubString(pos);
+        REAL dirx = atof(dirx_str);
+        const tString diry_str = params.ExtractNonBlankSubString(pos);
+        REAL diry = atof(diry_str);
+        // prepare coord and direction ...
+        eCoord ppos, pdir;
+        if (((x_str == "") && (y_str == "")) || ((dirx ==0) && (diry == 0))) {
+            return;
+        }
+        ppos = eCoord(x,y);
+        pdir = eCoord(dirx,diry);
+
+        // let's respawn now ...
+        eGameObject *pGameObject = pPlayer->Object();
+        if ((!pGameObject) ||
+            (!(pGameObject->Alive()) ))
+        {
+            gCycle *pCycle = new gCycle(grid, ppos, pdir, pPlayer);
+            pPlayer->ControlObject(pCycle);
+
+            if (message) {
+                tColoredString playerName;
+                playerName << *pPlayer << tColoredString::ColorString(1,1,1);
+
+                // send a console message to the player
+                sn_CenterMessage(tOutput("$player_respawn_center_message"), pPlayer->Owner());
+            }
+        }
+}
+
+static tConfItemFunc sg_RespawnPlayer_conf("RESPAWN_PLAYER",&sg_RespawnPlayer);
+
+

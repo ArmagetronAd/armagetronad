@@ -38,7 +38,7 @@ struct gRealColor;
 class gExplosion: virtual public eReferencableGameObject
 { // Boom!
 public:
-    gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color, gCycle * owner );
+    gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color, gCycle * owner, REAL radius = 0 );
     virtual ~gExplosion();
 
     virtual bool Timestep(REAL currentTime);
@@ -73,6 +73,7 @@ private:
     gParticles *theExplosion;
 
     REAL        createTime;
+    REAL 	radius_;
 
     //	gRealColor	color_;
     REAL		explosion_r;
