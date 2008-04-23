@@ -127,6 +127,8 @@ public:
     void RemoveSubStr(int start, int length);   //! Remove a substring, in-place
     tString Reverse();                          //! Reverses strings
 
+    tString ExtractNonBlankSubString( int &pos ) const; //!< Extract non blank char sequence starting at pos
+
     //! Truncate a string
     tString Truncate( int truncateAt ) const;
 

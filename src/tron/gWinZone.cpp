@@ -4485,3 +4485,376 @@ void gTargetZoneHack::OnVanish( void )
     TargetZoneCounter_--;
 }
 
+
+// *******************************************************************************
+// *
+// *	Spawn_Zone
+// *
+// *******************************************************************************
+
+static void sg_CreateZone_conf(std::istream &s)
+{
+        eGrid *grid = eGrid::CurrentGrid();
+        if(!grid) {
+                con << "Must be called while a grid exists!\n";
+                return;
+        }
+
+        tString params;
+        params.ReadLine( s, true );
+
+	// first parse the line to get the params : <win|death> <x> <y> <size> <growth>
+	eTeam *zoneTeam=NULL;
+	int pos = 0; //
+	tString zoneTypeStr = params.ExtractNonBlankSubString(pos);
+        tString zoneNameStr;
+	if ((zoneTypeStr=="n")||(zoneTypeStr=="N")) {
+            zoneNameStr = params.ExtractNonBlankSubString(pos);
+	    zoneTypeStr = params.ExtractNonBlankSubString(pos);
+        } else {
+	    zoneNameStr = tString("");
+	}
+	tString zoneTeamStr = tString("");
+	if ((zoneTypeStr=="fortress")||(zoneTypeStr=="flag")||(zoneTypeStr=="deathTeam")||(zoneTypeStr=="ballTeam")) {
+        	zoneTeamStr = params.ExtractNonBlankSubString(pos);
+	        for (int i = eTeam::teams.Len() - 1; i>=0; --i) {
+        	    tString teamName = eTeam::teams(i)->Name();
+	            if (zoneTeamStr==ePlayerNetID::FilterName(teamName)) {
+        	        zoneTeam = eTeam::teams(i);
+					break;
+				}
+			}
+	}
+
+	ePlayerNetID *zonePlayer = 0;
+	ePlayerNetID *zoneOwner = 0;
+	if(zoneTypeStr=="zombie" || zoneTypeStr == "zombieOwner") {
+		tString targetPlayer = params.ExtractNonBlankSubString(pos);
+		zonePlayer = ePlayerNetID::FindPlayerByName(targetPlayer, NULL);
+
+		if(!zonePlayer) {
+			return;
+		}
+	}
+	if(zoneTypeStr == "zombieOwner") {
+		tString targetPlayer = params.ExtractNonBlankSubString(pos);
+		zoneOwner = ePlayerNetID::FindPlayerByName(targetPlayer, NULL);
+		if(zoneOwner) {
+			zoneTeam = zoneOwner->CurrentTeam();
+		}
+	}
+
+	tString zonePosXStr = params.ExtractNonBlankSubString(pos);
+	tString zonePosYStr;
+
+	std::vector<eCoord> route;
+	if(zonePosXStr == "L") {
+		tString x,y;
+		while(true) {
+			x = params.ExtractNonBlankSubString(pos);
+			if(x == "Z" || x == "z" || x == "") break;
+			y = params.ExtractNonBlankSubString(pos);
+			route.push_back(eCoord(atof(x), atof(y)));
+		}
+	} else {
+		zonePosYStr = params.ExtractNonBlankSubString(pos);
+	}
+
+	const tString zoneSizeStr = params.ExtractNonBlankSubString(pos);
+	const tString zoneGrowthStr = params.ExtractNonBlankSubString(pos);
+        const tString zoneDirXStr = params.ExtractNonBlankSubString(pos);
+        const tString zoneDirYStr = params.ExtractNonBlankSubString(pos);
+	const tString zoneInteractive = params.ExtractNonBlankSubString(pos);
+	const tString zoneRedStr = params.ExtractNonBlankSubString(pos);
+        const tString zoneGreenStr = params.ExtractNonBlankSubString(pos);
+        const tString zoneBlueStr = params.ExtractNonBlankSubString(pos);
+	const tString targetRadiusStr = params.ExtractNonBlankSubString(pos);
+
+	// second convert params ( to do : check validity).
+	eCoord zonePos = route.empty() ? eCoord(atof(zonePosXStr),atof(zonePosYStr)) : route.front();
+	const REAL zoneSize = atof(zoneSizeStr);
+	const REAL zoneGrowth = atof(zoneGrowthStr);
+	eCoord zoneDir = eCoord(atof(zoneDirXStr),atof(zoneDirYStr));
+	gRealColor zoneColor;
+	bool setColorFlag = false;
+	if ((zoneRedStr!="")&&(zoneGreenStr!="")&&(zoneBlueStr!="")) {
+		zoneColor.r = atof(zoneRedStr);
+		zoneColor.g = atof(zoneGreenStr);
+		zoneColor.b = atof(zoneBlueStr);
+		setColorFlag = true;
+	}
+
+
+	// if no_team was pass, assigns one: the one that has a player spawned closest
+        if ( zoneTeamStr=="no_team" )
+        {
+            REAL teamDistance_ = 0;
+            const tList<eGameObject>& gameObjects = grid->GameObjects();
+            gCycle * closest = 0;
+            REAL closestDistance = 0;
+            for (int i=gameObjects.Len()-1;i>=0;i--)
+            {
+                gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
+
+                if (other )
+                {
+                    eTeam * otherTeam = other->Player()->CurrentTeam();
+                    eCoord otherpos = other->Position() - zonePos;
+                    REAL distance = otherpos.NormSquared();
+                    if ( !closest || distance < closestDistance )
+                    {
+                        closest = other;
+                        closestDistance = distance;
+                    }
+                }
+            }
+
+            if ( closest )
+            {
+                // take over team 
+                zoneTeam = closest->Player()->CurrentTeam();
+            }
+	}
+	// then create zone ...
+	gZone *Zone = NULL;
+    	if ( zoneTypeStr=="death" || zoneTypeStr=="deathTeam" ) {
+        	Zone = tNEW( gDeathZoneHack( grid, zonePos, true, zoneTeam ) );
+        	//sn_ConsoleOut( "$instant_death_activated" );
+                if (zoneTeam!=NULL) {
+                        zoneColor.r = zoneTeam->R()/15.0;
+                        zoneColor.g = zoneTeam->G()/15.0;
+                        zoneColor.b = zoneTeam->B()/15.0;
+                        zoneColor.r += (1.0 - zoneColor.r) / 1.8;
+                        zoneColor.g += (1.0 - zoneColor.g) / 1.8;
+                        zoneColor.b += (1.0 - zoneColor.b) / 1.8;
+                        setColorFlag = true;
+                }
+    	} else if ( zoneTypeStr=="win" ) {
+        	Zone = tNEW( gWinZoneHack( grid, zonePos, true ) );
+        	//sn_ConsoleOut( "$instant_win_activated" );
+        } else if ( zoneTypeStr=="ball" || zoneTypeStr=="ballTeam" ) {
+                Zone = tNEW( gBallZoneHack( grid, zonePos, true, zoneTeam ) );
+                //sn_ConsoleOut( "$instant_win_activated" );
+                if (zoneTeam!=NULL) {
+                        zoneColor.r = zoneTeam->R()/15.0;
+                        zoneColor.g = zoneTeam->G()/15.0;
+                        zoneColor.b = zoneTeam->B()/15.0;
+                        zoneColor.r += (1.0 - zoneColor.r) / 1.8;
+                        zoneColor.g += (1.0 - zoneColor.g) / 1.8;
+                        zoneColor.b += (1.0 - zoneColor.b) / 1.8;
+                        setColorFlag = true;
+                }
+        } else if ( zoneTypeStr=="flag" ) {
+                Zone = tNEW( gFlagZoneHack( grid, zonePos, true, zoneTeam ) );
+                //sn_ConsoleOut( "$instant_win_activated" );
+                if (zoneTeam!=NULL) {
+                        zoneColor.r = zoneTeam->R()/15.0;
+                        zoneColor.g = zoneTeam->G()/15.0;
+                        zoneColor.b = zoneTeam->B()/15.0;
+                	zoneColor.r += (1.0 - zoneColor.r) / 1.8;
+                	zoneColor.g += (1.0 - zoneColor.g) / 1.8;
+                	zoneColor.b += (1.0 - zoneColor.b) / 1.8;
+	                setColorFlag = true;
+		}
+        } else if ( zoneTypeStr=="fortress" ) {
+                Zone = tNEW( gBaseZoneHack( grid, zonePos, true, zoneTeam ) );
+                //sn_ConsoleOut( "$instant_win_activated" );
+		if (zoneTeam!=NULL) {
+                	zoneColor.r = zoneTeam->R()/15.0;
+                	zoneColor.g = zoneTeam->G()/15.0;
+                	zoneColor.b = zoneTeam->B()/15.0;
+	                setColorFlag = true;
+		} 
+        } else if ( zoneTypeStr=="zombie" || zoneTypeStr=="zombieOwner" ) {
+			gCycle *target = dynamic_cast<gCycle *>(zonePlayer->Object());
+			if(target) {
+				gDeathZoneHack *dZone = tNEW(gDeathZoneHack(grid, zonePos, true));
+				dZone->SetSeekingCycle(target);
+				dZone->SetType(gDeathZoneHack::TYPE_ZOMBIE_ZONE);
+				if(zoneOwner) {
+					dZone->SetOwner(zoneOwner);
+					if (zoneTeam!=NULL) {
+						zoneColor.r = zoneTeam->R()/15.0;
+						zoneColor.g = zoneTeam->G()/15.0;
+						zoneColor.b = zoneTeam->B()/15.0;
+						setColorFlag = true;
+					} 
+				}
+				Zone = dZone;
+			} else {
+				goto usage;
+			}
+    	} else if ( zoneTypeStr=="target" ) {
+        	Zone = tNEW( gTargetZoneHack( grid, zonePos, true ) );
+       	} else {
+		usage:
+		con << "Usage:\n"
+			   "SPAWN_ZONE <win|death|ball|target|blast> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+			   "SPAWN_ZONE <fortress|flag|deathTeam|ballTeam> <team> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+			   "SPAWN_ZONE zombie <player> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+			   "SPAWN_ZONE zombieOwner <player> <owner> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+			   "instead of <x> <y> one can write: L <x1> <y1> <x2> <y2> [...] Z\n";
+		return;
+	}
+    	static_cast<eGameObject*>(Zone)->Timestep( se_GameTime() );
+    	Zone->SetReferenceTime();
+    	Zone->SetRadius( zoneSize );
+    	Zone->SetExpansionSpeed( zoneGrowth );
+    	Zone->SetRotationSpeed( .3f );
+	Zone->SetVelocity(zoneDir);
+	if (setColorFlag) {
+		zoneColor.r = (zoneColor.r>1.0)?1.0:zoneColor.r;
+                zoneColor.g = (zoneColor.g>1.0)?1.0:zoneColor.g;
+                zoneColor.b = (zoneColor.b>1.0)?1.0:zoneColor.b;
+		Zone->SetColor(zoneColor);
+	}
+	if (zoneInteractive=="true") {
+		Zone->SetWallInteract(true);
+		Zone->SetWallBouncesLeft(-1);
+	}
+	REAL targetRadius = atof(targetRadiusStr);
+	if(targetRadius != 0) {
+		Zone->SetTargetRadius(targetRadius);
+	}
+	if(!route.empty()) {
+		Zone->SetPosition(route.front());
+		for(std::vector<eCoord>::const_iterator iter = route.begin(); iter != route.end(); ++iter) {
+			Zone->AddWaypoint(*iter);
+		}
+	}
+	Zone->SetName(zoneNameStr);
+	Zone->RequestSync();
+
+        tString edLog;
+        edLog << "ZONE_SPAWNED " << Zone->GOID() << " " << zoneNameStr << " " << Zone->GetPosition().x << " " << Zone->GetPosition().y << "\n";
+//        se_SaveToEdLog( edLog );
+}
+
+static tConfItemFunc sg_CreateZone_c("SPAWN_ZONE",&sg_CreateZone_conf);
+
+static void sg_CollapseZone(std::istream &s)
+{
+        tString params;
+        params.ReadLine( s, true );
+
+        // first parse the line to get the param : object_id
+        int pos = 0; //
+	const tString object_id_str = params.ExtractNonBlankSubString(pos);
+        // first check for the name
+        int zone_id;
+        zone_id=gZone::FindFirst(object_id_str);
+	if (zone_id==-1) {
+            zone_id = atoi(object_id_str);
+            if (zone_id==0 && object_id_str!="0") return;
+        }
+
+        const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+	while (zone_id!=-1) {
+            // get the zone ...
+            gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+	    if (zone) { 
+                zone->SetReferenceTime();
+                zone->SetExpansionSpeed( -zone->GetRadius()*.5 );
+                zone->RequestSync();
+                tString edLog;
+                edLog << "ZONE_COLLAPSED " << zone_id << " " << object_id_str <<" " << zone->GetPosition().x << " " << zone->GetPosition().y << "\n";
+//                se_SaveToEdLog( edLog );
+	        zone_id=gZone::FindNext(object_id_str, zone_id);
+	    }
+	}
+}
+
+static tConfItemFunc sg_CollapseZone_conf("COLLAPSE_ZONE",&sg_CollapseZone);
+
+static void sg_SetZoneRadius(std::istream &s)
+{
+        tString params;
+        params.ReadLine( s, true );
+
+        // parse the line to get the param : object_id, radius, speed
+        int pos = 0; //
+        const tString object_id_str = params.ExtractNonBlankSubString(pos);
+        const tString radius_str = params.ExtractNonBlankSubString(pos);
+        int radius = atoi(radius_str);
+        const tString speed_str = params.ExtractNonBlankSubString(pos);
+        REAL speed = atof(speed_str);
+
+        // first check for the name
+        int zone_id;
+        zone_id=gZone::FindFirst(object_id_str);
+        if (zone_id==-1) {
+            zone_id = atoi(object_id_str);
+            if (zone_id==0 && object_id_str!="0") return;
+        }
+
+        const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+        while (zone_id!=-1) {
+            // get the zone ...
+            gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+            if (zone) {
+                zone->SetReferenceTime();
+                // set new radius and speed to reach it ...
+                if (speed==0)
+                    zone->SetRadiusSmoothly( radius );
+                else
+                    zone->SetRadiusSmoothly( radius, speed );
+                zone->RequestSync();
+            }
+            zone_id=gZone::FindNext(object_id_str, zone_id);
+        }
+}
+
+static tConfItemFunc sg_SetZoneRadius_conf("SET_ZONE_RADIUS",&sg_SetZoneRadius);
+
+
+static void sg_SetZoneRoute(std::istream &s)
+{
+        tString params;
+        params.ReadLine( s, true );
+
+        // parse the line to get the param : object_id, positions ...
+        int pos = 0; //
+        const tString object_id_str = params.ExtractNonBlankSubString(pos);
+//        const tString mode_str = params.ExtractNonBlankSubString(pos);
+        std::vector<eCoord> route;
+        tString x,y;
+        while(true) {
+            x = params.ExtractNonBlankSubString(pos);
+            if(x == "") break;
+            y = params.ExtractNonBlankSubString(pos);
+            route.push_back(eCoord(atof(x), atof(y)));
+        }
+
+        // first check for the name
+        int zone_id;
+        zone_id=gZone::FindFirst(object_id_str);
+        if (zone_id==-1) {
+            zone_id = atoi(object_id_str);
+            if (zone_id==0 && object_id_str!="0") return;
+        }
+
+        const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+        while (zone_id!=-1) {
+            // get the zone ...
+            gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+            if (zone) {
+	        zone->SetReferenceTime();
+		eCoord zoneDir = eCoord(0,0);
+	        if(!route.empty()) {
+		    eCoord curPos = zone->GetPosition();
+                    zone->AddWaypoint(curPos);
+		    zoneDir = route.front();
+                    for(std::vector<eCoord>::const_iterator iter = route.begin(); iter != route.end(); ++iter) {
+                        zone->AddWaypoint(*iter + curPos);
+                    }
+                }
+                zone->SetVelocity(zoneDir);
+                zone->RequestSync();
+            }
+            zone_id=gZone::FindNext(object_id_str, zone_id);
+        }
+}
+
+static tConfItemFunc sg_SetZoneRoute_conf("SET_ZONE_POSITION",&sg_SetZoneRoute);
+
+

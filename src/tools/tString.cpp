@@ -1521,6 +1521,40 @@ tString tString::Reverse() {
 
 // *******************************************************************************************
 // *
+// *    ExtractNonBlankSubString
+// *
+// *******************************************************************************************
+//!
+//!    @param   pos             Position where to start the extraction.
+//!                             will contain the first position after the extracted string.
+//!    @return                  The substring extracted. Leading blanks will not be taken.
+//!
+// *******************************************************************************************
+
+tString tString::ExtractNonBlankSubString( int &pos ) const{
+    int currentPos = pos;
+    tASSERT( currentPos >= 0 );
+
+    if (currentPos > Len())
+        return tString("");
+
+    tString toReturn("");
+
+    // first ignore leading blanks ...
+    while (currentPos < Len() && isblank((*this)(currentPos))) {
+        currentPos++;
+    }
+    // then store the substring ...
+    while (currentPos < Len() && !isblank((*this)(currentPos))) {
+        toReturn << (*this)(currentPos++);
+    }
+    pos = currentPos;
+    return  toReturn;
+}
+
+
+// *******************************************************************************************
+// *
 // *	RemoveWordRight
 // *
 // *******************************************************************************************
