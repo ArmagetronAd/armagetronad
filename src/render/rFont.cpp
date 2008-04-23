@@ -56,6 +56,14 @@ rFont rFont::s_defaultFontSmall(lala_defaultFontSmall, 32,5/128.0,9/128.0,1/128.
 rFont rFont::s_defaultFontSmall("Anonymous/original/textures/font_s.png", 32,5/128.0,9/128.0,1/128.0);
 */
 
+//! like strnlen, but that's nonstandard :-(
+static size_t my_strnlen(char const *c, size_t i) {
+	char const *begin = c;
+	char const *end = c + i;
+	for(; *c && c != end; ++c);
+	return c - begin;
+}
+
 static rFont sr_lowerPartFont("textures/font_extra.png");
 rFont rFont::s_defaultFont("textures/font.png", &sr_lowerPartFont);
 rFont rFont::s_defaultFontSmall("textures/font_s.png",32,5/128.0,9/128.0,1/128.0);
@@ -424,7 +432,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
             int wordLen = 0;
             while ( *nextSpace != '\0' && *nextSpace != '\n' && !isblank(*nextSpace) )
             {
-                if (*nextSpace=='0' && strnlen(nextSpace, 8)>=8 && nextSpace[1]=='x' && colorMode != COLOR_IGNORE )
+                if (*nextSpace=='0' && my_strnlen(nextSpace, 8)>=8 && nextSpace[1]=='x' && colorMode != COLOR_IGNORE )
                 {
                     // skip color code
                     nextSpace += 8;
@@ -460,7 +468,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
         }
 
         // detect presence of color code
-        if (*c=='0' && strnlen(c, 8)>=8 && c[1]=='x' && colorMode != COLOR_IGNORE )
+        if (*c=='0' && my_strnlen(c, 8)>=8 && c[1]=='x' && colorMode != COLOR_IGNORE )
         {
             tColor color;
             bool use = false;
