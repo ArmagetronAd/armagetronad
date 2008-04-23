@@ -92,6 +92,7 @@ public:
     virtual REAL            Speed                   ()                                    const     ;   //!< returns the current speed
     virtual bool            Alive                   ()                                    const     ;   //!< returns whether the cycle is still alive
     virtual bool            Vulnerable              ()                                    const     ;   //!< returns whether the cycle can be killed
+    REAL GetAcceleration(void) const  { return acceleration; };  //!< Gets the cycle's acceleration
 
     bool                    CanMakeTurn             (int direction)                                    const     ;   //!< returns whether a turn is currently possible
     bool                    CanMakeTurn             ( REAL time, int direction                         ) const     ;   //!< returns whether a turn is possible at the given time

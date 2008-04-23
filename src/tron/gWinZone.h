@@ -84,6 +84,7 @@ public:
     eCoord          GetVelocity         ( void ) const;	                //!< Gets the current velocity
     gZone const &   GetVelocity         ( eCoord & velocity ) const;	//!< Gets the current velocity
     gZone &         SetRadius           ( REAL radius );	            //!< Sets the current radius
+    gZone &         SetRadiusSmoothly   ( REAL radius, REAL expansionSpeed = 5); //!< Sets the radius to go to smoothly
     REAL            GetRadius           ( void ) const;	                //!< Gets the current radius
     gZone const &   GetRadius           ( REAL & radius ) const;	    //!< Gets the current radius
     gZone &         SetExpansionSpeed   ( REAL expansionSpeed );	    //!< Sets the current expansion speed
@@ -96,6 +97,9 @@ public:
     REAL            GetRotationAcceleration( void ) const;	                        //!< Gets the current acceleration of the rotation
     gZone const &   GetRotationAcceleration( REAL & rotationAcceleration ) const;	//!< Gets the current acceleration of the rotation
 
+    gZone &         SetWallInteract     (bool wallInteract) {wallInteract_=wallInteract; return *this;}
+    gZone &         SetWallBouncesLeft  (int wallBouncesLeft) {wallBouncesLeft_=wallBouncesLeft; return *this;}
+
     gZone &         SetColor            (gRealColor color) {color_ = color; return *this;}      //!< Sets the current color
     gRealColor &    GetColor            () {return color_;}             //!< Gets the current color
     gZone &         GetColor            (gRealColor & color) {color = color_; return *this;}    //!< Gets the current color
@@ -105,8 +109,9 @@ public:
     gCycle *        GetSeekingCycle     () {return pSeekingCycle_;}  //!< Sets the current seeking cycle
     gZone &         SetTargetRadius     (REAL radius) {targetRadius_ = radius; return *this;}      //!< Sets the target radius
     gZone &         SetFallSpeed        (REAL speed) {fallSpeed_ = speed; return *this;}      //!< Sets the fall speed
-    void BounceOffPoint(eCoord dest, eCoord collide, REAL mod);
+    void BounceOffPoint(eCoord dest, eCoord collide);
 
+    gZone & AddWaypoint(eCoord const &point);
     void Destroy();
     bool destroyed_;
 
@@ -117,13 +122,19 @@ public:
 protected:
     bool wallInteract_;
     int wallBouncesLeft_;
-    eWall *pLastWall_;
+    REAL lastImpactTime_;
+    REAL newImpactTime_;
+    eCoord newImpactPos_;
+    eCoord newImpactVelocity_;
 
     bool dynamicCreation_;  //??? remove
     ePlayerNetID *pOwner_;
     gCycle *pSeekingCycle_;       //!< cycle owner of this zone
     bool seeking_;
     REAL targetRadius_;
+    REAL expectedRadius_;
+    bool resizeRequested_;
+    REAL previousExpansionSpeed_;
     REAL fallSpeed_;
     REAL lastSeekTime_;
 
@@ -137,6 +148,10 @@ protected:
     tFunction radius_;           //!< time dependence of radius
     tFunction rotationSpeed_;    //!< the zone's rotation speed
     eCoord    rotation_;         //!< the current rotation state
+
+        std::vector<eCoord> route_;
+        unsigned int lastCoord_;
+        REAL nextUpdate_;
 
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
     virtual void OnVanish();                     //!< called when the zone vanishes
@@ -170,7 +185,7 @@ private:
 class gWinZoneHack: public gZone
 {
 public:
-    gWinZoneHack(eGrid *grid, const eCoord &pos); //!< local constructor
+    gWinZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false); //!< local constructor
     gWinZoneHack(nMessage &m);                    //!< network constructor
     ~gWinZoneHack();                              //!< destructor
 
@@ -195,7 +210,7 @@ public:
         NUM_DEATH_ZONE_TYPES
     };
 
-    gDeathZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false );              //!< local constructor
+    gDeathZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam * teamowner = NULL );              //!< local constructor
     gDeathZoneHack(nMessage &m);                                  //!< network constructor
     ~gDeathZoneHack();                                            //!< destructor
 
@@ -221,7 +236,7 @@ private:
 class gBaseZoneHack: public gZone
 {
 public:
-    gBaseZoneHack(eGrid *grid, const eCoord &pos );               //!< local constructor
+    gBaseZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam * teamowner = NULL );               //!< local constructor
     gBaseZoneHack(nMessage &m);                                   //!< network constructor
     ~gBaseZoneHack();                                             //!< destructor
 
@@ -241,6 +256,7 @@ private:
     static void CountZonesOfTeam( eGrid const * grid, eTeam * otherTeam, int & count, gBaseZoneHack * & farthest ); //!< counts the zones belonging to the given team.
 
     REAL conquered_;                       //!< conquest status; zero if it is free, 1 if it has been completely conquered by the enemy
+    REAL conquerer_[MAXCLIENTS+1];        //!< time spend in the zone 
     int enemiesInside_;                     //!< count of enemies currently inside the zone
     tColoredString enemyPlayerName_;        //!< name of the first enemy player that was inside us
 
@@ -275,7 +291,7 @@ private:
 class gBallZoneHack: public gZone
 {
 public:
-    gBallZoneHack(eGrid *grid, const eCoord &pos );              //!< local constructor
+    gBallZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam * teamowner = NULL );              //!< local constructor
     gBallZoneHack(nMessage &m);                                  //!< network constructor
     ~gBallZoneHack();                                            //!< destructor
 
@@ -284,10 +300,13 @@ public:
     void GoHome();
 
 protected:
+    bool init_;
     eCoord originalPosition_;
+    eCoord originalVelocity_;
 
 private:
     virtual void OnVanish();                           //!< called when the zone vanishes
+    virtual bool Timestep(REAL currentTime);           //!< simulates behaviour up to currentTime
     virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone (kills them)
 
     tJUST_CONTROLLED_PTR<ePlayerNetID> lastPlayer_;
@@ -296,7 +315,7 @@ private:
 class gFlagZoneHack: public gZone
 {
 public:
-    gFlagZoneHack(eGrid *grid, const eCoord &pos );              //!< local constructor
+    gFlagZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam * teamowner = NULL );              //!< local constructor
     gFlagZoneHack(nMessage &m);                                  //!< network constructor
     ~gFlagZoneHack();                                            //!< destructor
 
