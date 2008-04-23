@@ -3171,9 +3171,9 @@ void gCycle::Die( REAL time )
     }
 }
 
-static eLadderLogWriter sg_deathFragWriter("DEATH_FRAG", true);
-static eLadderLogWriter sg_deathSuicideWriter("DEATH_SUICIDE", true);
-static eLadderLogWriter sg_deathTeamkillWriter("DEATH_TEAMKILL", true);
+eLadderLogWriter sg_deathFragWriter("DEATH_FRAG", true);
+eLadderLogWriter sg_deathSuicideWriter("DEATH_SUICIDE", true);
+eLadderLogWriter sg_deathTeamkillWriter("DEATH_TEAMKILL", true);
 
 void gCycle::KillAt( const eCoord& deathPos){
     // don't kill invulnerable cycles

@@ -3336,12 +3336,13 @@ gBallZoneHack::~gBallZoneHack( void )
 {
 }
 
+static eLadderLogWriter sg_ballVanishWriter("BALL_VANISH", false);
+
 void gBallZoneHack::OnVanish( void )
 {
     grid->RemoveGameObjectInteresting(this);
-    tString edLog;
-    edLog << "BALL_VANISH " << this->GOID() << " " << name_ << " " << GetPosition().x << " " << GetPosition().y << "\n";
-//    se_SaveToEdLog( edLog );
+    sg_ballVanishWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y;
+    sg_ballVanishWriter.write();
 }
 
 // *******************************************************************************
@@ -3379,6 +3380,9 @@ bool gBallZoneHack::Timestep( REAL time )
 //!		@param	time    the current time
 //!
 // *******************************************************************************
+extern eLadderLogWriter sg_deathFragWriter;
+extern eLadderLogWriter sg_deathSuicideWriter;
+extern eLadderLogWriter sg_deathTeamkillWriter;
 
 void gBallZoneHack::OnEnter( gCycle * target, REAL time )
 {
@@ -3419,14 +3423,9 @@ void gBallZoneHack::OnEnter( gCycle * target, REAL time )
                 preyName << *prey;
                 preyName << tColoredString::ColorString(1,1,1);
                 if (prey->CurrentTeam() != hunter->CurrentTeam()) {
-                    tString ladderLog;
-                    ladderLog << "DEATH_FRAG " << prey->GetUserName() << " " << hunter->GetUserName()  << "\n";
-//                    se_SaveToLadderLog( ladderLog );
-
-                    tString edLog;
-                    edLog << "DEATH_FRAG " << prey->GetUserName() << " " << nMachine::GetMachine(prey->Owner()).GetIP() << " "
-                                           << hunter->GetUserName() << " " << nMachine::GetMachine(hunter->Owner()).GetIP() << "\n";
-//                    se_SaveToEdLog( edLog );
+                    sg_deathFragWriter << prey->GetUserName() << nMachine::GetMachine(prey->Owner()).GetIP() 
+                                           << hunter->GetUserName() << nMachine::GetMachine(hunter->Owner()).GetIP();
+                    sg_deathFragWriter.write();
 
                     win.SetTemplateParameter(3, preyName);
                     win << "$player_win_frag";
@@ -3440,14 +3439,9 @@ void gBallZoneHack::OnEnter( gCycle * target, REAL time )
                     }
                 }
                 else { // this should never happens as the killed player is not kept as lastplayer but we can change it easily ;)
-                    tString ladderLog;
-                    ladderLog << "DEATH_TEAMKILL " << prey->GetUserName() << " " << hunter->GetUserName()  << "\n";
-//                    se_SaveToLadderLog( ladderLog );
-
-                    tString edLog;
-                    edLog << "DEATH_TEAMKILL " << prey->GetUserName() << " " << nMachine::GetMachine(prey->Owner()).GetIP() << " "
-                                           << hunter->GetUserName() << " " << nMachine::GetMachine(hunter->Owner()).GetIP() << "\n";
-//                    se_SaveToEdLog( edLog );
+                    sg_deathTeamkillWriter << prey->GetUserName() << nMachine::GetMachine(prey->Owner()).GetIP() 
+                                           << hunter->GetUserName() << nMachine::GetMachine(hunter->Owner()).GetIP();
+                    sg_deathTeamkillWriter.write();
 
                     tColoredString hunterName;
                     hunterName << *hunter << tColoredString::ColorString(1,1,1);
@@ -4319,6 +4313,10 @@ gTargetZoneHack::~gTargetZoneHack( void )
 //!
 // *******************************************************************************
 
+static eLadderLogWriter sg_targetzoneTimeoutWriter("TARGETZONE_TIMEOUT", false);
+static eLadderLogWriter sg_targetzoneConqueredWriter("TARGETZONE_CONQUERED", false);
+static eLadderLogWriter sg_targetzonePlayerLeftWriter("TARGETZONE_PLAYER_LEFT", false);
+
 bool gTargetZoneHack::Timestep( REAL time )
 {
     // check if the zone must collapse ...
@@ -4328,10 +4326,9 @@ bool gTargetZoneHack::Timestep( REAL time )
         SetReferenceTime();
         SetExpansionSpeed( -GetRadius()*.5 );
         RequestSync();
-        // send message to edlog file ...
-        tString edLog;
-        edLog << "TARGETZONE_TIMEOUT " << eGameObject::GOID() << " " << name_ <<" " << GetPosition().x << " " << GetPosition().y << "\n";
-//        se_SaveToEdLog( edLog );
+        // send message to ladder log file ...
+        sg_targetzoneTimeoutWriter << eGameObject::GOID() << name_ << GetPosition().x << GetPosition().y;
+	sg_targetzoneTimeoutWriter.write();
     }
 
     if ( ((currentState_ == State_Conquering) && (sg_targetTimeBeforeVanishOnceConquered>0) && (time - timeFirstEntry_>sg_targetTimeBeforeVanishOnceConquered))
@@ -4342,30 +4339,27 @@ bool gTargetZoneHack::Timestep( REAL time )
         SetReferenceTime();
         SetExpansionSpeed( -GetRadius()*.5 );
         RequestSync();
-        // send message to edlog file ...
-        tString edLog;
-        edLog << "TARGETZONE_CONQUERED " << eGameObject::GOID() << " " << name_ << " " << GetPosition().x << " " << GetPosition().y;
+        // send message to ladder log file ...
+        sg_targetzoneConqueredWriter << eGameObject::GOID() << name_ << GetPosition().x << GetPosition().y;
         if (firstPlayer_) {
-	    edLog << " " << firstPlayer_->GetUserName();
+	    sg_targetzoneConqueredWriter << firstPlayer_->GetUserName();
             if ( firstPlayer_->CurrentTeam() ) {
-                edLog << " " << ePlayerNetID::FilterName( firstPlayer_->CurrentTeam()->Name() );
+                sg_targetzoneConqueredWriter << ePlayerNetID::FilterName( firstPlayer_->CurrentTeam()->Name() );
             }
         }
-        edLog << "\n";
-//        se_SaveToEdLog( edLog );
+	sg_targetzoneConqueredWriter.write();
     }
 
     for (int i=0; i<MAXCLIENTS; i++) {
 	if (playersFlags[i]==2) {
-            tString edLog;
             ePlayerNetID* p = se_PlayerNetIDs(i);
             if (p) {
                 gCycle* prey = dynamic_cast< gCycle* >( p->Object() );
                 if ( prey ) {
                     REAL r = this->GetRadius();
                     if (!prey->Alive() || (( prey->Position() - this->Position() ).NormSquared() >= r*r)) {
-            		edLog << "PLAYER_LEFT_TARGET " << this->GOID() << " " << name_ << " " << GetPosition().x << " " << GetPosition().y << " " << p->GetUserName() << "\n";
-//                	se_SaveToEdLog( edLog );
+            		sg_targetzonePlayerLeftWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << p->GetUserName();
+                	sg_targetzonePlayerLeftWriter.write();
 			playersFlags[i] = 1;
 		    }
 		} else playersFlags[i] = 1;
@@ -4415,6 +4409,7 @@ bool gTargetZoneHack::Timestep( REAL time )
 //!		@param	time    the current time
 //!
 // *******************************************************************************
+static eLadderLogWriter sg_targetzonePlayerEnterWriter("BASEZONE_PLAYER_ENTER", false);
 
 void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
 {
@@ -4459,9 +4454,8 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
 
     // message in edlog
     if (playersFlags[target->Player()->ListID()] != 2) {
-        tString edLog;
-        edLog << "PLAYER_ENTER_TARGET " << this->GOID() << " " << name_ << " " << GetPosition().x << " " << GetPosition().y << " " << target->Player()->GetUserName() << "\n";
-//        se_SaveToEdLog( edLog );
+        sg_targetzonePlayerEnterWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName();
+        sg_targetzonePlayerEnterWriter.write();
 	playersFlags[target->Player()->ListID()] = 2;
     }
 }
@@ -4491,6 +4485,8 @@ void gTargetZoneHack::OnVanish( void )
 // *	Spawn_Zone
 // *
 // *******************************************************************************
+
+static eLadderLogWriter sg_spawnzoneWriter("ZONE_SPAWNED", false);
 
 static void sg_CreateZone_conf(std::istream &s)
 {
@@ -4725,12 +4721,13 @@ static void sg_CreateZone_conf(std::istream &s)
 	Zone->SetName(zoneNameStr);
 	Zone->RequestSync();
 
-        tString edLog;
-        edLog << "ZONE_SPAWNED " << Zone->GOID() << " " << zoneNameStr << " " << Zone->GetPosition().x << " " << Zone->GetPosition().y << "\n";
-//        se_SaveToEdLog( edLog );
+        sg_spawnzoneWriter << Zone->GOID() << zoneNameStr << Zone->GetPosition().x << Zone->GetPosition().y;
+        sg_spawnzoneWriter.write();
 }
 
 static tConfItemFunc sg_CreateZone_c("SPAWN_ZONE",&sg_CreateZone_conf);
+
+static eLadderLogWriter sg_collapsezoneWriter("ZONE_COLLAPSED", false);
 
 static void sg_CollapseZone(std::istream &s)
 {
@@ -4756,9 +4753,8 @@ static void sg_CollapseZone(std::istream &s)
                 zone->SetReferenceTime();
                 zone->SetExpansionSpeed( -zone->GetRadius()*.5 );
                 zone->RequestSync();
-                tString edLog;
-                edLog << "ZONE_COLLAPSED " << zone_id << " " << object_id_str <<" " << zone->GetPosition().x << " " << zone->GetPosition().y << "\n";
-//                se_SaveToEdLog( edLog );
+                sg_collapsezoneWriter << zone_id << object_id_str << zone->GetPosition().x << zone->GetPosition().y;
+                sg_collapsezoneWriter.write();
 	        zone_id=gZone::FindNext(object_id_str, zone_id);
 	    }
 	}
