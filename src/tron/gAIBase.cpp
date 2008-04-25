@@ -43,8 +43,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRandom.h"
 #include "tRecorder.h"
 #include <stdlib.h>
-#include <cstdlib>
-#include <memory>
 
 #define AI_REACTION          0 
 #define AI_EMERGENCY         1 
@@ -1085,6 +1083,10 @@ gAIPlayer::gAIPlayer():
     freeSide  = 0;
     log       = NULL;
 
+    route_.clear();
+    lastCoord_ = 0;
+    targetCurrentFace_ = 0;
+
     // find a good color
 
     current_ai=(current_ai+1) % MAXAI_COLOR;
@@ -1353,6 +1355,8 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
     case AI_PATH:
         thisAbility = character->properties[AI_STATE_PATH];
         break;
+    case AI_ROUTE:
+        break;
     case AI_SURVIVE:
         break;
     };
@@ -1368,6 +1372,8 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
         break;
     case AI_PATH:
         nextAbility = character->properties[AI_STATE_PATH];
+        break;
+    case AI_ROUTE:
         break;
     case AI_SURVIVE:
         break;
@@ -1422,6 +1428,11 @@ void gAIPlayer::ThinkSurvive(  ThinkData & data )
     if (nextStateChange > se_GameTime())
     {
         data.thinkAgain = .5f;
+	// if a route path is define, update the path and return to path state
+	if (!route_.empty()) 
+	{
+            UpdateRouteStep();
+	}
         return;
     }
 
@@ -1567,7 +1578,6 @@ void gAIPlayer::ThinkTrace( ThinkData & data )
     return;
 }
 
-
 void gAIPlayer::ThinkPath( ThinkData & data )
 {
     int lr = 0;
@@ -1602,8 +1612,6 @@ void gAIPlayer::ThinkPath( ThinkData & data )
             return;
         }
     }
-
-
 
     // find a new path if the one we got is outdated:
     if (lastPath < se_GameTime() - 10)
@@ -1703,6 +1711,168 @@ void gAIPlayer::ThinkPath( ThinkData & data )
         data.thinkAgain *= .7;
 }
 
+void gAIPlayer::ThinkRoute( ThinkData & data )
+{
+    int lr = 0;
+    REAL mindist = 10;
+
+    eCoord dir = Object()->Direction();
+    // REAL fs=front.distance;
+    REAL ls=data.left.distance;
+    REAL rs=data.right.distance;
+
+    eCoord tDir;
+
+    if ( !targetCurrentFace_ )
+    {
+#ifdef DEBUG
+    con << "Path: out 1 :( ...\n";
+#endif
+        SwitchToState(AI_SURVIVE, 1);
+        EmergencySurvive( data );
+
+        data.thinkAgain = 4;
+        return;
+    }
+    else
+    {
+        tDir = route_[lastCoord_] - Object()->Position();
+
+        // check closest enemy ... 
+        eCoord enemypos=eCoord(1000,1000);
+
+        const tList<eGameObject>& gameObjects = Object()->Grid()->GameObjects();
+        gCycle *secondbest = NULL;
+
+        // find the closest enemy
+        for (int i=gameObjects.Len()-1;i>=0;i--){
+            gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
+
+            if (other && other->Team()!=Object()->Team() &&
+                    !IsTrapped(other, Object())){
+                // then, enemy is realy an enemy
+                eCoord otherpos=other->Position()-Object()->Position();
+                if (otherpos.NormSquared()<enemypos.NormSquared()){
+                    // check if the path is clear
+                    gSensor p(Object(),Object()->Position(),otherpos);
+                    p.detect(REAL(.98));
+                    secondbest = dynamic_cast<gCycle *>(other);
+                    if (p.hit>=.98){
+                        enemypos = otherpos;
+                        target = secondbest;
+                    }
+                }
+            }
+        }
+
+        if (!target)
+            target = secondbest;
+
+        if (target && (enemypos.NormSquared()<25))
+            SwitchToState(AI_CLOSECOMBAT, 2);
+    }
+
+    // find a new path if the one we got is outdated:
+    if (lastPath < se_GameTime() - 10)
+        if (targetCurrentFace_)
+        {
+            Object()->FindCurrentFace();
+            eHalfEdge::FindPath(Object()->Position(), Object()->CurrentFace(),
+                                route_[lastCoord_], targetCurrentFace_,
+                                Object(),
+                                path);
+            lastPath = se_GameTime();
+	}
+
+    if (!path.Valid())
+    {
+        data.thinkAgain = 1;
+        return;
+    }
+
+    // find the most advanced path point that is in our viewing range:
+
+    for (int z = 10; z>=0; z--)
+        path.Proceed();
+
+    bool goon   = path.Proceed();
+    bool nogood = false;
+
+    do
+    {
+        if (goon)
+            goon = path.GoBack();
+        else
+            goon = true;
+
+        eCoord pos   = path.CurrentPosition() + path.CurrentOffset() * 0.1f;
+        eCoord opos  = Object()->Position();
+        eCoord odir  = pos - opos;
+
+        eCoord intermediate = opos + dir * eCoord::F(odir, dir);
+
+        gSensor p(Object(), opos, intermediate - opos);
+        p.detect(1.1f);
+        nogood = (p.hit <= .999999999 || eCoord::F(path.CurrentOffset(), odir) < 0);
+
+        if (!nogood)
+        {
+            gSensor p(Object(), intermediate, pos - intermediate);
+            p.detect(1);
+            nogood = (p.hit <= .99999999 || eCoord::F(path.CurrentOffset(), odir) < 0);
+        }
+
+    }
+    while (goon && nogood);
+
+    if (goon)
+    {
+        // now we have found our next goal. Try to get there.
+        eCoord pos    = Object()->Position();
+        eCoord target = path.CurrentPosition();
+
+        // look how far ahead the target is:
+        REAL ahead = eCoord::F(target - pos, dir)
+                     + eCoord::F(path.CurrentOffset(), dir);
+
+        if ( ahead > 0)
+        {	  // it is still before us. just wait a while.
+            mindist = ahead;
+        }
+        else
+        { // we have passed it. Make a turn towards it.
+            REAL side = (target - pos) * dir;
+
+            if ( !((side > 0 && ls < 3) || (side < 0 && rs < 3))
+                    && (fabs(side) > 3 || ahead < -10) )
+            {
+#ifdef DEBUG
+                con << "Following path...\n";
+#endif
+                lr += (side > 0 ? 1 : -1);
+            }
+        }
+    }
+    else // nogood
+    {
+#ifdef DEBUG
+        con << "Path: out 2 :( ...\n";
+#endif
+        lastPath -= 1;
+        SwitchToState(AI_SURVIVE);
+    }
+
+    EmergencySurvive( data, 1, -lr );
+
+    REAL d = sqrt(tDir.NormSquared()) * .2f;
+    if (d < mindist)
+        mindist = d;
+
+    data.thinkAgain = mindist / Object()->Speed();
+    if (data.thinkAgain > .4)
+        data.thinkAgain *= .7;
+}
+
 
 void gAIPlayer::ThinkCloseCombat( ThinkData & data )
 {
@@ -1719,15 +1889,34 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
     //  REAL ls=left.hit;
     //  REAL rs=right.hit;
 
+    if (nextStateChange > se_GameTime())
+    {
+        data.thinkAgain = .5f;
+        // if a route path is define, update the path and return to path state
+        if (!route_.empty())
+        {
+            UpdateRouteStep();
+        }
+        return;
+    }
+
     if ( bool( target ) && !IsTrapped(target, Object()) && nextStateChange < se_GameTime() )
     {
         gSensor p(Object(),Object()->Position(),target->Position() - Object()->Position());
         p.detect(REAL(1));
         if (p.hit <=  .999999)  // no free line of sight to victim. Switch to path mode.
         {
-            SwitchToState(AI_PATH, 5);
-            EmergencySurvive( data );
-            return;
+            // if a route path is define, update the path and return to path state
+            if (!route_.empty())
+            {
+                UpdateRouteStep();
+            } 
+            else 
+            {
+                SwitchToState(AI_PATH, 5);
+                EmergencySurvive( data );
+                return;
+            }
         }
     }
 
@@ -1829,8 +2018,16 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
 
                 if (enemyspeed > ourspeed)
                 {
-                    SetTraceSide(-side);
-                    SwitchToState(AI_TRACE, 10);
+	            // if a route path is define, update the path and return to path state
+        	    if (!route_.empty())
+            	    {
+	                UpdateRouteStep();
+	            }
+	            else
+	            {
+                        SetTraceSide(-side);
+                        SwitchToState(AI_TRACE, 10);
+		    }
                 }
             }
         }
@@ -2506,6 +2703,11 @@ void gAIPlayer::EmergencyPath( ThinkData & data )
     EmergencySurvive( data );
 }
 
+void gAIPlayer::EmergencyRoute( ThinkData & data )
+{
+    EmergencySurvive( data );
+}
+
 void gAIPlayer::EmergencyCloseCombat( ThinkData & data )
 {
     EmergencySurvive( data );
@@ -2596,6 +2798,9 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
         break;
     case AI_PATH:
         EmergencyPath(data);
+        break;
+    case AI_ROUTE:
+        EmergencyRoute(data);
         break;
     case AI_TRACE:
         EmergencyTrace(data);
@@ -2781,6 +2986,9 @@ REAL gAIPlayer::Think(){
         case AI_PATH:
             ThinkPath(data);
             break;
+        case AI_ROUTE:
+            ThinkRoute(data);
+            break;
         case AI_TRACE:
             ThinkTrace(data);
             break;
@@ -2929,6 +3137,12 @@ void gAIPlayer::Timestep(REAL time){
         if(.1+4*nextthought<1)
             concentration*=REAL(.1+4*nextthought);
     }
+
+    // check if a route is defined and if current destination is touched
+    if(!route_.empty()) {
+        eCoord tDir = route_[lastCoord_] - Object()->Position();
+	if (tDir.Norm()<2) NextRouteStep();
+    }
 }
 
 
@@ -2968,3 +3182,123 @@ void gAIPlayer::Release()
 	ePlayerNetID::Release();
 }
 */
+
+gAIPlayer &gAIPlayer::AddWaypoint(eCoord const &point) {
+        route_.push_back(point);
+        return *this;
+}
+
+void gAIPlayer::SetRoute(std::vector<eCoord> route)
+{
+        if(!route.empty()) {
+            eGrid *grid = eGrid::CurrentGrid();
+	    // start clearing the current route and storing the new one
+	    route_.clear();
+            for(std::vector<eCoord>::const_iterator iter = route.begin(); iter != route.end(); ++iter) {
+                AddWaypoint(*iter);
+            }
+            eCoord targetPos = route_.front();
+	    lastCoord_ = 0;
+	    targetCurrentFace_ = grid->FindSurroundingFace(targetPos);
+            Object()->FindCurrentFace();
+            eHalfEdge::FindPath(Object()->Position(), Object()->CurrentFace(),
+                                targetPos, targetCurrentFace_,
+                                Object(),
+                                path);
+            lastPath = se_GameTime();
+
+            if (!(path.Valid()))
+            {
+                route_.clear();
+		targetCurrentFace_ = NULL;
+                con << "invalid path.\n";
+            } else {
+                SwitchToState(AI_ROUTE, 5);
+                Think();
+                con << "let's go to the first point.\n";
+            }
+        } else
+	{
+            route_.clear();
+            targetCurrentFace_ = NULL;
+	}
+}
+
+void gAIPlayer::UpdateRouteStep()
+{
+        eGrid *grid = eGrid::CurrentGrid();
+        // update path
+        eCoord targetPos = route_[lastCoord_];
+        lastCoord_ = 0;
+        targetCurrentFace_ = grid->FindSurroundingFace(targetPos);
+        Object()->FindCurrentFace();
+        eHalfEdge::FindPath(Object()->Position(), Object()->CurrentFace(),
+                                targetPos, targetCurrentFace_,
+                                Object(),
+                                path);
+        lastPath = se_GameTime();
+
+        if (!(path.Valid()))
+        {
+            route_.clear();
+            targetCurrentFace_ = NULL;
+            con << "invalid path.\n";
+        } else {
+            SwitchToState(AI_ROUTE, 5);
+            Think();
+            con << "let's go to the next point.\n";
+        }
+}
+
+void gAIPlayer::NextRouteStep()
+{
+	// increment the position in the route ...
+        eCoord const &lastPos = route_[lastCoord_++];
+        if(lastCoord_ >= route_.size()) {
+            lastCoord_ = 0;
+        }
+        eCoord delta = route_[lastCoord_] - lastPos;
+        REAL dist = delta.Norm();
+        if(dist < EPS) { // next point is the same. Stop the route ...
+            route_.clear();
+            targetCurrentFace_ = NULL;
+	    return;
+	}
+	// update path
+        UpdateRouteStep();
+}
+
+static void sg_SetAIRoute(std::istream &s)
+{
+        tString params;
+        params.ReadLine( s, true );
+
+        // parse the line to get the param : object_id, positions ...
+        int pos = 0; //
+        const tString object_id_str = params.ExtractNonBlankSubString(pos);
+        std::vector<eCoord> route;
+        tString x,y;
+        while(true) {
+            x = params.ExtractNonBlankSubString(pos);
+            if(x == "") break;
+            y = params.ExtractNonBlankSubString(pos);
+            route.push_back(eCoord(atof(x), atof(y)));
+        }
+        ePlayerNetID *p = 0;
+        p = ePlayerNetID::FindPlayerByName(object_id_str);
+
+	// if no player found, or not a IA player, just leave ...
+	if (!p) return;
+        gAIPlayer *ai = dynamic_cast<gAIPlayer *>(p);
+	if ((!ai) || (!p->Object())) return;
+
+        tJUST_CONTROLLED_PTR<eFace> currentFace;  // the eFace pos it is currently
+        eGrid *grid = eGrid::CurrentGrid();
+ 
+        if(!route.empty()) {
+	    ai->SetRoute(route);            
+        }
+}
+
+static tConfItemFunc sg_SetAIRoute_conf("SET_AI_POSITION",&sg_SetAIRoute);
+

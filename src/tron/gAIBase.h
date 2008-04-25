@@ -39,6 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRandom.h"
 #include "nObserver.h"
 
+#include <vector>
+
 class gSensor;
 class gAISensor;
 class gAILog;
@@ -48,7 +50,8 @@ typedef enum
 { AI_SURVIVE = 0,   // just try to stay alive
   AI_TRACE,         // trace a wall
   AI_PATH,          // follow a path to a target
-  AI_CLOSECOMBAT    // try to frag a nearby opponent
+  AI_CLOSECOMBAT,   // try to frag a nearby opponent
+  AI_ROUTE          // follow a route (a set of coord)
 }
 gAI_STATE;
 
@@ -67,6 +70,11 @@ protected:
     ePath                   path;    // last found path to the victim
     REAL lastPath;                   // when was the last time we did a pathsearch?
 
+    // for route mode:
+        std::vector<eCoord> route_;
+        unsigned int lastCoord_;
+        tJUST_CONTROLLED_PTR<eFace> targetCurrentFace_; 
+	
     // for trace mode:
     int  traceSide;
     REAL lastChangeAttempt;
@@ -95,11 +103,11 @@ protected:
     // set trace side:
     void SetTraceSide(int side);
 
+public:
     // state change:
     void SwitchToState(gAI_STATE nextState, REAL minTime=10);
 
     // data structure common to thinking functions
-public:
     struct ThinkDataBase
     {
         int turn;                                   // direction to turn to
@@ -129,18 +137,25 @@ struct ThinkData : public ThinkDataBase
     virtual void ThinkTrace( ThinkData & data );
     virtual void ThinkPath( ThinkData & data );
     virtual void ThinkCloseCombat( ThinkData & data );
+    virtual void ThinkRoute( ThinkData & data );
 
     // emergency functions:
     virtual bool EmergencySurvive( ThinkData & data, int enemyEvade = -1, int preferedSide = 0);
     virtual void EmergencyTrace( ThinkData & data );
     virtual void EmergencyPath( ThinkData & data );
     virtual void EmergencyCloseCombat( ThinkData & data );
+    virtual void EmergencyRoute( ThinkData & data );
 
     // acting on gathered data
     virtual void ActOnData( ThinkData & data );
     virtual void ActOnData( ThinkDataBase & data );
 public:
     gAICharacter* Character() const {return character;}
+
+    gAIPlayer & AddWaypoint(eCoord const &point);
+    void SetRoute(std::vector<eCoord> route);
+    void UpdateRouteStep();
+    void NextRouteStep();
 
     //	virtual void AddRef();
     //	virtual void Release();
