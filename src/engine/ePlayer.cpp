@@ -645,6 +645,16 @@ static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p )
 #endif
 #endif
 
+void se_SaveToChatLog( tOutput const & out )
+{
+    if (sn_GetNetState()!=nCLIENT && !tRecorder::IsPlayingBack())
+    {
+        std::ofstream o;
+        if ( tDirectories::Var().Open(o, "chatlog.txt", std::ios::app) )
+            o << out;
+    }
+}
+
 #ifdef KRAWALL_SERVER
 // minimal access level to play
 static tAccessLevel se_playAccessLevel = tAccessLevel_Program;
@@ -3421,6 +3431,16 @@ void handle_chat( nMessage &m )
             {
                 se_BroadcastChat( p, say );
                 se_DisplayChatLocally( p, say);
+
+                tString s;
+                char szTemp[128];
+                time_t     now;
+                struct tm *pTime;
+                now = time(NULL);
+                pTime = localtime(&now);
+                strftime(szTemp,sizeof(szTemp),"[%Y/%m/%d %H:%M:%S] ",pTime);
+                s << szTemp << ": " << nMachine::GetMachine(p->Owner()).GetIP() << ": " << p->GetUserName() << ": " << say << "\n";
+                se_SaveToChatLog(s);
             }
         }
     }
