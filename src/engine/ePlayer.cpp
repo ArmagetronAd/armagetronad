@@ -57,7 +57,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 #include "../tron/gCycle.h"
 #include "../tron/gWinZone.h"
-
+#include "eGrid.h"
 
 tColoredString & operator << (tColoredString &s,const ePlayer &p){
     return s << tColoredString::ColorString(p.rgb[0]/15.0,
@@ -2273,6 +2273,9 @@ static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
 }
 #endif // KRAWALL
 
+static eLadderLogWriter se_adminLoginWriter("ADMIN_LOGIN", false);
+static eLadderLogWriter se_adminLogoutWriter("ADMIN_LOGOUT", false);
+
 // the following function really is only supposed to be called from here and nowhere else
 // (access right escalation risk):
 // log in (via admin password or hash based login)
@@ -2318,6 +2321,8 @@ static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p, std:
         // the following function really is only supposed to be called from here and nowhere else
         // (access right escalation risk)
         se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( p );
+	se_adminLoginWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP();
+	se_adminLoginWriter.write();
     }
     else
     {
@@ -2374,6 +2379,8 @@ static void se_AdminLogout( ePlayerNetID * p )
     if ( p->IsLoggedIn() )
     {
         sn_ConsoleOut("You have been logged out!\n",p->Owner());
+        se_adminLogoutWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP();
+        se_adminLogoutWriter.write();
     }
     p->BeNotLoggedIn();
 #endif
@@ -2397,6 +2404,8 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     eAdminConsoleFilter consoleFilter( p->Owner() );
     tConfItemBase::LoadLine(stream);
 }
+
+static eLadderLogWriter se_commandWriter("COMMAND", false);
 
 static void handle_chat_admin_commands( ePlayerNetID * p, tString const & command, tString const & say, std::istream & s )
 {
@@ -2439,6 +2448,11 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     else  if ( command == "/admin" )
     {
         se_AdminAdmin( p, s );
+    }
+    else  if ( command == "/cmd" )
+    {
+	se_commandWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << s; 
+        se_commandWriter.write();
     }
     else
         if (se_interceptUnknownCommands)
@@ -5444,6 +5458,139 @@ void ePlayerNetID::RankingLadderLog() {
     se_numHumansWriter.write();
 }
 
+static eLadderLogWriter se_playerGridPosWriter("PLAYER_GRIDPOS", false);
+
+void ePlayerNetID::GridPosLadderLog() {
+    if (se_PlayerNetIDs.Len()>0){
+        int max = se_PlayerNetIDs.Len();
+        for(int i=0;i<max;i++){
+            ePlayerNetID *p=se_PlayerNetIDs(i);
+            if (p->IsActive() && p->currentTeam && p->Object() && p->Object()->Alive() )
+            {
+                se_playerGridPosWriter << p->GetUserName() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y;
+                if (p->Object() && p->Object()->Team())
+		    se_playerGridPosWriter << FilterName(p->Object()->Team()->Name());
+                else se_playerGridPosWriter << " ";
+                    se_playerGridPosWriter.write();
+            }
+        }
+    }
+}
+
+// ratio used to set midfield between defense and offense. <= 1.0 means no midfield, n means (n-1)/(n+1) of the distance from zones center is midfield
+static REAL sg_playerPositioningMidfieldFactor = 3.0;
+static tSettingItem<REAL> sg_playerPositioningMidfieldFactorConf( "PLAYER_POSITIONING_MIDFIELD_FACTOR", sg_playerPositioningMidfieldFactor );
+
+// ratio used to set the circle around a zone dedicated to sumo or goal position.
+REAL sg_playerPositioningZoneFactor = 1.5;
+static tSettingItem<REAL> sg_playerPositioningZoneFactorConf( "PLAYER_POSITIONING_ZONE_FACTOR", sg_playerPositioningZoneFactor );
+
+static eLadderLogWriter se_tacticalPositionWriter("PLAYER_POSITION", false);
+
+void ePlayerNetID::TacticalPositioning() {
+    eGrid *grid = eGrid::CurrentGrid();
+    for ( int i = se_PlayerNetIDs.Len()-1; i >= 0; --i ) {
+        ePlayerNetID *p = se_PlayerNetIDs(i);
+        // if this player is not active, continue with next one
+        if (!p->IsActive()||!p->Object()) continue;
+        // compute closest friend and enemy zones distances
+        const tList<eGameObject>& gameObjects = grid->GameObjects();
+        REAL cHighDist = 9999999999.0;
+        REAL closestHomeDistance = cHighDist;
+        REAL closestHomeRadius = 0;
+        REAL closestTargetDistance = cHighDist;
+        REAL closestTargetRadius = 0;
+        gBaseZoneHack *zoneHome=0, *zoneTarget=0;
+        for (int j=gameObjects.Len()-1;j>=0;j--) {
+            gBaseZoneHack *zone=dynamic_cast<gBaseZoneHack *>(gameObjects(j));
+            // for all active base zone ...
+            if ( zone ) {
+                REAL zoneDistance = (zone->Position() - p->Object()->Position()).Norm();
+                if ( p->CurrentTeam() != zone->Team() ) {
+                    if (zoneDistance<closestTargetDistance) {
+                        closestTargetDistance=zoneDistance;
+                        zoneTarget = zone;
+                        closestTargetRadius = zoneTarget->GetRadius();
+                    }
+                } else {
+                    if (zoneDistance<closestHomeDistance) {
+                        closestHomeDistance=zoneDistance;
+                        zoneHome = zone;
+                        closestHomeRadius = zoneHome->GetRadius();
+                    }
+                }
+            }
+        }
+        REAL zoneDistance=cHighDist;
+        if (zoneHome && zoneTarget) {
+            zoneDistance=(zoneHome->Position()-zoneTarget->Position()).Norm();
+        }
+        // determine new position
+        tString TacPosStr=tString("NS");
+        ePlayerNetID::TacticalPosition newTacticalPos = ePlayerNetID::TP_NS;
+        int newClosestZoneID = -1;
+        if ((closestHomeDistance!=cHighDist)||(closestTargetDistance!=cHighDist)) {
+            if (closestHomeDistance<closestTargetDistance)
+                newClosestZoneID = zoneHome->GOID();
+            else
+                newClosestZoneID = zoneTarget->GOID();
+        }
+        if ((closestHomeDistance==cHighDist)&&(closestTargetDistance==cHighDist)) {
+            // nothing to do ... just to avoid this case
+        } else if (closestHomeDistance==cHighDist) {
+            // no home base, weird but yet, you must be offence
+            TacPosStr = tString("");
+            if (closestTargetDistance<=closestTargetRadius) {
+                newTacticalPos = ePlayerNetID::TP_Conquering;
+                TacPosStr<<tString("CONQUERING ")<<zoneTarget->GOID();
+            } else if (closestTargetDistance<=closestTargetRadius*sg_playerPositioningZoneFactor) {
+                newTacticalPos = ePlayerNetID::TP_Attacking;
+                TacPosStr<<tString("ATTACKING ")<<zoneTarget->GOID();
+            } else {
+                newTacticalPos = ePlayerNetID::TP_Offense;
+                TacPosStr=tString("OFFENSE");
+            }
+        } else if ((zoneDistance<0.1)&&(closestHomeDistance<=closestHomeRadius*sg_playerPositioningZoneFactor)) {
+            // Both home and target are at the same place ... it's sumo ;)
+            newTacticalPos = ePlayerNetID::TP_Sumo;
+            TacPosStr=tString("SUMO");
+        } else if (closestHomeDistance<=closestHomeRadius*sg_playerPositioningZoneFactor) {
+            // player in the goalie zone
+            newTacticalPos = ePlayerNetID::TP_Goal;
+            TacPosStr=tString("GOAL");
+        } else if (closestTargetDistance>closestHomeDistance*sg_playerPositioningMidfieldFactor) {
+            // Home is at least 2 times closer than target
+            newTacticalPos = ePlayerNetID::TP_Defense;
+            TacPosStr=tString("DEFENSE");
+        } else if (closestHomeDistance>closestTargetDistance*sg_playerPositioningMidfieldFactor) {
+            // target is at least 2 times closer than home
+            TacPosStr = tString("");
+            if (closestTargetDistance<=closestTargetRadius) {
+                newTacticalPos = ePlayerNetID::TP_Conquering;
+                TacPosStr<<tString("CONQUERING ")<<zoneTarget->GOID();
+            } else if (closestTargetDistance<=closestTargetRadius*sg_playerPositioningZoneFactor) {
+                newTacticalPos = ePlayerNetID::TP_Attacking;
+                TacPosStr<<tString("ATTACKING ")<<zoneTarget->GOID();
+            } else {
+                newTacticalPos = ePlayerNetID::TP_Offense;
+                TacPosStr=tString("OFFENSE");
+            }
+        } else {
+            // player seems to be midfield
+            newTacticalPos = ePlayerNetID::TP_Midfield;
+            TacPosStr=tString("MIDFIELD");
+        }
+        // if position changed, send a message and store new one
+        if ((p->tactical_pos != newTacticalPos) || ((p->closest_zoneid != newClosestZoneID) && (newTacticalPos>=6))) {
+            nMachine const &machine = nMachine::GetMachine(p->Owner());
+            se_tacticalPositionWriter << p->GetUserName() << machine.GetIP() << TacPosStr;
+            se_tacticalPositionWriter.write();
+            p->tactical_pos = newTacticalPos;
+            p->closest_zoneid = newClosestZoneID;
+        }
+    }
+}
+
 void ePlayerNetID::ClearAll(){
     for(int i=MAX_PLAYERS-1;i>=0;i--){
         ePlayer *local_p=ePlayer::PlayerConfig(i);
@@ -6890,6 +7037,8 @@ static ePlayerNetID * ReadPlayer( std::istream & s )
     return ePlayerNetID::FindPlayerByName( name );
 }
 
+static eLadderLogWriter se_playerKilledWriter("PLAYER_KILLED", true);
+
 static void Kill_conf(std::istream &s)
 {
     if ( se_NeedsServer( "KILL", s, false ) )
@@ -6901,8 +7050,10 @@ static void Kill_conf(std::istream &s)
 
     if ( p && p->Object() && p->Object()->Alive() )
     {
-        p->Object()->Kill();
         sn_ConsoleOut( tOutput( "$player_admin_kill", p->GetColoredName() ) );
+	se_playerKilledWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y; 
+	se_playerKilledWriter.write();
+	p->Object()->Kill();
     }
 }
 

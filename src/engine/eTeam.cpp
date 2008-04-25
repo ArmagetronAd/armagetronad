@@ -1467,4 +1467,36 @@ void eTeam::Shuffle( int startID, int stopID )
     }
 }
 
+static void sg_AddScoreTeam(std::istream &s)
+{
+        tString params;
+        params.ReadLine( s, true );
+
+        // parse the line to get the param : Teamname Points Message
+        int pos = 0; //
+        tString TeamStr = tString("");
+        TeamStr = params.ExtractNonBlankSubString(pos);
+        eTeam *pTeam=NULL;
+        for (int i = eTeam::teams.Len() - 1; i>=0; --i) {
+            tString teamName = eTeam::teams(i)->Name();
+            if (TeamStr==ePlayerNetID::FilterName(teamName)) {
+                pTeam = eTeam::teams(i);
+                break;
+            }
+        }
+        if (!pTeam) return;
+        tString ScoreStr = tString("");
+        ScoreStr = params.ExtractNonBlankSubString(pos);
+        int pScore = atoi(ScoreStr);
+        tString pMessage = params.SubStr(pos+1);
+        pMessage << "\n";
+
+        // Add score to team pTeam then send a message
+        pTeam->AddScore(pScore);
+        sn_ConsoleOut( pMessage );
+}
+
+static tConfItemFunc sg_AddScoreTeam_conf("ADD_SCORE_TEAM",&sg_AddScoreTeam);
+
+
 

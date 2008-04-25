@@ -193,6 +193,20 @@ public:
     bool flagOverrideChat;
     bool flagChatState;
 
+    enum TacticalPosition
+    {
+        TP_NS = 0,
+        TP_Goal = 1,
+        TP_Defense = 2,
+        TP_Midfield = 3,
+        TP_Sumo = 4,
+        TP_Offense = 5,
+        TP_Attacking = 6,
+        TP_Conquering = 7
+    };
+    TacticalPosition        tactical_pos;
+    int    closest_zoneid;
+
     int    pID;
     // REAL	rubberstatus;
     tArray<tString> lastSaid;
@@ -314,6 +328,8 @@ public:
     static void SortByScore(); // brings the players into the right order
     static tString Ranking( int MAX=12, bool cut = true );     // returns a ranking list
     static void RankingLadderLog();     // writes a small ranking list to ladderlog
+    static void GridPosLadderLog();     // writes a cycle positions to ladderlog
+    static void TacticalPositioning();  // tactical positioning 
     static void  ResetScore();  // resets the ranking list
 
     static void DisplayScores(); // display scores on the screen

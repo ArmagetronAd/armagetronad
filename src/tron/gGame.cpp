@@ -125,6 +125,10 @@ static tSettingItem< bool > sg_waitForExternalScriptConf( "WAIT_FOR_EXTERNAL_SCR
 static REAL sg_waitForExternalScriptTimeout = 3;
 static tSettingItem<REAL> sg_waitForExternalScriptTimeoutConf( "WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT", sg_waitForExternalScriptTimeout );
 
+// time in sec before player positioning starts
+static REAL sg_playerPositioningStartTime = 5.0;
+static tSettingItem<REAL> sg_playerPositioningStartTimeConf( "PLAYER_POSITIONING_START_TIME", sg_playerPositioningStartTime );
+
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
 // bool globalingame=false;
@@ -3310,7 +3314,7 @@ void gGame::StateUpdate(){
                 // log scores before players get renamed
                 ePlayerNetID::LogScoreDifferences();
 
-                //edLog << ePlayerNetID::RankingEd();
+                ePlayerNetID::RankingLadderLog();
 
                 sg_roundCommencingWriter << rounds+1 << sg_currentSettings->limitRounds;
                 sg_roundCommencingWriter.write();
@@ -4119,6 +4123,7 @@ bool gGame::GameLoop(bool input){
         static int lastcountdown=0;
         int cd=int(floor(-time))+1;
         if (cd>=0 && cd<PREPARE_TIME && cd!=lastcountdown && se_mainGameTimer && se_mainGameTimer->IsSynced() ){
+	    if (cd==1) ePlayerNetID::GridPosLadderLog();  
             lastcountdown=cd;
             tString s;
             s << cd;
@@ -4244,6 +4249,10 @@ bool gGame::GameLoop(bool input){
         sg_gameTimeWriter << gtime;
         sg_gameTimeWriter.write();
         lastTime = gtime;
+	if((int)gtime%5==0) ePlayerNetID::GridPosLadderLog(); 
+	if (gtime>sg_playerPositioningStartTime) {
+	    ePlayerNetID::TacticalPositioning();
+	}
     }
 
     if (state==GS_PLAY){
