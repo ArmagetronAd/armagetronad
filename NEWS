@@ -89,6 +89,10 @@ New settings
 ------------
 
   New settings and commands:
+- MIN_PLAY_TIME_*: minimal play time required before you are allowed to
+  play on this server.
+- SPAM_AUTOKICK_COUNT: minimal number of spam warning messages you get in a
+  row before you get kicked.
 - FORTRESS_COLLAPSE_SPEED: tune the collapse speed of fortress zones.
 - VOTE_KICK_REASON: default reason given on kick votes.
 - "/vote" chat interface to votes; "/vote kick <player>" issues a kick vote.
@@ -160,6 +164,14 @@ New settings
   "[L] "
 - PLAYER_MESSAGE <user ID or name> <Message>: Like /msg, but from the
   console
+- All ladderlog outputs can be enabled or disabled separately by using
+  LADDERLOG_WRITE_*. LADDERLOG_WRITE_ALL enables or disables all ladderlog
+  output alltogether.
+- SLAP <player> [points] sends a message to everyone and subtracts a number
+  of points (default: 1) from <player>'s score. Negative points are
+  supported.
+- AUTO_TEAM_SPEC_SPAM to disable the spectator join/leave messages you get
+  when AUTO_TEAM is enabled
 
 If --enable-armathentication was activated:
 - ACCESS_LEVEL_IPS to let admins see IPs of players in the list.
@@ -179,11 +191,17 @@ If --enable-armathentication was activated:
 - /lock, /unlock, /invite and /uninvite team management chat for players of
   access level ACCESS_LEVEL_TEAM or better.
 - /login chat command then uses the more secure hashed base logins
+- new chat commands /op and /deop to change other players' access rights
 
 Featurelets
 -----------
 
 - /teams chat command that rougly prints team layout.
+- clientside play time tracking and server controlled minimal required experience
+  to be allowed to play.
+- color codes in chat increase the spam level logarithmically.
+- /team messages get a reduced spam level; reduction factor is given by 
+  (team size)/(number of total players).
 - /team messages can be used by spectators to chat with other spectators only.
 - Performance optimizations. Using OpenGL display lists to cache geometry.
 - Removed ztrick, antialiasing and perspective correction settings. They all had only one right
@@ -247,6 +265,7 @@ Featurelets
 - /help command that supports multiple help topics. Use
   HELP_INTRODUCTORY_BLURB and ADD_HELP_TOPIC to control its contents
 - /rtfm command that allows moderators to send help messages to newbies
+- /players now shows the players' color and allows searching
 
 Bugfixes
 --------

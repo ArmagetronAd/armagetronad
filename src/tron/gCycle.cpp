@@ -2511,6 +2511,9 @@ bool gCycle::Timestep(REAL currentTime){
     // clear out dangerous info when we're done
     gMaxSpaceAheadHitInfoClearer hitInfoClearer( maxSpaceHit_ );
 
+    // archive rubber speed for later comparison
+    REAL rubberSpeedFactorBack = rubberSpeedFactor;
+
     // if ( Owner() == sn_myNetID )
     //    con << pos << ',' << distance << ',' << eCoord::F( dirDrive, pos ) - distance << '\n';
 
@@ -2679,6 +2682,36 @@ bool gCycle::Timestep(REAL currentTime){
         currentWall->Update(predictTime, PredictPosition() );
     }
 
+    // checkpoint wall when rubber starts to get used
+    if ( currentWall )
+    {
+        if ( rubberSpeedFactor >= .99 && rubberSpeedFactorBack < .99 )
+        {
+            currentWall->Checkpoint();
+        }
+        else if ( rubberSpeedFactor < .99 && rubberSpeedFactorBack >= .99 )
+        {
+            currentWall->Checkpoint();
+        }
+        else if ( rubberSpeedFactor < .1 && rubberSpeedFactorBack >= .1 )
+        {
+            currentWall->Checkpoint();
+        }
+        else if ( rubberSpeedFactor < .01 && rubberSpeedFactorBack >= .01 )
+        {
+            currentWall->Checkpoint();
+        }
+    }
+
+    if ( sn_GetNetState()==nSERVER )
+    {
+        // do an emergency sync when rubber starts to get used, it may come unexpected to clients
+        if ( rubberSpeedFactor < .99 && rubberSpeedFactorBack >= .99 )
+        {
+            RequestSyncOwner();
+        }
+    }
+
     return ret;
 }
 
@@ -2749,9 +2782,6 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
     {
         joystick_->Turn();
     }
-
-    // archive rubber speed for later comparison
-    REAL rubberSpeedFactorBack = rubberSpeedFactor;
 
     REAL ts=(currentTime-lastTime);
 
@@ -3002,39 +3032,8 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
         skewDot=0;
     }
 
-    // checkpoint wall when rubber starts to get used
-    if ( currentWall )
-    {
-        if ( rubberSpeedFactor >= .99 && rubberSpeedFactorBack < .99 )
-        {
-            currentWall->Checkpoint();
-        }
-
-        if ( rubberSpeedFactor < .99 && rubberSpeedFactorBack >= .99 )
-        {
-            currentWall->Checkpoint();
-        }
-
-        if ( rubberSpeedFactor < .1 && rubberSpeedFactorBack >= .1 )
-        {
-            currentWall->Checkpoint();
-        }
-
-        if ( rubberSpeedFactor < .01 && rubberSpeedFactorBack >= .01 )
-        {
-            currentWall->Checkpoint();
-        }
-    }
-
-
     if ( sn_GetNetState()==nSERVER )
     {
-        // do an emergency sync when rubber starts to get used, it may come unexpected to clients
-        if ( rubberSpeedFactor < .99 && rubberSpeedFactorBack >= .99 )
-        {
-            RequestSyncOwner();
-        }
-
         if (nextSync < tSysTimeFloat() )
         {
             // delay syncs for old clients when there is a wall ahead; they would tunnel locally
@@ -3120,6 +3119,10 @@ void gCycle::Die( REAL time )
     }
 }
 
+static eLadderLogWriter sg_deathFragWriter("DEATH_FRAG", true);
+static eLadderLogWriter sg_deathSuicideWriter("DEATH_SUICIDE", true);
+static eLadderLogWriter sg_deathTeamkillWriter("DEATH_TEAMKILL", true);
+
 void gCycle::KillAt( const eCoord& deathPos){
     // don't kill invulnerable cycles
     if ( !Vulnerable() )
@@ -3160,9 +3163,8 @@ void gCycle::KillAt( const eCoord& deathPos){
     {
         if (hunter)
         {
-            tString ladderLog;
-            ladderLog << "DEATH_SUICIDE " << hunter->GetUserName() << "\n";
-            se_SaveToLadderLog( ladderLog );
+            sg_deathSuicideWriter << hunter->GetUserName();
+            sg_deathSuicideWriter.write();
             tString notificationMessage(hunter->GetUserName());
             notificationMessage << " commited suicide";
             se_sendEventNotification(tString("Death suicide"), notificationMessage);
@@ -3188,9 +3190,8 @@ void gCycle::KillAt( const eCoord& deathPos){
                 preyName << *Player();
                 preyName << tColoredString::ColorString(1,1,1);
                 if (Player()->CurrentTeam() != hunter->CurrentTeam()) {
-                    tString ladderLog;
-                    ladderLog << "DEATH_FRAG " << Player()->GetUserName() << " " << hunter->GetUserName()  << "\n";
-                    se_SaveToLadderLog( ladderLog );
+                    sg_deathFragWriter << Player()->GetUserName() << hunter->GetUserName();
+                    sg_deathFragWriter.write();
                     tString notificationMessage(hunter->GetUserName());
                     notificationMessage << " core dumped " << Player()->GetUserName();
                     se_sendEventNotification(tString("Death frag"), notificationMessage);
@@ -3207,9 +3208,8 @@ void gCycle::KillAt( const eCoord& deathPos){
                     }
                 }
                 else {
-                    tString ladderLog;
-                    ladderLog << "DEATH_TEAMKILL " << Player()->GetUserName() << " " << hunter->GetUserName()  << "\n";
-                    se_SaveToLadderLog( ladderLog );
+                    sg_deathTeamkillWriter << Player()->GetUserName() << hunter->GetUserName();
+                    sg_deathTeamkillWriter.write();
                     tString notificationMessage(hunter->GetUserName());
                     notificationMessage << " teamkilled " << Player()->GetUserName();
                     se_sendEventNotification(tString("Death teamkill"), notificationMessage);
@@ -3335,6 +3335,8 @@ static void sg_HoleScore( gCycle & cycle )
     cycle.Player()->AddScore( score_hole, tOutput("$player_win_hole"), tOutput("$player_lose_hole") );
 }
 
+static eLadderLogWriter sg_sacrificeWriter("SACRIFICE", true);
+
 void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
     {
         // deactivate time check
@@ -3348,13 +3350,13 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
             
             // check whether we drove through a hole in an enemy wall made by a teammate
             gPlayerWall const * w = dynamic_cast< gPlayerWall const * >( ww );
-            if ( w && score_hole )
+            if ( Alive() && w && score_hole )
             {
                 gExplosion * explosion = w->Holer( a, time );
                 if ( explosion )
                 {
                     gCycle * holer = explosion->GetOwner();
-                    if ( holer && holer->Player() &&
+                    if ( holer && holer != this && holer->Player() &&
                          Player() &&
                          w->Cycle() && w->Cycle()->Player() &&
                          holer->Player()->CurrentTeam() == Player()->CurrentTeam() &&       // holer must have been a teammate 
@@ -3364,9 +3366,8 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                         // this test must come last, it resets the flag.
                         if ( explosion->AccountForHole() )
                         {
-                            tString ladderLog;
-                            ladderLog << "SACRIFICE " << Player()->GetUserName() << " " << holer->Player()->GetUserName() << " " << w->Cycle()->Player()->GetUserName() << "\n";
-                            se_SaveToLadderLog( ladderLog );
+                            sg_sacrificeWriter << Player()->GetUserName() << holer->Player()->GetUserName() << w->Cycle()->Player()->GetUserName();
+                            sg_sacrificeWriter.write();
                             if ( score_hole > 0 )
                             {
                                 // positive hole score goes to the holer

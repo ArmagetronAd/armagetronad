@@ -283,7 +283,7 @@ rerun:
             eHalfEdge *run   = currentFace->Edge(); // runs through all edges of the face
             eHalfEdge *best  = NULL;                // the best face to leave
             eHalfEdge *end   = run;
-            REAL bestScore   = -1000;
+            REAL bestScore   = -10.0;
             REAL bestERatio  = .5;
             REAL bestRRatio  = .5;
             eCoord bestCross   (0,0);
@@ -353,7 +353,7 @@ rerun:
                     e_ratio = 1;
                 }
 
-                if (!best || score > bestScore)
+                if (score > bestScore)
                 {
                     best       = run;
                     bestScore  = score;
@@ -421,7 +421,6 @@ rerun:
             else
             {
                 timeout = 0;
-                st_Breakpoint();
             }
         }
 
@@ -533,6 +532,25 @@ void eGameObject::FindCurrentFace(){
             }
             eCoord centerToPos = -center*(1/3.0);
             center = pos - centerToPos;
+  
+            // find a position that lies just inside the current triange
+            REAL centerInsideness = currentFace->Insideness(center);
+            eCoord inside;
+            
+            if( centerInsideness < 0 )
+            {
+                // this should not happen! but will, if the triangle has wrong orientation.
+                inside = center;
+            }
+            else
+            {
+                REAL factor = ( -insideness/( centerInsideness - insideness ) );
+                if ( factor > 1 )
+                {
+                    factor = 1;
+                }
+                inside = pos - centerToPos * factor;
+            }
 
             static bool recurse = true;
             if ( recurse )
@@ -560,7 +578,7 @@ void eGameObject::FindCurrentFace(){
                 // warp to the known good position and move back to where the
                 // object should be
                 eCoord oldPos = pos;
-                pos = center;
+                pos = inside;
 #ifdef DEBUG
                 eFace * lastFace = currentFace;
 #endif
@@ -572,6 +590,7 @@ void eGameObject::FindCurrentFace(){
                 {
 #ifdef DEBUG
                     // try again (yeah, this looks like a WTF, but it really helps in some cases because the situation has changed since the last try. /me blames floating points)
+                    // besides, (now, this was changed) the start position changed.
                     try
                     {
                         pos = center;

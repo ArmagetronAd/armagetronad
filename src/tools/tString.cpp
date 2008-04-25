@@ -1731,6 +1731,12 @@ tColoredString & operator <<(tColoredString &s, const tColoredStringProxy &color
 {
     if (st_colorStrings)
     {
+        if ( colorCode.r_ == -1 || colorCode.g_ == -1 || colorCode.b_ == -1 )
+        {
+            s << "0xRESETT";
+            return s;
+        }
+
         char cs[9];
         cs[0]='0';
         cs[1]='x';

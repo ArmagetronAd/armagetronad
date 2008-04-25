@@ -151,7 +151,7 @@ static nSettingItemWatched<REAL> c_smin("CYCLE_SPEED_MIN",
                                         nConfItemVersionWatcher::Group_Bumpy,
                                         9);
 
-// minimal speed
+// maximal speed
 static REAL sg_speedCycleMax=0;
 static nSettingItemWatched<REAL> c_smax("CYCLE_SPEED_MAX",
                                         sg_speedCycleMax,

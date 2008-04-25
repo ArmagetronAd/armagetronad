@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nSpamProtection.h"
 
 #include <set>
+#include <list>
 
 #define PLAYER_CONFITEMS (30+MAX_INSTANT_CHAT)
 
@@ -296,6 +297,8 @@ public:
     void SetSilenced( bool silenced ) { silenced_ = silenced; }
     bool& AccessSilenced( void ) { return silenced_; }
 
+    bool IsSuspended ( void ) { return suspended_ > 0; }
+
     eVoter * GetVoter() const {return voter_;}     // returns our voter
     void CreateVoter();						// create our voter or find it
     static void SilenceMenu();				// menu where you can silence players
@@ -416,6 +419,7 @@ public:
     ePlayerNetID & ForceName( tString const & name ); //!< Forces this player's name. Forces processed names (colored, username, nameFromCLient) as well.    
 
     inline ePlayerNetID & SetUserName( tString const & userName );  //!< Sets this player's name, cleared for system logs. Use for writing to files or comparing with admin input. The other names stay unaffected.
+
 private:
     inline ePlayerNetID & SetNameFromClient( tColoredString const & nameFromClient );   //!< Sets this player's name as the client wants it to be. Avoid using it when possilbe.
     inline ePlayerNetID & SetColoredName( tColoredString const & coloredName ); //!< Sets this player's name, cleared by the server. Use this for onscreen screen display.
@@ -434,7 +438,30 @@ extern bool se_assignTeamAutomatically;
 void se_ChatState( ePlayerNetID::ChatFlags flag, bool cs);
 
 void se_SaveToScoreFile( tOutput const & out );  //!< writes something to scorelog.txt
-void se_SaveToLadderLog( tOutput const & out );  //!< writes something to ladderlog.txt
+
+//! create a global instance of this to write stuff to ladderlog.txt
+class eLadderLogWriter {
+    static std::list<eLadderLogWriter *> &writers();
+    tString id;
+    bool enabled;
+    tSettingItem<bool> *conf;
+    tColoredString cache;
+public:
+    eLadderLogWriter(char const *ID, bool enabledByDefault);
+    ~eLadderLogWriter();
+    //! append a field to the current message. Spaces are added automatically.
+    template<typename T> eLadderLogWriter &operator<<(T const &s) {
+        if(enabled) {
+            cache << ' ' << s;
+        }
+        return *this;
+    }
+    void write(); //!< send to ladderlog and clear message
+
+    bool isEnabled() { return enabled; } //!< check this if you're going to make expensive calculations for ladderlog output
+
+    static void setAll(bool enabled); //!< enable or disable all writers
+};
 
 tColoredString & operator << (tColoredString &s,const ePlayer &p);
 tColoredString & operator << (tColoredString &s,const ePlayerNetID &p);

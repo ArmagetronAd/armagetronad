@@ -166,7 +166,7 @@ static eVoter* se_GetVoter( const nMessage& m )
     return eVoter::GetVoter( m.SenderID(), true );
 }
 
-eVoterPlayerInfo::eVoterPlayerInfo(): suspended_(0){}
+eVoterPlayerInfo::eVoterPlayerInfo(): suspended_(0), silenced_(0){}
 
 static tAccessLevel se_GetAccessLevel( int userID )
 {
@@ -228,7 +228,7 @@ public:
     }
 
     
-    void ReBroadcast( int exceptTo = -1 )
+    void ReBroadcast( int exceptTo )
     {
         // rebroadcast message to all non-voters that may be able to vote
         if ( sn_GetNetState() == nSERVER )
@@ -263,7 +263,7 @@ public:
 
             // set so every voter ony gets each vote once
             std::set< eVoter * > sentTo;
-            total_ = 0;
+            total_ = 1;
 
             for ( int i = MAXCLIENTS; i > 0; --i )
             {
@@ -287,6 +287,9 @@ public:
                 }
             }
             //			item->SendMessage();
+
+            if ( suggestor_ )
+                suggestor_->Spam( exceptTo, se_votingSpamIssue, tOutput("$spam_vote_kick_issue") );
         }
 
         con << tOutput( "$vote_new", GetDescription() );
@@ -395,7 +398,6 @@ public:
 
         if ( items_.Len() < se_maxVotes )
         {
-            voter->Spam( senderID, se_votingSpamIssue, tOutput("$spam_vote_kick_issue") );
             return true;
         }
         else
@@ -522,6 +524,17 @@ public:
         int pro, con, total;
 
         GetStats( pro, con, total );
+
+        if ( sn_GetNetState() == nSERVER )
+        {
+            // see if there are enough voters
+            if ( total <= se_minVoters )
+            {
+                this->BroadcastMessage( tOutput("$vote_toofew") );
+                delete this;
+                return;
+            }
+        }
 
         int bias = se_votingBias + DoGetExtraBias();
 

@@ -70,6 +70,26 @@ static tOutput* PrepareTeamText(tOutput* text, eTeam* team, const ePlayerNetID* 
     return text;
 }
 
+// sets the spectator mode of a local player
+static void SetSpectator( ePlayerNetID * player, bool spectate )
+{
+    for ( int i = MAX_PLAYERS; i>=0; --i )
+    {
+        if ( ePlayer::PlayerIsInGame(i))
+        {
+            ePlayer* localPlayer = ePlayer::PlayerConfig( i );
+            ePlayerNetID* pni = localPlayer->netPlayer;
+            if ( pni == player && localPlayer->spectate != spectate )
+            {
+                localPlayer->spectate = spectate;
+                con << tOutput( spectate ? "$player_toggle_spectator_on" : "$player_toggle_spectator_off", localPlayer->name );
+                ePlayerNetID::Update();
+            }
+        }
+    }
+}
+
+
 class gMenuItemPlayerTeam: public uMenuItem
 {
     tJUST_CONTROLLED_PTR< ePlayerNetID > 	player;
@@ -91,6 +111,7 @@ public:
 
     virtual void Enter()
     {
+        SetSpectator( player, false );
         player->SetTeamWish( team );
         menu->Exit();
     }
@@ -113,6 +134,7 @@ public:
 
     virtual void Enter()
     {
+        SetSpectator( player, false );
         player->CreateNewTeamWish();
         menu->Exit();
     }
@@ -230,21 +252,9 @@ public:
         uMenu playerMenu( title );
         tArray<uMenuItem*> items;
 
-        // quit from spectator mode, the player would be trown out of the team again otherwise
-        int i;
-        for ( i = MAX_PLAYERS; i>=0; --i )
+        if ( !player->IsSpectating() )
         {
-            if ( ePlayer::PlayerIsInGame(i))
-            {
-                ePlayer* localPlayer = ePlayer::PlayerConfig( i );
-                ePlayerNetID* pni = localPlayer->netPlayer;
-                if ( pni == this->player && localPlayer->spectate )
-                {
-                    localPlayer->spectate = false;
-                    con << tOutput("$player_toggle_spectator_off", localPlayer->name );
-                    ePlayerNetID::Update();
-                }
-            }
+            items[ items.Len() ] = tNEW( gMenuItemSpectate ) ( &playerMenu, player );
         }
 
         if ( player->NextTeam()!=NULL)
@@ -253,7 +263,7 @@ public:
         }
 
         // first pass add teams who probably can't be joined
-        for ( i = 0; i<eTeam::teams.Len(); i++ )
+        for ( int i = 0; i<eTeam::teams.Len(); i++ )
         {
             eTeam *team = eTeam::teams(i);
             if ( team && team != player->NextTeam() && !team->PlayerMayJoin( player ) )
@@ -263,22 +273,19 @@ public:
         }
         // second pass add teams who probably can be joined
         // Note: these will appear above the unjoinable ones.
-        for ( i = 0; i<eTeam::teams.Len(); i++ )
+        for ( int i = 0; i<eTeam::teams.Len(); i++ )
         {
             eTeam *team = eTeam::teams(i);
             if ( team && team != player->NextTeam() && team->PlayerMayJoin( player ))
                 items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team );
         }
 
-        items[items.Len()] = tNEW(gMenuItemAutoSelect) (&playerMenu, player);
-
-        if ( /* eTeam::NewTeamAllowed() && */
+        if ( player->IsSpectating() ||
             !( player->NextTeam() && player->NextTeam()->NumHumanPlayers() == 1 &&
                player->CurrentTeam() && player->CurrentTeam()->NumHumanPlayers() == 1 )
         )
         {
             items[ items.Len() ] = tNEW( gMenuItemNewTeam ) ( &playerMenu, player );
-
         }
 
         items[items.Len()] = tNEW ( gMenuItemSpacer ) ( &playerMenu );
@@ -287,7 +294,7 @@ public:
 
         playerMenu.Enter();
 
-        for ( i = items.Len()-1; i>=0; --i )
+        for ( int i = items.Len()-1; i>=0; --i )
         {
             delete items(i);
         }

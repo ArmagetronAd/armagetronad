@@ -168,13 +168,20 @@ void eTeam::UpdateProperties()
     int i;
     for ( i = players.Len()-1; i>=0; --i )
     {
-        if ( players(i)->IsHuman() )
+        ePlayerNetID * player = players(i);
+
+        // on the client, don't count players who already expressed their wish
+        // to leave a team as active players.
+        if ( sn_GetNetState() != nCLIENT || player->nextTeam == this )
         {
-            if ( players(i)->IsActive() )
-                ++numHumans;
+            if ( player->IsHuman() )
+            {
+                if ( player->IsActive() )
+                    ++numHumans;
+            }
+            else
+                ++numAIs;
         }
-        else
-            ++numAIs;
     }
 
     if ( nSERVER == sn_GetNetState() )
@@ -366,7 +373,11 @@ bool eTeam::IsLocked() const
 void eTeam::Invite( ePlayerNetID * player )
 {
     tASSERT( player );
-    if ( !IsInvited( player ) )
+    if ( !IsInvited( player ) && this->IsLocked() )
+    {
+	sn_ConsoleOut( tOutput( "$invite_team_can_join", player->GetColoredName(), Name() ) );
+    }
+    else if ( !IsInvited( player ) )
     {
         sn_ConsoleOut( tOutput( "$invite_team_invite", player->GetColoredName(), Name() ) );
     }
@@ -377,7 +388,7 @@ void eTeam::Invite( ePlayerNetID * player )
 void eTeam::UnInvite( ePlayerNetID * player )
 {
     tASSERT( player );
-    if ( player->CurrentTeam() == this )
+    if ( player->CurrentTeam() == this && this->IsLocked() )
     {
         sn_ConsoleOut( tOutput( "$invite_team_kick", player->GetColoredName(), Name() ) );
         player->SetTeam(0);
@@ -506,6 +517,8 @@ void eTeam::LogScoreDifferences( void )
 //!
 // *******************************************************************************
 
+static eLadderLogWriter se_roundScoreTeamWriter("ROUND_SCORE_TEAM", true);
+
 void eTeam::LogScoreDifference( void )
 {
     if ( lastScore_ > IMPOSSIBLY_LOW_SCORE && IsHuman() )
@@ -513,9 +526,8 @@ void eTeam::LogScoreDifference( void )
         tString ret;
         int scoreDifference = score - lastScore_;
         lastScore_ = IMPOSSIBLY_LOW_SCORE;
-        ret << "ROUND_SCORE_TEAM " << scoreDifference << " " << ePlayerNetID::FilterName( Name() );
-        ret << "\n";
-        se_SaveToLadderLog( ret );
+        se_roundScoreTeamWriter << scoreDifference << ePlayerNetID::FilterName( Name() );
+        se_roundScoreTeamWriter.write();
     }
 }
 
@@ -1109,7 +1121,7 @@ bool eTeam::PlayerMayJoin( const ePlayerNetID* player ) const
     {
         eTeam *t = teams(i);
 
-        if ( t->BalanceThisTeam() )
+        if ( !t->IsLocked() && t->BalanceThisTeam() )
         {
             int humans = t->NumHumanPlayers();
 
@@ -1200,6 +1212,20 @@ ePlayerNetID*	eTeam::OldestHumanPlayer(		) const
         if ( p->IsHuman() && ( !ret || ret->timeJoinedTeam > p->timeJoinedTeam || se_centerPlayerIsBoss ) )
         {
             ret = p;
+        }
+    }
+
+    if ( !ret )
+    {
+        // nobody? Darn. Look for a player that has this team set as next team.
+        
+        for (int i= se_PlayerNetIDs.Len()-1; i>=0; i--)
+        {   
+            ePlayerNetID* p = se_PlayerNetIDs(i);
+            if ( p->NextTeam() == this && p->IsHuman() && ( !ret || ret->timeJoinedTeam > p->timeJoinedTeam || se_centerPlayerIsBoss ) )
+            {
+                ret = p;
+            }
         }
     }
 

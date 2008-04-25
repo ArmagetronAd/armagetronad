@@ -197,10 +197,21 @@ limit_time_help			End the match after this number of minutes
 
 auto_team_help          Flag indicating whether players should be put into teams automatically.
 no_spectators_allowed	Sorry, does not work with automatic team assignment.\n
+auto_team_spec_spam_help    If set to 0, spectators won't be announced when joining or leaving, provided AUTO_TEAM is set to 0.
 
 allow_team_name_color_help   Allow a team to be named after a color
 allow_team_name_player_help  Allow a team to be named after the leading player
 allow_team_name_leader_help Set to 1 to allow team leader to set a team, 0 otherwise.
+
+play_time_total_help         Total time in minutes someone has played with this client
+play_time_online_help        Total time in minutes someone has played with this client online
+play_time_team_help          Total time in minutes someone has played with this client in a team
+min_play_time_total_help     Total play time in minutes required to play here
+min_play_time_online_help    Online play time in minutes required to play here
+min_play_time_team_help      Team play time in minutes required to play here
+play_time_total_lacking      You cannot play here; first, you need to get more general experience. Play somewhere else (local games count) for \1 minutes, then you can come back here and play.\n
+play_time_online_lacking     You cannot play here; first, you need to get more online experience. Play on other servers for \1 minutes, then you can come back here and play.\n
+play_time_team_lacking       You cannot play here; first, you need to get more team play experience. Play on other team servers for \1 minutes, then you can come back here and play.\n
 
 team_name_1_help name of team 1
 team_name_2_help name of team 2
@@ -370,6 +381,7 @@ spam_protection_chat_help           Extra factor for SPAM_PROTECTION for chat me
 spam_penalty_help					Number of seconds to silence a spammer.
 spam_maxlen_help					Maximal length of chat message.
 spam_autokick_help					Spam score that causes you to get kicked instantly.
+spam_autokick_count_help			Number of spam warnings before a player gets spamkicked.
 silence_all_help					If set to 1, new players will be silenced
 enable_chat_help					If set to 0, all chat will be surpressed (if reset on the server, messages from logged in players and private/team messages are still shown)
 allow_team_change_help				If set to 1, all players can change teams. If set to 0, players can only change teams if they've been specifically allowed to by ALLOW_TEAM_CHANGE_PLAYER
@@ -688,6 +700,10 @@ console_indent_help     Number of spaces each continuation of a wrapped console 
 console_decorate_id_help			Decorates every line of console output with the client ID
 console_decorate_ip_help			Decorates every line of console output with the client IP
 console_ladder_log_help			Sends ladder log output to the console
+ladderlog_write_all_help Set all the LADDER_LOG_WRITE_* settings to the same value
+ladderlog_write_all_usage Usage: LADDER_LOG_WRITE_ALL 1|0
+ladderlog_write_all_enabled Enabled full ladderlog output.
+ladderlog_write_all_disabled Disabled ladderlog output.
 ladderlog_game_time_interval If nonnegative, write a line with the current game time to the ladder log every n seconds.
 show_fps_help			Enable fps display
 floor_mirror_help		Floor mirror mode
@@ -844,6 +860,8 @@ ban_help                    Bans the specified player from the server (kicks him
 ban_ip_help                 Bans the spedified IP address from the server for a variable time.
 ban_list_help               Prints a list of currently banned IPs.
 unban_ip_help               Revokes the ban of the specified IP address.
+
+player_list_hidden_player_prefix_help	The prefix that is shown on hidden players' Global ID and access level when we can see it.
 
 # communication
 console_message_help		Prints a message on the console of all connected clients.
@@ -2218,6 +2236,9 @@ instant_round_end_activated	Round end zone activated! Enter it to end the round.
 instant_death_activated		Death zone activated! Avoid it!\n
 
 player_admin_kill			\1 0xRESETTwas smitten by an administrator.\n
+player_admin_slap_free			\1 0xRESETThas been slapped by an administrator.\n
+player_admin_slap_win			\1 has been hugged by an administrator and got \2 points.\n
+player_admin_slap_lose			\1 has been slapped by an administrator and lost \2 points.\n
 player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
 player_win_held_fortress	\1 was awarded \2 points for holding the base.\n
@@ -2314,8 +2335,7 @@ remove_help_topic_help  Remove a help topic.
 remove_help_topic_success Removed help topic "\1".\n
 remove_help_topic_notfound Help topic "\1" doesn't exist.\n
 
-rtfm_announcement \1 wants you to know about the following help topic:\n
-rtfm_success \1 got the following message:\n
+rtfm_announcement \2 wants \3 to know about /help \1.\n
 
 help_introductory_blurb_help Message that is displayed before the list of help topics if someone uses /help without arguments
 
@@ -2332,11 +2352,10 @@ help_commands_team_shortdesc Basic team management commands
 help_commands_team_text 0x88ff88/teamshuffle0xffff88: Shuffle yourself to be at the outside of your team's wingmen formation\n0x88ff88/teamshuffle <position>0xffff88: Shuffle yourself to be at a specific position\n0x88ff88/teamshuffle [+|-]<offset>0xffff88: Shuffle yourself up/down by a certain number of ranks\n0x88ff88/teamleave0xffff88: Leave your current team. Only works on some servers\n0x88ff88/teams0xffff88: Get a list of all teams with a somewhat graphic representation of their formation
 
 help_commands_pp_shortdesc Player police commands
-help_commands_pp_text 0x88ff88/players0xffff88: Get a list of all players, along with some other information\n0x88ff88/vote kick|suspend <player>0xffff88: Start a poll to kick or suspend a player
+help_commands_pp_text 0x88ff88/players [<search>]0xffff88: Get a list of all players, along with some other information. You can also match specific users with the search argument.\n0x88ff88/vote kick|suspend <player>0xffff88: Start a poll to kick or suspend a player
 
 help_commands_auth_shortdesc Authentication related commands
-help_commands_auth_text 0x88ff88/login [<user>]@<authority>0xffff88: Authenticate yourself using a given authority. Try @forums if you have an account at http://forums.armagetronad.net/\n0x88ff88/logout0xffff88: Log out so you can log back in as another player\n0x88ff88/vote include <file>0xffff88: Start a poll to include a given file\n0x88ff88/vote command <command>0xffff88: Start a poll to execute an admin command\n0x88ff88/admin <command>0xffff88: Execute a console command on the server if you have sufficient access rights\n0x88ff88/op <player> <optional access level>0xffff88: Gives another player a higher access level; the level defaults to the level one lower than you access level, which is also the maximal possible level\n0x88ff88/deop <player>0xffff88: Reverses /op; it takes away a player's access level, effectively making him unauthenticated again. Only works on players of lower access level than yours, of course.\n0x88ff88/promote <player> <optional steps>0xffff88: elevates a player's access level the given number of steps (default: one)\n0x88ff88/demote <player> <optional steps>0xffff88: lowers a player's access level the given number of steps (default: one)
-
+help_commands_auth_text 0x88ff88/login [<user>]@<authority>0xffff88: Authenticate yourself using a given authority. Try @forums if you have an account at http://forums.armagetronad.net/\n0x88ff88/logout0xffff88: Log out so you can log back in as another player\n0x88ff88/vote include <file>0xffff88: Start a poll to include a given file\n0x88ff88/vote command <command>0xffff88: Start a poll to execute an admin command\n0x88ff88/admin <command>0xffff88: Execute a console command on the server if you have sufficient access rights\n0x88ff88/op <player> [+|-]<optional access level>0xffff88: Gives another player a higher or a lower access level; the level defaults to the level one lower than you access level, which is also the maximal possible level\n0x88ff88/deop <player>0xffff88: Reverses /op; it takes away a player's access level, effectively making him unauthenticated again. Only works on players of lower access level than yours, of course.\n
 help_commands_auth_levels_shortdesc List of all access levels
 help_commands_auth_levels_text 0x88ff880 (Owner)0xffff88: The owner of the server. Commands entered on the server console are executed with these rights.\n0x88ff881 (Admin)0xffff88: A server administrator. By default, almost as powerful as the owner himself.\n0x88ff882 (Moderator)0xffff88: A server moderator. Is still allowed to use /admin, but is restricted to player management commands.\n0x88ff887 (Team Leader)0xffff88: Leader of a team. By default, no admin rights at all.\n0x88ff888 (Team Member)0xffff88: Member of a team. Local team accounts get this level.\n0x88ff8812 (Local User)0xffff88: Players with local accounts get this level.\n0x88ff8815 (Remote User)0xffff88: Players with remote accounts get this level by default.\n0x88ff8816 (Fallen from Grace)0xffff88: Authenticated players who abused default rights given to them.\n0x88ff8817 (Shunned)0xffff88: Same, only worse :)\n0x88ff8819 (Authenticated)0xffff88: Minimal level authenticated players can get.\n0x88ff8820 (Program)0xffff88: Unauthenticated players.
 
@@ -2352,9 +2371,10 @@ help_commands_tourney_text 0x88ff88/lock0xffff88: Locks your current team. Nobod
 invite_no_team          Can't use \1 if you're not on a team.\n
 invite_team_locked      \1 locked, you'll need an invitation from a team leader via the /invite command to join from now on.\n
 invite_team_unlocked    \1 unlocked, you can join it freely again.\n
+invite_team_can_join      \10xRESETT can now join \2.\n
 invite_team_invite      \10xRESETT has been invited to join \2.\n
 invite_team_kick        \10xRESETT has been kicked from \2.\n
-invite_team_uninvite    \10xRESETT has been uninvited from \2.\n
+invite_team_uninvite    \10xRESETT got his invitation to join \2 cancelled.\n
 invite_team_locked_list (locked)
 
 msg_toomanymatches 0xff0000Too many matches found for the search term \1. Be more specific.\n
@@ -2750,8 +2770,8 @@ hud_ping Ping:
 hud_rubber Rubber
 
 # access level messages
-access_level_hide_of_help      Hide user account information of players with at most this access level.
-access_level_hide_to_help      Hide user account information to players with less than this access level.
+access_level_hide_of_help      Minimal access level to be able to hide it's own user account information.
+access_level_hide_to_help      Minimal access level to see everyone's user account information.
 access_level_team_help         Minimal access level for /lock, /unlock, /invite and /uninvite team management.
 access_level_op_help           Minimal access level for /op, /deop, /promote and /demote co-admin management commands commands.
 access_level_op_max_help       Maximal access level attainable by /op and /promote commands.

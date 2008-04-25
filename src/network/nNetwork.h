@@ -660,7 +660,7 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects=false, bool otherEnd=true); //
 
 // causes the connected clients to print a message
 void sn_ConsoleOut(const tOutput &message,int client=-1);
-nMessage* sn_ConsoleOutMessage(const tOutput &message);
+nMessage* sn_ConsoleOutMessage( tString const & message );
 
 // causes the connected clients to print a message in the center of the screeen
 void sn_CenterMessage(const tOutput &message,int client=-1);

@@ -63,8 +63,9 @@ public:
 
 private:
     const nSpamProtectionSettings&	settings_;
-    REAL							spamProtect_;
-    nTimeRolling					spamProtectTime_;
+    REAL                            spamProtect_;
+    nTimeRolling                    spamProtectTime_;
+    int                             numWarnings_;
 };
 
 #endif // !defined(ArmageTron_SPAM_PROTECTION_H)

@@ -74,6 +74,22 @@ protected:
     virtual void ProcessImage(SDL_Surface *);       //!< process the surface before uploading it to GL
     virtual void OnSelect( bool enforce );
 };
+#ifndef DEDICATED
+//! like strnlen, but that's nonstandard :-(
+static size_t my_strnlen(char const *c, size_t i) {
+	char const *begin = c;
+	char const *end = c + i;
+	for(; *c && c != end; ++c);
+	return c - begin;
+}
+#endif
+
+static rFont sr_lowerPartFont("textures/font_extra.png");
+rFont rFont::s_defaultFont("textures/font.png", &sr_lowerPartFont);
+rFont rFont::s_defaultFontSmall("textures/font_s.png",32,5/128.0,9/128.0,1/128.0);
+//rFont rFont::s_defaultFontSmall("textures/Font.png",0,16/256.0,32/256.0);
+//rFont rFont::s_defaultFontSmall("textures/Font.png",0,1/16.0,1/8.0);
+
 rFont::rFont(const char *fileName,int Offset,REAL CWidth,REAL CHeight,REAL op, rFont *lower):
         rFileTexture(rTextureGroups::TEX_FONT,fileName,0,0),
         offset(Offset),cwidth(CWidth),cheight(CHeight),
@@ -188,18 +204,6 @@ void rFont::Render(unsigned char c,REAL left,REAL top,REAL right,REAL bot){
     }
 }
 #endif
-
-//! like strnlen, but that's nonstandard :-(
-static size_t my_strnlen(char const *c, size_t i) {
-	char const *begin = c;
-	char const *end = c + i;
-	for(; *c && c != end; ++c);
-	return c - begin;
-}
-
-static rFont sr_lowerPartFont("textures/font_extra.png");
-rFont rFont::s_defaultFont("textures/font.png", &sr_lowerPartFont);
-rFont rFont::s_defaultFontSmall("textures/font_s.png",32,5/128.0,9/128.0,1/128.0);
 
 #ifndef DEDICATED
 
@@ -563,7 +567,7 @@ rTextField & rTextField::StringOutput(const char * c, ColorMode colorMode )
     // run through string
     while (*c!='\0')
     {
-        if (trouble && !(*c=='0' && strnlen(c, 8)>=8 && c[1]=='x' && colorMode != COLOR_IGNORE)) {
+        if (trouble && !(*c=='0' && my_strnlen(c, 8)>=8 && c[1]=='x' && colorMode != COLOR_IGNORE)) {
             tString str;
             str << *c;
             currentWidth += sr_Font.GetWidth(str, cheight);

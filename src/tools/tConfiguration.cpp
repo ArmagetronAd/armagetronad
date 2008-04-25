@@ -545,7 +545,7 @@ static bool s_VetoPlayback( tString const & line )
           "SKY_WOBBLE", "LOWER_SKY", "UPPER_SKY", "DITHER", "HIGH_RIM", "FLOOR_DETAIL",
           "FLOOR_MIRROR", "SHOW_FPS", "TEXT_OUT", "SMOOTH_SHADING", "ALPHA_BLEND",
           "PERSP_CORRECT", "POLY_ANTIALIAS", "LINE_ANTIALIAS", "FAST_FORWARD_MAXSTEP",
-          "DEBUG_GNUPLOT", "FLOOR_", "MOVIEPACK_", "RIM_WALL_", "INCLUDE", "SINCLUDE",
+          "DEBUG_GNUPLOT", "FLOOR_", "MOVIEPACK_", "RIM_WALL_",
           0 };
 
     static std::vector< tString > vetos = st_Stringify( vetos_char );
@@ -953,19 +953,35 @@ void tConfItemFunc::WriteVal(std::ostream &){}
 
 bool tConfItemFunc::Save(){return false;}
 
-void st_Include( tString const & file, bool reportError )
+void st_Include( tString const & file, bool error )
 {
     // refuse to load illegal paths
     if( !tPath::IsValidPath( file ) )
         return;
 
-    if ( !Load( tDirectories::Var(), file ) )
+    if ( !tRecorder::IsPlayingBack() )
     {
-        if (!Load( tDirectories::Config(), file ) && reportError )
+        // really load include file
+        if ( !Load( tDirectories::Var(), file ) )
         {
-            con << tOutput( "$config_include_not_found", file );
+            if (!Load( tDirectories::Config(), file ) && error )
+            {
+                con << tOutput( "$config_include_not_found", file );
+            }
         }
     }
+    else
+    {
+        // just read configuration, and don't forget to reset the config level
+        tCurrentAccessLevel levelResetter;
+        tConfItemBase::LoadPlayback();
+    }
+
+    // mark section
+    char const * section = "INCLUDE_END";
+    tRecorder::Record( section );
+    tRecorder::PlaybackStrict( section );
+
 }
 
 static void Include(std::istream& s, bool error )

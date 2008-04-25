@@ -30,7 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tSysTime.h"
 
 static REAL se_SpamProtection = 4.0f;	// degree of spam protection
-static REAL se_SpamPenalty	  = 10.0f;	// silence penalty when found guilty of spamming
+static REAL se_SpamPenalty	  = 0.0f;	// silence penalty when found guilty of spamming
+static int  se_SpamAutoKickCount  = 3;	// minimal number of 
 static REAL se_SpamAutoKick	  = 20.0f;	// spam value that causes someone to get instantly kicked.
 int			se_SpamMaxLen	  = 80;		// maximal length of chat message
 
@@ -40,6 +41,8 @@ static tSettingItem<REAL> se_SPE("SPAM_PENALTY",
                                  se_SpamPenalty);
 static tSettingItem<REAL> se_SAK("SPAM_AUTOKICK",
                                  se_SpamAutoKick);
+static tSettingItem<int> se_SAKC("SPAM_AUTOKICK_COUNT",
+                                 se_SpamAutoKickCount);
 static nSettingItemWatched<int> se_SML("SPAM_MAXLEN",
                                        se_SpamMaxLen,
                                        nConfItemVersionWatcher::Group_Cheating,
@@ -52,7 +55,7 @@ nSpamProtectionSettings::nSpamProtectionSettings( REAL timeScale, char const * t
 }
 
 nSpamProtection::nSpamProtection( const nSpamProtectionSettings& settings )
-        : settings_( settings ), spamProtect_( 0.0f ), spamProtectTime_( tSysTimeFloat( ))
+    : settings_( settings ), spamProtect_( 0.0f ), spamProtectTime_( tSysTimeFloat( )), numWarnings_( 0 )
 {
 }
 
@@ -94,7 +97,7 @@ nSpamProtection::Level	nSpamProtection::CheckSpam( REAL spamlevel, int userToKic
 
         sn_ConsoleOut(message,userToKick);
 
-        if ( spamProtect_ > se_SpamAutoKick )
+        if ( spamProtect_ > se_SpamAutoKick && numWarnings_ >= se_SpamAutoKickCount )
         {
             tOutput message( "$network_kill_spamkick" );
             message.Append( " " );
@@ -104,8 +107,10 @@ nSpamProtection::Level	nSpamProtection::CheckSpam( REAL spamlevel, int userToKic
             return Level_Hard;
         }
 
+        ++numWarnings_;
         return Level_Mild;
     }
 
+    numWarnings_ = 0;
     return Level_Ok;
 }

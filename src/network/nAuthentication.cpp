@@ -916,7 +916,7 @@ bool nLoginProcess::CheckServerAddress( nMessage & m )
         }
     }
 
-    else if ( sn_GetMyAddress() == serverAddress )
+    if ( sn_GetMyAddress() == serverAddress )
     {
         // all's well
         return true;
