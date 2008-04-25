@@ -3032,7 +3032,9 @@ static void sg_VoteMenuIdle()
 static eLadderLogWriter sg_newRoundWriter("NEW_ROUND", true);
 static eLadderLogWriter sg_newMatchWriter("NEW_MATCH", true);
 static eLadderLogWriter sg_waitForExternalScriptWriter("WAIT_FOR_EXTERNAL_SCRIPT", true);
-
+static eLadderLogWriter sg_nextRoundWriter("NEXT_ROUND", false);
+static  eLadderLogWriter sg_roundCommencingWriter("ROUND_COMMENCING", false);
+ 
 void gGame::StateUpdate(){
 
     //	if (state==GS_CREATED)
@@ -3276,6 +3278,8 @@ void gGame::StateUpdate(){
 
                     if (strlen(sg_roundConsoleMessage) > 2)
                         sn_ConsoleOut(sg_roundConsoleMessage + "\n");
+		    sg_nextRoundWriter << rounds+1 << sg_currentSettings->limitRounds << mapfile << sg_roundCenterMessage;
+		    sg_nextRoundWriter.write();
                 }
                 else
                     mess << "$gamestate_newround_goldengoal";
@@ -3302,6 +3306,14 @@ void gGame::StateUpdate(){
                     goon = 0;
 
                 Analysis(0);
+
+                // log scores before players get renamed
+                ePlayerNetID::LogScoreDifferences();
+
+                //edLog << ePlayerNetID::RankingEd();
+
+                sg_roundCommencingWriter << rounds+1 << sg_currentSettings->limitRounds;
+                sg_roundCommencingWriter.write();
 
                 // wait for external script to end its work if needed
                 REAL timeout = tSysTimeFloat() + sg_waitForExternalScriptTimeout;
@@ -4072,6 +4084,7 @@ static uActionGlobalFunc ingamemenu_action(&ingamemenu,&ingamemenu_func, true );
 #endif // dedicated
 
 static eLadderLogWriter sg_gameTimeWriter("GAME_TIME", true);
+static eLadderLogWriter sg_startInWriter("START_IN", false);
 
 bool gGame::GameLoop(bool input){
     nNetState netstate = sn_GetNetState();
@@ -4110,6 +4123,8 @@ bool gGame::GameLoop(bool input){
             tString s;
             s << cd;
             con.CenterDisplay(s,0);
+	    sg_startInWriter << cd;
+	    sg_startInWriter.write();
         }
     }
     //con << sg_netPlayerWalls.Len() << '\n';
