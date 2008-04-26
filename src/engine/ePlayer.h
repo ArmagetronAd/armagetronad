@@ -446,6 +446,8 @@ public:
     }
     void write(); //!< send to ladderlog and clear message
 
+    bool isEnabled() { return enabled; } //!< check this if you're going to make expensive calculations for ladderlog output
+
     static void setAll(bool enabled); //!< enable or disable all writers
 };
 
