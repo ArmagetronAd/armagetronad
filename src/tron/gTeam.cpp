@@ -60,7 +60,7 @@ static tOutput* PrepareTeamText(tOutput* text, eTeam* team, const ePlayerNetID* 
     }
 
     // Handling the $team_join template ;)
-    text->SetTemplateParameter(1 , team->Name() );
+    text->SetTemplateParameter(1 , team->ColoredName() );
     text->SetTemplateParameter(2 , team->NumPlayers() );
     if (team->PlayerMayJoin(player))
         text->SetTemplateParameter(3, se_TeamMenu_Team_Ok);

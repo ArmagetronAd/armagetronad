@@ -54,6 +54,7 @@ protected:							// protected attributes
 
     unsigned short r,g,b;			// team color
     tString	name;					// our name
+    tString     coloredName;			//!< our colored name
 
     bool locked_;                   //!< if set, only invited players may join
 
@@ -173,6 +174,9 @@ public:												// public methods
     }
     const tString& 	Name() 	const {
         return name;
+    }
+    const tString& 	ColoredName() 	const {
+        return coloredName;
     }
 
     virtual void PrintName(tString &s) const;					// print out an understandable name in to s

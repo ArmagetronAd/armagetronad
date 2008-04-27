@@ -303,6 +303,14 @@ void eTeam::UpdateAppearance()
         r = g = b = 7;
     }
 
+    if ( oldr != r || oldg != g || oldb != b || name != updateName)
+    {
+	tColoredString newColoredName;
+	newColoredName << tColoredString::ColorString(r,g,b)
+		       << name;
+	coloredName = newColoredName;
+    }
+
     // if the name has been changed then update it
     if (name!=updateName)
     {
@@ -314,13 +322,13 @@ void eTeam::UpdateAppearance()
             tOutput message;
             tColoredString name;
             name << *oldest;
-            name << tColoredString::ColorString(1,1,1);
+            name << tColoredString::ColorString(-1,-1,-1);
             message.SetTemplateParameter(1, name);
 
             tColoredString resetColor;
             resetColor << tColoredString::ColorString(r,g,b);
             resetColor << updateName;
-            resetColor << tColoredString::ColorString(1,1,1);
+            resetColor << tColoredString::ColorString(-1,-1,-1);
             message.SetTemplateParameter(2, resetColor);
             message << "$team_renamed";
             sn_ConsoleOut(message);
