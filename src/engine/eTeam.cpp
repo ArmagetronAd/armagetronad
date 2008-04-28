@@ -303,14 +303,6 @@ void eTeam::UpdateAppearance()
         r = g = b = 7;
     }
 
-    if ( oldr != r || oldg != g || oldb != b || name != updateName)
-    {
-	tColoredString newColoredName;
-	newColoredName << tColoredString::ColorString(r,g,b)
-		       << name;
-	coloredName = newColoredName;
-    }
-
     // if the name has been changed then update it
     if (name!=updateName)
     {

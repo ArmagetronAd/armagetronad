@@ -58,9 +58,13 @@ static tOutput* PrepareTeamText(tOutput* text, eTeam* team, const ePlayerNetID* 
         *text << textTemplate;
         return text;
     }
+    // Build a colored team name
+    tColoredString teamname;
+    teamname << tColoredString::ColorString( team->R() , team->G () , team->B() )
+             << team->Name();
 
     // Handling the $team_join template ;)
-    text->SetTemplateParameter(1 , team->ColoredName() );
+    text->SetTemplateParameter(1 , teamname );
     text->SetTemplateParameter(2 , team->NumPlayers() );
     if (team->PlayerMayJoin(player))
         text->SetTemplateParameter(3, se_TeamMenu_Team_Ok);
