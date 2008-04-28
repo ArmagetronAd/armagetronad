@@ -3293,10 +3293,9 @@ static void sg_SetAIRoute(std::istream &s)
 	if ((!ai) || (!p->Object())) return;
 
         tJUST_CONTROLLED_PTR<eFace> currentFace;  // the eFace pos it is currently
-        eGrid *grid = eGrid::CurrentGrid();
- 
+
         if(!route.empty()) {
-	    ai->SetRoute(route);            
+	    ai->SetRoute(route);
         }
 }
 

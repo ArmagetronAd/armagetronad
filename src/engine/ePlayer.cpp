@@ -2459,9 +2459,11 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     {
         se_AdminAdmin( p, s );
     }
-    else  if ( command == "/cmd" )
+    else  if ( command == "/cmd" && se_commandWriter.isEnabled() )
     {
-	se_commandWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << s; 
+        tString str;
+        str.ReadLine(s);
+        se_commandWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << str;
         se_commandWriter.write();
     }
     else
@@ -5489,6 +5491,9 @@ void ePlayerNetID::RankingLadderLog() {
 static eLadderLogWriter se_playerGridPosWriter("PLAYER_GRIDPOS", false);
 
 void ePlayerNetID::GridPosLadderLog() {
+    if(!se_playerGridPosWriter.isEnabled()) {
+        return;
+    }
     if (se_PlayerNetIDs.Len()>0){
         int max = se_PlayerNetIDs.Len();
         for(int i=0;i<max;i++){
@@ -5497,7 +5502,7 @@ void ePlayerNetID::GridPosLadderLog() {
             {
                 se_playerGridPosWriter << p->GetUserName() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y;
                 if (p->Object() && p->Object()->Team())
-		    se_playerGridPosWriter << FilterName(p->Object()->Team()->Name());
+                    se_playerGridPosWriter << FilterName(p->Object()->Team()->Name());
                 else se_playerGridPosWriter << " ";
                     se_playerGridPosWriter.write();
             }

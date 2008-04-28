@@ -4751,7 +4751,7 @@ static void sg_CreateZone_conf(std::istream &s)
 	// if no_team was pass, assigns one: the one that has a player spawned closest
         if ( zoneTeamStr=="no_team" )
         {
-            REAL teamDistance_ = 0;
+            //REAL teamDistance_ = 0;
             const tList<eGameObject>& gameObjects = grid->GameObjects();
             gCycle * closest = 0;
             REAL closestDistance = 0;
@@ -4761,7 +4761,7 @@ static void sg_CreateZone_conf(std::istream &s)
 
                 if (other )
                 {
-                    eTeam * otherTeam = other->Player()->CurrentTeam();
+                    //eTeam * otherTeam = other->Player()->CurrentTeam();
                     eCoord otherpos = other->Position() - zonePos;
                     REAL distance = otherpos.NormSquared();
                     if ( !closest || distance < closestDistance )
