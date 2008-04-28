@@ -7186,7 +7186,7 @@ void ePlayerNetID::UpdateName( void )
         }
 
         // rudely overwrite name from client
-        nameFromServer_ = newName;
+        nameFromAdmin_ = nameFromServer_ = newName;
     }
 
     // set the colored name to the name from the client, set trailing color to white
@@ -7315,7 +7315,7 @@ bool ePlayerNetID::IsAllowedToRename ( void )
         // Just return false so the server thinks the player can't be renamed in any other way than admin-rename.
         return false;
     }
-    // didn't be disallow this player to rename via a command ?
+    // didn't we disallow this player to rename via a command ?
     if ( !this->renameAllowed_ )
     {
         tOutput message( "$player_rename_rejected_admin", nameFromServer_, nameFromClient_ );
