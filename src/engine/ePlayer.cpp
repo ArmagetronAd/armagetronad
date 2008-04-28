@@ -4563,6 +4563,9 @@ void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin ){
     SetAccessLevel( tAccessLevel_Default );
 
     rawAuthenticatedName_ = "";
+
+    // force update
+    UpdateName();
 }
 
 bool ePlayerNetID::IsAuthenticated() const
