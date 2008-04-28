@@ -133,7 +133,7 @@ static tSettingItem< bool > se_specSpamConf( "AUTO_TEAM_SPEC_SPAM", se_specSpam 
 static bool se_allowTeamChanges = true;
 static tSettingItem< bool > se_allowTeamChangesConf( "ALLOW_TEAM_CHANGE", se_allowTeamChanges );
 
-static bool se_enableChat = true;	//flag indicating whether chat should be allowed at all (logged in players can always chat)
+static bool se_enableChat = true;    //flag indicating whether chat should be allowed at all (logged in players can always chat)
 static tSettingItem< bool > se_enaChat("ENABLE_CHAT", se_enableChat);
 
 static tString se_hiddenPlayerPrefix ("0xaaaaaa");
@@ -913,7 +913,7 @@ public:
     {
     }
 private:
-    tCONTROLLED_PTR( ePlayerNetID ) player_;		// keep player referenced
+    tCONTROLLED_PTR( ePlayerNetID ) player_;        // keep player referenced
 };
 
 
@@ -2026,11 +2026,11 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
                  }
                  char first;
                  s >> first;
-             
+
                  if ( !s.eof() && !s.fail() )
                  {
                      s.unget();
-             
+
                      int newLevel = 0;
                      s >> newLevel;
 
@@ -2471,7 +2471,7 @@ static tAccessLevel se_shuffleUpAccessLevel = tAccessLevel_TeamMember;
 static tSettingItem< tAccessLevel > se_shuffleUpAccessLevelConf( "ACCESS_LEVEL_SHUFFLE_UP", se_shuffleUpAccessLevel );
 #endif
 
-static bool se_silenceAll = false;		// flag indicating whether new players should be silenced
+static bool se_silenceAll = false;        // flag indicating whether new players should be silenced
 
 // minimal access level for chat
 static tAccessLevel se_chatAccessLevel = tAccessLevel_Program;
@@ -2546,7 +2546,7 @@ public:
         // count color codes. We hate them. We really do. (Yeah, this calculation is inefficient.)
         int colorCodes = (say_.Len() - tColoredString::RemoveColors( say_ ).Len())/8;
         if ( colorCodes < 0 ) colorCodes = 0;
-        
+
         // apply them to the spam severity factor. Burn in hell, color code abusers.
         static const double log2 = log(2);
         factor *= log( 2 + colorCodes )/log2;
@@ -2694,7 +2694,7 @@ tSettingItem< bool > se_coloredDarkTeamConf( "FILTER_DARK_COLOR_TEAM", se_filter
 static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & spam )
 {
     eTeam *currentTeam = se_GetManagedTeam( p );
-    
+
     // team messages are less spammy than public chat, take care of that.
     // we don't care too much about AI players (but don't remove them from the denominator because we're too lazy to count the total number of human players).
     spam.factor_ = ( currentTeam ? currentTeam->NumHumanPlayers() : 1 )/REAL( se_PlayerNetIDs.Len() );
@@ -2935,9 +2935,9 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
         if ( p2->GetAccessLevel() < tAccessLevel_Default && !se_Hide( p2, receiver ) )
         {
 #ifdef KRAWALL_SERVER
-	    hidden = p2->GetAccessLevel() <= se_hideAccessLevelOf && p2->StealthMode();
+        hidden = p2->GetAccessLevel() <= se_hideAccessLevelOf && p2->StealthMode();
 #else
-	    hidden = false;
+        hidden = false;
 #endif
             tos << p2->GetColoredName()
                 << tColoredString::ColorString( -1, -1, -1)
@@ -2968,10 +2968,10 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
                 tos << ", IP = " << IP;
             }
         }
-	if ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_nVerAccessLevel )
-	{
-	    tos << ", " << sn_GetClientVersionString( sn_Connections[ p2->Owner() ].version.Max() ) << " (ID: " << sn_Connections[ p2->Owner() ].version.Max() << ")";
-	}
+    if ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_nVerAccessLevel )
+    {
+        tos << ", " << sn_GetClientVersionString( sn_Connections[ p2->Owner() ].version.Max() ) << " (ID: " << sn_Connections[ p2->Owner() ].version.Max() << ")";
+    }
 
         tos << "\n";
 
@@ -4924,9 +4924,9 @@ void ePlayerNetID::ReadSync(nMessage &m){
                 else
                 {
                     currentTeam->RemovePlayer( this );
-                } 
+                }
             }
-            
+
             nextTeam = newNextTeam;
 
             // update properties of the old current team in all cases
@@ -5606,7 +5606,7 @@ void ePlayerNetID::Update(){
 
                 // update spectator status
                 bool spectate = local_p->spectate;
-                
+
                 // force to spectator mode if the player lacks experience
                 if ( !spectate )
                 {
@@ -5670,7 +5670,7 @@ void ePlayerNetID::Update(){
         {
             // all activity gets logged here
             se_playTimeTotal += time;
-        
+
             if ( sn_GetNetState() == nCLIENT )
             {
                 // all online activity counts here
@@ -6268,9 +6268,9 @@ void ePlayerNetID::FindDefaultTeam( )
             min->PlayerMayJoin( this ) &&
             ( !eTeam::NewTeamAllowed() || ( min->NumHumanPlayers() > 0 && min->NumHumanPlayers() < favoriteNumberOfPlayersPerTeam ) )
        )
-        SetTeamWish( min );				// join the team
+        SetTeamWish( min );             // join the team
     else if ( eTeam::NewTeamAllowed() )
-        CreateNewTeamWish();			// create a new team
+        CreateNewTeamWish();            // create a new team
 
     // yes, if all teams are full and no team creation is allowed, the player stays without team and will not be spawned.
 
@@ -6587,16 +6587,16 @@ void ePlayerNetID::TrailColor( REAL&a_r, REAL&a_g, REAL&a_b ) const
     /*
     if ( ( static_cast<bool>(currentTeam) ) && ( currentTeam->IsHuman() ) )
     {
-    	int w = 6;
-    	a_r=(2*r + w*currentTeam->R())/( 15.0 * ( w + 2 ) );
-    	a_g=(2*g + w*currentTeam->G())/( 15.0 * ( w + 2 ) );
-    	a_b=(2*b + w*currentTeam->B())/( 15.0 * ( w + 2 ) );
+int w = 6;
+        a_r=(2*r + w*currentTeam->R())/( 15.0 * ( w + 2 ) );
+        a_g=(2*g + w*currentTeam->G())/( 15.0 * ( w + 2 ) );
+        _b=(2*b + w*currentTeam->B())/( 15.0 * ( w + 2 ) );
     }
     else
     {
-    	a_r = r/15.0;
-    	a_g = g/15.0;
-    	a_b = b/15.0;
+        a_r = r/15.0;
+        a_g = g/15.0;
+        a_b = b/15.0;
     }
     */
 }
@@ -6604,12 +6604,12 @@ void ePlayerNetID::TrailColor( REAL&a_r, REAL&a_g, REAL&a_b ) const
 /*
 void ePlayerNetID::AddRef()
 {
-	nNetObject::AddRef();
+    nNetObject::AddRef();
 }
 
 void ePlayerNetID::Release()
 {
-	nNetObject::Release();
+    nNetObject::Release();
 }
 */
 
@@ -6973,7 +6973,7 @@ public:
     gServerInfoAdmin(){};
 
 private:
-    virtual tString GetUsers()		const
+    virtual tString GetUsers() const
     {
         tString ret;
 
@@ -6989,7 +6989,7 @@ private:
         return ret;
     }
 
-    virtual tString GetGlobalIDs()		const
+    virtual tString GetGlobalIDs() const
     {
         tString ret;
 #ifdef KRAWALL_SERVER
@@ -7015,13 +7015,13 @@ private:
         return ret;
     }
 
-    virtual tString	GetOptions()	const
+    virtual tString GetOptions() const
     {
         se_CutString( sg_options, 240 );
         return sg_options;
     }
 
-    virtual tString GetUrl()		const
+    virtual tString GetUrl() const
     {
         se_CutString( sg_url, 75 );
         return sg_url;
@@ -7117,7 +7117,7 @@ public:
 
 // ******************************************************************************************
 // *
-// *	UpdateName
+// *    UpdateName
 // *
 // ******************************************************************************************
 //!
@@ -7232,11 +7232,11 @@ void ePlayerNetID::UpdateName( void )
 
 // ******************************************************************************************
 // *
-// *	AllowRename
+// *    AllowRename
 // *
 // ******************************************************************************************
 //!
-//!		@param	allow  let the player rename or not ?
+//!        @param    allow  let the player rename or not ?
 //!
 // ******************************************************************************************
 
@@ -7294,7 +7294,7 @@ static tAccessLevelSetter DisAllowRename_confLevel( DisAllowRename_conf, tAccess
 
 // ******************************************************************************************
 // *
-// *	IsAllowedToRename
+// *    IsAllowedToRename
 // *
 // ******************************************************************************************
 //!
@@ -7447,12 +7447,12 @@ static bool se_IsUnderscore( char c )
 
 // ******************************************************************************************
 // *
-// *	FilterName
+// *    FilterName
 // *
 // ******************************************************************************************
 //!
-//!		@param	in   input name
-//!		@param	out  output name cleared to be usable as a username
+//!        @param    in   input name
+//!        @param    out  output name cleared to be usable as a username
 //!
 // ******************************************************************************************
 
@@ -7476,12 +7476,12 @@ void ePlayerNetID::FilterName( tString const & in, tString & out )
 
 // ******************************************************************************************
 // *
-// *	FilterName
+// *    FilterName
 // *
 // ******************************************************************************************
 //!
-//!		@param	in   input name
-//!		@return      output name cleared to be usable as a username
+//!        @param    in   input name
+//!        @return        output name cleared to be usable as a username
 //!
 // ******************************************************************************************
 
@@ -7614,13 +7614,13 @@ static tSettingItem< bool > se_allowEnemiesSameClientConf( "ALLOW_ENEMIES_SAME_C
 
 // *******************************************************************************
 // *
-// *	Enemies
+// *    Enemies
 // *
 // *******************************************************************************
 //!
-//!		@param	a	first player to compare
-//!		@param	b	second player to compare
-//!		@return		true if a should be able to score against b or vice versa
+//!        @param    a    first player to compare
+//!        @param    b    second player to compare
+//!        @return        true if a should be able to score against b or vice versa
 //!
 // *******************************************************************************
 
@@ -7648,7 +7648,7 @@ bool ePlayerNetID::Enemies( ePlayerNetID const * a, ePlayerNetID const * b )
 
 // *******************************************************************************
 // *
-// *	RegisterWithMachine
+// *    RegisterWithMachine
 // *
 // *******************************************************************************
 //!
@@ -7667,7 +7667,7 @@ void ePlayerNetID::RegisterWithMachine( void )
 
 // *******************************************************************************
 // *
-// *	UnregisterWithMachine
+// *    UnregisterWithMachine
 // *
 // *******************************************************************************
 //!
@@ -7692,11 +7692,11 @@ void ePlayerNetID::UnregisterWithMachine( void )
 
 // *******************************************************************************
 // *
-// *	DoGetMachine
+// *    DoGetMachine
 // *
 // *******************************************************************************
 //!
-//!		@return		the machine this object belongs to
+//!        @return        the machine this object belongs to
 //!
 // *******************************************************************************
 
@@ -7711,11 +7711,11 @@ nMachine & ePlayerNetID::DoGetMachine( void ) const
 
 // *******************************************************************************
 // *
-// *	LastActivity
+// *    LastActivity
 // *
 // *******************************************************************************
 //!
-//!		@return
+//!        @return
 //!
 // *******************************************************************************
 
@@ -7726,7 +7726,7 @@ REAL ePlayerNetID::LastActivity( void ) const
 
 // *******************************************************************************
 // *
-// *	ResetScoreDifferences
+// *    ResetScoreDifferences
 // *
 // *******************************************************************************
 //!
@@ -7785,7 +7785,7 @@ void ePlayerNetID::Suspend( int rounds )
 
 // *******************************************************************************
 // *
-// *	LogScoreDifferences
+// *    LogScoreDifferences
 // *
 // *******************************************************************************
 //!
@@ -7820,7 +7820,7 @@ void ePlayerNetID::LogScoreDifferences( void )
 
 // *******************************************************************************
 // *
-// *	LogScoreDifference
+// *    LogScoreDifference
 // *
 // *******************************************************************************
 //!
