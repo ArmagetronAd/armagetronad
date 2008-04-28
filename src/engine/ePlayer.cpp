@@ -774,7 +774,7 @@ static bool se_Hide( ePlayerNetID const * hider, ePlayerNetID const * seeker )
 void se_SecretConsoleOut( tOutput const & message, tAccessLevel hider, ePlayerNetID const * exception1, ePlayerNetID const * exception2 = 0 )
 {
     // high enough access levels are never secret
-    if ( hider < se_hideAccessLevelOf )
+    if ( hider > se_hideAccessLevelOf )
     {
         sn_ConsoleOut( message );
     }
@@ -2024,7 +2024,7 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
              {
                  sn_ConsoleOut( tOutput( "$access_level_op_self", command ), admin->Owner() );
              }
-             else if ( admin->GetAccessLevel() > victim->GetAccessLevel() )
+             else if ( admin->GetAccessLevel() >= victim->GetAccessLevel() )
              {
                  sn_ConsoleOut( tOutput( "$access_level_op_overpowered", command ), admin->Owner() );
              }
@@ -2522,6 +2522,9 @@ static tSettingItem< tAccessLevel > se_msgSpyAccessLevelConf( "ACCESS_LEVEL_SPY_
 static tAccessLevel se_ipAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_ipAccessLevelConf( "ACCESS_LEVEL_IPS", se_ipAccessLevel );
 
+static tAccessLevel se_nVerAccessLevel = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_nVerAccessLevelConf( "ACCESS_LEVEL_NVER", se_nVerAccessLevel );
+
 static tSettingItem<bool> se_silAll("SILENCE_ALL",
                                     se_silenceAll);
 
@@ -2977,9 +2980,9 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
         if ( p2->GetAccessLevel() < tAccessLevel_Default && !se_Hide( p2, receiver ) )
         {
 #ifdef KRAWALL_SERVER
-            hidden = p2->GetAccessLevel() <= se_hideAccessLevelOf && p2->StealthMode();
+	    hidden = p2->GetAccessLevel() <= se_hideAccessLevelOf && p2->StealthMode();
 #else
-            hidden = false;
+	    hidden = false;
 #endif
             tos << p2->GetColoredName()
                 << tColoredString::ColorString( -1, -1, -1)
@@ -3002,7 +3005,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
         {
             tos << p2->GetColoredName() << tColoredString::ColorString(1,1,1) << " ( )";
         }
-        if ( tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel )
+        if ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel )
         {
             tString IP = p2->GetMachine().GetIP();
             if ( IP.Len() > 1 )
@@ -3010,6 +3013,11 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
                 tos << ", IP = " << IP;
             }
         }
+	if ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_nVerAccessLevel )
+	{
+	    tos << ", " << sn_GetClientVersionString( sn_Connections[ p2->Owner() ].version.Max() ) << " (ID: " << sn_Connections[ p2->Owner() ].version.Max() << ")";
+	}
+
         tos << "\n";
 
         if ( !doSearch )
@@ -7156,9 +7164,9 @@ static void Silence_conf(std::istream &s)
     }
 
     ePlayerNetID * p = ReadPlayer( s );
-    if ( p )
+    if ( p && !p->IsSilenced() )
     {
-        sn_ConsoleOut( tOutput( "$player_silenced", p->GetName() ) );
+        sn_ConsoleOut( tOutput( "$player_silenced", p->GetColoredName() ) );
         p->SetSilenced( true );
     }
 }
@@ -7174,9 +7182,9 @@ static void Voice_conf(std::istream &s)
     }
 
     ePlayerNetID * p = ReadPlayer( s );
-    if ( p )
+    if ( p && p->IsSilenced() )
     {
-        sn_ConsoleOut( tOutput( "$player_voiced", p->GetName() ) );
+        sn_ConsoleOut( tOutput( "$player_voiced", p->GetColoredName() ) );
         p->SetSilenced( false );
     }
 }

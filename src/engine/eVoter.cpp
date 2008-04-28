@@ -166,7 +166,7 @@ static eVoter* se_GetVoter( const nMessage& m )
     return eVoter::GetVoter( m.SenderID(), true );
 }
 
-eVoterPlayerInfo::eVoterPlayerInfo(): suspended_(0){}
+eVoterPlayerInfo::eVoterPlayerInfo(): suspended_(0), silenced_(0){}
 
 static tAccessLevel se_GetAccessLevel( int userID )
 {
