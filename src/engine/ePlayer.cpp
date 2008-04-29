@@ -2463,7 +2463,7 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     {
         tString str;
         str.ReadLine(s);
-        se_commandWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << str;
+        se_commandWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel() << str;
         se_commandWriter.write();
     }
     else
