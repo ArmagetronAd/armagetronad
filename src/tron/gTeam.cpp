@@ -60,7 +60,7 @@ static tOutput* PrepareTeamText(tOutput* text, eTeam* team, const ePlayerNetID* 
     }
     // Build a colored team name
     tColoredString teamname;
-    teamname << tColoredString::ColorString( team->R() , team->G () , team->B() )
+    teamname << tColoredString::ColorString( team->R() / 15.0 , team->G() / 15.0 , team->B() / 15.0 )
              << team->Name();
 
     // Handling the $team_join template ;)
