@@ -622,6 +622,10 @@ bool sg_TalkToMaster = true;
 static tSettingItem<bool> sg_ttm("TALK_TO_MASTER",
                                  sg_TalkToMaster);
 
+static int ladder_highscore_output=1;
+static tSettingItem<int> ldd_rout("LADDER_HIGHSCORE_OUTPUT",
+                                 ladder_highscore_output);
+
 class gHighscoresBase{
     int id;
     static tList<gHighscoresBase> highscoreList;
@@ -906,7 +910,7 @@ template<class T>class highscores: public gHighscoresBase{
 
         ePlayerNetID *p=online(newpos);
         //con << message;
-        if (p)
+        if (p && ladder_highscore_output)
             sn_ConsoleOut(tString(message),p->Owner());
         //Save();
     }
@@ -1060,7 +1064,7 @@ public:
 
         ePlayerNetID *p=online(newpos);
         // con << message;
-        if (p){
+        if (p && ladder_highscore_output){
             sn_ConsoleOut(tString(message),p->Owner());
         }
 
