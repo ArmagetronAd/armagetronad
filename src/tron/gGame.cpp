@@ -4092,7 +4092,6 @@ static uActionGlobalFunc ingamemenu_action(&ingamemenu,&ingamemenu_func, true );
 #endif // dedicated
 
 static eLadderLogWriter sg_gameTimeWriter("GAME_TIME", true);
-static eLadderLogWriter sg_startInWriter("START_IN", false);
 
 bool gGame::GameLoop(bool input){
     nNetState netstate = sn_GetNetState();
@@ -4132,8 +4131,6 @@ bool gGame::GameLoop(bool input){
             tString s;
             s << cd;
             con.CenterDisplay(s,0);
-	    sg_startInWriter << cd;
-	    sg_startInWriter.write();
         }
     }
     //con << sg_netPlayerWalls.Len() << '\n';
