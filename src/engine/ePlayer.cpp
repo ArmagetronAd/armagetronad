@@ -5521,6 +5521,9 @@ static tSettingItem<REAL> sg_playerPositioningZoneFactorConf( "PLAYER_POSITIONIN
 static eLadderLogWriter se_tacticalPositionWriter("PLAYER_POSITION", false);
 
 void ePlayerNetID::TacticalPositioning() {
+    if(!se_tacticalPositionWriter.isEnabled()) {
+        return;
+    }
     eGrid *grid = eGrid::CurrentGrid();
     for ( int i = se_PlayerNetIDs.Len()-1; i >= 0; --i ) {
         ePlayerNetID *p = se_PlayerNetIDs(i);

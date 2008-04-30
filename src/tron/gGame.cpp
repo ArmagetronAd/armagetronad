@@ -4253,10 +4253,10 @@ bool gGame::GameLoop(bool input){
         sg_gameTimeWriter << gtime;
         sg_gameTimeWriter.write();
         lastTime = gtime;
-	if((int)gtime%5==0) ePlayerNetID::GridPosLadderLog(); 
-	if (gtime>sg_playerPositioningStartTime) {
-	    ePlayerNetID::TacticalPositioning();
-	}
+	    if((int)gtime%5==0) ePlayerNetID::GridPosLadderLog(); 
+	    if (gtime>sg_playerPositioningStartTime) {
+	        ePlayerNetID::TacticalPositioning();
+	    }
     }
 
     if (state==GS_PLAY){
