@@ -4213,9 +4213,9 @@ bool gGame::GameLoop(bool input){
         synced_ = true;
     }
 
-    static float lastTime = -1;
+    static float lastTime = 1e42;
 
-    if(sg_gameTimeInterval >= 0 && (gtime >= lastTime + sg_gameTimeInterval || (gtime < lastTime && gtime >= 0))) {
+    if(sg_gameTimeInterval >= 0 && (gtime >= lastTime + sg_gameTimeInterval || gtime < lastTime)) {
         sg_gameTimeWriter << gtime;
         sg_gameTimeWriter.write();
         lastTime = gtime;
