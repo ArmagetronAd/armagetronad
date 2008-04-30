@@ -4945,6 +4945,7 @@ static void sg_CreateZone_conf(std::istream &s)
 	{
 		gBaseZoneHack *fZone = tNEW( gBaseZoneHack( grid, zonePos, true, zoneTeam ) );
 		fZone->OnRoundBegin();
+		if (!fZone) return; // fail to assigned a team to this zone.
 		Zone = fZone;
 		//sn_ConsoleOut( "$instant_win_activated" );
 		if (Zone->Team()!=NULL)
