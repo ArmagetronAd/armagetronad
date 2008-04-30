@@ -1,6 +1,6 @@
 /*
 
-*************************************************************************
+ *************************************************************************
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
 Copyright (C) 2000  Manuel Moos (manuel@moosnet.de)
@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -75,10 +75,10 @@ static tSettingItem<int> sg_ballsInteractConf( "BALLS_INTERACT", sg_ballsInterac
 static int sg_cycleWallsInteract = 0;
 static tSettingItem<int> sg_cycleWallsInteractConf( "BALLS_BOUNCE_ON_CYCLE_WALLS", sg_cycleWallsInteract );
 
-static int sg_ballTeamMode = 0; //0=ball score other team, 1=ball score only team owner ...
+static int sg_ballTeamMode = 0;	 //0=ball score other team, 1=ball score only team owner ...
 static tSettingItem<int> sg_ballTeamModeConfig( "BALL_TEAM_MODE", sg_ballTeamMode );
 
-static int sg_ballKiller = 0; //1=ball kill other team players ...
+static int sg_ballKiller = 0;	 //1=ball kill other team players ...
 static tSettingItem<int> sg_ballKillerConfig( "BALL_KILLS", sg_ballKiller );
 
 static REAL sg_ballSpeedDecay = 0;
@@ -93,34 +93,35 @@ static tSettingItem<int> sg_ballAutoRespawnConf( "BALL_AUTORESPAWN", sg_ballAuto
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
 {
-    gZone * ret = NULL;
-    if ( sg_zoneDeath )
-    {
-        ret = tNEW( gDeathZoneHack( grid, pos ) );
-        sn_ConsoleOut( "$instant_death_activated" );
-    }
-    else
-    {
-        ret = tNEW( gWinZoneHack( grid, pos ) );
-        if ( sg_currentSettings->gameType != gFREESTYLE )
-        {
-            sn_ConsoleOut( "$instant_win_activated" );
-        }
-        else
-        {
-            sn_ConsoleOut( "$instant_round_end_activated" );
-        }
-    }
+	gZone * ret = NULL;
+	if ( sg_zoneDeath )
+	{
+		ret = tNEW( gDeathZoneHack( grid, pos ) );
+		sn_ConsoleOut( "$instant_death_activated" );
+	}
+	else
+	{
+		ret = tNEW( gWinZoneHack( grid, pos ) );
+		if ( sg_currentSettings->gameType != gFREESTYLE )
+		{
+			sn_ConsoleOut( "$instant_win_activated" );
+		}
+		else
+		{
+			sn_ConsoleOut( "$instant_round_end_activated" );
+		}
+	}
 
-    // initialize radius and expansion speed
-    static_cast<eGameObject*>(ret)->Timestep( se_GameTime() );
-    ret->SetReferenceTime();
-    ret->SetRadius( sg_initialSize );
-    ret->SetExpansionSpeed( sg_expansionSpeed );
-    ret->SetRotationSpeed( .3f );
+	// initialize radius and expansion speed
+	static_cast<eGameObject*>(ret)->Timestep( se_GameTime() );
+	ret->SetReferenceTime();
+	ret->SetRadius( sg_initialSize );
+	ret->SetExpansionSpeed( sg_expansionSpeed );
+	ret->SetRotationSpeed( .3f );
 
-    return ret;
+	return ret;
 }
+
 
 // number of segments to render a zone with
 static const int sg_segments = 11;
@@ -138,8 +139,9 @@ static const int sg_segments = 11;
 
 inline REAL gZone::EvaluateFunctionNow( tFunction const & f ) const
 {
-    return f( lastTime - referenceTime_ );
+	return f( lastTime - referenceTime_ );
 }
+
 
 // *******************************************************************************
 // *
@@ -154,8 +156,9 @@ inline REAL gZone::EvaluateFunctionNow( tFunction const & f ) const
 
 inline void gZone::SetFunctionNow( tFunction & f, REAL value ) const
 {
-    f.SetOffset( value + f.GetSlope() * ( referenceTime_ - lastTime ) );
+	f.SetOffset( value + f.GetSlope() * ( referenceTime_ - lastTime ) );
 }
+
 
 // *******************************************************************************
 // *
@@ -170,37 +173,45 @@ inline void gZone::SetFunctionNow( tFunction & f, REAL value ) const
 
 int gZone::FindFirst(tString name)
 {
-    eGrid *grid = eGrid::CurrentGrid();
-    const tList<eGameObject>& gameObjects = grid->GameObjects();
-    for (int j=gameObjects.Len()-1;j>=0;j--) {
-        gZone *zone=dynamic_cast<gZone *>(gameObjects(j));
-        // for all active base zone ...
-        if ( zone ) {
-            if (zone->name_ == name) {
-                return j;
-            }
-        }
-    }
-    // if no zone has been found ...
-    return -1;
+	eGrid *grid = eGrid::CurrentGrid();
+	const tList<eGameObject>& gameObjects = grid->GameObjects();
+	for (int j=gameObjects.Len()-1;j>=0;j--)
+	{
+		gZone *zone=dynamic_cast<gZone *>(gameObjects(j));
+		// for all active base zone ...
+		if ( zone )
+		{
+			if (zone->name_ == name)
+			{
+				return j;
+			}
+		}
+	}
+	// if no zone has been found ...
+	return -1;
 }
+
 
 int gZone::FindNext(tString name, int prev_pos)
 {
-    eGrid *grid = eGrid::CurrentGrid();
-    const tList<eGameObject>& gameObjects = grid->GameObjects();
-    for (int j=prev_pos-1;j>=0;j--) {
-        gZone *zone=dynamic_cast<gZone *>(gameObjects(j));
-        // for all active base zone ...
-        if ( zone ) {
-            if (zone->name_ == name) {
-                return j;
-            }
-        }
-    }
-    // if no zone has been found ...
-    return -1;
+	eGrid *grid = eGrid::CurrentGrid();
+	const tList<eGameObject>& gameObjects = grid->GameObjects();
+	for (int j=prev_pos-1;j>=0;j--)
+	{
+		gZone *zone=dynamic_cast<gZone *>(gameObjects(j));
+		// for all active base zone ...
+		if ( zone )
+		{
+			if (zone->name_ == name)
+			{
+				return j;
+			}
+		}
+	}
+	// if no zone has been found ...
+	return -1;
 }
+
 
 // *******************************************************************************
 // *
@@ -214,46 +225,47 @@ int gZone::FindNext(tString name, int prev_pos)
 // *******************************************************************************
 
 gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation )
-        :eNetGameObject( grid, pos, eCoord( 0,0 ), NULL, true ), rotation_(1,0), lastCoord_(0), nextUpdate_(-1) 
+:eNetGameObject( grid, pos, eCoord( 0,0 ), NULL, true ), rotation_(1,0), lastCoord_(0), nextUpdate_(-1)
 {
-    // store creation time
-    referenceTime_ = createTime_ = lastTime = 0;
+	// store creation time
+	referenceTime_ = createTime_ = lastTime = 0;
 
-    destroyed_ = false;
-    dynamicCreation_ = dynamicCreation;
-    wallInteract_ = false;
-    wallBouncesLeft_ = 0;
-    targetRadius_ = 0;
-    resizeRequested_ = false;
-    fallSpeed_ = 0;
-    lastSeekTime_ = 0;
-    pOwner_ = NULL;
-    pSeekingCycle_ = NULL;
-    seeking_ = false;  //??? change this to a game object, allow seeking any
-    name_ = tString("");
+	destroyed_ = false;
+	dynamicCreation_ = dynamicCreation;
+	wallInteract_ = false;
+	wallBouncesLeft_ = 0;
+	targetRadius_ = 0;
+	resizeRequested_ = false;
+	fallSpeed_ = 0;
+	lastSeekTime_ = 0;
+	pOwner_ = NULL;
+	pSeekingCycle_ = NULL;
+	seeking_ = false;			 //??? change this to a game object, allow seeking any
+	name_ = tString("");
 
-    color_.r = color_.g = color_.b = 1.0f;
+	color_.r = color_.g = color_.b = 1.0f;
 
-    //??? Look at doing this in the shot or wherever it is created...
-    //??? or changing dynamic creation to disableAlpha or something
-    if (dynamicCreation)
-    {
-        referenceTime_ = createTime_ = lastTime = se_mainGameTimer->Time();
+	//??? Look at doing this in the shot or wherever it is created...
+	//??? or changing dynamic creation to disableAlpha or something
+	if (dynamicCreation)
+	{
+		referenceTime_ = createTime_ = lastTime = se_mainGameTimer->Time();
 
-        //Hack to get rid of the alpha to make zones non-transparent on creation
-        //Negative creation times seem OK with current code
-        createTime_ -= 3.5;
-    }
+		//Hack to get rid of the alpha to make zones non-transparent on creation
+		//Negative creation times seem OK with current code
+		createTime_ -= 3.5;
+	}
 
-    // add to game grid
-    this->AddToList();
+	// add to game grid
+	this->AddToList();
 
-    // initialize position functions
-    SetPosition( pos );
+	// initialize position functions
+	SetPosition( pos );
 
-        //wrtl: Ok, this is the result of three hours of debugging, I hope it helps...
-        eGameObject::pos = pos;
+	//wrtl: Ok, this is the result of three hours of debugging, I hope it helps...
+	eGameObject::pos = pos;
 }
+
 
 // *******************************************************************************
 // *
@@ -266,34 +278,35 @@ gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation )
 // *******************************************************************************
 
 gZone::gZone( nMessage & m )
-        :eNetGameObject( m ), rotation_(1,0)
+:eNetGameObject( m ), rotation_(1,0)
 {
-    destroyed_ = false;
-    dynamicCreation_ = false;
-    wallInteract_ = false;
-    wallBouncesLeft_ = 0;
-    targetRadius_ = 0;
-    resizeRequested_ = false;
-    fallSpeed_ = 0;
-    lastSeekTime_ = 0;
-    pOwner_ = NULL;
-    pSeekingCycle_ = NULL;
-    seeking_ = false;
-    name_ = tString("");
+	destroyed_ = false;
+	dynamicCreation_ = false;
+	wallInteract_ = false;
+	wallBouncesLeft_ = 0;
+	targetRadius_ = 0;
+	resizeRequested_ = false;
+	fallSpeed_ = 0;
+	lastSeekTime_ = 0;
+	pOwner_ = NULL;
+	pSeekingCycle_ = NULL;
+	seeking_ = false;
+	name_ = tString("");
 
-    // read creation time
-    m >> createTime_;
-    referenceTime_ = lastTime = createTime_;
+	// read creation time
+	m >> createTime_;
+	referenceTime_ = lastTime = createTime_;
 
-    // initialize color to white, ReadSync will fill in the true value if available
-    color_.r = color_.g = color_.b = 1.0f;
+	// initialize color to white, ReadSync will fill in the true value if available
+	color_.r = color_.g = color_.b = 1.0f;
 
-    // add to game grid
-    this->AddToList();
+	// add to game grid
+	this->AddToList();
 
-    // initialize position functions
-    SetPosition( pos );
+	// initialize position functions
+	SetPosition( pos );
 }
+
 
 // *******************************************************************************
 // *
@@ -308,6 +321,7 @@ gZone::~gZone( void )
 {
 }
 
+
 // *******************************************************************************
 // *
 // *	WriteCreate
@@ -320,11 +334,12 @@ gZone::~gZone( void )
 
 void gZone::WriteCreate( nMessage & m )
 {
-    // delegate
-    eNetGameObject::WriteCreate( m );
+	// delegate
+	eNetGameObject::WriteCreate( m );
 
-    m << createTime_;
+	m << createTime_;
 }
+
 
 // *******************************************************************************
 // *
@@ -338,23 +353,24 @@ void gZone::WriteCreate( nMessage & m )
 
 void gZone::WriteSync( nMessage & m )
 {
-    // delegate
-    eNetGameObject::WriteSync( m );
+	// delegate
+	eNetGameObject::WriteSync( m );
 
-    // write color
-    m << color_.r;
-    m << color_.g;
-    m << color_.b;
+	// write color
+	m << color_.r;
+	m << color_.g;
+	m << color_.b;
 
-    // write reference time and functions
-    m << referenceTime_;
-    m << posx_;
-    m << posy_;
-    m << radius_;
+	// write reference time and functions
+	m << referenceTime_;
+	m << posx_;
+	m << posy_;
+	m << radius_;
 
-    // write rotation speed
-    m << rotationSpeed_;
+	// write rotation speed
+	m << rotationSpeed_;
 }
+
 
 // *******************************************************************************
 // *
@@ -368,49 +384,50 @@ void gZone::WriteSync( nMessage & m )
 
 void gZone::ReadSync( nMessage & m )
 {
-    // delegage
-    eNetGameObject::ReadSync( m );
+	// delegage
+	eNetGameObject::ReadSync( m );
 
-    // read color
-    if (!m.End())
-    {
-        m >> color_.r;
-        m >> color_.g;
-        m >> color_.b;
-        se_MakeColorValid(color_.r, color_.g, color_.b, 1.0f);
-    }
+	// read color
+	if (!m.End())
+	{
+		m >> color_.r;
+		m >> color_.g;
+		m >> color_.b;
+		se_MakeColorValid(color_.r, color_.g, color_.b, 1.0f);
+	}
 
-    // read reference time and functions
-    if (!m.End())
-    {
-        m >> referenceTime_;
-        m >> posx_;
-        m >> posy_;
-        m >> radius_;
-    }
-    else
-    {
-        referenceTime_ = createTime_;
+	// read reference time and functions
+	if (!m.End())
+	{
+		m >> referenceTime_;
+		m >> posx_;
+		m >> posy_;
+		m >> radius_;
+	}
+	else
+	{
+		referenceTime_ = createTime_;
 
-        // take old default values
-        this->radius_.SetOffset( sg_initialSize );
-        this->radius_.SetSlope( sg_expansionSpeed );
-        SetPosition( pos );
-        SetVelocity( eCoord() );
-    }
+		// take old default values
+		this->radius_.SetOffset( sg_initialSize );
+		this->radius_.SetSlope( sg_expansionSpeed );
+		SetPosition( pos );
+		SetVelocity( eCoord() );
+	}
 
-    // read rotation speed
-    if (!m.End())
-    {
-        m >> rotationSpeed_;
-    }
-    else
-    {
-        // set fixed values
-        SetRotationSpeed( .3f );
-        SetRotationAcceleration( 0.0f );
-    }
+	// read rotation speed
+	if (!m.End())
+	{
+		m >> rotationSpeed_;
+	}
+	else
+	{
+		// set fixed values
+		SetRotationSpeed( .3f );
+		SetRotationAcceleration( 0.0f );
+	}
 }
+
 
 static float sg_shotSeekUpdateTime = 0.5;
 static tSettingItem<float> conf_shotSeekUpdateTime ("SHOT_SEEK_UPDATE_TIME", sg_shotSeekUpdateTime);
@@ -429,139 +446,147 @@ static REAL   s_zoneWallInteractionZoneDeltaTime;
 
 static void S_ZoneWallInteraction(eWall *pWall)
 {
-    //Ignore player walls for now
-    gPlayerWall *pPlayerWall = dynamic_cast<gPlayerWall*>(pWall);
-    if (pPlayerWall && !sg_cycleWallsInteract)
-    {
-        return;
-    }
+	//Ignore player walls for now
+	gPlayerWall *pPlayerWall = dynamic_cast<gPlayerWall*>(pWall);
+	if (pPlayerWall && !sg_cycleWallsInteract)
+	{
+		return;
+	}
 
-    // determine the coord (I) and time (t) of the impact
-    eCoord V = s_zoneWallInteractionZoneVelocity;
-    REAL R = s_zoneWallInteractionRadius;
+	// determine the coord (I) and time (t) of the impact
+	eCoord V = s_zoneWallInteractionZoneVelocity;
+	REAL R = s_zoneWallInteractionRadius;
 
-    eCoord XY = pWall->EndPoint(1) - pWall->EndPoint(0);
-    REAL norm_XY = XY.Norm();
-    XY *= (1/norm_XY);
-    eCoord XP = s_zoneWallInteractionCoord - pWall->EndPoint(0);
+	eCoord XY = pWall->EndPoint(1) - pWall->EndPoint(0);
+	REAL norm_XY = XY.Norm();
+	XY *= (1/norm_XY);
+	eCoord XP = s_zoneWallInteractionCoord - pWall->EndPoint(0);
 
-    REAL Vn = XY*V;
-    if (Vn==0) return; // if zone is moving along the wall, no impact ...
-    REAL d = XY*XP;
+	REAL Vn = XY*V;
+	if (Vn==0) return;			 // if zone is moving along the wall, no impact ...
+	REAL d = XY*XP;
 
-    REAL t1 = (R-d)/Vn;
-    REAL t2 = (-R-d)/Vn;
-    REAL t = 0;
-    if ((t1>0) && (t2>0)) return; // can't be, again ...
-    if (t1>0) t = t2;
-    else if (t2>0) t = t1;
-    else if (t1>t2) t = t2;
-    else t = t1;
+	REAL t1 = (R-d)/Vn;
+	REAL t2 = (-R-d)/Vn;
+	REAL t = 0;
+	if ((t1>0) && (t2>0)) return;// can't be, again ...
+	if (t1>0) t = t2;
+	else if (t2>0) t = t1;
+	else if (t1>t2) t = t2;
+	else t = t1;
 
-    REAL i = eCoord::F(XY,XP+V*t); // coordinate of the impact on the wall's line space
-    eCoord I;           // position of the impact
-    if (i>=0 && i<=norm_XY) // there's an impact on the wall
-    {
-        I = pWall->EndPoint(0) + XY * i;
-    }
-    else // the zone might hit a wall end point, let's check this
-    {
-        // select the wall end according to wall's line intersection coord (i)
-        eCoord P;
-        if (i<0) P = pWall->EndPoint(0);
-        else P = pWall->EndPoint(1);
+								 // coordinate of the impact on the wall's line space
+	REAL i = eCoord::F(XY,XP+V*t);
+	eCoord I;					 // position of the impact
+	if (i>=0 && i<=norm_XY)		 // there's an impact on the wall
+	{
+		I = pWall->EndPoint(0) + XY * i;
+	}
+	else						 // the zone might hit a wall end point, let's check this
+	{
+		// select the wall end according to wall's line intersection coord (i)
+		eCoord P;
+		if (i<0) P = pWall->EndPoint(0);
+		else P = pWall->EndPoint(1);
 
-        // get the time of the impact ...
-        eCoord dp = s_zoneWallInteractionCoord - P;
-        eCoord dv = s_zoneWallInteractionZoneVelocity;
-        REAL a = dv.NormSquared();
-        if (a<EPS) return; // if ball has no speed, just left ...
-        REAL b = 2*(dp.x*dv.x+dp.y*dv.y);
-        REAL c = dp.NormSquared()-s_zoneWallInteractionRadius*s_zoneWallInteractionRadius;
-        REAL delta = b*b-4*a*c;
-        if (delta<0) return; // no t. it can't be, an impact just occured ...
-        else // delta is positive, it means we have 2 different solutions
-        {
-        // the t we are looking for is negative and as close as possible to 0 = it just happens ;)
-            delta = sqrt(delta);
-            t1 = (-b-delta)/(2*a);
-            t2 = (-b+delta)/(2*a);
-            t = 0;
-            if ((t1>0) && (t2>0)) return; // can't be, again ...
-            if (t1>0) t = t2;
-            else if (t2>0) t = t1;
-            else if (t1>t2) t = t2;
-            else t = t1;
-            I = P;
-        }
-    }
+		// get the time of the impact ...
+		eCoord dp = s_zoneWallInteractionCoord - P;
+		eCoord dv = s_zoneWallInteractionZoneVelocity;
+		REAL a = dv.NormSquared();
+		if (a<EPS) return;		 // if ball has no speed, just left ...
+		REAL b = 2*(dp.x*dv.x+dp.y*dv.y);
+		REAL c = dp.NormSquared()-s_zoneWallInteractionRadius*s_zoneWallInteractionRadius;
+		REAL delta = b*b-4*a*c;
+		if (delta<0) return;	 // no t. it can't be, an impact just occured ...
+		else					 // delta is positive, it means we have 2 different solutions
+		{
+			// the t we are looking for is negative and as close as possible to 0 = it just happens ;)
+			delta = sqrt(delta);
+			t1 = (-b-delta)/(2*a);
+			t2 = (-b+delta)/(2*a);
+			t = 0;
+								 // can't be, again ...
+			if ((t1>0) && (t2>0)) return;
+			if (t1>0) t = t2;
+			else if (t2>0) t = t1;
+			else if (t1>t2) t = t2;
+			else t = t1;
+			I = P;
+		}
+	}
 
-    // t must be negative and close to 0 to make sence ...
-    if (t>0 || t<-s_zoneWallInteractionZoneDeltaTime) return;
+	// t must be negative and close to 0 to make sence ...
+	if (t>0 || t<-s_zoneWallInteractionZoneDeltaTime) return;
 
-    // at this point, we have the intersection (I), the time of intersection (t)
-    // let's check if it is the first impact ...
-    if (!s_zoneWallInteractionFound || (t<s_zoneWallInteractionImpactTime))
-    {
-        s_zoneWallInteractionImpactTime = t;
-        s_zoneWallInteractionImpactCoord = I;
-        s_zoneWallInteractionFound = true;
-    }
+	// at this point, we have the intersection (I), the time of intersection (t)
+	// let's check if it is the first impact ...
+	if (!s_zoneWallInteractionFound || (t<s_zoneWallInteractionImpactTime))
+	{
+		s_zoneWallInteractionImpactTime = t;
+		s_zoneWallInteractionImpactCoord = I;
+		s_zoneWallInteractionFound = true;
+	}
 }
+
 
 static void S_ZoneWallIntersect(eWall *pWall)
 {
-    //Ignore player walls for now
-    gPlayerWall *pPlayerWall = dynamic_cast<gPlayerWall*>(pWall);
-    if (pPlayerWall)
-    {
-        return;
-    }
+	//Ignore player walls for now
+	gPlayerWall *pPlayerWall = dynamic_cast<gPlayerWall*>(pWall);
+	if (pPlayerWall)
+	{
+		return;
+	}
 
-    // determine the point closest to s_zoneWallInteractionCoord
-    eCoord normal = pWall->Vec().Conj();
-    normal.Normalize();
+	// determine the point closest to s_zoneWallInteractionCoord
+	eCoord normal = pWall->Vec().Conj();
+	normal.Normalize();
 
-    eCoord Pos1 = normal.Turn( pWall->EndPoint(0) - s_zoneWallInteractionCoord );
-    eCoord Pos2 = normal.Turn( pWall->EndPoint(1) - s_zoneWallInteractionCoord );
+	eCoord Pos1 = normal.Turn( pWall->EndPoint(0) - s_zoneWallInteractionCoord );
+	eCoord Pos2 = normal.Turn( pWall->EndPoint(1) - s_zoneWallInteractionCoord );
 
-    tASSERT( fabs( Pos1.y - Pos2.y ) <= fabs( Pos1.y + Pos2.y + .1f ) * .1f );
+	tASSERT( fabs( Pos1.y - Pos2.y ) <= fabs( Pos1.y + Pos2.y + .1f ) * .1f );
 
-    REAL alpha = .5f;
-    if ( Pos1.x != Pos2.x)
-        alpha = Pos1.x / ( Pos1.x - Pos2.x );
+	REAL alpha = .5f;
+	if ( Pos1.x != Pos2.x)
+		alpha = Pos1.x / ( Pos1.x - Pos2.x );
 
-    eCoord closestCoord = pWall->Point(alpha);
+	eCoord closestCoord = pWall->Point(alpha);
 
-    if (!s_zoneWallInteractionFound)
-    {
-        s_zoneWallInteractionClosestCoord = closestCoord;
-        s_zoneWallInteractionFound = true;
-    }
-    else
-    {
-        if ((closestCoord - s_zoneWallInteractionCoord).NormSquared() <
-            (s_zoneWallInteractionClosestCoord - s_zoneWallInteractionCoord).NormSquared())
-        {
-            s_zoneWallInteractionClosestCoord = closestCoord;
-        }
-    }
+	if (!s_zoneWallInteractionFound)
+	{
+		s_zoneWallInteractionClosestCoord = closestCoord;
+		s_zoneWallInteractionFound = true;
+	}
+	else
+	{
+		if ((closestCoord - s_zoneWallInteractionCoord).NormSquared() <
+			(s_zoneWallInteractionClosestCoord - s_zoneWallInteractionCoord).NormSquared())
+		{
+			s_zoneWallInteractionClosestCoord = closestCoord;
+		}
+	}
 }
+
 
 void gZone::BounceOffPoint(eCoord dest, eCoord collide)
 {
-    //Use a simple angle deflection for now not even accounting for points that made too far in
-    eCoord V = GetVelocity();
-    eCoord P = GetPosition()+V*s_zoneWallInteractionImpactTime; // adjust position to be like at at impact time
-    eCoord base = collide - P;                                  // get normal vector to the impact
-    base.Normalize();
-    V = V - base*(eCoord::F(base,V)*2);                         // adjust speed
-    P = P-V*s_zoneWallInteractionImpactTime;                    // adjust position according to new speed
-    SetReferenceTime();
-    SetVelocity(V);
-    SetPosition(P);
-    RequestSync();
+	//Use a simple angle deflection for now not even accounting for points that made too far in
+	eCoord V = GetVelocity();
+								 // adjust position to be like at at impact time
+	eCoord P = GetPosition()+V*s_zoneWallInteractionImpactTime;
+	eCoord base = collide - P;	 // get normal vector to the impact
+	base.Normalize();
+								 // adjust speed
+	V = V - base*(eCoord::F(base,V)*2);
+								 // adjust position according to new speed
+	P = P-V*s_zoneWallInteractionImpactTime;
+	SetReferenceTime();
+	SetVelocity(V);
+	SetPosition(P);
+	RequestSync();
 }
+
 
 // *******************************************************************************
 // *
@@ -575,236 +600,247 @@ void gZone::BounceOffPoint(eCoord dest, eCoord collide)
 
 bool gZone::Timestep( REAL time )
 {
-    if ((sn_GetNetState() != nCLIENT) &&
-        (destroyed_))
-    {
-        //Keep the zone around on the server side so clients will sync
+	if ((sn_GetNetState() != nCLIENT) &&
+		(destroyed_))
+	{
+		//Keep the zone around on the server side so clients will sync
 
-        //??? Without this, the last update and RequestSync() DOES NOT make
-        //??? it to the clients.  Investigate how to both remove the zone from
-        //??? game AND sync the last update on time.  Removing from game gets to
-        //??? the client much later than the sync does if not killed and looks bad.
-        return (false);
-    }
+		//??? Without this, the last update and RequestSync() DOES NOT make
+		//??? it to the clients.  Investigate how to both remove the zone from
+		//??? game AND sync the last update on time.  Removing from game gets to
+		//??? the client much later than the sync does if not killed and looks bad.
+		return (false);
+	}
 
-    bool doRequestSync = false;
+	bool doRequestSync = false;
 
-    // resize
-    if (resizeRequested_) {
-            REAL r = GetRadius();
-            REAL s = GetExpansionSpeed();
-            if (((s>0)&&(r>expectedRadius_)) || ((s<0)&&(r<expectedRadius_))) {
-            SetReferenceTime();
-            SetRadius(expectedRadius_);
-            SetExpansionSpeed(previousExpansionSpeed_);
-            resizeRequested_ = false;
-            doRequestSync = true;
-            }
-    }
+	// resize
+	if (resizeRequested_)
+	{
+		REAL r = GetRadius();
+		REAL s = GetExpansionSpeed();
+		if (((s>0)&&(r>expectedRadius_)) || ((s<0)&&(r<expectedRadius_)))
+		{
+			SetReferenceTime();
+			SetRadius(expectedRadius_);
+			SetExpansionSpeed(previousExpansionSpeed_);
+			resizeRequested_ = false;
+			doRequestSync = true;
+		}
+	}
 
-    // rotate
-    REAL speed = GetRotationSpeed();
-    REAL angle = ( time - lastTime ) * speed;
-    // angle /= ( 1 + 2 * 3.14159 * angle/sg_segments );
-    rotation_ = rotation_.Turn( cos( angle ), sin( angle ) );
+	// rotate
+	REAL speed = GetRotationSpeed();
+	REAL angle = ( time - lastTime ) * speed;
+	// angle /= ( 1 + 2 * 3.14159 * angle/sg_segments );
+	rotation_ = rotation_.Turn( cos( angle ), sin( angle ) );
 
-    // delta time
-    REAL dt = time - referenceTime_;
+	// delta time
+	REAL dt = time - referenceTime_;
 
-    // move to new position
-    Move( eCoord( posx_( dt ), posy_( dt ) ), lastTime, time );
+	// move to new position
+	Move( eCoord( posx_( dt ), posy_( dt ) ), lastTime, time );
 
-    // decay speed
-    eCoord V = GetVelocity();
-    if (sg_ballSpeedDecay)
-    {
-        REAL SpeedFactor = V.Norm();
-        SpeedFactor = SpeedFactor - dt*sg_ballSpeedDecay;
-        SpeedFactor = SpeedFactor<0 ? 0 : SpeedFactor;
-        SetVelocity(V * SpeedFactor);
-	doRequestSync = true;
-    }
+	// decay speed
+	eCoord V = GetVelocity();
+	if (sg_ballSpeedDecay)
+	{
+		REAL SpeedFactor = V.Norm();
+		SpeedFactor = SpeedFactor - dt*sg_ballSpeedDecay;
+		SpeedFactor = SpeedFactor<0 ? 0 : SpeedFactor;
+		SetVelocity(V * SpeedFactor);
+		doRequestSync = true;
+	}
 
-    // update time
-    lastTime = time;
+	// update time
+	lastTime = time;
 
-    // kill this zone if it shrunk down to zero radius
-    if ( GetExpansionSpeed() < 0 && GetRadius() <= 0 )
-    {
-        OnVanish();
+	// kill this zone if it shrunk down to zero radius
+	if ( GetExpansionSpeed() < 0 && GetRadius() <= 0 )
+	{
+		OnVanish();
 
-        if (sn_GetNetState() == nCLIENT)
-        {
-        return true;
-    }
-        else
-        {
-            destroyed_ = true;
-            return false;
-        }
-    }
+		if (sn_GetNetState() == nCLIENT)
+		{
+			return true;
+		}
+		else
+		{
+			destroyed_ = true;
+			return false;
+		}
+	}
 
-    if (sn_GetNetState() != nCLIENT)
-    {
-        // check if wall interactions are enabled
-        if (wallInteract_)
-        {
-            //??? We sometimes hiccup and go through a wall too far between updates,
-            //and end up bouncing on the other side of it...  We should really back-calculate
-            //and look for walls for time updates that went more than half the zone radius -
-            //Or, just drop the whole thing and find out if using sensors would work better...
-            s_zoneWallInteractionFound = false;
-            s_zoneWallInteractionCoord = GetPosition();
-            s_zoneWallInteractionRadius = GetRadius();
-            s_zoneWallInteractionZoneVelocity = V;
-            s_zoneWallInteractionZoneDeltaTime = time - lastImpactTime_;
-            s_zoneWallInteractionZoneDeltaTime = (s_zoneWallInteractionZoneDeltaTime>1)?1:s_zoneWallInteractionZoneDeltaTime;
-            grid->ProcessWallsInRange(&S_ZoneWallInteraction,
-                                      s_zoneWallInteractionCoord,
-                                      s_zoneWallInteractionRadius*1.5,
-                                      CurrentFace());
+	if (sn_GetNetState() != nCLIENT)
+	{
+		// check if wall interactions are enabled
+		if (wallInteract_)
+		{
+			//??? We sometimes hiccup and go through a wall too far between updates,
+			//and end up bouncing on the other side of it...  We should really back-calculate
+			//and look for walls for time updates that went more than half the zone radius -
+			//Or, just drop the whole thing and find out if using sensors would work better...
+			s_zoneWallInteractionFound = false;
+			s_zoneWallInteractionCoord = GetPosition();
+			s_zoneWallInteractionRadius = GetRadius();
+			s_zoneWallInteractionZoneVelocity = V;
+			s_zoneWallInteractionZoneDeltaTime = time - lastImpactTime_;
+			s_zoneWallInteractionZoneDeltaTime = (s_zoneWallInteractionZoneDeltaTime>1)?1:s_zoneWallInteractionZoneDeltaTime;
+			grid->ProcessWallsInRange(&S_ZoneWallInteraction,
+				s_zoneWallInteractionCoord,
+				s_zoneWallInteractionRadius*1.5,
+				CurrentFace());
 
-            if (s_zoneWallInteractionFound)
-            {
-                if (wallBouncesLeft_ == 0)
-                {
-                    // kill the zone as we hit a wall
-                    //??? make kill code a common function
-                    destroyed_ = true;
-                    OnVanish();
-                    SetReferenceTime();
-                    SetExpansionSpeed(-1);
-                    SetRadius(0);
-                    RequestSync();
-                    return false;
-                }
-                else
-                {
-                    // bounce off wall
-                    BounceOffPoint(GetPosition(), s_zoneWallInteractionImpactCoord);
-                    lastImpactTime_ = time + s_zoneWallInteractionImpactTime;
+			if (s_zoneWallInteractionFound)
+			{
+				if (wallBouncesLeft_ == 0)
+				{
+					// kill the zone as we hit a wall
+					//??? make kill code a common function
+					destroyed_ = true;
+					OnVanish();
+					SetReferenceTime();
+					SetExpansionSpeed(-1);
+					SetRadius(0);
+					RequestSync();
+					return false;
+				}
+				else
+				{
+					// bounce off wall
+					BounceOffPoint(GetPosition(), s_zoneWallInteractionImpactCoord);
+					lastImpactTime_ = time + s_zoneWallInteractionImpactTime;
 
-                    if (wallBouncesLeft_ > 0)
-                    {
-                        wallBouncesLeft_--;
-                    }
+					if (wallBouncesLeft_ > 0)
+					{
+						wallBouncesLeft_--;
+					}
 
-                    return false;
-                }
-            }
+					return false;
+				}
+			}
 
-            // only clip if zone is moving
-            if ((posx_.GetSlope() != 0) || (posy_.GetSlope() != 0))
-            {
-                // clip movement to rim walls
-                eCoord dest(posx_(dt), posy_(dt));
-                tStackObject< ePoint > start(pos),stop(dest);
+			// only clip if zone is moving
+			if ((posx_.GetSlope() != 0) || (posy_.GetSlope() != 0))
+			{
+				// clip movement to rim walls
+				eCoord dest(posx_(dt), posy_(dt));
+				tStackObject< ePoint > start(pos),stop(dest);
 
-                REAL clip = eWallRim::Clip(start,stop,0);
+				REAL clip = eWallRim::Clip(start,stop,0);
 
-                if (clip < 1)
-                {
-                    gBallZoneHack *thisBallZone = dynamic_cast<gBallZoneHack *>(this);
-                    if (thisBallZone && sg_ballAutoRespawn)
-                    {
-                        // just respawn the ball at the original location
-                        thisBallZone->GoHome();
-                    } else
-                    {
-                        //Don't allow going outside, kill it
-                        destroyed_ = true;
-                        OnVanish();
-                        SetReferenceTime();
-                        SetExpansionSpeed(-1);
-                        SetRadius(0);
-                        RequestSync();
-                        return false;
-                    }
-                }
-            }
-        }
+				if (clip < 1)
+				{
+					gBallZoneHack *thisBallZone = dynamic_cast<gBallZoneHack *>(this);
+					if (thisBallZone && sg_ballAutoRespawn)
+					{
+						// just respawn the ball at the original location
+						thisBallZone->GoHome();
+					} else
+					{
+						//Don't allow going outside, kill it
+						destroyed_ = true;
+						OnVanish();
+						SetReferenceTime();
+						SetExpansionSpeed(-1);
+						SetRadius(0);
+						RequestSync();
+						return false;
+					}
+				}
+			}
+		}
 
-                if(!route_.empty() && time >= nextUpdate_) {
-                        if(nextUpdate_ < 0) nextUpdate_ = time;
-                        eCoord const &lastPos = route_[lastCoord_++];
-                        REAL speed = GetVelocity().Norm();
-                        SetPosition(lastPos);
-                        if(speed < EPS) route_.clear(); // no speed, no point...
-                        if(lastCoord_ >= route_.size()) {
-                                lastCoord_ = 0;
-                        }
-                        eCoord delta = route_[lastCoord_] - lastPos;
-                        REAL dist = delta.Norm();
-                        if(dist < EPS) { // next point is the same. Stop the route ...
-                            eCoord zoneDir = eCoord(0,0);
-                            SetVelocity(zoneDir);
-                            route_.clear();
-                        } else {
-                            delta.Normalize();
-                            SetVelocity(delta * speed);
-                            nextUpdate_ += dist/speed;
-                        }
-                        doRequestSync = true;
-                }
+		if(!route_.empty() && time >= nextUpdate_)
+		{
+			if(nextUpdate_ < 0) nextUpdate_ = time;
+			eCoord const &lastPos = route_[lastCoord_++];
+			REAL speed = GetVelocity().Norm();
+			SetPosition(lastPos);
+								 // no speed, no point...
+			if(speed < EPS) route_.clear();
+			if(lastCoord_ >= route_.size())
+			{
+				lastCoord_ = 0;
+			}
+			eCoord delta = route_[lastCoord_] - lastPos;
+			REAL dist = delta.Norm();
+			if(dist < EPS)		 // next point is the same. Stop the route ...
+			{
+				eCoord zoneDir = eCoord(0,0);
+				SetVelocity(zoneDir);
+				route_.clear();
+			}
+			else
+			{
+				delta.Normalize();
+				SetVelocity(delta * speed);
+				nextUpdate_ += dist/speed;
+			}
+			doRequestSync = true;
+		}
 
-        if ( targetRadius_ && (
-                        ((GetExpansionSpeed() > 0) && (GetRadius() >= targetRadius_))
-                        ||
-                        ((GetExpansionSpeed() < 0) && (GetRadius() <= targetRadius_))
-                        ))
-        {
-            //??? change this to allow negative fall speed and keeping the target radius
-            SetReferenceTime();
-            SetExpansionSpeed( -fallSpeed_ );
-            targetRadius_ = 0;
-            doRequestSync = true;
-        }
+		if ( targetRadius_ && (
+			((GetExpansionSpeed() > 0) && (GetRadius() >= targetRadius_))
+			||
+			((GetExpansionSpeed() < 0) && (GetRadius() <= targetRadius_))
+			))
+		{
+			//??? change this to allow negative fall speed and keeping the target radius
+			SetReferenceTime();
+			SetExpansionSpeed( -fallSpeed_ );
+			targetRadius_ = 0;
+			doRequestSync = true;
+		}
 
-        if (seeking_)
-        {
-            if ((!pSeekingCycle_) || (!pSeekingCycle_->Player()) || (!pSeekingCycle_->Alive()))
-            {
-                //Seeking cycle is gone, shrink
-                pSeekingCycle_ = NULL;
-                SetReferenceTime();
-                SetExpansionSpeed( -GetRadius()*1 );
-                targetRadius_ = 0;
-                seeking_ = false;
-                doRequestSync = true;
-            }
-            else
-            {
-                //Only run this every poll time to save on network traffic
-                if (lastTime >= (lastSeekTime_ + sg_shotSeekUpdateTime))
-                {
-                    //Calculate new direction
-                    eCoord newDir = pSeekingCycle_->Position() - GetPosition();
-                    newDir.Normalize();
+		if (seeking_)
+		{
+			if ((!pSeekingCycle_) || (!pSeekingCycle_->Player()) || (!pSeekingCycle_->Alive()))
+			{
+				//Seeking cycle is gone, shrink
+				pSeekingCycle_ = NULL;
+				SetReferenceTime();
+				SetExpansionSpeed( -GetRadius()*1 );
+				targetRadius_ = 0;
+				seeking_ = false;
+				doRequestSync = true;
+			}
+			else
+			{
+				//Only run this every poll time to save on network traffic
+				if (lastTime >= (lastSeekTime_ + sg_shotSeekUpdateTime))
+				{
+					//Calculate new direction
+					eCoord newDir = pSeekingCycle_->Position() - GetPosition();
+					newDir.Normalize();
 
-                    SetReferenceTime();
-                    SetVelocity(newDir * sg_zombieZoneSpeed);
-                    //??? move out all seeking variables into base zone
+					SetReferenceTime();
+					SetVelocity(newDir * sg_zombieZoneSpeed);
+					//??? move out all seeking variables into base zone
 
-                    lastSeekTime_ = lastTime;
+					lastSeekTime_ = lastTime;
 
-                    doRequestSync = true;
-                }
-            }
-        }
+					doRequestSync = true;
+				}
+			}
+		}
 
-        if (doRequestSync)
-        {
-            RequestSync();
-        }
-    }
+		if (doRequestSync)
+		{
+			RequestSync();
+		}
+	}
 
-    return false;
+	return false;
 }
 
-gZone &gZone::AddWaypoint(eCoord const &point) {
-        route_.push_back(point);
-        return *this;
+
+gZone &gZone::AddWaypoint(eCoord const &point)
+{
+	route_.push_back(point);
+	return *this;
 }
+
 
 // *******************************************************************************
 // *
@@ -818,6 +854,7 @@ gZone &gZone::AddWaypoint(eCoord const &point) {
 void gZone::OnVanish( void )
 {
 }
+
 
 // *******************************************************************************
 // *
@@ -833,155 +870,159 @@ void gZone::OnVanish( void )
 
 void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
 {
-    gCycle* prey = dynamic_cast< gCycle* >( target );
-    if ( prey )
-    {
-        REAL r = this->Radius();
-        if ( ( prey->Position() - this->Position() ).NormSquared() < r*r )
-        {
-            if ( prey->Player() && prey->Alive() )
-            {
-                OnEnter( prey, time );
-            }
-        }
-    }
-    else
-    {
-        if (!destroyed_)
-        {
-            // check if the interaction target is a zone
-            //gZone *pZone
-            gDeathZoneHack *pThisDeathZone = dynamic_cast<gDeathZoneHack *>(this);
-            if (pThisDeathZone)
-            {
-                gDeathZoneHack *pDeathZone = dynamic_cast<gDeathZoneHack *>(target);
-                if ((pDeathZone) && (pDeathZone != pThisDeathZone) && (!pDeathZone->destroyed_))
-                {
-                    REAL dis = this->Radius() + pDeathZone->Radius();
-                    if ( ( pDeathZone->Position() - this->Position() ).NormSquared() < (dis * dis) )
-                    {
-                        if ((pThisDeathZone->pLastShotCollision != pDeathZone) &&
-                            (pDeathZone->pLastShotCollision != pThisDeathZone))
-                        {
-                            pThisDeathZone->OnEnter(pDeathZone, time);
-                        }
-                    }
-                    else
-                    {
-                        if (pThisDeathZone->pLastShotCollision == pDeathZone)
-                        {
-                            pThisDeathZone->pLastShotCollision = NULL;
-                        }
+	gCycle* prey = dynamic_cast< gCycle* >( target );
+	if ( prey )
+	{
+		REAL r = this->Radius();
+		if ( ( prey->Position() - this->Position() ).NormSquared() < r*r )
+		{
+			if ( prey->Player() && prey->Alive() )
+			{
+				OnEnter( prey, time );
+			}
+		}
+	}
+	else
+	{
+		if (!destroyed_)
+		{
+			// check if the interaction target is a zone
+			//gZone *pZone
+			gDeathZoneHack *pThisDeathZone = dynamic_cast<gDeathZoneHack *>(this);
+			if (pThisDeathZone)
+			{
+				gDeathZoneHack *pDeathZone = dynamic_cast<gDeathZoneHack *>(target);
+				if ((pDeathZone) && (pDeathZone != pThisDeathZone) && (!pDeathZone->destroyed_))
+				{
+					REAL dis = this->Radius() + pDeathZone->Radius();
+					if ( ( pDeathZone->Position() - this->Position() ).NormSquared() < (dis * dis) )
+					{
+						if ((pThisDeathZone->pLastShotCollision != pDeathZone) &&
+							(pDeathZone->pLastShotCollision != pThisDeathZone))
+						{
+							pThisDeathZone->OnEnter(pDeathZone, time);
+						}
+					}
+					else
+					{
+						if (pThisDeathZone->pLastShotCollision == pDeathZone)
+						{
+							pThisDeathZone->pLastShotCollision = NULL;
+						}
 
-                        if (pDeathZone->pLastShotCollision == pThisDeathZone)
-                        {
-                            pDeathZone->pLastShotCollision = NULL;
-                        }
-                    }
-                }
-            }
+						if (pDeathZone->pLastShotCollision == pThisDeathZone)
+						{
+							pDeathZone->pLastShotCollision = NULL;
+						}
+					}
+				}
+			}
 
-            gBaseZoneHack *thisBaseZone = dynamic_cast<gBaseZoneHack *>(this);
-            if (thisBaseZone)
-            {
-                gZone *zone = dynamic_cast<gZone *>(target);
+			gBaseZoneHack *thisBaseZone = dynamic_cast<gBaseZoneHack *>(this);
+			if (thisBaseZone)
+			{
+				gZone *zone = dynamic_cast<gZone *>(target);
 
-                if ((zone) &&
-                    (zone != this) &&
-                    (!zone->destroyed_))
-                {
-                    REAL dis = this->Radius() + zone->Radius();
+				if ((zone) &&
+					(zone != this) &&
+					(!zone->destroyed_))
+				{
+					REAL dis = this->Radius() + zone->Radius();
 
-                    if ((zone->Position() - this->Position()).NormSquared() < (dis * dis))
-                    {
-                        OnEnter(zone, time);
-                    }
-                }
-            }
+					if ((zone->Position() - this->Position()).NormSquared() < (dis * dis))
+					{
+						OnEnter(zone, time);
+					}
+				}
+			}
 
-            // interaction between 2 balls
-            gBallZoneHack *thisBallZone = dynamic_cast<gBallZoneHack *>(this);
-            if (thisBallZone && sg_ballsInteract)
-            {
-                gBallZoneHack *ball = dynamic_cast<gBallZoneHack *>(target);
+			// interaction between 2 balls
+			gBallZoneHack *thisBallZone = dynamic_cast<gBallZoneHack *>(this);
+			if (thisBallZone && sg_ballsInteract)
+			{
+				gBallZoneHack *ball = dynamic_cast<gBallZoneHack *>(target);
 
-                s_zoneWallInteractionFound = false;
-                s_zoneWallInteractionCoord = GetPosition();
-                s_zoneWallInteractionRadius = GetRadius();
-                grid->ProcessWallsInRange(&S_ZoneWallIntersect,
-                              s_zoneWallInteractionCoord,
-                              s_zoneWallInteractionRadius+.5,
-                              CurrentFace());
+				s_zoneWallInteractionFound = false;
+				s_zoneWallInteractionCoord = GetPosition();
+				s_zoneWallInteractionRadius = GetRadius();
+				grid->ProcessWallsInRange(&S_ZoneWallIntersect,
+					s_zoneWallInteractionCoord,
+					s_zoneWallInteractionRadius+.5,
+					CurrentFace());
 
-                if (s_zoneWallInteractionFound)
-                    return;
+				if (s_zoneWallInteractionFound)
+					return;
 
-                if ((ball) &&
-                    (ball != this) &&
-                    (!ball->destroyed_))
-                {
-                    REAL r1 = this->Radius();
-                    REAL r2 = ball->Radius();
-                    REAL R = r1 + r2;
-                    eCoord p1 = this->Position();
-                    eCoord p2 = ball->Position();
-                    eCoord dp = p2 - p1;
-                    REAL c = dp.NormSquared() - R * R;
+				if ((ball) &&
+					(ball != this) &&
+					(!ball->destroyed_))
+				{
+					REAL r1 = this->Radius();
+					REAL r2 = ball->Radius();
+					REAL R = r1 + r2;
+					eCoord p1 = this->Position();
+					eCoord p2 = ball->Position();
+					eCoord dp = p2 - p1;
+					REAL c = dp.NormSquared() - R * R;
 
-                    if (c < 0) // the 2 balls just hit each other ...
-                    {
-                        // first find the real time and position of the impact ...
-                        eCoord v1 = this->GetVelocity();
-                        eCoord v2 = ball->GetVelocity();
-                        eCoord dv = v2 - v1;
-                        REAL a = dv.NormSquared();
-                        REAL b = 2*(dp.x*dv.x+dp.y*dv.y);
-                        REAL delta = b*b-4*a*c;
-                        if (delta<0) return; // no t. it can't be, an impact just occured ...
-                        else // delta is positive, it means we have 2 different solutions
-                        { // the t we are looking for is negative and as close as possible to 0 = it just happens ;)
-                            delta = sqrt(delta);
-                            REAL t1 = (-b-delta)/(2*a);
-                            REAL t2 = (-b+delta)/(2*a);
-                            REAL t = 0;
-                            if ((t1>0) && (t2>0)) return; // can't be, again ...
-                            if (t1>0) t = t2;
-                            else if (t2>0) t = t1;
-                            else if (t1>t2) t = t1;
-                            else t = t2;
+					if (c < 0)	 // the 2 balls just hit each other ...
+					{
+						// first find the real time and position of the impact ...
+						eCoord v1 = this->GetVelocity();
+						eCoord v2 = ball->GetVelocity();
+						eCoord dv = v2 - v1;
+						REAL a = dv.NormSquared();
+						REAL b = 2*(dp.x*dv.x+dp.y*dv.y);
+						REAL delta = b*b-4*a*c;
+								 // no t. it can't be, an impact just occured ...
+						if (delta<0) return;
+						else	 // delta is positive, it means we have 2 different solutions
+						{		 // the t we are looking for is negative and as close as possible to 0 = it just happens ;)
+							delta = sqrt(delta);
+							REAL t1 = (-b-delta)/(2*a);
+							REAL t2 = (-b+delta)/(2*a);
+							REAL t = 0;
+								 // can't be, again ...
+							if ((t1>0) && (t2>0)) return;
+							if (t1>0) t = t2;
+							else if (t2>0) t = t1;
+							else if (t1>t2) t = t1;
+							else t = t2;
 
-                            // if a wall impact happens too close, just skip balls interaction for now ...
-                            if (t > lastImpactTime_ - time) return;
+							// if a wall impact happens too close, just skip balls interaction for now ...
+							if (t > lastImpactTime_ - time) return;
 
-                            // now that we have the time, get the positions ...
-                            eCoord p1c = p1+v1*t;
-                            eCoord p2c = p2+v2*t;
-                            //eCoord pi = p1c + (p2c-p1c)*(R/this->Radius());
-                            // now compute the impact : new velocities and new correct positions ...
-                            eCoord base = (p2c-p1c);
-                            base.Normalize();
-                            REAL m1 = r1*r1; // the weight of the zones are set according to the area
-                            REAL m2 = r2*r2;
-                            REAL M = m1+m2;
-                            eCoord new_v1 = v1 + base*((2*m2/M)*(eCoord::F(dv,base)));
-                            eCoord new_v2 = v2 - base*((2*m1/M)*(eCoord::F(dv,base)));
-                            eCoord new_p1 = p1c + new_v1*(-t+0.01);
-                            eCoord new_p2 = p2c + new_v2*(-t+0.01);
-                            this->SetReferenceTime();
-                            this->SetPosition(new_p1);
-                            this->SetVelocity(new_v1);
-                            this->RequestSync();
-                            ball->SetReferenceTime();
-                            ball->SetPosition(new_p2);
-                            ball->SetVelocity(new_v2);
-                            ball->RequestSync();
-                        }
-                    }
-                }
-            }
-        }
-    }
+							// now that we have the time, get the positions ...
+							eCoord p1c = p1+v1*t;
+							eCoord p2c = p2+v2*t;
+							//eCoord pi = p1c + (p2c-p1c)*(R/this->Radius());
+							// now compute the impact : new velocities and new correct positions ...
+							eCoord base = (p2c-p1c);
+							base.Normalize();
+								 // the weight of the zones are set according to the area
+							REAL m1 = r1*r1;
+							REAL m2 = r2*r2;
+							REAL M = m1+m2;
+							eCoord new_v1 = v1 + base*((2*m2/M)*(eCoord::F(dv,base)));
+							eCoord new_v2 = v2 - base*((2*m1/M)*(eCoord::F(dv,base)));
+							eCoord new_p1 = p1c + new_v1*(-t+0.01);
+							eCoord new_p2 = p2c + new_v2*(-t+0.01);
+							this->SetReferenceTime();
+							this->SetPosition(new_p1);
+							this->SetVelocity(new_v1);
+							this->RequestSync();
+							ball->SetReferenceTime();
+							ball->SetPosition(new_p2);
+							ball->SetVelocity(new_v2);
+							ball->RequestSync();
+						}
+					}
+				}
+			}
+		}
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -998,6 +1039,7 @@ void gZone::OnEnter( gCycle * target, REAL time )
 {
 }
 
+
 // *******************************************************************************
 // *
 // *	OnEnter
@@ -1013,6 +1055,7 @@ void gZone::OnEnter( gZone * target, REAL time )
 {
 }
 
+
 // *******************************************************************************
 // *
 // *	Destroy
@@ -1021,13 +1064,14 @@ void gZone::OnEnter( gZone * target, REAL time )
 
 void gZone::Destroy()
 {
-    // destroy the zone by setting a negative expansion and a zero radius
-    destroyed_ = true;
-    SetReferenceTime();
-    SetExpansionSpeed(-1);
-    SetRadius(0);
-    RequestSync();
+	// destroy the zone by setting a negative expansion and a zero radius
+	destroyed_ = true;
+	SetReferenceTime();
+	SetExpansionSpeed(-1);
+	SetRadius(0);
+	RequestSync();
 }
+
 
 // the zone's network initializator
 static nNOInitialisator<gZone> zone_init(340,"zone");
@@ -1044,8 +1088,9 @@ static nNOInitialisator<gZone> zone_init(340,"zone");
 
 nDescriptor & gZone::CreatorDescriptor( void ) const
 {
-    return zone_init;
+	return zone_init;
 }
+
 
 // *******************************************************************************
 // *
@@ -1059,8 +1104,9 @@ nDescriptor & gZone::CreatorDescriptor( void ) const
 
 REAL gZone::Radius( void ) const
 {
-    return GetRadius();
+	return GetRadius();
 }
+
 
 // extra alpha blending factors
 static REAL sg_zoneAlpha = 1.0, sg_zoneAlphaServer = 1.0;
@@ -1079,90 +1125,95 @@ static nSettingItem< REAL > sg_zoneAlphaConfServer( "ZONE_ALPHA_SERVER", sg_zone
 
 void gZone::Render( const eCamera * cam )
 {
-#ifndef DEDICATED
-    REAL alpha = ( lastTime - createTime_ ) * .2f;
-    if ( alpha > .7f )
-        alpha = .7f;
-    if ( alpha <= 0 )
-        return;
+	#ifndef DEDICATED
+	REAL alpha = ( lastTime - createTime_ ) * .2f;
+	if ( alpha > .7f )
+		alpha = .7f;
+	if ( alpha <= 0 )
+		return;
 
-    alpha *= sg_zoneAlpha * sg_zoneAlphaServer;
+	alpha *= sg_zoneAlpha * sg_zoneAlphaServer;
 
-    ModelMatrix();
-    glPushMatrix();
+	ModelMatrix();
+	glPushMatrix();
 
-    const REAL seglen = .2f;
-    const REAL bot = 0.0f;
-    const REAL top = 5.0f; // + ( lastTime - createTime_ ) * .1f;
+	const REAL seglen = .2f;
+	const REAL bot = 0.0f;
+	const REAL top = 5.0f;		 // + ( lastTime - createTime_ ) * .1f;
 
-    REAL r = Radius();
-    GLfloat m[4][4]={{r*rotation_.x,r*rotation_.y,0,0},
-                     {-r*rotation_.y,r*rotation_.x,0,0},
-                     {0,0,top,0},
-                     {pos.x,pos.y,bot,1}};
+	REAL r = Radius();
+	GLfloat m[4][4]=
+	{
+		{
+			r*rotation_.x,r*rotation_.y,0,0
+		},
+		{-r*rotation_.y,r*rotation_.x,0,0},
+		{0,0,top,0},
+		{pos.x,pos.y,bot,1}
+	};
 
-    glMultMatrixf(&m[0][0]);
+	glMultMatrixf(&m[0][0]);
 
-    glColor4f( color_.r ,color_.g,color_.b, alpha );
+	glColor4f( color_.r ,color_.g,color_.b, alpha );
 
 	bool useAlpha = sr_alphaBlend ? !sg_zoneAlphaToggle : sg_zoneAlphaToggle;
-    static bool lastAlpha = useAlpha;
+	static bool lastAlpha = useAlpha;
 
-    static rDisplayList zoneList;
-    if ( lastAlpha != useAlpha || !zoneList.Call() )
-    {
-        lastAlpha = useAlpha;
+	static rDisplayList zoneList;
+	if ( lastAlpha != useAlpha || !zoneList.Call() )
+	{
+		lastAlpha = useAlpha;
 
-        rDisplayListFiller filler( zoneList );
-        
-        glDisable(GL_LIGHT0);
-        glDisable(GL_LIGHT1);
-        glDisable(GL_LIGHTING);
-        glDisable(GL_CULL_FACE);
-        glDepthMask(GL_FALSE);
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE );
-        glDisable(GL_TEXTURE_2D);
-        
-        if ( useAlpha )
-            BeginQuads();
-        else
-        {
-            sr_DepthOffset(true);
-            BeginLineStrip();
-        }
+		rDisplayListFiller filler( zoneList );
 
-        for ( int i = sg_segments - 1; i>=0; --i )
-        {
-            REAL a = i * 2 * 3.14159 / REAL( sg_segments );
-            REAL b = a + seglen;
-            
-            REAL sa = sin(a);
-            REAL ca = cos(a);
-            REAL sb = sin(b);
-            REAL cb = cos(b);
-            
-            glVertex3f(sa, ca, 0);
-            glVertex3f(sa, ca, 1);
-            glVertex3f(sb, cb, 1);
-            glVertex3f(sb, cb, 0);
-            
-            if ( !useAlpha )
-            {
-                glVertex3f(sa, ca, 0);
-                RenderEnd();
-                BeginLineStrip();
-            }
-        }
-        
-        RenderEnd();
+		glDisable(GL_LIGHT0);
+		glDisable(GL_LIGHT1);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_CULL_FACE);
+		glDepthMask(GL_FALSE);
+		glBlendFunc( GL_SRC_ALPHA, GL_ONE );
+		glDisable(GL_TEXTURE_2D);
 
-        sr_DepthOffset(false);
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glDepthMask(GL_TRUE);
-    }
+		if ( useAlpha )
+			BeginQuads();
+		else
+		{
+			sr_DepthOffset(true);
+			BeginLineStrip();
+		}
 
-    glPopMatrix();
-#endif
+		for ( int i = sg_segments - 1; i>=0; --i )
+		{
+			REAL a = i * 2 * 3.14159 / REAL( sg_segments );
+			REAL b = a + seglen;
+
+			REAL sa = sin(a);
+			REAL ca = cos(a);
+			REAL sb = sin(b);
+			REAL cb = cos(b);
+
+			glVertex3f(sa, ca, 0);
+			glVertex3f(sa, ca, 1);
+			glVertex3f(sb, cb, 1);
+			glVertex3f(sb, cb, 0);
+
+			if ( !useAlpha )
+			{
+				glVertex3f(sa, ca, 0);
+				RenderEnd();
+				BeginLineStrip();
+			}
+		}
+
+		RenderEnd();
+
+		sr_DepthOffset(false);
+		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+		glDepthMask(GL_TRUE);
+	}
+
+	glPopMatrix();
+	#endif
 }
 
 
@@ -1180,6 +1231,7 @@ bool gZone::RendersAlpha() const
 	return sr_alphaBlend ? !sg_zoneAlphaToggle : sg_zoneAlphaToggle;
 }
 
+
 // *******************************************************************************
 // *
 // *	gWinZoneHack
@@ -1192,12 +1244,13 @@ bool gZone::RendersAlpha() const
 // *******************************************************************************
 
 gWinZoneHack::gWinZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation )
-        :gZone( grid, pos, dynamicCreation )
+:gZone( grid, pos, dynamicCreation )
 {
-    color_.r = 0.0f;
-    color_.g = 1.0f;
-    color_.b = 0.0f;
+	color_.r = 0.0f;
+	color_.g = 1.0f;
+	color_.b = 0.0f;
 }
+
 
 // *******************************************************************************
 // *
@@ -1211,9 +1264,10 @@ gWinZoneHack::gWinZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreati
 // *******************************************************************************
 
 gWinZoneHack::gWinZoneHack( nMessage & m )
-        : gZone( m )
+: gZone( m )
 {
 }
+
 
 // *******************************************************************************
 // *
@@ -1228,6 +1282,7 @@ gWinZoneHack::~gWinZoneHack( void )
 {
 }
 
+
 // *******************************************************************************
 // *
 // *	OnEnter
@@ -1241,17 +1296,18 @@ gWinZoneHack::~gWinZoneHack( void )
 
 void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    static const char* message="$player_win_instant";
-    sg_DeclareWinner( target->Player()->CurrentTeam(), message );
+	static const char* message="$player_win_instant";
+	sg_DeclareWinner( target->Player()->CurrentTeam(), message );
 
-    // let zone vanish
-    if ( GetExpansionSpeed() >= 0 )
-    {
-        SetReferenceTime();
-        SetExpansionSpeed( -GetRadius()*.5 );
-        RequestSync();
-    }
+	// let zone vanish
+	if ( GetExpansionSpeed() >= 0 )
+	{
+		SetReferenceTime();
+		SetExpansionSpeed( -GetRadius()*.5 );
+		RequestSync();
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -1265,19 +1321,20 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 // *******************************************************************************
 
 gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, eTeam * teamowner )
-        :gZone( grid, pos, dynamicCreation )
+:gZone( grid, pos, dynamicCreation )
 {
-    deathZoneType = TYPE_NORMAL;
-    pLastShotCollision = NULL;
+	deathZoneType = TYPE_NORMAL;
+	pLastShotCollision = NULL;
 
-    color_.r = 1.0f;
-    color_.g = 0.0f;
-    color_.b = 0.0f;
+	color_.r = 1.0f;
+	color_.g = 0.0f;
+	color_.b = 0.0f;
 
-    if (teamowner!=NULL) team = teamowner;
+	if (teamowner!=NULL) team = teamowner;
 
-    grid->AddGameObjectInteresting(this);
+	grid->AddGameObjectInteresting(this);
 }
+
 
 // *******************************************************************************
 // *
@@ -1291,11 +1348,12 @@ gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
 // *******************************************************************************
 
 gDeathZoneHack::gDeathZoneHack( nMessage & m )
-        : gZone( m )
+: gZone( m )
 {
-    deathZoneType = TYPE_NORMAL;
-    pLastShotCollision = NULL;
+	deathZoneType = TYPE_NORMAL;
+	pLastShotCollision = NULL;
 }
+
 
 // *******************************************************************************
 // *
@@ -1310,13 +1368,15 @@ gDeathZoneHack::~gDeathZoneHack( void )
 {
 }
 
+
 static int score_deathzone=-1;
 static tSettingItem<int> s_dz("SCORE_DEATHZONE",score_deathzone);
 
 void gDeathZoneHack::OnVanish( void )
 {
-    grid->RemoveGameObjectInteresting(this);
+	grid->RemoveGameObjectInteresting(this);
 }
+
 
 extern int score_die;
 extern int score_kill;
@@ -1364,75 +1424,78 @@ static tSettingItem<int> sg_shotWallBounceConf ("SHOT_WALL_BOUNCE", sg_shotWallB
 
 gZone & gDeathZoneHack::SetType(int type)
 {
-    if (type < NUM_DEATH_ZONE_TYPES)
-    {
-        deathZoneType = type;
+	if (type < NUM_DEATH_ZONE_TYPES)
+	{
+		deathZoneType = type;
 
-        if ((type == TYPE_SHOT) ||
-            (type == TYPE_DEATH_SHOT))
-        {
-            // set wall interaction to kill the zone on a wall
-            wallInteract_ = true;
+		if ((type == TYPE_SHOT) ||
+			(type == TYPE_DEATH_SHOT))
+		{
+			// set wall interaction to kill the zone on a wall
+			wallInteract_ = true;
 
-            wallBouncesLeft_ = sg_shotWallBounce;
+			wallBouncesLeft_ = sg_shotWallBounce;
 
-            if (wallBouncesLeft_ < 0)
-            {
-                wallBouncesLeft_ = 0;
-            }
-        }
-    }
+			if (wallBouncesLeft_ < 0)
+			{
+				wallBouncesLeft_ = 0;
+			}
+		}
+	}
 
-    return (*this);
+	return (*this);
 }
+
 
 extern tList<ePlayerNetID> se_PlayerNetIDs;
 
 ePlayerNetID * validatePlayer(ePlayerNetID *pPlayer)
 {
-    if (pPlayer)
-    {
-        int i;
-        for (i = se_PlayerNetIDs.Len()-1; i>=0; --i)
-        {
-            if (se_PlayerNetIDs(i) == pPlayer)
-            {
-                break;
-            }
-        }
+	if (pPlayer)
+	{
+		int i;
+		for (i = se_PlayerNetIDs.Len()-1; i>=0; --i)
+		{
+			if (se_PlayerNetIDs(i) == pPlayer)
+			{
+				break;
+			}
+		}
 
-        if (i < 0)
-        {
-            pPlayer = NULL;
-        }
-    }
+		if (i < 0)
+		{
+			pPlayer = NULL;
+		}
+	}
 
-    return (pPlayer);
+	return (pPlayer);
 }
+
 
 gCycle * gDeathZoneHack::getPlayerCycle(ePlayerNetID *pPlayer)
 {
-    gCycle *pPlayerCycle = NULL;
-    if (pPlayer)
-    {
-        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
-        for (int i=gameObjects.Len()-1;i>=0;i--)
-        {
-            gCycle *pCycle=dynamic_cast<gCycle *>(gameObjects(i));
+	gCycle *pPlayerCycle = NULL;
+	if (pPlayer)
+	{
+		const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+		for (int i=gameObjects.Len()-1;i>=0;i--)
+		{
+			gCycle *pCycle=dynamic_cast<gCycle *>(gameObjects(i));
 
-            if (pCycle)
-            {
-                if (pCycle->Player() == pOwner_)
-                {
-                    pPlayerCycle = pCycle;
-                    break;
-                }
-            }
-        }
-    }
+			if (pCycle)
+			{
+				if (pCycle->Player() == pOwner_)
+				{
+					pPlayerCycle = pCycle;
+					break;
+				}
+			}
+		}
+	}
 
-    return (pPlayerCycle);
+	return (pPlayerCycle);
 }
+
 
 // *******************************************************************************
 // *
@@ -1447,322 +1510,329 @@ gCycle * gDeathZoneHack::getPlayerCycle(ePlayerNetID *pPlayer)
 
 void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    if (!dynamicCreation_)
-    {
-    target->Player()->AddScore(score_deathzone, tOutput(), "$player_lose_suicide");
-    target->Kill();
-    }
-    else
-    {
-        // check normal death zone linked to a team ...
-        if (deathZoneType == TYPE_NORMAL && team) {
-            if ((!target) || (!target->Player()))
-            {
-                return;
-            }
-            if (target->Player()->CurrentTeam() == team) return;
-        }
+	if (!dynamicCreation_)
+	{
+		target->Player()->AddScore(score_deathzone, tOutput(), "$player_lose_suicide");
+		target->Kill();
+	}
+	else
+	{
+		// check normal death zone linked to a team ...
+		if (deathZoneType == TYPE_NORMAL && team)
+		{
+			if ((!target) || (!target->Player()))
+			{
+				return;
+			}
+			if (target->Player()->CurrentTeam() == team) return;
+		}
 
-        //Validate the owner player ID
-        pOwner_ = validatePlayer(pOwner_);
-        //??? Really need for the player to get cleared when they exit, it is possible for
-        //a new player to enter and own a zone
+		//Validate the owner player ID
+		pOwner_ = validatePlayer(pOwner_);
+		//??? Really need for the player to get cleared when they exit, it is possible for
+		//a new player to enter and own a zone
 
-        //Get the owner cycle if still around
-        gCycle *pOwnerCycle = NULL;
-        if (pOwner_)
-        {
-            pOwnerCycle = getPlayerCycle(pOwner_);
+		//Get the owner cycle if still around
+		gCycle *pOwnerCycle = NULL;
+		if (pOwner_)
+		{
+			pOwnerCycle = getPlayerCycle(pOwner_);
 
-            if (target->Player() == pOwner_)
-            {
-                //Player entered own shot
-                if (!sg_shotKillSelf)
-                {
-                    //Don't kill yourself
-                    return;
-                }
-                else
-                {
-                    if (!score_shot_suicide)
-                    {
-                        tColoredString playerName;
-                        playerName << *target->Player() << tColoredString::ColorString(1,1,1);
-                        sn_ConsoleOut( tOutput( "$player_free_shot_suicide", playerName ) );
-                    }
-                    else
-                    {
-                        target->Player()->AddScore(score_shot_suicide, tOutput(), "$player_shot_suicide");
-                    }
-                    target->Kill();
-                }
-            }
-            else
-            {
-                //The cycle may have been deleted since...  I think this is OK because Player() returns a checked pointer
+			if (target->Player() == pOwner_)
+			{
+				//Player entered own shot
+				if (!sg_shotKillSelf)
+				{
+					//Don't kill yourself
+					return;
+				}
+				else
+				{
+					if (!score_shot_suicide)
+					{
+						tColoredString playerName;
+						playerName << *target->Player() << tColoredString::ColorString(1,1,1);
+						sn_ConsoleOut( tOutput( "$player_free_shot_suicide", playerName ) );
+					}
+					else
+					{
+						target->Player()->AddScore(score_shot_suicide, tOutput(), "$player_shot_suicide");
+					}
+					target->Kill();
+				}
+			}
+			else
+			{
+				//The cycle may have been deleted since...  I think this is OK because Player() returns a checked pointer
 
-                //Another player entered a shot, find ownership
-                ePlayerNetID *hunter = pOwner_;
-                ePlayerNetID *prey = target->Player();
+				//Another player entered a shot, find ownership
+				ePlayerNetID *hunter = pOwner_;
+				ePlayerNetID *prey = target->Player();
 
-                tOutput lose;
-                tOutput win;
+				tOutput lose;
+				tOutput win;
 
-                tColoredString preyName;
-                preyName << *prey;
-                preyName << tColoredString::ColorString(1,1,1);
+				tColoredString preyName;
+				preyName << *prey;
+				preyName << tColoredString::ColorString(1,1,1);
 
-                if (prey->CurrentTeam() != hunter->CurrentTeam())
-                {
-                    char *pWinString = "$player_win_shot";
-                    char *pFreeString = "$player_free_shot";
-                    int score = score_shot;
-                    if (deathZoneType == TYPE_DEATH_SHOT)
-                    {
-                        pWinString = "$player_win_death_shot";
-                        pFreeString = "$player_free_death_shot";
-                        score = score_death_shot;
-                    }
-                    else if (deathZoneType == TYPE_SELF_DESTRUCT)
-                    {
-                        pWinString = "$player_win_self_destruct";
-                        pFreeString = "$player_free_self_destruct";
-                        score = score_self_destruct;
-                    }
-                    else if (deathZoneType == TYPE_ZOMBIE_ZONE)
-                    {
-                        if (target == pSeekingCycle_)
-                        {
-                            pWinString = "$player_win_zombie_zone_revenge";
-                            pFreeString = "$player_free_zombie_zone_revenge";
-                            score = score_zombie_zone_revenge;
+				if (prey->CurrentTeam() != hunter->CurrentTeam())
+				{
+					char *pWinString = "$player_win_shot";
+					char *pFreeString = "$player_free_shot";
+					int score = score_shot;
+					if (deathZoneType == TYPE_DEATH_SHOT)
+					{
+						pWinString = "$player_win_death_shot";
+						pFreeString = "$player_free_death_shot";
+						score = score_death_shot;
+					}
+					else if (deathZoneType == TYPE_SELF_DESTRUCT)
+					{
+						pWinString = "$player_win_self_destruct";
+						pFreeString = "$player_free_self_destruct";
+						score = score_self_destruct;
+					}
+					else if (deathZoneType == TYPE_ZOMBIE_ZONE)
+					{
+						if (target == pSeekingCycle_)
+						{
+							pWinString = "$player_win_zombie_zone_revenge";
+							pFreeString = "$player_free_zombie_zone_revenge";
+							score = score_zombie_zone_revenge;
 
-                            //Zombie killed his maker - don't seek anymore
-                            pSeekingCycle_ = NULL;
-                        }
-                        else
-                        {
-                            pWinString = "$player_win_zombie_zone";
-                            pFreeString = "$player_free_zombie_zone";
-                            score = score_zombie_zone;
-                        }
-                    }
+							//Zombie killed his maker - don't seek anymore
+							pSeekingCycle_ = NULL;
+						}
+						else
+						{
+							pWinString = "$player_win_zombie_zone";
+							pFreeString = "$player_free_zombie_zone";
+							score = score_zombie_zone;
+						}
+					}
 
-                    if (score)
-                    {
-                        win.SetTemplateParameter(3, preyName);
-                        win << pWinString;
-                        hunter->AddScore(score, win, lose);
-                    }
-                    else
-                    {
-                        tColoredString hunterName;
-                        hunterName << *hunter << tColoredString::ColorString(1,1,1);
-                        sn_ConsoleOut( tOutput( pFreeString, hunterName, preyName ) );
-                    }
-                }
-                else
-                {
-                    //Team member entered shot
-                    if (!sg_shotKillSelf)
-                    {
-                        //Don't kill team
-                        return;
-                    }
+					if (score)
+					{
+						win.SetTemplateParameter(3, preyName);
+						win << pWinString;
+						hunter->AddScore(score, win, lose);
+					}
+					else
+					{
+						tColoredString hunterName;
+						hunterName << *hunter << tColoredString::ColorString(1,1,1);
+						sn_ConsoleOut( tOutput( pFreeString, hunterName, preyName ) );
+					}
+				}
+				else
+				{
+					//Team member entered shot
+					if (!sg_shotKillSelf)
+					{
+						//Don't kill team
+						return;
+					}
 
-                    tColoredString hunterName;
-                    hunterName << *hunter << tColoredString::ColorString(1,1,1);
-                    sn_ConsoleOut( tOutput( "$player_teamkill", hunterName, preyName ) );
-                }
+					tColoredString hunterName;
+					hunterName << *hunter << tColoredString::ColorString(1,1,1);
+					sn_ConsoleOut( tOutput( "$player_teamkill", hunterName, preyName ) );
+				}
 
-                target->Killed(pOwnerCycle); //???make this player so it isn't NULL if dead?
+								 //???make this player so it isn't NULL if dead?
+				target->Killed(pOwnerCycle);
 
-                target->Kill();
-            }
-        }
-        else
-        {
-                        if(deathZoneType == TYPE_ZOMBIE_ZONE) {
-                                target->Player()->AddScore(score_zombie_zone, tOutput(), "$player_lose_suicide");
-                        } else {
-                                target->Player()->AddScore(score_die, tOutput(), "$player_lose_frag");
-                        }
-            target->Kill();
-        }
+				target->Kill();
+			}
+		}
+		else
+		{
+			if(deathZoneType == TYPE_ZOMBIE_ZONE)
+			{
+				target->Player()->AddScore(score_zombie_zone, tOutput(), "$player_lose_suicide");
+			}
+			else
+			{
+				target->Player()->AddScore(score_die, tOutput(), "$player_lose_frag");
+			}
+			target->Kill();
+		}
 
-        if (((deathZoneType == TYPE_ZOMBIE_ZONE) && ((!pSeekingCycle_) || (sg_zombieZoneVanish))) ||
-            ((deathZoneType == TYPE_SELF_DESTRUCT) && (sg_selfDestructVanish)) ||
-            ((deathZoneType < TYPE_SELF_DESTRUCT) && (sg_shotKillVanish)))
-        {
-#if 0
-            SetReferenceTime();
-            SetExpansionSpeed( -GetRadius()*1 );
-            RequestSync();
-#else
-            //Instead of making the shot slowly dissapear, we'll get rid of it right away so it doesn't kill the zombie
-            destroyed_ = true;
-            SetReferenceTime();
-            SetExpansionSpeed(-1);
-            SetRadius(0);
-            RequestSync();
-#endif
-        }
-    }
+		if (((deathZoneType == TYPE_ZOMBIE_ZONE) && ((!pSeekingCycle_) || (sg_zombieZoneVanish))) ||
+			((deathZoneType == TYPE_SELF_DESTRUCT) && (sg_selfDestructVanish)) ||
+			((deathZoneType < TYPE_SELF_DESTRUCT) && (sg_shotKillVanish)))
+		{
+			#if 0
+			SetReferenceTime();
+			SetExpansionSpeed( -GetRadius()*1 );
+			RequestSync();
+			#else
+			//Instead of making the shot slowly dissapear, we'll get rid of it right away so it doesn't kill the zombie
+			destroyed_ = true;
+			SetReferenceTime();
+			SetExpansionSpeed(-1);
+			SetRadius(0);
+			RequestSync();
+			#endif
+		}
+	}
 }
+
 
 void gDeathZoneHack::OnEnter( gDeathZoneHack * target, REAL time )
 {
-    //Process if we're a zombie
-    if (deathZoneType == TYPE_ZOMBIE_ZONE)
-    {
-        if (target->deathZoneType == TYPE_ZOMBIE_ZONE)
-        {
-            //Two zombies met
-            if (GetSeekingCycle() == target->GetSeekingCycle())
-            {
-                //Zombies had same maker, merge
-            }
-        }
-        else if ((sg_zombieZoneShoot > 0) &&
-                 ((target->deathZoneType == TYPE_SHOT) ||
-                  (target->deathZoneType == TYPE_DEATH_SHOT)))
-        {
-            //A shot entered the zombie
+	//Process if we're a zombie
+	if (deathZoneType == TYPE_ZOMBIE_ZONE)
+	{
+		if (target->deathZoneType == TYPE_ZOMBIE_ZONE)
+		{
+			//Two zombies met
+			if (GetSeekingCycle() == target->GetSeekingCycle())
+			{
+				//Zombies had same maker, merge
+			}
+		}
+		else if ((sg_zombieZoneShoot > 0) &&
+			((target->deathZoneType == TYPE_SHOT) ||
+			(target->deathZoneType == TYPE_DEATH_SHOT)))
+		{
+			//A shot entered the zombie
 
-            //Validate the owner player ID
-            pOwner_ = validatePlayer(pOwner_);
-            //??? Really need for the player to get cleared when they exit, it is possible for
-            //a new player to enter and own a zone
+			//Validate the owner player ID
+			pOwner_ = validatePlayer(pOwner_);
+			//??? Really need for the player to get cleared when they exit, it is possible for
+			//a new player to enter and own a zone
 
-            //Validate the shot owner player ID
-            ePlayerNetID *pShotOwner = validatePlayer(target->pOwner_);
+			//Validate the shot owner player ID
+			ePlayerNetID *pShotOwner = validatePlayer(target->pOwner_);
 
-            if ((pOwner_) && (pShotOwner))
-            {
-                //We have both owners
-                if ((pOwner_->CurrentTeam() != pShotOwner->CurrentTeam()) ||
-                    (sg_shotKillSelf))
-                {
-                    //Shoot the zombie!
+			if ((pOwner_) && (pShotOwner))
+			{
+				//We have both owners
+				if ((pOwner_->CurrentTeam() != pShotOwner->CurrentTeam()) ||
+					(sg_shotKillSelf))
+				{
+					//Shoot the zombie!
 
-                    REAL zombieRadius = targetRadius_;
-                    REAL shotRadius = target->GetRadius() * sg_zombieZoneShoot;
+					REAL zombieRadius = targetRadius_;
+					REAL shotRadius = target->GetRadius() * sg_zombieZoneShoot;
 
-                    if (targetRadius_ <= 0)
-                    {
-                        zombieRadius = GetRadius();
-                    }
+					if (targetRadius_ <= 0)
+					{
+						zombieRadius = GetRadius();
+					}
 
-                    if (shotRadius >= zombieRadius)
-                    {
-                        //Shot was bigger than the zombie, destroy zombie
-                        destroyed_ = true;
-                        SetReferenceTime();
-                        SetExpansionSpeed(-1);
-                        SetRadius(0);
-                        RequestSync();
+					if (shotRadius >= zombieRadius)
+					{
+						//Shot was bigger than the zombie, destroy zombie
+						destroyed_ = true;
+						SetReferenceTime();
+						SetExpansionSpeed(-1);
+						SetRadius(0);
+						RequestSync();
 
-                        tColoredString zombieName;
-                        zombieName << *pOwner_;
-                        zombieName << tColoredString::ColorString(1,1,1);
+						tColoredString zombieName;
+						zombieName << *pOwner_;
+						zombieName << tColoredString::ColorString(1,1,1);
 
-                        tColoredString shooterName;
-                        shooterName << *pShotOwner << tColoredString::ColorString(1,1,1);
-                        sn_ConsoleOut( tOutput( "$player_free_zombie_zone_die", shooterName, zombieName ) );
-                    }
-                    else
-                    {
-                        //Take the zombie and target radius down by the shot radius
-                        SetReferenceTime();
-                        if (targetRadius_ > 0)
-                        {
-                            zombieRadius = GetRadius();
-                            SetRadius(zombieRadius - (shotRadius * zombieRadius / targetRadius_));
-                            targetRadius_ -= shotRadius;
-                        }
-                        else
-                        {
-                            SetRadius(zombieRadius - shotRadius);
+						tColoredString shooterName;
+						shooterName << *pShotOwner << tColoredString::ColorString(1,1,1);
+						sn_ConsoleOut( tOutput( "$player_free_zombie_zone_die", shooterName, zombieName ) );
+					}
+					else
+					{
+						//Take the zombie and target radius down by the shot radius
+						SetReferenceTime();
+						if (targetRadius_ > 0)
+						{
+							zombieRadius = GetRadius();
+							SetRadius(zombieRadius - (shotRadius * zombieRadius / targetRadius_));
+							targetRadius_ -= shotRadius;
+						}
+						else
+						{
+							SetRadius(zombieRadius - shotRadius);
 
-                        }
-                        RequestSync();
-                    }
+						}
+						RequestSync();
+					}
 
-                    //Destroy the shot, it is done
-                    target->destroyed_ = true;
-                    target->SetReferenceTime();
-                    target->SetExpansionSpeed(-1);
-                    target->SetRadius(0);
-                    target->RequestSync();
-                }
-            }
-        }
-    }
-    else if ((deathZoneType == TYPE_SHOT) ||
-             (deathZoneType == TYPE_DEATH_SHOT))
-    {
-        if ((target->deathZoneType == TYPE_SHOT) ||
-            (target->deathZoneType == TYPE_DEATH_SHOT))
-        {
-            //??? Warning - shot collision isn't working quite right
-            if (sg_shotCollision)
-            {
-                SetReferenceTime();
-                target->SetReferenceTime();
+					//Destroy the shot, it is done
+					target->destroyed_ = true;
+					target->SetReferenceTime();
+					target->SetExpansionSpeed(-1);
+					target->SetRadius(0);
+					target->RequestSync();
+				}
+			}
+		}
+	}
+	else if ((deathZoneType == TYPE_SHOT) ||
+		(deathZoneType == TYPE_DEATH_SHOT))
+	{
+		if ((target->deathZoneType == TYPE_SHOT) ||
+			(target->deathZoneType == TYPE_DEATH_SHOT))
+		{
+			//??? Warning - shot collision isn't working quite right
+			if (sg_shotCollision)
+			{
+				SetReferenceTime();
+				target->SetReferenceTime();
 
-                eCoord position1 = GetPosition();
-                eCoord position2 = target->GetPosition();
+				eCoord position1 = GetPosition();
+				eCoord position2 = target->GetPosition();
 
-                eCoord velocity1 = GetVelocity();
-                eCoord velocity2 = target->GetVelocity();
+				eCoord velocity1 = GetVelocity();
+				eCoord velocity2 = target->GetVelocity();
 
-                REAL radius1 = GetRadius();
-                REAL radius2 = target->GetRadius();
+				REAL radius1 = GetRadius();
+				REAL radius2 = target->GetRadius();
 
-#if 1
-                //Base the mass on a shot sphere volume
-                REAL massConstant = M_PI * 4 / 3;
-                REAL mass1 = radius1 * radius1 * radius1 * massConstant;
-                REAL mass2 = radius2 * radius2 * radius2 * massConstant;
-#else
-                //Base the mass on a shot circle area
-                REAL massConstant = M_PI;
-                REAL mass1 = radius1 * radius1 * massConstant;
-                REAL mass2 = radius2 * radius2 * massConstant;
-#endif
+				#if 1
+				//Base the mass on a shot sphere volume
+				REAL massConstant = M_PI * 4 / 3;
+				REAL mass1 = radius1 * radius1 * radius1 * massConstant;
+				REAL mass2 = radius2 * radius2 * radius2 * massConstant;
+				#else
+				//Base the mass on a shot circle area
+				REAL massConstant = M_PI;
+				REAL mass1 = radius1 * radius1 * massConstant;
+				REAL mass2 = radius2 * radius2 * massConstant;
+				#endif
 
-                eCoord impact = velocity2 - velocity1;
-                eCoord impulse = position2 - position1;
-                impulse.Normalize();
+				eCoord impact = velocity2 - velocity1;
+				eCoord impulse = position2 - position1;
+				impulse.Normalize();
 
-                REAL impactSpeed = eCoord::F(impact, impulse);
+				REAL impactSpeed = eCoord::F(impact, impulse);
 
-                REAL sign = 1;
-                if (impactSpeed < 0)
-                {
-                    sign = -1;
-                    impactSpeed *= -1;
-                }
+				REAL sign = 1;
+				if (impactSpeed < 0)
+				{
+					sign = -1;
+					impactSpeed *= -1;
+				}
 
-                impulse *= sqrt(impactSpeed * mass1 * mass2);
-                impulse *= sign;
+				impulse *= sqrt(impactSpeed * mass1 * mass2);
+				impulse *= sign;
 
-                velocity1 = velocity1 + (impulse * (1 / mass1));
-                velocity2 = velocity2 - (impulse * (1 / mass2));
+				velocity1 = velocity1 + (impulse * (1 / mass1));
+				velocity2 = velocity2 - (impulse * (1 / mass2));
 
-                SetVelocity(velocity1);
-                target->SetVelocity(velocity2);
+				SetVelocity(velocity1);
+				target->SetVelocity(velocity2);
 
-                RequestSync();
-                target->RequestSync();
+				RequestSync();
+				target->RequestSync();
 
-                //Record the last collision so we don't do it again
-                pLastShotCollision = target;
-                target->pLastShotCollision = this;
-            }
-        }
-    }
+				//Record the last collision so we don't do it again
+				pLastShotCollision = target;
+				target->pLastShotCollision = this;
+			}
+		}
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -1776,23 +1846,24 @@ void gDeathZoneHack::OnEnter( gDeathZoneHack * target, REAL time )
 // *******************************************************************************
 
 gBaseZoneHack::gBaseZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, eTeam * teamowner )
-        :gZone( grid, pos, dynamicCreation), onlySurvivor_( false ), currentState_( State_Safe )
+:gZone( grid, pos, dynamicCreation), onlySurvivor_( false ), currentState_( State_Safe )
 {
-    enemiesInside_ = ownersInside_ = 0;
-    conquered_ = 0;
-    lastSync_ = -10;
-    teamDistance_ = 0;
-    lastEnemyContact_ = se_GameTime();
-    lastRespawnRemindTime_ = -500;
-    lastRespawnRemindWaiting_ = 0;
-    touchy_ = false;
+	enemiesInside_ = ownersInside_ = 0;
+	conquered_ = 0;
+	lastSync_ = -10;
+	teamDistance_ = 0;
+	lastEnemyContact_ = se_GameTime();
+	lastRespawnRemindTime_ = -500;
+	lastRespawnRemindWaiting_ = 0;
+	touchy_ = false;
 
-    if (teamowner!=NULL) team = teamowner;
+	if (teamowner!=NULL) team = teamowner;
 
-    for (int i=0; i<MAXCLIENTS+1; i++) conquerer_[i]=0;
+	for (int i=0; i<MAXCLIENTS+1; i++) conquerer_[i]=0;
 
-    color_.r = color_.g = color_.b = 0;
+	color_.r = color_.g = color_.b = 0;
 }
+
 
 // *******************************************************************************
 // *
@@ -1805,18 +1876,19 @@ gBaseZoneHack::gBaseZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCrea
 // *******************************************************************************
 
 gBaseZoneHack::gBaseZoneHack( nMessage & m )
-        : gZone( m ), onlySurvivor_( false ), currentState_( State_Safe )
+: gZone( m ), onlySurvivor_( false ), currentState_( State_Safe )
 {
-    enemiesInside_ = ownersInside_ = 0;
-    conquered_ = 0;
-    lastSync_ = -10;
-    teamDistance_ = 0;
-    lastEnemyContact_ = se_GameTime();
-    lastRespawnRemindTime_ = -500;
-    lastRespawnRemindWaiting_ = 0;
-    touchy_ = false;
-    for (int i=0; i<MAXCLIENTS+1; i++) conquerer_[i]=0;
+	enemiesInside_ = ownersInside_ = 0;
+	conquered_ = 0;
+	lastSync_ = -10;
+	teamDistance_ = 0;
+	lastEnemyContact_ = se_GameTime();
+	lastRespawnRemindTime_ = -500;
+	lastRespawnRemindWaiting_ = 0;
+	touchy_ = false;
+	for (int i=0; i<MAXCLIENTS+1; i++) conquerer_[i]=0;
 }
+
 
 // *******************************************************************************
 // *
@@ -1830,6 +1902,7 @@ gBaseZoneHack::gBaseZoneHack( nMessage & m )
 gBaseZoneHack::~gBaseZoneHack( void )
 {
 }
+
 
 static REAL sg_conquestRate = .5;
 static REAL sg_defendRate = .25;
@@ -1902,23 +1975,24 @@ static tSettingItem<int> sg_baseRespawnRemindTimeConfig("BASE_RESPAWN_REMIND_TIM
 // fill in count and the zone that is farthest to the team.
 void gBaseZoneHack::CountZonesOfTeam( eGrid const * grid, eTeam * otherTeam, int & count, gBaseZoneHack * & farthest )
 {
-    count = 0;
-    farthest = NULL;
+	count = 0;
+	farthest = NULL;
 
-    // check whether other zones are already registered to that team
-    const tList<eGameObject>& gameObjects = grid->GameObjects();
-    for (int j=gameObjects.Len()-1;j>=0;j--)
-    {
-        gBaseZoneHack *otherZone=dynamic_cast<gBaseZoneHack *>(gameObjects(j));
+	// check whether other zones are already registered to that team
+	const tList<eGameObject>& gameObjects = grid->GameObjects();
+	for (int j=gameObjects.Len()-1;j>=0;j--)
+	{
+		gBaseZoneHack *otherZone=dynamic_cast<gBaseZoneHack *>(gameObjects(j));
 
-        if ( otherZone && otherTeam == otherZone->Team() )
-        {
-            count++;
-            if ( !farthest || otherZone->teamDistance_ > farthest->teamDistance_ )
-                farthest = otherZone;
-        }
-    }
+		if ( otherZone && otherTeam == otherZone->Team() )
+		{
+			count++;
+			if ( !farthest || otherZone->teamDistance_ > farthest->teamDistance_ )
+				farthest = otherZone;
+		}
+	}
 }
+
 
 static int sg_onSurviveScore = 0;
 static tSettingItem< int > sg_onSurviveConquestScoreConfig( "FORTRESS_HELD_SCORE", sg_onSurviveScore );
@@ -1940,239 +2014,240 @@ static tSettingItem< REAL > sg_collapseSpeedConfig( "FORTRESS_COLLAPSE_SPEED", s
 
 bool gBaseZoneHack::Timestep( REAL time )
 {
-    // no team?!? Get rid of this zone ASAP.
-    if ( !team )
-    {
-        return true;
-    }
+	// no team?!? Get rid of this zone ASAP.
+	if ( !team )
+	{
+		return true;
+	}
 
-    if ( currentState_ == State_Conquering )
-    {
-        // let zone vanish
-        SetReferenceTime();
+	if ( currentState_ == State_Conquering )
+	{
+		// let zone vanish
+		SetReferenceTime();
 
-        // let it light up in agony
-        if ( sg_collapseSpeed < .4 )
-        {
-            color_.r = color_.g = color_.b = 1;
-        }
+		// let it light up in agony
+		if ( sg_collapseSpeed < .4 )
+		{
+			color_.r = color_.g = color_.b = 1;
+		}
 
-        SetExpansionSpeed( -GetRadius()*sg_collapseSpeed );
-        SetRotationAcceleration( -GetRotationSpeed()*.4 );
-        RequestSync();
+		SetExpansionSpeed( -GetRadius()*sg_collapseSpeed );
+		SetRotationAcceleration( -GetRotationSpeed()*.4 );
+		RequestSync();
 
-        currentState_ = State_Conquered;
-    }
-    else if ( currentState_ == State_Conquered && GetRotationSpeed() < 0 )
-    {
-        // let zone vanish
-        SetReferenceTime();
-        SetRotationSpeed( 0 );
-        SetRotationAcceleration( 0 );
-        color_.r = color_.g = color_.b = .5;
-        RequestSync();
-    }
+		currentState_ = State_Conquered;
+	}
+	else if ( currentState_ == State_Conquered && GetRotationSpeed() < 0 )
+	{
+		// let zone vanish
+		SetReferenceTime();
+		SetRotationSpeed( 0 );
+		SetRotationAcceleration( 0 );
+		color_.r = color_.g = color_.b = .5;
+		RequestSync();
+	}
 
-    REAL dt = time - lastTime;
+	REAL dt = time - lastTime;
 
-    // conquest going on
-    REAL conquest = sg_conquestRate * enemiesInside_ - sg_defendRate * ownersInside_ - sg_conquestDecayRate;
-    conquered_ += dt * conquest;
+	// conquest going on
+	REAL conquest = sg_conquestRate * enemiesInside_ - sg_defendRate * ownersInside_ - sg_conquestDecayRate;
+	conquered_ += dt * conquest;
 
-    if ( touchy_ && enemiesInside_ > 0 )
-    {
-        conquered_ = 1.01;
-    }
+	if ( touchy_ && enemiesInside_ > 0 )
+	{
+		conquered_ = 1.01;
+	}
 
-    // clamp
-    if ( conquered_ < 0 )
-    {
-        conquered_ = 0;
-        conquest = 0;
-    }
-    if ( conquered_ > 1.01 )
-    {
-        conquered_ = 1.01;
-        conquest = 0;
-    }
+	// clamp
+	if ( conquered_ < 0 )
+	{
+		conquered_ = 0;
+		conquest = 0;
+	}
+	if ( conquered_ > 1.01 )
+	{
+		conquered_ = 1.01;
+		conquest = 0;
+	}
 
-    // set speed according to conquest status
-    if ( currentState_ == State_Safe )
-    {
-        REAL maxSpeed = 10 * ( 2 * 3.141 ) / sg_segments;
-        REAL omega = .3 + conquered_ * conquered_ * maxSpeed;
-        REAL omegaDot = 2 * conquered_ * conquest * maxSpeed;
+	// set speed according to conquest status
+	if ( currentState_ == State_Safe )
+	{
+		REAL maxSpeed = 10 * ( 2 * 3.141 ) / sg_segments;
+		REAL omega = .3 + conquered_ * conquered_ * maxSpeed;
+		REAL omegaDot = 2 * conquered_ * conquest * maxSpeed;
 
-        // determine the time since the last sync (exaggerate for smoother motion in local games)
-        REAL timeStep = lastTime - lastSync_;
-        if ( sn_GetNetState() != nSERVER )
-            timeStep *= 100;
+		// determine the time since the last sync (exaggerate for smoother motion in local games)
+		REAL timeStep = lastTime - lastSync_;
+		if ( sn_GetNetState() != nSERVER )
+			timeStep *= 100;
 
-        if ( sn_GetNetState() != nCLIENT &&
-                ( ( fabs( omega - GetRotationSpeed() ) + fabs( omegaDot - GetRotationAcceleration() ) ) * timeStep > .5 ) )
-        {
-            SetRotationSpeed( omega );
-            SetRotationAcceleration( omegaDot );
-            SetReferenceTime();
-            RequestSync();
-            lastSync_ = lastTime;
-        }
+		if ( sn_GetNetState() != nCLIENT &&
+			( ( fabs( omega - GetRotationSpeed() ) + fabs( omegaDot - GetRotationAcceleration() ) ) * timeStep > .5 ) )
+		{
+			SetRotationSpeed( omega );
+			SetRotationAcceleration( omegaDot );
+			SetReferenceTime();
+			RequestSync();
+			lastSync_ = lastTime;
+		}
 
-        // check for enemy contact timeout
-        if ( sg_conquestTimeout > 0 && lastEnemyContact_ + sg_conquestTimeout < time )
-        {
-            enemies_.clear();
+		// check for enemy contact timeout
+		if ( sg_conquestTimeout > 0 && lastEnemyContact_ + sg_conquestTimeout < time )
+		{
+			enemies_.clear();
 
-            // if the zone would collapse without defenders, let it collapse now. A smart defender would
-            // have left the zone to let it collapse anyway.
-            if ( sg_conquestDecayRate < 0 )
-            {
-                if ( team )
-                {
-                    if ( sg_onSurviveScore != 0 )
-                    {
-                        // give player the survive score bonus right now, they deserve it
-                        ZoneWasHeld();
-                    }
-                    else
-                    {
-                        sn_ConsoleOut( tOutput( "$zone_collapse_harmless", team->Name()  ) );
-                    }
-                }
-                conquered_ = 1.0;
-            }
-        }
+			// if the zone would collapse without defenders, let it collapse now. A smart defender would
+			// have left the zone to let it collapse anyway.
+			if ( sg_conquestDecayRate < 0 )
+			{
+				if ( team )
+				{
+					if ( sg_onSurviveScore != 0 )
+					{
+						// give player the survive score bonus right now, they deserve it
+						ZoneWasHeld();
+					}
+					else
+					{
+						sn_ConsoleOut( tOutput( "$zone_collapse_harmless", team->Name()  ) );
+					}
+				}
+				conquered_ = 1.0;
+			}
+		}
 
-        // check whether the zone got conquered
-        if ( conquered_ >= 1 )
-        {
-            currentState_ = State_Conquering;
-            OnConquest();
-        }
-    }
+		// check whether the zone got conquered
+		if ( conquered_ >= 1 )
+		{
+			currentState_ = State_Conquering;
+			OnConquest();
+		}
+	}
 
-    if ((team) &&
-        (((ownersInside_ > 0) && (sg_baseRespawn)) ||
-         ((enemiesInside_ > 0) && (sg_baseEnemyRespawn))))
-    {
-        // check for respawn
-        //??? change this to divide up spawns between bases, and randomly choose among those closest
-        gSpawnPoint *pSpawn = Arena.ClosestSpawnPoint(GetPosition());
+	if ((team) &&
+		(((ownersInside_ > 0) && (sg_baseRespawn)) ||
+		((enemiesInside_ > 0) && (sg_baseEnemyRespawn))))
+	{
+		// check for respawn
+		//??? change this to divide up spawns between bases, and randomly choose among those closest
+		gSpawnPoint *pSpawn = Arena.ClosestSpawnPoint(GetPosition());
 
-        if (pSpawn)
-        {
-            for (int i = team->NumPlayers() - 1; i >= 0; --i)
-            {
-                ePlayerNetID *pPlayer = team->Player(i);
+		if (pSpawn)
+		{
+			for (int i = team->NumPlayers() - 1; i >= 0; --i)
+			{
+				ePlayerNetID *pPlayer = team->Player(i);
 
-                eGameObject *pGameObject = pPlayer->Object();
+				eGameObject *pGameObject = pPlayer->Object();
 
-                if ((!pGameObject) ||
-                    ((!pGameObject->Alive()) &&
-                    (pGameObject->DeathTime() < (time - 1))))
-                {
-                    lastRespawnRemindTime_ = time - sg_baseRespawnRemindTime - 1;
+				if ((!pGameObject) ||
+					((!pGameObject->Alive()) &&
+					(pGameObject->DeathTime() < (time - 1))))
+				{
+					lastRespawnRemindTime_ = time - sg_baseRespawnRemindTime - 1;
 
-                    eCoord pos, dir;
+					eCoord pos, dir;
 
-                    pSpawn->Spawn(pos, dir);
+					pSpawn->Spawn(pos, dir);
 
-                    gCycle *pCycle = new gCycle(grid, pos, dir, pPlayer);
-                    pPlayer->ControlObject(pCycle);
+					gCycle *pCycle = new gCycle(grid, pos, dir, pPlayer);
+					pPlayer->ControlObject(pCycle);
 
-                    tColoredString playerName;
-                    playerName << *pPlayer << tColoredString::ColorString(1,1,1);
+					tColoredString playerName;
+					playerName << *pPlayer << tColoredString::ColorString(1,1,1);
 
-                    if ((ownersInside_ > 0) && (sg_baseRespawn))
-                    {
-                        tColoredString spawnerName;
-                        spawnerName << teamPlayerName_ << tColoredString::ColorString(1,1,1);
-                        sn_ConsoleOut( tOutput( "$player_base_respawn", playerName, spawnerName ) );
-                    }
-                    else
-                    {
-                        tColoredString spawnerName;
-                        spawnerName << enemyPlayerName_ << tColoredString::ColorString(1,1,1);
-                        sn_ConsoleOut( tOutput( "$player_base_enemy_respawn", playerName, spawnerName ) );
-                    }
+					if ((ownersInside_ > 0) && (sg_baseRespawn))
+					{
+						tColoredString spawnerName;
+						spawnerName << teamPlayerName_ << tColoredString::ColorString(1,1,1);
+						sn_ConsoleOut( tOutput( "$player_base_respawn", playerName, spawnerName ) );
+					}
+					else
+					{
+						tColoredString spawnerName;
+						spawnerName << enemyPlayerName_ << tColoredString::ColorString(1,1,1);
+						sn_ConsoleOut( tOutput( "$player_base_enemy_respawn", playerName, spawnerName ) );
+					}
 
-                    // send a console message to the player
-                    sn_CenterMessage(tOutput("$player_respawn_center_message"), pPlayer->Owner());
-                }
-            }
-        }
-    }
+					// send a console message to the player
+					sn_CenterMessage(tOutput("$player_respawn_center_message"), pPlayer->Owner());
+				}
+			}
+		}
+	}
 
-    // reset counts
-    enemiesInside_ = ownersInside_ = 0;
+	// reset counts
+	enemiesInside_ = ownersInside_ = 0;
 
-    if ((team) && (sg_baseRespawn) && (sg_baseRespawnRemindTime > 0) &&
-        (time >= (lastRespawnRemindTime_ + sg_baseRespawnRemindTime)))
-    {
-        // find out how many players are waiting to be respawned
-        int waiting = 0;
-        int alive = 0;
+	if ((team) && (sg_baseRespawn) && (sg_baseRespawnRemindTime > 0) &&
+		(time >= (lastRespawnRemindTime_ + sg_baseRespawnRemindTime)))
+	{
+		// find out how many players are waiting to be respawned
+		int waiting = 0;
+		int alive = 0;
 
-        for (int i = team->NumPlayers() - 1; i >= 0; --i)
-        {
-            ePlayerNetID *pPlayer = team->Player(i);
+		for (int i = team->NumPlayers() - 1; i >= 0; --i)
+		{
+			ePlayerNetID *pPlayer = team->Player(i);
 
-            eGameObject *pGameObject = pPlayer->Object();
+			eGameObject *pGameObject = pPlayer->Object();
 
-            if ((!pGameObject) ||
-                (!pGameObject->Alive()))
-            {
-                waiting++;
-            }
-            else
-            {
-                alive++;
-            }
-        }
+			if ((!pGameObject) ||
+				(!pGameObject->Alive()))
+			{
+				waiting++;
+			}
+			else
+			{
+				alive++;
+			}
+		}
 
-        if ((waiting) && (alive))
-        {
-            if (lastRespawnRemindWaiting_)
-            {
-                for (int i = team->NumPlayers() - 1; i >= 0; --i)
-                {
-                    ePlayerNetID *pPlayer = team->Player(i);
-                    if (alive > 1)
-                    {
-                        sn_ConsoleOut(tOutput("$player_base_respawn_reminder", waiting), pPlayer->Owner());
-                    }
-                    else
-                    {
-                        sn_ConsoleOut(tOutput("$player_base_respawn_reminder_alone", waiting), pPlayer->Owner());
-                    }
-                }
-            }
+		if ((waiting) && (alive))
+		{
+			if (lastRespawnRemindWaiting_)
+			{
+				for (int i = team->NumPlayers() - 1; i >= 0; --i)
+				{
+					ePlayerNetID *pPlayer = team->Player(i);
+					if (alive > 1)
+					{
+						sn_ConsoleOut(tOutput("$player_base_respawn_reminder", waiting), pPlayer->Owner());
+					}
+					else
+					{
+						sn_ConsoleOut(tOutput("$player_base_respawn_reminder_alone", waiting), pPlayer->Owner());
+					}
+				}
+			}
 
-            if ((alive > 1) || (lastRespawnRemindWaiting_ != 1))
-            {
-                lastRespawnRemindTime_ = time;
-            }
-            else
-            {
-                lastRespawnRemindTime_ = time - (sg_baseRespawnRemindTime / 3);
-            }
-        }
+			if ((alive > 1) || (lastRespawnRemindWaiting_ != 1))
+			{
+				lastRespawnRemindTime_ = time;
+			}
+			else
+			{
+				lastRespawnRemindTime_ = time - (sg_baseRespawnRemindTime / 3);
+			}
+		}
 
-        lastRespawnRemindWaiting_ = waiting;
-    }
+		lastRespawnRemindWaiting_ = waiting;
+	}
 
-    // delegate
-    bool ret = gZone::Timestep( time );
+	// delegate
+	bool ret = gZone::Timestep( time );
 
-    // reward survival
-    if ( team && !ret && onlySurvivor_ )
-    {
-        const char* message= ( eTeam::teams.Len() > 2 || sg_onConquestScore ) ? "$player_win_held_fortress" : "$player_win_conquest";
-        sg_DeclareWinner( team, message );
-    }
-    
-    return ret;
+	// reward survival
+	if ( team && !ret && onlySurvivor_ )
+	{
+		const char* message= ( eTeam::teams.Len() > 2 || sg_onConquestScore ) ? "$player_win_held_fortress" : "$player_win_conquest";
+		sg_DeclareWinner( team, message );
+	}
+
+	return ret;
 }
+
 
 // *******************************************************************************
 // *
@@ -2185,49 +2260,50 @@ bool gBaseZoneHack::Timestep( REAL time )
 
 void gBaseZoneHack::OnVanish( void )
 {
-    if (!team)
-        return;
+	if (!team)
+		return;
 
-    CheckSurvivor();
+	CheckSurvivor();
 
-    // kill the closest owners of the zone
-    if ( currentState_ != State_Safe && ( enemies_.size() > 0 || sg_defendRate < 0 ) )
-    {
-        int kills = int( sg_onConquestKillRatio * team->NumPlayers() );
-        kills = kills > sg_onConquestKillMin ? kills : sg_onConquestKillMin;
+	// kill the closest owners of the zone
+	if ( currentState_ != State_Safe && ( enemies_.size() > 0 || sg_defendRate < 0 ) )
+	{
+		int kills = int( sg_onConquestKillRatio * team->NumPlayers() );
+		kills = kills > sg_onConquestKillMin ? kills : sg_onConquestKillMin;
 
-        while ( kills > 0 )
-        {
-            -- kills;
+		while ( kills > 0 )
+		{
+			-- kills;
 
-            ePlayerNetID * closest = NULL;
-            REAL closestDistance = 0;
+			ePlayerNetID * closest = NULL;
+			REAL closestDistance = 0;
 
-            // find the closest living owner
-            for ( int i = team->NumPlayers()-1; i >= 0; --i )
-            {
-                ePlayerNetID * player = team->Player(i);
-                eNetGameObject * object = player->Object();
-                if ( object && object->Alive() )
-                {
-                    eCoord otherpos = object->Position() - pos;
-                    REAL distance = otherpos.NormSquared();
-                    if ( !closest || distance < closestDistance )
-                    {
-                        closest = player;
-                        closestDistance = distance;
-                    }
-                }
-            }
+			// find the closest living owner
+			for ( int i = team->NumPlayers()-1; i >= 0; --i )
+			{
+				ePlayerNetID * player = team->Player(i);
+				eNetGameObject * object = player->Object();
+				if ( object && object->Alive() )
+				{
+					eCoord otherpos = object->Position() - pos;
+					REAL distance = otherpos.NormSquared();
+					if ( !closest || distance < closestDistance )
+					{
+						closest = player;
+						closestDistance = distance;
+					}
+				}
+			}
 
-            if ( closest )
-            {
-                sn_ConsoleOut( tOutput("$player_kill_collapse", closest->GetName() ) );
-                closest->Object()->Kill();
-            }
-        }
-    }
+			if ( closest )
+			{
+				sn_ConsoleOut( tOutput("$player_kill_collapse", closest->GetName() ) );
+				closest->Object()->Kill();
+			}
+		}
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -2243,74 +2319,79 @@ static eLadderLogWriter sg_basezoneConquererWriter("BASEZONE_CONQUERER", true);
 
 void gBaseZoneHack::OnConquest( void )
 {
-    if ( team )
-    {
-        sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << GetPosition().x << GetPosition().y;
-        sg_basezoneConqueredWriter.write();
-    }
-    float rr = GetRadius();
-    rr *= rr;
-    for(int i = se_PlayerNetIDs.Len()-1; i >=0; --i) {
-        ePlayerNetID *player = se_PlayerNetIDs(i);
-        if(!player) {
-            continue;
-        }
-        gCycle *cycle = dynamic_cast<gCycle *>(player->Object());
-        if(!cycle) {
-            continue;
-        }
-        if(cycle->Alive() && (cycle->Position() - Position()).NormSquared() < rr) {
-            sg_basezoneConquererWriter << player->GetUserName();
-            sg_basezoneConquererWriter.write();
-        }
-    }
+	if ( team )
+	{
+		sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << GetPosition().x << GetPosition().y;
+		sg_basezoneConqueredWriter.write();
+	}
+	float rr = GetRadius();
+	rr *= rr;
+	for(int i = se_PlayerNetIDs.Len()-1; i >=0; --i)
+	{
+		ePlayerNetID *player = se_PlayerNetIDs(i);
+		if(!player)
+		{
+			continue;
+		}
+		gCycle *cycle = dynamic_cast<gCycle *>(player->Object());
+		if(!cycle)
+		{
+			continue;
+		}
+		if(cycle->Alive() && (cycle->Position() - Position()).NormSquared() < rr)
+		{
+			sg_basezoneConquererWriter << player->GetUserName();
+			sg_basezoneConquererWriter.write();
+		}
+	}
 
-    // calculate score. If nobody really was inside the zone any more, half it.
-    int totalScore = sg_onConquestScore;
-    if ( 0 == enemiesInside_ )
-        totalScore /= 2;
+	// calculate score. If nobody really was inside the zone any more, half it.
+	int totalScore = sg_onConquestScore;
+	if ( 0 == enemiesInside_ )
+		totalScore /= 2;
 
-    // eliminate dead enemies
-    TeamArray enemiesAlive;
-    for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
-    {
-        eTeam* team = *iter;
-        if ( team->Alive() )
-            enemiesAlive.push_back( team );
-    }
-    enemies_ = enemiesAlive;
+	// eliminate dead enemies
+	TeamArray enemiesAlive;
+	for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
+	{
+		eTeam* team = *iter;
+		if ( team->Alive() )
+			enemiesAlive.push_back( team );
+	}
+	enemies_ = enemiesAlive;
 
-    // add score for successful conquest, divided equally between the teams that are
-    // inside the zone
-    if ( totalScore && enemies_.size() > 0 )
-    {
-        tOutput win;
-        if ( team )
-        {
-            win.SetTemplateParameter( 3, team->Name() );
-            win << "$player_win_conquest_specific";
-        }
-        else
-        {
-            win << "$player_win_conquest";
-        }
+	// add score for successful conquest, divided equally between the teams that are
+	// inside the zone
+	if ( totalScore && enemies_.size() > 0 )
+	{
+		tOutput win;
+		if ( team )
+		{
+			win.SetTemplateParameter( 3, team->Name() );
+			win << "$player_win_conquest_specific";
+		}
+		else
+		{
+			win << "$player_win_conquest";
+		}
 
-        int score = totalScore / enemies_.size();
-        for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
-        {
-            (*iter)->AddScore( score, win, tOutput() );
-        }
-    }
+		int score = totalScore / enemies_.size();
+		for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
+		{
+			(*iter)->AddScore( score, win, tOutput() );
+		}
+	}
 
-    // trigger immediate win
-    if ( sg_onConquestWin && enemies_.size() > 0 )
-    {
-        static const char* message="$player_win_conquest";
-        sg_DeclareWinner( enemies_[0], message );
-    }
+	// trigger immediate win
+	if ( sg_onConquestWin && enemies_.size() > 0 )
+	{
+		static const char* message="$player_win_conquest";
+		sg_DeclareWinner( enemies_[0], message );
+	}
 
-    CheckSurvivor();
+	CheckSurvivor();
 }
+
 
 // if this flag is enabled, the last team with a non-conquered zone wins the round.
 static int sg_onSurviveWin = 1;
@@ -2327,33 +2408,35 @@ static tSettingItem< int > sg_onSurviveWinConfig( "FORTRESS_SURVIVE_WIN", sg_onS
 
 void gBaseZoneHack::CheckSurvivor( void )
 {
-    // test if there is only one team with non-conquered zones left
-    if ( sg_onSurviveWin )
-    {
-        // find surviving team and test whether it is the only one
-        gBaseZoneHack * survivor = 0;
-        bool onlySurvivor = true;
+	// test if there is only one team with non-conquered zones left
+	if ( sg_onSurviveWin )
+	{
+		// find surviving team and test whether it is the only one
+		gBaseZoneHack * survivor = 0;
+		bool onlySurvivor = true;
 
-        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
-        for (int i=gameObjects.Len()-1;i>=0 && onlySurvivor;i--){
-            gBaseZoneHack *other=dynamic_cast<gBaseZoneHack *>(gameObjects(i));
+		const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+		for (int i=gameObjects.Len()-1;i>=0 && onlySurvivor;i--)
+		{
+			gBaseZoneHack *other=dynamic_cast<gBaseZoneHack *>(gameObjects(i));
 
-            if ( other && other->currentState_ == State_Safe && other->team )
-            {
-                if ( survivor && survivor->team != other->team )
-                    onlySurvivor = false;
-                else
-                    survivor = other;
-            }
-        }
+			if ( other && other->currentState_ == State_Safe && other->team )
+			{
+				if ( survivor && survivor->team != other->team )
+					onlySurvivor = false;
+				else
+					survivor = other;
+			}
+		}
 
-        // reward it later
-        if ( onlySurvivor && survivor )
-        {
-            survivor->onlySurvivor_ = true;
-        }
-    }
+		// reward it later
+		if ( onlySurvivor && survivor )
+		{
+			survivor->onlySurvivor_ = true;
+		}
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -2366,25 +2449,26 @@ void gBaseZoneHack::CheckSurvivor( void )
 
 void gBaseZoneHack::ZoneWasHeld( void )
 {
-    // survived?
-    if ( currentState_ == State_Safe && sg_onSurviveScore != 0 )
-    {
-        // award owning team
-        if ( team && team->Alive() )
-        {
-            team->AddScore( sg_onSurviveScore, tOutput("$player_win_held_fortress"), tOutput("$player_lose_held_fortress") );
+	// survived?
+	if ( currentState_ == State_Safe && sg_onSurviveScore != 0 )
+	{
+		// award owning team
+		if ( team && team->Alive() )
+		{
+			team->AddScore( sg_onSurviveScore, tOutput("$player_win_held_fortress"), tOutput("$player_lose_held_fortress") );
 
-            currentState_ = State_Conquering;
-            enemies_.clear();
-        }
-        else
-        {
-            // give a little conquering help. The round is almost over, if
-            // an enemy actually made it into the zone by now, it should be his.
-            touchy_ = true;
-        }
-    }
+			currentState_ = State_Conquering;
+			enemies_.clear();
+		}
+		else
+		{
+			// give a little conquering help. The round is almost over, if
+			// an enemy actually made it into the zone by now, it should be his.
+			touchy_ = true;
+		}
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -2398,77 +2482,78 @@ void gBaseZoneHack::ZoneWasHeld( void )
 
 void gBaseZoneHack::OnRoundBegin( void )
 {
-    // determine the owning team: the one that has a player spawned closest
-    // find the closest player
-    if ( !team )
-    {
-        teamDistance_ = 0;
-        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
-        gCycle * closest = NULL;
-        REAL closestDistance = 0;
-        for (int i=gameObjects.Len()-1;i>=0;i--)
-        {
-            gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
+	// determine the owning team: the one that has a player spawned closest
+	// find the closest player
+	if ( !team )
+	{
+		teamDistance_ = 0;
+		const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+		gCycle * closest = NULL;
+		REAL closestDistance = 0;
+		for (int i=gameObjects.Len()-1;i>=0;i--)
+		{
+			gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
 
-            if (other )
-            {
-                eTeam * otherTeam = other->Player()->CurrentTeam();
-                eCoord otherpos = other->Position() - pos;
-                REAL distance = otherpos.NormSquared();
-                if ( !closest || distance < closestDistance )
-                {
-                    // check whether other zones are already registered to that team
-                    gBaseZoneHack * farthest = NULL;
-                    int count = 0;
-                    if ( sg_baseZonesPerTeam > 0 )
-                        CountZonesOfTeam( Grid(), otherTeam, count, farthest );
+			if (other )
+			{
+				eTeam * otherTeam = other->Player()->CurrentTeam();
+				eCoord otherpos = other->Position() - pos;
+				REAL distance = otherpos.NormSquared();
+				if ( !closest || distance < closestDistance )
+				{
+					// check whether other zones are already registered to that team
+					gBaseZoneHack * farthest = NULL;
+					int count = 0;
+					if ( sg_baseZonesPerTeam > 0 )
+						CountZonesOfTeam( Grid(), otherTeam, count, farthest );
 
-                    // only set team if not too many closer other zones are registered
-                    if ( sg_baseZonesPerTeam == 0 || count < sg_baseZonesPerTeam || farthest->teamDistance_ > distance )
-                    {
-                        closest = other;
-                        closestDistance = distance;
-                    }
-                }
-            }
-        }
+					// only set team if not too many closer other zones are registered
+					if ( sg_baseZonesPerTeam == 0 || count < sg_baseZonesPerTeam || farthest->teamDistance_ > distance )
+					{
+						closest = other;
+						closestDistance = distance;
+					}
+				}
+			}
+		}
 
-        if ( closest )
-        {
-            // take over team and color
-            team = closest->Player()->CurrentTeam();
-            color_.r = team->R()/15.0;
-            color_.g = team->G()/15.0;
-            color_.b = team->B()/15.0;
-            teamDistance_ = closestDistance;
+		if ( closest )
+		{
+			// take over team and color
+			team = closest->Player()->CurrentTeam();
+			color_.r = team->R()/15.0;
+			color_.g = team->G()/15.0;
+			color_.b = team->B()/15.0;
+			teamDistance_ = closestDistance;
 
-            RequestSync();
-        }
+			RequestSync();
+		}
 
-        // if this zone does not belong to a team, discard it.
-        if ( !team )
-        {
-            RemoveFromGame();
-            return;
-        }
+		// if this zone does not belong to a team, discard it.
+		if ( !team )
+		{
+			RemoveFromGame();
+			return;
+		}
 
-        // check other zones owned by the same team. Discard the one farthest away
-        // if the max count is exceeded
-        if ( team && sg_baseZonesPerTeam > 0 )
-        {
-            gBaseZoneHack * farthest = 0;
-            int count = 0;
-            CountZonesOfTeam( Grid(), team, count, farthest );
+		// check other zones owned by the same team. Discard the one farthest away
+		// if the max count is exceeded
+		if ( team && sg_baseZonesPerTeam > 0 )
+		{
+			gBaseZoneHack * farthest = 0;
+			int count = 0;
+			CountZonesOfTeam( Grid(), team, count, farthest );
 
-            // discard team of farthest zone
-            if ( count > sg_baseZonesPerTeam )
-            {
-                farthest->team = NULL;
-                farthest->RemoveFromGame();
-            }
-        }
-    }
+			// discard team of farthest zone
+			if ( count > sg_baseZonesPerTeam )
+			{
+				farthest->team = NULL;
+				farthest->RemoveFromGame();
+			}
+		}
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -2481,12 +2566,13 @@ void gBaseZoneHack::OnRoundBegin( void )
 
 void gBaseZoneHack::OnRoundEnd( void )
 {
-    // survived?
-    if ( currentState_ == State_Safe )
-    {
-        ZoneWasHeld();
-    }
+	// survived?
+	if ( currentState_ == State_Safe )
+	{
+		ZoneWasHeld();
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -2501,109 +2587,110 @@ void gBaseZoneHack::OnRoundEnd( void )
 
 void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    // determine the team of the player
-    tASSERT( target );
-    if ( !target->Player() )
-        return;
-    tJUST_CONTROLLED_PTR< eTeam > otherTeam = target->Player()->CurrentTeam();
-    if (!otherTeam)
-        return;
-    if ( currentState_ != State_Safe )
-        return;
+	// determine the team of the player
+	tASSERT( target );
+	if ( !target->Player() )
+		return;
+	tJUST_CONTROLLED_PTR< eTeam > otherTeam = target->Player()->CurrentTeam();
+	if (!otherTeam)
+		return;
+	if ( currentState_ != State_Safe )
+		return;
 
-    // remember who is inside
-    if ( team == otherTeam )
-    {
-        if ( ownersInside_ == 0 )
-        {
-            // store the name
-            teamPlayerName_ = target->Player()->GetColoredName();
-        }
+	// remember who is inside
+	if ( team == otherTeam )
+	{
+		if ( ownersInside_ == 0 )
+		{
+			// store the name
+			teamPlayerName_ = target->Player()->GetColoredName();
+		}
 
-        ++ ownersInside_;
-    }
-    else if ( team )
-    {
-        // check if base enemy kills are enabled
-        if (sg_baseEnemyKill)
-        {
-            tColoredString playerName;
-            playerName << *target->Player() << tColoredString::ColorString(1,1,1);
-            sn_ConsoleOut( tOutput( "$player_base_enemy_kill", playerName ) );
+		++ ownersInside_;
+	}
+	else if ( team )
+	{
+		// check if base enemy kills are enabled
+		if (sg_baseEnemyKill)
+		{
+			tColoredString playerName;
+			playerName << *target->Player() << tColoredString::ColorString(1,1,1);
+			sn_ConsoleOut( tOutput( "$player_base_enemy_kill", playerName ) );
 
-            target->Kill();
+			target->Kill();
 
-            return;
-        }
+			return;
+		}
 
-        if ( enemiesInside_ == 0 )
-        {
-            enemies_.clear();
+		if ( enemiesInside_ == 0 )
+		{
+			enemies_.clear();
 
-            // store the name
-            enemyPlayerName_ = target->Player()->GetColoredName();
-        }
+			// store the name
+			enemyPlayerName_ = target->Player()->GetColoredName();
+		}
 
-        ++ enemiesInside_;
-        conquerer_[target->Player()->ListID()]+=time - lastTime;
-        if ( std::find( enemies_.begin(), enemies_.end(), otherTeam ) == enemies_.end() )
-            enemies_.push_back( otherTeam );
-            
-        lastEnemyContact_ = time;
-    }
-    else
-    {
-        conquerer_[target->Player()->ListID()]+=time - lastTime;
-    }
+		++ enemiesInside_;
+		conquerer_[target->Player()->ListID()]+=time - lastTime;
+		if ( std::find( enemies_.begin(), enemies_.end(), otherTeam ) == enemies_.end() )
+			enemies_.push_back( otherTeam );
 
-    // check if player has a flag
-    if (target->flag_)
-    {
-        // check if the player is on our team
-        if (team == otherTeam)
-        {
-            // search for another flag owned by our team
-            bool allFlagsHome = true;
+		lastEnemyContact_ = time;
+	}
+	else
+	{
+		conquerer_[target->Player()->ListID()]+=time - lastTime;
+	}
 
-            if (sg_flagRequiredHome)
-            {
-                const tList<eGameObject>& gameObjects = Grid()->GameObjects();
-                for (int i=gameObjects.Len()-1;i>=0;i--)
-                {
-                    gFlagZoneHack *otherFlag=dynamic_cast<gFlagZoneHack *>(gameObjects(i));
+	// check if player has a flag
+	if (target->flag_)
+	{
+		// check if the player is on our team
+		if (team == otherTeam)
+		{
+			// search for another flag owned by our team
+			bool allFlagsHome = true;
 
-                    if ((otherFlag) &&
-                        (otherFlag->Team() == team))
-                    {
-                        // check if flag is at home (starting position)
-                        if (!otherFlag->IsHome())
-                        {
-                            allFlagsHome = false;
-                        }
-                    }
-                }
-            }
+			if (sg_flagRequiredHome)
+			{
+				const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+				for (int i=gameObjects.Len()-1;i>=0;i--)
+				{
+					gFlagZoneHack *otherFlag=dynamic_cast<gFlagZoneHack *>(gameObjects(i));
 
-            if (!allFlagsHome)
-            {
-                target->flag_->WarnFlagNotHome();
-            }
-            else
-            {
-                // player has scored a flag capture
-                tOutput lose;
-                tOutput win;
-                int score = sg_scoreFlag;
+					if ((otherFlag) &&
+						(otherFlag->Team() == team))
+					{
+						// check if flag is at home (starting position)
+						if (!otherFlag->IsHome())
+						{
+							allFlagsHome = false;
+						}
+					}
+				}
+			}
 
-                win << "$player_flag_score";
-                target->Player()->AddScore(score, win, lose);
+			if (!allFlagsHome)
+			{
+				target->flag_->WarnFlagNotHome();
+			}
+			else
+			{
+				// player has scored a flag capture
+				tOutput lose;
+				tOutput win;
+				int score = sg_scoreFlag;
 
-                // tell the flag to go back home
-                target->flag_->GoHome();
-            }
-        }
-    }
+				win << "$player_flag_score";
+				target->Player()->AddScore(score, win, lose);
+
+				// tell the flag to go back home
+				target->flag_->GoHome();
+			}
+		}
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -2618,125 +2705,129 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
 
 void gBaseZoneHack::OnEnter( gZone * target, REAL time )
 {
-    if(currentState_ == State_Conquering || currentState_ == State_Conquered) return; //it already hit the zone.
-    gBallZoneHack *ball = dynamic_cast<gBallZoneHack *>(target);
-    if (!ball) return;
+								 //it already hit the zone.
+	if(currentState_ == State_Conquering || currentState_ == State_Conquered) return;
+	gBallZoneHack *ball = dynamic_cast<gBallZoneHack *>(target);
+	if (!ball) return;
 
-    // check ball team mode
-    int toScore;
-    if (!team || !target ) toScore = 1;
-    else if (sg_ballTeamMode) toScore = target->Team() == team ? 1 : 0;
-    else toScore = target->Team() == team ? 0 : 1;
+	// check ball team mode
+	int toScore;
+	if (!team || !target ) toScore = 1;
+	else if (sg_ballTeamMode) toScore = target->Team() == team ? 1 : 0;
+	else toScore = target->Team() == team ? 0 : 1;
 
-    if (ball && toScore)
-    {
-        // the ball entered the goal, figure out who shot it
-        ePlayerNetID *lastPlayer = ball->GetLastPlayer();
+	if (ball && toScore)
+	{
+		// the ball entered the goal, figure out who shot it
+		ePlayerNetID *lastPlayer = ball->GetLastPlayer();
 
-        // and respawn players ...
-        if ( sg_baseRespawn || sg_baseEnemyRespawn )
-        {
-        // check for respawn
-        //??? change this to divide up spawns between bases, and randomly choose among those closest
-        gSpawnPoint *pSpawn = Arena.ClosestSpawnPoint(GetPosition());
+		// and respawn players ...
+		if ( sg_baseRespawn || sg_baseEnemyRespawn )
+		{
+			// check for respawn
+			//??? change this to divide up spawns between bases, and randomly choose among those closest
+			gSpawnPoint *pSpawn = Arena.ClosestSpawnPoint(GetPosition());
 
-        if (pSpawn)
-        {
-            for (int i = team->NumPlayers() - 1; i >= 0; --i)
-            {
-                ePlayerNetID *pPlayer = team->Player(i);
+			if (pSpawn)
+			{
+				for (int i = team->NumPlayers() - 1; i >= 0; --i)
+				{
+					ePlayerNetID *pPlayer = team->Player(i);
 
-                eGameObject *pGameObject = pPlayer->Object();
+					eGameObject *pGameObject = pPlayer->Object();
 
-                if ((!pGameObject) ||
-                    ((!pGameObject->Alive()) &&
-                    (pGameObject->DeathTime() < (time - 1))))
-                {
-                    lastRespawnRemindTime_ = time - sg_baseRespawnRemindTime - 1;
+					if ((!pGameObject) ||
+						((!pGameObject->Alive()) &&
+						(pGameObject->DeathTime() < (time - 1))))
+					{
+						lastRespawnRemindTime_ = time - sg_baseRespawnRemindTime - 1;
 
-                    eCoord pos, dir;
+						eCoord pos, dir;
 
-                    pSpawn->Spawn(pos, dir);
+						pSpawn->Spawn(pos, dir);
 
-                    gCycle *pCycle = new gCycle(grid, pos, dir, pPlayer);
-                    pPlayer->ControlObject(pCycle);
+						gCycle *pCycle = new gCycle(grid, pos, dir, pPlayer);
+						pPlayer->ControlObject(pCycle);
 
-                    tColoredString playerName;
-                    playerName << *pPlayer << tColoredString::ColorString(1,1,1);
+						tColoredString playerName;
+						playerName << *pPlayer << tColoredString::ColorString(1,1,1);
 
-                    if ((ownersInside_ > 0) && (sg_baseRespawn))
-                    {
-                        tColoredString spawnerName;
-                        spawnerName << teamPlayerName_ << tColoredString::ColorString(1,1,1);
-                        sn_ConsoleOut( tOutput( "$player_base_respawn", playerName, spawnerName ) );
-                    }
-                    else
-                    {
-                        tColoredString spawnerName;
-                        spawnerName << enemyPlayerName_ << tColoredString::ColorString(1,1,1);
-                        sn_ConsoleOut( tOutput( "$player_base_enemy_respawn", playerName, spawnerName ) );
-                    }
+						if ((ownersInside_ > 0) && (sg_baseRespawn))
+						{
+							tColoredString spawnerName;
+							spawnerName << teamPlayerName_ << tColoredString::ColorString(1,1,1);
+							sn_ConsoleOut( tOutput( "$player_base_respawn", playerName, spawnerName ) );
+						}
+						else
+						{
+							tColoredString spawnerName;
+							spawnerName << enemyPlayerName_ << tColoredString::ColorString(1,1,1);
+							sn_ConsoleOut( tOutput( "$player_base_enemy_respawn", playerName, spawnerName ) );
+						}
 
-                    // send a console message to the player
-                    sn_CenterMessage(tOutput("$player_respawn_center_message"), pPlayer->Owner());
-                }
-            }
-        }
-        }
+						// send a console message to the player
+						sn_CenterMessage(tOutput("$player_respawn_center_message"), pPlayer->Owner());
+					}
+				}
+			}
+		}
 
-        if (!lastPlayer)
-        {
-            return;
-        } else {
-            eTeam *lastTeam = lastPlayer->CurrentTeam();
+		if (!lastPlayer)
+		{
+			return;
+		}
+		else
+		{
+			eTeam *lastTeam = lastPlayer->CurrentTeam();
 
-            if (lastTeam == team)
-            {
-                // own team hit it in
-                tColoredString playerName;
-                playerName << *lastPlayer << tColoredString::ColorString(1,1,1);
-                sn_ConsoleOut( tOutput( "$player_score_own_goal", playerName ) );
+			if (lastTeam == team)
+			{
+				// own team hit it in
+				tColoredString playerName;
+				playerName << *lastPlayer << tColoredString::ColorString(1,1,1);
+				sn_ConsoleOut( tOutput( "$player_score_own_goal", playerName ) );
 
-                // search through the teams and add a point to each
-                for (int i = eTeam::teams.Len() - 1; i >= 0; i--)
-                {
-                    if (eTeam::teams(i) != team)
-                    {
-                        eTeam::teams(i)->AddScore(1);
-                        lastTeam = eTeam::teams(i);
-                    }
-                }
-            }
-            else
-            {
-                // another team hit it in, give that player the point
-                tOutput lose;
-                tOutput win;
-                int score = sg_scoreGoal;
+				// search through the teams and add a point to each
+				for (int i = eTeam::teams.Len() - 1; i >= 0; i--)
+				{
+					if (eTeam::teams(i) != team)
+					{
+						eTeam::teams(i)->AddScore(1);
+						lastTeam = eTeam::teams(i);
+					}
+				}
+			}
+			else
+			{
+				// another team hit it in, give that player the point
+				tOutput lose;
+				tOutput win;
+				int score = sg_scoreGoal;
 
-                win << "$player_score_goal";
-                lastPlayer->AddScore(score, win, lose);
-            }
+				win << "$player_score_goal";
+				lastPlayer->AddScore(score, win, lose);
+			}
 
-            // check if the round should end or we should respawn the ball
-            if (sg_goalRoundEnd)
-            {
-                //static const char* message="$player_win_instant";
-                //sg_DeclareWinner( lastTeam, message );
+			// check if the round should end or we should respawn the ball
+			if (sg_goalRoundEnd)
+			{
+				//static const char* message="$player_win_instant";
+				//sg_DeclareWinner( lastTeam, message );
 
-                //// destroy the ball
-                //ball->Destroy();
-                OnConquest();
-                currentState_ = State_Conquering;
-            }
-            else
-            {
-                // don't end the round, just respawn the ball at the original location
-                ball->GoHome();
-            }
-        }
-    }
+				//// destroy the ball
+				//ball->Destroy();
+				OnConquest();
+				currentState_ = State_Conquering;
+			}
+			else
+			{
+				// don't end the round, just respawn the ball at the original location
+				ball->GoHome();
+			}
+		}
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -2748,9 +2839,10 @@ void gBaseZoneHack::OnEnter( gZone * target, REAL time )
 // *******************************************************************************
 
 tFunction::tFunction( void )
-        : offset_(0), slope_(0)
+: offset_(0), slope_(0)
 {
 }
+
 
 // *******************************************************************************
 // *
@@ -2765,6 +2857,7 @@ tFunction::~tFunction( void )
 {
 }
 
+
 // *******************************************************************************
 // *
 // *	Evaluate
@@ -2778,8 +2871,9 @@ tFunction::~tFunction( void )
 
 REAL tFunction::Evaluate( REAL argument ) const
 {
-    return offset_ + slope_ * argument;
+	return offset_ + slope_ * argument;
 }
+
 
 // *******************************************************************************
 // *
@@ -2795,16 +2889,17 @@ REAL tFunction::Evaluate( REAL argument ) const
 
 nMessage & operator << ( nMessage & m, tFunction const & f )
 {
-    // write ID for compatibility with future extensions
-    unsigned short ID = 1;
-    m.Write( ID );
+	// write ID for compatibility with future extensions
+	unsigned short ID = 1;
+	m.Write( ID );
 
-    // write values
-    m << f.GetOffset();
-    m << f.GetSlope();
+	// write values
+	m << f.GetOffset();
+	m << f.GetSlope();
 
-    return m;
+	return m;
 }
+
 
 // *******************************************************************************
 // *
@@ -2820,20 +2915,21 @@ nMessage & operator << ( nMessage & m, tFunction const & f )
 
 nMessage & operator >> ( nMessage & m, tFunction & f )
 {
-    // write ID for compatibility with future extensions
-    unsigned short ID;
-    m.Read(ID);
-    tASSERT( ID == 1 );
+	// write ID for compatibility with future extensions
+	unsigned short ID;
+	m.Read(ID);
+	tASSERT( ID == 1 );
 
-    // read values
-    REAL slope, offset;
-    m >> offset >> slope;
+	// read values
+	REAL slope, offset;
+	m >> offset >> slope;
 
-    // store values
-    f.SetOffset( offset ).SetSlope( slope );
+	// store values
+	f.SetOffset( offset ).SetSlope( slope );
 
-    return m;
+	return m;
 }
+
 
 // *******************************************************************************
 // *
@@ -2847,10 +2943,11 @@ nMessage & operator >> ( nMessage & m, tFunction & f )
 
 eCoord gZone::GetPosition( void ) const
 {
-    eCoord ret;
-    GetPosition( ret );
-    return ret;
+	eCoord ret;
+	GetPosition( ret );
+	return ret;
 }
+
 
 // *******************************************************************************
 // *
@@ -2865,10 +2962,11 @@ eCoord gZone::GetPosition( void ) const
 
 gZone const & gZone::GetPosition( eCoord & position ) const
 {
-    position.x = EvaluateFunctionNow( posx_ );
-    position.y = EvaluateFunctionNow( posy_ );
-    return *this;
+	position.x = EvaluateFunctionNow( posx_ );
+	position.y = EvaluateFunctionNow( posy_ );
+	return *this;
 }
+
 
 // *******************************************************************************
 // *
@@ -2883,10 +2981,11 @@ gZone const & gZone::GetPosition( eCoord & position ) const
 
 gZone & gZone::SetPosition( eCoord const & position )
 {
-    SetFunctionNow( posx_, position.x );
-    SetFunctionNow( posy_, position.y );
-    return *this;
+	SetFunctionNow( posx_, position.x );
+	SetFunctionNow( posy_, position.y );
+	return *this;
 }
+
 
 // *******************************************************************************
 // *
@@ -2900,11 +2999,12 @@ gZone & gZone::SetPosition( eCoord const & position )
 
 eCoord gZone::GetVelocity( void ) const
 {
-    eCoord ret;
-    GetVelocity( ret );
+	eCoord ret;
+	GetVelocity( ret );
 
-    return ret;
+	return ret;
 }
+
 
 // *******************************************************************************
 // *
@@ -2919,11 +3019,12 @@ eCoord gZone::GetVelocity( void ) const
 
 gZone const & gZone::GetVelocity( eCoord & velocity ) const
 {
-    velocity.x = posx_.GetSlope();
-    velocity.y = posy_.GetSlope();
+	velocity.x = posx_.GetSlope();
+	velocity.y = posy_.GetSlope();
 
-    return *this;
+	return *this;
 }
+
 
 // *******************************************************************************
 // *
@@ -2938,18 +3039,19 @@ gZone const & gZone::GetVelocity( eCoord & velocity ) const
 
 gZone & gZone::SetVelocity( eCoord const & velocity )
 {
-    // backup position
-    eCoord pos;
-    GetPosition( pos );
+	// backup position
+	eCoord pos;
+	GetPosition( pos );
 
-    posx_.SetSlope( velocity.x );
-    posy_.SetSlope( velocity.y );
+	posx_.SetSlope( velocity.x );
+	posy_.SetSlope( velocity.y );
 
-    // restore position
-    SetPosition( pos );
+	// restore position
+	SetPosition( pos );
 
-    return *this;
+	return *this;
 }
+
 
 // *******************************************************************************
 // *
@@ -2963,11 +3065,12 @@ gZone & gZone::SetVelocity( eCoord const & velocity )
 
 REAL gZone::GetRadius( void ) const
 {
-    REAL ret = EvaluateFunctionNow( this->radius_ );
-    ret = ret > 0 ? ret : 0;
+	REAL ret = EvaluateFunctionNow( this->radius_ );
+	ret = ret > 0 ? ret : 0;
 
-    return ret;
+	return ret;
 }
+
 
 // *******************************************************************************
 // *
@@ -2982,10 +3085,11 @@ REAL gZone::GetRadius( void ) const
 
 gZone const & gZone::GetRadius( REAL & radius ) const
 {
-    radius = GetRadius();
+	radius = GetRadius();
 
-    return *this;
+	return *this;
 }
+
 
 // *******************************************************************************
 // *
@@ -3000,10 +3104,11 @@ gZone const & gZone::GetRadius( REAL & radius ) const
 
 gZone & gZone::SetRadius( REAL radius )
 {
-    SetFunctionNow( this->radius_, radius );
+	SetFunctionNow( this->radius_, radius );
 
-    return *this;
+	return *this;
 }
+
 
 // *******************************************************************************
 // *
@@ -3019,14 +3124,16 @@ gZone & gZone::SetRadius( REAL radius )
 
 gZone & gZone::SetRadiusSmoothly( REAL radius, REAL expansionSpeed )
 {
-    expectedRadius_ = radius;
-    if (!resizeRequested_) previousExpansionSpeed_ = GetExpansionSpeed(); // save expansion speed if not already resizing ...
-    resizeRequested_ = true;
-    expansionSpeed = (expansionSpeed==0?radius*0.5:(expansionSpeed<0?-expansionSpeed:expansionSpeed));
-    SetExpansionSpeed( (GetRadius()>radius?-expansionSpeed:expansionSpeed ));
+	expectedRadius_ = radius;
+								 // save expansion speed if not already resizing ...
+	if (!resizeRequested_) previousExpansionSpeed_ = GetExpansionSpeed();
+	resizeRequested_ = true;
+	expansionSpeed = (expansionSpeed==0?radius*0.5:(expansionSpeed<0?-expansionSpeed:expansionSpeed));
+	SetExpansionSpeed( (GetRadius()>radius?-expansionSpeed:expansionSpeed ));
 
-    return *this;
+	return *this;
 }
+
 
 // *******************************************************************************
 // *
@@ -3040,8 +3147,9 @@ gZone & gZone::SetRadiusSmoothly( REAL radius, REAL expansionSpeed )
 
 REAL gZone::GetExpansionSpeed( void ) const
 {
-    return this->radius_.GetSlope();
+	return this->radius_.GetSlope();
 }
+
 
 // *******************************************************************************
 // *
@@ -3056,10 +3164,11 @@ REAL gZone::GetExpansionSpeed( void ) const
 
 gZone const & gZone::GetExpansionSpeed( REAL & expansionSpeed ) const
 {
-    expansionSpeed = this->radius_.GetSlope();
+	expansionSpeed = this->radius_.GetSlope();
 
-    return *this;
+	return *this;
 }
+
 
 // *******************************************************************************
 // *
@@ -3074,12 +3183,13 @@ gZone const & gZone::GetExpansionSpeed( REAL & expansionSpeed ) const
 
 gZone & gZone::SetExpansionSpeed( REAL expansionSpeed )
 {
-    REAL r = EvaluateFunctionNow( this->radius_ );
-    this->radius_.SetSlope( expansionSpeed );
-    SetRadius( r );
+	REAL r = EvaluateFunctionNow( this->radius_ );
+	this->radius_.SetSlope( expansionSpeed );
+	SetRadius( r );
 
-    return *this;
+	return *this;
 }
+
 
 // *******************************************************************************
 // *
@@ -3092,15 +3202,16 @@ gZone & gZone::SetExpansionSpeed( REAL expansionSpeed )
 
 void gZone::SetReferenceTime( void )
 {
-    // set offsets to current values
-    this->posx_.SetOffset( EvaluateFunctionNow( this->posx_ ) );
-    this->posy_.SetOffset( EvaluateFunctionNow( this->posy_ ) );
-    this->radius_.SetOffset( EvaluateFunctionNow( this->radius_ ) );
-    this->rotationSpeed_.SetOffset( EvaluateFunctionNow( this->rotationSpeed_ ) );
+	// set offsets to current values
+	this->posx_.SetOffset( EvaluateFunctionNow( this->posx_ ) );
+	this->posy_.SetOffset( EvaluateFunctionNow( this->posy_ ) );
+	this->radius_.SetOffset( EvaluateFunctionNow( this->radius_ ) );
+	this->rotationSpeed_.SetOffset( EvaluateFunctionNow( this->rotationSpeed_ ) );
 
-    // reset time
-    this->referenceTime_ = lastTime;
+	// reset time
+	this->referenceTime_ = lastTime;
 }
+
 
 // *******************************************************************************
 // *
@@ -3114,8 +3225,9 @@ void gZone::SetReferenceTime( void )
 
 REAL gZone::GetRotationSpeed( void ) const
 {
-    return EvaluateFunctionNow( rotationSpeed_ );
+	return EvaluateFunctionNow( rotationSpeed_ );
 }
+
 
 // *******************************************************************************
 // *
@@ -3130,9 +3242,10 @@ REAL gZone::GetRotationSpeed( void ) const
 
 gZone const & gZone::GetRotationSpeed( REAL & rotationSpeed ) const
 {
-    rotationSpeed = this->GetRotationSpeed();
-    return *this;
+	rotationSpeed = this->GetRotationSpeed();
+	return *this;
 }
+
 
 // *******************************************************************************
 // *
@@ -3147,9 +3260,10 @@ gZone const & gZone::GetRotationSpeed( REAL & rotationSpeed ) const
 
 gZone & gZone::SetRotationSpeed( REAL rotationSpeed )
 {
-    SetFunctionNow( this->rotationSpeed_, rotationSpeed );
-    return *this;
+	SetFunctionNow( this->rotationSpeed_, rotationSpeed );
+	return *this;
 }
+
 
 // *******************************************************************************
 // *
@@ -3163,8 +3277,9 @@ gZone & gZone::SetRotationSpeed( REAL rotationSpeed )
 
 REAL gZone::GetRotationAcceleration( void ) const
 {
-    return this->rotationSpeed_.GetSlope();
+	return this->rotationSpeed_.GetSlope();
 }
+
 
 // *******************************************************************************
 // *
@@ -3179,9 +3294,10 @@ REAL gZone::GetRotationAcceleration( void ) const
 
 gZone const & gZone::GetRotationAcceleration( REAL & rotationAcceleration ) const
 {
-    rotationAcceleration = this->GetRotationAcceleration();
-    return *this;
+	rotationAcceleration = this->GetRotationAcceleration();
+	return *this;
 }
+
 
 // *******************************************************************************
 // *
@@ -3196,12 +3312,13 @@ gZone const & gZone::GetRotationAcceleration( REAL & rotationAcceleration ) cons
 
 gZone & gZone::SetRotationAcceleration( REAL rotationAcceleration )
 {
-    REAL omega = this->GetRotationSpeed();
-    this->rotationSpeed_.SetSlope( rotationAcceleration );
-    SetRotationSpeed( omega );
+	REAL omega = this->GetRotationSpeed();
+	this->rotationSpeed_.SetSlope( rotationAcceleration );
+	SetRotationSpeed( omega );
 
-    return *this;
+	return *this;
 }
+
 
 // *******************************************************************************
 // *
@@ -3215,24 +3332,25 @@ gZone & gZone::SetRotationAcceleration( REAL rotationAcceleration )
 // *******************************************************************************
 
 gBallZoneHack::gBallZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, eTeam * teamowner )
-        :gZone( grid, pos, dynamicCreation )
+:gZone( grid, pos, dynamicCreation )
 {
-    color_.r = 1.0f;
-    color_.g = 1.0f;
-    color_.b = 1.0f;
+	color_.r = 1.0f;
+	color_.g = 1.0f;
+	color_.b = 1.0f;
 
-    wallInteract_ = true;
-    wallBouncesLeft_ = -1;
-    lastPlayer_ = NULL;
-    originalPosition_ = pos;
-    originalVelocity_ = eCoord(0,0);
-    init_ = false;
-    lastImpactTime_ = 0;
+	wallInteract_ = true;
+	wallBouncesLeft_ = -1;
+	lastPlayer_ = NULL;
+	originalPosition_ = pos;
+	originalVelocity_ = eCoord(0,0);
+	init_ = false;
+	lastImpactTime_ = 0;
 
-    if (teamowner!=NULL) team = teamowner;
+	if (teamowner!=NULL) team = teamowner;
 
-    grid->AddGameObjectInteresting(this);
+	grid->AddGameObjectInteresting(this);
 }
+
 
 // *******************************************************************************
 // *
@@ -3246,13 +3364,14 @@ gBallZoneHack::gBallZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCrea
 // *******************************************************************************
 
 gBallZoneHack::gBallZoneHack( nMessage & m )
-        : gZone( m )
+: gZone( m )
 {
-    lastPlayer_ = NULL;
-    init_ = false;
-    originalPosition_ = pos;
-    originalVelocity_ = eCoord(0,0);
+	lastPlayer_ = NULL;
+	init_ = false;
+	originalPosition_ = pos;
+	originalVelocity_ = eCoord(0,0);
 }
+
 
 // *******************************************************************************
 // *
@@ -3267,14 +3386,16 @@ gBallZoneHack::~gBallZoneHack( void )
 {
 }
 
+
 static eLadderLogWriter sg_ballVanishWriter("BALL_VANISH", false);
 
 void gBallZoneHack::OnVanish( void )
 {
-    grid->RemoveGameObjectInteresting(this);
-    sg_ballVanishWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y;
-    sg_ballVanishWriter.write();
+	grid->RemoveGameObjectInteresting(this);
+	sg_ballVanishWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y;
+	sg_ballVanishWriter.write();
 }
+
 
 // *******************************************************************************
 // *
@@ -3288,18 +3409,19 @@ void gBallZoneHack::OnVanish( void )
 
 bool gBallZoneHack::Timestep( REAL time )
 {
-    // initialize the zone info, this happens only once, but has to happen after construction
-    if (!init_)
-    {
-        init_ = true;
-        originalVelocity_ = GetVelocity();
-    }
+	// initialize the zone info, this happens only once, but has to happen after construction
+	if (!init_)
+	{
+		init_ = true;
+		originalVelocity_ = GetVelocity();
+	}
 
-    // delegate
-    bool returnStatus = gZone::Timestep( time );
+	// delegate
+	bool returnStatus = gZone::Timestep( time );
 
-    return (returnStatus);
+	return (returnStatus);
 }
+
 
 // *******************************************************************************
 // *
@@ -3317,135 +3439,137 @@ extern eLadderLogWriter sg_deathTeamkillWriter;
 
 void gBallZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    if ((!target) || (!target->Player()))
-    {
-        return;
-    }
+	if ((!target) || (!target->Player()))
+	{
+		return;
+	}
 
-    REAL dt = time - referenceTime_;
-    eCoord dest(posx_(dt), posy_(dt));
-    s_zoneWallInteractionFound = false;
-    s_zoneWallInteractionCoord = dest;
-    s_zoneWallInteractionRadius = GetRadius();
-    grid->ProcessWallsInRange(&S_ZoneWallIntersect,
-                              s_zoneWallInteractionCoord,
-                              s_zoneWallInteractionRadius,
-                              CurrentFace());
+	REAL dt = time - referenceTime_;
+	eCoord dest(posx_(dt), posy_(dt));
+	s_zoneWallInteractionFound = false;
+	s_zoneWallInteractionCoord = dest;
+	s_zoneWallInteractionRadius = GetRadius();
+	grid->ProcessWallsInRange(&S_ZoneWallIntersect,
+		s_zoneWallInteractionCoord,
+		s_zoneWallInteractionRadius,
+		CurrentFace());
 
-    // keep some data to allow to bounce even for killing balls ...
-    eCoord p2 = target->Position();
-    eCoord v2 = target->Direction()*target->Speed();
+	// keep some data to allow to bounce even for killing balls ...
+	eCoord p2 = target->Position();
+	eCoord v2 = target->Direction()*target->Speed();
 
-    // check killer balls ... ;)
-    ePlayerNetID * prey = target->Player();
-    if ((sg_ballKiller) && (team) && !(prey->CurrentTeam() == team))
-    {
-        target->Kill();
-        // scoring ...
-        if ( lastPlayer_ )
-        {
-            tOutput lose;
-            tOutput win;
-            ePlayerNetID * hunter = lastPlayer_;
+	// check killer balls ... ;)
+	ePlayerNetID * prey = target->Player();
+	if ((sg_ballKiller) && (team) && !(prey->CurrentTeam() == team))
+	{
+		target->Kill();
+		// scoring ...
+		if ( lastPlayer_ )
+		{
+			tOutput lose;
+			tOutput win;
+			ePlayerNetID * hunter = lastPlayer_;
 
-            if ( hunter->CurrentTeam() != prey->CurrentTeam() )
-            {
-                tColoredString preyName;
-                preyName << *prey;
-                preyName << tColoredString::ColorString(1,1,1);
-                if (prey->CurrentTeam() != hunter->CurrentTeam()) {
-                    sg_deathFragWriter << prey->GetUserName() << nMachine::GetMachine(prey->Owner()).GetIP() 
-                                           << hunter->GetUserName() << nMachine::GetMachine(hunter->Owner()).GetIP();
-                    sg_deathFragWriter.write();
+			if ( hunter->CurrentTeam() != prey->CurrentTeam() )
+			{
+				tColoredString preyName;
+				preyName << *prey;
+				preyName << tColoredString::ColorString(1,1,1);
+				if (prey->CurrentTeam() != hunter->CurrentTeam())
+				{
+					sg_deathFragWriter << prey->GetUserName() << nMachine::GetMachine(prey->Owner()).GetIP()
+						<< hunter->GetUserName() << nMachine::GetMachine(hunter->Owner()).GetIP();
+					sg_deathFragWriter.write();
 
-                    win.SetTemplateParameter(3, preyName);
-                    win << "$player_win_frag";
-                    if ( score_kill != 0 )
-                        hunter->AddScore(score_kill, win, lose );
-                    else
-                    {
-                        tColoredString hunterName;
-                        hunterName << *hunter << tColoredString::ColorString(1,1,1);
-                        sn_ConsoleOut( tOutput( "$player_free_frag", hunterName, preyName ) );
-                    }
-                }
-                else { // this should never happens as the killed player is not kept as lastplayer but we can change it easily ;)
-                    sg_deathTeamkillWriter << prey->GetUserName() << nMachine::GetMachine(prey->Owner()).GetIP() 
-                                           << hunter->GetUserName() << nMachine::GetMachine(hunter->Owner()).GetIP();
-                    sg_deathTeamkillWriter.write();
+					win.SetTemplateParameter(3, preyName);
+					win << "$player_win_frag";
+					if ( score_kill != 0 )
+						hunter->AddScore(score_kill, win, lose );
+					else
+					{
+						tColoredString hunterName;
+						hunterName << *hunter << tColoredString::ColorString(1,1,1);
+						sn_ConsoleOut( tOutput( "$player_free_frag", hunterName, preyName ) );
+					}
+				}
+				else			 // this should never happens as the killed player is not kept as lastplayer but we can change it easily ;)
+				{
+					sg_deathTeamkillWriter << prey->GetUserName() << nMachine::GetMachine(prey->Owner()).GetIP()
+						<< hunter->GetUserName() << nMachine::GetMachine(hunter->Owner()).GetIP();
+					sg_deathTeamkillWriter.write();
 
-                    tColoredString hunterName;
-                    hunterName << *hunter << tColoredString::ColorString(1,1,1);
-                    sn_ConsoleOut( tOutput( "$player_teamkill", hunterName, preyName ) );
-                }
-            }
-        }
-        else
-            target->Player()->AddScore(score_deathzone, tOutput(), "$player_lose_suicide");
-    }
-    else
-    {
-        // keep the last cycle to enter even if we're discarding this hit
-        lastPlayer_ = target->Player();
-    }
+					tColoredString hunterName;
+					hunterName << *hunter << tColoredString::ColorString(1,1,1);
+					sn_ConsoleOut( tOutput( "$player_teamkill", hunterName, preyName ) );
+				}
+			}
+		}
+		else
+			target->Player()->AddScore(score_deathzone, tOutput(), "$player_lose_suicide");
+	}
+	else
+	{
+		// keep the last cycle to enter even if we're discarding this hit
+		lastPlayer_ = target->Player();
+	}
 
-    //Only process the cycle kick if there is no wall inside the zone
-    if (s_zoneWallInteractionFound)
-        return;
+	//Only process the cycle kick if there is no wall inside the zone
+	if (s_zoneWallInteractionFound)
+		return;
 
-    REAL r1 = this->GetRadius();
-    REAL r2 = 0.2; // the cycle "radius". to be adjusted ...
-    REAL R = r1 + r2;
-    eCoord p1 = this->Position();
-    eCoord dp = p2 - p1;
-    REAL c = dp.NormSquared() - R * R;
-    // first find the real time and position of the impact ...
-    eCoord v1 = this->GetVelocity();
-    eCoord dv = v2 - v1;
-    REAL a = dv.NormSquared();
-    REAL b = 2*(dp.x*dv.x+dp.y*dv.y);
-    REAL delta = b*b-4*a*c;
-    if (delta<0) return; // no t. it can't be, an impact just occured ...
-    delta = sqrt(delta);
-    REAL t1 = (-b-delta)/(2*a);
-    REAL t2 = (-b+delta)/(2*a);
-    REAL t = 0;
-    if ((t1>0) && (t2>0)) return; // can't be, again ...
-    if (t1>0) t = t2;
-    else if (t2>0) t = t1;
-    else if (t1>t2) t = t1;
-    else t = t2;
+	REAL r1 = this->GetRadius();
+	REAL r2 = 0.2;				 // the cycle "radius". to be adjusted ...
+	REAL R = r1 + r2;
+	eCoord p1 = this->Position();
+	eCoord dp = p2 - p1;
+	REAL c = dp.NormSquared() - R * R;
+	// first find the real time and position of the impact ...
+	eCoord v1 = this->GetVelocity();
+	eCoord dv = v2 - v1;
+	REAL a = dv.NormSquared();
+	REAL b = 2*(dp.x*dv.x+dp.y*dv.y);
+	REAL delta = b*b-4*a*c;
+	if (delta<0) return;		 // no t. it can't be, an impact just occured ...
+	delta = sqrt(delta);
+	REAL t1 = (-b-delta)/(2*a);
+	REAL t2 = (-b+delta)/(2*a);
+	REAL t = 0;
+	if ((t1>0) && (t2>0)) return;// can't be, again ...
+	if (t1>0) t = t2;
+	else if (t2>0) t = t1;
+	else if (t1>t2) t = t1;
+	else t = t2;
 
-    // if a wall impact happens too close, just skip cycle bouncing for now ...
-    if (t < lastImpactTime_ - time) return;
+	// if a wall impact happens too close, just skip cycle bouncing for now ...
+	if (t < lastImpactTime_ - time) return;
 
-    // now that we have the time, get the positions ...
-    eCoord p1c = p1+v1*t;
-    eCoord p2c = p2+v2*t;
-    // now compute the impact : new velocities and new correct positions ...
-    eCoord base = (p2c-p1c);
-    base.Normalize();
-    eCoord new_v1 = base*-target->Speed();
-    eCoord new_p1 = p1c + new_v1*(-t+0.01);
-    new_v1 = new_v1*(1+sg_ballCycleBoost*target->GetAcceleration()/100);
+	// now that we have the time, get the positions ...
+	eCoord p1c = p1+v1*t;
+	eCoord p2c = p2+v2*t;
+	// now compute the impact : new velocities and new correct positions ...
+	eCoord base = (p2c-p1c);
+	base.Normalize();
+	eCoord new_v1 = base*-target->Speed();
+	eCoord new_p1 = p1c + new_v1*(-t+0.01);
+	new_v1 = new_v1*(1+sg_ballCycleBoost*target->GetAcceleration()/100);
 
-    s_zoneWallInteractionFound = false;
-    s_zoneWallInteractionCoord = new_p1 + new_v1 * dt;
-    s_zoneWallInteractionRadius = GetRadius();
-    grid->ProcessWallsInRange(&S_ZoneWallIntersect,
-                              s_zoneWallInteractionCoord,
-                              s_zoneWallInteractionRadius,
-                              CurrentFace());
+	s_zoneWallInteractionFound = false;
+	s_zoneWallInteractionCoord = new_p1 + new_v1 * dt;
+	s_zoneWallInteractionRadius = GetRadius();
+	grid->ProcessWallsInRange(&S_ZoneWallIntersect,
+		s_zoneWallInteractionCoord,
+		s_zoneWallInteractionRadius,
+		CurrentFace());
 
+	if (s_zoneWallInteractionFound)
+		return;
 
-    if (s_zoneWallInteractionFound)
-        return;
-
-    SetReferenceTime();
-    this->SetPosition(new_p1);
-    this->SetVelocity(new_v1);
-    RequestSync();
+	SetReferenceTime();
+	this->SetPosition(new_p1);
+	this->SetVelocity(new_v1);
+	RequestSync();
 }
+
 
 // *******************************************************************************
 // *
@@ -3455,11 +3579,12 @@ void gBallZoneHack::OnEnter( gCycle * target, REAL time )
 
 void gBallZoneHack::RemovePlayer( ePlayerNetID *player )
 {
-    if (&*lastPlayer_ == player)
-    {
-        lastPlayer_ = NULL;
-    }
+	if (&*lastPlayer_ == player)
+	{
+		lastPlayer_ = NULL;
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -3469,8 +3594,9 @@ void gBallZoneHack::RemovePlayer( ePlayerNetID *player )
 
 ePlayerNetID * gBallZoneHack::GetLastPlayer()
 {
-    return lastPlayer_;
+	return lastPlayer_;
 }
+
 
 // *******************************************************************************
 // *
@@ -3480,15 +3606,16 @@ ePlayerNetID * gBallZoneHack::GetLastPlayer()
 
 void gBallZoneHack::GoHome()
 {
-    // remove the last cycle
-    lastPlayer_ = NULL;
+	// remove the last cycle
+	lastPlayer_ = NULL;
 
-    // put the ball at home
-    SetReferenceTime();
-    SetPosition(originalPosition_);
-    SetVelocity(originalVelocity_);
-    RequestSync();
+	// put the ball at home
+	SetReferenceTime();
+	SetPosition(originalPosition_);
+	SetVelocity(originalVelocity_);
+	RequestSync();
 }
+
 
 // *******************************************************************************
 // *
@@ -3502,30 +3629,31 @@ void gBallZoneHack::GoHome()
 // *******************************************************************************
 
 gFlagZoneHack::gFlagZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, eTeam * teamowner  )
-        :gZone( grid, pos, dynamicCreation )
+:gZone( grid, pos, dynamicCreation )
 {
-    color_.r = 1.0f;
-    color_.g = 1.0f;
-    color_.b = 1.0f;
+	color_.r = 1.0f;
+	color_.g = 1.0f;
+	color_.b = 1.0f;
 
-    init_ = false;
-    originalPosition_ = pos;
-    homePosition_ = pos;
-    owner_ = NULL;
-    ownerTime_ = 0;
-    ownerWarnedNotHome_ = false;
-    chatBlinkUpdateTime_ = 0;
-    blinkUpdateTime_ = 0;
-    blinkTrackUpdateTime_ = 0;
-    ownerDropped_ = NULL;
-    ownerDroppedTime_ = 0;
-    lastHoldScoreTime_ = -1;
-    positionUpdatePending_ = false;
+	init_ = false;
+	originalPosition_ = pos;
+	homePosition_ = pos;
+	owner_ = NULL;
+	ownerTime_ = 0;
+	ownerWarnedNotHome_ = false;
+	chatBlinkUpdateTime_ = 0;
+	blinkUpdateTime_ = 0;
+	blinkTrackUpdateTime_ = 0;
+	ownerDropped_ = NULL;
+	ownerDroppedTime_ = 0;
+	lastHoldScoreTime_ = -1;
+	positionUpdatePending_ = false;
 
-    SetExpansionSpeed(0);
-    SetRotationSpeed( .3f );
-    if (teamowner!=NULL) team = teamowner;
+	SetExpansionSpeed(0);
+	SetRotationSpeed( .3f );
+	if (teamowner!=NULL) team = teamowner;
 }
+
 
 // *******************************************************************************
 // *
@@ -3539,22 +3667,23 @@ gFlagZoneHack::gFlagZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCrea
 // *******************************************************************************
 
 gFlagZoneHack::gFlagZoneHack( nMessage & m )
-        : gZone( m )
+: gZone( m )
 {
-    init_ = false;
-    originalPosition_ = pos;
-    homePosition_ = pos;
-    owner_ = NULL;
-    ownerTime_ = 0;
-    ownerWarnedNotHome_ = false;
-    chatBlinkUpdateTime_ = 0;
-    blinkUpdateTime_ = 0;
-    blinkTrackUpdateTime_ = 0;
-    ownerDropped_ = NULL;
-    ownerDroppedTime_ = 0;
-    lastHoldScoreTime_ = -1;
-    positionUpdatePending_ = false;
+	init_ = false;
+	originalPosition_ = pos;
+	homePosition_ = pos;
+	owner_ = NULL;
+	ownerTime_ = 0;
+	ownerWarnedNotHome_ = false;
+	chatBlinkUpdateTime_ = 0;
+	blinkUpdateTime_ = 0;
+	blinkTrackUpdateTime_ = 0;
+	ownerDropped_ = NULL;
+	ownerDroppedTime_ = 0;
+	lastHoldScoreTime_ = -1;
+	positionUpdatePending_ = false;
 }
+
 
 // *******************************************************************************
 // *
@@ -3567,9 +3696,10 @@ gFlagZoneHack::gFlagZoneHack( nMessage & m )
 
 gFlagZoneHack::~gFlagZoneHack( void )
 {
-    // remove the owner
-    RemoveOwner();
+	// remove the owner
+	RemoveOwner();
 }
+
 
 // if positive, blinks chat box of the player with the flag at the time in this setting
 static float sg_flagChatBlinkTime = -1;
@@ -3635,239 +3765,240 @@ static tSettingItem<float> sg_flagColorBConfig( "FLAG_COLOR_B", sg_flagColorB );
 
 bool gFlagZoneHack::Timestep( REAL time )
 {
-    // initialize the zone info, this happens only once, but has to happen after construction
-    if (!init_)
-    {
-        init_ = true;
+	// initialize the zone info, this happens only once, but has to happen after construction
+	if (!init_)
+	{
+		init_ = true;
 
-        // save the original radius, can't do this at construction
-        originalRadius_ = GetRadius();
+		// save the original radius, can't do this at construction
+		originalRadius_ = GetRadius();
 
-        if ((sg_flagColorR >= 0) &&
-            (sg_flagColorG >= 0) &&
-            (sg_flagColorB >= 0))
-        {
-            color_.r = sg_flagColorR;
-            color_.g = sg_flagColorG;
-            color_.b = sg_flagColorB;
+		if ((sg_flagColorR >= 0) &&
+			(sg_flagColorG >= 0) &&
+			(sg_flagColorB >= 0))
+		{
+			color_.r = sg_flagColorR;
+			color_.g = sg_flagColorG;
+			color_.b = sg_flagColorB;
 
-            if (color_.r > 1.0)
-            {
-                color_.r = 1.0;
-            }
-            if (color_.g > 1.0)
-            {
-                color_.g = 1.0;
-            }
-            if (color_.b > 1.0)
-            {
-                color_.b = 1.0;
-            }
+			if (color_.r > 1.0)
+			{
+				color_.r = 1.0;
+			}
+			if (color_.g > 1.0)
+			{
+				color_.g = 1.0;
+			}
+			if (color_.b > 1.0)
+			{
+				color_.b = 1.0;
+			}
 
-            RequestSync();
-        }
+			RequestSync();
+		}
 
-        // if this is a team based flag, find the team
-        //??? PIG - FIX to make sure every player has a flag?
-        if (sg_flagTeam)
-        {
-            const tList<eGameObject>& gameObjects = Grid()->GameObjects();
-            gCycle * closest = NULL;
-            REAL closestDistance = 0;
-            for (int i=gameObjects.Len()-1;i>=0;i--)
-            {
-                gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
+		// if this is a team based flag, find the team
+		//??? PIG - FIX to make sure every player has a flag?
+		if (sg_flagTeam)
+		{
+			const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+			gCycle * closest = NULL;
+			REAL closestDistance = 0;
+			for (int i=gameObjects.Len()-1;i>=0;i--)
+			{
+				gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
 
-                if (other )
-                {
-                    // eTeam * otherTeam = other->Player()->CurrentTeam();
-                    eCoord otherpos = other->Position() - pos;
-                    REAL distance = otherpos.NormSquared();
-                    if ( !closest || distance < closestDistance )
-                    {
-                        closest = other;
-                        closestDistance = distance;
-                    }
-                }
-            }
+				if (other )
+				{
+					// eTeam * otherTeam = other->Player()->CurrentTeam();
+					eCoord otherpos = other->Position() - pos;
+					REAL distance = otherpos.NormSquared();
+					if ( !closest || distance < closestDistance )
+					{
+						closest = other;
+						closestDistance = distance;
+					}
+				}
+			}
 
-            if ( closest )
-            {
-                // take over team and color
-                team = closest->Player()->CurrentTeam();
-                color_.r = team->R()/15.0;
-                color_.g = team->G()/15.0;
-                color_.b = team->B()/15.0;
+			if ( closest )
+			{
+				// take over team and color
+				team = closest->Player()->CurrentTeam();
+				color_.r = team->R()/15.0;
+				color_.g = team->G()/15.0;
+				color_.b = team->B()/15.0;
 
-                color_.r += (1.0 - color_.r) / 1.8;
-                color_.g += (1.0 - color_.g) / 1.8;
-                color_.b += (1.0 - color_.b) / 1.8;
+				color_.r += (1.0 - color_.r) / 1.8;
+				color_.g += (1.0 - color_.g) / 1.8;
+				color_.b += (1.0 - color_.b) / 1.8;
 
-                RequestSync();
-            }
+				RequestSync();
+			}
 
-            // if this zone does not belong to a team, discard it.
-            if ( !team )
-            {
-                return true;
-            }
-        }
-    }
+			// if this zone does not belong to a team, discard it.
+			if ( !team )
+			{
+				return true;
+			}
+		}
+	}
 
-    // check if the flag is owned
-    if (owner_)
-    {
-        ePlayerNetID *player = owner_->Player();
+	// check if the flag is owned
+	if (owner_)
+	{
+		ePlayerNetID *player = owner_->Player();
 
-        if ((player) &&
-            (sg_flagHoldTime > 0) &&
-            (time >= (ownerTime_ + sg_flagHoldTime)))
-        {
-            // go home
-            GoHome();
+		if ((player) &&
+			(sg_flagHoldTime > 0) &&
+			(time >= (ownerTime_ + sg_flagHoldTime)))
+		{
+			// go home
+			GoHome();
 
-            tColoredString playerName;
-            playerName << *player << tColoredString::ColorString(1,1,1);
-            sn_ConsoleOut( tOutput( "$player_flag_timeout", playerName ) );
-        }
-    }
+			tColoredString playerName;
+			playerName << *player << tColoredString::ColorString(1,1,1);
+			sn_ConsoleOut( tOutput( "$player_flag_timeout", playerName ) );
+		}
+	}
 
-    // check if the flag is owned
-    if (owner_)
-    {
-        ePlayerNetID *player = owner_->Player();
+	// check if the flag is owned
+	if (owner_)
+	{
+		ePlayerNetID *player = owner_->Player();
 
-        if (player)
-        {
-            if ((sg_flagHoldScoreTime > 0) &&
-                (sg_flagHoldScore) &&
-                (time >= (lastHoldScoreTime_ + sg_flagHoldScoreTime)))
-            {
-                lastHoldScoreTime_ = time;
+		if (player)
+		{
+			if ((sg_flagHoldScoreTime > 0) &&
+				(sg_flagHoldScore) &&
+				(time >= (lastHoldScoreTime_ + sg_flagHoldScoreTime)))
+			{
+				lastHoldScoreTime_ = time;
 
-                tOutput win;
-                tOutput lose;
+				tOutput win;
+				tOutput lose;
 
-                win << "$player_flag_hold_score_win";
-                lose << "$player_flag_hold_score_lose";
+				win << "$player_flag_hold_score_win";
+				lose << "$player_flag_hold_score_lose";
 
-                player->AddScore(sg_flagHoldScore, win, lose);
-            }
-        }
+				player->AddScore(sg_flagHoldScore, win, lose);
+			}
+		}
 
-        if (player)
-        {
-            // check if flag chat blinking is enabled
-            if (sg_flagChatBlinkTime > 0)
-            {
-                if (player->flagOverrideChat)
-                {
-                    if (time > (chatBlinkUpdateTime_ + sg_flagChatBlinkTime))
-                    {
-                        chatBlinkUpdateTime_ = time;
-                        player->flagChatState = !player->flagChatState;
-                        player->RequestSync();
-                    }
-                }
-                else
-                {
-                    // start the override
-                    chatBlinkUpdateTime_ = time;
-                    player->flagOverrideChat = true;
-                    player->flagChatState = false;
-                    player->RequestSync();
-                }
-            }
-        }
+		if (player)
+		{
+			// check if flag chat blinking is enabled
+			if (sg_flagChatBlinkTime > 0)
+			{
+				if (player->flagOverrideChat)
+				{
+					if (time > (chatBlinkUpdateTime_ + sg_flagChatBlinkTime))
+					{
+						chatBlinkUpdateTime_ = time;
+						player->flagChatState = !player->flagChatState;
+						player->RequestSync();
+					}
+				}
+				else
+				{
+					// start the override
+					chatBlinkUpdateTime_ = time;
+					player->flagOverrideChat = true;
+					player->flagChatState = false;
+					player->RequestSync();
+				}
+			}
+		}
 
-        if (sg_flagBlinkTime > 0)
-        {
-            REAL startRadiusPercent = sg_flagBlinkStart;
-            if (startRadiusPercent < 0)
-            {
-                startRadiusPercent = 0;
-            }
+		if (sg_flagBlinkTime > 0)
+		{
+			REAL startRadiusPercent = sg_flagBlinkStart;
+			if (startRadiusPercent < 0)
+			{
+				startRadiusPercent = 0;
+			}
 
-            REAL endRadiusPercent = sg_flagBlinkEnd;
-            if (endRadiusPercent < startRadiusPercent)
-            {
-                endRadiusPercent = startRadiusPercent;
-            }
+			REAL endRadiusPercent = sg_flagBlinkEnd;
+			if (endRadiusPercent < startRadiusPercent)
+			{
+				endRadiusPercent = startRadiusPercent;
+			}
 
-            // get the time the flag will be on
-            REAL onTime = sg_flagBlinkTime;
+			// get the time the flag will be on
+			REAL onTime = sg_flagBlinkTime;
 
-            if ((sg_flagBlinkOnTime > 0) &&
-                (sg_flagBlinkOnTime < onTime))
-            {
-                onTime = sg_flagBlinkOnTime;
-            }
+			if ((sg_flagBlinkOnTime > 0) &&
+				(sg_flagBlinkOnTime < onTime))
+			{
+				onTime = sg_flagBlinkOnTime;
+			}
 
-            if (time >= (blinkUpdateTime_ + sg_flagBlinkTime))
-            {
-                // start a new blink
-                blinkUpdateTime_ = time;
-                blinkTrackUpdateTime_ = time;
+			if (time >= (blinkUpdateTime_ + sg_flagBlinkTime))
+			{
+				// start a new blink
+				blinkUpdateTime_ = time;
+				blinkTrackUpdateTime_ = time;
 
-                REAL expansionSpeed =
-                    (originalRadius_ *
-                     (endRadiusPercent - startRadiusPercent)) /
-                    onTime;
+				REAL expansionSpeed =
+					(originalRadius_ *
+					(endRadiusPercent - startRadiusPercent)) /
+					onTime;
 
-                SetReferenceTime();
+				SetReferenceTime();
 
-                if (sg_flagBlinkTrackTime > 0)
-                {
-                    SetPosition(owner_->Position());
-                    SetVelocity(owner_->Direction() * owner_->Speed());
-                }
-                else
-                {
-                    eCoord estimatedPosition =
-                        (owner_->Position() +
-                         (owner_->Direction() *
-                          (sg_flagBlinkEstimatePosition * owner_->Speed() * onTime)));
+				if (sg_flagBlinkTrackTime > 0)
+				{
+					SetPosition(owner_->Position());
+					SetVelocity(owner_->Direction() * owner_->Speed());
+				}
+				else
+				{
+					eCoord estimatedPosition =
+						(owner_->Position() +
+						(owner_->Direction() *
+						(sg_flagBlinkEstimatePosition * owner_->Speed() * onTime)));
 
-                    SetPosition(estimatedPosition);
-                    SetVelocity(se_zeroCoord);
-                }
+					SetPosition(estimatedPosition);
+					SetVelocity(se_zeroCoord);
+				}
 
-                SetRadius(originalRadius_ * startRadiusPercent);
-                SetExpansionSpeed(expansionSpeed);
-                RequestSync();
-            }
-            else if (GetRadius() > 0)
-            {
-                if (time >= (blinkUpdateTime_ + onTime))
-                {
-                    // kill the blink until the next update time
-                    SetReferenceTime();
-                    SetVelocity(se_zeroCoord);
-                    SetRadius(0);
-                    SetExpansionSpeed(0);
-                    RequestSync();
-                }
-                else if ((sg_flagBlinkTrackTime > 0) &&
-                         (time >= (blinkTrackUpdateTime_ + sg_flagBlinkTrackTime)))
-                {
-                    // track the owner again
-                    SetReferenceTime();
-                    SetPosition(owner_->Position());
-                    SetVelocity(owner_->Direction() * owner_->Speed());
-                    RequestSync();
-                }
-            }
-        }
-    }
+				SetRadius(originalRadius_ * startRadiusPercent);
+				SetExpansionSpeed(expansionSpeed);
+				RequestSync();
+			}
+			else if (GetRadius() > 0)
+			{
+				if (time >= (blinkUpdateTime_ + onTime))
+				{
+					// kill the blink until the next update time
+					SetReferenceTime();
+					SetVelocity(se_zeroCoord);
+					SetRadius(0);
+					SetExpansionSpeed(0);
+					RequestSync();
+				}
+				else if ((sg_flagBlinkTrackTime > 0) &&
+					(time >= (blinkTrackUpdateTime_ + sg_flagBlinkTrackTime)))
+				{
+					// track the owner again
+					SetReferenceTime();
+					SetPosition(owner_->Position());
+					SetVelocity(owner_->Direction() * owner_->Speed());
+					RequestSync();
+				}
+			}
+		}
+	}
 
-    // delegate
-    bool returnStatus = gZone::Timestep( time );
+	// delegate
+	bool returnStatus = gZone::Timestep( time );
 
-    // any pending position updates have been made
-    positionUpdatePending_ = false;
+	// any pending position updates have been made
+	positionUpdatePending_ = false;
 
-    return (returnStatus);
+	return (returnStatus);
 }
+
 
 // *******************************************************************************
 // *
@@ -3882,63 +4013,64 @@ bool gFlagZoneHack::Timestep( REAL time )
 
 void gFlagZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    // make sure target, player, and their team are OK
-    if ((!target) ||
-        (!target->Player()) ||
-        (!target->Player()->CurrentTeam()))
-    {
-        return;
-    }
+	// make sure target, player, and their team are OK
+	if ((!target) ||
+		(!target->Player()) ||
+		(!target->Player()->CurrentTeam()))
+	{
+		return;
+	}
 
-    // don't process if not initialized yet or owned or updating
-    if ((!init_) ||
-        (owner_) ||
-        (positionUpdatePending_))
-    {
-        return;
-    }
+	// don't process if not initialized yet or owned or updating
+	if ((!init_) ||
+		(owner_) ||
+		(positionUpdatePending_))
+	{
+		return;
+	}
 
-    // check if the player is on our team or not (check will fail if team not enabled)
-    if (target->Player()->CurrentTeam() == team)
-    {
-        // player is on our team, if we're not at home, go back
-        if (!IsHome())
-        {
-            // go home
-            GoHome();
+	// check if the player is on our team or not (check will fail if team not enabled)
+	if (target->Player()->CurrentTeam() == team)
+	{
+		// player is on our team, if we're not at home, go back
+		if (!IsHome())
+		{
+			// go home
+			GoHome();
 
-            tColoredString playerName;
-            playerName << *target->Player() << tColoredString::ColorString(1,1,1);
-            sn_ConsoleOut( tOutput( "$player_flag_return", playerName ) );
-        }
-    }
-    // check if this player dropped the flag previously
-    else if ((target != ownerDropped_) || (time > (ownerDroppedTime_ + sg_flagDropTime)))
-    {
-        // take the flag
-        owner_ = target;
-        ownerTime_ = time;
-        lastHoldScoreTime_ = time;
-        ownerWarnedNotHome_ = false;
-        owner_->flag_ = this;
+			tColoredString playerName;
+			playerName << *target->Player() << tColoredString::ColorString(1,1,1);
+			sn_ConsoleOut( tOutput( "$player_flag_return", playerName ) );
+		}
+	}
+	// check if this player dropped the flag previously
+	else if ((target != ownerDropped_) || (time > (ownerDroppedTime_ + sg_flagDropTime)))
+	{
+		// take the flag
+		owner_ = target;
+		ownerTime_ = time;
+		lastHoldScoreTime_ = time;
+		ownerWarnedNotHome_ = false;
+		owner_->flag_ = this;
 
-        blinkUpdateTime_ = -1000;
-        blinkTrackUpdateTime_ = -1000;
+		blinkUpdateTime_ = -1000;
+		blinkTrackUpdateTime_ = -1000;
 
-        // diminish the flag and put it at the original location
-        SetReferenceTime();
-        SetVelocity(se_zeroCoord);
-        SetPosition(originalPosition_);
-        SetRadius(0);
-        SetExpansionSpeed(0);
-        RequestSync();
-        positionUpdatePending_ = true;
+		// diminish the flag and put it at the original location
+		SetReferenceTime();
+		SetVelocity(se_zeroCoord);
+		SetPosition(originalPosition_);
+		SetRadius(0);
+		SetExpansionSpeed(0);
+		RequestSync();
+		positionUpdatePending_ = true;
 
-        tColoredString playerName;
-        playerName << *target->Player() << tColoredString::ColorString(1,1,1);
-        sn_ConsoleOut( tOutput( "$player_flag_take", playerName ) );
-    }
+		tColoredString playerName;
+		playerName << *target->Player() << tColoredString::ColorString(1,1,1);
+		sn_ConsoleOut( tOutput( "$player_flag_take", playerName ) );
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -3948,20 +4080,21 @@ void gFlagZoneHack::OnEnter( gCycle * target, REAL time )
 
 void gFlagZoneHack::WarnFlagNotHome()
 {
-    // if we have an owner, warn them if we haven't already
-    if ((owner_) &&
-        (!ownerWarnedNotHome_))
-    {
-        ownerWarnedNotHome_ = true;
+	// if we have an owner, warn them if we haven't already
+	if ((owner_) &&
+		(!ownerWarnedNotHome_))
+	{
+		ownerWarnedNotHome_ = true;
 
-        if (owner_->Player())
-        {
-            tColoredString playerName;
-            playerName << *owner_->Player() << tColoredString::ColorString(1,1,1);
-            sn_ConsoleOut( tOutput( "$player_flag_cant_score", playerName ) );
-        }
-    }
+		if (owner_->Player())
+		{
+			tColoredString playerName;
+			playerName << *owner_->Player() << tColoredString::ColorString(1,1,1);
+			sn_ConsoleOut( tOutput( "$player_flag_cant_score", playerName ) );
+		}
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -3971,17 +4104,18 @@ void gFlagZoneHack::WarnFlagNotHome()
 
 bool gFlagZoneHack::IsHome()
 {
-    // flag is at home if at the original position and not owned
-    if ((!owner_) &&
-        (GetPosition() == homePosition_))
-    {
-        return (true);
-    }
-    else
-    {
-        return (false);
-    }
+	// flag is at home if at the original position and not owned
+	if ((!owner_) &&
+		(GetPosition() == homePosition_))
+	{
+		return (true);
+	}
+	else
+	{
+		return (false);
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -3991,67 +4125,68 @@ bool gFlagZoneHack::IsHome()
 
 void gFlagZoneHack::GoHome()
 {
-    // remove the owner
-    RemoveOwner();
+	// remove the owner
+	RemoveOwner();
 
-    // circle randomness
-#if 0
-    // pick a new home position if randomness is on
-    REAL randomness = sg_flagHomeRandomness * gArena::SizeMultiplier();
-    if (randomness > originalRadius_)
-    {
-        REAL homeRadius = randomness - originalRadius_;
+	// circle randomness
+	#if 0
+	// pick a new home position if randomness is on
+	REAL randomness = sg_flagHomeRandomness * gArena::SizeMultiplier();
+	if (randomness > originalRadius_)
+	{
+		REAL homeRadius = randomness - originalRadius_;
 
-        tRandomizer & randomizer = tReproducibleRandomizer::GetInstance();
-        REAL randX = (randomizer.Get() * 2.0f) - 1.0f;
-        REAL randY = (randomizer.Get() * 2.0f) - 1.0f;
+		tRandomizer & randomizer = tReproducibleRandomizer::GetInstance();
+		REAL randX = (randomizer.Get() * 2.0f) - 1.0f;
+		REAL randY = (randomizer.Get() * 2.0f) - 1.0f;
 
-        //??? Would a random turn and random radius be a better use?
+		//??? Would a random turn and random radius be a better use?
 
-        homePosition_.x = randX * homeRadius;
-        homePosition_.y = randY * sqrtf((homeRadius * homeRadius) - (homePosition_.x * homePosition_.x));
+		homePosition_.x = randX * homeRadius;
+		homePosition_.y = randY * sqrtf((homeRadius * homeRadius) - (homePosition_.x * homePosition_.x));
 
-        homePosition_.x += originalPosition_.x;
-        homePosition_.y += originalPosition_.y;
-    }
-#endif
+		homePosition_.x += originalPosition_.x;
+		homePosition_.y += originalPosition_.y;
+	}
+	#endif
 
-    // pick a new home position if randomness is on
-    REAL randomnessX = (sg_flagHomeRandomnessX * gArena::SizeMultiplier()) - originalRadius_;
-    REAL randomnessY = (sg_flagHomeRandomnessY * gArena::SizeMultiplier()) - originalRadius_;
+	// pick a new home position if randomness is on
+	REAL randomnessX = (sg_flagHomeRandomnessX * gArena::SizeMultiplier()) - originalRadius_;
+	REAL randomnessY = (sg_flagHomeRandomnessY * gArena::SizeMultiplier()) - originalRadius_;
 
-    if ((randomnessX > 0) || (randomnessY > 0))
-    {
-        if (randomnessX < 0)
-        {
-            randomnessX = 0;
-        }
-        if (randomnessY < 0)
-        {
-            randomnessY = 0;
-        }
+	if ((randomnessX > 0) || (randomnessY > 0))
+	{
+		if (randomnessX < 0)
+		{
+			randomnessX = 0;
+		}
+		if (randomnessY < 0)
+		{
+			randomnessY = 0;
+		}
 
-        tRandomizer & randomizer = tReproducibleRandomizer::GetInstance();
+		tRandomizer & randomizer = tReproducibleRandomizer::GetInstance();
 
-        REAL randX = (randomizer.Get() * 2.0f) - 1.0f;
-        REAL randY = (randomizer.Get() * 2.0f) - 1.0f;
+		REAL randX = (randomizer.Get() * 2.0f) - 1.0f;
+		REAL randY = (randomizer.Get() * 2.0f) - 1.0f;
 
-        homePosition_.x = randX * randomnessX;
-        homePosition_.y = randY * randomnessY;
+		homePosition_.x = randX * randomnessX;
+		homePosition_.y = randY * randomnessY;
 
-        homePosition_.x += originalPosition_.x;
-        homePosition_.y += originalPosition_.y;
-    }
+		homePosition_.x += originalPosition_.x;
+		homePosition_.y += originalPosition_.y;
+	}
 
-    // put the flag at home
-    SetReferenceTime();
-    SetVelocity(se_zeroCoord);
-    SetPosition(homePosition_);
-    SetRadius(originalRadius_);
-    SetExpansionSpeed(0);
-    RequestSync();
-    positionUpdatePending_ = true;
+	// put the flag at home
+	SetReferenceTime();
+	SetVelocity(se_zeroCoord);
+	SetPosition(homePosition_);
+	SetRadius(originalRadius_);
+	SetExpansionSpeed(0);
+	RequestSync();
+	positionUpdatePending_ = true;
 }
+
 
 // *******************************************************************************
 // *
@@ -4061,22 +4196,23 @@ void gFlagZoneHack::GoHome()
 
 void gFlagZoneHack::RemoveOwner()
 {
-    // get rid of the owner
-    if (owner_)
-    {
-        if (owner_->Player())
-        {
-            if (owner_->Player()->flagOverrideChat)
-            {
-                owner_->Player()->flagOverrideChat = false;
-                owner_->Player()->RequestSync();
-            }
-        }
+	// get rid of the owner
+	if (owner_)
+	{
+		if (owner_->Player())
+		{
+			if (owner_->Player()->flagOverrideChat)
+			{
+				owner_->Player()->flagOverrideChat = false;
+				owner_->Player()->RequestSync();
+			}
+		}
 
-        owner_->flag_ = NULL;
-        owner_ = NULL;
-    }
+		owner_->flag_ = NULL;
+		owner_ = NULL;
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -4086,43 +4222,43 @@ void gFlagZoneHack::RemoveOwner()
 
 void gFlagZoneHack::OwnerDropped()
 {
-    if (owner_)
-    {
-        // save the last owner and drop time
-        ownerDropped_ = owner_;
-        ownerDroppedTime_ = lastTime;
+	if (owner_)
+	{
+		// save the last owner and drop time
+		ownerDropped_ = owner_;
+		ownerDroppedTime_ = lastTime;
 
-        ePlayerNetID *player = owner_->Player();
+		ePlayerNetID *player = owner_->Player();
 
-        if (player)
-        {
-            //??? prints after round ends... can check if enemies are alive?
-            //??? add flag for knowing when grid is getting deleted?
-            tColoredString playerName;
-            playerName << *player << tColoredString::ColorString(1,1,1);
-            sn_ConsoleOut( tOutput( "$player_flag_drop", playerName ) );
-        }
+		if (player)
+		{
+			//??? prints after round ends... can check if enemies are alive?
+			//??? add flag for knowing when grid is getting deleted?
+			tColoredString playerName;
+			playerName << *player << tColoredString::ColorString(1,1,1);
+			sn_ConsoleOut( tOutput( "$player_flag_drop", playerName ) );
+		}
 
-        if (sg_flagDropHome)
-        {
-            // this will take the flag home and remove the owner
-            GoHome();
-        }
-        else
-        {
-            // put the flag at the owner's last position
-            SetReferenceTime();
-            SetVelocity(se_zeroCoord);
-            SetPosition(owner_->Position());
-            SetRadius(originalRadius_);
-            SetExpansionSpeed(0);
-            RequestSync();
-            positionUpdatePending_ = true;
+		if (sg_flagDropHome)
+		{
+			// this will take the flag home and remove the owner
+			GoHome();
+		}
+		else
+		{
+			// put the flag at the owner's last position
+			SetReferenceTime();
+			SetVelocity(se_zeroCoord);
+			SetPosition(owner_->Position());
+			SetRadius(originalRadius_);
+			SetExpansionSpeed(0);
+			RequestSync();
+			positionUpdatePending_ = true;
 
-            // remove the owner
-            RemoveOwner();
-        }
-    }
+			// remove the owner
+			RemoveOwner();
+		}
+	}
 }
 
 
@@ -4152,9 +4288,12 @@ static tSettingItem<int> sg_targetScoreDepleteConf( "TARGET_SCORE_DEPLETE", sg_t
 static int sg_targetIsWinzone = 1;
 static tSettingItem<int> sg_targetIsWinzoneConf( "TARGET_DECLARE_WINNER", sg_targetIsWinzone );
 
-int gTargetZoneHack::TargetZoneCounter_ = 0;		//!< count check zone on grid
-REAL gTargetZoneHack::winnerTime_ = 0;			//!< game time when a winner can be declared if nothing happens soon
-ePlayerNetID *gTargetZoneHack::winner_ = 0;		//!< first player entering the last zone to be declare winner
+								 //!< count check zone on grid
+int gTargetZoneHack::TargetZoneCounter_ = 0;
+								 //!< game time when a winner can be declared if nothing happens soon
+REAL gTargetZoneHack::winnerTime_ = 0;
+								 //!< first player entering the last zone to be declare winner
+ePlayerNetID *gTargetZoneHack::winner_ = 0;
 
 // *******************************************************************************
 // *
@@ -4167,32 +4306,32 @@ ePlayerNetID *gTargetZoneHack::winner_ = 0;		//!< first player entering the last
 //!
 // *******************************************************************************
 
-
 gTargetZoneHack::gTargetZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation)
-        :gZone( grid, pos, dynamicCreation )
+:gZone( grid, pos, dynamicCreation )
 {
-    color_.r = 0.0f;
-    color_.g = 1.0f;
-    color_.b = 0.0f;
+	color_.r = 0.0f;
+	color_.g = 1.0f;
+	color_.b = 0.0f;
 
-    TargetZoneCounter_++;
-    winnerTime_ = -1;
-    winner_ = 0;
-    firstPlayer_ = 0;
-    zoneInitialScore_ = sg_targetInitScore;
-    zoneScore_ = sg_targetInitScore;
-    zoneScoreDeplete_ = sg_targetScoreDeplete;
-    timeFirstEntry_ = -1.0;
-    targetEmptyTime_ = -1.0;
-    currentState_ = State_Safe;
-    for(int i=0; i<MAXCLIENTS; i++) playersFlags[i] = 0;
+	TargetZoneCounter_++;
+	winnerTime_ = -1;
+	winner_ = 0;
+	firstPlayer_ = 0;
+	zoneInitialScore_ = sg_targetInitScore;
+	zoneScore_ = sg_targetInitScore;
+	zoneScoreDeplete_ = sg_targetScoreDeplete;
+	timeFirstEntry_ = -1.0;
+	targetEmptyTime_ = -1.0;
+	currentState_ = State_Safe;
+	for(int i=0; i<MAXCLIENTS; i++) playersFlags[i] = 0;
 
-    grid->AddGameObjectInteresting(this);
+	grid->AddGameObjectInteresting(this);
 
-    SetExpansionSpeed(0);
-    SetRotationSpeed( .3f );
-    RequestSync();
+	SetExpansionSpeed(0);
+	SetRotationSpeed( .3f );
+	RequestSync();
 }
+
 
 // *******************************************************************************
 // *
@@ -4206,20 +4345,21 @@ gTargetZoneHack::gTargetZoneHack( eGrid * grid, const eCoord & pos, bool dynamic
 // *******************************************************************************
 
 gTargetZoneHack::gTargetZoneHack( nMessage & m )
-        : gZone( m )
+: gZone( m )
 {
-    TargetZoneCounter_++;
-    winnerTime_ = -1;
-    winner_ = 0;
-    firstPlayer_ = 0;
-    zoneInitialScore_ = sg_targetInitScore;
-    zoneScore_ = sg_targetInitScore;
-    zoneScoreDeplete_ = sg_targetScoreDeplete;
-    timeFirstEntry_ = -1.0;
-    targetEmptyTime_ = -1.0;
-    currentState_ = State_Safe;
-    for(int i=0; i<MAXCLIENTS; i++) playersFlags[i] = 0;
+	TargetZoneCounter_++;
+	winnerTime_ = -1;
+	winner_ = 0;
+	firstPlayer_ = 0;
+	zoneInitialScore_ = sg_targetInitScore;
+	zoneScore_ = sg_targetInitScore;
+	zoneScoreDeplete_ = sg_targetScoreDeplete;
+	timeFirstEntry_ = -1.0;
+	targetEmptyTime_ = -1.0;
+	currentState_ = State_Safe;
+	for(int i=0; i<MAXCLIENTS; i++) playersFlags[i] = 0;
 }
+
 
 // *******************************************************************************
 // *
@@ -4233,6 +4373,7 @@ gTargetZoneHack::gTargetZoneHack( nMessage & m )
 gTargetZoneHack::~gTargetZoneHack( void )
 {
 }
+
 
 // *******************************************************************************
 // *
@@ -4250,85 +4391,97 @@ static eLadderLogWriter sg_targetzonePlayerLeftWriter("TARGETZONE_PLAYER_LEFT", 
 
 bool gTargetZoneHack::Timestep( REAL time )
 {
-    // check if the zone must collapse ...
-    if ( (currentState_ != State_Conquered) && (currentState_ != State_Conquering) && (sg_targetTimeBeforeVanish>0) && ((time - createTime_ - 3.5)>sg_targetTimeBeforeVanish) ) {
-        // zone is conquered, make the zone collapse ...
-        currentState_ = State_Conquered;
-        SetReferenceTime();
-        SetExpansionSpeed( -GetRadius()*.5 );
-        RequestSync();
-        // send message to ladder log file ...
-        sg_targetzoneTimeoutWriter << eGameObject::GOID() << name_ << GetPosition().x << GetPosition().y;
-	sg_targetzoneTimeoutWriter.write();
-    }
-
-    if ( ((currentState_ == State_Conquering) && (sg_targetTimeBeforeVanishOnceConquered>0) && (time - timeFirstEntry_>sg_targetTimeBeforeVanishOnceConquered))
-       ||((currentState_ != State_Conquered) && (zoneScore_<=0) && (zoneScore_!=zoneInitialScore_)) ) 
-    {
-        // zone is conquered, make the zone collapse ...
-        currentState_ = State_Conquered;
-        SetReferenceTime();
-        SetExpansionSpeed( -GetRadius()*.5 );
-        RequestSync();
-        // send message to ladder log file ...
-        sg_targetzoneConqueredWriter << eGameObject::GOID() << name_ << GetPosition().x << GetPosition().y;
-        if (firstPlayer_) {
-	    sg_targetzoneConqueredWriter << firstPlayer_->GetUserName();
-            if ( firstPlayer_->CurrentTeam() ) {
-                sg_targetzoneConqueredWriter << ePlayerNetID::FilterName( firstPlayer_->CurrentTeam()->Name() );
-            }
-        }
-	sg_targetzoneConqueredWriter.write();
-    }
-
-    for (int i=0; i<MAXCLIENTS; i++) {
-	if (playersFlags[i]==2) {
-            ePlayerNetID* p = se_PlayerNetIDs(i);
-            if (p) {
-                gCycle* prey = dynamic_cast< gCycle* >( p->Object() );
-                if ( prey ) {
-                    REAL r = this->GetRadius();
-                    if (!prey->Alive() || (( prey->Position() - this->Position() ).NormSquared() >= r*r)) {
-            		sg_targetzonePlayerLeftWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << p->GetUserName();
-                	sg_targetzonePlayerLeftWriter.write();
-			playersFlags[i] = 1;
-		    }
-		} else playersFlags[i] = 1;
-	    } else playersFlags[i] = 1;
+	// check if the zone must collapse ...
+	if ( (currentState_ != State_Conquered) && (currentState_ != State_Conquering) && (sg_targetTimeBeforeVanish>0) && ((time - createTime_ - 3.5)>sg_targetTimeBeforeVanish) )
+	{
+		// zone is conquered, make the zone collapse ...
+		currentState_ = State_Conquered;
+		SetReferenceTime();
+		SetExpansionSpeed( -GetRadius()*.5 );
+		RequestSync();
+		// send message to ladder log file ...
+		sg_targetzoneTimeoutWriter << eGameObject::GOID() << name_ << GetPosition().x << GetPosition().y;
+		sg_targetzoneTimeoutWriter.write();
 	}
-    } 
 
-    // manage rotation speed
-    REAL omega;
-    REAL omegaDot;
-    REAL maxSpeed = 10 * ( 2 * 3.141 ) / sg_segments;
-    if (currentState_ != State_Conquered) {
-        // set rotation speed accordingly to remaining points ...
-        REAL conquered = (zoneInitialScore_==0?0:(REAL)(zoneInitialScore_ - zoneScore_) / (REAL)zoneInitialScore_);
-        omega = .3 + conquered * conquered * maxSpeed;
-        omegaDot = 2 * conquered * maxSpeed;
-    } else {
-        omega = .3 + maxSpeed;
-        omegaDot = 2 * maxSpeed;
-    }
-    REAL timeStep = lastTime;
-    if ( sn_GetNetState() != nSERVER )
-        timeStep *= 100;
+	if ( ((currentState_ == State_Conquering) && (sg_targetTimeBeforeVanishOnceConquered>0) && (time - timeFirstEntry_>sg_targetTimeBeforeVanishOnceConquered))
+		||((currentState_ != State_Conquered) && (zoneScore_<=0) && (zoneScore_!=zoneInitialScore_)) )
+	{
+		// zone is conquered, make the zone collapse ...
+		currentState_ = State_Conquered;
+		SetReferenceTime();
+		SetExpansionSpeed( -GetRadius()*.5 );
+		RequestSync();
+		// send message to ladder log file ...
+		sg_targetzoneConqueredWriter << eGameObject::GOID() << name_ << GetPosition().x << GetPosition().y;
+		if (firstPlayer_)
+		{
+			sg_targetzoneConqueredWriter << firstPlayer_->GetUserName();
+			if ( firstPlayer_->CurrentTeam() )
+			{
+				sg_targetzoneConqueredWriter << ePlayerNetID::FilterName( firstPlayer_->CurrentTeam()->Name() );
+			}
+		}
+		sg_targetzoneConqueredWriter.write();
+	}
 
-    if ( sn_GetNetState() != nCLIENT &&
-            ( ( fabs( omega - GetRotationSpeed() ) + fabs( omegaDot - GetRotationAcceleration() ) ) * timeStep > .5 ) )
-    {
-        SetRotationSpeed( omega );
-        SetRotationAcceleration( omegaDot );
-        SetReferenceTime();
-        RequestSync();
-    }
+	for (int i=0; i<MAXCLIENTS; i++)
+	{
+		if (playersFlags[i]==2)
+		{
+			ePlayerNetID* p = se_PlayerNetIDs(i);
+			if (p)
+			{
+				gCycle* prey = dynamic_cast< gCycle* >( p->Object() );
+				if ( prey )
+				{
+					REAL r = this->GetRadius();
+					if (!prey->Alive() || (( prey->Position() - this->Position() ).NormSquared() >= r*r))
+					{
+						sg_targetzonePlayerLeftWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << p->GetUserName();
+						sg_targetzonePlayerLeftWriter.write();
+						playersFlags[i] = 1;
+					}
+				} else playersFlags[i] = 1;
+			} else playersFlags[i] = 1;
+		}
+	}
 
-    // delegate
-    bool returnStatus = gZone::Timestep( time );
+	// manage rotation speed
+	REAL omega;
+	REAL omegaDot;
+	REAL maxSpeed = 10 * ( 2 * 3.141 ) / sg_segments;
+	if (currentState_ != State_Conquered)
+	{
+		// set rotation speed accordingly to remaining points ...
+		REAL conquered = (zoneInitialScore_==0?0:(REAL)(zoneInitialScore_ - zoneScore_) / (REAL)zoneInitialScore_);
+		omega = .3 + conquered * conquered * maxSpeed;
+		omegaDot = 2 * conquered * maxSpeed;
+	}
+	else
+	{
+		omega = .3 + maxSpeed;
+		omegaDot = 2 * maxSpeed;
+	}
+	REAL timeStep = lastTime;
+	if ( sn_GetNetState() != nSERVER )
+		timeStep *= 100;
 
-    return (returnStatus);
+	if ( sn_GetNetState() != nCLIENT &&
+		( ( fabs( omega - GetRotationSpeed() ) + fabs( omegaDot - GetRotationAcceleration() ) ) * timeStep > .5 ) )
+	{
+		SetRotationSpeed( omega );
+		SetRotationAcceleration( omegaDot );
+		SetReferenceTime();
+		RequestSync();
+	}
+
+	// delegate
+	bool returnStatus = gZone::Timestep( time );
+
+	return (returnStatus);
 }
+
 
 // *******************************************************************************
 // *
@@ -4344,52 +4497,58 @@ static eLadderLogWriter sg_targetzonePlayerEnterWriter("BASEZONE_PLAYER_ENTER", 
 
 void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    // make sure target and player are OK
-    if ((!target) ||
-        (!target->Player()) ||
-         (currentState_ == State_Conquered))
-    {
-        return;
-    }
-
-    // keep first player in memory, if it's the last zone, he is the winner ...
-    if (!firstPlayer_) {
-        firstPlayer_= target->Player();
-        timeFirstEntry_ = time;
-        currentState_ = State_Conquering;
-	// keep winner ...
-        winnerTime_ = timeFirstEntry_;
-        winner_ = firstPlayer_;
-    }
-
-    // Check if player already entered this zone
-    // If not ...
-    if (!playersFlags[target->Player()->ListID()]) {
-        if (zoneScore_>0) {
-            //  flag the player
-            playersFlags[target->Player()->ListID()]=1;
-	    // grant the player
-            tOutput win;
-            tOutput lose;
-            win << "$player_target_score_win";
-            lose << "$player_target_score_lose";
-            target->Player()->AddScore(zoneScore_, win, lose);
-        }
-        // and decrease zone score value
-        zoneScore_-=zoneScoreDeplete_;
-        if (zoneScore_<=0) {
-	    zoneScore_=0;
-	    targetEmptyTime_=time;
+	// make sure target and player are OK
+	if ((!target) ||
+		(!target->Player()) ||
+		(currentState_ == State_Conquered))
+	{
+		return;
 	}
-    }
 
-    // message in edlog
-    if (playersFlags[target->Player()->ListID()] != 2) {
-        sg_targetzonePlayerEnterWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName();
-        sg_targetzonePlayerEnterWriter.write();
-	playersFlags[target->Player()->ListID()] = 2;
-    }
+	// keep first player in memory, if it's the last zone, he is the winner ...
+	if (!firstPlayer_)
+	{
+		firstPlayer_= target->Player();
+		timeFirstEntry_ = time;
+		currentState_ = State_Conquering;
+		// keep winner ...
+		winnerTime_ = timeFirstEntry_;
+		winner_ = firstPlayer_;
+	}
+
+	// Check if player already entered this zone
+	// If not ...
+	if (!playersFlags[target->Player()->ListID()])
+	{
+		if (zoneScore_>0)
+		{
+			//  flag the player
+			playersFlags[target->Player()->ListID()]=1;
+			// grant the player
+			tOutput win;
+			tOutput lose;
+			win << "$player_target_score_win";
+			lose << "$player_target_score_lose";
+			target->Player()->AddScore(zoneScore_, win, lose);
+		}
+		// and decrease zone score value
+		zoneScore_-=zoneScoreDeplete_;
+		if (zoneScore_<=0)
+		{
+			zoneScore_=0;
+			targetEmptyTime_=time;
+		}
+	}
+
+	// message in edlog
+	if (playersFlags[target->Player()->ListID()] != 2)
+	{
+		sg_targetzonePlayerEnterWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName();
+		sg_targetzonePlayerEnterWriter.write();
+		playersFlags[target->Player()->ListID()] = 2;
+	}
 }
+
 
 // *******************************************************************************
 // *
@@ -4399,15 +4558,16 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
 
 void gTargetZoneHack::OnVanish( void )
 {
-    // check if we have a winner ...
-    if (sg_targetIsWinzone && (TargetZoneCounter_==1) && firstPlayer_) {
-        winnerTime_ = timeFirstEntry_;
-        winner_ = firstPlayer_;
-        static const char* message="$player_target_win_conquest";
-        sg_DeclareWinner( firstPlayer_->CurrentTeam(), message );
-    }
-    // decrement target zone counter
-    TargetZoneCounter_--;
+	// check if we have a winner ...
+	if (sg_targetIsWinzone && (TargetZoneCounter_==1) && firstPlayer_)
+	{
+		winnerTime_ = timeFirstEntry_;
+		winner_ = firstPlayer_;
+		static const char* message="$player_target_win_conquest";
+		sg_DeclareWinner( firstPlayer_->CurrentTeam(), message );
+	}
+	// decrement target zone counter
+	TargetZoneCounter_--;
 }
 
 
@@ -4422,20 +4582,20 @@ void gTargetZoneHack::OnVanish( void )
 //!
 // *******************************************************************************
 
-
 gBlastZoneHack::gBlastZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation)
-        :gZone( grid, pos, dynamicCreation )
+:gZone( grid, pos, dynamicCreation )
 {
-    color_.r = 0.0f;
-    color_.g = 1.0f;
-    color_.b = 0.0f;
+	color_.r = 0.0f;
+	color_.g = 1.0f;
+	color_.b = 0.0f;
 
-    grid->AddGameObjectInteresting(this);
+	grid->AddGameObjectInteresting(this);
 
-    SetExpansionSpeed(0);
-    SetRotationSpeed( .3f );
-    RequestSync();
+	SetExpansionSpeed(0);
+	SetRotationSpeed( .3f );
+	RequestSync();
 }
+
 
 // *******************************************************************************
 // *
@@ -4449,9 +4609,10 @@ gBlastZoneHack::gBlastZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
 // *******************************************************************************
 
 gBlastZoneHack::gBlastZoneHack( nMessage & m )
-        : gZone( m )
+: gZone( m )
 {
 }
+
 
 // *******************************************************************************
 // *
@@ -4465,6 +4626,7 @@ gBlastZoneHack::gBlastZoneHack( nMessage & m )
 gBlastZoneHack::~gBlastZoneHack( void )
 {
 }
+
 
 // *******************************************************************************
 // *
@@ -4483,74 +4645,76 @@ extern void clamp01(REAL &c);
 // remove walls in the blast zone ...
 void S_BlastWalls( eWall * w )
 {
-    // determine the point closest to s_blastCoord
-    eCoord normal = w->Vec().Conj();
-    normal.Normalize();
+	// determine the point closest to s_blastCoord
+	eCoord normal = w->Vec().Conj();
+	normal.Normalize();
 
-    eCoord Pos1 = normal.Turn( w->EndPoint(0) - s_blastCoord );
-    eCoord Pos2 = normal.Turn( w->EndPoint(1) - s_blastCoord );
+	eCoord Pos1 = normal.Turn( w->EndPoint(0) - s_blastCoord );
+	eCoord Pos2 = normal.Turn( w->EndPoint(1) - s_blastCoord );
 
-    tASSERT( fabs( Pos1.y - Pos2.y ) <= fabs( Pos1.y + Pos2.y + .1f ) * .1f );
+	tASSERT( fabs( Pos1.y - Pos2.y ) <= fabs( Pos1.y + Pos2.y + .1f ) * .1f );
 
-    REAL alpha = .5f;
-    if ( Pos1.x != Pos2.x)
-        alpha = Pos1.x / ( Pos1.x - Pos2.x );
+	REAL alpha = .5f;
+	if ( Pos1.x != Pos2.x)
+		alpha = Pos1.x / ( Pos1.x - Pos2.x );
 
-    REAL radius = s_blastRadius * s_blastRadius - Pos1.y * Pos2.y;
+	REAL radius = s_blastRadius * s_blastRadius - Pos1.y * Pos2.y;
 
-    // wall too far away
-    if ( radius < 0 )
-        return;
+	// wall too far away
+	if ( radius < 0 )
+		return;
 
-    radius = sqrt( radius );
+	radius = sqrt( radius );
 
-    // works only for player walls
-    gPlayerWall* wall = dynamic_cast<gPlayerWall*>( w );
-    if ( ! wall )
-        return;
+	// works only for player walls
+	gPlayerWall* wall = dynamic_cast<gPlayerWall*>( w );
+	if ( ! wall )
+		return;
 
-    REAL closestPos = wall->Pos( alpha );
+	REAL closestPos = wall->Pos( alpha );
 
-    REAL start = closestPos - radius;
-    REAL end = closestPos + radius;
+	REAL start = closestPos - radius;
+	REAL end = closestPos + radius;
 
-    // cut away walls in the zone (if they are not reduced to a point) 
-    REAL wallEnd = wall->EndPos();
-    REAL wallBeg = wall->BegPos();
-    if ( wallEnd <= wallBeg )
-    {
-        return;
-    }
-    REAL endAlpha = ( end - wallBeg ) / ( wallEnd - wallBeg );
-    // std::cout << wall->BegTime() << "\n";
-    clamp01( endAlpha );
-    end = wall->Pos( endAlpha );
+	// cut away walls in the zone (if they are not reduced to a point)
+	REAL wallEnd = wall->EndPos();
+	REAL wallBeg = wall->BegPos();
+	if ( wallEnd <= wallBeg )
+	{
+		return;
+	}
+	REAL endAlpha = ( end - wallBeg ) / ( wallEnd - wallBeg );
+	// std::cout << wall->BegTime() << "\n";
+	clamp01( endAlpha );
+	end = wall->Pos( endAlpha );
 
-    if ( end > start )
-    {
-        wall->BlowHole ( start, end, NULL );
-        wall->NetWall()->RequestSync ();
-    }
+	if ( end > start )
+	{
+		wall->BlowHole ( start, end, NULL );
+		wall->NetWall()->RequestSync ();
+	}
 }
+
 
 bool gBlastZoneHack::Timestep( REAL time )
 {
-    s_blastCoord  = GetPosition();
-    s_blastRadius = GetRadius();
+	s_blastCoord  = GetPosition();
+	s_blastRadius = GetRadius();
 
-    if ( s_blastRadius > 0 )
-    {
-        grid->ProcessWallsInRange( &S_BlastWalls,
-                                   s_blastCoord,
-                                   s_blastRadius,
-                                   CurrentFace() );
-    }
+	if ( s_blastRadius > 0 )
+	{
+		grid->ProcessWallsInRange( &S_BlastWalls,
+			s_blastCoord,
+			s_blastRadius,
+			CurrentFace() );
+	}
 
-    // delegate
-    bool returnStatus = gZone::Timestep( time );
+	// delegate
+	bool returnStatus = gZone::Timestep( time );
 
-    return (returnStatus);
+	return (returnStatus);
 }
+
 
 // *******************************************************************************
 // *
@@ -4566,6 +4730,7 @@ bool gBlastZoneHack::Timestep( REAL time )
 void gBlastZoneHack::OnEnter( gCycle * target, REAL time )
 {
 }
+
 
 // *******************************************************************************
 // *
@@ -4588,52 +4753,63 @@ static eLadderLogWriter sg_spawnzoneWriter("ZONE_SPAWNED", false);
 
 static void sg_CreateZone_conf(std::istream &s)
 {
-        eGrid *grid = eGrid::CurrentGrid();
-        if(!grid) {
-                con << "Must be called while a grid exists!\n";
-                return;
-        }
+	eGrid *grid = eGrid::CurrentGrid();
+	if(!grid)
+	{
+		con << "Must be called while a grid exists!\n";
+		return;
+	}
 
-        tString params;
-        params.ReadLine( s, true );
+	tString params;
+	params.ReadLine( s, true );
 
 	// first parse the line to get the params : <win|death> <x> <y> <size> <growth>
 	eTeam *zoneTeam=NULL;
-	int pos = 0; //
+	int pos = 0;				 //
 	tString zoneTypeStr = params.ExtractNonBlankSubString(pos);
-        tString zoneNameStr;
-	if ((zoneTypeStr=="n")||(zoneTypeStr=="N")) {
-            zoneNameStr = params.ExtractNonBlankSubString(pos);
-	    zoneTypeStr = params.ExtractNonBlankSubString(pos);
-        } else {
-	    zoneNameStr = tString("");
+	tString zoneNameStr;
+	if ((zoneTypeStr=="n")||(zoneTypeStr=="N"))
+	{
+		zoneNameStr = params.ExtractNonBlankSubString(pos);
+		zoneTypeStr = params.ExtractNonBlankSubString(pos);
+	}
+	else
+	{
+		zoneNameStr = tString("");
 	}
 	tString zoneTeamStr = tString("");
-	if ((zoneTypeStr=="fortress")||(zoneTypeStr=="flag")||(zoneTypeStr=="deathTeam")||(zoneTypeStr=="ballTeam")) {
-        	zoneTeamStr = params.ExtractNonBlankSubString(pos);
-	        for (int i = eTeam::teams.Len() - 1; i>=0; --i) {
-        	    tString teamName = eTeam::teams(i)->Name();
-	            if (zoneTeamStr==ePlayerNetID::FilterName(teamName)) {
-        	        zoneTeam = eTeam::teams(i);
-					break;
-				}
+	if ((zoneTypeStr=="fortress")||(zoneTypeStr=="flag")||(zoneTypeStr=="deathTeam")||(zoneTypeStr=="ballTeam"))
+	{
+		zoneTeamStr = params.ExtractNonBlankSubString(pos);
+		for (int i = eTeam::teams.Len() - 1; i>=0; --i)
+		{
+			tString teamName = eTeam::teams(i)->Name();
+			if (zoneTeamStr==ePlayerNetID::FilterName(teamName))
+			{
+				zoneTeam = eTeam::teams(i);
+				break;
 			}
+		}
 	}
 
 	ePlayerNetID *zonePlayer = 0;
 	ePlayerNetID *zoneOwner = 0;
-	if(zoneTypeStr=="zombie" || zoneTypeStr == "zombieOwner") {
+	if(zoneTypeStr=="zombie" || zoneTypeStr == "zombieOwner")
+	{
 		tString targetPlayer = params.ExtractNonBlankSubString(pos);
 		zonePlayer = ePlayerNetID::FindPlayerByName(targetPlayer, NULL);
 
-		if(!zonePlayer) {
+		if(!zonePlayer)
+		{
 			return;
 		}
 	}
-	if(zoneTypeStr == "zombieOwner") {
+	if(zoneTypeStr == "zombieOwner")
+	{
 		tString targetPlayer = params.ExtractNonBlankSubString(pos);
 		zoneOwner = ePlayerNetID::FindPlayerByName(targetPlayer, NULL);
-		if(zoneOwner) {
+		if(zoneOwner)
+		{
 			zoneTeam = zoneOwner->CurrentTeam();
 		}
 	}
@@ -4642,26 +4818,30 @@ static void sg_CreateZone_conf(std::istream &s)
 	tString zonePosYStr;
 
 	std::vector<eCoord> route;
-	if(zonePosXStr == "L") {
+	if(zonePosXStr == "L")
+	{
 		tString x,y;
-		while(true) {
+		while(true)
+		{
 			x = params.ExtractNonBlankSubString(pos);
 			if(x == "Z" || x == "z" || x == "") break;
 			y = params.ExtractNonBlankSubString(pos);
 			route.push_back(eCoord(atof(x), atof(y)));
 		}
-	} else {
+	}
+	else
+	{
 		zonePosYStr = params.ExtractNonBlankSubString(pos);
 	}
 
 	const tString zoneSizeStr = params.ExtractNonBlankSubString(pos);
 	const tString zoneGrowthStr = params.ExtractNonBlankSubString(pos);
-        const tString zoneDirXStr = params.ExtractNonBlankSubString(pos);
-        const tString zoneDirYStr = params.ExtractNonBlankSubString(pos);
+	const tString zoneDirXStr = params.ExtractNonBlankSubString(pos);
+	const tString zoneDirYStr = params.ExtractNonBlankSubString(pos);
 	const tString zoneInteractive = params.ExtractNonBlankSubString(pos);
 	const tString zoneRedStr = params.ExtractNonBlankSubString(pos);
-        const tString zoneGreenStr = params.ExtractNonBlankSubString(pos);
-        const tString zoneBlueStr = params.ExtractNonBlankSubString(pos);
+	const tString zoneGreenStr = params.ExtractNonBlankSubString(pos);
+	const tString zoneBlueStr = params.ExtractNonBlankSubString(pos);
 	const tString targetRadiusStr = params.ExtractNonBlankSubString(pos);
 
 	// second convert params ( to do : check validity).
@@ -4671,158 +4851,189 @@ static void sg_CreateZone_conf(std::istream &s)
 	eCoord zoneDir = eCoord(atof(zoneDirXStr),atof(zoneDirYStr));
 	gRealColor zoneColor;
 	bool setColorFlag = false;
-	if ((zoneRedStr!="")&&(zoneGreenStr!="")&&(zoneBlueStr!="")) {
+	if ((zoneRedStr!="")&&(zoneGreenStr!="")&&(zoneBlueStr!=""))
+	{
 		zoneColor.r = atof(zoneRedStr);
 		zoneColor.g = atof(zoneGreenStr);
 		zoneColor.b = atof(zoneBlueStr);
 		setColorFlag = true;
 	}
 
-
 	// if no_team was pass, assigns one: the one that has a player spawned closest
-        if ( zoneTeamStr=="no_team" )
-        {
-            //REAL teamDistance_ = 0;
-            const tList<eGameObject>& gameObjects = grid->GameObjects();
-            gCycle * closest = 0;
-            REAL closestDistance = 0;
-            for (int i=gameObjects.Len()-1;i>=0;i--)
-            {
-                gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
+	if ( zoneTeamStr=="no_team" )
+	{
+		//REAL teamDistance_ = 0;
+		const tList<eGameObject>& gameObjects = grid->GameObjects();
+		gCycle * closest = 0;
+		REAL closestDistance = 0;
+		for (int i=gameObjects.Len()-1;i>=0;i--)
+		{
+			gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
 
-                if (other )
-                {
-                    //eTeam * otherTeam = other->Player()->CurrentTeam();
-                    eCoord otherpos = other->Position() - zonePos;
-                    REAL distance = otherpos.NormSquared();
-                    if ( !closest || distance < closestDistance )
-                    {
-                        closest = other;
-                        closestDistance = distance;
-                    }
-                }
-            }
+			if (other )
+			{
+				//eTeam * otherTeam = other->Player()->CurrentTeam();
+				eCoord otherpos = other->Position() - zonePos;
+				REAL distance = otherpos.NormSquared();
+				if ( !closest || distance < closestDistance )
+				{
+					closest = other;
+					closestDistance = distance;
+				}
+			}
+		}
 
-            if ( closest )
-            {
-                // take over team 
-                zoneTeam = closest->Player()->CurrentTeam();
-            }
+		if ( closest )
+		{
+			// take over team
+			zoneTeam = closest->Player()->CurrentTeam();
+		}
 	}
 	// then create zone ...
 	gZone *Zone = NULL;
-    	if ( zoneTypeStr=="death" || zoneTypeStr=="deathTeam" ) {
-        	Zone = tNEW( gDeathZoneHack( grid, zonePos, true, zoneTeam ) );
-        	//sn_ConsoleOut( "$instant_death_activated" );
-                if (zoneTeam!=NULL) {
-                        zoneColor.r = zoneTeam->R()/15.0;
-                        zoneColor.g = zoneTeam->G()/15.0;
-                        zoneColor.b = zoneTeam->B()/15.0;
-                        zoneColor.r += (1.0 - zoneColor.r) / 1.8;
-                        zoneColor.g += (1.0 - zoneColor.g) / 1.8;
-                        zoneColor.b += (1.0 - zoneColor.b) / 1.8;
-                        setColorFlag = true;
-                }
-    	} else if ( zoneTypeStr=="win" ) {
-        	Zone = tNEW( gWinZoneHack( grid, zonePos, true ) );
-        	//sn_ConsoleOut( "$instant_win_activated" );
-        } else if ( zoneTypeStr=="ball" || zoneTypeStr=="ballTeam" ) {
-                Zone = tNEW( gBallZoneHack( grid, zonePos, true, zoneTeam ) );
-                //sn_ConsoleOut( "$instant_win_activated" );
-                if (zoneTeam!=NULL) {
-                        zoneColor.r = zoneTeam->R()/15.0;
-                        zoneColor.g = zoneTeam->G()/15.0;
-                        zoneColor.b = zoneTeam->B()/15.0;
-                        zoneColor.r += (1.0 - zoneColor.r) / 1.8;
-                        zoneColor.g += (1.0 - zoneColor.g) / 1.8;
-                        zoneColor.b += (1.0 - zoneColor.b) / 1.8;
-                        setColorFlag = true;
-                }
-        } else if ( zoneTypeStr=="flag" ) {
-                Zone = tNEW( gFlagZoneHack( grid, zonePos, true, zoneTeam ) );
-                //sn_ConsoleOut( "$instant_win_activated" );
-                if (zoneTeam!=NULL) {
-                        zoneColor.r = zoneTeam->R()/15.0;
-                        zoneColor.g = zoneTeam->G()/15.0;
-                        zoneColor.b = zoneTeam->B()/15.0;
-                	zoneColor.r += (1.0 - zoneColor.r) / 1.8;
-                	zoneColor.g += (1.0 - zoneColor.g) / 1.8;
-                	zoneColor.b += (1.0 - zoneColor.b) / 1.8;
-	                setColorFlag = true;
+	if ( zoneTypeStr=="death" || zoneTypeStr=="deathTeam" )
+	{
+		Zone = tNEW( gDeathZoneHack( grid, zonePos, true, zoneTeam ) );
+		//sn_ConsoleOut( "$instant_death_activated" );
+		if (zoneTeam!=NULL)
+		{
+			zoneColor.r = zoneTeam->R()/15.0;
+			zoneColor.g = zoneTeam->G()/15.0;
+			zoneColor.b = zoneTeam->B()/15.0;
+			zoneColor.r += (1.0 - zoneColor.r) / 1.8;
+			zoneColor.g += (1.0 - zoneColor.g) / 1.8;
+			zoneColor.b += (1.0 - zoneColor.b) / 1.8;
+			setColorFlag = true;
 		}
-        } else if ( zoneTypeStr=="fortress" ) {
-                Zone = tNEW( gBaseZoneHack( grid, zonePos, true, zoneTeam ) );
-				Zone->OnRoundBegin();
-                //sn_ConsoleOut( "$instant_win_activated" );
-		if (Zone->Team()!=NULL) {
-                	zoneColor.r = Zone->Team()->R()/15.0;
-                	zoneColor.g = Zone->Team()->G()/15.0;
-                	zoneColor.b = Zone->Team()->B()/15.0;
-	                setColorFlag = true;
-		} 
-        } else if ( zoneTypeStr=="zombie" || zoneTypeStr=="zombieOwner" ) {
-			gCycle *target = dynamic_cast<gCycle *>(zonePlayer->Object());
-			if(target) {
-				gDeathZoneHack *dZone = tNEW(gDeathZoneHack(grid, zonePos, true));
-				dZone->SetSeekingCycle(target);
-				dZone->SetType(gDeathZoneHack::TYPE_ZOMBIE_ZONE);
-				if(zoneOwner) {
-					dZone->SetOwner(zoneOwner);
-					if (zoneTeam!=NULL) {
-						zoneColor.r = zoneTeam->R()/15.0;
-						zoneColor.g = zoneTeam->G()/15.0;
-						zoneColor.b = zoneTeam->B()/15.0;
-						setColorFlag = true;
-					} 
+	}
+	else if ( zoneTypeStr=="win" )
+	{
+		Zone = tNEW( gWinZoneHack( grid, zonePos, true ) );
+		//sn_ConsoleOut( "$instant_win_activated" );
+	}
+	else if ( zoneTypeStr=="ball" || zoneTypeStr=="ballTeam" )
+	{
+		Zone = tNEW( gBallZoneHack( grid, zonePos, true, zoneTeam ) );
+		//sn_ConsoleOut( "$instant_win_activated" );
+		if (zoneTeam!=NULL)
+		{
+			zoneColor.r = zoneTeam->R()/15.0;
+			zoneColor.g = zoneTeam->G()/15.0;
+			zoneColor.b = zoneTeam->B()/15.0;
+			zoneColor.r += (1.0 - zoneColor.r) / 1.8;
+			zoneColor.g += (1.0 - zoneColor.g) / 1.8;
+			zoneColor.b += (1.0 - zoneColor.b) / 1.8;
+			setColorFlag = true;
+		}
+	}
+	else if ( zoneTypeStr=="flag" )
+	{
+		Zone = tNEW( gFlagZoneHack( grid, zonePos, true, zoneTeam ) );
+		//sn_ConsoleOut( "$instant_win_activated" );
+		if (zoneTeam!=NULL)
+		{
+			zoneColor.r = zoneTeam->R()/15.0;
+			zoneColor.g = zoneTeam->G()/15.0;
+			zoneColor.b = zoneTeam->B()/15.0;
+			zoneColor.r += (1.0 - zoneColor.r) / 1.8;
+			zoneColor.g += (1.0 - zoneColor.g) / 1.8;
+			zoneColor.b += (1.0 - zoneColor.b) / 1.8;
+			setColorFlag = true;
+		}
+	}
+	else if ( zoneTypeStr=="fortress" )
+	{
+		gBaseZoneHack *fZone = tNEW( gBaseZoneHack( grid, zonePos, true, zoneTeam ) );
+		fZone->OnRoundBegin();
+		Zone = fZone;
+		//sn_ConsoleOut( "$instant_win_activated" );
+		if (Zone->Team()!=NULL)
+		{
+			zoneColor.r = Zone->Team()->R()/15.0;
+			zoneColor.g = Zone->Team()->G()/15.0;
+			zoneColor.b = Zone->Team()->B()/15.0;
+			setColorFlag = true;
+		}
+	}
+	else if ( zoneTypeStr=="zombie" || zoneTypeStr=="zombieOwner" )
+	{
+		gCycle *target = dynamic_cast<gCycle *>(zonePlayer->Object());
+		if(target)
+		{
+			gDeathZoneHack *dZone = tNEW(gDeathZoneHack(grid, zonePos, true));
+			dZone->SetSeekingCycle(target);
+			dZone->SetType(gDeathZoneHack::TYPE_ZOMBIE_ZONE);
+			if(zoneOwner)
+			{
+				dZone->SetOwner(zoneOwner);
+				if (zoneTeam!=NULL)
+				{
+					zoneColor.r = zoneTeam->R()/15.0;
+					zoneColor.g = zoneTeam->G()/15.0;
+					zoneColor.b = zoneTeam->B()/15.0;
+					setColorFlag = true;
 				}
-				Zone = dZone;
-			} else {
-				goto usage;
 			}
-    	} else if ( zoneTypeStr=="target" ) {
-        	Zone = tNEW( gTargetZoneHack( grid, zonePos, true ) );
-       	} else {
+			Zone = dZone;
+		}
+		else
+		{
+			goto usage;
+		}
+	}
+	else if ( zoneTypeStr=="target" )
+	{
+		Zone = tNEW( gTargetZoneHack( grid, zonePos, true ) );
+	}
+	else
+	{
 		usage:
 		con << "Usage:\n"
-			   "SPAWN_ZONE <win|death|ball|target|blast> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
-			   "SPAWN_ZONE <fortress|flag|deathTeam|ballTeam> <team> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
-			   "SPAWN_ZONE zombie <player> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
-			   "SPAWN_ZONE zombieOwner <player> <owner> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
-			   "instead of <x> <y> one can write: L <x1> <y1> <x2> <y2> [...] Z\n";
+			"SPAWN_ZONE <win|death|ball|target|blast> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+			"SPAWN_ZONE <fortress|flag|deathTeam|ballTeam> <team> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+			"SPAWN_ZONE zombie <player> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+			"SPAWN_ZONE zombieOwner <player> <owner> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+			"instead of <x> <y> one can write: L <x1> <y1> <x2> <y2> [...] Z\n";
 		return;
 	}
-    	static_cast<eGameObject*>(Zone)->Timestep( se_GameTime() );
-    	Zone->SetReferenceTime();
-    	Zone->SetRadius( zoneSize );
-    	Zone->SetExpansionSpeed( zoneGrowth );
-    	Zone->SetRotationSpeed( .3f );
+	static_cast<eGameObject*>(Zone)->Timestep( se_GameTime() );
+	Zone->SetReferenceTime();
+	Zone->SetRadius( zoneSize );
+	Zone->SetExpansionSpeed( zoneGrowth );
+	Zone->SetRotationSpeed( .3f );
 	Zone->SetVelocity(zoneDir);
-	if (setColorFlag) {
+	if (setColorFlag)
+	{
 		zoneColor.r = (zoneColor.r>1.0)?1.0:zoneColor.r;
-                zoneColor.g = (zoneColor.g>1.0)?1.0:zoneColor.g;
-                zoneColor.b = (zoneColor.b>1.0)?1.0:zoneColor.b;
+		zoneColor.g = (zoneColor.g>1.0)?1.0:zoneColor.g;
+		zoneColor.b = (zoneColor.b>1.0)?1.0:zoneColor.b;
 		Zone->SetColor(zoneColor);
 	}
-	if (zoneInteractive=="true") {
+	if (zoneInteractive=="true")
+	{
 		Zone->SetWallInteract(true);
 		Zone->SetWallBouncesLeft(-1);
 	}
 	REAL targetRadius = atof(targetRadiusStr);
-	if(targetRadius != 0) {
+	if(targetRadius != 0)
+	{
 		Zone->SetTargetRadius(targetRadius);
 	}
-	if(!route.empty()) {
+	if(!route.empty())
+	{
 		Zone->SetPosition(route.front());
-		for(std::vector<eCoord>::const_iterator iter = route.begin(); iter != route.end(); ++iter) {
+		for(std::vector<eCoord>::const_iterator iter = route.begin(); iter != route.end(); ++iter)
+		{
 			Zone->AddWaypoint(*iter);
 		}
 	}
 	Zone->SetName(zoneNameStr);
 	Zone->RequestSync();
 
-        sg_spawnzoneWriter << Zone->GOID() << zoneNameStr << Zone->GetPosition().x << Zone->GetPosition().y;
-        sg_spawnzoneWriter.write();
+	sg_spawnzoneWriter << Zone->GOID() << zoneNameStr << Zone->GetPosition().x << Zone->GetPosition().y;
+	sg_spawnzoneWriter.write();
 }
+
 
 static tConfItemFunc sg_CreateZone_c("SPAWN_ZONE",&sg_CreateZone_conf);
 
@@ -4830,126 +5041,138 @@ static eLadderLogWriter sg_collapsezoneWriter("ZONE_COLLAPSED", false);
 
 static void sg_CollapseZone(std::istream &s)
 {
-        tString params;
-        params.ReadLine( s, true );
+	tString params;
+	params.ReadLine( s, true );
 
-        // first parse the line to get the param : object_id
-        int pos = 0; //
+	// first parse the line to get the param : object_id
+	int pos = 0;				 //
 	const tString object_id_str = params.ExtractNonBlankSubString(pos);
-        // first check for the name
-        int zone_id;
-        zone_id=gZone::FindFirst(object_id_str);
-	if (zone_id==-1) {
-            zone_id = atoi(object_id_str);
-            if (zone_id==0 && object_id_str!="0") return;
-        }
+	// first check for the name
+	int zone_id;
+	zone_id=gZone::FindFirst(object_id_str);
+	if (zone_id==-1)
+	{
+		zone_id = atoi(object_id_str);
+		if (zone_id==0 && object_id_str!="0") return;
+	}
 
-        const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
-	while (zone_id!=-1) {
-            // get the zone ...
-            gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
-	    if (zone) { 
-                zone->SetReferenceTime();
-                zone->SetExpansionSpeed( -zone->GetRadius()*.5 );
-                zone->RequestSync();
-                sg_collapsezoneWriter << zone_id << object_id_str << zone->GetPosition().x << zone->GetPosition().y;
-                sg_collapsezoneWriter.write();
-	        zone_id=gZone::FindNext(object_id_str, zone_id);
-	    }
+	const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+	while (zone_id!=-1)
+	{
+		// get the zone ...
+		gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+		if (zone)
+		{
+			zone->SetReferenceTime();
+			zone->SetExpansionSpeed( -zone->GetRadius()*.5 );
+			zone->RequestSync();
+			sg_collapsezoneWriter << zone_id << object_id_str << zone->GetPosition().x << zone->GetPosition().y;
+			sg_collapsezoneWriter.write();
+			zone_id=gZone::FindNext(object_id_str, zone_id);
+		}
 	}
 }
+
 
 static tConfItemFunc sg_CollapseZone_conf("COLLAPSE_ZONE",&sg_CollapseZone);
 
 static void sg_SetZoneRadius(std::istream &s)
 {
-        tString params;
-        params.ReadLine( s, true );
+	tString params;
+	params.ReadLine( s, true );
 
-        // parse the line to get the param : object_id, radius, speed
-        int pos = 0; //
-        const tString object_id_str = params.ExtractNonBlankSubString(pos);
-        const tString radius_str = params.ExtractNonBlankSubString(pos);
-        int radius = atoi(radius_str);
-        const tString speed_str = params.ExtractNonBlankSubString(pos);
-        REAL speed = atof(speed_str);
+	// parse the line to get the param : object_id, radius, speed
+	int pos = 0;				 //
+	const tString object_id_str = params.ExtractNonBlankSubString(pos);
+	const tString radius_str = params.ExtractNonBlankSubString(pos);
+	int radius = atoi(radius_str);
+	const tString speed_str = params.ExtractNonBlankSubString(pos);
+	REAL speed = atof(speed_str);
 
-        // first check for the name
-        int zone_id;
-        zone_id=gZone::FindFirst(object_id_str);
-        if (zone_id==-1) {
-            zone_id = atoi(object_id_str);
-            if (zone_id==0 && object_id_str!="0") return;
-        }
+	// first check for the name
+	int zone_id;
+	zone_id=gZone::FindFirst(object_id_str);
+	if (zone_id==-1)
+	{
+		zone_id = atoi(object_id_str);
+		if (zone_id==0 && object_id_str!="0") return;
+	}
 
-        const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
-        while (zone_id!=-1) {
-            // get the zone ...
-            gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
-            if (zone) {
-                zone->SetReferenceTime();
-                // set new radius and speed to reach it ...
-                if (speed==0)
-                    zone->SetRadiusSmoothly( radius );
-                else
-                    zone->SetRadiusSmoothly( radius, speed );
-                zone->RequestSync();
-            }
-            zone_id=gZone::FindNext(object_id_str, zone_id);
-        }
+	const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+	while (zone_id!=-1)
+	{
+		// get the zone ...
+		gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+		if (zone)
+		{
+			zone->SetReferenceTime();
+			// set new radius and speed to reach it ...
+			if (speed==0)
+				zone->SetRadiusSmoothly( radius );
+			else
+				zone->SetRadiusSmoothly( radius, speed );
+			zone->RequestSync();
+		}
+		zone_id=gZone::FindNext(object_id_str, zone_id);
+	}
 }
+
 
 static tConfItemFunc sg_SetZoneRadius_conf("SET_ZONE_RADIUS",&sg_SetZoneRadius);
 
-
 static void sg_SetZoneRoute(std::istream &s)
 {
-        tString params;
-        params.ReadLine( s, true );
+	tString params;
+	params.ReadLine( s, true );
 
-        // parse the line to get the param : object_id, positions ...
-        int pos = 0; //
-        const tString object_id_str = params.ExtractNonBlankSubString(pos);
-//        const tString mode_str = params.ExtractNonBlankSubString(pos);
-        std::vector<eCoord> route;
-        tString x,y;
-        while(true) {
-            x = params.ExtractNonBlankSubString(pos);
-            if(x == "") break;
-            y = params.ExtractNonBlankSubString(pos);
-            route.push_back(eCoord(atof(x), atof(y)));
-        }
+	// parse the line to get the param : object_id, positions ...
+	int pos = 0;				 //
+	const tString object_id_str = params.ExtractNonBlankSubString(pos);
+	//        const tString mode_str = params.ExtractNonBlankSubString(pos);
+	std::vector<eCoord> route;
+	tString x,y;
+	while(true)
+	{
+		x = params.ExtractNonBlankSubString(pos);
+		if(x == "") break;
+		y = params.ExtractNonBlankSubString(pos);
+		route.push_back(eCoord(atof(x), atof(y)));
+	}
 
-        // first check for the name
-        int zone_id;
-        zone_id=gZone::FindFirst(object_id_str);
-        if (zone_id==-1) {
-            zone_id = atoi(object_id_str);
-            if (zone_id==0 && object_id_str!="0") return;
-        }
+	// first check for the name
+	int zone_id;
+	zone_id=gZone::FindFirst(object_id_str);
+	if (zone_id==-1)
+	{
+		zone_id = atoi(object_id_str);
+		if (zone_id==0 && object_id_str!="0") return;
+	}
 
-        const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
-        while (zone_id!=-1) {
-            // get the zone ...
-            gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
-            if (zone) {
-	        zone->SetReferenceTime();
-		eCoord zoneDir = eCoord(0,0);
-	        if(!route.empty()) {
-		    eCoord curPos = zone->GetPosition();
-                    zone->AddWaypoint(curPos);
-		    zoneDir = route.front();
-                    for(std::vector<eCoord>::const_iterator iter = route.begin(); iter != route.end(); ++iter) {
-                        zone->AddWaypoint(*iter + curPos);
-                    }
-                }
-                zone->SetVelocity(zoneDir);
-                zone->RequestSync();
-            }
-            zone_id=gZone::FindNext(object_id_str, zone_id);
-        }
+	const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+	while (zone_id!=-1)
+	{
+		// get the zone ...
+		gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+		if (zone)
+		{
+			zone->SetReferenceTime();
+			eCoord zoneDir = eCoord(0,0);
+			if(!route.empty())
+			{
+				eCoord curPos = zone->GetPosition();
+				zone->AddWaypoint(curPos);
+				zoneDir = route.front();
+				for(std::vector<eCoord>::const_iterator iter = route.begin(); iter != route.end(); ++iter)
+				{
+					zone->AddWaypoint(*iter + curPos);
+				}
+			}
+			zone->SetVelocity(zoneDir);
+			zone->RequestSync();
+		}
+		zone_id=gZone::FindNext(object_id_str, zone_id);
+	}
 }
 
+
 static tConfItemFunc sg_SetZoneRoute_conf("SET_ZONE_POSITION",&sg_SetZoneRoute);
-
-
