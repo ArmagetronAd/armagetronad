@@ -334,6 +334,7 @@ class gBaseZoneHack: public gZone
 		gBaseZoneHack(nMessage &m);
 		~gBaseZoneHack();		 //!< destructor
 
+		bool CheckTeamAssignment(); //!< Check if this zone is assigned to a team, if not, try to assign one.
 	private:
 								 //!< simulates behaviour up to currentTime
 		virtual bool Timestep(REAL currentTime);
@@ -347,10 +348,8 @@ class gBaseZoneHack: public gZone
 		virtual void OnConquest();
 								 //!< checks for the only surviving zone
 		virtual void CheckSurvivor();
-	public:
 								 //!< called on the beginning of the round
 		virtual void OnRoundBegin();
-	private:
 								 //!< called on the end of the round
 		virtual void OnRoundEnd();
 

@@ -1578,8 +1578,8 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 
 				if (prey->CurrentTeam() != hunter->CurrentTeam())
 				{
-					char *pWinString = "$player_win_shot";
-					char *pFreeString = "$player_free_shot";
+					char const *pWinString = "$player_win_shot";
+					char const *pFreeString = "$player_free_shot";
 					int score = score_shot;
 					if (deathZoneType == TYPE_DEATH_SHOT)
 					{
@@ -2472,15 +2472,15 @@ void gBaseZoneHack::ZoneWasHeld( void )
 
 // *******************************************************************************
 // *
-// *   OnRoundBegin
+// *   CheckTeamAssignment
 // *
 // *******************************************************************************
 //!
-//! @return shall the hole process be repeated?
+//! @return true if a team is assigned, false if not
 //!
 // *******************************************************************************
 
-void gBaseZoneHack::OnRoundBegin( void )
+bool gBaseZoneHack::CheckTeamAssignment()
 {
 	// determine the owning team: the one that has a player spawned closest
 	// find the closest player
@@ -2529,11 +2529,10 @@ void gBaseZoneHack::OnRoundBegin( void )
 			RequestSync();
 		}
 
-		// if this zone does not belong to a team, discard it.
+		// if this zone does not belong to a team, return false.
 		if ( !team )
 		{
-			RemoveFromGame();
-			return;
+			return false;
 		}
 
 		// check other zones owned by the same team. Discard the one farthest away
@@ -2552,6 +2551,28 @@ void gBaseZoneHack::OnRoundBegin( void )
 			}
 		}
 	}
+	return true;
+}
+
+
+// *******************************************************************************
+// *
+// *   OnRoundBegin
+// *
+// *******************************************************************************
+//!
+//! @return shall the hole process be repeated?
+//!
+// *******************************************************************************
+
+void gBaseZoneHack::OnRoundBegin( void )
+{
+		// if this zone does not belong to a team, discard it.
+		if ( !CheckTeamAssignment() )
+		{
+			RemoveFromGame();
+			return;
+		}
 }
 
 
@@ -4944,8 +4965,12 @@ static void sg_CreateZone_conf(std::istream &s)
 	else if ( zoneTypeStr=="fortress" )
 	{
 		gBaseZoneHack *fZone = tNEW( gBaseZoneHack( grid, zonePos, true, zoneTeam ) );
-		fZone->OnRoundBegin();
-		if (!fZone) return; // fail to assigned a team to this zone.
+		// if this zone does not belong to a team, discard it.
+		if ( !fZone->CheckTeamAssignment() )
+		{
+			fZone->RemoveFromGame();
+			return;
+		}
 		Zone = fZone;
 		//sn_ConsoleOut( "$instant_win_activated" );
 		if (Zone->Team()!=NULL)
