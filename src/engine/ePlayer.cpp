@@ -7076,6 +7076,9 @@ static ePlayerNetID * ReadPlayer( std::istream & s )
     return ePlayerNetID::FindPlayerByName( name );
 }
 
+static bool se_enableAdminKillMessage = true;
+static tSettingItem< bool > se_enableAdminKillMessageConf( "ADMIN_KILL_MESSAGE", se_enableAdminKillMessage );
+
 static eLadderLogWriter se_playerKilledWriter("PLAYER_KILLED", true);
 
 static void Kill_conf(std::istream &s)
@@ -7089,10 +7092,10 @@ static void Kill_conf(std::istream &s)
 
     if ( p && p->Object() && p->Object()->Alive() )
     {
-        sn_ConsoleOut( tOutput( "$player_admin_kill", p->GetColoredName() ) );
-	se_playerKilledWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y; 
-	se_playerKilledWriter.write();
-	p->Object()->Kill();
+		if (se_enableAdminKillMessage) sn_ConsoleOut( tOutput( "$player_admin_kill", p->GetColoredName() ) );
+		se_playerKilledWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y; 
+		se_playerKilledWriter.write();
+		p->Object()->Kill();
     }
 }
 
