@@ -100,7 +100,8 @@ public:
 
     void SetWinding(int number);
     void SetWinding(int number, eCoord directions[], bool normalise=true);
-
+	float GetWindingAngle(int winding);
+	 
     // Ask the grid to turn a winding
     void Turn(int &currentWinding, int direction);
 

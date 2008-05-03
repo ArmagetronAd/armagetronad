@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "eAdvWall.h"
 #include "nNetObject.h"
+#include "gExplosion.h"
 #include "rDisplayList.h"
 //#include "nObserver.h"
 class gExplosion;
@@ -187,6 +188,9 @@ public:
 
     //eCoord Vec(){return w->Vec();}
     eCoord Vec();  //!< returns the vector from the beginning to the end of the wall
+
+    tArray<gPlayerWallCoord> &Coords() { return coords_; }
+    
 protected:
     virtual ~gNetPlayerWall();
     void ReleaseData(); // release all references

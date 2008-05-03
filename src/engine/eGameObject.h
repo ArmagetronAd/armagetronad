@@ -34,6 +34,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eCoord.h"
 #include "tSafePTR.h"
 
+#include <fstream>
+#include <iostream>
+
 class eGrid;
 class uActionPlayer;
 class eTeam;
@@ -172,6 +175,9 @@ public:
 
     //! draws object to the screen using OpenGL
     virtual void Render(const eCamera *cam);
+
+    //! draws it in a svg file
+    virtual void DrawSvg(std::ofstream &f, float lx, float ly, float w, float h);
 
     //! returns whether the rendering uses alpha blending (massively, so sorting errors would show)
     virtual bool RendersAlpha() const;

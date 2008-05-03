@@ -105,6 +105,7 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/gSensor.cpp tron/gSensor.h tron/gServerBrowser.cpp tron/gServerBrowser.h tron/gSparks.cpp tron/gSparks.h\
 	tron/gSpawn.cpp tron/gSpawn.h tron/gStuff.cpp tron/gStuff.h tron/gTeam.cpp tron/gTeam.h tron/gWall.cpp\
 	tron/gWall.h tron/gWinZone.cpp tron/gWinZone.h\
+	tron/gSvgOutput.h tron/gSvgOutput.cpp\
 	tron/gFriends.h tron/gFriends.cpp\
 	tron/gServerFavorites.h tron/gServerFavorites.cpp
 

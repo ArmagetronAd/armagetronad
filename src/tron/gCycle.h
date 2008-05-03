@@ -329,6 +329,9 @@ public:
                           int viewer,REAL rvol,REAL lvol);
 #endif
 
+	//! draws it in a svg file
+	virtual void DrawSvg(std::ofstream &f, float lx, float ly, float w, float h);
+
     virtual eCoord CamPos() const;
     virtual eCoord PredictPosition() const;
     virtual eCoord  CamTop() const;

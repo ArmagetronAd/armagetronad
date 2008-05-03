@@ -686,6 +686,14 @@ eCoord eGrid::GetDirection(int winding)
 }
 
 /*
+ * Return the direction associated with a winding number
+ */
+float eGrid::GetWindingAngle(int winding)
+{
+    return axis.GetWindingAngle(winding);
+}
+
+/*
  * Define the number of winding to be used on this grid
  */
 void eGrid::SetWinding(int number)

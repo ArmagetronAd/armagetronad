@@ -4985,8 +4985,19 @@ void gCycle::PPDisplay(){
 }
 #endif
 
-
-
+//! draws it in a svg file
+void gCycle::DrawSvg(std::ofstream &f, float lx, float ly, float w, float h) {
+    double alpha = 1;
+    if(!Alive()) {
+        alpha -= 2 * (se_GameTime() - DeathTime());
+        if(alpha <= 0) return;
+    }
+    eCoord p = PredictPosition(), dir = Direction();
+    float a = Grid()->GetWindingAngle(WindingNumber())*180/M_PI;
+	f << "  <polygon points=\"2,0 -2,2 -2,-2\" fill=\"rgb(" << color_.r*100 << "%," << color_.g*100 << "%," << color_.b*100 
+	  << "%)\" stroke=\"none\" transform=\"translate(" << w-pos.x+lx << " " << pos.y-ly 
+	  << ") scale(-1,1) rotate(" << a << ")\" opacity=\"" << alpha << "\" />\n";
+};
 
 
 // cycle network routines:

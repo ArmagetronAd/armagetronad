@@ -55,6 +55,9 @@ public:
                           int viewer,REAL rvol,REAL lvol);
 #endif
 
+	//! draws it in a svg file
+	virtual void DrawSvg(std::ofstream &f, float lx, float ly, float w, float h);
+
     bool AccountForHole(); // will return true exactly once per explosion; to be used to make the holing score only count once.
 
     static void OnNewWall( eWall* w );	// blow holes into a new wall

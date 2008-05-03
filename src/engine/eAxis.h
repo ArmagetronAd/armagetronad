@@ -23,7 +23,8 @@ public:
     int WindingNumber() const {return numberWinding;}
     int NearestWinding (eCoord pos);
     eCoord GetDirection (int winding);
-
+	float GetWindingAngle (int winding) {return windingAngles?windingAngles[winding]:0;}
+	
     void Turn(int &currentWinding, int direction);
     void TurnRight(int &direction);
     void TurnLeft(int &direction);
