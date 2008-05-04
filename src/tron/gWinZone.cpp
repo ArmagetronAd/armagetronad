@@ -4534,7 +4534,7 @@ bool gTargetZoneHack::Timestep( REAL time )
 //!		@param	time    the current time
 //!
 // *******************************************************************************
-static eLadderLogWriter sg_targetzonePlayerEnterWriter("BASEZONE_PLAYER_ENTER", false);
+static eLadderLogWriter sg_targetzonePlayerEnterWriter("TARGETZONE_PLAYER_ENTER", false);
 
 void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
 {
