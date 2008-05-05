@@ -43,6 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eFloor.h"
 #include "gSparks.h"
 #include "gExplosion.h"
+#include "gSvgOutput.h"
 #include "gWall.h"
 #include "nKrawall.h"
 #include "gAIBase.h"
@@ -4994,10 +4995,9 @@ void gCycle::DrawSvg(std::ofstream &f) {
     }
     eCoord p = PredictPosition(), dir = Direction();
     float a = Grid()->GetWindingAngle(WindingNumber())*180/M_PI;
-	f << "  <polygon points=\"2,0 -2,2 -2,-2\" fill=\"rgb(" << color_.r*100 << "%," << color_.g*100 << "%," << color_.b*100 
-	  << "%)\" stroke=\"none\" transform=\"translate(" << -pos.x << " " << pos.y 
-	  << ") scale(-1,1) rotate(" << a << ")\" opacity=\"" << alpha << "\" />\n";
-};
+    f << "  <use xlink:href='#cycle' fill='" << gSvgColor(color_) << "' transform=\"translate(" << -pos.x << " " << pos.y 
+      << ") rotate(" << (180 - a) << ")\" opacity=\"" << alpha << "\" />\n";
+}
 
 
 // cycle network routines:

@@ -40,22 +40,29 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //! Write a svg file of a 2D map of the grid
 class SvgOutput {
 private:
-	std::ofstream svgFile;	//!< file to write svg output
-	long afterRimWallsPos;	//!< position in this file after header and rim walls as they will not change during the round
-	float lx, ly, hx, hy;	//!< lower and higher coordinate of the map
-	
+    std::ofstream svgFile;	//!< file to write svg output
+    long afterRimWallsPos;	//!< position in this file after header and rim walls as they will not change during the round
+    float lx, ly, hx, hy;	//!< lower and higher coordinate of the map
+
     void WriteSvgHeader();	//!< Write to svg output file the appropriate svg header
     void WriteSvgFooter();	//!< Write to svg output file the appropriate svg footer
-    
+
     void DrawRimWalls( tList<eWallRim> &list );		//!< Draws all the rim walls
     void DrawWalls(tList<gNetPlayerWall> &list);	//!< Draws all player walls
     void DrawObjects();								//!< Draws all game objects
 
 public:
     void Create();	//!< create svg file with header, rim walls, player walls, other objects and footer 
-    
+
     SvgOutput();	//!< default constructor
     ~SvgOutput();	//!< default destructor
 };
+
+struct gSvgColor {
+    REAL r, g, b;
+    gSvgColor(REAL R, REAL G, REAL B) : r(R), g(G), b(B) {}
+    gSvgColor(gRealColor const &c) : r(c.r), g(c.g), b(c.b) {}
+};
+std::ostream &operator<<(std::ostream &s, gSvgColor const &c);
 
 #endif

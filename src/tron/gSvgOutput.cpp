@@ -36,14 +36,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 extern std::vector<eCoord> se_rimWallRubberBand;
 
+std::ostream &operator<<(std::ostream &s, gSvgColor const &c) {
+    tASSERT(c.r >= 0 && c.r <= 1);
+    tASSERT(c.g >= 0 && c.g <= 1);
+    tASSERT(c.b >= 0 && c.b <= 1);
+    s.fill('0');
+    return s << '#' << std::hex
+             << std::setw(2) << (int)(c.r*255)
+             << std::setw(2) << (int)(c.g*255)
+             << std::setw(2) << (int)(c.b*255);
+}
+
 void SvgOutput::WriteSvgHeader() {
-	// Assume the file is already open
-	svgFile << "<?xml version=\"1.0\" standalone=\"no\"?>\n";
-	svgFile << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
-	svgFile << "<svg width=\"100%\" height=\"100%\" version=\"1.1\" viewBox=\"" << -hx << " " << ly << " "
-			<< hx-lx << " " << hy-ly << "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
-	svgFile << "<rect x=\"" << -hx << "\" y=\"" << ly << "\" width=\"" << hx-lx << "\" height=\"" << hy-ly
-			<< "\" stroke=\"none\" fill=\"#333333\" />\n\n";
+    // Assume the file is already open
+    svgFile << "<?xml version=\"1.0\" standalone=\"no\"?>\n";
+    svgFile << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
+    svgFile << "<svg xmlns:xlink='http://www.w3.org/1999/xlink' width=\"100%\" height=\"100%\" version=\"1.1\" viewBox=\"" << -hx << " " << ly << " "
+            << hx-lx << " " << hy-ly << "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
+    svgFile << "<rect x=\"" << -hx << "\" y=\"" << ly << "\" width=\"" << hx-lx << "\" height=\"" << hy-ly
+          << "\" stroke=\"none\" fill=\"#333333\" />\n\n";
+    svgFile << "<defs>\n\t<polygon id='cycle' stroke='none' points='4,0 0,2 0,-2' />\n</defs>\n\n";
 }
 
 void SvgOutput::WriteSvgFooter() {
@@ -56,9 +68,10 @@ void SvgOutput::DrawRimWalls( tList<eWallRim> &list ) {
 	{
 		eWallRim *wall = list[i];
 		eCoord begin = wall->EndPoint(0), end = wall->EndPoint(1);
-		svgFile << "  <line x1=\"" << -begin.x << "\" y1=\"" << begin.y
-				<< "\" x2=\"" << -end.x << "\" y2=\"" << end.y 
-				<< "\" stroke=\"#FFFFFF\" stroke-width=\"1\" stroke-linecap=\"round\" />\n";
+		svgFile << "\n\tM" << -begin.x << ',' << begin.y << ' ' << -end.x << ',' << end.y;
+		//svgFile << "  <line x1=\"" << -begin.x << "\" y1=\"" << begin.y
+		//		<< "\" x2=\"" << -end.x << "\" y2=\"" << end.y 
+		//		<< "\" stroke=\"#FFFFFF\" stroke-width=\"1\" stroke-linecap=\"round\" />\n";
 	}
 }
 
@@ -95,11 +108,13 @@ void SvgOutput::DrawWalls(tList<gNetPlayerWall> &list) {
             if(curDist < minDist) curDist = minDist;
             curDist = (curDist - begDist) / lenDist;
             if(prevDangerous) {
-				eCoord v = endPos - begPos, begin = begPos + v * prevDist, end = begPos + v * curDist;
-				svgFile << "  <line x1=\"" << -begin.x << "\" y1=\"" << begin.y << "\" x2=\"" << -end.x
-						<< "\" y2=\"" << end.y << "\" stroke=\"rgb(" << cycle->color_.r*100 << "%," << cycle->color_.g*100 
-						<< "%," << cycle->color_.b*100 << "%)\" stroke-width=\"1\" stroke-linecap=\"round\" opacity=\"" 
-						<< alpha << "\"/>\n";
+                eCoord v = endPos - begPos, begin = begPos + v * prevDist, end = begPos + v * curDist;
+                svgFile << "\t<path d='M" << -begin.x << ',' << begin.y
+                        << ' ' << -end.x << ',' << end.y << "' stroke='" << gSvgColor(cycle->color_) << '\'';
+                if(alpha != 1) {
+                    svgFile << " opacity='" << alpha << '\'';
+                }
+                svgFile << " />\n";
             }
             prevDangerous = curDangerous;
             prevDist = curDist;
@@ -118,32 +133,32 @@ void SvgOutput::DrawObjects() {
 }
 
 void SvgOutput::Create() {
-	// open file as a new one
-	svgFile.clear();
-	if ( !tDirectories::Var().Open(svgFile, "map.svg", std::ios::trunc) ) return;
-	// get map limits
-	const eRectangle &bounds = eWallRim::GetBounds();
+    // open file as a new one
+    svgFile.clear();
+    if ( !tDirectories::Var().Open(svgFile, "map.svg", std::ios::trunc) ) return;
+    // get map limits
+    const eRectangle &bounds = eWallRim::GetBounds();
     lx = ((long)bounds.GetLow().x) - 5;
     ly = ((long)bounds.GetLow().y) - 5;
     hx = ((long)bounds.GetHigh().x) + 5;
     hy = ((long)bounds.GetHigh().y) + 5;
-	// add header, rim walls
-	WriteSvgHeader();
-	svgFile << "<!-- Rim Walls -->\n";
-	DrawRimWalls(se_rimWalls);
-	svgFile << "<!-- End of Rim Walls -->\n\n";
-	// keep the current file offset
-	afterRimWallsPos = svgFile.tellp();
-	// add player walls and other game objects 
-	svgFile << "<!-- Cycle's Walls -->\n";
-	DrawWalls(sg_netPlayerWallsGridded);
-	DrawWalls(sg_netPlayerWalls);
-	svgFile << "\n<!-- Other objects -->\n";
+    // add header, rim walls
+    WriteSvgHeader();
+    svgFile << "<!-- Rim Walls -->\n<path stroke='#fff' stroke-width='1' stroke-linecap='round' d='";
+    DrawRimWalls(se_rimWalls);
+    svgFile << "' />\n<!-- End of Rim Walls -->\n\n";
+    // keep the current file offset
+    afterRimWallsPos = svgFile.tellp();
+    // add player walls and other game objects 
+    svgFile << "<!-- Cycle's Walls -->\n<g stroke-width='1' stroke-linecap='round'>\n";
+    DrawWalls(sg_netPlayerWallsGridded);
+    DrawWalls(sg_netPlayerWalls);
+    svgFile << "\n</g>\n<!-- Game objects -->\n";
     DrawObjects();
-	// add the footer and close the filepp
-	WriteSvgFooter();
-	svgFile.close();
-	//con << "Svg file created\n";
+    // add the footer and close the filepp
+    WriteSvgFooter();
+    svgFile.close();
+    //con << "Svg file created\n";
 }
 
 SvgOutput::SvgOutput() {

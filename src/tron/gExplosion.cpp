@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tInitExit.h"
 #include "gWall.h"
 #include "gCycle.h"
+#include "gSvgOutput.h"
 #include "eGrid.h"
 #include "tRandom.h"
 #include "tMath.h"
@@ -419,24 +420,29 @@ void gExplosion::OnRemoveFromGame()
 
 //! draws it in a svg file
 void gExplosion::DrawSvg(std::ofstream &f) {
-	REAL a1=(lastTime-createTime)+.01f;//+.2;
-	REAL e=a1-1;
+    REAL a1=(lastTime-createTime)+.01f;//+.2;
+    REAL e=a1-1;
 
-	if (e<0) e=0;
+    if (e<0) e=0;
 
-	REAL fade=(2-a1);
-	if (fade<0) fade=0;
-	if (fade>1) fade=1;
+    REAL fade=(2-a1);
+    if (fade<0) fade=0;
+    if (fade>1) fade=1;
 
-	a1*=100;
-	e*=100;
+    a1*=100;
+    e*=100;
 
-	for(int i=expvec.Len()-1;i>=0;i--){
-		f << "  <line x1=\"" << -(pos.x+a1*expvec[i].x[0]) << "\" y1=\"" << pos.y+a1*expvec[i].x[1] 
-		  << "\" x2=\"" << -(pos.x+e*expvec[i].x[0]) << "\" y2=\"" << pos.y+e*expvec[i].x[1]
-		  << "\" stroke=\"rgb(" << explosion_r*100 << "%," << explosion_g*100 
-		  << "%," << explosion_b*100 << "%)\" stroke-width=\".8\" opacity=\"" << fade << "\"/>\n";
-	}
+    f << "<!-- Explosion -->\n<path stroke-width='.8' stroke='" << gSvgColor(explosion_r, explosion_g, explosion_b) << "' opacity='" << fade << "' d='";
+
+    for(int i=expvec.Len()-1;i>=0;i--){
+        f << "\n\tM" 
+          << -(pos.x+a1*expvec[i].x[0]) << ','
+          << pos.y+a1*expvec[i].x[1] << ' '
+          << -(pos.x+e*expvec[i].x[0]) << ','
+          << pos.y+e*expvec[i].x[1];
+    }
+
+    f << "' />\n";
 }
 
 extern REAL se_GameTime();
@@ -456,17 +462,17 @@ static void sg_SetExplosion(std::istream &s)
         int pos = 0; //
         const tString x = params.ExtractNonBlankSubString(pos);
         const tString y = params.ExtractNonBlankSubString(pos);
-	eCoord epos = eCoord(atof(x), atof(y));
+        eCoord epos = eCoord(atof(x), atof(y));
         const tString radius_str = params.ExtractNonBlankSubString(pos);
         int radius = atoi(radius_str);
-	if (radius<=0) return;
+        if (radius<=0) return;
 
-	// extra parameters for explosion init ...
+        // extra parameters for explosion init ...
         gRealColor ecolor;
         ecolor.r = 1.0;
         ecolor.g = 1.0;
         ecolor.b = 1.0;
-	REAL time = se_GameTime();
+        REAL time = se_GameTime();
 
         gExplosion *explosion = NULL;
         explosion = tNEW( gExplosion( grid, epos, time, ecolor, NULL, radius) );

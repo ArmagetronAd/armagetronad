@@ -46,6 +46,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eTess2.h"
 #include "eWall.h"
 #include "gWall.h"
+#include "gSvgOutput.h"
 #include "eSound.h"
 #include "uInput.h"
 #include "tMath.h"
@@ -1238,21 +1239,20 @@ void gZone::DrawSvg(std::ofstream &f) {
         return;
     alpha *= sg_zoneAlpha * sg_zoneAlphaServer;
 
-    f << "  <circle cx=\"0\" cy=\"0\" r=\"" << r << "\" fill=\"none\" stroke=\"rgb(" 
-      << color_.r*100 << "%," << color_.g*100 << "%," << color_.b*100 << "%)\" stroke-width=\"1\" stroke-dasharray=\""
+    f << "  <circle cx=\"0\" cy=\"0\" r=\"" << r << "\" fill=\"none\" stroke='" << gSvgColor(color_) << "' stroke-width=\"1\" stroke-dasharray=\""
       << dash << ", " << dash << "\" opacity=\"" <<  alpha << "\" transform=\"translate("
       << -pos.x << " " << pos.y << ")\">\n";
     REAL speed = GetRotationSpeed();
     if(fabs(speed) > EPS) {
-        REAL t = abs(2*M_PI/speed);
+        REAL t = fabs(2*M_PI/speed);
         f << "    <animateTransform attributeName=\"transform\" attributeType=\"XML\" type=\"rotate\" from=\"0\" to=\"";
         if(speed > 0) {
             f << '-';
         }
         f << "360\" dur=\""
-          << t << "\" repeatCount=\"indefinite\" additive=\"sum\" />";
+          << t << "\" repeatCount=\"indefinite\" additive=\"sum\" />\n";
     }
-    f << "</circle>";
+    f << "  </circle>\n";
 
 }
 
