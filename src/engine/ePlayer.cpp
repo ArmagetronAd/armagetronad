@@ -5483,7 +5483,7 @@ void ePlayerNetID::RankingLadderLog() {
             if(p->currentTeam) {
                 se_onlinePlayerWriter << FilterName(p->currentTeam->Name());
                 ++num_humans;
-            }
+			}
         }
         se_onlinePlayerWriter.write();
     }
@@ -5507,7 +5507,7 @@ void ePlayerNetID::GridPosLadderLog() {
                 if (p->Object() && p->Object()->Team())
                     se_playerGridPosWriter << FilterName(p->Object()->Team()->Name());
                 else se_playerGridPosWriter << " ";
-                    se_playerGridPosWriter.write();
+                se_playerGridPosWriter.write();
             }
         }
     }

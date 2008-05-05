@@ -1230,10 +1230,22 @@ void gZone::Render( const eCamera * cam )
 void gZone::DrawSvg(std::ofstream &f, float lx, float ly, float w, float h) {
     REAL r = Radius();
 	REAL dash = 2 * r * M_PI / 20;
+
+	REAL alpha = ( lastTime - createTime_ ) * .2f;
+	if ( alpha > .7f )
+		alpha = .7f;
+	if ( alpha <= 0 )
+		return;
+	alpha *= sg_zoneAlpha * sg_zoneAlphaServer;
 	
-	f << "  <circle cx=\"" << w-pos.x+lx << "\" cy=\"" << pos.y-ly << "\" r=\"" << r << "\" fill=\"none\" stroke=\"rgb(" 
+	f << "  <circle cx=\"0\" cy=\"0\" r=\"" << r << "\" fill=\"none\" stroke=\"rgb(" 
 	  << color_.r*100 << "%," << color_.g*100 << "%," << color_.b*100 << "%)\" stroke-width=\"1\" stroke-dasharray=\""
-	  << dash << ", " << dash << "\" />\n";
+	  << dash << ", " << dash << "\" opacity=\"" <<  alpha << "\" transform=\"translate(" 
+	  << w-pos.x+lx << " " << pos.y-ly << ")\">\n";
+	REAL t = abs(2*M_PI/GetRotationSpeed());
+	f << "    <animateTransform attributeName=\"transform\" attributeType=\"XML\" type=\"rotate\" from=\"0\" to=\"360\" dur=\""
+	  << t << "\" repeatCount=\"indefinite\" additive=\"sum\" /> </circle>";
+
 }
 
 
