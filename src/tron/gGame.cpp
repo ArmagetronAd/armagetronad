@@ -993,6 +993,14 @@ static float sg_gameTimeInterval=-1;
 static tSettingItem<float> sggti("LADDERLOG_GAME_TIME_INTERVAL",
                                  sg_gameTimeInterval);
 
+static float sg_tacticalPositionInterval=5;
+static tSettingItem<float> sgtpi("TACTICAL_POSITION_INTERVAL",
+                                 sg_tacticalPositionInterval);
+
+static float sg_gridPosInterval=1;
+static tSettingItem<float> sggpi("GRID_POSITION_INTERVAL",
+                                 sg_gridPosInterval);
+
 
 class ladder: public highscores<REAL>{
 public:
@@ -4251,22 +4259,31 @@ bool gGame::GameLoop(bool input){
         synced_ = true;
     }
 
-    static float lastTime = 1e42;
-
-    if(sg_gameTimeInterval >= 0 && (gtime >= lastTime + sg_gameTimeInterval || gtime < lastTime)) {
-        sg_gameTimeWriter << gtime;
-        sg_gameTimeWriter.write();
-        lastTime = gtime;
-    }
-    if((int)gtime%5==0) ePlayerNetID::GridPosLadderLog();
-    if (gtime>sg_playerPositioningStartTime) {
-        ePlayerNetID::TacticalPositioning();
-    }
-
-    static float lastSvgTime = 1e42;
-    if(sg_svgOutputFreq >= 0 && (gtime >= lastSvgTime + sg_svgOutputFreq || gtime < lastSvgTime)) {
-        sg_svgOutput.Create();
-        lastSvgTime = gtime;
+    {
+        static float lastTime = 1e42;
+        if(sg_gameTimeInterval >= 0 && (gtime >= lastTime + sg_gameTimeInterval || gtime < lastTime)) {
+            sg_gameTimeWriter << gtime;
+            sg_gameTimeWriter.write();
+            lastTime = gtime;
+        }
+    } {
+        static float lastTime = 1e42;
+        if(sg_tacticalPositionInterval >= 0 && (gtime >= lastTime + sg_tacticalPositionInterval || gtime < lastTime)) {
+            ePlayerNetID::GridPosLadderLog();
+            lastTime = gtime;
+        }
+    } {
+        static float lastTime = 1e42;
+        if(sg_gridPosInterval >= 0 && (gtime >= lastTime + sg_gridPosInterval || gtime < lastTime)) {
+            ePlayerNetID::TacticalPositioning();
+            lastTime = gtime;
+        }
+    } {
+        static float lastTime = 1e42;
+        if(sg_svgOutputFreq >= 0 && (gtime >= lastTime + sg_svgOutputFreq || gtime < lastTime)) {
+            sg_svgOutput.Create();
+            lastTime = gtime;
+        }
     }
 
     if (state==GS_PLAY){
