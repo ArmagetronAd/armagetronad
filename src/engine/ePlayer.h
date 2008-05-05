@@ -421,6 +421,7 @@ extern int    sr_viewportBelongsToPlayer[MAX_VIEWPORTS];
 void se_ChatState( ePlayerNetID::ChatFlags flag, bool cs);
 
 void se_SaveToScoreFile( tOutput const & out );  //!< writes something to scorelog.txt
+void se_SaveToChatLog( tOutput const & out );  //!< writes something to chatlog.txt (if enabled) and/or ladderlog
 
 //! create a global instance of this to write stuff to ladderlog.txt
 class eLadderLogWriter {

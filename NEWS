@@ -79,6 +79,10 @@ Changes since 0.2.8.2:
 - All ladderlog outputs can be enabled or disabled separately by using
   LADDERLOG_WRITE_*. LADDERLOG_WRITE_ALL enables or disables all ladderlog
   output alltogether.
+- CHAT_LOG controls whether to write a machine-readable chatlog to
+  var/chatlog.txt
+- CONSOLE_DECORATE_TIMESTAMP write a timestamp for every console message?
+- LADDERLOG_DECORATE_TIMESTAMP prefix every ladderlog message with a timestamp?
 - SLAP <player> [points] sends a message to everyone and subtracts a number
   of points (default: 1) from <player>'s score. Negative points are
   supported.
