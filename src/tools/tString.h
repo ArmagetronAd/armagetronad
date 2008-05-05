@@ -259,6 +259,7 @@ bool operator>=( const tString& first, const tString& second );
   void operator <<(tString &s,float c);
 */
 
+tString st_GetCurrentTime(char const *szFormat);
 
 #endif
 

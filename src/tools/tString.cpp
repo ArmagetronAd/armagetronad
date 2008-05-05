@@ -309,6 +309,10 @@ void tString::SetPos(int l, bool cut){
             operator+=(' ');
         }
     }
+    if( l == Len() && !cut)
+    {
+        operator+=(' ');
+    }
     for(i=Len();i<l;i++)
         operator+=(' ');
 }
@@ -1732,4 +1736,15 @@ void tToUpper( tString & toTransform )
     {
         toTransform[i] = toupper( toTransform[i] );
     }
+}
+
+tString st_GetCurrentTime( char const * szFormat )
+{
+    char szTemp[128];
+    time_t     now;
+    struct tm *pTime;
+    now = time(NULL);
+    pTime = localtime(&now);
+    strftime(szTemp,sizeof(szTemp),szFormat,pTime);
+    return tString(szTemp);
 }

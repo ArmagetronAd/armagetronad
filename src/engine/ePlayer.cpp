@@ -645,35 +645,6 @@ static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p )
 #endif
 #endif
 
-// do you want specific log for chat
-static int se_chatLog = 0; // 0=no chat log, 1=chat in chatlog.txt, 2=chat in ladder log CHAT message
-static tSettingItem< int > se_chatLogConf( "CHAT_LOG", se_chatLog );
-
-static eLadderLogWriter se_chatWriter("CHAT", true);
-
-void se_SaveToChatLog( tOutput const & out )
-{
-    if (sn_GetNetState()!=nCLIENT && !tRecorder::IsPlayingBack())
-    {
-		char szTemp[128];
-		time_t     now;
-		struct tm *pTime;
-		now = time(NULL);
-		pTime = localtime(&now);
-		strftime(szTemp,sizeof(szTemp),"[%Y/%m/%d-%H:%M:%S] ",pTime);
-
-		if (se_chatLog == 1) {
-			std::ofstream o;
-			if ( tDirectories::Var().Open(o, "chatlog.txt", std::ios::app) ) {
-				o << szTemp << " " << out << "\n";
-			}
-		} else if (se_chatLog == 2) {
-			se_chatWriter << out;
-			se_chatWriter.write();
-		}
-    }
-}
-
 #ifdef KRAWALL_SERVER
 // minimal access level to play
 static tAccessLevel se_playAccessLevel = tAccessLevel_Program;
@@ -2713,6 +2684,10 @@ static void se_ChatMe( ePlayerNetID * p, std::istream & s, eChatSpamTester & spa
     se_BroadcastChatLine( p, console, forOldClients );
     console << "\n";
     sn_ConsoleOut(console,0);
+
+    tString str;
+    str << p->GetUserName() << " /me " << msg;
+    se_SaveToChatLog(str);
     return;
 }
 
@@ -5151,17 +5126,48 @@ eNetGameObject *ePlayerNetID::Object() const{
 static bool se_consoleLadderLog = false;
 static tSettingItem< bool > se_consoleLadderLogConf( "CONSOLE_LADDER_LOG", se_consoleLadderLog );
 
+static bool se_ladderlogDecorateTS = false;
+static tSettingItem< bool > se_ladderlogDecorateTSConf( "LADDERLOG_DECORATE_TIMESTAMP", se_ladderlogDecorateTS );
+extern bool sn_decorateTS; // from nNetwork.cpp
+
 void se_SaveToLadderLog( tOutput const & out )
 {
     if (se_consoleLadderLog)
     {
-        std::cout << "[L] " << out << std::endl;
+        std::cout << "[L";
+        if(sn_decorateTS) {
+            std::cout << st_GetCurrentTime(" TS=%Y/%m/%d-%H:%M:%S");
+        }
+        std::cout << "] " << out << std::endl;
     }
     if (sn_GetNetState()!=nCLIENT && !tRecorder::IsPlayingBack())
     {
         std::ofstream o;
         if ( tDirectories::Var().Open(o, "ladderlog.txt", std::ios::app) )
+            if(se_ladderlogDecorateTS) {
+                o << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
+            }
             o << out << std::endl;;
+    }
+}
+
+static bool se_chatLog = false;
+static tSettingItem<bool> se_chatLogConf("CHAT_LOG", se_chatLog);
+
+static eLadderLogWriter se_chatWriter("CHAT", false);
+
+void se_SaveToChatLog(tOutput const &out) {
+    if(sn_GetNetState() != nCLIENT && !tRecorder::IsPlayingBack()) {
+        if(se_chatWriter.isEnabled()) {
+            se_chatWriter << out;
+            se_chatWriter.write();
+        }
+        if(se_chatLog) {
+            std::ofstream o;
+            if ( tDirectories::Var().Open(o, "chatlog.txt", std::ios::app) ) {
+                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << out << std::endl;
+            }
+        }
     }
 }
 

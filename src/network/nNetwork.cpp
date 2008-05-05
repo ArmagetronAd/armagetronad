@@ -2806,6 +2806,9 @@ static tConfItem< short > sn_decorateIDConf( "CONSOLE_DECORATE_ID", sn_decorateI
 static short sn_decorateIP = false;
 static tConfItem< short > sn_decorateIPConf( "CONSOLE_DECORATE_IP", sn_decorateIP );
 
+bool sn_decorateTS = false;
+static tConfItem< bool > sn_decorateTSConf( "CONSOLE_DECORATE_TIMESTAMP", sn_decorateTS );
+
 // console with filter for better machine readable log format
 class nConsoleFilter:public tConsoleFilter{
 private:
@@ -2822,7 +2825,11 @@ private:
             line << "[";
             if ( sn_decorateID )
                 line << id;
-            if ( sn_decorateID && printIP )
+            if ( sn_decorateID && sn_decorateTS )
+                line << " ";
+            if ( sn_decorateTS )
+                line << st_GetCurrentTime("TS=%Y/%m/%d-%H:%M:%S");
+            if ( (sn_decorateID || sn_decorateTS) && printIP )
                 line << " ";
             if ( printIP )
             {
