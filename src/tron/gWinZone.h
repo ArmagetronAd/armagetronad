@@ -255,7 +255,7 @@ class gZone: public eNetGameObject
 		virtual void Render(const eCamera *cam);
 
 		//! draws it in a svg file
-		virtual void DrawSvg(std::ofstream &f, float lx, float ly, float w, float h);
+		virtual void DrawSvg(std::ofstream &f);
 
 		//! returns whether the rendering uses alpha blending (massively, so sorting errors would show)
 		virtual bool RendersAlpha() const;

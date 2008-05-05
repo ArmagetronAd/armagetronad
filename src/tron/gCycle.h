@@ -330,7 +330,7 @@ public:
 #endif
 
 	//! draws it in a svg file
-	virtual void DrawSvg(std::ofstream &f, float lx, float ly, float w, float h);
+	virtual void DrawSvg(std::ofstream &f);
 
     virtual eCoord CamPos() const;
     virtual eCoord PredictPosition() const;

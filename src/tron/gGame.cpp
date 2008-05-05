@@ -126,11 +126,8 @@ static tSettingItem< bool > sg_waitForExternalScriptConf( "WAIT_FOR_EXTERNAL_SCR
 static REAL sg_waitForExternalScriptTimeout = 3;
 static tSettingItem<REAL> sg_waitForExternalScriptTimeoutConf( "WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT", sg_waitForExternalScriptTimeout );
 
-static bool sg_svgOutputEnable = false;
-static tSettingItem< bool > sg_svgOutputEnableConf( "SVG_OUTPUT_ENABLE", sg_svgOutputEnable );
-
-static int sg_svgOutputFreq = 5;
-static tSettingItem<int> sg_sg_svgOutputFreqConf( "SVG_OUTPUT_TIMING", sg_svgOutputFreq );
+static REAL sg_svgOutputFreq = -1;
+static tSettingItem<REAL> sg_sg_svgOutputFreqConf( "SVG_OUTPUT_TIMING", sg_svgOutputFreq );
 
 // time in sec before player positioning starts
 static REAL sg_playerPositioningStartTime = 5.0;
@@ -3168,9 +3165,9 @@ void gGame::StateUpdate(){
             init_game_grid(grid, aParser);
 
             nNetObject::ClearAllDeleted();
-			
-			if (sg_svgOutputEnable) sg_svgOutput.Create();
-			
+
+            if (sg_svgOutputFreq >= 0) sg_svgOutput.Create();
+
             SetState(GS_CREATE_OBJECTS,GS_CAMERA);
             break;
         case GS_CREATE_OBJECTS:
@@ -4260,11 +4257,16 @@ bool gGame::GameLoop(bool input){
         sg_gameTimeWriter << gtime;
         sg_gameTimeWriter.write();
         lastTime = gtime;
-	    if((int)gtime%5==0) ePlayerNetID::GridPosLadderLog();
-	    if (sg_svgOutputEnable && (gtime>=0) && ((int)gtime%sg_svgOutputFreq==1)) sg_svgOutput.Create(); 
-	    if (gtime>sg_playerPositioningStartTime) {
-	        ePlayerNetID::TacticalPositioning();
-	    }
+    }
+    if((int)gtime%5==0) ePlayerNetID::GridPosLadderLog();
+    if (gtime>sg_playerPositioningStartTime) {
+        ePlayerNetID::TacticalPositioning();
+    }
+
+    static float lastSvgTime = 1e42;
+    if(sg_svgOutputFreq >= 0 && (gtime >= lastSvgTime + sg_svgOutputFreq || gtime < lastSvgTime)) {
+        sg_svgOutput.Create();
+        lastSvgTime = gtime;
     }
 
     if (state==GS_PLAY){

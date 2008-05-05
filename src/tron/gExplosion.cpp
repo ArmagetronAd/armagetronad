@@ -418,7 +418,7 @@ void gExplosion::OnRemoveFromGame()
 }
 
 //! draws it in a svg file
-void gExplosion::DrawSvg(std::ofstream &f, float lx, float ly, float w, float h) {
+void gExplosion::DrawSvg(std::ofstream &f) {
 	REAL a1=(lastTime-createTime)+.01f;//+.2;
 	REAL e=a1-1;
 
@@ -432,8 +432,8 @@ void gExplosion::DrawSvg(std::ofstream &f, float lx, float ly, float w, float h)
 	e*=100;
 
 	for(int i=expvec.Len()-1;i>=0;i--){
-		f << "  <line x1=\"" << w-(pos.x+a1*expvec[i].x[0]-lx) << "\" y1=\"" << pos.y+a1*expvec[i].x[1]-ly 
-		  << "\" x2=\"" << w-(pos.x+e*expvec[i].x[0]-lx) << "\" y2=\"" << pos.y+e*expvec[i].x[1]-ly 
+		f << "  <line x1=\"" << -(pos.x+a1*expvec[i].x[0]) << "\" y1=\"" << pos.y+a1*expvec[i].x[1] 
+		  << "\" x2=\"" << -(pos.x+e*expvec[i].x[0]) << "\" y2=\"" << pos.y+e*expvec[i].x[1]
 		  << "\" stroke=\"rgb(" << explosion_r*100 << "%," << explosion_g*100 
 		  << "%," << explosion_b*100 << "%)\" stroke-width=\".8\" opacity=\"" << fade << "\"/>\n";
 	}

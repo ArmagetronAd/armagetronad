@@ -652,7 +652,7 @@ void eGameObject::Kill(){}
 void eGameObject::Render(const eCamera *){}
 
 //! draws it in a svg file
-void eGameObject::DrawSvg(std::ofstream &f, float lx, float ly, float w, float h) {};
+void eGameObject::DrawSvg(std::ofstream &f) {};
     
 // *******************************************************************************
 // *

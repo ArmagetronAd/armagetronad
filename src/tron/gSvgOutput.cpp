@@ -40,9 +40,9 @@ void SvgOutput::WriteSvgHeader() {
 	// Assume the file is already open
 	svgFile << "<?xml version=\"1.0\" standalone=\"no\"?>\n";
 	svgFile << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
-	svgFile << "<svg width=\"100%\" height=\"100%\" version=\"1.1\" viewBox=\"0 0 "
-			<< -lx+hx << " " << -ly+hy << "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
-	svgFile << "<rect x=\"0\" y=\"0\" width=\"" << -lx+hx << "\" height=\"" << -ly+hy
+	svgFile << "<svg width=\"100%\" height=\"100%\" version=\"1.1\" viewBox=\"" << -hx << " " << ly << " "
+			<< hx-lx << " " << hy-ly << "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
+	svgFile << "<rect x=\"" << -hx << "\" y=\"" << ly << "\" width=\"" << hx-lx << "\" height=\"" << hy-ly
 			<< "\" stroke=\"none\" fill=\"#333333\" />\n\n";
 }
 
@@ -56,8 +56,8 @@ void SvgOutput::DrawRimWalls( tList<eWallRim> &list ) {
 	{
 		eWallRim *wall = list[i];
 		eCoord begin = wall->EndPoint(0), end = wall->EndPoint(1);
-		svgFile << "  <line x1=\"" << hx-begin.x << "\" y1=\"" << begin.y-ly
-				<< "\" x2=\"" << hx-end.x << "\" y2=\"" << end.y-ly 
+		svgFile << "  <line x1=\"" << -begin.x << "\" y1=\"" << begin.y
+				<< "\" x2=\"" << -end.x << "\" y2=\"" << end.y 
 				<< "\" stroke=\"#FFFFFF\" stroke-width=\"1\" stroke-linecap=\"round\" />\n";
 	}
 }
@@ -96,8 +96,8 @@ void SvgOutput::DrawWalls(tList<gNetPlayerWall> &list) {
             curDist = (curDist - begDist) / lenDist;
             if(prevDangerous) {
 				eCoord v = endPos - begPos, begin = begPos + v * prevDist, end = begPos + v * curDist;
-				svgFile << "  <line x1=\"" << hx-begin.x << "\" y1=\"" << begin.y-ly << "\" x2=\"" << hx-end.x
-						<< "\" y2=\"" << end.y-ly << "\" stroke=\"rgb(" << cycle->color_.r*100 << "%," << cycle->color_.g*100 
+				svgFile << "  <line x1=\"" << -begin.x << "\" y1=\"" << begin.y << "\" x2=\"" << -end.x
+						<< "\" y2=\"" << end.y << "\" stroke=\"rgb(" << cycle->color_.r*100 << "%," << cycle->color_.g*100 
 						<< "%," << cycle->color_.b*100 << "%)\" stroke-width=\"1\" stroke-linecap=\"round\" opacity=\"" 
 						<< alpha << "\"/>\n";
             }
@@ -113,7 +113,7 @@ void SvgOutput::DrawObjects() {
     for(size_t i = 0; i < len; ++i) {
         eGameObject *obj = gameObjects(i);
         tASSERT(obj);
-        obj->DrawSvg(svgFile, lx, ly, hx-lx, hy-ly);
+        obj->DrawSvg(svgFile);
     }
 }
 
