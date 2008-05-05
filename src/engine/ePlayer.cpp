@@ -645,13 +645,32 @@ static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p )
 #endif
 #endif
 
+// do you want specific log for chat
+static int se_chatLog = 0; // 0=no chat log, 1=chat in chatlog.txt, 2=chat in ladder log CHAT message
+static tSettingItem< int > se_chatLogConf( "CHAT_LOG", se_chatLog );
+
+static eLadderLogWriter se_chatWriter("CHAT", true);
+
 void se_SaveToChatLog( tOutput const & out )
 {
     if (sn_GetNetState()!=nCLIENT && !tRecorder::IsPlayingBack())
     {
-        std::ofstream o;
-        if ( tDirectories::Var().Open(o, "chatlog.txt", std::ios::app) )
-            o << out;
+		char szTemp[128];
+		time_t     now;
+		struct tm *pTime;
+		now = time(NULL);
+		pTime = localtime(&now);
+		strftime(szTemp,sizeof(szTemp),"[%Y/%m/%d-%H:%M:%S] ",pTime);
+
+		if (se_chatLog == 1) {
+			std::ofstream o;
+			if ( tDirectories::Var().Open(o, "chatlog.txt", std::ios::app) ) {
+				o << szTemp << " " << out << "\n";
+			}
+		} else if (se_chatLog == 2) {
+			se_chatWriter << out;
+			se_chatWriter.write();
+		}
     }
 }
 
@@ -3442,14 +3461,8 @@ void handle_chat( nMessage &m )
                 se_BroadcastChat( p, say );
                 se_DisplayChatLocally( p, say);
 
-                tString s;
-                char szTemp[128];
-                time_t     now;
-                struct tm *pTime;
-                now = time(NULL);
-                pTime = localtime(&now);
-                strftime(szTemp,sizeof(szTemp),"[%Y/%m/%d %H:%M:%S] ",pTime);
-                s << szTemp << ": " << nMachine::GetMachine(p->Owner()).GetIP() << ": " << p->GetUserName() << ": " << say << "\n";
+				tString s;
+                s << nMachine::GetMachine(p->Owner()).GetIP() << " " << p->GetUserName() << ": " << say;
                 se_SaveToChatLog(s);
             }
         }
