@@ -3861,10 +3861,7 @@ void gGame::Analysis(REAL time){
 
                         sg_roundWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() );
                         sg_roundWinnerWriter.write();
-                    } else {
-                        sg_roundWinnerWriter << "none";
-                        sg_roundWinnerWriter.write();
-					}
+                    }
                 }
                 check_hs();
                 winner = -1;
