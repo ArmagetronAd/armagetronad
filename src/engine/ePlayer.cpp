@@ -2668,6 +2668,10 @@ static void se_ChatMe( ePlayerNetID * p, std::istream & s, eChatSpamTester & spa
     se_BroadcastChatLine( p, console, forOldClients );
     console << "\n";
     sn_ConsoleOut(console,0);
+
+    tString str;
+    str << p->GetUserName() << " /me " << msg;
+    se_SaveToChatLog(str);
     return;
 }
 
@@ -3415,6 +3419,10 @@ void handle_chat( nMessage &m )
             {
                 se_BroadcastChat( p, say );
                 se_DisplayChatLocally( p, say);
+
+                tString s;
+                s << p->GetUserName() << ' ' << say;
+                se_SaveToChatLog(s);
             }
         }
     }
@@ -5102,17 +5110,48 @@ eNetGameObject *ePlayerNetID::Object() const{
 static bool se_consoleLadderLog = false;
 static tSettingItem< bool > se_consoleLadderLogConf( "CONSOLE_LADDER_LOG", se_consoleLadderLog );
 
+static bool se_ladderlogDecorateTS = false;
+static tSettingItem< bool > se_ladderlogDecorateTSConf( "LADDERLOG_DECORATE_TIMESTAMP", se_ladderlogDecorateTS );
+extern bool sn_decorateTS; // from nNetwork.cpp
+
 void se_SaveToLadderLog( tOutput const & out )
 {
     if (se_consoleLadderLog)
     {
-        std::cout << "[L] " << out << std::endl;
+        std::cout << "[L";
+        if(sn_decorateTS) {
+            std::cout << st_GetCurrentTime(" TS=%Y/%m/%d-%H:%M:%S");
+        }
+        std::cout << "] " << out << std::endl;
     }
     if (sn_GetNetState()!=nCLIENT && !tRecorder::IsPlayingBack())
     {
         std::ofstream o;
         if ( tDirectories::Var().Open(o, "ladderlog.txt", std::ios::app) )
+            if(se_ladderlogDecorateTS) {
+                o << st_GetCurrentTime("%Y/%m/%d-%H:%M:%S ");
+            }
             o << out << std::endl;;
+    }
+}
+
+static bool se_chatLog = false;
+static tSettingItem<bool> se_chatLogConf("CHAT_LOG", se_chatLog);
+
+static eLadderLogWriter se_chatWriter("CHAT", false);
+
+void se_SaveToChatLog(tOutput const &out) {
+    if(sn_GetNetState() != nCLIENT && !tRecorder::IsPlayingBack()) {
+        if(se_chatWriter.isEnabled()) {
+            se_chatWriter << out;
+            se_chatWriter.write();
+        }
+        if(se_chatLog) {
+            std::ofstream o;
+            if ( tDirectories::Var().Open(o, "chatlog.txt", std::ios::app) ) {
+                o << st_GetCurrentTime("[%Y/%m/%d-%H:%M:%S] ") << out << std::endl;
+            }
+        }
     }
 }
 
