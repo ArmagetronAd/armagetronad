@@ -3436,9 +3436,8 @@ void handle_chat( nMessage &m )
                 se_BroadcastChat( p, say );
                 se_DisplayChatLocally( p, say);
 
-				tString s;
-                //s << nMachine::GetMachine(p->Owner()).GetIP() << " " << p->GetUserName() << ": " << say;
-                s << p->GetUserName() << " " << say;
+                tString s;
+                s << p->GetUserName() << ' ' << say;
                 se_SaveToChatLog(s);
             }
         }
