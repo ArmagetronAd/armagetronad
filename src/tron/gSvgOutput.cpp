@@ -49,13 +49,18 @@ std::ostream &operator<<(std::ostream &s, gSvgColor const &c) {
 
 void SvgOutput::WriteSvgHeader() {
     // Assume the file is already open
-    svgFile << "<?xml version=\"1.0\" standalone=\"no\"?>\n";
-    svgFile << "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n";
-    svgFile << "<svg xmlns:xlink='http://www.w3.org/1999/xlink' width=\"100%\" height=\"100%\" version=\"1.1\" viewBox=\"" << -hx << " " << ly << " "
-            << hx-lx << " " << hy-ly << "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
-    svgFile << "<rect x=\"" << -hx << "\" y=\"" << ly << "\" width=\"" << hx-lx << "\" height=\"" << hy-ly
-          << "\" stroke=\"none\" fill=\"#333333\" />\n\n";
-    svgFile << "<defs>\n\t<polygon id='cycle' stroke='none' points='4,0 0,2 0,-2' />\n</defs>\n\n";
+    svgFile << "<?xml version=\"1.0\" standalone=\"no\"?>\n"
+               "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n"
+               "<svg xmlns:xlink='http://www.w3.org/1999/xlink' width=\"100%\" height=\"100%\" version=\"1.1\" viewBox=\""
+            << lx   << " " << -hy    << " "
+            << hx-lx << " " << hy-ly
+            << "\" xmlns=\"http://www.w3.org/2000/svg\">\n"
+               "<rect x=\"" << lx << "\" y=\"" << -hy << "\" width=\"" << hx-lx << "\" height=\"" << hy-ly
+            << "\" stroke=\"none\" fill=\"#333333\" />\n\n"
+
+               "<defs>\n"
+               "\t<polygon id='cycle' stroke='none' points='4,0 0,2 0,-2' />\n"
+               "</defs>\n\n";
 }
 
 void SvgOutput::WriteSvgFooter() {
@@ -68,7 +73,7 @@ void SvgOutput::DrawRimWalls( tList<eWallRim> &list ) {
 	{
 		eWallRim *wall = list[i];
 		eCoord begin = wall->EndPoint(0), end = wall->EndPoint(1);
-		svgFile << "\n\tM" << -begin.x << ',' << begin.y << ' ' << -end.x << ',' << end.y;
+		svgFile << "\n\tM" << begin.x << ',' << -begin.y << ' ' << end.x << ',' << -end.y;
 		//svgFile << "  <line x1=\"" << -begin.x << "\" y1=\"" << begin.y
 		//		<< "\" x2=\"" << -end.x << "\" y2=\"" << end.y 
 		//		<< "\" stroke=\"#FFFFFF\" stroke-width=\"1\" stroke-linecap=\"round\" />\n";
@@ -109,8 +114,8 @@ void SvgOutput::DrawWalls(tList<gNetPlayerWall> &list) {
             curDist = (curDist - begDist) / lenDist;
             if(prevDangerous) {
                 eCoord v = endPos - begPos, begin = begPos + v * prevDist, end = begPos + v * curDist;
-                svgFile << "\t<path d='M" << -begin.x << ',' << begin.y
-                        << ' ' << -end.x << ',' << end.y << "' stroke='" << gSvgColor(cycle->color_) << '\'';
+                svgFile << "\t<path d='M" << begin.x << ',' << -begin.y
+                        << ' ' << end.x << ',' << -end.y << "' stroke='" << gSvgColor(cycle->color_) << '\'';
                 if(alpha != 1) {
                     svgFile << " opacity='" << alpha << '\'';
                 }

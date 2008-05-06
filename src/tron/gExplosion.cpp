@@ -436,10 +436,10 @@ void gExplosion::DrawSvg(std::ofstream &f) {
 
     for(int i=expvec.Len()-1;i>=0;i--){
         f << "\n\tM" 
-          << -(pos.x+a1*expvec[i].x[0]) << ','
-          << pos.y+a1*expvec[i].x[1] << ' '
-          << -(pos.x+e*expvec[i].x[0]) << ','
-          << pos.y+e*expvec[i].x[1];
+          <<  pos.x+a1*expvec[i].x[0] << ','
+          << -pos.y-a1*expvec[i].x[1] << ' '
+          <<  pos.x+e*expvec[i].x[0] << ','
+          << -pos.y-e*expvec[i].x[1];
     }
 
     f << "' />\n";

@@ -1241,12 +1241,12 @@ void gZone::DrawSvg(std::ofstream &f) {
 
     f << "  <circle cx=\"0\" cy=\"0\" r=\"" << r << "\" fill=\"none\" stroke='" << gSvgColor(color_) << "' stroke-width=\"1\" stroke-dasharray=\""
       << dash << ", " << dash << "\" opacity=\"" <<  alpha << "\" transform=\"translate("
-      << -pos.x << " " << pos.y << ")\">\n";
+      << pos.x << " " << -pos.y << ")\">\n";
     REAL speed = GetRotationSpeed();
     if(fabs(speed) > EPS) {
         REAL t = fabs(2*M_PI/speed);
         f << "    <animateTransform attributeName=\"transform\" attributeType=\"XML\" type=\"rotate\" from=\"0\" to=\"";
-        if(speed > 0) {
+        if(speed < 0) {
             f << '-';
         }
         f << "360\" dur=\""
