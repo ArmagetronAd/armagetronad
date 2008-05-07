@@ -323,6 +323,7 @@ public:
     int TotalScore() const;
     static void ResetScoreDifferences(); //<! Resets the last stored score so ScoreDifferences takes this as a reference time
     static void LogScoreDifferences();   //<! Logs accumulated scores of all players since the last call to ResetScoreDifferences() to ladderlog.txt
+    static void UpdateSuspensions();     //<! Decrements the number of rounds players are suspended for
     void LogScoreDifference();           //<! Logs accumulated scores since the last call to ResetScoreDifferences() to ladderlog.txt
 
     static void SortByScore(); // brings the players into the right order

@@ -127,7 +127,10 @@ static REAL sg_waitForExternalScriptTimeout = 3;
 static tSettingItem<REAL> sg_waitForExternalScriptTimeoutConf( "WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT", sg_waitForExternalScriptTimeout );
 
 static REAL sg_svgOutputFreq = -1;
-static tSettingItem<REAL> sg_sg_svgOutputFreqConf( "SVG_OUTPUT_TIMING", sg_svgOutputFreq );
+static tSettingItem<REAL> sg_svgOutputFreqConf( "SVG_OUTPUT_TIMING", sg_svgOutputFreq );
+
+static bool sg_svgOutputScoreDifferences = false;
+static tSettingItem<bool> sg_svgOutputScoreDifferencesConf( "SVG_OUTPUT_LOG_SCORE_DIFFERENCES", sg_svgOutputScoreDifferences );
 
 // time in sec before player positioning starts
 static REAL sg_playerPositioningStartTime = 5.0;
@@ -1841,6 +1844,7 @@ static void own_game( nNetState enter_state ){
 
     // write scores one last time
     ePlayerNetID::LogScoreDifferences();
+    ePlayerNetID::UpdateSuspensions();
     sg_gameEndWriter.write();
 
     sg_currentGame=NULL;
@@ -3114,6 +3118,7 @@ void gGame::StateUpdate(){
 
             // log scores before players get renamed
             ePlayerNetID::LogScoreDifferences();
+            ePlayerNetID::UpdateSuspensions();
             sg_newRoundWriter.write();
 
             // kick spectators
@@ -4282,6 +4287,9 @@ bool gGame::GameLoop(bool input){
         static float lastTime = 1e42;
         if(sg_svgOutputFreq >= 0 && (gtime >= lastTime + sg_svgOutputFreq || gtime < lastTime)) {
             sg_svgOutput.Create();
+            if(sg_svgOutputScoreDifferences) {
+                ePlayerNetID::LogScoreDifferences();
+            }
             lastTime = gtime;
         }
     }
