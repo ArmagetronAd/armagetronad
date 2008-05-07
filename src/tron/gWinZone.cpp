@@ -2356,6 +2356,7 @@ void gBaseZoneHack::OnVanish( void )
 
 static eLadderLogWriter sg_basezoneConqueredWriter("BASEZONE_CONQUERED", true);
 static eLadderLogWriter sg_basezoneConquererWriter("BASEZONE_CONQUERER", true);
+static eLadderLogWriter sg_basezoneConquererTeamWriter("BASEZONE_CONQUERER_TEAM", true);
 
 void gBaseZoneHack::OnConquest( void )
 {
@@ -2418,6 +2419,8 @@ void gBaseZoneHack::OnConquest( void )
 		int score = totalScore / enemies_.size();
 		for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
 		{
+			sg_basezoneConquererTeamWriter << ePlayerNetID::FilterName((*iter)->Name()) << score;
+			sg_basezoneConquererTeamWriter.write();
 			(*iter)->AddScore( score, win, tOutput() );
 		}
 	}

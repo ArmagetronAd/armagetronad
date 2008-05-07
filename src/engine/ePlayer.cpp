@@ -5502,7 +5502,7 @@ void ePlayerNetID::RankingLadderLog() {
             if(p->currentTeam) {
                 se_onlinePlayerWriter << FilterName(p->currentTeam->Name());
                 ++num_humans;
-			}
+            }
         }
         se_onlinePlayerWriter.write();
     }
