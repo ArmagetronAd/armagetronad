@@ -7837,6 +7837,15 @@ void ePlayerNetID::LogScoreDifferences( void )
     {
         ePlayerNetID* p = se_PlayerNetIDs(i);
         p->LogScoreDifference();
+    }
+
+    eTeam::LogScoreDifferences();
+}
+
+void ePlayerNetID::UpdateSuspensions() {
+    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+    {
+        ePlayerNetID* p = se_PlayerNetIDs(i);
 
         int suspended = p->GetSuspended();
 
@@ -7853,8 +7862,6 @@ void ePlayerNetID::LogScoreDifferences( void )
             }
         }
     }
-
-    eTeam::LogScoreDifferences();
 }
 
 // *******************************************************************************

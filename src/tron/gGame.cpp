@@ -1821,6 +1821,7 @@ static void own_game( nNetState enter_state ){
 
     // write scores one last time
     ePlayerNetID::LogScoreDifferences();
+    ePlayerNetID::UpdateSuspensions();
     sg_gameEndWriter.write();
 
     sg_currentGame=NULL;
@@ -3091,6 +3092,7 @@ void gGame::StateUpdate(){
 
             // log scores before players get renamed
             ePlayerNetID::LogScoreDifferences();
+            ePlayerNetID::UpdateSuspensions();
             sg_newRoundWriter.write();
 
             // kick spectators
