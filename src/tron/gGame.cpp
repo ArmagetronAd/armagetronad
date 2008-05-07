@@ -4146,7 +4146,7 @@ bool gGame::GameLoop(bool input){
         static int lastcountdown=0;
         int cd=int(floor(-time))+1;
         if (cd>=0 && cd<PREPARE_TIME && cd!=lastcountdown && se_mainGameTimer && se_mainGameTimer->IsSynced() ){
-	    if (cd==1) ePlayerNetID::GridPosLadderLog();  
+		    if (cd==1) ePlayerNetID::GridPosLadderLog();  
             lastcountdown=cd;
             tString s;
             s << cd;
@@ -4273,14 +4273,14 @@ bool gGame::GameLoop(bool input){
         }
     } {
         static float lastTime = 1e42;
-        if(sg_tacticalPositionInterval >= 0 && (gtime >= lastTime + sg_tacticalPositionInterval || gtime < lastTime)) {
-            ePlayerNetID::GridPosLadderLog();
+        if((gtime > 0) && (sg_tacticalPositionInterval >= 0) && (gtime >= lastTime + sg_tacticalPositionInterval || gtime < lastTime)) {
+            ePlayerNetID::TacticalPositioning();
             lastTime = gtime;
         }
     } {
         static float lastTime = 1e42;
-        if(sg_gridPosInterval >= 0 && (gtime >= lastTime + sg_gridPosInterval || gtime < lastTime)) {
-            ePlayerNetID::TacticalPositioning();
+        if((sg_gridPosInterval >= 0) && (gtime > sg_gridPosInterval) && (gtime >= lastTime + sg_gridPosInterval || gtime < lastTime)) {
+            ePlayerNetID::GridPosLadderLog();
             lastTime = gtime;
         }
     } {
