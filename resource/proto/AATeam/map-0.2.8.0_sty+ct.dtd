@@ -26,7 +26,7 @@
 <!ELEMENT Field (Axes?, (Spawn | Wall | Zone)*)>
 
 <!ELEMENT Axes (Axis*)>
-<!ELEMENT Spawn EMPTY> 
+<!ELEMENT Spawn (Spawn*)> 
 <!ELEMENT Wall (Point+) >
 <!ELEMENT Point EMPTY>
 <!ELEMENT Axis EMPTY>
@@ -56,7 +56,7 @@
 <!ATTLIST Axis angle CDATA #IMPLIED>
 <!ATTLIST Axis length CDATA "1.0">
 
-<!ATTLIST Zone effect (win | death | fortress | ball | flag) "death" >
+<!ATTLIST Zone effect (win | death | fortress | ball | flag | target) "death" >
 
 <!ELEMENT ShapeCircle (Point)>
 <!ATTLIST ShapeCircle radius CDATA #REQUIRED>

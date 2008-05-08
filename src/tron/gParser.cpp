@@ -17,6 +17,7 @@
 #include "gWall.h"
 #include "gArena.h"
 #include "gWinZone.h"
+#include "gSpawn.h"
 #include "tMemManager.h"
 #include "tResourceManager.h"
 #include "tRecorder.h"
@@ -444,7 +445,30 @@ gParser::parseSpawn(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
     y = myxmlGetPropFloat(cur, "y");
     myxmlGetDirection(cur, xdir, ydir);
 
-    theArena->NewSpawnPoint(eCoord(x, y), eCoord(xdir, ydir));
+    eCoord rootPos = eCoord(x, y);
+    eCoord rootDir = eCoord(xdir, ydir);
+    gSpawnPoint *sp = tNEW(gSpawnPoint)(rootPos, rootDir);
+    for(xmlNodePtr child = cur->xmlChildrenNode; child; child = child->next) {
+        if(!isElement(child->name, (const xmlChar *)"Spawn", keyword)) {
+            continue;
+        }
+
+        x = myxmlGetPropFloat(child, "x");
+        y = myxmlGetPropFloat(child, "y");
+        myxmlGetDirection(child, xdir, ydir);
+
+        eCoord pos = eCoord(x, y);
+        eCoord dir = eCoord(xdir, ydir);
+
+        if(xdir == 0 && ydir == 0) {
+            // no direction given (at least no sensible one)
+            // assume the same direction as the root spawn point
+            dir = rootDir;
+        }
+
+        sp->AddSubSpawn(pos, dir);
+    }
+    theArena->NewSpawnPoint(sp);
 
     endElementAlternative(grid, cur, keyword);
 }

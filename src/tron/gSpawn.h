@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ArmageTron_SPAWN_H
 
 #include "eCoord.h"
+#include <vector>
 
 class gSpawnPoint{
     friend class gArena;
@@ -36,7 +37,10 @@ class gSpawnPoint{
     int   id;
     eCoord location,direction;
     REAL  lastTimeUsed;
-    int   numberOfUses;
+    unsigned numberOfUses;
+
+    std::vector<eCoord> subPositions;
+    std::vector<eCoord> subDirections;
 
 public:
     gSpawnPoint(const eCoord &loc,const eCoord &dir);
@@ -44,6 +48,8 @@ public:
 
     //enters valid spawn eCoordinates and direction in loc and dir
     void Spawn(eCoord &loc,eCoord &dir);
+
+    void AddSubSpawn(eCoord const &loc, eCoord const &dir);
 
     // estimates the danger of spawning here (0: no problem, 10: certain death)
     REAL Danger();

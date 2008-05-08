@@ -42,7 +42,7 @@ class gArena{
     friend class gParser;
 
 public:
-    void NewSpawnPoint(const eCoord &loc,const eCoord &dir);
+    void NewSpawnPoint(gSpawnPoint *sp);
 
     gArena();
     virtual ~gArena();

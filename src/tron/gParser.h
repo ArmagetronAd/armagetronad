@@ -13,6 +13,7 @@ class ePoint;
 class gGame;
 class gWallRim;
 class gXMLCharReturn;
+class gSpawnPoint;
 
 /*
 Note to the reader: In the full World idea, the parser should, 

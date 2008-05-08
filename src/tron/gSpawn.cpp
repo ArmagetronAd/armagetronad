@@ -54,8 +54,17 @@ void gSpawnPoint::Spawn(eCoord &loc,eCoord &dir){
       numberOfUses=0;
     */
 
+    lastTimeUsed=se_GameTime();
+
+    if(numberOfUses > 0 && numberOfUses <= subPositions.size()) {
+        loc = subPositions[numberOfUses - 1] * gArena::SizeMultiplier();
+        dir = subDirections[numberOfUses - 1];
+        ++numberOfUses;
+        return;
+    }
+
     int d,away;
-    int wrappedNumberOfUses = numberOfUses % sg_spawnWrap;
+    int wrappedNumberOfUses = (numberOfUses ? numberOfUses- subPositions.size() : 0) % sg_spawnWrap;
 
     if (wrappedNumberOfUses%2==1){
         d=1;
@@ -69,10 +78,7 @@ void gSpawnPoint::Spawn(eCoord &loc,eCoord &dir){
     dir=direction;
 
     loc=location * gArena::SizeMultiplier() - dir.Turn(sg_spawnBack,-d*sg_spawnSide) * away * gCycle::SpeedMultiplier();
-
-    lastTimeUsed=se_GameTime();
     numberOfUses++;
-
 }
 
 // estimates the danger of spawning here (0: no problem, 10: certain death)
@@ -86,4 +92,7 @@ void gSpawnPoint::Clear(){
 }
 
 
-
+void gSpawnPoint::AddSubSpawn(eCoord const &pos, eCoord const &dir){
+    subPositions.push_back(pos);
+    subDirections.push_back(dir);
+}

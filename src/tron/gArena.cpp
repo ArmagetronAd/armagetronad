@@ -47,9 +47,8 @@ gArena::gArena():spawnPoints()
 {
 }
 
-void gArena::NewSpawnPoint(const eCoord &loc,const eCoord &dir){
-    gSpawnPoint *s=tNEW(gSpawnPoint) (loc,dir);
-    spawnPoints.Add(s,s->id);
+void gArena::NewSpawnPoint(gSpawnPoint *sp){
+    spawnPoints.Add(sp,sp->id);
 }
 
 
