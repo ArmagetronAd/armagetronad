@@ -629,9 +629,7 @@ bool sg_TalkToMaster = true;
 static tSettingItem<bool> sg_ttm("TALK_TO_MASTER",
                                  sg_TalkToMaster);
 
-static int ladder_highscore_output=1;
-static tSettingItem<int> ldd_rout("LADDER_HIGHSCORE_OUTPUT",
-                                 ladder_highscore_output);
+extern int ladder_highscore_output;
 
 class gHighscoresBase{
     int id;

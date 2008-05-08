@@ -143,6 +143,11 @@ static tConfItemLine se_hiddenPlayerPrefixConf( "PLAYER_LIST_HIDDEN_PLAYER_PREFI
 
 static tReferenceHolder< ePlayerNetID > se_PlayerReferences;
 
+int ladder_highscore_output=1;
+static tSettingItem<int> ldd_rout("LADDER_HIGHSCORE_OUTPUT",
+                                 ladder_highscore_output);
+
+
 class PasswordStorage
 {
 public:
@@ -5111,8 +5116,10 @@ void ePlayerNetID::Greet(){
         tString s;
         s << o;
         s << "\n";
-        GreetHighscores(s);
-        s << "\n";
+        if (ladder_highscore_output) {
+			GreetHighscores(s);
+			s << "\n";
+		}
         //std::cout << s;
         sn_ConsoleOut(s,Owner());
         greeted=true;
