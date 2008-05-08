@@ -43,7 +43,7 @@ private:
     std::ofstream svgFile;	//!< file to write svg output
     long afterRimWallsPos;	//!< position in this file after header and rim walls as they will not change during the round
     float lx, ly, hx, hy;	//!< lower and higher coordinate of the map
-
+	
     void WriteSvgHeader();	//!< Write to svg output file the appropriate svg header
     void WriteSvgFooter();	//!< Write to svg output file the appropriate svg footer
 

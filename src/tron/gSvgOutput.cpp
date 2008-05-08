@@ -147,6 +147,7 @@ void SvgOutput::Create() {
     ly = ((long)bounds.GetLow().y) - 5;
     hx = ((long)bounds.GetHigh().x) + 5;
     hy = ((long)bounds.GetHigh().y) + 5;
+    
     // add header, rim walls
     WriteSvgHeader();
     svgFile << "<!-- Rim Walls -->\n<path stroke='#fff' stroke-width='1' stroke-linecap='round' d='";

@@ -8157,3 +8157,29 @@ int ePlayerNetID::GetSuspended() const
 {
     return suspended_;
 }
+
+static void sg_AddScorePlayer(std::istream &s)
+{
+        tString params;
+        params.ReadLine( s, true );
+
+        // parse the line to get the param : Teamname Points Message
+        int pos = 0; //
+        tString PlayerStr = tString("");
+        PlayerStr = params.ExtractNonBlankSubString(pos);
+        ePlayerNetID *pPlayer = 0;
+        int num_matches = -1;
+        pPlayer = ePlayerNetID::FindPlayerByName(PlayerStr, NULL);
+        if (!pPlayer) return;
+        tString ScoreStr = tString("");
+        ScoreStr = params.ExtractNonBlankSubString(pos);
+        int pScore = atoi(ScoreStr);
+        tString pMessage = params.SubStr(pos+1);
+        pMessage << "\n";
+
+        // Add score to team pTeam then send a message
+        pPlayer->AddScore(pScore,pMessage,pMessage);
+}
+
+static tConfItemFunc sg_AddScorePlayer_conf("ADD_SCORE_PLAYER",&sg_AddScorePlayer);
+
