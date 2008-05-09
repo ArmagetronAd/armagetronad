@@ -4997,24 +4997,26 @@ void gCycle::DrawSvg(std::ofstream &f) {
     float a = Grid()->GetWindingAngle(WindingNumber())*180/M_PI;
     f << "  <use xlink:href='#cycle' fill='" << gSvgColor(color_) << "' transform=\"translate(" << pos.x << " " << -pos.y
       << ") rotate(" << -a << ")\" opacity=\"" << alpha << "\" />\n";
-	if (Player()) {
-		eCoord v = p - eCoord(SvgOutput::cx,SvgOutput::cy);
-		v.Normalize();
-		float tx = p.x + v.x * 2;
-		float ty = p.y + v.y * 3;
-		tString n = Player()->GetName();
-		tString filtered;
-	    for( int i = 0; i<=n.Len()-2; i++ )
-		{
-			if ( n(i)=='<' ) filtered << "&lt;";
-			else if ( n(i)=='>' ) filtered << "&gt;";
-			else filtered << n(i);
-		}
- 		
-		f << "  <text x='" << tx << "' y='" << -ty << "' stroke='#333333' stroke-width='.2' fill='" << gSvgColor(color_) << "' text-anchor='"
-		  << (tx<SvgOutput::cx?"end":"start") << "' opacity='" << alpha << "' font-size='8' font-family = 'fantasy' >"
-		  << filtered << "</text>\n";
-	}
+    if (Player()) {
+        eCoord v = p - eCoord(SvgOutput::cx,SvgOutput::cy);
+        v.Normalize();
+        float tx = p.x + v.x * 2;
+        float ty = p.y + v.y * 3;
+
+        f << "  <text x='" << tx << "' y='" << -ty << "' stroke='#333333' stroke-width='.2' fill='" << gSvgColor(color_) << "' text-anchor='"
+          << (tx<SvgOutput::cx?"end":"start") << "' opacity='" << alpha << "' font-size='8' font-family = 'fantasy'>";
+        tString const &n = Player()->GetName();
+        for( char *c = &n(0); *c != 0; ++c )
+        {
+            unsigned char u = *c;
+            if ( u=='<' ) f << "&lt;";
+            else if ( u=='>' ) f << "&gt;";
+            else if( u < ' ' );
+            else if( u > '~' && u < 0xa0 );
+            else f << *c;
+        }
+        f << "</text>\n";
+    }
 }
 
 
