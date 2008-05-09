@@ -476,7 +476,7 @@ void eTeam::LogScoreDifference( void )
     {
         tString ret;
         int scoreDifference = score - lastScore_;
-        lastScore_ = IMPOSSIBLY_LOW_SCORE;
+        //lastScore_ = IMPOSSIBLY_LOW_SCORE;
         se_roundScoreTeamWriter << scoreDifference << ePlayerNetID::FilterName( Name() );
         se_roundScoreTeamWriter.write();
     }
