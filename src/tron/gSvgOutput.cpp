@@ -68,6 +68,14 @@ void SvgOutput::WriteSvgHeader() {
 
                "<defs>\n"
                "\t<polygon id='cycle' stroke='none' points='4,0 0,2 0,-2' />\n"
+               "\t<filter x=\"" << lx << "\" y=\"" << -hy << "\" width=\"" << hx-lx << "\" height=\"" << hy-ly << "\" id='wallsFilter' filterUnits='userSpaceOnUse'>\n"
+               "\t\t<feGaussianBlur in='SourceAlpha' stdDeviation='1' />\n"
+               "\t\t<feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0  0 0 0 0 1' />\n"
+               "\t\t<feMerge>\n"
+               "\t\t\t<feMergeNode />\n"
+               "\t\t\t<feMergeNode in='SourceGraphic' />\n"
+               "\t\t</feMerge>\n"
+               "\t</filter>\n"
                "</defs>\n\n";
 }
 
@@ -145,6 +153,9 @@ void SvgOutput::DrawObjects() {
     }
 }
 
+static bool sg_cycleWallsGlow = true;
+static tSettingItem<bool> sg_cycleWallsGlowConf("SVG_CYCLE_WALLS_GLOW", sg_cycleWallsGlow);
+
 static eLadderLogWriter sg_svgOutputWriter("SVG_CREATED", true);
 
 void SvgOutput::Create() {
@@ -161,7 +172,7 @@ void SvgOutput::Create() {
     h = hy - ly;
     cx = (lx + hx)/2;
     cy = (ly + hy)/2;
-    
+
     // add header, rim wallsun(
     WriteSvgHeader();
     svgFile << "<!-- Rim Walls -->\n<path stroke='#fff' stroke-width='1' stroke-linecap='round' d='";
@@ -170,7 +181,11 @@ void SvgOutput::Create() {
     // keep the current file offset
     afterRimWallsPos = svgFile.tellp();
     // add player walls and other game objects 
-    svgFile << "<!-- Cycle's Walls -->\n<g stroke-width='1' stroke-linecap='round'>\n";
+    svgFile << "<!-- Cycle's Walls -->\n<g stroke-width='1' stroke-linecap='round'";
+    if(sg_cycleWallsGlow) {
+        svgFile << " filter='url(#wallsFilter)'";
+    }
+    svgFile << ">\n";
     DrawWalls(sg_netPlayerWallsGridded);
     DrawWalls(sg_netPlayerWalls);
     svgFile << "\n</g>\n<!-- Game objects -->\n";
