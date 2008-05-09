@@ -5002,9 +5002,18 @@ void gCycle::DrawSvg(std::ofstream &f) {
 		v.Normalize();
 		float tx = p.x + v.x * 2;
 		float ty = p.y + v.y * 3;
+		tString n = Player()->GetName();
+		tString filtered;
+	    for( int i = 0; i<=n.Len()-2; i++ )
+		{
+			if ( n(i)=='<' ) filtered << "&lt;";
+			else if ( n(i)=='>' ) filtered << "&gt;";
+			else filtered << n(i);
+		}
+ 		
 		f << "  <text x='" << tx << "' y='" << -ty << "' stroke='#333333' stroke-width='.2' fill='" << gSvgColor(color_) << "' text-anchor='"
 		  << (tx<SvgOutput::cx?"end":"start") << "' opacity='" << alpha << "' font-size='8' font-family = 'fantasy' >"
-		  << Player()->GetName() << "</text>\n";
+		  << filtered << "</text>\n";
 	}
 }
 
