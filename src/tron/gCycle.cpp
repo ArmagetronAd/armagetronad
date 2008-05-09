@@ -4997,6 +4997,15 @@ void gCycle::DrawSvg(std::ofstream &f) {
     float a = Grid()->GetWindingAngle(WindingNumber())*180/M_PI;
     f << "  <use xlink:href='#cycle' fill='" << gSvgColor(color_) << "' transform=\"translate(" << pos.x << " " << -pos.y
       << ") rotate(" << -a << ")\" opacity=\"" << alpha << "\" />\n";
+	if (Player()) {
+		eCoord v = p - eCoord(SvgOutput::cx,SvgOutput::cy);
+		v.Normalize();
+		float tx = p.x + v.x * 2;
+		float ty = p.y + v.y * 3;
+		f << "  <text x='" << tx << "' y='" << -ty << "' stroke='#333333' stroke-width='.2' fill='" << gSvgColor(color_) << "' text-anchor='"
+		  << (tx<SvgOutput::cx?"end":"start") << "' opacity='" << alpha << "' font-size='8' font-family = 'fantasy' >"
+		  << Player()->GetName() << "</text>\n";
+	}
 }
 
 

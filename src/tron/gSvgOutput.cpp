@@ -50,6 +50,11 @@ std::ostream &operator<<(std::ostream &s, gSvgColor const &c) {
              << std::setw(2) << (int)(clamp(c.b)*255);
 }
 
+std::ofstream SvgOutput::svgFile;
+long SvgOutput::afterRimWallsPos;
+float SvgOutput::lx, SvgOutput::ly, SvgOutput::hx, SvgOutput::hy;
+float SvgOutput::w, SvgOutput::h, SvgOutput::cx, SvgOutput::cy;
+
 void SvgOutput::WriteSvgHeader() {
     // Assume the file is already open
     svgFile << "<?xml version=\"1.0\" standalone=\"no\"?>\n"
@@ -148,12 +153,16 @@ void SvgOutput::Create() {
     if ( !tDirectories::Var().Open(svgFile, "map.svg", std::ios::trunc) ) return;
     // get map limits
     const eRectangle &bounds = eWallRim::GetBounds();
-    lx = ((long)bounds.GetLow().x) - 5;
-    ly = ((long)bounds.GetLow().y) - 5;
-    hx = ((long)bounds.GetHigh().x) + 5;
-    hy = ((long)bounds.GetHigh().y) + 5;
+    lx = round(bounds.GetLow().x) - 5;
+    ly = round(bounds.GetLow().y) - 5;
+    hx = round(bounds.GetHigh().x) + 5;
+    hy = round(bounds.GetHigh().y) + 5;
+    w = hx - lx;
+    h = hy - ly;
+    cx = (lx + hx)/2;
+    cy = (ly + hy)/2;
     
-    // add header, rim walls
+    // add header, rim wallsun(
     WriteSvgHeader();
     svgFile << "<!-- Rim Walls -->\n<path stroke='#fff' stroke-width='1' stroke-linecap='round' d='";
     DrawRimWalls(se_rimWalls);

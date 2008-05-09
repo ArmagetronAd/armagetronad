@@ -40,19 +40,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //! Write a svg file of a 2D map of the grid
 class SvgOutput {
 private:
-    std::ofstream svgFile;	//!< file to write svg output
-    long afterRimWallsPos;	//!< position in this file after header and rim walls as they will not change during the round
-    float lx, ly, hx, hy;	//!< lower and higher coordinate of the map
+    static std::ofstream svgFile;	//!< file to write svg output
+    static long afterRimWallsPos;	//!< position in this file after header and rim walls as they will not change during the round
 	
-    void WriteSvgHeader();	//!< Write to svg output file the appropriate svg header
-    void WriteSvgFooter();	//!< Write to svg output file the appropriate svg footer
+    static void WriteSvgHeader();	//!< Write to svg output file the appropriate svg header
+    static void WriteSvgFooter();	//!< Write to svg output file the appropriate svg footer
 
-    void DrawRimWalls( tList<eWallRim> &list );		//!< Draws all the rim walls
-    void DrawWalls(tList<gNetPlayerWall> &list);	//!< Draws all player walls
-    void DrawObjects();								//!< Draws all game objects
+    static void DrawRimWalls( tList<eWallRim> &list );		//!< Draws all the rim walls
+    static void DrawWalls(tList<gNetPlayerWall> &list);	//!< Draws all player walls
+    static void DrawObjects();								//!< Draws all game objects
 
 public:
-    void Create();	//!< create svg file with header, rim walls, player walls, other objects and footer 
+    static float lx, ly, hx, hy;	//!< lower and higher coordinate of the map
+	static float w, h, cx, cy;		//!< width, height and center x,y coordinates
+
+    static void Create();	//!< create svg file with header, rim walls, player walls, other objects and footer 
 
     SvgOutput();	//!< default constructor
     ~SvgOutput();	//!< default destructor
