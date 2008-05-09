@@ -3115,7 +3115,7 @@ void gGame::StateUpdate(){
             rViewport::Update(MAX_PLAYERS);
 
             // log scores before players get renamed
-            ePlayerNetID::LogScoreDifferences();
+            //ePlayerNetID::LogScoreDifferences();
             ePlayerNetID::UpdateSuspensions();
             sg_newRoundWriter.write();
 
