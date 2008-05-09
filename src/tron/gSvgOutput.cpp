@@ -36,15 +36,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 extern std::vector<eCoord> se_rimWallRubberBand;
 
+static REAL clamp(REAL c) {
+    if(c < 0) return 0;
+    if(c > 1) return 1;
+    return c;
+}
+
 std::ostream &operator<<(std::ostream &s, gSvgColor const &c) {
-    tASSERT(c.r >= 0 && c.r <= 1);
-    tASSERT(c.g >= 0 && c.g <= 1);
-    tASSERT(c.b >= 0 && c.b <= 1);
     s.fill('0');
     return s << '#' << std::hex
-             << std::setw(2) << (int)(c.r*255)
-             << std::setw(2) << (int)(c.g*255)
-             << std::setw(2) << (int)(c.b*255);
+             << std::setw(2) << (int)(clamp(c.r)*255)
+             << std::setw(2) << (int)(clamp(c.g)*255)
+             << std::setw(2) << (int)(clamp(c.b)*255);
 }
 
 void SvgOutput::WriteSvgHeader() {
@@ -137,6 +140,8 @@ void SvgOutput::DrawObjects() {
     }
 }
 
+static eLadderLogWriter sg_svgOutputWriter("SVG_CREATED", true);
+
 void SvgOutput::Create() {
     // open file as a new one
     svgFile.clear();
@@ -164,6 +169,7 @@ void SvgOutput::Create() {
     // add the footer and close the filepp
     WriteSvgFooter();
     svgFile.close();
+    sg_svgOutputWriter.write();
     //con << "Svg file created\n";
 }
 
