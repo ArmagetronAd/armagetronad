@@ -181,15 +181,18 @@ void SvgOutput::Create() {
     // keep the current file offset
     afterRimWallsPos = svgFile.tellp();
     // add player walls and other game objects 
-    svgFile << "<!-- Cycle's Walls -->\n<g stroke-width='1' stroke-linecap='round'";
     if(sg_cycleWallsGlow) {
-        svgFile << " filter='url(#wallsFilter)'";
+        svgFile << "<g filter='url(#wallsFilter)'>\n";
     }
+    svgFile << "<!-- Cycle's Walls -->\n<g stroke-width='1' stroke-linecap='round'";
     svgFile << ">\n";
     DrawWalls(sg_netPlayerWallsGridded);
     DrawWalls(sg_netPlayerWalls);
     svgFile << "\n</g>\n<!-- Game objects -->\n";
     DrawObjects();
+    if(sg_cycleWallsGlow) {
+        svgFile << "</g>\n";
+    }
     // add the footer and close the filepp
     WriteSvgFooter();
     svgFile.close();
