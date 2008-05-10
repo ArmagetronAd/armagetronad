@@ -37,12 +37,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eRectangle.h"
 #include "rRender.h"
 
+#include <vector>
+
 /* **********************************************
    RimWall
    ********************************************** */
 
 static eRectangle se_rimWallBounds;
 tList<eWallRim> se_rimWalls;
+std::vector<ePolyLine> se_unsplittedRimWalls;
 
 eWallRim::eWallRim(eGrid *grid, bool backface_cull, REAL h)
         :eWall(grid), rim_id(-1),bf_cull(backface_cull), height(h)

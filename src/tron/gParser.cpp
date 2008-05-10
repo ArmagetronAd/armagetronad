@@ -12,6 +12,7 @@
 #include<stdarg.h>
 
 #include "eCoord.h"
+#include "eAdvWall.h"
 #include "eGrid.h"
 #include "eTess2.h"
 #include "gWall.h"
@@ -599,6 +600,8 @@ gParser::parseWallRect(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword) {
     endElementAlternative(grid, cur, keyword);
 }
 
+extern std::vector<ePolyLine> se_unsplittedRimWalls;
+
 void
 gParser::parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
@@ -617,11 +620,16 @@ gParser::parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
             x = myxmlGetPropFloat(cur, "x");
             y = myxmlGetPropFloat(cur, "y");
 
-            if (R == NULL)
+            if (R == NULL) {
                 R = grid->Insert(eCoord(x, y) * sizeMultiplier);
-            else
+                ePolyLine P('M',eCoord(x, y) * sizeMultiplier);
+                se_unsplittedRimWalls.push_back(P);
+            } else {
                 R = this->DrawRim(grid, R, eCoord(x, y) * sizeMultiplier, height);
-
+                ePolyLine P('L',eCoord(x, y) * sizeMultiplier);
+                se_unsplittedRimWalls.push_back(P);
+			}
+			
             // TODO-Alt:
             // if this function returns a point, use it in the wall. Otherwise, ignore what comes out.
             endElementAlternative(grid, cur, keyword);

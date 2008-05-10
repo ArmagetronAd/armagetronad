@@ -1255,6 +1255,8 @@ void exit_game_grid(eGrid *grid){
     grid->Clear();
 }
 
+extern std::vector<ePolyLine> se_unsplittedRimWalls;
+
 void exit_game_objects(eGrid *grid){
     sr_con.fullscreen=true;
 
@@ -1275,6 +1277,8 @@ void exit_game_objects(eGrid *grid){
 
     gNetPlayerWall::Clear();
 
+	se_unsplittedRimWalls.clear();
+	
     exit_game_grid(grid);
 }
 

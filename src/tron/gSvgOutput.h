@@ -46,7 +46,7 @@ private:
     static void WriteSvgHeader();	//!< Write to svg output file the appropriate svg header
     static void WriteSvgFooter();	//!< Write to svg output file the appropriate svg footer
 
-    static void DrawRimWalls( tList<eWallRim> &list );		//!< Draws all the rim walls
+    static void DrawRimWalls( std::vector<ePolyLine> &list );		//!< Draws all the rim walls
     static void DrawWalls(tList<gNetPlayerWall> &list);	//!< Draws all player walls
     static void DrawObjects();								//!< Draws all game objects
 

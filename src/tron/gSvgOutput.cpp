@@ -29,12 +29,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eRectangle.h"
 #include "ePlayer.h"
 #include "eTimer.h"
+#include "eAdvWall.h"
 #include "eGrid.h"
 #include "gCycle.h"
 #include "tDirectories.h"
 #include "gSvgOutput.h"
-
-extern std::vector<eCoord> se_rimWallRubberBand;
 
 static REAL clamp(REAL c) {
     if(c < 0) return 0;
@@ -64,7 +63,7 @@ void SvgOutput::WriteSvgHeader() {
             << hx-lx << " " << hy-ly
             << "\" xmlns=\"http://www.w3.org/2000/svg\">\n"
                "<rect x=\"" << lx << "\" y=\"" << -hy << "\" width=\"" << hx-lx << "\" height=\"" << hy-ly
-            << "\" stroke=\"none\" fill=\"#333333\" />\n\n"
+            << "\" stroke=\"none\" fill=\"#222\" />\n\n"
 
                "<defs>\n"
                "\t<polygon id='cycle' stroke='none' points='4,0 0,2 0,-2' />\n"
@@ -84,15 +83,16 @@ void SvgOutput::WriteSvgFooter() {
 	svgFile << "\n</svg>\n";
 }
 
-void SvgOutput::DrawRimWalls( tList<eWallRim> &list ) {
-	for (int i=list.Len()-1; i >= 0; --i)
+void SvgOutput::DrawRimWalls( std::vector<ePolyLine> &list ) {
+	int last_cr=0;
+	for (int i=0; i < list.size(); ++i)
 	{
-		eWallRim *wall = list[i];
-		eCoord begin = wall->EndPoint(0), end = wall->EndPoint(1);
-		svgFile << "\n\tM" << begin.x << ',' << -begin.y << ' ' << end.x << ',' << -end.y;
-		//svgFile << "  <line x1=\"" << -begin.x << "\" y1=\"" << begin.y
-		//		<< "\" x2=\"" << -end.x << "\" y2=\"" << end.y 
-		//		<< "\" stroke=\"#FFFFFF\" stroke-width=\"1\" stroke-linecap=\"round\" />\n";
+		ePolyLine P = list[i];
+		if (i-last_cr>=8) {
+			svgFile << "\n\t";
+			last_cr=i;
+		}
+		svgFile << P.op << P.pt.x << ',' << -P.pt.y << " ";
 	}
 }
 
@@ -153,6 +153,8 @@ void SvgOutput::DrawObjects() {
     }
 }
 
+extern std::vector<ePolyLine> se_unsplittedRimWalls;
+
 static bool sg_cycleWallsGlow = true;
 static tSettingItem<bool> sg_cycleWallsGlowConf("SVG_CYCLE_WALLS_GLOW", sg_cycleWallsGlow);
 
@@ -173,11 +175,11 @@ void SvgOutput::Create() {
     cx = (lx + hx)/2;
     cy = (ly + hy)/2;
 
-    // add header, rim wallsun(
+    // add header, rim wall
     WriteSvgHeader();
-    svgFile << "<!-- Rim Walls -->\n<path stroke='#fff' stroke-width='1' stroke-linecap='round' d='";
-    DrawRimWalls(se_rimWalls);
-    svgFile << "' />\n<!-- End of Rim Walls -->\n\n";
+    svgFile << "<!-- Rim Walls -->\n<path fill = 'none' stroke='#fff' stroke-width='1' stroke-linecap='round'\n\td='";
+    DrawRimWalls(se_unsplittedRimWalls);
+    svgFile << "'/>\n<!-- End of Rim Walls -->\n\n";
     // keep the current file offset
     afterRimWallsPos = svgFile.tellp();
     // add player walls and other game objects 

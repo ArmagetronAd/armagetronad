@@ -30,9 +30,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ArmageTron_ADV_WALL_H
 
 #include "eWall.h"
+#include "eCoord.h"
 #include "nNetObject.h"
 
 class eRectangle;
+
+// class to keep unsplitted rimwalls as a svg path
+class ePolyLine {
+public:
+	char	op;	//!< operation M: moveto, L: lineto
+	eCoord	pt; //!< corresponding point
+	ePolyLine(char p_op, eCoord p_pt):op(p_op),pt(p_pt) {};
+};
 
 class eWallRim:public eWall{
 protected:
