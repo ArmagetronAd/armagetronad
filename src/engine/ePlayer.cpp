@@ -758,11 +758,19 @@ static bool se_Hide( ePlayerNetID const * hider, ePlayerNetID const * seeker )
     return se_Hide( hider, seeker->GetAccessLevel() );
 }
 
-// console messages for players who can see users of access level hider; the two exceptions get a message anyway.
-void se_SecretConsoleOut( tOutput const & message, tAccessLevel hider, ePlayerNetID const * exception1, ePlayerNetID const * exception2 = 0 )
+static bool se_CanHide ( ePlayerNetID const * hider )
+{
+    return hider->GetAccessLevel() <= se_hideAccessLevelOf;
+}
+
+typedef bool (*CANHIDEFUNC)( ePlayerNetID const * hider );
+typedef bool (*HIDEFUNC)( ePlayerNetID const * hider, ePlayerNetID const * seeker );
+
+// secret console messages: If CanHideFunc returns false it is displayed to everyone. Else, for each player we apply HideFunc, to see if one can hide his message to the other. The two exceptions get a message anyway.
+void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, HIDEFUNC HideFunc, ePlayerNetID const * exception1, ePlayerNetID const * exception2 = 0, CANHIDEFUNC CanHideFunc = 0 )
 {
     // high enough access levels are never secret
-    if ( hider > se_hideAccessLevelOf )
+    if ( CanHideFunc != 0 && !(*CanHideFunc)( hider ) )
     {
         sn_ConsoleOut( message );
     }
@@ -781,7 +789,7 @@ void se_SecretConsoleOut( tOutput const & message, tAccessLevel hider, ePlayerNe
         for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
         {
             ePlayerNetID* player = se_PlayerNetIDs(i);
-            if ( player->GetAccessLevel() <= se_hideAccessLevelTo || player == exception1 || player == exception2 )
+            if ( player == exception1 || player == exception2 || !(*HideFunc)( hider, player ) )
             {
                 canSee[ player->Owner() ] = true;
             }
@@ -796,13 +804,6 @@ void se_SecretConsoleOut( tOutput const & message, tAccessLevel hider, ePlayerNe
             }
         }
     }
-}
-
-// console messages for players who can see the user object.
-void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, ePlayerNetID const * admin = 0 )
-{
-    tASSERT( hider );
-    se_SecretConsoleOut( message, hider->GetAccessLevel(), hider, admin );
 }
 
 static eLadderLogWriter se_authorityBlurbWriter("AUTHORITY_BLURB", true);
@@ -2088,14 +2089,14 @@ void se_Promote( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel acces
             se_SecretConsoleOut( tOutput( "$access_level_promote",
                                           victim->GetLogName(),
                                           tCurrentAccessLevel::GetName( accessLevel ),
-                                          admin->GetLogName() ), victim, admin );
+                                          admin->GetLogName() ), victim, &se_Hide, admin, 0, &se_CanHide );
         }
         else if ( accessLevel > oldAccessLevel )
         {
             se_SecretConsoleOut( tOutput( "$access_level_demote",
                                  victim->GetLogName(),
                                  tCurrentAccessLevel::GetName( accessLevel ),
-                                 admin->GetLogName() ), victim, admin );
+                                 admin->GetLogName() ), victim, &se_Hide, admin, 0, &se_CanHide );
 
         }
     }
@@ -2377,6 +2378,15 @@ static void se_AdminLogout( ePlayerNetID * p )
 #endif
 }
 
+// access level a user has to have to be able to see what's being typed at /admin
+static tAccessLevel se_consoleSpyAccessLevel = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_consoleSpyAccessLevelConf( "ACCESS_LEVEL_SPY_CONSOLE", se_consoleSpyAccessLevel );
+
+static bool se_canSeeConsole( ePlayerNetID const *, ePlayerNetID const * seeker )
+{
+    return seeker->GetAccessLevel() <= se_consoleSpyAccessLevel;
+}
+
 // /admin chat command
 static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
 {
@@ -2388,7 +2398,9 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
 
     tString str;
     str.ReadLine(s);
-    con << "Remote admin command by " << *p << "0xRESETT: " << str << "\n";
+    tColoredString msg;
+    msg << tColoredString::ColorString(1,0,0) << "Remote admin command" << tColoredString::ColorString(-1,-1,-1) << " by " << tColoredString::ColorString(1,1,.5) << p->GetUserName() << tColoredString::ColorString(-1,-1,-1) << ": " << tColoredString::ColorString(.5,.5,1) << str << "\n";
+    se_SecretConsoleOut( msg, p, &se_canSeeConsole, p );
     std::istringstream stream(&str(0));
 
     // install filter
@@ -2485,7 +2497,7 @@ static tSettingItem< REAL > se_chatRequestTimeoutConf( "ACCESS_LEVEL_CHAT_TIMEOU
 static tAccessLevel se_teamSpyAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_teamSpyAccessLevelConf( "ACCESS_LEVEL_SPY_TEAM", se_teamSpyAccessLevel );
 
-// access level a user to have to be able to listen to /msg messages
+// access level a user has to have to be able to listen to /msg messages
 static tAccessLevel se_msgSpyAccessLevel = tAccessLevel_Owner;
 static tSettingItem< tAccessLevel > se_msgSpyAccessLevelConf( "ACCESS_LEVEL_SPY_MSG", se_msgSpyAccessLevel );
 
@@ -4541,17 +4553,20 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
                                               GetName(),
                                               newAuthenticatedName,
                                               tCurrentAccessLevel::GetName( GetAccessLevel() ),
-                                              order ), this, admin );
+                                              order ), this, &se_Hide, admin, 0, &se_CanHide );
             }
             else
             {
-                se_SecretConsoleOut( tOutput( "$login_message", GetName(), newAuthenticatedName, order ), this, admin );
+                se_SecretConsoleOut( tOutput( "$login_message", GetName(), newAuthenticatedName, order ), this, &se_Hide, admin, 0, &se_CanHide );
             }
 
         }
     }
 
     GetScoreFromDisconnectedCopy();
+    
+    // force name update
+    UpdateName();
 }
 
 void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin ){
@@ -4559,11 +4574,11 @@ void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin ){
     {
         if ( admin )
         {
-            se_SecretConsoleOut( tOutput( "$logout_message_deop", GetName(), GetFilteredAuthenticatedName(), admin->GetLogName() ), this, admin );
+            se_SecretConsoleOut( tOutput( "$logout_message_deop", GetName(), GetFilteredAuthenticatedName(), admin->GetLogName() ), this, &se_Hide, admin, 0, &se_CanHide );
         }
         else
         {
-            se_SecretConsoleOut( tOutput( "$logout_message", GetName(), GetFilteredAuthenticatedName() ), this );
+            se_SecretConsoleOut( tOutput( "$logout_message", GetName(), GetFilteredAuthenticatedName() ), this, &se_Hide, 0, 0, &se_CanHide );
         }
     }
 
