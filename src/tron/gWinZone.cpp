@@ -2300,6 +2300,8 @@ bool gBaseZoneHack::Timestep( REAL time )
 //!
 // *******************************************************************************
 
+static eLadderLogWriter sg_deathBasezoneConqueredWriter("DEATH_BASEZONE_CONQUERED", true);
+
 void gBaseZoneHack::OnVanish( void )
 {
 	if (!team)
@@ -2341,6 +2343,8 @@ void gBaseZoneHack::OnVanish( void )
 			{
 				sn_ConsoleOut( tOutput("$player_kill_collapse", closest->GetName() ) );
 				closest->Object()->Kill();
+				sg_deathBasezoneConqueredWriter << ePlayerNetID::FilterName(closest->GetUserName());
+				sg_deathBasezoneConqueredWriter.write();
 			}
 		}
 	}
@@ -2367,7 +2371,7 @@ void gBaseZoneHack::OnConquest( void )
 		sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << GetPosition().x << GetPosition().y;
 		if ( enemies_.size() == 0 ) //no enemies inside
 		{
-			sg_basezoneConqueredWriter << "NO_ENEMYS";
+			sg_basezoneConqueredWriter << "NO_ENEMIES";
 		}
 		sg_basezoneConqueredWriter.write();
 	}
