@@ -1,6 +1,6 @@
 #*****************************************
 #
-# Traduction francaise par mygal
+# Traduction francaise originale par mygal
 # Commentaires, critiques, etc.?
 #            themygal@gmail.com
 # Thx 2 tang322 4 his help
@@ -27,8 +27,9 @@ language                      Francais
 #*****************************************
 
 first_use_help                Est-ce la premiere fois que vous jouez a \g?
-include_help                  Inclus ce fichier
-new_team_allowed_help         Est-ce possible de creer une nouvelle team?
+include_help                  Inclus un fichier.
+sinclude_help		      Inclus un fichier silencieusement, sans message d'erreur s'il n'est pas trouvé.
+new_team_allowed_help         Est-ce possible de creer une nouvelle équipe?
 
 #********************************************
 #********************************************
@@ -48,8 +49,7 @@ keyboard_help                 Configuration du clavier
 #********************************************
 #********************************************
 
-#ORIGINAL TEXT:               Time in seconds during which no two different keyboard events can trigger the same action
-#doublebind_time_help         UNTRANSLATED
+doublebind_time_help         Temps en secondes pendant lequel deux touches différentes peuvent effectuer la même action.
 
 #********************************************
 #********************************************
@@ -60,35 +60,99 @@ keyboard_help                 Configuration du clavier
 #********************************************
 
 cycle_speed_help              Vitesse basique de votre moto si vous roulez en ligne droite.
-cycle_start_speed_help        Vitesse initiale de votre moto
-cycle_delay_help              Temps minimum entre les tours
+cycle_speed_min_help          Vitesse minimum de votre moto, relativement à CYCLE_SPEED.
 
-#ORIGINAL TEXT:               Turn delays will be based on the time since the last turn if this is 1 (default) and the distance if this is 0. Intermediate values and values out of these bounds are supported as well.
-#cycle_delay_timebased_help   UNTRANSLATED
-cycle_accel_help              Facteur d'acceleration des murs
-cycle_accel_offset_help       Distance numerique minimum des murs
-cycle_wall_near_help          Distance maximum des murs accelerateurs
-cycle_sound_speed_help        Vitesse du son
+cycle_speed_max_help          Vitesse maximum de votre moto, relativement à CYCLE_SPEED.
+
+cycle_speed_decay_below_help  Vitesse de retour à CYCLE_SPEED quand la vitesse est en dessous de ceci.
+cycle_speed_decay_above_help  Vitesse de retour à CYCLE_SPEED quand la vitesse est en dessous de ceci.
+
+cycle_start_speed_help        Vitesse initiale de votre moto.
+cycle_sound_speed_help        Facteur appliqué à la vitesse currente pour obtenir la vitesse du son du moteur.
+
+cycle_accel_help              Facteur d'acceleration des murs.
+cycle_accel_self_help         Multiplicateur de CYCLE_ACCEL pour votre propre mur.
+cycle_accel_team_help         Multiplicateur de CYCLE_ACCEL pour les murs de vos coéquipiers.
+cycle_accel_enemy_help        Multiplicateur de CYCLE_ACCEL pour les murs de vos ennemis.
+cycle_accel_rim_help          Multiplicateur de CYCLE_ACCEL pour les murs de l'arène.
+cycle_accel_slingshot_help    Multiplicateur de l'effect cumulé de CYCLE_ACCEL, si la moto est entre son propre mur et un autre mur.
+cycle_accel_tunnel_help       Multiplicateur de l'effect cumulé de CYCLE_ACCEL, si la moto est entre deux murs qui ne lui appartiennent pas.
+cycle_accel_offset_help       Distance numerique minimum des murs.
+cycle_wall_near_help          Distance maximum des murs accelerateurs.
+
+cycle_boost_self_help         Accélération lorsque vous vous tournez de votre mur.
+cycle_boost_team_help         Accélération lorsque vous vous tournez d'un des murs de vos coéquipiers.
+cycle_boost_enemy_help        Accélération lorsque vous vous tournez d'un mur ennemi.
+cycle_boost_rim_help          Accélération lorsque vous vous tournez du mur de l'arène.
+
+cycle_boostfactor_self_help   Facteur auquel votre vitesse est multipliée quand vous vous tournez de votre mur.
+cycle_boostfactor_team_help   Facteur auquel votre vitesse est multipliée quand vous vous tournez d'un des murs de vos coéquipiers.
+cycle_boostfactor_enemy_help  Facteur auquel votre vitesse est multipliée quand vous vous tournez d'un mur ennemi.
+cycle_boostfactor_rim_help    Facteur auquel votre vitesse est multipliée quand vous vous tournez du mur de l'arène.
+
+cycle_turn_memory_help        Nombre de tours une moto va mémoriser lorsque ces tours ne sont pour le moment pas possibles.
+cycle_delay_help              Temps minimum entre les tours
+cycle_delay_bonus_help        Facteur additionnel à CYCLE_DELAY appliqué sur le server dédié seulement.
+
+cycle_delay_timebased_help    Est-ce que CYCLE_DELAY doit être basé sur le dernier tour (1) or par rapport à la distance (0) ? Les valeurs intermédiaires sont aussi supportées.
+
+cycle_turn_speed_factor_help  Facteur auquel la vitesse est multipliée après un tour.
+
+cycle_delay_doublebind_bonus_help Facteur auquel CYCLE_DELAY est multiplié pour des tours consécutifs dans la même direction.
+
 cycle_brake_help              Intensite du frein
+
+cycle_width_help              La largeur d'une moto lors des collisions. Par exemple elle ne pourra pas rentrer dans des tunnels trop petits.
+
+#ORIGINAL TEXT:               Minimum distance of a cycle to a wall on either side before it takes harm.
+cycle_width_side_help         
+
+#ORIGINAL TEXT:               If the cycle_width conditions are barely violated, use up this much rubber.If set to 1, the rubber usage rate is the same as if you were sitting in front of a wall.
+#cycle_width_rubber_min_help  UNTRANSLATED
+
+#ORIGINAL TEXT:               If the cycle_width conditions are massively violated, use up this much rubber.If set to 1, the rubber usage rate is the same as if you were sitting in front of a wall.
+#cycle_width_rubber_max_help  UNTRANSLATED
+
 cycle_rubber_help             DIstance minimum a laquelle vous pouvez rouler contre un mur
+
+#ORIGINAL TEXT:               Timescale rubber is restored on.
+#cycle_rubber_time_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Revert to old, framerate dependant and old-clients-ripping, rubber code if old clients are present. Old means <= 0.2.7.0 here.
+#cycle_rubber_legacy_help     UNTRANSLATED
 
 #ORIGINAL TEXT:               Rubber usage is based on distance travelled if this is 0 (default) and the time passed if this is 1. Intermediate values and values out of these bounds are supported as well.
 #cycle_rubber_timebased_help  UNTRANSLATED
 cycle_rubber_speed_help       Vitesse logarithmique de l'approximation du mur( chaque seconde, vous vous rapprochez du mur avec un facteur de ~0.4^{cette valeur} )
 cycle_rubber_mindistance_help Le code de la distance minimale qui vous separe du mur
+
+#ORIGINAL TEXT:               If > 0, CYCLE_RUBBER_MINDISTANCE effectively is never taken to be bigger than this value times the size of any detected gaps the cylce can squeeze through. For "Open" gameplay.
+#cycle_rubber_mindistance_gap_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Gap detection only sees gaps that the cycle may reach in no less than this many seconds.
+#cycle_rubber_mindistance_gap_side_help UNTRANSLATED
 cycle_rubber_mindistance_ratio_help Distance additionnelle a CYCLE_RUBBER_MINDISTANCE pour chaque unite de longueur du mur que vous avez devant vous 
 
 #ORIGINAL TEXT:               Addidional distance if you have an empty rubber meter (gets faded out gradually as you use up all your rubber)
 #cycle_rubber_mindistance_reservoir_help UNTRANSLATED
 
-#ORIGINAL TEXT:               Additional distance for unprepared grinds; it gets applied when the cycle's last turn was just a fraction of a second ago and faded out preparation times larger than CYCLE_RUBBER_MINDISTANCE_PREPARATION. 
+#ORIGINAL TEXT:               Additional distance for unprepared grinds; it gets applied when the cycle's last turn was just a fraction of a second ago and faded out preparation times larger than CYCLE_RUBBER_MINDISTANCE_PREPARATION.
 #cycle_rubber_mindistance_unprepared_help UNTRANSLATED
 
-#ORIGINAL TEXT:               Timescale in seconds a cycle's last turn time is compared with to determine the effect of CYCLE_RUBBER_MINDISTANCE_UNPREPARED.  
+#ORIGINAL TEXT:               Timescale in seconds a cycle's last turn time is compared with to determine the effect of CYCLE_RUBBER_MINDISTANCE_UNPREPARED.
 #cycle_rubber_mindistance_preparation_help UNTRANSLATED
 cycle_rubber_mindistance_legacy_help Extra factor for minimal distance to walls enforced by the rubber code, active when peers with the rip bug are connected
 cycle_rubber_minadjust_help   En s'ajustant sur environ 180ing. de mur, permet de se rapprocher d'au moins cette valeur ( relativement a la derniere distance )
+
+#ORIGINAL TEXT:               During this fraction of the cycle delay time after each turn, rubber efficiency will be multiplied with CYCLE_RUBBER_DELAY_BONUS.
+#cycle_rubber_delay_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               Factor for CYCLE_RUBBER_DELAY rubber efficiency.
+#cycle_rubber_delay_bonus_help UNTRANSLATED
 cycle_ping_rubber_help        Finesse additionnelle pour les joueurs avec un haut ping
+
+#ORIGINAL TEXT:               With finite length trails, the used rubber is multiplied with this value and the result is subtracted from the wall length.
+#cycle_rubber_wall_shrink_help UNTRANSLATED
 cycle_brake_refill_help       Evalue ce qu'il reste dans le reservoir de frein quand celui-ci ne fonctionne pas
 cycle_brake_deplete_help      Evalue ce que le reservoir de frein utilise quand vous freinez
 cycle_sync_interval_enemy_help Temps ( en secondes ), entre les updates serveur/client des ennemis
@@ -110,6 +174,9 @@ cycle_time_tolerance_help     Pas encore utilise
 #ORIGINAL TEXT:               Number of extrapolation simulation timesteps each real timestep; increase for better accuracy
 #cycle_sync_ff_steps_help     UNTRANSLATED
 topology_police_help          Fait des controles "a posteriori", pour verifier que les mouvements en jeu etaient possibles. Lui attribuer "1" pour l'activer.
+
+#ORIGINAL TEXT:               Extra topology police flag to check for walls that are put into the grid datastructure exactly parallel to each other. Requites TOPOLOGY_POLICE to be active.
+#topology_police_parallel_help UNTRANSLATED
 cycle_smooth_time_help        Timescale for smoothing options. Increasing this will make interpolation smoother, but less accurate. Decreasing it will make network synchronization jumpy.
 
 #ORIGINAL TEXT:               Minimum speed of smooth correction relative to cycle speed.
@@ -125,7 +192,27 @@ cycle_max_refcount_help       Nombre maximum de reference admis pour les motos a
 #********************************************
 #********************************************
 
+#ORIGINAL TEXT:               Penalty on the effective time in seconds if the enemy influence detection is from a teammate
+#enemy_teammate_penalty_help  UNTRANSLATED
+
+#ORIGINAL TEXT:               Penalty on the effective time in seconds if the enemy influence detection comes from a dead player
+#enemy_dead_penalty_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               Penalty in seconds if the victim is in chatbot state and the enemy influence is just the chatbot evading a wall
+#enemy_chatbot_penalty_help   UNTRANSLATED
+
+#ORIGINAL TEXT:               If set to 1, not the build time of the encountered wall, but the current time enters the comparison of enemy influences. Arbitrary blending values are allowed.
+#enemy_currenttime_influence_help UNTRANSLATED
+
+#ORIGINAL TEXT:               If no enemy influence can be found for the last this many seconds, a player's death counts as a suicide.
+#enemy_suicide_timeout_help   UNTRANSLATED
 score_die_help                Les points que vous gagnez en mourrant
+
+#ORIGINAL TEXT:               What you get for surviving
+#score_survive_help           UNTRANSLATED
+
+#ORIGINAL TEXT:               What you get for making a hole for your teammates
+#score_hole_help              UNTRANSLATED
 score_kill_help               Les points que vous gagnez en tuant quelqu'un
 score_suicide_help            Les points que vous gagnez en mourrant betement
 score_win_help                Les points que vous gagnez en remportant un round
@@ -137,7 +224,6 @@ sp_walls_length_help          Longueur des murs en metres. Une valeur negative r
 sp_explosion_radius_help      Rayon de l'onde de choc des explosions
 sp_team_balance_on_quit_help  Les equipes s'equilibrent-elles si un joueur s'en va?
 sp_team_balance_with_ais_help Les equipes s'equilibrent-elles avec les IA?
-sp_team_max_imbalance_perm_help Disproportion maximum et permanente autorisee pour une equipe
 sp_team_max_imbalance_help    Disproportion maximum mais temporaire autorisee pour une equipe
 sp_team_max_players_help      Nombre maximum de joueurs par equipe
 sp_team_min_players_help      Nombre minimum de joueurs par equipe
@@ -154,15 +240,27 @@ sp_limit_score_help           Fin du match lorsqu'un joueur atteint ce score
 sp_limit_rounds_help          Fin du match apres autant de rounds
 sp_limit_time_help            Fin du match apres autant de minutes
 
+#ORIGINAL TEXT:               Determines how much each wingman is placed backwards in a team.
+#spawn_wingmen_back_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               Determines how much each wingman is placed sidewards in a team.
+#spawn_wingmen_side_help      UNTRANSLATED
+
 walls_stay_up_delay_help      Nombre de secondes durant lesquelles les murs d'un joueur mort restent eleves. Une valeur negative les laissera toujours eleves.
 walls_length_help             Longueur des murs en metres. Une valeur negative rendra ces murs infinis
 explosion_radius_help         Rayon de l'onde de choc des explosions
 team_balance_on_quit_help     Les equipes s'equilibrent-elles si un joueur s'en va?
 team_balance_with_ais_help    Les equipes s'equilibrent-elles avec les IA?
-team_max_imbalance_perm_help  Disproportion maximum et permanente autorisee pour une equipe
 team_max_imbalance_help       Disproportion maximum mais temporaire autorisee pour une equipe
 team_max_players_help         Nombre maximum de joueurs par equipe
 team_min_players_help         Nombre minimum de joueurs par equipe
+
+#ORIGINAL TEXT:               If set to 1, players are allowed to change their position in the team as they wish. If 0, they only can drop in rank.
+#team_allow_shuffle_up_help   UNTRANSLATED
+
+#ORIGINAL TEXT:               If set to 1, the center player is the team's boss. If at 0, it's the player who is on that team longest.
+#team_center_is_boss_help     UNTRANSLATED
+
 teams_max_help                Nombre maximum d'equipes
 teams_min_help                Nombre minimum d'equipes
 finish_type_help              Que se passe-t-il lorsque le dernier joueur humain est mort?
@@ -176,6 +274,160 @@ limit_score_help              Fin du match lorsqu'un joueur atteint ce score
 limit_rounds_help             Fin du match apres autant de rounds
 limit_time_help               Fin du match apres autant de minutes 
 
+#ORIGINAL TEXT:               Flag indicating whether players should be put into teams automatically.
+#auto_team_help               UNTRANSLATED
+
+#ORIGINAL TEXT:               If set to 0, spectators won't be announced when joining or leaving, provided AUTO_TEAM is set to 0.
+#auto_team_spec_spam_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               Allow a team to be named after a color
+#allow_team_name_color_help   UNTRANSLATED
+
+#ORIGINAL TEXT:               Allow a team to be named after the leading player
+#allow_team_name_player_help  UNTRANSLATED
+
+#ORIGINAL TEXT:               Total time in minutes someone has played with this client
+#play_time_total_help         UNTRANSLATED
+
+#ORIGINAL TEXT:               Total time in minutes someone has played with this client online
+#play_time_online_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Total time in minutes someone has played with this client in a team
+#play_time_team_help          UNTRANSLATED
+
+#ORIGINAL TEXT:               Total play time in minutes required to play here
+#min_play_time_total_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               Online play time in minutes required to play here
+#min_play_time_online_help    UNTRANSLATED
+
+#ORIGINAL TEXT:               Team play time in minutes required to play here
+#min_play_time_team_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               You cannot play here; first, you need to get more general experience. Play somewhere else (local games count) for \1 minutes, then you can come back here and play.\n
+#play_time_total_lacking      UNTRANSLATED
+
+#ORIGINAL TEXT:               You cannot play here; first, you need to get more online experience. Play on other servers for \1 minutes, then you can come back here and play.\n
+#play_time_online_lacking     UNTRANSLATED
+
+#ORIGINAL TEXT:               You cannot play here; first, you need to get more team play experience. Play on other team servers for \1 minutes, then you can come back here and play.\n
+#play_time_team_lacking       UNTRANSLATED
+
+#ORIGINAL TEXT:               name of team 1
+#team_name_1_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               name of team 2
+#team_name_2_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               name of team 3
+#team_name_3_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               name of team 4
+#team_name_4_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               name of team 5
+#team_name_5_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               name of team 6
+#team_name_6_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               name of team 7
+#team_name_7_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               name of team 8
+#team_name_8_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               red portion of team 1's color
+#team_red_1_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               red portion of team 2's color
+#team_red_2_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               red portion of team 3's color
+#team_red_3_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               red portion of team 4's color
+#team_red_4_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               red portion of team 5's color
+#team_red_5_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               red portion of team 6's color
+#team_red_6_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               red portion of team 7's color
+#team_red_7_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               red portion of team 8's color
+#team_red_8_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               green portion of team 1's color
+#team_green_1_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               green portion of team 2's color
+#team_green_2_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               green portion of team 3's color
+#team_green_3_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               green portion of team 4's color
+#team_green_4_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               green portion of team 5's color
+#team_green_5_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               green portion of team 6's color
+#team_green_6_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               green portion of team 7's color
+#team_green_7_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               green portion of team 8's color
+#team_green_8_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               blue portion of team 1's color
+#team_blue_1_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               blue portion of team 2's color
+#team_blue_2_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               blue portion of team 3's color
+#team_blue_3_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               blue portion of team 4's color
+#team_blue_4_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               blue portion of team 5's color
+#team_blue_5_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               blue portion of team 6's color
+#team_blue_6_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               blue portion of team 7's color
+#team_blue_7_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               blue portion of team 8's color
+#team_blue_8_help             UNTRANSLATED
+
+# wall length modification
+#ORIGINAL TEXT:               Distance multiplier in wall length calculation. All values are legal. See settings.cfg for full docs.
+#cycle_dist_wall_shrink_help  UNTRANSLATED
+
+#ORIGINAL TEXT:               Distance offset in wall length calculation. See settings.cfg for full docs.
+#cycle_dist_wall_shrink_offset_help UNTRANSLATED
+
+# respawn relevant settings (no server supports respawning yet, but the client is prepared)
+#ORIGINAL TEXT:               Frequency in Hz an invulnerable cycle blinks with.
+#cycle_blink_frequency_help   UNTRANSLATED
+
+#ORIGINAL TEXT:               Time in seconds a cycle is invulnerable after a respawn.
+#cycle_invulnerable_time_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Time in seconds a cycle does not make a wall after a respawn.
+#cycle_wall_time_help         UNTRANSLATED
+
+#ORIGINAL TEXT:               Set to 1 if the invulnerability and wall delay should already be active on the initial spawn at the beginning of a round.
+#cycle_first_spawn_protection_help UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -185,12 +437,27 @@ limit_time_help               Fin du match apres autant de minutes
 #********************************************
 #********************************************
 
+# map file
+#ORIGINAL TEXT:               File that contains the map used for playing 
+#map_file_help                UNTRANSLATED
+
+#ORIGINAL TEXT:               DEPRECIATED - use RESOURCE_REPOSITORY_SERVER and MAP_FILE instead
+#map_uri_help                 UNTRANSLATED
+
+#ORIGINAL TEXT:               In how many directions a cycle can turn 4 is the default, 6 is hexatron 
+#arena_axes_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               URI the client uses to search for map files if they aren't stored locally. Better leave it alone 
+#resource_repository_client_help UNTRANSLATED
+
+#ORIGINAL TEXT:               URI clients and the server use to search for map files if they aren't stored locally 
+#resource_repository_server_help UNTRANSLATED
+
 # limits
 speed_factor_help             Modificateur de vitesse des motos
 sp_speed_factor_help          Modificateur de vitesse des motos
 size_factor_help              Modificateur de la taille de l'arene
 sp_size_factor_help           Modificateur de la taille de l'arene
-win_zone_deaths_help          "1" pour activer une "Death Zone"
 
 # single player settings (used by dedicated server only)
 sp_ais_help                   Nombre d'IA en mode Single-Player
@@ -216,11 +483,42 @@ win_zone_min_round_time_help  Nombre minimum ( en secondes ) ou la "Instant Win 
 win_zone_min_last_death_help  Nombre minimum ( en secondes ) depuis le dernier crash avant l'activation de la "Instant Win Zone"
 win_zone_expansion_help       Vitesse d'expansion de la "Instant Win Zone"
 win_zone_initial_size_help    Taille initiale de la "Instant Win Zone"
+win_zone_deaths_help          "1" pour activer une "Death Zone"
+
+#ORIGINAL TEXT:               Randomness factor of the initial win zone position. 0 fixes it at the arena center, 1 spreads the zone all over it.
+#win_zone_randomness_help     UNTRANSLATED
 
 game_timeout_help             Donne approximativement le temps maximum entre les rounds
 
+#ORIGINAL TEXT:               Last round time a player in chat mode is able to pause the timer
+#last_chat_break_time_help    UNTRANSLATED
+
+#ORIGINAL TEXT:               Lenght of an extra pause at the beginning of the round
+#extra_round_time_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Maximum time in seconds to wait for a single player to stop chatting.
+#player_chat_wait_max_help    UNTRANSLATED
+
+#ORIGINAL TEXT:               Maximum fraction of time to wait for a single player to stop chatting.
+#player_chat_wait_fraction_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Set to 1 if only one player should get his chat wait time reduced at any given time.
+#player_chat_wait_single_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Set to 1 if only team leaders, and 0 if all players, should be allowed to pause the timer.
+#player_chat_wait_teamleader_help UNTRANSLATED
+
 wait_for_external_script_help Let the server wait for an external script between two rounds until the script switches this setting back to 0.
 wait_for_external_script_timeout_help If the server has been paused by WAIT_FOR_EXTERNAL_SCRIPT for more seconds than this, kickstart the game.
+
+#ORIGINAL TEXT:               Time in seconds after which a permanent chatter is removed from the game
+#chatter_remove_time_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               Time in seconds after which an inactive player is removed from the game
+#idle_remove_time_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Time in seconds after which an inactive player is kicked
+#idle_kick_time_help          UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -231,6 +529,12 @@ wait_for_external_script_timeout_help If the server has been paused by WAIT_FOR_
 #********************************************
 
 player_name_confitem_help     Nom du joueur
+
+#ORIGINAL TEXT:               Global player ID
+#player_user_confitem_help    UNTRANSLATED
+
+#ORIGINAL TEXT:               Schould this player automatically request authentication?
+#auto_login_confitem_help     UNTRANSLATED
 camcenter_help                Centre la camera interne sur la direction de la moto
 start_cam_help                Camera initiale
 start_fov_help                Champs de vision initial
@@ -250,11 +554,42 @@ color_r_help                  Couleur de votre moto et de ses murs, rouge. Il n'
 #********************************************
 #********************************************
 #
+#       Convenience
+#
+#********************************************
+#********************************************
+
+#ORIGINAL TEXT:               Number of lines kept in the console history.
+#history_size_console_help    UNTRANSLATED
+
+#ORIGINAL TEXT:               Number of lines kept in the chat history.
+#history_size_chat_help       UNTRANSLATED
+
+#********************************************
+#********************************************
+#
 #       Spam protection
 #
 #********************************************
 #********************************************
 
+#ORIGINAL TEXT:               Minimum time for 10 ping packets from one machine to arrive.
+#ping_flood_time_10_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimum time for 20 ping packets from one machine to arrive.
+#ping_flood_time_20_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimum time for 50 ping packets from one machine to arrive.
+#ping_flood_time_50_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimum time for 100 ping packets from one machine to arrive.
+#ping_flood_time_100_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               The times PING_FLOOD_TIME_X, multiplied by this value, count for all pings from all machines. Negative values disable global flood protection.
+#ping_flood_global_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimum time between identical chat messages.
+#spam_protection_repeat_help  UNTRANSLATED
 spam_protection_help          Determine la "puissance" du filtre anti-spam: determine le delai minimum entre 2 messages
 
 #ORIGINAL TEXT:               Extra factor for SPAM_PROTECTION for votes.
@@ -265,7 +600,29 @@ spam_protection_help          Determine la "puissance" du filtre anti-spam: dete
 spam_penalty_help             Nombre de secondes ou un spammeur ne peut plus poster
 spam_maxlen_help              Taille maximale des messages dans le chat
 spam_autokick_help            Les "points de spam", qui vous bannissent d'un serveur instantanement.
+
+#ORIGINAL TEXT:               Number of spam warnings before a player gets spamkicked.
+#spam_autokick_count_help     UNTRANSLATED
 silence_all_help              Si "1", le chat sera desactive
+
+#ORIGINAL TEXT:               If set to 0, all chat will be surpressed (if reset on the server, messages from logged in players and private/team messages are still shown)
+#enable_chat_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               If set to 1, all players can change teams. If set to 0, players can only change teams if they've been specifically allowed to by ALLOW_TEAM_CHANGE_PLAYER
+#allow_team_change_help       UNTRANSLATED
+
+# spam kick messages
+#ORIGINAL TEXT:               You chatted too much.
+#spam_chat                    UNTRANSLATED
+
+#ORIGINAL TEXT:               You switched teams too often.
+#spam_teamchage               UNTRANSLATED
+
+#ORIGINAL TEXT:               You issued too many kick votes.
+#spam_vote_kick_issue         UNTRANSLATED
+
+#ORIGINAL TEXT:               Too many of your votes got rejected.
+#spam_vote_rejected           UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -280,6 +637,59 @@ silence_all_help              Si "1", le chat sera desactive
 
 #ORIGINAL TEXT:               If set to 1, this allows two players that play on the same client to fight for points with each other.
 #allow_enemies_same_client_help UNTRANSLATED
+
+#ORIGINAL TEXT:               If set to 1, this allows a player to issue cycle and camera control commands during chat (losing the chatbot and the yellow chat pyramid).
+#allow_control_during_chat_help UNTRANSLATED
+
+#ORIGINAL TEXT:               If set to 1, players with identical names are tolerated. If set to 0, all but one will be renamed.
+#allow_imposters_help         UNTRANSLATED
+
+#ORIGINAL TEXT:               If set to 1, players with identical names are tolerated. If set to 0, all but one will be renamed.
+#allow_impostors_help         UNTRANSLATED
+
+#********************************************
+#********************************************
+#
+#       Lag compensation
+#
+#********************************************
+#********************************************
+
+#ORIGINAL TEXT:               Maximal speed increase of timer while lag is compensated for.
+#lag_max_speedup_timer_help   UNTRANSLATED
+
+#ORIGINAL TEXT:               Timescale the slow lag measurement decays on.
+#lag_slow_time_help           UNTRANSLATED
+
+#ORIGINAL TEXT:               Timescale the fast lag measurement decays on.
+#lag_fast_time_help           UNTRANSLATED
+
+#ORIGINAL TEXT:               Extra weight lag reports from the server influence the slow lag compensation with.
+#lag_slow_weight_help         UNTRANSLATED
+
+#ORIGINAL TEXT:               Extra weight lag reports from the server influence the fast lag compensation with.
+#lag_fast_weight_help         UNTRANSLATED
+
+#ORIGINAL TEXT:               Maximal seconds of total lag credit.
+#lag_credit_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Maximal seconds of lag credit for a single lag event.
+#lag_credit_single_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Sweet spot, the fill ratio of lag credit the server tries to keep the client at.
+#lag_sweet_spot_help          UNTRANSLATED
+
+#ORIGINAL TEXT:               Timescale lag credit is restored on.
+#lag_credit_time_help         UNTRANSLATED
+
+#ORIGINAL TEXT:               Extra amount of lag compensation, determined by the client.
+#lag_offset_client_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Extra amount of lag compensation, determined by the server.
+#lag_offset_server_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Extra amount of lag compensation for clients that don't support automatic compensation, determined by the server.
+#lag_offset_legacy_help       UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -301,6 +711,8 @@ silence_all_help              Si "1", le chat sera desactive
 #ORIGINAL TEXT:               Maximal value of the kicks per hour; larger values are smoothly clamped.
 #network_autoban_max_kph_help UNTRANSLATED
 
+#ORIGINAL TEXT:               If set to something bigger than zero, this is the maximal time in seconds a client without players is tolerated.
+#network_spectator_time_help  UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -310,15 +722,42 @@ silence_all_help              Si "1", le chat sera desactive
 #********************************************
 #********************************************
 
+#ORIGINAL TEXT:               Set to 1 to use the enhanced server controlled vote items for kick votes. Does not work for clients prior to 0.2.8.0_rc1.
+#vote_use_server_controlled_kick_help UNTRANSLATED
 voting_timeout_help           votes older than this time out and are rejected.
+
+#ORIGINAL TEXT:               Additional value for VOTING_TIMEOUT for every voter present.
+#voting_timeout_per_voter_help UNTRANSLATED
 allow_voting_help             Si 1, les votes seront permis aux joueurs.
 allow_voting_spectator_help   Si 1, les votes seront permis aux spectateurs.
 min_voters_help               Nombre de votants devant etre online pour que le vote soit active.                      
+
+#ORIGINAL TEXT:               The maximum number of total votes that can be active at any given moment.
+#max_votes_help               UNTRANSLATED
+
+#ORIGINAL TEXT:               Cancels all running polls.
+#votes_cancel_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               The maximum number of votes suggested by each voter that can be active at any given moment.
+#max_votes_per_voter_help     UNTRANSLATED
 voting_start_decay_help       Nombre de secondes apres lequel les non-votants sont ignores.
 
 #ORIGINAL TEXT:               One non-voter is ignored everytime this many secons pass.
 #voting_decay_help            UNTRANSLATED
 voting_bias_help              Ajoute des personnes votantes virtuels qui s'opposent a chaque changement.
+
+#ORIGINAL TEXT:               Add virtual voters that oppose every kick vote.
+#voting_bias_kick_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Add virtual voters that oppose every suspend vote.
+#voting_bias_suspend_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               Add virtual voters that oppose every include vote.
+#voting_bias_include_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               Add virtual voters that oppose every command vote.
+#voting_bias_command_help     UNTRANSLATED
+
 voting_privacy_help           controls logging of voting process. 2: nothing gets logged 1: vote submission is logged for the server admin 0: voting is logged for the server admin -1: vote submission is made public -2: everything is made public
 
 #ORIGINAL TEXT:               The spam level of issuing a vote.
@@ -326,12 +765,27 @@ voting_privacy_help           controls logging of voting process. 2: nothing get
 
 #ORIGINAL TEXT:               The spam level of getting your vote rejected.
 #voting_spam_reject_help      UNTRANSLATED
-voting_suspend_help		    Arrête les votes pour n minutes.
-voting_suspend_default_help	    Valeur par défaut de VOTING_SUSPEND.
-voting_unsuspend_help		    Autorise les votes à nouveau.
-voting_suspended		    Les votes ont été suspendus pour les prochaines \1 minutes.\n
-voting_unsuspended		    Les votes sont à nouveau autorisés.\n
-vote_rejected_voting_suspended		Les votes ont été suspendus par l'Administrateur.\n
+
+#ORIGINAL TEXT:               The minimum time in seconds between two harmful votes against the same player.
+#voting_harm_time_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               The minimum time in seconds between two kick votes against the same player.
+#voting_kick_time_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               The minimum time in seconds a player needs to be online with the same name before he can issue votes.
+#voting_maturity_help         UNTRANSLATED
+
+#ORIGINAL TEXT:               The number of rounds "/vote suspend <player>" suspends a player for.
+#voting_suspend_rounds_help   UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal number of harmful votes (suspension, kick,..) that need to have been issued (success is not required) against a player before a kick vote issued via the menu really results in a kick; otherwise, the result is a simple suspension.
+#voting_kick_minharm_help     UNTRANSLATED
+voting_suspend_help           Arrête les votes pour n minutes.
+voting_suspend_default_help   Valeur par défaut de VOTING_SUSPEND.
+voting_unsuspend_help         Autorise les votes à nouveau.
+voting_suspended              Les votes ont été suspendus pour les prochaines \1 minutes.\n
+voting_unsuspended            Les votes sont à nouveau autorisés.\n
+vote_rejected_voting_suspended Les votes ont été suspendus par l'Administrateur.\n
 
 #********************************************
 #********************************************
@@ -358,6 +812,9 @@ show_own_name_help            Voulez-vous aussi afficher votre nom au-dessus de 
 #ORIGINAL TEXT:               Maximum recording time between rendered frames in fast forward mode
 #fast_forward_maxstep_help    UNTRANSLATED
 
+#ORIGINAL TEXT:               Maximum real time between rendered frames in fast forward mode
+#fast_forward_maxstep_real_help UNTRANSLATED
+
 #ORIGINAL TEXT:               Maximum fraction of the time left until the end of FF mode between rendered frames
 #fast_forward_maxstep_rel_help UNTRANSLATED
 
@@ -375,6 +832,18 @@ camera_forbid_free_help       Interdit l'utilisation de la camera libre pour tou
 camera_forbid_follow_help     Interdit l'utilisation de la camera externe pour tout le monde
 camera_forbid_custom_help     Interdit l'utilisation de la camera personnalisee pour tout le monde
 
+#ORIGINAL TEXT:               Forbids the use of the server custom camera
+#camera_forbid_server_custom_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Forbids use of special glance camera settings
+#camera_forbid_custom_glance_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Overrides custom glance settings with vanues from the server
+#camera_override_custom_glance_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Overrides custom glance settings with vanues from the server only for the server custom camera
+#camera_override_custom_glance_server_custom_help UNTRANSLATED
+
 camera_follow_start_x_help    Determine la position (x) de la camera externe fixe
 camera_follow_start_y_help    Determine la position (y) de la camera externe fixe
 camera_follow_start_z_help    Determine la position (z) de la camera externe fixe
@@ -383,8 +852,11 @@ camera_smart_start_x_help     Determine la position (x) de la "smart camera"
 camera_smart_start_y_help     Determine la position (y) de la "smart camera"
 camera_smart_start_z_help     Determine la position (z) de la "smart camera"
 
-#ORIGINAL TEXT:               use custom camera settings when glancing with the smart camera
+#ORIGINAL TEXT:               Use custom camera settings when glancing with the smart camera
 #camera_smart_glance_custom_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Custom Glance
+#camera_smart_glance_custom_text UNTRANSLATED
 
 camera_free_start_x_help      Determine la position (x) de la camera libre
 camera_free_start_y_help      Determine la position (y) de la camera libre
@@ -392,11 +864,71 @@ camera_free_start_z_help      Determine la position (z) de la camera libre
 
 camera_custom_back_help       Position de la camera personnalisee: de combien peut-elle s'eloigner de la moto?
 camera_custom_rise_help       Position de la camera personnalisee: de combien peut-elle se rapprocher de la moto?
+
+#ORIGINAL TEXT:               This value is multiplied with the current speed and added to CAMERA_CUSTOM_BACK.
+#camera_custom_back_fromspeed_help UNTRANSLATED
+
+#ORIGINAL TEXT:               This value is multiplied with the current speed and added to CAMERA_CUSTOM_RISE.
+#camera_custom_rise_fromspeed_help UNTRANSLATED
 camera_custom_pitch_help      Position de la camera personnalisee: de combien peut-elle monter/descendre?
+
+#ORIGINAL TEXT:               Position of the custom camera: how much the camera zooms in your cycle at the beginning of the round (to show the team's formation
+#camera_custom_zoom_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               Speed the custom camera turns with
+#camera_custom_turn_speed_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Extra factor to CAMERA_CUSTOM_TURN_SPEED after a quick reverse
+#camera_custom_turn_speed_180_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Speed the internal camera turns with
+#camera_in_turn_speed_help    UNTRANSLATED
 
 camera_server_custom_back_help Position de la camera personnalisee: de combien peut-elle s'eloigner de la moto?
 camera_server_custom_rise_help Position de la camera personnalisee: de combien peut-elle se rapprocher de la moto?
+
+#ORIGINAL TEXT:               This value is multiplied with the current speed and added to CAMERA_SERVER_CUSTOM_BACK.
+#camera_server_custom_back_fromspeed_help UNTRANSLATED
+
+#ORIGINAL TEXT:               This value is multiplied with the current speed and added to CAMERA_SERVER_CUSTOM_RISE.
+#camera_server_custom_rise_fromspeed_help UNTRANSLATED
 camera_server_custom_pitch_help Position de la camera personnalisee: de combien peut-elle monter/descendre?
+
+#ORIGINAL TEXT:               Speed the server custom camera turns with. Turn values are taken from the clientside settings if this is negative.
+#camera_server_custom_turn_speed_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Extra factor to CAMERA_SERVER_CUSTOM_TURN_SPEED after a quick reverse
+#camera_server_custom_turn_speed_180_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Position of the glance camera: how much is it moved back from the cycle?
+#camera_glance_back_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               Position of the glance camera: how much is it moved up from the cycle?
+#camera_glance_rise_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               This value is multiplied with the current speed and added to CAMERA_GLANCE_BACK.
+#camera_glance_back_fromspeed_help UNTRANSLATED
+
+#ORIGINAL TEXT:               This value is multiplied with the current speed and added to CAMERA_GLANCE_RISE.
+#camera_glance_rise_fromspeed_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Position of the glance camera: how much does it look up/down?
+#camera_glance_pitch_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               Position of the server glance camera: how much is it moved back from the cycle?
+#camera_server_glance_back_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Position of the server glance camera: how much is it moved up from the cycle?
+#camera_server_glance_rise_help UNTRANSLATED
+
+#ORIGINAL TEXT:               This value is multiplied with the current speed and added to CAMERA_SERVER_GLANCE_BACK.
+#camera_server_glance_back_fromspeed_help UNTRANSLATED
+
+#ORIGINAL TEXT:               This value is multiplied with the current speed and added to CAMERA_SERVER_GLANCE_RISE.
+#camera_server_glance_rise_fromspeed_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Position of the server glance camera: how much does it look up/down?
+#camera_server_glance_pitch_help UNTRANSLATED
 
 #ORIGINAL TEXT:               The speed the external visibility targets recovers from wall hits
 #camera_visibility_recovery_speed_help UNTRANSLATED
@@ -438,12 +970,33 @@ dedicated_idle_help           Apres autant de temps ( en heures ), le serveur de
 
 #ORIGINAL TEXT:               Maximum simulation steps per second the dedicated server will perform
 #dedicated_fps_help           UNTRANSLATED
+
+#ORIGINAL TEXT:               Number of times per frame the server should check whether simulation can be done if no network input is coming
+#dedicated_fps_idle_factor_help UNTRANSLATED
 talk_to_master_help           Annoncer ce serveur sur Internet?
 max_out_rate_help             Taux maximum de sortie sur le reseau
 max_in_rate_help              Taux maximum d'entree sur le reseau
 ping_charity_help             Combien de ping comptez vous assurer a votre adversaire?
+
+#ORIGINAL TEXT:               Server option: maximum ping charity value. Set to 0 to avoid instant kills. Active only if all clients are 0.2.8.3 or better.
+#ping_charity_max_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Server option: minimum ping charity value. Use to enforce fairness. Active only if all clients are 0.2.8.3 or better.
+#ping_charity_min_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Don't touch: the server says this is the maximal ping compensation.
+#ping_charity_server_help     UNTRANSLATED
 big_brother_help              Avons-nous deja envoye l'information "Big brother"?
 server_name_help              Nom de ce serveur
+
+#ORIGINAL TEXT:               Short description of the options on this server
+#server_options_help          UNTRANSLATED
+
+#ORIGINAL TEXT:               IP the server listens on 
+#server_ip_help               UNTRANSLATED
+
+#ORIGINAL TEXT:               If your server is on dynamic IP and you set up a dynamic DNS that always points to it, you can set this variable to the DNS name to help clients remember your server across IP changes.
+#server_dns_help              UNTRANSLATED
 server_port_help              Port qu'utilise ce serveur
 client_port_help              Port auquel nous essayons de nous connecter
 max_clients_help              Nombre maximum de clients reseau a accepter
@@ -456,7 +1009,7 @@ url_help                      URI HTTP associee a un serveur
 
 # settings compatibility 
 
-#ORIGINAL TEXT:               Default legacy behavior for settings that absolutely break the client and make play impossilbe. Example of an affected setting: MAP_FILE
+#ORIGINAL TEXT:               Default legacy behavior for settings that absolutely break the client and make play impossible. Example of an affected setting: MAP_FILE
 #setting_legacy_behavior_breaking_help UNTRANSLATED
 
 #ORIGINAL TEXT:               Default legacy behavior for settings that allow play on old clients in principle, but with severe limitations (cycles bouncing around, player commands not executed on time). Example: CYCLE_DELAY_TIMEBASED
@@ -479,6 +1032,112 @@ url_help                      URI HTTP associee a un serveur
 #********************************************
 #********************************************
 
+#ORIGINAL TEXT:               Store screenshots as PNG files, not BMP files.
+#png_screenshot_help          UNTRANSLATED
+
+#ORIGINAL TEXT:               Draw sparks in white (instead of cycle colors).
+#white_sparks_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               Keeps rendering active when the program window loses input focus.
+#keep_window_active_help      UNTRANSLATED
+
+# hud
+#ORIGINAL TEXT:               Show the brake meter on the HUD? 
+#show_brake_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Show the number of enemies and friends left on the HUD? 
+#show_alive_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Show the fastest player on the HUD? 
+#show_fastest_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               Show the HUD? 
+#show_hud_help                UNTRANSLATED
+
+#ORIGINAL TEXT:               Show your ping on the HUD? 
+#show_ping_help               UNTRANSLATED
+
+#ORIGINAL TEXT:               Show the rubber meter on the HUD? 
+#show_rubber_help             UNTRANSLATED
+
+#ORIGINAL TEXT:               Show your single player scores on the HUD? 
+#show_score_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Show the speed meter on the HUD? 
+#show_speed_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Show the current time in the top- right corner? 
+#show_time_help               UNTRANSLATED
+
+#ORIGINAL TEXT:               Show the time in 24 hour format? 
+#show_time_24_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               Horizontal position of the speed meter 
+#speed_gauge_locx_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Vertical position of the speed meter 
+#speed_gauge_locy_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Size of the speed meter 
+#speed_gauge_size_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Horizontal position of the rubber meter 
+#rubber_gauge_locx_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Vertical position of the rubber meter 
+#rubber_gauge_locy_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Size of the rubber meter 
+#rubber_gauge_size_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Horizontal position of the brake meter 
+#brake_gauge_locx_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Vertical position of the brake meter 
+#brake_gauge_locy_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Size of the brake meter 
+#brake_gauge_size_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Horizontal position of the alive headcount display
+#alive_locx_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Vertical position of the alive headcount display
+#alive_locy_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Size of the alive headcount display
+#alive_size_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Horizontal position of the fastest player display
+#fastest_locx_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               Vertical position of the fastest player display
+#fastest_locy_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               Size of the fastest player display
+#fastest_size_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               Horizontal position of the ping display
+#ping_locx_help               UNTRANSLATED
+
+#ORIGINAL TEXT:               Vertical position of the ping display
+#ping_locy_help               UNTRANSLATED
+
+#ORIGINAL TEXT:               Size of the ping display
+#ping_size_help               UNTRANSLATED
+
+#ORIGINAL TEXT:               Horizontal position of the score display
+#score_locx_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Vertical position of the score display
+#score_locy_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Size of the score display
+#score_size_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Vertical position of the center messages
+#cm_locy_help                 UNTRANSLATED
+
 #floor
 grid_size_help                Distance entre les lignes de la grille
 grid_size_moviepack_help      distance between gridlines when moviepack is active
@@ -486,12 +1145,26 @@ floor_red_help                Couleur du sol ( rouge )
 floor_green_help              Couleur du sol ( vert )
 floor_blue_help               Couleur du sol ( bleu )
 
+#ORIGINAL TEXT:               Extension of the rim wall texture in the horizontal direction
+#rim_wall_stretch_x_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               Extension of the rim wall texture in the vertical direction
+#rim_wall_stretch_y_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               Set to 1 if the rim wall texture should repeat in the vertical direction
+#rim_wall_wrap_y_help         UNTRANSLATED
 
 #moviepack settings
 moviepack_floor_red_help      Couleur du sol ( rouge )
 moviepack_floor_green_help    Couleur du sol ( vert )
 moviepack_floor_blue_help     Couleur du sol ( bleu )
 moviepack_wall_stretch_help   Distance entre les lignes verticales des murs du moviepack
+
+#ORIGINAL TEXT:               Extension of one square of rim wall texture in the horizontal direction for the moviepack
+#moviepack_rim_wall_stretch_x_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Extension of the rim wall texture in the vertical direction for the moviepack
+#moviepack_rim_wall_stretch_y_help UNTRANSLATED
 
 #detail settings
 #ORIGINAL TEXT:               Swap Mode:
@@ -521,7 +1194,6 @@ moviepack_wall_stretch_help   Distance entre les lignes verticales des murs du m
 #ORIGINAL TEXT:               Determines the commands used to sync graphics and input. 0: do nothing, 1: call glFlush(), 2: call glFinish().
 #swap_mode_help               UNTRANSLATED
 
-ztrick_help                   Performance tweak; Ne fonctionne pas sur la plupart des systemes Windows
 texture_mode_0_help           Texture du sol:
 texture_mode_1_help           Texture des murs:
 texture_mode_2_help           Texture des objets:
@@ -531,14 +1203,44 @@ gl_extensions_help            Informations du systeme "OpenGL"
 gl_version_help               Informations du systeme "OpenGL"
 gl_renderer_help              Informations du systeme "OpenGL"
 gl_vendor_help                informations du systeme "OpenGL"
-line_antialias_help           Active l'anti-aliasing des lignes
-poly_antialias_help           Active l'anti-aliasing des polygones
-persp_correct_help            Active la correction des perspectives
 alpha_blend_help              Active l'alpha-blending
+
+#ORIGINAL TEXT:               This is XORd with ALPHA_BLEND to determine the way to draw zones
+#zone_alpha_toggle_help       UNTRANSLATED
 smooth_shading_help           Active le smooth shading
 text_out_help                 Active la sortie console texte
+
+#ORIGINAL TEXT:               Number of characters in each line of console output
+#console_columns_help         UNTRANSLATED
+
+#ORIGINAL TEXT:               Number of lines of console output without user intervention
+#console_rows_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               Number of lines of console output when scrolling back
+#console_rows_max_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Number of spaces each continuation of a wrapped console line is indented by
+#console_indent_help          UNTRANSLATED
 console_decorate_id_help      Decore chaque ligne de la sortie console avec l'ID du client
 console_decorate_ip_help      Decore chaque ligne de la sortie console avec l'IP du client
+
+#ORIGINAL TEXT:               Sends ladder log output to the console
+#console_ladder_log_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               Set all the LADDER_LOG_WRITE_* settings to the same value
+#ladderlog_write_all_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               Usage: LADDER_LOG_WRITE_ALL 1|0
+#ladderlog_write_all_usage    UNTRANSLATED
+
+#ORIGINAL TEXT:               Enabled full ladderlog output.
+#ladderlog_write_all_enabled  UNTRANSLATED
+
+#ORIGINAL TEXT:               Disabled ladderlog output.
+#ladderlog_write_all_disabled UNTRANSLATED
+
+#ORIGINAL TEXT:               If nonnegative, write a line with the current game time to the ladder log every n seconds.
+#ladderlog_game_time_interval UNTRANSLATED
 show_fps_help                 Active l'affichage des FPS
 floor_mirror_help             Le sol reflechit comme un miroir
 floor_detail_help             Details du sol
@@ -549,19 +1251,76 @@ lower_sky_help                Dessine le ciel inferieur
 sky_wobble_help               Anime le ciel
 infinity_plane_help           Utilise une infinite de points (Ne fonctionne pas sur la plupart des systemes Windows)
 lag_o_meter_help              Dessine le lagmetre  dans le jeu en reseau
+
+#ORIGINAL TEXT:               Scale of the Lag-O-Meter. 1.0 is the "correct" value, older clients were hardcoded to .5 due to a bug.
+#lag_o_meter_scale_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               The Lag-O-Meter will only be drawn if the product of cycle speed and lag is bigger than this value.
+#lag_o_meter_threshold_help   UNTRANSLATED
+
+#ORIGINAL TEXT:               Amount the player color should be blended with white to get the color of the Lag-O-Meter. 1 means white, 0 means the color of the player.
+#lag_o_meter_blend_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Should we use the old buggy Lag-O-Meter? This functionality will go away soon.
+#lag_o_meter_use_old_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               Should the Axis Indicator be rendered?
+#axes_indicator_help          UNTRANSLATED
 predict_objects_help          Predit les deplacements des motos dans le jeu en reseau
 textures_hi_help              Utilise des textures haute-definition
 sparks_help                   Dessine des etincelles lorsqu'une moto roule trop pres d'un mur
+
+#ORIGINAL TEXT:               Enable explosions?
+#explosion_help               UNTRANSLATED
 
 #ORIGINAL TEXT:               If set, you leave a menu to the top and reenter it at the bottom.
 #wrap_menu_help               UNTRANSLATED
 floor_mirror_int_help         Intensite de l'effet reflechissant du sol
 color_strings_help            Dessine des cordes colorees
 
+#ORIGINAL TEXT:               Filter color codes from strings coming in over the network.
+#filter_color_strings_help    UNTRANSLATED
+
+#ORIGINAL TEXT:               Filter dark color codes from strings coming in over the network.
+#filter_dark_color_strings_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Filter color codes from player names.
+#filter_color_names_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               Filter dark color codes from player names.
+#filter_dark_color_names_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Filter whitespace and other junk from beginnings and ends of player names.
+#filter_name_ends_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Filter excess whitespace and other junk from the middle of player names.
+#filter_name_middle_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               Filter color codes from server names in the server browser.
+#filter_color_server_names_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Filter dark color codes from server names in the server browser.
+#filter_dark_color_server_names_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Filter color codes from /team messages.
+#filter_color_team_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Filter dark color codes from /team messages.
+#filter_dark_color_team_help  UNTRANSLATED
+
+#ORIGINAL TEXT:               Transparency factor for zone rendering. 1.0 gives full strength.
+#zone_alpha_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Transparency factor for zone rendering, controlled by the server. 1.0 gives full strength.
+#zone_alpha_server_help       UNTRANSLATED
+
 #screen mode
 custom_screen_height_help     Taille d'ecran personnalisee ( longueur )
 custom_screen_width_help      Taille d'ecran personnalisee ( hauteur )
 custom_screen_aspect_help     Custom screen aspect ratio ( pixel width/pixel height)
+
+#ORIGINAL TEXT:               Desktop
+#screen_size_desktop          UNTRANSLATED
 armagetron_screenmode_help    Resolution de l'ecran
 armagetron_last_screenmode_help Derniere resolution de l'ecran
 armagetron_windowsize_help    Taille de la fenetre
@@ -615,14 +1374,26 @@ viewport_belongs_help         Assigner une vue a un joueur
 #********************************************
 #********************************************
 
+#ORIGINAL TEXT:               Characters that count as word delimiters when skipping over words in a text input field.
+#word_delimiters_help         UNTRANSLATED
+
 mouse_grab_help               "Bloque" le pointeur de la souris dans la fenetre
 moviepack_help                Utiliser le moviepack, si possible
 armagetron_version_help       Votre version de \g
 message_of_day_help           Message envoye aux clients
+
+#ORIGINAL TEXT:               If fullscreen display is supported, this will be the title above message_of_day
+#title_of_day_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               Time message_of_day is displayed for in fullscreen mode
+#message_of_day_timeout_help  UNTRANSLATED
 round_console_message_help    Message envoye aux clients apres chaque round
 round_center_message_help     Message en grand envoye aux clients apres chaque round
 
 password_storage_help         Determine ou vos mots de passe sont stockes: 1 = sur le disque dur (risque), 0 = dans la memoire et -1 = ils ne sont pas stockes.
+
+#ORIGINAL TEXT:               Try to protect user.cfg from read access by other users?
+#protect_sensitive_files_help UNTRANSLATED
 admin_pass_help               Mot de passe de base de l'administrateur du jeu
 
 backward_compatibility_help   Nombre maximum d'anciennes versions du protocole a supporter
@@ -633,7 +1404,57 @@ quit_help                     Eteint le serveur dedie et quitte
 exit_help                     Eteint le serveur dedie et quitte
 
 # manning and kicking commands
+#ORIGINAL TEXT:               The console command \1 only works on the server. You probably want to say "/admin \1 \2".\n
+#only_works_on_server         UNTRANSLATED
+
+#ORIGINAL TEXT:               Prints list of currently active players
+#players_help                 UNTRANSLATED
+
+#ORIGINAL TEXT:               Kill a specific player (as warning before a kick)
+#kill_help                    UNTRANSLATED
+
+#ORIGINAL TEXT:               Silence a specific player so he can't use public chat any more (/msg and /team still work)
+#silence_help                 UNTRANSLATED
+
+#ORIGINAL TEXT:               Suspend a player from playing for the following N rounds (default: 5)
+#suspend_help                 UNTRANSLATED
+
+#ORIGINAL TEXT:               Removes a player suspension.
+#unsuspend_help               UNTRANSLATED
+
+#ORIGINAL TEXT:               Reverse of SILENCE
+#voice_help                   UNTRANSLATED
+
+#ORIGINAL TEXT:               Allow a specific player to change teams even if ALLOW_TEAM_CHANGE is disabled
+#allow_team_change_player_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Reverse of ALLOW_TEAM_CHANGE_PLAYER
+#disallow_team_change_player_help UNTRANSLATED
 kick_help                     Bannis le joueur indique du serveur
+
+#ORIGINAL TEXT:               The reason given to a player kicked by KICK if none is specified.
+#default_kick_reason_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               Kicks the specified player from the server and, if the client supports it, redirects him to a different server.
+#kick_to_help                 UNTRANSLATED
+
+#ORIGINAL TEXT:               Kicks the specified player from the server and, if the client supports it, redirects him to a different server. Does not imply an autoban penalty.
+#move_to_help                 UNTRANSLATED
+
+#ORIGINAL TEXT:               The reason given to a player kicked by KICK_TO or MOVE_TO if none is specified.
+#default_kick_to_reason_help  UNTRANSLATED
+
+#ORIGINAL TEXT:               Default server IP/name a player is redirected to by KICK_TO and MOVE_TO.
+#default_kick_to_server       UNTRANSLATED
+
+#ORIGINAL TEXT:               Default server port a player is redirected to by KICK_TO and MOVE_TO.
+#default_kick_to_port         UNTRANSLATED
+
+#ORIGINAL TEXT:               Server IP/name a player is redirected to by vote kicks.
+#vote_kick_to_server          UNTRANSLATED
+
+#ORIGINAL TEXT:               Default server port a player is redirected to by vote kicks.
+#vote_kick_to_port            UNTRANSLATED
 
 #ORIGINAL TEXT:               Bans the specified player from the server (kicks him first) for a variable time in minutes.
 #ban_help                     UNTRANSLATED
@@ -647,12 +1468,43 @@ kick_help                     Bannis le joueur indique du serveur
 #ORIGINAL TEXT:               Revokes the ban of the specified IP address.
 #unban_ip_help                UNTRANSLATED
 
+#ORIGINAL TEXT:               The prefix that is shown on hidden players' Global ID and access level when we can see it.
+#player_list_hidden_player_prefix_help UNTRANSLATED
+
 # communication
 console_message_help          Affiche un message dans la console a tous les clients connectes
 center_message_help           Affiche un message en grand sur l'ecran pour tous les clients connectes
+
+#ORIGINAL TEXT:               Prints a big message all over the screen, interrupting gameplay for a configurable timeout. Use with care.
+#fullscreen_message_help      UNTRANSLATED
 say_help                      Serveurs dedies seulement: permet a l'administrateur de dire quelque chose
 
+#ORIGINAL TEXT:               Renames the given player.
+#rename_help                  UNTRANSLATED
+
+#ORIGINAL TEXT:               Gives the given player the ability to rename.
+#allow_rename_player_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               Prevents the given player from renameing.
+#disallow_rename_player_help  UNTRANSLATED
+
 #********************************************
+#********************************************
+#
+#       Bugs
+#
+#********************************************
+#********************************************
+
+#ORIGINAL TEXT:               Allows the rim wall to be ripped open by a VERY close grind.
+#bug_rip_help                 UNTRANSLATED
+
+#ORIGINAL TEXT:               Allows players to pass through walls on odd occasions.
+#bug_tunnel_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Allows the player's colors to overflow and wrap around for the cycle, allowing different colors for cycle and trail.
+#bug_color_overflow_help      UNTRANSLATED
+
 #********************************************
 #********************************************
 #********************************************
@@ -692,11 +1544,41 @@ input_screenshot_help         Fais un screenshot et l'enregistre sous screenshot
 input_chat_text               Chat
 input_chat_help               Vous permet de discuter avec d'autres joueurs sur le reseau.
 
+#ORIGINAL TEXT:               Toggle Spectator
+#input_toggle_spectator_text  UNTRANSLATED
+
+#ORIGINAL TEXT:               Toggles spectator mode, conveniently taking you out of the game so you can take a call (of nature, possibly) and back into the game when you're done.
+#input_toggle_spectator_help  UNTRANSLATED
+
 input_score_text              Score
 input_score_help              Affiche la grille de scores.
 
 input_toggle_fullscreen_text  Bascule en mode plein-ecran
 input_toggle_fullscreen_help  Bascule entre les modes en fenetre et plein-ecran
+
+#ORIGINAL TEXT:               Toggle mousegrab
+#input_toggle_mousegrab_text  UNTRANSLATED
+
+#ORIGINAL TEXT:               Frees the mouse pointer or contstrains it to the program window
+#input_toggle_mousegrab_help  UNTRANSLATED
+
+#ORIGINAL TEXT:               Reload textures
+#input_reload_textures_text   UNTRANSLATED
+
+#ORIGINAL TEXT:               Reloads all textures. Useful for content creators.
+#input_reload_textures_help   UNTRANSLATED
+
+#ORIGINAL TEXT:               Ingame menu
+#input_ingame_menu_text       UNTRANSLATED
+
+#ORIGINAL TEXT:               Triggers the ingame menu. ESC is hardcoded to this function so you don't get trapped in the game :)
+#input_ingame_menu_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Pause game
+#input_pause_game_text        UNTRANSLATED
+
+#ORIGINAL TEXT:               Stops the game timer or resumes it.
+#input_pause_game_help        UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -722,6 +1604,12 @@ input_mess_down_help          Derouler les messages d'une page vers le bas.
 
 input_cycle_brake_text        Frein
 input_cycle_brake_help        Vous fait decelerer dans les situations critiques
+
+#ORIGINAL TEXT:               Toggle Brake
+#input_cycle_brake_toggle_text UNTRANSLATED
+
+#ORIGINAL TEXT:               turns your brake on and off permanently without you needing to hold down a key
+#input_cycle_brake_toggle_help UNTRANSLATED
 
 input_cycle_turn_right_text   Tourner a droite
 input_cycle_turn_right_help   Fais un quart de tour vers la droite
@@ -835,6 +1723,12 @@ player_mainmenu_help          Selectionne le nom du joueur et le mode de control
 system_settings_menu_text     Configuration: systeme
 system_settings_menu_help     Configure le son, les graphismes et tout ce qui touche a l'apparence de \g
 
+#ORIGINAL TEXT:               About
+#main_menu_about_text         UNTRANSLATED
+
+#ORIGINAL TEXT:               Displays information about the version of \g, the location of its config files, sites to visit and the project admins.
+#main_menu_about_help         UNTRANSLATED
+
 main_menu_exit_text           Quitter le jeu
 main_menu_exit_help           Au revoir!
 
@@ -858,6 +1752,39 @@ game_menu_disconnect_text     Deconnexion
 game_menu_disconnect_help     Deconnecte du serveur et retourne au menu principal.
 
 
+#********************************************
+#********************************************
+#
+#             Version Info screen
+#
+#********************************************
+#********************************************
+#ORIGINAL TEXT:               About this installation of \g
+#version_info_title           UNTRANSLATED
+
+#ORIGINAL TEXT:               Version of \g: \1
+#version_info_version         UNTRANSLATED
+
+#ORIGINAL TEXT:               \n0xff8888Official website:0xRESETT http://armagetronad.net/\n0xff8888Official forums:0xRESETT http://forums.armagetronad.net/\n0xff8888Wiki (strategies, tournaments, ...):0xRESETT http://wiki.armagetronad.net/\n0xff8888Project admins:0xRESETT z-man, Tank Program (guru3), Lucifer
+#version_info_misc_stuff      UNTRANSLATED
+
+#ORIGINAL TEXT:               Location of user.cfg:
+#path_info_user_cfg           UNTRANSLATED
+
+#ORIGINAL TEXT:               Configuration directories:
+#path_info_config             UNTRANSLATED
+
+#ORIGINAL TEXT:               Resource directories (maps):
+#path_info_resource           UNTRANSLATED
+
+#ORIGINAL TEXT:               Data directories (textures, moviepack, ...):
+#path_info_data               UNTRANSLATED
+
+#ORIGINAL TEXT:               Screenshot directories:
+#path_info_screenshot         UNTRANSLATED
+
+#ORIGINAL TEXT:               Var directories:
+#path_info_var                UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -1081,6 +2008,12 @@ network_opts_pingchar_help    Le ping maximum ( en ms ), que vous pouvez obtenir
 network_opts_lagometer_text   Lagmetre:
 network_opts_lagometer_help   Dans un jeu en reseau, l'endroit ou les autres joueurs peuvent deja etre maintenant ( mais vous ne le voyez pas encore a cause du retardement du reseau ) est indique sous forme d'une figure geometrique. Utile lors d'un jeu sur Internet
 
+#ORIGINAL TEXT:               Axes Indicator:
+#network_opts_axesindicator_text UNTRANSLATED
+
+#ORIGINAL TEXT:               The axes indicator is meant to show the directions the cycle can turn to as lines going out from the cycle. Good on servers with changing configs so you know what to expect before you turn.
+#network_opts_axesindicator_help UNTRANSLATED
+
 network_opts_predict_text     Prevision:
 network_opts_predict_help     Dans un jeu en reseau, extrapole le mouvement des motos. La laisser desactivee donnera des meilleurs graphismes, l'activer donnera une meilleure image de la situation; le lagmetre est un bon substitut pour les previsions. Toujours desactive en mode serveur
 
@@ -1115,9 +2048,6 @@ network_custjoin_port_help    Le port que le serveur reseau utilise; doit corres
 network_custjoin_name_text    Nom du serveur:
 network_custjoin_name_help    Le nom ou l'adresse IP du serveur auquel vous voulez vous connecter
 
-network_custjoin_connect_text Connection!
-network_custjoin_connect_help Entre dans l'arene!
-
 #network host menu
 network_host_text             Heberger un jeu en reseau
 network_host_help             Demarrer un serveur
@@ -1140,7 +2070,7 @@ network_host_host_help        Entre dans l'arene! Les autres joueurs pourront ve
 #ORIGINAL TEXT:               Edit Bookmarks
 #bookmarks_menu_edit          UNTRANSLATED
 
-#ORIGINAL TEXT:               Edit and add server bookmarks.
+#ORIGINAL TEXT:               Edit and add favorite servers.
 #bookmarks_menu_edit_help     UNTRANSLATED
 
 #ORIGINAL TEXT:               Edit \1
@@ -1160,6 +2090,67 @@ network_host_host_help        Entre dans l'arene! Les autres joueurs pourront ve
 
 #ORIGINAL TEXT:               Connect to \1
 #bookmarks_menu_connect       UNTRANSLATED
+
+#ORIGINAL TEXT:               Connect To Server
+#bookmarks_menu_edit_connect_text UNTRANSLATED
+
+#ORIGINAL TEXT:               Enter the game grid!
+#bookmarks_menu_edit_connect_help UNTRANSLATED
+
+
+#ORIGINAL TEXT:               Subcultures
+#masters_menu                 UNTRANSLATED
+
+#ORIGINAL TEXT:               Add, edit, and connect to alternative master servers for special purposes.
+#masters_menu_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               Edit Subcultures
+#masters_menu_edit            UNTRANSLATED
+
+#ORIGINAL TEXT:               Edit and add subcultures.
+#masters_menu_edit_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Edit \1
+#masters_menu_edit_slot       UNTRANSLATED
+
+#ORIGINAL TEXT:               Address
+#masters_menu_address         UNTRANSLATED
+
+#ORIGINAL TEXT:               The address of the master server managing the subculture.
+#masters_menu_address_help    UNTRANSLATED
+
+#ORIGINAL TEXT:               Name
+#masters_menu_name            UNTRANSLATED
+
+#ORIGINAL TEXT:               The name of the subculture. This is used only for display, not functional purposes.
+#masters_menu_name_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Browse \1
+#masters_menu_connect         UNTRANSLATED
+
+#ORIGINAL TEXT:               Browse Subculture
+#masters_menu_edit_connect_text UNTRANSLATED
+
+#ORIGINAL TEXT:               Opens a master server like server browser specialized for servers of this subculture.
+#masters_menu_edit_connect_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Mates
+#friends_menu                 UNTRANSLATED
+
+#ORIGINAL TEXT:               Edit your mates.
+#friends_menu_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               Mates Enabled
+#friends_enable               UNTRANSLATED
+
+#ORIGINAL TEXT:               Turn on/off friends mates filtering.
+#friends_enable_help          UNTRANSLATED
+
+#ORIGINAL TEXT:               Mate
+#friend_word                  UNTRANSLATED
+
+#ORIGINAL TEXT:               If a server has this name on its players list, it will show when filtering is on.
+#friend_help                  UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -1225,8 +2216,37 @@ silence_player_text           Faire taire \1
 player_police_kick_text       Bannir qqn
 player_police_kick_help       Lance un vote pour "mettre qqn a la porte"
 
+#ORIGINAL TEXT:               If accepted, \1 will be removed from the server.
+#kick_player_details_text     UNTRANSLATED
 kick_player_text              Bannir \1
 kick_player_help              Appuyer sur enter ou espace lancera un vote pour la bannissement de ce joueur.
+
+#ORIGINAL TEXT:               If accepted, \1 will be suspended for some rounds.
+#suspend_player_details_text  UNTRANSLATED
+
+#ORIGINAL TEXT:               Suspend \1
+#suspend_player_text          UNTRANSLATED
+
+#ORIGINAL TEXT:               If accepted, the file \1 will be included as a configuration file.
+#vote_include_details_text    UNTRANSLATED
+
+#ORIGINAL TEXT:               Include \1
+#vote_include_text            UNTRANSLATED
+
+#ORIGINAL TEXT:               Include file \1 not found or not readable.\n
+#vote_include_error           UNTRANSLATED
+
+#ORIGINAL TEXT:               Including file \1. Only users of access level \2 or higher will receive the output.\n
+#vote_include_message         UNTRANSLATED
+
+#ORIGINAL TEXT:               If accepted, the console command "\1" will be executed on the server.
+#vote_command_details_text    UNTRANSLATED
+
+#ORIGINAL TEXT:               Command \1
+#vote_command_text            UNTRANSLATED
+
+#ORIGINAL TEXT:               Executing command "\1".\n
+#vote_command_message         UNTRANSLATED
 
 #*************************************
 #*************************************
@@ -1248,7 +2268,11 @@ vote_dont_mind_help           Ceci equivaut a un vote blanc.
 vote_reject                   Desapprouve
 vote_reject_help              En selectionnant ceci, vous etes "contre".
 
-vote_help                     This menu entry determines your vote.
+#ORIGINAL TEXT:               This menu entry determines your vote. Details: \1
+#vote_details_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               This vote was submitted by \1.
+#vote_submitter_text          UNTRANSLATED
 
 #*************************************
 #*************************************
@@ -1279,11 +2303,25 @@ viewport_belongs_text         La vue \1 est assignee au joueur \2 (\3)
 viewport_assign_text          Assigner des vues aux joueurs
 viewport_assign_help          Qui se trouve dans quelle partie de l'ecran?       
 
+#ORIGINAL TEXT:               Authentication
+#player_authenticate_text     UNTRANSLATED
+
+#ORIGINAL TEXT:               If you have a global ID, activating this menuitem will make you log in with it. You'll be prompted for a password, naturally.
+#player_authenticate_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               Authentication requests have been sent to the server. You should be prompted for a password shortly.\n
+#player_authenticate_action   UNTRANSLATED
 
 #player setup
 
 player_name_text              Nom:
 player_name_help              Le... dans la phrase "Gagnant: ... ". utilisez les touches gauche/droite, backspace (<-), delete (suppr.), espace et toutes les touches alphanumeriques.
+
+#ORIGINAL TEXT:               Global ID:
+#player_global_id_text        UNTRANSLATED
+
+#ORIGINAL TEXT:               If you have one, enter your global player ID here. If you have an account on the forums at forums.armagetronad.net, your ID will be your account name, followed by "@forums". Accounts on other community sites may give you a different ID.
+#player_global_id_help        UNTRANSLATED
 
 player_input_text             Configuration des touches
 player_input_help             Configure le controle du clavier et/ou de la souris pour ce joueur
@@ -1313,6 +2351,18 @@ player_green_help             Vous permet de choisir le composant vert de votre 
 
 player_red_text               Rouge:
 player_red_help               Vous permet de choisir le composant rouge de votre couleur
+
+#ORIGINAL TEXT:               Auto Login:
+#player_autologin_text        UNTRANSLATED
+
+#ORIGINAL TEXT:               When enabled, you will automatically initiate the (usually completely optional) login procedure as soon as you enter a server.
+#player_autologin_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Hide Global ID:
+#player_stealth_text          UNTRANSLATED
+
+#ORIGINAL TEXT:               Usually your global ID is shown to everyone when you log in or when someone uses the /players chat command. Enabling this tells the server that you prefer to remain anonymous. The server may still show your ID to moderators and administrators on the server or even decide to ignore your request.
+#player_stealth_help          UNTRANSLATED
 
 player_spectator_text         Mode spectateur:
 player_spectator_help         En mode spectateur, vous ne controlez pas de moto; vous voyez juste le jeu comme si vous etiez mort. Les autres ne savent pas que vous etes la, vous n'apparaissez pas dans le tableau du score
@@ -1390,6 +2440,12 @@ team_menu_join_help           Le joueur actuel rejoindra l'equipe specifiee au p
 
 team_menu_create              Creer une equipe
 team_menu_create_help         Cree une nouvelle equipe contenant le joueur actuel
+
+#ORIGINAL TEXT:               spectate
+#team_menu_spectate           UNTRANSLATED
+
+#ORIGINAL TEXT:               Quits the game and enters spectator mode.
+#team_menu_spectate_help      UNTRANSLATED
 
 team_owned_by                 Equipe de \1
 team_ai                       Equipe des IA 
@@ -1607,20 +2663,11 @@ detail_floor_tex_help         Un plan infini est affiche, avec la structure de l
 detail_floor_2tex_text        Double plan acev texture
 detail_floor_2tex_help        Tout comme dans "Plan avec texture", le sol est un plan infini avec une texture. Mais ici, les deux types de lignes sont affichees dans deux etapes separees du rendu, ayant pour resultat une image beaucoup plus jolie
 
-detail_polyantialias_text     Antial. des polygones:
-detail_polyantialias_help     Les contours des objets doivent ils etre lisses pour eviter les escaliers de pixel laids? Indisponible sur la plupart des systemes
-
-detail_lineantialias_text     Antial. des lignes:
-detail_lineantialias_help     Les lignes doivent-elles etre lissees pour eviter les escaliers laids de pixels?
-
 detail_alpha_text             Couche alpha:
 detail_alpha_help             La couche alpha est utilisee pour afficher des objets semitransparents, comme les explosions ou les murs derriere les motos. Ca ne necessite pas beaucoup de ressources sur la plupart des cartes 3D, mais cela ralentit un peu le rendu logiciel
 
 detail_smooth_text            "Nuances lisses":
 detail_smooth_help            Les bords semblent arrondis, en ajoutant un degrade de couleurs aux surfaces. M^me le rendu logiciel n'est pas ralenti avec cela!
-
-detail_persp_text             corr. de la persp.:
-detail_persp_help             La plupart des rendus ignorent ceci. Si il est sur "Off", les textures des murs et des sols seront horriblement deformees. Je ne vois vraiment pas pourquoi je vous laisse choisir ceci :D
 
 detail_text_truecolor_text    Textures en "Couleur vraie":
 detail_text_truecolor_help    Utilise des textures en mode 32 bits, au lieu du 16 bits traditionnel.
@@ -1696,8 +2743,23 @@ misc_fps_help                 Affiche ou non les FPS ( "frames per second", nbe 
 tweaks_displaylists_text      Listes d'affichage:
 tweaks_displaylists_help      Les liste d'affichage sont une propriete d'OpenGL pour afficher la meme chose plusieurs fois; elles sont normalement utilisees pour les motos. Cependant, quelques utilisations ne fonctionnent pas: Si vous ne voyez pas les motos, desactivez ceci.
 
-tweaks_ztrick_text            ZTrick:
-tweaks_ztrick_help            Une acceleration qui fonctionne sur la plupart des systemes: au lieu d'effacer et de recreer tout apres chaque frame, nous dessinons juste l'arriere-plan (sols et murs d'enceinte). Activez-le si vous n'avez aucun problemes avec.
+#ORIGINAL TEXT:               Off
+#tweaks_displaylists_off_text UNTRANSLATED
+
+#ORIGINAL TEXT:               Don't use display lists at all.
+#tweaks_displaylists_off_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Create and Call
+#tweaks_displaylists_cac_text UNTRANSLATED
+
+#ORIGINAL TEXT:               Use displaylists; Create them and call them directly. This is the recommended way.
+#tweaks_displaylists_cac_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Create and Execute
+#tweaks_displaylists_cae_text UNTRANSLATED
+
+#ORIGINAL TEXT:               Use displaylists; Create them let them be executed while they are filled. The expers say this is slower than Create and Call.
+#tweaks_displaylists_cae_help UNTRANSLATED
 
 tweaks_infinity_text          Infini:
 tweaks_infinity_help          Quelques plans ( ciel, sol, etc. ) ont une prolongation infinie. Si ceci est active, ils sont vraiment dessines en tant que plans infinis. Quelques rendus d'OpenGL ne semble pas trop apprecier ceci ( toutes les versions de Windows que j'ai vu ). Le desactiver si les textures du sol et/ou du ciel sont deformees
@@ -1741,6 +2803,9 @@ menuitem_toggle_off           Off
 #********************************************
 #********************************************
 #********************************************
+
+#ORIGINAL TEXT:               Timer hickup of \1 seconds detected and compensated. If this happens frequently, you should check whether your system timer is operating correctly.\n
+#timer_hickup                 UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -1845,6 +2910,9 @@ gamestate_newround_console    C'est parti (round \1 sur \2 )!\n
 gamestate_newround_goldengoal C'est parti! (Round special; le gagnant gagne le match)!\n
 gamestate_newround_log        Nouveau round\n
 
+#ORIGINAL TEXT:               Waiting up to \2 seconds for \1 to finish chatting.\n
+#gamestate_chat_wait          UNTRANSLATED
+
 gamestate_wait_players        En attente de joueurs reels...\n
 gamestate_wait_players_con    En attente de joueurs reels ( seuls des spectateurs sont en ligne )...\n
 
@@ -1868,11 +2936,54 @@ gamestate_winner_humans       Humains.
 
 instant_win_activated         "Instant Win Zone" activee! Entrez-y pour gagner le round.\n
 
-#ORIGINAL TEXT:               Death zone zone activated! Avoid it!\n
+#ORIGINAL TEXT:               Round end zone activated! Enter it to end the round.\n
+#instant_round_end_activated  UNTRANSLATED
+
+#ORIGINAL TEXT:               Death zone activated! Avoid it!\n
 #instant_death_activated      UNTRANSLATED
 
+#ORIGINAL TEXT:               \1 0xRESETTwas smitten by an administrator.\n
+#player_admin_kill            UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 0xRESETThas been slapped by an administrator.\n
+#player_admin_slap_free       UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 has been hugged by an administrator and got \2 points.\n
+#player_admin_slap_win        UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 has been slapped by an administrator and lost \2 points.\n
+#player_admin_slap_lose       UNTRANSLATED
 player_win_instant            \1 a gagne \2 points pour avoir atteint la "Instant Win Zone".\n
 
+#ORIGINAL TEXT:               \1 was awarded \2 points for conquering the enemy base.\n
+#player_win_conquest          UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 was awarded \2 points for holding the base.\n
+#player_win_held_fortress     UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 lost \2 points for being too defensive.\n
+#player_lose_held_fortress    UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 was awarded \2 points for conquering \3's base.\n
+#player_win_conquest_specific UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 was eradicated by its collapsing zone.\n
+#player_kill_collapse         UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 got \2 points for a sacrifice for the good of the team.\n
+#player_win_hole              UNTRANSLATED
+
+#ORIGINAL TEXT:               0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
+#player_lose_hole             UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 0x77ff77is allowed to play again.\n
+#player_no_longer_suspended   UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 0xff7777is banned to spectator mode for \2 round(s).\n
+#player_suspended             UNTRANSLATED
+
+#ORIGINAL TEXT:               \1's zone collapses harmlessly for lack of enemy contacts.\n
+#zone_collapse_harmless       UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -1882,29 +2993,267 @@ player_win_instant            \1 a gagne \2 points pour avoir atteint la "Instan
 #********************************************
 #********************************************
 
+#ORIGINAL TEXT:               Sorry, does not work with automatic team assignment.\n
+#player_teamleave_disallowed  UNTRANSLATED
+
+#ORIGINAL TEXT:               Sorry, the administrator disabled team changes.\n
+#player_teamchanges_disallowed UNTRANSLATED
+
+#ORIGINAL TEXT:               Sorry, you are still suspended from playing for the next \1 round(s).\n
+#player_teamchanges_suspended UNTRANSLATED
+
+#ORIGINAL TEXT:               Sorry, your access level is not high enough to play. You're \1, required would be \2.\n
+#player_teamchanges_accesslevel UNTRANSLATED
+
+#ORIGINAL TEXT:               Sorry, your access level is not high enough to issue a vote of this type. You're \1, required would be \2.\n
+#player_vote_accesslevel      UNTRANSLATED
 player_pingcharity_changed    Ping change de \1 a \2.\n
+
+#ORIGINAL TEXT:               SPAM PROTECTION: you already said: \1\n
+#spam_protection_repeat       UNTRANSLATED
 spam_protection               PROTECTION ANTISPAM: vous devez vous taire pendant \1 secondes.\n
+
+#ORIGINAL TEXT:               SPAM PROTECTION: public chat is disabled.\n
+#spam_protection_silenceall   UNTRANSLATED
+
+#ORIGINAL TEXT:               SPAM PROTECTION: you have been silenced by the server administrator.\n
+#spam_protection_silenced     UNTRANSLATED
+
+#ORIGINAL TEXT:               SPAM PROTECTION: you have to be given voice in order to chat publically.\n
+#spam_protection_silenced_default UNTRANSLATED
+
+#ORIGINAL TEXT:               \10xff7777 has been silenced.\n
+#player_silenced              UNTRANSLATED
+
+#ORIGINAL TEXT:               \10x77ff77 has been given his voice back.\n
+#player_voiced                UNTRANSLATED
+
+#ORIGINAL TEXT:               \10x77ff77 has been allowed to change his team.\n
+#player_allowed_teamchange    UNTRANSLATED
+
+#ORIGINAL TEXT:               \10xff7777 cannot change teams anymore.\n
+#player_disallowed_teamchange UNTRANSLATED
 vote_spam_protection          PROTECTION ANTISPAM VOTES: vous ne pouvez plus voter durant \1 secondes.\n
 chat_title_text               dit:
 player_entered_game           \1 0x7fff7fest entre(e) dans le jeu.\n
+
+#ORIGINAL TEXT:               \1 0x7fff7fentered as spectator.\n
+#player_entered_spectator     UNTRANSLATED
+
+#ORIGINAL TEXT:               0xff7f7fSpectator \1 0xff7f7fleft.\n
+#player_left_spectator        UNTRANSLATED
 player_left_game              \1 0xff7f7fa perdu \2 points.\n
 player_leaving_game           \1 0xff7f7fquitte le jeu.\n
 player_renamed                \2 s'appelle maintenant \1.\n
+
+#ORIGINAL TEXT:               \2 has been renamed to \1.\n
+#player_got_renamed           UNTRANSLATED
+
+#ORIGINAL TEXT:               \2 will be renamed to \1.\n
+#player_will_be_renamed       UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 0xffffffis not allowed to rename to \2 0xffffffright now to avoid confusion with kick votes.\n
+#player_rename_rejected_votekick UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 0xffffffis not allowed to rename to \20xffffff, as its name was locked by the administrator.\n
+#player_rename_rejected_admin UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 0x7fff7fis allowed to rename again.\n
+#player_allowed_rename        UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 0xff7f7fis not allowed to rename anymore.\n
+#player_disallowed_rename     UNTRANSLATED
 player_welcome                \n\nBienvenue \1! Ce serveur utilise la version \2.\n
 player_win_default            \1 gagne \2 points pour une raison tres etrange.\n
 player_lose_default           \1 perd \2 points pour une raison tres etrange.\n
 player_lose_suicide           \1 perd \2 points parcequ'il s'est suicide.\n
+
+#ORIGINAL TEXT:               \1 committed suicide.\n
+#player_free_suicide          UNTRANSLATED
 player_win_frag               \1 a vaincu \3 et gagne \2 points.\n
+
+#ORIGINAL TEXT:               \1 got \2 points for surviving.\n
+#player_win_survive           UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 core dumped \2.\n
+#player_free_frag             UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 core dumped teammate \2! Boo! No points for that!\n
+#player_teamkill              UNTRANSLATED
 player_win_frag_ai            \1 gagne \2 points pour avoir vaincu un IA.\n
 player_lose_frag              \1 perd \2 points puisqu'il a cause une erreur generale de protection.\n
 player_lose_rim               \1 perd \2 points pour avoir essaye de s'enfuir lachement de l'arene.\n
 player_win_survivor           \1 a obtenu \2 points pour etre la derniere equipe active.\n
 player_joins_team             \1 se battra avec \2 lors du prochain round.\n
+
+#ORIGINAL TEXT:               \1 still wants to play for \2, but isn't currently allowed to.\n
+#player_joins_team_wish       UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 wants to play for a team that ceased to exist, ignoring request.\n
+#player_joins_team_noex       UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 wants to leave \2 on the next respawn.\n
+#player_leave_team_wish       UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 does not want to play next round.\n
+#player_leave_game_wish       UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 0x7fff7fplays for \2.\n
+#player_joins_team_start      UNTRANSLATED
+#player_joins_team_now   \1 0x7fff7fnow plays for \2.\n
+#ORIGINAL TEXT:               \1 0x7f7fffswitches from \3 to \2.\n
+#player_changes_team          UNTRANSLATED
 player_leaves_team            \1 0xff7f7fquitte \2.\n
 player_creates_team           \1 a cree une nouvelle equipe.\n
 player_nocreate_team          \1 ne peut pas creer actuellement une nouvelle equipe.\n
 player_nojoin_team            \1 ne peut pas rejoindre \2 actuellement.\n
+
+#ORIGINAL TEXT:               You are not on a team.\n
+#player_not_on_team           UNTRANSLATED
+
+#ORIGINAL TEXT:               Teammates
+#player_team_message          UNTRANSLATED
+
+#ORIGINAL TEXT:               Spectators
+#player_spectator_message     UNTRANSLATED
+
+#ORIGINAL TEXT:               No teams with more than one player.\n
+#no_real_teams                UNTRANSLATED
 player_topologypolice         Order from Topology Police: \1
+
+#ORIGINAL TEXT:               \1 gets shuffled from rank \2 to \3.\n
+#team_shuffle                 UNTRANSLATED
+
+#ORIGINAL TEXT:               You are not allowed to shuffle up.\n
+#player_noshuffleup           UNTRANSLATED
+
+#ORIGINAL TEXT:               Your shuffling wish has no effect.\n
+#player_noshuffle             UNTRANSLATED
+
+#ORIGINAL TEXT:               /shuffle expects a number as argument; an explicit sign (+/-) will change your position by the indicated number of steps, no sign will shuffle you to the given position.\n
+#player_shuffle_error         UNTRANSLATED
+
+#ORIGINAL TEXT:               Add a new help topic to be used with /help. Usage: ADD_HELP_TOPIC <topic> <short description> <text>
+#add_help_topic_help          UNTRANSLATED
+
+#ORIGINAL TEXT:               Usage: ADD_HELP_TOPIC <topic> <short description> <text>\n
+#add_help_topic_usage         UNTRANSLATED
+
+#ORIGINAL TEXT:               Added help topic "\1".\n
+#add_help_topic_success       UNTRANSLATED
+
+#ORIGINAL TEXT:               Remove a help topic.
+#remove_help_topic_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Removed help topic "\1".\n
+#remove_help_topic_success    UNTRANSLATED
+
+#ORIGINAL TEXT:               Help topic "\1" doesn't exist.\n
+#remove_help_topic_notfound   UNTRANSLATED
+
+#ORIGINAL TEXT:               \2 wants \3 to know about /help \1.\n
+#rtfm_announcement            UNTRANSLATED
+
+#ORIGINAL TEXT:               Message that is displayed before the list of help topics if someone uses /help without arguments
+#help_introductory_blurb_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Say /help TOPIC to get help on the following topics.\n
+#help_topics_list_start       UNTRANSLATED
+
+#ORIGINAL TEXT:               Help topic \1 not found. Try /help with no arguments to see a list of available topics.\n
+#help_topic_not_found         UNTRANSLATED
+
+#ORIGINAL TEXT:               List of all chat commands
+#help_commands_shortdesc      UNTRANSLATED
+
+#ORIGINAL TEXT:               This help topic is empty. Use one of the following sub-topics instead:
+#help_commands_text           UNTRANSLATED
+
+#ORIGINAL TEXT:               Basic chat commands
+#help_commands_chat_shortdesc UNTRANSLATED
+
+#ORIGINAL TEXT:               0x88ff88/me <message>0xffff88: Transmit an action, as in "/me is a noob."\n0x88ff88/msg <part of a nickname> <message>0xffff88: Send a private message that only a specific player can see\n0x88ff88/team <message>0xffff88: Send a message to your teammates, or to all spectators if you're not on a team
+#help_commands_chat_text      UNTRANSLATED
+
+#ORIGINAL TEXT:               Basic team management commands
+#help_commands_team_shortdesc UNTRANSLATED
+
+#ORIGINAL TEXT:               0x88ff88/teamshuffle0xffff88: Shuffle yourself to be at the outside of your team's wingmen formation\n0x88ff88/teamshuffle <position>0xffff88: Shuffle yourself to be at a specific position\n0x88ff88/teamshuffle [+|-]<offset>0xffff88: Shuffle yourself up/down by a certain number of ranks\n0x88ff88/teamleave0xffff88: Leave your current team. Only works on some servers\n0x88ff88/teams0xffff88: Get a list of all teams with a somewhat graphic representation of their formation
+#help_commands_team_text      UNTRANSLATED
+
+#ORIGINAL TEXT:               Player police commands
+#help_commands_pp_shortdesc   UNTRANSLATED
+
+#ORIGINAL TEXT:               0x88ff88/players [<search>]0xffff88: Get a list of all players, along with some other information. You can also match specific users with the search argument.\n0x88ff88/vote kick|suspend <player>0xffff88: Start a poll to kick or suspend a player
+#help_commands_pp_text        UNTRANSLATED
+
+#ORIGINAL TEXT:               Authentication related commands
+#help_commands_auth_shortdesc UNTRANSLATED
+
+#ORIGINAL TEXT:               0x88ff88/login [<user>]@<authority>0xffff88: Authenticate yourself using a given authority. Try @forums if you have an account at http://forums.armagetronad.net/\n0x88ff88/logout0xffff88: Log out so you can log back in as another player\n0x88ff88/vote include <file>0xffff88: Start a poll to include a given file\n0x88ff88/vote command <command>0xffff88: Start a poll to execute an admin command\n0x88ff88/admin <command>0xffff88: Execute a console command on the server if you have sufficient access rights\n0x88ff88/op <player> [+|-]<optional access level>0xffff88: Gives another player a higher or a lower access level; the level defaults to the level one lower than you access level, which is also the maximal possible level\n0x88ff88/deop <player>0xffff88: Reverses /op; it takes away a player's access level, effectively making him unauthenticated again. Only works on players of lower access level than yours, of course.\n
+#help_commands_auth_text      UNTRANSLATED
+
+#ORIGINAL TEXT:               List of all access levels
+#help_commands_auth_levels_shortdesc UNTRANSLATED
+
+#ORIGINAL TEXT:               0x88ff880 (Owner)0xffff88: The owner of the server. Commands entered on the server console are executed with these rights.\n0x88ff881 (Admin)0xffff88: A server administrator. By default, almost as powerful as the owner himself.\n0x88ff882 (Moderator)0xffff88: A server moderator. Is still allowed to use /admin, but is restricted to player management commands.\n0x88ff887 (Team Leader)0xffff88: Leader of a team. By default, no admin rights at all.\n0x88ff888 (Team Member)0xffff88: Member of a team. Local team accounts get this level.\n0x88ff8812 (Local User)0xffff88: Players with local accounts get this level.\n0x88ff8815 (Remote User)0xffff88: Players with remote accounts get this level by default.\n0x88ff8816 (Fallen from Grace)0xffff88: Authenticated players who abused default rights given to them.\n0x88ff8817 (Shunned)0xffff88: Same, only worse :)\n0x88ff8819 (Authenticated)0xffff88: Minimal level authenticated players can get.\n0x88ff8820 (Program)0xffff88: Unauthenticated players.
+#help_commands_auth_levels_text UNTRANSLATED
+
+#ORIGINAL TEXT:               Remote admin commands
+#help_commands_ra_shortdesc   UNTRANSLATED
+
+#ORIGINAL TEXT:               0x88ff88/login <password>0xffff88: Log in as the server administrator using the server-specific password\n0x88ff88/logout0xffff88: Drop your logged in status so that other players can't see that you're an administrator\n0x88ff88/admin <command>0xffff88: Execute a console command as if it were entered on the server
+#help_commands_ra_text        UNTRANSLATED
+
+#ORIGINAL TEXT:               Miscellaneous commands
+#help_commands_misc_shortdesc UNTRANSLATED
+
+#ORIGINAL TEXT:               0x88ff88/help0xffff88: You just found out about this one :-)\n0x88ff88/teach <player> <topic>0xffff88: same as /help, but the the output gets sent to another player.\n0x88ff88/rtfm0xffff88: alias for /teach\n0x88ff88/command <command>0xffff88: Execute a command on your own client. Useful for instant chats
+#help_commands_misc_text      UNTRANSLATED
+
+#ORIGINAL TEXT:               Tourney related commands
+#help_commands_tourney_shortdesc UNTRANSLATED
+
+#ORIGINAL TEXT:               0x88ff88/lock0xffff88: Locks your current team. Nobody can join it any more on their own. To let someone in, you need to invoke\n0x88ff88/invite <player>0xffff88: From that moment on, the player is allowed to join you. Another effect of /invite, even if your team is not locked, is that the invited player can read all of your team's /team messages. Invitations are permanent until revoked. That means a player who is invited into your team can join and leave it freely without further need to /invite him again. Players who were on the team when you /locked it are not automatically invited when they leave on their own account.\n0x88ff88/uninvite <player>0xffff88: reverses /invite. The invitation is revoked, the player can no longer join you, and if he currently is on your team, he will be thrown out.\n0x88ff88/unlock0xffff88: makes your team available for everyone to join again.
+#help_commands_tourney_text   UNTRANSLATED
+
+#ORIGINAL TEXT:               Can't use \1 if you're not on a team.\n
+#invite_no_team               UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 locked, you'll need an invitation from a team leader via the /invite command to join from now on.\n
+#invite_team_locked           UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 unlocked, you can join it freely again.\n
+#invite_team_unlocked         UNTRANSLATED
+
+#ORIGINAL TEXT:               \10xRESETT can now join \2.\n
+#invite_team_can_join         UNTRANSLATED
+
+#ORIGINAL TEXT:               \10xRESETT has been invited to join \2.\n
+#invite_team_invite           UNTRANSLATED
+
+#ORIGINAL TEXT:               \10xRESETT has been kicked from \2.\n
+#invite_team_kick             UNTRANSLATED
+
+#ORIGINAL TEXT:               \10xRESETT got his invitation to join \2 cancelled.\n
+#invite_team_uninvite         UNTRANSLATED
+
+#ORIGINAL TEXT:               (locked)
+#invite_team_locked_list      UNTRANSLATED
+
+#ORIGINAL TEXT:               0xff0000Too many matches found for the search term \1. Be more specific.\n
+#msg_toomanymatches           UNTRANSLATED
+
+#ORIGINAL TEXT:               0xff0000No matches were found that contained \1.\n
+#msg_nomatch                  UNTRANSLATED
+
+
+
+#ORIGINAL TEXT:               \1 switches to spectator mode and will stop playing the next round.\n
+#player_toggle_spectator_on   UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 leaves spectator mode and enters the game again.\n
+#player_toggle_spectator_off  UNTRANSLATED
 
 #camera messages
 camera_watching_ai            Observation d'un IA\n
@@ -1934,11 +3283,17 @@ player_scoretable_inactive    Deconnecte
 #********************************************
 #********************************************
 
+#ORIGINAL TEXT:               Server Message
+#fullscreen_message_title     UNTRANSLATED
+
 network_message_timeout_title Le serveur ne repond pas
 network_message_timeout_inter Le serveur auquel vous voulez vous connecter n'a pas repondu durant dix secondes.\nil est sans doute inaccessible, ou vous avez mal ecrit son nom dans le menu "connection perso.".
 
 network_message_denied_title  Login refuse
 network_message_denied_inter  Le serveur auquel vous voulez vous connecter a refuse votre login.\nLa plupart du temps, c'est parcequ'il est plein.
+
+#ORIGINAL TEXT:               The server you wanted to connect to denied your login attempt.
+#network_message_denied_inter2 UNTRANSLATED
 
 network_message_lateto_title  Temps ecoule
 network_message_lateto_inter  La connexion au serveur etait reussie; cependant, la synchronisation a echoue.\nEssayez juste encore!
@@ -1956,6 +3311,12 @@ network_master_timeout_inter  Le serveur maitre ne repond pas, donc la liste des
 
 network_master_denied_title   Login du maitre refuse
 network_master_denied_inter   Le serveur maitre a refuse votre login. La plupart du temps, ca se produit parcequ'il est complet. Reessayez plus tard.
+
+#ORIGINAL TEXT:               Version Expired
+#testing_version_expired_title UNTRANSLATED
+
+#ORIGINAL TEXT:               You are running a public test version or an unsupported CVS build. The server you tried to connect to is running a much newer version and that combination is only supported for major releases. An update is probably available for you on www.armagetronad.net or beta.armagetronad.net.
+#testing_version_expired      UNTRANSLATED
 
 network_master_upgrage        Une mise a jour est necessaire
 network_master_downgrage      Le serveur n'est plus a jour
@@ -1981,7 +3342,11 @@ network_statistics3           Recus:     \5 octets dans \6 paquets (\7 octets/s)
 
 network_login_denial          Login refuse...\n
 network_server_login          Login recu de \1.\n
+
+#ORIGINAL TEXT:               unknown
+#network_unknown_version      UNTRANSLATED
 network_server_login_success  Nouvel utilisateur: \1\n
+
 
 network_toomanyservers        \n\n\nAttention: trop de serveurs en place sur cet ordinateur.\nLeaving the port range that is scanned by clients with default settings.\n\n\n
 
@@ -1993,14 +3358,25 @@ network_logout_done           Termine!\n
 network_logout_server         Deconnexion recue de \1.\n
 
 network_login_process         informations concernant le login envoyee. \nEn attente de la reponse..\n
+
+#ORIGINAL TEXT:               Login failed.\n
+#network_login_failed         UNTRANSLATED
 network_login_failed_full     Connexion echouee: le serveur est complet.\n
 network_login_failed_timeout  Connexion echouee: Teps ecoule.\n
+
+#ORIGINAL TEXT:               Login failed: Aborted.\n
+#network_login_failed_abort   UNTRANSLATED
 network_login_success         Connexion reussie. Utilisateur n° \1 \n
 network_login_sync            Synchronisation avec le serveur...\n
 network_login_relabeling      Relabeling NetObjects...\n
 network_login_sync2           Resynchronisation...\n
 network_login_done            Termine!\n
 
+#ORIGINAL TEXT:               User \1 kicked, reason given to him: \2\n
+#network_kill_log             UNTRANSLATED
+
+#ORIGINAL TEXT:               \n\nYou will now be redirected to the server \1:\2. You can prevent that by pressing ESC.\n
+#network_redirect             UNTRANSLATED
 network_kill_preface          Raisons donnees par le serveur:
 network_kill_maxidgrabber     Il manque d'identificateurs: votre client etait celui qui en occupait le plus pour lui-meme. La raison de cec peut etre un bug
 network_kill_maxiduser        Il manque d'identificateurs: votre client etait celui qui en occupait le plus
@@ -2016,19 +3392,32 @@ network_kill_overflow         Le reseau etait plein.
 #ORIGINAL TEXT:               Too many players were logged in from your connection.
 #network_kill_too_many_players UNTRANSLATED
 network_kill_kick             Vous avez ete banni par l'administrateur; veuillez rester a l'ecart.
-#network_kill_banned		You are banned for at least \1 minutes.
+
+#ORIGINAL TEXT:               You have been kicked automatically for being idle.
+#network_kill_idle            UNTRANSLATED
 network_kill_banned           Vous avez ete banni par l'administrateur du serveur. \2
+#network_kill_banned         You are banned. Please stay away. The more often you retry to connect, the longer your ban stays.
 network_kill_unknown          Aucune raison n'a ete donnee.
 network_kill_spamkick         Vous avez ete banni automatiquement pour avoir spamme.
 voted_kill_kick               Vous avez ete banni par une foule fachee; veuillez rester a l'ecart.
 
-network_kick_notfound         Le joueur \1 n'a pas ete trouve. Souvenez-vous que la casse doit etre respecter (majuscules/minuscules).\n
+#ORIGINAL TEXT:               You have been sitting in spectator mode for too long.
+#network_kill_spectator       UNTRANSLATED
 
 #ORIGINAL TEXT:               Kicks per hour of IP \1 are now \2.\n
 #network_ban_kph              UNTRANSLATED
 
-#ORIGINAL TEXT:               Players from IP \1 are banned for \2 minutes.\n
+#ORIGINAL TEXT:               Players from IP \1 are banned for \2 minutes. Reason: \3\n
 #network_ban                  UNTRANSLATED
+
+#ORIGINAL TEXT:               Players from IP \1 are no longer banned.\n
+#network_noban                UNTRANSLATED
+
+#ORIGINAL TEXT:               This is an autoban from being kicked too often.
+#network_ban_kick             UNTRANSLATED
+
+#ORIGINAL TEXT:               None given.
+#network_ban_noreason         UNTRANSLATED
 
 #*************************************
 #*************************************
@@ -2041,7 +3430,16 @@ network_kick_notfound         Le joueur \1 n'a pas ete trouve. Souvenez-vous que
 vote_accepted                 Sondage "\1" accepte.\n
 vote_rejected                 Sondage "\1" refuse.\n
 vote_timeout                  Le temps du sondage "\1" est ecoule.\n
+
+#ORIGINAL TEXT:               All polls have been canceled by an administrator.\n
+#vote_cancel_all              UNTRANSLATED
 vote_new                      Nouveau sondage: "\1". Allez dans le menu principal pour voter.\n
+
+#ORIGINAL TEXT:               Poll rejected, same suggestion was made already.\n
+#vote_redundant               UNTRANSLATED
+
+#ORIGINAL TEXT:               Poll rejected, you're not old enough to issue votes, wait \1 seconds.\n
+#vote_maturity                UNTRANSLATED
 vote_overflow                 Sondage refuse, trop de sondages en cours.\n
 vote_disabled                 Sondage refuse, desactive par l'admin.\n
 vote_disabled_spectator       Sondage/voix refuse, desactive par l'admin pour les spectateurs.\n
@@ -2049,6 +3447,12 @@ vote_toofew                   Sondage refuse, trop peu d'utilisaturs en ligne.\n
 vote_submitted                Sondage "\2" propose par \1.\n
 vote_vote_for                 \1 a vote "pour" au sondage "\2".\n
 vote_vote_against             \1 a vote "Contre" au sondage "\2".\n
+
+#ORIGINAL TEXT:               Unknown /vote command \1, available are: \2\n
+#vote_unknown_command         UNTRANSLATED
+
+#ORIGINAL TEXT:               Can't vote against local player/AI \1.\n
+#vote_kick_local              UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -2089,6 +3493,50 @@ network_master_host_lan_help  Cela demarrera un jeu sur votre ordinateur, mais s
 #ORIGINAL TEXT:               Resource \1 not found in cache. Downloading it, please be patient...\n
 #resource_not_cached          UNTRANSLATED
 
+#ORIGINAL TEXT:               Downloading \1 ...\n
+#resource_downloading         UNTRANSLATED
+
+#ORIGINAL TEXT:               ERROR: Return value 404 : File not found.\n
+#resource_fetcherror_404      UNTRANSLATED
+
+#ORIGINAL TEXT:               ERROR: Return value \1 != 200.\n
+#resource_fetcherror          UNTRANSLATED
+
+#ORIGINAL TEXT:               ERROR: NULL or empty filename.\n
+#resource_no_filename         UNTRANSLATED
+
+#ORIGINAL TEXT:               ERROR: Absolute filename, the server is trying to overwrite system files.\n
+#resource_abs_path            UNTRANSLATED
+
+#ORIGINAL TEXT:               ERROR: Cannot determine path to write resource to.\n
+#resource_no_writepath        UNTRANSLATED
+
+#ORIGINAL TEXT:               ERROR: Cannot open \1 for writing.\n
+#resource_no_write            UNTRANSLATED
+
+#********************************************
+#********************************************
+#
+#       Directory messages
+#
+#********************************************
+#********************************************
+
+#ORIGINAL TEXT:               Could not create path to "\1". Check your user's rights.
+#directory_path_nonwritable   UNTRANSLATED
+
+#ORIGINAL TEXT:               ERROR: User given path is NULL or empty.\n
+#directory_path_null          UNTRANSLATED
+
+#ORIGINAL TEXT:               ERROR: User given path "\1" is an absolute path. You're not allowed to access files outside of the configured file hierarchies.\n
+#directory_path_absolute      UNTRANSLATED
+
+#ORIGINAL TEXT:               ERROR: User given path "\1" is a relative path. You're not allowed to access files outside of the configured file hierarchies.\n
+#directory_path_relative      UNTRANSLATED
+
+#ORIGINAL TEXT:               ERROR: User given path "\1" contains a hidden component.\n
+#directory_path_hidden        UNTRANSLATED
+
 #********************************************
 #********************************************
 #
@@ -2097,12 +3545,16 @@ network_master_host_lan_help  Cela demarrera un jeu sur votre ordinateur, mais s
 #********************************************
 #********************************************
 
+# printed on loading a map
+#ORIGINAL TEXT:               Loading map \1 ...\n
+#map_file_loading             UNTRANSLATED
+
 # title of map error message
 #ORIGINAL TEXT:               Map load failure
 #map_file_load_failure_title  UNTRANSLATED
 
 # printed when a map can't be loaded, and the user can do something about it
-#ORIGINAL TEXT:               The map \1 could not be loaded; please check your configuration for spelling mistakes.\n
+#ORIGINAL TEXT:               The map \1 could not be loaded or parsed; please check your configuration and the log.\n
 #map_file_load_failure_self   UNTRANSLATED
 
 # printed when a map can't be loaded, and  the failure is the server admin's fault
@@ -2112,6 +3564,16 @@ network_master_host_lan_help  Cela demarrera un jeu sur votre ordinateur, mais s
 # worst case: default map could not load, either
 #ORIGINAL TEXT:               \nFallback to default map did not work either. Please send a bug report, this is unusual.\n
 #map_file_load_failure_default UNTRANSLATED
+
+# resource at the wrong place
+#ORIGINAL TEXT:               Incorrect File Path
+#resource_file_wrong_place_title UNTRANSLATED
+
+#ORIGINAL TEXT:               The resource file loaded from "\1" wants to be at "\2". Possible resolutions:\na) If you are not the author of the resource, you should move it to the right place given above and adapt the reference pointing to it.\nb) If you are the author and want the file to stay where it is, you can modify its <Resource> tag so it wants to be where you put it. Consult the documentation on how to do that.\n
+#resource_file_wrong_place    UNTRANSLATED
+
+#ORIGINAL TEXT:               Reverting to last known working map \1.\n
+#map_file_reverting           UNTRANSLATED
 
 #********************************************
 #********************************************
@@ -2154,17 +3616,99 @@ sound_error_unsupported       Le fichier son \1 n'est pas dans un format support
 #********************************************
 #********************************************
 
+#ORIGINAL TEXT:               Configuration file "\1" to be included not found.\n
+#config_include_not_found     UNTRANSLATED
+
+#ORIGINAL TEXT:               Configuration resource "\1" to be included not found.\n
+#config_rinclude_not_found    UNTRANSLATED
 config_command_unknown        Commande \1 inconnue.\n
 config_command_other          Vous vouliez sans doute:\n
+
+#ORIGINAL TEXT:               There are more commands containing your search string that were left out to avoid flooding your terminal.\n
+#config_command_more          UNTRANSLATED
 config_file_write_error       N'a pas pu ecrire dans le fichier de configuration\n
 config_value_changed          \1 a change \2 en \3.\n
 config_error_read             erreur de lecture de \1: format non valide.\n
 config_message_info           \1 est actuellement a \2.\n
 
+#ORIGINAL TEXT:               SIGHUP received, reloading configuration.\n
+#config_sighup                UNTRANSLATED
+
 nconfig_errror_protected      Seul le serveur peut modifier \1.\n
 nconfig_error_unknown         Message recu du setting \1 inconnu...\n\n\n\nVOUS DEVRIEZ PROBABLEMENT METTRE ARMAGETRON A JOUR\n
+
+#ORIGINAL TEXT:               Got conf message for  setting \1 which is not network aware.\n\nYOU PROBABLY SHOULD UPGRADE ARMAGETRON ADVANCED!!!\n
+#nconfig_error_nonet          UNTRANSLATED
+
+#ORIGINAL TEXT:               Ignoring old conf message for setting \1.\n
+#nconfig_error_ignoreold      UNTRANSLATED
 nconfig_value_changed         \1 a change \2 en \3 dans l'ordre du serveur.\n
 
+#ORIGINAL TEXT:               Owner
+#config_accesslevel_0         UNTRANSLATED
+
+#ORIGINAL TEXT:               Administrator
+#config_accesslevel_1         UNTRANSLATED
+
+#ORIGINAL TEXT:               Moderator
+#config_accesslevel_2         UNTRANSLATED
+
+#ORIGINAL TEXT:               Team Leader
+#config_accesslevel_7         UNTRANSLATED
+
+#ORIGINAL TEXT:               Team Member
+#config_accesslevel_8         UNTRANSLATED
+
+#ORIGINAL TEXT:               Local User
+#config_accesslevel_12        UNTRANSLATED
+
+#ORIGINAL TEXT:               Remote User
+#config_accesslevel_15        UNTRANSLATED
+
+#ORIGINAL TEXT:               Fallen from Grace
+#config_accesslevel_16        UNTRANSLATED
+
+#ORIGINAL TEXT:               Shunned
+#config_accesslevel_17        UNTRANSLATED
+
+#ORIGINAL TEXT:               Authenticated
+#config_accesslevel_19        UNTRANSLATED
+
+#ORIGINAL TEXT:               Program
+#config_accesslevel_20        UNTRANSLATED
+
+#ORIGINAL TEXT:               Changes the access level of a configuration item to make it available to lower ranked users
+#access_level_help            UNTRANSLATED
+
+#ORIGINAL TEXT:               usage: ACCESS_LEVEL <config command> <required minimal access level (numerical)>\n
+#access_level_usage           UNTRANSLATED
+
+#ORIGINAL TEXT:               Required access level of command \1 changed to "\2".\n
+#access_level_change          UNTRANSLATED
+
+#ORIGINAL TEXT:               Required access level of command \1 is "\2", you only have "\3".\n
+#access_level_error           UNTRANSLATED
+
+#ORIGINAL TEXT:               For the duratioon of the rest of the configuration file  thiss directive appears in, elevate the access level.
+#casacl_help                  UNTRANSLATED
+
+#ORIGINAL TEXT:               Usage: CASACL <required access level> <elevated access level>\n
+#casacl_usage                 UNTRANSLATED
+
+#ORIGINAL TEXT:               Loading Abort
+#abort_loading_name           UNTRANSLATED
+
+#ORIGINAL TEXT:               Current config file/stream loading was aborted by command \1.
+#abort_loading_description    UNTRANSLATED
+
+#ORIGINAL TEXT:               Changes the access level of a user.
+#user_level_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               usage: USER_LEVEL <authenticated name> <user access level (numerical)>\n
+#user_level_usage             UNTRANSLATED
+
+#ORIGINAL TEXT:               Access level of user \1 changed to "\2".\n
+#user_level_change            UNTRANSLATED
 
 #*************************************
 #*************************************
@@ -2198,10 +3742,340 @@ login_storepw_disk_help       Paresseux: stocke le mot de passe sur votre disque
 
 password_help                 Configurations: mot de passe
 
+#ORIGINAL TEXT:               Already logged in.\n
+#login_request_redundant      UNTRANSLATED
 login_request_failed          La connexion a echoue. Reessayez!
-login_request_first           Login requis sur ce serveur
+
+#ORIGINAL TEXT:               Two logins with the same account are not permitted.\n
+#login_request_failed_dup     UNTRANSLATED
+
+#ORIGINAL TEXT:               This server does not support authentication of the type you requested, sorry.\n
+#login_not_supported          UNTRANSLATED
+
+#ORIGINAL TEXT:               Login with Authority \1
+#login_request                UNTRANSLATED
+
+#ORIGINAL TEXT:               Login with Local Account
+#login_request_local          UNTRANSLATED
 login_request_namechange      Le nom a change; un login est necessaire
 login_request_master          Le serveur maitre a besoin d'un login
 
+# access level messages
+#ORIGINAL TEXT:               Minimal access level to be able to hide it's own user account information.
+#access_level_hide_of_help    UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level to see everyone's user account information.
+#access_level_hide_to_help    UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level for /lock, /unlock, /invite and /uninvite team management.
+#access_level_team_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level for /op, /deop, /promote and /demote co-admin management commands commands.
+#access_level_op_help         UNTRANSLATED
+
+#ORIGINAL TEXT:               Maximal access level attainable by /op and /promote commands.
+#access_level_op_max_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level for /admin command.
+#access_level_admin_help      UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level for /teach or /rtfm command.
+#access_level_rtfm_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level for chatting.
+#access_level_chat_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level you need for seeing IPs of players in the /players command.
+#access_level_ips_help        UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level you need for seeing /team messages as a spectator.
+#access_level_spy_team_help   UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level you need for seeing /msg messages directed to others.
+#access_level_spy_msg_help    UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level for playing
+#access_level_play_help       UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level for shuffling up
+#access_level_shuffle_up_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Sliding minimal access level for playing; if enough players of a higher access level than given by ACCESS_LEVEL_PLAY are online, their level will be the minimal level for play; however, it will never be higher than ACCESS_LEVEL_PLAY_SLIDING.
+#access_level_play_sliding_help UNTRANSLATED
+
+#ORIGINAL TEXT:               The access level required to play will only slide up if at least this many players of a higher level are online.
+#access_level_play_sliders_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Access level required to play changed from \1 to \2.\n
+#access_level_play_changed    UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level required to issue suspend votes.
+#access_level_vote_suspend_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level required to issue kick votes.
+#access_level_vote_kick_help  UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level required to issue inclue votes.
+#access_level_vote_inclue_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level successful include votes will be executed at.
+#access_level_vote_include_execute_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level required to issue command votes.
+#access_level_vote_command_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Minimal access level successful command votes will be executed at.
+#access_level_vote_command_execute_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Time in seconds between public announcements that someone wants to chat, but can't. Set to 0 to disable the public warnings.
+#access_level_chat_timeout_help UNTRANSLATED
+
+#ORIGINAL TEXT:               \10xRESETT would like to chat, but is not authorized yet. Would someone be so kind and say "/op \2" or "/promote \2"?\n
+#access_level_chat_request    UNTRANSLATED
+
+#ORIGINAL TEXT:               0xff7f7fChat denied,0xffffff insufficient access level.\n
+#access_level_chat_denied     UNTRANSLATED
+
+#ORIGINAL TEXT:               0xff7f7f\1 denied,0xffffff insufficient access level.\n
+#access_level_op_denied       UNTRANSLATED
+
+#ORIGINAL TEXT:               0xff7f7f\1 denied,0xffffff your need higher access righrs than your victim.\n
+#access_level_op_overpowered  UNTRANSLATED
+
+#ORIGINAL TEXT:               0xff7f7f\1 denied,0xffffff can't do that to yourself :).\n
+#access_level_op_self         UNTRANSLATED
+
+#ORIGINAL TEXT:               0xff7f7f\1 denied,0xffffff your victim already has maximal rights.\n
+#access_level_op_denied_max   UNTRANSLATED
+
+#ORIGINAL TEXT:               0xff7f7f\1 denied,0xffffff your victim is an AI.\n
+#access_level_op_denied_ai    UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 has been demoted to "\2" by order of \3.\n
+#access_level_demote          UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 has been promoted to "\2" by order of \3.\n
+#access_level_promote         UNTRANSLATED
+
+#ORIGINAL TEXT:               0xff7f7f/admin denied,0xffffff insufficient access level.\n
+#access_level_admin_denied    UNTRANSLATED
+
+#ORIGINAL TEXT:               Required access level to shuffle up is "\1", you only have "\2".\n
+#access_level_shuffle_up_denied UNTRANSLATED
+
+#ORIGINAL TEXT:               Required access level to teach others is "\1", you only have "\2".\n
+#access_level_rtfm_denied     UNTRANSLATED
+
+#ORIGINAL TEXT:               You need to be logged in to teach others.\n
+#rtfm_denied                  UNTRANSLATED
+
+#ORIGINAL TEXT:               Unknown chat command "\1".\n
+#chat_command_unknown         UNTRANSLATED
+
+#ORIGINAL TEXT:               Comma separated list of authorities your server should refuse to query.
+#authority_blacklist_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               If non-empty, only authorities on this comma separated list will be queried by your server.
+#authority_whitelist_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               If set to 1, the server assumes that your LAN is safe and that nobody can run a pharming server on it.
+#trust_lan_help               UNTRANSLATED
+
+#ORIGINAL TEXT:               List of hash authentication methods to disable support for.
+#hash_method_blacklist_help   UNTRANSLATED
+
+#ORIGINAL TEXT:               User \1 requests authentication as "\2@\3".\n
+#login_message_requested      UNTRANSLATED
+
+#ORIGINAL TEXT:               Your login process will be delayed because the server configuration makes it impossible to be processed immedeately in the background. We're sorry for the inconvenience.\n
+#login_message_delayed        UNTRANSLATED
+
+#ORIGINAL TEXT:               Password request sent to user \1, username "\2", method \3, message "\4".\n
+#login_message_responded      UNTRANSLATED
+
+#ORIGINAL TEXT:               \3\1 has been logged in as \2.\n
+#login_message                UNTRANSLATED
+
+#ORIGINAL TEXT:               Order of \1: 
+#login_message_byorder        UNTRANSLATED
+
+#ORIGINAL TEXT:               \4\1 has been logged in as \2 at access level "\3".\n
+#login_message_special        UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 has been logged out as \2.\n
+#logout_message               UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 has been logged out as \2 by order of \3.\n
+#logout_message_deop          UNTRANSLATED
+
+#ORIGINAL TEXT:               0xff7f7fLogin failed,0xffffff reason: \1\n
+#login_failed_message         UNTRANSLATED
+
+# various reasons for logins to fail
+#ORIGINAL TEXT:               Login aborted.
+#login_error_aborted          UNTRANSLATED
+
+#ORIGINAL TEXT:               Authentication URL \1 invalid, illegal characters in hostname part (only ASCII letters, numbers and a fine selection of other characters are allowed).
+#login_error_invalidurl_illegal_hostname UNTRANSLATED
+
+#ORIGINAL TEXT:               Authentication URL \1 invalid, illegal characters in path part (only ASCII letters, numbers, dots, slashes and a fine selection of other characters are allowed).
+#login_error_invalidurl_illegal_path UNTRANSLATED
+
+#ORIGINAL TEXT:               Authentication URL \1 invalid, illegal characters in port (only numbers are allowed).
+#login_error_invalidurl_illegal_port UNTRANSLATED
+
+#ORIGINAL TEXT:               Authentication URL \1 invalid. Just leave away the default port, please :).
+#login_error_invalidurl_defaultport UNTRANSLATED
+
+#ORIGINAL TEXT:               Authentication URL \1 invalid, double slash or ending with slash.
+#login_error_invalidurl_slash UNTRANSLATED
+
+#ORIGINAL TEXT:               Authentication URL \1 invalid, it contains a raw IP address.
+#login_error_invalidurl_rawip UNTRANSLATED
+
+#ORIGINAL TEXT:               Authentication URL \1 invalid, it was not found.
+#login_error_invalidurl_notfound UNTRANSLATED
+
+#ORIGINAL TEXT:               Authentication via Global ID not available on this server.
+#login_error_noremote         UNTRANSLATED
+
+#ORIGINAL TEXT:               Authority \1 is on this server's blacklist.
+#login_error_blacklist        UNTRANSLATED
+
+#ORIGINAL TEXT:               Authority \1 is not on this server's whitelist.
+#login_error_whitelist        UNTRANSLATED
+
+#ORIGINAL TEXT:               Server adress mismatch, \1 (sent by client) != \2 (our address). Pharming suspected. If  you are connecting from the LAN and get this error, either set "TRUST_LAN" on the server (only if your LAN can be fully trusted, of course) or use "SERVER_IP" to make the local IP known to the server.
+#login_error_pharm            UNTRANSLATED
+
+#ORIGINAL TEXT:               The local method used for auhtentication has been modified since your password was set. In the server's config files, put all commands that define authentication methods before all local password definitions.
+#login_error_methodmismatch   UNTRANSLATED
+
+#ORIGINAL TEXT:               No authentication method could be found. Your client supports \1, this server supports \2, and the authentication server supports \3.
+#login_error_nomethod         UNTRANSLATED
+
+#ORIGINAL TEXT:               Authentication URL \1 does not return a list of supported methods, got error code \2, content "\3".
+#login_error_nomethodlist     UNTRANSLATED
+
+#ORIGINAL TEXT:               Authentication URL \1 does not return a list of methods properties, got error code \2, content "\3".
+#login_error_nomethodproperties UNTRANSLATED
+
+#ORIGINAL TEXT:               User does not exist, authentication server returned "\1".
+#login_error_nouser           UNTRANSLATED
+
+#ORIGINAL TEXT:               Wrong password supplied, authentication server  returned "\1".
+#login_error_password         UNTRANSLATED
+
+#ORIGINAL TEXT:               Unknown error code \1 returned, content "\2".
+#login_error_unknown          UNTRANSLATED
+
+#ORIGINAL TEXT:               Answer "\1" expected from server, but got \2 instead.
+#login_error_unexpected_answer UNTRANSLATED
+
+#ORIGINAL TEXT:               Local user \1 not found.
+#login_error_local_nouser     UNTRANSLATED
+
+#ORIGINAL TEXT:               Supplied password for local user \1 incorrect.
+#login_error_local_password   UNTRANSLATED
+
+#ORIGINAL TEXT:               \1 requires a player username as additional paramenter.\n
+#chatcommand_requires_player  UNTRANSLATED
+
+#ORIGINAL TEXT:               Adds a local user account from a name/password pair.
+#local_user_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Usage: LOCAL_USER <user name> <password>\n
+#local_user_syntax            UNTRANSLATED
+
+#ORIGINAL TEXT:               Adds a local account for an entire team (team tags are compared).
+#local_team_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Usage: LOCAL_TEAM <team tag> <password>\n
+#local_team_syntax            UNTRANSLATED
+
+#ORIGINAL TEXT:               Adds an account over the md5-hash based login system for a team leader. Team leaders can pick up players into the game.
+#md5_password_teamleader_help UNTRANSLATED
+
+#ORIGINAL TEXT:               Usage: MD5_PASSWORD_TEAMLEADER <user name> <password>\n
+#md5_password_teamleader_syntax UNTRANSLATED
+
+#ORIGINAL TEXT:               Removes an password account for a user or team.
+#md5_user_remove_help         UNTRANSLATED
+
+#ORIGINAL TEXT:               Usage: USER_REMOVE <user name/team tag>\n
+#md5_password_remove_syntax   UNTRANSLATED
+
+#ORIGINAL TEXT:               User name/team tag \1 removed.\n
+#md5_password_removed         UNTRANSLATED
+
+#ORIGINAL TEXT:               User name/team tag \1 to remove not found.\n
+#md5_password_remove_notfound UNTRANSLATED
+
+#ORIGINAL TEXT:               Reserves a screen name to a registered user
+#reserve_screen_name_help     UNTRANSLATED
+
+#ORIGINAL TEXT:               Usage: RESERVE_SCREEN_NAME <screen name (in quotes if it contains spaces)> <user>
+#reserve_screen_namne_usage   UNTRANSLATED
+
+#ORIGINAL TEXT:               Screen name "\1" reserved for user \2.\n
+#reserve_screen_name_change   UNTRANSLATED
+
+#ORIGINAL TEXT:               Allows bending authenticated names around: a player authenticated as X originally can appear as y.
+#user_alias_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Usage: USER_ALIAS <user> <alias of user>
+#alias_usage                  UNTRANSLATED
+
+#ORIGINAL TEXT:               User \1 will be known as \2.\n
+#alias_change                 UNTRANSLATED
+
+#ORIGINAL TEXT:               Allows to ban players based on their authentication ID.
+#ban_user_help                UNTRANSLATED
+
+#ORIGINAL TEXT:               User \1 has been banned.\n
+#ban_user_message             UNTRANSLATED
+
+#ORIGINAL TEXT:               Undoes BAN_USER.
+#unban_user_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               User \1 has been unbanned.\n
+#unban_user_message           UNTRANSLATED
+
+#ORIGINAL TEXT:               Gives a list of banned users.
+#ban_user_list_help           UNTRANSLATED
+
+#ORIGINAL TEXT:               Extra hash prefix for local accounts used to scramble the password
+#md5_prefix_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               Extra hash suffix for local accounts used to scramble the password
+#md5_suffix_help              UNTRANSLATED
+
+#ORIGINAL TEXT:               If set to 1, Global IDs (Armathentication) will be enabled on this server.
+#global_id_help               UNTRANSLATED
+
+# items that should not be translated
+
 # Room for lost settings in translation files:
 
+
+# Outdated:
+sp_team_max_imbalance_perm_help Disproportion maximum et permanente autorisee pour une equipe
+team_max_imbalance_perm_help  Disproportion maximum et permanente autorisee pour une equipe
+ztrick_help                   Performance tweak; Ne fonctionne pas sur la plupart des systemes Windows
+tweaks_ztrick_text            ZTrick:
+vote_help                     This menu entry determines your vote.
+detail_polyantialias_help     Les contours des objets doivent ils etre lisses pour eviter les escaliers de pixel laids? Indisponible sur la plupart des systemes
+network_custjoin_connect_text Connection!
+persp_correct_help            Active la correction des perspectives
+network_custjoin_connect_help Entre dans l'arene!
+tweaks_ztrick_help            Une acceleration qui fonctionne sur la plupart des systemes: au lieu d'effacer et de recreer tout apres chaque frame, nous dessinons juste l'arriere-plan (sols et murs d'enceinte). Activez-le si vous n'avez aucun problemes avec.
+detail_lineantialias_text     Antial. des lignes:
+line_antialias_help           Active l'anti-aliasing des lignes
+detail_persp_text             corr. de la persp.:
+detail_polyantialias_text     Antial. des polygones:
+poly_antialias_help           Active l'anti-aliasing des polygones
+login_request_first           Login requis sur ce serveur
+network_kick_notfound         Le joueur \1 n'a pas ete trouve. Souvenez-vous que la casse doit etre respecter (majuscules/minuscules).\n
+detail_persp_help             La plupart des rendus ignorent ceci. Si il est sur "Off", les textures des murs et des sols seront horriblement deformees. Je ne vois vraiment pas pourquoi je vous laisse choisir ceci :D
+detail_lineantialias_help     Les lignes doivent-elles etre lissees pour eviter les escaliers laids de pixels?
+#network_kill_banned		You are banned for at least \1 minutes.
