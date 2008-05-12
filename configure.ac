@@ -59,34 +59,19 @@ AC_PREREQ(2.50)
 
 build_regular=true
 
-AC_ARG_ENABLE(glout,
-     AC_HELP_STRING([--enable-glout],
-		[enable graphical output; otherwise, compile a dedicated server (default=enabled)]),
+AC_ARG_ENABLE(dedicated,
+     AC_HELP_STRING([--enable-dedicated],
+		[enables dedicated server; otherwise, compile a client (default=disabled)]),
      [case "${enableval}" in
-       yes) build_dedicated=false
-			build_regular=true
-	   	;;
-       no)  build_dedicated=true
+       yes) build_dedicated=true
 			build_regular=false
+	   	;;
+       no)  build_dedicated=false
+			build_regular=true
 	    ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-glout) ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-dedicated) ;;
      esac],[build_dedicated=false])
 
-# flag to set when mockup versions of the executables should be built to save
-# compile time when testing the release process
-AM_CONDITIONAL(BUILDFAKERELEASE, test "$ARMAGETRONAD_FAKERELEASE" != "")
-
-# set replacement variables for dedicated server
-progtitle_serverorclient=" Client"
-progtitle_server=""
-if test x$build_dedicated = xtrue; then
-   progtitle_serverorclient=" Server"
-   progtitle_server=" Server"
-fi
-AC_SUBST(progtitle_serverorclient)
-AC_SUBST(progtitle_server)
-AC_SUBST(build_dedicated)
-AC_SUBST(build_regular)
 
 dnl AC_ARG_ENABLE(glout,
 dnl [  --enable-glout          enable graphical output; otherwise, compile
@@ -113,6 +98,19 @@ AC_ARG_ENABLE(main,
        *) AC_MSG_ERROR(bad value ${enableval} for --enable-main) ;;
      esac],[armamain=true])
 
+AC_ARG_ENABLE(glout,
+     AC_HELP_STRING([--enable-glout],
+		[Inverse alias of --enable-dedicated]),
+     [case "${enableval}" in
+       yes) build_dedicated=false
+			build_regular=true
+	   	;;
+       no)  build_dedicated=true
+			build_regular=false
+	    ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-glout) ;;
+     esac],[build_dedicated=false])
+
 # consistency check of the three build flags	 
 test x$armamain = xfalse && build_dedicated=false build_regular=false
 test x$build_dedicated = xfalse && test x$build_regular = xfalse && armamain=false
@@ -120,6 +118,22 @@ test x$build_dedicated = xfalse && test x$build_regular = xfalse && armamain=fal
 AM_CONDITIONAL(BUILDDEDICATED, test x$build_dedicated = xtrue)
 AM_CONDITIONAL(BUILDREGULAR, test x$build_regular = xtrue)
 AM_CONDITIONAL(BUILDMAIN, test x$armamain = xtrue)
+
+# flag to set when mockup versions of the executables should be built to save
+# compile time when testing the release process
+AM_CONDITIONAL(BUILDFAKERELEASE, test "$ARMAGETRONAD_FAKERELEASE" != "")
+
+# set replacement variables for dedicated server
+progtitle_serverorclient=" Client"
+progtitle_server=""
+if test x$build_dedicated = xtrue; then
+   progtitle_serverorclient=" Server"
+   progtitle_server=" Server"
+fi
+AC_SUBST(progtitle_serverorclient)
+AC_SUBST(progtitle_server)
+AC_SUBST(build_dedicated)
+AC_SUBST(build_regular)
 
 AC_ARG_ENABLE(memmanager,
 	AC_HELP_STRING([--enable-memmanager],
@@ -136,15 +150,18 @@ AC_ARG_ENABLE(respawn,
 		[enable unsupported, hacky, impossible to deactivate at runtime, deathmatch mode. Use at your own risk. (default=disabled)]),,
 enable_respawn=no)
 
-AC_ARG_ENABLE(krawall,
-	AC_HELP_STRING([--enable-krawall],
-		[enable special visuals for the krawall gaming network (default=disabled)]),,
+# start alias group
+AC_ENABLE(krawall,,
 enable_krawall=no)
+
+AC_ENABLE(authentication,,
+enable_armathentication=no)
 
 AC_ARG_ENABLE(armathentication,
 	AC_HELP_STRING([--enable-armathentication],
 		[enable server side code for the krawall style user authentication (default=disabled)]),,
 enable_armathentication=no)
+# end alias group
 
 AC_ARG_ENABLE(automakedefaults,
 	AC_HELP_STRING([--enable-automakedefaults],
