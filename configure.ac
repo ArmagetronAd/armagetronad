@@ -109,7 +109,7 @@ AC_ARG_ENABLE(glout,
 			build_regular=false
 	    ;;
        *) AC_MSG_ERROR(bad value ${enableval} for --enable-glout) ;;
-     esac],[build_dedicated=false])
+     esac],)
 
 # consistency check of the three build flags	 
 test x$armamain = xfalse && build_dedicated=false build_regular=false
@@ -150,19 +150,34 @@ AC_ARG_ENABLE(respawn,
 		[enable unsupported, hacky, impossible to deactivate at runtime, deathmatch mode. Use at your own risk. (default=disabled)]),,
 enable_respawn=no)
 
-# start alias group
-AC_ENABLE(krawall,,
+AC_ARG_ENABLE(krawall,
+	AC_HELP_STRING([--enable-krawall],
+		[enable special visuals for the krawall gaming network (default=disabled)]),,
 enable_krawall=no)
 
-AC_ENABLE(authentication,,
-enable_armathentication=no)
+dnl start alias group
+AC_ENABLE(armathentication,
+    [echo $enableval; case "${enableval}" in
+       yes) enable_armathentication=yes
+	   	;;
+       no)  enable_armathentication=no
+	    ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-armathentication) ;;
+     esac],enable_armathentication=no
+     )
 
-AC_ARG_ENABLE(armathentication,
-	AC_HELP_STRING([--enable-armathentication],
-		[enable server side code for the krawall style user authentication (default=disabled)]),,
-enable_armathentication=no)
-# end alias group
-
+AC_ARG_ENABLE(authentication,
+    AC_HELP_STRING([--enable-authentication],
+		[enable server side code for the krawall style user authentication (default=disabled)]),
+    [case "${enableval}" in
+       yes) enable_armathentication=yes
+	   	;;
+       no)  enable_armathentication=no
+	    ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-authentication) ;;
+     esac],
+    )
+dnl end alias group
 AC_ARG_ENABLE(automakedefaults,
 	AC_HELP_STRING([--enable-automakedefaults],
 		[enforce the default installation directories as set by automake. localstatedir=prefix/var violates the FHS, so this is off by default.]),,
