@@ -2388,9 +2388,9 @@ static void se_AdminLogout( ePlayerNetID * p )
 static tAccessLevel se_consoleSpyAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_consoleSpyAccessLevelConf( "ACCESS_LEVEL_SPY_CONSOLE", se_consoleSpyAccessLevel );
 
-static bool se_canSeeConsole( ePlayerNetID const *, ePlayerNetID const * seeker )
+static bool se_cannotSeeConsole( ePlayerNetID const *, ePlayerNetID const * seeker )
 {
-    return seeker->GetAccessLevel() <= se_consoleSpyAccessLevel;
+    return seeker->GetAccessLevel() > se_consoleSpyAccessLevel;
 }
 
 // /admin chat command
@@ -2406,7 +2406,7 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     str.ReadLine(s);
     tColoredString msg;
     msg << tColoredString::ColorString(1,0,0) << "Remote admin command" << tColoredString::ColorString(-1,-1,-1) << " by " << tColoredString::ColorString(1,1,.5) << p->GetUserName() << tColoredString::ColorString(-1,-1,-1) << ": " << tColoredString::ColorString(.5,.5,1) << str << "\n";
-    se_SecretConsoleOut( msg, p, &se_canSeeConsole, p );
+    se_SecretConsoleOut( msg, p, &se_cannotSeeConsole, p );
     std::istringstream stream(&str(0));
 
     // install filter
