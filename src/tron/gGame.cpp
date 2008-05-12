@@ -3077,7 +3077,7 @@ void gGame::StateUpdate(){
             if ( random == 0 )
             {
                 sg_RequestedDisconnection = true;
-                //						sn_SetNetState( nSTANDALONE );
+                //sn_SetNetState( nSTANDALONE );
                 goon = false;
             }
 
@@ -3121,6 +3121,7 @@ void gGame::StateUpdate(){
             // log scores before players get renamed
             //ePlayerNetID::LogScoreDifferences();
             ePlayerNetID::UpdateSuspensions();
+            sg_newRoundWriter << sg_GetCurrentTime("%Y-%m-%d %H:%M:%S");
             sg_newRoundWriter.write();
 
             // kick spectators
@@ -4048,6 +4049,7 @@ void gGame::StartNewMatch(){
 
 void gGame::StartNewMatchNow(){
     if ( rounds != 0 )
+        sg_newMatchWriter << sg_GetCurrentTime("%Y-%m-%d %H:%M:%S");
         sg_newMatchWriter.write();
 
     rounds=0;
@@ -4281,7 +4283,7 @@ bool gGame::GameLoop(bool input){
         }
     } {
         static float lastTime = 1e42;
-        if((sg_gridPosInterval >= 0) && (gtime > sg_gridPosInterval) && (gtime >= lastTime + sg_gridPosInterval || gtime < lastTime)) {
+        if((sg_gridPosInterval >= 0) && (gtime > sg_gridPosInterval) && (gtime >= lastTime + sg_gridPosInterval + 1 || gtime < lastTime)) {
             ePlayerNetID::GridPosLadderLog();
             lastTime = gtime;
         }
@@ -4313,7 +4315,7 @@ bool gGame::GameLoop(bool input){
                     if ( random == 0 )
                     {
                         sg_RequestedDisconnection = true;
-                        //						sn_SetNetState( nSTANDALONE );
+                        //sn_SetNetState( nSTANDALONE );
                         goon = false;
                     }
                 }

@@ -5648,7 +5648,7 @@ void ePlayerNetID::TacticalPositioning() {
         // if position changed, send a message and store new one
         if ((p->tactical_pos != newTacticalPos) || ((p->closest_zoneid != newClosestZoneID) && (newTacticalPos>=6))) {
             nMachine const &machine = nMachine::GetMachine(p->Owner());
-            se_tacticalPositionWriter << p->GetUserName() << machine.GetIP() << TacPosStr;
+            se_tacticalPositionWriter << p->GetUserName() << TacPosStr;
             se_tacticalPositionWriter.write();
             p->tactical_pos = newTacticalPos;
             p->closest_zoneid = newClosestZoneID;

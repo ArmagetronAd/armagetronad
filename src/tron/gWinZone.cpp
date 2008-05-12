@@ -2363,6 +2363,10 @@ void gBaseZoneHack::OnConquest( void )
 	if ( team )
 	{
 		sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << GetPosition().x << GetPosition().y;
+		if ( enemies_.size() == 0 ) //no enemies inside
+		{
+			sg_basezoneConqueredWriter << "NO_ENEMYS";
+		}
 		sg_basezoneConqueredWriter.write();
 	}
 	float rr = GetRadius();
@@ -2415,7 +2419,6 @@ void gBaseZoneHack::OnConquest( void )
 		{
 			win << "$player_win_conquest";
 		}
-
 		int score = totalScore / enemies_.size();
 		for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
 		{
@@ -2424,14 +2427,12 @@ void gBaseZoneHack::OnConquest( void )
 			(*iter)->AddScore( score, win, tOutput() );
 		}
 	}
-
 	// trigger immediate win
 	if ( sg_onConquestWin && enemies_.size() > 0 )
 	{
 		static const char* message="$player_win_conquest";
 		sg_DeclareWinner( enemies_[0], message );
 	}
-
 	CheckSurvivor();
 }
 
