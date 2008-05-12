@@ -163,6 +163,8 @@ public:												// public methods
         return name;
     }
 
+    const tColoredString& GetColoredName();
+
     virtual void PrintName(tString &s) const;					// print out an understandable name in to s
 
 

@@ -32,6 +32,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <set>
 
+tColoredString & operator << ( tColoredString &s, eTeam * team)
+{
+    if ( !team )
+        return s << tOutput("$player_spectator_message");
+    else
+        return s << team->GetColoredName();
+}
+
 #define TEAMCOLORS 8
 
 static unsigned short se_team_rgb[TEAMCOLORS][3]=
@@ -1467,4 +1475,10 @@ void eTeam::Shuffle( int startID, int stopID )
     }
 }
 
-
+const tColoredString& eTeam::GetColoredName()
+{
+    tColoredString ret;
+    return ret << tColoredString::ColorString( R() / 15.0, G() / 15.0, B() / 15.0)
+        << Name()
+        << tColoredString::ColorString(-1, -1, -1);
+}

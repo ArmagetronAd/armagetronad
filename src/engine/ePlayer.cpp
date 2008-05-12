@@ -764,6 +764,8 @@ static bool se_CanHide ( ePlayerNetID const * hider )
     return hider->GetAccessLevel() <= se_hideAccessLevelOf;
 }
 
+#endif
+
 typedef bool (*CANHIDEFUNC)( ePlayerNetID const * hider );
 typedef bool (*HIDEFUNC)( ePlayerNetID const * hider, ePlayerNetID const * seeker );
 
@@ -806,6 +808,8 @@ void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, H
         }
     }
 }
+
+#ifdef KRAWALL_SERVER
 
 static eLadderLogWriter se_authorityBlurbWriter("AUTHORITY_BLURB", true);
 
@@ -1645,15 +1649,16 @@ static tColoredString se_BuildChatString( eTeam const *team, ePlayerNetID const 
     {
         // foo --> Teammates: some message here
         console << tColoredString::ColorString(1,1,.5) << " --> ";
-        console << tColoredString::ColorString(team->R(),team->G(),team->B()) << tOutput("$player_team_message");
+        // We don't << team here, because we want "Teammates" to show instead of the team name
+        console << tColoredString::ColorString( team->R() / 15.0, team->G() / 15.0, team->B() / 15.0 ) << tOutput("$player_team_message");
     }
     else {
         // foo (Red Team) --> Blue Team: some message here
         eTeam *senderTeam = sender->CurrentTeam();
         console << tColoredString::ColorString(1,1,.5) << " (";
-        console << tColoredString::ColorString(senderTeam->R(),senderTeam->G(),senderTeam->B()) << senderTeam->Name();
+        console << senderTeam;
         console << tColoredString::ColorString(1,1,.5) << ") --> ";
-        console << tColoredString::ColorString(team->R(),team->G(),team->B()) << team->Name();
+        console << team;
     }
 
     console << tColoredString::ColorString(1,1,.5) << ": ";
@@ -1879,15 +1884,15 @@ void se_SendTeamMessage( eTeam const * team, ePlayerNetID const * sender ,ePlaye
         else if (sender->CurrentTeam() == team) {
             // ( foo --> Teammates ) some message here
             say << tColoredString::ColorString(1,1,.5) << " --> ";
-            say << tColoredString::ColorString(team->R(),team->G(),team->B()) << tOutput("$player_team_message");;
+            say << tColoredString::ColorString(team->R()/15.0,team->G()/15.0,team->B()/15.0) << tOutput("$player_team_message");;
         }
         // ( foo (Blue Team) --> Red Team ) some message
         else {
             eTeam *senderTeam = sender->CurrentTeam();
             say << tColoredString::ColorString(1,1,.5) << " (";
-            say << tColoredString::ColorString(team->R(),team->G(),team->B()) << team->Name();
+            say << team;
             say << tColoredString::ColorString(1,1,.5) << " ) --> ";
-            say << tColoredString::ColorString(senderTeam->R(),senderTeam->G(),senderTeam->B()) << senderTeam->Name();
+            say << senderTeam;
         }
         say << tColoredString::ColorString(1,1,.5) << " ) ";
         say << message;
@@ -2866,9 +2871,7 @@ static void se_ListTeam( ePlayerNetID * receiver, eTeam * team )
     std::ostringstream tos;
 
     // send team name
-    tColoredString teamName;
-    teamName << tColoredStringProxy( team->R()/15.0f, team->G()/15.0f, team->B()/15.0f ) << team->Name();
-    tos << teamName << "0xRESETT";
+    tos << team;
     if ( team->IsLocked() )
     {
         tos << " " << tOutput( "$invite_team_locked_list" );
@@ -2961,6 +2964,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
                 << " ( ";
             if ( hidden )
                 tos << se_hiddenPlayerPrefix;
+#ifdef KRAWALL_SERVER
             tos << p2->GetFilteredAuthenticatedName();
             if ( hidden )
                 tos << tColoredString::ColorString( -1 ,-1 ,-1 )
@@ -2968,6 +2972,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
                     << se_hiddenPlayerPrefix;
             else
                 tos << ", ";
+#endif
             tos << tCurrentAccessLevel::GetName( p2->GetAccessLevel() );
             if ( hidden )
                 tos << tColoredString::ColorString( -1 ,-1 ,-1 );
