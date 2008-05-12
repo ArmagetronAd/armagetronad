@@ -107,6 +107,7 @@ tString sn_serverName("Unnamed Server");
 
 const unsigned int sn_defaultPort = 4534;
 unsigned int sn_serverPort = 4534;
+bool sn_decorateTS = false;
 
 tString net_hostip("ANY");
 
@@ -2806,7 +2807,6 @@ static tConfItem< short > sn_decorateIDConf( "CONSOLE_DECORATE_ID", sn_decorateI
 static short sn_decorateIP = false;
 static tConfItem< short > sn_decorateIPConf( "CONSOLE_DECORATE_IP", sn_decorateIP );
 
-bool sn_decorateTS = false;
 static tConfItem< bool > sn_decorateTSConf( "CONSOLE_DECORATE_TIMESTAMP", sn_decorateTS );
 
 // console with filter for better machine readable log format

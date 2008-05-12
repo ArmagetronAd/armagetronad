@@ -64,6 +64,8 @@ extern const unsigned int sn_defaultPort; // default port a server listens on
 
 extern int sn_defaultDelay;
 
+extern  bool sn_decorateTS;
+
 extern tString sn_DenyReason;		// the reason the server gave for sending a login_deny packet
 
 // rate control
