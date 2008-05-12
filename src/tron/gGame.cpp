@@ -1462,6 +1462,9 @@ void init_game_objects(eGrid *grid){
       static REAL g[MAX_PLAYERS]={.2,1,.2,1};
       static REAL b[MAX_PLAYERS]={.2,.2,1,.2};
     */
+ // 0 loser first 1 winners first
+static int sg_spawnWinnersFirst = 0;
+static tSettingItem<int> sg_spawnWinnersFirstConf( "SPAWN_WINNERS_FIRST", sg_spawnWinnersFirst);
 
     if (sn_GetNetState()!=nCLIENT)
     {
@@ -1473,7 +1476,13 @@ void init_game_objects(eGrid *grid){
         int spawnPointsUsed = 0;
         for(int t=eTeam::teams.Len()-1;t>=0;t--)
         {
-            eTeam *team = eTeam::teams(t);
+           int z;
+        if (sg_spawnWinnersFirst == 1){
+           z =(-1*t)+ eTeam::teams.Len()-1;
+      }else{
+         z =t;
+      }
+            eTeam *team = eTeam::teams(z);
             team->Update();
 
             gSpawnPoint *spawn = Arena.LeastDangerousSpawnPoint();
@@ -1486,7 +1495,7 @@ void init_game_objects(eGrid *grid){
                 // the next spawn point is the last of this group. Skip it if
                 // either only two players are left (and the one would need to play alone)
                 // or we can fill the remaining groups well with one player short.
-                if ( t == 2 || ( ( t % ( sg_spawnPointGroupSize - 1 ) ) == 0 && t < ( sg_spawnPointGroupSize - 1 ) * ( sg_spawnPointGroupSize - 1 ) ) )
+                if ( z == 2 || ( ( z % ( sg_spawnPointGroupSize - 1 ) ) == 0 && z < ( sg_spawnPointGroupSize - 1 ) * ( sg_spawnPointGroupSize - 1 ) ) )
                 {
                     eCoord pos, dir;
                     spawn->Spawn( pos, dir );
@@ -3341,7 +3350,7 @@ void gGame::StateUpdate(){
                 // log scores before players get renamed
                 ePlayerNetID::LogScoreDifferences();
 
-                ePlayerNetID::RankingLadderLog();
+                //ePlayerNetID::RankingLadderLog();
 
                 sg_roundCommencingWriter << rounds+1 << sg_currentSettings->limitRounds;
                 sg_roundCommencingWriter.write();
@@ -3966,6 +3975,8 @@ void gGame::Analysis(REAL time){
                             message << "$gamestate_champ_default";
                         }
 
+						ePlayerNetID::LogMatchScores();
+						
                         se_SaveToScoreFile(message);
                         se_SaveToScoreFile("$gamestate_champ_finalscores");
                         se_SaveToScoreFile(eTeam::Ranking( -1, false ));

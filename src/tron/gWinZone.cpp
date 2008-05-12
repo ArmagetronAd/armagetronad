@@ -1565,6 +1565,8 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 				return;
 			}
 			if (target->Player()->CurrentTeam() == team) return;
+			target->Player()->AddScore(score_deathzone, tOutput(), "$player_lose_suicide");
+			target->Kill();
 		}
 
 		//Validate the owner player ID

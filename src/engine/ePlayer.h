@@ -325,6 +325,7 @@ public:
     static void LogScoreDifferences();   //<! Logs accumulated scores of all players since the last call to ResetScoreDifferences() to ladderlog.txt
     static void UpdateSuspensions();     //<! Decrements the number of rounds players are suspended for
     void LogScoreDifference();           //<! Logs accumulated scores since the last call to ResetScoreDifferences() to ladderlog.txt
+    static void LogMatchScores();         //<! Logs match scores of all players to ladderlog.txt
 
     static void SortByScore(); // brings the players into the right order
     static tString Ranking( int MAX=12, bool cut = true );     // returns a ranking list

@@ -459,6 +459,22 @@ void eTeam::LogScoreDifferences( void )
     }
 }
 
+static eLadderLogWriter se_matchScoreTeamWriter("MATCH_SCORE_TEAM", true);
+
+void eTeam::LogMatchScores( void )
+{
+    for ( int i = teams.Len()-1; i>=0; --i )
+    {
+        eTeam* t = teams(i);
+		if ( t->IsHuman() )
+		{
+			se_matchScoreTeamWriter << t->score << ePlayerNetID::FilterName( t->Name() );
+			se_matchScoreTeamWriter.write();
+		}
+    }
+}
+
+
 // *******************************************************************************
 // *
 // *	LogScoreDifference

@@ -5504,6 +5504,9 @@ void ePlayerNetID::RankingLadderLog() {
 
         se_onlinePlayerWriter << p->GetLogName();
 
+		// add player color to the message
+		se_onlinePlayerWriter << p->r << p->g << p->b;
+
         if(p->IsActive()) {
             se_onlinePlayerWriter << p->ping;
             if(p->currentTeam) {
@@ -8074,6 +8077,24 @@ void ePlayerNetID::LogScoreDifferences( void )
     }
 
     eTeam::LogScoreDifferences();
+}
+
+static eLadderLogWriter se_matchScoreWriter("MATCH_SCORE", true);
+
+void ePlayerNetID::LogMatchScores( void )
+{
+    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+    {
+        ePlayerNetID* p = se_PlayerNetIDs(i);
+        if (p->IsHuman()) {
+			se_matchScoreWriter << p->score << p->GetUserName();
+			if ( p->currentTeam )
+				se_matchScoreWriter << FilterName( p->currentTeam->Name() );
+			se_matchScoreWriter.write();
+		}
+    }
+
+    eTeam::LogMatchScores();
 }
 
 void ePlayerNetID::UpdateSuspensions() {

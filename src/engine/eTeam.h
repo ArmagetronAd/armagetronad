@@ -130,6 +130,7 @@ public:												// public methods
     static void ResetScoreDifferences(); //<! Resets the last stored score so ScoreDifferences takes this as a reference time
     static void LogScoreDifferences();   //<! Logs accumulated scores of all players since the last call to ResetScoreDifferences() to ladderlog.txt
     void LogScoreDifference();           //<! Logs accumulated scores since the last call to ResetScoreDifferences() to ladderlog.txt
+    static void LogMatchScores();        //<! Logs scores of all teams to ladderlog.txt
 
     // player inquiry
     int	 			NumPlayers		(		) const {
