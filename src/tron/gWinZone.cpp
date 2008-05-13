@@ -2305,6 +2305,7 @@ static eLadderLogWriter sg_deathBasezoneConqueredWriter("DEATH_BASEZONE_CONQUERE
 
 void gBaseZoneHack::OnVanish( void )
 {
+	
 	if (!team)
 		return;
 
@@ -2348,6 +2349,11 @@ void gBaseZoneHack::OnVanish( void )
 				sg_deathBasezoneConqueredWriter.write();
 			}
 		}
+	}
+	// the zone has been abandoned.
+	if ( currentState_ != State_Safe && ( enemies_.size() == 0 || sg_defendRate < 0 ) )
+	{
+		sg_deathBasezoneConqueredWriter.write();
 	}
 }
 
