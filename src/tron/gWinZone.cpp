@@ -4594,7 +4594,7 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
 		winner_ = firstPlayer_;
 		// send on enter commands ...
 		std::istringstream stream(&OnEnterCmd(0));
-		tConfItemBase::LoadLine(stream);
+		tConfItemBase::LoadAll(stream);
 	}
 
 	// Check if player already entered this zone
@@ -4641,7 +4641,7 @@ void gTargetZoneHack::OnVanish( void )
 {
 	// send on vanish commands ...
 	std::istringstream stream(&OnVanishCmd(0));
-    tConfItemBase::LoadLine(stream);
+    tConfItemBase::LoadAll(stream);
 
 	// check if we have a winner ...
 	if (sg_targetIsWinzone && (TargetZoneCounter_==1) && firstPlayer_)
@@ -5296,8 +5296,13 @@ static void sg_SetTargetCmd(std::istream &s)
 		gTargetZoneHack *zone=dynamic_cast<gTargetZoneHack *>(gameObjects(zone_id));
 		if (zone)
 		{
-			if (mode_str=="onenter") zone->SetOnEnterCmd(cmd_str, mode_str);
-			else if (mode_str=="onvanish") zone->SetOnVanishCmd(cmd_str, mode_str);
+			if (event_str=="onenter") {
+				zone->SetOnEnterCmd(cmd_str, mode_str);
+				con << "Zone " << zone->GOID() << " command onenter '" << cmd_str << "'\n";
+			} else if (event_str=="onvanish") {
+				zone->SetOnVanishCmd(cmd_str, mode_str);
+				con << "Zone " << zone->GOID() << " command onvanish '" << cmd_str << "'\n";
+			}
 			zone_id=gZone::FindNext(object_id_str, zone_id);
 		}
 	}
