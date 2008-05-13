@@ -1557,14 +1557,17 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 	}
 	else
 	{
-		// check normal death zone linked to a team ...
-		if (deathZoneType == TYPE_NORMAL && team)
-		{
-			if ((!target) || (!target->Player()))
+
+		if (deathZoneType == TYPE_NORMAL)
+			// check normal death zone linked to a team ...
+			if (team)
 			{
-				return;
+				if ((!target) || (!target->Player()))
+				{
+					return;
+				}
+				if (target->Player()->CurrentTeam() == team) return;
 			}
-			if (target->Player()->CurrentTeam() == team) return;
 			target->Player()->AddScore(score_deathzone, tOutput(), "$player_lose_suicide");
 			target->Kill();
 		}

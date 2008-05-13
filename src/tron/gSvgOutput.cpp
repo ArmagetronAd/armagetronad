@@ -105,12 +105,12 @@ void SvgOutput::DrawWalls(tList<gNetPlayerWall> &list) {
         gNetPlayerWall *wall = list[i];
         gCycle *cycle = wall->Cycle();
         if(!cycle) continue;
-        double wallsLength = cycle->ThisWallsLength();
         double alpha = 1;
         if(!cycle->Alive() && wallsStayUpDelay >= 0) {
             alpha -= 2 * (currentTime - cycle->DeathTime() - wallsStayUpDelay);
             if(alpha <= 0) continue;
         }
+        double wallsLength = cycle->ThisWallsLength();
         double cycleDist = cycle->GetDistance();
         double minDist = limitedLength && cycleDist > wallsLength ? cycleDist - wallsLength : 0;
         const eCoord &begPos = wall->EndPoint(0), &endPos = wall->EndPoint(1);
