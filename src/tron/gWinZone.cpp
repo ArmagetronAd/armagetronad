@@ -1557,14 +1557,17 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 	}
 	else
 	{
-		// check normal death zone linked to a team ...
-		if (deathZoneType == TYPE_NORMAL && team)
-		{
-			if ((!target) || (!target->Player()))
+
+		if (deathZoneType == TYPE_NORMAL) {
+			// check normal death zone linked to a team ...
+			if (team)
 			{
-				return;
+				if ((!target) || (!target->Player()))
+				{
+					return;
+				}
+				if (target->Player()->CurrentTeam() == team) return;
 			}
-			if (target->Player()->CurrentTeam() == team) return;
 			target->Player()->AddScore(score_deathzone, tOutput(), "$player_lose_suicide");
 			target->Kill();
 		}
@@ -4585,6 +4588,9 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
 		// keep winner ...
 		winnerTime_ = timeFirstEntry_;
 		winner_ = firstPlayer_;
+		// send on enter commands ...
+		std::istringstream stream(&OnEnterCmd(0));
+		tConfItemBase::LoadLine(stream);
 	}
 
 	// Check if player already entered this zone
@@ -4629,6 +4635,10 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
 
 void gTargetZoneHack::OnVanish( void )
 {
+	// send on vanish commands ...
+	std::istringstream stream(&OnVanishCmd(0));
+    tConfItemBase::LoadLine(stream);
+
 	// check if we have a winner ...
 	if (sg_targetIsWinzone && (TargetZoneCounter_==1) && firstPlayer_)
 	{
@@ -5193,7 +5203,6 @@ static void sg_SetZoneRadius(std::istream &s)
 	}
 }
 
-
 static tConfItemFunc sg_SetZoneRadius_conf("SET_ZONE_RADIUS",&sg_SetZoneRadius);
 
 static void sg_SetZoneRoute(std::istream &s)
@@ -5250,5 +5259,44 @@ static void sg_SetZoneRoute(std::istream &s)
 	}
 }
 
-
 static tConfItemFunc sg_SetZoneRoute_conf("SET_ZONE_POSITION",&sg_SetZoneRoute);
+
+static void sg_SetTargetCmd(std::istream &s)
+{
+	tString params;
+	params.ReadLine( s, true );
+
+	// first parse the line to get the param : object_id
+	int pos = 0;				 //
+	const tString object_id_str = params.ExtractNonBlankSubString(pos);
+	tString event_str = params.ExtractNonBlankSubString(pos);
+	tString mode_str("new");
+	if (event_str=="add") {
+		mode_str = tString("add");
+		event_str = params.ExtractNonBlankSubString(pos);
+	}
+	tString cmd_str = params.SubStr(pos);
+	// first check for the name
+	int zone_id;
+	zone_id=gZone::FindFirst(object_id_str);
+	if (zone_id==-1)
+	{
+		zone_id = atoi(object_id_str);
+		if (zone_id==0 && object_id_str!="0") return;
+	}
+
+	const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+	while (zone_id!=-1)
+	{
+		// get the zone ...
+		gTargetZoneHack *zone=dynamic_cast<gTargetZoneHack *>(gameObjects(zone_id));
+		if (zone)
+		{
+			if (mode_str=="onenter") zone->SetOnEnterCmd(cmd_str, mode_str);
+			else if (mode_str=="onvanish") zone->SetOnVanishCmd(cmd_str, mode_str);
+			zone_id=gZone::FindNext(object_id_str, zone_id);
+		}
+	}
+}
+
+static tConfItemFunc sg_SetTargetCmd_conf("SET_TARGET_COMMAND",&sg_SetTargetCmd);

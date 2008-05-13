@@ -505,6 +505,10 @@ class gTargetZoneHack: public gZone
 			State_Conquered		 //!< conquered
 		};
 		State currentState_;	 //!< the current state
+		tString OnEnterCmd, OnVanishCmd; //!< commands to be parse when the first player enter the target and when the target vanish
+	public:
+		void SetOnEnterCmd(tString &cmd, tString &mode) {if (mode=="add") OnEnterCmd << "\n" << cmd; else OnEnterCmd = cmd;};
+		void SetOnVanishCmd(tString &cmd, tString &mode) {if (mode=="add") OnVanishCmd << "\n" << cmd; else OnVanishCmd = cmd;};
 };
 
 class gBlastZoneHack: public gZone
