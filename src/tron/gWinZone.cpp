@@ -1547,7 +1547,7 @@ gCycle * gDeathZoneHack::getPlayerCycle(ePlayerNetID *pPlayer)
 //!		@param	time    the current time
 //!
 // *******************************************************************************
-
+static eLadderLogWriter sg_deathDeathZoneWriter("DEATH_DEATHZONE", true);
 void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 {
 	if (!dynamicCreation_)
@@ -1570,6 +1570,8 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 			}
 			target->Player()->AddScore(score_deathzone, tOutput(), "$player_lose_suicide");
 			target->Kill();
+			sg_deathDeathZoneWriter << ePlayerNetID::FilterName(target->Player()->GetUserName());
+			sg_deathDeathZoneWriter.write();
 		}
 
 		//Validate the owner player ID
