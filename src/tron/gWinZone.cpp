@@ -1550,28 +1550,24 @@ gCycle * gDeathZoneHack::getPlayerCycle(ePlayerNetID *pPlayer)
 static eLadderLogWriter sg_deathDeathZoneWriter("DEATH_DEATHZONE", true);
 void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 {
-	if (!dynamicCreation_)
+	if (!dynamicCreation_ || ( deathZoneType == TYPE_NORMAL && !team ) )
 	{
-		target->Player()->AddScore(score_deathzone, tOutput(), "$player_lose_suicide");
+		target->Player()->AddScore(score_deathzone, tOutput(), "$player_lose_deathzone");
 		target->Kill();
+		sg_deathDeathZoneWriter << ePlayerNetID::FilterName(target->Player()->GetUserName());
+		sg_deathDeathZoneWriter.write();
 	}
 	else
 	{
 
-		if (deathZoneType == TYPE_NORMAL) {
-			// check normal death zone linked to a team ...
-			if (team)
+		// check normal death zone linked to a team ...
+		if (team && deathZoneType == TYPE_NORMAL)
+		{
+			if ((!target) || (!target->Player()))
 			{
-				if ((!target) || (!target->Player()))
-				{
-					return;
-				}
-				if (target->Player()->CurrentTeam() == team) return;
+				return;
 			}
-			target->Player()->AddScore(score_deathzone, tOutput(), "$player_lose_suicide");
-			target->Kill();
-			sg_deathDeathZoneWriter << ePlayerNetID::FilterName(target->Player()->GetUserName());
-			sg_deathDeathZoneWriter.write();
+			if (target->Player()->CurrentTeam() == team) return;
 		}
 
 		//Validate the owner player ID
