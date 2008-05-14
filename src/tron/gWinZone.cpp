@@ -2312,7 +2312,7 @@ void gBaseZoneHack::OnVanish( void )
 	CheckSurvivor();
 
 	// kill the closest owners of the zone
-	if ( currentState_ != State_Safe && ( enemies_.size() > 0 || sg_defendRate < 0 ) )
+	if ( currentState_ != State_Safe )
 	{
 		int kills = int( sg_onConquestKillRatio * team->NumPlayers() );
 		kills = kills > sg_onConquestKillMin ? kills : sg_onConquestKillMin;
@@ -2343,17 +2343,19 @@ void gBaseZoneHack::OnVanish( void )
 
 			if ( closest )
 			{
-				sn_ConsoleOut( tOutput("$player_kill_collapse", closest->GetName() ) );
-				closest->Object()->Kill();
 				sg_deathBasezoneConqueredWriter << ePlayerNetID::FilterName(closest->GetUserName());
+				if ( enemies_.size() > 0 || sg_defendRate < 0)
+				{
+					sn_ConsoleOut( tOutput("$player_kill_collapse", closest->GetName() ) );
+					closest->Object()->Kill();
+				}
+				else
+				{
+					sg_deathBasezoneConqueredWriter << "NO_ENEMIES";
+				}
 				sg_deathBasezoneConqueredWriter.write();
 			}
 		}
-	}
-	// the zone has been abandoned.
-	if ( currentState_ != State_Safe && ( enemies_.size() == 0 || sg_defendRate < 0 ) )
-	{
-		sg_deathBasezoneConqueredWriter.write();
 	}
 }
 
