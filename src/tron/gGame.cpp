@@ -1338,7 +1338,7 @@ static void sg_copySettings()
 {
     eTeam::minTeams					= sg_currentSettings->minTeams;
     eTeam::maxTeams					= sg_currentSettings->maxTeams;
-    eTeam::maxPlayers				= sg_currentSettings->maxPlayersPerTeam;
+    eTeam::maxPlayers				= (sg_currentSettings->maxPlayersPerTeam)? sg_currentSettings->maxPlayersPerTeam : 1;
     eTeam::minPlayers				= sg_currentSettings->minPlayersPerTeam;
     eTeam::maxImbalance			 	= sg_currentSettings->maxTeamImbalance;
     eTeam::balanceWithAIs			= sg_currentSettings->balanceTeamsWithAIs;
