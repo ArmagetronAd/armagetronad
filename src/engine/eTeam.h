@@ -163,7 +163,7 @@ public:												// public methods
         return name;
     }
 
-    const tColoredString& GetColoredName();
+    tColoredString GetColoredName(void) const;
 
     virtual void PrintName(tString &s) const;					// print out an understandable name in to s
 

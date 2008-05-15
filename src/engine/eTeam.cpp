@@ -39,6 +39,13 @@ tColoredString & operator << ( tColoredString &s, eTeam * team)
     else
         return s << team->GetColoredName();
 }
+std::ostream & operator << ( std::ostream &s, eTeam * team)
+{
+    if ( !team )
+        return s << tOutput("$player_spectator_message");
+    else
+        return s << team->GetColoredName();
+}
 
 #define TEAMCOLORS 8
 
@@ -1475,7 +1482,7 @@ void eTeam::Shuffle( int startID, int stopID )
     }
 }
 
-const tColoredString& eTeam::GetColoredName()
+tColoredString eTeam::GetColoredName(void) const
 {
     tColoredString ret;
     return ret << tColoredString::ColorString( R() / 15.0, G() / 15.0, B() / 15.0)

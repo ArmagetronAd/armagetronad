@@ -2871,7 +2871,7 @@ static void se_ListTeam( ePlayerNetID * receiver, eTeam * team )
     std::ostringstream tos;
 
     // send team name
-    tos << team;
+    tos << team->GetColoredName();
     if ( team->IsLocked() )
     {
         tos << " " << tOutput( "$invite_team_locked_list" );
