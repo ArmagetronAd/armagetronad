@@ -781,8 +781,8 @@ void se_UnSuspendVotes( std::istream & s )
     se_votesSuspend( 0, true, s );
 }
 
-static tConfItemFunc se_suspendVotes_conf( "VOTING_SUSPEND", &se_SuspendVotes );
-static tConfItemFunc se_unSuspendVotes_conf( "VOTING_UNSUSPEND", &se_UnSuspendVotes );
+static tConfItemFunc se_suspendVotes_conf( "VOTES_SUSPEND", &se_SuspendVotes );
+static tConfItemFunc se_unSuspendVotes_conf( "VOTES_UNSUSPEND", &se_UnSuspendVotes );
 
 
 static nDescriptor vote_handler(230,eVoteItem::GetControlMessage,"vote cast");

@@ -476,9 +476,9 @@ voting_kick_time_help               The minimum time in seconds between two kick
 voting_maturity_help                The minimum time in seconds a player needs to be online with the same name before he can issue votes.
 voting_suspend_rounds_help          The number of rounds "/vote suspend <player>" suspends a player for.
 voting_kick_minharm_help            Minimal number of harmful votes (suspension, kick,..) that need to have been issued (success is not required) against a player before a kick vote issued via the menu really results in a kick; otherwise, the result is a simple suspension.
-voting_suspend_help		    Suspends voting for n minutes.
-voting_suspend_default_help	    Default value for VOTING_SUSPEND.
-voting_unsuspend_help		    Allows voting again.
+votes_suspend_help		    Suspends voting for n minutes.
+votes_suspend_default_help	    Default value for VOTES_SUSPEND.
+votes_unsuspend_help		    Allows voting again.
 voting_suspended		    Voting has been suspended for the next \1 minutes.\n
 voting_unsuspended		    Voting is allowed again.\n
 vote_rejected_voting_suspended		    Voting has been suspended by the Administrator.\n
