@@ -413,7 +413,7 @@ void eTeam::AddScore(int points,
     score += points;
 
     tOutput message;
-    message.SetTemplateParameter(1, tColoredString::RemoveColors(name));
+    message.SetTemplateParameter(1, GetColoredName());
     message.SetTemplateParameter(2, points > 0 ? points : -points);
 
     if (points>0)

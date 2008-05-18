@@ -901,7 +901,7 @@ bool gBaseZoneHack::Timestep( REAL time )
                     }
                     else
                     {
-                        sn_ConsoleOut( tOutput( "$zone_collapse_harmless", team->Name()  ) );
+                        sn_ConsoleOut( tOutput( "$zone_collapse_harmless", team->GetColoredName()  ) );
                     }
                 }
                 conquered_ = 1.0;
@@ -980,7 +980,10 @@ void gBaseZoneHack::OnVanish( void )
 
             if ( closest )
             {
-                sn_ConsoleOut( tOutput("$player_kill_collapse", closest->GetName() ) );
+                tColoredString playerName;
+                playerName = closest->GetColoredName();
+                playerName << tColoredStringProxy(-1,-1,-1);
+                sn_ConsoleOut( tOutput("$player_kill_collapse", playerName ) );
                 closest->Object()->Kill();
             }
         }
@@ -1045,7 +1048,7 @@ void gBaseZoneHack::OnConquest( void )
         tOutput win;
         if ( team )
         {
-            win.SetTemplateParameter( 3, team->Name() );
+            win.SetTemplateParameter( 3, team->GetColoredName() );
             win << "$player_win_conquest_specific";
         }
         else
