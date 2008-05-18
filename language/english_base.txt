@@ -2273,7 +2273,9 @@ spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
 spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
 spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in order to chat publically.\n
 player_silenced         \10xff7777 has been silenced.\n
+player_silenced_local   \10xff7777 has been locally silenced.\n
 player_voiced           \10x77ff77 has been given his voice back.\n
+player_voiced_local     \10x77ff77 has been locally voiced.\n
 player_allowed_teamchange \10x77ff77 has been allowed to change his team.\n
 player_disallowed_teamchange \10xff7777 cannot change teams anymore.\n
 vote_spam_protection	VOTE SPAM PROTECTION: you are disallowed from issuing votes for the next \1 seconds.\n

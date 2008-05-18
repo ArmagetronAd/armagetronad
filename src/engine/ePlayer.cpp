@@ -1632,7 +1632,7 @@ ePlayerNetID * CompareBufferToPlayerNames
 
 ePlayerNetID * ePlayerNetID::FindPlayerByName( tString const & name, ePlayerNetID * requester )
 {
-   int num_matches = 0;
+    int num_matches = 0;
 
     // try filtering the names before comparing them, this makes the matching case-insensitive
     SE_NameFilter Filter = &ePlayerNetID::FilterName;
@@ -7225,21 +7225,26 @@ static ePlayerNetID * ReadPlayer( std::istream & s )
     tString name;
     s >> name;
 
-    int num = name.ToInt();
-    if ( num > 0 )
+    try
     {
-        // look for a player from that client
-        for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
-        {
-            ePlayerNetID* p = se_PlayerNetIDs(i);
+        int num = name.ToInt();
 
-            // check whether it's p who should be returned
-            if ( p->Owner() == num )
+        if ( num > 0 )
+        {
+            // look for a player from that client
+            for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
             {
-                return p;
+                ePlayerNetID* p = se_PlayerNetIDs(i);
+
+                // check whether it's p who should be returned
+                if ( p->Owner() == num )
+                {
+                    return p;
+                }
             }
         }
-    }
+    // name.ToInt will throw a tGenericException when name doesn't look like an int, but it's not fatal, so we will just go on
+    } catch ( tGenericException ) {}
 
     return ePlayerNetID::FindPlayerByName( name );
 }
@@ -7333,17 +7338,17 @@ static tAccessLevelSetter se_unsuspendConfLevel( unsuspend_conf, tAccessLevel_Mo
 
 static void Silence_conf(std::istream &s)
 {
-    if ( se_NeedsServer( "SILENCE", s ) )
-    {
-        return;
-    }
-
     ePlayerNetID * p = ReadPlayer( s );
     if ( p && !p->IsSilenced() )
     {
-        sn_ConsoleOut( tOutput( "$player_silenced", p->GetColoredName() ) );
+#ifndef DEDICATED
+        if ( sn_GetNetState() == nCLIENT )
+            sn_ConsoleOut( tOutput( "$player_silenced_local", p->GetColoredName() ) );
+        else
+#endif
+            sn_ConsoleOut( tOutput( "$player_silenced", p->GetColoredName() ) );
         p->SetSilenced( true );
-    }
+    }    
 }
 
 static tConfItemFunc silence_conf("SILENCE",&Silence_conf);
@@ -7351,15 +7356,15 @@ static tAccessLevelSetter se_silenceConfLevel( silence_conf, tAccessLevel_Modera
 
 static void Voice_conf(std::istream &s)
 {
-    if ( se_NeedsServer( "VOICE", s ) )
-    {
-        return;
-    }
-
     ePlayerNetID * p = ReadPlayer( s );
     if ( p && p->IsSilenced() )
     {
-        sn_ConsoleOut( tOutput( "$player_voiced", p->GetColoredName() ) );
+#ifndef DEDICATED
+        if ( sn_GetNetState() == nCLIENT )
+            sn_ConsoleOut( tOutput( "$player_voiced_local", p->GetColoredName() ) );
+        else
+#endif
+            sn_ConsoleOut( tOutput( "$player_voiced", p->GetColoredName() ) );
         p->SetSilenced( false );
     }
 }
