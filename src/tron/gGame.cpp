@@ -4059,10 +4059,10 @@ void gGame::StartNewMatch(){
 }
 
 void gGame::StartNewMatchNow(){
-    if ( rounds != 0 )
+    if ( rounds != 0 ) {
         sg_newMatchWriter << sg_GetCurrentTime("%Y-%m-%d %H:%M:%S");
         sg_newMatchWriter.write();
-
+	}
     rounds=0;
     warning=0;
     startTime=tSysTimeFloat()-10;
