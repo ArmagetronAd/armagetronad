@@ -53,6 +53,8 @@ std::ofstream SvgOutput::svgFile;
 long SvgOutput::afterRimWallsPos;
 float SvgOutput::lx, SvgOutput::ly, SvgOutput::hx, SvgOutput::hy;
 float SvgOutput::w, SvgOutput::h, SvgOutput::cx, SvgOutput::cy;
+static bool sg_svgTransparentBackground=false;
+static tSettingItem< bool > sg_svgTransparentBackgroundConf( "SVG_TRANSPARENT_BACKGROUND", sg_svgTransparentBackground);
 
 void SvgOutput::WriteSvgHeader() {
     // Assume the file is already open
@@ -61,12 +63,13 @@ void SvgOutput::WriteSvgHeader() {
                "<svg xmlns:xlink='http://www.w3.org/1999/xlink' width=\"100%\" height=\"100%\" version=\"1.1\" viewBox=\""
             << lx   << " " << -hy    << " "
             << hx-lx << " " << hy-ly
-            << "\" xmlns=\"http://www.w3.org/2000/svg\">\n"
-               "<rect x=\"" << lx << "\" y=\"" << -hy << "\" width=\"" << hx-lx << "\" height=\"" << hy-ly
-            << "\" stroke=\"none\" fill=\"#222\" />\n\n"
-
-               "<defs>\n"
-               "\t<polygon id='cycle' stroke='none' points='4,0 0,2 0,-2' />\n"
+            << "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
+			if ( !sg_svgTransparentBackground ) {
+				svgFile << "<rect x=\"" << lx << "\" y=\"" << -hy << "\" width=\"" << hx-lx << "\" height=\"" << hy-ly
+					<< "\" stroke=\"none\" fill=\"#222\" />\n\n";
+			}
+     svgFile << "<defs>\n"
+			   "\t<polygon id='cycle' stroke='none' points='4,0 0,2 0,-2' />\n"
                "\t<filter x=\"" << lx << "\" y=\"" << -hy << "\" width=\"" << hx-lx << "\" height=\"" << hy-ly << "\" id='wallsFilter' filterUnits='userSpaceOnUse'>\n"
                "\t\t<feGaussianBlur in='SourceAlpha' stdDeviation='1' />\n"
                "\t\t<feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0  0 0 0 0 1' />\n"
