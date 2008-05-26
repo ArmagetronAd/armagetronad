@@ -5567,8 +5567,13 @@ static int se_pingCharityMax = 500, se_pingCharityMin = 0;
 static tSettingItem<int> se_pingCharityMaxConf( "PING_CHARITY_MAX", se_pingCharityMax );
 static tSettingItem<int> se_pingCharityMinConf( "PING_CHARITY_MIN", se_pingCharityMin );
 
-static bool se_ForceSpectate( REAL time, REAL minTime, char const * message, char const * & cantPlayMessage, int & experienceNeeded )
+static bool se_ForceSpectate( REAL & time, REAL minTime, char const * message, char const * & cantPlayMessage, int & experienceNeeded )
 {
+    if ( time < 0 )
+    {
+        time = 0;
+    }
+
     if ( time >= minTime )
     {
         return false;
