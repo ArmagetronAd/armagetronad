@@ -2279,6 +2279,10 @@ player_flag_cant_score		\1 took the flag home, but their flag isn't back yet. Ge
 player_flag_hold_score_win	\1 got \2 points for holding the flag!\n
 player_flag_hold_score_lose	\1 lost \2 points for holding the flag!\n
 
+player_target_score_win         \1 got \2 points for entering a target.\n
+player_target_score_lose        \1 lost \2 points for entering a target.\n
+player_target_win_conquest      \1 win round for being the first to get the last target.\n
+
 player_base_respawn		\1 was respawned by \2.\n
 player_base_enemy_respawn	\1 was respawned by their enemy \2.\n
 player_base_enemy_kill		\1 forgot which team they're on...\n
