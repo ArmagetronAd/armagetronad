@@ -1640,7 +1640,7 @@ static tColoredString se_BuildChatString( eTeam const *team, ePlayerNetID const 
     tColoredString console;
     console << *sender;
 
-    if( !sender->CurrentTeam() )
+    if( !team )
     {
         // foo --> Spectatos: message
         console << tColoredString::ColorString(1,1,.5) << " --> " << tOutput("$player_spectator_message");
@@ -1658,7 +1658,7 @@ static tColoredString se_BuildChatString( eTeam const *team, ePlayerNetID const 
         console << tColoredString::ColorString(1,1,.5) << " (";
         console << senderTeam;
         console << tColoredString::ColorString(1,1,.5) << ") --> ";
-        console << team;
+        console << team->GetColoredName();
     }
 
     console << tColoredString::ColorString(1,1,.5) << ": ";
@@ -1876,7 +1876,9 @@ void se_SendTeamMessage( eTeam const * team, ePlayerNetID const * sender ,ePlaye
         tColoredString say;
         say << tColoredString::ColorString(1,1,.5) << "( " << *sender;
 
-        if( !sender->CurrentTeam() )
+	con << team->Name() << "\n";
+
+        if( !team )
         {
             // foo --> Spectatos: message
             say << tColoredString::ColorString(1,1,.5) << " --> " << tOutput("$player_spectator_message");
@@ -2758,11 +2760,16 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
             ePlayerNetID * admin = se_PlayerNetIDs(i);
 
             if (
-                // well, you have to be a spectator. No spying on the enemy.
-                se_GetManagedTeam( admin ) == 0 && admin != p &&
-                (
-                    // let spectating admins of sufficient rights eavesdrop
-                    admin->GetAccessLevel() <=  se_teamSpyAccessLevel ||
+                // two cases:
+                   (
+                    // You are a speccing admin, and you aren't invited to anything:
+                    se_GetManagedTeam( admin ) == 0 &&
+                    admin != p &&
+                    admin->GetAccessLevel() <=  se_teamSpyAccessLevel
+                    ) ||
+                   (
+                    // You are invited and spectating
+                    admin->CurrentTeam() == NULL &&
                     // invited players are also authorized
                     currentTeam->IsInvited( admin )
                     )
