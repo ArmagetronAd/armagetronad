@@ -541,7 +541,7 @@ void nLoginProcess::FetchInfoFromAuthority()
     nMemberFunctionRunner::ScheduleForeground( *this, &nLoginProcess::QueryFromClient );
 }
 
-static bool sn_supportRemoteLogins = false;
+bool sn_supportRemoteLogins = false;
 static tSettingItem< bool > sn_supportRemoteLoginsConf( "GLOBAL_ID", sn_supportRemoteLogins );
 
 // legal characters in authority hostnames(besides alnum and dots)

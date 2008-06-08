@@ -1606,6 +1606,8 @@ void nServerInfo::GetFromLANContinuouslyStop()
     sn_SetNetState(nSTANDALONE);
 }
 
+extern bool sn_supportRemoteLogins; // nAuthentication.cpp
+
 void nServerInfo::TellMasterAboutMe(nServerInfoBase *masterInfo)
 {
     // don't reinitialize the network system
@@ -1661,8 +1663,9 @@ void nServerInfo::TellMasterAboutMe(nServerInfoBase *masterInfo)
             }
         }
 
-        // try a generic socket next ( a shot in the dark, but worth a try )
-        if ( result != nOK )
+        // try a generic socket next ( a shot in the dark, but worth a try ), except if we have GLOBAL_ID on, because it causes mismatches the server being on it's control port instead of it's listening port.
+        // when GLOBAL_ID is off, this does not have much incidence, so let it do
+        if ( result != nOK && !sn_supportRemoteLogins )
         {
             // leave connection at NULL so the server info will be filled with generic info
             connection = NULL;
