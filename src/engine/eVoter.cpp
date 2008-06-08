@@ -133,27 +133,33 @@ static tSettingItem< int > se_votingMaturitySI( "VOTING_MATURITY", se_votingMatu
 // minimal access level for kick votes
 static tAccessLevel se_accessLevelVoteKick = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_accessLevelVoteKickSI( "ACCESS_LEVEL_VOTE_KICK", se_accessLevelVoteKick );
+static tAccessLevelSetter se_accessLevelVoteKickSILevel( se_accessLevelVoteKickSI, tAccessLevel_Owner );
 
 // minimal access level for suspend votes
 static tAccessLevel se_accessLevelVoteSuspend = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_accessLevelVoteSuspendSI( "ACCESS_LEVEL_VOTE_SUSPEND", se_accessLevelVoteSuspend );
+static tAccessLevelSetter se_accessLevelVoteSuspendSILevel( se_accessLevelVoteSuspendSI, tAccessLevel_Owner );
 
 // minimal access level for include votes
 static tAccessLevel se_accessLevelVoteInclude = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_accessLevelVoteIncludeSI( "ACCESS_LEVEL_VOTE_INCLUDE", se_accessLevelVoteInclude );
+static tAccessLevelSetter se_accessLevelVoteIncludeSILevel( se_accessLevelVoteIncludeSI, tAccessLevel_Owner );
 
 // minimal access level for include votes
 static tAccessLevel se_accessLevelVoteIncludeExecute = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_accessLevelVoteIncludeExecuteSI( "ACCESS_LEVEL_VOTE_INCLUDE_EXECUTE", se_accessLevelVoteIncludeExecute );
+static tAccessLevelSetter se_accessLevelVoteIncludeExecuteSILevel( se_accessLevelVoteIncludeExecuteSI, tAccessLevel_Owner );
 
 // minimal access level for direct command votes
 static tAccessLevel se_accessLevelVoteCommand = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_accessLevelVoteCommandSI( "ACCESS_LEVEL_VOTE_COMMAND", se_accessLevelVoteCommand );
+static tAccessLevelSetter se_accessLevelVoteCommandSILevel( se_accessLevelVoteCommandSI, tAccessLevel_Owner );
 
 // access level direct command votes will be executed with (minimal level is,
 // however, the access level of the vote submitter)
 static tAccessLevel se_accessLevelVoteCommandExecute = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_accessLevelVoteCommandExecuteSI( "ACCESS_LEVEL_VOTE_COMMAND_EXECUTE", se_accessLevelVoteCommandExecute );
+static tAccessLevelSetter se_accessLevelVoteCommandExecuteSILevel( se_accessLevelVoteCommandExecuteSI, tAccessLevel_Owner );
 
 #endif
 

@@ -648,14 +648,17 @@ static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p )
 // minimal access level to play
 static tAccessLevel se_playAccessLevel = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_playAccessLevelConf( "ACCESS_LEVEL_PLAY", se_playAccessLevel );
+static tAccessLevelSetter se_playAccessLevelConfLevel( se_playAccessLevelConf, tAccessLevel_Owner );
 
 // minimal sliding access level to play (slides up as soon as enoughpeople of higher access level get authenticated )
 static tAccessLevel se_playAccessLevelSliding = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_playAccessLevelSlidingConf( "ACCESS_LEVEL_PLAY_SLIDING", se_playAccessLevelSliding );
+static tAccessLevelSetter se_playAccessLevelSlidingConfLevel( se_playAccessLevelSlidingConf, tAccessLevel_Owner );
 
 // that many high level players are reuqired to drag the access level up
 static int se_playAccessLevelSliders = 4;
 static tSettingItem< int > se_playAccessLevelSlidersConf( "ACCESS_LEVEL_PLAY_SLIDERS", se_playAccessLevelSliders );
+static tAccessLevelSetter se_playAccessLevelSlidersConfLevel( se_playAccessLevelSlidersConf, tAccessLevel_Owner );
 
 static tAccessLevel se_accessLevelRequiredToPlay = tAccessLevel_Program;
 static void UpdateAccessLevelRequiredToPlay()
@@ -727,10 +730,12 @@ tAccessLevel ePlayerNetID::AccessLevelRequiredToPlay()
 // maximal user level whose accounts can be hidden from other users
 static tAccessLevel se_hideAccessLevelOf = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_hideAccessLevelOfConf( "ACCESS_LEVEL_HIDE_OF", se_hideAccessLevelOf );
+static tAccessLevelSetter se_hideAccessLevelOfConfLevel( se_hideAccessLevelOfConf, tAccessLevel_Owner );
 
 // but they are only hidden to players with a lower access level than this
 static tAccessLevel se_hideAccessLevelTo = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_hideAccessLevelToConf( "ACCESS_LEVEL_HIDE_TO", se_hideAccessLevelTo );
+static tAccessLevelSetter se_hideAccessLevelToConfLevel( se_hideAccessLevelToConf, tAccessLevel_Owner );
 
 // determines whether hider can hide from seeker
 static bool se_Hide( ePlayerNetID const * hider, tAccessLevel currentLevel )
@@ -1993,6 +1998,7 @@ static tSettingItem<bool> se_interceptUnknownCommandsConf("INTERCEPT_UNKNOWN_COM
 // minimal access level for /admin
 static tAccessLevel se_adminAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_adminAccessLevelConf( "ACCESS_LEVEL_ADMIN", se_adminAccessLevel );
+static tAccessLevelSetter se_adminAccessLevelConfLevel( se_adminAccessLevelConf, tAccessLevel_Owner );
 
 void handle_command_intercept(ePlayerNetID *p, tString say) {
     con << "[cmd] " << *p << ": " << say << '\n';
@@ -2003,10 +2009,12 @@ void handle_command_intercept(ePlayerNetID *p, tString say) {
 // minimal access level for /op/deop
 static tAccessLevel se_opAccessLevel = tAccessLevel_TeamLeader;
 static tSettingItem< tAccessLevel > se_opAccessLevelConf( "ACCESS_LEVEL_OP", se_opAccessLevel );
+static tAccessLevelSetter se_opAccessLevelConfLevel( se_opAccessLevelConf, tAccessLevel_Owner );
 
 // maximal result thereof
 static tAccessLevel se_opAccessLevelMax = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_opAccessLevelMaxConf( "ACCESS_LEVEL_OP_MAX", se_opAccessLevelMax );
+static tAccessLevelSetter se_opAccessLevelMaxConfLevel( se_opAccessLevelMaxConf, tAccessLevel_Owner );
 
 // an operation that changes the access level of another player
 typedef void (*OPFUNC)( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel accessLevel );
@@ -2163,6 +2171,7 @@ void se_DeOp( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel )
 // minimal access level for /team management
 static tAccessLevel se_teamAccessLevel = tAccessLevel_TeamLeader;
 static tSettingItem< tAccessLevel > se_teamAccessLevelConf( "ACCESS_LEVEL_TEAM", se_teamAccessLevel );
+static tAccessLevelSetter se_teamAccessLevelConfLevel( se_teamAccessLevelConf, tAccessLevel_Owner );
 
 // returns the team managed by an admin
 static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
@@ -2389,6 +2398,7 @@ static void se_AdminLogout( ePlayerNetID * p )
 // access level a user has to have to be able to see what's being typed at /admin
 static tAccessLevel se_consoleSpyAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_consoleSpyAccessLevelConf( "ACCESS_LEVEL_SPY_CONSOLE", se_consoleSpyAccessLevel );
+static tAccessLevelSetter se_consoleSpyAccessLevelConfLevel( se_consoleSpyAccessLevelConf, tAccessLevel_Owner );
 
 static bool se_cannotSeeConsole( ePlayerNetID const *, ePlayerNetID const * seeker )
 {
@@ -2489,6 +2499,7 @@ static tSettingItem<bool> se_allowShuffleUpConf("TEAM_ALLOW_SHUFFLE_UP",
 #else
 static tAccessLevel se_shuffleUpAccessLevel = tAccessLevel_TeamMember;
 static tSettingItem< tAccessLevel > se_shuffleUpAccessLevelConf( "ACCESS_LEVEL_SHUFFLE_UP", se_shuffleUpAccessLevel );
+static tAccessLevelSetter se_shuffleUpAccessLevelConfLevel( se_shuffleUpAccessLevelConf, tAccessLevel_Owner );
 #endif
 
 static bool se_silenceAll = false;        // flag indicating whether new players should be silenced
@@ -2496,6 +2507,7 @@ static bool se_silenceAll = false;        // flag indicating whether new players
 // minimal access level for chat
 static tAccessLevel se_chatAccessLevel = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_chatAccessLevelConf( "ACCESS_LEVEL_CHAT", se_chatAccessLevel );
+static tAccessLevelSetter se_chatAccessLevelConfLevel( se_chatAccessLevelConf, tAccessLevel_Owner );
 
 // time between public chat requests, set to 0 to disable
 REAL se_chatRequestTimeout = 60;
@@ -2504,17 +2516,21 @@ static tSettingItem< REAL > se_chatRequestTimeoutConf( "ACCESS_LEVEL_CHAT_TIMEOU
 // access level a spectator has to have to be able to listen to /team messages
 static tAccessLevel se_teamSpyAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_teamSpyAccessLevelConf( "ACCESS_LEVEL_SPY_TEAM", se_teamSpyAccessLevel );
+static tAccessLevelSetter se_teamSpyAccessLevelConfLevel( se_teamSpyAccessLevelConf, tAccessLevel_Owner );
 
 // access level a user has to have to be able to listen to /msg messages
 static tAccessLevel se_msgSpyAccessLevel = tAccessLevel_Owner;
 static tSettingItem< tAccessLevel > se_msgSpyAccessLevelConf( "ACCESS_LEVEL_SPY_MSG", se_msgSpyAccessLevel );
+static tAccessLevelSetter se_msgSpyAccessLevelConfLevel( se_msgSpyAccessLevelConf, tAccessLevel_Owner );
 
 // access level a user has to have to get IP addresses in /players output
 static tAccessLevel se_ipAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_ipAccessLevelConf( "ACCESS_LEVEL_IPS", se_ipAccessLevel );
+static tAccessLevelSetter se_ipAccessLevelConfLevel( se_ipAccessLevelConf, tAccessLevel_Owner );
 
 static tAccessLevel se_nVerAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_nVerAccessLevelConf( "ACCESS_LEVEL_NVER", se_nVerAccessLevel );
+static tAccessLevelSetter se_nVerAccessLevelConfLevel( se_nVerAccessLevelConf, tAccessLevel_Owner );
 
 static tSettingItem<bool> se_silAll("SILENCE_ALL",
                                     se_silenceAll);
@@ -3260,6 +3276,7 @@ static void se_Help( ePlayerNetID * sender, ePlayerNetID * receiver, std::istrea
 
 static tAccessLevel se_rtfmAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_rtfmAccessLevelConf( "ACCESS_LEVEL_RTFM", se_rtfmAccessLevel );
+static tAccessLevelSetter se_rtfmAccessLevelConfLevel( se_rtfmAccessLevelConf, tAccessLevel_Owner );
 
 #ifdef DEDICATED
 static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, eChatSpamTester &spam ) {
