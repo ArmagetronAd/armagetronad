@@ -2040,7 +2040,7 @@ gamestate_done                fertig!\n
 gamestate_timeout_intro       \n\nZeitüberschreitung! Grund:\n
 gamestate_timeout_message     Benutzer \1 weiss noch nichts von Objekt \2 ( \3 ).\n
 
-gamestate_reset_center        Reset
+gamestate_reset_center        Neues Match
 gamestate_reset_console       Nach dieser Runde beginnt ein neues Match; Punktzahlen werden zurückgesetzt.\n
 gamestate_resetnow_center     Neues Match
 gamestate_resetnow_console    Setzte Punktzahlen zurück...\n

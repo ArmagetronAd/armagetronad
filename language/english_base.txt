@@ -2133,7 +2133,7 @@ gamestate_done			done!\n
 gamestate_timeout_intro		\n\nTimeout! Reason:\n
 gamestate_timeout_message	User \1 does not know about netobject \2 ( \3 ).\n
 
-gamestate_reset_center		Reset
+gamestate_reset_center		New Match
 gamestate_reset_console		Resetting scores and starting new match after this round.\n
 gamestate_resetnow_center	New Match
 gamestate_resetnow_console	Resetting scores...\n
