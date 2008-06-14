@@ -57,6 +57,8 @@ typedef ZThread::FastMutex nMutex;
 typedef tNonMutex nMutex;
 #endif
 
+bool sn_supportRemoteLogins = false;
+
 // authority black and whitelists
 static tString sn_AuthorityBlacklist, sn_AuthorityWhitelist;
 tConfItemLine  sn_AuthorityBlacklistConf( "AUTHORITY_BLACKLIST", sn_AuthorityBlacklist );
@@ -541,7 +543,6 @@ void nLoginProcess::FetchInfoFromAuthority()
     nMemberFunctionRunner::ScheduleForeground( *this, &nLoginProcess::QueryFromClient );
 }
 
-bool sn_supportRemoteLogins = false;
 static tSettingItem< bool > sn_supportRemoteLoginsConf( "GLOBAL_ID", sn_supportRemoteLogins );
 
 // legal characters in authority hostnames(besides alnum and dots)
