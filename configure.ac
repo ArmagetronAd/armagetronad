@@ -744,8 +744,10 @@ dnl *************************************************
 
 test -z "$FREETYPE_CONFIG" && FREETYPE_CONFIG=freetype-config
 
+FTGL_CFLAGS="`pkg-config ftgl --cflags`"
+
 AC_CHECK_LIB(ftgl,FT_Render_Glyph,
-CPPFLAGS="$CPPFLAGS `pkg-config ftgl --cflags`"
+CPPFLAGS="$CPPFLAGS $FTGL_CFLAGS"
 LIBS="$LIBS `pkg-config ftgl --libs`"
 ,
 AC_MSG_ERROR([You need the library ftgl to compile Armagetron. Read the file doc/install_linux.html.]),
@@ -754,7 +756,7 @@ AC_MSG_ERROR([You need the library ftgl to compile Armagetron. Read the file doc
 
 USE_FTGL=yes
 
-# `pkg-config ftgl --cflags` doesn't reliably give the include path to FTGL itself, we are on our own finding the includes
+# `pkg-config ftgl --cflags` doesn't reliably give the include path to FTGL itself, we are on our own finding the includes in some cases.
 # look for FTGL headers in default system header locations and the prefixes of the libraries that do have a -config script
 FTGL_HEADERS="/usr/include/FTGL /usr/local/include/FTGL `$FREETYPE_CONFIG --prefix`/include/FTGL `$SDL_CONFIG --prefix`/include/FTGL `$XML2_CONFIG --prefix/`include/FTGL ${prefix}/include/FTGL "
 
@@ -769,20 +771,22 @@ AC_ARG_WITH(ftgl,
 )
 
 # candidates are collected, walk through them
-found=false
-AC_MSG_CHECKING(for location of FTGL includes)
-for candidate in ${FTGL_HEADERS}; do
-    if test -r ${candidate}/FTGL.h; then
-        AC_MSG_RESULT(${candidate})
-        CPPFLAGS="$CPPFLAGS -I${candidate}"
-        found=true
-        break
-    fi
-done
+if test -z "`echo $FTGL_CFLAGS | grep FTGL`"; then
+    found=false
+    AC_MSG_CHECKING(for location of FTGL includes)
+    for candidate in ${FTGL_HEADERS}; do
+        if test -r ${candidate}/FTGL.h; then
+            AC_MSG_RESULT(${candidate})
+                CPPFLAGS="$CPPFLAGS -I${candidate}"
+                found=true
+                break
+            fi
+    done
 
-if test ${found} = false; then
-    AC_MSG_RESULT(not found)
-    AC_MSG_ERROR([FTGL headers not found on your system. Please pass the correct location via --with-ftgl=<path to FTGL include directory>.])
+    if test ${found} = false; then
+        AC_MSG_RESULT(not found)
+        AC_MSG_ERROR([FTGL headers not found on your system. Please pass the correct location via --with-ftgl=<path to FTGL include directory>.])
+    fi
 fi
 
 dnl *************************************************
