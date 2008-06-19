@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#include "eTeam.h"
 #include "tMemManager.h"
 #include "ePlayer.h"
 //#include "tInitExit.h"
@@ -46,7 +47,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rSysdep.h"
 #include "nAuthentication.h"
 #include "tDirectories.h"
-#include "eTeam.h"
 #include "eVoter.h"
 #include "tReferenceHolder.h"
 #include "tRandom.h"
@@ -1661,9 +1661,9 @@ static tColoredString se_BuildChatString( eTeam const *team, ePlayerNetID const 
         // foo (Red Team) --> Blue Team: some message here
         eTeam *senderTeam = sender->CurrentTeam();
         console << tColoredString::ColorString(1,1,.5) << " (";
-        console << senderTeam;
+        console << *senderTeam;
         console << tColoredString::ColorString(1,1,.5) << ") --> ";
-        console << team->GetColoredName();
+        console << *team;
     }
 
     console << tColoredString::ColorString(1,1,.5) << ": ";
@@ -1897,7 +1897,7 @@ void se_SendTeamMessage( eTeam const * team, ePlayerNetID const * sender ,ePlaye
         else {
             eTeam *senderTeam = sender->CurrentTeam();
             say << tColoredString::ColorString(1,1,.5) << " (";
-            say << team;
+            say << *team;
             say << tColoredString::ColorString(1,1,.5) << " ) --> ";
             say << senderTeam;
         }
@@ -2776,11 +2776,12 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
             ePlayerNetID * admin = se_PlayerNetIDs(i);
 
             if (
+                admin != p &&
+                (
                 // two cases:
                    (
                     // You are a speccing admin, and you aren't invited to anything:
                     se_GetManagedTeam( admin ) == 0 &&
-                    admin != p &&
                     admin->GetAccessLevel() <=  se_teamSpyAccessLevel
                     ) ||
                    (
@@ -2789,6 +2790,7 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
                     // invited players are also authorized
                     currentTeam->IsInvited( admin )
                     )
+                 )
                 )
             {
                 se_SendTeamMessage(currentTeam, p, admin, msg);

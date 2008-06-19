@@ -32,19 +32,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <set>
 
-tColoredString & operator << ( tColoredString &s, eTeam * team)
+tString & operator << ( tString &s, const eTeam & team)
 {
-    if ( !team )
+    if ( !(&team) )
         return s << tOutput("$player_spectator_message");
     else
-        return s << team->GetColoredName();
+        return s << team.GetColoredName();
 }
-std::ostream & operator << ( std::ostream &s, eTeam * team)
+std::ostream & operator << ( std::ostream &s, const eTeam & team)
 {
-    if ( !team )
+    if ( !(&team) )
         return s << tOutput("$player_spectator_message");
     else
-        return s << team->GetColoredName();
+        return s << team.GetColoredName();
 }
 
 #define TEAMCOLORS 8
