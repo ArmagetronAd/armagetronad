@@ -72,6 +72,9 @@ static tString se_team_name[TEAMCOLORS]=
     tString("$team_name_black")
 };
 
+// static tList<eTeam> se_ColoredTeams;
+static eTeam * se_ColoredTeams[TEAMCOLORS]={0,0,0,0,0,0,0,0};
+
 static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
 // class that creates config items for one team
@@ -602,6 +605,9 @@ void eTeam::EnforceConstraints()
         imbalance=0;
 }
 
+static int se_teamEliminationMode = 0;
+static tSettingItem<int> se_teamEliminationModeConf("TEAM_ELIMINATION_MODE", se_teamEliminationMode );
+
 // make sure the limits on team number and such are met
 void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
 {
@@ -637,9 +643,9 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
         balance = true;
 
         // find the max and min number of players per team and the
-        eTeam *max = NULL, *min = NULL, *ai = NULL;
+        eTeam *max = NULL, *min = NULL, *ai = NULL, *lastColor = NULL, *last = NULL;
         int    maxP = minPlayers, minP = 100000;
-        bool minLocked = false;
+        int    maxColorID = 0;
 
         int numTeams = 0;
         int numHumanTeams = 0;
@@ -666,27 +672,50 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
                     max  = t;
                 }
 
-                // prefer unlocked teams as elimination victims, and of course smaller teams
-                if ( ( humans > 0 || t->NumPlayers() == 0 ) && humans < minP && ( minLocked || !t->IsLocked() ) )
+                // mode 0: prefer unlocked teams as elimination victims, and of course smaller teams
+                if ( ( humans > 0 || t->NumPlayers() == 0 ) && humans < minP && !t->IsLocked() )
                 {
                     minP = humans;
                     min  = t;
-                    minLocked = t->IsLocked();
                 }
+
+                // mode 1: keep the first teams (Team blue, Team gold, etc)
+                if ( ( humans > 0 || t->NumPlayers() == 0 ) && t->colorID > maxColorID && t == se_ColoredTeams[t->colorID])
+                {
+                    maxColorID = t->colorID;
+                    lastColor = t;
+                }
+
+                // mode 2: lowest score goes out
+                last = t;
             }
         }
 
-        if ( ( numTeams > maxTeams && min ) || ( numTeams > minTeams && ai ) )
+        eTeam * teamToKill = NULL;
+        switch ( se_teamEliminationMode )
+        {
+            case 0:
+                teamToKill = min;
+                break;
+            case 1:
+                teamToKill = lastColor;
+                break;
+            case 2:
+                teamToKill = last;
+                break;
+        }
+
+        if ( ( numTeams > maxTeams && teamToKill ) || ( numTeams > minTeams && ai ) )
         {
             // too many teams. Destroy the smallest team.
             // better: destroy the AI team
             if ( ai )
-                min = ai;
+                teamToKill = ai;
 
-            for ( i = min->NumPlayers()-1; i>=0; --i )
+            for ( i = teamToKill->NumPlayers()-1; i>=0; --i )
             {
                 // one player from the dismantled team.
-                tJUST_CONTROLLED_PTR< ePlayerNetID > pni = min->Player(i);
+                tJUST_CONTROLLED_PTR< ePlayerNetID > pni = teamToKill->Player(i);
 
                 // just ignore AIs, they get removed later by the "balance with AIs" code once it notices all humans are gone from this team
                 if ( !pni->IsHuman() )
@@ -705,7 +734,7 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
                     {
                         int humans = t->NumHumanPlayers();
 
-                        if ( humans < secondMinP && t != min )
+                        if ( humans < secondMinP && t != teamToKill )
                         {
                             secondMinP = humans;
                             second = t;
@@ -771,10 +800,6 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
         }
     }
 }
-
-// static tList<eTeam> se_ColoredTeams;
-
-static eTeam * se_ColoredTeams[TEAMCOLORS]={0,0,0,0,0,0,0,0};
 
 // inquire or set the ability to use a color as a team name
 bool eTeam::NameTeamAfterColor ( bool wish )

@@ -181,6 +181,7 @@ team_max_players_help		Maximum number of players per team
 team_min_players_help		Minimum number of players per team
 team_allow_shuffle_up_help  If set to 1, players are allowed to change their position in the team as they wish. If 0, they only can drop in rank.
 team_center_is_boss_help    If set to 1, the center player is the team's boss. If at 0, it's the player who is on that team longest.
+team_elimination_mode_help  Defines the way ArmagetronAd should eliminate teams when there's more teams than TEAMS_MAX: Set to 0 it will try to keep as many players as possible, kicking teams that have the lowest score if teams are balanced; Set to 1 it will try to keep the best team colors (Team blue, then Team gold, then Team red, etc); Set to 2 it will kick out the teams that have the lowest score, regardless of balance.
 
 teams_max_help			Maximum number of teams
 teams_min_help			Minimum number of teams
