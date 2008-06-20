@@ -49,6 +49,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define PLAYER_CONFITEMS (30+MAX_INSTANT_CHAT)
 
+// call on commands that only work on the server; quit if it returns true
+static bool se_NeedsServer(char const * command, std::istream & s, bool strict = true )
+{
+    if ( sn_GetNetState() != nSERVER && ( strict || sn_GetNetState() != nSTANDALONE ) )
+    {
+        tString rest;
+        rest.ReadLine( s );
+        con << tOutput("$only_works_on_server", command, rest );
+        return true;
+    }
+
+    return false;
+}
+
+
 class tConfItemBase;
 class uAction;
 class tOutput;

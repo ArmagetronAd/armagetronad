@@ -6730,21 +6730,6 @@ static unsigned short se_ReadUser( std::istream &s, ePlayerNetID * requester = 0
     return 0;
 }
 
-
-// call on commands that only work on the server; quit if it returns true
-static bool se_NeedsServer(char const * command, std::istream & s, bool strict = true )
-{
-    if ( sn_GetNetState() != nSERVER && ( strict || sn_GetNetState() != nSTANDALONE ) )
-    {
-        tString rest;
-        rest.ReadLine( s );
-        con << tOutput("$only_works_on_server", command, rest );
-        return true;
-    }
-
-    return false;
-}
-
 static void se_PlayerMessageConf(std::istream &s)
 {
     if ( se_NeedsServer( "PLAYER_MESSAGE", s ) )

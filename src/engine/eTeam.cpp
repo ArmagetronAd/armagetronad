@@ -338,6 +338,27 @@ bool eTeam::IsLocked() const
     return locked_;
 }
 
+static void se_UnlockAllTeams ( void )
+{
+    for ( int i = eTeam::teams.Len()-1; i>=0; --i )
+    {
+        (eTeam::teams(i))->SetLocked( false );
+    }
+}
+
+static void se_UnlockAllTeamsConf ( std::istream & s )
+{
+    if ( se_NeedsServer( "UNLOCK_ALL_TEAMS", s ) )
+    {
+        return;
+    }
+
+    se_UnlockAllTeams();
+}
+
+static tConfItemFunc se_unlockAllTeamsConf("UNLOCK_ALL_TEAMS",&se_UnlockAllTeamsConf);
+static tAccessLevelSetter se_unlockAllTemasConfLevel( se_unlockAllTeamsConf, tAccessLevel_Moderator );
+
 // invite the player to join
 void eTeam::Invite( ePlayerNetID * player )
 {
@@ -692,6 +713,8 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
         }
 
         eTeam * teamToKill = NULL;
+        if( se_teamEliminationMode > 2 ) se_teamEliminationMode = 0;
+        // let negative values simply "lock" teams like you lock a server with a low MAX_CLIENTS
         switch ( se_teamEliminationMode )
         {
             case 0:

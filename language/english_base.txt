@@ -2303,6 +2303,7 @@ help_commands_tourney_text 0x88ff88/lock0xffff88: Locks your current team. Nobod
 invite_no_team          Can't use \1 if you're not on a team.\n
 invite_team_locked      \1 locked, you'll need an invitation from a team leader via the /invite command to join from now on.\n
 invite_team_unlocked    \1 unlocked, you can join it freely again.\n
+unlock_all_teams_help   Unlocks all teams.
 invite_team_can_join      \10xRESETT can now join \2.\n
 invite_team_invite      \10xRESETT has been invited to join \2.\n
 invite_team_kick        \10xRESETT has been kicked from \2.\n
