@@ -2018,6 +2018,7 @@ static tAccessLevelSetter se_opAccessLevelMaxConfLevel( se_opAccessLevelMaxConf,
 
 // an operation that changes the access level of another player
 typedef void (*OPFUNC)( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel accessLevel );
+
 static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const * command, OPFUNC F )
 {
     if ( admin->GetAccessLevel() <= se_opAccessLevel )
@@ -2025,46 +2026,49 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
         ePlayerNetID * victim = se_FindPlayerInChatCommand( admin, command, s );
         if ( victim )
         {
-             if ( victim == admin )
-             {
-                 sn_ConsoleOut( tOutput( "$access_level_op_self", command ), admin->Owner() );
-             }
-             else if ( admin->GetAccessLevel() >= victim->GetAccessLevel() )
-             {
-                 sn_ConsoleOut( tOutput( "$access_level_op_overpowered", command ), admin->Owner() );
-             }
-             else
-             {
-                 // read optional access level, this part is merly a copypaste from the /shuffle code
-                 int level = se_opAccessLevelMax;
-                 if ( victim->IsAuthenticated() )
-                 {
+            if ( victim == admin )
+            {
+                sn_ConsoleOut( tOutput( "$access_level_op_self", command ), admin->Owner() );
+            }
+            else if ( admin->GetAccessLevel() >= victim->GetAccessLevel() )
+            {
+                sn_ConsoleOut( tOutput( "$access_level_op_overpowered", command ), admin->Owner() );
+            }
+            else
+            {
+                // read optional access level, this part is merly a copypaste from the /shuffle code
+                int level = se_opAccessLevelMax;
+                if ( victim->IsAuthenticated() )
+                {
                      level = victim->GetAccessLevel();
-                 }
-                 char first;
-                 s >> first;
+                }
+                char first;
+                s >> first;
 
-                 if ( !s.eof() && !s.fail() )
-                 {
-                     s.unget();
+                if ( !s.eof() && !s.fail() )
+                {
+                    s.unget();
+                    int newLevel = 0;
+                    s >> newLevel;
 
-                     int newLevel = 0;
-                     s >> newLevel;
+                    if ( first == '+' || first == '-' )
+                    {
+                        level += newLevel;
+                    }
+                    else
+                    {
+                        level = newLevel;
+                    }
+                }
 
-                     if ( first == '+' || first == '-' )
-                     {
-                         level += newLevel;
-                     }
-                     else
-                     {
-                         level = newLevel;
-                     }
-                 }
+                s >> level;
 
-                 s >> level;
+                if ( level <= admin->GetAccessLevel() )
+                    level = admin->GetAccessLevel() + 1;
 
-                 tAccessLevel accessLevel;
-                 accessLevel = static_cast< tAccessLevel >( level );
+                tAccessLevel accessLevel;
+
+                accessLevel = static_cast< tAccessLevel >( level );
 
                 if ( accessLevel > admin->GetAccessLevel() )
                 {
