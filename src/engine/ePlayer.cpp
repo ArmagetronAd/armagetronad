@@ -2975,18 +2975,22 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
 
     bool hidden = false;
 
+    int count = 0;
+
     for ( int i2 = se_PlayerNetIDs.Len()-1; i2>=0; --i2 )
     {
         ePlayerNetID* p2 = se_PlayerNetIDs(i2);
         tColoredString tos;
+        if ( doSearch )
+            tos << "  ";
         tos << p2->Owner();
         tos << ": ";
         if ( p2->GetAccessLevel() < tAccessLevel_Default && !se_Hide( p2, receiver ) )
         {
 #ifdef KRAWALL_SERVER
-        hidden = p2->GetAccessLevel() <= se_hideAccessLevelOf && p2->StealthMode();
+            hidden = p2->GetAccessLevel() <= se_hideAccessLevelOf && p2->StealthMode();
 #else
-        hidden = false;
+            hidden = false;
 #endif
             tos << p2->GetColoredName()
                 << tColoredString::ColorString( -1, -1, -1)
@@ -3019,10 +3023,10 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
                 tos << ", IP = " << IP;
             }
         }
-    if ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_nVerAccessLevel )
-    {
-        tos << ", " << sn_GetClientVersionString( sn_Connections[ p2->Owner() ].version.Max() ) << " (ID: " << sn_Connections[ p2->Owner() ].version.Max() << ")";
-    }
+        if ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_nVerAccessLevel )
+        {
+            tos << ", " << sn_GetClientVersionString( sn_Connections[ p2->Owner() ].version.Max() ) << " (ID: " << sn_Connections[ p2->Owner() ].version.Max() << ")";
+        }
 
         tos << "\n";
 
@@ -3034,8 +3038,24 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
             tToLower( tosLowercase );
             // looks quite like a hack, but i guess it's faster( esp. for me :) ) than checking on each parameter individually
             if ( tosLowercase.StrPos( search ) != -1 )
+            {
+                count++;
+                if ( count == 1 )
+                {
+                    sn_ConsoleOut( tOutput( "$player_list_search", search ) , receiver->Owner() );
+                }
                 sn_ConsoleOut( tos, receiver->Owner() );
+            }
         }
+    }
+
+    if ( doSearch && !count )
+    {
+        sn_ConsoleOut( tOutput( "$player_list_search_no_results", search ) , receiver->Owner() );
+    }
+    else if ( doSearch )
+    {
+        sn_ConsoleOut( tOutput( "$player_list_search_end" ) , receiver->Owner() );
     }
 }
 
@@ -7214,7 +7234,14 @@ void ePlayerNetID::UpdateName( void )
     eNameMessenger messenger( *this );
 
     // apply client change, stripping excess spaces
-    if ( sn_GetNetState() == nSTANDALONE || ( !IsHuman() && sn_GetNetState() != nCLIENT ) || ( IsHuman() && ( sn_GetNetState() == nCLIENT || !messenger.adminRename_ ) && Owner() == sn_myNetID) )
+    if ( sn_GetNetState() == nSTANDALONE
+    || ( !IsHuman() && sn_GetNetState() != nCLIENT )
+    || ( 
+            IsHuman()
+         && ( sn_GetNetState() == nCLIENT || !messenger.adminRename_ )
+         && ( sn_GetNetState() != nCLIENT || Owner() == sn_myNetID )
+       )
+       )
     {
         // apply name filters only on remote players
         if ( Owner() != 0 )

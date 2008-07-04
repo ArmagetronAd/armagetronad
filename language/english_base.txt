@@ -890,6 +890,9 @@ ban_list_help               Prints a list of currently banned IPs.
 unban_ip_help               Revokes the ban of the specified IP address.
 
 player_list_hidden_player_prefix_help	The prefix that is shown on hidden players' Global ID and access level when we can see it.
+player_list_search          Search string "\1" matches:\n
+player_list_search_no_results Search string "\1" returned no result.\n
+player_list_search_end      End of search.\n
 
 # communication
 console_message_help		Prints a message on the console of all connected clients.
