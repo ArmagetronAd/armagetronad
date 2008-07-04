@@ -3015,7 +3015,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
         {
             tos << p2->GetColoredName() << tColoredString::ColorString(1,1,1) << " ( )";
         }
-        if ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel )
+        if ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_ipAccessLevel || p2->Owner() != 0 && p2->Owner() == receiver->Owner() )
         {
             tString IP = p2->GetMachine().GetIP();
             if ( IP.Len() > 1 )
@@ -3023,7 +3023,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
                 tos << ", IP = " << IP;
             }
         }
-        if ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_nVerAccessLevel )
+        if ( p2->Owner() != 0 && tCurrentAccessLevel::GetAccessLevel() <= se_nVerAccessLevel || p2->Owner() != 0 && p2->Owner() == receiver->Owner() != 0 )
         {
             tos << ", " << sn_GetClientVersionString( sn_Connections[ p2->Owner() ].version.Max() ) << " (ID: " << sn_Connections[ p2->Owner() ].version.Max() << ")";
         }
@@ -3065,6 +3065,8 @@ static void players_conf(std::istream &s)
 }
 
 static tConfItemFunc players("PLAYERS",&players_conf);
+static tAccessLevelSetter players_AccessLevel( players, tAccessLevel_Owner );
+
 
 // /players gives a player list
 static void se_ChatPlayers( ePlayerNetID * p, std::istream &s )
