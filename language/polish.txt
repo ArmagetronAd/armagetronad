@@ -1,0 +1,2859 @@
+#Polish translation by Rafal Cieslak. 
+#based on english_base.txt :)
+
+
+#*****************************************
+#*****************************************
+#*****************************************
+#*****************************************
+# 
+# Help texts for the various configuration
+# options that can be set via the console.
+# 
+# The text item for a configuration item
+# with name NAME has the ID name_help.
+#
+#*****************************************
+#*****************************************
+#*****************************************
+#*****************************************
+language Polish
+
+first_use_help			Czy po raz pierwszy uøywasz \g?
+include_help			Do≥πcza poniøszy plik
+sinclude_help			Do≥πcza poniøszy plik, nie zwracajπc b≥Ídu, jeøeli go nie znaleziono
+new_team_allowed_help		Czy tworzenie nowej druøyny jest aktualnie dozwolone?
+
+#********************************************
+#********************************************
+#
+# lost settings
+#
+#********************************************
+#********************************************
+
+keyboard_help			Ustawienia klawiatury
+
+#********************************************
+#********************************************
+#
+# keyboard settings
+#
+#********************************************
+#********************************************
+
+doublebind_time_help    Czas w sekundach pomiÍdzy wywo≥aniem tej samej akcji przez inne klawisze.
+
+#********************************************
+#********************************************
+#
+# Cycle physics related configuration options
+#
+#********************************************
+#********************************************
+
+cycle_speed_help		        Podstawowa prÍdkoúÊ cyklu podczas jazdy prosto i nie w pobliøu úcian
+cycle_speed_min_help		    Minimalna prÍdkoúÊ cyklu, mierzona wzglÍdem CYCLE_SPEED
+cycle_speed_max_help		    Maksymalna prÍdkoúÊ cyklu, mierzona wzglÍdem CYCLE_SPEED. 0 = bez limitu.
+cycle_start_speed_help		    Poczπtkowa prÍdkoúÊ cyklu
+cycle_sound_speed_help		    Dzielnik prÍdkoúci düwiÍku
+
+cycle_accel_help                Mnoønik przyúpieszenia przy úcianach
+cycle_accel_self_help           Mnoønik do CYCLE_ACCEL dla w≥asnej úciany
+cycle_accel_team_help           Mnoønik do CYCLE_ACCEL dla úciany graczy z druøyny
+cycle_accel_enemy_help          Mnoønik do CYCLE_ACCEL dla úciany przeciwnikÛw
+cycle_accel_rim_help            Mnoønik do CYCLE_ACCEL dla zewnÍtrznych úcian
+cycle_accel_slingshot_help      Mnoønik do ca≥kowitego CYCLE_ACCEL, jeúli cykl jest pomiÍdzy dwiema úcianami, z czego jedna jest jego w≥asna
+cycle_accel_tunnel_help         Mnoønik do ca≥kowitego CYCLE_ACCEL, jeúli cykl jest pomiÍdzy dwiema úcianami, a øadna nie jest jego
+cycle_accel_offset_help	        Minimalny odstÍp od úciany, musi byÊ dodatni
+cycle_wall_near_help		    Maksymalny przyúpieszajπcy odstÍp od úciany
+
+cycle_boost_self_help           Dodatkowe przyúpieszenie otrzymywane podczas zrywania w≥asnej úciany.
+cycle_boost_team_help           Dodatkowe przyúpieszenie otrzymywane podczas zrywania úciany gracza z druøyny.
+cycle_boost_enemy_help          Dodatkowe przyúpieszenie otrzymywane podczas zrywania úciany przeciwnika.
+cycle_boost_rim_help            Dodatkowe przyúpieszenie otrzymywane podczas zrywania úciany krawÍdzi.
+cycle_boostfactor_self_help     Mnoønik do przyúpieszenia otrzymywany podczas zrywania w≥asnej úciany.
+cycle_boostfactor_team_help     Mnoønik do przyúpieszenia otrzymywany podczas zrywania úciany gracza z druøyny.
+cycle_boostfactor_enemy_help    Mnoønik do przyúpieszenia otrzymywany podczas zrywania úciany przeciwnika.
+cycle_boostfactor_rim_help     Mnoønik do przyúpieszenia otrzymywany podczas zrywania úciany krawÍdzi.
+
+cycle_turn_memory_help         IloúÊ oczekujπcych ruchÛw cyklu, jakie sπ zapamiÍtywane i wykonywane. (Bufor)
+
+cycle_delay_help		        Minimalny odstÍp czasowy pomiÍdzy skrÍtami.(musi byÊ wiÍkszy od 0)
+cycle_delay_bonus_help		    Dodatkowy mnoønik CYCLE_DELAY stosowany tylko na serwerze dedykowanym serwerze.
+cycle_delay_timebased_help		Jeúli wartoúÊ tej opcji to 1, to odstÍp pomiÍdzy skrÍtami bÍdzie bazowany na czasie, natomiast 0 spowoduje, øe bÍdzie bazowany na odleg≥oúci. Wartoúci poúrednie i inne teø sπ obs≥ugiwane.
+cycle_turn_speed_factor_help    Mnoønik prÍdkoúci cyklu podczas skrÍcania.
+cycle_delay_doublebind_bonus_help       Mnoønik do CYCLE_DELAY dla skrÍtÛw w tÍ samπ stronÍ pod rzπd.
+
+
+cycle_brake_help		Si≥a hamulcÛw
+
+cycle_width_help        Kolizyjna szerokoúÊ tunelu. Jeúli cykl wjedzie do tunelu o takiej szerokoúci, lub wÍøszego, odniesie szkody.
+cycle_width_side_help        Minimalna odleg≥oúÊ cyklu od úciany zanim odniesie szkody.
+cycle_width_rubber_min_help  Jeøeli warunki okreúlone w cycle_width sπ lekko przekroczone, zuøywane bÍdzie tak duøo Rubber'a. Jeøeli ta wartoúÊ wynosi 1, zuøycie rubbera bÍdzie takie samo, jakby cykl sta≥ naprzeciw úciany.
+cycle_width_rubber_max_help  Jeøeli warunki okreúlone w cycle_width sπ mocno przekroczone, zuøywane bÍdzie tak duøo Rubber'a. Jeøeli ta wartoúÊ wynosi 1, zuøycie rubbera bÍdzie takie samo, jakby cykl sta≥ naprzeciw úciany.
+
+cycle_rubber_help		IloúÊ Rubber'a. Ta przyjazna graczom wartoúÊ okreúla w praktyce jak d≥ugo mogπ staÊ naprzeciw úciany zanim ulegnπ zniszczeniu.
+cycle_rubber_time_help		    Czas, w jakim przywracany jest ca≥y Rubber.
+cycle_rubber_legacy_help		Kod Rubber'a dla starych klientÛw. Starych tzn. <= 0.2.7.0.
+cycle_rubber_timebased_help		Jeúli wartoúÊ tej opcji to 1, to zuøycie Ruber'a bazowane na czasie, natomiast 0 spowoduje, øe bÍdzie bazowane na odleg≥oúci. Wartoúci poúrednie i inne teø sπ obs≥ugiwane.
+cycle_rubber_speed_help             PrÍdkoúÊ, gdy cykl zuøywa Rubber stojπc naprzeciw úciany (w ciπgu kaødej sekundy znajdujesz siÍ bliøej úciany o ~0.4^{ta watroúÊ})
+cycle_rubber_mindistance_help		Minimalna odleg≥oúÊ na jakiej moøe znajdowaÊ siÍ cykl od úciany wskutek Rubber'a.
+cycle_rubber_mindistance_gap_help		Jeøeli wiÍksze od zera 0, CYCLE_RUBBER_MINDISTANCE jest automatycznie modyfikowany tak, aby w powsta≥ym tunelu mÛg≥ siÍ zmieúciÊ cykl.
+cycle_rubber_mindistance_gap_side_help  CYCLE_RUBBER_MINDISTANCE_GAP zadzia≥a tylko wtedy, jeøeli przez ten teoretyczny tunel mÛg≥by przejechaÊ cykl w ciπgu okreúlonej tu liczby sekund
+cycle_rubber_mindistance_ratio_help	Dodatkowa odleg≥oúÊ powiÍkszajπca CYCLE_RUBBER_MINDISTANCE w zaleønoúci od d≥ugoúci úciany naprzeciw ktÛrej stoisz
+cycle_rubber_mindistance_reservoir_help		Dodatkowy dystans jeøeli masz pusty Miernik Ruber'a (Zmienia siÍ w miarÍ jak zuøywasz Rubber)
+cycle_rubber_mindistance_unprepared_help	Dodatkowy dystans dla nieprzygotowanych grindÛw; zostaje stosowany gdy ostatni skrÍt gracza by≥ tylko poúlizgiem i przekroczy≥ czas na przygotowanie okreúlony w CYCLE_RUBBER_MINDISTANCE_PREPARATION.
+cycle_rubber_mindistance_preparation_help	Skala czasu, do ktÛrej porÛwnywany jest czas od ostatniego skrÍtu gracza, aby okreúliÊ skutki CYCLE_RUBBER_MINDISTANCE_UNPREPARED.
+cycle_rubber_mindistance_legacy_help		Dodatkowy mnoønik do CYCLE_RUBBER_MINDISTANCE, aktywowany gdy starsi gracze z b≥Ídem Ñrip bugî sπ pod≥πczeni
+cycle_rubber_minadjust_help			Kiedy wyrÛwnywanie do úciany, pozwÛl zbliøyÊ siÍ do niej co najmniej na tÍ odleg≥oúÊ, wzglÍdem poprzedniej pozycji
+cycle_rubber_delay_help     Podczas tego odstÍpu czasu po ostatnim skrÍcie gracza, efektywnoúÊ Rubbera zostanie zwielokrotniona o CYCLE_RUBBER_DELAY_BONUS.
+cycle_rubber_delay_bonus_help Mnoønik ñ dodatkowe ustawienie potrzebne do CYCLE_RUBBER_DELAY.
+cycle_ping_rubber_help		Dodatkowe zwiÍkszenie przyjaznoúci Rubbera graczom o duøym ping'u.
+cycle_rubber_wall_shrink_help       Przy skoÒczonej d≥ugoúci úcian, zuøyty Rubber jest mnoøony przez tÍ wartoúÊ a d≥ugoúÊ úciany jest zmniejszana o ten wynik
+cycle_brake_refill_help				StopieÒ, w jakim prze≥adowujπ siÍ hamulce graczy, kiedy nie sπ uøywane
+cycle_brake_deplete_help			StopieÒ, w jakim prze≥adowujπ siÍ hamulce graczy, kiedy S• uøywane
+cycle_sync_interval_enemy_help		Czas pomiÍdzy odúwieøaniem przez klienta informacji o po≥oøeniu cykli
+cycle_sync_interval_self_help		OdstÍp czasu pomiÍdzy informacjami wysy≥anymi przez klienta o pozycji jego cyklu
+cycle_avoid_oldclient_bad_sync_help	Jeøeli ustawione na 1, klienci w starej wersji nie bÍdπ otrzymywali informacji w sytuacjach kiedy wiadomo, øe spowoduje to ich niekompatybilnoúÊ.
+cycle_fair_antilag_help				Jeúli ustawione na 1, dezaktywuje kod odpowiedzialny za Ñpoúlizgiî spowodowane lagiem, gdy klienci w starej wersji sπ po≥πczeni.
+cycle_time_tolerance_help			Maksymalny odstÍp czasowy pomiÍdzy wykonaniem tej samej akcji na serwerze i kliencie.
+cycle_packetloss_tolerance_help     åmierÊ cyklu jest tak d≥ugo unikana, jak b≥πd gracza moøe zostaÊ wyjaúniony przez utracone w sieci pakiety. Wybranie tego umoøliwia oszukiwanie.
+cycle_sync_ff_help 					PrÍdkoúÊ prognozowania synchronizowania; zmniejsz dla mniejszego obciπøenia CPU, ale wiÍksze wartoúci mogπ poprawiaÊ ping
+cycle_sync_ff_steps_help 			IloúÊ krokÛw symulacji na jeden krok prawdziwy; zwiÍksz dla wiÍkszej dok≥adnoúci
+topology_police_help				Sprawdzanie, czy te ruchy w grze by≥y prawid≥owe.
+topology_police_parallel_help		Dodatek do TOPOLOGY_POLICE sprawdzajπcy úciany wewnπtrz struktury mapy, ktÛre sπ rÛwnoleg≥e.
+cycle_smooth_time_help				Skala czasowa dla opcji synchronizacji. ZwiÍkszenie tego spowoduje, øe interpolacja bÍdzie p≥ynniejsza, ale mniej dok≥adna. Zmniejszenie os≥abi p≥ynnoúÊ synchronizacji
+cycle_smooth_min_speed_help			Minimalna prÍdkoúÊ korekcji p≥ynnoúci wzglÍdem prÍdkoúci cyklu
+cycle_smooth_threshold_help			Tylko synchronizacje w ktÛrych zmiana po≥oøenia graczy sπ mniejsze od tej wartoúci (mierzonej w prÍdkoúci) bÍdπ wprowadzane p≥ynnie. WiÍksze zmiany bÍdπ wprowadzane natychmiast.
+
+#********************************************
+#********************************************
+#
+#      Score rules configuration items
+#
+#********************************************
+#********************************************
+enemy_suicide_timeout_help        åmierÊ gracza zostanie zaliczona jako samobÛjstwo, jeøeli nie znaleziono wp≥ywu innych graczy na niego w ciπgu tylu sekund.
+score_die_help			IloúÊ punktÛw, jakπ zdobywasz za úmierÊ
+score_survive_help       IloúÊ punktÛw, jakπ zdobywasz za przeøycie
+score_hole_help			 IloúÊ punktÛw, jakπ zdobywasz za robienie dziur w úcianach przeciwnikÛw dla dobra w≥asnej druøyny
+score_kill_help			 IloúÊ punktÛw, jakπ zdobywasz za zabicie kogoú
+score_suicide_help		 IloúÊ punktÛw, jakπ zdobywasz za samobÛjstwo
+score_win_help			 IloúÊ punktÛw, jakπ zdobywasz za wygranie rundy
+score_deathzone_help		 IloúÊ punktÛw, jakπ zdobywasz za dotkniÍcie strefy úmierci
+
+sp_score_win_help			IloúÊ punktÛw, jakπ zdobywasz za wygranie rundy w trybie pojedynczego gracza
+sp_walls_stay_up_delay_help	Czas w sekundach po jakim znikajπ úciany gracza, ktÛry zginπ≥; ujemne wartoúci zostawiπ te úciany na zawsze.
+sp_walls_length_help		D≥ugoúÊ úciany cyklu w metrach; ujemne wartoúci spowodujπ, øe úcian bÍdπ mia≥y nieskoÒczonπ d≥ugoúÊ.
+sp_explosion_radius_help PromieÒ wybuchu eksplodujπcego cyklu w trybie pojedynczego gracza
+sp_team_balance_on_quit_help	WyrÛwnywaÊ druøyny w trybie pojedynczego gracza po wyjúciu?
+sp_team_balance_with_ais_help	WyrÛwnywaÊ druøyny w trybie pojedynczego graczami AI?
+sp_team_max_imbalance_help	Maksymalna dopuszczalna nierÛwnoúÊ druøyn w trybie pojedynczego gracza
+sp_team_max_players_help	Maksimum graczy na jednπ druøynÍ w trybie pojedynczego gracza
+sp_team_min_players_help Minimum graczy na jednπ druøynÍ w trybie pojedynczego gracza
+sp_teams_max_help		Maksymalna iloúÊ druøyn w trybie pojedynczego gracza
+sp_teams_min_help		Minimalna iloúÊ druøyn w trybie pojedynczego gracza
+sp_finish_type_help		Co siÍ dzieje, kiedy zginie ostatni cz≥owiek w trybie pojedynczego gracza?
+sp_game_type_help		Typ rozgrywki w trybie pojedynczego gracza. 0 - Freestyle, 1  - ostatni øywy gracz lub 2 ñ Ludzie vs. AI.
+sp_auto_iq_help			Automatycznie dobieraÊ IQ graczy komputerowych w trybie pojedynczego gracza?
+sp_auto_ais_help		Automatycznie tworzyÊ graczy AI w trybie pojedynczego gracza?
+sp_ai_iq_help			Inteligencja graczy AI w trybie pojedynczego gracza
+sp_min_players_help		Minimalna iloúÊ graczy w trybie pojedynczego gracza
+sp_num_ais_help			IloúÊ graczy AI w trybie pojedynczego gracza
+sp_limit_score_help		Gdy ktÛryú z graczy w trybie pojedynczego gracza przekroczy ten limit punktÛw, rozpocznie siÍ nowy mecz
+sp_limit_rounds_help		IloúÊ rund na jeden mecz w trybie pojedynczego gracza
+sp_limit_time_help		Maksymalny czas trwania jednego meczu w minutach w trybie pojedynczego gracza
+
+spawn_wingmen_back_help     Okreúla, jak daleko w ty≥ znajduje siÍ pozycja startowa skrzyd≥owych.
+spawn_wingmen_side_help     Okreúla, jak daleko w bok znajduje siÍ pozycja startowa skrzyd≥owych.
+
+walls_stay_up_delay_help	Czas w sekundach, po jakim znikajπ úciany po wybuchu cyklu; ujemne wartoúci zostawiπ úciany na zawsze.
+walls_length_help		D≥ugoúÊ úciany w metrach; ujemne wartoúci spowodujÍ, øe úciany bÍdπ nieskoÒczenie d≥ugie.
+explosion_radius_help		PromieÒ wybuchu po eksplozji cyklu
+team_balance_on_quit_help	WyrÛwnywaÊ druøyny po wyjúciu?
+team_balance_with_ais_help	WyrÛwnywaÊ si≥Í druøyn graczami AI?
+team_max_imbalance_help	Maksymalna dopuszczana rÛønica w iloúci graczy poszczegÛlnych druøyn
+team_max_players_help		Maksymalna iloúÊ graczy na druøynÍ
+team_min_players_help		Minimalna iloúÊ graczy na druøynÍ
+team_allow_shuffle_up_help  Jeøeli wynosi 1, gracze mogπ siÍ przetasowywaÊ do woli. Jeúli 0, to mogπ tylko spadaÊ na mniejsze pozycje.
+team_center_is_boss_help    Jeøeli wynosi 1, graczem startujπcym na úrodku bÍdzie szef druøyny. Jeøeli 0, bÍdzie to gracz, ktÛry jest w tej druøynie przez najd≥uøszy okres czasu.
+
+teams_max_help			Maksymalna iloúÊ druøyn
+teams_min_help			Minimalna iloúÊ druøyn
+finish_type_help		Co siÍ dzieje, gdy wszyscy ludzcy gracze zginπ?
+game_type_help			Typ rozgrywki. 0 - Freestyle, 1  - ostatni øywy gracz lub 2 ñ Ludzie vs. AI.
+auto_iq_help			Automatycznie dobieraÊ IQ graczy komputerowych?
+auto_ais_help			Automatycznie tworzyÊ graczy AI?
+ai_iq_help			Inteligencja graczy AI
+min_players_help		Minimalna iloúÊ graczy
+num_ais_help			IloúÊ graczy AI
+limit_score_help		Gdy ktÛryú z graczy przekroczy ten limit punktÛw, rozpocznie siÍ nowy mecz
+limit_rounds_help		IloúÊ rund na jeden mecz
+limit_time_help			Maksymalny czas trwania jednego meczu w minutach
+
+auto_team_help          Oznacza, czy gracze powinny byÊ automatycznie umieszczani w druøynach.
+no_spectators_allowed	Niestety, nie dzia≥a z automatycznym przypisywaniem druøyn.\n
+auto_team_spec_spam_help    Jeúli 0, przyjúcie/odejúcie obserwatora nie bÍdzie oznaczane.
+
+allow_team_name_color_help   Nazywanie druøyn po kolorze
+allow_team_name_player_help  Nazywanie druøyn po nazwie lidera
+allow_team_name_leader_help Pozwala liderowi utworzyÊ druøynÍ.
+
+play_time_total_help         £πczny czas gry, z jakim ktÛrym ktÛú gra≥ na tym kliencie
+play_time_online_help        £πczny czas gry, z jakim ktÛrym ktÛú gra≥ na tym kliencie online
+play_time_team_help          £πczny czas gry, z jakim ktÛrym ktÛú gra≥ na tym kliencie w druøynie
+min_play_time_total_help     £πczny czas gry, wymagany aby mÛc zagraÊ tutaj.
+min_play_time_online_help    £πczny czas gry online, wymagany aby mÛc zagraÊ tutaj.
+min_play_time_team_help      £πczny czas gry w druøynie, wymagany aby mÛc zagraÊ tutaj.
+play_time_total_lacking      Nie moøesz tu graÊ, najpierw musisz zdobyÊ wiÍcej doúwiadczenia. Zagraj przez \1 min. (takøe lokalnie), aby uzyskaÊ dostÍp do gry na tym serwerze.\n
+play_time_online_lacking     Nie moøesz tu graÊ, najpierw musisz zdobyÊ wiÍcej doúwiadczenia w grze online. Zagraj przez \1 min. na innych serwerach, aby uzyskaÊ dostÍp do gry na tym serwerze.\n
+play_time_team_lacking       Nie moøesz tu graÊ, najpierw musisz zdobyÊ wiÍcej doúwiadczenia w grze druøynowej. Zagraj przez \1 minut na serwerzch druøynowych, aby uzyskaÊ dostÍp do gry na tym serwerze.\n
+
+
+team_name_1_help nazwa druøyny 1
+team_name_2_help nazwa druøyny 2
+team_name_3_help nazwa druøyny 3
+team_name_4_help nazwa druøyny 4
+team_name_5_help nazwa druøyny 5
+team_name_6_help nazwa druøyny 6
+team_name_7_help nazwa druøyny 7
+team_name_8_help nazwa druøyny 8
+
+team_red_1_help czerwona czÍúÊ koloru druøyny 1
+team_red_2_help czerwona czÍúÊ koloru druøyny 2
+team_red_3_help czerwona czÍúÊ koloru druøyny 3
+team_red_4_help czerwona czÍúÊ koloru druøyny 4
+team_red_5_help czerwona czÍúÊ koloru druøyny 5
+team_red_6_help czerwona czÍúÊ koloru druøyny 6
+team_red_7_help czerwona czÍúÊ koloru druøyny 7
+team_red_8_help czerwona czÍúÊ koloru druøyny 8
+
+team_green_1_help zielona czÍúÊ koloru druøyny 1
+team_green_2_help zielona czÍúÊ koloru druøyny 2
+team_green_3_help zielona czÍúÊ koloru druøyny 3
+team_green_4_help zielona czÍúÊ koloru druøyny 4
+team_green_5_help zielona czÍúÊ koloru druøyny 5
+team_green_6_help zielona czÍúÊ koloru druøyny 6
+team_green_7_help zielona czÍúÊ koloru druøyny 7
+team_green_8_help zielona czÍúÊ koloru druøyny 8
+
+team_blue_1_help niebieska czÍúÊ koloru druøyny 1
+team_blue_2_help niebieska czÍúÊ koloru druøyny 2
+team_blue_3_help niebieska czÍúÊ koloru druøyny 3
+team_blue_4_help niebieska czÍúÊ koloru druøyny 4
+team_blue_5_help niebieska czÍúÊ koloru druøyny 5
+team_blue_6_help niebieska czÍúÊ koloru druøyny 6
+team_blue_7_help niebieska czÍúÊ koloru druøyny 7
+team_blue_8_help niebieska czÍúÊ koloru druøyny 8
+
+# wall length modification
+cycle_dist_wall_shrink_help        Mnoønik wszystkich odleg≥oúci w obliczeniach úcian. Wszystkie wartoúci sπ dozwolone. Zobacz do settings.cfg po szczegÛ≥owe informacje.
+cycle_dist_wall_shrink_offset_help Offset wszystkich odleg≥oúci w obliczeniach úcian. Zobacz do settings.cfg po szczegÛ≥owe informacje.
+
+# respawn relevant settings (no server supports respawning yet, but the client is prepared)
+cycle_blink_frequency_help        CzÍstotliwoúÊ w Hz z ktÛrπ migocze nieúmiertelny cykl.
+cycle_invulnerable_time_help      Czas w sekundach w jakim cykl jest nieúmiertelny po restarcie.
+cycle_wall_time_help              Czas w sekundach po jakim cykl zaczyna tworzyÊ za sobπ úcianÍ po restarcie.
+cycle_first_spawn_protection_help Ustaw na 1, jeøeli øyczysz sobie, aby ustawienia nieúmiertelnoúci i opÛünienie zostawiania úciany dotyczy≥y teø pierwszego, poczπtkowego startu cykli. 
+
+#********************************************
+#********************************************
+#
+#       Game rules configuration items
+#
+#********************************************
+#********************************************
+
+# map file
+map_file_help                     Plik mapy uøywanej do gry
+map_uri_help                      Uøywaj RESOURCE_REPOSITORY_SERVER i MAP_FILE zamiast tego!
+arena_axes_help                   W ilu kierunkach moøe jechaÊ cykl: 4 - domyúlne, 6 to hexatron.
+resource_repository_client_help   URI ktÛrego uøywa klient szukajπc map, ktÛrych mu brakuje do gry. Lepiej nie zmieniaÊ.
+resource_repository_server_help   URI ktÛrego uøywajπ klient i serwer szukajπc map, ktÛrych in brakuje.
+
+# limits
+speed_factor_help		Mnoønik prÍdkoúci cyklÛw
+sp_speed_factor_help		Mnoønik prÍdkoúci cyklÛw w trybie pojedynczego gracza
+size_factor_help		Mnoønik rozmiaru areny
+sp_size_factor_help		Mnoønik rozmiaru areny w trybie pojedynczego gracza
+
+# single player settings (used by dedicated server only)
+sp_ais_help			iloúÊ graczy AI w trybie pojedynczego gracza
+
+start_new_match_help		Rozpoczyna nowy mecz
+
+# ladder and highscore rules
+ladder_min_bet_help		Minimalny wynik, potrzebny do zostania umieszczonym w rankingu
+ladder_percent_bet_help		Procent Twojego wyniku, ktÛry umieszczasz w rankingu.
+ladder_tax_help			Procent Twojego wyniku w rankingu, ktÛry jesteú winien fiskusowi :-)
+ladder_lose_percent_on_load_help Procent wyniku w rankingu tracony przy kaødym za≥adowaniu
+ladder_lose_min_on_load_help   Minimalna iloúÊ punktÛw w rankingu tracona przy kaødym za≥adowaniu
+
+ladder_gain_extra_help		Zaleøny od pinga dodatkowy bonus do rankingu jaki otrzymuje zwyciÍzca
+
+real_arena_size_factor_help	Aktualny rozmiar areny. Zostaw tÍ wartoúÊ! Zmieniaj size_factor.
+real_cycle_speed_factor_help	Aktualna prÍdkoúÊ cykli. Zostaw tÍ wartoúÊ! Zmieniaj speed_factor.
+
+sp_win_zone_min_round_time_help 	Minimalna liczba sekund jaka musi up≥ynπÊ od poczπtku rundy, aby mog≥a zostaÊ aktywowana strefa wygranej w trybie pojedynczego gracza
+sp_win_zone_min_last_death_help 	Minimalna liczba sekund jaka musi up≥ynπÊ od ostatniej úmierci, aby mog≥a zostaÊ aktywowana strefa wygranej w trybie pojedynczego gracza
+win_zone_min_round_time_help 		 Minimalna liczba sekund jaka musi up≥ynπÊ od poczπtku rundy, aby mog≥a zostaÊ aktywowana strefa wygranej
+win_zone_min_last_death_help 		 Minimalna liczba sekund jaka musi up≥ynπÊ od ostatniej úmierci, aby mog≥a zostaÊ aktywowana strefa wygranej
+win_zone_expansion_help				PrÍdkoúÊ ekspansji strefy wygranej
+win_zone_initial_size_help			Poczπtkowy rozmiar strefy wygranej
+win_zone_deaths_help	            WartoúÊ = 1 zmienia jπ w strefÍ úmierci.
+win_zone_randomness_help            LosowoúÊ startowego po≥oøenia strefy wygranej. 0 umieszcza jπ zawsze na úrodku, 1 rozmieszcza jπ po ca≥ej mapie.
+
+game_timeout_help					Podstawowy limit czasowy dla synchronizacji; oznacza dok≥adny czas pomiÍdzy rundami.
+last_chat_break_time_help           Czas ostatniej rundy, na jaki gracz prowadzπcy rozmowÍ moøe zatrzymaÊ grÍ.
+extra_round_time_help               D≥ugoúÊ dodatkowej przerwy na poczπtku rundy.
+player_chat_wait_max_help           Maksymalny czas w sekundach w jakim czeka siÍ na pojedynczego gracza, aø skoÒczy rozmawiaÊ.
+player_chat_wait_fraction_help      Maksymalny poúlizg czasu w sekundach w jakim czeka siÍ na pojedynczego gracza, aø skoÒczy rozmawiaÊ .
+player_chat_wait_single_help        Ustaw na 1, jeúli powinno siÍ czekaÊ tylko na jednego rozmawiajπcego gracza.
+player_chat_wait_teamleader_help    Ustaw na 1, jeøeli øyczysz sobie aby tylko kapitanowie druøyn mogli zatrzymywaÊ czas gry rozmawiajπc.
+
+chatter_remove_time_help            Czas w sekundach, po jakim gracz ciπgle rozmawiajπcy jest usuwany z gry.
+idle_remove_time_help               Czas w sekundach, po jakim nieaktywny gracz jest usuwany z gry.
+idle_kick_time_help                 Czas w sekundach, po jakim nieaktywny gracz jest wykopywany z serwera.
+
+#********************************************
+#********************************************
+#
+#       Player Configuration items
+#
+#********************************************
+#********************************************
+
+player_name_confitem_help	ImiÍ Gracza
+player_teamname_confitem_help	Nazwa druøyny
+player_user_confitem_help	Globalny ID Gracza
+auto_login_confitem_help	 Czy ten gracz powinien automatycznie prosiÊ o autentykacjÍ?
+camcenter_help			Automatycznie ustaw kamerÍ wewnÍtrznπ zgodnie z kierunkiem jazdy.
+start_cam_help			Poczπtkowa kamera
+start_fov_help			Poczπtkowy zasiÍg widoku
+allow_cam_help			PozwÛl/zabroÒ graczom uøycie innych kamer
+instant_chat_string_help		Szybki Chat dostÍpny przy naciúniÍciu jednego klawisza
+name_team_after_player_help	Jeúli wybrane, druøyny bÍdπ nosiÊ nazwy po ich liderach.
+fav_num_per_team_player_help	Ulubiona iloúÊ graczy na druøynÍ
+spectator_mode_help		Ustawia tryb obserwatora temu graczu.
+auto_incam_help			Automatycznie prze≥πcza na kamerÍ wewnÍtrznπ w labiryncie
+camwobble_help			Pozwala kamerze wewnÍtrznej pochylaÊ siÍ razem z Twoim cyklem.
+
+color_b_help			CzÍúÊ niebieska koloru gracza ñ úciany i cyklu.
+color_g_help			CzÍúÊ zielona koloru gracza ñ úciany i cyklu.
+color_r_help			CzÍúÊ czerwona koloru gracza ñ úciany i cyklu.
+
+#********************************************
+#********************************************
+#
+#       Convenience
+#
+#********************************************
+#********************************************
+
+history_size_console_help    IloúÊ linii trzymanych w historii konsoli.
+history_size_chat_help       IloúÊ linii trzymanych w historii chatu.
+enable_name_hilighting_help  PodúwiatlaÊ Twoje imiÍ w wiadomoúciach wysy≥πnych przez innych graczy?
+
+#********************************************
+#********************************************
+#
+#       Spam protection
+#
+#********************************************
+#********************************************
+
+ping_flood_time_10_help             Minimalny dozwolony czas na otrzymanie 10 pakietÛw ping z jednego komputera.
+ping_flood_time_20_help             Minimalny dozwolony czas na otrzymanie 20 pakietÛw ping z jednego komputera.
+ping_flood_time_50_help             Minimalny dozwolony czas na otrzymanie 50 pakietÛw ping z jednego komputera.
+ping_flood_time_100_help            Minimalny dozwolony czas na otrzymanie 100 pakietÛw ping z jednego komputera.
+ping_flood_global_help              Czasy z PING_FLOOD_TIME_X, pomnoøone przez tÍ wartoúÊ, liczπ pingi dla wszystkich komputerÛw. Ujemne wartoúci wy≥πczπ ochronÍ przed pingfloodem.
+
+spam_protection_repeat_help         Minimalny odstÍp czasowy pomiÍdzy dwiema identycznymi wiadomoúciami tekstowymi.
+spam_protection_help				Minimalny odstÍp czasowy pomiÍdzy kolejnymi wiadomoúciami, ochrona przez spamem.
+spam_protection_vote_help           Mnoønik do SPAM_PROTECTION dotyczπcy g≥osowaÒ.
+spam_protection_chat_help            Mnoønik do SPAM_PROTECTION dotyczπcy wiadomoúci tekstowych.
+spam_penalty_help					IloúÊ sekund, na jakπ ma zostaÊ wyciszony spamer.
+spam_maxlen_help					Maksymalna d≥ugoúÊ wiadomoúci tekstowej.
+spam_autokick_help					IloúÊ spamu, po ktÛrej gracz zostanie automatycznie wykopany.
+silence_all_help					Jeøeli 1, to nowi gracze bÍdπ od poczπtku wyciszeni.
+enable_chat_help					Jeøeli 0, wszystkie wiadomoúci tekstowe bÍdπ magazynowane (jeøeli zostanπ zmienione na serwerze, to te zapamiÍtane na komputerach graczy nie ulegnπ zmianie)
+allow_team_change_help				Jeúli ustawione na 1, to kaødy gracz bÍdzie mÛg≥ wg. W≥asnego uznania zmieniaÊ druøynÍ. W przeciwnym wypadku gracze bÍdπ mogli to robiÊ tylko wtedy, gdy otrzymajπ specjalne pozwolenie tzn. ustawienie ALLOW_TEAM_CHANGE_PLAYER
+
+spam_autokick_count_help			IloúÊ ostrzerzeÒ jakπ otrzyma spamer przed wykopaniem.
+# spam kick messages
+spam_chat                   Rozmawia≥eú za duøo.
+spam_teamchage              Zbyt czÍsto zmienia≥eú druøyny.
+spam_vote_kick_issue        Zg≥asza≥eú zbyt duøo ankiet.
+spam_vote_rejected          Zbyt wiele Twoich g≥osÛw zosta≥o odrzuconych.
+
+#********************************************
+#********************************************
+#
+#       Cheat protection
+#
+#********************************************
+#********************************************
+
+allow_enemies_same_ip_help         Pozwala walczyÊ dwÛm graczom o tym samym IP.
+allow_enemies_same_client_help     Pozwala walczyÊ dwÛm graczom z tego samego klienta.
+
+allow_control_during_chat_help     Pozwala graczowi wpisywaÊ komendy podczas rozmowy.
+
+allow_imposters_help               Jeøeli ustawione na 1, to gracze o tej samej nazwie bÍdπ tolerowani. W przeciwnym wypadku wszyscy oprÛcz jednego bÍdπ automatycznie zmieniaÊ nazwÍ.
+allow_impostors_help               Jeøeli ustawione na 1, to gracze o tej samej nazwie bÍdπ tolerowani. W przeciwnym wypadku wszyscy oprÛcz jednego bÍdπ automatycznie zmieniaÊ nazwÍ.
+
+#********************************************
+#********************************************
+#
+#       Banning
+#
+#********************************************
+#********************************************
+
+network_min_ban_help                Minimalny okres,czasu, na jaki moøe zostaÊ zbanowany uøytkownik.
+
+network_autoban_offset_help         Automatycznie banuj graczy na NETWORK_AUTOBAN_FACTOR * ( kph - NETWORK_AUTOBAN_OFFSET ) minut kiedy zostanπ wykopani; kph to úrednia iloúÊ wykopaÒ na godzinÍ.
+network_autoban_factor_help         Automatycznie banuj graczy na NETWORK_AUTOBAN_FACTOR * ( kph - NETWORK_AUTOBAN_OFFSET ) minut kiedy zostanπ wykopani; kph to úrednia iloúÊ wykopaÒ na godzinÍ.
+network_autoban_max_kph_help        Maksymalna wartoúÊ kph, wykonaÒ na godzinÍ.
+
+network_spectator_time_help         Jeøeli ustawione na wiÍcej niø zero, to bÍdzie maksymalny czas w sekundach, w ciπgu ktÛrego tolerowany jest klient bez graczy.
+
+#********************************************
+#********************************************
+#
+#       Voting settings
+#
+#********************************************
+#********************************************
+
+vote_use_server_controlled_kick_help Ustaw na jeden, jeøeli chcesz uøyÊ ulepszonego sterowania ankietami przez serwer.
+voting_timeout_help					Czas trwania ankiety.
+voting_timeout_per_voter_help   	Dodatek do VOTING_TIMEOUT dla kaødego ankietowanego.
+allow_voting_help					Jeúli 1, gracze bÍdπ mogli g≥osowaÊ.
+allow_voting_spectator_help			Jeúli 1, obserwatorzy bÍdπ mogli g≥osowaÊ.
+min_voters_help						IloúÊ graczy mogπcych g≥osowaÊ, jaka musi byÊ pod≥πczona, aby moøna by≥o utworzyÊ ankietÍ.
+max_votes_help                      Maksymalna iloúÊ ankiet, jakie mogπ byÊ aktywne w danej chwili.
+max_votes_per_voter_help            Maksymalna iloúÊ ankiet wys≥anych przez jednego gracza, jakie mogπ byÊ aktywne w danej chwili.
+voting_start_decay_help				IloúÊ sekund, po ktÛrych ci, co nie g≥osowani sπ ignorowani.
+voting_decay_help					Jeden z nie g≥osujπcych zostaje ignorowany po up≥ywie tylu sekund, ile tu ustawiono.
+voting_bias_help					Dodaj wirtualnych g≥osujπcych, ktÛrzy przeciwstawiπ siÍ kaødej zmianie.
+voting_privacy_help					Kontrola prywatnoúci ankiet. 2: nic nie jest pokazywane 1: nades≥anie ankiety jest widoczne dla administratora 0: g≥osowanie jest widoczne dla administratora -1: nades≥anie ankiety jest publiczne -2: wszystko jest publiczne
+voting_spam_issue_help              Poziom spamu dla nadsy≥ania ankiet.
+voting_spam_reject_help             Poziom spamu dla odrzucania ankiet.
+voting_kick_time_help               Minimalny odstÍp czasu pomiÍdzy ankietami dotyczπcymi wykopania tego samego gracza.
+voting_maturity_help                Czas w sekundach, po jakim úwieøo pod≥πczony do serwera gracz moøe zaczπÊ wysy≥aÊ ankiety.
+votes_cancel_help                   Anuluj wszystkie aktywne ankiety.
+
+voting_suspend_help		    Blokuje g≥osowanie na n sekund.
+voting_suspend_default_help	    Domyúlna wartoúÊ VOTING_SUSPEND.
+voting_unsuspend_help		    PrzeciwieÒstwo VOTING_SUSPEND.
+voting_suspended		    G≥osowanie zosta≥o zawieszone na nastÍpne \1 min..\n
+voting_unsuspended		    G≥osowanie jest ponownie dozwolone.\n
+vote_rejected_voting_suspended		    G≥osowanie zosta≥o zawieszone przez administartora..\n
+
+#********************************************
+#********************************************
+#
+#       Name Display
+#
+#********************************************
+#********************************************
+
+fadeout_name_delay_help				Czas, w jakim wyúwietlane sπ nazwy graczy. 0 jeúli majπ w ogÛle nie byÊ wyúwietlane lub -1 jeúli majπ byÊ pokazane zawsze.
+show_own_name_help					  Czy Twoje imiÍ powinno byÊ wyúwietlane powyøej Twojego cyklu?
+display_colored_names_over_cycles_help		Czy imiona nad cyklami powinny byÊ wyúwietlane w kolorze cyklu?
+dead_console_decoration *MARTWY*  
+#********************************************
+#********************************************
+#
+#       Recording and playback
+#
+#********************************************
+#********************************************
+
+recording_debuglevel_help		    Poziom dodatkowych informacji, jakie sπ nagrywane.
+fast_forward_maxstep_help           Maksymalny czas nagrania pomiÍdzy poszczegÛlnymi wyúwietlanymi klatkami przy przewijaniu.
+fast_forward_maxstep_real_help      Maksymalny rzeczywisty czas pomiÍdzy poszczegÛlnymi wyúwietlanymi klatkami przy przewijaniu.
+fast_forward_maxstep_rel_help       Maksymalny poúlizg czasu, jaki zosta≥ do koÒca trybu przewijania pomiÍdzy wyúwietlanymi klatkami.
+
+#********************************************
+#********************************************
+#
+#       Camera Configuration items
+#
+#********************************************
+#********************************************
+
+camera_forbid_smart_help	Zabrania klientom uøycia kamery Sprytnej
+camera_forbid_in_help		Zabrania klientom uøycia kamery WewnÍtrznej
+camera_forbid_free_help		Zabrania klientom uøycia kamery Wolnej
+camera_forbid_follow_help	Zabrania klientom uøycia kamery ZewnÍtrznej
+camera_forbid_custom_help	Zabrania klientom uøycia kamery W≥asnej
+camera_forbid_server_custom_help  Zabrania klientom uøycia kamery W≥asnej Serwera
+camera_forbid_mer_help		Zabrania uøycia kamery Meritona
+
+camera_forbid_custom_glance_help                 Zabrania ustawieÒ spojrzeÒ kamery w≥asnej
+camera_override_custom_glance_help               Nadpisz ustawienia spojrzeÒ kamery w≥asnej ustawieniami serwera.
+camera_override_custom_glance_server_custom_help  Nadpisz ustawienia spojrzeÒ kamery w≥asnej serwera ustawieniami serwera.
+
+camera_follow_start_x_help	Pozycja poczπtkowa kamery ZewnÍtrznej
+camera_follow_start_y_help	Pozycja poczπtkowa kamery ZewnÍtrznej
+camera_follow_start_z_help	Pozycja poczπtkowa kamery ZewnÍtrznej
+
+camera_smart_start_x_help	Pozycja poczπtkowa Sprytnej kamery
+camera_smart_start_y_help	Pozycja poczπtkowa Sprytnej kamery
+camera_smart_start_z_help	Pozycja poczπtkowa Sprytnej kamery
+camera_smart_glance_custom_help Uøyj ustawieÒ kamery W≥asnej do spoglπdania w boki przy pomocy kamery Sprytnej
+camera_smart_glance_custom_text W≥asne spoglπdanie
+
+camera_free_start_x_help	Pozycja poczπtkowa Wolnej kamery
+camera_free_start_y_help	Pozycja poczπtkowa Wolnej kamery
+camera_free_start_z_help	Pozycja poczπtkowa Wolnej kamery
+
+camera_custom_back_help		Pozycja kamery W≥asnej: jak daleko za cyklem siÍ znajduje?
+camera_custom_rise_help		Pozycja kamery W≥asnej: jak wysoko nad cyklem siÍ znajduje?
+camera_custom_back_fromspeed_help		Ta wartoúÊ jest mnoøona przez aktualnπ prÍdkoúÊ cyklu i dodawana do CAMERA_CUSTOM_BACK.
+camera_custom_rise_fromspeed_help		Ta wartoúÊ jest mnoøona przez aktualnπ prÍdkoúÊ cyklu i dodawana do CAMERA_CUSTOM_RISE.
+camera_custom_pitch_help	Pozycja kamery W≥asnej: jak bardzo patrzy w gÛrÍ/dÛ≥?
+camera_custom_zoom_help     Pozycja kamery W≥asnej: jak bardzo przybliøona jest do Twojego cyklu na poczπtku rundy (aby pokazaÊ formacjÍ druøyny)?
+camera_custom_turn_speed_help PrÍdkoúÊ, z jakπ obraca siÍ kamera W≥asna.
+camera_custom_turn_speed_180_help Dodatkowy mnoønik do CAMERA_CUSTOM_TURN_SPEED po nawrocie.
+camera_in_turn_speed_help PrÍdkoúÊ, z jakπ obraca siÍ kamera wewnÍtrzna.
+
+camera_server_custom_back_help		Pozycja kamery W≥asnej: jak daleko za cyklem siÍ znajduje?
+camera_server_custom_rise_help		Pozycja kamery W≥asnej: jak wysoko nad cyklem siÍ znajduje?
+camera_server_custom_back_fromspeed_help		Ta wartoúÊ jest mnoøona przez aktualnπ prÍdkoúÊ cyklu i dodawana do CAMERA_SERVER_CUSTOM_BACK.
+camera_server_custom_rise_fromspeed_help		Ta wartoúÊ jest mnoøona przez aktualnπ prÍdkoúÊ cyklu i dodawana do CAMERA_SERVER_CUSTOM_RISE.
+camera_server_custom_pitch_help		Pozycja kamery W≥asnej: jak bardzo patrzy w gÛrÍ/dÛ≥?
+camera_server_custom_turn_speed_help PrÍdkoúÊ, z jakπ obraca siÍ kamera W≥asna Serwera. Jeúli mniejsze niø zero, to ustawienia obrotu zostanπ wziÍte od klienta.
+camera_server_custom_turn_speed_180_help Dodatkowy mnoønik do CAMERA_SERVER_CUSTOM_TURN_SPEED po nawrocie.
+
+#red/green 3D rendering settings
+camera_eye_distance_help              Dystans pomiÍdzy oczami trÛjwymiarowej kamery. Ustaw na 0, aby wy≥πczyÊ
+camera_eye_1_color_help               Kolor pierwszego oka. 1 to czerwony, 2 to zielony, 4 to niebieski, suma tych wartoúci oznacza mieszninÍ tych kolorÛw
+camera_eye_2_color_help               Kolor drugiego oka. 1 to czerwony, 2 to zielony, 4 to niebieski, suma tych wartoúci oznacza mieszninÍ tych kolorÛw
+camera_in_max_focus_distance_help     To, pomnoøone przez aktualnπ prÍdkoúÊ, okreúla maksymalnπ odleg≥oúÊ obiektu ostroúci, chyba, øe úciana jest bliøej.
+
+#********************************************
+#********************************************
+#
+#       Network Configuration items
+#
+#********************************************
+#********************************************
+ 
+custom_server_name_help	Nazwa serwera, do ktÛrego pod≥πczyÊ
+dedicated_idle_help		Po uruchomieniu na ten czas (w godz.), serwer dedykowany siÍ wy≥πczy.
+dedicated_fps_help      Maksymalna iloúÊ krokÛw symulacji, jakπ bÍdzie przeprowadza≥ serwer dedykowany
+talk_to_master_help		Czy wys≥aÊ informacje o tym serwerze do Internetu?
+max_out_rate_help		Maksymalna wyjúciowa iloúÊ kb/s.
+max_in_rate_help		Maksymalna wejúciowa iloúÊ kb/s.
+ping_charity_help		Dopuszczalna przez Ciebie rÛønica pomiÍdzy Twoim pingiem, a pingiem innych graczy.
+ping_charity_max_help	Opcja serwera: maksymalna wartoúÊ zrÛwnania pinga. Ustaw 0 aby uniknπÊ b≥yskawicznych úmierci. Aktywne tylko, gdy klienci sπ w wersji 0.2.8.3lub nowszej.
+ping_charity_min_help	Opcja serwera: minimalna wartoúÊ zrÛwnania pinga. Uøyj, aby wymusiÊ grÍ fair. Aktywne tylko, gdy klienci sπ w wersji 0.2.8.3lub nowszej.
+ping_charity_server_help Nie zmieniaj: maksymalna kompensacja pingu dla serwera.
+big_brother_help		Czy juø wys≥aliúmy informacje wielkiemu bratu?
+server_name_help		Nazwa tego serwaera
+server_options_help		KrÛtki opis opcji tego serwera
+server_ip_help          IP, na ktÛrym nas≥uchuje ten serwer
+server_port_help		Port, na ktÛrym nas≥uchuje serwer
+client_port_help		Port, na ktÛrym prÛbujemy siÍ po≥πcznyÊ
+max_clients_help		Maksymalna iloúÊ klientÛw
+max_clients_same_ip_soft_help		Maksymalna dozwolona iloúÊ graczy z tego samego IP; nastÍpni bÍdπ wykopani, gdy serwer bÍdzie pe≥ny
+max_clients_same_ip_hard_help		Maksymalna dozwolona iloúÊ graczy z tego samego IP; nastÍpni bÍdπ ignorowani.
+max_players_same_ip_help  Maksymalna iloúÊ graczy z tego samego IP (kaødy klient moøe obs≥uøyÊ aø 4 graczy!)
+url_help				Adres internetowy powiπzany z tym serwerem.
+
+#********************************************
+#********************************************
+#
+#       Graphics Configuration items
+#
+#********************************************
+#********************************************
+
+png_screenshot_help	Zapisuj zdjÍcia jako pliki PNG, a nie BMP.
+white_sparks_help        Rysuj iskry na bia≥o (zamiast w kolorze cyklu).
+keep_window_active_help  Nadal wyúwietlaj grÍ, gdy okno gry straci kursor (trzymaj zawsze na wierzchu).
+
+# hud
+show_brake_help                   PokazywaÊ w HUD miernik hamulcÛw? 
+show_alive_help                   PokazywaÊ w HUD iloúÊ pozosta≥ych przeciwnikÛw i przyjaciÛ≥?
+show_fastest_help                 PokazywaÊ w HUD najszybszego gracza?
+show_hud_help                     PokazywaÊ HUD?
+show_ping_help                    PokazywaÊ w HUD TwÛj ping?
+show_rubber_help                  PokazywaÊ w HUD miernik Rubber'a?
+show_score_help                   PokazywaÊ w HUD TwÛj wynik?
+show_speed_help                   PokazywaÊ PrÍdkoúciomierz w HUD?
+show_time_help                    PokazywaÊ w HUD aktualny czas?
+show_time_24_help                 PokazywaÊ w HUD czas w 24-godzinnym formacie?
+speed_gauge_locx_help             Po≥oøenie poziome PrÍdkoúciomierza
+speed_gauge_locy_help             Po≥oøenie pionowe PrÍdkoúciomierza
+speed_gauge_size_help             Rozmiar PrÍdkoúciomierza
+rubber_gauge_locx_help            Po≥oøenie poziome miernika Rubber'a
+rubber_gauge_locy_help            Po≥oøenie pionowe miernika Rubber'a
+rubber_gauge_size_help            Rozmiar miernika Rubber'a
+brake_gauge_locx_help             Po≥oøenie poziome miernika hamulcÛw
+brake_gauge_locy_help             Po≥oøenie pionowe miernika hamulcÛw
+brake_gauge_size_help             Rozmiar miernika hamulcÛw
+alive_locx_help                   Po≥oøenie poziome informacji o pozosta≥ych øywych graczach
+alive_locy_help                   Po≥oøenie pionowe informacji o pozosta≥ych øywych graczach
+alive_size_help                   Rozmiar informacji o pozosta≥ych øywych graczach
+fastest_locx_help                 Po≥oøenie poziome informacji o najszybszym graczu
+fastest_locy_help                 Po≥oøenie pionowe informacji o najszybszym graczu
+fastest_size_help                 Rozmiar informacji o najszybszym graczu
+ping_locx_help                    Po≥oøenie poziome wyúwietlacza Ping'a
+ping_locy_help                    Po≥oøenie pionowe wyúwietlacza Ping'a
+ping_size_help                    Rozmiar wyúwietlacza Ping'a
+score_locx_help                   Po≥oøenie poziome wyúwietlacza wyniku
+score_locy_help                   Po≥oøenie pionowe wyúwietlacza wyniku
+score_size_help                   Rozmiar wyúwietlacza wyniku
+cm_locy_help                      Po≥oøenie pionowe wyúrodkowanych wiadomoúci.
+
+cockpit_file_help                 Plik z informacjami o kokpicie
+forbid_hud_map                    ZabroniÊ klientom uøycia minimapy?
+forbid_cockpit_data_help          Lista zabronionych kokpitÛw
+
+
+#floor
+grid_size_help			OdstÍp pomiÍdzy liniami siatki.
+grid_size_moviepack_help	OdstÍp pomiÍdzy liniami siatki, kiedy paczka filmowa jest w≥πczona.
+floor_red_help			Kolor pod≥ogi
+floor_green_help		Kolor pod≥ogi
+floor_blue_help			Kolor pod≥ogi
+
+rim_wall_stretch_x_help Poziome rozciπgniÍcie tekstur úcian krawÍdziowych.
+rim_wall_stretch_y_help Pionowe rozciπgniÍcie tekstur úcian krawÍdziowych.
+rim_wall_wrap_y_help    Ustaw na 1, jeøeli tekstura úcian krawÍdziowych ma siÍ powtarzaÊ w pionie.
+
+#moviepack settings
+moviepack_floor_red_help	Kolor pod≥ogi
+moviepack_floor_green_help	Kolor pod≥ogi
+moviepack_floor_blue_help	Kolor pod≥ogi
+moviepack_wall_stretch_help	Odleg≥oúÊ pomiÍdzy pionowymi liniami paczki filmowej.
+moviepack_rim_wall_stretch_x_help  Poziome rozciπgniÍcie tekstur úcian krawÍdziowych paczki filmowej.
+moviepack_rim_wall_stretch_y_help  Pionowe rozciπgniÍcie tekstur úcian krawÍdziowych paczki filmowej.
+
+#detail settings
+swapmode_text           Tryb synchronizacji grafiki:
+swapmode_help           Okreúla funkcjÍ wywo≥ywanπ do synchronizacji grafiki.
+swapmode_fastest_text   Najszybsza
+swapmode_fastest_help   Bez takiej funkcji. Najszybsze, i zuøywa najmniej CPU, ale moøe spowodowaÊ b≥Ídy grafiki. Uøywaj na w≥asne ryzyko.
+swapmode_glflush_text   Flush
+swapmode_glflush_help   Wywo≥uje funkcjÍ glFlush() do synchronizacji grafiki. Ma≥e zuøycie CPU i zapobiega b≥Ídom grafiki. To jest domyúlna wartoúÊ.
+swapmode_glfinish_text  Finish
+swapmode_glfinish_help  Wywo≥uje funkcjÍ glFinish() do synchronizacji grafiki. Gwarantuje brak opÛünienia grafiki,ale moøe spowodowaÊ utratÍ klatek lub duøe obciπøeniu CPU na niektÛrych systemach. Lepiej uøywaÊ Flush, jeúli nie dzia≥a prawid≥owo.
+swap_mode_help          Okreúla komendÍ uøywanπ do synchronizacji grafiki. 0: brak, 1: glFlush(), 2: glFinish().
+
+ztrick_help			    Dotyczy ulepszeÒ efektywnoúci grafiki. Nie dzia≥a na systemie Windows.
+texture_mode_0_help		Tekstura pod≥ogi:
+texture_mode_1_help		Tekstury úcian:
+texture_mode_2_help		Tekstury obiektÛw:
+texture_mode_3_help		Czcionka:
+
+gl_extensions_help		Informacje systemowe OpenGL
+gl_version_help			Informacje systemowe OpenGL
+gl_renderer_help		Informacje systemowe OpenGL
+gl_vendor_help			Informacje systemowe OpenGL
+line_antialias_help		Aktywuj antyaliasing linii
+poly_antialias_help		Aktywuj antyaliasing obiektÛw
+persp_correct_help		Aktywuj korekcjÍ perspektywy
+alpha_blend_help		Aktywuj pÛ≥przezroczystoúÊ
+smooth_shading_help		Aktywuj cieniowanie
+text_out_help			Aktywuj wyúwietlanie wyjúcia tekstowego/konsoli
+console_columns_help    IloúÊ znakÛw w kaødej linii konsoli
+console_rows_help       Domyúlna iloúÊ linii konsoli
+console_rows_max_help   IloúÊ linii konsoli przy przewijaniu wstecz.
+console_decorate_id_help			Umieszcza ID gracza w kaødej linii konsoli
+console_decorate_ip_help			Umieszcza IP klienta w kaødej linii konsoli
+console_ladder_log_help			Wyúwietla w konsoli informacje o rankingu
+ladderlog_game_time_interval Jeúli dodatnie, wypisz czas gry co n sekund.
+ladderlog_write_all_help Ustwa wszystkie ustawienia LADDER_LOG_WRITE_* na tÍ samπ wartoúÊ.
+ladderlog_write_all_usage Uøycie: LADDER_LOG_WRITE_ALL 1|0
+ladderlog_write_all_enabled Aktywuj pe≥ny widok rankingu.
+ladderlog_write_all_disabled Wy≥πcz widok rankingu.
+show_fps_help			Wyúwietlaj fps
+floor_mirror_help		Tryb lustra pod≥ogi
+floor_detail_help		Tryb detali pod≥ogi
+high_rim_help			Rysuj wysokie úciany krawÍdzi
+dither_help			Dithering
+upper_sky_help			Rysuj wyøszπ p≥aszczyznÍ nieba
+lower_sky_help			Rysuj niøszπ p≥aszczyznÍ nieba
+sky_wobble_help			Animacja nieba
+infinity_plane_help		Uøywaj nieskoÒczonych p≥aszczyzn (Nie dzia≥a pod systemem Windows)
+lag_o_meter_help		Rysuj Lag-O-Mierz
+lag_o_meter_scale_help  Skala Lag-O-Mierza. 1.0 to Ñpoprawnaî wartoúÊ, starsi klienci majπ zawsze 0.5 ze wzglÍdu na b≥πd w grze.
+lag_o_meter_threshold_help	Lag-O-Mierz bÍdzie rysowany tylko wtedy, gry prÍdkoúÊ cyklu i ping bÍdπ wiÍksze od tej wartoúci.
+lag_o_meter_blend_help		Kolor Lag-O-Mierza. 1 bia≥y, 0 kolor gracza.
+lag_o_meter_use_old_help	Czy powinniúmy uøywaÊ starego, niestabilnego Lag-O-Mierza?
+axes_indicator_help		Czy ma byÊ wyúwietlane oznaczenie osi.
+predict_objects_help    Przewiduj ruch cyklu w grze sieciowej
+textures_hi_help		Uøyj tekstur o lepszych kolorach.
+sparks_help			    Rysuj iskry podczas grindowania.
+explosion_help          WyúwietlaÊ eksplozje?
+wrap_menu_help			Jeøeli aktywne, to nastπpi przeskok przez ca≥e menu, jeúli dojdziesz do jego koÒca i naciúnij klawisz w dÛ≥.
+floor_mirror_int_help   Si≥a lustra pod≥ogi.
+color_strings_help		TwÛrz stringi do kolorowych efektÛw.
+filter_color_strings_help		Odfiltruj kody kolorÛw wiadomoúci z sieci.
+filter_color_names_help		     Odfiltruj kody kolorÛw nazw graczy.
+filter_name_ends_help           Odfiltruj spacje i inne úmieci na poczπtku/koÒcu nazw graczy.
+filter_name_middle_help         Odfiltruj spacje i inne úmieci z nazw graczy.
+filter_color_server_names_help	Odfiltruj kody kolorÛw z nazw serwerÛw.
+filter_dark_color_strings_help		Odfiltruj czarny kolor wiadomoúci z sieci.
+filter_dark_color_names_help		    Odfiltruj czarny kolor nazw graczy.
+filter_dark_color_server_names_help	Odfiltruj czarne znaki z nazw serwerÛw.
+filter_color_team_help	Odfiltruj kody kolorÛw z diadomoúci /team.
+filter_dark_color_team_help	Odfiltruj czarnu kolor z diadomoúci /team.
+zone_alpha_help             PrzezroczystoúÊ stref. 1.0  - pe≥ny kolor.
+zone_alpha_server_help      PrzezroczystoúÊ stref kontrolowana przez serwer. 1.0  - pe≥ny kolor.
+
+#screen mode
+custom_screen_height_help	W≥asny rozmiar ekranu
+custom_screen_width_help	W≥asny rozmiar ekranu
+custom_screen_aspect_help	W≥asna dysproporcja ekranu  ( szerokoúÊ piksela/wysokoúÊ piksela)
+screen_size_desktop         Pulpit
+armagetron_screenmode_help	RozdzielczoúÊ ekranu
+armagetron_last_screenmode_help Ostatnia rozdzielczoúÊ ekranu
+armagetron_windowsize_help	Rozmiar okna
+armagetron_last_windowsize_help Ostatni rozmiar okna
+fullscreen_help			Pe≥ny ekran, czy gra w oknie?
+last_fullscreen_help		Pe≥ny ekran, czy gra w oknie? - ostatnia dzia≥ajπca wartoúÊ.
+check_errors_help		Sprawdzaj, czy dany tryb video istnieje.
+last_check_errors_help		Sprawdzaj, czy dany tryb video istnieje. - ostatnia dzia≥ajπca wartoúÊ.
+colordepth_help			G≥Íbia kolorÛw (0: 16 1: domyúlne systemu 2: 24)
+last_colordepth_help		 G≥Íbia kolorÛw - ostatnia dzia≥ajπca wartoúÊ.
+zdepth_help				g≥Íbia bufora z (0: 16 1: z g≥Íbi koloru 2: 32)
+last_zdepth_help		 g≥Íbia bufora z - ostatnia dzia≥ajπca wartoúÊ.
+use_sdl_help			UøywaÊ SDL?
+last_use_sdl_help		UøywaÊ SDL? - ostatnia dzia≥ajπca wartoúÊ.
+failed_attempts_help		IloúÊ nieudanych prÛb zainicjowania grafiki.
+software_renderer_help		Czy OpenGL nie jest przyúpieszany sprzÍtowo?
+motion_blur_time_help       Czas, podczas ktÛrego sπsiadujπce klatki przenikajπ przez siebie.
+armagetron_vsync_help       Co robimy z pionowπ synchronizacjπ monitora
+rmagetron_vsync_last_help  Co robimy z pionowπ synchronizacjπ monitora
+armagetron_vsync_last_help  Co robimy z pionowπ synchronizacjπ monitora
+
+#model
+use_displaylists_help		Uøyj listy wyúwietlania do rysowania cykli?
+
+#********************************************
+#********************************************
+#
+#       Sound Configuration items
+#
+#********************************************
+#********************************************
+
+sound_buffer_shift_help		Mnoønik rozmiaru bufora.
+sound_quality_help		JakoúÊ düwiÍku [0=brak, 3=wysoka]
+sound_sources_help		IloúÊ ürÛde≥ düwiÍku s≥yszana naraz.
+
+# this is the new stuff
+sound_channels Kana≥y
+sound_channels_help IloúÊ kana≥Ûw, jakπ moøe obs≥uøyÊ Twoja karta düwiÍkowa.
+sound_playlist_text Lista Odtwarzania.
+sound_playlist_help Lista Odtwarzania, ktÛrej mamy uøyÊ.
+sound_playlistinternal_text Wbudowana
+sound_playlistinternal_help Uøyj wbudowanej Listy Odtwarzania.
+sound_playlistcustom_text W≥asna
+sound_playlistcustom_help Uøyj w≥asnej listy odtwarzania
+sound_customplaylist_text W≥πsne Lista Odtwarzania
+sound_customplaylist_help Pe≥na úcieøka do Twojej Listy Odtwarzania.
+
+#********************************************
+#********************************************
+#
+#       Viewport Configuration items
+#
+#********************************************
+#********************************************
+
+
+viewport_conf_help		Konfiguracja podzia≥u ekranu; decyduje ilu graczy moøe graÊ na tym komputerze.
+viewport_belongs_help		Dopisz gracza do tego fragmentu ekranu.
+
+#********************************************
+#********************************************
+#
+#       Misc. Configuration items
+#
+#********************************************
+#********************************************
+mouse_grab_help			£ap kursor myszy, tak aby nie mÛg≥ opuúciÊ okna gry.
+moviepack_help			Uøyj paczki filmowej
+armagetron_version_help		Twoja wersja \g
+message_of_day_help		WiadomoúÊ dnia wysy≥ana klientowi po pod≥πczeniu, i jeøeli to moøliwe, wyúwietlana na pe≥nym ekranie.
+title_of_day_help		Jeúli moøna wyúwietlaÊ informacje na pe≥nym ekranie, to bÍdzie nag≥Ûwek MESSAGE_OF_DAY.
+message_of_day_timeout_help		Czas wyúwietlania message_of_day na pe≥nym ekranie.
+round_console_message_help	WiadomoúÊ wysy≥ana klientom na poczπtku kaødej rundy
+round_center_message_help	Wielka wiadomoúÊ wysy≥ana klientom na poczπtku kaødej rundy
+
+password_storage_help			Okreúla, gdzie sπ przechowywane Twoje has≥a: 1 ñ dysk twardy, 0 pamiÍÊ RAM, -1 w ogÛle nie sπ zapamiÍtywane przez grÍ.
+protect_sensitive_files_help ChroÒiÊ plik user.cfg przed czytanie przez innych uøytkownikÛw?
+admin_pass_help			Has≥o administratora
+
+backward_compatibility_help	Maksymalna iloúÊ obs≥ugiwanych starych protoko≥Ûw.`
+
+# program control
+quit_help					Zamyka serwer dedykowany i wy≥πcza to okno.
+exit_help					Zamyka serwer dedykowany i wy≥πcza to okno.
+
+# manning and kicking commands
+only_works_on_server        Komenda \1 dzia≥a tylko na serwerze. Prawdopodobnie chcia≥eú powiedzieÊ "/admin \1 \2".\n
+players_help                Wypisz listÍ graczy
+kill_help                   Zabij wybranego gracza
+silence_help                Wycisz gracza, aby nie mÛg≥ publicznie rozmawiaÊ (/msg i /team ciπgle bÍdπ jednak dzia≥aÊ)
+voice_help                  PrzeciwieÒstwo SILENCE
+allow_team_change_player_help PozwÛl konkretnemu graczu zmieniaÊ druøyny, nawet jeúli ALLOW_TEAM_CHANGE jest ustawione na 0
+disallow_team_change_player_help PrzeciwieÒstwo ALLOW_TEAM_CHANGE_PLAYER
+kick_help					Wykop konkretnego gracza z serwera
+default_kick_reason_help    Domyúlna przyczyna wykopania
+kick_to_help    			Wykopuje podanego gracza i jeúli klient na to pozwala, przenosi go na inny serwer.
+move_to_help    			Wykopuje podanego gracza i jeúli klient na to pozwala, przenosi go na inny serwer. Nie dolicza wykopania do Autobanu.
+default_kick_to_reason_help Domyúlna przyczyna wykopania przez KICK_TO lub MOVE_TO.
+default_kick_to_server_help      Domyúlna nazwa serwera/jego IP, do ktÛrego przekierowany bÍdzie gracza przez komendy KICK_TO i MOVE_TO.
+default_kick_to_port_help        Domyúlna port serwera, do ktÛrego przekierowany bÍdzie gracza przez komendy KICK_TO i MOVE_TO.
+vote_kick_to_server_help         Domyúlna nazwa serwera/jego IP, do ktÛrego przekierowany bÍdzie gracza przez wykopani na skutek ankiety.
+vote_kick_to_port_help           Domyúlna port serwera, do ktÛrego przekierowany bÍdzie gracza przez wykopani na skutek ankiety.
+suspend_help				Zabrania graczu grÍ przez nastÍpne N rund (domyúlnie: 5)
+unsuspend_help              PrzeciwieÒstwo SUSPEND.
+
+ban_help                    Banuje gracza z tego serwera (wykopujπc go wpierw) na okreúlony czas.
+ban_ip_help                 Banuje IP na okreúlony czas.
+ban_list_help               Wyúwietla listÍ zbanowanych adresÛw IP.
+unban_ip_help               PrzeciwieÒstwo BAN_IP.
+
+player_list_hidden_player_prefix_help	Prefiks, poazywany przed Globalnym ID graczy ukrytych i poziom dostÍpu potrzebny, aby go zobaczyÊ.
+
+# communication
+console_message_help		Wyúwietla w konsoli informacjÍ o wszystkich pod≥πczonych klientach.
+center_message_help			Wyúwietla wielkπ informacjÍ na úrodku ekranu o wszystkich pod≥πczonych klientach.
+fullscreen_message_help     Wyúwietla na ekranie bardzo duøπ wiadomoúÊ zatrzymujπc grÍ na pewien czas. Uøywaj ostroønie.
+say_help					Tylko serwer dedykowany: Pozwala administratorowi coú powiedzieÊ.
+
+rename_help		    Nadaje graczu nowπ nazwÍ.
+allow_rename_player_help    Pozwala temu graczu zmieniaÊ nazwÍ.
+disallow_rename_player_help Zabrania temu graczu zmieniaÊ nazwÍ.
+
+#********************************************
+#*****************************************************************************************************************************************************************************
+#********************************************
+#
+# Key bindings; every input ITEM item gets two
+# strings: the short description string 
+# appearing in the configuration menus
+# (named input_item_text) and the help message 
+# you see below the input configuration menu
+# when you select the input item for a longer
+# time (named input_item_help).
+#
+#********************************************
+#********************************************
+#********************************************
+#********************************************
+
+#generic texts
+input_items_unbound		Nieprzypisane
+input_items_global		Globalne sterowanie
+
+
+#********************************************
+#********************************************
+#
+#       Misc. Configuration items
+#
+#********************************************
+#********************************************
+
+input_console_input_text			Konsola
+input_console_input_help			Wejúcie do konsoli.
+
+input_screenshot_text				Screenshot
+input_screenshot_help				Robi zdjÍcie i zapisuje je jako screenshot_X.bmp w folderze var.
+
+input_chat_text						Chat
+input_chat_help						Pozwala rozmawiaÊ z innymi graczami w sieci.
+
+input_toggle_spectator_text	        Prze≥πcz obserwatora
+input_toggle_spectator_help	        Prze≥πcza tryb obserwatora, wy≥πczajπc gracza z gry aby mÛg≥ porozmawiaÊ i wrÛciÊ kiedy skoÒczy.
+
+input_score_text					Wynik
+input_score_help					Pokazuje tabelÍ wynikÛw.
+
+input_toggle_fullscreen_text		Prze≥πcz tryb pe≥nego ekranu
+input_toggle_fullscreen_help		Prze≥πcza pomiÍdzy trybem pe≥nego ekranu a trybem "w oknie".
+
+input_toggle_mousegrab_text         Prze≥πcz zgarnianie myszy
+input_toggle_mousegrab_help         Uwalnia wskaünik myszy, lub blokuje go w oknie gry.
+
+input_reload_textures_text          Prze≥aduj tekstury
+input_reload_textures_help          Prze≥adowuje wszystkie tekstury. Przydatne dla ich twÛrcÛw.
+
+input_ingame_menu_text              Menu gry
+input_ingame_menu_help              Aktywuje menu gry. Klawisz ESC jest zawsze przypisany do tej funkcji, wiÍc nigdy nie zgubisz siÍ w grze :)
+
+input_pause_game_text               Pauza
+input_pause_game_help               Zatrzymuje grÍ, lub ponownie jπ aktywuje.
+
+#********************************************
+#********************************************
+#
+#       console scrolling items
+#
+#********************************************
+#********************************************
+
+input_mess_up_text					PrzewiÒ w gÛrÍ
+input_mess_up_help					Przewija wiadomoúci o stronÍ w gÛrÍ.
+
+input_mess_down_text				PrzewiÒ w dÛ≥
+input_mess_down_help				Przewija wiadomoúci o stronÍ w dÛ≥.
+#********************************************
+#********************************************
+#
+#       cockpit keys
+#
+#********************************************
+#********************************************
+
+input_cockpit_key_1_text			Klawisz kokpitu 1
+input_cockpit_key_2_text			Klawisz kokpitu 2
+input_cockpit_key_3_text			Klawisz kokpitu 3
+input_cockpit_key_4_text			Klawisz kokpitu 4
+input_cockpit_key_5_text			Klawisz kokpitu 5
+
+input_cockpit_key_1_help			Klawisze kokpitu mogπ wywo≥aÊ pewne akcjem jak np. ukrywanie niekturych jego czÍúci. Ich efekt zaleøy od wybranego pliku kokpitu.
+input_cockpit_key_2_help			Klawisze kokpitu mogπ wywo≥aÊ pewne akcjem jak np. ukrywanie niekturych jego czÍúci. Ich efekt zaleøy od wybranego pliku kokpitu.
+input_cockpit_key_3_help			Klawisze kokpitu mogπ wywo≥aÊ pewne akcjem jak np. ukrywanie niekturych jego czÍúci. Ich efekt zaleøy od wybranego pliku kokpitu.
+input_cockpit_key_4_help			Klawisze kokpitu mogπ wywo≥aÊ pewne akcjem jak np. ukrywanie niekturych jego czÍúci. Ich efekt zaleøy od wybranego pliku kokpitu.
+input_cockpit_key_5_help			Klawisze kokpitu mogπ wywo≥aÊ pewne akcjem jak np. ukrywanie niekturych jego czÍúci. Ich efekt zaleøy od wybranego pliku kokpitu.
+
+#********************************************
+#********************************************
+#
+#       cycle control keys
+#
+#********************************************
+#********************************************
+
+input_cycle_brake_text		Hamulec
+input_cycle_brake_help		zmniejsza Twojπ prÍdkoúÊ w krytycznych sytuacjach
+
+input_cycle_brake_toggle_text		Prze≥πcznik hamulca
+input_cycle_brake_toggle_help		prze≥πcza hamulec na sta≥e, aby nie trzeba by≥ trzymaÊ wciúniÍtego klawisza hamowania.
+
+input_cycle_turn_right_text	SkrÍÊ w prawo
+input_cycle_turn_right_help	Wykonuje zwrot w prawo o 90 stopni
+
+input_cycle_turn_left_text	SkrÍÊ w lewo
+input_cycle_turn_left_help	Wykonuje zwrot w lewo o 90 stopni
+
+input_joy_left_text         Joystick - Lewo
+input_joy_left_help         Kaøe cyklowi jechaÊ w lewo wzglÍdem aktualnego widoku
+input_joy_right_text        Joystick - Prawo
+input_joy_right_help        Kaøe cyklowi jechaÊ w prawo wzglÍdem aktualnego widoku
+input_joy_up_text           Joystick - GÛra
+input_joy_up_help           Kaøe cyklowi jechaÊ w gÛrÍ wzglÍdem aktualnego widoku
+input_joy_down_text         Joystick - DÛ≥
+input_joy_down_help         Kaøe cyklowi jechaÊ w dÛ≥ wzglÍdem aktualnego widoku
+input_joy_glance_text       Joystick - Kamera
+input_joy_glance_help       Kiedy przytrzymany, ruchy joysticka bÍdπ poruszaÊ kamerπ, a nie cyklem
+
+
+#********************************************
+#********************************************
+#
+#       camera control keys
+#
+#********************************************
+#********************************************
+
+input_move_back_text		PrzesuÒ w ty≥
+input_move_back_help		Przesuwa kamerÍ do ty≥u.
+
+input_move_forward_text		PrzesuÒ w przÛd
+input_move_forward_help		 Przesuwa kamerÍ do przodu.
+
+input_move_down_text		 PrzesuÒ w dÛ≥
+input_move_down_help		 Przesuwa kamerÍ w dÛ≥, lub obraca jπ, jeúli jej pozycja wzglÍdem cyklu jest sta≥a.
+
+input_move_up_text		 PrzesuÒ w gÛrÍ
+input_move_up_help		Przesuwa kamerÍ w gÛrÍ, lub obraca jπ, jeúli jej pozycja wzglÍdem cyklu jest sta≥a.
+
+input_move_right_text		 PrzesuÒ w prawo
+input_move_right_help		Przesuwa kamerÍ w prawo, lub obraca jπ, jeúli jej pozycja wzglÍdem cyklu jest sta≥a.
+
+input_move_left_text		 PrzesuÒ w lewo
+input_move_left_help		Przesuwa kamerÍ w lewo, lub obraca jπ, jeúli jej pozycja wzglÍdem cyklu jest sta≥a.
+
+input_zoom_out_text		Pomniejsz
+input_zoom_out_help		Pokaø wiÍkszy obszar sceny, ale z mniejszπ iloúciπ szczegÛ≥Ûw.
+
+input_zoom_in_text		PowiÍksz
+input_zoom_in_help		Zmniejsza pole widzenia umoøliwiajπc dostrzeøenie wiÍcej szczegÛ≥Ûw.
+
+input_glance_back_text		SpÛjrz w ty≥
+input_glance_back_help		Tymczasowo obraca kamerÍ w ty≥.
+
+input_glance_right_text		SpÛjrz w prawo
+input_glance_right_help		Tymczasowo obraca kamerÍ w prawo.
+
+input_glance_left_text		SpÛjrz w lewo
+input_glance_left_help		Tymczasowo obraca kamerÍ w lewo.
+
+input_glance_forward_text	Glance w przÛd
+input_glance_forward_help	Tymczasowo obraca kamerÍ do przodu.
+
+input_bank_down_text		ObrÛÊ w dÛ≥
+input_bank_down_help		Obraca kamerÍ w dÛ≥ lub przesuwa jπ do gÛry, jeúli jej kierunek jest sta≥y.
+
+input_bank_up_text		ObrÛÊ w gÛrÍ
+input_bank_up_help		Obraca kamerÍ w gÛrÍ lub przesuwa jπ w dÛ≥, jeúli jej kierunek jest sta≥y.
+
+input_look_right_text		ObrÛÊ w prawo.
+input_look_right_help		Obraca kamerÍ w prawo lub przesuwa jπ w lewo, jeúli jej kierunek jest sta≥y.
+
+input_look_left_text		ObrÛÊ w lewo.
+input_look_left_help		Obraca kamerÍ w lewo lub przesuwa jπ w prawo, jeúli jej kierunek jest sta≥y.
+
+input_switch_view_text		Prze≥πcz kamerÍ
+input_switch_view_help		Zmienia perspektywÍ kamery.
+
+#********************************************
+#********************************************
+#
+#          instant chat keys
+#
+#********************************************
+#********************************************
+
+input_instant_chat_text		Szybki Chat \1
+input_instant_chat_help		W≥πcza specjalny, dowolnie ustawiany tekst.
+
+#********************************************
+#********************************************
+#
+#          media player keys
+#
+#********************************************
+#********************************************
+
+input_music_play_text       Graj MuzykÍ
+input_music_play_help       Rozpoczyna odtwarzanie muzyki
+input_music_next_text       NastÍpny UtwÛr
+input_music_next_help       Prze≥πcza nastÍpny utwÛr
+input_music_previous_text       Poprzedni UtwÛr
+input_music_previous_help       Prze≥πcza poprzedni utwÛr
+input_music_pause_text      Pauza
+input_music_pause_help      Pauzuje muzykÍ
+input_music_stop_text       Stop
+input_music_stop_help       Zatrzymuje muzykÍ
+input_music_volume_up_text  ZwiÍksz G≥oúnoúÊ
+input_music_volume_up_help  Podg≥aúnia muzykÍ
+input_music_volume_down_text Zmniejsz G≥oúnoúÊ
+input_music_volume_down_help Scisza muzykÍ
+
+
+#********************************************
+#********************************************
+#********************************************
+#********************************************
+#
+# Menu texts (titles, menuitems and
+# selection items) and their corresponding
+# help texts (the texts that appear when
+# you don't press up and down in the menu
+# for a while)
+#
+#********************************************
+#********************************************
+#********************************************
+#********************************************
+
+
+#********************************************
+#********************************************
+#
+#             main menu
+#
+#********************************************
+#********************************************
+
+main_menu_text			\g v\1
+
+game_menu_text			Gra
+game_menu_main_help		Konfiguracja i uruchomienie gry.
+
+player_mainmenu_text		Ustawienia Gracza
+player_mainmenu_help		WybÛr imion i ustawienia sterowania.
+
+system_settings_menu_text	Ustawienia
+system_settings_menu_help	Ustawienia düwiÍku, grafiki i zachowania gry \g
+
+main_menu_about_text		O programie
+main_menu_about_help		Wyúwietla informacje o posiadanej wersji \g, lokalizacji plikÛ konfiguracyjnych, stronach do odwiedzenia i administratorach projektu.
+
+main_menu_exit_text		Wyjúcie
+main_menu_exit_help		Do zobaczenia!
+
+
+#ingame menu
+ingame_menu_text		Menu gry
+
+game_menu_ingame_text		ZmieÒ grÍ
+game_menu_ingame_help		Ustawienia dotyczπce gry
+
+ingame_menu_exit_text		PowrÛt do gry
+ingame_menu_exit_help		Powraca na siatkÍ gry!
+
+game_menu_shutdown_text		Zamknij serwer
+game_menu_shutdown_help		KoÒczy dzia≥anie serwera i powraca do g≥Ûwnego menu.
+
+game_menu_exit_text		OpuúÊ grÍ
+game_menu_exit_help		KoÒczy tÍ partiÍ i wraca do menu g≥Ûwnego.
+
+game_menu_disconnect_text	Roz≥πcz
+game_menu_disconnect_help	Roz≥πcza grÍ i powraca do g≥Ûwnego menu.
+
+
+#********************************************
+#********************************************
+#
+#             Version Info screen
+#
+#********************************************
+#********************************************
+version_info_title              Informacje o tej instalacji \g
+version_info_version            Posiadana wersja gry \g: \1
+version_info_misc_stuff         \n0xff8888Oficjalna strona:0xRESETT http://armagetronad.net/\n0xff8888Oficjalne forum:0xRESETT http://forums.armagetronad.net/\n0xff8888Wiki (strategie, zawody, ...):0xRESETT http://wiki.armagetronad.net/\n0xff8888Administratorzy projektu:0xRESETT z-man, Tank Program (guru3), Lucifer
+
+path_info_user_cfg              Po≥oøenie pliku user.cfg:
+path_info_config                Foldery konfiguracji:
+path_info_resource              Foldery plikÛw (map, kokpitÛw):
+path_info_data                  Foldery danych (tekstury, Paczki Filmowe (moviepacks), ...):
+path_info_screenshot            Foldery zdjÍÊ:
+path_info_var                   Foldery zmiennych:
+
+#********************************************
+#********************************************
+#
+#             game menu
+#
+#********************************************
+#********************************************
+
+game_menu_start_text		Gra Lokalna
+game_menu_start_help		Wejdü na siatkÍ gry! Zagrajπ tylko gracze skonfigurowani na tym komputerze.
+
+network_menu_text		Gra Sieciowa
+network_menu_help		Pod≥πcza CiÍ do wieloosobowej gry przez Internet.
+
+game_settings_menu_text		Ustawienia gry
+game_settings_menu_help		Wybierz tryb gry i iloúÊ przeciwnikÛw
+
+
+game_menu_reset_text		Zacznij nowy mecz
+game_menu_reset_help		Po koÒcu aktualnej rundy zaczÍty bÍdzie nowy mecz, a wszystkie punkty zostanπ wykasowane.
+
+#game settings
+game_menu_finish_text		Tryb ukoÒczenia:
+game_menu_finish_help		Co siÍ dzieje kiedy wszyscy ludzcy gracze zginπ?
+
+game_menu_finish_expr_text	Ekspresowy Reset
+game_menu_finish_expr_help	Gra zaczyna siÍ od nowa najszybciej jak to moøliwe.
+
+game_menu_finish_stop_text	Reset
+game_menu_finish_stop_help	Gra zaczyna siÍ od nowa po kilku sekundach.
+
+game_menu_finish_fast_text	Szybki koniec
+game_menu_finish_fast_help	Gra toczy siÍ dalej normalnie dopÛki nie ma zwyciÍzcy, ale w przyúpieszonym trybie.
+
+game_menu_finish_normal_text	Normalne ukoÒczenie
+game_menu_finish_normal_help	Pozwala grze toczyÊ siÍ dalej dopÛki nie ma zwyciÍzcy. Nuuuøπce.
+
+game_menu_mode_text		Tryb gry:
+game_menu_mode_help		Ustawia zasady na jakich chcesz graÊ na:
+
+game_menu_mode_free_text	Freestyle
+game_menu_mode_free_help	Bez zasad, bez zwyciÍzcy. Gra koÒczy siÍ, gdy wszyscy ludzcy gracze zginπ.
+
+game_menu_mode_lms_text		Ostatni Øywy Cz≥owiek
+game_menu_mode_lms_help		Ostatni øywy gracz ludzki zwyciÍøa. Jeúli wszyscy ludzie zginπ, wygrywa komputer.
+
+game_menu_mode_team_text	Ludzie vs. AI
+game_menu_mode_team_help	Wszyscy ludzie tworzπ jednπ druøynÍ, komputer gra drugim zespo≥em. Ludzie zaczynajπ z jednego punktu na planszy. Wygrywa ta druøyna, ktÛra przeøyje d≥uøej.
+
+game_menu_autoai_text		Automatyczne AI:
+game_menu_autoai_help		Bazujπc na aktualnym wyniku, komputer automatycznie ocenia ile graczy AI ma stanπÊ przeciw ludzkim graczom.
+
+game_menu_autoiq_text		Automatyczne IQ:
+game_menu_autoiq_help		Bazujπc na aktualnym wyniku, komputer automatycznie ocenia inteligencjÍ graczy AI stajπcych przeciw ludzkim graczom.
+
+game_menu_ais_text		IloúÊ graczy AI:
+game_menu_ais_help		Pozwala na wybÛr, ile graczy Sztucznej Inteligencji("Artificial Intelligence") ma wziπÊ udzia≥ w grze.
+
+game_menu_iq_text		AI IQ:
+game_menu_iq_help		Pozwala na wybÛr úredniej inteligencji graczy Sztucznej Inteligencji("Artificial Intelligence") biorπcych udzia≥ w grze.
+
+game_menu_minplayers_text	Minimalna iloúÊ graczy:
+game_menu_minplayers_help	Wybiera minimalnπ iloúÊ graczy na siatce. Jeøeli jest niewystarczajπco graczy sterowanych przez ludzi, zostanπ oni zastπpieni przez graczy komputerowych.
+
+game_menu_speed_text		PrÍdkoúÊ:
+game_menu_speed_help		Mnoønik prÍdkoúci. Ujemne wartoúci spowolniπ grÍ, dodatnie przyúpieszajπ. PowiÍkszenie tej wartoúci o 2 powiÍksza prÍdkoúÊ dwukrotnie. Sensowne wartoúci leøπ pomiÍdzi -2 i +4.
+
+game_menu_size_text		Rozmiar Areny:
+game_menu_size_help		Mnoønik rozmiaru. Ujemne wartoúci pomniejszajπ arenÍ, dodatnie jπ powiÍkszajπ. PowiÍkszenie tej wartoúci o 2 zwiÍksza rozmiar dwukrotnie. Sensowne wartoúci leøπ pomiÍdzy -6 i +2.
+
+game_menu_balance_quit_text	WyrÛwnanie po Wyjúciu:
+game_menu_balance_quit_help	Czy wyrÛwnaÊ druøyny jeúli ktoú opuúci jednπ z nich?
+
+game_menu_balance_ais_text	WyrÛwnanie AI:
+game_menu_balance_ais_help	Czy wyrÛwnaÊ poziom druøyn dodajπc mocne AI do s≥abszej druøyny?
+
+game_menu_imb_perm_text		Max. sta≥a nierÛwnoúÊ:
+game_menu_imb_perm_help		Maksymalna ciπg≥a nierÛwnoúÊ w sile druøyn; moøe byÊ naruszana na krÛtki czas
+
+game_menu_imb_text		Max. tymczasowa nierÛwnoúÊ:
+game_menu_imb_help		Maksymalna dozwolona nierÛwnoúÊ w sile druøyn
+
+game_menu_max_players_text	Max. graczy na druøynÍ:
+game_menu_max_players_help	Maksymalna iloúÊ graczy w jednej druøynie
+
+game_menu_min_players_text	Min. graczy na druøynÍ:
+game_menu_min_players_help	Minimalna iloúÊ graczy w jednej druøynie( brakujπce miejsca zostanπ zajÍte przez AI)
+
+game_menu_max_teams_text	Max. druøyn:
+game_menu_max_teams_help	Maksymalna iloúÊ druøyn
+
+game_menu_min_teams_text	Min. druøyn:
+game_menu_min_teams_help	Minimalna iloúÊ druøyn
+
+game_menu_wallstayup_text		OpÛünienie åcian:
+game_menu_wallstayup_help		Czas w jakim úciana zostaje na planszy po jego przegranej
+
+game_menu_wallstayup_infinite_text	nieskoÒczone
+game_menu_wallstayup_infinite_help	åciany zostajπ na zawsze
+
+game_menu_wallstayup_immediate_text	natychmiastowe
+game_menu_wallstayup_immediate_help	åciany znikajπ natychmiast
+
+game_menu_wallstayup_halfsecond_text	1/2s
+game_menu_wallstayup_halfsecond_help	åciany znikajπ po po≥owie sekundy
+
+game_menu_wallstayup_second_text	1s
+game_menu_wallstayup_second_help	åciany znikajπ po sekundzie
+
+game_menu_wallstayup_2second_text	2s
+game_menu_wallstayup_2second_help	åciany znikajπ po dwÛch sekundach
+
+game_menu_wallstayup_4second_text	4s
+game_menu_wallstayup_4second_help	åciany znikajπ po 4 sekundach
+
+game_menu_wallstayup_8second_text	8s
+game_menu_wallstayup_8second_help	åciany znikajπ po 8 sekundach
+
+game_menu_wallstayup_16second_text	16s
+game_menu_wallstayup_16second_help	åciany znikajπ po 16 sekundach
+
+game_menu_wallstayup_32second_text	32s
+game_menu_wallstayup_32second_help	åciany znikajπ po 32 sekundach
+
+game_menu_wallslength_text		D≥ugoúÊ úciany:
+game_menu_wallslength_help		D≥ugoúÊ úciany cyklu mierzona w metrach
+
+game_menu_wallslength_infinite_text	nieskoÒczona
+game_menu_wallslength_infinite_help	åciany sπ nieskoÒczenie d≥ugie
+
+game_menu_wallslength_25meter_text	25m
+game_menu_wallslength_25meter_help	åciany majπ 25 metrÛw d≥ugoúci
+
+game_menu_wallslength_50meter_text	50m
+game_menu_wallslength_50meter_help	åciany majπ 50  metrÛw d≥ugoúci
+
+game_menu_wallslength_100meter_text	100m
+game_menu_wallslength_100meter_help	åciany majπ 100 metrÛw d≥ugoúci
+
+game_menu_wallslength_200meter_text	200m
+game_menu_wallslength_200meter_help	åciany majπ 200 metrÛw d≥ugoúci
+
+game_menu_wallslength_300meter_text	300m
+game_menu_wallslength_300meter_help	åciany majπ 300 metrÛw d≥ugoúci
+
+game_menu_wallslength_400meter_text	400m
+game_menu_wallslength_400meter_help	åciany majπ 400 metrÛw d≥ugoúci
+
+game_menu_wallslength_600meter_text	600m
+game_menu_wallslength_600meter_help	åciany majπ 600 metrÛw d≥ugoúci
+
+game_menu_wallslength_800meter_text	800m
+game_menu_wallslength_800meter_help åciany majπ 800 metrÛw d≥ugoúci
+
+game_menu_wallslength_1200meter_text	1200m
+game_menu_wallslength_1200meter_help	åciany majπ 1200 metrÛw d≥ugoúci
+
+game_menu_wallslength_1600meter_text	1600m
+game_menu_wallslength_1600meter_help	åciany majπ 1600 metrÛw d≥ugoúci
+
+game_menu_wallslength_2400meter_text	2400m
+game_menu_wallslength_2400meter_help	åciany majπ 2400 metrÛw d≥ugoúci
+
+game_menu_exrad_text			PromieÒ Wybuchu:
+game_menu_exrad_help			PromieÒ, w jakim niszczejπ úciany po wybuch cyklu
+
+game_menu_exrad_0_text			brak
+game_menu_exrad_0_help			Bez takiego wybuchu
+
+game_menu_exrad_2meters_text		2m
+game_menu_exrad_2meters_help		PromieÒ wybuch ma 2 metry
+
+game_menu_exrad_4meters_text		4m
+game_menu_exrad_4meters_help		PromieÒ wybuch ma 4 metry
+
+game_menu_exrad_8meters_text		8m
+game_menu_exrad_8meters_help		PromieÒ wybuch ma 8 metrÛw
+
+game_menu_exrad_16meters_text		16m
+game_menu_exrad_16meters_help		PromieÒ wybuch ma 16 metrÛw
+
+game_menu_exrad_32meters_text		32m
+game_menu_exrad_32meters_help		PromieÒ wybuch ma 32 metry
+
+game_menu_exrad_64meters_text		64m
+game_menu_exrad_64meters_help		PromieÒ wybuch ma 64 metry
+
+game_menu_exrad_128meters_text		128m
+game_menu_exrad_128meters_help		PromieÒ wybuch ma 128 metrÛw
+
+game_menu_wz_mr_text		Strefa wygranej - Minimalny czas rundy
+game_menu_wz_mr_help		Minimalny czas rundy w sekundach, po jakim aktywowana jest sterefa natychmiastowej wygranej
+
+game_menu_wz_ld_text		Strefa wygranej - Ostatnia úmierÊ
+game_menu_wz_ld_help		Minimalny czas od ostatniej úmierci, po jakim aktywowana jest sterefa natychmiastowej wygranej
+
+
+#********************************************
+#********************************************
+#
+#             network menus
+#
+#********************************************
+#********************************************
+
+#network game menu
+network_menu_lan_text		Gra przez LAN
+network_menu_lan_help		Pod≥πcz siÍ do serwera w Twojej sieci lokalnej, lub utwÛrz taki.
+
+network_menu_internet_text	Gra Internetowa
+network_menu_internet_help	Pod≥πcza CiÍ do serwera internetowego, lub tworzy taki.
+
+network_opts_text		Ustawienia sieci
+network_opts_help		Konfiguruje Twoje ustawienia dotyczπce sieci.
+
+#network options
+network_opts_pingchar_text	ZrÛwnanie Ping'a:
+network_opts_pingchar_help	Maksymalny ping (w ms) jaki oczekujesz do innych graczy. \g automatycznie zmniejszy ich ping i powiÍkszy TwÛj, dopÛki nie osiπgniecie takiego samego lub osiπgniÍte zostanie maksimum.
+
+network_opts_lagometer_text	Lag-O-Mierz:
+network_opts_lagometer_help	W grze sieciowej miejsce gdzie moøe byÊ juø inny gracz (ale nie widzisz jeszcze tego za wzglÍdu na opÛünienie w sieci) jest oznaczone przez geometrycznπ figurÍ na siatce. Praktyczne w grze przez Internet.
+network_opts_axesindicator_text	Wskaünik osi:
+network_opts_axesindicator_help	Wskaünik osi pokazuje kierunek w jaki bÍdzie mÛg≥ skrÍciÊ TwÛj cykl jako trzy linie. Jest to przydatne na serwerach czÍsto zmieniajπcych ustawienia, abyú wiedzia≥ czego siÍ spodziewaÊ zanim skrÍcisz.
+
+network_opts_predict_text	Przewidywanie:
+network_opts_predict_help	Przewiduje po≥oøenie cyklu przeciwnika w trybie gry przez internet. Pozostawienie wy≥πczonego powoduje, øe grafika jest p≥ynniejsza, jednak w≥πczenie daje Ci lepszy widok na aktualnπ sytuacjÍ. Ja mam wy≥πczone; Lag-O-Mierz jest dobrπ alternatywπ. Jest zawsze wy≥πczone w trybie serwera.
+
+network_opts_inrate_text	Wskaünik danych wchodzπcych:
+network_opts_inrate_help	Maksymalna liczba kilobajtÛw jakπ Twoja sieÊ moøe odebraÊ w ciπgu kaødej sekundy. 1 dla modemÛw 9.6k (gra bÍdzie ograniczona), 3 dla modemÛw 28.8k (zazwyczaj bez k≥opotÛw)...7 dla modemÛw 56k, 8 dla ISDN, jeszcze wiÍcej dla innych modemÛw, (A)DSL i LAN.
+
+network_opts_outrate_text	Wskaünik danych wychodzπcych:
+network_opts_outrate_help	Maksymalna liczba kilobajtÛw jakπ Twoja sieÊ moøe wys≥aÊ w ciπgu kaødej sekundy. Jeøeli nie chcesz zak≥adaÊ w≥asnego serwera, ustaw na 2 lub 3; wiÍkszy przesy≥ nigdy nie jest uøywany. Oczywiúcie, ustawienie wiÍkszej wartoúci nigdy nie boli.
+
+
+network_opts_deletepw_text	UsuÒ has≥a
+network_opts_deletepw_help	Ta funkcja wykasuje wszystkie zapamiÍtane has≥a.
+network_opts_deletepw_complete	Has≥a zosta≥y usuniÍte.
+
+network_opts_minport_text	Najmniejszy port:
+network_opts_minport_help	Najmniejszy port, ktÛry jest skanowany w poszukiwaniu serwerÛw w sieci LAN.
+
+network_opts_maxport_text	Maximum Port:
+network_opts_maxport_help	NajwiÍkszy port, ktÛry jest skanowany w poszukiwaniu serwerÛw w sieci LAN.
+
+network_opts_master_text	Wysy≥aj sygna≥ do serwera g≥Ûwnego:
+network_opts_master_help	Czy chcesz informowaÊ serwer g≥Ûwny, o tym, øe w≥aúnie masz uruchomiony serwer? Jeøeli w≥πczysz tÍ opcjπ i uruchomisz w≥asny serwer, spodziewaj siÍ wizyty goúci.
+
+
+#network custom join menu
+network_custjoin_text		Pod≥πcz Do Serwera
+network_custjoin_help		Pozwala na rÍczny wybÛr serwera, do ktÛrego chcesz siÍ pod≥πczyÊ.
+
+network_custjoin_port_text	Port Serwera:
+network_custjoin_port_help	Port sieciowy, na ktÛrym nas≥uchuje serwer; musi byÊ taki sam, jak wybrano przy zak≥adaniu serwera, abyú mÛg≥ do≥πczyÊ do gry.
+
+network_custjoin_name_text	Nazwa Serwera:
+network_custjoin_name_help	Nazwa lub adres IP serwera, do ktÛrego chcesz do≥πczyÊ.
+
+#network host menu
+network_host_text		StwÛrz GrÍ Sieciowπ
+network_host_help		Za≥Ûø serwer.
+
+network_host_name_text		Nazwa Serwera:
+network_host_name_help		Nazwa serwera, ktÛra pojawi siÍ w przeglπdarce serwerÛw. Wybierz jakπ tylko chcesz ñ nie ma to wp≥ywu na funkcjonalnoúÊ gry.
+
+network_host_port_text		Port Serwera:
+network_host_port_help		Port sieciowy, na ktÛrym nas≥uchiwa≥ bÍdzie serwer.
+
+network_host_host_text		Za≥Ûø Serwer
+network_host_host_help		Wejdü na siatkÍ gry! Inni gracze bÍdπ mogli do≥πczyÊ za pomocπ opcji ÑPod≥πcz Do Serweraî.
+
+bookmarks_menu              Zak≥adki SerwerÛw
+bookmarks_menu_help         Dodaj, edytuj lub pod≥πcz siÍ do serwerÛw ktÛre posiadasz w zak≥adkach.
+bookmarks_menu_edit         Edytuj Zak≥adki
+bookmarks_menu_edit_help    Edytuj lub dodawaj ulubione serwery.
+bookmarks_menu_edit_slot    Edytuj \1
+bookmarks_menu_address      Adres
+bookmarks_menu_address_help Adres tego serwera.
+bookmarks_menu_name         Nazwa
+bookmarks_menu_name_help    Nazwa tego serwera. Uøywane tylko do wyúwietlenia, nie dla powodÛw funkcyjnych.
+bookmarks_menu_connect      Po≥πcz z \1
+bookmarks_menu_edit_connect_text	Po≥πcz Z Serwerem
+bookmarks_menu_edit_connect_help	Wejdü na siatkÍ gry.
+
+
+masters_menu                Subkultury
+masters_menu_help           Dodawaj, edytuj i pod≥πczaj siÍ do innych serwerÛw g≥Ûwnych z powodÛw specjalnych.
+masters_menu_edit           Edytuj Subkultury
+masters_menu_edit_help      Edytuj i dodawaj subkultury.
+masters_menu_edit_slot      Edytuj \1
+masters_menu_address        Adres
+masters_menu_address_help   Adres serwera g≥Ûwnego rozporzπdzajπcego subkulturπ.
+masters_menu_name           Nazwa.
+masters_menu_name_help      Nazwa tego serwera. Uøywane tylko do wyúwietlenia, nie dla powodÛw funkcyjnych.
+masters_menu_connect        Przeglπdaj \1
+masters_menu_edit_connect_text	Przeglπdaj SubkulturÍ
+masters_menu_edit_connect_help	Otwiera serwer g≥Ûwny jako przeglπdarkÍ serwerÛw przypisanych do tej subkultury.
+
+friends_menu				Znajomi
+friends_menu_help			Edytuj swoich znajomych.
+friends_enable				Znajomi Aktywowani
+friends_enable_help			W≥πcz/wy≥πcz filtrowanie poprzez obecnoúÊ znajomych.
+friend_word					Znajomy
+friend_help					Jeúli wúrÛd graczy pod≥πczonych do serwera znajdzie siÍ to imiÍ, zostanie to wyraünie zaznaczone.
+
+#********************************************
+#********************************************
+#
+#             "Misc Stuff" menu
+#
+#********************************************
+#********************************************
+
+misc_menu_text			RÛøne Ustawienia
+misc_menu_help			Ustawienia, ktÛrych nie umieszczono nigdzie indziej, np. dotyczπce klawiatury.
+
+misc_global_key_text		Globalna Konfiguracja Klawiatury
+misc_global_key_help		TroszkÍ ustawieÒ klawiatury niezaleønych od aktywnego gracza.
+
+misc_menuwrap_text		Przeskok Menu:
+misc_menuwrap_help		Co siÍ dzieje, jeøeli jesteú na gÛrze menu i wciúniesz klawisz "w gÛrÍ"?
+
+misc_textout_text		Wyjúcie tekstowe:
+misc_textout_help		Wyúwietlanie wiadomoúci tekstowych (chat, status...) na ekranie. Wymuszone w grach sieciowych.
+
+misc_moviepack_text		Paczka Filmowa (moviepack):
+misc_moviepack_help		Jeúli ta opcja jest aktywna, a Paczka Filmowa jest zainstalowana, \g wyúwietli grafikÍ jak w filmie.
+
+
+#*************************************
+#*************************************
+#
+#    language menu
+#
+#*************************************
+#*************************************
+
+language_first_help		JÍzyk, ktÛrego \g bÍdzie uøywa≥
+language_second_help		JÍzyk, ktÛry bÍdzie uøyty, jeøeli nie znaleziono danego wyraøenia w pierwszym.
+
+language_menu_title		Ustawienia JÍzyka
+language_menu_help		Wybierz jÍzyk uøywany przez \g do wyúwietlania komunikatÛw na ekranie.
+
+language_menu_item_fist		Pierwszy jÍzyk:
+language_menu_item_first_help	\g wyúwietli wiÍkszoúÊ wiadomoúci w tym jÍzyku. Uøyj strza≥ek w lewo/prawo aby wybraÊ.
+
+language_menu_item_second	Drugi jÍzyk:
+language_menu_item_second_help	Jeøeli dane wyraøenie nie jest dostÍpne w danym jÍzyku, \g uøyje drugiego aby wyúwietliÊ ten komunikat (lub, w ostatecznoúci po Angielsku). Uøyj strza≥ek w lewo/prawo aby wybraÊ.
+
+#*************************************
+#*************************************
+#
+#       police menu
+#
+#*************************************
+#*************************************
+
+player_police_text					Blokady Graczy
+player_police_help					Pozwala wyciszyÊ jakiegoú gracza, lub zag≥osowaÊ za jego wyrzuceniem.
+
+player_police_silence_text			Menu Wyciszenia
+player_police_silence_help			Pozwala lokalnie wyciszyÊ spamujπcych graczy.
+
+silence_player_help					Po wybraniu wszystkie wiadomoúci od tego gracza zostanπ zablokowane.
+silence_player_text					Wycisz \1
+
+player_police_kick_text				Menu Wyrzucania
+player_police_kick_help				Pozwala utworzyÊ ankietÍ dotyczπcπ wyrzucenia gracza z serwera.
+
+kick_player_details_text			Po zaakceptowaniu, \1 zostanie wyrzucony z tego serwera
+kick_player_text					WyrzuÊ \1
+kick_player_help					Potwierdzenie utworzy ankietÍ wúrÛd graczy na temat wyrzucenia tego gracza z serwera.
+
+suspend_player_details_text			Po zaakceptowaniu, \1 bÍdzie zawieszony na kilka rund.
+suspend_player_text					Zawieú \1
+
+vote_include_details_text			Po zaakceptowaniu \1 zastanie do≥πczony jako plik konfiguracji.
+vote_include_text					Za≥πcz \1
+vote_include_error					Za≥πczony plik \1 nie istnieje, lub jest nieczytelny.\n
+vote_include_message				Za≥πczanie pliku \1. Tylko uøytkownicy o poziomie \2 lub wyøszym otrzymajπ informacje.\n
+
+vote_command_details_text			Jeúli zaakceptowane komenda "\1" zostanie wykonana na serwere.
+vote_command_text					Komenda \1
+vote_command_message				Wykonywanie komendy "\1".\n
+#*************************************
+#*************************************
+#
+#       vote menu
+#
+#*************************************
+#*************************************
+
+voting_menu_text					G≥osuj
+voting_menu_help					G≥osuj na aktywne ankiety
+
+vote_approve						Zaakceptuj
+vote_approve_help					Wybierajπc tÍ opcjÍ, zaznaczasz, øe zgadzasz siÍ z tπ ankietπ.
+
+vote_dont_mind						Nie wiem
+vote_dont_mind_help					Zostawiajπc tak wybrane, odk≥adasz g≥osowanie na pÛüniej.
+
+vote_reject							OdmÛw
+vote_reject_help					Wybierajπ tÍ opcjÍ, odmawiasz g≥osowania.
+
+vote_details_help                   Ten wpis w menu opisuje szczegÛ≥y ankiety. SzczegÛ≥y: \1
+vote_submitter_text                 Ankieta zosta≥a wys≥ana przez \1.
+
+#*************************************
+#*************************************
+#
+#       player menus
+#
+#*************************************
+#*************************************
+
+#player menu
+
+player_menu_text		Ustawienia Gracza \1 
+player_menu_help		Ustawienia kontroli kamery i cyklu dla gracza nr. \1
+
+viewport_menu_title		Dzielenie Ekranu...
+viewport_menu_help		Chcesz zagraÊ samemu, lub wolisz podzieliÊ ekran dla trybu wieloosobowego?
+
+viewport_conf_text		Podzia≥y: 
+viewport_conf_name_0		Pojedynczy Gracz
+viewport_conf_name_1		Poziomy Podzia≥
+viewport_conf_name_2		Pionowy Podzia≥
+viewport_conf_name_3		Trzech Graczy, Wersja a
+viewport_conf_name_4		Trzech Graczy, Wersja b
+viewport_conf_name_5		Czterech Graczy
+
+viewport_belongs_text		Ekran \1 naleøy do gracza \2 (\3)
+
+viewport_assign_text		Przypisz Ekrany do Graczy
+viewport_assign_help		Do ktÛrego z graczy naleøy ktÛra czÍúÊ ekranu?
+
+player_authenticate_text    Autentykacja
+player_authenticate_help    Jeøeli posiadasz globalne ID, aktywowanie tej opcji zaloguje CiÍ za jego pomocπ. Oczywiúcie zostaniesz zapytany o has≥o.
+player_authenticate_action  Zapytanie zosta≥o wys≥ane do serwera. Za chwilÍ powinieneú zostaÊ zapytany o has≥o.\n
+
+#player setup
+
+player_name_text		ImiÍ:
+player_name_help		To, co zastπpi wielokropek w zdaniu "ZwyciÍzcπ zosta≥  ... ". Uøyj klawiszy <lewo>/<prawo>, delete, backspace i wszystkich pozosta≥ych klawiszy.
+
+player_teamname_text            Nazwa druøny:
+player_teamname_help            Uøyj klawiszy <lewo>/<prawo>, delete, backspace i wszystkich pozosta≥ych klawiszy.
+
+player_global_id_text		Globalne ID:
+player_global_id_help		Wpisz tutaj globalne ID gracza, jeúli takie posiadasz. Jeúli masz konto na forum forums.armagetronad.net, Twoim ID bÍdzie TwÛj login, zakoÒczony "@forums". Konta na innych stronach mogÍ daÊ Ci inne ID.
+
+player_input_text		Konfiguracja Sterowania
+player_input_help		Ustaw kontrolÍ klawiaturπ i myszπ dla tego gracza.
+
+input_for_player		Konfiguracja Sterowania \1: \2
+
+player_camera_input_text	Konfiguracja sterowania kamerπ
+player_camera_input_help	Ustaw sterowanie kamerπ za pomocπ klawiatury i myszy dla tego gracza.
+
+camera_controls			\1: Konfiguracja sterowania kamerπ
+
+player_camera_text		Ustawienia Kamery
+player_camera_help		Przygotuj ustawienia kamery.
+
+player_chat_text		Ustawienia Szybkiego Chatu
+
+player_chat_chat		Szybki Chat \1:
+player_chat_chat_help		Ustawia szybkie teksty, ktÛre mogπ zostaÊ wys≥ane przez naciúniÍcie jednego klawisza.
+
+player_blue_text		Niebieski:
+player_blue_help		Pozwala Ci ustawiÊ niebieskπ sk≥adowπ Twojego koloru.
+
+player_green_text		Zielony:
+player_green_help		Pozwala Ci ustawiÊ zielonπ sk≥adowπ Twojego koloru.
+
+player_red_text			Czerwony:
+player_red_help			Pozwala Ci ustawiÊ czerwonπ sk≥adowπ Twojego koloru.
+
+player_autologin_text		Automatyczne Logowanie:
+player_autologin_help		Jeúli aktywowane, po do≥πczeniu do serwera procedura logowania rozpocznie siÍ automatycznie.
+
+player_stealth_text		Ukryj Globalne ID:
+player_stealth_help		Zazwyczaj Twoje globalne ID jest pokazywane wszystkim w momencie logowania, lub po wpisaniu komendy /players. Wybranie tej opcji przekaøe serwerowi, øe wola≥byú pozostaÊ anonimowy. Serwer moøe jednak pokazaÊ Twoje ID moderatorom/administratorom, lub w ogÛle odmÛwiÊ Twojej proúbie.
+
+player_spectator_text		Tryb Obserwatora:
+player_spectator_help		W trybie obserwatora nie kontrolujesz pojazdu; moøesz tylko oglπdaÊ grÍ, tak jakbyú juø by≥ nieøywy. Inni gracze bÍdπ CiÍ widzieli w tabeli wynikÛw i bÍdziesz mÛg≥ z nimi rozmawiaÊ, ale nie bÍdziesz startowa≥ na poczπtku rundy.
+
+player_name_team_text		Nazwij DruøynÍ po Graczu:
+player_name_team_help		Tu moøesz wybraÊ metodÍ tworzenia nazwy druøyn: W≥ oznacza, øe druøyna bÍdzie nosiÊ nazwÍ od najstarszego gracza, Wy≥ oznacza, øe to bÍdzie prosta nazwa pochodzπca od koloru.
+
+player_num_per_team_text	Graczy na druøynÍ:
+player_num_per_team_help	Tutaj ustaw swojπ ulubionπ iloúÊ graczy w druøynie. Kiedy do≥πczysz do gry, a najmniejsza z druøyn ma mniej graczy niø podano tutaj, do≥πczysz w≥aúnie do tej druøyny. W przeciwnym wypadku utworzysz nowπ druøynÍ. Tylko domyúlne zachowanie jest tu wyspecyfikowane; w trakcie gry moøesz zmieniÊ zespÛ≥.
+
+
+#camera prefs menu
+
+player_camera_initial_text	Kamera:
+player_camera_initial_help	Wybierz swojπ ulubionπ kamerÍ tutaj.
+
+player_camera_initial_int_text	WewnÍtrzna
+player_camera_initial_int_help	Widok z wnÍtrza Twojego pojazdu.
+
+player_camera_initial_smrt_text	Sprytna
+player_camera_initial_smrt_help	Sprytna kamera stara siÍ daÊ Ci najlepszy widok na akcjÍ w kaødym momencie.
+
+player_camera_initial_ext_text	ZewnÍtrzna
+player_camera_initial_ext_help	Sta≥a, zewnÍtrzna perspektywa.
+
+player_camera_initial_free_text	Wolna
+player_camera_initial_free_help	Ruchoma, latajπca kamera.
+
+player_camera_initial_cust_text	W≥asna
+player_camera_initial_cust_help	Konfigurowalna kamera podπøajπca za pojazdem.
+
+player_camera_initial_scust_text	W≥asna Serwera
+player_camera_initial_scust_help	Konfigurowalna kamera podπøajπca za pojazdem, pozycja jest ustalona przez administratora.
+
+player_camera_initial_mer_text	Kamera Meritona
+player_camera_initial_mer_help	Zoptymalizowana do pojedynkÛw.
+
+
+player_camera_fov_text		FOV:
+player_camera_fov_help		Wybierz ulubione pole widoku - FOV (Field of vision).
+
+player_camera_incam_text	DopuúÊ KamerÍ WewnÍtrznπ:
+player_camera_incam_help	Przyciskajπc prze≥πcznik kamery, to pozwoli prze≥πczyÊ siÍ do kamery wewnÍtrznej.
+
+player_camera_free_text		DopuúÊ KamerÍ Wolnπ:
+player_camera_free_help		Przyciskajπc prze≥πcznik kamery, to pozwoli prze≥πczyÊ siÍ do kamery wolnej.
+
+player_camera_fixed_text	DopuúÊ KamerÍ ZewnÍtrzna:
+player_camera_fixed_help	Przyciskajπc prze≥πcznik kamery, to pozwoli prze≥πczyÊ siÍ do kamery zewnÍtrznej.
+
+player_camera_smartcam_text	DopuúÊ KamerÍ Sprytnπ
+player_camera_smartcam_help	Przyciskajπc prze≥πcznik kamery, to pozwoli prze≥πczyÊ siÍ do kamery Sprytnej.
+
+player_camera_custom_text	DopuúÊ KamerÍ W≥asnπ:
+player_camera_custom_help	Przyciskajπc prze≥πcznik kamery, to pozwoli prze≥πczyÊ siÍ do kamery w≥asnej. (Ustawiane w pliku settings.cfg).
+
+player_camera_server_custom_text	DopuúÊ KamerÍ W≥asnπ Serwera:
+player_camera_server_custom_help	Przyciskajπc prze≥πcznik kamery, to pozwoli prze≥πczyÊ siÍ do kamery w≥asnej serwera. ((Ustawiane w pliku settings_custom.cfg bna serwerze).
+
+player_camera_server_custom_text	DopÛúÊ KamerÍ Meritona
+player_camera_server_custom_help	Przyciskajπc prze≥πcznik kamery, to pozwoli prze≥πczyÊ siÍ do kamery Meritona.
+
+
+
+player_camera_center_int_text	Wyúrodkuj KamerÍ:
+player_camera_center_int_help	W≥: Za kaødym razem, gdy skrÍcasz, kamera obrÛci widok, tak, aby podπøaÊ dok≥adnie za Tobπ. Praktyczne do gry na klawiaturze.\nWy≥: samemu sterujesz po≥oøeniem kamery; jest ono niezaleøne od kierunku jazdy. Wybierz, jeøeli sterujesz kamerπ za pomocπ myszy, jak w Quake'u.
+
+player_camera_wobble_text	Wstrzπsy Kamery WewnÍtrznej:
+player_camera_wobble_help	W≥: kamera wewnÍtrzna buja siÍ razem z Twoim cyklem; moøna dostaÊ choroby morskiej... \nWy≥: kamera wewnÍtrzna zostaje na sta≥ym po≥oøeniu wzglÍdem kierunku, w ktÛry jedzie TwÛj cykl.
+
+player_camera_autoin_text	Automatyczna Kamera WewnÍtrzna:
+player_camera_autoin_help	W≥: Sprytna kamera automatycznie prze≥πcza siÍ na wewnÍtrznπ, gdy wjedziesz doi tunelu. \nWy≥: Sprytna kamera ustawia widok od gÛry, gdy wjedziesz do tunelu.
+
+# team menu
+team_menu_title			Menu Druøyn
+team_menu_help			Pozwala graczom zmieniaÊ druøyny i tworzyÊ nowe.
+
+team_menu_player_title		Wybierz druøynÍ dla \1
+team_menu_player_help		Pozwala temu graczu podjπÊ decyzje zwiπzane z druøynami
+
+team_menu_join			\3do≥πcz do \1 (\2)
+team_menu_join_help		Wybierz, jeúli chcesz do≥πczyÊ do druøyny \1.
+
+
+# values of these "configuration items" are inserted in "\3" at team_menu_join 
+team_menu_color_team_full_help	PozwÛl zmieniaÊ prefix/kolor pe≥nych druøyn.
+team_menu_color_team_ok_help	PozwÛl zmieniaÊ prefix/kolor druøyn.
+
+team_menu_info_current_team	Aktualna druøyna: \1
+team_menu_info_next_team	NastÍna druøyna: \1
+
+team_menu_create        stwÛrz nowπ druøynÍ
+team_menu_create_help   Wybierz, jeøeli øyczysz sobie za≥oøyÊ w≥asnπ druøynÍ.
+team_menu_auto          do≥πcz do automatycznie wybraniej
+team_menu_auto_help     Do≥πcza CiÍ do najmniejszej druøyny, lub tworzy nowπ.
+team_menu_spectate      do≥πcz do obserwatrÛw
+team_menu_spectate_help Wybierz, jeúli chcesz pooglπdaÊ i pogadaÊ.
+
+team_owned_by			\1's Team
+team_ai					\1's AI Team
+team_empty				<brak>
+
+team_name_blue			Druøyna Niebieska
+team_name_gold			Druøyna Z≥ota
+team_name_red			Druøyna Czerwona
+team_name_green			Druøyna Zielona
+team_name_violet		Druøyna Fioletowa
+team_name_ugly			Druøyna Brzydka
+team_name_white			Druøyna Bia≥a
+team_name_black			Druøyna Czarna
+
+#********************************************
+#********************************************
+#
+#             sound menu
+#
+#********************************************
+#********************************************
+
+sound_menu_text			Ustawienia düwiÍku
+sound_menu_help			Konfiguracja jakoúci düwiÍku.
+
+sound_menu_sources_text		èrÛd≥a düwiÍku:
+sound_menu_sources_help		IloúÊ ürÛde≥ düwiÍku, jakie bÍdπ miksowane i odtwarzane; zbyt niska wartoúÊ zaowocuje okresowym zanikaniem düwiÍku rÛønych waønych elementÛw gry (TwÛj w≥asny cykl), zbyt duøa natomiast moøe zeøreÊ moc CPU. Dobrπ wartoúciπ dla wolniejszych komputerÛw jest 6.
+
+sound_menu_quality_text		JakoúÊ düwiÍku
+sound_menu_quality_help		Okreúla jakoúÊ düwiÍku; aktualnie dostÍpne sπ tylko tryby 16-to bitowe.
+
+sound_menu_quality_off_text	Wy≥.
+sound_menu_quality_off_help	Wy≥πcza ca≥kowicie düwiÍk
+
+sound_menu_quality_low_text	Niska
+sound_menu_quality_low_help	Wyjúcie düwiÍkowe - 16 bit 11025 Hz stereo.
+
+sound_menu_quality_medium_text	årednia
+sound_menu_quality_medium_help	Wyjúcie düwiÍkowe - 16 bit 22050 Hz stereo.
+
+sound_menu_quality_high_text	Wysoka
+sound_menu_quality_high_help	Wyjúcie düwiÍkowe - 16 bit 44100 Hz stereo.
+
+sound_menu_buffer_text		WielkoúÊ Bufora:
+sound_menu_buffer_help		Wybiera rozmiar bufora düwiÍku.
+
+sound_menu_buffer_vsmall_text	Bardzo ma≥y
+sound_menu_buffer_vsmall_help	Oko≥o 0.02s, ale duøe prawdopodobieÒstwo b≥ÍdÛw w düwiÍku.
+
+sound_menu_buffer_small_text	Ma≥y
+sound_menu_buffer_small_help	Poniøej 0.04s, ale prawdopodobieÒstwo b≥ÍdÛw w düwiÍku.
+
+sound_menu_buffer_med_text	Normalny
+sound_menu_buffer_med_help	Oko≥o 0.1s, and wciπø mogπ pojawiaÊ siÍ artefakty.
+
+sound_menu_buffer_high_text	Duøy
+sound_menu_buffer_high_help	Oko≥o 0.2s, raczej bezb≥Ídnie.
+
+sound_menu_buffer_vhigh_text	Bardzo duøy
+sound_menu_buffer_vhigh_help	Oko≥o 0.4s.
+
+
+#********************************************
+#********************************************
+#
+#             graphics menus
+#
+#********************************************
+#********************************************
+
+#display menu
+display_settings_menu		Ustawienia Grafiki
+display_settings_menu_help	Konfiguracja systemu graficznego..
+
+screen_mode_menu		Tryb Ekranu
+screen_mode_menu_help		RozdzielczoúÊ ekranu itp.
+
+preferences_menu		Preferencje
+preferences_menu_help		Opcje, ktÛre zaleøπ bardziej od Twoich preferencji, niø od wydajnoúci komputera.
+
+hud_menu                    Ustawienia HUD
+hud_menu_help               Zmieniaj opcje wyúwietlacza HUD (ang. heads up display).
+
+detail_settings_menu		Ustawienia detali
+detail_settings_menu_help	Pozwala dostosowaÊ iloúÊ szczegÛ≥Ûw do wydajnoúci Twojego komputera.
+
+performance_tweaks_menu		Ustawienia wydajnoúci
+performance_tweaks_menu_help	Te ustawienia mogπ poprawiÊ wydajnoúÊ gry, ale nie dzia≥ajπ na wszystkich systemach.
+
+graphics_load_defaults_text	PrzywrÛÊ Domyúlne
+graphics_load_defaults_help	To przywrÛci te ustawienia, na ktÛrych komputer dzia≥a≥ poprawnie, wed≥ug tego g≥upiego programu.
+
+
+#feature menuitem
+feature_disabled_text		Wy≥.
+feature_disabled_help		Opcja jest aktualnie nieaktywna.
+
+feature_default_text		Ust. Systemu
+feature_default_help		TwÛj system zadecyduje o tym ustawieniu.
+
+feature_enabled_text		W≥.
+feature_enabled_help		Ta opcja jest w≥πczona.
+
+#texture menuitem
+texture_menuitem_help		Wybiera tryb wyúwietlania tekstur. ZwrÛÊ uwagÍ, jak wp≥ywa to na t≥o menu. Aktualny stan:
+
+texture_off_text		Wy≥.
+texture_off_help		W ogÛle brak tekstur.
+
+texture_nearest_text		Najbliøsze
+texture_nearest_help		Najszybciej, ale najbrzydziej: bez filtrowania ani detali. Nie zalecane.
+
+texture_bilinear_text		Dwuliniowe
+texture_bilinear_help		Ciπgle brzydko: tekstury sπ filtrowane, ale ca≥y czas nie ma poziomu detali. Nie zalecane.
+
+texture_mipmap_nearest_text	MipMapy - Najbliøsze
+texture_mipmap_nearest_help	Bez filtrowania, ale sπ detale (MipMapy). Jeøeli uøywasz softwarowego generowania, a chcesz zobaczyÊ tekstury, wybierz ten tryb.
+
+texture_mipmap_bilinear_text	MipMapy - Dwuliniowe
+texture_mipmap_bilinear_help	Filtrowanie + poziomy detali. Nie najlepsze, ale da siÍ uøywaÊ na starszych akceleratorach 3D.
+
+texture_mipmap_trilinear_text	MipMapy - TrÛjliniowe
+texture_mipmap_trilinear_help	Filtrowanie i interpolacja pomiÍdzy poszczegÛlnymi poziomami detali. Wyglπda p≥ynnie i jest tak samo szybkie jak ÑMipMapy ñ Dwulinioweî na wiÍkszoúci nowszych kart graficznych. Ta opcja jest czasami ignorowana.
+
+
+#screen mode menu
+screen_resolution_text		RozdzielczoúÊ ekranu:
+screen_resolution_help		Wybiera rozdzielczoúÊ ekranu. Zmiany bÍdπ widoczne dopiero gdy ponownie uruchomisz \g lub wybierzesz opcjÍ "Zaakceptuj Zmiany" poniøej.
+
+window_size_text		Rozmiar Okna:
+window_size_help		Wybiera rozmiar okna. Zmiany bÍdπ widoczne dopiero gdy ponownie uruchomisz \g lub wybierzesz opcjÍ "Zaakceptuj Zmiany" poniøej.
+
+screen_custom_text		W≥asne
+screen_custom_help		Akceptuje ustawienia zmiennych CUSTOM_SCREEN_WIDTH and CUSTOM_SCREEN_HEIGHT w pliku artr.cfg (Windows) lub ~/.ArmageTronrc (Linux) by ustawiÊ w≥asne wymiary ekranu.
+
+screen_fullscreen_text		Pe≥ny Ekran:
+screen_fullscreen_help		Prze≥πcza pomiÍdzy trybami Pe≥nego Ekranu i Okna. Tak jak z rozdzielczoúciπ, zmiany bÍdπ widoczne dopiero gdy ponownie uruchomisz \g lub wybierzesz opcjÍ "Zaakceptuj Zmiany" poniøej.
+
+screen_colordepth_text		G≥Íbia KolorÛw:
+screen_colordepth_help		Wybierz g≥ÍbiÍ kolorÛw na ktÛrej \g ma pracowaÊ. Zmiany bÍdπ widoczne dopiero gdy ponownie uruchomisz \g lub wybierzesz opcjÍ "Zaakceptuj Zmiany" poniøej.
+
+screen_colordepth_16_text	16 BitÛw
+screen_colordepth_16_help	Zazwyczaj okreúlane jako s≥aba jakoúÊ, ale \g nie uøywa zbyt wielu efektÛw graficznych, wiÍc wyglπda ca≥kiem w porzπdku.
+
+screen_colordepth_desk_text	Domyúlne
+screen_colordepth_desk_help	G≥Íbia kolorÛw Twojego systemu; zazwyczaj taka sama jakπ masz na pulpicie.
+
+screen_colordepth_32_text	32 Bity
+screen_colordepth_32_help	Wysoka jakoúÊ.
+
+screen_zdepth_text			G≥ÍbokoúÊ bufora Z:
+screen_zdepth_help			G≥Íbia na buforze z; okreúla jakoúÊ widocznoúci g≥Íbi. Zmiany bÍdπ widoczne dopiero gdy ponownie uruchomisz \g lub wybierzesz opcjÍ "Zaakceptuj Zmiany" poniøej.
+screen_zdepth_16_text		16 BitÛw
+screen_zdepth_16_help		Nie zalecane, ale zazwyczaj bÍdzie dzia≥aÊ.
+
+screen_zdepth_desk_text		Domyúlne
+screen_zdepth_desk_help		Taki sam jak g≥Íbia koloru; to jest najbardziej kompatybilna opcja.
+
+screen_zdepth_32_text		32 Bity
+screen_zdepth_32_help		Wymuú 32-bitowy bufor z. Jeøeli zadzia≥a, podniesie jakoúÊ 16-to bitowej g≥Íbi koloru.
+
+screen_check_errors_text	Sprawdzaj B≥Ídy:
+screen_check_errors_help	Czy interesujπ nas b≥Ídy i ostrzeøenia zwracane przez kartÍ graficznπ? Zazwyczaj najlepiej jest nie dotykaÊ tej opcji.
+
+screen_use_sdl_text		Uøywaj SDL/OpenGL:
+screen_use_sdl_help		Aktywuje uøycie czystej procedury inicjacji OpenGl; jeúli wy≥πczone, \g uøyje nieeleganckiej metody, ktÛra by≥a konieczna z SDL 1.0.
+
+screen_vsync_text		VSync:
+screen_vsync_help		Co naleøy robiÊ z sygna≥em synchronizacji pionowej monitora?
+
+screen_vsync_on_text	Czekaj
+screen_vsync_on_help	Czeka na kaødπ klatkÍ. Zazwyczaj owocuje bardzo p≥ynnπ animiacjπ ograniczonπ czÍstotliwoúciπ odúwieøania Twojego monitora i powoduje, øe gra nie zuøywa 100% mocy CPU. Zalecane.
+
+screen_vsync_default_text	Domyúlne
+screen_vsync_default_help	Nie ruszaj domyúlnych systemu.
+
+screen_vsync_off_text	Nie czekaj
+screen_vsync_off_help	Ignoruj sygna≥. W skutek tego utworzonych bÍdzie wiÍcej klatek, ale nie zobaczysz ich wszystkich, TwÛj monitor nie nadπøy z ich pokazywaniem. Nie zalecane.
+
+screen_vsync_motionblur_text	Motion Blur
+screen_vsync_motionblur_help	TwÛrz w≥asne klatki do zmiÍkczania ruchu, co zmniejsza iloúÊ artefaktÛw. Zalecane zaawansowanym graczom.
+
+screen_vsync_motionblur_unsupported	TwÛj system nie uøywa Motion Blur, wy≥πczanie.\n
+
+screen_grab_mouse_text		Przechwytuj mysz:
+screen_grab_mouse_help		Jeøeli w≥πczone, wskaünik myszy jest, wyúrodkowany po kaødym jej ruchu; jest wiÍc zatem nimoøliwe by opÛúciÊ niπ ekran gry. Ta opcja jest uøyteczna tylko gdy grasz w \g w trybie okna.
+
+screen_apply_changes_text	Zaakceptuj zmiany
+screen_apply_changes_help	PrÛbuje zatwierdziÊ zmiany bez koniecznoúci opuszczania gry. Uøywaj wy≥πcznie na w≥asne ryzyko.
+
+screen_keep_window_active_text   Zawsze Aktywny
+screen_keep_window_active_help   Czy \g ma zostaÊ aktywny, kiedy jest w trybie okna i straci kursor?
+
+#detail menu
+detail_floor_mirror_text	Lustro Pod≥ogi:
+detail_floor_mirror_help	KrÛte obiekty powinny mieÊ swoje odbicie na pod≥odze?
+
+detail_floor_mirror_off_text	Wy≥.
+detail_floor_mirror_off_help	Øadne
+
+detail_floor_mirror_obj_text	Tylko Obiekty
+detail_floor_mirror_obj_help	Wszystkie poruszajπce siÍ obiekty
+
+detail_floor_mirror_ow_text	Obiekty i úciany
+detail_floor_mirror_ow_help	To, co najwaøniejsze w grze
+
+detail_floor_mirror_ev_text	Wszystko!
+detail_floor_mirror_ev_help	Zupe≥nie wszystkie elementy gry
+
+detail_dither_text		Dithering:
+detail_dither_help		Jeøeli g≥Íbia kolorÛw, ktÛrπ aktualnie masz ustawionπ nie pozwala na wygenerowanie danego koloru, bÍdzie on symulowany przez mieszanie innych. Wy≥πczenie tej opcji spowoduje poprawienie jakoúci obrazu generowanego przez grÍ na niektÛrych systemach; ale w ma≥ej rozdzielczoúci w≥πczenie jej poprawi ogÛlny wyglπd.
+
+detail_floor_text		Detale Pod≥ogi:
+detail_floor_help		\g zna rÛøne metody rysowania pod≥ogi i siatki gry; te lepiej wyglπdajπce mogπ jednak kosztowaÊ trochÍ FPS (Klatek na sekundÍ).
+
+detail_floor_no_text		Bez pod≥ogi
+detail_floor_no_help		Nie rysuj w ogÛle niczego. Najszybsza moøliwoúÊ.
+
+detail_floor_grid_text		Tylko siatka.
+detail_floor_grid_help		Tylko linie siatki sπ rysowane. To dobry wybÛr, jeøeli uøywasz generowania softwarowego.
+
+detail_floor_tex_text		Teksturowana p≥aszczyzna
+detail_floor_tex_help		Rysowana jest nieskoÒczona p≥aszczyzna z naniesionπ teksturÍ. Zalecane dla w≥aúcicieli kart graficznych 3d.
+
+detail_floor_2tex_text		PodwÛjna teksturowana p≥aszczyzna
+detail_floor_2tex_help		Tak samo jak w "Teksturowana p≥aszczyzna", pod≥oga jest nieskoÒczonπ, teksturowanπ p≥aszczyznπ. Ale tym razem rysowane sπ dwie grupy linii w oddzielnych krokach, co owocuje ostrzejszym obrazem.
+
+detail_polyantialias_text	Antyaliasing ObiektÛw:
+detail_polyantialias_help	Czy kontury wszystkich obiektÛw powinny byÊ zmiÍkczane, aby uniknπÊ brzydko wyglπdajπcych punktÛw? Nie zaimplementowane na wiÍkszoúci systemÛw.
+
+detail_lineantialias_text	Antyaliasing Linii:
+detail_lineantialias_help	Czy linie powinny byÊ wyg≥adzane?
+
+detail_alpha_text		PÛ≥przezroczystoúÊ:
+detail_alpha_help		NiektÛre obiekty w grze sπ pÛ≥przezroczyste. Z wiÍkszoúciπ kart 3d nie kosztuje wydajnoúci, ale spowalnia grÍ przy generowaniu softwarowym.
+
+detail_smooth_text		G≥adkie Cieniowanie:
+detail_smooth_help		Niech krawÍdzie wyglπdajπ na zaokrπglone poprzez dodanie im eleganckiego cienia. Even software rendering is not slowed down by activating this.
+
+detail_persp_text		Korekcja perspektywy:
+detail_persp_help		WiÍkszoúÊ generatorÛw grafiki ignoruje tÍ opcjÍ; jeúli juø uda Ci siÍ jπ wy≥πczyÊ, úciany i pod≥oga bÍdπ totalnie zdeformowane. NaprawdÍ nie mam pojÍcia, czemu pozostawia siÍ wybÛr uøytkownikowi.... :)
+
+detail_text_truecolor_text	Tekstury TrueColor:
+detail_text_truecolor_help	Przechowuje tekstury w jakoúci 32 bit zamiast 16.
+
+#preferences menu
+pref_sparks_text		Iskry:
+pref_sparks_help		åwiecπce iskry wylatujπce z rozbitego pojazdu.
+
+pref_explosion_text		Eksplozje:
+pref_explosion_help		W≥πcza eksplozje cyklu kiedy gracz ulegnie wypadkowi.
+
+pref_explosion_hud_text		Eksplozje (minimapa):
+pref_explosion_hud_help		Prze≥πcza pokazywanie eksplozji na minimapie.
+
+pref_skymove_text		Ruch nieba:
+pref_skymove_help		Aktywuje animacje niøszego p≥atu nieba.
+
+pref_lowersky_text		Niøsze niebo:
+pref_lowersky_help		Aktywuje wyúwietlanie niøszej warstwy nieba w postaci chmur/plazmy. Moøe os≥abiÊ wydajnoúÊ.
+
+pref_uppersky_text		Wyøsze niebo:
+pref_uppersky_help		W≥πcza wyúwietlanie gÛrnego p≥atu nieba, p≥aszczyzny podobnej do pod≥ogi. Moøe os≥abiÊ wydajnoúÊ.
+
+pref_highrim_text		Wysokie krawÍdzie:
+pref_highrim_help		Jeøeli w≥πczone, úciany krawÍdzi bÍdπ nieskoÒczenie wysokie. W przeciwnym wypadku bÍdπ wysokoúci úcian gracza.
+
+pref_headlight_text		Pokaø úwiat≥o cyklu:
+pref_headlight_help		Wyúwietla úwiat≥o rozjaúniajπce drogÍ przed Twoim cyklem. Musi byÊ akceptowane przez Twojπ kartÍ wideo.
+
+pref_showhud_text		Pokaø HUD
+pref_showhud_help		Jeøeli w≥πczone, w trybie jednego gracza bÍdπ wyúwietlane informacje na ekranie.
+
+pref_showfastest_text		Pokaø Najszybszego
+pref_showfastest_help		Pokaø w HUD gracza, ktÛry osiπgnπ≥ najwiÍkszπ prÍdkoúÊ.
+
+pref_showscore_text 		Pokaø Wynik
+pref_showscore_help		Pokazuje w HUD TwÛj wynik, oraz najwyøszy wynik.
+
+pref_showenemies_text		Pokaø PrzeciwnikÛw
+pref_showenemies_help		Wyúwietla w HUD, ile graczy jest wciπø øywych.
+
+pref_showtime_text		Pokaø Czas
+pref_showtime_help		Pokazuje w HUD aktualnπ godzinÍ.
+
+pref_show24hour_text    Pokaø zegar 24-godzinny
+pref_show24hour_help	Jeøeli w≥πczone, zegar bÍdzie 24-godzinny, przeciwnie - 12-godzinny.
+
+pref_showping_text		Pokaø Ping
+pref_showping_help		Pokazuje TwÛj aktualny Ping w HUD.
+
+pref_showbrake_text		Pokaø Miernik Hamulca
+pref_showbrake_help		Pokazuje w HUD aktualny stan Twoich hamulcÛw.
+
+pref_showspeed_text		Pokaø PrÍdkoúciomierz
+pref_showspeed_help		Pokazuje PrÍdkoúciomierz w HUD.
+
+pref_showrubber_text		Pokaø Miernik Rubber'a
+pref_showrubber_help		Pokazuje status Twojego Rubber'a w HUD.
+
+misc_fps_text			Pokaø FPS:
+misc_fps_help			Wyúwietla w HUD aktualny FPS ñ iloúÊ klatek na sekundÍ.
+
+#tweaks menu
+tweaks_displaylists_text	Listy wyúwietlania
+tweaks_displaylists_help	Listy wyúwietlania to funkcja OpenGl s≥uøπca wyúwietlaniu jednej rzeczy wiele razy; jest normalnie uøywana do wyúwietlania cykli i innej geometrii. Jednakøe niektÛre implementacje sπ zepsute, przez co powinieneú wy≥πczyÊ tÍ opcjÍ jeøeli nie widzisz cykli.
+
+tweaks_displaylists_off_text Wy≥.
+tweaks_displaylists_off_help Nie uøywaj list wyúwietlania.
+tweaks_displaylists_cac_text TwÛrz i wywo≥uj
+tweaks_displaylists_cac_help Uøywaj; TwÛrz je i wywo≥uj bezpoúrednio. Rekomendowane.
+tweaks_displaylists_cae_text TwÛrz i wykonuj
+tweaks_displaylists_cae_help Uøywaj; TwÛrz je i wykonuj po wype≥nieniu. Dzia≥ wolniej niø TwÛrz i wywo≥uj.
+tweaks_ztrick_text		ZTrick:
+tweaks_ztrick_help		Przyúpieszenie, ktÛre zadzia≥a wy≥πcznie na starych kartach graficznych: zamiast czyúciÊ ekran i rysowaÊ wszystko od nowa, rysujemy t≥o (pod≥ogÍ i úciany).
+
+tweaks_infinity_text		NieskoÒczonoúÊ:
+tweaks_infinity_help		NiektÛre p≥aszczyzny (pod≥oga, niebo) majπ nieskoÒczone wymiary; jeøeli ta opcja jest w≥πczona, to sπ one faktycznie rysowane jako nieskoÒczone. NiektÛre systemy nie lubiπ takiej opcji, wiÍc wy≥πcz jπ, jeøeli pod≥oga i siatka sπ popsute.
+
+
+#********************************************
+#********************************************
+#
+#           generic menu texts
+#
+#********************************************
+#********************************************
+
+#menu texts: generic
+menuitem_exit_text		PowrÛt
+menuitem_exit_help		Zamyka to menu i powraca do poprzedniego.
+
+menuitem_accept			Zaakceptuj
+menuitem_accept_help		Akceptuje zmiany w tym menu i kontynuuje.
+
+input_item_help			Aby zmieniÊ, naciúnij ENTER lub SPACJ , nastÍpnie naciúnij klawisz/przycisk myszy, ktÛry chcesz przypisaÊ do tej funkcji. Moøesz rÛwniesz poruszaÊ myszkπ.
+input_press_any_key		Naciúnij dowolny klawisz!
+
+menuitem_toggle_on		W≥.
+menuitem_toggle_off		Wy≥.
+
+
+
+
+
+
+
+#********************************************
+#********************************************
+#********************************************
+#********************************************
+#
+#   Game messages printed on the console
+#
+#********************************************
+#********************************************
+#********************************************
+#********************************************
+
+timer_hickup                Przeskok zegara o \1 sek. znaleziony i zrekompensowany. Jeøeli bÍdzie siÍ to zdarza≥o czÍsto, powinieneú sprawdziÊ, czy TwÛj systemowy zegar dzia≥a poprawnie..\n
+
+#********************************************
+#********************************************
+#
+#   Greeting message printed on first start
+#
+#********************************************
+#********************************************
+
+welcome_message_heading		Witamy w \g!
+welcome_message_intro		Domyúlne ustawienia zosta≥y wprowadzone, nawiπzujπc do Twojej konfiguracji\n\n
+welcome_message_vendor		GL Vendor   : 
+welcome_message_renderer	GL Renderer : 
+welcome_message_version		GL Version  : 
+welcome_message_finish		\nMi≥ej Gry!\n
+#\n\nTa gra jest wspomagana przez KGN (Krawall Gaming Network, www.krawall.de).
+
+#********************************************
+#********************************************
+#
+#   Network compatibility warnings
+#
+#********************************************
+#********************************************
+
+setting_legacy_clientblock  Ustawienie \1 (Group: \2) odstaje od wartoúci domyúlnej; klienci starsi niø \3 nie zostanπ wpuszczeni.\n
+setting_legacy_revert       Ustawienie \1 (Group: \2) odstaje od wartoúci domyúlnej; zostanie do niej przywrÛcone, gdy pod≥πczπ siÍ klienci starsi niø \3.\n
+setting_legacy_ignore       Ustawienie \1 (Group: \2) odstaje od wartoúci domyúlnej; klienci starsi niø \3 mogπ mieÊ problemy.\n
+setting_legacy_change_blocked   Ustawienie \1 (Group: \2) nie moøe byÊ teraz zmienione; pod≥πczeni sπ klienci starsi niø \3.\n
+
+#********************************************
+#********************************************
+#
+#      leaque/highscore messages
+#
+#********************************************
+#********************************************
+
+league_message_rose		\1 wszed≥ na miejsce \3 na \4 zamiast \2.
+league_message_dropped		\1 spad≥ na miejsce \3 na \4 zamiast \2.
+
+league_message_greet_intro	Jesteú 
+league_message_greet_sep	,
+league_message_greet_lastsep	i 
+league_message_greet		numer \1 na \2 - \3
+league_message_greet_new	not na \3
+
+won_rounds_description		lista wygranych rund w trybie wieloosobowym
+won_matches_description		lista wygranych meczy w trybie wieloosobowym
+
+highscore_description		najlepsze wyniki pojedynczego gracza
+highscore_message_entered	\1 do≥πczy≥ do \2 z \3 punktami
+highscore_message_improved	\1 powiÍkszy≥ swÛj personalny rekord w /\2/ to \3 
+highscore_message_move_top	i wysunπ≥ siÍ na prowadzenie!
+highscore_message_move_pos	i przeskoczy≥ na pozycjÍ \4.
+highscore_message_stay_top	i pozosta≥ na prowadzeniu.
+highscore_message_stay_pos	,ale zosta≥ na pozycji \4.
+
+ladder_description		rankingu
+ladder_message_entered		\1 do≥πczy≥ do \2 z \3 punktami
+ladder_message_gained		\1 zdoby≥ \5 punktÛw w \2 
+ladder_message_lost		\1 straci≥ \5 punktÛw w \2 
+ladder_message_move_top		i wysunπ≥ siÍ na prowadzenie!
+ladder_message_move_pos		i przeskoczy≥ na pozycjÍ \4.
+ladder_message_stay_top		i pozosta≥ na prowadzeniu.
+ladder_message_stay_pos		,ale zosta≥ na pozycji \4.
+
+online_activity_nobody		Nikogo online.
+online_activity_onespec		Tylko jeden uøytkownik w trybie obserwatora.
+online_activity_manyspec		\1 uøytkownikÛw online w trybie obserwatora.
+online_activity_napping		Nikogo tu ni ma. BiorÍ drzemkÍ...
+
+
+#********************************************
+#********************************************
+#
+#  messages describing the current gamestate
+#
+#********************************************
+#********************************************
+
+gamestate_deleting_objects	Usuwanie obiektÛw...\n
+gamestate_deleting_grid		Usuwanie siatki...\n
+gamestate_creating_grid		Tworzenie siatki...\n
+gamestate_done			gotowe!\n
+gamestate_timeout_intro		\n\nKoniec czasu! Przyczyna:\n
+gamestate_timeout_message	Uøytkownik \1 nie wie o NetObjects \2 ( \3 ).\n
+
+gamestate_reset_center		Reset
+gamestate_reset_console		Po tej rundzie nastπpi reset wszystkich wynikÛw i rozpocznie siÍ nowy mecz.\n
+gamestate_resetnow_center	Nowy Mecz
+gamestate_resetnow_console	Kasowanie wynikÛw...\n
+gamestate_resetnow_log		Nowy mecz\n
+gamestate_newround_console	Start (runda \1 z \2 )!\n
+gamestate_newround_goldengoal	Start (runda dodatkowa ñ kto zdobÍdzie przewagÍ wygrywa)!\n
+gamestate_newround_log		Nowa runda\n
+gamestate_chat_wait         Oczekiwanie do \2 sek., aø \1 skoÒczy rozmawiaÊ.\n
+
+gamestate_wait_players		Czekanie na prawdziwych graczy...\n
+gamestate_wait_players_con	Czekanie na prawdziwych graczy (tylko obserwatorzy online)...\n
+
+gamestate_tensecond_warn	Zosta≥o dziesiÍÊ sekund!\n
+gamestate_30seconds_warn	Zosta≥o 30 sekund!\n
+gamestate_minute_warn		Zosta≥a jedna minuta!\n
+gamestate_2minutes_warn		Zosta≥y dwie minuty!\n
+gamestate_5minutes_warn		Zosta≥o piÍÊ minut!\n
+gamestate_10minutes_warn	Zosta≥o 10 minut!\n
+
+gamestate_champ_center		ZwyciÍzca meczy: \1
+gamestate_champ_console		OgÛlny zwyciÍzca: \1 
+gamestate_champ_scorehit	z \1 punktami.\n
+gamestate_champ_timehit		aø przekroczony zosta≥ limit \1 minut.\n
+gamestate_champ_default		po \1 rundach.\n
+gamestate_champ_finalscores	Wyniki koÒcowe:\n
+
+gamestate_winner_winner		ZwyciÍzca: 
+gamestate_winner_ai		AI.
+gamestate_winner_humans		Ludzie.
+
+instant_win_activated		Strefa natychmiastowej wygranej zosta≥a aktywowana! Wjedü do niej aby wygraÊ rundÍ!\n
+instant_round_end_activated	Strefa koÒca rundy aktywowana! Wjedü do niej aby rozpoczπÊ nowπ rundÍ.\n
+instant_death_activated		Strefa úmierci aktywowana! Unikaj jej!\n
+
+player_admin_kill			\1 0xRESETTzosta≥ od≥πczony przez administratora.\n
+player_admin_slap_free			\1 0xRESETTzosta≥ spoliczkowany przez administratora.\n
+player_admin_slap_win			\1 zosta≥ przytulony przez administartora i dosta≥ \2 pkt.\n
+player_admin_slap_lose			\1 zosta≥ spoliczkowany przez administratora i starci≥ \2 pkt.\n
+player_win_instant			\1 otrzyma≥ \2 pkt. za dotkniÍcie strefy zwyciÍstwa.\n
+player_win_conquest			\1 otrzyma≥ \2 pkt. za zdobycie bazy przeciwnika.\n
+player_win_held_fortress	\1 otrzyma≥ \2 pkt. za utrzymanie w≥asnej bazy.\n
+player_lose_held_fortress	\1 straci≥ \2 pkt. za bycie zbyt defensywnym.\n
+player_win_conquest_specific \1 otrzyma≥ \2 pkt. za zdobycie bazy \3'.\n
+player_kill_collapse        \1 zosta≥ zniszczony przez jego w≥asnπ, zapadajπcπ siÍ strefÍ..\n
+player_win_hole             \1 dosta≥ \2 pkt. za poúwiÍcenie dla dobra druøyny.\n
+player_lose_hole            0xffff00On zrobi≥ 0xff7f00DZIUR !!1!!0xRESETT \1 straci≥ \2 pkt. za swoje nieuczciwe zachowanie.\n
+
+player_no_longer_suspended  \1 0x77ff77znÛw moøe graÊ.\n
+player_suspended            \1 0xff7777zostaje zmuszony do byÊia w trybie obserwatora przez najbliøsze \2 rund.\n
+
+zone_collapse_harmless      Strefa \1 zapad≥a siÍ nieszkodliwie, szczÍúcie przeciwnikÛw!\n
+
+#********************************************
+#********************************************
+#
+#  messages about player activity
+#
+#********************************************
+#********************************************
+
+player_teamleave_disallowed Niestety, to nie dzia≥a z automatycznym przypisywaniem druøyn.\n
+player_teamchanges_disallowed Administrator zabroni≥ zmian w druøynach.\n
+player_teamchanges_suspended Niestety, jesteú wy≥πczony z gry na nastÍpne \1 rund.\n
+player_teamchanges_accesslevel Niestety, masz na niski poziom dostÍpu (\1) do gry. Wymagany poziom to \2.\n
+player_vote_accesslevel Niestety, masz na niski poziom dostÍpu (\1) aby zaproponowaÊ takπ ankietÍ. Wymagany poziom to \2.\n
+player_pingcharity_changed	ZrÛwnanie pinga zmieni≥o siÍ na \2, stara wartoúÊ to \1.\n
+spam_protection_repeat  OCHRONA PRZED SPAMEM: juø powiedzia≥eú: \1\n
+spam_protection			OCHRONA PRZED SPAMEM: jesteú wyciszony na \1 sekund.\n
+spam_protection_silenceall OCHRONA PRZED SPAMEM: rozmowa jest wy≥πczona.\n
+spam_protection_silenced OCHRONA PRZED SPAMEM: zosta≥eú wyciszony przez administratora.\n
+spam_protection_silenced_default OCHRONA PRZED SPAMEM: aby rozmawiaÊ, musisz najpierw otrzymaÊ do tego prawo.\n
+player_silenced         \10xff7777 zosta≥ wyciszony.\n
+player_silenced_local   \10xff7777 zosta≥ lokalnie wyciszony.\n
+player_voiced           \10x77ff77 otrzyma≥ prawo do rozmowy.\n
+player_voiced_local     \10x77ff77 otrzyma≥ prawo do lokalnej rozmowy.\n
+player_allowed_teamchange \10x77ff77 moøe juø zmieniaÊ druøynÍ.\n
+player_disallowed_teamchange \10xff7777 nie moøe zmieniaÊ druøyn.\n
+vote_spam_protection	OCHRONA PRZED SPAMEM: nie moøesz proponowaÊ wiÍcej ankiet przez \1 sek.\n
+chat_title_text			MÛw:
+player_entered_game		\1 0x7fff7fdo≥πczy≥ do gry.\n
+player_entered_spectator \1 0x7fff7fdo≥πczy≥jako obserwator.\n
+player_left_spectator    0xff7f7fObserwator \1 0xff7f7fopuúci≥ grÍ.\n
+player_left_game		\1 zosta≥ wyrzucony z \2 pkt.\n
+player_leaving_game		\1 0xff7f7fopuúci≥ grÍ.\n
+player_renamed			\2 teraz ma imiÍ \1.\n
+player_renamed_teamname	\2 zmieni≥ nazwÍ w druøynie na \1.\n
+player_got_renamed		\2 dosta≥ nowπ nazwÍ "\1".\n
+player_will_be_renamed		\2 bÍdzie mia≥ nowe imiÍ \1.\n
+player_rename_rejected_votekick  \1 0xffffffnie moøe zmieniÊ nazwy na \2 0xffffffponiewaø w≥aúnie trwa ankieta na jego temat.\n
+player_rename_rejected_admin    \1 0xffffffnie moøe zmieniÊ nazwy na \20xffffff, bo to imiÍ jest zablokowane przez administratora.\n
+player_allowed_rename		\1 0x7fff7fznÛw moøe zmieniaÊ swojπ nazwÍ.\n
+player_disallowed_rename	\1 0xff7f7fnie moøe wiÍcej zmieniaÊ swojej nazwy.\n
+player_welcome			\n\nWitaj \1! Ten serwer jest w wersji \2.\n
+player_win_default		\1 zdoby≥ \2 pkt. z bardzo dziwnej przyczyny.\n
+player_lose_default		\1 straci≥ \2 pkt. z nietypowego powodu.\n
+player_lose_suicide		\1 pope≥ni≥ samobÛjstwo, tracπc \2 pkt.\n
+player_free_suicide		\1 pope≥ni≥ samobÛjstwo.\n
+player_win_frag			\1 zniszczy≥ \3 dostajπc \2 pkt.\n
+player_win_survive		\1 zdoby≥ \2 pkt. za przetrwanie.\n
+player_free_frag		\1 zniszczy≥ \2.\n
+player_teamkill			\1 zniszczy≥ \2, ktÛry jest z nim w druøynie! Boo! Za to nie ma punktÛw!\n
+player_win_frag_ai		\1 otrzyma≥ \2 pkt. za zniszczenie gracza AI.\n
+player_lose_frag		\1 straci≥ \2 pkt., poniewaø wjecha≥ w úcianÍ.\n
+player_lose_rim		    \1 straci≥ \2 pkt. prÛbujπc uciec poza siatkÍ gry.\n
+player_win_survivor		\1 zosta≥ nagrodzony \2 pkt. za przetrwanie.\n
+player_joins_team       \1 chcia≥by zagraÊ dla \2 w nastÍpnej rundzie.\n
+player_joins_team_wish  \1 ciπgle chce graÊ \2, ale aktualnie nie jest to dozwolone.\n
+player_joins_team_noex  \1 chce graÊ dla druøyny, ktÛra przesta≥π istnieÊ, ignorowanie proúby.\n
+player_leave_team_wish  \1 chce opuúciÊ \2 w nastÍpnej rundzie.\n
+player_leave_game_wish  \1 nie chce graÊ nastÍpnej rundy.\n
+player_joins_team_start \1 0x7fff7fgra dla \2.\n
+#player_joins_team_now   \1 0x7fff7fod teraz gra dla \2.\n
+player_changes_team     \1 0x7f7fffzmienia druøynÍ z \3 na \2.\n
+player_leaves_team		\1 0xff7f7fopuúci≥ \2.\n
+player_creates_team		\1 za≥oøy≥ nowπ druøynÍ - \2.\n
+player_nocreate_team		\1 nie moøe teraz za≥oøyÊ nowej druøyny.\n
+player_nojoin_team		\1 nie moøe teraz do≥πczyÊ do \2.\n
+player_not_on_team      Nie jesteú druøynπ.\n
+no_real_teams           Nie ma druøyn z ponad jednym graczem.\n
+team_renamed            \1 zmieni≥ nazwÍ druøyny na \2.\n
+player_team_message     Druøyna
+player_spectator_message Obserwatorzy
+
+team_shuffle            \1, ktÛry dotπd startowa≥ na pozycji \2, przetasowa≥ siÍ i teraz wyruszy z pozycji \3.\n
+player_noshuffleup      Nie wolno Ci tasowaÊ.\n
+player_noshuffle        Twoje tasowanie nie przynios≥o øadnego efektu.\n
+player_shuffle_error    /shuffle expects a number as argument; an explicit sign (+/-) will change your position by the indicated number of steps, no sign will shuffle you to the given position.\n
+
+add_help_topic_help     Dodaj nowy temat pomocy uzyskiwany przy pomocy komendy /help. Uøycie: ADD_HELP_TOPIC <temat> <krÛÛtki opis> <tekst>
+add_help_topic_usage    Uøycie: ADD_HELP_TOPIC <temat> <krÛÛtki opis> <tekst>.\n
+add_help_topic_success  Dodano temat pomocy "\1".\n
+remove_help_topic_help  UsuÒ temet pomocy.
+remove_help_topic_success UsuniÍto temat pomocy "\1".\n
+remove_help_topic_notfound Temat pomocy "\1" nie istnieje.\n
+
+rtfm_announcement \2 chcia≥by \3 wiedzieÊ o /help \1.\n
+
+help_introductory_blurb_help WiadomoúÊ wyúwietlana przed listπ tematÛw, gdy ktoú zapyta /help bez argumentÛw.
+
+help_topics_list_start  Powiedz /help TEMAT by uzyskaÊ pomoc na ten temat.\n
+help_topic_not_found    Temat pomocy \1 nie zosta≥ znaleziony. Wpisz /help bez argumentÛw, aby zobaczyÊ listÍ tematÛw pomocy.\n
+
+help_commands_shortdesc Lista wszystkich komend tekstowych.
+help_commands_text      Ten temat jest pusty. Uøyj jednego z podtematÛw.
+
+help_commands_chat_shortdesc Podstwawowe komendy
+help_commands_chat_text      0x88ff88/me <wiadomoúÊ>0xffff88: Wysy≥a opis akcji, jak w "/me is a noob."\n0x88ff88/msg <czÍúÊ nicku> <wiadomoúÊ>0xffff88: Wysy≥a prywatnπ wiadomoúÊ, ktÛrπ zobaczy tylko wybrany gracz\n0x88ff88/team <wiadomoúÊ>0xffff88: Wysy≥π wiadomoúÊ do ca≥ej Twojej druøyny, lub do wszystkich obserwatorÛw, jeúli jesteú jednym z nich.
+
+help_commands_team_shortdesc Podstawowe komendy zarzπdzania druøynπ
+help_commands_team_text 0x88ff88/teamshuffle0xffff88: Przemieszcza CiÍ, tak, abyú w nastÍpnej rundzie startowa≥ z pozycji skrzyd≥owego.\n0x88ff88/teamshuffle <pozycja>0xffff88: Przetasowuje tak, abyú siÍ znalaz≥ na wybranej pozycji.\n0x88ff88/teamshuffle [+|-]<offset>0xffff88: Przetasowuje CiÍ o okreúlonπ iloúÊpozycji w gÛrÍ/dÛ≥\n0x88ff88/teamleave0xffff88: Opuszcza aktualnπ druøynÍ. Dzia≥π tylko na niektÛrych serwerach.\n0x88ff88/teams0xffff88: Wyúwietla listÍ druøyn i ich formacje.
+
+help_commands_pp_shortdesc Komendy zachowaÒ graczy
+help_commands_pp_text 0x88ff88/players [<szukany>]0xffff88: Wyúwietla listÍ graczy z odrobinπ innych informacji. Moøesz teø wyszukiwaÊ graczy w ten sposÛb.\n0x88ff88/vote kick|suspend <player>0xffff88: Rozpoczyna ankietÍ o wykopaniu/zawieszeniu gracza.
+
+help_commands_auth_shortdesc Komendy zwiπzane z autentykacjπ.
+help_commands_auth_text 0x88ff88/login [<uøytkownik>]@<autentykujπcy>0xffff88: Autentykuje CiÍ. SprÛbuj @forums jeúli masz konto na http://forums.armagetronad.net/\n0x88ff88/logout0xffff88: Wylogowuje, abyú mÛg≥ siÍ zalogowaÊ, jako ktoú inny.\n0x88ff88/vote include <plik>0xffff88: Zaczyna ankietÍ o do≥πczeniu jakiegoú pliku\n0x88ff88/vote command <komenda>0xffff88: Zaczyna ankietÍ o wykonaniu jakejú komendy na serwerze\n0x88ff88/admin <komenda>0xffff88: Wykonaj komendÍ na konsoli, o ile masz odpowiednie uprawnienia.\n0x88ff88/op <gracz> [+|-]<poziom dostÍpu>0xffff88: Daje temu graczu nowy poziom dostÍpu; domyúlnie o jeden lepszy.\n0x88ff88/deop <gracz>0xffff88: PrzeciwieÒstwo /op; zabiera jeden poziom graczu. OOczywiúcie, dzia≥π tylko na graczach, ktÛrzy majπ mniejszy poziom dostÍpu od ciebie.\n
+
+help_commands_auth_levels_shortdesc Poziomy dostÍpu
+help_commands_auth_levels_text 0x88ff880 (W≥aúciciel)0xffff88: W≥aúciciel serwera. Komendy wpisane na konsoli sπ wykonywane z jego uprawnieniami.\n0x88ff881 (Administrator)0xffff88: Administrator serwera. Domyúlnie, jest tak samo potÍøny jak w≥aúciciel.\n0x88ff882 (Moderator)0xffff88: Moderator serwera. Moøe uøywaÊ komendy /admin, ale tylko do zarzπdzania uøytkownikami.\n0x88ff887 (Kapitan druøyny)0xffff88: Domyúlnie, nie ma praw administratora.\n0x88ff888 (Cz≥onek druøyny)0xffff88: W≥aúciciele zwyk≥ych kont w druøynie otrzymujπ ten poziom.\n0x88ff8812 (Lokalny uøytkownik)0xffff88: Gracze z kontem lokalnym otrzymujπ ten poziom.\n0x88ff8815 (Zdalny uøytkownik)0xffff88: Gracze z kontem zdalnym domyúlnie dostajπ ten poziom.\n0x88ff8816 (Uøytkownik z ograniczonym dostÍpem)0xffff88: Autentykowany garzc, ktÛry zas≥uøy≥ sobie na obniøenie jsgo praw.\n0x88ff8817 (Unikany)0xffff88: Tak, jak powyøej, tylko mocniej :)\n0x88ff8819 (Autentykowany)0xffff88: Najmniejszy poziom, dla autentykowanych graczy.\n0x88ff8820 (Program)0xffff88: Niezautentykowani.
+
+help_commands_ra_shortdesc Zdalne komendy administartora.
+help_commands_ra_text 0x88ff88/login <has≥o>0xffff88: Loguje CiÍ jako administartor uøywajπc has≥a a serewrze\n0x88ff88/logout0xffff88: Wylogowuje CiÍ, aby inni nie widzieli, øe jesteú administartorem.\n0x88ff88/admin <komenda>0xffff88: Wykonuje komendÍ, tak jakby by≥a wpisana na serwerze.
+
+help_commands_misc_shortdesc Inne komendy
+help_commands_misc_text 0x88ff88/help0xffff88: Chyba wiesz juø coú o tej komendzie... :-)\n0x88ff88/teach <gracz> <temat>0xffff88: Takie samo jak /help, ale wysy≥a zawartoúÊ innemu graczu.\n0x88ff88/rtfm0xffff88: to samo co /teach\n0x88ff88/command <komenda>0xffff88: Wykonuje komendÍ na Twoim kilencie.Przydatne do Szybkiego Chatu.
+
+help_commands_tourney_shortdesc Komendy zwiπzane z konkursami
+help_commands_tourney_text 0x88ff88/lock0xffff88: Blokuje Twojπ druøynÍ, tak, aby nikt nie mÛg≥ do niej do≥πczyÊ\n0x88ff88/invite <gracz>0xffff88: Od teraz ten gracz bÍdzie mÛg≥ do≥πczyÊ do Twojej druøyny. Inny efektt /invite, to fakt, øe zaproszony gracz bÍdzie mÛg≥ czytaÊ dwojr wiadomoúci /team. Zaproszenia sπ wieczne. To oznacza, øe jeúli gracz przyjmie zaproszenie, a potem odejdzie od Twojej druøyny, to bÍdzie mÛg≥ do niej powrÛciÊ bez ponownego zaproszenia.Gracze, ktÛrzy byli w twojej druøynie, w momencie zablokowania jej, zosatjπ w niej, ale nie sπ do niej automatycznie zapraszani.\n0x88ff88/uninvite <player>0xffff88: przeciwieÒstwo /invite. Zaproszenie jest anulowane, gracz nie moøe do≥πczyÊ do Twojej druøyny, a jeúli w niej jest, to zostaje z niej wyrzucony..\n0x88ff88/unlock0xffff88: Odblokowuje Twojπ druønÍ.
+
+
+invite_no_team          Nie moøesz uøyÊ \1 ,jeúli nie jesteú druøynπ.\n
+invite_team_locked      Druøyna \1 jest zablokowana, potrzebujesz specjalnego zaproszenia od kapitana druøyny, aby mÛc do niej do≥πczyÊ.\n
+invite_team_unlocked    Druøyna \1 jest odblokowana, moøesz do niej do≥πczyÊ bez øadnych przeszkÛd.\n
+invite_team_can_join      \10xRESETT moøe teraz dojúÊ do \2.\n
+invite_team_invite      \10xRESETT zosta≥ zaproszony do druøyny \2.\n
+invite_team_kick        \10xRESETT zosta≥ wykopany z druøyny \2.\n
+invite_team_uninvite    \10xRESETT juø nie jest zapraszany do \2.\n
+invite_team_locked_list (zablokowana)
+
+msg_toomanymatches 0xff0000Dla zapytania /\1/ znaleziono zbyt wiele wynikÛw. Bπdü bardziej precyzyjny.\n
+msg_nomatch 0xff0000Nie znaleziono nic zawierajπcego \1.\n
+
+
+
+player_toggle_spectator_on  \1 prze≥πcza siÍ w tryb obserwatora i nie zagra w nastÍpnej rundzie.\n
+player_toggle_spectator_off \1 opuszcza tryb obserwatora i zaraz do≥πczy do gry.\n
+
+#camera messages
+camera_watching_ai		Oglπdany: Gracz AI\n
+camera_watching_player		Oglπdany: \1\n
+
+#score table
+team_scoretable_name		Druøyna:
+team_scoretable_score		Wynik:
+team_scoretable_members		Cz≥onkowie:
+team_scoretable_alive		Øywi:
+player_scoretable_name		Gracz:
+player_scoretable_team		Cz≥onek druøyny:
+player_scoretable_score		Wynik:
+player_scoretable_ping		Ping:
+player_scoretable_alive		Øywy:
+player_scoretable_alive_yes	Tak
+player_scoretable_alive_no	Nie
+player_scoretable_pingcharity   ZrÛwnanie Ping'a:
+player_scoretable_nobody	Nikogo tu nie ma.\n
+player_scoretable_inactive	Roz≥πczony
+
+
+
+#********************************************
+#********************************************
+#
+#          network messages
+#
+#********************************************
+#********************************************
+
+fullscreen_message_title        WiadomoúÊ od serwera
+
+network_message_timeout_title	Serwer nie odpowiedzia≥
+network_message_timeout_inter	Serwer, z ktÛrym prÛbowa≥eú siÍ po≥πczyÊ nie odpowiedzia≥ przez dziesiÍÊ skund.\nPrawdopodobnie jest wy≥πczony lub niedostÍpny, albo teø üle wpisa≥eú jego nazwÍ w menu ÑPod≥πcz po serweraî.
+
+network_message_dns_error_title	B≥πd DNS
+network_message_dns_error_inter	Wpisana przez Ciebie nazwa serwera nie ma odpowiadajπcego adresu IP. To moøe oznaczaÊ, øe albo jπ üle wpisa≥eú, Twoja sieÊ jest wy≥πczona, lub serwer nie jest juø dostÍony pod tπ nazwπ.
+
+network_message_denied_title	Logowanie zabronione
+network_message_denied_inter	Serwer, z ktÛrym chcia≥eú siÍ po≥πczyÊ nie pozwoli≥ Ci siÍ zalogowaÊ.\nZazwyczaj oznacza to øe jest juø pe≥ny.
+network_message_denied_inter2	Serwer, z ktÛrym chcia≥eú siÍ po≥πczyÊ nie pozwoli≥ Ci siÍ zalogowaÊ.
+
+network_message_lateto_title	Przekroczony limit czasu
+network_message_lateto_inter	Po≥πczenie z serwerem zosta≥o nawiπzane; jednakøe nie uda≥o siÍ zsynchronizowaÊ.\nPo prostu sprÛbuj ponownie!
+
+network_message_lostconn_title	Po≥πczenie utracone
+network_message_lostconn_inter	Po≥πczenie z serwerem zosta≥o zerwane. To moøe byÊ z powodu awarii prawdziwej sieci (np. kabel sieciowy siÍ odpiπ≥ lub uleg≥ uszkodzeniu), lub z powodu b≥Ídu serwera (W takim wypadku naleøa≥oby poinformowaÊ administratora.)
+
+network_message_abortconn_title	Po≥πczenie przerwane.
+network_message_abortconn_inter	Serwer przerwa≥ po≥πczenie.
+
+network_master_timeout_retry	Jeden z g≥Ûwnych serwerÛw nie odpowiedzia≥. PrÛbowanie nastÍpnego...\n
+network_master_timeout_title	Serwery g≥Ûwne nie odpowiedzia≥y
+network_master_timeout_inter	Serwery g≥Ûwne nie odpowiedzia≥y, przez co nie da≥o siÍ odúwieøyÊ listy serwerÛw z grπ. BÍdziesz teraz przeglπda≥ starπ listÍ.\n\nPrzyczynπ moøe byÊ problem z Twoim po≥πczeniem sieciowym. Sprawdü:\n- czy masz dzia≥ajπce po≥πczenie internetowe: wejdü za pomocπ przeglπdarki internetowej na stronÍ http://www.armagetronad.net.\n- czy przypadkiem zapora ogniowa/firewall (o ile masz taki) nie blokuje Armagetron'a. Aby zobaczyÊ, czy w tym leøy problem, wy≥πcz swÛj firewall i sprÛbuj ponownie. Jeøeli wtedy zadzia≥a, w≥πcz firewall ponownie, ale kaø mu nie blokowaÊ Armagetron'a: \g uøywa UDP i zazwyczaj portÛw od 4533 do 4540. NiektÛre firewallem majπ takøe opcjÍ blokowania programÛw po ich nazwie; upewnij siÍ, øe armagetronad(.exe) nie jest zablokowany.\nJeøeli natomiast nie kontrolujesz ustawieÒ swojej sieci, powinieneú skonsultowaÊ siÍ z jej administratorem, aby wprowadzi≥ on odpowiednie konfiguracje.\nOstatniπ moøliwπ, acz ma≥o prawdopodobnπ przyczynπ tego b≥Ídu, moøe byÊ fakt, øe infrastruktura serwerÛw jest aktualnie wy≥πczona. Odwiedü forum na forums.armagetronad.net lub kana≥ IRC #armagetron na irc.freenode.net by sprawdziÊ, czy ktoú jeszcze ma ten sam problem.
+
+network_master_denied_title		Logowanie zabronione
+network_master_denied_inter		Serwer g≥Ûwny nie pozwoli≥ Ci siÍ zalogowaÊ, co oznacza, øe najprawdopodobniej jest pe≥ny. SprÛbuj ponownie z kilka chwil.
+
+testing_version_expired_title   Niew≥aúciwa wersja
+testing_version_expired         Posiadasz za starπ testowπ wersjÍ Armagetron'a. Serwer, do ktÛrego prÛbowa≥eú siÍ pod≥πczyÊ jest w znacznie nowszej wersji, co uniemoøliwi≥o komunikacjÍ. Aktualizacja jest dostÍpna na www.armagetronad.net lub beta.armagetronad.net.
+
+network_master_upgrage			Potrzebna aktualizacja
+network_master_downgrage		Serwer jest przestarza≥y
+network_master_incompatible		Serwer jest niekompatybilny
+network_master_full			Pe≥ny
+network_master_serverinfo       Wersja: \1\nAdres    : \2\nOpcje/opis: \3\n
+network_master_players			Gracze: 
+network_master_players_empty	Pusty
+network_master_options			Opcje:\n
+
+network_connecting_to_server	£πczenie do \1...\n
+network_connecting_gamestate	Oczekiwanie na informacje o stanie gry...\n
+network_syncing_gamestate	Otrzymane! Synchronizacja gry...\n
+network_warn_unknowndescriptor	\n\n\nOtrzymano nieznanπ informacjÍ \1 \n\nPRAWDOPODOBNIE POWINIENEå ZAKTUALIZOWA∆ ARMAGETRON ADVANCED!!!!\n
+network_error			B≥πd sieci.\n
+network_error_timeout		Uøytkownik \1 przekroczy≥ limit czasu.\n
+network_error_shortmessage	WiadomoúÊ uøytkownika \1's by≥a zbyt krÛtka.\n
+network_error_overflow		Uøytkownik \1 nie jest w stanie utrzymaÊ przesy≥ danych.\n
+network_killuser		Usuwanie uøytkownika \1, ping \2.\n
+network_statistics1		Czas:     \1 sek.\n
+network_statistics2		Wys≥ano:     \2 bajtÛw w \3 pakietach (\4 bajtÛw/s)\n
+network_statistics3		Otrzymano: \5 bajtÛw w \6 pakietach (\7 bajtÛw/s)\n
+
+network_login_denial		Otrzymano odmowÍ zalogowania...\n
+network_server_login		Otrzymano formularz logowania \1 poprzez socket \2, wersja sieci: \3 (ID: \4).\n
+network_unknown_version	nieznana
+network_server_login_success	Nowy uøytkownik: \1\n
+
+network_toomanyservers		\n\n\nOstrzerzenie: zbyt wiele serwerÛw otwartych na tym komputerze.\nZostanie uøyty port spoza rangi okreúlonej w ustawianiach.\n\n\n
+
+network_browser_unidentified Otrzymano niezidentyfikowanπ informacjÍ od serwera \1 poprzez socket \2.\n
+
+network_logout_process		Wylogowanie...\n
+network_logout_done		Gotowe!\n
+network_logout_server		otrzymano formularz wylogowania od \1.\n
+
+network_login_process		Wys≥ano formularz logowania. Oczekiwanie na odpowiedü...\n
+network_login_failed        Logowanie nieudane.\n
+network_login_failed_full	Logowanie nieudane: Serwer jest pe≥ny.\n
+network_login_failed_timeout	Logowanie nieudane: Przekroczono limit czasu.\n
+network_login_failed_abort	Logowanie nieudane: Logowanie anulowane.\n
+network_login_success		Logowanie Udane: Uøytkownik nr. \1 \n
+network_login_sync		Synchronizowanie...\n
+network_login_relabeling	Przetwaraznie NetObjects...\n
+network_login_sync2		Ponowne synchronizowanie...\n
+network_login_done		Gotowe!\n
+
+network_kill_log            Uøytkownik \1 usuniÍty z gry, przyczyna mu podana: \2\n
+network_redirect            \n\nZostaniesz teraz przekierowany na serwer \1:\2. Moøesz anulowaÊ tÍ operacjÍ naciskajπc ESC.\n
+network_kill_preface		Przyczyna podana przez serwer:
+network_kill_maxidgrabber	SkoÒczy≥y siÍ wolne ID, twÛj klient zajmowa≥ wiÍkszoúÊ z nich dla siebie. To moøe byÊ b≥πd gry.
+network_kill_maxiduser		SkoÒczy≥y siÍ wolne ID, twÛj klient zajmowa≥ wiÍkszoúÊ z nich.
+network_kill_cheater		Wyglπda na to, øe uøywa≥eú kodÛw. Jeúli to nieprawda, to jest to b≥πd gry, ktÛry powinieneú zg≥osiÊ.
+network_kill_error			Podczas przetwarzania informacji wys≥anych przez Twojego klienta, wystπpi≥ b≥πd. To zazwyczaj oznacza b≥πd, ktÛry powinieneú zg≥osiÊ.
+network_kill_timeout		Przekroczy≥eú limit czasu.
+network_kill_logout			Regularnie siÍ wylogowywa≥eú.
+network_kill_incompatible	Twoja wersja gry jest niekompatybilna z serwerem.
+network_kill_full			Serwer jest po prostu przepe≥niony.
+network_kill_shutdown		Serwer zosta≥ wy≥πczony.
+network_kill_overflow		Wystπpi≥o przeciπøenie sieci.
+network_kill_too_many_players Zbyt wielu graczy zosta≥o zalogowanych na Twoje po≥πczenie.
+network_kill_kick			Zosta≥eú wykopany przez administratora; nie wchodü tu na razie.
+network_kill_idle           Zosta≥eú automatycznie roz≥πczony, poniewaø zbyt d≥ugo nie gra≥eú.
+network_kill_banned		Jesteú zbanowany na \1 min. \2
+#network_kill_banned         Zosta≥eú zbanowany. ProszÍ nie wchodziÊ tutaj. Im wiÍcej razy bÍdziesz prÛbowa≥ siÍ po≥πczyÊ, tym d≥uøej bÍdziesz zbanowany.
+network_kill_unknown		Nie podano przyczyny.
+network_kill_spamkick		Zosta≥eú automatycznie wykopany za spamowanie.
+voted_kill_kick				Zosta≥eú wykopany z powodu takiego kaprysu innych graczy; nie wchodü tu tymczasowo.
+network_kill_spectator      Zbyt d≥ugo przebywa≥eú w trybie obserwatora.
+
+network_ban_kph             Wykopania-na-godzinÍ z adresu IP \1 wynoszπ teraz \2.\n
+network_ban                 Gracze o IP \1 sπ zbanowani na \2 min. PowÛd: \3\n
+network_noban               Gracze o IP \1 nie sπ juø wiÍcej zbanowani.\n
+
+network_ban_kick            Automatyczne zbanowanie spowodowane bardzo czÍstym wykopwaniem.
+network_ban_noreason        Nie podano.
+
+#*************************************
+#*************************************
+#
+#       vote messages
+#
+#*************************************
+#*************************************
+
+vote_accepted						Ankieta "\1" zosta≥a zaakceptowana. (\2 graczy zag≥osowa≥o za, \3 przeciw, wstrzyma≥o siÍ \4)\n
+vote_rejected						Ankieta "\1" Zosta≥a odrzucona. (\2 graczy zag≥osowa≥o za, \3 przeciw, wstrzyma≥o siÍ \4)\n
+vote_cancel_all                     Wszystkie ankiety zosta≥y anulowane przez administratora.\n
+vote_timeout						SkoÒczy≥ siÍ czas trwania ankiety "\1".\n
+vote_new							Nowa ankieta: "\1". Wejdü do menu aby wziπÊ w niej udzia≥.\n
+vote_redundant                      Ankieta odrzucona, te same sugestie zosta≥y juø podane.\n
+vote_maturity                       Ankieta odrzucona, nie jesteú wystarczajπco starym graczem aby g≥osowaÊ, odczekaj \1 sekund.\n
+vote_overflow						Ankieta odrzucona, zbyt wiele aktualnie trwajπcych.\n
+vote_disabled						Ankiety zosta≥y zablokowane przez administratora.\n
+vote_disabled_spectator				Ankieta/G≥os odrzucony, administrator nie pozwala na to obserwatorom.\n
+vote_toofew							Ankieta odrzucona, zbyt ma≥o graczy mogπcych g≥osowaÊ jest online.\n
+vote_submitted						Ankieta "\2" nades≥ana przez \1.\n
+vote_vote_for						\1 zag≥osowa≥ za ankietπ "\2".\n
+vote_vote_against					\1 zag≥osowa≥ przeciwko ankiecie "\2".\n
+vote_unknown_command                Nieznana komenda \1, dostÍpne to: \2\n
+vote_kick_local                     Nie da siÍ g≥osowaÊ przeciw lokalnemu graczu/AI \1.\n
+
+#********************************************
+#********************************************
+#
+#          the server browser menu
+#          and master server messages
+#
+#********************************************
+#********************************************
+
+network_master_unknown		Nieznany Serwer
+network_master_polling		Oczekiwanie...
+network_master_unreachable	Nieosiπgalny
+network_master_noserver		Niestety, nie znaleziono øadnego serwera :-(
+network_master_servername	Nazwa Serwera
+network_master_score		Wynik
+network_master_users		Gracze
+network_master_ping		Ping
+network_master_browserhelp	Naciúnij "Enter" aby siÍ po≥πczyÊ z tym serwerem, "p" aby odúwieøyÊ pojedynczy serwer, "r" by odúwieøyÊ ca≥π listÍ, "+/-" by zmieniÊ wynik tego serwera, "kursor lewo/prawo" by zmieniÊ metodÍ sortowania, lub "b" aby go dodaÊ do ulubionych. "m" prze≥πcza filtrowanie wg. znajomych.
+network_master_connecting	£πczenie z \1...\n
+network_master_send		Wysy≥anie informacji o serwerze...\n
+network_master_reqlist		Zapytanie o listÍ serwerÛw...\n
+network_master_status		Otrzymywanie \1-tego serwera...\n
+network_master_finish		Otrzymano \1 serwerÛw.\n
+network_master_start		Za≥Ûø grÍ
+network_master_host_inet_help	Rozpocznie grÍ sieciowπ na Twoim komputerze i bÍdzie ona widoczna w internecie.
+network_master_host_lan_help	Rozpocznie grÍ sieciowπ na Twoim komputerze, ktÛra bÍdzie dostÍpna tylko w Twojej sieci LAN.
+
+
+#********************************************
+#********************************************
+#
+#       Resource messages
+#
+#********************************************
+#********************************************
+
+resource_not_cached         Plik \1 nie znaleziony. Pobieranie go, proszÍ czekaÊ...\n
+resource_downloading        Pobieranie \1 ...\n
+resource_fetcherror_404     B£•D: ZwrÛcona wartoúÊ 404: File not found.\n
+resource_fetcherror         B£•D: ZwrÛcona wartoúÊ \1 != 200.\n
+resource_no_filename        B£•D: NULL lub pusta nazwa pliku.\n
+resource_abs_path           B£•D: BezwzglÍdna úcieøka pliku, serwer prÛbuje nadpisaÊ system pliÛw.\n
+resource_no_writepath       B£•D: Nie moøna okreúliÊ úcieøki do ktÛrej pobraÊ plik.\n
+resource_no_write           B£•D: Nie moøna zapisaÊ pliku \1.\n
+
+#********************************************
+#********************************************
+#
+#       Directory messages
+#
+#********************************************
+#********************************************
+
+directory_path_nonwritable Nie moøna utworzyÊ úcieøki do "\1". Sprawdü swoje uprawnienia uøytkownika.
+directory_path_null        B£•D: åcieøka jest pusta.\n
+directory_path_absolute    B£•D: åcieøka "\1" jest úcieøkπ bezwzglÍdnπ/absolutnπ. Nie wolno Ci uzyskaÊ dostÍpu do plikÛw poza skonfigurowanymi hierarchiami.\n
+directory_path_relative    B£•D: åcieøka "\1" jest úcieøkπ wzglÍdnπ/relatywnπ. Nie wolno Ci uzyskaÊ dostÍpu do plikÛw poza skonfigurowanymi hierarchiami.\n
+directory_path_hidden     B£•D: åcieøka "\1" zawiera ukryty komponent.\n
+
+#********************************************
+#********************************************
+#
+#       map messages
+#
+#********************************************
+#********************************************
+# printed on loading a map
+map_file_loading             Trwa ≥adowanie mapy \1 ...\n
+
+# title of map error message
+map_file_load_failure_title  B≥πd podczas ≥adowania mapy
+
+# printed when a map can't be loaded, and the user can do something about it
+map_file_load_failure_self   Mapa \1 nie mog≥a byÊ odczytana lub za≥adowana; sprawdü w≥asnπ konfiguracjÍ i informacje w logu.\n
+
+# printed when a map can't be loaded, and  the failure is the server admin's fault
+map_file_load_failure_server  Mapa \1 nie mog≥a byÊ za≥adowana.\nByÊ moøe serwer, z ktÛrym siÍ ≥πczy≥eú ma zepsutπ konfiguracjÍ; powinieneú poinformowaÊ jego administratora o tym b≥Ídzie.\n
+
+# worst case: default map could not load, either
+map_file_load_failure_default \nNie uda≥o siÍ za≥adowaÊ domyúlnej mapy. Koniecznie zg≥oú ten b≥πd, to bardzo nietypowy problem.\n
+
+# resource at the wrong place
+resource_file_wrong_place_title Nieprawid≥owa úcieøka pliku
+resource_file_wrong_place     Plik za≥adowany z "\1" chcia≥by byÊ w "\2". Moøliwe rozwiπzania:\na) Jeøeli nie jesteú jego autorem, powinieneú przenieúÊ ten plik we w≥aúciwe miejsce, tak jak podano powyøej.\nb) Jeøeli natomiast jesteú jego autorem, a chcesz aby zosta≥ tam gdzie jest, moøesz zmieniÊ mu tag <Resource> øeby dzia≥a≥ w tym katalogu co jest. Po szczegÛ≥y zajrzyj do dokumentacji np. wiki.armagetronad.net.\n
+
+map_file_reverting           Przywracanie ostatniej dzia≥ajπcej mapy \1.\n
+
+#********************************************
+#********************************************
+#
+#         Texture messages
+#
+#********************************************
+#********************************************
+
+# texture not found error message
+texture_error_filenotfound        Plik tekstury \1 nie mÛg≥ byÊ za≥adowany.\n
+texture_error_filenotfound_title  Nie znaleziono tekstury.
+
+#********************************************
+#********************************************
+#
+#         Sound messages
+#
+#********************************************
+#********************************************
+
+sound_error_no16bit		Niestety, potrzebujemy wyjúcia stereo 16 bit (Jestem zbyt leniwy aby zajπÊ siÍ innymi formatami. Moøe jeúli bardzo ≥adnie poprosisz?).\n
+sound_error_initfailed		Inicjacja düwiÍku zakoÒczona niepowodzeniem.\n
+sound_firstinit			PrÛba düwiÍku. Zrestartuj \g w wypadku awarii.\n
+sound_inited			DüwiÍk zainicjowany: 16 bit stereo przy \1 Hz, rozmiar bufora - \2 sampli.\n
+sound_disabling			Wy≥πczanie düwiÍku...\n
+sound_disabling_done		Gotowe!\n
+sound_error_filenotfound	Plik düwiÍkowy \1 nie znaleziony. Czy wywo≥a≥eú \g z w≥aúciwego katalogu?
+sound_error_unsupported		Plik düwiÍkowy \1 jest w nieobs≥ugiwanym formacie. Przykro mi!
+sound_error_unknown			Plik \1 nie mÛg≥ byÊ za≥adowany: \2
+
+#********************************************
+#********************************************
+#
+#         Configuration messages
+#
+#********************************************
+#********************************************
+
+config_include_not_found    Plik konfiguracji "\1", ktÛry mia≥ byÊ do≥πczony, nie zosta≥ odnaleziony.\n
+config_rinclude_not_found   èrÛd≥o konfiguracji "\1" ktÛre mia≥o byÊ do≥πczone, nie zosta≥o odnalezione.\n
+config_command_unknown		Nieznana komenda \1.\n
+config_command_other		Czy chodzi≥o Ci o:\n
+config_command_more		    Jest wiÍcej komend zawierajπcych szukane wyraøenie, ale nie sπ one wyúwietlone, by nie przepe≥niÊ wyúwietlacza.\n
+config_file_write_error		Nie uda≥o siÍ zapisaÊ pliku konfiguracji!\n
+config_value_changed		WartoúÊ \1 zmieni≥a siÍ na \2 na \3.\n
+config_error_read		B≥πd przy czytaniu wartoúci \1: nieprawid≥owy format.\n
+config_message_info		\1 ma wartoúÊ \2.\n
+config_sighup           Odnawianie konfiguracji (SIGHUP).\n
+
+nconfig_errror_protected	Tylko serwer moøe modyfikowaÊ tÍ wartoúÊ. \1.\n
+nconfig_error_unknown		Otrzymano konfiguracjÍ nieznanego ustawienia \1.\n\nPRAWDOPODOBNIE POWINIENEå ZAKTUALIZOWA∆ ARMAGETRON ADVANCED!!!\n
+nconfig_error_nonet         Otrzymano konfiguracjÍ ustawienia \1 ktÛre nie dotyczy sieci.\n\nPRAWDOPODOBNIE POWINIENEå ZAKTUALIZOWA∆ ARMAGETRON ADVANCED!!!\n
+nconfig_error_ignoreold		Ignorowanie starej konfiguracji ustawienia \1.\n
+nconfig_value_changed		WartoúÊ \1 zmieni≥a siÍ z \2 na \3 z polecenia serwera.\n
+
+config_accesslevel_0        W≥aúciciel
+config_accesslevel_1        Administrator
+config_accesslevel_2        Moderator
+config_accesslevel_7        Kapitan Druøyny
+config_accesslevel_8        Cz≥onek Druøyny
+config_accesslevel_12       Lokalny Uøytkownik
+config_accesslevel_15       Zdalny uøytkownik
+config_accesslevel_17       Unikany
+config_accesslevel_19       Zautentykowany
+config_accesslevel_20       Program
+
+access_level_help           Zmienia poziom dostÍpu do danej komendy, tak, by uøytkownicy o mniejszych uprawnieniach mogli jπ modyfikowaÊ.
+access_level_usage          uøycie: ACCESS_LEVEL <komenda> <wymagany poziom uprawnieÒ (liczba)>\n
+access_level_change         Wymagany poziom dostÍpu do komendy \1 wynosi teraz "\2".\n
+access_level_error          Wymagany poziom dostÍpu do komendy \1 to "\2", ale masz tylko "\3".\n
+
+casacl_help                   Do koÒca tego pliku konfiguracji ta dyrektywa podniesie wymagany poziom dostÍpu o wskazanπ wartoúÊ.
+casacl_usage                  uøycie: CASACL <wymagany poziom dostÍpu> <podniesiona wartoúÊ>\n
+
+abort_loading_name          £adowanie przerwane
+abort_loading_description   £adowanie pliku konfiguracji zosta≥o przerwane przez komendÍ \1.
+
+user_level_help             Zmienia poziom dostÍpu uøytkownika.
+user_level_usage            uøycie: USER_LEVEL <nazwa po autentykacji> <poziom dostÍpu uøytkownika (liczba)>\n
+user_level_change           Poziom dostÍpu uøytkownika \1 zosta≥ zmieniony i teraz jest to "\2".\n
+
+#*************************************
+#*************************************
+#
+#    Login messages
+#
+#*************************************
+#*************************************
+
+#login texts
+login_password_title		Has≥o
+login_password_help		Tutaj wpisz swoje has≥o. NaciúniÍcie Enter zaloguje CiÍ.
+
+login_cancel			Anuluj Logowanie
+login_cancel_help		Zatrzymanie procedury logowania.
+
+login_username			Nazwa Uøytkownika
+login_username_help		Tutaj wprowadü swojπ nazwÍ uøytkownika.
+
+login_storepw_text		Przechowuj has≥o:
+login_storepw_help		Okreúla, w jaki sposÛb majπ byÊ pamiÍtane has≥a.
+
+login_storepw_dont_text		Nie przechowuj
+login_storepw_dont_help		Zapomnij has≥a natychmiast po zalogowaniu.
+
+login_storepw_mem_text		W pamiÍci
+login_storepw_mem_help		Has≥a bÍdπ zapamiÍtane do koÒca tej sesji, tzn. do zamkniÍcia Armagetrona.
+
+login_storepw_disk_text		Na dysku
+login_storepw_disk_help		Dla leniwych: zapamiÍta has≥a na dysku twardym, abyú nie musia≥ ich wiÍcej wpisywaÊ. Pomimo, øe has≥a sπ zaszyfrowana, jest to niebyt bezbieczna opcja.
+
+password_help			Ustawienia Has≥a
+
+login_request_redundant		Juø zalogowano.\n
+login_request_failed		Logowanie nieudane. SprÛbuj ponownie!
+login_request_failed_dup	Dwa loginy na jedno konto nie sπ dozwolone.\n
+login_not_supported         Niestety, ten serwer nie dopuszcza autentykacji tego typu, co prosi≥eú.\n
+login_request               Logowanie jako \1
+login_request_local         Logowanie z Kontem Lokalnym
+login_request_namechange	Nazwa zosta≥a zmieniona. Wymagane zalogowanie.
+login_request_master		Serwer g≥Ûwny wymaga zalogowania.
+
+hud_fastest Najszybszy:
+hud_score Wynik:
+hud_score_player Ja:
+hud_score_top Najw.:
+hud_enemies_alive Przeciwnicy:
+hud_teammates_alive Przyjaciele:
+hud_ping Ping:
+hud_rubber Rubber
+
+
+# access level messages
+access_level_hide_of_help      Minimalny poziom dostÍpu potrzebny, aby mÛc ukryÊ w≥asne dane.
+access_level_hide_to_help      Minimalny poziom dostÍpu potrzebny, aby widzieÊ dane wszystkich uøytkownikÛw.
+access_level_team_help         Minimalny poziom dostÍpu potrzebny do uøycia komend /lock, /unlock, /invite i /uninvite.
+access_level_op_help           Minimalny poziom dostÍpu potrzebny do uøycia komend administratora, jak /op, /deop, /promote /demote.
+access_level_op_max_help       Maksymalny poziom dostÍpu do osiπgniÍcia za pomocπ komend /op i /promote.
+access_level_admin_help        Minimalny poziom dostÍpu potrzebny do uøycia komendy /admin.
+access_level_rtfm_help         Minimalny poziom dostÍpu potrzebny do uøycia komend /teach i /rtfm.
+access_level_chat_help         Minimalny poziom dostÍpu potrzebny do rozmawiania.
+access_level_ips_help          Minimalny poziom dostÍpu potrzebny, by widzieÊ IP innych graczy za pomocπ komendy /players.
+access_level_spy_team_help     Minimalny poziom dostÍpu potrzebny, by widzieÊ /team : wiadomoúci druøyn bÍdπc obserwatorem.
+access_level_spy_msg_help      Minimalny poziom dostÍpu potrzebny, by widzieÊ /msg : prywatne wiadomoúci.
+access_level_play_help          Minimalny poziom dostÍpu potrzebny, aby mÛc graÊ.
+access_level_shuffle_up_help    Minimalny poziom dostÍpu potrzebny, aby uzyskaÊ dostÍp do komendy /shuffle.
+access_level_play_sliding_help Zmienny minimalny poziom potrzebny do gry; jeøeli jest wystarczajπco duøo graczy o poziome wyøszym niø ustawiono w ACCESS_LEVEL_PLAY, to ich poziom stanie siÍ minimalnym potrzebnym do gry; aczkolwiek nigdy nie bÍdzie on wyøszy niø ACCESS_LEVEL_PLAY_SLIDING.
+access_level_play_sliders_help Poziom dostÍpu potrzebny do gry podniesie siÍ tylko wtedy, gry tylu graczy o wyøszym poziomie bÍdzie online.
+access_level_play_changed      Poziom dostÍpu potrzebny aby graÊ, zmieni≥ siÍ z \1 na \2.\n
+
+access_level_vote_suspend_help    Minimalny poziom dostÍpu potrzebny aby wys≥aÊ ankietÍ o zawieszeniu.
+access_level_vote_kick_help   Minimalny poziom dostÍpu potrzebny aby wys≥aÊ ankietÍ o wykopaniu.
+access_level_vote_inclue_help    Minimalny poziom dostÍpu potrzebny aby wys≥aÊ ankietÍ o do≥πczeniu pliku konfiguracji.
+access_level_vote_include_execute_help    Minimalny poziom dostÍpu do do≥πczenia pliku konfiguracji.
+access_level_vote_command_help    Minimalny poziom dostÍpu potrzebny aby wys≥aÊ ankietÍ o wykonaniu komendy.
+access_level_vote_command_execute_help   Minimalny poziom dostÍpu do wykonania komendy po g≥osowaniu.
+
+access_level_chat_timeout_help   Czas w sekundach pomiÍdzy publicznymi komunikatami, øe ktoú chcia≥by porozmawiaÊ, ale nie pozwala mu na to jego poziom dostÍpu. Jeøeli ustawisz tÍ wartoúÊ na 0, takie publiczne komunikaty nie bÍdπ wyúwietlane.
+access_level_chat_request   \10xRESETT chcia≥by coú powiedzieÊ, ale nie ma wystarczajπcego poziomu dostÍpu. Czy znalaz≥by siÍ ktoú na tyle mi≥y by powiedzieÊ "/op \2" lub "/promote \2"?\n
+access_level_chat_denied    0xff7f7fRozmowa zabroniona,0xffffff nieprawid≥owy poziom dostÍpu.\n
+access_level_op_denied      0xff7f7f\1 zabronione,0xffffff niew≥aúciwy poziom dostÍpu.\n
+access_level_op_overpowered 0xff7f7f\1 zabronione,0xffffff musisz mieÊ wyøsze prawa dostÍpu niø Twoja ofiara.\n
+access_level_op_self        0xff7f7f\1 zabronione,0xffffff nie moøesz sam siÍ promowaÊ :).\n
+access_level_op_denied_max  0xff7f7f\1 zabronione,0xffffff Twoja ofiara ma juø maksymalne prawa dostÍpu.\n
+access_level_op_denied_ai   0xff7f7f\1 zabronione,0xffffff Twoja ofiara jest graczem AI.\n
+
+access_level_demote         \1 zosta≥ zdegradowany na pozycjÍ "\2" na rozkaz \3.\n
+access_level_promote        \1 zosta≥ promowany na pozycjÍ "\2" z rozkazu \3.\n
+
+access_level_admin_denied   0xff7f7fKomenda /admin jest niedozwolona,0xffffff niew≥aúciwy poziom dostÍpu.\n
+access_level_shuffle_up_denied Wymagany poziom dostÍpu, aby siÍ przetasowaÊ to "\1", ale ty masz tylko "\2".\n
+access_level_rtfm_denied    Wymagany poziom dostÍpu, aby uczyÊ innych to "\1", ale ty masz tylko "\2".\n
+rtfm_denied                 Musisz byÊ zalogowany, by uczyÊ innych.\n
+
+
+chat_command_unknown        Nieznane polecenie "\1".\n
+
+authority_blacklist_help    Na czarnej liúcie znajdujπ siÍ osobowoúci, ktÛrym ten serwer odmÛwi zalogowania. Wartoúci oddzielane przecinkami.
+authority_whitelist_help    Jeúli nie jest puste, to ten serwer pozwoli siÍ zalogowaÊ tylko podanym osobowoúciom, oddzielanym przecinkami.
+trust_lan_help              Jeøeli ustawione na 1, serwer uzna øe Twoja sieÊ LAN jest bezpieczna i nikt nie bÍdzie prÛbowa≥ pharming'u.
+hash_method_blacklist_help  Lista metod hash, ktÛre majπ zostaÊ wy≥πczone.
+
+login_message_requested     Uøytkownik \1 prosi o autentykacjÍ jako "\2@\3".\n
+login_message_delayed       TwÛj proces logowania zosta≥ od≥oøony na pÛüniej, poniewaø konfiguracja serwera nie pozwala na logowanie w tle. Serdecznie przeprzszamy.\n
+login_message_responded     Zapytanie o has≥o zosta≥o wys≥ane do uøytkownika \1, nazwa "\2", metoda \3, wiadomoúÊ "\4".\n
+login_message               \3\1 zosta≥ zalogowany jako \2.\n
+login_message_byorder       Rozkaz \1: 
+login_message_special       \4\1 zosta≥ zalogowany jako \2 na poziomie dostÍpu "\3".\n
+logout_message              \1 wylogowa≥ siÍ jako \2.\n
+logout_message_deop         \1 wylogowa≥ siÍ jako \2 z rozkazu \3.\n
+login_failed_message        0xff7f7fLogowanie nieudane,0xffffff powÛd: \1\n
+
+# various reasons for logins to fail
+login_error_aborted         Logowanie anulowane.
+login_error_invalidurl_illegal_hostname   URL Autentykacji \1 jest nieprawid≥owy; zawiera niepoprawne znaki w nazwie host'a (dozwolone sπ tylko znaki ASCII, cyfry i kropki).
+login_error_invalidurl_illegal_path   URL Autentykacji \1 jest nieprawid≥owy; zawiera niepoprawne znaki w úcieøce (dozwolone sπ tylko znaki ASCII, cyfry, slashe i kropki).
+login_error_invalidurl_illegal_port   URL Autentykacji \1 jest nieprawid≥owy, zawiera niepoprawne znaki w miejscu portu (dozwolone sπ tylko cyfry).
+login_error_invalidurl_defaultport   URL Autentykacji \1 jest nieprawid≥owy. Po prostu zostaw domyúlny port :).
+login_error_invalidurl_slash         URL Autentykacji \1 jest nieprawid≥owy, podwÛjny slash, lub slash na koÒcu adresu.
+login_error_invalidurl_rawip         URL Autentykacji \1 jest nieprawid≥owy, zawiera surowy adres IP.
+login_error_invalidurl_notfound      URL Autentykacji \1 jest nieprawid≥owy, w ogÛle nie zosta≥ znaleziony.
+login_error_noremote                 Autentykacja poprzez Globalne ID nie jest dozwolona na tym serwerze.
+login_error_blacklist                OsobowoúÊ \1 jest na czarnej liúcie na tym serwerze.
+login_error_whitelist                OsobowoúÊ \1 nie jest na bia≥ej liúcie na tym serwerze.
+login_error_nomethod        Nie znaleziono odpowiedniej metody autentykacji. Ty obs≥ugujesz \1, ten serwer obs≥uguje \2, a serwer autentykacji obs≥uguje \3.
+login_error_nomethodlist    URL Autentykacji \1 nie zwrÛci≥ listy obs≥ugiwanych metod autentykacji, otrzymano kod b≥Ídu \2, zawartoúÊ "\3".
+login_error_nomethodproperties    URL Autentykacji \1 nie zwrÛci≥ listy w≥aúciwoúci metod autentykacji, otrzymano kod b≥Ídu \2, zawartoúÊ "\3".
+login_error_nouser          Uøytkownik nie istnieje, serwer autentykacji zwrÛci≥ "\1".
+login_error_password        Nieprawid≥owe has≥o podane, serwer autentykacji zwrÛci≥ "\1".
+login_error_unknown         Otrzymano nieznany kod b≥Ídu \1, zawartoúÊ "\2".
+login_error_unexpected_answer Oczekiwano odpowiedzi serwera "\1", ale otrzymano \2.
+
+login_error_local_nouser    Lokalny uøytkownik \1 nie zosta≥ znaleziony.
+login_error_local_password  Has≥o podane dla uøytkownika \1 jest nieprawid≥owe.
+
+chatcommand_requires_player  \1 wymaga nazwy gracza jako dodatkowego argumentu.\n
+
+local_user_help   Dodaje lokalnego uøytkownika o podanej nazwie/haúle.
+local_user_syntax Uøycie: LOCAL_USER <nazwa_uøytkownika> <has≥o>\n
+
+local_team_help          Dodaje lokalne konto druøyny (porÛwnywane sπ taki druøyn).
+local_team_syntax        Uøycie: LOCAL_TEAM <tag druøyny> <has≥o>\n
+
+md5_password_teamleader_help   Dodaje lokalne konto Kapitana Druøyny, bazowane na systemie md5-hash. Tacy kapitanowie mogπ wybieraÊ graczy do gry.
+md5_password_teamleader_syntax Uøycie: MD5_PASSWORD_TEAMLEADER <nazwa uøytkownika> <has≥o>\n
+
+md5_user_remove_help   Usuwa has≥o dla uøytkownika/druøyny.
+md5_password_remove_syntax Uøycie: USER_REMOVE <nazwa uøytkownika/tag druøyny>\n
+md5_password_removed        Nazwa uøytkownika/tag druøyny \1 usuniÍty.\n
+md5_password_remove_notfound Nazwa uøytkownika/tag druøyny \1 nie znaleziony.\n
+
+reserve_screen_name_help      Rezerwuje nazwy graczy dla zalogowanych uøytkownikÛw.
+reserve_screen_namne_usage   Uøycie: RESERVE_SCREEN_NAME <nazwa gracza (w cudzys≥owie, jeøeli zawiera spacje)> <uøytkownik>
+reserve_screen_name_change   Nazwa gracza "\1" jest zarezerwowana dla uøytkownika \2.\n
+
+user_alias_help               Nadaje przezwiska uøytkownikom, uøytkownik X moøe byÊ znany pod nazwπ Y.
+alias_usage                   Uøycie: USER_ALIAS <uøytkownik> <alias>
+alias_change                  Uøytkownik \1 bÍdzie teraz zwany \2.\n
+
+ban_user_help                 Pozwala banowaÊ uøytkownikÛw na podstawie ich Globalnego ID.
+ban_user_message              Uøytkownik \1 zosta≥ zbanowany.\n
+unban_user_help               Cofa BAN_USER.
+unban_user_message            Uøytkownik \1 zosta≥ odbanowany.\n
+ban_user_list_help            Wyúwietla listÍ zbanowanych uøytkownikÛw.
+
+md5_prefix_help               Dodatkowy prefiks dla lokalnych uøytkownikÛw bazowany na md5, aby utrudniÊ ich has≥a.
+md5_suffix_help               Dodatkowy postfiks dla lokalnych uøytkownikÛw bazowany na md5, aby utrudniÊ ich has≥a.
+
+global_id_help                Jeøeli ustawione na 1, Autentykacja i Globalne ID bÍdπ aktywne na tym serwerze.
+
+# items that should not be translated
+include english_base_notranslate.txt
+
+# Room for lost settings in translation files:
+
+tab_completion_toomanyresults Znaleziono zbyt wiele rezultatÛw. Podaj nastÍpne znaki.\n
+tab_completion_results Moøliwoúci:\n

@@ -111,6 +111,7 @@ If --enable-armathentication was activated:
 - new chat commands /op and /deop to change other players' access rights
 
   Featurelets:
+- Added Polish language file
 - clientside play time tracking and server controlled minimal required experience
   to be allowed to play.
 - color codes in chat increase the spam level logarithmically.
