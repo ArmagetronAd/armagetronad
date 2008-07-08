@@ -363,6 +363,7 @@ FTFont &rFontContainer::New(int size) {
         font = Load(tDirectories::Data().GetReadPath("textures/Armagetronad.ttf"));
 
     }
+    font->CharMap(ft_encoding_latin_1);
     font->FaceSize(size);
     (*this)[size] = font;
     return *font;
