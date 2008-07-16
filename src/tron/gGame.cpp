@@ -197,7 +197,7 @@ static eWavData extro("moviesounds/extro.wav");
 #define AUTO_AI_WIN     3
 #define AUTO_AI_LOSE    1
 
-gGameSettings::gGameSettings(int a_scoreWin,
+gGameSettings::gGameSettings(int a_scoreWin, int a_scoreDiffWin,
                              int a_limitTime, int a_limitRounds, int a_limitScore,
                              int a_numAIs,    int a_minPlayers,  int a_AI_IQ,
                              bool a_autoNum, bool a_autoIQ,
@@ -206,7 +206,7 @@ gGameSettings::gGameSettings(int a_scoreWin,
                              int a_minTeams,
                              int a_winZoneMinRoundTime, int a_winZoneMinLastDeath
                             )
-        :scoreWin(a_scoreWin),
+        :scoreWin(a_scoreWin), scoreDiffWin(a_scoreDiffWin),
         limitTime(a_limitTime), limitRounds(a_limitRounds), limitScore(a_limitScore),
         numAIs(a_numAIs),       minPlayers(a_minPlayers),   AI_IQ(a_AI_IQ),
         autoNum(a_autoNum),     autoIQ(a_autoIQ),
@@ -524,7 +524,7 @@ void gGameSettings::Menu()
     GameSettings.Enter();
 }
 
-gGameSettings singlePlayer(10,
+gGameSettings singlePlayer(10, 1,
                            30, 10, 100000,
                            1,   0, 30,
                            true, true,
@@ -532,7 +532,7 @@ gGameSettings singlePlayer(10,
                            gDUEL, gFINISH_IMMEDIATELY, 1,
                            100000, 1000000);
 
-gGameSettings multiPlayer(10,
+gGameSettings multiPlayer(10, 1,
                           30, 10, 100,
                           0,   4, 100,
                           false, false,
@@ -542,9 +542,8 @@ gGameSettings multiPlayer(10,
 
 gGameSettings* sg_currentSettings = &singlePlayer;
 
-
-
 static tSettingItem<int> mp_sw("SCORE_WIN"   ,multiPlayer.scoreWin);
+static tSettingItem<int> mp_sd("SCORE_DIFF_WIN"   ,multiPlayer.scoreDiffWin);
 static tSettingItem<int> mp_lt("LIMIT_TIME"  ,multiPlayer.limitTime);
 static tSettingItem<int> mp_lr("LIMIT_ROUNDS",multiPlayer.limitRounds);
 static tSettingItem<int> mp_ls("LIMIT_SCORE" ,multiPlayer.limitScore);
@@ -578,6 +577,7 @@ static tConfItem<REAL>   mp_wl		("WALLS_LENGTH"		    ,		multiPlayer.wallsLength 
 static tConfItem<REAL>   mp_er		("EXPLOSION_RADIUS"		,		multiPlayer.explosionRadius );
 
 static tSettingItem<int> sp_sw("SP_SCORE_WIN"   ,singlePlayer.scoreWin);
+static tSettingItem<int> sp_sd("SP_SCORE_DIFF_WIN"   ,singlePlayer.scoreDiffWin);
 static tSettingItem<int> sp_lt("SP_LIMIT_TIME"  ,singlePlayer.limitTime);
 static tSettingItem<int> sp_lr("SP_LIMIT_ROUNDS",singlePlayer.limitRounds);
 static tSettingItem<int> sp_ls("SP_LIMIT_SCORE" ,singlePlayer.limitScore);
@@ -3923,7 +3923,9 @@ void gGame::Analysis(REAL time){
                     || ( eTeam::teams(0)->Score() > eTeam::teams(1)->Score() && sg_EnemyExists(0))){
 
                 // only then we can have a true winner:
-                if (eTeam::teams(0)->Score() >= sg_currentSettings->limitScore ||		// the score limit must be hit
+                if (
+                        ( eTeam::teams(0)->Score() >= sg_currentSettings->limitScore
+						 && eTeam::teams(0)->Score() >= eTeam::teams(1)->Score() + sg_currentSettings->scoreDiffWin ) ||		// the score limit must be hit
                         rounds + winnerExtraRound >= sg_currentSettings->limitRounds ||     // or the round limit
                         tSysTimeFloat()>=startTime+sg_currentSettings->limitTime*60 ||      // or the time limit
                         (active <= 1 && eTeam::teams.Len() > 1)								// or all but one players must have disconnected.

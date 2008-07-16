@@ -132,6 +132,7 @@ class gGameSettings
 {
 public:
     int scoreWin;    // score you get when you win a round
+    int scoreDiffWin;    // score must be over scorewin by this amount
 
     int limitTime;   // match time limit
     int limitRounds; // match round limit
@@ -166,7 +167,7 @@ public:
     REAL		wallsLength;		// the maximum total length of the walls
     REAL		explosionRadius;	// the radius of the holes blewn in by an explosion
 
-    gGameSettings(int a_scoreWin,
+    gGameSettings(int a_scoreWin, int a_scoreDiffWin,
                   int a_limitTime, int a_limitRounds, int a_limitScore,
                   int a_numAIs,    int a_minPlayers,  int a_AI_IQ,
                   bool a_autoNum, bool a_autoIQ,
