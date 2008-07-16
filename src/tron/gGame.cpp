@@ -658,7 +658,7 @@ protected:
 
         // send the poor guy who just dropped a message
         ePlayerNetID *p=online(i);
-        if (p){
+        if (p && ladder_highscore_output){
             tColoredString name;
             name << *p << tColoredString::ColorString(1,.5,.5);
 
