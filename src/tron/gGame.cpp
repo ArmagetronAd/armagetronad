@@ -1854,7 +1854,7 @@ static void own_game( nNetState enter_state ){
     sg_EnterGame( enter_state );
 
     // write scores one last time
-    ePlayerNetID::LogScoreDifferences();
+    //ePlayerNetID::LogScoreDifferences();
     ePlayerNetID::UpdateSuspensions();
     sg_gameEndWriter.write();
 
@@ -3128,7 +3128,7 @@ void gGame::StateUpdate(){
             rViewport::Update(MAX_PLAYERS);
 
             // log scores before players get renamed
-            //ePlayerNetID::LogScoreDifferences();
+            ePlayerNetID::LogScoreDifferences();
             ePlayerNetID::UpdateSuspensions();
             sg_newRoundWriter << sg_GetCurrentTime("%Y-%m-%d %H:%M:%S");
             sg_newRoundWriter.write();
@@ -3925,7 +3925,7 @@ void gGame::Analysis(REAL time){
                 // only then we can have a true winner:
                 if (
                         ( eTeam::teams(0)->Score() >= sg_currentSettings->limitScore
-						 && eTeam::teams(0)->Score() >= eTeam::teams(1)->Score() + sg_currentSettings->scoreDiffWin ) ||		// the score limit must be hit
+			&& eTeam::teams.Len()>1 && eTeam::teams(0)->Score() >= eTeam::teams(1)->Score() + sg_currentSettings->scoreDiffWin ) ||		// the score limit must be hit
                         rounds + winnerExtraRound >= sg_currentSettings->limitRounds ||     // or the round limit
                         tSysTimeFloat()>=startTime+sg_currentSettings->limitTime*60 ||      // or the time limit
                         (active <= 1 && eTeam::teams.Len() > 1)								// or all but one players must have disconnected.
