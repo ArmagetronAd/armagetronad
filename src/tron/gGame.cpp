@@ -1854,7 +1854,7 @@ static void own_game( nNetState enter_state ){
     sg_EnterGame( enter_state );
 
     // write scores one last time
-    //ePlayerNetID::LogScoreDifferences();
+    ePlayerNetID::LogScoreDifferences();
     ePlayerNetID::UpdateSuspensions();
     sg_gameEndWriter.write();
 
@@ -3348,7 +3348,7 @@ void gGame::StateUpdate(){
                 Analysis(0);
 
                 // log scores before players get renamed
-                ePlayerNetID::LogScoreDifferences();
+                //ePlayerNetID::LogScoreDifferences();
 
                 //ePlayerNetID::RankingLadderLog();
 
