@@ -2615,6 +2615,7 @@ config_value_changed		\1 changed from \2 to \3.\n
 config_error_read		Input error reading \1: invalid format.\n
 config_message_info		\1 is currently set to \2.\n
 config_sighup           SIGHUP received, reloading configuration.\n
+config_abort               Configuration file/stream loading aborted.\n
 
 nconfig_errror_protected	No way. Only the server can change \1.\n
 nconfig_error_unknown		Got conf message for unknown setting \1.\n\nYOU PROBABLY SHOULD UPGRADE ARMAGETRON ADVANCED!!!\n

@@ -46,6 +46,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rRender.h"
 #include "rSysdep.h"
 #include "nAuthentication.h"
+#include "nKrawallPrivate.cpp"
 #include "tDirectories.h"
 #include "eVoter.h"
 #include "tReferenceHolder.h"
@@ -2427,7 +2428,14 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
 
     // install filter
     eAdminConsoleFilter consoleFilter( p->Owner() );
-    tConfItemBase::LoadLine(stream);
+    try
+    {
+        tConfItemBase::LoadLine(stream);
+    }
+    catch (tAbortLoading)
+    {
+        con << tOutput("$config_abort");
+    }
 }
 
 static void handle_chat_admin_commands( ePlayerNetID * p, tString const & command, tString const & say, std::istream & s )
@@ -3074,6 +3082,7 @@ static void se_ChatPlayers( ePlayerNetID * p, std::istream &s )
     se_ListPlayers( p, s );
 }
 
+
 // team shuffling: reorders team formation
 static void se_ChatShuffle( ePlayerNetID * p, std::istream & s )
 {
@@ -3350,6 +3359,7 @@ static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, e
     }
 }
 #endif
+
 
 void handle_chat( nMessage &m )
 {
@@ -4270,6 +4280,7 @@ bool ePlayerNetID::AcceptClientSync() const{
 template< class P > class eUserConfig: public tConfItemBase
 {
 public:
+    typedef typename std::map< tString, P > Properties;
     P Get(tString const & name ) const
     {
         typename Properties::const_iterator iter = properties.find( name );
@@ -4280,9 +4291,11 @@ public:
 
         return GetDefault();
     }
+    Properties GetMap () const
+    {
+        return properties;
+    }
 protected:
-    typedef std::map< tString, P > Properties;
-
    eUserConfig( char const * name )
     : tConfItemBase( name )
     {
@@ -4362,6 +4375,95 @@ public:
 };
 
 static eUserLevel se_userLevel;
+#ifdef KRAWALL_SERVER
+
+static tAccessLevel se_adminListMinAccessLevel = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_adminListMinAccessLevelConf( "ADMIN_LIST_MIN_ACCESS_LEVEL", se_adminListMinAccessLevel );
+static tAccessLevelSetter se_adminListMinAccessLevelConfLevel( se_adminListMinAccessLevelConf, tAccessLevel_Owner );
+
+void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s )
+{
+    // First, browse trough all users in se_userLevel and sort them by access level in adminLevelsMap, then output it
+    typedef std::set< tString > aSetOfAdmins;
+    typedef std::map< tAccessLevel, aSetOfAdmins > AdminLevelsMap;
+
+    AdminLevelsMap adminLevelsMap;
+    tColoredString userinfo;
+    tString user;
+    tAccessLevel accessLevel;
+    AdminLevelsMap::iterator usersAccessLevelInSet;
+    
+    
+    eUserLevel::Properties gidMap = se_userLevel.GetMap();
+    
+
+    for ( eUserLevel::Properties::iterator iter = gidMap.begin(); iter != gidMap.end(); ++iter )
+    {
+        
+        user = (*iter).first;
+        accessLevel = (*iter).second;
+        if ( accessLevel <= se_adminListMinAccessLevel )
+        {
+            // Prepare a string with the info about that user
+            userinfo << "  " << user;
+            userinfo << "\n";
+
+            usersAccessLevelInSet = adminLevelsMap.find( accessLevel );
+
+            if ( usersAccessLevelInSet == adminLevelsMap.end() )
+            {
+                
+                adminLevelsMap[ accessLevel ] = aSetOfAdmins();
+
+                AdminLevelsMap::iterator usersAccessLevelInSet = adminLevelsMap.find( accessLevel );
+
+            }
+
+            aSetOfAdmins theRightSet = (*usersAccessLevelInSet).second;
+        con << "Harr!\n";
+
+            theRightSet.insert( --(theRightSet.end()), userinfo );
+
+            sn_ConsoleOut( userinfo, receiver->Owner() );
+        }
+
+    }
+
+
+
+
+
+    // Now we have'em sorted by access level, it's show-time!
+    // for each access level out there
+    AdminLevelsMap::iterator it;
+        con << "Hi!\n";
+
+    for ( it = adminLevelsMap.begin(); it != adminLevelsMap.end(); ++it )
+    {
+        con << "Hi!\n";
+        // First, print the access level's name
+        tAccessLevel accessLevel = (*it).first;
+        tColoredString tos;
+        tos << tCurrentAccessLevel::GetName( accessLevel ) << ":\n";
+        sn_ConsoleOut( tos, receiver->Owner() );
+
+        // Then print the admin's names
+        for ( aSetOfAdmins::iterator userIt = (*it).second.begin(); userIt != (*it).second.end(); ++userIt )
+        {
+            sn_ConsoleOut( (*userIt), receiver->Owner() );
+        }
+    }
+}
+
+static void se_ListAdmins_conf( std::istream &s )
+{
+    se_ListAdmins( 0, s );
+}
+
+static tConfItemFunc se_ListAdminsConf("ADMINS",&se_ListAdmins_conf);
+static tAccessLevelSetter se_ListAdminsConfLevel( se_ListAdminsConf, tAccessLevel_Owner );
+
+#endif
 
 // reserves a nickname
 class eReserveNick: public eUserConfig< tString >
