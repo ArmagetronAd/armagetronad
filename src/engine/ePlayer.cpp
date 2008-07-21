@@ -4460,8 +4460,8 @@ static void se_ListAdmins_conf( std::istream &s )
     se_ListAdmins( 0, s );
 }
 
-static tConfItemFunc se_ListAdminsConf("ADMINS",&se_ListAdmins_conf);
-static tAccessLevelSetter se_ListAdminsConfLevel( se_ListAdminsConf, tAccessLevel_Owner );
+//static tConfItemFunc se_ListAdminsConf("ADMINS",&se_ListAdmins_conf);
+//static tAccessLevelSetter se_ListAdminsConfLevel( se_ListAdminsConf, tAccessLevel_Owner );
 
 #endif
 
