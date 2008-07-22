@@ -7362,6 +7362,9 @@ public:
         else if ( logName != oldLogName_ || screenName != oldScreenName_ )
         {
             se_playerRenamedWriter << oldLogName_ << logName << nMachine::GetMachine(player_.Owner()).GetIP() << screenName;
+#ifdef KRAWALL_SERVER
+            se_playerRenamedWriter << (player_.IsAuthenticated()?1:0);
+#endif
             se_playerRenamedWriter.write();
 
             if ( oldScreenName_ != screenName )
