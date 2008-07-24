@@ -58,6 +58,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nNetwork.h"
 #include <time.h>
 
+// call on commands that only work on the server; quit if it returns true
+bool se_NeedsServer(char const * command, std::istream & s, bool strict )
+{
+    if ( sn_GetNetState() != nSERVER && ( strict || sn_GetNetState() != nSTANDALONE ) )
+    {
+        tString rest;
+        rest.ReadLine( s );
+        con << tOutput("$only_works_on_server", command, rest );
+        return true;
+    }
+
+    return false;
+}
 
 tColoredString & operator << (tColoredString &s,const ePlayer &p){
     return s << tColoredString::ColorString(p.rgb[0]/15.0,
@@ -4455,13 +4468,15 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s )
     }
 }
 
+/*
 static void se_ListAdmins_conf( std::istream &s )
 {
     se_ListAdmins( 0, s );
 }
 
-//static tConfItemFunc se_ListAdminsConf("ADMINS",&se_ListAdmins_conf);
-//static tAccessLevelSetter se_ListAdminsConfLevel( se_ListAdminsConf, tAccessLevel_Owner );
+static tConfItemFunc se_ListAdminsConf("ADMINS",&se_ListAdmins_conf);
+static tAccessLevelSetter se_ListAdminsConfLevel( se_ListAdminsConf, tAccessLevel_Owner );
+*/
 
 #endif
 

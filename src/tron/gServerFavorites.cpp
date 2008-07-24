@@ -248,7 +248,7 @@ static gServerFavoritesHolder * sg_holder = &sg_favoriteHolder;
 // current minimal port accessible in the menu
 static int sg_lowPort = gServerBrowser::lowPort;
 // current language id prefix
-static char * sg_languageIDPrefix = "$bookmarks_";
+static char const * sg_languageIDPrefix = "$bookmarks_";
 // yeah, this could all be more elegant.
 
 // generates a language string item fitting the current situation
