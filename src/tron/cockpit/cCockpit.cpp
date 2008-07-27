@@ -410,7 +410,7 @@ tValue::BasePtr cCockpit::cb_CurrentPosX(void) {
 
 tValue::BasePtr cCockpit::cb_CurrentPosY(void) {
     if(m_Type == VIEWPORT_TOP) return tValue::BasePtr(new tValue::Base());
-    return tValue::BasePtr(new tValue::Float(m_FocusCycle->Position().x));
+    return tValue::BasePtr(new tValue::Float(m_FocusCycle->Position().y));
 }
 
 cCockpit* cCockpit::_instance = 0;
