@@ -4401,17 +4401,17 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s )
     typedef std::map< tAccessLevel, aSetOfAdmins > AdminLevelsMap;
 
     AdminLevelsMap adminLevelsMap;
-    tColoredString userinfo;
     tString user;
     tAccessLevel accessLevel;
     AdminLevelsMap::iterator usersAccessLevelInSet;
     
     
     eUserLevel::Properties gidMap = se_userLevel.GetMap();
-    
+   
 
     for ( eUserLevel::Properties::iterator iter = gidMap.begin(); iter != gidMap.end(); ++iter )
     {
+        tColoredString userinfo;
         
         user = (*iter).first;
         accessLevel = (*iter).second;
@@ -4419,8 +4419,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s )
         {
             // Prepare a string with the info about that user
             userinfo << "  " << user;
-            userinfo << "\n";
-
+        
             usersAccessLevelInSet = adminLevelsMap.find( accessLevel );
 
             if ( usersAccessLevelInSet == adminLevelsMap.end() )
@@ -4428,47 +4427,39 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s )
                 
                 adminLevelsMap[ accessLevel ] = aSetOfAdmins();
 
-                AdminLevelsMap::iterator usersAccessLevelInSet = adminLevelsMap.find( accessLevel );
-
+                usersAccessLevelInSet = adminLevelsMap.find( accessLevel );
             }
 
-            aSetOfAdmins theRightSet = (*usersAccessLevelInSet).second;
-        con << "Harr!\n";
+            aSetOfAdmins & theRightSet = (*usersAccessLevelInSet).second;
 
-            theRightSet.insert( --(theRightSet.end()), userinfo );
+            theRightSet.insert( userinfo );
 
-            sn_ConsoleOut( userinfo, receiver->Owner() );
+            // sn_ConsoleOut( userinfo, receiver->Owner() );
         }
-
     }
-
-
-
-
 
     // Now we have'em sorted by access level, it's show-time!
     // for each access level out there
     AdminLevelsMap::iterator it;
-        con << "Hi!\n";
 
     for ( it = adminLevelsMap.begin(); it != adminLevelsMap.end(); ++it )
     {
-        con << "Hi!\n";
+        std::stringstream output;
+
         // First, print the access level's name
         tAccessLevel accessLevel = (*it).first;
-        tColoredString tos;
-        tos << tCurrentAccessLevel::GetName( accessLevel ) << ":\n";
-        sn_ConsoleOut( tos, receiver->Owner() );
+        output << tCurrentAccessLevel::GetName( accessLevel ) << ": ";
 
         // Then print the admin's names
         for ( aSetOfAdmins::iterator userIt = (*it).second.begin(); userIt != (*it).second.end(); ++userIt )
         {
-            sn_ConsoleOut( (*userIt), receiver->Owner() );
+            output << (*userIt);
         }
+        output << "\n";
+        sn_ConsoleOut( output.str().c_str(), receiver->Owner() );
     }
 }
 
-/*
 static void se_ListAdmins_conf( std::istream &s )
 {
     se_ListAdmins( 0, s );
@@ -4476,7 +4467,6 @@ static void se_ListAdmins_conf( std::istream &s )
 
 static tConfItemFunc se_ListAdminsConf("ADMINS",&se_ListAdmins_conf);
 static tAccessLevelSetter se_ListAdminsConfLevel( se_ListAdminsConf, tAccessLevel_Owner );
-*/
 
 #endif
 
