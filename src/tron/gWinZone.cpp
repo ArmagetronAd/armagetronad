@@ -2437,11 +2437,21 @@ void gBaseZoneHack::OnConquest( void )
 		int score = totalScore / enemies_.size();
 		for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
 		{
-			sg_basezoneConquererTeamWriter << ePlayerNetID::FilterName((*iter)->Name()) << score;
-			sg_basezoneConquererTeamWriter.write();
+			//sg_basezoneConquererTeamWriter << ePlayerNetID::FilterName((*iter)->Name()) << score;
+			//sg_basezoneConquererTeamWriter.write();
 			(*iter)->AddScore( score, win, tOutput() );
 		}
 	}
+	//write basezoneConquererTeam msg regardless of whether a score is given
+		if(  enemies_.size() > 0)
+		{
+			int score = totalScore / enemies_.size();
+			for ( TeamArray::iterator iter = enemies_.begin(); iter != enemies_.end(); ++iter )
+			{
+				sg_basezoneConquererTeamWriter << ePlayerNetID::FilterName((*iter)->Name()) << score;
+				sg_basezoneConquererTeamWriter.write();
+			}		
+		}
 	// trigger immediate win
 	if ( sg_onConquestWin && enemies_.size() > 0 )
 	{
