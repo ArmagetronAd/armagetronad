@@ -7085,7 +7085,7 @@ static ePlayerNetID * ReadPlayer( std::istream & s )
     // read name of player to be returned
     tString name;
     s >> name;
-
+	/* Removed by ed so players are not selected by id number, just names, So players with a number for a name do not confuse things
     int num = name.toInt();
     if ( num > 0 )
     {
@@ -7101,7 +7101,7 @@ static ePlayerNetID * ReadPlayer( std::istream & s )
             }
         }
     }
-
+	*/
     return ePlayerNetID::FindPlayerByName( name );
 }
 
