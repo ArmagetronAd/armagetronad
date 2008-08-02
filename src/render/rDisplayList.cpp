@@ -162,12 +162,15 @@ void rDisplayList::Clear( int inhibitGeneration )
 void rDisplayList::ClearAll()
 {
 #ifndef DEDICATED
+    Cancel();
     tASSERT(!IsRecording());
 
     rDisplayList *run = se_displayListAnchor;
     while (run)
     {
+        tASSERT( !run->filling_ );
         run->Clear();
+        tASSERT( !run->list_ );
         run = run->Next();
     }
 #endif
