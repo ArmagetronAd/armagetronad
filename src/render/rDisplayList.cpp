@@ -218,6 +218,15 @@ void rDisplayListFiller::Start()
 {
 #ifndef DEDICATED
     bool useList = sr_useDisplayLists != rDisplayList_Off && list_.inhibit_ == 0 && !sr_currentFiller;
+
+    // don't ever use display lists if they are blacklisted
+#ifndef DEBUG
+    if ( sr_blacklistDisplayLists )
+    {
+        useList = false;
+    }
+#endif
+
     if ( useList )
     {
 #ifdef LIST_STATS

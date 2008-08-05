@@ -70,6 +70,7 @@ static int default_texturemode = GL_LINEAR_MIPMAP_LINEAR;
 #endif
 
 rDisplayListUsage sr_useDisplayLists=rDisplayList_Off;
+bool              sr_blacklistDisplayLists=false;
 
 static int width[ArmageTron_Custom+2]  = {0, 320, 320, 400, 512, 640, 800, 1024	, 1280, 1280, 1280, 1600, 1680, 2048,800,320};
 static int height[ArmageTron_Custom+2] = {0, 200, 240, 300, 384, 480, 600,  768	,  800,  854, 1024, 1200, 1050, 1572,600,200};
@@ -854,6 +855,7 @@ void sr_LoadDefaultConfig(){
     // High detail defaults; no problem for your ordinary 3d-card.
     sr_alphaBlend=true;
     sr_useDisplayLists=rDisplayList_Off;
+    sr_blacklistDisplayLists=false;
     sr_textOut=true;
     sr_dither=true;
     sr_smoothShading=true;
@@ -909,6 +911,14 @@ void sr_LoadDefaultConfig(){
 #endif
     else if(strstr(gl_vendor,"Matrox")){
         sr_floorDetail = rFLOOR_TEXTURE;  // double textured floor does not work
+    }
+
+    // display list blacklist
+    else if(strstr(gl_version,"Mesa"))
+    {
+        // mesa DRI and software has problems
+        sr_useDisplayLists=rDisplayList_Off;
+        sr_blacklistDisplayLists=true;
     }
 }
 
