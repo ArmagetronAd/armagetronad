@@ -6876,6 +6876,7 @@ void ePlayerNetID::Release()
 }
 */
 
+
 // reads a network ID from the stream, either the number or my user name
 static unsigned short se_ReadUser( std::istream &s, ePlayerNetID * requester = 0 )
 {
@@ -7079,6 +7080,7 @@ static void se_BanConf(std::istream &s)
 
 static tConfItemFunc se_banConf("BAN",&se_BanConf);
 static tAccessLevelSetter se_banConfLevel( se_banConf, tAccessLevel_Moderator );
+
 
 static ePlayerNetID * ReadPlayer( std::istream & s )
 {
@@ -8207,4 +8209,36 @@ static void sg_AddScorePlayer(std::istream &s)
 }
 
 static tConfItemFunc sg_AddScorePlayer_conf("ADD_SCORE_PLAYER",&sg_AddScorePlayer);
+
+static void sg_SetPlayerTeam(std::istream &s)
+{
+        tString params;
+        params.ReadLine( s, true );
+
+        // parse the line to get the param : Teamname Points Message
+        int pos = 0; //
+        tString PlayerStr = tString("");
+        PlayerStr = params.ExtractNonBlankSubString(pos);
+        ePlayerNetID *pPlayer = 0;
+        int num_matches = -1;
+        pPlayer = ePlayerNetID::FindPlayerByName(PlayerStr, NULL);
+        if (!pPlayer) return;
+
+        tString TeamStr = tString("");
+        TeamStr = params.ExtractNonBlankSubString(pos);
+        eTeam *pTeam=NULL;
+        for (int i = eTeam::teams.Len() - 1; i>=0; --i) {
+            tString teamName = eTeam::teams(i)->Name();
+            if (TeamStr==ePlayerNetID::FilterName(teamName)) {
+                pTeam = eTeam::teams(i);
+                break;
+            }
+        }
+        if (!pTeam) return;
+        
+		// Force player to a team
+		pPlayer->SetTeamForce(pTeam);
+}
+
+static tConfItemFunc sg_SetPlayerTeam_conf("SET_PLAYER_TEAM",&sg_SetPlayerTeam);
 
