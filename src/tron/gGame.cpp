@@ -1188,7 +1188,7 @@ static char const * wishWinnerMessage = "";
 
 void sg_DeclareWinner( eTeam* team, char const * message )
 {
-    if ( team && !winner )
+    if ( team && !winner && !wishWinner )
     {
         wishWinner = team->TeamID() + 1;
         wishWinnerMessage = message;
