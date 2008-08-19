@@ -306,8 +306,14 @@ void rModel::Render(){
             {
                 for(int j=0;j<=2;j++)
                 {
-                    glTexCoord3fv(reinterpret_cast<REAL *>(&(texVert(modelTexFaces(i).A[j]))));
-                    glNormal3fv(reinterpret_cast<REAL *>(&(normals(modelFaces(i).A[j]))));
+                    if ( modelTexFaces.Len() > 0 )
+                    {
+                        glTexCoord3fv(reinterpret_cast<REAL *>(&(texVert(modelTexFaces(i).A[j]))));
+                    }
+                    if ( normals.Len() > 0 )
+                    {
+                        glNormal3fv(reinterpret_cast<REAL *>(&(normals(modelFaces(i).A[j]))));
+                    }
                     glVertex3fv(reinterpret_cast<REAL *>(&(vertices(modelFaces(i).A[j]))));
                 }
             }
