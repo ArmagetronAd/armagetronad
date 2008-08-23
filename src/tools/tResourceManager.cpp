@@ -34,7 +34,7 @@ static int myHTTPFetch(const char *URI, const char *filename, const char *savepa
 
     ctxt = xmlNanoHTTPOpen(URI, NULL);
     if (ctxt == NULL) {
-        con << "ERROR: ctxt is NULL\n";
+        con << tOutput( "$resource_fetcherror_noconnect", URI );
         return 1;
     }
 

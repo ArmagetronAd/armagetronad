@@ -2517,6 +2517,7 @@ network_master_host_lan_help	This will start a network game that is only visible
 
 resource_not_cached         Resource \1 not found in cache. Downloading it, please be patient...\n
 resource_downloading        Downloading \1 ...\n
+resource_fetcherror_noconnect ERROR: Impossible to reach host of URI \1. This may be caused by a DNS resolving issue, please report to http://forums.armagetronad.net/ if this happens with the main resource repository(http://resource.armagetronad.net/resource/).\n
 resource_fetcherror_404     ERROR: Return value 404 : File not found.\n
 resource_fetcherror         ERROR: Return value \1 != 200.\n
 resource_no_filename        ERROR: NULL or empty filename.\n
