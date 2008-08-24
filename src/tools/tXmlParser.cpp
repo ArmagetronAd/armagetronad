@@ -291,11 +291,6 @@ bool tXmlParser::LoadWithParsing(const char* filename, const char *uri) {
     }
 }
 
-bool tXmlResource::LoadFile(const char* filename, const char* uri) {
-    m_Filename = tResourceManager::locateResource(filename, uri);
-    return LoadXmlFile(m_Filename, uri);
-}
-
 bool tXmlParser::LoadFile(const char* filename, const char* uri) {
     return LoadXmlFile(filename, uri);
 }
@@ -452,57 +447,6 @@ bool tXmlParser::ValidateXml(FILE* docfd, const char* uri, const char* filepath)
     initGenericErrorDefaultFunc( NULL );
 #endif
     return validated;
-}
-
-bool tXmlResource::ValidateXml(FILE* docfd, const char* uri, const char* filepath) {
-    bool validated = tXmlParser::ValidateXml(docfd, uri, filepath);
-
-    /* check filepath */
-    if ( validated && filepath )
-    {
-        node root = GetRoot();
-
-        if (!root) {
-            con << "Empty document\n";
-            return false;
-        } else if (root.IsOfType("Resource")) {
-            m_Path = tResourcePath (
-                root.GetProp("author"),
-                root.GetProp("category"),
-                root.GetProp("name"),
-                root.GetProp("version"),
-                root.GetProp("type"),
-                tString("xml"),
-                tString("")
-            );
-            tString rightFilepath( m_Path.Path() );
-            tString pureFilepath( filepath );
-            int pos;
-            while((pos = pureFilepath.StrPos("//")) != -1) {
-                pureFilepath.RemoveSubStr(pos, 1);
-            }
-	    tResourcePath purepath(pureFilepath);
-            if ( purepath != m_Path )
-            {
-                con << "\nWARNING: incorrect filepath. The resource wants to be at \"" << rightFilepath << "\", but was loaded from \"" << filepath << "\".\n\n";
-            }
-        }
-        else {
-            con << "Root node is not of type 'Resource' but '" << root.GetName() << "'.\n";
-            return false;
-        }
-    }
-
-    return validated;
-}
-
-tXmlParser::node tXmlResource::GetFileContents(void) {
-    for(node cur = GetRoot().GetFirstChild(); cur; ++cur) {
-        if(!cur.IsOfType("comment") && !cur.IsOfType("text")) {
-            return cur;
-        }
-    }
-    return 0;
 }
 
 tXmlParser::node tXmlParser::GetRoot() {

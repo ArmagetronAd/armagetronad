@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //! This might get moved to src/ui, even though parts have to stay in
 //! the higher regions of the sources.
 
-#include "tXmlParser.h"
+#include "tResource.h"
 #include "tSafePTR.h"
 #include "ePlayer.h"
 #include <deque>

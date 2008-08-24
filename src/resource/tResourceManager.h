@@ -1,12 +1,21 @@
 #ifndef ArmageTron_RESOURCEMANAGER_H
 #define ArmageTron_RESOURCEMANAGER_H
 
+#include <boost/smart_ptr.hpp>
+
 #include "tString.h"
-#include "tResource.h"
+
+class tResource;
 
 typedef int (*tNewResourceFunc)(const char* path);
 
+//! Shortcut for casting to tResource*
+#define resource_cast(a) dynamic_cast<tResource *> (a)
+
 //! resource manager: fetches and caches resources from repositories or arbitrary URIs
+/** 
+ *   put detailed docs here
+ */
 class tResourceManager {
 public:
     //! When finished, this will be the preferred way to load a resource.
@@ -43,6 +52,23 @@ public:
     //! register a resource component loader
     // todo: finish this
     static void RegisterLoader();
+
+    //! Convenient typedef for a type that stores references to the resource
+    /// manager.
+    typedef boost::shared_ptr<tResourceManager> Reference;
+
+    //! tResourceManager is a singleton, and this is how you get the
+    /// global instance of it.
+    Reference GetResourceManager();
+
+    ~tResourceManager();
+private:
+    //! The only instance of tResourceManager allowed
+    static Reference __inst;
+
+    //! We make the constructor private so that nobody else can
+    /// instantiate this class
+    tResourceManager();
 };
 
 //! helper class to construct a resource path

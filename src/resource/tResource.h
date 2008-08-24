@@ -29,10 +29,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef ArmageTron_TRESOURCE_H
 #define ArmageTron_TRESOURCE_H
 
-class tResource {
-public:
+#include "tXmlParser.h"
 
-private:
+#include "tResourceManager.h"
+
+class tResource : public tXmlParser {
+public:
+    bool LoadFile(const char* filename, const char* uri="");
+    tResourcePath const &Path() const {return m_Path;} //!< get the resource path this file was loaded from
+protected:
+    bool ValidateXml(FILE* docfd, const char* uri, const char* filepath);
+    tResourcePath m_Path; //!< the resource identifier of this resource
+    node GetFileContents(void); //!< Returns the node the "real" file contents are within
 };
+
+//! \deprecated
+typedef tResource tXmlResource;
 
 #endif

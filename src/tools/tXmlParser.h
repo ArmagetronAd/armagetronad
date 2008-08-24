@@ -141,16 +141,6 @@ protected:
     virtual bool ValidateXml(FILE* docfd, const char* uri=NULL, const char* filepath=NULL);
 };
 
-class tXmlResource : public tXmlParser {
-public:
-    bool LoadFile(const char* filename, const char* uri="");
-	tResourcePath const &Path() const {return m_Path;} //!< get the resource path this file was loaded from
-protected:
-    bool ValidateXml(FILE* docfd, const char* uri, const char* filepath);
-    tResourcePath m_Path; //!< the resource identifier of this resource
-    node GetFileContents(void); //!< Returns the node the "real" file contents are within
-};
-
 #ifndef _MSC_VER
 //! This function will print an error message if the extraction failed
 //! @param prop The name of the attribute to be read
@@ -164,5 +154,5 @@ template<typename T> void tXmlParser::node::GetProp(CHAR const *prop, T &target)
 
 }
 using tXmlParserNamespace::tXmlParser;
-using tXmlParserNamespace::tXmlResource;
+//using tXmlParserNamespace::tXmlResource;
 #endif

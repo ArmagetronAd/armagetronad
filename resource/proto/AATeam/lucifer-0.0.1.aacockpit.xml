@@ -1,10 +1,41 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <!DOCTYPE Resource SYSTEM "cockpit.dtd">
 
-<Resource type="aacockpit" name="Playroom" version="0.0.1" author="Lucifer" category="sick">
+<Resource type="aacockpit" name="Playroom" version="0.0.2" author="Lucifer" category="sick">
     <Cockpit version="0.0.1">
-        <!-- speed meter -->
-        <BarGauge camera="*">
+        <WidgetTemplate id="VerticalBar">
+            <Size height="0.150" width="0.010" />
+            <Background>
+                <Gradient orientation="value">
+                <Color r="0." g="1." b="0." alpha=".05" at="0."/>
+                <Color r="0." g="1." b="0." alpha=".1" at=".3"/>
+                <Color r="1." g="1." b="1." alpha=".2" at=".4"/>
+                <Color r="1." g="1." b="1." alpha=".2" at="1."/>
+                </Gradient>
+            </Background>
+            <Foreground>
+                <Gradient orientation="value">
+                    <Color r="0." g="1." b="0." alpha=".4" at="0."/>
+                    <Color r="0." g="1." b="0." alpha=".4" at=".3"/>
+                    <Color r="1." g="1." b="0." alpha=".4" at=".6"/>
+                    <Color r="1." g="0." b="0." alpha=".4" at=".8"/>
+                    <Color r="1." g="0." b="0." alpha=".4" at="1."/>
+                </Gradient>
+            </Foreground>
+        </WidgetTemplate>
+        <WidgetTemplate id="Clock">
+            <Position x=".6" y="-.9" />
+            <Size height="0.075" width="0.075" />
+            <Foreground>
+                <Solid>
+                    <Color r="1." g="1." b="1." alpha="1." />
+                </Solid>
+            </Foreground>
+            <ShowCurrent value="false" />
+            <ShowMaximum value="false" />
+            <ShowMinimum value="false" />
+        </WidgetTemplate>
+        <BarGauge camera="^in">
             <DataSet>
                 <AtomicData field="source" source="player_speed" />
                 <AtomicData field="minimum" source="0" />
@@ -30,7 +61,7 @@
             </Foreground>
         </BarGauge>
         <!--- Acceleration meter -->
-        <BarGauge camera="*">
+        <BarGauge camera="^in">
             <DataSet>
                 <AtomicData field="source" source="player_acceleration" />
                 <AtomicData field="minimum" source="-50" />
@@ -51,7 +82,7 @@
             </Background>
         </BarGauge>
         <!-- Brakes -->
-        <BarGauge camera="*">
+        <BarGauge camera="^in">
             <DataSet>
                 <AtomicData field="source" source="player_brakes" />
                 <AtomicData field="minimum" source="0" />
@@ -79,7 +110,7 @@
         </BarGauge>
 
         <!-- Enemies alive -->
-        <Label camera="*">
+        <Label camera="^in">
             <DataSet id="enemies">
                 <AtomicData field="source" source="enemies_alive" />
             </DataSet>
@@ -201,7 +232,7 @@
             </Face>
         </Label> -->
         <!-- Clock -->
-        <Label camera="*" viewport="top">
+        <Label camera="^in">
             <DataSet id="hours">
                 <AtomicData source="current_hours12h" minwidth="2" fill="0" />
             </DataSet>
@@ -232,7 +263,7 @@
             </Face>
         </Label>
         <!-- FPS -->
-        <BarGauge camera="*" viewport="top">
+        <BarGauge camera="^in">
             <DataSet>
                 <AtomicData field="source" source="current_framerate" />
                 <AtomicData field="minimum" source="0" />
@@ -256,14 +287,273 @@
         </BarGauge>
 
         <!-- HUD Map (obviously) -->
-        <Map camera="*">
+        <Map camera="^in">
             <Position x="0" y="-0.759" />
             <Size height="0.24" width="0.24" />
             <Background>
+                <Image scale_x=".075" scale_y=".075" repeat="both">
+                    <Graphic author="wrtlprnft" version="1" name="floor" extension="png" uri="http://wrtlprnft.ath.cx/floor.png" />
+                </Image>
                 <Solid>
-                    <Color r="1." g="1." b="1." alpha=".2" />
+                    <Color r=".5" g="1." b=".5" alpha="1." />
                 </Solid>
             </Background>
+            <MapModes toggleKey="1">
+                <MapMode mode="cycle" rotation="camera" zoomFactor="4" clipMode="ellipse" />
+            </MapModes>
+            <MapModes toggleKey="2">
+                <MapMode mode="cycle" rotation="camera" zoomFactor="2" clipMode="ellipse" />
+            </MapModes>
+            <MapModes toggleKey="3">
+                <MapMode mode="full" rotation="spawn" />
+            </MapModes>
+            <MapModes toggleKey="4">
+                <MapMode mode="closestZone" rotation="fixed" />
+            </MapModes>
+        </Map>
+        <!-- Here follows the incam cockpit, which is different than the rest -->
+        <!-- Just a background for the cockpit as a whole -->
+        <Rectangle camera="in">
+            <Position x="0" y="0"/>
+            <Size height="1" width="1"/>
+            <Background>
+                <Image scale_x="1" scale_y="1">
+                    <Graphic category="sick" author="Lucifer" version="1" name="playroom" extension="png" />
+                </Image>
+            </Background>
+        </Rectangle>
+        <!-- speed meter -->
+        <VerticalBarGauge camera="in" usetemplate="VerticalBar">
+            <DataSet>
+                <AtomicData field="source" source="player_speed" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="80" />
+            </DataSet>
+            <Position x="0.3" y="-0.7" />
+            <ShowCurrent value="false" />
+            <ShowMaximum value="false" />
+            <ShowMinimum value="false" />
+            <Caption location="bottom">
+                <Text value="S" />
+            </Caption>
+            <Background>
+                <Solid>
+                    <Color r="0.1" g="0.3" b="0.2" alpha="0.2" />
+                </Solid>
+            </Background>
+            <Foreground>
+                <Solid>
+                    <Color r="1." g="0." b="0." alpha="1." />
+                </Solid>
+            </Foreground>
+        </VerticalBarGauge>
+        <!-- Brakes -->
+        <VerticalBarGauge camera="in" usetemplate="VerticalBar">
+            <DataSet>
+                <AtomicData field="source" source="player_brakes" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="1" />
+            </DataSet>
+            <Position x="0.33" y="-0.7" />
+            <ShowCurrent value="false" />
+            <ShowMaximum value="false" />
+            <ShowMinimum value="false" />
+            <Caption location="bottom">
+                <Text value="B" />
+            </Caption>
+        </VerticalBarGauge>
+        <!-- Rubber -->
+        <VerticalBarGauge camera="in" usetemplate="VerticalBar">
+            <DataSet>
+                <AtomicData field="source" source="player_rubber" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="cycle_rubber" />
+            </DataSet>
+            <Position x="0.27" y="-0.7" />
+            <ShowCurrent value="false" />
+            <ShowMaximum value="false" />
+            <ShowMinimum value="false" />
+            <Caption location="bottom">
+                <Text value="R" />
+            </Caption>
+        </VerticalBarGauge>
+        <Rectangle camera="in">
+            <Position x="0.27" y="-0.7"/>
+            <Size height="0.150" width="0.013" />
+            <Background>
+                <Image scale_x="1" scale_y=".2">
+                    <Graphic category="sick" author="Lucifer" version="1" name="bubblewindow" extension="png" />
+                </Image>
+            </Background>
+        </Rectangle>
+        <Rectangle camera="in">
+            <Position x="0.3" y="-0.7"/>
+            <Size height="0.150" width="0.013" />
+            <Background>
+                <Image scale_x="1" scale_y=".2">
+                    <Graphic category="sick" author="Lucifer" version="1" name="bubblewindow" extension="png" />
+                </Image>
+            </Background>
+        </Rectangle>
+        <Rectangle camera="in">
+            <Position x="0.33" y="-0.7"/>
+            <Size height="0.150" width="0.013" />
+            <Background>
+                <Image scale_x="1" scale_y=".2">
+                    <Graphic category="sick" author="Lucifer" version="1" name="bubblewindow" extension="png" />
+                </Image>
+            </Background>
+        </Rectangle>
+
+        <!-- Enemies alive -->
+        <VerticalBarGauge camera="in" usetemplate="VerticalBar">
+            <DataSet id="enemies">
+                <AtomicData field="source" source="enemies_alive" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="10" />
+            </DataSet>
+            <ShowCurrent value="true" />
+            <ShowMaximum value="false" />
+            <ShowMinimum value="false" />
+            <Position x="-0.26" y="-0.7" />
+            <Caption location="bottom">
+                <Text value="E" />
+            </Caption>
+            <Foreground>
+                <Solid>
+                    <Color r="1.0" g="0.0" b="0.0" alpha="1.0" />
+                </Solid>
+            </Foreground>
+        </VerticalBarGauge>
+        <!-- Friends alive -->
+        <VerticalBarGauge camera="in" usetemplate="VerticalBar">
+            <DataSet id="friends">
+                <AtomicData field="source" source="friends_alive" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="10" />
+            </DataSet>
+            <ShowCurrent value="true" />
+            <ShowMaximum value="false" />
+            <ShowMinimum value="false" />
+            <Position x="-0.29" y="-0.7" />
+            <Caption location="bottom">
+                <Text value="F" />
+            </Caption>
+            <Foreground>
+                <Solid>
+                    <Color r="0.0" g="1.0" b="0.0" alpha="1.0" />
+                </Solid>
+            </Foreground>
+        </VerticalBarGauge>
+        <Rectangle camera="in">
+            <Position x="-0.29" y="-0.7"/>
+            <Size height="0.150" width="0.013" />
+            <Background>
+                <Image scale_x="1" scale_y="1.0">
+                    <Graphic category="sick" author="Lucifer" version="1" name="bubblewindow" extension="png" />
+                </Image>
+            </Background>
+        </Rectangle>
+        <Rectangle camera="in">
+            <Position x="-0.26" y="-0.7"/>
+            <Size height="0.150" width="0.013" />
+            <Background>
+                <Image scale_x="1" scale_y="1.0">
+                    <Graphic category="sick" author="Lucifer" version="1" name="bubblewindow" extension="png" />
+                </Image>
+            </Background>
+        </Rectangle>
+        <!-- FPS -->
+        <BarGauge camera="in" viewport="top">
+            <DataSet>
+                <AtomicData field="source" source="current_framerate" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="100" />
+            </DataSet>
+            <Position x="0" y="0.45" />
+            <Size height="0.03" width="0.08" />
+            <ShowCurrent value="true" />
+            <ShowMaximum value="true" />
+            <ShowMinimum value="true" />
+            <Background>
+                <Solid>
+                    <Color r="0." g="1." b="0." alpha="1." />
+                </Solid>
+            </Background>
+            <Foreground>
+                <Solid>
+                    <Color r="1." g="0." b="0." alpha="1." />
+                </Solid>
+            </Foreground>
+        </BarGauge>
+
+        <Rectangle camera="in" usetemplate="Clock">
+            <Size height="1" width="1" />
+            <Background>
+                <Image>
+                    <Graphic author="wrtlprnft" version="1" name="benboisclock" uri="http://wrtlprnft.ath.cx/benboisclock.png" />
+                </Image>
+                <Solid>
+                    <Color r="1." g="1." b="1." alpha=".8" />
+                </Solid>
+            </Background>
+        </Rectangle>
+        <NeedleGauge camera="in" usetemplate="Clock">
+            <DataSet>
+                <AtomicData field="source" source="current_seconds" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="60" />
+            </DataSet>
+            <Angles min="-270" max="90" />
+            <Size height="0.75" width="0.75" />
+        </NeedleGauge>
+        <NeedleGauge camera="in" usetemplate="Clock">
+            <DataSet>
+                <Math lvalue="current_minutes" type="sum" field="source">
+                     <RValue>
+                          <Math rvalue="0.01666666" type="product" lvalue="current_seconds" />
+                     </RValue>
+                </Math>
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="60" />
+            </DataSet>
+            <Angles min="-270" max="90" />
+            <Size height="0.75" width="0.75" />
+        </NeedleGauge>
+        <NeedleGauge camera="in" usetemplate="Clock">
+            <DataSet>
+                <Math lvalue="current_hours12h" type="sum" field="source">
+                     <RValue>
+                          <Math rvalue="0.01666666" type="product" lvalue="current_minutes" />
+                     </RValue>
+                </Math>
+                <AtomicData field="minimum" source="1" />
+                <AtomicData field="maximum" source="13" />
+            </DataSet>
+            <Angles min="-240" max="120" />
+            <Size height="0.5" width="0.5" />
+        </NeedleGauge>
+        <!-- HUD Map (obviously) -->
+        <Map camera="in">
+            <Position x="0" y="-0.759" />
+            <Size height="0.24" width="0.24" />
+            <Background>
+                <Image scale_x=".075" scale_y=".075" repeat="both">
+                    <Graphic author="wrtlprnft" version="1" name="floor" extension="png" uri="http://wrtlprnft.ath.cx/floor.png" />
+                </Image>
+                <Solid>
+                    <Color r=".5" g="1." b=".5" alpha="1." />
+                </Solid>
+            </Background>
+            <MapModes toggleKey="1">
+                <MapMode mode="full" rotation="spawn" />
+                <MapMode mode="closestZone" rotation="fixed" />
+            </MapModes>
+            <MapModes toggleKey="2">
+                <MapMode mode="cycle" rotation="camera" zoomFactor="3" clipMode="ellipse" />
+                <MapMode mode="cycle" rotation="cycle" zoomFactor="3" clipMode="ellipse" />
+                <MapMode mode="cycle" rotation="spawn" zoomFactor="4" clipMode="ellipse" />
+            </MapModes>
         </Map>
     </Cockpit>
 </Resource>

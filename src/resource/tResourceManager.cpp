@@ -14,6 +14,23 @@
 #include "tResourceManager.h"
 #include "tString.h"
 
+// This is a little ugly, open to suggestions :)
+tResourceManager::Reference tResourceManager::__inst = tResourceManager::Reference(new tResourceManager() );
+
+tResourceManager::tResourceManager() {
+    // stub constructor for now
+}
+
+tResourceManager::~tResourceManager() { }
+
+tResourceManager::Reference tResourceManager::GetResourceManager() {
+    if(!__inst) {
+        __inst = Reference(new tResourceManager() );
+    }
+
+    return Reference(__inst);
+}
+
 void tResourceManager::RegisterLoader()
 {
 }

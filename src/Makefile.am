@@ -44,7 +44,7 @@ ${srcdir}/network/nNetwork.cpp: nTrueVersion.h
 # library file listings
 
 if BUILDMAIN
-tools_extra=tools/tResourceManager.cpp tools/tResourceManager.h
+tools_extra=resource/tResourceManager.cpp resource/tResourceManager.h
 else
 tools_extra=
 endif
@@ -52,7 +52,7 @@ endif
 
 # Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
 # the fragile dependency on undefined behaviour of the linker...)
-libtools_a_SOURCES=	${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.cpp tools/tColor.h\
+libtools_a_SOURCES = ${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.cpp tools/tColor.h\
 	tools/tConfiguration.cpp tools/tConfiguration.h tools/tConsole.cpp tools/tConsole.h tools/tCrypt.cpp tools/tCrypt.h\
 	tools/tDirectories.cpp tools/tDirectories.h tools/tError.cpp tools/tError.h tools/tEventQueue.cpp\
 	tools/tEventQueue.h tools/tHeap.cpp tools/tHeap.h tools/tInitExit.h tools/tLinkedList.cpp tools/tLinkedList.h\
@@ -88,8 +88,8 @@ libtools_a_SOURCES=	${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallba
 	tools/tValue.h tools/tValueParser.h\
 	tools/tFunction.h tools/tFunction.cpp\
 	tools/tPolynomial.h tools/tPolynomialMarshaler.h tools/tPolynomialWithBase.h \
-        tools/tResource.h tools/tResource.cpp \
-	tools/tRuby.h tools/tRuby.cpp
+	tools/tRuby.h tools/tRuby.cpp \
+	resource/tResource.h resource/tResource.cpp
 
 #tools/tCommandLine.cpp tools/tCommandLine.h
 libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentication.cpp\
@@ -177,7 +177,7 @@ endif
 
 #AM_CXXFLAGS= $(BINRELOC_CFLAGS)
 
-libtools_a_CXXFLAGS  =$(AM_CXXFLAGS)  -I@srcdir@/tools -I@srcdir@/thirdparty/mathexpr
+libtools_a_CXXFLAGS  =$(AM_CXXFLAGS)  -I@srcdir@/tools -I@srcdir@/resource -I@srcdir@/thirdparty/mathexpr
 libnetwork_a_CXXFLAGS=$(libtools_a_CXXFLAGS)  -I@srcdir@/network
 librender_a_CXXFLAGS =$(libtools_a_CXXFLAGS)  -I@srcdir@/render
 libui_a_CXXFLAGS     =$(librender_a_CXXFLAGS) -I@srcdir@/ui -I@srcdir@/thirdparty/shttpd -I@srcdir@/thirdparty/scrap

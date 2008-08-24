@@ -3,7 +3,7 @@
 #define ArmageTron_PARSER_H
 
 #include "defs.h"
-#include "tXmlParser.h"
+#include "tResource.h"
 #include "eCoord.h"
 #include "tValue.h"
 #include <map>
@@ -32,7 +32,7 @@ pointer to the gGame, the gArena and the gGrid.
 
 */
 
-class gParser : public tXmlResource {
+class gParser : public tResource {
 
     gArena *theArena; /*Patch: All the world structure should be created by the parser*/
     eGrid *theGrid; /*Patch: All the world structure should be created by the parser*/
