@@ -74,6 +74,7 @@ bool se_NeedsServer(char const * command, std::istream & s, bool strict )
     return false;
 }
 
+
 tColoredString & operator << (tColoredString &s,const ePlayer &p){
     return s << tColoredString::ColorString(p.rgb[0]/15.0,
                                             p.rgb[1]/15.0,
@@ -2513,12 +2514,12 @@ static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
 }
 #endif // DEDICATED
 
+static bool se_silenceDead = false;
+static tSettingItem<bool> se_silenceDeadConf("SILENCE_DEAD", se_silenceDead);
+
 // help message printed out to whoever asks for it
 static tString se_helpMessage("");
 static tConfItemLine se_helpMessageConf("HELP_MESSAGE",se_helpMessage);
- 
-static bool se_silenceDead = false;
-static tSettingItem<bool> se_silenceDeadConf("SILENCE_DEAD", se_silenceDead);
 
 // time during which no repeaded chat messages are printed
 static REAL se_alreadySaidTimeout=5.0;
@@ -3473,6 +3474,11 @@ void handle_chat( nMessage &m )
                     }
                     else if (command == "/players") {
                         se_ChatPlayers( p, s );
+                        return;
+                    }
+                    else if (command == "/drop")
+                    {
+                        p->DropFlag();
                         return;
                     }
                     else if (command == "/vote" || command == "/callvote") {

@@ -2720,6 +2720,23 @@ bool gCycle::Timestep(REAL currentTime){
         currentWall->Update(predictTime, PredictPosition() );
     }
 
+    //check for brake change (probably not the best place to do this)
+    if (sn_GetNetState()!=nCLIENT)
+    {
+        if (braking != oldBraking)
+        {
+            ProcessShoot(false);
+        }
+    }
+
+#ifndef DEDICATED
+    // keep rendering the cycle
+    if ( ret && GOID() >= 0 )
+    {
+        tNEW( gCycleRenderer( this ) );
+    }
+#endif
+
     // checkpoint wall when rubber starts to get used
     if ( currentWall )
     {

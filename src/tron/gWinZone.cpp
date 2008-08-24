@@ -1524,6 +1524,8 @@ gBaseZoneHack::gBaseZoneHack( eGrid * grid, const eCoord & pos )
     lastSync_ = -10;
     teamDistance_ = 0;
     lastEnemyContact_ = se_GameTime();
+    lastRespawnRemindTime_ = -500;
+    lastRespawnRemindWaiting_ = 0;
     touchy_ = false;
 
     color_.r = color_.g = color_.b = 0;
@@ -1550,6 +1552,8 @@ gBaseZoneHack::gBaseZoneHack( nMessage & m )
     lastSync_ = -10;
     teamDistance_ = 0;
     lastEnemyContact_ = se_GameTime();
+    lastRespawnRemindTime_ = -500;
+    lastRespawnRemindWaiting_ = 0;
     touchy_ = false;
 
     lastRespawnRemindTime_ = -500;
@@ -1660,6 +1664,8 @@ void gBaseZoneHack::CountZonesOfTeam( eGrid const * grid, eTeam * otherTeam, int
 
 static int sg_onSurviveScore = 0;
 static tSettingItem< int > sg_onSurviveConquestScoreConfig( "FORTRESS_HELD_SCORE", sg_onSurviveScore );
+
+extern gArena Arena;
 
 static REAL sg_collapseSpeed = .5;
 static tSettingItem< REAL > sg_collapseSpeedConfig( "FORTRESS_COLLAPSE_SPEED", sg_collapseSpeed );

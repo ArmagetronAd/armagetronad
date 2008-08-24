@@ -354,6 +354,8 @@ public:
     void BeNotLoggedIn() { SetAccessLevel( tAccessLevel_Program ); }
     tAccessLevel GetLastAccessLevel() const { return lastAccessLevel; }
 
+    void DropFlag();
+
     static ePlayerNetID * FindPlayerByName( tString const & name, ePlayerNetID * requester = 0 ); //!< finds a player by name using lax name matching. Reports errors to the console or to the requesting player.
 
     void UpdateName();                                           //!< update the player name from either the client's wishes, either the admin's wishes.
@@ -361,8 +363,6 @@ public:
     static tString FilterName( tString const & in );             //!< filters a name (removes unprintables, color codes and spaces)
     bool IsAllowedToRename ( void );                             //!< tells if the user can rename or not, takes care about everything
     void AllowRename( bool allow );                              //!< Allows a player to rename (or not)
-
-    void DropFlag();
 
 private:
     tColoredString  nameFromClient_;        //!< this player's name as the client wants it to be. Avoid using it when possilbe.
