@@ -26,26 +26,36 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#ifndef ArmageTron_TRESOURCE_H
-#define ArmageTron_TRESOURCE_H
 
-#include "tXmlParser.h"
+#ifndef TDICT_H
+#define TDICT_H
 
-#include "tResourceManager.h"
+#include <map>
+#include <string>
+#include <functional>
 
-class tResource;
+#include "tString.h"
 
-class tResource : public tXmlParser {
+class RuntimeStringCmp {
 public:
-    bool LoadFile(const char* filename, const char* uri="");
-    tResourcePath const &Path() const {return m_Path;} //!< get the resource path this file was loaded from
-protected:
-    bool ValidateXml(FILE* docfd, const char* uri, const char* filepath);
-    tResourcePath m_Path; //!< the resource identifier of this resource
-    node GetFileContents(void); //!< Returns the node the "real" file contents are within
+    // the comparison
+    bool operator() (const tString& s1, const tString& s2) const {
+            return s1.Compare(s2);
+    }
 };
 
-//! \deprecated
-typedef tResource tXmlResource;
+template <typename T, typename A, typename S=std::less<T> >
+class tDict : public std::map<T, A, S> {
+public:    
+    inline bool HasKey(T x) {
+        return (this->find(x)!=this->end() );
+    }
+};
+
+template <typename R>
+class tStringDict : public tDict<tString, R, RuntimeStringCmp> {
+public:
+    tStringDict() : std::map<tString, R, RuntimeStringCmp>(RuntimeStringCmp()) { };
+};
 
 #endif

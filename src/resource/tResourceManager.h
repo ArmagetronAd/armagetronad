@@ -1,16 +1,72 @@
+/*
+
+*************************************************************************
+
+ArmageTron -- Just another Tron Lightcycle Game in 3D.
+Copyright (C) 2005  by 
+and the AA DevTeam (see the file AUTHORS(.txt) in the main source directory)
+
+**************************************************************************
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+  
+***************************************************************************
+
+*/
+
+
 #ifndef ArmageTron_RESOURCEMANAGER_H
 #define ArmageTron_RESOURCEMANAGER_H
 
 #include <boost/smart_ptr.hpp>
 
+#include "tDict.h"
 #include "tString.h"
 
 class tResource;
 
-typedef int (*tNewResourceFunc)(const char* path);
+typedef tResource* (*tNewResourceType)(const char* path);
 
 //! Shortcut for casting to tResource*
 #define resource_cast(a) dynamic_cast<tResource *> (a)
+
+/** tResourceType describes a resource type to the resource system.
+ *     Upon instantiation, it reports itself to tResourceManager so
+ *     it can be used by whoever needs to use it.
+ **/
+class tResourceType {
+public:
+    /// This constructor is used by the resource to create new instances
+    /// of the resource type.
+    tResourceType(const char* name, const char* description, const char* extension,
+                  tNewResourceType creator);
+
+    /// Returns the name of the resource type
+    const tString& GetName() { return m_Name; };
+    
+    //! Convenient typedef for a type that stores references to the resource
+    /// type.
+    typedef boost::shared_ptr<tResourceType> Reference;
+
+    Reference Get_reference() { return Reference(this); };
+private:
+    /// We make this constructor private so nobody will use it
+    tResourceType();
+
+    tString m_Name;
+};
 
 //! resource manager: fetches and caches resources from repositories or arbitrary URIs
 /** 
@@ -29,6 +85,8 @@ public:
 
     //! Register a resource type.
     /**
+            @param name the name of the resource type
+            @param description a human readable description of the resource type
             @param func a function that returns a new instance of the resource
             @return the unique identifier for the function.  Use this in subsequence calls to GetResource.
 
@@ -36,7 +94,7 @@ public:
             that new type.  Later on you'll call tResourceManager to instantiate the type for a
             resource that's needed and you'll need to know the identifier returned from this method.
      */
-    static int RegisterResourceType(tNewResourceFunc func);
+    static int RegisterResourceType(tResourceType& newType);
 
     //! Return the position of the resource in the cache
     static tString locateResource(const char *file, const char *uri="");
@@ -65,6 +123,8 @@ public:
 private:
     //! The only instance of tResourceManager allowed
     static Reference __inst;
+
+    static tStringDict<tResourceType::Reference>* m_ResourceList;
 
     //! We make the constructor private so that nobody else can
     /// instantiate this class
@@ -114,5 +174,6 @@ public:
     bool operator==(tResourcePath const &other) const;
     bool operator!=(tResourcePath const &other) const;
 };
+
 
 #endif //ArmageTron_RESOURCEMANAGER_H

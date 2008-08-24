@@ -10,19 +10,52 @@
 #include <libxml/nanohttp.h>
 
 #include "tConfiguration.h"
+#include "tDict.h"
 #include "tDirectories.h"
 #include "tResourceManager.h"
 #include "tString.h"
 
+/****************************************************************
+ *       tResourceType                                          *
+ ***************************************************************/
+
+/** This constructor is the one you should always use.  Make sure
+ *  you create a function with the signature for tNewResourceType
+ *  that returns a newly created instance of your tResource subclass
+ *  that has been typecasted to tResource.  The Resource Manager will
+ *  use the function you provide to create new instances of your
+ *  resource type
+ *
+ *  \param name the name of the resource type
+ *  \param description a human readable description of the resource type
+ *  \param extension the filename extension that will be found on disk
+ *  \param creator a function that creates a new instance of the resource
+ */
+tResourceType::tResourceType(const char* name, const char* description, const char* extension,
+                  tNewResourceType creator) {
+    m_Name = tString(name);
+}
+
+
+/***************************************************************
+ *          tResourceManager                                   *
+ ***************************************************************/
+
 // This is a little ugly, open to suggestions :)
 tResourceManager::Reference tResourceManager::__inst = tResourceManager::Reference(new tResourceManager() );
+tStringDict<tResourceType::Reference>*
+    tResourceManager::m_ResourceList = new tStringDict<tResourceType::Reference>();
 
+/** The constructor for tResourceManager. */
 tResourceManager::tResourceManager() {
     // stub constructor for now
 }
 
 tResourceManager::~tResourceManager() { }
 
+/** When you need to carry a local reference for the Resource Manager,
+ *  use this method to do so.  It may be more convenient for you thataway.
+ */
 tResourceManager::Reference tResourceManager::GetResourceManager() {
     if(!__inst) {
         __inst = Reference(new tResourceManager() );
@@ -31,6 +64,8 @@ tResourceManager::Reference tResourceManager::GetResourceManager() {
     return Reference(__inst);
 }
 
+/** Used by tResourceLoader to register a file loader of some sort.
+ */
 void tResourceManager::RegisterLoader()
 {
 }
@@ -41,8 +76,11 @@ tResource* tResourceManager::GetResource(const char *file, int typeID)
     return NULL;
 }
 
-int tResourceManager::RegisterResourceType(tNewResourceFunc func) {
-    // stub
+int tResourceManager::RegisterResourceType(tResourceType& newType) {
+    if(!m_ResourceList->HasKey(newType.GetName() ) ) {
+        m_ResourceList[newType.GetName()] = newType.Get_reference();
+        return 1;
+    }
     return 0;
 }
 
@@ -301,6 +339,11 @@ static bool st_checkVersion(tString const &Version) {
     }
     return true;
 }
+
+/****************************************************************
+ *       tResourcePath                                          *
+ ****************************************************************/
+
 
 tResourcePath::tResourcePath(tString const &Author,
                              tString const &Category,
