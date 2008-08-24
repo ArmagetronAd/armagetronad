@@ -67,10 +67,11 @@ public:
             that new type.  Later on you'll call tResourceManager to instantiate the type for a
             resource that's needed and you'll need to know the identifier returned from this method.
      */
-    static int RegisterResourceType(tResourceType& newType);
+    static int RegisterResourceType(tResourceType* newType);
 
     //! Return the position of the resource in the cache
     static tString locateResource(const char *file, const char *uri="");
+
     //! opens a resource
     static FILE *openResource(const char *pathname, const char *uri="");
 

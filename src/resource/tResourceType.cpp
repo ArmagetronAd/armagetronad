@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
+#include "tResourceManager.h"
 #include "tString.h"
 
 #include "tResourceType.h"
@@ -50,6 +51,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 tResourceType::tResourceType(const char* name, const char* description, const char* extension,
                   tNewResourceType creator) {
     m_Name = tString(name);
+    m_Description = tString(description);
+    m_Extension = tString(extension);
+
+    m_Creator = creator;
+
+    tResourceManager::RegisterResourceType(this);
 }
 
 

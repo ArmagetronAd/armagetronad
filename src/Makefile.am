@@ -89,7 +89,7 @@ libtools_a_SOURCES = ${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallb
 	tools/tFunction.h tools/tFunction.cpp\
 	tools/tPolynomial.h tools/tPolynomialMarshaler.h tools/tPolynomialWithBase.h \
 	tools/tRuby.h tools/tRuby.cpp \
-	resource/tResource.h resource/tResource.cpp
+	resource/tResource.h resource/tResource.cpp resource/tResourceType.h resource/tResourceType.cpp
 
 #tools/tCommandLine.cpp tools/tCommandLine.h
 libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentication.cpp\

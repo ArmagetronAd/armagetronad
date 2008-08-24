@@ -67,6 +67,11 @@ private:
     /// We make this constructor private so nobody will use it
     tResourceType();
 
+    /// This is the heart of the class, the function pointer that points
+    /// to a user-defined function that creates a new instance of a
+    /// tResource subclass
+    tNewResourceType m_Creator;
+
     /// The name of the resource type
     tString m_Name;
     /// A human readable description of the resource type

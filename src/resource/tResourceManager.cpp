@@ -81,9 +81,16 @@ tResource* tResourceManager::GetResource(const char *file, int typeID)
     return NULL;
 }
 
-int tResourceManager::RegisterResourceType(tResourceType& newType) {
-    if(m_ResourceList->find(newType.GetName() ) == m_ResourceList->end() ) {
-        m_ResourceList->insert( make_pair( newType.GetName(), newType.Get_reference() ) );
+/**
+ *   Call RegisterResourceType when you want to register a new resource
+ *   type.  While that may be obvious, make sure you use the tResourceType
+ *   class to describe the resource type.
+ *
+ *   Ok, fine, there's nothing non-obvious about this method.
+ */
+int tResourceManager::RegisterResourceType(tResourceType* newType) {
+    if(m_ResourceList->find(newType->GetName() ) == m_ResourceList->end() ) {
+        m_ResourceList->insert( make_pair( newType->GetName(), newType->Get_reference() ) );
         return 1;
     }
     return 0;
