@@ -26,30 +26,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#ifndef ArmageTron_TRESOURCE_H
-#define ArmageTron_TRESOURCE_H
+#include "tString.h"
 
-#include "tXmlParser.h"
-
-#include "tResourceManager.h"
-
-class tResource;
-
-class tResource : public tXmlParser {
-public:
-    bool LoadFile(const char* filename, const char* uri="");
-    tResourcePath const &Path() const {return m_Path;} //!< get the resource path this file was loaded from
-protected:
-    bool ValidateXml(FILE* docfd, const char* uri, const char* filepath);
-    tResourcePath m_Path; //!< the resource identifier of this resource
-    node GetFileContents(void); //!< Returns the node the "real" file contents are within
-};
-
-//! \deprecated
-typedef tResource tXmlResource;
-
-//! Map type for storing tResource subclasses
-//typedef std::map< tString, tResource::Reference > tResourceMap;
+#include "tResourceType.h"
 
 
-#endif
+/****************************************************************
+ *       tResourceType                                          *
+ ***************************************************************/
+
+/** This constructor is the one you should always use.  Make sure
+ *  you create a function with the signature for tNewResourceType
+ *  that returns a newly created instance of your tResource subclass
+ *  that has been typecasted to tResource.  The Resource Manager will
+ *  use the function you provide to create new instances of your
+ *  resource type
+ *
+ *  \param name the name of the resource type
+ *  \param description a human readable description of the resource type
+ *  \param extension the filename extension that will be found on disk
+ *  \param creator a function that creates a new instance of the resource
+ */
+tResourceType::tResourceType(const char* name, const char* description, const char* extension,
+                  tNewResourceType creator) {
+    m_Name = tString(name);
+}
+
+
+
+

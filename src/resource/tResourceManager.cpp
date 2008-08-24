@@ -1,3 +1,31 @@
+/*
+
+*************************************************************************
+
+ArmageTron -- Just another Tron Lightcycle Game in 3D.
+Copyright (C) 2005  by 
+and the AA DevTeam (see the file AUTHORS(.txt) in the main source directory)
+
+**************************************************************************
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+  
+***************************************************************************
+
+*/
+
 #include "aa_config.h"
 
 #include <errno.h>
@@ -15,36 +43,13 @@
 #include "tResourceManager.h"
 #include "tString.h"
 
-/****************************************************************
- *       tResourceType                                          *
- ***************************************************************/
-
-/** This constructor is the one you should always use.  Make sure
- *  you create a function with the signature for tNewResourceType
- *  that returns a newly created instance of your tResource subclass
- *  that has been typecasted to tResource.  The Resource Manager will
- *  use the function you provide to create new instances of your
- *  resource type
- *
- *  \param name the name of the resource type
- *  \param description a human readable description of the resource type
- *  \param extension the filename extension that will be found on disk
- *  \param creator a function that creates a new instance of the resource
- */
-tResourceType::tResourceType(const char* name, const char* description, const char* extension,
-                  tNewResourceType creator) {
-    m_Name = tString(name);
-}
-
-
 /***************************************************************
  *          tResourceManager                                   *
  ***************************************************************/
 
 // This is a little ugly, open to suggestions :)
 tResourceManager::Reference tResourceManager::__inst = tResourceManager::Reference(new tResourceManager() );
-tStringDict<tResourceType::Reference>*
-    tResourceManager::m_ResourceList = new tStringDict<tResourceType::Reference>();
+tResourceTypeMap* tResourceManager::m_ResourceList = new tResourceTypeMap();
 
 /** The constructor for tResourceManager. */
 tResourceManager::tResourceManager() {
@@ -77,8 +82,8 @@ tResource* tResourceManager::GetResource(const char *file, int typeID)
 }
 
 int tResourceManager::RegisterResourceType(tResourceType& newType) {
-    if(!m_ResourceList->HasKey(newType.GetName() ) ) {
-        m_ResourceList[newType.GetName()] = newType.Get_reference();
+    if(m_ResourceList->find(newType.GetName() ) == m_ResourceList->end() ) {
+        m_ResourceList->insert( make_pair( newType.GetName(), newType.Get_reference() ) );
         return 1;
     }
     return 0;

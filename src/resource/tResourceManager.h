@@ -34,39 +34,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tDict.h"
 #include "tString.h"
+#include "tResourceType.h"
 
 class tResource;
-
-typedef tResource* (*tNewResourceType)(const char* path);
-
+    
 //! Shortcut for casting to tResource*
 #define resource_cast(a) dynamic_cast<tResource *> (a)
-
-/** tResourceType describes a resource type to the resource system.
- *     Upon instantiation, it reports itself to tResourceManager so
- *     it can be used by whoever needs to use it.
- **/
-class tResourceType {
-public:
-    /// This constructor is used by the resource to create new instances
-    /// of the resource type.
-    tResourceType(const char* name, const char* description, const char* extension,
-                  tNewResourceType creator);
-
-    /// Returns the name of the resource type
-    const tString& GetName() { return m_Name; };
-    
-    //! Convenient typedef for a type that stores references to the resource
-    /// type.
-    typedef boost::shared_ptr<tResourceType> Reference;
-
-    Reference Get_reference() { return Reference(this); };
-private:
-    /// We make this constructor private so nobody will use it
-    tResourceType();
-
-    tString m_Name;
-};
 
 //! resource manager: fetches and caches resources from repositories or arbitrary URIs
 /** 
@@ -124,7 +97,7 @@ private:
     //! The only instance of tResourceManager allowed
     static Reference __inst;
 
-    static tStringDict<tResourceType::Reference>* m_ResourceList;
+    static tResourceTypeMap* m_ResourceList;
 
     //! We make the constructor private so that nobody else can
     /// instantiate this class
