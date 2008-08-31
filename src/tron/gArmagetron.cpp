@@ -425,6 +425,14 @@ int filter(const SDL_Event *tEvent){
                 Activate(true);
             if ( !tEvent->active.gain && tEvent->active.state & flags )
                 Activate(false);
+
+            // reload GL stuff if application gets reactivated
+            if ( tEvent->active.gain && tEvent->active.state & SDL_APPACTIVE )
+            {
+                // just treat it like a screen mode change, gets the job done
+                rCallbackBeforeScreenModeChange::Exec();
+                rCallbackAfterScreenModeChange::Exec();
+            }
             return false;
         }
 
