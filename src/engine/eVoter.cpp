@@ -2153,7 +2153,9 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
     message >> command;
     tToLower( command );
 
-    eVoter * voter = p->GetVoter();
+    eVoter * voter = eVoter::GetVoter( p->Owner(), true ); // can't use ePlayerNedID::GetVoter here,
+                                                           // as it can't show a warning,
+                                                           // for example if the voter has only spectators
     if ( !eVoteItem::AcceptNewVote( voter, p->Owner() ) )
     {
         return;
