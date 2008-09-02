@@ -481,6 +481,21 @@ public:
 
 extern int se_SpamMaxLen;	// maximal length of chat message
 
+class eChatSpamTester
+{
+public:
+    eChatSpamTester( ePlayerNetID * p, tString const & say );
+    bool Block();
+    bool Check();
+
+    bool tested_;             //!< flag indicating whether the chat line has already been checked fro spam
+    bool shouldBlock_;        //!< true if the message should be blocked for spam
+    ePlayerNetID * player_;   //!< the chatting player
+    tColoredString say_;      //!< the chat line
+    REAL factor_;             //!< extra spam weight factor
+
+};
+
 
 // ******************************************************************************************
 // *

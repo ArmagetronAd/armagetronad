@@ -2451,16 +2451,29 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     }
 }
 
-static void handle_chat_admin_commands( ePlayerNetID * p, tString const & command, tString const & say, std::istream & s )
+static void handle_chat_admin_commands( ePlayerNetID * p, tString const & command, tString const & say, std::istream & s, eChatSpamTester &spam )
 {
     if  (command == "/login")
     {
+        // Really, there's no reason one would log in and log out all the time
+        spam.factor_ = 2;
+        if ( spam.Block() )
+        {
+            return;
+        }
+
         // the following function really is only supposed to be called from here and nowhere else
         // (access right escalation risk)
         se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( p, s );
     }
     else  if (command == "/logout")
     {
+        spam.factor_ = 2;
+        if( spam.Block() )
+        {
+            return;
+        }
+
         se_AdminLogout( p );
     }
 #ifdef KRAWALL_SERVER
@@ -2561,61 +2574,60 @@ static tSettingItem<bool> se_silAll("SILENCE_ALL",
                                     se_silenceAll);
 
 // handles spam checking at the right time
-class eChatSpamTester
+eChatSpamTester::eChatSpamTester( ePlayerNetID * p, tString const & say )
+: tested_( false ), shouldBlock_( false ), player_( p ), say_( say ), factor_( 1 )
 {
-public:
-    eChatSpamTester( ePlayerNetID * p, tString const & say )
-    : tested_( false ), shouldBlock_( false ), player_( p ), say_( say ), factor_( 1 )
+    say_.RemoveTrailingColor();
+}
+
+bool eChatSpamTester::Block()
+{
+    if ( !tested_ )
     {
-        say_.RemoveTrailingColor();
+        shouldBlock_ = Check();
+        tested_ = true;
     }
 
-    bool Block()
+    return shouldBlock_;
+}
+
+bool eChatSpamTester::Check()
+{
+    nTimeRolling currentTime = tSysTimeFloat();
+
+    // check if the player already said the same thing not too long ago
+    for (short c = 0; c < player_->lastSaid.Len(); c++)
     {
-        if ( !tested_ )
+        if( (say_.StripWhitespace() == player_->lastSaid[c].StripWhitespace()) && ( (currentTime - player_->lastSaidTimes[c]) < se_alreadySaidTimeout * factor_ ) )
         {
-            shouldBlock_ = Check();
-            tested_ = true;
-        }
-
-        return shouldBlock_;
-    }
-
-    bool Check()
-    {
-        nTimeRolling currentTime = tSysTimeFloat();
-
-        // check if the player already said the same thing not too long ago
-        for (short c = 0; c < player_->lastSaid.Len(); c++)
-        {
-            if( (say_.StripWhitespace() == player_->lastSaid[c].StripWhitespace()) && ( (currentTime - player_->lastSaidTimes[c]) < se_alreadySaidTimeout * factor_ ) )
-            {
-                sn_ConsoleOut( tOutput("$spam_protection_repeat", say_ ), player_->Owner() );
-                return true;
-            }
-        }
-
-        REAL lengthMalus = say_.Len() / 20.0;
-        if ( lengthMalus > 4.0 )
-        {
-            lengthMalus = 4.0;
-        }
-
-        // extra spam severity factor
-        REAL factor = factor_;
-
-        // count color codes. We hate them. We really do. (Yeah, this calculation is inefficient.)
-        int colorCodes = (say_.Len() - tColoredString::RemoveColors( say_ ).Len())/8;
-        if ( colorCodes < 0 ) colorCodes = 0;
-
-        // apply them to the spam severity factor. Burn in hell, color code abusers.
-        static const double log2 = log(2);
-        factor *= log( 2 + colorCodes )/log2;
-
-        if ( nSpamProtection::Level_Mild <= player_->chatSpam_.CheckSpam( (1+lengthMalus)*factor, player_->Owner(), tOutput("$spam_chat") ) )
-        {
+            sn_ConsoleOut( tOutput("$spam_protection_repeat", say_ ), player_->Owner() );
             return true;
         }
+    }
+
+    REAL lengthMalus = say_.Len() / 20.0;
+    if ( lengthMalus > 4.0 )
+    {
+        lengthMalus = 4.0;
+    }
+
+    // extra spam severity factor
+    REAL factor = factor_;
+
+
+    // count color codes. We hate them. We really do. (Yeah, this calculation is inefficient.)
+    int colorCodes = (say_.Len() - tColoredString::RemoveColors( say_ ).Len())/8;
+    if ( colorCodes < 0 ) colorCodes = 0;
+
+
+    // apply them to the spam severity factor. Burn in hell, color code abusers.
+    static const double log2 = log(2);
+    factor *= log( 2 + colorCodes )/log2;
+
+    if ( nSpamProtection::Level_Mild <= player_->chatSpam_.CheckSpam( (1+lengthMalus)*factor, player_->Owner(), tOutput("$spam_chat") ) )
+    {
+        return true;
+    }
 
 #ifdef KRAWALL_SERVER
         if ( player_->GetAccessLevel() > se_chatAccessLevel )
@@ -2651,13 +2663,6 @@ public:
 
         return false;
     }
-
-    bool tested_;             //!< flag indicating whether the chat line has already been checked fro spam
-    bool shouldBlock_;        //!< true if the message should be blocked for spam
-    ePlayerNetID * player_;   //!< the chatting player
-    tColoredString say_;      //!< the chat line
-    REAL factor_;             //!< extra spam weight factor
-};
 
 // checks whether a player is silenced, giving him appropriate warnings if he is
 bool IsSilencedWithWarning( ePlayerNetID const * p )
@@ -3469,7 +3474,7 @@ void handle_chat( nMessage &m )
                         return;
                     }
                     else {
-                        handle_chat_admin_commands( p, command, say, s );
+                        handle_chat_admin_commands( p, command, say, s, spam );
                         return;
                     }
 #endif
