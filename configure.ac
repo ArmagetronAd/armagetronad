@@ -525,9 +525,7 @@ if test x$armamain = xtrue; then
 
 test -z "$XML2_CONFIG" && XML2_CONFIG=xml2-config
 
-if $XML2_CONFIG --libs > /dev/null; then
-  echo -n ""
-else
+if ! $XML2_CONFIG --libs > /dev/null; then
   AC_MSG_ERROR([Fatal error: the libxml2 configuration script $XML2_CONFIG does not work/exist.])
 fi
 

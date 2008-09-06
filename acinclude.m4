@@ -63,7 +63,7 @@ AC_DEFUN([AC_USE_SUBST_UNIVERSAL],
 AC_CONFIG_COMMANDS(universal_variables,[
 # clear files
 for f in src/tUniversalVariables.h.in.new universal_variables universal_variable_substitutions universal_variable_values.in universal_variable_values_makefile.new universal_variable_values_makefile_sed.new; do
-    echo -n "" > $f
+    touch $f
 done
 
 # prepare value inserting makefile:
@@ -98,7 +98,7 @@ for variable in ${ac_aa_universal_variables}; do
 
     # add C macro to prototype file (later modified by the makefile
     # to contain the possibly modified variable values)
-    echo -e "#ifndef ${variable_u}\n    #define ${variable_u} \"@${variable}@\"\n#endif" >> src/tUniversalVariables.h.in.new
+    printf "#ifndef %s\n    #define %s \"@%s@\"\n#endif\n" "${variable_u}" "${variable_u}" "${variable}" >> src/tUniversalVariables.h.in.new
 
     # generate prototype for file containing the actual values of the variables
     # echo ${variable}=@${variable}@  >> universal_variable_values.in
@@ -209,7 +209,7 @@ AC_DEFUN([AC_AA_REPLACEPATHS],
 #echo ap=${ac_aa_pathvars}
 # put the path names into a file
 AC_CONFIG_COMMANDS(pathsubstitution,[
-echo -n "" > batch/relocate.in
+touch batch/relocate.in
 
 # generate path relocation sed script: replaces @foo_reloc@ with the
 # output of `relocate @foo@`, where @foo@ itself is replaced during
