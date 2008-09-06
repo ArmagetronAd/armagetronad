@@ -84,8 +84,8 @@ uMenu::~uMenu(){
 }
 
 void uMenu::ReverseItems(){
-    tList<uMenuItem> dummy = items;
-    items.SetLen(0);
+    tList<uMenuItem> dummy;
+    dummy.Swap( items );
 
     for (int i=dummy.Len()-1; i>=0; i--){
         uMenuItem *x = dummy[i];
