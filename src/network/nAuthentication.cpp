@@ -48,7 +48,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <zthread/FastMutex.h>
 #include <zthread/FastRecursiveMutex.h>
 #include <zthread/Guard.h>
-#include <zthread/SynchronousExecutor.h>
+// #include <zthread/SynchronousExecutor.h>
 #include <zthread/ThreadedExecutor.h>
 typedef ZThread::ThreadedExecutor nExecutor;
 //typedef ZThread::SynchronousExecutor nExecutor;

@@ -46,7 +46,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rRender.h"
 #include "rSysdep.h"
 #include "nAuthentication.h"
-#include "nKrawallPrivate.cpp"
 #include "tDirectories.h"
 #include "eVoter.h"
 #include "tReferenceHolder.h"
