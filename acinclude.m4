@@ -63,6 +63,7 @@ AC_DEFUN([AC_USE_SUBST_UNIVERSAL],
 AC_CONFIG_COMMANDS(universal_variables,[
 # clear files
 for f in src/tUniversalVariables.h.in.new universal_variables universal_variable_substitutions universal_variable_values.in universal_variable_values_makefile.new universal_variable_values_makefile_sed.new; do
+    rm -f $f
     touch $f
 done
 
@@ -209,6 +210,8 @@ AC_DEFUN([AC_AA_REPLACEPATHS],
 #echo ap=${ac_aa_pathvars}
 # put the path names into a file
 AC_CONFIG_COMMANDS(pathsubstitution,[
+#clear the file
+rm -f batch/relocate.in
 touch batch/relocate.in
 
 # generate path relocation sed script: replaces @foo_reloc@ with the
