@@ -17,6 +17,7 @@
 first_use_help			Is this the first time you use \g?
 include_help			Includes the following file
 sinclude_help			Includes the following file silently, without error message if it is not found
+rinclude_help           Includes a file using the resource system. Use the direct link syntax to your profit here.
 new_team_allowed_help		Is it currently allowed to create a new team?
 
 #********************************************
@@ -866,6 +867,7 @@ exit_help					Shuts the dedicated server down and quits.
 # manning and kicking commands
 only_works_on_server        The console command \1 only works on the server. You probably want to say "/admin \1 \2".\n
 players_help                Prints list of currently active players
+teams_help                  Get a list of all teams with a somewhat graphic representation of their formation. Same as saying /teams
 kill_help                   Kill a specific player (as warning before a kick)
 silence_help                Silence a specific player so he can't use public chat any more (/msg and /team still work)
 suspend_help                Suspend a player from playing for the following N rounds (default: 5)
@@ -2176,6 +2178,7 @@ player_admin_kill			\1 0xRESETTwas smitten by an administrator.\n
 player_admin_slap_free			\1 0xRESETThas been slapped by an administrator.\n
 player_admin_slap_win			\1 has been hugged by an administrator and got \2 points.\n
 player_admin_slap_lose			\1 has been slapped by an administrator and lost \2 points.\n
+slap_help                   Slaps the given player by penalizing him with the specified amount of points. Be smart and you may be able to hug your users, too ;)
 player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
 player_win_held_fortress	\1 was awarded \2 points for holding the base.\n
@@ -2701,7 +2704,9 @@ access_level_op_max_help       Maximal access level attainable by /op and /promo
 access_level_admin_help        Minimal access level for /admin command.
 access_level_rtfm_help        Minimal access level for /teach or /rtfm command.
 access_level_chat_help         Minimal access level for chatting.
-access_level_ips_help          Minimal access level you need for seeing IPs of players in the /players command.
+access_level_ips_help          Minimal access level you need for seeing IPs of other players in the /players command.
+access_level_nver_help         Minimal access level you need for seeing Network versions/strings from other players in /players.
+access_level_spy_console_help  Minimal access level you need for seeing console input from other (in-game) admins.
 access_level_spy_team_help     Minimal access level you need for seeing /team messages as a spectator.
 access_level_spy_msg_help      Minimal access level you need for seeing /msg messages directed to others.
 access_level_play_help         Minimal access level for playing
@@ -2712,7 +2717,7 @@ access_level_play_changed      Access level required to play changed from \1 to 
 
 access_level_vote_suspend_help    Minimal access level required to issue suspend votes.
 access_level_vote_kick_help    Minimal access level required to issue kick votes.
-access_level_vote_inclue_help    Minimal access level required to issue inclue votes.
+access_level_vote_include_help    Minimal access level required to issue inclue votes.
 access_level_vote_include_execute_help    Minimal access level successful include votes will be executed at.
 access_level_vote_command_help    Minimal access level required to issue command votes.
 access_level_vote_command_execute_help    Minimal access level successful command votes will be executed at.
