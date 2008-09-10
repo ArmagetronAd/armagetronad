@@ -241,6 +241,8 @@ public:
         return title;
     }
 
+    tAccessLevel GetRequiredLevel() const { return requiredLevel; }
+
     static int EatWhitespace(std::istream &s); // eat whitespace from stream; return: first non-whitespace char
 
     static void SaveAll(std::ostream &s);

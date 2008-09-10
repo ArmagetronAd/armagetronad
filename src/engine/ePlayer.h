@@ -359,6 +359,8 @@ public:
     bool IsAllowedToRename ( void );                             //!< tells if the user can rename or not, takes care about everything
     void AllowRename( bool allow );                              //!< Allows a player to rename (or not)
 
+    static bool HasRenameCapability ( ePlayerNetID const *, ePlayerNetID const * admin ); //!< Checks if the admin can use the RENAME command. Used in IsAllowedToRename()
+
 private:
     tColoredString  nameFromClient_;        //!< this player's name as the client wants it to be. Avoid using it when possilbe.
     tColoredString  nameFromServer_;        //!< this player's name as the server wants it to be. Avoid using it when possilbe.
@@ -496,6 +498,7 @@ public:
 
 };
 
+void ForceName ( std::istream & s );
 
 // ******************************************************************************************
 // *

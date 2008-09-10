@@ -153,6 +153,10 @@ static tSettingItem< bool > se_enaChat("ENABLE_CHAT", se_enableChat);
 static tString se_hiddenPlayerPrefix ("0xaaaaaa");
 static tConfItemLine se_hiddenPlayerPrefixConf( "PLAYER_LIST_HIDDEN_PLAYER_PREFIX", se_hiddenPlayerPrefix );
 
+static tConfItemFunc Rename_conf("RENAME", &ForceName);
+static tAccessLevelSetter Rename_confLevel( Rename_conf, tAccessLevel_Moderator );
+
+
 static tReferenceHolder< ePlayerNetID > se_PlayerReferences;
 
 class PasswordStorage
@@ -4428,27 +4432,27 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s )
     tString user;
     tAccessLevel accessLevel;
     AdminLevelsMap::iterator usersAccessLevelInSet;
-    
-    
+
+
     eUserLevel::Properties gidMap = se_userLevel.GetMap();
-   
+
 
     for ( eUserLevel::Properties::iterator iter = gidMap.begin(); iter != gidMap.end(); ++iter )
     {
         tColoredString userinfo;
-        
+
         user = (*iter).first;
         accessLevel = (*iter).second;
         if ( accessLevel <= se_adminListMinAccessLevel )
         {
             // Prepare a string with the info about that user
             userinfo << "  " << user;
-        
+
             usersAccessLevelInSet = adminLevelsMap.find( accessLevel );
 
             if ( usersAccessLevelInSet == adminLevelsMap.end() )
             {
-                
+
                 adminLevelsMap[ accessLevel ] = aSetOfAdmins();
 
                 usersAccessLevelInSet = adminLevelsMap.find( accessLevel );
@@ -7531,6 +7535,19 @@ static void DisAllowRename( std::istream & s )
 static tConfItemFunc DisAllowRename_conf("DISALLOW_RENAME_PLAYER", &DisAllowRename);
 static tAccessLevelSetter DisAllowRename_confLevel( DisAllowRename_conf, tAccessLevel_Moderator );
 
+// ******************************************************************************************
+// *
+// *    IsAllowedToRename
+// *
+// ******************************************************************************************
+//!
+//!
+// ******************************************************************************************
+
+bool ePlayerNetID::HasRenameCapability ( ePlayerNetID const * victim, ePlayerNetID const * admin )
+{
+    return Rename_conf.GetRequiredLevel() <= admin->GetAccessLevel();
+}
 
 // ******************************************************************************************
 // *
@@ -7559,7 +7576,7 @@ bool ePlayerNetID::IsAllowedToRename ( void )
     if ( !this->renameAllowed_ )
     {
         tOutput message( "$player_rename_rejected_admin", nameFromServer_, nameFromClient_ );
-        sn_ConsoleOut( message, Owner() );
+        se_SecretConsoleOut( message, this, &ePlayerNetID::HasRenameCapability, this );
         con << message;
         return false;
     }
@@ -7812,7 +7829,7 @@ ePlayerNetID & ePlayerNetID::ForceName( tString const & name )
 }
 
 // Set an admin command for it
-static void ForceName ( std::istream & s )
+void ForceName ( std::istream & s )
 {
     ePlayerNetID * p;
     p = ReadPlayer( s );
@@ -7823,9 +7840,7 @@ static void ForceName ( std::istream & s )
         p->ForceName ( newname );
     }
 }
-static tConfItemFunc Rename_conf("RENAME", &ForceName);
-static tAccessLevelSetter Rename_confLevel( Rename_conf, tAccessLevel_Moderator );
-
+// the tConfItemFunc is defined in ePlayer.h
 // ******************************************************************************************
 // *
 // * GetFilteredAuthenticatedName
