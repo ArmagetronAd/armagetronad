@@ -2654,6 +2654,10 @@ user_level_help             Changes the access level of a user.
 user_level_usage            usage: USER_LEVEL <authenticated name> <user access level (numerical)>\n
 user_level_change           Access level of user \1 changed to "\2".\n
 
+authority_level_help             Changes the access level for all users from the same authority. Mainly only useful for private authorities.
+authority_level_usage            usage: AUTHORITY_LEVEL <authority> <new access level (numerical)>\n
+authority_level_change           Access level of users from authority \1 changed to "\2".\n
+
 #*************************************
 #*************************************
 #

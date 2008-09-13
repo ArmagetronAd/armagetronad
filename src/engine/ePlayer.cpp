@@ -4317,6 +4317,16 @@ bool ePlayerNetID::AcceptClientSync() const{
 
 #ifdef KRAWALL_SERVER
 
+tString se_GetAuthorityFromGid ( const tString gid )
+{
+    int pos;
+    if ( ( pos = gid.StrPos( "@" ) ) != -1 )
+    {
+        return gid.SubStr( pos +1 );
+    }
+    return gid;
+}
+
 // changes various user aspects
 template< class P > class eUserConfig: public tConfItemBase
 {
@@ -4416,6 +4426,47 @@ public:
 };
 
 static eUserLevel se_userLevel;
+
+class eAuthorityLevel: public eUserConfig< tAccessLevel >
+{
+public:
+    eAuthorityLevel()
+    : eUserConfig< tAccessLevel >( "AUTHORITY_LEVEL" )
+    {
+        requiredLevel = tAccessLevel_Owner;
+    }
+
+    tAccessLevel GetDefault() const
+    {
+        return tAccessLevel_DefaultAuthenticated;
+    }
+
+    virtual tAccessLevel ReadRawVal(tString const & name, std::istream &s) const
+    {
+        int levelInt;
+        s >> levelInt;
+        tAccessLevel level = static_cast< tAccessLevel >( levelInt );
+
+        if ( s.fail() || name.StrPos( "@" ) != -1 )
+        {
+            if(printErrors)
+            {
+                con << tOutput( "$authority_level_usage" );
+            }
+            return GetDefault();
+        }
+
+        if(printChange)
+        {
+            con << tOutput( "$authority_level_change", name, tCurrentAccessLevel::GetName( level ) );
+        }
+
+        return level;
+    }
+};
+
+static eAuthorityLevel se_authorityLevel;
+
 #ifdef KRAWALL_SERVER
 
 static tAccessLevel se_adminListMinAccessLevel = tAccessLevel_Moderator;
@@ -4683,7 +4734,16 @@ static tConfItemFunc sn_listBanConf("BAN_USER_LIST",&se_ListBannedUsers);
 
 static void se_CheckAccessLevel( tAccessLevel & level, tString const & authName )
 {
-    tAccessLevel newLevel = se_userLevel.Get( authName );
+    tAccessLevel newLevel;
+
+    newLevel = se_authorityLevel.Get( se_GetAuthorityFromGid( authName ) );
+    con << "got authority " <<  se_GetAuthorityFromGid( authName ) << " " << newLevel << "\n";
+    if ( newLevel < level || newLevel > tAccessLevel_DefaultAuthenticated )
+    {
+        level = newLevel;
+    }
+
+    newLevel = se_userLevel.Get( authName );
     if ( newLevel < level || newLevel > tAccessLevel_DefaultAuthenticated )
     {
         level = newLevel;
