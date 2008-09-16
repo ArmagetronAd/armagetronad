@@ -4737,7 +4737,6 @@ static void se_CheckAccessLevel( tAccessLevel & level, tString const & authName 
     tAccessLevel newLevel;
 
     newLevel = se_authorityLevel.Get( se_GetAuthorityFromGid( authName ) );
-    con << "got authority " <<  se_GetAuthorityFromGid( authName ) << " " << newLevel << "\n";
     if ( newLevel < level || newLevel > tAccessLevel_DefaultAuthenticated )
     {
         level = newLevel;
