@@ -362,8 +362,32 @@ public:
     virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0);
 };
 
+// *****************************************
+//               Float Choose
+// *****************************************
 
+class uMenuItemReal:public uMenuItem{
+protected:
+    tOutput title;
+    REAL &target;
+    REAL Min,Max;
+    REAL Step;
+public:
+    /*
+      uMenuItemInt(uMenu *m,const char *tit,
+      const char *help,int &targ,
+      int mi,int ma,int step=1);
+    */
+    uMenuItemReal(uMenu *m,const tOutput &title,
+                 const tOutput &help,REAL &targ,
+                 REAL mi,REAL ma,REAL step=1);
 
+    ~uMenuItemReal(){};
+
+    virtual void LeftRight(int);
+
+    virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0);
+};
 
 // *****************************************************
 //  String query
