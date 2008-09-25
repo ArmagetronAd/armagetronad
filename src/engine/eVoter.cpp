@@ -164,7 +164,7 @@ static tAccessLevelSetter se_accessLevelVoteCommandExecuteSILevel( se_accessLeve
 #endif
 
 static REAL se_defaultVotesSuspendLength = 3;
-static tSettingItem< REAL > se_defaultVotesSuspendLenght_Conf( "VOTING_SUSPEND_DEFAULT", se_defaultVotesSuspendLength );
+static tSettingItem< REAL > se_defaultVotesSuspendLenght_Conf( "VOTES_SUSPEND_DEFAULT", se_defaultVotesSuspendLength );
 static REAL se_votesSuspendTimeout = 0;
 
 static eVoter* se_GetVoter( const nMessage& m )
@@ -773,7 +773,7 @@ void se_votesSuspend( REAL minutes, bool announce, std::istream & s )
     }
     else if ( announce && minutes <= 0 )
     {
-    	sn_ConsoleOut( tOutput( "$voting_unsuspended" ) );
+        sn_ConsoleOut( tOutput( "$voting_unsuspended" ) );
     }
 
 }

@@ -870,9 +870,9 @@ players_help                Prints list of currently active players
 teams_help                  Get a list of all teams with a somewhat graphic representation of their formation. Same as saying /teams
 kill_help                   Kill a specific player (as warning before a kick)
 silence_help                Silence a specific player so he can't use public chat any more (/msg and /team still work)
-suspend_help                Suspend a player from playing for the following N rounds (default: 5)
+suspend_help                Suspend a player from playing for the following N rounds (default is set by SUSPEND_DEFAULT_ROUNDS)
 unsuspend_help              Removes a player suspension.
-
+suspend_default_rounds_help Sets default round timeout for SUSPEND.
 voice_help                  Reverse of SILENCE
 allow_team_change_player_help Allow a specific player to change teams even if ALLOW_TEAM_CHANGE is disabled
 disallow_team_change_player_help Reverse of ALLOW_TEAM_CHANGE_PLAYER

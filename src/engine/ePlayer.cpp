@@ -7182,6 +7182,9 @@ static void Slap_conf(std::istream &s)
 
 static tConfItemFunc slap_conf("SLAP", &Slap_conf);
 
+static int se_suspendDefault = 5;
+static tSettingItem< int > se_suspendDefaultConf( "SUSPEND_DEFAULT_ROUNDS", se_suspendDefault );
+
 static void Suspend_conf_base(std::istream &s, int rounds )
 {
     if ( se_NeedsServer( "SUSPEND", s, false ) )
@@ -7204,7 +7207,7 @@ static void Suspend_conf_base(std::istream &s, int rounds )
 
 static void Suspend_conf(std::istream &s )
 {
-    Suspend_conf_base( s, 5 );
+    Suspend_conf_base( s, se_suspendDefault );
 }
 
 
