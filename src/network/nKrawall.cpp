@@ -474,6 +474,37 @@ void nKrawall::SplitUserName( tString const & original, tString & username, tStr
     authority = "";
 }
 
+void nKrawall::SplitBaseAuthorityName( tString const & authority, tString & base )
+{
+    for( int i = 1; i < authority.Len(); ++i )
+    {
+        if ( authority[i] == '/' )
+        {
+                base = authority.SubStr( 0, i );
+                return;
+        }
+    }
+    base = authority;
+    return;
+}
+
+// Tell if an authority has the right to claim that the user uses another authority
+bool nKrawall::CanClaim ( tString contacted, tString claimed )
+{
+    // Check if the claimed authority is just the one we contacted
+    if ( contacted == claimed )
+        return true;
+
+    // It could be claiming the user is from a subdirectory:
+    tString contactedBase, claimedBase;
+    SplitBaseAuthorityName( contacted, contactedBase );
+    SplitBaseAuthorityName( claimed, claimedBase );
+    if ( claimedBase == contactedBase )
+        return true;
+
+    return false;
+}
+
 #ifdef KRAWALL_SERVER_LEAGUE
 
 // called on the master server when the league message is received
