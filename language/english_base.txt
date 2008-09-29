@@ -896,6 +896,18 @@ player_list_search          Search string "\1" matches:\n
 player_list_search_no_results Search string "\1" returned no result.\n
 player_list_search_end      End of search.\n
 
+admins_help                 Lists the server admins. You should use /admins or /listadmins instead of this.
+
+admin_list_cant_see         You are not allowed to list these admins.\n
+
+admin_list_colors_best_red_help    Red color component to the best access level listed by /admins
+admin_list_colors_best_green_help  Green color component to the best access level listed by /admins
+admin_list_colors_best_blue_help   Blue color component to the best access level listed by /admins
+admin_list_colors_worst_red_help   Red color component to the worst access level listed by /admins
+admin_list_colors_worst_green_help Green color component to the worst access level listed by /admins
+admin_list_colors_worst_blue_help  Blue color component to the worst access level listed by /admins
+admin_list_min_access_level_help   Minimal access level to be shown in /admins
+
 # communication
 console_message_help		Prints a message on the console of all connected clients.
 center_message_help			Prints a big message on the screen of all connected clients.
@@ -2743,7 +2755,11 @@ access_level_shuffle_up_denied Required access level to shuffle up is "\1", you 
 access_level_rtfm_denied    Required access level to teach others is "\1", you only have "\2".\n
 rtfm_denied                 You need to be logged in to teach others.\n
 
+access_level_list_admins_help Access level required to be able to use the "/admins" command.
+access_level_list_admins_see_everyone_help Users with this access level or better will be able to list any configured admin, regardless of ADMIN_LIST_MIN_ACCESS_LEVEL.
+
 chat_command_unknown        Unknown chat command "\1".\n
+chat_command_accesslevel    Sorry, your access level is not high enough to use the "\1" command You're \1, required would be \2.\n
 
 authority_blacklist_help    Comma separated list of authorities your server should refuse to query.
 authority_whitelist_help    If non-empty, only authorities on this comma separated list will be queried by your server.

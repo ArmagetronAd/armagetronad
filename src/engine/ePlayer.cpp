@@ -3381,6 +3381,7 @@ static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, e
 }
 #endif
 
+void se_ListAdmins( ePlayerNetID *, std::istream &s, tString );
 
 void handle_chat( nMessage &m )
 {
@@ -3454,8 +3455,12 @@ void handle_chat( nMessage &m )
                         se_ChatMsg( p, s, spam );
                         return;
                     }
-                    else if (command == "/players") {
+                    else if (command == "/players" || command == "/listplayers") {
                         se_ChatPlayers( p, s );
+                        return;
+                    }
+                    else if (command == "/admins" || command == "/listadmins") {
+                        se_ListAdmins( p, s, command );
                         return;
                     }
                     else if (command == "/vote" || command == "/callvote") {
@@ -4473,10 +4478,117 @@ static tAccessLevel se_adminListMinAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_adminListMinAccessLevelConf( "ADMIN_LIST_MIN_ACCESS_LEVEL", se_adminListMinAccessLevel );
 static tAccessLevelSetter se_adminListMinAccessLevelConfLevel( se_adminListMinAccessLevelConf, tAccessLevel_Owner );
 
-void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s )
+static tAccessLevel se_accessLevelListAdmins = tAccessLevel_Moderator; /* This command is sensible, especially if admin rights are set to an
+                                                                        * account that can still be registered at.
+                                                                        */
+static tSettingItem< tAccessLevel > se_accessLevelListAdminsConf( "ACCESS_LEVEL_LIST_ADMINS", se_accessLevelListAdmins );
+static tAccessLevelSetter se_accessLevelListAdminsConfLevel( se_accessLevelListAdminsConf, tAccessLevel_Owner );
+
+static tAccessLevel se_accessLevelListAdminsSeeEveryone = tAccessLevel_Moderator;
+static tSettingItem< tAccessLevel > se_accessLevelListAdminsSeeEveryoneConf( "ACCESS_LEVEL_LIST_ADMINS_SEE_EVERYONE", se_accessLevelListAdminsSeeEveryone );
+static tAccessLevelSetter se_accessLevelListAdminsSeeEveryoneConfLevel( se_accessLevelListAdminsSeeEveryoneConf, tAccessLevel_Owner );
+
+static int se_adminListColors_BestRed = 15;
+static tSettingItem< int > se_adminListColors_BetterRed_Conf( "ADMIN_LIST_COLORS_BEST_RED", se_adminListColors_BestRed );
+
+static int se_adminListColors_WorstRed = 15;
+static tSettingItem< int > se_adminListColors_WorstRed_Conf( "ADMIN_LIST_COLORS_WORST_RED", se_adminListColors_WorstRed );
+
+static int se_adminListColors_BestGreen = 0;
+static tSettingItem< int > se_adminListColors_BetterGreen_Conf( "ADMIN_LIST_COLORS_BEST_GREEN", se_adminListColors_BestGreen );
+
+static int se_adminListColors_WorstGreen = 15;
+static tSettingItem< int > se_adminListColors_WorstGreen_Conf( "ADMIN_LIST_COLORS_WORST_GREEN", se_adminListColors_WorstGreen );
+
+static int se_adminListColors_BestBlue = 0;
+static tSettingItem< int > se_adminListColors_BetterBlue_Conf( "ADMIN_LIST_COLORS_BEST_BLUE", se_adminListColors_BestBlue );
+
+static int se_adminListColors_WorstBlue = 7;
+static tSettingItem< int > se_adminListColors_WorstBlue_Conf( "ADMIN_LIST_COLORS_WORST_BLUE", se_adminListColors_WorstBlue );
+
+void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
 {
-    // First, browse trough all users in se_userLevel and sort them by access level in adminLevelsMap, then output it
-    typedef std::set< tString > aSetOfAdmins;
+    // What's going to be sent ? But wait..are we sending anything at all?
+    bool canSeeEverything = false;
+    if ( receiver != 0 && receiver->GetAccessLevel() > se_accessLevelListAdmins )
+    {
+        sn_ConsoleOut( tOutput("$chat_command_accesslevel", command,
+                               tCurrentAccessLevel::GetName( receiver->GetAccessLevel() ),
+                               tCurrentAccessLevel::GetName( se_accessLevelListAdmins ) ),
+                       receiver->Owner() );
+        return;
+    }
+    if ( receiver == 0 || receiver->GetAccessLevel() <= se_accessLevelListAdminsSeeEveryone )
+    {
+        canSeeEverything = true;
+    }
+
+    int firstNumber, secondNumber;
+    bool gotFirstNumber = true, gotSecondNumber = true;
+    s >> firstNumber;
+    if ( s.fail() )
+    {
+        gotFirstNumber = false;
+        gotSecondNumber = false;
+    }
+    else
+    {
+        s >> secondNumber;
+        if ( s.fail() )
+        {
+            gotSecondNumber = false;
+        }
+    }
+
+    std::set< tAccessLevel > accessLevelsToList;
+
+    if ( gotFirstNumber && !gotSecondNumber )
+    {
+        if ( canSeeEverything || firstNumber <= se_adminListMinAccessLevel )
+        {
+            accessLevelsToList.insert( static_cast<tAccessLevel>( firstNumber ) );
+        }
+        else
+        {
+            sn_ConsoleOut( tOutput("$admin_list_cant_see"), receiver->Owner() );
+            return;
+        }
+    }
+    else if ( ( gotFirstNumber && gotSecondNumber ) || ( !gotFirstNumber && !gotSecondNumber ) )
+    {
+        int lowest, highest;
+        if ( !gotFirstNumber && !gotSecondNumber )
+        {
+            lowest = 0;
+            highest = se_adminListMinAccessLevel;
+        }
+        else
+        {
+            if ( secondNumber > firstNumber )
+            {
+                lowest = firstNumber;
+                highest = secondNumber;
+            }
+            else
+            {
+                lowest = secondNumber;
+                highest = firstNumber;
+            }
+            if ( !canSeeEverything && highest > se_adminListMinAccessLevel )
+            {
+                sn_ConsoleOut( tOutput("$admin_list_cant_see"), receiver->Owner() );
+                return;
+            }
+        }
+
+        for ( int al = lowest; al <= highest; ++al )
+        {
+            accessLevelsToList.insert( static_cast<tAccessLevel>(al) );
+        }
+    }
+
+    // Now browse trough all users in se_userLevel and sort them by access level in adminLevelsMap, then output it
+    typedef std::map< tString, tString > aSetOfAdmins;
     typedef std::map< tAccessLevel, aSetOfAdmins > AdminLevelsMap;
 
     AdminLevelsMap adminLevelsMap;
@@ -4484,20 +4596,18 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s )
     tAccessLevel accessLevel;
     AdminLevelsMap::iterator usersAccessLevelInSet;
 
-
     eUserLevel::Properties gidMap = se_userLevel.GetMap();
-
 
     for ( eUserLevel::Properties::iterator iter = gidMap.begin(); iter != gidMap.end(); ++iter )
     {
-        tColoredString userinfo;
+        tColoredString userinfo, lowerUser;
 
         user = (*iter).first;
         accessLevel = (*iter).second;
-        if ( accessLevel <= se_adminListMinAccessLevel )
+        if ( accessLevelsToList.find( accessLevel ) != accessLevelsToList.end() )
         {
             // Prepare a string with the info about that user
-            userinfo << "  " << user;
+//            userinfo << "  " << user;
 
             usersAccessLevelInSet = adminLevelsMap.find( accessLevel );
 
@@ -4511,7 +4621,9 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s )
 
             aSetOfAdmins & theRightSet = (*usersAccessLevelInSet).second;
 
-            theRightSet.insert( userinfo );
+            lowerUser = user;
+            tToLower( lowerUser );
+            theRightSet[ lowerUser ] =user;
 
             // sn_ConsoleOut( userinfo, receiver->Owner() );
         }
@@ -4521,27 +4633,63 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s )
     // for each access level out there
     AdminLevelsMap::iterator it;
 
+    int numberOfAccessLevelsShown = adminLevelsMap.size() -1;
+    int advancement = 0;
+    REAL red, green, blue;
+    tColoredString accessLevelColor;
+    tColoredString output;
+
     for ( it = adminLevelsMap.begin(); it != adminLevelsMap.end(); ++it )
     {
-        std::stringstream output;
+        output = "";
 
         // First, print the access level's name
         tAccessLevel accessLevel = (*it).first;
-        output << tCurrentAccessLevel::GetName( accessLevel ) << ": ";
+
+        // Find the appropriate color for it
+        if (numberOfAccessLevelsShown <= 0)
+            numberOfAccessLevelsShown = 1;
+        red = (
+                    se_adminListColors_BestRed * ( numberOfAccessLevelsShown - advancement )
+                  + se_adminListColors_WorstRed  * ( advancement )
+              ) / 16.0 / numberOfAccessLevelsShown;
+        green = (
+                    se_adminListColors_BestGreen * ( numberOfAccessLevelsShown - advancement )
+                  + se_adminListColors_WorstGreen  * ( advancement )
+              ) / 16.0 / numberOfAccessLevelsShown;
+        blue = (
+                    se_adminListColors_BestBlue * ( numberOfAccessLevelsShown - advancement )
+                  + se_adminListColors_WorstBlue  * ( advancement )
+              ) / 16.0 / numberOfAccessLevelsShown;
+
+        accessLevelColor << tColoredString::ColorString( red, green, blue );
+        output << accessLevelColor
+               << tCurrentAccessLevel::GetName( accessLevel ) << ": ";
+//        accessLevelColor = "";
 
         // Then print the admin's names
         for ( aSetOfAdmins::iterator userIt = (*it).second.begin(); userIt != (*it).second.end(); ++userIt )
         {
-            output << (*userIt);
+            if ( userIt == (*it).second.begin() )
+            {
+                output << (*userIt).second;
+            }
+            else
+            {
+                output << " | " << (*userIt).second;
+            }
         }
+
         output << "\n";
-        sn_ConsoleOut( output.str().c_str(), receiver->Owner() );
+        sn_ConsoleOut( output, receiver->Owner() );
+
+        ++advancement;
     }
 }
 
 static void se_ListAdmins_conf( std::istream &s )
 {
-    se_ListAdmins( 0, s );
+    se_ListAdmins( 0, s, tString( "PLAYERS" ) );
 }
 
 static tConfItemFunc se_ListAdminsConf("ADMINS",&se_ListAdmins_conf);
