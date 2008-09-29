@@ -7405,6 +7405,8 @@ static void Voice_conf(std::istream &s)
 
 static tConfItemFunc voice_conf("VOICE",&Voice_conf);
 static tAccessLevelSetter se_voiceConfLevel( voice_conf, tAccessLevel_Moderator );
+static tConfItemFunc unsilence_conf("UNSILENCE",&Voice_conf);
+static tAccessLevelSetter se_unsilenceConfLevel( unsilence_conf, tAccessLevel_Moderator );
 
 static tString sg_url;
 static tSettingItem< tString > sg_urlConf( "URL", sg_url );
