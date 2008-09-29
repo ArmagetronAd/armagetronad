@@ -4676,7 +4676,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
             }
             else
             {
-                output << " | " << (*userIt).second;
+                output << ", " << (*userIt).second;
             }
         }
 
