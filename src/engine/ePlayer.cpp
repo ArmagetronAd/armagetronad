@@ -4509,7 +4509,6 @@ static tSettingItem< int > se_adminListColors_WorstBlue_Conf( "ADMIN_LIST_COLORS
 void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
 {
     // What's going to be sent ? But wait..are we sending anything at all?
-    bool canSeeEverything = false;
     if ( receiver != 0 && receiver->GetAccessLevel() > se_accessLevelListAdmins )
     {
         sn_ConsoleOut( tOutput("$chat_command_accesslevel", command,
@@ -4518,6 +4517,8 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
                        receiver->Owner() );
         return;
     }
+
+    bool canSeeEverything = false;
     if ( receiver == 0 || receiver->GetAccessLevel() <= se_accessLevelListAdminsSeeEveryone )
     {
         canSeeEverything = true;
@@ -4626,6 +4627,38 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
             theRightSet[ lowerUser ] =user;
 
             // sn_ConsoleOut( userinfo, receiver->Owner() );
+        }
+    }
+
+    // Do it again for authorities
+    eAuthorityLevel::Properties authoritiesMap = se_authorityLevel.GetMap();
+
+    for ( eUserLevel::Properties::iterator iter = authoritiesMap.begin(); iter != authoritiesMap.end(); ++iter )
+    {
+        tColoredString userinfo, lowerUser;
+
+        user = (*iter).first;
+        accessLevel = (*iter).second;
+        if ( accessLevelsToList.find( accessLevel ) != accessLevelsToList.end() )
+        {
+            // Prepare a string with the info about that user
+            usersAccessLevelInSet = adminLevelsMap.find( accessLevel );
+
+            if ( usersAccessLevelInSet == adminLevelsMap.end() )
+            {
+
+                adminLevelsMap[ accessLevel ] = aSetOfAdmins();
+
+                usersAccessLevelInSet = adminLevelsMap.find( accessLevel );
+            }
+
+            aSetOfAdmins & theRightSet = (*usersAccessLevelInSet).second;
+
+            lowerUser = user;
+            tToLower( lowerUser );
+            user = tOutput ( "$admin_list_authoritylevel", user );
+            lowerUser = tString( "AAA" ) << lowerUser;
+            theRightSet[ lowerUser ] = user;
         }
     }
 
