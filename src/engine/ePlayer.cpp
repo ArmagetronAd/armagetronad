@@ -3381,7 +3381,9 @@ static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, e
 }
 #endif
 
+#ifdef DEDICATED
 void se_ListAdmins( ePlayerNetID *, std::istream &s, tString );
+#endif
 
 void handle_chat( nMessage &m )
 {
@@ -3459,10 +3461,12 @@ void handle_chat( nMessage &m )
                         se_ChatPlayers( p, s );
                         return;
                     }
+#ifdef DEDICATED
                     else if (command == "/admins" || command == "/listadmins") {
                         se_ListAdmins( p, s, command );
                         return;
                     }
+#endif
                     else if (command == "/vote" || command == "/callvote") {
                         eVoter::HandleChat( p, s );
                         return;
