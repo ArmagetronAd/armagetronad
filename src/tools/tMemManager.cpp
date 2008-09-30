@@ -90,6 +90,9 @@ static bool reported=false;
 #include <zthread/FastRecursiveMutex.h>
 
 static ZThread::FastRecursiveMutex st_mutex;
+#elif defined(HAVE_PTHREAD)
+#include "pthread-binding.h"
+static tPThreadRecursiveMutex st_mutex;
 #else
 class tMockMutex
 {

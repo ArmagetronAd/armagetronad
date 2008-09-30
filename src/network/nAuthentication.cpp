@@ -53,6 +53,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 typedef ZThread::ThreadedExecutor nExecutor;
 //typedef ZThread::SynchronousExecutor nExecutor;
 typedef ZThread::FastMutex nMutex;
+#elif defined(HAVE_PTHREAD)
+#include "pthread-binding.h"
+typedef tPThreadMutex nMutex;
 #else
 typedef tNonMutex nMutex;
 #endif
@@ -231,6 +234,12 @@ template< class T > class nMemberFunctionRunnerTemplate
     : public ZThread::Runnable
 #endif
 {
+private:
+#ifdef HAVE_PTHREAD
+    static void DoCall(nMemberFunctionRunnerTemplate*o) {
+        ((o->object_)->*(o->function_))();
+    }
+#endif
 public:
     nMemberFunctionRunnerTemplate( T & object, void (T::*function)() )
     : object_( &object ), function_( function )
@@ -252,12 +261,17 @@ public:
     //! schedule a task for execution in a background thread
     static void ScheduleBackground( T & object, void (T::*function)()  )
     {
-#ifdef HAVE_LIBZTHREAD
+#if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
         // schedule the task into a background thread
-        static nExecutor executor;
         if ( !tRecorder::IsRunning() )
         {
+#ifdef HAVE_PTHREAD
+            pthread_t thread;
+            pthread_create(&thread, NULL, DoCall, (void*)(new nMemberFunctionRunnerTemplate( object, function )));
+#else
+            static nExecutor executor;
             executor.execute( ZThread::Task( new nMemberFunctionRunnerTemplate( object, function ) ) );
+#endif
         }
         else
         {
