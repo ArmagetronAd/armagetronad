@@ -894,7 +894,7 @@ unban_ip_help               Revokes the ban of the specified IP address.
 player_list_hidden_player_prefix_help	The prefix that is shown on hidden players' Global ID and access level when we can see it.
 player_list_search          Search string "\1" matches:\n
 player_list_search_no_results Search string "\1" returned no result.\n
-player_list_search_end      End of search.\n
+player_list_search_end      End of search (\1 matches).\n
 
 admins_help                 Lists the server admins. You should use /admins or /listadmins instead of this.
 

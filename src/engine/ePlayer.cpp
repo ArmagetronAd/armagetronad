@@ -3084,7 +3084,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
     }
     else if ( doSearch )
     {
-        sn_ConsoleOut( tOutput( "$player_list_search_end" ) , receiver->Owner() );
+        sn_ConsoleOut( tOutput( "$player_list_search_end", count ) , receiver->Owner() );
     }
 }
 
