@@ -547,25 +547,14 @@ AC_MSG_ERROR([
 # fi
 
 dnl *************************************************
-dnl         Armathentication Threading
+dnl         ZThread
 dnl *************************************************
 
 if test x$enable_armathentication = xyes; then
 
-ACX_PTHREAD([
-
-LIBS="${PTHREAD_LIBS} ${LIBS}"
-CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
-CC="${PTHREAD_CC}"
-AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
-
-],[
-
 AM_PATH_ZTHREAD_AA(2.3.2)
 CXXFLAGS="${CXXFLAGS} ${ZTHREAD_CXXFLAGS}"
 LIBS="${LIBS} ${ZTHREAD_LIBS}"
-
-])
 
 fi # krawall
 fi # armamain
