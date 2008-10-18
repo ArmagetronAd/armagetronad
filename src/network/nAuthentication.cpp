@@ -236,8 +236,9 @@ template< class T > class nMemberFunctionRunnerTemplate
 {
 private:
 #ifdef HAVE_PTHREAD
-    static void DoCall(nMemberFunctionRunnerTemplate*o) {
-        ((o->object_)->*(o->function_))();
+    static void* DoCall( void *o ) {
+        nMemberFunctionRunnerTemplate * functionRunner = (nMemberFunctionRunnerTemplate*) o;
+        ( (functionRunner->object_)->*(functionRunner->function_) )();
     }
 #endif
 public:
@@ -266,8 +267,10 @@ public:
         if ( !tRecorder::IsRunning() )
         {
 #ifdef HAVE_PTHREAD
+            nMemberFunctionRunnerTemplate<T> * runner = new nMemberFunctionRunnerTemplate<T>( object, function );
+
             pthread_t thread;
-            pthread_create(&thread, NULL, DoCall, (void*)(new nMemberFunctionRunnerTemplate( object, function )));
+            pthread_create(&thread, NULL, (nMemberFunctionRunnerTemplate::DoCall), (void*) runner);
 #else
             static nExecutor executor;
             executor.execute( ZThread::Task( new nMemberFunctionRunnerTemplate( object, function ) ) );
@@ -341,7 +344,7 @@ private:
 };
 
 template< class T >
-std::deque< nMemberFunctionRunnerTemplate<T> > 
+std::deque< nMemberFunctionRunnerTemplate<T> >
 nMemberFunctionRunnerTemplate<T>::pendingForBreak_;
 
 // convenience wrapper
@@ -374,7 +377,7 @@ public:
     {
         if ( block )
         {
-#ifdef HAVE_LIBZTHREAD
+#if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
             ScheduleBackground( object, function );
 #else
             ScheduleBreak( object, function );
@@ -406,7 +409,7 @@ public:
 
     // inform the user about delays
         bool delays = false;
-#ifdef HAVE_LIBZTHREAD
+#if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
         delays = tRecorder::IsRunning();
 #endif
         if ( delays )
