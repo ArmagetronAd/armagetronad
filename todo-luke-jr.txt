@@ -9,12 +9,16 @@ Legend:
 
 F>	fallback to original/map-1.0.xml if map not found (on server only)
 
-	central resource db
+BUF>	AutoWrap if turn is < X degrees
 
-BUF	AutoWrap if turn is < X degrees
+UF>	take units for angle (degrees or radians)
 
-UF	take units for angle (degrees or radians)
+F>	figure out how to handle changes in dynamic keysyms (cleanly)
 
-	figure out how to handle changes in dynamic keysyms (cleanly)
+U>	tResource/{tXmlResource/{gMap,cCockpit},tCssResource,tBinaryResource}
 
-	tResource/{tXmlResource/{gMap,cCockpit},tCssResource,tBinaryResource}
+B>	IPv6 compatibility
+
+UF>	libcurl resource fetcher
+
+>	XMPP integration
