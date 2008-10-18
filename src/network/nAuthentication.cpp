@@ -53,9 +53,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 typedef ZThread::ThreadedExecutor nExecutor;
 //typedef ZThread::SynchronousExecutor nExecutor;
 typedef ZThread::FastMutex nMutex;
+#define nQueue ZThread::LockedQueue
 #elif defined(HAVE_PTHREAD)
 #include "pthread-binding.h"
 typedef tPThreadMutex nMutex;
+#define nQueue tPThreadQueue
 #else
 typedef tNonMutex nMutex;
 #endif
@@ -291,7 +293,7 @@ public:
     //! schedule a task for execution in the next tToDo call
     static void ScheduleForeground( T & object, void (T::*function)()  )
     {
-#ifdef HAVE_LIBZTHREAD
+#if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
         Pending().add( nMemberFunctionRunnerTemplate( object, function ) );
         st_ToDo( FinishAll );
 #else
@@ -322,11 +324,10 @@ private:
     // taks for the break
     static std::deque< nMemberFunctionRunnerTemplate > pendingForBreak_;
 
-#ifdef HAVE_LIBZTHREAD
     // queue of foreground tasks
-     static ZThread::LockedQueue< nMemberFunctionRunnerTemplate, ZThread::FastMutex > & Pending()
+     static nQueue< nMemberFunctionRunnerTemplate, nMutex > & Pending()
      {
-         static ZThread::LockedQueue< nMemberFunctionRunnerTemplate, ZThread::FastMutex > pending;
+         static nQueue< nMemberFunctionRunnerTemplate, nMutex > pending;
          return pending;
      }
     
@@ -340,7 +341,6 @@ private:
             next.run();
         }
     }
-#endif
 };
 
 template< class T >
