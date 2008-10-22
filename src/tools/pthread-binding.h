@@ -9,9 +9,7 @@ private:
 public:
     tPThreadMutex() {
         // TODO: error checking
-        pthread_mutexattr_t mta;
-        
-        pthread_mutex_init(&mutex, &mta);
+        pthread_mutex_init(&mutex, NULL);
     }
     void acquire() {
         pthread_mutex_lock(&mutex);
