@@ -184,7 +184,11 @@ static tArray<PasswordStorage> S_passwords;
 // if unsed, usernames of non-authenticated players get all special characters escaped (especially all @)
 // and usernames of authenticated players get left as they are (with all special characters except the last
 // escaped.)
+#if defined(KRAWALL)
 bool se_legacyLogNames = false;
+#else
+bool se_legacyLogNames = true;
+#endif
 static tSettingItem<bool> se_llnConf("LEGACY_LOG_NAMES", se_legacyLogNames );
 
 // transform special characters in name to escape sequences
