@@ -2995,7 +2995,7 @@ static void se_ChatTeams( ePlayerNetID * p )
     se_ListTeams( p );
 }
 
-static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
+static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s, tString command )
 {
     tString search;
     bool doSearch = false;
@@ -3064,7 +3064,10 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
         tos << "\n";
 
         if ( !doSearch )
+        {
             sn_ConsoleOut( tos, receiver->Owner() );
+            count++;
+        }
         else
         {
             tString tosLowercase( tColoredString::RemoveColors(tos) );
@@ -3075,7 +3078,7 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
                 count++;
                 if ( count == 1 )
                 {
-                    sn_ConsoleOut( tOutput( "$player_list_search", search ) , receiver->Owner() );
+                    sn_ConsoleOut( tOutput( "$player_list_search", command, search ) , receiver->Owner() );
                 }
                 sn_ConsoleOut( tos, receiver->Owner() );
             }
@@ -3084,17 +3087,21 @@ static void se_ListPlayers( ePlayerNetID * receiver, std::istream &s )
 
     if ( doSearch && !count )
     {
-        sn_ConsoleOut( tOutput( "$player_list_search_no_results", search ) , receiver->Owner() );
+        sn_ConsoleOut( tOutput( "$player_list_search_no_results", command, search ) , receiver->Owner() );
     }
     else if ( doSearch )
     {
-        sn_ConsoleOut( tOutput( "$player_list_search_end", count ) , receiver->Owner() );
+        sn_ConsoleOut( tOutput( "$player_list_search_end", command, count ) , receiver->Owner() );
+    }
+    else
+    {
+        sn_ConsoleOut( tOutput( "$player_list_end", command, count ) , receiver->Owner() );
     }
 }
 
 static void players_conf(std::istream &s)
 {
-    se_ListPlayers( 0, s );
+    se_ListPlayers( 0, s, tString("PLAYERS") );
 }
 
 static tConfItemFunc players("PLAYERS",&players_conf);
@@ -3102,9 +3109,9 @@ static tAccessLevelSetter players_AccessLevel( players, tAccessLevel_Owner );
 
 
 // /players gives a player list
-static void se_ChatPlayers( ePlayerNetID * p, std::istream &s )
+static void se_ChatPlayers( ePlayerNetID * p, std::istream &s, tString command )
 {
-    se_ListPlayers( p, s );
+    se_ListPlayers( p, s, command );
 }
 
 
@@ -3386,7 +3393,7 @@ static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, e
 #endif
 
 #if defined(DEDICATED) && defined(KRAWALL_SERVER)
-void se_ListAdmins( ePlayerNetID *, std::istream &s, tString );
+void se_ListAdmins( ePlayerNetID *, std::istream &s, tString command );
 #endif
 
 void handle_chat( nMessage &m )
@@ -3462,7 +3469,7 @@ void handle_chat( nMessage &m )
                         return;
                     }
                     else if (command == "/players" || command == "/listplayers") {
-                        se_ChatPlayers( p, s );
+                        se_ChatPlayers( p, s, command );
                         return;
                     }
 #if defined(DEDICATED) && defined(KRAWALL_SERVER)
@@ -4549,6 +4556,8 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
         }
     }
 
+    int userCount = 0, authorityCount = 0;
+
     std::set< tAccessLevel > accessLevelsToList;
 
     if ( gotFirstNumber && !gotSecondNumber )
@@ -4559,7 +4568,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
         }
         else
         {
-            sn_ConsoleOut( tOutput("$admin_list_cant_see"), receiver->Owner() );
+            sn_ConsoleOut( tOutput( "$admin_list_cant_see", command ), receiver->Owner() );
             return;
         }
     }
@@ -4632,9 +4641,9 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
 
             lowerUser = user;
             tToLower( lowerUser );
-            theRightSet[ lowerUser ] =user;
+            theRightSet[ lowerUser ] = user;
 
-            // sn_ConsoleOut( userinfo, receiver->Owner() );
+            userCount++;
         }
     }
 
@@ -4667,6 +4676,8 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
             user = tOutput ( "$admin_list_authoritylevel", user );
             lowerUser = tString( "AAA" ) << lowerUser;
             theRightSet[ lowerUser ] = user;
+
+            authorityCount++;
         }
     }
 
@@ -4726,6 +4737,11 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
 
         ++advancement;
     }
+
+    tOutput sumup;
+    sumup = "";
+
+    sn_ConsoleOut( tOutput( "$admin_list_end", command, userCount, authorityCount, static_cast<int>( adminLevelsMap.size() ) ), receiver->Owner() );
 }
 
 static void se_ListAdmins_conf( std::istream &s )
