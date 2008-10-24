@@ -184,7 +184,7 @@ static tArray<PasswordStorage> S_passwords;
 // if unsed, usernames of non-authenticated players get all special characters escaped (especially all @)
 // and usernames of authenticated players get left as they are (with all special characters except the last
 // escaped.)
-#if defined(KRAWALL)
+#if defined(KRAWALL_SERVER)
 bool se_legacyLogNames = false;
 #else
 bool se_legacyLogNames = true;
@@ -3385,7 +3385,7 @@ static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, e
 }
 #endif
 
-#if defined(DEDICATED) && defined(KRAWALL)
+#if defined(DEDICATED) && defined(KRAWALL_SERVER)
 void se_ListAdmins( ePlayerNetID *, std::istream &s, tString );
 #endif
 
@@ -3465,7 +3465,7 @@ void handle_chat( nMessage &m )
                         se_ChatPlayers( p, s );
                         return;
                     }
-#if defined(DEDICATED) && defined(KRAWALL)
+#if defined(DEDICATED) && defined(KRAWALL_SERVER)
                     else if (command == "/admins" || command == "/listadmins") {
                         se_ListAdmins( p, s, command );
                         return;
