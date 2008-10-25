@@ -619,6 +619,8 @@ static void PasswordCallback( nKrawall::nPasswordRequest const & request,
     // force a small console while we are in here
     rSmallConsoleCallback cb(&tr);
 
+    se_ChatState( ePlayerNetID::ChatFlags_Menu, true );
+
     login.Enter();
 
     // return username/scrambled password
@@ -641,6 +643,8 @@ static void PasswordCallback( nKrawall::nPasswordRequest const & request,
             storage->save = (se_PasswordStorageMode > 0);
         }
     }
+
+    se_ChatState( ePlayerNetID::ChatFlags_Menu, false );
 }
 
 #ifdef DEDICATED
