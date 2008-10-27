@@ -1618,13 +1618,7 @@ void tString::NetFilter( void )
     static tNetCharacterFilter filter;
 
     // run through string
-    for( int i = Len()-2; i>=0; --i )
-    {
-        // character to filter
-        char & my = (*this)(i);
-
-        my = filter.Filter(my);
-    }
+    filter.FilterString( *this );
 }
 
 bool st_colorStrings=true;
