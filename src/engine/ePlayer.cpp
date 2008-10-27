@@ -7645,8 +7645,8 @@ void ePlayerNetID::UpdateName( void )
 
     // apply client change, stripping excess spaces
     if ( sn_GetNetState() == nSTANDALONE
-    || ( !IsHuman() && sn_GetNetState() != nCLIENT )
-    || ( 
+    || ( Owner() == 0 && sn_GetNetState() != nCLIENT )
+    || (
             IsHuman()
          && ( sn_GetNetState() == nCLIENT || !messenger.adminRename_ )
          && ( sn_GetNetState() != nCLIENT || Owner() == sn_myNetID )
