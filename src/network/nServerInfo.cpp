@@ -80,6 +80,8 @@ static tSettingItem< REAL > sn_queryDelayGlobalConf( "BROWSER_QUERY_DELAY_GLOBAL
 static tSettingItem< int > sn_numQueriesConf( "BROWSER_NUM_QUERIES", sn_numQueries );
 static tSettingItem< int > sn_TNALostContactConf( "BROWSER_CONTACTLOSS", sn_TNALostContact );
 
+nServerInfoCharacterFilter sn_serverNameCharacterFilter;
+
 static int sn_MaxUnreachable()
 {
     return sn_IsMaster ? 10 : 5;
@@ -164,6 +166,7 @@ nServerInfo::nServerInfo()
         timesNotAnswered(5),
         stillOnMasterServer(false),
         name(""),
+        nameForSorting(""),
         users(0),
         maxUsers_(MAXCLIENTS),
         score(-10000),
@@ -268,6 +271,7 @@ static const tString METHOD     ("method");
 static const tString KEY        ("key");
 static const tString TNA        ("tna");
 static const tString NAME       ("name");
+static const tString FILTEREDNAME ("filteredName");
 static const tString VERSION_TAG    ("version");
 static const tString RELEASE    ("release");
 static const tString SCOREBIAS  ("scorebias");
@@ -294,6 +298,7 @@ void nServerInfo::Save(std::ostream &s) const
 
     s << SCOREBIAS  << "\t" << scoreBias_ << "\n";
     s << NAME  << "\t" << name             << "\n";
+    s << FILTEREDNAME  << "\t" << nameForSorting   << "\n";    
     s << TNA  << "\t" << timesNotAnswered  << "\n";
     s << END   << "\t" << "\n\n";
 }
@@ -347,6 +352,8 @@ void nServerInfo::Load(std::istream &s)
             s >> timesNotAnswered;
         else if (id == NAME)
             name.ReadLine(s);
+        else if (id == FILTEREDNAME)
+            nameForSorting.ReadLine(s);
         else
             con << "Warning: unknown tag " << id << " found in server config file.\n";
     }
@@ -405,19 +412,25 @@ void nServerInfo::Sort( PrimaryKey key )
             //	    break;
             int compare = 0;
             bool previousPolling = prev->Polling();
-            bool previousUnreachable  = !prev->Reachable() && !previousPolling;
+            bool previousUnreachable  = !prev->Reachable() || previousPolling;
             bool ascendPolling = ascend->Polling();
-            bool ascendUnreachable  = !ascend->Reachable() && !ascendPolling;
+            bool ascendUnreachable  = !ascend->Reachable() || ascendPolling;
+
+            // Idiots get their server removed
+            if ( !previousUnreachable && !ascendUnreachable && prev->nameForSorting == "") {
+                prev->Remove();
+                break;
+            }
 
             switch ( key )
             {
 
             case KEY_NAME:
-                // Unreachable servers should be displayed at the end of the list
-                if ( !previousUnreachable && !ascendUnreachable ) {
-                    compare = tColoredString::RemoveColors(prev->name).Compare( tColoredString::RemoveColors(ascend->name), true );
+                // Unreachable servers should be displayed at the end of the list                
+                if ( !previousUnreachable && !ascendUnreachable )
+                {
+                    compare = prev->nameForSorting.Compare( ascend->nameForSorting, true );
                 }
-
                 break;
             case KEY_PING:
                 if ( ascend->ping > prev->ping )
@@ -1036,7 +1049,10 @@ void nServerInfo::GetSmallServerInfo(nMessage &m){
     n->stillOnMasterServer = true;
 
     if (n->name.Len() <= 1)
+    {
         n->name <<  ToString( baseInfo );
+        n->nameForSorting << sn_serverNameCharacterFilter.FilterServerName( n->name, true );
+    }
 
     //  n->advancedInfoSet = false;
     n->queried         = 0;
@@ -2682,6 +2698,7 @@ void nServerInfo::DoGetFrom( nSocket const * socket )
     tColoredString filteredName( sn_serverName );
     filteredName.NetFilter();
     name            = filteredName;
+    nameForSorting  = sn_serverNameCharacterFilter.FilterServerName( filteredName, false );
 
     if ( nServerInfoAdmin::GetAdmin() )
     {
@@ -2743,6 +2760,8 @@ void nServerInfo::NetReadThis( nMessage & m )
     tString oldName = name;
 
     sn_ReadFiltered( m, name  ); // get the server name
+    nameForSorting = sn_serverNameCharacterFilter.FilterServerName ( name, false );
+                                // and filter it for sorting
     m >> users;                 // get the playing users
 
     if ( !m.End() )
@@ -2996,4 +3015,98 @@ const tString & nServerInfo::DoGetName( void ) const
     return name;
 }
 
+// *******************************************************************************************
+// *
+// *	nServerInfoCharacterFilter
+// *
+// *******************************************************************************************
+//!
+//!
+// *******************************************************************************************
+
+nServerInfoCharacterFilter::nServerInfoCharacterFilter( void )
+{
+    int i;
+    filter[0] = 0;
+
+    // Delete all unknown characters
+    for (i=255; i>0; --i)
+    {
+        filter[i] = -1;
+    }
+
+    // leave as they are..
+    // numbers:
+    for (i='9'; i>='0'; --i)
+    {
+        filter[i] = i;
+    }
+    // and lowercase letters:
+    for (i='z'; i >='a'; --i)
+    {
+        filter[i] = i;
+    }
+
+    // but convert uppercase characters to lowercase
+    for (i='Z'; i>='A'; --i)
+    {
+        filter[i] = i + ('a' - 'A');
+    }
+
+    //! map umlauts and stuff to their base characters
+    SetMap(0xc0,0xc5,'a');
+    SetMap(0xd1,0xd6,'o');
+    SetMap(0xd9,0xdD,'u');
+    SetMap(0xdf,'s');
+    SetMap(0xe0,0xe5,'a');
+    SetMap(0xe8,0xeb,'e');
+    SetMap(0xec,0xef,'i');
+    SetMap(0xf0,0xf6,'o');
+    SetMap(0xf9,0xfc,'u');
+
+    // Remap l33t characters
+    SetMap('0', 'o');
+    SetMap('1', 'i');
+    SetMap('2', 'z');
+    SetMap('3', 'e');
+    SetMap('4', 'a');
+    SetMap('5', 's');
+    SetMap('6', 'g');
+    SetMap('7', 't');
+    SetMap('$', 's');
+    SetMap('+', 't');
+}
+
+// *******************************************************************************************
+// *
+// *	nServerInfoCharacterFilter
+// *
+// *******************************************************************************************
+//!
+//!
+// *******************************************************************************************
+
+tString nServerInfoCharacterFilter::FilterServerName( tString s, bool IP )
+{
+    // Remove colors
+    s = tColoredString::RemoveColors( s );
+
+    // Map characters accordingly to the filter
+    int len = s.Len();
+    tString out;
+    int c;
+    for ( int i = 0; i < len; i++ )
+    {
+        if( IP && ( ( s[i] <= '9' && s[i] >= '0' ) || s[i] == '.' || s[i] == ':' ) )
+        {
+            out << s[i];
+        }
+        else if ( ( c = Filter( s[i] ) ) >= 0 )
+        {
+            out << (char) c;
+        }
+    }
+//    std::cout << "Filtered name for "<< ( IP? "IP ":"" ) << "'" << s << "' : '" << out << "'\n";
+    return out;
+}
 

@@ -139,6 +139,8 @@ protected:
     int     users;            // number of users online
     int	  maxUsers_;		// maximum number of users allowed
 
+    tString nameForSorting;     //!< Name used when sorting servers.
+
     tString userNames_;		// names of the connected users
     tString userGlobalIDs_;		// IDs of the connected users
     tString userNamesOneLine_;// names of the connected users in one line
@@ -192,6 +194,7 @@ public:
 
     static nServerInfo *GetFirstServer();  // get the first (best) server
     static void Sort( PrimaryKey key );    // sort the servers by score
+    static tString SortableName( const char * ); // gives a sanitized name for sorting
     static void CalcScoreAll();            // calculate the score for all servers
     static void DeleteAll(bool autosave=true);     // delete all server infos
 
@@ -333,6 +336,13 @@ private:
     virtual tString GetUrl()		const = 0;
 
     static nServerInfoAdmin* GetAdmin();
+};
+
+class nServerInfoCharacterFilter: public tCharacterFilter
+{
+public:
+    nServerInfoCharacterFilter( void );
+    tString FilterServerName( tString, bool );
 };
 
 // *******************************************************************************************

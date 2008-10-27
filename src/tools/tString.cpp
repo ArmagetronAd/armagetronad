@@ -225,72 +225,6 @@ bool tString::operator==(const tString &other) const
 
 // char st_stringOutputBuffer[tMAX_STRING_OUTPUT];
 
-// filters illegal characters
-class tCharacterFilter
-{
-public:
-    tCharacterFilter()
-    {
-        int i;
-        filter[0]=0;
-
-        // map all unknown characters to underscores
-        for (i=255; i>=0; --i)
-        {
-            filter[i] = '_';
-        }
-
-        // leave ASCII characters as they are
-        // for (i=127; i>=32; --i)
-        // no, leave all ISO Latin 1 characters as they are
-        for (i=255; i>=32; --i)
-        {
-            filter[i] = i;
-        }
-
-        // map return and tab to space
-        SetMap('\n',' ');
-        SetMap('\t',' ');
-
-        //! map umlauts and stuff to their base characters
-        /*
-        SetMap(0xc0,0xc5,'A');
-        SetMap(0xd1,0xd6,'O');
-        SetMap(0xd9,0xdD,'U');
-        SetMap(0xdf,'s');
-        SetMap(0xe0,0xe5,'a');
-        SetMap(0xe8,0xeb,'e');
-        SetMap(0xec,0xef,'i');
-        SetMap(0xf0,0xf6,'o');
-        SetMap(0xf9,0xfc,'u');
-        */
-
-        //!todo: map weird chars
-        // make this data driven.
-    }
-
-    char Filter( unsigned char in )
-    {
-        return filter[ static_cast< unsigned int >( in )];
-    }
-private:
-    void SetMap( int in1, int in2, unsigned char out)
-    {
-        tASSERT( in2 <= 0xff );
-        tASSERT( 0 <= in1 );
-        tASSERT( in1 < in2 );
-        for( int i = in2; i >= in1; --i )
-            filter[ i ] = out;
-    }
-
-    void SetMap( unsigned char in, unsigned char out)
-    {
-        filter[ static_cast< unsigned int >( in ) ] = out;
-    }
-
-    char filter[256];
-};
-
 // *******************************************************************************
 // *
 // *	tString
@@ -1537,22 +1471,22 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
         // skip color codes
         if (*c=='0' && len >= 2 && c[1]=='x')
         {
-	    if( len >= 8 && darkonly && strncmp( c, "0xRESETT", 8 ) != 0 )
-	    {
-		tColor colorToFilter;
-		colorToFilter = tColor( c );
-		if ( !colorToFilter.IsDark() )
-		{
-	            ret << c[0] << c[1] << c[2] << c[3] << c[4] << c[5] << c[6] << c[7];
-		}
-		else
-		{
+        if( len >= 8 && darkonly && strncmp( c, "0xRESETT", 8 ) != 0 )
+        {
+        tColor colorToFilter;
+        colorToFilter = tColor( c );
+        if ( !colorToFilter.IsDark() )
+        {
+                ret << c[0] << c[1] << c[2] << c[3] << c[4] << c[5] << c[6] << c[7];
+        }
+        else
+        {
                     removed = true;
-		}
-		c   += 8;
-		len -= 8;	
-	    }
-	    else if( len >= 8 )
+        }
+        c   += 8;
+        len -= 8;
+        }
+        else if( len >= 8 )
             {
                 c   += 8;
                 len -= 8;
@@ -1563,7 +1497,7 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
                 // skip incomplete color codes, too
                 return RemoveColors( ret, darkonly );
             }
-	    // st_Breakpoint();
+        // st_Breakpoint();
         }
         else
         {
@@ -1681,7 +1615,7 @@ void tColoredString::RemoveTrailingColor( void )
 
 void tString::NetFilter( void )
 {
-    static tCharacterFilter filter;
+    static tNetCharacterFilter filter;
 
     // run through string
     for( int i = Len()-2; i>=0; --i )
@@ -2272,3 +2206,118 @@ void tToUpper( tString & toTransform )
         toTransform[i] = toupper( toTransform[i] );
     }
 }
+
+// **********************************************************************
+// *
+// *	Filter
+// *
+// **********************************************************************
+//!
+//!    @param      in            Character to process filters on
+//!
+// **********************************************************************
+
+char tCharacterFilter::Filter( unsigned char in )
+{
+    if ( filter[ static_cast< unsigned int >( in )] < 0 )
+        return -1;
+    else
+        return filter[ static_cast< unsigned int >( in )];
+}
+
+// **********************************************************************
+// *
+// *	Filter
+// *
+// **********************************************************************
+//!
+//!    @param      in            Character to process filters on
+//!
+// **********************************************************************
+
+tString tCharacterFilter::FilterString( tString & s )
+{
+    int len = s.Len();
+    tString out;
+    int c;
+    for ( int i = 0; i < len; i++ )
+    {
+        c = Filter( s[i] );
+        if ( c >= 0 )
+        {
+            out << (char) c;
+        }
+    }
+    return out;
+}
+
+// **********************************************************************
+// *
+// *	SetMap
+// *
+// **********************************************************************
+//!
+//!    @param      in1           Begin of the character range to process filters on
+//!    @param      in2           End of the character range
+//!    @param      out           Filtered character
+//!
+// **********************************************************************
+
+void tCharacterFilter::SetMap( int in1, int in2, char out)
+{
+    tASSERT( in2 <= 0xff );
+    tASSERT( 0 <= in1 );
+    tASSERT( in1 < in2 );
+    for( int i = in2; i >= in1; --i )
+        filter[ i ] = out;
+}
+
+// **********************************************************************
+// *
+// *	SetMap
+// *
+// **********************************************************************
+//!
+//!    @param      in            Character to process filters on
+//!    @param      out           Filtered character
+//!
+// **********************************************************************
+
+void tCharacterFilter::SetMap( unsigned char in, char out)
+{
+    filter[ static_cast< unsigned int >( in ) ] = out;
+}
+
+// **********************************************************************
+// *
+// *	tNetCharacterFilter
+// *
+// **********************************************************************
+//!
+//!
+// **********************************************************************
+
+tNetCharacterFilter::tNetCharacterFilter ( void )
+{
+    int i;
+    filter[0]=0;
+
+    // map all unknown characters to underscores
+    for (i=255; i>=0; --i)
+    {
+        filter[i] = '_';
+    }
+
+    // no, leave all ISO Latin 1 characters as they are
+    for (i=255; i>=32; --i)
+    {
+        filter[i] = i;
+    }
+
+    // map return and tab to space
+    SetMap('\n',' ');
+    SetMap('\t',' ');
+
+
+}
+

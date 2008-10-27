@@ -288,6 +288,27 @@ bool tString::Convert( T & target, size_type startPos ) const
 }
 #endif
 
+class tCharacterFilter
+{
+public:
+    char Filter ( unsigned char );
+    tString FilterString ( tString & );
+
+protected:
+    tCharacterFilter ( void ) {} // To use a tCharacterFilter, make your own class herit of this one and define the constructor
+
+    void SetMap ( int, int, char );
+    void SetMap ( unsigned char, char );
+
+    char filter[256];
+};
+
+class tNetCharacterFilter: public tCharacterFilter
+{
+public:
+    tNetCharacterFilter ( void );
+};
+
 #endif
 
 

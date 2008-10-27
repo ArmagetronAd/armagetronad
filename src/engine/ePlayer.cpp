@@ -7831,7 +7831,10 @@ public:
 
     char Filter( unsigned char in )
     {
-        return filter[ static_cast< unsigned int >( in )];
+        if ( filter[ static_cast< unsigned int >( in )] < 0 )
+            return '_';
+        else
+            return filter[ static_cast< unsigned int >( in )];
     }
 private:
     void SetMap( int in1, int in2, unsigned char out)
