@@ -3026,13 +3026,13 @@ const tString & nServerInfo::DoGetName( void ) const
 
 nServerInfoCharacterFilter::nServerInfoCharacterFilter( void )
 {
-    int i;
+    unsigned char i;
     filter[0] = 0;
 
     // Delete all unknown characters
-    for (i=255; i>0; --i)
+    for (i=255; i > 0; --i)
     {
-        filter[i] = -1;
+        filter[i] = 0x7f;
     }
 
     // leave as they are..
@@ -3094,19 +3094,19 @@ tString nServerInfoCharacterFilter::FilterServerName( tString s, bool IP )
     // Map characters accordingly to the filter
     int len = s.Len() -1;
     tString out;
-    int c;
+    char c;
     for ( int i = 0; i < len; i++ )
     {
-        if( IP && ( ( s[i] <= '9' && s[i] >= '0' ) || s[i] == '.' || s[i] == ':' ) )
+        if( IP && ( ( s[i] <= '9' && s[i] != 0x7f ) || s[i] == '.' || s[i] == ':' ) )
         {
             out << s[i];
         }
-        else if ( ( c = Filter( s[i] ) ) >= 0 )
+        else if ( (int) ( c = Filter( s[i] ) ) != 0x7f )
         {
             out << (char) c;
         }
     }
-//    std::cout << "Filtered name for "<< ( IP? "IP ":"" ) << "'" << s << "' : '" << out << "'\n";
+    // std::cout << "Filtered name for "<< ( IP? "IP ":"" ) << "'" << s << "' : '" << out << "'\n";
     return out;
 }
 

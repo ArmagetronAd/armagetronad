@@ -2201,10 +2201,7 @@ void tToUpper( tString & toTransform )
 
 char tCharacterFilter::Filter( unsigned char in )
 {
-    if ( filter[ static_cast< unsigned int >( in )] < 0 )
-        return -1;
-    else
-        return filter[ static_cast< unsigned int >( in )];
+    return filter[ in ];
 }
 
 // **********************************************************************
@@ -2221,15 +2218,18 @@ tString tCharacterFilter::FilterString( tString & s )
 {
     int len = s.Len() -1;
     tString out;
-    int c;
+    unsigned char c;
     for ( int i = 0; i < len; i++ )
     {
         c = Filter( s[i] );
-        if ( c > 0 )
+        if ( ( c ) != 0x7f ) // If it's a del character, that means we want to strip it
         {
-            out << (char) c;
+            out << c;
         }
+        std::cout << "'" << (unsigned char) c << "'(" << int( c ) << ")\n";
     }
+    // std::cout << "Filtered name for " /*<< ( IP? "IP ":"" )*/ << "'" << s << "' : '" << out << "'\n";
+
     return out;
 }
 
@@ -2245,12 +2245,12 @@ tString tCharacterFilter::FilterString( tString & s )
 //!
 // **********************************************************************
 
-void tCharacterFilter::SetMap( int in1, int in2, char out)
+void tCharacterFilter::SetMap( unsigned char in1, unsigned char in2, unsigned char out)
 {
     tASSERT( in2 <= 0xff );
     tASSERT( 0 <= in1 );
     tASSERT( in1 < in2 );
-    for( int i = in2; i >= in1; --i )
+    for( unsigned char i = in2; i >= in1; --i )
         filter[ i ] = out;
 }
 
@@ -2265,9 +2265,9 @@ void tCharacterFilter::SetMap( int in1, int in2, char out)
 //!
 // **********************************************************************
 
-void tCharacterFilter::SetMap( unsigned char in, char out)
+void tCharacterFilter::SetMap( unsigned char in, unsigned char out )
 {
-    filter[ static_cast< unsigned int >( in ) ] = out;
+    filter[ in ] = out;
 }
 
 // **********************************************************************
@@ -2281,17 +2281,18 @@ void tCharacterFilter::SetMap( unsigned char in, char out)
 
 tNetCharacterFilter::tNetCharacterFilter ( void )
 {
-    int i;
+    unsigned char i;
     filter[0]=0;
 
     // map all unknown characters to underscores
-    for (i=255; i>=0; --i)
+    for (i=255; i > 0; i--)
     {
+        std::cout << i << "(" << (int) i << ")\n";
         filter[i] = '_';
     }
 
     // no, leave all ISO Latin 1 characters as they are
-    for (i=255; i>=32; --i)
+    for (i=255; i >= 32; --i)
     {
         filter[i] = i;
     }

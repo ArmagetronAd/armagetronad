@@ -297,8 +297,8 @@ public:
 protected:
     tCharacterFilter ( void ) {} // To use a tCharacterFilter, make your own class herit of this one and define the constructor
 
-    void SetMap ( int, int, char );
-    void SetMap ( unsigned char, char );
+    void SetMap ( unsigned char, unsigned char, unsigned char );
+    void SetMap ( unsigned char, unsigned char );
 
     char filter[256];
 };
