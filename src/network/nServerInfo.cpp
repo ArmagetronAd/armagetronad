@@ -3092,7 +3092,7 @@ tString nServerInfoCharacterFilter::FilterServerName( tString s, bool IP )
     s = tColoredString::RemoveColors( s );
 
     // Map characters accordingly to the filter
-    int len = s.Len();
+    int len = s.Len() -1;
     tString out;
     int c;
     for ( int i = 0; i < len; i++ )

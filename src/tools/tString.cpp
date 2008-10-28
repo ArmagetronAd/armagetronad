@@ -1105,20 +1105,8 @@ tString::CHAR tString::operator []( size_t i ) const
 
 tString::CHAR & tString::operator []( size_t i )
 {
-    while( i >= size() )
-    {
-        *this += ' ';
-#ifdef DEBUG
-        static bool warn = true;
-        if( warn )
-        {
-            warn = false;
-            tERR_MESSAGE("Auto-expanding string, this functionality will go away.");
-        }
-#endif
-    }
-
-    return BASE::operator[](i);
+    tASSERT( i <= size() );
+    return BASE::operator[]( i );
 }
 
 // *******************************************************************************
@@ -1618,7 +1606,7 @@ void tString::NetFilter( void )
     static tNetCharacterFilter filter;
 
     // run through string
-    filter.FilterString( *this );
+    *this = filter.FilterString( *this );
 }
 
 bool st_colorStrings=true;
@@ -2231,13 +2219,13 @@ char tCharacterFilter::Filter( unsigned char in )
 
 tString tCharacterFilter::FilterString( tString & s )
 {
-    int len = s.Len();
+    int len = s.Len() -1;
     tString out;
     int c;
     for ( int i = 0; i < len; i++ )
     {
         c = Filter( s[i] );
-        if ( c >= 0 )
+        if ( c > 0 )
         {
             out << (char) c;
         }
