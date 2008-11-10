@@ -3066,6 +3066,7 @@ nServerInfoCharacterFilter::nServerInfoCharacterFilter( void )
 
     // Remap l33t characters
     SetMap('0', 'o');
+    SetMap(0xb0, 'o'); // °
     SetMap('1', 'i');
     SetMap('2', 'z');
     SetMap('3', 'e');

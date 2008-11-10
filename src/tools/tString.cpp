@@ -2226,7 +2226,6 @@ tString tCharacterFilter::FilterString( tString & s )
         {
             out << c;
         }
-        std::cout << "'" << (unsigned char) c << "'(" << int( c ) << ")\n";
     }
     // std::cout << "Filtered name for " /*<< ( IP? "IP ":"" )*/ << "'" << s << "' : '" << out << "'\n";
 
@@ -2287,7 +2286,6 @@ tNetCharacterFilter::tNetCharacterFilter ( void )
     // map all unknown characters to underscores
     for (i=255; i > 0; i--)
     {
-        std::cout << i << "(" << (int) i << ")\n";
         filter[i] = '_';
     }
 
