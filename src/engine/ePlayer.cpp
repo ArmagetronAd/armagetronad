@@ -1014,7 +1014,7 @@ static char const * default_instant_chat[]=
      "/me just installed this game and still doesn't know how to talk.",
      "/team You all suck, I want a new team.",
      "Are you the real \"Player 1\"?",
-     "Shh, don't tell anyone: Press SHIFT-ESC for cheats!",
+     "Only idiots miss holes!",
      NULL};
 
 #endif
