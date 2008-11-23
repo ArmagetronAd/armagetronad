@@ -552,20 +552,20 @@ dnl *************************************************
 
 if test x$enable_armathentication = xyes; then
 
-ACX_PTHREAD([
+dnl ACX_PTHREAD([
 
-LIBS="${PTHREAD_LIBS} ${LIBS}"
-CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
-CC="${PTHREAD_CC}"
-AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
+dnl LIBS="${PTHREAD_LIBS} ${LIBS}"
+dnl CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
+dnl CC="${PTHREAD_CC}"
+dnl AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
 
-],[
+dnl ],[
 
 AM_PATH_ZTHREAD_AA(2.3.2)
 CXXFLAGS="${CXXFLAGS} ${ZTHREAD_CXXFLAGS}"
 LIBS="${LIBS} ${ZTHREAD_LIBS}"
 
-])
+dnl ])
 
 fi # krawall
 fi # armamain
