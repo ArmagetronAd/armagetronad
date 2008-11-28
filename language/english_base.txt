@@ -892,14 +892,16 @@ ban_list_help               Prints a list of currently banned IPs.
 unban_ip_help               Revokes the ban of the specified IP address.
 
 player_list_hidden_player_prefix_help	The prefix that is shown on hidden players' Global ID and access level when we can see it.
-player_list_search          Search string "\1" matches:\n
-player_list_search_no_results Search string "\1" returned no result.\n
-player_list_search_end      End of search (\1 matches).\n
+player_list_search          \1: Search string "\2" matches:\n
+player_list_search_no_results \1: Search string "\2" returned no result.\n
+player_list_search_end      \1: End of search (\2 matches).\n
+player_list_end             \1: Listed \2 players.\n
 
 admins_help                 Lists the server admins. You should use /admins or /listadmins instead of this.
 
-admin_list_cant_see         You are not allowed to list these admins.\n
+admin_list_cant_see         \1: You are not allowed to list these admins.\n
 admin_list_authoritylevel   users from authority \1
+admin_list_end              \1: Listed \2 users and \3 authorities on \4 access levels.\n
 
 admin_list_colors_best_red_help    Red color component to the best access level listed by /admins
 admin_list_colors_best_green_help  Green color component to the best access level listed by /admins
@@ -2483,7 +2485,7 @@ vote_rejected						Poll "\1" has been rejected.\n
 vote_timeout						Poll "\1" timed out.\n
 vote_cancel_all                     All polls have been canceled by an administrator.\n
 vote_new							New poll: "\1". Enter the main menu vote on it.\n
-vote_redundant                      Poll rejected, same suggestion was made already.\n
+vote_redundant                      Poll rejected, same suggestion was made already recently.\n
 vote_maturity                       Poll rejected, you're not old enough to issue votes, wait \1 seconds.\n
 vote_overflow						Poll rejected, too many pending polls.\n
 vote_disabled						Poll rejected, disabled by server admin.\n
@@ -2760,7 +2762,7 @@ access_level_list_admins_help Access level required to be able to use the "/admi
 access_level_list_admins_see_everyone_help Users with this access level or better will be able to list any configured admin, regardless of ADMIN_LIST_MIN_ACCESS_LEVEL.
 
 chat_command_unknown        Unknown chat command "\1".\n
-chat_command_accesslevel    Sorry, your access level is not high enough to use the "\1" command You're \1, required would be \2.\n
+chat_command_accesslevel    Sorry, your access level is not high enough to use the "\1" command. You're \2, required would be \3.\n
 
 authority_blacklist_help    Comma separated list of authorities your server should refuse to query.
 authority_whitelist_help    If non-empty, only authorities on this comma separated list will be queried by your server.
