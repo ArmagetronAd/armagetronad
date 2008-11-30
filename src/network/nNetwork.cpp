@@ -1493,6 +1493,7 @@ void login_accept_handler(nMessage &m){
             if ( !sn_IsLANAddress( address ) )
             {
                 sn_myAddress = address;
+                con << "Got address " << address << ".\n";
             }
 
             // read salt reply and compare it to what we sent

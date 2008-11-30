@@ -324,13 +324,14 @@ private:
     // taks for the break
     static std::deque< nMemberFunctionRunnerTemplate > pendingForBreak_;
 
+#if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
     // queue of foreground tasks
-     static nQueue< nMemberFunctionRunnerTemplate, nMutex > & Pending()
-     {
-         static nQueue< nMemberFunctionRunnerTemplate, nMutex > pending;
-         return pending;
-     }
-    
+    nQueue< nMemberFunctionRunnerTemplate, nMutex > & Pending()
+    {
+        static nQueue< nMemberFunctionRunnerTemplate, nMutex > pending;
+        return pending;
+    }
+
     // function that calls them
     static void FinishAll()
     {
@@ -341,6 +342,7 @@ private:
             next.run();
         }
     }
+#endif
 };
 
 template< class T >
@@ -932,6 +934,8 @@ bool nLoginProcess::CheckServerAddress( nMessage & m )
             return true;
         }
     }
+
+    std::cout << serverAddress;
 
     if ( sn_GetMyAddress() == serverAddress )
     {
