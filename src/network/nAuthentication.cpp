@@ -237,7 +237,7 @@ template< class T > class nMemberFunctionRunnerTemplate
 #endif
 {
 private:
-#ifdef HAVE_PTHREAD
+#if defined(HAVE_PTHREAD) && !defined(HAVE_LIBZTHREAD)
     static void* DoCall( void *o ) {
         nMemberFunctionRunnerTemplate * functionRunner = (nMemberFunctionRunnerTemplate*) o;
         ( (functionRunner->object_)->*(functionRunner->function_) )();
@@ -268,7 +268,7 @@ public:
         // schedule the task into a background thread
         if ( !tRecorder::IsRunning() )
         {
-#ifdef HAVE_PTHREAD
+#if !defined(HAVE_LIBZTHREAD)
             nMemberFunctionRunnerTemplate<T> * runner = new nMemberFunctionRunnerTemplate<T>( object, function );
 
             pthread_t thread;
@@ -326,7 +326,7 @@ private:
 
 #if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
     // queue of foreground tasks
-    nQueue< nMemberFunctionRunnerTemplate, nMutex > & Pending()
+    static nQueue< nMemberFunctionRunnerTemplate, nMutex > & Pending()
     {
         static nQueue< nMemberFunctionRunnerTemplate, nMutex > pending;
         return pending;
