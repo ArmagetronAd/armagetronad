@@ -1232,7 +1232,7 @@ void gAIPlayer::SetNumberOfAIs(int num, int minPlayers, int iq, int tries)
         for (i = se_PlayerNetIDs.Len()-1; i>=0; i--)
         {
             ePlayerNetID *p = se_PlayerNetIDs(i);
-            if ( !p->IsSpectating() )
+            if ( p->CurrentTeam() )
                 ++pcount;
         }
 

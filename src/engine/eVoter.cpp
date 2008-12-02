@@ -1968,7 +1968,7 @@ eVoter* eVoter::GetVoter( int ID, bool complain )			// find or create the voter 
         for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
         {
             ePlayerNetID* p = se_PlayerNetIDs(i);
-            if ( p->Owner() == ID && !p->IsSpectating() )
+            if ( p->Owner() == ID && p->CurrentTeam() )
                 player = true;
         }
         if (!player)
