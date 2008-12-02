@@ -4944,8 +4944,12 @@ static tConfItemFunc sn_listBanConf("BAN_USER_LIST",&se_ListBannedUsers);
 static void se_CheckAccessLevel( tAccessLevel & level, tString const & authName )
 {
     tAccessLevel newLevel;
+    tString authority;
+    tString user;
 
-    newLevel = se_authorityLevel.Get( se_GetAuthorityFromGid( authName ) );
+    nKrawall::SplitUserName( authName, user, authority );
+
+    newLevel = se_authorityLevel.Get( authority );
     if ( newLevel < level || newLevel > tAccessLevel_DefaultAuthenticated )
     {
         level = newLevel;
