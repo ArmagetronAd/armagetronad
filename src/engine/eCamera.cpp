@@ -514,8 +514,8 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
         // copy over position and direction, but reset glancing.
         // this will keep the camera as it was before the turn.
         glancingRight=glancingBack=glancingLeft=false;
-        dir = dir.Turn( -glanceDir_ );
-        pos = Glance( pos, -glanceDir_ );
+        dir = dir.Turn( glanceDir_ );
+        pos = Glance( pos, glanceDir_ );
         glanceSmooth = 0;
     }
 
