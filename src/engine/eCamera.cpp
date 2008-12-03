@@ -502,12 +502,10 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
     bool takeOverGlance = false;
     if (eGameObject::se_turnLeft==*reinterpret_cast<uActionPlayer *>(Act)){
         takeOverGlance = glancingLeft || glancingBack;
-        glancingBack=glancingLeft=false;
         turn=-1;
     }
     if (eGameObject::se_turnRight==*reinterpret_cast<uActionPlayer *>(Act)){
         takeOverGlance = glancingRight || glancingBack;
-        glancingBack=glancingRight=false;
         turn=1;
     }
 
@@ -515,8 +513,9 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
     {
         // copy over position and direction, but reset glancing.
         // this will keep the camera as it was before the turn.
-        dir = dir.Turn( glanceDir_ );
-        pos = Glance( pos, glanceDir_ );
+        glancingRight=glancingBack=glancingLeft=false;
+        dir = dir.Turn( -glanceDir_ );
+        pos = Glance( pos, -glanceDir_ );
         glanceSmooth = 0;
     }
 
