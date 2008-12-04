@@ -4119,6 +4119,13 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
 }
 
 void gCycle::Render(const eCamera *cam){
+    static int counter = 0;
+    ++ counter;
+    if ( counter == -1 )
+    {
+        st_Breakpoint();
+    }
+
     // are we blinking from invulnerability?
     bool blinking = false;
     if ( lastTime > spawnTime_ && !Vulnerable() )

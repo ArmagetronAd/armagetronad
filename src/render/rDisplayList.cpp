@@ -35,6 +35,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 #endif
 
+#define DONTDOIT
+#include "rRender.h"
+
 #ifdef LIST_STATS
 class rListCounter
 {
@@ -102,6 +105,9 @@ bool rDisplayList::OnCall()
 {
 #ifndef DEDICATED
     tASSERT( !filling_ );
+
+    // abort previous glBegin block
+    RenderEnd();
 
     // no playback while another list is recorded; this
     // gives us a chance to agglomerate primitives.

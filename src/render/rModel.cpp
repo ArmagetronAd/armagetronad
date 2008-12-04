@@ -37,6 +37,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rGL.h"
 #include <string.h>
 
+#define DONTDOIT
+#include "rRender.h"
+
 tCONFIG_ENUM(rDisplayListUsage);
 
 static tConfItem<rDisplayListUsage> mod_udl("USE_DISPLAYLISTS", sr_useDisplayLists);
@@ -277,6 +280,9 @@ void rModel::Render(){
         return;
     if ( !displayList_.Call() )
     {
+        // close pending glBegin() blocks
+        RenderEnd();
+
         // model display lists should definitely be compiled before other lists
         rDisplayList::Cancel();
 
