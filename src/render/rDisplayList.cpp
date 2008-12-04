@@ -35,7 +35,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 #endif
 
-#define DONTDOIT
 #include "rRender.h"
 
 #ifdef LIST_STATS
@@ -274,6 +273,9 @@ void rDisplayListFiller::Stop()
     {
         tASSERT( list_.list_ );
         tASSERT( sr_currentFiller == this );
+
+        // close previous glBegin block
+        RenderEnd();
 
         sr_currentFiller = 0;
         list_.filling_ = false;
