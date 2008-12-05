@@ -52,7 +52,7 @@ std::ostream & operator << ( std::ostream &s, const eTeam & team)
 static unsigned short se_team_rgb[TEAMCOLORS][3]=
 { {  4,  8, 15 } , // blue
     { 15, 13,  0 } , // gold
-    { 15,  4,  4 } , // red
+    { 15,  1,  1 } , // red
     {  0, 15,  4 } , // green
     { 15,  4, 15 } , // violet
     {  4, 15, 15 } , // ugly green
