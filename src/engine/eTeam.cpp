@@ -827,6 +827,12 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
 // inquire or set the ability to use a color as a team name
 bool eTeam::NameTeamAfterColor ( bool wish )
 {
+    // reassign colors if colorID >= maxTeams
+    if ( wish && colorID >= maxTeams )
+    {
+        NameTeamAfterColor( false );
+    }
+
     if ( wish && colorID < 0 )
     {
         for ( int i = 0; i < TEAMCOLORS; ++i )
