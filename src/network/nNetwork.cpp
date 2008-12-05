@@ -952,6 +952,10 @@ senderID(::sn_myNetID), readOut(0){
 
     messageIDBig_ = current_id;
 
+#ifdef DEBUG_X
+    con << "Message " << d.id << " " << current_id << "\n";
+#endif
+
 #ifdef DEBUG
     BreakOnMessageID( messageIDBig_ );
 #endif
