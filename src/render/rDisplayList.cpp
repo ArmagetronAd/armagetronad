@@ -139,10 +139,15 @@ bool rDisplayList::OnCall()
 void rDisplayList::Clear( int inhibitGeneration )
 {
 #ifndef DEDICATED
-
     // clear the list
     if ( !filling_ && list_ )
     {
+        // abort previous glBegin block
+        if ( renderer )
+        {
+            RenderEnd();
+        }
+
         glDeleteLists( list_, 1 );
         list_ = 0;
     }

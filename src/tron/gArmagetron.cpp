@@ -691,7 +691,6 @@ int main(int argc,char **argv){
                     nNetObject::ClearAll();
 
                     rITexture::UnloadAll();
-                    sr_RendererCleanup();
                 }
                 catch (tException const & e)
                 {
@@ -704,6 +703,7 @@ int main(int argc,char **argv){
                 }
 
                 sr_ExitDisplay();
+                sr_RendererCleanup();
 
                 //std::cout << "exit\n";
 
