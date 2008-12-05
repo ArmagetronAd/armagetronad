@@ -156,6 +156,18 @@ void eTeam::UpdateStaticFlags()
     }
 }
 
+// number of rounds played (updated right after spawning)
+int eTeam::RoundsPlayed() const
+{
+    return roundsPlayed;
+}
+
+// increase round counter
+void eTeam::PlayRound()
+{
+    roundsPlayed++;
+}
+
 //update internal properties ( player count )
 void eTeam::UpdateProperties()
 {
@@ -626,8 +638,17 @@ void eTeam::EnforceConstraints()
         imbalance=0;
 }
 
-static int se_teamEliminationMode = 0;
-static tSettingItem<int> se_teamEliminationModeConf("TEAM_ELIMINATION_MODE", se_teamEliminationMode );
+enum eTeamEliminationMode
+{
+    TEAM_ELIMINATION_SIZE  = 0, // eliminate smallest team
+    TEAM_ELIMINATION_COLOR = 1, // eliminate ugliest team
+    TEAM_ELIMINATION_SCORE = 2  // eliminate suckiest team
+};
+
+tCONFIG_ENUM( eTeamEliminationMode );
+
+static eTeamEliminationMode se_teamEliminationMode = TEAM_ELIMINATION_SIZE;
+static tSettingItem<eTeamEliminationMode> se_teamEliminationModeConf("TEAM_ELIMINATION_MODE", se_teamEliminationMode );
 
 // make sure the limits on team number and such are met
 void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
@@ -713,17 +734,17 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
         }
 
         eTeam * teamToKill = NULL;
-        if( se_teamEliminationMode > 2 ) se_teamEliminationMode = 0;
+        if( (int)se_teamEliminationMode > 2 ) se_teamEliminationMode = TEAM_ELIMINATION_SIZE;
         // let negative values simply "lock" teams like you lock a server with a low MAX_CLIENTS
         switch ( se_teamEliminationMode )
         {
-            case 0:
+            case TEAM_ELIMINATION_SIZE:
                 teamToKill = min;
                 break;
-            case 1:
+            case TEAM_ELIMINATION_COLOR:
                 teamToKill = lastColor;
                 break;
-            case 2:
+            case TEAM_ELIMINATION_SCORE:
                 teamToKill = last;
                 break;
         }
@@ -828,7 +849,7 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
 bool eTeam::NameTeamAfterColor ( bool wish )
 {
     // reassign colors if colorID >= maxTeams
-    if ( wish && colorID >= maxTeams )
+    if ( wish && colorID >= maxTeams && se_teamEliminationMode == TEAM_ELIMINATION_COLOR )
     {
         NameTeamAfterColor( false );
     }
@@ -1353,7 +1374,7 @@ void eTeam::ReceiveControlNet(nMessage &m)
 // con/desstruction
 // default constructor
 eTeam::eTeam()
-        :colorID(-1),listID(-1)
+        :colorID(-1),listID(-1), roundsPlayed(0)
 {
     score = 0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;

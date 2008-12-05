@@ -1446,10 +1446,23 @@ void init_game_objects(eGrid *grid){
                                   sg_currentSettings->AI_IQ);
 
         int spawnPointsUsed = 0;
+
         for(int t=eTeam::teams.Len()-1;t>=0;t--)
         {
             eTeam *team = eTeam::teams(t);
+
+
+            // reset team color of fresh teams
+            if ( team->RoundsPlayed() == 0 )
+            {
+                team->NameTeamAfterColor( false );
+            }
+
+            // update team name
             team->Update();
+
+            // increase round counter
+            team->PlayRound();
 
             gSpawnPoint *spawn = Arena.LeastDangerousSpawnPoint();
             spawnPointsUsed++;
