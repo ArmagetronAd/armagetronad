@@ -540,12 +540,12 @@ public:
 
     virtual ~uMenuItemFileSelection() {};
 
-    void SetDir( const char *dir ) { dir_ = dir; }; const
-    void SetFileSpec( const char *fileSpec ) { fileSpec_ = fileSpec; }; const
-    void SetFormatName( bool formatName ) { formatName_ = formatName; }; const
-    void SetGetFilesFlag( int getFilesFlag ) { getFilesFlag_ = getFilesFlag; } const
-    void SetDefaultFileName( const char *defaultFileName ) { defaultFileName_ = defaultFileName; }; const
-    void SetDefaultFilePath( const char *defaultFilePath ) { defaultFilePath_ = defaultFilePath; }; const
+    void SetDir( const char *dir ) { dir_ = dir; }
+    void SetFileSpec( const char *fileSpec ) { fileSpec_ = fileSpec; }
+    void SetFormatName( bool formatName ) { formatName_ = formatName; }
+    void SetGetFilesFlag( int getFilesFlag ) { getFilesFlag_ = getFilesFlag; }
+    void SetDefaultFileName( const char *defaultFileName ) { defaultFileName_ = defaultFileName; }
+    void SetDefaultFilePath( const char *defaultFilePath ) { defaultFilePath_ = defaultFilePath; }
 
     void SetParams( const char *dir, const char *fileSpec, int getFilesFlag,
                     bool formatName, const char *defaultFileName, const char *defaultFilePath )

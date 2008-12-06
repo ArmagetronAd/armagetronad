@@ -4724,11 +4724,13 @@ void gCycle::SoundMix(Uint8 *dest,unsigned int len,
             engine->Mix(dest,len,viewer,rvol,lvol,verletSpeed_/(sg_speedCycleSound * SpeedMultiplier()));
 
         if (turning)
+        {
             if (turn_wav.alt)
                 turning->Mix(dest,len,viewer,rvol,lvol,5);
             else
                 turning->Mix(dest,len,viewer,rvol,lvol,1);
-
+        }
+        
         if (spark)
             spark->Mix(dest,len,viewer,rvol*.5,lvol*.5,4);
     }

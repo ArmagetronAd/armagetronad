@@ -2307,7 +2307,7 @@ static void rec_peer(unsigned int peer){
                                 if (id <= MAXCLIENTS && mess_id != 0)  // messages with ID 0 are non-ack messages and come really often. they are always new.
                                 {
                                     unsigned short diff=mess_id-highest_ack[id];
-                                    if (diff>0 && diff<10000 ||
+                                    if ( ( diff>0 && diff<10000 ) ||
                                             ((
                                                  mess.Descriptor() == login_accept.ID() ||
                                                  mess.Descriptor() == login_deny.ID()   ||

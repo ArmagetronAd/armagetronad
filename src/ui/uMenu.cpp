@@ -369,20 +369,24 @@ void uMenu::HandleEvent( SDL_Event event )
                             lastkey=tSysTimeFloat();
                 selected++;
                 if (selected>=items.Len())
+                {
                     if (wrap)
                         selected=0;
                     else
                         selected=items.Len()-1;
+                }
                 break;
 
             case(SDLK_DOWN):
                             lastkey=tSysTimeFloat();
                 selected--;
                 if (selected<0)
+                {
                     if (wrap)
                         selected=items.Len()-1;
                     else
                         selected=0;
+                }
 
                 break;
 
@@ -1152,7 +1156,7 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
     // catch some keyboard input
     {
         uInputProcessGuard inputProcessGuard;
-        while (su_GetSDLInput(tEvent));
+        while (su_GetSDLInput(tEvent)) ;
     }
 
     {
@@ -1236,7 +1240,7 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
     // catch some keyboard input
     {
         uInputProcessGuard inputProcessGuard;
-        while (su_GetSDLInput(tEvent));
+        while (su_GetSDLInput(tEvent)) ;
     }
 
     uMenu::SetIdle(idle_back);

@@ -142,7 +142,9 @@ public:
         }
 #endif
         if (i>=Len())
+        {
             SetLen(i+1);
+        }
 
         //    dump(low,flow,"[" << i << "]" << "=" << ((T *)Base())[i] << '\n');
 

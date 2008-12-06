@@ -177,7 +177,7 @@ bool tCommandLineData::Analyse(int argc,char **argv)
             bool success = false;
             while ( commandLineAnalyzer )
             {
-                if ( success = commandLineAnalyzer->Analyze( parser ) )
+                if ( ( success = commandLineAnalyzer->Analyze( parser ) ) )
                     break;
                 commandLineAnalyzer = commandLineAnalyzer->Next();
             }

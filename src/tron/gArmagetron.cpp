@@ -228,7 +228,7 @@ static void welcome(){
         // catch some keyboard input
         {
             uInputProcessGuard inputProcessGuard;
-            while (su_GetSDLInput(tEvent));
+            while (su_GetSDLInput(tEvent)) ;
         }
 
         sr_textOut = textOutBack;
@@ -250,7 +250,7 @@ static void welcome(){
     // catch some keyboard input
     {
         uInputProcessGuard inputProcessGuard;
-        while (su_GetSDLInput(tEvent));
+        while (su_GetSDLInput(tEvent)) ;
     }
 
     timeout = tSysTimeFloat() + 10;

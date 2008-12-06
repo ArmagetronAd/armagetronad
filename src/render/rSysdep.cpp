@@ -622,7 +622,7 @@ void rSysDep::SwapGL(){
     if (!sr_glOut)
     {
         // display next frame in fast foward mode
-        if ( s_fastForward && ( time > s_nextFastForwardFrameRecorded || realTime > s_nextFastForwardFrameReal ) || next_glOut )
+        if ( ( s_fastForward && ( time > s_nextFastForwardFrameRecorded || realTime > s_nextFastForwardFrameReal ) ) || next_glOut )
         {
             sr_glOut = true;
             rSysDep::ClearGL();

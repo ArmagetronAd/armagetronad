@@ -121,9 +121,11 @@ bool sr_DesktopScreensizeSupported()
     SDL_version const & sdlVersion = *SDL_Linked_Version();
 
     return
-        sdlVersion.major > 1 || sdlVersion.major == 1 &&
-        ( sdlVersion.minor > 2 || sdlVersion.minor == 2 &&
-          ( sdlVersion.patch >= 10 ) );
+    sdlVersion.major > 1 || 
+    ( sdlVersion.major == 1 &&
+      ( sdlVersion.minor > 2 || 
+        ( sdlVersion.minor == 2 &&
+          ( sdlVersion.patch >= 10 ) ) ) );
 #else
     return false;
 #endif
@@ -639,10 +641,12 @@ static bool lowlevel_sr_InitDisplay(){
 #ifndef WIN32
     if(!strstr(gl_renderer,"Voodoo3"))
 #endif
+    {
         if(currentScreensetting.fullscreen)
             SDL_ShowCursor(0);
         else
             SDL_ShowCursor(1);
+    }
 
 #ifdef WIN32
     renderer_identification << "WIN32 ";

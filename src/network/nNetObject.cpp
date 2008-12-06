@@ -1045,7 +1045,7 @@ nNetObject::~nNetObject(){
 
         // con << "Destroying object " << id << '\n';
         for(int user=MAXCLIENTS;user>=0;user--){
-            if(user!=sn_myNetID && knowsAbout[user].knowsAboutExistence ||
+            if( ( user!=sn_myNetID && knowsAbout[user].knowsAboutExistence ) ||
                     knowsAbout[user].acksPending){
                 if (destroyers[user]==NULL)
                 {

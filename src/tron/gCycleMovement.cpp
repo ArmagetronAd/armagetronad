@@ -480,7 +480,7 @@ static void blocks(const gSensor &s, const gCycleMovement *c, int lr)
 
     if (s.type == gSENSOR_RIM)
         gAIPlayer::CycleBlocksRim(c, lr);
-    else if (s.type == gSENSOR_TEAMMATE || s.type == gSENSOR_ENEMY && s.ehit)
+    else if (s.type == gSENSOR_TEAMMATE || ( s.type == gSENSOR_ENEMY && s.ehit ) )
     {
         gPlayerWall *w = dynamic_cast<gPlayerWall*>(s.ehit->GetWall());
         if (w)
@@ -2960,7 +2960,7 @@ void gCycleMovement::CalculateAcceleration()
     }
 
     // kill cycle if it is inside a too narrow channel
-    if ( slingshot && tunnelWidth < sg_cycleWidth || sideWidth < sg_cycleWidthSide )
+    if ( ( slingshot && tunnelWidth < sg_cycleWidth ) || sideWidth < sg_cycleWidthSide )
     {
         tunnelWidth = 0;
         REAL sideWidth = sg_cycleWidthSide * 2;
