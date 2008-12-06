@@ -304,7 +304,7 @@ void rModel::Render(){
 
         if ( !modelTexFacesCoherent )
         {
-            rDisplayListFiller filler( displayList_ );
+            rDisplayListFiller filler( displayList_, false );
             glEnable(GL_CULL_FACE);
 
             // sigh, we need to do it the complicated way
@@ -339,7 +339,7 @@ void rModel::Render(){
             glVertexPointer(3,GL_FLOAT,0,&vertices[0]);
             glEnableClientState(GL_VERTEX_ARRAY);
 
-            rDisplayListFiller filler( displayList_ );
+            rDisplayListFiller filler( displayList_, false );
             glEnable(GL_CULL_FACE);
 
             glDrawElements(GL_TRIANGLES,
