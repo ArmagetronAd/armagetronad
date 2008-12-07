@@ -293,7 +293,7 @@ test $DEBUGLEVEL -ge 3 && enable_memmanager=yes
 test $DEBUGLEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -DDEBUG_EXPENSIVE"
 test $DEBUGLEVEL -ge 5 && CXXFLAGS="$CXXFLAGS -DMEM_DEB"
 
-test $CODELEVEL -ge 1 && CXXFLAGS="$CXXFLAGS -Wall"
+test $CODELEVEL -ge 1 && CXXFLAGS="$CXXFLAGS -Wall -Wno-strict-overflow"
 dnl test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wshadow -Wpointer-arith -Wfloat-equal -W -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code --pedantic -Winline"
 test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wpointer-arith -W -Wcast-qual -Wcast-align --pedantic -Wno-unused-parameter"
 test $CODELEVEL -ge 3 && CXXFLAGS="$CXXFLAGS -Weffc++ -Wshadow -Winline -Wfloat-equal -Wconversion"
