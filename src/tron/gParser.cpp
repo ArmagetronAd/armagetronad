@@ -198,11 +198,6 @@ gParser::isValidCodeName(const xmlChar *version)
     return false;
 }
 
-template< typename T >
-static void Ignore( T )
-{
-}
-
 bool
 gParser::isValidDotNumber(const xmlChar *version)
 {
