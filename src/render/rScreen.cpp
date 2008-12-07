@@ -686,6 +686,12 @@ static bool lowlevel_sr_InitDisplay(){
     )
         software_renderer=true;
 
+    if ( // test for Mesa software GL, new versions
+        strstr(gl_vendor,"Mesa") &&
+        strstr(gl_renderer,"Software Rasterizer")
+        )
+        software_renderer=true;
+
     if ( // test for GLX software GL
         strstr(gl_renderer,"GLX") &&
         strstr(gl_renderer,"ndirect") &&
