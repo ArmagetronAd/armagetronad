@@ -44,10 +44,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tMemManager.h"
 
 // include definition for top source directory
+#ifndef MACOSX
 #ifdef TOP_SOURCE_DIR
 static const char * s_topSourceDir = TOP_SOURCE_DIR;
 #else
 static const char * s_topSourceDir = ".";
+#endif
 #endif
 
 // program name definition
