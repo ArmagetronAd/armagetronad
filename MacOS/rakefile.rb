@@ -61,3 +61,4 @@ end
 
 desc "Update version"
 task "update-version" => ["remove-version", "xcode:process-files"]
+
