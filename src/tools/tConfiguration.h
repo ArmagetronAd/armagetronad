@@ -337,7 +337,7 @@ private:
 
 template<class T> class tConfItem:virtual public tConfItemBase{
 public:
-    typedef bool (*ShouldChangeFuncT)(T &newValue);
+    typedef bool (*ShouldChangeFuncT)(T const &newValue);
 protected:
     T    *target;
     ShouldChangeFuncT shouldChangeFunc_;

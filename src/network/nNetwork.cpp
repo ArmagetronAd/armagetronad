@@ -471,7 +471,7 @@ static void reset_last_acks(int i){
 //#ifndef DEBUG
 int sn_maxClients=MAXCLIENTS;
 
-bool restrictMaxClients( int &newValue )
+bool restrictMaxClients( int const &newValue )
 {
     if (newValue > MAXCLIENTS)
     {
