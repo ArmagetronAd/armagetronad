@@ -1547,6 +1547,9 @@ gCycle * gDeathZoneHack::getPlayerCycle(ePlayerNetID *pPlayer)
 //!		@param	time    the current time
 //!
 // *******************************************************************************
+static eLadderLogWriter sg_deathShotFragWriter("DEATH_SHOT_FRAG", true);
+static eLadderLogWriter sg_deathShotSuicideWriter("DEATH_SHOT_SUICIDE", true);
+static eLadderLogWriter sg_deathShotTeamkillWriter("DEATH_SHOT_TEAMKILL", true);
 static eLadderLogWriter sg_deathDeathZoneWriter("DEATH_DEATHZONE", true);
 void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 {
@@ -1591,6 +1594,8 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 				}
 				else
 				{
+                    sg_deathShotSuicideWriter << *target->Player()->GetUserName();
+                    sg_deathShotSuicideWriter.write();
 					if (!score_shot_suicide)
 					{
 						tColoredString playerName;
@@ -1621,6 +1626,8 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 
 				if (prey->CurrentTeam() != hunter->CurrentTeam())
 				{
+                    sg_deathShotFragWriter << prey->GetUserName() << hunter->GetUserName();
+                    sg_deathShotFragWriter.write();
 					char const *pWinString = "$player_win_shot";
 					char const *pFreeString = "$player_free_shot";
 					int score = score_shot;
@@ -1676,7 +1683,8 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 						//Don't kill team
 						return;
 					}
-
+                    sg_deathShotTeamkillWriter << prey->GetUserName() << hunter->GetUserName();
+                    sg_deathShotTeamkillWriter.write();
 					tColoredString hunterName;
 					hunterName << *hunter << tColoredString::ColorString(1,1,1);
 					sn_ConsoleOut( tOutput( "$player_teamkill", hunterName, preyName ) );
