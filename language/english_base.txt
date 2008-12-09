@@ -609,6 +609,7 @@ server_dns_help         If your server is on dynamic IP and you set up a dynamic
 server_port_help		Port this server listens on
 client_port_help		Port we try to connect to
 max_clients_help		Maximum number of network clients to accept
+max_clients_limit       Warning: MAX_CLIENTS can not be be greater than \1. Setting not changed.
 max_clients_same_ip_soft_help		Maximum number of network clients to accept from the same IP; more logins will get kicked when the server is full
 max_clients_same_ip_hard_help		Maximum number of network clients to accept from the same IP; more logins will be ignored
 max_players_same_ip_help  maximum number of players from the same IP (note that each client can legally host up to four players)

@@ -471,7 +471,20 @@ static void reset_last_acks(int i){
 //#ifndef DEBUG
 int sn_maxClients=MAXCLIENTS;
 
-static tSettingItem< int > sn_maxClientsConf( "MAX_CLIENTS", sn_maxClients );
+bool restrictMaxClients( int &newValue )
+{
+    if (newValue > MAXCLIENTS)
+    {
+        tOutput o;
+        o.SetTemplateParameter(1, MAXCLIENTS);
+        o << "$max_clients_limit";
+        con << o << '\n';
+        return false;
+    }
+    return true;
+}
+
+static tSettingItem< int > sn_maxClientsConf( "MAX_CLIENTS", sn_maxClients, &restrictMaxClients );
 
 int sn_allowSameIPCountSoft=4;
 static tSettingItem< int > sn_allowSameIPCountSoftConf( "MAX_CLIENTS_SAME_IP_SOFT", sn_allowSameIPCountSoft );

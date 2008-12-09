@@ -336,16 +336,22 @@ private:
 };
 
 template<class T> class tConfItem:virtual public tConfItemBase{
+public:
+    typedef bool (*ShouldChangeFuncT)(T &newValue);
 protected:
     T    *target;
+    ShouldChangeFuncT shouldChangeFunc_;
 
-    tConfItem(T &t):tConfItemBase(""),target(&t){};
+    tConfItem(T &t):tConfItemBase(""),target(&t), shouldChangeFunc_(NULL) {};
 public:
     tConfItem(const char *title,const tOutput& help,T& t)
-            :tConfItemBase(title,help),target(&t){}
+            :tConfItemBase(title,help),target(&t), shouldChangeFunc_(NULL) {}
 
     tConfItem(const char *title,T& t)
-            :tConfItemBase(title),target(&t){}
+            :tConfItemBase(title),target(&t), shouldChangeFunc_(NULL) {}
+        
+    tConfItem(const char*title, T& t, ShouldChangeFuncT changeFunc)
+            :tConfItemBase(title),target(&t),shouldChangeFunc_(changeFunc) {}
 
     virtual ~tConfItem(){}
 
@@ -397,22 +403,25 @@ public:
                     {
                         tOutput o;
                         o.SetTemplateParameter(1, title);
-                        o << "nconfig_errror_protected";
+                        o << "$nconfig_errror_protected";
                         con << "";
                     }
                     else{
-                        if (printChange)
+                        if (shouldChangeFunc_ && shouldChangeFunc_(dummy))
                         {
-                            tOutput o;
-                            o.SetTemplateParameter(1, title);
-                            o.SetTemplateParameter(2, *target);
-                            o.SetTemplateParameter(3, dummy);
-                            o << "$config_value_changed";
-                            con << o;
-                        }
+                            if (printChange)
+                            {
+                                tOutput o;
+                                o.SetTemplateParameter(1, title);
+                                o.SetTemplateParameter(2, *target);
+                                o.SetTemplateParameter(3, dummy);
+                                o << "$config_value_changed";
+                                con << o;
+                            }
 
-                        *target=dummy;
-                        changed=true;
+                            *target = dummy;
+                            changed = true;
+                        }
                     }
                 }
         }
@@ -442,6 +451,9 @@ public:
 
     tSettingItem(const char *title,T& t)
             :tConfItemBase(title),tConfItem<T>(title, t){}
+    
+    tSettingItem(const char *title, T& t, typename tConfItem<T>::ShouldChangeFuncT changeFunc)
+            :tConfItemBase(title), tConfItem<T>(title, t, changeFunc) {}
 
     virtual ~tSettingItem(){}
 
