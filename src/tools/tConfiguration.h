@@ -407,7 +407,7 @@ public:
                         con << "";
                     }
                     else{
-                        if (shouldChangeFunc_ && shouldChangeFunc_(dummy))
+                        if (!shouldChangeFunc_ || shouldChangeFunc_(dummy))
                         {
                             if (printChange)
                             {
