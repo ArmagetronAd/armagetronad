@@ -638,6 +638,15 @@ static bool lowlevel_sr_InitDisplay(){
     gl_version    << reinterpret_cast<const char *>(glGetString(GL_VERSION));
     gl_extensions << reinterpret_cast<const char *>(glGetString(GL_EXTENSIONS));
 
+    // display list blacklist
+    sr_blacklistDisplayLists=false;
+
+    if(strstr(gl_version,"Mesa 7.0"))
+    {
+        // mesa DRI and software has problems in the 7.0 series
+        sr_blacklistDisplayLists=true;
+    }
+
 #ifndef WIN32
     if(!strstr(gl_renderer,"Voodoo3"))
 #endif
@@ -865,7 +874,6 @@ void sr_LoadDefaultConfig(){
     // High detail defaults; no problem for your ordinary 3d-card.
     sr_alphaBlend=true;
     sr_useDisplayLists=rDisplayList_Off;
-    sr_blacklistDisplayLists=false;
     sr_textOut=true;
     sr_dither=true;
     sr_smoothShading=true;
@@ -923,13 +931,12 @@ void sr_LoadDefaultConfig(){
         sr_floorDetail = rFLOOR_TEXTURE;  // double textured floor does not work
     }
 
-    // display list blacklist
+    /*
     else if(strstr(gl_version,"Mesa"))
     {
-        // mesa DRI and software has problems
         sr_useDisplayLists=rDisplayList_Off;
-        sr_blacklistDisplayLists=true;
     }
+    */
 }
 
 void sr_ResetRenderState(bool menu){
