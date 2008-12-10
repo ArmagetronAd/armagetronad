@@ -62,7 +62,7 @@ build_regular=true
 have_lzma=false
     AC_ARG_WITH(maxclients, AC_HELP_STRING([--with-maxclients],[sets the hardcoded limit for the number of connected clients (default: 16 for clients and 32 for dedicated servers)]),
 [ 
-    CXXFLAGS="$CXXFLAGS -DMAXCLIENTS=${withval}"
+    AC_DEFINE_UNQUOTED(MAXCLIENTS,${withval},maximal number of clients)
 ])
 
 AC_ARG_ENABLE(dedicated,
