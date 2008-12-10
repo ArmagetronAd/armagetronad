@@ -230,7 +230,7 @@ void rDisplayListFiller::Start( bool respectBlacklist )
     bool useList = sr_useDisplayLists != rDisplayList_Off && list_.inhibit_ == 0 && !sr_currentFiller;
 
     // don't ever use display lists if they are blacklisted
-#ifndef DEBUG
+#ifndef DEBUG_X
     if ( sr_blacklistDisplayLists && respectBlacklist )
     {
         useList = false;
