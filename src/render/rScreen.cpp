@@ -641,9 +641,9 @@ static bool lowlevel_sr_InitDisplay(){
     // display list blacklist
     sr_blacklistDisplayLists=false;
 
-    if(strstr(gl_version,"Mesa 7.0"))
+    if(strstr(gl_version,"Mesa 7.0") || strstr(gl_version,"Mesa 7.1"))
     {
-        // mesa DRI and software has problems in the 7.0 series
+        // mesa DRI and software has problems in the 7.0/7.1 series
         sr_blacklistDisplayLists=true;
     }
 
