@@ -46,12 +46,12 @@ for line in sys.stdin:
 
     if function == 'glBegin':
         if inBlock:
-            print "Error: Still in block."
+            print "Error: Still in block.", lineNo
             exit(-1)
         inBlock = True
     elif function == 'glEnd':
         if not inBlock:
-            print "Error: Not in block."
+            print "Error: Not in block.", lineNo
             exit(-1)
         inBlock = False
     else:
@@ -64,22 +64,27 @@ for line in sys.stdin:
     if function == 'glGenLists':
         legalLists[result] = True
         if inList:
-            print "Error: Still in list generation."
+            print "Error: Still in list generation.", lineNo
             exit(-1)
 
     if function == 'glEndList':
         if not inList:
-            print "Error: Not in list generation."
+            print "Error: Not in list generation.", lineNo
+            exit(-1)
+        if inBlockAtListStart != inBlock:
+            print "Error: glBegin/glEnd mismatch in list.", lineNo
             exit(-1)
         inList=False
 
     if function == 'glNewList':
+        inBlockAtListStart=inBlock
         list=args[0:args.find(',')]
+        currentList=list
         if inList:
-            print "Error: Still in list generation."
+            print "Error: Still in list generation.", lineNo
             exit(-1)
         if not legalLists[list]:
-            print "Error: list %s used, but not generated." % [list]
+            print "Error: list %s used, but not generated." % [list], lineNo
             exit(-1)
         setLists[list]=True
         inList=True
@@ -91,16 +96,19 @@ for line in sys.stdin:
     if function == 'glCallList':
         list=args
         if not legalLists[list]:
-            print "Error: list %s used, but not generated." % [list]
+            print "Error: list %s used, but not generated." % [list], lineNo
+            exit(-1)
+        if inList and currentList == list:
+            print "Error: list %s used, but it's just getting generated." % [list], lineNo
             exit(-1)
         if not setLists[list]:
-            print "Error: list %s used, but not set." % [list]
+            print "Error: list %s used, but not set." % [list], lineNo
             exit(-1)
 
     if function == 'glDeleteLists':
         list=args[0:args.find(',')]
         if not legalLists[list]:
-            print "Error: list %s used, but not generated." % [list]
+            print "Error: list %s used, but not generated." % [list], lineNo
             exit(-1)
         legalLists[list]=False
         setLists[list]=False

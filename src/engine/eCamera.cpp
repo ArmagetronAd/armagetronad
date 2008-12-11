@@ -688,11 +688,6 @@ public:
         if ( recursion < 0 || hardRecursion < 0 )
             return;
 
-        static int count = 0;
-        count ++;
-        if ( count == 35390 )
-            st_Breakpoint();
-
         // tell the wall that it is blocking the sight (if requested)
         if ( lowerWall_ )
         {
