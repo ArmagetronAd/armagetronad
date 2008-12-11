@@ -2246,8 +2246,6 @@ tString tCharacterFilter::FilterString( tString & s )
 
 void tCharacterFilter::SetMap( unsigned char in1, unsigned char in2, unsigned char out)
 {
-    tASSERT( in2 <= 0xff );
-    tASSERT( 0 <= in1 );
     tASSERT( in1 < in2 );
     for( unsigned char i = in2; i >= in1; --i )
         filter[ i ] = out;

@@ -166,9 +166,9 @@ nServerInfo::nServerInfo()
         timesNotAnswered(5),
         stillOnMasterServer(false),
         name(""),
-        nameForSorting(""),
         users(0),
         maxUsers_(MAXCLIENTS),
+        nameForSorting(""),
         score(-10000),
         scoreBias_(0),
         queryType_( QUERY_ALL )
