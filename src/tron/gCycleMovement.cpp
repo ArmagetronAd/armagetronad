@@ -3199,7 +3199,7 @@ bool gCycleMovement::DoTurn( int dir )
                 // this would be the maximal acceleration factor
                 REAL accelerationFactorMax = (1/sg_accelerationCycleOffs) - accellerationFactorOffset;
 
-                if( accelerationFactorMax > 0 )
+                if( accelerationFactorMax > 0 && dist < sg_nearCycle )
                 {
                     // select boost settings according to wall type
                     // apply modificators
