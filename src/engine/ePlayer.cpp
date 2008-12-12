@@ -6412,7 +6412,7 @@ bool ePlayerNetID::WaitToLeaveChat()
     for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
     {
         ePlayerNetID* player = se_PlayerNetIDs(i);
-        if ( player->CurrentTeam() && player->chatting_ && ( !se_playerWaitTeamleader || player->CurrentTeam()->OldestHumanPlayer() == player ) )
+        if ( player->CurrentTeam() && !player->IsSilenced() && player->chatting_ && ( !se_playerWaitTeamleader || player->CurrentTeam()->OldestHumanPlayer() == player ) )
         {
             // account for waiting time if everyone is to get his time reduced
             if ( !se_playerWaitSingle )
