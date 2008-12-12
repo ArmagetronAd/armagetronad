@@ -599,7 +599,8 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
         {
             std::istringstream in( static_cast< const char * >( authority ) );
             std::ostringstream outShort; // stream for shorthand authority
-            std::ostringstream outFull;  // stream for full authority URL that is to be used for lookups     
+            std::ostringstream outFull;  // stream for full authority URL that is to be used for lookups
+            std::ostringstream outDirectory;
             int c = in.get();
 
             // is the authority an abreviation?
@@ -638,7 +639,6 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                     }
                     else if ( c == '/' )
                     {
-                        shortcut = false;
                         slash = true;
                         inHostName = false;
                     }
@@ -651,7 +651,6 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                 {
                     if ( c == '/' )
                     {
-                        shortcut = false;
                         inPort = false;
                         slash = true;
                     }
@@ -688,9 +687,15 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                 }
 
                 // shorthand authority must consist of lowercase letters only
-                outShort.put(tolower(c));
-
-                outFull.put(c);
+                if( inHostName || inPort )
+                {
+                    outShort.put(tolower(c));
+                    outFull.put(c);
+                }
+                else
+                {
+                    outDirectory.put(c);
+                }
 
                 c = in.get();
             }
@@ -725,6 +730,12 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                 // strip it
                 authority = authority.SubStr( 0, authority.Len() - strlen( def ) - 1 );
                 shortcut = true;
+            }
+
+            if( slash )
+            {
+                fullAuthority << outDirectory;
+                authority << outDirectory;
             }
         }
 

@@ -7173,11 +7173,11 @@ static void se_PlayerMessageConf(std::istream &s)
     int receiver = se_ReadUser( s );
 
     tColoredString msg;
-    msg.ReadLine(s);
+    s >> msg;
 
     if ( receiver <= 0 || s.good() )
     {
-        con << "Usage: PLAYER_MESSAGE <user ID or name> <Message>\n";
+        con << "Usage: PLAYER_MESSAGE <user ID or name> \"<Message>\"\n";
         return;
     }
 
