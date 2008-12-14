@@ -471,7 +471,20 @@ static void reset_last_acks(int i){
 //#ifndef DEBUG
 int sn_maxClients=MAXCLIENTS;
 
-static tSettingItem< int > sn_maxClientsConf( "MAX_CLIENTS", sn_maxClients );
+bool restrictMaxClients( int const &newValue )
+{
+    if (newValue > MAXCLIENTS)
+    {
+        tOutput o;
+        o.SetTemplateParameter(1, MAXCLIENTS);
+        o << "$max_clients_limit";
+        con << o << '\n';
+        return false;
+    }
+    return true;
+}
+
+static tSettingItem< int > sn_maxClientsConf( "MAX_CLIENTS", sn_maxClients, &restrictMaxClients );
 
 int sn_allowSameIPCountSoft=4;
 static tSettingItem< int > sn_allowSameIPCountSoftConf( "MAX_CLIENTS_SAME_IP_SOFT", sn_allowSameIPCountSoft );
@@ -951,6 +964,10 @@ senderID(::sn_myNetID), readOut(0){
         current_id = IDS_RESERVED + 1;
 
     messageIDBig_ = current_id;
+
+#ifdef DEBUG_X
+    con << "Message " << d.id << " " << current_id << "\n";
+#endif
 
 #ifdef DEBUG
     BreakOnMessageID( messageIDBig_ );
@@ -1492,6 +1509,10 @@ void login_accept_handler(nMessage &m){
             m >> address;
             if ( !sn_IsLANAddress( address ) )
             {
+                if ( sn_myAddress != address )
+                {
+                    con << "Got address " << address << ".\n";
+                }
                 sn_myAddress = address;
             }
 
@@ -2299,7 +2320,7 @@ static void rec_peer(unsigned int peer){
                                 if (id <= MAXCLIENTS && mess_id != 0)  // messages with ID 0 are non-ack messages and come really often. they are always new.
                                 {
                                     unsigned short diff=mess_id-highest_ack[id];
-                                    if (diff>0 && diff<10000 ||
+                                    if ( ( diff>0 && diff<10000 ) ||
                                             ((
                                                  mess.Descriptor() == login_accept.ID() ||
                                                  mess.Descriptor() == login_deny.ID()   ||

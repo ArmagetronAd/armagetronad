@@ -48,11 +48,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <zthread/FastMutex.h>
 #include <zthread/FastRecursiveMutex.h>
 #include <zthread/Guard.h>
-#include <zthread/SynchronousExecutor.h>
+// #include <zthread/SynchronousExecutor.h>
 #include <zthread/ThreadedExecutor.h>
 typedef ZThread::ThreadedExecutor nExecutor;
 //typedef ZThread::SynchronousExecutor nExecutor;
 typedef ZThread::FastMutex nMutex;
+#define nQueue ZThread::LockedQueue
+#elif defined(HAVE_PTHREAD)
+#include "pthread-binding.h"
+typedef tPThreadMutex nMutex;
+#define nQueue tPThreadQueue
 #else
 typedef tNonMutex nMutex;
 #endif
@@ -231,6 +236,13 @@ template< class T > class nMemberFunctionRunnerTemplate
     : public ZThread::Runnable
 #endif
 {
+private:
+#if defined(HAVE_PTHREAD) && !defined(HAVE_LIBZTHREAD)
+    static void* DoCall( void *o ) {
+        nMemberFunctionRunnerTemplate * functionRunner = (nMemberFunctionRunnerTemplate*) o;
+        ( (functionRunner->object_)->*(functionRunner->function_) )();
+    }
+#endif
 public:
     nMemberFunctionRunnerTemplate( T & object, void (T::*function)() )
     : object_( &object ), function_( function )
@@ -252,12 +264,19 @@ public:
     //! schedule a task for execution in a background thread
     static void ScheduleBackground( T & object, void (T::*function)()  )
     {
-#ifdef HAVE_LIBZTHREAD
+#if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
         // schedule the task into a background thread
-        static nExecutor executor;
         if ( !tRecorder::IsRunning() )
         {
+#if !defined(HAVE_LIBZTHREAD)
+            nMemberFunctionRunnerTemplate<T> * runner = new nMemberFunctionRunnerTemplate<T>( object, function );
+
+            pthread_t thread;
+            pthread_create(&thread, NULL, (nMemberFunctionRunnerTemplate::DoCall), (void*) runner);
+#else
+            static nExecutor executor;
             executor.execute( ZThread::Task( new nMemberFunctionRunnerTemplate( object, function ) ) );
+#endif
         }
         else
         {
@@ -274,7 +293,7 @@ public:
     //! schedule a task for execution in the next tToDo call
     static void ScheduleForeground( T & object, void (T::*function)()  )
     {
-#ifdef HAVE_LIBZTHREAD
+#if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
         Pending().add( nMemberFunctionRunnerTemplate( object, function ) );
         st_ToDo( FinishAll );
 #else
@@ -305,14 +324,14 @@ private:
     // taks for the break
     static std::deque< nMemberFunctionRunnerTemplate > pendingForBreak_;
 
-#ifdef HAVE_LIBZTHREAD
+#if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
     // queue of foreground tasks
-     static ZThread::LockedQueue< nMemberFunctionRunnerTemplate, ZThread::FastMutex > & Pending()
-     {
-         static ZThread::LockedQueue< nMemberFunctionRunnerTemplate, ZThread::FastMutex > pending;
-         return pending;
-     }
-    
+    static nQueue< nMemberFunctionRunnerTemplate, nMutex > & Pending()
+    {
+        static nQueue< nMemberFunctionRunnerTemplate, nMutex > pending;
+        return pending;
+    }
+
     // function that calls them
     static void FinishAll()
     {
@@ -327,7 +346,7 @@ private:
 };
 
 template< class T >
-std::deque< nMemberFunctionRunnerTemplate<T> > 
+std::deque< nMemberFunctionRunnerTemplate<T> >
 nMemberFunctionRunnerTemplate<T>::pendingForBreak_;
 
 // convenience wrapper
@@ -360,7 +379,7 @@ public:
     {
         if ( block )
         {
-#ifdef HAVE_LIBZTHREAD
+#if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
             ScheduleBackground( object, function );
 #else
             ScheduleBreak( object, function );
@@ -392,7 +411,7 @@ public:
 
     // inform the user about delays
         bool delays = false;
-#ifdef HAVE_LIBZTHREAD
+#if defined(HAVE_LIBZTHREAD) || defined(HAVE_PTHREAD)
         delays = tRecorder::IsRunning();
 #endif
         if ( delays )
@@ -580,7 +599,8 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
         {
             std::istringstream in( static_cast< const char * >( authority ) );
             std::ostringstream outShort; // stream for shorthand authority
-            std::ostringstream outFull;  // stream for full authority URL that is to be used for lookups     
+            std::ostringstream outFull;  // stream for full authority URL that is to be used for lookups
+            std::ostringstream outDirectory;
             int c = in.get();
 
             // is the authority an abreviation?
@@ -619,7 +639,6 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                     }
                     else if ( c == '/' )
                     {
-                        shortcut = false;
                         slash = true;
                         inHostName = false;
                     }
@@ -632,7 +651,6 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                 {
                     if ( c == '/' )
                     {
-                        shortcut = false;
                         inPort = false;
                         slash = true;
                     }
@@ -669,9 +687,15 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                 }
 
                 // shorthand authority must consist of lowercase letters only
-                outShort.put(tolower(c));
-
-                outFull.put(c);
+                if( inHostName || inPort )
+                {
+                    outShort.put(tolower(c));
+                    outFull.put(c);
+                }
+                else
+                {
+                    outDirectory.put(c);
+                }
 
                 c = in.get();
             }
@@ -706,6 +730,12 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                 // strip it
                 authority = authority.SubStr( 0, authority.Len() - strlen( def ) - 1 );
                 shortcut = true;
+            }
+
+            if( slash )
+            {
+                fullAuthority << outDirectory;
+                authority << outDirectory;
             }
         }
 
@@ -915,6 +945,8 @@ bool nLoginProcess::CheckServerAddress( nMessage & m )
             return true;
         }
     }
+
+    std::cout << serverAddress;
 
     if ( sn_GetMyAddress() == serverAddress )
     {

@@ -58,29 +58,25 @@ module BuildTools
     # Helper method to generate everything we need to know about this build
     def generate_build_information
       self.determine_source_kind
-      
-      if @build_information[:kind] == "CVS"
-        self.generate_version_dated
-      else
-        self.determine_version_release
-      end
-      
+      self.generate_version
       self.generate_year
       self.serialize_build_information
     end
     
+    def generate_version
+      game_version =
+        if @build_information[:kind] == "CVS"
+          %x("#{TOP_LEVEL}/batch/make/version" "#{TOP_LEVEL}").chomp
+        else
+          File.read("#{TOP_LEVEL}/src/macosx/config_common.h.in").scan(/#define VERSION "(.*)"/)[0][0]
+        end
+      @build_information[:version] = game_version
+    end
+    
+    
     # Delete this file if you would like to generate new information. Also be sure to put the tags back in the files ( @version@, etc... )
     def generated_build_information_already?
       File.exists?(BUILD_INFORMATION_FILE)
-    end
-  
-    # Generate a dated string derived from major_version and minor_version
-    def generate_version_dated
-      minor_version = open(MINOR_VERSION_FILE,'r') { |f| f.readlines }[0].chomp # only need the first line
-      major_version = open(MAJOR_VERSION_FILE,'r') { |f| f.readlines }[0].chomp
-      minor_version.gsub!(/DATE/, Time.now.strftime("%Y%m%d"))
-      
-      @build_information[:version] = major_version + minor_version
     end
     
     def generate_year
@@ -89,7 +85,7 @@ module BuildTools
     
     # Determine if the source is checked out from CVS or it is a Release source
     def determine_source_kind
-      if FileTest.directory?("#{TOP_LEVEL}/.svn")
+      if FileTest.directory?("#{TOP_LEVEL}/.svn") || FileTest.directory?("#{TOP_LEVEL}/.bzr")
         @build_information[:kind] = "CVS"
       else
         @build_information[:kind] = "Release"
@@ -105,14 +101,7 @@ module BuildTools
     def deserialize_build_information
       @build_information = YAML.load_file(BUILD_INFORMATION_FILE)
     end
-    
-    # If this is a release source we must extract the version from the config file
-    def determine_version_release
-      open(TOP_LEVEL+"/src/macosx/config_common.h.in",'r') do |f|
-          f.read.scan(/^#define VERSION "(.*)"/) { |version| @build_information[:version] = version }
-      end
-    end
-    
+        
     # Replace a tag, ex. @tag@, with replace_with in a given file
     def replace_tag(file, tag, replace_with)
       replace_with = "\"#{replace_with}\"" if file =~ /config_common.h/ && tag == "version"

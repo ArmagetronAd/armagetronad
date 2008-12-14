@@ -541,6 +541,29 @@ std::ostream & operator << ( std::ostream & s, nServerInfo const & info )
     return s;
 }
 
+// checks whether server is in list twice, deletes it if that's the case
+static void CheckDuplicate( nServerInfo * server )
+{
+    // remove double servers
+    bool IsDouble = 0;
+    nServerInfo *run = nServerInfo::GetFirstServer();
+    while(!IsDouble && run)
+    {
+        if (run != server && *run == *server )
+            IsDouble = true;
+        
+        run = run->Next();
+    }
+    
+    if (IsDouble)
+    {
+#ifdef DEBUG_X
+        con << "Deleting duplicate server " << server->GetName() << "\n";
+#endif  
+        delete server;
+    }
+}
+
 void nServerInfo::Load(const tPath& path, const char *filename)
 {
     sn_LastLoaded = filename;
@@ -557,6 +580,9 @@ void nServerInfo::Load(const tPath& path, const char *filename)
             server->GetAddress();
 
             tRecorder::Record( section, *server );
+
+            CheckDuplicate( server );
+
             server = CreateServerInfo();
         }
         delete server;
@@ -582,23 +608,11 @@ void nServerInfo::Load(const tPath& path, const char *filename)
 
             // record server
             tRecorder::Record( section, *server );
-
+            
             // preemptively resolve DNS
             server->GetAddress();
 
-            // remove double servers
-            bool IsDouble = 0;
-            nServerInfo *run = GetFirstServer();
-            while(!IsDouble && run)
-            {
-                if (run != server && *run == *server )
-                    IsDouble = true;
-
-                run = run->Next();
-            }
-
-            if (IsDouble)
-                delete server;
+            CheckDuplicate( server );
         }
         else
             break;
@@ -1510,6 +1524,9 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
             }
             else
             {
+#ifdef DEBUG_X
+                con << "Deleting outdated server " << run->GetName() << ".\n";
+#endif
                 // kill it
                 delete run;
             }
@@ -1809,6 +1826,10 @@ void nServerInfo::QueryServer()                                  // start to get
         // send information query directly to server
         sn_Bend( GetAddress() );
 
+#ifdef DEBUG_X
+        con << "Pinging " << GetName() << "\n";
+#endif
+
         tJUST_CONTROLLED_PTR< nMessage > req = tNEW(nMessage)(RequestBigServerInfoDescriptor);
         req->ClearMessageID();
         req->SendImmediately(0, false);
@@ -1956,6 +1977,9 @@ void nServerInfo::StartQueryAll( QueryType queryType )                         /
         // mark worst server for kickout if total TNA is too high
         if ( kickOut && ( ( totalTNA > totalTNAMax && maxTNA >= sn_TNALostContact ) || unreachableCount > maxUnreachable ) )
         {
+#ifdef DEBUG_X
+            con << "Deleting outdated server " << kickOut->GetName() << ".\n";
+#endif
             // just delete the bastard!
             delete kickOut;
             //			kickOut->timesNotAnswered = sn_MaxTNA() + 100;

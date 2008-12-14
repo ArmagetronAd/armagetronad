@@ -4333,6 +4333,16 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
 }
 
 void gCycle::Render(const eCamera *cam){
+    /*
+    // for use when there's rendering problems on one specific occasion
+    static int counter = 0;
+    ++ counter;
+    if ( counter == -1 )
+    {
+        st_Breakpoint();
+    }
+    */
+
     // are we blinking from invulnerability?
     bool blinking = false;
     if ( lastTime > spawnTime_ && !Vulnerable() )
@@ -4928,11 +4938,13 @@ void gCycle::SoundMix(Uint8 *dest,unsigned int len,
             engine->Mix(dest,len,viewer,rvol,lvol,verletSpeed_/(sg_speedCycleSound * SpeedMultiplier()));
 
         if (turning)
+        {
             if (turn_wav.alt)
                 turning->Mix(dest,len,viewer,rvol,lvol,5);
             else
                 turning->Mix(dest,len,viewer,rvol,lvol,1);
-
+        }
+        
         if (spark)
             spark->Mix(dest,len,viewer,rvol*.5,lvol*.5,4);
     }

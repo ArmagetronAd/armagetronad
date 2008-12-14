@@ -84,8 +84,8 @@ uMenu::~uMenu(){
 }
 
 void uMenu::ReverseItems(){
-    tList<uMenuItem> dummy = items;
-    items.SetLen(0);
+    tList<uMenuItem> dummy;
+    dummy.Swap( items );
 
     for (int i=dummy.Len()-1; i>=0; i--){
         uMenuItem *x = dummy[i];
@@ -369,20 +369,24 @@ void uMenu::HandleEvent( SDL_Event event )
                             lastkey=tSysTimeFloat();
                 selected++;
                 if (selected>=items.Len())
+                {
                     if (wrap)
                         selected=0;
                     else
                         selected=items.Len()-1;
+                }
                 break;
 
             case(SDLK_DOWN):
                             lastkey=tSysTimeFloat();
                 selected--;
                 if (selected<0)
+                {
                     if (wrap)
                         selected=items.Len()-1;
                     else
                         selected=0;
+                }
 
                 break;
 
@@ -641,6 +645,46 @@ void uMenuItemInt::LeftRight(int dir){
 }
 
 void uMenuItemInt::Render(REAL x,REAL y,REAL alpha,
+                          bool selected){
+    DisplayText(x-.02,y,title,selected,alpha,1);
+
+    tString s;
+    s << target;
+    DisplayText(x+.02,y,s,selected,alpha,-1);
+}
+
+// *****************************************
+//               Float Choose
+// *****************************************
+
+#ifdef SLOPPYLOCALE
+uMenuItemReal::uMenuItemReal
+(uMenu *m,const char *tit,const char *help,REAL &targ,
+ REAL mi,REAL ma,REAL step)
+        :uMenuItem(m,help),title(tit),target(targ),Min(mi),Max(ma),
+        Step(step){
+    if (target<Min) target=Min;
+    if (target>Max) target=Max;
+}
+#endif
+
+uMenuItemReal::uMenuItemReal
+(uMenu *m,const tOutput &tit,const tOutput &help,REAL &targ,
+ REAL mi,REAL ma,REAL step)
+        :uMenuItem(m,help),title(tit),target(targ),Min(mi),Max(ma),
+        Step(step){
+    if (target<Min) target=Min;
+    if (target>Max) target=Max;
+}
+
+
+void uMenuItemReal::LeftRight(int dir){
+    target+=dir*Step;
+    if (target<Min) target=Min;
+    if (target>Max) target=Max;
+}
+
+void uMenuItemReal::Render(REAL x,REAL y,REAL alpha,
                           bool selected){
     DisplayText(x-.02,y,title,selected,alpha,1);
 
@@ -1112,7 +1156,7 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
     // catch some keyboard input
     {
         uInputProcessGuard inputProcessGuard;
-        while (su_GetSDLInput(tEvent));
+        while (su_GetSDLInput(tEvent)) ;
     }
 
     {
@@ -1196,7 +1240,7 @@ bool uMenu::Message(const tOutput& message, const tOutput& interpretation, REAL 
     // catch some keyboard input
     {
         uInputProcessGuard inputProcessGuard;
-        while (su_GetSDLInput(tEvent));
+        while (su_GetSDLInput(tEvent)) ;
     }
 
     uMenu::SetIdle(idle_back);

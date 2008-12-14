@@ -40,9 +40,11 @@ TMPBIN=${DESTDIR}${PREFIX}/armatempbin
 test -d ${TMPBIN} || mkdir ${TMPBIN} || exit 1
 RM=${TMPBIN}/rm
 
+echo "" > ${UNINSTALL}.files
+
 cat > ${RM} <<EOF
 #! /bin/sh
-echo rm "\$*" | sed -e s/DESTDIR_UNINSTALL/\\\${DESTDIR}/g >> ${UNINSTALL}
+echo rm "\$*" | sed -e s/DESTDIR_UNINSTALL/\\\${DESTDIR}/g >> ${UNINSTALL}.files
 EOF
 
 chmod 755 ${RM} || exit 1
@@ -60,6 +62,24 @@ rm -f ${RM}
 
 fi
 
-chmod 755 $UNINSTALL
+# generate directories to uninstall from file list
+sed -e "s,rm.*\\\$,rmdir --ignore-fail-on-non-empty \$," < ${UNINSTALL}.files > ${UNINSTALL}.dir0
+
+echo "" > ${UNINSTALL}.dir
+
+while test -s ${UNINSTALL}.dir0; do
+  sed -e "s,/[^/]*\$,," < ${UNINSTALL}.dir0 | grep ${PROGNAME} > ${UNINSTALL}.dir1
+  cat ${UNINSTALL}.dir1 >> ${UNINSTALL}.dir
+  mv ${UNINSTALL}.dir1 ${UNINSTALL}.dir0
+done
+
+# compose uninstall script from file and directory list
+cat ${UNINSTALL}.files >> ${UNINSTALL}
+sort ${UNINSTALL}.dir --reverse --unique >> ${UNINSTALL}
+
+# clean up
+rm -f ${UNINSTALL}.dir ${UNINSTALL}.dir0 ${UNINSTALL}.files
+
+chmod 755 ${UNINSTALL}
 
 echo "done."

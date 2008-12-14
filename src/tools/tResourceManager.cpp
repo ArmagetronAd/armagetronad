@@ -54,7 +54,7 @@ static int myHTTPFetch(const char *URI, const char *filename, const char *savepa
     int maxlen = 10000;
     buf = (char*)malloc(maxlen);
     while( (len = xmlNanoHTTPRead(ctxt, buf, maxlen)) > 0 ) {
-        fwrite(buf, len, 1, fd);
+        Ignore( fwrite(buf, len, 1, fd) );
     }
     free(buf);
 

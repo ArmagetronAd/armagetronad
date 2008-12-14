@@ -377,7 +377,6 @@
 		8CBA604B089EF359007E21DC /* textures in Resources */ = {isa = PBXBuildFile; fileRef = 8CBA6041089EF359007E21DC /* textures */; };
 		8CBA60B1089F00F2007E21DC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA60B0089F00F2007E21DC /* OpenGL.framework */; };
 		8CBA62E108A01A55007E21DC /* Armagetron Advanced.icns in Resources */ = {isa = PBXBuildFile; fileRef = 8CBA62E008A01A55007E21DC /* Armagetron Advanced.icns */; };
-		8CBA646208A065A8007E21DC /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8CBA646108A065A8007E21DC /* Info.plist */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		9B5414A50A45C78200745CE6 /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414A20A45C78200745CE6 /* libpng.framework */; };
 		9B5414A60A45C78200745CE6 /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B5414A30A45C78200745CE6 /* SDL_image.framework */; };
@@ -1313,7 +1312,6 @@
 				8CBA604A089EF359007E21DC /* sound in Resources */,
 				8CBA604B089EF359007E21DC /* textures in Resources */,
 				8CBA62E108A01A55007E21DC /* Armagetron Advanced.icns in Resources */,
-				8CBA646208A065A8007E21DC /* Info.plist in Resources */,
 				8C6EF51D08A32A0500816348 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

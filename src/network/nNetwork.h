@@ -102,7 +102,11 @@ private:
 void nReadError( bool critical = true );
 
 #ifndef MAXCLIENTS
+#ifdef DEDICATED
+#define MAXCLIENTS 32
+#else
 #define MAXCLIENTS 16
+#endif
 #endif
 
 // We can be single player, multiplayer server/client.

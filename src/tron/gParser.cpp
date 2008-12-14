@@ -208,7 +208,7 @@ gParser::isValidDotNumber(const xmlChar *version)
     /* Check that we have at least i.j.k.xxx */
     for (int i=0; i<3; i++)
     {
-        strtol(start, &end, 10);
+        Ignore( strtol(start, &end, 10) );
         if (start != end) {
             valid = true;
             start = end +1;

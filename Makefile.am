@@ -92,7 +92,7 @@ uninstall_location=$(DESTDIR)${bindir}/${uninstaller}
 install-uninstall: @srcdir@/batch/make/uninstall Makefile
 	$(install_sh_PROGRAM) $< $(uninstall_location)
 	rm $(uninstall_location)
-	ROOTDIR=$(ROOTDIR) DESTDIR=$(DESTDIR) MAKE="$(MAKE)" PREFIX="${prefix}" PROGTITLE="${progtitle}" SCRIPTDIR="${scriptdir}" sh $< $(uninstall_location) "$(external_uninstall_cmd)"
+	ROOTDIR=$(ROOTDIR) DESTDIR=$(DESTDIR) MAKE="$(MAKE)" PREFIX="${prefix}" PROGTITLE="${progtitle}" PROGNAME="${progname}" SCRIPTDIR="${scriptdir}" sh $< $(uninstall_location) "$(external_uninstall_cmd)"
 else
 install-uninstall:
 endif

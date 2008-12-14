@@ -35,6 +35,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tArray.h"
 #include <string.h>
 
+void GrowingArrayBase::Swap( GrowingArrayBase & other )
+{
+    ::Swap( len, other.len );
+    ::Swap( size, other.size );
+    ::Swap( base, other.base );
+}
+
 void GrowingArrayBase::ComplainIfFull(){
     if (Len()>0)
         tERR_ERROR("Array should be empty.");

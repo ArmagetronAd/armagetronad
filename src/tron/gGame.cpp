@@ -193,7 +193,7 @@ gGameSettings::gGameSettings(int a_scoreWin,
                              int a_speedFactor, int a_sizeFactor,
                              gGameType a_gameType,  gFinishType a_finishType,
                              int a_minTeams,
-                             int a_winZoneMinRoundTime, int a_winZoneMinLastDeath
+                             REAL a_winZoneMinRoundTime, REAL a_winZoneMinLastDeath
                             )
         :scoreWin(a_scoreWin),
         limitTime(a_limitTime), limitRounds(a_limitRounds), limitScore(a_limitScore),
@@ -279,17 +279,17 @@ void gGameSettings::Menu()
 {
     uMenu GameSettings("$game_settings_menu_text");
 
-    uMenuItemInt wzmr
+    uMenuItemReal wzmr
     (&GameSettings,
      "$game_menu_wz_mr_text",
      "$game_menu_wz_mr_help",
-     winZoneMinRoundTime,0,1000,10);
+     winZoneMinRoundTime, (REAL) 0, (REAL) 1000, (REAL) 10 );
 
-    uMenuItemInt wzmld
+    uMenuItemReal wzmld
     (&GameSettings,
      "$game_menu_wz_ld_text",
      "$game_menu_wz_ld_help",
-     winZoneMinLastDeath,0,1000,10);
+     winZoneMinLastDeath, (REAL) 0 , (REAL) 1000, (REAL) 10 );
 
     uMenuItemToggle team_et
     (&GameSettings,
@@ -551,8 +551,8 @@ static tConfItem<int>    mp_zf("SIZE_FACTOR" ,multiPlayer.sizeFactor);
 static tConfItem<gGameType>    mp_gt("GAME_TYPE",multiPlayer.gameType);
 static tConfItem<gFinishType>  mp_ft("FINISH_TYPE",multiPlayer.finishType);
 
-static tConfItem<int>    mp_wzmr("WIN_ZONE_MIN_ROUND_TIME",multiPlayer.winZoneMinRoundTime);
-static tConfItem<int>    mp_wzld("WIN_ZONE_MIN_LAST_DEATH",multiPlayer.winZoneMinLastDeath);
+static tConfItem<REAL>   mp_wzmr("WIN_ZONE_MIN_ROUND_TIME",multiPlayer.winZoneMinRoundTime);
+static tConfItem<REAL>   mp_wzld("WIN_ZONE_MIN_LAST_DEATH",multiPlayer.winZoneMinLastDeath);
 
 static tConfItem<int>    mp_tmin	("TEAMS_MIN",					multiPlayer.minTeams);
 static tConfItem<int>    mp_tmax	("TEAMS_MAX",					multiPlayer.maxTeams);
@@ -584,8 +584,8 @@ static tConfItem<int>    sp_zf("SP_SIZE_FACTOR" ,singlePlayer.sizeFactor);
 static tConfItem<gGameType>    sp_gt("SP_GAME_TYPE",singlePlayer.gameType);
 static tConfItem<gFinishType>  sp_ft("SP_FINISH_TYPE",singlePlayer.finishType);
 
-static tConfItem<int>    sp_wzmr("SP_WIN_ZONE_MIN_ROUND_TIME",singlePlayer.winZoneMinRoundTime);
-static tConfItem<int>    sp_wzld("SP_WIN_ZONE_MIN_LAST_DEATH",singlePlayer.winZoneMinLastDeath);
+static tConfItem<REAL>    sp_wzmr("SP_WIN_ZONE_MIN_ROUND_TIME",singlePlayer.winZoneMinRoundTime);
+static tConfItem<REAL>    sp_wzld("SP_WIN_ZONE_MIN_LAST_DEATH",singlePlayer.winZoneMinLastDeath);
 
 static tConfItem<int>    sp_tmin	("SP_TEAMS_MIN",					singlePlayer.minTeams);
 static tConfItem<int>    sp_tmax	("SP_TEAMS_MAX",					singlePlayer.maxTeams);
@@ -1446,10 +1446,23 @@ void init_game_objects(eGrid *grid){
                                   sg_currentSettings->AI_IQ);
 
         int spawnPointsUsed = 0;
+
         for(int t=eTeam::teams.Len()-1;t>=0;t--)
         {
             eTeam *team = eTeam::teams(t);
+
+
+            // reset team color of fresh teams
+            if ( team->RoundsPlayed() == 0 )
+            {
+                team->NameTeamAfterColor( false );
+            }
+
+            // update team name
             team->Update();
+
+            // increase round counter
+            team->PlayRound();
 
             gSpawnPoint *spawn = Arena.LeastDangerousSpawnPoint();
             spawnPointsUsed++;

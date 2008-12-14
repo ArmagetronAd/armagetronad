@@ -59,6 +59,12 @@ AC_PREREQ(2.50)
 
 build_regular=true
 
+have_lzma=false
+    AC_ARG_WITH(maxclients, AC_HELP_STRING([--with-maxclients],[sets the hardcoded limit for the number of connected clients (default: 16 for clients and 32 for dedicated servers)]),
+[ 
+    AC_DEFINE_UNQUOTED(MAXCLIENTS,${withval},maximal number of clients)
+])
+
 AC_ARG_ENABLE(dedicated,
      AC_HELP_STRING([--enable-dedicated],
 		[enables dedicated server; otherwise, compile a client (default=disabled)]),
@@ -293,10 +299,16 @@ test $DEBUGLEVEL -ge 3 && enable_memmanager=yes
 test $DEBUGLEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -DDEBUG_EXPENSIVE"
 test $DEBUGLEVEL -ge 5 && CXXFLAGS="$CXXFLAGS -DMEM_DEB"
 
-test $CODELEVEL -ge 1 && CXXFLAGS="$CXXFLAGS -Wall"
+if test $CODELEVEL -ge 1; then
+    CXXFLAGS="$CXXFLAGS -Wall"
+    
+    # careful, only supported on GCC 4.2 and later
+    AX_CXXFLAGS_GCC_OPTION(-Wno-strict-overflow)
+fi
+
 dnl test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wshadow -Wpointer-arith -Wfloat-equal -W -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code --pedantic -Winline"
-test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wpointer-arith -W -Wcast-qual -Wcast-align -Wconversion --pedantic -Wno-unused-parameter"
-test $CODELEVEL -ge 3 && CXXFLAGS="$CXXFLAGS -Weffc++ -Wshadow -Winline -Wfloat-equal"
+test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wpointer-arith -W -Wcast-qual -Wcast-align --pedantic -Wno-unused-parameter"
+test $CODELEVEL -ge 3 && CXXFLAGS="$CXXFLAGS -Weffc++ -Wshadow -Winline -Wfloat-equal -Wconversion"
 test $CODELEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -Werror"
 
 # work arond known cause of warnings in SDL headers
@@ -525,9 +537,7 @@ if test x$armamain = xtrue; then
 
 test -z "$XML2_CONFIG" && XML2_CONFIG=xml2-config
 
-if $XML2_CONFIG --libs > /dev/null; then
-  echo -n ""
-else
+if ! $XML2_CONFIG --libs > /dev/null; then
   AC_MSG_ERROR([Fatal error: the libxml2 configuration script $XML2_CONFIG does not work/exist.])
 fi
 
@@ -549,14 +559,25 @@ AC_MSG_ERROR([
 # fi
 
 dnl *************************************************
-dnl         ZThread
+dnl         Armathentication Threading
 dnl *************************************************
 
 if test x$enable_armathentication = xyes; then
 
+dnl ACX_PTHREAD([
+
+dnl LIBS="${PTHREAD_LIBS} ${LIBS}"
+dnl CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
+dnl CC="${PTHREAD_CC}"
+dnl AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
+
+dnl ],[
+
 AM_PATH_ZTHREAD_AA(2.3.2)
 CXXFLAGS="${CXXFLAGS} ${ZTHREAD_CXXFLAGS}"
 LIBS="${LIBS} ${ZTHREAD_LIBS}"
+
+dnl ])
 
 fi # krawall
 fi # armamain

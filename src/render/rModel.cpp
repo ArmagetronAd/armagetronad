@@ -37,6 +37,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rGL.h"
 #include <string.h>
 
+#define DONTDOIT
+#include "rRender.h"
+
 tCONFIG_ENUM(rDisplayListUsage);
 
 static tConfItem<rDisplayListUsage> mod_udl("USE_DISPLAYLISTS", sr_useDisplayLists);
@@ -277,6 +280,9 @@ void rModel::Render(){
         return;
     if ( !displayList_.Call() )
     {
+        // close pending glBegin() blocks
+        RenderEnd();
+
         // model display lists should definitely be compiled before other lists
         rDisplayList::Cancel();
 
@@ -294,12 +300,13 @@ void rModel::Render(){
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         }
 
-        rDisplayListFiller filler( displayList_ );
            
-        glEnable(GL_CULL_FACE);
 
         if ( !modelTexFacesCoherent )
         {
+            rDisplayListFiller filler( displayList_, false );
+            glEnable(GL_CULL_FACE);
+
             // sigh, we need to do it the complicated way
             glBegin( GL_TRIANGLES );
             for(int i=modelFaces.Len()-1;i>=0;i--)
@@ -319,6 +326,7 @@ void rModel::Render(){
             }
             glEnd();
 
+            glDisable(GL_CULL_FACE);
         }
         else
         {
@@ -331,17 +339,21 @@ void rModel::Render(){
             glVertexPointer(3,GL_FLOAT,0,&vertices[0]);
             glEnableClientState(GL_VERTEX_ARRAY);
 
+            rDisplayListFiller filler( displayList_, false );
+            glEnable(GL_CULL_FACE);
+
             glDrawElements(GL_TRIANGLES,
                            modelFaces.Len()*3,
                            GL_UNSIGNED_INT,
                            &modelFaces(0));
+
+            glDisable(GL_CULL_FACE);
         }
+
 
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         glDisableClientState(GL_VERTEX_ARRAY);
         glDisableClientState(GL_NORMAL_ARRAY);
-
-        glDisable(GL_CULL_FACE);
     }
 }
 #endif

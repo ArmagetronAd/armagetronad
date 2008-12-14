@@ -164,7 +164,7 @@ static tAccessLevelSetter se_accessLevelVoteCommandExecuteSILevel( se_accessLeve
 #endif
 
 static REAL se_defaultVotesSuspendLength = 3;
-static tSettingItem< REAL > se_defaultVotesSuspendLenght_Conf( "VOTING_SUSPEND_DEFAULT", se_defaultVotesSuspendLength );
+static tSettingItem< REAL > se_defaultVotesSuspendLenght_Conf( "VOTES_SUSPEND_DEFAULT", se_defaultVotesSuspendLength );
 static REAL se_votesSuspendTimeout = 0;
 
 static eVoter* se_GetVoter( const nMessage& m )
@@ -773,7 +773,7 @@ void se_votesSuspend( REAL minutes, bool announce, std::istream & s )
     }
     else if ( announce && minutes <= 0 )
     {
-    	sn_ConsoleOut( tOutput( "$voting_unsuspended" ) );
+        sn_ConsoleOut( tOutput( "$voting_unsuspended" ) );
     }
 
 }
@@ -1968,7 +1968,7 @@ eVoter* eVoter::GetVoter( int ID, bool complain )			// find or create the voter 
         for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
         {
             ePlayerNetID* p = se_PlayerNetIDs(i);
-            if ( p->Owner() == ID && !p->IsSpectating() )
+            if ( p->Owner() == ID && p->CurrentTeam() )
                 player = true;
         }
         if (!player)
@@ -2153,7 +2153,9 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
     message >> command;
     tToLower( command );
 
-    eVoter * voter = p->GetVoter();
+    eVoter * voter = eVoter::GetVoter( p->Owner(), true ); // can't use ePlayerNedID::GetVoter here,
+                                                           // as it can't show a warning,
+                                                           // for example if the voter has only spectators
     if ( !eVoteItem::AcceptNewVote( voter, p->Owner() ) )
     {
         return;

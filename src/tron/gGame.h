@@ -149,8 +149,8 @@ public:
 
     int  autoAIFraction; // helper variable for the autoAI functions
 
-    int	 winZoneMinRoundTime;	// minimum number of seconds a round must be going before the win zone is activated
-    int	 winZoneMinLastDeath;	// minimum number of seconds the last death happended before the win zone is activated
+    REAL winZoneMinRoundTime;	// minimum number of seconds a round must be going before the win zone is activated
+    REAL winZoneMinLastDeath;	// minimum number of seconds the last death happended before the win zone is activated
 
     gGameType   gameType;      // what type of game is played?
     gFinishType finishType;    // what happens when all humans are dead?
@@ -173,7 +173,7 @@ public:
                   int a_speedFactor, int a_sizeFactor,
                   gGameType a_gameType,  gFinishType a_finishType,
                   int a_minTeams,
-                  int a_winZoneMinRoundTime, int a_winZoneMinLastDeath
+                  REAL a_winZoneMinRoundTime, REAL a_winZoneMinLastDeath
                  );
 
     void AutoAI(bool success);

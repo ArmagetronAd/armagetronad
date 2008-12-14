@@ -114,6 +114,11 @@ inline REAL floorf( REAL x ) throw() { return REAL(floor( x )); }
 inline bool isblank(int x){ return ((x == ' ') || (x == '\t')); }
 #endif
 
+// use this function to explicitly ignore return values
+template< typename T >
+static void Ignore( T )
+{}
+
 #ifdef _MSC_VER
 
 #include <iostream>
