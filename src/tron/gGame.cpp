@@ -3355,7 +3355,11 @@ void gGame::Analysis(REAL time){
                         // print winning message
                         tOutput message;
                         message << "$gamestate_winner_winner";
+#ifdef LUCIFER_ALWAYS_WINS
+                        message << "Lucifer";
+#else
                         message << eTeam::teams[winner-1]->Name();
+#endif
 
                         m_Mixer->PushButton(ROUND_WINNER);
 
@@ -3431,7 +3435,11 @@ void gGame::Analysis(REAL time){
 
                         {
                             tOutput message;
+#ifdef LUCIFER_ALWAYS_WINS
+                            message.SetTemplateParameter(1, "Lucifer" );
+#else
                             message.SetTemplateParameter(1, eTeam::teams[0]->Name() );
+#endif
                             message << "$gamestate_champ_center";
                             sn_CenterMessage(message);
 
