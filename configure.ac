@@ -303,7 +303,7 @@ if test $CODELEVEL -ge 1; then
     CXXFLAGS="$CXXFLAGS -Wall"
     
     # careful, only supported on GCC 4.2 and later
-    AX_CXXFLAGS_GCC_OPTION(-Wno-strict-overflow)
+    dnl AX_CXXFLAGS_GCC_OPTION(-Wno-strict-overflow)
 fi
 
 dnl test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wshadow -Wpointer-arith -Wfloat-equal -W -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code --pedantic -Winline"
