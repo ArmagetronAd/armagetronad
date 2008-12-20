@@ -13,16 +13,34 @@ module AA::Config
     File.join(*([base] + components))
   end
   
+  # A path to a file in src/
   def self.src_path(*components)
     combine_path_components(SRC_DIR, *components)
   end
   
+  # A path to a file in MacOS/build/
   def self.build_path(*components)
     combine_path_components(BUILD_DIR, *components)
   end
   
+  # A path to a file in MacOS/build/{Debug, etc}
+  def self.configuration_build_path(*components)
+    combine_path_components(CONFIGURATION_BUILD_DIR, *components)
+  end
+  
+  # A path to a file in the resource directory of the game.
   def self.package_path(*components)
     combine_path_components(PACKGAGE_RESOURCE_DIR, *components)
+  end
+  
+  # The arch of the build
+  def self.arch
+    archs = (ENV["ARCHS"] || "i386").split
+    if archs.length > 1
+      "universal"
+    else
+      archs.first
+    end
   end
   
   def self.version
@@ -32,19 +50,33 @@ module AA::Config
       File.read("#{SRC_DIR}/src/macosx/version.h.in").scan(/#define VERSION "(.*)"/)[0][0]
     end
   end
+
+  # escape text to make it useable in a shell script as one “word” (string)
+  def self.escape_sh(str)
+  	str.to_s.gsub(/(?=[^a-zA-Z0-9_.\/\-\x7F-\xFF\n])/, '\\').gsub(/\n/, "'\n'").sub(/^$/, "''")
+  end
     
   # Paths are relative the Rakefile
   SRC_DIR = File.expand_path(File.dirname(__FILE__) + "/..")
   
   BUILD_DIR = ENV["SYMROOT"] || "build"
   
+  CONFIGURATION_BUILD_DIR = ENV["CONFIGURATION_BUILD_DIR"] || (BUILD_DIR + "/Debug")
+  
   PRODUCT_NAME = ENV["PRODUCT_NAME"] || "Armagetron Advanced"
   
   DEDICATED = !!PRODUCT_NAME[/dedicated/i]
   
+  # The Armagetron Advanced.app, or the Armagetron Advanced Dedicated directory
+  PACKGAGE_RESOURCE_DIR_BASE = [
+    CONFIGURATION_BUILD_DIR,
+    DEDICATED ? "" : PRODUCT_NAME + (ENV["WRAPPER_SUFFIX"] || ".app")
+  ].join("/")
+  
+  # Where all the game data should go
   PACKGAGE_RESOURCE_DIR = [
-    ENV["CONFIGURATION_BUILD_DIR"] || (BUILD_DIR + "/Debug"),
-    DEDICATED ? "" : PRODUCT_NAME + (ENV["WRAPPER_SUFFIX"] || ".app") + "/Contents/Resources"
+    PACKGAGE_RESOURCE_DIR_BASE,
+     DEDICATED ? "" : "Contents/Resources"
   ].join("/")
     
   BUILD_TYPE = [src_path(".svn"), src_path(".bzr")].any? { |f| File.exists?(f) } ? :development : :release

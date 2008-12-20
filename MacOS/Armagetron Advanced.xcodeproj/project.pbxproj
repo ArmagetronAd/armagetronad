@@ -6,6 +6,58 @@
 	objectVersion = 42;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		9B31399E0EFD0560009690D0 /* Create Client Release */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 9B3139B90EFD05A3009690D0 /* Build configuration list for PBXAggregateTarget "Create Client Release" */;
+			buildPhases = (
+				9B3139B40EFD0586009690D0 /* ShellScript */,
+			);
+			dependencies = (
+				9B3139F20EFD0987009690D0 /* PBXTargetDependency */,
+				9B3139B20EFD056D009690D0 /* PBXTargetDependency */,
+			);
+			name = "Create Client Release";
+			productName = "Create Client Release";
+		};
+		9B3139BD0EFD073A009690D0 /* Create Dedicated Release */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 9B3139C10EFD073A009690D0 /* Build configuration list for PBXAggregateTarget "Create Dedicated Release" */;
+			buildPhases = (
+				9B3139C00EFD073A009690D0 /* ShellScript */,
+			);
+			dependencies = (
+				9B3139F00EFD097D009690D0 /* PBXTargetDependency */,
+				9B3139CF0EFD0756009690D0 /* PBXTargetDependency */,
+			);
+			name = "Create Dedicated Release";
+			productName = "Create Client Release";
+		};
+		9B3139D00EFD0773009690D0 /* Create Full Release */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 9B3139E60EFD079F009690D0 /* Build configuration list for PBXAggregateTarget "Create Full Release" */;
+			buildPhases = (
+			);
+			dependencies = (
+				9B3139D40EFD077B009690D0 /* PBXTargetDependency */,
+				9B3139D60EFD077B009690D0 /* PBXTargetDependency */,
+			);
+			name = "Create Full Release";
+			productName = "Create Full Release";
+		};
+		9B3139EC0EFD0963009690D0 /* Update Version */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 9B3139F40EFD0995009690D0 /* Build configuration list for PBXAggregateTarget "Update Version" */;
+			buildPhases = (
+				9B3139EB0EFD0963009690D0 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "Update Version";
+			productName = "Update Version";
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		8CBA60B1089F00F2007E21DC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA60B0089F00F2007E21DC /* OpenGL.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -375,6 +427,51 @@
 			script = "/opt/local/bin/swig -c++ -ruby -autorename -I../src/engine -I../src/network -I../src/render -I../src/tools -I../src/tron -I../src/ui -I../src/macosx/client -I../src/macosx -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}_wrap.cxx\" \"${INPUT_FILE_PATH}\"";
 		};
 /* End PBXBuildRule section */
+
+/* Begin PBXContainerItemProxy section */
+		9B3139B10EFD056D009690D0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D1107260486CEB800E47090 /* Armagetron Advanced */;
+			remoteInfo = "Armagetron Advanced";
+		};
+		9B3139CE0EFD0756009690D0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8C11CA41095A268E007AE0EA /* Armagetron Advanced Dedicated */;
+			remoteInfo = "Armagetron Advanced Dedicated";
+		};
+		9B3139D30EFD077B009690D0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9B31399E0EFD0560009690D0 /* Create Client Release */;
+			remoteInfo = "Create Client Release";
+		};
+		9B3139D50EFD077B009690D0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9B3139BD0EFD073A009690D0 /* Create Dedicated Release */;
+			remoteInfo = "Create Dedicated Release";
+		};
+		9B3139EF0EFD097D009690D0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9B3139EC0EFD0963009690D0 /* Update Version */;
+			remoteInfo = "Update Version";
+		};
+		9B3139F10EFD0987009690D0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9B3139EC0EFD0963009690D0 /* Update Version */;
+			remoteInfo = "Update Version";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		8CBA5DD5089EEBB3007E21DC /* Copy Frameworks */ = {
@@ -1456,6 +1553,10 @@
 			targets = (
 				8D1107260486CEB800E47090 /* Armagetron Advanced */,
 				8C11CA41095A268E007AE0EA /* Armagetron Advanced Dedicated */,
+				9B31399E0EFD0560009690D0 /* Create Client Release */,
+				9B3139BD0EFD073A009690D0 /* Create Dedicated Release */,
+				9B3139D00EFD0773009690D0 /* Create Full Release */,
+				9B3139EC0EFD0963009690D0 /* Update Version */,
 			);
 		};
 /* End PBXProject section */
@@ -1523,6 +1624,45 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
 			shellScript = "rake xcode:cleanup\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am astylerc\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone";
+		};
+		9B3139B40EFD0586009690D0 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = "/bin/bash -l";
+			shellScript = "PRODUCT_NAME=\"Armagetron Advanced\" rake release:dmg\n";
+		};
+		9B3139C00EFD073A009690D0 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = "/bin/bash -l";
+			shellScript = "PRODUCT_NAME=\"Armagetron Advanced Dedicated\" rake release:dmg\n";
+		};
+		9B3139EB0EFD0963009690D0 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = "/bin/bash -l";
+			shellScript = "rake update-version";
 		};
 		9BD7DB490A2CBA7A00D7033C /* Run script: Prepare */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1849,6 +1989,39 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		9B3139B20EFD056D009690D0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D1107260486CEB800E47090 /* Armagetron Advanced */;
+			targetProxy = 9B3139B10EFD056D009690D0 /* PBXContainerItemProxy */;
+		};
+		9B3139CF0EFD0756009690D0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8C11CA41095A268E007AE0EA /* Armagetron Advanced Dedicated */;
+			targetProxy = 9B3139CE0EFD0756009690D0 /* PBXContainerItemProxy */;
+		};
+		9B3139D40EFD077B009690D0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9B31399E0EFD0560009690D0 /* Create Client Release */;
+			targetProxy = 9B3139D30EFD077B009690D0 /* PBXContainerItemProxy */;
+		};
+		9B3139D60EFD077B009690D0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9B3139BD0EFD073A009690D0 /* Create Dedicated Release */;
+			targetProxy = 9B3139D50EFD077B009690D0 /* PBXContainerItemProxy */;
+		};
+		9B3139F00EFD097D009690D0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9B3139EC0EFD0963009690D0 /* Update Version */;
+			targetProxy = 9B3139EF0EFD097D009690D0 /* PBXContainerItemProxy */;
+		};
+		9B3139F20EFD0987009690D0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9B3139EC0EFD0963009690D0 /* Update Version */;
+			targetProxy = 9B3139F10EFD0987009690D0 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin PBXVariantGroup section */
 		9BB5B9260D84605700BF5F1C /* InfoPlist.strings.in */ = {
 			isa = PBXVariantGroup;
@@ -1993,6 +2166,90 @@
 			};
 			name = Release;
 		};
+		9B31399F0EFD0560009690D0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Armagetron Advanced";
+			};
+			name = Debug;
+		};
+		9B3139A00EFD0560009690D0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "Create Client Release";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		9B3139C20EFD073A009690D0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Armagetron Advanced Dedicated";
+			};
+			name = Debug;
+		};
+		9B3139C30EFD073A009690D0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "Create Client Release";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		9B3139D10EFD0774009690D0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Create Full Release";
+			};
+			name = Debug;
+		};
+		9B3139D20EFD0774009690D0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "Create Full Release";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		9B3139ED0EFD0963009690D0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Update Version";
+			};
+			name = Debug;
+		};
+		9B3139EE0EFD0963009690D0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "Update Version";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -2019,6 +2276,42 @@
 			buildConfigurations = (
 				8CBA5D49089EE60D007E21DC /* Debug */,
 				8CBA5D4A089EE60D007E21DC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9B3139B90EFD05A3009690D0 /* Build configuration list for PBXAggregateTarget "Create Client Release" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B31399F0EFD0560009690D0 /* Debug */,
+				9B3139A00EFD0560009690D0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9B3139C10EFD073A009690D0 /* Build configuration list for PBXAggregateTarget "Create Dedicated Release" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B3139C20EFD073A009690D0 /* Debug */,
+				9B3139C30EFD073A009690D0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9B3139E60EFD079F009690D0 /* Build configuration list for PBXAggregateTarget "Create Full Release" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B3139D10EFD0774009690D0 /* Debug */,
+				9B3139D20EFD0774009690D0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9B3139F40EFD0995009690D0 /* Build configuration list for PBXAggregateTarget "Update Version" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B3139ED0EFD0963009690D0 /* Debug */,
+				9B3139EE0EFD0963009690D0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
