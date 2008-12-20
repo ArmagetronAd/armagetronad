@@ -5,7 +5,10 @@ def directory(dir)
   Rake::Task[dir]
 end
 
-module AAConfig
+module AA
+end
+
+module AA::Config
   def self.combine_path_components(base, *components)
     File.join(*([base] + components))
   end
@@ -56,7 +59,7 @@ module AAConfig
 end
 
 task "remove-version" do
-  rm_rf(AAConfig.build_path("src", "macosx"))
+  rm_rf(AA::Config.build_path("src", "macosx"))
 end
 
 desc "Update version"

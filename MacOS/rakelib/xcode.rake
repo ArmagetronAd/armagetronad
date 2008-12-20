@@ -1,7 +1,7 @@
-module AAConfig
+module AA::Xcode
   def self.process_file(orig, package_dir=nil)
-    result_file = build_path(orig.ext)
-    orig = src_path(orig)
+    result_file = AA::Config.build_path(orig.ext)
+    orig = AA::Config.src_path(orig)
   
     # Process the file (copy to build dir, replace tags)
     file result_file => [orig, directory(result_file.pathmap("%d"))] do |t|
@@ -10,7 +10,7 @@ module AAConfig
       # replace the tags
       open(result_file, "r+") do |f|
         data = f.read
-        TAG_MAPPINGS.each { |tag, value| data.gsub!("@#{tag}@", value) }
+        AA::Config::TAG_MAPPINGS.each { |tag, value| data.gsub!("@#{tag}@", value) }
         f.rewind
         f.print(data)
         f.truncate(f.pos)
@@ -20,7 +20,7 @@ module AAConfig
   
     # Should the file be included with the game dist?
     if package_dir
-      package_dest = package_path(package_dir, result_file.pathmap("%f"))
+      package_dest = AA::Config.package_path(package_dir, result_file.pathmap("%f"))
       file package_dest => [result_file, directory(package_dest.pathmap("%d"))] do |t|
         cp(result_file, package_dest)
       end
@@ -35,28 +35,28 @@ namespace "xcode" do
   task "cleanup" => ["package-files", "package-resouces"]
   
   task "sort-resources" do
-    if !File.exists?(AAConfig.build_path("resource"))
-      if AAConfig::BUILD_TYPE == :development
-        sh %{"#{AAConfig::SRC_DIR}/batch/make/sortresources" \\
-             "#{AAConfig::SRC_DIR}/resource/proto" \\
-             "#{AAConfig::BUILD_DIR}/resource/included" \\
-             "#{AAConfig::SRC_DIR}/batch/make/sortresources.py"}
+    if !File.exists?(AA::Config.build_path("resource"))
+      if AA::Config::BUILD_TYPE == :development
+        sh %{"#{AA::Config::SRC_DIR}/batch/make/sortresources" \\
+             "#{AA::Config::SRC_DIR}/resource/proto" \\
+             "#{AA::Config::BUILD_DIR}/resource/included" \\
+             "#{AA::Config::SRC_DIR}/batch/make/sortresources.py"}
       else
-        cp_r(AAConfig.src_path("resource"), AAConfig::BUILD_DIR)
+        cp_r(AA::Config.src_path("resource"), AA::Config::BUILD_DIR)
       end
     end
   end
   
   task "package-resouces" do
-    if !File.exists?(AAConfig.package_path("resource"))
-      cp_r(AAConfig.build_path("resource"), AAConfig::PACKGAGE_RESOURCE_DIR)
+    if !File.exists?(AA::Config.package_path("resource"))
+      cp_r(AA::Config.build_path("resource"), AA::Config::PACKGAGE_RESOURCE_DIR)
     end
   end
 
-  AAConfig.process_file("src/macosx/version.h.in")
-  AAConfig.process_file("config/aiplayers.cfg.in", "config")  
-  AAConfig.process_file("language/languages.txt.in", "language")
-  if !AAConfig::DEDICATED
-    AAConfig.process_file("src/macosx/English.lproj/InfoPlist.strings.in", "English.lproj")
+  AA::Xcode.process_file("src/macosx/version.h.in")
+  AA::Xcode.process_file("config/aiplayers.cfg.in", "config")  
+  AA::Xcode.process_file("language/languages.txt.in", "language")
+  if !AA::Config::DEDICATED
+    AA::Xcode.process_file("src/macosx/English.lproj/InfoPlist.strings.in", "English.lproj")
   end
 end
