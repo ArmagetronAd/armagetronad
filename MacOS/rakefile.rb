@@ -87,7 +87,7 @@ module AA::Config
     "progtitle" => PRODUCT_NAME,
   }
   
-  PROGRAM_SHORT_NAME = DEDICATED ? "armagetronad" : "armagetronad-dedicated"
+  PROGRAM_SHORT_NAME = DEDICATED ? "armagetronad-dedicated" : "armagetronad"
 end
 
 task "remove-version" do
