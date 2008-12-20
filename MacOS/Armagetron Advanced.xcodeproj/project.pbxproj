@@ -10,6 +10,18 @@
 		8CBA60B1089F00F2007E21DC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA60B0089F00F2007E21DC /* OpenGL.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		9B61EBC30B5FEF010018DEA7 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 9B61EBBC0B5FEF010018DEA7 /* scripts */; };
+		9B7CFE190EFCE74700126634 /* tResource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE130EFCE74700126634 /* tResource.cpp */; };
+		9B7CFE1A0EFCE74700126634 /* tResource.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B7CFE140EFCE74700126634 /* tResource.h */; };
+		9B7CFE1B0EFCE74700126634 /* tResourceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE150EFCE74700126634 /* tResourceManager.cpp */; };
+		9B7CFE1C0EFCE74700126634 /* tResourceManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B7CFE160EFCE74700126634 /* tResourceManager.h */; };
+		9B7CFE1D0EFCE74700126634 /* tResourceType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE170EFCE74700126634 /* tResourceType.cpp */; };
+		9B7CFE1E0EFCE74700126634 /* tResourceType.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B7CFE180EFCE74700126634 /* tResourceType.h */; };
+		9B7CFE1F0EFCE74700126634 /* tResource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE130EFCE74700126634 /* tResource.cpp */; };
+		9B7CFE200EFCE74700126634 /* tResource.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B7CFE140EFCE74700126634 /* tResource.h */; };
+		9B7CFE210EFCE74700126634 /* tResourceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE150EFCE74700126634 /* tResourceManager.cpp */; };
+		9B7CFE220EFCE74700126634 /* tResourceManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B7CFE160EFCE74700126634 /* tResourceManager.h */; };
+		9B7CFE230EFCE74700126634 /* tResourceType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE170EFCE74700126634 /* tResourceType.cpp */; };
+		9B7CFE240EFCE74700126634 /* tResourceType.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B7CFE180EFCE74700126634 /* tResourceType.h */; };
 		9B83FE950B12161600878E8A /* Growl-WithInstaller.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9B83FF0F0B121B3100878E8A /* Growl-WithInstaller.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9BB5B9280D84605700BF5F1C /* InfoPlist.strings.in in Resources */ = {isa = PBXBuildFile; fileRef = 9BB5B9260D84605700BF5F1C /* InfoPlist.strings.in */; };
@@ -148,8 +160,6 @@
 		9BB7B83F0D830423004FE8C3 /* tRandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7D20D830422004FE8C3 /* tRandom.cpp */; };
 		9BB7B8420D830423004FE8C3 /* tRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7D50D830422004FE8C3 /* tRecorder.cpp */; };
 		9BB7B8440D830423004FE8C3 /* tRecorderInternal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7D70D830422004FE8C3 /* tRecorderInternal.cpp */; };
-		9BB7B8470D830423004FE8C3 /* tResource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7DA0D830422004FE8C3 /* tResource.cpp */; };
-		9BB7B8490D830423004FE8C3 /* tResourceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7DC0D830422004FE8C3 /* tResourceManager.cpp */; };
 		9BB7B84B0D830423004FE8C3 /* tRing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7DE0D830422004FE8C3 /* tRing.cpp */; };
 		9BB7B84D0D830423004FE8C3 /* tRuby.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7E00D830422004FE8C3 /* tRuby.cpp */; };
 		9BB7B84F0D830423004FE8C3 /* tSafePTR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7E20D830422004FE8C3 /* tSafePTR.cpp */; };
@@ -190,8 +200,6 @@
 		9BB7B8A90D830423004FE8C3 /* tRandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7D20D830422004FE8C3 /* tRandom.cpp */; };
 		9BB7B8AC0D830423004FE8C3 /* tRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7D50D830422004FE8C3 /* tRecorder.cpp */; };
 		9BB7B8AE0D830423004FE8C3 /* tRecorderInternal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7D70D830422004FE8C3 /* tRecorderInternal.cpp */; };
-		9BB7B8B10D830423004FE8C3 /* tResource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7DA0D830422004FE8C3 /* tResource.cpp */; };
-		9BB7B8B30D830423004FE8C3 /* tResourceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7DC0D830422004FE8C3 /* tResourceManager.cpp */; };
 		9BB7B8B50D830423004FE8C3 /* tRing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7DE0D830422004FE8C3 /* tRing.cpp */; };
 		9BB7B8B70D830423004FE8C3 /* tRuby.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7E00D830422004FE8C3 /* tRuby.cpp */; };
 		9BB7B8B90D830423004FE8C3 /* tSafePTR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B7E20D830422004FE8C3 /* tSafePTR.cpp */; };
@@ -408,6 +416,12 @@
 		9B61EBBC0B5FEF010018DEA7 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = ../scripts; sourceTree = SOURCE_ROOT; };
 		9B77E6C80D8618B90022FDF2 /* xcode.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; path = xcode.rake; sourceTree = "<group>"; };
 		9B77E6C90D8618B90022FDF2 /* rakefile.rb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.ruby; path = rakefile.rb; sourceTree = "<group>"; };
+		9B7CFE130EFCE74700126634 /* tResource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tResource.cpp; sourceTree = "<group>"; };
+		9B7CFE140EFCE74700126634 /* tResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tResource.h; sourceTree = "<group>"; };
+		9B7CFE150EFCE74700126634 /* tResourceManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tResourceManager.cpp; sourceTree = "<group>"; };
+		9B7CFE160EFCE74700126634 /* tResourceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tResourceManager.h; sourceTree = "<group>"; };
+		9B7CFE170EFCE74700126634 /* tResourceType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tResourceType.cpp; sourceTree = "<group>"; };
+		9B7CFE180EFCE74700126634 /* tResourceType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tResourceType.h; sourceTree = "<group>"; };
 		9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "Growl-WithInstaller.framework"; path = "/Library/Frameworks/ArmagetronAdvanced/current/Growl-WithInstaller.framework"; sourceTree = "<absolute>"; };
 		9B9E56300D81D962008DD17D /* shared.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = shared.xcconfig; sourceTree = "<group>"; };
 		9BB5B9240D84604400BF5F1C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
@@ -589,10 +603,6 @@
 		9BB7B7D70D830422004FE8C3 /* tRecorderInternal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tRecorderInternal.cpp; sourceTree = "<group>"; };
 		9BB7B7D80D830422004FE8C3 /* tRecorderInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tRecorderInternal.h; sourceTree = "<group>"; };
 		9BB7B7D90D830422004FE8C3 /* tReferenceHolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tReferenceHolder.h; sourceTree = "<group>"; };
-		9BB7B7DA0D830422004FE8C3 /* tResource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tResource.cpp; sourceTree = "<group>"; };
-		9BB7B7DB0D830422004FE8C3 /* tResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tResource.h; sourceTree = "<group>"; };
-		9BB7B7DC0D830422004FE8C3 /* tResourceManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tResourceManager.cpp; sourceTree = "<group>"; };
-		9BB7B7DD0D830422004FE8C3 /* tResourceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tResourceManager.h; sourceTree = "<group>"; };
 		9BB7B7DE0D830422004FE8C3 /* tRing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tRing.cpp; sourceTree = "<group>"; };
 		9BB7B7DF0D830422004FE8C3 /* tRing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tRing.h; sourceTree = "<group>"; };
 		9BB7B7E00D830422004FE8C3 /* tRuby.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tRuby.cpp; sourceTree = "<group>"; };
@@ -821,6 +831,20 @@
 			);
 			path = rakelib;
 			sourceTree = "<group>";
+		};
+		9B7CFE120EFCE74700126634 /* resource */ = {
+			isa = PBXGroup;
+			children = (
+				9B7CFE130EFCE74700126634 /* tResource.cpp */,
+				9B7CFE140EFCE74700126634 /* tResource.h */,
+				9B7CFE150EFCE74700126634 /* tResourceManager.cpp */,
+				9B7CFE160EFCE74700126634 /* tResourceManager.h */,
+				9B7CFE170EFCE74700126634 /* tResourceType.cpp */,
+				9B7CFE180EFCE74700126634 /* tResourceType.h */,
+			);
+			name = resource;
+			path = ../src/resource;
+			sourceTree = SOURCE_ROOT;
 		};
 		9BB7B5A30D8302DF004FE8C3 /* Source */ = {
 			isa = PBXGroup;
@@ -1079,6 +1103,7 @@
 		9BB7B7A00D830422004FE8C3 /* tools */ = {
 			isa = PBXGroup;
 			children = (
+				9B7CFE120EFCE74700126634 /* resource */,
 				9BB7B7A30D830422004FE8C3 /* tArray.cpp */,
 				9BB7B7A40D830422004FE8C3 /* tArray.h */,
 				9BB7B7A50D830422004FE8C3 /* tCallback.cpp */,
@@ -1134,10 +1159,6 @@
 				9BB7B7D70D830422004FE8C3 /* tRecorderInternal.cpp */,
 				9BB7B7D80D830422004FE8C3 /* tRecorderInternal.h */,
 				9BB7B7D90D830422004FE8C3 /* tReferenceHolder.h */,
-				9BB7B7DA0D830422004FE8C3 /* tResource.cpp */,
-				9BB7B7DB0D830422004FE8C3 /* tResource.h */,
-				9BB7B7DC0D830422004FE8C3 /* tResourceManager.cpp */,
-				9BB7B7DD0D830422004FE8C3 /* tResourceManager.h */,
 				9BB7B7DE0D830422004FE8C3 /* tRing.cpp */,
 				9BB7B7DF0D830422004FE8C3 /* tRing.h */,
 				9BB7B7E00D830422004FE8C3 /* tRuby.cpp */,
@@ -1357,6 +1378,9 @@
 			files = (
 				9BB7BA120D8304FD004FE8C3 /* aa_config.h in Headers */,
 				9BCBE30D0D922EAE0022855B /* AAPaste.h in Headers */,
+				9B7CFE1A0EFCE74700126634 /* tResource.h in Headers */,
+				9B7CFE1C0EFCE74700126634 /* tResourceManager.h in Headers */,
+				9B7CFE1E0EFCE74700126634 /* tResourceType.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1366,6 +1390,9 @@
 			files = (
 				9BB7BA240D830669004FE8C3 /* aa_config.h in Headers */,
 				9BCBE30F0D922EAE0022855B /* AAPaste.h in Headers */,
+				9B7CFE200EFCE74700126634 /* tResource.h in Headers */,
+				9B7CFE220EFCE74700126634 /* tResourceManager.h in Headers */,
+				9B7CFE240EFCE74700126634 /* tResourceType.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1593,8 +1620,6 @@
 				9BB7B8A90D830423004FE8C3 /* tRandom.cpp in Sources */,
 				9BB7B8AC0D830423004FE8C3 /* tRecorder.cpp in Sources */,
 				9BB7B8AE0D830423004FE8C3 /* tRecorderInternal.cpp in Sources */,
-				9BB7B8B10D830423004FE8C3 /* tResource.cpp in Sources */,
-				9BB7B8B30D830423004FE8C3 /* tResourceManager.cpp in Sources */,
 				9BB7B8B50D830423004FE8C3 /* tRing.cpp in Sources */,
 				9BB7B8B70D830423004FE8C3 /* tRuby.cpp in Sources */,
 				9BB7B8B90D830423004FE8C3 /* tSafePTR.cpp in Sources */,
@@ -1662,6 +1687,9 @@
 				9BB7BA060D830473004FE8C3 /* uMenu.cpp in Sources */,
 				9BCBDE440D91F7F30022855B /* tColor.cpp in Sources */,
 				9BCBE3100D922EAE0022855B /* AAPaste.cpp in Sources */,
+				9B7CFE1F0EFCE74700126634 /* tResource.cpp in Sources */,
+				9B7CFE210EFCE74700126634 /* tResourceManager.cpp in Sources */,
+				9B7CFE230EFCE74700126634 /* tResourceType.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1748,8 +1776,6 @@
 				9BB7B83F0D830423004FE8C3 /* tRandom.cpp in Sources */,
 				9BB7B8420D830423004FE8C3 /* tRecorder.cpp in Sources */,
 				9BB7B8440D830423004FE8C3 /* tRecorderInternal.cpp in Sources */,
-				9BB7B8470D830423004FE8C3 /* tResource.cpp in Sources */,
-				9BB7B8490D830423004FE8C3 /* tResourceManager.cpp in Sources */,
 				9BB7B84B0D830423004FE8C3 /* tRing.cpp in Sources */,
 				9BB7B84D0D830423004FE8C3 /* tRuby.cpp in Sources */,
 				9BB7B84F0D830423004FE8C3 /* tSafePTR.cpp in Sources */,
@@ -1817,6 +1843,9 @@
 				9BB7BA000D830473004FE8C3 /* uMenu.cpp in Sources */,
 				9BCBDE120D91F6D90022855B /* tColor.cpp in Sources */,
 				9BCBE30E0D922EAE0022855B /* AAPaste.cpp in Sources */,
+				9B7CFE190EFCE74700126634 /* tResource.cpp in Sources */,
+				9B7CFE1B0EFCE74700126634 /* tResourceManager.cpp in Sources */,
+				9B7CFE1D0EFCE74700126634 /* tResourceType.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1843,10 +1872,10 @@
 				FRAMEWORK_SEARCH_PATHS = "\"$(SRCROOT)/../../Library/Frameworks\"";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = "$(SHARED_HEADER_SEARCH_PATHS)";
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = "$(SHARED_LIBRARY_SEARCH_PATHS)";
-				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CPLUSPLUSFLAGS = "$(SHARED_OTHER_CPLUSPLUSFLAGS)";
 				OTHER_LDFLAGS = "$(SHARED_OTHER_LDFLAGS)";
 				OTHER_REZFLAGS = "";
@@ -1870,10 +1899,10 @@
 				FRAMEWORK_SEARCH_PATHS = "\"$(SRCROOT)/../../Library/Frameworks\"";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 2;
 				HEADER_SEARCH_PATHS = "$(SHARED_HEADER_SEARCH_PATHS)";
 				INSTALL_PATH = "$(HOME)/bin";
 				LIBRARY_SEARCH_PATHS = "$(SHARED_LIBRARY_SEARCH_PATHS)";
-				OPTIMIZATION_CFLAGS = "-O2";
 				OTHER_CPLUSPLUSFLAGS = "$(SHARED_OTHER_CPLUSPLUSFLAGS)";
 				OTHER_LDFLAGS = "$(SHARED_OTHER_LDFLAGS)";
 				OTHER_REZFLAGS = "";
