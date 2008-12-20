@@ -44,7 +44,7 @@ module AAConfig
     DEDICATED ? "" : PRODUCT_NAME + (ENV["WRAPPER_SUFFIX"] || "") + "/Contents/Resources"
   ].join("/")
     
-  BUILD_TYPE = File.exists?(src_path(".svn")) ? :development : :release
+  BUILD_TYPE = [src_path(".svn"), src_path(".bzr")].any? { |f| File.exists?(f) } ? :development : :release
     
   TAG_MAPPINGS = {
     "version" => version(),
