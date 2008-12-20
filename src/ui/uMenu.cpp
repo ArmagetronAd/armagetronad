@@ -28,11 +28,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "aa_config.h"
 
-#ifdef MACOSX
-#   include "AAPaste.h"
-#   include <CoreFoundation/CoreFoundation.h>
-#else
-#   include "scrap.h"
+#ifndef DEDICATED
+#   ifdef MACOSX
+#       include "AAPaste.h"
+#       include <CoreFoundation/CoreFoundation.h>
+#   else
+#       include "scrap.h"
+#   endif
 #endif
 
 #include "tSysTime.h"

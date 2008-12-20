@@ -321,7 +321,6 @@
 		9BCBE30D0D922EAE0022855B /* AAPaste.h in Headers */ = {isa = PBXBuildFile; fileRef = 9BCBE30B0D922EAE0022855B /* AAPaste.h */; };
 		9BCBE30E0D922EAE0022855B /* AAPaste.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BCBE30C0D922EAE0022855B /* AAPaste.cpp */; };
 		9BCBE30F0D922EAE0022855B /* AAPaste.h in Headers */ = {isa = PBXBuildFile; fileRef = 9BCBE30B0D922EAE0022855B /* AAPaste.h */; };
-		9BCBE3100D922EAE0022855B /* AAPaste.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BCBE30C0D922EAE0022855B /* AAPaste.cpp */; };
 		9BD7D9720A2C7CB400D7033C /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96B0A2C7CB400D7033C /* libfreetype.a */; };
 		9BD7D9730A2C7CB400D7033C /* libftgl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96C0A2C7CB400D7033C /* libftgl.a */; };
 		9BD7D9740A2C7CB400D7033C /* libpng.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BD7D96D0A2C7CB400D7033C /* libpng.framework */; };
@@ -1686,7 +1685,6 @@
 				9BB7BA040D830473004FE8C3 /* uInputQueue.cpp in Sources */,
 				9BB7BA060D830473004FE8C3 /* uMenu.cpp in Sources */,
 				9BCBDE440D91F7F30022855B /* tColor.cpp in Sources */,
-				9BCBE3100D922EAE0022855B /* AAPaste.cpp in Sources */,
 				9B7CFE1F0EFCE74700126634 /* tResource.cpp in Sources */,
 				9B7CFE210EFCE74700126634 /* tResourceManager.cpp in Sources */,
 				9B7CFE230EFCE74700126634 /* tResourceType.cpp in Sources */,
