@@ -56,7 +56,7 @@ module AAConfig
 end
 
 task "remove-version" do
-  rm_rf(build_path("src", "macosx"))
+  rm_rf(AAConfig.build_path("src", "macosx"))
 end
 
 desc "Update version"
