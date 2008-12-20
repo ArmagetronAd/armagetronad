@@ -70,14 +70,14 @@ module AA::Config
   # The Armagetron Advanced.app, or the Armagetron Advanced Dedicated directory
   PACKGAGE_RESOURCE_DIR_BASE = [
     CONFIGURATION_BUILD_DIR,
-    DEDICATED ? "" : PRODUCT_NAME + (ENV["WRAPPER_SUFFIX"] || ".app")
-  ].join("/")
+    DEDICATED ? nil : PRODUCT_NAME + (ENV["WRAPPER_SUFFIX"] || ".app")
+  ].compact.join("/")
   
   # Where all the game data should go
   PACKGAGE_RESOURCE_DIR = [
     PACKGAGE_RESOURCE_DIR_BASE,
-     DEDICATED ? "" : "Contents/Resources"
-  ].join("/")
+     DEDICATED ? nil : "Contents/Resources"
+  ].compact.join("/")
     
   BUILD_TYPE = [src_path(".svn"), src_path(".bzr")].any? { |f| File.exists?(f) } ? :development : :release
     
