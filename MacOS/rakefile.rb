@@ -44,7 +44,7 @@ module AA::Config
   
   PACKGAGE_RESOURCE_DIR = [
     ENV["CONFIGURATION_BUILD_DIR"] || (BUILD_DIR + "/Debug"),
-    DEDICATED ? "" : PRODUCT_NAME + (ENV["WRAPPER_SUFFIX"] || "") + "/Contents/Resources"
+    DEDICATED ? "" : PRODUCT_NAME + (ENV["WRAPPER_SUFFIX"] || ".app") + "/Contents/Resources"
   ].join("/")
     
   BUILD_TYPE = [src_path(".svn"), src_path(".bzr")].any? { |f| File.exists?(f) } ? :development : :release
