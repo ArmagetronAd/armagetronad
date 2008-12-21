@@ -401,7 +401,7 @@
 			outputFiles = (
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).tab.cpp",
 			);
-			script = "bison -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.tab.cpp\" \"${INPUT_FILE_PATH}\"";
+			script = "test -n \"${BISON}\" || BISON=bison\n$BISON -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.tab.cpp\" \"${INPUT_FILE_PATH}\"";
 		};
 		9BB5B8560D845C2500BF5F1C /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
@@ -412,7 +412,7 @@
 			outputFiles = (
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).tab.cpp",
 			);
-			script = "bison -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.tab.cpp\" \"${INPUT_FILE_PATH}\"";
+			script = "test -n \"${BISON}\" || BISON=bison\n$BISON -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.tab.cpp\" \"${INPUT_FILE_PATH}\"";
 		};
 		9BC0F61A0B517A8B0041120B /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
@@ -433,42 +433,42 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8D1107260486CEB800E47090 /* Armagetron Advanced */;
+			remoteGlobalIDString = 8D1107260486CEB800E47090;
 			remoteInfo = "Armagetron Advanced";
 		};
 		9B3139CE0EFD0756009690D0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8C11CA41095A268E007AE0EA /* Armagetron Advanced Dedicated */;
+			remoteGlobalIDString = 8C11CA41095A268E007AE0EA;
 			remoteInfo = "Armagetron Advanced Dedicated";
 		};
 		9B3139D30EFD077B009690D0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 9B31399E0EFD0560009690D0 /* Create Client Release */;
+			remoteGlobalIDString = 9B31399E0EFD0560009690D0;
 			remoteInfo = "Create Client Release";
 		};
 		9B3139D50EFD077B009690D0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 9B3139BD0EFD073A009690D0 /* Create Dedicated Release */;
+			remoteGlobalIDString = 9B3139BD0EFD073A009690D0;
 			remoteInfo = "Create Dedicated Release";
 		};
 		9B3139EF0EFD097D009690D0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 9B3139EC0EFD0963009690D0 /* Update Version */;
+			remoteGlobalIDString = 9B3139EC0EFD0963009690D0;
 			remoteInfo = "Update Version";
 		};
 		9B3139F10EFD0987009690D0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 9B3139EC0EFD0963009690D0 /* Update Version */;
+			remoteGlobalIDString = 9B3139EC0EFD0963009690D0;
 			remoteInfo = "Update Version";
 		};
 /* End PBXContainerItemProxy section */
