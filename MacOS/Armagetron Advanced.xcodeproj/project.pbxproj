@@ -401,7 +401,7 @@
 			outputFiles = (
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).tab.cpp",
 			);
-			script = "test -n \"${BISON}\" || BISON=bison\n$BISON -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.tab.cpp\" \"${INPUT_FILE_PATH}\"";
+			script = "test -n \"${BISON}\" || BISON=bison\necho $BISON\n$BISON -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.tab.cpp\" \"${INPUT_FILE_PATH}\"";
 		};
 		9BB5B8560D845C2500BF5F1C /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
@@ -412,7 +412,7 @@
 			outputFiles = (
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).tab.cpp",
 			);
-			script = "test -n \"${BISON}\" || BISON=bison\n$BISON -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.tab.cpp\" \"${INPUT_FILE_PATH}\"";
+			script = "test -n \"${BISON}\" || BISON=bison\necho $BISON\n$BISON -o \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.tab.cpp\" \"${INPUT_FILE_PATH}\"";
 		};
 		9BC0F61A0B517A8B0041120B /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
