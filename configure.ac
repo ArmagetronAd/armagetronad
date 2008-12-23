@@ -299,10 +299,14 @@ test $DEBUGLEVEL -ge 3 && enable_memmanager=yes
 test $DEBUGLEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -DDEBUG_EXPENSIVE"
 test $DEBUGLEVEL -ge 5 && CXXFLAGS="$CXXFLAGS -DMEM_DEB"
 
+dnl oddly, this macro needs to be called once unconditionally, or automake
+dnl borks up.
+AX_CXXFLAGS_GCC_OPTION()
+
 if test $CODELEVEL -ge 1; then
     CXXFLAGS="$CXXFLAGS -Wall"
     
-    # careful, only supported on GCC 4.2 and later
+    dnl careful, only supported on GCC 4.2 and later
     AX_CXXFLAGS_GCC_OPTION(-Wno-strict-overflow)
 fi
 
