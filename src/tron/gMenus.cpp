@@ -652,6 +652,9 @@ public:
 
             con << tColoredString::ColorString(.5,.5,1) << " > " << *content << '\n';
 
+            // direct commands are executed at owner level
+            tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
             // pass the console command to the configuration system
             std::stringstream s(&((*content)[0]));
             tConfItemBase::LoadAll( s, false );

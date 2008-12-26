@@ -280,6 +280,8 @@ public:
     {
         this->setting_.Set( value );
     }
+
+    nSettingItem< T > & GetSetting(){ return setting_; }
 private:
     nSettingItem< T > setting_;
     nConfItemVersionWatcher watcher_;

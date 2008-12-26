@@ -182,6 +182,7 @@ enum tAccessLevel
     tAccessLevel_23 = 23,          // reserved
     tAccessLevel_24 = 24,          // reserved
     tAccessLevel_25 = 25,          // reserved
+    tAccessLevel_Invalid = 255,    // completely invalid level
     tAccessLevel_Default = 20
 };
 
@@ -222,7 +223,8 @@ protected:
     const tOutput help;
     bool changed;
 
-    tAccessLevel requiredLevel;
+    tAccessLevel requiredLevel; //!< access level required to change this setting
+    tAccessLevel setLevel;      //!< access level of the user making the last change to this setting
 
     typedef std::map< tString, tConfItemBase * > tConfItemMap;
     static tConfItemMap & ConfItemMap();
@@ -242,6 +244,7 @@ public:
     }
 
     tAccessLevel GetRequiredLevel() const { return requiredLevel; }
+    tAccessLevel GetSetLevel() const { return setLevel; }
 
     static int EatWhitespace(std::istream &s); // eat whitespace from stream; return: first non-whitespace char
 

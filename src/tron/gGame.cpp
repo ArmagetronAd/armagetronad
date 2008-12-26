@@ -2849,6 +2849,10 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
 
 static void sg_ParseMap ( gParser * aParser )
 {
+    // let settings in the map file be executed with the rights of the person
+    // who set the map
+    tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
+
     sg_ParseMap(aParser, mapfile);
 }
 
@@ -3335,6 +3339,9 @@ void gGame::StateUpdate(){
                 }
 
                 {
+                    // default include files are executed at owner level
+                    tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
                     std::ifstream s;
 
                     // load contents of everytime.cfg for real
