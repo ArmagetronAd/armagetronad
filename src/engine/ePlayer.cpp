@@ -5009,8 +5009,13 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
             accessLevel_ = static_cast< tAccessLevel >( tAccessLevel_Program - 1 );
         }
 
-        // take over the access level
-        SetAccessLevel( accessLevel_ );
+        {
+            // authorize access level change (careful, don't blindly copy/paste to other places)
+            tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
+            // take over the access level
+            SetAccessLevel( accessLevel_ );
+        }
 
         tString order( "" );
         if ( admin )

@@ -1306,7 +1306,13 @@ void init_game_grid(eGrid *grid, gParser *aParser){
       SDL_Delay(1000);
     */
 
-    Arena.PrepareGrid(grid, aParser);
+    {
+        // let settings in the map file be executed with the rights of the person
+        // who set the map
+        tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
+
+        Arena.PrepareGrid(grid, aParser);
+    }
 
     absolute_winner=winner=wishWinner=0;
 }
@@ -2849,10 +2855,6 @@ static void sg_ParseMap ( gParser * aParser, tString mapfile )
 
 static void sg_ParseMap ( gParser * aParser )
 {
-    // let settings in the map file be executed with the rights of the person
-    // who set the map
-    tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
-
     sg_ParseMap(aParser, mapfile);
 }
 
