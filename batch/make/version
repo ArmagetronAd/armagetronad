@@ -80,6 +80,37 @@ if test -d "${srcdir}/.svn"; then
     fi
 fi
 
-test -z "$DATE" || minor_version=`cat ${srcdir}/minor_version | sed -e "s,DATE,$DATE," -e "s,YYYYMMDD,$DATE,"`
+# Check if bzr is installed, and if the path is versionned
+bzr >/dev/null 2>&1
+if test $? -eq 0
+then
+    bzr diff ${srcdir} --quiet >/dev/null 2>&1
+    # Test for the return code of bzr diff (see bzr diff --help)
+    if test $? -eq 0
+    then
+        # If no change was made, use revision number
+        # but first check if it's tagged
+        revno=$(bzr revno ${srcdir})
+        tag=$(bzr tags | grep -P "^(.*?) +${revno}$" | awk '{ print $1 }')
+        if test $tag
+        then
+            # If it is tagged, use the tag
+            DATE=_$tag
+        else
+            # If not, use revision number
+            DATE=_r$(bzr revno ${srcdir})
+        fi
+    elif test $? -lt 3
+    then
+        # If a change was made, use revision number plus build date
+        DATE=_r$(bzr revno ${srcdir})_$DATE
+    # It returns 3 if it's not versionned, so forget it
+    fi
+fi
+
+if test ! $minor_version
+then
+    test -z "$DATE" || minor_version=`cat ${srcdir}/minor_version | sed -e "s,DATE,$DATE," -e "s,YYYYMMDD,$DATE,"`
+fi
 
 echo $major_version$minor_version
