@@ -45,7 +45,7 @@ nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/di
 	textures/floor_a.png textures/floor_b.png textures/floor.png textures/font_extra.png\
 	textures/font.png textures/font_s.png textures/icon.png textures/KGN_logo.png textures/rim_wall.png\
 	textures/shadow.png textures/sky.png textures/title.jpg\
-	textures/font.ttf textures/Armagetronad.ttf
+	textures/Armagetronad.ttf
 
 nobase_sound_DATA=sound/1voicemale.ogg  sound/announcerGO.ogg  sound/expl.ogg\
 	sound/2voicemale.ogg  sound/cycle_turn.ogg   sound/grind.ogg\
