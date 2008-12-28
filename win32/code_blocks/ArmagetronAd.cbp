@@ -85,6 +85,7 @@
 			<Add directory="..\..\src\network" />
 			<Add directory="..\..\src\render" />
 			<Add directory="..\..\src\tools" />
+			<Add directory="..\..\src\resource" />
 			<Add directory="..\..\src\tools\values" />
 			<Add directory="..\..\src\ui" />
 			<Add directory="..\..\src\win32" />
@@ -231,6 +232,12 @@
 		<Unit filename="..\..\src\render\rTextureRenderTarget.h" />
 		<Unit filename="..\..\src\render\rViewport.cpp" />
 		<Unit filename="..\..\src\render\rViewport.h" />
+		<Unit filename="..\..\src\resource\tResource.cpp" />
+		<Unit filename="..\..\src\resource\tResource.h" />
+		<Unit filename="..\..\src\resource\tResourceManager.cpp" />
+		<Unit filename="..\..\src\resource\tResourceManager.h" />
+		<Unit filename="..\..\src\resource\tResourceType.cpp" />
+		<Unit filename="..\..\src\resource\tResourceType.h" />
 		<Unit filename="..\..\src\thirdparty\mathexpr\mathexpr.cpp" />
 		<Unit filename="..\..\src\thirdparty\mathexpr\mathexpr.h" />
 		<Unit filename="..\..\src\thirdparty\particles\ParticleDLL\Particle.h" />
@@ -290,7 +297,6 @@
 		<Unit filename="..\..\src\tools\tMemStack.h" />
 		<Unit filename="..\..\src\tools\tPlayList.cpp" />
 		<Unit filename="..\..\src\tools\tPlayList.h" />
-		<Unit filename="..\..\src\tools\tPolynomial.cpp" />
 		<Unit filename="..\..\src\tools\tPolynomial.h" />
 		<Unit filename="..\..\src\tools\tPolynomialWithBase.h" />
 		<Unit filename="..\..\src\tools\tRandom.cpp" />
@@ -300,8 +306,6 @@
 		<Unit filename="..\..\src\tools\tRecorderInternal.cpp" />
 		<Unit filename="..\..\src\tools\tRecorderInternal.h" />
 		<Unit filename="..\..\src\tools\tReferenceHolder.h" />
-		<Unit filename="..\..\src\tools\tResourceManager.cpp" />
-		<Unit filename="..\..\src\tools\tResourceManager.h" />
 		<Unit filename="..\..\src\tools\tRing.cpp" />
 		<Unit filename="..\..\src\tools\tRing.h" />
 		<Unit filename="..\..\src\tools\tSafePTR.cpp" />
