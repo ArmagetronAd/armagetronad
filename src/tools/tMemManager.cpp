@@ -92,6 +92,9 @@ static bool reported=false;
 #include <zthread/FastRecursiveMutex.h>
 
 static ZThread::FastRecursiveMutex st_mutex;
+#elif defined(HAVE_PTHREAD)
+#include "pthread-binding.h"
+static tPThreadRecursiveMutex st_mutex;
 #else
 class tMockMutex
 {
@@ -204,7 +207,15 @@ public:
     void        complete_Dispose(memblock *m);
     void        Check(); // check integrity
 
+    tMemManager( tMemManager const & other )
+    : size( other.size )
+    , blocksize( other.blocksize )
+    , semaphore( 1 )
+    {
+    }
 private:
+    tMemManager & operator =( tMemManager const & );
+
     int  Lower(int i){ // the element below i in the heap
         if(i%2==0)  // just to make sure what happens; you never know what 1/2 is..
             return i/2-1;
@@ -223,7 +234,7 @@ private:
     void CheckHeap(); // checks the heap structure
     //#endif
 
-static int  UpperL(int i){return 2*i+1;} // the elements left and
+    static int  UpperL(int i){return 2*i+1;} // the elements left and
     static int  UpperR(int i){return 2*i+2;} // right above i
 
     void Insert(memblock *b);  // starts to manage object e

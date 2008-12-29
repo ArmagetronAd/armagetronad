@@ -101,7 +101,7 @@ public:
             (reinterpret_cast<int *>((*this)(i)))[offset]=-1;
     }
 
-tList(int size=0):tArray<T*, MALLOC>(size){}
+    tList(int size=0):tArray<T*, MALLOC>(size){}
 
     void Add(T *t,int &idnum){
         offset=&idnum-(reinterpret_cast<int *>(t));
@@ -164,6 +164,18 @@ tList(int size=0):tArray<T*, MALLOC>(size){}
     {
         Remove( t, t->ListIDRef() );
     }
+
+    //! fast data swap with other list
+    void Swap( tList & other )
+    {
+        tArray<T *, MALLOC>::Swap( other );
+
+        ::Swap( offset, other.offset );
+    }
+private:
+    // forbid copying
+    tList( tList const & );
+    tList & operator = ( tList const & );
 };
 
 class tListMember

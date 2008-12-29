@@ -1044,8 +1044,8 @@ nNetObject::~nNetObject(){
         tRecorderSync< int >::Archive( "_NETOBJECT_DESTROYED", 3, idsync );
 
         // con << "Destroying object " << id << '\n';
-        for (int user=MAXCLIENTS;user>=0;user--){
-            if (user!=sn_myNetID && knowsAbout[user].knowsAboutExistence ||
+        for(int user=MAXCLIENTS;user>=0;user--){
+            if( ( user!=sn_myNetID && knowsAbout[user].knowsAboutExistence ) ||
                     knowsAbout[user].acksPending){
                 if (destroyers[user]==NULL)
                 {

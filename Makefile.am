@@ -33,7 +33,7 @@ masterUninstallTasks=echo 'No tasks for the master server'
 endif
 
 languagedata=language/english_base.txt language/english_base_notranslate.txt language/american.txt language/british.txt\
-             language/deutsch.txt language/french.txt language/spanish.txt
+             language/deutsch.txt language/french.txt language/spanish.txt language/polish_transliterated.txt language/polish.txt
 
 nobase_dist_language_DATA=language/languages.txt.in $(languagedata) language/update.py
 
@@ -105,7 +105,7 @@ uninstall_location=$(DESTDIR)${bindir}/${uninstaller}
 install-uninstall: @srcdir@/batch/make/uninstall Makefile
 	$(install_sh_PROGRAM) $< $(uninstall_location)
 	rm $(uninstall_location)
-	ROOTDIR=$(ROOTDIR) DESTDIR=$(DESTDIR) MAKE="$(MAKE)" PREFIX="${prefix}" PROGTITLE="${progtitle}" SCRIPTDIR="${scriptdir}" sh $< $(uninstall_location) "$(external_uninstall_cmd)"
+	ROOTDIR=$(ROOTDIR) DESTDIR=$(DESTDIR) MAKE="$(MAKE)" PREFIX="${prefix}" PROGTITLE="${progtitle}" PROGNAME="${progname}" SCRIPTDIR="${scriptdir}" sh $< $(uninstall_location) "$(external_uninstall_cmd)"
 else
 install-uninstall:
 endif

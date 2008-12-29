@@ -141,6 +141,9 @@ void sr_Read_stdin(){
     while ( read(stdin_descriptor,&line_in[currentIn],1)>0){
         if (line_in[currentIn]=='\n' || currentIn>=MAXLINE-1)
         {
+            // stdin commands are executed at owner level
+            tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
             line_in[currentIn+1]='\0';
             std::istringstream s(line_in);
             tConfItemBase::LoadAll(s, true);

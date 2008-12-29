@@ -441,6 +441,7 @@ static bool CheckLoop(const gCycle *a, const gCycle *b,
 
                 // detect early loop
                 if (run == b)
+                {
                     if (bClosedIn)
                     {
                         winding = 0;
@@ -448,6 +449,7 @@ static bool CheckLoop(const gCycle *a, const gCycle *b,
                     }
                     else
                         bClosedIn = true;
+                }
             }
             else
             {
@@ -890,8 +892,8 @@ gCycleMemoryEntry* gCycleMemory::Latest (int side)  const
     for (int i=memory.Len()-1; i>=0; i--)
     {
         gCycleMemoryEntry* m = memory(i);
-        if ((!ret || (m->max[side].dist > ret->max[side].dist)
-                && bool( m->cycle ) && m->cycle->Alive() ))
+        if ((!ret || ( (m->max[side].dist > ret->max[side].dist)
+                       && bool( m->cycle ) && m->cycle->Alive() ) ) )
             ret = memory(i);
     }
 
@@ -905,8 +907,8 @@ gCycleMemoryEntry* gCycleMemory::Earliest (int side)  const
     for (int i=memory.Len()-1; i>=0; i--)
     {
         gCycleMemoryEntry* m = memory(i);
-        if ((!ret || (m->min[side].dist < ret->min[side].dist)
-                && bool( m->cycle ) && m->cycle->Alive()))
+        if ((!ret || ( (m->min[side].dist < ret->min[side].dist)
+                       && bool( m->cycle ) && m->cycle->Alive() ) ) )
             ret = memory(i);
     }
     return ret;
@@ -1260,7 +1262,7 @@ void gAIPlayer::SetNumberOfAIs(int num, int minPlayers, int iq, int tries)
         for (i = se_PlayerNetIDs.Len()-1; i>=0; i--)
         {
             ePlayerNetID *p = se_PlayerNetIDs(i);
-            if ( !p->IsSpectating() )
+            if ( p->CurrentTeam() )
                 ++pcount;
         }
 
@@ -1530,7 +1532,7 @@ void gAIPlayer::ThinkTrace( ThinkData & data )
 
         if (a < b)
             a = b;
-        if ( a > 0 && a < nextTurn || !left.front.edge)
+        if ( ( a > 0 && a < nextTurn ) || !left.front.edge)
             nextTurn = a;
     }
 

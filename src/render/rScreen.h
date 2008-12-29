@@ -116,6 +116,7 @@ enum rDisplayListUsage
 };
 
 extern rDisplayListUsage sr_useDisplayLists;   // use GL display lists
+extern bool sr_blacklistDisplayLists;   // use GL display lists (override for buggy implementations)
 // not delete the screen, just pait the background with depth test
 // disabled. Gives 20% speedup.
 

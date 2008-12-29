@@ -59,7 +59,7 @@ static tSettingItem<REAL> f_m("FLOOR_MIRROR_INT",sr_floorMirror_strength);
 #define view_h 2.7
 
 #ifdef DEBUG
-bool debug_grid=1;
+bool debug_grid=0;
 #endif
 
 REAL upper_height=100;

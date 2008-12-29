@@ -456,7 +456,7 @@ static void blocks(const gSensor &s, const gCycleMovement *c, int lr)
 
     if (s.type == gSENSOR_RIM)
         gAIPlayer::CycleBlocksRim(c, lr);
-    else if (s.type == gSENSOR_TEAMMATE || s.type == gSENSOR_ENEMY && s.ehit)
+    else if (s.type == gSENSOR_TEAMMATE || ( s.type == gSENSOR_ENEMY && s.ehit ) )
     {
         gPlayerWall *w = dynamic_cast<gPlayerWall*>(s.ehit->GetWall());
         if (w)
@@ -2808,6 +2808,8 @@ void gCycleMovement::AccelerationDiscontinuity()
 
 void gCycleMovement::CalculateAcceleration()
 {
+    tASSERT( good( verletSpeed_ ) );
+
     // reset usage variables
     brakeUsage = 0.0f;
     rubberUsage = 0.0f;
@@ -2944,7 +2946,7 @@ void gCycleMovement::CalculateAcceleration()
     }
 
     // kill cycle if it is inside a too narrow channel
-    if ( slingshot && tunnelWidth < sg_cycleWidth || sideWidth < sg_cycleWidthSide )
+    if ( ( slingshot && tunnelWidth < sg_cycleWidth ) || sideWidth < sg_cycleWidthSide )
     {
         tunnelWidth = 0;
         REAL sideWidth = sg_cycleWidthSide * 2;
@@ -3010,6 +3012,8 @@ void gCycleMovement::CalculateAcceleration()
 
     tASSERT( good( acceleration ) );
     sg_ArchiveReal( acceleration, 9 );
+
+    tASSERT( good( verletSpeed_ ) );
 }
 
 // *******************************************************************************************
@@ -3074,8 +3078,10 @@ void gCycleMovement::ApplyAcceleration( REAL dt )
     }
 
     // if decay wasn't handled properly (because it didn't need to), use euler/verlet
+    tASSERT( good( acceleration ) );
     if ( !properDecay )
         verletSpeed_+=acceleration*verletTimestep;
+    tASSERT( good( verletSpeed_ ) );
 
     // clamp speed
     REAL minSpeed = sg_speedCycle*SpeedMultiplier()*sg_speedCycleMin;
@@ -3179,37 +3185,41 @@ bool gCycleMovement::DoTurn( int dir )
                 // this would be the maximal acceleration factor
                 REAL accelerationFactorMax = (1/sg_accelerationCycleOffs) - accellerationFactorOffset;
 
-                // select boost settings according to wall type
-                // apply modificators
-                REAL boost = 0, boostFactor = 1;
-                switch (gridder2.type)
+                if( accelerationFactorMax > 0 && dist < sg_nearCycle )
                 {
-                case gSENSOR_SELF:
-                    boost = sg_boostCycleSelf;
-                    boostFactor = sg_boostFactorCycleSelf;
-                    break;
-                case gSENSOR_TEAMMATE:
-                    boost = sg_boostCycleTeam;
-                    boostFactor = sg_boostFactorCycleTeam;
-                    break;
-                case gSENSOR_ENEMY:
-                    boost = sg_boostCycleEnemy;
-                    boostFactor = sg_boostFactorCycleEnemy;
-                    break;
-                case gSENSOR_RIM:
-                    boost = sg_boostCycleRim;
-                    boostFactor = sg_boostFactorCycleRim;
-                    break;
-                case gSENSOR_NONE:
-                    break;
+                    // select boost settings according to wall type
+                    // apply modificators
+                    REAL boost = 0, boostFactor = 1;
+                    switch (gridder2.type)
+                    {
+                    case gSENSOR_SELF:
+                        boost = sg_boostCycleSelf;
+                        boostFactor = sg_boostFactorCycleSelf;
+                        break;
+                    case gSENSOR_TEAMMATE:
+                        boost = sg_boostCycleTeam;
+                        boostFactor = sg_boostFactorCycleTeam;
+                        break;
+                    case gSENSOR_ENEMY:
+                        boost = sg_boostCycleEnemy;
+                        boostFactor = sg_boostFactorCycleEnemy;
+                        break;
+                    case gSENSOR_RIM:
+                        boost = sg_boostCycleRim;
+                        boostFactor = sg_boostFactorCycleRim;
+                        break;
+                    case gSENSOR_NONE:
+                        break;
+                    }
+
+                    // apply acceleration factor to boost
+                    boostFactor = 1 + ( boostFactor - 1 ) * accelerationFactor / accelerationFactorMax;
+                    boost *= SpeedMultiplier() * accelerationFactor / accelerationFactorMax;
+
+                    // apply boost to speed
+                    verletSpeed_ = verletSpeed_ * boostFactor + boost;
+                    tASSERT( good( verletSpeed_ ) );
                 }
-
-                // apply acceleration factor to boost
-                boostFactor = 1 + ( boostFactor - 1 ) * accelerationFactor / accelerationFactorMax;
-                boost *= SpeedMultiplier() * accelerationFactor / accelerationFactorMax;
-
-                // apply boost to speed
-                verletSpeed_ = verletSpeed_ * boostFactor + boost;
             }
 
             // if edges have been inserted into the grid, find a new current face.

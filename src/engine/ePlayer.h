@@ -49,6 +49,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #define PLAYER_CONFITEMS (30+MAX_INSTANT_CHAT)
 
+// call on commands that only work on the server; quit if it returns true
+bool se_NeedsServer(char const * command, std::istream & s, bool strict = true );
+
 class tConfItemBase;
 class uAction;
 class tOutput;
@@ -317,6 +320,7 @@ public:
     int TotalScore() const;
     static void ResetScoreDifferences(); //<! Resets the last stored score so ScoreDifferences takes this as a reference time
     static void LogScoreDifferences();   //<! Logs accumulated scores of all players since the last call to ResetScoreDifferences() to ladderlog.txt
+    static void UpdateSuspensions();     //<! Decrements the number of rounds players are suspended for
     void LogScoreDifference();           //<! Logs accumulated scores since the last call to ResetScoreDifferences() to ladderlog.txt
 
     static void SortByScore(); // brings the players into the right order
@@ -370,6 +374,8 @@ public:
     static tString FilterName( tString const & in );             //!< filters a name (removes unprintables, color codes and spaces)
     bool IsAllowedToRename ( void );                             //!< tells if the user can rename or not, takes care about everything
     void AllowRename( bool allow );                              //!< Allows a player to rename (or not)
+
+    static bool HasRenameCapability ( ePlayerNetID const *, ePlayerNetID const * admin ); //!< Checks if the admin can use the RENAME command. Used in IsAllowedToRename()
 
 private:
     tColoredString  nameFromClient_;        //!< this player's name as the client wants it to be. Avoid using it when possilbe.
@@ -438,6 +444,7 @@ extern bool se_assignTeamAutomatically;
 void se_ChatState( ePlayerNetID::ChatFlags flag, bool cs);
 
 void se_SaveToScoreFile( tOutput const & out );  //!< writes something to scorelog.txt
+void se_SaveToChatLog( tOutput const & out );  //!< writes something to chatlog.txt (if enabled) and/or ladderlog
 
 //! create a global instance of this to write stuff to ladderlog.txt
 class eLadderLogWriter {
@@ -493,6 +500,22 @@ public:
 
 extern int se_SpamMaxLen;	// maximal length of chat message
 
+class eChatSpamTester
+{
+public:
+    eChatSpamTester( ePlayerNetID * p, tString const & say );
+    bool Block();
+    bool Check();
+
+    bool tested_;             //!< flag indicating whether the chat line has already been checked fro spam
+    bool shouldBlock_;        //!< true if the message should be blocked for spam
+    ePlayerNetID * player_;   //!< the chatting player
+    tColoredString say_;      //!< the chat line
+    REAL factor_;             //!< extra spam weight factor
+
+};
+
+void ForceName ( std::istream & s );
 
 // ******************************************************************************************
 // *

@@ -46,6 +46,9 @@ protected:
     void ResizeBase(int i,int size_of_T, bool useMalloc);
     void *Base() const {return base;}
 
+    //! fast data swap with other array
+    void Swap( GrowingArrayBase & other );
+
     GrowingArrayBase(int firstsize,int size_of_T, bool useMalloc);
     void Delete( bool useMalloc );
     ~GrowingArrayBase();
@@ -82,6 +85,11 @@ protected:
             new(reinterpret_cast<T *>(Base())+i) T();
     }
 
+    //! fast data swap with other array
+    void Swap( tArray & other )
+    {
+        GrowingArrayBase::Swap( other );
+    }
 
     void Clear(){
         int i;
@@ -134,7 +142,9 @@ public:
         }
 #endif
         if (i>=Len())
+        {
             SetLen(i+1);
+        }
 
         //    dump(low,flow,"[" << i << "]" << "=" << ((T *)Base())[i] << '\n');
 

@@ -85,6 +85,7 @@ tCurrentAccessLevel::~tCurrentAccessLevel()
 //! returns the current access level
 tAccessLevel tCurrentAccessLevel::GetAccessLevel()
 {
+    tASSERT( currentLevel_ != tAccessLevel_Invalid );
     return currentLevel_;
 }
 
@@ -96,7 +97,7 @@ tString tCurrentAccessLevel::GetName( tAccessLevel level )
     return tString( tOutput( s.str().c_str() ) );
 }
 
-tAccessLevel tCurrentAccessLevel::currentLevel_ = tAccessLevel_Owner; //!< the current access level
+tAccessLevel tCurrentAccessLevel::currentLevel_ = tAccessLevel_Invalid; //!< the current access level
 
 tAccessLevelSetter::tAccessLevelSetter( tConfItemBase & item, tAccessLevel level )
 {
@@ -281,6 +282,7 @@ changed(false),callback(cb){
     confmap[title] = this;
 
     requiredLevel = tAccessLevel_Admin;
+    setLevel      = tAccessLevel_Owner;
 }
 
 tConfItemBase::tConfItemBase(const char *t, const tOutput& h, callbackFunc *cb)
@@ -294,6 +296,7 @@ changed(false),callback(cb){
     confmap[title] = this;
 
     requiredLevel = tAccessLevel_Admin;
+    setLevel      = tAccessLevel_Owner;
 }
 
 tConfItemBase::~tConfItemBase()
@@ -363,11 +366,17 @@ void tConfItemBase::LoadLine(std::istream &s){
 
             if ( ci->requiredLevel >= tCurrentAccessLevel::GetAccessLevel() )
             {
+                ci->setLevel = tCurrentAccessLevel::GetAccessLevel();
+
                 ci->ReadVal(s);
                 if (ci->changed)
+                {
                     ci->WasChanged();
+                }
                 else
+                {
                     ci->changed=cb;
+                }
             }
             else
             {
@@ -814,6 +823,9 @@ static void st_InstallSigHupHandler();
 
 void st_LoadConfig( bool printChange )
 {
+    // default include files are executed at owner level
+    tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
     st_InstallSigHupHandler();
 
     const tPath& var = tDirectories::Var();

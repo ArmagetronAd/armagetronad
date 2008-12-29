@@ -72,6 +72,7 @@ static int default_texturemode = GL_LINEAR_MIPMAP_LINEAR;
     #endif
 
 rDisplayListUsage sr_useDisplayLists=rDisplayList_Off;
+bool              sr_blacklistDisplayLists=false;
 
 static int width[ArmageTron_Custom+2]  = {0, 320, 320, 400, 512, 640, 800, 1024	, 1280, 1280, 1280, 1600, 1680, 2048,800,320};
 static int height[ArmageTron_Custom+2] = {0, 200, 240, 300, 384, 480, 600,  768	,  800,  854, 1024, 1200, 1050, 1572,600,200};
@@ -122,9 +123,11 @@ bool sr_DesktopScreensizeSupported()
     SDL_version const & sdlVersion = *SDL_Linked_Version();
 
     return
-        sdlVersion.major > 1 || sdlVersion.major == 1 &&
-        ( sdlVersion.minor > 2 || sdlVersion.minor == 2 &&
-          ( sdlVersion.patch >= 10 ) );
+    sdlVersion.major > 1 || 
+    ( sdlVersion.major == 1 &&
+      ( sdlVersion.minor > 2 || 
+        ( sdlVersion.minor == 2 &&
+          ( sdlVersion.patch >= 10 ) ) ) );
 #else
     return false;
 #endif
@@ -719,13 +722,24 @@ static bool lowlevel_sr_InitDisplay(){
     gl_version    << reinterpret_cast<const char *>(glGetString(GL_VERSION));
     gl_extensions << reinterpret_cast<const char *>(glGetString(GL_EXTENSIONS));
 
+    // display list blacklist
+    sr_blacklistDisplayLists=false;
+
+    if(strstr(gl_version,"Mesa 7.0") || strstr(gl_version,"Mesa 7.1"))
+    {
+        // mesa DRI and software has problems in the 7.0/7.1 series
+        sr_blacklistDisplayLists=true;
+    }
+
     #ifndef WIN32
     if(!strstr(gl_renderer,"Voodoo3"))
     #endif
+    {
         if(currentScreensetting.fullscreen)
             SDL_ShowCursor(0);
         else
             SDL_ShowCursor(1);
+    }
 
     #ifdef WIN32
     renderer_identification << "WIN32 ";
@@ -763,6 +777,12 @@ static bool lowlevel_sr_InitDisplay(){
         strstr(gl_vendor,"rian") && strstr(gl_renderer,"X11") &&
         strstr(gl_renderer,"esa")
     )
+        software_renderer=true;
+
+    if ( // test for Mesa software GL, new versions
+        strstr(gl_vendor,"Mesa") &&
+        strstr(gl_renderer,"Software Rasterizer")
+        )
         software_renderer=true;
 
     if ( // test for GLX software GL
@@ -994,6 +1014,13 @@ void sr_LoadDefaultConfig(){
     else if(strstr(gl_vendor,"Matrox")){
         sr_floorDetail = rFLOOR_TEXTURE;  // double textured floor does not work
     }
+
+    /*
+    else if(strstr(gl_version,"Mesa"))
+    {
+        sr_useDisplayLists=rDisplayList_Off;
+    }
+    */
 }
 
 void sr_ResetRenderState(bool menu){

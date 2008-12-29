@@ -44,7 +44,7 @@ bool tHeapBase::SwapIf(int i,int j)
     tASSERT( e2->hID == j );
 
     if (e1->Val() > e2->Val()){
-        Swap(tList< tHeapElement >::operator()(i),tList< tHeapElement >::operator()(j));
+        ::Swap(tList< tHeapElement >::operator()(i),tList< tHeapElement >::operator()(j));
         e1->hID=j;
         e2->hID=i;
         return true;

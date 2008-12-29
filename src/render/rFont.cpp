@@ -79,7 +79,7 @@ protected:
 static size_t my_strnlen(char const *c, size_t i) {
 	char const *begin = c;
 	char const *end = c + i;
-	for(; *c && c != end; ++c);
+	for(; *c && c != end; ++c) ;
 	return c - begin;
 }
 #endif

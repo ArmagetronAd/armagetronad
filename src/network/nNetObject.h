@@ -72,7 +72,7 @@ private:
 
     int syncListID_;                                 // ID for the list of objects to sync
 public:
-    class nKnowsAboutInfo{
+    struct nKnowsAboutInfo{
     public:
     bool knowsAboutExistence:
         1; // is the creation message through?
@@ -81,7 +81,7 @@ public:
         // for it's ack?
     bool syncReq:
         1;              // should a sync message be sent?
-    unsigned int  acksPending:
+    unsigned char  acksPending:
         4;          // how many messages are underway?
 
         nKnowsAboutInfo(){
@@ -96,7 +96,6 @@ public:
             syncReq=true;
             acksPending=0;
         }
-
     };
 protected:
 

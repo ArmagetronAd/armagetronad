@@ -44,7 +44,7 @@ eSensor::eSensor(eGameObject *o,const eCoord &start,const eCoord &d)
 
         // find a better current face if our start postion is not really at the
         // current position of the owner
-        if ( grid && !currentFace || !currentFace->IsInside( pos ) && currentFace->IsInside( owned->pos ) )
+        if ( ( grid && !currentFace ) || ( !currentFace->IsInside( pos ) && currentFace->IsInside( owned->pos ) ) )
         {
             currentFace = o->grid->FindSurroundingFace( pos, currentFace );
         }

@@ -244,8 +244,7 @@ static void sg_AlternativeMaster( int ID )
 static INTFUNCPTR sg_Connect = &sg_ConnectFavorite;
 // current server holder
 static gServerFavoritesHolder * sg_holder = &sg_favoriteHolder;
-// current minimal port accessible in the menu
-static int sg_lowPort = gServerBrowser::lowPort;
+
 // current language id prefix
 static char const * sg_languageIDPrefix = "$bookmarks_";
 // yeah, this could all be more elegant.
@@ -276,7 +275,7 @@ public:
         // prepare output reading "Edit <server name>"
         // create menu items (autodeleted when the edit menu is killed)
         tNEW(uMenuItemFunctionInt) ( menu, sg_GetBookmarkString( "menu_edit_connect_text" ), sg_GetBookmarkString( "menu_edit_connect_help" ), sg_Connect, fav.GetIndex() );
-        tNEW(uMenuItemInt)         ( menu,"$network_custjoin_port_text","$network_custjoin_port_help", fav.port_, sg_lowPort, gServerBrowser::highPort );
+        tNEW(uMenuItemInt)         ( menu,"$network_custjoin_port_text","$network_custjoin_port_help", fav.port_, 0, 0x7fffffff );
         tNEW(uMenuItemString)      ( menu,sg_GetBookmarkString( "menu_address" ),sg_GetBookmarkString( "menu_address_help" ),fav.address_);
     }
 
@@ -420,11 +419,10 @@ static void sg_TransferCustomServer()
     }
 }
 
-static void sg_FavoritesMenu( INTFUNCPTR connect, gServerFavoritesHolder & holder, int lowPort )
+static void sg_FavoritesMenu( INTFUNCPTR connect, gServerFavoritesHolder & holder )
 {
     sg_Connect = connect;
     sg_holder  = &holder;
-    sg_lowPort = lowPort;
 
     sg_TransferCustomServer();
 
@@ -454,7 +452,7 @@ static void sg_FavoritesMenu( INTFUNCPTR connect, gServerFavoritesHolder & holde
 void gServerFavorites::FavoritesMenu( void )
 {
     sg_languageIDPrefix = "$bookmarks_";
-    sg_FavoritesMenu( &sg_ConnectFavorite, sg_favoriteHolder, gServerBrowser::lowPort );
+    sg_FavoritesMenu( &sg_ConnectFavorite, sg_favoriteHolder );
 }
 
 // *********************************************************************************************
@@ -487,7 +485,7 @@ void gServerFavorites::AlternativesMenu( void )
     nServerInfo::DeleteAll();
 
     sg_languageIDPrefix = "$masters_";
-    sg_FavoritesMenu( &sg_AlternativeMaster, sg_masterHolder, gServerBrowser::lowPort - 10 );
+    sg_FavoritesMenu( &sg_AlternativeMaster, sg_masterHolder );
 }
 
 // *********************************************************************************************
@@ -507,8 +505,9 @@ void gServerFavorites::CustomConnectMenu( void )
     sg_connectionMenu = & net_menu;
 
     gServerFavorite & fav = sg_favoriteHolder.GetFavorite(-1);
-
+    
     // create menu entries
+    sg_languageIDPrefix = "$bookmarks_";
     gCustomConnectEntries submenu( fav, &net_menu );
 
     net_menu.Enter();

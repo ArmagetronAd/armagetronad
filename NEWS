@@ -167,6 +167,10 @@ New settings
 - All ladderlog outputs can be enabled or disabled separately by using
   LADDERLOG_WRITE_*. LADDERLOG_WRITE_ALL enables or disables all ladderlog
   output alltogether.
+- CHAT_LOG controls whether to write a machine-readable chatlog to
+  var/chatlog.txt
+- CONSOLE_DECORATE_TIMESTAMP write a timestamp for every console message?
+- LADDERLOG_DECORATE_TIMESTAMP prefix every ladderlog message with a timestamp?
 - SLAP <player> [points] sends a message to everyone and subtracts a number
   of points (default: 1) from <player>'s score. Negative points are
   supported.
@@ -197,6 +201,7 @@ Featurelets
 -----------
 
 - /teams chat command that rougly prints team layout.
+- Added Polish language file
 - clientside play time tracking and server controlled minimal required experience
   to be allowed to play.
 - color codes in chat increase the spam level logarithmically.
@@ -266,6 +271,7 @@ Featurelets
   HELP_INTRODUCTORY_BLURB and ADD_HELP_TOPIC to control its contents
 - /rtfm command that allows moderators to send help messages to newbies
 - /players now shows the players' color and allows searching
+- TEAM_ELIMINATION_MODE sets the way ArmagetronAd removes teams when there's too much teams.
 
 Bugfixes
 --------

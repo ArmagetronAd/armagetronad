@@ -2380,7 +2380,7 @@ bool gNetPlayerWall::IsDangerousApartFromHoles( REAL a, REAL time ) const
     if ( gCycle::WallsStayUpDelay() >= 0.0f )
     {
         // walls disappeear after death
-        if (!cycle_ || !cycle_->Alive() && cycle_->deathTime+ gCycle::WallsStayUpDelay()+0.2f<=time)
+        if (!cycle_ || ( !cycle_->Alive() && cycle_->deathTime + gCycle::WallsStayUpDelay()+0.2f <= time ) )
             return false;
     }
 

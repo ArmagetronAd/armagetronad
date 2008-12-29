@@ -37,6 +37,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rGL.h"
 #include <string.h>
 
+#define DONTDOIT
+#include "rRender.h"
+
 tCONFIG_ENUM(rDisplayListUsage);
 
 static tConfItem<rDisplayListUsage> mod_udl("USE_DISPLAYLISTS", sr_useDisplayLists);
@@ -277,6 +280,9 @@ void rModel::Render(){
         return;
     if ( !displayList_.Call() )
     {
+        // close pending glBegin() blocks
+        RenderEnd();
+
         // model display lists should definitely be compiled before other lists
         rDisplayList::Cancel();
 
@@ -294,25 +300,33 @@ void rModel::Render(){
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         }
 
-        rDisplayListFiller filler( displayList_ );
            
-        glEnable(GL_CULL_FACE);
 
         if ( !modelTexFacesCoherent )
         {
+            rDisplayListFiller filler( displayList_, false );
+            glEnable(GL_CULL_FACE);
+
             // sigh, we need to do it the complicated way
             glBegin( GL_TRIANGLES );
             for(int i=modelFaces.Len()-1;i>=0;i--)
             {
                 for(int j=0;j<=2;j++)
                 {
-                    glTexCoord3fv(reinterpret_cast<REAL *>(&(texVert(modelTexFaces(i).A[j]))));
-                    glNormal3fv(reinterpret_cast<REAL *>(&(normals(modelFaces(i).A[j]))));
+                    if ( modelTexFaces.Len() > 0 )
+                    {
+                        glTexCoord3fv(reinterpret_cast<REAL *>(&(texVert(modelTexFaces(i).A[j]))));
+                    }
+                    if ( normals.Len() > 0 )
+                    {
+                        glNormal3fv(reinterpret_cast<REAL *>(&(normals(modelFaces(i).A[j]))));
+                    }
                     glVertex3fv(reinterpret_cast<REAL *>(&(vertices(modelFaces(i).A[j]))));
                 }
             }
             glEnd();
 
+            glDisable(GL_CULL_FACE);
         }
         else
         {
@@ -325,17 +339,21 @@ void rModel::Render(){
             glVertexPointer(3,GL_FLOAT,0,&vertices[0]);
             glEnableClientState(GL_VERTEX_ARRAY);
 
+            rDisplayListFiller filler( displayList_, false );
+            glEnable(GL_CULL_FACE);
+
             glDrawElements(GL_TRIANGLES,
                            modelFaces.Len()*3,
                            GL_UNSIGNED_INT,
                            &modelFaces(0));
+
+            glDisable(GL_CULL_FACE);
         }
+
 
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         glDisableClientState(GL_VERTEX_ARRAY);
         glDisableClientState(GL_NORMAL_ARRAY);
-
-        glDisable(GL_CULL_FACE);
     }
 }
 #endif

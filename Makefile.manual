@@ -106,9 +106,11 @@ installcheck_douninstall.inst:
 
 installcheck_douninstall.inst2:
 	./._inst2/$(bindir)/${uninstaller}
+	find ._inst2 -mindepth 1 -type d -name ${progname} -exec echo leftover directory \{\} >> .leftover.inst2 \;
 
 installcheck_douninstall.inst3:
 	./._inst3/$(bindir)/${uninstaller}
+	find ._inst3 -mindepth 1 -type d -name ${progname} -exec echo leftover directory \{\} >> .leftover.inst3 \;
 
 installcheck_uninstall.inst: installcheck_test.inst
 installcheck_uninstall.%: installcheck_install.%

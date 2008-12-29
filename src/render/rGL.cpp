@@ -37,6 +37,18 @@ void sr_CheckGLError()
     GLenum error;
     while ( (error = glGetError()) != GL_NO_ERROR )
     {
+        // don't spam, only report every odd error
+        static int count = 0;
+        int check = ++count;
+        while ( ( check & 1 ) == 0 && check !=0 )
+        {
+            check >>= 1;
+        }
+        if ( check > 3 )
+        {
+            continue;
+        }
+
         std::stringstream s;
         s << "GL error 0X" << std::hex << error << " (" << (char const *)gluErrorString(error) << ")\n";
         con << s.str();

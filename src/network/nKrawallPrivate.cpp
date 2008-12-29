@@ -288,6 +288,7 @@ static void sn_ReadPasswordRemove( std::istream & s )
 
 static tConfItemFunc sn_kpr( "USER_REMOVE", sn_ReadPasswordRemove );
 
+
 // fetch the scrambled password of username from the users database
 void nKrawall::CheckScrambledPassword( nCheckResultBase & result,
                                        nPasswordCheckData const & data )
@@ -415,12 +416,16 @@ void nKrawall::CheckScrambledPassword( nCheckResultBase & result,
         {
             tString claimedAuthority;
             SplitUserName( fullUserName, result.username, claimedAuthority );
-            if ( claimedAuthority != result.authority )
+            if ( !CanClaim ( result.authority, claimedAuthority ) )
             {
-                result.error << tOutput( "$login_error_unexpected_answer", 
-                                         tString("PASSWORD_OK ") + result.username + "@" + result.authority,
-                                         buf );
+                result.error << tOutput( "$login_error_invalidclaim",
+                                         result.authority,
+                                         result.username + "@" + claimedAuthority );
                 return;
+            }
+            else
+            {
+                result.authority = claimedAuthority;
             }
         }
 

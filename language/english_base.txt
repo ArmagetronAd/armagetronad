@@ -17,6 +17,7 @@
 first_use_help			Is this the first time you use \g?
 include_help			Includes the following file
 sinclude_help			Includes the following file silently, without error message if it is not found
+rinclude_help           Includes a file using the resource system. Use the direct link syntax to your profit here.
 new_team_allowed_help		Is it currently allowed to create a new team?
 
 #********************************************
@@ -181,6 +182,7 @@ team_max_players_help		Maximum number of players per team
 team_min_players_help		Minimum number of players per team
 team_allow_shuffle_up_help  If set to 1, players are allowed to change their position in the team as they wish. If 0, they only can drop in rank.
 team_center_is_boss_help    If set to 1, the center player is the team's boss. If at 0, it's the player who is on that team longest.
+team_elimination_mode_help  Defines the way ArmagetronAd should eliminate teams when there's more teams than TEAMS_MAX: Set to 0 it will try to keep as many players as possible, kicking teams that have the lowest score if teams are balanced; Set to 1 it will try to keep the best team colors (Team blue, then Team gold, then Team red, etc); Set to 2 it will kick out the teams that have the lowest score, regardless of balance.
 
 teams_max_help			Maximum number of teams
 teams_min_help			Minimum number of teams
@@ -332,7 +334,7 @@ idle_kick_time_help                 Time in seconds after which an inactive play
 player_name_confitem_help	    Player name
 player_teamname_confitem_help	Team name
 player_user_confitem_help	Global player ID
-auto_login_confitem_help	Schould this player automatically request authentication?
+auto_login_confitem_help	Should this player automatically request authentication?
 camcenter_help			Center internal camera on driving direction
 start_cam_help			Initial Camera
 start_fov_help			Initial field of vision
@@ -480,9 +482,9 @@ voting_kick_time_help               The minimum time in seconds between two kick
 voting_maturity_help                The minimum time in seconds a player needs to be online with the same name before he can issue votes.
 voting_suspend_rounds_help          The number of rounds "/vote suspend <player>" suspends a player for.
 voting_kick_minharm_help            Minimal number of harmful votes (suspension, kick,..) that need to have been issued (success is not required) against a player before a kick vote issued via the menu really results in a kick; otherwise, the result is a simple suspension.
-voting_suspend_help		    Suspends voting for n minutes.
-voting_suspend_default_help	    Default value for VOTING_SUSPEND.
-voting_unsuspend_help		    Allows voting again.
+votes_suspend_help		    Suspends voting for n minutes.
+votes_suspend_default_help	    Default value for VOTES_SUSPEND.
+votes_unsuspend_help		    Allows voting again.
 voting_suspended		    Voting has been suspended for the next \1 minutes.\n
 voting_unsuspended		    Voting is allowed again.\n
 vote_rejected_voting_suspended		    Voting has been suspended by the Administrator.\n
@@ -619,6 +621,7 @@ server_dns_help         If your server is on dynamic IP and you set up a dynamic
 server_port_help		Port this server listens on
 client_port_help		Port we try to connect to
 max_clients_help		Maximum number of network clients to accept
+max_clients_limit       Warning: MAX_CLIENTS can not be be greater than \1. Setting not changed.
 max_clients_same_ip_soft_help		Maximum number of network clients to accept from the same IP; more logins will get kicked when the server is full
 max_clients_same_ip_hard_help		Maximum number of network clients to accept from the same IP; more logins will be ignored
 max_players_same_ip_help  maximum number of players from the same IP (note that each client can legally host up to four players)
@@ -699,12 +702,37 @@ console_rows_max_help   Number of lines of console output when scrolling back
 console_indent_help     Number of spaces each continuation of a wrapped console line is indented by
 console_decorate_id_help			Decorates every line of console output with the client ID
 console_decorate_ip_help			Decorates every line of console output with the client IP
+console_decorate_timestamp_help			Decorates every line of console output with the current date and time
 console_ladder_log_help			Sends ladder log output to the console
+ladderlog_decorate_timestamp_help		Decorates every line of ladderlog output with the current date and time
 ladderlog_write_all_help Set all the LADDER_LOG_WRITE_* settings to the same value
 ladderlog_write_all_usage Usage: LADDER_LOG_WRITE_ALL 1|0
 ladderlog_write_all_enabled Enabled full ladderlog output.
 ladderlog_write_all_disabled Disabled ladderlog output.
+ladderlog_write_authority_blurb_help          Write to ladderlog: AUTHORITY_BLURB <name> <value>
+ladderlog_write_basezone_conquered_help       Write to ladderlog: BASEZONE_CONQUERED <team> <cx> <cy>
+ladderlog_write_basezone_conquerer_help       Write to ladderlog: BASEZONE_CONQUERER <player>
+ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter> [/me] <chat string>
+ladderlog_write_death_frag_help               Write to ladderlog: DEATH_FRAG <prey> <predator>
+ladderlog_write_death_suicide_help            Write to ladderlog: DEATH_SUICIDE <player>
+ladderlog_write_death_teamkill_help           Write to ladderlog: DEATH_TEAMKILL <prey> <predator>
+ladderlog_write_game_end_help                 Write to ladderlog: GAME_END
+ladderlog_write_game_time_help                Write to ladderlog: GAME_TIME <time> (see also: GAME_TIME_INTERVAL)
+ladderlog_write_match_winner_help             Write to ladderlog: MATCH_WINNER <winner>
+ladderlog_write_new_match_help                Write to ladderlog: NEW_MATCH
+ladderlog_write_new_round_help                Write to ladderlog: NEW_ROUND
+ladderlog_write_num_humans_help               Write to ladderlog: NUM_HUMANS <number of humans>
+ladderlog_write_online_player_help            Write to ladderlog: ONLINE_PLAYER <name> [<ping> [<team>]]
+ladderlog_write_player_entered_help           Write to ladderlog: PLAYER_ENTERED <name> <IP> <screen name>
+ladderlog_write_player_left_help              Write to ladderlog: PLAYER_LEFT <name> <IP>
+ladderlog_write_player_renamed_help           Write to ladderlog: PLAYER_RENAMED <old name> <new name> <ip> <screen name>
+ladderlog_write_round_score_help              Write to ladderlog: ROUND_SCORE <score difference> <player> [<team>]
+ladderlog_write_round_score_team_help         Write to ladderlog: ROUND_SCORE_TEAM <score difference> <team>
+ladderlog_write_round_winner_help             Write to ladderlog: ROUND_WINNER <winner>
+ladderlog_write_sacrifice_help                Write to ladderlog: SACRIFICE <player who used the hole> <player who created the hole> <player owning the wall the hole was made into>
+ladderlog_write_wait_for_external_script_help Write to ladderlog: WAIT_FOR_EXTERNAL_SCRIPT (see also: WAIT_FOR_EXTERNAL_SCRIPT and WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
 ladderlog_game_time_interval If nonnegative, write a line with the current game time to the ladder log every n seconds.
+chat_log_help			Write machine parsable chat messages to var/chatlog.txt
 show_fps_help			Enable fps display
 floor_mirror_help		Floor mirror mode
 floor_detail_help		Floor detail settings
@@ -838,11 +866,12 @@ exit_help					Shuts the dedicated server down and quits.
 # manning and kicking commands
 only_works_on_server        The console command \1 only works on the server. You probably want to say "/admin \1 \2".\n
 players_help                Prints list of currently active players
+teams_help                  Get a list of all teams with a somewhat graphic representation of their formation. Same as saying /teams
 kill_help                   Kill a specific player (as warning before a kick)
 silence_help                Silence a specific player so he can't use public chat any more (/msg and /team still work)
-suspend_help                Suspend a player from playing for the following N rounds (default: 5)
+suspend_help                Suspend a player from playing for the following N rounds (default is set by SUSPEND_DEFAULT_ROUNDS)
 unsuspend_help              Removes a player suspension.
-
+suspend_default_rounds_help Sets default round timeout for SUSPEND.
 voice_help                  Reverse of SILENCE
 allow_team_change_player_help Allow a specific player to change teams even if ALLOW_TEAM_CHANGE is disabled
 disallow_team_change_player_help Reverse of ALLOW_TEAM_CHANGE_PLAYER
@@ -862,6 +891,24 @@ ban_list_help               Prints a list of currently banned IPs.
 unban_ip_help               Revokes the ban of the specified IP address.
 
 player_list_hidden_player_prefix_help	The prefix that is shown on hidden players' Global ID and access level when we can see it.
+player_list_search          \1: Search string "\2" matches:\n
+player_list_search_no_results \1: Search string "\2" returned no result.\n
+player_list_search_end      \1: End of search (\2 matches).\n
+player_list_end             \1: Listed \2 players.\n
+
+admins_help                 Lists the server admins. You should use /admins or /listadmins instead of this.
+
+admin_list_cant_see         \1: You are not allowed to list these admins.\n
+admin_list_authoritylevel   users from authority \1
+admin_list_end              \1: Listed \2 users and \3 authorities on \4 access levels.\n
+
+admin_list_colors_best_red_help    Red color component to the best access level listed by /admins
+admin_list_colors_best_green_help  Green color component to the best access level listed by /admins
+admin_list_colors_best_blue_help   Blue color component to the best access level listed by /admins
+admin_list_colors_worst_red_help   Red color component to the worst access level listed by /admins
+admin_list_colors_worst_green_help Green color component to the worst access level listed by /admins
+admin_list_colors_worst_blue_help  Blue color component to the worst access level listed by /admins
+admin_list_min_access_level_help   Minimal access level to be shown in /admins
 
 # communication
 console_message_help		Prints a message on the console of all connected clients.
@@ -2200,7 +2247,7 @@ gamestate_done			done!\n
 gamestate_timeout_intro		\n\nTimeout! Reason:\n
 gamestate_timeout_message	User \1 does not know about netobject \2 ( \3 ).\n
 
-gamestate_reset_center		Reset
+gamestate_reset_center		New Match
 gamestate_reset_console		Resetting scores and starting new match after this round.\n
 gamestate_resetnow_center	New Match
 gamestate_resetnow_console	Resetting scores...\n
@@ -2239,6 +2286,7 @@ player_admin_kill			\1 0xRESETTwas smitten by an administrator.\n
 player_admin_slap_free			\1 0xRESETThas been slapped by an administrator.\n
 player_admin_slap_win			\1 has been hugged by an administrator and got \2 points.\n
 player_admin_slap_lose			\1 has been slapped by an administrator and lost \2 points.\n
+slap_help                   Slaps the given player by penalizing him with the specified amount of points. Be smart and you may be able to hug your users, too ;)
 player_win_instant			\1 was awarded \2 points for hitting the instant win zone.\n
 player_win_conquest			\1 was awarded \2 points for conquering the enemy base.\n
 player_win_held_fortress	\1 was awarded \2 points for holding the base.\n
@@ -2354,7 +2402,7 @@ help_commands_team_shortdesc Basic team management commands
 help_commands_team_text 0x88ff88/teamshuffle0xffff88: Shuffle yourself to be at the outside of your team's wingmen formation\n0x88ff88/teamshuffle <position>0xffff88: Shuffle yourself to be at a specific position\n0x88ff88/teamshuffle [+|-]<offset>0xffff88: Shuffle yourself up/down by a certain number of ranks\n0x88ff88/teamleave0xffff88: Leave your current team. Only works on some servers\n0x88ff88/teams0xffff88: Get a list of all teams with a somewhat graphic representation of their formation
 
 help_commands_pp_shortdesc Player police commands
-help_commands_pp_text 0x88ff88/players [<search>]0xffff88: Get a list of all players, along with some other information. You can also match specific users with the search argument.\n0x88ff88/vote kick|suspend <player>0xffff88: Start a poll to kick or suspend a player
+help_commands_pp_text 0x88ff88/players [<search>]0xffff88: Get a list of all players, along with some other information. You can also match specific users with the search argument.\n0x88ff88/admins [<access level> [<access level>]]0xffff88: Gets the list of admins. If first parameter is specified, only admins who have this exact level will be shown. If both arguments are set, all the admins in that range of access levels will be listed.\n0x88ff88/vote kick|suspend <player>0xffff88: Start a poll to kick or suspend a player
 
 help_commands_auth_shortdesc Authentication related commands
 help_commands_auth_text 0x88ff88/login [<user>]@<authority>0xffff88: Authenticate yourself using a given authority. Try @forums if you have an account at http://forums.armagetronad.net/\n0x88ff88/logout0xffff88: Log out so you can log back in as another player\n0x88ff88/vote include <file>0xffff88: Start a poll to include a given file\n0x88ff88/vote command <command>0xffff88: Start a poll to execute an admin command\n0x88ff88/admin <command>0xffff88: Execute a console command on the server if you have sufficient access rights\n0x88ff88/op <player> [+|-]<optional access level>0xffff88: Gives another player a higher or a lower access level; the level defaults to the level one lower than you access level, which is also the maximal possible level\n0x88ff88/deop <player>0xffff88: Reverses /op; it takes away a player's access level, effectively making him unauthenticated again. Only works on players of lower access level than yours, of course.\n
@@ -2373,6 +2421,7 @@ help_commands_tourney_text 0x88ff88/lock0xffff88: Locks your current team. Nobod
 invite_no_team          Can't use \1 if you're not on a team.\n
 invite_team_locked      \1 locked, you'll need an invitation from a team leader via the /invite command to join from now on.\n
 invite_team_unlocked    \1 unlocked, you can join it freely again.\n
+unlock_all_teams_help   Unlocks all teams.
 invite_team_can_join      \10xRESETT can now join \2.\n
 invite_team_invite      \10xRESETT has been invited to join \2.\n
 invite_team_kick        \10xRESETT has been kicked from \2.\n
@@ -2538,7 +2587,7 @@ vote_rejected						Poll "\1" has been rejected. (\2 Players voted for the poll, 
 vote_timeout						Poll "\1" timed out.\n
 vote_cancel_all                     All polls have been canceled by an administrator.\n
 vote_new							New poll: "\1". Enter the main menu vote on it.\n
-vote_redundant                      Poll rejected, same suggestion was made already.\n
+vote_redundant                      Poll rejected, same suggestion was made already recently.\n
 vote_maturity                       Poll rejected, you're not old enough to issue votes, wait \1 seconds.\n
 vote_overflow						Poll rejected, too many pending polls.\n
 vote_disabled						Poll rejected, disabled by server admin.\n
@@ -2588,6 +2637,7 @@ network_master_host_lan_help	This will start a network game that is only visible
 
 resource_not_cached         Resource \1 not found in cache. Downloading it, please be patient...\n
 resource_downloading        Downloading \1 ...\n
+resource_fetcherror_noconnect ERROR: Impossible to reach host of URI \1. This may be caused by a DNS resolving issue, please report to http://forums.armagetronad.net/ if this happens with the main resource repository(http://resource.armagetronad.net/resource/).\n
 resource_fetcherror_404     ERROR: Return value 404 : File not found.\n
 resource_fetcherror         ERROR: Return value \1 != 200.\n
 resource_no_filename        ERROR: NULL or empty filename.\n
@@ -2687,6 +2737,7 @@ config_value_changed		\1 changed from \2 to \3.\n
 config_error_read		Input error reading \1: invalid format.\n
 config_message_info		\1 is currently set to \2.\n
 config_sighup           SIGHUP received, reloading configuration.\n
+config_abort               Configuration file/stream loading aborted.\n
 
 nconfig_errror_protected	No way. Only the server can change \1.\n
 nconfig_error_unknown		Got conf message for unknown setting \1.\n\nYOU PROBABLY SHOULD UPGRADE ARMAGETRON ADVANCED!!!\n
@@ -2720,6 +2771,10 @@ abort_loading_description   Current config file/stream loading was aborted by co
 user_level_help             Changes the access level of a user.
 user_level_usage            usage: USER_LEVEL <authenticated name> <user access level (numerical)>\n
 user_level_change           Access level of user \1 changed to "\2".\n
+
+authority_level_help             Changes the access level for all users from the same authority. Mainly only useful for private authorities.
+authority_level_usage            usage: AUTHORITY_LEVEL <authority> <new access level (numerical)>\n
+authority_level_change           Access level of users from authority \1 changed to "\2".\n
 
 #*************************************
 #*************************************
@@ -2780,7 +2835,9 @@ access_level_op_max_help       Maximal access level attainable by /op and /promo
 access_level_admin_help        Minimal access level for /admin command.
 access_level_rtfm_help        Minimal access level for /teach or /rtfm command.
 access_level_chat_help         Minimal access level for chatting.
-access_level_ips_help          Minimal access level you need for seeing IPs of players in the /players command.
+access_level_ips_help          Minimal access level you need for seeing IPs of other players in the /players command.
+access_level_nver_help         Minimal access level you need for seeing Network versions/strings from other players in /players.
+access_level_spy_console_help  Minimal access level you need for seeing console input from other (in-game) admins.
 access_level_spy_team_help     Minimal access level you need for seeing /team messages as a spectator.
 access_level_spy_msg_help      Minimal access level you need for seeing /msg messages directed to others.
 access_level_play_help         Minimal access level for playing
@@ -2791,7 +2848,7 @@ access_level_play_changed      Access level required to play changed from \1 to 
 
 access_level_vote_suspend_help    Minimal access level required to issue suspend votes.
 access_level_vote_kick_help    Minimal access level required to issue kick votes.
-access_level_vote_inclue_help    Minimal access level required to issue inclue votes.
+access_level_vote_include_help    Minimal access level required to issue inclue votes.
 access_level_vote_include_execute_help    Minimal access level successful include votes will be executed at.
 access_level_vote_command_help    Minimal access level required to issue command votes.
 access_level_vote_command_execute_help    Minimal access level successful command votes will be executed at.
@@ -2813,7 +2870,11 @@ access_level_shuffle_up_denied Required access level to shuffle up is "\1", you 
 access_level_rtfm_denied    Required access level to teach others is "\1", you only have "\2".\n
 rtfm_denied                 You need to be logged in to teach others.\n
 
+access_level_list_admins_help Access level required to be able to use the "/admins" command.
+access_level_list_admins_see_everyone_help Users with this access level or better will be able to list any configured admin, regardless of ADMIN_LIST_MIN_ACCESS_LEVEL.
+
 chat_command_unknown        Unknown chat command "\1".\n
+chat_command_accesslevel    Sorry, your access level is not high enough to use the "\1" command. You're \2, required would be \3.\n
 
 authority_blacklist_help    Comma separated list of authorities your server should refuse to query.
 authority_whitelist_help    If non-empty, only authorities on this comma separated list will be queried by your server.
@@ -2850,6 +2911,7 @@ login_error_nomethodproperties    Authentication URL \1 does not return a list o
 login_error_nouser          User does not exist, authentication server returned "\1".
 login_error_password        Wrong password supplied, authentication server  returned "\1".
 login_error_unknown         Unknown error code \1 returned, content "\2".
+login_error_invalidclaim    Authority "\1" can't claim you to be "\2"!
 login_error_unexpected_answer Answer "\1" expected from server, but got \2 instead.
 
 login_error_local_nouser    Local user \1 not found.
