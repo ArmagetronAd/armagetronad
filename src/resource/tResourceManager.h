@@ -3,7 +3,7 @@
 *************************************************************************
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
-Copyright (C) 2005  by 
+Copyright (C) 2005  by
 and the AA DevTeam (see the file AUTHORS(.txt) in the main source directory)
 
 **************************************************************************
@@ -21,7 +21,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -30,19 +30,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef ArmageTron_RESOURCEMANAGER_H
 #define ArmageTron_RESOURCEMANAGER_H
 
-#include <boost/smart_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "tDict.h"
 #include "tString.h"
 #include "tResourceType.h"
 
 class tResource;
-    
+
 //! Shortcut for casting to tResource*
 #define resource_cast(a) dynamic_cast<tResource *> (a)
 
 //! resource manager: fetches and caches resources from repositories or arbitrary URIs
-/** 
+/**
  *   put detailed docs here
  */
 class tResourceManager {

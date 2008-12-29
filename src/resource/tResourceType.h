@@ -3,7 +3,7 @@
 *************************************************************************
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
-Copyright (C) 2005  by 
+Copyright (C) 2005  by
 and the AA DevTeam (see the file AUTHORS(.txt) in the main source directory)
 
 **************************************************************************
@@ -21,7 +21,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -29,12 +29,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef ArmageTron_RESOURCETYPE_H
 #define ArmageTron_RESOURCETYPE_H
 
-#include <boost/smart_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "tString.h"
 
 class tResource;
-    
+
 typedef tResource* (*tNewResourceType)(const char* path);
 
 
@@ -51,13 +51,13 @@ public:
 
     /// Returns the name of the resource type
     const tString& GetName() { return m_Name; };
-    
+
     /// Returns the description of the resource type
     const tString& GetDescription() { return m_Description; };
-    
+
     /// Returns the file extension of the resource type
     const tString& GetExtension() { return m_Extension; };
-    
+
     //! Convenient typedef for a type that stores references to the resource
     /// type.
     typedef boost::shared_ptr<tResourceType> Reference;
