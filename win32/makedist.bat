@@ -57,6 +57,7 @@ goto :exit
 		xcopy %AA_DIR%\models %1\models /I /E /Y /C
 		xcopy %AA_DIR%\music %1\music /I /E /Y /C
 		xcopy %AA_DIR%\sound %1\sound /I /E /Y /C
+		if exist %1\resource del /S /Q %1\resource
 		mkdir %1\resource
 		xcopy %AA_DIR%\resource\proto %1\resource\included /I /E /Y /C
 		xcopy %AA_DIR%\resource\included %1\resource\included /I /E /Y /C
