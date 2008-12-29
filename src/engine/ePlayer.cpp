@@ -2707,6 +2707,11 @@ static tAccessLevel se_msgSpyAccessLevel = tAccessLevel_Owner;
 static tSettingItem< tAccessLevel > se_msgSpyAccessLevelConf( "ACCESS_LEVEL_SPY_MSG", se_msgSpyAccessLevel );
 static tAccessLevelSetter se_msgSpyAccessLevelConfLevel( se_msgSpyAccessLevelConf, tAccessLevel_Owner );
 
+// access level for freedom from spam protection
+static tAccessLevel se_spamAccessLevel = tAccessLevel_5;
+static tSettingItem< tAccessLevel > se_spamAccessLevelConf( "ACCESS_LEVEL_SPAM", se_spamAccessLevel );
+static tAccessLevelSetter se_spamAccessLevelConfLevel( se_spamAccessLevelConf, tAccessLevel_Owner );
+
 // access level a user has to have to get IP addresses in /players output
 static tAccessLevel se_ipAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_ipAccessLevelConf( "ACCESS_LEVEL_IPS", se_ipAccessLevel );
@@ -2739,6 +2744,8 @@ bool eChatSpamTester::Block()
 
 bool eChatSpamTester::Check()
 {
+	return false;
+
     nTimeRolling currentTime = tSysTimeFloat();
 
     // check if the player already said the same thing not too long ago
@@ -2813,6 +2820,9 @@ bool eChatSpamTester::Check()
 // checks whether a player is silenced, giving him appropriate warnings if he is
 bool IsSilencedWithWarning( ePlayerNetID const * p )
 {
+    if ( p->GetAccessLevel() <= se_spamAccessLevel )
+	return false;
+
     if ( !se_enableChat && ! p->IsLoggedIn() )
     {
         // everyone except the admins is silenced
@@ -3659,7 +3669,7 @@ void handle_chat( nMessage &m )
             }
 
             // well, that leaves only regular, boring chat.
-            if ( say.Len() <= se_SpamMaxLen+2 && !IsSilencedWithWarning(p) )
+            if ( ( say.Len() <= se_SpamMaxLen+2 || p->GetAccessLevel() <= se_spamAccessLevel ) && !IsSilencedWithWarning(p) )
             {
                 se_BroadcastChat( p, say );
                 se_DisplayChatLocally( p, say);
