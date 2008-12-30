@@ -61,8 +61,8 @@ module AA::Config
   	str.to_s.gsub(/(?=[^a-zA-Z0-9_.\/\-\x7F-\xFF\n])/, '\\').gsub(/\n/, "'\n'").sub(/^$/, "''")
   end
     
-  # Paths are relative the Rakefile
-  SRC_DIR = File.expand_path(File.dirname(__FILE__) + "/..")
+  # The top-level project directory
+  SRC_DIR = (ENV["PROJECT_DIR"] || File.dirname(__FILE__) + "/..") + "/.."
   
   BUILD_DIR = ENV["SYMROOT"] || "build"
   
