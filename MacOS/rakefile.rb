@@ -23,6 +23,11 @@ module AA::Config
     combine_path_components(BUILD_DIR, *components)
   end
   
+  # A path to a file in MacOS/build/Generated/
+  def self.generated_path(*components)
+    combine_path_components(build_path("Generated"), *components)
+  end
+  
   # A path to a file in MacOS/build/{Debug, etc}
   def self.configuration_build_path(*components)
     combine_path_components(CONFIGURATION_BUILD_DIR, *components)
@@ -91,7 +96,7 @@ module AA::Config
 end
 
 task "remove-version" do
-  rm_rf(AA::Config.build_path("src", "macosx"))
+  rm_rf(AA::Config.generated_path("src", "macosx"))
 end
 
 desc "Update version"

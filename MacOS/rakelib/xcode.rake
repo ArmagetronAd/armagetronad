@@ -1,6 +1,8 @@
 module AA::Xcode
+  GENERATED_RESOURCE_DIR = AA::Config.generated_path("resource")
+  
   def self.process_file(orig, package_dir=nil)
-    result_file = AA::Config.build_path(orig.ext)
+    result_file = AA::Config.generated_path(orig.ext)
     orig = AA::Config.src_path(orig)
   
     # Process the file (copy to build dir, replace tags)
@@ -27,6 +29,20 @@ module AA::Xcode
       task "package-files" => package_dest
     end
   end
+  
+  def self.sort_resources
+    resource_included = AA::Config.combine_path_components(GENERATED_RESOURCE_DIR, "included")
+    
+    if AA::Config::BUILD_TYPE == :development
+      sh %{"#{AA::Config::SRC_DIR}/batch/make/sortresources" \\
+           "#{AA::Config::SRC_DIR}/resource/proto" \\
+           #{AA::Config.escape_sh resource_included} \\
+           "#{AA::Config::SRC_DIR}/batch/make/sortresources.py"}
+    else
+      cp_r(AA::Config.src_path("resource"), AA::Config.generated_path)
+    end
+  end
+  
 end
 
 namespace "xcode" do
@@ -35,21 +51,14 @@ namespace "xcode" do
   task "cleanup" => ["package-files", "package-resouces"]
   
   task "sort-resources" do
-    if !File.exists?(AA::Config.build_path("resource"))
-      if AA::Config::BUILD_TYPE == :development
-        sh %{"#{AA::Config::SRC_DIR}/batch/make/sortresources" \\
-             "#{AA::Config::SRC_DIR}/resource/proto" \\
-             "#{AA::Config::BUILD_DIR}/resource/included" \\
-             "#{AA::Config::SRC_DIR}/batch/make/sortresources.py"}
-      else
-        cp_r(AA::Config.src_path("resource"), AA::Config::BUILD_DIR)
-      end
+    if !File.exists?(AA::Xcode::GENERATED_RESOURCE_DIR)
+      AA::Xcode.sort_resources
     end
   end
   
   task "package-resouces" do
     if !File.exists?(AA::Config.package_path("resource"))
-      cp_r(AA::Config.build_path("resource"), AA::Config::PACKGAGE_RESOURCE_DIR)
+      cp_r(AA::Xcode::GENERATED_RESOURCE_DIR, AA::Config::PACKGAGE_RESOURCE_DIR)
     end
   end
 
