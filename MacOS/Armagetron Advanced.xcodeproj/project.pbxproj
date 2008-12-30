@@ -56,6 +56,18 @@
 			name = "Update Version";
 			productName = "Update Version";
 		};
+		9B6377420F0AACC2009F661F /* Create AABeta Client Release */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 9B63774C0F0AACF7009F661F /* Build configuration list for PBXAggregateTarget "Create AABeta Client Release" */;
+			buildPhases = (
+				9B6377410F0AACC2009F661F /* ShellScript */,
+			);
+			dependencies = (
+				9B6377510F0AAD60009F661F /* PBXTargetDependency */,
+			);
+			name = "Create AABeta Client Release";
+			productName = "Create AABeta Release";
+		};
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
@@ -468,6 +480,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 9B3139EC0EFD0963009690D0;
 			remoteInfo = "Update Version";
+		};
+		9B6377500F0AAD60009F661F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9B31399E0EFD0560009690D0 /* Create Client Release */;
+			remoteInfo = "Create Client Release";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -1551,6 +1570,7 @@
 				9B31399E0EFD0560009690D0 /* Create Client Release */,
 				9B3139BD0EFD073A009690D0 /* Create Dedicated Release */,
 				9B3139D00EFD0773009690D0 /* Create Full Release */,
+				9B6377420F0AACC2009F661F /* Create AABeta Client Release */,
 				9B3139EC0EFD0963009690D0 /* Update Version */,
 			);
 		};
@@ -1657,6 +1677,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
 			shellScript = "rake update-version";
+		};
+		9B6377410F0AACC2009F661F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = "/bin/bash -l";
+			shellScript = "PRODUCT_NAME=\"Armagetron Advanced\" rake aabeta:release";
 		};
 		9BD7DB490A2CBA7A00D7033C /* Run script: Prepare */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2014,6 +2047,11 @@
 			target = 9B3139EC0EFD0963009690D0 /* Update Version */;
 			targetProxy = 9B3139F10EFD0987009690D0 /* PBXContainerItemProxy */;
 		};
+		9B6377510F0AAD60009F661F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9B31399E0EFD0560009690D0 /* Create Client Release */;
+			targetProxy = 9B6377500F0AAD60009F661F /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
@@ -2244,6 +2282,27 @@
 			};
 			name = Release;
 		};
+		9B6377430F0AACC2009F661F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Create AABeta Release";
+			};
+			name = Debug;
+		};
+		9B6377440F0AACC2009F661F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "Create AABeta Release";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -2306,6 +2365,15 @@
 			buildConfigurations = (
 				9B3139ED0EFD0963009690D0 /* Debug */,
 				9B3139EE0EFD0963009690D0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9B63774C0F0AACF7009F661F /* Build configuration list for PBXAggregateTarget "Create AABeta Client Release" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B6377430F0AACC2009F661F /* Debug */,
+				9B6377440F0AACC2009F661F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

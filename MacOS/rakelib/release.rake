@@ -16,7 +16,11 @@ module AA::Release
   end
   
   def self.dmg_name
-    AA::Config.configuration_build_path("#{AA::Config::PROGRAM_SHORT_NAME}-#{AA::Config.version}.macosx-#{AA::Config.arch}")
+    "#{AA::Config::PROGRAM_SHORT_NAME}-#{AA::Config.version}.macosx-#{AA::Config.arch}"
+  end
+  
+  def self.dmg_path
+    AA::Config.configuration_build_path(dmg_name())
   end
   
   def self.temp_file
@@ -32,7 +36,7 @@ namespace "release" do
   
   task "dmg" do
     release_directory = AA::Release.temp_directory
-    final_dmg = AA::Release.dmg_name
+    final_dmg = AA::Release.dmg_path
     
     final_dmg_plus_ext = final_dmg + ".dmg"
     if File.exists?(final_dmg_plus_ext)
