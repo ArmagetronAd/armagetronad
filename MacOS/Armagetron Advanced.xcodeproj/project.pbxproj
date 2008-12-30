@@ -61,7 +61,6 @@
 /* Begin PBXBuildFile section */
 		8CBA60B1089F00F2007E21DC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA60B0089F00F2007E21DC /* OpenGL.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		9B61EBC30B5FEF010018DEA7 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 9B61EBBC0B5FEF010018DEA7 /* scripts */; };
 		9B7CFE190EFCE74700126634 /* tResource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE130EFCE74700126634 /* tResource.cpp */; };
 		9B7CFE1A0EFCE74700126634 /* tResource.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B7CFE140EFCE74700126634 /* tResource.h */; };
 		9B7CFE1B0EFCE74700126634 /* tResourceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE150EFCE74700126634 /* tResourceManager.cpp */; };
@@ -77,7 +76,6 @@
 		9B83FE950B12161600878E8A /* Growl-WithInstaller.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9B83FF0F0B121B3100878E8A /* Growl-WithInstaller.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9BB5B9280D84605700BF5F1C /* InfoPlist.strings.in in Resources */ = {isa = PBXBuildFile; fileRef = 9BB5B9260D84605700BF5F1C /* InfoPlist.strings.in */; };
-		9BB7B3FF0D8246A2004FE8C3 /* scripts in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9B61EBBC0B5FEF010018DEA7 /* scripts */; };
 		9BB7B4000D8246A2004FE8C3 /* config in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAE20A2CAE0700D7033C /* config */; };
 		9BB7B4010D8246A2004FE8C3 /* language in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAFE0A2CAE1D00D7033C /* language */; };
 		9BB7B5E10D8302FA004FE8C3 /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B5A60D8302FA004FE8C3 /* eAdvWall.cpp */; };
@@ -494,7 +492,6 @@
 			dstPath = .;
 			dstSubfolderSpec = 16;
 			files = (
-				9BB7B3FF0D8246A2004FE8C3 /* scripts in CopyFiles */,
 				9BB7B4000D8246A2004FE8C3 /* config in CopyFiles */,
 				9BB7B4010D8246A2004FE8C3 /* language in CopyFiles */,
 			);
@@ -509,7 +506,6 @@
 		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CBA60B0089F00F2007E21DC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		9B61EBBC0B5FEF010018DEA7 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = ../scripts; sourceTree = SOURCE_ROOT; };
 		9B77E6C80D8618B90022FDF2 /* xcode.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; path = xcode.rake; sourceTree = "<group>"; };
 		9B77E6C90D8618B90022FDF2 /* rakefile.rb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.ruby; path = rakefile.rb; sourceTree = "<group>"; };
 		9B7CFE130EFCE74700126634 /* tResource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tResource.cpp; sourceTree = "<group>"; };
@@ -1452,7 +1448,6 @@
 			children = (
 				9BB5B9240D84604400BF5F1C /* Info.plist */,
 				9BB7B6860D830352004FE8C3 /* English.lproj */,
-				9B61EBBC0B5FEF010018DEA7 /* scripts */,
 				9BD7DB7D0A2CE35600D7033C /* Armagetron Advanced.icns */,
 				9BD7DAE20A2CAE0700D7033C /* config */,
 				9BD7DAFE0A2CAE1D00D7033C /* language */,
@@ -1574,7 +1569,6 @@
 				9BD7DB3E0A2CAE4600D7033C /* textures in Resources */,
 				9BD7DB770A2CE28500D7033C /* SDLMain.nib in Resources */,
 				9BD7DB7E0A2CE35600D7033C /* Armagetron Advanced.icns in Resources */,
-				9B61EBC30B5FEF010018DEA7 /* scripts in Resources */,
 				9BB7B6730D830322004FE8C3 /* version.h.in in Resources */,
 				9BB5B9280D84605700BF5F1C /* InfoPlist.strings.in in Resources */,
 			);
