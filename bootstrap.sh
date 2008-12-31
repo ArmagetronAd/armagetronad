@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# set -x
+
 test -r ChangeLog || touch -t 198001010000 ChangeLog
 MYDIR=`dirname $0`
 if test -r batch/make/version; then
