@@ -280,6 +280,19 @@ public:
 
 static tConfItemLevel st_confLevel;
 
+static bool st_preventCasacl = false;
+
+tCasaclPreventer::tCasaclPreventer( bool prevent )
+{
+    previous_ = st_preventCasacl;
+    st_preventCasacl = prevent;
+}
+
+tCasaclPreventer::~tCasaclPreventer()
+{
+    st_preventCasacl = previous_;
+}
+
 static char const *st_casacl = "CASACL";
 
 //! casacl (Check And Set ACcess Level) command: elevates the access level for the context of the current configuration file
@@ -315,6 +328,11 @@ public:
                             tCurrentAccessLevel::GetName( required ),
                             tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() )
                 );
+            throw tAbortLoading( st_casacl );
+        }
+        else if ( st_preventCasacl )
+        {
+            con << tOutput( "$casacl_not_allowed" );
             throw tAbortLoading( st_casacl );
         }
         else
@@ -1034,6 +1052,9 @@ bool tConfItemFunc::Save(){return false;}
 
 static void Include(std::istream& s, bool error )
 {
+    // allow CASACL
+    tCasaclPreventer allower(false);
+
     tString file;
     s >> file;
 

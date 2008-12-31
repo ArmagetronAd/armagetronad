@@ -186,6 +186,16 @@ enum tAccessLevel
     tAccessLevel_Default = 20
 };
 
+//! class to temporarily allow/forbid the use of casacl
+class tCasaclPreventer
+{
+public:
+    tCasaclPreventer( bool prevent = true );
+    ~tCasaclPreventer();
+private:
+    bool previous_; //!< previous value of prevention flag
+};
+
 //! class managing the current access level
 class tCurrentAccessLevel
 {

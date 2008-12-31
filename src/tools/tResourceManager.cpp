@@ -199,6 +199,9 @@ FILE* tResourceManager::openResource(const char *uri, const char *file) {
 
 static void RInclude(std::istream& s)
 {
+    // forbid CASACL
+    tCasaclPreventer preventer;
+
     tString file;
     s >> file;
 
