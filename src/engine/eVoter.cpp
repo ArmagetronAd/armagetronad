@@ -1456,7 +1456,12 @@ protected:
     {
         // check whether enough harmful votes were collected already
         ePlayerNetID * p = GetPlayer();
-        if ( fromMenu_ && p && p->GetVoter()->HarmCount() < se_kickMinHarm )
+        if ( p && !p->GetVoter() )
+        {
+            p->CreateVoter();
+        }
+
+        if ( fromMenu_ && p && p->GetVoter() && p->GetVoter()->HarmCount() < se_kickMinHarm )
         {
             // try to transfor the vote to a suspension
             eVoteItem * item = tNEW ( eVoteItemSuspend )( p );
@@ -1491,6 +1496,10 @@ private:
 
 static void se_HandleKickVote( nMessage& m )
 {
+    // set high default access level for menu issued kick votes, the true access level
+    // is taken from the highest level player from the sending client later
+    tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
     // accept message
     if ( eVoteItem::AcceptNewVote( m ) )
     {

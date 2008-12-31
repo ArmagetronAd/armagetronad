@@ -88,6 +88,9 @@ static char line_in[MAXLINE+2];
 static int currentIn=0;
 
 void sr_Read_stdin(){
+    // stdin commands are executed at owner level
+    tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
     tConfItemBase::LoadPlayback( true );
 
     if ( !unblocked )
@@ -141,9 +144,6 @@ void sr_Read_stdin(){
     while ( read(stdin_descriptor,&line_in[currentIn],1)>0){
         if (line_in[currentIn]=='\n' || currentIn>=MAXLINE-1)
         {
-            // stdin commands are executed at owner level
-            tCurrentAccessLevel level( tAccessLevel_Owner, true );
-
             line_in[currentIn+1]='\0';
             std::istringstream s(line_in);
             tConfItemBase::LoadAll(s, true);
