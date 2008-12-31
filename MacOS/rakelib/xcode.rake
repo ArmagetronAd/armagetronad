@@ -3,7 +3,7 @@ module AA::Xcode
   
   def self.process_file(orig, package_dir=nil)
     result_file = AA::Config.generated_path(orig.ext)
-    orig = AA::Config.src_path(orig)
+    orig = AA::Config.top_path(orig)
   
     # Process the file (copy to build dir, replace tags)
     file result_file => [orig, directory(result_file.pathmap("%d"))] do |t|
@@ -34,12 +34,12 @@ module AA::Xcode
     resource_included = AA::Config.combine_path_components(GENERATED_RESOURCE_DIR, "included")
     
     if AA::Config::BUILD_TYPE == :development
-      sh %{"#{AA::Config::SRC_DIR}/batch/make/sortresources" \\
-           "#{AA::Config::SRC_DIR}/resource/proto" \\
+      sh %{"#{AA::Config::TOP_DIR}/batch/make/sortresources" \\
+           "#{AA::Config::TOP_DIR}/resource/proto" \\
            #{AA::Config.escape_sh resource_included} \\
-           "#{AA::Config::SRC_DIR}/batch/make/sortresources.py"}
+           "#{AA::Config::TOP_DIR}/batch/make/sortresources.py"}
     else
-      cp_r(AA::Config.src_path("resource"), AA::Config.generated_path)
+      cp_r(AA::Config.top_path("resource"), AA::Config.generated_path)
     end
   end
   

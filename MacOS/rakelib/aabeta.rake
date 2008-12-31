@@ -8,7 +8,7 @@
 module AA::AABeta
   
   def self.version_branch
-    File.read(AA::Config.src_path("major_version")).chomp
+    File.read(AA::Config.top_path("major_version")).chomp
   end
   
   RELEASES_LIST_DIR = AA::Config.generated_path("www-aabeta")

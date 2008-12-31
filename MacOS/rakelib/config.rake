@@ -3,9 +3,9 @@ module AA::Config
     File.join(*([base] + components))
   end
   
-  # A path to a file in src/
-  def self.src_path(*components)
-    combine_path_components(SRC_DIR, *components)
+  # A path to a file from the top-level armagetronad directory
+  def self.top_path(*components)
+    combine_path_components(TOP_DIR, *components)
   end
   
   # A path to a file in MacOS/build/
@@ -40,9 +40,9 @@ module AA::Config
   
   def self.version
     if BUILD_TYPE == :development
-      %x("#{SRC_DIR}/batch/make/version" "#{SRC_DIR}").chomp
+      %x("#{TOP_DIR}/batch/make/version" "#{TOP_DIR}").chomp
     else
-      File.read("#{SRC_DIR}/src/macosx/version.h.in").scan(/#define VERSION "(.*)"/)[0][0]
+      File.read("#{TOP_DIR}/src/macosx/version.h.in").scan(/#define VERSION "(.*)"/)[0][0]
     end
   end
 
@@ -52,7 +52,7 @@ module AA::Config
   end
     
   # The top-level project directory
-  SRC_DIR = (ENV["PROJECT_DIR"] || File.dirname(__FILE__) + "/..") + "/.."
+  TOP_DIR = (ENV["PROJECT_DIR"] || File.dirname(__FILE__) + "/..") + "/.."
   
   BUILD_DIR = ENV["SYMROOT"] || "build"
   
@@ -74,7 +74,7 @@ module AA::Config
      DEDICATED ? nil : "Contents/Resources"
   ].compact.join("/")
     
-  BUILD_TYPE = [src_path(".svn"), src_path(".bzr")].any? { |f| File.exists?(f) } ? :development : :release
+  BUILD_TYPE = [top_path(".svn"), top_path(".bzr")].any? { |f| File.exists?(f) } ? :development : :release
     
   TAG_MAPPINGS = {
     "version" => version(),
