@@ -43,10 +43,11 @@ module AA::AABeta
   end
     
   # Returns a php assoc suitable to be put into releases.php
-  def self.make_php_assoc(params)    
+  def self.make_php_assoc(params)
     # Make the release in the same order as others
-    php_params = params.to_a.sort_by { |(key, _)| SORT_BY.index(key) }.map { |(k, v)| "    '#{k}' => '#{v}'" }
-    
+    params = params.to_a.sort_by { |(key, _)| SORT_BY.index(key) }
+    php_params = params.map { |(k, v)| "    #{k.inspect} => #{v.inspect}" }
+
     "array(\n" + php_params.join(",\n") + "\n),\n"
   end
   
