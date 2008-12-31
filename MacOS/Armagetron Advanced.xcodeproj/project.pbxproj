@@ -485,7 +485,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 9B31399E0EFD0560009690D0 /* Create Client Release */;
+			remoteGlobalIDString = 9B31399E0EFD0560009690D0;
 			remoteInfo = "Create Client Release";
 		};
 /* End PBXContainerItemProxy section */
@@ -525,8 +525,11 @@
 		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CBA60B0089F00F2007E21DC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		9B77E6C80D8618B90022FDF2 /* xcode.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; path = xcode.rake; sourceTree = "<group>"; };
-		9B77E6C90D8618B90022FDF2 /* rakefile.rb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.ruby; path = rakefile.rb; sourceTree = "<group>"; };
+		9B715F4C0F0BD95100034EBF /* release.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = release.rake; sourceTree = "<group>"; tabWidth = 2; };
+		9B715F4D0F0BD95100034EBF /* config.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = config.rake; sourceTree = "<group>"; tabWidth = 2; };
+		9B715F4E0F0BD95100034EBF /* aabeta.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = aabeta.rake; sourceTree = "<group>"; tabWidth = 2; };
+		9B77E6C80D8618B90022FDF2 /* xcode.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = xcode.rake; sourceTree = "<group>"; tabWidth = 2; };
+		9B77E6C90D8618B90022FDF2 /* rakefile.rb */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = text.script.ruby; path = rakefile.rb; sourceTree = "<group>"; tabWidth = 2; };
 		9B7CFE130EFCE74700126634 /* tResource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tResource.cpp; sourceTree = "<group>"; };
 		9B7CFE140EFCE74700126634 /* tResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tResource.h; sourceTree = "<group>"; };
 		9B7CFE150EFCE74700126634 /* tResourceManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tResourceManager.cpp; sourceTree = "<group>"; };
@@ -938,6 +941,9 @@
 		9B77E6C70D8618B90022FDF2 /* rakelib */ = {
 			isa = PBXGroup;
 			children = (
+				9B715F4E0F0BD95100034EBF /* aabeta.rake */,
+				9B715F4D0F0BD95100034EBF /* config.rake */,
+				9B715F4C0F0BD95100034EBF /* release.rake */,
 				9B77E6C80D8618B90022FDF2 /* xcode.rake */,
 			);
 			path = rakelib;
