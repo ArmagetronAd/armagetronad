@@ -208,6 +208,19 @@ tConfItemBase::tConfItemMap & tConfItemBase::ConfItemMap()
     return *st_confMap;
 }
 
+static bool st_preventCasacl = false;
+
+tCasaclPreventer::tCasaclPreventer( bool prevent )
+{
+    previous_ = st_preventCasacl;
+    st_preventCasacl = prevent;
+}
+
+tCasaclPreventer::~tCasaclPreventer()
+{
+    st_preventCasacl = previous_;
+}
+
 #ifdef KRAWALL_SERVER
 
 // changes the access level of a configuration item
@@ -279,19 +292,6 @@ public:
 };
 
 static tConfItemLevel st_confLevel;
-
-static bool st_preventCasacl = false;
-
-tCasaclPreventer::tCasaclPreventer( bool prevent )
-{
-    previous_ = st_preventCasacl;
-    st_preventCasacl = prevent;
-}
-
-tCasaclPreventer::~tCasaclPreventer()
-{
-    st_preventCasacl = previous_;
-}
 
 static char const *st_casacl = "CASACL";
 
