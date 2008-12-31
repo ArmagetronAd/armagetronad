@@ -1,6 +1,12 @@
 module AA::Xcode
   GENERATED_RESOURCE_DIR = AA::Config.generated_path("resource")
   
+  TAG_MAPPINGS = {
+    "version" => AA::Config.version(),
+    "year" => Time.now.strftime("%Y"),
+    "progtitle" => AA::Config::PRODUCT_NAME,
+  }
+  
   def self.process_file(orig, package_dir=nil)
     result_file = AA::Config.generated_path(orig.ext)
     orig = AA::Config.top_path(orig)
@@ -12,7 +18,7 @@ module AA::Xcode
       # replace the tags
       open(result_file, "r+") do |f|
         data = f.read
-        AA::Config::TAG_MAPPINGS.each { |tag, value| data.gsub!("@#{tag}@", value) }
+        TAG_MAPPINGS.each { |tag, value| data.gsub!("@#{tag}@", value) }
         f.rewind
         f.print(data)
         f.truncate(f.pos)

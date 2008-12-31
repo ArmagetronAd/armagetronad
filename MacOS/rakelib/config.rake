@@ -76,11 +76,5 @@ module AA::Config
     
   BUILD_TYPE = [top_path(".svn"), top_path(".bzr")].any? { |f| File.exists?(f) } ? :development : :release
     
-  TAG_MAPPINGS = {
-    "version" => version(),
-    "year" => Time.now.strftime("%Y"),
-    "progtitle" => PRODUCT_NAME,
-  }
-  
   PROGRAM_SHORT_NAME = DEDICATED ? "armagetronad-dedicated" : "armagetronad"
 end
