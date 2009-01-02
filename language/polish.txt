@@ -986,7 +986,8 @@ disallow_rename_player_help   Zabrania temu graczu zmieniac nazwe.
 #********************************************
 #********************************************
 
-bug_rip_help                 Pozwól scianom zewnetrznym byc przekraczane przez BARDZO bliskie grindowanie.bug_tunnel_help              Pozwól graczom przejezdzac przez sciany w dziwnych przypadkach.
+bug_rip_help                 Pozwól scianom zewnetrznym byc przekraczane przez BARDZO bliskie grindowanie.
+bug_tunnel_help              Pozwól graczom przejezdzac przez sciany w dziwnych przypadkach.
 bug_color_overflow_help      Pozwól graczom na osobne kolory cyklu i sciany.
 
 #********************************************
@@ -2798,7 +2799,8 @@ access_level_play_sliders_help Poziom dostepu potrzebny do gry podniesie sie tyl
 access_level_play_changed     Poziom dostepu potrzebny aby grac, zmienil sie z \1 na \2.\n
 
 access_level_vote_suspend_help Minimalny poziom dostepu potrzebny aby wyslac ankiete o zawieszeniu.
-access_level_vote_kick_help   Minimalny poziom dostepu potrzebny aby wyslac ankiete o wykopaniu.access_level_vote_include_help Minimalny poziom dostepu do dolaczenia pliku konfiguracji.
+access_level_vote_kick_help   Minimalny poziom dostepu potrzebny aby wyslac ankiete o wykopaniu.
+access_level_vote_include_help Minimalny poziom dostepu do dolaczenia pliku konfiguracji.
 access_level_vote_include_execute_help Minimalny poziom dostepu do dolaczenia pliku konfiguracji i wykonania go.
 access_level_vote_command_help Minimalny poziom dostepu potrzebny aby wyslac ankiete o wykonaniu komendy.
 access_level_vote_command_execute_help Minimalny poziom dostepu do wykonania komendy po glosowaniu.
