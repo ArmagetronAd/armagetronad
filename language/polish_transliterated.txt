@@ -1,6 +1,4 @@
 #Polish translation by Rafal Cieslak. 
-#based on english_base.txt :)
-
 
 #*****************************************
 #*****************************************
@@ -228,12 +226,12 @@ auto_team_spec_spam_help      Jesli 0, przyjscie/odejscie obserwatora nie bedzie
 allow_team_name_color_help    Nazywanie druzyn po kolorze
 allow_team_name_player_help   Nazywanie druzyn po nazwie lidera
 
-play_time_total_help          laczny czas gry, z jakim ktorym ktos gral na tym kliencie
-play_time_online_help         laczny czas gry, z jakim ktorym ktos gral na tym kliencie online
-play_time_team_help           laczny czas gry, z jakim ktorym ktos gral na tym kliencie w druzynie
-min_play_time_total_help      laczny czas gry, wymagany aby moc zagrac na tym serwerze.
-min_play_time_online_help     laczny czas gry online, wymagany aby moc zagrac na tym serwerze.
-min_play_time_team_help       laczny czas gry w druzynie, wymagany aby moc zagrac na tym serwerze.
+play_time_total_help          Łaczny czas gry, z jakim ktorym ktos gral na tym kliencie
+play_time_online_help         Łaczny czas gry, z jakim ktorym ktos gral na tym kliencie online
+play_time_team_help           Łaczny czas gry, z jakim ktorym ktos gral na tym kliencie w druzynie
+min_play_time_total_help      Łaczny czas gry, wymagany aby moc zagrac na tym serwerze.
+min_play_time_online_help     Łaczny czas gry online, wymagany aby moc zagrac na tym serwerze.
+min_play_time_team_help       Łaczny czas gry w druzynie, wymagany aby moc zagrac na tym serwerze.
 play_time_total_lacking       Nie mozesz tu grac, najpierw musisz zdobyc wiecej doswiadczenia. Zagraj przez \1 min. (takze lokalnie), aby uzyskac dostep do gry na tym serwerze.\n
 play_time_online_lacking      Nie mozesz tu grac, najpierw musisz zdobyc wiecej doswiadczenia w grze online. Zagraj przez \1 min. na innych serwerach, aby uzyskac dostep do gry na tym serwerze.\n
 play_time_team_lacking        Nie mozesz tu grac, najpierw musisz zdobyc wiecej doswiadczenia w grze druzynowej. Zagraj przez \1 minut na serwerzch druzynowych, aby uzyskac dostep do gry na tym serwerze.\n
@@ -499,19 +497,11 @@ votes_cancel_help             Anuluj wszystkie aktywne ankiety.
 max_votes_per_voter_help      Maksymalna ilosc ankiet wyslanych przez jednego gracza, jakie moga byc aktywne w danej chwili.
 voting_start_decay_help       Ilosc sekund, po ktorych ci, co nie glosowani sa ignorowani.
 voting_decay_help             Jeden z nie glosujacych zostaje ignorowany po uplywie tylu sekund, ile tu ustawiono.
-voting_bias_help              Dodaj wirtualnych glosujacych, ktorzy przeciwstawia sie kazdej zmianie.
-
-#ORIGINAL TEXT:               Add virtual voters that oppose every kick vote.
-#voting_bias_kick_help        Dodaj wirtualnych glosujacych, przeciwstawajacych sie wszystkim ankietom dotyczacym wykopania graczy.
-
-#ORIGINAL TEXT:               Add virtual voters that oppose every suspend vote.
-#voting_bias_suspend_help     Dodaj wirtualnych glosujacych, przeciwstawajacych sie wszystkim ankietom dotyczacym zawieszenia graczy.
-
-#ORIGINAL TEXT:               Add virtual voters that oppose every include vote.
-#voting_bias_include_help     Dodaj wirtualnych glosujacych, przeciwstawajacych sie wszystkim ankietom dotyczacym dolaczenia pliku.
-
-#ORIGINAL TEXT:               Add virtual voters that oppose every command vote.
-#voting_bias_command_help     Dodaj wirtualnych glosujacych, przeciwstawajacych sie wszystkim ankietom dotyczacym wykonania komendy na serwerze.
+voting_bias_help              Dodaj wirtualnych glosujacych, ktorzy przeciwstawia sie kazdej ankiecie.
+voting_bias_kick_help        Dodaj wirtualnych glosujacych, przeciwstawajacych sie wszystkim ankietom dotyczacym wykopania graczy.
+voting_bias_suspend_help     Dodaj wirtualnych glosujacych, przeciwstawajacych sie wszystkim ankietom dotyczacym zawieszenia graczy.
+voting_bias_include_help     Dodaj wirtualnych glosujacych, przeciwstawajacych sie wszystkim ankietom dotyczacym dolaczenia pliku.
+voting_bias_command_help     Dodaj wirtualnych glosujacych, przeciwstawajacych sie wszystkim ankietom dotyczacym wykonania komendy na serwerze.
 
 voting_privacy_help           Kontrola prywatnosci ankiet. 2: nic nie jest pokazywane 1: nadeslanie ankiety jest widoczne dla administratora 0: glosowanie jest widoczne dla administratora -1: nadeslanie ankiety jest publiczne -2: wszystko jest publiczne
 voting_spam_issue_help        Poziom spamu dla nadsylania ankiet.
@@ -617,6 +607,7 @@ camera_glance_pitch_help     Poloznienie kamery Zerkajacej: jak bardzo patrzy w 
 camera_server_glance_back_help Poloznienie kamery Zerkajacej serwera: jak bardzo za cyklem ma sie znajdowac?
 camera_server_glance_rise_help Poloznienie kamery Zerkajacej serwera: jak bardzo nad cyklem ma sie znajdowac?
 camera_server_glance_rise_fromspeed_help Ta wartosc jest mnozona przez aktualna predkosc i dodawana do CAMERA_SERVER_GLANCE_RISE.
+camera_server_glance_back_fromspeed_help Ta wartosc jest mnozona przez aktualna predkosc i dodawana do CAMERA_SERVER_GLANCE_BACK.
 camera_server_glance_pitch_help Poloznienie kamery Zerkajacej: jak bardzo patrzy w gore/dol?
 
 #This few translations below looks unsurely of me, if you can, repair them. Szczerze mowiac, nie mam pojecia o co w nich chodzi.
@@ -767,7 +758,7 @@ gl_renderer_help              Informacje systemowe OpenGL
 gl_vendor_help                Informacje systemowe OpenGL
 alpha_blend_help              Aktywuj polprzezroczystosc
 
-#zone_alpha_toggle_help       XOR z ALPHA_BLEND okresla sposob w jaki majabyc rysowane strefy.
+zone_alpha_toggle_help       XOR z ALPHA_BLEND okresla sposob w jaki majabyc rysowane strefy.
 smooth_shading_help           Aktywuj cieniowanie
 text_out_help                 Aktywuj wyswietlanie wyjscia tekstowego/konsoli
 console_columns_help          Ilosc znakow w kazdej linii konsoli
@@ -807,7 +798,7 @@ ladderlog_write_round_score_help Wpisuje do rankingu wynik gracza po rundzie: RO
 ladderlog_write_round_score_team_help Wpisuje do rankingu wynik druzyny po rundzie: ROUND_SCORE_TEAM <roznica wyniku> <druzyna>
 ladderlog_write_round_winner_help Wpisuje do rankingu zwyciezce rundy: ROUND_WINNER <zwyciezca>
 ladderlog_write_sacrifice_help Wpisuje do rankingu poswiecenie: SACRIFICE <gracz, ktory uzyl dziury> <gracz, ktory zrobil dziure> <gracz, w czyjej sciany byl ta dziura>
-_write_wait_for_external_script_help Wpisuje do rankingu oczekiwanie na zewnetrzny skrypt: WAIT_FOR_EXTERNAL_SCRIPT (zobacz rowniez: WAIT_FOR_EXTERNAL_SCRIPT i WAIT)
+ladderlog_write_wait_for_external_script_help Wpisuje do rankingu oczekiwanie na zewnetrzny skrypt: WAIT_FOR_EXTERNAL_SCRIPT (zobacz rowniez: WAIT_FOR_EXTERNAL_SCRIPT i WAIT)
 
 ladderlog_game_time_interval  Jesli dodatnie, wypisuj czas gry co n sekund.
 
@@ -908,7 +899,7 @@ viewport_belongs_help         Dopisz gracza do tego fragmentu ekranu.
 
 word_delimiters_help         Znaki, ktore licza sie jako ograniczniki slow podczas przeskakiwania po slowach w polach tekstowych.
 
-mouse_grab_help               lap kursor myszy, tak aby nie mogl opuscic okna gry.
+mouse_grab_help               Łap kursor myszy, tak aby nie mogl opuscic okna gry.
 moviepack_help                Uzyj paczki filmowej
 armagetron_version_help       Twoja wersja \g
 message_of_day_help           Wiadomosc dnia wysylana klientowi po podlaczeniu, i jezeli to mozliwe, wyswietlana na pelnym ekranie.
@@ -995,10 +986,8 @@ disallow_rename_player_help   Zabrania temu graczu zmieniac nazwe.
 #********************************************
 #********************************************
 
-bug_rip_help                 Pozwol scianom zewnetrznym byc przekraczane przez BARDZO bliskie grindowanie.
-bug_tunnel_help              Pozwol graczon przejezdzac przez sciany w dziwnych przypadkach.
+bug_rip_help                 Pozwol scianom zewnetrznym byc przekraczane przez BARDZO bliskie grindowanie.bug_tunnel_help              Pozwol graczom przejezdzac przez sciany w dziwnych przypadkach.
 bug_color_overflow_help      Pozwol graczom na osobne kolory cyklu i sciany.
-
 #********************************************
 #********************************************
 #********************************************
@@ -2474,7 +2463,7 @@ network_master_players        Gracze:
 network_master_players_empty  Pusty
 network_master_options        Opcje:\n
 
-network_connecting_to_server  laczenie do \1...\n
+network_connecting_to_server  Laczenie z \1...\n
 network_connecting_gamestate  Oczekiwanie na informacje o stanie gry...\n
 network_syncing_gamestate     Otrzymane! Synchronizacja gry...\n
 network_warn_unknowndescriptor \n\n\nOtrzymano nieznana informacje \1 \n\nPRAWDOPODOBNIE POWINIENEs ZAKTUALIZOWAc ARMAGETRON ADVANCED!!!!\n
@@ -2585,7 +2574,7 @@ network_master_score          Wynik
 network_master_users          Gracze
 network_master_ping           Ping
 network_master_browserhelp    Nacisnij "Enter" aby sie polaczyc z tym serwerem, "p" aby odswiezyc pojedynczy serwer, "r" by odswiezyc cala liste, "+/-" by zmienic wynik tego serwera, "kursor lewo/prawo" by zmienic metode sortowania, lub "b" aby go dodac do ulubionych. "m" przelacza filtrowanie wg. znajomych.
-network_master_connecting     laczenie z \1...\n
+network_master_connecting     Laczenie z \1...\n
 network_master_send           Wysylanie informacji o serwerze...\n
 network_master_reqlist        Zapytanie o liste serwerow...\n
 network_master_status         Otrzymywanie \1-tego serwera...\n
@@ -2706,7 +2695,7 @@ config_error_read             Blad przy czytaniu wartosci \1: nieprawidlowy form
 config_message_info           \1 ma wartosc \2.\n
 config_sighup                 Odnawianie konfiguracji (SIGHUP).\n
 
-config_abort                 ladowanie konfiguracji zostalo zatrzymane.\n
+config_abort                 Ladowanie konfiguracji zostalo zatrzymane.\n
 
 nconfig_errror_protected      Tylko serwer moze modyfikowac te wartosc. \1.\n
 nconfig_error_unknown         Otrzymano konfiguracje nieznanego ustawienia \1.\n\nPRAWDOPODOBNIE POWINIENEs ZAKTUALIZOWAc ARMAGETRON ADVANCED!!!\n
@@ -2733,10 +2722,10 @@ access_level_change           Wymagany poziom dostepu do komendy \1 wynosi teraz
 access_level_error            Wymagany poziom dostepu do komendy \1 to "\2", ale masz tylko "\3".\n
 
 casacl_help                   Do konca tego pliku konfiguracji ta dyrektywa podniesie wymagany poziom dostepu o wskazana wartosc.
-casacl_usage                  uzycie: CASACL <wymagany poziom dostepu> <podniesiona wartosc>\n
+casacl_usage                  uzycie: CASACL <wymagany poziom dostepu> <podniesiona wartosc>\ncasacl_not_allowed	      Nie można użyć komendy CASACL w tym kontekście.
 
-abort_loading_name            ladowanie przerwane
-abort_loading_description     ladowanie pliku konfiguracji zostalo przerwane przez komende \1.
+abort_loading_name            Ladowanie przerwane
+abort_loading_description     Ladowanie pliku konfiguracji zostalo przerwane przez komende \1.
 
 user_level_help               Zmienia poziom dostepu uzytkownika.
 user_level_usage              uzycie: USER_LEVEL <nazwa po autentykacji> <poziom dostepu uzytkownika (liczba)>\n
@@ -2807,8 +2796,7 @@ access_level_play_sliders_help Poziom dostepu potrzebny do gry podniesie sie tyl
 access_level_play_changed     Poziom dostepu potrzebny aby grac, zmienil sie z \1 na \2.\n
 
 access_level_vote_suspend_help Minimalny poziom dostepu potrzebny aby wyslac ankiete o zawieszeniu.
-access_level_vote_kick_help   Minimalny poziom dostepu potrzebny aby wyslac ankiete o wykopaniu.
-access_level_vote_include_help Minimalny poziom dostepu do dolaczenia pliku konfiguracji.
+access_level_vote_kick_help   Minimalny poziom dostepu potrzebny aby wyslac ankiete o wykopaniu.access_level_vote_include_help Minimalny poziom dostepu do dolaczenia pliku konfiguracji.
 access_level_vote_include_execute_help Minimalny poziom dostepu do dolaczenia pliku konfiguracji i wykonania go.
 access_level_vote_command_help Minimalny poziom dostepu potrzebny aby wyslac ankiete o wykonaniu komendy.
 access_level_vote_command_execute_help Minimalny poziom dostepu do wykonania komendy po glosowaniu.
@@ -2955,7 +2943,7 @@ hud_ping                      Ping:
 sound_channels                Kanaly
 player_voiced_local           \10x77ff77 otrzymal prawo do lokalnej rozmowy.\n
 input_music_volume_down_help  Scisza muzyke
-access_level_vote_include_help Minimalny poziom dostepu potrzebny aby wyslac ankiete o dolaczeniu pliku konfiguracji.
+access_level_vote_inclue_help Minimalny poziom dostepu potrzebny aby wyslac ankiete o dolaczeniu pliku konfiguracji.
 detail_polyantialias_text     Antyaliasing Obiektow:
 input_music_previous_help     Przelacza poprzedni utwor
 input_music_stop_text         Stop
