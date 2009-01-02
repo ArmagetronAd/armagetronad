@@ -995,7 +995,8 @@ disallow_rename_player_help   Zabrania temu graczu zmieniaæ nazwê.
 #********************************************
 #********************************************
 
-bug_rip_help                 Pozwól ¶cianom zewnêtrznym byæ przekraczane przez BARDZO bliskie grindowanie.bug_tunnel_help              Pozwól graczon przeje¿d¿aæ przez ¶ciany w dziwnych przypadkach.
+bug_rip_help                 Pozwól ¶cianom zewnêtrznym byæ przekraczane przez BARDZO bliskie grindowanie.
+bug_tunnel_help              Pozwól graczon przeje¿d¿aæ przez ¶ciany w dziwnych przypadkach.
 bug_color_overflow_help      Pozwól graczom na osobne kolory cyklu i ¶ciany.
 
 #********************************************
@@ -2806,7 +2807,8 @@ access_level_play_sliders_help Poziom dostêpu potrzebny do gry podniesie siê tyl
 access_level_play_changed     Poziom dostêpu potrzebny aby graæ, zmieni³ siê z \1 na \2.\n
 
 access_level_vote_suspend_help Minimalny poziom dostêpu potrzebny aby wys³aæ ankietê o zawieszeniu.
-access_level_vote_kick_help   Minimalny poziom dostêpu potrzebny aby wys³aæ ankietê o wykopaniu.access_level_vote_include_help Minimalny poziom dostêpu do do³±czenia pliku konfiguracji.
+access_level_vote_kick_help   Minimalny poziom dostêpu potrzebny aby wys³aæ ankietê o wykopaniu.
+access_level_vote_include_help Minimalny poziom dostêpu do do³±czenia pliku konfiguracji.
 access_level_vote_include_execute_help Minimalny poziom dostêpu do do³±czenia pliku konfiguracji i wykonania go.
 access_level_vote_command_help Minimalny poziom dostêpu potrzebny aby wys³aæ ankietê o wykonaniu komendy.
 access_level_vote_command_execute_help Minimalny poziom dostêpu do wykonania komendy po g³osowaniu.
@@ -2953,7 +2955,7 @@ hud_ping                      Ping:
 sound_channels                Kana³y
 player_voiced_local           \10x77ff77 otrzyma³ prawo do lokalnej rozmowy.\n
 input_music_volume_down_help  Scisza muzykê
-access_level_vote_inclue_help Minimalny poziom dostêpu potrzebny aby wys³aæ ankietê o do³±czeniu pliku konfiguracji.
+access_level_vote_include_help Minimalny poziom dostêpu potrzebny aby wys³aæ ankietê o do³±czeniu pliku konfiguracji.
 detail_polyantialias_text     Antyaliasing Obiektów:
 input_music_previous_help     Prze³±cza poprzedni utwór
 input_music_stop_text         Stop

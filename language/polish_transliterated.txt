@@ -995,7 +995,8 @@ disallow_rename_player_help   Zabrania temu graczu zmieniac nazwe.
 #********************************************
 #********************************************
 
-bug_rip_help                 Pozwol scianom zewnetrznym byc przekraczane przez BARDZO bliskie grindowanie.bug_tunnel_help              Pozwol graczon przejezdzac przez sciany w dziwnych przypadkach.
+bug_rip_help                 Pozwol scianom zewnetrznym byc przekraczane przez BARDZO bliskie grindowanie.
+bug_tunnel_help              Pozwol graczon przejezdzac przez sciany w dziwnych przypadkach.
 bug_color_overflow_help      Pozwol graczom na osobne kolory cyklu i sciany.
 
 #********************************************
@@ -2806,7 +2807,8 @@ access_level_play_sliders_help Poziom dostepu potrzebny do gry podniesie sie tyl
 access_level_play_changed     Poziom dostepu potrzebny aby grac, zmienil sie z \1 na \2.\n
 
 access_level_vote_suspend_help Minimalny poziom dostepu potrzebny aby wyslac ankiete o zawieszeniu.
-access_level_vote_kick_help   Minimalny poziom dostepu potrzebny aby wyslac ankiete o wykopaniu.access_level_vote_include_help Minimalny poziom dostepu do dolaczenia pliku konfiguracji.
+access_level_vote_kick_help   Minimalny poziom dostepu potrzebny aby wyslac ankiete o wykopaniu.
+access_level_vote_include_help Minimalny poziom dostepu do dolaczenia pliku konfiguracji.
 access_level_vote_include_execute_help Minimalny poziom dostepu do dolaczenia pliku konfiguracji i wykonania go.
 access_level_vote_command_help Minimalny poziom dostepu potrzebny aby wyslac ankiete o wykonaniu komendy.
 access_level_vote_command_execute_help Minimalny poziom dostepu do wykonania komendy po glosowaniu.
@@ -2953,7 +2955,7 @@ hud_ping                      Ping:
 sound_channels                Kanaly
 player_voiced_local           \10x77ff77 otrzymal prawo do lokalnej rozmowy.\n
 input_music_volume_down_help  Scisza muzyke
-access_level_vote_inclue_help Minimalny poziom dostepu potrzebny aby wyslac ankiete o dolaczeniu pliku konfiguracji.
+access_level_vote_include_help Minimalny poziom dostepu potrzebny aby wyslac ankiete o dolaczeniu pliku konfiguracji.
 detail_polyantialias_text     Antyaliasing Obiektow:
 input_music_previous_help     Przelacza poprzedni utwor
 input_music_stop_text         Stop
