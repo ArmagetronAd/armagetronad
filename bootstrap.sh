@@ -5,6 +5,8 @@ test $AUTOHEADER || AUTOHEADER=autoheader
 test $AUTOCONF   || AUTOCONF=autoconf
 test $AUTOMAKE   || AUTOMAKE=automake
 
+# set -x
+
 test -r ChangeLog || touch -t 198001010000 ChangeLog
 
 MYDIR=`dirname $0`

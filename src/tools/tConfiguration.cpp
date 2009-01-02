@@ -112,6 +112,19 @@ tConfItemBase::tConfItemMap & tConfItemBase::ConfItemMap()
     return *st_confMap;
 }
 
+static bool st_preventCasacl = false;
+
+tCasaclPreventer::tCasaclPreventer( bool prevent )
+{
+    previous_ = st_preventCasacl;
+    st_preventCasacl = prevent;
+}
+
+tCasaclPreventer::~tCasaclPreventer()
+{
+    st_preventCasacl = previous_;
+}
+
 #ifdef KRAWALL_SERVER
 
 // changes the access level of a configuration item
@@ -219,6 +232,11 @@ public:
                             tCurrentAccessLevel::GetName( required ),
                             tCurrentAccessLevel::GetName( tCurrentAccessLevel::GetAccessLevel() )
                 );
+            throw tAbortLoading( st_casacl );
+        }
+        else if ( st_preventCasacl )
+        {
+            con << tOutput( "$casacl_not_allowed" );
             throw tAbortLoading( st_casacl );
         }
         else
@@ -998,6 +1016,9 @@ void st_Include( tString const & file, bool error )
 
 static void Include(std::istream& s, bool error )
 {
+    // allow CASACL
+    tCasaclPreventer allower(false);
+
     tString file;
     s >> file;
 

@@ -2,6 +2,8 @@
 # determines the version of the sources
 # usage: version <source directory>
 
+#set -x
+
 srcdir="$1"
 
 # set version parts to defaults for CVS snapshot
@@ -111,7 +113,7 @@ then
     fi
 fi
 
-if test ! $minor_version
+if test -z "$minor_version"
 then
     test -z "$DATE" || minor_version=`cat ${srcdir}/minor_version | sed -e "s,DATE,$DATE," -e "s,YYYYMMDD,$DATE,"`
 fi

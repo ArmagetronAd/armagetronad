@@ -294,17 +294,22 @@ FILE* tResourceManager::openResource(const char *file, const char *uri) {
 
 static void RInclude(std::istream& s)
 {
-    tString file;
-    s >> file;
+    // prevent CASACL
+    tCasaclPreventer preventer;
 
-    tString rclcl = tResourceManager::locateResource(NULL, file);
-    if ( rclcl ) {
-        std::ifstream rc(rclcl);
-        tConfItemBase::LoadAll(rc, false );
+    tString resourceID;
+    s >> resourceID;
+
+    tString filename = tResourceManager::locateResource(NULL, resourceID);
+
+    if ( filename )
+    {
+        st_Include( filename, true );
+
         return;
     }
 
-    con << tOutput( "$config_rinclude_not_found", file );
+    con << tOutput( "$config_rinclude_not_found", resourceID );
 }
 
 static tConfItemFunc s_RInclude("RINCLUDE",  &RInclude);
