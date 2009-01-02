@@ -1,6 +1,4 @@
-#Polish translation by Rafal Cieslak. 
-#based on english_base.txt :)
-
+language Polish (no special chars)
 
 
 #*****************************************
@@ -18,7 +16,6 @@
 #*****************************************
 #*****************************************
 #*****************************************
-language Polish (no special chars)
 
 first_use_help			Czy po raz pierwszy uzywasz \g?
 include_help			Dolacza ponizszy plik

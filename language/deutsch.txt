@@ -1,7 +1,3 @@
-# maintained (mainly) by z-man
-# distributed under the same conditions as the
-# rest of Armagetron Advanced (see COPYING)
-
 language                      Deutsch
 
 #*****************************************
