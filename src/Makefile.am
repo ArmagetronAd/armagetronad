@@ -86,6 +86,7 @@ libtools_a_SOURCES = ${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallb
 	tools/tFunction.h tools/tFunction.cpp\
 	tools/tPolynomial.h tools/tPolynomialMarshaler.h tools/tPolynomialWithBase.h \
 	tools/tRuby.h tools/tRuby.cpp \
+	tools/tDict.h \
 	resource/tResource.h resource/tResource.cpp resource/tResourceType.h resource/tResourceType.cpp
 
 #tools/tCommandLine.cpp tools/tCommandLine.h
@@ -235,7 +236,8 @@ endif
 
 armagetronad_main_SOURCES = tron/gFloor.cpp tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a librubywrap.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
+armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
+#  librubywrap.a
 # armagetronad_main_LDFLAGS=
 
 armagetronad_main_master_SOURCES = network/master.cpp

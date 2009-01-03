@@ -4929,7 +4929,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
             lowerUser = user;
             tToLower( lowerUser );
             user = tOutput ( "$admin_list_authoritylevel", user );
-            lowerUser = tString( "AAA" ) << lowerUser;
+            lowerUser = tColoredString((tString&)"AAA" + lowerUser);
             theRightSet[ lowerUser ] = user;
 
             authorityCount++;
