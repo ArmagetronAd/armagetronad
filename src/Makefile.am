@@ -1,9 +1,6 @@
 include $(top_srcdir)/Makefile.paths
 
-SUBDIRS = first thirdparty
-if ENABLE_RUBY
-SUBDIRS += swig
-endif
+SUBDIRS = first thirdparty swig
 
 # target directory
 gamesdir=${bindir}
@@ -207,12 +204,13 @@ endif
 games_PROGRAMS = $(buildmain) $(buildthemaster)
 #EXTRA_PROGRAMS = armagetronad_main_master
 
-if ENABLE_RUBY
-librubywrap_a_SOURCES    = ${top_builddir}/src/swig/ext/armagetronad_wrap.cxx
-librubywrap_a_CXXFLAGS   = $(libtron_a_CXXFLAGS) -w
-else
-librubywrap_a_SOURCES    = 
-endif
+#if ENABLE_RUBY
+#rubysources = ${top_builddir}/src/swig/ext/armagetronad_wrap.cxx
+#librubywrap_a_SOURCES    = $(rubysources)
+#librubywrap_a_CXXFLAGS   = $(libtron_a_CXXFLAGS) -w
+#else
+#librubywrap_a_SOURCES    = 
+#endif
 
 if BUILDFAKERELEASE
 BUILDFAKE=echo -e "\#!/bin/sh\necho Running FAKE \"\$$0\" \"\$$@\"\ntest \"\$$1\" = "--doc" || test \"\$$1\" = "--help" || sleep 5" > $@; chmod 755 $@
@@ -223,7 +221,8 @@ armagetronad_main_master$(EXEEXT): Makefile
 	${BUILDFAKE}
 else
 if BUILDMAIN
-noinst_LIBRARIES = libenginecore.a libengine.a librender.a  libtron.a libui.a libnetwork.a libtools.a librubywrap.a
+noinst_LIBRARIES = libenginecore.a libengine.a librender.a  libtron.a libui.a libnetwork.a libtools.a
+# librubywrap.a
 else
 noinst_LIBRARIES = libnetwork.a libtools.a
 endif

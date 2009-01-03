@@ -1,4 +1,3 @@
-if ENABLE_RUBY
 # all the SWIG interface files
 INTERFACEFILES = ext/armagetronad.i ext/std/sstream.i ext/tools/tConfiguration.i  \
                  ext/tools/tDirectories.i ext/tools/tLocale.i ext/tools/tString.i \
@@ -8,8 +7,10 @@ INTERFACEFILES = ext/armagetronad.i ext/std/sstream.i ext/tools/tConfiguration.i
                  ext/engine/eNetGameObject.i ext/network/nNetObject.i
 
 # although they should not be needed for a plain build, the interfaces are the true sources.
-EXTRA_DIST = ${INTERFACEFILES} ext/armagetronad_wrap.cxx ext/armagetronad_wrap.h
+EXTRA_DIST = ${INTERFACEFILES}
+#ext/armagetronad_wrap.cxx ext/armagetronad_wrap.h
 
+if ENABLE_RUBY
 swig_all = ${top_builddir}/src/swig/ext/armagetronad_wrap.cxx
 swig_all_include = -I${srcdir}/.. -I${srcdir}/../tools -I${srcdir}/../network -I${srcdir}/../render -I${srcdir}/../ui -I${srcdir}/../tron -I${srcdir}/../engine
 
