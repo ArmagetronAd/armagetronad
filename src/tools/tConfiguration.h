@@ -255,12 +255,12 @@ protected:
     tConfItem(T &t):tConfItemBase(""),target(&t), shouldChangeFunc_(NULL) {};
 public:
     tConfItem(const char *title,const tOutput& help,T& t, callbackFunc *cb)
-            :tConfItemBase(title,help,cb),target(&t){}
+            :tConfItemBase(title,help,cb),target(&t), shouldChangeFunc_(NULL) {}
     tConfItem(const char *title,const tOutput& help,T& t)
             :tConfItemBase(title,help),target(&t), shouldChangeFunc_(NULL) {}
 
    tConfItem(const char *title,T& t, callbackFunc *cb)
-            :tConfItemBase(title,cb),target(&t){}
+            :tConfItemBase(title,cb),target(&t), shouldChangeFunc_(NULL) {}
     tConfItem(const char *title,T& t)
             :tConfItemBase(title),target(&t), shouldChangeFunc_(NULL) {}
         
