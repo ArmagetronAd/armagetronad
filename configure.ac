@@ -188,7 +188,7 @@ AC_ENABLE(armathentication,
        no)  enable_armathentication=no
 	    ;;
        *) AC_MSG_ERROR(bad value ${enableval} for --enable-armathentication) ;;
-     esac],enable_armathentication=no
+     esac],enable_armathentication=yes
      )
 
 AC_ARG_ENABLE(zonesv2,
