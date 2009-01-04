@@ -19,11 +19,11 @@ fi
 verbose=
 srcdir="$1"
 
-if ( test $1 == "--verbose" || test $1 == "-v" ) && test $# -eq 2
+if ( test x"$1" = x"--verbose" || test x"$1" = x"-v" ) && test $# -eq 2
 then
     verbose=#
     srcdir=$2
-elif ( test $1 == "--verbose" || test $1 == "-v" )
+elif ( test x"$1" = x"--verbose" || test x"$1" = x"-v" )
 then
     echo "ERROR: Invalid argument count" >&2
     show_usage $0
@@ -119,11 +119,11 @@ then
     # So we count revisions, including merged ones, also including fools which have empty
     # lines with only "revno: 15" in their commit messages
     revno=$( bzr revno ${srcdir} 2>/dev/null)    
-    revcount=$(bzr log ${srcdir} 2>/dev/null | grep -P '^ *revno: [0-9\.]+$' | wc -l)
+    revcount=$(bzr log ${srcdir} 2>/dev/null | grep '^ *revno: [0-9\.]+$' | wc -l)
     lca=$revno
     lcaz=$revcount
     versioned=#
-    branchurl=$(bzr info ${srcdir} 2>/dev/null | grep -P '^  parent branch: .*$' | awk '-F: ' '{ print $2 }' )
+    branchurl=$(bzr info ${srcdir} 2>/dev/null | grep '^  parent branch: .*$' | awk '-F: ' '{ print $2 }' )
 
 
     # We will check this branch diverged, and/or if tree changed
@@ -176,7 +176,7 @@ then
     then
         major_version=$( cd ${srcdir}; bzr nick )
         branchnick=$major_version
-        revid=$( bzr log --show-ids -l1 ${srcdir} | grep -P "^revision-id: (.*)$" | head -n 1 | awk '{print $2}' )
+        revid=`bzr testament | grep "^revision-id: " | awk '{print $2}'`
     fi
 fi
 
