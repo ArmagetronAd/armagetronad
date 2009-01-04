@@ -70,7 +70,7 @@ dist-hook-scm:
 	sed -e "s/m4_include(version)//" -e "s/AUTOMATIC_VERSION/$(VERSION)/" < @srcdir@/configure.ac > $(distdir)/configure.ac
 
 #	same for src/macosx/config_common.h.in
-	sed -e "s/@ver""sion@/\"$(VERSION)\"/" < @srcdir@/src/macosx/config_common.h.in > $(distdir)/src/macosx/config_common.h.in
+	sed -e "s/@ver""sion@/\"$(VERSION)\"/" < @srcdir@/src/macosx/version.h.in > $(distdir)/src/macosx/version.h.in
 
 #   regenerate dependant files so they no longer reference to the file "version" which will be removed
 	cp @srcdir@/bootstrap.sh $(distdir)
