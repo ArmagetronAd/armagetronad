@@ -3354,7 +3354,7 @@ public:
     }
 
     void write(tColoredString &s) const {
-        s << tColoredString::ColorString(.5,.5,1.) << tOutput(m_shortdesc) << ":\n" << tOutput(m_text) << '\n';
+        s << tColoredString::ColorString(.5,.5,1.) << tOutput((const char *)m_shortdesc) << ":\n" << tOutput((const char *)m_text) << '\n';
     }
 
     static void addHelpTopic(std::istream &s) {
@@ -3404,7 +3404,7 @@ private:
                 printed_start = true;
                 s << tOutput("$help_topics_list_start");
             }
-            s << tColoredString::ColorString(.5,.5,1.) << begin->first << tColoredString::ColorString(1.,1.,.5) << ": " << tOutput(begin->second.m_shortdesc) << "\n";
+            s << tColoredString::ColorString(.5,.5,1.) << begin->first << tColoredString::ColorString(1.,1.,.5) << ": " << tOutput((const char *)begin->second.m_shortdesc) << "\n";
         }
     }
 
@@ -3448,6 +3448,8 @@ static std::map<tString, eHelpTopic> & FillHelpTopics()
 #endif
     se_makeDefaultHelpTopic(helpTopics, "commands_misc");
     se_makeDefaultHelpTopic(helpTopics, "commands_pp");
+
+    se_makeDefaultHelpTopic(helpTopics, "version");
 
     return helpTopics;
 }

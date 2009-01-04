@@ -39,8 +39,6 @@ class tLocaleSubItem; // identifies a single string in a single language
 
 static tArray<tString> st_TemplateParameters;
 
-static tString s_gameName("Armagetron"); // the official name of this game
-
 class tLocaleItem: public tReferencable< tLocaleItem >    // idendifies a string in all languages
 {
     friend class tLocaleSubItem;
@@ -254,10 +252,47 @@ tLocaleItem::operator const char *() const// return the version of this string i
             else if (i < temp.Len() - 1)
             {
                 c = temp(i+1);
-                if (c == 'g')
-                    replaced << s_gameName;
-                else
+                switch ( c )
                 {
+                case 'b':
+                    replaced << st_programBranchUrl;
+                    break;
+                case 'c':
+                    replaced << tOutput(
+                            ( st_programChanged )? "$yes" : "$no"
+                            );
+                    break;
+                case 'd':
+                    replaced << st_programBuildDate;
+                    break;
+                case 'g':
+                    replaced << st_programName;
+                    break;
+                case 'i':
+                    replaced << st_programRevId;
+                    break;
+                case 'l':
+                    replaced << st_programBranchLca;
+                    break;
+                case 'm':
+                    replaced << st_programBranchLcaZ;
+                    break;
+                case 'o':
+                    replaced << st_programRevNo;
+                    break;
+                case 'p':
+                    replaced << st_programBranchNick;
+                    break;
+                case 't':
+                    replaced << st_programRevTag;
+                    break;
+                case 'v':
+                    replaced << st_programVersion;
+                    break;
+                case 'z':
+                    replaced << st_programRevZNr;
+                    break;
+                default:
                     int index = c-'0';
                     if (index > 0 && index < 10)
                         replaced << st_TemplateParameters[index];
@@ -783,8 +818,8 @@ void               tLocale::Load(const char* filename)
     tLocaleItem::Load(filename, false);
 
     // determine the name of the game
-    s_gameName.Clear();
-    s_gameName << tOutput("$game_name");
+    st_programName.Clear();
+    st_programName << tOutput("$game_name");
 }
 
 void               tLocale::Clear()
