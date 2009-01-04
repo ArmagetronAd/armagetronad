@@ -301,7 +301,7 @@ test $DEBUGLEVEL -ge 5 && CXXFLAGS="$CXXFLAGS -DMEM_DEB"
 
 dnl oddly, this macro needs to be called once unconditionally, or automake
 dnl borks up.
-AX_CXXFLAGS_GCC_OPTION()
+AX_CXXFLAGS_GCC_OPTION(-nobodyreadsconfigureoutputanyway)
 
 if test $CODELEVEL -ge 1; then
     CXXFLAGS="$CXXFLAGS -Wall"
