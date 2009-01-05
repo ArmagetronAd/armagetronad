@@ -41,7 +41,6 @@ branchnick=
 revcount=
 tag=
 srcchanged=
-builddate=
 lca=0
 lcaz=0
 branchurl=
@@ -131,15 +130,15 @@ then
     # So we count revisions, including merged ones, also including fools which have empty
     # lines with only "revno: 15" in their commit messages
     revno=$( bzr revno ${srcdir} 2>/dev/null)    
-    revcount=$(bzr log ${srcdir} 2>/dev/null | grep '^ *revno: [0-9\.]+$' | wc -l)
+    revcount=$( bzr log ${srcdir} 2>/dev/null | sed -ne 's/^ *revno: [0-9\.]\+$/\0/p' | wc -l )
     lca=$revno
     lcaz=$revcount
     versioned=#
-    branchurl=$(bzr info ${srcdir} 2>/dev/null | grep '^  parent branch: .*$' | awk '-F: ' '{ print $2 }' )
+    branchurl=$( bzr info ${srcdir} 2>/dev/null | sed -ne 's/^  parent branch: \(.*\)$/\1/p' )
 
 
     # We will check this branch diverged, and/or if tree changed
-    bzrmissingcout=$( cd ${srcdir}; bzr missing --this 2>/dev/null )
+    bzrmissingcout=$( cd ${srcdir} && bzr missing --this 2>/dev/null )
     missing=$?
     bzr diff ${srcdir} --quiet >/dev/null 2>&1
     changed=$?
@@ -149,9 +148,9 @@ then
     # if it diverged:
     then
         # Count the revisions we added locally
-        localrevisions=$( echo "${bzrmissingcout}" | sed -n '2,1p' | awk '{print $3}' )
+        localrevisions=$( echo "${bzrmissingcout}" | sed -ne '2,1s/^You have \([0-9]\+\) extra revision(s):$/\1/p' )
         # See how many steps it is, with the fool's number
-        stepsbackwards=$( bzr log ${srcdir} -l ${localrevisions} | grep -P '^ *revno: [0-9\.]+$' | wc -l )
+        stepsbackwards=$( bzr log ${srcdir} -l ${localrevisions} | sed -ne 's/^ *revno: [0-9\.]\+$/\0/p' | wc -l )
         # And start dancing.
         minor_version=_alpha_z$(( ${revcount} - ${stepsbackwards} ))_${DATE}
         # Set last common ancestors
@@ -169,7 +168,7 @@ then
         # If really no change was made, use the fool's number, with tag if any
         # So check if we have tags
         revno=$(bzr revno ${srcdir})
-        tag=$(bzr tags -d ${srcdir} | grep -P "^(.*?) +${revno}$" | awk '{ print $1 }')
+        tag=$(bzr tags -d ${srcdir} | sed -ne 's/^\(.*\) +${revno}$/\1/p' )
         if test ${tag}
         then
             # If it is tagged, use the tag
@@ -188,7 +187,7 @@ then
     then
         major_version=$( cd ${srcdir}; bzr nick )
         branchnick=$major_version
-        revid=`bzr testament | grep "^revision-id: " | awk '{print $2}'`
+        revid=$( bzr testament | sed -ne 's/^revision-id: \(.*\)/\1/p' )
     fi
 fi
 

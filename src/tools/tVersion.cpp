@@ -26,19 +26,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 #ifndef TRUE_ARMAGETRONAD_VERSION
 #include "tTrueVersion.h"
-#endif
 
 #include "tVersion.h"
+#include "tString.h"
 
-st_programVersion       = TRUE_ARMAGETRONAD_VERSION;
-st_programRevId         = TRUE_ARMAGETRONAD_REVID;
-st_programRevNo         = TRUE_ARMAGETRONAD_REVNO;
-st_programBranchNick    = TRUE_ARMAGETRONAD_BRANCHNICK;
-st_programRevZNr        = TRUE_ARMAGETRONAD_ZNR;
-st_programRevTag        = TRUE_ARMAGETRONAD_REVTAG;
-st_programChanged       = TRUE_ARMAGETRONAD_CHANGED;
-st_programBuildDate     = TRUE_ARMAGETRONAD_BUILDDATE;
-st_programBranchLca     = TRUE_ARMAGETRONAD_BRANCHLCA;
-st_programBranchLcaZ    = TRUE_ARMAGETRONAD_BRANCHLCAZ;
-st_programBranchUrl     = TRUE_ARMAGETRONAD_BRANCHURL;
+tString st_programName          ("Armagetron Advanced");
+tString st_programVersion       (TRUE_ARMAGETRONAD_VERSION);
+tString st_programRevId         (TRUE_ARMAGETRONAD_REVID);
+int     st_programRevNo         (TRUE_ARMAGETRONAD_REVNO);
+tString st_programBranchNick    (TRUE_ARMAGETRONAD_BRANCHNICK);
+int     st_programRevZNr        (TRUE_ARMAGETRONAD_ZNR);
+tString st_programRevTag        (TRUE_ARMAGETRONAD_REVTAG);
+bool    st_programChanged       (TRUE_ARMAGETRONAD_CHANGED);
+tString st_programBuildDate     (TRUE_ARMAGETRONAD_BUILDDATE);
+int     st_programBranchLca     (TRUE_ARMAGETRONAD_BRANCHLCA);
+int     st_programBranchLcaZ    (TRUE_ARMAGETRONAD_BRANCHLCAZ);
+tString st_programBranchUrl     (TRUE_ARMAGETRONAD_BRANCHURL);
 
+#endif
