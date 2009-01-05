@@ -759,7 +759,10 @@ void exit_game_objects(eGrid *grid){
 
     su_prefetchInput=false;
 
+#ifndef DEDICATED
 	cCockpit::AfterRoundProcess();
+#endif
+
     int i;
     for (i=ePlayer::Num()-1;i>=0;i--){
         if (ePlayer::PlayerConfig(i))
