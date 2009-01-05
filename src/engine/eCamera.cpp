@@ -486,8 +486,9 @@ eCamera::eCamera(eGrid *g, rViewport *view,ePlayerNetID *p,
         :id(-1),grid(g),netPlayer(p),localPlayer(lp),
         // centerID(0),
         mode(m),pos(0,0),dir(1,0),top(0,0),
-        mirrorView_(false), cameraMain_(rMain), renderInCockpit_(false),
-		vp(view){
+        vp(view),
+        cameraMain_(rMain), renderInCockpit_(false), mirrorView_(false)
+		{
     /*
       if (p->pID>=0)
       localPlayer=playerConfig[p->pID];
@@ -551,6 +552,9 @@ bool eCamera::SetCamMode(eCamMode m){
 			break;
 		case CAMERA_MER:
 			break;
+        case CAMERA_COUNT:
+            tASSERT(0);
+            break;
 		}
 		return true;
 	}
