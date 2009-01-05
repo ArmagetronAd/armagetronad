@@ -34,6 +34,18 @@ fi
 major_version=`cat ${srcdir}/major_version`
 DATE=`date +%Y%m%d`
 builddate=`date -R`
+minor_version=
+revid=0
+revno=0
+branchnick=
+revcount=
+tag=
+srcchanged=
+builddate=
+lca=0
+lcaz=0
+branchurl=
+
 
 #echo $major_version
 #echo $minor_version
