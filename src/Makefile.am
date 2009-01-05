@@ -146,6 +146,7 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/cockpit/cCockpit.h \
 	tron/cockpit/cWidgetBase.h tron/cockpit/cWidgetBase.cpp \
 	tron/cockpit/cMap.h tron/cockpit/cMap.cpp \
+    tron/cockpit/cCamview.h tron/cockpit/cCamview.cpp \
 	tron/cockpit/cLabel.h tron/cockpit/cLabel.cpp \
 	tron/cockpit/cGauges.h tron/cockpit/cGauges.cpp \
 	tron/cockpit/cRectangle.h tron/cockpit/cRectangle.cpp\
@@ -234,7 +235,7 @@ else
 extralibs= thirdparty/particles/libparticles.a thirdparty/scrap/libscrap.a
 endif
 
-armagetronad_main_SOURCES = tron/gFloor.cpp tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp
+armagetronad_main_SOURCES = tron/gFloor.cpp tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp tron/cockpit/cCamview.cpp 
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
 armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 #  librubywrap.a

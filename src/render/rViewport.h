@@ -37,14 +37,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class rViewport{
     REAL left,bottom,width,height;
+	rViewport *rootViewport;
 public:
-    rViewport(REAL l,REAL b,REAL w,REAL h):left(l),bottom(b),width(w),height(h){}
+	void SetRootViewport(rViewport *root) {rootViewport=root;}
+	rViewport *GetRootViewport() {return rootViewport;}
+    rViewport(REAL l,REAL b,REAL w,REAL h):left(l),bottom(b),width(w),height(h),rootViewport(0){}
     // create a subviewport of top
     rViewport(rViewport &top,rViewport &sub)
             :left  (top.left+top.width*sub.left),
             bottom(top.bottom+top.height*sub.bottom),
             width(top.width*sub.width),
-    height(top.height*sub.height){}
+    		height(top.height*sub.height),
+    		rootViewport(0){}
 
     ~rViewport(){tCHECK_DEST;}
 
@@ -64,6 +68,7 @@ public:
 
     //! returns the height and width of the viewport
     tCoord GetDimensions() const {return tCoord(width, height);}
+    tCoord GetPosition() const {return tCoord(left, bottom);}
 
     static rViewport s_viewportFullscreen,
     s_viewportLeft,s_viewportRight,
@@ -78,7 +83,7 @@ public:
 
 };
 
-extern int      sr_viewportBelongsToPlayer[MAX_VIEWPORTS];
+extern int  sr_viewportBelongsToPlayer[MAX_VIEWPORTS];
 extern int  s_newViewportBelongsToPlayer[MAX_VIEWPORTS];
 
 
