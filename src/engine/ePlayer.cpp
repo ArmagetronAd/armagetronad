@@ -2390,7 +2390,7 @@ static void se_AdminLogout( ePlayerNetID * p )
     p->BeNotLoggedIn();
 #endif
 }
-
+static eLadderLogWriter se_adminCommandWriter("ADMIN_COMMAND", false);
 // /admin chat command
 static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
 {
@@ -2402,6 +2402,8 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
 
     tString str;
     str.ReadLine(s);
+    se_adminCommandWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel() << str;
+    se_adminCommandWriter.write();
     con << "Remote admin command by " << *p << "0xRESETT: " << str << "\n";
     std::istringstream stream(&str(0));
 
