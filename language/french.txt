@@ -1,13 +1,3 @@
-#*****************************************
-#
-# Traduction francaise par mygal
-# Commentaires, critiques, etc.?
-#            themygal@gmail.com
-# Thx 2 tang322 4 his help
-#
-#*****************************************
-
-
 language                      Francais
 
 #*****************************************
