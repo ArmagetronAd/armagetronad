@@ -30,7 +30,9 @@ dist-hook:
 # keep track of true version
 tTrueVersion.h: $(wildcard $(top_srcdir)/*_version) $(wildcard $(top_srcdir)/.svn) $(wildcard $(top_srcdir)/CVS) $(wildcard $(top_srcdir)/.bzr) $(wildcard $(top_srcdir)/batch/make/version) Makefile
 #	if the version generation files exist, use it to define the version. Else, Fallback to the autopackage version.
-	if test -r $(top_srcdir)/batch/make/version; then \
+	if test -f $(top_srcdir)/src/tFakeVersion.h; then \
+		cp $(top_srcdir)/src/tFakeVersion.h $(top_srcdir)/src/tTrueVersion.h; \
+	elif test -r $(top_srcdir)/batch/make/version; then \
 		sh $(top_srcdir)/batch/make/version --verbose $(top_srcdir) | awk '{ print "#define TRUE_ARMAGETRONAD_" $$1 " " substr( $$0, index( $$0, $$2 ) ) }' >$@; \
 	else \
 		echo "#define TRUE_ARMAGETRONAD_VERSION VERSION" > $@; \
