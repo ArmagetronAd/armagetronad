@@ -132,8 +132,10 @@ void Camview::Render() {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
+
 	// Rendering cameras
     rViewportConfiguration* viewportConfiguration = rViewportConfiguration::CurrentViewportConfiguration();
+
     for ( int viewport = viewportConfiguration->num_viewports-1; viewport >= 0; --viewport )
     {	
     	//con << "render subviewport\n";
@@ -193,13 +195,20 @@ void Camview::Render() {
 	glPopMatrix();
     glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
+    
+    // Restore the root viewport
+    sr_ResetRenderState(true);
+    glViewport (GLsizei(0),
+                GLsizei(0),
+                GLsizei(sr_screenWidth),
+                GLsizei(sr_screenWidth));
 }
 
 void Camview::PostParsingProcess()
 {
     rViewportConfiguration* viewportConfiguration = rViewportConfiguration::CurrentViewportConfiguration();
     rViewport *vpmod = new rViewport((m_position.x+1)/2,(m_position.y+1)/2,m_size.x,m_size.y*sr_screenWidth/sr_screenHeight);
-	// eGrid *grid = eGrid::CurrentGrid();
+	eGrid *grid = eGrid::CurrentGrid();
     for ( int viewport = viewportConfiguration->num_viewports-1; viewport >= 0; --viewport )
     {
         // get the viewport
@@ -240,7 +249,7 @@ void Camview::AfterRoundProcess() {
 
 void Camview::CreateCamera(int vp) {
 	eGrid *grid = eGrid::CurrentGrid();
-    // const tList<eCamera>& cameras = grid->Cameras();
+    const tList<eCamera>& cameras = grid->Cameras();
 	int playerID = sr_viewportBelongsToPlayer[ vp ];
 	ePlayer* player = ePlayer::PlayerConfig( playerID );
 	cam[vp] = new eCamera(grid,
@@ -259,9 +268,9 @@ Camview::Camview():
         dirAngle(0), dirCos(0), dirSin(0), 
         posTranslation(tCoord(0,0)),
         z(0), rise(0), fov(0),
-        mirror(false), mainCameraFlag(false), mainCameraDirFlag(false), dirAngleFlag(false),
+        mirror(false), dirAngleFlag(false),
         posTranslationFlag(false), 
-        riseFlag(false), fovFlag(false), ReadyFlag(false)
+        riseFlag(false), fovFlag(false), mainCameraDirFlag(false), mainCameraFlag(false), ReadyFlag(false)
 {
     rViewportConfiguration* viewportConfiguration = rViewportConfiguration::CurrentViewportConfiguration();
     for ( int viewport = viewportConfiguration->num_viewports-1; viewport >= 0; --viewport )

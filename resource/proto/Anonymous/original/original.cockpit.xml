@@ -3,6 +3,22 @@
 
 <Resource type="aacockpit" name="standard" version="0.0.1" author="Anonymous" category="">
     <Cockpit version="0.0.1">
+        <Camview camera="in" view="in">
+            <Position x="-0.95" y="-0.95" />
+            <Size height="0.15" width="0.3" />
+            <Translation x="0.5" y="0" z="0" />
+            <Rotation value="150" />
+            <Mirror value="true" />
+        </Camview>
+
+        <Camview camera="in" view="in">
+            <Position x="0.35" y="-0.95" />
+            <Size height="0.15" width="0.3" />
+            <Translation x="-0.5" y="0" z="0" />
+            <Rotation value="210" />
+            <Mirror value="true" />
+        </Camview>
+
         <WidgetTemplate id="Clock">
             <Position x=".3" y=".4" />
             <Size height="0.075" width="0.075" />
@@ -548,22 +564,6 @@
                 </Solid>
             </Background>
         </Map>
-
-        <Camview camera="in" view="in">
-            <Position x="-0.95" y="-0.95" />
-            <Size height="0.15" width="0.3" />
-            <Translation x="0.5" y="0" z="0" />
-            <Rotation value="150" />
-            <Mirror value="true" />
-        </Camview>
-
-        <Camview camera="in" view="in">
-            <Position x="0.35" y="-0.95" />
-            <Size height="0.15" width="0.3" />
-            <Translation x="-0.5" y="0" z="0" />
-            <Rotation value="210" />
-            <Mirror value="true" />
-        </Camview>
 
     </Cockpit>
 </Resource>
