@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "eEventNotification.h"
-#include "eEventNotification.h"
 #include "gStuff.h"
 #include "eSoundMixer.h"
 #include "eGrid.h"
@@ -79,6 +78,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#include "uWebinterface.h"
 
 #include "gRotation.h"
+#include "cockpit/cCockpit.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -759,6 +759,10 @@ void exit_game_objects(eGrid *grid){
 
     su_prefetchInput=false;
 
+#ifndef DEDICATED
+	cCockpit::AfterRoundProcess();
+#endif
+
     int i;
     for (i=ePlayer::Num()-1;i>=0;i--){
         if (ePlayer::PlayerConfig(i))
@@ -1204,6 +1208,7 @@ void init_game_camera(eGrid *grid){
 
             lastTime_gameloop=lastTimeTimestep=0;
         }
+    cCockpit::BeforeRoundProcess();
 #else
     se_ResetGameTimer( -PREPARE_TIME - sg_extraRoundTime );
     se_PauseGameTimer(false);
@@ -1268,14 +1273,18 @@ void RenderAllViewports(eGrid *grid){
         */
 
         const tList<eCamera>& cameras = grid->Cameras();
-
         for (int i=cameras.Len()-1;i>=0;i--){
-            int p=sr_viewportBelongsToPlayer[i];
-            conf->Select(i);
-            rViewport *act=conf->Port(i);
-            if (act && ePlayer::PlayerConfig(p))
-                ePlayer::PlayerConfig(p)->Render();
-            else con << "hey! viewport " << i << " does not exist!\n";
+	    	if (!cameras(i)->RenderInCockpit()) {
+				int p=sr_viewportBelongsToPlayer[i];
+				conf->Select(i);
+				rViewport *act=conf->Port(i);
+				if (act && ePlayer::PlayerConfig(p))
+					ePlayer::PlayerConfig(p)->Render();
+				else con << "hey! viewport " << i << " does not exist!\n";
+			} else {
+				cameras(i)->SetRenderInCockpit(false);
+			}
+			
         }
 
         // glDisable( GL_FOG );

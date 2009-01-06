@@ -152,13 +152,13 @@ public:
     const tList<eGameObject>& GameObjectsInteresting() const{return gameObjectsInteresting;}
     const tList<eGameObject>& GameObjectsInactive() const{return gameObjectsInactive;}
 
-
+/* Try to get ride of these functions as it seems useless to use them instead of the cam parameter itself
     int    NumberOfCameras();
     const eCoord& CameraPos(int i);
     eCoord CameraGlancePos(int i);
     const eCoord& CameraDir(int i);
     REAL CameraHeight(int i);
-
+*/
 
     //  int    NumberOfCameras(){return eCamera::Number();}
     //  const eCoord& CameraPos(int i){return eCamera::PosNum(i);}
@@ -179,7 +179,7 @@ public:
 
 protected:
     // render helper
-    void display_simple( int viewer,bool floor,
+    void display_simple( eCamera* cam, int viewer,bool floor,
                          bool sr_upperSky,bool sr_lowerSky,
                          REAL flooralpha,
                          bool eWalls,bool gameObjects,
@@ -225,6 +225,7 @@ protected:
 
     // cameras
     tList<eCamera>     cameras;
+    tList<eCamera>     subcameras;
 
     // walls
     // tHeap<eWallView>  wallsVisible[MAX_VIEWERS];

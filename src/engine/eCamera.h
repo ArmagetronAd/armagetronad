@@ -93,7 +93,6 @@ protected:
     REAL turning;   // number of turns in the last seconds
     REAL smoothTurning; //that value smoothed
 
-
     REAL distance;    // distance travelled so far
     REAL lastrendertime; // the time this was last rendered
 
@@ -114,6 +113,10 @@ protected:
 
     bool renderingMain_;	// flag indicating whether the current rendering process is the main process or just a mirror effect
 
+    bool cameraMain_;		// flag indicating whether the camera is a main camera or a widget view
+    bool renderInCockpit_;	// flag indicating whether the camera is rendered in the cockpit (to disable main rendering)
+    bool mirrorView_;		// flag indicating whether the rendering should be done as in a mirror
+
     static bool InterestingToWatch(eGameObject const * g);
 
     //! returns the next view direction if a glance towards targetDir is requested
@@ -128,6 +131,7 @@ protected:
 
     void MyInit();
 public:
+
     bool CenterIncamOnTurn();
     bool WhobbleIncam();
     bool AutoSwitchIncam();
@@ -135,13 +139,26 @@ public:
     bool RenderingMain() const { return renderingMain_;  }
     void SetRenderingMain( bool f ){ renderingMain_ = f; }
 
+    bool CameraMain() const { return cameraMain_;  }
+    void SetCameraMain( bool f ){ cameraMain_ = f; }
+
+    bool RenderInCockpit() const { return renderInCockpit_;  }
+    void SetRenderInCockpit( bool f ){ renderInCockpit_ = f; }
+
+    bool MirrorView() const { return mirrorView_;  }
+    void SetMirrorView( bool f ){ mirrorView_ = f; }
+
+    REAL CameraFOV  () const {return fov;}
+    void SetCameraFOV  (REAL fovNew) {fov=fovNew;}
+
     const ePlayerNetID* Player() const;
     const ePlayer* LocalPlayer() const;
 
-    eCamera(eGrid *grid, rViewport *vp,ePlayerNetID *owner,ePlayer *lp,eCamMode m=CAMERA_IN);
+    eCamera(eGrid *grid, rViewport *vp,ePlayerNetID *owner,ePlayer *lp,eCamMode m=CAMERA_IN, bool rMain=true);
     virtual ~eCamera();
 
     eGameObject * Center() const;
+    void SetCenter(eGameObject * c);
 
     eCoord CenterPos() const;
     eCoord CenterDir() const;
@@ -161,6 +178,12 @@ public:
     const eCoord& CameraPos() const {return pos;}
     eCoord        CameraGlancePos() const {return pos;}  //! CHECK: this method is redundant with CameraPos(). I leave removing it to you since it is called externally.
     REAL          CameraZ  () const {return z;}
+    REAL          CameraRise  () const {return rise;}
+
+    void SetCameraDir(eCoord &pDir) {dir = pDir;}
+    void SetCameraPos(eCoord &pPos) {pos = pPos;}
+    void SetCameraZ  (REAL pZ) {z = pZ;}
+    void SetCameraRise  (REAL pRise) {rise = pRise;}
 
     bool CenterAlive() const;
 
@@ -172,6 +195,7 @@ public:
     bool Act(uActionCamera *act,REAL x);
 
     eCamMode GetCamMode() {return mode;}
+    bool SetCamMode(eCamMode m);		//! Set camera mode, return true if change is allowed and complete, otherwise false
 
 #ifndef DEDICATED
     void Render();

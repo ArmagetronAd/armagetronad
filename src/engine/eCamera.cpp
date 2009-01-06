@@ -386,7 +386,7 @@ static void se_SetWatchedObject( eCamera * cam, eGameObject * obj )
 
 void eCamera::MyInit(){
     if (localPlayer){
-        mode=localPlayer->startCamera; //PENDING:
+        if (cameraMain_) mode=localPlayer->startCamera; //PENDING:
         fov=localPlayer->startFOV;
     }
 
@@ -422,7 +422,8 @@ void eCamera::MyInit(){
     //  foot=tNEW(eGameObject)(pos,dir,0);
     distance=0;
     lastrendertime=se_GameTime();
-    grid->cameras.Add(this,id);
+	if (CameraMain()) grid->cameras.Add(this,id);
+	else grid->subcameras.Add(this,id);
     //  se_ResetVisibles(id);
     smoothTurning=turning=0;
     centerPosLast=centerposLast=CenterPos();
@@ -481,11 +482,13 @@ const ePlayerNetID* eCamera::Player() const { return netPlayer; }
 const ePlayer* eCamera::LocalPlayer() const { return localPlayer; }
 
 eCamera::eCamera(eGrid *g, rViewport *view,ePlayerNetID *p,
-                 ePlayer *lp,eCamMode m)
+                 ePlayer *lp,eCamMode m, bool rMain)
         :id(-1),grid(g),netPlayer(p),localPlayer(lp),
         // centerID(0),
         mode(m),pos(0,0),dir(1,0),top(0,0),
-vp(view){
+        vp(view),
+        cameraMain_(rMain), renderInCockpit_(false), mirrorView_(false)
+		{
     /*
       if (p->pID>=0)
       localPlayer=playerConfig[p->pID];
@@ -503,8 +506,11 @@ eCamera::~eCamera(){
     //  se_ResetVisibles(se_cameras.Len());
     //  if (ID!=se_cameras.Len()) se_ResetVisibles(ID);
 
-    grid->cameras.Remove(this, id);
-
+    if (cameraMain_)
+    	grid->cameras.Remove(this, id);
+    else
+		grid->subcameras.Remove(this, id);
+		
     tCHECK_DEST;
 }
 
@@ -513,6 +519,46 @@ eCamera::~eCamera(){
 
 eGameObject * eCamera::Center() const{
     return center;
+}
+
+void eCamera::SetCenter(eGameObject * c) {
+    center = c;
+}
+
+bool eCamera::SetCamMode(eCamMode m){
+
+    if ((localPlayer && localPlayer->allowCam[m] && (!forbid_camera[m])) && m != CAMERA_COUNT) {
+    	mode = m;
+		switch(mode){
+		case CAMERA_IN:
+			rise=0;
+			break;
+		case CAMERA_SMART_IN:
+			break;
+		case CAMERA_CUSTOM:
+			rise=0;
+			break;
+		case CAMERA_SERVER_CUSTOM:
+			rise=0;
+			break;
+		case CAMERA_FREE:
+			break;
+		case CAMERA_FOLLOW:
+			break;
+		case CAMERA_SMART:
+			smartcamIncamSmooth=1;
+			z=z+1;
+			pos=pos+dir.Turn(-1,.1);
+			break;
+		case CAMERA_MER:
+			break;
+        case CAMERA_COUNT:
+            tASSERT(0);
+            break;
+		}
+		return true;
+	}
+	return false;
 }
 
 void eCamera::SwitchView(){
@@ -1444,6 +1490,8 @@ void eCamera::Render(){
     glLoadIdentity();
 
     if(CenterCockpitFixedBefore()){
+	    glMatrixMode(GL_PROJECTION);
+		if (mirrorView_) glScalef(-1,1,1);
         vp->Perspective(fov,zNear,1E+20,se_cameraEyeDistance/2.);
 
         gluLookAt(0,
@@ -1490,6 +1538,8 @@ void eCamera::Render(){
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
 
+			glMatrixMode(GL_PROJECTION);
+			if (mirrorView_) glScalef(-1,1,1);
             vp->Perspective(fov,zNear,1E+20,-se_cameraEyeDistance/2.);
 
             float offset = 0;
@@ -1498,7 +1548,7 @@ void eCamera::Render(){
                 test.detect(se_cameraInMaxFocusDistance*Center()->Speed());
                 offset = test.hit;
             }
-
+ 
             gluLookAt(0,
                       0,
                       0,
@@ -2190,6 +2240,11 @@ void eCamera::s_Timestep(eGrid *grid, REAL time){
             eCamera *c = grid->cameras(i);
             c->Timestep(time-lastTime);
             su_FetchAndStoreSDLInput();
+        }
+        for(int i=grid->subcameras.Len()-1;i>=0;i--){
+            //con << time-lastTime<< '\n';
+            eCamera *c = grid->subcameras(i);
+            c->Timestep(time-lastTime);
         }
         lastTime=time;
     }
