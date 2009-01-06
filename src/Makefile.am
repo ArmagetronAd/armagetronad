@@ -50,7 +50,9 @@ endif
 
 # Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
 # the fragile dependency on undefined behaviour of the linker...)
-libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tArray.cpp tools/tArray.h tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.cpp tools/tColor.h\
+libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVersion.h\
+	tools/tArray.cpp tools/tArray.h \
+	tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.cpp tools/tColor.h\
 	tools/tConfiguration.cpp tools/tConfiguration.h tools/tConsole.cpp tools/tConsole.h tools/tCrypt.cpp tools/tCrypt.h\
 	tools/tDirectories.cpp tools/tDirectories.h tools/tError.cpp tools/tError.h tools/tEventQueue.cpp\
 	tools/tEventQueue.h tools/tHeap.cpp tools/tHeap.h tools/tInitExit.h tools/tLinkedList.cpp tools/tLinkedList.h\
@@ -77,7 +79,6 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tArray.cpp tools/tA
 	tools/values/vebLegacy.cpp tools/values/vebLegacy.h \
 	tools/values/vebMathExpr.cpp tools/values/vebMathExpr.h \
 	tools/values/vebCFunction.h \
-	tools/tMemManager.cpp tools/tMemManager.h\
 	tools/tStatFile.cpp tools/tStatFile.h\
 	tools/tStatEntry.h tools/tStatEntry.cpp\
 	tools/tPlayList.h tools/tPlayList.cpp\
@@ -88,7 +89,9 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tArray.cpp tools/tA
 	tools/tPolynomial.h tools/tPolynomialMarshaler.h tools/tPolynomialWithBase.h \
 	tools/tRuby.h tools/tRuby.cpp \
 	tools/tDict.h \
-	resource/tResource.h resource/tResource.cpp resource/tResourceType.h resource/tResourceType.cpp
+	resource/tResource.h resource/tResource.cpp resource/tResourceType.h resource/tResourceType.cpp\
+	tools/tMemManager.cpp tools/tMemManager.h
+# again, tMemManager.cpp/.h must be last here.
 
 #tools/tCommandLine.cpp tools/tCommandLine.h
 libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentication.cpp\
