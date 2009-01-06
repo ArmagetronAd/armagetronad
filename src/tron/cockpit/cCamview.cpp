@@ -132,8 +132,10 @@ void Camview::Render() {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
+
 	// Rendering cameras
     rViewportConfiguration* viewportConfiguration = rViewportConfiguration::CurrentViewportConfiguration();
+
     for ( int viewport = viewportConfiguration->num_viewports-1; viewport >= 0; --viewport )
     {	
     	//con << "render subviewport\n";
@@ -193,6 +195,13 @@ void Camview::Render() {
 	glPopMatrix();
     glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
+    
+    // Restore the root viewport
+    sr_ResetRenderState(true);
+    glViewport (GLsizei(0),
+                GLsizei(0),
+                GLsizei(sr_screenWidth),
+                GLsizei(sr_screenWidth));
 }
 
 void Camview::PostParsingProcess()
