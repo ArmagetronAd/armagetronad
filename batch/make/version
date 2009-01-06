@@ -38,7 +38,7 @@ minor_version=
 revid=0
 revno=0
 branchnick=
-revcount=
+revcount=0
 tag=
 srcchanged=
 lca=0
@@ -122,7 +122,7 @@ fi
 # Check if bzr is installed, and if the path is versionned
 bzr >/dev/null 2>&1
 # But for now, ignore it
-if test $? -eq 0
+if test $? -eq 0 && test -d ${srcdir}/.bzr
 #if test 1 -eq 0
 then
     # Crappily, we can't rely on revision numbers to do anything

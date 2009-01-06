@@ -30,6 +30,51 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tVersion.h"
 #include "tString.h"
 
+// emergency defines for macros so rarely used build paths can be lazy
+#ifndef TRUE_ARMAGETRONAD_VERSION
+#define TRUE_ARMAGETRONAD_VERSION "UNKNOWN"
+#endif
+
+#ifndef TRUE_ARMAGETRONAD_REVID
+#define TRUE_ARMAGETRONAD_REVID "UNKNOWN"
+#endif
+
+#ifndef TRUE_ARMAGETRONAD_REVNO
+#define TRUE_ARMAGETRONAD_REVNO 0
+#endif
+
+#ifndef TRUE_ARMAGETRONAD_BRANCHNICK
+#define TRUE_ARMAGETRONAD_BRANCHNICK "UNKNOWN"
+#endif
+
+#ifndef TRUE_ARMAGETRONAD_ZNR
+#define TRUE_ARMAGETRONAD_ZNR 0
+#endif
+
+#ifndef TRUE_ARMAGETRONAD_REVTAG
+#define TRUE_ARMAGETRONAD_REVTAG ""
+#endif
+
+#ifndef TRUE_ARMAGETRONAD_CHANGED
+#define TRUE_ARMAGETRONAD_CHANGED false
+#endif
+
+#ifndef TRUE_ARMAGETRONAD_BUILDDATE
+#define TRUE_ARMAGETRONAD_BUILDDATE "UNKNOWN"
+#endif
+
+#ifndef TRUE_ARMAGETRONAD_BRANCHLCA
+#define TRUE_ARMAGETRONAD_BRANCHLCA 0
+#endif
+
+#ifndef TRUE_ARMAGETRONAD_BRANCHLCAZ
+#define TRUE_ARMAGETRONAD_BRANCHLCAZ 0
+#endif
+
+#ifndef TRUE_ARMAGETRONAD_BRANCHURL
+#define TRUE_ARMAGETRONAD_BRANCHURL "UNKNOWN"
+#endif
+
 tString st_programName          ("Armagetron Advanced");
 tString st_programVersion       (TRUE_ARMAGETRONAD_VERSION);
 tString st_programRevId         (TRUE_ARMAGETRONAD_REVID);
