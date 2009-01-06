@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tString.h"
 #include "tLinkedList.h"
 #include "tError.h"
+#include "tVersion.h"
 
 class tLocaleItem;
 class tOutputItemBase;

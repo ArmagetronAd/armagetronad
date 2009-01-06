@@ -28,15 +28,16 @@ dist-hook:
 	done
 
 # keep track of true version
-nTrueVersion.h: $(wildcard $(top_srcdir)/*_version) $(wildcard $(top_srcdir)/.svn) $(wildcard $(top_srcdir)/CVS) $(wildcard $(top_srcdir)/batch/make/version) Makefile
+tTrueVersion.h: $(wildcard $(top_srcdir)/*_version) $(wildcard $(top_srcdir)/.svn) $(wildcard $(top_srcdir)/CVS) $(wildcard $(top_srcdir)/.bzr) $(wildcard $(top_srcdir)/batch/make/version) Makefile
 #	if the version generation files exist, use it to define the version. Else, Fallback to the autopackage version.
 	if test -r $(top_srcdir)/batch/make/version; then \
-		echo \#define TRUE_ARMAGETRONAD_VERSION \"`sh $(top_srcdir)/batch/make/version $(top_srcdir)`\" > $@; \
+		sh $(top_srcdir)/batch/make/version --verbose $(top_srcdir) | awk '{ print "#define TRUE_ARMAGETRONAD_" $$1 " " substr( $$0, index( $$0, $$2 ) ) }' >$@; \
 	else \
 		echo "#define TRUE_ARMAGETRONAD_VERSION VERSION" > $@; \
 	fi
 
-${srcdir}/network/nNetwork.cpp: nTrueVersion.h
+${srcdir}/tools/tLocale.cpp: ${srcdir}/tools/tVersion.cpp
+${srcdir}/tools/tVersion.cpp: tTrueVersion.h 
 
 # library file listings
 
@@ -49,7 +50,9 @@ endif
 
 # Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
 # the fragile dependency on undefined behaviour of the linker...)
-libtools_a_SOURCES = ${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.cpp tools/tColor.h\
+libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVersion.h\
+	tools/tArray.cpp tools/tArray.h \
+	tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.cpp tools/tColor.h\
 	tools/tConfiguration.cpp tools/tConfiguration.h tools/tConsole.cpp tools/tConsole.h tools/tCrypt.cpp tools/tCrypt.h\
 	tools/tDirectories.cpp tools/tDirectories.h tools/tError.cpp tools/tError.h tools/tEventQueue.cpp\
 	tools/tEventQueue.h tools/tHeap.cpp tools/tHeap.h tools/tInitExit.h tools/tLinkedList.cpp tools/tLinkedList.h\
@@ -76,7 +79,6 @@ libtools_a_SOURCES = ${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallb
 	tools/values/vebLegacy.cpp tools/values/vebLegacy.h \
 	tools/values/vebMathExpr.cpp tools/values/vebMathExpr.h \
 	tools/values/vebCFunction.h \
-	tools/tMemManager.cpp tools/tMemManager.h\
 	tools/tStatFile.cpp tools/tStatFile.h\
 	tools/tStatEntry.h tools/tStatEntry.cpp\
 	tools/tPlayList.h tools/tPlayList.cpp\
@@ -87,7 +89,9 @@ libtools_a_SOURCES = ${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallb
 	tools/tPolynomial.h tools/tPolynomialMarshaler.h tools/tPolynomialWithBase.h \
 	tools/tRuby.h tools/tRuby.cpp \
 	tools/tDict.h \
-	resource/tResource.h resource/tResource.cpp resource/tResourceType.h resource/tResourceType.cpp
+	resource/tResource.h resource/tResource.cpp resource/tResourceType.h resource/tResourceType.cpp\
+	tools/tMemManager.cpp tools/tMemManager.h
+# again, tMemManager.cpp/.h must be last here.
 
 #tools/tCommandLine.cpp tools/tCommandLine.h
 libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentication.cpp\

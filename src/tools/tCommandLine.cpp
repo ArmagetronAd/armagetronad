@@ -140,7 +140,8 @@ bool tCommandLineData::Analyse(int argc,char **argv)
 #ifdef HELPAVAIL
                 s << "--doc                        : print documentation for all console commands\n";
 #endif
-                s << "-v, --version                : print version number\n\n";
+                s << "-v, --version                : print version number\n";
+                s << "--versioninfo                : print build source information\n\n";
 
                 // ask third party analyzers
                 tCommandLineAnalyzer * commandLineAnalyzer = s_commandLineAnalyzerAnchor;
@@ -169,6 +170,23 @@ bool tCommandLineData::Analyse(int argc,char **argv)
         else if ( parser.GetSwitch( "--version", "-v") )
         {
             QUIT( "This is " << name_ << " version " << *programVersion_ << ".\n" );
+        }
+        else if ( parser.GetSwitch( "--versioninfo") )
+        {
+            std::ostringstream s;
+            s << "Program Name                 : " << st_programName << "\n";
+            s << "Version                      : " << st_programVersion << "\n";
+            s << "Parent branch                : " << st_programBranchNick << "\n";
+            s << "Parent branch's URL          : " << st_programBranchUrl << "\n";
+            s << "Tag                          : " << st_programRevTag << "\n";
+            s << "Revision number              : r" << st_programRevNo << "(z" << st_programRevZNr << ")\n";
+            s << "Revision ID                  : " << st_programRevId << "\n";
+            s << "Ancestor                     : r" << st_programBranchLca << "(z" << st_programBranchLcaZ << ")\n";
+            s << "Source changed               : " << (st_programChanged? "Yes" : "No") << "\n";
+            s << "Build date                   : " << st_programBuildDate << "\n";
+
+            quitWithMessagePrepare( s.str().c_str() );
+            return false;
         }
         else
         {

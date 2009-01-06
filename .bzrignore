@@ -47,7 +47,7 @@ resource/included/
 resource/automatic/
 .deps
 src/armagetronad_main
-src/nTrueVersion.h
+src/tTrueVersion.h
 src/tUniversalVariables.h
 src/tUniversalVariables.h.in
 .dummy.dep

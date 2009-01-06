@@ -1,19 +1,27 @@
-SplineFontDB: 1.0
+SplineFontDB: 3.0
 FontName: Armagetronad
 FullName: Armagetronad
 FamilyName: Armagetronad
 Weight: Mager
 Copyright: Created by Dave Fancella with FontForge 1.0 (http://fontforge.sf.net)
-Comments: 2006-5-7: Created.
+UComments: "2006-5-7: Created." 
 Version: 001.000
 ItalicAngle: 0
 UnderlinePosition: -100
 UnderlineWidth: 50
 Ascent: 819
 Descent: 205
+LayerCount: 2
+Layer: 0 0 "Back"  1
+Layer: 1 0 "Fore"  0
 NeedsXUIDChange: 1
 XUID: [1021 537 1979520975 15056201]
 FSType: 0
+OS2Version: 0
+OS2_WeightWidthSlopeOnly: 0
+OS2_UseTypoMetrics: 0
+CreationTime: 1230356750
+ModificationTime: 1231182067
 OS2TypoAscent: 0
 OS2TypoAOffset: 1
 OS2TypoDescent: 0
@@ -28,12 +36,12 @@ HheadAOffset: 1
 HheadDescent: 0
 HheadDOffset: 1
 OS2Vendor: 'PfEd'
-ScriptLang: 2
- 1 DFLT 1 dflt 
- 1 latn 1 dflt 
-TtfTable: cvt  4
-!$VK#
-EndTtf
+Lookup: 4 0 0 "'frac' Diagonal Fractions lookup 0"  {"'frac' Diagonal Fractions lookup 0 subtable"  } ['frac' ('DFLT' <'dflt' > ) ]
+DEI: 91125
+ShortTable: cvt  2
+  34
+  648
+EndShort
 LangName: 1033 
 Encoding: UnicodeFull
 UnicodeInterp: none
@@ -41,7 +49,7 @@ NameList: Adobe Glyph List
 DisplaySize: -36
 AntiAlias: 1
 FitToEm: 1
-WinInfo: 21 21 13
+WinInfo: 9618 21 13
 Grid
 -154 -457 m 25
  -214 -457 l 25
@@ -52,13 +60,16 @@ Grid
  -151 1123 l 25
  -150 -507 l 25
 EndSplineSet
-BeginChars: 1114112 258
+BeginChars: 1114112 261
+
 StartChar: exclam
 Encoding: 33 33 0
 Width: 670
 Flags: HW
-TeX: 101 0 0 0
+TeX: 101 0
+LayerCount: 2
 Fore
+SplineSet
 104 164 m 1
  240 164 l 1
  240 4 l 1
@@ -71,12 +82,15 @@ Fore
  103 809 104 815 102 819 c 1
 EndSplineSet
 EndChar
+
 StartChar: A
 Encoding: 65 65 1
 Width: 670
 Flags: HW
-TeX: 65 0 0 0
+TeX: 65 0
+LayerCount: 2
 Fore
+SplineSet
 631 -4 m 25
  496 -4 l 25
  439 177 l 25
@@ -91,11 +105,12 @@ Fore
  251 282 l 25
 EndSplineSet
 EndChar
+
 StartChar: B
 Encoding: 66 66 2
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122.13 51.25 51.0353 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -118,6 +133,7 @@ rr<$!!!!$!s8W-!s8W-!rr<$!!!!$!rr<$!!<<*!rr<$!!!!$!rr<$!!!*'!rr<$!!!!$!rr<$!
 s8W-!s8W-!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 312.5 717 m 26
  186.5 717 l 25
  186.5 465 l 25
@@ -142,18 +158,20 @@ Fore
  81.5 0 l 25
 EndSplineSet
 EndChar
+
 StartChar: space
 Encoding: 32 32 3
-AltUni: 160
+AltUni2: 0000a0.ffffffff.0
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 EndChar
+
 StartChar: C
 Encoding: 67 67 4
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -123 1119 46.875 50.4375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -174,6 +192,7 @@ zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!s8N'!zz!!!$!s8N'!zzzs8W*!zzzs8W*!zzz!<<*!
 zzz!<<*!s8W-!rr<$!z!!*'!s8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 576.5 819 m 25
  576.5 720.1 l 25
  414.5 720.1 l 17
@@ -187,11 +206,12 @@ Fore
  576.5 819 l 25
 EndSplineSet
 EndChar
+
 StartChar: D
 Encoding: 68 68 5
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1126.87 51.5625 51.2772 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -213,6 +233,7 @@ rr<$!z!<<'!!!*'!rr<$!z!<<'!!!!$!rr<$!z!<<'!!!!$!rr<$!z!<<'!!!*'!rr<$!z!<<'!
 s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 286.442 720 m 25
  286.442 101 l 25
  328.442 101 l 17
@@ -231,11 +252,12 @@ Fore
  179.442 105 l 25
 EndSplineSet
 EndChar
+
 StartChar: E
 Encoding: 69 69 6
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -147 1116 50.8125 50.3438 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -257,6 +279,7 @@ zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!s8W-!s8W-!rr<$!!!!$!s8W-!s8W-!
 rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 75.5 0 m 29
  75.5 816 l 29
  594.5 815 l 29
@@ -272,12 +295,14 @@ Fore
  75.5 0 l 29
 EndSplineSet
 EndChar
+
 StartChar: F
 Encoding: 70 70 7
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Fore
+SplineSet
 75.5 0 m 29
  75.5 816 l 25
  594.5 815 l 25
@@ -292,11 +317,12 @@ Fore
  75.5 0 l 29
 EndSplineSet
 EndChar
+
 StartChar: G
 Encoding: 71 71 8
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 50.9993 51.0312 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -318,6 +344,7 @@ rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!s8W-!s8N'!!!!$!rr<$!s8W-!s8N'!
 s8W-!s8W-!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 308 360 m 29
  617 359 l 29
  617 0 l 29
@@ -335,11 +362,12 @@ Fore
  308 360 l 29
 EndSplineSet
 EndChar
+
 StartChar: H
 Encoding: 72 72 9
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 50.6875 50.8438 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -361,6 +389,7 @@ rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!
 zs8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 511 461 m 29
  511 825 l 29
  616 818 l 29
@@ -376,11 +405,12 @@ Fore
  511 461 l 29
 EndSplineSet
 EndChar
+
 StartChar: I
 Encoding: 73 73 10
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -165 1125 54.1875 51.125 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -401,6 +431,7 @@ rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!
 rr<$!zz!!!$!rr<$!zz!!!$!rr<$!z!!!$!s8W-!s8W-!rr<$!!!!$!s8W-!s8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 65.5 818 m 25
  604.5 819 l 25
  604.5 717 l 25
@@ -416,11 +447,12 @@ Fore
  65.5 818 l 25
 EndSplineSet
 EndChar
+
 StartChar: J
 Encoding: 74 74 11
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -198 1113 49.1424 50.4688 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -441,6 +473,7 @@ zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzs8N'!
 s8W-!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 432 166 m 9
  431 810 l 25
  530 810 l 25
@@ -456,11 +489,12 @@ Fore
  422 108 432 124 432 166 c 9
 EndSplineSet
 EndChar
+
 StartChar: K
 Encoding: 75 75 12
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -153 1128 51.1875 51.4062 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -482,6 +516,7 @@ rr<$!z!!!$!rrE*!s8N'!z!!!$!rr<'!s8N'!z!!!$!rr<$!s8W*!z!!!$!rr<$!!<<*!z!!!$!
 rr<$!!<<*!rr<$!!!!$!rr<$!!!*'!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 593 818 m 25
  592 767 l 25
  262 436 l 25
@@ -498,13 +533,14 @@ Fore
  593 818 l 25
 EndSplineSet
 EndChar
+
 StartChar: L
 Encoding: 76 76 13
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
 HStem: 0 100<129 671> 796 20G<130 229>
 VStem: 130 99<0 100 816 816>
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -144 1118.93 48.75 51.029 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -525,6 +561,7 @@ rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!
 rr<$!zz!!!$!rr<$!zz!!!$!s8W-!s8W-!s8N'!!!!$!s8W-!s8W-!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 65 816 m 29
  164 816 l 25
  165 100 l 25
@@ -534,11 +571,12 @@ Fore
  65 816 l 29
 EndSplineSet
 EndChar
+
 StartChar: M
 Encoding: 77 77 14
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -153 1128.07 51 51.1273 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -561,6 +599,7 @@ rr<$!!!!$!rr<$!!!!$!rr<$!!!!$!rr<$!!!!$!rr<$!!!!$!rr<$!!!!$!rr<$!!!!$!rr<$!
 rr<$!!!!$!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 588.5 819 m 25
  588.5 0 l 25
  486.5 0 l 25
@@ -576,11 +615,12 @@ Fore
  588.5 819 l 25
 EndSplineSet
 EndChar
+
 StartChar: N
 Encoding: 78 78 15
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -159 1123.9 53.625 50.8095 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -602,6 +642,7 @@ s8N'!!!!$!rr<$!s8W*!s8N'!!!!$!rr<$!!<<*!s8N'!!!!$!rr<$!!<<*!s8N'!!!!$!rr<$!
 !!*'!s8N'!!!!$!rr<$!!!*'!s8N'!!!!$!rr<$!!!!$!s8N'!!!!$!rr<$!!!!$!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 524 818 m 29
  631 818 l 29
  633 1 l 25
@@ -615,11 +656,12 @@ Fore
  524 818 l 29
 EndSplineSet
 EndChar
+
 StartChar: O
 Encoding: 79 79 16
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -153 1122 51.8606 50.8438 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -641,6 +683,7 @@ s8W*!zz!<<*!s8W-!zz!<<*!s8W-!zzs8W-!!<<*!rr<$!zs8W*!!!*'!rr<$!!!!$!s8W*!
 zz!<<*!s8W-!zz!!*'!s8W*!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 335 690 m 24
  206.146 691.086 156.615 539.852 158 411 c 24
  159.397 280.88 210.877 133.097 341 132 c 24
@@ -653,11 +696,12 @@ Fore
  47.7295 597.312 143 816 338 816 c 0
 EndSplineSet
 EndChar
+
 StartChar: P
 Encoding: 80 80 17
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -98 1122.07 51 50.846 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -678,29 +722,31 @@ z!!!$!rr<$!!!*'!z!!!$!rr<$!!!*'!z!!!$!rr<$!!!*'!z!!*'!rr<$!!!*'!s8W-!s8W-!
 rr<$!!!*'!s8W-!s8W-!z!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
-159.5 713 m 29
- 159.5 409 l 29
- 415.5 408 l 21
- 474.5 408 510.5 443 514.5 508 c 13
- 513.5 613 l 21
- 514.5 678 483.5 715 411.5 715 c 13
- 159.5 713 l 29
-157.5 309 m 29
- 155.5 0 l 29
- 54.5 0 l 29
- 54.5 819 l 29
- 411.5 819 l 21
- 547.5 818 614.5 750 614.5 619 c 13
- 615.5 502 l 21
- 615.5 375 532.5 310 418.5 309 c 13
- 157.5 309 l 29
+SplineSet
+159.5 713 m 25
+ 159.5 409 l 25
+ 415.5 408 l 17
+ 474.5 408 510.5 443 514.5 508 c 9
+ 513.5 613 l 17
+ 514.5 678 483.5 715 411.5 715 c 9
+ 159.5 713 l 25
+157.5 309 m 25
+ 155.5 0 l 25
+ 54.5 0 l 25
+ 54.5 819 l 25
+ 411.5 819 l 17
+ 547.5 818 614.5 750 614.5 619 c 9
+ 615.5 502 l 17
+ 615.5 375 532.5 310 418.5 309 c 9
+ 157.5 309 l 25
 EndSplineSet
 EndChar
+
 StartChar: Q
 Encoding: 81 81 18
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -93 1125 49.5711 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -722,6 +768,7 @@ rr<$!z!!*'!s8W-!rr<$!z!<<*!s8N*!rr<$!zs8W-!rr<'!rr<$!!!!$!s8W*!!!!$!rr<$!
 z!!*'!s8W-!s8N'!z!!*'!s8W-!s8W-!rr<$!!!*'!s8W*!!<<*!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 514.5 640 m 26
  514.793 673.148 500.699 717 478.5 717 c 0
  342.5 717 162.5 565.19 162.5 387 c 26
@@ -745,12 +792,14 @@ Fore
  60.5 620.626 280.5 822 475.5 819 c 0
 EndSplineSet
 EndChar
+
 StartChar: R
 Encoding: 82 82 19
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Fore
+SplineSet
 159.5 713 m 25
  159.5 444 l 25
  415.5 443 l 17
@@ -772,11 +821,12 @@ Fore
  155.5 0 l 25
 EndSplineSet
 EndChar
+
 StartChar: S
 Encoding: 83 83 20
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -99 1125.1 50.8125 51.0345 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -798,6 +848,7 @@ zzz!<<*!rr<$!!!*'!z!!*'!rr<$!!!*'!rr<$!!!*'!rr<$!!!*'!s8W-!s8W-!rr<$!!!*'!
 s8W-!s8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 53.5 617 m 25
  52.5 819 l 25
  617.5 819 l 25
@@ -815,11 +866,12 @@ Fore
  53.5 617 l 25
 EndSplineSet
 EndChar
+
 StartChar: T
 Encoding: 84 84 21
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1127.86 50.625 51.2144 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -841,6 +893,7 @@ zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!
 zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 80 816 m 25
  590 816 l 25
  590 614 l 25
@@ -856,11 +909,12 @@ Fore
  80 816 l 25
 EndSplineSet
 EndChar
+
 StartChar: U
 Encoding: 85 85 22
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -96 1125.04 50.625 50.9387 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -882,26 +936,28 @@ rr<$!!!*'!z!!!$!rr<$!!!*'!z!!!$!rr<$!!!*'!z!!!$!rr<$!!!*'!rr<$!!!*'!rr<$!
 !!*'!s8W-!s8W-!rr<$!!!*'!s8W-!s8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
-245.506 -1 m 17
- 119.506 -1 53.5059 41 54.5059 195 c 9
+SplineSet
+245.506 -1 m 21
+ 119.506 -1 53.5059 41 54.5059 195 c 13
  54.5059 816 l 29
  159.506 815 l 29
- 160.506 198 l 17
- 161.506 130 188.506 105 255.506 106 c 9
- 419.506 106 l 17
- 486.506 105 513.506 130 514.506 198 c 9
+ 160.506 198 l 21
+ 161.506 130 188.506 105 255.506 106 c 13
+ 419.506 106 l 21
+ 486.506 105 513.506 130 514.506 198 c 13
  513.506 819 l 29
  615.506 818 l 29
- 614.506 196 l 17
- 615.506 42 549.506 0 423.506 0 c 9
- 245.506 -1 l 17
+ 614.506 196 l 21
+ 615.506 42 549.506 0 423.506 0 c 13
+ 245.506 -1 l 21
 EndSplineSet
 EndChar
+
 StartChar: V
 Encoding: 86 86 23
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -99 1119 49.7697 51.0312 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -923,6 +979,7 @@ zzs8W*!s8W*!zzs8W-!s8W*!zz!<<*!s8W*!zz!<<*!rr<$!zz!!*'!rr<$!zz!!*'!rr<$!
 zz!!*'!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 336.5 195 m 25
  509.5 601 l 25
  509.5 814 l 25
@@ -937,11 +994,12 @@ Fore
  336.5 195 l 25
 EndSplineSet
 EndChar
+
 StartChar: W
 Encoding: 87 87 24
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -102 1119.09 51.1875 50.9402 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -963,6 +1021,7 @@ z!!*'!!!*'!!!*'!z!!*'!!!*'!!!*'!z!!*'!rrE*!!<<*!z!!*'!s8W-!s8W-!z!!!$!s8W-!
 s8W*!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 246.5 0 m 17
  114.5 0 79.5 48 79.5 162 c 9
  78.5 816 l 25
@@ -980,21 +1039,13 @@ Fore
  246.5 0 l 17
 EndSplineSet
 EndChar
+
 StartChar: X
 Encoding: 88 88 25
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
-75 810 m 25
- 570 87 l 29
-492 0 m 25
- 0 732 l 25
-567 732 m 25
- 81 9 l 25
-0 81 m 25
- 501 819 l 25
-EndSplineSet
 Image: 16 32 1 16 256 0 -99 1122.02 51.1875 50.938 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
 'GM5r'bqK"()Ic'(`4)-)&X>2)B0V7*#oq=*??1B*ZlIG+<VdM+X&$R+sS<W,U=W],palb-7:/g
@@ -1014,7 +1065,18 @@ s8W*!zzs8W-!s8W*!zz!<<*!s8N'!zz!!*'!rr<$!zz!<<*!s8N'!zz!<<*!s8N'!zzs8W-!
 s8W*!z!!!$!s8W*!s8W-!z!!!$!s8N'!!<<*!z!!*'!s8N'!!<<*!rr<$!!!*'!rr<$!!!*'!
 rr<$!!!*'!z!!!$!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
+SplineSet
+75 810 m 25
+ 570 87 l 29
+492 0 m 25
+ 0 732 l 25
+567 732 m 25
+ 81 9 l 25
+0 81 m 25
+ 501 819 l 25
+EndSplineSet
 Fore
+SplineSet
 132.5 0 m 29
  51.5 0 l 25
  55.5 87 l 25
@@ -1034,11 +1096,12 @@ Fore
  132.5 0 l 29
 EndSplineSet
 EndChar
+
 StartChar: Y
 Encoding: 89 89 26
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -156 1122 51.625 51.125 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1060,6 +1123,7 @@ rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!
 rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 334 511 m 29
  492 669 l 29
  492 813 l 29
@@ -1076,11 +1140,12 @@ Fore
  334 511 l 29
 EndSplineSet
 EndChar
+
 StartChar: Z
 Encoding: 90 90 27
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -102 1122.19 50.625 50.9434 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1101,6 +1166,7 @@ zz!!!$!s8N'!zz!!*'!rr<$!zz!<<*!rr<$!zz!<<*!zzzs8W*!zz!!!$!s8W*!zz!!!$!s8N'!
 zz!!*'!s8N'!zz!!*'!s8W-!s8W-!rr<$!!!*'!s8W-!s8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 179.5 102 m 25
  614.5 101 l 25
  614.5 0 l 25
@@ -1114,11 +1180,12 @@ Fore
  179.5 102 l 25
 EndSplineSet
 EndChar
+
 StartChar: quotedbl
 Encoding: 34 34 28
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -48 1125 51.0625 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1138,6 +1205,7 @@ s8W-!s8W-!z!<<*!s8W-!s8W-!z!<<*!s8N*!s8W-!z!<<*!rr<$!s8W-!z!<<*!rr<$!s8W-!
 z!!*'!z!<<'!z!!*'!z!<<'!z!!!$!z!!*$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 615.5 819 m 25
  615.5 681 l 25
  465.5 414 l 25
@@ -1150,11 +1218,12 @@ Fore
  54.5 819 l 25
 EndSplineSet
 EndChar
+
 StartChar: numbersign
 Encoding: 35 35 29
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -51 1122 51.25 50.8438 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1175,6 +1244,7 @@ z!!!$!rr<$!s8N'!z!!!$!rr<$!s8N'!z!!!$!rr<$!s8N'!z!<<*!s8W-!s8W-!z!<<*!s8W-!
 s8W-!z!!!$!rr<$!s8N'!z!!!$!rr<$!s8N'!z!!!$!rr<$!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 409 561 m 25
  260 561 l 25
  260 409 l 25
@@ -1211,11 +1281,12 @@ Fore
  156 819 l 25
 EndSplineSet
 EndChar
+
 StartChar: dollar
 Encoding: 36 36 30
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -102 1118 51.25 50.9062 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1236,6 +1307,7 @@ s8W-!s8W-!z!!*'!s8W-!s8W-!zzz!!*'!zzz!!*'!z!!*'!s8W-!s8W-!z!!*'!s8W-!s8W-!
 zz!!*'!zzz!!*'!zzz!!*'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 285 816 m 25
  388 816 l 25
  388 659 l 25
@@ -1259,11 +1331,12 @@ Fore
  285 816 l 25
 EndSplineSet
 EndChar
+
 StartChar: percent
 Encoding: 37 37 31
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -48 1125 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1284,6 +1357,7 @@ zz!<<*!rr<$!zzs8W-!zz!!!$!s8W*!zz!!!$!s8N'!zz!!*'!s8N'!zz!<<*!rr<$!zz!<<*!
 z!<<*!z!<<'!z!<<*!z!<3$!z!<<*!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 617.5 819 m 25
  617.5 653 l 25
  54.5 0 l 25
@@ -1301,11 +1375,12 @@ Fore
  51.5 819 l 25
 EndSplineSet
 EndChar
+
 StartChar: ampersand
 Encoding: 38 38 32
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -54 1119 51.25 50.8438 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1326,6 +1401,7 @@ z!<<*!s8W-!s8N'!z!!*'!s8W-!rr<$!z!!*'!s8W*!zz!<<*!s8W-!!!!$!z!<<*!!<<*!
 rrE*!z!<<'!!!*'!s8W-!z!<<*!!!!$!s8W-!z!<<*!s8W-!s8W-!z!!*'!s8W-!rrE*!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 284 714 m 0
  419 714 503 659.979 503 546 c 0
  503 420 398 384 299 321 c 0
@@ -1348,11 +1424,12 @@ Fore
  56 645 171.43 714 284 714 c 0
 EndSplineSet
 EndChar
+
 StartChar: quotesingle
 Encoding: 39 39 33
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 9 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1372,6 +1449,7 @@ zzzs8W-!zzzs8W-!zzzs8W-!zzzs8W*!zzzs8W*!zzzs8W*!zzzs8N'!zzzs8N'!zzzrr<$!
 zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 265.5 816 m 25
  405.5 816 l 25
  405.5 657 l 25
@@ -1379,11 +1457,12 @@ Fore
  265.5 816 l 25
 EndSplineSet
 EndChar
+
 StartChar: slash
 Encoding: 47 47 34
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -53 1122 51.1875 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1404,6 +1483,7 @@ rr<$!zzs8W-!zzzs8W*!zz!!!$!s8W*!zz!!*'!s8N'!zz!!*'!rr<$!zz!<<*!rr<$!zz!<<*!
 zzz!<<'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 614 819 m 25
  614 671 l 25
  120 0 l 25
@@ -1412,11 +1492,12 @@ Fore
  614 819 l 25
 EndSplineSet
 EndChar
+
 StartChar: parenleft
 Encoding: 40 40 35
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1437,6 +1518,7 @@ zzz!<<'!zzz!<<'!zzz!<<'!zzz!<<*!zzz!<<*!rr<$!zz!!*'!rr<$!zz!!!$!s8N'!zz!!!$!
 s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 310.5 402 m 0
  310.5 621.056 448.5 765 565.5 816 c 9
  565.5 723 l 17
@@ -1446,12 +1528,14 @@ Fore
  484.5 0 310.5 207 310.5 402 c 0
 EndSplineSet
 EndChar
+
 StartChar: parenright
 Encoding: 41 41 36
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Fore
+SplineSet
 367.5 402 m 0
  367.5 207 193.5 0 112.5 0 c 9
  112.5 100 l 17
@@ -1461,28 +1545,13 @@ Fore
  229.5 765 367.5 621.056 367.5 402 c 0
 EndSplineSet
 EndChar
+
 StartChar: asterisk
 Encoding: 42 42 37
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
-246 102 m 29
- 357 105 l 25
- 354 711 l 25
- 252 717 l 25
- 246 102 l 29
-33 219 m 25
- 501 669 l 25
- 570 606 l 25
- 93 144 l 25
- 33 219 l 25
-102 666 m 25
- 570 225 l 25
- 516 156 l 25
- 45 603 l 25
- 102 666 l 25
-EndSplineSet
 Image: 16 32 1 16 256 0 -51 1122 51.0625 50.8438 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
 'GM5r'bqK"()Ic'(`4)-)&X>2)B0V7*#oq=*??1B*ZlIG+<VdM+X&$R+sS<W,U=W],palb-7:/g
@@ -1501,7 +1570,25 @@ zz!!*$!!!*'!!!!$!z!!*$!!!*'!!!!$!z!!*'!s8W-!s8W-!z!!*'!s8W-!s8W-!zz!<<*!
 rr<$!zz!<<*!rr<$!z!!*'!s8W-!s8W-!z!!*'!s8W-!s8W-!z!!*$!!!*'!!!!$!z!!*$!
 !!*'!!!!$!zz!!*'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
+SplineSet
+246 102 m 29
+ 357 105 l 25
+ 354 711 l 25
+ 252 717 l 25
+ 246 102 l 29
+33 219 m 25
+ 501 669 l 25
+ 570 606 l 25
+ 93 144 l 25
+ 33 219 l 25
+102 666 m 25
+ 570 225 l 25
+ 516 156 l 25
+ 45 603 l 25
+ 102 666 l 25
+EndSplineSet
 Fore
+SplineSet
 266.5 106 m 25
  266.5 298 l 25
  116.5 154 l 25
@@ -1523,11 +1610,12 @@ Fore
  266.5 106 l 25
 EndSplineSet
 EndChar
+
 StartChar: plus
 Encoding: 43 43 38
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -102 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1547,6 +1635,7 @@ zzz!!*'!zzz!!*'!zzz!!*'!zz!!*'!s8W-!s8W-!z!!*'!s8W-!s8W-!zz!!*'!zzz!!*'!
 zzz!!*'!zzz!!*'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 80 360 m 25
  80 462 l 25
  287 462 l 25
@@ -1562,11 +1651,12 @@ Fore
  80 360 l 25
 EndSplineSet
 EndChar
+
 StartChar: comma
 Encoding: 44 44 39
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1585,6 +1675,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzzzz
 s8N'!zzs8W-!s8N'!zzzs8N'!zzzs8N'!zzzs8N'!zzzs8N'!zzzs8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 24 356 m 25
  330 356 l 25
  330 0 l 25
@@ -1594,11 +1685,12 @@ Fore
  24 356 l 25
 EndSplineSet
 EndChar
+
 StartChar: hyphen
 Encoding: 45 45 40
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -51 1122 51.4375 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1617,6 +1709,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzzzz
 s8W-!s8W-!z!<<*!s8W-!s8W-!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 53 306 m 25
  53 409 l 25
  617 409 l 25
@@ -1624,11 +1717,12 @@ Fore
  53 306 l 25
 EndSplineSet
 EndChar
+
 StartChar: period
 Encoding: 46 46 41
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -153 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1647,6 +1741,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzzzz
 zzz!<<*!zzz!<<*!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 258.5 153 m 29
  411.5 153 l 29
  411.5 -1 l 29
@@ -1654,11 +1749,12 @@ Fore
  258.5 153 l 29
 EndSplineSet
 EndChar
+
 StartChar: zero
 Encoding: 48 48 42
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1680,6 +1776,7 @@ zs8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!
 s8N'!!!!$!s8N'!!!!$!s8W-!s8W-!s8N'!!!!$!s8W-!s8W-!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 271.625 709.92 m 0
  170.225 709.92 151.725 678.1 151.725 564.88 c 0
  151.725 418.558 152.675 372.133 152.675 248.9 c 17
@@ -1700,11 +1797,12 @@ Fore
  51.5 773 81.5 816 237.5 816 c 0
 EndSplineSet
 EndChar
+
 StartChar: one
 Encoding: 49 49 43
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -148 1122 51.125 50.8438 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1725,6 +1823,7 @@ zzzs8N'!s8N'!zzs8N'!s8N'!zzs8N'!s8N'!zzs8N'!s8N'!zzs8N'!s8N'!zs8W-!s8W-!
 s8N'!zs8W-!s8W-!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 54.5 816 m 25
  391.1 816 l 25
  391.1 109 l 25
@@ -1740,11 +1839,12 @@ Fore
  54.5 816 l 25
 EndSplineSet
 EndChar
+
 StartChar: two
 Encoding: 50 50 44
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1765,6 +1865,7 @@ s8W-!s8W-!s8N'!!!!$!s8W-!s8W-!s8N'!zzzs8N'!zzzs8N'!zzzs8N'!zzzs8N'!zzzs8N'!
 zz!!!$!rr<$!zz!!!$!s8N'!zz!!!$!s8W-!s8W-!s8N'!!!!$!s8W-!s8W-!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 53 816 m 25
  617 816 l 25
  617 358 l 25
@@ -1781,11 +1882,12 @@ Fore
  53 816 l 25
 EndSplineSet
 EndChar
+
 StartChar: at
 Encoding: 64 64 45
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1807,6 +1909,7 @@ s8N'!!!!$!rr<'!rr<$!s8N'!!!!$!rr<'!rr<$!s8N'!!!!$!rr<'!rr<$!s8N'!!!!$!rr<'!
 rr<$!s8N'!!!!$!s8W-!s8W-!s8N'!!!!$!s8W-!s8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 304 714 m 1
  244 714 235 696 214 675 c 9
  157 606 l 25
@@ -1833,11 +1936,12 @@ Fore
  157 408 l 25
 EndSplineSet
 EndChar
+
 StartChar: three
 Encoding: 51 51 46
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1859,6 +1963,7 @@ rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!*'!rr<$!!!!$!s8W-!s8W-!rr<$!!!!$!s8W-!
 s8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 78 819 m 25
  592 819 l 25
  592 0 l 25
@@ -1874,11 +1979,12 @@ Fore
  78 819 l 25
 EndSplineSet
 EndChar
+
 StartChar: four
 Encoding: 52 52 47
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -148 1122 51.125 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1899,6 +2005,7 @@ zzzs8N'!zzzs8N'!!!*'!zzs8N'!!!*'!zzs8N'!!!*'!zzs8N'!!!*'!zzs8N'!!!*'!zzs8N'!
 zzz!!*'!zzz!!*'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 107 819 m 25
  207 819 l 25
  207 363 l 25
@@ -1916,11 +2023,12 @@ Fore
  107 819 l 25
 EndSplineSet
 EndChar
+
 StartChar: five
 Encoding: 53 53 48
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1941,6 +2049,7 @@ s8W-!s8N'!z!<<*!s8W-!s8N'!zzzs8N'!zzzs8N'!zzzs8N'!zzzs8N'!!!!$!s8W*!zs8N'!
 !!!$!s8W-!s8W-!s8N'!zs8W-!s8W-!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 252.5 102 m 9
  510.5 102 l 25
  510.5 361 l 25
@@ -1958,11 +2067,12 @@ Fore
  156.5 126 189.5 102 252.5 102 c 9
 EndSplineSet
 EndChar
+
 StartChar: six
 Encoding: 54 54 49
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -1984,6 +2094,7 @@ rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!s8W-!s8W-!s8N'!!!!$!s8W-!s8W-!s8N'!
 s8W-!s8W-!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 512 254 m 25
  157 254 l 25
  157 108 l 25
@@ -2000,11 +2111,12 @@ Fore
  617 360 l 25
 EndSplineSet
 EndChar
+
 StartChar: seven
 Encoding: 55 55 50
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2025,6 +2137,7 @@ zz!!!$!s8N'!zz!<<*!zzzs8W*!zzzs8W*!zzzs8N'!zzzs8N'!zzzs8N'!zzzs8N'!zzzs8N'!
 zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 183.5 663 m 25
  81.5 663 l 25
  81.5 816 l 25
@@ -2042,11 +2155,12 @@ Fore
  183.5 663 l 25
 EndSplineSet
 EndChar
+
 StartChar: eight
 Encoding: 56 56 51
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.8438 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2068,6 +2182,7 @@ zs8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!s8W-!s8W-!s8N'!
 !!!$!s8W-!s8W-!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 516 357 m 25
  155 357 l 25
  155 108 l 25
@@ -2089,11 +2204,12 @@ Fore
  55 0 l 25
 EndSplineSet
 EndChar
+
 StartChar: nine
 Encoding: 57 57 52
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2114,6 +2230,7 @@ rr<$!zs8N'!!!!$!s8W-!s8W-!s8N'!!!!$!s8W-!s8W-!s8N'!zzzs8N'!zzzs8N'!zzzs8N'!
 zzzs8N'!zzzs8N'!zzzs8N'!zzzs8N'!zz!!!$!s8N'!zz!!!$!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 518 718 m 25
  159 718 l 25
  159 565 l 25
@@ -2130,11 +2247,12 @@ Fore
  467 102 l 25
 EndSplineSet
 EndChar
+
 StartChar: colon
 Encoding: 58 58 53
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2154,6 +2272,7 @@ s8N'!zz!!!$!s8N'!zz!!!$!s8N'!zzzzzzzzzzzzzz!!!$!s8N'!zz!!!$!s8N'!zz!!!$!
 s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 260 612 m 25
  413 612 l 25
  413 458 l 25
@@ -2166,11 +2285,12 @@ Fore
  257 308 l 25
 EndSplineSet
 EndChar
+
 StartChar: semicolon
 Encoding: 59 59 54
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2190,6 +2310,7 @@ zzz!<<*!zzz!<<*!zzzzzzzzzzzzzzz!<<*!s8W*!zz!<<*!s8W*!zzz!<<'!zzz!<<'!zzz!<<'!
 zzz!<<'!zzz!<<'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 182 356 m 25
  488 356 l 25
  488 0 l 25
@@ -2204,11 +2325,12 @@ Fore
  186 667 l 25
 EndSplineSet
 EndChar
+
 StartChar: less
 Encoding: 60 60 55
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2229,6 +2351,7 @@ s8W*!zz!!!$!s8W-!zzzs8W-!s8N'!zz!!*'!s8W*!zzzs8W-!rr<$!zz!<<*!s8N'!zz!!!$!
 s8N'!zzz!<3$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 53 420.794 m 25
  617 765 l 25
  617 633 l 25
@@ -2239,11 +2362,12 @@ Fore
  53 420.794 l 25
 EndSplineSet
 EndChar
+
 StartChar: greater
 Encoding: 62 62 56
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 51.0312 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2264,6 +2388,7 @@ s8N'!zz!!*'!s8N'!zz!<<*!s8N'!z!!!$!s8W-!rr<$!z!!*'!s8W*!zzs8W-!rr<$!z!!!$!
 s8W-!zz!!!$!s8N'!zz!!!$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 617 420.794 m 25
  617 350.206 l 25
  53 6 l 25
@@ -2274,11 +2399,12 @@ Fore
  617 420.794 l 25
 EndSplineSet
 EndChar
+
 StartChar: equal
 Encoding: 61 61 57
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2298,6 +2424,7 @@ s8W-!s8W-!s8N'!!!!$!s8W-!s8W-!s8N'!zzzzzzzz!!!$!s8W-!s8W-!s8N'!!!!$!s8W-!
 s8W-!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 53 513 m 25
  53 616 l 25
  617 616 l 25
@@ -2310,11 +2437,12 @@ Fore
  53 306 l 25
 EndSplineSet
 EndChar
+
 StartChar: question
 Encoding: 63 63 58
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2335,33 +2463,35 @@ zzzs8W-!rr<$!z!!!$!s8W-!s8N'!z!<<*!s8N'!s8N'!!!!$!s8W-!!!!$!s8N'!!!!$!s8W*!
 zzz!<<'!zzz!<<'!zzzzzzz!<<'!zzz!<<'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
-150.5 156 m 25
- 150.5 253 l 26
- 150.5 372.126 264.5 414 351.5 483 c 0
- 415.345 533.636 507.5 591 507.5 622 c 0
- 507.5 693 492.5 717 469.5 717 c 0
- 417.5 717 355.742 664.722 291.5 618 c 26
- 126.5 498 l 25
- 60.5 565.909 l 25
- 243.5 699 l 18
- 368.9 790.2 420.5 822 469.5 822 c 0
- 565.5 822 609.5 747 609.5 622 c 0
- 609.5 534 506.672 483.879 417.5 417 c 0
- 345.5 363 251.5 297 251.5 253 c 10
- 251.5 156 l 25
- 150.5 156 l 25
-150.5 102 m 25
- 251.5 102 l 25
- 251.5 0 l 25
- 150.5 0 l 25
- 150.5 102 l 25
+SplineSet
+150.5 156 m 29
+ 150.5 253 l 30
+ 150.5 372.126 264.5 414 351.5 483 c 4
+ 415.345 533.636 507.5 591 507.5 622 c 4
+ 507.5 693 492.5 717 469.5 717 c 4
+ 417.5 717 355.742 664.722 291.5 618 c 30
+ 126.5 498 l 29
+ 60.5 565.909 l 29
+ 243.5 699 l 22
+ 368.9 790.2 420.5 822 469.5 822 c 4
+ 565.5 822 609.5 747 609.5 622 c 4
+ 609.5 534 506.672 483.879 417.5 417 c 4
+ 345.5 363 251.5 297 251.5 253 c 14
+ 251.5 156 l 29
+ 150.5 156 l 29
+150.5 102 m 29
+ 251.5 102 l 29
+ 251.5 0 l 29
+ 150.5 0 l 29
+ 150.5 102 l 29
 EndSplineSet
 EndChar
+
 StartChar: bracketright
 Encoding: 93 93 59
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -99 1122 51.0625 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2383,6 +2513,7 @@ zzs8N*!rr<$!zzs8N*!rr<$!zzs8N*!rr<$!!!*'!s8W-!s8W-!rr<$!!!*'!s8W-!s8W-!
 rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 511 717 m 29
  465 717 l 29
  465 104 l 29
@@ -2399,32 +2530,39 @@ Fore
  53 819 l 29
 EndSplineSet
 EndChar
+
 StartChar: braceright
 Encoding: 125 125 60
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 92 123 N -1 0 0 1 670 0 2
 EndChar
+
 StartChar: bracketleft
 Encoding: 91 91 61
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 59 93 S -1 0 0 1 670 0 2
 EndChar
+
 StartChar: backslash
 Encoding: 92 92 62
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 34 47 N -1 0 0 1 670 0 2
 EndChar
+
 StartChar: asciicircum
 Encoding: 94 94 63
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -73 1119 51.0625 50.8438 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2445,6 +2583,7 @@ s8W-!z!!!$!s8W*!s8W-!z!!*'!s8N'!!<<*!rr<$!!!*'!rr<$!!!*'!rr<$!!!*'!rr<$!
 !!*'!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 334.5 807 m 29
  197 589.5 l 29
  257.666 558 l 29
@@ -2454,11 +2593,12 @@ Fore
  334.5 807 l 29
 EndSplineSet
 EndChar
+
 StartChar: underscore
 Encoding: 95 95 64
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2477,6 +2617,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzzzz
 s8W-!s8W-!s8W*!s8W-!s8W-!s8W-!s8W*!zzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 26 -152 m 25
  26 -51 l 25
  644 -51 l 25
@@ -2484,11 +2625,12 @@ Fore
  26 -152 l 25
 EndSplineSet
 EndChar
+
 StartChar: grave
 Encoding: 96 96 65
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2507,6 +2649,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzzzz
 zzz!!!$!rr<$!zzzs8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 284.75 816.5 m 29
  437.75 714 l 29
  437.75 664 l 29
@@ -2516,11 +2659,12 @@ Fore
  284.75 816.5 l 29
 EndSplineSet
 EndChar
+
 StartChar: a
 Encoding: 97 97 66
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -147 1173 51.0625 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2541,6 +2685,7 @@ zs8N'!z!<<'!zs8N'!z!<<'!zs8N'!zs8W*!zs8N'!!!!$!s8W*!zs8W-!s8W-!s8W*!z!<<*!
 s8W-!s8W*!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 238.604 308 m 17
  184.604 308 157.604 276 157.604 210 c 1
  157.604 138 181.604 105 238.604 105 c 9
@@ -2562,11 +2707,12 @@ Fore
  157.604 614 l 25
 EndSplineSet
 EndChar
+
 StartChar: b
 Encoding: 98 98 67
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2588,6 +2734,7 @@ rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!s8N'!!!!$!s8N'!!!!$!s8W*!
 !!*'!s8N'!!!!$!s8W-!s8W-!s8N'!!!!$!s8W-!s8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 413 513 m 9
  265 510 l 17
  190 510 161 486 161 406 c 9
@@ -2609,11 +2756,12 @@ Fore
  55 818 l 25
 EndSplineSet
 EndChar
+
 StartChar: c
 Encoding: 99 99 68
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -147 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2634,6 +2782,7 @@ zz!!!$!rr<$!zz!!!$!s8N'!zz!!!$!s8W*!zz!!!$!s8W-!zzzs8W-!s8W-!rr<$!z!<<*!
 s8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 588.5 615 m 29
  588.5 513 l 29
  357.5 507 l 30
@@ -2647,11 +2796,12 @@ Fore
  588.5 615 l 29
 EndSplineSet
 EndChar
+
 StartChar: d
 Encoding: 100 100 69
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -147 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2673,6 +2823,7 @@ s8N'!!!!$!s8N'!!!!$!s8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!
 s8N'!zs8W-!s8W-!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 403.586 510 m 9
  259.586 510 l 17
  184.586 510 161.586 486 161.586 404 c 9
@@ -2694,11 +2845,12 @@ Fore
  514.586 819 l 25
 EndSplineSet
 EndChar
+
 StartChar: e
 Encoding: 101 101 70
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -153 1176 51.4375 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2719,6 +2871,7 @@ rr<$!zs8N'!!!!$!s8W-!s8W-!s8N'!!!!$!s8W-!s8W-!s8N'!!!!$!rr<$!zz!!!$!s8N'!
 zz!!!$!s8W*!zz!!!$!s8W-!s8W-!s8N'!zs8W-!s8W-!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 418 517 m 9
  261 517 l 17
  195 517 165 489 165 364 c 9
@@ -2738,11 +2891,12 @@ Fore
  54 561 114 618 261 618 c 9
 EndSplineSet
 EndChar
+
 StartChar: f
 Encoding: 102 102 71
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2763,6 +2917,7 @@ zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!
 zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 203.5 0 m 25
  203.5 513 l 25
  107.5 513 l 25
@@ -2782,11 +2937,12 @@ Fore
  203.5 0 l 25
 EndSplineSet
 EndChar
+
 StartChar: g
 Encoding: 103 103 72
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2808,6 +2964,7 @@ rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!s8N'!!!!$!s8N'!!!!$!s8W*!
 s8N'!zs8W-!s8W-!s8N'!zs8W-!s8W-!rr<$!zzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 410.5 503 m 9
  262.5 506 l 17
  187.5 506 157.5 485 157.5 409 c 9
@@ -2831,11 +2988,12 @@ Fore
  617.5 0 l 17
 EndSplineSet
 EndChar
+
 StartChar: h
 Encoding: 104 104 73
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2856,6 +3014,7 @@ zs8W-!z!<<'!zs8W*!z!<<'!zs8N'!z!<<'!zs8N'!z!<<'!zs8N'!z!<<'!zs8N'!z!<<'!
 zs8N'!z!<<'!zs8N'!z!<<'!zs8N'!z!<<'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 55.5 817 m 25
  158.5 817 l 25
  158.5 501 l 17
@@ -2873,11 +3032,12 @@ Fore
  55.5 817 l 25
 EndSplineSet
 EndChar
+
 StartChar: i
 Encoding: 105 105 74
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2897,14 +3057,16 @@ zzzs8W*!zzzs8W*!zzzzzzzzzz!!*'!s8W*!zz!!*'!s8W*!zzz!<<'!zzz!<<'!zzz!<<'!
 zzz!<<'!zzz!<<'!zzz!<<'!zzz!<<'!zzz!<<'!zz!!*'!s8W-!s8N'!z!!*'!s8W-!s8N'!
 zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
+Fore
 Refer: 41 46 S 1 0 0 1 18.5 713 2
 Refer: 155 305 N 1 0 0 1 13 0 3
 EndChar
+
 StartChar: j
 Encoding: 106 106 75
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -147 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2926,6 +3088,7 @@ rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!z!<<'!!!!$!rr<$!z!<<*!!!*'!rr<$!
 z!<<*!s8W-!rr<$!z!<<*!s8W-!rr<$!zzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 387.5 820 m 25
  539.5 820 l 25
  539.5 667 l 25
@@ -2948,11 +3111,12 @@ Fore
  437.5 507 l 25
 EndSplineSet
 EndChar
+
 StartChar: k
 Encoding: 107 107 76
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -2973,6 +3137,7 @@ zs8N*!s8W-!zzs8W-!s8W*!zzs8W-!rr<$!zzs8W-!s8N'!zzs8W-!s8W*!zzs8N'!s8W-!
 rr<$!zs8N'!!<<*!s8N'!zs8N'!!!!$!s8W*!zs8N'!zs8W*!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 613 4 m 25
  454 4 l 25
  251 207 l 25
@@ -2989,13 +3154,14 @@ Fore
  613 4 l 25
 EndSplineSet
 EndChar
+
 StartChar: l
 Encoding: 108 108 77
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
 HStem: 0 104<105 510> 714 102<105 359>
 VStem: 251 108<104 816>
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3016,6 +3182,7 @@ zzz!<<'!zzz!<<'!zzz!<<'!zzz!<<'!zzz!<<'!zz!!*'!s8W-!s8N'!z!!*'!s8W-!s8N'!
 zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 132.5 816 m 25
  386.5 816 l 25
  386.5 104 l 25
@@ -3029,11 +3196,12 @@ Fore
  132.5 816 l 25
 EndSplineSet
 EndChar
+
 StartChar: m
 Encoding: 109 109 78
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3054,6 +3222,7 @@ zs8N'!s8N'!s8N'!zs8N'!s8N'!s8N'!zs8N'!s8N'!s8N'!zs8N'!s8N'!s8N'!zs8N'!s8N'!
 s8N'!zs8N'!s8N'!s8N'!zs8N'!s8N'!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 79.5 0 m 29
  79.5 613 l 29
  182.5 613 l 29
@@ -3072,13 +3241,14 @@ Fore
  79.5 0 l 29
 EndSplineSet
 EndChar
+
 StartChar: n
 Encoding: 110 110 79
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
 HStem: 0 21G<54 157 512 614> 510 102<358 581.5>
 VStem: 54 103<0 612> 512 102<0 558>
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3099,6 +3269,7 @@ z!<<'!zs8N'!z!<<'!zs8N'!z!<<'!zs8N'!z!<<'!zs8N'!z!<<'!zs8N'!z!<<'!zs8N'!
 z!<<'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 513 0 m 29
  513 510 l 21
  435 510 359 510 359 510 c 21
@@ -3115,11 +3286,12 @@ Fore
  513 0 l 29
 EndSplineSet
 EndChar
+
 StartChar: o
 Encoding: 111 111 80
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1172 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3140,6 +3312,7 @@ rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!s8N'!zs8N'!
 !!!$!s8W*!!!!$!s8N'!!!!$!s8W-!s8W-!s8N'!zs8W-!s8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 417 514 m 13
  262 514 l 21
  182 514 164 495 164 412 c 13
@@ -3160,11 +3333,12 @@ Fore
  53 558 110 612 262 612 c 13
 EndSplineSet
 EndChar
+
 StartChar: p
 Encoding: 112 112 81
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -101 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3186,6 +3360,7 @@ s8N'!!<<*!rr<$!!!*'!s8W*!s8W-!rr<$!!!*'!s8W-!s8W-!z!!*'!s8W-!s8W*!z!!*'!
 zzz!!*'!zzz!!*'!zzz!!*'!zzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 358 516 m 13
  311 516 l 21
  205 516 159 459 159 358 c 13
@@ -3209,11 +3384,12 @@ Fore
  55 -204 l 29
 EndSplineSet
 EndChar
+
 StartChar: q
 Encoding: 113 113 82
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -102 1170 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3235,6 +3411,7 @@ s8W-!s8W-!rr<$!!!*'!s8W-!s8W-!rr<$!!!*'!s8N'!!<<*!rr<$!!!*'!rr<$!!!*'!rr<$!
 rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 312 516 m 9
  359 516 l 17
  465 516 511 459 511 358 c 9
@@ -3255,11 +3432,12 @@ Fore
  312 615 l 21
 EndSplineSet
 EndChar
+
 StartChar: r
 Encoding: 114 114 83
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3280,6 +3458,7 @@ rrE*!s8W-!rr<$!!!!$!s8W-!s8W-!rr<$!!!!$!s8W-!!!*'!rr<$!!!!$!s8W*!!!!$!rr<$!
 rr<$!zz!!!$!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 77 0 m 25
  77 611 l 25
  187 611 l 25
@@ -3295,11 +3474,12 @@ Fore
  77 0 l 25
 EndSplineSet
 EndChar
+
 StartChar: s
 Encoding: 115 115 84
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -102 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3320,6 +3500,7 @@ s8W-!zzzs8W-!s8W*!zz!!*'!s8W-!rr<$!zz!<<*!rr<$!zz!!*'!rr<$!!!*'!rr<$!!!*'!
 rr<$!!!*'!s8W-!s8W-!rr<$!!!*'!s8W-!s8W-!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 308 516 m 4
  294.661 515.961 223.012 514.371 179.539 489.879 c 4
  169.308 484.114 161.617 477.606 162 472 c 4
@@ -3341,13 +3522,14 @@ Fore
  447.801 509.604 407.373 516.289 308 516 c 4
 EndSplineSet
 EndChar
+
 StartChar: t
 Encoding: 116 116 85
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
 HStem: 3 101<398 525> 513 103<162 260 370 626>
 VStem: 260 110<156 513 616 764> 574 96<94.5 204>
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -102 1174 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3368,6 +3550,7 @@ zzzs8N'!zzzs8N'!zzzs8N'!zzzs8N'!!!*'!zzs8W*!!<<*!zzs8W-!s8W-!zzs8W-!s8W-!
 zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 179 764 m 25
  289 764 l 25
  289 616 l 25
@@ -3391,11 +3574,12 @@ Fore
  179 764 l 25
 EndSplineSet
 EndChar
+
 StartChar: u
 Encoding: 117 117 86
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -105 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3416,6 +3600,7 @@ z!!!$!rr<$!!!*'!z!!!$!rr<$!!!*'!z!!!$!rr<$!!!*'!z!!!$!rr<$!!!*'!z!!!$!rr<$!
 s8W-!rr<$!!!*'!s8W-!s8W-!rr<$!!!!$!s8W-!s8N*!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 311.5 102 m 17
  384.5 102 512.5 174 512.5 256 c 9
  512.5 612 l 29
@@ -3433,11 +3618,12 @@ Fore
  311.5 102 l 17
 EndSplineSet
 EndChar
+
 StartChar: v
 Encoding: 118 118 87
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -102 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3458,6 +3644,7 @@ z!!!$!rr<$!!!*'!z!!!$!rr<$!!!*'!z!!!$!rr<$!!!*'!rr<$!!!*'!rr<$!!!*'!rr<$!
 s8N'!zz!<<*!s8N'!zz!!*'!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 53 614 m 25
  160 614 l 25
  160 460 l 25
@@ -3472,11 +3659,12 @@ Fore
  53 614 l 25
 EndSplineSet
 EndChar
+
 StartChar: w
 Encoding: 119 119 88
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -102 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3497,6 +3685,7 @@ z!!*'!!!*'!!!*'!z!!*'!!!*'!!!*'!z!!*'!!!*'!!!*'!z!!*'!rrE*!!<<*!z!!*'!s8W-!
 s8W-!z!!!$!s8W-!s8W*!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 80 612 m 25
  182 612 l 25
  182 164 l 17
@@ -3516,23 +3705,13 @@ Fore
  80 612 l 25
 EndSplineSet
 EndChar
+
 StartChar: x
 Encoding: 120 120 89
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
-72 12 m 29
- 561 519 l 29
- 498 621 l 29
- 9 114 l 29
- 72 12 l 29
-63 612 m 29
- 561 114 l 29
- 492 9 l 29
- -6 507 l 29
- 63 612 l 29
-EndSplineSet
 Image: 16 32 1 16 256 0 -102 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
 'GM5r'bqK"()Ic'(`4)-)&X>2)B0V7*#oq=*??1B*ZlIG+<VdM+X&$R+sS<W,U=W],palb-7:/g
@@ -3551,7 +3730,20 @@ z!!!$!rr<$!!!*'!rr<$!!!*'!rr<$!!!!$!s8N'!!<<*!z!!!$!s8W*!s8W-!zzs8W-!s8W*!
 zz!<<*!s8N'!zz!<<*!s8N'!zzs8W-!s8W*!z!!!$!s8W*!s8W-!z!!*'!s8N'!!<<*!rr<$!
 !!*'!rr<$!!!*'!rr<$!!!*'!z!!!$!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
+SplineSet
+72 12 m 29
+ 561 519 l 29
+ 498 621 l 29
+ 9 114 l 29
+ 72 12 l 29
+63 612 m 29
+ 561 114 l 29
+ 492 9 l 29
+ -6 507 l 29
+ 63 612 l 29
+EndSplineSet
 Fore
+SplineSet
 334.5 228 m 29
  122.5 0 l 25
  52.5 0 l 25
@@ -3571,17 +3763,13 @@ Fore
  334.5 228 l 29
 EndSplineSet
 EndChar
+
 StartChar: y
 Encoding: 121 121 90
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
-237 75 m 29
- -38.4834 495 l 29
-465 465 m 25
- 213 12 l 25
-EndSplineSet
 Image: 16 32 1 16 256 0 -150 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
 'GM5r'bqK"()Ic'(`4)-)&X>2)B0V7*#oq=*??1B*ZlIG+<VdM+X&$R+sS<W,U=W],palb-7:/g
@@ -3601,7 +3789,14 @@ rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!rr<$!zs8N'!!!!$!s8N'!!!!$!s8N'!!!!$!s8N'!
 s8W*!zz!!*'!s8W*!zz!!!$!s8N'!zz!!!$!s8N'!zz!!*'!rr<$!z!!!$!s8W-!rr<$!z!!!$!
 s8W-!zzzzzzzzzzzzzzzzzzzzzz
 EndImage
+SplineSet
+237 75 m 29
+ -38.4834 495 l 29
+465 465 m 25
+ 213 12 l 25
+EndSplineSet
 Fore
+SplineSet
 210.5 -201 m 9
  54.5 -200 l 25
  54.5 -102 l 25
@@ -3621,11 +3816,12 @@ Fore
  333.5 -150 351.5 -201 210.5 -201 c 9
 EndSplineSet
 EndChar
+
 StartChar: z
 Encoding: 122 122 91
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -101 1173 51.1875 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3646,6 +3842,7 @@ s8N'!zz!<<*!rr<$!zzs8W-!zz!!*'!s8W*!zz!!*'!s8N'!zz!!*'!s8W-!s8W-!rr<$!!!*'!
 s8W-!s8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 53 615 m 25
  614 615 l 25
  614 516 l 25
@@ -3659,11 +3856,12 @@ Fore
  53 615 l 25
 EndSplineSet
 EndChar
+
 StartChar: braceleft
 Encoding: 123 123 92
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3684,6 +3882,7 @@ zz!!!$!rr<$!z!!!$!s8W-!zz!!!$!s8W-!zzz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!
 zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!s8W-!rr<$!z!!!$!s8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 286.5 819 m 29
  591.5 819 l 29
  591.5 717 l 29
@@ -3703,11 +3902,12 @@ Fore
  286.5 819 l 29
 EndSplineSet
 EndChar
+
 StartChar: bar
 Encoding: 124 124 93
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3727,6 +3927,7 @@ zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!
 zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 286.5 820 m 25
  383.5 820 l 25
  383.5 -2 l 25
@@ -3734,11 +3935,12 @@ Fore
  286.5 820 l 25
 EndSplineSet
 EndChar
+
 StartChar: asciitilde
 Encoding: 126 126 94
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3757,6 +3959,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzzzz
 s8W-!s8W-!rr<$!!!!$!s8W-!s8W-!rr<$!!!!$!s8W-!s8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 224 424 m 0
  343.217 418.297 365.633 350.98 436 352 c 0
  449.306 352.193 454.916 352.509 468.591 367.074 c 0
@@ -3772,11 +3975,12 @@ Fore
  138.485 387.414 165.488 426.799 224 424 c 0
 EndSplineSet
 EndChar
+
 StartChar: uni007F
 Encoding: 127 127 95
 Width: 1024
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 0 819 32 32 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3794,12 +3998,14 @@ gt^]@h;-rEhV[5Ji8EPPiSieUioB(ZjQ,C`jlPXek3(pjkih6pl07KulKdd%m-O*+mHs?0mdKW5
 nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 EndChar
+
 StartChar: exclamdown
 Encoding: 161 161 96
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Fore
+SplineSet
 402 657 m 1
  266 657 l 1
  266 817 l 1
@@ -3812,19 +4018,23 @@ Fore
  404 14 402 8 404 4 c 1
 EndSplineSet
 EndChar
+
 StartChar: questiondown
 Encoding: 191 191 97
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 58 63 N -1 0 0 -1 670 822 2
 EndChar
+
 StartChar: acute
 Encoding: 180 180 98
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Fore
+SplineSet
 385.25 816.5 m 25
  437.75 816.5 l 25
  437.75 765 l 25
@@ -3834,11 +4044,12 @@ Fore
  385.25 816.5 l 25
 EndSplineSet
 EndChar
+
 StartChar: dieresis
 Encoding: 168 168 99
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -3857,6 +4068,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzs8N
 s8N'!zzs8N'!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 384 818 m 25
  384 919 l 29
  487 919 l 29
@@ -3869,403 +4081,502 @@ Fore
  183 818 l 25
 EndSplineSet
 EndChar
+
 StartChar: Agrave
 Encoding: 192 192 100
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 65 96 S 1 0 0 1 -8.25 213 2
 Refer: 1 65 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Aacute
 Encoding: 193 193 101
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 S 1 0 0 1 20.75 213 2
 Refer: 1 65 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Acircumflex
 Encoding: 194 194 102
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 10.5 319 2
 Refer: 1 65 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Atilde
 Encoding: 195 195 103
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 94 126 S 1 0 0 1 -15.5 625 2
 Refer: 1 65 N 1 0 0 1 -10.5 0 3
 EndChar
+
 StartChar: Adieresis
 Encoding: 196 196 104
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 99 168 S 1 0 0 1 -2 56 2
 Refer: 1 65 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Egrave
 Encoding: 200 200 105
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 65 96 S 1 0 0 1 6.25 209 2
 Refer: 6 69 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Eacute
 Encoding: 201 201 106
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 S 1 0 0 1 83.25 213 2
 Refer: 6 69 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Ecircumflex
 Encoding: 202 202 107
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 S 1 0 0 1 27 319 2
 Refer: 6 69 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Edieresis
 Encoding: 203 203 108
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 99 168 S 1 0 0 1 17.5 59 2
 Refer: 6 69 N 1 0 0 1 -10 0 3
 EndChar
+
 StartChar: Igrave
 Encoding: 204 204 109
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 65 96 S 1 0 0 1 -5.25 216 2
 Refer: 10 73 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Iacute
 Encoding: 205 205 110
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 S 1 0 0 1 -0.25 216 2
 Refer: 10 73 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Icircumflex
 Encoding: 206 206 111
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 S 1 0 0 1 23.5 322 2
 Refer: 10 73 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Idieresis
 Encoding: 207 207 112
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 99 168 S 1 0 0 1 122 62 2
 Refer: 10 73 N 1 0 0 1 -2 0 3
 EndChar
+
 StartChar: Ntilde
 Encoding: 209 209 113
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 94 126 S 1 0 0 1 -1 624 2
 Refer: 15 78 N 1 0 0 1 -12 0 3
 EndChar
+
 StartChar: Ograve
 Encoding: 210 210 114
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 65 96 N 1 0 0 1 0.749615 213 2
 Refer: 16 79 N 1 0 0 1 -0.000127792 0 3
 EndChar
+
 StartChar: Oacute
 Encoding: 211 211 115
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 S 1 0 0 1 5.74963 213 2
 Refer: 16 79 N 1 0 0 1 -0.000127792 0 3
 EndChar
+
 StartChar: Ocircumflex
 Encoding: 212 212 116
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 19.4996 319 2
 Refer: 16 79 N 1 0 0 1 -0.000127792 0 3
 EndChar
+
 StartChar: Otilde
 Encoding: 213 213 117
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 94 126 S 1 0 0 1 -8.9983 625 2
 Refer: 16 79 N 1 0 0 1 -18.9981 0 3
 EndChar
+
 StartChar: Odieresis
 Encoding: 214 214 118
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 99 168 S 1 0 0 1 -0.000371933 59 2
 Refer: 16 79 N 1 0 0 1 -0.000127792 0 3
 EndChar
+
 StartChar: Ugrave
 Encoding: 217 217 119
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 65 96 N 1 0 0 1 -1.745 216 2
 Refer: 22 85 N 1 0 0 1 -0.000261307 0 3
 EndChar
+
 StartChar: Uacute
 Encoding: 218 218 120
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 S 1 0 0 1 1.255 216 2
 Refer: 22 85 N 1 0 0 1 -0.000261307 0 3
 EndChar
+
 StartChar: Ucircumflex
 Encoding: 219 219 121
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 S 1 0 0 1 15.005 322 2
 Refer: 22 85 N 1 0 0 1 -0.000261307 0 3
 EndChar
+
 StartChar: Udieresis
 Encoding: 220 220 122
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 99 168 S 1 0 0 1 -4.495 62 2
 Refer: 22 85 N 1 0 0 1 -0.000261307 0 3
 EndChar
+
 StartChar: Yacute
 Encoding: 221 221 123
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 S 1 0 0 1 -4.75 213 2
 Refer: 26 89 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: agrave
 Encoding: 224 224 124
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 65 96 S 1 0 0 1 20.8545 11 2
 Refer: 66 97 N 1 0 0 1 -0.000408173 0 3
 EndChar
+
 StartChar: aacute
 Encoding: 225 225 125
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 S 1 0 0 1 13.8548 11 2
 Refer: 66 97 N 1 0 0 1 -0.000408173 0 3
 EndChar
+
 StartChar: acircumflex
 Encoding: 226 226 126
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 S 1 0 0 1 12.6045 111 2
 Refer: 66 97 N 1 0 0 1 -0.000408173 0 3
 EndChar
+
 StartChar: atilde
 Encoding: 227 227 127
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 94 126 N 1 0 0 1 24.1045 420 2
 Refer: 66 97 N 1 0 0 1 -0.000408173 0 3
 EndChar
+
 StartChar: adieresis
 Encoding: 228 228 128
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 99 168 S 1 0 0 1 9.10442 -137 2
 Refer: 66 97 N 1 0 0 1 -0.000408173 0 3
 EndChar
+
 StartChar: egrave
 Encoding: 232 232 129
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 65 96 N 1 0 0 1 2.25 15 2
 Refer: 70 101 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: eacute
 Encoding: 233 233 130
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 S 1 0 0 1 17.25 15 2
 Refer: 70 101 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: ecircumflex
 Encoding: 234 234 131
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 S 1 0 0 1 21 121 2
 Refer: 70 101 S 1 0 0 1 0 0 3
 EndChar
+
 StartChar: edieresis
 Encoding: 235 235 132
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 99 168 S 1 0 0 1 1.25 -139 2
 Refer: 70 101 N 1 0 0 1 -0.25 0 3
 EndChar
+
 StartChar: igrave
 Encoding: 236 236 133
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 65 96 S 1 0 0 1 -23.25 9 2
 Refer: 155 305 N 1 0 0 1 -26 0 3
 EndChar
+
 StartChar: iacute
 Encoding: 237 237 134
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 S 1 0 0 1 -44.5 9 2
 Refer: 155 305 N 1 0 0 1 -52.25 0 3
 EndChar
+
 StartChar: icircumflex
 Encoding: 238 238 135
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 S 1 0 0 1 -14.5 115 2
 Refer: 155 305 N 1 0 0 1 -26 0 3
 EndChar
+
 StartChar: idieresis
 Encoding: 239 239 136
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 99 168 S 1 0 0 1 -52 -145 2
 Refer: 155 305 N 1 0 0 1 -64 0 3
 EndChar
+
 StartChar: ntilde
 Encoding: 241 241 137
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 94 126 S 1 0 0 1 -2.5 421 2
 Refer: 79 110 N 1 0 0 1 -21.5 0 3
 EndChar
+
 StartChar: ograve
 Encoding: 242 242 138
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 65 96 N 1 0 0 1 2.25 9 2
 Refer: 80 111 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: oacute
 Encoding: 243 243 139
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 S 1 0 0 1 -12.75 9 2
 Refer: 80 111 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: ocircumflex
 Encoding: 244 244 140
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 21 115 2
 Refer: 80 111 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: otilde
 Encoding: 245 245 141
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 94 126 S 1 0 0 1 -32.25 418 2
 Refer: 80 111 N 1 0 0 1 -22.75 0 3
 EndChar
+
 StartChar: odieresis
 Encoding: 246 246 142
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 99 168 S 1 0 0 1 -9.25 -145 2
 Refer: 80 111 N 1 0 0 1 -0.75 0 3
 EndChar
+
 StartChar: ugrave
 Encoding: 249 249 143
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 65 96 N 1 0 0 1 -1.75 9 2
 Refer: 86 117 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: uacute
 Encoding: 250 250 144
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 S 1 0 0 1 13.25 9 2
 Refer: 86 117 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: ucircumflex
 Encoding: 251 251 145
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 17 115 2
 Refer: 86 117 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: udieresis
 Encoding: 252 252 146
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 99 168 S 1 0 0 1 -2.5 -145 2
 Refer: 86 117 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: yacute
 Encoding: 253 253 147
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 S 1 0 0 1 12.75 9 2
 Refer: 90 121 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: ydieresis
 Encoding: 255 255 148
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 99 168 S 1 0 0 1 -2 -130 2
 Refer: 90 121 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: degree
 Encoding: 176 176 149
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -4284,6 +4595,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzzzz
 s8N'!zzrr<$!!<3$!zzrr<$!!<3$!zzrr<$!!<3$!zzrr<$!!<3$!zzs8W-!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 376 769 m 13
  285 769 l 21
  249 769 234 756 234 720 c 13
@@ -4304,11 +4616,12 @@ Fore
  184 720 l 21
 EndSplineSet
 EndChar
+
 StartChar: cedilla
 Encoding: 184 184 150
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -4327,6 +4640,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzzzz
 zzz!<<'!zzz!<<'!zz!!!$!s8W*!zzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 477.5 -136 m 25,0,0
 411.5 -100 m 1,0,0
  411.5 -179 395.5 -205 308.5 -205 c 9,0,0
@@ -4339,46 +4653,56 @@ Fore
  396.5 0 411.5 -22 411.5 -100 c 1,0,0
 EndSplineSet
 EndChar
+
 StartChar: Aring
 Encoding: 197 197 151
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 149 176 S 1 0 0 1 -6 323.9 2
 Refer: 1 65 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Ccedilla
 Encoding: 199 199 152
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 150 184 N 1 0 0 1 142 13.05 2
 Refer: 4 67 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: aring
 Encoding: 229 229 153
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 149 176 S 1 0 0 1 23.1044 160 2
 Refer: 66 97 N 1 0 0 1 -0.000408173 0 3
 EndChar
+
 StartChar: ccedilla
 Encoding: 231 231 154
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 150 184 N 1 0 0 1 136 6.8 2
 Refer: 68 99 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: dotlessi
 Encoding: 305 305 155
 Width: 670
 Flags: W
-TeX: 0 0 0 0
 HStem: 4 100<159 563> 461 102<159 413>
 VStem: 308 105<104 563>
+LayerCount: 2
 Fore
+SplineSet
 159 563 m 25
  413 563 l 25
  413 104 l 25
@@ -4392,523 +4716,652 @@ Fore
  159 563 l 25
 EndSplineSet
 EndChar
+
 StartChar: Jcircumflex
 Encoding: 308 308 156
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 162 319 2
 Refer: 11 74 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Cacute
 Encoding: 262 262 157
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 N 1 0 0 1 283.75 216 2
 Refer: 4 67 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: cacute
 Encoding: 263 263 158
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 S 1 0 0 1 64.25 0 2
 Refer: 68 99 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Ccircumflex
 Encoding: 264 264 159
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 S 1 0 0 1 17.5 322 2
 Refer: 4 67 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: ccircumflex
 Encoding: 265 265 160
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 S 1 0 0 1 20 118 2
 Refer: 68 99 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Cdotaccent
 Encoding: 266 266 161
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 41 46 S 1 0 0 1 185.5 857 2
 Refer: 4 67 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: cdotaccent
 Encoding: 267 267 162
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 41 46 S 1 0 0 1 224 671 2
 Refer: 68 99 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: dcaron
 Encoding: 271 271 163
 Width: 1037
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 S 1 0 0 1 684.086 463 2
 Refer: 69 100 N 1 0 0 1 0 0 2
 EndChar
+
 StartChar: Edotaccent
 Encoding: 278 278 164
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 41 46 N 1 0 0 1 -103 722 2
 Refer: 6 69 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: edotaccent
 Encoding: 279 279 165
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 41 46 N 1 0 0 1 161 524 2
 Refer: 70 101 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Gcircumflex
 Encoding: 284 284 166
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 140.5 319 2
 Refer: 8 71 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: gcircumflex
 Encoding: 285 285 167
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 121.5 115 2
 Refer: 72 103 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Gdotaccent
 Encoding: 288 288 168
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 41 46 N 1 0 0 1 280.5 722 2
 Refer: 8 71 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: gdotaccent
 Encoding: 289 289 169
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 41 46 N 1 0 0 1 261.5 518 2
 Refer: 72 103 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Gcommaaccent
 Encoding: 290 290 170
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 127 -417 2
 Refer: 8 71 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Hcircumflex
 Encoding: 292 292 171
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 192.5 328 2
 Refer: 9 72 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: hcircumflex
 Encoding: 293 293 172
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 16.5 320 2
 Refer: 73 104 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Itilde
 Encoding: 296 296 173
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 94 126 N 1 0 0 1 343 625 2
 Refer: 10 73 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: itilde
 Encoding: 297 297 174
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 94 126 N 1 0 0 1 101 418 2
 Refer: 155 305 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Idotaccent
 Encoding: 304 304 175
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 41 46 N 1 0 0 1 423.5 725 2
 Refer: 10 73 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: jcircumflex
 Encoding: 309 309 176
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 145 323 2
 Refer: 75 106 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Kcommaaccent
 Encoding: 310 310 177
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 328.5 -419 2
 Refer: 12 75 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: kcommaaccent
 Encoding: 311 311 178
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 127 -413 2
 Refer: 76 107 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Lacute
 Encoding: 313 313 179
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 N 1 0 0 1 -68.25 213 2
 Refer: 13 76 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: lacute
 Encoding: 314 314 180
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 N 1 0 0 1 150.25 213 2
 Refer: 77 108 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Lcommaaccent
 Encoding: 315 315 181
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 127 -417 2
 Refer: 13 76 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: lcommaaccent
 Encoding: 316 316 182
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 127 -417 2
 Refer: 77 108 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Lcaron
 Encoding: 317 317 183
 Width: 1037
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 577.5 460 2
 Refer: 13 76 N 1 0 0 1 0 0 2
 EndChar
+
 StartChar: lcaron
 Encoding: 318 318 184
 Width: 1037
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 396.5 460 2
 Refer: 77 108 N 1 0 0 1 0 0 2
 EndChar
+
 StartChar: Nacute
 Encoding: 323 323 185
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 N 1 0 0 1 -91.25 217 2
 Refer: 15 78 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: nacute
 Encoding: 324 324 186
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 N 1 0 0 1 152.75 9 2
 Refer: 79 110 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Ncommaaccent
 Encoding: 325 325 187
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 320 -417 2
 Refer: 15 78 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: ncommaaccent
 Encoding: 326 326 188
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 127 -417 2
 Refer: 79 110 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Racute
 Encoding: 340 340 189
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 N 1 0 0 1 50.75 216 2
 Refer: 19 82 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: racute
 Encoding: 341 341 190
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 N 1 0 0 1 152.75 9 2
 Refer: 83 114 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Rcommaaccent
 Encoding: 342 342 191
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 123.5 -417 2
 Refer: 19 82 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: rcommaaccent
 Encoding: 343 343 192
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 -76 -417 2
 Refer: 83 114 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Sacute
 Encoding: 346 346 193
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 N 1 0 0 1 152.75 216 2
 Refer: 20 83 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: sacute
 Encoding: 347 347 194
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 N 1 0 0 1 179.687 9.2511 2
 Refer: 84 115 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Scircumflex
 Encoding: 348 348 195
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 16.5 322 2
 Refer: 20 83 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: scircumflex
 Encoding: 349 349 196
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 43.4367 115.251 2
 Refer: 84 115 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Scedilla
 Encoding: 350 350 197
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 150 184 N 1 0 0 1 -284.5 6.8 2
 Refer: 20 83 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: scedilla
 Encoding: 351 351 198
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 150 184 N 1 0 0 1 84.0059 6.8 2
 Refer: 84 115 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Tcommaaccent
 Encoding: 354 354 199
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 150 184 N 1 0 0 1 -0.5 6.8 2
 Refer: 21 84 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: tcommaaccent
 Encoding: 355 355 200
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 150 184 N 1 0 0 1 53.5 9.61623 2
 Refer: 85 116 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: tcaron
 Encoding: 357 357 201
 Width: 1037
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 189.5 408 2
 Refer: 85 116 N 1 0 0 1 0 0 2
 EndChar
+
 StartChar: Utilde
 Encoding: 360 360 202
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 94 126 N 1 0 0 1 254.506 625 2
 Refer: 22 85 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: utilde
 Encoding: 361 361 203
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 94 126 N 1 0 0 1 76.5 418 2
 Refer: 86 117 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Uring
 Encoding: 366 366 204
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 149 176 N 1 0 0 1 304.506 368 2
 Refer: 22 85 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: uring
 Encoding: 367 367 205
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 149 176 N 1 0 0 1 126.5 161 2
 Refer: 86 117 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Wcircumflex
 Encoding: 372 372 206
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 16.5 319 2
 Refer: 24 87 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: wcircumflex
 Encoding: 373 373 207
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 16.5 115 2
 Refer: 88 119 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Ycircumflex
 Encoding: 374 374 208
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 -191 319 2
 Refer: 26 89 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: ycircumflex
 Encoding: 375 375 209
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 N 1 0 0 1 16.5 115 2
 Refer: 90 121 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Ydieresis
 Encoding: 376 376 210
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 99 168 N 1 0 0 1 -80.5 59 2
 Refer: 26 89 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Zacute
 Encoding: 377 377 211
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 N 1 0 0 1 -126.75 216 2
 Refer: 27 90 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: zacute
 Encoding: 378 378 212
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 98 180 N 1 0 0 1 151.25 12 2
 Refer: 91 122 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Zdotaccent
 Encoding: 379 379 213
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 41 46 N 1 0 0 1 -123 725 2
 Refer: 27 90 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: zdotaccent
 Encoding: 380 380 214
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 41 46 N 1 0 0 1 155 521 2
 Refer: 91 122 N 1 0 0 1 0 0 3
 EndChar
+
 StartChar: Ohorn
 Encoding: 416 416 215
 Width: 1037
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 266.5 460 2
 Refer: 16 79 N 1 0 0 1 0 0 2
 EndChar
+
 StartChar: ohorn
 Encoding: 417 417 216
 Width: 1037
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 339.5 256 2
 Refer: 80 111 N 1 0 0 1 0 0 2
 EndChar
+
 StartChar: Uhorn
 Encoding: 431 431 217
 Width: 1037
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 434.5 463 2
 Refer: 22 85 N 1 0 0 1 0 0 2
 EndChar
+
 StartChar: uhorn
 Encoding: 432 432 218
 Width: 1037
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 39 44 N 1 0 0 1 536.5 256 2
 Refer: 86 117 N 1 0 0 1 0 0 2
 EndChar
+
 StartChar: plusminus
 Encoding: 177 177 219
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 38 43 S 1 0 0 1 78 105 2
 Refer: 40 45 S 1 0 0 1 53 -246 2
 EndChar
+
 StartChar: divide
 Encoding: 247 247 220
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -90 1221 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -4928,6 +5381,7 @@ zzz!!*'!zzzzzzzzzz!!*'!s8W-!s8W-!z!!*'!s8W-!s8W-!zzzzzzzzzz!!*'!zzz!!*'!
 zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 284.5 204 m 25
  389.5 203 l 25
  389.5 101 l 25
@@ -4945,18 +5399,21 @@ Fore
  78.5 306 l 25
 EndSplineSet
 EndChar
+
 StartChar: Eth
 Encoding: 208 208 221
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 222 272 N 1 0 0 1 0 0 2
 EndChar
+
 StartChar: Dcroat
 Encoding: 272 272 222
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9062 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -4978,6 +5435,7 @@ rr<$!z!<<'!!!*'!rr<$!z!<<'!!<<*!zz!<<'!!<<*!zz!<<'!s8W*!z!!!$!s8W-!s8W*!
 z!!!$!s8W-!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 258 103 m 22
  350.523 95.29 413 241 414 405 c 4
  415.14 592.039 353.638 726.72 249 718 c 14
@@ -5004,11 +5462,12 @@ Fore
  0 718 l 29
 EndSplineSet
 EndChar
+
 StartChar: germandbls
 Encoding: 223 223 223
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -153 1170 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5030,6 +5489,7 @@ z!!!$!rr<$!!!*'!z!!!$!rrE*!s8W*!z!!!$!rrE*!s8W*!z!!!$!rr<$!!!*'!z!!!$!rr<$!
 rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 263 409 m 25
  263 508 l 25
  417 508 l 25
@@ -5057,11 +5517,12 @@ Fore
  263 409 l 25
 EndSplineSet
 EndChar
+
 StartChar: multiply
 Encoding: 215 215 224
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -101 1122 51.1875 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5082,6 +5543,7 @@ zz!!!$!rr<$!zz!!*'!s8N'!zz!<<'!!<<'!zzs8N'!!!*'!z!!!$!rr<$!!!!$!rr<$!!!*'!
 zzs8N'!!!*$!zz!<3$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 79 0 m 25
  335 255 l 25
  591 0 l 25
@@ -5099,11 +5561,12 @@ Fore
  79 0 l 25
 EndSplineSet
 EndChar
+
 StartChar: ae
 Encoding: 230 230 225
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -51 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5125,6 +5588,7 @@ s8N'!!<<'!!!*'!rr<'!s8N'!!<<*!s8W-!s8W-!s8N'!!<<*!s8W-!s8W-!s8N'!!<<*!s8W*!
 s8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 551.012 401 m 25,0,0
 408.512 356 m 25,0,0
  494.762 356 l 17,0,0
@@ -5171,11 +5635,12 @@ Fore
  408.512 118 416.012 101 446.012 101 c 1,0,0
 EndSplineSet
 EndChar
+
 StartChar: eth
 Encoding: 240 240 226
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -102 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5198,6 +5663,7 @@ rr<$!zzzs8N'!!<3$!zz!<<*!s8N'!zz!!*'!rr<$!zzs8W-!rr<$!zzs8N'!s8N'!zzrr<$!
 zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 417 514 m 9
  262 514 l 17
  182 514 164 495 164 412 c 9
@@ -5229,12 +5695,14 @@ Fore
  536 618 617 573 617 412 c 9
 EndSplineSet
 EndChar
+
 StartChar: oslash
 Encoding: 248 248 227
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Fore
+SplineSet
 482 519 m 26
  515.524 552.524 560 591 599 552 c 0
  641 510 598.618 464.065 563 429 c 26
@@ -5262,11 +5730,12 @@ Fore
  53 558 110 612 262 612 c 9
 EndSplineSet
 EndChar
+
 StartChar: thorn
 Encoding: 254 254 228
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -51 1119 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5289,6 +5758,7 @@ zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!zzz!!*'!s8W-!s8W-!rr<$!
 zzz!!*'!zzz!!*'!zzz!<<*!rr<$!zz!<<*!rr<$!zzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 439.5 566 m 13
  284.5 566 l 21
  204.5 566 184.5 547 184.5 464 c 13
@@ -5315,12 +5785,14 @@ Fore
  184.5 665 l 29
 EndSplineSet
 EndChar
+
 StartChar: Thorn
 Encoding: 222 222 229
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Fore
+SplineSet
 439.5 564 m 9
  284.5 564 l 17
  204.5 564 184.5 545 184.5 462 c 9
@@ -5347,11 +5819,12 @@ Fore
  184.5 663 l 25
 EndSplineSet
 EndChar
+
 StartChar: cent
 Encoding: 162 162 230
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -153 1173 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5372,6 +5845,7 @@ zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!s8N'!zz!!!$!s8W*!zz!!!$!s8W-!zzzs8W-!s8W-!
 rr<$!z!<<*!s8W-!rr<$!zzs8N'!zzzs8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 590.5 612 m 25
  590.5 510 l 25
  332.5 510 l 26
@@ -5391,11 +5865,12 @@ Fore
  590.5 612 l 25
 EndSplineSet
 EndChar
+
 StartChar: yen
 Encoding: 165 165 231
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.8438 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5417,6 +5892,7 @@ s8W-!rr<$!z!!!$!rr<$!zz!!!$!rr<$!z!!!$!s8W-!s8W-!rr<$!!!!$!s8W-!s8W-!rr<$!
 z!!!$!rr<$!zz!!!$!rr<$!zz!!*'!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 435.5 0 m 29
  435.5 56 l 25
  384.5 56 l 25
@@ -5451,11 +5927,12 @@ Fore
  435.5 0 l 29
 EndSplineSet
 EndChar
+
 StartChar: sterling
 Encoding: 163 163 232
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -151 1122 51.3125 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5476,6 +5953,7 @@ s8W-!rr<$!zz!<<'!zzz!<<'!zzzs8W*!zz!!!$!s8N'!!!!$!z!!!$!s8W-!s8W-!z!!!$!
 s8W-!s8W-!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 231.437 0 m 17
  141.437 0 102.437 31 102.437 106 c 1
  102.437 208 204.437 237 204.437 306 c 9
@@ -5500,11 +5978,12 @@ Fore
  231.437 0 l 17
 EndSplineSet
 EndChar
+
 StartChar: currency
 Encoding: 164 164 233
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5523,6 +6002,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzzzz
 !<<'!zz!<<*!s8W*!zz!!*'!s8N'!zz!!*'!s8N'!zz!<<*!s8W*!zz!<<'!!<<'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 332 456 m 24
  308.776 456 293 434.224 293 411 c 24
  293 386.88 307.88 363 332 363 c 24
@@ -5547,11 +6027,12 @@ Fore
  219.389 396.758 220.36 428.243 248 456 c 9
 EndSplineSet
 EndChar
+
 StartChar: brokenbar
 Encoding: 166 166 234
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9688 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5571,6 +6052,7 @@ rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zzzzzzzzzzzzzzz
 rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zz!!!$!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 286.5 819 m 25
  383.5 819 l 25
  383.5 509 l 25
@@ -5583,11 +6065,12 @@ Fore
  286.5 308 l 25
 EndSplineSet
 EndChar
+
 StartChar: section
 Encoding: 167 167 235
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9062 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5608,6 +6091,7 @@ zzrr<$!!<3$!zzs8N'!s8N'!zzs8W-!s8N'!zzz!<3$!zzz!<3$!zzzs8N'!zzzs8N'!zzs8W-!
 s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 380.5 515 m 9
  283.5 515 l 17
  247.5 515 234.5 502 234.5 466 c 9
@@ -5638,11 +6122,12 @@ Fore
  283.5 258 l 17
 EndSplineSet
 EndChar
+
 StartChar: copyright
 Encoding: 169 169 236
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -48.8 1050.26 45.1 44.7975 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5663,6 +6148,7 @@ s8N'!zzs8N'!!!*'!z!!!$!zzrr<$!!!*$!zz!<3$!!!*$!!!*'!s8N'!!<3$!!<3$!!!*$!
 s8N'!!<3$!!!*$!zz!<3$!!!!$!zzrr<$!zs8N'!!!*'!zz!!*'!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 326.169 635.371 m 4
  301.657 634.93 268.613 620.388 269.35 518.936 c 4
  269.911 441.107 282.946 383.711 337.346 383.87 c 4
@@ -5698,11 +6184,12 @@ Fore
  598.789 644.452 491.374 767.554 335 768.608 c 0
 EndSplineSet
 EndChar
+
 StartChar: ordfeminine
 Encoding: 170 170 237
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1072 51.25 50.9688 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5722,6 +6209,7 @@ rr<$!zzrr<$!rr<$!zzzrr<$!zzs8W-!rr<$!zzrr<$!rr<$!zzrr<$!rr<$!zzrr<$!rr<$!
 zzs8W-!rr<$!zzzzzzs8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 374 611 m 9
  294 611 l 17
  264 611 258 604 258 580 c 9
@@ -5756,11 +6244,12 @@ Fore
  208 410.5 l 5
 EndSplineSet
 EndChar
+
 StartChar: guillemotleft
 Encoding: 171 171 238
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -102 1122 51.25 50.9688 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5780,6 +6269,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzzzz
 zz!!*'!rrE*!rr<$!z!!!$!s8N*!s8N'!zzs8W*!s8W*!zz!<<*!!<<*!zz!!*'!!!*'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 163.63 390.315 m 5
  163.63 369.74 l 5
  381.37 152 l 5
@@ -5800,11 +6290,12 @@ Fore
  363.63 390.314 l 5
 EndSplineSet
 EndChar
+
 StartChar: logicalnot
 Encoding: 172 172 239
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -50 1122 51.25 50.9062 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5823,6 +6314,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzzzz
 s8W-!s8W-!z!<<*!s8W-!s8W-!zzz!!*'!zzz!!*'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 52.5 308 m 25
  52.5 409 l 25
  617.5 409 l 25
@@ -5832,11 +6324,12 @@ Fore
  52.5 308 l 25
 EndSplineSet
 EndChar
+
 StartChar: uni00AD
 Encoding: 173 173 240
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9062 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5855,6 +6348,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzzzz
 s8W-!s8W-!s8W*!!<<*!s8W-!s8W-!s8W*!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 53 306 m 29
  53 409 l 29
  617 409 l 29
@@ -5862,11 +6356,12 @@ Fore
  53 306 l 29
 EndSplineSet
 EndChar
+
 StartChar: registered
 Encoding: 174 174 241
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -38.8 1046.26 45.1 44.7975 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5887,6 +6382,7 @@ s8N'!zzs8N'!!!*'!z!!!$!zzrr<$!!!*$!zz!<3$!!!*$!!!*'!s8N'!!<3$!!<3$!!!*$!
 !!*$!!<3$!!<3$!!!*$!zz!<3$!!!!$!zzrr<$!zs8N'!!!*'!zz!!*'!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 229.25 677.625 m 29
  346.75 677.625 l 21
  440.5 677.625 456.75 647.625 456.75 572.625 c 13
@@ -5916,11 +6412,12 @@ Fore
  598.789 644.452 491.374 767.554 335 768.608 c 0
 EndSplineSet
 EndChar
+
 StartChar: macron
 Encoding: 175 175 242
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9688 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5939,6 +6436,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzz!<<*!
 s8W-!s8W-!s8N'!!<<*!s8W-!s8W-!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 53 716 m 25
  53 819 l 25
  617 819 l 25
@@ -5946,11 +6444,12 @@ Fore
  53 716 l 25
 EndSplineSet
 EndChar
+
 StartChar: uni00B2
 Encoding: 178 178 243
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9688 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -5969,6 +6468,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzs8W
 zzzzrr<$!zzzrr<$!zzzrr<$!zz!<<*!zzzrr<$!zzzrr<$!zzzrr<$!zzz!<<*!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 206.26 590 m 6
  203.953 689.182 262.698 712.191 332.26 713 c 4
  403.452 713.827 410.796 736.652 411.26 788 c 4
@@ -5986,11 +6486,12 @@ Fore
  205.09 511.31 206.26 590 206.26 590 c 6
 EndSplineSet
 EndChar
+
 StartChar: uni00B3
 Encoding: 179 179 244
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9062 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -6009,6 +6510,7 @@ nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzs8W
 zzzzrr<$!zzzrr<$!zzzrr<$!zz!<<*!zzzzrr<$!zzzrr<$!zzzrr<$!zzs8W-!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 207.398 918 m 5
  433.605 918 462.993 936.661 462.398 786 c 4
  462.147 722.372 460.635 676.192 397.519 667.983 c 4
@@ -6039,11 +6541,12 @@ Fore
  207.398 918 l 5
 EndSplineSet
 EndChar
+
 StartChar: uni00B5
 Encoding: 181 181 245
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -105 1122 51.25 50.9062 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -6064,6 +6567,7 @@ zzs8N'!!!*'!zzs8N'!!!*'!zzs8W-!s8W-!rr<$!zs8W-!s8W-!s8N'!zs8N'!!!*'!s8N'!
 zs8N'!zzzs8N'!zzzs8N'!zzzs8N'!zzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 28 562 m 25
  231 562 l 25
  231 206 l 17
@@ -6087,11 +6591,12 @@ Fore
  28 562 l 25
 EndSplineSet
 EndChar
+
 StartChar: paragraph
 Encoding: 182 182 246
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -102 1122 51.25 50.9688 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -6113,6 +6618,7 @@ s8W-!zzs8W-!s8W-!z!!!$!s8W*!!<<'!z!!*'!rrE'!!<<'!z!!*'!!!*$!!<<'!z!!*'!
 s8W-!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 283.5 462 m 9
  283.5 714 l 17
  224.5 714 182.5 664 182.5 590 c 1
@@ -6137,11 +6643,12 @@ Fore
  234.5 0 l 9
 EndSplineSet
 EndChar
+
 StartChar: periodcentered
 Encoding: 183 183 247
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9062 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -6159,13 +6666,15 @@ gt^]@h;-rEhV[5Ji8EPPiSieUioB(ZjQ,C`jlPXek3(pjkih6pl07KulKdd%m-O*+mHs?0mdKW5
 nF5r;naZ2@o(2JEo^qeKp%A%Pp@n=Uq"XX[q>'m`qYU0er;?KkrVc`prr<#uzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz!!*'!
 zzz!!*'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
+Fore
 Refer: 41 46 N 0.67 0 0 0.67 215.405 252.725 2
 EndChar
+
 StartChar: uni00B9
 Encoding: 185 185 248
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9062 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -6185,6 +6694,7 @@ s8N'!zzz!<3$!zzz!<3$!zzz!<3$!zzz!<3$!zzz!<3$!zzz!<3'!zzz!<3'!zz!!!$!s8W-!
 zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 205.5 919 m 25
  360.5 919 l 25
  360.5 513 l 25
@@ -6200,11 +6710,12 @@ Fore
  205.5 919 l 25
 EndSplineSet
 EndChar
+
 StartChar: ordmasculine
 Encoding: 186 186 249
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9062 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -6224,6 +6735,7 @@ s8N'!zzrr<$!!<3$!zzrr<$!!<3$!zzrr<$!!<3$!zzrr<$!!<3$!zzs8W-!s8N'!zzzzzzs8W-!
 s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 120 460.5 m 1
  426 460.5 l 1
  426 407.5 l 1
@@ -6232,11 +6744,12 @@ Fore
 EndSplineSet
 Refer: 149 176 S 1 0 0 1 -65 0 2
 EndChar
+
 StartChar: guillemotright
 Encoding: 187 187 250
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9688 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -6257,6 +6770,7 @@ rr<'!rr<$!z!!*'!rrE*!rr<$!z!<<*!!<<*!zzs8W*!s8W*!z!!!$!s8N*!s8N'!z!!!$!
 rr<'!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 506.37 390.314 m 5
  506.37 369.74 l 5
  288.63 152 l 5
@@ -6277,11 +6791,12 @@ Fore
  306.37 390.314 l 5
 EndSplineSet
 EndChar
+
 StartChar: onequarter
 Encoding: 188 188 251
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9688 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -6303,6 +6818,7 @@ s8N'!z!!!$!s8W-!rr<$!z!!*'!s8W-!rr<$!z!<<*!s8W*!rr<'!z!<<*!s8N'!rr<'!z!<<*!
 rr<$!rr<'!z!<<*!zs8W-!rr<$!zz!!!$!zzz!!!$!zzz!!!$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 27 103 m 25
  643 719 l 25
  643 615 l 25
@@ -6311,15 +6827,16 @@ Fore
 EndSplineSet
 Refer: 47 52 N 0.526316 0 0 0.500611 328.421 -114 2
 Refer: 43 49 S 0.5 0 0 0.563725 34.5004 473 2
-LCarets: 0 65535 '    ' 2 0 0 
-Ligature: 0 0 'frac' one slash four
-Ligature: 0 0 'frac' one fraction four
+LCarets2: 2 0 0 
+Ligature2: "'frac' Diagonal Fractions lookup 0 subtable" one slash four
+Ligature2: "'frac' Diagonal Fractions lookup 0 subtable" one fraction four
 EndChar
+
 StartChar: onehalf
 Encoding: 189 189 252
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9375 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -6341,6 +6858,7 @@ s8N'!z!!!$!s8W-!rr<$!z!!*'!s8W-!!<<*!rr<$!!<<*!s8W*!z!<3$!!<<*!s8N'!z!<3$!
 !<<*!rr<$!!!*'!rr<$!!<<*!z!<3$!zzz!<3$!zzz!<3$!zzz!!*'!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 22.2275 103 m 25
  638.229 719 l 25
  638.229 615 l 25
@@ -6349,15 +6867,16 @@ Fore
 EndSplineSet
 Refer: 243 178 N 1.00186 0 0 0.890115 182.648 -518.344 2
 Refer: 43 49 S 0.5 0 0 0.563725 20.7275 467 2
-LCarets: 0 65535 '    ' 2 0 0 
-Ligature: 0 0 'frac' one slash two
-Ligature: 0 0 'frac' one fraction two
+LCarets2: 2 0 0 
+Ligature2: "'frac' Diagonal Fractions lookup 0 subtable" one slash two
+Ligature2: "'frac' Diagonal Fractions lookup 0 subtable" one fraction two
 EndChar
+
 StartChar: threequarters
 Encoding: 190 190 253
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9688 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -6379,6 +6898,7 @@ s8N'!z!!!$!s8W-!rr<$!z!!*'!s8W-!rr<$!z!<<*!s8W*!rr<'!z!<<*!s8N'!rr<'!z!<<*!
 rr<$!rr<'!z!<<*!zs8W-!rr<$!zz!!!$!zzz!!!$!zzz!!!$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 27 103 m 25
  643 719 l 25
  643 615 l 25
@@ -6387,15 +6907,16 @@ Fore
 EndSplineSet
 Refer: 244 179 N 1 0 0 1 -129 -15 2
 Refer: 47 52 S 0.526316 0 0 0.500611 331.421 -81 2
-LCarets: 0 65535 '    ' 2 0 0 
-Ligature: 0 0 'frac' three slash four
-Ligature: 0 0 'frac' three fraction four
+LCarets2: 2 0 0 
+Ligature2: "'frac' Diagonal Fractions lookup 0 subtable" three slash four
+Ligature2: "'frac' Diagonal Fractions lookup 0 subtable" three fraction four
 EndChar
+
 StartChar: AE
 Encoding: 198 198 254
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -150 1122 51.25 50.9688 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -6417,6 +6938,7 @@ z!!!$!rr<'!rr<$!z!!*'!rr<'!rr<$!z!!*'!!!!$!rr<$!z!!*'!!!!$!s8W-!rr<$!!!*'!
 !!!$!s8W-!rr<$!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
 Fore
+SplineSet
 334.9 713 m 25
  274.7 459 l 25
  334.9 459 l 25
@@ -6440,11 +6962,12 @@ Fore
  644.9 814 l 29
 EndSplineSet
 EndChar
+
 StartChar: Oslash
 Encoding: 216 216 255
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
 Back
 Image: 16 32 1 16 256 0 -94 1178 51.25 50.9062 0
 !!!!"!<E6'!WrN,"9\i2"U,)7"pYA<#RC\B#mgqG$4@4L$k*OR%1NdW%M''\&.fBb&J5Wg&ebol
@@ -6465,24 +6988,193 @@ rr<$!!!*'!s8N*!s8W-!rr<$!!!*'!rrE*!s8W-!rr<$!!!*'!!<<*!s8N*!rr<$!!!*'!s8W-!
 s8N*!rr<$!!!*'!s8W-!rrE*!rr<$!!!*'!s8W-!!<<*!rr<$!!!*'!s8W-!!<<*!z!<<*!
 s8W*!s8W-!z!<<*!s8W-!s8W*!z!<<*!s8W-!s8W*!z!<<*!s8W-!s8N'!zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 EndImage
+Fore
 Refer: 34 47 S 1 0 0 1 -25.0004 3 2
 Refer: 16 79 N 1 0 0 1 -0.000127792 0 2
 EndChar
+
 StartChar: caron
 Encoding: 711 711 256
 Width: 670
 Flags: HW
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 63 94 S -1 0 0 -1 670 1365 2
 EndChar
+
 StartChar: amacron
 Encoding: 257 257 257
 Width: 670
 Flags: H
-TeX: 0 0 0 0
+LayerCount: 2
+Fore
 Refer: 242 175 S 1 0 0 1 -3.89648 -44 2
 Refer: 66 97 N 1 0 0 1 0 0 3
 EndChar
+
+StartChar: peseta
+Encoding: 8359 8359 258
+Width: 1402
+Flags: HW
+LayerCount: 2
+Fore
+SplineSet
+1056 512 m 0
+ 1042.66 511.961 971.012 510.371 927.539 485.879 c 0
+ 917.308 480.114 909.617 473.606 910 468 c 0
+ 916.339 375.198 1025.8 362.485 1056 362 c 0
+ 1304.88 358.001 1348.86 244.378 1347 166 c 0
+ 1346.53 146.229 1346.05 103.549 1291.84 62.334 c 0
+ 1223.18 10.1328 1108.12 -0.291992 1056 0 c 0
+ 968.93 0.488281 938.59 8.00684 838.803 54.7158 c 1
+ 881.197 145.284 l 1
+ 969.728 103.845 985.92 100.312 1056 100 c 0
+ 1126.66 99.6846 1198.92 117.308 1231.31 141.938 c 0
+ 1244.62 152.053 1246.86 156.277 1247 166 c 0
+ 1248 233.626 1172.85 260.757 1056 262 c 0
+ 974.967 262.862 820.333 302.462 810 468 c 0
+ 808.346 494.508 820.335 540.259 878.454 573.003 c 0
+ 939.032 607.133 1020.31 611.786 1056 612 c 0
+ 1166.89 612.664 1220.95 603.369 1317 563.823 c 1
+ 1277 472.177 l 1
+ 1195.8 505.604 1155.37 512.289 1056 512 c 0
+533 761 m 25
+ 643 761 l 25
+ 643 613 l 25
+ 809 613 l 25
+ 809 510 l 25
+ 643 510 l 25
+ 643 153 l 17
+ 643 123 651 101 691 101 c 9
+ 708 101 l 17
+ 750 101 757 117 757 153 c 9
+ 757 201 l 25
+ 853 201 l 25
+ 853 153 l 17
+ 831 27 786 15 708 0 c 1
+ 691 0 l 1
+ 597 -3 533 36 533 153 c 9
+ 533 510 l 25
+ 435 510 l 25
+ 435 613 l 25
+ 533 613 l 25
+ 533 761 l 25
+159.5 713 m 25
+ 159.5 409 l 25
+ 235 408 l 17
+ 294 408 330 443 334 508 c 9
+ 333 613 l 17
+ 334 678 303 715 231 715 c 9
+ 159.5 713 l 25
+157.5 309 m 25
+ 155.5 0 l 25
+ 54.5 0 l 25
+ 54.5 819 l 25
+ 231 819 l 17
+ 367 818 434 750 434 619 c 9
+ 435 502 l 17
+ 435 375 352 310 238 309 c 9
+ 157.5 309 l 25
+EndSplineSet
+EndChar
+
+StartChar: uni2606
+Encoding: 9734 9734 259
+Width: 670
+Flags: HW
+LayerCount: 2
+Fore
+SplineSet
+315 819 m 29
+ 435 588 l 29
+ 627 588 l 29
+ 471 312 l 29
+ 576 0 l 29
+ 324 225 l 29
+315 819 m 25
+ 435 588 l 25
+ 627 588 l 25
+ 471 312 l 25
+ 576 0 l 25
+ 324 225 l 25
+EndSplineSet
+EndChar
+
+StartChar: smileface
+Encoding: 9786 9786 260
+Width: 670
+Flags: HW
+LayerCount: 2
+Fore
+SplineSet
+301.575 159.45 m 17
+ 251.175 159.45 224.775 176.25 225.175 237.85 c 9
+ 225.175 262.25 l 25
+ 295 261 l 25
+ 295.25 237.75 l 17
+ 295.5 220.75 302.25 214.5 319 214.75 c 9
+ 360 214.75 l 17
+ 376.75 214.5 383.5 220.75 383.75 237.75 c 9
+ 383.5 262.75 l 25
+ 449.575 263.05 l 25
+ 449.175 238.25 l 17
+ 449.575 176.65 423.175 159.85 372.775 159.85 c 9
+ 301.575 159.45 l 17
+396 416.301 m 9
+ 380.5 416.301 l 17
+ 372.5 416.301 370.7 414.4 370.7 406.101 c 9
+ 370.7 384.5 l 17
+ 370.7 377.5 373.4 375 380.5 375 c 9
+ 294 375 l 17
+ 302 375 406.101 377.5 406.101 384.5 c 9
+ 406.101 406.101 l 17
+ 406.101 414.101 403.4 416.301 396 416.301 c 9
+378.15 440.051 m 9
+ 401.4 440.051 l 17
+ 423.301 440.051 431.4 431.95 431.4 410.051 c 9
+ 431.4 377.65 l 17
+ 431.4 356.351 424.2 348.25 401.4 348.25 c 9
+ 378.15 348.25 l 17
+ 355.801 348.25 346.801 355.9 346.801 377.65 c 9
+ 346.801 410.051 l 17
+ 346.801 431.95 355.351 440.051 378.15 440.051 c 9
+294 416.301 m 9
+ 278.5 416.301 l 17
+ 270.5 416.301 268.7 414.4 268.7 406.101 c 9
+ 268.7 384.5 l 17
+ 268.7 377.5 271.4 375 278.5 375 c 9
+ 294 375 l 17
+ 302 375 304.101 377.5 304.101 384.5 c 9
+ 304.101 406.101 l 17
+ 304.101 414.101 301.4 416.301 294 416.301 c 9
+276.15 440.051 m 9
+ 299.4 440.051 l 17
+ 321.301 440.051 329.4 431.95 329.4 410.051 c 9
+ 329.4 377.65 l 17
+ 329.4 356.351 322.2 348.25 299.4 348.25 c 9
+ 276.15 348.25 l 17
+ 253.801 348.25 244.801 355.9 244.801 377.65 c 9
+ 244.801 410.051 l 17
+ 244.801 431.95 253.351 440.051 276.15 440.051 c 9
+417 514 m 9
+ 262 514 l 17
+ 182 514 164 495 164 412 c 9
+ 164 196 l 17
+ 164 126 191 101 262 101 c 9
+ 417 101 l 17
+ 497 101 518 126 518 196 c 9
+ 518 412 l 17
+ 518 492 491 514 417 514 c 9
+262 612 m 9
+ 417 612 l 17
+ 563 612 617 558 617 412 c 9
+ 617 196 l 17
+ 617 54 569 0 417 0 c 9
+ 262 0 l 17
+ 113 0 53 51 53 196 c 9
+ 53 412 l 17
+ 53 558 110 612 262 612 c 9
+EndSplineSet
+EndChar
 EndChars
-DupEnc: 160 3
 EndSplineFont

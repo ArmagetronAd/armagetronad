@@ -19,6 +19,8 @@ include_help			Includes the following file
 sinclude_help			Includes the following file silently, without error message if it is not found
 rinclude_help           Includes a file using the resource system. Use the direct link syntax to your profit here.
 new_team_allowed_help		Is it currently allowed to create a new team?
+yes                     Yes
+no                      No
 
 #********************************************
 #********************************************
@@ -2417,6 +2419,9 @@ help_commands_misc_text 0x88ff88/help0xffff88: You just found out about this one
 
 help_commands_tourney_shortdesc Tourney related commands
 help_commands_tourney_text 0x88ff88/lock0xffff88: Locks your current team. Nobody can join it any more on their own. To let someone in, you need to invoke\n0x88ff88/invite <player>0xffff88: From that moment on, the player is allowed to join you. Another effect of /invite, even if your team is not locked, is that the invited player can read all of your team's /team messages. Invitations are permanent until revoked. That means a player who is invited into your team can join and leave it freely without further need to /invite him again. Players who were on the team when you /locked it are not automatically invited when they leave on their own account.\n0x88ff88/uninvite <player>0xffff88: reverses /invite. The invitation is revoked, the player can no longer join you, and if he currently is on your team, he will be thrown out.\n0x88ff88/unlock0xffff88: makes your team available for everyone to join again.
+
+help_version_shortdesc  This server's version
+help_version_text       0xffff7fThis is running:\n0x7fff7f    \g \v\n0xffff7fIt was built on 0x7fff7f\d0xffff7f, from revision 0x7fff7fr\o0xffff7f(0x7fff7fz\z0xffff7f), which has revision 0x7fff7fr\l0xffff7f(0x7fff7fz\m0xffff7f) for last common ancestor with branch 0x7fff7f\p0xffff7f, which can be found at:\n0x7fff7f    \b\n0xffff7fThis revision's ID is:\n0x7fff7f    \i\n0xffff7fIt was tagged(empty if not tagged):\n0x7fff7f    \t\n0xffff7fSource changed:\n0x7fff7f    \c
 
 invite_no_team          Can't use \1 if you're not on a team.\n
 invite_team_locked      \1 locked, you'll need an invitation from a team leader via the /invite command to join from now on.\n
