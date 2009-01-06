@@ -548,5 +548,22 @@
                 </Solid>
             </Background>
         </Map>
+
+        <Camview camera="in" view="in">
+            <Position x="-0.95" y="-0.95" />
+            <Size height="0.15" width="0.3" />
+            <Translation x="0.5" y="0" z="0" />
+            <Rotation value="150" />
+            <Mirror value="true" />
+        </Camview>
+
+        <Camview camera="in" view="in">
+            <Position x="0.35" y="-0.95" />
+            <Size height="0.15" width="0.3" />
+            <Translation x="-0.5" y="0" z="0" />
+            <Rotation value="210" />
+            <Mirror value="true" />
+        </Camview>
+
     </Cockpit>
 </Resource>

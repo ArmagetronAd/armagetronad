@@ -18,7 +18,7 @@
     usetemplate CDATA ''
 ">
 
-<!ELEMENT Cockpit ((BarGauge | NeedleGauge | Map | Label | VerticalBarGauge | Rectangle | WidgetTemplate)+)>
+<!ELEMENT Cockpit ((BarGauge | NeedleGauge | Map | Label | VerticalBarGauge | Rectangle | WidgetTemplate | Camview )+)>
 <!ATTLIST Cockpit version CDATA #REQUIRED>
 
 <!ELEMENT WidgetTemplate ((DataSet |
@@ -102,6 +102,39 @@
                    MapModes
                   )*)>
 <!ATTLIST Map %CommonWidgetAttributes;>
+
+<!ELEMENT Camview (( Position |
+                   	 Size |
+                   	 Background |
+                   	 Translation |
+                   	 Rotation |
+                   	 FOV |
+                   	 Mirror |
+                   	 Rise |
+                   	 MainCameraDir
+                  )*)>
+<!ATTLIST Camview %CommonWidgetAttributes;>
+<!ATTLIST Camview view CDATA #REQUIRED>
+
+<!ELEMENT Translation EMPTY>
+<!ATTLIST Translation x CDATA "0">
+<!ATTLIST Translation y CDATA "0">
+<!ATTLIST Translation z CDATA "0">
+
+<!ELEMENT Rotation EMPTY>
+<!ATTLIST Rotation value CDATA "0">
+
+<!ELEMENT FOV EMPTY>
+<!ATTLIST FOV value CDATA "0">
+
+<!ELEMENT Mirror EMPTY>
+<!ATTLIST Mirror value (true | false) "false">
+
+<!ELEMENT Rise EMPTY>
+<!ATTLIST Rise value CDATA "0">
+
+<!ELEMENT MainCameraDir EMPTY>
+<!ATTLIST MainCameraDir value (true | false) "false">
 
 <!ELEMENT DataSet ((AtomicData | Conditional | Math | Value)+)>
 <!ATTLIST DataSet id CDATA "">
