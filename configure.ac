@@ -25,7 +25,7 @@ dnl AC_CANONICAL_BUILD
 dnl AC_CANONICAL_HOST
 
 AC_PROG_RANLIB
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE(tar-ustar)
 
 dnl detect which link commant to use
 AC_PROG_LN_S
