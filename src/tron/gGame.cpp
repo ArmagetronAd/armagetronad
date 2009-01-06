@@ -761,7 +761,8 @@ void exit_game_objects(eGrid *grid){
 
 #ifndef DEDICATED
 	cCockpit::AfterRoundProcess();
-#endif   
+#endif
+
     int i;
     for (i=ePlayer::Num()-1;i>=0;i--){
         if (ePlayer::PlayerConfig(i))
