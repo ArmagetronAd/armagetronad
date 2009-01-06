@@ -300,8 +300,11 @@ test $DEBUGLEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -DDEBUG_EXPENSIVE"
 test $DEBUGLEVEL -ge 5 && CXXFLAGS="$CXXFLAGS -DMEM_DEB"
 
 dnl oddly, this macro needs to be called once unconditionally, or automake
-dnl borks up.
+dnl borks up. Backup CXXFLAGS and restore them in case the test passes. Which it does
+dnl for some versions of GCC.
+CXXFLAGS_BACK="${CXXFLAGS}"
 AX_CXXFLAGS_GCC_OPTION(-nobodyreadsconfigureoutputanyway)
+CXXFLAGS="${CXXFLAGS_BACK}"
 
 if test $CODELEVEL -ge 1; then
     CXXFLAGS="$CXXFLAGS -Wall"
