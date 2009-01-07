@@ -6,7 +6,7 @@
 <!ENTITY % resource.module "INCLUDE">
 <![%resource.module;[
 <!ENTITY % resource.mod
-	SYSTEM "resource-0.3.1-a.dtd">
+	SYSTEM "resource.dtd">
 %resource.mod;]]>
 
 <!ELEMENT Map (Settings?, World)> 

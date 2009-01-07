@@ -29,17 +29,22 @@ find ${destination}/ -name "*~" -exec rm -rf \{\} \;
 # rename them properly
 python ${sortresources} -v ${destination} || exit 1
 
-# silently remove empty directories
-find ${destination} -type d -depth -exec rmdir \{\} \; > /dev/null 2>&1 
-
 # copy dtds
 test -r ${destination}/AATeam || mkdir ${destination}/AATeam
+# get resource.dtd's new version
+RESOURCEVERSION=`grep "<!-- version=" < ${source}/resource.dtd | sed -e "s,.*=\",," -e "s,\".*,,"`
+
 for type in `ls ${source} | grep '.dtd$' | grep -v -- - | sed -e 's,.dtd,,'`; do
     # copy dtd file to one with correct version
     VERSION=`grep "<!-- version=" < ${destination}/${type}.dtd | sed -e "s,.*=\",," -e "s,\".*,,"`
-    cp ${destination}/${type}.dtd ${destination}/AATeam/${type}-$VERSION.dtd
+    # If the file includes resource.dtd, make it include the properly
+    # versioned resource-version.dtd
+    sed "s,resource.dtd,resource-$RESOURCEVERSION.dtd,g" < ${destination}/${type}.dtd > ${destination}/AATeam/${type}-$VERSION.dtd
     echo $VERSION > ${destination}/.${type}version
 done
+
+# silently remove empty directories
+find ${destination} -type d -depth -exec rmdir \{\} \; > /dev/null 2>&1 
 
 # tag completion
 touch ${destination} || exit 1

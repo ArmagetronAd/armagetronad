@@ -4,47 +4,11 @@
 
 #set -x
 
-show_usage()
-{
-    echo "USAGE: $1 [-v|--verbose] srcdir"
-}
-
-if test $# -ne 1 && test $# -ne 2
-then
-    echo "ERROR: Invalid argument count" >&2
-    show_usage $0
-    exit 1
-fi
-
-verbose=
 srcdir="$1"
-
-if ( test x"$1" = x"--verbose" || test x"$1" = x"-v" ) && test $# -eq 2
-then
-    verbose=#
-    srcdir=$2
-elif ( test x"$1" = x"--verbose" || test x"$1" = x"-v" )
-then
-    echo "ERROR: Invalid argument count" >&2
-    show_usage $0
-    exit 1
-fi
 
 # set version parts to defaults for CVS snapshot
 major_version=`cat ${srcdir}/major_version`
 DATE=`date +%Y%m%d`
-builddate=`date -R`
-minor_version=
-revid=0
-revno=0
-branchnick=
-revcount=0
-tag=
-srcchanged=
-lca=0
-lcaz=0
-branchurl=
-
 
 #echo $major_version
 #echo $minor_version
@@ -122,72 +86,30 @@ fi
 # Check if bzr is installed, and if the path is versionned
 bzr >/dev/null 2>&1
 # But for now, ignore it
-if test $? -eq 0 && test -d ${srcdir}/.bzr
-#if test 1 -eq 0
+#if test $? -eq 0
+if test 1 -eq 0
 then
-    # Crappily, we can't rely on revision numbers to do anything
-    # ( ie. when one merges then pushes, the last revno might be lower than originally)
-    # So we count revisions, including merged ones, also including fools which have empty
-    # lines with only "revno: 15" in their commit messages
-    revno=$( bzr revno ${srcdir} 2>/dev/null)    
-    revcount=$( bzr log ${srcdir} 2>/dev/null | sed -ne 's/^ *revno: [0-9\.]\+$/\0/p' | wc -l )
-    lca=$revno
-    lcaz=$revcount
-    versioned=#
-    branchurl=$( bzr info ${srcdir} 2>/dev/null | sed -ne 's/^  parent branch: \(.*\)$/\1/p' )
-
-
-    # We will check this branch diverged, and/or if tree changed
-    bzrmissingcout=$( cd ${srcdir} && bzr missing --this 2>/dev/null )
-    missing=$?
     bzr diff ${srcdir} --quiet >/dev/null 2>&1
-    changed=$?
-        
-
-    if test ${missing} -eq 1
-    # if it diverged:
+    # Test for the return code of bzr diff (see bzr diff --help)
+    if test $? -eq 0
     then
-        # Count the revisions we added locally
-        localrevisions=$( echo "${bzrmissingcout}" | sed -ne '2,1s/^You have \([0-9]\+\) extra revision(s):$/\1/p' )
-        # See how many steps it is, with the fool's number
-        stepsbackwards=$( bzr log ${srcdir} -l ${localrevisions} | sed -ne 's/^ *revno: [0-9\.]\+$/\0/p' | wc -l )
-        # And start dancing.
-        minor_version=_alpha_z$(( ${revcount} - ${stepsbackwards} ))_${DATE}
-        # Set last common ancestors
-        lca=$(( ${revno} - ${localrevisions}))
-        lcaz=$(( ${revcount} - ${stepsbackwards} ))
-        srcchanged=#
-    elif test ${missing} -eq 0 && ( test ${changed} -eq 1 || test ${changed} -eq 2 )
-    then
-        # If a change was made and no more revision was added, just use revision fool's number plus build date
-        minor_version=_alpha_z${revcount}_${DATE}
-        # And this is versionned too
-        srcchanged=#
-    elif test ${missing} -eq 0
-    then
-        # If really no change was made, use the fool's number, with tag if any
-        # So check if we have tags
+        # If no change was made, use revision number
+        # but first check if it's tagged
         revno=$(bzr revno ${srcdir})
-        tag=$(bzr tags -d ${srcdir} | sed -ne 's/^\(.*\) +${revno}$/\1/p' )
-        if test ${tag}
+        tag=$(bzr tags | grep -P "^(.*?) +${revno}$" | awk '{ print $1 }')
+        if test $tag
         then
             # If it is tagged, use the tag
-            minor_version=_alpha_z${revcount}_${tag}
+            DATE=_$tag
         else
-            # If not, use fool's number only
-            minor_version=_alpha_z${revcount}
+            # If not, use revision number
+            DATE=_r$(bzr revno ${srcdir})
         fi
-        # That's versioned as well
-    else
-        # Otherwise, this is just not versionned
-        versioned=
-    fi
-
-    if test $versioned
+    elif test $? -lt 3
     then
-        major_version=$( cd ${srcdir}; bzr nick )
-        branchnick=$major_version
-        revid=$( bzr testament | sed -ne 's/^revision-id: \(.*\)/\1/p' )
+        # If a change was made, use revision number plus build date
+        DATE=_r$(bzr revno ${srcdir})_$DATE
+    # It returns 3 if it's not versionned, so forget it
     fi
 fi
 
@@ -196,27 +118,4 @@ then
     test -z "$DATE" || minor_version=`cat ${srcdir}/minor_version | sed -e "s,DATE,$DATE," -e "s,YYYYMMDD,$DATE,"`
 fi
 
-if test $verbose
-then
-    echo VERSION \"$major_version$minor_version\"
-    echo REVID \"$revid\"
-    echo REVNO $revno
-    echo BRANCHNICK \"$branchnick\"
-    echo ZNR $revcount
-    echo REVTAG \"$tag\"
-
-    if test $srcchanged
-    then
-        echo CHANGED true
-    else
-        echo CHANGED false
-    fi
-
-    echo BUILDDATE \"$builddate\"
-    echo BRANCHLCA $lca
-    echo BRANCHLCAZ $lcaz
-    echo BRANCHURL \"$branchurl\"
-else
-    echo $major_version$minor_version
-fi
-
+echo $major_version$minor_version

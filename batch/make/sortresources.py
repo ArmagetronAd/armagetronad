@@ -78,6 +78,7 @@ def parseResource(filename, data):
               # fallback: return empty stream, result: no dtd checking is done.
               # Not horribly bad in this context
               print "warning, could not find requested entity", sysid
+              
               return StringIO.StringIO("")
 
     # parse: create parser...
