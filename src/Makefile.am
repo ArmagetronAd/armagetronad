@@ -40,64 +40,6 @@ tTrueVersion.h: $(wildcard $(top_srcdir)/*_version) $(wildcard $(top_srcdir)/.sv
 distclean-local:
 	rm -f tTrueVersion.h
 
-#   fix internal version info
-	mv $(distdir)/src/tTrueVersion.h $(distdir)/src/tFakeVersion.h
-
-if USE_UNINSTALL
-
-# installed location of the uninstall script
-uninstall_location=$(DESTDIR)${bindir}/${uninstaller}
-
-# generate and install uninstallation script
-install-uninstall: ${top_srcdir}/batch/make/uninstall Makefile
-	$(install_sh_PROGRAM) $< $(uninstall_location)
-	rm $(uninstall_location)
-	ROOTDIR=$(ROOTDIR) DESTDIR=$(DESTDIR) MAKE="$(MAKE)" PREFIX="${prefix}" PROGTITLE="${progtitle}" PROGNAME="${progname}" SCRIPTDIR="${scriptdir}" sh $< $(uninstall_location) "$(external_uninstall_cmd)"
-else
-install-uninstall:
-endif
-
-# additional things on installation
-install-exec-hook: install-uninstall
-#	rename executable to armagetronad-VERSION and link to armagetronad
-if BUILDMAIN
-	cd  $(DESTDIR)${bindir}; mv armagetronad_main$(EXEEXT) @progname@$(executable_suffix)
-endif
-
-#	delegate to special tasks
-	$(masterInstallTasks)
-
-install-data-hook:
-#	install systemwide files
-if USE_SYSINSTALL
-	DESTDIR=$(DESTDIR) ROOTDIR=$(ROOTDIR) bash $(DESTDIR)${scriptdir}/sysinstall install $(prefix)
-endif
-
-uninstall-hook:
-#	delete executable and uninstaller
-	rm -f $(DESTDIR)${bindir}/@progname@$(executable_suffix)
-
-#	delegate to special tasks
-	$(masterUninstallTasks)
-
-if USE_UNINSTALL
-	rm -f $(uninstall_location)
-endif
-#   rm -rf $(DESTDIR)$(aa_datadir)
-
-# this has to be done first on uninstall/install. Unfortuantely.
-# automake uses strict bottom-up logic here, so it is
-# a special target recursively made from within src.
-uninstall-first:
-#	uninstall systemwide files
-if USE_SYSINSTALL
-	if test -z "$(AA_FAKE_UNINSTALL)"; then DESTDIR=$(DESTDIR) ROOTDIR=$(ROOTDIR) bash $(DESTDIR)${scriptdir}/sysinstall uninstall $(prefix); fi
-endif
-
-install-first:
-#	uninstall previous version (if it exists), ignoring errors
-	test -n "$(uninstall_location)" && test -x "$(uninstall_location)" && "$(uninstall_location)" || true
-
 ${srcdir}/tools/tLocale.cpp: ${srcdir}/tools/tVersion.cpp
 ${srcdir}/tools/tVersion.cpp: tTrueVersion.h 
 
