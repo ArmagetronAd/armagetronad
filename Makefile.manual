@@ -165,7 +165,7 @@ $(srcdir)/ChangeLog: .changetag
 # triggers regeneration of ChangeLog and version
 distprep:
 # rebuild fingerprint and update source change tag that way
-	if test -d ${srcdir}/.svn; then rm -f fingerprint; $(MAKE) fingerprint; fi
+	if test -d ${srcdir}/.svn || test -d ${srcdir}/.bzr; then rm -f fingerprint; $(MAKE) fingerprint; fi
 
 #############
 # Debugging #
