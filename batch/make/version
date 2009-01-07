@@ -33,7 +33,7 @@ fi
 # set version parts to defaults for CVS snapshot
 major_version=`cat ${srcdir}/major_version`
 DATE=`date +%Y%m%d`
-builddate=`date -R`
+builddate=`date +'%a, %d %b %Y %T %z'`
 minor_version=
 revid=0
 revno=0
