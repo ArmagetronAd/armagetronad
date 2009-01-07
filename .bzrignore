@@ -23,6 +23,7 @@ Makefile.in
 ./configure
 ./depcomp
 ./install-sh
+./ylwrap
 ./missing
 ./touch
 ./version
