@@ -25,7 +25,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 #ifndef TRUE_ARMAGETRONAD_VERSION
-#include "tTrueVersion.h"
+
+#include "aa_config.h"
+
+#ifndef MACOSX_XCODE
+#   include "tTrueVersion.h"
+#endif
 
 #include "tVersion.h"
 #include "tString.h"
