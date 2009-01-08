@@ -111,6 +111,7 @@ If --enable-armathentication was activated:
 - new chat commands /op and /deop to change other players' access rights
 
   Featurelets:
+- Added Polish language file
 - clientside play time tracking and server controlled minimal required experience
   to be allowed to play.
 - color codes in chat increase the spam level logarithmically.
@@ -180,6 +181,7 @@ If --enable-armathentication was activated:
   HELP_INTRODUCTORY_BLURB and ADD_HELP_TOPIC to control its contents
 - /rtfm command that allows moderators to send help messages to newbies
 - /players now shows the players' color and allows searching
+- TEAM_ELIMINATION_MODE sets the way ArmagetronAd removes teams when there's too much teams.
 
   Bugfixes:
 - Text input fields now let the text wrap correctly and make use of the space allocated

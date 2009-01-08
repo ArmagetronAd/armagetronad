@@ -34,7 +34,7 @@ static int myHTTPFetch(const char *URI, const char *filename, const char *savepa
 
     ctxt = xmlNanoHTTPOpen(URI, NULL);
     if (ctxt == NULL) {
-        con << "ERROR: ctxt is NULL\n";
+        con << tOutput( "$resource_fetcherror_noconnect", URI );
         return 1;
     }
 
@@ -54,7 +54,7 @@ static int myHTTPFetch(const char *URI, const char *filename, const char *savepa
     int maxlen = 10000;
     buf = (char*)malloc(maxlen);
     while( (len = xmlNanoHTTPRead(ctxt, buf, maxlen)) > 0 ) {
-        fwrite(buf, len, 1, fd);
+        Ignore( fwrite(buf, len, 1, fd) );
     }
     free(buf);
 
@@ -199,6 +199,9 @@ FILE* tResourceManager::openResource(const char *uri, const char *file) {
 
 static void RInclude(std::istream& s)
 {
+    // forbid CASACL
+    tCasaclPreventer preventer;
+
     tString file;
     s >> file;
 

@@ -32,13 +32,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <set>
 
+tString & operator << ( tString &s, const eTeam & team)
+{
+    if ( !(&team) )
+        return s << tOutput("$player_spectator_message");
+    else
+        return s << team.GetColoredName();
+}
+std::ostream & operator << ( std::ostream &s, const eTeam & team)
+{
+    if ( !(&team) )
+        return s << tOutput("$player_spectator_message");
+    else
+        return s << team.GetColoredName();
+}
+
 #define TEAMCOLORS 8
 
 static unsigned short se_team_rgb[TEAMCOLORS][3]=
 { {  4,  8, 15 } , // blue
-    { 15, 15,  4 } , // gold
-    { 15,  4,  4 } , // red
-    {  4, 15,  4 } , // green
+    { 15, 13,  0 } , // gold
+    { 15,  1,  1 } , // red
+    {  0, 15,  4 } , // green
     { 15,  4, 15 } , // violet
     {  4, 15, 15 } , // ugly green
     { 15, 15, 15 } , // white
@@ -56,6 +71,9 @@ static tString se_team_name[TEAMCOLORS]=
     tString("$team_name_white"),
     tString("$team_name_black")
 };
+
+// static tList<eTeam> se_ColoredTeams;
+static eTeam * se_ColoredTeams[TEAMCOLORS]={0,0,0,0,0,0,0,0};
 
 static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
@@ -136,6 +154,18 @@ void eTeam::UpdateStaticFlags()
         for (int i = teams.Len() - 1; i>=0; --i)
             teams(i)->Update();
     }
+}
+
+// number of rounds played (updated right after spawning)
+int eTeam::RoundsPlayed() const
+{
+    return roundsPlayed;
+}
+
+// increase round counter
+void eTeam::PlayRound()
+{
+    roundsPlayed++;
 }
 
 //update internal properties ( player count )
@@ -320,6 +350,27 @@ bool eTeam::IsLocked() const
     return locked_;
 }
 
+static void se_UnlockAllTeams ( void )
+{
+    for ( int i = eTeam::teams.Len()-1; i>=0; --i )
+    {
+        (eTeam::teams(i))->SetLocked( false );
+    }
+}
+
+static void se_UnlockAllTeamsConf ( std::istream & s )
+{
+    if ( se_NeedsServer( "UNLOCK_ALL_TEAMS", s ) )
+    {
+        return;
+    }
+
+    se_UnlockAllTeams();
+}
+
+static tConfItemFunc se_unlockAllTeamsConf("UNLOCK_ALL_TEAMS",&se_UnlockAllTeamsConf);
+static tAccessLevelSetter se_unlockAllTemasConfLevel( se_unlockAllTeamsConf, tAccessLevel_Moderator );
+
 // invite the player to join
 void eTeam::Invite( ePlayerNetID * player )
 {
@@ -398,7 +449,7 @@ void eTeam::AddScore(int points,
     score += points;
 
     tOutput message;
-    message.SetTemplateParameter(1, tColoredString::RemoveColors(name));
+    message.SetTemplateParameter(1, GetColoredName());
     message.SetTemplateParameter(2, points > 0 ? points : -points);
 
     if (points>0)
@@ -603,6 +654,18 @@ void eTeam::EnforceConstraints()
         imbalance=0;
 }
 
+enum eTeamEliminationMode
+{
+    TEAM_ELIMINATION_SIZE  = 0, // eliminate smallest team
+    TEAM_ELIMINATION_COLOR = 1, // eliminate ugliest team
+    TEAM_ELIMINATION_SCORE = 2  // eliminate suckiest team
+};
+
+tCONFIG_ENUM( eTeamEliminationMode );
+
+static eTeamEliminationMode se_teamEliminationMode = TEAM_ELIMINATION_SIZE;
+static tSettingItem<eTeamEliminationMode> se_teamEliminationModeConf("TEAM_ELIMINATION_MODE", se_teamEliminationMode );
+
 // make sure the limits on team number and such are met
 void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
 {
@@ -638,9 +701,9 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
         balance = true;
 
         // find the max and min number of players per team and the
-        eTeam *max = NULL, *min = NULL, *ai = NULL;
+        eTeam *max = NULL, *min = NULL, *ai = NULL, *lastColor = NULL, *last = NULL;
         int    maxP = minPlayers, minP = 100000;
-        bool minLocked = false;
+        int    maxColorID = 0;
 
         int numTeams = 0;
         int numHumanTeams = 0;
@@ -667,27 +730,52 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
                     max  = t;
                 }
 
-                // prefer unlocked teams as elimination victims, and of course smaller teams
-                if ( ( humans > 0 || t->NumPlayers() == 0 ) && humans < minP && ( minLocked || !t->IsLocked() ) )
+                // mode 0: prefer unlocked teams as elimination victims, and of course smaller teams
+                if ( ( humans > 0 || t->NumPlayers() == 0 ) && humans < minP && !t->IsLocked() )
                 {
                     minP = humans;
                     min  = t;
-                    minLocked = t->IsLocked();
                 }
+
+                // mode 1: keep the first teams (Team blue, Team gold, etc)
+                if ( ( humans > 0 || t->NumPlayers() == 0 ) && t->colorID > maxColorID && t == se_ColoredTeams[t->colorID])
+                {
+                    maxColorID = t->colorID;
+                    lastColor = t;
+                }
+
+                // mode 2: lowest score goes out
+                last = t;
             }
         }
 
-        if ( ( numTeams > maxTeams && min ) || ( numTeams > minTeams && ai ) )
+        eTeam * teamToKill = NULL;
+        if( (int)se_teamEliminationMode > 2 ) se_teamEliminationMode = TEAM_ELIMINATION_SIZE;
+        // let negative values simply "lock" teams like you lock a server with a low MAX_CLIENTS
+        switch ( se_teamEliminationMode )
+        {
+            case TEAM_ELIMINATION_SIZE:
+                teamToKill = min;
+                break;
+            case TEAM_ELIMINATION_COLOR:
+                teamToKill = lastColor;
+                break;
+            case TEAM_ELIMINATION_SCORE:
+                teamToKill = last;
+                break;
+        }
+
+        if ( ( numTeams > maxTeams && teamToKill ) || ( numTeams > minTeams && ai ) )
         {
             // too many teams. Destroy the smallest team.
             // better: destroy the AI team
             if ( ai )
-                min = ai;
+                teamToKill = ai;
 
-            for ( i = min->NumPlayers()-1; i>=0; --i )
+            for ( i = teamToKill->NumPlayers()-1; i>=0; --i )
             {
                 // one player from the dismantled team.
-                tJUST_CONTROLLED_PTR< ePlayerNetID > pni = min->Player(i);
+                tJUST_CONTROLLED_PTR< ePlayerNetID > pni = teamToKill->Player(i);
 
                 // just ignore AIs, they get removed later by the "balance with AIs" code once it notices all humans are gone from this team
                 if ( !pni->IsHuman() )
@@ -706,7 +794,7 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
                     {
                         int humans = t->NumHumanPlayers();
 
-                        if ( humans < secondMinP && t != min )
+                        if ( humans < secondMinP && t != teamToKill )
                         {
                             secondMinP = humans;
                             second = t;
@@ -773,13 +861,15 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
     }
 }
 
-// static tList<eTeam> se_ColoredTeams;
-
-static eTeam * se_ColoredTeams[TEAMCOLORS]={0,0,0,0,0,0,0,0};
-
 // inquire or set the ability to use a color as a team name
 bool eTeam::NameTeamAfterColor ( bool wish )
 {
+    // reassign colors if colorID >= maxTeams
+    if ( wish && colorID >= maxTeams && se_teamEliminationMode == TEAM_ELIMINATION_COLOR )
+    {
+        NameTeamAfterColor( false );
+    }
+
     if ( wish && colorID < 0 )
     {
         for ( int i = 0; i < TEAMCOLORS; ++i )
@@ -1300,7 +1390,7 @@ void eTeam::ReceiveControlNet(nMessage &m)
 // con/desstruction
 // default constructor
 eTeam::eTeam()
-        :colorID(-1),listID(-1)
+        :colorID(-1),listID(-1), roundsPlayed(0)
 {
     score = 0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;
@@ -1484,7 +1574,9 @@ void eTeam::Shuffle( int startID, int stopID )
 }
 
 static void sg_AddScoreTeam(std::istream &s)
+
 {
+
         tString params;
         params.ReadLine( s, true );
 
@@ -1515,4 +1607,10 @@ static void sg_AddScoreTeam(std::istream &s)
 static tConfItemFunc sg_AddScoreTeam_conf("ADD_SCORE_TEAM",&sg_AddScoreTeam);
 
 
-
+tColoredString eTeam::GetColoredName(void) const
+{
+    tColoredString ret;
+    return ret << tColoredString::ColorString( R() / 15.0, G() / 15.0, B() / 15.0)
+        << Name()
+        << tColoredString::ColorString(-1, -1, -1);
+}

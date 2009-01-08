@@ -204,7 +204,7 @@ gGameSettings::gGameSettings(int a_scoreWin, int a_scoreDiffWin,
                              int a_speedFactor, int a_sizeFactor,
                              gGameType a_gameType,  gFinishType a_finishType,
                              int a_minTeams,
-                             int a_winZoneMinRoundTime, int a_winZoneMinLastDeath
+                             REAL a_winZoneMinRoundTime, REAL a_winZoneMinLastDeath
                             )
         :scoreWin(a_scoreWin), scoreDiffWin(a_scoreDiffWin),
         limitTime(a_limitTime), limitRounds(a_limitRounds), limitScore(a_limitScore),
@@ -290,17 +290,17 @@ void gGameSettings::Menu()
 {
     uMenu GameSettings("$game_settings_menu_text");
 
-    uMenuItemInt wzmr
+    uMenuItemReal wzmr
     (&GameSettings,
      "$game_menu_wz_mr_text",
      "$game_menu_wz_mr_help",
-     winZoneMinRoundTime,0,1000,10);
+     winZoneMinRoundTime, (REAL) 0, (REAL) 1000, (REAL) 10 );
 
-    uMenuItemInt wzmld
+    uMenuItemReal wzmld
     (&GameSettings,
      "$game_menu_wz_ld_text",
      "$game_menu_wz_ld_help",
-     winZoneMinLastDeath,0,1000,10);
+     winZoneMinLastDeath, (REAL) 0 , (REAL) 1000, (REAL) 10 );
 
     uMenuItemToggle team_et
     (&GameSettings,
@@ -561,8 +561,8 @@ static tConfItem<int>    mp_zf("SIZE_FACTOR" ,multiPlayer.sizeFactor);
 static tConfItem<gGameType>    mp_gt("GAME_TYPE",multiPlayer.gameType);
 static tConfItem<gFinishType>  mp_ft("FINISH_TYPE",multiPlayer.finishType);
 
-static tConfItem<int>    mp_wzmr("WIN_ZONE_MIN_ROUND_TIME",multiPlayer.winZoneMinRoundTime);
-static tConfItem<int>    mp_wzld("WIN_ZONE_MIN_LAST_DEATH",multiPlayer.winZoneMinLastDeath);
+static tConfItem<REAL>   mp_wzmr("WIN_ZONE_MIN_ROUND_TIME",multiPlayer.winZoneMinRoundTime);
+static tConfItem<REAL>   mp_wzld("WIN_ZONE_MIN_LAST_DEATH",multiPlayer.winZoneMinLastDeath);
 
 static tConfItem<int>    mp_tmin	("TEAMS_MIN",					multiPlayer.minTeams);
 static tConfItem<int>    mp_tmax	("TEAMS_MAX",					multiPlayer.maxTeams);
@@ -595,8 +595,8 @@ static tConfItem<int>    sp_zf("SP_SIZE_FACTOR" ,singlePlayer.sizeFactor);
 static tConfItem<gGameType>    sp_gt("SP_GAME_TYPE",singlePlayer.gameType);
 static tConfItem<gFinishType>  sp_ft("SP_FINISH_TYPE",singlePlayer.finishType);
 
-static tConfItem<int>    sp_wzmr("SP_WIN_ZONE_MIN_ROUND_TIME",singlePlayer.winZoneMinRoundTime);
-static tConfItem<int>    sp_wzld("SP_WIN_ZONE_MIN_LAST_DEATH",singlePlayer.winZoneMinLastDeath);
+static tConfItem<REAL>    sp_wzmr("SP_WIN_ZONE_MIN_ROUND_TIME",singlePlayer.winZoneMinRoundTime);
+static tConfItem<REAL>    sp_wzld("SP_WIN_ZONE_MIN_LAST_DEATH",singlePlayer.winZoneMinLastDeath);
 
 static tConfItem<int>    sp_tmin	("SP_TEAMS_MIN",					singlePlayer.minTeams);
 static tConfItem<int>    sp_tmax	("SP_TEAMS_MAX",					singlePlayer.maxTeams);
@@ -1209,7 +1209,7 @@ static char const * wishWinnerMessage = "";
 
 void sg_DeclareWinner( eTeam* team, char const * message )
 {
-    if ( team && !winner )
+    if ( team && !winner && !wishWinner )
     {
         wishWinner = team->TeamID() + 1;
         wishWinnerMessage = message;
@@ -1331,7 +1331,13 @@ void init_game_grid(eGrid *grid, gParser *aParser){
       SDL_Delay(1000);
     */
 
-    Arena.PrepareGrid(grid, aParser);
+    {
+        // let settings in the map file be executed with the rights of the person
+        // who set the map
+        tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
+
+        Arena.PrepareGrid(grid, aParser);
+    }
 
     absolute_winner=winner=wishWinner=0;
 }
@@ -1363,7 +1369,7 @@ static void sg_copySettings()
 {
     eTeam::minTeams					= sg_currentSettings->minTeams;
     eTeam::maxTeams					= sg_currentSettings->maxTeams;
-    eTeam::maxPlayers				= sg_currentSettings->maxPlayersPerTeam;
+    eTeam::maxPlayers				= (sg_currentSettings->maxPlayersPerTeam)? sg_currentSettings->maxPlayersPerTeam : 1;
     eTeam::minPlayers				= sg_currentSettings->minPlayersPerTeam;
     eTeam::maxImbalance			 	= sg_currentSettings->maxTeamImbalance;
     eTeam::balanceWithAIs			= sg_currentSettings->balanceTeamsWithAIs;
@@ -1474,16 +1480,29 @@ static tSettingItem<int> sg_spawnWinnersFirstConf( "SPAWN_WINNERS_FIRST", sg_spa
                                   sg_currentSettings->AI_IQ);
 
         int spawnPointsUsed = 0;
+
         for(int t=eTeam::teams.Len()-1;t>=0;t--)
         {
-           int z;
-        if (sg_spawnWinnersFirst == 1){
-           z =(-1*t)+ eTeam::teams.Len()-1;
-      }else{
-         z =t;
-      }
+            int z;
+            if (sg_spawnWinnersFirst == 1){
+                z =(-1*t)+ eTeam::teams.Len()-1;
+            }else{
+                z =t;
+            }
             eTeam *team = eTeam::teams(z);
+
+            // reset team color of fresh teams
+            if ( team->RoundsPlayed() == 0 )
+            {
+                team->NameTeamAfterColor( false );
+            }
+
+            // update team name
+
             team->Update();
+
+            // increase round counter
+            team->PlayRound();
 
             gSpawnPoint *spawn = Arena.LeastDangerousSpawnPoint();
             spawnPointsUsed++;
@@ -3372,6 +3391,9 @@ void gGame::StateUpdate(){
                 }
 
                 {
+                    // default include files are executed at owner level
+                    tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
                     std::ifstream s;
 
                     // load contents of everytime.cfg for real

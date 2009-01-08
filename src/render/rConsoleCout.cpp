@@ -88,6 +88,9 @@ static char line_in[MAXLINE+2];
 static int currentIn=0;
 
 void sr_Read_stdin(){
+    // stdin commands are executed at owner level
+    tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
     tConfItemBase::LoadPlayback( true );
 
     if ( !unblocked )

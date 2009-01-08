@@ -3,6 +3,7 @@ The AA-DevTeam currently consists of (alphabetic username order):
 Real name           SF username     Forum name (empty if identical to SF name)
 
 Dave Fancella       davidfancella   Lucifer
+epsy                epsy
 Fred                guru3           Tank Program
 Jochen Darley       jarrt           joda.bot
 Peter               klaxnek         klax
@@ -35,8 +36,13 @@ Jonathan                 : Headlight (needs activation) and overhead map (will b
 Meriton                  : Replacement for the old buggy Lag-O-Meter
 Oscilloscope             : Most default instant chats
 Belenus                  : OpenBSD support sniplets
-epsy                     : VOTING_SUSPEND console command
-			 
+
+Translators who aren't already cited above:
+Rafal Cieslak            : Polish
+mygal                    : French
+tang322                  : French
+
+
 External code merged in from:
 ID Software         : first version of the low level networking code
 David McAllister    : particle system API

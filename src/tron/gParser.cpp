@@ -210,7 +210,7 @@ gParser::isValidDotNumber(const xmlChar *version)
     /* Check that we have at least i.j.k.xxx */
     for (int i=0; i<3; i++)
     {
-        strtol(start, &end, 10);
+        Ignore( strtol(start, &end, 10) );
         if (start != end) {
             valid = true;
             start = end +1;
@@ -852,7 +852,7 @@ gParser::parseSetting(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
         std::stringstream ss;
         /* Yes it is ackward to generate a string that will be decifered on the other end*/
         ss << myxmlGetProp(cur, "name")  << " " << myxmlGetProp(cur, "value");
-        tConfItemBase::LoadAll(ss, false );
+        tConfItemBase::LoadLine(ss);
     }
     /* Verify if any sub elements are included, and if they contain any Alt
        Sub elements of Point arent defined in the current version*/

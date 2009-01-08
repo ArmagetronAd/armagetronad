@@ -338,13 +338,14 @@ if test @enable_restoreold@ = yes && test ${MODE} = uninstall; then
     fi
 fi
 
+NEWVARDIR=`relocate @aa_localstatedir@`
+
 # migrate old configuration
 if test ${MODE} = install && test @enable_migratestate@ != no; then
     # locate old configuration
     OLDVARDIR=`relocate @oldvardir@`
     if test -d ${ROOTDIR}${OLDVARDIR}; then
         # locate new configuration
-        NEWVARDIR=`relocate @aa_localstatedir@`
         if ! test -r ${ROOTDIR}${NEWVARDIR}/won_rounds.txt && test ${OLDVARDIR} != ${NEWVARDIR}; then
             # move or copy it over
             command=cp
@@ -358,6 +359,11 @@ if test ${MODE} = install && test @enable_migratestate@ != no; then
             ${command} ${ROOTDIR}${OLDVARDIR}/* ${DESTDIR}${NEWVARDIR}/
         fi
     fi
+fi
+
+# remove var directory
+if test ${MODE} = uninstall; then
+  rmdir "${DESTDIR}${NEWVARDIR}"
 fi
 
 # add user

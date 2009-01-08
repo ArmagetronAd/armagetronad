@@ -1,3 +1,16 @@
+src/macosx/config_common.h
+src/macosx/English.lproj/InfoPlist.strings
+MacOS/Armagetron Advanced.xcodeproj/*.mode1v3
+MacOS/Armagetron Advanced.xcodeproj/*.pbxuser
+MacOS/build/
+macosx_build_information.yml
+*.DS_Store
+.gdbinit
+batch/rcd_config
+batch/rcd_server
+batch/rcd_startstop
+batch/serverstarter
+./armagetronad-dedicated
 COPYING
 ChangeLog
 EclipseBuild
@@ -31,6 +44,7 @@ config/rc.config
 desktop/armagetronad.desktop
 language/languages.txt
 resource/included/
+resource/automatic/
 .deps
 src/armagetronad_main
 src/nTrueVersion.h

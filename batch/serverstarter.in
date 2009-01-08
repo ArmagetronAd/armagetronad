@@ -21,7 +21,7 @@ run() {
 while true; do
   STARTDATE=`date +%s`
 
-  run
+  run $*
 
   # give up if restarts come too quickly; ten per minute is suspicious
   OLDESTSTART=${STARTDATE_LOG[1]}

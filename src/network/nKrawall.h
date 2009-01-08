@@ -254,6 +254,8 @@ public:
 #ifdef KRAWALL_SERVER
     //! split a fully qualified user name in authority and username part
     static void SplitUserName( tString const & original, tString & username, tString & authority );
+    static void SplitBaseAuthorityName( tString const & authority, tString & base );
+    static bool CanClaim( tString contacted, tString claimed );
 
     // check whether username's password, when run through ScrambleWithSalt( ScramblePassword(password), salt ), equals scrambledRemote. result.userName and result.authority need to be set by the caller, success and error are filled by this function, and authority may be modified.
     static void CheckScrambledPassword( nCheckResultBase & result,

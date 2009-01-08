@@ -133,32 +133,38 @@ static tSettingItem< int > se_votingMaturitySI( "VOTING_MATURITY", se_votingMatu
 // minimal access level for kick votes
 static tAccessLevel se_accessLevelVoteKick = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_accessLevelVoteKickSI( "ACCESS_LEVEL_VOTE_KICK", se_accessLevelVoteKick );
+static tAccessLevelSetter se_accessLevelVoteKickSILevel( se_accessLevelVoteKickSI, tAccessLevel_Owner );
 
 // minimal access level for suspend votes
 static tAccessLevel se_accessLevelVoteSuspend = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_accessLevelVoteSuspendSI( "ACCESS_LEVEL_VOTE_SUSPEND", se_accessLevelVoteSuspend );
+static tAccessLevelSetter se_accessLevelVoteSuspendSILevel( se_accessLevelVoteSuspendSI, tAccessLevel_Owner );
 
 // minimal access level for include votes
 static tAccessLevel se_accessLevelVoteInclude = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_accessLevelVoteIncludeSI( "ACCESS_LEVEL_VOTE_INCLUDE", se_accessLevelVoteInclude );
+static tAccessLevelSetter se_accessLevelVoteIncludeSILevel( se_accessLevelVoteIncludeSI, tAccessLevel_Owner );
 
 // minimal access level for include votes
 static tAccessLevel se_accessLevelVoteIncludeExecute = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_accessLevelVoteIncludeExecuteSI( "ACCESS_LEVEL_VOTE_INCLUDE_EXECUTE", se_accessLevelVoteIncludeExecute );
+static tAccessLevelSetter se_accessLevelVoteIncludeExecuteSILevel( se_accessLevelVoteIncludeExecuteSI, tAccessLevel_Owner );
 
 // minimal access level for direct command votes
 static tAccessLevel se_accessLevelVoteCommand = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_accessLevelVoteCommandSI( "ACCESS_LEVEL_VOTE_COMMAND", se_accessLevelVoteCommand );
+static tAccessLevelSetter se_accessLevelVoteCommandSILevel( se_accessLevelVoteCommandSI, tAccessLevel_Owner );
 
 // access level direct command votes will be executed with (minimal level is,
 // however, the access level of the vote submitter)
 static tAccessLevel se_accessLevelVoteCommandExecute = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_accessLevelVoteCommandExecuteSI( "ACCESS_LEVEL_VOTE_COMMAND_EXECUTE", se_accessLevelVoteCommandExecute );
+static tAccessLevelSetter se_accessLevelVoteCommandExecuteSILevel( se_accessLevelVoteCommandExecuteSI, tAccessLevel_Owner );
 
 #endif
 
 static REAL se_defaultVotesSuspendLength = 3;
-static tSettingItem< REAL > se_defaultVotesSuspendLenght_Conf( "VOTING_SUSPEND_DEFAULT", se_defaultVotesSuspendLength );
+static tSettingItem< REAL > se_defaultVotesSuspendLenght_Conf( "VOTES_SUSPEND_DEFAULT", se_defaultVotesSuspendLength );
 static REAL se_votesSuspendTimeout = 0;
 
 static eVoter* se_GetVoter( const nMessage& m )
@@ -767,7 +773,7 @@ void se_votesSuspend( REAL minutes, bool announce, std::istream & s )
     }
     else if ( announce && minutes <= 0 )
     {
-    	sn_ConsoleOut( tOutput( "$voting_unsuspended" ) );
+        sn_ConsoleOut( tOutput( "$voting_unsuspended" ) );
     }
 
 }
@@ -781,8 +787,8 @@ void se_UnSuspendVotes( std::istream & s )
     se_votesSuspend( 0, true, s );
 }
 
-static tConfItemFunc se_suspendVotes_conf( "VOTING_SUSPEND", &se_SuspendVotes );
-static tConfItemFunc se_unSuspendVotes_conf( "VOTING_UNSUSPEND", &se_UnSuspendVotes );
+static tConfItemFunc se_suspendVotes_conf( "VOTES_SUSPEND", &se_SuspendVotes );
+static tConfItemFunc se_unSuspendVotes_conf( "VOTES_UNSUSPEND", &se_UnSuspendVotes );
 
 
 static nDescriptor vote_handler(230,eVoteItem::GetControlMessage,"vote cast");
@@ -1450,7 +1456,12 @@ protected:
     {
         // check whether enough harmful votes were collected already
         ePlayerNetID * p = GetPlayer();
-        if ( fromMenu_ && p && p->GetVoter()->HarmCount() < se_kickMinHarm )
+        if ( p && !p->GetVoter() )
+        {
+            p->CreateVoter();
+        }
+
+        if ( fromMenu_ && p && p->GetVoter() && p->GetVoter()->HarmCount() < se_kickMinHarm )
         {
             // try to transfor the vote to a suspension
             eVoteItem * item = tNEW ( eVoteItemSuspend )( p );
@@ -1485,6 +1496,10 @@ private:
 
 static void se_HandleKickVote( nMessage& m )
 {
+    // set high default access level for menu issued kick votes, the true access level
+    // is taken from the highest level player from the sending client later
+    tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
     // accept message
     if ( eVoteItem::AcceptNewVote( m ) )
     {
@@ -1962,7 +1977,7 @@ eVoter* eVoter::GetVoter( int ID, bool complain )			// find or create the voter 
         for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
         {
             ePlayerNetID* p = se_PlayerNetIDs(i);
-            if ( p->Owner() == ID && !p->IsSpectating() )
+            if ( p->Owner() == ID && p->CurrentTeam() )
                 player = true;
         }
         if (!player)
@@ -2147,7 +2162,9 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
     message >> command;
     tToLower( command );
 
-    eVoter * voter = p->GetVoter();
+    eVoter * voter = eVoter::GetVoter( p->Owner(), true ); // can't use ePlayerNedID::GetVoter here,
+                                                           // as it can't show a warning,
+                                                           // for example if the voter has only spectators
     if ( !eVoteItem::AcceptNewVote( voter, p->Owner() ) )
     {
         return;

@@ -133,11 +133,11 @@ class rDisplayListFiller
     friend class rDisplayList;
 public:
     //! constructor, automatically starting to fill teh list
-    explicit rDisplayListFiller( rDisplayList & list );
+    explicit rDisplayListFiller( rDisplayList & list, bool respectBlacklist = true );
     ~rDisplayListFiller();
 
     //! starts filling the display list (done automatically on construction)
-    void Start();
+    void Start( bool respectBlacklist = true );
     
     //! stops filling the display list (done automatically on destruction)
     void Stop();

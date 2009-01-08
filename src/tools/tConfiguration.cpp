@@ -181,6 +181,7 @@ tCurrentAccessLevel::~tCurrentAccessLevel()
 //! returns the current access level
 tAccessLevel tCurrentAccessLevel::GetAccessLevel()
 {
+    tASSERT( currentLevel_ != tAccessLevel_Invalid );
     return currentLevel_;
 }
 
@@ -192,7 +193,7 @@ tString tCurrentAccessLevel::GetName( tAccessLevel level )
     return tString( tOutput( s.str().c_str() ) );
 }
 
-tAccessLevel tCurrentAccessLevel::currentLevel_ = tAccessLevel_Owner; //!< the current access level
+tAccessLevel tCurrentAccessLevel::currentLevel_ = tAccessLevel_Invalid; //!< the current access level
 
 tAccessLevelSetter::tAccessLevelSetter( tConfItemBase & item, tAccessLevel level )
 {
@@ -205,6 +206,19 @@ tConfItemBase::tConfItemMap & tConfItemBase::ConfItemMap()
     if (!st_confMap)
         st_confMap = tNEW( tConfItemMap );
     return *st_confMap;
+}
+
+static bool st_preventCasacl = false;
+
+tCasaclPreventer::tCasaclPreventer( bool prevent )
+{
+    previous_ = st_preventCasacl;
+    st_preventCasacl = prevent;
+}
+
+tCasaclPreventer::~tCasaclPreventer()
+{
+    st_preventCasacl = previous_;
 }
 
 #ifdef KRAWALL_SERVER
@@ -316,6 +330,11 @@ public:
                 );
             throw tAbortLoading( st_casacl );
         }
+        else if ( st_preventCasacl )
+        {
+            con << tOutput( "$casacl_not_allowed" );
+            throw tAbortLoading( st_casacl );
+        }
         else
         {
             tString().ReadLine(s); // prevent commands following this one without a newline
@@ -379,6 +398,7 @@ changed(false){
     confmap[title] = this;
 
     requiredLevel = tAccessLevel_Admin;
+    setLevel      = tAccessLevel_Owner;
 }
 
 tConfItemBase::tConfItemBase(const char *t, const tOutput& h)
@@ -392,6 +412,7 @@ changed(false){
     confmap[title] = this;
 
     requiredLevel = tAccessLevel_Admin;
+    setLevel      = tAccessLevel_Owner;
 }
 
 tConfItemBase::~tConfItemBase()
@@ -462,11 +483,17 @@ void tConfItemBase::LoadLine(std::istream &s){
 
             if ( ci->requiredLevel >= tCurrentAccessLevel::GetAccessLevel() )
             {
+                ci->setLevel = tCurrentAccessLevel::GetAccessLevel();
+
                 ci->ReadVal(s);
                 if (ci->changed)
+                {
                     ci->WasChanged();
+                }
                 else
+                {
                     ci->changed=cb;
+                }
             }
             else
             {
@@ -886,6 +913,9 @@ static void st_InstallSigHupHandler();
 
 void st_LoadConfig( bool printChange )
 {
+    // default include files are executed at owner level
+    tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
     st_InstallSigHupHandler();
 
     const tPath& var = tDirectories::Var();
@@ -1022,6 +1052,9 @@ bool tConfItemFunc::Save(){return false;}
 
 static void Include(std::istream& s, bool error )
 {
+    // allow CASACL
+    tCasaclPreventer allower(false);
+
     tString file;
     s >> file;
 

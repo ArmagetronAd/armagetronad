@@ -32,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nNetObject.h"
 #include "tList.h"
 
+tString & operator << ( tString&, const eTeam&);
+std::ostream & operator << ( std::ostream&, const eTeam&);
 
 template<class T> class nConfItem;
 
@@ -51,6 +53,8 @@ protected:							// protected attributes
     int maxPlayersLocal;			// maximum number of players allowed in this team
     int maxImbalanceLocal;			// maximum imbalance allowed here
 
+    int roundsPlayed;               //!< number of rounds played
+
     unsigned short r,g,b;			// team color
     tString	name;					// our name
 
@@ -68,6 +72,9 @@ public:							// public configuration options
     static bool enforceRulesOnQuit; // if the quitting of one player unbalances the teams, enforce the rules by redistributing
 
     static tList<eTeam> teams;		//  list of all teams
+
+    int RoundsPlayed() const;       //!< number of rounds played (updated right after spawning, so it includes the current round)
+    void PlayRound();               //!< increase round counter
 
     void UpdateProperties();		// update internal properties ( player count )
     void UpdateAppearance();		// update name and color
@@ -163,6 +170,8 @@ public:												// public methods
     const tString& 	Name() 	const {
         return name;
     }
+
+    tColoredString GetColoredName(void) const;
 
     virtual void PrintName(tString &s) const;					// print out an understandable name in to s
 

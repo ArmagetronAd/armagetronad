@@ -1,13 +1,3 @@
-#*****************************************
-#
-# Traduction francaise par mygal
-# Commentaires, critiques, etc.?
-#            themygal@gmail.com
-# Thx 2 tang322 4 his help
-#
-#*****************************************
-
-
 language                      Francais
 
 #*****************************************
@@ -326,9 +316,9 @@ voting_privacy_help           controls logging of voting process. 2: nothing get
 
 #ORIGINAL TEXT:               The spam level of getting your vote rejected.
 #voting_spam_reject_help      UNTRANSLATED
-voting_suspend_help		    Arrête les votes pour n minutes.
-voting_suspend_default_help	    Valeur par défaut de VOTING_SUSPEND.
-voting_unsuspend_help		    Autorise les votes à nouveau.
+votes_suspend_help		    Arrête les votes pour n minutes.
+votes_suspend_default_help	    Valeur par défaut de VOTES_SUSPEND.
+votes_unsuspend_help		    Autorise les votes à nouveau.
 voting_suspended		    Les votes ont été suspendus pour les prochaines \1 minutes.\n
 voting_unsuspended		    Les votes sont à nouveau autorisés.\n
 vote_rejected_voting_suspended		Les votes ont été suspendus par l'Administrateur.\n

@@ -396,7 +396,7 @@ int tString::StrPos( const tString &tofind ) const
     for (int i=0; i<Len()-1; i++) {
         if ((*this)(i) == tofind(0)) {
             bool found = true;
-            for (int j=0; j<tofind.Len()-1; j++) {
+            for (int j=0; j<tofind.Len()-1 && i+j < Len()-1; j++) {
                 if ((*this)(i+j) != tofind(j))
                     found = false;
             }

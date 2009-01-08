@@ -49,6 +49,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define PLAYER_CONFITEMS (30+MAX_INSTANT_CHAT)
 
+// call on commands that only work on the server; quit if it returns true
+bool se_NeedsServer(char const * command, std::istream & s, bool strict = true );
+
 class tConfItemBase;
 class uAction;
 class tOutput;
@@ -379,6 +382,8 @@ public:
     bool IsAllowedToRename ( void );                             //!< tells if the user can rename or not, takes care about everything
     void AllowRename( bool allow );                              //!< Allows a player to rename (or not)
 
+    static bool HasRenameCapability ( ePlayerNetID const *, ePlayerNetID const * admin ); //!< Checks if the admin can use the RENAME command. Used in IsAllowedToRename()
+
 private:
     tColoredString  nameFromClient_;        //!< this player's name as the client wants it to be. Avoid using it when possilbe.
     tColoredString  nameFromServer_;        //!< this player's name as the server wants it to be. Avoid using it when possilbe.
@@ -501,6 +506,22 @@ public:
 
 extern int se_SpamMaxLen;	// maximal length of chat message
 
+class eChatSpamTester
+{
+public:
+    eChatSpamTester( ePlayerNetID * p, tString const & say );
+    bool Block();
+    bool Check();
+
+    bool tested_;             //!< flag indicating whether the chat line has already been checked fro spam
+    bool shouldBlock_;        //!< true if the message should be blocked for spam
+    ePlayerNetID * player_;   //!< the chatting player
+    tColoredString say_;      //!< the chat line
+    REAL factor_;             //!< extra spam weight factor
+
+};
+
+void ForceName ( std::istream & s );
 
 // ******************************************************************************************
 // *

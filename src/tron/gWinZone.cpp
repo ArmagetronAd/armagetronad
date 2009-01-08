@@ -2161,7 +2161,7 @@ bool gBaseZoneHack::Timestep( REAL time )
 					}
 					else
 					{
-						sn_ConsoleOut( tOutput( "$zone_collapse_harmless", team->Name()  ) );
+						sn_ConsoleOut( tOutput( "$zone_collapse_harmless", team->GetColoredName()  ) );
 					}
 				}
 				conquered_ = 1.0;
@@ -2320,7 +2320,7 @@ void gBaseZoneHack::OnVanish( void )
 	CheckSurvivor();
 
 	// kill the closest owners of the zone
-	if ( currentState_ != State_Safe )
+	if ( currentState_ != State_Safe  && ( enemies_.size() > 0 || sg_defendRate < 0 ))
 	{
 		int kills = int( sg_onConquestKillRatio * team->NumPlayers() );
 		kills = kills > sg_onConquestKillMin ? kills : sg_onConquestKillMin;
@@ -2354,7 +2354,10 @@ void gBaseZoneHack::OnVanish( void )
 				sg_deathBasezoneConqueredWriter << ePlayerNetID::FilterName(closest->GetUserName());
 				if ( enemies_.size() > 0 || sg_defendRate < 0)
 				{
-					sn_ConsoleOut( tOutput("$player_kill_collapse", closest->GetName() ) );
+                    tColoredString playerName;
+                    playerName = closest->GetColoredName();
+                    playerName << tColoredStringProxy(-1,-1,-1);
+                    sn_ConsoleOut( tOutput("$player_kill_collapse", playerName ) );
 					closest->Object()->Kill();
 				}
 				else
@@ -2435,7 +2438,7 @@ void gBaseZoneHack::OnConquest( void )
 		tOutput win;
 		if ( team )
 		{
-			win.SetTemplateParameter( 3, team->Name() );
+			win.SetTemplateParameter( 3, team->GetColoredName() );
 			win << "$player_win_conquest_specific";
 		}
 		else

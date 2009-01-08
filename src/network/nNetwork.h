@@ -64,6 +64,8 @@ extern const unsigned int sn_defaultPort; // default port a server listens on
 
 extern int sn_defaultDelay;
 
+extern  bool sn_decorateTS;
+
 extern tString sn_DenyReason;		// the reason the server gave for sending a login_deny packet
 
 // rate control
@@ -100,7 +102,11 @@ private:
 void nReadError( bool critical = true );
 
 #ifndef MAXCLIENTS
+#ifdef DEDICATED
+#define MAXCLIENTS 32
+#else
 #define MAXCLIENTS 16
+#endif
 #endif
 
 // We can be single player, multiplayer server/client.

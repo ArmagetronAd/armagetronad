@@ -1,6 +1,8 @@
 #!/bin/sh
 
-test -r ChangeLog || touch touch -t 198001010000 ChangeLog
+# set -x
+
+test -r ChangeLog || touch -t 198001010000 ChangeLog
 MYDIR=`dirname $0`
 if test -r batch/make/version; then
     echo "Generating version..."
@@ -17,5 +19,5 @@ echo "Running automake..."
 automake -a || exit 1
 
 echo "Flagging scripts as executable..."
-chmod 755 $MYDIR/*.sh || exit 1
+chmod a+x $MYDIR/*.sh || exit 1
 echo "Done!  You may now run configure and start building."

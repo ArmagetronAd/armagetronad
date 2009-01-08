@@ -871,7 +871,7 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
                 if (right_test < 0 && left_test < 0)
                     score *= -1;     // here, - * - still is -.....
 
-                if (!best || score > best_score  && rvec * lvec < 0
+                if (!best || ( score > best_score  && rvec * lvec < 0 )
                    )
                     best = run;
 

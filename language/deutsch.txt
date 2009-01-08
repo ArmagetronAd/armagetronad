@@ -1,7 +1,3 @@
-# maintained (mainly) by z-man
-# distributed under the same conditions as the
-# rest of Armagetron Advanced (see COPYING)
-
 language                      Deutsch
 
 #*****************************************
@@ -2040,7 +2036,7 @@ gamestate_done                fertig!\n
 gamestate_timeout_intro       \n\nZeitüberschreitung! Grund:\n
 gamestate_timeout_message     Benutzer \1 weiss noch nichts von Objekt \2 ( \3 ).\n
 
-gamestate_reset_center        Reset
+gamestate_reset_center        Neues Match
 gamestate_reset_console       Nach dieser Runde beginnt ein neues Match; Punktzahlen werden zurückgesetzt.\n
 gamestate_resetnow_center     Neues Match
 gamestate_resetnow_console    Setzte Punktzahlen zurück...\n
@@ -2295,7 +2291,7 @@ vote_accepted                 Vorschlag "\1" wurde angenommen.\n
 vote_rejected                 Vorschlag "\1" wurde abgelehnt.\n
 vote_timeout                  Abstimmung "\1" wurde ohne Ergebnis beendet.\n
 vote_new                      Neuer Abstimmungsvorschlag: "\1". Gib deine Stimme im Hauptmenu ab.\n
-vote_redundant                Vorschlag abgelehnt, ein identischer Vorschlag wurde bereits gemacht.\n
+vote_redundant                Vorschlag abgelehnt, ein identischer Vorschlag wurde bereits vor kurzem gemacht.\n
 vote_maturity                 Vorschlag abgelehnt, du bist noch nicht alt genug, warte \1 Sekunden.\n
 vote_overflow                 Vorschlag abgelehnt, es sind bereits zu viele Vorschläge aktiv.\n
 vote_disabled                 Abstimmungen wurden leider von Serveradministrator abgeschaltet.\n
