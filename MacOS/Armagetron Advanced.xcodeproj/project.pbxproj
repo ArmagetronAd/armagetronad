@@ -73,6 +73,14 @@
 /* Begin PBXBuildFile section */
 		8CBA60B1089F00F2007E21DC /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CBA60B0089F00F2007E21DC /* OpenGL.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		9B1ECD060F159F3500288C28 /* cCamview.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B1ECD040F159F3500288C28 /* cCamview.cpp */; };
+		9B1ECD070F159F3500288C28 /* cCamview.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B1ECD050F159F3500288C28 /* cCamview.h */; };
+		9B1ECD080F159F3500288C28 /* cCamview.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B1ECD040F159F3500288C28 /* cCamview.cpp */; };
+		9B1ECD090F159F3500288C28 /* cCamview.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B1ECD050F159F3500288C28 /* cCamview.h */; };
+		9B1ECD260F159FF800288C28 /* tVersion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B1ECD240F159FF800288C28 /* tVersion.cpp */; };
+		9B1ECD270F159FF800288C28 /* tVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B1ECD250F159FF800288C28 /* tVersion.h */; };
+		9B1ECD280F159FF800288C28 /* tVersion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B1ECD240F159FF800288C28 /* tVersion.cpp */; };
+		9B1ECD290F159FF800288C28 /* tVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B1ECD250F159FF800288C28 /* tVersion.h */; };
 		9B7CFE190EFCE74700126634 /* tResource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE130EFCE74700126634 /* tResource.cpp */; };
 		9B7CFE1A0EFCE74700126634 /* tResource.h in Headers */ = {isa = PBXBuildFile; fileRef = 9B7CFE140EFCE74700126634 /* tResource.h */; };
 		9B7CFE1B0EFCE74700126634 /* tResourceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE150EFCE74700126634 /* tResourceManager.cpp */; };
@@ -525,6 +533,10 @@
 		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CBA60B0089F00F2007E21DC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9B1ECD040F159F3500288C28 /* cCamview.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cCamview.cpp; sourceTree = "<group>"; };
+		9B1ECD050F159F3500288C28 /* cCamview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cCamview.h; sourceTree = "<group>"; };
+		9B1ECD240F159FF800288C28 /* tVersion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tVersion.cpp; sourceTree = "<group>"; };
+		9B1ECD250F159FF800288C28 /* tVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tVersion.h; sourceTree = "<group>"; };
 		9B715F4C0F0BD95100034EBF /* release.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = release.rake; sourceTree = "<group>"; tabWidth = 2; };
 		9B715F4D0F0BD95100034EBF /* config.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = config.rake; sourceTree = "<group>"; tabWidth = 2; };
 		9B715F4E0F0BD95100034EBF /* aabeta.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = aabeta.rake; sourceTree = "<group>"; tabWidth = 2; };
@@ -1294,6 +1306,8 @@
 				9BB7B7EE0D830422004FE8C3 /* tToDo.h */,
 				9BB7B7EF0D830422004FE8C3 /* tValue.h */,
 				9BB7B7F00D830422004FE8C3 /* tValueParser.h */,
+				9B1ECD240F159FF800288C28 /* tVersion.cpp */,
+				9B1ECD250F159FF800288C28 /* tVersion.h */,
 				9BB7B7F10D830422004FE8C3 /* tXmlParser.cpp */,
 				9BB7B7F20D830422004FE8C3 /* tXmlParser.h */,
 				9BB7B7FA0D830423004FE8C3 /* values */,
@@ -1400,6 +1414,8 @@
 		9BB7B8E50D830448004FE8C3 /* cockpit */ = {
 			isa = PBXGroup;
 			children = (
+				9B1ECD040F159F3500288C28 /* cCamview.cpp */,
+				9B1ECD050F159F3500288C28 /* cCamview.h */,
 				9BB7B8E60D830448004FE8C3 /* cCockpit.cpp */,
 				9BB7B8E70D830448004FE8C3 /* cCockpit.h */,
 				9BB7B8E80D830448004FE8C3 /* cGauges.cpp */,
@@ -1497,6 +1513,8 @@
 				9B7CFE1A0EFCE74700126634 /* tResource.h in Headers */,
 				9B7CFE1C0EFCE74700126634 /* tResourceManager.h in Headers */,
 				9B7CFE1E0EFCE74700126634 /* tResourceType.h in Headers */,
+				9B1ECD070F159F3500288C28 /* cCamview.h in Headers */,
+				9B1ECD270F159FF800288C28 /* tVersion.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1509,6 +1527,8 @@
 				9B7CFE200EFCE74700126634 /* tResource.h in Headers */,
 				9B7CFE220EFCE74700126634 /* tResourceManager.h in Headers */,
 				9B7CFE240EFCE74700126634 /* tResourceType.h in Headers */,
+				9B1ECD090F159F3500288C28 /* cCamview.h in Headers */,
+				9B1ECD290F159FF800288C28 /* tVersion.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1861,6 +1881,8 @@
 				9B7CFE1F0EFCE74700126634 /* tResource.cpp in Sources */,
 				9B7CFE210EFCE74700126634 /* tResourceManager.cpp in Sources */,
 				9B7CFE230EFCE74700126634 /* tResourceType.cpp in Sources */,
+				9B1ECD080F159F3500288C28 /* cCamview.cpp in Sources */,
+				9B1ECD280F159FF800288C28 /* tVersion.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2017,6 +2039,8 @@
 				9B7CFE190EFCE74700126634 /* tResource.cpp in Sources */,
 				9B7CFE1B0EFCE74700126634 /* tResourceManager.cpp in Sources */,
 				9B7CFE1D0EFCE74700126634 /* tResourceType.cpp in Sources */,
+				9B1ECD060F159F3500288C28 /* cCamview.cpp in Sources */,
+				9B1ECD260F159FF800288C28 /* tVersion.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
