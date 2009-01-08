@@ -6,7 +6,28 @@
 
 import sys, os
 import shutil
-import sortresources
+foundModule = False
+
+newPathSearch = os.path.dirname(os.path.abspath(sys.argv[0]) )
+sys.path.insert(0, newPathSearch)
+
+maxnumAttempts = 10
+numAttempts = 0
+
+while not foundModule:
+    try:
+        import armabuild
+        foundModule = True
+        print "Found armabuild!"
+    except:
+        sys.path[0] = os.path.dirname(newPathSearch)
+    numAttempts += 1
+
+    if numAttempts > 9:
+        print "Unable to find armabuild module.  Can't continue."
+        sys.exit(1)
+
+from armabuild import resource
 
 def IgnoreFiles(visitdir, contents):
     ignoreList = ["CVS", ".svn", ".bzr"]
@@ -17,32 +38,6 @@ def IgnoreFiles(visitdir, contents):
             
     return ignoreList
 
-def GetDtdVersion(dtdfile):
-    dtdfileObj = open(dtdfile)
-
-    for line in dtdfileObj:
-        line = line.strip()
-        
-        if line.startswith("<!-- version="):
-            varList = line.split('"')
-            
-            # the version should be the second item in the list
-            dtdfileObj.close()
-
-            return varList[1]
-    return ""
-
-def CopyDtd(source, destination, dtdVersion):
-    sourceObj = open(source, "r")
-    destObj = open(destination, "w")
-
-    for line in sourceObj:
-        line = line.replace("resource.dtd", dtdVersion)
-        destObj.write(line)
-
-    sourceObj.close()
-    destObj.close()
-
 if __name__ == "__main__":
     source = sys.argv[1]
     destination = sys.argv[2]
@@ -51,21 +46,19 @@ if __name__ == "__main__":
     if os.path.exists(source) is False:
         sys.exit(1)
 
-    print destination
-
     if os.path.exists(destination):
         shutil.rmtree(destination)
 
     shutil.copytree(source, destination, IgnoreFiles)
 
     print "Running sortresources"
-    sortresources.main(["-v", destination] )
+    resource.main(["-v", destination] )
     print "Done"
 
     if os.path.exists(os.path.join(destination, "AATeam") ) is False:
         os.mkdir(os.path.join(destination, "AATeam") )
 
-    resourceVersion = GetDtdVersion(os.path.join(source, "resource.dtd") )
+    resourceVersion = resource.GetDtdVersion(os.path.join(source, "resource.dtd") )
 
     resourceName = "resource-" + resourceVersion + ".dtd"
 
@@ -74,9 +67,9 @@ if __name__ == "__main__":
     for a in dtdList:
         base, ext = os.path.splitext(a)
         if ext.lower() == ".dtd":
-            resourceVersion = GetDtdVersion(os.path.join(source, a) )
-            print resourceVersion
-            CopyDtd(os.path.join(source, a),
+            resourceVersion = resource.GetDtdVersion(os.path.join(source, a) )
+            
+            resource.CopyDtd(os.path.join(source, a),
                     os.path.join(destination, "AATeam",
                                     base + "-" + resourceVersion + ".dtd"),
                     resourceName
