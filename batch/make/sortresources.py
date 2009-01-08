@@ -207,8 +207,8 @@ def Options( ret ):
     print "         -h print this message"
     print
     sys.exit( ret )
-    
-if __name__ == "__main__":
+
+def main(argList):
     destinationDirectory = "."
     sourceDirectory = "."
     function  = Move
@@ -217,7 +217,7 @@ if __name__ == "__main__":
     doPrint = False
 
     # parse arguments
-    for arg in sys.argv[1:]:
+    for arg in argList:
         # parse options
         if len(arg)>0 and arg[0] == "-":
             if len(arg) > 1:
@@ -248,3 +248,7 @@ if __name__ == "__main__":
 
     # do the work
     scanDir(sourceDirectory, destinationDirectory, function)
+    
+    
+if __name__ == "__main__":
+    main(sys.argv)

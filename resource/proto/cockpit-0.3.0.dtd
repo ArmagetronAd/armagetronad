@@ -1,4 +1,4 @@
-<!-- version="AATeam/0.3.0" -->
+<!-- version="0.3.0" -->
 <!ELEMENT Resource (Cockpit)>
 
 <!ATTLIST Resource
