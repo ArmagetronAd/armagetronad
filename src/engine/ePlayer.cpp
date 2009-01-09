@@ -150,6 +150,12 @@ static tSettingItem< bool > se_specSpamConf( "AUTO_TEAM_SPEC_SPAM", se_specSpam 
 static bool se_allowTeamChanges = true;
 static tSettingItem< bool > se_allowTeamChangesConf( "ALLOW_TEAM_CHANGE", se_allowTeamChanges );
 
+static bool se_chatLogWritePM = false;
+static tSettingItem< bool > se_chatLogWritePMConf( "CHATLOG_WRITE_PM", se_chatLogWritePM );
+
+static bool se_chatLogWriteTeam = false;
+static tSettingItem< bool > se_chatLogWriteTeamConf( "CHATLOG_WRITE_TEAM", se_chatLogWriteTeam );
+
 static bool se_enableChat = true;    //flag indicating whether chat should be allowed at all (logged in players can always chat)
 static tSettingItem< bool > se_enaChat("ENABLE_CHAT", se_enableChat);
 
@@ -2895,6 +2901,13 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
             }
         }
     }
+    
+    //add /team to chatlog
+    if (se_chatLogWriteTeam){
+        tString str;
+        str << p->GetUserName() << " /team " << msg;
+        se_SaveToChatLog(str);
+    }
 }
 
 // /msg chat commant: talk to anyone team
@@ -2943,6 +2956,13 @@ static void se_ChatMsg( ePlayerNetID * p, std::istream & s, eChatSpamTester & sp
                 {
                     se_SendPrivateMessage( p, receiver, admin, msg_core );
                 }
+            }
+            
+            //send /msg to chatlog
+            if (se_chatLogWritePM ){
+                tString str;
+                str << p->GetUserName() << " /msg " << receiver->GetUserName() << msg_core;
+                se_SaveToChatLog(str);
             }
         }
     }

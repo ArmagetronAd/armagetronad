@@ -725,10 +725,12 @@ ladderlog_write_all_help Set all the LADDER_LOG_WRITE_* settings to the same val
 ladderlog_write_all_usage Usage: LADDER_LOG_WRITE_ALL 1|0
 ladderlog_write_all_enabled Enabled full ladderlog output.
 ladderlog_write_all_disabled Disabled ladderlog output.
+ladderlog_write_admin_command                 Write to ladderlog: ADMIN_COMMAND <name> <setting>
 ladderlog_write_authority_blurb_help          Write to ladderlog: AUTHORITY_BLURB <name> <value>
 ladderlog_write_basezone_conquered_help       Write to ladderlog: BASEZONE_CONQUERED <team> <cx> <cy>
 ladderlog_write_basezone_conquerer_help       Write to ladderlog: BASEZONE_CONQUERER <player>
 ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter> [/me] <chat string>
+ladderlog_write_command_help                  Write to ladderlog: COMMAND <player> <ip> <auth level> <command> <options>
 ladderlog_write_death_frag_help               Write to ladderlog: DEATH_FRAG <prey> <predator>
 ladderlog_write_death_suicide_help            Write to ladderlog: DEATH_SUICIDE <player>
 ladderlog_write_death_teamkill_help           Write to ladderlog: DEATH_TEAMKILL <prey> <predator>
@@ -748,7 +750,12 @@ ladderlog_write_round_winner_help             Write to ladderlog: ROUND_WINNER <
 ladderlog_write_sacrifice_help                Write to ladderlog: SACRIFICE <player who used the hole> <player who created the hole> <player owning the wall the hole was made into>
 ladderlog_write_wait_for_external_script_help Write to ladderlog: WAIT_FOR_EXTERNAL_SCRIPT (see also: WAIT_FOR_EXTERNAL_SCRIPT and WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
 ladderlog_game_time_interval If nonnegative, write a line with the current game time to the ladder log every n seconds.
+
+
 chat_log_help			Write machine parsable chat messages to var/chatlog.txt
+chatlog_write_team      Write /team messages to chatlog [1: on | 0:off]
+chatlog_write_pm        Write Private messages (/msg) to chatlog [1: on | 0:off]
+CHATLOG_WRITE_TEAM  CHATLOG_WRITE_PM
 show_fps_help			Enable fps display
 floor_mirror_help		Floor mirror mode
 floor_detail_help		Floor detail settings
