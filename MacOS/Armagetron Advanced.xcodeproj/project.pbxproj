@@ -1635,7 +1635,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "rake xcode:prepare";
+			shellScript = "rake --trace xcode:prepare";
 		};
 		8CAD91B7095A459400DA0ECC /* Run script: Cleanup */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1649,7 +1649,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "rake xcode:cleanup\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am astylerc\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone";
+			shellScript = "rake --trace xcode:cleanup\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am astylerc\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone";
 		};
 		8CBA6203089F11BE007E21DC /* Run script: Cleanup */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1663,7 +1663,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "rake xcode:cleanup\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am astylerc\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone";
+			shellScript = "rake --trace xcode:cleanup\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am astylerc\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone";
 		};
 		9B3139B40EFD0586009690D0 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1676,7 +1676,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "PRODUCT_NAME=\"Armagetron Advanced\" rake release:dmg\n";
+			shellScript = "PRODUCT_NAME=\"Armagetron Advanced\" rake --trace release:dmg\n";
 		};
 		9B3139C00EFD073A009690D0 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1689,7 +1689,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "PRODUCT_NAME=\"Armagetron Advanced Dedicated\"\nCONFIGURATION_BUILD_DIR=\"${CONFIGURATION_BUILD_DIR}/Armagetron Advanced Dedicated\"\n\nrake release:dmg\n";
+			shellScript = "PRODUCT_NAME=\"Armagetron Advanced Dedicated\"\nCONFIGURATION_BUILD_DIR=\"${CONFIGURATION_BUILD_DIR}/Armagetron Advanced Dedicated\"\n\nrake --trace release:dmg\n";
 		};
 		9B3139EB0EFD0963009690D0 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1702,7 +1702,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "rake update-version";
+			shellScript = "rake --trace update-version";
 		};
 		9B6377410F0AACC2009F661F /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1715,7 +1715,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "PRODUCT_NAME=\"Armagetron Advanced\" rake aabeta:release";
+			shellScript = "PRODUCT_NAME=\"Armagetron Advanced\" rake --trace aabeta:release";
 		};
 		9BD7DB490A2CBA7A00D7033C /* Run script: Prepare */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1729,7 +1729,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "rake xcode:prepare";
+			shellScript = "rake --trace xcode:prepare";
 		};
 /* End PBXShellScriptBuildPhase section */
 
