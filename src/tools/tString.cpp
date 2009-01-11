@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -1900,7 +1900,7 @@ tString & tString::operator=(const tString &s)
 //static int   st_TempStringLength = 1000;
 #endif
 
-// static int	 
+// static int
 
 class tTempStringCleanup
 {
@@ -2141,7 +2141,7 @@ bool tIsInList( tString const & list_, tString const & item )
         }
 
         // check whether the match is a true list match
-        if ( 
+        if (
             ( pos == 0 || list[pos-1] == ',' || isblank(list[pos-1]) )
             &&
             ( pos + item.Len() >= list.Len() || list[pos+item.Len()-1] == ',' || isblank(list[pos+item.Len()-1]) )
@@ -2155,7 +2155,7 @@ bool tIsInList( tString const & list_, tString const & item )
             list = list.SubStr( pos + 1 );
         }
     }
-    
+
     return false;
 }
 
@@ -2282,7 +2282,7 @@ void tCharacterFilter::SetMap( unsigned char in, unsigned char out )
 
 tNetCharacterFilter::tNetCharacterFilter ( void )
 {
-    unsigned char i;
+    unsigned int i;
     filter[0]=0;
 
     // map all unknown characters to underscores
