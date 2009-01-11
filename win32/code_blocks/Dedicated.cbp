@@ -1273,12 +1273,6 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
-		<Unit filename="..\..\src\tools\tResourceManager.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
-		</Unit>
 		<Unit filename="..\..\src\tools\tResourceManager.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
