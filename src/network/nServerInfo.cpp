@@ -352,6 +352,7 @@ void nServerInfo::Load(std::istream &s)
             name.ReadLine(s);
         else
         {
+            // ignore rest of line
             tString dummy;
             dummy.ReadLine( s );
 
