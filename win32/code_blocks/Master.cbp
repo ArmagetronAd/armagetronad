@@ -23,6 +23,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s"/>
+					<Add library=".\libZThread.a"/>
 				</Linker>
 			</Target>
 			<Target title="Win32 Debug">
@@ -39,6 +40,9 @@
 					<Add option="-D_DEBUG"/>
 					<Add option="-DDEBUG"/>
 				</Compiler>
+				<Linker>
+					<Add library=".\libZThread_debug.a"/>
+				</Linker>
 			</Target>
 			<Target title="Win32 Profile">
 				<Option output="..\..\build\profile\armagetronad_master.exe"/>
@@ -70,6 +74,7 @@
 			<Add directory="..\..\src\tools"/>
 			<Add directory="..\..\src\ui"/>
 			<Add directory="..\..\src\win32_ded"/>
+			<Add directory="..\..\..\winlibs\ZThread\include"/>
 		</Compiler>
 		<Linker>
 			<Add library="libwsock32.a"/>
@@ -277,6 +282,20 @@
 			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tCallbackString.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tColor.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tColor.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -603,6 +622,20 @@
 			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tToDo.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tVersion.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tVersion.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
