@@ -305,6 +305,9 @@ void nServerInfo::Save(std::ostream &s) const
 
 void nServerInfo::Load(std::istream &s)
 {
+    static bool warnedAboutUnknownOptions = false;
+    bool warnedAboutUnknownOptionsBefore = warnedAboutUnknownOptions;
+
     bool end = false;
     while (!end && s.good() && !s.eof())
     {
@@ -355,7 +358,18 @@ void nServerInfo::Load(std::istream &s)
         else if (id == FILTEREDNAME)
             nameForSorting.ReadLine(s);
         else
-            con << "Warning: unknown tag " << id << " found in server config file.\n";
+        {
+            // ignore rest of line
+            tString dummy;
+            dummy.ReadLine( s );
+
+            // warn, but only on first entry
+            if ( !warnedAboutUnknownOptionsBefore )
+            {
+                con << "Warning: unknown tag " << id << " found in server config file.\n";
+                warnedAboutUnknownOptions = true;
+            }
+        }            
     }
 
     queried = 0;
