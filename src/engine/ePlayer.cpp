@@ -3716,13 +3716,13 @@ void ePlayerNetID::Chat(const tString &s_orig)
     {
         // direct commands are executed at owner level
         tCurrentAccessLevel level( tAccessLevel_Owner, true );
-        
+
         tString params("");
         if (s_orig.StrPos(" ") == -1)
             return;
         else
             params = s_orig.SubStr(s_orig.StrPos(" ") + 1);
-        
+
         if ( tRecorder::IsPlayingBack() )
         {
             tConfItemBase::LoadPlayback();
@@ -3746,7 +3746,7 @@ void ePlayerNetID::Chat(const tString &s_orig)
         case nSERVER:
         {
             se_BroadcastChat( this, s );
-            
+
             // falling through on purpose
             // break;
         }
@@ -4931,7 +4931,7 @@ void se_ListAdmins ( ePlayerNetID * receiver, std::istream &s, tString command )
             lowerUser = user;
             tToLower( lowerUser );
             user = tOutput ( "$admin_list_authoritylevel", user );
-            lowerUser = tColoredString((tString&)"AAA" + lowerUser);
+            lowerUser = tColoredString( tString("AAA") + lowerUser);
             theRightSet[ lowerUser ] = user;
 
             authorityCount++;
@@ -5287,7 +5287,7 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
     }
 
     GetScoreFromDisconnectedCopy();
-    
+
     // force name update
     UpdateName();
 }
@@ -7862,7 +7862,7 @@ static void Silence_conf(std::istream &s)
 #endif
             sn_ConsoleOut( tOutput( "$player_silenced", p->GetColoredName() ) );
         p->SetSilenced( true );
-    }    
+    }
 }
 
 static tConfItemFunc silence_conf("SILENCE",&Silence_conf);

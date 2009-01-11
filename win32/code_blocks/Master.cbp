@@ -6,6 +6,7 @@
 		<Option title="Master"/>
 		<Option makefile="Makefile"/>
 		<Option makefile_is_custom="0"/>
+		<Option active_target="0"/>
 		<Option compiler="0"/>
 		<Build>
 			<Target title="Win32 Release">
@@ -23,6 +24,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s"/>
+					<Add library=".\libZThread.a"/>
 				</Linker>
 			</Target>
 			<Target title="Win32 Debug">
@@ -39,6 +41,9 @@
 					<Add option="-D_DEBUG"/>
 					<Add option="-DDEBUG"/>
 				</Compiler>
+				<Linker>
+					<Add library=".\libZThread_debug.a"/>
+				</Linker>
 			</Target>
 			<Target title="Win32 Profile">
 				<Option output="..\..\build\profile\armagetronad_master.exe"/>
@@ -70,9 +75,15 @@
 			<Add directory="..\..\src\tools"/>
 			<Add directory="..\..\src\ui"/>
 			<Add directory="..\..\src\win32_ded"/>
+			<Add directory="..\..\..\winlibs\ZThread\include"/>
+			<Add directory="..\..\..\winlibs\libxml2\include"/>
+			<Add directory="..\..\src\resource"/>
+			<Add directory="..\..\..\winlibs\boost\includes"/>
+			<Add directory="..\..\..\winlibs\iconv\include"/>
 		</Compiler>
 		<Linker>
 			<Add library="libwsock32.a"/>
+			<Add library="..\..\..\winlibs\libxml2\lib\libxml2.lib"/>
 		</Linker>
 		<Unit filename="..\..\src\network\master.cpp">
 			<Option compilerVar="CPP"/>
@@ -248,6 +259,48 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
+		<Unit filename="..\..\src\resource\tResource.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\resource\tResource.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\resource\tResourceManager.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\resource\tResourceManager.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\resource\tResourceType.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\resource\tResourceType.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
 		<Unit filename="..\..\src\tools\tArray.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
@@ -277,6 +330,20 @@
 			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tCallbackString.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tColor.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tColor.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -603,6 +670,34 @@
 			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tToDo.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tVersion.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tVersion.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tXmlParser.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tXmlParser.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>

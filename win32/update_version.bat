@@ -88,16 +88,14 @@ echo #define MINOR_VERSION %MINOR_VERSION% >> %HELP_FILE%
 
 echo #define BUILD_DATE "%DATESTAMP%" >> %HELP_FILE%
 
-echo #define VERSION "%MAJOR_VERSION%%MINOR_VERSION%" >> %HELP_FILE%
+echo #define TRUE_ARMAGETRONAD_VERSION "%MAJOR_VERSION%%MINOR_VERSION%" >> %HELP_FILE%
 
+echo #define TRUE_ARMAGETRONAD_BUILDDATE "%DATESTAMP%" >> %HELP_FILE%
 
 echo. - Detected: Armagetron Advanced %MAJOR_VERSION%%MINOR_VERSION%
 echo.
 echo.
-echo Do you want to update 'version.h' ? (requires full rebuild afterwards)
-SET FLAG=/Y
-IF EXIST %AA_DIR%\src\version.h SET FLAG=/-Y
-copy %HELP_FILE% %AA_DIR%\src\version.h %FLAG%
+copy %HELP_FILE% %AA_DIR%\src\tTrueVersion.h
 
 :exit
 IF NOT "%HAVE_PYTHON%"=="0" (
