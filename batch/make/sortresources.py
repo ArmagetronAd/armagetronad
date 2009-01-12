@@ -13,6 +13,7 @@ numAttempts = 0
 while not foundModule:
     try:
         import armabuild
+        import armabuild.resource
         foundModule = True
         print "Found armabuild!"
     except:
