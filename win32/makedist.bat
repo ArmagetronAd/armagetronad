@@ -51,6 +51,7 @@ goto :exit
 		echo ^| updating %2
 		echo +-------------------------------------------------------
 		echo *** copying files...
+		xcopy %AA_DIR%\src\doc %1\doc /I /E /Y /C
 		xcopy %AA_DIR%\arenas %1\arenas /I /E /Y /C
 		xcopy %AA_DIR%\config %1\config /I /E /Y /C
 		xcopy %AA_DIR%\language %1\language /I /E /Y /C
