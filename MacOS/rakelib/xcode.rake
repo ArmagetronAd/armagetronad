@@ -5,7 +5,7 @@ module AA::Xcode
     "version" => AA::Config.version(),
     "year" => Time.now.strftime("%Y"),
     "progtitle" => AA::Config::PRODUCT_NAME,
-  }
+  }.merge(AA::Config::VERSION_INFO.info)
   
   def self.process_file(orig, package_dir=nil)
     result_file = AA::Config.generated_path(orig.ext)
