@@ -842,17 +842,6 @@ gParser::parseSettings(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 void
 gParser::parseMap(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-    if ( sn_GetNetState() != nCLIENT )
-    {
-        // verify version. But only in standalone or server mode, we don't want to break
-        // clients on servers handing out maps with this setting wrong.
-        gXMLCharReturn mapVersion = myxmlGetProp(cur, "version");
-        if ( 0 != strcmp( mapVersion, "2" ) )
-        {
-            throw tGenericException( tOutput( "$map_version_unsupported", mapVersion ), tOutput( "$map_version_unsupported_title" ) );
-        }
-    }
-
     cur = cur->xmlChildrenNode;
     while (cur != NULL) {
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}

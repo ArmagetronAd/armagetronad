@@ -2585,9 +2585,6 @@ map_file_load_failure_default \nFallback to default map did not work either. Ple
 resource_file_wrong_place_title Incorrect File Path
 resource_file_wrong_place     The resource file loaded from "\1" wants to be at "\2". Possible resolutions:\na) If you are not the author of the resource, you should move it to the right place given above and adapt the reference pointing to it.\nb) If you are the author and want the file to stay where it is, you can modify its <Resource> tag so it wants to be where you put it. Consult the documentation on how to do that.\n
 
-map_version_unsupported_title Map Version Unsupported
-map_version_unsupported      Got map format version "\1", but only "2" is supported by this build.
-
 map_file_reverting           Reverting to last known working map \1.\n
 
 #********************************************
