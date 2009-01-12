@@ -118,6 +118,16 @@ if test -d "${srcdir}/.svn"; then
     fi
 fi
 
+bzr_count_revisions()
+{
+    srcdir="$1"
+    limit="$2"
+    
+    test -z "$limit" || limit="-l $limit"
+    
+    bzr log $limit "${srcdir}" 2>/dev/null | egrep -c '^ *revno: [0-9\.]+$'
+}
+
 # *TODO* once we get our superproject up on launchpad (and thus get saner branch nicks), use branch nicks for $major_version
 # Check if bzr is installed, and if the path is versionned
 bzr >/dev/null 2>&1
@@ -130,7 +140,7 @@ then
     # So we count revisions, including merged ones, also including fools which have empty
     # lines with only "revno: 15" in their commit messages
     revno=$( bzr revno ${srcdir} 2>/dev/null)    
-    revcount=$( bzr log ${srcdir} 2>/dev/null | sed -ne 's/^ *revno: [0-9\.]\+$/\0/p' | wc -l )
+    revcount=$( bzr_count_revisions ${srcdir} )
     lca=$revno
     lcaz=$revcount
     versioned=#
