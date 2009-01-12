@@ -441,7 +441,8 @@ class gFlagZoneHack: public gZone
 		void GoHome();
 		void RemoveOwner();
 		void OwnerDropped();
-
+        gCycle* Owner(){return owner_;}
+        
 	protected:
 		bool init_;
 		eCoord originalPosition_;
