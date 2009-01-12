@@ -1259,8 +1259,8 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 
                 if (prey->CurrentTeam() != hunter->CurrentTeam())
                 {
-                    char *pWinString = "$player_win_shot";
-                    char *pFreeString = "$player_free_shot";
+                    char const *pWinString = "$player_win_shot";
+                    char const *pFreeString = "$player_free_shot";
                     int score = score_shot;
                     if (deathZoneType == TYPE_DEATH_SHOT)
                     {
