@@ -33,7 +33,7 @@ tTrueVersion.h: $(wildcard $(top_srcdir)/*_version) $(wildcard $(top_srcdir)/.sv
 	if test -f $(top_srcdir)/src/tFakeVersion.h; then \
 		cp $(top_srcdir)/src/tFakeVersion.h $@; \
 	else \
-		echo "#define TRUE_ARMAGETRONAD_VERSION `sh $(top_srcdir)/batch/make/version $(top_srcdir)`" >$@; \
+		echo "#define TRUE_ARMAGETRONAD_VERSION \"`sh $(top_srcdir)/batch/make/version $(top_srcdir)`\"" >$@; \
 	fi
 
 # clean up true version
