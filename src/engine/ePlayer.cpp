@@ -5776,7 +5776,7 @@ void ePlayerNetID::Greet(){
     if (!greeted){
         tOutput o;
         o.SetTemplateParameter(1, GetName() );
-        o.SetTemplateParameter(2, sn_programVersion);
+        o.SetTemplateParameter(2, st_programVersion);
         o << "$player_welcome";
         tString s;
         s << o;
@@ -7190,7 +7190,8 @@ void ePlayerNetID::SetTeam( eTeam* newTeam )
 void ePlayerNetID::SetTeamname(const char* newTeamname)
 {
     teamname = newTeamname;
-    if (bool(currentTeam) && currentTeam->OldestHumanPlayer() &&
+    if (sn_GetNetState() != nCLIENT && 
+        bool(currentTeam) && currentTeam->OldestHumanPlayer() &&
             currentTeam->OldestHumanPlayer()->ID()==ID())
     {
         currentTeam->UpdateAppearance();

@@ -2715,7 +2715,7 @@ void nServerInfo::DoGetFrom( nSocket const * socket )
 
     users           = sn_NumRealUsers();
     version_        = sn_CurrentVersion();
-    release_        = sn_programVersion;
+    release_        = st_programVersion;
 
 #ifdef WIN32
     release_ += " win";

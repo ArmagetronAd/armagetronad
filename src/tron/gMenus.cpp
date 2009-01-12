@@ -75,7 +75,7 @@ static tConfItemLine c_ext("GL_EXTENSIONS",gl_extensions);
 static tConfItemLine c_ver("GL_VERSION",gl_version);
 static tConfItemLine c_rEnd("GL_RENDERER",gl_renderer);
 static tConfItemLine c_vEnd("GL_VENDOR",gl_vendor);
-// static tConfItemLine a_ver("ARMAGETRON_VERSION",sn_programVersion);
+// static tConfItemLine a_ver("ARMAGETRON_VERSION",st_programVersion);
 
 #ifndef DEDICATED
 static uMenuItemStringWithHistory::history_t &sg_consoleHistory() {

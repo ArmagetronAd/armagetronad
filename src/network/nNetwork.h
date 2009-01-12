@@ -55,8 +55,6 @@ typedef double nTimeRolling;				// typedef for time variables in network code th
 extern tString sn_bigBrotherString; // the string that is sent
 // to the server for system information
 
-extern tString sn_programVersion; // our version
-
 extern tString sn_serverName;     // telling name of the server
 
 extern  unsigned int sn_serverPort;       // port we listen on when in server mode

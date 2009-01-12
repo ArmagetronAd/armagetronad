@@ -2013,7 +2013,7 @@ void MainMenu(bool ingame){
     }
 
     tOutput title;
-    title.SetTemplateParameter( 1, sn_programVersion );
+    title.SetTemplateParameter( 1, st_programVersion );
     if (!ingame)
         title << "$main_menu_text";
     else

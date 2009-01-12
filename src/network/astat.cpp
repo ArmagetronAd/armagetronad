@@ -88,7 +88,7 @@ int main(int argc, char **argv)
     //  Poll();
 
     tCommandLineData commandLine;
-    commandLine.programVersion_  = &sn_programVersion;
+    commandLine.programVersion_  = &st_programVersion;
     commandLine.Analyse(argc, argv);
     tLocale::Load("languages.txt");
 
