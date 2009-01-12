@@ -547,7 +547,7 @@ int main(int argc,char **argv){
     try
     {
         tCommandLineData commandLine;
-        commandLine.programVersion_  = &sn_programVersion;
+        commandLine.programVersion_  = &st_programVersion;
 
         // analyse command line
         // tERR_MESSAGE( "Analyzing command line." );
@@ -558,7 +558,7 @@ int main(int argc,char **argv){
         {
             // embed version in recording
             const char * versionSection = "VERSION";
-            tString version( sn_programVersion );
+            tString version( st_programVersion );
             tRecorder::Playback( versionSection, version );
             tRecorder::Record( versionSection, version );
         }
@@ -754,7 +754,7 @@ int main(int argc,char **argv){
                     gLogo::SetBig(false);
                     gLogo::SetSpinning(true);
 
-                    sn_bigBrotherString = renderer_identification + "VER=" + sn_programVersion + "\n\n";
+                    sn_bigBrotherString = renderer_identification + "VER=" + st_programVersion + "\n\n";
 
 #ifdef HAVE_LIBRUBY      
                     try {

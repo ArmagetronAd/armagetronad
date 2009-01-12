@@ -72,7 +72,7 @@ static nConsoleDateFilter sn_consoleFilter;
 int main(int argc, char** argv)
 {
     tCommandLineData commandLine;
-    commandLine.programVersion_ = &sn_programVersion;
+    commandLine.programVersion_ = &st_programVersion;
     commandLine.Analyse(argc, argv);
     tLocale::Load("languages.txt");
     atexit(tLocale::Clear);

@@ -100,12 +100,6 @@ unsigned int sn_WatchMessageID = 76;
 tString sn_bigBrotherString;
 // tString sn_greeting[5];  //made 4 = 5 (lol i broke the laws of maths. subby),  k's bug fix
 
-#ifndef TRUE_ARMAGETRONAD_VERSION
-#define TRUE_ARMAGETRONAD_VERSION VERSION
-#endif
-
-tString sn_programVersion (TRUE_ARMAGETRONAD_VERSION)    ;
-
 tString sn_serverName("Unnamed Server");
 
 const unsigned int sn_defaultPort = 4534;
