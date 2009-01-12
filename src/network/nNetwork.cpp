@@ -56,10 +56,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "version.h"
 #endif // MACOSX_XCODE
 
-#ifdef WIN32
-#include "version.h"
-#endif // WIN32
-
 // my IP address. Master server/game server hopefully tell me a correct one.
 static tString sn_myAddress ("*.*.*.*:*");
 tString const & sn_GetMyAddress()
@@ -1112,7 +1108,7 @@ nMessage& nMessage::operator >> (tColoredString &s )
     if ( sn_filterColorStrings )
         s = tColoredString::RemoveColors( s, false );
     else if ( sn_filterDarkColorStrings )
-        s = tColoredString::RemoveColors( s, true );	
+        s = tColoredString::RemoveColors( s, true );
 
     return *this;
 }
@@ -1502,7 +1498,7 @@ void login_accept_handler(nMessage &m){
 #ifndef DEDICATED
             // expiration for public beta versions
             if ( !sn_AcceptingFromMaster &&
-                    ( strstr( VERSION, "rc" ) || strstr( VERSION, "alpha" ) || strstr( VERSION, "beta" ) ) &&
+                    ( strstr( st_programVersion.c_str(), "rc" ) || strstr( st_programVersion.c_str(), "alpha" ) || strstr( st_programVersion.c_str(), "beta" ) ) &&
                     sn_Connections[0].version.Max() > sn_currentProtocolVersion + 1 )
             {
                 throw tGenericException( tOutput("$testing_version_expired"), tOutput("$testing_version_expired_title" ) );
@@ -1512,7 +1508,7 @@ void login_accept_handler(nMessage &m){
         }
         else
             sn_Connections[0].version = nVersion( 0, 0);
-        
+
         // read my public IP
         if ( !m.End() )
         {
@@ -1538,7 +1534,7 @@ void login_accept_handler(nMessage &m){
             static const char * section = "LOGIN_SALT";
             tRecorder::Playback( section, compare );
             tRecorder::Record( section, compare );
-            
+
             if ( compare != 0 )
             {
                 nReadError( false );
@@ -2735,10 +2731,10 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
 
     // write our version
     (*mess) << sn_MyVersion();
-    
+
     // write our supported authentication methods
     (*mess) << nKrawall::nMethod::SupportedMethods();
-    
+
     // write a random salt
     nKrawall::RandomSalt( loginSalt );
     nKrawall::WriteScrambledPassword( loginSalt, *mess );

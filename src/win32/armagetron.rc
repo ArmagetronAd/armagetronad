@@ -1,7 +1,7 @@
 //Microsoft Developer Studio generated resource script.
 //http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tools/tools/about_resource_files.asp
 #include "resource.h"
-#include "..\version.h"
+#include "..\tTrueVersion.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -85,14 +85,14 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "\0"
             VALUE "FileDescription", "Armagetron Advanced\0"
-            VALUE "FileVersion", VERSION
+            VALUE "FileVersion", TRUE_ARMAGETRONAD_VERSION
             VALUE "InternalName", "ArmagetronAd\0"
             VALUE "LegalCopyright", "GNU Public License\0"
             VALUE "License", "GPL\0"
             VALUE "Homepage", "http://www.armagetronad.net\0"
             VALUE "OriginalFilename", "ArmagetronAd.exe\0"
             VALUE "ProductName", "Armagetron Advanced\0"
-            VALUE "ProductVersion", VERSION
+            VALUE "ProductVersion", TRUE_ARMAGETRONAD_VERSION
         END
     END
     BLOCK "VarFileInfo"
