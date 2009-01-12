@@ -195,8 +195,7 @@ then
 
     if test $versioned
     then
-        major_version=$( cd ${srcdir}; bzr nick )
-        branchnick=$major_version
+        branchnick=$( cd ${srcdir}; bzr nick )
         revid=$( bzr testament | sed -ne 's/^revision-id: \(.*\)/\1/p' )
     fi
 fi
