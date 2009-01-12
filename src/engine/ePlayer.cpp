@@ -3428,7 +3428,7 @@ void handle_chat( nMessage &m )
         if (p)
         {
             // for the duration of this function, set the access level to the level of the user.
-            tCurrentAccessLevel levelOverride( p->GetAccessLevel() );
+            tCurrentAccessLevel levelOverride( p->GetAccessLevel(), true );
 
             // check if the player is owned by the sender to avoid cheating
             if( p->Owner() != m.SenderID() )
@@ -3579,42 +3579,51 @@ void ePlayerNetID::Chat(const tString &s_orig)
     tColoredString s( s_orig );
     s.NetFilter();
 
-    switch (sn_GetNetState())
+#ifndef DEDICATED
+    // check for direct console commands
+    if( s_orig.StartsWith("/console") )
     {
-    case nCLIENT:
+        // direct commands are executed at owner level
+        tCurrentAccessLevel level( tAccessLevel_Owner, true );
+        
+        tString params("");
+        if (s_orig.StrPos(" ") == -1)
+            return;
+        else
+            params = s_orig.SubStr(s_orig.StrPos(" ") + 1);
+        
+        if ( tRecorder::IsPlayingBack() )
         {
-            if(s_orig.StartsWith("/console") ) {
-                tString params("");
-                if (s_orig.StrPos(" ") == -1)
-                    return;
-                else
-                    params = s_orig.SubStr(s_orig.StrPos(" ") + 1);
-
-                if ( tRecorder::IsPlayingBack() )
-                {
-                    tConfItemBase::LoadPlayback();
-                }
-                else
-                {
-                    std::stringstream s(static_cast< char const * >( params ) );
-                    tConfItemBase::LoadAll(s);
-                }
-            }
-            else
-            {
-                se_NewChatMessage( this, s )->BroadCast();
-            }
+            tConfItemBase::LoadPlayback();
+        }
+        else
+        {
+            std::stringstream s(static_cast< char const * >( params ) );
+            tConfItemBase::LoadAll(s);
+        }
+    }
+    else
+#endif
+    {
+        switch (sn_GetNetState())
+        {
+        case nCLIENT:
+        {
+            se_NewChatMessage( this, s )->BroadCast();
             break;
         }
-    case nSERVER:
+        case nSERVER:
         {
             se_BroadcastChat( this, s );
+            
+            // falling through on purpose
+            // break;
         }
-    default:
+        default:
         {
             se_DisplayChatLocally( this, s );
-
             break;
+        }
         }
     }
 }
@@ -5032,8 +5041,13 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
             accessLevel_ = static_cast< tAccessLevel >( tAccessLevel_Program - 1 );
         }
 
-        // take over the access level
-        SetAccessLevel( accessLevel_ );
+        {
+            // authorize access level change (careful, don't blindly copy/paste to other places)
+            tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
+            // take over the access level
+            SetAccessLevel( accessLevel_ );
+        }
 
         tString order( "" );
         if ( admin )

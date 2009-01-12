@@ -1306,7 +1306,13 @@ void init_game_grid(eGrid *grid, gParser *aParser){
       SDL_Delay(1000);
     */
 
-    Arena.PrepareGrid(grid, aParser);
+    {
+        // let settings in the map file be executed with the rights of the person
+        // who set the map
+        tCurrentAccessLevel level( conf_mapfile.GetSetting().GetSetLevel(), true );
+
+        Arena.PrepareGrid(grid, aParser);
+    }
 
     absolute_winner=winner=wishWinner=0;
 }
@@ -3335,6 +3341,9 @@ void gGame::StateUpdate(){
                 }
 
                 {
+                    // default include files are executed at owner level
+                    tCurrentAccessLevel level( tAccessLevel_Owner, true );
+
                     std::ifstream s;
 
                     // load contents of everytime.cfg for real
