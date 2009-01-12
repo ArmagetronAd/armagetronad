@@ -81,7 +81,7 @@ echo *%MAJOR_VERSION%*
 echo *%DATESTAMP%*
 echo *%DATESTAMP:~4%*
 echo *%HELP_FILE%*
-echo *** generating version.h...
+echo *** generating tTrueVersion.h...
 echo #define MAJOR_VERSION 1,%MAJOR_VERSION:.=%,0,%REV% > %HELP_FILE%
 
 echo #define MINOR_VERSION %MINOR_VERSION% >> %HELP_FILE%
