@@ -160,7 +160,7 @@ then
         # Count the revisions we added locally
         localrevisions=$( echo "${bzrmissingcout}" | sed -ne '2,1s/[^0-9]//gp' )
         # See how many steps it is, with the fool's number
-        stepsbackwards=$( bzr log ${srcdir} -l ${localrevisions} | sed -ne 's/^ *revno: [0-9\.]\+$/\0/p' | wc -l )
+        stepsbackwards=$( bzr_count_revisions ${srcdir} ${localrevisions} )
         # And start dancing.
         minor_version=_alpha_z$(( ${revcount} - ${stepsbackwards} ))_${DATE}
         # Set last common ancestors
