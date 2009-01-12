@@ -158,7 +158,7 @@ then
     # if it diverged:
     then
         # Count the revisions we added locally
-        localrevisions=$( echo "${bzrmissingcout}" | sed -ne '2,1s/^You have \([0-9]\+\) extra revision(s):$/\1/p' )
+        localrevisions=$( echo "${bzrmissingcout}" | sed -ne '2,1s/[^0-9]//gp' )
         # See how many steps it is, with the fool's number
         stepsbackwards=$( bzr log ${srcdir} -l ${localrevisions} | sed -ne 's/^ *revno: [0-9\.]\+$/\0/p' | wc -l )
         # And start dancing.
