@@ -7190,7 +7190,8 @@ void ePlayerNetID::SetTeam( eTeam* newTeam )
 void ePlayerNetID::SetTeamname(const char* newTeamname)
 {
     teamname = newTeamname;
-    if (bool(currentTeam) && currentTeam->OldestHumanPlayer() &&
+    if (sn_GetNetState() != nCLIENT && 
+        bool(currentTeam) && currentTeam->OldestHumanPlayer() &&
             currentTeam->OldestHumanPlayer()->ID()==ID())
     {
         currentTeam->UpdateAppearance();
