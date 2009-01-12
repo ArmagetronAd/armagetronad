@@ -302,6 +302,7 @@ public:
     void GoHome();
     void RemoveOwner();
     void OwnerDropped();
+    gCycle* Owner(){return owner_;}
 
 protected:
     bool init_;

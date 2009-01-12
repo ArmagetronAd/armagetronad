@@ -3490,6 +3490,19 @@ void gFlagZoneHack::OnEnter( gCycle * target, REAL time )
         return;
     }
 
+    //check to see if player already has a flag
+    bool playerHasFlag = false;
+    const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+    for (int i=gameObjects.Len()-1;i>=0;i--)
+    {
+        gFlagZoneHack *otherFlag=dynamic_cast<gFlagZoneHack *>(gameObjects(i));
+        if ((otherFlag)){
+            if (otherFlag->Owner() == target ){
+                playerHasFlag = true;
+            }
+        }
+    }
+    
     // check if the player is on our team or not (check will fail if team not enabled)
     if (target->Player()->CurrentTeam() == team)
     {
@@ -3505,7 +3518,7 @@ void gFlagZoneHack::OnEnter( gCycle * target, REAL time )
         }
     }
     // check if this player dropped the flag previously
-    else if ((target != ownerDropped_) || (time > (ownerDroppedTime_ + sg_flagDropTime)))
+    else if (((target != ownerDropped_) || (time > (ownerDroppedTime_ + sg_flagDropTime))) && (!playerHasFlag))
     {
         // take the flag
         owner_ = target;
