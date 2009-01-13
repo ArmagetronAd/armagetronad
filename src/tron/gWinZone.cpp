@@ -2022,6 +2022,10 @@ static tSettingItem<bool> sg_flagDropHomeConfig("FLAG_DROP_HOME", sg_flagDropHom
 static int sg_baseRespawnRemindTime=30;
 static tSettingItem<int> sg_baseRespawnRemindTimeConfig("BASE_RESPAWN_REMIND_TIME", sg_baseRespawnRemindTime);
 
+//number of flags that must be home in order to capture
+static int sg_minFlagsHome = 0;
+static tSettingItem<int> sg_minFlagsHomeConfig( "MIN_FLAGS_HOME", sg_minFlagsHome );
+
 // count zones belonging to the given team.
 // fill in count and the zone that is farthest to the team.
 void gBaseZoneHack::CountZonesOfTeam( eGrid const * grid, eTeam * otherTeam, int & count, gBaseZoneHack * & farthest )
@@ -2751,26 +2755,37 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
 		{
 			// search for another flag owned by our team
 			bool allFlagsHome = true;
+            int flagsHome = 0;
+            int flagsTaken = 0;
+            const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+            for (int i=gameObjects.Len()-1;i>=0;i--)
+            {
+                gFlagZoneHack *otherFlag=dynamic_cast<gFlagZoneHack *>(gameObjects(i));
 
-			if (sg_flagRequiredHome)
+                if ((otherFlag) &&
+                    (otherFlag->Team() == team))
+                {
+                    // check if flag is at home (starting position)
+                    if (!otherFlag->IsHome())
+                    {
+                        allFlagsHome = false;
+                        flagsTaken++;
+                    }
+                    else
+                    {
+                        flagsHome++;
+                    }
+                }
+            }
+            if (!sg_flagRequiredHome)
 			{
-				const tList<eGameObject>& gameObjects = Grid()->GameObjects();
-				for (int i=gameObjects.Len()-1;i>=0;i--)
-				{
-					gFlagZoneHack *otherFlag=dynamic_cast<gFlagZoneHack *>(gameObjects(i));
-
-					if ((otherFlag) &&
-						(otherFlag->Team() == team))
-					{
-						// check if flag is at home (starting position)
-						if (!otherFlag->IsHome())
-						{
-							allFlagsHome = false;
-						}
-					}
-				}
+                if (sg_minFlagsHome > (flagsHome+flagsTaken)){
+                    allFlagsHome=false;
+                }else if(sg_minFlagsHome <= flagsHome){
+                    allFlagsHome=true;
+                }
 			}
-
+            
 			if (!allFlagsHome)
 			{
 				target->flag_->WarnFlagNotHome();

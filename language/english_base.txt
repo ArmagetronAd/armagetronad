@@ -2308,6 +2308,7 @@ player_flag_score		\1 took the flag home for \2 points, nice flag handling!\n
 player_flag_cant_score		\1 took the flag home, but their flag isn't back yet. Get it!\n
 player_flag_hold_score_win	\1 got \2 points for holding the flag!\n
 player_flag_hold_score_lose	\1 lost \2 points for holding the flag!\n
+min_flags_home              minimum number of flags that must be home in order for flag to be captured
 
 player_target_score_win         \1 got \2 points for entering a target.\n
 player_target_score_lose        \1 lost \2 points for entering a target.\n
