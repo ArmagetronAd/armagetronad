@@ -2795,20 +2795,19 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
     else if ( se_filterDarkColorTeam )
         msg = tColoredString::RemoveColors ( msg, true );
 
-    // Log message to server and sender
+    // Log message to server (and in previous revisions, the sender)
     tColoredString messageForServerAndSender = se_BuildChatString(currentTeam, p, msg);
     messageForServerAndSender << "\n";
 
     if (currentTeam != NULL) // If a player has just joined the game, he is not yet on a team. Sending a /team message will crash the server
     {
         sn_ConsoleOut(messageForServerAndSender, 0);
-        sn_ConsoleOut(messageForServerAndSender, p->Owner());
 
         // Send message to team-mates
         int numTeamPlayers = currentTeam->NumPlayers();
-        for (int teamPlayerIndex = 0; teamPlayerIndex < numTeamPlayers; teamPlayerIndex++) {
-            if (currentTeam->Player(teamPlayerIndex)->Owner() != p->Owner()) // Do not resend the message to yourself
-                se_SendTeamMessage(currentTeam, p, currentTeam->Player(teamPlayerIndex), msg);
+        for (int teamPlayerIndex = 0; teamPlayerIndex < numTeamPlayers; teamPlayerIndex++)
+        {
+            se_SendTeamMessage(currentTeam, p, currentTeam->Player(teamPlayerIndex), msg);
         }
 
         // check for other players who are authorized to hear the message
@@ -2841,14 +2840,13 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
     else
     {
         sn_ConsoleOut(messageForServerAndSender, 0);
-        sn_ConsoleOut(messageForServerAndSender, p->Owner());
 
         // check for other spectators
         for( int i = se_PlayerNetIDs.Len() - 1; i >=0; --i )
         {
             ePlayerNetID * spectator = se_PlayerNetIDs(i);
 
-            if ( se_GetManagedTeam( spectator ) == 0 && spectator != p )
+            if ( se_GetManagedTeam( spectator ) == 0 )
             {
                 se_SendTeamMessage(currentTeam, p, spectator, msg);
             }
