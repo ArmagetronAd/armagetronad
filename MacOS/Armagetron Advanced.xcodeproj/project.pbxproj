@@ -401,6 +401,8 @@
 		9B69F6260A63E1A700F5F2E4 /* eLagCompensation.h in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */; };
 		9B69F6270A63E1A700F5F2E4 /* eLagCompensation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */; };
 		9B78706A0D5E4FD20088A96F /* libZThread.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B7870670D5E4FD20088A96F /* libZThread.a */; };
+		9BA977200F1EC45500F02184 /* SDL_mixer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BA9771F0F1EC45500F02184 /* SDL_mixer.framework */; };
+		9BA9773D0F1EC49700F02184 /* SDL_mixer.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9BA9771F0F1EC45500F02184 /* SDL_mixer.framework */; };
 		D01641340D904A6600FC0A23 /* tColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01641330D904A6600FC0A23 /* tColor.cpp */; };
 		D01641350D904A6600FC0A23 /* tColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01641330D904A6600FC0A23 /* tColor.cpp */; };
 		D01641360D904A6600FC0A23 /* tColor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D01641330D904A6600FC0A23 /* tColor.cpp */; };
@@ -461,6 +463,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				9BA9773D0F1EC49700F02184 /* SDL_mixer.framework in Copy Frameworks */,
 				9B5414DB0A45C78D00745CE6 /* libpng.framework in Copy Frameworks */,
 				9B5414DC0A45C78D00745CE6 /* SDL_image.framework in Copy Frameworks */,
 				9B5414DD0A45C78D00745CE6 /* SDL.framework in Copy Frameworks */,
@@ -702,7 +705,7 @@
 		8CBA60B0089F00F2007E21DC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		8CBA62A1089F1A95007E21DC /* config.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../src/macosx/client/config.h; sourceTree = SOURCE_ROOT; };
 		8CBA62E008A01A55007E21DC /* Armagetron Advanced.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = "Armagetron Advanced.icns"; sourceTree = "<group>"; };
-		8CBA646108A065A8007E21DC /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
+		8CBA646108A065A8007E21DC /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
 		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B5414A20A45C78200745CE6 /* libpng.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libpng.framework; path = /Library/Frameworks/ArmagetronAdvanced/current/libpng.framework; sourceTree = "<absolute>"; };
 		9B5414A30A45C78200745CE6 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = /Library/Frameworks/ArmagetronAdvanced/current/SDL_image.framework; sourceTree = "<absolute>"; };
@@ -715,6 +718,7 @@
 		9B69F6210A63E1A700F5F2E4 /* eLagCompensation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eLagCompensation.cpp; sourceTree = "<group>"; };
 		9B69F6220A63E1A700F5F2E4 /* eLagCompensation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eLagCompensation.h; sourceTree = "<group>"; };
 		9B7870670D5E4FD20088A96F /* libZThread.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libZThread.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libZThread.a; sourceTree = "<absolute>"; };
+		9BA9771F0F1EC45500F02184 /* SDL_mixer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_mixer.framework; path = /Library/Frameworks/ArmagetronAdvanced/current/SDL_mixer.framework; sourceTree = "<absolute>"; };
 		D01641330D904A6600FC0A23 /* tColor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tColor.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -751,6 +755,7 @@
 				9B5414A60A45C78200745CE6 /* SDL_image.framework in Frameworks */,
 				9B5414A70A45C78200745CE6 /* SDL.framework in Frameworks */,
 				9B5E11BF0D5EC32500175ABB /* CoreServices.framework in Frameworks */,
+				9BA977200F1EC45500F02184 /* SDL_mixer.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1154,6 +1159,7 @@
 				9B7870670D5E4FD20088A96F /* libZThread.a */,
 				9B5414A40A45C78200745CE6 /* SDL.framework */,
 				9B5414A30A45C78200745CE6 /* SDL_image.framework */,
+				9BA9771F0F1EC45500F02184 /* SDL_mixer.framework */,
 			);
 			name = current;
 			sourceTree = "<group>";
@@ -2056,6 +2062,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					/Library/Frameworks/ArmagetronAdvanced/current/SDL.framework/Headers,
+					/Library/Frameworks/ArmagetronAdvanced/current/SDL_mixer.framework/Headers,
 					/Library/Frameworks/ArmagetronAdvanced/current/SDL_image.framework/Headers,
 					/Library/Frameworks/ArmagetronAdvanced/current/libpng.framework/Headers,
 					/usr/include/libxml2,
@@ -2107,6 +2114,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					/Library/Frameworks/ArmagetronAdvanced/current/SDL.framework/Headers,
+					/Library/Frameworks/ArmagetronAdvanced/current/SDL_mixer.framework/Headers,
 					/Library/Frameworks/ArmagetronAdvanced/current/SDL_image.framework/Headers,
 					/Library/Frameworks/ArmagetronAdvanced/current/libpng.framework/Headers,
 					/usr/include/libxml2,
