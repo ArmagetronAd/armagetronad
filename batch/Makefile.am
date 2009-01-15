@@ -47,9 +47,12 @@ EXTRA_DIST=\
 	sysinstall.in\
 	starter.in\
 	stat.in\
+	armabuild/__init__.py\
+	armabuild/resource.py\
     make/uninstall\
 	make/releasetag\
 	make/sortresources.py\
+	make/copyresources.py\
 	make/sortresources\
 	make/regenerate_fingerprint
 
