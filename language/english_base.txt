@@ -2751,6 +2751,8 @@ access_level_op_overpowered 0xff7f7f\1 denied,0xffffff your need higher access r
 access_level_op_self        0xff7f7f\1 denied,0xffffff can't do that to yourself :).\n
 access_level_op_denied_max  0xff7f7f\1 denied,0xffffff your victim already has maximal rights.\n
 access_level_op_denied_ai   0xff7f7f\1 denied,0xffffff your victim is an AI.\n
+access_level_op_same        \1: This would have no effect.\n
+access_level_op_unclear     \1: User is already logged in, please explicitely set an access level.\n
 
 access_level_demote         \1 has been demoted to "\2" by order of \3.\n
 access_level_promote        \1 has been promoted to "\2" by order of \3.\n
