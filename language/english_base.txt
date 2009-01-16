@@ -2794,6 +2794,7 @@ login_error_noremote                 Authentication via Global ID not available 
 login_error_blacklist                Authority \1 is on this server's blacklist.
 login_error_whitelist                Authority \1 is not on this server's whitelist.
 login_error_pharm                    Server adress mismatch, \1 (sent by client) != \2 (our address). Pharming suspected. If  you are connecting from the LAN and get this error, either set "TRUST_LAN" on the server (only if your LAN can be fully trusted, of course) or use "SERVER_IP" to make the local IP known to the server.
+login_error_pharm_cheap              Server adress trouble. Client sent unspecific server address.
 login_error_methodmismatch  The local method used for auhtentication has been modified since your password was set. In the server's config files, put all commands that define authentication methods before all local password definitions.
 login_error_nomethod        No authentication method could be found. Your client supports \1, this server supports \2, and the authentication server supports \3.
 login_error_nomethodlist    Authentication URL \1 does not return a list of supported methods, got error code \2, content "\3".
