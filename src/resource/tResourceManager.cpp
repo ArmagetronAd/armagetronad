@@ -315,7 +315,7 @@ static void RInclude(std::istream& s)
 static tConfItemFunc s_RInclude("RINCLUDE",  &RInclude);
 
 static bool st_checkAuthor(tString const &Author) {
-    if(Author.empty() || Author[0] < 'A' || Author[0] > 'z' || Author[0] > 'Z' && Author[0] < 'a' || Author.find('/') != tString::npos) {
+    if(Author.empty() || Author[0] < 'A' || Author[0] > 'z' || ( Author[0] > 'Z' && Author[0] < 'a' ) || Author.find('/') != tString::npos) {
         tERR_WARN("Resource authors must start with a letter and may not contain slashes");
         return false;
     }
