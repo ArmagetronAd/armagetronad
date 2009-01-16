@@ -36,12 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifndef DEDICATED
 #include "rRender.h"
-#include <FTGLPixmapFont.h>
-#include <FTGLBitmapFont.h>
-#include <FTGLTextureFont.h>
-#include <FTGLPolygonFont.h>
-#include <FTGLOutlineFont.h>
-#include <FTGLExtrdFont.h>
+#include <ftgl.h>
 //#include <GL/gl>
 //#include <SDL>
 #endif
