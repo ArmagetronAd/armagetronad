@@ -37,7 +37,7 @@ char* MidStr(const char*s,int i1,int i2)
 
 char* CopyStr(const char*s)
 {char*s1=new char[strlen(s)+1];char*s12=s1;const char*s2=s;
-    while((*s12++=*s2++));return s1;}
+    while((*s12++=*s2++)) ;return s1;}
 
 void InsStr(char*&s,int n,char c)// Warning : deletes the old string
 {if(n<0||n>(int)strlen(s))return;
@@ -427,7 +427,7 @@ case ErrOp:case Num:case Var:return -1;
     };
     int i;
     for(i=(int)strlen(s)-1;i>=0;i--){
-        if(s[i]==opc&&(op!=Sub||i&&s[i-1]==')'))return i;
+        if(s[i]==opc&&(op!=Sub||(i&&s[i-1]==')')))return i;
     if(s[i]==')'){i=SearchCorClosebracket(s,i);if(i==-1)return -1;};
     };
     return -1;
@@ -1086,25 +1086,25 @@ void BCDouble(pfoncld*&pf,pfoncld*pf1,pfoncld*pf2,
               pfoncld f)
 {
     pfoncld*pf3,*pf4=pf1;long n1,n2;
-    for(n1=0;*pf4!=NULL;pf4++,n1++);for(n2=0,pf4=pf2;*pf4!=NULL;pf4++,n2++);
+    for(n1=0;*pf4!=NULL;pf4++,n1++) ;for(n2=0,pf4=pf2;*pf4!=NULL;pf4++,n2++) ;
     pf=new pfoncld[n1+n2+2];
     for(pf3=pf,pf4=pf1;*pf4!=NULL;pf3++,pf4++)*pf3=*pf4;
     for(pf4=pf2;*pf4!=NULL;pf3++,pf4++)*pf3=*pf4;
     *pf3++=f;*pf3=NULL;//delete[]pf1,pf2;
     float**pv3,**pv4=pv1;
-    for(n1=0;*pv4!=NULL;pv4++,n1++);for(n2=0,pv4=pv2;*pv4!=NULL;pv4++,n2++);
+    for(n1=0;*pv4!=NULL;pv4++,n1++) ;for(n2=0,pv4=pv2;*pv4!=NULL;pv4++,n2++) ;
     pv=new float*[n1+n2+1];
     for(pv3=pv,pv4=pv1;*pv4!=NULL;pv3++,pv4++)*pv3=*pv4;
     for(pv4=pv2;*pv4!=NULL;pv3++,pv4++)*pv3=*pv4;
     *pv3=NULL;//delete[]pv1,pv2;
     float*pp3,*pp4=pp1;
-    for(n1=0;*pp4!=ErrVal;pp4++,n1++);for(n2=0,pp4=pp2;*pp4!=ErrVal;pp4++,n2++);
+    for(n1=0;*pp4!=ErrVal;pp4++,n1++) ;for(n2=0,pp4=pp2;*pp4!=ErrVal;pp4++,n2++) ;
     pp=new float[n1+n2+1];  // Really need to add and not to take max(n1,n2) in case of Juxt operator
     for(pp3=pp,pp4=pp1;*pp4!=ErrVal;pp3++,pp4++)*pp3=0;
     for(pp4=pp2;*pp4!=ErrVal;pp3++,pp4++)*pp3=0;
     *pp3=ErrVal;//delete[]pp1,pp2;
     PRFunction*prf3,*prf4=prf1;
-    for(n1=0;*prf4!=NULL;prf4++,n1++);for(n2=0,prf4=prf2;*prf4!=NULL;prf4++,n2++);
+    for(n1=0;*prf4!=NULL;prf4++,n1++) ;for(n2=0,prf4=prf2;*prf4!=NULL;prf4++,n2++) ;
     prf=new PRFunction[n1+n2+1];
     for(prf3=prf,prf4=prf1;*prf4!=NULL;prf3++,prf4++)*prf3=*prf4;
     for(prf4=prf2;*prf4!=NULL;prf3++,prf4++)*prf3=*prf4;
@@ -1115,22 +1115,22 @@ void BCSimple(pfoncld*&pf,pfoncld*pf1,float**&pv,float**pv1,
               float*&pp,float*pp1,RFunction**&prf,RFunction**prf1,pfoncld f)
 {
     pfoncld*pf3,*pf4=pf1;long n;
-    for(n=0;*pf4!=NULL;pf4++,n++);
+    for(n=0;*pf4!=NULL;pf4++,n++) ;
     pf=new pfoncld[n+2];
     for(pf4=pf1,pf3=pf;*pf4!=NULL;pf3++,pf4++)*pf3=*pf4;
     *pf3++=f;*pf3=NULL;//delete[]pf1;
     float**pv3,**pv4=pv1;
-    for(n=0;*pv4!=NULL;pv4++,n++);
+    for(n=0;*pv4!=NULL;pv4++,n++) ;
     pv=new float*[n+1];
     for(pv3=pv,pv4=pv1;*pv4!=NULL;pv3++,pv4++)*pv3=*pv4;
     *pv3=NULL;//delete[]pv1;
     float*pp3,*pp4=pp1;
-    for(n=0;*pp4!=ErrVal;pp4++,n++);
+    for(n=0;*pp4!=ErrVal;pp4++,n++) ;
     pp=new float[n+1];
     for(pp3=pp,pp4=pp1;*pp4!=ErrVal;pp3++,pp4++)*pp3=0;
     *pp3=ErrVal;//delete[]pp1;
     RFunction**prf3,**prf4=prf1;
-    for(n=0;*prf4!=NULL;prf4++,n++);
+    for(n=0;*prf4!=NULL;prf4++,n++) ;
     prf=new RFunction*[n+1];
     for(prf3=prf,prf4=prf1;*prf4!=NULL;prf3++,prf4++)*prf3=*prf4;
     *prf3=NULL;//delete[]prf1;
@@ -1140,22 +1140,22 @@ void BCFun(pfoncld*&pf,pfoncld*pf1,float**&pv,float**pv1,
            float*&pp,float*pp1,RFunction**&prf,RFunction**prf1,PRFunction rf)
 {
     pfoncld*pf3,*pf4=pf1;long n;
-    for(n=0;*pf4!=NULL;pf4++,n++);
+    for(n=0;*pf4!=NULL;pf4++,n++) ;
     pf=new pfoncld[n+2];
     for(pf4=pf1,pf3=pf;*pf4!=NULL;pf3++,pf4++)*pf3=*pf4;
     *pf3++=&RFunc;*pf3=NULL;//delete[]pf1;
     float**pv3,**pv4=pv1;
-    for(n=0;*pv4!=NULL;pv4++,n++);
+    for(n=0;*pv4!=NULL;pv4++,n++) ;
     pv=new float*[n+1];
     for(pv3=pv,pv4=pv1;*pv4!=NULL;pv3++,pv4++)*pv3=*pv4;
     *pv3=NULL;//delete[]pv1;
     float*pp3,*pp4=pp1;
-    for(n=0;*pp4!=ErrVal;pp4++,n++);
+    for(n=0;*pp4!=ErrVal;pp4++,n++) ;
     pp=new float[n+1];
     for(pp3=pp,pp4=pp1;*pp4!=ErrVal;pp3++,pp4++)*pp3=0;
     *pp3=ErrVal;//delete[]pp1;
     PRFunction*prf3,*prf4=prf1;
-    for(n=0;*prf4!=NULL;prf4++,n++);
+    for(n=0;*prf4!=NULL;prf4++,n++) ;
     prf=new PRFunction[n+2];
     for(prf4=prf1,prf3=prf;*prf4!=NULL;prf3++,prf4++)*prf3=*prf4;
     *prf3++=rf;*prf3=NULL;//delete[]pf1;

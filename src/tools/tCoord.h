@@ -168,7 +168,7 @@ template<typename T> void tCoord::GrahamScan(T &in, T &out) {
     tCoord P=in.front();
     typename T::iterator iter(in.begin()+1);
     for(; iter != in.end(); ++iter) {
-        if(iter->y < P.y || iter->y == P.y && iter->x < P.x) {
+        if(iter->y < P.y || ( iter->y == P.y && iter->x < P.x ) ) {
             P = *iter;
         }
     }

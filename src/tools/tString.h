@@ -284,7 +284,7 @@ bool tString::Convert( T & target, size_type startPos ) const
     s >> target;
 
     // return failure condition
-    return !s.fail() && s.eof() || isspace(s.get());
+    return ( !s.fail() && s.eof() ) || isspace(s.get());
 }
 #endif
 

@@ -3886,7 +3886,7 @@ public:
     eAutoCompleterChat(std::deque<tString> &words):uAutoCompleter(words) {};
     int DoFullCompletion(tString &string, int pos, int len, tString &match) {
         tString actualString;
-        if(pos - len == 0 || pos - len == 6 && string.StartsWith("/team ")) {
+        if(pos - len == 0 || ( pos - len == 6 && string.StartsWith("/team ") ) ) {
             actualString = match + ": ";
         } else if(string.StartsWith("/admin ")) {
             actualString = Simplify(match) + " ";
@@ -8071,7 +8071,7 @@ void ePlayerNetID::UpdateName( void )
        )
        )
     {
-        if ( sn_GetNetState() == nSTANDALONE || !IsHuman() || IsHuman() && ( nameFromServer_ != nameFromClient_ && !messenger.adminRename_ ) )
+        if ( sn_GetNetState() == nSTANDALONE || !IsHuman() || ( IsHuman() && ( nameFromServer_ != nameFromClient_ && !messenger.adminRename_ ) ) )
 	{
 	    // apply name filters only on remote players
             if ( Owner() != 0 )
