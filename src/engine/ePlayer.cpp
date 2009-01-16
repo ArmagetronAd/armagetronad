@@ -2181,8 +2181,6 @@ typedef void (*OPFUNC)( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLeve
 
 static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const * command, OPFUNC F )
 {
-    bool isexplicit = false;
-
     if ( admin->GetAccessLevel() <= se_opAccessLevel )
     {
         ePlayerNetID * victim = se_FindPlayerInChatCommand( admin, command, s );
@@ -2206,9 +2204,9 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
                 }
                 char first;
                 s >> first;
+
                 if ( !s.eof() && !s.fail() )
                 {
-                    isexplicit = true;
                     s.unget();
                     int newLevel = 0;
                     s >> newLevel;
@@ -2232,18 +2230,7 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
 
                 accessLevel = static_cast< tAccessLevel >( level );
 
-                if ( accessLevel == victim->GetAccessLevel() )
-                {
-                    if ( isexplicit )
-                    {
-                        sn_ConsoleOut( tOutput( "$access_level_op_same", command ), admin->Owner() );
-                    }
-                    else
-                    {
-                        sn_ConsoleOut( tOutput( "$access_level_op_unclear", command ), admin->Owner() );
-                    }
-                }
-                else if ( accessLevel > admin->GetAccessLevel() )
+                if ( accessLevel > admin->GetAccessLevel() )
                 {
                      (*F)( admin, victim, accessLevel );
                 }
@@ -3899,7 +3886,7 @@ public:
     eAutoCompleterChat(std::deque<tString> &words):uAutoCompleter(words) {};
     int DoFullCompletion(tString &string, int pos, int len, tString &match) {
         tString actualString;
-        if(pos - len == 0 || ( pos - len == 6 && string.StartsWith("/team ") ) ) {
+        if(pos - len == 0 || pos - len == 6 && string.StartsWith("/team ")) {
             actualString = match + ": ";
         } else if(string.StartsWith("/admin ")) {
             actualString = Simplify(match) + " ";
@@ -3969,8 +3956,8 @@ public:
                 {
                     if ( content->Len() + insertion.insertion_.Len() <= maxLength_ )
                     {
-                        *content = content->SubStr( 0, realCursorPos ) + insertion.insertion_ + content->SubStr( realCursorPos );
-                        realCursorPos += insertion.insertion_.Len()-1;
+                        *content = content->SubStr( 0, cursorPos ) + insertion.insertion_ + content->SubStr( cursorPos );
+                        cursorPos += insertion.insertion_.Len()-1;
                     }
 
                     return true;
@@ -5387,13 +5374,10 @@ void ePlayerNetID::WriteSync(nMessage &m){
 // makes sure the passed string is not longer than the given maximum
 static void se_CutString( tColoredString & string, int maxLen )
 {
-    if ( string.LenUtf8() > maxLen )
+    if (string.Len() > maxLen )
     {
-        // nibble away one character at a time (not very efficient)
-        while ( string.LenUtf8() > maxLen )
-        {
-            string.RemoveSubStrUtf8( string.size() - 1, 1 );
-        }
+        string = string.SubStr(0, maxLen);
+        //string[string.Len()-1]='\0';
         string.RemoveTrailingColor();
     }
 }
@@ -8087,7 +8071,7 @@ void ePlayerNetID::UpdateName( void )
        )
        )
     {
-        if ( sn_GetNetState() == nSTANDALONE || !IsHuman() || ( IsHuman() && ( nameFromServer_ != nameFromClient_ && !messenger.adminRename_ ) ) )
+        if ( sn_GetNetState() == nSTANDALONE || !IsHuman() || IsHuman() && ( nameFromServer_ != nameFromClient_ && !messenger.adminRename_ ) )
 	{
 	    // apply name filters only on remote players
             if ( Owner() != 0 )
@@ -8400,9 +8384,17 @@ static bool se_IsUnderscore( char c )
 
 void ePlayerNetID::FilterName( tString const & in, tString & out )
 {
+    int i;
     static ePlayerCharacterFilter filter;
-    tString temp = tColoredString::RemoveColors( in );
-    out = filter.FilterString( temp );
+    out = tColoredString::RemoveColors( in );
+
+    // filter out illegal characters
+    for ( i = out.Size()-1; i>=0; --i )
+    {
+        char & c = out[i];
+
+        c = filter.Filter( c );
+    }
 
     // strip leading and trailing unknown characters
     se_StripMatchingEnds( out, se_IsUnderscore, se_IsUnderscore );
