@@ -326,6 +326,33 @@ class gDeathZoneHack: public gZone
 
 		gCycle * getPlayerCycle(ePlayerNetID *pPlayer);
 };
+//! Rubber zone: Increase players rubber on enter
+class gRubberZoneHack: public gZone
+{
+	public:
+
+								 //!< local constructor
+		gRubberZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false);
+								 //!< network constructor
+		gRubberZoneHack(nMessage &m);
+		~gRubberZoneHack();		 //!< destructor
+
+
+								 //!< Sets the current rubber
+		gZone &         SetRubber            (REAL rubber);
+		REAL            GetRubber            () {return (rmRubber);}
+
+								 //!< reacts on objects inside the zone
+	protected:
+		virtual void OnVanish(); //!< called when the zone vanishes
+		REAL rmRubber;
+
+	private:
+								 //!< reacts on objects inside the zone (kills them)
+		virtual void OnEnter( gCycle *target, REAL time );
+
+		gCycle * getPlayerCycle(ePlayerNetID *pPlayer);
+};
 
 //! base zone: belongs to a team, enemy players who manage to stay inside win the round (will be replaced
 class gBaseZoneHack: public gZone

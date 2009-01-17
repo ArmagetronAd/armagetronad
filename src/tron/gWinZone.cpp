@@ -1884,6 +1884,130 @@ void gDeathZoneHack::OnEnter( gDeathZoneHack * target, REAL time )
 	}
 }
 
+// *******************************************************************************
+// *
+// *	gRubberZoneHack
+// *
+// *******************************************************************************
+//!
+//!		@param	grid Grid to put the zone into
+//!		@param	pos	 Position to spawn the zone at
+//!
+// *******************************************************************************
+
+gRubberZoneHack::gRubberZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation)
+:gZone( grid, pos, dynamicCreation )
+{
+	color_.r = 1.0f;
+    color_.g = 0.7f;
+    color_.b = 0.2f;
+
+	grid->AddGameObjectInteresting(this);
+}
+
+
+// *******************************************************************************
+// *
+// *	~gRubberZoneHack
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+gRubberZoneHack::~gRubberZoneHack( void )
+{
+}
+
+
+static int score_rubberzone=-1;
+static tSettingItem<int> s_rz("SCORE_RUBBERZONE",score_rubberzone);
+
+void gRubberZoneHack::OnVanish( void )
+{
+	grid->RemoveGameObjectInteresting(this);
+}
+
+gZone & gRubberZoneHack::SetRubber(REAL rubber)
+{
+	rmRubber = rubber;
+
+	return (*this);
+}
+
+gCycle * gRubberZoneHack::getPlayerCycle(ePlayerNetID *pPlayer)
+{
+	gCycle *pPlayerCycle = NULL;
+	if (pPlayer)
+	{
+		const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+		for (int i=gameObjects.Len()-1;i>=0;i--)
+		{
+			gCycle *pCycle=dynamic_cast<gCycle *>(gameObjects(i));
+
+			if (pCycle)
+			{
+				if (pCycle->Player() == pOwner_)
+				{
+					pPlayerCycle = pCycle;
+					break;
+				}
+			}
+		}
+	}
+
+	return (pPlayerCycle);
+}
+
+// *******************************************************************************
+// *
+// *	sg_RubberZoneHurt
+// *
+// *******************************************************************************
+//!
+//!		@param	target  the cycle that has been found inside the zone
+//!		@brief    when DZ_RUBBER is not 0: change target's rubber instead of just killing
+//!
+// *******************************************************************************
+static eLadderLogWriter sg_deathRubberZoneWriter("DEATH_RUBBERZONE", true);
+static void sg_RubberZoneHurt( gCycle * target, REAL rmRubber );
+void sg_RubberZoneHurt( gCycle * target, REAL rmRubber)
+{
+    REAL rubber = target->GetRubber();
+
+    if ( rubber + rmRubber >= sg_rubberCycle )       // max rubber amount reached, kill the cycle
+    {
+        target->Player()->AddScore( score_rubberzone, tOutput(), "$player_lose_rubberzone" );
+        target->Kill();
+        target->SetRubber( sg_rubberCycle );
+        sg_deathRubberZoneWriter << target->Player()->GetUserName();
+        sg_deathRubberZoneWriter.write();
+    }
+    else if ( rubber + rmRubber > 0 )            // sg_deathZoneRubberMalus might be negative, avoid setting a negative rubber!
+    {
+        target->SetRubber( rubber + rmRubber );
+    }
+    else                                                        // too low value, just set to zero
+        target->SetRubber( 0 );
+}
+
+
+// *******************************************************************************
+// *    gRubberZoneHack
+// *	OnEnter
+// *
+// *******************************************************************************
+//!
+//!		@param	target  the cycle that has been found inside the zone
+//!		@param	time    the current time
+//!
+// *******************************************************************************
+
+void gRubberZoneHack::OnEnter( gCycle * target, REAL time )
+{
+    sg_RubberZoneHurt( target, rmRubber );
+}
+
 
 // *******************************************************************************
 // *
@@ -4983,6 +5107,13 @@ static void sg_CreateZone_conf(std::istream &s)
 	const tString zoneGrowthStr = params.ExtractNonBlankSubString(pos);
 	const tString zoneDirXStr = params.ExtractNonBlankSubString(pos);
 	const tString zoneDirYStr = params.ExtractNonBlankSubString(pos);
+    tString  zoneRubberStr;
+    REAL zoneRubber;
+    if(zoneTypeStr == "rubber"){
+        zoneRubberStr = params.ExtractNonBlankSubString(pos);
+        zoneRubber = atof(zoneRubberStr);
+        con << zoneRubber;
+    }
 	const tString zoneInteractive = params.ExtractNonBlankSubString(pos);
 	const tString zoneRedStr = params.ExtractNonBlankSubString(pos);
 	const tString zoneGreenStr = params.ExtractNonBlankSubString(pos);
@@ -4993,6 +5124,7 @@ static void sg_CreateZone_conf(std::istream &s)
 	eCoord zonePos = route.empty() ? eCoord(atof(zonePosXStr),atof(zonePosYStr)) : route.front();
 	const REAL zoneSize = atof(zoneSizeStr);
 	const REAL zoneGrowth = atof(zoneGrowthStr);
+	//const REAL zoneRubber = atof(zoneRubberStr);
 	eCoord zoneDir = eCoord(atof(zoneDirXStr),atof(zoneDirYStr));
 	gRealColor zoneColor;
 	bool setColorFlag = false;
@@ -5051,10 +5183,16 @@ static void sg_CreateZone_conf(std::istream &s)
 			setColorFlag = true;
 		}
 	}
-	else if ( zoneTypeStr=="win" )
+	else if ( zoneTypeStr=="win")
 	{
 		Zone = tNEW( gWinZoneHack( grid, zonePos, true ) );
 		//sn_ConsoleOut( "$instant_win_activated" );
+	}
+	else if ( zoneTypeStr=="rubber")
+	{
+        gRubberZoneHack *rZone = tNEW(gRubberZoneHack(grid, zonePos, true));
+			rZone->SetRubber(zoneRubber);
+		Zone = rZone;
 	}
 	else if ( zoneTypeStr=="ball" || zoneTypeStr=="ballTeam" )
 	{
@@ -5140,6 +5278,7 @@ static void sg_CreateZone_conf(std::istream &s)
 		usage:
 		con << "Usage:\n"
 			"SPAWN_ZONE <win|death|ball|target|blast> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
+            "SPAWN_ZONE rubber <x> <y> <size> <growth> <xdir> <ydir> <rubber> <interactive> <r> <g> <b> <target_size> \n"
 			"SPAWN_ZONE <fortress|flag|deathTeam|ballTeam> <team> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
 			"SPAWN_ZONE zombie <player> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
 			"SPAWN_ZONE zombieOwner <player> <owner> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"

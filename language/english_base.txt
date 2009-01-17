@@ -2258,6 +2258,7 @@ player_win_default		\1 got \2 points for a very strange reason.\n
 player_lose_default		\1 lost \2 points for a very strange reason.\n
 player_lose_suicide		\1 committed suicide and lost \2 points.\n
 player_lose_deathzone	\1 exploded on a deathzone and lost \2 points.\n
+player_lose_rubberzone	\1 exploded on a rubberzone and lost \2 points.\n
 player_free_suicide		\1 committed suicide.\n
 player_win_frag			\1 core dumped \3 for \2 points.\n
 player_win_survive		\1 got \2 points for surviving.\n
