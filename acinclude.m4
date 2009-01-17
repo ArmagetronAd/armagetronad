@@ -525,7 +525,7 @@ int main (int argc, char *argv[]) {
 
           echo $LIBS;
 
-          AC_TRY_LINK([#include "zthread/ZThread.h"], 
+          AC_TRY_LINK([#include "zthread/Task.h"], 
                       [ return 0; ], [
           echo "*** The test program compiled, but did not run. This usually means"
           echo "*** that the run-time linker is not finding ZThread or finding the wrong"
@@ -540,10 +540,10 @@ int main (int argc, char *argv[]) {
           echo "*** exact error that occured. This usually means ZThread was incorrectly installed"
           echo "*** or that you have moved ZThread since it was installed. In the latter case, you"
           echo "*** may want to edit the zthread-config script: $ZTHREAD_CONFIG" ])
-          CFLAGS="$ac_save_CXXFLAGS"
-          CXXFLAGS="$ac_save_CXXFLAGS"
-          LIBS="$ac_save_LIBS"
        fi
+       CFLAGS="$ac_save_CXXFLAGS"
+       CXXFLAGS="$ac_save_CXXFLAGS"
+       LIBS="$ac_save_LIBS"
      fi
 
      ZTHREAD_CXXFLAGS=""
