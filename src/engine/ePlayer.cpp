@@ -2181,6 +2181,8 @@ typedef void (*OPFUNC)( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLeve
 
 static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const * command, OPFUNC F )
 {
+    bool isexplicit = false;
+
     if ( admin->GetAccessLevel() <= se_opAccessLevel )
     {
         ePlayerNetID * victim = se_FindPlayerInChatCommand( admin, command, s );
@@ -2204,9 +2206,9 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
                 }
                 char first;
                 s >> first;
-
                 if ( !s.eof() && !s.fail() )
                 {
+                    isexplicit = true;
                     s.unget();
                     int newLevel = 0;
                     s >> newLevel;
@@ -2230,7 +2232,18 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
 
                 accessLevel = static_cast< tAccessLevel >( level );
 
-                if ( accessLevel > admin->GetAccessLevel() )
+                if ( accessLevel == victim->GetAccessLevel() )
+                {
+                    if ( isexplicit )
+                    {
+                        sn_ConsoleOut( tOutput( "$access_level_op_same", command ), admin->Owner() );
+                    }
+                    else
+                    {
+                        sn_ConsoleOut( tOutput( "$access_level_op_unclear", command ), admin->Owner() );
+                    }
+                }
+                else if ( accessLevel > admin->GetAccessLevel() )
                 {
                      (*F)( admin, victim, accessLevel );
                 }

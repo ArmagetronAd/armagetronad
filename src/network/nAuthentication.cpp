@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nNetwork.h"
 #include "nNetObject.h"
 #include "nSocket.h"
+#include "nServerInfo.h"
 
 #include <memory>
 #include <string>
@@ -406,6 +407,7 @@ class nLoginProcess:
 public:
     nLoginProcess( int userID )
     : nMachineDecorator( nMachine::GetMachine( userID ) )
+    , checkAddress( true )
     {
         // install self reference to keep this object alive
         selfReference_ = this;
@@ -469,7 +471,7 @@ public:
     void ProcessClientAnswer( nMessage & answer );
 
     // sanity check the server address
-    bool CheckServerAddress( nMessage & m );
+    bool CheckServerAddress();
 
     // and here we go again: a background task talks with the authority
     // and determines whether the client is authorized or not.
@@ -506,6 +508,15 @@ private:
 
     //! pointer to self to keep the object alive while the machine exists
     SelfPointer selfReference_;
+
+    //! address of socket receiving the login message
+    nAddress serverSocketAddress;
+    
+    //! address of login message sender
+    tString peerAddress;
+
+    //! flag indicating whether the sent server address needs checking
+    bool checkAddress;
 };
 
 
@@ -897,22 +908,32 @@ void nLoginProcess::ProcessClientAnswer( nMessage & m )
         // read the server address the client used for scrambling
         m >> serverAddress;
 
-        // sanity check it, of course :)
-        if ( !CheckServerAddress( m ) )
-        {
-            // no use going on, the server address won't match, password checking will fail.
-            return;
-        }
+        // sanity check it later
     }
     else
     {
         serverAddress = sn_GetMyAddress();
-
+        
         if ( method.method != "bmd5" )
         {
             con << "WARNING, client did not send the server address. Password checks may fail.\n";
         }
+        else
+        {
+            checkAddress = false;
+        }
     }
+
+    // store receiving socket address
+    nSocket const * socket = sn_Connections[m.SenderID()].socket;
+    if ( !socket )
+    {
+        ReportAuthorityError( "Internal error, no receiving socket of authentication message." );
+    }
+    serverSocketAddress = socket->GetAddress();
+
+    // store peer address
+    sn_GetAdr( m.SenderID(), peerAddress );
   
     // and go on
     nMemberFunctionRunner::ScheduleMayBlock( *this, &nLoginProcess::Authorize, authority != "" );
@@ -922,51 +943,78 @@ static bool sn_trustLAN = false;
 static tSettingItem< bool > sn_TrustLANConf( "TRUST_LAN", sn_trustLAN );
 
 // sanity check the server address
-bool nLoginProcess::CheckServerAddress( nMessage & m )
+bool nLoginProcess::CheckServerAddress()
 {
-    // check whether we can read our IP from the socket
-    nSocket const * socket = sn_Connections[m.SenderID()].socket;
-    if ( socket )
+    // if no check is requested (only canm happen for old bmd5 protocol), don't check.
+    if ( !checkAddress )
     {
-        tString compareAddress = socket->GetAddress().ToString();
-        if ( !compareAddress.StartsWith("*") && compareAddress == serverAddress )
-        {
-            // everything is fine, adresses match
-            return true;
-        }
+        return true;
+    }
+
+    // serverAddress given from client never can be *.*.*.*:*. This would
+    // give false positive check results because some of the methods below
+    // compare serverAddress to strings that may be *.*.*.*:*, and checking
+    //  serverAddress once here is the safest and easiest way.
+    if ( serverAddress.StartsWith("*") )
+    {
+        return ReportAuthorityError( tOutput("$login_error_pharm_cheap" ) );
+    }
+
+    // check whether we can read our IP from the socket
+    tString compareAddress = serverSocketAddress.ToString();
+    if ( compareAddress == serverAddress )
+    {
+        // everything is fine, adresses match
+        return true;
     }
 
     // check the incoming address, clients from the LAN should be safe
     if ( sn_trustLAN )
     {
-        tString peerAddress;
-        sn_GetAdr( m.SenderID(), peerAddress );
         if ( sn_IsLANAddress( peerAddress ) && sn_IsLANAddress( serverAddress ) )
         {
             return true;
         }
     }
 
-    std::cout << serverAddress;
+    // std::cout << serverAddress;
 
-    if ( sn_GetMyAddress() == serverAddress )
+    // fetch our server address. First, try the basic networking system.
+    tString trueServerAddress = sn_GetMyAddress();
+
+    if ( trueServerAddress == serverAddress )
     {
         // all's well
         return true;
     }
 
-    tString hisServerAddress = serverAddress;
-    serverAddress = sn_GetMyAddress();
-
-    // if we don't know our own address, 
-    if ( sn_GetMyAddress().StartsWith("*") )
+    // if SERVER_DNS is set, the client most likely will connect over that IP. Use it.
+    if ( sn_GetMyDNSName().Len() > 1 )
     {
-        // reject authentication.
-        return ReportAuthorityError( tOutput("$login_error_pharm", hisServerAddress, sn_GetMyAddress() ) );
+        // resolve DNS. Yes, do this every time someone logs in, IPs can change.
+        // after all, that's the point of setting SERVER_DNS :)
+        nAddress address;
+        address.SetHostname( sn_GetMyDNSName() );
+        
+        address.SetPort( serverSocketAddress.GetPort() );
+
+        // transform back to string
+        trueServerAddress = address.ToString();
     }
 
+    if ( trueServerAddress == serverAddress )
+    {
+        // all's well
+        return true;
+    }
+
+    // Z-Man: can't remember what this swapping is for. Possibly to accept
+    // the login anyway for debugging purposes.
+    tString hisServerAddress = serverAddress;
+    serverAddress = trueServerAddress;
+
     // reject authentication.
-    return ReportAuthorityError( tOutput("$login_error_pharm", hisServerAddress, sn_GetMyAddress() ) );
+    return ReportAuthorityError( tOutput("$login_error_pharm", hisServerAddress, trueServerAddress ) );
 }
 
 // and here we go again: a background task talks with the authority
@@ -981,6 +1029,13 @@ void nLoginProcess::Authorize()
     }
     else
     {
+        // sanity check it server address
+        if ( !CheckServerAddress() )
+        {
+            // no use going on, the server address won't match, password checking will fail.
+            return;
+        }
+
         if ( !tRecorder::IsPlayingBack() )
         {
             nKrawall::CheckScrambledPassword( *this, *this );

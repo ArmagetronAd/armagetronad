@@ -43,6 +43,9 @@ class tPath;
 
 typedef nServerInfo* (sn_ServerInfoCreator)();
 
+//! return the DNS name of this machine, if set
+tString const & sn_GetMyDNSName();
+
 //! Basic server information: everything you need to connect
 class nServerInfoBase
 {
