@@ -541,6 +541,14 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"target")) {
             zone = tNEW( gTargetZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *) "effect"), (const xmlChar *)"rubber")) {
+            REAL rubberVal = myxmlGetPropFloat(cur, "rubberVal");
+            if (rubberVal != 0.0 ){
+                gRubberZoneHack *rZone= tNEW(gRubberZoneHack(grid, eCoord(x*sizeMultiplier,y*sizeMultiplier), false ));
+                rZone->SetRubber(rubberVal);
+                zone = rZone;
+            }
+        }
 
         // leaving zone undeleted is no memory leak here, the gid takes control of it
         if ( zone )
