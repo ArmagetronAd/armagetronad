@@ -710,6 +710,10 @@ gl_renderer_help		OpenGL system information
 gl_vendor_help			OpenGL system information
 alpha_blend_help		Enable alpha blending
 zone_alpha_toggle_help		This is XORd with ALPHA_BLEND to determine the way to draw zones
+zone_segments_help		How many segments the zone is formed with. Default is 11
+zone_seg_length_help	The rendered percentual of every segment. Default is .5
+zone_bottom			Where to put the zone along the Z axis. Default is 0.0
+zone_height			The zone segments' height. Default is 5.0
 smooth_shading_help		Enable smooth shading
 text_out_help			Enable console text output
 console_columns_help    Number of characters in each line of console output
