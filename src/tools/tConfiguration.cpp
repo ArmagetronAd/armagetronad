@@ -43,7 +43,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tCommandLine.h"
 #include "tResourceManager.h"
 #include "tError.h"
-#include "utf8.h"
 
 #include <vector>
 #include <string.h>
@@ -55,8 +54,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 bool           tConfItemBase::printChange=true;
 bool           tConfItemBase::printErrors=true;
 
-// flag indicating the currently loaded config is in latin1 encoding (default: utf8)
-static bool st_loadAsLatin1 = false;
 
 //! @param newLevel         the new access level to set over the course of the lifetime of this object
 //! @param allowElevation   only if set to true, getting higher access rights is possible. Use with extreme care.
@@ -419,9 +416,7 @@ void tConfItemBase::LoadLine(std::istream &s){
             // eat rest of input line
             tString rest;
             rest.ReadLine( s );
-#ifdef MACOSX
-            printErrors = false;
-#endif
+
             if (printErrors)
             {
                 tOutput o;
@@ -627,32 +622,6 @@ void tConfItemBase::LoadAll(std::istream &s, bool record ){
             tString rest;
             rest.ReadLine( s );
             line << rest;
-        }
-
-        // convert to utf8
-        if ( st_loadAsLatin1 )
-        {
-            line = st_Latin1ToUTF8( line );
-        }
-
-        // and check. No invalid utf8 string must enter the system.
-        {
-            tString::iterator reader = line.begin();
-            try
-            {
-                while( reader != line.end() )
-                {
-                    // convert from utf8
-                    utf8::next( reader, line.end() );
-                }
-            }
-            catch(...)
-            {
-                con << "Illegal utf8 found in config file, ignoring most of it.\n";
-
-                // save what there is to save
-                line.NetFilter();
-            }
         }
 
         if ( line.Len() <= 1 )
@@ -864,31 +833,9 @@ static tExtraConfigCommandLineAnalyzer s_extraAnalyzer;
 // configuration files to load. The first one found will be loaded, and
 // only the very first one will be written to. Use it to protect stable client's
 // config from the experimental client's wrath.
-char const * st_userConfigs[] = { "user_3_1_utf8.cfg", 0 };
-char const * st_userConfigsLatin1[] = { "user_3_1.cfg", "user_3_0.cfg", "user.cfg", 0 };
+char const * st_userConfigs[] = { "user_3_1.cfg", "user_3_0.cfg", "user.cfg", 0 };
 
 static void st_InstallSigHupHandler();
-
-static bool st_LoadUserConfigs( char const * const * userConfig, bool latin1 )
-{
-    const tPath& var = tDirectories::Var();
-
-    st_loadAsLatin1 = latin1;
-
-    // load the first available user configuration file
-    while ( *userConfig )
-    { 
-        if ( Load( var, *userConfig ) )
-        {
-            st_loadAsLatin1 = false;
-            return true;
-        }
-        userConfig++;
-    }
-
-    st_loadAsLatin1 = false;
-    return false;
-}
 
 void st_LoadConfig( bool printChange )
 {
@@ -905,8 +852,12 @@ void st_LoadConfig( bool printChange )
 #ifdef DEDICATED
     tConfItemBase::printErrors=false;
 #endif
-    st_LoadUserConfigs( st_userConfigs, false ) || st_LoadUserConfigs( st_userConfigsLatin1, true );
-
+    {
+        // load the first available user configuration file
+        char const * const * userConfig = st_userConfigs;
+        while ( *userConfig && !Load( var, *userConfig ) )
+            userConfig++;
+    }
     tConfItemBase::printErrors=true;
 
     Load( config, "settings.cfg" );
