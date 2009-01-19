@@ -332,7 +332,7 @@ nMessage& operator >> ( nMessage& m, google::protobuf::Message & buffer )
         unsigned short value;
         m.Read( value );
         rw.put( value >> 8 );
-        rw.put( value && 0xff );
+        rw.put( value & 0xff );
     }
 
     // then, read the string into the buffer
@@ -692,6 +692,8 @@ nDescriptor::nDescriptor(unsigned short identification,nHandler *handle,
 
     streamDescriptors[identification]=this;
 }
+
+nVersionFeature sn_protocolBuffers( 21 );
 
 nPBDescriptorBase::nPBDescriptorBase(unsigned short identification,
                                      const char * name, 

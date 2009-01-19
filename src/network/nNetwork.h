@@ -424,6 +424,8 @@ public:
                 const char *name, bool acceptEvenIfNotLoggedIn = false);
 };
 
+extern nVersionFeature sn_protocolBuffers;
+
 // new descriptor for protocol buffer messages
 class nPBDescriptorBase: public nDescriptorBase
 {
@@ -529,7 +531,7 @@ public:
 
     //! create a message from a pattern buffer
     template< class MESSAGE >
-    nMessage * Transform( MESSAGE const & message );
+    static nMessage * Transform( MESSAGE const & message );
 
     nMessage& operator<< (const REAL &x);
     nMessage& operator>> (REAL &x);
@@ -659,7 +661,7 @@ public:
 template< class MESSAGE > 
 class nPBDescriptor: public nPBDescriptorBase
 {
-    typedef void Handler( MESSAGE & message );
+    typedef void Handler( MESSAGE & message, nMessage & envelope );
 
     //! instance of this descriptor
     static nPBDescriptor * instance_;
@@ -672,20 +674,20 @@ class nPBDescriptor: public nPBDescriptorBase
     Handler * handler_;
 
     //! delegates message handling
-    virtual void DoHandleMessage( nMessage & message )
+    virtual void DoHandleMessage( nMessage & envelope )
     {
         // read into protocol buffer
         MESSAGE protocolBuffer;
-        message >> protocolBuffer;
+        envelope >> protocolBuffer;
 
         // and delegate
-        handler_( protocolBuffer );
+        handler_( protocolBuffer, envelope );
     }
 public:
     //! puts a puffer into a message
     nMessage * Transform( MESSAGE const & message ) const
     {
-        nMessage * ret = new nMessage( this );
+        nMessage * ret = new nMessage( *this );
         
         *ret << message;
 
