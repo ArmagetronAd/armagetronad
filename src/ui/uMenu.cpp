@@ -212,6 +212,12 @@ void uMenu::OnEnter(){
                 switch (tEvent.type)
                 {
                 case SDL_KEYDOWN:
+                    if ( tEvent.key.keysym.sym == SDLK_UNKNOWN )
+                    {
+                        // don't repeat unknown syms. They come from multi-key compositions and
+                        // don't send keyup events when released.
+                        break;
+                    }
                     repeat = true;
                     memcpy( &tEventRepeat, &tEvent, sizeof( SDL_Event ) );
                     nextrepeat = tSysTimeFloat() + repeatdelay;
