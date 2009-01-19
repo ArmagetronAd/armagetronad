@@ -1,0 +1,11 @@
+// Protocol buffer types for ePlayer.cpp
+
+// chat messages
+message Chat
+{
+    // the object ID of the chatting player
+    required int32 playerID = 1;
+
+    // the fully formatted chat string
+    required string chatLine = 2;  
+}

@@ -44,11 +44,15 @@ ${srcdir}/tools/tLocale.cpp: ${srcdir}/tools/tVersion.cpp
 ${srcdir}/tools/tVersion.cpp: tTrueVersion.h 
 
 # protocol buffer rules
-%.pb.cc: %.proto
-        protoc $< --cpp_out=.
+protobuf/%.pb: ${srcdir}/protobuf/%.proto
+	test -d protobuf || mkdir protobuf
+	protoc $< --cpp_out=protobuf --proto_path=${srcdir}/protobuf 2>&1 | sed -e s,^$*.proto,${srcdir}/protobuf/$*.proto,
 
-%.pb.h: %.proto
-        protoc $< --cpp_out=.
+protobuf/%.pb.cc: protobuf/%.pb
+	true
+
+protobuf/%.pb.h: protobuf/%.pb
+	true
 
 # library file listings
 
@@ -58,6 +62,9 @@ else
 tools_extra=
 endif
 
+# protocol buffers. Need to be compiled first so the headers exist for the
+# other modules to include.
+libprotobuf_a_SOURCES = protobuf/ePlayer.pb.cc protobuf/ePlayer.pb.h
 
 # Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
 # the fragile dependency on undefined behaviour of the linker...)
@@ -191,7 +198,7 @@ endif
 
 #AM_CXXFLAGS= $(BINRELOC_CFLAGS)
 
-libtools_a_CXXFLAGS  =$(AM_CXXFLAGS)  -I@srcdir@/tools -I@srcdir@/resource -I@srcdir@/thirdparty/mathexpr
+libtools_a_CXXFLAGS  =$(AM_CXXFLAGS) $(CXXFLAGS_OURFILES)  -I@srcdir@/tools -I@srcdir@/resource -I@srcdir@/thirdparty/mathexpr
 libnetwork_a_CXXFLAGS=$(libtools_a_CXXFLAGS)  -I@srcdir@/network
 librender_a_CXXFLAGS =$(libtools_a_CXXFLAGS)  -I@srcdir@/render
 libui_a_CXXFLAGS     =$(librender_a_CXXFLAGS) -I@srcdir@/ui -I@srcdir@/thirdparty/shttpd -I@srcdir@/thirdparty/scrap
@@ -238,10 +245,10 @@ armagetronad_main_master$(EXEEXT): Makefile
 	${BUILDFAKE}
 else
 if BUILDMAIN
-noinst_LIBRARIES = libenginecore.a libengine.a librender.a  libtron.a libui.a libnetwork.a libtools.a
+noinst_LIBRARIES = libprotobuf.a libenginecore.a libengine.a librender.a  libtron.a libui.a libnetwork.a libtools.a
 # librubywrap.a
 else
-noinst_LIBRARIES = libnetwork.a libtools.a
+noinst_LIBRARIES = libprotobuf.a libnetwork.a libtools.a
 endif
 
 if BUILDDEDICATED
@@ -252,13 +259,13 @@ endif
 
 armagetronad_main_SOURCES = tron/gFloor.cpp tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp tron/cockpit/cCamview.cpp 
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
+armagetronad_main_LDADD= libtron.a libprotobuf.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 #  librubywrap.a
 # armagetronad_main_LDFLAGS=
 
 armagetronad_main_master_SOURCES = network/master.cpp
 armagetronad_main_master_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_master_LDADD=libnetwork.a libtools.a
+armagetronad_main_master_LDADD=libprotobuf.a libnetwork.a libtools.a
 endif
 
 ## Note: tron/gFloor.cpp is not referenced from the outside, but required anyway. So it can't be put into
