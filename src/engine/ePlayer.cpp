@@ -1574,17 +1574,17 @@ static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message
             se_rubyEval(msgCore.SubStr(skip + 6));
         }
     }
-
 }
 
 static nVersionFeature se_chatRelay( 3 );
 
-//!todo: lower this number or increase network version before next release
 static nVersionFeature se_chatHandlerClient( 6 );
 
 // chat message from client to server
-void handle_chat( nMessage& );
+void handle_chat( nMessage & );
+void handle_chat( Engine::Chat &, nMessage & );
 static nDescriptor chat_handler(200,handle_chat,"Chat");
+static nPBDescriptor< Engine::Chat > chat_handler_pb(200,handle_chat,"Chat");
 
 // checks whether text_to_search contains search_for_text
 bool Contains( const tString & search_for_text, const tString & text_to_search ) {
@@ -1889,10 +1889,28 @@ static nMessage* se_ServerControlledChatMessage(  eTeam const * team, ePlayerNet
 static nMessage* se_NewChatMessage( ePlayerNetID const * player, tString const & message )
 {
     tASSERT( player );
+    
 
     nMessage *m=tNEW(nMessage) (chat_handler);
     m->Write( player->ID() );
     se_AppendChat( *m, message );
+
+    if( sn_protocolBuffers.Supported() )
+    {
+        Engine::Chat chat;
+        chat.set_player_id( player->ID() );
+        std::ostringstream cleanup;
+        se_AppendChat( cleanup, message );
+        chat.set_chat_line( cleanup.str() );
+
+        con << "Traditional size: " << m->DataLen() << "\n";
+        {
+            tJUST_CONTROLLED_PTR< nMessage > m2( m );
+        }
+
+        m = nMessage::Transform( chat );
+        con << "ProtoBuf size:    " << m->DataLen() << "\n";
+    }
 
     return m;
 }
@@ -3560,13 +3578,9 @@ static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, e
 void se_ListAdmins( ePlayerNetID *, std::istream &s, tString command );
 #endif
 
-void handle_chat( nMessage &m )
+void handle_chat( unsigned short id, tColoredString const & say, nMessage & m )
 {
     nTimeRolling currentTime = tSysTimeFloat();
-    unsigned short id;
-    m.Read(id);
-    tColoredString say;
-    m >> say;
 
     tJUST_CONTROLLED_PTR< ePlayerNetID > p=dynamic_cast<ePlayerNetID *>(nNetObject::ObjectDangerous(id));
 
@@ -3699,6 +3713,21 @@ void handle_chat( nMessage &m )
     {
         se_DisplayChatLocally( p, say );
     }
+}
+
+void handle_chat( nMessage &m )
+{
+    unsigned short id;
+    m.Read(id);
+    tColoredString say;
+    m >> say;
+    
+    handle_chat( id, say, m );
+}
+
+void handle_chat( Engine::Chat & message, nMessage & envelope )
+{
+    handle_chat( message.player_id(), tColoredString( message.chat_line().c_str() ), envelope );
 }
 
 // check if a string is a legal player name
