@@ -43,6 +43,13 @@ distclean-local:
 ${srcdir}/tools/tLocale.cpp: ${srcdir}/tools/tVersion.cpp
 ${srcdir}/tools/tVersion.cpp: tTrueVersion.h 
 
+# protocol buffer rules
+%.pb.cc: %.proto
+        protoc $< --cpp_out=.
+
+%.pb.h: %.proto
+        protoc $< --cpp_out=.
+
 # library file listings
 
 if BUILDMAIN
@@ -85,7 +92,6 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/values/vebCFunction.h \
 	tools/tStatFile.cpp tools/tStatFile.h\
 	tools/tStatEntry.h tools/tStatEntry.cpp\
-	tools/tRectangle.h tools/tRectangle.cpp \
 	tools/tPlayList.h tools/tPlayList.cpp\
 	tools/tDecorator.h tools/tDecorator.cpp\
 	tools/tCoord.h\
@@ -119,7 +125,7 @@ libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentication
 	engine/ePath.cpp engine/ePath.h engine/ePlayer.cpp engine/ePlayer.h engine/eSensor.cpp\
 	engine/eSensor.h engine/eTeam.cpp engine/eTeam.h engine/eTess2.h\
 	engine/eTimer.cpp engine/eTimer.h engine/eVoter.cpp engine/eVoter.h engine/eWall.cpp engine/eWall.h\
-	engine/eRectangle.h \
+	engine/eRectangle.cpp engine/eRectangle.h \
 	engine/sound/sdl_mixer/eChannelSDLMixer.cpp \
 	engine/sound/sdl_mixer/eChannelSDLMixer.h \
 	engine/sound/sdl_mixer/eMusicTrackSDLMixer.cpp \
@@ -185,7 +191,7 @@ endif
 
 #AM_CXXFLAGS= $(BINRELOC_CFLAGS)
 
-libtools_a_CXXFLAGS  =$(AM_CXXFLAGS)  -I@srcdir@/tools -I@srcdir@/resource -I@srcdir@/thirdparty/mathexpr -I@srcdir@/thirdparty/utf8
+libtools_a_CXXFLAGS  =$(AM_CXXFLAGS)  -I@srcdir@/tools -I@srcdir@/resource -I@srcdir@/thirdparty/mathexpr
 libnetwork_a_CXXFLAGS=$(libtools_a_CXXFLAGS)  -I@srcdir@/network
 librender_a_CXXFLAGS =$(libtools_a_CXXFLAGS)  -I@srcdir@/render
 libui_a_CXXFLAGS     =$(librender_a_CXXFLAGS) -I@srcdir@/ui -I@srcdir@/thirdparty/shttpd -I@srcdir@/thirdparty/scrap
