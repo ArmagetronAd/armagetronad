@@ -6,7 +6,7 @@ resourcedir=${aa_datadir}/resource
 sourcefiles = $(shell test -d ${srcdir}/proto && find ${srcdir}/proto -type f | grep -v CVS | grep -v "~")
 
 included: ${sourcefiles} ${top_srcdir}/batch/make/sortresources.py ${top_srcdir}/batch/make/copyresources.py Makefile
-	if test -d ${srcdir}/proto; then python ${top_srcdir}/batch/make/copyresources.py ${srcdir}/proto $@; fi
+	if test -d ${srcdir}/proto; then python ${top_srcdir}/batch/make/copyresources.py ${srcdir}/proto $@ && cp -r ${srcdir}/binary/* $@/; fi
 # @sh ${top_srcdir}/batch/make/sortresources ${srcdir}/proto $@ ${top_srcdir}/batch/make/sortresources.py || { rm -rf $@; false; }
 
 all: included
