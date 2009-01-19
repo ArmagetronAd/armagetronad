@@ -42,8 +42,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdlib.h>
 #include <fstream>
 #include "tMath.h"
-#include "utf8.h"
 #include <string.h>
+
+#include "google/protobuf/message.h"
 
 #ifndef WIN32
 #include  <netinet/in.h>
@@ -207,92 +208,6 @@ static unsigned short highest_ack[MAXCLIENTS+2];
 // Version control
 //********************************************************
 
-//! class that can temporarily override the current version
-class nTempVersionOverrider
-{
-public:
-    nTempVersionOverrider()
-    : lastOverrider_( overrider_ )
-    , overridden_( false )
-    , version_( sn_CurrentVersion() )
-    {
-        overrider_ = this;
-    }
-    
-    ~nTempVersionOverrider()
-    {
-        // restore old overrider
-        overrider_ = lastOverrider_;
-    }
-
-    //! send a version override message to a peer
-    static void SendOverrideMessage( int peer, nVersion const & version )
-    {
-        // create message
-        nMessage *m = tNEW(nMessage)( descriptor_ );
-
-        // write info
-        *m << version;
-        
-        // send info
-        m->ClearMessageID();
-        m->SendImmediately(peer, false);
-    }
-
-    static bool Overridden()
-    {
-        return ( overrider_ && overrider_->overridden_ );
-    }
-
-    static nVersion const & OverriddenVersion()
-    {
-        if ( Overridden() )
-            return overrider_->version_;
-        else
-            return sn_CurrentVersion();
-    }
-
-    //! override currently active version
-    static void Override( nVersion const & version )
-    {
-        if ( overrider_ && ! overrider_->overridden_ )
-        {
-            overrider_->overridden_ = true;
-        }
-
-        overrider_->version_ = version;
-    }
-    
-    //! accept version override message
-    static void ReceiveOverrideMessage( nMessage & m )
-    {
-        // as the server, return the favor
-        if ( sn_GetNetState() == nSERVER )
-            SendOverrideMessage( m.SenderID(), sn_MyVersion() );
-
-        nVersion version;
-        m >> version;
-
-        Override( version );
-    }
-
-    //! returns the network message descriptor
-    static nDescriptor const & Descriptor()
-    {
-        return descriptor_;
-    }
-private:
-    static nTempVersionOverrider * overrider_;    //!< the current overrider
-    nTempVersionOverrider * lastOverrider_;       //!< the last overrider
-    static nDescriptor descriptor_;               //!< message descriptor for version override messages
-
-    bool overridden_;                             //!< flag telling the destructor whether it needs to revert stuff
-    nVersion version_;                            //!< the version to use as override
-};
-
-nTempVersionOverrider * nTempVersionOverrider::overrider_ = 0;
-nDescriptor nTempVersionOverrider::descriptor_( 12, nTempVersionOverrider::ReceiveOverrideMessage, "override_version", true );
-
 static int sn_MaxBackwardsCompatibility = 1000;
 static tSettingItem<int> sn_mxc("BACKWARD_COMPATIBILITY",sn_MaxBackwardsCompatibility);
 
@@ -406,6 +321,53 @@ std::istream& operator >> ( std::istream& s, nVersion& ver )
     return s;
 }
 
+// read/write operators for protocol buffers
+nMessage& operator >> ( nMessage& m, google::protobuf::Message & buffer )
+{
+    // first, read into a string. protobufs ALWAYS take the whole rest of a
+    // message. Luckily, they don't mind a single appended 0 byte.
+    std::stringstream rw;
+    while( !m.End() )
+    {
+        unsigned short value;
+        m.Read( value );
+        rw.put( value >> 8 );
+        rw.put( value && 0xff );
+    }
+
+    // then, read the string into the buffer
+    buffer.ParseFromIstream( &rw );
+
+    // TODO: optimize. The stream copy should not be required, the data is
+    // already in memory. But first, make it so that the byte order in memory
+    // is already the network byte order, right now, it's the machine's order.
+
+    return m;
+}
+
+nMessage& operator << ( nMessage& m, google::protobuf::Message const & buffer )
+{
+    // dump into plain stringstream
+    std::stringstream rw;
+    buffer.SerializeToOstream( &rw );
+
+    // write stringstream to message
+    while( !rw.eof() )
+    {
+        unsigned short value = ((unsigned char)rw.get()) << 8;
+        if ( !rw.eof() )
+        {
+            value += (unsigned char)rw.get();
+        }
+        m.Write( value );
+    }
+
+    // mark message as final
+    m.Finalize();
+   
+    return m;
+}
+
 std::ostream& operator << ( std::ostream& s, const nVersion& ver )
 {
     s << ver.Min() << " ";
@@ -414,7 +376,7 @@ std::ostream& operator << ( std::ostream& s, const nVersion& ver )
     return s;
 }
 
-nVersionFeature::nVersionFeature( int min, int max ) // creates a feature that is supported from version min to max; values of -1 indicate no bordera
+nVersionFeature::nVersionFeature( int min, int max ) // creates a feature that is supported from version min to max; values of -1 indicate no border
 {
     tASSERT( min_ >= sn_MyVersion().Min() );
     tASSERT( max < 0 || max <= sn_MyVersion().Max() );
@@ -423,20 +385,18 @@ nVersionFeature::nVersionFeature( int min, int max ) // creates a feature that i
     max_ = max;
 }
 
-bool nVersionFeature::Supported() const
+bool nVersionFeature::Supported()
 {
-    return 
-    ( min_ < 0 || nTempVersionOverrider::OverriddenVersion().Max() >= min_ ) &&  
-    ( max_ < 0 || nTempVersionOverrider::OverriddenVersion().Min() <= max_ );
+    return ( min_ < 0 || sn_CurrentVersion().Max() >= min_ ) &&  ( max_ < 0 || sn_CurrentVersion().Min() <= max_ );
 }
 
-bool nVersionFeature::Supported( int client ) const
+bool nVersionFeature::Supported( int client )
 {
     if ( client < 0 || client > MAXCLIENTS )
         return false;
 
     // the version to check the feature for
-    const nVersion * version = &nTempVersionOverrider::OverriddenVersion();
+    const nVersion * version = &sn_CurrentVersion();
 
     if ( sn_GetNetState() == nCLIENT )
     {
@@ -615,29 +575,22 @@ public:
 
 // *************************************************************
 
-unsigned short nDescriptor::s_nextID(1);
-
 #define MAXDESCRIPTORS 400
-static nDescriptor* descriptors[MAXDESCRIPTORS];
+static nDescriptorBase* streamDescriptors[MAXDESCRIPTORS];
+static nDescriptorBase* protoBufDescriptors[MAXDESCRIPTORS];
 
-static nDescriptor* nDescriptor_anchor;
+static nDescriptorBase* nDescriptor_anchor;
 
-nDescriptor::nDescriptor(unsigned short identification,
-                         nHandler *handle,const char *Name, bool awl)
-        :tListItem<nDescriptor>(nDescriptor_anchor),
-        id(identification),handler(handle),name(Name), acceptWithoutLogin(awl)
+nDescriptorBase::nDescriptorBase(unsigned short identification,
+                                 const char *Name, bool awl)
+: tListItem<nDescriptorBase>(nDescriptor_anchor),
+  id(identification), name(Name), acceptWithoutLogin(awl)
 {
 #ifdef DEBUG
 #ifndef WIN32
     //  con << "Descriptor " << id << ": " << name << '\n';
 #endif
 #endif
-    if (MAXDESCRIPTORS<=id || descriptors[id]!=NULL){
-        con << "Descriptor " << id << " already used!\n";
-        exit(-1);
-    }
-    s_nextID=id+1;
-    descriptors[id]=this;
 }
 
 /*
@@ -656,9 +609,12 @@ nDescriptor::nDescriptor(nHandler *handle,const char *Name)
 }
 */
 
+// flag that marks protocol buffer messages
+static const unsigned short sn_protoBufFlag = 0x8000;
+
 int nCurrentSenderID::currentSenderID_ = 0;
 
-void nDescriptor::HandleMessage(nMessage &message){
+void nDescriptorBase::HandleMessage(nMessage &message){
     static tArray<bool> warned;
 
     // store sender ID for console
@@ -672,7 +628,15 @@ void nDescriptor::HandleMessage(nMessage &message){
 #ifndef NOEXCEPT
     try{
 #endif
-        nDescriptor *nd = 0;
+        nDescriptorBase *nd = 0;
+
+        // pick right descriptor set according to highest bit
+        nDescriptorBase * const * descriptors = streamDescriptors;
+        if ( message.descriptor & sn_protoBufFlag )
+        {
+            descriptors = protoBufDescriptors;
+            message.descriptor ^= sn_protoBufFlag;
+        }
 
         // z-man: security check ( thanks, Luigi Auriemma! )
         if ( message.descriptor  < MAXDESCRIPTORS )
@@ -680,7 +644,7 @@ void nDescriptor::HandleMessage(nMessage &message){
 
         if (nd){
             if ((message.SenderID() <= MAXCLIENTS) || nd->acceptWithoutLogin)
-                nd->handler(message);
+                nd->DoHandleMessage(message);
         }
         else
             if (!warned[message.Descriptor()]){
@@ -709,6 +673,40 @@ void nDescriptor::HandleMessage(nMessage &message){
 
 #endif
 }
+
+void nDescriptor::DoHandleMessage( nMessage & message )
+{
+    (*handler)( message );
+}
+    
+nDescriptor::nDescriptor(unsigned short identification,nHandler *handle,
+                         const char *name, bool acceptEvenIfNotLoggedIn )
+: nDescriptorBase( identification, name, acceptEvenIfNotLoggedIn ),
+  handler( handle )
+{
+    if (MAXDESCRIPTORS<=identification || streamDescriptors[identification]!=NULL)
+    {
+        con << "Descriptor " << identification << " already used!\n";
+        exit(-1);
+    }
+
+    streamDescriptors[identification]=this;
+}
+
+nPBDescriptorBase::nPBDescriptorBase(unsigned short identification,
+                                     const char * name, 
+                                     bool acceptEvenIfNotLoggedIn )
+: nDescriptorBase( identification | sn_protoBufFlag, name, acceptEvenIfNotLoggedIn )
+{
+    if (MAXDESCRIPTORS<=identification || protoBufDescriptors[identification]!=NULL)
+    {
+        con << "Protocol Buffer Descriptor " << identification << " already used!\n";
+        exit(-1);
+    }
+    
+    protoBufDescriptors[identification]=this;
+}
+
 
 // *************************************************************
 
@@ -767,11 +765,11 @@ nWaitForAck::nWaitForAck(nMessage* m,int rec)
 
     timeout=sn_GetTimeout( rec );
 
-#ifdef nSIMULATE_PING 
-   timeSendAgain=::netTime + nSIMULATE_PING;
+#ifdef nSIMULATE_PING
+    timeSendAgain=::netTime + nSIMULATE_PING;
 #ifndef WIN32
     tRandomizer & randomizer = tReproducibleRandomizer::GetInstance();
-    timeSendAgain+= randomizer.Get() * nSIMULATE_PING_VARIANT;
+    timeSendAgain+= randimizer.Get() * nSIMULATE_PING_VARIANT;
     // timeSendAgain+=(nSIMULATE_PING_VARIANT*random())/RAND_MAX;
 #endif
 #else
@@ -1015,7 +1013,7 @@ static unsigned long int sn_ExpandMessageID( unsigned short id, unsigned short s
 
 nMessage::nMessage(unsigned short*& buffer,short sender, int lenLeft )
         :descriptor(ntohs(*(buffer++))),messageIDBig_(sn_ExpandMessageID(ntohs(*(buffer++)),sender)),
-senderID(sender),readOut(0){
+         senderID(sender),readOut(0){
 #ifdef NET_DEBUG
     nMessages++;
 #endif
@@ -1040,8 +1038,8 @@ senderID(sender),readOut(0){
 #endif
 }
 
-nMessage::nMessage(const nDescriptor &d)
-        :descriptor(d.id),
+nMessage::nMessage( const nDescriptorBase &d )
+        :descriptor( d.id ),
 senderID(::sn_myNetID), readOut(0){
 #ifdef NET_DEBUG
     nMessages++;
@@ -1099,73 +1097,10 @@ void nMessage::BroadCast(bool ack){
     }
 }
 
+
 static nVersionFeature sn_ZeroMessageCrashfix( 1 );
 
-/*
-// Z-Man: commented out looking for a better way, please don't delete yet until we have a proper
-// different way of sending UTF8 over the network.
-
-static nVersionFeature unicode( 21_not_anymore_adapt_to_new_version );
-static bool sn_serverSendsUnicode = false;
-static nSettingItemWatched<bool> sn_serverSendsUnicodeConf( "SERVER_SENDS_UTF8", sn_serverSendsUnicode, nConfItemVersionWatcher::Group_Visual, 21 );
-
-static bool ServerSendsUnicode()
-{
-    // while a version override is active, it's safe to rely on the set version.
-    // otherwise, use the setting item.
-    return nTempVersionOverrider::Overridden() ? unicode.Supported() : sn_serverSendsUnicode;
-}
-*/
-
-nMessage& nMessage::operator << (const tString &ss){
-    tString s = ss;
-
-    /*
-    // Z-Man: commented out looking for a better way, please don't delete yet until we have a proper
-    // different way of sending UTF8 over the network.
-
-    // convert utf8 to latin1. For comments the operator >>.
-    if ( sn_GetNetState() == nSERVER ? !ServerSendsUnicode() : !unicode.Supported(0) )
-    */
-
-    {
-        try
-        {
-            tString copy;
-
-            tString::iterator reader = s.begin();
-            std::back_insert_iterator< tString > writer = back_inserter(copy);
-            
-            while ( reader != s.end() )
-            {
-                // just convert every byte of the original latin1 into utf8, assuming unicode matches latin1
-                // where latin1 is defined.
-                uint32_t c = utf8::next( reader, s.end() );
-                
-                // convert unknown characters to underscores
-                if ( c < 256 )
-                    *writer = c;
-                else
-                    *writer = '_';
-                
-                ++writer;
-            }
-
-            s = copy;
-        }
-        catch( ... )
-        {
-            // no need to do a thing. utf8 passes as latin1 almost all of the time, unless
-            // you're German or French or anything non-English. well.
-            con << "latin1 to utf8 conversion error!\n";
-        }
-    }
-
-    if ( !sn_ZeroMessageCrashfix.Supported() && s.Len() <= 0 )
-    {
-        return this->operator<<( s + " " );
-    }
-
+nMessage& nMessage::operator << (const tString &s){
     unsigned short len=s.Size()+1;
 
     // clamp away excess zeroes
@@ -1183,7 +1118,7 @@ nMessage& nMessage::operator << (const tString &ss){
             return this->operator<<( replacement );
         }
     }
-    else if ( len == 1 )
+    else if ( len == 1 && s(0) == 0 )
     {
         // do away with the the trailing zero in zero length strings.
         len = 0;
@@ -1196,20 +1131,11 @@ nMessage& nMessage::operator << (const tString &ss){
 
     // write first pairs of bytes
     for(i=0;i+1<len;i+=2)
-    {
-        // yep. Signed arithmetic. That gives
-        // nice overflows. By the time we noticed,
-        // it was too late to change :)
-        signed char lo = s[i];
-        signed char hi = s[i+1];
-
-        // combine the two into a single short
-        Write( short(lo) + (short(hi) << 8) );
-    }
+        Write(sRaw[i]+(sRaw[i+1] << 8));
 
     // write last byte
     if (i<len)
-        Write( static_cast< signed char >( sRaw[i] ) );
+        Write(sRaw[i]);
 
     return *this;
 }
@@ -1238,16 +1164,10 @@ nMessage& nMessage::ReadRaw(tString &s )
         s.reserve(len);
         for(int i=0;i<len;i+=2){
             Read(w);
-            
-            // carefully reverse the signed
-            // encoding logic
-            signed char lo = w & 0xff;
-            signed short hi = ((short)w) - lo;
-            hi >>= 8;
-            sn_AddToString( s, lo );
-
+            tString::CHAR c1 = w & 255;
+            sn_AddToString( s, c1 );
             if (i+1<len)
-                sn_AddToString( s, hi );
+                sn_AddToString( s, (w-c1) >> 8 );
         }
     }
 
@@ -1263,29 +1183,6 @@ nMessage& nMessage::operator >> (tColoredString &s )
 {
     // read the raw data
     ReadRaw( s );
-
-    // convert latin1 encoding to utf8
-    // The server knows which clients support unicode precisely; every unicode supporting client
-    // sends in utf8 to a unicode supporting server. However, the server has to send back latin1
-    // to all clients once one client does not support unicode, because messages containing strings
-    // can be broadcast. So the client has to do the conversion if only one client is online
-    // that does not support unicode.
-    // if ( sn_GetNetState() == nSERVER ? !unicode.Supported( SenderID() ) : !ServerSendsUnicode() )
-    {
-        s =  st_Latin1ToUTF8(s);
-    }
-    /*
-    // Z-Man: commented out looking for a better way, please don't delete yet until we have a proper
-    // different way of sending UTF8 over the network.
-    else
-    {
-        // the incoming string is supposed to be in utf8 format. check that, and crop it otherwise.
-        // no invalid utf8 string is supposed to be able to enter the system. Maybe it's just a
-        // stray latin1 string? If not, it's set to an error string.
-        if ( !utf8::is_valid( s.begin(), s.end() ) )
-            s = st_Latin1ToUTF8(s);
-    }
-    */
 
     // filter client string messages
     if ( sn_GetNetState() == nSERVER )
@@ -2265,10 +2162,6 @@ void nMessage::SendImmediately(int peer,bool ack){
         tASSERT(messageIDBig_);
 #endif
         new nWaitForAck(this,peer);
-
-#ifdef nSIMULATE_PING
-        return;
-#endif
     }
 
     // server: messages to yourself are a bit strange...
@@ -2616,10 +2509,6 @@ static void rec_peer(unsigned int peer){
             try
             {
 	#endif
-                // prepare to override currently active version
-                nTempVersionOverrider overrider;
-
-
                 static int recursionCount = 0;
                 ++recursionCount;
 
@@ -2628,15 +2517,6 @@ static void rec_peer(unsigned int peer){
                 {
                     tJUST_CONTROLLED_PTR< nMessage > mess = receivedMessages.front();
                     receivedMessages.pop_front();
-
-                    // set version to something really old on messages from the login slot
-                    // or messages the client receives while it's not yet logged in
-                    if ( ( mess->SenderID() == MAXCLIENTS+1 ||
-                         ( sn_GetNetState() == nCLIENT && !login_succeeded ) ) 
-                         && !nTempVersionOverrider::Overridden() )
-                    {
-                        nTempVersionOverrider::Override( nVersion( 0, 4 ) );
-                    }
 
                     // perhaps the connection died?
                     if ( sn_Connections[ mess->SenderID() ].socket )
@@ -2825,13 +2705,6 @@ void sn_SetNetState(nNetState x){
                 sn_DisconnectUserNoWarn(i, "$network_kill_shutdown");
             }
 
-            // repeat to clear out pending stuff created during
-            // the last run (destruction messages, for example)
-            for(int i=MAXCLIENTS+1;i>=0;i--)
-            {
-                sn_DisconnectUserNoWarn(i, "$network_kill_shutdown");
-            }
-
             sn_Connections[0].socket = 0;
 
             // shutdown network system to get new socket
@@ -2857,9 +2730,6 @@ void sn_Bend( nAddress const & address )
         sn_SetNetState(nCLIENT);
 
     peers[0] = address;
-
-    // prepend packet with version information
-    nTempVersionOverrider::SendOverrideMessage( 0, sn_myVersion );
 }
 
 void sn_Bend( tString const & server, unsigned int port)
@@ -3610,8 +3480,7 @@ static bool net_Accept()
 {
     return
         nCallbackAcceptPackedWithoutConnection::Descriptor()==login_accept.ID() ||
-        nCallbackAcceptPackedWithoutConnection::Descriptor()==login_deny.ID() ||
-        nCallbackAcceptPackedWithoutConnection::Descriptor()==nTempVersionOverrider::Descriptor().ID();
+        nCallbackAcceptPackedWithoutConnection::Descriptor()==login_deny.ID();
 }
 
 static nCallbackAcceptPackedWithoutConnection net_acc( &net_Accept );

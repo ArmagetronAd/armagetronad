@@ -38,6 +38,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tException.h"
 #include <memory>
 
+// protocol buffers forward declaration
+namespace google { namespace protobuf { class Message; } }
+
 class nSocket;
 class nAddress;
 class nBasicNetworkSystem;
@@ -152,8 +155,13 @@ private:
     int min_, max_;
 };
 
+// read/write operators for versions
 nMessage& operator >> ( nMessage& m, nVersion& ver );
 nMessage& operator << ( nMessage& m, const nVersion& ver );
+
+// read/write operators for protocol buffers
+nMessage& operator >> ( nMessage& m, google::protobuf::Message & buffer );
+nMessage& operator << ( nMessage& m, google::protobuf::Message const & buffer );
 
 std::istream& operator >> ( std::istream& s, nVersion& ver );
 std::ostream& operator << ( std::ostream& s, const nVersion& ver );
@@ -167,8 +175,8 @@ class nVersionFeature
 {
 public:
     nVersionFeature( int min, int max = -1 ); // creates a feature that is supported from version min to max; values of -1 indicate no border
-    bool Supported() const;                   // returns whether this feature is supported by everyone
-    bool Supported( int client ) const;       // returns whether this feature is supported by a certain client ( resp. the server in client mode )
+    bool Supported();                         // returns whether this feature is supported by everyone
+    bool Supported( int client );             // returns whether this feature is supported by a certain client ( resp. the server in client mode )
 private:
     int min_, max_;
 };
@@ -379,31 +387,49 @@ extern int sn_myNetID; // our network identification:  0: server
 // Network messages and functions that know how to handle them:
 
 class nMessage;
-typedef void nHandler(nMessage &m);
 
-
-// types of network messages
-class nDescriptor:public tListItem<nDescriptor>{
+// basic network message descriptor.
+class nDescriptorBase:public tListItem<nDescriptorBase>
+{
     friend class nMessage;
 
-    static unsigned short s_nextID;
+    unsigned short id;     //!< our id
 
-    unsigned short id;     // our id
-    nHandler *handler;  // function responsible for our type of message
-
-    const char *name;
+    const char *name;      //!< our name
 
     const bool acceptWithoutLogin;
-public:
-    nDescriptor(unsigned short identification,nHandler *handle
-                ,const char *name, bool acceptEvenIfNotLoggedIn = false);
-    //  nDescriptor(nHandler *handle,
-    //		const char *name);
-    static void HandleMessage(nMessage &message);
 
-    unsigned short ID() const{
+    virtual void DoHandleMessage( nMessage & message ) = 0;
+public:
+    nDescriptorBase(unsigned short identification, const char *name, bool acceptEvenIfNotLoggedIn = false);
+
+    static void HandleMessage( nMessage &message );
+
+    unsigned short ID()
+    {
         return id;
     }
+};
+
+typedef void nHandler(nMessage &m);
+
+// old descriptor for streaming messages
+class nDescriptor: public nDescriptorBase
+{
+    nHandler *handler;  // function responsible for our type of message
+
+    virtual void DoHandleMessage( nMessage & message );
+public:
+    nDescriptor(unsigned short identification,nHandler *handle,
+                const char *name, bool acceptEvenIfNotLoggedIn = false);
+};
+
+// new descriptor for protocol buffer messages
+class nPBDescriptorBase: public nDescriptorBase
+{
+public:
+    nPBDescriptorBase(unsigned short identification,
+                      const char * name, bool acceptEvenIfNotLoggedIn = false);
 };
 
 // register the routine that gives the peer the server/client information
@@ -420,7 +446,7 @@ class nMessage: public tReferencable< nMessage >{
     friend class tControlledPTR< nMessage >;
     friend class tReferencable< nMessage >;
 
-    friend class nDescriptor;
+    friend class nDescriptorBase;
     friend class nNetObject;
     friend class nWaitForAck;
 
@@ -428,11 +454,11 @@ class nMessage: public tReferencable< nMessage >{
     //	void Release();
 
 protected:
-    unsigned short descriptor;    // the network message type id
-    // unsigned short messageID_;    // the network message id, every message gets its own (up to overflow)
-    unsigned long messageIDBig_;  // uniquified message ID, the last 16 bits are the same as messageID_
-    short          senderID;      // sender's identification
-    tArray<unsigned short> data;  // assuming ints are 32 bit wide...
+    unsigned short descriptor;    //!< the network message type id
+    // unsigned short messageID_; //!< the network message id, every message gets its own (up to overflow)
+    unsigned long messageIDBig_;  //!< uniquified message ID, the last 16 bits are the same as messageID_
+    short          senderID;      //!< sender's identification
+    tArray<unsigned short> data;  //!< assuming ints are 32 bit wide...
 
     unsigned int readOut;
 
@@ -458,15 +484,23 @@ public:
         return data.Len();
     }
 
-    unsigned short Data(unsigned short n) const {
+    unsigned short Data(unsigned short n){
         return data(n);
+    }
+
+    //! makes sure nothing else gets written to the message (in debug mode)
+    void Finalize()
+    {
+#ifdef DEBUG
+        readOut++;
+#endif
     }
 
     void ClearMessageID(){ // clear the message ID so no acks are sent for it
         messageIDBig_ = 0;
     }
 
-    nMessage(const nDescriptor &);  // create a new message
+    nMessage( const nDescriptorBase & );  // create a new message
     nMessage(unsigned short*& buffer, short sn_myNetID, int lenLeft );
     // read a message from the network stream
 
@@ -487,8 +521,15 @@ public:
     void Send(int peer,REAL priority=0,bool ack=true);
 
     void Write(const unsigned short &x){
+        // can't write to a reading message, or one that was finalized
+        tASSERT( 0 == readOut );
+
         data[data.Len()]=x;
     }
+
+    //! create a message from a pattern buffer
+    template< class MESSAGE >
+    nMessage * Transform( MESSAGE const & message );
 
     nMessage& operator<< (const REAL &x);
     nMessage& operator>> (REAL &x);
@@ -614,7 +655,81 @@ public:
     //    template<class T> nMessage& operator >> ( tControlledPTR<T>& p );
 };
 
+// templated version of protocol buffer messages
+template< class MESSAGE > 
+class nPBDescriptor: public nPBDescriptorBase
+{
+    typedef void Handler( MESSAGE & message );
 
+    //! instance of this descriptor
+    static nPBDescriptor * instance_;
+
+#ifdef DEBUG
+    static bool multipleInstances_;
+#endif
+
+    //! function actually handling the incoming message
+    Handler * handler_;
+
+    //! delegates message handling
+    virtual void DoHandleMessage( nMessage & message )
+    {
+        // read into protocol buffer
+        MESSAGE protocolBuffer;
+        message >> protocolBuffer;
+
+        // and delegate
+        handler_( protocolBuffer );
+    }
+public:
+    //! puts a puffer into a message
+    nMessage * Transform( MESSAGE const & message ) const
+    {
+        nMessage * ret = new nMessage( this );
+        
+        *ret << message;
+
+        return ret;
+    }
+
+    //! puts a puffer into a message
+    static nMessage * TransformStatic( MESSAGE const & message )
+    {
+        tASSERT( !multipleInstances_ );
+        tASSERT( instance_ );
+        return instance_->Transform( message );
+    }
+
+    nPBDescriptor( unsigned short identification, Handler * handler,
+                   const char * name, bool acceptEvenIfNotLoggedIn = false )
+    : nPBDescriptorBase( identification, name, acceptEvenIfNotLoggedIn )
+    , handler_( handler )
+    {
+#ifdef DEBUG
+        if ( instance_ )
+        {
+            multipleInstances_ = true;
+        }
+#endif
+        instance_ = this;
+    }
+};
+
+//! instance of this descriptor
+template< class MESSAGE > 
+nPBDescriptor< MESSAGE > * nPBDescriptor< MESSAGE >::instance_ = 0;
+
+#ifdef DEBUG
+template< class MESSAGE > 
+bool nPBDescriptor< MESSAGE >::multipleInstances_ = false;
+#endif
+
+// create a message from a pattern buffer
+template< class MESSAGE >
+nMessage * nMessage::Transform( MESSAGE const & message )
+{
+    return nPBDescriptor< MESSAGE >::TransformStatic( message );
+}
 
 // the class that is responsible for getting acknowleEdgement for
 // netmessages

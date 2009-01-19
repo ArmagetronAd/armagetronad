@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
+
 #include "defs.h"
 
 #include "rGL.h"
@@ -339,7 +340,10 @@ static void make_screenshot(){
     }
 
     if (s_videoout)
-        Ignore( write(s_videooutDest, temp->pixels, sr_screenWidth * sr_screenHeight * 3) );
+    {
+        ssize_t written = write(s_videooutDest, temp->pixels, sr_screenWidth * sr_screenHeight * 3);
+        written = 0;
+    }
 
     if (sr_screenshotIsPlanned) {
         // save screenshot in unused slot
