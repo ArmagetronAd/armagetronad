@@ -246,10 +246,10 @@ armagetronad_main_master$(EXEEXT): Makefile
 	${BUILDFAKE}
 else
 if BUILDMAIN
-noinst_LIBRARIES = libprotobuf.a libenginecore.a libengine.a librender.a  libtron.a libui.a libnetwork.a libtools.a
+noinst_LIBRARIES = libtools.a libnetwork.a libprotobuf.a libenginecore.a libengine.a librender.a  libtron.a libui.a
 # librubywrap.a
 else
-noinst_LIBRARIES = libprotobuf.a libnetwork.a libtools.a
+noinst_LIBRARIES = libtools.a libnetwork.a libprotobuf.a
 endif
 
 if BUILDDEDICATED
