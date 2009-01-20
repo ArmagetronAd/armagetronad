@@ -31,7 +31,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "google/protobuf/message.h"
 #include "google/protobuf/descriptor.h"
 
+
 using namespace google::protobuf;
+
+#if GOOGLE_PROTOBUF_VERSION < 2000003
+// cull first parameter from reflection functions
+#define REFL_GET( function, message, field )        function( field )
+#define REFL_SET( function, message, field, value ) function( field, value )
+typedef Message::Reflection Reflection;
+#else
+#define REFL_GET( function, message, field )        function( message, field )
+#define REFL_SET( function, message, field, value ) function( message, field, value )
+#endif
 
 /*
 Not defined here, but in nNetwork.cpp for access to the right static variables and macros.
@@ -63,17 +74,17 @@ void nPBDescriptorBase::DoStreamTo( Message const & in, nMessage & out ) const
         switch( field->cpp_type() )
         {
         case FieldDescriptor::CPPTYPE_INT32:
-            out << reflection->GetInt32( in, field );
+            out << reflection->REFL_GET( GetInt32, in, field );
             break;
         case FieldDescriptor::CPPTYPE_UINT32:
-            out.Write( reflection->GetUInt32( in, field ) );
+            out.Write( reflection->REFL_GET( GetUInt32, in, field ) );
             break;
         case FieldDescriptor::CPPTYPE_STRING:
-            out << reflection->GetString( in, field );
+            out << reflection->REFL_GET( GetString, in, field );
             break;
         case FieldDescriptor::CPPTYPE_MESSAGE:
             // todo: call function over corresponding descriptor
-            nPBDescriptorBase::DoStreamTo( reflection->GetMessage( in, field ), out );
+            nPBDescriptorBase::DoStreamTo( reflection->REFL_GET( GetMessage, in, field ), out );
             break;
 
             // not yet implemented
