@@ -55,6 +55,9 @@ nPBDescriptorBase::nPBDescriptorBase(unsigned short identification,
 //! dumb streaming to message
 void nPBDescriptorBase::DoStreamTo( Message const & in, nMessage & out ) const
 {
+    // strip protocol buffer flag from message descriptor
+    out.descriptor &= ~protoBufFlag;
+
     // get reflection interface
     const Reflection * reflection = in.GetReflection();
     const Descriptor * descriptor = in.GetDescriptor();

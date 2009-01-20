@@ -561,9 +561,6 @@ nDescriptor::nDescriptor(nHandler *handle,const char *Name)
 }
 */
 
-// flag that marks protocol buffer messages
-static const unsigned short sn_protoBufFlag = 0x8000;
-
 int nCurrentSenderID::currentSenderID_ = 0;
 
 void nDescriptorBase::HandleMessage(nMessage &message){
@@ -584,10 +581,10 @@ void nDescriptorBase::HandleMessage(nMessage &message){
 
         // pick right descriptor set according to highest bit
         nDescriptorBase * const * descriptors = streamDescriptors;
-        if ( message.descriptor & sn_protoBufFlag )
+        if ( message.descriptor & nPBDescriptorBase::protoBufFlag )
         {
             descriptors = protoBufDescriptors;
-            message.descriptor ^= sn_protoBufFlag;
+            message.descriptor ^= nPBDescriptorBase::protoBufFlag;
         }
 
         // z-man: security check ( thanks, Luigi Auriemma! )
@@ -650,7 +647,7 @@ nVersionFeature sn_protocolBuffers( 21 );
 nPBDescriptorBase::nPBDescriptorBase(unsigned short identification,
                                      const char * name, 
                                      bool acceptEvenIfNotLoggedIn )
-: nDescriptorBase( identification | sn_protoBufFlag, name, acceptEvenIfNotLoggedIn )
+: nDescriptorBase( identification | nPBDescriptorBase::protoBufFlag, name, acceptEvenIfNotLoggedIn )
 {
     if (MAXDESCRIPTORS<=identification || protoBufDescriptors[identification]!=NULL)
     {

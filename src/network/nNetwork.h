@@ -432,6 +432,7 @@ class nMessage: public tReferencable< nMessage >{
     friend class tReferencable< nMessage >;
 
     friend class nDescriptorBase;
+    friend class nPBDescriptorBase;
     friend class nNetObject;
     friend class nWaitForAck;
 

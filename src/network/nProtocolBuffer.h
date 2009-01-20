@@ -54,6 +54,9 @@ public:
     {
         DoStreamFrom( in, out );
     }
+
+    // flag that marks protocol buffer messages
+    static const unsigned short protoBufFlag = 0x8000;
 private:
     //! dumb streaming to message
     virtual void DoStreamTo( google::protobuf::Message const & in, nMessage & out ) const;
