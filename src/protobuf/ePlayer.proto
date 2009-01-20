@@ -1,6 +1,8 @@
 // Protocol buffer types for ePlayer.cpp
 package Engine;
 
+import "nNetObject.proto";
+
 // chat messages
 message Chat
 {
@@ -9,4 +11,20 @@ message Chat
 
     // the fully formatted chat string
     required string chat_line = 2;  
+}
+
+message ePlayerNetIDInit
+{
+    required Network.nNetObjectInit base = 1;
+}
+
+message ePlayerNetIDSync
+{
+    required Network.nNetObjectSync base = 1;
+}
+
+message ePlayerNetIDTotal
+{
+    required ePlayerNetIDInit init = 1;
+    required ePlayerNetIDSync sync = 2;
 }

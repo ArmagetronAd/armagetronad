@@ -1,0 +1,15 @@
+package Network;
+
+message nNetObjectInit
+{
+}
+
+message nNetObjectSync
+{
+}
+
+message nNetObjectTotal
+{
+    required nNetObjectInit init = 1;
+    required nNetObjectSync sync = 2;
+}

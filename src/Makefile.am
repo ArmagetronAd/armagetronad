@@ -64,7 +64,9 @@ endif
 
 # protocol buffers. Need to be compiled first so the headers exist for the
 # other modules to include.
-libprotobuf_a_SOURCES = protobuf/ePlayer.pb.cc protobuf/ePlayer.pb.h
+libprotobuf_a_SOURCES = \
+    protobuf/nNetObject.pb.cc protobuf/nNetObject.pb.h \
+    protobuf/ePlayer.pb.cc protobuf/ePlayer.pb.h
 
 # Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
 # the fragile dependency on undefined behaviour of the linker...)
