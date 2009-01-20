@@ -44,8 +44,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tMath.h"
 #include <string.h>
 
-#include "google/protobuf/message.h"
-
 #ifndef WIN32
 #include  <netinet/in.h>
 #else
@@ -319,53 +317,6 @@ std::istream& operator >> ( std::istream& s, nVersion& ver )
     ver = nVersion( min, max );
 
     return s;
-}
-
-// read/write operators for protocol buffers
-nMessage& operator >> ( nMessage& m, google::protobuf::Message & buffer )
-{
-    // first, read into a string. protobufs ALWAYS take the whole rest of a
-    // message. Luckily, they don't mind a single appended 0 byte.
-    std::stringstream rw;
-    while( !m.End() )
-    {
-        unsigned short value;
-        m.Read( value );
-        rw.put( value >> 8 );
-        rw.put( value & 0xff );
-    }
-
-    // then, read the string into the buffer
-    buffer.ParseFromIstream( &rw );
-
-    // TODO: optimize. The stream copy should not be required, the data is
-    // already in memory. But first, make it so that the byte order in memory
-    // is already the network byte order, right now, it's the machine's order.
-
-    return m;
-}
-
-nMessage& operator << ( nMessage& m, google::protobuf::Message const & buffer )
-{
-    // dump into plain stringstream
-    std::stringstream rw;
-    buffer.SerializeToOstream( &rw );
-
-    // write stringstream to message
-    while( !rw.eof() )
-    {
-        unsigned short value = ((unsigned char)rw.get()) << 8;
-        if ( !rw.eof() )
-        {
-            value += (unsigned char)rw.get();
-        }
-        m.Write( value );
-    }
-
-    // mark message as final
-    m.Finalize();
-   
-    return m;
 }
 
 std::ostream& operator << ( std::ostream& s, const nVersion& ver )

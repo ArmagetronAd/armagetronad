@@ -116,6 +116,7 @@ libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentication.cpp\
 	network/nAuthentication.h network/nConfig.cpp network/nConfig.h\
 	network/nKrawall.cpp network/nKrawall.h network/nKrawallPrivate.cpp\
 	network/nNetObject.cpp network/nNetObject.h network/nNetwork.cpp network/nNetwork.h\
+	network/nProtocolBuffer.cpp network/nProtocolBuffer.h\
 	network/nObserver.cpp network/nObserver.h network/nPriorizing.cpp network/nPriorizing.h\
 	network/nServerInfo.cpp network/nServerInfo.h network/nSimulatePing.h network/nSocket.cpp\
 	network/nSocket.h network/nSpamProtection.cpp network/nSpamProtection.h

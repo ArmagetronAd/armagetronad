@@ -38,9 +38,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tException.h"
 #include <memory>
 
-// protocol buffers forward declaration
-namespace google { namespace protobuf { class Message; } }
-
 class nSocket;
 class nAddress;
 class nBasicNetworkSystem;
@@ -158,10 +155,6 @@ private:
 // read/write operators for versions
 nMessage& operator >> ( nMessage& m, nVersion& ver );
 nMessage& operator << ( nMessage& m, const nVersion& ver );
-
-// read/write operators for protocol buffers
-nMessage& operator >> ( nMessage& m, google::protobuf::Message & buffer );
-nMessage& operator << ( nMessage& m, google::protobuf::Message const & buffer );
 
 std::istream& operator >> ( std::istream& s, nVersion& ver );
 std::ostream& operator << ( std::ostream& s, const nVersion& ver );
@@ -656,82 +649,6 @@ public:
 
     //    template<class T> nMessage& operator >> ( tControlledPTR<T>& p );
 };
-
-// templated version of protocol buffer messages
-template< class MESSAGE > 
-class nPBDescriptor: public nPBDescriptorBase
-{
-    typedef void Handler( MESSAGE & message, nMessage & envelope );
-
-    //! instance of this descriptor
-    static nPBDescriptor * instance_;
-
-#ifdef DEBUG
-    static bool multipleInstances_;
-#endif
-
-    //! function actually handling the incoming message
-    Handler * handler_;
-
-    //! delegates message handling
-    virtual void DoHandleMessage( nMessage & envelope )
-    {
-        // read into protocol buffer
-        MESSAGE protocolBuffer;
-        envelope >> protocolBuffer;
-
-        // and delegate
-        handler_( protocolBuffer, envelope );
-    }
-public:
-    //! puts a puffer into a message
-    nMessage * Transform( MESSAGE const & message ) const
-    {
-        nMessage * ret = new nMessage( *this );
-        
-        *ret << message;
-
-        return ret;
-    }
-
-    //! puts a puffer into a message
-    static nMessage * TransformStatic( MESSAGE const & message )
-    {
-        tASSERT( !multipleInstances_ );
-        tASSERT( instance_ );
-        return instance_->Transform( message );
-    }
-
-    nPBDescriptor( unsigned short identification, Handler * handler,
-                   const char * name, bool acceptEvenIfNotLoggedIn = false )
-    : nPBDescriptorBase( identification, name, acceptEvenIfNotLoggedIn )
-    , handler_( handler )
-    {
-#ifdef DEBUG
-        if ( instance_ )
-        {
-            multipleInstances_ = true;
-        }
-#endif
-        instance_ = this;
-    }
-};
-
-//! instance of this descriptor
-template< class MESSAGE > 
-nPBDescriptor< MESSAGE > * nPBDescriptor< MESSAGE >::instance_ = 0;
-
-#ifdef DEBUG
-template< class MESSAGE > 
-bool nPBDescriptor< MESSAGE >::multipleInstances_ = false;
-#endif
-
-// create a message from a pattern buffer
-template< class MESSAGE >
-nMessage * nMessage::Transform( MESSAGE const & message )
-{
-    return nPBDescriptor< MESSAGE >::TransformStatic( message );
-}
 
 // the class that is responsible for getting acknowleEdgement for
 // netmessages
