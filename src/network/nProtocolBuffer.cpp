@@ -40,9 +40,11 @@ using namespace google::protobuf;
 #define REFL_GET( function, message, field )        function( field )
 #define REFL_SET( function, message, field, value ) function( field, value )
 typedef Message::Reflection Reflection;
+#define REFLECTION_CONST Reflection
 #else
 #define REFL_GET( function, message, field )        function( message, field )
 #define REFL_SET( function, message, field, value ) function( message, field, value )
+#define REFLECTION_CONST Reflection const
 #endif
 
 /*
@@ -120,8 +122,8 @@ void nPBDescriptorBase::StreamToStatic( Message const & in, nMessage & out )
 void nPBDescriptorBase::StreamFromDefault( nMessage & in, Message & out  )
 {
     // get reflection interface
-    Reflection * reflection = out.GetReflection();
-    const Descriptor * descriptor = out.GetDescriptor();
+    REFLECTION_CONST * reflection = out.GetReflection();
+    Descriptor const * descriptor = out.GetDescriptor();
 
     // iterate over fields in ID order
     int count = descriptor->field_count();
@@ -141,39 +143,39 @@ void nPBDescriptorBase::StreamFromDefault( nMessage & in, Message & out  )
         {
             int32 value;
             in >> value;
-            reflection->REFL_SET( SetInt32, out, field, value );
+            reflection->REFL_SET( SetInt32, &out, field, value );
         }
         break;
         case FieldDescriptor::CPPTYPE_UINT32:
         {
             unsigned short value;
             in.Read( value );
-            reflection->REFL_SET( SetUInt32, out, field, value );
+            reflection->REFL_SET( SetUInt32, &out, field, value );
         }
         break;
         case FieldDescriptor::CPPTYPE_STRING:
         {
             tString value;
             in >> value;
-            reflection->REFL_SET( SetString, out, field, value );
+            reflection->REFL_SET( SetString, &out, field, value );
         }
         break;
         case FieldDescriptor::CPPTYPE_FLOAT:
         {
             REAL value;
             in >> value;
-            reflection->REFL_SET( SetFloat, out, field, value );
+            reflection->REFL_SET( SetFloat, &out, field, value );
         }
         break;
         case FieldDescriptor::CPPTYPE_BOOL:
         {
             bool value;
             in >> value;
-            reflection->REFL_SET( SetBool, out, field, value );
+            reflection->REFL_SET( SetBool, &out, field, value );
         }
         break;
         case FieldDescriptor::CPPTYPE_MESSAGE:
-            StreamFromStatic( in, *reflection->REFL_GET( MutableMessage, out, field ) );
+            StreamFromStatic( in, *reflection->REFL_GET( MutableMessage, &out, field ) );
             break;
 
         // explicitly unsupported:
