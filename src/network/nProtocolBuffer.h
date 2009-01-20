@@ -34,6 +34,8 @@ namespace google { namespace protobuf { class Message; } }
 
 #include "nNetwork.h"
 
+#include <map>
+
 extern nVersionFeature sn_protocolBuffers;
 
 // new descriptor for protocol buffer messages
@@ -41,9 +43,12 @@ class nPBDescriptorBase: public nDescriptorBase
 {
 public:
     typedef google::protobuf::Message Message;
+    typedef std::map< std::string, nPBDescriptorBase * > DescriptorMap;
 
     nPBDescriptorBase(unsigned short identification,
-                      const char * name, bool acceptEvenIfNotLoggedIn = false);
+                      Message const & prototype, bool acceptEvenIfNotLoggedIn = false);
+
+    static std::string const & DetermineName( Message const & prototype );
 
     //! dumb streaming to message
     inline void StreamTo( Message const & in, nMessage & out ) const
@@ -57,14 +62,28 @@ public:
         DoStreamFrom( in, out );
     }
 
+    //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
+    inline Message * Create() const
+    {
+        return DoCreate();
+    }
+
     // flag that marks protocol buffer messages
     static const unsigned short protoBufFlag = 0x8000;
+protected:
+    static DescriptorMap const & GetDescriptorsByName();
+
 private:
+    static DescriptorMap descriptorsByName;
+
     //! dumb streaming to message
     virtual void DoStreamTo( Message const & in, nMessage & out ) const;
 
     //! dumb streaming from message
     virtual void DoStreamFrom( nMessage & in, Message & out ) const;
+
+    //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
+    virtual Message * DoCreate() const = 0;
 };
 
 // read/write operators for protocol buffers
@@ -115,6 +134,12 @@ class nPBDescriptor: public nPBDescriptorBase
         HandlerArgument argument( protocolBuffer, envelope );
         handler_( argument );
     }
+
+    //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
+    virtual Message * DoCreate() const
+    {
+        return new MESSAGE;
+    }
 public:
     //! puts a puffer into a message
     nMessage * Transform( MESSAGE const & message ) const
@@ -147,8 +172,8 @@ public:
     }
 
     nPBDescriptor( unsigned short identification, Handler * handler,
-                   const char * name, bool acceptEvenIfNotLoggedIn = false )
-    : nPBDescriptorBase( identification, name, acceptEvenIfNotLoggedIn )
+                   bool acceptEvenIfNotLoggedIn = false )
+    : nPBDescriptorBase( identification, MESSAGE(), acceptEvenIfNotLoggedIn )
     , handler_( handler )
     {
 #ifdef DEBUG

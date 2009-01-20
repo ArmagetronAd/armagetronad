@@ -388,7 +388,7 @@ class nDescriptorBase:public tListItem<nDescriptorBase>
 
     unsigned short id;     //!< our id
 
-    const char *name;      //!< our name
+    tString name;          //!< our name
 
     const bool acceptWithoutLogin;
 
@@ -397,6 +397,11 @@ public:
     nDescriptorBase(unsigned short identification, const char *name, bool acceptEvenIfNotLoggedIn = false);
 
     static void HandleMessage( nMessage &message );
+
+    tString const & GetName()
+    {
+        return name;
+    }
 
     unsigned short ID()
     {

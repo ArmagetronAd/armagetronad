@@ -645,15 +645,17 @@ nDescriptor::nDescriptor(unsigned short identification,nHandler *handle,
 nVersionFeature sn_protocolBuffers( 21 );
 
 nPBDescriptorBase::nPBDescriptorBase(unsigned short identification,
-                                     const char * name, 
+                                     Message const & prototype, 
                                      bool acceptEvenIfNotLoggedIn )
-: nDescriptorBase( identification | nPBDescriptorBase::protoBufFlag, name, acceptEvenIfNotLoggedIn )
+: nDescriptorBase( identification | nPBDescriptorBase::protoBufFlag, DetermineName( prototype ).c_str(), acceptEvenIfNotLoggedIn )
 {
     if (MAXDESCRIPTORS<=identification || protoBufDescriptors[identification]!=NULL)
     {
         con << "Protocol Buffer Descriptor " << identification << " already used!\n";
         exit(-1);
     }
+
+    descriptorsByName[ GetName() ] = this;
     
     protoBufDescriptors[identification]=this;
 }

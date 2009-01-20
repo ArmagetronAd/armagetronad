@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "nProtocolBuffer.h"
+#include "tConsole.h"
 
 #include "google/protobuf/message.h"
 #include "google/protobuf/descriptor.h"
@@ -51,6 +52,18 @@ nPBDescriptorBase::nPBDescriptorBase(unsigned short identification,
                                      const char * name, 
                                      bool acceptEvenIfNotLoggedIn )
 */
+
+std::string const & nPBDescriptorBase::DetermineName( Message const & prototype )
+{
+    return prototype.GetDescriptor()->full_name();
+}
+
+nPBDescriptorBase::DescriptorMap const & nPBDescriptorBase::GetDescriptorsByName()
+{
+    return descriptorsByName;
+}
+
+nPBDescriptorBase::DescriptorMap nPBDescriptorBase::descriptorsByName;
 
 //! dumb streaming to message
 void nPBDescriptorBase::DoStreamTo( Message const & in, nMessage & out ) const
@@ -85,17 +98,40 @@ void nPBDescriptorBase::DoStreamTo( Message const & in, nMessage & out ) const
         case FieldDescriptor::CPPTYPE_STRING:
             out << reflection->REFL_GET( GetString, in, field );
             break;
-        case FieldDescriptor::CPPTYPE_MESSAGE:
-            // todo: call function over corresponding descriptor
-            nPBDescriptorBase::DoStreamTo( reflection->REFL_GET( GetMessage, in, field ), out );
-            break;
-
-            // not yet implemented
         case FieldDescriptor::CPPTYPE_FLOAT:
+            out << reflection->REFL_GET( GetFloat, in, field );
+            break;
         case FieldDescriptor::CPPTYPE_BOOL:
-        case FieldDescriptor::CPPTYPE_ENUM:
+            out << reflection->REFL_GET( GetBool, in, field );
+            break;
+        case FieldDescriptor::CPPTYPE_MESSAGE:
+        {
+            // try to determine suitable descriptor
+            Message const & message = reflection->REFL_GET( GetMessage, in, field );
+            nPBDescriptorBase const * embedded = descriptorsByName[ DetermineName( message ) ];
+            if ( embedded )
+            {
+                // found it, delegate
+                embedded->StreamTo( message, out );
+            }
+            else
+            {
+#ifdef DEBUG
+                static bool warn = true;
+                if ( warn )
+                {
+                    tERR_WARN( "Unknown buffer format, not sure if it'll get streamed correctly." );
+                    warn = false;
+                }
+#endif
 
-            // explicitly unsupported:
+                nPBDescriptorBase::DoStreamTo( message, out );
+            }
+        }
+        break;
+
+        // explicitly unsupported:
+        case FieldDescriptor::CPPTYPE_ENUM:
         case FieldDescriptor::CPPTYPE_INT64:
         case FieldDescriptor::CPPTYPE_UINT64:
         case FieldDescriptor::CPPTYPE_DOUBLE:

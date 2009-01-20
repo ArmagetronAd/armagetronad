@@ -1585,7 +1585,7 @@ static nVersionFeature se_chatHandlerClient( 6 );
 void handle_chat( nMessage & );
 void handle_chat( nReceivedProtocolBuffer< Engine::Chat > & );
 static nDescriptor chat_handler(200,handle_chat,"Chat");
-static nPBDescriptor< Engine::Chat > chat_handler_pb(200,handle_chat,"Chat");
+static nPBDescriptor< Engine::Chat > chat_handler_pb(200,handle_chat);
 
 // checks whether text_to_search contains search_for_text
 bool Contains( const tString & search_for_text, const tString & text_to_search ) {
