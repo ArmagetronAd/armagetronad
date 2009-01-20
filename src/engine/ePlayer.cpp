@@ -1583,7 +1583,7 @@ static nVersionFeature se_chatHandlerClient( 6 );
 
 // chat message from client to server
 void handle_chat( nMessage & );
-void handle_chat( Engine::Chat &, nMessage & );
+void handle_chat( nReceivedProtocolBuffer< Engine::Chat > & );
 static nDescriptor chat_handler(200,handle_chat,"Chat");
 static nPBDescriptor< Engine::Chat > chat_handler_pb(200,handle_chat,"Chat");
 
@@ -3720,9 +3720,10 @@ void handle_chat( nMessage &m )
     handle_chat( id, say, m );
 }
 
-void handle_chat( Engine::Chat & message, nMessage & envelope )
+void handle_chat( nReceivedProtocolBuffer< Engine::Chat > & message )
 {
-    handle_chat( message.player_id(), tColoredString( message.chat_line().c_str() ), envelope );
+    Engine::Chat & content = message.content;
+    handle_chat( content.player_id(), tColoredString( content.chat_line().c_str() ), message.envelope );
 }
 
 // check if a string is a legal player name

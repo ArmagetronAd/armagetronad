@@ -40,17 +40,19 @@ extern nVersionFeature sn_protocolBuffers;
 class nPBDescriptorBase: public nDescriptorBase
 {
 public:
+    typedef google::protobuf::Message Message;
+
     nPBDescriptorBase(unsigned short identification,
                       const char * name, bool acceptEvenIfNotLoggedIn = false);
 
     //! dumb streaming to message
-    inline void StreamTo( google::protobuf::Message const & in, nMessage & out ) const
+    inline void StreamTo( Message const & in, nMessage & out ) const
     {
         DoStreamTo( in, out );
     }
 
     //! dumb streaming from message
-    inline void StreamFrom( nMessage & in, google::protobuf::Message & out  ) const
+    inline void StreamFrom( nMessage & in, Message & out  ) const
     {
         DoStreamFrom( in, out );
     }
@@ -59,21 +61,38 @@ public:
     static const unsigned short protoBufFlag = 0x8000;
 private:
     //! dumb streaming to message
-    virtual void DoStreamTo( google::protobuf::Message const & in, nMessage & out ) const;
+    virtual void DoStreamTo( Message const & in, nMessage & out ) const;
 
     //! dumb streaming from message
-    virtual void DoStreamFrom( nMessage & in, google::protobuf::Message & out ) const;
+    virtual void DoStreamFrom( nMessage & in, Message & out ) const;
 };
 
 // read/write operators for protocol buffers
 nMessage& operator >> ( nMessage& m, google::protobuf::Message & buffer );
 nMessage& operator << ( nMessage& m, google::protobuf::Message const & buffer );
 
+//! argument passed to protocol buffer handlers
+template< class MESSAGE >
+struct nReceivedProtocolBuffer
+{
+    //! the buffer itself
+    MESSAGE & content;
+
+    //! the network message it came in
+    nMessage & envelope;
+
+    // filling constructor
+    nReceivedProtocolBuffer( MESSAGE & c, nMessage & e )
+    : content(c), envelope(e)
+    {}
+};
+
 // templated version of protocol buffer messages
 template< class MESSAGE > 
 class nPBDescriptor: public nPBDescriptorBase
 {
-    typedef void Handler( MESSAGE & message, nMessage & envelope );
+    typedef nReceivedProtocolBuffer< MESSAGE > HandlerArgument;
+    typedef void Handler( HandlerArgument & message );
 
     //! instance of this descriptor
     static nPBDescriptor * instance_;
@@ -93,7 +112,8 @@ class nPBDescriptor: public nPBDescriptorBase
         envelope >> protocolBuffer;
 
         // and delegate
-        handler_( protocolBuffer, envelope );
+        HandlerArgument argument( protocolBuffer, envelope );
+        handler_( argument );
     }
 public:
     //! puts a puffer into a message
