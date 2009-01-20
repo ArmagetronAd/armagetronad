@@ -62,6 +62,18 @@ public:
         DoStreamFrom( in, out );
     }
 
+    //! dumb streaming from message, static version
+    static void StreamFromStatic( nMessage & in, Message & out  );
+
+    //! dumb streaming to message, static version
+    static inline void StreamToStatic( Message const & in, nMessage & out );
+
+    //! selective writing to message, either embedded or transformed
+    void WriteMessage( Message const & in, nMessage & out ) const;
+
+    //! selective reading message, either embedded or transformed
+    void ReadMessage( nMessage & in, Message & out  ) const;
+
     //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
     inline Message * Create() const
     {
@@ -81,6 +93,12 @@ private:
 
     //! dumb streaming from message
     virtual void DoStreamFrom( nMessage & in, Message & out ) const;
+
+    //! dumb streaming from message, static version
+    static void StreamFromDefault( nMessage & in, Message & out  );
+
+    //! dumb streaming to message, static version
+    static void StreamToDefault( Message const & in, nMessage & out );
 
     //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
     virtual Message * DoCreate() const = 0;
@@ -128,7 +146,8 @@ class nPBDescriptor: public nPBDescriptorBase
     {
         // read into protocol buffer
         MESSAGE protocolBuffer;
-        envelope >> protocolBuffer;
+
+        ReadMessage( envelope, protocolBuffer );
 
         // and delegate
         HandlerArgument argument( protocolBuffer, envelope );
@@ -146,16 +165,7 @@ public:
     {
         nMessage * ret = new nMessage( *this );
 
-        if ( sn_protocolBuffers.Supported() )
-        {
-            // write the message in its native format
-            *ret << message;
-        }
-        else
-        {
-            // transform the message to our legacy format
-            StreamTo( message, *ret );
-        }
+        WriteMessage( message, *ret );
 
         return ret;
     }

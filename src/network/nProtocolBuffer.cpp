@@ -64,13 +64,66 @@ nPBDescriptorBase::DescriptorMap const & nPBDescriptorBase::GetDescriptorsByName
 }
 
 nPBDescriptorBase::DescriptorMap nPBDescriptorBase::descriptorsByName;
-
-//! dumb streaming to message
-void nPBDescriptorBase::DoStreamTo( Message const & in, nMessage & out ) const
+//! dumb streaming from message, static version
+void nPBDescriptorBase::StreamFromStatic( nMessage & in, Message & out  )
 {
-    // strip protocol buffer flag from message descriptor
-    out.descriptor &= ~protoBufFlag;
+    // try to determine suitable descriptor
+    nPBDescriptorBase const * embedded = descriptorsByName[ DetermineName( out ) ];
+    if ( embedded )
+    {
+        // found it, delegate
+        embedded->StreamFrom( in, out );
+    }
+    else
+    {
+#ifdef DEBUG
+        static bool warn = true;
+        if ( warn )
+        {
+            tERR_WARN( "Unknown buffer format, not sure if it'll get streamed correctly." );
+            warn = false;
+        }
+#endif
+        
+        // fallback to default
+        StreamFromDefault( in, out );
+    }
+}
 
+//! dumb streaming to message, static version
+void nPBDescriptorBase::StreamToStatic( Message const & in, nMessage & out )
+{
+    // try to determine suitable descriptor
+    nPBDescriptorBase const * embedded = descriptorsByName[ DetermineName( in ) ];
+    if ( embedded )
+    {
+        // found it, delegate
+        embedded->StreamTo( in, out );
+    }
+    else
+    {
+#ifdef DEBUG
+        static bool warn = true;
+        if ( warn )
+        {
+            tERR_WARN( "Unknown buffer format, not sure if it'll get streamed correctly." );
+            warn = false;
+        }
+#endif
+        
+        // fallback to default
+        StreamToDefault( in, out );
+    }
+}
+
+//! dumb streaming from message, static version
+void nPBDescriptorBase::StreamFromDefault( nMessage & in, Message & out  )
+{
+}
+
+//! dumb streaming to message, static version
+void nPBDescriptorBase::StreamToDefault( Message const & in, nMessage & out )
+{
     // get reflection interface
     const Reflection * reflection = in.GetReflection();
     const Descriptor * descriptor = in.GetDescriptor();
@@ -105,30 +158,8 @@ void nPBDescriptorBase::DoStreamTo( Message const & in, nMessage & out ) const
             out << reflection->REFL_GET( GetBool, in, field );
             break;
         case FieldDescriptor::CPPTYPE_MESSAGE:
-        {
-            // try to determine suitable descriptor
-            Message const & message = reflection->REFL_GET( GetMessage, in, field );
-            nPBDescriptorBase const * embedded = descriptorsByName[ DetermineName( message ) ];
-            if ( embedded )
-            {
-                // found it, delegate
-                embedded->StreamTo( message, out );
-            }
-            else
-            {
-#ifdef DEBUG
-                static bool warn = true;
-                if ( warn )
-                {
-                    tERR_WARN( "Unknown buffer format, not sure if it'll get streamed correctly." );
-                    warn = false;
-                }
-#endif
-
-                nPBDescriptorBase::DoStreamTo( message, out );
-            }
-        }
-        break;
+            StreamToStatic( reflection->REFL_GET( GetMessage, in, field ), out );
+            break;
 
         // explicitly unsupported:
         case FieldDescriptor::CPPTYPE_ENUM:
@@ -140,7 +171,45 @@ void nPBDescriptorBase::DoStreamTo( Message const & in, nMessage & out ) const
             break;
         }
     }
-   
+}   
+
+//! selective writing to message, either embedded or transformed
+void nPBDescriptorBase::WriteMessage( Message const & in, nMessage & out ) const
+{
+    if ( sn_protocolBuffers.Supported() )
+    {
+        // write the message in its native format
+        out << in;
+    }
+    else
+    {
+        // strip protocol buffer flag from message descriptor
+        out.descriptor &= ~protoBufFlag;
+
+        // transform the message to our legacy format
+        StreamTo( in, out );
+    }
+}
+
+//! selective reading message, either embedded or transformed
+void nPBDescriptorBase::ReadMessage( nMessage & in, Message & out  ) const
+{
+    if ( in.descriptor & protoBufFlag )
+    {
+        // message is a proper protocol buffer message
+        in >> out;
+    }
+    else
+    {
+        // transform from old format
+        StreamFrom( in, out );
+    }
+}
+
+//! dumb streaming to message
+void nPBDescriptorBase::DoStreamTo( Message const & in, nMessage & out ) const
+{
+    StreamToDefault( in, out );
 }
 
 //! dumb streaming from message
