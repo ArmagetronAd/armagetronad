@@ -417,16 +417,6 @@ public:
                 const char *name, bool acceptEvenIfNotLoggedIn = false);
 };
 
-extern nVersionFeature sn_protocolBuffers;
-
-// new descriptor for protocol buffer messages
-class nPBDescriptorBase: public nDescriptorBase
-{
-public:
-    nPBDescriptorBase(unsigned short identification,
-                      const char * name, bool acceptEvenIfNotLoggedIn = false);
-};
-
 // register the routine that gives the peer the server/client information
 // (game type, number of players online....)
 void RequestInfoHandler(nHandler *handle);

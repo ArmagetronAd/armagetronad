@@ -1890,28 +1890,22 @@ static nMessage* se_ServerControlledChatMessage(  eTeam const * team, ePlayerNet
 static nMessage* se_NewChatMessage( ePlayerNetID const * player, tString const & message )
 {
     tASSERT( player );
+
+    // clean up chat
+    std::ostringstream cleanup;
+    se_AppendChat( cleanup, message );
+
+    Engine::Chat chat;
+    chat.set_player_id( player->ID() );
+    chat.set_chat_line( cleanup.str() );
     
+    return nMessage::Transform( chat );
+    
+    // old code:
 
     nMessage *m=tNEW(nMessage) (chat_handler);
     m->Write( player->ID() );
     se_AppendChat( *m, message );
-
-    if( sn_protocolBuffers.Supported() )
-    {
-        Engine::Chat chat;
-        chat.set_player_id( player->ID() );
-        std::ostringstream cleanup;
-        se_AppendChat( cleanup, message );
-        chat.set_chat_line( cleanup.str() );
-
-        con << "Traditional size: " << m->DataLen() << "\n";
-        {
-            tJUST_CONTROLLED_PTR< nMessage > m2( m );
-        }
-
-        m = nMessage::Transform( chat );
-        con << "ProtoBuf size:    " << m->DataLen() << "\n";
-    }
 
     return m;
 }

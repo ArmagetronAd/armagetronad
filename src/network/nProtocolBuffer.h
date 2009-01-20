@@ -34,6 +34,34 @@ namespace google { namespace protobuf { class Message; } }
 
 #include "nNetwork.h"
 
+extern nVersionFeature sn_protocolBuffers;
+
+// new descriptor for protocol buffer messages
+class nPBDescriptorBase: public nDescriptorBase
+{
+public:
+    nPBDescriptorBase(unsigned short identification,
+                      const char * name, bool acceptEvenIfNotLoggedIn = false);
+
+    //! dumb streaming to message
+    inline void StreamTo( google::protobuf::Message const & in, nMessage & out ) const
+    {
+        DoStreamTo( in, out );
+    }
+
+    //! dumb streaming from message
+    inline void StreamFrom( nMessage & in, google::protobuf::Message & out  ) const
+    {
+        DoStreamFrom( in, out );
+    }
+private:
+    //! dumb streaming to message
+    virtual void DoStreamTo( google::protobuf::Message const & in, nMessage & out ) const;
+
+    //! dumb streaming from message
+    virtual void DoStreamFrom( nMessage & in, google::protobuf::Message & out ) const;
+};
+
 // read/write operators for protocol buffers
 nMessage& operator >> ( nMessage& m, google::protobuf::Message & buffer );
 nMessage& operator << ( nMessage& m, google::protobuf::Message const & buffer );
@@ -69,8 +97,17 @@ public:
     nMessage * Transform( MESSAGE const & message ) const
     {
         nMessage * ret = new nMessage( *this );
-        
-        *ret << message;
+
+        if ( sn_protocolBuffers.Supported() )
+        {
+            // write the message in its native format
+            *ret << message;
+        }
+        else
+        {
+            // transform the message to our legacy format
+            StreamTo( message, *ret );
+        }
 
         return ret;
     }
@@ -78,7 +115,10 @@ public:
     //! puts a puffer into a message
     static nMessage * TransformStatic( MESSAGE const & message )
     {
+        // if there are multiple instances of descriptors of the same message class,
+        // you can't pick one reliably.
         tASSERT( !multipleInstances_ );
+
         tASSERT( instance_ );
         return instance_->Transform( message );
     }

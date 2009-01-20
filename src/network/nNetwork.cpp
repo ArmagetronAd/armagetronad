@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConsole.h"
 #include "tDirectories.h"
 #include "nSocket.h"
+#include "nProtocolBuffer.h"
 #include "nConfig.h"
 #include "nKrawall.h"
 #include "tSysTime.h"

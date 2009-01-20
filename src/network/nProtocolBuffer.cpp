@@ -29,9 +29,77 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nProtocolBuffer.h"
 
 #include "google/protobuf/message.h"
+#include "google/protobuf/descriptor.h"
+
+using namespace google::protobuf;
+
+/*
+Not defined here, but in nNetwork.cpp for access to the right static variables and macros.
+
+nPBDescriptorBase::nPBDescriptorBase(unsigned short identification,
+                                     const char * name, 
+                                     bool acceptEvenIfNotLoggedIn )
+*/
+
+//! dumb streaming to message
+void nPBDescriptorBase::DoStreamTo( Message const & in, nMessage & out ) const
+{
+    // get reflection interface
+    const Reflection * reflection = in.GetReflection();
+    const Descriptor * descriptor = in.GetDescriptor();
+
+    // iterate over fields in ID order
+    int count = descriptor->field_count();
+    for( int i = 0; i < count; ++i )
+    {
+        FieldDescriptor const * field = descriptor->field( i );
+
+        if ( ! field->is_required() )
+        {
+            // only required fields get streamed
+            continue;
+        }
+
+        switch( field->cpp_type() )
+        {
+        case FieldDescriptor::CPPTYPE_INT32:
+            out << reflection->GetInt32( in, field );
+            break;
+        case FieldDescriptor::CPPTYPE_UINT32:
+            out.Write( reflection->GetUInt32( in, field ) );
+            break;
+        case FieldDescriptor::CPPTYPE_STRING:
+            out << reflection->GetString( in, field );
+            break;
+        case FieldDescriptor::CPPTYPE_MESSAGE:
+            // todo: call function over corresponding descriptor
+            nPBDescriptorBase::DoStreamTo( reflection->GetMessage( in, field ), out );
+            break;
+
+            // not yet implemented
+        case FieldDescriptor::CPPTYPE_FLOAT:
+        case FieldDescriptor::CPPTYPE_BOOL:
+        case FieldDescriptor::CPPTYPE_ENUM:
+
+            // explicitly unsupported:
+        case FieldDescriptor::CPPTYPE_INT64:
+        case FieldDescriptor::CPPTYPE_UINT64:
+        case FieldDescriptor::CPPTYPE_DOUBLE:
+        default:
+            tERR_ERROR( "Unsupported field type." );
+            break;
+        }
+    }
+   
+}
+
+//! dumb streaming from message
+void nPBDescriptorBase::DoStreamFrom( nMessage & in, Message & out ) const
+{
+}
 
 // read/write operators for protocol buffers
-nMessage& operator >> ( nMessage& m, google::protobuf::Message & buffer )
+nMessage& operator >> ( nMessage& m, Message & buffer )
 {
     // first, read into a string. protobufs ALWAYS take the whole rest of a
     // message. Luckily, they don't mind a single appended 0 byte.
@@ -57,7 +125,7 @@ nMessage& operator >> ( nMessage& m, google::protobuf::Message & buffer )
     return m;
 }
 
-nMessage& operator << ( nMessage& m, google::protobuf::Message const & buffer )
+nMessage& operator << ( nMessage& m, Message const & buffer )
 {
     // dump into plain stringstream
     std::stringstream rw;
