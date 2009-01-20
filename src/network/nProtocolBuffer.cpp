@@ -119,6 +119,73 @@ void nPBDescriptorBase::StreamToStatic( Message const & in, nMessage & out )
 //! dumb streaming from message, static version
 void nPBDescriptorBase::StreamFromDefault( nMessage & in, Message & out  )
 {
+    // get reflection interface
+    Reflection * reflection = out.GetReflection();
+    const Descriptor * descriptor = out.GetDescriptor();
+
+    // iterate over fields in ID order
+    int count = descriptor->field_count();
+    for( int i = 0; i < count; ++i )
+    {
+        FieldDescriptor const * field = descriptor->field( i );
+
+        if ( ! field->is_required() )
+        {
+            // only required fields get streamed
+            continue;
+        }
+
+        switch( field->cpp_type() )
+        {
+        case FieldDescriptor::CPPTYPE_INT32:
+        {
+            int32 value;
+            in >> value;
+            reflection->REFL_SET( SetInt32, out, field, value );
+        }
+        break;
+        case FieldDescriptor::CPPTYPE_UINT32:
+        {
+            unsigned short value;
+            in.Read( value );
+            reflection->REFL_SET( SetUInt32, out, field, value );
+        }
+        break;
+        case FieldDescriptor::CPPTYPE_STRING:
+        {
+            tString value;
+            in >> value;
+            reflection->REFL_SET( SetString, out, field, value );
+        }
+        break;
+        case FieldDescriptor::CPPTYPE_FLOAT:
+        {
+            REAL value;
+            in >> value;
+            reflection->REFL_SET( SetFloat, out, field, value );
+        }
+        break;
+        case FieldDescriptor::CPPTYPE_BOOL:
+        {
+            bool value;
+            in >> value;
+            reflection->REFL_SET( SetBool, out, field, value );
+        }
+        break;
+        case FieldDescriptor::CPPTYPE_MESSAGE:
+            StreamFromStatic( in, *reflection->REFL_GET( MutableMessage, out, field ) );
+            break;
+
+        // explicitly unsupported:
+        case FieldDescriptor::CPPTYPE_ENUM:
+        case FieldDescriptor::CPPTYPE_INT64:
+        case FieldDescriptor::CPPTYPE_UINT64:
+        case FieldDescriptor::CPPTYPE_DOUBLE:
+        default:
+            tERR_ERROR( "Unsupported field type." );
+            break;
+        }
+    }
 }
 
 //! dumb streaming to message, static version
@@ -215,6 +282,7 @@ void nPBDescriptorBase::DoStreamTo( Message const & in, nMessage & out ) const
 //! dumb streaming from message
 void nPBDescriptorBase::DoStreamFrom( nMessage & in, Message & out ) const
 {
+    StreamFromDefault( in, out );
 }
 
 // read/write operators for protocol buffers

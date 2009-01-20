@@ -587,15 +587,27 @@ void nDescriptorBase::HandleMessage(nMessage &message){
             message.descriptor ^= nPBDescriptorBase::protoBufFlag;
         }
 
+        // try default descriptor first
+
         // z-man: security check ( thanks, Luigi Auriemma! )
         if ( message.descriptor  < MAXDESCRIPTORS )
             nd=descriptors[message.descriptor];
 
-        if (nd){
+        // not found? Try a protocol buffer replacement.
+        if( !nd && descriptors == streamDescriptors )
+        {
+            nd = protoBufDescriptors[ message.descriptor ];
+        }
+
+        if (nd)
+        {
+            // handle message
             if ((message.SenderID() <= MAXCLIENTS) || nd->acceptWithoutLogin)
                 nd->DoHandleMessage(message);
         }
         else
+        {
+            // nope, error.
             if (!warned[message.Descriptor()]){
                 tOutput warn;
                 warn.SetTemplateParameter(1, message.Descriptor());
@@ -603,6 +615,7 @@ void nDescriptorBase::HandleMessage(nMessage &message){
                 con << warn;
                 warned[message.Descriptor()]=true;
             }
+        }
 #ifndef NOEXCEPT
     }
     catch(nIgnore const &){
