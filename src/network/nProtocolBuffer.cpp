@@ -258,6 +258,8 @@ void nPBDescriptorBase::WriteMessage( Message const & in, nMessage & out ) const
 
     if ( sn_protocolBuffers.Supported() )
     {
+        tASSERT( out.descriptor & protoBufFlag );
+
         // write the message in its native format
         out << in;
     }
