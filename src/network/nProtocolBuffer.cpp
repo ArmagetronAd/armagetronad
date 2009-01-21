@@ -307,23 +307,207 @@ void nPBDescriptorBase::ReadMessage( nMessage & in, Message & out  ) const
 //! @param b second message
 //! @param total total maximal size of message (must be zeroed before call)
 //! @param total difference of messages, between 0 and total (must be zeroed before call)
+//! @param removed is set to true if a has an element that is missing from b
 void nPBDescriptorBase::EstimateMessageDifference( Message const & a,
-                                                    Message const & b,
-                                                    int & total,
-                                                    int & difference )
+                                                   Message const & b,
+                                                   int & total,
+                                                   int & difference,
+                                                   bool & removed )
 {
-    tASSERT(0);
+    // get reflection interface
+    const Reflection * ra = a.GetReflection();
+    Descriptor const * descriptor  = a.GetDescriptor();
+    const Reflection * rb = a.GetReflection();
+    tASSERT( descriptor == b.GetDescriptor() );
+
+    // iterate over fields in ID order
+    int count = descriptor->field_count();
+    for( int i = 0; i < count; ++i )
+    {
+        FieldDescriptor const * field = descriptor->field( i );
+        tASSERT( field );
+
+        int weight = 0;
+        bool differ = false;
+
+        if ( field->label() == FieldDescriptor::LABEL_REPEATED )
+        {
+            continue;
+        }
+
+        switch( field->cpp_type() )
+        {
+#define COMPARE( getter, w ) weight = w; differ = ( ra->REFL_GET( getter, a, field ) != rb->REFL_GET( getter, b, field ) )
+        case FieldDescriptor::CPPTYPE_INT32:
+            COMPARE( GetInt32, 2 );
+            break;
+        case FieldDescriptor::CPPTYPE_UINT32:
+            COMPARE( GetUInt32, 2 );
+            break;
+        case FieldDescriptor::CPPTYPE_STRING:
+            COMPARE( GetString, 8 );
+            break;
+        case FieldDescriptor::CPPTYPE_FLOAT:
+            COMPARE( GetFloat, 4 );
+            break;
+        case FieldDescriptor::CPPTYPE_BOOL:
+            COMPARE( GetBool, 1 );
+            break;
+        case FieldDescriptor::CPPTYPE_ENUM:
+            COMPARE( GetEnum, 2 );
+            break;
+    case FieldDescriptor::CPPTYPE_INT64:
+            COMPARE( GetInt64, 4 );
+            break;
+        case FieldDescriptor::CPPTYPE_UINT64:
+            COMPARE( GetUInt64, 4 );
+            break;
+        case FieldDescriptor::CPPTYPE_DOUBLE:
+            COMPARE( GetDouble, 8 );
+            break;
+        case FieldDescriptor::CPPTYPE_MESSAGE:
+            EstimateMessageDifference( ra->REFL_GET( GetMessage, a, field ), rb->REFL_GET( GetMessage, b, field ), total, difference, removed );
+            break;
+        default:
+            tERR_ERROR( "Unsupported field type." );
+            break;
+#undef COMPARE
+        }
+    
+        // accounting
+        total += weight;
+        if ( differ || ra->REFL_GET( HasField, a, field ) != rb->REFL_GET( HasField, b, field ) )
+        {
+            difference += weight;
+        }
+
+        // check for missing fields
+        if ( ra->REFL_GET( HasField, a, field ) && ! rb->REFL_GET( HasField, b, field ) )
+        {
+            removed = true;
+        }
+    }
 }
 
 //! calculates the difference between two messages
 //! @param base base message
 //! @param derived second message
 //! @param diff target message for difference. All the fields where base and derived differ are set here, with the value taken from derived.
+//! @param copy if true, the first operation is a copy from derived to diff. If false, only elements equal in both derived and base are discarded from diff.
 void nPBDescriptorBase::DiffMessages( Message const & base,
                                       Message const & derived,
-                                      Message & diff )
+                                      Message & diff,
+                                      bool copy )
 {
-    tASSERT(0);
+    // get reflection interface
+    Reflection const * r_base     = base.GetReflection();
+    Descriptor const * descriptor = base.GetDescriptor();
+    Reflection const * r_derived  = derived.GetReflection();
+    REFLECTION_CONST *  r_diff     = diff.GetReflection();
+    tASSERT( descriptor == derived.GetDescriptor() );
+    tASSERT( descriptor == diff.GetDescriptor() );
+
+    // make copy
+    if ( copy )
+    {
+        diff.CopyFrom( derived );
+    }
+
+    // iterate over fields in ID order
+    int count = descriptor->field_count();
+    for( int i = 0; i < count; ++i )
+    {
+        FieldDescriptor const * field = descriptor->field( i );
+        tASSERT( field );
+
+        if ( field->label() == FieldDescriptor::LABEL_REPEATED )
+        {
+            continue;
+        }
+
+        if ( !r_base->REFL_GET( HasField, base, field ) )
+        {
+            continue;
+        }
+        
+        bool differ = false;
+        switch( field->cpp_type() )
+        {
+#define COMPARE( getter ) differ = ( r_base->REFL_GET( getter, base, field ) != r_derived->REFL_GET( getter, derived, field ) )
+        case FieldDescriptor::CPPTYPE_INT32:
+            COMPARE( GetInt32 );
+            break;
+        case FieldDescriptor::CPPTYPE_UINT32:
+            COMPARE( GetUInt32 );
+            break;
+        case FieldDescriptor::CPPTYPE_STRING:
+            COMPARE( GetString );
+            break;
+        case FieldDescriptor::CPPTYPE_FLOAT:
+            COMPARE( GetFloat );
+            break;
+        case FieldDescriptor::CPPTYPE_BOOL:
+            COMPARE( GetBool );
+            break;
+        case FieldDescriptor::CPPTYPE_ENUM:
+            COMPARE( GetEnum );
+            break;
+    case FieldDescriptor::CPPTYPE_INT64:
+            COMPARE( GetInt64 );
+            break;
+        case FieldDescriptor::CPPTYPE_UINT64:
+            COMPARE( GetUInt64 );
+            break;
+        case FieldDescriptor::CPPTYPE_DOUBLE:
+            COMPARE( GetDouble );
+            break;
+        case FieldDescriptor::CPPTYPE_MESSAGE:
+            DiffMessages( r_base->REFL_GET( GetMessage, base, field ), r_derived->REFL_GET( GetMessage, derived, field ), *r_diff->REFL_GET( MutableMessage, &diff, field ), false );
+            break;
+        default:
+            tERR_ERROR( "Unsupported field type." );
+            break;
+#undef COMPARE
+        }
+    
+        if ( differ )
+        {
+            // clear the field
+            r_diff->REFL_GET( ClearField, &diff, field );
+        }
+    }
+}
+
+//! @param message the message to rid of all repeated fields
+void nPBDescriptorBase::ClearRepeated( Message & message )
+{
+    // get reflection interface
+    Descriptor const * descriptor = message.GetDescriptor();
+    REFLECTION_CONST * reflection = message.GetReflection();
+
+    // iterate over fields in ID order
+    int count = descriptor->field_count();
+    for( int i = 0; i < count; ++i )
+    {
+        FieldDescriptor const * field = descriptor->field( i );
+        tASSERT( field );
+
+        if ( field->label() == FieldDescriptor::LABEL_REPEATED )
+        {
+            // clear the field
+            reflection->REFL_GET( ClearField, &message, field );
+            continue;
+        }
+
+        switch( field->cpp_type() )
+        {
+        case FieldDescriptor::CPPTYPE_MESSAGE:
+            ClearRepeated( *reflection->REFL_GET( MutableMessage, &message, field ) );
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 //! dumb streaming to message

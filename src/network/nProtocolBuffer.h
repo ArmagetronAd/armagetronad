@@ -106,12 +106,24 @@ public:
     static void EstimateMessageDifference( Message const & a,
                                            Message const & b,
                                            int & total,
-                                           int & difference );
+                                           int & difference,
+                                           bool & removed );
 
     //! calculates the difference between two messages
     static void DiffMessages( Message const & base,
                               Message const & derived,
-                              Message & diff );
+                              Message & diff,
+                              bool copy = true );
+
+    //! clears all repeated fields from a message
+    static void ClearRepeated( Message & message );
+
+    // the above three functions are supposed to be used for compression.
+    // the sender first uses EsimateMessageDifference to  find a suitable previous
+    // message  to reference, then calls Diffmessages in the two messages, sends
+    // the difference message and a reference to base over to the receiver.
+    // The receiver makes a copy of the base message, calls ClearRepeated onn it,
+    // then merges the difference message into it.
     
     // flag that marks protocol buffer messages
     static const unsigned short protoBufFlag = 0x8000;
