@@ -29,6 +29,7 @@
 					<Add library="..\..\..\winlibs\build\dist\libSDL_image.a"/>
 					<Add library="..\..\..\winlibs\build\dist\libSDL.a"/>
 					<Add library="..\..\..\winlibs\build\dist\libFTGL.a"/>
+					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf.a"/>
 					<Add library=".\libZThread.a"/>
 				</Linker>
 			</Target>
@@ -50,6 +51,7 @@
 					<Add library="..\..\..\winlibs\build\debug\libSDL_image.a"/>
 					<Add library="..\..\..\winlibs\build\debug\libSDL.a"/>
 					<Add library="..\..\..\winlibs\build\debug\libFTGL.a"/>
+					<Add library="..\..\..\winlibs\protobuf\vsprojects\libprotobuf_debug.a"/>
 					<Add library=".\libZThread_debug.a"/>
 				</Linker>
 			</Target>
@@ -113,7 +115,8 @@
 			<Add directory="..\..\..\winlibs\boost\includes"/>
 			<Add directory="..\..\src\thirdparty\scrap"/>
 			<Add directory="..\..\..\winlibs\ZThread\include"/>
-			<Add directory="..\..\src\thirdparty\utf8"/>
+			<Add directory="..\..\..\winlibs\protobuf\src"/>
+			<Add directory="..\..\src\protobuf"/>
 		</Compiler>
 		<Linker>
 			<Add library="libopengl32.a"/>
@@ -646,6 +649,20 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
+		<Unit filename="..\..\src\network\nProtocolBuffer.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\network\nProtocolBuffer.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
 		<Unit filename="..\..\src\network\nServerInfo.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
@@ -706,6 +723,50 @@
 		</Unit>
 		<Unit filename="..\..\src\network\nettest_main.cpp">
 			<Option compilerVar="CPP"/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\protobuf\ePlayer.pb.cc">
+			<Option compilerVar="CC"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\protobuf\ePlayer.pb.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\protobuf\ePlayer.proto">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\protobuf\nNetObject.pb.cc">
+			<Option compilerVar="CC"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\protobuf\nNetObject.pb.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\protobuf\nNetObject.proto">
+			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
 			<Option target="Win32 Release"/>
@@ -1507,20 +1568,6 @@
 			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tRecorderInternal.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tRectangle.cpp">
-			<Option compilerVar="CPP"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-			<Option target="Win32 Profile"/>
-		</Unit>
-		<Unit filename="..\..\src\tools\tRectangle.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -2574,7 +2621,7 @@
 		</Unit>
 		<Unit filename="..\..\src\win32\armagetron.rc">
 			<Option compilerVar="WINDRES"/>
-			<Option objectName="armagetronad\src\win32\armagetron.res"/>
+			<Option objectName="protocolbuffer-armagetronad-work\src\win32\armagetron.res"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
@@ -2617,7 +2664,7 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
-		<Unit filename="..\..\..\winlibs\sdl\src\main\win32\SDL_win32_main.c">
+		<Unit filename="..\..\..\winlibs\SDL\src\main\win32\SDL_win32_main.c">
 			<Option compilerVar="CC"/>
 			<Option target="Win32 Release"/>
 			<Option target="Win32 Debug"/>
