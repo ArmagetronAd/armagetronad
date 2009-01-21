@@ -2476,10 +2476,7 @@ static void rec_peer(unsigned int peer){
                 }
 #endif
             }
-	#ifndef NOEXCEPT
-            try
             {
-	#endif
                 static int recursionCount = 0;
                 ++recursionCount;
 
@@ -2498,17 +2495,7 @@ static void rec_peer(unsigned int peer){
                 {
                     nCallbackReceivedComplete::ReceivedComplete();
                 }
-
-	#ifndef NOEXCEPT
             }
-
-            catch(nKillHim const &)
-            {
-                con << "nKillHim signal caught.\n";
-                sn_DisconnectUser(peer, "$network_kill_error");
-            }
-	#endif
-
         }
     }
 }

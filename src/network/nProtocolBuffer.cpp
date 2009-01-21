@@ -28,10 +28,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nProtocolBuffer.h"
 #include "tConsole.h"
+#include "nNetObject.h"
 
 #include "google/protobuf/message.h"
 #include "google/protobuf/descriptor.h"
 
+#include "nNetObject.pb.h"
 
 using namespace google::protobuf;
 
@@ -335,4 +337,65 @@ nMessage& operator << ( nMessage& m, Message const & buffer )
     m.Finalize();
    
     return m;
+}
+
+nOPBDescriptorBase::~nOPBDescriptorBase()
+{}
+
+unsigned int nOPBDescriptorBase::GetObjectID ( Network::nNetObjectInit const & message )
+{
+    return message.object_id();
+}
+
+//! checks to run before creating a new object
+//! @return true if all is OK
+bool nOPBDescriptorBase::PreCheck( unsigned short id, nSenderInfo sender )
+{
+    if (sn_netObjectsOwner[id]!=sender.SenderID() || bool(sn_netObjects[id]))
+    {
+#ifdef DEBUG
+        st_Breakpoint();
+        if (!sn_netObjects[id])
+        {
+            con << "Netobject " << id << " is already reserved!\n";
+        }
+        else
+        {
+            con << "Netobject " << id << " is already defined!\n";
+        }
+#endif
+        if (sn_netObjectsOwner[id]!=sender.SenderID())
+        {
+            Cheater( sender.SenderID() );
+            nReadError();
+        }
+
+        return false;
+    }
+
+    // all OK
+    return true;
+}
+
+//! checks to run after creating a new object
+void nOPBDescriptorBase::PostCheck( nNetObject * object, nSenderInfo sender )
+{
+#ifdef DEBUG
+    /*
+      tString str;
+      n->PrintName( str );
+      con << "Received object " << str << "\n";
+    */
+#endif
+            
+    if ( sn_GetNetState()==nSERVER && !object->AcceptClientSync() )
+    {
+        object->Release();
+        Cheater( sender.SenderID() ); // cheater!
+    }
+    else if ( static_cast< nNetObject* >( sn_netObjects[ object->ID() ] ) != object )
+    {
+        // object was unable to be registered
+        object->Release(); // silently delete it.
+    }
 }

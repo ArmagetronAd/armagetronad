@@ -2111,9 +2111,12 @@ void nNetObject::WriteSync( Network::nNetObjectInit & ) const
 {
 }
 
+// nOPBDescriptor< nNetObject, Network::nNetObjectTotal > sn_pbdescriptor( 0 );
+
 //! returns the descriptor responsible for this class
 nOPBDescriptorBase const & nNetObject::DoGetDescriptor() const
 {
+    // return sn_pbdescriptor;
     nOPBDescriptorBase * ret = 0;
     return *ret;
 }

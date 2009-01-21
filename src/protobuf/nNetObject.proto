@@ -2,6 +2,8 @@ package Network;
 
 message nNetObjectInit
 {
+    // ID of the object
+    required uint32 object_id = 1;
 }
 
 message nNetObjectSync

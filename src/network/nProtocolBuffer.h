@@ -32,8 +32,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // protocol buffers forward declaration
 namespace google { namespace protobuf { class Message; } }
 
+namespace Network{ class nNetObjectInit; }
+
 #include "nNetwork.h"
 class nNetObject;
+class nNetObjectRegistrar;
 
 #include <map>
 
@@ -46,7 +49,7 @@ public:
     //! reference to the message, it contains all info
     nMessage const & envelope;
     
-    int Sender() const
+    int SenderID() const
     {
         return envelope.SenderID();
     }
@@ -217,7 +220,8 @@ nMessage * nMessage::Transform( MESSAGE const & message )
 class nOPBDescriptorBase
 {
 public:
-    ~nOPBDescriptorBase();
+    typedef google::protobuf::Message Message;
+    virtual ~nOPBDescriptorBase();
 
     //! creates an initialization message for an object
     inline nMessage * WriteInit( nNetObject const & object )
@@ -230,6 +234,21 @@ public:
     {
         return DoWriteSync( object );
     }
+protected:
+    // fetches the network object ID from a creation message
+    template< class MESSAGE >
+    static unsigned int GetObjectID( MESSAGE const & message )
+    {
+        return GetObjectID( message, message );
+    }
+
+    static unsigned int GetObjectID ( Network::nNetObjectInit const & message );
+
+    //! checks to run before creating a new object
+    static bool PreCheck( unsigned short id, nSenderInfo sender );
+
+    //! checks to run after creating a new object
+    static void PostCheck( nNetObject * object, nSenderInfo sender );
 private:
     //! creates an initialization message for an object
     virtual nMessage * DoWriteInit( nNetObject const & object ) = 0;
@@ -247,20 +266,34 @@ public:
     : nOPBDescriptorBase()
     , nPBDescriptor< MESSAGE >( identification, &HandleCreation, false )
     {}
-
 private:
     static void HandleCreation( MESSAGE & message, nSenderInfo const & sender )
     {
-        tASSERT(0);
+        unsigned short id = GetObjectID( message.init() );
+        
+        if( PreCheck( id, sender ) )
+        {
+            nNetObjectRegistrar registrar;
+            tJUST_CONTROLLED_PTR< OBJECT > n=new OBJECT( message.init(), message.sync(), sender );
+            n->InitAfterCreation();
+            n->ReadSync( message.sync(), sender );
+            n->Register( registrar );
+            
+            PostCheck( n, sender );
+        }
     }
 
     //! creates an initialization message for an object
-    virtual nMessage * DoWriteInit( nNetObject const & object ) = 0;
+    virtual nMessage * DoWriteInit( nNetObject const & object )
+    {
+        return 0;
+    }
 
     //! creates an sync message for an object
-    virtual nMessage * DoWriteSync( nNetObject const & object ) = 0;
-
-                                           
+    virtual nMessage * DoWriteSync( nNetObject const & object )
+    {
+        return 0;
+    }
 };
 
 #endif
