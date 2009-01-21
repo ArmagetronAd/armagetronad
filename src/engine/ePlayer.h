@@ -47,6 +47,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <set>
 #include <list>
 
+namespace Engine{ class ePlayerNetIDInit; class ePlayerNetIDSync; }
+
 #define PLAYER_CONFITEMS (30+MAX_INSTANT_CHAT)
 
 // call on commands that only work on the server; quit if it returns true
@@ -268,9 +270,22 @@ public:
     virtual bool 			AcceptClientSync() const;
     virtual void 			WriteSync(nMessage &m);
     virtual void 			ReadSync(nMessage &m);
-    virtual nDescriptor&	CreatorDescriptor() const;
     virtual void			InitAfterCreation();
     virtual bool			ClearToTransmit(int user) const;
+
+    //! creates a netobject form sync data
+    ePlayerNetID( Engine::ePlayerNetIDInit const &, Engine::ePlayerNetIDSync const &, nSenderInfo const & );
+    //! reads incremental sync data
+    void ReadSync( Engine::ePlayerNetIDSync const &, nSenderInfo const & );
+    //! writes initialization data
+    void WriteInit( Engine::ePlayerNetIDInit & );
+    //! writes sync data
+    void WriteSync( Engine::ePlayerNetIDSync & );
+
+private:
+    //! returns the descriptor responsible for this class
+    virtual nOPBDescriptorBase const * DoGetDescriptor() const;
+public:
 
     virtual void 			NewObject(){}        				// called when we control a new object
     virtual void 			RightBeforeDeath(int triesLeft){} 	// is called right before the vehicle gets destroyed.

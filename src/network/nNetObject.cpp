@@ -1240,8 +1240,38 @@ void nNetObject::ReadCreate(nMessage &m, int run )
     tASSERT( run > 0 );
 }
 
+static nMessage * CreationMessage( nNetObject & obj )
+{
+    nOPBDescriptorBase const * pbDescriptor = obj.GetDescriptor();
+    if ( pbDescriptor )
+    {
+        return pbDescriptor->WriteInit( obj );
+    }
+    else
+    {
+        nMessage * m = new nMessage( obj.CreatorDescriptor()) ;
+        
+#ifdef DEBUG
+        if (obj.ID() == sn_WatchNetID)
+            sn_WatchMessage = m;
+#endif
+        
+        obj.WriteAll(*m,true);
+
+        return m;
+    }
+}
+
 void nNetObject::WriteAll( nMessage & m, bool create )
 {
+    nOPBDescriptorBase const * pbDescriptor = GetDescriptor();
+    if ( !create && pbDescriptor )
+    {
+        // do it the pattern buffer way
+        pbDescriptor->WriteSync( *this, m );
+        return;
+    }
+
     int lastLen = -1;
     int run = 0;
 
@@ -1621,15 +1651,7 @@ void nNetObject::SyncAll(){
                             */
                             // send a creation message
 
-                            tJUST_CONTROLLED_PTR< nMessage > m=new nMessage
-                                                               (nos->CreatorDescriptor());
-
-#ifdef DEBUG
-                            if (s == sn_WatchNetID)
-                                sn_WatchMessage = m;
-#endif
-
-                            nos->WriteAll(*m,true);
+                            tJUST_CONTROLLED_PTR< nMessage > m = CreationMessage( *nos );
                             new nWaitForAckSync(m,user,s);
                             unsigned long id = m->MessageIDBig();
                             m->SendImmediately(user, false);
@@ -2101,9 +2123,7 @@ void nBandwidthTaskSync::DoExecute( nSendBuffer& buffer, nBandwidthControl& cont
 // executes whatever it has to do
 void nBandwidthTaskCreate::DoExecute( nSendBuffer& buffer, nBandwidthControl& control )
 {
-    tJUST_CONTROLLED_PTR< nMessage > message = tNEW( nMessage )( Object().CreatorDescriptor() );
-    Object().WriteAll( *message, true );
-
+    tJUST_CONTROLLED_PTR< nMessage > message = CreationMessage( Object() );
     buffer.AddMessage( *message, &control );
 }
 
@@ -2123,32 +2143,79 @@ nMachine & nNetObject::DoGetMachine( void ) const
     return nMachine::GetMachine( Owner() );
 }
 
-
+// was once pure virtual. with pbuffer, its a base implementation
+// throwing an assertion if called.
+nDescriptor& nNetObject::CreatorDescriptor() const
+{
+    tASSERT( 0 );
+    static nDescriptor dummy( 0, NULL, "bla" );
+    return dummy;
+}
 
 // protocol buffer stuff
 
 //! creates a netobject form sync data
-nNetObject::nNetObject( Network::nNetObjectInit const &, Network::nNetObjectSync const &, nSenderInfo const & )
+nNetObject::nNetObject( Network::nNetObjectInit const & init, Network::nNetObjectSync const &, nSenderInfo const & sender )
 {
-    tASSERT(0);
+    id = 0;
+    owner = 0;
+
+    syncListID_ = -1;
+
+    tASSERT( sn_Registrar );
+    nNetObjectRegistrar& registrar = *sn_Registrar;
+
+    createdLocally = false;
+
+    registrar.id = init.object_id();
+#ifdef DEBUG
+    //con << "Netobject " << id << " created on remote order.\n";
+    //  if (id == 383)
+    //  st_Breakpoint();
+#endif
+    owner = init.owner_id();;
+
+    // clients are only allowed to create self-owned objects
+    if ( sn_GetNetState() == nSERVER )
+    {
+        if ( owner != sender.SenderID() )
+        {
+            throw nKillHim();
+        }
+    }
+
+    registrar.object = this;
+    registrar.sender = sender.SenderID();
+
+    knowsAbout[sender.SenderID()].knowsAboutExistence=true;
+#ifdef DEBUG
+    // con << "Netobject " << id  << " created (remote order).\n";
+#endif
 }
 
 //! reads incremental sync data
-void nNetObject::ReadSync( Network::nNetObjectSync const &, nSenderInfo const & )
+void nNetObject::ReadSync( Network::nNetObjectSync const & sync, nSenderInfo const & sender )
 {
-    tASSERT(0);
+    if (sn_GetNetState()==nSERVER){
+        bool back=knowsAbout[sender.SenderID()].syncReq;
+        RequestSync(); // tell the others about it
+        knowsAbout[sender.SenderID()].syncReq=back;
+        // but not the sender of the message; he
+        // knows already.
+    }
 }
 
 //! writes initialization data
-void nNetObject::WriteInit( Network::nNetObjectInit & ) const
+void nNetObject::WriteInit( Network::nNetObjectInit & init ) const
 {
-    tASSERT(0);
+    init.set_object_id( id );
+    init.set_owner_id( owner );
 }
 
 //! writes sync data
-void nNetObject::WriteSync( Network::nNetObjectInit & ) const
+void nNetObject::WriteSync( Network::nNetObjectSync & ) const
 {
-    tASSERT(0);
+    // nothing to do.
 }
 
 // nOPBDescriptor< nNetObject, Network::nNetObjectTotal > sn_pbdescriptor( 0 );

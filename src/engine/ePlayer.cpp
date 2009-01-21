@@ -5371,45 +5371,48 @@ void ePlayerNetID::CreateVoter()
     }
 }
 
-void ePlayerNetID::WriteSync(nMessage &m){
+//! writes sync data
+void ePlayerNetID::WriteSync( Engine::ePlayerNetIDSync & sync )
+{
     lastSync=tSysTimeFloat();
-    nNetObject::WriteSync(m);
-    m.Write(r);
-    m.Write(g);
-    m.Write(b);
+    nNetObject::WriteSync( *sync.mutable_base() );
+
+    Engine::eColor & color = *sync.mutable_color();
+    color.set_r(r);
+    color.set_g(g);
+    color.set_b(b);
 
     // write ping charity; spectators get a fake (high) value
     if ( currentTeam || nextTeam )
-        m.Write(pingCharity);
+        sync.set_ping_charity( pingCharity );
     else
-        m.Write(1000);
+        sync.set_ping_charity( 1000 );
 
     if ( sn_GetNetState() == nCLIENT )
     {
-        m << nameFromClient_;
+        sync.set_player_name( nameFromClient_ );
     }
     else
     {
-        m << nameFromServer_;
+        sync.set_player_name( nameFromServer_ );
     }
 
-    //if(sn_GetNetState()==nSERVER)
-    m << ping;
+    sync.set_ping( ping );
 
     // pack chat, spectator and stealth status together
     unsigned short flags = ( chatting_ ? 1 : 0 ) | ( spectating_ ? 2 : 0 ) | ( stealth_ ? 4 : 0 );
-    m << flags;
+    sync.set_flags( flags );
 
-    m << score;
-    m << static_cast<unsigned short>(disconnected);
+    sync.set_score( score );
+    sync.set_disconnected( disconnected );
 
-    m << nextTeam;
-    m << currentTeam;
+    sync.set_next_team_id( PointerToID( nextTeam ) );
+    sync.set_current_team_id( PointerToID( currentTeam ) );
 
-    m << favoriteNumberOfPlayersPerTeam;
-    m << nameTeamAfterMe;
-    //TODO: Only update between rounds
-    m << teamname;
+    sync.set_favorite_number_of_players_per_team( favoriteNumberOfPlayersPerTeam );
+    sync.set_name_team_after_me( nameTeamAfterMe );
+    
+    sync.set_team_name( teamname );
 }
 
 // makes sure the passed string is not longer than the given maximum
@@ -5607,15 +5610,17 @@ static void se_OptionalNameFilters( tString & remoteName )
     }
 }
 
-void ePlayerNetID::ReadSync(nMessage &m){
+//! reads incremental sync data
+void ePlayerNetID::ReadSync( Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender )
+{
     // check whether this is the first sync
     bool firstSync = ( this->ID() == 0 );
 
-    nNetObject::ReadSync(m);
+    nNetObject::ReadSync( sync.base(), sender );
 
-    m.Read(r);
-    m.Read(g);
-    m.Read(b);
+    r = sync.color().r();
+    g = sync.color().g();
+    g = sync.color().b();
 
     if ( !se_bugColorOverflow )
     {
@@ -5625,7 +5630,7 @@ void ePlayerNetID::ReadSync(nMessage &m){
         Clamp(b);
     }
 
-    m.Read(pingCharity);
+    pingCharity = sync.ping_charity();
     sg_ClampPingCharity(pingCharity);
 
     // name as sent from the other end
@@ -5634,7 +5639,7 @@ void ePlayerNetID::ReadSync(nMessage &m){
     // name handling
     {
         // read and shorten name, but don't update it yet
-        m >> remoteName;
+        remoteName = sync.player_name();
 
         // filter
         se_OptionalNameFilters( remoteName );
@@ -5648,16 +5653,12 @@ void ePlayerNetID::ReadSync(nMessage &m){
         UpdateName();
     }
 
-    REAL p;
-    m >> p;
     if (sn_GetNetState()!=nSERVER)
-        ping=p;
+        ping = sync.ping();
 
-    //  if (!m.End())
     {
         // read chat and spectator status
-        unsigned short flags;
-        m >> flags;
+        unsigned short flags = sync.flags();
 
         if (Owner() != ::sn_myNetID)
         {
@@ -5673,32 +5674,24 @@ void ePlayerNetID::ReadSync(nMessage &m){
         }
     }
 
-    //  if (!m.End())
     {
         if(sn_GetNetState()!=nSERVER)
-            m >> score;
-        else{
-            int s;
-            m >> s;
-        }
+            score = sync.score();
     }
 
-    if (!m.End()){
-        unsigned short newdisc;
-        m >> newdisc;
-
+    if (sync.has_disconnected()){
         if (Owner() != ::sn_myNetID && sn_GetNetState()!=nSERVER)
-            disconnected = newdisc;
+            disconnected = sync.disconnected();
     }
 
-    if (!m.End())
+    if ( sync.has_next_team_id() )
     {
         if ( nSERVER != sn_GetNetState() )
         {
             eTeam *newCurrentTeam, *newNextTeam;
 
-            m >> newNextTeam;
-            m >> newCurrentTeam;
+            IDToPointer( sync.next_team_id()   , newNextTeam    );
+            IDToPointer( sync.current_team_id(), newCurrentTeam );
 
             // update team
             tJUST_CONTROLLED_PTR< eTeam > oldTeam( currentTeam );
@@ -5723,19 +5716,14 @@ void ePlayerNetID::ReadSync(nMessage &m){
                 oldTeam->UpdateProperties();
             }
         }
-        else
-        {
-            eTeam* t;
-            m >> t;
-            m >> t;
-        }
 
-        m >> favoriteNumberOfPlayersPerTeam;
-        m >> nameTeamAfterMe;
+        favoriteNumberOfPlayersPerTeam = sync.favorite_number_of_players_per_team();
+        nameTeamAfterMe = sync.name_team_after_me();
     }
-    if (!m.End())
+
+    if( sync.has_team_name() )
     {
-        m >> teamname;
+        teamname = sync.team_name();
     }
     // con << "Player info updated.\n";
 
@@ -5764,16 +5752,70 @@ void ePlayerNetID::ReadSync(nMessage &m){
 
         RequestSync();
     }
-
 }
 
+//! creates a netobject form sync data
+ePlayerNetID::ePlayerNetID( Engine::ePlayerNetIDInit const & init, Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender )
+: nNetObject(init.base(), sync.base(), sender ),listID(-1), teamListID(-1)
+ , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings )
+{
+    // default access level
+    lastAccessLevel = tAccessLevel_Default;
 
-nNOInitialisator<ePlayerNetID> ePlayerNetID_init(201,"ePlayerNetID");
+    greeted     =false;
+    chatting_   =false;
+    spectating_ =false;
+    stealth_    =false;
+    disconnected=false;
+    suspended_  = 0;
+    chatFlags_  =0;
 
-nDescriptor &ePlayerNetID::CreatorDescriptor() const{
-    return ePlayerNetID_init;
+    r = g = b = 15;
+
+    nameTeamAfterMe = false;
+    teamname = "";
+
+    lastSaid.SetLen(12);
+    lastSaidTimes.SetLen(12);
+
+    pID=-1;
+    se_PlayerNetIDs.Add(this,listID);
+    object=NULL;
+    ping=sn_Connections[sender.SenderID()].ping;
+    lastSync=tSysTimeFloat();
+
+    loginWanted = false;
+
+    score=0;
+    lastScore_=IMPOSSIBLY_LOW_SCORE;
+    // rubberstatus=0;
 }
 
+//! writes initialization data
+void ePlayerNetID::WriteInit( Engine::ePlayerNetIDInit & init )
+{
+    // just delegate
+    nNetObject::WriteInit( *init.mutable_base() );
+}
+
+static nOPBDescriptor< ePlayerNetID, Engine::ePlayerNetIDTotal > se_pbdescriptor( 201 );
+// nNOInitialisator<ePlayerNetID> ePlayerNetID_init(201,"ePlayerNetID");
+
+//! returns the descriptor responsible for this class
+nOPBDescriptorBase const * ePlayerNetID::DoGetDescriptor() const
+{
+    return & se_pbdescriptor;
+}
+
+void ePlayerNetID::ReadSync(nMessage &m){
+    se_pbdescriptor.ReadSync( *this, m );
+    return;
+}
+
+void ePlayerNetID::WriteSync(nMessage &m){
+    se_pbdescriptor.WriteSync( *this, m );
+    return;
+}
 
 
 void ePlayerNetID::ControlObject(eNetGameObject *c){

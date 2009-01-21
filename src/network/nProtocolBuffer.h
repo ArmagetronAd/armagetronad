@@ -224,19 +224,19 @@ public:
     virtual ~nOPBDescriptorBase();
 
     //! creates an initialization message for an object
-    inline nMessage * WriteInit( nNetObject const & object ) const
+    inline nMessage * WriteInit( nNetObject & object ) const
     {
         return DoWriteInit( object );
     }
 
-    //! creates an sync message for an object
-    inline nMessage * WriteSync( nNetObject const & object ) const
+    //! writes sync message
+    inline void WriteSync( nNetObject & object, nMessage & message ) const
     {
-        return DoWriteSync( object );
+        return DoWriteSync( object, message );
     }
 
     //! reads a sync message
-    inline void ReadSync( nNetObject const & object, nMessage & envelope ) const
+    inline void ReadSync( nNetObject & object, nMessage & envelope ) const
     {
         return DoReadSync( object, envelope );
     }
@@ -245,7 +245,7 @@ protected:
     template< class MESSAGE >
     static unsigned int GetObjectID( MESSAGE const & message )
     {
-        return GetObjectID( message, message );
+        return GetObjectID( message.base() );
     }
 
     static unsigned int GetObjectID ( Network::nNetObjectInit const & message );
@@ -257,13 +257,13 @@ protected:
     static void PostCheck( nNetObject * object, nSenderInfo sender );
 private:
     //! creates an initialization message for an object
-    virtual nMessage * DoWriteInit( nNetObject const & object ) const = 0;
+    virtual nMessage * DoWriteInit( nNetObject & object ) const = 0;
 
-    //! creates an sync message for an object
-    virtual nMessage * DoWriteSync( nNetObject const & object ) const = 0;
+    //! writes a sync message
+    virtual void DoWriteSync( nNetObject & object, nMessage & message ) const = 0;
 
     //! reads a sync message
-    virtual void DoReadSync( nNetObject const & object, nMessage & envelope ) const = 0;
+    virtual void DoReadSync( nNetObject & object, nMessage & envelope ) const = 0;
 };
 
 //! specialization of descriptor for each network object class
@@ -276,6 +276,9 @@ public:
     , nPBDescriptor< MESSAGE >( identification, &HandleCreation, false )
     {}
 private:
+    // template message
+    static const MESSAGE prototype;
+
     static void HandleCreation( MESSAGE & message, nSenderInfo const & sender )
     {
         unsigned short id = GetObjectID( message.init() );
@@ -292,25 +295,73 @@ private:
         }
     }
 
-    //! creates an initialization message for an object
-    virtual nMessage * DoWriteInit( nNetObject const & object ) const
+    //! writes sync, true work
+    template< class SYNC >
+    void DoWriteSync( nNetObject & object, nMessage & message, SYNC const & ) const
     {
-        tASSERT(0);
-        return 0;
+        // cast to correct type
+        tASSERT( dynamic_cast< OBJECT * >( &object ) );
+        OBJECT & cast = static_cast< OBJECT & >( object );
+
+        // write sync
+        SYNC sync;
+        cast.WriteSync( sync );
+
+        // transfer sync to message
+        WriteMessage( sync, message );
+    }
+
+    //! reads sync, true work
+    template< class SYNC >
+    void DoReadSync( nNetObject & object, nMessage & envelope, SYNC const & ) const
+    {
+        // cast to correct type
+        tASSERT( dynamic_cast< OBJECT * >( &object ) );
+        OBJECT & cast = static_cast< OBJECT & >( object );
+
+        // read sync from message
+        SYNC sync;
+
+        // transfer sync to message
+        ReadMessage( envelope, sync );
+
+        // delegate to object
+        cast.ReadSync( sync, nSenderInfo( envelope ) );
+    }
+
+    //! creates an initialization message for an object
+    virtual nMessage * DoWriteInit( nNetObject & object ) const
+    {
+        // init message
+        MESSAGE message;
+        
+        // object cast to correct type
+        tASSERT( dynamic_cast< OBJECT * >( &object ) );
+        OBJECT & cast = static_cast< OBJECT & >( object );
+        
+        // work
+        cast.WriteInit( *message.mutable_init() );
+        cast.WriteSync( *message.mutable_sync() );
+        
+        // and transform
+        return nMessage::Transform( message );
     }
 
     //! creates an sync message for an object
-    virtual nMessage * DoWriteSync( nNetObject const & object ) const
+    virtual void DoWriteSync( nNetObject & object, nMessage & message ) const
     {
-        tASSERT(0);
-        return 0;
+        DoWriteSync( object, message, prototype.sync() );
     }
 
     //! reads a sync message
-    virtual void DoReadSync( nNetObject const & object, nMessage & envelope ) const
+    virtual void DoReadSync( nNetObject & object, nMessage & envelope ) const
     {
-        tASSERT(0);
+        DoReadSync( object, envelope, prototype.sync() );
     }
 };
+
+// template message
+template< class OBJECT, class MESSAGE >
+const MESSAGE nOPBDescriptor< OBJECT, MESSAGE >::prototype;
 
 #endif

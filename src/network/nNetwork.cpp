@@ -402,6 +402,7 @@ void sn_UpdateCurrentVersion()
 
     if ( sn_GetNetState() == nCLIENT )
     {
+        version.Merge( version, sn_Connections[0].version );
         sn_currentVersion = version;
         return;
     }
@@ -2144,6 +2145,11 @@ void nMessage::SendImmediately(int peer,bool ack){
     }
 
 #ifdef DEBUG
+    if (descriptor>MAXDESCRIPTORS && !sn_protocolBuffers.Supported( peer ) )
+    {
+        st_Breakpoint();
+    }
+
     /*
     if (descriptor>1)
       con << "SMT " << descriptor << "\n";

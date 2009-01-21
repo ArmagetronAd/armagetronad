@@ -4,10 +4,14 @@ message nNetObjectInit
 {
     // ID of the object
     required uint32 object_id = 1;
+
+    // ID of the owner
+    required uint32 owner_id = 2;
 }
 
 message nNetObjectSync
 {
+    // no data here.
 }
 
 message nNetObjectTotal

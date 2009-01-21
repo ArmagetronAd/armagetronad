@@ -151,7 +151,7 @@ public:
 
     inline nMachine & GetMachine() const;  //!< returns the machine this object belongs to
 
-    virtual nDescriptor& CreatorDescriptor() const=0;
+    virtual nDescriptor& CreatorDescriptor() const;
 
     nNetObject(int owner=-1); // sn_netObjects can be normally created on the server
     // and will
@@ -251,6 +251,49 @@ public:
     void WriteAll( nMessage & m, bool create );
     void ReadAll ( nMessage & m, bool create );
 
+    // turn an ID into an object pointer
+    template<class T>  static void IDToPointer( unsigned short id, T * & p )
+    {
+        if ( 0 != id )
+            p = dynamic_cast<T*> ( nNetObject::ObjectDangerous(id) );
+        else
+            p = NULL;
+    }
+
+    template<class T> void IDToPointer( unsigned short id, tControlledPTR<T>& p )
+    {
+        if ( 0 != id )
+            p = dynamic_cast<T*> ( nNetObject::ObjectDangerous(id) );
+        else
+            p = NULL;
+    }
+
+    // turn an object pointer int an ID
+    template<class T>  static unsigned short PointerToID( T * p )
+    {
+        if ( !p )
+        {
+            return 0;
+        }
+        else
+        {
+            return p->ID();
+        }
+    }
+
+    // turn an object pointer int an ID
+    template<class T>  static unsigned short PointerToID( tControlledPTR<T> const & p )
+    {
+        if ( !p )
+        {
+            return 0;
+        }
+        else
+        {
+            return p->ID();
+        }
+    }
+
     // even better new stuff: protocol buffers. The functions are non-virtual; they
     // get called over the descriptor:
     //! creates a netobject form sync data
@@ -260,7 +303,7 @@ public:
     //! writes initialization data
     void WriteInit( Network::nNetObjectInit & ) const;
     //! writes sync data
-    void WriteSync( Network::nNetObjectInit & ) const;
+    void WriteSync( Network::nNetObjectSync & ) const;
 
     //! returns the descriptor responsible for this class
     inline nOPBDescriptorBase const * GetDescriptor() const { return DoGetDescriptor(); }
@@ -428,16 +471,13 @@ public:
     nNOInitialisator(unsigned short id,const char *name):nDescriptor(id,Init,name){};
 };
 
-// Z-Man: operators moved here from nNetwork.h. TODO: make them nonmember operators if possible.
+// nonmember pointer read operators.
 template<class T> nMessage& operator >> ( nMessage& m, T*& p )
 {
     unsigned short id;
     m.Read(id);
 
-    if ( 0 != id )
-        p = dynamic_cast<T*> ( nNetObject::ObjectDangerous(id) );
-    else
-        p = NULL;
+    nNetObject::IDToPointer( id, p );
 
     return m;
 }
@@ -447,10 +487,7 @@ template<class T> nMessage& operator >> ( nMessage& m, tControlledPTR<T>& p )
     unsigned short id;
     m.Read(id);
 
-    if ( 0 != id )
-        p = dynamic_cast<T*> ( nNetObject::ObjectDangerous(id) );
-    else
-        p = NULL;
+    nNetObject::IDToPointer( id, p );
 
     return m;
 }

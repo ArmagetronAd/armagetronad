@@ -80,11 +80,11 @@ void nPBDescriptorBase::StreamFromStatic( nMessage & in, Message & out  )
     }
     else
     {
-#ifdef DEBUG
+#ifdef DEBUG_X
         static bool warn = true;
         if ( warn )
         {
-            tERR_WARN( "Unknown buffer format, not sure if it'll get streamed correctly." );
+            tERR_WARN( "Unknown buffer format " << DetermineName( out ) << ", not sure if it'll get streamed correctly." );
             warn = false;
         }
 #endif
@@ -106,7 +106,7 @@ void nPBDescriptorBase::StreamToStatic( Message const & in, nMessage & out )
     }
     else
     {
-#ifdef DEBUG
+#ifdef DEBUG_X
         static bool warn = true;
         if ( warn )
         {
@@ -132,6 +132,11 @@ void nPBDescriptorBase::StreamFromDefault( nMessage & in, Message & out  )
     for( int i = 0; i < count; ++i )
     {
         FieldDescriptor const * field = descriptor->field( i );
+
+        if ( in.End() )
+        {
+            break;
+        }
 
         if ( ! field->is_required() )
         {
@@ -247,6 +252,10 @@ void nPBDescriptorBase::StreamToDefault( Message const & in, nMessage & out )
 //! selective writing to message, either embedded or transformed
 void nPBDescriptorBase::WriteMessage( Message const & in, nMessage & out ) const
 {
+#ifdef DEBUG
+    in.CheckInitialized();
+#endif
+
     if ( sn_protocolBuffers.Supported() )
     {
         // write the message in its native format

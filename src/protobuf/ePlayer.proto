@@ -15,12 +15,35 @@ message Chat
 
 message ePlayerNetIDInit
 {
+    // base class init data
     required Network.nNetObjectInit base = 1;
+}
+
+// color used by players. values go from 0 to 15.
+message eColor
+{
+    required uint32 r = 1;
+    required uint32 g = 2;
+    required uint32 b = 3;
 }
 
 message ePlayerNetIDSync
 {
+    // base class sync data
     required Network.nNetObjectSync base = 1;
+
+    required eColor color           = 2;
+    required uint32 ping_charity    = 3;
+    required string player_name     = 4;
+    required float  ping            = 5;
+    required uint32 flags           = 6;
+    required sint32 score           = 7;
+    required bool   disconnected    = 8;
+    required uint32 next_team_id    = 9;
+    required uint32 current_team_id = 10;
+    required int32  favorite_number_of_players_per_team = 11;
+    required bool   name_team_after_me = 12;
+    required string team_name       = 13;
 }
 
 message ePlayerNetIDTotal
