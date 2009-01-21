@@ -254,7 +254,20 @@ void nPBDescriptorBase::WriteMessage( Message const & in, nMessage & out ) const
 {
 #ifdef DEBUG
     in.CheckInitialized();
+
+#ifdef DEBUG_X
+    {
+        // stats
+        nMessage a( *this ), b( *this );
+        a << in;
+        StreamTo( in, b );
+        con << "Old size: "  << b.DataLen()*2
+            << ",new size: " << a.DataLen()*2
+            << ".\n";
 #endif
+    }
+#endif
+    
 
     if ( sn_protocolBuffers.Supported() )
     {
