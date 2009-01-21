@@ -64,3 +64,4 @@ aa_config.h.in
 *.depend
 .objs
 ./build
+.objs_release
