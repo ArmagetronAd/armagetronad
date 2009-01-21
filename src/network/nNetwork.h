@@ -603,6 +603,8 @@ public:
     nMessage& operator<< (const bool &x);
     nMessage& operator>> (bool &x);
 
+    /*
+    // nobody is using those. phew.
     template <class T> nMessage& operator<<(const tArray<T>& a)
     {
         unsigned short len = a.Len();
@@ -623,6 +625,7 @@ public:
 
         return *this;
     }
+    */
 
     template<class T> nMessage& operator << (const T* p)
     {

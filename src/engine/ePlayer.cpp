@@ -5377,7 +5377,7 @@ void ePlayerNetID::WriteSync( Engine::ePlayerNetIDSync & sync )
     lastSync=tSysTimeFloat();
     nNetObject::WriteSync( *sync.mutable_base() );
 
-    Engine::eColor & color = *sync.mutable_color();
+    Engine::ePlayerColor & color = *sync.mutable_color();
     color.set_r(r);
     color.set_g(g);
     color.set_b(b);
