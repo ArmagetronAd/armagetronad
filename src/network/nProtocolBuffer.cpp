@@ -132,16 +132,17 @@ void nPBDescriptorBase::StreamFromDefault( nMessage & in, Message & out  )
     for( int i = 0; i < count; ++i )
     {
         FieldDescriptor const * field = descriptor->field( i );
+        tASSERT( field );
 
         if ( in.End() )
         {
             break;
         }
 
-        if ( ! field->is_required() )
+        if ( FieldDescriptor::kLastReservedNumber < field->number() )
         {
-            // only required fields get streamed
-            continue;
+            // end marker
+            break;
         }
 
         switch( field->cpp_type() )
@@ -210,10 +211,10 @@ void nPBDescriptorBase::StreamToDefault( Message const & in, nMessage & out )
     {
         FieldDescriptor const * field = descriptor->field( i );
 
-        if ( ! field->is_required() )
+        if ( FieldDescriptor::kLastReservedNumber < field->number() )
         {
-            // only required fields get streamed
-            continue;
+            // end marker
+            break;
         }
 
         switch( field->cpp_type() )

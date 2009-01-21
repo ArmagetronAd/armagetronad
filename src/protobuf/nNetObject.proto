@@ -3,19 +3,25 @@ package Network;
 message nNetObjectInit
 {
     // ID of the object
-    required uint32 object_id = 1;
+    optional uint32 object_id = 1;
 
     // ID of the owner
-    required uint32 owner_id = 2;
+    optional uint32 owner_id = 2;
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
 }
 
 message nNetObjectSync
 {
     // no data here.
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
 }
 
 message nNetObjectTotal
 {
-    required nNetObjectInit init = 1;
-    required nNetObjectSync sync = 2;
+    optional nNetObjectInit init = 1;
+    optional nNetObjectSync sync = 2;
 }

@@ -10,44 +10,56 @@ message Chat
     optional uint32 player_id = 1;
     
     // the fully formatted chat string
-    required string chat_line = 2;  
+    optional string chat_line = 2;  
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
 }
 
 message ePlayerNetIDInit
 {
     // base class init data
-    required Network.nNetObjectInit base = 1;
+    optional Network.nNetObjectInit base = 1;
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
 }
 
 // color used by players. values go from 0 to 15.
 message ePlayerColor
 {
-    required uint32 r = 1;
-    required uint32 g = 2;
-    required uint32 b = 3;
+    optional uint32 r = 1;
+    optional uint32 g = 2;
+    optional uint32 b = 3;
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
 }
 
 message ePlayerNetIDSync
 {
     // base class sync data
-    required Network.nNetObjectSync base = 1;
+    optional Network.nNetObjectSync base = 1;
 
-    required ePlayerColor color     = 2;
-    required uint32 ping_charity    = 3;
-    required string player_name     = 4;
-    required float  ping            = 5;
-    required uint32 flags           = 6;
-    required sint32 score           = 7;
-    required bool   disconnected    = 8;
-    required uint32 next_team_id    = 9;
-    required uint32 current_team_id = 10;
-    required int32  favorite_number_of_players_per_team = 11;
-    required bool   name_team_after_me = 12;
-    required string team_name       = 13;
+    optional ePlayerColor color     = 2;
+    optional uint32 ping_charity    = 3;
+    optional string player_name     = 4;
+    optional float  ping            = 5;
+    optional uint32 flags           = 6;
+    optional sint32 score           = 7;
+    optional bool   disconnected    = 8;
+    optional uint32 next_team_id    = 9;
+    optional uint32 current_team_id = 10;
+    optional int32  favorite_number_of_players_per_team = 11;
+    optional bool   name_team_after_me = 12;
+    optional string team_name       = 13;
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
 }
 
 message ePlayerNetIDTotal
 {
-    required ePlayerNetIDInit init = 1;
-    required ePlayerNetIDSync sync = 2;
+    optional ePlayerNetIDInit init = 1;
+    optional ePlayerNetIDSync sync = 2;
 }
