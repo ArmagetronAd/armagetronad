@@ -254,8 +254,9 @@ void nPBDescriptorBase::WriteMessage( Message const & in, nMessage & out ) const
 {
 #ifdef DEBUG
     in.CheckInitialized();
+#endif
 
-#ifdef DEBUG_X
+#ifdef DEBUG
     {
         // stats
         nMessage a( *this ), b( *this );
@@ -264,7 +265,6 @@ void nPBDescriptorBase::WriteMessage( Message const & in, nMessage & out ) const
         con << "Old size: "  << b.DataLen()*2
             << ",new size: " << a.DataLen()*2
             << ".\n";
-#endif
     }
 #endif
     
