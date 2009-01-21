@@ -263,10 +263,10 @@ public:
     void WriteSync( Network::nNetObjectInit & ) const;
 
     //! returns the descriptor responsible for this class
-    inline nOPBDescriptorBase const & GetDescriptor() const { return DoGetDescriptor(); }
+    inline nOPBDescriptorBase const * GetDescriptor() const { return DoGetDescriptor(); }
 private:
     //! returns the descriptor responsible for this class
-    virtual nOPBDescriptorBase const & DoGetDescriptor() const;
+    virtual nOPBDescriptorBase const * DoGetDescriptor() const;
 
     // control functions:
 

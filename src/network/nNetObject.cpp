@@ -1467,9 +1467,6 @@ public:
     }
 };
 
-
-
-
 static void net_sync_handler(nMessage &m){
     unsigned short id;
     m.Read(id);
@@ -1487,15 +1484,54 @@ static void net_sync_handler(nMessage &m){
             tERR_ERROR("sync should only be called client-side!");
 #endif
         }
-        else if (obj->SyncIsNew(m)){
-            m.Reset();
-            m.Read(id);
-            obj->ReadAll(m, false);
+        else
+        {
+            nOPBDescriptorBase const * pbDescriptor = obj->GetDescriptor();
+            if ( pbDescriptor )
+            {
+                // protocol buffer capable
+                pbDescriptor->ReadSync( *obj, m );
+            }
+            else
+            {
+                // plain old streaming code
+                if (obj->SyncIsNew(m))
+                {
+                    m.Reset();
+                    m.Read(id);
+                    obj->ReadAll(m, false);
+                }
+            }
         }
     }
 }
 
-static nDescriptor net_sync(24,net_sync_handler,"net_sync");
+// static nDescriptor net_sync(24,net_sync_handler,"net_sync");
+
+// protocol buffer sync descriptor. Needs some special care
+// because we need to read the object ID before we know the message type.
+class nPBSyncDescriptor: public nPBDescriptorBase
+{
+public:
+    nPBSyncDescriptor(): nPBDescriptorBase( 24, Network::nNetObjectSync() )
+    {
+    }
+
+    //! delegates message handling
+    virtual void DoHandleMessage( nMessage & envelope )
+    {
+        // delegate
+        net_sync_handler( envelope );
+    }
+
+    //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
+    virtual Message * DoCreate() const
+    {
+        return new Network::nNetObjectSync;
+    }
+};
+
+static nPBSyncDescriptor net_sync;
 
 bool nNetObject::AcceptClientSync() const{
     return false;
@@ -2094,30 +2130,32 @@ nMachine & nNetObject::DoGetMachine( void ) const
 //! creates a netobject form sync data
 nNetObject::nNetObject( Network::nNetObjectInit const &, Network::nNetObjectSync const &, nSenderInfo const & )
 {
+    tASSERT(0);
 }
 
 //! reads incremental sync data
 void nNetObject::ReadSync( Network::nNetObjectSync const &, nSenderInfo const & )
 {
+    tASSERT(0);
 }
 
 //! writes initialization data
 void nNetObject::WriteInit( Network::nNetObjectInit & ) const
 {
+    tASSERT(0);
 }
 
 //! writes sync data
 void nNetObject::WriteSync( Network::nNetObjectInit & ) const
 {
+    tASSERT(0);
 }
 
 // nOPBDescriptor< nNetObject, Network::nNetObjectTotal > sn_pbdescriptor( 0 );
 
 //! returns the descriptor responsible for this class
-nOPBDescriptorBase const & nNetObject::DoGetDescriptor() const
+nOPBDescriptorBase const * nNetObject::DoGetDescriptor() const
 {
-    // return sn_pbdescriptor;
-    nOPBDescriptorBase * ret = 0;
-    return *ret;
+    return 0;
 }
 

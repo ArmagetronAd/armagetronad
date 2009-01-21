@@ -224,15 +224,21 @@ public:
     virtual ~nOPBDescriptorBase();
 
     //! creates an initialization message for an object
-    inline nMessage * WriteInit( nNetObject const & object )
+    inline nMessage * WriteInit( nNetObject const & object ) const
     {
         return DoWriteInit( object );
     }
 
     //! creates an sync message for an object
-    inline nMessage * WriteSync( nNetObject const & object )
+    inline nMessage * WriteSync( nNetObject const & object ) const
     {
         return DoWriteSync( object );
+    }
+
+    //! reads a sync message
+    inline void ReadSync( nNetObject const & object, nMessage & envelope ) const
+    {
+        return DoReadSync( object, envelope );
     }
 protected:
     // fetches the network object ID from a creation message
@@ -251,10 +257,13 @@ protected:
     static void PostCheck( nNetObject * object, nSenderInfo sender );
 private:
     //! creates an initialization message for an object
-    virtual nMessage * DoWriteInit( nNetObject const & object ) = 0;
+    virtual nMessage * DoWriteInit( nNetObject const & object ) const = 0;
 
     //! creates an sync message for an object
-    virtual nMessage * DoWriteSync( nNetObject const & object ) = 0;
+    virtual nMessage * DoWriteSync( nNetObject const & object ) const = 0;
+
+    //! reads a sync message
+    virtual void DoReadSync( nNetObject const & object, nMessage & envelope ) const = 0;
 };
 
 //! specialization of descriptor for each network object class
@@ -284,15 +293,23 @@ private:
     }
 
     //! creates an initialization message for an object
-    virtual nMessage * DoWriteInit( nNetObject const & object )
+    virtual nMessage * DoWriteInit( nNetObject const & object ) const
     {
+        tASSERT(0);
         return 0;
     }
 
     //! creates an sync message for an object
-    virtual nMessage * DoWriteSync( nNetObject const & object )
+    virtual nMessage * DoWriteSync( nNetObject const & object ) const
     {
+        tASSERT(0);
         return 0;
+    }
+
+    //! reads a sync message
+    virtual void DoReadSync( nNetObject const & object, nMessage & envelope ) const
+    {
+        tASSERT(0);
     }
 };
 
