@@ -35,6 +35,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class nObserver;
 
+class nSenderInfo;
+class nOPBDescriptorBase;
+namespace Network{ class nNetObjectInit; class nNetObjectSync; }
+
 // checks whether n is newer than old; if so, old is set to n and
 // true is returned.
 bool sn_Update(unsigned short &old,unsigned short n);
@@ -113,9 +117,6 @@ public:
 
     static nNetObject *ObjectDangerous(int i );
     // the same thin but returns NULL if the object is not yet available.
-    
-    // clears an eventually deleted object of the given ID out of the main lists
-    static void ClearDeleted( unsigned short ID );
 
     virtual void AddRef(); // call this every time you add a pointer
     // to this nNetObject from another nNetObject, so we know when it is
@@ -250,6 +251,23 @@ public:
     void WriteAll( nMessage & m, bool create );
     void ReadAll ( nMessage & m, bool create );
 
+    // even better new stuff: protocol buffers. The functions are non-virtual; they
+    // get called over the descriptor:
+    //! creates a netobject form sync data
+    nNetObject( Network::nNetObjectInit const &, Network::nNetObjectSync const &, nSenderInfo const & );
+    //! reads incremental sync data
+    void ReadSync( Network::nNetObjectSync const &, nSenderInfo const & );
+    //! writes initialization data
+    void WriteInit( Network::nNetObjectInit & ) const;
+    //! writes sync data
+    void WriteSync( Network::nNetObjectInit & ) const;
+
+    //! returns the descriptor responsible for this class
+    inline nOPBDescriptorBase const & GetDescriptor() const { return DoGetDescriptor(); }
+private:
+    //! returns the descriptor responsible for this class
+    virtual nOPBDescriptorBase const & DoGetDescriptor() const;
+
     // control functions:
 
 protected:
@@ -344,8 +362,6 @@ template<class T> class nNOInitialisator:public nDescriptor{
 
             unsigned short id=m.Data(0);
             //unsigned short owner=m.data(1);
-
-            nNetObject::ClearDeleted(id);
 
             if (sn_netObjectsOwner[id]!=m.SenderID() || bool(sn_netObjects[id]))
             {

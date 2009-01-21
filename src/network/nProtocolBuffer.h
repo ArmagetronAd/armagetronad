@@ -33,10 +33,28 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 namespace google { namespace protobuf { class Message; } }
 
 #include "nNetwork.h"
+class nNetObject;
 
 #include <map>
 
 extern nVersionFeature sn_protocolBuffers;
+
+//! extra information about the sender of a message
+struct nSenderInfo
+{
+public:
+    //! reference to the message, it contains all info
+    nMessage const & envelope;
+    
+    int Sender() const
+    {
+        return envelope.SenderID();
+    }
+    
+    explicit nSenderInfo( nMessage const & e )
+    : envelope( e )
+    {}
+};
 
 // new descriptor for protocol buffer messages
 class nPBDescriptorBase: public nDescriptorBase
@@ -47,6 +65,7 @@ public:
 
     nPBDescriptorBase(unsigned short identification,
                       Message const & prototype, bool acceptEvenIfNotLoggedIn = false);
+    ~nPBDescriptorBase();
 
     static std::string const & DetermineName( Message const & prototype );
 
@@ -74,7 +93,7 @@ public:
     //! selective reading message, either embedded or transformed
     void ReadMessage( nMessage & in, Message & out  ) const;
 
-    //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
+    //! creates a protocol buffer of the managed type. Needs to be deleted later.
     inline Message * Create() const
     {
         return DoCreate();
@@ -108,28 +127,11 @@ private:
 nMessage& operator >> ( nMessage& m, google::protobuf::Message & buffer );
 nMessage& operator << ( nMessage& m, google::protobuf::Message const & buffer );
 
-//! argument passed to protocol buffer handlers
-template< class MESSAGE >
-struct nReceivedProtocolBuffer
-{
-    //! the buffer itself
-    MESSAGE & content;
-
-    //! the network message it came in
-    nMessage & envelope;
-
-    // filling constructor
-    nReceivedProtocolBuffer( MESSAGE & c, nMessage & e )
-    : content(c), envelope(e)
-    {}
-};
-
 // templated version of protocol buffer messages
 template< class MESSAGE > 
 class nPBDescriptor: public nPBDescriptorBase
 {
-    typedef nReceivedProtocolBuffer< MESSAGE > HandlerArgument;
-    typedef void Handler( HandlerArgument & message );
+    typedef void Handler( MESSAGE & message, nSenderInfo const & sender );
 
     //! instance of this descriptor
     static nPBDescriptor * instance_;
@@ -150,8 +152,7 @@ class nPBDescriptor: public nPBDescriptorBase
         ReadMessage( envelope, protocolBuffer );
 
         // and delegate
-        HandlerArgument argument( protocolBuffer, envelope );
-        handler_( argument );
+        handler_( protocolBuffer, nSenderInfo( envelope ) );
     }
 
     //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
@@ -211,5 +212,55 @@ nMessage * nMessage::Transform( MESSAGE const & message )
 {
     return nPBDescriptor< MESSAGE >::TransformStatic( message );
 }
+
+// network object descriptors
+class nOPBDescriptorBase
+{
+public:
+    ~nOPBDescriptorBase();
+
+    //! creates an initialization message for an object
+    inline nMessage * WriteInit( nNetObject const & object )
+    {
+        return DoWriteInit( object );
+    }
+
+    //! creates an sync message for an object
+    inline nMessage * WriteSync( nNetObject const & object )
+    {
+        return DoWriteSync( object );
+    }
+private:
+    //! creates an initialization message for an object
+    virtual nMessage * DoWriteInit( nNetObject const & object ) = 0;
+
+    //! creates an sync message for an object
+    virtual nMessage * DoWriteSync( nNetObject const & object ) = 0;
+};
+
+//! specialization of descriptor for each network object class
+template< class OBJECT, class MESSAGE >
+class nOPBDescriptor: public nOPBDescriptorBase, public nPBDescriptor< MESSAGE >
+{
+public:
+    nOPBDescriptor( int identification )
+    : nOPBDescriptorBase()
+    , nPBDescriptor< MESSAGE >( identification, &HandleCreation, false )
+    {}
+
+private:
+    static void HandleCreation( MESSAGE & message, nSenderInfo const & sender )
+    {
+        tASSERT(0);
+    }
+
+    //! creates an initialization message for an object
+    virtual nMessage * DoWriteInit( nNetObject const & object ) = 0;
+
+    //! creates an sync message for an object
+    virtual nMessage * DoWriteSync( nNetObject const & object ) = 0;
+
+                                           
+};
 
 #endif

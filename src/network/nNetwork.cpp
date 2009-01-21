@@ -545,6 +545,8 @@ nDescriptorBase::nDescriptorBase(unsigned short identification,
 #endif
 }
 
+nDescriptorBase::~nDescriptorBase(){}
+
 /*
 nDescriptor::nDescriptor(nHandler *handle,const char *Name)
   :id(s_nextID++),handler(handle),name(Name)
@@ -655,6 +657,8 @@ nDescriptor::nDescriptor(unsigned short identification,nHandler *handle,
     streamDescriptors[identification]=this;
 }
 
+nDescriptor::~nDescriptor(){}
+
 nVersionFeature sn_protocolBuffers( 21 );
 
 nPBDescriptorBase::nPBDescriptorBase(unsigned short identification,
@@ -673,6 +677,7 @@ nPBDescriptorBase::nPBDescriptorBase(unsigned short identification,
     protoBufDescriptors[identification]=this;
 }
 
+nPBDescriptorBase::~nPBDescriptorBase(){}
 
 // *************************************************************
 

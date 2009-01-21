@@ -395,6 +395,7 @@ class nDescriptorBase:public tListItem<nDescriptorBase>
     virtual void DoHandleMessage( nMessage & message ) = 0;
 public:
     nDescriptorBase(unsigned short identification, const char *name, bool acceptEvenIfNotLoggedIn = false);
+    virtual ~nDescriptorBase();
 
     static void HandleMessage( nMessage &message );
 
@@ -420,6 +421,8 @@ class nDescriptor: public nDescriptorBase
 public:
     nDescriptor(unsigned short identification,nHandler *handle,
                 const char *name, bool acceptEvenIfNotLoggedIn = false);
+
+    ~nDescriptor();
 };
 
 // register the routine that gives the peer the server/client information

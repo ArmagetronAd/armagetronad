@@ -1583,7 +1583,7 @@ static nVersionFeature se_chatHandlerClient( 6 );
 
 // chat message from client to server
 // void handle_chat( nMessage & );
-void handle_chat( nReceivedProtocolBuffer< Engine::Chat > & );
+void handle_chat( Engine::Chat &, nSenderInfo const & );
 // static nDescriptor chat_handler(200,handle_chat,"Chat");
 static nPBDescriptor< Engine::Chat > chat_handler_pb(200,handle_chat);
 
@@ -3575,7 +3575,7 @@ static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, e
 void se_ListAdmins( ePlayerNetID *, std::istream &s, tString command );
 #endif
 
-void handle_chat( unsigned short id, tColoredString const & say, nMessage & m )
+void handle_chat( unsigned short id, tColoredString const & say, nMessage const & m )
 {
     nTimeRolling currentTime = tSysTimeFloat();
 
@@ -3722,10 +3722,9 @@ void handle_chat( nMessage &m )
     handle_chat( id, say, m );
 }
 
-void handle_chat( nReceivedProtocolBuffer< Engine::Chat > & message )
+void handle_chat( Engine::Chat & message, nSenderInfo const & sender )
 {
-    Engine::Chat & content = message.content;
-    handle_chat( content.player_id(), tColoredString( content.chat_line().c_str() ), message.envelope );
+    handle_chat( message.player_id(), tColoredString( message.chat_line().c_str() ), sender.envelope );
 }
 
 // check if a string is a legal player name
