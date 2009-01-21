@@ -102,6 +102,17 @@ public:
         return DoCreate();
     }
 
+    //! compares two messages, filling in total size and difference.
+    static void EstimateMessageDifference( Message const & a,
+                                           Message const & b,
+                                           int & total,
+                                           int & difference );
+
+    //! calculates the difference between two messages
+    static void DiffMessages( Message const & base,
+                              Message const & derived,
+                              Message & diff );
+    
     // flag that marks protocol buffer messages
     static const unsigned short protoBufFlag = 0x8000;
 protected:

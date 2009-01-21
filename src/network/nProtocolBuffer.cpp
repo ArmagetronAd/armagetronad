@@ -302,6 +302,30 @@ void nPBDescriptorBase::ReadMessage( nMessage & in, Message & out  ) const
     }
 }
 
+//! compares two messages, filling in total size and difference.
+//! @param a first message
+//! @param b second message
+//! @param total total maximal size of message (must be zeroed before call)
+//! @param total difference of messages, between 0 and total (must be zeroed before call)
+void nPBDescriptorBase::EstimateMessageDifference( Message const & a,
+                                                    Message const & b,
+                                                    int & total,
+                                                    int & difference )
+{
+    tASSERT(0);
+}
+
+//! calculates the difference between two messages
+//! @param base base message
+//! @param derived second message
+//! @param diff target message for difference. All the fields where base and derived differ are set here, with the value taken from derived.
+void nPBDescriptorBase::DiffMessages( Message const & base,
+                                      Message const & derived,
+                                      Message & diff )
+{
+    tASSERT(0);
+}
+
 //! dumb streaming to message
 void nPBDescriptorBase::DoStreamTo( Message const & in, nMessage & out ) const
 {
