@@ -140,7 +140,7 @@ class nPBDescriptor: public nPBDescriptorBase
     static nPBDescriptor * instance_;
 
 #ifdef DEBUG
-    static bool multipleInstances_;
+    bool multipleInstances_;
 #endif
 
     //! function actually handling the incoming message
@@ -177,11 +177,12 @@ public:
     //! puts a puffer into a message
     static nMessage * TransformStatic( MESSAGE const & message )
     {
+        tASSERT( instance_ );
+
         // if there are multiple instances of descriptors of the same message class,
         // you can't pick one reliably.
-        tASSERT( !multipleInstances_ );
+        tASSERT( !instance_->multipleInstances_ );
 
-        tASSERT( instance_ );
         return instance_->Transform( message );
     }
 
@@ -191,10 +192,7 @@ public:
     , handler_( handler )
     {
 #ifdef DEBUG
-        if ( instance_ )
-        {
-            multipleInstances_ = true;
-        }
+        multipleInstances_ = instance_;
 #endif
         instance_ = this;
     }
@@ -203,11 +201,6 @@ public:
 //! instance of this descriptor
 template< class MESSAGE > 
 nPBDescriptor< MESSAGE > * nPBDescriptor< MESSAGE >::instance_ = 0;
-
-#ifdef DEBUG
-template< class MESSAGE > 
-bool nPBDescriptor< MESSAGE >::multipleInstances_ = false;
-#endif
 
 // create a message from a pattern buffer
 template< class MESSAGE >

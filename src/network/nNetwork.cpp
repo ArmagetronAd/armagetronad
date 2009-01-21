@@ -582,24 +582,28 @@ void nDescriptorBase::HandleMessage(nMessage &message){
 #endif
         nDescriptorBase *nd = 0;
 
+        // index into arrays
+        int index = message.descriptor;
+
         // pick right descriptor set according to highest bit
         nDescriptorBase * const * descriptors = streamDescriptors;
         if ( message.descriptor & nPBDescriptorBase::protoBufFlag )
         {
             descriptors = protoBufDescriptors;
-            message.descriptor ^= nPBDescriptorBase::protoBufFlag;
+            index &= ~nPBDescriptorBase::protoBufFlag;
         }
 
-        // try default descriptor first
-
         // z-man: security check ( thanks, Luigi Auriemma! )
-        if ( message.descriptor  < MAXDESCRIPTORS )
-            nd=descriptors[message.descriptor];
-
-        // not found? Try a protocol buffer replacement.
-        if( !nd && descriptors == streamDescriptors )
+        if ( index  < MAXDESCRIPTORS )
         {
-            nd = protoBufDescriptors[ message.descriptor ];
+            // try default descriptor first
+            nd=descriptors[index];
+
+            // not found? Try a protocol buffer replacement.
+            if( !nd && descriptors == streamDescriptors )
+            {
+                nd = protoBufDescriptors[ index ];
+            }
         }
 
         if (nd)

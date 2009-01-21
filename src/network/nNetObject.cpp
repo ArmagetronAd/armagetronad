@@ -2156,6 +2156,7 @@ nDescriptor& nNetObject::CreatorDescriptor() const
 
 //! creates a netobject form sync data
 nNetObject::nNetObject( Network::nNetObjectInit const & init, Network::nNetObjectSync const &, nSenderInfo const & sender )
+:lastSyncID_(sender.envelope.MessageIDBig()),refCtr_(0)
 {
     id = 0;
     owner = 0;
