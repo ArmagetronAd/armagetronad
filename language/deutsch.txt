@@ -19,6 +19,7 @@ language                      Deutsch
 first_use_help                Wurde \g zum ersten mal gestartet?
 include_help                  bindet die angegebene Datei ein
 sinclude_help                 bindet die angegebene Datei ein, ohne eine Fehlermeldung zu liefern, wenn sie nicht gefunden wurde
+rinclude_help                 bindet die angegebene Datei über das Resourcensystem ein; sie kann so von einem entfernten Server kommen.
 new_team_allowed_help         Kann man momentan ein neues Team eröffnen?
 
 #********************************************
@@ -141,6 +142,8 @@ enemy_chatbot_penalty_help    Abzug in Sekunden, mit der der Zeitpunkt des Konta
 enemy_currenttime_influence_help Wenn dies auf 1 gesetzt wird, so ist nicht mehr die Aufbauzeit der Mauer, sondern die Zeit des Kontaktes relevant für die Bestimmug des Killers. Alle Zahlenwerte sind hier erlaubt.
 enemy_suicide_timeout_help    Wenn es keinen Feindkontakt innerhalb dieser Zeit in Sekunden gab, dann zählt ein Tod als Selbstmord.
 score_die_help                Punktzahl, die man fürs Sterben erhält (sollte negativ sein)
+score_survive_help            Punktzahl, die man für das Überleben bekommt
+score_hole_help               Punktzahl, die man erhält, wenn man für ein Teammitglied ein Loch in eine gegnerische Wand macht
 score_kill_help               Punktzahl, die man für das Beseitigen eines Gegners erhält (sollte positiv sein)
 score_suicide_help            Was man für Selbstmord erhält (sollte negativ sein)
 score_win_help                Was man für den Gewinn einer Runde erhält (sollte positiv sein)
@@ -181,6 +184,7 @@ team_max_players_help         Höchstzahl von Spielern pro Team
 team_min_players_help         Mindestzahl von Spielern pro Team
 team_allow_shuffle_up_help    Wenn dies auf 1 gesetzt wird, dann dürfen sich Spieler mit /teamshuffle selber nach innen befördern. Ansonsten dürfen sie sich nur degradieren.
 team_center_is_boss_help      Wenn dies auf 1 gesetzt wird, so ist der mittlere Spieler immer der Boss eines Teams. Ansonsten trägt der älteste Spieler diese Verantwortung.
+team_elimination_mode_help    Gibt an, wie Teams eliminiert werden, wenn es mehr als (SP_)TEAMS_MAX gibt. Ein Wert von 0 löst das jeweils kleinste Team auf (mit möglichst geringer Punktzahl), 1 behält Teams mit "besserer" Farbe (blau > gold > rot etc), und 2 eliminiert die Teams mit der geringsten Punktzahl.
 
 teams_max_help                Höchstzahl von Teams
 teams_min_help                Mindestzahl von Teams
@@ -196,9 +200,20 @@ limit_rounds_help             Beende das Match nach dieser Rundenzahl
 limit_time_help               Beende das Match nach Ablauf von soviel Minuten
 
 auto_team_help                Wenn dies auf 1 steht, werden Spieler automatisch einem Team zugeteilt. Steht es auf 0, bleiben sie Zuschauer.
+auto_team_spec_spam_help      Nur wenn der wert 1 ist, werden Zuschauer, die den Server betreten oder verlassen, angekündigt. Hat nur einen Effekt, wenn AUTO_TEAM auf 0 steht.
 
 allow_team_name_color_help    Erlaubt es, ein Team nach einer Farbe zu benennen
 allow_team_name_player_help   Erlaubt es, ein Team nach dem Anführer zu benennen
+
+play_time_total_help          Gesamtzeit in Minuten, die mit diesem Client gespielt wurde
+play_time_online_help         Gesamtzeit in Minuten, die mit diesem Client online gespielt wurde
+play_time_team_help           Gesamtzeit in Minuten, die mit diesem Client in einem Team gespielt wurde
+min_play_time_total_help      Benötigte Gesamtspielzeitzeit in Minuten, um hier zu spielen
+min_play_time_online_help     Benötigte Gesamtspielzeitzeit online in Minuten, um hier zu spielen
+min_play_time_team_help       Benötigte Gesamtspielzeitzeit in einem Team in Minuten, um hier zu spielen
+play_time_total_lacking       Du kannst hier nicht spielen, erst benötigst Du mehr allgemeine Erfahrung. Spiele bitte \1 Minuten woanders (alleine gegen die CPUs zählt).\n
+play_time_online_lacking      Du kannst hier nicht spielen, erst benötigst Du mehr Erfahrung im Online-Spiel. Spiele bitte \1 Minuten auf anderen Servern.\n
+play_time_team_lacking        Du kannst hier nicht spielen, erst benötigst Du mehr allgemeine Erfahrung im Teamspiel. Spiele bitte \1 Minuten auf einem anderen Server mit Teams.\n
 
 team_name_1_help              Name für Team 1
 team_name_2_help              Name für Team 2
@@ -301,6 +316,9 @@ player_chat_wait_fraction_help So lange (an der Gesamtzeit gemessen) wird maxima
 player_chat_wait_single_help  Setze dies auf 1, wenn immer nur ein Spieler seinen Zeitvorrat reduziert bekommen soll, obwohl auch auf andere noch gewartet wird.
 player_chat_wait_teamleader_help Setze dies auf 1, wenn nur Teamchefs eine Spielpause auslösen können soll, oder auf 0, um das allen Spielern zu erlauben.
 
+wait_for_external_script_help Lässt den Server zwischen zwei Runden auf ein externes Script warten, bis das Script den Wert wieder auf 0 setzt.
+wait_for_external_script_timeout_help Maximale Zeit in Sekunden, die der Server über WAIT_FOR_EXTERNAL_SCRIPT pausiert werden kann. Wenn die Zeit abgelaufen ist, startet die nächste Runde auch so.
+
 chatter_remove_time_help      Zeit in Sekunden im Chatbot-Zustand, nach der ein Spieler aus dem Spiel geworfen wird
 idle_remove_time_help         Zeit in Sekunden ohne Steuerungsbefehl, nach der ein Spieler aus dem Spiel geworfen wird
 idle_kick_time_help           Zeit in Sekunden ohne Steuerungsbefehl, nach der ein Spieler vom Server geworfen wird
@@ -314,6 +332,8 @@ idle_kick_time_help           Zeit in Sekunden ohne Steuerungsbefehl, nach der e
 #********************************************
 
 player_name_confitem_help     Spielername
+player_user_confitem_help     Golbale Spieler-ID
+auto_login_confitem_help      Soll sich dieser Spieler automatisch am Server einloggen?
 camcenter_help                Zentriere die interne Kamera in Fahrtrichtung
 start_cam_help                Lieblingskameramodus
 start_fov_help                Anfänglicher Sichtwinkel
@@ -361,6 +381,7 @@ spam_protection_chat_help     Extrafaktor auf SPAM_PROTECTION für Chat-Nachricht
 spam_penalty_help             Extrastrafe für eine erkanne Spam-Aktion
 spam_maxlen_help              Maximallänge für die Chat-Nachrichten.
 spam_autokick_help            Spamer-Wert, bei dem der Spieler automatisch vom Server geworfen wird.
+spam_autokick_count_help      Zahl der Spam-Warnungen, bevor ein Spieler gekickt wird.
 silence_all_help              Wenn dieser Wert auf 1 gesetzt ist, dann wird aller Chat unterbunden.
 enable_chat_help              Wenn dies auf 0 gesetzt wird, dann werden alle öffentlichen Chat-Nachrichten unterdrückt (Auf dem Server sind Nachrichten von Administratoren und /msg und /team-Nachrichten Ausnahmen).
 allow_team_change_help        Nur wenn dieser Wert 1 ist dürfen Spieler irh Team beliebig wählen. Wenn dieser Wert 0 ist, muss ein Administrator jeden Teamwechsel mit ALLOW_TEAM_CHANGE_PLAYER authorisieren.
@@ -441,15 +462,30 @@ allow_voting_help             Wenn dieser Wert auf 1 gesetz ist, dann sind Absti
 allow_voting_spectator_help   Wenn dies auf 1 gesetzt wird, dann dürfen auch Zuschauer abstimmen.
 min_voters_help               Minimalzahl der Stimmberechtigten, damit Abstimmungen zugelassen werden.
 max_votes_help                Maximalzahl der Abstimmungen, die gleichzeitig laufen können.
+votes_cancel_help             Bricht alle laufenden Abstimmungen a.
 max_votes_per_voter_help      Maximalzahl der Abstimmungen von jedem Stimmberechtigten, die gleichzeitig laufen könnnen.
 voting_start_decay_help       Nach sovielen Sekunden wird begonnen, die Enthaltungen in einer Abstimmung zu ignorieren; es kommt dadurch auch bei nicht absoluten Mehrheiten zu einem Ergebnis.
 voting_decay_help             Alle soviele Sekunden wird eine Enthaltung mehr ignoriert.
 voting_bias_help              fügt so viele virtuelle Wähler hinzu, die sich gegen jede Veränderung aussprechen.
+voting_bias_kick_help         fügt so viele virtuelle Wähler hinzu, die sich gegen jeden Rauswurf aussprechen.
+voting_bias_suspend_help      fügt so viele virtuelle Wähler hinzu, die sich gegen jede Suspendierung stellen.
+voting_bias_include_help      fügt so viele virtuelle Wähler hinzu, die sich gegen jede Include-Abstimmung stellen.
+voting_bias_command_help      fügt so viele virtuelle Wähler hinzu, die sich gegen jede Kommando-Abstimmung stellen.
+
 voting_privacy_help           Kontrolliert die Ausgabe von Abstimmungen. 2: alles bleibt geheim 1: der Initiator einer Abstimmung wird im Serverlog vermerkt 0: die gesamte Abstimmung wird im Log vermerkt -1: der Initiator einer Abstimmung wird öffentlich bekanntgegeben -2: die gesamte Abstimmung ist öffentlich.
 voting_spam_issue_help        Es wird als so nevig angesehen, eine Abstimmung zu beginnen.
 voting_spam_reject_help       Es wird als so nevig angesehen, wenn eine Abstimmung abgelehnt wird..
+voting_harm_time_help         Zeit in Sekunden, die zwischen zwei schädlichen Abstimmungen gegen denselben Spieler liegen muss.
 voting_kick_time_help         Mindestzeit in Sekunden, die zwischen zwei Vertreibungsvorschlägen gegen denselben Spieler liegen muss.
 voting_maturity_help          Zeit in Sekunden, die ein Spieler auf dem Server anwesend sein muss, bevor er Abstimmungen starten darf.
+voting_suspend_rounds_help    Anzahl der Runden, die ein Spieler via "/vote suspend <spielername>" suspendiert wird.
+voting_kick_minharm_help      Zahl der schädlichen Abstimmungen (suspension, kick,...), die gegen einen Spieler (nicht notwendigerweise erfolgreich) eingereicht werden müssen, bevor ein Vertreibungsvorschlag aus dem Menu wirklich als Vertreibung gehandhabt wird. Davor werden Suspendierungen daraus.
+votes_suspend_help            Unterbricht Abstimmungen fuer x Minuten.
+votes_suspend_default_help    Defaultwert für die Zeit in VOTES_SUSPEND.
+votes_unsuspend_help          Erlaubt Abstimmungen wieder.
+voting_suspended              Abstimmungen wurden für die nächsten \1 Minuten unterbrochen.\n
+voting_unsuspended            Abstimmungen sind wieder erlaubt.\n
+vote_rejected_voting_suspended Abstimmungen wuden vom Administrator unterbrochen.\n
 
 #********************************************
 #********************************************
@@ -575,6 +611,7 @@ server_dns_help               Wenn der Server auf einem Rechner mit dynamischer,
 server_port_help              Port, auf dem dieser Server Verbindungen annimmt
 client_port_help              Port, auf dem wir versuchen, Verbindung aufzunehmen
 max_clients_help              Maximale Zahl der akzeptierten Verbindungen von Clients.
+max_clients_limit             Warnung: MAX_CLIENTS kann nicht größer als \1 sein. Einstellung nicht verändert.
 max_clients_same_ip_soft_help Maximale Zahl der Clients, die von derselben IP-Adresse dauerhaft akzeptiert werden: die Verbindung überzählige Clients kann jederzeit abreissen.
 max_clients_same_ip_hard_help Maximale Zahl der Clients, die von derselben IP-Adresse akzeptiert werden: mehr Clients werden von Anfang an abgeblockt.
 max_players_same_ip_help      Maximalzahl der Spieler, die von derselben Internetadresse aus spielen dürfen.
@@ -664,7 +701,6 @@ swapmode_glfinish_text        glFinish
 swapmode_glfinish_help        glFinish() wird zur Synchronisation verwendet. Nur so ist es garantiert, dass Eingabe und Ausgabe wirklich Synchron laufen, aber der Preis ist auf einigen Systemen die Vollauslastung des Prozessors.
 swap_mode_help                Bestimmt, wie Ein- und Ausgabe synchronisiert werden. 0: gar nicht, 1: mit glFlush(), 2: mit glFinish().
 
-ztrick_help                   Knifflige Leistungsverbesserung: funktionniert leider meist nicht... (3dfx-Karten sind die einzig bekannte Ausnahme)
 texture_mode_0_help           Bodentextur:
 texture_mode_1_help           Wandtexturen:
 texture_mode_2_help           Objekttexturen:
@@ -674,19 +710,47 @@ gl_extensions_help            OpenGL System-Information
 gl_version_help               OpenGL System-Information
 gl_renderer_help              OpenGL System-Information
 gl_vendor_help                OpenGL System-Information
-line_antialias_help           Aktiviert Kantenglättung für Linien
-poly_antialias_help           Aktiviert Kantenglättung für Polygone
-persp_correct_help            Aktiviert Perspektivenkorrektur
 alpha_blend_help              Aktiviert Transparenzeffekte
+zone_alpha_toggle_help        Dieser wert wird mit ALPHA_BLEND geXORed, um den Rendermodus der Zonen zu bestimmen
 smooth_shading_help           Aktiviert "Rundes Licht"
 text_out_help                 Aktiviert Textausgabe
 console_columns_help          Anzahl der Spalten der Textausgabe
 console_rows_help             Anzahl der Zeilen der Textausgabe (normal)
 console_rows_max_help         Anzahl der Zeilen der Textausgabe (maximal beim Hochscrollen)
+console_indent_help           Anzahl der Leerzeichen, mit denen die Vortsetzung einer automatisch umgebrochenen Konsolenzeile eingerückt wird
 console_decorate_id_help      Jede Ausgabezeile wird mit der ID-Nummer des Clients, der sie verursacht hat, dekoriert
 console_decorate_ip_help      Jede Ausgabezeile wird mit der IP-Adresse des Clients, der sie verursacht hat, dekoriert
+console_decorate_timestamp_help Dekoriert jede Zeile der Konsolenausgabe mit aktuellem Datum und Uhrzeit
 console_ladder_log_help       Schickt das Ladder-Log auch an die Standardausgabe
+ladderlog_decorate_timestamp_help Dekoriert jede zeile von ladderlog.txt mit aktuellem Datum und Uhrzeit
+ladderlog_write_all_help      Setzt alle LADDER_LOG_WRITE_*-Einstellungen auf denselben Wert
+ladderlog_write_all_usage     Verwendung: LADDER_LOG_WRITE_ALL 1|0
+ladderlog_write_all_enabled   Aktiviert volle Ausgabe nach ladderlog.txt.
+ladderlog_write_all_disabled  Deaktiviert ausgabe nach ladderlog.txt.
+ladderlog_write_authority_blurb_help Schreibt in ladderlog.txt: AUTHORITY_BLURB <Name> <Wert>
+ladderlog_write_basezone_conquered_help Schreibt in ladderlog.txt: BASEZONE_CONQUERED <Team> <cx> <cy>
+ladderlog_write_basezone_conquerer_help Schreibt in ladderlog.txt: BASEZONE_CONQUERER <Spieler>
+ladderlog_write_chat_help     Schreibt in ladderlog.txt: CHAT <Redner> [/me] <was er sagt>
+ladderlog_write_death_frag_help Schreibt in ladderlog.txt: DEATH_FRAG <Beute> <Jäger>
+ladderlog_write_death_suicide_help Schreibt in ladderlog.txt: DEATH_SUICIDE <Spieler>
+ladderlog_write_death_teamkill_help Schreibt in ladderlog.txt: DEATH_TEAMKILL <Beute> <Jäger>
+ladderlog_write_game_end_help Schreibt in ladderlog.txt: GAME_END
+ladderlog_write_game_time_help Schreibt in ladderlog.txt:  GAME_TIME <Zeit> (beachte ebenfalls: GAME_TIME_INTERVAL)
+ladderlog_write_match_winner_help Schreibt in ladderlog.txt: MATCH_WINNER <Gewinner>
+ladderlog_write_new_match_help Schreibt in ladderlog.txt: NEW_MATCH
+ladderlog_write_new_round_help Schreibt in ladderlog.txt: NEW_ROUND
+ladderlog_write_num_humans_help Schreibt in ladderlog.txt: NUM_HUMANS <Zahl der Menschlichen Spieler>
+ladderlog_write_online_player_help Schreibt in ladderlog.txt: ONLINE_PLAYER <Name> [<Ping> [<Team>]]
+ladderlog_write_player_entered_help Schreibt in ladderlog.txt: PLAYER_ENTERED <Name> <IP> <Spitzname>
+ladderlog_write_player_left_help Schreibt in ladderlog.txt: PLAYER_LEFT <Name> <IP>
+ladderlog_write_player_renamed_help Schreibt in ladderlog.txt: PLAYER_RENAMED <alter Name> <neuer Name> <IP> <Spitzname>
+ladderlog_write_round_score_help Schreibt in ladderlog.txt: ROUND_SCORE <Punktzahl diese Runde> <Spieler> [<Team>]
+ladderlog_write_round_score_team_help Schreibt in ladderlog.txt: ROUND_SCORE_TEAM <Punktzahl diese Runde> <Team>
+ladderlog_write_round_winner_help Schreibt in ladderlog.txt: ROUND_WINNER <Gewinner>
+ladderlog_write_sacrifice_help Schreibt in ladderlog.txt: SACRIFICE <Spieler, der das Loch benutzt hat> <Spieler, der das Loch gemacht hat> <Spieler, dessen Wand durchlöchert wurde>
+ladderlog_write_wait_for_external_script_help Schreibt in ladderlog.txt: WAIT_FOR_EXTERNAL_SCRIPT (beachte ebenfalls: WAIT_FOR_EXTERNAL_SCRIPT und WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
 ladderlog_game_time_interval  Wenn dies auf einen positiven Wert gesetz wird, so wird alle n Sekunden eine Statusmeldung ins Ladder-Log geschrieben.
+chat_log_help                 Schreibt maschinenlesbares Chatlog in var/chatlog.txt
 show_fps_help                 Aktiviert Performance-Anzeige 
 floor_mirror_help             Spiegelung des Bodens
 floor_detail_help             Detail des Bodens
@@ -710,10 +774,18 @@ wrap_menu_help                Kann man ein Menu nach oben verlassen (und es somi
 floor_mirror_int_help         Stärke der Bodenspiegelungen
 color_strings_help            Markiere Texte farblich (z.B. Namen im Chat)
 filter_color_strings_help     Entferne Farbcodierungen aus allen Texten, die über das Netwerk empfangen werden.
+filter_dark_color_strings_help Entferne zu dunkle Farbcodierungen aus Zeichenketten.
 filter_color_names_help       Entferne Farbcodierungen aus Spielernamen.
+filter_dark_color_names_help  Entferne zu dunkle Farbcodierungen aus Spielernamen.
 filter_name_ends_help         Entferne Leerzeichen und anderen Müll von Anfang und Ende der Spielernamen.
 filter_name_middle_help       Sollen extra-Freiräume und anderer Müll aus Spielernamen entfernt werden?
 filter_color_server_names_help Entferne Farbcodierungen aus Servernamen im Browser.
+filter_dark_color_server_names_help Entferne zu dunkle Farbcodierungen aus Servernamen.
+filter_color_team_help        Entferne Farbcodierungen aus /team-Nachrichten.
+filter_dark_color_team_help   Entferne zu dunkle Farbcodierungen aus /team-Nachrichten.
+
+zone_alpha_help               Transparenzfaktor für Rendering der Zonen. 1.0 ist das Maximum.
+zone_alpha_server_help        Transparenzfaktor für Rendering der Zonen, vom Server kontrolliert. 1.0 ist das Maximum.
 
 #screen mode
 custom_screen_height_help     Benutzerdefinierte Bildschirmhöhe
@@ -785,6 +857,7 @@ round_console_message_help    Konsolennachricht, die jede Runde wiederholt wird
 round_center_message_help     Zentralnachricht, die jede Runde wiederholt wird
 
 password_storage_help         Bestimmt, wo die Passwörter gespeichert werden: gar nicht (-1), nur im Speicher(0) oder auf der Festplatte(1, nicht empfohlen)
+protect_sensitive_files_help  Soll verhindert werden, dass user.cfg und andere Dateien von anderen Benutzern gelesen werden können?
 admin_pass_help               Kennwort für das grundlegende im Spiel admin
 
 backward_compatibility_help   Maximale Zahl älterer Versionen, die noch unterstützt werden.
@@ -795,9 +868,14 @@ quit_help                     Beendet den Serverprozess.
 exit_help                     Beendet den Serverprozess.
 
 # manning and kicking commands
+only_works_on_server          Der Konsolenbefehl \1 funktionniert nur auf dem Server. Wenn Du entsprechende Rechte hast, kannst du ihm aktivieren, indem Du "/admin \1 \2" sagst.\n
 players_help                  Gibt eine Liste der eingeloggten Spieler aus
+teams_help                    Gibt eine Liste aller Teams mit einer rudimentären Darstellung der Formation aus. Analog zum Chat-Kommando /teams.
 kill_help                     Tötet den angegebenen Spieler (als Warnung vor einem Rausschmiss)
 silence_help                  Verbietet einem bestimmten Spieler, öffentlich zu Reden
+suspend_help                  Suspendiert einen Spieler für die nächsten N Runden (Defaultwert für N ist SUSPEND_DEFAULT_ROUNDS)
+unsuspend_help                Hebt eine Suspendierung auf.
+suspend_default_rounds_help   Wieviele Runden soll eine Suspendierung normalerweise dauern?
 voice_help                    Kehrt SILENCE um
 allow_team_change_player_help Erlaubt einem bestimmten Speiler, einmal das Team zu wechseln
 disallow_team_change_player_help Kehrt ALLOW_TEAM_CHANGE_PLAYER um
@@ -815,6 +893,10 @@ ban_help                      Wirft den angegebenen Spieler vom Server und verba
 ban_ip_help                   Verbannt spieler von der angegebenen IP-Adresse für die angegebene Zeit in Minuten vom Server.
 ban_list_help                 Gibt die Liste der Verbannten IP-Adressen aus.
 unban_ip_help                 Hebt eine Verbannung auf.
+
+
+
+
 
 # communication
 console_message_help          Gibt eine Nachricht auf den Konsolen aller angeschlossenen Spieler aus.
@@ -1359,21 +1441,20 @@ bookmarks_menu_address_help   Die Adresse des Servers
 bookmarks_menu_name           Name
 bookmarks_menu_name_help      Der Name des Servers. Wird nur für die Anzeige verwendet und hat keine Funktion, ist also frei wählbar.
 bookmarks_menu_connect        Verbindung zu \1 aufbauen
-
 bookmarks_menu_edit_connect_text Verbindung aufbauen
 bookmarks_menu_edit_connect_help Teleport zum Spieleraster!
 
+
 masters_menu                  Subkulturen
 masters_menu_help             Verbinde dich mit alternativen Gemeinschaften von Servern
-masters_menu_edit           Verwaltung
-masters_menu_edit_help      Verwaltet die Subkulturen
-masters_menu_edit_slot      Bearbeite \1
-masters_menu_address        Adresse
-masters_menu_address_help   Die Adresse des Master-Servers, der die Subkultur verwaltet
-masters_menu_name           Name
-masters_menu_name_help      Der Name der Subkultur. Wird nur für die Anzeige verwendet und hat keine Funktion, ist also frei wählbar.
-masters_menu_connect        Mit Subkultur \1 verbinden
-
+masters_menu_edit             Verwaltung
+masters_menu_edit_help        Verwaltet die Subkulturen
+masters_menu_edit_slot        Bearbeite \1
+masters_menu_address          Adresse
+masters_menu_address_help     Die Adresse des Master-Servers, der die Subkultur verwaltet
+masters_menu_name             Name
+masters_menu_name_help        Der Name der Subkultur. Wird nur für die Anzeige verwendet und hat keine Funktion, ist also frei wählbar.
+masters_menu_connect          Mit Subkultur \1 verbinden
 masters_menu_edit_connect_text Subkultur Betreten
 masters_menu_edit_connect_help Öffnet ein Master-Server-Browser-ähliches Menu mit allen Servern dieser Subkultur
 
@@ -1452,6 +1533,9 @@ kick_player_details_text      Wenn dieser Vorschlag akzeptiert wird, dann wird \
 kick_player_text              Vertreibe \1
 kick_player_help              Dieser Menupunkt schlägt den anderen Spielern vor, besagten Spieler vom Server zu werfen.
 
+
+
+
 #*************************************
 #*************************************
 #
@@ -1510,6 +1594,7 @@ viewport_assign_help          Welcher Spieler spielt in welchem Fenster?
 player_name_text              Name:
 player_name_help              Das ... in "Sieger: ... ". Benutze die normalen Editiertasten.
 
+
 player_input_text             Spiel-Tasten
 player_input_help             Stellt die Tastaturbelegung für die Steuerung der Vehikel ein
 
@@ -1536,6 +1621,8 @@ player_green_help             Stellt den Grünanteil deiner Farbe ein
 
 player_red_text               Rot:
 player_red_help               Stellt den Rotanteil deiner Farbe ein
+
+
 
 player_spectator_text         Nur Zuschauer:
 player_spectator_help         Wenn man nur Zuschauer ist, so steuert man kein eigenes Vehikel und kann nur den anderen zusehen.
@@ -1613,6 +1700,7 @@ team_menu_join_help           Werde Mitglied von diesem Team
 
 team_menu_create              Neues Team/Beliebiges Team
 team_menu_create_help         Gründet ein neues Team und lässt den Spieler beitreten, oder, sollte das nicht möglich sein, tritt einem beliebigen Team bei
+
 
 team_owned_by                 \1s Team
 team_ai                       Computergegner
@@ -1824,20 +1912,11 @@ detail_floor_tex_help         Eine einfache texturierte Ebene wird gezeichnet. S
 detail_floor_2tex_text        Doppelt texturierte Ebene
 detail_floor_2tex_help        Die beiden Gruppen von Rasterlinien werden separat gezeichnet und sind damit bis zum Horizont gestochen scharf. Kostet allerdings auch etwas an Performance.
 
-detail_polyantialias_text     Polygon-Antial.:
-detail_polyantialias_help     Sollen die Kanten von Polygonen geglättet werden? Auf den meisten Systemen ist dieses Feature leider nicht richtig implementiert.
-
-detail_lineantialias_text     Line-Antial.:
-detail_lineantialias_help     Sollen die Kanten von Linien geglättet werden?
-
 detail_alpha_text             Transparenz:
 detail_alpha_help             Kostenlos auf den meisten 3D-Karten: Einige Objekte (die ersten Meter der Wände hinter den Vehikeln) werden transparent dargestellt. Verlangsamt den Software Renderer ein wenig.
 
 detail_smooth_text            Rundes Licht:
 detail_smooth_help            (Besser bekannt als Smooth Shading) Lässt die Beleuchtung der Objekte "runder" erscheinen. Auch bei Softwarerendering fast umsonst.
-
-detail_persp_text             Perpektivenkorrektur:
-detail_persp_help             Wenn man dieses Feature deaktivert, so werden die Boden- und Wandtexturen fürchterlich verzerrt; Objekttexturen leiden jedoch nur wenig. Bringt im Softwaremodus etwas Geschwindigkeit, bei den meisten 3D-Beschleunigern kann man es gar nicht mehr abschalten.
 
 detail_text_truecolor_text    Texturen in TrueColor:
 detail_text_truecolor_help    Speichert die Texturen in 32 Bit (24 Bit Farbe + 8 Bit Transparenz), sonst werden 16 Bit verwendet.
@@ -1900,9 +1979,6 @@ misc_fps_help                 Wenn die FPS-Anzeige aktiviert ist, wird die aktue
 #tweaks menu
 tweaks_displaylists_text      Display Lists:
 tweaks_displaylists_help      Display Lists sind ein OpenGL-Feature, um ein Objekt schnell oft rendern zu können; es wird normalerweise für die Vehikel verwendet. Manchmal funktioniert das aber nicht richtig: wenn die Vehikel unsichtbar sind, dann sollte dieses Feature ausgeschaltet werden.
-
-tweaks_ztrick_text            Z-Trick:
-tweaks_ztrick_help            Geschwindigkeitstrick: auf 3dfx-Karten kann man das Löschen des Z-Puffers (für die Tiefensortierung der Objekte) sparen. Wenn es nicht funktionniert, so verschwinden die Vehikel mit seltsamen Effekten aus dem Bild.
 
 tweaks_infinity_text          Unendlich:
 tweaks_infinity_help          OpenGL unterstützt eigentlich unendlich ferne Punkte: sie entsprechen einfach nur Richtungen. Senn dieser Menupunkt aktiviert wird, dann verwendet \g diese unendlichen Punkte, um z.B. den Boden zu zeichnen. Meistens ist dieses Feature allerdings kaputtoptimiert.
@@ -2073,9 +2149,10 @@ instant_death_activated       Die Todeszone wurde aktiviert! Vermeide sie!\n
 
 player_win_instant            \1 bekam \2 Punkte durch das Erreichen der Siegzone.\n
 player_win_conquest           \1 bekam \2 Punkte für das erobern der Basis des Feindes.\n
+player_win_held_fortress      \1 bekam \2 Punkte für das Halten der eigenen Basis.\n
 player_win_conquest_specific  \1 bekam \2 Punkte für das erobern der Basis von \3.\n
 player_kill_collapse          \1 wurde von seiner kollabierenden Zone vernichtet.\n
-player_win_held_fortress      \1 bekam \2 Punkte für das Halten der eigenen Basis.\n
+
 
 zone_collapse_harmless        \1s Zone verpufft harmlos wegen mangelden Feindkontakts.\n
 
@@ -2107,7 +2184,7 @@ player_left_spectator         0xff7f7fZuschauer \1 0xff7f7fis weg.\n
 player_left_game              \1 0xff7f7fwurde mit \2 Punkten endgültig gelöscht.\n
 player_leaving_game           \1 0xff7f7fhat das Spiel verlassen.\n
 player_renamed                \2 hat sich auf \1 umbenannt.\n
-player_rename_rejected_votekick  \1 0xffffffdarf sich nicht in \2 0xffffffumbenennen, das könnte die Abstimmenden verwirren.\n
+player_rename_rejected_votekick \1 0xffffffdarf sich nicht in \2 0xffffffumbenennen, das könnte die Abstimmenden verwirren.\n
 player_welcome                \n\nWilkommen \1! Auf diesem Server läuft Version \2.\n
 player_win_default            \1 erhält aus sehr seltsamen Gründen \2 Punkte.\n
 player_lose_default           \1 verliert aus sehr seltsamen Gründen \2 Punkte.\n
@@ -2138,6 +2215,19 @@ player_topologypolice         Die Topologiepolizei befiehlt: \1
 team_shuffle                  \1 wird von Position \2 auf \3 verschoben.\n
 player_noshuffleup            Du darfst dich hier nicht selbst befördern.\n
 player_noshuffle              Dein Positionsänderungswunsch hat keinen Effekt.\n
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 msg_toomanymatches            0xff0000Zu viele Treffer bei Suche nach \1. Bitte etwas genauer.\n
 msg_nomatch                   0xff0000Keine Treffer bein Suche nach \1.\n
@@ -2229,6 +2319,7 @@ network_login_denial          Verbindungsabbruch bestätigt...\n
 network_server_login          Empfange Verbindungsaufbau von \1.\n
 network_server_login_success  Neuer Benutzer: \1\n
 
+
 network_toomanyservers        \n\n\nWarnung: auf dieem Computer laufen zu viele Server.\nDieser könnte von Clients eventuell nicht gefunden werden.\n\n\n
 
 network_browser_unidentified  Nichtidentifizierbare Serverinformation von \1 "uber Kanal \2 erhalten.\n
@@ -2269,8 +2360,6 @@ network_kill_unknown          Kein Grund angegeben.
 network_kill_spamkick         Du wurdest wegen Spammings automatisch vom Server entfernt. Sei bitte etwas vorsichtiger.
 voted_kill_kick               Du wurdest von einem wütenden Mob vom Server geschmissen; wahrscheinlich hassen sie dich. Gute Arbeit! Versuche, woanders zu spielen.
 network_kill_spectator        Du warst zu lange nur Beobachter.
-
-network_kick_notfound         Spieler \1 nicht gefunden. Gross/Kleinschreibung?\n
 
 network_ban_kph               IP \1 ist nun mit \2 Kicks pro Stunde registriert.\n
 network_ban                   Spieler von IP \1 sind für die nächsten \2 minuten gesperrt. Grund: \3\n
@@ -2368,6 +2457,8 @@ directory_path_hidden         FEHLER: Der angegebene Pfad "\1" enthält eine vers
 #********************************************
 #********************************************
 
+# printed on loading a map
+
 # title of map error message
 map_file_load_failure_title   Fehler mit Arena
 
@@ -2383,6 +2474,7 @@ map_file_load_failure_default \nDie Standardarena konnte auch nicht geladen werd
 # resource at the wrong place
 resource_file_wrong_place_title Datei am falschen Ort
 resource_file_wrong_place     Die Datei, die von "\1" geladen wurde, sollte bei "\2" liegen. Korrekturmöglichkeiten:\na) Wenn Du nicht der Autor der Datei bist, solltest Du sie dahin verschieben, wo sie sein will.\nb) Wenn du der Autor bist und die Datei bleiben soll, wo sie ist, kannst Du auch den <Resource> tag in der Datei anpassen. Wie genau, sagt die Dokumentation.
+
 
 #********************************************
 #********************************************
@@ -2439,6 +2531,11 @@ nconfig_error_ignoreold       Veraltete Konfigurationsänderung für Einstellung \
 nconfig_value_changed         \1 wurde auf Befehl des Servers von \2 auf \3 verändert.\n
 
 
+
+
+
+
+
 #*************************************
 #*************************************
 #
@@ -2472,9 +2569,31 @@ login_storepw_disk_help       Für Faulpelze: Passwort muss nie wieder eingegeben
 password_help                 Passwort-Einstellung
 
 login_request_failed          Login fehlgeschlagen. Neuer Versuch!
-login_request_first           Dieser Server erfordert ein Login.
 login_request_namechange      Neues Login nach Namensänderung erforderlich.
 login_request_master          Der Master-Server erfordert ein Login.
+
+# access level messages
+
+
+
+
+
+
+
+
+
+# various reasons for logins to fail
+
+
+
+
+
+
+
+
+
+
+
 
 # items that should not be translated
 
@@ -2483,5 +2602,19 @@ login_request_master          Der Master-Server erfordert ein Login.
 
 # Outdated:
 team_max_imbalance_perm_help  Höchste tolerierte Ungleichheit der Teams, dauerhaft
+detail_polyantialias_text     Polygon-Antial.:
+tweaks_ztrick_text            Z-Trick:
+detail_lineantialias_text     Line-Antial.:
 player_joins_team_now         \1 0x7fff7fspielt nun für \2.\n
+line_antialias_help           Aktiviert Kantenglättung für Linien
+detail_persp_text             Perpektivenkorrektur:
+network_kick_notfound         Spieler \1 nicht gefunden. Gross/Kleinschreibung?\n
+detail_persp_help             Wenn man dieses Feature deaktivert, so werden die Boden- und Wandtexturen fürchterlich verzerrt; Objekttexturen leiden jedoch nur wenig. Bringt im Softwaremodus etwas Geschwindigkeit, bei den meisten 3D-Beschleunigern kann man es gar nicht mehr abschalten.
 sp_team_max_imbalance_perm_help Höchste tolerierte Ungleichheit der Teams, dauerhaft
+ztrick_help                   Knifflige Leistungsverbesserung: funktionniert leider meist nicht... (3dfx-Karten sind die einzig bekannte Ausnahme)
+tweaks_ztrick_help            Geschwindigkeitstrick: auf 3dfx-Karten kann man das Löschen des Z-Puffers (für die Tiefensortierung der Objekte) sparen. Wenn es nicht funktionniert, so verschwinden die Vehikel mit seltsamen Effekten aus dem Bild.
+login_request_first           Dieser Server erfordert ein Login.
+detail_lineantialias_help     Sollen die Kanten von Linien geglättet werden?
+poly_antialias_help           Aktiviert Kantenglättung für Polygone
+detail_polyantialias_help     Sollen die Kanten von Polygonen geglättet werden? Auf den meisten Systemen ist dieses Feature leider nicht richtig implementiert.
+persp_correct_help            Aktiviert Perspektivenkorrektur
