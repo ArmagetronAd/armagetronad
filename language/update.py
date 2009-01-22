@@ -9,6 +9,8 @@
 #           panish translation is up to date.
 #           the --complete switch adds the original texts as comments to all items, even
 #           those already translated.
+#           the --scm switch removes all comments added by previous runs so you can
+#           easily check in partial translations into source control.
 #
 # update.py --dist
 #           compactifies translations: strips comments and whitespace
@@ -22,7 +24,8 @@ class LanguageUpdater:
     def __init__(self):
         # maximal assumed length of identifier
         self.maxlen = 30
-        self.commentAll = False
+        self.commentAll  = False
+        self.commentNone = False
         self.autoComment = "#ORIGINAL TEXT:"
         self.autoComment2 = "#TRANSLATION "
         self.untranslated = "UNTRANSLATED\n"
@@ -53,7 +56,8 @@ class LanguageUpdater:
             del self.dictionary[ key ]
         except KeyError:
             # translation not found: note that.
-            self.Write( "#" + key, self.untranslated )
+            if not self.commentNone:
+                self.Write( "#" + key, self.untranslated )
 
     # writes dictionary to open outfile
     def WriteDictionary0( self ):
@@ -129,7 +133,7 @@ class LanguageUpdater:
             else:
                 if not pair[0] == "include":
                     # write original text as a comment
-                    if self.commentAll or pair[0] not in self.dictionary:
+                    if self.commentAll or ( pair[0] not in self.dictionary and not self.commentNone ):
                         if separate:
                             self.outfile.write("\n")
                         self.Write( self.autoComment, pair[1] )
@@ -204,6 +208,8 @@ if __name__ == "__main__":
     else:
         if len( sys.argv ) >= 2 and sys.argv[1] == "--complete":
             lu.commentAll = True
+        if len( sys.argv ) >= 2 and sys.argv[1] == "--scm":
+            lu.commentNone = True
 
         # read in all translations
         for file in sys.argv[1:]:
