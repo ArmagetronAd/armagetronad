@@ -120,6 +120,12 @@ class LanguageUpdater:
         # flag indicating whether the next item needs an extra separation line
         separate = True    
 
+        # flag indicating whether the last language item was translated
+        lastTranslated = True
+
+        # flag indicating whether the last line was empty
+        lastEmpty = False
+
         # read through base file, rewriting it
         for line in infile.readlines():
             pair = self.ParseLine( line )
@@ -128,12 +134,16 @@ class LanguageUpdater:
                 try: del self.lostcomments[ line ]
                 except KeyError: pass
                 # just print line, it is a comment or whitespace
-                self.outfile.write( line )
+                empty = ( len(line) <= 1 )
+                if lastTranslated or ( not empty or not lastEmpty ):
+                    self.outfile.write( line )
+                    lastEmpty = empty
                 separate = False
             else:
                 if not pair[0] == "include":
                     # write original text as a comment
-                    if self.commentAll or ( pair[0] not in self.dictionary and not self.commentNone ):
+                    lastTranslated = pair[0] in self.dictionary
+                    if self.commentAll or ( not lastTranslated and not self.commentNone ):
                         if separate:
                             self.outfile.write("\n")
                         self.Write( self.autoComment, pair[1] )
