@@ -712,6 +712,10 @@ gl_renderer_help              OpenGL System-Information
 gl_vendor_help                OpenGL System-Information
 alpha_blend_help              Aktiviert Transparenzeffekte
 zone_alpha_toggle_help        Dieser wert wird mit ALPHA_BLEND geXORed, um den Rendermodus der Zonen zu bestimmen
+zone_segments_help            Mit wievelen Segmenten Zonen dargestellt werden. Default: 11
+zone_seg_length_help          Der Anteil jedes Zonensegents, der tatsächlich dargestellt wird. Default: .5
+zone_bottom                   Unterer Rand der Zonen. Default: 0.0
+zone_height                   Höhe der Zonen: Default: 5.0
 smooth_shading_help           Aktiviert "Rundes Licht"
 text_out_help                 Aktiviert Textausgabe
 console_columns_help          Anzahl der Spalten der Textausgabe
@@ -894,10 +898,15 @@ ban_ip_help                   Verbannt spieler von der angegebenen IP-Adresse fü
 ban_list_help                 Gibt die Liste der Verbannten IP-Adressen aus.
 unban_ip_help                 Hebt eine Verbannung auf.
 
+player_list_hidden_player_prefix_help Der Prefix, der vor versteckten Globalen IDs gezeigt wird, wenn man sie doch sehen kann.
+player_list_search            \1: Suchmuster "\n" passt auf:\n
+player_list_search_no_results \1: Suchmuster "\2" liefert keine Treffer.\n
+player_list_search_end        \1: Ende der Suchergebnisse (\2 Treffer).\n
+player_list_end               \1: \2 Spieler.\n
 
+admins_help                   Gibt eine Liste der Administratoren. Siehe auch /admins and /listadmins chat commands.
 
-
-
+admin_list_cant_see           \1: Zugriff auf Administratorenliste verweigert.\n
 # communication
 console_message_help          Gibt eine Nachricht auf den Konsolen aller angeschlossenen Spieler aus.
 center_message_help           Gibt eine Nachricht in der Bildschirmmitte aller angeschlossenen Spieler aus.
@@ -1533,9 +1542,6 @@ kick_player_details_text      Wenn dieser Vorschlag akzeptiert wird, dann wird \
 kick_player_text              Vertreibe \1
 kick_player_help              Dieser Menupunkt schlägt den anderen Spielern vor, besagten Spieler vom Server zu werfen.
 
-
-
-
 #*************************************
 #*************************************
 #
@@ -1588,12 +1594,10 @@ viewport_belongs_text         Fenster \1 gehört Spieler \2 (\3)
 viewport_assign_text          Fenster zuteilen
 viewport_assign_help          Welcher Spieler spielt in welchem Fenster?
 
-
 #player setup
 
 player_name_text              Name:
 player_name_help              Das ... in "Sieger: ... ". Benutze die normalen Editiertasten.
-
 
 player_input_text             Spiel-Tasten
 player_input_help             Stellt die Tastaturbelegung für die Steuerung der Vehikel ein
@@ -1621,8 +1625,6 @@ player_green_help             Stellt den Grünanteil deiner Farbe ein
 
 player_red_text               Rot:
 player_red_help               Stellt den Rotanteil deiner Farbe ein
-
-
 
 player_spectator_text         Nur Zuschauer:
 player_spectator_help         Wenn man nur Zuschauer ist, so steuert man kein eigenes Vehikel und kann nur den anderen zusehen.
@@ -1700,7 +1702,6 @@ team_menu_join_help           Werde Mitglied von diesem Team
 
 team_menu_create              Neues Team/Beliebiges Team
 team_menu_create_help         Gründet ein neues Team und lässt den Spieler beitreten, oder, sollte das nicht möglich sein, tritt einem beliebigen Team bei
-
 
 team_owned_by                 \1s Team
 team_ai                       Computergegner
@@ -2152,8 +2153,6 @@ player_win_conquest           \1 bekam \2 Punkte für das erobern der Basis des F
 player_win_held_fortress      \1 bekam \2 Punkte für das Halten der eigenen Basis.\n
 player_win_conquest_specific  \1 bekam \2 Punkte für das erobern der Basis von \3.\n
 player_kill_collapse          \1 wurde von seiner kollabierenden Zone vernichtet.\n
-
-
 zone_collapse_harmless        \1s Zone verpufft harmlos wegen mangelden Feindkontakts.\n
 
 #********************************************
@@ -2215,20 +2214,6 @@ player_topologypolice         Die Topologiepolizei befiehlt: \1
 team_shuffle                  \1 wird von Position \2 auf \3 verschoben.\n
 player_noshuffleup            Du darfst dich hier nicht selbst befördern.\n
 player_noshuffle              Dein Positionsänderungswunsch hat keinen Effekt.\n
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 msg_toomanymatches            0xff0000Zu viele Treffer bei Suche nach \1. Bitte etwas genauer.\n
 msg_nomatch                   0xff0000Keine Treffer bein Suche nach \1.\n
 
@@ -2389,7 +2374,6 @@ vote_toofew                   Vorschlag abgelehnt, es sind zu wenig Wahlberechti
 vote_submitted                Vorschlag "\2" wurde von \1 eingebracht.\n
 vote_vote_for                 \1 hat für Vorschlag "\2" gestimmt.\n
 vote_vote_against             \1 hat gegen Vorschlag "\2" gestimmt.\n
-
 #********************************************
 #********************************************
 #
@@ -2475,7 +2459,6 @@ map_file_load_failure_default \nDie Standardarena konnte auch nicht geladen werd
 resource_file_wrong_place_title Datei am falschen Ort
 resource_file_wrong_place     Die Datei, die von "\1" geladen wurde, sollte bei "\2" liegen. Korrekturmöglichkeiten:\na) Wenn Du nicht der Autor der Datei bist, solltest Du sie dahin verschieben, wo sie sein will.\nb) Wenn du der Autor bist und die Datei bleiben soll, wo sie ist, kannst Du auch den <Resource> tag in der Datei anpassen. Wie genau, sagt die Dokumentation.
 
-
 #********************************************
 #********************************************
 #
@@ -2523,18 +2506,11 @@ config_file_write_error       Konnte Konfiguration nicht speichern!\n
 config_value_changed          \1 wurde von \2 auf \3 verändert.\n
 config_error_read             Eingabefehler beim Lesen von \1: Ungültiges Format.\n
 config_message_info           \1 steht momentan auf \2.\n
-
 nconfig_errror_protected      Nix da. Nur der Server darf \1 ändern.\n
 nconfig_error_unknown         Konfigurationsänderung für die unbekannte Variable \1 erhalten.\n\n\n\nWAHRSCHEINLICH SOLLTE EINE NEUE VERSION VON ARMAGETRON INSTALLIERT WERDEN!!!!\n
 nconfig_error_nonet           Konfigurationsänderung über das Netwzerk für die Variable \1 erhalten, die jedoch keinen Netzwerksupport hat.\n\n\n\nWAHRSCHEINLICH SOLLTE EINE NEUE VERSION VON ARMAGETRON INSTALLIERT WERDEN!!!!\n
 nconfig_error_ignoreold       Veraltete Konfigurationsänderung für Einstellung \1 wird ignoriert.\n
 nconfig_value_changed         \1 wurde auf Befehl des Servers von \2 auf \3 verändert.\n
-
-
-
-
-
-
 
 #*************************************
 #*************************************
@@ -2574,47 +2550,9 @@ login_request_master          Der Master-Server erfordert ein Login.
 
 # access level messages
 
-
-
-
-
-
-
-
-
 # various reasons for logins to fail
-
-
-
-
-
-
-
-
-
-
-
 
 # items that should not be translated
 
 # Room for lost settings in translation files:
 
-
-# Outdated:
-team_max_imbalance_perm_help  Höchste tolerierte Ungleichheit der Teams, dauerhaft
-detail_polyantialias_text     Polygon-Antial.:
-tweaks_ztrick_text            Z-Trick:
-detail_lineantialias_text     Line-Antial.:
-player_joins_team_now         \1 0x7fff7fspielt nun für \2.\n
-line_antialias_help           Aktiviert Kantenglättung für Linien
-detail_persp_text             Perpektivenkorrektur:
-network_kick_notfound         Spieler \1 nicht gefunden. Gross/Kleinschreibung?\n
-detail_persp_help             Wenn man dieses Feature deaktivert, so werden die Boden- und Wandtexturen fürchterlich verzerrt; Objekttexturen leiden jedoch nur wenig. Bringt im Softwaremodus etwas Geschwindigkeit, bei den meisten 3D-Beschleunigern kann man es gar nicht mehr abschalten.
-sp_team_max_imbalance_perm_help Höchste tolerierte Ungleichheit der Teams, dauerhaft
-ztrick_help                   Knifflige Leistungsverbesserung: funktionniert leider meist nicht... (3dfx-Karten sind die einzig bekannte Ausnahme)
-tweaks_ztrick_help            Geschwindigkeitstrick: auf 3dfx-Karten kann man das Löschen des Z-Puffers (für die Tiefensortierung der Objekte) sparen. Wenn es nicht funktionniert, so verschwinden die Vehikel mit seltsamen Effekten aus dem Bild.
-login_request_first           Dieser Server erfordert ein Login.
-detail_lineantialias_help     Sollen die Kanten von Linien geglättet werden?
-poly_antialias_help           Aktiviert Kantenglättung für Polygone
-detail_polyantialias_help     Sollen die Kanten von Polygonen geglättet werden? Auf den meisten Systemen ist dieses Feature leider nicht richtig implementiert.
-persp_correct_help            Aktiviert Perspektivenkorrektur
