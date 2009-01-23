@@ -616,6 +616,8 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
 
             // is the authority an abreviation?
             bool shortcut = true;
+            // does it contain a path?
+            bool hasPath = false;
 
             // is the server a raw IP?
             bool rawIP = true;
@@ -677,6 +679,7 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                 }
                 else // must be in path
                 {
+                    con << "in path, " << in << "\n";
                     if ( c == '/' )
                     {
                         if ( slash )
@@ -694,6 +697,7 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                         }
 
                         slash = false;
+                        hasPath = true;
                     }
                 }
 
@@ -701,12 +705,13 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                 if( inHostName || inPort )
                 {
                     outShort.put(tolower(c));
-                    outFull.put(c);
+                    outFull.put( (char) c );
                 }
                 else
                 {
-                    outDirectory.put(c);
+                    outDirectory.put( (char) c);
                 }
+
 
                 c = in.get();
             }
@@ -723,6 +728,7 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
             {
                 return ReportAuthorityError( tOutput( "$login_error_invalidurl_rawip", authority ) );
             }
+
 
             authority = outShort.str().c_str();
             fullAuthority = outFull.str().c_str();
@@ -743,10 +749,10 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                 shortcut = true;
             }
 
-            if( slash )
+            if( hasPath )
             {
-                fullAuthority << outDirectory;
-                authority << outDirectory;
+                fullAuthority += outDirectory.str().c_str();
+                authority += outDirectory.str().c_str();
             }
         }
 
