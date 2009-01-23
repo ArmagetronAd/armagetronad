@@ -236,6 +236,7 @@ gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation )
 	wallInteract_ = false;
 	wallBouncesLeft_ = 0;
 	targetRadius_ = 0;
+    lastImpactTime_ = 0;
 	resizeRequested_ = false;
 	fallSpeed_ = 0;
 	lastSeekTime_ = 0;
@@ -285,6 +286,7 @@ gZone::gZone( nMessage & m )
 	dynamicCreation_ = false;
 	wallInteract_ = false;
 	wallBouncesLeft_ = 0;
+    lastImpactTime_ = 0;
 	targetRadius_ = 0;
 	resizeRequested_ = false;
 	fallSpeed_ = 0;
