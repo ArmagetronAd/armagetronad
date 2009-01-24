@@ -69,6 +69,19 @@ static REAL sg_initialSize = 5.0f;
 static nSettingItem< REAL > sg_expansionSpeedConf( "WIN_ZONE_EXPANSION", sg_expansionSpeed );
 static nSettingItem< REAL > sg_initialSizeConf( "WIN_ZONE_INITIAL_SIZE", sg_initialSize );
 
+static int sg_zoneSegments = 11;
+static tSettingItem<int> sg_zoneSegmentsConf( "ZONE_SEGMENTS", sg_zoneSegments );
+
+static REAL sg_zoneSegLength = .5;
+static tSettingItem<REAL> sg_zoneSegLengthConf( "ZONE_SEG_LENGTH", sg_zoneSegLength );
+
+static REAL sg_zoneBottom = 0.0f;
+static tSettingItem<REAL> sg_zoneBottomConf( "ZONE_BOTTOM", sg_zoneBottom );
+
+static REAL sg_zoneHeight = 5.0f;
+static tSettingItem<REAL> sg_zoneHeightConf( "ZONE_HEIGHT", sg_zoneHeight );
+
+
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
 {
@@ -836,6 +849,11 @@ static nSettingItem< REAL > sg_zoneAlphaConfServer( "ZONE_ALPHA_SERVER", sg_zone
 void gZone::Render( const eCamera * cam )
 {
 #ifndef DEDICATED
+    if ( sg_zoneSegLength <= 0 )
+        sg_zoneSegLength = .5;
+    if ( sg_zoneSegments < 1 )
+        sg_zoneSegments = 11;
+
     REAL alpha = ( lastTime - createTime_ ) * .2f;
     if ( alpha > .7f )
         alpha = .7f;
@@ -847,15 +865,13 @@ void gZone::Render( const eCamera * cam )
     ModelMatrix();
     glPushMatrix();
 
-    const REAL seglen = .2f;
-    const REAL bot = 0.0f;
-    const REAL top = 5.0f; // + ( lastTime - createTime_ ) * .1f;
+    REAL seglen = 2 * M_PI / sg_zoneSegments * sg_zoneSegLength;
 
     REAL r = Radius();
     GLfloat m[4][4]={{r*rotation_.x,r*rotation_.y,0,0},
                      {-r*rotation_.y,r*rotation_.x,0,0},
-                     {0,0,top,0},
-                     {pos.x,pos.y,bot,1}};
+                     {0,0,sg_zoneHeight,0},
+                     {pos.x,pos.y,sg_zoneBottom,1}};
 
     glMultMatrixf(&m[0][0]);
 
@@ -887,9 +903,9 @@ void gZone::Render( const eCamera * cam )
             BeginLineStrip();
         }
 
-        for ( int i = sg_segments - 1; i>=0; --i )
+        for ( int i = sg_zoneSegments - 1; i>=0; --i )
         {
-            REAL a = i * 2 * 3.14159 / REAL( sg_segments );
+            REAL a = i * 2 * M_PI / REAL( sg_zoneSegments );
             REAL b = a + seglen;
             
             REAL sa = sin(a);
@@ -1743,7 +1759,7 @@ bool gBaseZoneHack::Timestep( REAL time )
     // set speed according to conquest status
     if ( currentState_ == State_Safe )
     {
-        REAL maxSpeed = 10 * ( 2 * 3.141 ) / sg_segments;
+        REAL maxSpeed = 10 * ( 2 * M_PI ) / sg_segments;
         REAL omega = .3 + conquered_ * conquered_ * maxSpeed;
         REAL omegaDot = 2 * conquered_ * conquest * maxSpeed;
 

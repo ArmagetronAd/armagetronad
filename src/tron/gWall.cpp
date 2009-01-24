@@ -195,9 +195,9 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
     }
 
 
-    if (h>9000){
-        if (sr_lowerSky || sg_MoviePack()) h=lower_height;
-        if (sr_upperSky && !sg_MoviePack()) h=upper_height;
+    if (h>lower_height){
+        if (sr_upperSky && !sg_MoviePack() && h>upper_height) h=upper_height;
+        else if (sr_lowerSky || sg_MoviePack()) h=lower_height;
     }
 
     BeginQuads();

@@ -3184,8 +3184,12 @@ void sn_Receive(){
                 // clear peer info used for receiving
                 memset( &peers[MAXCLIENTS+1], 0, sizeof(sockaddr) );
 
+                // copy socket info over to [MAXCLIENTS+1] and receive. The copy
+                // step is important, nAuthentication.cpp relies on the socket being set.
                 if((sn_Connections[MAXCLIENTS+1].socket = (*i).CheckNewConnection() ) != NULL)
+                {
                     rec_peer(MAXCLIENTS+1);
+                }
             }
         }
         // z-man: after much thought, the server does also need to listen to the

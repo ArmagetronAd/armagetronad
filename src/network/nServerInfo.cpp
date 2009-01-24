@@ -2576,6 +2576,11 @@ static tString net_dns("");
 
 static tConfItemLine sn_sbtip_official("SERVER_DNS", net_dns);
 
+tString const & sn_GetMyDNSName()
+{
+    return net_dns;
+}
+
 // *******************************************************************************************
 // *
 // *    DoGetFrom
