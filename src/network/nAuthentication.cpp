@@ -679,7 +679,6 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
                 }
                 else // must be in path
                 {
-                    con << "in path, " << in << "\n";
                     if ( c == '/' )
                     {
                         if ( slash )
