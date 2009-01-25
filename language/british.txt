@@ -1,4 +1,5 @@
 language British English
+encoding latin1
 include english_base.txt
 
 fav_num_per_team_player_help      The favourite number of players per team for this player
