@@ -403,7 +403,7 @@ class uMenuItemString: public uMenuItem{
 protected:
     tOutput  description;
     tString *content;
-    unsigned int realCursorPos; // position of cursor as byte offset into string
+    size_t realCursorPos; // position of cursor as byte offset into string
     int      maxLength_;
 
     bool InsertChar(int unicode);
