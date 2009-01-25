@@ -17,3 +17,5 @@
 
 /* Define to 1 if you have the `png' library (-lpng). */
 #define HAVE_LIBPNG 1
+
+#define HAVE_FTGL_H 1
