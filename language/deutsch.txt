@@ -912,6 +912,9 @@ console_message_help          Gibt eine Nachricht auf den Konsolen aller angesch
 center_message_help           Gibt eine Nachricht in der Bildschirmmitte aller angeschlossenen Spieler aus.
 fullscreen_message_help       Unterbricht das Spiel mit einer bildschirmfüllenden Nachrict.
 say_help                      Lässt den Server-Administrator etwas sagen.
+rename_help                   Benennt den angegebenen Spieler um.
+allow_rename_player_help      Gibt dem angegebenen Spieler die Erlaubnis, seinen Namen wieder zu ändern.
+disallow_rename_player_help   Nimmt dem angegebenen Spieler die Erlaubnis, seinen Namen zu ändern.
 
 #********************************************
 #********************************************
