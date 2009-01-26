@@ -371,44 +371,60 @@ void uMenu::OnEnter(){
 void uMenu::HandleEvent( SDL_Event event )
 {
 #ifndef DEDICATED
+    su_inMenu = true;
+
+    // int newSelected = -1;
+    switch (event.type)
+    {
+    case SDL_KEYDOWN:
+    {
+        if (!disphelp)
+            lastkey=tSysTimeFloat();
+        
+        switch (event.key.keysym.sym){
+        case(SDLK_ESCAPE):
+            repeat = false;
+            lastkey=tSysTimeFloat();
+            Exit();
+            return;
+            break;
+        case(SDLK_UP):
+            lastkey=tSysTimeFloat();
+            selected = GetNextSelectable(selected);
+            return;
+            break;
+        case(SDLK_DOWN):
+            lastkey=tSysTimeFloat();
+            selected = GetPrevSelectable(selected);
+            return;
+            break;
+        default:
+            break;
+        }
+    }
+    default:
+        break;
+    }
     if (!items[selected]->Event(event))
     {
         // int newSelected = -1;
         switch (event.type){
         case SDL_KEYDOWN:
         {
-            if (!disphelp)
-                lastkey=tSysTimeFloat();
             switch (event.key.keysym.sym){
-
-            case(SDLK_ESCAPE):
-                            repeat = false;
-                lastkey=tSysTimeFloat();
-                Exit();
-                break;
-
-                case(SDLK_UP):
-                                lastkey=tSysTimeFloat();
-                    selected = GetNextSelectable(selected);
-                    break;
-                case(SDLK_DOWN):
-                                lastkey=tSysTimeFloat();
-                    selected = GetPrevSelectable(selected);
-                    break;
-
             case(SDLK_LEFT):
-                            items[selected]->LeftRight(-1);
+                items[selected]->LeftRight(-1);
                 break;
             case(SDLK_RIGHT):
-                            items[selected]->LeftRight(1);
+                items[selected]->LeftRight(1);
                 break;
-
+                
             case(SDLK_SPACE):
-                        case(SDLK_KP_ENTER):
-                            case(SDLK_RETURN):
-                                    repeat = false;
+            case(SDLK_KP_ENTER):
+            case(SDLK_RETURN):
+                repeat = false;
                 try
-        {
+                {
                     su_inMenu = false;
                     items[selected]->Enter();
                 }
@@ -454,8 +470,6 @@ void uMenu::HandleEvent( SDL_Event event )
             break;
         }
     }
-
-    su_inMenu = true;
 #endif
 }
 
