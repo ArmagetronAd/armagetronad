@@ -43,6 +43,51 @@ class nNetObjectRegistrar;
 
 extern nVersionFeature sn_protocolBuffers;
 
+//! fills a message with a protocol buffer
+class nMessageFillerProtoBufBase: public nMessageFiller
+{
+protected:
+    //! fills the receiving buffer with data
+    virtual void OnFill( nSendBuffer::Buffer & buffer, int receiver ) const;
+
+    //! returns the wrapped protcol buffer
+    inline nProtoBuf const & GetMessage() const
+    {
+        return DoGetMessage();
+    }
+
+private:
+    //! returns the wrapped protcol buffer
+    virtual nProtoBuf const & DoGetMessage() const = 0;
+};
+
+//! implementation for each protocl buffer 
+template< class PROTOBUF > 
+class nMessageFillerProtoBuf: public nMessageFillerProtoBufBase
+{
+public:
+    //! returns the wrapped protcol buffer
+    inline PROTOBUF const & GetMessage() const
+    {
+        return protoBuf_;
+    }
+
+    //! returns the wrapped protcol buffer
+    inline PROTOBUF & AccessMessage()
+    {
+        return protoBuf_;
+    }
+private:
+    //! returns the wrapped protcol buffer
+    virtual nProtoBuf const & DoGetMessage() const
+    {
+        return protoBuf_;
+    }
+
+    //! the wrapped buffer
+    PROTOBUF protoBuf_;
+};
+
 //! extra information about the sender of a message
 struct nSenderInfo
 {
@@ -154,10 +199,10 @@ nMessage& operator >> ( nMessage& m, nProtoBuf & buffer );
 nMessage& operator << ( nMessage& m, nProtoBuf const & buffer );
 
 // templated version of protocol buffer messages
-template< class MESSAGE > 
+template< class PROTOBUF > 
 class nPBDescriptor: public nPBDescriptorBase
 {
-    typedef void Handler( MESSAGE & message, nSenderInfo const & sender );
+    typedef void Handler( PROTOBUF & message, nSenderInfo const & sender );
 
     //! instance of this descriptor
     static nPBDescriptor * instance_;
@@ -173,7 +218,7 @@ class nPBDescriptor: public nPBDescriptorBase
     virtual void DoHandleMessage( nMessage & envelope )
     {
         // read into protocol buffer
-        MESSAGE protocolBuffer;
+        PROTOBUF protocolBuffer;
 
         ReadMessage( envelope, protocolBuffer );
 
@@ -184,11 +229,11 @@ class nPBDescriptor: public nPBDescriptorBase
     //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
     virtual nProtoBuf * DoCreate() const
     {
-        return new MESSAGE;
+        return new PROTOBUF;
     }
 public:
     //! puts a puffer into a message
-    nMessage * Transform( MESSAGE const & message ) const
+    nMessage * Transform( PROTOBUF const & message ) const
     {
         nMessage * ret = new nMessage( *this );
 
@@ -198,7 +243,7 @@ public:
     }
 
     //! puts a puffer into a message
-    static nMessage * TransformStatic( MESSAGE const & message )
+    static nMessage * TransformStatic( PROTOBUF const & message )
     {
         tASSERT( instance_ );
 
@@ -211,7 +256,7 @@ public:
 
     nPBDescriptor( unsigned short identification, Handler * handler,
                    bool acceptEvenIfNotLoggedIn = false )
-    : nPBDescriptorBase( identification, MESSAGE(), acceptEvenIfNotLoggedIn )
+    : nPBDescriptorBase( identification, PROTOBUF(), acceptEvenIfNotLoggedIn )
     , handler_( handler )
     {
 #ifdef DEBUG
@@ -222,14 +267,14 @@ public:
 };
 
 //! instance of this descriptor
-template< class MESSAGE > 
-nPBDescriptor< MESSAGE > * nPBDescriptor< MESSAGE >::instance_ = 0;
+template< class PROTOBUF > 
+nPBDescriptor< PROTOBUF > * nPBDescriptor< PROTOBUF >::instance_ = 0;
 
 // create a message from a pattern buffer
-template< class MESSAGE >
-nMessage * nMessage::Transform( MESSAGE const & message )
+template< class PROTOBUF >
+nMessage * nMessage::Transform( PROTOBUF const & message )
 {
-    return nPBDescriptor< MESSAGE >::TransformStatic( message );
+    return nPBDescriptor< PROTOBUF >::TransformStatic( message );
 }
 
 // network object descriptors
@@ -257,8 +302,8 @@ public:
     }
 protected:
     // fetches the network object ID from a creation message
-    template< class MESSAGE >
-    static unsigned int GetObjectID( MESSAGE const & message )
+    template< class PROTOBUF >
+    static unsigned int GetObjectID( PROTOBUF const & message )
     {
         return GetObjectID( message.base() );
     }
@@ -282,19 +327,19 @@ private:
 };
 
 //! specialization of descriptor for each network object class
-template< class OBJECT, class MESSAGE >
-class nOPBDescriptor: public nOPBDescriptorBase, public nPBDescriptor< MESSAGE >
+template< class OBJECT, class PROTOBUF >
+class nOPBDescriptor: public nOPBDescriptorBase, public nPBDescriptor< PROTOBUF >
 {
 public:
     nOPBDescriptor( int identification )
     : nOPBDescriptorBase()
-    , nPBDescriptor< MESSAGE >( identification, &HandleCreation, false )
+    , nPBDescriptor< PROTOBUF >( identification, &HandleCreation, false )
     {}
 private:
     // template message
-    static const MESSAGE prototype;
+    static const PROTOBUF prototype;
 
-    static void HandleCreation( MESSAGE & message, nSenderInfo const & sender )
+    static void HandleCreation( PROTOBUF & message, nSenderInfo const & sender )
     {
         unsigned short id = GetObjectID( message.init() );
         
@@ -348,7 +393,7 @@ private:
     virtual nMessage * DoWriteInit( nNetObject & object ) const
     {
         // init message
-        MESSAGE message;
+        PROTOBUF message;
         
         // object cast to correct type
         tASSERT( dynamic_cast< OBJECT * >( &object ) );
@@ -376,8 +421,8 @@ private:
 };
 
 // template message
-template< class OBJECT, class MESSAGE >
-const MESSAGE nOPBDescriptor< OBJECT, MESSAGE >::prototype;
+template< class OBJECT, class PROTOBUF >
+const PROTOBUF nOPBDescriptor< OBJECT, PROTOBUF >::prototype;
 
 class nMessageCache
 {
