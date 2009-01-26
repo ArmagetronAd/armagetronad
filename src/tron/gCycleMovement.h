@@ -31,8 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eNetGameObject.h"
 #include <deque>
 
-#include "rColor.h"
-
 class gCycle;
 class gDestination;
 class gPlayerWall;
@@ -67,7 +65,12 @@ public:
     void							AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycleMovement * thisCycle ); // add the interaction with a wall to our data
 };
 
-typedef rColor gRealColor;
+struct gRealColor {
+    REAL r,g,b;
+
+    gRealColor():r(1), g(1), b(1){}
+
+};
 
 //! class handling lightcycle movement aspects ( not networking beyond construction, no rendering, no wall building )
 class gCycleMovement : public eNetGameObject
@@ -241,15 +244,12 @@ protected:
     REAL            rubber;                     //!< the amount rubber used up by the cycle
     REAL            rubberMalus;                //!< additional rubber usage factor
     REAL            rubberSpeedFactor;          //!< the factor by which the speed is currently multiplied by rubber
-    REAL            rubberDepleteTime_;         //!< the time rubber got depleted
 
     REAL            brakeUsage;                 //!< current brake usage
     REAL            rubberUsage;                //!< current rubber usage (not from hitting a wall, but from tunneling. Without taking efficiency into account.)
 
     // room for accessors
 public:
-    REAL RubberDepleteTime() const;                //!< returns the time rubber got fully used (or 0 if it hasn't)
-
     REAL GetMaxSpaceAhead( REAL maxReport ) const; //< Returns the current maximal space ahead
 
     inline REAL GetDistance( void ) const;  //!< Gets the distance traveled so far
@@ -404,20 +404,6 @@ inline bool gCycleMovement::IsDestinationUsed( const gDestination * dest ) const
 inline void gCycleMovement::DropTempWall( gPlayerWall * wall, eCoord const & pos, eCoord const & dir )
 {
     this->OnDropTempWall( wall, pos, dir );
-}
-
-// *******************************************************************************************
-// *
-// *    RubberDepleteTime
-// *
-// *******************************************************************************************
-//!
-//!     @return     the time rubber got depleted
-//!
-// *******************************************************************************************
-inline REAL gCycleMovement::RubberDepleteTime() const
-{
-    return rubberDepleteTime_;
 }
 
 // *******************************************************************************************

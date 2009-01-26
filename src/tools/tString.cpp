@@ -611,7 +611,7 @@ int tString::StrPos( const tString & tofind ) const
     for (int i=0; i<Len()-1; i++) {
         if ((*this)(i) == tofind(0)) {
             bool found = true;
-            for (int j=0; j<tofind.Len()-1 && i+j < Len()-1; j++) {
+            for (int j=0; j<tofind.Len()-1; j++) {
                 if ((*this)(i+j) != tofind(j))
                     found = false;
             }
@@ -2333,7 +2333,7 @@ wchar_t tCharacterFilter::Filter( wchar_t in )
 //!
 // **********************************************************************
 
-tString tCharacterFilter::FilterByteString( tString const & s )
+tString tCharacterFilter::FilterByteString( tString & s )
 {
     int len = s.Len() -1;
     tString out;
@@ -2341,7 +2341,7 @@ tString tCharacterFilter::FilterByteString( tString const & s )
     for ( int i = 0; i < len; i++ )
     {
         c = Filter( s[i] );
-        if ( c != 0x7f ) // If it's a del character, that means we want to strip it
+        if ( ( c ) != 0x7f ) // If it's a del character, that means we want to strip it
         {
             out << c;
         }
@@ -2360,13 +2360,13 @@ tString tCharacterFilter::FilterByteString( tString const & s )
 //!
 // **********************************************************************
 
-tString tCharacterFilter::FilterString( tString const & s )
+tString tCharacterFilter::FilterString( tString & s )
 {
     // output string
     tString out;
 
     // prepare reader and writer
-    tString::const_iterator reader = s.begin();
+    tString::iterator reader = s.begin();
     std::back_insert_iterator< tString > writer = back_inserter(out);
 
     try
@@ -2376,12 +2376,10 @@ tString tCharacterFilter::FilterString( tString const & s )
         {
             // convert from utf8
             wchar_t c = utf8::next( reader, s.end() );
-            // Check if we don't want to strip it anyway
-            wchar_t f = Filter( c );
-            if ( f != 0x7f )
+            if ( c != 0x7f )
             {
                 // filter and convert back to utf8
-                utf8::append( f, writer );
+                utf8::append( Filter( c ), writer );
             }
         }
     }

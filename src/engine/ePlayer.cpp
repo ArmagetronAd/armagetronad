@@ -3997,8 +3997,8 @@ public:
                 {
                     if ( content->Len() + insertion.insertion_.Len() <= maxLength_ )
                     {
-                        *content = content->SubStr( 0, cursorPos ) + insertion.insertion_ + content->SubStr( cursorPos );
-                        cursorPos += insertion.insertion_.Len()-1;
+                        *content = content->SubStr( 0, realCursorPos ) + insertion.insertion_ + content->SubStr( realCursorPos );
+                        realCursorPos += insertion.insertion_.Len()-1;
                     }
 
                     return true;
@@ -5418,10 +5418,13 @@ void ePlayerNetID::WriteSync( Engine::ePlayerNetIDSync & sync )
 // makes sure the passed string is not longer than the given maximum
 static void se_CutString( tColoredString & string, int maxLen )
 {
-    if (string.Len() > maxLen )
+    if ( string.LenUtf8() > maxLen )
     {
-        string = string.SubStr(0, maxLen);
-        //string[string.Len()-1]='\0';
+        // nibble away one character at a time (not very efficient)
+        while ( string.LenUtf8() > maxLen )
+        {
+            string.RemoveSubStrUtf8( string.size() - 1, 1 );
+        }
         string.RemoveTrailingColor();
     }
 }
@@ -8467,17 +8470,9 @@ static bool se_IsUnderscore( char c )
 
 void ePlayerNetID::FilterName( tString const & in, tString & out )
 {
-    int i;
     static ePlayerCharacterFilter filter;
-    out = tColoredString::RemoveColors( in );
-
-    // filter out illegal characters
-    for ( i = out.Size()-1; i>=0; --i )
-    {
-        char & c = out[i];
-
-        c = filter.Filter( c );
-    }
+    tString temp = tColoredString::RemoveColors( in );
+    out = filter.FilterString( temp );
 
     // strip leading and trailing unknown characters
     se_StripMatchingEnds( out, se_IsUnderscore, se_IsUnderscore );

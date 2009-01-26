@@ -87,6 +87,7 @@
 		9B7CFE230EFCE74700126634 /* tResourceType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE170EFCE74700126634 /* tResourceType.cpp */; };
 		9B83FE950B12161600878E8A /* Growl-WithInstaller.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9B83FF0F0B121B3100878E8A /* Growl-WithInstaller.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
+		9BB5B9280D84605700BF5F1C /* InfoPlist.strings.in in Resources */ = {isa = PBXBuildFile; fileRef = 9BB5B9260D84605700BF5F1C /* InfoPlist.strings.in */; };
 		9BB7B4000D8246A2004FE8C3 /* config in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAE20A2CAE0700D7033C /* config */; };
 		9BB7B4010D8246A2004FE8C3 /* language in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAFE0A2CAE1D00D7033C /* language */; };
 		9BB7B5E10D8302FA004FE8C3 /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B5A60D8302FA004FE8C3 /* eAdvWall.cpp */; };
@@ -140,6 +141,7 @@
 		9BB7B6670D830322004FE8C3 /* AARuby.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6520D830321004FE8C3 /* AARuby.mm */; };
 		9BB7B6690D830322004FE8C3 /* AAURLHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6540D830321004FE8C3 /* AAURLHandler.mm */; };
 		9BB7B6710D830322004FE8C3 /* SDLMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B65F0D830321004FE8C3 /* SDLMain.mm */; };
+		9BB7B6730D830322004FE8C3 /* version.h.in in Resources */ = {isa = PBXBuildFile; fileRef = 9BB7B6610D830322004FE8C3 /* version.h.in */; };
 		9BB7B6AF0D830366004FE8C3 /* md5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6900D830365004FE8C3 /* md5.cpp */; };
 		9BB7B6B10D830366004FE8C3 /* nAuthentication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6920D830365004FE8C3 /* nAuthentication.cpp */; };
 		9BB7B6B30D830366004FE8C3 /* nConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6940D830365004FE8C3 /* nConfig.cpp */; };
@@ -525,7 +527,7 @@
 		9B437BA00F2CBD8300A10CC6 /* tRectangle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tRectangle.cpp; sourceTree = "<group>"; };
 		9B437BB10F2CBD9E00A10CC6 /* utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utf8.h; sourceTree = "<group>"; };
 		9B715F4C0F0BD95100034EBF /* release.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = release.rake; sourceTree = "<group>"; tabWidth = 2; };
-		9B715F4D0F0BD95100034EBF /* config.rb */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = config.rb; sourceTree = "<group>"; tabWidth = 2; };
+		9B715F4D0F0BD95100034EBF /* config.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = config.rake; sourceTree = "<group>"; tabWidth = 2; };
 		9B715F4E0F0BD95100034EBF /* aabeta.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = aabeta.rake; sourceTree = "<group>"; tabWidth = 2; };
 		9B77E6C80D8618B90022FDF2 /* xcode.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = xcode.rake; sourceTree = "<group>"; tabWidth = 2; };
 		9B77E6C90D8618B90022FDF2 /* rakefile.rb */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = text.script.ruby; path = rakefile.rb; sourceTree = "<group>"; tabWidth = 2; };
@@ -948,7 +950,7 @@
 			isa = PBXGroup;
 			children = (
 				9B715F4E0F0BD95100034EBF /* aabeta.rake */,
-				9B715F4D0F0BD95100034EBF /* config.rb */,
+				9B715F4D0F0BD95100034EBF /* config.rake */,
 				9B715F4C0F0BD95100034EBF /* release.rake */,
 				9B77E6C80D8618B90022FDF2 /* xcode.rake */,
 			);
@@ -1578,6 +1580,8 @@
 				9BD7DB3E0A2CAE4600D7033C /* textures in Resources */,
 				9BD7DB770A2CE28500D7033C /* SDLMain.nib in Resources */,
 				9BD7DB7E0A2CE35600D7033C /* Armagetron Advanced.icns in Resources */,
+				9BB7B6730D830322004FE8C3 /* version.h.in in Resources */,
+				9BB5B9280D84605700BF5F1C /* InfoPlist.strings.in in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1624,7 +1628,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "rake --trace xcode:cleanup\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am astylerc armagetronad.sfd\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone";
+			shellScript = "rake --trace xcode:cleanup\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am astylerc\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone";
 		};
 		9B3139B40EFD0586009690D0 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2146,7 +2150,6 @@
 					ppc,
 					i386,
 				);
-				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/current;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "../src/macosx/Armagetron Advanced_Prefix.pch";
@@ -2168,7 +2171,6 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = "Armagetron Advanced";
 				SDKROOT = "";
-				STRIP_INSTALLED_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

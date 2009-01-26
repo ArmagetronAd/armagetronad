@@ -161,8 +161,8 @@ void sr_utf8216(tString const &in, std::wstring &out) {
 int sr_fontType = sr_fontTexture;
 static tConfItem< int > sr_fontTypeConf( "FONT_TYPE", sr_fontType, &sr_ReloadFont);
 
-float sr_lineHeight = 1.;
-static tConfItem< float > sr_lineHeightconf( "LINE_HEIGHT", sr_lineHeight);
+static float sr_fontSizeFactor = .9;
+static tConfItem< float > sr_fontSizeFactorConf( "FONT_SIZE_FACTOR", sr_fontSizeFactor, &sr_ReloadFont );
 
 class rFontContainer : std::map<int, FTFont *> {
     FTFont &New(int size);
@@ -212,20 +212,12 @@ public:
         }
     }
     FTFont &GetFont(float height) {
-        static float size_factor = .8; // guess, then improve
-        int size = int(height/sr_lineHeight*size_factor*sr_screenHeight/2.+.5);
-        FTFont *ret;
+        int size = int(height*sr_fontSizeFactor*sr_screenHeight/2.+.5);
         if(count(size)) {
-            ret = (*this)[size]; //already exists
+            return *((*this)[size]); //already exists
         } else {
-            ret = &New(size);
+            return New(size);
         }
-        // set the new size factor to what we found out about our
-        // current font… this assumes the line height is linear to
-        // the font size, which should be true unless the font uses
-        // different glyphs for different sizes.
-        size_factor = size / ret->LineHeight();
-        return *ret;
     }
     void BBox(FTGL_STRING const &str, float height, tCoord where, float &l, float &b, float &r, float &t) {
         if(sr_fontType != sr_fontOld) {
@@ -397,21 +389,17 @@ void rTextField::FlushLine(int len,bool newline){
 
                 sr_Font.BBox(str, cheight, tCoord(nextx, realTop-cheight), l, b, r, t);
 
-                if(t > realTop) {
-                    t = realTop;
-                }
-
                 //sr_ResetRenderState(true);
 
                 BeginQuads();
 
-                glVertex2f(l, b);
+                glVertex2f(   l, b);
 
-                glVertex2f(r, b);
+                glVertex2f(   r, b);
 
-                glVertex2f(r ,t);
+                glVertex2f(   r ,t);
 
-                glVertex2f(l, t);
+                glVertex2f(   l, t);
                 RenderEnd();
             }
             else
@@ -758,13 +746,6 @@ void rTextField::GetDefaultColor( tColor & defaultColor )
 void rTextField::SetDefaultColor( tColor const & defaultColor )
 {
     defaultColor_ = defaultColor;
-    if ( !sr_alphaBlend )
-    {
-        defaultColor_.r_ *= defaultColor_.a_;
-        defaultColor_.g_ *= defaultColor_.a_;
-        defaultColor_.b_ *= defaultColor_.a_;
-        defaultColor_.a_ = 1;
-    }
     blendColor_ = tColor();
 }
 
@@ -811,13 +792,6 @@ void rTextField::GetBlendColor( tColor & blendColor )
 void rTextField::SetBlendColor( tColor const & blendColor )
 {
     blendColor_ = blendColor;
-    if ( !sr_alphaBlend )
-    {
-        blendColor_.r_ *= blendColor_.a_;
-        blendColor_.g_ *= blendColor_.a_;
-        blendColor_.b_ *= blendColor_.a_;
-        blendColor_.a_ = 1;
-    }
 }
 
 tColor rTextField::defaultColor_;

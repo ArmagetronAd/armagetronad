@@ -406,7 +406,7 @@ protected:
     size_t realCursorPos; // position of cursor as byte offset into string
     int      maxLength_;
 
-    bool InsertChar(int unicode, bool convert = true);
+    bool InsertChar(int unicode);
 
     // color mode used for rendering
     rTextField::ColorMode colorMode_;

@@ -419,7 +419,9 @@ void tConfItemBase::LoadLine(std::istream &s){
             // eat rest of input line
             tString rest;
             rest.ReadLine( s );
-
+#ifdef MACOSX
+            printErrors = false;
+#endif
             if (printErrors)
             {
                 tOutput o;
@@ -567,7 +569,7 @@ static bool s_VetoPlayback( tString const & line )
           "COLORDEPTH", "FULLSCREEN ", "ARMAGETRON_LAST_WINDOWSIZE",
           "ARMAGETRON_WINDOWSIZE", "ARMAGETRON_LAST_SCREENMODE",
           "ARMAGETRON_SCREENMODE", "CUSTOM_SCREEN", "SOUND",
-          "PASSWORD", "ADMIN_PASS",
+          "PASSWORD", "ADMIN_PASS", "RECORDING_DEBUGLEVEL",
           "ZTRICK", "MOUSE_GRAB", "PNG_SCREENSHOT", // "WHITE_SPARKS", "SPARKS",
           "KEEP_WINDOW_ACTIVE", "TEXTURE_MODE", "TEXTURES_HI", "LAG_O_METER", "INFINITY_PLANE",
           "SKY_WOBBLE", "LOWER_SKY", "UPPER_SKY", "DITHER", "HIGH_RIM", "FLOOR_DETAIL",
@@ -593,7 +595,7 @@ static bool s_VetoRecording( tString const & line )
     static std::vector< tString > vetos = st_Stringify( vetos_char );
 
     // delegate
-    return s_Veto( line, vetos ) || s_VetoPlayback( line );
+    return s_Veto( line, vetos );
 }
 
 

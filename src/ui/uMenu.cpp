@@ -890,7 +890,7 @@ bool uMenuItemString::Event(SDL_Event &e){
             realCursorPos -= content->RemoveSubStrUtf8(realCursorPos,-1);
         }
     }
-    else if (c.sym == SDLK_KP_ENTER || c.sym == SDLK_RETURN || c.sym == SDLK_UP || c.sym == SDLK_DOWN || c.sym == SDLK_ESCAPE ) {
+    else if (c.sym == SDLK_KP_ENTER || c.sym == SDLK_RETURN) {
         ret = false;
         //        c.sym = SDLK_DOWN;
     }
@@ -902,7 +902,7 @@ bool uMenuItemString::Event(SDL_Event &e){
             CFIndex bytesLength = CFDataGetLength(data);
             
             for (int i = 0; i < bytesLength; i++) {
-                if (!InsertChar(bytes[i], false))
+                if (!InsertChar(bytes[i]))
                     break;
             }
             
@@ -953,42 +953,17 @@ bool uMenuItemString::Event(SDL_Event &e){
 #endif
 }
 
-inline bool IsReservedCodePoint(int unicode)
-{
-    bool reserved = unicode < 32;
-
-#ifdef MACOSX
-    /*
-     Function keys code points. See the “Function-Key Unicodes” section.
-     http://developer.apple.com/DOCUMENTATION/Cocoa/Reference/ApplicationKit/Classes/NSEvent_Class/Reference/Reference.html
-     */
-     
-    reserved = reserved || (unicode >= 0xF700 && unicode <= 0xF747);
-#endif
-    
-    return reserved;
-}
-
-bool uMenuItemString::InsertChar(int unicode, bool convert) {
+bool uMenuItemString::InsertChar(int unicode) {
 #ifndef DEDICATED
-    if (!IsReservedCodePoint(unicode))
+    if (32 <= unicode)
     {
         // insert character if there is room
         if ( content->LenUtf8() < maxLength_ )
         {
             tString utf8string;
-            
-            if (convert)
-            {
-                unsigned short utf16string[1];
-                utf16string[0] = unicode;
-                utf8::utf16to8(utf16string, utf16string+1, back_inserter(utf8string));
-            }
-            else
-            {
-                utf8string.push_back(unicode);
-            }
-            
+            unsigned short utf16string[1];
+            utf16string[0] = unicode;
+            utf8::utf16to8(utf16string, utf16string+1, back_inserter(utf8string));
             content->insert(realCursorPos, utf8string);
             realCursorPos+=utf8string.size();
         }
