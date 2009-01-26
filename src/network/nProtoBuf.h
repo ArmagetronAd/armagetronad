@@ -41,7 +41,7 @@ class nNetObjectRegistrar;
 
 #include <map>
 
-extern nVersionFeature sn_protocolBuffers;
+extern nVersionFeature sn_protoBuf;
 
 //! fills a message with a protocol buffer
 class nMessageFillerProtoBufBase: public nMessageFiller
@@ -109,14 +109,14 @@ public:
 };
 
 // new descriptor for protocol buffer messages
-class nPBDescriptorBase: public nDescriptorBase
+class nProtoBufDescriptorBase: public nDescriptorBase
 {
 public:
-    typedef std::map< std::string, nPBDescriptorBase * > DescriptorMap;
+    typedef std::map< std::string, nProtoBufDescriptorBase * > DescriptorMap;
 
-    nPBDescriptorBase(unsigned short identification,
+    nProtoBufDescriptorBase(unsigned short identification,
                       nProtoBuf const & prototype, bool acceptEvenIfNotLoggedIn = false);
-    ~nPBDescriptorBase();
+    ~nProtoBufDescriptorBase();
 
     static std::string const & DetermineName( nProtoBuf const & prototype );
 
@@ -140,9 +140,6 @@ public:
 
     //! dumb streaming to message, static version
     static inline void StreamToStatic( nProtoBuf const & in, nMessage & out );
-
-    //! selective writing to message, either embedded or transformed
-    void WriteMessage( nProtoBuf const & in, nMessage & out ) const;
 
     //! selective reading message, either embedded or transformed
     void ReadMessage( nMessage & in, nProtoBuf & out  ) const;
@@ -206,14 +203,14 @@ nMessage& operator << ( nMessage& m, nProtoBuf const & buffer );
 
 // templated version of protocol buffer messages
 template< class PROTOBUF > 
-class nPBDescriptor: public nPBDescriptorBase
+class nProtoBufDescriptor: public nProtoBufDescriptorBase
 {
     typedef void Handler( PROTOBUF & message, nSenderInfo const & sender );
 
     typedef nMessageFillerProtoBuf< PROTOBUF > Filler;
 
     //! instance of this descriptor
-    static nPBDescriptor * instance_;
+    static nProtoBufDescriptor * instance_;
 
 #ifdef DEBUG
     bool multipleInstances_;
@@ -243,7 +240,7 @@ class nPBDescriptor: public nPBDescriptorBase
         return new PROTOBUF;
     }
 public:
-    using nPBDescriptorBase::Transform;
+    using nProtoBufDescriptorBase::Transform;
 
     //! puts a puffer into a message
     nMessage * Transform( PROTOBUF const & protoBuf ) const
@@ -268,9 +265,9 @@ public:
         return instance_->Transform( message );
     }
 
-    nPBDescriptor( unsigned short identification, Handler * handler,
+    nProtoBufDescriptor( unsigned short identification, Handler * handler,
                    bool acceptEvenIfNotLoggedIn = false )
-    : nPBDescriptorBase( identification, PROTOBUF(), acceptEvenIfNotLoggedIn )
+    : nProtoBufDescriptorBase( identification, PROTOBUF(), acceptEvenIfNotLoggedIn )
     , handler_( handler )
     {
 #ifdef DEBUG
@@ -282,20 +279,20 @@ public:
 
 //! instance of this descriptor
 template< class PROTOBUF > 
-nPBDescriptor< PROTOBUF > * nPBDescriptor< PROTOBUF >::instance_ = 0;
+nProtoBufDescriptor< PROTOBUF > * nProtoBufDescriptor< PROTOBUF >::instance_ = 0;
 
 // create a message from a pattern buffer
 template< class PROTOBUF >
 nMessage * nMessage::Transform( PROTOBUF const & message )
 {
-    return nPBDescriptor< PROTOBUF >::TransformStatic( message );
+    return nProtoBufDescriptor< PROTOBUF >::TransformStatic( message );
 }
 
 // network object descriptors
-class nOPBDescriptorBase
+class nOProtoBufDescriptorBase
 {
 public:
-    virtual ~nOPBDescriptorBase();
+    virtual ~nOProtoBufDescriptorBase();
 
     //! creates an initialization message for an object
     inline nMessage * WriteInit( nNetObject & object ) const
@@ -342,12 +339,12 @@ private:
 
 //! specialization of descriptor for each network object class
 template< class OBJECT, class PROTOBUF >
-class nOPBDescriptor: public nOPBDescriptorBase, public nPBDescriptor< PROTOBUF >
+class nOProtoBufDescriptor: public nOProtoBufDescriptorBase, public nProtoBufDescriptor< PROTOBUF >
 {
 public:
-    nOPBDescriptor( int identification )
-    : nOPBDescriptorBase()
-    , nPBDescriptor< PROTOBUF >( identification, &HandleCreation, false )
+    nOProtoBufDescriptor( int identification )
+    : nOProtoBufDescriptorBase()
+    , nProtoBufDescriptor< PROTOBUF >( identification, &HandleCreation, false )
     {}
 private:
     // template message
@@ -444,7 +441,7 @@ private:
 
 // template message
 template< class OBJECT, class PROTOBUF >
-const PROTOBUF nOPBDescriptor< OBJECT, PROTOBUF >::prototype;
+const PROTOBUF nOProtoBufDescriptor< OBJECT, PROTOBUF >::prototype;
 
 class nMessageCache
 {

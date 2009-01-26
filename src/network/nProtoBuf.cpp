@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#include "nProtocolBuffer.h"
+#include "nProtoBuf.h"
 #include "tConsole.h"
 #include "nNetObject.h"
 
@@ -59,7 +59,7 @@ int nMessageFillerProtoBufBase::OnFill( FillArguments & arguments ) const
     unsigned short descriptor = arguments.message_.Descriptor();
 
     // does the receiver understand ProtoBufs?
-    if ( sn_protocolBuffers.Supported( arguments.receiver_ ) )
+    if ( sn_protoBuf.Supported( arguments.receiver_ ) )
     {
         // yep. Stream them.
 
@@ -86,7 +86,7 @@ int nMessageFillerProtoBufBase::OnFill( FillArguments & arguments ) const
         if ( !oldFormat_ )
         {
             oldFormat_ = new nMessage( dummy );
-            nPBDescriptorBase::StreamToStatic( GetProtoBuf(), *oldFormat_ );
+            nProtoBufDescriptorBase::StreamToStatic( GetProtoBuf(), *oldFormat_ );
         }
 
         // and copy the message contents over.
@@ -96,7 +96,7 @@ int nMessageFillerProtoBufBase::OnFill( FillArguments & arguments ) const
         }
 
         // bend the descriptor
-        descriptor &= ~nPBDescriptorBase::protoBufFlag;
+        descriptor &= ~nProtoBufDescriptorBase::protoBufFlag;
     }
 
     return descriptor;
@@ -105,23 +105,23 @@ int nMessageFillerProtoBufBase::OnFill( FillArguments & arguments ) const
 /*
 Not defined here, but in nNetwork.cpp for access to the right static variables and macros.
 
-nPBDescriptorBase::nPBDescriptorBase(unsigned short identification,
+nProtoBufDescriptorBase::nProtoBufDescriptorBase(unsigned short identification,
                                      const char * name, 
                                      bool acceptEvenIfNotLoggedIn )
 */
 
-std::string const & nPBDescriptorBase::DetermineName( Message const & prototype )
+std::string const & nProtoBufDescriptorBase::DetermineName( Message const & prototype )
 {
     return prototype.GetDescriptor()->full_name();
 }
 
-nPBDescriptorBase::DescriptorMap const & nPBDescriptorBase::GetDescriptorsByName()
+nProtoBufDescriptorBase::DescriptorMap const & nProtoBufDescriptorBase::GetDescriptorsByName()
 {
     return descriptorsByName;
 }
 
 //! puts a filler into a message, taking ownership of it
-nMessage * nPBDescriptorBase::Transform( nMessageFillerProtoBufBase * filler ) const
+nMessage * nProtoBufDescriptorBase::Transform( nMessageFillerProtoBufBase * filler ) const
 {
     nMessage * ret = new nMessage( *this );
     
@@ -130,12 +130,12 @@ nMessage * nPBDescriptorBase::Transform( nMessageFillerProtoBufBase * filler ) c
     return ret;
 }
 
-nPBDescriptorBase::DescriptorMap nPBDescriptorBase::descriptorsByName;
+nProtoBufDescriptorBase::DescriptorMap nProtoBufDescriptorBase::descriptorsByName;
 //! dumb streaming from message, static version
-void nPBDescriptorBase::StreamFromStatic( nMessage & in, Message & out  )
+void nProtoBufDescriptorBase::StreamFromStatic( nMessage & in, Message & out  )
 {
     // try to determine suitable descriptor
-    nPBDescriptorBase const * embedded = descriptorsByName[ DetermineName( out ) ];
+    nProtoBufDescriptorBase const * embedded = descriptorsByName[ DetermineName( out ) ];
     if ( embedded )
     {
         // found it, delegate
@@ -158,10 +158,10 @@ void nPBDescriptorBase::StreamFromStatic( nMessage & in, Message & out  )
 }
 
 //! dumb streaming to message, static version
-void nPBDescriptorBase::StreamToStatic( Message const & in, nMessage & out )
+void nProtoBufDescriptorBase::StreamToStatic( Message const & in, nMessage & out )
 {
     // try to determine suitable descriptor
-    nPBDescriptorBase const * embedded = descriptorsByName[ DetermineName( in ) ];
+    nProtoBufDescriptorBase const * embedded = descriptorsByName[ DetermineName( in ) ];
     if ( embedded )
     {
         // found it, delegate
@@ -184,7 +184,7 @@ void nPBDescriptorBase::StreamToStatic( Message const & in, nMessage & out )
 }
 
 //! dumb streaming from message, static version
-void nPBDescriptorBase::StreamFromDefault( nMessage & in, Message & out  )
+void nProtoBufDescriptorBase::StreamFromDefault( nMessage & in, Message & out  )
 {
     // get reflection interface
     REFLECTION_CONST * reflection = out.GetReflection();
@@ -262,7 +262,7 @@ void nPBDescriptorBase::StreamFromDefault( nMessage & in, Message & out  )
 }
 
 //! dumb streaming to message, static version
-void nPBDescriptorBase::StreamToDefault( Message const & in, nMessage & out )
+void nProtoBufDescriptorBase::StreamToDefault( Message const & in, nMessage & out )
 {
     // get reflection interface
     const Reflection * reflection = in.GetReflection();
@@ -313,49 +313,8 @@ void nPBDescriptorBase::StreamToDefault( Message const & in, nMessage & out )
     }
 }   
 
-//! selective writing to message, either embedded or transformed
-void nPBDescriptorBase::WriteMessage( Message const & in, nMessage & out ) const
-{
-    tASSERT( 0 );
-
-#ifdef DEBUG_X
-
-#ifdef DEBUG
-    in.CheckInitialized();
-#endif
-
-#ifdef DEBUG
-    {
-        // stats
-        nMessage a( *this ), b( *this );
-        a << in;
-        StreamTo( in, b );
-        con << "Old size: "  << b.DataLen()*2
-            << ",new size: " << a.DataLen()*2
-            << ".\n";
-    }
-#endif
-
-    if ( sn_protocolBuffers.Supported() )
-    {
-
-        // write the message in its native format
-        out << in;
-    }
-    else
-    {
-        // strip protocol buffer flag from message descriptor
-        out.descriptor &= ~protoBufFlag;
-
-        // transform the message to our legacy format
-        StreamTo( in, out );
-    }
-
-#endif
-}
-
 //! selective reading message, either embedded or transformed
-void nPBDescriptorBase::ReadMessage( nMessage & in, Message & out  ) const
+void nProtoBufDescriptorBase::ReadMessage( nMessage & in, Message & out  ) const
 {
     if ( in.descriptor & protoBufFlag )
     {
@@ -375,7 +334,7 @@ void nPBDescriptorBase::ReadMessage( nMessage & in, Message & out  ) const
 //! @param total total maximal size of message (must be zeroed before call)
 //! @param total difference of messages, between 0 and total (must be zeroed before call)
 //! @param removed is set to true if a has an element that is missing from b
-void nPBDescriptorBase::EstimateMessageDifference( Message const & a,
+void nProtoBufDescriptorBase::EstimateMessageDifference( Message const & a,
                                                    Message const & b,
                                                    int & total,
                                                    int & difference,
@@ -461,7 +420,7 @@ void nPBDescriptorBase::EstimateMessageDifference( Message const & a,
 //! @param derived second message
 //! @param diff target message for difference. All the fields where base and derived differ are set here, with the value taken from derived.
 //! @param copy if true, the first operation is a copy from derived to diff. If false, only elements equal in both derived and base are discarded from diff.
-void nPBDescriptorBase::DiffMessages( Message const & base,
+void nProtoBufDescriptorBase::DiffMessages( Message const & base,
                                       Message const & derived,
                                       Message & diff,
                                       bool copy )
@@ -546,7 +505,7 @@ void nPBDescriptorBase::DiffMessages( Message const & base,
 }
 
 //! @param message the message to rid of all repeated fields
-void nPBDescriptorBase::ClearRepeated( Message & message )
+void nProtoBufDescriptorBase::ClearRepeated( Message & message )
 {
     // get reflection interface
     Descriptor const * descriptor = message.GetDescriptor();
@@ -578,13 +537,13 @@ void nPBDescriptorBase::ClearRepeated( Message & message )
 }
 
 //! dumb streaming to message
-void nPBDescriptorBase::DoStreamTo( Message const & in, nMessage & out ) const
+void nProtoBufDescriptorBase::DoStreamTo( Message const & in, nMessage & out ) const
 {
     StreamToDefault( in, out );
 }
 
 //! dumb streaming from message
-void nPBDescriptorBase::DoStreamFrom( nMessage & in, Message & out ) const
+void nProtoBufDescriptorBase::DoStreamFrom( nMessage & in, Message & out ) const
 {
     StreamFromDefault( in, out );
 }
@@ -641,17 +600,17 @@ nMessage& operator << ( nMessage& m, Message const & buffer )
     return m;
 }
 
-nOPBDescriptorBase::~nOPBDescriptorBase()
+nOProtoBufDescriptorBase::~nOProtoBufDescriptorBase()
 {}
 
-unsigned int nOPBDescriptorBase::GetObjectID ( Network::nNetObjectInit const & message )
+unsigned int nOProtoBufDescriptorBase::GetObjectID ( Network::nNetObjectInit const & message )
 {
     return message.object_id();
 }
 
 //! checks to run before creating a new object
 //! @return true if all is OK
-bool nOPBDescriptorBase::PreCheck( unsigned short id, nSenderInfo sender )
+bool nOProtoBufDescriptorBase::PreCheck( unsigned short id, nSenderInfo sender )
 {
     if (sn_netObjectsOwner[id]!=sender.SenderID() || bool(sn_netObjects[id]))
     {
@@ -680,7 +639,7 @@ bool nOPBDescriptorBase::PreCheck( unsigned short id, nSenderInfo sender )
 }
 
 //! checks to run after creating a new object
-void nOPBDescriptorBase::PostCheck( nNetObject * object, nSenderInfo sender )
+void nOProtoBufDescriptorBase::PostCheck( nNetObject * object, nSenderInfo sender )
 {
 #ifdef DEBUG
     /*

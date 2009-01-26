@@ -284,7 +284,7 @@ public:
 
 private:
     //! returns the descriptor responsible for this class
-    virtual nOPBDescriptorBase const * DoGetDescriptor() const;
+    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
 public:
 
     virtual void 			NewObject(){}        				// called when we control a new object

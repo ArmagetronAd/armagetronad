@@ -57,7 +57,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tRecorder.h"
 #include "nConfig.h"
 #include "nNetwork.h"
-#include "nProtocolBuffer.h"
+#include "nProtoBuf.h"
 #include <time.h>
 #include "tRuby.h"
 
@@ -1585,7 +1585,7 @@ static nVersionFeature se_chatHandlerClient( 6 );
 // void handle_chat( nMessage & );
 void handle_chat( Engine::Chat &, nSenderInfo const & );
 // static nDescriptor chat_handler(200,handle_chat,"Chat");
-static nPBDescriptor< Engine::Chat > chat_handler_pb(200,handle_chat);
+static nProtoBufDescriptor< Engine::Chat > chat_handler_pb(200,handle_chat);
 
 // checks whether text_to_search contains search_for_text
 bool Contains( const tString & search_for_text, const tString & text_to_search ) {
@@ -5801,11 +5801,11 @@ void ePlayerNetID::WriteInit( Engine::ePlayerNetIDInit & init )
     nNetObject::WriteInit( *init.mutable_base() );
 }
 
-static nOPBDescriptor< ePlayerNetID, Engine::ePlayerNetIDTotal > se_pbdescriptor( 201 );
+static nOProtoBufDescriptor< ePlayerNetID, Engine::ePlayerNetIDTotal > se_pbdescriptor( 201 );
 // nNOInitialisator<ePlayerNetID> ePlayerNetID_init(201,"ePlayerNetID");
 
 //! returns the descriptor responsible for this class
-nOPBDescriptorBase const * ePlayerNetID::DoGetDescriptor() const
+nOProtoBufDescriptorBase const * ePlayerNetID::DoGetDescriptor() const
 {
     return & se_pbdescriptor;
 }

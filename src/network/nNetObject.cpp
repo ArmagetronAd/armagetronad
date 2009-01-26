@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nConfig.h"
 #include "tRecorder.h"
 
-#include "nProtocolBuffer.h"
+#include "nProtoBuf.h"
 #include "nNetObject.pb.h"
 
 #include <deque>
@@ -1242,7 +1242,7 @@ void nNetObject::ReadCreate(nMessage &m, int run )
 
 static nMessage * CreationMessage( nNetObject & obj )
 {
-    nOPBDescriptorBase const * pbDescriptor = obj.GetDescriptor();
+    nOProtoBufDescriptorBase const * pbDescriptor = obj.GetDescriptor();
     if ( pbDescriptor )
     {
         return pbDescriptor->WriteInit( obj );
@@ -1264,7 +1264,7 @@ static nMessage * CreationMessage( nNetObject & obj )
 
 void nNetObject::WriteAll( nMessage & m, bool create )
 {
-    nOPBDescriptorBase const * pbDescriptor = GetDescriptor();
+    nOProtoBufDescriptorBase const * pbDescriptor = GetDescriptor();
     if ( !create && pbDescriptor )
     {
         // do it the pattern buffer way
@@ -1516,7 +1516,7 @@ static void net_sync_handler(nMessage &m){
         }
         else
         {
-            nOPBDescriptorBase const * pbDescriptor = obj->GetDescriptor();
+            nOProtoBufDescriptorBase const * pbDescriptor = obj->GetDescriptor();
             if ( pbDescriptor )
             {
                 // protocol buffer capable
@@ -1540,10 +1540,10 @@ static void net_sync_handler(nMessage &m){
 
 // protocol buffer sync descriptor. Needs some special care
 // because we need to read the object ID before we know the message type.
-class nPBSyncDescriptor: public nPBDescriptorBase
+class nProtoBufSyncDescriptor: public nProtoBufDescriptorBase
 {
 public:
-    nPBSyncDescriptor(): nPBDescriptorBase( 24, Network::nNetObjectSync() )
+    nProtoBufSyncDescriptor(): nProtoBufDescriptorBase( 24, Network::nNetObjectSync() )
     {
     }
 
@@ -1561,7 +1561,7 @@ public:
     }
 };
 
-static nPBSyncDescriptor net_sync;
+static nProtoBufSyncDescriptor net_sync;
 
 bool nNetObject::AcceptClientSync() const{
     return false;
@@ -2219,10 +2219,10 @@ void nNetObject::WriteSync( Network::nNetObjectSync & ) const
     // nothing to do.
 }
 
-// nOPBDescriptor< nNetObject, Network::nNetObjectTotal > sn_pbdescriptor( 0 );
+// nOProtoBufDescriptor< nNetObject, Network::nNetObjectTotal > sn_pbdescriptor( 0 );
 
 //! returns the descriptor responsible for this class
-nOPBDescriptorBase const * nNetObject::DoGetDescriptor() const
+nOProtoBufDescriptorBase const * nNetObject::DoGetDescriptor() const
 {
     return 0;
 }

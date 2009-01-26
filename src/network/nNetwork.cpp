@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConsole.h"
 #include "tDirectories.h"
 #include "nSocket.h"
-#include "nProtocolBuffer.h"
+#include "nProtoBuf.h"
 #include "nConfig.h"
 #include "nKrawall.h"
 #include "tSysTime.h"
@@ -676,10 +676,10 @@ void nDescriptorBase::HandleMessage(nMessage &message){
 
         // pick right descriptor set according to highest bit
         nDescriptorBase * const * descriptors = streamDescriptors;
-        if ( message.descriptor & nPBDescriptorBase::protoBufFlag )
+        if ( message.descriptor & nProtoBufDescriptorBase::protoBufFlag )
         {
             descriptors = protoBufDescriptors;
-            index &= ~nPBDescriptorBase::protoBufFlag;
+            index &= ~nProtoBufDescriptorBase::protoBufFlag;
         }
 
         // z-man: security check ( thanks, Luigi Auriemma! )
@@ -764,12 +764,16 @@ nMessageFiller::FillArguments::FillArguments( nSendBuffer::Buffer & buffer, nMes
 : buffer_( buffer ), message_( message ), receiver_( receiver )
 {}
 
-nVersionFeature sn_protocolBuffers( 21 );
+nVersionFeature sn_protoBuf( 21 );
 
-nPBDescriptorBase::nPBDescriptorBase(unsigned short identification,
-                                     nProtoBuf const & prototype, 
-                                     bool acceptEvenIfNotLoggedIn )
-: nDescriptorBase( identification | nPBDescriptorBase::protoBufFlag, DetermineName( prototype ).c_str(), acceptEvenIfNotLoggedIn )
+nProtoBufDescriptorBase::nProtoBufDescriptorBase
+(unsigned short identification,
+ nProtoBuf const & prototype, 
+ bool acceptEvenIfNotLoggedIn )
+: nDescriptorBase( 
+    identification | nProtoBufDescriptorBase::protoBufFlag,
+    DetermineName( prototype ).c_str(),
+    acceptEvenIfNotLoggedIn )
 {
     if (MAXDESCRIPTORS<=identification || protoBufDescriptors[identification]!=NULL)
     {
@@ -782,7 +786,7 @@ nPBDescriptorBase::nPBDescriptorBase(unsigned short identification,
     protoBufDescriptors[identification]=this;
 }
 
-nPBDescriptorBase::~nPBDescriptorBase(){}
+nProtoBufDescriptorBase::~nProtoBufDescriptorBase(){}
 
 // *************************************************************
 

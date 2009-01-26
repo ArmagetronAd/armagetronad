@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 class nObserver;
 
 class nSenderInfo;
-class nOPBDescriptorBase;
+class nOProtoBufDescriptorBase;
 namespace Network{ class nNetObjectInit; class nNetObjectSync; }
 
 // checks whether n is newer than old; if so, old is set to n and
@@ -306,10 +306,10 @@ public:
     void WriteSync( Network::nNetObjectSync & ) const;
 
     //! returns the descriptor responsible for this class
-    inline nOPBDescriptorBase const * GetDescriptor() const { return DoGetDescriptor(); }
+    inline nOProtoBufDescriptorBase const * GetDescriptor() const { return DoGetDescriptor(); }
 private:
     //! returns the descriptor responsible for this class
-    virtual nOPBDescriptorBase const * DoGetDescriptor() const;
+    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
 
     // control functions:
 
