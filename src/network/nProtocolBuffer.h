@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // protocol buffers forward declaration
 namespace google { namespace protobuf { class Message; } }
+typedef google::protobuf::Message nProtoBuf;
 
 namespace Network{ class nNetObjectInit; }
 
@@ -63,60 +64,59 @@ public:
 class nPBDescriptorBase: public nDescriptorBase
 {
 public:
-    typedef google::protobuf::Message Message;
     typedef std::map< std::string, nPBDescriptorBase * > DescriptorMap;
 
     nPBDescriptorBase(unsigned short identification,
-                      Message const & prototype, bool acceptEvenIfNotLoggedIn = false);
+                      nProtoBuf const & prototype, bool acceptEvenIfNotLoggedIn = false);
     ~nPBDescriptorBase();
 
-    static std::string const & DetermineName( Message const & prototype );
+    static std::string const & DetermineName( nProtoBuf const & prototype );
 
     //! dumb streaming to message
-    inline void StreamTo( Message const & in, nMessage & out ) const
+    inline void StreamTo( nProtoBuf const & in, nMessage & out ) const
     {
         DoStreamTo( in, out );
     }
 
     //! dumb streaming from message
-    inline void StreamFrom( nMessage & in, Message & out  ) const
+    inline void StreamFrom( nMessage & in, nProtoBuf & out  ) const
     {
         DoStreamFrom( in, out );
     }
 
     //! dumb streaming from message, static version
-    static void StreamFromStatic( nMessage & in, Message & out  );
+    static void StreamFromStatic( nMessage & in, nProtoBuf & out  );
 
     //! dumb streaming to message, static version
-    static inline void StreamToStatic( Message const & in, nMessage & out );
+    static inline void StreamToStatic( nProtoBuf const & in, nMessage & out );
 
     //! selective writing to message, either embedded or transformed
-    void WriteMessage( Message const & in, nMessage & out ) const;
+    void WriteMessage( nProtoBuf const & in, nMessage & out ) const;
 
     //! selective reading message, either embedded or transformed
-    void ReadMessage( nMessage & in, Message & out  ) const;
+    void ReadMessage( nMessage & in, nProtoBuf & out  ) const;
 
     //! creates a protocol buffer of the managed type. Needs to be deleted later.
-    inline Message * Create() const
+    inline nProtoBuf * Create() const
     {
         return DoCreate();
     }
 
     //! compares two messages, filling in total size and difference.
-    static void EstimateMessageDifference( Message const & a,
-                                           Message const & b,
+    static void EstimateMessageDifference( nProtoBuf const & a,
+                                           nProtoBuf const & b,
                                            int & total,
                                            int & difference,
                                            bool & removed );
 
     //! calculates the difference between two messages
-    static void DiffMessages( Message const & base,
-                              Message const & derived,
-                              Message & diff,
+    static void DiffMessages( nProtoBuf const & base,
+                              nProtoBuf const & derived,
+                              nProtoBuf & diff,
                               bool copy = true );
 
     //! clears all repeated fields from a message
-    static void ClearRepeated( Message & message );
+    static void ClearRepeated( nProtoBuf & message );
 
     // the above three functions are supposed to be used for compression.
     // the sender first uses EsimateMessageDifference to  find a suitable previous
@@ -134,24 +134,24 @@ private:
     static DescriptorMap descriptorsByName;
 
     //! dumb streaming to message
-    virtual void DoStreamTo( Message const & in, nMessage & out ) const;
+    virtual void DoStreamTo( nProtoBuf const & in, nMessage & out ) const;
 
     //! dumb streaming from message
-    virtual void DoStreamFrom( nMessage & in, Message & out ) const;
+    virtual void DoStreamFrom( nMessage & in, nProtoBuf & out ) const;
 
     //! dumb streaming from message, static version
-    static void StreamFromDefault( nMessage & in, Message & out  );
+    static void StreamFromDefault( nMessage & in, nProtoBuf & out  );
 
     //! dumb streaming to message, static version
-    static void StreamToDefault( Message const & in, nMessage & out );
+    static void StreamToDefault( nProtoBuf const & in, nMessage & out );
 
     //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
-    virtual Message * DoCreate() const = 0;
+    virtual nProtoBuf * DoCreate() const = 0;
 };
 
 // read/write operators for protocol buffers
-nMessage& operator >> ( nMessage& m, google::protobuf::Message & buffer );
-nMessage& operator << ( nMessage& m, google::protobuf::Message const & buffer );
+nMessage& operator >> ( nMessage& m, nProtoBuf & buffer );
+nMessage& operator << ( nMessage& m, nProtoBuf const & buffer );
 
 // templated version of protocol buffer messages
 template< class MESSAGE > 
@@ -182,7 +182,7 @@ class nPBDescriptor: public nPBDescriptorBase
     }
 
     //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
-    virtual Message * DoCreate() const
+    virtual nProtoBuf * DoCreate() const
     {
         return new MESSAGE;
     }
@@ -236,7 +236,6 @@ nMessage * nMessage::Transform( MESSAGE const & message )
 class nOPBDescriptorBase
 {
 public:
-    typedef google::protobuf::Message Message;
     virtual ~nOPBDescriptorBase();
 
     //! creates an initialization message for an object

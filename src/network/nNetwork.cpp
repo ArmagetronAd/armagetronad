@@ -756,7 +756,7 @@ nDescriptor::~nDescriptor(){}
 nVersionFeature sn_protocolBuffers( 21 );
 
 nPBDescriptorBase::nPBDescriptorBase(unsigned short identification,
-                                     Message const & prototype, 
+                                     nProtoBuf const & prototype, 
                                      bool acceptEvenIfNotLoggedIn )
 : nDescriptorBase( identification | nPBDescriptorBase::protoBufFlag, DetermineName( prototype ).c_str(), acceptEvenIfNotLoggedIn )
 {

@@ -1555,7 +1555,7 @@ public:
     }
 
     //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
-    virtual Message * DoCreate() const
+    virtual nProtoBuf * DoCreate() const
     {
         return new Network::nNetObjectSync;
     }
