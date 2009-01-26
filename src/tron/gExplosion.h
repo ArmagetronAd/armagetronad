@@ -29,14 +29,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ArmageTron_explosion_H
 
 #include "eGameObject.h"
+#include "rColor.h"
 
 class gCycle;
-struct gRealColor;
 
 class gExplosion: virtual public eReferencableGameObject
 { // Boom!
 public:
-    gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color, gCycle * owner );
+    gExplosion(eGrid *grid, const eCoord &pos,REAL time, rColor & color, gCycle * owner );
     virtual ~gExplosion();
 
     virtual bool Timestep(REAL currentTime);

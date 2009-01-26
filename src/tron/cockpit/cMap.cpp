@@ -414,7 +414,7 @@ void Map::DrawWalls(tList<gNetPlayerWall> &list) {
             alpha -= 2 * (currentTime - cycle->DeathTime() - wallsStayUpDelay);
             if(alpha <= 0) continue;
         }
-        glColor4f(cycle->color_.r, cycle->color_.g, cycle->color_.b, alpha);
+        glColor4f(cycle->color_.r_, cycle->color_.g_, cycle->color_.b_, alpha);
         double cycleDist = cycle->GetDistance();
         double minDist = limitedLength && cycleDist > wallsLength ? cycleDist - wallsLength : 0;
         const eCoord &begPos = wall->EndPoint(0), &endPos = wall->EndPoint(1);

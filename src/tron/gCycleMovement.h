@@ -31,6 +31,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eNetGameObject.h"
 #include <deque>
 
+#include "rColor.h"
+
 class gCycle;
 class gDestination;
 class gPlayerWall;
@@ -65,12 +67,7 @@ public:
     void							AddWall( const gPlayerWall * wall, REAL timeBuilt, gCycleMovement * thisCycle ); // add the interaction with a wall to our data
 };
 
-struct gRealColor {
-    REAL r,g,b;
-
-    gRealColor():r(1), g(1), b(1){}
-
-};
+typedef rColor gRealColor;
 
 //! class handling lightcycle movement aspects ( not networking beyond construction, no rendering, no wall building )
 class gCycleMovement : public eNetGameObject
