@@ -2113,18 +2113,18 @@ int  nBandwidthTaskObject::DoEstimateSize() const
 }
 
 // executes whatever it has to do
-void nBandwidthTaskSync::DoExecute( nSendBuffer& buffer, nBandwidthControl& control )
+void nBandwidthTaskSync::DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer )
 {
     tJUST_CONTROLLED_PTR< nMessage > message = tNEW( nMessage )( net_sync );
     Object().WriteAll( *message, false );
-    buffer.AddMessage( *message, &control );
+    buffer.AddMessage( *message, &control, peer );
 }
 
 // executes whatever it has to do
-void nBandwidthTaskCreate::DoExecute( nSendBuffer& buffer, nBandwidthControl& control )
+void nBandwidthTaskCreate::DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer )
 {
     tJUST_CONTROLLED_PTR< nMessage > message = CreationMessage( Object() );
-    buffer.AddMessage( *message, &control );
+    buffer.AddMessage( *message, &control, peer );
 }
 
 

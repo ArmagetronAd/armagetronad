@@ -380,4 +380,8 @@ private:
 template< class OBJECT, class MESSAGE >
 const MESSAGE nOPBDescriptor< OBJECT, MESSAGE >::prototype;
 
+class nMessageCache
+{
+};
+
 #endif

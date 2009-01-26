@@ -1076,6 +1076,8 @@ static unsigned long int sn_ExpandMessageID( unsigned short id, unsigned short s
     return expanders[sender].ExpandMessageID(id);
 }
 
+nMessageFiller::~nMessageFiller(){}
+
 nMessage::nMessage(unsigned short*& buffer,short sender, int lenLeft )
         :descriptor(ntohs(*(buffer++))),messageIDBig_(sn_ExpandMessageID(ntohs(*(buffer++)),sender)),
          senderID(sender),readOut(0){
@@ -2153,7 +2155,7 @@ nTimeRolling sn_StatsTime		= 0;
 
 
 // adds a message to the buffer
-void nSendBuffer::AddMessage	( nMessage&			message, nBandwidthControl* control )
+void nSendBuffer::AddMessage	( nMessage&			message, nBandwidthControl* control, int peer )
 {
     unsigned long id = message.MessageID();
     unsigned short len = message.DataLen();
@@ -2163,9 +2165,29 @@ void nSendBuffer::AddMessage	( nMessage&			message, nBandwidthControl* control )
 
     sendBuffer_[sendBuffer_.Len()]=htons(message.MessageID());
 
-    sendBuffer_[sendBuffer_.Len()]=htons(message.DataLen());
+    // reserve space for data length
+    int dataLenOffset = sendBuffer_.Len();
+    sendBuffer_[dataLenOffset] = len;
+    int overhead = sendBuffer_.Len();
+
+    // write raw data
     for(int i=0;i<len;i++)
+    {
         sendBuffer_[sendBuffer_.Len()]=htons(message.Data(i));
+    }
+
+    // write extra data
+    if ( message.GetFiller() )
+    {
+        message.GetFiller()->Fill( sendBuffer_, peer );
+    }
+    else
+    {
+        tASSERT( len == sendBuffer_.Len() - overhead );
+    }
+
+    // determine data lenght and write it to reserved space
+    sendBuffer_[dataLenOffset] = htons( sendBuffer_.Len() - overhead );
 
     tRecorderSync< unsigned short >::Archive( "_MESSAGE_SEND_LEN", 5, len );
 
@@ -2362,7 +2384,7 @@ void nMessage::SendImmediately(int peer,bool ack){
 
     if (sn_Connections[peer].socket)
     {
-        sn_Connections[peer].sendBuffer_.AddMessage( *this, &sn_Connections[peer].bandwidthControl_ );
+        sn_Connections[peer].sendBuffer_.AddMessage( *this, &sn_Connections[peer].bandwidthControl_, peer );
 
         /*
           if (sn_Connections[].rate_control[peer]>0)
@@ -3692,8 +3714,8 @@ void sn_Statistics()
 
 
 
-nConnectionInfo::nConnectionInfo(){Clear();}
-nConnectionInfo::~nConnectionInfo(){}
+nConnectionInfo::nConnectionInfo():messageCache_(*new nMessageCache()){Clear();}
+nConnectionInfo::~nConnectionInfo(){ delete & messageCache_; }
 
 void nConnectionInfo::Clear(){
     socket     = NULL;

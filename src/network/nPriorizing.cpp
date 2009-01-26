@@ -149,7 +149,7 @@ nBandwidthArbitrator::~nBandwidthArbitrator()
 }
 
 // fills the send buffer with top priority messages
-bool nBandwidthArbitrator::Fill( nSendBuffer& buffer, nBandwidthControl& control )
+bool nBandwidthArbitrator::Fill( nSendBuffer& buffer, nBandwidthControl& control, int peer )
 {
     // return whether a message was sent
     bool ret = false;
@@ -182,7 +182,7 @@ bool nBandwidthArbitrator::Fill( nSendBuffer& buffer, nBandwidthControl& control
                         next = this->Next( type );
 
                         // send it
-                        next->Execute( buffer, control );
+                        next->Execute( buffer, control, peer );
 
                         // sum up priority
                         totalPriority += priority;
@@ -349,6 +349,8 @@ void nBandwidthSceduler::RemoveArbitrator	( nBandwidthArbitrator& arbitrator )
 class nBandwitdhDistributor: public nBandwidthArbitrator
 {
 public:
+    nBandwitdhDistributor( int peer ): peer_( peer ){}
+
     nSendBuffer&		SendBuffer()				{ return buffer_; }
     const	nSendBuffer&		SendBuffer()		const	{ return buffer_; }
     nBandwidthControl&	BandwidthControl()			{ return control_; }
@@ -362,6 +364,8 @@ private:
 
     nSendBuffer buffer_;											// buffer taking the messages
     nBandwidthControl control_;										// bandwidth control
+
+    int peer_;
 };
 
 
@@ -372,7 +376,7 @@ private:
 // consumes some bandwidth
 bool nBandwitdhDistributor::DoUseBandwidth( REAL dt )
 {
-    return this->Fill( this->buffer_, this->control_ );
+    return this->Fill( this->buffer_, this->control_, this->peer_ );
 }
 
 
@@ -385,7 +389,7 @@ public:
 
     nMessage& Message() const { return *message_; }
 protected:
-    virtual void DoExecute( nSendBuffer& buffer, nBandwidthControl& control );				// executes whatever it has to do
+    virtual void DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer );				// executes whatever it has to do
     virtual int  DoEstimateSize() const;													// estimate bandwidth usage
     //	virtual void DoPriorize();																// rethinks priority
 private:
@@ -405,9 +409,9 @@ nBandwidthTaskMessage::nBandwidthTaskMessage( nType type, nMessage& message )
 }
 
 // executes whatever it has to do
-void nBandwidthTaskMessage::DoExecute( nSendBuffer& buffer, nBandwidthControl& control )
+void nBandwidthTaskMessage::DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer )
 {
-    buffer.AddMessage( *message_, &control );
+    buffer.AddMessage( *message_, &control, peer );
 }
 
 // estimate bandwidth usage
@@ -464,7 +468,7 @@ public:
         nBandwidthSceduler sceduler;
 
         {
-            tJUST_CONTROLLED_PTR< nBandwidthArbitrator > distributor = tNEW( nBandwitdhDistributor );
+            tJUST_CONTROLLED_PTR< nBandwidthArbitrator > distributor = tNEW( nBandwitdhDistributor(0) );
             sceduler.AddArbitrator( *distributor );
 
             {

@@ -43,6 +43,8 @@ class nAddress;
 class nBasicNetworkSystem;
 class nServerInfoBase;
 
+class nMessageCache;
+
 extern nBasicNetworkSystem sn_BasicNetworkSystem;
 
 class nMessage;
@@ -180,12 +182,15 @@ class nBandwidthControl;
 class nSendBuffer
 {
 public:
+    typedef tArray<unsigned short> Buffer;
+
     int Len				() const {
         return sendBuffer_.Len();    // returns the length of the buffer
     }
 
-    void AddMessage		( nMessage&			message
-                       , nBandwidthControl* control );				// adds a message to the buffer
+    void AddMessage		( nMessage&			message,
+                          nBandwidthControl* control,
+                          int peer );                 // adds a message to the buffer
     void Send			( nSocket const & 	socket
                   , const nAddress &	peer
                   , nBandwidthControl* control );				// send the contents of the buffer to a specific socket
@@ -196,7 +201,7 @@ public:
     void Clear();													// clears the buffer
 
 private:
-    tArray<unsigned short> sendBuffer_;
+    Buffer sendBuffer_;
 };
 
 class nBandwidthControl
@@ -312,6 +317,8 @@ protected:
 
 struct nConnectionInfo     // everything that is needed to manage a connection
 {
+    nMessageCache &        messageCache_;
+
     nSocket const *        socket;             // the network UDP socket
     int                    ackPending;
 
@@ -431,8 +438,25 @@ void RequestInfoHandler(nHandler *handle);
 // the first sn_myNetID available for external use (give some room!)
 #define NET_ID_FIRST 100
 
-// Network messages. Allways to be created with new, get deleted automatically.
+//! Message fillers. Fill messages with data at the time they're written.
+class nMessageFiller: public tReferencable< nMessageFiller >
+{
+    friend class tControlledPTR< nMessageFiller >;
+    friend class tReferencable< nMessageFiller >;
 
+public:
+    inline void Fill( nSendBuffer::Buffer & buffer, int receiver ) const
+    {
+        OnFill( buffer, receiver );
+    }
+protected:
+    //! fills the receiving buffer with data
+    virtual void OnFill( nSendBuffer::Buffer & buffer, int receiver ) const = 0;
+    virtual ~nMessageFiller();
+};
+
+
+// Network messages. Allways to be created with new, get deleted automatically.
 class nMessage: public tReferencable< nMessage >{
     //friend class nMessage_planned_send;
     friend class tControlledPTR< nMessage >;
@@ -452,6 +476,8 @@ protected:
     unsigned long messageIDBig_;  //!< uniquified message ID, the last 16 bits are the same as messageID_
     short          senderID;      //!< sender's identification
     tArray<unsigned short> data;  //!< assuming ints are 32 bit wide...
+
+    tJUST_CONTROLLED_PTR< nMessageFiller > filler_; //!< extra object appending data to the message.
 
     unsigned int readOut;
 
@@ -479,6 +505,16 @@ public:
 
     unsigned short Data(unsigned short n) const {
         return data(n);
+    }
+
+    nMessageFiller * GetFiller() const
+    {
+        return filler_;
+    }
+
+    void SetFiller( nMessageFiller * filler )
+    {
+        filler_ = filler;
     }
 
     //! makes sure nothing else gets written to the message (in debug mode)
