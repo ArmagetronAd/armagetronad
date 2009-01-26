@@ -302,10 +302,10 @@ public:
     wchar_t Filter ( wchar_t );
 
     // filter a whole string, byte for byte
-    tString FilterByteString ( tString & );
+    tString FilterByteString ( tString const & );
 
     // filter a whole utf8 string
-    tString FilterString ( tString & );
+    tString FilterString ( tString const & );
 protected:
     tCharacterFilter ( void ) {} // To use a tCharacterFilter, make your own class inherit of this one and define the constructor
 

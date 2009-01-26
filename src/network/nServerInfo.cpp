@@ -3150,7 +3150,6 @@ nServerInfoCharacterFilter::nServerInfoCharacterFilter( bool filterIPAddressChar
     SetMap(0xb0, 'o'); // °
     SetMap('$', 's');
     SetMap('+', 't');
-    SetMap(0xd7, 'x'); // ×    
 
     if ( filterIPAddressCharacters )
     {
@@ -3168,6 +3167,7 @@ nServerInfoCharacterFilter::nServerInfoCharacterFilter( bool filterIPAddressChar
         SetMap(':', ':');
         SetMap('.', '.');
     }
+
 }
 
 // *******************************************************************************************
@@ -3181,7 +3181,7 @@ nServerInfoCharacterFilter::nServerInfoCharacterFilter( bool filterIPAddressChar
 
 tString nServerInfoCharacterFilter::FilterServerName( tString const & s )
 {
-    // Remove colors and filter
+    // Remove colors
     return FilterString( tColoredString::RemoveColors( s ) );
 }
 

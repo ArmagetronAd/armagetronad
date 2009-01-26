@@ -888,9 +888,9 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
 
         REAL r,g,b;
         if (cycle_){
-            r=cycle_->trailColor_.r_;
-            g=cycle_->trailColor_.g_;
-            b=cycle_->trailColor_.b_;
+            r=cycle_->trailColor_.r;
+            g=cycle_->trailColor_.g;
+            b=cycle_->trailColor_.b;
         }
         else
             r=g=b=1;
