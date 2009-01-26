@@ -463,10 +463,6 @@ class Sensor: public gSensor
             , turnedRecently_ ( 0 )
             , owner_ ( owner )
     {
-#ifdef RLBOT
-        rlDir = 1;
-        rlLastTime = -100;
-#endif
     }
 
     // describes walls we like. We like enemy walls. We like to go between them.
@@ -618,51 +614,9 @@ class Sensor: public gSensor
         return owner_->CanMakeTurn( ( action == &gCycle::se_turnRight ) ? 1 : -1 );
     }
 
-#ifdef RLBOT
-    int rlDir;
-    REAL rlLastTime;
-#endif
-
     // does the main thinking
     void Activate( REAL currentTime )
     {
-#ifdef RLBOT
-        // hack chatbot for crazy turning
-        {
-            if (!owner_->Alive() || !owner_->Vulnerable() )
-            {
-                return;
-            }
-            if( fabs( rlLastTime - currentTime) > 1 )
-            {
-                owner_->Act( &gCycle::se_turnRight, 1 );
-                rlDir = -1;
-            }
-            else  if ( rlDir > 0 )
-            {
-                if( CanMakeTurn( &gCycle::se_turnRight ) )
-                {
-                    owner_->Act( &gCycle::se_turnRight, 1 );
-                    owner_->Act( &gCycle::se_turnRight, 1 );
-                    owner_->Act( &gCycle::se_turnRight, 1 );
-                    rlDir = -1;
-                }
-            }
-            else
-            {
-                if( CanMakeTurn( &gCycle::se_turnLeft ) )
-                {
-                    owner_->Act( &gCycle::se_turnLeft, 1 );
-                    owner_->Act( &gCycle::se_turnLeft, 1 );
-                    owner_->Act( &gCycle::se_turnLeft, 1 );
-                    rlDir = 1;
-                }
-            }
-            rlLastTime = currentTime;
-            return;
-        }
-#endif
-
         // is it already time for activation?
         if ( currentTime < nextChatAI_ )
             return;
@@ -1195,12 +1149,6 @@ void gDestination::CopyFrom(const gCycleMovement &other)
 #endif
     if ( other.Owner() && other.Player() )
         chatting = other.Player()->IsChatting();
-
-    // cheat. If rubber ran out, backdate the time.
-    if ( other.RubberDepleteTime() > 0 )
-    {
-        gameTime = other.RubberDepleteTime();
-    }
 }
 
 void gDestination::CopyFrom(const gCycle &other)
@@ -1549,16 +1497,6 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
                 // for the credit
                 lag = eLag::TakeCredit( Owner(), lag + lagOffset ) - lagOffset;
 
-                // don't go back further than last sync to the owner.
-                // old clients get doubly confused and produce an extra
-                // evil lag slide.
-                static nVersionFeature noConfusionFromMoveBack( 16 );
-                if( !noConfusionFromMoveBack.Supported( Owner() ) && 
-                    lastTime - lag < lastSyncOwnerGameTime_ )
-                {
-                    lag = lastTime - lastSyncOwnerGameTime_;
-                }
-
                 // no compensation? Just quit.
                 if ( lag < 0 )
                     return;
@@ -1598,7 +1536,7 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
                 // see if we went back too far (should almost never happen)
                 if ( distance < minDist )
                 {
-                    // st_Breakpoint();
+                    st_Breakpoint();
                     TimestepCore( lastTime + ( minDist - distance )/verletSpeed_ );
                 }
             }
@@ -1698,10 +1636,6 @@ sg_cycleDistWallShrinkOffsetConf("CYCLE_DIST_WALL_SHRINK_OFFSET",
 static REAL sg_CycleWallLengthFromDist( REAL distance )
 {
     REAL len = gCycle::WallsLength();
-    if ( len <= 0 )
-    {
-        return len;
-    }
 
     // make base length longer or shorter, depending on the sign of sg_cycleDistWallShrink
     REAL d = sg_cycleDistWallShrinkOffset - distance;
@@ -1716,10 +1650,6 @@ REAL gCycle::ThisWallsLength() const
 {
     // get distance influence
     REAL len = sg_CycleWallLengthFromDist( distance );
-    if ( len <= 0 )
-    {
-        return len;
-    }
 
     // apply rubber shortening
     return len - GetRubber() * sg_cycleRubberWallShrink;
@@ -1821,28 +1751,6 @@ void gCycleExtrapolator::CopyFrom( const SyncData& sync, const gCycle& other )
 
     // copy distance
     trueDistance_ = GetDistance();
-
-    // make a small timestep backwards if we passed the next
-    // destination. While this makes us react a tad later to lag slides,
-    // it avoids lag slide false positives, which later cause real
-    // lag slides.
-    if( eLag::Feature().Supported(0) )
-    {
-        gDestination *dest = GetCurrentDestination();
-        if ( dest )
-        {
-            REAL distToDest = eCoord::F( dest->position - pos, dirDrive );
-            if( distToDest < 0 )
-            {
-                // instead of doing a full simulation, just trust the data from the
-                // destination.
-                pos = dest->position;
-                lastTime = dest->gameTime;
-                distance = dest->distance;
-                verletSpeed_ = dest->speed;
-            }
-        }
-    }
 }
 
 gCycleExtrapolator::gCycleExtrapolator(eGrid *grid, const eCoord &pos,const eCoord &dir,ePlayerNetID *p,bool autodelete)
@@ -1934,10 +1842,10 @@ void gCycleExtrapolator::PassEdge(const eWall *ww,REAL time,REAL a,int){
 bool gCycleExtrapolator::TimestepCore(REAL currentTime, bool calculateAcceleration)
 {
     // determine a suitable next destination
-    gDestination destDefault( *parent_ ), *dest=GetCurrentDestination();
-    if ( !dest )
+    gDestination destDefault( *parent_ ), *dest=&destDefault;
+    if ( GetCurrentDestination() )
     {
-        dest = &destDefault;
+        dest = GetCurrentDestination();
     }
 
     // correct distance
@@ -2353,7 +2261,6 @@ void gCycle::MyInitAfterCreation(){
     con << "Created cycle.\n";
 #endif
     nextSyncOwner=nextSync=tSysTimeFloat()-1;
-    lastSyncOwnerGameTime_ = 0;
 
     if (sn_GetNetState()!=nCLIENT)
         RequestSync();
@@ -2804,17 +2711,6 @@ bool gCycle::Timestep(REAL currentTime){
             RequestSyncOwner();
         }
     }
-
-    // check whether simulation has fallen too far behind the requested time
-#ifdef DEDICATED
-    if ( Alive() && currentTime > lastTime + 4 * Lag() + 10 )
-    {
-        sn_ConsoleOut( "0xff7777Admin : 0xffff77BUG had to kill a cycle because it lagged behind in the simulation. Probably the invulnerability bug. Investigate!\n" );
-        st_Breakpoint();
-        KillAt( pos );
-        ret = false;
-    }
-#endif
 
     return ret;
 }
@@ -3581,7 +3477,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                 // another possibility: if the walls are very short compared to rubber, we could
                 // get away with just accounding for some rubber on the cycle that we'd need to kill
                 // otherwise.
-                if ( !saved && verletSpeed_ >= 0 && this->ThisWallsLength() > 0 )
+                if ( !saved && verletSpeed_ >= 0 )
                 {
                     REAL dt = otherTime - time;
 
@@ -5028,7 +4924,6 @@ gCycle::gCycle(nMessage &m)
     lastTimeAnim = lastTime = -EPS;
 
     nextSync = nextSyncOwner = -1;
-    lastSyncOwnerGameTime_ = 0;
 }
 
 
@@ -5043,11 +4938,6 @@ static nVersionFeature sg_verletIntegration( 7 );
 
 void gCycle::WriteSync(nMessage &m){
     //	eNetGameObject::WriteSync(m);
-
-    if( SyncedUser() == Owner() )
-    {
-        lastSyncOwnerGameTime_ = lastTime;
-    }
 
     if ( Alive() )
     {
@@ -5205,24 +5095,11 @@ bool gCycle::Extrapolate( REAL dt )
     if ( newTime >= lastTime )
     {
         // simulate extrapolator until now
-        if( lastTime > extrapolator_->LastTime() )
-        {
-            eGameObject::TimestepThis( lastTime, extrapolator_ );
-        }
+        eGameObject::TimestepThis( lastTime, extrapolator_ );
 
         // test if there are real (the check for list does that) destinations left; we cannot call it finished if there are.
         gDestination* unhandledDestination = extrapolator_->GetCurrentDestination();
         ret = !unhandledDestination || !unhandledDestination->list;
-        
-        if( !ret )
-        {
-            if ( unhandledDestination->gameTime < newTime - Lag() * 2 - sn_Connections[0].ping.GetPing()*2 - GetTurnDelay()*4 )
-            {
-                // emergency reset.
-                extrapolator_ = 0;
-                resimulate_ = true;
-            }
-        }
 
         newTime = lastTime;
     }
