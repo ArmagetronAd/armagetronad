@@ -151,9 +151,9 @@ gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& col
     holeAccountedFor_ = false;
 
     lastTime = time;
-    explosion_r = color.r;
-    explosion_g = color.g;
-    explosion_b = color.b;
+    explosion_r = color.r_;
+    explosion_g = color.g_;
+    explosion_b = color.b_;
     //std::cout << "about to do sg_Explosions.Add\n";
     sg_Explosions.Add( this, listID );
     z=0;

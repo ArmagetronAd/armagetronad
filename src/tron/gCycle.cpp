@@ -243,9 +243,9 @@ void gTextureCycle::ProcessImage(SDL_Surface *im)
 #ifndef DEDICATED
     // blend transparent texture parts with cycle color
     tVERIFY(im->format->BytesPerPixel == 4);
-    GLubyte R=int(color_.r*255);
-    GLubyte G=int(color_.g*255);
-    GLubyte B=int(color_.b*255);
+    GLubyte R=int(color_.r_*255);
+    GLubyte G=int(color_.g_*255);
+    GLubyte B=int(color_.b_*255);
 
     GLubyte *pixels =reinterpret_cast<GLubyte *>(im->pixels);
 
@@ -264,7 +264,7 @@ void gTextureCycle::OnSelect(bool enforce){
     rISurfaceTexture::OnSelect(enforce);
 
     if(rTextureGroups::TextureMode[rTextureGroups::TEX_OBJ]<0){
-        REAL R=color_.r,G=color_.g,B=color_.b;
+        REAL R=color_.r_,G=color_.g_,B=color_.b_;
         if(wheel){
             R*=.7;
             G*=.7;
@@ -2169,22 +2169,22 @@ void gCycle::MyInitAfterCreation(){
         if(!player)
         { // distribute AI colors
             // con << current_ai << ':' << take_ai << ':' << maxmindist <<  "\n\n\n";
-            color_.r=1;
-            color_.g=1;
-            color_.b=1;
+            color_.r_=1;
+            color_.g_=1;
+            color_.b_=1;
 
-            trailColor_.r=1;
-            trailColor_.g=1;
-            trailColor_.b=1;
+            trailColor_.r_=1;
+            trailColor_.g_=1;
+            trailColor_.b_=1;
         }
         else
         {
-            player->Color(color_.r,color_.g,color_.b);
-            player->TrailColor(trailColor_.r,trailColor_.g,trailColor_.b);
+            player->Color(color_.r_,color_.g_,color_.b_);
+            player->TrailColor(trailColor_.r_,trailColor_.g_,trailColor_.b_);
         }
 
-        se_MakeColorValid( color_.r, color_.g, color_.b, 1.0f );
-        se_MakeColorValid( trailColor_.r, trailColor_.g, trailColor_.b, .5f );
+        se_MakeColorValid( color_.r_, color_.g_, color_.b_, 1.0f );
+        se_MakeColorValid( trailColor_.r_, trailColor_.g_, trailColor_.b_, .5f );
     }
 
     // load model and texture
@@ -2988,10 +2988,10 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
                     gCycle *tmpcycle = tmpplayerWall->Cycle();
 
                     if( tmpcycle )
-                        new gSpark(grid, sparkpos-dirDrive*.1,sparkdir,currentTime,color_.r,color_.g,color_.b,tmpcycle->color_.r,tmpcycle->color_.g,tmpcycle->color_.b);
+                        new gSpark(grid, sparkpos-dirDrive*.1,sparkdir,currentTime,color_.r_,color_.g_,color_.b_,tmpcycle->color_.r_,tmpcycle->color_.g_,tmpcycle->color_.b_);
                 }
                 else
-                    new gSpark(grid, sparkpos-dirDrive*.1,sparkdir,currentTime,color_.r,color_.g,color_.b,1,1,1);
+                    new gSpark(grid, sparkpos-dirDrive*.1,sparkdir,currentTime,color_.r_,color_.g_,color_.b_,1,1,1);
             }
         }
 
@@ -3008,10 +3008,10 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
                     gCycle *tmpcycle = tmpplayerWall->Cycle();
 
                     if( tmpcycle )
-                        new gSpark(grid, sparkpos-dirDrive*.1,sparkdir,currentTime,color_.r,color_.g,color_.b,tmpcycle->color_.r,tmpcycle->color_.g,tmpcycle->color_.b);
+                        new gSpark(grid, sparkpos-dirDrive*.1,sparkdir,currentTime,color_.r_,color_.g_,color_.b_,tmpcycle->color_.r_,tmpcycle->color_.g_,tmpcycle->color_.b_);
                 }
                 else
-                    new gSpark(grid, sparkpos-dirDrive*.1,sparkdir,currentTime,color_.r,color_.g,color_.b,1,1,1);
+                    new gSpark(grid, sparkpos-dirDrive*.1,sparkdir,currentTime,color_.r_,color_.g_,color_.b_,1,1,1);
             }
         }
 #endif
@@ -4346,13 +4346,13 @@ void gCycle::Render(const eCamera *cam){
                 if ( player->IsChatting() )
                 {
                     renderPyramid = true;
-                    colorPyramid.b = 0.0f;
+                    colorPyramid.b_ = 0.0f;
                 }
                 else if ( !player->IsActive() )
                 {
                     renderPyramid = true;
-                    colorPyramid.b = 0.0f;
-                    colorPyramid.g = 0.0f;
+                    colorPyramid.b_ = 0.0f;
+                    colorPyramid.g_ = 0.0f;
                 }
                 else if ( cam && cam->Center() == this && se_GameTime() < timeout && player->CurrentTeam() && player->CurrentTeam()->NumPlayers() > 1 )
                 {
@@ -4379,12 +4379,12 @@ void gCycle::Render(const eCamera *cam){
 
                 BeginTriangles();
 
-                glColor4f( colorPyramid.r,colorPyramid.g,colorPyramid.b, alpha );
+                glColor4f( colorPyramid.r_,colorPyramid.g_,colorPyramid.b_, alpha );
                 glVertex3f(0,0,3);
                 glVertex3f(0,1,4.5);
                 glVertex3f(0,-1,4.5);
 
-                glColor4f( colorPyramid.r * .7f,colorPyramid.g * .7f,colorPyramid.b * .7f, alpha );
+                glColor4f( colorPyramid.r_ * .7f,colorPyramid.g_ * .7f,colorPyramid.b_ * .7f, alpha );
                 glVertex3f(0,0,3);
                 glVertex3f(1,0,4.5);
                 glVertex3f(-1,0,4.5);
@@ -4617,7 +4617,7 @@ void gCycle::Render2D(tCoord scale) const {
         alpha -= 2 * (se_GameTime() - DeathTime());
         if(alpha <= 0) return;
     }
-    glColor4f(color_.r, color_.g, color_.b, alpha);
+    glColor4f(color_.r_, color_.g_, color_.b_, alpha);
     eCoord pos = PredictPosition(), dir = Direction();
     tCoord p = pos;
     glPushMatrix();
@@ -4911,14 +4911,14 @@ gCycle::gCycle(nMessage &m)
     dirSpawn = dirDrive;
 
 
-    m >> color_.r;
-    m >> color_.g;
-    m >> color_.b;
+    m >> color_.r_;
+    m >> color_.g_;
+    m >> color_.b_;
 
     trailColor_ = color_;
 
-    se_MakeColorValid( color_.r, color_.g, color_.b, 1.0f );
-    se_MakeColorValid( trailColor_.r, trailColor_.g, trailColor_.b, .5f );
+    se_MakeColorValid( color_.r_, color_.g_, color_.b_, 1.0f );
+    se_MakeColorValid( trailColor_.r_, trailColor_.g_, trailColor_.b_, .5f );
 
     // set last time so that the first read_sync will not think this is old
     lastTimeAnim = lastTime = -EPS;
@@ -4929,9 +4929,9 @@ gCycle::gCycle(nMessage &m)
 
 void gCycle::WriteCreate(nMessage &m){
     eNetGameObject::WriteCreate(m);
-    m << color_.r;
-    m << color_.g;
-    m << color_.b;
+    m << color_.r_;
+    m << color_.g_;
+    m << color_.b_;
 }
 
 static nVersionFeature sg_verletIntegration( 7 );
