@@ -48,7 +48,7 @@ class nMessageFillerProtoBufBase: public nMessageFiller
 {
 protected:
     //! fills the receiving buffer with data
-    virtual void OnFill( nSendBuffer::Buffer & buffer, int receiver ) const;
+    virtual int OnFill(  FillArguments & arguments ) const;
 
     //! returns the wrapped protcol buffer
     inline nProtoBuf const & GetProtoBuf() const
@@ -59,6 +59,9 @@ protected:
 private:
     //! returns the wrapped protcol buffer
     virtual nProtoBuf const & DoGetProtoBuf() const = 0;
+
+    //! dummy message used to cache raw data in old message format
+    mutable tJUST_CONTROLLED_PTR< nMessage > oldFormat_;
 };
 
 //! implementation for each protocl buffer 
@@ -129,6 +132,9 @@ public:
         DoStreamFrom( in, out );
     }
 
+    //! puts a filler into a message, taking ownership of it
+    nMessage * Transform( nMessageFillerProtoBufBase * filler ) const;
+
     //! dumb streaming from message, static version
     static void StreamFromStatic( nMessage & in, nProtoBuf & out  );
 
@@ -142,7 +148,7 @@ public:
     void ReadMessage( nMessage & in, nProtoBuf & out  ) const;
 
     //! creates a protocol buffer of the managed type. Needs to be deleted later.
-    inline nProtoBuf * Create() const
+    inline nProtoBuf * Create2() const
     {
         return DoCreate();
     }
@@ -204,6 +210,8 @@ class nPBDescriptor: public nPBDescriptorBase
 {
     typedef void Handler( PROTOBUF & message, nSenderInfo const & sender );
 
+    typedef nMessageFillerProtoBuf< PROTOBUF > Filler;
+
     //! instance of this descriptor
     static nPBDescriptor * instance_;
 
@@ -218,28 +226,34 @@ class nPBDescriptor: public nPBDescriptorBase
     virtual void DoHandleMessage( nMessage & envelope )
     {
         // read into protocol buffer
-        PROTOBUF protocolBuffer;
+        Filler * filler = new Filler;
+        envelope.SetFiller( filler );
 
-        ReadMessage( envelope, protocolBuffer );
+        ReadMessage( envelope, filler->AccessProtoBuf() );
 
         // and delegate
-        handler_( protocolBuffer, nSenderInfo( envelope ) );
+        handler_( filler->AccessProtoBuf(), nSenderInfo( envelope ) );
     }
 
     //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
     virtual nProtoBuf * DoCreate() const
     {
+        tASSERT(0);
+
         return new PROTOBUF;
     }
 public:
+    using nPBDescriptorBase::Transform;
+
     //! puts a puffer into a message
-    nMessage * Transform( PROTOBUF const & message ) const
+    nMessage * Transform( PROTOBUF const & protoBuf ) const
     {
-        nMessage * ret = new nMessage( *this );
+        // pack buffer into a message filler
+        Filler * filler = new Filler;
+        filler->AccessProtoBuf() = protoBuf;
 
-        WriteMessage( message, *ret );
-
-        return ret;
+        // and delegate
+        return Transform( filler );
     }
 
     //! puts a puffer into a message
@@ -359,28 +373,33 @@ private:
     template< class SYNC >
     void DoWriteSync( nNetObject & object, nMessage & message, SYNC const & ) const
     {
+        typedef nMessageFillerProtoBuf< SYNC > Filler;
+        Filler * filler = new Filler;
+        message.SetFiller( filler );
+
         // cast to correct type
         tASSERT( dynamic_cast< OBJECT * >( &object ) );
         OBJECT & cast = static_cast< OBJECT & >( object );
 
         // write sync
-        SYNC sync;
+        SYNC & sync = filler->AccessProtoBuf();
         cast.WriteSync( sync );
-
-        // transfer sync to message
-        WriteMessage( sync, message );
     }
 
     //! reads sync, true work
     template< class SYNC >
     void DoReadSync( nNetObject & object, nMessage & envelope, SYNC const & ) const
     {
+        typedef nMessageFillerProtoBuf< SYNC > Filler;
+        Filler * filler = new Filler;
+        envelope.SetFiller( filler );
+
         // cast to correct type
         tASSERT( dynamic_cast< OBJECT * >( &object ) );
         OBJECT & cast = static_cast< OBJECT & >( object );
 
         // read sync from message
-        SYNC sync;
+        SYNC & sync = filler->AccessProtoBuf();
 
         // transfer sync to message
         ReadMessage( envelope, sync );
@@ -392,19 +411,22 @@ private:
     //! creates an initialization message for an object
     virtual nMessage * DoWriteInit( nNetObject & object ) const
     {
+        typedef nMessageFillerProtoBuf< PROTOBUF > Filler;
+        
         // init message
-        PROTOBUF message;
+        Filler * filler = new Filler;
+        PROTOBUF & protoBuf = filler->AccessProtoBuf();
         
         // object cast to correct type
         tASSERT( dynamic_cast< OBJECT * >( &object ) );
         OBJECT & cast = static_cast< OBJECT & >( object );
         
         // work
-        cast.WriteInit( *message.mutable_init() );
-        cast.WriteSync( *message.mutable_sync() );
+        cast.WriteInit( *protoBuf.mutable_init() );
+        cast.WriteSync( *protoBuf.mutable_sync() );
         
         // and transform
-        return nMessage::Transform( message );
+        return Transform( filler );
     }
 
     //! creates an sync message for an object

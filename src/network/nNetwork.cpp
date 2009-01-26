@@ -753,6 +753,17 @@ nDescriptor::nDescriptor(unsigned short identification,nHandler *handle,
 
 nDescriptor::~nDescriptor(){}
 
+
+// write one data element, a short.
+void nMessageFiller::FillArguments::Write( unsigned short data )
+{
+    buffer_[ buffer_.Len() ] = htons( data );
+}
+
+nMessageFiller::FillArguments::FillArguments( nSendBuffer::Buffer & buffer, nMessage & message, int receiver )
+: buffer_( buffer ), message_( message ), receiver_( receiver )
+{}
+
 nVersionFeature sn_protocolBuffers( 21 );
 
 nPBDescriptorBase::nPBDescriptorBase(unsigned short identification,
@@ -2155,12 +2166,13 @@ nTimeRolling sn_StatsTime		= 0;
 
 
 // adds a message to the buffer
-void nSendBuffer::AddMessage	( nMessage&			message, nBandwidthControl* control, int peer )
+void nSendBuffer::AddMessage( nMessage& message, nBandwidthControl* control, int peer )
 {
     unsigned long id = message.MessageID();
     unsigned short len = message.DataLen();
     tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_SEND", 5, id );
 
+    int descriptorIndex = sendBuffer_.Len();
     sendBuffer_[sendBuffer_.Len()]=htons(message.Descriptor());
 
     sendBuffer_[sendBuffer_.Len()]=htons(message.MessageID());
@@ -2179,7 +2191,8 @@ void nSendBuffer::AddMessage	( nMessage&			message, nBandwidthControl* control, 
     // write extra data
     if ( message.GetFiller() )
     {
-        message.GetFiller()->Fill( sendBuffer_, peer );
+        nMessageFiller::FillArguments arguments( sendBuffer_, message, peer );
+        sendBuffer_[descriptorIndex] = htons( message.GetFiller()->Fill( arguments ) );
     }
     else
     {
@@ -2346,11 +2359,6 @@ void nMessage::SendImmediately(int peer,bool ack){
     }
 
 #ifdef DEBUG
-    if (descriptor>MAXDESCRIPTORS && !sn_protocolBuffers.Supported( peer ) )
-    {
-        st_Breakpoint();
-    }
-
     /*
     if (descriptor>1)
       con << "SMT " << descriptor << "\n";

@@ -35,12 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nNetObject.pb.h"
 
-#ifndef WIN32
-#include  <netinet/in.h>
-#else
-#include  <windows.h>
-#endif
-
 using namespace google::protobuf;
 
 #if GOOGLE_PROTOBUF_VERSION < 2000003
@@ -56,22 +50,56 @@ typedef Message::Reflection Reflection;
 #endif
 
 //! fills the receiving buffer with data
-void nMessageFillerProtoBufBase::OnFill( nSendBuffer::Buffer & buffer, int receiver ) const
+int nMessageFillerProtoBufBase::OnFill( FillArguments & arguments ) const
 {
-    // dump into plain stringstream
-    std::stringstream rw;
-    GetProtoBuf().SerializeToOstream( &rw );
+#ifdef DEBUG
+    GetProtoBuf().CheckInitialized();
+#endif
 
-    // write stringstream to message
-    while( !rw.eof() )
+    unsigned short descriptor = arguments.message_.Descriptor();
+
+    // does the receiver understand ProtoBufs?
+    if ( sn_protocolBuffers.Supported( arguments.receiver_ ) )
     {
-        unsigned short value = ((unsigned char)rw.get()) << 8;
-        if ( !rw.eof() )
+        // yep. Stream them.
+
+        // dump into plain stringstream
+        std::stringstream rw;
+        GetProtoBuf().SerializeToOstream( &rw );
+
+        // write stringstream to message
+        while( !rw.eof() )
         {
-            value += (unsigned char)rw.get();
+            unsigned short value = ((unsigned char)rw.get()) << 8;
+            if ( !rw.eof() )
+            {
+                value += (unsigned char)rw.get();
+            }
+            arguments.Write( value );
         }
-        buffer[buffer.Size()] = htons( value );
     }
+    else
+    {
+        // receiver does not understant ProtoBufs. Transform
+        // to old style message.
+        static nDescriptor dummy( 0, NULL, "dummy" );
+        if ( !oldFormat_ )
+        {
+            oldFormat_ = new nMessage( dummy );
+            nPBDescriptorBase::StreamToStatic( GetProtoBuf(), *oldFormat_ );
+        }
+
+        // and copy the message contents over.
+        for( int i = 0; i < oldFormat_->DataLen(); ++i )
+        {
+            arguments.Write( oldFormat_->Data(i) );
+        }
+
+        // bend the descriptor
+        descriptor &= ~nPBDescriptorBase::protoBufFlag;
+    }
+
+    return descriptor;
 }
 
 /*
@@ -90,6 +118,16 @@ std::string const & nPBDescriptorBase::DetermineName( Message const & prototype 
 nPBDescriptorBase::DescriptorMap const & nPBDescriptorBase::GetDescriptorsByName()
 {
     return descriptorsByName;
+}
+
+//! puts a filler into a message, taking ownership of it
+nMessage * nPBDescriptorBase::Transform( nMessageFillerProtoBufBase * filler ) const
+{
+    nMessage * ret = new nMessage( *this );
+    
+    ret->SetFiller( filler );
+    
+    return ret;
 }
 
 nPBDescriptorBase::DescriptorMap nPBDescriptorBase::descriptorsByName;
@@ -278,6 +316,10 @@ void nPBDescriptorBase::StreamToDefault( Message const & in, nMessage & out )
 //! selective writing to message, either embedded or transformed
 void nPBDescriptorBase::WriteMessage( Message const & in, nMessage & out ) const
 {
+    tASSERT( 0 );
+
+#ifdef DEBUG_X
+
 #ifdef DEBUG
     in.CheckInitialized();
 #endif
@@ -293,11 +335,9 @@ void nPBDescriptorBase::WriteMessage( Message const & in, nMessage & out ) const
             << ".\n";
     }
 #endif
-    
 
     if ( sn_protocolBuffers.Supported() )
     {
-        tASSERT( out.descriptor & protoBufFlag );
 
         // write the message in its native format
         out << in;
@@ -310,6 +350,8 @@ void nPBDescriptorBase::WriteMessage( Message const & in, nMessage & out ) const
         // transform the message to our legacy format
         StreamTo( in, out );
     }
+
+#endif
 }
 
 //! selective reading message, either embedded or transformed

@@ -443,15 +443,28 @@ class nMessageFiller: public tReferencable< nMessageFiller >
 {
     friend class tControlledPTR< nMessageFiller >;
     friend class tReferencable< nMessageFiller >;
-
 public:
-    inline void Fill( nSendBuffer::Buffer & buffer, int receiver ) const
+    // arguments passed to fill fucntion
+    struct FillArguments
     {
-        OnFill( buffer, receiver );
+        nSendBuffer::Buffer & buffer_; // buffer to write to
+        nMessage & message_;           // the message that is written
+        int receiver_;                 // designated receiver of the buffer
+
+        // write one data element, a short.
+        void Write( unsigned short data );
+
+        FillArguments( nSendBuffer::Buffer & buffer, nMessage & message, int receiver );
+    };
+
+    inline int Fill( FillArguments & arguments ) const
+    {
+        return OnFill( arguments );
     }
 protected:
     //! fills the receiving buffer with data
-    virtual void OnFill( nSendBuffer::Buffer & buffer, int receiver ) const = 0;
+    //  return value: descriptor ID
+    virtual int OnFill( FillArguments & arguments ) const = 0;
     virtual ~nMessageFiller();
 };
 
