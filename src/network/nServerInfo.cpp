@@ -82,6 +82,9 @@ static tSettingItem< int > sn_TNALostContactConf( "BROWSER_CONTACTLOSS", sn_TNAL
 
 nServerInfoCharacterFilter sn_serverNameCharacterFilter;
 
+// number of big server info queries to accept (-1 for infinity)
+static int sn_numAcceptQueries = 0;
+
 static int sn_MaxUnreachable()
 {
     return sn_IsMaster ? 10 : 5;
@@ -1161,6 +1164,21 @@ void nServerInfo::GiveSmallServerInfo(nMessage &m)
         if ( FloodProtection( m ) )
             return;
 
+        // allow some followup queries
+        if ( sn_numAcceptQueries >= 0 )
+        {
+            sn_numAcceptQueries += 3;
+            if ( sn_numAcceptQueries > 10 )
+            {
+                sn_numAcceptQueries = 10;
+            }
+            if ( sn_numAcceptQueries < 5 )
+            {
+                sn_numAcceptQueries = 5;
+            }
+            // con << sn_numAcceptQueries << "\n";
+        }
+
         // immediately respond with a small info
         tJUST_CONTROLLED_PTR< nMessage > ret = tNEW(nMessage)(SmallServerDescriptor);
 
@@ -1250,6 +1268,19 @@ void nServerInfo::GetBigServerInfo(nMessage &m)
 
 void nServerInfo::GiveBigServerInfo(nMessage &m)
 {
+    // check whether we should respond
+    if ( sn_numAcceptQueries >= 0 )
+    {
+        if( sn_numAcceptQueries == 0 )
+        {
+            // ignore
+            return;
+        }
+
+        --sn_numAcceptQueries;
+        // con << sn_numAcceptQueries << "\n";
+    }
+
     if ( FloodProtection( m ) )
         return;
 
@@ -1684,6 +1715,9 @@ extern bool sn_supportRemoteLogins; // nAuthentication.cpp
 
 void nServerInfo::TellMasterAboutMe(nServerInfoBase *masterInfo)
 {
+    // accept infinite queries
+    sn_numAcceptQueries = -1;
+
     // don't reinitialize the network system
     nSocketResetInhibitor inhibitor;
 
