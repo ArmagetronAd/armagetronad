@@ -80,7 +80,8 @@ static tSettingItem< REAL > sn_queryDelayGlobalConf( "BROWSER_QUERY_DELAY_GLOBAL
 static tSettingItem< int > sn_numQueriesConf( "BROWSER_NUM_QUERIES", sn_numQueries );
 static tSettingItem< int > sn_TNALostContactConf( "BROWSER_CONTACTLOSS", sn_TNALostContact );
 
-nServerInfoCharacterFilter sn_serverNameCharacterFilter;
+nServerInfoCharacterFilter sn_serverIPCharacterFilter( false );
+nServerInfoCharacterFilter sn_serverNameCharacterFilter( true );
 
 // number of big server info queries to accept (-1 for infinity)
 static int sn_numAcceptQueries = 0;
@@ -1082,7 +1083,7 @@ void nServerInfo::GetSmallServerInfo(nMessage &m){
     if (n->name.Len() <= 1)
     {
         n->name <<  ToString( baseInfo );
-        n->nameForSorting << sn_serverNameCharacterFilter.FilterServerName( n->name, true );
+        n->nameForSorting << sn_serverIPCharacterFilter.FilterServerName( n->name );
     }
 
     //  n->advancedInfoSet = false;
@@ -2778,7 +2779,7 @@ void nServerInfo::DoGetFrom( nSocket const * socket )
     tColoredString filteredName( sn_serverName );
     filteredName.NetFilter();
     name            = filteredName;
-    nameForSorting  = sn_serverNameCharacterFilter.FilterServerName( filteredName, false );
+    nameForSorting  = sn_serverNameCharacterFilter.FilterServerName( filteredName );
 
     if ( nServerInfoAdmin::GetAdmin() )
     {
@@ -2840,7 +2841,7 @@ void nServerInfo::NetReadThis( nMessage & m )
     tString oldName = name;
 
     sn_ReadFiltered( m, name  ); // get the server name
-    nameForSorting = sn_serverNameCharacterFilter.FilterServerName ( name, false );
+    nameForSorting = sn_serverNameCharacterFilter.FilterServerName ( name );
                                 // and filter it for sorting
     m >> users;                 // get the playing users
 
@@ -3101,10 +3102,11 @@ const tString & nServerInfo::DoGetName( void ) const
 // *
 // *******************************************************************************************
 //!
+//! @param filterIPAddressCharacters filter characters that are OK in an IP, but not in a server name
 //!
 // *******************************************************************************************
 
-nServerInfoCharacterFilter::nServerInfoCharacterFilter( void )
+nServerInfoCharacterFilter::nServerInfoCharacterFilter( bool filterIPAddressCharacters )
 {
     unsigned char i;
     filter[0] = 0;
@@ -3145,17 +3147,27 @@ nServerInfoCharacterFilter::nServerInfoCharacterFilter( void )
     SetMap(0xf9,0xfc,'u');
 
     // Remap l33t characters
-    SetMap('0', 'o');
     SetMap(0xb0, 'o'); // °
-    SetMap('1', 'i');
-    SetMap('2', 'z');
-    SetMap('3', 'e');
-    SetMap('4', 'a');
-    SetMap('5', 's');
-    SetMap('6', 'g');
-    SetMap('7', 't');
     SetMap('$', 's');
     SetMap('+', 't');
+
+    if ( filterIPAddressCharacters )
+    {
+        SetMap('0', 'o');
+        SetMap('1', 'i');
+        SetMap('2', 'z');
+        SetMap('3', 'e');
+        SetMap('4', 'a');
+        SetMap('5', 's');
+        SetMap('6', 'g');
+        SetMap('7', 't');
+    }
+    else
+    {
+        SetMap(':', ':');
+        SetMap('.', '.');
+    }
+
 }
 
 // *******************************************************************************************
@@ -3167,27 +3179,9 @@ nServerInfoCharacterFilter::nServerInfoCharacterFilter( void )
 //!
 // *******************************************************************************************
 
-tString nServerInfoCharacterFilter::FilterServerName( tString s, bool IP )
+tString nServerInfoCharacterFilter::FilterServerName( tString const & s )
 {
     // Remove colors
-    s = tColoredString::RemoveColors( s );
-
-    // Map characters accordingly to the filter
-    int len = s.Len() -1;
-    tString out;
-    char c;
-    for ( int i = 0; i < len; i++ )
-    {
-        if( IP && ( ( s[i] <= '9' && s[i] != 0x7f ) || s[i] == '.' || s[i] == ':' ) )
-        {
-            out << s[i];
-        }
-        else if ( (int) ( c = Filter( s[i] ) ) != 0x7f )
-        {
-            out << (char) c;
-        }
-    }
-    // std::cout << "Filtered name for "<< ( IP? "IP ":"" ) << "'" << s << "' : '" << out << "'\n";
-    return out;
+    return FilterString( tColoredString::RemoveColors( s ) );
 }
 

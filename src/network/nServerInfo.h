@@ -344,8 +344,8 @@ private:
 class nServerInfoCharacterFilter: public tCharacterFilter
 {
 public:
-    nServerInfoCharacterFilter( void );
-    tString FilterServerName( tString, bool );
+    nServerInfoCharacterFilter( bool filterIPAddressCharacters );
+    tString FilterServerName( tString const & s );
 };
 
 // *******************************************************************************************
