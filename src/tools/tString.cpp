@@ -2333,7 +2333,7 @@ wchar_t tCharacterFilter::Filter( wchar_t in )
 //!
 // **********************************************************************
 
-tString tCharacterFilter::FilterByteString( tString & s )
+tString tCharacterFilter::FilterByteString( tString const & s )
 {
     int len = s.Len() -1;
     tString out;
@@ -2360,13 +2360,13 @@ tString tCharacterFilter::FilterByteString( tString & s )
 //!
 // **********************************************************************
 
-tString tCharacterFilter::FilterString( tString & s )
+tString tCharacterFilter::FilterString( tString const & s )
 {
     // output string
     tString out;
 
     // prepare reader and writer
-    tString::iterator reader = s.begin();
+    tString::const_iterator reader = s.begin();
     std::back_insert_iterator< tString > writer = back_inserter(out);
 
     try
