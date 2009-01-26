@@ -35,6 +35,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nNetObject.pb.h"
 
+#ifndef WIN32
+#include  <netinet/in.h>
+#else
+#include  <windows.h>
+#endif
+
 using namespace google::protobuf;
 
 #if GOOGLE_PROTOBUF_VERSION < 2000003
@@ -48,6 +54,25 @@ typedef Message::Reflection Reflection;
 #define REFL_SET( function, message, field, value ) function( message, field, value )
 #define REFLECTION_CONST Reflection const
 #endif
+
+//! fills the receiving buffer with data
+void nMessageFillerProtoBufBase::OnFill( nSendBuffer::Buffer & buffer, int receiver ) const
+{
+    // dump into plain stringstream
+    std::stringstream rw;
+    GetProtoBuf().SerializeToOstream( &rw );
+
+    // write stringstream to message
+    while( !rw.eof() )
+    {
+        unsigned short value = ((unsigned char)rw.get()) << 8;
+        if ( !rw.eof() )
+        {
+            value += (unsigned char)rw.get();
+        }
+        buffer[buffer.Size()] = htons( value );
+    }
+}
 
 /*
 Not defined here, but in nNetwork.cpp for access to the right static variables and macros.
@@ -551,6 +576,8 @@ nMessage& operator >> ( nMessage& m, Message & buffer )
 
 nMessage& operator << ( nMessage& m, Message const & buffer )
 {
+    tASSERT(0);
+
     // dump into plain stringstream
     std::stringstream rw;
     buffer.SerializeToOstream( &rw );

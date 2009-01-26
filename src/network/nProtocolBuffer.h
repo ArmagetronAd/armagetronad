@@ -51,14 +51,14 @@ protected:
     virtual void OnFill( nSendBuffer::Buffer & buffer, int receiver ) const;
 
     //! returns the wrapped protcol buffer
-    inline nProtoBuf const & GetMessage() const
+    inline nProtoBuf const & GetProtoBuf() const
     {
-        return DoGetMessage();
+        return DoGetProtoBuf();
     }
 
 private:
     //! returns the wrapped protcol buffer
-    virtual nProtoBuf const & DoGetMessage() const = 0;
+    virtual nProtoBuf const & DoGetProtoBuf() const = 0;
 };
 
 //! implementation for each protocl buffer 
@@ -67,19 +67,19 @@ class nMessageFillerProtoBuf: public nMessageFillerProtoBufBase
 {
 public:
     //! returns the wrapped protcol buffer
-    inline PROTOBUF const & GetMessage() const
+    inline PROTOBUF const & GetProtoBuf() const
     {
         return protoBuf_;
     }
 
     //! returns the wrapped protcol buffer
-    inline PROTOBUF & AccessMessage()
+    inline PROTOBUF & AccessProtoBuf()
     {
         return protoBuf_;
     }
 private:
     //! returns the wrapped protcol buffer
-    virtual nProtoBuf const & DoGetMessage() const
+    virtual nProtoBuf const & DoGetProtoBuf() const
     {
         return protoBuf_;
     }
