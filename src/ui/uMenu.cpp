@@ -890,7 +890,7 @@ bool uMenuItemString::Event(SDL_Event &e){
             realCursorPos -= content->RemoveSubStrUtf8(realCursorPos,-1);
         }
     }
-    else if (c.sym == SDLK_KP_ENTER || c.sym == SDLK_RETURN) {
+    else if (c.sym == SDLK_KP_ENTER || c.sym == SDLK_RETURN || c.sym == SDLK_UP || c.sym == SDLK_DOWN || c.sym == SDLK_ESCAPE ) {
         ret = false;
         //        c.sym = SDLK_DOWN;
     }
