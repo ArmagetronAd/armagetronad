@@ -39,7 +39,7 @@ using namespace google::protobuf;
 
 #ifdef DEBUG
 // print debug strings?
-#define DEBUG_STRINGS
+// #define DEBUG_STRINGS
 #endif
 
 #if GOOGLE_PROTOBUF_VERSION < 2000003
@@ -359,8 +359,8 @@ void nProtoBufDescriptorBase::ReadMessage( nMessage & in, nProtoBuf & out, nProt
             work.ParsePartialFromIstream( &rw );
 
 #ifdef DEBUG_STRINGS
-            con << "Base  : " << work.ShortDebugString() << "\n";
-            con << "Diff  : " << out.ShortDebugString() << "\n";
+            con << "Base  : " << out.ShortDebugString() << "\n";
+            con << "Diff  : " << work.ShortDebugString() << "\n";
 #endif
 
             out.MergeFrom( work );
@@ -710,8 +710,13 @@ void nMessageCache::Clear()
     parts.clear();
 }
 
+static int sn_messageCacheSize = 1000;
+
 //! adds a message to the cache
-void nMessageCache::AddMessage( nMessage * message, bool incoming )
+//! @param message the message to add
+//! @param incoming true for incoming messages, keep an extra long backlog then
+//! @param reallyAdd true if message should be added. Otherwise, we just purge old messages.
+void nMessageCache::AddMessage( nMessage * message, bool incoming, bool reallyAdd )
 {
     // fetch message filler, ignoring invalid ones
     if ( !message || message->MessageID() == 0 )
@@ -725,27 +730,49 @@ void nMessageCache::AddMessage( nMessage * message, bool incoming )
     {
         return;
     }
-    
+
+#ifdef DEBUG_STRINGS
+    if ( !reallyAdd )
+    {
+        con << "NOT ";
+    }
+    con << "Adding message " << message->MessageID() << " to cache.\n";
+#endif    
+
     // get the cache belonging to this descriptor
     Descriptor const * descriptor = filler->GetProtoBuf().GetDescriptor();
     nMessageCacheByDescriptor & cache = parts[ descriptor ];
 
     // and push the message into the cache
-    cache.queue_.push_back( message );
+    if ( reallyAdd )
+    {
+        cache.queue_.push_back( message );
+    }
 
     // purge old messages
-    const int backlog = 100;
+    const int backlog = sn_messageCacheSize;
     int back = backlog;
     if ( incoming )
     {
         back = 100 + back * 2;
     }
-    if ( back > 0xffff )
+    int max = 0xffff;
+    if ( !incoming )
     {
-        back = 0xffff;
+        max /= 2;
+    }
+    if ( back > max )
+    {
+        back = max;
     }
 
-    while ( cache.queue_.front()->MessageID() + back < message->MessageID() )
+    if ( !incoming )
+    {
+        int x;
+        x = 0;
+    }
+
+    while ( cache.queue_.size() > 0 && cache.queue_.front()->MessageID() + back < message->MessageID() )
     {
         cache.queue_.pop_front();
     }
@@ -779,7 +806,7 @@ bool nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & targ
             tASSERT( dynamic_cast< nMessageFillerProtoBufBase * >( message->GetFiller() ) );
             nMessageFillerProtoBufBase * filler = static_cast< nMessageFillerProtoBufBase * >( message->GetFiller() );
             
-            target.MergeFrom( filler->GetProtoBuf() );
+            target.CopyFrom( filler->GetProtoBuf() );
             
             nProtoBufDescriptorBase::ClearRepeated( target );
 
@@ -856,8 +883,6 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
     
     if ( best )
     {
-        con << "Size = " << size << ", diff = " << bestDifference << "\n";
-
         // found a good previous message. yay!
         tASSERT( dynamic_cast< nMessageFillerProtoBufBase * >( best->GetFiller() ) );
         nMessageFillerProtoBufBase * filler = static_cast< nMessageFillerProtoBufBase * >( best->GetFiller() );
@@ -868,6 +893,7 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
         DiffMessages( cached, source, target );
 
 #ifdef DEBUG_STRINGS
+        con << "Size = " << size << ", diff = " << bestDifference << "\n";
         con << "Base  : " << cached.ShortDebugString() << "\n";
         con << "Source: " << source.ShortDebugString() << "\n";
         con << "Diff  : " << target.ShortDebugString() << "\n";
@@ -883,3 +909,8 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
         return 0;
     }
 }
+
+#include "nConfig.h"
+
+static nSettingItem< int > sn_messageCacheSizeConf( "MESSAGE_CACHE_SIZE", sn_messageCacheSize );
+

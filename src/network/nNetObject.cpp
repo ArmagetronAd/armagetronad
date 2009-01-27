@@ -1443,6 +1443,21 @@ nMessage * nNetObject::NewControlMessage(){
     return m;
 }
 
+// ack that doesn't resend, just wait
+class nDontWaitForAck: public nWaitForAck{
+public:
+    nDontWaitForAck(nMessage* m,int rec)
+    : nWaitForAck( m, rec ){}
+    virtual ~nDontWaitForAck(){};
+
+    virtual bool DoResend()
+    { 
+        // explicitly don't add message to cache
+        sn_Connections[receiver].messageCacheOut_.AddMessage( message, false, false );
+
+        return false;
+    }
+};
 
 
 class nWaitForAckSync: public nWaitForAck{
@@ -1683,6 +1698,10 @@ void nNetObject::SyncAll(){
                         if (nos->knowsAbout[user].nextSyncAck){
                             new nWaitForAckSync(m,user,s);
                             nos->knowsAbout[user].nextSyncAck=false;
+                        }
+                        else
+                        {
+                            new nDontWaitForAck(m,user);
                         }
 #ifndef nSIMULATE_PING
                         unsigned long id = m->MessageIDBig();

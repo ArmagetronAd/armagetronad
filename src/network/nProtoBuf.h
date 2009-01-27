@@ -494,7 +494,7 @@ public:
     void Clear();
 
     //! adds a message to the cache
-    void AddMessage( nMessage * message, bool incoming );
+    void AddMessage( nMessage * message, bool incoming, bool reallyAdd = true );
 
     //! fill protobuf from cache. Returns true on success.
     bool UncompressProtoBuf( unsigned short cacheID, nProtoBuf & target );

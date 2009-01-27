@@ -719,7 +719,10 @@ public:
     nWaitForAck(nMessage* m,int rec);
     virtual ~nWaitForAck();
 
-    virtual void AckExtraAction(){};
+    virtual void AckExtraAction();
+
+    // resend message. Return value: keep ack around?
+    virtual bool DoResend();
 
     static void Ackt(unsigned short id,unsigned short peer);
 

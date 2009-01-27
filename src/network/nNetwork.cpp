@@ -816,6 +816,10 @@ static int acks=0;
 static int max_acks=0;
 #endif
 
+void nWaitForAck::AckExtraAction()
+{
+}
+
 nWaitForAck::nWaitForAck(nMessage* m,int rec)
         :id(-1),message(m),receiver(rec)
 {
@@ -944,6 +948,13 @@ void nWaitForAck::AckAllPeer(unsigned short peer){
     }
 }
 
+bool nWaitForAck::DoResend()
+{ 
+    message->SendImmediately( receiver,false);
+        
+    return true;
+}
+
 void nWaitForAck::Resend(){
     static tReproducibleRandomizer randomizer;
 
@@ -1023,8 +1034,10 @@ void nWaitForAck::Resend(){
                             deb_net=true;
                         }
                         connection.ReliableMessageSent();
-                        pendingAck->message->SendImmediately
-                        (pendingAck->receiver,false);
+                        if ( !pendingAck->DoResend() )
+                        {
+                            delete pendingAck;
+                        }
                         deb_net=false;
                     }
                 }
@@ -2347,7 +2360,6 @@ void nMessage::BroadcastCollected(int peer, unsigned int port){
 
     sn_Connections[peer].sendBuffer_.Broadcast( *sn_Connections[peer].socket, port, &sn_Connections[peer].bandwidthControl_ );
 }
-
 
 // TODO_NOACK
 void nMessage::SendImmediately(int peer,bool ack){
