@@ -150,6 +150,7 @@ public:
 
     tAccessLevel GetRequiredLevel() const { return requiredLevel; }
     tAccessLevel GetSetLevel() const { return setLevel; }
+    void         SetSetLevel( tAccessLevel level ) { setLevel = level; }
 
     static int EatWhitespace(std::istream &s); // eat whitespace from stream; return: first non-whitespace char
 

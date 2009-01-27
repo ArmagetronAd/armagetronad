@@ -134,6 +134,7 @@ static REAL sg_waitForExternalScriptTimeout = 3;
 static tSettingItem<REAL> sg_waitForExternalScriptTimeoutConf( "WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT", sg_waitForExternalScriptTimeout );
 
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
+static tAccessLevelSetter conf_mapfile_setter( conf_mapfile.GetSetting(), tAccessLevel_Owner );
 
 // config item for semi-colon deliminated list of maps/configs, needs semi-colon at the end
 // ie, original/map-1.0.1.xml;original/map-1.0.1.xml;
@@ -209,6 +210,8 @@ private:
 
 static tSettingRotation sg_mapRotation("MAP_ROTATION");
 static tSettingRotation sg_configRotation("CONFIG_ROTATION");
+static tAccessLevelSetter sg_mapRotationSetter( sg_mapRotation, tAccessLevel_Owner );
+static tAccessLevelSetter sg_configSetter( sg_configRotation, tAccessLevel_Owner );
 
 //0 = never, 1 = round, 2 = match
 static int rotationtype = 0;
@@ -3605,11 +3608,15 @@ void rotate()
     if ( sg_mapRotation.Size() > 0 )
     {
         conf_mapfile.Set( sg_mapRotation.Current() );
+        conf_mapfile.GetSetting().SetSetLevel( sg_mapRotation.GetSetLevel() );
         sg_mapRotation.Rotate();
     }
 
     if ( sg_configRotation.Size() > 0 )
     {
+        // transfer 
+        tCurrentAccessLevel level( sg_configRotation.GetSetLevel(), true );
+
         st_Include( sg_configRotation.Current() );
         sg_configRotation.Rotate();
     }
