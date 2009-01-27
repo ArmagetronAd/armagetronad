@@ -2660,10 +2660,6 @@ static void rec_peer(unsigned int peer){
 
                                     sn_Connections[id].ackMess->Write(mess.MessageID());
 
-                                    // store message in incoming cache
-                                    sn_Connections[peer].messageCacheIn_.AddMessage( &mess );
-
-
                                     if (sn_Connections[id].ackMess->DataLen()>100){
                                         sn_Connections[id].ackMess->Send(id, 0, false);
                                         sn_Connections[id].ackMess=NULL;
@@ -2730,7 +2726,12 @@ static void rec_peer(unsigned int peer){
 
                     // perhaps the connection died?
                     if ( sn_Connections[ mess->SenderID() ].socket )
+                    {
                         nDescriptor::HandleMessage( *mess );
+
+                        // store message in incoming cache
+                        sn_Connections[ mess->SenderID() ].messageCacheIn_.AddMessage( mess );
+                    }
                 }
 
                 if ( --recursionCount <= 0 )

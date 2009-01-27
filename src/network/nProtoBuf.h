@@ -56,9 +56,17 @@ protected:
         return DoGetProtoBuf();
     }
 
+    //! returns a temporary work protocol buffer
+    inline nProtoBuf & AccessWorkProtoBuf() const
+    {
+        return DoAccessWorkProtoBuf();
+    }
 private:
     //! returns the wrapped protcol buffer
     virtual nProtoBuf const & DoGetProtoBuf() const = 0;
+
+    //! returns the wrapped protcol buffer
+    virtual nProtoBuf & DoAccessWorkProtoBuf() const = 0;
 
     //! dummy message used to cache raw data in old message format
     mutable tJUST_CONTROLLED_PTR< nMessage > oldFormat_;
@@ -80,6 +88,12 @@ public:
     {
         return protoBuf_;
     }
+
+    //! returns the wrapped protcol buffer
+    inline static PROTOBUF & AccessWorkProtoBuf()
+    {
+        return workProtoBuf_;
+    }
 private:
     //! returns the wrapped protcol buffer
     virtual nProtoBuf const & DoGetProtoBuf() const
@@ -87,9 +101,21 @@ private:
         return protoBuf_;
     }
 
+    //! returns the wrapped protcol buffer
+    virtual nProtoBuf & DoAccessWorkProtoBuf() const
+    {
+        return workProtoBuf_;
+    }
+
     //! the wrapped buffer
     PROTOBUF protoBuf_;
+
+    //! the wrapped work buffer
+    static PROTOBUF workProtoBuf_;
 };
+
+template< class PROTOBUF >
+PROTOBUF nMessageFillerProtoBuf< PROTOBUF >::workProtoBuf_;
 
 //! extra information about the sender of a message
 struct nSenderInfo
@@ -459,7 +485,7 @@ public:
     
     //! find suitable previous message and compresses
     //! the passed protobuf. Return value: the cache ID.
-    unsigned short CompressProtoBuff( nProtoBuf & target );
+    unsigned short CompressProtoBuff( nProtoBuf const & source, nProtoBuf & target );
 };
 
 #endif

@@ -52,20 +52,27 @@ typedef nProtoBuf::Reflection Reflection;
 //! fills the receiving buffer with data
 int nMessageFillerProtoBufBase::OnFill( FillArguments & arguments ) const
 {
+    nProtoBuf const & fullProtoBuf = GetProtoBuf();
+
 #ifdef DEBUG
-    GetProtoBuf().CheckInitialized();
+    fullProtoBuf.CheckInitialized();
 #endif
 
     unsigned short descriptor = arguments.message_.Descriptor();
 
-    // does the receiver understand ProtoBufs?
+    // does the receiver understand ProtoBufs?a
     if ( sn_protoBuf.Supported( arguments.receiver_ ) )
     {
         // yep. Stream them.
 
+        // compress message, writing the cache ID
+        nProtoBuf & workProtoBuf = AccessWorkProtoBuf();
+        nMessageCache & cache = sn_Connections[ arguments.receiver_ ].messageCacheOut_;
+        arguments.Write( cache.CompressProtoBuff( fullProtoBuf, workProtoBuf ) );
+
         // dump into plain stringstream
         std::stringstream rw;
-        GetProtoBuf().SerializeToOstream( &rw );
+        workProtoBuf.SerializeToOstream( &rw );
 
         // write stringstream to message
         while( !rw.eof() )
@@ -86,7 +93,7 @@ int nMessageFillerProtoBufBase::OnFill( FillArguments & arguments ) const
         if ( !oldFormat_ )
         {
             oldFormat_ = new nMessage( dummy );
-            nProtoBufDescriptorBase::StreamToStatic( GetProtoBuf(), *oldFormat_ );
+            nProtoBufDescriptorBase::StreamToStatic( fullProtoBuf, *oldFormat_ );
         }
 
         // and copy the message contents over.
@@ -314,11 +321,21 @@ void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nMessage & 
 }   
 
 //! selective reading message, either embedded or transformed
-void nProtoBufDescriptorBase::ReadMessage( nMessage & in, nProtoBuf & out  ) const
+void nProtoBufDescriptorBase::ReadMessage( nMessage & in, nProtoBuf & out ) const
 {
     if ( in.descriptor & protoBufFlag )
     {
-        // message is a proper protocol buffer message
+        // message is a proper protocol buffer message.
+
+        // read the cache ID
+        unsigned short cacheID;
+        in.Read( cacheID );
+
+        // pre-fill
+        nMessageCache & cache = sn_Connections[ in.SenderID() ].messageCacheIn_;
+        cache.UncompressProtoBuf( cacheID, out );
+    
+        // fill rest of fields
         in >> out;
     }
     else
@@ -672,11 +689,15 @@ void nMessageCache::AddMessage( nMessage * message )
 
 //! fill protobuf from cache
 void nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & target )
-{}
+{
+    target.Clear();
+}
 
 //! find suitable previous message and compresses
 //! the passed protobuf. Return value: the cache ID.
-unsigned short nMessageCache::CompressProtoBuff( nProtoBuf & target )
+unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProtoBuf & target )
 {
+    target.CopyFrom( source );
+
     return 0;
 }
