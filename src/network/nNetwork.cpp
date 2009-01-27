@@ -895,6 +895,11 @@ void nWaitForAck::Ackt(unsigned short id,unsigned short peer){
                 ack->receiver==peer){
             success=1;
 
+            // cache the message in the outgoing cache, 
+            // we know the receiver has it stored
+            // in its incoming cache
+            sn_Connections[peer].messageCacheOut_.AddMessage( ack->message );
+
 #ifdef DEBUG
             //      if (sn_pendingAcks(i)->message == sn_WatchMessage)
             //	st_Breakpoint();
@@ -2654,6 +2659,11 @@ static void rec_peer(unsigned int peer){
                                     }
 
                                     sn_Connections[id].ackMess->Write(mess.MessageID());
+
+                                    // store message in incoming cache
+                                    sn_Connections[peer].messageCacheIn_.AddMessage( &mess );
+
+
                                     if (sn_Connections[id].ackMess->DataLen()>100){
                                         sn_Connections[id].ackMess->Send(id, 0, false);
                                         sn_Connections[id].ackMess=NULL;
@@ -3740,6 +3750,9 @@ nConnectionInfo::~nConnectionInfo()
 }
 
 void nConnectionInfo::Clear(){
+    messageCacheIn_.Clear();
+    messageCacheOut_.Clear();
+
     socket     = NULL;
     ackPending = 0;
     ping.Reset();

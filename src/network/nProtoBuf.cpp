@@ -661,6 +661,11 @@ void nOProtoBufDescriptorBase::PostCheck( nNetObject * object, nSenderInfo sende
     }
 }
 
+//! clears the cache
+void nMessageCache::Clear()
+{
+}
+
 //! adds a message to the cache
 void nMessageCache::AddMessage( nMessage * message )
 {}

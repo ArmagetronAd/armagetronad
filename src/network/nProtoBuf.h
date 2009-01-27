@@ -448,6 +448,9 @@ const PROTOBUF nOProtoBufDescriptor< OBJECT, PROTOBUF >::prototype;
 class nMessageCache
 {
 public:
+    //! clears the cache
+    void Clear();
+
     //! adds a message to the cache
     void AddMessage( nMessage * message );
 
