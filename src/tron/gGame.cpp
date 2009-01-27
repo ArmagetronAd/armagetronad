@@ -3605,11 +3605,15 @@ void rotate()
     if ( sg_mapRotation.Size() > 0 )
     {
         conf_mapfile.Set( sg_mapRotation.Current() );
+        conf_mapfile.GetSetting().SetSetLevel( sg_mapRotation.GetSetLevel() );
         sg_mapRotation.Rotate();
     }
 
     if ( sg_configRotation.Size() > 0 )
     {
+        // transfer 
+        tCurrentAccessLevel level( sg_configRotation.GetSetLevel(), true );
+
         st_Include( sg_configRotation.Current() );
         sg_configRotation.Rotate();
     }
