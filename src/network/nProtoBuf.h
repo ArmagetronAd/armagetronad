@@ -172,7 +172,7 @@ public:
     static inline void StreamToStatic( nProtoBuf const & in, nMessage & out );
 
     //! selective reading message, either embedded or transformed
-    void ReadMessage( nMessage & in, nProtoBuf & out  ) const;
+    void ReadMessage( nMessage & in, nProtoBuf & out, nProtoBuf & work  ) const;
 
     //! creates a protocol buffer of the managed type. Needs to be deleted later.
     inline nProtoBuf * Create2() const
@@ -228,8 +228,8 @@ private:
 };
 
 // read/write operators for protocol buffers
-nMessage& operator >> ( nMessage& m, nProtoBuf & buffer );
-nMessage& operator << ( nMessage& m, nProtoBuf const & buffer );
+// nMessage& operator >> ( nMessage& m, nProtoBuf & buffer );
+// nMessage& operator << ( nMessage& m, nProtoBuf const & buffer );
 
 // templated version of protocol buffer messages
 template< class PROTOBUF > 
@@ -256,7 +256,7 @@ class nProtoBufDescriptor: public nProtoBufDescriptorBase
         Filler * filler = new Filler;
         envelope.SetFiller( filler );
 
-        ReadMessage( envelope, filler->AccessProtoBuf() );
+        ReadMessage( envelope, filler->AccessProtoBuf(), filler->AccessWorkProtoBuf() );
 
         // and delegate
         handler_( filler->AccessProtoBuf(), nSenderInfo( envelope ) );
@@ -429,7 +429,7 @@ private:
         SYNC & sync = filler->AccessProtoBuf();
 
         // transfer sync to message
-        ReadMessage( envelope, sync );
+        ReadMessage( envelope, sync, filler->AccessWorkProtoBuf() );
 
         // delegate to object
         cast.ReadSync( sync, nSenderInfo( envelope ) );
@@ -496,8 +496,8 @@ public:
     //! adds a message to the cache
     void AddMessage( nMessage * message, bool incoming );
 
-    //! fill protobuf from cache
-    void UncompressProtoBuf( unsigned short cacheID, nProtoBuf & target );
+    //! fill protobuf from cache. Returns true on success.
+    bool UncompressProtoBuf( unsigned short cacheID, nProtoBuf & target );
     
     //! find suitable previous message and compresses
     //! the passed protobuf. Return value: the cache ID.

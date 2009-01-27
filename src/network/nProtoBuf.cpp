@@ -37,6 +37,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 using namespace google::protobuf;
 
+#ifdef DEBUG
+// print debug strings?
+#define DEBUG_STRINGS
+#endif
+
 #if GOOGLE_PROTOBUF_VERSION < 2000003
 // cull first parameter from reflection functions
 #define REFL_GET( function, message, field )        function( field )
@@ -321,7 +326,7 @@ void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nMessage & 
 }   
 
 //! selective reading message, either embedded or transformed
-void nProtoBufDescriptorBase::ReadMessage( nMessage & in, nProtoBuf & out ) const
+void nProtoBufDescriptorBase::ReadMessage( nMessage & in, nProtoBuf & out, nProtoBuf & work ) const
 {
     if ( in.descriptor & protoBufFlag )
     {
@@ -333,10 +338,46 @@ void nProtoBufDescriptorBase::ReadMessage( nMessage & in, nProtoBuf & out ) cons
 
         // pre-fill
         nMessageCache & cache = sn_Connections[ in.SenderID() ].messageCacheIn_;
-        cache.UncompressProtoBuf( cacheID, out );
-    
+        bool inCache = cache.UncompressProtoBuf( cacheID, out );
+
         // fill rest of fields
-        in >> out;
+
+        // first, read into a string. protobufs ALWAYS take the whole rest of a
+        // message. Luckily, they don't mind a single appended 0 byte.
+        std::stringstream rw;
+        while( !in.End() )
+        {
+            unsigned short value;
+            in.Read( value );
+            rw.put( value >> 8 );
+            rw.put( value & 0xff );
+        }
+
+        // then, read the string into the buffer
+        if ( inCache )
+        {
+            work.ParsePartialFromIstream( &rw );
+
+#ifdef DEBUG_STRINGS
+            con << "Base  : " << work.ShortDebugString() << "\n";
+            con << "Diff  : " << out.ShortDebugString() << "\n";
+#endif
+
+            out.MergeFrom( work );
+
+#ifdef DEBUG_STRINGS
+            con << "Merged: " << out.ShortDebugString() << "\n";
+#endif
+        }
+        else
+        {
+            // just read directly
+            out.ParsePartialFromIstream( &rw );
+        }
+
+        // TODO: optimize. The stream copy should not be required, the data is
+        // already in memory. But first, make it so that the byte order in memory
+        // is already the network byte order, right now, it's the machine's order.
     }
     else
     {
@@ -364,8 +405,8 @@ void nProtoBufDescriptorBase::EstimateMessageDifference( nProtoBuf const & a,
     tASSERT( descriptor == b.GetDescriptor() );
 
 #ifdef DEBUG
-    // tString da = a.DebugString();
-    // tString db = b.DebugString();
+    // tString da = a.ShortDebugString();
+    // tString db = b.ShortDebugString();
 #endif    
 
     // iterate over fields in ID order
@@ -518,7 +559,7 @@ void nProtoBufDescriptorBase::DiffMessages( nProtoBuf const & base,
 #undef COMPARE
         }
     
-        if ( differ )
+        if ( !differ )
         {
             // clear the field
             r_diff->REFL_GET( ClearField, &diff, field );
@@ -573,26 +614,6 @@ void nProtoBufDescriptorBase::DoStreamFrom( nMessage & in, nProtoBuf & out ) con
 // read/write operators for protocol buffers
 nMessage& operator >> ( nMessage& m, nProtoBuf & buffer )
 {
-    // first, read into a string. protobufs ALWAYS take the whole rest of a
-    // message. Luckily, they don't mind a single appended 0 byte.
-    std::stringstream rw;
-    while( !m.End() )
-    {
-        unsigned short value;
-        m.Read( value );
-        rw.put( value >> 8 );
-        rw.put( value & 0xff );
-    }
-
-    // then, read the string into the buffer
-    buffer.ParseFromIstream( &rw );
-
-    // TODO: optimize. The stream copy should not be required, the data is
-    // already in memory. But first, make it so that the byte order in memory
-    // is already the network byte order, right now, it's the machine's order.
-
-    // also, maybe postpone the actual write to when the message is sent; then
-    // previous messages to the same client can be scanned and used as templates.
 
     return m;
 }
@@ -731,7 +752,7 @@ void nMessageCache::AddMessage( nMessage * message, bool incoming )
 }
 
 //! fill protobuf from cache
-void nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & target )
+bool nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & target )
 {
     // clear target
     target.Clear();
@@ -739,7 +760,7 @@ void nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & targ
     // do nothing if told so
     if ( cacheID == 0 )
     {
-        return;
+        return false;
     }
 
     // get the cache belonging to this descriptor
@@ -762,13 +783,15 @@ void nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & targ
             
             nProtoBufDescriptorBase::ClearRepeated( target );
 
-            return;
+            return true;
         }
     }
 
     tASSERT( 0 );
 
     throw nKillHim();
+
+    return false;
 }
 
 //! find suitable previous message and compresses
@@ -843,6 +866,12 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
         // calculate diff message
         nProtoBufDescriptorBase::
         DiffMessages( cached, source, target );
+
+#ifdef DEBUG_STRINGS
+        con << "Base  : " << cached.ShortDebugString() << "\n";
+        con << "Source: " << source.ShortDebugString() << "\n";
+        con << "Diff  : " << target.ShortDebugString() << "\n";
+#endif
 
         // and return the message ID
         return static_cast< unsigned short >( best->MessageID() );
