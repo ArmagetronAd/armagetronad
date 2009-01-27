@@ -41,7 +41,7 @@ using namespace google::protobuf;
 // cull first parameter from reflection functions
 #define REFL_GET( function, message, field )        function( field )
 #define REFL_SET( function, message, field, value ) function( field, value )
-typedef Message::Reflection Reflection;
+typedef nProtoBuf::Reflection Reflection;
 #define REFLECTION_CONST Reflection
 #else
 #define REFL_GET( function, message, field )        function( message, field )
@@ -110,7 +110,7 @@ nProtoBufDescriptorBase::nProtoBufDescriptorBase(unsigned short identification,
                                      bool acceptEvenIfNotLoggedIn )
 */
 
-std::string const & nProtoBufDescriptorBase::DetermineName( Message const & prototype )
+std::string const & nProtoBufDescriptorBase::DetermineName( nProtoBuf const & prototype )
 {
     return prototype.GetDescriptor()->full_name();
 }
@@ -132,7 +132,7 @@ nMessage * nProtoBufDescriptorBase::Transform( nMessageFillerProtoBufBase * fill
 
 nProtoBufDescriptorBase::DescriptorMap nProtoBufDescriptorBase::descriptorsByName;
 //! dumb streaming from message, static version
-void nProtoBufDescriptorBase::StreamFromStatic( nMessage & in, Message & out  )
+void nProtoBufDescriptorBase::StreamFromStatic( nMessage & in, nProtoBuf & out  )
 {
     // try to determine suitable descriptor
     nProtoBufDescriptorBase const * embedded = descriptorsByName[ DetermineName( out ) ];
@@ -158,7 +158,7 @@ void nProtoBufDescriptorBase::StreamFromStatic( nMessage & in, Message & out  )
 }
 
 //! dumb streaming to message, static version
-void nProtoBufDescriptorBase::StreamToStatic( Message const & in, nMessage & out )
+void nProtoBufDescriptorBase::StreamToStatic( nProtoBuf const & in, nMessage & out )
 {
     // try to determine suitable descriptor
     nProtoBufDescriptorBase const * embedded = descriptorsByName[ DetermineName( in ) ];
@@ -184,7 +184,7 @@ void nProtoBufDescriptorBase::StreamToStatic( Message const & in, nMessage & out
 }
 
 //! dumb streaming from message, static version
-void nProtoBufDescriptorBase::StreamFromDefault( nMessage & in, Message & out  )
+void nProtoBufDescriptorBase::StreamFromDefault( nMessage & in, nProtoBuf & out  )
 {
     // get reflection interface
     REFLECTION_CONST * reflection = out.GetReflection();
@@ -262,7 +262,7 @@ void nProtoBufDescriptorBase::StreamFromDefault( nMessage & in, Message & out  )
 }
 
 //! dumb streaming to message, static version
-void nProtoBufDescriptorBase::StreamToDefault( Message const & in, nMessage & out )
+void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nMessage & out )
 {
     // get reflection interface
     const Reflection * reflection = in.GetReflection();
@@ -314,7 +314,7 @@ void nProtoBufDescriptorBase::StreamToDefault( Message const & in, nMessage & ou
 }   
 
 //! selective reading message, either embedded or transformed
-void nProtoBufDescriptorBase::ReadMessage( nMessage & in, Message & out  ) const
+void nProtoBufDescriptorBase::ReadMessage( nMessage & in, nProtoBuf & out  ) const
 {
     if ( in.descriptor & protoBufFlag )
     {
@@ -334,8 +334,8 @@ void nProtoBufDescriptorBase::ReadMessage( nMessage & in, Message & out  ) const
 //! @param total total maximal size of message (must be zeroed before call)
 //! @param total difference of messages, between 0 and total (must be zeroed before call)
 //! @param removed is set to true if a has an element that is missing from b
-void nProtoBufDescriptorBase::EstimateMessageDifference( Message const & a,
-                                                   Message const & b,
+void nProtoBufDescriptorBase::EstimateMessageDifference( nProtoBuf const & a,
+                                                   nProtoBuf const & b,
                                                    int & total,
                                                    int & difference,
                                                    bool & removed )
@@ -420,9 +420,9 @@ void nProtoBufDescriptorBase::EstimateMessageDifference( Message const & a,
 //! @param derived second message
 //! @param diff target message for difference. All the fields where base and derived differ are set here, with the value taken from derived.
 //! @param copy if true, the first operation is a copy from derived to diff. If false, only elements equal in both derived and base are discarded from diff.
-void nProtoBufDescriptorBase::DiffMessages( Message const & base,
-                                      Message const & derived,
-                                      Message & diff,
+void nProtoBufDescriptorBase::DiffMessages( nProtoBuf const & base,
+                                      nProtoBuf const & derived,
+                                      nProtoBuf & diff,
                                       bool copy )
 {
     // get reflection interface
@@ -505,7 +505,7 @@ void nProtoBufDescriptorBase::DiffMessages( Message const & base,
 }
 
 //! @param message the message to rid of all repeated fields
-void nProtoBufDescriptorBase::ClearRepeated( Message & message )
+void nProtoBufDescriptorBase::ClearRepeated( nProtoBuf & message )
 {
     // get reflection interface
     Descriptor const * descriptor = message.GetDescriptor();
@@ -537,19 +537,19 @@ void nProtoBufDescriptorBase::ClearRepeated( Message & message )
 }
 
 //! dumb streaming to message
-void nProtoBufDescriptorBase::DoStreamTo( Message const & in, nMessage & out ) const
+void nProtoBufDescriptorBase::DoStreamTo( nProtoBuf const & in, nMessage & out ) const
 {
     StreamToDefault( in, out );
 }
 
 //! dumb streaming from message
-void nProtoBufDescriptorBase::DoStreamFrom( nMessage & in, Message & out ) const
+void nProtoBufDescriptorBase::DoStreamFrom( nMessage & in, nProtoBuf & out ) const
 {
     StreamFromDefault( in, out );
 }
 
 // read/write operators for protocol buffers
-nMessage& operator >> ( nMessage& m, Message & buffer )
+nMessage& operator >> ( nMessage& m, nProtoBuf & buffer )
 {
     // first, read into a string. protobufs ALWAYS take the whole rest of a
     // message. Luckily, they don't mind a single appended 0 byte.
@@ -575,7 +575,7 @@ nMessage& operator >> ( nMessage& m, Message & buffer )
     return m;
 }
 
-nMessage& operator << ( nMessage& m, Message const & buffer )
+nMessage& operator << ( nMessage& m, nProtoBuf const & buffer )
 {
     tASSERT(0);
 
@@ -659,4 +659,19 @@ void nOProtoBufDescriptorBase::PostCheck( nNetObject * object, nSenderInfo sende
         // object was unable to be registered
         object->Release(); // silently delete it.
     }
+}
+
+//! adds a message to the cache
+void nMessageCache::AddMessage( nMessage * message )
+{}
+
+//! fill protobuf from cache
+void nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & target )
+{}
+
+//! find suitable previous message and compresses
+//! the passed protobuf. Return value: the cache ID.
+unsigned short nMessageCache::CompressProtoBuff( nProtoBuf & target )
+{
+    return 0;
 }

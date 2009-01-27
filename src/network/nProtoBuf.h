@@ -443,8 +443,20 @@ private:
 template< class OBJECT, class PROTOBUF >
 const PROTOBUF nOProtoBufDescriptor< OBJECT, PROTOBUF >::prototype;
 
+//! message cache, used to compress and restore messages
+//! based on previous messages.
 class nMessageCache
 {
+public:
+    //! adds a message to the cache
+    void AddMessage( nMessage * message );
+
+    //! fill protobuf from cache
+    void UncompressProtoBuf( unsigned short cacheID, nProtoBuf & target );
+    
+    //! find suitable previous message and compresses
+    //! the passed protobuf. Return value: the cache ID.
+    unsigned short CompressProtoBuff( nProtoBuf & target );
 };
 
 #endif
