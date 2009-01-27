@@ -98,11 +98,13 @@ class gMenuItemPlayerTeam: public uMenuItem
 {
     tJUST_CONTROLLED_PTR< ePlayerNetID > 	player;
     tJUST_CONTROLLED_PTR< eTeam >			team;
+    bool            canJoin_;
 public:
-    gMenuItemPlayerTeam(uMenu *M,ePlayerNetID* p, eTeam* t )
+    gMenuItemPlayerTeam(uMenu *M,ePlayerNetID* p, eTeam* t, bool canJoin )
             : uMenuItem( M, tOutput("$team_menu_join_help", t->Name())),
             player ( p ),
-            team ( t)
+            team ( t),
+            canJoin_( canJoin )
     {
     }
 
@@ -110,7 +112,7 @@ public:
     {
         tOutput text;
         PrepareTeamText(&text, team, player, "$team_menu_join");
-        DisplayTextSpecial( x, y, text, selected, alpha );
+        DisplayTextSpecial( x, y, text, selected, alpha * ( canJoin_ ? 1 : ( selected ? .8 : .5 ) ) );
     }
 
     virtual void Enter()
@@ -270,9 +272,9 @@ public:
         for ( int i = 0; i<eTeam::teams.Len(); i++ )
         {
             eTeam *team = eTeam::teams(i);
-            if ( team && team != player->NextTeam() && !team->PlayerMayJoin( player ) )
+            if ( team && team != player->NextTeam() && !team->PlayerMayJoin( player ))
             {
-                items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team );
+                items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team, false );
             }
         }
         // second pass add teams who probably can be joined
@@ -281,7 +283,7 @@ public:
         {
             eTeam *team = eTeam::teams(i);
             if ( team && team != player->NextTeam() && team->PlayerMayJoin( player ))
-                items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team );
+                items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team, true );
         }
 
         if ( player->IsSpectating() ||
