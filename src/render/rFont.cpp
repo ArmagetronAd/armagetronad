@@ -606,6 +606,13 @@ void rTextField::GetDefaultColor( tColor & defaultColor )
 void rTextField::SetDefaultColor( tColor const & defaultColor )
 {
     defaultColor_ = defaultColor;
+    if ( !sr_alphaBlend )
+    {
+        defaultColor_.r_ *= defaultColor_.a_;
+        defaultColor_.g_ *= defaultColor_.a_;
+        defaultColor_.b_ *= defaultColor_.a_;
+        defaultColor_.a_ = 1;
+    }
     blendColor_ = tColor();
 }
 
@@ -652,6 +659,13 @@ void rTextField::GetBlendColor( tColor & blendColor )
 void rTextField::SetBlendColor( tColor const & blendColor )
 {
     blendColor_ = blendColor;
+    if ( !sr_alphaBlend )
+    {
+        blendColor_.r_ *= blendColor_.a_;
+        blendColor_.g_ *= blendColor_.a_;
+        blendColor_.b_ *= blendColor_.a_;
+        blendColor_.a_ = 1;
+    }
 }
 
 tColor rTextField::defaultColor_;
