@@ -213,17 +213,9 @@ static tSettingRotation sg_configRotation("CONFIG_ROTATION");
 static tAccessLevelSetter sg_mapRotationSetter( sg_mapRotation, tAccessLevel_Owner );
 static tAccessLevelSetter sg_configSetter( sg_configRotation, tAccessLevel_Owner );
 
-enum gRotationType
-{
-    gROTATION_NEVER = 0,
-    gROTATION_ROUND = 1,
-    gROTATION_MATCH = 2
-};
-
-tCONFIG_ENUM( gRotationType );
-
-static gRotationType rotationtype = gROTATION_NEVER;
-static tSettingItem<gRotationType> conf_rotationtype("ROTATION_TYPE",rotationtype);
+//0 = never, 1 = round, 2 = match
+static int rotationtype = 0;
+static tSettingItem<int> conf_rotationtype("ROTATION_TYPE",rotationtype);
 
 // bool globalingame=false;
 tString sg_GetCurrentTime( char const * szFormat )
@@ -1435,7 +1427,7 @@ void sg_HostGame(){
         int numPlayers = 0;
 
         while (numPlayers == 0 &&
-                (ded_idle <= 0.0f || tSysTimeFloat()<startTime + ded_idle * 3600 ) && !uMenu::quickexit ){
+                (ded_idle<.0001 || tSysTimeFloat()<startTime + ded_idle * 3600 ) && !uMenu::quickexit ){
             sr_Read_stdin();
             st_DoToDo();
             gGame::NetSyncIdle();
@@ -1459,7 +1451,7 @@ void sg_HostGame(){
             }
         }
 
-        if (sg_NumUsers() <= 0 && ded_idle > 0.0f &&
+        if (sg_NumUsers() <= 0 && ded_idle>0.0001 &&
                 tSysTimeFloat()>= startTime + ded_idle * 3600 )
         {
             sg_Timestamp();
@@ -2617,11 +2609,6 @@ void gGame::StateUpdate(){
         case GS_TRANSFER_SETTINGS:
             // sr_con.autoDisplayAtNewline=true;
 
-            // rotate, if rotate is once per round
-            if ( rotationtype == gROTATION_ROUND )
-                rotate();
-            gRotation::HandleNewRound();
-
             // transfer game settings
             if ( nCLIENT != sn_GetNetState() )
             {
@@ -2888,6 +2875,11 @@ void gGame::StateUpdate(){
 
             se_UserShowScores(false);
 
+            // rotate, if rotate is once per round
+            if (rotationtype == 1)
+                rotate();
+            gRotation::HandleNewRound();
+
             //con.autoDisplayAtNewline=true;
             sr_con.fullscreen=true;
             SetState(GS_DELETE_OBJECTS,GS_DELETE_GRID);
@@ -2951,7 +2943,7 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 
         eGameObject *e=p->Object();
 
-        if ( ( !e || ( !e->Alive() && e->DeathTime() < time - .5 ) ) && sn_GetNetState() != nCLIENT )
+        if ( ( !e || !e->Alive() && e->DeathTime() < time - .5 ) && sn_GetNetState() != nCLIENT )
         {
             sg_RespawnPlayer(time, grid, &arena, p);
         }
@@ -3006,11 +2998,7 @@ void gGame::Timestep(REAL time,bool cam){
 #endif
 
 #ifdef RESPAWN_HACK
-    // no respawining while deathzone is active.
-    if( !winDeathZone_ )
-    {
-        sg_Respawn(time,grid,Arena);
-    }
+    sg_Respawn(time,grid,Arena);
 #endif
 
     // chop timestep into small, managable bits
@@ -3556,7 +3544,7 @@ void gGame::Analysis(REAL time){
                             se_mainGameTimer->speed = 1;
 
                         //check for map rotation, new match...
-                        if ( rotationtype == gROTATION_MATCH )
+                        if (rotationtype == 2)
                             rotate();
 
                         gRotation::HandleNewMatch();
@@ -4094,14 +4082,8 @@ void sg_EnterGameCore( nNetState enter_state ){
         sg_copySettings();
 
         // initiate rotation
-        if ( rotationtype != gROTATION_ROUND )
-        {
-            // called before first round starts
-            // in the regular way, no need to call it here
-            // in round rotation mode
-            rotate();
-            gRotation::HandleNewRound();
-        }
+        rotate();
+        gRotation::HandleNewRound();
         gRotation::HandleNewMatch();
     }
 

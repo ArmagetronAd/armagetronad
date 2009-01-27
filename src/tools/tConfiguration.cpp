@@ -419,9 +419,7 @@ void tConfItemBase::LoadLine(std::istream &s){
             // eat rest of input line
             tString rest;
             rest.ReadLine( s );
-#ifdef MACOSX
-            printErrors = false;
-#endif
+
             if (printErrors)
             {
                 tOutput o;
