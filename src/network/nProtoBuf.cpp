@@ -360,8 +360,13 @@ void nProtoBufDescriptorBase::EstimateMessageDifference( nProtoBuf const & a,
     // get reflection interface
     const Reflection * ra = a.GetReflection();
     Descriptor const * descriptor  = a.GetDescriptor();
-    const Reflection * rb = a.GetReflection();
+    const Reflection * rb = b.GetReflection();
     tASSERT( descriptor == b.GetDescriptor() );
+
+#ifdef DEBUG
+    // tString da = a.DebugString();
+    // tString db = b.DebugString();
+#endif    
 
     // iterate over fields in ID order
     int count = descriptor->field_count();
@@ -753,19 +758,99 @@ void nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & targ
             tASSERT( dynamic_cast< nMessageFillerProtoBufBase * >( message->GetFiller() ) );
             nMessageFillerProtoBufBase * filler = static_cast< nMessageFillerProtoBufBase * >( message->GetFiller() );
             
-            
             target.MergeFrom( filler->GetProtoBuf() );
+            
+            nProtoBufDescriptorBase::ClearRepeated( target );
 
-            break;
+            return;
         }
     }
+
+    tASSERT( 0 );
+
+    throw nKillHim();
 }
 
 //! find suitable previous message and compresses
 //! the passed protobuf. Return value: the cache ID.
 unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProtoBuf & target )
 {
-    target.CopyFrom( source );
+    // get the cache belonging to this descriptor
+    Descriptor const * descriptor = target.GetDescriptor();
+    nMessageCacheByDescriptor & cache = parts[ descriptor ];
 
-    return 0;
+    // try to find the best matching message in the queue
+    nMessage * best = 0;
+
+    // total size, maximum size to save
+    int size = 0;
+    
+    // best difference achieved so far
+    int bestDifference = 0;
+    
+    // attempts so far
+    int count = 0;
+
+    // count when last best message was found
+    int bestCount = 0;
+
+    // find the cacheID
+    typedef nMessageCacheByDescriptor::CacheQueue CacheQueue;
+    for( CacheQueue::reverse_iterator i = cache.queue_.rbegin();
+         i != cache.queue_.rend(); ++i )
+    {
+        nMessage * message = *i;
+
+        tASSERT( dynamic_cast< nMessageFillerProtoBufBase * >( message->GetFiller() ) );
+        nMessageFillerProtoBufBase * filler = static_cast< nMessageFillerProtoBufBase * >( message->GetFiller() );
+        nProtoBuf const & cached = filler->GetProtoBuf();
+
+        // the current difference
+        int difference = 0;
+        size = 0;
+
+        // whether there were removed fields
+        bool removed = false;
+
+        nProtoBufDescriptorBase::
+        EstimateMessageDifference( cached, source,
+                                   size, difference, removed );
+        if ( !removed && ( !best || difference < bestDifference ) )
+        {
+            // best message so far
+            best = message;
+            bestDifference = difference;
+        }
+
+        // check whether it pays to look on
+        if ( bestDifference * count > 2 * bestCount * size )
+        {
+            break;
+        }
+
+        ++count;
+    }
+    
+    if ( best )
+    {
+        con << "Size = " << size << ", diff = " << bestDifference << "\n";
+
+        // found a good previous message. yay!
+        tASSERT( dynamic_cast< nMessageFillerProtoBufBase * >( best->GetFiller() ) );
+        nMessageFillerProtoBufBase * filler = static_cast< nMessageFillerProtoBufBase * >( best->GetFiller() );
+        nProtoBuf const & cached = filler->GetProtoBuf();
+
+        // calculate diff message
+        nProtoBufDescriptorBase::
+        DiffMessages( cached, source, target );
+
+        // and return the message ID
+        return static_cast< unsigned short >( best->MessageID() );
+    }
+    else
+    {
+        // no message found, return full protobuf
+        target.CopyFrom( source );
+        return 0;
+    }
 }
