@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ArmageTron_ProtocolBuffer_H
 
 // protocol buffers forward declaration
-namespace google { namespace protobuf { class Message; } }
+namespace google { namespace protobuf { class Message; class Descriptor; } }
 typedef google::protobuf::Message nProtoBuf;
 
 namespace Network{ class nNetObjectInit; }
@@ -40,16 +40,15 @@ class nNetObject;
 class nNetObjectRegistrar;
 
 #include <map>
+#include <deque>
+// #include <hash_map>
 
 extern nVersionFeature sn_protoBuf;
 
 //! fills a message with a protocol buffer
 class nMessageFillerProtoBufBase: public nMessageFiller
 {
-protected:
-    //! fills the receiving buffer with data
-    virtual int OnFill(  FillArguments & arguments ) const;
-
+public:
     //! returns the wrapped protcol buffer
     inline nProtoBuf const & GetProtoBuf() const
     {
@@ -61,6 +60,11 @@ protected:
     {
         return DoAccessWorkProtoBuf();
     }
+
+protected:
+    //! fills the receiving buffer with data
+    virtual int OnFill(  FillArguments & arguments ) const;
+
 private:
     //! returns the wrapped protcol buffer
     virtual nProtoBuf const & DoGetProtoBuf() const = 0;
@@ -469,6 +473,18 @@ private:
 template< class OBJECT, class PROTOBUF >
 const PROTOBUF nOProtoBufDescriptor< OBJECT, PROTOBUF >::prototype;
 
+//! one cache for every protobuf descriptor
+class nMessageCacheByDescriptor
+{
+    // trivial first implementation
+
+    friend class nMessageCache;
+
+    //! queue of cached messages
+    typedef std::deque< tJUST_CONTROLLED_PTR< nMessage > > CacheQueue;
+    CacheQueue queue_;
+};
+
 //! message cache, used to compress and restore messages
 //! based on previous messages.
 class nMessageCache
@@ -478,7 +494,7 @@ public:
     void Clear();
 
     //! adds a message to the cache
-    void AddMessage( nMessage * message );
+    void AddMessage( nMessage * message, bool incoming );
 
     //! fill protobuf from cache
     void UncompressProtoBuf( unsigned short cacheID, nProtoBuf & target );
@@ -486,6 +502,11 @@ public:
     //! find suitable previous message and compresses
     //! the passed protobuf. Return value: the cache ID.
     unsigned short CompressProtoBuff( nProtoBuf const & source, nProtoBuf & target );
+
+private:
+    // the partial caches
+    typedef std::map< google::protobuf::Descriptor const *, nMessageCacheByDescriptor > CacheMap;
+    CacheMap parts;
 };
 
 #endif

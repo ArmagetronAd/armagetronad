@@ -681,16 +681,84 @@ void nOProtoBufDescriptorBase::PostCheck( nNetObject * object, nSenderInfo sende
 //! clears the cache
 void nMessageCache::Clear()
 {
+    parts.clear();
 }
 
 //! adds a message to the cache
-void nMessageCache::AddMessage( nMessage * message )
-{}
+void nMessageCache::AddMessage( nMessage * message, bool incoming )
+{
+    // fetch message filler, ignoring invalid ones
+    if ( !message || message->MessageID() == 0 )
+    {
+        return;
+    }
+
+    nMessageFillerProtoBufBase * filler = dynamic_cast< nMessageFillerProtoBufBase * >( message->GetFiller() );
+
+    if ( !filler )
+    {
+        return;
+    }
+    
+    // get the cache belonging to this descriptor
+    Descriptor const * descriptor = filler->GetProtoBuf().GetDescriptor();
+    nMessageCacheByDescriptor & cache = parts[ descriptor ];
+
+    // and push the message into the cache
+    cache.queue_.push_back( message );
+
+    // purge old messages
+    const int backlog = 100;
+    int back = backlog;
+    if ( incoming )
+    {
+        back = 100 + back * 2;
+    }
+    if ( back > 0xffff )
+    {
+        back = 0xffff;
+    }
+
+    while ( cache.queue_.front()->MessageID() + back < message->MessageID() )
+    {
+        cache.queue_.pop_front();
+    }
+}
 
 //! fill protobuf from cache
 void nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & target )
 {
+    // clear target
     target.Clear();
+
+    // do nothing if told so
+    if ( cacheID == 0 )
+    {
+        return;
+    }
+
+    // get the cache belonging to this descriptor
+    Descriptor const * descriptor = target.GetDescriptor();
+    nMessageCacheByDescriptor & cache = parts[ descriptor ];
+
+    // find the cacheID
+    typedef nMessageCacheByDescriptor::CacheQueue CacheQueue;
+    for( CacheQueue::reverse_iterator i = cache.queue_.rbegin();
+         i != cache.queue_.rend(); ++i )
+    {
+        nMessage * message = *i;
+        if ( ( message->MessageID() & 0xffff ) == cacheID )
+        {
+            // found it, copy over
+            tASSERT( dynamic_cast< nMessageFillerProtoBufBase * >( message->GetFiller() ) );
+            nMessageFillerProtoBufBase * filler = static_cast< nMessageFillerProtoBufBase * >( message->GetFiller() );
+            
+            
+            target.MergeFrom( filler->GetProtoBuf() );
+
+            break;
+        }
+    }
 }
 
 //! find suitable previous message and compresses

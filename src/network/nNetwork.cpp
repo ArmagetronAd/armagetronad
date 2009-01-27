@@ -898,7 +898,7 @@ void nWaitForAck::Ackt(unsigned short id,unsigned short peer){
             // cache the message in the outgoing cache, 
             // we know the receiver has it stored
             // in its incoming cache
-            sn_Connections[peer].messageCacheOut_.AddMessage( ack->message );
+            sn_Connections[peer].messageCacheOut_.AddMessage( ack->message, false );
 
 #ifdef DEBUG
             //      if (sn_pendingAcks(i)->message == sn_WatchMessage)
@@ -2730,7 +2730,7 @@ static void rec_peer(unsigned int peer){
                         nDescriptor::HandleMessage( *mess );
 
                         // store message in incoming cache
-                        sn_Connections[ mess->SenderID() ].messageCacheIn_.AddMessage( mess );
+                        sn_Connections[ mess->SenderID() ].messageCacheIn_.AddMessage( mess, true );
                     }
                 }
 
