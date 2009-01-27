@@ -3726,8 +3726,18 @@ void sn_Statistics()
 
 
 
-nConnectionInfo::nConnectionInfo():messageCache_(*new nMessageCache()){Clear();}
-nConnectionInfo::~nConnectionInfo(){ delete & messageCache_; }
+nConnectionInfo::nConnectionInfo()
+: messageCacheIn_(*new nMessageCache())
+, messageCacheOut_(*new nMessageCache())
+{
+    Clear();
+}
+
+nConnectionInfo::~nConnectionInfo()
+{ 
+    delete & messageCacheIn_;
+    delete & messageCacheOut_;
+}
 
 void nConnectionInfo::Clear(){
     socket     = NULL;

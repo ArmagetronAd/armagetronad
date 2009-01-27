@@ -317,7 +317,8 @@ protected:
 
 struct nConnectionInfo     // everything that is needed to manage a connection
 {
-    nMessageCache &        messageCache_;
+    nMessageCache &        messageCacheIn_;
+    nMessageCache &        messageCacheOut_;
 
     nSocket const *        socket;             // the network UDP socket
     int                    ackPending;
