@@ -2609,6 +2609,11 @@ void gGame::StateUpdate(){
         case GS_TRANSFER_SETTINGS:
             // sr_con.autoDisplayAtNewline=true;
 
+            // rotate, if rotate is once per round
+            if (rotationtype == 1)
+                rotate();
+            gRotation::HandleNewRound();
+
             // transfer game settings
             if ( nCLIENT != sn_GetNetState() )
             {
@@ -2874,11 +2879,6 @@ void gGame::StateUpdate(){
             nPingAverager::SetWeight(1E-20);
 
             se_UserShowScores(false);
-
-            // rotate, if rotate is once per round
-            if (rotationtype == 1)
-                rotate();
-            gRotation::HandleNewRound();
 
             //con.autoDisplayAtNewline=true;
             sr_con.fullscreen=true;
@@ -4082,8 +4082,14 @@ void sg_EnterGameCore( nNetState enter_state ){
         sg_copySettings();
 
         // initiate rotation
-        rotate();
-        gRotation::HandleNewRound();
+        if ( rotationtype != 1 )
+        {
+            // called before first round starts
+            // in the regular way, no need to call it here
+            // in round rotation mode
+            rotate();
+            gRotation::HandleNewRound();
+        }
         gRotation::HandleNewMatch();
     }
 
