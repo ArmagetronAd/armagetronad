@@ -33,12 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tLocale.h"
 #include "tConfiguration.h"
 
-#ifndef WIN32
-#include  <netinet/in.h>
-#else
-#include  <windows.h>
-#endif
-
 #include "utf8.h"
 
 static nVersionFeature sn_ZeroMessageCrashfix( 1 );
@@ -102,27 +96,44 @@ nStreamMessage::nStreamMessage( nDescriptorBase const & descriptor )
 {
 }
 
-nStreamMessage::nStreamMessage(unsigned short*& buffer,short sender, int lenLeft )
+unsigned short sn_Read( unsigned char * & buffer )
+{
+    unsigned short hi = *(buffer++);
+    unsigned short lo = *(buffer++);
+    return ( hi << 8 ) + lo;
+}
+
+nStreamMessage::nStreamMessage(unsigned char * & buffer,short sender, unsigned char * end )
 : readOut(0)
 {
-descriptor = ntohs(*(buffer++));
-messageIDBig_ = sn_ExpandMessageID(ntohs(*(buffer++)),sender);
-senderID = sender;
-
-tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_IN", 3, messageIDBig_ );
-    tRecorderSync< unsigned short >::Archive( "_MESSAGE_DECL_IN", 3, descriptor );
-
-    unsigned short len=ntohs(*(buffer++));
-    lenLeft--;
-    if ( len > lenLeft )
+    // enough data for header?
+    if ( buffer + 6 > end )
     {
-        len = lenLeft;
 #ifndef NOEXCEPT
         throw nKillHim();
 #endif
+        return;
+    }
+
+    descriptor = sn_Read( buffer );
+    messageIDBig_ = sn_ExpandMessageID( sn_Read( buffer ),sender);
+    senderID = sender;
+
+    tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_IN", 3, messageIDBig_ );
+    tRecorderSync< unsigned short >::Archive( "_MESSAGE_DECL_IN", 3, descriptor );
+
+    unsigned short len = sn_Read( buffer );
+    if ( len * 2 > end - buffer )
+    {
+#ifndef NOEXCEPT
+        throw nKillHim();
+#endif
+        len = ( end - buffer )/2;
     }
     for(int i=0;i<len;i++)
-        data[i]=ntohs(*(buffer++));
+    {
+        data[i]= sn_Read( buffer );
+    }
 
 #ifdef DEBUG
     sn_BreakOnMessageID( messageIDBig_ );

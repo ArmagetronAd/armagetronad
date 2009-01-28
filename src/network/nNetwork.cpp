@@ -2003,30 +2003,31 @@ static void rec_peer(unsigned int peer){
 
     // the growing buffer we read messages into
     const int serverMaxAcceptedSize=2000;
-    static tArray< unsigned short > storage(2000);
-    int maxrec = 0; maxrec = storage.Len();
-    unsigned short * buff = 0; buff = &storage[0];
+    static tArray< unsigned char > storage(2000);
+    int maxReceive = 0; maxReceive = storage.Len();
+    unsigned char * buffer = 0; buffer = &storage[0];
 
     // short buff[maxrec];
     if (sn_Connections[peer].socket){
         int count=0;
-        int len=1;
-        while (len>=0 && sn_Connections[peer].socket)
+        int received = 1;
+        while ( received>=0 && sn_Connections[peer].socket )
         {
             nAddress addrFrom; // the sender of the current packet
-            len = sn_Connections[peer].socket->Read( reinterpret_cast<int8 *>(buff),maxrec*2, addrFrom);
+            received = sn_Connections[peer].socket->Read( reinterpret_cast< int8 *>( buffer ), maxReceive, addrFrom);
 
-            if (len>0){
-                if ( len >= maxrec*2 )
+            if ( received > 0 )
+            {
+                if ( received >= maxReceive )
                 {
                     // the message was too long to receive. What to do?
-                    if ( sn_GetNetState() != nSERVER || len < serverMaxAcceptedSize )
+                    if ( sn_GetNetState() != nSERVER || received < serverMaxAcceptedSize )
                     {
                         // expand the buffer. The message is lost now, but the
                         // peer will certainly resend it. Hopefully, the buffer will be large enough to hold it then.
-                        storage[maxrec*2-1]=0;
-                        maxrec = storage.Len();
-                        buff = &storage[0];
+                        storage[maxReceive*2-1]=0;
+                        maxReceive = storage.Len();
+                        buffer = &storage[0];
 
                         tERR_WARN( "Oversized network packet received. Read buffer has been enlargened to catch it the next time.");
 
@@ -2042,13 +2043,14 @@ static void rec_peer(unsigned int peer){
                     }
                 }
 
-                unsigned short *b=buff;
-                unsigned short *bend=buff+(len/2-1);
+                unsigned char *currentRead = buffer;
+                unsigned char *bufferEnd = buffer+(received-2);
 
                 sn_ReceivedPackets++;
-                sn_ReceivedBytes  += len + OVERHEAD;
+                sn_ReceivedBytes  += received + OVERHEAD;
 
-                unsigned short claim_id=ntohs(*bend);
+                // last two bytes hold the ID of the sender
+                unsigned short claim_id=(*(bufferEnd+1)) + ( static_cast< unsigned short >(*bufferEnd) << 8 );
 
                 // z-man: security check ( thanks, Luigi Auriemma! )
                 if ( claim_id > MAXCLIENTS+1 )
@@ -2060,7 +2062,7 @@ static void rec_peer(unsigned int peer){
                 */
                 count ++;
 
-                unsigned int id=peer;
+                unsigned int id = peer;
                 //	 for(unsigned int i=1;i<=(unsigned int)maxclients;i++)
                 int comp=nAddress::Compare( addrFrom, peers[claim_id] );
                 if ( comp == 0 ) // || claim_id == MAXCLIENTS+1 )
@@ -2078,18 +2080,15 @@ static void rec_peer(unsigned int peer){
 
                 //	 if (peer!=id)
                 //  con << "Changed incoming address.\n";
-                int lenleft = bend - b;
 
 #ifndef NOEXCEPT
                 try
                 {
 #endif
-                    while( lenleft > 0 ){
+                    while( bufferEnd > currentRead ){
                         tJUST_CONTROLLED_PTR< nMessage > pmess;
-                        pmess = tNEW( nMessage )(b,id,lenleft);
+                        pmess = tNEW( nMessage )( currentRead, id, bufferEnd );
                         nMessage& mess = *pmess;
-
-                        lenleft = bend - b;
 
                         bool mess_is_new=true;
                         // see if we have got this packet before
