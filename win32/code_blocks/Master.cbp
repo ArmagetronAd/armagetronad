@@ -84,6 +84,8 @@
 			<Add directory="..\..\..\winlibs\boost\includes"/>
 			<Add directory="..\..\..\winlibs\iconv\include"/>
 			<Add directory="..\..\..\winlibs\protobuf\src"/>
+			<Add directory="..\..\src\protobuf"/>
+			<Add directory="..\..\src\thirdparty\utf8"/>
 		</Compiler>
 		<Linker>
 			<Add library="libwsock32.a"/>

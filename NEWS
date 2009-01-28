@@ -87,15 +87,6 @@ Changes since 0.2.8
 - Added support for armagetronad URLs on Mac OS X and KDE -- armagetronad://<server>[:<port>]. port defaults to 4534.
 - New command-line flag: --connect <server>[:<port>]. Startup the game and connect directly to <server>.
 
-Changes since 0.2.8.3_beta1:
-============================
-
-- Better lag slide protection: clients no longer get confused when
-  the server sends their cycle back in time, and the server no longer
-  does that for old clients.
-- Fixed rare wallpassing bug; it required what whould usually be an
-  instakill and infinte wall length.
-
 Changes since 0.2.8.2
 =====================
 
@@ -290,8 +281,6 @@ Featurelets
 Bugfixes
 --------
 
-- Added compensation for drifting timers (observed often with
-  overclocked mainboards)
 - Text input fields now let the text wrap correctly and make use of the space allocated
   for them in a not-completely-dumb way. And *sigh* depending on the text field, color
   codes are either ignored (for the usernames) or both displayed in text and rendered.
