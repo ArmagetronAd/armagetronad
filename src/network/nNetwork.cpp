@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tSysTime.h"
 #include "tRecorder.h"
 #include "tRandom.h"
+#include "nBinary.h"
 #include <stdlib.h>
 #include <fstream>
 #include "tMath.h"
@@ -750,7 +751,7 @@ nDescriptor::~nDescriptor(){}
 // write one data element, a short.
 void nMessageFiller::FillArguments::Write( unsigned short data )
 {
-    buffer_[ buffer_.Len() ] = htons( data );
+    nBinaryWriter( buffer_ ).WriteShort( data );
 }
 
 nMessageFiller::FillArguments::FillArguments( nSendBuffer::Buffer & buffer, nMessage & message, int receiver )
@@ -1677,7 +1678,6 @@ int sn_ReceivedBytes    = 0;
 int sn_ReceivedPackets  = 0;
 nTimeRolling sn_StatsTime		= 0;
 
-
 // adds a message to the buffer
 void nSendBuffer::AddMessage( nMessageBase & message2, nBandwidthControl* control, int peer )
 {
@@ -1687,35 +1687,48 @@ void nSendBuffer::AddMessage( nMessageBase & message2, nBandwidthControl* contro
     unsigned short len = message.DataLen();
     tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_SEND", 5, id );
 
-    int descriptorIndex = sendBuffer_.Len();
-    sendBuffer_[sendBuffer_.Len()]=htons(message.Descriptor());
+    // prepare writer
+    nBinaryWriter writer( sendBuffer_ );
 
-    sendBuffer_[sendBuffer_.Len()]=htons(message.MessageID());
+    // reserve space for descriptor
+    nBinaryWriter descriptorWriter( writer );
+    writer.WriteShort( message.Descriptor() );
+
+    // write message ID
+    writer.WriteShort( message.MessageID() );
 
     // reserve space for data length
-    int dataLenOffset = sendBuffer_.Len();
-    sendBuffer_[dataLenOffset] = len;
+    nBinaryWriter dataLenWriter( writer );
+    writer.WriteShort( 0 );
+
     int overhead = sendBuffer_.Len();
 
     // write raw data
     for(int i=0;i<len;i++)
     {
-        sendBuffer_[sendBuffer_.Len()]=htons(message.Data(i));
+        writer.WriteShort( message.Data(i) );
     }
 
     // write extra data
     if ( message.GetFiller() )
     {
         nMessageFiller::FillArguments arguments( sendBuffer_, message, peer );
-        sendBuffer_[descriptorIndex] = htons( message.GetFiller()->Fill( arguments ) );
+        descriptorWriter.WriteShort( message.GetFiller()->Fill( arguments ) );
+
+        // pad with zero to get the size even
+        if( 1 == ( sendBuffer_.Len() & 1 ) )
+        {
+            sendBuffer_[sendBuffer_.Len()] = 0;
+        }
     }
     else
     {
-        tASSERT( len == sendBuffer_.Len() - overhead );
+        tASSERT( 2 * len == sendBuffer_.Len() - overhead );
     }
 
     // determine data lenght and write it to reserved space
-    sendBuffer_[dataLenOffset] = htons( sendBuffer_.Len() - overhead );
+    
+    dataLenWriter.WriteShort( ( sendBuffer_.Len() - overhead ) >> 1 );
 
     tRecorderSync< unsigned short >::Archive( "_MESSAGE_SEND_LEN", 5, len );
 
@@ -1732,17 +1745,17 @@ void nSendBuffer::Send			( nSocket const &				socket
 {
     if (sendBuffer_.Len()){
         sn_SentPackets++;
-        sn_SentBytes  += sendBuffer_.Len() * 2 + OVERHEAD;
+        sn_SentBytes  += sendBuffer_.Len() + OVERHEAD;
 
         // store our id
-        sendBuffer_[sendBuffer_.Len()]=htons(::sn_myNetID);
+        nBinaryWriter( sendBuffer_ ).WriteShort( ::sn_myNetID );
 
         socket.Write( reinterpret_cast<int8 *>(&(sendBuffer_[0])),
-                      2*sendBuffer_.Len(), peer);
+                      sendBuffer_.Len(), peer);
 
         if ( control )
         {
-            control->Use( nBandwidthControl::Usage_Execution, 2*sendBuffer_.Len() + OVERHEAD );
+            control->Use( nBandwidthControl::Usage_Execution, sendBuffer_.Len() + OVERHEAD );
         }
 
         this->Clear();
@@ -1898,7 +1911,7 @@ void nMessageBase::SendImmediately(int peer,bool ack){
     }
 #endif
 
-    if (sn_Connections[peer].sendBuffer_.Len()*2 + Size() + 6 > MAX_MESS_LEN ){
+    if (sn_Connections[peer].sendBuffer_.Len() + Size() + 6 > MAX_MESS_LEN ){
         SendCollected(peer);
         //con << "Overflow packets sent to " << peer << '\n';
     }
@@ -2043,7 +2056,7 @@ static void rec_peer(unsigned int peer){
                     }
                 }
 
-                unsigned char *currentRead = buffer;
+                unsigned char const * currentRead = buffer;
                 unsigned char *bufferEnd = buffer+(received-2);
 
                 sn_ReceivedPackets++;
@@ -3366,6 +3379,11 @@ nBasicNetworkSystem sn_BasicNetworkSystem;
 
 nKillHim::nKillHim( void )
 {
+#ifdef DEBUG
+    // for breakpoints
+    int x;
+    x = 0;
+#endif
 }
 
 // *******************************************************************************************

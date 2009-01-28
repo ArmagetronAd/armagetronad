@@ -181,10 +181,10 @@ class nBandwidthControl;
 class nSendBuffer
 {
 public:
-    typedef tArray<unsigned short> Buffer;
+    typedef tArray<unsigned char> Buffer;
 
-    int Len				() const {
-        return sendBuffer_.Len();    // returns the length of the buffer
+    int Len () const {
+        return sendBuffer_.Len();    // returns the length of the buffer in bytes
     }
 
     void AddMessage		( nMessageBase&      message,

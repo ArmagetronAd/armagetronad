@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nProtoBuf.h"
 #include "tConsole.h"
 #include "nNetObject.h"
+#include "nBinary.h"
 
 #include "google/protobuf/message.h"
 #include "google/protobuf/descriptor.h"

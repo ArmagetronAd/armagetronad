@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tLocale.h"
 #include "tConfiguration.h"
 
+#include "nBinary.h"
+
 #include "utf8.h"
 
 static nVersionFeature sn_ZeroMessageCrashfix( 1 );
@@ -96,33 +98,19 @@ nStreamMessage::nStreamMessage( nDescriptorBase const & descriptor )
 {
 }
 
-unsigned short sn_Read( unsigned char * & buffer )
-{
-    unsigned short hi = *(buffer++);
-    unsigned short lo = *(buffer++);
-    return ( hi << 8 ) + lo;
-}
-
-nStreamMessage::nStreamMessage(unsigned char * & buffer,short sender, unsigned char * end )
+nStreamMessage::nStreamMessage(unsigned char const * & buffer,short sender, unsigned char const * end )
 : readOut(0)
 {
-    // enough data for header?
-    if ( buffer + 6 > end )
-    {
-#ifndef NOEXCEPT
-        throw nKillHim();
-#endif
-        return;
-    }
+    nBinaryReader reader( buffer, end );    
 
-    descriptor = sn_Read( buffer );
-    messageIDBig_ = sn_ExpandMessageID( sn_Read( buffer ),sender);
+    descriptor = reader.ReadShort();
+    messageIDBig_ = sn_ExpandMessageID( reader.ReadShort(),sender);
     senderID = sender;
 
     tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_IN", 3, messageIDBig_ );
     tRecorderSync< unsigned short >::Archive( "_MESSAGE_DECL_IN", 3, descriptor );
 
-    unsigned short len = sn_Read( buffer );
+    unsigned short len = reader.ReadShort();
     if ( len * 2 > end - buffer )
     {
 #ifndef NOEXCEPT
@@ -132,7 +120,7 @@ nStreamMessage::nStreamMessage(unsigned char * & buffer,short sender, unsigned c
     }
     for(int i=0;i<len;i++)
     {
-        data[i]= sn_Read( buffer );
+        data[i]= reader.ReadShort();
     }
 
 #ifdef DEBUG

@@ -65,7 +65,7 @@ public:
     }
 
     nStreamMessage( const nDescriptorBase & );  // create a new message
-    nStreamMessage(unsigned char * & buffer, short sn_myNetID, unsigned char * end );
+    nStreamMessage(unsigned char const * & buffer, short sn_myNetID, unsigned char const * end );
     // read a message from the network stream
 
     void Write(const unsigned short &x){
