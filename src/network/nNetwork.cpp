@@ -43,7 +43,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdlib.h>
 #include <fstream>
 #include "tMath.h"
-#include "utf8.h"
 #include <string.h>
 
 #ifndef WIN32
@@ -86,12 +85,6 @@ bool sn_IsLANAddress( tString const & address )
 
     return false;
 }
-
-// debug watches
-#ifdef DEBUG
-nMessage* sn_WatchMessage = NULL;
-unsigned int sn_WatchMessageID = 76;
-#endif
 
 #define NO_ACK
 
@@ -605,11 +598,11 @@ public:
 };
 
 class nMessage_planned_send:public planned_send{
-    tCONTROLLED_PTR(nMessage) m;
+    tCONTROLLED_PTR(nMessageBase) m;
     bool ack;
 
 public:
-    nMessage_planned_send(nMessage *m,REAL priority,bool ack,int peer);
+    nMessage_planned_send(nMessageBase *m,REAL priority,bool ack,int peer);
     ~nMessage_planned_send();
 
     virtual void execute();
@@ -655,7 +648,7 @@ nDescriptor::nDescriptor(nHandler *handle,const char *Name)
 
 int nCurrentSenderID::currentSenderID_ = 0;
 
-void nDescriptorBase::HandleMessage(nMessage &message){
+void nDescriptorBase::HandleMessage(nMessageBase &message){
     static tArray<bool> warned;
 
     // store sender ID for console
@@ -732,9 +725,9 @@ void nDescriptorBase::HandleMessage(nMessage &message){
 #endif
 }
 
-void nDescriptor::DoHandleMessage( nMessage & message )
+void nDescriptor::DoHandleMessage( nMessageBase & message )
 {
-    (*handler)( message );
+    (*handler)( dynamic_cast< nStreamMessage & >( message ) );
 }
     
 nDescriptor::nDescriptor(unsigned short identification,nHandler *handle,
@@ -820,7 +813,7 @@ void nWaitForAck::AckExtraAction()
 {
 }
 
-nWaitForAck::nWaitForAck(nMessage* m,int rec)
+nWaitForAck::nWaitForAck(nMessageBase* m,int rec)
         :id(-1),message(m),receiver(rec)
 {
 #ifdef DEBUG
@@ -1058,89 +1051,26 @@ static int nMessages=0;
 static int max_nMessages=0;
 #endif
 
-#ifdef DEBUG
-void BreakOnMessageID( unsigned int messageID )
-{
-    if (messageID == sn_WatchMessageID && messageID != 0 )
-    {
-        int x;
-        x = 0;
-    }
-}
-#endif
-
-class nMessageIDExpander
-{
-    unsigned long quarters[4];
-public:
-    nMessageIDExpander()
-    {
-        for (int i=3; i>=0; --i)
-            quarters[i]=i << 14;
-    }
-
-    unsigned long ExpandMessageID( unsigned short id )
-    {
-        // the current ID is in this quarter
-        int thisQuarter = ( id >> 14 ) & 3;
-
-        // the following quarter will be this
-        int nextQuarter = ( thisQuarter + 1 ) & 3;
-
-        // make sure the following quarter has a higher upper ID completion than this
-        quarters[nextQuarter] = quarters[thisQuarter] + ( 1 << 14 );
-
-        // replace high two bits of incoming ID with the counted up ID
-        return quarters[thisQuarter] | id;
-    }
-};
-
-//! expands a short message ID to a full int message ID, assuming it is from a message that was
-// just received.
-static unsigned long int sn_ExpandMessageID( unsigned short id, unsigned short sender )
-{
-#ifdef DEBUG
-    BreakOnMessageID( id );
-#endif
-
-    static nMessageIDExpander expanders[MAXCLIENTS+2];
-
-    tASSERT( sender <= MAXCLIENTS+2 )
-    return expanders[sender].ExpandMessageID(id);
-}
 
 nMessageFiller::~nMessageFiller(){}
 
-nMessage::nMessage(unsigned short*& buffer,short sender, int lenLeft )
-        :descriptor(ntohs(*(buffer++))),messageIDBig_(sn_ExpandMessageID(ntohs(*(buffer++)),sender)),
-         senderID(sender),readOut(0){
+nMessageBase::nMessageBase()
+        :descriptor(0),messageIDBig_(0),
+         senderID(0)
+{
 #ifdef NET_DEBUG
     nMessages++;
 #endif
-
-    tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_IN", 3, messageIDBig_ );
-    tRecorderSync< unsigned short >::Archive( "_MESSAGE_DECL_IN", 3, descriptor );
-
-    unsigned short len=ntohs(*(buffer++));
-    lenLeft--;
-    if ( len > lenLeft )
-    {
-        len = lenLeft;
-#ifndef NOEXCEPT
-        throw nKillHim();
-#endif
-    }
-    for(int i=0;i<len;i++)
-        data[i]=ntohs(*(buffer++));
-
-#ifdef DEBUG
-    BreakOnMessageID( messageIDBig_ );
-#endif
 }
 
-nMessage::nMessage( const nDescriptorBase &d )
+#ifdef DEBUG
+void sn_BreakOnMessageID( unsigned int id );
+#endif
+
+nMessageBase::nMessageBase( const nDescriptorBase &d )
         :descriptor( d.id ),
-senderID(::sn_myNetID), readOut(0){
+senderID(::sn_myNetID)
+{
 #ifdef NET_DEBUG
     nMessages++;
 #endif
@@ -1156,7 +1086,7 @@ senderID(::sn_myNetID), readOut(0){
 #endif
 
 #ifdef DEBUG
-    BreakOnMessageID( messageIDBig_ );
+    sn_BreakOnMessageID( messageIDBig_ );
 #endif
 
     tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_OUT", 3, messageIDBig_ );
@@ -1164,7 +1094,7 @@ senderID(::sn_myNetID), readOut(0){
 }
 
 
-nMessage::~nMessage(){
+nMessageBase::~nMessageBase(){
 #ifdef NET_DEBUG
     nMessages--;
     if (nMessages>max_nMessages){
@@ -1184,8 +1114,8 @@ nMessage::~nMessage(){
 
 
 
-void nMessage::BroadCast(bool ack){
-    tControlledPTR< nMessage > keep( this );
+void nMessageBase::BroadCast(bool ack){
+    tControlledPTR< nMessageBase > keep( this );
     if (sn_GetNetState()==nCLIENT)
         Send(0,ack);
 
@@ -1196,445 +1126,6 @@ void nMessage::BroadCast(bool ack){
         }
     }
 }
-
-static nVersionFeature sn_ZeroMessageCrashfix( 1 );
-
-/*
-// Z-Man: commented out looking for a better way, please don't delete yet until we have a proper
-// different way of sending UTF8 over the network.
-
-static nVersionFeature unicode( 21_not_anymore_adapt_to_new_version );
-static bool sn_serverSendsUnicode = false;
-static nSettingItemWatched<bool> sn_serverSendsUnicodeConf( "SERVER_SENDS_UTF8", sn_serverSendsUnicode, nConfItemVersionWatcher::Group_Visual, 21 );
-
-static bool ServerSendsUnicode()
-{
-    // while a version override is active, it's safe to rely on the set version.
-    // otherwise, use the setting item.
-    return nTempVersionOverrider::Overridden() ? unicode.Supported() : sn_serverSendsUnicode;
-}
-*/
-
-nMessage& nMessage::operator << (const tString &ss){
-    tString s = ss;
-
-    /*
-    // Z-Man: commented out looking for a better way, please don't delete yet until we have a proper
-    // different way of sending UTF8 over the network.
-
-    // convert utf8 to latin1. For comments the operator >>.
-    if ( sn_GetNetState() == nSERVER ? !ServerSendsUnicode() : !unicode.Supported(0) )
-    */
-
-    {
-        try
-        {
-            tString copy;
-
-            tString::iterator reader = s.begin();
-            std::back_insert_iterator< tString > writer = back_inserter(copy);
-            
-            while ( reader != s.end() )
-            {
-                // just convert every byte of the original latin1 into utf8, assuming unicode matches latin1
-                // where latin1 is defined.
-                uint32_t c = utf8::next( reader, s.end() );
-                
-                // convert unknown characters to underscores
-                if ( c < 256 )
-                    *writer = c;
-                else
-                    *writer = '_';
-                
-                ++writer;
-            }
-
-            s = copy;
-        }
-        catch( ... )
-        {
-            // no need to do a thing. utf8 passes as latin1 almost all of the time, unless
-            // you're German or French or anything non-English. well.
-            con << "latin1 to utf8 conversion error!\n";
-        }
-    }
-
-    if ( !sn_ZeroMessageCrashfix.Supported() && s.Len() <= 0 )
-    {
-        return this->operator<<( s + " " );
-    }
-
-    unsigned short len=s.Size()+1;
-
-    // clamp away excess zeroes
-    while(len > 1 && s(len-2)==0)
-    {
-        --len;
-    }
-
-    // check whether all clients support zero length strings
-    if ( !sn_ZeroMessageCrashfix.Supported() )
-    {
-        if ( len <= 0 )
-        {
-            static tString replacement("");
-            return this->operator<<( replacement );
-        }
-    }
-    else if ( len == 1 )
-    {
-        // do away with the the trailing zero in zero length strings.
-        len = 0;
-    }
-
-    Write(len);
-    int i;
-
-    char const * sRaw = s;
-
-    // write first pairs of bytes
-    for(i=0;i+1<len;i+=2)
-        Write(sRaw[i]+(sRaw[i+1] << 8));
-
-    // write last byte
-    if (i<len)
-        Write(sRaw[i]);
-
-    return *this;
-}
-
-nMessage& nMessage::operator << (const tColoredString &s){
-    return *this << static_cast< const tString & >( s );
-}
-
-nMessage& nMessage::operator << ( const tOutput &o ){
-    return *this << tString( static_cast< const char * >( o ) );
-}
-
-static void sn_AddToString( tString & s, tString::CHAR c )
-{
-    if ( c )
-        s += c;
-}
-
-nMessage& nMessage::ReadRaw(tString &s )
-{
-    s.Clear();
-    unsigned short w,len;
-    Read(len);
-    if ( len > 0 )
-    {
-        s.reserve(len);
-        for(int i=0;i<len;i+=2){
-            Read(w);
-            tString::CHAR c1 = w & 255;
-            sn_AddToString( s, c1 );
-            if (i+1<len)
-                sn_AddToString( s, (w-c1) >> 8 );
-        }
-    }
-
-    return *this;
-}
-
-bool sn_filterColorStrings = false;
-static tConfItem<bool> sn_filterColorStringsConf("FILTER_COLOR_STRINGS",sn_filterColorStrings);
-bool sn_filterDarkColorStrings = false;
-static tConfItem<bool> sn_filterDarkColorStringsConf("FILTER_DARK_COLOR_STRINGS",sn_filterDarkColorStrings);
-
-nMessage& nMessage::operator >> (tColoredString &s )
-{
-    // read the raw data
-    ReadRaw( s );
-
-    // convert latin1 encoding to utf8
-    // The server knows which clients support unicode precisely; every unicode supporting client
-    // sends in utf8 to a unicode supporting server. However, the server has to send back latin1
-    // to all clients once one client does not support unicode, because messages containing strings
-    // can be broadcast. So the client has to do the conversion if only one client is online
-    // that does not support unicode.
-    // if ( sn_GetNetState() == nSERVER ? !unicode.Supported( SenderID() ) : !ServerSendsUnicode() )
-    {
-        s =  st_Latin1ToUTF8(s);
-    }
-    /*
-    // Z-Man: commented out looking for a better way, please don't delete yet until we have a proper
-    // different way of sending UTF8 over the network.
-    else
-    {
-        // the incoming string is supposed to be in utf8 format. check that, and crop it otherwise.
-        // no invalid utf8 string is supposed to be able to enter the system. Maybe it's just a
-        // stray latin1 string? If not, it's set to an error string.
-        if ( !utf8::is_valid( s.begin(), s.end() ) )
-            s = st_Latin1ToUTF8(s);
-    }
-    */
-
-    // filter client string messages
-    if ( sn_GetNetState() == nSERVER )
-    {
-        s.NetFilter();
-        s.RemoveTrailingColor();
-    }
-
-    // filter color codes away
-    if ( sn_filterColorStrings )
-        s = tColoredString::RemoveColors( s, false );
-    else if ( sn_filterDarkColorStrings )
-        s = tColoredString::RemoveColors( s, true );
-
-    return *this;
-}
-
-nMessage& nMessage::operator >> (tString &s )
-{
-    tColoredString safe;
-    operator>>( safe );
-    s = safe;
-
-    return *this;
-}
-
-
-#define MANT 26
-#define EXP (32-MANT)
-#define MS (MANT-1)
-
-
-typedef struct{
-int mant:MANT;
-unsigned int exp:EXP;
-} myfloat;
-
-
-nMessage& nMessage::operator<<(const REAL &x){
-
-
-#ifdef DEBUG
-    // con << "write x= " << x;
-
-
-    if(sizeof(myfloat)!=sizeof(int))
-        tERR_ERROR_INT("floating ePoint format does not work!");
-#endif
-    /*
-      REAL nachkomma=x-floor(x);
-      Write(short(x-nachkomma));
-      Write(60000*nachkomma);
-    */
-    // no fuss. Read and write floats in binary format.
-    // will likely cause problems for systems other than i386.
-
-    //Write(((short *)&x)[0]);
-    //Write(((short *)&x)[1]);
-
-    // right. Caused severe problems with the AIX port.
-
-    // new way: own floating ePoint format that is not good with small numbers
-    // (we do not need them anyway)
-    REAL y=x;
-
-    unsigned int negative=0;
-    if (y<0){
-        y=-y;
-        negative=1;
-    }
-
-    unsigned int exp=0;
-    while ( fabs(y)>=64 && exp < (1<<EXP)-6 )
-    {
-        exp +=6;
-        y/=64;
-    }
-    while ( fabs(y)>=1 && exp < (1<<EXP)-1 )
-    {
-        exp++;
-        y/=2;
-    }
-    // now x=y*2^exp
-    unsigned int mant=int(y*(1<<MS));
-    // now x=mant*2^exp * (1/ (1<<MANT))
-
-    // cutoffs:
-    if (mant>((1<<MS))-1)
-        mant=(1<<MS)-1;
-
-    if (exp>(1<<EXP)-1){
-        exp=(1<<EXP)-1;
-        if (mant>0)
-            mant=(1<<MS)-1;
-    }
-
-    // put them together:
-
-    unsigned int trans=(mant & ((1<<MS)-1)) | (negative << MS) | (exp << MANT);
-    /*
-      myfloat trans;
-      trans.exp=exp;
-      trans.mant=mant;
-    */
-
-    operator<<(reinterpret_cast<int &>(trans));
-
-#ifdef DEBUG
-    /*
-      con << "mant: " << mant
-      << ", exp: " << exp
-      << ", negative: " << negative;
-    */
-
-    unsigned int mant2=trans & ((1 << MS)-1);
-    unsigned int negative2=(trans >> MS) & 1;
-    unsigned int nt=trans-mant-(negative << MS);
-    unsigned int exp2=nt >> MANT;
-
-    if (mant2!=mant || negative2!=negative || exp2!=exp)
-        tERR_ERROR_INT("Floating ePoint tranfer failure!");
-
-    /*
-      con << ", x: " << x;
-
-      con << ", mant: " << mant
-      << ", exp: " << exp
-      << ", negative: " << negative;
-    */
-
-    // check:
-
-    REAL z=REAL(mant)/(1<<MS);
-    if (negative)
-        z=-z;
-
-    while (exp>=6){
-        exp-=6;
-        z*=64;
-    }
-    while (exp>0){
-        exp--;
-        z*=2;
-    }
-
-    if (fabs(z-x)>(fabs(x)+1)*.001)
-        tERR_ERROR_INT("Floating ePoint tranfer failure!");
-
-    //con << ", z: " << z << '\n';
-#endif
-
-    return *this;
-}
-
-nMessage& nMessage::operator>>(REAL &x){
-    /*
-      short vorkomma;
-      unsigned short nachkomma;
-      Read((unsigned short &)vorkomma);
-      Read(nachkomma);
-      x=vorkomma+nachkomma/60000.0;
-
-      Read(((unsigned short *)&x)[0]);
-      Read(((unsigned short *)&x)[1]);
-     */
-
-    unsigned int trans;
-    operator>>(reinterpret_cast<int &>(trans));
-
-    int mant=trans & ((1 << MS)-1);
-    unsigned int negative=(trans >> MS) & 1;
-    unsigned int exp=(trans-mant-(negative << MS)) >> MANT;
-
-    x=REAL(mant)/(1<<MS);
-    if (negative)
-        x=-x;
-
-#ifdef DEBUG
-    //  con << "read mant: " <<mant << ", exp: " << exp;
-#endif
-
-    while (exp>=6){
-        exp-=6;
-        x*=64;
-    }
-    while (exp>0){
-        exp--;
-        x*=2;
-    }
-
-#ifdef DEBUG
-#ifndef WIN32
-    if (!finite(x))
-        st_Breakpoint();
-    // con << " , x= " << x << '\n';
-#endif
-#endif
-    return *this;
-}
-
-nMessage& nMessage::operator<< (const short &x){
-    Write((reinterpret_cast<const short *>(&x))[0]);
-
-    return *this;
-}
-
-nMessage& nMessage::operator>> (short &x){
-    Read(reinterpret_cast<unsigned short *>(&x)[0]);
-
-    return *this;
-}
-
-nMessage& nMessage::operator<< (const int &x){
-    unsigned short a=x & (0xFFFF);
-    short b=(x-a) >> 16;
-
-    Write(a);
-    operator<<(b);
-
-    return *this;
-}
-
-nMessage& nMessage::operator>> (int &x){
-    unsigned short a;
-    short b;
-
-    Read(a);
-    operator>>(b);
-
-    x=(b << 16)+a;
-
-    return *this;
-}
-
-nMessage& nMessage::operator<< (const bool &x){
-    if (x)
-        Write(1);
-    else
-        Write(0);
-
-    return *this;
-}
-
-nMessage& nMessage::operator>> (bool &x){
-    unsigned short y;
-    Read(y);
-    x= (y!=0);
-
-    return *this;
-}
-
-
-void nMessage::Read(unsigned short &x){
-    if (End()){
-        tOutput o;
-        st_Breakpoint();
-        o.SetTemplateParameter(1, senderID);
-        o << "$network_error_shortmessage";
-        con << o;
-        // sn_DisconnectUser(senderID, "$network_kill_error");
-        nReadError( false );
-    }
-    else
-        x=data(readOut++);
-}
-
 
 // **********************************************
 //  Basic communication classes: login
@@ -2083,7 +1574,7 @@ int login_handler( nMessage &m, unsigned short rate ){
 
         rep->Send(new_id, -killTimeout);
 
-        nMessage::SendCollected( new_id );
+        nMessageBase::SendCollected( new_id );
 
         nConfItemBase::s_SendConfig(true, new_id);
 
@@ -2188,8 +1679,10 @@ nTimeRolling sn_StatsTime		= 0;
 
 
 // adds a message to the buffer
-void nSendBuffer::AddMessage( nMessage& message, nBandwidthControl* control, int peer )
+void nSendBuffer::AddMessage( nMessageBase & message2, nBandwidthControl* control, int peer )
 {
+    nStreamMessage & message = dynamic_cast< nStreamMessage & >( message2 );
+
     unsigned long id = message.MessageID();
     unsigned short len = message.DataLen();
     tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_SEND", 5, id );
@@ -2340,7 +1833,7 @@ void nBandwidthControl::Update( REAL ts)
     rateControlPlanned_ = rateControl_;
 }
 
-void nMessage::SendCollected(int peer)
+void nMessageBase::SendCollected(int peer)
 {
     //if ( peer == 7 && sn_Connections[peer].sendBuffer_.Len() > 0 )
     //    con << tSysTimeFloat() << "\n";
@@ -2354,7 +1847,7 @@ void nMessage::SendCollected(int peer)
 }
 
 
-void nMessage::BroadcastCollected(int peer, unsigned int port){
+void nMessageBase::BroadcastCollected(int peer, unsigned int port){
     if (peer<0 || peer > MAXCLIENTS+1 || !sn_Connections[peer].socket)
         tERR_ERROR("Invalid peer!");
 
@@ -2362,7 +1855,7 @@ void nMessage::BroadcastCollected(int peer, unsigned int port){
 }
 
 // TODO_NOACK
-void nMessage::SendImmediately(int peer,bool ack){
+void nMessageBase::SendImmediately(int peer,bool ack){
     if (ack)
     {
 #ifdef NO_ACK
@@ -2375,7 +1868,7 @@ void nMessage::SendImmediately(int peer,bool ack){
     if ( sn_GetNetState() == nSERVER && peer == 0 && ack )
     {
         st_Breakpoint();
-        tJUST_CONTROLLED_PTR< nMessage > bounce(this);
+        tJUST_CONTROLLED_PTR< nMessageBase > bounce(this);
         return;
     }
 
@@ -2405,7 +1898,7 @@ void nMessage::SendImmediately(int peer,bool ack){
     }
 #endif
 
-    if (sn_Connections[peer].sendBuffer_.Len()+data.Len()+3 > MAX_MESS_LEN/2){
+    if (sn_Connections[peer].sendBuffer_.Len()*2 + Size() + 6 > MAX_MESS_LEN ){
         SendCollected(peer);
         //con << "Overflow packets sent to " << peer << '\n';
     }
@@ -2443,12 +1936,12 @@ void nMessage::SendImmediately(int peer,bool ack){
             << peer << '\n';
     }
 
-    tControlledPTR< nMessage > bounce( this ); // delete this message if nobody is interested in it any more
+    tControlledPTR< nMessageBase > bounce( this ); // delete this message if nobody is interested in it any more
 }
 
 REAL sent_per_messid[MAXDESCRIPTORS+100];
 
-void nMessage::Send(int peer,REAL priority,bool ack){
+void nMessageBase::Send(int peer,REAL priority,bool ack){
 #ifdef NO_ACK
     if (!ack)
         messageIDBig_ = 0;
@@ -2458,7 +1951,7 @@ void nMessage::Send(int peer,REAL priority,bool ack){
     if ( sn_GetNetState() == nSERVER && peer == 0 && ack )
     {
         st_Breakpoint();
-        tJUST_CONTROLLED_PTR< nMessage > bounce(this);
+        tJUST_CONTROLLED_PTR< nMessageBase > bounce(this);
         return;
     }
 
@@ -2480,7 +1973,7 @@ void nMessage::Send(int peer,REAL priority,bool ack){
     // the next line was redundant; the send buffer handles that part of accounting.
     //sn_Connections[peer].bandwidthControl_.Use( nBandwidthControl::Usage_Planning, 2*(data.Len()+3) );
 
-    sent_per_messid[descriptor]+=2*(data.Len()+3);
+    sent_per_messid[descriptor] += Size() + 6;
 
     tASSERT(Descriptor()!=s_Acknowledge.ID() || !ack);
 
@@ -2907,7 +2400,7 @@ void sn_SetNetState(nNetState x){
                             lo->Write(static_cast<unsigned short>(sn_myNetID));
                             lo->ClearMessageID();
                             lo->SendImmediately(0, false);
-                            nMessage::SendCollected(0);
+                            nMessageBase::SendCollected(0);
                             tDelay(1000);
                         }
                         con << tOutput("$network_logout_done");
@@ -3044,7 +2537,7 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
 
     mess->ClearMessageID();
     mess->SendImmediately(0,false);
-    nMessage::SendCollected(0);
+    nMessageBase::SendCollected(0);
 
     con << tOutput("$network_login_process");
 
@@ -3062,7 +2555,7 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
             // con << "retrying...\n";
             nextSend = tSysTimeFloat() + resend;
             mess->SendImmediately(0,false);
-            nMessage::SendCollected(0);
+            nMessageBase::SendCollected(0);
         }
 
         tAdvanceFrame(10000);
@@ -3355,7 +2848,7 @@ void planned_send::add_to_priority(REAL diff)
 // **********************************************
 
 nMessage_planned_send::nMessage_planned_send
-(nMessage *M,REAL priority,bool Ack,int Peer)
+(nMessageBase *M,REAL priority,bool Ack,int Peer)
         :planned_send(priority,Peer),m(M),ack(Ack){
     //if (m)
 }
@@ -3432,7 +2925,7 @@ static void sn_SendPlanned2( REAL dt ){
         if ( connection.socket )
         {
             if (connection.sendBuffer_.Len()>0 && connection.bandwidthControl_.CanSend() )
-                nMessage::SendCollected(i);
+                nMessageBase::SendCollected(i);
 
             // update bandwidth usage and other time related data
             connection.Timestep( dt );
@@ -3581,7 +3074,7 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
 
     if (sn_Connections[i].socket)
     {
-        nMessage::SendCollected(i);
+        nMessageBase::SendCollected(i);
         printMessage = true;
 
         // to make sure...
@@ -3602,7 +3095,7 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
                 *mess << port;
 
                 mess->SendImmediately(i, false);
-                nMessage::SendCollected(i);
+                nMessageBase::SendCollected(i);
             }
         }
     }

@@ -3575,7 +3575,7 @@ static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, e
 void se_ListAdmins( ePlayerNetID *, std::istream &s, tString command );
 #endif
 
-void handle_chat( unsigned short id, tColoredString const & say, nMessage const & m )
+void handle_chat( unsigned short id, tColoredString const & say, nMessageBase const & m )
 {
     nTimeRolling currentTime = tSysTimeFloat();
 

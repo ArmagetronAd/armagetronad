@@ -1240,7 +1240,7 @@ void nNetObject::ReadCreate(nMessage &m, int run )
     tASSERT( run > 0 );
 }
 
-static nMessage * CreationMessage( nNetObject & obj )
+static nMessageBase * CreationMessage( nNetObject & obj )
 {
     nOProtoBufDescriptorBase const * pbDescriptor = obj.GetDescriptor();
     if ( pbDescriptor )
@@ -1463,7 +1463,7 @@ public:
 class nWaitForAckSync: public nWaitForAck{
     unsigned short netobj;
 public:
-    nWaitForAckSync(nMessage* m,int rec,unsigned short obj)
+    nWaitForAckSync(nMessageBase* m,int rec,unsigned short obj)
             :nWaitForAck(m,rec),netobj(obj){
         if (sn_netObjects(obj)->knowsAbout[rec].acksPending<15)
         {
@@ -1512,7 +1512,9 @@ public:
     }
 };
 
-static void net_sync_handler(nMessage &m){
+static void net_sync_handler(nMessageBase &m2){
+    nStreamMessage & m = dynamic_cast< nStreamMessage & >( m2 );
+
     unsigned short id;
     m.Read(id);
 #ifdef DEBUG
@@ -1563,7 +1565,7 @@ public:
     }
 
     //! delegates message handling
-    virtual void DoHandleMessage( nMessage & envelope )
+    virtual void DoHandleMessage( nMessageBase & envelope )
     {
         // delegate
         net_sync_handler( envelope );
@@ -1666,7 +1668,7 @@ void nNetObject::SyncAll(){
                             */
                             // send a creation message
 
-                            tJUST_CONTROLLED_PTR< nMessage > m = CreationMessage( *nos );
+                            tJUST_CONTROLLED_PTR< nMessageBase > m = CreationMessage( *nos );
                             new nWaitForAckSync(m,user,s);
                             unsigned long id = m->MessageIDBig();
                             m->SendImmediately(user, false);
@@ -2142,7 +2144,7 @@ void nBandwidthTaskSync::DoExecute( nSendBuffer& buffer, nBandwidthControl& cont
 // executes whatever it has to do
 void nBandwidthTaskCreate::DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer )
 {
-    tJUST_CONTROLLED_PTR< nMessage > message = CreationMessage( Object() );
+    tJUST_CONTROLLED_PTR< nMessageBase > message = CreationMessage( Object() );
     buffer.AddMessage( *message, &control, peer );
 }
 

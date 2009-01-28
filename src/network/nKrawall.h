@@ -45,17 +45,14 @@ the executable is not distributed).
 // #include "nNetObject.h"
 #include "tConfiguration.h"
 
+class nStreamMessage;
+typedef nStreamMessage nMessage;
+
 #include <deque>
 
 class nNetObject;
 
-#ifndef _IOSFWD_
-#endif
-
-//#error x
-
 class tString;
-class nMessage;
 
 //! base class for authentication, unaware of armagetron network messages
 class nKrawall

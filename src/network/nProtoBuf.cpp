@@ -326,8 +326,10 @@ void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nMessage & 
 }   
 
 //! selective reading message, either embedded or transformed
-void nProtoBufDescriptorBase::ReadMessage( nMessage & in, nProtoBuf & out, nProtoBuf & work ) const
+void nProtoBufDescriptorBase::ReadMessage( nMessageBase & in2, nProtoBuf & out, nProtoBuf & work ) const
 {
+    nStreamMessage & in = dynamic_cast< nStreamMessage & >( in2 );
+
     if ( in.descriptor & protoBufFlag )
     {
         // message is a proper protocol buffer message.
@@ -716,7 +718,7 @@ static int sn_messageCacheSize = 1000;
 //! @param message the message to add
 //! @param incoming true for incoming messages, keep an extra long backlog then
 //! @param reallyAdd true if message should be added. Otherwise, we just purge old messages.
-void nMessageCache::AddMessage( nMessage * message, bool incoming, bool reallyAdd )
+void nMessageCache::AddMessage( nMessageBase * message, bool incoming, bool reallyAdd )
 {
     // fetch message filler, ignoring invalid ones
     if ( !message || message->MessageID() == 0 )
@@ -799,7 +801,7 @@ bool nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & targ
     for( CacheQueue::reverse_iterator i = cache.queue_.rbegin();
          i != cache.queue_.rend(); ++i )
     {
-        nMessage * message = *i;
+        nMessageBase * message = *i;
         if ( ( message->MessageID() & 0xffff ) == cacheID )
         {
             // found it, copy over
@@ -830,7 +832,7 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
     nMessageCacheByDescriptor & cache = parts[ descriptor ];
 
     // try to find the best matching message in the queue
-    nMessage * best = 0;
+    nMessageBase * best = 0;
 
     // total size, maximum size to save
     int size = 0;
@@ -849,7 +851,7 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
     for( CacheQueue::reverse_iterator i = cache.queue_.rbegin();
          i != cache.queue_.rend(); ++i )
     {
-        nMessage * message = *i;
+        nMessageBase * message = *i;
 
         tASSERT( dynamic_cast< nMessageFillerProtoBufBase * >( message->GetFiller() ) );
         nMessageFillerProtoBufBase * filler = static_cast< nMessageFillerProtoBufBase * >( message->GetFiller() );

@@ -73,7 +73,7 @@ private:
     virtual nProtoBuf & DoAccessWorkProtoBuf() const = 0;
 
     //! dummy message used to cache raw data in old message format
-    mutable tJUST_CONTROLLED_PTR< nMessage > oldFormat_;
+    mutable tJUST_CONTROLLED_PTR< nStreamMessage > oldFormat_;
 };
 
 //! implementation for each protocl buffer 
@@ -126,14 +126,14 @@ struct nSenderInfo
 {
 public:
     //! reference to the message, it contains all info
-    nMessage const & envelope;
+    nMessageBase const & envelope;
     
     int SenderID() const
     {
         return envelope.SenderID();
     }
     
-    explicit nSenderInfo( nMessage const & e )
+    explicit nSenderInfo( nMessageBase const & e )
     : envelope( e )
     {}
 };
@@ -151,13 +151,13 @@ public:
     static std::string const & DetermineName( nProtoBuf const & prototype );
 
     //! dumb streaming to message
-    inline void StreamTo( nProtoBuf const & in, nMessage & out ) const
+    inline void StreamTo( nProtoBuf const & in, nStreamMessage & out ) const
     {
         DoStreamTo( in, out );
     }
 
     //! dumb streaming from message
-    inline void StreamFrom( nMessage & in, nProtoBuf & out  ) const
+    inline void StreamFrom( nStreamMessage & in, nProtoBuf & out  ) const
     {
         DoStreamFrom( in, out );
     }
@@ -166,13 +166,13 @@ public:
     nMessage * Transform( nMessageFillerProtoBufBase * filler ) const;
 
     //! dumb streaming from message, static version
-    static void StreamFromStatic( nMessage & in, nProtoBuf & out  );
+    static void StreamFromStatic( nStreamMessage & in, nProtoBuf & out  );
 
     //! dumb streaming to message, static version
-    static inline void StreamToStatic( nProtoBuf const & in, nMessage & out );
+    static inline void StreamToStatic( nProtoBuf const & in, nStreamMessage & out );
 
     //! selective reading message, either embedded or transformed
-    void ReadMessage( nMessage & in, nProtoBuf & out, nProtoBuf & work  ) const;
+    void ReadMessage( nMessageBase & in, nProtoBuf & out, nProtoBuf & work  ) const;
 
     //! creates a protocol buffer of the managed type. Needs to be deleted later.
     inline nProtoBuf * Create2() const
@@ -212,24 +212,20 @@ private:
     static DescriptorMap descriptorsByName;
 
     //! dumb streaming to message
-    virtual void DoStreamTo( nProtoBuf const & in, nMessage & out ) const;
+    virtual void DoStreamTo( nProtoBuf const & in, nStreamMessage & out ) const;
 
     //! dumb streaming from message
-    virtual void DoStreamFrom( nMessage & in, nProtoBuf & out ) const;
+    virtual void DoStreamFrom( nStreamMessage & in, nProtoBuf & out ) const;
 
     //! dumb streaming from message, static version
-    static void StreamFromDefault( nMessage & in, nProtoBuf & out  );
+    static void StreamFromDefault( nStreamMessage & in, nProtoBuf & out  );
 
     //! dumb streaming to message, static version
-    static void StreamToDefault( nProtoBuf const & in, nMessage & out );
+    static void StreamToDefault( nProtoBuf const & in, nStreamMessage & out );
 
     //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
     virtual nProtoBuf * DoCreate() const = 0;
 };
-
-// read/write operators for protocol buffers
-// nMessage& operator >> ( nMessage& m, nProtoBuf & buffer );
-// nMessage& operator << ( nMessage& m, nProtoBuf const & buffer );
 
 // templated version of protocol buffer messages
 template< class PROTOBUF > 
@@ -250,7 +246,7 @@ class nProtoBufDescriptor: public nProtoBufDescriptorBase
     Handler * handler_;
 
     //! delegates message handling
-    virtual void DoHandleMessage( nMessage & envelope )
+    virtual void DoHandleMessage( nMessageBase & envelope )
     {
         // read into protocol buffer
         Filler * filler = new Filler;
@@ -325,19 +321,19 @@ public:
     virtual ~nOProtoBufDescriptorBase();
 
     //! creates an initialization message for an object
-    inline nMessage * WriteInit( nNetObject & object ) const
+    inline nMessageBase * WriteInit( nNetObject & object ) const
     {
         return DoWriteInit( object );
     }
 
     //! writes sync message
-    inline void WriteSync( nNetObject & object, nMessage & message ) const
+    inline void WriteSync( nNetObject & object, nMessageBase & message ) const
     {
         return DoWriteSync( object, message );
     }
 
     //! reads a sync message
-    inline void ReadSync( nNetObject & object, nMessage & envelope ) const
+    inline void ReadSync( nNetObject & object, nMessageBase & envelope ) const
     {
         return DoReadSync( object, envelope );
     }
@@ -358,13 +354,13 @@ protected:
     static void PostCheck( nNetObject * object, nSenderInfo sender );
 private:
     //! creates an initialization message for an object
-    virtual nMessage * DoWriteInit( nNetObject & object ) const = 0;
+    virtual nMessageBase * DoWriteInit( nNetObject & object ) const = 0;
 
     //! writes a sync message
-    virtual void DoWriteSync( nNetObject & object, nMessage & message ) const = 0;
+    virtual void DoWriteSync( nNetObject & object, nMessageBase & message ) const = 0;
 
     //! reads a sync message
-    virtual void DoReadSync( nNetObject & object, nMessage & envelope ) const = 0;
+    virtual void DoReadSync( nNetObject & object, nMessageBase & envelope ) const = 0;
 };
 
 //! specialization of descriptor for each network object class
@@ -398,7 +394,7 @@ private:
 
     //! writes sync, true work
     template< class SYNC >
-    void DoWriteSync( nNetObject & object, nMessage & message, SYNC const & ) const
+    void DoWriteSync( nNetObject & object, nMessageBase & message, SYNC const & ) const
     {
         typedef nMessageFillerProtoBuf< SYNC > Filler;
         Filler * filler = new Filler;
@@ -415,7 +411,7 @@ private:
 
     //! reads sync, true work
     template< class SYNC >
-    void DoReadSync( nNetObject & object, nMessage & envelope, SYNC const & ) const
+    void DoReadSync( nNetObject & object, nMessageBase & envelope, SYNC const & ) const
     {
         typedef nMessageFillerProtoBuf< SYNC > Filler;
         Filler * filler = new Filler;
@@ -436,7 +432,7 @@ private:
     }
 
     //! creates an initialization message for an object
-    virtual nMessage * DoWriteInit( nNetObject & object ) const
+    virtual nMessageBase * DoWriteInit( nNetObject & object ) const
     {
         typedef nMessageFillerProtoBuf< PROTOBUF > Filler;
         
@@ -457,13 +453,13 @@ private:
     }
 
     //! creates an sync message for an object
-    virtual void DoWriteSync( nNetObject & object, nMessage & message ) const
+    virtual void DoWriteSync( nNetObject & object, nMessageBase & message ) const
     {
         DoWriteSync( object, message, prototype.sync() );
     }
 
     //! reads a sync message
-    virtual void DoReadSync( nNetObject & object, nMessage & envelope ) const
+    virtual void DoReadSync( nNetObject & object, nMessageBase & envelope ) const
     {
         DoReadSync( object, envelope, prototype.sync() );
     }
@@ -481,7 +477,7 @@ class nMessageCacheByDescriptor
     friend class nMessageCache;
 
     //! queue of cached messages
-    typedef std::deque< tJUST_CONTROLLED_PTR< nMessage > > CacheQueue;
+    typedef std::deque< tJUST_CONTROLLED_PTR< nMessageBase > > CacheQueue;
     CacheQueue queue_;
 };
 
@@ -494,7 +490,7 @@ public:
     void Clear();
 
     //! adds a message to the cache
-    void AddMessage( nMessage * message, bool incoming, bool reallyAdd = true );
+    void AddMessage( nMessageBase * message, bool incoming, bool reallyAdd = true );
 
     //! fill protobuf from cache. Returns true on success.
     bool UncompressProtoBuf( unsigned short cacheID, nProtoBuf & target );
