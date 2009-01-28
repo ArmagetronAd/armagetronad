@@ -1043,7 +1043,16 @@ nMessage& nMessage::operator << (const tString &s){
 
     // write first pairs of bytes
     for(i=0;i+1<len;i+=2)
-        Write(s[i]+(s[i+1] << 8));
+    {
+        // yep. Signed shorts. That gives
+        // nice overflows. By the time we noticed,
+        // it was too late to change :)
+        short lo = s[i];
+        short hi = s[i+1];
+
+        // combine the two into a single short
+        Write( lo + (hi << 8) );
+    }
 
     // write last byte
     if (i<len)
@@ -1070,9 +1079,16 @@ nMessage& nMessage::ReadRaw(tString &s )
         s[len-1] = 0;
         for(int i=0;i<len;i+=2){
             Read(w);
-            s[i]=w & 255;
+            
+            // carefully reverse the signed
+            // encoding logic
+            char lo = w & 0xff;
+            unsigned short hi = (short)w - lo;
+            hi >>= 8;
+
+            s[i] = lo;
             if (i+1<len)
-                s[i+1]=(w-s[i]) >> 8;
+                s[i+1] = hi;
         }
     }
 
