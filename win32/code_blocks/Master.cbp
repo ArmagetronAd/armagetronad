@@ -80,6 +80,7 @@
 			<Add directory="..\..\src\resource"/>
 			<Add directory="..\..\..\winlibs\boost\includes"/>
 			<Add directory="..\..\..\winlibs\iconv\include"/>
+			<Add directory="..\..\src\thirdparty\utf8"/>
 		</Compiler>
 		<Linker>
 			<Add library="libwsock32.a"/>

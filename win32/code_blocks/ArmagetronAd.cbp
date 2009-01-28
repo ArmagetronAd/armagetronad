@@ -113,6 +113,7 @@
 			<Add directory="..\..\..\winlibs\boost\includes"/>
 			<Add directory="..\..\src\thirdparty\scrap"/>
 			<Add directory="..\..\..\winlibs\ZThread\include"/>
+			<Add directory="..\..\src\thirdparty\utf8"/>
 		</Compiler>
 		<Linker>
 			<Add library="libopengl32.a"/>
@@ -1506,6 +1507,20 @@
 			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tRecorderInternal.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tRectangle.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tRectangle.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
