@@ -213,9 +213,17 @@ static tSettingRotation sg_configRotation("CONFIG_ROTATION");
 static tAccessLevelSetter sg_mapRotationSetter( sg_mapRotation, tAccessLevel_Owner );
 static tAccessLevelSetter sg_configSetter( sg_configRotation, tAccessLevel_Owner );
 
-//0 = never, 1 = round, 2 = match
-static int rotationtype = 0;
-static tSettingItem<int> conf_rotationtype("ROTATION_TYPE",rotationtype);
+enum gRotationType
+{
+    gROTATION_NEVER = 0,
+    gROTATION_ROUND = 1,
+    gROTATION_MATCH = 2
+};
+
+tCONFIG_ENUM( gRotationType );
+
+static gRotationType rotationtype = gROTATION_NEVER;
+static tSettingItem<gRotationType> conf_rotationtype("ROTATION_TYPE",rotationtype);
 
 // bool globalingame=false;
 tString sg_GetCurrentTime( char const * szFormat )
@@ -2610,7 +2618,7 @@ void gGame::StateUpdate(){
             // sr_con.autoDisplayAtNewline=true;
 
             // rotate, if rotate is once per round
-            if (rotationtype == 1)
+            if ( rotationtype == gROTATION_ROUND )
                 rotate();
             gRotation::HandleNewRound();
 
@@ -3544,7 +3552,7 @@ void gGame::Analysis(REAL time){
                             se_mainGameTimer->speed = 1;
 
                         //check for map rotation, new match...
-                        if (rotationtype == 2)
+                        if ( rotationtype == gROTATION_MATCH )
                             rotate();
 
                         gRotation::HandleNewMatch();
@@ -4082,7 +4090,7 @@ void sg_EnterGameCore( nNetState enter_state ){
         sg_copySettings();
 
         // initiate rotation
-        if ( rotationtype != 1 )
+        if ( rotationtype != gROTATION_ROUND )
         {
             // called before first round starts
             // in the regular way, no need to call it here
