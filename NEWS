@@ -1,3 +1,8 @@
+Changes since 0.3.1
+===================
+- Switched to utf-8 encoded strings internally and for config files.
+  Language files can be either utf-8 or latin-1.
+
 Changes since 0.3.0
 ===================
 
