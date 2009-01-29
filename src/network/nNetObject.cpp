@@ -1272,6 +1272,9 @@ void nNetObject::WriteAll( nMessage & m, bool create )
         return;
     }
 
+    // bend descriptor to old descriptor ID
+    m.descriptor &= ~nProtoBufDescriptorBase::protoBufFlag;
+
     int lastLen = -1;
     int run = 0;
 
