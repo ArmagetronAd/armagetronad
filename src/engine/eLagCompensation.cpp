@@ -44,6 +44,8 @@ static REAL se_lagFastDecayTime=5.0;    // timescale the fast lag measurement de
 static REAL se_lagSlowWeight=.2f;       // extra weight lag reports from the server influence the slow lag compensation with
 static REAL se_lagFastWeight=1.0f;      // extra weight lag reports from the server influence the fast lag compensation with
 
+static REAL se_lagCreditSingle = .1f;   // maximal seconds of lag credit given or accepted in a single event
+
 static tSettingItem< REAL > se_maxLagSpeedupConf( "LAG_MAX_SPEEDUP_TIMER", se_maxLagSpeedup );
 static tSettingItem< REAL > se_lagSlowDecayTimeConf( "LAG_SLOW_TIME", se_lagSlowDecayTime );
 static tSettingItem< REAL > se_lagFastDecayTimeConf( "LAG_FAST_TIME", se_lagFastDecayTime );
@@ -62,6 +64,9 @@ class nClientLag
 #ifdef DEBUG
         con << "Received message of " << lag << " seconds of lag, weight " << weight << "\n";
 #endif
+
+        // clamp
+        lag = lag > se_lagCreditSingle ? se_lagCreditSingle : lag;
 
         // memorize the time of serious reports
         if ( weight > 1 )
@@ -89,7 +94,7 @@ class nClientLag
         if ( lagFast_ < lagSlow_ )
             lagFast_ = lagSlow_;
 
-        // clam smooth lag with fast lag
+        // clamp smooth lag with fast lag
         if (  smoothLag_ > lagFast_ )
             smoothLag_ = lagFast_;
 
@@ -129,9 +134,6 @@ static nDescriptor se_receiveLagMessageDescriptor( 240, se_receiveLagMessage,"la
 
 // maximal seconds of lag credit
 static REAL se_lagCredit = .5f;
-
-// maximal seconds of lag credit given in a single event
-static REAL se_lagCreditSingle = .1f;
 
 // sweet spot, the fill ratio of lag credit the server tries to keep the client at
 static REAL se_lagCreditSweetSpot = .5f;

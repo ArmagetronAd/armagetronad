@@ -281,6 +281,8 @@ Featurelets
 Bugfixes
 --------
 
+- Added compensation for drifting timers (observed often with
+  overclocked mainboards)
 - Text input fields now let the text wrap correctly and make use of the space allocated
   for them in a not-completely-dumb way. And *sigh* depending on the text field, color
   codes are either ignored (for the usernames) or both displayed in text and rendered.
