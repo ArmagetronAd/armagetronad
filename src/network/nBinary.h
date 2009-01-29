@@ -58,6 +58,21 @@ public:
         WriteByte( hi );
         WriteByte( lo );
     }
+
+    //! writes a variable width int, using 1 to 5 bytes.
+    void WriteVarInt( unsigned int value )
+    {
+        // write lsbs first with msb set to indicate
+        // stuff comes after it
+        while( value >= 0x80 )
+        {
+            WriteByte( ( value & 0x7f ) | 0x80 );
+            value >>= 7;
+        }
+
+        // write the remainder with msb clear
+        WriteByte( value );
+    }
 private:
     Buffer & target_;
     size_t   writeIndex_;
@@ -90,6 +105,26 @@ public:
         unsigned short lo = ReadByte();
         
         return lo + ( hi << 8 );
+    }
+
+    //! reads a variable width int, using 1 to 5 bytes.
+    unsigned int ReadVarInt()
+    {
+        unsigned int ret = 0;
+        unsigned char c = ReadByte();
+        
+        // read as long as the MSB is set
+        while( c & 0x80 )
+        {
+            ret |= c & 0x7f;
+            ret <<= 7;
+            c = ReadByte();
+        }
+
+        // read last value with msb cleared.
+        ret |= c;
+
+        return ret;
     }
 private:
     //! current read position
