@@ -73,6 +73,11 @@ eTimer::eTimer(nMessage &m):nNetObject(m), startTimeSmoothedOffset_(0){
     averageSpf_.Add(1/60.0,5);
 
     creationSystemTime_ = tSysTimeFloat();
+
+    lastStartTime_ = lastRemoteTime_ = 0;
+
+    // assume strongly the clocks are in sync
+    startTimeDrift_.Add( 0, 100 );
 }
 
 eTimer::~eTimer(){
@@ -119,6 +124,8 @@ static tSettingItem<REAL> se_timerStartFudgeStopConf("TIMER_SYNC_START_FUDGE_STO
 void eTimer::ReadSync(nMessage &m){
     nNetObject::ReadSync(m);
 
+    bool checkDrift = true;
+
     //std::cerr << "Got sync:" << remote_currentTime << ":" << speed << '\n';
 
     // determine the best estimate of the start time offset that reproduces the sent remote
@@ -136,6 +143,7 @@ void eTimer::ReadSync(nMessage &m){
         {
             qualityTester_.Timestep( 100 );
             startTimeOffset_.Reset();
+            checkDrift = false;
         }
 
         speed = remoteSpeed;
@@ -162,6 +170,7 @@ void eTimer::ReadSync(nMessage &m){
         if ( remote_currentTime < se_timerStartFudgeStop )
         {
             remote_currentTime += ping * ( se_timerStartFudgeStop - remote_currentTime ) * se_timerStartFudge;
+            checkDrift = false;
         }
 
         // determine quality from ping variance
@@ -169,6 +178,27 @@ void eTimer::ReadSync(nMessage &m){
 
         // determine start time
         remoteStartTimeOffset = smoothedSystemTime_ - startTime_ - remote_currentTime;
+
+        // calculate drift
+        if( checkDrift )
+        {
+            REAL timeDifference = remote_currentTime - lastRemoteTime_;
+            REAL drift = lastStartTime_ - remoteStartTimeOffset;
+
+            if ( timeDifference > 0 )
+            {
+                REAL driftAverage = startTimeDrift_.GetAverage();
+                // con << "Drift: " << driftAverage << "\n";
+                REAL driftDifference = drift/timeDifference;
+                
+                timeDifference = timeDifference > 1 ? 1 : timeDifference;
+                startTimeDrift_.Timestep( timeDifference * .1 );
+                startTimeDrift_.Add( driftDifference + driftAverage, timeDifference );
+            }
+        }
+
+        lastStartTime_ = remoteStartTimeOffset;
+        lastRemoteTime_ = remote_currentTime;
 
         // let the averagers decay faster at the beginning
         if ( remote_currentTime < 0 )
@@ -275,7 +305,7 @@ void eTimer::SyncTime(){
     // pingAverager_   .Timestep( timeStep * .05);
 
     // if we're not running at default speed, update the virtual start time
-    startTime_ += ( 1.0 - speed ) * timeStep;
+    startTime_ += ( 1.0 - speed - startTimeDrift_.GetAverage() ) * timeStep;
 
     // smooth time offset
     {
