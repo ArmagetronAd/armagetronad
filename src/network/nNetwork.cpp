@@ -1769,19 +1769,19 @@ void nSendBuffer::Broadcast	( nSocket const &				socket
 {
     if (sendBuffer_.Len()){
         sn_SentPackets++;
-        sn_SentBytes  += sendBuffer_.Len() * 2 + OVERHEAD;
+        sn_SentBytes  += sendBuffer_.Len() + OVERHEAD;
 
         // store our id
-        sendBuffer_[sendBuffer_.Len()]=htons(::sn_myNetID);
+        nBinaryWriter( sendBuffer_ ).WriteShort(::sn_myNetID);
 
         socket.Broadcast( reinterpret_cast<int8 *>(&(sendBuffer_[0])),
-                          2*sendBuffer_.Len(), port);
+                          sendBuffer_.Len(), port);
 
         Clear();
 
         if ( control )
         {
-            control->Use( nBandwidthControl::Usage_Execution, 2*sendBuffer_.Len() + OVERHEAD );
+            control->Use( nBandwidthControl::Usage_Execution, sendBuffer_.Len() + OVERHEAD );
         }
     }
 }
@@ -1789,9 +1789,6 @@ void nSendBuffer::Broadcast	( nSocket const &				socket
 // clears the buffer
 void nSendBuffer::Clear()
 {
-    for(int i=sendBuffer_.Len()-1;i>=0;i--)
-        sendBuffer_(i)=0;
-
     sendBuffer_.SetLen( 0 );
 }
 
