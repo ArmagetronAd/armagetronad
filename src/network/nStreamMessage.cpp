@@ -113,10 +113,7 @@ nStreamMessage::nStreamMessage(unsigned char const * & buffer,short sender, unsi
     unsigned short len = reader.ReadShort();
     if ( len * 2 > end - buffer )
     {
-#ifndef NOEXCEPT
         throw nKillHim();
-#endif
-        len = ( end - buffer )/2;
     }
     for(int i=0;i<len;i++)
     {

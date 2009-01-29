@@ -77,10 +77,7 @@ public:
     {
         if( read_ >= end_ )
         {
-#ifndef NOEXCEPT
             throw nKillHim();
-#endif
-            return 0;
         }
 
         return *(read_++);

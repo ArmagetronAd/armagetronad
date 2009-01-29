@@ -489,10 +489,7 @@ bool ANET_ListenOn( nHostList const & addresses, nSocketListener::SocketArray & 
             // return if we only want one socket
             if ( onesocketonly )
             {
-#ifndef NOEXCEPT
                 throw OneSocketOpened();
-#endif
-                return true;
             }
         }
         else
@@ -621,7 +618,6 @@ bool ANET_ListenOnConst( char const * hostname, int net_hostport,  nSocketListen
     if ( hostList.empty() )
     {
         // name lookup failures won't be tolerated here
-#ifndef NOEXCEPT
         if ( !ignoreErrors )
         {
             tString details( "Hostname lookup failed for " );
@@ -629,7 +625,6 @@ bool ANET_ListenOnConst( char const * hostname, int net_hostport,  nSocketListen
             details += " while trying to open listening sockets.";
             throw nSocket::PermanentError( details );
         }
-#endif
 
         // fallback for nonexceptional systems
         if ( hostname )
@@ -1645,7 +1640,6 @@ int nSocket::Bind( nAddress const & addr )
         socket_ = -1;
 
         // throw exception on fatal error
-#ifndef NOEXCEPT
         // name lookup failures won't be tolerated here
         if ( ANET_Error() == nSocketError_Reset )
         {
@@ -1654,7 +1648,6 @@ int nSocket::Bind( nAddress const & addr )
             details += " because that is not an address of the local machine.";
             throw nSocket::PermanentError( details );
         }
-#endif
 
         return -1;
     }

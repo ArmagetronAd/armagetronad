@@ -394,10 +394,8 @@ extern tArray<unsigned short> sn_netObjectsOwner;
 template<class T> class nNOInitialisator:public nDescriptor{
     // create a new nNetObject
     static void Init(nMessage &m){
-#ifndef NOEXCEPT
         try
         {
-#endif
             if (m.DataLen()<2)
             {
                 nReadError();
@@ -454,14 +452,12 @@ template<class T> class nNOInitialisator:public nDescriptor{
                     n->Release(); // silently delete it.
                 }
             }
-#ifndef NOEXCEPT
         }
         catch (nKillHim)
         {
             con << "nKillHim signal caught.\n";
             Cheater(m.SenderID());
         }
-#endif
     }
 
 public:

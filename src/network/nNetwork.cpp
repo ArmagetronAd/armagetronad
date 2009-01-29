@@ -660,9 +660,7 @@ void nDescriptorBase::HandleMessage(nMessageBase &message){
         con << "RMT " << message.descriptor << "\n";
 #endif
 
-#ifndef NOEXCEPT
     try{
-#endif
         nDescriptorBase *nd = 0;
 
         // index into arrays
@@ -706,7 +704,6 @@ void nDescriptorBase::HandleMessage(nMessageBase &message){
                 warned[message.Descriptor()]=true;
             }
         }
-#ifndef NOEXCEPT
     }
     catch(nIgnore const &){
         // well, do nothing.
@@ -722,8 +719,6 @@ void nDescriptorBase::HandleMessage(nMessageBase &message){
         // want a harmless uncaught exception to bring down the server.
         sn_ConsoleOut( e.GetName() + ": " + e.GetDescription() + '\n', message.SenderID() );
     }
-
-#endif
 }
 
 void nDescriptor::DoHandleMessage( nMessageBase & message )
@@ -2091,10 +2086,8 @@ static void rec_peer(unsigned int peer){
                 //	 if (peer!=id)
                 //  con << "Changed incoming address.\n";
 
-#ifndef NOEXCEPT
                 try
                 {
-#endif
                     while( bufferEnd > currentRead ){
                         tJUST_CONTROLLED_PTR< nMessage > pmess;
                         pmess = tNEW( nMessage )( currentRead, id, bufferEnd );
@@ -2205,7 +2198,6 @@ static void rec_peer(unsigned int peer){
                                 //con << "Message " << mess_id << ":" << id << " was not new.\n";
                             }
                     }
-#ifndef NOEXCEPT
                 }
 
                 catch(nKillHim)
@@ -2213,7 +2205,6 @@ static void rec_peer(unsigned int peer){
                     con << "nKillHim signal caught.\n";
                     sn_DisconnectUser(peer, "$network_kill_error");
                 }
-#endif
             }
 
             {
@@ -2622,16 +2613,10 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
 void nReadError( bool critical )
 {
     // st_Breakpoint();
-#ifndef NOEXCEPT
     if ( critical )
         throw nKillHim();
     else
         throw nIgnore();
-#else
-    con << "\nI told you not to use PGCC! Now we need to leave the\n"
-    << "system in an undefined state. The progam will crash now.\n"
-    << "\n\n";
-#endif
 }
 
 #ifdef DEDICATED

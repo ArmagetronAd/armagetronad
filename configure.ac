@@ -1026,25 +1026,6 @@ fi
 
 dnl RUBY and SWIG end
 
-
-
-
-if test "`$CXX -v 2>&1 | grep -v executing | grep pgcc`"  ; then
-AC_MSG_WARN(
-[
-
-
-You are using PGCC to compile Armagetron. Due to a bug in PGCC,
-exception handling needs to be disabled. This makes the server
-mode vulnerable to an attack that causes the server to block or
-crash. (The attack is still detected, but nothing can be done
-about it. You will get the message \"I told you not to use PGCC!\")
-
-
-])
-CXXFLAGS="$CXXFLAGS -fno-exceptions -DNOEXCEPT"
-fi
-
 dnl Replace `main' with a function in -lpthread:
 
 dnl Checks for header files.
