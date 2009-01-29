@@ -76,8 +76,8 @@ eTimer::eTimer(nMessage &m):nNetObject(m), startTimeSmoothedOffset_(0){
 
     lastStartTime_ = lastRemoteTime_ = 0;
 
-    // assume VERY strongly the clocks are in sync
-    startTimeDrift_.Add( 0, 10000 );
+    // assume strongly the clocks are in sync
+    startTimeDrift_.Add( 0, 100 );
 }
 
 eTimer::~eTimer(){
