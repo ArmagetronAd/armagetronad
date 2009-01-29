@@ -59,8 +59,8 @@ public:
         WriteByte( lo );
     }
 
-    //! writes a variable width int, using 1 to 5 bytes.
-    void WriteVarInt( unsigned int value )
+    //! writes a variable width unsigned integer, using 1 to 5 bytes.
+    void WriteVarUInt( unsigned int value )
     {
         // write lsbs first with msb set to indicate
         // stuff comes after it
@@ -72,6 +72,19 @@ public:
 
         // write the remainder with msb clear
         WriteByte( value );
+    }
+
+    //! writes a variable width signed integer
+    void WriteVarSInt( int value )
+    {
+        if ( value > 0 )
+        {
+            WriteVarUInt( value << 1 );
+        }
+        else
+        {
+            WriteVarUInt( ( (-1-value) << 1 ) | 1 );
+        }
     }
 private:
     Buffer & target_;
@@ -108,7 +121,7 @@ public:
     }
 
     //! reads a variable width int, using 1 to 5 bytes.
-    unsigned int ReadVarInt()
+    unsigned int ReadVarUInt()
     {
         unsigned int ret = 0;
         unsigned char c = ReadByte();
@@ -125,6 +138,22 @@ public:
         ret |= c;
 
         return ret;
+    }
+
+    //! reads a variable width signed integer
+    int ReadVarSInt()
+    {
+        unsigned int value = ReadVarUInt();
+        if ( value & 1 )
+        {
+            // negative number
+            return -1 - ( (value & ~1) >> 1 );
+        }
+        else
+        {
+            // positive number
+            return value >> 1;
+        }
     }
 private:
     //! current read position
