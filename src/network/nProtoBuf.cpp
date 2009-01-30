@@ -126,6 +126,10 @@ void nProtoBufHeader::Read( nBinaryReader & reader )
     len = reader.ReadVarUInt();
 }
 
+nProtoBufMessageBase::nProtoBufMessageBase( nProtoBufDescriptorBase const & descriptor )
+: nMessageBase( descriptor ), sections_( descriptor.GetDefaultStreamSections() )
+{}
+
 //! returns the descriptor
 nProtoBufDescriptorBase const & nProtoBufMessageBase::GetDescriptor() const
 {
@@ -186,7 +190,7 @@ int nProtoBufMessageBase::OnWrite( WriteArguments & arguments ) const
         {
             static nDescriptor dummy( 0, NULL, NULL );
             oldFormat_ = new nMessage( dummy );
-            GetDescriptor().StreamTo( fullProtoBuf, *oldFormat_ );
+            GetDescriptor().StreamTo( fullProtoBuf, *oldFormat_, GetStreamSections() );
         }
 
         // and copy the message contents over.
@@ -264,7 +268,7 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
         }
 
         // transform
-        GetDescriptor().StreamFrom( *oldFormat_, AccessProtoBuf() );
+        GetDescriptor().StreamFrom( *oldFormat_, AccessProtoBuf(), GetStreamSections() );
     }
 }
 
@@ -293,14 +297,14 @@ nProtoBufDescriptorBase::DescriptorMap const & nProtoBufDescriptorBase::GetDescr
 
 nProtoBufDescriptorBase::DescriptorMap nProtoBufDescriptorBase::descriptorsByName;
 //! dumb streaming from message, static version
-void nProtoBufDescriptorBase::StreamFromStatic( nMessage & in, nProtoBuf & out  )
+void nProtoBufDescriptorBase::StreamFromStatic( nMessage & in, nProtoBuf & out, StreamSections sections )
 {
     // try to determine suitable descriptor
     nProtoBufDescriptorBase const * embedded = descriptorsByName[ DetermineName( out ) ];
     if ( embedded )
     {
         // found it, delegate
-        embedded->StreamFrom( in, out );
+        embedded->StreamFrom( in, out, sections );
     }
     else
     {
@@ -314,19 +318,19 @@ void nProtoBufDescriptorBase::StreamFromStatic( nMessage & in, nProtoBuf & out  
 #endif
         
         // fallback to default
-        StreamFromDefault( in, out );
+        StreamFromDefault( in, out, sections );
     }
 }
 
 //! dumb streaming to message, static version
-void nProtoBufDescriptorBase::StreamToStatic( nProtoBuf const & in, nMessage & out )
+void nProtoBufDescriptorBase::StreamToStatic( nProtoBuf const & in, nMessage & out, StreamSections sections )
 {
     // try to determine suitable descriptor
     nProtoBufDescriptorBase const * embedded = descriptorsByName[ DetermineName( in ) ];
     if ( embedded )
     {
         // found it, delegate
-        embedded->StreamTo( in, out );
+        embedded->StreamTo( in, out, sections );
     }
     else
     {
@@ -340,16 +344,19 @@ void nProtoBufDescriptorBase::StreamToStatic( nProtoBuf const & in, nMessage & o
 #endif
         
         // fallback to default
-        StreamToDefault( in, out );
+        StreamToDefault( in, out, sections );
     }
 }
 
 //! dumb streaming from message, static version
-void nProtoBufDescriptorBase::StreamFromDefault( nMessage & in, nProtoBuf & out  )
+void nProtoBufDescriptorBase::StreamFromDefault( nMessage & in, nProtoBuf & out, StreamSections sections )
 {
     // get reflection interface
     REFLECTION_CONST * reflection = out.GetReflection();
     Descriptor const * descriptor = out.GetDescriptor();
+
+    // flags for the current section
+    int currentSectionFlags = 1;
 
     // iterate over fields in ID order
     int count = descriptor->field_count();
@@ -366,7 +373,19 @@ void nProtoBufDescriptorBase::StreamFromDefault( nMessage & in, nProtoBuf & out 
         if ( FieldDescriptor::kLastReservedNumber < field->number() )
         {
             // end marker
-            break;
+            currentSectionFlags <<= 1;
+            continue;
+        }
+
+        // skip over fields if section doesn't match
+        if ( 0 == ( sections & currentSectionFlags ) && field->cpp_type() != FieldDescriptor::CPPTYPE_MESSAGE )
+        {
+            if( currentSectionFlags > sections )
+            {
+                break;
+            }
+
+            continue;
         }
 
         switch( field->cpp_type() )
@@ -407,7 +426,7 @@ void nProtoBufDescriptorBase::StreamFromDefault( nMessage & in, nProtoBuf & out 
         }
         break;
         case FieldDescriptor::CPPTYPE_MESSAGE:
-            StreamFromStatic( in, *reflection->REFL_GET( MutableMessage, &out, field ) );
+            StreamFromStatic( in, *reflection->REFL_GET( MutableMessage, &out, field ), i ? nProtoBufMessageBase::SECTION_First : sections );
             break;
 
         // explicitly unsupported:
@@ -423,11 +442,14 @@ void nProtoBufDescriptorBase::StreamFromDefault( nMessage & in, nProtoBuf & out 
 }
 
 //! dumb streaming to message, static version
-void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nMessage & out )
+void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nMessage & out, StreamSections sections )
 {
     // get reflection interface
     const Reflection * reflection = in.GetReflection();
     const Descriptor * descriptor = in.GetDescriptor();
+
+    // flags for the current section
+    int currentSectionFlags = 1;
 
     // iterate over fields in ID order
     int count = descriptor->field_count();
@@ -438,7 +460,19 @@ void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nMessage & 
         if ( FieldDescriptor::kLastReservedNumber < field->number() )
         {
             // end marker
-            break;
+            currentSectionFlags <<= 1;
+            continue;
+        }
+
+        // skip over fields if section doesn't match
+        if ( 0 == ( sections & currentSectionFlags ) && ( field->cpp_type() != FieldDescriptor::CPPTYPE_MESSAGE || i != 0 ) )
+        {
+            if( currentSectionFlags > sections )
+            {
+                break;
+            }
+
+            continue;
         }
 
         switch( field->cpp_type() )
@@ -459,7 +493,7 @@ void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nMessage & 
             out << reflection->REFL_GET( GetBool, in, field );
             break;
         case FieldDescriptor::CPPTYPE_MESSAGE:
-            StreamToStatic( reflection->REFL_GET( GetMessage, in, field ), out );
+            StreamToStatic( reflection->REFL_GET( GetMessage, in, field ), out, i ? nProtoBufMessageBase::SECTION_First : sections );
             break;
 
         // explicitly unsupported:
@@ -688,17 +722,18 @@ void nProtoBufDescriptorBase::ClearRepeated( nProtoBuf & message )
 }
 
 //! dumb streaming to message
-void nProtoBufDescriptorBase::DoStreamTo( nProtoBuf const & in, nMessage & out ) const
+void nProtoBufDescriptorBase::DoStreamTo( nProtoBuf const & in, nMessage & out, StreamSections sections ) const
 {
-    StreamToDefault( in, out );
+    StreamToDefault( in, out, sections );
 }
 
 //! dumb streaming from message
-void nProtoBufDescriptorBase::DoStreamFrom( nMessage & in, nProtoBuf & out ) const
+void nProtoBufDescriptorBase::DoStreamFrom( nMessage & in, nProtoBuf & out, StreamSections sections ) const
 {
-    StreamFromDefault( in, out );
+    StreamFromDefault( in, out, sections );
 }
 
+/*
 // read/write operators for protocol buffers
 nMessage& operator >> ( nMessage& m, nProtoBuf & buffer )
 {
@@ -730,6 +765,7 @@ nMessage& operator << ( nMessage& m, nProtoBuf const & buffer )
    
     return m;
 }
+*/
 
 nOProtoBufDescriptorBase::~nOProtoBufDescriptorBase()
 {}

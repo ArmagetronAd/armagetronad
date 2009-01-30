@@ -59,9 +59,9 @@ class nProtoBufDescriptor;
 //! header structure of a ProtoBuf message
 struct nProtoBufHeader
 {
-    unsigned int   len; //! the length of the buffer
+    unsigned int   len;        //! the length of the buffer
     unsigned short messageID;  //! message ID
-    unsigned short cacheRef; //! reference to cache base message
+    unsigned short cacheRef;   //! reference to cache base message
 
     nProtoBufHeader()
     : len(0), messageID(0), cacheRef(0)
@@ -76,9 +76,29 @@ struct nProtoBufHeader
 class nProtoBufMessageBase: public nMessageBase
 {
 public:
-    nProtoBufMessageBase( nDescriptorBase const & descriptor )
-    : nMessageBase( descriptor )
-    {}
+    //! sections to stream in each protobuf. Sections are delimitered by
+    //! elements with IDs past the range of reserved IDs (>= 20000)
+    enum StreamSections
+    {
+        SECTION_First = 1,  // only the first section (default behavior, normal messages only have one section)
+        SECTION_Second = 2, // only the second section
+        SECTION_All = 3,    // the first two sections at once
+        SECTION_Default = 1
+    };
+
+    nProtoBufMessageBase( nProtoBufDescriptorBase const & descriptor );
+
+    //! set sections to stream for old format
+    void SetStreamSections( StreamSections sections )
+    {
+        sections_ = sections;
+    }
+
+    //! get sections to stream for old format
+    StreamSections GetStreamSections() const
+    {
+        return sections_;
+    }
 
     //! returns the wrapped protcol buffer
     inline nProtoBuf const & GetProtoBuf() const
@@ -137,6 +157,9 @@ private:
 
     //! dummy message used to cache raw data in old message format
     mutable tJUST_CONTROLLED_PTR< nStreamMessage > oldFormat_;
+
+    //! sections to stream
+    StreamSections sections_;
 };
 
 //! implementation for each protocol buffer type
@@ -172,6 +195,7 @@ public:
     {
         return descriptor_;
     }
+
 protected:
     //! handles the message
     virtual void OnHandle()
@@ -240,6 +264,8 @@ class nProtoBufDescriptorBase: public nDescriptorBase
 {
 public:
     typedef std::map< std::string, nProtoBufDescriptorBase * > DescriptorMap;
+    typedef nProtoBufMessageBase::StreamSections StreamSections;
+    // using nProtoBufMessageBase::StreamSections;
 
     nProtoBufDescriptorBase(unsigned short identification,
                       nProtoBuf const & prototype, bool acceptEvenIfNotLoggedIn = false);
@@ -248,22 +274,38 @@ public:
     static std::string const & DetermineName( nProtoBuf const & prototype );
 
     //! dumb streaming to message
-    inline void StreamTo( nProtoBuf const & in, nStreamMessage & out ) const
+    inline void StreamTo( nProtoBuf const & in, nStreamMessage & out, StreamSections sections ) const
     {
-        DoStreamTo( in, out );
+        if ( sections == nProtoBufMessageBase::SECTION_All )
+        {
+            DoStreamTo( in, out, nProtoBufMessageBase::SECTION_First );
+            DoStreamTo( in, out, nProtoBufMessageBase::SECTION_Second );
+        }
+        else
+        {
+            DoStreamTo( in, out, sections );
+        }
     }
 
     //! dumb streaming from message
-    inline void StreamFrom( nStreamMessage & in, nProtoBuf & out  ) const
+    inline void StreamFrom( nStreamMessage & in, nProtoBuf & out, StreamSections sections ) const
     {
-        DoStreamFrom( in, out );
+        if ( sections == nProtoBufMessageBase::SECTION_All )
+        {
+            DoStreamFrom( in, out, nProtoBufMessageBase::SECTION_First );
+            DoStreamFrom( in, out, nProtoBufMessageBase::SECTION_Second );
+        }
+        else
+        {
+            DoStreamFrom( in, out, sections );
+        }
     }
 
     //! dumb streaming from message, static version
-    static void StreamFromStatic( nStreamMessage & in, nProtoBuf & out  );
+    static void StreamFromStatic( nStreamMessage & in, nProtoBuf & out, StreamSections sections );
 
     //! dumb streaming to message, static version
-    static inline void StreamToStatic( nProtoBuf const & in, nStreamMessage & out );
+    static inline void StreamToStatic( nProtoBuf const & in, nStreamMessage & out, StreamSections sections );
 
     //! compares two messages, filling in total size and difference.
     static void EstimateMessageDifference( nProtoBuf const & a,
@@ -296,26 +338,42 @@ public:
     {
         return DoCreateMessage();
     }
+
+    //! set default sections to stream for old format
+    void SetDefaultStreamSections( StreamSections sections )
+    {
+        sections_ = sections;
+    }
+
+    //! get default sections to stream for old format
+    StreamSections GetDefaultStreamSections() const
+    {
+        return sections_;
+    }
+
 protected:
     static DescriptorMap const & GetDescriptorsByName();
 
 private:
     static DescriptorMap descriptorsByName;
 
+    //! sections to stream in the old format
+    StreamSections sections_;
+
     //! creates a message
     virtual nProtoBufMessageBase * DoCreateMessage() const = 0;
 
     //! dumb streaming to message
-    virtual void DoStreamTo( nProtoBuf const & in, nStreamMessage & out ) const;
+    virtual void DoStreamTo( nProtoBuf const & in, nStreamMessage & out, StreamSections sections ) const;
 
     //! dumb streaming from message
-    virtual void DoStreamFrom( nStreamMessage & in, nProtoBuf & out ) const;
+    virtual void DoStreamFrom( nStreamMessage & in, nProtoBuf & out, StreamSections sections ) const;
 
     //! dumb streaming from message, static version
-    static void StreamFromDefault( nStreamMessage & in, nProtoBuf & out  );
+    static void StreamFromDefault( nStreamMessage & in, nProtoBuf & out, StreamSections sections );
 
     //! dumb streaming to message, static version
-    static void StreamToDefault( nProtoBuf const & in, nStreamMessage & out );
+    static void StreamToDefault( nProtoBuf const & in, nStreamMessage & out, StreamSections sections );
 };
 
 // network object descriptors
@@ -325,7 +383,7 @@ public:
     virtual ~nOProtoBufDescriptorBase();
 
     //! writes sync message
-    inline nMessageBase * WriteSync( nNetObject & object, bool create ) const
+    inline nProtoBufMessageBase * WriteSync( nNetObject & object, bool create ) const
     {
         return DoWriteSync( object, create );
     }
@@ -339,7 +397,7 @@ public:
     //! reads from old style sync message
     inline void ReadSync( nNetObject & object, nStreamMessage & stream, bool create ) const
     {
-        return DoReadSync( object, stream );
+        return DoReadSync( object, stream, create );
     }
 
     /*
@@ -367,10 +425,10 @@ protected:
     static void PostCheck( nNetObject * object, nSenderInfo sender );
 private:
     //! writes a sync message
-    virtual nMessageBase * DoWriteSync( nNetObject & object, bool create ) const = 0;
+    virtual nProtoBufMessageBase * DoWriteSync( nNetObject & object, bool create ) const = 0;
 
     //! reads an old sync message
-    virtual void DoReadSync( nNetObject & object, nStreamMessage & envelope ) const = 0;
+    virtual void DoReadSync( nNetObject & object, nStreamMessage & envelope, bool create ) const = 0;
 
     //! writes into an old sync message
     virtual void DoWriteSync( nNetObject & object, nStreamMessage & envelope, bool create ) const = 0;
@@ -468,7 +526,11 @@ public:
     nOProtoBufDescriptor( int identification )
     : nOProtoBufDescriptorBase()
     , nProtoBufDescriptor< PROTOBUF >( identification, &HandleIncoming, false )
-    {}
+    {
+        // for creation messages (which are the one handled over this descriptor,
+        // should they come in in the old format), stream everything
+        this->SetDefaultStreamSections( nProtoBufMessageBase::SECTION_All );
+    }
 private:
     // template message
     static const PROTOBUF prototype;
@@ -529,7 +591,7 @@ private:
 
 private:
     //! writes sync, true work
-    nMessageBase * DoWriteSync( nNetObject & object, bool create ) const
+    nProtoBufMessageBase * DoWriteSync( nNetObject & object, bool create ) const
     {
         nProtoBufMessage< PROTOBUF > * message = this->CreateMessage();
 
@@ -541,19 +603,36 @@ private:
         PROTOBUF & sync = message->AccessProtoBuf();
         cast.WriteSync( sync, create );
 
+        // set old streaming mode
+        message->SetStreamSections( create ? nProtoBufMessageBase::SECTION_All : nProtoBufMessageBase::SECTION_Second );
+
         return message;
     }
 
     //! reads a sync message
-    virtual void DoReadSync( nNetObject & object, nStreamMessage & envelope ) const
+    virtual void DoReadSync( nNetObject & object, nStreamMessage & envelope, bool create ) const
     {
-        tASSERT(0);
+        // cast to correct type
+        tASSERT( dynamic_cast< OBJECT * >( &object ) );
+        OBJECT & cast = static_cast< OBJECT & >( object );
+
+        // read sync
+        PROTOBUF sync;
+        StreamFrom( envelope, sync, create ? nProtoBufMessageBase::SECTION_First : nProtoBufMessageBase::SECTION_Second );
+        cast.ReadSync( sync, nSenderInfo( envelope ) );
     }
 
     //! writes into an old sync message
     virtual void DoWriteSync( nNetObject & object, nStreamMessage & envelope, bool create ) const
     {
-        tASSERT(0);
+        // cast to correct type
+        tASSERT( dynamic_cast< OBJECT * >( &object ) );
+        OBJECT & cast = static_cast< OBJECT & >( object );
+
+        // read sync
+        PROTOBUF sync;
+        cast.WriteSync( sync, create );
+        StreamTo( sync, envelope, create ? nProtoBufMessageBase::SECTION_First : nProtoBufMessageBase::SECTION_Second );
     }
     
     virtual nProtoBufMessageBase* DoCreateMessage() const

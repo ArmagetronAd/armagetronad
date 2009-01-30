@@ -2,18 +2,23 @@ package Network;
 
 message nNetObjectSync
 {
+    // legacy creation data:
+
     // ID of the object
     optional uint32 object_id = 1;
 
     // ID of the owner
     optional uint32 owner_id = 2;
 
-    // legacy message end marker, extensions go after it
-    optional bool legacy_message_end_marker = 20000;
+    // legacy creation data end marker
+    optional bool legacy_create_end = 20000;
 
-    // no data here.
+    // no sync data here.
+    // well, technically, object_id is written in this
+    // section normally, but that bit is handled
+    // by the calling code for the old stream format.
 
-    // legacy message end marker, extensions go after it
-    optional bool legacy_message_end_marker2 = 20001;
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
 }
 

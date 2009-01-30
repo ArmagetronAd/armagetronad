@@ -789,7 +789,8 @@ nProtoBufDescriptorBase::nProtoBufDescriptorBase
 : nDescriptorBase( 
     identification | nProtoBufDescriptorBase::protoBufFlag,
     DetermineName( prototype ).c_str(),
-    acceptEvenIfNotLoggedIn )
+    acceptEvenIfNotLoggedIn ),
+  sections_( nProtoBufMessageBase::SECTION_Default )
 {
     if (MAXDESCRIPTORS<=identification || protoBufDescriptors[identification]!=NULL)
     {
@@ -1707,7 +1708,10 @@ void nSendBuffer::AddMessage( nMessageBase & message, nBandwidthControl* control
 
     // give control to message
     nMessageBase::WriteArguments arguments( sendBuffer_, peer );
-    message.Write( arguments );
+    int descriptor = message.Write( arguments );
+
+    // write the real descriptor
+    descriptorWriter.WriteShort( descriptor );
 
     unsigned short len = sendBuffer_.Len() - lenBefore;
     tRecorderSync< unsigned short >::Archive( "_MESSAGE_SEND_LEN", 5, len );

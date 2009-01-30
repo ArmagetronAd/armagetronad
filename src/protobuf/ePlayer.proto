@@ -32,8 +32,8 @@ message ePlayerNetIDSync
     // base class init data
     optional Network.nNetObjectSync base = 1;
 
-    // legacy message end marker, extensions go after it
-    optional bool legacy_message_end_marker = 20000;
+    // legacy creation data end marker
+    optional bool legacy_create_end = 20000;
 
     optional ePlayerColor color     = 2;
     optional uint32 ping_charity    = 3;
@@ -48,6 +48,6 @@ message ePlayerNetIDSync
     optional bool   name_team_after_me = 12;
     optional string team_name       = 13;
 
-    // legacy message end marker, extensions go after it
-    optional bool legacy_message_end_marker2 = 20001;
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
 }
