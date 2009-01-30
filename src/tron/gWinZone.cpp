@@ -91,6 +91,18 @@ static tSettingItem<REAL> sg_ballCycleBoostConf( "BALL_CYCLE_ACCEL_BOOST", sg_ba
 static int sg_ballAutoRespawn = 1;
 static tSettingItem<int> sg_ballAutoRespawnConf( "BALL_AUTORESPAWN", sg_ballAutoRespawn );
 
+static int sg_zoneSegments = 11;
+static tSettingItem<int> sg_zoneSegmentsConf( "ZONE_SEGMENTS", sg_zoneSegments );
+
+static REAL sg_zoneSegLength = .5;
+static tSettingItem<REAL> sg_zoneSegLengthConf( "ZONE_SEG_LENGTH", sg_zoneSegLength );
+
+static REAL sg_zoneBottom = 0.0f;
+static tSettingItem<REAL> sg_zoneBottomConf( "ZONE_BOTTOM", sg_zoneBottom );
+
+static REAL sg_zoneHeight = 5.0f;
+static tSettingItem<REAL> sg_zoneHeightConf( "ZONE_HEIGHT", sg_zoneHeight );
+
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
 {
@@ -1128,95 +1140,92 @@ static nSettingItem< REAL > sg_zoneAlphaConfServer( "ZONE_ALPHA_SERVER", sg_zone
 
 void gZone::Render( const eCamera * cam )
 {
-	#ifndef DEDICATED
-	REAL alpha = ( lastTime - createTime_ ) * .2f;
-	if ( alpha > .7f )
-		alpha = .7f;
-	if ( alpha <= 0 )
-		return;
+    #ifndef DEDICATED
+    if ( sg_zoneSegLength <= 0 )
+        sg_zoneSegLength = .5;
+    if ( sg_zoneSegments < 1 )
+        sg_zoneSegments = 11;
 
-	alpha *= sg_zoneAlpha * sg_zoneAlphaServer;
+    REAL alpha = ( lastTime - createTime_ ) * .2f;
+    if ( alpha > .7f )
+    alpha = .7f;
+    if ( alpha <= 0 )
+        return;
+    alpha *= sg_zoneAlpha * sg_zoneAlphaServer;
+    
+	    ModelMatrix();
+    glPushMatrix();
 
-	ModelMatrix();
-	glPushMatrix();
+    REAL seglen = 2 * M_PI / sg_zoneSegments * sg_zoneSegLength;
 
-	const REAL seglen = .2f;
-	const REAL bot = 0.0f;
-	const REAL top = 5.0f;		 // + ( lastTime - createTime_ ) * .1f;
+    REAL r = Radius();
+    GLfloat m[4][4]={{r*rotation_.x,r*rotation_.y,0,0},
+                     {-r*rotation_.y,r*rotation_.x,0,0},
+                     {0,0,sg_zoneHeight,0},
+                     {pos.x,pos.y,sg_zoneBottom,1}};
 
-	REAL r = Radius();
-	GLfloat m[4][4]=
-	{
-		{
-			r*rotation_.x,r*rotation_.y,0,0
-		},
-		{-r*rotation_.y,r*rotation_.x,0,0},
-		{0,0,top,0},
-		{pos.x,pos.y,bot,1}
-	};
+    glMultMatrixf(&m[0][0]);
 
-	glMultMatrixf(&m[0][0]);
-
-	glColor4f( color_.r ,color_.g,color_.b, alpha );
+    glColor4f( color_.r ,color_.g,color_.b, alpha );
 
 	bool useAlpha = sr_alphaBlend ? !sg_zoneAlphaToggle : sg_zoneAlphaToggle;
-	static bool lastAlpha = useAlpha;
+    static bool lastAlpha = useAlpha;
 
-	static rDisplayList zoneList;
-	if ( lastAlpha != useAlpha || !zoneList.Call() )
-	{
-		lastAlpha = useAlpha;
+    static rDisplayList zoneList;
+    if ( lastAlpha != useAlpha || !zoneList.Call() )
+    {
+        lastAlpha = useAlpha;
 
-		rDisplayListFiller filler( zoneList );
+        rDisplayListFiller filler( zoneList );
+        
+        glDisable(GL_LIGHT0);
+        glDisable(GL_LIGHT1);
+        glDisable(GL_LIGHTING);
+        glDisable(GL_CULL_FACE);
+        glDepthMask(GL_FALSE);
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE );
+        glDisable(GL_TEXTURE_2D);
+        
+        if ( useAlpha )
+            BeginQuads();
+        else
+        {
+            sr_DepthOffset(true);
+            BeginLineStrip();
+        }
 
-		glDisable(GL_LIGHT0);
-		glDisable(GL_LIGHT1);
-		glDisable(GL_LIGHTING);
-		glDisable(GL_CULL_FACE);
-		glDepthMask(GL_FALSE);
-		glBlendFunc( GL_SRC_ALPHA, GL_ONE );
-		glDisable(GL_TEXTURE_2D);
+        for ( int i = sg_zoneSegments - 1; i>=0; --i )
+        {
+            REAL a = i * 2 * M_PI / REAL( sg_zoneSegments );
+            REAL b = a + seglen;
+            
+            REAL sa = sin(a);
+            REAL ca = cos(a);
+            REAL sb = sin(b);
+            REAL cb = cos(b);
+            
+            glVertex3f(sa, ca, 0);
+            glVertex3f(sa, ca, 1);
+            glVertex3f(sb, cb, 1);
+            glVertex3f(sb, cb, 0);
+            
+            if ( !useAlpha )
+            {
+                glVertex3f(sa, ca, 0);
+                RenderEnd();
+                BeginLineStrip();
+            }
+        }
+        
+        RenderEnd();
 
-		if ( useAlpha )
-			BeginQuads();
-		else
-		{
-			sr_DepthOffset(true);
-			BeginLineStrip();
-		}
+        sr_DepthOffset(false);
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+        glDepthMask(GL_TRUE);
+    }
 
-		for ( int i = sg_segments - 1; i>=0; --i )
-		{
-			REAL a = i * 2 * 3.14159 / REAL( sg_segments );
-			REAL b = a + seglen;
-
-			REAL sa = sin(a);
-			REAL ca = cos(a);
-			REAL sb = sin(b);
-			REAL cb = cos(b);
-
-			glVertex3f(sa, ca, 0);
-			glVertex3f(sa, ca, 1);
-			glVertex3f(sb, cb, 1);
-			glVertex3f(sb, cb, 0);
-
-			if ( !useAlpha )
-			{
-				glVertex3f(sa, ca, 0);
-				RenderEnd();
-				BeginLineStrip();
-			}
-		}
-
-		RenderEnd();
-
-		sr_DepthOffset(false);
-		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-		glDepthMask(GL_TRUE);
-	}
-
-	glPopMatrix();
-	#endif
+    glPopMatrix();
+#endif
 }
 
 
@@ -1240,7 +1249,7 @@ void gZone::DrawSvg(std::ofstream &f) {
     if ( alpha <= 0 )
         return;
     alpha *= sg_zoneAlpha * sg_zoneAlphaServer;
-
+    
     f << "  <circle cx=\"0\" cy=\"0\" r=\"" << r << "\" fill=\"none\" stroke='" << gSvgColor(color_) << "' stroke-width=\"1\" stroke-dasharray=\""
       << dash << ", " << dash << "\" opacity=\"" <<  alpha << "\" transform=\"translate("
       << pos.x << " " << -pos.y << ")\">\n";
@@ -2254,7 +2263,7 @@ bool gBaseZoneHack::Timestep( REAL time )
 	// set speed according to conquest status
 	if ( currentState_ == State_Safe )
 	{
-		REAL maxSpeed = 10 * ( 2 * 3.141 ) / sg_segments;
+		REAL maxSpeed = 10 * ( 2 *  M_PI ) / sg_segments;
 		REAL omega = .3 + conquered_ * conquered_ * maxSpeed;
 		REAL omegaDot = 2 * conquered_ * conquest * maxSpeed;
 

@@ -710,6 +710,10 @@ gl_renderer_help		OpenGL system information
 gl_vendor_help			OpenGL system information
 alpha_blend_help		Enable alpha blending
 zone_alpha_toggle_help		This is XORd with ALPHA_BLEND to determine the way to draw zones
+zone_segments_help		How many segments the zone is formed with. Default is 11
+zone_seg_length_help	The rendered percentual of every segment. Default is .5
+zone_bottom			Where to put the zone along the Z axis. Default is 0.0
+zone_height			The zone segments' height. Default is 5.0
 smooth_shading_help		Enable smooth shading
 text_out_help			Enable console text output
 console_columns_help    Number of characters in each line of console output
@@ -2800,6 +2804,8 @@ access_level_op_overpowered 0xff7f7f\1 denied,0xffffff your need higher access r
 access_level_op_self        0xff7f7f\1 denied,0xffffff can't do that to yourself :).\n
 access_level_op_denied_max  0xff7f7f\1 denied,0xffffff your victim already has maximal rights.\n
 access_level_op_denied_ai   0xff7f7f\1 denied,0xffffff your victim is an AI.\n
+access_level_op_same        \1: This would have no effect.\n
+access_level_op_unclear     \1: User is already logged in, please explicitely set an access level.\n
 
 access_level_demote         \1 has been demoted to "\2" by order of \3.\n
 access_level_promote        \1 has been promoted to "\2" by order of \3.\n
@@ -2843,6 +2849,7 @@ login_error_noremote                 Authentication via Global ID not available 
 login_error_blacklist                Authority \1 is on this server's blacklist.
 login_error_whitelist                Authority \1 is not on this server's whitelist.
 login_error_pharm                    Server adress mismatch, \1 (sent by client) != \2 (our address). Pharming suspected. If  you are connecting from the LAN and get this error, either set "TRUST_LAN" on the server (only if your LAN can be fully trusted, of course) or use "SERVER_IP" to make the local IP known to the server.
+login_error_pharm_cheap              Server address trouble. Client sent unspecific server address.
 login_error_methodmismatch  The local method used for auhtentication has been modified since your password was set. In the server's config files, put all commands that define authentication methods before all local password definitions.
 login_error_nomethod        No authentication method could be found. Your client supports \1, this server supports \2, and the authentication server supports \3.
 login_error_nomethodlist    Authentication URL \1 does not return a list of supported methods, got error code \2, content "\3".

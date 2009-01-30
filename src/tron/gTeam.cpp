@@ -54,20 +54,20 @@ class gMenuItemPlayerTeam: public uMenuItem
 {
     ePlayerNetID* 	player;
     eTeam*			team;
+    bool            canJoin_;
 public:
-    gMenuItemPlayerTeam(uMenu *M,ePlayerNetID* p, eTeam* t )
+    gMenuItemPlayerTeam(uMenu *M,ePlayerNetID* p, eTeam* t, bool canJoin )
             : uMenuItem( M, tOutput("$team_menu_join_help") ),
             player ( p ),
-            team ( t)
+            team ( t),
+            canJoin_( canJoin )
     {
     }
 
     virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0)
     {
-        tOutput text;
-        text.SetTemplateParameter(1 , team->Name() );
-        text << "$team_menu_join";
-        DisplayTextSpecial( x, y, text, selected, alpha );
+        tOutput text( "$team_menu_join", team->Name() );
+        DisplayTextSpecial( x, y, text, selected, alpha * ( canJoin_ ? 1 : ( selected ? .8 : .5 ) ) );
     }
 
     virtual void Enter()
@@ -157,9 +157,9 @@ public:
         for ( i = eTeam::teams.Len()-1; i>=0; --i )
         {
             eTeam *team = eTeam::teams(i);
-            if ( team != player->NextTeam() && team->PlayerMayJoin( player ) )
+            if ( team != player->NextTeam() )
             {
-                items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team );
+                items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team, team->PlayerMayJoin( player )  );
             }
         }
 

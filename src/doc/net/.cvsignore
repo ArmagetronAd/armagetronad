@@ -1,8 +1,0 @@
-Makefile
-ml
-*.html
-*.ghost
-.m4.dep
-Makefile.in
-*.dep
-

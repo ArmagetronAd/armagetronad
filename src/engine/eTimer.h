@@ -62,8 +62,12 @@ private:
     double smoothedSystemTime_;         //!< the smoothed system time
     double startTime_;                  //!< when was the last game started?
     nAverager startTimeOffset_;         //!< the smoothed average of this averager is added to the start time on the client
+    nAverager  startTimeDrift_;         //!< drift of effective start time
     REAL startTimeSmoothedOffset_;      //!< the smoothed average of startTimeOffset_
     nAverager qualityTester_;           //!< averager that tells us about the quality of the sync messages
+    
+    REAL lastStartTime_;                //!< last received start time
+    REAL lastRemoteTime_;               //!< last received time
 
     // the current game time is always smoothedSystemTime_ - ( startTime_ + startTimeSmoothedOffset_ ).
 

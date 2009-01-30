@@ -1359,10 +1359,7 @@ public:
 protected:
     virtual bool DoFillFromMessage( nMessage& m )
     {
-        // should never be called on the client
-        tASSERT( sn_GetNetState() != nCLIENT );
-
-        // deletage
+        // delegate
         bool ret = eVoteItemHarm::DoFillFromMessage( m );
 
         // fill in description
