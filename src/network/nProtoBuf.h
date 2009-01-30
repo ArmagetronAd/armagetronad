@@ -35,9 +35,16 @@ typedef google::protobuf::Message nProtoBuf;
 
 namespace Network{ class nNetObjectInit; }
 
+#include "tMemManager.h"
+
 #include "nNetwork.h"
+#include "nNetObject.h"
+
 class nNetObject;
 class nNetObjectRegistrar;
+
+class nBinaryReader;
+class nBinaryWriter;
 
 #include <map>
 #include <deque>
@@ -45,14 +52,44 @@ class nNetObjectRegistrar;
 
 extern nVersionFeature sn_protoBuf;
 
-//! fills a message with a protocol buffer
-class nMessageFillerProtoBufBase: public nMessageFiller
+class nProtoBufDescriptorBase;
+template< class PROTOBUF >
+class nProtoBufDescriptor;
+
+//! header structure of a ProtoBuf message
+struct nProtoBufHeader
+{
+    unsigned int   len; //! the length of the buffer
+    unsigned short messageID;  //! message ID
+    unsigned short cacheRef; //! reference to cache base message
+
+    nProtoBufHeader()
+    : len(0), messageID(0), cacheRef(0)
+    {}
+
+    // read/write functions
+    void Write( nBinaryWriter & writer );
+    void Read ( nBinaryReader & reader );
+};
+
+//! protocol buffer message
+class nProtoBufMessageBase: public nMessageBase
 {
 public:
+    nProtoBufMessageBase( nDescriptorBase const & descriptor )
+    : nMessageBase( descriptor )
+    {}
+
     //! returns the wrapped protcol buffer
     inline nProtoBuf const & GetProtoBuf() const
     {
         return DoGetProtoBuf();
+    }
+
+    //! returns the wrapped protcol buffer
+    inline nProtoBuf & AccessProtoBuf()
+    {
+        return DoAccessProtoBuf();
     }
 
     //! returns a temporary work protocol buffer
@@ -61,26 +98,58 @@ public:
         return DoAccessWorkProtoBuf();
     }
 
+    /*
+    //! returns a descriptor for 
+    inline int GetStreamDescriptorID() const
+    {
+        return DoGetStreamDescriptorID();
+    }
+    */
+
+    //! returns the descriptor
+    nProtoBufDescriptorBase const & GetDescriptor() const;
 protected:
     //! fills the receiving buffer with data
-    virtual int OnFill(  FillArguments & arguments ) const;
+    virtual int OnWrite( WriteArguments & arguments ) const;
 
+    //! reads data from network buffer
+    virtual void OnRead( unsigned char const * & buffer, unsigned char const * end );
 private:
+    // approximate size of the message in bytes
+    virtual int Size() const;
+
     //! returns the wrapped protcol buffer
     virtual nProtoBuf const & DoGetProtoBuf() const = 0;
 
     //! returns the wrapped protcol buffer
+    virtual nProtoBuf & DoAccessProtoBuf() = 0;
+
+    //! returns the wrapped work protcol buffer
     virtual nProtoBuf & DoAccessWorkProtoBuf() const = 0;
+
+    /*
+    //! returns a descriptor for 
+    virtual int GetStreamDescriptorID() const
+    {
+        return DoGetStreamDescriptorID();
+    }
+    */
 
     //! dummy message used to cache raw data in old message format
     mutable tJUST_CONTROLLED_PTR< nStreamMessage > oldFormat_;
 };
 
-//! implementation for each protocl buffer 
+//! implementation for each protocol buffer type
 template< class PROTOBUF > 
-class nMessageFillerProtoBuf: public nMessageFillerProtoBufBase
+class nProtoBufMessage: public nProtoBufMessageBase
 {
 public:
+    explicit nProtoBufMessage( nProtoBufDescriptor< PROTOBUF > const & descriptor )
+    : nProtoBufMessageBase( descriptor )
+    , descriptor_( descriptor )
+    {
+    }
+
     //! returns the wrapped protcol buffer
     inline PROTOBUF const & GetProtoBuf() const
     {
@@ -98,6 +167,19 @@ public:
     {
         return workProtoBuf_;
     }
+
+    inline nProtoBufDescriptor< PROTOBUF > const & GetDescriptor() const
+    {
+        return descriptor_;
+    }
+protected:
+    //! handles the message
+    virtual void OnHandle()
+    {
+        nSenderInfo senderInfo( *this );
+        GetDescriptor().Handle( GetProtoBuf(), senderInfo );
+    }
+
 private:
     //! returns the wrapped protcol buffer
     virtual nProtoBuf const & DoGetProtoBuf() const
@@ -106,10 +188,25 @@ private:
     }
 
     //! returns the wrapped protcol buffer
+    virtual nProtoBuf & DoAccessProtoBuf()
+    {
+        return protoBuf_;
+    }
+
+    //! returns the wrapped work protcol buffer
     virtual nProtoBuf & DoAccessWorkProtoBuf() const
     {
         return workProtoBuf_;
     }
+
+    //! returns the descriptor
+    virtual nProtoBufDescriptor< PROTOBUF > const & DoGetDescriptor() const
+    {
+        return descriptor_;
+    }
+
+    //! the descriptor
+    nProtoBufDescriptor< PROTOBUF > const & descriptor_;
 
     //! the wrapped buffer
     PROTOBUF protoBuf_;
@@ -119,7 +216,7 @@ private:
 };
 
 template< class PROTOBUF >
-PROTOBUF nMessageFillerProtoBuf< PROTOBUF >::workProtoBuf_;
+PROTOBUF nProtoBufMessage< PROTOBUF >::workProtoBuf_;
 
 //! extra information about the sender of a message
 struct nSenderInfo
@@ -162,23 +259,11 @@ public:
         DoStreamFrom( in, out );
     }
 
-    //! puts a filler into a message, taking ownership of it
-    nMessage * Transform( nMessageFillerProtoBufBase * filler ) const;
-
     //! dumb streaming from message, static version
     static void StreamFromStatic( nStreamMessage & in, nProtoBuf & out  );
 
     //! dumb streaming to message, static version
     static inline void StreamToStatic( nProtoBuf const & in, nStreamMessage & out );
-
-    //! selective reading message, either embedded or transformed
-    void ReadMessage( nMessageBase & in, nProtoBuf & out, nProtoBuf & work  ) const;
-
-    //! creates a protocol buffer of the managed type. Needs to be deleted later.
-    inline nProtoBuf * Create2() const
-    {
-        return DoCreate();
-    }
 
     //! compares two messages, filling in total size and difference.
     static void EstimateMessageDifference( nProtoBuf const & a,
@@ -205,11 +290,20 @@ public:
     
     // flag that marks protocol buffer messages
     static const unsigned short protoBufFlag = 0x8000;
+
+    //! creates a message
+    nProtoBufMessageBase * CreateMessage() const
+    {
+        return DoCreateMessage();
+    }
 protected:
     static DescriptorMap const & GetDescriptorsByName();
 
 private:
     static DescriptorMap descriptorsByName;
+
+    //! creates a message
+    virtual nProtoBufMessageBase * DoCreateMessage() const = 0;
 
     //! dumb streaming to message
     virtual void DoStreamTo( nProtoBuf const & in, nStreamMessage & out ) const;
@@ -222,65 +316,88 @@ private:
 
     //! dumb streaming to message, static version
     static void StreamToDefault( nProtoBuf const & in, nStreamMessage & out );
+};
 
-    //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
-    virtual nProtoBuf * DoCreate() const = 0;
+// network object descriptors
+class nOProtoBufDescriptorBase
+{
+public:
+    virtual ~nOProtoBufDescriptorBase();
+
+    //! writes sync message
+    inline nMessageBase * WriteSync( nNetObject & object, bool create ) const
+    {
+        return DoWriteSync( object, create );
+    }
+
+    //! writes sync message, old style (for subclasses)
+    inline void WriteSync( nNetObject & object, nStreamMessage & stream, bool create ) const
+    {
+        return DoWriteSync( object, stream, create );
+    }
+
+    //! reads from old style sync message
+    inline void ReadSync( nNetObject & object, nStreamMessage & stream, bool create ) const
+    {
+        return DoReadSync( object, stream );
+    }
+
+    /*
+    //! creates a message
+    nProtoBufMessageBase * CreateMessage() const
+    {
+        return DoCreateMessage();
+    }
+    */
+protected:
+    // fetches the network object ID from a creation message
+    template< class PROTOBUF >
+    static unsigned int GetObjectID( PROTOBUF const & message )
+    {
+        tASSERT( message.has_base() );
+        return GetObjectID( message.base() );
+    }
+
+    static unsigned int GetObjectID ( Network::nNetObjectSync const & message );
+
+    //! checks to run before creating a new object
+    static bool PreCheck( unsigned short id, nSenderInfo sender );
+
+    //! checks to run after creating a new object
+    static void PostCheck( nNetObject * object, nSenderInfo sender );
+private:
+    //! writes a sync message
+    virtual nMessageBase * DoWriteSync( nNetObject & object, bool create ) const = 0;
+
+    //! reads an old sync message
+    virtual void DoReadSync( nNetObject & object, nStreamMessage & envelope ) const = 0;
+
+    //! writes into an old sync message
+    virtual void DoWriteSync( nNetObject & object, nStreamMessage & envelope, bool create ) const = 0;
+
+    //! creates a message
+    // virtual nProtoBufMessageBase * DoCreateMessage() const = 0;
 };
 
 // templated version of protocol buffer messages
 template< class PROTOBUF > 
 class nProtoBufDescriptor: public nProtoBufDescriptorBase
 {
-    typedef void Handler( PROTOBUF & message, nSenderInfo const & sender );
-
-    typedef nMessageFillerProtoBuf< PROTOBUF > Filler;
-
-    //! instance of this descriptor
-    static nProtoBufDescriptor * instance_;
-
-#ifdef DEBUG
-    bool multipleInstances_;
-#endif
-
-    //! function actually handling the incoming message
-    Handler * handler_;
-
-    //! delegates message handling
-    virtual void DoHandleMessage( nMessageBase & envelope )
-    {
-        // read into protocol buffer
-        Filler * filler = new Filler;
-        envelope.SetFiller( filler );
-
-        ReadMessage( envelope, filler->AccessProtoBuf(), filler->AccessWorkProtoBuf() );
-
-        // and delegate
-        handler_( filler->AccessProtoBuf(), nSenderInfo( envelope ) );
-    }
-
-    //! creates a protocol buffer of the managed tpye. Needs to be deleted later.
-    virtual nProtoBuf * DoCreate() const
-    {
-        tASSERT(0);
-
-        return new PROTOBUF;
-    }
 public:
-    using nProtoBufDescriptorBase::Transform;
+    typedef void Handler( PROTOBUF const & message, nSenderInfo const & sender );
 
     //! puts a puffer into a message
-    nMessage * Transform( PROTOBUF const & protoBuf ) const
+    nMessageBase * Transform( PROTOBUF const & protoBuf ) const
     {
         // pack buffer into a message filler
-        Filler * filler = new Filler;
-        filler->AccessProtoBuf() = protoBuf;
-
-        // and delegate
-        return Transform( filler );
+        nProtoBufMessage< PROTOBUF > * m = CreateMessage();
+        m->AccessProtoBuf() = protoBuf;
+        
+        return m;
     }
 
     //! puts a puffer into a message
-    static nMessage * TransformStatic( PROTOBUF const & message )
+    static nMessageBase * TransformStatic( PROTOBUF const & message )
     {
         tASSERT( instance_ );
 
@@ -301,67 +418,47 @@ public:
 #endif
         instance_ = this;
     }
+    
+    void Handle( PROTOBUF const & message, nSenderInfo const & sender ) const
+    {
+        tASSERT( handler_ );
+        handler_( message, sender );
+    }
+    
+    //! creates a message
+    inline nProtoBufMessage< PROTOBUF > * CreateMessage() const
+    {
+        return tNEW(nProtoBufMessage< PROTOBUF >)( *this );
+    }
+    
+private:
+    //! instance of this descriptor
+    static nProtoBufDescriptor * instance_;
+    
+#ifdef DEBUG
+    bool multipleInstances_;
+#endif
+    
+    //! function actually handling the incoming message
+    Handler * handler_;
+    
+    //! creates a message
+    virtual nProtoBufMessageBase * DoCreateMessage() const
+    {
+        return CreateMessage();
+    }
 };
-
-//! instance of this descriptor
-template< class PROTOBUF > 
-nProtoBufDescriptor< PROTOBUF > * nProtoBufDescriptor< PROTOBUF >::instance_ = 0;
 
 // create a message from a pattern buffer
 template< class PROTOBUF >
-nMessage * nMessage::Transform( PROTOBUF const & message )
+nMessageBase * nMessage::Transform( PROTOBUF const & message )
 {
     return nProtoBufDescriptor< PROTOBUF >::TransformStatic( message );
 }
 
-// network object descriptors
-class nOProtoBufDescriptorBase
-{
-public:
-    virtual ~nOProtoBufDescriptorBase();
-
-    //! creates an initialization message for an object
-    inline nMessageBase * WriteInit( nNetObject & object ) const
-    {
-        return DoWriteInit( object );
-    }
-
-    //! writes sync message
-    inline void WriteSync( nNetObject & object, nMessageBase & message ) const
-    {
-        return DoWriteSync( object, message );
-    }
-
-    //! reads a sync message
-    inline void ReadSync( nNetObject & object, nMessageBase & envelope ) const
-    {
-        return DoReadSync( object, envelope );
-    }
-protected:
-    // fetches the network object ID from a creation message
-    template< class PROTOBUF >
-    static unsigned int GetObjectID( PROTOBUF const & message )
-    {
-        return GetObjectID( message.base() );
-    }
-
-    static unsigned int GetObjectID ( Network::nNetObjectInit const & message );
-
-    //! checks to run before creating a new object
-    static bool PreCheck( unsigned short id, nSenderInfo sender );
-
-    //! checks to run after creating a new object
-    static void PostCheck( nNetObject * object, nSenderInfo sender );
-private:
-    //! creates an initialization message for an object
-    virtual nMessageBase * DoWriteInit( nNetObject & object ) const = 0;
-
-    //! writes a sync message
-    virtual void DoWriteSync( nNetObject & object, nMessageBase & message ) const = 0;
-
-    //! reads a sync message
-    virtual void DoReadSync( nNetObject & object, nMessageBase & envelope ) const = 0;
-};
+//! instance of this descriptor
+template< class PROTOBUF > 
+nProtoBufDescriptor< PROTOBUF > * nProtoBufDescriptor< PROTOBUF >::instance_ = 0;
 
 //! specialization of descriptor for each network object class
 template< class OBJECT, class PROTOBUF >
@@ -370,104 +467,106 @@ class nOProtoBufDescriptor: public nOProtoBufDescriptorBase, public nProtoBufDes
 public:
     nOProtoBufDescriptor( int identification )
     : nOProtoBufDescriptorBase()
-    , nProtoBufDescriptor< PROTOBUF >( identification, &HandleCreation, false )
+    , nProtoBufDescriptor< PROTOBUF >( identification, &HandleIncoming, false )
     {}
 private:
     // template message
     static const PROTOBUF prototype;
 
-    static void HandleCreation( PROTOBUF & message, nSenderInfo const & sender )
+    static void HandleCreation( PROTOBUF const & message, nSenderInfo const & sender )
     {
-        unsigned short id = GetObjectID( message.init() );
+        unsigned short id = GetObjectID( message );
         
         if( PreCheck( id, sender ) )
         {
             nNetObjectRegistrar registrar;
-            tJUST_CONTROLLED_PTR< OBJECT > n=new OBJECT( message.init(), message.sync(), sender );
+            tJUST_CONTROLLED_PTR< OBJECT > n=tNEW(OBJECT)( message, sender );
             n->InitAfterCreation();
-            n->ReadSync( message.sync(), sender );
+            n->ReadSync( message, sender );
             n->Register( registrar );
             
             PostCheck( n, sender );
         }
     }
 
-    //! writes sync, true work
-    template< class SYNC >
-    void DoWriteSync( nNetObject & object, nMessageBase & message, SYNC const & ) const
+    static void HandleIncoming( PROTOBUF const & message, nSenderInfo const & sender )
     {
-        typedef nMessageFillerProtoBuf< SYNC > Filler;
-        Filler * filler = new Filler;
-        message.SetFiller( filler );
+        unsigned short id = GetObjectID( message );
+        OBJECT * object;
+        nNetObject::IDToPointer( id, object );
+        if ( object )
+        {
+            object->ReadSync( message, sender );
+        }
+        else
+        {
+            HandleCreation( message, sender );
+        }
+    }
+
+    //! reads sync, true work
+    void DoReadSync( nNetObject & object, nProtoBufMessage< PROTOBUF > & envelope ) const
+    {
+        // cast to correct type
+        tASSERT( dynamic_cast< OBJECT * >( &object ) );
+        OBJECT & cast = static_cast< OBJECT & >( object );
+
+        // read sync from message
+        PROTOBUF & sync = envelope->AccessProtoBuf();
+
+        // transfer sync to message
+        ReadMessage( envelope, sync, envelope->AccessWorkProtoBuf() );
+
+        // delegate to object
+        cast.ReadSync( sync, nSenderInfo( envelope ) );
+    }
+
+    //! creates a message
+    nProtoBufMessage< PROTOBUF > * CreateMessage() const
+    {
+        return tNEW(nProtoBufMessage< PROTOBUF >)( *this );
+    }
+
+private:
+    //! writes sync, true work
+    nMessageBase * DoWriteSync( nNetObject & object, bool create ) const
+    {
+        nProtoBufMessage< PROTOBUF > * message = this->CreateMessage();
 
         // cast to correct type
         tASSERT( dynamic_cast< OBJECT * >( &object ) );
         OBJECT & cast = static_cast< OBJECT & >( object );
 
         // write sync
-        SYNC & sync = filler->AccessProtoBuf();
-        cast.WriteSync( sync );
-    }
+        PROTOBUF & sync = message->AccessProtoBuf();
+        cast.WriteSync( sync, create );
 
-    //! reads sync, true work
-    template< class SYNC >
-    void DoReadSync( nNetObject & object, nMessageBase & envelope, SYNC const & ) const
-    {
-        typedef nMessageFillerProtoBuf< SYNC > Filler;
-        Filler * filler = new Filler;
-        envelope.SetFiller( filler );
-
-        // cast to correct type
-        tASSERT( dynamic_cast< OBJECT * >( &object ) );
-        OBJECT & cast = static_cast< OBJECT & >( object );
-
-        // read sync from message
-        SYNC & sync = filler->AccessProtoBuf();
-
-        // transfer sync to message
-        ReadMessage( envelope, sync, filler->AccessWorkProtoBuf() );
-
-        // delegate to object
-        cast.ReadSync( sync, nSenderInfo( envelope ) );
-    }
-
-    //! creates an initialization message for an object
-    virtual nMessageBase * DoWriteInit( nNetObject & object ) const
-    {
-        typedef nMessageFillerProtoBuf< PROTOBUF > Filler;
-        
-        // init message
-        Filler * filler = new Filler;
-        PROTOBUF & protoBuf = filler->AccessProtoBuf();
-        
-        // object cast to correct type
-        tASSERT( dynamic_cast< OBJECT * >( &object ) );
-        OBJECT & cast = static_cast< OBJECT & >( object );
-        
-        // work
-        cast.WriteInit( *protoBuf.mutable_init() );
-        cast.WriteSync( *protoBuf.mutable_sync() );
-        
-        // and transform
-        return Transform( filler );
-    }
-
-    //! creates an sync message for an object
-    virtual void DoWriteSync( nNetObject & object, nMessageBase & message ) const
-    {
-        DoWriteSync( object, message, prototype.sync() );
+        return message;
     }
 
     //! reads a sync message
-    virtual void DoReadSync( nNetObject & object, nMessageBase & envelope ) const
+    virtual void DoReadSync( nNetObject & object, nStreamMessage & envelope ) const
     {
-        DoReadSync( object, envelope, prototype.sync() );
+        tASSERT(0);
+    }
+
+    //! writes into an old sync message
+    virtual void DoWriteSync( nNetObject & object, nStreamMessage & envelope, bool create ) const
+    {
+        tASSERT(0);
+    }
+    
+    virtual nProtoBufMessageBase* DoCreateMessage() const
+    {
+        return CreateMessage();
     }
 };
 
 // template message
 template< class OBJECT, class PROTOBUF >
 const PROTOBUF nOProtoBufDescriptor< OBJECT, PROTOBUF >::prototype;
+
+#endif
 
 //! one cache for every protobuf descriptor
 class nMessageCacheByDescriptor
@@ -477,7 +576,7 @@ class nMessageCacheByDescriptor
     friend class nMessageCache;
 
     //! queue of cached messages
-    typedef std::deque< tJUST_CONTROLLED_PTR< nMessageBase > > CacheQueue;
+    typedef std::deque< tJUST_CONTROLLED_PTR< nProtoBufMessageBase > > CacheQueue;
     CacheQueue queue_;
 };
 
@@ -488,6 +587,9 @@ class nMessageCache
 public:
     //! clears the cache
     void Clear();
+
+    //! adds a message to the cache
+    void AddMessage( nProtoBufMessageBase * message, bool incoming, bool reallyAdd = true );
 
     //! adds a message to the cache
     void AddMessage( nMessageBase * message, bool incoming, bool reallyAdd = true );
@@ -504,5 +606,3 @@ private:
     typedef std::map< google::protobuf::Descriptor const *, nMessageCacheByDescriptor > CacheMap;
     CacheMap parts;
 };
-
-#endif

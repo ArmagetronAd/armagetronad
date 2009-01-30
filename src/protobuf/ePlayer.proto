@@ -16,15 +16,6 @@ message Chat
     optional bool legacy_message_end_marker = 20000;
 }
 
-message ePlayerNetIDInit
-{
-    // base class init data
-    optional Network.nNetObjectInit base = 1;
-
-    // legacy message end marker, extensions go after it
-    optional bool legacy_message_end_marker = 20000;
-}
-
 // color used by players. values go from 0 to 15.
 message ePlayerColor
 {
@@ -38,8 +29,11 @@ message ePlayerColor
 
 message ePlayerNetIDSync
 {
-    // base class sync data
+    // base class init data
     optional Network.nNetObjectSync base = 1;
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
 
     optional ePlayerColor color     = 2;
     optional uint32 ping_charity    = 3;
@@ -55,11 +49,5 @@ message ePlayerNetIDSync
     optional string team_name       = 13;
 
     // legacy message end marker, extensions go after it
-    optional bool legacy_message_end_marker = 20000;
-}
-
-message ePlayerNetIDTotal
-{
-    optional ePlayerNetIDInit init = 1;
-    optional ePlayerNetIDSync sync = 2;
+    optional bool legacy_message_end_marker2 = 20001;
 }

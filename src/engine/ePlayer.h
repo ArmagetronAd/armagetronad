@@ -47,7 +47,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <set>
 #include <list>
 
-namespace Engine{ class ePlayerNetIDInit; class ePlayerNetIDSync; }
+namespace Engine{ class ePlayerNetIDSync; }
 
 #define PLAYER_CONFITEMS (30+MAX_INSTANT_CHAT)
 
@@ -274,13 +274,11 @@ public:
     virtual bool			ClearToTransmit(int user) const;
 
     //! creates a netobject form sync data
-    ePlayerNetID( Engine::ePlayerNetIDInit const &, Engine::ePlayerNetIDSync const &, nSenderInfo const & );
-    //! reads incremental sync data
-    void ReadSync( Engine::ePlayerNetIDSync const &, nSenderInfo const & );
-    //! writes initialization data
-    void WriteInit( Engine::ePlayerNetIDInit & );
-    //! writes sync data
-    void WriteSync( Engine::ePlayerNetIDSync & );
+    ePlayerNetID( Engine::ePlayerNetIDSync const &, nSenderInfo const & );
+    //! reads incremental sync data. Returns false if sync was invalid or old.
+    bool ReadSync( Engine::ePlayerNetIDSync const &, nSenderInfo const & );
+    //! writes sync data (and initialization data if flat is set)
+    void WriteSync( Engine::ePlayerNetIDSync &, bool init );
 
 private:
     //! returns the descriptor responsible for this class

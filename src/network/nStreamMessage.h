@@ -44,6 +44,8 @@ protected:
 
     unsigned int readOut;
 
+    nDescriptorBase const & descriptor_;
+
     ~nStreamMessage();
 public:
     unsigned short DataLen() const{
@@ -64,9 +66,7 @@ public:
 #endif
     }
 
-    nStreamMessage( const nDescriptorBase & );  // create a new message
-    nStreamMessage(unsigned char const * & buffer, short sn_myNetID, unsigned char const * end );
-    // read a message from the network stream
+    explicit nStreamMessage( const nDescriptorBase & );  // create a new message
 
     void Write(const unsigned short &x){
         // can't write to a reading message, or one that was finalized
@@ -77,7 +77,7 @@ public:
 
     //! create a message from a pattern buffer
     template< class MESSAGE >
-    static nMessage * Transform( MESSAGE const & message );
+    static nMessageBase * Transform( MESSAGE const & message );
 
     nMessage& operator<< (const REAL &x);
     nMessage& operator>> (REAL &x);
@@ -176,6 +176,24 @@ public:
 
         return *this;
     }
+
+    inline nDescriptorBase const & GetDescriptor() const
+    {
+        return descriptor_;
+    }
+protected:
+    //! handle this message
+    virtual void OnHandle();
+
+    //! fills the receiving buffer with data
+    //!  @return descriptor ID to fill in
+    virtual int OnWrite( WriteArguments & arguments ) const;
+
+    //! reads data from network buffer
+    virtual void OnRead( unsigned char const * & buffer, unsigned char const * end );
+
+    //! returns the descriptor
+    virtual nDescriptorBase const & DoGetDescriptor() const;
 };
 
 // read/write operators for versions

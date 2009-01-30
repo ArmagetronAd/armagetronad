@@ -386,7 +386,7 @@ extern int sn_myNetID; // our network identification:  0: server
 
 // Network messages and functions that know how to handle them:
 
-// basic network message descriptor.
+// basic network message descriptor; describes a message type.
 class nDescriptorBase:public tListItem<nDescriptorBase>
 {
     friend class nMessageBase;
@@ -395,14 +395,16 @@ class nDescriptorBase:public tListItem<nDescriptorBase>
 
     tString name;          //!< our name
 
-    const bool acceptWithoutLogin;
-
-    virtual void DoHandleMessage( nMessageBase & message ) = 0;
+    const bool acceptWithoutLogin; //!< if true, messages of this type will be accepted from unconnected clients
 public:
     nDescriptorBase(unsigned short identification, const char *name, bool acceptEvenIfNotLoggedIn = false);
     virtual ~nDescriptorBase();
 
-    static void HandleMessage( nMessageBase &message );
+    //! reads a message from a data buffer
+    static tJUST_CONTROLLED_PTR< nMessageBase > CreateMessage( unsigned char const * & data, unsigned char const * end, int sender );
+
+    //! creates a message of this type for sending
+    nMessageBase * CreateMessage() const;
 
     tString const & GetName()
     {
@@ -412,6 +414,13 @@ public:
     unsigned short ID() const{
         return id;
     }
+
+private:
+    //! creates a message
+    nMessageBase * CreateReceivedMessage() const;
+
+    //! creates a message
+    virtual nMessageBase * DoCreateMessage() const = 0;
 };
 
 typedef void nHandler( nMessage &m );
@@ -419,14 +428,21 @@ typedef void nHandler( nMessage &m );
 // old descriptor for streaming messages
 class nDescriptor: public nDescriptorBase
 {
+    friend class nStreamMessage;
+
     nHandler *handler;  // function responsible for our type of message
 
-    virtual void DoHandleMessage( nMessageBase & message );
 public:
     nDescriptor(unsigned short identification,nHandler *handle,
                 const char *name, bool acceptEvenIfNotLoggedIn = false);
 
     ~nDescriptor();
+
+    //! creates a message for sending
+    nStreamMessage * CreateMessage() const;
+private:
+    //! creates a message
+    virtual nMessageBase * DoCreateMessage() const;
 };
 
 // register the routine that gives the peer the server/client information
@@ -435,37 +451,6 @@ void RequestInfoHandler(nHandler *handle);
 
 // the first sn_myNetID available for external use (give some room!)
 #define NET_ID_FIRST 100
-
-//! Message fillers. Fill messages with data at the time they're written.
-class nMessageFiller: public tReferencable< nMessageFiller >
-{
-    friend class tControlledPTR< nMessageFiller >;
-    friend class tReferencable< nMessageFiller >;
-public:
-    // arguments passed to fill fucntion
-    struct FillArguments
-    {
-        nSendBuffer::Buffer & buffer_; // buffer to write to
-        nMessageBase & message_;       // the message that is written
-        int receiver_;                 // designated receiver of the buffer
-
-        // write one data element, a short.
-        void Write( unsigned short data );
-
-        FillArguments( nSendBuffer::Buffer & buffer, nMessage & message, int receiver );
-    };
-
-    inline int Fill( FillArguments & arguments ) const
-    {
-        return OnFill( arguments );
-    }
-protected:
-    //! fills the receiving buffer with data
-    //  return value: descriptor ID
-    virtual int OnFill( FillArguments & arguments ) const = 0;
-    virtual ~nMessageFiller();
-};
-
 
 // Network messages. Allways to be created with new, get deleted automatically.
 class nMessageBase: public tReferencable< nMessageBase >{
@@ -478,23 +463,20 @@ class nMessageBase: public tReferencable< nMessageBase >{
     friend class nNetObject;
     friend class nWaitForAck;
 
+    nMessageBase( const nMessageBase & );
 protected:
-    unsigned short descriptor;    //!< the network message type id
-    // unsigned short messageID_; //!< the network message id, every message gets its own (up to overflow)
+    unsigned short descriptorID_;  //!< the network message type id
     unsigned long messageIDBig_;  //!< uniquified message ID, the last 16 bits are the same as messageID_
-    short          senderID;      //!< sender's identification
-
-    // TODO: turn into virtual functions of message itself
-    tJUST_CONTROLLED_PTR< nMessageFiller > filler_; //!< extra object appending data to the message.
+    short          senderID_;      //!< sender's identification
 
     virtual ~nMessageBase();
 public:
-    unsigned short Descriptor() const{
-        return descriptor;
+    unsigned short DescriptorID() const{
+        return descriptorID_;
     }
 
     unsigned short SenderID() const{
-        return senderID;
+        return senderID_;
     }
 
     unsigned short MessageID() const{
@@ -505,16 +487,6 @@ public:
         return messageIDBig_;
     }
 
-    nMessageFiller * GetFiller() const
-    {
-        return filler_;
-    }
-
-    void SetFiller( nMessageFiller * filler )
-    {
-        filler_ = filler;
-    }
-
     // approximate size of the message in bytes
     virtual int Size() const = 0;
 
@@ -522,8 +494,7 @@ public:
         messageIDBig_ = 0;
     }
 
-    nMessageBase( const nDescriptorBase & );  //!< create a new message
-    nMessageBase();                           //!< default constructor
+    explicit nMessageBase( const nDescriptorBase & );  //!< create a new message
 
     // immediately send the message WITHOUT the queue; dangerous!
     void SendImmediately(int peer,bool ack=true);
@@ -540,7 +511,58 @@ public:
 
     // put the message into the send heap
     void Send(int peer,REAL priority=0,bool ack=true);
+
+    //! handle this message
+    void Handle();
+
+    // arguments passed to fill fucntion
+    struct WriteArguments
+    {
+        nSendBuffer::Buffer & buffer_; // buffer to write to
+        int receiver_;                 // designated receiver of the buffer
+
+        // write one data element, a short.
+        void Write( unsigned short data );
+
+        WriteArguments( nSendBuffer::Buffer & buffer, int receiver );
+    };
+
+    //! fills the receiving buffer with data
+    inline int Write( WriteArguments & arguments ) const
+    {
+        return OnWrite( arguments );
+    }
+
+    //! reads data from network buffer
+    void Read( unsigned char const * & buffer, unsigned char const * end )
+    {
+        OnRead( buffer, end );
+    }
+
+    //! returns the descriptor
+    nDescriptorBase const & GetDescriptor() const
+    {
+        return DoGetDescriptor();
+    }
+protected:
+    //! handle this message
+    virtual void OnHandle() = 0;
+
+    //! fills the receiving buffer with data
+    //!  @return descriptor ID to fill in
+    virtual int OnWrite( WriteArguments & arguments ) const = 0;
+
+    //! reads data from network buffer
+    virtual void OnRead( unsigned char const * & buffer, unsigned char const * end ) = 0;
+
+private:
+    //! returns the descriptor
+    virtual nDescriptorBase const & DoGetDescriptor() const = 0;
 };
+
+//! expands a short message ID to a full int message ID, assuming it is from a message that was
+//! just received.
+unsigned long int sn_ExpandMessageID( unsigned short id, unsigned short sender );
 
 // the class that is responsible for getting acknowleEdgement for
 // netmessages
@@ -627,7 +649,7 @@ public:
 
     nCallbackAcceptPackedWithoutConnection(BOOLRETFUNC *f);
 
-    static bool Accept( const nMessage& m );
+    static bool Accept( const nMessageBase& m );
 };
 
 class nCallbackReceivedComplete: public tCallback

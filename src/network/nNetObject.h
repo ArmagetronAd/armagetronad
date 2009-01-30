@@ -37,7 +37,9 @@ class nObserver;
 
 class nSenderInfo;
 class nOProtoBufDescriptorBase;
-namespace Network{ class nNetObjectInit; class nNetObjectSync; }
+class nProtoBufDescriptorBase;
+
+namespace Network{ class nNetObjectSync; }
 
 // checks whether n is newer than old; if so, old is set to n and
 // true is returned.
@@ -101,15 +103,16 @@ public:
             acksPending=0;
         }
     };
-protected:
 
-    nKnowsAboutInfo knowsAbout[MAXCLIENTS+2];
-
-    nNetObject *Object(int i);
+    static nNetObject *Object(int i);
     // returns a pointer to the nNetObject
     // with id=i. If that does not exist yet, wait for it to spawn,
     // or, on the server, kill the person responsible.
     // should be only called in constructors.
+
+protected:
+
+    nKnowsAboutInfo knowsAbout[MAXCLIENTS+2];
 
     void DoBroadcastExistence();
 public:
@@ -248,8 +251,9 @@ public:
     // equals to 0 and do nothing otherwise.
 
     // these functions handle the process. Note that they are non-virtual.
-    void WriteAll( nMessage & m, bool create );
-    void ReadAll ( nMessage & m, bool create );
+    nMessageBase * WriteAll();
+    void WriteAll( nStreamMessage & message, bool create );
+    void ReadAll ( nStreamMessage & message, bool create );
 
     // turn an ID into an object pointer
     template<class T>  static void IDToPointer( unsigned short id, T * & p )
@@ -297,13 +301,11 @@ public:
     // even better new stuff: protocol buffers. The functions are non-virtual; they
     // get called over the descriptor:
     //! creates a netobject form sync data
-    nNetObject( Network::nNetObjectInit const &, Network::nNetObjectSync const &, nSenderInfo const & );
-    //! reads incremental sync data
-    void ReadSync( Network::nNetObjectSync const &, nSenderInfo const & );
-    //! writes initialization data
-    void WriteInit( Network::nNetObjectInit & ) const;
-    //! writes sync data
-    void WriteSync( Network::nNetObjectSync & ) const;
+    nNetObject( Network::nNetObjectSync const &, nSenderInfo const & );
+    //! reads sync data, returns false if sync was old or otherwise invalid
+    bool ReadSync( Network::nNetObjectSync const &, nSenderInfo const & );
+    //! writes sync data (and initialization data if flag is set)
+    void WriteSync( Network::nNetObjectSync &, bool init ) const;
 
     //! returns the descriptor responsible for this class
     inline nOProtoBufDescriptorBase const * GetDescriptor() const { return DoGetDescriptor(); }

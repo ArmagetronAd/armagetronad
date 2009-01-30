@@ -26,6 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
+#define XXX
+
 #include "nProtoBuf.h"
 #include "tConsole.h"
 #include "nNetObject.h"
@@ -55,8 +57,87 @@ typedef nProtoBuf::Reflection Reflection;
 #define REFLECTION_CONST Reflection const
 #endif
 
+enum HeaderFlags
+{
+    FLAG_MessageID = 1,
+    FLAG_CacheRef  = 2,
+    FLAG_Unknown   = ~3
+};
+
+void nProtoBufHeader::Write( nBinaryWriter & writer )
+{
+    unsigned char flags = 
+    ( messageID > 0 ? FLAG_MessageID : 0 ) |
+    ( cacheRef  > 0 ? FLAG_CacheRef  : 0 );
+
+    // write variable data
+    writer.WriteByte( flags );
+    if ( messageID > 0 )
+    {
+        writer.WriteShort( messageID );
+    }
+    if ( cacheRef > 0 )
+    {
+        if ( messageID > 0 )
+        {
+            // write a relative reference
+            short relative = messageID - cacheRef;
+
+            // yeah, writing the signed value as unsigned is
+            // on purpose. Messages can't reference future messages.
+            writer.WriteVarUInt( relative );
+        }
+        else
+        {
+            // write an absolute reference
+            writer.WriteShort( cacheRef );
+        }
+    }
+
+    writer.WriteVarUInt( len );
+}
+
+void nProtoBufHeader::Read( nBinaryReader & reader )
+{
+    // read variable data
+    unsigned char flags = reader.ReadByte();
+    if ( flags & FLAG_Unknown )
+    {
+        // unknown flags, reading will fail
+        nReadError( true );
+    }
+    if( flags & FLAG_MessageID )
+    {
+        messageID = reader.ReadShort();
+    }
+    if( flags & FLAG_CacheRef )
+    {
+        if( flags & FLAG_MessageID )
+        {
+            short relative = reader.ReadVarUInt();
+            cacheRef = messageID - relative;
+        }
+        else
+        {
+            cacheRef = reader.ReadShort();
+        }
+    }
+    
+    len = reader.ReadVarUInt();
+}
+
+//! returns the descriptor
+nProtoBufDescriptorBase const & nProtoBufMessageBase::GetDescriptor() const
+{
+    // we'd use covariant return types, but that only works in one direction,
+    // and nProtoBufDescriptorBase has a covariant return that requires
+    // this class definition to be complete.
+    tASSERT( dynamic_cast< nProtoBufDescriptorBase const * >( &nMessageBase::GetDescriptor() ) );
+    return static_cast< nProtoBufDescriptorBase const & >( nMessageBase::GetDescriptor() );
+}
+
 //! fills the receiving buffer with data
-int nMessageFillerProtoBufBase::OnFill( FillArguments & arguments ) const
+int nProtoBufMessageBase::OnWrite( WriteArguments & arguments ) const
 {
     nProtoBuf const & fullProtoBuf = GetProtoBuf();
 
@@ -64,55 +145,132 @@ int nMessageFillerProtoBufBase::OnFill( FillArguments & arguments ) const
     fullProtoBuf.CheckInitialized();
 #endif
 
-    unsigned short descriptor = arguments.message_.Descriptor();
+    unsigned short descriptor = DescriptorID();
 
-    // does the receiver understand ProtoBufs?a
+    // does the receiver understand ProtoBufs?
     if ( sn_protoBuf.Supported( arguments.receiver_ ) )
     {
-        // yep. Stream them.
+        nBinaryWriter writer( arguments.buffer_ );
 
+        // yep. Stream them.
         // compress message, writing the cache ID
         nProtoBuf & workProtoBuf = AccessWorkProtoBuf();
         nMessageCache & cache = sn_Connections[ arguments.receiver_ ].messageCacheOut_;
-        arguments.Write( cache.CompressProtoBuff( fullProtoBuf, workProtoBuf ) );
+
+        nProtoBufHeader header;
+        header.cacheRef = cache.CompressProtoBuff( fullProtoBuf, workProtoBuf ); 
 
         // dump into plain stringstream
         std::stringstream rw;
         workProtoBuf.SerializeToOstream( &rw );
 
+        // write header data
+        header.len = rw.str().size();
+        header.messageID = MessageID();
+        header.Write( writer );
+
         // write stringstream to message
-        while( !rw.eof() )
+        unsigned int count = header.len;
+        while( count > 0 )
         {
-            unsigned short value = ((unsigned char)rw.get()) << 8;
-            if ( !rw.eof() )
-            {
-                value += (unsigned char)rw.get();
-            }
-            arguments.Write( value );
+            tASSERT( rw.good() );
+            writer.WriteByte( rw.get() );
+            --count;
         }
     }
     else
     {
         // receiver does not understant ProtoBufs. Transform
         // to old style message.
-        static nDescriptor dummy( 0, NULL, "dummy" );
         if ( !oldFormat_ )
         {
+            static nDescriptor dummy( 0, NULL, NULL );
             oldFormat_ = new nMessage( dummy );
-            nProtoBufDescriptorBase::StreamToStatic( fullProtoBuf, *oldFormat_ );
+            GetDescriptor().StreamTo( fullProtoBuf, *oldFormat_ );
         }
 
         // and copy the message contents over.
-        for( int i = 0; i < oldFormat_->DataLen(); ++i )
-        {
-            arguments.Write( oldFormat_->Data(i) );
-        }
+        static_cast< nMessageBase * >( oldFormat_ )->Write( arguments );
 
-        // bend the descriptor
+        // bend the descriptor (TODO: sync messages need more bending)
         descriptor &= ~nProtoBufDescriptorBase::protoBufFlag;
     }
 
     return descriptor;
+}
+
+//! reads data from network buffer if the header was already read
+void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char const * end )
+{
+    if( DescriptorID() & nProtoBufDescriptorBase::protoBufFlag )
+    {
+        // read header
+        nBinaryReader reader( buffer, end );
+        nProtoBufHeader header;
+        header.Read( reader );
+
+        messageIDBig_ = sn_ExpandMessageID( header.messageID, SenderID() );
+        
+        if ( buffer + header.len > end )
+        {
+            nReadError( true );
+        }
+        
+        // read the cache ID
+        unsigned short cacheID = header.cacheRef;
+        
+        nProtoBuf & out = AccessProtoBuf();
+        nProtoBuf & work = AccessWorkProtoBuf();
+        
+        // pre-fill
+        nMessageCache & cache = sn_Connections[ SenderID() ].messageCacheIn_;
+        bool inCache = cacheID && cache.UncompressProtoBuf( cacheID, out );
+        // fill rest of fields
+        
+        if ( inCache )
+        {
+            work.ParsePartialFromArray( buffer, header.len );
+            work.DiscardUnknownFields();
+            
+#ifdef DEBUG_STRINGS
+            con << "Base  : " << out.ShortDebugString() << "\n";
+            con << "Diff  : " << work.ShortDebugString() << "\n";
+#endif
+            
+            out.MergeFrom( work );
+            
+#ifdef DEBUG_STRINGS
+            con << "Merged: " << out.ShortDebugString() << "\n";
+#endif
+        }
+        else
+        {
+            // just read directly
+            out.ParsePartialFromArray( buffer, header.len );
+            out.DiscardUnknownFields();
+        }
+
+        reader.Advance( header.len );
+    }
+    else
+    {
+        // old format, first read it that way, then transform
+        if ( !oldFormat_ )
+        {
+            // read old format
+            static nDescriptor dummy( 0, NULL, NULL );
+            oldFormat_ = new nMessage( dummy );
+            static_cast< nMessageBase * >( oldFormat_ )->Read( buffer, end );
+        }
+
+        // transform
+        GetDescriptor().StreamFrom( *oldFormat_, AccessProtoBuf() );
+    }
+}
+
+int nProtoBufMessageBase::Size() const
+{
+    return GetProtoBuf().ByteSize() + 5;
 }
 
 /*
@@ -131,16 +289,6 @@ std::string const & nProtoBufDescriptorBase::DetermineName( nProtoBuf const & pr
 nProtoBufDescriptorBase::DescriptorMap const & nProtoBufDescriptorBase::GetDescriptorsByName()
 {
     return descriptorsByName;
-}
-
-//! puts a filler into a message, taking ownership of it
-nMessage * nProtoBufDescriptorBase::Transform( nMessageFillerProtoBufBase * filler ) const
-{
-    nMessage * ret = new nMessage( *this );
-    
-    ret->SetFiller( filler );
-    
-    return ret;
 }
 
 nProtoBufDescriptorBase::DescriptorMap nProtoBufDescriptorBase::descriptorsByName;
@@ -325,69 +473,6 @@ void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nMessage & 
         }
     }
 }   
-
-//! selective reading message, either embedded or transformed
-void nProtoBufDescriptorBase::ReadMessage( nMessageBase & in2, nProtoBuf & out, nProtoBuf & work ) const
-{
-    nStreamMessage & in = dynamic_cast< nStreamMessage & >( in2 );
-
-    if ( in.descriptor & protoBufFlag )
-    {
-        // message is a proper protocol buffer message.
-
-        // read the cache ID
-        unsigned short cacheID;
-        in.Read( cacheID );
-
-        // pre-fill
-        nMessageCache & cache = sn_Connections[ in.SenderID() ].messageCacheIn_;
-        bool inCache = cache.UncompressProtoBuf( cacheID, out );
-
-        // fill rest of fields
-
-        // first, read into a string. protobufs ALWAYS take the whole rest of a
-        // message. Luckily, they don't mind a single appended 0 byte.
-        std::stringstream rw;
-        while( !in.End() )
-        {
-            unsigned short value;
-            in.Read( value );
-            rw.put( value >> 8 );
-            rw.put( value & 0xff );
-        }
-
-        // then, read the string into the buffer
-        if ( inCache )
-        {
-            work.ParsePartialFromIstream( &rw );
-
-#ifdef DEBUG_STRINGS
-            con << "Base  : " << out.ShortDebugString() << "\n";
-            con << "Diff  : " << work.ShortDebugString() << "\n";
-#endif
-
-            out.MergeFrom( work );
-
-#ifdef DEBUG_STRINGS
-            con << "Merged: " << out.ShortDebugString() << "\n";
-#endif
-        }
-        else
-        {
-            // just read directly
-            out.ParsePartialFromIstream( &rw );
-        }
-
-        // TODO: optimize. The stream copy should not be required, the data is
-        // already in memory. But first, make it so that the byte order in memory
-        // is already the network byte order, right now, it's the machine's order.
-    }
-    else
-    {
-        // transform from old format
-        StreamFrom( in, out );
-    }
-}
 
 //! compares two messages, filling in total size and difference.
 //! @param a first message
@@ -649,8 +734,12 @@ nMessage& operator << ( nMessage& m, nProtoBuf const & buffer )
 nOProtoBufDescriptorBase::~nOProtoBufDescriptorBase()
 {}
 
-unsigned int nOProtoBufDescriptorBase::GetObjectID ( Network::nNetObjectInit const & message )
+unsigned int nOProtoBufDescriptorBase::GetObjectID ( Network::nNetObjectSync const & message )
 {
+    if( !message.has_object_id() )
+    {
+        nReadError( true );
+    }
     return message.object_id();
 }
 
@@ -719,17 +808,10 @@ static int sn_messageCacheSize = 1000;
 //! @param message the message to add
 //! @param incoming true for incoming messages, keep an extra long backlog then
 //! @param reallyAdd true if message should be added. Otherwise, we just purge old messages.
-void nMessageCache::AddMessage( nMessageBase * message, bool incoming, bool reallyAdd )
+void nMessageCache::AddMessage( nProtoBufMessageBase * message, bool incoming, bool reallyAdd )
 {
     // fetch message filler, ignoring invalid ones
     if ( !message || message->MessageID() == 0 )
-    {
-        return;
-    }
-
-    nMessageFillerProtoBufBase * filler = dynamic_cast< nMessageFillerProtoBufBase * >( message->GetFiller() );
-
-    if ( !filler )
     {
         return;
     }
@@ -743,7 +825,7 @@ void nMessageCache::AddMessage( nMessageBase * message, bool incoming, bool real
 #endif    
 
     // get the cache belonging to this descriptor
-    Descriptor const * descriptor = filler->GetProtoBuf().GetDescriptor();
+    Descriptor const * descriptor = message->GetProtoBuf().GetDescriptor();
     nMessageCacheByDescriptor & cache = parts[ descriptor ];
 
     // and push the message into the cache
@@ -781,6 +863,19 @@ void nMessageCache::AddMessage( nMessageBase * message, bool incoming, bool real
     }
 }
 
+//! adds a message to the cache
+//! @param message the message to add
+//! @param incoming true for incoming messages, keep an extra long backlog then
+//! @param reallyAdd true if message should be added. Otherwise, we just purge old messages.
+void nMessageCache::AddMessage( nMessageBase * message, bool incoming, bool reallyAdd )
+{
+    nProtoBufMessageBase * message2 = dynamic_cast< nProtoBufMessageBase * >( message );
+    if( message2 )
+    {
+        AddMessage( message2, incoming, reallyAdd );
+    }
+}
+
 //! fill protobuf from cache
 bool nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & target )
 {
@@ -802,14 +897,11 @@ bool nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & targ
     for( CacheQueue::reverse_iterator i = cache.queue_.rbegin();
          i != cache.queue_.rend(); ++i )
     {
-        nMessageBase * message = *i;
+        nProtoBufMessageBase * message = *i;
         if ( ( message->MessageID() & 0xffff ) == cacheID )
         {
             // found it, copy over
-            tASSERT( dynamic_cast< nMessageFillerProtoBufBase * >( message->GetFiller() ) );
-            nMessageFillerProtoBufBase * filler = static_cast< nMessageFillerProtoBufBase * >( message->GetFiller() );
-            
-            target.CopyFrom( filler->GetProtoBuf() );
+            target.CopyFrom( message->GetProtoBuf() );
             
             nProtoBufDescriptorBase::ClearRepeated( target );
 
@@ -817,9 +909,7 @@ bool nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & targ
         }
     }
 
-    tASSERT( 0 );
-
-    throw nKillHim();
+    nReadError( false );
 
     return false;
 }
@@ -833,7 +923,7 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
     nMessageCacheByDescriptor & cache = parts[ descriptor ];
 
     // try to find the best matching message in the queue
-    nMessageBase * best = 0;
+    nProtoBufMessageBase * best = 0;
 
     // total size, maximum size to save
     int size = 0;
@@ -852,11 +942,9 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
     for( CacheQueue::reverse_iterator i = cache.queue_.rbegin();
          i != cache.queue_.rend(); ++i )
     {
-        nMessageBase * message = *i;
+        nProtoBufMessageBase * message = *i;
 
-        tASSERT( dynamic_cast< nMessageFillerProtoBufBase * >( message->GetFiller() ) );
-        nMessageFillerProtoBufBase * filler = static_cast< nMessageFillerProtoBufBase * >( message->GetFiller() );
-        nProtoBuf const & cached = filler->GetProtoBuf();
+        nProtoBuf const & cached = message->GetProtoBuf();
 
         // the current difference
         int difference = 0;
@@ -887,9 +975,7 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
     if ( best )
     {
         // found a good previous message. yay!
-        tASSERT( dynamic_cast< nMessageFillerProtoBufBase * >( best->GetFiller() ) );
-        nMessageFillerProtoBufBase * filler = static_cast< nMessageFillerProtoBufBase * >( best->GetFiller() );
-        nProtoBuf const & cached = filler->GetProtoBuf();
+        nProtoBuf const & cached = best->GetProtoBuf();
 
         // calculate diff message
         nProtoBufDescriptorBase::

@@ -1,6 +1,6 @@
 package Network;
 
-message nNetObjectInit
+message nNetObjectSync
 {
     // ID of the object
     optional uint32 object_id = 1;
@@ -10,18 +10,10 @@ message nNetObjectInit
 
     // legacy message end marker, extensions go after it
     optional bool legacy_message_end_marker = 20000;
-}
 
-message nNetObjectSync
-{
     // no data here.
 
     // legacy message end marker, extensions go after it
-    optional bool legacy_message_end_marker = 20000;
+    optional bool legacy_message_end_marker2 = 20001;
 }
 
-message nNetObjectTotal
-{
-    optional nNetObjectInit init = 1;
-    optional nNetObjectSync sync = 2;
-}

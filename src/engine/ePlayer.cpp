@@ -1583,7 +1583,7 @@ static nVersionFeature se_chatHandlerClient( 6 );
 
 // chat message from client to server
 // void handle_chat( nMessage & );
-void handle_chat( Engine::Chat &, nSenderInfo const & );
+void handle_chat( Engine::Chat const &, nSenderInfo const & );
 // static nDescriptor chat_handler(200,handle_chat,"Chat");
 static nProtoBufDescriptor< Engine::Chat > chat_handler_pb(200,handle_chat);
 
@@ -1887,7 +1887,7 @@ static nMessage* se_ServerControlledChatMessage(  eTeam const * team, ePlayerNet
 }
 
 // pepares a chat message the client has to put together
-static nMessage* se_NewChatMessage( ePlayerNetID const * player, tString const & message )
+static nMessageBase * se_NewChatMessage( ePlayerNetID const * player, tString const & message )
 {
     tASSERT( player );
 
@@ -1900,16 +1900,6 @@ static nMessage* se_NewChatMessage( ePlayerNetID const * player, tString const &
     chat.set_chat_line( cleanup.str() );
     
     return nMessage::Transform( chat );
-    
-    // old code:
-
-    /* 
-    nMessage *m=tNEW(nMessage) (chat_handler);
-    m->Write( player->ID() );
-    se_AppendChat( *m, message );
-
-    return m;
-    */
 }
 
 // prepares a very old style chat message: just a regular remote console output message
@@ -1943,7 +1933,7 @@ void se_SendChatLine( ePlayerNetID* sender, const tString& fullLine, const tStri
         }
         else if ( se_chatRelay.Supported( receiver ) )
         {
-            tJUST_CONTROLLED_PTR< nMessage > mNew = se_NewChatMessage( sender, forOldClients );
+            tJUST_CONTROLLED_PTR< nMessageBase > mNew = se_NewChatMessage( sender, forOldClients );
             mNew->Send( receiver );
         }
         else
@@ -1961,7 +1951,7 @@ void se_BroadcastChatLine( ePlayerNetID* sender, const tString& line, const tStr
 {
     // create chat messages
     tJUST_CONTROLLED_PTR< nMessage > mServerControlled = se_ServerControlledChatMessageConsole( sender, line );
-    tJUST_CONTROLLED_PTR< nMessage > mNew = se_NewChatMessage( sender, forOldClients );
+    tJUST_CONTROLLED_PTR< nMessageBase > mNew = se_NewChatMessage( sender, forOldClients );
     tJUST_CONTROLLED_PTR< nMessage > mOld = se_OldChatMessage( line );
 
     // send them to the users, depending on what they understand
@@ -1985,7 +1975,7 @@ void se_BroadcastChat( ePlayerNetID* sender, const tString& say )
 {
     // create chat messages
     tJUST_CONTROLLED_PTR< nMessage > mServerControlled = se_ServerControlledChatMessage( sender, say );
-    tJUST_CONTROLLED_PTR< nMessage > mNew = se_NewChatMessage( sender, say );
+    tJUST_CONTROLLED_PTR< nMessageBase > mNew = se_NewChatMessage( sender, say );
     tJUST_CONTROLLED_PTR< nMessage > mOld = se_OldChatMessage( sender, say );
 
     // send them to the users, depending on what they understand
@@ -3722,7 +3712,7 @@ void handle_chat( nMessage &m )
     handle_chat( id, say, m );
 }
 
-void handle_chat( Engine::Chat & message, nSenderInfo const & sender )
+void handle_chat( Engine::Chat const & message, nSenderInfo const & sender )
 {
     handle_chat( message.player_id(), tColoredString( message.chat_line().c_str() ), sender.envelope );
 }
@@ -5372,10 +5362,10 @@ void ePlayerNetID::CreateVoter()
 }
 
 //! writes sync data
-void ePlayerNetID::WriteSync( Engine::ePlayerNetIDSync & sync )
+void ePlayerNetID::WriteSync( Engine::ePlayerNetIDSync & sync, bool init )
 {
     lastSync=tSysTimeFloat();
-    nNetObject::WriteSync( *sync.mutable_base() );
+    nNetObject::WriteSync( *sync.mutable_base(), init );
 
     Engine::ePlayerColor & color = *sync.mutable_color();
     color.set_r(r);
@@ -5614,12 +5604,13 @@ static void se_OptionalNameFilters( tString & remoteName )
 }
 
 //! reads incremental sync data
-void ePlayerNetID::ReadSync( Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender )
+bool ePlayerNetID::ReadSync( Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender )
 {
     // check whether this is the first sync
     bool firstSync = ( this->ID() == 0 );
 
-    nNetObject::ReadSync( sync.base(), sender );
+    if ( !nNetObject::ReadSync( sync.base(), sender ) )
+        return false;
 
     r = sync.color().r();
     g = sync.color().g();
@@ -5755,11 +5746,13 @@ void ePlayerNetID::ReadSync( Engine::ePlayerNetIDSync const & sync, nSenderInfo 
 
         RequestSync();
     }
+
+    return true;
 }
 
 //! creates a netobject form sync data
-ePlayerNetID::ePlayerNetID( Engine::ePlayerNetIDInit const & init, Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender )
-: nNetObject(init.base(), sync.base(), sender ),listID(-1), teamListID(-1)
+ePlayerNetID::ePlayerNetID( Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender )
+: nNetObject( sync.base(), sender ),listID(-1), teamListID(-1)
  , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings )
 {
     // default access level
@@ -5794,14 +5787,7 @@ ePlayerNetID::ePlayerNetID( Engine::ePlayerNetIDInit const & init, Engine::ePlay
     // rubberstatus=0;
 }
 
-//! writes initialization data
-void ePlayerNetID::WriteInit( Engine::ePlayerNetIDInit & init )
-{
-    // just delegate
-    nNetObject::WriteInit( *init.mutable_base() );
-}
-
-static nOProtoBufDescriptor< ePlayerNetID, Engine::ePlayerNetIDTotal > se_pbdescriptor( 201 );
+static nOProtoBufDescriptor< ePlayerNetID, Engine::ePlayerNetIDSync > se_pbdescriptor( 201 );
 // nNOInitialisator<ePlayerNetID> ePlayerNetID_init(201,"ePlayerNetID");
 
 //! returns the descriptor responsible for this class
@@ -5810,13 +5796,13 @@ nOProtoBufDescriptorBase const * ePlayerNetID::DoGetDescriptor() const
     return & se_pbdescriptor;
 }
 
-void ePlayerNetID::ReadSync(nMessage &m){
-    se_pbdescriptor.ReadSync( *this, m );
+void ePlayerNetID::ReadSync(nStreamMessage &m){
+    se_pbdescriptor.ReadSync( *this, m, false );
     return;
 }
 
-void ePlayerNetID::WriteSync(nMessage &m){
-    se_pbdescriptor.WriteSync( *this, m );
+void ePlayerNetID::WriteSync(nStreamMessage &m){
+    se_pbdescriptor.WriteSync( *this, m, false );
     return;
 }
 

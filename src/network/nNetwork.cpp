@@ -649,108 +649,135 @@ nDescriptor::nDescriptor(nHandler *handle,const char *Name)
 
 int nCurrentSenderID::currentSenderID_ = 0;
 
-void nDescriptorBase::HandleMessage(nMessageBase &message){
+tJUST_CONTROLLED_PTR< nMessageBase > nDescriptorBase::CreateMessage( unsigned char const * & data, unsigned char const * end, int sender )
+{
     static tArray<bool> warned;
 
     // store sender ID for console
-    nCurrentSenderID currentSender( message.SenderID() );
+    nCurrentSenderID currentSender( sender );
 
 #ifdef DEBUG_X
     if (message.descriptor>1)
         con << "RMT " << message.descriptor << "\n";
 #endif
 
-    try{
-        nDescriptorBase *nd = 0;
-
-        // index into arrays
-        int index = message.descriptor;
-
-        // pick right descriptor set according to highest bit
-        nDescriptorBase * const * descriptors = streamDescriptors;
-        if ( message.descriptor & nProtoBufDescriptorBase::protoBufFlag )
-        {
-            descriptors = protoBufDescriptors;
-            index &= ~nProtoBufDescriptorBase::protoBufFlag;
-        }
-
-        // z-man: security check ( thanks, Luigi Auriemma! )
-        if ( index  < MAXDESCRIPTORS )
-        {
-            // try default descriptor first
-            nd=descriptors[index];
-
-            // not found? Try a protocol buffer replacement.
-            if( !nd && descriptors == streamDescriptors )
-            {
-                nd = protoBufDescriptors[ index ];
-            }
-        }
-
-        if (nd)
-        {
-            // handle message
-            if ((message.SenderID() <= MAXCLIENTS) || nd->acceptWithoutLogin)
-                nd->DoHandleMessage(message);
-        }
-        else
-        {
-            // nope, error.
-            if (!warned[message.Descriptor()]){
-                tOutput warn;
-                warn.SetTemplateParameter(1, message.Descriptor());
-                warn << "$network_warn_unknowndescriptor";
-                con << warn;
-                warned[message.Descriptor()]=true;
-            }
-        }
-    }
-    catch(nIgnore const &){
-        // well, do nothing.
-    }
-    catch(nKillHim const &){
-        // st_Breakpoint();
-        con << tOutput("$network_error");
-        sn_DisconnectUser(message.SenderID(), "$network_kill_error" );
-    }
-    catch( tGenericException & e )
-    {
-        // relay generic errors to sender of message; don't do anything else bad. Especially, we don't
-        // want a harmless uncaught exception to bring down the server.
-        sn_ConsoleOut( e.GetName() + ": " + e.GetDescription() + '\n', message.SenderID() );
-    }
-}
-
-void nDescriptor::DoHandleMessage( nMessageBase & message )
-{
-    (*handler)( dynamic_cast< nStreamMessage & >( message ) );
-}
+    nBinaryReader reader( data, end );
     
+    // read descriptor ID
+    unsigned short descriptor = reader.ReadShort();
+    
+    nDescriptorBase *nd = 0;
+    
+    // index into arrays
+    int index = descriptor;
+    
+    // pick right descriptor set according to highest bit
+    nDescriptorBase * const * descriptors = streamDescriptors;
+    if ( descriptor & nProtoBufDescriptorBase::protoBufFlag )
+    {
+        descriptors = protoBufDescriptors;
+        index &= ~nProtoBufDescriptorBase::protoBufFlag;
+    }
+    
+    // z-man: security check ( thanks, Luigi Auriemma! )
+    if ( index  < MAXDESCRIPTORS )
+    {
+        // try default descriptor first
+        nd=descriptors[index];
+        
+        // not found? Try a protocol buffer replacement.
+        if( !nd && descriptors == streamDescriptors )
+        {
+            nd = protoBufDescriptors[ index ];
+        }
+    }
+    
+    if (!nd)
+    {
+        // fallback to global default descriptor
+        nd = descriptors[0];
+        
+        // nope, error.
+        if (!warned[index]){
+            con << tOutput( "$network_warn_unknowndescriptor", index );
+            warned[index]=true;
+        }
+    }
+    
+    tASSERT(nd);
+    
+    // create message
+    tJUST_CONTROLLED_PTR< nMessageBase > ret = nd->CreateReceivedMessage();
+    tASSERT(ret);
+    
+    // fill in the bits we know
+    ret->senderID_ = sender;
+    ret->descriptorID_ = descriptor;
+    
+    // and read the rest.
+    ret->Read( data, end );
+
+    return ret;
+}
+
+// flag set only while receiving a message
+static bool sn_readingFromPeer = false;
+
+//! creates a message while receiving
+nMessageBase * nDescriptorBase::CreateMessage() const
+{
+    return DoCreateMessage();
+}
+
+//! creates a message while receiving
+nMessageBase * nDescriptorBase::CreateReceivedMessage() const
+{
+    sn_readingFromPeer = true;
+    nMessageBase * ret = CreateMessage();
+    sn_readingFromPeer = false;
+        
+    return ret;
+}
+
 nDescriptor::nDescriptor(unsigned short identification,nHandler *handle,
                          const char *name, bool acceptEvenIfNotLoggedIn )
 : nDescriptorBase( identification, name, acceptEvenIfNotLoggedIn ),
   handler( handle )
 {
-    if (MAXDESCRIPTORS<=identification || streamDescriptors[identification]!=NULL)
+    if( name )
     {
-        con << "Descriptor " << identification << " already used!\n";
-        exit(-1);
-    }
+        if (MAXDESCRIPTORS<=identification || streamDescriptors[identification]!=NULL)
+        {
+            con << "Descriptor " << identification << " already used!\n";
+            exit(-1);
+        }
 
-    streamDescriptors[identification]=this;
+        streamDescriptors[identification]=this;
+    }
 }
 
 nDescriptor::~nDescriptor(){}
 
+//! creates a message
+nStreamMessage * nDescriptor::CreateMessage() const
+{
+    return tNEW(nStreamMessage)( *this );
+}
+
+//! creates a message
+nMessageBase * nDescriptor::DoCreateMessage() const
+{
+    return CreateMessage();
+}
 
 // write one data element, a short.
-void nMessageFiller::FillArguments::Write( unsigned short data )
+void nMessageBase::WriteArguments::Write( unsigned short data )
 {
     nBinaryWriter( buffer_ ).WriteShort( data );
 }
 
-nMessageFiller::FillArguments::FillArguments( nSendBuffer::Buffer & buffer, nMessage & message, int receiver )
-: buffer_( buffer ), message_( message ), receiver_( receiver )
+nMessageBase::WriteArguments::WriteArguments( nSendBuffer::Buffer & buffer, int receiver )
+: buffer_( buffer ), receiver_( receiver )
 {}
 
 nVersionFeature sn_protoBuf( 21 );
@@ -821,7 +848,7 @@ nWaitForAck::nWaitForAck(nMessageBase* m,int rec)
     if (!message)
         tERR_ERROR("Null ack!");
 
-    if (message->Descriptor()!=s_Acknowledge.ID())
+    if (message->DescriptorID() != s_Acknowledge.ID())
         sn_Connections[receiver].ackPending++;
     else
         tERR_ERROR("Should not wait for ack of an ack message itself.");
@@ -865,7 +892,7 @@ nWaitForAck::~nWaitForAck(){
     }
 #endif
 
-    if (bool(message) && message->Descriptor()!=s_Acknowledge.ID())
+    if (bool(message) && message->DescriptorID()!=s_Acknowledge.ID())
     {
         sn_Connections[receiver].ackPending--;
         sn_Connections[receiver].ReliableMessageSent();
@@ -1047,48 +1074,38 @@ static int nMessages=0;
 static int max_nMessages=0;
 #endif
 
-
-nMessageFiller::~nMessageFiller(){}
-
-nMessageBase::nMessageBase()
-        :descriptor(0),messageIDBig_(0),
-         senderID(0)
-{
-#ifdef NET_DEBUG
-    nMessages++;
-#endif
-}
-
 #ifdef DEBUG
 void sn_BreakOnMessageID( unsigned int id );
 #endif
 
 nMessageBase::nMessageBase( const nDescriptorBase &d )
-        :descriptor( d.id ),
-senderID(::sn_myNetID)
+: descriptorID_( d.id ),
+  messageIDBig_(0),
+  senderID_(::sn_myNetID)
 {
 #ifdef NET_DEBUG
     nMessages++;
 #endif
-
-    current_id++;
-    if (current_id <= IDS_RESERVED)
-        current_id = IDS_RESERVED + 1;
-
-    messageIDBig_ = current_id;
-
+    if ( !sn_readingFromPeer )
+    {
+        current_id++;
+        if (current_id <= IDS_RESERVED)
+            current_id = IDS_RESERVED + 1;
+        
+        messageIDBig_ = current_id;
+        
 #ifdef DEBUG_X
-    con << "Message " << d.id << " " << current_id << "\n";
+        con << "Message " << d.id << " " << current_id << "\n";
 #endif
-
+        
 #ifdef DEBUG
-    sn_BreakOnMessageID( messageIDBig_ );
+        sn_BreakOnMessageID( messageIDBig_ );
 #endif
-
-    tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_OUT", 3, messageIDBig_ );
-    tRecorderSync< unsigned short >::Archive( "_MESSAGE_DECL_OUT", 3, descriptor );
+        
+        tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_OUT", 3, messageIDBig_ );
+        tRecorderSync< unsigned short >::Archive( "_MESSAGE_DECL_OUT", 3, descriptorID_ );
+    }
 }
-
 
 nMessageBase::~nMessageBase(){
 #ifdef NET_DEBUG
@@ -1674,62 +1691,30 @@ int sn_ReceivedPackets  = 0;
 nTimeRolling sn_StatsTime		= 0;
 
 // adds a message to the buffer
-void nSendBuffer::AddMessage( nMessageBase & message2, nBandwidthControl* control, int peer )
+void nSendBuffer::AddMessage( nMessageBase & message, nBandwidthControl* control, int peer )
 {
-    nStreamMessage & message = dynamic_cast< nStreamMessage & >( message2 );
-
     unsigned long id = message.MessageID();
-    unsigned short len = message.DataLen();
+
     tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_SEND", 5, id );
+    size_t lenBefore = sendBuffer_.Len();
 
     // prepare writer
     nBinaryWriter writer( sendBuffer_ );
 
     // reserve space for descriptor
     nBinaryWriter descriptorWriter( writer );
-    writer.WriteShort( message.Descriptor() );
+    writer.WriteShort( message.DescriptorID() );
 
-    // write message ID
-    writer.WriteShort( message.MessageID() );
+    // give control to message
+    nMessageBase::WriteArguments arguments( sendBuffer_, peer );
+    message.Write( arguments );
 
-    // reserve space for data length
-    nBinaryWriter dataLenWriter( writer );
-    writer.WriteShort( 0 );
-
-    int overhead = sendBuffer_.Len();
-
-    // write raw data
-    for(int i=0;i<len;i++)
-    {
-        writer.WriteShort( message.Data(i) );
-    }
-
-    // write extra data
-    if ( message.GetFiller() )
-    {
-        nMessageFiller::FillArguments arguments( sendBuffer_, message, peer );
-        descriptorWriter.WriteShort( message.GetFiller()->Fill( arguments ) );
-
-        // pad with zero to get the size even
-        if( 1 == ( sendBuffer_.Len() & 1 ) )
-        {
-            sendBuffer_[sendBuffer_.Len()] = 0;
-        }
-    }
-    else
-    {
-        tASSERT( 2 * len == sendBuffer_.Len() - overhead );
-    }
-
-    // determine data lenght and write it to reserved space
-    
-    dataLenWriter.WriteShort( ( sendBuffer_.Len() - overhead ) >> 1 );
-
+    unsigned short len = sendBuffer_.Len() - lenBefore;
     tRecorderSync< unsigned short >::Archive( "_MESSAGE_SEND_LEN", 5, len );
 
     if ( control )
     {
-        control->Use( nBandwidthControl::Usage_Planning, len * 2 );
+        control->Use( nBandwidthControl::Usage_Planning, len );
     }
 }
 
@@ -1895,7 +1880,7 @@ void nMessageBase::SendImmediately(int peer,bool ack){
 
     if (peer==MAXCLIENTS+1){
 #ifdef DEBUG
-        if(descriptor==s_Acknowledge.id)
+        if(descriptorID_==s_Acknowledge.id)
             con << "Sending ack to login slot.\n";
 #endif
         //      else if (descriptor
@@ -1937,7 +1922,7 @@ void nMessageBase::SendImmediately(int peer,bool ack){
         */
 
         if (deb_net)
-            con << "Sent " <<descriptor << ':' << messageIDBig_ << ":"
+            con << "Sent " <<descriptorID_ << ':' << messageIDBig_ << ":"
             << peer << '\n';
     }
 
@@ -1963,7 +1948,7 @@ void nMessageBase::Send(int peer,REAL priority,bool ack){
 #ifdef DEBUG
 
     if (peer==MAXCLIENTS+1){
-        if(descriptor==s_Acknowledge.id)
+        if(descriptorID_==s_Acknowledge.id)
             con << "Sending ack to login slot.\n";
         //      else if (descriptor
         //	tERR_ERROR("the last user only should receive denials or acks.");
@@ -1978,12 +1963,38 @@ void nMessageBase::Send(int peer,REAL priority,bool ack){
     // the next line was redundant; the send buffer handles that part of accounting.
     //sn_Connections[peer].bandwidthControl_.Use( nBandwidthControl::Usage_Planning, 2*(data.Len()+3) );
 
-    sent_per_messid[descriptor] += Size() + 6;
+    sent_per_messid[descriptorID_] += Size() + 6;
 
-    tASSERT(Descriptor()!=s_Acknowledge.ID() || !ack);
+    tASSERT(DescriptorID()!=s_Acknowledge.ID() || !ack);
 
     new nMessage_planned_send(this,priority+sn_OrderPriority,ack,peer);
     sn_OrderPriority += .01; // to roughly keep the relative order of netmessages
+}
+
+//! handle this message
+void nMessageBase::Handle()
+{
+    try
+    {
+        if ( (SenderID() <= MAXCLIENTS) || DoGetDescriptor().acceptWithoutLogin )
+        {
+            OnHandle();
+        }
+    }
+    catch(nIgnore const &){
+        // well, do nothing.
+    }
+    catch(nKillHim const &){
+        // st_Breakpoint();
+        con << tOutput("$network_error");
+        sn_DisconnectUser(senderID_, "$network_kill_error" );
+    }
+    catch( tGenericException & e )
+    {
+        // relay generic errors to sender of message; don't do anything else bad. Especially, we don't
+        // want a harmless uncaught exception to bring down the server.
+        sn_ConsoleOut( e.GetName() + ": " + e.GetDescription() + '\n', senderID_ );
+    }
 }
 
 // ack messages: don't get an ID
@@ -1995,7 +2006,7 @@ public:
 
 // receive and s_Acknowledge the recently reveived network messages
 
-typedef std::deque< tJUST_CONTROLLED_PTR< nMessage > > nMessageFifo;
+typedef std::deque< tJUST_CONTROLLED_PTR< nMessageBase > > nMessageFifo;
 
 static void rec_peer(unsigned int peer){
     tASSERT( sn_Connections[peer].socket );
@@ -2083,15 +2094,12 @@ static void rec_peer(unsigned int peer){
                     sn_Connections[ MAXCLIENTS+1 ].socket = sn_Connections[peer].socket;
                 }
 
-                //	 if (peer!=id)
-                //  con << "Changed incoming address.\n";
-
                 try
                 {
                     while( bufferEnd > currentRead ){
-                        tJUST_CONTROLLED_PTR< nMessage > pmess;
-                        pmess = tNEW( nMessage )( currentRead, id, bufferEnd );
-                        nMessage& mess = *pmess;
+                        tJUST_CONTROLLED_PTR< nMessageBase > pmess =
+                        nDescriptorBase::CreateMessage( currentRead, bufferEnd, id );
+                        nMessageBase& mess = *pmess;
 
                         bool mess_is_new=true;
                         // see if we have got this packet before
@@ -2119,9 +2127,9 @@ static void rec_peer(unsigned int peer){
                                     unsigned short diff=mess_id-highest_ack[id];
                                     if ( ( diff>0 && diff<10000 ) ||
                                             ((
-                                                 mess.Descriptor() == login_accept.ID() ||
-                                                 mess.Descriptor() == login_deny.ID()   ||
-                                                 mess.Descriptor() == login.ID()
+                                                 mess.DescriptorID() == login_accept.ID() ||
+                                                 mess.DescriptorID() == login_deny.ID()   ||
+                                                 mess.DescriptorID() == login.ID()
                                              ) && highest_ack[id] == 0)
                                        ){
                                         // the message has a more recent id than anything before.
@@ -2149,7 +2157,7 @@ static void rec_peer(unsigned int peer){
 #ifdef NO_ACK
                                     (mess.MessageID()) &&
 #endif
-                                    (mess.Descriptor()!=login_ignore.ID() ||
+                                    (mess.DescriptorID()!=login_ignore.ID() ||
                                      login_succeeded )){
                                     // do not ack the login_ignore packet that did not let you in.
 
@@ -2199,11 +2207,19 @@ static void rec_peer(unsigned int peer){
                             }
                     }
                 }
-
+                catch(nIgnore const &){
+                    // well, do nothing.
+                }
                 catch(nKillHim)
                 {
                     con << "nKillHim signal caught.\n";
-                    sn_DisconnectUser(peer, "$network_kill_error");
+                    sn_DisconnectUser(id, "$network_kill_error");
+                }
+                catch( tGenericException & e )
+                {
+                    // relay generic errors to sender of message; don't do anything else bad. Especially, we don't
+                    // want a harmless uncaught exception to bring down the server.
+                    sn_ConsoleOut( e.GetName() + ": " + e.GetDescription() + '\n', id );
                 }
             }
 
@@ -2217,7 +2233,7 @@ static void rec_peer(unsigned int peer){
                 // handle messages
                 while ( receivedMessages.begin() != receivedMessages.end() )
                 {
-                    tJUST_CONTROLLED_PTR< nMessage > mess = receivedMessages.front();
+                    tJUST_CONTROLLED_PTR< nMessageBase > mess = receivedMessages.front();
                     receivedMessages.pop_front();
 
                     // set version to something really old on messages from the login slot
@@ -2232,7 +2248,7 @@ static void rec_peer(unsigned int peer){
                     // perhaps the connection died?
                     if ( sn_Connections[ mess->SenderID() ].socket )
                     {
-                        nDescriptor::HandleMessage( *mess );
+                        mess->Handle();
 
                         // store message in incoming cache
                         sn_Connections[ mess->SenderID() ].messageCacheIn_.AddMessage( mess, true );
@@ -3161,9 +3177,9 @@ nCallbackAcceptPackedWithoutConnection::nCallbackAcceptPackedWithoutConnection(B
 {
 }
 
-bool nCallbackAcceptPackedWithoutConnection::Accept( const nMessage& m )
+bool nCallbackAcceptPackedWithoutConnection::Accept( const nMessageBase& m )
 {
-    descriptor=m.Descriptor();
+    descriptor=m.DescriptorID();
     return Exec( s_AcceptAnchor );
 }
 

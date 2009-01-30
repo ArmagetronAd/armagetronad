@@ -80,8 +80,8 @@ public:
 };
 
 //! expands a short message ID to a full int message ID, assuming it is from a message that was
-// just received.
-static unsigned long int sn_ExpandMessageID( unsigned short id, unsigned short sender )
+//! just received.
+unsigned long int sn_ExpandMessageID( unsigned short id, unsigned short sender )
 {
 #ifdef DEBUG
     sn_BreakOnMessageID( id );
@@ -94,26 +94,23 @@ static unsigned long int sn_ExpandMessageID( unsigned short id, unsigned short s
 }
 
 nStreamMessage::nStreamMessage( nDescriptorBase const & descriptor )
-: nMessageBase( descriptor ), readOut(0)
+: nMessageBase( descriptor ), readOut(0), descriptor_( descriptor )
 {
 }
 
-nStreamMessage::nStreamMessage(unsigned char const * & buffer,short sender, unsigned char const * end )
-: readOut(0)
+void nStreamMessage::OnRead( unsigned char const * & buffer, unsigned char const * end )
 {
     nBinaryReader reader( buffer, end );    
 
-    descriptor = reader.ReadShort();
-    messageIDBig_ = sn_ExpandMessageID( reader.ReadShort(),sender);
-    senderID = sender;
+    messageIDBig_ = sn_ExpandMessageID( reader.ReadShort(),senderID_);
 
     tRecorderSync< unsigned long >::Archive( "_MESSAGE_ID_IN", 3, messageIDBig_ );
-    tRecorderSync< unsigned short >::Archive( "_MESSAGE_DECL_IN", 3, descriptor );
+    tRecorderSync< unsigned short >::Archive( "_MESSAGE_DECL_IN", 3, descriptorID_ );
 
     unsigned short len = reader.ReadShort();
     if ( len * 2 > end - buffer )
     {
-        throw nKillHim();
+        nReadError( true );
     }
     for(int i=0;i<len;i++)
     {
@@ -559,7 +556,7 @@ void nStreamMessage::Read(unsigned short &x){
     if (End()){
         tOutput o;
         st_Breakpoint();
-        o.SetTemplateParameter(1, senderID);
+        o.SetTemplateParameter(1, senderID_);
         o << "$network_error_shortmessage";
         con << o;
         // sn_DisconnectUser(senderID, "$network_kill_error");
@@ -567,4 +564,48 @@ void nStreamMessage::Read(unsigned short &x){
     }
     else
         x=data(readOut++);
+}
+
+//! handle this message
+void nStreamMessage::OnHandle()
+{
+    tASSERT( dynamic_cast< nDescriptor const * >( &GetDescriptor() ) );
+    (* static_cast< nDescriptor const & >( GetDescriptor() ).handler)( *this );
+}
+
+//! fills the receiving buffer with data
+//!  @return descriptor ID to fill in
+int nStreamMessage::OnWrite( WriteArguments & arguments ) const
+{
+    nBinaryWriter writer( arguments.buffer_ );
+
+    // write message ID
+    writer.WriteShort( MessageID() );
+
+    // reserve space for data length
+    nBinaryWriter dataLenWriter( writer );
+    writer.WriteShort( 0 );
+
+    int overhead = arguments.buffer_.Len();
+
+    // write raw data
+    int len = DataLen();
+    for(int i=0;i<len;i++)
+    {
+        writer.WriteShort( Data(i) );
+    }
+
+    tASSERT( 2 * len == arguments.buffer_.Len() - overhead );
+
+    // determine data lenght and write it to reserved space
+    
+    dataLenWriter.WriteShort( len );
+
+    return DescriptorID();
+}
+
+//! returns the descriptor
+nDescriptorBase const & nStreamMessage::DoGetDescriptor() const
+{
+    return descriptor_;
 }
