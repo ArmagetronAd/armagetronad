@@ -48,6 +48,12 @@ protected:
 
     ~nStreamMessage();
 public:
+    //! bends the descriptor around. useful for compatibility hacks.
+    void BendDescriptorID( int descriptor )
+    {
+        descriptorID_ = descriptor;
+    }
+
     unsigned short DataLen() const{
         return data.Len();
     }

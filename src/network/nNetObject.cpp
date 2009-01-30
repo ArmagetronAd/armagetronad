@@ -1542,6 +1542,69 @@ static void net_sync_handler(nMessage & m){
 
 static nDescriptor net_sync(24,net_sync_handler,"net_sync");
 
+
+//! class converting sync messages
+class nMessageConverterSync: public nMessageConverter
+{
+public:
+    static const nProtoBufDescriptorBase::StreamSections sections;
+
+    //! function responsible for turning message into old stream message
+    virtual void StreamFromProtoBuf( nProtoBufMessageBase const & source, nStreamMessage & target ) const
+    {
+        // stream to message
+        source.GetDescriptor().StreamTo( source.GetProtoBuf(), target, sections );
+    
+        // bend the descriptor
+        target.BendDescriptorID( net_sync.ID() );
+    }
+
+    //! function responsible for reading an old message
+    virtual void StreamToProtoBuf( nStreamMessage & source, nProtoBufMessageBase & target ) const
+    {
+        // stream from message
+        target.GetDescriptor().StreamFrom( source, target.AccessProtoBuf(), sections  );
+    }
+};
+
+const nProtoBufDescriptorBase::StreamSections nMessageConverterSync::sections( nProtoBufDescriptorBase::StreamSections(nProtoBufDescriptorBase::SECTION_ID | nProtoBufDescriptorBase::SECTION_Second) );
+
+//! class converting creation messages
+class nMessageConverterCreate: public nMessageConverter
+{
+public:
+    //! function responsible for turning message into old stream message
+    virtual void StreamFromProtoBuf( nProtoBufMessageBase const & source, nStreamMessage & target ) const
+    {
+        // stream to message
+        source.GetDescriptor().StreamTo( source.GetProtoBuf(), target, nProtoBufDescriptorBase::SECTION_All );
+    
+        // bend the descriptor
+        target.BendDescriptorID( source.DescriptorID() & ~nProtoBufDescriptorBase::protoBufFlag );
+    }
+
+    //! function responsible for reading an old message
+    virtual void StreamToProtoBuf( nStreamMessage & source, nProtoBufMessageBase & target ) const
+    {
+        // stream from message
+        target.GetDescriptor().StreamFrom( source, target.AccessProtoBuf(), nProtoBufDescriptorBase::SECTION_All );
+    }
+};
+
+//! converter for creation messages
+nMessageConverter * nOProtoBufDescriptorBase::CreationConverter()
+{
+    static nMessageConverterCreate create;
+    return &create;
+}
+
+//! converter for sync messages
+nMessageConverter * nOProtoBufDescriptorBase::SyncConverter()
+{
+    static nMessageConverterSync sync;
+    return &sync;
+}
+
 nMessageBase * nNetObject::WriteAll()
 {
     nOProtoBufDescriptorBase const * pbDescriptor = GetDescriptor();

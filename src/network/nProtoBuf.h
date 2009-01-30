@@ -72,32 +72,24 @@ struct nProtoBufHeader
     void Read ( nBinaryReader & reader );
 };
 
+class nMessageConverter;
+
 //! protocol buffer message
 class nProtoBufMessageBase: public nMessageBase
 {
-public:
-    //! sections to stream in each protobuf. Sections are delimitered by
-    //! elements with IDs past the range of reserved IDs (>= 20000)
-    enum StreamSections
-    {
-        SECTION_First = 1,  // only the first section (default behavior, normal messages only have one section)
-        SECTION_Second = 2, // only the second section
-        SECTION_All = 3,    // the first two sections at once
-        SECTION_Default = 1
-    };
-
+public: 
     nProtoBufMessageBase( nProtoBufDescriptorBase const & descriptor );
 
-    //! set sections to stream for old format
-    void SetStreamSections( StreamSections sections )
+    //! set the compatibility converter
+    void SetConverter( nMessageConverter * streamer )
     {
-        sections_ = sections;
+        converter_ = streamer;
     }
 
-    //! get sections to stream for old format
-    StreamSections GetStreamSections() const
+    //! gets the compatibility converter
+    nMessageConverter * GetConverter() const
     {
-        return sections_;
+        return converter_;
     }
 
     //! returns the wrapped protcol buffer
@@ -117,14 +109,6 @@ public:
     {
         return DoAccessWorkProtoBuf();
     }
-
-    /*
-    //! returns a descriptor for 
-    inline int GetStreamDescriptorID() const
-    {
-        return DoGetStreamDescriptorID();
-    }
-    */
 
     //! returns the descriptor
     nProtoBufDescriptorBase const & GetDescriptor() const;
@@ -147,19 +131,11 @@ private:
     //! returns the wrapped work protcol buffer
     virtual nProtoBuf & DoAccessWorkProtoBuf() const = 0;
 
-    /*
-    //! returns a descriptor for 
-    virtual int GetStreamDescriptorID() const
-    {
-        return DoGetStreamDescriptorID();
-    }
-    */
-
     //! dummy message used to cache raw data in old message format
     mutable tJUST_CONTROLLED_PTR< nStreamMessage > oldFormat_;
 
-    //! sections to stream
-    StreamSections sections_;
+    //! the compatibility converter
+    nMessageConverter * converter_;
 };
 
 //! implementation for each protocol buffer type
@@ -264,40 +240,60 @@ class nProtoBufDescriptorBase: public nDescriptorBase
 {
 public:
     typedef std::map< std::string, nProtoBufDescriptorBase * > DescriptorMap;
-    typedef nProtoBufMessageBase::StreamSections StreamSections;
-    // using nProtoBufMessageBase::StreamSections;
+
+    //! sections to stream in each protobuf. Sections are delimitered by
+    //! elements with IDs past the range of reserved IDs (>= 20000)
+    enum StreamSections
+    {
+        SECTION_First = 1,  // only the first section (default behavior, normal messages only have one section)
+        SECTION_ID     = 2, // only the object ID from sync messages
+        SECTION_Second = 4, // only the second section
+        SECTION_All    = 5, // both sections for creation message
+        SECTION_Default = 1,
+        SECTION_Max     = 7
+    };
 
     nProtoBufDescriptorBase(unsigned short identification,
                       nProtoBuf const & prototype, bool acceptEvenIfNotLoggedIn = false);
     ~nProtoBufDescriptorBase();
+
+    //! sets the compatibility converter used by messages of this class
+    void SetConverter( nMessageConverter * streamer )
+    {
+        converter_ = streamer;
+    }
+
+    //! gets the compatibility converter used by messages of this class
+    nMessageConverter * GetConverter() const
+    {
+        return converter_;
+    }
+
+    nMessageConverter & GetDefaultConverter();
 
     static std::string const & DetermineName( nProtoBuf const & prototype );
 
     //! dumb streaming to message
     inline void StreamTo( nProtoBuf const & in, nStreamMessage & out, StreamSections sections ) const
     {
-        if ( sections == nProtoBufMessageBase::SECTION_All )
+        for ( int flag = 1; flag < SECTION_Max; flag <<= 1 )
         {
-            DoStreamTo( in, out, nProtoBufMessageBase::SECTION_First );
-            DoStreamTo( in, out, nProtoBufMessageBase::SECTION_Second );
-        }
-        else
-        {
-            DoStreamTo( in, out, sections );
+            if ( sections & flag )
+            {
+                DoStreamTo( in, out, StreamSections(flag) );
+            }
         }
     }
 
     //! dumb streaming from message
     inline void StreamFrom( nStreamMessage & in, nProtoBuf & out, StreamSections sections ) const
     {
-        if ( sections == nProtoBufMessageBase::SECTION_All )
+        for ( int flag = 1; flag < SECTION_Max; flag <<= 1 )
         {
-            DoStreamFrom( in, out, nProtoBufMessageBase::SECTION_First );
-            DoStreamFrom( in, out, nProtoBufMessageBase::SECTION_Second );
-        }
-        else
-        {
-            DoStreamFrom( in, out, sections );
+            if ( sections & flag )
+            {
+                DoStreamFrom( in, out, StreamSections(flag) );
+            }
         }
     }
 
@@ -339,26 +335,14 @@ public:
         return DoCreateMessage();
     }
 
-    //! set default sections to stream for old format
-    void SetDefaultStreamSections( StreamSections sections )
-    {
-        sections_ = sections;
-    }
-
-    //! get default sections to stream for old format
-    StreamSections GetDefaultStreamSections() const
-    {
-        return sections_;
-    }
-
 protected:
     static DescriptorMap const & GetDescriptorsByName();
 
 private:
     static DescriptorMap descriptorsByName;
 
-    //! sections to stream in the old format
-    StreamSections sections_;
+    //! gets the compatibility converter used by messages of this class
+    nMessageConverter * converter_;
 
     //! creates a message
     virtual nProtoBufMessageBase * DoCreateMessage() const = 0;
@@ -400,13 +384,12 @@ public:
         return DoReadSync( object, stream, create );
     }
 
-    /*
-    //! creates a message
-    nProtoBufMessageBase * CreateMessage() const
-    {
-        return DoCreateMessage();
-    }
-    */
+    //! converter for creation messages
+    static nMessageConverter * CreationConverter();
+
+    //! converter for sync messages
+    static nMessageConverter * SyncConverter();
+
 protected:
     // fetches the network object ID from a creation message
     template< class PROTOBUF >
@@ -423,6 +406,7 @@ protected:
 
     //! checks to run after creating a new object
     static void PostCheck( nNetObject * object, nSenderInfo sender );
+
 private:
     //! writes a sync message
     virtual nProtoBufMessageBase * DoWriteSync( nNetObject & object, bool create ) const = 0;
@@ -435,6 +419,19 @@ private:
 
     //! creates a message
     // virtual nProtoBufMessageBase * DoCreateMessage() const = 0;
+};
+
+
+//! class converting messages
+class nMessageConverter
+{
+public:
+    //! function responsible for turning message into old stream message
+    virtual void StreamFromProtoBuf( nProtoBufMessageBase const & source, nStreamMessage & target ) const;
+
+    //! function responsible for reading an old message
+    virtual void StreamToProtoBuf( nStreamMessage & source, nProtoBufMessageBase & target ) const;
+protected:
 };
 
 // templated version of protocol buffer messages
@@ -527,9 +524,7 @@ public:
     : nOProtoBufDescriptorBase()
     , nProtoBufDescriptor< PROTOBUF >( identification, &HandleIncoming, false )
     {
-        // for creation messages (which are the one handled over this descriptor,
-        // should they come in in the old format), stream everything
-        this->SetDefaultStreamSections( nProtoBufMessageBase::SECTION_All );
+        this->SetConverter( CreationConverter() );
     }
 private:
     // template message
@@ -603,8 +598,11 @@ private:
         PROTOBUF & sync = message->AccessProtoBuf();
         cast.WriteSync( sync, create );
 
-        // set old streaming mode
-        message->SetStreamSections( create ? nProtoBufMessageBase::SECTION_All : nProtoBufMessageBase::SECTION_Second );
+        // set old streaming mode to sync mode
+        if ( !create )
+        {
+            message->SetConverter( SyncConverter() );
+        }
 
         return message;
     }
@@ -618,7 +616,7 @@ private:
 
         // read sync
         PROTOBUF sync;
-        StreamFrom( envelope, sync, create ? nProtoBufMessageBase::SECTION_First : nProtoBufMessageBase::SECTION_Second );
+        StreamFrom( envelope, sync, create ? nProtoBufDescriptorBase::SECTION_First : nProtoBufDescriptorBase::SECTION_Second );
         cast.ReadSync( sync, nSenderInfo( envelope ) );
     }
 
@@ -632,7 +630,7 @@ private:
         // read sync
         PROTOBUF sync;
         cast.WriteSync( sync, create );
-        StreamTo( sync, envelope, create ? nProtoBufMessageBase::SECTION_First : nProtoBufMessageBase::SECTION_Second );
+        StreamTo( sync, envelope, create ? nProtoBufDescriptorBase::SECTION_First : nProtoBufDescriptorBase::SECTION_Second );
     }
     
     virtual nProtoBufMessageBase* DoCreateMessage() const

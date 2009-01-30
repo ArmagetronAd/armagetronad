@@ -126,8 +126,26 @@ void nProtoBufHeader::Read( nBinaryReader & reader )
     len = reader.ReadVarUInt();
 }
 
+//! function responsible for turning message into old stream message
+void nMessageConverter::StreamFromProtoBuf( nProtoBufMessageBase const & source, nStreamMessage & target ) const
+{
+    // stream to message
+    source.GetDescriptor().StreamTo( source.GetProtoBuf(), target, nProtoBufDescriptorBase::SECTION_First );
+    
+    // bend the descriptor
+    target.BendDescriptorID( source.DescriptorID() & ~nProtoBufDescriptorBase::protoBufFlag );
+}
+
+//! function responsible for reading an old message
+void nMessageConverter::StreamToProtoBuf( nStreamMessage & source, nProtoBufMessageBase & target ) const
+{
+    // stream from message
+    target.GetDescriptor().StreamFrom( source, target.AccessProtoBuf(), nProtoBufDescriptorBase::SECTION_First );
+}
+
 nProtoBufMessageBase::nProtoBufMessageBase( nProtoBufDescriptorBase const & descriptor )
-: nMessageBase( descriptor ), sections_( descriptor.GetDefaultStreamSections() )
+: nMessageBase( descriptor ), 
+  converter_( descriptor.GetConverter() )
 {}
 
 //! returns the descriptor
@@ -188,16 +206,19 @@ int nProtoBufMessageBase::OnWrite( WriteArguments & arguments ) const
         // to old style message.
         if ( !oldFormat_ )
         {
+            // Transform to old style message.
             static nDescriptor dummy( 0, NULL, NULL );
-            oldFormat_ = new nMessage( dummy );
-            GetDescriptor().StreamTo( fullProtoBuf, *oldFormat_, GetStreamSections() );
+            oldFormat_ = tNEW(nStreamMessage)( dummy );
+
+            tASSERT( converter_ );
+            converter_->StreamFromProtoBuf( *this, *oldFormat_ );
         }
 
         // and copy the message contents over.
         static_cast< nMessageBase * >( oldFormat_ )->Write( arguments );
 
-        // bend the descriptor (TODO: sync messages need more bending)
-        descriptor &= ~nProtoBufDescriptorBase::protoBufFlag;
+        // bend the descriptor
+        descriptor = oldFormat_->DescriptorID();
     }
 
     return descriptor;
@@ -268,7 +289,8 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
         }
 
         // transform
-        GetDescriptor().StreamFrom( *oldFormat_, AccessProtoBuf(), GetStreamSections() );
+        tASSERT( converter_ );
+        converter_->StreamToProtoBuf( *oldFormat_, *this );
     }
 }
 
@@ -284,6 +306,12 @@ nProtoBufDescriptorBase::nProtoBufDescriptorBase(unsigned short identification,
                                      const char * name, 
                                      bool acceptEvenIfNotLoggedIn )
 */
+
+nMessageConverter & nProtoBufDescriptorBase::GetDefaultConverter()
+{
+    static nMessageConverter converter;
+    return converter;
+}
 
 std::string const & nProtoBufDescriptorBase::DetermineName( nProtoBuf const & prototype )
 {
@@ -373,12 +401,12 @@ void nProtoBufDescriptorBase::StreamFromDefault( nMessage & in, nProtoBuf & out,
         if ( FieldDescriptor::kLastReservedNumber < field->number() )
         {
             // end marker
-            currentSectionFlags <<= 1;
+            currentSectionFlags <<= 2;
             continue;
         }
 
         // skip over fields if section doesn't match
-        if ( 0 == ( sections & currentSectionFlags ) && field->cpp_type() != FieldDescriptor::CPPTYPE_MESSAGE )
+        if ( ( 0 == ( sections & currentSectionFlags ) ) && ( ( sections != SECTION_ID && field->cpp_type() != FieldDescriptor::CPPTYPE_MESSAGE ) || i != 0 ) )
         {
             if( currentSectionFlags > sections )
             {
@@ -426,7 +454,7 @@ void nProtoBufDescriptorBase::StreamFromDefault( nMessage & in, nProtoBuf & out,
         }
         break;
         case FieldDescriptor::CPPTYPE_MESSAGE:
-            StreamFromStatic( in, *reflection->REFL_GET( MutableMessage, &out, field ), i ? nProtoBufMessageBase::SECTION_First : sections );
+            StreamFromStatic( in, *reflection->REFL_GET( MutableMessage, &out, field ), i ? SECTION_First : sections );
             break;
 
         // explicitly unsupported:
@@ -460,12 +488,12 @@ void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nMessage & 
         if ( FieldDescriptor::kLastReservedNumber < field->number() )
         {
             // end marker
-            currentSectionFlags <<= 1;
+            currentSectionFlags <<= 2;
             continue;
         }
 
         // skip over fields if section doesn't match
-        if ( 0 == ( sections & currentSectionFlags ) && ( field->cpp_type() != FieldDescriptor::CPPTYPE_MESSAGE || i != 0 ) )
+        if ( ( 0 == ( sections & currentSectionFlags ) ) && ( ( sections != SECTION_ID && field->cpp_type() != FieldDescriptor::CPPTYPE_MESSAGE ) || i != 0 ) )
         {
             if( currentSectionFlags > sections )
             {
@@ -493,7 +521,7 @@ void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nMessage & 
             out << reflection->REFL_GET( GetBool, in, field );
             break;
         case FieldDescriptor::CPPTYPE_MESSAGE:
-            StreamToStatic( reflection->REFL_GET( GetMessage, in, field ), out, i ? nProtoBufMessageBase::SECTION_First : sections );
+            StreamToStatic( reflection->REFL_GET( GetMessage, in, field ), out, i ? SECTION_First : sections );
             break;
 
         // explicitly unsupported:
