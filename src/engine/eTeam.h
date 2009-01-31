@@ -218,7 +218,6 @@ public:												// public methods
 
     // con/desstruction
     eTeam();											// default constructor
-    eTeam(nMessage &m);									// remote constructor
     ~eTeam();											// destructor
 
 private:

@@ -4311,43 +4311,6 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
 }
 
 
-
-
-ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
-        , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings )
-{
-    // default access level
-    lastAccessLevel = tAccessLevel_Default;
-
-    greeted     =false;
-    chatting_   =false;
-    spectating_ =false;
-    stealth_    =false;
-    disconnected=false;
-    suspended_  = 0;
-    chatFlags_  =0;
-
-    color.r_ = color.g_ = color.b_ = 15;
-
-    nameTeamAfterMe = false;
-    teamname = "";
-
-    lastSaid.SetLen(12);
-    lastSaidTimes.SetLen(12);
-
-    pID=-1;
-    se_PlayerNetIDs.Add(this,listID);
-    object=NULL;
-    ping=sn_Connections[m.SenderID()].ping;
-    lastSync=tSysTimeFloat();
-
-    loginWanted = false;
-
-    score=0;
-    lastScore_=IMPOSSIBLY_LOW_SCORE;
-    // rubberstatus=0;
-}
-
 void ePlayerNetID::Activity()
 {
     // the player was active; therefore, he cannot possibly be chatting_ or disconnected.
@@ -5790,17 +5753,6 @@ nOProtoBufDescriptorBase const * ePlayerNetID::DoGetDescriptor() const
 {
     return & se_pbdescriptor;
 }
-
-void ePlayerNetID::ReadSync(nStreamMessage &m){
-    se_pbdescriptor.ReadSync( *this, m, false );
-    return;
-}
-
-void ePlayerNetID::WriteSync(nStreamMessage &m){
-    se_pbdescriptor.WriteSync( *this, m, false );
-    return;
-}
-
 
 void ePlayerNetID::ControlObject(eNetGameObject *c){
     if (bool(object) && c!=object)

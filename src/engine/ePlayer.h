@@ -226,7 +226,6 @@ public:
     nSpamProtection chatSpam_;
 
     ePlayerNetID(int p=-1);
-    ePlayerNetID(nMessage &m);
     virtual ~ePlayerNetID();
 
     virtual bool ActionOnQuit();
@@ -269,8 +268,6 @@ public:
     virtual void 			PrintName(tString &s) const;
 
     virtual bool 			AcceptClientSync() const;
-    virtual void 			WriteSync(nMessage &m);
-    virtual void 			ReadSync(nMessage &m);
     virtual void			InitAfterCreation();
     virtual bool			ClearToTransmit(int user) const;
 
