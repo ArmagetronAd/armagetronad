@@ -1079,15 +1079,15 @@ static int max_nMessages=0;
 void sn_BreakOnMessageID( unsigned int id );
 #endif
 
-nMessageBase::nMessageBase( const nDescriptorBase &d )
+nMessageBase::nMessageBase( const nDescriptorBase &d, unsigned int messageID )
 : descriptorID_( d.id ),
-  messageIDBig_(0),
+  messageIDBig_( messageID ),
   senderID_(::sn_myNetID)
 {
 #ifdef NET_DEBUG
     nMessages++;
 #endif
-    if ( !sn_readingFromPeer )
+    if ( !sn_readingFromPeer && !messageIDBig_ )
     {
         current_id++;
         if (current_id <= IDS_RESERVED)
