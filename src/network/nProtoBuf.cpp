@@ -291,6 +291,7 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
         // transform
         tASSERT( converter_ );
         converter_->StreamToProtoBuf( *oldFormat_, *this );
+        messageIDBig_ = oldFormat_->MessageIDBig();
     }
 }
 
