@@ -58,7 +58,7 @@ protected:							// protected attributes
 
     int roundsPlayed;               //!< number of rounds played
 
-    unsigned short r,g,b;			// team color
+    tShortColor color;	            // team color
     tString	name;					// our name
 
     bool locked_;                   //!< if set, only invited players may join
@@ -170,15 +170,21 @@ public:												// public methods
     ePlayerNetID*	YoungestAIPlayer(		) const;							// the youngest AI player
     bool			Alive			(		) const;							// is any of the players currently alive?
 
+    // color
+    tShortColor const & Color() const
+    {
+        return color;
+    }
+    
     // name and color
     unsigned short	R() 	const {
-        return r;
+        return color.r_;
     }
     unsigned short	G() 	const {
-        return g;
+        return color.g_;
     }
     unsigned short	B() 	const {
-        return b;
+        return color.b_;
     }
     const tString& 	Name() 	const {
         return name;

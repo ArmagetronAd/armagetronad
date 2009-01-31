@@ -43,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eNetGameObject.h"
 #include "tCallbackString.h"
 #include "nSpamProtection.h"
+#include "tColor.h"
 
 #include <set>
 #include <list>
@@ -209,7 +210,7 @@ public:
     tArray<tString> lastSaid;
     tArray<nTimeRolling> lastSaidTimes;
     //	void SetLastSaid(tString ls);
-    unsigned short r,g,b; // our color
+    tShortColor color; // our color
 
     unsigned short pingCharity; // max ping you are willing to take over
 

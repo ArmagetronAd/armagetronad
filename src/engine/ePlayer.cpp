@@ -4249,7 +4249,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
 
     nameTeamAfterMe = false;
 
-    r = g = b = 15;
+    color.r_ = color.g_ = color.b_ = 15;
 
     greeted             = true;
     chatting_           = false;
@@ -4267,9 +4267,9 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
         if (P){
             SetName( P->Name() );
             teamname = P->Teamname();
-            r=   P->rgb[0];
-            g=   P->rgb[1];
-            b=   P->rgb[2];
+            color.r_=   P->rgb[0];
+            color.g_=   P->rgb[1];
+            color.b_=   P->rgb[2];
 
             sg_ClampPingCharity();
             pingCharity=::pingCharity;
@@ -4327,7 +4327,7 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     suspended_  = 0;
     chatFlags_  =0;
 
-    r = g = b = 15;
+    color.r_ = color.g_ = color.b_ = 15;
 
     nameTeamAfterMe = false;
     teamname = "";
@@ -5367,10 +5367,7 @@ void ePlayerNetID::WriteSync( Engine::ePlayerNetIDSync & sync, bool init )
     lastSync=tSysTimeFloat();
     nNetObject::WriteSync( *sync.mutable_base(), init );
 
-    Tools::tShortColor & color = *sync.mutable_color();
-    color.set_r(r);
-    color.set_g(g);
-    color.set_b(b);
+    color.WriteSync( *sync.mutable_color() );
 
     // write ping charity; spectators get a fake (high) value
     if ( currentTeam || nextTeam )
@@ -5426,7 +5423,7 @@ static void se_CutString( tString & string, int maxLen )
 
 static bool se_bugColorOverflow=true;
 tSettingItem< bool > se_bugColorOverflowColor( "BUG_COLOR_OVERFLOW", se_bugColorOverflow );
-void Clamp( unsigned short & colorComponent )
+void Clamp( unsigned char & colorComponent )
 {
     if ( colorComponent > 15 )
         colorComponent = 15;
@@ -5612,16 +5609,14 @@ bool ePlayerNetID::ReadSync( Engine::ePlayerNetIDSync const & sync, nSenderInfo 
     if ( !nNetObject::ReadSync( sync.base(), sender ) )
         return false;
 
-    r = sync.color().r();
-    g = sync.color().g();
-    g = sync.color().b();
+    color.ReadSync( sync.color() );
 
     if ( !se_bugColorOverflow )
     {
         // clamp color values
-        Clamp(r);
-        Clamp(g);
-        Clamp(b);
+        Clamp(color.r_);
+        Clamp(color.g_);
+        Clamp(color.b_);
     }
 
     pingCharity = sync.ping_charity();
@@ -5766,7 +5761,7 @@ ePlayerNetID::ePlayerNetID( Engine::ePlayerNetIDSync const & sync, nSenderInfo c
     suspended_  = 0;
     chatFlags_  =0;
 
-    r = g = b = 15;
+    color = tShortColor(15,15,15);
 
     nameTeamAfterMe = false;
     teamname = "";
@@ -6420,7 +6415,7 @@ static void se_RandomizeColor( ePlayer * l, ePlayerNetID * p )
         ePlayerNetID * other = se_PlayerNetIDs(i);
         if ( other != p )
         {
-            int color[3] = { other->r, other->g, other->b };
+            int color[3] = { other->color.r_, other->color.g_, other->color.b_ };
             int currentDiff = se_ColorDistance( currentRGB, color );
             int newDiff     = se_ColorDistance( newRGB, color );
             if ( currentDiff < currentMinDiff )
@@ -6546,9 +6541,9 @@ void ePlayerNetID::Update(){
                     se_RandomizeColor(local_p,p);
                 }
 
-                p->r=ePlayer::PlayerConfig(i)->rgb[0];
-                p->g=ePlayer::PlayerConfig(i)->rgb[1];
-                p->b=ePlayer::PlayerConfig(i)->rgb[2];
+                p->color.r_=ePlayer::PlayerConfig(i)->rgb[0];
+                p->color.g_=ePlayer::PlayerConfig(i)->rgb[1];
+                p->color.b_=ePlayer::PlayerConfig(i)->rgb[2];
 
                 sg_ClampPingCharity();
                 p->pingCharity=::pingCharity;
@@ -7558,9 +7553,9 @@ void ePlayerNetID::Color( REAL&a_r, REAL&a_g, REAL&a_b ) const
         REAL g_w = 1;
         REAL b_w = 2;
 
-        int r = this->r;
-        int g = this->g;
-        int b = this->b;
+        int r = this->color.r_;
+        int g = this->color.g_;
+        int b = this->color.b_;
 
         // don't tolerate color overflow in a real team
         if ( currentTeam->NumPlayers() > 1 )
@@ -7579,9 +7574,9 @@ void ePlayerNetID::Color( REAL&a_r, REAL&a_g, REAL&a_b ) const
     }
     else
     {
-        a_r = r/15.0;
-        a_g = g/15.0;
-        a_b = b/15.0;
+        a_r = color.r_/15.0;
+        a_g = color.g_/15.0;
+        a_b = color.b_/15.0;
     }
 }
 
@@ -8551,7 +8546,7 @@ ePlayerNetID & ePlayerNetID::ForceName( tString const & name )
         this->nameFromAdmin_.NetFilter();
 
         // crappiest line ever :-/
-        newName << tColoredString::ColorString( r/15.0, g/15.0, b/15.0 ) << this->nameFromAdmin_ << tColoredString::ColorString( -1, -1, -1 );
+        newName << tColoredString::ColorString( color.r_/15.0, color.g_/15.0, color.b_/15.0 ) << this->nameFromAdmin_ << tColoredString::ColorString( -1, -1, -1 );
 
         con << tOutput("$player_will_be_renamed", newName, oldName);
 

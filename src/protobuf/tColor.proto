@@ -18,9 +18,10 @@ message tColor
     optional float r = 1;
     optional float g = 2;
     optional float b = 3;
-    optional float a = 4;
 
     // legacy message end marker, extensions go after it
     optional bool legacy_message_end_marker = 20000;
+
+    optional float a = 4 [default = 1];
 }
 

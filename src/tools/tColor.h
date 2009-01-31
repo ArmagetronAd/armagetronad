@@ -31,6 +31,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tString.h"
 #include "defs.h"
 
+namespace Tools{ class tColor; class tShortColor; }
+
 //! rgba color represented by floats between 0 and 1
 class tColor
 {
@@ -45,10 +47,30 @@ public:
     void FillFrom( const char * c );		//!< Fills this color object from a color code string
     void FillFrom( const wchar_t * c );		//!< Fills this color object from a color code string
 
+    void WriteSync( Tools::tColor & target ) const; //!< writes sync data
+    void ReadSync( Tools::tColor const & source );  //!< reads sync data
+
     // the colors are public because they are independent of each other
     REAL r_, g_, b_, a_;                    //!< Color values
 
     bool IsDark( void );	//!< Has this color to be rendered on a bright background ?
+protected:
+private:
+};
+
+//! color where each component is represented by a short from 0 to 15
+class tShortColor
+{
+public:
+    tShortColor();       //!< Constructor
+    tShortColor( unsigned char r, unsigned char g, unsigned char b );  //!< Constructor
+    ~tShortColor(){}                           //!< Destructor
+
+    void WriteSync( Tools::tShortColor & target ) const; //!< writes sync data
+    void ReadSync( Tools::tShortColor const & source );  //!< reads sync data
+
+    // the colors are public because they are independent of each other
+    unsigned char r_, g_, b_;                 //!< Color values
 protected:
 private:
 };
@@ -63,6 +85,14 @@ inline bool operator==(const tColor &lColor, const tColor &rColor) {
 }
 
 inline bool operator!=(const tColor &lColor, const tColor &rColor) {
+    return !operator==(lColor, rColor);
+}
+
+inline bool operator==(const tShortColor &lColor, const tShortColor &rColor) {
+    return ( (lColor.r_ == rColor.r_) && (lColor.g_ == rColor.g_) && (lColor.b_ == rColor.b_));
+}
+
+inline bool operator!=(const tShortColor &lColor, const tShortColor &rColor) {
     return !operator==(lColor, rColor);
 }
 

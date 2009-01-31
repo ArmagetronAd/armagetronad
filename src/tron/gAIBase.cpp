@@ -1136,9 +1136,9 @@ gAIPlayer::gAIPlayer():
                 ePlayerNetID *p=se_PlayerNetIDs(j);
                 if (p && p != this)
                 {
-                    R = p->r/15.0;
-                    G = p->g/15.0;
-                    B = p->b/15.0;
+                    R = p->color.r_/15.0;
+                    G = p->color.g_/15.0;
+                    B = p->color.b_/15.0;
                 }
                 else
                     continue;
@@ -1178,9 +1178,9 @@ gAIPlayer::gAIPlayer():
     }
 
 
-    r = static_cast<int>(rgb_ai[take_ai][0] * 15);
-    g = static_cast<int>(rgb_ai[take_ai][1] * 15);
-    b = static_cast<int>(rgb_ai[take_ai][2] * 15);
+    color.r_ = static_cast<int>(rgb_ai[take_ai][0] * 15);
+    color.g_ = static_cast<int>(rgb_ai[take_ai][1] * 15);
+    color.b_ = static_cast<int>(rgb_ai[take_ai][2] * 15);
 
 
     ping = 0;
