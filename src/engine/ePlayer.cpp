@@ -8078,29 +8078,31 @@ void ePlayerNetID::UpdateName( void )
     eNameMessenger messenger( *this );
 
     // apply client change, stripping excess spaces
-    if ( sn_GetNetState() == nSTANDALONE
-    || ( Owner() == 0 && sn_GetNetState() != nCLIENT )
-    || (
-            IsHuman()
-         && ( sn_GetNetState() == nCLIENT || !messenger.adminRename_ )
-         && ( sn_GetNetState() != nCLIENT || Owner() == sn_myNetID )
-       )
+    if (
+            sn_GetNetState() == nSTANDALONE
+        || ( Owner() == 0 && sn_GetNetState() != nCLIENT )
+        || (
+                IsHuman()
+            && ( sn_GetNetState() == nCLIENT || !messenger.adminRename_ )
+            && ( sn_GetNetState() != nCLIENT || Owner() == sn_myNetID )
+           )
        )
     {
-        if ( sn_GetNetState() == nSTANDALONE || !IsHuman() || ( IsHuman() && ( nameFromServer_ != nameFromClient_ && !messenger.adminRename_ ) ) )
-	{
-	    // apply name filters only on remote players
+
+        if ( sn_GetNetState() == nSTANDALONE || Owner() == 0 || ( IsHuman() && ( nameFromServer_ != nameFromClient_ && !messenger.adminRename_ ) ) )
+        {
+            // apply name filters only on remote players
             if ( Owner() != 0 )
-	        se_OptionalNameFilters( nameFromClient_ );
+            se_OptionalNameFilters( nameFromClient_ );
 
             // nothing wrong ? proceed to renaming
-	    nameFromAdmin_ = nameFromServer_ = nameFromClient_;
-	}
+            nameFromAdmin_ = nameFromServer_ = nameFromClient_;
+        }
         else
-	{
-	    // revert name
+        {
+            // revert name
             nameFromClient_ = nameFromServer_ = nameFromAdmin_;
-	}
+        }
     }
     // remove colors from name
     tString newName = tColoredString::RemoveColors( nameFromServer_ );
