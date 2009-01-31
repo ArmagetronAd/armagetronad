@@ -1,0 +1,35 @@
+// Protocol buffer types for gAIBase.cpp
+package Game;
+
+import "ePlayer.proto";
+import "eTeam.proto";
+
+// sync message for AIs
+message gAIPlayerSync
+{
+    // base class init data, needs to come first
+    optional Engine.ePlayerNetIDSync base = 1;
+
+    // legacy creation data end marker
+    optional bool legacy_create_end = 20000;
+
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
+    // extensions go here
+}
+
+// sync message for AI teams
+message gAITeamSync
+{
+    // base class init data, needs to come first
+    optional Engine.eTeamSync base = 1;
+
+    // legacy creation data end marker
+    optional bool legacy_create_end = 20000;
+
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
+    // extensions go here
+}

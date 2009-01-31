@@ -1,0 +1,26 @@
+// Protocol buffer types for colors.
+package Tools;
+
+// color used by players and teams. values go from 0 to 15.
+message tShortColor
+{
+    optional uint32 r = 1;
+    optional uint32 g = 2;
+    optional uint32 b = 3;
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// float valued color, used by game objects.
+message tColor
+{
+    optional float r = 1;
+    optional float g = 2;
+    optional float b = 3;
+    optional float a = 4;
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+

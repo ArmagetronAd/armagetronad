@@ -32,6 +32,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <set>
 
+#include "nProtoBuf.h"
+#include "eTeam.pb.h"
+
 tString & operator << ( tString &s, const eTeam & team)
 {
     if ( !(&team) )
@@ -116,10 +119,12 @@ inline static tColoredStringProxy ColorString( const eTeam * t )
     return tColoredStringProxy( t->R()/15.0f, t->G()/15.0f, t->B()/15.0f );
 }
 
-nNOInitialisator<eTeam> eTeam_init(220,"eTeam");
+nOProtoBufDescriptor<eTeam, Engine::eTeamSync > eTeam_init(220);
 
-nDescriptor &eTeam::CreatorDescriptor() const{
-    return eTeam_init;
+//! returns the descriptor responsible for this class
+nOProtoBufDescriptorBase const * eTeam::DoGetDescriptor() const
+{
+    return &eTeam_init;
 }
 
 int  eTeam::minTeams=0;					// minimum nuber of teams
@@ -841,10 +846,7 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
                 }
 
                 // mode 2: lowest score goes out
-                if ( !last )
-                {
-                    last = t;
-                }
+                last = t;
             }
         }
 
@@ -1443,29 +1445,37 @@ bool eTeam::ClearToTransmit(int user) const
 
 // syncronisation functions:
 
-// store sync message in m
-void eTeam::WriteSync(nMessage &m)
+//! writes sync data (and initialization data if flat is set)
+void eTeam::WriteSync( Engine::eTeamSync & sync, bool init )
 {
-    m << r;
-    m << g;
-    m << b;
-    m << name;
-    m << maxPlayersLocal;
-    m << maxImbalanceLocal;
-    m << score;
+    nNetObject::WriteSync( *sync.mutable_base(), init );
+
+    Tools::tShortColor & color = *sync.mutable_color();
+    color.set_r( r );
+    color.set_g( g );
+    color.set_b( b );
+    sync.set_name( name );
+    sync.set_max_players( maxPlayersLocal );
+    sync.set_max_imbalance( maxImbalanceLocal );
+    sync.set_score( score );
 }
 
 
-// guess what
-void eTeam::ReadSync(nMessage &m)
+//! reads incremental sync data. Returns false if sync was invalid or old.
+bool eTeam::ReadSync( Engine::eTeamSync const & sync, nSenderInfo const & init )
 {
-    m >> r;
-    m >> g;
-    m >> b;
-    m >> name;
-    m >> maxPlayersLocal;
-    m >> maxImbalanceLocal;
-    m >> score;
+    if ( !nNetObject::ReadSync( sync.base(), init ) )
+    {
+        return false;
+    }
+
+    r = sync.color().r();
+    g = sync.color().g();
+    b = sync.color().b();
+    name = sync.name();
+    maxPlayersLocal = sync.max_players();
+    maxImbalanceLocal = sync.max_imbalance();
+    score = sync.score();
 
     // update colored player names
     if ( sn_GetNetState() != nSERVER )
@@ -1475,9 +1485,11 @@ void eTeam::ReadSync(nMessage &m)
             players(i)->UpdateName();
         }
     }
+
+    return true;
 }
 
-
+/*
 // is the message newer	than the last accepted sync
 bool eTeam::SyncIsNew(nMessage &m)
 {
@@ -1494,6 +1506,7 @@ void eTeam::WriteCreate(nMessage &m)
     nNetObject::WriteCreate(m);
 }
 
+*/
 
 // control functions:
 // receives the control message. the data written to the message created
@@ -1501,8 +1514,6 @@ void eTeam::WriteCreate(nMessage &m)
 void eTeam::ReceiveControlNet(nMessage &m)
 {
 }
-
-
 
 // con/desstruction
 // default constructor
@@ -1520,9 +1531,9 @@ eTeam::eTeam()
 
 
 // remote constructor
-eTeam::eTeam(nMessage &m)
-        :nNetObject( m ),
-        colorID(-1),listID(-1)
+eTeam::eTeam( Engine::eTeamSync const & sync, nSenderInfo const & sender )
+: nNetObject( sync.base(), sender ),
+  colorID(-1),listID(-1)
 {
     score = 0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;

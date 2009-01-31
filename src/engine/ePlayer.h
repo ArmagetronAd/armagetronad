@@ -274,13 +274,11 @@ public:
     virtual bool			ClearToTransmit(int user) const;
 
     //! creates a netobject form sync data
-    ePlayerNetID( Engine::ePlayerNetIDSync const &, nSenderInfo const & );
+    ePlayerNetID( Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender );
     //! reads incremental sync data. Returns false if sync was invalid or old.
-    bool ReadSync( Engine::ePlayerNetIDSync const &, nSenderInfo const & );
+    bool ReadSync( Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender );
     //! writes sync data (and initialization data if flat is set)
-    void WriteSync( Engine::ePlayerNetIDSync &, bool init );
-
-private:
+    void WriteSync( Engine::ePlayerNetIDSync & sync, bool init );
     //! returns the descriptor responsible for this class
     virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
 public:

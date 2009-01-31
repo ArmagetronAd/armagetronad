@@ -46,7 +46,7 @@ ${srcdir}/tools/tVersion.cpp: tTrueVersion.h
 # protocol buffer rules
 protobuf/%.pb: ${srcdir}/protobuf/%.proto
 	test -d protobuf || mkdir protobuf
-	protoc $< --cpp_out=protobuf --proto_path=${srcdir}/protobuf 2>&1 | sed -e s,^$*.proto,${srcdir}/protobuf/$*.proto,
+	protoc $< --cpp_out=protobuf --proto_path=${srcdir}/protobuf 2>&1 | sed -e "s,^\(.*\).proto,${srcdir}/protobuf/\1.proto,"
 
 protobuf/%.pb.cc: protobuf/%.pb
 	true
@@ -65,8 +65,13 @@ endif
 # protocol buffers. Need to be compiled first so the headers exist for the
 # other modules to include.
 libprotobuf_a_SOURCES = \
+    protobuf/tColor.pb.cc protobuf/tColor.pb.h \
     protobuf/nNetObject.pb.cc protobuf/nNetObject.pb.h \
-    protobuf/ePlayer.pb.cc protobuf/ePlayer.pb.h
+    protobuf/eTeam.pb.cc protobuf/eTeam.pb.h \
+    protobuf/ePlayer.pb.cc protobuf/ePlayer.pb.h \
+    protobuf/gAIBase.pb.cc protobuf/gAIBase.pb.h
+#    protobuf/.pb.cc protobuf/.pb.h \
+#
 
 # Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
 # the fragile dependency on undefined behaviour of the linker...)

@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tList.h"
 #include <vector>
 
+namespace Engine{ class eTeamSync; }
+
 tString & operator << ( tString&, const eTeam&);
 std::ostream & operator << ( std::ostream&, const eTeam&);
 
@@ -189,16 +191,14 @@ public:												// public methods
 
     virtual bool ClearToTransmit(int user) const;		// we must not transmit an object that contains pointers to non-transmitted objects. this function is supposed to check that.
 
-    // syncronisation functions:
-    virtual void WriteSync(nMessage &m);				// store sync message in m
-    virtual void ReadSync(nMessage &m);					// guess what
-    virtual bool SyncIsNew(nMessage &m);				// is the message newer	than the last accepted sync
-    virtual nDescriptor&	CreatorDescriptor() const;
-
-    // the extra information sent on creation:
-    virtual void WriteCreate(nMessage &m); // store sync message in m
-    // the information written by this function should
-    // be read from the message in the "message"- connstructor
+    //! creates a netobject form sync data
+    eTeam( Engine::eTeamSync const &, nSenderInfo const & );
+    //! reads incremental sync data. Returns false if sync was invalid or old.
+    bool ReadSync( Engine::eTeamSync const &, nSenderInfo const & );
+    //! writes sync data (and initialization data if flat is set)
+    void WriteSync( Engine::eTeamSync &, bool init );
+    //! returns the descriptor responsible for this class
+    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
 
     // control functions:
     virtual void ReceiveControlNet(nMessage &m);

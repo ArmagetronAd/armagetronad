@@ -515,6 +515,40 @@ nMessageBase * nMessage::Transform( PROTOBUF const & message )
 template< class PROTOBUF > 
 nProtoBufDescriptor< PROTOBUF > * nProtoBufDescriptor< PROTOBUF >::instance_ = 0;
 
+//! class for automatic conversion to 'basse' protobuffers
+template< class SOURCE >
+class nProtoBufBaseConverter
+{
+public:
+    nProtoBufBaseConverter( SOURCE & source )
+    : source_( source ){}
+
+    operator SOURCE &()
+    {
+        return source_;
+    }
+
+    template< class DEST >
+    operator DEST const &()
+    {
+        return Convert( source_.base() );
+    }
+
+    template< class DEST >
+    operator DEST &()
+    {
+        return Convert( *source_.mutable_base() );
+    }
+private:
+    template< class MEDIUM >
+    nProtoBufBaseConverter< MEDIUM > Convert( MEDIUM & medium )
+    {
+        return nProtoBufBaseConverter< MEDIUM >( medium );
+    }
+
+    SOURCE & source_;
+};
+
 //! specialization of descriptor for each network object class
 template< class OBJECT, class PROTOBUF >
 class nOProtoBufDescriptor: public nOProtoBufDescriptorBase, public nProtoBufDescriptor< PROTOBUF >
@@ -539,7 +573,7 @@ private:
             nNetObjectRegistrar registrar;
             tJUST_CONTROLLED_PTR< OBJECT > n=tNEW(OBJECT)( message, sender );
             n->InitAfterCreation();
-            n->ReadSync( message, sender );
+            n->ReadSync( nProtoBufBaseConverter< PROTOBUF const >( message ), sender );
             n->Register( registrar );
             
             PostCheck( n, sender );
@@ -553,7 +587,7 @@ private:
         nNetObject::IDToPointer( id, object );
         if ( object )
         {
-            object->ReadSync( message, sender );
+            object->ReadSync( nProtoBufBaseConverter< PROTOBUF const >( message ), sender );
         }
         else
         {
@@ -575,7 +609,7 @@ private:
         ReadMessage( envelope, sync, envelope->AccessWorkProtoBuf() );
 
         // delegate to object
-        cast.ReadSync( sync, nSenderInfo( envelope ) );
+        cast.ReadSync( nProtoBufBaseConverter< PROTOBUF const >( sync ), nSenderInfo( envelope ) );
     }
 
     //! creates a message
@@ -596,7 +630,7 @@ private:
 
         // write sync
         PROTOBUF & sync = message->AccessProtoBuf();
-        cast.WriteSync( sync, create );
+        cast.WriteSync( nProtoBufBaseConverter< PROTOBUF >( sync ), create );
 
         // set old streaming mode to sync mode
         if ( !create )
@@ -617,7 +651,7 @@ private:
         // read sync
         PROTOBUF sync;
         StreamFrom( envelope, sync, create ? nProtoBufDescriptorBase::SECTION_First : nProtoBufDescriptorBase::SECTION_Second );
-        cast.ReadSync( sync, nSenderInfo( envelope ) );
+        cast.ReadSync( nProtoBufBaseConverter< PROTOBUF const >( sync ), nSenderInfo( envelope ) );
     }
 
     //! writes into an old sync message
@@ -629,7 +663,7 @@ private:
 
         // read sync
         PROTOBUF sync;
-        cast.WriteSync( sync, create );
+        cast.WriteSync( nProtoBufBaseConverter< PROTOBUF >( sync ), create );
         StreamTo( sync, envelope, create ? nProtoBufDescriptorBase::SECTION_First : nProtoBufDescriptorBase::SECTION_Second );
     }
     

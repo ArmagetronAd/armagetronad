@@ -1,0 +1,46 @@
+// Protocol buffer types for <X>
+package Tools;
+package Network;
+package Render;
+package Engine;
+package UI;
+package Game;
+
+// import "nNetObject.proto";
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// legacy message
+message <X>
+{
+    // legacy stuff goes here
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// legacy sync message
+message <X>Sync
+{
+    // base class init data, needs to come first
+    optional Network.nNetObjectSync base = 1;
+
+    // legacy creation data goes here
+
+    // legacy creation data end marker
+    optional bool legacy_create_end = 20000;
+
+    // legacy sync data goes here
+
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
+    // extensions go here
+}

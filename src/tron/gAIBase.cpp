@@ -46,6 +46,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <cstdlib>
 #include <memory>
 
+#include "nProtoBuf.h"
+#include "gAIBase.pb.h"
+
 #define AI_REACTION          0 
 #define AI_EMERGENCY         1 
 #define AI_RANGE             2 
@@ -189,9 +192,8 @@ static gAICharacter* BestIQ( int iq )
     return bestIQ;
 }
 
-
-
-gAITeam::gAITeam(nMessage &m) : eTeam(m)
+gAITeam::gAITeam( Game::gAITeamSync const & sync, nSenderInfo const & sender )
+  : eTeam( sync.base(), sender )
 {
     //	teams.Remove( this, listID );
 }
@@ -201,11 +203,11 @@ gAITeam::gAITeam()
     //	teams.Remove( this, listID );
 }
 
-static nNOInitialisator<gAITeam> gAITeam_init(331,"gAITeam");
+static nOProtoBufDescriptor<gAITeam,Game::gAITeamSync> gAITeam_init(331);
 
-nDescriptor &gAITeam::CreatorDescriptor() const
+nOProtoBufDescriptorBase const * gAITeam::DoGetDescriptor() const
 {
-    return gAITeam_init;
+    return &gAITeam_init;
 }
 
 // fill empty team positions with AI players
@@ -1078,14 +1080,16 @@ static REAL rgb_ai[MAXAI_COLOR][3]={
                                        {.5,.5,.5}
                                    };
 
-static nNOInitialisator<gAIPlayer> gAIPlayer_init(330,"gAIPlayer");
+static nOProtoBufDescriptor<gAIPlayer,Game::gAIPlayerSync> gAIPlayer_init(330);
 
-nDescriptor &gAIPlayer::CreatorDescriptor() const{
-    return gAIPlayer_init;
+nOProtoBufDescriptorBase const * gAIPlayer::DoGetDescriptor() const
+{
+    return &gAIPlayer_init;
 }
 
-gAIPlayer::gAIPlayer(nMessage &m) :
-        ePlayerNetID(m),
+//! creates a netobject form sync data
+gAIPlayer::gAIPlayer( Game::gAIPlayerSync const & sync, nSenderInfo const & sender ):
+        ePlayerNetID(sync.base(), sender ),
         character(NULL),
         //	target(NULL),
         lastPath(se_GameTime()-100),

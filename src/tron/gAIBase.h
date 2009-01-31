@@ -44,6 +44,8 @@ class gAISensor;
 class gAILog;
 class gAICharacter;
 
+namespace Game{ class gAIPlayerSync; class gAITeamSync; }
+
 typedef enum
 { AI_SURVIVE = 0,   // just try to stay alive
   AI_TRACE,         // trace a wall
@@ -238,17 +240,30 @@ public:
 
     virtual void Color( REAL&r, REAL&g, REAL&b ) const;
 
-    virtual nDescriptor&	CreatorDescriptor() const;
-    gAIPlayer(nMessage &m);
+    //! creates a netobject form sync data
+    gAIPlayer( Game::gAIPlayerSync const & sync, nSenderInfo const & sender );
+    //! reads incremental sync data. Returns false if sync was invalid or old.
+    // bool ReadSync( Game::gAIPlayerSync const & sync, nSenderInfo const & sender );
+    //! writes sync data (and initialization data if flat is set)
+    // void WriteSync( Game::gAIPlayerSync & sync, bool init );
+    //! returns the descriptor responsible for this class
+    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
 };
 
 // the AI team
 class gAITeam: public eTeam
 {
 public:
-    gAITeam(nMessage &m);
     gAITeam();
-    virtual nDescriptor &CreatorDescriptor() const;
+
+    //! creates a netobject form sync data
+    gAITeam( Game::gAITeamSync const & sync, nSenderInfo const & sender );
+    //! reads incremental sync data. Returns false if sync was invalid or old.
+    // bool ReadSync( Game::gAITeamSync const & sync, nSenderInfo const & sender );
+    //! writes sync data (and initialization data if flat is set)
+    // void WriteSync( Game::gAITeamSync & sync, bool init );
+    //! returns the descriptor responsible for this class
+    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
 
     static void BalanceWithAIs(bool doBalance = balanceWithAIs);	// fill empty team positions with AI players
     virtual bool PlayerMayJoin(const ePlayerNetID* player) const;	// may player join this team?
