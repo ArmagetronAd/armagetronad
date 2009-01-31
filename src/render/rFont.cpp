@@ -161,6 +161,9 @@ void sr_utf8216(tString const &in, std::wstring &out) {
 int sr_fontType = sr_fontTexture;
 static tConfItem< int > sr_fontTypeConf( "FONT_TYPE", sr_fontType, &sr_ReloadFont);
 
+float sr_lineHeight = 1.;
+static tConfItem< float > sr_lineHeightconf( "LINE_HEIGHT", sr_lineHeight);
+
 class rFontContainer : std::map<int, FTFont *> {
     FTFont &New(int size);
     FTFont *Load(tString const &path);
@@ -209,8 +212,8 @@ public:
         }
     }
     FTFont &GetFont(float height) {
-        static float size_factor = .9; // guess, then improve
-        int size = int(height*size_factor*sr_screenHeight/2.+.5);
+        static float size_factor = .8; // guess, then improve
+        int size = int(height/sr_lineHeight*size_factor*sr_screenHeight/2.+.5);
         FTFont *ret;
         if(count(size)) {
             ret = (*this)[size]; //already exists
