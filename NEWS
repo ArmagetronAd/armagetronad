@@ -1,3 +1,5 @@
+Changes since 0.2.8.3_beta1:
+
 Changes since 0.2.8.2:
 
   New settings and commands:
@@ -184,6 +186,8 @@ If --enable-armathentication was activated:
 - TEAM_ELIMINATION_MODE sets the way ArmagetronAd removes teams when there's too much teams.
 
   Bugfixes:
+- Added compensation for drifting timers (observed often with
+  overclocked mainboards)
 - Text input fields now let the text wrap correctly and make use of the space allocated
   for them in a not-completely-dumb way. And *sigh* depending on the text field, color
   codes are either ignored (for the usernames) or both displayed in text and rendered.
