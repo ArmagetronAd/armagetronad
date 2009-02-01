@@ -30,5 +30,7 @@ message nNetObjectControl
     optional uint32 object_id = 1;
     
     // the actual data is store in extensions provided by the classes using this mechanism.
-    extensions 16 to 10000;
+    extensions 5    to 15;     // one byte overhead
+    extensions 100  to 2048;   // two bytes overhead
+    extensions 4096 to 20000;  // three bytes overhead
 }
