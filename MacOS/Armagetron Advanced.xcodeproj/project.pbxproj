@@ -1624,7 +1624,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
-			shellScript = "rake --trace xcode:cleanup\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am astylerc\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone";
+			shellScript = "rake --trace xcode:cleanup\n\nfor f in *.in *.svn *.cvs *.cvsignore *.am astylerc armagetronad.sfd\ndo\n\tfind \"${CONFIGURATION_BUILD_DIR}\" -name $f -depth -exec rm -rf \\{\\} \\;\ndone";
 		};
 		9B3139B40EFD0586009690D0 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
