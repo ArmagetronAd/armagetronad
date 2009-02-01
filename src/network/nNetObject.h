@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ArmageTron_NETOBJECT_H
 
 #include "nNetwork.h"
+#include "nProtoBufForward.h"
 #include "tArray.h"
 #include "tConsole.h"
 #include <string.h>
@@ -331,10 +332,14 @@ protected:
     // copies of this nNetObject; control is received with ReceiveControlNet().
     // It is automatically broadcast (sent to the server in client mode).
 
-    // conversion for stream legacy control messages
-    virtual void StreamControl( Network::nNetObjectControl const & constrol, nStreamMessage & stream );
-    virtual void UnstreamControl( nStreamMessage & stream, Network::nNetObjectControl const & constrol );
-    
+private:
+    // conversion for stream legacy control messages.
+    virtual void StreamControl( Network::nNetObjectControl const & control, nStreamMessage & stream );
+    virtual void UnstreamControl( nStreamMessage & stream, Network::nNetObjectControl & control );
+
+    // easier to implement conversion helpers: just extract the relevant sub-protbuf.
+    virtual nProtoBuf       * ExtractControl( Network::nNetObjectControl       & control );
+    virtual nProtoBuf const * ExtractControl( Network::nNetObjectControl const & control );
 public:
 
     virtual void ReceiveControlNet(nMessage &m);

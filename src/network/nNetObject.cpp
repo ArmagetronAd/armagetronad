@@ -1532,11 +1532,33 @@ Network::nNetObjectControl & nNetObject::BroadcastControl(){
 }
 
 // conversion for stream legacy control messages
-void nNetObject::StreamControl( Network::nNetObjectControl const & constrol, nStreamMessage & stream )
-{}
+void nNetObject::StreamControl( Network::nNetObjectControl const & control, nStreamMessage & stream )
+{
+    nProtoBuf const * relevant = ExtractControl( control );
+    if ( relevant )
+    {
+        nProtoBufDescriptorBase::StreamToStatic( *relevant, stream, nProtoBufDescriptorBase::SECTION_Default );
+    }
+}
 
-void nNetObject::UnstreamControl( nStreamMessage & stream, Network::nNetObjectControl const & constrol )
-{}
+void nNetObject::UnstreamControl( nStreamMessage & stream, Network::nNetObjectControl & control )
+{
+    nProtoBuf * relevant = ExtractControl( control );
+    if ( relevant )
+    {
+        nProtoBufDescriptorBase::StreamFromStatic( stream, *relevant, nProtoBufDescriptorBase::SECTION_Default );
+    }
+}
+
+// easier to implement conversion helpers: just extract the relevant sub-protbuf.
+nProtoBuf * nNetObject::ExtractControl( Network::nNetObjectControl & control )
+{
+    return NULL;
+}
+nProtoBuf const * nNetObject::ExtractControl( Network::nNetObjectControl const & control )
+{
+    return NULL;
+}
 
 // ack that doesn't resend, just wait
 class nDontWaitForAck: public nWaitForAck{

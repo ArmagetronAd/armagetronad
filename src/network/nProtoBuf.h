@@ -29,6 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef ArmageTron_ProtocolBuffer_H
 #define ArmageTron_ProtocolBuffer_H
 
+#include "nProtoBufForward.h"
+
 // protocol buffers forward declaration
 namespace google { namespace protobuf { class Message; class Descriptor; } }
 typedef google::protobuf::Message nProtoBuf;
@@ -301,7 +303,7 @@ public:
     static void StreamFromStatic( nStreamMessage & in, nProtoBuf & out, StreamSections sections );
 
     //! dumb streaming to message, static version
-    static inline void StreamToStatic( nProtoBuf const & in, nStreamMessage & out, StreamSections sections );
+    static void StreamToStatic( nProtoBuf const & in, nStreamMessage & out, StreamSections sections );
 
     //! compares two messages, filling in total size and difference.
     static void EstimateMessageDifference( nProtoBuf const & a,
@@ -686,8 +688,6 @@ private:
 template< class OBJECT, class PROTOBUF >
 const PROTOBUF nOProtoBufDescriptor< OBJECT, PROTOBUF >::prototype;
 
-#endif
-
 //! one cache for every protobuf descriptor
 class nMessageCacheByDescriptor
 {
@@ -726,3 +726,5 @@ private:
     typedef std::map< google::protobuf::Descriptor const *, nMessageCacheByDescriptor > CacheMap;
     CacheMap parts;
 };
+
+#endif
