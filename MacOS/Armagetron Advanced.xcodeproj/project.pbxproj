@@ -87,7 +87,6 @@
 		9B7CFE230EFCE74700126634 /* tResourceType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE170EFCE74700126634 /* tResourceType.cpp */; };
 		9B83FE950B12161600878E8A /* Growl-WithInstaller.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9B83FF0F0B121B3100878E8A /* Growl-WithInstaller.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
-		9BB5B9280D84605700BF5F1C /* InfoPlist.strings.in in Resources */ = {isa = PBXBuildFile; fileRef = 9BB5B9260D84605700BF5F1C /* InfoPlist.strings.in */; };
 		9BB7B4000D8246A2004FE8C3 /* config in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAE20A2CAE0700D7033C /* config */; };
 		9BB7B4010D8246A2004FE8C3 /* language in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAFE0A2CAE1D00D7033C /* language */; };
 		9BB7B5E10D8302FA004FE8C3 /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B5A60D8302FA004FE8C3 /* eAdvWall.cpp */; };
@@ -141,7 +140,6 @@
 		9BB7B6670D830322004FE8C3 /* AARuby.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6520D830321004FE8C3 /* AARuby.mm */; };
 		9BB7B6690D830322004FE8C3 /* AAURLHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6540D830321004FE8C3 /* AAURLHandler.mm */; };
 		9BB7B6710D830322004FE8C3 /* SDLMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B65F0D830321004FE8C3 /* SDLMain.mm */; };
-		9BB7B6730D830322004FE8C3 /* version.h.in in Resources */ = {isa = PBXBuildFile; fileRef = 9BB7B6610D830322004FE8C3 /* version.h.in */; };
 		9BB7B6AF0D830366004FE8C3 /* md5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6900D830365004FE8C3 /* md5.cpp */; };
 		9BB7B6B10D830366004FE8C3 /* nAuthentication.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6920D830365004FE8C3 /* nAuthentication.cpp */; };
 		9BB7B6B30D830366004FE8C3 /* nConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B6940D830365004FE8C3 /* nConfig.cpp */; };
@@ -1580,8 +1578,6 @@
 				9BD7DB3E0A2CAE4600D7033C /* textures in Resources */,
 				9BD7DB770A2CE28500D7033C /* SDLMain.nib in Resources */,
 				9BD7DB7E0A2CE35600D7033C /* Armagetron Advanced.icns in Resources */,
-				9BB7B6730D830322004FE8C3 /* version.h.in in Resources */,
-				9BB5B9280D84605700BF5F1C /* InfoPlist.strings.in in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
