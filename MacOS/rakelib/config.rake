@@ -1,13 +1,15 @@
 require "shellwords"
 require "enumerator"
+require "yaml"
 
 class AA::Version
-  
-  def initialize()
-    @info = initialize_info()
+  def initialize(version_file)
+    @version_file = version_file
+    initialize_info()
   end
   
   attr_reader :info
+  attr_reader :version_file
   
   def [](key)
     @info[key]
@@ -23,13 +25,22 @@ class AA::Version
     }
   end
   
-  def initialize_info()
+  def initialize_info
+    if File.exist?(@version_file)
+      @info = File.open(@version_file) { |f| YAML.load(f) }
+    else
+      @info = generate_version()
+      File.open(@version_file, "w") { |f| YAML.dump(@info, f) }
+    end
+  end
+  
+  def generate_version()
     if AA::Config::BUILD_TYPE == :development
       data = version_script(true)
       words = Shellwords.shellwords(data)
       make_hash(words)
     else
-      # TODO
+      # TODO: get version from version.h
     end
   end
 
@@ -120,5 +131,7 @@ module AA::Config
     
   PROGRAM_SHORT_NAME = DEDICATED ? "armagetronad-dedicated" : "armagetronad"
   
-  VERSION_INFO = AA::Version.new
+  VERSION_INFO = AA::Version.new(generated_path("version.yaml"))
+    
+
 end
