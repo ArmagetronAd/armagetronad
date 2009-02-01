@@ -66,9 +66,12 @@ endif
 # other modules to include.
 libprotobuf_a_SOURCES = \
     protobuf/tColor.pb.cc protobuf/tColor.pb.h \
+    protobuf/tCoord.pb.cc protobuf/tCoord.pb.h \
     protobuf/nNetObject.pb.cc protobuf/nNetObject.pb.h \
     protobuf/eTeam.pb.cc protobuf/eTeam.pb.h \
     protobuf/ePlayer.pb.cc protobuf/ePlayer.pb.h \
+    protobuf/eNetGameObject.pb.cc protobuf/eNetGameObject.pb.h \
+    protobuf/eVoter.pb.cc protobuf/eVoter.pb.h \
     protobuf/gAIBase.pb.cc protobuf/gAIBase.pb.h
 #    protobuf/.pb.cc protobuf/.pb.h \
 #

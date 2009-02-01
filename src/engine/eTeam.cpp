@@ -1496,13 +1496,6 @@ void eTeam::WriteCreate(nMessage &m)
 
 */
 
-// control functions:
-// receives the control message. the data written to the message created
-// by *NewControlMessage() can be read directly from m.
-void eTeam::ReceiveControlNet(nMessage &m)
-{
-}
-
 // con/desstruction
 // default constructor
 eTeam::eTeam()

@@ -206,11 +206,6 @@ public:												// public methods
     //! returns the descriptor responsible for this class
     virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
 
-    // control functions:
-    virtual void ReceiveControlNet(nMessage &m);
-    // receives the control message. the data written to the message created
-    // by *NewControlMessage() can be read directly from m.
-
     // shall the server accept sync messages from the clients?
     virtual bool AcceptClientSync() const	{
         return false;

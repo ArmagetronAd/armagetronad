@@ -7392,12 +7392,11 @@ void ePlayerNetID::SetTeamWish(eTeam* newTeam)
     }
     if ( nCLIENT ==  sn_GetNetState() && Owner() == sn_myNetID )
     {
-        nMessage* m = NewControlMessage();
+        Engine::ePlayerNetIDControl & control = *BroadcastControl().MutableExtension( Engine::player_control );
 
-        (*m) << TEAMCHANGE;
-        (*m) << newTeam;
+        control.set_type( TEAMCHANGE );
+        control.set_team_id( PointerToID( newTeam ) );
 
-        m->BroadCast();
         // update local client data, should be ok (dangerous?, why?)
         SetTeamForce( newTeam );
     }
@@ -7416,11 +7415,9 @@ void ePlayerNetID::CreateNewTeamWish()
 {
     if ( nCLIENT ==  sn_GetNetState() )
     {
-        nMessage* m = NewControlMessage();
+        Engine::ePlayerNetIDControl & control = *BroadcastControl().MutableExtension( Engine::player_control );
 
-        (*m) << NEW_TEAM;
-
-        m->BroadCast();
+        control.set_type( NEW_TEAM );
     }
     else
         // create a new team if possible otherwise spectate
@@ -7428,10 +7425,12 @@ void ePlayerNetID::CreateNewTeamWish()
 }
 
 // receive the team control wish
-void ePlayerNetID::ReceiveControlNet(nMessage &m)
+void ePlayerNetID::ReceiveControlNet( Network::nNetObjectControl const & controlBase )
 {
-    short messageType;
-    m >> messageType;
+    tASSERT( controlBase.HasExtension( Engine::player_control ) );
+    Engine::ePlayerNetIDControl const & control = controlBase.GetExtension( Engine::player_control );
+
+    short messageType = control.type();
 
     switch (messageType)
     {
@@ -7449,7 +7448,7 @@ void ePlayerNetID::ReceiveControlNet(nMessage &m)
         {
             eTeam *newTeam;
 
-            m >> newTeam;
+            IDToPointer( control.team_id(), newTeam );
 
             if(!TeamChangeAllowed( true )) {
                 break;
@@ -7492,6 +7491,19 @@ void ePlayerNetID::ReceiveControlNet(nMessage &m)
         }
     }
 }
+
+// easier to implement conversion helpers: just extract the relevant sub-protbuf.
+nProtoBuf       * ePlayerNetID::ExtractControl( Network::nNetObjectControl       & control )
+{
+    return control.MutableExtension( Engine::player_control );
+}
+
+nProtoBuf const * ePlayerNetID::ExtractControl( Network::nNetObjectControl const & control )
+{
+    tASSERT( control.HasExtension( Engine::player_control ) );
+    return & control.GetExtension( Engine::player_control );
+}
+
 
 void ePlayerNetID::Color( REAL&a_r, REAL&a_g, REAL&a_b ) const
 {

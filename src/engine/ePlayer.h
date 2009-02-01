@@ -260,7 +260,11 @@ public:
 
     void CreateNewTeam(); 	    				// create a new team and join it (on the server)
     void CreateNewTeamWish();	 				// express the wish to create a new team and join it
-    virtual void ReceiveControlNet(nMessage &m);// receive the team control wish
+    virtual void ReceiveControlNet( Network::nNetObjectControl const & control );// receive the team control wish
+
+    // easier to implement conversion helpers: just extract the relevant sub-protbuf.
+    virtual nProtoBuf       * ExtractControl( Network::nNetObjectControl       & control );
+    virtual nProtoBuf const * ExtractControl( Network::nNetObjectControl const & control );
 
     static bool Enemies( ePlayerNetID const * a, ePlayerNetID const * b ); //!< determines whether two players are opponents and can score points against each other
 

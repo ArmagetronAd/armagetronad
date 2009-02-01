@@ -54,5 +54,5 @@ message ePlayerNetIDControl
 
 extend Network.nNetObjectControl
 {
-    optional ePlayerNetIDControl player_control = 16;
+    optional ePlayerNetIDControl player_control = 100;
 }

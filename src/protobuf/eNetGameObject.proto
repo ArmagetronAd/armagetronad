@@ -1,12 +1,8 @@
-// Protocol buffer types for PROTO
-//package Tools;
-//package Network;
-//package Render;
-//package Engine;
-//package UI;
-//package Game;
+// Protocol buffer types for eNetGameObject
+package Engine;
 
-// import "nNetObject.proto";
+import "nNetObject.proto";
+import "tCoord.proto";
 
 /* Translation rules for data types:
 
@@ -18,7 +14,7 @@
 */
 
 // legacy message
-message PROTO
+message eNetGameObject
 {
     // legacy stuff goes here
 
@@ -27,17 +23,21 @@ message PROTO
 }
 
 // legacy sync message
-message PROTOSync
+message eNetGameObjectSync
 {
     // base class init data, needs to come first
     optional Network.nNetObjectSync base = 1;
 
-    // legacy creation data goes here
+    optional uint32 player_id  = 2; // netobject ID of player owning the object
+    optional bool   autodelete = 3; // flag indicating whether the object should automatically
+                                    // delete itself after death
 
     // legacy creation data end marker
     optional bool legacy_create_end = 20000;
 
-    // legacy sync data goes here
+    optional float last_time            = 4; // last time the object was simulated
+    optional Tools.tDirection direction = 5; // current direction of movement
+    optional Tools.tCoord     position  = 6; // current position
 
     // legacy sync data end marker
     optional bool legacy_sync_end = 20001;
@@ -46,9 +46,12 @@ message PROTOSync
 }
 
 // net object control message
-message PROTOControl
+message eNetGameObjectControl
 {
     // legacy data goes here
+    optional float  time = 1;         // time of activation
+    optional uint32 action_id = 2;    // ID of action  
+    optional float  action_level = 3; // strength of action
 
     // legacy message end marker, extensions go after it
     optional bool legacy_message_end_marker = 20000;
@@ -57,5 +60,5 @@ message PROTOControl
 // register control
 extend Network.nNetObjectControl
 {
-    optional PROTOControl player_control = 20000;
+    optional eNetGameObjectControl net_game_object_control = 5;
 }

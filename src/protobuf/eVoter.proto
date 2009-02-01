@@ -1,0 +1,21 @@
+// Protocol buffer types for eVoter
+package Engine;
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// legacy message
+message eVoter
+{
+    // legacy stuff goes here
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+

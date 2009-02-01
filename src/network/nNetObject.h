@@ -346,7 +346,7 @@ public:
     // receives the control message. the data written to the message created
     // by *NewControlMessage() can be read directly from m.
 
-    virtual void ReceiveControlNet( Network::nNetObjectControl const & constrol );
+    virtual void ReceiveControlNet( Network::nNetObjectControl const & control );
     // receives the control message. the data written to the message created
     // by *NewControlMessage() can be read directly from m.
 

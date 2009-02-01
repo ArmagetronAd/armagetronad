@@ -34,6 +34,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eTeam.h"
 #include "eTess2.h"
 
+#include "eNetGameObject.pb.h"
+
 //static nNOInitialisator<eNetGameObject> eNetGameObject_Init("eNetGameObject");
 
 #define MAX_PING_OVERFLOW 3
@@ -166,14 +168,14 @@ void eNetGameObject::Release()
 }
 
 // control functions:
-void eNetGameObject::ReceiveControlNet(nMessage &m){
-    REAL time;
-    unsigned short act_id;
-    REAL x;
+void eNetGameObject::ReceiveControlNet( Network::nNetObjectControl const & controlBase )
+{
+    tASSERT( controlBase.HasExtension( Engine::net_game_object_control ) );
+    Engine::eNetGameObjectControl const & control = controlBase.GetExtension( Engine::net_game_object_control );
 
-    m >> time;
-    m.Read(act_id);
-    m >> x;
+    REAL time = control.time();
+    unsigned short act_id = control.action_id();
+    REAL x = control.action_level();
 
     REAL backdate=Lag();//sn_ping[m.SenderID()]*.5;
     if (backdate>sn_pingCharityServer*.001)
@@ -214,12 +216,24 @@ void eNetGameObject::SetPlayer(ePlayerNetID* a_player)
 void eNetGameObject::SendControl(REAL time,uActionPlayer *Act,REAL x){
     if (sn_GetNetState()==nCLIENT && Owner()==::sn_myNetID){
         //con << "sending control at " << time << "\n";
-        nMessage *m=NewControlMessage();
-        *m << time;
-        m->Write(Act->ID());
-        *m << x;
-        m->BroadCast();
+
+        Engine::eNetGameObjectControl & control = *BroadcastControl().MutableExtension( Engine::net_game_object_control );
+        control.set_time( time );
+        control.set_action_id( Act->ID() );
+        control.set_action_level( x );
     }
+}
+
+// easier to implement conversion helpers: just extract the relevant sub-protbuf.
+nProtoBuf       * eNetGameObject::ExtractControl( Network::nNetObjectControl       & control )
+{
+    return control.MutableExtension( Engine::net_game_object_control );
+}
+
+nProtoBuf const * eNetGameObject::ExtractControl( Network::nNetObjectControl const & control )
+{
+    tASSERT( control.HasExtension( Engine::net_game_object_control ) );
+    return & control.GetExtension( Engine::net_game_object_control );
 }
 
 void eNetGameObject::ReceiveControl(REAL time,uActionPlayer *Act,REAL x){
