@@ -1395,44 +1395,7 @@ void nNetObject::RequestSync(bool ack){
 }
 
 
-static void net_control_handler(nMessage &m){
-    //con << "control\n";
-    if (sn_GetNetState()==nSERVER){
-        unsigned short id;
-        m.Read(id);
-        nNetObject *o = sn_netObjects[id];
-        if ( o ){
-            if (m.SenderID()==o->Owner()) // only the owner is
-                // allowed to control the object
-                o->ReceiveControlNet(m);
-            else
-                Cheater(m.SenderID()); // another lame cheater.
-        }
-    }
-}
-
-static nDescriptor net_control(23,net_control_handler,"net_control");
-
-void nNetObject::ReceiveControlNet(nMessage &){
-#ifdef DEBUG
-    if (sn_GetNetState()==nCLIENT)
-        tERR_ERROR("rec_cont should not be called client-side!");
-#endif
-
-    // after control is received, we better sync this object with
-    // the clients:
-
-    RequestSync();
-}
-
-// control functions:
-nMessage * nNetObject::NewControlMessage(){
-    nMessage *m=new nMessage(net_control);
-    m->Write(id);
-    return m;
-}
-
-static void net_control_handler_protobuf( Network::nNetObjectControl const & control, nSenderInfo const & sender )
+static void net_control_handler( Network::nNetObjectControl const & control, nSenderInfo const & sender )
 {
     //con << "control\n";
     if (sn_GetNetState()==nSERVER){
@@ -1495,13 +1458,13 @@ private:
 
 public:
     nProtoBufNetControlDescriptor()
-    : nProtoBufDescriptor< Network::nNetObjectControl >( 23, net_control_handler_protobuf )
+    : nProtoBufDescriptor< Network::nNetObjectControl >( 23, net_control_handler )
     {
         SetConverter( this );
     }
 };
 
-static nProtoBufNetControlDescriptor net_control_protobuf;
+static nProtoBufNetControlDescriptor net_control;
 
 void nNetObject::ReceiveControlNet( Network::nNetObjectControl const & )
 {
@@ -1518,7 +1481,7 @@ void nNetObject::ReceiveControlNet( Network::nNetObjectControl const & )
 
 // control functions:
 Network::nNetObjectControl & nNetObject::BroadcastControl(){
-    nProtoBufMessage< Network::nNetObjectControl > * m = net_control_protobuf.CreateMessage();
+    nProtoBufMessage< Network::nNetObjectControl > * m = net_control.CreateMessage();
 
     // broadcast the message. This keeps it alive until the next time the network queue
     // is flushed, so it's safe to operate on its internal data afterwards.

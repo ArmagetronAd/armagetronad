@@ -702,6 +702,7 @@ void nProtoBufDescriptorBase::DiffMessages( nProtoBuf const & base,
             COMPARE( GetDouble );
             break;
         case FieldDescriptor::CPPTYPE_MESSAGE:
+            differ = true;
             DiffMessages( r_base->REFL_GET( GetMessage, base, field ), r_derived->REFL_GET( GetMessage, derived, field ), *r_diff->REFL_GET( MutableMessage, &diff, field ), false );
             break;
         default:

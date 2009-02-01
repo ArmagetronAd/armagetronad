@@ -323,10 +323,6 @@ protected:
     //! returns the user that the current WriteSync() is intended for
     static int SyncedUser();
 
-    nMessage *NewControlMessage();
-    // creates a new nMessage that can be used to control other
-    // copies of this nNetObject; control is received with ReceiveControlNet();
-
     Network::nNetObjectControl & BroadcastControl();
     // creates a new control message that can be used to control other
     // copies of this nNetObject; control is received with ReceiveControlNet().
@@ -341,10 +337,6 @@ private:
     virtual nProtoBuf       * ExtractControl( Network::nNetObjectControl       & control );
     virtual nProtoBuf const * ExtractControl( Network::nNetObjectControl const & control );
 public:
-
-    virtual void ReceiveControlNet(nMessage &m);
-    // receives the control message. the data written to the message created
-    // by *NewControlMessage() can be read directly from m.
 
     virtual void ReceiveControlNet( Network::nNetObjectControl const & control );
     // receives the control message. the data written to the message created
