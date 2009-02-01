@@ -23,3 +23,12 @@ message nNetObjectSync
     optional bool legacy_sync_end = 20001;
 }
 
+// net object control message
+message nNetObjectControl
+{
+    // ID of the object
+    optional uint32 object_id = 1;
+    
+    // the actual data is store in extensions provided by the classes using this mechanism.
+    extensions 16 to 10000;
+}

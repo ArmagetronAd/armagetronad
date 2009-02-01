@@ -1432,6 +1432,53 @@ nMessage * nNetObject::NewControlMessage(){
     return m;
 }
 
+static void net_control_handler_protobuf( Network::nNetObjectControl const & control, nSenderInfo const & sender )
+{
+    //con << "control\n";
+    if (sn_GetNetState()==nSERVER){
+        unsigned short id = control.object_id();
+        nNetObject *o = sn_netObjects[id];
+        if ( o ){
+            if ( sender.SenderID()==o->Owner() ) // only the owner is
+                // allowed to control the object
+                o->ReceiveControlNet( control );
+            else
+                Cheater( sender.SenderID() ); // another lame cheater.
+        }
+    }
+}
+
+static nProtoBufDescriptor< Network::nNetObjectControl >
+net_control_protobuf(23,net_control_handler_protobuf);
+
+void nNetObject::ReceiveControlNet( Network::nNetObjectControl const & )
+{
+#ifdef DEBUG
+    if (sn_GetNetState()==nCLIENT)
+        tERR_ERROR("rec_cont should not be called client-side!");
+#endif
+
+    // after control is received, we better sync this object with
+    // the clients:
+
+    RequestSync();
+}
+
+// control functions:
+Network::nNetObjectControl & nNetObject::BroadcastControl(){
+    nProtoBufMessage< Network::nNetObjectControl > * m = net_control_protobuf.CreateMessage();
+
+    // broadcast the message. This keeps it alive until the next time the network queue
+    // is flushed, so it's safe to operate on its internal data afterwards.
+    m->BroadCast();
+
+    Network::nNetObjectControl & control = m->AccessProtoBuf();
+
+    control.set_object_id( ID() );
+
+    return control;
+}
+
 // ack that doesn't resend, just wait
 class nDontWaitForAck: public nWaitForAck{
 public:

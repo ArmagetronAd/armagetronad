@@ -39,7 +39,7 @@ class nSenderInfo;
 class nOProtoBufDescriptorBase;
 class nProtoBufDescriptorBase;
 
-namespace Network{ class nNetObjectSync; }
+namespace Network{ class nNetObjectSync; class nNetObjectControl; }
 
 // checks whether n is newer than old; if so, old is set to n and
 // true is returned.
@@ -323,10 +323,19 @@ protected:
 
     nMessage *NewControlMessage();
     // creates a new nMessage that can be used to control other
-    // copies of this nNetObject; control is received with ReceiveControl();
+    // copies of this nNetObject; control is received with ReceiveControlNet();
+
+    Network::nNetObjectControl & BroadcastControl();
+    // creates a new control message that can be used to control other
+    // copies of this nNetObject; control is received with ReceiveControlNet().
+    // It is automatically broadcast (sent to the server in client mode).
 public:
 
     virtual void ReceiveControlNet(nMessage &m);
+    // receives the control message. the data written to the message created
+    // by *NewControlMessage() can be read directly from m.
+
+    virtual void ReceiveControlNet( Network::nNetObjectControl const & constrol );
     // receives the control message. the data written to the message created
     // by *NewControlMessage() can be read directly from m.
 

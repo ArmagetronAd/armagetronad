@@ -41,3 +41,18 @@ message ePlayerNetIDSync
     // legacy sync data end marker
     optional bool legacy_sync_end = 20001;
 }
+
+// net object control message
+message ePlayerNetIDControl
+{
+    optional uint32 type    = 1; // TEAMCHANGE:0 NEW_TEAM:1
+    optional uint32 team_id = 2; // the ID of the team to change to
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+extend Network.nNetObjectControl
+{
+    optional ePlayerNetIDControl player_control = 16;
+}
