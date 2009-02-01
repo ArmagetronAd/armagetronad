@@ -902,7 +902,7 @@ bool uMenuItemString::Event(SDL_Event &e){
             CFIndex bytesLength = CFDataGetLength(data);
             
             for (int i = 0; i < bytesLength; i++) {
-                if (!InsertChar(bytes[i]))
+                if (!InsertChar(bytes[i], false))
                     break;
             }
             
@@ -953,7 +953,7 @@ bool uMenuItemString::Event(SDL_Event &e){
 #endif
 }
 
-bool uMenuItemString::InsertChar(int unicode) {
+bool uMenuItemString::InsertChar(int unicode, bool convert) {
 #ifndef DEDICATED
     if (32 <= unicode)
     {
@@ -961,9 +961,18 @@ bool uMenuItemString::InsertChar(int unicode) {
         if ( content->LenUtf8() < maxLength_ )
         {
             tString utf8string;
-            unsigned short utf16string[1];
-            utf16string[0] = unicode;
-            utf8::utf16to8(utf16string, utf16string+1, back_inserter(utf8string));
+            
+            if (convert)
+            {
+                unsigned short utf16string[1];
+                utf16string[0] = unicode;
+                utf8::utf16to8(utf16string, utf16string+1, back_inserter(utf8string));
+            }
+            else
+            {
+                utf8string.push_back(unicode);
+            }
+            
             content->insert(realCursorPos, utf8string);
             realCursorPos+=utf8string.size();
         }

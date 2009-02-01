@@ -3150,6 +3150,7 @@ nServerInfoCharacterFilter::nServerInfoCharacterFilter( bool filterIPAddressChar
     SetMap(0xb0, 'o'); // °
     SetMap('$', 's');
     SetMap('+', 't');
+    SetMap(0xd7, 'x'); // ×    
 
     if ( filterIPAddressCharacters )
     {
@@ -3167,7 +3168,6 @@ nServerInfoCharacterFilter::nServerInfoCharacterFilter( bool filterIPAddressChar
         SetMap(':', ':');
         SetMap('.', '.');
     }
-
 }
 
 // *******************************************************************************************

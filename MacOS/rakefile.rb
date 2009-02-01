@@ -1,6 +1,3 @@
-# Setup load-path
-$LOAD_PATH.unshift(File.expand_path("./"))
-
 # Make directory return a useful value
 alias :original_directory :directory
 def directory(dir)
@@ -8,21 +5,17 @@ def directory(dir)
   Rake::Task[dir]
 end
 
-require "rakelib/config"
-
 module AA
-  CONFIG = AA::Config.new
 end
 
-AA::CONFIG.version_info.initialize_info
-
+import "rakelib/config.rake"
 import "rakelib/xcode.rake"
 import "rakelib/release.rake"
 import "rakelib/aabeta.rake"
 
 task "remove-version" do
-  rm_rf(AA::CONFIG.generated_path("src", "macosx"))
-  rm_f(AA::CONFIG::version_info.version_file)
+  rm_rf(AA::Config.generated_path("src", "macosx"))
+  rm_f(AA::Config::VERSION_INFO.version_file)
 end
 
 desc "Update version"
