@@ -211,19 +211,19 @@ nMessage& nStreamMessage::operator << (const tString &ss){
     // write first pairs of bytes
     for(i=0;i+1<len;i+=2)
     {
-        // yep. Signed shorts. That gives
+        // yep. Signed arithmetic. That gives
         // nice overflows. By the time we noticed,
         // it was too late to change :)
-        short lo = s[i];
-        short hi = s[i+1];
+        signed char lo = s[i];
+        signed char hi = s[i+1];
 
         // combine the two into a single short
-        Write( lo + (hi << 8) );
+        Write( short(lo) + (short(hi) << 8) );
     }
 
     // write last byte
     if (i<len)
-        Write(sRaw[i]);
+        Write( static_cast< signed char >( sRaw[i] ) );
 
     return *this;
 }
@@ -255,8 +255,8 @@ nMessage& nStreamMessage::ReadRaw(tString &s )
             
             // carefully reverse the signed
             // encoding logic
-            char lo = w & 0xff;
-            unsigned short hi = (short)w - lo;
+            signed char lo = w & 0xff;
+            signed short hi = ((short)w) - lo;
             hi >>= 8;
             sn_AddToString( s, lo );
 
