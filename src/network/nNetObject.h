@@ -56,6 +56,7 @@ struct nNetObjectRegistrar;
 
 class nNetObject{
     friend class nWaitForAckSync;
+    friend class nProtoBufNetControlDescriptor;
 
     bool createdLocally;		 // was the object created on this computer? (alternative: it was created on remote order)
     unsigned long int lastSyncID_;  // the extended id of the last accepted sync message
@@ -329,6 +330,11 @@ protected:
     // creates a new control message that can be used to control other
     // copies of this nNetObject; control is received with ReceiveControlNet().
     // It is automatically broadcast (sent to the server in client mode).
+
+    // conversion for stream legacy control messages
+    virtual void StreamControl( Network::nNetObjectControl const & constrol, nStreamMessage & stream );
+    virtual void UnstreamControl( nStreamMessage & stream, Network::nNetObjectControl const & constrol );
+    
 public:
 
     virtual void ReceiveControlNet(nMessage &m);
@@ -338,14 +344,6 @@ public:
     virtual void ReceiveControlNet( Network::nNetObjectControl const & constrol );
     // receives the control message. the data written to the message created
     // by *NewControlMessage() can be read directly from m.
-
-    /* old version, not good for other games:
-    virtual void SendControl(REAL time,uActionPlayer *Act,REAL x);
-    // is called on the client whenever a control key is pressed. This
-    // sends a message to the server, who will call
-    virtual void ReceiveControl(REAL time,uActionPlayer *Act,REAL x);
-    // on his instance of the nNetObject.
-    */
 
     // shall the server accept sync messages from the clients?
     virtual bool AcceptClientSync() const;

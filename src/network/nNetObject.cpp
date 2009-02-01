@@ -1448,8 +1448,60 @@ static void net_control_handler_protobuf( Network::nNetObjectControl const & con
     }
 }
 
-static nProtoBufDescriptor< Network::nNetObjectControl >
-net_control_protobuf(23,net_control_handler_protobuf);
+class nProtoBufNetControlDescriptor: 
+    public nProtoBufDescriptor< Network::nNetObjectControl >,
+    public nMessageConverter
+{
+private:
+    //! function responsible for turning message into old stream message
+    virtual void StreamFromProtoBuf( nProtoBufMessageBase const & source, nStreamMessage & target ) const
+    {
+        // cast to correct type
+        Network::nNetObjectControl const & control =
+        static_cast< Network::nNetObjectControl const & >( source.GetProtoBuf() );
+
+        // fetch object ID and object
+        unsigned short id = control.object_id();
+        target.Write( id );
+        nNetObject * object = nNetObject::ObjectDangerous( id );
+        if ( object )
+        {
+            // delegate core work
+            object->StreamControl( control, target );
+        }
+
+        // bend the descriptor
+        target.BendDescriptorID( source.DescriptorID() & ~nProtoBufDescriptorBase::protoBufFlag );
+    }
+    
+    //! function responsible for reading an old message
+    virtual void StreamToProtoBuf( nStreamMessage & source, nProtoBufMessageBase & target ) const
+    {
+        // cast to correct type
+        Network::nNetObjectControl & control =
+        static_cast< Network::nNetObjectControl & >( target.AccessProtoBuf() );
+
+        // fetch object ID and object
+        unsigned short id;
+        source.Read( id );
+        control.set_object_id( id );
+        nNetObject * object = nNetObject::ObjectDangerous( id );
+        if ( object )
+        {
+            // delegate core work
+            object->UnstreamControl( source, control );
+        }
+    }
+
+public:
+    nProtoBufNetControlDescriptor()
+    : nProtoBufDescriptor< Network::nNetObjectControl >( 23, net_control_handler_protobuf )
+    {
+        SetConverter( this );
+    }
+};
+
+static nProtoBufNetControlDescriptor net_control_protobuf;
 
 void nNetObject::ReceiveControlNet( Network::nNetObjectControl const & )
 {
@@ -1478,6 +1530,13 @@ Network::nNetObjectControl & nNetObject::BroadcastControl(){
 
     return control;
 }
+
+// conversion for stream legacy control messages
+void nNetObject::StreamControl( Network::nNetObjectControl const & constrol, nStreamMessage & stream )
+{}
+
+void nNetObject::UnstreamControl( nStreamMessage & stream, Network::nNetObjectControl const & constrol )
+{}
 
 // ack that doesn't resend, just wait
 class nDontWaitForAck: public nWaitForAck{
