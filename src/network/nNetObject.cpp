@@ -1413,7 +1413,7 @@ static void net_control_handler( Network::nNetObjectControl const & control, nSe
 
 class nProtoBufNetControlDescriptor: 
     public nProtoBufDescriptor< Network::nNetObjectControl >,
-    public nMessageConverter
+    public nMessageStreamer
 {
 private:
     //! function responsible for turning message into old stream message
@@ -1635,7 +1635,7 @@ static nDescriptor net_sync(24,net_sync_handler,"net_sync");
 
 
 //! class converting sync messages
-class nMessageConverterSync: public nMessageConverter
+class nMessageStreamerSync: public nMessageStreamer
 {
 public:
     static const nProtoBufDescriptorBase::StreamSections sections;
@@ -1658,10 +1658,10 @@ public:
     }
 };
 
-const nProtoBufDescriptorBase::StreamSections nMessageConverterSync::sections( nProtoBufDescriptorBase::StreamSections(nProtoBufDescriptorBase::SECTION_ID | nProtoBufDescriptorBase::SECTION_Second) );
+const nProtoBufDescriptorBase::StreamSections nMessageStreamerSync::sections( nProtoBufDescriptorBase::StreamSections(nProtoBufDescriptorBase::SECTION_ID | nProtoBufDescriptorBase::SECTION_Second) );
 
 //! class converting creation messages
-class nMessageConverterCreate: public nMessageConverter
+class nMessageStreamerCreate: public nMessageStreamer
 {
 public:
     //! function responsible for turning message into old stream message
@@ -1683,16 +1683,16 @@ public:
 };
 
 //! converter for creation messages
-nMessageConverter * nOProtoBufDescriptorBase::CreationConverter()
+nMessageStreamer * nOProtoBufDescriptorBase::CreationConverter()
 {
-    static nMessageConverterCreate create;
+    static nMessageStreamerCreate create;
     return &create;
 }
 
 //! converter for sync messages
-nMessageConverter * nOProtoBufDescriptorBase::SyncConverter()
+nMessageStreamer * nOProtoBufDescriptorBase::SyncConverter()
 {
-    static nMessageConverterSync sync;
+    static nMessageStreamerSync sync;
     return &sync;
 }
 

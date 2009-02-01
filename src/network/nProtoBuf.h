@@ -74,7 +74,7 @@ struct nProtoBufHeader
     void Read ( nBinaryReader & reader );
 };
 
-class nMessageConverter;
+class nMessageStreamer;
 
 //! protocol buffer message
 class nProtoBufMessageBase: public nMessageBase
@@ -83,13 +83,13 @@ public:
     nProtoBufMessageBase( nProtoBufDescriptorBase const & descriptor );
 
     //! set the compatibility converter
-    void SetConverter( nMessageConverter * streamer )
+    void SetConverter( nMessageStreamer * streamer )
     {
         converter_ = streamer;
     }
 
     //! gets the compatibility converter
-    nMessageConverter * GetConverter() const
+    nMessageStreamer * GetConverter() const
     {
         return converter_;
     }
@@ -114,6 +114,12 @@ public:
 
     //! returns the descriptor
     nProtoBufDescriptorBase const & GetDescriptor() const;
+
+    //! bends the message ID
+    void BendMessageID( unsigned int id )
+    {
+        messageIDBig_ = id;
+    }
 protected:
     //! fills the receiving buffer with data
     virtual int OnWrite( WriteArguments & arguments ) const;
@@ -137,7 +143,7 @@ private:
     mutable tJUST_CONTROLLED_PTR< nStreamMessage > oldFormat_;
 
     //! the compatibility converter
-    nMessageConverter * converter_;
+    nMessageStreamer * converter_;
 };
 
 //! implementation for each protocol buffer type
@@ -174,6 +180,25 @@ public:
         return descriptor_;
     }
 
+    //! fills the receiving buffer with data
+    virtual int OnWrite( WriteArguments & arguments ) const
+    {
+        // translate message for older clients
+        if ( this->descriptor_.GetTranslator() )
+        {
+            tJUST_CONTROLLED_PTR< nProtoBufMessageBase > translated = this->descriptor_.GetTranslator()->
+            Translate( this->protoBuf_, arguments.receiver_ );
+            if ( translated )
+            {
+                // if a translation was required, send it.
+                translated->BendMessageID( MessageID() );
+                return translated->Write( arguments );
+            }
+        }
+        
+        // no translation required, fallback to regular code
+        return nProtoBufMessageBase::OnWrite( arguments );
+    }
 protected:
     //! handles the message
     virtual void OnHandle()
@@ -260,18 +285,18 @@ public:
     ~nProtoBufDescriptorBase();
 
     //! sets the compatibility converter used by messages of this class
-    void SetConverter( nMessageConverter * streamer )
+    void SetConverter( nMessageStreamer * streamer )
     {
         converter_ = streamer;
     }
 
     //! gets the compatibility converter used by messages of this class
-    nMessageConverter * GetConverter() const
+    nMessageStreamer * GetConverter() const
     {
         return converter_;
     }
 
-    nMessageConverter & GetDefaultConverter();
+    nMessageStreamer & GetDefaultConverter();
 
     static std::string const & DetermineName( nProtoBuf const & prototype );
 
@@ -344,7 +369,7 @@ private:
     static DescriptorMap descriptorsByName;
 
     //! gets the compatibility converter used by messages of this class
-    nMessageConverter * converter_;
+    nMessageStreamer * converter_;
 
     //! creates a message
     virtual nProtoBufMessageBase * DoCreateMessage() const = 0;
@@ -387,10 +412,10 @@ public:
     }
 
     //! converter for creation messages
-    static nMessageConverter * CreationConverter();
+    static nMessageStreamer * CreationConverter();
 
     //! converter for sync messages
-    static nMessageConverter * SyncConverter();
+    static nMessageStreamer * SyncConverter();
 
 protected:
     // fetches the network object ID from a creation message
@@ -424,8 +449,8 @@ private:
 };
 
 
-//! class converting messages
-class nMessageConverter
+//! class converting protobuf messages to stream messages
+class nMessageStreamer
 {
 public:
     //! function responsible for turning message into old stream message
@@ -433,7 +458,21 @@ public:
 
     //! function responsible for reading an old message
     virtual void StreamToProtoBuf( nStreamMessage & source, nProtoBufMessageBase & target ) const;
-protected:
+};
+
+//! class converting messages for older clients
+template< class PROTOBUF >
+class nMessageTranslator
+{
+public:
+    //! constructor registering with the descriptor
+    nMessageTranslator( nProtoBufDescriptor< PROTOBUF > & descriptor );
+
+    //! convert current message format to format suitable for old client
+    virtual nProtoBufMessageBase * Translate( PROTOBUF const & source, int receiver ) const
+    {
+        return NULL;
+    }
 };
 
 // templated version of protocol buffer messages
@@ -468,6 +507,7 @@ public:
     nProtoBufDescriptor( unsigned short identification, Handler * handler,
                    bool acceptEvenIfNotLoggedIn = false )
     : nProtoBufDescriptorBase( identification, PROTOBUF(), acceptEvenIfNotLoggedIn )
+    , translator_( NULL )
     , handler_( handler )
     {
 #ifdef DEBUG
@@ -488,13 +528,25 @@ public:
         return tNEW(nProtoBufMessage< PROTOBUF >)( *this );
     }
     
+    inline nMessageTranslator< PROTOBUF > * GetTranslator() const
+    {
+        return translator_;
+    }
+
+    inline void SetTranslator(nMessageTranslator< PROTOBUF > * translator )
+    {
+        translator_ = translator;
+    }
 private:
     //! instance of this descriptor
     static nProtoBufDescriptor * instance_;
-    
+
 #ifdef DEBUG
     bool multipleInstances_;
 #endif
+
+    //! translator for old clients
+    nMessageTranslator< PROTOBUF > * translator_;
     
     //! function actually handling the incoming message
     Handler * handler_;
@@ -505,6 +557,12 @@ private:
         return CreateMessage();
     }
 };
+
+template< class PROTOBUF >
+nMessageTranslator< PROTOBUF >::nMessageTranslator( nProtoBufDescriptor< PROTOBUF > & descriptor )
+{
+    descriptor.SetTranslator( this );
+}
 
 // create a message from a pattern buffer
 template< class PROTOBUF >

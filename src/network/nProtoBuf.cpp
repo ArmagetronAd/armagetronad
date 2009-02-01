@@ -127,7 +127,7 @@ void nProtoBufHeader::Read( nBinaryReader & reader )
 }
 
 //! function responsible for turning message into old stream message
-void nMessageConverter::StreamFromProtoBuf( nProtoBufMessageBase const & source, nStreamMessage & target ) const
+void nMessageStreamer::StreamFromProtoBuf( nProtoBufMessageBase const & source, nStreamMessage & target ) const
 {
     // stream to message
     source.GetDescriptor().StreamTo( source.GetProtoBuf(), target, nProtoBufDescriptorBase::SECTION_First );
@@ -137,7 +137,7 @@ void nMessageConverter::StreamFromProtoBuf( nProtoBufMessageBase const & source,
 }
 
 //! function responsible for reading an old message
-void nMessageConverter::StreamToProtoBuf( nStreamMessage & source, nProtoBufMessageBase & target ) const
+void nMessageStreamer::StreamToProtoBuf( nStreamMessage & source, nProtoBufMessageBase & target ) const
 {
     // stream from message
     target.GetDescriptor().StreamFrom( source, target.AccessProtoBuf(), nProtoBufDescriptorBase::SECTION_First );
@@ -308,9 +308,9 @@ nProtoBufDescriptorBase::nProtoBufDescriptorBase(unsigned short identification,
                                      bool acceptEvenIfNotLoggedIn )
 */
 
-nMessageConverter & nProtoBufDescriptorBase::GetDefaultConverter()
+nMessageStreamer & nProtoBufDescriptorBase::GetDefaultConverter()
 {
-    static nMessageConverter converter;
+    static nMessageStreamer converter;
     return converter;
 }
 
