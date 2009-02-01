@@ -2256,15 +2256,8 @@ nNetObject::nNetObject( Network::nNetObjectSync const & sync, nSenderInfo const 
 }
 
 //! reads incremental sync data
-bool nNetObject::ReadSync( Network::nNetObjectSync const & sync, nSenderInfo const & sender )
+void nNetObject::ReadSync( Network::nNetObjectSync const & sync, nSenderInfo const & sender )
 {
-    // check if sync is new
-    unsigned long int bigID =  sender.envelope.MessageIDBig();
-    if ( ID() && !sn_Update(lastSyncID_,bigID) )
-    {
-        return false;
-    }
-
     if (sn_GetNetState()==nSERVER){
         bool back=knowsAbout[sender.SenderID()].syncReq;
         RequestSync(); // tell the others about it
@@ -2272,7 +2265,17 @@ bool nNetObject::ReadSync( Network::nNetObjectSync const & sync, nSenderInfo con
         // but not the sender of the message; he
         // knows already.
     }
+}
 
+//! reads incremental sync data
+bool nNetObject::SyncIsNew( Network::nNetObjectSync const & sync, nSenderInfo const & sender )
+{
+    // check if sync is new
+    unsigned long int bigID =  sender.envelope.MessageIDBig();
+    if ( ID() && !sn_Update(lastSyncID_,bigID) && bigID != 0 )
+    {
+        return false;
+    }
     return true;
 }
 

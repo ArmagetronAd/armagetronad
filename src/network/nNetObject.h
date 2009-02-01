@@ -303,9 +303,11 @@ public:
     //! creates a netobject form sync data
     nNetObject( Network::nNetObjectSync const &, nSenderInfo const & );
     //! reads sync data, returns false if sync was old or otherwise invalid
-    bool ReadSync( Network::nNetObjectSync const &, nSenderInfo const & );
+    void ReadSync( Network::nNetObjectSync const &, nSenderInfo const & );
     //! writes sync data (and initialization data if flag is set)
     void WriteSync( Network::nNetObjectSync &, bool init ) const;
+    //! returns true if sync message is new (and updates 
+    bool SyncIsNew( Network::nNetObjectSync const &, nSenderInfo const & );
 
     //! returns the descriptor responsible for this class
     inline nOProtoBufDescriptorBase const * GetDescriptor() const { return DoGetDescriptor(); }

@@ -1,5 +1,6 @@
 package Network;
 
+// net object sync message
 message nNetObjectSync
 {
     // legacy creation data:

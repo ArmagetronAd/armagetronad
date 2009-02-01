@@ -1457,12 +1457,9 @@ void eTeam::WriteSync( Engine::eTeamSync & sync, bool init )
 
 
 //! reads incremental sync data. Returns false if sync was invalid or old.
-bool eTeam::ReadSync( Engine::eTeamSync const & sync, nSenderInfo const & init )
+void eTeam::ReadSync( Engine::eTeamSync const & sync, nSenderInfo const & init )
 {
-    if ( !nNetObject::ReadSync( sync.base(), init ) )
-    {
-        return false;
-    }
+    nNetObject::ReadSync( sync.base(), init );
 
     color.ReadSync( sync.color() );
     name = sync.name();
@@ -1478,8 +1475,6 @@ bool eTeam::ReadSync( Engine::eTeamSync const & sync, nSenderInfo const & init )
             players(i)->UpdateName();
         }
     }
-
-    return true;
 }
 
 /*

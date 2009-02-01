@@ -5564,13 +5564,12 @@ static void se_OptionalNameFilters( tString & remoteName )
 }
 
 //! reads incremental sync data
-bool ePlayerNetID::ReadSync( Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender )
+void ePlayerNetID::ReadSync( Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender )
 {
     // check whether this is the first sync
     bool firstSync = ( this->ID() == 0 );
 
-    if ( !nNetObject::ReadSync( sync.base(), sender ) )
-        return false;
+    nNetObject::ReadSync( sync.base(), sender );
 
     color.ReadSync( sync.color() );
 
@@ -5704,8 +5703,6 @@ bool ePlayerNetID::ReadSync( Engine::ePlayerNetIDSync const & sync, nSenderInfo 
 
         RequestSync();
     }
-
-    return true;
 }
 
 //! creates a netobject form sync data

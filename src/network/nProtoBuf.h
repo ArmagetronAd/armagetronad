@@ -587,7 +587,11 @@ private:
         nNetObject::IDToPointer( id, object );
         if ( object )
         {
-            object->ReadSync( nProtoBufBaseConverter< PROTOBUF const >( message ), sender );
+            nProtoBufBaseConverter< PROTOBUF const > converter( message );
+            if ( object->SyncIsNew( converter, sender ) )
+            {
+                object->ReadSync( converter, sender );
+            }
         }
         else
         {
@@ -609,7 +613,12 @@ private:
         ReadMessage( envelope, sync, envelope->AccessWorkProtoBuf() );
 
         // delegate to object
-        cast.ReadSync( nProtoBufBaseConverter< PROTOBUF const >( sync ), nSenderInfo( envelope ) );
+        nProtoBufBaseConverter< PROTOBUF const > converter( sync );
+        nSenderInfo sender( envelope );
+        if ( cast.SyncIsNew( converter, sender ) )
+        {
+            cast.ReadSync( converter, sender );
+        }
     }
 
     //! creates a message

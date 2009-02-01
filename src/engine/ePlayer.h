@@ -274,7 +274,7 @@ public:
     //! creates a netobject form sync data
     ePlayerNetID( Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender );
     //! reads incremental sync data. Returns false if sync was invalid or old.
-    bool ReadSync( Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender );
+    void ReadSync( Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender );
     //! writes sync data (and initialization data if flat is set)
     void WriteSync( Engine::ePlayerNetIDSync & sync, bool init );
     //! returns the descriptor responsible for this class

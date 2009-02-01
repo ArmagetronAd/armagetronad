@@ -200,7 +200,7 @@ public:												// public methods
     //! creates a netobject form sync data
     eTeam( Engine::eTeamSync const &, nSenderInfo const & );
     //! reads incremental sync data. Returns false if sync was invalid or old.
-    bool ReadSync( Engine::eTeamSync const &, nSenderInfo const & );
+    void ReadSync( Engine::eTeamSync const &, nSenderInfo const & );
     //! writes sync data (and initialization data if flat is set)
     void WriteSync( Engine::eTeamSync &, bool init );
     //! returns the descriptor responsible for this class
