@@ -1861,7 +1861,7 @@ void se_AppendChat( TARGET & out, tString const & message )
     }
 }
 
-// builds a colored chat string
+// builds a regular colored chat string
 static tColoredString se_BuildChatString( ePlayerNetID const * sender, tString const & message )
 {
     tColoredString console;
@@ -1957,8 +1957,8 @@ static nMessageBase * se_ServerControlledChatMessage(  eTeam const * team, ePlay
     return se_ServerControlledChatMessageConsole( sender, se_BuildChatString(team, sender, message) );
 }
 
-// pepares a chat message the client has to put together
-static nMessageBase * se_NewChatMessage( ePlayerNetID const * player, tString const & message )
+// pepares a chat message for the server
+static nMessageBase * se_ChatMessageForServer( ePlayerNetID const * player, tString const & message )
 {
     tASSERT( player );
 
@@ -1977,11 +1977,9 @@ static nMessageBase * se_NewChatMessage( ePlayerNetID const * player, tString co
 // sends the full chat line to receiver, marked as originating from <sender> so
 // it can be silenced.
 // ( the client will see <fullLine> resp. <sender name> : <forOldClients> if it is pre-0.2.8 and at least 0.2.6 )
+static
 void se_SendChatLine( ePlayerNetID* sender, const tString& fullLine, int receiver )
 {
-    // create chat messages
-
-    // send them to the users, depending on what they understand
     if ( sn_Connections[ receiver ].socket )
     {
         tJUST_CONTROLLED_PTR< nMessageBase > mServerControlled = se_ServerControlledChatMessageConsole( sender, fullLine );
@@ -1992,22 +1990,23 @@ void se_SendChatLine( ePlayerNetID* sender, const tString& fullLine, int receive
 // sends the full chat line to all connected clients, marked as originating from <sender> so
 // it can be silenced.
 // ( the client will see <fullLine> resp. <sender name> : <forOldClients> if it is pre-0.2.8 and at least 0.2.6 )
+static
 void se_BroadcastChatLine( ePlayerNetID* sender, const tString& line )
 {
-    // create chat messages
     se_ServerControlledChatMessageConsole( sender, line )->BroadCast();
 }
 
 // send the chat of player p to all connected clients after properly formatting it
 // ( the clients will see <player>: <say>
+static
 void se_BroadcastChat( ePlayerNetID* sender, const tString& say )
 {
-    // create chat messages
     se_ServerControlledChatMessage( sender, say )->BroadCast();
 }
 
 
 // sends a private message from sender to receiver, and really sends it to eavesdropper (will usually be equal to receiver)
+static
 void se_SendPrivateMessage( ePlayerNetID const * sender, ePlayerNetID const * receiver, ePlayerNetID const * eavesdropper, tString const & message )
 {
     tASSERT( sender );
@@ -2021,6 +2020,7 @@ void se_SendPrivateMessage( ePlayerNetID const * sender, ePlayerNetID const * re
 }
 
 // Sends a /team message
+static
 void se_SendTeamMessage( eTeam const * team, ePlayerNetID const * sender ,ePlayerNetID const * receiver, tString const & message )
 {
     tASSERT( receiver );
@@ -3699,7 +3699,7 @@ void ePlayerNetID::Chat(const tString &s_orig)
         {
         case nCLIENT:
         {
-            se_NewChatMessage( this, s )->BroadCast();
+            se_ChatMessageForServer( this, s )->BroadCast();
             break;
         }
         case nSERVER:
