@@ -1890,11 +1890,12 @@ static nMessageBase * se_NewChatMessage( ePlayerNetID const * player, tString co
     std::ostringstream cleanup;
     se_AppendChat( cleanup, message );
 
-    Engine::Chat chat;
+    nProtoBufMessage< Engine::Chat > * m = chat_handler_pb.CreateMessage();
+    Engine::Chat & chat = m->AccessProtoBuf();
     chat.set_player_id( player->ID() );
     chat.set_chat_line( cleanup.str() );
     
-    return nMessage::Transform( chat );
+    return m;
 }
 
 // prepares a very old style chat message: just a regular remote console output message

@@ -2102,8 +2102,25 @@ static void rec_peer(unsigned int peer){
                 try
                 {
                     while( bufferEnd > currentRead ){
-                        tJUST_CONTROLLED_PTR< nMessageBase > pmess =
-                        nDescriptorBase::CreateMessage( currentRead, bufferEnd, id );
+                        tJUST_CONTROLLED_PTR< nMessageBase > pmess;
+                        unsigned char const * lastRead = currentRead;
+                        try
+                        {
+                            pmess = nDescriptorBase::CreateMessage( currentRead, bufferEnd, id );
+                        }
+                        catch( nIgnore const & )
+                        {
+                            if ( lastRead < currentRead )
+                            {
+                                // just ignore this one message
+                                continue;
+                            }
+                            else
+                            {
+                                throw;
+                            }
+                        }
+
                         nMessageBase& mess = *pmess;
 
                         bool mess_is_new=true;

@@ -1454,6 +1454,11 @@ private:
             // delegate core work
             object->UnstreamControl( source, control );
         }
+        else
+        {
+            // ignore this message
+            nReadError( false );
+        }
     }
 
 public:
