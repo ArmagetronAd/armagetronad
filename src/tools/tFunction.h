@@ -31,6 +31,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "defs.h"
 #include "tError.h"
 
+namespace Tools { class Function; }
+
 //! mathematical function (to be moved into tools sometime, and currently limited to linear functions)
 class tFunction
 {
@@ -53,6 +55,9 @@ public:
     inline tFunction & SetSlope( REAL const & slope );	//!< Sets function slope
     inline REAL const & GetSlope( void ) const;	//!< Gets function slope
     inline tFunction const & GetSlope( REAL & slope ) const;	//!< Gets function slope
+
+    void ReadSync ( Tools::Function const & sync )      ; //!< read from protobuf
+    void WriteSync( Tools::Function       & sync ) const; //!< write to  protobuf
 protected:
 private:
 };

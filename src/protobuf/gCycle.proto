@@ -1,0 +1,65 @@
+// Protocol buffer types for gCycle(Movement).cpp
+package Game;
+
+import "eNetGameObject.proto";
+import "tColor.proto";
+import "tCoord.proto";
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// sync message for cylce base
+message CycleMovementSync
+{
+    // base class init data, needs to come first
+    optional Engine.NetGameObjectSync base = 1;
+
+    // legacy creation data goes here
+
+    // legacy creation data end marker
+    optional bool legacy_create_end = 20000;
+
+    // legacy sync data goes here
+
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
+    // extensions go here
+}
+
+// sync message for cylce
+message CycleSync
+{
+    // base class init data, needs to come first
+    optional CycleMovementSync base = 1;
+
+    optional Tools.Color color = 16; // cycle (and trail) color
+
+    // legacy creation data end marker
+    optional bool legacy_create_end = 20000;
+
+    optional float speed    = 2;  // current movement speed
+    optional bool  alive    = 17; // alive status
+    optional float distance = 3;  // distance traveled so far
+    optional uint32 wall_id = 4;  // ID of current wall
+    optional uint32 turns   = 5;  // number of turns taken
+    optional bool   braking = 6;  // brake currently active?
+
+    optional Tools.Position last_turn_position = 7; // position of last turn
+    optional uint32 rubber_compressed = 8; // compressed rubber reservoir
+    optional uint32 rubber_effectiveness_compressed = 9; // compressed rubber effectiveness
+
+    optional uint32 last_message_id = 10; // ID of last control message from client
+    optional uint32 brake_compressed = 11; // compressed brake reservoir
+
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
+    // extensions go here
+}

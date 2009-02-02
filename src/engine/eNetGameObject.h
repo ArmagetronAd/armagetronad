@@ -32,6 +32,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eGameObject.h"
 #include "tCallback.h"
 
+namespace Engine { class NetGameObjectSync; }
+
 // max ping to equalize;
 extern int sn_pingCharityServer;
 
@@ -77,16 +79,10 @@ public:
     virtual void InitAfterCreation();
 
     eNetGameObject(eGrid *grid, const eCoord &pos,const eCoord &dir,ePlayerNetID* p,bool autodelete=false);
-    eNetGameObject(nMessage &m);
 
     virtual void DoRemoveFromGame(); // just remove it from the lists and unregister it
 
-    virtual void WriteCreate(nMessage &m);
-    virtual void WriteSync(nMessage &m);
-    virtual void ReadSync(nMessage &m);
-    //virtual nDescriptor &CreatorDescriptor() const;
     virtual bool ClearToTransmit(int user) const;
-    virtual bool SyncIsNew(nMessage &m);
 
     virtual void AddRef();          //!< adds a reference
     virtual void Release();         //!< removes a reference
@@ -106,6 +102,15 @@ public:
 
     virtual REAL Lag() const;
     virtual REAL LagThreshold() const;
+
+    //! creates a netobject form sync data
+    eNetGameObject( Engine::NetGameObjectSync const & sync, nSenderInfo const & sender );
+    //! reads sync data, returns false if sync was old or otherwise invalid
+    void ReadSync( Engine::NetGameObjectSync const & sync, nSenderInfo const & sender );
+    //! writes sync data (and initialization data if flag is set)
+    void WriteSync( Engine::NetGameObjectSync & sync, bool init ) const;
+    //! returns true if sync message is new (and updates 
+    bool SyncIsNew( Engine::NetGameObjectSync const & sync, nSenderInfo const & sender );
 };
 
 nMessage &operator << (nMessage &m, const eCoord &x);

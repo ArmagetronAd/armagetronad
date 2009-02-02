@@ -1,0 +1,46 @@
+// Protocol buffer types for zone v2 shapes
+
+package Zone;
+
+import "eNetGameObject.proto";
+import "tFunction.proto";
+import "tPolynomial.proto";
+import "tColor.proto";
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// legacy sync message
+message ShapeSync
+{
+    // base class init data, needs to come first
+    optional Engine.NetGameObjectSync base = 1;
+
+    optional float  creation_time = 2; // time of creation
+    optional uint32 zone_id       = 3; // id of this shape???
+
+    // legacy creation data end marker
+    optional bool legacy_create_end = 20000;
+
+    optional float reference_time = 4;  // zero point of the following functions        
+
+    optional Tools.Function pos_x  = 5; // x position of center
+    optional Tools.Function pos_y  = 6; // y position of center
+
+    optional Tools.Function scale  = 7; // size scale of zone
+
+    optional Tools.PolynomialSync rotation2 = 8; // rotation of the zone?
+
+    optional Tools.Color color     = 9; // zone color ( rgba )
+
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
+    // extensions go here
+}

@@ -1,0 +1,22 @@
+// Protocol buffer types for polynomials
+package Tools;
+
+import "nNetObject.proto";
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// sync message for polynomials
+message PolynomialSync
+{
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
+    // extensions go here
+}

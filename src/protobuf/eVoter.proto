@@ -74,22 +74,4 @@ message VoteItemHarm
     optional bool legacy_message_end_marker = 20000;
 }
 
-// suspend vote
-message VoteItemSuspend
-{
-    optional VoteItemHarm base      = 15; // basic vote item
-
-    // legacy message end marker, extensions go after it
-    optional bool legacy_message_end_marker = 20000;
-}
-
-// kick vote
-message VoteItemKick
-{
-    optional VoteItemHarm base      = 15; // basic vote item
-
-    // legacy message end marker, extensions go after it
-    optional bool legacy_message_end_marker = 20000;
-}
-
 

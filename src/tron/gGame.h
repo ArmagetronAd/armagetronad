@@ -41,6 +41,8 @@ class gParser;
 class gArena;
 class ePlayerNetID;
 
+namespace Game { class GameSync; }
+
 typedef enum{gFREESTYLE,gDUEL,gHUMAN_VS_AI}
 gGameType;
 
@@ -86,11 +88,14 @@ class gGame:public nNetObject{
 
 public:
     gGame();
-    gGame(nMessage &m);
     virtual ~gGame();
-    virtual void WriteSync(nMessage &m);
-    virtual void ReadSync(nMessage &m);
-    virtual nDescriptor &CreatorDescriptor() const;
+
+    //! creates a netobject form sync data
+    gGame( Game::GameSync const &, nSenderInfo const & );
+    //! reads sync data, returns false if sync was old or otherwise invalid
+    void ReadSync( Game::GameSync const &, nSenderInfo const & );
+    //! writes sync data (and initialization data if flag is set)
+    void WriteSync( Game::GameSync &, bool init ) const;
 
     static void NetSync(); // do all the network syncronisation.
     static void NetSyncIdle(); // do all the network syncronisation and wait a bit.
@@ -121,6 +126,10 @@ public:
     void StartNewMatchNow();
 
     eSoundMixer* m_Mixer;
+
+private:
+    //! returns the descriptor responsible for this class
+    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
 };
 
 void update_settings( bool const * goon = 0 );

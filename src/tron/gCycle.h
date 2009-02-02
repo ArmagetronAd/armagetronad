@@ -58,6 +58,7 @@ extern bool headlights;
 // steering help
 extern REAL sg_rubberCycle;
 
+namespace Game { class CycleSync; }
 
 // this class set is responsible for remembering which walls are too
 // close together to pass through safely. The AI uses this information,
@@ -91,7 +92,6 @@ public:
     void CopyFrom( const SyncData& sync, const gCycle& other );	        	// copies relevant info from sync data and everything else from other cycle
 
     gCycleExtrapolator(eGrid *grid, const eCoord &pos,const eCoord &dir,ePlayerNetID *p=NULL,bool autodelete=1);
-    // gCycleExtrapolator(nMessage &m);
     virtual ~gCycleExtrapolator();
 
     // virtual gDestination* GetCurrentDestination() const;			// returns the current destination
@@ -107,8 +107,6 @@ public:
     REAL			  trueDistance_;										// distance predicted as best as we can
 private:
     // virtual REAL            DoGetDistanceSinceLastTurn  (                               ) const     ;   //!< returns the distance since the last turn
-
-    virtual nDescriptor& CreatorDescriptor() const;
 
     const gCycleMovement* parent_;												// the cycle that is extrapolated
 };
@@ -221,7 +219,6 @@ private:
     //	unsigned short currentWallID;
 
     nTimeRolling nextSync, nextSyncOwner;
-    REAL lastSyncOwnerGameTime_;    //!< time of the last sync to the owner in game time
 
     void MyInitAfterCreation();
 
@@ -263,24 +260,30 @@ public:
 
     bool    IsMe( eGameObject const * other ) const;              //!< checks whether the passed pointer is logically identical with this cycle
 
-    // the network routines:
-    gCycle(nMessage &m);
-    virtual void WriteCreate(nMessage &m);
-    virtual void WriteSync(nMessage &m);
-    virtual void ReadSync(nMessage &m);
     virtual void RequestSyncOwner(); //!< requests special syncs to the owner on important points (just passed an enemy trail end safely...)
     virtual void RequestSyncAll(); //!< requests special syncs to everyone on important points (just passed an enemy trail end safely...)
 
     virtual void SyncEnemy ( const eCoord& begWall );    //!< handle sync message for enemy cycles
     // virtual void SyncFriend( const eCoord& begWall );    //!< handle sync message for enemy cycles
 
+    //! creates a netobject form sync data
+    gCycle( Game::CycleSync const & sync, nSenderInfo const & sender );
+    //! reads sync data, returns false if sync was old or otherwise invalid
+    void ReadSync( Game::CycleSync const & sync, nSenderInfo const & sender );
+    //! writes sync data (and initialization data if flag is set)
+    void WriteSync( Game::CycleSync & sync, bool init ) const;
+    //! returns true if sync message is new (and updates 
+
+
     virtual void ReceiveControl(REAL time,uActionPlayer *Act,REAL x);
     virtual void PrintName(tString &s) const;
     virtual bool ActionOnQuit();
 
-    virtual nDescriptor &CreatorDescriptor() const;
-    virtual bool SyncIsNew(nMessage &m);
-    //virtual bool ClearToTransmit(int user) const;
+    //! returns the descriptor responsible for this class
+    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
+
+    //! returns true if sync message is new (and updates 
+    bool SyncIsNew( Game::CycleSync const & sync, nSenderInfo const & sender );
 
     virtual bool Timestep(REAL currentTime);
     virtual bool TimestepCore(REAL currentTime,bool calculateAcceleration = true);

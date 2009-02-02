@@ -70,6 +70,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // TODO: get rid of this
 #include "tDirectories.h"
 
+#include "gCycle.pb.h"
+#include "nProtoBuf.h"
+
 // also used in gWall.cpp
 bool sg_gnuplotDebug = false;
 
@@ -88,7 +91,7 @@ static tSettingItem< bool > sg_predictWallsConf( "PREDICT_WALLS", sg_predictWall
 
 //  *****************************************************************
 
-static nNOInitialisator<gCycle> cycle_init(320,"cycle");
+static nOProtoBufDescriptor< gCycle, Game::CycleSync > cycle_init( 320 );
 
 //  *****************************************************************
 
@@ -1203,9 +1206,7 @@ public:
     // write compressed float to message
     void Write( nMessage& m, REAL value ) const
     {
-        clamp( value, min_, max_ );
-        unsigned short compressed = static_cast< unsigned short > ( maxShort_ * ( value - min_ )/( max_ - min_ ) );
-        m.Write( compressed );
+        m.Write( Write( value ) );
     }
 
     REAL Read( nMessage& m ) const
@@ -1213,7 +1214,20 @@ public:
         unsigned short compressed;
         m.Read( compressed );
 
+        return Read( compressed );
+    }
+
+    REAL Read( unsigned short compressed ) const
+    {
         return  min_ + compressed * ( max_ - min_ )/maxShort_;
+    }
+
+    unsigned short Write( REAL value ) const
+    {
+        clamp( value, min_, max_ );
+        unsigned short compressed = static_cast< unsigned short > ( maxShort_ * ( value - min_ )/( max_ - min_ ) );
+
+        return compressed;
     }
 private:
     REAL min_, max_;  // minimal and maximal expected value
@@ -1379,7 +1393,7 @@ static void new_destination_handler(nMessage &m)
 
     // and the ID of the cycle the destination is added to
     nNetObject *o=nNetObject::ObjectDangerous(cycle_id);
-    if (o && &o->CreatorDescriptor() == &cycle_init){
+    if (o && o->GetDescriptor() == &cycle_init){
         if ((sn_GetNetState() == nSERVER) && (m.SenderID() != o->Owner()))
         {
             Cheater(m.SenderID());
@@ -1885,12 +1899,6 @@ bool gCycleExtrapolator::DoTurn( int dir )
     return gCycleMovement::DoTurn( dir );
 }
 */
-
-nDescriptor &gCycleExtrapolator::CreatorDescriptor() const{
-    // should never be called
-    tASSERT( 0 );
-    return cycle_init;
-}
 
 //  *****************************************************************
 
@@ -4896,8 +4904,8 @@ void gCycle::PPDisplay(){
 
 
 // cycle network routines:
-gCycle::gCycle(nMessage &m)
-        :gCycleMovement(m),
+gCycle::gCycle( Game::CycleSync const & sync, nSenderInfo const & sender )
+        :gCycleMovement( sync.base(), sender ),
         skew(0),skewDot(0),
         rotationFrontWheel(1,0),rotationRearWheel(1,0),heightFrontWheel(0),heightRearWheel(0),
         currentWall(NULL),
@@ -4918,11 +4926,7 @@ gCycle::gCycle(nMessage &m)
     spawnTime_ = se_GameTime() + 100;
     dirSpawn = dirDrive;
 
-
-    m >> color_.r_;
-    m >> color_.g_;
-    m >> color_.b_;
-
+    color_.ReadSync( sync.color() );
     trailColor_ = color_;
 
     se_MakeColorValid( color_.r_, color_.g_, color_.b_, 1.0f );
@@ -4934,29 +4938,22 @@ gCycle::gCycle(nMessage &m)
     nextSync = nextSyncOwner = -1;
 }
 
-
-void gCycle::WriteCreate(nMessage &m){
-    eNetGameObject::WriteCreate(m);
-    m << color_.r_;
-    m << color_.g_;
-    m << color_.b_;
-}
-
 static nVersionFeature sg_verletIntegration( 7 );
 
-void gCycle::WriteSync(nMessage &m){
-    //	eNetGameObject::WriteSync(m);
+void gCycle::WriteSync(  Game::CycleSync & sync, bool init ) const
+{
+    gCycleMovement::WriteSync( nProtoBufBaseConverter< Game::CycleSync >( sync ), init );
 
-    if ( Alive() )
+    if ( init )
     {
-        m << lastTime;
+        color_.WriteSync( *sync.mutable_color() );
     }
-    else
+
+    // override time sync from base class on death
+    if ( !Alive() )
     {
-        m << deathTime;
+        sync.mutable_base()->mutable_base()->set_last_time( deathTime );
     }
-    m << Direction();
-    m << Position();
 
     REAL speed = verletSpeed_;
     // if the clients understand it, send them the real current speed
@@ -4969,54 +4966,46 @@ void gCycle::WriteSync(nMessage &m){
         x = 0;
     }
 
-    m << speed;
-    m << short( Alive() ? 1 : 0 );
-    m << distance;
+    sync.set_speed( speed );
+    sync.set_alive( Alive() );
+    sync.set_distance( distance );
     if (!currentWall || currentWall->preliminary)
-        m.Write(0);
+        sync.set_wall_id( 0 );
     else
-        m.Write(currentWall->ID());
+        sync.set_wall_id( currentWall->ID() );
 
-    m.Write(turns);
-    m.Write(braking);
+    sync.set_turns(turns);
+    sync.set_braking(braking);
 
     // write last turn position
-    m << GetLastTurnPos();
+    GetLastTurnPos().WriteSync( *sync.mutable_last_turn_position() );
 
     // write rubber
-    compressZeroOne.Write( m, rubber/( sg_rubberCycle + .1 ) );
-    compressZeroOne.Write( m, 1/( 1 + rubberMalus ) );
+    sync.set_rubber_compressed( compressZeroOne.Write( rubber/( sg_rubberCycle + .1 ) ) );
+    sync.set_rubber_effectiveness_compressed( compressZeroOne.Write( 1/( 1 + rubberMalus ) ) );
 
     // write last clientside sync message ID
     unsigned short lastMessageID = 0;
     if ( lastDestination )
         lastMessageID = lastDestination->messageID;
-    m.Write(lastMessageID);
+    sync.set_last_message_id( lastMessageID );
 
     // write brake
-    compressZeroOne.Write( m, brakingReservoir );
+    sync.set_brake_compressed( compressZeroOne.Write( brakingReservoir ) );
 
     // set new sync times
     // nextSync=tSysTimeFloat()+sg_syncIntervalEnemy;
     // nextSyncOwner=tSysTimeFloat()+sg_GetSyncIntervalSelf( this );
 }
 
-bool gCycle::SyncIsNew(nMessage &m){
-    bool ret=eNetGameObject::SyncIsNew(m);
+bool gCycle::SyncIsNew( Game::CycleSync const & sync, nSenderInfo const & sender ){
+    bool ret = gCycleMovement::SyncIsNew( nProtoBufBaseConverter< Game::CycleSync const >( sync ), sender );
 
-
-    REAL dummy2;
-    short al;
-    unsigned short Turns;
-
-    m >> dummy2;
-    m >> al;
-    m >> dummy2;
-    m.Read(Turns);
+    short al = sync.alive();
 
 #ifdef DEBUG_X
     con << "received sync for player " << player->GetName() << "  ";
-    if (ret || al!=1){
+    if (ret || al != 1){
         con << "accepting..\n";
         return true;
     }
@@ -5027,7 +5016,7 @@ bool gCycle::SyncIsNew(nMessage &m){
     }
 #endif
 
-    return ret || al!=1;
+    return ret || al != 1;
 }
 
 void gCycle::RequestSyncOwner()
@@ -5272,7 +5261,7 @@ void ClampForward( eCoord& newPos, const eCoord& startPos, const eCoord& dir )
 extern REAL sg_cycleBrakeRefill;
 extern REAL sg_cycleBrakeDeplete;
 
-void gCycle::ReadSync( nMessage &m )
+void gCycle::ReadSync( Game::CycleSync const & syncX, nSenderInfo const & sender )
 {
     // data from sync message
     SyncData sync;
@@ -5282,9 +5271,8 @@ void gCycle::ReadSync( nMessage &m )
 
     eCoord new_pos = pos;	// the extrapolated position
 
-    // warning: depends on the implementation of eNetGameObject::WriteSync
-    // since we don't call eNetGameObject::ReadSync.
-    m >> sync.time;
+    Engine::NetGameObjectSync const & baseSync = syncX.base().base();
+    sync.time = baseSync.last_time();
 
     // reset values not sent with old protocol messages
     sync.rubber = rubber;
@@ -5292,25 +5280,25 @@ void gCycle::ReadSync( nMessage &m )
     sync.braking = braking;
     sync.messageID = 1;
 
-    m >> sync.dir;
-    m >> sync.pos;
+    sync.dir.ReadSync( baseSync.direction() );
+    sync.pos.ReadSync( baseSync.position() );
 
     //eDebugLine::SetTimeout( 1.0 );
     //eDebugLine::SetColor( 1,1,1 );
     //eDebugLine::Draw( lastSyncMessage_.pos, 0, lastSyncMessage_.pos, 20 );
 
-    m >> sync.speed;
-    m >> sync_alive;
-    m >> sync.distance;
-    m.Read(sync_wall);
-    if (!m.End())
-        m.Read(sync.turns);
-    if (!m.End())
-        m.Read(sync.braking);
+    sync.speed = syncX.speed();
+    sync_alive = syncX.alive();
+    sync.distance = syncX.distance();
+    sync_wall = syncX.wall_id();
+    if ( syncX.has_turns() )
+        sync.turns = syncX.turns();
+    if ( syncX.has_braking() )
+        sync.braking = syncX.braking();
 
-    if ( !m.End() )
+    if ( syncX.has_last_turn_position() )
     {
-        m >> sync.lastTurn;
+        sync.lastTurn.ReadSync( syncX.last_turn_position() );
     }
     else if ( currentWall )
     {
@@ -5320,20 +5308,20 @@ void gCycle::ReadSync( nMessage &m )
     bool canUseExtrapolatorMethod = false;
 
     bool rubberSent = false;
-    if ( !m.End() )
+    if ( syncX.has_rubber_compressed() )
     {
         rubberSent = true;
 
         // read rubber
         REAL preRubber, preRubberMalus;
-        preRubber = compressZeroOne.Read( m );
-        preRubberMalus = compressZeroOne.Read( m );
+        preRubber = compressZeroOne.Read( syncX.rubber_compressed() );
+        preRubberMalus = compressZeroOne.Read( syncX.rubber_effectiveness_compressed() );
 
         // read last message ID
-        m.Read(sync.messageID);
+        sync.messageID = syncX.last_message_id();
 
         // read braking reservoir
-        sync.brakingReservoir = compressZeroOne.Read( m );
+        sync.brakingReservoir = compressZeroOne.Read( syncX.brake_compressed() );
         // std::cout << "sync: " << sync.brakingReservoir << ":" << sync.braking << "\n";
 
         // undo skewing
@@ -5983,8 +5971,9 @@ bool gCycle::ActionOnQuit()
 }
 
 
-nDescriptor &gCycle::CreatorDescriptor() const{
-    return cycle_init;
+nOProtoBufDescriptorBase const * gCycle::DoGetDescriptor() const
+{
+    return &cycle_init;
 }
 
 /*

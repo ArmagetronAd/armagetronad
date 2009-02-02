@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "rColor.h"
 
+namespace Game { class CycleMovementSync; }
+
 class gCycle;
 class gDestination;
 class gPlayerWall;
@@ -134,7 +136,6 @@ public:
             ,                                         const eCoord &        dir
             ,                                         ePlayerNetID *        p=NULL
                     ,                                 bool                  autodelete=1 )          ;   //!< local constructor
-    gCycleMovement                                  ( nMessage &            message      )          ;   //!< remote constructor
     virtual ~gCycleMovement                         ()                                              ;   //!< destructor
     virtual void OnRemoveFromGame(); // called when the cycle is physically removed from the game
 
@@ -167,6 +168,8 @@ public:
     virtual void            CalculateAcceleration   (                                   )           ;   //!< calculate acceleration to apply later
     virtual void            ApplyAcceleration       ( REAL                  dt          )           ;   //!< apply acceleration calculated earlier
 
+    //! creates a netobject form sync data
+    gCycleMovement( Game::CycleMovementSync const & sync, nSenderInfo const & sender );
 protected:
     // destination handling
     REAL                    DistanceToDestination   ( gDestination &        dest        ) const     ;   //!< calculates the distance to the given destination

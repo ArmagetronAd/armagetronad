@@ -2,6 +2,9 @@
 #include "gCycle.h"
 #include "zZone.h"
 
+#include "zShape.pb.h"
+#include "nProtoBuf.h"
+
 zShape::zShape(eGrid* grid, unsigned short idZone)
         :eNetGameObject( grid, eCoord(0,0), eCoord(0,0), NULL, true ),
         posx_(),
@@ -18,23 +21,18 @@ zShape::zShape(eGrid* grid, unsigned short idZone)
     joinWithZone();
 }
 
-zShape::zShape(nMessage &m):eNetGameObject(m)
+zShape::zShape( Zone::ShapeSync const & sync, nSenderInfo const & sender )
+: eNetGameObject( sync.base(), sender )
 {
-    REAL time;
-    m >> time;
-    setCreatedTime(time);
+    setCreatedTime( sync.creation_time() );
 
-    networkRead(m);
-
-    unsigned short anIdZone;
-    m >> anIdZone;
+    unsigned short anIdZone = sync.zone_id();
     if(anIdZone != idZone_) {
         idZone_ = anIdZone;
         newIdZone_ = true;
         joinWithZone();
     }
 }
-
 
 void zShape::setCreatedTime(REAL time)
 {
@@ -51,58 +49,28 @@ void zShape::setReferenceTime(REAL time)
     // Do not update lasttime_, referencetime_ might be set in the future for ease of equation writing.
 }
 
-void zShape::networkWrite(nMessage &m)
+void zShape::WriteSync( Zone::ShapeSync & sync, bool init ) const
 {
+    eNetGameObject::WriteSync( *sync.mutable_base(), init );
 
-    m << referencetime_;
-    m << posx_;
-    m << posy_;
-    m << scale_;
-    m << rotation2;
-    m << color_.r_;
-    m << color_.g_;
-    m << color_.b_;
-    m << color_.a_;
+    sync.set_reference_time( referencetime_ );
+    posx_.WriteSync( *sync.mutable_pos_x() );
+    posy_.WriteSync( *sync.mutable_pos_y() );
+    scale_.WriteSync( *sync.mutable_scale() );
+    // m << rotation2;
+    color_.WriteSync( *sync.mutable_color() );
 }
 
-void zShape::networkRead(nMessage &m)
+void zShape::ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender )
 {
-    REAL time;
-    m >> time;
-    setReferenceTime(time);
-    m >> posx_;
-    m >> posy_;
-    m >> scale_;
-    m >> rotation2;
+    eNetGameObject::ReadSync( sync.base(), sender );
 
-    m >> color_.r_;
-    m >> color_.g_;
-    m >> color_.b_;
-    m >> color_.a_;
-}
-
-/*
- * to create a shape on the clients
- */
-void zShape::WriteCreate( nMessage & m )
-{
-    eNetGameObject::WriteCreate(m);
-
-    m << createdtime_;
-
-    networkWrite(m);
-
-    m << idZone_;
-}
-
-void zShape::WriteSync(nMessage &m)
-{
-    networkWrite(m);
-}
-
-void zShape::ReadSync(nMessage &m)
-{
-    networkRead(m);
+    setReferenceTime( sync.reference_time() );
+    posx_.ReadSync( sync.pos_x() );
+    posy_.ReadSync( sync.pos_y() );
+    scale_.ReadSync( sync.scale() );
+    // m << rotation2;
+    color_.ReadSync( sync.color() );
 }
 
 void zShape::setPosX(const tFunction & x){
@@ -184,8 +152,10 @@ zShapeCircle::zShapeCircle(eGrid *grid, unsigned short idZone):
         radius(1.0, 0.0)
 {}
 
+static Zone::ShapeSync zsync;
+
 zShapeCircle::zShapeCircle(nMessage &m):
-        zShape(m),
+        zShape( zsync, nSenderInfo( m ) ),
         emulatingOldZone_(false),
         radius(1.0, 0.0)
 {
@@ -204,13 +174,13 @@ void zShapeCircle::WriteCreate( nMessage & m )
 
 void zShapeCircle::WriteSync(nMessage &m)
 {
-    zShape::WriteSync(m);
+    // zShape::WriteSync(m);
     m << radius;
 }
 
 void zShapeCircle::ReadSync(nMessage &m)
 {
-    zShape::ReadSync(m);
+    // zShape::ReadSync(m);
     m >> radius;
 }
 
@@ -382,8 +352,9 @@ void zShapeCircle::render2d(tCoord scale) const {
 }
 
 //
-zShapePolygon::zShapePolygon(nMessage &m):zShape(m),
-        points()
+zShapePolygon::zShapePolygon(nMessage &m)
+: zShape( zsync, nSenderInfo( m ) ),
+ points()
 {
     int numPoints;
     m >> numPoints;
@@ -641,6 +612,7 @@ void zShapePolygon::render2d(tCoord scale) const {
 static nNOInitialisator<zShapeCircle> zoneCircle_init(350,"shapeCircle");
 static nNOInitialisator<zShapePolygon> zonePolygon_init(360,"shapePolygon");
 
+/*
 nDescriptor & zShapeCircle::CreatorDescriptor( void ) const
 {
     return zoneCircle_init;
@@ -650,3 +622,4 @@ nDescriptor & zShapePolygon::CreatorDescriptor( void ) const
 {
     return zonePolygon_init;
 }
+*/

@@ -1,0 +1,42 @@
+// Protocol buffer types for zones v1
+package Game;
+
+import "eNetGameObject.proto";
+import "tColor.proto";
+import "tFunction.proto";
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// legacy sync message
+message ZoneV1Sync
+{
+    // base class init data, needs to come first
+    optional Engine.NetGameObjectSync base = 1;
+
+    optional float create_time = 2; // time of creation
+
+    // legacy creation data end marker
+    optional bool legacy_create_end = 20000;
+
+    optional Tools.Color color = 3;     // zone color
+
+    optional float reference_time = 4;  // zero point of the following functions        
+
+    optional Tools.Function pos_x  = 5; // x position of center
+    optional Tools.Function pos_y  = 6; // y position of center
+    optional Tools.Function radius = 7; // radius of zone
+
+    optional Tools.Function rotation_speed = 8; // rotation speed of zone
+
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
+    // extensions go here
+}

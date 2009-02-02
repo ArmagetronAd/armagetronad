@@ -96,17 +96,15 @@ nNetObject(p->Owner()),player(p){
 
 
 
-eNetGameObject::eNetGameObject(nMessage &m)
+eNetGameObject::eNetGameObject( Engine::NetGameObjectSync const & sync, nSenderInfo const & sender )
         :eGameObject(eGrid::CurrentGrid(), eCoord(0,0), eCoord(0,0), NULL),
-nNetObject(m){
+nNetObject( sync.base(), sender ){
     tASSERT(grid);
 
     lastClientsideAction=0;
-    unsigned short pid;
-    m.Read(pid);
+    unsigned short pid = sync.player_id();
     player=static_cast<ePlayerNetID *>(Object(pid));
-    m.Read(pid);
-    autodelete=pid;
+    autodelete = sync.autodelete();
 
     laggometerSmooth=laggometer=0;
 
@@ -141,9 +139,11 @@ eNetGameObject::~eNetGameObject(){
 
 
 
-bool eNetGameObject::SyncIsNew(nMessage &m){
-    bool ret=nNetObject::SyncIsNew(m);
-    m >> lastAttemptedSyncTime;
+bool eNetGameObject::SyncIsNew(  Engine::NetGameObjectSync const & sync, nSenderInfo const & sender )
+{
+    bool ret = nNetObject::SyncIsNew( sync.base(), sender );
+    
+    lastAttemptedSyncTime = sync.last_time();
 
 #ifdef DEBUG
     if (Owner()==::sn_myNetID && lastAttemptedSyncTime>lastClientsideAction+100){
@@ -151,10 +151,7 @@ bool eNetGameObject::SyncIsNew(nMessage &m){
     }
 #endif
 
-    eCoord dummy;
-    m >> dummy;
-    m >> dummy;
-    return (ret);	// && lastAttemptedSyncTime>lastClientsideAction); // test for time no longer needed
+    return ret;
 }
 
 void eNetGameObject::AddRef()
@@ -248,33 +245,28 @@ void eNetGameObject::ReceiveControl(REAL time,uActionPlayer *Act,REAL x){
     RequestSync();
 }
 
+void eNetGameObject::WriteSync( Engine::NetGameObjectSync & sync, bool init ) const
+{
+    nNetObject::WriteSync( *sync.mutable_base(), init );
 
-void eNetGameObject::WriteCreate(nMessage &m){
-    nNetObject::WriteCreate(m);
-    m.Write(player->ID());
-    m.Write(autodelete);
+    if ( init )
+    {
+        sync.set_player_id( player->ID() );
+        sync.set_autodelete( autodelete );
+    }
+
+    sync.set_last_time( lastTime );
+    Direction().WriteSync( *sync.mutable_direction() );
+    Position() .WriteSync( *sync.mutable_position()  );
 }
 
-void eNetGameObject::WriteSync(nMessage &m){
-    nNetObject::WriteSync(m);
-    //con << lastTime << '\n';
-    m << lastTime;
-    m << Direction();
-    m << Position();
+void eNetGameObject::ReadSync( Engine::NetGameObjectSync const & sync, nSenderInfo const & sender )
+{
+    nNetObject::ReadSync( sync.base(), sender );
+    lastTime = sync.last_time();
+    dir.ReadSync( sync.direction() );
+    pos.ReadSync( sync.position() );
 }
-
-void eNetGameObject::ReadSync(nMessage &m){
-    nNetObject::ReadSync(m);
-    m >> lastTime;
-    m >> dir;
-
-    m >> pos;
-}
-
-/*
-nDescriptor &eNetGameObject::CreatorDescriptor() const{
-  return eNetGameObject_init.desc;
-  } */
 
 bool eNetGameObject::ClearToTransmit(int user) const{
 #ifdef DEBUG

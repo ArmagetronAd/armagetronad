@@ -1,3 +1,6 @@
+#ifndef Z_SHAPE_H
+#define Z_SHAPE_H
+
 #include "tValue.h"
 #include "rColor.h"
 #include <boost/shared_ptr.hpp>
@@ -7,17 +10,19 @@
 #include "tFunction.h"
 #include "tPolynomial.h"
 
-#ifndef Z_SHAPE_H
-#define Z_SHAPE_H
+namespace Zone { class ShapeSync; }
 
 class zShape : public eNetGameObject{
 public:
     zShape(eGrid* grid, unsigned short idZone);
-    zShape(nMessage &m);
     virtual ~zShape() {};
-    virtual void WriteCreate( nMessage & m );
-    virtual void WriteSync(nMessage &m);   //!< writes sync data
-    virtual void ReadSync(nMessage &m);    //!< reads sync data
+
+    //! creates a netobject form sync data
+    zShape( Zone::ShapeSync const & sync, nSenderInfo const & sender );
+    //! reads sync data, returns false if sync was old or otherwise invalid
+    void ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender );
+    //! writes sync data (and initialization data if flag is set)
+    void WriteSync( Zone::ShapeSync & sync, bool init ) const;
 
     void animate( REAL time );
     virtual bool isInteracting(eGameObject * target);
@@ -50,9 +55,6 @@ protected:
     rColor color_;
 
     eCoord Position() { return eCoord(posx_(lasttime_ - referencetime_), posy_(lasttime_ - referencetime_) ); };
-
-    void networkRead(nMessage &m);
-    void networkWrite(nMessage &m);
 
     void setCreatedTime(REAL time);
 
@@ -90,7 +92,6 @@ protected:
     tFunction radius;
 
 private:
-    virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
 };
 
 typedef std::pair<tFunction, tFunction> myPoint;
@@ -116,7 +117,6 @@ protected:
     bool isInside (eCoord anECoord);
     static void networkRead(nMessage &m, zShape *aShape);
 private:
-    virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
 };
 
 //typedef boost::shared_ptr<zShape> zShapePtr;

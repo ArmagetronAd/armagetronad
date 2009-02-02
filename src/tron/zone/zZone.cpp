@@ -137,6 +137,7 @@ static nVersionFeature sz_ShapedZones(20);
 //!
 // *******************************************************************************
 
+#ifdef xxx
 zZone::zZone( nMessage & m )
         :eNetGameObject( m ),
         //rotation_(1,0),
@@ -223,6 +224,7 @@ zZone::zZone( nMessage & m )
 */
 
 }
+#endif
 
 // *******************************************************************************
 // *
@@ -292,7 +294,7 @@ void zZone::WriteCreate( nMessage & m )
 void zZone::WriteSync( nMessage & m )
 {
     // delegate
-    eNetGameObject::WriteSync( m );
+    // eNetGameObject::WriteSync( m );
 
     /*
     // write color
@@ -340,7 +342,7 @@ void zZone::WriteSync( nMessage & m )
 void zZone::ReadSync( nMessage & m )
 {
     // delegage
-    eNetGameObject::ReadSync( m );
+    // eNetGameObject::ReadSync( m );
 
     if(shape && shape->isEmulatingOldZone())
     {
@@ -625,7 +627,7 @@ void zZone::OnOutside( gCycle * target, REAL time )
 }
 
 // the zone's network initializator
-static nNOInitialisator<zZone> zone_init(341,"zonev2");
+// static nNOInitialisator<zZone> zone_init(341,"zonev2");
 
 // *******************************************************************************
 // *
@@ -639,7 +641,9 @@ static nNOInitialisator<zZone> zone_init(341,"zonev2");
 
 nDescriptor & zZone::CreatorDescriptor( void ) const
 {
-    return zone_init;
+    nDescriptor * x = 0;
+    return *x;
+    // return zone_init;
 }
 
 /*

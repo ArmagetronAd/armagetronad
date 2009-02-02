@@ -324,13 +324,13 @@ public:
     // even better new stuff: protocol buffers. The functions are non-virtual; they
     // get called over the descriptor:
     //! creates a netobject form sync data
-    nNetObject( Network::NetObjectSync const &, nSenderInfo const & );
+    nNetObject( Network::NetObjectSync const & sync, nSenderInfo const & sender );
     //! reads sync data, returns false if sync was old or otherwise invalid
-    void ReadSync( Network::NetObjectSync const &, nSenderInfo const & );
+    void ReadSync( Network::NetObjectSync const & sync, nSenderInfo const & sender );
     //! writes sync data (and initialization data if flag is set)
-    void WriteSync( Network::NetObjectSync &, bool init ) const;
+    void WriteSync( Network::NetObjectSync & sync, bool init ) const;
     //! returns true if sync message is new (and updates 
-    bool SyncIsNew( Network::NetObjectSync const &, nSenderInfo const & );
+    bool SyncIsNew( Network::NetObjectSync const & sync, nSenderInfo const & sender );
 
     //! returns the descriptor responsible for this class
     inline nOProtoBufDescriptorBase const * GetDescriptor() const { return DoGetDescriptor(); }

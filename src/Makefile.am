@@ -67,6 +67,8 @@ endif
 libprotobuf_a_SOURCES = \
     protobuf/tColor.pb.cc protobuf/tColor.pb.h \
     protobuf/tCoord.pb.cc protobuf/tCoord.pb.h \
+    protobuf/tFunction.pb.cc protobuf/tFunction.pb.h \
+    protobuf/tPolynomial.pb.cc protobuf/tPolynomial.pb.h \
     protobuf/nNetObject.pb.cc protobuf/nNetObject.pb.h \
     protobuf/nConfig.pb.cc protobuf/nConfig.pb.h \
     protobuf/eTeam.pb.cc protobuf/eTeam.pb.h \
@@ -76,6 +78,12 @@ libprotobuf_a_SOURCES = \
     protobuf/eEventNotification.pb.cc protobuf/eEventNotification.pb.h \
     protobuf/eLagCompensation.pb.cc protobuf/eLagCompensation.pb.h \
     protobuf/eTimer.pb.cc protobuf/eTimer.pb.h \
+    protobuf/zZone.pb.cc protobuf/zZone.pb.h \
+    protobuf/zShape.pb.cc protobuf/zShape.pb.h \
+    protobuf/gGame.pb.cc protobuf/gGame.pb.h \
+    protobuf/gCycle.pb.cc protobuf/gCycle.pb.h \
+    protobuf/gWall.pb.cc protobuf/gWall.pb.h \
+    protobuf/gZone.pb.cc protobuf/gZone.pb.h \
     protobuf/gAIBase.pb.cc protobuf/gAIBase.pb.h
 #    protobuf/.pb.cc protobuf/.pb.h \
 #
@@ -116,7 +124,7 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/tRectangle.h tools/tRectangle.cpp \
 	tools/tPlayList.h tools/tPlayList.cpp\
 	tools/tDecorator.h tools/tDecorator.cpp\
-	tools/tCoord.h\
+	tools/tCoord.h tools/tCoord.cpp\
 	tools/tValue.h tools/tValueParser.h\
 	tools/tFunction.h tools/tFunction.cpp\
 	tools/tPolynomial.h tools/tPolynomialMarshaler.h tools/tPolynomialWithBase.h \

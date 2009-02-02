@@ -1,10 +1,5 @@
-// Protocol buffer types for PROTO
-//package Tools;
-//package Network;
-//package Render;
-//package Engine;
-//package UI;
-//package Game;
+// Protocol buffer types for gGame.cpp
+package Game;
 
 import "nNetObject.proto";
 
@@ -17,27 +12,25 @@ import "nNetObject.proto";
 
 */
 
-// legacy message
-message PROTO
+// client state message
+message ClientState
 {
-    // legacy stuff goes here
+    optional uint32 state = 1; // the current state of the game on the client
 
     // legacy message end marker, extensions go after it
     optional bool legacy_message_end_marker = 20000;
 }
 
-// legacy sync message
-message PROTOSync
+// sync message for gGame
+message GameSync
 {
     // base class init data, needs to come first
     optional Network.NetObjectSync base = 1;
 
-    // legacy creation data goes here
-
     // legacy creation data end marker
     optional bool legacy_create_end = 20000;
 
-    // legacy sync data goes here
+    optional uint32 state = 2; // the current state of the game
 
     // legacy sync data end marker
     optional bool legacy_sync_end = 20001;
@@ -45,17 +38,13 @@ message PROTOSync
     // extensions go here
 }
 
-// net object control message
-message PROTOControl
+// client state message
+message FullscreenMessage
 {
-    // legacy data goes here
+    optional string title   = 1; // title displayed at the top
+    optional string message = 2; // body text
+    optional float  timeout = 3; // timeout in seconds, message will dissapear after that
 
     // legacy message end marker, extensions go after it
     optional bool legacy_message_end_marker = 20000;
-}
-
-// register control
-extend Network.NetObjectControl
-{
-    optional PROTOControl player_control = 20000;
 }
