@@ -90,6 +90,9 @@ Changes since 0.2.8
 Changes since 0.2.8.3_beta1:
 ============================
 
+- Fixed rare wallpassing bug; it required what whould usually be an
+  instakill and infinte wall length.
+
 Changes since 0.2.8.2
 =====================
 
