@@ -418,14 +418,14 @@ nVersionFeature::nVersionFeature( int min, int max ) // creates a feature that i
     max_ = max;
 }
 
-bool nVersionFeature::Supported()
+bool nVersionFeature::Supported() const
 {
     return 
     ( min_ < 0 || nTempVersionOverrider::OverriddenVersion().Max() >= min_ ) &&  
     ( max_ < 0 || nTempVersionOverrider::OverriddenVersion().Min() <= max_ );
 }
 
-bool nVersionFeature::Supported( int client )
+bool nVersionFeature::Supported( int client ) const
 {
     if ( client < 0 || client > MAXCLIENTS )
         return false;
@@ -1126,21 +1126,32 @@ nMessageBase::~nMessageBase(){
     tCHECK_DEST;
 }
 
-
-
-
-void nMessageBase::BroadCast(bool ack){
+// send it to anyone who is interested and upports the given feature
+void nMessageBase::BroadCast( nVersionFeature const & feature, bool ack )
+{
     tControlledPTR< nMessageBase > keep( this );
-    if (sn_GetNetState()==nCLIENT)
+    if (sn_GetNetState()==nCLIENT && feature.Supported( 0 ) )
         Send(0,ack);
 
     if (sn_GetNetState()==nSERVER){
-        for(int i=MAXCLIENTS;i>0;i--){
-            if (sn_Connections[i].socket)
+        for(int i=MAXCLIENTS;i>0;i--)
+        {
+            if ( sn_Connections[i].socket && feature.Supported(i) )
+            {
                 Send(i,0,ack);
+            }
         }
     }
 }
+
+// send it to anyone who is interested
+void nMessageBase::BroadCast(bool ack)
+{
+    static nVersionFeature all(0);
+    BroadCast( all, ack );
+}
+
+
 
 // **********************************************
 //  Basic communication classes: login

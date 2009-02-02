@@ -73,6 +73,7 @@ libprotobuf_a_SOURCES = \
     protobuf/ePlayer.pb.cc protobuf/ePlayer.pb.h \
     protobuf/eNetGameObject.pb.cc protobuf/eNetGameObject.pb.h \
     protobuf/eVoter.pb.cc protobuf/eVoter.pb.h \
+    protobuf/eEventNotification.pb.cc protobuf/eEventNotification.pb.h \
     protobuf/gAIBase.pb.cc protobuf/gAIBase.pb.h
 #    protobuf/.pb.cc protobuf/.pb.h \
 #

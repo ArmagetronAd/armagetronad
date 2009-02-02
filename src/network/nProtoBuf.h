@@ -501,6 +501,14 @@ public:
         return m->AccessProtoBuf();
     }
 
+    //! creates and schedules a message for broadcast to all clients supporting a certain feature, returning the protovuf to fill
+    PROTOBUF & Broadcast( nVersionFeature const & feature, bool ack = true )
+    {
+        nProtoBufMessage< PROTOBUF > * m = CreateMessage();
+        m->BroadCast( feature, ack );
+        return m->AccessProtoBuf();
+    }
+
     //! creates and schedules a message for sending to a specific peer, returning the protovuf to fill
     PROTOBUF & Send( unsigned int receiver, bool ack = true )
     {

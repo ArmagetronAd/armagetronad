@@ -168,9 +168,9 @@ void sn_UpdateCurrentVersion();         //!< updates the sn_CurrentVersion()
 class nVersionFeature
 {
 public:
-    nVersionFeature( int min, int max = -1 ); // creates a feature that is supported from version min to max; values of -1 indicate no border
-    bool Supported();                         // returns whether this feature is supported by everyone
-    bool Supported( int client );             // returns whether this feature is supported by a certain client ( resp. the server in client mode )
+    explicit nVersionFeature( int min, int max = -1 ); // creates a feature that is supported from version min to max; values of -1 indicate no border
+    bool Supported() const;                            // returns whether this feature is supported by everyone
+    bool Supported( int client ) const;                // returns whether this feature is supported by a certain client ( resp. the server in client mode )
 private:
     int min_, max_;
 };
@@ -514,6 +514,9 @@ public:
     // send it to anyone who is interested
     // (the server in client mode, all clients in server mode)
     void BroadCast(bool ack=true);
+
+    // send it to anyone who is interested and upports the given feature
+    void BroadCast( nVersionFeature const & feature, bool ack=true );
 
     // put the message into the send heap
     void Send(int peer,REAL priority=0,bool ack=true);

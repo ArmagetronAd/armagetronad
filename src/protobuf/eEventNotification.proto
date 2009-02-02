@@ -1,0 +1,23 @@
+// Protocol buffer types for eEventNotification
+package Engine;
+
+// import "nNetObject.proto";
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// legacy message
+message EventNotification
+{
+    optional string title = 1;
+    optional string message = 2;    
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
