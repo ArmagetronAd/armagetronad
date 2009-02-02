@@ -57,7 +57,7 @@ void se_eventNotificationHandle( Engine::EventNotification const & event, nSende
 
 static nProtoBufDescriptor< Engine::EventNotification > se_eventNotificationDescriptor(  199, se_eventNotificationHandle );
 
-void se_sendEventNotification( tString title, tString message )
+void se_sendEventNotification( tString const & title, tString const & message )
 {
     if ( sn_GetNetState() != nSERVER )
     {
