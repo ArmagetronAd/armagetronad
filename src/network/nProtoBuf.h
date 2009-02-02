@@ -505,6 +505,7 @@ public:
     PROTOBUF & Broadcast( nVersionFeature const & feature, bool ack = true )
     {
         nProtoBufMessage< PROTOBUF > * m = CreateMessage();
+        lastSent_ = m;
         m->BroadCast( feature, ack );
         return m->AccessProtoBuf();
     }
@@ -513,6 +514,7 @@ public:
     PROTOBUF & Send( unsigned int receiver, bool ack = true )
     {
         nProtoBufMessage< PROTOBUF > * m = CreateMessage();
+        lastSent_ = m;
         m->Send( receiver, ack );
         return m->AccessProtoBuf();
     }
@@ -522,6 +524,7 @@ public:
     {
         // pack buffer into a message filler
         nProtoBufMessage< PROTOBUF > * m = CreateMessage();
+        lastSent_ = m;
         m->AccessProtoBuf() = protoBuf;
         
         return m;
@@ -565,6 +568,8 @@ public:
 private:
     //! instance of this descriptor
     static nProtoBufDescriptor * instance_;
+
+    tJUST_CONTROLLED_PTR< nProtoBufMessage< PROTOBUF > > lastSent_;
 
 #ifdef DEBUG
     bool multipleInstances_;
