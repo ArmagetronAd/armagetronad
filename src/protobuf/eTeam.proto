@@ -4,16 +4,16 @@ package Engine;
 import "nNetObject.proto";
 import "tColor.proto";
 
-// eTeam sync message
-message eTeamSync
+// Team sync message
+message TeamSync
 {
     // base class init data, needs to come first
-    optional Network.nNetObjectSync base = 1;
+    optional Network.NetObjectSync base = 1;
 
     // legacy creation data end marker
     optional bool legacy_create_end = 20000;
 
-    optional Tools.tShortColor color         = 2;     // the team's color
+    optional Tools.ShortColor  color         = 2;     // the team's color
     optional string            name          = 3;     // the team's name
     optional int32             max_players   = 4;     // maximum number of players
     optional int32             max_imbalance = 5;     // maximum difference in team sizes

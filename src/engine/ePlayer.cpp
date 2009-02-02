@@ -5257,7 +5257,7 @@ void ePlayerNetID::CreateVoter()
 }
 
 //! writes sync data
-void ePlayerNetID::WriteSync( Engine::ePlayerNetIDSync & sync, bool init )
+void ePlayerNetID::WriteSync( Engine::PlayerNetIDSync & sync, bool init )
 {
     lastSync=tSysTimeFloat();
     nNetObject::WriteSync( *sync.mutable_base(), init );
@@ -5496,7 +5496,7 @@ static void se_OptionalNameFilters( tString & remoteName )
 }
 
 //! reads incremental sync data
-void ePlayerNetID::ReadSync( Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender )
+void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo const & sender )
 {
     // check whether this is the first sync
     bool firstSync = ( this->ID() == 0 );
@@ -5638,7 +5638,7 @@ void ePlayerNetID::ReadSync( Engine::ePlayerNetIDSync const & sync, nSenderInfo 
 }
 
 //! creates a netobject form sync data
-ePlayerNetID::ePlayerNetID( Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender )
+ePlayerNetID::ePlayerNetID( Engine::PlayerNetIDSync const & sync, nSenderInfo const & sender )
 : nNetObject( sync.base(), sender ),listID(-1), teamListID(-1)
  , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings )
 {
@@ -5674,7 +5674,7 @@ ePlayerNetID::ePlayerNetID( Engine::ePlayerNetIDSync const & sync, nSenderInfo c
     // rubberstatus=0;
 }
 
-static nOProtoBufDescriptor< ePlayerNetID, Engine::ePlayerNetIDSync > se_pbdescriptor( 201 );
+static nOProtoBufDescriptor< ePlayerNetID, Engine::PlayerNetIDSync > se_pbdescriptor( 201 );
 // nNOInitialisator<ePlayerNetID> ePlayerNetID_init(201,"ePlayerNetID");
 
 //! returns the descriptor responsible for this class
@@ -7324,7 +7324,7 @@ void ePlayerNetID::SetTeamWish(eTeam* newTeam)
     }
     if ( nCLIENT ==  sn_GetNetState() && Owner() == sn_myNetID )
     {
-        Engine::ePlayerNetIDControl & control = *BroadcastControl().MutableExtension( Engine::player_control );
+        Engine::PlayerNetIDControl & control = *BroadcastControl().MutableExtension( Engine::player_control );
 
         control.set_type( TEAMCHANGE );
         control.set_team_id( PointerToID( newTeam ) );
@@ -7347,7 +7347,7 @@ void ePlayerNetID::CreateNewTeamWish()
 {
     if ( nCLIENT ==  sn_GetNetState() )
     {
-        Engine::ePlayerNetIDControl & control = *BroadcastControl().MutableExtension( Engine::player_control );
+        Engine::PlayerNetIDControl & control = *BroadcastControl().MutableExtension( Engine::player_control );
 
         control.set_type( NEW_TEAM );
     }
@@ -7357,10 +7357,10 @@ void ePlayerNetID::CreateNewTeamWish()
 }
 
 // receive the team control wish
-void ePlayerNetID::ReceiveControlNet( Network::nNetObjectControl const & controlBase )
+void ePlayerNetID::ReceiveControlNet( Network::NetObjectControl const & controlBase )
 {
     tASSERT( controlBase.HasExtension( Engine::player_control ) );
-    Engine::ePlayerNetIDControl const & control = controlBase.GetExtension( Engine::player_control );
+    Engine::PlayerNetIDControl const & control = controlBase.GetExtension( Engine::player_control );
 
     short messageType = control.type();
 
@@ -7425,12 +7425,12 @@ void ePlayerNetID::ReceiveControlNet( Network::nNetObjectControl const & control
 }
 
 // easier to implement conversion helpers: just extract the relevant sub-protbuf.
-nProtoBuf       * ePlayerNetID::ExtractControl( Network::nNetObjectControl       & control )
+nProtoBuf       * ePlayerNetID::ExtractControl( Network::NetObjectControl       & control )
 {
     return control.MutableExtension( Engine::player_control );
 }
 
-nProtoBuf const * ePlayerNetID::ExtractControl( Network::nNetObjectControl const & control )
+nProtoBuf const * ePlayerNetID::ExtractControl( Network::NetObjectControl const & control )
 {
     tASSERT( control.HasExtension( Engine::player_control ) );
     return & control.GetExtension( Engine::player_control );

@@ -40,7 +40,7 @@ class nSenderInfo;
 class nOProtoBufDescriptorBase;
 class nProtoBufDescriptorBase;
 
-namespace Network{ class nNetObjectSync; class nNetObjectControl; }
+namespace Network{ class NetObjectSync; class NetObjectControl; }
 
 // checks whether n is newer than old; if so, old is set to n and
 // true is returned.
@@ -303,13 +303,13 @@ public:
     // even better new stuff: protocol buffers. The functions are non-virtual; they
     // get called over the descriptor:
     //! creates a netobject form sync data
-    nNetObject( Network::nNetObjectSync const &, nSenderInfo const & );
+    nNetObject( Network::NetObjectSync const &, nSenderInfo const & );
     //! reads sync data, returns false if sync was old or otherwise invalid
-    void ReadSync( Network::nNetObjectSync const &, nSenderInfo const & );
+    void ReadSync( Network::NetObjectSync const &, nSenderInfo const & );
     //! writes sync data (and initialization data if flag is set)
-    void WriteSync( Network::nNetObjectSync &, bool init ) const;
+    void WriteSync( Network::NetObjectSync &, bool init ) const;
     //! returns true if sync message is new (and updates 
-    bool SyncIsNew( Network::nNetObjectSync const &, nSenderInfo const & );
+    bool SyncIsNew( Network::NetObjectSync const &, nSenderInfo const & );
 
     //! returns the descriptor responsible for this class
     inline nOProtoBufDescriptorBase const * GetDescriptor() const { return DoGetDescriptor(); }
@@ -323,22 +323,22 @@ protected:
     //! returns the user that the current WriteSync() is intended for
     static int SyncedUser();
 
-    Network::nNetObjectControl & BroadcastControl();
+    Network::NetObjectControl & BroadcastControl();
     // creates a new control message that can be used to control other
     // copies of this nNetObject; control is received with ReceiveControlNet().
     // It is automatically broadcast (sent to the server in client mode).
 
 private:
     // conversion for stream legacy control messages.
-    virtual void StreamControl( Network::nNetObjectControl const & control, nStreamMessage & stream );
-    virtual void UnstreamControl( nStreamMessage & stream, Network::nNetObjectControl & control );
+    virtual void StreamControl( Network::NetObjectControl const & control, nStreamMessage & stream );
+    virtual void UnstreamControl( nStreamMessage & stream, Network::NetObjectControl & control );
 
     // easier to implement conversion helpers: just extract the relevant sub-protbuf.
-    virtual nProtoBuf       * ExtractControl( Network::nNetObjectControl       & control );
-    virtual nProtoBuf const * ExtractControl( Network::nNetObjectControl const & control );
+    virtual nProtoBuf       * ExtractControl( Network::NetObjectControl       & control );
+    virtual nProtoBuf const * ExtractControl( Network::NetObjectControl const & control );
 public:
 
-    virtual void ReceiveControlNet( Network::nNetObjectControl const & control );
+    virtual void ReceiveControlNet( Network::NetObjectControl const & control );
     // receives the control message. the data written to the message created
     // by *NewControlMessage() can be read directly from m.
 

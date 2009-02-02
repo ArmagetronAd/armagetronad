@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tString.h"
 #include "defs.h"
 
-namespace Tools{ class tColor; class tShortColor; }
+namespace Tools{ class Color; class ShortColor; }
 
 //! rgba color represented by floats between 0 and 1
 class tColor
@@ -47,8 +47,8 @@ public:
     void FillFrom( const char * c );		//!< Fills this color object from a color code string
     void FillFrom( const wchar_t * c );		//!< Fills this color object from a color code string
 
-    void WriteSync( Tools::tColor & target ) const; //!< writes sync data
-    void ReadSync( Tools::tColor const & source );  //!< reads sync data
+    void WriteSync( Tools::Color & target ) const; //!< writes sync data
+    void ReadSync( Tools::Color const & source );  //!< reads sync data
 
     // the colors are public because they are independent of each other
     REAL r_, g_, b_, a_;                    //!< Color values
@@ -66,8 +66,8 @@ public:
     tShortColor( unsigned char r, unsigned char g, unsigned char b );  //!< Constructor
     ~tShortColor(){}                           //!< Destructor
 
-    void WriteSync( Tools::tShortColor & target ) const; //!< writes sync data
-    void ReadSync( Tools::tShortColor const & source );  //!< reads sync data
+    void WriteSync( Tools::ShortColor & target ) const; //!< writes sync data
+    void ReadSync( Tools::ShortColor const & source );  //!< reads sync data
 
     // the colors are public because they are independent of each other
     unsigned char r_, g_, b_;                 //!< Color values

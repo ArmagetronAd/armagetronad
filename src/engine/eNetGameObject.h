@@ -53,11 +53,11 @@ protected:
     REAL laggometerSmooth;  //!< the lag, smoothed over time
 
     // used to implement the control functions
-    virtual void ReceiveControlNet( Network::nNetObjectControl const & control );
+    virtual void ReceiveControlNet( Network::NetObjectControl const & control );
 
     // easier to implement conversion helpers: just extract the relevant sub-protbuf.
-    virtual nProtoBuf       * ExtractControl( Network::nNetObjectControl       & control );
-    virtual nProtoBuf const * ExtractControl( Network::nNetObjectControl const & control );
+    virtual nProtoBuf       * ExtractControl( Network::NetObjectControl       & control );
+    virtual nProtoBuf const * ExtractControl( Network::NetObjectControl const & control );
 
     virtual ~eNetGameObject();
 

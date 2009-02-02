@@ -44,7 +44,7 @@ class gAISensor;
 class gAILog;
 class gAICharacter;
 
-namespace Game{ class gAIPlayerSync; class gAITeamSync; }
+namespace Game{ class AIPlayerSync; class AITeamSync; }
 
 typedef enum
 { AI_SURVIVE = 0,   // just try to stay alive
@@ -241,11 +241,11 @@ public:
     virtual void Color( REAL&r, REAL&g, REAL&b ) const;
 
     //! creates a netobject form sync data
-    gAIPlayer( Game::gAIPlayerSync const & sync, nSenderInfo const & sender );
+    gAIPlayer( Game::AIPlayerSync const & sync, nSenderInfo const & sender );
     //! reads incremental sync data. Returns false if sync was invalid or old.
-    // bool ReadSync( Game::gAIPlayerSync const & sync, nSenderInfo const & sender );
+    // bool ReadSync( Game::AIPlayerSync const & sync, nSenderInfo const & sender );
     //! writes sync data (and initialization data if flat is set)
-    // void WriteSync( Game::gAIPlayerSync & sync, bool init );
+    // void WriteSync( Game::AIPlayerSync & sync, bool init );
     //! returns the descriptor responsible for this class
     virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
 };
@@ -257,11 +257,11 @@ public:
     gAITeam();
 
     //! creates a netobject form sync data
-    gAITeam( Game::gAITeamSync const & sync, nSenderInfo const & sender );
+    gAITeam( Game::AITeamSync const & sync, nSenderInfo const & sender );
     //! reads incremental sync data. Returns false if sync was invalid or old.
-    // bool ReadSync( Game::gAITeamSync const & sync, nSenderInfo const & sender );
+    // bool ReadSync( Game::AITeamSync const & sync, nSenderInfo const & sender );
     //! writes sync data (and initialization data if flat is set)
-    // void WriteSync( Game::gAITeamSync & sync, bool init );
+    // void WriteSync( Game::AITeamSync & sync, bool init );
     //! returns the descriptor responsible for this class
     virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
 

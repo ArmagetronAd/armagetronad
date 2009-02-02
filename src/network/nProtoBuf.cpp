@@ -830,7 +830,7 @@ nMessage& operator << ( nMessage& m, nProtoBuf const & buffer )
 nOProtoBufDescriptorBase::~nOProtoBufDescriptorBase()
 {}
 
-unsigned int nOProtoBufDescriptorBase::GetObjectID ( Network::nNetObjectSync const & message )
+unsigned int nOProtoBufDescriptorBase::GetObjectID ( Network::NetObjectSync const & message )
 {
     if( !message.has_object_id() )
     {

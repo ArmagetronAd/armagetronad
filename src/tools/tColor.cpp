@@ -198,7 +198,7 @@ void tColor::FillFrom( const wchar_t * c )
 //! @param target the protobuf to write to
 //!
 // *******************************************************************************************
-void tColor::WriteSync( Tools::tColor & target ) const
+void tColor::WriteSync( Tools::Color & target ) const
 {
     target.set_r( r_ );
     target.set_g( g_ );
@@ -215,7 +215,7 @@ void tColor::WriteSync( Tools::tColor & target ) const
 //! @param source the protobuf to read from
 //!
 // *******************************************************************************************
-void tColor::ReadSync( Tools::tColor const & source )
+void tColor::ReadSync( Tools::Color const & source )
 {
     r_ = source.r();
     g_ = source.g();
@@ -275,7 +275,7 @@ tShortColor::tShortColor( unsigned char r, unsigned char g, unsigned char b )
 //! @param target the protobuf to write to
 //!
 // *******************************************************************************************
-void tShortColor::WriteSync( Tools::tShortColor & target ) const
+void tShortColor::WriteSync( Tools::ShortColor & target ) const
 {
     target.set_r( r_ );
     target.set_g( g_ );
@@ -291,7 +291,7 @@ void tShortColor::WriteSync( Tools::tShortColor & target ) const
 //! @param target the protobuf to read from
 //!
 // *******************************************************************************************
-void tShortColor::ReadSync( Tools::tShortColor const & source )
+void tShortColor::ReadSync( Tools::ShortColor const & source )
 {
     r_ = source.r();
     g_ = source.g();

@@ -429,7 +429,7 @@ protected:
         return GetObjectID( message.base() );
     }
 
-    static unsigned int GetObjectID ( Network::nNetObjectSync const & message );
+    static unsigned int GetObjectID ( Network::NetObjectSync const & message );
 
     //! checks to run before creating a new object
     static bool PreCheck( unsigned short id, nSenderInfo sender );

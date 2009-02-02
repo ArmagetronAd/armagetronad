@@ -48,7 +48,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <set>
 #include <list>
 
-namespace Engine{ class ePlayerNetIDSync; }
+namespace Engine{ class PlayerNetIDSync; }
 
 #define PLAYER_CONFITEMS (30+MAX_INSTANT_CHAT)
 
@@ -260,11 +260,11 @@ public:
 
     void CreateNewTeam(); 	    				// create a new team and join it (on the server)
     void CreateNewTeamWish();	 				// express the wish to create a new team and join it
-    virtual void ReceiveControlNet( Network::nNetObjectControl const & control );// receive the team control wish
+    virtual void ReceiveControlNet( Network::NetObjectControl const & control );// receive the team control wish
 
     // easier to implement conversion helpers: just extract the relevant sub-protbuf.
-    virtual nProtoBuf       * ExtractControl( Network::nNetObjectControl       & control );
-    virtual nProtoBuf const * ExtractControl( Network::nNetObjectControl const & control );
+    virtual nProtoBuf       * ExtractControl( Network::NetObjectControl       & control );
+    virtual nProtoBuf const * ExtractControl( Network::NetObjectControl const & control );
 
     static bool Enemies( ePlayerNetID const * a, ePlayerNetID const * b ); //!< determines whether two players are opponents and can score points against each other
 
@@ -276,11 +276,11 @@ public:
     virtual bool			ClearToTransmit(int user) const;
 
     //! creates a netobject form sync data
-    ePlayerNetID( Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender );
+    ePlayerNetID( Engine::PlayerNetIDSync const & sync, nSenderInfo const & sender );
     //! reads incremental sync data. Returns false if sync was invalid or old.
-    void ReadSync( Engine::ePlayerNetIDSync const & sync, nSenderInfo const & sender );
+    void ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo const & sender );
     //! writes sync data (and initialization data if flat is set)
-    void WriteSync( Engine::ePlayerNetIDSync & sync, bool init );
+    void WriteSync( Engine::PlayerNetIDSync & sync, bool init );
     //! returns the descriptor responsible for this class
     virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
 public:

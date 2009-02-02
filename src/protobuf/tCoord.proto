@@ -11,7 +11,7 @@ package Tools;
 */
 
 // message for coordinates
-message tCoord
+message Position
 {
     optional float x = 1;
     optional float y = 2;
@@ -21,7 +21,7 @@ message tCoord
 }
 
 // message for directions
-message tDirection
+message Direction
 {
     optional float x = 1;
     optional float y = 2;

@@ -119,7 +119,7 @@ inline static tColoredStringProxy ColorString( const eTeam * t )
     return tColoredStringProxy( t->R()/15.0f, t->G()/15.0f, t->B()/15.0f );
 }
 
-nOProtoBufDescriptor<eTeam, Engine::eTeamSync > eTeam_init(220);
+nOProtoBufDescriptor<eTeam, Engine::TeamSync > eTeam_init(220);
 
 //! returns the descriptor responsible for this class
 nOProtoBufDescriptorBase const * eTeam::DoGetDescriptor() const
@@ -1444,7 +1444,7 @@ bool eTeam::ClearToTransmit(int user) const
 // syncronisation functions:
 
 //! writes sync data (and initialization data if flat is set)
-void eTeam::WriteSync( Engine::eTeamSync & sync, bool init )
+void eTeam::WriteSync( Engine::TeamSync & sync, bool init )
 {
     nNetObject::WriteSync( *sync.mutable_base(), init );
 
@@ -1457,7 +1457,7 @@ void eTeam::WriteSync( Engine::eTeamSync & sync, bool init )
 
 
 //! reads incremental sync data. Returns false if sync was invalid or old.
-void eTeam::ReadSync( Engine::eTeamSync const & sync, nSenderInfo const & init )
+void eTeam::ReadSync( Engine::TeamSync const & sync, nSenderInfo const & init )
 {
     nNetObject::ReadSync( sync.base(), init );
 
@@ -1512,7 +1512,7 @@ eTeam::eTeam()
 
 
 // remote constructor
-eTeam::eTeam( Engine::eTeamSync const & sync, nSenderInfo const & sender )
+eTeam::eTeam( Engine::TeamSync const & sync, nSenderInfo const & sender )
 : nNetObject( sync.base(), sender ),
   colorID(-1),listID(-1)
 {

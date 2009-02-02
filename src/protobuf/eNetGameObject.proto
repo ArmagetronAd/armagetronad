@@ -14,7 +14,7 @@ import "tCoord.proto";
 */
 
 // legacy message
-message eNetGameObject
+message NetGameObject
 {
     // legacy stuff goes here
 
@@ -23,10 +23,10 @@ message eNetGameObject
 }
 
 // legacy sync message
-message eNetGameObjectSync
+message NetGameObjectSync
 {
     // base class init data, needs to come first
-    optional Network.nNetObjectSync base = 1;
+    optional Network.NetObjectSync base = 1;
 
     optional uint32 player_id  = 2; // netobject ID of player owning the object
     optional bool   autodelete = 3; // flag indicating whether the object should automatically
@@ -36,8 +36,8 @@ message eNetGameObjectSync
     optional bool legacy_create_end = 20000;
 
     optional float last_time            = 4; // last time the object was simulated
-    optional Tools.tDirection direction = 5; // current direction of movement
-    optional Tools.tCoord     position  = 6; // current position
+    optional Tools.Direction direction = 5; // current direction of movement
+    optional Tools.Position  position  = 6; // current position
 
     // legacy sync data end marker
     optional bool legacy_sync_end = 20001;
@@ -46,7 +46,7 @@ message eNetGameObjectSync
 }
 
 // net object control message
-message eNetGameObjectControl
+message NetGameObjectControl
 {
     // legacy data goes here
     optional float  time = 1;         // time of activation
@@ -58,7 +58,7 @@ message eNetGameObjectControl
 }
 
 // register control
-extend Network.nNetObjectControl
+extend Network.NetObjectControl
 {
-    optional eNetGameObjectControl net_game_object_control = 5;
+    optional NetGameObjectControl net_game_object_control = 5;
 }

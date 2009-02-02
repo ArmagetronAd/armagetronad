@@ -36,15 +36,15 @@ message Chat
     optional bool legacy_message_end_marker = 20000;
 }
 
-message ePlayerNetIDSync
+message PlayerNetIDSync
 {
     // base class init data
-    optional Network.nNetObjectSync base = 1;
+    optional Network.NetObjectSync base = 1;
 
     // legacy creation data end marker
     optional bool legacy_create_end = 20000;
 
-    optional Tools.tShortColor color = 2;
+    optional Tools.ShortColor color = 2;
     optional uint32 ping_charity    = 3;
     optional string player_name     = 4;
     optional float  ping            = 5;
@@ -62,7 +62,7 @@ message ePlayerNetIDSync
 }
 
 // net object control message
-message ePlayerNetIDControl
+message PlayerNetIDControl
 {
     optional uint32 type    = 1; // TEAMCHANGE:0 NEW_TEAM:1
     optional uint32 team_id = 2; // the ID of the team to change to
@@ -71,7 +71,7 @@ message ePlayerNetIDControl
     optional bool legacy_message_end_marker = 20000;
 }
 
-extend Network.nNetObjectControl
+extend Network.NetObjectControl
 {
-    optional ePlayerNetIDControl player_control = 100;
+    optional PlayerNetIDControl player_control = 100;
 }

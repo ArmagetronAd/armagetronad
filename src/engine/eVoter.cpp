@@ -39,9 +39,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nServerInfo.h"
 
 #include "rConsole.h"
+#include "nProtoBuf.h"
 
 #include "ePlayer.h"
 #include "eGrid.h"
+
+#include "eVoter.pb.h"
 
 #ifndef DEDICATED
 // use server controlled votes (just for the client, to avoid UPGRADE messages)

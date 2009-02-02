@@ -5,10 +5,10 @@ import "ePlayer.proto";
 import "eTeam.proto";
 
 // sync message for AIs
-message gAIPlayerSync
+message AIPlayerSync
 {
     // base class init data, needs to come first
-    optional Engine.ePlayerNetIDSync base = 1;
+    optional Engine.PlayerNetIDSync base = 1;
 
     // legacy creation data end marker
     optional bool legacy_create_end = 20000;
@@ -20,10 +20,10 @@ message gAIPlayerSync
 }
 
 // sync message for AI teams
-message gAITeamSync
+message AITeamSync
 {
     // base class init data, needs to come first
-    optional Engine.eTeamSync base = 1;
+    optional Engine.TeamSync base = 1;
 
     // legacy creation data end marker
     optional bool legacy_create_end = 20000;

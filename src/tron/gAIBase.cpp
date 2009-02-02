@@ -192,7 +192,7 @@ static gAICharacter* BestIQ( int iq )
     return bestIQ;
 }
 
-gAITeam::gAITeam( Game::gAITeamSync const & sync, nSenderInfo const & sender )
+gAITeam::gAITeam( Game::AITeamSync const & sync, nSenderInfo const & sender )
   : eTeam( sync.base(), sender )
 {
     //	teams.Remove( this, listID );
@@ -203,7 +203,7 @@ gAITeam::gAITeam()
     //	teams.Remove( this, listID );
 }
 
-static nOProtoBufDescriptor<gAITeam,Game::gAITeamSync> gAITeam_init(331);
+static nOProtoBufDescriptor<gAITeam,Game::AITeamSync> gAITeam_init(331);
 
 nOProtoBufDescriptorBase const * gAITeam::DoGetDescriptor() const
 {
@@ -1080,7 +1080,7 @@ static REAL rgb_ai[MAXAI_COLOR][3]={
                                        {.5,.5,.5}
                                    };
 
-static nOProtoBufDescriptor<gAIPlayer,Game::gAIPlayerSync> gAIPlayer_init(330);
+static nOProtoBufDescriptor<gAIPlayer,Game::AIPlayerSync> gAIPlayer_init(330);
 
 nOProtoBufDescriptorBase const * gAIPlayer::DoGetDescriptor() const
 {
@@ -1088,7 +1088,7 @@ nOProtoBufDescriptorBase const * gAIPlayer::DoGetDescriptor() const
 }
 
 //! creates a netobject form sync data
-gAIPlayer::gAIPlayer( Game::gAIPlayerSync const & sync, nSenderInfo const & sender ):
+gAIPlayer::gAIPlayer( Game::AIPlayerSync const & sync, nSenderInfo const & sender ):
         ePlayerNetID(sync.base(), sender ),
         character(NULL),
         //	target(NULL),

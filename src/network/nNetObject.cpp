@@ -1395,7 +1395,7 @@ void nNetObject::RequestSync(bool ack){
 }
 
 
-static void net_control_handler( Network::nNetObjectControl const & control, nSenderInfo const & sender )
+static void net_control_handler( Network::NetObjectControl const & control, nSenderInfo const & sender )
 {
     //con << "control\n";
     if (sn_GetNetState()==nSERVER){
@@ -1412,7 +1412,7 @@ static void net_control_handler( Network::nNetObjectControl const & control, nSe
 }
 
 class nProtoBufNetControlDescriptor: 
-    public nProtoBufDescriptor< Network::nNetObjectControl >,
+    public nProtoBufDescriptor< Network::NetObjectControl >,
     public nMessageStreamer
 {
 private:
@@ -1420,8 +1420,8 @@ private:
     virtual void StreamFromProtoBuf( nProtoBufMessageBase const & source, nStreamMessage & target ) const
     {
         // cast to correct type
-        Network::nNetObjectControl const & control =
-        static_cast< Network::nNetObjectControl const & >( source.GetProtoBuf() );
+        Network::NetObjectControl const & control =
+        static_cast< Network::NetObjectControl const & >( source.GetProtoBuf() );
 
         // fetch object ID and object
         unsigned short id = control.object_id();
@@ -1441,8 +1441,8 @@ private:
     virtual void StreamToProtoBuf( nStreamMessage & source, nProtoBufMessageBase & target ) const
     {
         // cast to correct type
-        Network::nNetObjectControl & control =
-        static_cast< Network::nNetObjectControl & >( target.AccessProtoBuf() );
+        Network::NetObjectControl & control =
+        static_cast< Network::NetObjectControl & >( target.AccessProtoBuf() );
 
         // fetch object ID and object
         unsigned short id;
@@ -1463,7 +1463,7 @@ private:
 
 public:
     nProtoBufNetControlDescriptor()
-    : nProtoBufDescriptor< Network::nNetObjectControl >( 23, net_control_handler )
+    : nProtoBufDescriptor< Network::NetObjectControl >( 23, net_control_handler )
     {
         SetStreamer( this );
     }
@@ -1471,7 +1471,7 @@ public:
 
 static nProtoBufNetControlDescriptor net_control;
 
-void nNetObject::ReceiveControlNet( Network::nNetObjectControl const & )
+void nNetObject::ReceiveControlNet( Network::NetObjectControl const & )
 {
 #ifdef DEBUG
     if (sn_GetNetState()==nCLIENT)
@@ -1485,14 +1485,14 @@ void nNetObject::ReceiveControlNet( Network::nNetObjectControl const & )
 }
 
 // control functions:
-Network::nNetObjectControl & nNetObject::BroadcastControl(){
-    nProtoBufMessage< Network::nNetObjectControl > * m = net_control.CreateMessage();
+Network::NetObjectControl & nNetObject::BroadcastControl(){
+    nProtoBufMessage< Network::NetObjectControl > * m = net_control.CreateMessage();
 
     // broadcast the message. This keeps it alive until the next time the network queue
     // is flushed, so it's safe to operate on its internal data afterwards.
     m->BroadCast();
 
-    Network::nNetObjectControl & control = m->AccessProtoBuf();
+    Network::NetObjectControl & control = m->AccessProtoBuf();
 
     control.set_object_id( ID() );
 
@@ -1500,7 +1500,7 @@ Network::nNetObjectControl & nNetObject::BroadcastControl(){
 }
 
 // conversion for stream legacy control messages
-void nNetObject::StreamControl( Network::nNetObjectControl const & control, nStreamMessage & stream )
+void nNetObject::StreamControl( Network::NetObjectControl const & control, nStreamMessage & stream )
 {
     nProtoBuf const * relevant = ExtractControl( control );
     if ( relevant )
@@ -1509,7 +1509,7 @@ void nNetObject::StreamControl( Network::nNetObjectControl const & control, nStr
     }
 }
 
-void nNetObject::UnstreamControl( nStreamMessage & stream, Network::nNetObjectControl & control )
+void nNetObject::UnstreamControl( nStreamMessage & stream, Network::NetObjectControl & control )
 {
     nProtoBuf * relevant = ExtractControl( control );
     if ( relevant )
@@ -1519,11 +1519,11 @@ void nNetObject::UnstreamControl( nStreamMessage & stream, Network::nNetObjectCo
 }
 
 // easier to implement conversion helpers: just extract the relevant sub-protbuf.
-nProtoBuf * nNetObject::ExtractControl( Network::nNetObjectControl & control )
+nProtoBuf * nNetObject::ExtractControl( Network::NetObjectControl & control )
 {
     return NULL;
 }
-nProtoBuf const * nNetObject::ExtractControl( Network::nNetObjectControl const & control )
+nProtoBuf const * nNetObject::ExtractControl( Network::NetObjectControl const & control )
 {
     return NULL;
 }
@@ -2312,7 +2312,7 @@ nDescriptor& nNetObject::CreatorDescriptor() const
 // protocol buffer stuff
 
 //! creates a netobject form sync data
-nNetObject::nNetObject( Network::nNetObjectSync const & sync, nSenderInfo const & sender )
+nNetObject::nNetObject( Network::NetObjectSync const & sync, nSenderInfo const & sender )
 :lastSyncID_(sender.envelope.MessageIDBig() - 1),refCtr_(0)
 {
     id = 0;
@@ -2352,7 +2352,7 @@ nNetObject::nNetObject( Network::nNetObjectSync const & sync, nSenderInfo const 
 }
 
 //! reads incremental sync data
-void nNetObject::ReadSync( Network::nNetObjectSync const & sync, nSenderInfo const & sender )
+void nNetObject::ReadSync( Network::NetObjectSync const & sync, nSenderInfo const & sender )
 {
     if (sn_GetNetState()==nSERVER){
         bool back=knowsAbout[sender.SenderID()].syncReq;
@@ -2364,7 +2364,7 @@ void nNetObject::ReadSync( Network::nNetObjectSync const & sync, nSenderInfo con
 }
 
 //! reads incremental sync data
-bool nNetObject::SyncIsNew( Network::nNetObjectSync const & sync, nSenderInfo const & sender )
+bool nNetObject::SyncIsNew( Network::NetObjectSync const & sync, nSenderInfo const & sender )
 {
     // check if sync is new
     unsigned long int bigID =  sender.envelope.MessageIDBig();
@@ -2376,7 +2376,7 @@ bool nNetObject::SyncIsNew( Network::nNetObjectSync const & sync, nSenderInfo co
 }
 
 //! writes sync data
-void nNetObject::WriteSync( Network::nNetObjectSync & sync, bool init ) const
+void nNetObject::WriteSync( Network::NetObjectSync & sync, bool init ) const
 {
     sync.set_object_id( id );
     if( init )
@@ -2385,7 +2385,7 @@ void nNetObject::WriteSync( Network::nNetObjectSync & sync, bool init ) const
     }
 }
 
-// nOProtoBufDescriptor< nNetObject, Network::nNetObjectTotal > sn_pbdescriptor( 0 );
+// nOProtoBufDescriptor< nNetObject, Network::NetObjectTotal > sn_pbdescriptor( 0 );
 
 //! returns the descriptor responsible for this class
 nOProtoBufDescriptorBase const * nNetObject::DoGetDescriptor() const

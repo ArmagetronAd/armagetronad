@@ -32,6 +32,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nNetwork.h"
 #include "nConfig.h"
+#include "nProtoBuf.h"
+
+#include "eLagCompensation.pb.h"
 
 #ifdef DEBUG
 #define DEBUG_LAG
@@ -116,21 +119,15 @@ private:
 
 static nClientLag se_clientLag;
 
-static void se_receiveLagMessage( nMessage & m )
+static void se_receiveLagMessage( Engine::LagNotification const & notification, nSenderInfo const & )
 {
     if ( sn_GetNetState() != nCLIENT )
         return;
 
-    REAL lag;
-    m >> lag;
-
-    REAL weight;
-    m >> weight;
-
-    se_clientLag.ReportLag( lag, weight );
+    se_clientLag.ReportLag( notification.lag(), notification.weight() );
 }
 
-static nDescriptor se_receiveLagMessageDescriptor( 240, se_receiveLagMessage,"lag message" );
+static nProtoBufDescriptor< Engine::LagNotification > se_receiveLagMessageDescriptor( 240, se_receiveLagMessage );
 
 // maximal seconds of lag credit
 static REAL se_lagCredit = .5f;
@@ -208,8 +205,8 @@ public:
         lastLag_ = time;
 
         // send a simple message to the client
-        nMessage * mess = tNEW( nMessage )( se_receiveLagMessageDescriptor );
-        *mess << lag;
+        Engine::LagNotification & notification = se_receiveLagMessageDescriptor.Send( client_ );
+        notification.set_lag( lag );
 
         // propose a weight to the client, it will determine how much impact the lag report has
         REAL weight = 1;
@@ -217,9 +214,7 @@ public:
         {
             weight = ( (creditUsed_+2*lag)/credit )/se_lagCreditSweetSpot;
         }
-        *mess << weight;
-
-        mess->Send( client_ );
+        notification.set_weight( weight );
     }
 
     REAL CreditLeft()

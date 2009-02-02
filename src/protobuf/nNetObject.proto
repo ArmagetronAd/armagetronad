@@ -1,7 +1,7 @@
 package Network;
 
 // net object sync message
-message nNetObjectSync
+message NetObjectSync
 {
     // legacy creation data:
 
@@ -24,7 +24,7 @@ message nNetObjectSync
 }
 
 // net object control message
-message nNetObjectControl
+message NetObjectControl
 {
     // ID of the object
     optional uint32 object_id = 1;
