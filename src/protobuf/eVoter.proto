@@ -10,12 +10,86 @@ package Engine;
 
 */
 
-// legacy message
-message eVoter
+// vote submission
+message VoteSubmission
 {
-    // legacy stuff goes here
+    optional uint32 vote_id = 1;   // ID of vote item
+    optional bool   accept  = 2;   // whether vote was accepted by the submitter
 
     // legacy message end marker, extensions go after it
     optional bool legacy_message_end_marker = 20000;
 }
+
+// basic vote item
+message VoteItem
+{
+    optional uint32 vote_id = 1;  // ID of vote item
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// vote item with server controlled text
+message VoteItemServerControlledProperties
+{
+    optional string description = 1; // short description for menu title
+    optional string details     = 2; // details for help text
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// vote item with server controlled text
+message VoteItemServerControlled
+{
+    optional VoteItemServerControlledProperties properties = 1; // properties of this vote
+
+    optional VoteItem base      = 15; // basic vote item
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// change message for server controlled votes
+message VoteChanges
+{
+    optional uint32 vote_id = 1;   // ID of vote item
+    optional bool   expired = 2;   // whether the vote is expired
+
+    optional VoteItemServerControlledProperties properties = 3; // properties of this vote
+        
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+
+// vote item harming a player (kick, suspend)
+message VoteItemHarm
+{
+    optional uint32 player_id = 1;    // ID of the player getting harmed
+
+    optional VoteItem base      = 15; // basic vote item
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// suspend vote
+message VoteItemSuspend
+{
+    optional VoteItemHarm base      = 15; // basic vote item
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// kick vote
+message VoteItemKick
+{
+    optional VoteItemHarm base      = 15; // basic vote item
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
 
