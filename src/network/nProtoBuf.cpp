@@ -168,7 +168,7 @@ int nProtoBufMessageBase::OnWrite( WriteArguments & arguments ) const
         nProtoBufDescriptorBase const & descriptor = GetDescriptor();
         if ( descriptor.GetTranslator() )
         {
-            tJUST_CONTROLLED_PTR< nProtoBufMessageBase > translated = descriptor.GetTranslator()->
+            tJUST_CONTROLLED_PTR< nMessageBase > translated = descriptor.GetTranslator()->
             Translate( fullProtoBuf, arguments.receiver_ );
             if ( translated )
             {
@@ -325,7 +325,7 @@ nMessageTranslatorBase::nMessageTranslatorBase( nProtoBufDescriptorBase & descri
 //! convert current message format to format suitable for old client
 //! @param source source protobuf
 //! @param receiver the network ID of the receiver
-nProtoBufMessageBase * nMessageTranslatorBase::Translate( nProtoBuf const & source, int receiver ) const
+nMessageBase * nMessageTranslatorBase::Translate( nProtoBuf const & source, int receiver ) const
 {
     return NULL;
 }

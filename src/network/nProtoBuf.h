@@ -114,12 +114,6 @@ public:
 
     //! returns the descriptor
     nProtoBufDescriptorBase const & GetDescriptor() const;
-
-    //! bends the message ID
-    void BendMessageID( unsigned int id )
-    {
-        messageIDBig_ = id;
-    }
 protected:
     //! fills the receiving buffer with data
     virtual int OnWrite( WriteArguments & arguments ) const;
@@ -250,7 +244,7 @@ public:
     explicit nMessageTranslatorBase( nProtoBufDescriptorBase & descriptor );
     
     //! convert current message format to format suitable for old client
-    virtual nProtoBufMessageBase * Translate( nProtoBuf const & source, int receiver ) const;
+    virtual nMessageBase * Translate( nProtoBuf const & source, int receiver ) const;
 };
 
 // new descriptor for protocol buffer messages
@@ -474,14 +468,14 @@ public:
     : nMessageTranslatorBase( descriptor ){}
 
     //! convert current message format to format suitable for old client
-    virtual nProtoBufMessageBase * Translate( nProtoBuf const & source, int receiver ) const
+    virtual nMessageBase * Translate( nProtoBuf const & source, int receiver ) const
     {
         tASSERT( dynamic_cast< PROTOBUF const * >( &source ) );
         return Translate( static_cast< PROTOBUF const & >( source ), receiver );
     }
 
     //! convert current message format to format suitable for old client
-    virtual nProtoBufMessageBase * Translate( PROTOBUF const & source, int receiver ) const
+    virtual nMessageBase * Translate( PROTOBUF const & source, int receiver ) const
     {
         return NULL;
     }

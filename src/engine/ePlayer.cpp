@@ -1899,13 +1899,13 @@ static nMessageBase * se_NewChatMessage( ePlayerNetID const * player, tString co
 }
 
 // prepares a very old style chat message: just a regular remote console output message
-static nMessage* se_OldChatMessage( tString const & line )
+static nMessageBase * se_OldChatMessage( tString const & line )
 {
     return sn_ConsoleOutMessage( line + "\n" );
 }
 
 // prepares a very old style chat message: just a regular remote console output message
-static nMessage* se_OldChatMessage( ePlayerNetID const * player, tString const & message )
+static nMessageBase * se_OldChatMessage( ePlayerNetID const * player, tString const & message )
 {
     tASSERT( player );
 
@@ -1934,7 +1934,7 @@ void se_SendChatLine( ePlayerNetID* sender, const tString& fullLine, const tStri
         }
         else
         {
-            tJUST_CONTROLLED_PTR< nMessage > mOld = se_OldChatMessage( fullLine );
+            tJUST_CONTROLLED_PTR< nMessageBase > mOld = se_OldChatMessage( fullLine );
             mOld->Send( receiver );
         }
     }
@@ -1948,7 +1948,7 @@ void se_BroadcastChatLine( ePlayerNetID* sender, const tString& line, const tStr
     // create chat messages
     tJUST_CONTROLLED_PTR< nMessageBase > mServerControlled = se_ServerControlledChatMessageConsole( sender, line );
     tJUST_CONTROLLED_PTR< nMessageBase > mNew = se_NewChatMessage( sender, forOldClients );
-    tJUST_CONTROLLED_PTR< nMessage > mOld = se_OldChatMessage( line );
+    tJUST_CONTROLLED_PTR< nMessageBase > mOld = se_OldChatMessage( line );
 
     // send them to the users, depending on what they understand
     for ( int user = MAXCLIENTS; user > 0; --user )
@@ -1972,7 +1972,7 @@ void se_BroadcastChat( ePlayerNetID* sender, const tString& say )
     // create chat messages
     tJUST_CONTROLLED_PTR< nMessageBase > mServerControlled = se_ServerControlledChatMessage( sender, say );
     tJUST_CONTROLLED_PTR< nMessageBase > mNew = se_NewChatMessage( sender, say );
-    tJUST_CONTROLLED_PTR< nMessage > mOld = se_OldChatMessage( sender, say );
+    tJUST_CONTROLLED_PTR< nMessageBase > mOld = se_OldChatMessage( sender, say );
 
     // send them to the users, depending on what they understand
     for ( int user = MAXCLIENTS; user > 0; --user )

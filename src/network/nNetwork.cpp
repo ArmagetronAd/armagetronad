@@ -2720,7 +2720,7 @@ static nDescriptor sn_ConsoleOut_nd(8,sn_ConsoleOut_handler,"sn_ConsoleOut");
 #define MTU 1400
 
 // causes the connected clients to print a message
-nMessage* sn_ConsoleOutMessage( tString const & message )
+nMessageBase * sn_ConsoleOutMessage( tString const & message )
 {
     // truncate message to about 1.5K, a safe size for all UDP packets
     static const int maxLen = MTU+100;
@@ -2729,7 +2729,7 @@ nMessage* sn_ConsoleOutMessage( tString const & message )
     {
         recurse = false;
         tERR_WARN( "Long console message truncated.");
-        nMessage * m = sn_ConsoleOutMessage( message.SubStr( 0, MTU ) );
+        nMessageBase * m = sn_ConsoleOutMessage( message.SubStr( 0, MTU ) );
         recurse = true;
         return m;
     }
@@ -2741,7 +2741,7 @@ nMessage* sn_ConsoleOutMessage( tString const & message )
 }
 
 void sn_ConsoleOutRaw( tString & message,int client){
-    tJUST_CONTROLLED_PTR< nMessage > m = sn_ConsoleOutMessage( message );
+    tJUST_CONTROLLED_PTR< nMessageBase > m = sn_ConsoleOutMessage( message );
 
     if (client<0){
         m->BroadCast();
