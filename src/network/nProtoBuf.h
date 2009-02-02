@@ -494,6 +494,22 @@ class nProtoBufDescriptor: public nProtoBufDescriptorBase
 public:
     typedef void Handler( PROTOBUF const & message, nSenderInfo const & sender );
 
+    //! creates and schedules a message for broadcast (in client mode, that means just sending it to the server), returning the protovuf to fill
+    PROTOBUF & Broadcast( bool ack = true )
+    {
+        nProtoBufMessage< PROTOBUF > * m = CreateMessage();
+        m->BroadCast( ack );
+        return m->AccessProtoBuf();
+    }
+
+    //! creates and schedules a message for sending to a specific peer, returning the protovuf to fill
+    PROTOBUF & Send( unsigned int receiver, bool ack = true )
+    {
+        nProtoBufMessage< PROTOBUF > * m = CreateMessage();
+        m->Send( receiver, ack );
+        return m->AccessProtoBuf();
+    }
+
     //! puts a puffer into a message
     nMessageBase * Transform( PROTOBUF const & protoBuf ) const
     {

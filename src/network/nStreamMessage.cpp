@@ -93,7 +93,7 @@ unsigned long int sn_ExpandMessageID( unsigned short id, unsigned short sender )
     return expanders[sender].ExpandMessageID(id);
 }
 
-nStreamMessage::nStreamMessage( nDescriptorBase const & descriptor, unsigned int messageID )
+nStreamMessage::nStreamMessage( nDescriptor const & descriptor, unsigned int messageID )
 : nMessageBase( descriptor, messageID ), readOut(0), descriptor_( descriptor )
 {
 }
@@ -586,7 +586,9 @@ int nStreamMessage::OnWrite( WriteArguments & arguments ) const
     nBinaryWriter dataLenWriter( writer );
     writer.WriteShort( 0 );
 
+#ifdef DEBUG
     int overhead = arguments.buffer_.Len();
+#endif
 
     // write raw data
     int len = DataLen();

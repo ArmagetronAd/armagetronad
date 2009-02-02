@@ -72,7 +72,7 @@ public:
 #endif
     }
 
-    explicit nStreamMessage( const nDescriptorBase &, unsigned int messageID = 0  );  // create a new message
+    explicit nStreamMessage( const nDescriptor &, unsigned int messageID = 0  );  // create a new message
 
     void Write(const unsigned short &x){
         // can't write to a reading message, or one that was finalized
