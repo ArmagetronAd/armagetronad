@@ -1758,6 +1758,82 @@ static ePlayerNetID * se_FindPlayerInChatCommand( ePlayerNetID * sender, char co
 void handle_chat_client( Engine::Chat const & chat, nSenderInfo const & sender );
 static nProtoBufDescriptor< Engine::Chat > se_clientChatHandler( 203, handle_chat_client );
 
+static bool se_FilterOutName( tString const & name, tString & toFilter, bool startOnly = false )
+{
+    int pos = toFilter.StrPos( name );
+    if ( pos < 0 )
+    {
+        return false;
+    }
+    else
+    {
+        if ( startOnly && pos > 0 )
+        {
+            return false;
+        }
+
+        toFilter = toFilter.SubStr( 0, pos ) + toFilter.SubStr( pos + name.size() );
+        return true;
+    }
+}
+
+// chat message transformation for old clients
+class nMessageTranslatorChat: public nMessageTranslator< Engine::Chat >
+{
+public:
+    nMessageTranslatorChat(): nMessageTranslator< Engine::Chat >( se_clientChatHandler ){}
+
+    //! convert current message format to format suitable for old client
+    virtual nMessageBase * Translate( Engine::Chat const & source, int receiver ) const
+    {
+        // client old enough for formatted chat message?
+        if ( se_chatHandlerClient.Supported( receiver ) )
+        {
+            return NULL;
+        }
+
+        if ( se_chatRelay.Supported( receiver ) )
+        {
+            // transform message to server chat message, the client will understand that, too
+            nProtoBufMessage< Engine::Chat > * m = se_serverChatHandler.CreateMessage();
+            Engine::Chat & dest = m->AccessProtoBuf();
+            
+            dest.set_player_id( source.player_id() );
+
+            tString chat = source.chat_line();
+
+            // filter player name from chat line
+            ePlayerNetID *p;
+            nNetObject::IDToPointer( source.player_id(), p );
+            if( p )
+            {
+                se_FilterOutName( p->GetColoredName(), chat ) ||
+                se_FilterOutName( p->GetName(), chat );
+            }
+
+            // filter colon from chat line
+            {
+                tColoredString colon;
+                colon << tColoredString::ColorString( 1,1,.5 ) << ": ";
+                se_FilterOutName( colon, chat, true );
+            }
+
+            dest.set_chat_line( chat );
+
+            return m;
+        }
+        else
+        {
+            // very old clients require console messages
+            return sn_ConsoleOutMessage( source.chat_line() + "\n" );
+        }
+    }
+    
+};
+
+static nMessageTranslatorChat se_chatTranslator;
+
+
 void handle_chat_client(  Engine::Chat const & chat, nSenderInfo const & sender )
 {
     if(sn_GetNetState()!=nSERVER)
@@ -1898,71 +1974,28 @@ static nMessageBase * se_NewChatMessage( ePlayerNetID const * player, tString co
     return m;
 }
 
-// prepares a very old style chat message: just a regular remote console output message
-static nMessageBase * se_OldChatMessage( tString const & line )
-{
-    return sn_ConsoleOutMessage( line + "\n" );
-}
-
-// prepares a very old style chat message: just a regular remote console output message
-static nMessageBase * se_OldChatMessage( ePlayerNetID const * player, tString const & message )
-{
-    tASSERT( player );
-
-    return se_OldChatMessage( se_BuildChatString( player, message ) );
-}
-
 // sends the full chat line to receiver, marked as originating from <sender> so
 // it can be silenced.
 // ( the client will see <fullLine> resp. <sender name> : <forOldClients> if it is pre-0.2.8 and at least 0.2.6 )
-void se_SendChatLine( ePlayerNetID* sender, const tString& fullLine, const tString& forOldClients, int receiver )
+void se_SendChatLine( ePlayerNetID* sender, const tString& fullLine, int receiver )
 {
     // create chat messages
 
     // send them to the users, depending on what they understand
     if ( sn_Connections[ receiver ].socket )
     {
-        if ( se_chatHandlerClient.Supported( receiver ) )
-        {
-            tJUST_CONTROLLED_PTR< nMessageBase > mServerControlled = se_ServerControlledChatMessageConsole( sender, fullLine );
-            mServerControlled->Send( receiver );
-        }
-        else if ( se_chatRelay.Supported( receiver ) )
-        {
-            tJUST_CONTROLLED_PTR< nMessageBase > mNew = se_NewChatMessage( sender, forOldClients );
-            mNew->Send( receiver );
-        }
-        else
-        {
-            tJUST_CONTROLLED_PTR< nMessageBase > mOld = se_OldChatMessage( fullLine );
-            mOld->Send( receiver );
-        }
+        tJUST_CONTROLLED_PTR< nMessageBase > mServerControlled = se_ServerControlledChatMessageConsole( sender, fullLine );
+        mServerControlled->Send( receiver );
     }
 }
 
 // sends the full chat line to all connected clients, marked as originating from <sender> so
 // it can be silenced.
 // ( the client will see <fullLine> resp. <sender name> : <forOldClients> if it is pre-0.2.8 and at least 0.2.6 )
-void se_BroadcastChatLine( ePlayerNetID* sender, const tString& line, const tString& forOldClients )
+void se_BroadcastChatLine( ePlayerNetID* sender, const tString& line )
 {
     // create chat messages
-    tJUST_CONTROLLED_PTR< nMessageBase > mServerControlled = se_ServerControlledChatMessageConsole( sender, line );
-    tJUST_CONTROLLED_PTR< nMessageBase > mNew = se_NewChatMessage( sender, forOldClients );
-    tJUST_CONTROLLED_PTR< nMessageBase > mOld = se_OldChatMessage( line );
-
-    // send them to the users, depending on what they understand
-    for ( int user = MAXCLIENTS; user > 0; --user )
-    {
-        if ( sn_Connections[ user ].socket )
-        {
-            if ( se_chatHandlerClient.Supported( user ) )
-                mServerControlled->Send( user );
-            else if ( se_chatRelay.Supported( user ) )
-                mNew->Send( user );
-            else
-                mOld->Send( user );
-        }
-    }
+    se_ServerControlledChatMessageConsole( sender, line )->BroadCast();
 }
 
 // send the chat of player p to all connected clients after properly formatting it
@@ -1970,23 +2003,7 @@ void se_BroadcastChatLine( ePlayerNetID* sender, const tString& line, const tStr
 void se_BroadcastChat( ePlayerNetID* sender, const tString& say )
 {
     // create chat messages
-    tJUST_CONTROLLED_PTR< nMessageBase > mServerControlled = se_ServerControlledChatMessage( sender, say );
-    tJUST_CONTROLLED_PTR< nMessageBase > mNew = se_NewChatMessage( sender, say );
-    tJUST_CONTROLLED_PTR< nMessageBase > mOld = se_OldChatMessage( sender, say );
-
-    // send them to the users, depending on what they understand
-    for ( int user = MAXCLIENTS; user > 0; --user )
-    {
-        if ( sn_Connections[ user ].socket )
-        {
-            if ( se_chatHandlerClient.Supported( user ) )
-                mServerControlled->Send( user );
-            else if ( se_chatRelay.Supported( user ) )
-                mNew->Send( user );
-            else
-                mOld->Send( user );
-        }
-    }
+    se_ServerControlledChatMessage( sender, say )->BroadCast();
 }
 
 
@@ -2000,31 +2017,7 @@ void se_SendPrivateMessage( ePlayerNetID const * sender, ePlayerNetID const * re
     int cid = eavesdropper->Owner();
 
     // determine wheter the receiver knows about the server controlled chat message
-    if ( se_chatHandlerClient.Supported( cid ) )
-    {
-        // send server controlled message
-        se_ServerControlledChatMessage( sender, receiver, message )->Send( cid );
-    }
-    else
-    {
-        tColoredString say;
-        say << tColoredString::ColorString(1,1,.5) << "( --> ";
-        say << *receiver;
-        say << tColoredString::ColorString(1,1,.5) << " ) ";
-        say << message;
-
-        // format message containing receiver
-        if ( se_chatRelay.Supported( cid ) )
-        {
-            // send client formatted message
-            se_NewChatMessage( sender, say )->Send( cid );
-        }
-        else
-        {
-            // send console out message
-            se_OldChatMessage( sender, say )->Send( cid );
-        }
-    }
+    se_ServerControlledChatMessage( sender, receiver, message )->Send( cid );
 }
 
 // Sends a /team message
@@ -2037,62 +2030,8 @@ void se_SendTeamMessage( eTeam const * team, ePlayerNetID const * sender ,ePlaye
     if ( clientID == 0 )
         return;
 
-    if ( se_chatHandlerClient.Supported( clientID ) ) {
-        se_ServerControlledChatMessage( team, sender, message )->Send( clientID );
-    }
-    else {
-        tColoredString say;
-        say << tColoredString::ColorString(1,1,.5) << "( " << *sender;
-
-	con << team->Name() << "\n";
-
-        if( !team )
-        {
-            // foo --> Spectatos: message
-            say << tColoredString::ColorString(1,1,.5) << " --> " << tOutput("$player_spectator_message");
-        }
-        else if (sender->CurrentTeam() == team) {
-            // ( foo --> Teammates ) some message here
-            say << tColoredString::ColorString(1,1,.5) << " --> ";
-            say << tColoredString::ColorString(team->R()/15.0,team->G()/15.0,team->B()/15.0) << tOutput("$player_team_message");;
-        }
-        // ( foo (Blue Team) --> Red Team ) some message
-        else {
-            eTeam *senderTeam = sender->CurrentTeam();
-            say << tColoredString::ColorString(1,1,.5) << " (";
-            say << *team;
-            say << tColoredString::ColorString(1,1,.5) << " ) --> ";
-            say << senderTeam;
-        }
-        say << tColoredString::ColorString(1,1,.5) << " ) ";
-        say << message;
-
-        // format message containing receiver
-        if ( se_chatRelay.Supported( clientID ) )
-            // send client formatted message
-            se_NewChatMessage( sender, say )->Send( clientID );
-        else
-            // send console out message
-            se_OldChatMessage( sender, say )->Send( clientID );
-    }
+    se_ServerControlledChatMessage( team, sender, message )->Send( clientID );
 }
-
-// returns a player ( not THE player, there may be more ) belonging to a user ID
-/*
-static ePlayerNetID * se_GetPlayerFromUserID( int uid )
-{
-    // run through all players and look for a match
-    for ( int a = se_PlayerNetIDs.Len()-1; a>=0; --a )
-    {
-        ePlayerNetID * p = se_PlayerNetIDs(a);
-        if ( p && p->Owner() == uid )
-            return p;
-    }
-
-    // found nothing
-    return 0;
-}
-*/
 
 // returns a player ( not THE player, there may be more ) belonging to a user ID that is still alive
 // static
@@ -2877,12 +2816,7 @@ static void se_ChatMe( ePlayerNetID * p, std::istream & s, eChatSpamTester & spa
     console << tColoredString::ColorString(1,1,.5) << " " << msg;
     console << tColoredString::ColorString(1,1,1)  << " *";
 
-    tColoredString forOldClients;
-    forOldClients << tColoredString::ColorString(1,1,1)  << "*"
-                  << tColoredString::ColorString(1,1,.5) << msg
-                  << tColoredString::ColorString(1,1,1)  << "*";
-
-    se_BroadcastChatLine( p, console, forOldClients );
+    se_BroadcastChatLine( p, console );
     console << "\n";
     sn_ConsoleOut(console,0);
 
@@ -3503,7 +3437,7 @@ static void se_Help( ePlayerNetID * sender, ePlayerNetID * receiver, std::istrea
         // send help disguised as a chat message (with disabled spam limit)
         int spamMaxLenBack = se_SpamMaxLen;
         se_SpamMaxLen = 0;
-        se_SendChatLine(sender, reply, reply, receiver->Owner());
+        se_SendChatLine( sender, reply, receiver->Owner() );
         se_SpamMaxLen = spamMaxLenBack;
     }
 }
@@ -3543,7 +3477,7 @@ static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, e
         newbie_name << *newbie << tColoredString::ColorString(1,1,1);
 
         tString announcement( tOutput("$rtfm_announcement", str, name, newbie_name) );
-        se_BroadcastChatLine( p, announcement, announcement );
+        se_BroadcastChatLine( p, announcement );
         con << announcement;
 
         se_Help(p, newbie, s1);
