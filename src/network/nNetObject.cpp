@@ -1460,7 +1460,7 @@ public:
     nProtoBufNetControlDescriptor()
     : nProtoBufDescriptor< Network::nNetObjectControl >( 23, net_control_handler )
     {
-        SetConverter( this );
+        SetStreamer( this );
     }
 };
 
@@ -1683,14 +1683,14 @@ public:
 };
 
 //! converter for creation messages
-nMessageStreamer * nOProtoBufDescriptorBase::CreationConverter()
+nMessageStreamer * nOProtoBufDescriptorBase::CreationStreamer()
 {
     static nMessageStreamerCreate create;
     return &create;
 }
 
 //! converter for sync messages
-nMessageStreamer * nOProtoBufDescriptorBase::SyncConverter()
+nMessageStreamer * nOProtoBufDescriptorBase::SyncStreamer()
 {
     static nMessageStreamerSync sync;
     return &sync;

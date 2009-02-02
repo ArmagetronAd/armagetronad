@@ -145,7 +145,7 @@ void nMessageStreamer::StreamToProtoBuf( nStreamMessage & source, nProtoBufMessa
 
 nProtoBufMessageBase::nProtoBufMessageBase( nProtoBufDescriptorBase const & descriptor )
 : nMessageBase( descriptor ), 
-  converter_( descriptor.GetConverter() )
+  streamer_( descriptor.GetStreamer() )
 {}
 
 //! returns the descriptor
@@ -163,11 +163,27 @@ int nProtoBufMessageBase::OnWrite( WriteArguments & arguments ) const
 {
     nProtoBuf const & fullProtoBuf = GetProtoBuf();
 
+    // translate message for older clients
+    {
+        nProtoBufDescriptorBase const & descriptor = GetDescriptor();
+        if ( descriptor.GetTranslator() )
+        {
+            tJUST_CONTROLLED_PTR< nProtoBufMessageBase > translated = descriptor.GetTranslator()->
+            Translate( fullProtoBuf, arguments.receiver_ );
+            if ( translated )
+            {
+                // if a translation was required, send it.
+                translated->BendMessageID( MessageID() );
+                return translated->Write( arguments );
+            }
+        }
+    }
+
 #ifdef DEBUG
     fullProtoBuf.CheckInitialized();
 #endif
 
-    unsigned short descriptor = DescriptorID();
+    unsigned short descriptorID = DescriptorID();
 
     // does the receiver understand ProtoBufs?
     if ( sn_protoBuf.Supported( arguments.receiver_ ) )
@@ -210,18 +226,18 @@ int nProtoBufMessageBase::OnWrite( WriteArguments & arguments ) const
             static nDescriptor dummy( 0, NULL, NULL );
             oldFormat_ = tNEW(nStreamMessage)( dummy, MessageID() );
 
-            tASSERT( converter_ );
-            converter_->StreamFromProtoBuf( *this, *oldFormat_ );
+            tASSERT( streamer_ );
+            streamer_->StreamFromProtoBuf( *this, *oldFormat_ );
         }
 
         // and copy the message contents over.
         static_cast< nMessageBase * >( oldFormat_ )->Write( arguments );
 
         // bend the descriptor
-        descriptor = oldFormat_->DescriptorID();
+        descriptorID = oldFormat_->DescriptorID();
     }
 
-    return descriptor;
+    return descriptorID;
 }
 
 //! reads data from network buffer if the header was already read
@@ -289,8 +305,8 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
         }
 
         // transform
-        tASSERT( converter_ );
-        converter_->StreamToProtoBuf( *oldFormat_, *this );
+        tASSERT( streamer_ );
+        streamer_->StreamToProtoBuf( *oldFormat_, *this );
         messageIDBig_ = oldFormat_->MessageIDBig();
     }
 }
@@ -298,6 +314,20 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
 int nProtoBufMessageBase::Size() const
 {
     return GetProtoBuf().ByteSize() + 5;
+}
+
+//! constructor registering with the descriptor
+nMessageTranslatorBase::nMessageTranslatorBase( nProtoBufDescriptorBase & descriptor )
+{
+    descriptor.SetTranslator( this );
+}
+
+//! convert current message format to format suitable for old client
+//! @param source source protobuf
+//! @param receiver the network ID of the receiver
+nProtoBufMessageBase * nMessageTranslatorBase::Translate( nProtoBuf const & source, int receiver ) const
+{
+    return NULL;
 }
 
 /*
@@ -308,10 +338,10 @@ nProtoBufDescriptorBase::nProtoBufDescriptorBase(unsigned short identification,
                                      bool acceptEvenIfNotLoggedIn )
 */
 
-nMessageStreamer & nProtoBufDescriptorBase::GetDefaultConverter()
+nMessageStreamer & nProtoBufDescriptorBase::GetDefaultStreamer()
 {
-    static nMessageStreamer converter;
-    return converter;
+    static nMessageStreamer streamer;
+    return streamer;
 }
 
 std::string const & nProtoBufDescriptorBase::DetermineName( nProtoBuf const & prototype )

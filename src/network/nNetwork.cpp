@@ -790,7 +790,8 @@ nProtoBufDescriptorBase::nProtoBufDescriptorBase
     identification | nProtoBufDescriptorBase::protoBufFlag,
     DetermineName( prototype ).c_str(),
     acceptEvenIfNotLoggedIn ),
-  converter_( &nProtoBufDescriptorBase::GetDefaultConverter() )
+    streamer_( &nProtoBufDescriptorBase::GetDefaultStreamer() ),
+    translator_( NULL )
 {
     if (MAXDESCRIPTORS<=identification || protoBufDescriptors[identification]!=NULL)
     {
