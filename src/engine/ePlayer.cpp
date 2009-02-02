@@ -1792,7 +1792,10 @@ public:
             return NULL;
         }
 
-        if ( se_chatRelay.Supported( receiver ) )
+        ePlayerNetID *p;
+        nNetObject::IDToPointer( source.player_id(), p );
+
+        if ( se_chatRelay.Supported( receiver ) && (!p || p->Owner() != receiver ) )
         {
             // transform message to server chat message, the client will understand that, too
             nProtoBufMessage< Engine::Chat > * m = se_serverChatHandler.CreateMessage();
@@ -1803,8 +1806,6 @@ public:
             tString chat = source.chat_line();
 
             // filter player name from chat line
-            ePlayerNetID *p;
-            nNetObject::IDToPointer( source.player_id(), p );
             if( p )
             {
                 se_FilterOutName( p->GetColoredName(), chat ) ||
@@ -1824,8 +1825,11 @@ public:
         }
         else
         {
-            // very old clients require console messages
+            // very old clients require console messages.
             return sn_ConsoleOutMessage( source.chat_line() + "\n" );
+
+            // not so very old clients get this type of translation too if the sender
+            // is a local player on the receiver and unlikely to be silenced.
         }
     }
     
