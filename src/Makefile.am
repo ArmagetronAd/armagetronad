@@ -68,6 +68,7 @@ libprotobuf_a_SOURCES = \
     protobuf/tColor.pb.cc protobuf/tColor.pb.h \
     protobuf/tCoord.pb.cc protobuf/tCoord.pb.h \
     protobuf/nNetObject.pb.cc protobuf/nNetObject.pb.h \
+    protobuf/nConfig.pb.cc protobuf/nConfig.pb.h \
     protobuf/eTeam.pb.cc protobuf/eTeam.pb.h \
     protobuf/ePlayer.pb.cc protobuf/ePlayer.pb.h \
     protobuf/eNetGameObject.pb.cc protobuf/eNetGameObject.pb.h \

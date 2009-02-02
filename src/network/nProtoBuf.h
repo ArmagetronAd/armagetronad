@@ -230,6 +230,11 @@ public:
     {
         return envelope.SenderID();
     }
+
+    int MessageIDBig() const
+    {
+        return envelope.MessageIDBig();
+    }
     
     explicit nSenderInfo( nMessageBase const & e )
     : envelope( e )

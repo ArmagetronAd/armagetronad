@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // protocol buffers forward declaration
 namespace google { namespace protobuf { class Message; class Descriptor; } }
 typedef google::protobuf::Message nProtoBuf;
+struct nSenderInfo;
 
 #endif
 
