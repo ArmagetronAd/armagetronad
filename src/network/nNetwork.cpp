@@ -704,7 +704,10 @@ tJUST_CONTROLLED_PTR< nMessageBase > nDescriptorBase::CreateMessage( unsigned ch
         }
     }
     
-    tASSERT(nd);
+    if ( !nd )
+    {
+        nReadError( false );
+    }
     
     // create message
     tJUST_CONTROLLED_PTR< nMessageBase > ret = nd->CreateReceivedMessage();

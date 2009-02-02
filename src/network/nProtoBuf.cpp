@@ -251,11 +251,9 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
         header.Read( reader );
 
         messageIDBig_ = sn_ExpandMessageID( header.messageID, SenderID() );
-        
-        if ( buffer + header.len > end )
-        {
-            nReadError( true );
-        }
+
+        unsigned char const * payload = buffer;
+        reader.Advance( header.len );
         
         // read the cache ID
         unsigned short cacheID = header.cacheRef;
@@ -270,7 +268,7 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
         
         if ( inCache )
         {
-            work.ParsePartialFromArray( buffer, header.len );
+            work.ParsePartialFromArray( payload, header.len );
             work.DiscardUnknownFields();
             
 #ifdef DEBUG_STRINGS
@@ -287,11 +285,9 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
         else
         {
             // just read directly
-            out.ParsePartialFromArray( buffer, header.len );
+            out.ParsePartialFromArray( payload, header.len );
             out.DiscardUnknownFields();
         }
-
-        reader.Advance( header.len );
     }
     else
     {
