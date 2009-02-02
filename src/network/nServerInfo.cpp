@@ -3181,7 +3181,7 @@ nServerInfoCharacterFilter::nServerInfoCharacterFilter( bool filterIPAddressChar
 
 tString nServerInfoCharacterFilter::FilterServerName( tString const & s )
 {
-    // Remove colors
+    // Remove colors and filter
     return FilterString( tColoredString::RemoveColors( s ) );
 }
 
