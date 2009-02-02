@@ -1581,7 +1581,7 @@ static nVersionFeature se_chatHandlerClient( 6 );
 // chat message from client to server
 // void handle_chat( nMessage & );
 void handle_chat( Engine::Chat const &, nSenderInfo const & );
-static nProtoBufDescriptor< Engine::Chat > chat_handler_pb(200,handle_chat);
+static nProtoBufDescriptor< Engine::Chat > se_serverChatHandler(200,handle_chat);
 
 // checks whether text_to_search contains search_for_text
 bool Contains( const tString & search_for_text, const tString & text_to_search ) {
@@ -1756,7 +1756,7 @@ static ePlayerNetID * se_FindPlayerInChatCommand( ePlayerNetID * sender, char co
 
 // chat message from server to client
 void handle_chat_client( Engine::Chat const & chat, nSenderInfo const & sender );
-static nProtoBufDescriptor< Engine::Chat > chat_handler_client( 203, handle_chat_client );
+static nProtoBufDescriptor< Engine::Chat > se_clientChatHandler( 203, handle_chat_client );
 
 void handle_chat_client(  Engine::Chat const & chat, nSenderInfo const & sender )
 {
@@ -1847,7 +1847,7 @@ static nMessageBase* se_ServerControlledChatMessageConsole( ePlayerNetID const *
 {
     tASSERT( player );
 
-    nProtoBufMessage< Engine::Chat > * m = chat_handler_client.CreateMessage();
+    nProtoBufMessage< Engine::Chat > * m = se_clientChatHandler.CreateMessage();
     Engine::Chat & chat = m->AccessProtoBuf();
 
     chat.set_player_id( player->ID() );
@@ -1890,7 +1890,7 @@ static nMessageBase * se_NewChatMessage( ePlayerNetID const * player, tString co
     std::ostringstream cleanup;
     se_AppendChat( cleanup, message );
 
-    nProtoBufMessage< Engine::Chat > * m = chat_handler_pb.CreateMessage();
+    nProtoBufMessage< Engine::Chat > * m = se_serverChatHandler.CreateMessage();
     Engine::Chat & chat = m->AccessProtoBuf();
     chat.set_player_id( player->ID() );
     chat.set_chat_line( cleanup.str() );
