@@ -1647,6 +1647,10 @@ sg_cycleDistWallShrinkOffsetConf("CYCLE_DIST_WALL_SHRINK_OFFSET",
 static REAL sg_CycleWallLengthFromDist( REAL distance )
 {
     REAL len = gCycle::WallsLength();
+    if ( len <= 0 )
+    {
+        return len;
+    }
 
     // make base length longer or shorter, depending on the sign of sg_cycleDistWallShrink
     REAL d = sg_cycleDistWallShrinkOffset - distance;
@@ -1661,6 +1665,10 @@ REAL gCycle::ThisWallsLength() const
 {
     // get distance influence
     REAL len = sg_CycleWallLengthFromDist( distance );
+    if ( len <= 0 )
+    {
+        return len;
+    }
 
     // apply rubber shortening
     return len - GetRubber() * sg_cycleRubberWallShrink;
@@ -3462,7 +3470,7 @@ void gCycle::PassEdge(const eWall *ww,REAL time,REAL a,int){
                 // another possibility: if the walls are very short compared to rubber, we could
                 // get away with just accounding for some rubber on the cycle that we'd need to kill
                 // otherwise.
-                if ( !saved && verletSpeed_ >= 0 )
+                if ( !saved && verletSpeed_ >= 0 && this->ThisWallsLength() > 0 )
                 {
                     REAL dt = otherTime - time;
 
