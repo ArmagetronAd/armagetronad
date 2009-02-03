@@ -86,9 +86,9 @@ protected:
     void parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
 #ifdef ENABLE_ZONESV2
-    zShapePtr parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, short unsigned int idZone, const xmlChar * keyword);
-    zShapePtr parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, short unsigned int idZone, const xmlChar * keyword);
-    zShapePtr parseShapePolygon(eGrid *grid, xmlNodePtr cur, short unsigned int idZone, const xmlChar * keyword);
+    zShapePtr parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, zZone * zone, const xmlChar * keyword);
+    zShapePtr parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, zZone * zone, const xmlChar * keyword);
+    zShapePtr parseShapePolygon(eGrid *grid, xmlNodePtr cur, zZone * zone, const xmlChar * keyword);
     void      parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShapePtr &shape);
     void                 parseMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
 

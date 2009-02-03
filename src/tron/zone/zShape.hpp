@@ -12,9 +12,11 @@
 
 namespace Zone { class ShapeSync; class ShapeCircleSync; class ShapePolygonSync; }
 
+class zZone;
+
 class zShape : public eNetGameObject{
 public:
-    zShape(eGrid* grid, unsigned short idZone);
+    zShape(eGrid * grid, zZone * zone );
     virtual ~zShape() {};
 
     //! creates a netobject form sync data
@@ -44,7 +46,6 @@ public:
   rColor getColor() {return color_;};
 
     void TimeStep( REAL time );
-    virtual bool isEmulatingOldZone() {return false;};
     void setReferenceTime(REAL time);
 
 protected:
@@ -58,14 +59,9 @@ protected:
 
     void setCreatedTime(REAL time);
 
-    void joinWithZone();
-
     REAL createdtime_; // The in-game time when this shape was first instantiated
     REAL referencetime_; // The in-game time when this shape's data was updated, used for evaluation
     REAL lasttime_; // What is to be considered as the current time for this shape
-
-    unsigned short idZone_;
-    bool newIdZone_;
 };
 
 class zShapeCircle : public zShape {
@@ -73,7 +69,7 @@ class zShapeCircle : public zShape {
   // Circle dont have a radius attribute per see.
   // They have a default radius of 1.0, and it get scaled
 public :
-    zShapeCircle(eGrid *grid, unsigned short idZone);
+    zShapeCircle(eGrid * grid, zZone * zone );
     ~zShapeCircle() {};
 
     //! creates a netobject form sync data
@@ -86,9 +82,6 @@ public :
     bool isInteracting(eGameObject * target);
     void render(const eCamera * cam );
 	virtual void render2d(tCoord scale) const;
-
-    bool isEmulatingOldZone() {return emulatingOldZone_;}; 
-    bool emulatingOldZone_;
 
     void setRadius(tFunction radius) {this->radius = radius;};
 protected:
@@ -104,7 +97,7 @@ typedef std::pair<tFunction, tFunction> myPoint;
 
 class zShapePolygon : public zShape {
 public :
-    zShapePolygon(eGrid *grid, unsigned short idZone);
+    zShapePolygon(eGrid *grid, zZone * zone );
     ~zShapePolygon() {};
 
     //! creates a netobject form sync data
@@ -118,8 +111,6 @@ public :
     void render(const eCamera * cam );
     virtual void render2d(tCoord scale) const;
     void addPoint( myPoint const &aPoint) { points.push_back(aPoint);};
-
-    bool isEmulatingOldZone() {return false;}; // zShapePolygon cant be used for emulation of old zones
 
 protected:
     std::vector< myPoint > points;

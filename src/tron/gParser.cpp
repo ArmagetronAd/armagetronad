@@ -604,9 +604,9 @@ gParser::parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 }
 
 zShapePtr
-gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, unsigned short idZone, const xmlChar * keyword)
+gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, zZone * zone, const xmlChar * keyword)
 {
-    zShapePtr shape = zShapePtr( new zShapeCircle(grid, idZone) );
+    zShapePtr shape = zShapePtr( new zShapeCircle(grid, zone) );
 
     // Build up the scale information
     {
@@ -652,9 +652,9 @@ gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, unsigned short id
 }
 
 zShapePtr
-gParser::parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, unsigned short idZone, const xmlChar * keyword)
+gParser::parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, zZone * zone, const xmlChar * keyword)
 {
-    zShapeCircle *shapePtr = new zShapeCircle(grid, idZone) ;
+    zShapeCircle *shapePtr = new zShapeCircle(grid, zone) ;
 
     // The radius need to be handled separatly
     tFunction tfRadius;
@@ -676,7 +676,7 @@ gParser::parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, unsigned short idZo
 }
 
 zShapePtr
-gParser::parseShapePolygon(eGrid *grid, xmlNodePtr cur, unsigned short idZone, const xmlChar * keyword)
+gParser::parseShapePolygon(eGrid *grid, xmlNodePtr cur, zZone * zone, const xmlChar * keyword)
 {
     // Polygon shapes are not supported by older clients.
     // Yes, it is on purpose that this item is set and never reset once polygonial shapes
@@ -685,7 +685,7 @@ gParser::parseShapePolygon(eGrid *grid, xmlNodePtr cur, unsigned short idZone, c
     // plan for polygonial shapes, probably never.
     safetymecanism_polygonal_shapeused.Set(true);
 
-    zShapePtr shape = zShapePtr( new zShapePolygon(grid, idZone) );
+    zShapePtr shape = zShapePtr( new zShapePolygon(grid, zone) );
     parseShape(grid, cur, keyword, shape);
 
     return shape;
@@ -1373,7 +1373,7 @@ gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
         while (cur) {
             if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
             else if (isElement(cur->name, (const xmlChar *)"ShapeCircle", keyword)) {
-                zone->setShape( parseShapeCircleArthemis(grid, cur, zone->ID(), keyword) );
+                zone->setShape( parseShapeCircleArthemis(grid, cur, zone, keyword) );
             }
             else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
                 if (isValidAlternative(cur, keyword)) {
@@ -1425,10 +1425,10 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         while (cur != NULL) {
             if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
             else if (isElement(cur->name, (const xmlChar *)"ShapeCircle", keyword)) {
-                zone->setShape( parseShapeCircleBachus(grid, cur, zone->ID(), keyword) );
+                zone->setShape( parseShapeCircleBachus(grid, cur, zone, keyword) );
             }
             else if (isElement(cur->name, (const xmlChar *)"ShapePolygon", keyword)) {
-                zone->setShape( parseShapePolygon(grid, cur, zone->ID(), keyword) );
+                zone->setShape( parseShapePolygon(grid, cur, zone, keyword) );
             }
             else if (isElement(cur->name, (const xmlChar *)"Enter", keyword)) {
                 xmlNodePtr cur2 = cur->xmlChildrenNode;

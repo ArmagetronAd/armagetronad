@@ -23,7 +23,6 @@ message ShapeSync
     optional Engine.NetGameObjectSync base = 1;
 
     optional float  creation_time = 2; // time of creation
-    optional uint32 zone_id       = 3; // id of this shape???
 
     // legacy creation data end marker
     optional bool legacy_create_end = 20000;

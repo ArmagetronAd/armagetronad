@@ -5,7 +5,7 @@
 #include "zShape.pb.h"
 #include "nProtoBuf.h"
 
-zShape::zShape(eGrid* grid, unsigned short idZone)
+zShape::zShape( eGrid* grid, zZone * zone )
         :eNetGameObject( grid, eCoord(0,0), eCoord(0,0), NULL, true ),
         posx_(),
         posy_(),
@@ -14,24 +14,16 @@ zShape::zShape(eGrid* grid, unsigned short idZone)
         color_(),
         createdtime_(0.0),
         referencetime_(0.0),
-        lasttime_(0.0),
-        idZone_(idZone),
-        newIdZone_(false)
+        lasttime_(0.0)
 {
-    joinWithZone();
+    tASSERT( zone );
+    zone->setShape( this );
 }
 
 zShape::zShape( Zone::ShapeSync const & sync, nSenderInfo const & sender )
 : eNetGameObject( sync.base(), sender )
 {
     setCreatedTime( sync.creation_time() );
-
-    unsigned short anIdZone = sync.zone_id();
-    if(anIdZone != idZone_) {
-        idZone_ = anIdZone;
-        newIdZone_ = true;
-        joinWithZone();
-    }
 }
 
 void zShape::setCreatedTime(REAL time)
@@ -122,11 +114,6 @@ void zShape::TimeStep( REAL time ) {
         // The shape has collapsed and should be removed
       }
     */
-
-    if(newIdZone_) {
-        joinWithZone();
-    }
-
 }
 
 bool zShape::isInteracting(eGameObject * target) {
@@ -138,17 +125,8 @@ void zShape::render(const eCamera *cam )
 void zShape::render2d(tCoord scale) const
     {}
 
-void zShape::joinWithZone() {
-    if(sn_netObjects[idZone_]) {
-        zZone *asdf = dynamic_cast<zZone*>(&*sn_netObjects[idZone_]);
-        asdf->setShape(zShapePtr(this));
-        newIdZone_ = false;
-    }
-}
-
-zShapeCircle::zShapeCircle(eGrid *grid, unsigned short idZone):
-        zShape(grid, idZone),
-        emulatingOldZone_(false),
+zShapeCircle::zShapeCircle(eGrid *grid, zZone * zone ):
+        zShape(grid, zone ),
         radius(1.0, 0.0)
 {}
 
@@ -158,7 +136,6 @@ zShapeCircle::zShapeCircle(eGrid *grid, unsigned short idZone):
 
 zShapeCircle::zShapeCircle( Zone::ShapeCircleSync const & sync, nSenderInfo const & sender ):
         zShape( sync.base(), sender ),
-        emulatingOldZone_(false),
         radius(1.0, 0.0)
 {
 }
@@ -365,8 +342,8 @@ zShapePolygon::zShapePolygon(  Zone::ShapePolygonSync const & sync, nSenderInfo 
     }
 }
 
-zShapePolygon::zShapePolygon(eGrid *grid, unsigned short idZone):
-        zShape(grid, idZone),
+zShapePolygon::zShapePolygon(eGrid *grid, zZone * zone ):
+        zShape( grid, zone ),
         points()
 {}
 
