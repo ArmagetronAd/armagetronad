@@ -266,7 +266,7 @@ public:
             p = NULL;
     }
 
-    template<class T> static void IDToPointer( unsigned short id, tControlledPTR<T>& p )
+    template<class T> static void IDToPointer( unsigned short id, tControlledPTR<T> & p )
     {
         if ( 0 != id )
             p = dynamic_cast<T*> ( nNetObject::ObjectDangerous(id) );
@@ -274,7 +274,15 @@ public:
             p = NULL;
     }
 
-    template<class T> static void IDToPointer( unsigned short id, nObserverPtr<T>& p )
+    template<class T> static void IDToPointer( unsigned short id, tJUST_CONTROLLED_PTR<T> & p )
+    {
+        if ( 0 != id )
+            p = dynamic_cast<T*> ( nNetObject::ObjectDangerous(id) );
+        else
+            p = NULL;
+    }
+
+    template<class T> static void IDToPointer( unsigned short id, nObserverPtr<T> & p )
     {
         if ( 0 != id )
             p = dynamic_cast<T*> ( nNetObject::ObjectDangerous(id) );
@@ -296,20 +304,7 @@ public:
     }
 
     // turn an object pointer int an ID
-    template<class T>  static unsigned short PointerToID( tControlledPTR<T> const & p )
-    {
-        if ( !p )
-        {
-            return 0;
-        }
-        else
-        {
-            return p->ID();
-        }
-    }
-
-    // turn an object pointer int an ID
-    template<class T>  static unsigned short PointerToID( nObserverPtr<T> const & p )
+    template<class T>  static unsigned short PointerToID( T const & p )
     {
         if ( !p )
         {

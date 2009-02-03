@@ -69,9 +69,19 @@ class zZone: public eNetGameObject
 {
 public:
     zZone(eGrid *grid); //!< local constructor
-    zZone(nMessage &m);                    //!< network constructor
     ~zZone();                              //!< destructor
     void RemoveFromGame();		   //!< call this instead of the destructor
+
+    //! creates a netobject form sync data
+    zZone( Zone::ZoneSync const & sync, nSenderInfo const & sender );
+    //! reads sync data, returns false if sync was old or otherwise invalid
+    void ReadSync( Zone::ZoneSync const & sync, nSenderInfo const & sender );
+    //! writes sync data (and initialization data if flag is set)
+    void WriteSync( Zone::ZoneSync & sync, bool init ) const;
+
+    // we must not transmit an object that contains pointers
+    // to non-transmitted objects. this function is supposed to check that.
+    virtual bool ClearToTransmit( int user ) const;
 
     void SetReferenceTime();               //!< sets the reference time to the current time
 
@@ -147,10 +157,6 @@ protected:
     std::set<ePlayerNetID *> playersOutside; //!< The players that are currently outside the zone
 
 private:
-    virtual void WriteCreate(nMessage &m); //!< writes data for network constructor
-    virtual void WriteSync(nMessage &m);   //!< writes sync data
-    virtual void ReadSync(nMessage &m);    //!< reads sync data
-
     virtual void InteractWith( eGameObject *target,REAL time,int recursion=1 ); //!< looks for objects inzide the zone and reacts on them
 
     void OnEnter( gCycle *target, REAL time ); //!< reacts on objects entering the zone
@@ -158,7 +164,8 @@ private:
     void OnInside( gCycle *target, REAL time ); //!< reacts on objects inside the zone
     void OnOutside( gCycle *target, REAL time ); //!< reacts on objects outside the zone
 
-    virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
+    //! returns the descriptor responsible for this class
+    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
 
     //    REAL Scale() const;           //!< returns the current scale
 

@@ -19,7 +19,8 @@ message ZoneSync
     // base class init data, needs to come first
     optional Engine.NetGameObjectSync base = 1;
 
-    // legacy creation data goes here
+    optional float  create_time = 2; // time of creation
+    optional uint32 shape_id    = 3; // ID of shape object
 
     // legacy creation data end marker
     optional bool legacy_create_end = 20000;
