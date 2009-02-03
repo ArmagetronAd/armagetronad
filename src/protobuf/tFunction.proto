@@ -15,6 +15,8 @@ import "nNetObject.proto";
 // message to sync linear functions of the form offset + t * slope
 message Function
 {
+    optional uint32 id    = 16 [default = 1 ]; // ID, not used any more
+
     optional float offset = 1;
     optional float slope  = 2;
 
