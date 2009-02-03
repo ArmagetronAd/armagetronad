@@ -14,6 +14,23 @@ import "tCoord.proto";
 
 */
 
+// cycle movement commands
+message CycleDestinationSync
+{
+    optional Tools.Position  position  = 1; // position of command action
+    optional Tools.Direction direction = 2; // driving direction after command
+    optional float           distance  = 3; // driving distance so far
+    optional uint32          flags     = 4; // flags: 1 for braking, 2 for chatting
+    optional uint32          cycle_id  = 5; // ID of the owning cycle
+    
+    // really optional stuff, not always written by old clients
+    optional float           game_time = 6; // time of command
+    optional uint32          turns     = 7; // number of turns so far
+
+    // legacy creation data end marker
+    optional bool legacy_end = 20000;
+}
+
 // sync message for cylce base
 message CycleMovementSync
 {

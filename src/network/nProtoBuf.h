@@ -235,6 +235,11 @@ public:
     {
         return envelope.MessageIDBig();
     }
+
+    unsigned short MessageID() const
+    {
+        return envelope.MessageID();
+    }
     
     explicit nSenderInfo( nMessageBase const & e )
     : envelope( e )

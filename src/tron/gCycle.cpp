@@ -1104,35 +1104,34 @@ gDestination::gDestination(const gCycle &c)
 }
 
 // or from a message
-gDestination::gDestination(nMessage &m, unsigned short & cycle_id )
+gDestination::gDestination( Game::CycleDestinationSync const & sync, nSenderInfo const & sender, unsigned short & cycle_id )
         :gameTime(0),distance(0),speed(0),
         hasBeenUsed(false),
         messageID(1),
         missable(true),
 next(NULL),list(NULL){
-    m >> position;
-    m >> direction;
-    m >> distance;
+    position.ReadSync( sync.position() );
+    direction.ReadSync( sync.direction() );
+    distance = sync.distance();
 
-    unsigned short flags;
-    m >> flags;
+    unsigned short flags = sync.flags();
     braking  = flags & 0x01;
     chatting = flags & 0x02;
 
-    messageID = m.MessageID();
+    messageID = sender.MessageID();
 
     turns = 0;
 
-    m.Read( cycle_id );
+    cycle_id = sync.cycle_id();
 
-    if ( !m.End() )
-        m >> gameTime;
+    if ( sync.has_game_time() )
+        gameTime = sync.game_time();
     else
         gameTime = -1000;
 
-    if ( !m.End() )
+    if ( sync.has_turns() )
     {
-        m.Read( turns );
+        turns = sync.turns();
     }
 }
 
@@ -1242,24 +1241,25 @@ const unsigned short gFloatCompressor::maxShort_ = 0xFFFF;
 static gFloatCompressor compressZeroOne( 0, 1 );
 
 // write all the data into a nMessage
-void gDestination::WriteCreate(nMessage &m, unsigned short cycle_id ){
-    m << position;
-    m << direction;
-    m << distance;
+void gDestination::WriteCreate( Game::CycleDestinationSync & sync, nMessageBase const & m, unsigned short cycle_id )
+{
+    position .WriteSync( *sync.mutable_position()  );
+    direction.WriteSync( *sync.mutable_direction() );
+    sync.set_distance( distance );
 
     unsigned short flags = 0;
     if ( braking )
         flags |= 0x01;
     if ( chatting )
         flags |= 0x02;
-    m << flags;
+    sync.set_flags( flags );
 
     // store message ID for later reference
     messageID = m.MessageID();
 
-    m.Write( cycle_id );
-    m << gameTime;
-    m.Write( turns );
+    sync.set_cycle_id( cycle_id );
+    sync.set_game_time( gameTime );
+    sync.set_turns( turns );
 }
 
 gDestination *gDestination::RightBefore(gDestination *list, REAL dist){
@@ -1385,36 +1385,33 @@ gDestination & gDestination::SetGameTime( REAL gameTime )
 
 // ********************************************************
 
-static void new_destination_handler(nMessage &m)
+static void new_destination_handler( Game::CycleDestinationSync const & sync, nSenderInfo const & sender )
 {
     // read the destination
     unsigned short cycle_id;
-    gDestination *dest=new gDestination(m, cycle_id );
+    gDestination *dest=tNEW(gDestination)( sync, sender, cycle_id );
 
     // and the ID of the cycle the destination is added to
-    nNetObject *o=nNetObject::ObjectDangerous(cycle_id);
-    if (o && o->GetDescriptor() == &cycle_init){
-        if ((sn_GetNetState() == nSERVER) && (m.SenderID() != o->Owner()))
+    gCycle * c;
+    nNetObject::IDToPointer( cycle_id, c );
+    if ( c )
+    {
+        if ( (sn_GetNetState() == nSERVER) && ( sender.SenderID() != c->Owner()) )
         {
-            Cheater(m.SenderID());
+            Cheater( sender.SenderID() );
         }
-        else
-            if(o->Owner() != ::sn_myNetID)
-            {
-                gCycle* c = dynamic_cast<gCycle *>(o);
-                if (c)
-                {
-                    if ( c->Player() && !dest->Chatting() )
-                        c->Player()->Activity();
-
-                    // fill default gametime
-                    if ( dest->GetGameTime() < -100 )
-                        dest->SetGameTime( se_GameTime()+c->Lag()*3 );
-
-                    c->AddDestination(dest);
-                    dest = 0;
-                }
-            }
+        else if( c->Owner() != ::sn_myNetID )
+        {
+            if ( c->Player() && !dest->Chatting() )
+                c->Player()->Activity();
+            
+            // fill default gametime
+            if ( dest->GetGameTime() < -100 )
+                dest->SetGameTime( se_GameTime()+c->Lag()*3 );
+            
+            c->AddDestination(dest);
+            dest = 0;
+        }
     }
 
     // delete the destination if it has not been used
@@ -1422,11 +1419,11 @@ static void new_destination_handler(nMessage &m)
     delete dest;
 }
 
-static nDescriptor destination_descriptor(321,&new_destination_handler,"destinaton");
+static nProtoBufDescriptor< Game::CycleDestinationSync > destination_descriptor( 321, &new_destination_handler );
 
 static void BroadCastNewDestination(gCycleMovement *c, gDestination *dest){
-    nMessage *m=new nMessage(destination_descriptor);
-    dest->WriteCreate(*m, c->ID() );
+    nProtoBufMessage< Game::CycleDestinationSync > * m =destination_descriptor.CreateMessage();
+    dest->WriteCreate( m->AccessProtoBuf(), *m, c->ID() );
     m->BroadCast();
 }
 
