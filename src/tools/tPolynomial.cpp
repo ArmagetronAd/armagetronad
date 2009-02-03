@@ -137,7 +137,6 @@ template<typename T> T & operator >> ( T & m, tPolynomial & f )
  */
 #define DELTA 1e-3
 
-template<typename T>
 bool operator == (const tPolynomial & left, const tPolynomial & right)
 {
     tPolynomial tRebasedRight;
@@ -185,7 +184,6 @@ bool operator == (const tPolynomial & left, const tPolynomial & right)
     return res;
 }
 
-template<typename T>
 bool operator != (const tPolynomial & left, const tPolynomial & right)
 {
     return !(left == right);
