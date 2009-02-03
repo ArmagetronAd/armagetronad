@@ -49,11 +49,15 @@ using namespace google::protobuf;
 // cull first parameter from reflection functions
 #define REFL_GET( function, message, field )        function( field )
 #define REFL_SET( function, message, field, value ) function( field, value )
+#define REFL_GET_REP( function, message, field, index )        function( field, index )
+#define REFL_SET_REP( function, message, field, index, value ) function( field, index, value )
 typedef nProtoBuf::Reflection Reflection;
 #define REFLECTION_CONST Reflection
 #else
 #define REFL_GET( function, message, field )        function( message, field )
 #define REFL_SET( function, message, field, value ) function( message, field, value )
+#define REFL_GET_REP( function, message, field, index )        function( message, field, index )
+#define REFL_SET_REP( function, message, field, index, value ) function( message, field, index, value )
 #define REFLECTION_CONST Reflection const
 #endif
 
@@ -125,6 +129,15 @@ void nProtoBufHeader::Read( nBinaryReader & reader )
     
     len = reader.ReadVarUInt();
 }
+
+nMessageStreamer::nMessageStreamer(){}
+
+nMessageStreamer::nMessageStreamer( nProtoBufDescriptorBase & descriptor )
+{
+    descriptor.SetStreamer( this );
+}
+
+nMessageStreamer::~nMessageStreamer(){}
 
 //! function responsible for turning message into old stream message
 void nMessageStreamer::StreamFromProtoBuf( nProtoBufMessageBase const & source, nStreamMessage & target ) const
@@ -312,6 +325,8 @@ int nProtoBufMessageBase::Size() const
     return GetProtoBuf().ByteSize() + 5;
 }
 
+nMessageTranslatorBase::nMessageTranslatorBase(){}
+
 //! constructor registering with the descriptor
 nMessageTranslatorBase::nMessageTranslatorBase( nProtoBufDescriptorBase & descriptor )
 {
@@ -443,6 +458,42 @@ void nProtoBufDescriptorBase::StreamFromDefault( nMessage & in, nProtoBuf & out,
             continue;
         }
 
+        if ( field->label() == FieldDescriptor::LABEL_REPEATED )
+        {
+            // This case doesn't happen too often. Actually, just once:
+            // the gNetPlayerWall sync. All quirks here are just to get that
+            // one case right.
+
+            // read field size
+            unsigned short size;
+            in.Read( size );
+
+            // clear the array
+            reflection->REFL_GET( ClearField, &out, field );
+
+            switch( field->cpp_type() )
+            {
+            case FieldDescriptor::CPPTYPE_MESSAGE:
+            {
+                // read field in reverse order
+                for( int j = size-1; j >= 0; --j )
+                {
+                    reflection->REFL_GET( AddMessage, &out, field );
+                }
+                
+                for( int j = size-1; j >= 0; --j )
+                {
+                    StreamFromStatic( in, *reflection->REFL_GET_REP( MutableRepeatedMessage, &out, field, j ), SECTION_First );
+                }
+            }
+            break;
+            default:
+                break;
+            }
+
+            continue;
+        }
+
         switch( field->cpp_type() )
         {
         case FieldDescriptor::CPPTYPE_INT32:
@@ -524,6 +575,43 @@ void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nMessage & 
         {
             if( currentSectionFlags > sections )
             {
+                break;
+            }
+
+            continue;
+        }
+
+        if ( field->label() == FieldDescriptor::LABEL_REPEATED )
+        {
+            // con << in.ShortDebugString() << "\n";
+
+            // This case doesn't happen too often. Actually, just once:
+            // the gNetPlayerWall sync. All quirks here are just to get that
+            // one case right.
+
+            // read field size
+            unsigned short size = reflection->REFL_GET( FieldSize, in, field );
+            if ( size == 0 )
+            {
+                continue;
+            }
+
+            out.Write( size );
+
+            // clear the array
+
+            switch( field->cpp_type() )
+            {
+            case FieldDescriptor::CPPTYPE_MESSAGE:
+            {
+                // write fields in reverse order
+                for( int j = size-1; j >= 0; --j )
+                {
+                    StreamToStatic( reflection->REFL_GET_REP( GetRepeatedMessage, in, field, j ), out, SECTION_First );
+                }
+            }
+            break;
+            default:
                 break;
             }
 

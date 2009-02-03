@@ -250,6 +250,8 @@ public:
 class nMessageTranslatorBase
 {
 public:
+    nMessageTranslatorBase();
+
     //! constructor registering with the descriptor
     explicit nMessageTranslatorBase( nProtoBufDescriptorBase & descriptor );
     
@@ -461,6 +463,12 @@ private:
 class nMessageStreamer
 {
 public:
+    nMessageStreamer();
+
+    //! constructor setting the default streamer of the given descriptor
+    explicit nMessageStreamer( nProtoBufDescriptorBase & descriptor );
+    virtual ~nMessageStreamer();
+
     //! function responsible for turning message into old stream message
     virtual void StreamFromProtoBuf( nProtoBufMessageBase const & source, nStreamMessage & target ) const;
 

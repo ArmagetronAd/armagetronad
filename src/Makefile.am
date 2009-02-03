@@ -84,6 +84,7 @@ libprotobuf_a_SOURCES = \
     protobuf/gCycle.pb.cc protobuf/gCycle.pb.h \
     protobuf/gWall.pb.cc protobuf/gWall.pb.h \
     protobuf/gZone.pb.cc protobuf/gZone.pb.h \
+    protobuf/gWall.pb.cc protobuf/gWall.pb.h \
     protobuf/gAIBase.pb.cc protobuf/gAIBase.pb.h
 #    protobuf/.pb.cc protobuf/.pb.h \
 #
