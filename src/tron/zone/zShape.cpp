@@ -152,36 +152,32 @@ zShapeCircle::zShapeCircle(eGrid *grid, unsigned short idZone):
         radius(1.0, 0.0)
 {}
 
-static Zone::ShapeSync zsync;
-
-zShapeCircle::zShapeCircle(nMessage &m):
-        zShape( zsync, nSenderInfo( m ) ),
-        emulatingOldZone_(false),
-        radius(1.0, 0.0)
-{
-    m >> radius;
-}
-
 /*
  * to create a shape on the clients
  */
-void zShapeCircle::WriteCreate( nMessage & m )
-{
-    zShape::WriteCreate(m);
 
-    m << radius;
+zShapeCircle::zShapeCircle( Zone::ShapeCircleSync const & sync, nSenderInfo const & sender ):
+        zShape( sync.base(), sender ),
+        emulatingOldZone_(false),
+        radius(1.0, 0.0)
+{
 }
 
-void zShapeCircle::WriteSync(nMessage &m)
+void zShapeCircle::WriteSync( Zone::ShapeCircleSync & sync, bool init ) const
 {
-    // zShape::WriteSync(m);
-    m << radius;
+    zShape::WriteSync( *sync.mutable_base(), init );
+
+    radius.WriteSync( *sync.mutable_radius() );
 }
 
-void zShapeCircle::ReadSync(nMessage &m)
+void zShapeCircle::ReadSync( Zone::ShapeCircleSync const & sync, nSenderInfo const & sender )
 {
-    // zShape::ReadSync(m);
-    m >> radius;
+    zShape::ReadSync( sync.base(), sender );
+
+    if ( sync.has_radius() )
+    {
+        radius.ReadSync( sync.radius() );
+    }
 }
 
 bool zShapeCircle::isInteracting(eGameObject * target)
@@ -352,20 +348,19 @@ void zShapeCircle::render2d(tCoord scale) const {
 }
 
 //
-zShapePolygon::zShapePolygon(nMessage &m)
-: zShape( zsync, nSenderInfo( m ) ),
+zShapePolygon::zShapePolygon(  Zone::ShapePolygonSync const & sync, nSenderInfo const & sender )
+: zShape( sync.base(), sender ),
  points()
 {
-    int numPoints;
-    m >> numPoints;
-
+    int numPoints = sync.points_size();
+    
     // read the polygon shape
-    for( ; numPoints>0 && !m.End(); numPoints-- )
+    for ( int i = 0; i < numPoints; ++i )
     {
         tFunction tfX, tfY;
-        m >> tfX;
-        m >> tfY;
-
+        Zone::FunctionPointSync const & point = sync.points(i);
+        tfX.ReadSync( point.x() );
+        tfY.ReadSync( point.y() );
         addPoint( myPoint( tfX, tfY ) );
     }
 }
@@ -378,24 +373,35 @@ zShapePolygon::zShapePolygon(eGrid *grid, unsigned short idZone):
 /*
  * to create a shape on the clients
  */
-void zShapePolygon::WriteCreate( nMessage & m )
+void zShapePolygon::WriteSync( Zone::ShapePolygonSync & sync, bool init ) const
 {
-    zShape::WriteCreate(m);
+    zShape::WriteSync( *sync.mutable_base(), init );
 
-    int numPoints;
-    numPoints = points.size();
-    m << numPoints;
+    if ( !init )
+    {
+        return;
+    }
+
+    sync.clear_points();
 
     std::vector< myPoint >::const_iterator iter;
     for(iter = points.begin();
             iter != points.end();
             ++iter)
     {
-        m << (*iter).first;
-        m << (*iter).second;
+        Zone::FunctionPointSync & point = *sync.add_points();
+
+        (*iter).first.WriteSync( *point.mutable_x() );
+        (*iter).second.WriteSync( *point.mutable_y() );
     }
 
     //    WriteSync( m );
+}
+
+//! reads sync data, returns false if sync was old or otherwise invalid
+void zShapePolygon::ReadSync( Zone::ShapePolygonSync const & sync, nSenderInfo const & sender )
+{
+    zShape::ReadSync( sync.base(), sender );
 }
 
 bool zShapePolygon::isInside(eCoord anECoord) {
@@ -609,17 +615,15 @@ void zShapePolygon::render2d(tCoord scale) const {
 }
 
 // the shapes's network initializator
-static nNOInitialisator<zShapeCircle> zoneCircle_init(350,"shapeCircle");
-static nNOInitialisator<zShapePolygon> zonePolygon_init(360,"shapePolygon");
+static nOProtoBufDescriptor< zShapeCircle, Zone::ShapeCircleSync > zoneCircle_init( 350 );
+static nOProtoBufDescriptor< zShapePolygon, Zone::ShapePolygonSync > zonePolygon_init( 360 );
 
-/*
-nDescriptor & zShapeCircle::CreatorDescriptor( void ) const
+nOProtoBufDescriptorBase const * zShapeCircle::DoGetDescriptor() const
 {
-    return zoneCircle_init;
+    return &zoneCircle_init;
 }
 
-nDescriptor & zShapePolygon::CreatorDescriptor( void ) const
+nOProtoBufDescriptorBase const * zShapePolygon::DoGetDescriptor() const
 {
-    return zonePolygon_init;
+    return &zonePolygon_init;
 }
-*/

@@ -10,7 +10,7 @@
 #include "tFunction.h"
 #include "tPolynomial.h"
 
-namespace Zone { class ShapeSync; }
+namespace Zone { class ShapeSync; class ShapeCircleSync; class ShapePolygonSync; }
 
 class zShape : public eNetGameObject{
 public:
@@ -74,11 +74,14 @@ class zShapeCircle : public zShape {
   // They have a default radius of 1.0, and it get scaled
 public :
     zShapeCircle(eGrid *grid, unsigned short idZone);
-    zShapeCircle(nMessage &m);
     ~zShapeCircle() {};
-    void WriteCreate( nMessage & m );
-    void WriteSync(nMessage &m);   //!< writes sync data
-    void ReadSync(nMessage &m);    //!< reads sync data
+
+    //! creates a netobject form sync data
+    zShapeCircle( Zone::ShapeCircleSync const & sync, nSenderInfo const & sender );
+    //! reads sync data, returns false if sync was old or otherwise invalid
+    void ReadSync( Zone::ShapeCircleSync const & sync, nSenderInfo const & sender );
+    //! writes sync data (and initialization data if flag is set)
+    void WriteSync( Zone::ShapeCircleSync & sync, bool init ) const;
 
     bool isInteracting(eGameObject * target);
     void render(const eCamera * cam );
@@ -92,6 +95,9 @@ protected:
     tFunction radius;
 
 private:
+    //! returns the descriptor responsible for this class
+    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
+    
 };
 
 typedef std::pair<tFunction, tFunction> myPoint;
@@ -99,24 +105,29 @@ typedef std::pair<tFunction, tFunction> myPoint;
 class zShapePolygon : public zShape {
 public :
     zShapePolygon(eGrid *grid, unsigned short idZone);
-    zShapePolygon(nMessage &n);
     ~zShapePolygon() {};
-    void WriteCreate( nMessage & m );
-  //    void WriteSync(nMessage &m);   //!< writes sync data
-  //    void ReadSync(nMessage &m);    //!< reads sync data
+
+    //! creates a netobject form sync data
+    zShapePolygon( Zone::ShapePolygonSync const & sync, nSenderInfo const & sender );
+    //! reads sync data, returns false if sync was old or otherwise invalid
+    void ReadSync( Zone::ShapePolygonSync const & sync, nSenderInfo const & sender );
+    //! writes sync data (and initialization data if flag is set)
+    void WriteSync( Zone::ShapePolygonSync & sync, bool init ) const;
 
     bool isInteracting(eGameObject * target);
     void render(const eCamera * cam );
     virtual void render2d(tCoord scale) const;
     void addPoint( myPoint const &aPoint) { points.push_back(aPoint);};
 
-  bool isEmulatingOldZone() {return false;}; // zShapePolygon cant be used for emulation of old zones
+    bool isEmulatingOldZone() {return false;}; // zShapePolygon cant be used for emulation of old zones
 
 protected:
     std::vector< myPoint > points;
     bool isInside (eCoord anECoord);
     static void networkRead(nMessage &m, zShape *aShape);
 private:
+    //! returns the descriptor responsible for this class
+    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
 };
 
 //typedef boost::shared_ptr<zShape> zShapePtr;

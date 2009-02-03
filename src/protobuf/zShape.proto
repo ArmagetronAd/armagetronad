@@ -16,7 +16,7 @@ import "tColor.proto";
 
 */
 
-// legacy sync message
+// sync message for shapes
 message ShapeSync
 {
     // base class init data, needs to come first
@@ -43,4 +43,28 @@ message ShapeSync
     optional bool legacy_sync_end = 20001;
 
     // extensions go here
+}
+
+// sync message for circles
+message ShapeCircleSync
+{
+    // base class init data, needs to come first
+    optional ShapeSync base = 1;
+
+    optional Tools.Function radius = 2; // radius of the circle
+}
+
+message FunctionPointSync
+{
+    optional Tools.Function x = 1; // x movement
+    optional Tools.Function y = 2; // y movement
+}
+
+// sync message for circles
+message ShapePolygonSync
+{
+    // base class init data, needs to come first
+    optional ShapeSync base = 1;
+
+    repeated FunctionPointSync points = 2; // the vertices
 }
