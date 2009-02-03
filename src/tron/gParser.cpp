@@ -618,7 +618,7 @@ gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, unsigned short id
 
     // Set up the default rotation speed
     {
-        tPolynomial<nMessage> tpRotation(2);
+        tPolynomial tpRotation(2);
         tpRotation[0] = 0.0f;
         tpRotation[1] = .3f;
         shape->setRotation2( tpRotation );
@@ -733,7 +733,7 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
 
     if (myxmlHasProp(cur, "rotation")) {
         string str = string(myxmlGetProp(cur, "rotation"));
-        tPolynomial<nMessage> tpRotation;
+        tPolynomial tpRotation;
 
 	tpRotation.parse(str);
         shape->setRotation2( tpRotation );
@@ -808,7 +808,7 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
         else if (isElement(cur->name, (const xmlChar *)"Rotation", keyword)) {
             zZoneInfluenceItemRotation *b = new zZoneInfluenceItemRotation(refZone);
 
-	    tPolynomialMarshaler<nMessage> tpm;
+	    tPolynomialMarshaler tpm;
 
 	    std::cout << "about to read a rotation " << std::endl;
 	    if( myxmlHasProp(cur, "rotation") ) {
@@ -820,10 +820,10 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
 	    else {
 	      // read the parameters from the old notation
 	      string str = string(myxmlGetProp(cur, "rotationAngle"));
-	      tPolynomial<nMessage> tpRotationAngle(str);
+	      tPolynomial tpRotationAngle(str);
 
 	      str = string(myxmlGetProp(cur, "rotationSpeed"));
-	      tPolynomial<nMessage> tpRotationSpeed(str);
+	      tPolynomial tpRotationSpeed(str);
 
 	      // generate the equivalent polynomial marsaller
 	      tpm.setConstant(tpRotationAngle);
@@ -894,7 +894,7 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
     zMonitorInfluencePtr infl = zMonitorInfluencePtr(new zMonitorInfluence(ref));
     infl->setMarked(myxmlGetPropTriad(cur, "marked"));
 
-    tPolynomialMarshaler<nMessage> tpmInfluence;
+    tPolynomialMarshaler tpmInfluence;
 
     if (myxmlHasProp(cur, (const xmlChar*)"influence")) {
         // new notation, superseed the previous notation
@@ -902,8 +902,8 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
 	tpmInfluence.parse(str);
     }
     else {
-      tPolynomial<nMessage> tpInfluenceConstant;
-      tPolynomial<nMessage> tpInfluenceVariant;
+      tPolynomial tpInfluenceConstant;
+      tPolynomial tpInfluenceVariant;
       if(myxmlHasProp(cur, "influenceAdd")) {
         tpInfluenceConstant.parse( string(myxmlGetProp(cur, "influenceAdd")) );
       }
@@ -1298,9 +1298,9 @@ gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
                 // use the same name as the associated zone
                 monitors[zoneName] = monitor;
                 // TODO: read data and populate t
-                tPolynomial<nMessage> t;
+                tPolynomial t;
                 monitor->setInit( t );
-                tPolynomial<nMessage> drift(2);
+                tPolynomial drift(2);
                 drift[1] = -1.0f * sg_conquestDecayRate;
                 monitor->setDrift( drift );
                 monitor->setClampLow ( 0.0f );
@@ -1346,7 +1346,7 @@ gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
 
                         zZoneInfluenceItemRotation *b = new zZoneInfluenceItemRotation(zone);
 
-			tPolynomialMarshaler<nMessage> tpm;
+			tPolynomialMarshaler tpm;
 
 			string str = string(myxmlGetProp(cur, "rotation"));
 			tpm.parse(str);
@@ -1623,10 +1623,10 @@ gParser::parseMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         }
 
         // TODO: read data and populate t
-        tPolynomial<nMessage> t;
+        tPolynomial t;
         //        monitor->setInit(myxmlGetPropFloat(cur, "init"));
         monitor->setInit( t );
-        tPolynomial<nMessage> drift(2);
+        tPolynomial drift(2);
         drift[1] = myxmlGetPropFloat(cur, "drift");
         monitor->setDrift( drift );
         monitor->setClampLow (myxmlGetPropFloat(cur, "low"));

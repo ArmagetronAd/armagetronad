@@ -15,8 +15,22 @@ import "nNetObject.proto";
 // sync message for polynomials
 message PolynomialSync
 {
+    optional float reference          = 1;  // zero point
+    repeated float coefficients       = 2;  // coefficients
+
     // legacy sync data end marker
     optional bool legacy_sync_end = 20001;
 
-    // extensions go here
+}
+
+// sync message for polynomials with offset
+message PolynomialWithBaseSync
+{
+    optional PolynomialSync base      = 1;
+
+    optional float offset             = 2;  // fixed offset
+
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
 }

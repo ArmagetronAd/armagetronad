@@ -61,7 +61,7 @@ public:
     virtual zValidator *copy(void) const;
     virtual ~zValidator() {};
 
-    void validate(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, Triggerer possibleUser, const tPolynomial<nMessage> &tp);
+    void validate(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, Triggerer possibleUser, const tPolynomial &tp);
 
     void addSelector(zSelectorPtr _selector) {
         selectors.push_back(_selector);

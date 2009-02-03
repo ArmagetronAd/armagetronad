@@ -57,7 +57,7 @@ void zShape::WriteSync( Zone::ShapeSync & sync, bool init ) const
     posx_.WriteSync( *sync.mutable_pos_x() );
     posy_.WriteSync( *sync.mutable_pos_y() );
     scale_.WriteSync( *sync.mutable_scale() );
-    // m << rotation2;
+    rotation2.WriteSync( *sync.mutable_rotation2() );
     color_.WriteSync( *sync.mutable_color() );
 }
 
@@ -69,7 +69,7 @@ void zShape::ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender 
     posx_.ReadSync( sync.pos_x() );
     posy_.ReadSync( sync.pos_y() );
     scale_.ReadSync( sync.scale() );
-    // m << rotation2;
+    rotation2.ReadSync( sync.rotation2() );
     color_.ReadSync( sync.color() );
 }
 
@@ -81,7 +81,7 @@ void zShape::setPosY(const tFunction & y){
     posy_ = y;
 }
 
-void zShape::setRotation2(const tPolynomial<nMessage> & r) {
+void zShape::setRotation2(const tPolynomial & r) {
   if(rotation2 == r) {
     // Empty: Nothing to do, no need to send an update
   }

@@ -127,7 +127,9 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/tCoord.h tools/tCoord.cpp\
 	tools/tValue.h tools/tValueParser.h\
 	tools/tFunction.h tools/tFunction.cpp\
-	tools/tPolynomial.h tools/tPolynomialMarshaler.h tools/tPolynomialWithBase.h \
+	tools/tPolynomial.h tools/tPolynomial.cpp\
+	tools/tPolynomialMarshaler.h tools/tPolynomialMarshaler.cpp \
+	tools/tPolynomialWithBase.h tools/tPolynomialWithBase.cpp \
 	tools/tRuby.h tools/tRuby.cpp \
 	tools/tDict.h \
 	resource/tResource.h resource/tResource.cpp resource/tResourceType.h resource/tResourceType.cpp\

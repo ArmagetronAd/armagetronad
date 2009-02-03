@@ -31,7 +31,7 @@ public:
 
     void setPosX(const tFunction &x);
     void setPosY(const tFunction &y);
-    void setRotation2(const tPolynomial<nMessage> & r);
+    void setRotation2(const tPolynomial & r);
 
     void setScale(const tFunction &s);
     void setColor(const rColor &c);
@@ -51,7 +51,7 @@ protected:
     tFunction posx_; //!< position need not be inside the shape.
     tFunction posy_; //!< positoin need not be inside the shape.
     tFunction scale_; //!< Used to affect the contour and not the position
-    tPolynomial<nMessage> rotation2; //!< Rotate the contour around the position at this rate.
+    tPolynomial rotation2; //!< Rotate the contour around the position at this rate.
     rColor color_;
 
     eCoord Position() { return eCoord(posx_(lasttime_ - referencetime_), posy_(lasttime_ - referencetime_) ); };

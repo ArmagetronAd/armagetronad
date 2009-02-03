@@ -405,7 +405,7 @@ void zZone::ReadSync( nMessage & m )
             rotationSpeed.SetOffset( .3f );
             rotationSpeed.SetSlope( 0.0f );
         }
-	tPolynomial<nMessage> tpRotationSpeed(2);
+	tPolynomial tpRotationSpeed(2);
 	tpRotationSpeed[0] = rotationSpeed.GetOffset();
 	tpRotationSpeed[1] = rotationSpeed.GetSlope();
         shape->setRotation2(tpRotationSpeed);
@@ -553,7 +553,7 @@ void zZone::InteractWith( eGameObject * target, REAL time, int recursion )
 }
 
 REAL asdf[] = {0, 1};
-tPolynomial<nMessage> tpOne(asdf, sizeof(asdf)/sizeof(asdf[0]));
+tPolynomial tpOne(asdf, sizeof(asdf)/sizeof(asdf[0]));
 // *******************************************************************************
 // *
 // *	OnEnter

@@ -4538,7 +4538,7 @@ void oldFortressAutomaticAssignment(zZone *zone, zMonitorPtr monitor)
 
                 zMonitorInfluencePtr inflDefender = zMonitorInfluencePtr(new zMonitorInfluence( monitor ));
 
-                tPolynomial<nMessage> tpInfluenceSlide(2);
+                tPolynomial tpInfluenceSlide(2);
                 tpInfluenceSlide[0] = -1.0 * sg_defendRate;
                 inflDefender->setInfluenceSlide( tpInfluenceSlide );
                 //                inflDefender->setInfluenceSlide( tFunction(-1.0 * sg_defendRate, 0.0) );
