@@ -1906,8 +1906,6 @@ void se_SendTeamMessage( eTeam const * team, ePlayerNetID const * sender ,ePlaye
         tColoredString say;
         say << tColoredString::ColorString(1,1,.5) << "( " << *sender;
 
-	con << team->Name() << "\n";
-
         if( !team )
         {
             // foo --> Spectatos: message
@@ -2480,7 +2478,7 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     if  (command == "/login")
     {
         // Really, there's no reason one would log in and log out all the time
-        spam.factor_ = 2;
+        spam.factor_ = 1;
         if ( spam.Block() )
         {
             return;
@@ -2492,7 +2490,7 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     }
     else  if (command == "/logout")
     {
-        spam.factor_ = 2;
+        spam.factor_ = 1;
         if( spam.Block() )
         {
             return;
@@ -2829,8 +2827,6 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
             ePlayerNetID * admin = se_PlayerNetIDs(i);
 
             if (
-                admin != p &&
-                (
                 // two cases:
                    (
                     // You are a speccing admin, and you aren't invited to anything:
@@ -2843,7 +2839,6 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
                     // invited players are also authorized
                     currentTeam->IsInvited( admin )
                     )
-                 )
                 )
             {
                 se_SendTeamMessage(currentTeam, p, admin, msg);
@@ -7671,6 +7666,8 @@ void ePlayerNetID::UpdateName( void )
 
     // monitor name changes
     eNameMessenger messenger( *this );
+
+    con << Owner() << " state: " << sn_GetNetState() << "(" << nSTANDALONE << nCLIENT << nSERVER << ")\n";
 
     // apply client change, stripping excess spaces
     if ( sn_GetNetState() == nSTANDALONE
