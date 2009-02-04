@@ -953,9 +953,25 @@ bool uMenuItemString::Event(SDL_Event &e){
 #endif
 }
 
+inline bool IsReservedCodePoint(int unicode)
+{
+    bool reserved = unicode < 32;
+
+#ifdef MACOSX
+    /*
+     Function keys code points. See the “Function-Key Unicodes” section.
+     http://developer.apple.com/DOCUMENTATION/Cocoa/Reference/ApplicationKit/Classes/NSEvent_Class/Reference/Reference.html
+     */
+     
+    reserved = reserved || (unicode >= 0xF700 && unicode <= 0xF747);
+#endif
+    
+    return reserved;
+}
+
 bool uMenuItemString::InsertChar(int unicode, bool convert) {
 #ifndef DEDICATED
-    if (32 <= unicode)
+    if (!IsReservedCodePoint(unicode))
     {
         // insert character if there is room
         if ( content->LenUtf8() < maxLength_ )
