@@ -693,23 +693,6 @@ bool sn_Update(unsigned long &old,unsigned long n){
         return false;
 }
 
-// static unsigned long int global_lastSync=0;
-
-bool nNetObject::SyncIsNew(nMessage &m){
-    unsigned long int bigID =  m.MessageIDBig();
-    //    sn_Update(global_lastSync,bigID);
-    return sn_Update(lastSyncID_,bigID);
-}
-
-/*
-static unsigned short global_lastSync=0;
-
-bool nNetObject::SyncIsNew(nMessage &m){
-    sn_Update(global_lastSync,m.MessageID());
-    return sn_Update(lastSyncID,m.MessageID());
-}
-*/
-
 nNetObject::nNetObject(int own):lastSyncID_(0),
 id(0),refCtr_(0),owner(own){
 #ifdef DEBUG
@@ -776,45 +759,6 @@ void nNetObject::Register( const nNetObjectRegistrar& registrar )
 
     sn_netObjectsOwner[id]=owner;
     sn_netObjects_AcceptClientSync[id]=false;
-}
-
-nNetObject::nNetObject(nMessage &m):lastSyncID_(m.MessageIDBig()),refCtr_(0){
-    // sn_Update(global_lastSync,lastSyncID_);
-
-    id = 0;
-    owner = 0;
-
-    syncListID_ = -1;
-
-    tASSERT( sn_Registrar );
-    nNetObjectRegistrar& registrar = *sn_Registrar;
-
-    createdLocally = false;
-
-    m.Read( registrar.id );
-#ifdef DEBUG
-    //con << "Netobject " << id << " created on remote order.\n";
-    //  if (id == 383)
-    //  st_Breakpoint();
-#endif
-    m.Read( owner );
-
-    // clients are only allowed to create self-owned objects
-    if ( sn_GetNetState() == nSERVER )
-    {
-        if ( owner != m.SenderID() )
-        {
-            nReadError( true );
-        }
-    }
-
-    registrar.object = this;
-    registrar.sender = m.SenderID();
-
-    knowsAbout[m.SenderID()].knowsAboutExistence=true;
-#ifdef DEBUG
-    // con << "Netobject " << id  << " created (remote order).\n";
-#endif
 }
 
 void nNetObject::DoBroadcastExistence(){
@@ -1207,127 +1151,14 @@ bool nNetObject::ClearToTransmit(int user) const{
     return true;
 }
 
-void nNetObject::WriteSync(nMessage &m, int run )
-{
-    if ( run == 0 )
-    {
-        WriteSync( m );
-    }
-}
-
-void nNetObject::ReadSync(nMessage &m, int run )
-{
-    if ( run == 0 )
-    {
-        ReadSync( m );
-    }
-}
-
-void nNetObject::WriteCreate(nMessage &m, int run )
-{
-    if ( run == 0 )
-    {
-        WriteCreate( m );
-    }
-}
-
-void nNetObject::ReadCreate(nMessage &m, int run )
-{
-    // run == 0 would call the constructor, but run == 0 never happens.
-    tASSERT( run > 0 );
-}
-
 static nMessageBase * CreationMessage( nNetObject & obj )
 {
-    nOProtoBufDescriptorBase const * pbDescriptor = obj.GetDescriptor();
-    if ( pbDescriptor )
-    {
-        return pbDescriptor->WriteSync( obj, true );
-    }
-    else
-    {
-        nStreamMessage * m = new nStreamMessage( obj.CreatorDescriptor() );
-        
-#ifdef DEBUG
-        if (obj.ID() == sn_WatchNetID)
-            sn_WatchMessage = m;
-#endif
-        
-        obj.WriteAll(*m,true);
-
-        return m;
-    }
+    return obj.GetDescriptor().WriteSync( obj, true );
 }
 
-void nNetObject::WriteAll( nStreamMessage & m, bool create )
+static nMessageBase * SyncMessage( nNetObject & obj )
 {
-    int lastLen = -1;
-    int run = 0;
-
-    // write as long as the read functions do something
-    while ( m.DataLen() > lastLen )
-    {
-        lastLen = m.DataLen();
-        if ( create )
-        {
-            WriteCreate(m,run);
-        }
-
-        WriteSync(m,run);
-        ++run;
-    }
-}
-
-void nNetObject::ReadAll ( nStreamMessage & m, bool create )
-{
-    int lastRead = -1;
-    int run = 0;
-
-    // read as long as the read functions do something
-    while ( m.ReadSoFar() > lastRead )
-    {
-        lastRead = m.ReadSoFar();
-        if ( create && run > 0 )
-        {
-            ReadCreate(m,run);
-        }
-
-        ReadSync(m,run);
-        ++run;
-    }
-}
-
-void nNetObject::WriteSync(nMessage &m){
-#ifdef DEBUG
-    if (sn_GetNetState()!=nSERVER && !AcceptClientSync())
-        tERR_ERROR("WriteSync should only be called server-side!");
-#endif
-} // nothing to do yet
-
-
-
-void nNetObject::ReadSync(nMessage &m){
-    if (sn_GetNetState()==nSERVER){
-        bool back=knowsAbout[m.SenderID()].syncReq;
-        RequestSync(); // tell the others about it
-        knowsAbout[m.SenderID()].syncReq=back;
-        // but not the sender of the message; he
-        // knows already.
-    }
-}
-
-extern bool deb_net;
-
-// read and write id and owner
-void nNetObject::WriteCreate(nMessage &m){
-    m.Write(id);
-    m.Write(owner);
-
-    // store the info needed in the destructor
-    sn_netObjects_AcceptClientSync[id]=this->AcceptClientSync();
-
-    if (deb_net)
-        con << "Sending creation message for nNetObject " << id << "\n";
+    return obj.GetDescriptor().WriteSync( obj, false );
 }
 
 void nNetObject::GetID()
@@ -1616,22 +1447,7 @@ static void net_sync_handler(nMessage & m){
         }
         else
         {
-            nOProtoBufDescriptorBase const * pbDescriptor = obj->GetDescriptor();
-            if ( pbDescriptor )
-            {
-                // protocol buffer capable
-                pbDescriptor->ReadSync( *obj, m, false );
-            }
-            else
-            {
-                // plain old streaming code
-                if (obj->SyncIsNew(m))
-                {
-                    m.Reset();
-                    m.Read(id);
-                    obj->ReadAll(m, false);
-                }
-            }
+            obj->GetDescriptor().ReadSync( *obj, m, false );
         }
     }
 }
@@ -1688,35 +1504,17 @@ public:
 };
 
 //! converter for creation messages
-nMessageStreamer * nOProtoBufDescriptorBase::CreationStreamer()
+nMessageStreamer * nNetObjectDescriptorBase::CreationStreamer()
 {
     static nMessageStreamerCreate create;
     return &create;
 }
 
 //! converter for sync messages
-nMessageStreamer * nOProtoBufDescriptorBase::SyncStreamer()
+nMessageStreamer * nNetObjectDescriptorBase::SyncStreamer()
 {
     static nMessageStreamerSync sync;
     return &sync;
-}
-
-nMessageBase * nNetObject::WriteAll()
-{
-    nOProtoBufDescriptorBase const * pbDescriptor = GetDescriptor();
-    if ( pbDescriptor )
-    {
-        // do it the pattern buffer way
-        return pbDescriptor->WriteSync( *this, false );
-    }
-    else
-    {
-        // create a bastardized stream message
-        nStreamMessage * m = tNEW(nStreamMessage)( net_sync );
-        m->Write( ID() );
-        WriteAll( *m, false );
-        return m;
-    }
 }
 
 bool nNetObject::AcceptClientSync() const{
@@ -1830,7 +1628,7 @@ void nNetObject::SyncAll(){
                              && sn_Connections[user].bandwidthControl_.Control( nBandwidthControl::Usage_Planning ) >50
                              && nos->knowsAbout[user].acksPending<=1){
                         // send a sync
-                        tJUST_CONTROLLED_PTR< nMessageBase > m = nos->WriteAll();
+                        tJUST_CONTROLLED_PTR< nMessageBase > m = SyncMessage( *nos );
                         nos->knowsAbout[user].syncReq=false;
 
                         if (nos->knowsAbout[user].nextSyncAck){
@@ -2272,8 +2070,7 @@ int  nBandwidthTaskObject::DoEstimateSize() const
 // executes whatever it has to do
 void nBandwidthTaskSync::DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer )
 {
-    tJUST_CONTROLLED_PTR< nMessage > message = tNEW( nMessage )( net_sync );
-    Object().WriteAll( *message, false );
+    tJUST_CONTROLLED_PTR< nMessageBase > message = SyncMessage( Object() );
     buffer.AddMessage( *message, &control, peer );
 }
 
@@ -2298,15 +2095,6 @@ void nBandwidthTaskCreate::DoExecute( nSendBuffer& buffer, nBandwidthControl& co
 nMachine & nNetObject::DoGetMachine( void ) const
 {
     return nMachine::GetMachine( Owner() );
-}
-
-// was once pure virtual. with pbuffer, its a base implementation
-// throwing an assertion if called.
-nDescriptor& nNetObject::CreatorDescriptor() const
-{
-    tASSERT( 0 );
-    static nDescriptor dummy( 0, NULL, "bla" );
-    return dummy;
 }
 
 // protocol buffer stuff
@@ -2385,11 +2173,13 @@ void nNetObject::WriteSync( Network::NetObjectSync & sync, bool init ) const
     }
 }
 
-// nOProtoBufDescriptor< nNetObject, Network::NetObjectTotal > sn_pbdescriptor( 0 );
+// nNetObjectDescriptor< nNetObject, Network::NetObjectTotal > sn_pbdescriptor( 0 );
 
 //! returns the descriptor responsible for this class
-nOProtoBufDescriptorBase const * nNetObject::DoGetDescriptor() const
+nNetObjectDescriptorBase const & nNetObject::DoGetDescriptor() const
 {
-    return 0;
+    tASSERT(0);
+    nNetObjectDescriptorBase * ret = 0;
+    return *ret;
 }
 

@@ -203,11 +203,11 @@ gAITeam::gAITeam()
     //	teams.Remove( this, listID );
 }
 
-static nOProtoBufDescriptor<gAITeam,Game::AITeamSync> gAITeam_init(331);
+static nNetObjectDescriptor<gAITeam,Game::AITeamSync> gAITeam_init(331);
 
-nOProtoBufDescriptorBase const * gAITeam::DoGetDescriptor() const
+nNetObjectDescriptorBase const & gAITeam::DoGetDescriptor() const
 {
-    return &gAITeam_init;
+    return gAITeam_init;
 }
 
 // fill empty team positions with AI players
@@ -1080,11 +1080,11 @@ static REAL rgb_ai[MAXAI_COLOR][3]={
                                        {.5,.5,.5}
                                    };
 
-static nOProtoBufDescriptor<gAIPlayer,Game::AIPlayerSync> gAIPlayer_init(330);
+static nNetObjectDescriptor<gAIPlayer,Game::AIPlayerSync> gAIPlayer_init(330);
 
-nOProtoBufDescriptorBase const * gAIPlayer::DoGetDescriptor() const
+nNetObjectDescriptorBase const & gAIPlayer::DoGetDescriptor() const
 {
-    return &gAIPlayer_init;
+    return gAIPlayer_init;
 }
 
 //! creates a netobject form sync data

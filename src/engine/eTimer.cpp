@@ -225,11 +225,11 @@ void eTimer::ReadSync( Engine::TimerSync const & sync, nSenderInfo const & sende
     startTimeOffset_.Add( remoteStartTimeOffset, 1/remoteTimeNonQuality );
 }
 
-static nOProtoBufDescriptor< eTimer, Engine::TimerSync > eTimer_init(210);
+static nNetObjectDescriptor< eTimer, Engine::TimerSync > eTimer_init(210);
 
-nOProtoBufDescriptorBase const * eTimer::DoGetDescriptor() const
+nNetObjectDescriptorBase const & eTimer::DoGetDescriptor() const
 {
-    return &eTimer_init;
+    return eTimer_init;
 }
 
 // determines whether time should be smoothed

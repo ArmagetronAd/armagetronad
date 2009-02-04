@@ -165,7 +165,7 @@ private:
     void OnOutside( gCycle *target, REAL time ); //!< reacts on objects outside the zone
 
     //! returns the descriptor responsible for this class
-    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 
     //    REAL Scale() const;           //!< returns the current scale
 

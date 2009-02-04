@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 class nObserver;
 
 class nSenderInfo;
-class nOProtoBufDescriptorBase;
+class nNetObjectDescriptorBase;
 class nProtoBufDescriptorBase;
 
 namespace Network{ class NetObjectSync; class NetObjectControl; }
@@ -156,8 +156,6 @@ public:
 
     inline nMachine & GetMachine() const;  //!< returns the machine this object belongs to
 
-    virtual nDescriptor& CreatorDescriptor() const;
-
     nNetObject(int owner=-1); // sn_netObjects can be normally created on the server
     // and will
     // send the clients a notification that
@@ -166,10 +164,6 @@ public:
     // and the id and owner are sent, too.
 
     // owner=-1 means: this object belongs to us!
-
-
-    nNetObject(nMessage &m); // or, if initially created on the
-    // server, via a creation nMessage on the client.
 
     virtual void InitAfterCreation(); // after remote creation,
     // this routine is called
@@ -215,47 +209,6 @@ public:
     // we must not transmit an object that contains pointers
     // to non-transmitted objects. this function is supposed to check that.
     virtual bool ClearToTransmit(int user) const;
-
-    // syncronisation functions (old):
-    virtual void WriteSync(nMessage &m); // store sync message in m
-    virtual void ReadSync(nMessage &m); // guess what
-
-    // new
-    virtual void WriteSync(nMessage &m, int run ); // store sync message in m
-    virtual void ReadSync(nMessage &m, int run ); // guess what
-
-    virtual bool SyncIsNew(nMessage &m); // is the pure sync message newer than the last accepted sync
-
-    // the extra information sent on creation (old):
-    virtual void WriteCreate(nMessage &m); // store sync message in m
-    // the information written by this function should
-    // be read from the message in the "message"- connstructor
-
-    // new
-    virtual void WriteCreate(nMessage &m, int run );
-    virtual void ReadCreate(nMessage &m, int run );
-
-    // the "run" parameter in the new versions is intended to fix the
-    // compatibility problems when you want to extend the data written in
-    // WriteCreate(). The old method of writing a creation message was
-    //
-    // WriteCreate(m); WriteSync(m);
-    // and it was read by
-    // Constructor(m); ReadSync(m);
-    //
-    // the new sequence of calls is
-    // WriteCreate(m,0); WriteSync(m,0); WriteCreate(m,1),WriteSync(m,1)...
-    // and the new read sequence is
-    // Constructor(m); ReadSync(m,0), ReadCreate(m,1), ReadSync(m,1)...
-    // where the write operation continues until no data was written and
-    // the read operation continues until no data was read.
-    // the default of the new functions is to call the old ones if "run"
-    // equals to 0 and do nothing otherwise.
-
-    // these functions handle the process. Note that they are non-virtual.
-    nMessageBase * WriteAll();
-    void WriteAll( nStreamMessage & message, bool create );
-    void ReadAll ( nStreamMessage & message, bool create );
 
     // turn an ID into an object pointer
     template<class T>  static void IDToPointer( unsigned short id, T * & p )
@@ -328,10 +281,10 @@ public:
     bool SyncIsNew( Network::NetObjectSync const & sync, nSenderInfo const & sender );
 
     //! returns the descriptor responsible for this class
-    inline nOProtoBufDescriptorBase const * GetDescriptor() const { return DoGetDescriptor(); }
+    inline nNetObjectDescriptorBase const & GetDescriptor() const { return DoGetDescriptor(); }
 private:
     //! returns the descriptor responsible for this class
-    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const = 0;
 
     // control functions:
 
@@ -360,7 +313,6 @@ public:
 
     // shall the server accept sync messages from the clients?
     virtual bool AcceptClientSync() const;
-
 
     void GetID();			// get a network ID
     void RequestSync(bool ack=true);  // request a sync
@@ -404,113 +356,7 @@ void ClearKnows(int user, bool clear = false);
 
 void Cheater(int user);
 
-
-
-
 extern tArray<unsigned short> sn_netObjectsOwner;
-
-
-// create one of those for every new class of sn_netObjects you define.
-// you can then remotely spawn other T's
-// by sending netpackets of type net_initialisator<T>.desc
-// (correctly initialised, of course...)
-
-template<class T> class nNOInitialisator:public nDescriptor{
-    // create a new nNetObject
-    static void Init(nMessage &m){
-        try
-        {
-            if (m.DataLen()<2)
-            {
-                nReadError();
-            }
-
-            unsigned short id=m.Data(0);
-            //unsigned short owner=m.data(1);
-
-            if (sn_netObjectsOwner[id]!=m.SenderID() || bool(sn_netObjects[id]))
-            {
-#ifdef DEBUG
-                st_Breakpoint();
-                if (!sn_netObjects[id])
-                {
-                    con << "Netobject " << id << " is already reserved!\n";
-                }
-                else
-                {
-                    con << "Netobject " << id << " is already defined!\n";
-                }
-#endif
-                if (sn_netObjectsOwner[id]!=m.SenderID())
-                {
-                    Cheater(m.SenderID());
-                    nReadError();
-                }
-            }
-            else
-            {
-                nNetObjectRegistrar registrar;
-                //			nNetObject::RegisterRegistrar( registrar );
-                tJUST_CONTROLLED_PTR< T > n=new T(m);
-                n->InitAfterCreation();
-                nNetObject * no = n;
-                no->ReadAll(m,true);
-                n->Register( registrar );
-
-#ifdef DEBUG
-                /*
-                tString str;
-                n->PrintName( str );
-                con << "Received object " << str << "\n";
-                */
-#endif
-
-                if (sn_GetNetState()==nSERVER && !n->AcceptClientSync())
-                {
-                    Cheater(m.SenderID()); // cheater!
-                    n->Release();
-                }
-                else if ( static_cast< nNetObject* >( sn_netObjects[ n->ID() ] ) != n )
-                {
-                    // object was unable to be registered
-                    n->Release(); // silently delete it.
-                }
-            }
-        }
-        catch (nKillHim)
-        {
-            con << "nKillHim signal caught.\n";
-            Cheater(m.SenderID());
-        }
-    }
-
-public:
-    //nDescriptor desc;
-
-    //  nNOInitialisator(const char *name):nDescriptor(init,name){};
-    nNOInitialisator(unsigned short id,const char *name):nDescriptor(id,Init,name){};
-};
-
-// nonmember pointer read operators.
-template<class T> nMessage& operator >> ( nMessage& m, T*& p )
-{
-    unsigned short id;
-    m.Read(id);
-
-    nNetObject::IDToPointer( id, p );
-
-    return m;
-}
-
-template<class T> nMessage& operator >> ( nMessage& m, tControlledPTR<T>& p )
-{
-    unsigned short id;
-    m.Read(id);
-
-    nNetObject::IDToPointer( id, p );
-
-    return m;
-}
 
 // ************************************************************************************
 // *

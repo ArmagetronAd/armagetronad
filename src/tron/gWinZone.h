@@ -101,7 +101,7 @@ protected:
 
 private:
     //! returns the descriptor responsible for this class
-    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 
     virtual void InteractWith( eGameObject *target,REAL time,int recursion=1 ); //!< looks for objects inzide the zone and reacts on them
 

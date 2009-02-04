@@ -288,7 +288,7 @@ public:
 
 private:
     //! returns the descriptor responsible for this class
-    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 
     tArray<gPlayerWallCoord> coords_;
 

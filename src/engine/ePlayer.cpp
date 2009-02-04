@@ -5674,13 +5674,12 @@ ePlayerNetID::ePlayerNetID( Engine::PlayerNetIDSync const & sync, nSenderInfo co
     // rubberstatus=0;
 }
 
-static nOProtoBufDescriptor< ePlayerNetID, Engine::PlayerNetIDSync > se_pbdescriptor( 201 );
-// nNOInitialisator<ePlayerNetID> ePlayerNetID_init(201,"ePlayerNetID");
+static nNetObjectDescriptor< ePlayerNetID, Engine::PlayerNetIDSync > se_pbdescriptor( 201 );
 
 //! returns the descriptor responsible for this class
-nOProtoBufDescriptorBase const * ePlayerNetID::DoGetDescriptor() const
+nNetObjectDescriptorBase const & ePlayerNetID::DoGetDescriptor() const
 {
-    return & se_pbdescriptor;
+    return se_pbdescriptor;
 }
 
 void ePlayerNetID::ControlObject(eNetGameObject *c){

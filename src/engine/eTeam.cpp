@@ -119,12 +119,12 @@ inline static tColoredStringProxy ColorString( const eTeam * t )
     return tColoredStringProxy( t->R()/15.0f, t->G()/15.0f, t->B()/15.0f );
 }
 
-nOProtoBufDescriptor<eTeam, Engine::TeamSync > eTeam_init(220);
+nNetObjectDescriptor<eTeam, Engine::TeamSync > eTeam_init(220);
 
 //! returns the descriptor responsible for this class
-nOProtoBufDescriptorBase const * eTeam::DoGetDescriptor() const
+nNetObjectDescriptorBase const & eTeam::DoGetDescriptor() const
 {
-    return &eTeam_init;
+    return eTeam_init;
 }
 
 int  eTeam::minTeams=0;					// minimum nuber of teams

@@ -592,15 +592,15 @@ void zShapePolygon::render2d(tCoord scale) const {
 }
 
 // the shapes's network initializator
-static nOProtoBufDescriptor< zShapeCircle, Zone::ShapeCircleSync > zoneCircle_init( 350 );
-static nOProtoBufDescriptor< zShapePolygon, Zone::ShapePolygonSync > zonePolygon_init( 360 );
+static nNetObjectDescriptor< zShapeCircle, Zone::ShapeCircleSync > zoneCircle_init( 350 );
+static nNetObjectDescriptor< zShapePolygon, Zone::ShapePolygonSync > zonePolygon_init( 360 );
 
-nOProtoBufDescriptorBase const * zShapeCircle::DoGetDescriptor() const
+nNetObjectDescriptorBase const & zShapeCircle::DoGetDescriptor() const
 {
-    return &zoneCircle_init;
+    return zoneCircle_init;
 }
 
-nOProtoBufDescriptorBase const * zShapePolygon::DoGetDescriptor() const
+nNetObjectDescriptorBase const & zShapePolygon::DoGetDescriptor() const
 {
-    return &zonePolygon_init;
+    return zonePolygon_init;
 }

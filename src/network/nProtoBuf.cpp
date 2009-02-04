@@ -911,10 +911,10 @@ nMessage& operator << ( nMessage& m, nProtoBuf const & buffer )
 }
 */
 
-nOProtoBufDescriptorBase::~nOProtoBufDescriptorBase()
+nNetObjectDescriptorBase::~nNetObjectDescriptorBase()
 {}
 
-unsigned int nOProtoBufDescriptorBase::GetObjectID ( Network::NetObjectSync const & message )
+unsigned int nNetObjectDescriptorBase::GetObjectID ( Network::NetObjectSync const & message )
 {
     if( !message.has_object_id() )
     {
@@ -925,7 +925,7 @@ unsigned int nOProtoBufDescriptorBase::GetObjectID ( Network::NetObjectSync cons
 
 //! checks to run before creating a new object
 //! @return true if all is OK
-bool nOProtoBufDescriptorBase::PreCheck( unsigned short id, nSenderInfo sender )
+bool nNetObjectDescriptorBase::PreCheck( unsigned short id, nSenderInfo sender )
 {
     if (sn_netObjectsOwner[id]!=sender.SenderID() || bool(sn_netObjects[id]))
     {
@@ -954,7 +954,7 @@ bool nOProtoBufDescriptorBase::PreCheck( unsigned short id, nSenderInfo sender )
 }
 
 //! checks to run after creating a new object
-void nOProtoBufDescriptorBase::PostCheck( nNetObject * object, nSenderInfo sender )
+void nNetObjectDescriptorBase::PostCheck( nNetObject * object, nSenderInfo sender )
 {
 #ifdef DEBUG
     /*

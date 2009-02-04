@@ -247,7 +247,7 @@ public:
     //! writes sync data (and initialization data if flat is set)
     // void WriteSync( Game::AIPlayerSync & sync, bool init );
     //! returns the descriptor responsible for this class
-    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 };
 
 // the AI team
@@ -263,7 +263,7 @@ public:
     //! writes sync data (and initialization data if flat is set)
     // void WriteSync( Game::AITeamSync & sync, bool init );
     //! returns the descriptor responsible for this class
-    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 
     static void BalanceWithAIs(bool doBalance = balanceWithAIs);	// fill empty team positions with AI players
     virtual bool PlayerMayJoin(const ePlayerNetID* player) const;	// may player join this team?

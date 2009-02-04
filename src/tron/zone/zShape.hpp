@@ -89,7 +89,7 @@ protected:
 
 private:
     //! returns the descriptor responsible for this class
-    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
     
 };
 
@@ -118,7 +118,7 @@ protected:
     static void networkRead(nMessage &m, zShape *aShape);
 private:
     //! returns the descriptor responsible for this class
-    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 };
 
 //typedef boost::shared_ptr<zShape> zShapePtr;

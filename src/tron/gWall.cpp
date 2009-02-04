@@ -2183,11 +2183,11 @@ void gNetPlayerWall::ReadSync( Game::PlayerWallSync const & sync, nSenderInfo co
 #endif
 }
 
-static nOProtoBufDescriptor< gNetPlayerWall, Game::PlayerWallSync > gNetPlayerWall_init(300);
+static nNetObjectDescriptor< gNetPlayerWall, Game::PlayerWallSync > gNetPlayerWall_init(300);
 
-nOProtoBufDescriptorBase const * gNetPlayerWall::DoGetDescriptor() const
+nNetObjectDescriptorBase const & gNetPlayerWall::DoGetDescriptor() const
 {
-    return &gNetPlayerWall_init;
+    return gNetPlayerWall_init;
 }
 
 void gNetPlayerWall::PrintName(tString &s) const

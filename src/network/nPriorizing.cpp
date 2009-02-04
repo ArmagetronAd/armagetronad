@@ -437,7 +437,7 @@ int  nBandwidthTaskMessage::DoEstimateSize() const
 
 
 
-#ifdef DEBUG
+#ifdef DEBUG_X
 
 static nDescriptor testDescriptor( 399, NULL, NULL, "test" );
 //static nDescriptor testDescriptor( 399, NULL, NULL, "test" );

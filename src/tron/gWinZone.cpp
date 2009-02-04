@@ -400,7 +400,7 @@ void gZone::OnEnter( gCycle * target, REAL time )
 }
 
 // the zone's network initializator
-static nOProtoBufDescriptor< gZone, Game::ZoneV1Sync > zone_init( 340 );
+static nNetObjectDescriptor< gZone, Game::ZoneV1Sync > zone_init( 340 );
 
 // *******************************************************************************
 // *
@@ -412,9 +412,9 @@ static nOProtoBufDescriptor< gZone, Game::ZoneV1Sync > zone_init( 340 );
 //!
 // *******************************************************************************
 
-nOProtoBufDescriptorBase const * gZone::DoGetDescriptor() const
+nNetObjectDescriptorBase const & gZone::DoGetDescriptor() const
 {
-    return &zone_init;
+    return zone_init;
 }
 
 // *******************************************************************************

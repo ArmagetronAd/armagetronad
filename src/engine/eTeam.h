@@ -204,7 +204,7 @@ public:												// public methods
     //! writes sync data (and initialization data if flat is set)
     void WriteSync( Engine::TeamSync &, bool init );
     //! returns the descriptor responsible for this class
-    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 
     // shall the server accept sync messages from the clients?
     virtual bool AcceptClientSync() const	{

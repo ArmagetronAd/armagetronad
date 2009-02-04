@@ -282,7 +282,7 @@ public:
     //! writes sync data (and initialization data if flat is set)
     void WriteSync( Engine::PlayerNetIDSync & sync, bool init );
     //! returns the descriptor responsible for this class
-    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 public:
 
     virtual void 			NewObject(){}        				// called when we control a new object

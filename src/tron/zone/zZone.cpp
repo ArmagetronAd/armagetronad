@@ -461,7 +461,7 @@ void zZone::OnOutside( gCycle * target, REAL time )
 }
 
 // the zone's network initializator
-static nOProtoBufDescriptor< zZone, Zone::ZoneSync > zone_init( 341 );
+static nNetObjectDescriptor< zZone, Zone::ZoneSync > zone_init( 341 );
 
 // *******************************************************************************
 // *
@@ -473,9 +473,9 @@ static nOProtoBufDescriptor< zZone, Zone::ZoneSync > zone_init( 341 );
 //!
 // *******************************************************************************
 
-nOProtoBufDescriptorBase const * zZone::DoGetDescriptor() const
+nNetObjectDescriptorBase const & zZone::DoGetDescriptor() const
 {
-    return &zone_init;
+    return zone_init;
 }
 
 /*

@@ -83,7 +83,7 @@ private:
     mutable double nextSync_; //!< system time of the next sync to the clients
 
     //! returns the descriptor responsible for this class
-    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 };
 
 REAL se_GameTime();

@@ -398,10 +398,10 @@ private:
 };
 
 // network object descriptors
-class nOProtoBufDescriptorBase
+class nNetObjectDescriptorBase
 {
 public:
-    virtual ~nOProtoBufDescriptorBase();
+    virtual ~nNetObjectDescriptorBase();
 
     //! writes sync message
     inline nProtoBufMessageBase * WriteSync( nNetObject & object, bool create ) const
@@ -645,11 +645,11 @@ private:
 
 //! specialization of descriptor for each network object class
 template< class OBJECT, class PROTOBUF >
-class nOProtoBufDescriptor: public nOProtoBufDescriptorBase, public nProtoBufDescriptor< PROTOBUF >
+class nNetObjectDescriptor: public nNetObjectDescriptorBase, public nProtoBufDescriptor< PROTOBUF >
 {
 public:
-    nOProtoBufDescriptor( int identification )
-    : nOProtoBufDescriptorBase()
+    nNetObjectDescriptor( int identification )
+    : nNetObjectDescriptorBase()
     , nProtoBufDescriptor< PROTOBUF >( identification, &HandleIncoming, false )
     {
         this->SetStreamer( CreationStreamer() );
@@ -778,7 +778,7 @@ private:
 
 // template message
 template< class OBJECT, class PROTOBUF >
-const PROTOBUF nOProtoBufDescriptor< OBJECT, PROTOBUF >::prototype;
+const PROTOBUF nNetObjectDescriptor< OBJECT, PROTOBUF >::prototype;
 
 //! one cache for every protobuf descriptor
 class nMessageCacheByDescriptor

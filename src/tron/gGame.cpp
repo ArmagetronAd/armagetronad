@@ -2286,11 +2286,11 @@ static void ingame_menu_cleanup()
 #endif
 
 
-static nOProtoBufDescriptor< gGame, Game::GameSync > game_init( 310 );
+static nNetObjectDescriptor< gGame, Game::GameSync > game_init( 310 );
 
-nOProtoBufDescriptorBase const * gGame::DoGetDescriptor() const
+nNetObjectDescriptorBase const & gGame::DoGetDescriptor() const
 {
-    return &game_init;
+    return game_init;
 }
 
 

@@ -36,8 +36,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "eNetGameObject.pb.h"
 
-//static nNOInitialisator<eNetGameObject> eNetGameObject_Init("eNetGameObject");
-
 #define MAX_PING_OVERFLOW 3
 #define PING_OVERFLOW_TS .1
 

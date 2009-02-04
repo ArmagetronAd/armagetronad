@@ -91,7 +91,7 @@ static tSettingItem< bool > sg_predictWallsConf( "PREDICT_WALLS", sg_predictWall
 
 //  *****************************************************************
 
-static nOProtoBufDescriptor< gCycle, Game::CycleSync > cycle_init( 320 );
+static nNetObjectDescriptor< gCycle, Game::CycleSync > cycle_init( 320 );
 
 //  *****************************************************************
 
@@ -1887,6 +1887,13 @@ bool gCycleExtrapolator::TimestepCore(REAL currentTime, bool calculateAccelerati
     trueDistance_ = distance;
 
     return ret;
+}
+
+nNetObjectDescriptorBase const & gCycleExtrapolator::DoGetDescriptor() const
+{
+    tASSERT(0);
+    nNetObjectDescriptorBase * ret = 0;
+    return *ret;
 }
 
 /*
@@ -5967,10 +5974,9 @@ bool gCycle::ActionOnQuit()
     }
 }
 
-
-nOProtoBufDescriptorBase const * gCycle::DoGetDescriptor() const
+nNetObjectDescriptorBase const & gCycle::DoGetDescriptor() const
 {
-    return &cycle_init;
+    return cycle_init;
 }
 
 /*

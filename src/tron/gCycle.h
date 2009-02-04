@@ -106,6 +106,9 @@ public:
 
     REAL			  trueDistance_;										// distance predicted as best as we can
 private:
+    //! returns the descriptor responsible for this class
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
+
     // virtual REAL            DoGetDistanceSinceLastTurn  (                               ) const     ;   //!< returns the distance since the last turn
 
     const gCycleMovement* parent_;												// the cycle that is extrapolated
@@ -280,7 +283,7 @@ public:
     virtual bool ActionOnQuit();
 
     //! returns the descriptor responsible for this class
-    virtual nOProtoBufDescriptorBase const * DoGetDescriptor() const;
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 
     //! returns true if sync message is new (and updates 
     bool SyncIsNew( Game::CycleSync const & sync, nSenderInfo const & sender );
