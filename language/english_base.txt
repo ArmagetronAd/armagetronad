@@ -2724,10 +2724,10 @@ login_request_master		Master server requires Login.
 access_level_hide_of_help      Minimal access level to be able to hide it's own user account information.
 access_level_hide_to_help      Minimal access level to see everyone's user account information.
 access_level_team_help         Minimal access level for /lock, /unlock, /invite and /uninvite team management.
-access_level_op_help           Minimal access level for /op, /deop, /promote and /demote co-admin management commands commands.
-access_level_op_max_help       Maximal access level attainable by /op and /promote commands.
+access_level_op_help           Minimal access level for /op and /deop co-admin management commands commands.
+access_level_op_max_help       Maximal access level directly attainable by /op commands.
 access_level_admin_help        Minimal access level for /admin command.
-access_level_rtfm_help        Minimal access level for /teach or /rtfm command.
+access_level_rtfm_help         Minimal access level for /teach or /rtfm command.
 access_level_chat_help         Minimal access level for chatting.
 access_level_ips_help          Minimal access level you need for seeing IPs of other players in the /players command.
 access_level_nver_help         Minimal access level you need for seeing Network versions/strings from other players in /players.
@@ -2748,7 +2748,7 @@ access_level_vote_command_help    Minimal access level required to issue command
 access_level_vote_command_execute_help    Minimal access level successful command votes will be executed at.
 
 access_level_chat_timeout_help   Time in seconds between public announcements that someone wants to chat, but can't. Set to 0 to disable the public warnings.
-access_level_chat_request   \10xRESETT would like to chat, but is not authorized yet. Would someone be so kind and say "/op \2" or "/promote \2"?\n
+access_level_chat_request   \10xRESETT would like to chat, but is not authorized yet. Would someone be so kind and say "/op \2"?\n
 access_level_chat_denied    0xff7f7fChat denied,0xffffff insufficient access level.\n
 access_level_op_denied      0xff7f7f\1 denied,0xffffff insufficient access level.\n
 access_level_op_overpowered 0xff7f7f\1 denied,0xffffff your need higher access righrs than your victim.\n
@@ -2756,7 +2756,7 @@ access_level_op_self        0xff7f7f\1 denied,0xffffff can't do that to yourself
 access_level_op_denied_max  0xff7f7f\1 denied,0xffffff your victim already has maximal rights.\n
 access_level_op_denied_ai   0xff7f7f\1 denied,0xffffff your victim is an AI.\n
 access_level_op_same        \1: This would have no effect.\n
-access_level_op_unclear     \1: User is already logged in, please explicitely set an access level.\n
+access_level_op_unclear     \1: User is already logged in, please explicitly set an access level.\n
 
 access_level_demote         \1 has been demoted to "\2" by order of \3.\n
 access_level_promote        \1 has been promoted to "\2" by order of \3.\n
