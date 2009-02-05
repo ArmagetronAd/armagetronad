@@ -11,8 +11,8 @@ import "nNetObject.proto";
 /* Translation rules for data types:
 
   Stream type                ProtoBuf types
-  short                      uint32
-  int                        sint32, int32
+  short                      uint32, fixed32
+  int                        sint32, int32, sfixed32
   tString                    string
 
 */

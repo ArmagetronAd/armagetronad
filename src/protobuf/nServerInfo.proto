@@ -4,14 +4,55 @@ package Network;
 /* Translation rules for data types:
 
   Stream type                ProtoBuf types
-  short                      uint32
+  short                      uint32, fixed32
   int                        sint32, int32
   tString                    string
 
 */
 
-// legacy message
-message PROTO
+// minimal server info
+message SmallServerInfo
+{
+    optional int32  port = 1;     // port of server
+    optional string hostname = 2; // hostname/IP of server
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// minimal server info request
+message RequestSmallServerInfo
+{
+    // legacy stuff goes here
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// full server info
+message BigServerInfo
+{
+    optional SmallServerInfo base = 1; // base information
+
+    optional string name         = 2; // name of server
+    optional string users        = 3; // screen names of players
+
+    optional string version      = 4; // version of server
+
+    optional int32 max_users     = 5; // maximum number of clients
+
+    optional string usernames    = 6; // usernames of players
+    optional string options      = 7; // info about server options
+    optional string url          = 8; // server homepage
+    
+    optional string global_ids   = 9; // global IDs of players
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// full server info request
+message RequestBigServerInfo
 {
     // legacy stuff goes here
 
