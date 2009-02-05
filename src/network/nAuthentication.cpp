@@ -36,6 +36,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nNetObject.h"
 #include "nSocket.h"
 #include "nServerInfo.h"
+#include "nProtoBuf.h"
+
+#include "nAuthentication.pb.h"
 
 #include <memory>
 #include <string>
@@ -93,9 +96,9 @@ void nAuthentication::SetLoginResultCallback (nAuthentication::LoginResultCallba
 
 // network handler declarations
 
-static nDescriptor nPasswordRequest(40, &nAuthentication::HandlePasswordRequest, "password_request");
+static nProtoBufDescriptor< Network::PasswordRequest > nPasswordRequest(40, &nAuthentication::HandlePasswordRequest );
 
-static nDescriptor nPasswordAnswer(41, &nAuthentication::HandlePasswordAnswer, "password_answer");
+static nProtoBufDescriptor< Network::PasswordAnswer > nPasswordAnswer(41, &nAuthentication::HandlePasswordAnswer );
 
 // password request and answer
 static nKrawall::nPasswordRequest sn_request;
@@ -123,22 +126,21 @@ static void FinishHandlePasswordRequest()
     sn_answer.scrambled.Clear();
 
     // and send it back
-    nMessage *ret = tNEW(nMessage)(nPasswordAnswer);
-    nKrawall::WriteScrambledPassword(egg, *ret);
-    *ret << sn_answer.username;
-    *ret << sn_answer.aborted;
-    *ret << sn_answer.automatic;
-    *ret << sn_answer.serverAddress;
-    ret->Send(0);
+    Network::PasswordAnswer & answer = nPasswordAnswer.Send(0);
+    nKrawall::WriteScrambledPassword(egg, *answer.mutable_answer() );
+    answer.set_username( sn_answer.username );
+    answer.set_aborted( sn_answer.aborted );
+    answer.set_automatic( sn_answer.automatic );
+    answer.set_server_address( sn_answer.serverAddress );
 
     s_inUse = false;
 }
 
 // receive a password request
-void nAuthentication::HandlePasswordRequest(nMessage& m)
+void nAuthentication::HandlePasswordRequest( Network::PasswordRequest const & request, nSenderInfo const & sender )
 {
-    if (m.SenderID() > 0 || sn_GetNetState() != nCLIENT)
-        Cheater(m.SenderID());
+    if ( sender.SenderID() > 0 || sn_GetNetState() != nCLIENT )
+        Cheater( sender.SenderID() );
 
     sn_answer = nKrawall::nPasswordAnswer();
     sn_request = nKrawall::nPasswordRequest();
@@ -149,42 +151,22 @@ void nAuthentication::HandlePasswordRequest(nMessage& m)
     s_inUse = true;
 
     // read salt and username from the message
-    ReadSalt(m, sn_salt);
+    ReadSalt( request.nonce(), sn_salt );
 
     // read the username as raw as sanely possible
-    m.ReadRaw(sn_answer.username);
-    sn_answer.username.NetFilter();
+    sn_answer.username = request.username();
+    sn_request.message = request.message();
 
-    m >> sn_request.message;
-    if (!m.End())
-    {
-        m >> sn_request.failureOnLastTry;
-    }
-    else
-    {
-        sn_request.failureOnLastTry = true;
-    }
-    if (!m.End())
-    {
-        // read method, prefix and suffiox
-        m >> sn_request.method;
-        m.ReadRaw(sn_request.prefix);
-        m.ReadRaw(sn_request.suffix);
-        sn_request.prefix.NetFilter();
-        sn_request.suffix.NetFilter();
-    }
-    else
-    {
-        // clear them
-        sn_request.method = "bmd5";
-        sn_request.prefix = "";
-        sn_request.suffix = "";
-    }
+    sn_request.failureOnLastTry = request.fail_last();
+
+    sn_request.method = request.method();
+    sn_request.prefix = request.prefix();
+    sn_request.suffix = request.suffix();
 
     // postpone the answer for a better opportunity since it
     // most likely involves opening a menu and waiting a while (and we
     // are right now in the process of fetching network messages...)
-    st_ToDo(&FinishHandlePasswordRequest);
+    st_ToDo( &FinishHandlePasswordRequest );
 }
 
 #ifdef KRAWALL_SERVER
@@ -468,7 +450,7 @@ public:
     void QueryFromClient();
 
     // authentication data received from the client is processed here:
-    void ProcessClientAnswer( nMessage & answer );
+    void ProcessClientAnswer( Network::PasswordAnswer const & answer, nSenderInfo const & sender );
 
     // sanity check the server address
     bool CheckServerAddress();
@@ -870,48 +852,38 @@ void nLoginProcess::QueryFromClient()
     nKrawall::RandomSalt(salt);
     
     // send the salt value and the username to the
-    nMessage *m = tNEW(nMessage)(::nPasswordRequest);
-    nKrawall::WriteSalt(salt, *m);
-    *m << username;
-    *m << static_cast<tString>(message);
-    *m << nLoginPersistence::Find( userID ).userAuthFailedLastTime;
+    Network::PasswordRequest & request = ::nPasswordRequest.Send( userID ); 
+    nKrawall::WriteSalt( salt, *request.mutable_nonce() );
+    request.set_username( username );
+    request.set_message( message );
+    request.set_fail_last( nLoginPersistence::Find( userID ).userAuthFailedLastTime );
     
     // write method info
-    *m << method.method;
-    *m << method.prefix;
-    *m << method.suffix;
+    request.set_method( method.method );
+    request.set_prefix( method.prefix );
+    request.set_suffix( method.suffix );
     
-    m->Send(userID);
-
     // well, then we wait for the answer.
     con << tOutput( "$login_message_responded", userID, username, method.method, message );
 }
 
 // authentication data received from the client is processed here:
-void nLoginProcess::ProcessClientAnswer( nMessage & m )
+void nLoginProcess::ProcessClientAnswer( Network::PasswordAnswer const & answer, nSenderInfo const & sender )
 {
     success = false;
     
     // read password and username from remote
-    nKrawall::ReadScrambledPassword(m, hash);
+    nKrawall::ReadScrambledPassword( answer.answer(), hash );
 
-    m.ReadRaw(username);
-    username.NetFilter();
+    username = answer.username();
 
-    aborted = false;
-    automatic = false;
-    if ( !m.End() )
-    {
-        m >> aborted;
-    }
-    if ( !m.End() )
-    {
-        m >> automatic;
-    }
-    if (!m.End())
+    aborted = answer.aborted();
+    automatic = answer.automatic();
+
+    if ( answer.has_server_address() )
     {
         // read the server address the client used for scrambling
-        m >> serverAddress;
+        serverAddress = answer.server_address();
 
         // sanity check it later
     }
@@ -930,7 +902,7 @@ void nLoginProcess::ProcessClientAnswer( nMessage & m )
     }
 
     // store receiving socket address
-    nSocket const * socket = sn_Connections[m.SenderID()].socket;
+    nSocket const * socket = sn_Connections[sender.SenderID()].socket;
     if ( !socket )
     {
         ReportAuthorityError( "Internal error, no receiving socket of authentication message." );
@@ -938,7 +910,7 @@ void nLoginProcess::ProcessClientAnswer( nMessage & m )
     serverSocketAddress = socket->GetAddress();
 
     // store peer address
-    sn_GetAdr( m.SenderID(), peerAddress );
+    sn_GetAdr( sender.SenderID(), peerAddress );
   
     // and go on
     nMemberFunctionRunner::ScheduleMayBlock( *this, &nLoginProcess::Authorize, authority != "" );
@@ -1111,16 +1083,16 @@ static nCallbackLoginLogout reset(&sn_Reset);
 
 #endif // KRAWALL_SERVER
     
-void nAuthentication::HandlePasswordAnswer(nMessage& m)
+void nAuthentication::HandlePasswordAnswer( Network::PasswordAnswer const & answer, nSenderInfo const & sender )
 {
 #ifdef KRAWALL_SERVER
     // find login pricess
-    nLoginProcess * process = nLoginProcess::Find( m.SenderID() );
+    nLoginProcess * process = nLoginProcess::Find( sender.SenderID() );
 
     // and delegate to it
     if ( process )
     {
-        process->ProcessClientAnswer( m );
+        process->ProcessClientAnswer( answer, sender );
     }
 #endif
 }
