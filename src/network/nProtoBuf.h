@@ -373,7 +373,7 @@ protected:
     static DescriptorMap const & GetDescriptorsByName();
 
 private:
-    static DescriptorMap descriptorsByName;
+    static DescriptorMap & AccessDescriptorsByName();
 
     //! gets the compatibility streamer used by messages of this class
     nMessageStreamer * streamer_;

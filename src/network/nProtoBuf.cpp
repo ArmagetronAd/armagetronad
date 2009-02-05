@@ -362,15 +362,21 @@ std::string const & nProtoBufDescriptorBase::DetermineName( nProtoBuf const & pr
 
 nProtoBufDescriptorBase::DescriptorMap const & nProtoBufDescriptorBase::GetDescriptorsByName()
 {
+    return AccessDescriptorsByName();
+}
+
+nProtoBufDescriptorBase::DescriptorMap & nProtoBufDescriptorBase::AccessDescriptorsByName()
+{
+    static DescriptorMap descriptorsByName;
     return descriptorsByName;
 }
 
-nProtoBufDescriptorBase::DescriptorMap nProtoBufDescriptorBase::descriptorsByName;
+
 //! dumb streaming from message, static version
 void nProtoBufDescriptorBase::StreamFromStatic( nMessage & in, nProtoBuf & out, StreamSections sections )
 {
     // try to determine suitable descriptor
-    nProtoBufDescriptorBase const * embedded = descriptorsByName[ DetermineName( out ) ];
+    nProtoBufDescriptorBase const * embedded = AccessDescriptorsByName()[ DetermineName( out ) ];
     if ( embedded )
     {
         // found it, delegate
@@ -396,7 +402,7 @@ void nProtoBufDescriptorBase::StreamFromStatic( nMessage & in, nProtoBuf & out, 
 void nProtoBufDescriptorBase::StreamToStatic( nProtoBuf const & in, nMessage & out, StreamSections sections )
 {
     // try to determine suitable descriptor
-    nProtoBufDescriptorBase const * embedded = descriptorsByName[ DetermineName( in ) ];
+    nProtoBufDescriptorBase const * embedded = AccessDescriptorsByName()[ DetermineName( in ) ];
     if ( embedded )
     {
         // found it, delegate

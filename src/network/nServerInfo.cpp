@@ -44,6 +44,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nAuthentication.h"
 #endif
 
+#include "nProtoBuf.h"
+#include "nServerInfo.pb.h"
+
 #include <fstream>
 
 static nServerInfo*          sn_masterList  = NULL;
@@ -663,19 +666,19 @@ void nServerInfo::Load(const tPath& path, const char *filename)
 
 // used to transfer small server information (adress, port, public key)
 // from the master server or response to a broadcast to the client
-static nDescriptor SmallServerDescriptor(50,nServerInfo::GetSmallServerInfo,"small_server", true);
+static nProtoBufDescriptor< Network::SmallServerInfo > SmallServerDescriptor(50,nServerInfo::GetSmallServerInfo, true);
 
 // used to transfer the rest of the server info (name, number of players, etc)
 // from the server directly to the client
-static nDescriptor BigServerDescriptor(51,nServerInfo::GetBigServerInfo,"big_server", true);
-static nDescriptor BigServerMasterDescriptor(54,nServerInfo::GetBigServerInfoMaster,"big_server_master", true);
+static nProtoBufDescriptor< Network::BigServerInfo > BigServerDescriptor(51,nServerInfo::GetBigServerInfo, true);
+static nProtoBufDescriptor< Network::BigServerInfo > BigServerMasterDescriptor(54,nServerInfo::GetBigServerInfoMaster, true);
 
 // request small server information from master server/broadcast
-static nDescriptor RequestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo,"small_request", true);
+static nProtoBufDescriptor< Network::RequestSmallServerInfo > RequestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo, true);
 
 // request big server information from master server/broadcast
-static nDescriptor RequestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo,"big_request", true);
-static nDescriptor RequestBigServerInfoMasterDescriptor(55,nServerInfo::GiveBigServerInfoMaster,"big_request_master", true);
+static nProtoBufDescriptor< Network::RequestBigServerInfo > RequestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo, true);
+static nProtoBufDescriptor< Network::RequestBigServerInfoMaster > RequestBigServerInfoMasterDescriptor(55,nServerInfo::GiveBigServerInfoMaster, true);
 
 // used to transfer the rest of the server info (name, number of players, etc)
 // from the server directly to the client
@@ -1020,9 +1023,11 @@ bool FloodProtection( int sender )
     return FloodProtection( peer ) || ( sn_minPingTimeGlobalFactor > 0 && FloodProtection( server, sn_minPingTimeGlobalFactor ) );
 }
 
-void nServerInfo::GetSmallServerInfo(nMessage &m){
+void nServerInfo::GetSmallServerInfo( Network::SmallServerInfo const & info,
+                                      nSenderInfo              const & sender )
+{
     nServerInfoBase baseInfo;
-    baseInfo.NetRead( m );
+    baseInfo.ReadSync( info.base(), sender );
 
     // ReadServerInfo(m, port, connectionName, sn_AcceptingFromBroadcast, sn_AcceptingFromMaster);
 
@@ -1052,9 +1057,6 @@ void nServerInfo::GetSmallServerInfo(nMessage &m){
         }
         run = run->Next();
     }
-
-    if (m.End())
-        return;
 
     if (!n)
     {
@@ -1090,7 +1092,9 @@ void nServerInfo::GetSmallServerInfo(nMessage &m){
     n->queried         = 0;
 
     if (!sn_IsMaster)
-        m >> n->transactionNr;
+    {
+        n->transactionNr = info.transaction();
+    }
     else
     {
         // n->timesNotAnswered = 5;
@@ -1103,9 +1107,6 @@ void nServerInfo::GetSmallServerInfo(nMessage &m){
             sn_QuerySoon = n;
             sn_QueryTimeout = tSysTimeFloat() + 5.0f;
         }
-
-        unsigned int dummy;
-        m >> dummy;
     }
 
     if (sn_IsMaster)
@@ -1120,49 +1121,45 @@ static bool TransIsNewer(unsigned int newTrans, unsigned int oldTrans)
     return (diff > 0);
 }
 
-void nServerInfo::GiveSmallServerInfo(nMessage &m)
+void nServerInfo::GiveSmallServerInfo( Network::RequestSmallServerInfo const & info,
+                                       nSenderInfo                     const & sender )
 {
     // start transmitting the server list in master server mode
     if (sn_IsMaster)
     {
-        con << "Giving server info to user " << m.SenderID() << "\n";
+        con << "Giving server info to user " << sender.SenderID() << "\n";
 
-        sn_Requested[m.SenderID()] = true;
+        sn_Requested[sender.SenderID()] = true;
 #ifdef KRAWALL_SERVER_LEAGUE
         // one moment! check if we need authentification
         tString adr;
-        unsigned int port = sn_GetPort(m.SenderID());
-        sn_GetAdr(m.SenderID(), adr);
+        unsigned int port = sn_GetPort(sender.SenderID());
+        sn_GetAdr(sender.SenderID(), adr);
         if (nKrawall::RequireMasterLogin(adr, port))
         {
             nAuthentication::SetLoginResultCallback(&ResultCallback);
-            nAuthentication::RequestLogin(tString(""), m.SenderID(), tOutput("$login_request_master"));
+            nAuthentication::RequestLogin(tString(""), sender.SenderID(), tOutput("$login_request_master"));
         }
         else
         {
-            sn_Transmitting[m.SenderID()] = GetFirstServer();
-            sn_Auth[m.SenderID()]         = true;
+            sn_Transmitting[sender.SenderID()] = GetFirstServer();
+            sn_Auth[sender.SenderID()]         = true;
         }
 #else
-        sn_Transmitting[m.SenderID()] = GetFirstServer();
+        sn_Transmitting[sender.SenderID()] = GetFirstServer();
 #endif
 
-        if (m.End())
-            sn_SendAll[m.SenderID()] = true;
-        else
-        {
-            sn_SendAll[m.SenderID()] = false;
-            m >> sn_LastKnown[m.SenderID()];
-        }
+        sn_SendAll  [sender.SenderID()] = !info.has_transaction();
+        sn_LastKnown[sender.SenderID()] = info.transaction();
 
         // give out all server info if there is a disagreement
-        // if ( static_cast< unsigned int > ( sn_NextTransactionNr - sn_lastKnown[m.SenderID] ) < 1000 )
-        sn_SendAll[m.SenderID()] = true;
+        // if ( static_cast< unsigned int > ( sn_NextTransactionNr - sn_lastKnown[sender.SenderID] ) < 1000 )
+        sn_SendAll[sender.SenderID()] = true;
     }
 
     else
     {
-        if ( FloodProtection( m.SenderID() ) )
+        if ( FloodProtection( sender.SenderID() ) )
             return;
 
         // allow some followup queries
@@ -1181,32 +1178,32 @@ void nServerInfo::GiveSmallServerInfo(nMessage &m)
         }
 
         // immediately respond with a small info
-        tJUST_CONTROLLED_PTR< nMessage > ret = tNEW(nMessage)(SmallServerDescriptor);
+        tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::SmallServerInfo > > ret = SmallServerDescriptor.CreateMessage();
 
         // get small server info
         nServerInfoBase info;
-        info.GetFrom( sn_Connections[m.SenderID()].socket );
+        info.GetFrom( sn_Connections[sender.SenderID()].socket );
 
         // fill it in
-        info.NetWrite(*ret);
+        info.WriteSync( *ret->AccessProtoBuf().mutable_base() );
 
-        unsigned int notrans = 0;
-        *ret << notrans;
+        // dummy transaction
+        ret->AccessProtoBuf().set_transaction(0);
 
         ret->ClearMessageID();
-        ret->SendImmediately(m.SenderID(), false);
-        nMessage::SendCollected(m.SenderID());
+        ret->SendImmediately(sender.SenderID(), false);
+        nMessage::SendCollected(sender.SenderID());
     }
 }
 
 // from nNetwork.cpp
 int sn_NumRealUsers();
 
-nServerInfo* nServerInfo::GetBigServerInfoCommon(nMessage &m)
+nServerInfo* nServerInfo::GetBigServerInfoCommon(  Network::BigServerInfo const & info, nSenderInfo const & sender )
 {
     // read server info
     nServerInfoBase baseInfo;
-    baseInfo.NetRead( m );
+    baseInfo.ReadSync( info.base(), sender );
 
     // find the server
     nServerInfo *server = GetFirstServer();
@@ -1215,7 +1212,7 @@ nServerInfo* nServerInfo::GetBigServerInfoCommon(nMessage &m)
 
     if ( server )
     {
-        server->NetReadThis( m );
+        server->ReadSyncThis( info, sender );
         server->Alive();
         server->CalcScore();
     }
@@ -1225,7 +1222,7 @@ nServerInfo* nServerInfo::GetBigServerInfoCommon(nMessage &m)
         {
             tOutput message;
             message.SetTemplateParameter(1, ToString( baseInfo ) );
-            message.SetTemplateParameter(2, sn_Connections[m.MessageID()].socket->GetAddress().ToString() );
+            message.SetTemplateParameter(2, sn_Connections[sender.MessageID()].socket->GetAddress().ToString() );
             message << "$network_browser_unidentified";
             con << message;
         }
@@ -1245,29 +1242,28 @@ nServerInfo* nServerInfo::GetBigServerInfoCommon(nMessage &m)
     return server;
 }
 
-void nServerInfo::GiveBigServerInfoCommon(nMessage &m, const nServerInfo & info, nDescriptor& descriptor )
+void nServerInfo::GiveBigServerInfoCommon( int receiver, const nServerInfo & info, nProtoBufDescriptor< Network::BigServerInfo > & descriptor )
 {
     // create message
-    nMessage *ret = tNEW(nMessage)( descriptor );
+    nProtoBufMessage< Network::BigServerInfo > *ret = descriptor.CreateMessage();
 
     // write info
-    info.NetWrite( *ret );
+    info.WriteSync( ret->AccessProtoBuf() );
 
     // send info
     ret->ClearMessageID();
-    ret->SendImmediately(m.SenderID(), false);
-    nMessage::SendCollected(m.SenderID());
+    ret->SendImmediately( receiver, false);
+    nMessage::SendCollected( receiver );
 }
 
-void nServerInfo::GetBigServerInfo(nMessage &m)
+void nServerInfo::GetBigServerInfo( Network::BigServerInfo const & info,
+                                    nSenderInfo            const & sender )
 {
-    nServerInfo * server = GetBigServerInfoCommon( m );
-
-    if (!server)
-        return;
+    GetBigServerInfoCommon( info, sender );
 }
 
-void nServerInfo::GiveBigServerInfo(nMessage &m)
+void nServerInfo::GiveBigServerInfo( Network::RequestBigServerInfo const & info,
+                                     nSenderInfo                   const & sender )
 {
     // check whether we should respond
     if ( sn_numAcceptQueries >= 0 )
@@ -1282,7 +1278,7 @@ void nServerInfo::GiveBigServerInfo(nMessage &m)
         // con << sn_numAcceptQueries << "\n";
     }
 
-    if ( FloodProtection( m.SenderID() ) )
+    if ( FloodProtection( sender.SenderID() ) )
         return;
 
     if (sn_IsMaster)
@@ -1290,10 +1286,10 @@ void nServerInfo::GiveBigServerInfo(nMessage &m)
 
     // collect info
     nServerInfo me;
-    me.GetFrom( sn_Connections[m.SenderID()].socket );
+    me.GetFrom( sn_Connections[sender.SenderID()].socket );
 
     // delegate
-    GiveBigServerInfoCommon(m, me, BigServerDescriptor );
+    GiveBigServerInfoCommon( sender.SenderID(), me, BigServerDescriptor );
 }
 
 void nServerInfo::SetFromMaster()
@@ -1308,12 +1304,13 @@ void nServerInfo::SetFromMaster()
     CalcScore();
 }
 
-void nServerInfo::GetBigServerInfoMaster(nMessage &m)
+void nServerInfo::GetBigServerInfoMaster( Network::BigServerInfo const & info,
+                                          nSenderInfo            const & sender )
 {
-    if ( sn_GetNetState() == nSERVER && FloodProtection( m.SenderID() ) )
+    if ( sn_GetNetState() == nSERVER && FloodProtection( sender.SenderID() ) )
         return;
 
-    nServerInfo *server = GetBigServerInfoCommon( m );
+    nServerInfo *server = GetBigServerInfoCommon( info, sender );
 
     if (!server)
         return;
@@ -1321,9 +1318,10 @@ void nServerInfo::GetBigServerInfoMaster(nMessage &m)
     server->SetFromMaster();
 }
 
-void nServerInfo::GiveBigServerInfoMaster(nMessage &m)
+void nServerInfo::GiveBigServerInfoMaster( Network::RequestBigServerInfoMaster const & info,
+                                           nSenderInfo                         const & sender )
 {
-    if ( FloodProtection( m.SenderID() ) )
+    if ( FloodProtection( sender.SenderID() ) )
         return;
 
     if ( !sn_IsMaster )
@@ -1331,7 +1329,7 @@ void nServerInfo::GiveBigServerInfoMaster(nMessage &m)
 
     // read info of desired server from message
     nServerInfoBase baseInfo;
-    baseInfo.NetRead( m );
+    baseInfo.ReadSync( info.server(), sender );
 
     // find the server
     nServerInfo *server = GetFirstServer();
@@ -1342,7 +1340,7 @@ void nServerInfo::GiveBigServerInfoMaster(nMessage &m)
         return;
 
     // delegate
-    GiveBigServerInfoCommon(m, *server, BigServerMasterDescriptor );
+    GiveBigServerInfoCommon( sender.SenderID(), *server, BigServerMasterDescriptor );
 }
 
 /*
@@ -1354,7 +1352,7 @@ void nServerInfo::GiveBigServerInfoMaster(nMessage &m)
 void nServerInfo::GiveExtraServerInfo(nMessage &m)
 {
 	if (sn_IsMaster)
-		Cheater(m.SenderID());
+		Cheater(sender.SenderID());
   
 	unsigned short extraType;
 	WriteMyInfo(m);
@@ -1384,10 +1382,10 @@ void nServerInfo::GiveExtraServerInfo(nMessage &m)
 	}
 
 	mRet << ret;
-	mRet.Send( m.SenderID() );
+	mRet.Send( sender.SenderID() );
 	mRet.ClearMessageID();
-	mRet.SendImmediately(m.SenderID(), false);
-	nMessage::SendCollected(m.SenderID());
+	mRet.SendImmediately(sender.SenderID(), false);
+	nMessage::SendCollected(sender.SenderID());
 }
 
 void nServerInfo::GetExtraServerInfo(nMessage &m)
@@ -1568,10 +1566,9 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
     // send the server list request message
     con << tOutput("$network_master_reqlist");
 
-    nMessage *m=tNEW(nMessage)(RequestSmallServerInfoDescriptor);
-    if (GetFirstServer())
-        *m << latest;
-    m->BroadCast();
+    Network::RequestSmallServerInfo & request = RequestSmallServerInfoDescriptor.Broadcast();
+    if ( GetFirstServer() )
+        request.set_transaction( latest );
 
     sn_ServerCount = 0;
     int lastReported = 10;
@@ -1646,7 +1643,7 @@ void nServerInfo::GetFromLAN(unsigned int pollBeginPort, unsigned int pollEndPor
     con << tOutput("$network_master_reqlist");
     for (unsigned int port = pollBeginPort; port <= pollEndPort; port++)
     {
-        nMessage *m=tNEW(nMessage)(RequestSmallServerInfoDescriptor);
+        nMessageBase *m = RequestSmallServerInfoDescriptor.CreateMessage();
         m->ClearMessageID();
         m->SendImmediately(0, false);
         nMessage::BroadcastCollected(0, port);
@@ -1697,7 +1694,7 @@ void nServerInfo::GetFromLANContinuously(unsigned int pollBeginPort, unsigned in
     // prepare the request message and broadcast it
     for (unsigned int port = pollBeginPort; port <= pollEndPort; port++)
     {
-        nMessage *m=tNEW(nMessage)(RequestSmallServerInfoDescriptor);
+        nMessageBase * m = RequestSmallServerInfoDescriptor.CreateMessage();
         m->ClearMessageID();
         m->SendImmediately(0, false);
         nMessage::BroadcastCollected(0, port);
@@ -1791,16 +1788,14 @@ void nServerInfo::TellMasterAboutMe(nServerInfoBase *masterInfo)
     info.GetFrom( connection );
 
     // write it to a network message message
-    nMessage *m=tNEW(nMessage)(SmallServerDescriptor);
-    info.NetWrite(*m);
-    unsigned int dummy = 0;
-    *m << dummy;
+    Network::SmallServerInfo & reply = SmallServerDescriptor.Broadcast();
+    info.WriteSync( *reply.mutable_base() );
+    reply.set_transaction( 0 );
 
     // send it
     con << tOutput("$network_master_send");
-    m->BroadCast();
-    sn_Receive();
     sn_SendPlanned();
+    sn_Receive();
 
     // wait for the data to be accepted
     nTimeRolling timeout = tSysTimeFloat() + 20;
@@ -1922,7 +1917,7 @@ void nServerInfo::QueryServer()                                  // start to get
         con << "Pinging " << GetName() << "\n";
 #endif
 
-        tJUST_CONTROLLED_PTR< nMessage > req = tNEW(nMessage)(RequestBigServerInfoDescriptor);
+        tJUST_CONTROLLED_PTR< nMessageBase > req = RequestBigServerInfoDescriptor.CreateMessage();
         req->ClearMessageID();
         req->SendImmediately(0, false);
         nMessage::SendCollected(0);
@@ -1932,11 +1927,11 @@ void nServerInfo::QueryServer()                                  // start to get
         // send information query to master
         sn_Bend( GetMasters()->GetAddress() );
 
-        tJUST_CONTROLLED_PTR< nMessage > req = tNEW(nMessage)(RequestBigServerInfoMasterDescriptor);
+        tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::RequestBigServerInfoMaster > > req = RequestBigServerInfoMasterDescriptor.CreateMessage();
         req->ClearMessageID();
 
         // write server info into request packet
-        nServerInfoBase::NetWriteThis( *req );
+        nServerInfoBase::WriteSync( *req->AccessProtoBuf().mutable_server() );
 
         req->SendImmediately(0, false);
         nMessage::SendCollected(0);
@@ -1975,10 +1970,10 @@ void nServerInfo::ClearInfoFlags()
     ping = 10;
 }
 
-void GetSenderData(const nMessage &m,tString& name, int& port)
+void GetSenderData( int sender, tString& name, int& port )
 {
-    sn_GetAdr(m.SenderID(),name);
-    port = sn_GetPort(m.SenderID());
+    sn_GetAdr( sender, name );
+    port = sn_GetPort( sender );
 }
 
 // *******************************************************************************
@@ -2281,10 +2276,9 @@ void nServerInfo::RunMaster()
                 if (sn_Transmitting[i]->TimesNotAnswered() < sn_TNALostContact )
                 {
                     // tell user i about server sn_Transmitting[i]
-                    nMessage *m = tNEW(nMessage)(SmallServerDescriptor);
-                    sn_Transmitting[i]->nServerInfoBase::NetWriteThis( *m );
-                    *m << sn_Transmitting[i]->TransactionNr();
-                    m->Send(i);
+                    Network::SmallServerInfo & reply = SmallServerDescriptor.Send(i);
+                    sn_Transmitting[i]->nServerInfoBase::WriteSync( *reply.mutable_base() );
+                    reply.set_transaction( sn_Transmitting[i]->TransactionNr() );
                 }
 
                 sn_Transmitting[i] = sn_Transmitting[i]->Next();
@@ -2571,73 +2565,44 @@ nServerInfoBase & nServerInfoBase::operator =( const nServerInfoBase & other )
 
 // *******************************************************************************************
 // *
-// *   DoNetWrite
+// *	WriteSync
 // *
 // *******************************************************************************************
 //!
-//!        @param  m message to write to
+//!        @param  info protobuf to sync to
 //!
 // *******************************************************************************************
 
-void nServerInfoBase::DoNetWrite( nMessage & m ) const
+void nServerInfoBase::WriteSync( Network::SmallServerInfoBase & info ) const
 {
-    NetWriteThis( m );
-}
-
-// *******************************************************************************************
-// *
-// *   DoNetRead
-// *
-// *******************************************************************************************
-//!
-//!        @param  m message to read from
-//!
-// *******************************************************************************************
-
-void nServerInfoBase::DoNetRead( nMessage & m )
-{
-    NetReadThis( m );
-}
-
-// *******************************************************************************************
-// *
-// *	NetWriteThis
-// *
-// *******************************************************************************************
-//!
-//!        @param  m message to write to
-//!
-// *******************************************************************************************
-
-void nServerInfoBase::NetWriteThis( nMessage & m ) const
-{
-    m << port_;            // write the port
-    m << connectionName_;  // and the name
+    info.set_port( port_ );                // write the port
+    info.set_hostname( connectionName_ );  // and the name
 }
 
 // reads a string, filtering out unwanted characters regardless of the network mode
-static void sn_ReadFiltered( nMessage & m, tString & s )
+static void sn_ReadFiltered( std::string const & in, tString & out )
 {
-    tColoredString raw;
-    m >> raw;
+    tColoredString raw( in.c_str() );
     raw.NetFilter();
-    s = raw;
+    out = raw;
 }
 
 // *******************************************************************************************
 // *
-// *	NetReadThis
+// *	ReadSync
 // *
 // *******************************************************************************************
 //!
-//!		@param	m   message to read from
+//!		@param	info protobuf to sync from
+//!     @param  sender info about sender
 //!
 // *******************************************************************************************
 
-void nServerInfoBase::NetReadThis( nMessage & m )
+void nServerInfoBase::ReadSync( Network::SmallServerInfoBase const & info,
+                                nSenderInfo                  const & sender )
 {
-    m >> port_;                            // get the port
-    sn_ReadFiltered( m, connectionName_ ); // get the connection name
+    port_ = info.port();                                 // get the port
+    sn_ReadFiltered( info.hostname(), connectionName_ ); // get the connection name
 
     if ( ( sn_IsMaster || sn_AcceptingFromBroadcast || sn_AcceptingFromMaster ) && connectionName_.Len()>1 ) // no valid name (must come directly from the server who does not know his own address)
     {
@@ -2653,7 +2618,7 @@ void nServerInfoBase::NetReadThis( nMessage & m )
         }
 #endif
 
-        sn_GetAdr( m.SenderID(), connectionName_ );
+        sn_GetAdr( sender.SenderID(), connectionName_ );
 
         // remove the port
         for (int i=connectionName_.Size()-1; i>=0; i--)
@@ -2706,34 +2671,36 @@ void nServerInfoBase::DoGetFrom( nSocket const * socket )
 
 // *******************************************************************************************
 // *
-// *   DoNetWrite
+// *   WriteSync
 // *
 // *******************************************************************************************
 //!
-//!        @param  m message to write to
+//!        @param  info protobuf to sync to
 //!
 // *******************************************************************************************
 
-void nServerInfo::DoNetWrite( nMessage & m ) const
+void nServerInfo::WriteSync( Network::BigServerInfo & info ) const
 {
-    nServerInfoBase::DoNetWrite( m );
-    NetWriteThis( m );
+    nServerInfoBase::WriteSync( *info.mutable_base() );
+    WriteSyncThis( info );
 }
 
 // *******************************************************************************************
 // *
-// *   DoNetRead
+// *   ReadSync
 // *
 // *******************************************************************************************
 //!
-//!        @param  null
+//!		@param	info protobuf to sync from
+//!     @param  sender info about sender
 //!
 // *******************************************************************************************
 
-void nServerInfo::DoNetRead( nMessage & m )
+void nServerInfo::ReadSync ( Network::BigServerInfo const & info,
+                             nSenderInfo            const & sender)
 {
-    nServerInfoBase::DoNetRead( m );
-    NetReadThis( m );
+    nServerInfoBase::ReadSync( info.base(), sender );
+    ReadSyncThis( info, sender );
 }
 
 // *******************************************************************************************
@@ -2801,54 +2768,56 @@ void nServerInfo::DoGetFrom( nSocket const * socket )
 
 // *******************************************************************************************
 // *
-// *	NetWriteThis
+// *	WriteSyncThis
 // *
 // *******************************************************************************************
 //!
-//!        @param  m message to write to
+//!        @param  info protobuf to sync to
 //!
 // *******************************************************************************************
 
-void nServerInfo::NetWriteThis( nMessage & m ) const
+void nServerInfo::WriteSyncThis( Network::BigServerInfo & info ) const
 {
-    m << name;
-    m << users;
+    info.set_name( name );
+    info.set_users( users );
 
-    m << version_;
-    m << release_;
+    version_.WriteSync( *info.mutable_version() );
+    info.set_release( release_ );
 
-    m << maxUsers_;
+    info.set_max_users( maxUsers_ );
 
-    m << userNames_;
-    m << options_;
-    m << url_;
+    info.set_usernames( userNames_ );
+    info.set_options( options_ );
+    info.set_url( url_ );
 
-    m << userGlobalIDs_;
+    info.set_global_ids( userGlobalIDs_ );
 }
 
 // *******************************************************************************************
 // *
-// *	NetReadThis
+// *	ReadSyncThis
 // *
 // *******************************************************************************************
 //!
-//!		@param	m   message to read from
+//!		@param	info protobuf to sync from
+//!     @param  sender info about sender
 //!
 // *******************************************************************************************
 
-void nServerInfo::NetReadThis( nMessage & m )
+void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
+                                 nSenderInfo            const & sender )
 {
     tString oldName = name;
 
-    sn_ReadFiltered( m, name  ); // get the server name
+    sn_ReadFiltered( info.name(), name  ); // get the server name
     nameForSorting = sn_serverNameCharacterFilter.FilterServerName ( name );
                                 // and filter it for sorting
-    m >> users;                 // get the playing users
+    users = info.users();       // get the number of playing users
 
-    if ( !m.End() )
+    if ( info.has_version() )
     {
-        m >> version_;
-        sn_ReadFiltered( m, release_ );
+        version_.ReadSync( info.version() );
+        sn_ReadFiltered( info.release(), release_ );
         login2_ = true;
     }
     else
@@ -2856,16 +2825,16 @@ void nServerInfo::NetReadThis( nMessage & m )
         login2_ = false;
     }
 
-    if ( !m.End() )
+    if ( info.has_max_users() )
     {
-        m >> maxUsers_;
+        maxUsers_ = info.max_users();
     }
 
-    if ( !m.End() )
+    if ( info.has_usernames() )
     {
-        m >> userNames_;
-        m >> options_;
-        sn_ReadFiltered( m, url_ );
+        userNames_ = info.usernames();
+        options_   = info.options();
+        sn_ReadFiltered( info.url(), url_ );
 
         if (options_.Len() > 240)
             options_.SetPos( 240, true );
@@ -2879,9 +2848,9 @@ void nServerInfo::NetReadThis( nMessage & m )
         options_ = "No Info\n";
         url_ = "No Info\n";
     }
-    if ( !m.End() )
+    if ( info.has_global_ids() )
     {
-        m >> userGlobalIDs_;
+        userGlobalIDs_ = info.global_ids();
     }
     else
     {
@@ -2935,12 +2904,11 @@ void nServerInfo::NetReadThis( nMessage & m )
             nServerInfo * master = GetMasters();
             while( master )
             {
-                tJUST_CONTROLLED_PTR< nMessage > ret = tNEW(nMessage)(SmallServerDescriptor);
+                tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::SmallServerInfo > > ret = SmallServerDescriptor.CreateMessage();
 
                 // get small server info
-                nServerInfoBase::NetWriteThis(*ret);
-                unsigned int notrans = 0;
-                *ret << notrans;
+                nServerInfoBase::WriteSync( *ret->AccessProtoBuf().mutable_base() );
+                ret->AccessProtoBuf().set_transaction( 0 );
                 ret->ClearMessageID();
 
                 // send message

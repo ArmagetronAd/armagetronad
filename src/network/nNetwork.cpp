@@ -814,7 +814,7 @@ nProtoBufDescriptorBase::nProtoBufDescriptorBase
         exit(-1);
     }
 
-    descriptorsByName[ GetName() ] = this;
+    AccessDescriptorsByName()[ GetName() ] = this;
     
     protoBufDescriptors[identification]=this;
 }

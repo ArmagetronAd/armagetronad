@@ -1,6 +1,8 @@
 // Protocol buffer types for nServerInfo.cpp
 package Network;
 
+import "nNetwork.proto";
+
 /* Translation rules for data types:
 
   Stream type                ProtoBuf types
@@ -11,7 +13,7 @@ package Network;
 */
 
 // minimal server info
-message SmallServerInfo
+message SmallServerInfoBase
 {
     optional int32  port = 1;     // port of server
     optional string hostname = 2; // hostname/IP of server
@@ -20,10 +22,21 @@ message SmallServerInfo
     optional bool legacy_message_end_marker = 20000;
 }
 
+// minimal server info, actual message
+message SmallServerInfo
+{
+    optional SmallServerInfoBase base = 1; // base information
+
+    optional int32      transaction = 2; // transaction number
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
 // minimal server info request
 message RequestSmallServerInfo
 {
-    // legacy stuff goes here
+    optional int32      transaction = 1; // transaction number known to the client
 
     // legacy message end marker, extensions go after it
     optional bool legacy_message_end_marker = 20000;
@@ -32,29 +45,37 @@ message RequestSmallServerInfo
 // full server info
 message BigServerInfo
 {
-    optional SmallServerInfo base = 1; // base information
+    optional SmallServerInfoBase base = 1; // base information
 
     optional string name         = 2; // name of server
-    optional string users        = 3; // screen names of players
+    optional int32  users        = 3; // number of connected clients
 
-    optional string version      = 4; // version of server
+    optional VersionSync version = 4; // protocol version of server
+    optional string release      = 5; // version of server as string
 
-    optional int32 max_users     = 5; // maximum number of clients
+    optional int32 max_users     = 6; // maximum number of clients
 
-    optional string usernames    = 6; // usernames of players
-    optional string options      = 7; // info about server options
-    optional string url          = 8; // server homepage
+    optional string usernames    = 7; // usernames of players
+    optional string options      = 8; // info about server options
+    optional string url          = 9; // server homepage
     
-    optional string global_ids   = 9; // global IDs of players
+    optional string global_ids   = 10; // global IDs of players
 
     // legacy message end marker, extensions go after it
     optional bool legacy_message_end_marker = 20000;
 }
 
-// full server info request
+// full server info request from server itself
 message RequestBigServerInfo
 {
-    // legacy stuff goes here
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// full server info request from master server
+message RequestBigServerInfoMaster
+{
+    optional SmallServerInfoBase server = 1; // server to query
 
     // legacy message end marker, extensions go after it
     optional bool legacy_message_end_marker = 20000;
