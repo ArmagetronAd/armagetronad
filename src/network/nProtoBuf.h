@@ -583,7 +583,7 @@ private:
     //! instance of this descriptor
     static nProtoBufDescriptor * instance_;
 
-    tJUST_CONTROLLED_PTR< nProtoBufMessage< PROTOBUF > > lastSent_;
+    mutable tJUST_CONTROLLED_PTR< nProtoBufMessage< PROTOBUF > > lastSent_;
 
 #ifdef DEBUG
     bool multipleInstances_;

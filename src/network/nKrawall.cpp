@@ -365,7 +365,7 @@ void nKrawall::WriteScrambledPassword(const nScrambledPassword& scrambled,
                                       nMessage &m)
 {
     for (int i = 7; i>=0; i--)
-        m.Write(scrambled[i << 1] + (scrambled[(i << 1) + 1] << 8));
+        m.Write(scrambled[i << 1] | (scrambled[(i << 1) + 1] << 8));
 }
 
 void nKrawall::ReadScrambledPassword( nMessage &m,
@@ -383,6 +383,12 @@ void nKrawall::ReadScrambledPassword( nMessage &m,
     }
 }
 
+// flips the two 16 bit groups in an int
+static inline unsigned int sn_Flip( unsigned int in )
+{
+    return ( ( in & 0xffff0000 ) >> 16 ) | ( ( in & 0xffff ) << 16 );
+}
+
 // network read/write operations of these data types
 void nKrawall::WriteScrambledPassword(const nScrambledPassword& scrambled,
                                       Network::Hash & hash )
@@ -394,14 +400,14 @@ void nKrawall::WriteScrambledPassword(const nScrambledPassword& scrambled,
     for (int i = 3; i>=0; i--)
     {
         intermediate[i] = 
-        (scrambled[(i << 2)+0] << 0 ) + (scrambled[(i << 2) + 1] << 8 ) +
-        (scrambled[(i << 2)+2] << 16) + (scrambled[(i << 2) + 3] << 24);
+        (scrambled[(i << 2)+0] << 0 ) | (scrambled[(i << 2) + 1] << 8 ) |
+        (scrambled[(i << 2)+2] << 16) | (scrambled[(i << 2) + 3] << 24);
     }
 
-    md5.set_a( intermediate[3] );
-    md5.set_b( intermediate[2] );
-    md5.set_c( intermediate[1] );
-    md5.set_d( intermediate[0] );
+    md5.set_a( sn_Flip( intermediate[3] ) );
+    md5.set_b( sn_Flip( intermediate[2] ) );
+    md5.set_c( sn_Flip( intermediate[1] ) );
+    md5.set_d( sn_Flip( intermediate[0] ) );
 }
 
 void nKrawall::ReadScrambledPassword( Network::Hash const & hash,
@@ -410,13 +416,13 @@ void nKrawall::ReadScrambledPassword( Network::Hash const & hash,
     Network::MD5Raw const & md5 = hash.md5_raw();
 
     // read totally reversed for network
-    unsigned int intermediate[4] = { md5.d(), md5.c(), md5.b(), md5.a() };
+    unsigned int intermediate[4] = { sn_Flip( md5.d() ), sn_Flip( md5.c() ), sn_Flip( md5.b() ), sn_Flip( md5.a() ) };
 
     for (int i = 3; i>=0; i--)
     {
         for( int j = 3; j >= 0; j-- )
         {
-            scrambled[ (i << 2) + j ] = intermediate[i] >> (j << 3);
+            scrambled[ (i << 2) + j ] = ( intermediate[i] >> (j << 3) ) & 0xff;
         }
     }
 }

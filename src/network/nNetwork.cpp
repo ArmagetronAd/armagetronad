@@ -929,7 +929,7 @@ nWaitForAck::nWaitForAck(nMessageBase* m,int rec)
     if (!message)
         tERR_ERROR("Null ack!");
 
-    if (message->DescriptorID() != s_Acknowledge.ID())
+    if ( sn_StripDescriptor( message->DescriptorID() ) != sn_StripDescriptor( s_Acknowledge.ID() ) )
         sn_Connections[receiver].ackPending++;
     else
         tERR_ERROR("Should not wait for ack of an ack message itself.");
@@ -973,7 +973,7 @@ nWaitForAck::~nWaitForAck(){
     }
 #endif
 
-    if (bool(message) && message->DescriptorID()!=s_Acknowledge.ID())
+    if (bool(message) && sn_StripDescriptor( message->DescriptorID() ) != sn_StripDescriptor( s_Acknowledge.ID() ) )
     {
         sn_Connections[receiver].ackPending--;
         sn_Connections[receiver].ReliableMessageSent();
@@ -1290,12 +1290,13 @@ void login_deny_handler( Network::LoginDenied const & denied, nSenderInfo const 
 
 static nProtoBufDescriptor< Network::LoginDenied > login_deny( 3, login_deny_handler );
 
-void login_handler_1( nMessage&m );
-void login_handler_2( nMessage&m );
+// handles very old and protobuf logins
+void login_handler( Network::Login const & login, nSenderInfo const & sender );
+void login_handler_intermediate( nMessage & m );
 void logout_handler( Network::Logout const &, nSenderInfo const & );
 
-nDescriptor login(6,login_handler_1,"login1", true);
-nDescriptor login_2(11,login_handler_2,"login2", true);
+nProtoBufDescriptor< Network::Login > loginDescriptor ( 6, login_handler, true );
+nDescriptor login_2(11,login_handler_intermediate,"login2", true);
 nProtoBufDescriptor< Network::Logout> logout(7,logout_handler);
 
 tString sn_DenyReason;
@@ -1385,7 +1386,7 @@ void login_accept_handler( Network::LoginAccepted const & accepted, nSenderInfo 
     }
 }
 
-static nProtoBufDescriptor< Network::LoginAccepted > login_accept(5, login_accept_handler, true);
+static nProtoBufDescriptor< Network::LoginAccepted > login_accept( 5, login_accept_handler, true );
 
 //static short new_id=0;
 
@@ -1477,44 +1478,67 @@ static REAL sn_minBan    = 120; // minimal ban time in seconds for trying to con
 static tSettingItem< REAL > sn_minBanSetting( "NETWORK_MIN_BAN", sn_minBan );
 
 // defined in nServerInfo.cpp
-extern bool FloodProtection( nMessage const & m );
+extern bool FloodProtection( int senderID );
 
 // flag to disable 0.2.8 test version lockout
 static bool sn_lockOut028tTest = true;
 static tSettingItem< bool > sn_lockOut028TestConf( "NETWORK_LOCK_OUT_028_TEST", sn_lockOut028tTest );
 
-int login_handler( nMessage &m, unsigned short rate ){
-    nCurrentSenderID senderID;
+void login_handler_intermediate( nMessage &m )
+{
+    Network::Login login;
+
+    unsigned short rate;
+    unsigned short bb;
+
+    m.Read( rate );
+    m.Read( bb );
+    login.set_rate( rate );
+
+    if ( bb )
+    { // we get a big brother message
+        tString rem_bb;
+        m >> rem_bb;
+        login.set_big_brother( rem_bb );
+    }
 
     // read version and suppored authentication methods
-    nVersion version;
-    tString supportedAuthenticationMethods("");
-    nKrawall::nSalt salt; // it's OK that this may stay uninitialized
     if ( !m.End() )
     {
         // read version
+        nVersion version;
         m >> version;
-
-        // ok, clients that send a version do have at lesat basic authentication.
-        supportedAuthenticationMethods = "bmd5";
+        version.WriteSync( *login.mutable_version() );
     }
     if ( !m.End() )
     {
         // read authentication methods
+        tString supportedAuthenticationMethods("");
         m >> supportedAuthenticationMethods;
+        login.set_authentication_methods( supportedAuthenticationMethods );
     }
     if ( !m.End() )
     {
         // also read a login salt, the client expects to get it returned verbatim
+        nKrawall::nSalt salt; // it's OK that this may stay uninitialized
         nKrawall::ReadScrambledPassword( m, salt );
+        nKrawall::WriteScrambledPassword( salt, *login.mutable_token() );
     }
+
+    // delegate to protobuf method
+    login_handler( login, nSenderInfo( m ) );
+}
+
+void login_handler( Network::Login const & login, nSenderInfo const & sender )
+{
+    nCurrentSenderID senderID;
 
     // don't accept logins in client mode
     if (sn_GetNetState() != nSERVER)
-        return -1;
+        return;
 
     // ban users
-    nMachine & machine = nMachine::GetMachine( m.SenderID() );
+    nMachine & machine = nMachine::GetMachine( sender.SenderID() );
     REAL banned = machine.IsBanned();
     if ( banned > 0 )
     {
@@ -1530,16 +1554,16 @@ int login_handler( nMessage &m, unsigned short rate ){
         else
             con << tOutput( "$network_ban", machine.GetIP() , int(banned/60), reason.Len() > 1 ? reason : tOutput( "$network_ban_noreason" ) );
 
-        sn_DisconnectUser(m.SenderID(), tOutput( "$network_kill_banned", int(banned/60), reason ) );
+        sn_DisconnectUser(sender.SenderID(), tOutput( "$network_kill_banned", int(banned/60), reason ) );
     }
 
     // ignore multiple logins
-    if( CountSameConnection( m.SenderID() ) > 0 )
-        return -1;
+    if( CountSameConnection( sender.SenderID() ) > 0 )
+        return;
 
     // ignore login floods
-    if ( FloodProtection( m ) )
-        return -1;
+    if ( FloodProtection( sender.SenderID() ) )
+        return;
 
     bool success=false;
 
@@ -1550,29 +1574,31 @@ int login_handler( nMessage &m, unsigned short rate ){
     //	return -1;
 
     nVersion mergedVersion;
+    nVersion version;
+    version.ReadSync( login.version() );
     if ( !mergedVersion.Merge( version, sn_CurrentVersion() ) )
     {
-        sn_DisconnectUser(m.SenderID(), "$network_kill_incompatible");
+        sn_DisconnectUser( sender.SenderID(), "$network_kill_incompatible" );
     }
 
     // expire 0.2.8 test versions, they have a security flaw
     if ( sn_lockOut028tTest && version.Max() >= 5 && version.Max() <= 10 )
     {
-        sn_DisconnectUser(m.SenderID(), "0.2.8_beta and 0.2.8.0_rc versions have a dangerous security flaw and are obsoleted, please upgrade to 0.2.8.2.1.");
+        sn_DisconnectUser( sender.SenderID(), "0.2.8_beta and 0.2.8.0_rc versions have a dangerous security flaw and are obsoleted, please upgrade to 0.2.8.2.1." );
     }
 
-    if (m.SenderID()!=MAXCLIENTS+1)
+    if ( sender.SenderID()!=MAXCLIENTS+1 )
     {
         //con << "Ignoring second login from " << m.SenderID() << ".\n";
-        login_ignore.Send( m.SenderID() );
+        login_ignore.Send( sender.SenderID() );
     }
-    else if (sn_Connections[m.SenderID()].socket)
+    else if (sn_Connections[sender.SenderID()].socket)
     {
         if ( sn_maxClients > MAXCLIENTS )
             sn_maxClients = MAXCLIENTS;
 
         // count doublicate IPs
-        if ( CountSameIP( m.SenderID(), true ) < sn_allowSameIPCountHard )
+        if ( CountSameIP( sender.SenderID(), true ) < sn_allowSameIPCountHard )
         {
             // find new free ( or freeable ) ID
             new_id = GetFreeSlot();
@@ -1593,7 +1619,7 @@ int login_handler( nMessage &m, unsigned short rate ){
                 // peers			[ MAXCLIENTS+1 ].sa_family	= 0;
                 //				nCallbackLoginLogout::UserLoggedIn(i);
 
-                sn_Connections	[ new_id ].supportedAuthenticationMethods_ = supportedAuthenticationMethods;
+                sn_Connections	[ new_id ].supportedAuthenticationMethods_ = login.authentication_methods();
 
                 // recount doublicate IPs
                 CountSameIP( new_id, true );
@@ -1602,8 +1628,8 @@ int login_handler( nMessage &m, unsigned short rate ){
 
         // log login to console
         tOutput o;
-        o.SetTemplateParameter(1, peers[m.SenderID()].ToString() );
-        o.SetTemplateParameter(2, sn_Connections[m.SenderID()].socket->GetAddress().ToString() );
+        o.SetTemplateParameter(1, peers[sender.SenderID()].ToString() );
+        o.SetTemplateParameter(2, sn_Connections[sender.SenderID()].socket->GetAddress().ToString() );
         o.SetTemplateParameter(3, sn_GetClientVersionString(version.Max()) );
         o.SetTemplateParameter(4, version.Max() );
         o << "$network_server_login";
@@ -1622,6 +1648,7 @@ int login_handler( nMessage &m, unsigned short rate ){
         sn_Connections[new_id].bandwidthControl_.Reset();
         reset_last_acks(new_id);
 
+        short rate = login.rate();
         if (rate>sn_maxRateOut)
             rate=sn_maxRateOut;
 
@@ -1636,8 +1663,8 @@ int login_handler( nMessage &m, unsigned short rate ){
         Network::LoginAccepted & accepted = login_accept.Send( new_id );
         accepted.set_net_id( new_id );
         sn_myVersion.WriteSync( *accepted.mutable_version() );
-        accepted.set_address( peers[m.SenderID()].ToString() );
-        nKrawall::WriteScrambledPassword( salt, *accepted.mutable_token() );
+        accepted.set_address( peers[sender.SenderID()].ToString() );
+        accepted.mutable_token()->CopyFrom( login.token() );
         nMessageBase::SendCollected( new_id );
 
         nConfItemBase::s_SendConfig(true, new_id);
@@ -1652,59 +1679,28 @@ int login_handler( nMessage &m, unsigned short rate ){
         //      ANET_Listen(false);
         //      ANET_Listen(true);
     }
-    else if (m.SenderID()==MAXCLIENTS+1)
+    else if (sender.SenderID()==MAXCLIENTS+1)
     {
         sn_DisconnectUser(MAXCLIENTS+1, "$network_kill_full");
     }
 
     sn_UpdateCurrentVersion();
 
-    return new_id;
-}
-
-void login_handler_1(nMessage& m)
-{
-    unsigned short rate;
-
-    m.Read( rate );
-
-    if ( !m.End() ){ // we get a big brother message (ignore it)
-        tString rem_bb;
-        m >> rem_bb;
-    }
-
-    login_handler( m, rate );
-}
-
-void login_handler_2(nMessage& m)
-{
-    unsigned short rate;
-    unsigned short bb;
-
-    m.Read( rate );
-    m.Read( bb );
-    tString rem_bb;
-
-    if ( bb )
-    { // we get a big brother message
-        m >> rem_bb;
-    }
-
-    int new_ID = login_handler( m, rate );
-
-    if ( new_ID > 0 )
+    if ( new_id > 0 )
     {
-        sn_currentVersion.WriteSync( *versionControl.Send( new_ID ).mutable_version() );
+        sn_currentVersion.WriteSync( *versionControl.Send( new_id ).mutable_version() );
 
-        if ( bb )
+        // store big brother message
+        if ( login.has_big_brother() && login.big_brother().size() > 0 )
         {
             std::ofstream s;
             if ( tDirectories::Var().Open(s, "big_brother",std::ios::app) )
-                s << rem_bb << '\n';
+            {
+                s << login.big_brother() << '\n';
+            }
         }
     }
 }
-
 
 void logout_handler( Network::Logout const &, nSenderInfo const & sender )
 {
@@ -2016,7 +2012,7 @@ void nMessageBase::Send(int peer,REAL priority,bool ack){
 
     sent_per_messid[descriptorID_] += Size() + 6;
 
-    tASSERT(DescriptorID()!=s_Acknowledge.ID() || !ack);
+    tASSERT( sn_StripDescriptor( DescriptorID() )!= sn_StripDescriptor( s_Acknowledge.ID() ) || !ack);
 
     new nMessage_planned_send(this,priority+sn_OrderPriority,ack,peer);
     sn_OrderPriority += .01; // to roughly keep the relative order of netmessages
@@ -2195,9 +2191,9 @@ static void rec_peer(unsigned int peer){
                                     unsigned short diff=mess_id-highest_ack[id];
                                     if ( ( diff>0 && diff<10000 ) ||
                                             ((
-                                                 mess.DescriptorID() == login_accept.ID() ||
-                                                 mess.DescriptorID() == login_deny.ID()   ||
-                                                 mess.DescriptorID() == login.ID()
+                                                 sn_StripDescriptor( mess.DescriptorID() ) == sn_StripDescriptor( login_accept.ID() )||
+                                                 sn_StripDescriptor( mess.DescriptorID() ) == sn_StripDescriptor( login_deny.ID() )   ||
+                                                 sn_StripDescriptor( mess.DescriptorID() ) == sn_StripDescriptor( loginDescriptor.ID() )
                                              ) && highest_ack[id] == 0)
                                        ){
                                         // the message has a more recent id than anything before.
@@ -2225,7 +2221,7 @@ static void rec_peer(unsigned int peer){
 #ifdef NO_ACK
                                     (mess.MessageID()) &&
 #endif
-                                    (mess.DescriptorID()!=login_ignore.ID() ||
+                                    ( sn_StripDescriptor( mess.DescriptorID() ) != sn_StripDescriptor( login_ignore.ID() ) ||
                                      login_succeeded )){
                                     // do not ack the login_ignore packet that did not let you in.
 
@@ -2535,6 +2531,29 @@ void sn_Bend( tString const & server, unsigned int port)
 }
 
 nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket const * socket ){
+    if ( loginType == Login_All )
+    {
+        nConnectError ret;
+        if ( sn_GetNetState() != nCLIENT )
+        {
+            // ret = sn_Connect( server, Login_Protobuf, socket );
+        }
+        if ( sn_GetNetState() != nCLIENT )
+        {
+            ret = sn_Connect( server, Login_Post0252, socket );
+        }
+        if ( sn_GetNetState() != nCLIENT )
+        {
+            sn_Connect( server, Login_Protobuf, socket );
+        }
+        if ( sn_GetNetState() != nCLIENT )
+        {
+            ret = sn_Connect( server, Login_Pre0252, socket );
+        }
+
+        return ret;
+    }
+
     sn_DenyReason = "";
 
     // reset redirection
@@ -2575,48 +2594,64 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
     // reset version control until the true value is given by the server.
     sn_currentVersion = nVersion(0,0);
 
-    // Login stuff.....
-    tJUST_CONTROLLED_PTR< nMessage > mess;
-    if ( loginType != Login_Pre0252 )
+    // prepare login data
+    Network::Login login;
+    login.set_rate( sn_maxRateIn );
+    if( big_brother )
     {
-        mess=new nMessage(login_2);
-        mess->Write(sn_maxRateIn);
+        login.set_big_brother( sn_bigBrotherString );
+        big_brother = false;
+    }
 
+    sn_MyVersion().WriteSync( *login.mutable_version() );
+    login.set_authentication_methods( nKrawall::nMethod::SupportedMethods() );
+
+    nKrawall::RandomSalt( loginSalt );
+    nKrawall::WriteScrambledPassword( loginSalt, *login.mutable_token() );
+
+    tJUST_CONTROLLED_PTR< nMessageBase > mess;
+
+    sn_Connections[0].version = sn_myVersion;
+
+    switch( loginType )
+    {
+    case Login_All:
+        tASSERT(0);
+        break;
+    case Login_Protobuf:
+        // switch server connection to protobuf capable version
+        sn_Connections[0].version = sn_myVersion;
+    case Login_Pre0252:
+        // just write a protobuf message. In pre-0.2.5.2 mode, it'll get converted
+        // to a stream message correctly.
+        mess = loginDescriptor.Transform( login );
+        break;
+    case Login_Post0252:
+        // old style login
+        tJUST_CONTROLLED_PTR< nStreamMessage > stream = new nMessage(login_2);
+        mess = stream;
+        stream->Write(sn_maxRateIn);
+        
         unsigned short bb = big_brother;
-        mess->Write( bb );
+        stream->Write( bb );
         if ( bb ){
-            (*mess) << sn_bigBrotherString;
+            (*stream) << sn_bigBrotherString;
             big_brother=false;
         }
-    }
-    else
-    {
-        mess=new nMessage(login);
-        mess->Write(sn_maxRateIn);
-
-        // send (worthless) big brother string
-        if (big_brother)
-        {
-            (*mess) << sn_bigBrotherString;
-        }
-        else
-        {
-            (*mess) << tString("");
-        }
-
-        big_brother=false;
+        
+        // write our version
+        (*stream) << sn_MyVersion();
+        
+        // write our supported authentication methods
+        (*stream) << nKrawall::nMethod::SupportedMethods();
+        
+        // write a random salt
+        nKrawall::WriteScrambledPassword( loginSalt, *stream );
+        
+        break;
     }
 
-    // write our version
-    (*mess) << sn_MyVersion();
-
-    // write our supported authentication methods
-    (*mess) << nKrawall::nMethod::SupportedMethods();
-
-    // write a random salt
-    nKrawall::RandomSalt( loginSalt );
-    nKrawall::WriteScrambledPassword( loginSalt, *mess );
-
+    // send message
     mess->ClearMessageID();
     mess->SendImmediately(0,false);
     nMessageBase::SendCollected(0);
@@ -2658,19 +2693,8 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
         sn_SetNetState(nSTANDALONE);
         return nDENIED;
     }
-    else if (tSysTimeFloat()>=timeout || sn_GetNetState()!=nCLIENT){
-        if ( loginType == Login_All )
-        {
-            return 	sn_Connect( server, Login_Pre0252, socket );
-        }
-        else
-        {
-            con << tOutput("$network_login_failed_timeout");
-            sn_SetNetState(nSTANDALONE);
-            return nTIMEOUT;
-        }
-    }
-    else{
+    else if (login_succeeded)
+    {
         nCallbackLoginLogout::UserLoggedIn(0);
 
         tOutput mess;
@@ -2688,6 +2712,11 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
         nPingAverager::SetWeight(1);
 
         return nOK;
+    }
+    else
+    {
+        sn_SetNetState(nSTANDALONE);
+        return nTIMEOUT;
     }
 }
 
@@ -3241,7 +3270,7 @@ nCallbackAcceptPackedWithoutConnection::nCallbackAcceptPackedWithoutConnection(B
 
 bool nCallbackAcceptPackedWithoutConnection::Accept( const nMessageBase& m )
 {
-    descriptor=m.DescriptorID();
+    descriptor=sn_StripDescriptor( m.DescriptorID() );
     return Exec( s_AcceptAnchor );
 }
 
@@ -3260,9 +3289,9 @@ void nCallbackReceivedComplete::ReceivedComplete( )
 static bool net_Accept()
 {
     return
-        nCallbackAcceptPackedWithoutConnection::Descriptor()==login_accept.ID() ||
-        nCallbackAcceptPackedWithoutConnection::Descriptor()==login_deny.ID() ||
-        nCallbackAcceptPackedWithoutConnection::Descriptor()==nTempVersionOverrider::Descriptor().ID();
+        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( login_accept.ID() ) ||
+        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( login_deny.ID() ) ||
+        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( nTempVersionOverrider::Descriptor().ID() );
 }
 
 static nCallbackAcceptPackedWithoutConnection net_acc( &net_Accept );

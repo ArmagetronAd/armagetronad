@@ -105,21 +105,10 @@ message LoginAccepted
     optional bool legacy_message_end_marker = 20000;
 }
 
-// old login message
-message LegacyLogin
-{
-    optional uint32 rate = 1; // requested bandwith in kbyte/s
-
-    optional string big_brother = 2; // big brother hardware stats string
-
-    // legacy message end marker, extensions go after it
-    optional bool legacy_message_end_marker = 20000;
-}
-
 // current login message
 message Login
 {
-    optional uint32 rate = 1; // requested bandwith in kbyte/s
+    optional uint32 rate = 1;              // requested bandwith in kbyte/s
 
     optional string big_brother = 2;       // big brother hardware stats string
 

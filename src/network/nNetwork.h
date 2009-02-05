@@ -378,8 +378,9 @@ extern int sn_maxNoAck;
 enum nLoginType
 {
     Login_Pre0252,  // use the login method known to pre-0.2.5.2 versions
-    Login_Post0252, // use the newer login method
-    Login_All       // first attempt the new one, then the old one
+    Login_Post0252, // use the newer stream login method
+    Login_Protobuf, // use the protobuf method
+    Login_All       // attempt all login types
 };
 
 // go to client mode and connect to server
@@ -430,6 +431,12 @@ private:
     //! creates a message
     virtual nMessageBase * DoCreateMessage() const = 0;
 };
+
+// strip descriptor of irrelevant bits (protobuf flag and whatever else we come up with)
+inline unsigned int sn_StripDescriptor( unsigned int ID )
+{
+    return ID & 0x7fff;
+}
 
 typedef void nHandler( nMessage &m );
 

@@ -687,9 +687,9 @@ static nDescriptor RequestBigServerInfoMasterDescriptor(55,nServerInfo::GiveBigS
 static bool net_Accept()
 {
     return
-        nCallbackAcceptPackedWithoutConnection::Descriptor()==SmallServerDescriptor.ID() ||
-        nCallbackAcceptPackedWithoutConnection::Descriptor()==BigServerDescriptor.ID() ||
-        nCallbackAcceptPackedWithoutConnection::Descriptor()==BigServerMasterDescriptor.ID();
+        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( SmallServerDescriptor.ID() ) ||
+        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( BigServerDescriptor.ID() ) ||
+        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( BigServerMasterDescriptor.ID() );
 }
 
 static nCallbackAcceptPackedWithoutConnection net_acc( &net_Accept );
@@ -996,11 +996,11 @@ static REAL sn_minPingTimeGlobalFactor = 0.1;
 static tSettingItem< REAL > sn_minPingTimeGlobal( "PING_FLOOD_GLOBAL", sn_minPingTimeGlobalFactor );
 
 // determines wheter the message comes from a flood attack; if so, reject it (return true)
-bool FloodProtection( nMessage const & m )
+bool FloodProtection( int sender )
 {
     // get the machine infos
     nMachine & server = nMachine::GetMachine( 0 );
-    nMachine & peer   = nMachine::GetMachine( m.SenderID() );
+    nMachine & peer   = nMachine::GetMachine( sender );
 
     // only accept one ping per packet
     if ( !sn_firstInPacket )
@@ -1162,7 +1162,7 @@ void nServerInfo::GiveSmallServerInfo(nMessage &m)
 
     else
     {
-        if ( FloodProtection( m ) )
+        if ( FloodProtection( m.SenderID() ) )
             return;
 
         // allow some followup queries
@@ -1282,7 +1282,7 @@ void nServerInfo::GiveBigServerInfo(nMessage &m)
         // con << sn_numAcceptQueries << "\n";
     }
 
-    if ( FloodProtection( m ) )
+    if ( FloodProtection( m.SenderID() ) )
         return;
 
     if (sn_IsMaster)
@@ -1310,7 +1310,7 @@ void nServerInfo::SetFromMaster()
 
 void nServerInfo::GetBigServerInfoMaster(nMessage &m)
 {
-    if ( sn_GetNetState() == nSERVER && FloodProtection( m ) )
+    if ( sn_GetNetState() == nSERVER && FloodProtection( m.SenderID() ) )
         return;
 
     nServerInfo *server = GetBigServerInfoCommon( m );
@@ -1323,7 +1323,7 @@ void nServerInfo::GetBigServerInfoMaster(nMessage &m)
 
 void nServerInfo::GiveBigServerInfoMaster(nMessage &m)
 {
-    if ( FloodProtection( m ) )
+    if ( FloodProtection( m.SenderID() ) )
         return;
 
     if ( !sn_IsMaster )
