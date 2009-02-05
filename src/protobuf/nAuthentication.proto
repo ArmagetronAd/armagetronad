@@ -1,0 +1,36 @@
+// Protocol buffer types for nAuthentication.cpp
+package Network;
+
+import "nNetObject.proto";
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// md5 message
+message MD5Raw
+{
+    // raw, hacky md5 storage. 
+    optional fixed32 a = 1;
+    optional fixed32 b = 2;
+    optional fixed32 c = 3;
+    optional fixed32 d = 4;
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// hash values
+message Hash
+{
+    optional MD5Raw md5_raw = 1;
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+

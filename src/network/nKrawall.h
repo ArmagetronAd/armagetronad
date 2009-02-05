@@ -45,6 +45,8 @@ the executable is not distributed).
 // #include "nNetObject.h"
 #include "tConfiguration.h"
 
+namespace Network{ class Hash; }
+
 class nStreamMessage;
 typedef nStreamMessage nMessage;
 
@@ -207,6 +209,12 @@ public:
     static void ReadScrambledPassword( nMessage &m,
                                        nScrambledPassword& scrambled);
 
+    static void WriteScrambledPassword(const nScrambledPassword& scrambled,
+                                       Network::Hash & hash );
+
+    static void ReadScrambledPassword( Network::Hash const & hash,
+                                       nScrambledPassword& scrambled);
+
     // file read/write operations of these data types
     static void WriteScrambledPassword(const nScrambledPassword& scrambled,
                                        std::ostream &s);
@@ -216,9 +224,21 @@ public:
 
 
     static void WriteSalt(const nSalt& salt,
+                          Network::Hash & hash )
+    {
+        WriteScrambledPassword(salt, hash );
+    }
+
+    static void WriteSalt(const nSalt& salt,
                           nMessage &m)
     {
         WriteScrambledPassword(salt, m);
+    }
+
+    static void ReadSalt( Network::Hash const & hash,
+                          nSalt& salt)
+    {
+        ReadScrambledPassword( hash, salt);
     }
 
     static void ReadSalt( nMessage &m,

@@ -36,7 +36,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nObserver.h"
 //#include "tCrypt.h"
 #include "tException.h"
+
 #include <memory>
+#include <deque>
 
 class nSocket;
 class nAddress;
@@ -44,6 +46,8 @@ class nBasicNetworkSystem;
 class nServerInfoBase;
 
 class nMessageCache;
+
+namespace Network { class VersionSync; }
 
 extern nBasicNetworkSystem sn_BasicNetworkSystem;
 
@@ -143,6 +147,10 @@ public:
     bool Supported( int version ) const;	// check if a particular version is supported
     bool Merge( const nVersion& a,
                 const nVersion& b);	// merges two versions to one; the new version supports only features both versions understand. false is returned if no common denominator could be found
+
+    // syncing to protobufs
+    void WriteSync( Network::VersionSync       & sync ) const;
+    void ReadSync ( Network::VersionSync const & sync )      ;
 
     int Min() const	{
         return min_;
@@ -335,8 +343,8 @@ struct nConnectionInfo     // everything that is needed to manage a connection
     // version info
     nVersion				version;
 
-    // ack messages
-    tJUST_CONTROLLED_PTR< nMessage >          ackMess;
+    // packages to acknowledge
+    std::deque< unsigned short > acks_;
 
     // authentication
     // tString                userName;
@@ -444,10 +452,6 @@ private:
     //! creates a message
     virtual nMessageBase * DoCreateMessage() const;
 };
-
-// register the routine that gives the peer the server/client information
-// (game type, number of players online....)
-void RequestInfoHandler(nHandler *handle);
 
 // the first sn_myNetID available for external use (give some room!)
 #define NET_ID_FIRST 100

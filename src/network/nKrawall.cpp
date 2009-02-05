@@ -48,6 +48,8 @@ the executable is not distributed).
 #include <vector>
 #include <string.h>
 
+#include "nAuthentication.pb.h"
+
 #ifndef DEDICATED
 // on the client, we want to disable the broken bmd5 by default.
 static tString sn_methodBlacklist( "bmd5" );
@@ -378,6 +380,44 @@ void nKrawall::ReadScrambledPassword( nMessage &m,
 
         scrambled[ i << 1     ] = low;
         scrambled[(i << 1) + 1] = high;
+    }
+}
+
+// network read/write operations of these data types
+void nKrawall::WriteScrambledPassword(const nScrambledPassword& scrambled,
+                                      Network::Hash & hash )
+{
+    Network::MD5Raw & md5 = *hash.mutable_md5_raw();
+
+    // write totally reversed for network
+    unsigned int intermediate[4];
+    for (int i = 3; i>=0; i--)
+    {
+        intermediate[i] = 
+        (scrambled[(i << 2)+0] << 0 ) + (scrambled[(i << 2) + 1] << 8 ) +
+        (scrambled[(i << 2)+2] << 16) + (scrambled[(i << 2) + 3] << 24);
+    }
+
+    md5.set_a( intermediate[3] );
+    md5.set_b( intermediate[2] );
+    md5.set_c( intermediate[1] );
+    md5.set_d( intermediate[0] );
+}
+
+void nKrawall::ReadScrambledPassword( Network::Hash const & hash,
+                                      nScrambledPassword& scrambled)
+{
+    Network::MD5Raw const & md5 = hash.md5_raw();
+
+    // read totally reversed for network
+    unsigned int intermediate[4] = { md5.d(), md5.c(), md5.b(), md5.a() };
+
+    for (int i = 3; i>=0; i--)
+    {
+        for( int j = 3; j >= 0; j-- )
+        {
+            scrambled[ (i << 2) + j ] = intermediate[i] >> (j << 3);
+        }
     }
 }
 

@@ -510,11 +510,12 @@ public:
     PROTOBUF & Broadcast( bool ack = true )
     {
         nProtoBufMessage< PROTOBUF > * m = CreateMessage();
+        lastSent_ = m;
         m->BroadCast( ack );
         return m->AccessProtoBuf();
     }
 
-    //! creates and schedules a message for broadcast to all clients supporting a certain feature, returning the protovuf to fill
+    //! creates and schedules a message for broadcast to all clients supporting a certain feature, returning the protobuf to fill
     PROTOBUF & Broadcast( nVersionFeature const & feature, bool ack = true )
     {
         nProtoBufMessage< PROTOBUF > * m = CreateMessage();
@@ -528,7 +529,7 @@ public:
     {
         nProtoBufMessage< PROTOBUF > * m = CreateMessage();
         lastSent_ = m;
-        m->Send( receiver, ack );
+        m->Send( receiver, 0, ack );
         return m->AccessProtoBuf();
     }
 
