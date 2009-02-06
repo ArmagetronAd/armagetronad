@@ -45,6 +45,11 @@ void zShape::WriteSync( Zone::ShapeSync & sync, bool init ) const
 {
     eNetGameObject::WriteSync( *sync.mutable_base(), init );
 
+    if ( init )
+    {
+        sync.set_creation_time( createdtime_ );
+    }
+
     sync.set_reference_time( referencetime_ );
     posx_.WriteSync( *sync.mutable_pos_x() );
     posy_.WriteSync( *sync.mutable_pos_y() );
@@ -604,3 +609,64 @@ nNetObjectDescriptorBase const & zShapePolygon::DoGetDescriptor() const
 {
     return zonePolygon_init;
 }
+
+#include "gZone.pb.h"
+
+//! convert circle shape messages into zone v1 messages for old clients
+class nZonesV1Translator: public nMessageTranslator< Zone::ShapeCircleSync >
+{
+public:
+    //! constructor registering with the descriptor
+    nZonesV1Translator(): nMessageTranslator< Zone::ShapeCircleSync >( zoneCircle_init )
+    {
+    }
+    
+    //! convert current message format to format suitable for old client
+    virtual nMessageBase * Translate( Zone::ShapeCircleSync const & source, int receiver ) const
+    {
+        if( sn_protoBuf.Supported( receiver ) )
+        {
+            // no translation required for protobuf capable clients
+            return NULL;
+        }
+
+        Zone::ShapeSync const & shape = source.base();
+
+        // copy message over
+        Game::ZoneV1Sync dest;
+        dest.mutable_base()->CopyFrom( shape.base() );
+        dest.mutable_color()->CopyFrom( shape.color() );
+        dest.set_create_time( shape.creation_time() );
+        dest.set_reference_time( shape.reference_time() );
+        dest.mutable_pos_x()->CopyFrom( shape.pos_x() );
+        dest.mutable_pos_y()->CopyFrom( shape.pos_y() );
+
+        // transfer radius function
+        tFunction scale, radius;
+        scale.ReadSync( shape.scale() );
+        radius.ReadSync( source.radius() );
+
+        // mend them together, ignoring the quadratic term
+        tFunction mendedRadius( scale.GetOffset() * radius.GetOffset(), scale.GetOffset() * radius.GetSlope() + scale.GetSlope() * radius.GetOffset() );
+        mendedRadius.WriteSync( *dest.mutable_radius() );
+
+        // calculate rotation speed
+        tPolynomial rotation;
+        rotation.ReadSync( shape.rotation2() );
+        rotation.adaptToNewReferenceVarValue( shape.reference_time() );
+        tFunction mendedRotation( rotation[1], rotation[2] );
+        mendedRotation.WriteSync( *dest.mutable_rotation_speed() );
+
+        nProtoBufMessageBase * ret = nProtoBufDescriptor< Game::ZoneV1Sync >::TransformStatic( dest );
+
+        if( !shape.has_creation_time() )
+        {
+            // make it a sync message
+            ret->SetStreamer( nNetObjectDescriptorBase::SyncStreamer() );
+        }
+        
+        return ret;
+    }
+};
+
+static nZonesV1Translator sn_v1translator;

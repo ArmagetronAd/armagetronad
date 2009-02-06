@@ -1225,11 +1225,6 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
 void
 gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-    // Currently, we have no compatibility plan for any v2 zone type. When we have one,
-    // remove the lines that look like this (apart from the one where really
-    // polugonal shapes are parsed)
-    safetymecanism_polygonal_shapeused.Set(true);
-
     if (sn_GetNetState() != nCLIENT )
     {
         rColor color( 1, 0, 0, .7 );
@@ -1390,11 +1385,6 @@ gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
 void
 gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-    // Currently, we have no compatibility plan for any v2 zone type. When we have one,
-    // remove the lines that look like this (apart from the one where really
-    // polugonal shapes are parsed)
-    safetymecanism_polygonal_shapeused.Set(true);
-
     string zoneName = "";
 
     if (myxmlHasProp(cur, "name"))

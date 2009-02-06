@@ -538,7 +538,7 @@ public:
     }
 
     //! puts a puffer into a message
-    nMessageBase * Transform( PROTOBUF const & protoBuf ) const
+    nProtoBufMessage< PROTOBUF > * Transform( PROTOBUF const & protoBuf ) const
     {
         // pack buffer into a message filler
         nProtoBufMessage< PROTOBUF > * m = CreateMessage();
@@ -549,7 +549,7 @@ public:
     }
 
     //! puts a puffer into a message
-    static nMessageBase * TransformStatic( PROTOBUF const & message )
+    static nProtoBufMessage< PROTOBUF > * TransformStatic( PROTOBUF const & message )
     {
         tASSERT( instance_ );
 
