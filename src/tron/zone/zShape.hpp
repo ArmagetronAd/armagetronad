@@ -115,7 +115,6 @@ public :
 protected:
     std::vector< myPoint > points;
     bool isInside (eCoord anECoord);
-    static void networkRead(nMessage &m, zShape *aShape);
 private:
     //! returns the descriptor responsible for this class
     virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;

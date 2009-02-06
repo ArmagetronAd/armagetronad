@@ -54,7 +54,7 @@ extern nBasicNetworkSystem sn_BasicNetworkSystem;
 // TODO: rename. nMessageBase ->nMessage, remove typedef
 class nMessageBase;
 class nStreamMessage;
-typedef nStreamMessage nMessage;
+// typedef nStreamMessage nMessage;
 
 
 
@@ -167,6 +167,9 @@ public:
 private:
     int min_, max_;
 };
+
+std::istream& operator >> ( std::istream& s, nVersion& ver );
+std::ostream& operator << ( std::ostream& s, const nVersion& ver );
 
 const nVersion& sn_MyVersion();			//!< the version this progam maximally supports
 const nVersion& sn_CurrentVersion();	//!< the version currently supported by all connected players
@@ -437,28 +440,6 @@ inline unsigned int sn_StripDescriptor( unsigned int ID )
 {
     return ID & 0x7fff;
 }
-
-typedef void nHandler( nMessage &m );
-
-// old descriptor for streaming messages
-class nDescriptor: public nDescriptorBase
-{
-    friend class nStreamMessage;
-
-    nHandler *handler;  // function responsible for our type of message
-
-public:
-    nDescriptor(unsigned short identification,nHandler *handle,
-                const char *name, bool acceptEvenIfNotLoggedIn = false);
-
-    ~nDescriptor();
-
-    //! creates a message for sending
-    nStreamMessage * CreateMessage() const;
-private:
-    //! creates a message
-    virtual nMessageBase * DoCreateMessage() const;
-};
 
 // the first sn_myNetID available for external use (give some room!)
 #define NET_ID_FIRST 100
@@ -1080,7 +1061,7 @@ nMachine & nMachine::SetDecorators( nMachineDecorator * decorators )
 }
 
 // TODO: remove
-#include "nStreamMessage.h"
+// #include "nStreamMessage.h"
 
 #endif
 

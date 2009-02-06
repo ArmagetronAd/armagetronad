@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nPriorizing.h"
 #include "nNetwork.h"
 #include "tMemManager.h"
+#include "nStreamMessage.h"
 
 tDEFINE_REFOBJ( nBandwidthTask )
 tDEFINE_REFOBJ( nBandwidthArbitrator )
@@ -385,15 +386,15 @@ bool nBandwitdhDistributor::DoUseBandwidth( REAL dt )
 class nBandwidthTaskMessage: public nBandwidthTask
 {
 public:
-    nBandwidthTaskMessage( nType type, nMessage& message );
+    nBandwidthTaskMessage( nType type, nStreamMessage& message );
 
-    nMessage& Message() const { return *message_; }
+    nStreamMessage& Message() const { return *message_; }
 protected:
     virtual void DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer );				// executes whatever it has to do
     virtual int  DoEstimateSize() const;													// estimate bandwidth usage
     //	virtual void DoPriorize();																// rethinks priority
 private:
-    tJUST_CONTROLLED_PTR< nMessage > message_;
+    tJUST_CONTROLLED_PTR< nStreamMessage > message_;
 };
 
 
@@ -403,7 +404,7 @@ private:
 // nBandwidthTaskMessage: message sending bandwidth task
 // *********************************************************
 
-nBandwidthTaskMessage::nBandwidthTaskMessage( nType type, nMessage& message )
+nBandwidthTaskMessage::nBandwidthTaskMessage( nType type, nStreamMessage& message )
         :nBandwidthTask( type ), message_( &message )
 {
 }
@@ -447,7 +448,7 @@ static nDescriptor testDescriptor( 399, NULL, NULL, "test" );
 class nTestObject: public nNetObject
 {
 public:
-    nTestObject( nMessage& m ): nNetObject( m ){}
+    nTestObject( nStreamMessage& m ): nNetObject( m ){}
     nTestObject(){};
     virtual nDescriptor& CreatorDescriptor() const;
     virtual bool AcceptClientSync() const{return true;}

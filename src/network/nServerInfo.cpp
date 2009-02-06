@@ -1192,7 +1192,7 @@ void nServerInfo::GiveSmallServerInfo( Network::RequestSmallServerInfo const & i
 
         ret->ClearMessageID();
         ret->SendImmediately(sender.SenderID(), false);
-        nMessage::SendCollected(sender.SenderID());
+        nMessageBase::SendCollected(sender.SenderID());
     }
 }
 
@@ -1253,7 +1253,7 @@ void nServerInfo::GiveBigServerInfoCommon( int receiver, const nServerInfo & inf
     // send info
     ret->ClearMessageID();
     ret->SendImmediately( receiver, false);
-    nMessage::SendCollected( receiver );
+    nMessageBase::SendCollected( receiver );
 }
 
 void nServerInfo::GetBigServerInfo( Network::BigServerInfo const & info,
@@ -1646,7 +1646,7 @@ void nServerInfo::GetFromLAN(unsigned int pollBeginPort, unsigned int pollEndPor
         nMessageBase *m = RequestSmallServerInfoDescriptor.CreateMessage();
         m->ClearMessageID();
         m->SendImmediately(0, false);
-        nMessage::BroadcastCollected(0, port);
+        nMessageBase::BroadcastCollected(0, port);
         tDelay(1000);
     }
 
@@ -1697,7 +1697,7 @@ void nServerInfo::GetFromLANContinuously(unsigned int pollBeginPort, unsigned in
         nMessageBase * m = RequestSmallServerInfoDescriptor.CreateMessage();
         m->ClearMessageID();
         m->SendImmediately(0, false);
-        nMessage::BroadcastCollected(0, port);
+        nMessageBase::BroadcastCollected(0, port);
         tDelay(1000);
     }
 }
@@ -1920,7 +1920,7 @@ void nServerInfo::QueryServer()                                  // start to get
         tJUST_CONTROLLED_PTR< nMessageBase > req = RequestBigServerInfoDescriptor.CreateMessage();
         req->ClearMessageID();
         req->SendImmediately(0, false);
-        nMessage::SendCollected(0);
+        nMessageBase::SendCollected(0);
     }
     else
     {
@@ -1934,7 +1934,7 @@ void nServerInfo::QueryServer()                                  // start to get
         nServerInfoBase::WriteSync( *req->AccessProtoBuf().mutable_server() );
 
         req->SendImmediately(0, false);
-        nMessage::SendCollected(0);
+        nMessageBase::SendCollected(0);
     }
 
     timeQuerySent = tSysTimeFloat();
@@ -2914,7 +2914,7 @@ void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
                 // send message
                 sn_Bend( master->GetAddress() );
                 ret->SendImmediately(0, false);
-                nMessage::SendCollected(0);
+                nMessageBase::SendCollected(0);
 
                 master = master->Next();
             }

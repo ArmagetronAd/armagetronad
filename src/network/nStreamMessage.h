@@ -31,6 +31,28 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nNetwork.h"
 
+typedef void nHandler( nStreamMessage &m );
+
+// old descriptor for streaming messages
+class nStreamDescriptor: public nDescriptorBase
+{
+    friend class nStreamMessage;
+
+    nHandler *handler;  // function responsible for our type of message
+
+public:
+    nStreamDescriptor(unsigned short identification,nHandler *handle,
+                      const char *name, bool acceptEvenIfNotLoggedIn = false);
+
+    ~nStreamDescriptor();
+
+    //! creates a message for sending
+    nStreamMessage * CreateMessage() const;
+private:
+    //! creates a message
+    virtual nMessageBase * DoCreateMessage() const;
+};
+
 // old style stream network messages
 class nStreamMessage: public nMessageBase
 {
@@ -72,7 +94,7 @@ public:
 #endif
     }
 
-    explicit nStreamMessage( const nDescriptor &, unsigned int messageID = 0  );  // create a new message
+    explicit nStreamMessage( const nStreamDescriptor &, unsigned int messageID = 0  );  // create a new message
 
     void Write(const unsigned short &x){
         // can't write to a reading message, or one that was finalized
@@ -82,26 +104,26 @@ public:
     }
 
     //! create a message from a pattern buffer
-    template< class MESSAGE >
-    static nMessageBase * Transform( MESSAGE const & message );
+    // template< class MESSAGE >
+    // static nMessageBase * Transform( MESSAGE const & message );
 
-    nMessage& operator<< (const REAL &x);
-    nMessage& operator>> (REAL &x);
+    nStreamMessage& operator<< (const REAL &x);
+    nStreamMessage& operator>> (REAL &x);
 
-    nMessage& operator<< (const unsigned short &x){
+    nStreamMessage& operator<< (const unsigned short &x){
         Write(x);
         return *this;
     }
-    nMessage& operator>> (unsigned short &x){
+    nStreamMessage& operator>> (unsigned short &x){
         Read(x);
         return *this;
     }
 
-    nMessage& operator<< (const double &x){
+    nStreamMessage& operator<< (const double &x){
         return operator<<(REAL(x));
     }
 
-    nMessage& operator>> (double &x){
+    nStreamMessage& operator>> (double &x){
         REAL y;
         operator>>(y);
         x=y;
@@ -110,13 +132,13 @@ public:
     }
 
     // read a string without any kind of filtering
-    nMessage& ReadRaw(tString &s);
+    nStreamMessage& ReadRaw(tString &s);
 
-    nMessage& operator >> (tString &s);
-    nMessage& operator >> (tColoredString &s);
-    nMessage& operator << (const tString &s);
-    nMessage& operator << (const tColoredString &s);
-    nMessage& operator << (const tOutput &o);
+    nStreamMessage& operator >> (tString &s);
+    nStreamMessage& operator >> (tColoredString &s);
+    nStreamMessage& operator << (const tString &s);
+    nStreamMessage& operator << (const tColoredString &s);
+    nStreamMessage& operator << (const tOutput &o);
 
     template<class T> void BinWrite (const T &x){
         for (unsigned int i=0;i<sizeof(T)/2;i++)
@@ -145,25 +167,25 @@ public:
     }
 
 
-    nMessage& operator<< (const short &x);
-    nMessage& operator>> (short &x);
+    nStreamMessage& operator<< (const short &x);
+    nStreamMessage& operator>> (short &x);
 
-    nMessage& operator<< (const int &x);
-    nMessage& operator>> (int &x);
+    nStreamMessage& operator<< (const int &x);
+    nStreamMessage& operator>> (int &x);
 
-    nMessage& operator<< (const unsigned int &x){
+    nStreamMessage& operator<< (const unsigned int &x){
         operator<<(reinterpret_cast<const int&>(x));
         return *this;
     }
-    nMessage& operator>> (unsigned int &x){
+    nStreamMessage& operator>> (unsigned int &x){
         operator>>(reinterpret_cast<int&>(x));
         return *this;
     }
 
-    nMessage& operator<< (const bool &x);
-    nMessage& operator>> (bool &x);
+    nStreamMessage& operator<< (const bool &x);
+    nStreamMessage& operator>> (bool &x);
 
-    template<class T> nMessage& operator << (const T* p)
+    template<class T> nStreamMessage& operator << (const T* p)
     {
         if (p)
             Write( p->ID() );
@@ -173,7 +195,7 @@ public:
         return *this;
     }
 
-    template<class T> nMessage& operator << (const tControlledPTR<T> p)
+    template<class T> nStreamMessage& operator << (const tControlledPTR<T> p)
     {
         if (p)
             Write( p->ID() );
@@ -203,10 +225,7 @@ protected:
 };
 
 // read/write operators for versions
-nMessage& operator >> ( nMessage& m, nVersion& ver );
-nMessage& operator << ( nMessage& m, const nVersion& ver );
-
-std::istream& operator >> ( std::istream& s, nVersion& ver );
-std::ostream& operator << ( std::ostream& s, const nVersion& ver );
+nStreamMessage& operator >> ( nStreamMessage& m, nVersion& ver );
+nStreamMessage& operator << ( nStreamMessage& m, const nVersion& ver );
 
 #endif

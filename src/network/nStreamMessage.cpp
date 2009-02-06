@@ -40,7 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 static nVersionFeature sn_ZeroMessageCrashfix( 1 );
 
 #ifdef DEBUG
-nMessage* sn_WatchMessage = NULL;
+nMessageBase* sn_WatchMessage = NULL;
 unsigned int sn_WatchMessageID = 76;
 
 void sn_BreakOnMessageID( unsigned int messageID )
@@ -93,7 +93,7 @@ unsigned long int sn_ExpandMessageID( unsigned short id, unsigned short sender )
     return expanders[sender].ExpandMessageID(id);
 }
 
-nStreamMessage::nStreamMessage( nDescriptor const & descriptor, unsigned int messageID )
+nStreamMessage::nStreamMessage( nStreamDescriptor const & descriptor, unsigned int messageID )
 : nMessageBase( descriptor, messageID ), readOut(0), descriptor_( descriptor )
 {
 }
@@ -131,7 +131,7 @@ int nStreamMessage::Size() const
     return DataLen() * 2;
 }
 
-nMessage& nStreamMessage::operator << (const tString &ss){
+nStreamMessage& nStreamMessage::operator << (const tString &ss){
     tString s = ss;
 
     /*
@@ -228,11 +228,11 @@ nMessage& nStreamMessage::operator << (const tString &ss){
     return *this;
 }
 
-nMessage& nStreamMessage::operator << (const tColoredString &s){
+nStreamMessage& nStreamMessage::operator << (const tColoredString &s){
     return *this << static_cast< const tString & >( s );
 }
 
-nMessage& nStreamMessage::operator << ( const tOutput &o ){
+nStreamMessage& nStreamMessage::operator << ( const tOutput &o ){
     return *this << tString( static_cast< const char * >( o ) );
 }
 
@@ -242,7 +242,7 @@ static void sn_AddToString( tString & s, tString::CHAR c )
         s += c;
 }
 
-nMessage& nStreamMessage::ReadRaw(tString &s )
+nStreamMessage& nStreamMessage::ReadRaw(tString &s )
 {
     s.Clear();
     unsigned short w,len;
@@ -273,7 +273,7 @@ static tConfItem<bool> sn_filterColorStringsConf("FILTER_COLOR_STRINGS",sn_filte
 bool sn_filterDarkColorStrings = false;
 static tConfItem<bool> sn_filterDarkColorStringsConf("FILTER_DARK_COLOR_STRINGS",sn_filterDarkColorStrings);
 
-nMessage& nStreamMessage::operator >> (tColoredString &s )
+nStreamMessage& nStreamMessage::operator >> (tColoredString &s )
 {
     // read the raw data
     ReadRaw( s );
@@ -317,7 +317,7 @@ nMessage& nStreamMessage::operator >> (tColoredString &s )
     return *this;
 }
 
-nMessage& nStreamMessage::operator >> (tString &s )
+nStreamMessage& nStreamMessage::operator >> (tString &s )
 {
     tColoredString safe;
     operator>>( safe );
@@ -338,7 +338,7 @@ unsigned int exp:EXP;
 } myfloat;
 
 
-nMessage& nStreamMessage::operator<<(const REAL &x){
+nStreamMessage& nStreamMessage::operator<<(const REAL &x){
 
 
 #ifdef DEBUG
@@ -454,7 +454,7 @@ nMessage& nStreamMessage::operator<<(const REAL &x){
     return *this;
 }
 
-nMessage& nStreamMessage::operator>>(REAL &x){
+nStreamMessage& nStreamMessage::operator>>(REAL &x){
     /*
       short vorkomma;
       unsigned short nachkomma;
@@ -500,19 +500,19 @@ nMessage& nStreamMessage::operator>>(REAL &x){
     return *this;
 }
 
-nMessage& nStreamMessage::operator<< (const short &x){
+nStreamMessage& nStreamMessage::operator<< (const short &x){
     Write((reinterpret_cast<const short *>(&x))[0]);
 
     return *this;
 }
 
-nMessage& nStreamMessage::operator>> (short &x){
+nStreamMessage& nStreamMessage::operator>> (short &x){
     Read(reinterpret_cast<unsigned short *>(&x)[0]);
 
     return *this;
 }
 
-nMessage& nStreamMessage::operator<< (const int &x){
+nStreamMessage& nStreamMessage::operator<< (const int &x){
     unsigned short a=x & (0xFFFF);
     short b=(x-a) >> 16;
 
@@ -522,7 +522,7 @@ nMessage& nStreamMessage::operator<< (const int &x){
     return *this;
 }
 
-nMessage& nStreamMessage::operator>> (int &x){
+nStreamMessage& nStreamMessage::operator>> (int &x){
     unsigned short a;
     short b;
 
@@ -534,7 +534,7 @@ nMessage& nStreamMessage::operator>> (int &x){
     return *this;
 }
 
-nMessage& nStreamMessage::operator<< (const bool &x){
+nStreamMessage& nStreamMessage::operator<< (const bool &x){
     if (x)
         Write(1);
     else
@@ -543,7 +543,7 @@ nMessage& nStreamMessage::operator<< (const bool &x){
     return *this;
 }
 
-nMessage& nStreamMessage::operator>> (bool &x){
+nStreamMessage& nStreamMessage::operator>> (bool &x){
     unsigned short y;
     Read(y);
     x= (y!=0);
@@ -569,8 +569,8 @@ void nStreamMessage::Read(unsigned short &x){
 //! handle this message
 void nStreamMessage::OnHandle()
 {
-    tASSERT( dynamic_cast< nDescriptor const * >( &GetDescriptor() ) );
-    (* static_cast< nDescriptor const & >( GetDescriptor() ).handler)( *this );
+    tASSERT( dynamic_cast< nStreamDescriptor const * >( &GetDescriptor() ) );
+    (* static_cast< nStreamDescriptor const & >( GetDescriptor() ).handler)( *this );
 }
 
 //! fills the receiving buffer with data

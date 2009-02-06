@@ -38,6 +38,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nNetObject.pb.h"
 
+#include "nStreamMessage.h"
+
 using namespace google::protobuf;
 
 #ifdef DEBUG
@@ -156,6 +158,8 @@ void nMessageStreamer::StreamToProtoBuf( nStreamMessage & source, nProtoBufMessa
     target.GetDescriptor().StreamFrom( source, target.AccessProtoBuf(), nProtoBufDescriptorBase::SECTION_First );
 }
 
+nProtoBufMessageBase::~nProtoBufMessageBase(){}
+
 nProtoBufMessageBase::nProtoBufMessageBase( nProtoBufDescriptorBase const & descriptor )
 : nMessageBase( descriptor ), 
   streamer_( descriptor.GetStreamer() )
@@ -236,7 +240,7 @@ int nProtoBufMessageBase::OnWrite( WriteArguments & arguments ) const
         if ( !oldFormat_ )
         {
             // Transform to old style message.
-            static nDescriptor dummy( 0, NULL, NULL );
+            static nStreamDescriptor dummy( 0, NULL, NULL );
             oldFormat_ = tNEW(nStreamMessage)( dummy, MessageID() );
 
             tASSERT( streamer_ );
@@ -308,7 +312,7 @@ void nProtoBufMessageBase::OnRead( unsigned char const * & buffer, unsigned char
         if ( !oldFormat_ )
         {
             // read old format
-            static nDescriptor dummy( 0, NULL, NULL );
+            static nStreamDescriptor dummy( 0, NULL, NULL );
             oldFormat_ = tNEW(nStreamMessage)( dummy, MessageID() );
             static_cast< nMessageBase * >( oldFormat_ )->Read( buffer, end );
         }
@@ -373,7 +377,7 @@ nProtoBufDescriptorBase::DescriptorMap & nProtoBufDescriptorBase::AccessDescript
 
 
 //! dumb streaming from message, static version
-void nProtoBufDescriptorBase::StreamFromStatic( nMessage & in, nProtoBuf & out, StreamSections sections )
+void nProtoBufDescriptorBase::StreamFromStatic( nStreamMessage & in, nProtoBuf & out, StreamSections sections )
 {
     // try to determine suitable descriptor
     nProtoBufDescriptorBase const * embedded = AccessDescriptorsByName()[ DetermineName( out ) ];
@@ -399,7 +403,7 @@ void nProtoBufDescriptorBase::StreamFromStatic( nMessage & in, nProtoBuf & out, 
 }
 
 //! dumb streaming to message, static version
-void nProtoBufDescriptorBase::StreamToStatic( nProtoBuf const & in, nMessage & out, StreamSections sections )
+void nProtoBufDescriptorBase::StreamToStatic( nProtoBuf const & in, nStreamMessage & out, StreamSections sections )
 {
     // try to determine suitable descriptor
     nProtoBufDescriptorBase const * embedded = AccessDescriptorsByName()[ DetermineName( in ) ];
@@ -425,7 +429,7 @@ void nProtoBufDescriptorBase::StreamToStatic( nProtoBuf const & in, nMessage & o
 }
 
 //! dumb streaming from message, static version
-void nProtoBufDescriptorBase::StreamFromDefault( nMessage & in, nProtoBuf & out, StreamSections sections )
+void nProtoBufDescriptorBase::StreamFromDefault( nStreamMessage & in, nProtoBuf & out, StreamSections sections )
 {
     // get reflection interface
     REFLECTION_CONST * reflection = out.GetReflection();
@@ -466,38 +470,72 @@ void nProtoBufDescriptorBase::StreamFromDefault( nMessage & in, nProtoBuf & out,
 
         if ( field->label() == FieldDescriptor::LABEL_REPEATED )
         {
-            // This case doesn't happen too often. Actually, just once:
-            // the gNetPlayerWall sync. All quirks here are just to get that
-            // one case right.
-
-            // read field size
-            unsigned short size;
-            in.Read( size );
-
-            // clear the array
-            reflection->REFL_GET( ClearField, &out, field );
-
-            switch( field->cpp_type() )
+            if ( i != 0 )
             {
-            case FieldDescriptor::CPPTYPE_MESSAGE:
-            {
-                // read field in reverse order
-                for( int j = size-1; j >= 0; --j )
+                // This case doesn't happen too often. Actually, just once:
+                // the gNetPlayerWall sync. All quirks here are just to get that
+                // one case right.
+
+                // read field size
+                unsigned short size;
+                in.Read( size );
+                
+                // clear the array
+                reflection->REFL_GET( ClearField, &out, field );
+                
+                switch( field->cpp_type() )
                 {
-                    reflection->REFL_GET( AddMessage, &out, field );
+                case FieldDescriptor::CPPTYPE_MESSAGE:
+                {
+                    // read field in reverse order
+                    for( int j = size-1; j >= 0; --j )
+                    {
+                        reflection->REFL_GET( AddMessage, &out, field );
+                    }
+                    
+                    for( int j = size-1; j >= 0; --j )
+                    {
+                        StreamFromStatic( in, *reflection->REFL_GET_REP( MutableRepeatedMessage, &out, field, j ), SECTION_First );
+                    }
+                }
+                break;
+                default:
+                    break;
+                }
+
+                continue;
+            }
+            else
+            {
+                // the other repeated arrays are just fill-the-message types, where no
+                // lenght is streamed and the array ends when the message ends.
+                // clear the array
+                reflection->REFL_GET( ClearField, &out, field );
+                while( !in.End() )
+                {
+                    switch( field->cpp_type() )
+                    {
+                    case FieldDescriptor::CPPTYPE_UINT32:
+                    {
+                        unsigned short value;
+                        in.Read( value );
+                        reflection->REFL_SET( AddUInt32, &out, field, value );
+                        break;
+                    }
+                    case FieldDescriptor::CPPTYPE_MESSAGE:
+                    {
+                        nProtoBuf * message = reflection->REFL_GET( AddMessage, &out, field );
+                        StreamFromStatic( in, *message, SECTION_First );
+                        break;
+                    }
+                    default:
+                        break;
+                    }
                 }
                 
-                for( int j = size-1; j >= 0; --j )
-                {
-                    StreamFromStatic( in, *reflection->REFL_GET_REP( MutableRepeatedMessage, &out, field, j ), SECTION_First );
-                }
-            }
-            break;
-            default:
                 break;
             }
-
-            continue;
+            
         }
 
         switch( field->cpp_type() )
@@ -554,7 +592,7 @@ void nProtoBufDescriptorBase::StreamFromDefault( nMessage & in, nProtoBuf & out,
 }
 
 //! dumb streaming to message, static version
-void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nMessage & out, StreamSections sections )
+void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nStreamMessage & out, StreamSections sections )
 {
     // get reflection interface
     const Reflection * reflection = in.GetReflection();
@@ -589,39 +627,68 @@ void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nMessage & 
 
         if ( field->label() == FieldDescriptor::LABEL_REPEATED )
         {
-            // con << in.ShortDebugString() << "\n";
-
-            // This case doesn't happen too often. Actually, just once:
-            // the gNetPlayerWall sync. All quirks here are just to get that
-            // one case right.
-
-            // read field size
-            unsigned short size = reflection->REFL_GET( FieldSize, in, field );
-            if ( size == 0 )
+            if ( i != 0 )
             {
+                // con << in.ShortDebugString() << "\n";
+                
+                // This case doesn't happen too often. Actually, just once:
+                // the gNetPlayerWall sync. All quirks here are just to get that
+                // one case right.
+                
+                // read field size
+                unsigned short size = reflection->REFL_GET( FieldSize, in, field );
+                if ( size == 0 )
+                {
+                    continue;
+                }
+                
+                out.Write( size );
+                
+                // clear the array
+                
+                switch( field->cpp_type() )
+                {
+                case FieldDescriptor::CPPTYPE_MESSAGE:
+                {
+                    // write fields in reverse order
+                    for( int j = size-1; j >= 0; --j )
+                    {
+                        StreamToStatic( reflection->REFL_GET_REP( GetRepeatedMessage, in, field, j ), out, SECTION_First );
+                    }
+                }
+                break;
+                default:
+                    break;
+                }
+
                 continue;
             }
-
-            out.Write( size );
-
-            // clear the array
-
-            switch( field->cpp_type() )
+            else
             {
-            case FieldDescriptor::CPPTYPE_MESSAGE:
-            {
-                // write fields in reverse order
-                for( int j = size-1; j >= 0; --j )
+                unsigned short size = reflection->REFL_GET( FieldSize, in, field );
+                for( int j = 0; j < size; ++j )
                 {
-                    StreamToStatic( reflection->REFL_GET_REP( GetRepeatedMessage, in, field, j ), out, SECTION_First );
+                    switch( field->cpp_type() )
+                    {
+                    case FieldDescriptor::CPPTYPE_UINT32:
+                    {
+                        out.Write( reflection->REFL_GET_REP( GetRepeatedUInt32, in, field, j ) );
+                        break;
+                    }
+                    case FieldDescriptor::CPPTYPE_MESSAGE:
+                    {
+                        nProtoBuf const & message = reflection->REFL_GET_REP( GetRepeatedMessage, in, field, j );
+                        StreamToStatic( message, out, SECTION_First );
+                        break;
+                    }
+                    default:
+                        break;
+                    }
                 }
-            }
-            break;
-            default:
+
                 break;
             }
 
-            continue;
         }
 
         switch( field->cpp_type() )
@@ -872,26 +939,26 @@ void nProtoBufDescriptorBase::ClearRepeated( nProtoBuf & message )
 }
 
 //! dumb streaming to message
-void nProtoBufDescriptorBase::DoStreamTo( nProtoBuf const & in, nMessage & out, StreamSections sections ) const
+void nProtoBufDescriptorBase::DoStreamTo( nProtoBuf const & in, nStreamMessage & out, StreamSections sections ) const
 {
     StreamToDefault( in, out, sections );
 }
 
 //! dumb streaming from message
-void nProtoBufDescriptorBase::DoStreamFrom( nMessage & in, nProtoBuf & out, StreamSections sections ) const
+void nProtoBufDescriptorBase::DoStreamFrom( nStreamMessage & in, nProtoBuf & out, StreamSections sections ) const
 {
     StreamFromDefault( in, out, sections );
 }
 
 /*
 // read/write operators for protocol buffers
-nMessage& operator >> ( nMessage& m, nProtoBuf & buffer )
+nStreamMessage& operator >> ( nStreamMessage& m, nProtoBuf & buffer )
 {
 
     return m;
 }
 
-nMessage& operator << ( nMessage& m, nProtoBuf const & buffer )
+nStreamMessage& operator << ( nStreamMessage& m, nProtoBuf const & buffer )
 {
     tASSERT(0);
 

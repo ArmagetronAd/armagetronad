@@ -113,9 +113,6 @@ public:
     bool SyncIsNew( Engine::NetGameObjectSync const & sync, nSenderInfo const & sender );
 };
 
-nMessage &operator << (nMessage &m, const eCoord &x);
-nMessage &operator >> (nMessage &m, eCoord &x);
-
 class eTransferInhibitor: public tCallbackOr{
     static int user;
 public:

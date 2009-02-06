@@ -356,19 +356,6 @@ bool eTransferInhibitor::no_transfer(int u){
 
 int eTransferInhibitor::user;
 
-nMessage & operator<< (nMessage &m, const eCoord &x){
-    m << x.x;
-    m << x.y;
-
-    return m;
-}
-
-nMessage & operator>> (nMessage &m, eCoord &x){
-    m >> x.x;
-    m >> x.y;
-
-    return m;
-}
 // *******************************************************************************
 // *
 // *	DoGetMachine

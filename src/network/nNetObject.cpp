@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nProtoBuf.h"
 #include "nBinary.h"
 #include "nNetObject.pb.h"
+#include "nNetObjectPrivate.pb.h"
 
 #include <deque>
 #include <set>
@@ -48,7 +49,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // debug watchs
 #ifdef DEBUG
 int sn_WatchNetID = 0;
-extern nMessage* sn_WatchMessage;
+extern nMessageBase* sn_WatchMessage;
 #endif
 
 tDEFINE_REFOBJ( nNetObject )
@@ -359,27 +360,30 @@ static unsigned short next_free_server( bool kill ){
     }
 }
 
-void req_id_handler(nMessage &m){
+static void sn_GrantIDsHandler( Network::GrantIDs const & ids, nSenderInfo const & sender )
+{
     unsigned short stop = distribute;
     if (distribute == 0)
         stop = ID_PREFETCH;
 
-    if (sn_GetNetState()==nSERVER)
-        Cheater(m.SenderID());
+    if ( sn_GetNetState()==nSERVER )
+    {
+        Cheater( sender.SenderID() );
+    }
     else{
-        while (!m.End())
+        for( int i = ids.blocks_size() - 1; i >= 0; --i )
         {
-            unsigned short id, count=1;
-            m.Read(id);
-            if (!m.End())
-                m.Read(count);
+            Network::IDBlock const & block = ids.blocks(i);
+
+            unsigned short id = block.start();
+            unsigned short count = block.length();
 
             for (unsigned short i=id + count - 1; i>= id && request+1 != stop; i--)
             {
                 if (sn_netObjects[i])
                 {
                     con << "Warning! Network id receive error on ID " << i << " belonging to client " << sn_netObjects[i]->Owner() << "\n";
-                    con << "while recieving ID block " << id << "-" << id+count-1 << " from netmessage " << m.MessageID() << ".\n";
+                    con << "while recieving ID block " << id << "-" << id+count-1 << " from netmessage " << sender.MessageID() << ".\n";
 
                 }
                 else
@@ -397,76 +401,59 @@ void req_id_handler(nMessage &m){
     }
 }
 
-nDescriptor req_id(20,req_id_handler,"req_id");
+nProtoBufDescriptor< Network::GrantIDs > sn_grantIDsDescriptor( 20, sn_GrantIDsHandler, "req_id" );
 
-void id_req_handler(nMessage &m){
+void sn_RequestIDsHandler( Network::RequestIDs const & request, nSenderInfo const & sender )
+{
     // Add security: keep clients from fetching too many ids
 
-    if (sn_GetNetState()==nSERVER && m.SenderID()<=MAXCLIENTS)
+    if (sn_GetNetState()==nSERVER && sender.SenderID()<=MAXCLIENTS)
     {
-        if (m.End())
-        { // old style request; send only one ID back.
-            tJUST_CONTROLLED_PTR< nMessage > rep=new nMessage(req_id);
-            unsigned short id=next_free_server(true);
-            sn_netObjectsOwner[id]=m.SenderID();
-            //	  con << "Assigning ID " << id << "\n";
-            rep->Write(id);
-            rep->Send(m.SenderID());
-
-#ifdef DEBUG
-            //con << "distributed id " << net_current_id-1 << " to user " << m.SenderID() << '\n';
-#endif
-        }
-        else
+        unsigned short num = request.num();
+        
+        // not too many requests accepted. kick violators.
+        if ( num > ID_PREFETCH*4 )
         {
-            // new style request: many IDs
-            unsigned short num;
-            m.Read(num);
-
-            // but not too many. kick violators.
-            if ( num > ID_PREFETCH*4 )
+            nReadError( true );
+        }
+        
+        Network::GrantIDs & grant = sn_grantIDsDescriptor.Send( sender.SenderID() );
+        
+        unsigned short begin_block=0;	// begin of the block of currently assigned IDs
+        unsigned short block_len=0;		// and it's length
+        
+        for (int i = num-1; i>=0; i--)
+        {
+            nNetObjectID id = next_free_server(true);
+            
+            sn_netObjectsOwner[id] = sender.SenderID();
+            
+            if (begin_block + block_len == id)	// RLE for allocated IDs
+                block_len++;
+            else
             {
-                nReadError( true );
-            }
-
-            tJUST_CONTROLLED_PTR< nMessage > rep=new nMessage(req_id);
-
-            unsigned short begin_block=0;	// begin of the block of currently assigned IDs
-            unsigned short block_len=0;		// and it's length
-
-            for (int i = num-1; i>=0; i--)
-            {
-                nNetObjectID id = next_free_server(true);
-
-                sn_netObjectsOwner[id]=m.SenderID();
-
-                if (begin_block + block_len == id)	// RLE for allocated IDs
-                    block_len++;
-                else
+                if (block_len > 0)
                 {
-                    if (block_len > 0)
-                    {
-                        //		      con << "Assigning block " << begin_block << " - " << begin_block + block_len - 1 << "\n";
-                        rep->Write(begin_block);
-                        rep->Write(block_len);
-                    }
-                    begin_block = id;
-                    block_len = 1;
+                    //		      con << "Assigning block " << begin_block << " - " << begin_block + block_len - 1 << "\n";
+                    Network::IDBlock & block = *grant.add_blocks();
+                    block.set_start( begin_block );
+                    block.set_length( block_len );
                 }
+                begin_block = id;
+                block_len = 1;
             }
-            if (block_len > 0)
-            {
-                //	      con << "Assigning block " << begin_block << " - " << begin_block + block_len - 1 << "\n";
-                rep->Write(begin_block);
-                rep->Write(block_len);
-            }
-
-            rep->Send(m.SenderID());
+        }
+        if (block_len > 0)
+        {
+            //	      con << "Assigning block " << begin_block << " - " << begin_block + block_len - 1 << "\n";
+            Network::IDBlock & block = *grant.add_blocks();
+            block.set_start( begin_block );
+            block.set_length( block_len );
         }
     }
 }
 
-nDescriptor id_req(21,id_req_handler,"id_req_handler");
+nProtoBufDescriptor< Network::RequestIDs > sn_requestIDsDescriptor( 21, sn_RequestIDsHandler );
 
 unsigned short next_free(){
     unsigned short ret=0;
@@ -478,9 +465,9 @@ unsigned short next_free(){
                 need_soon -= ID_PREFETCH;
             if (need_soon < (ID_PREFETCH >> 1))
             {
-                tJUST_CONTROLLED_PTR< nMessage > m = new nMessage(id_req);
-                m->Write(ID_PREFETCH >> 2);
-                m->Send(0);
+                // request some IDs
+                Network::RequestIDs & request = sn_requestIDsDescriptor.Send(0);
+                request.set_num( ID_PREFETCH >> 2 );
             }
 
             double timeout=tSysTimeFloat()+60;
@@ -527,9 +514,9 @@ void first_fill_ids(){
 
     distribute=request=0;
 
-    tJUST_CONTROLLED_PTR< nMessage > m = new nMessage(id_req);
-    m->Write(ID_PREFETCH - 10);
-    m->Send(0);
+    // request some IDs
+    Network::RequestIDs & request = sn_requestIDsDescriptor.Send(0);
+    request.set_num( ID_PREFETCH - 10 );
 }
 
 
@@ -819,12 +806,12 @@ void nNetObject::InitAfterCreation(){
 } // after remote creation,
 
 
-static void net_destroy_handler(nMessage &m){
+static void sn_DestroyObjectsHandler( Network::DestroyObjects const & destroy, nSenderInfo const & sender )
+{
     //con << "destroy begin\n";
-    unsigned short id;
-    //int count=0;
-    while (!m.End()){
-        m.Read(id);
+    for( int i = destroy.ids_size()-1; i >= 0; --i )
+    {
+        unsigned short id = destroy.ids(i);
 #ifdef DEBUG
         sn_BreakOnObjectID( id );
 #endif
@@ -834,7 +821,7 @@ static void net_destroy_handler(nMessage &m){
 
         nDestroyInfo& info = sn_Destroyed[ sn_Destroyed.Len() ];
         info.id = id;
-        info.sender = m.SenderID();
+        info.sender = sender.SenderID();
         info.actionOnDeleteExecuted=false;
         info.timeout=tSysTimeFloat()+nDeletedTimeout;
 
@@ -923,9 +910,9 @@ void nNetObject::RegisterRegistrar( nNetObjectRegistrar& r )
 }
 */
 
-static nDescriptor net_destroy(22,net_destroy_handler,"net_destroy");
+static nProtoBufDescriptor< Network::DestroyObjects > sn_destroyObjectsDescriptor( 22, sn_DestroyObjectsHandler );
 
-static tJUST_CONTROLLED_PTR< nMessage > destroyers[MAXCLIENTS+2];
+static tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::DestroyObjects > > destroyers[MAXCLIENTS+2];
 static REAL                             destroyersTime[MAXCLIENTS+2];
 
 // list of netobjects that have a sync request running
@@ -999,12 +986,12 @@ nNetObject::~nNetObject(){
                     knowsAbout[user].acksPending){
                 if (destroyers[user]==NULL)
                 {
-                    destroyers[user]=new nMessage(net_destroy);
+                    destroyers[user] = sn_destroyObjectsDescriptor.CreateMessage();
                     destroyersTime[user]=tSysTimeFloat();
                 }
-                destroyers[user]->Write(id);
+                destroyers[user]->AccessProtoBuf().add_ids(id);
 
-                if (destroyers[user]->DataLen()>100){
+                if (destroyers[user]->AccessProtoBuf().ids_size() > 100){
                     destroyers[user]->Send(user);
                     destroyers[user]=NULL;
                 }
@@ -1428,7 +1415,8 @@ public:
     }
 };
 
-static void net_sync_handler(nMessage & m){
+static void net_sync_handler( nStreamMessage & m )
+{
     unsigned short id;
     m.Read(id);
 #ifdef DEBUG
@@ -1440,7 +1428,7 @@ static void net_sync_handler(nMessage & m){
                 (!obj->AcceptClientSync()
                  || obj->Owner()!=m.SenderID())
            ){
-            Cheater(m.SenderID());
+            Cheater( m.SenderID() );
 #ifdef DEBUG
             tERR_ERROR("sync should only be called client-side!");
 #endif
@@ -1452,8 +1440,7 @@ static void net_sync_handler(nMessage & m){
     }
 }
 
-static nDescriptor net_sync(24,net_sync_handler,"net_sync");
-
+static nStreamDescriptor net_sync(24,net_sync_handler,"net_sync");
 
 //! class converting sync messages
 class nMessageStreamerSync: public nMessageStreamer
@@ -1568,7 +1555,7 @@ void nNetObject::SyncAll(){
             if (destroyers[user])
             {
                 // but check whether the opportunity is good (big destroyers message, or a sync packet in the pipe) first
-                if ( destroyers[user]->DataLen() > 75 ||
+                if ( destroyers[user]->AccessProtoBuf().ids_size() > 75 ||
                         sn_Connections[user].sendBuffer_.Len() > 0 ||
                         destroyersTime[user] < tSysTimeFloat()-.5 )
                 {
@@ -1714,25 +1701,26 @@ void nNetObject::SyncAll(){
 }
 
 
-static void ready_handler(nMessage &m)
+static void sn_ReadyObjectsHandler( Network::ReadyObjects const & ready, nSenderInfo const & sender )
 {
-    is_ready_to_get_objects[m.SenderID()]=true;
+    is_ready_to_get_objects[ sender.SenderID() ]=true;
 
     // reset peer's ping, it's probably unreliable
-    sn_Connections[m.SenderID()].ping.Timestep(100);
+    sn_Connections[ sender.SenderID() ].ping.Timestep(100);
 }
 
-static nDescriptor ready(25,ready_handler,"ready to get objects");
+static nProtoBufDescriptor< Network::ReadyObjects > sn_readyObjectsDescriptor( 25, sn_ReadyObjectsHandler );
 
-
-static void net_clear_handler(nMessage &m){
-    if (sn_GetNetState()!=nSERVER){
+static void sn_ClearObjectsHandler( Network::ClearObjects const & clear, nSenderInfo const & sender )
+{
+    if ( sn_GetNetState()!=nSERVER )
+    {
         nNetObject::ClearAll();
         first_fill_ids();
     }
 }
 
-static nDescriptor net_clear(26,net_clear_handler,"net_clear");
+static nProtoBufDescriptor< Network::ClearObjects > sn_clearObjectsDescriptor( 26, sn_ClearObjectsHandler );
 
 
 void nNetObject::ClearAllDeleted()
@@ -1776,7 +1764,7 @@ void nNetObject::ClearAll(){
         sn_SyncRequestedObject.Remove( n, n->syncListID_ );
     }
 
-    (tNEW(nMessage)(net_clear))->BroadCast(); // just to make sure..
+    sn_clearObjectsDescriptor.Broadcast(); // just to make sure..
 }
 
 
@@ -1865,7 +1853,7 @@ void nNetObject::RelabelOnConnect(){
             }
         }
     }
-    (new nMessage(ready))->Send(0);
+    sn_readyObjectsDescriptor.Send(0);
     is_ready_to_get_objects[0]=true;
 }
 
@@ -1899,18 +1887,17 @@ static nCallbackLoginLogout nlc(&login_callback);
 static bool sync_ack[MAXCLIENTS+2];
 static unsigned short c_sync=0;
 
-static void sync_ack_handler(nMessage &m){
-    unsigned short id;
-    m.Read(id);
+static void sn_SyncAckHandler( Network::SyncAck const & ack, nSenderInfo const & sender )
+{
+    unsigned short id = ack.token();
     if (id==c_sync)
-        sync_ack[m.SenderID()]=true;
+        sync_ack[ sender.SenderID() ] = true;
 }
 
-static nDescriptor sync_ack_nd(27,sync_ack_handler,"sync_ack");
+static nProtoBufDescriptor< Network::SyncAck > sn_syncAckDescriptor( 27, sn_SyncAckHandler );
 
-
-static void sync_msg_handler(nMessage &m);
-static nDescriptor sync_nd(28,sync_msg_handler,"sync_msg");
+static void sn_SyncHandler( Network::Sync const & sync, nSenderInfo const & sender );
+static nProtoBufDescriptor< Network::Sync > sn_syncDescriptor( 28, sn_SyncHandler );
 
 // from nNetwork.C
 
@@ -1936,11 +1923,10 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
             sync_ack[0]=true;
             if ( sg_ServerSync.Supported( 0 ) && otherEnd )
             {
-                tJUST_CONTROLLED_PTR< nMessage > m=new nMessage(sync_nd);
-                *m << timeout;
-                m->Write(sync_sn_netObjects);
-                m->Write(c_sync);
-                m->Send(0);
+                Network::Sync & sync = sn_syncDescriptor.Send(0);
+                sync.set_timeout( timeout );
+                sync.set_sync_netobjects( sync_sn_netObjects );
+                sync.set_token( c_sync );
                 sync_ack[0]=false;
             }
             else
@@ -1968,11 +1954,10 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
         for (int user=MAXCLIENTS;user>0;user--){
             sync_ack[user]=false;
             if (sn_Connections[user].socket){
-                tJUST_CONTROLLED_PTR< nMessage > m=new nMessage(sync_nd);
-                *m << timeout;
-                m->Write(sync_sn_netObjects);
-                m->Write(c_sync);
-                m->Send(user);
+                Network::Sync & sync = sn_syncDescriptor.Send( user );
+                sync.set_timeout( timeout );
+                sync.set_sync_netobjects( sync_sn_netObjects );
+                sync.set_token( c_sync );
             }
         }
 
@@ -2006,33 +1991,30 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
 #endif
 }
 
-static void sync_msg_handler(nMessage &m){
+static void sn_SyncHandler( Network::Sync const & sync, nSenderInfo const & sender )
+{
     static bool recursion=false;
     if (!recursion){
         recursion=true;
 
-        REAL timeout;
-        unsigned short sync_sn_netObjects;
-
-        // sync and write sync response
-        m >> timeout;
-        m.Read(sync_sn_netObjects);
-        unsigned short c_sync;
-        m.Read(c_sync);
+        REAL timeout = sync.timeout();
+        bool sync_sn_netObjects = sync.sync_netobjects();
+        unsigned short c_sync = sync.token();
 
         if (sn_GetNetState()!=nSERVER){
+            // clients obediently sync...
             sn_Sync(timeout+4,sync_sn_netObjects!=0,false);
-            tJUST_CONTROLLED_PTR< nMessage > m=new nMessage(sync_ack_nd);
-            m->Write(c_sync);
-            m->Send(0);
+            
+            // and reply.
+            sn_syncAckDescriptor.Send(0).set_token( c_sync );
         }
         else
         {
             // no time for syncing! write sync response immediately with low priority so the client
             // gets it as soon as all other things are sent
-            tJUST_CONTROLLED_PTR< nMessage > response=new nMessage(sync_ack_nd);
-            response->Write(c_sync);
-            response->Send(m.SenderID(),10000000);
+            nProtoBufMessage< Network::SyncAck > * response = sn_syncAckDescriptor.CreateMessage();
+            response->AccessProtoBuf().set_token( c_sync );
+            response->Send( sender.SenderID(), 10000000 );
         }
         recursion=false;
     }

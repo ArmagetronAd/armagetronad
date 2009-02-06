@@ -12,12 +12,72 @@ import "nNetObject.proto";
 
 */
 
-// legacy message
-message PROTO
+// client request for IDs
+message RequestIDs
 {
-    // legacy stuff goes here
+    optional uint32 num = 1 [default = 1]; // number of IDs the client requests
 
     // legacy message end marker, extensions go after it
     optional bool legacy_message_end_marker = 20000;
 }
 
+// block of free IDs
+message IDBlock
+{
+    optional uint32 start = 1;  // start of block
+    optional uint32 length = 2 [ default = 1 ]; // length of block
+
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// server answer
+message GrantIDs
+{
+    repeated IDBlock blocks = 1; // ID blocks reserved for client
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// destroy command
+message DestroyObjects
+{
+    repeated uint32 ids = 1; // IDs of objects to destroy
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// sent by client if it's ready to receive netobjects
+message ReadyObjects
+{
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// sent by server to tell client to clear all objects
+message ClearObjects
+{
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// sync message, tells peer to sync
+message Sync
+{
+    optional float  timeout         = 2; // timeout in seconds
+    optional bool   sync_netobjects = 3; // flag indicating whether netobjects should also be synced
+    optional uint32 token = 1; // token, copied to sync ack message
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// sync ack message, tells peer sync is complete
+message SyncAck
+{
+    optional uint32 token           = 1; // token, copied from sync message
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}

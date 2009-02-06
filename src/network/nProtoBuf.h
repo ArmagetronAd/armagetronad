@@ -31,6 +31,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nProtoBufForward.h"
 
+// TODO: remove
+#include "nStreamMessage.h"
+
 // protocol buffers forward declaration
 namespace google { namespace protobuf { class Message; class Descriptor; } }
 typedef google::protobuf::Message nProtoBuf;
@@ -81,6 +84,7 @@ class nProtoBufMessageBase: public nMessageBase
 {
 public: 
     nProtoBufMessageBase( nProtoBufDescriptorBase const & descriptor );
+    ~nProtoBufMessageBase();
 
     //! set the compatibility streamer
     void SetStreamer( nMessageStreamer * streamer )
@@ -599,12 +603,14 @@ private:
     }
 };
 
+/*
 // create a message from a pattern buffer
 template< class PROTOBUF >
 nMessageBase * nMessage::Transform( PROTOBUF const & message )
 {
     return nProtoBufDescriptor< PROTOBUF >::TransformStatic( message );
 }
+*/
 
 //! instance of this descriptor
 template< class PROTOBUF > 

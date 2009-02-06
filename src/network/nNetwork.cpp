@@ -56,6 +56,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nNetwork.pb.h"
 
+#include "nStreamMessage.h"
+
 #ifdef MACOSX_XCODE
 #include "version.h"
 #endif // MACOSX_XCODE
@@ -754,8 +756,8 @@ nMessageBase * nDescriptorBase::CreateReceivedMessage() const
     return ret;
 }
 
-nDescriptor::nDescriptor(unsigned short identification,nHandler *handle,
-                         const char *name, bool acceptEvenIfNotLoggedIn )
+nStreamDescriptor::nStreamDescriptor(unsigned short identification,nHandler *handle,
+                                     const char *name, bool acceptEvenIfNotLoggedIn )
 : nDescriptorBase( identification, name, acceptEvenIfNotLoggedIn ),
   handler( handle )
 {
@@ -771,16 +773,16 @@ nDescriptor::nDescriptor(unsigned short identification,nHandler *handle,
     }
 }
 
-nDescriptor::~nDescriptor(){}
+nStreamDescriptor::~nStreamDescriptor(){}
 
 //! creates a message
-nStreamMessage * nDescriptor::CreateMessage() const
+nStreamMessage * nStreamDescriptor::CreateMessage() const
 {
     return tNEW(nStreamMessage)( *this );
 }
 
 //! creates a message
-nMessageBase * nDescriptor::DoCreateMessage() const
+nMessageBase * nStreamDescriptor::DoCreateMessage() const
 {
     return CreateMessage();
 }
@@ -830,25 +832,11 @@ static void handleDefault( nMessage & m )
 static void handleDefaultProtoBuf( Network::Dummy const & pb, nSenderInfo const & sender )
 {}
 
-static nDescriptor s_DefaultDescriptor( 0, handleDefault, "default" );
+static nStreamDescriptor s_DefaultDescriptor( 0, handleDefault, "default" );
 static nProtoBufDescriptor< Network::Dummy > s_DefaultProtoBufDescriptor( 0, handleDefaultProtoBuf );
 
-// classic ack packets
-void ack_handler(nMessage &m){
-    while (!m.End()){
-        sn_Connections[m.SenderID()].AckReceived();
-
-        unsigned short ack;
-        m.Read(ack);
-        //con << "Got ack:" << ack << ":" << m.SenderID() << '\n';
-        nWaitForAck::Ackt(ack,m.SenderID());
-    }
-}
-
-static nDescriptor s_Acknowledge(1,ack_handler,"ack");
-
 // protobuf ack packets
-void ack_handler_pb( Network::Ack const & ack, nSenderInfo const & sender )
+void ack_handler( Network::Ack const & ack, nSenderInfo const & sender )
 {
     for( int i = ack.ack_ids_size() - 1; i >= 0; --i )
     {
@@ -858,38 +846,20 @@ void ack_handler_pb( Network::Ack const & ack, nSenderInfo const & sender )
     }
 }
 
-static nProtoBufDescriptor< Network::Ack > s_ProtoBufAcknowledge(1,ack_handler_pb);
+static nProtoBufDescriptor< Network::Ack > s_Acknowledge( 1, ack_handler );
 
 // send ack message for received packets
 static void sn_SendAcks( int peer, bool immediately )
 {
     std::deque< unsigned short > & acks = sn_Connections[ peer ].acks_;
-    nMessageBase * m = 0;
 
-    if ( sn_protoBuf.Supported( peer ) )
+    nProtoBufMessage< Network::Ack > * m = s_Acknowledge.CreateMessage();
+    for( std::deque< unsigned short >::const_iterator i = acks.begin(); i != acks.end(); ++i )
     {
-        // send protobuf ack
-       
-        nProtoBufMessage< Network::Ack > * mm = s_ProtoBufAcknowledge.CreateMessage();
-        for( std::deque< unsigned short >::const_iterator i = acks.begin(); i != acks.end(); ++i )
-        {
-            mm->AccessProtoBuf().add_ack_ids( *i );
-        }
-
-        m = mm;
+        m->AccessProtoBuf().add_ack_ids( *i );
     }
-    else
-    {
-        // old way
-        nStreamMessage * mm = new nStreamMessage( s_Acknowledge );
-        for( std::deque< unsigned short >::const_iterator i = acks.begin(); i != acks.end(); ++i )
-        {
-            mm->Write( *i );
-        }
-
-        m = mm;
-    }
-
+    
+    m->BendMessageID(0);
     if( immediately )
     {
         m->SendImmediately( peer, false );
@@ -1296,7 +1266,7 @@ void login_handler_intermediate( nMessage & m );
 void logout_handler( Network::Logout const &, nSenderInfo const & );
 
 nProtoBufDescriptor< Network::Login > loginDescriptor ( 6, login_handler, true );
-nDescriptor login_2(11,login_handler_intermediate,"login2", true);
+nStreamDescriptor login_2(11,login_handler_intermediate,"login2", true);
 nProtoBufDescriptor< Network::Logout> logout(7,logout_handler);
 
 tString sn_DenyReason;
@@ -2044,12 +2014,14 @@ void nMessageBase::Handle()
     }
 }
 
+/*
 // ack messages: don't get an ID
 class nAckMessage: public nMessage
 {
 public:
     nAckMessage(): nMessage( s_Acknowledge ){ messageIDBig_ = 0; }
 };
+*/
 
 // receive and s_Acknowledge the recently reveived network messages
 
@@ -2628,7 +2600,7 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
         break;
     case Login_Post0252:
         // old style login
-        tJUST_CONTROLLED_PTR< nStreamMessage > stream = new nMessage(login_2);
+        tJUST_CONTROLLED_PTR< nStreamMessage > stream = new nStreamMessage(login_2);
         mess = stream;
         stream->Write(sn_maxRateIn);
         

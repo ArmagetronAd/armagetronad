@@ -48,6 +48,8 @@ the executable is not distributed).
 #include <vector>
 #include <string.h>
 
+#include "nStreamMessage.h"
+
 #include "nAuthentication.pb.h"
 
 #ifndef DEDICATED
@@ -362,13 +364,13 @@ tString nKrawall::EncodeString( tString const & original )
 
 // network read/write operations of these data types
 void nKrawall::WriteScrambledPassword(const nScrambledPassword& scrambled,
-                                      nMessage &m)
+                                      nStreamMessage &m)
 {
     for (int i = 7; i>=0; i--)
         m.Write(scrambled[i << 1] | (scrambled[(i << 1) + 1] << 8));
 }
 
-void nKrawall::ReadScrambledPassword( nMessage &m,
+void nKrawall::ReadScrambledPassword( nStreamMessage &m,
                                       nScrambledPassword& scrambled)
 {
     for (int i = 7; i>=0; i--)

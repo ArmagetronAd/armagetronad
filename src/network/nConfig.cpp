@@ -46,7 +46,7 @@ nConfItemBase::nConfItemBase(const char *title)
 
 nConfItemBase::~nConfItemBase(){}
 
-void nConfItemBase::s_GetConfigStream(nMessage &m){
+void nConfItemBase::s_GetConfigStream(nStreamMessage &m){
     if (sn_GetNetState()==nSERVER){
         nReadError(); // never accept config messages from the clients
     }
@@ -98,8 +98,8 @@ void nConfItemBase::s_GetConfigStream(nMessage &m){
 }
 
 
-static nDescriptor transferConfig(60,nConfItemBase::s_GetConfigStream,
-                                  "transfer config");
+static nStreamDescriptor transferConfig(60,nConfItemBase::s_GetConfigStream,
+                                        "transfer config");
 
 void nConfItemBase::s_GetConfigProtoBuf( Network::Config const & protoBuf, nSenderInfo const & sender ){
     if (sn_GetNetState()==nSERVER){
@@ -216,7 +216,7 @@ void nConfItemBase::SendConfig(bool force, int peer){
     if ( (changed || force) && sn_GetNetState()==nSERVER)
     {
         //con << "sending conf message for " << tConfItems(i)->title << "\n";
-        tJUST_CONTROLLED_PTR< nStreamMessage > m=tNEW(nMessage)(transferConfig);
+        tJUST_CONTROLLED_PTR< nStreamMessage > m=tNEW(nStreamMessage)(transferConfig);
         *m << title;
         NetWriteVal(*m);
 

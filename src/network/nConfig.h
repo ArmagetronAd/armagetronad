@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nProtoBufForward.h"
 
+#include "nStreamMessage.h"
+
 namespace Network{ class Config; }
 
 template<class T> inline bool sn_compare(T&a, T&b)
@@ -93,10 +95,10 @@ public:
     nConfItemBase(const char *title);
     virtual ~nConfItemBase();
 
-    virtual void NetReadVal(nMessage &m)=0;
-    virtual void NetWriteVal(nMessage &m)=0;
+    virtual void NetReadVal(nStreamMessage &m)=0;
+    virtual void NetWriteVal(nStreamMessage &m)=0;
 
-    static void s_GetConfigStream( nMessage &m );
+    static void s_GetConfigStream( nStreamMessage &m );
 
     virtual void NetReadVal ( Network::Config const & protoBuf )=0;
     virtual void NetWriteVal( Network::Config       & protoBuf )=0;
@@ -144,7 +146,7 @@ public:
     virtual ~nConfItem(){}
 
 
-    virtual void NetReadVal(nMessage &m){
+    virtual void NetReadVal(nStreamMessage &m){
         T dummy;
         m >> dummy;
         if (sn_compare(dummy,*this->target)){
@@ -163,7 +165,7 @@ public:
         }
     }
 
-    virtual void NetWriteVal(nMessage &m){
+    virtual void NetWriteVal(nStreamMessage &m){
         m << *this->target;
     }
 
