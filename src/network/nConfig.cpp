@@ -153,7 +153,7 @@ void nConfItemBase::s_GetConfigProtoBuf( Network::Config const & protoBuf, nSend
 
 
 static nProtoBufDescriptor< Network::Config >
-transferConfigProtoBuf( 60, nConfItemBase::s_GetConfigProtoBuf );
+sn_ConfigDescriptor( 60, nConfItemBase::s_GetConfigProtoBuf );
 
 // helper functions for templated subclasses
 int     nConfItemBase::NetReadHelper( Network::Config const & protoBuf, int )
@@ -220,7 +220,7 @@ void nConfItemBase::SendConfig(bool force, int peer){
         *m << title;
         NetWriteVal(*m);
 
-        tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::Config > > m2=transferConfigProtoBuf.CreateMessage();
+        tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::Config > > m2=sn_ConfigDescriptor.CreateMessage();
         Network::Config & config = m2->AccessProtoBuf();
         config.set_name( title );
         NetWriteVal( config );

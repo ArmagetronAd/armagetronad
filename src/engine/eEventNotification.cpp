@@ -44,7 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 static nVersionFeature se_eventNotificationFeature( 20 );
 
-void se_eventNotificationHandle( Engine::EventNotification const & event, nSenderInfo const & )
+void se_eventNotificationHandler( Engine::EventNotification const & event, nSenderInfo const & )
 {
     tString title = event.title();
     tString message = event.message();
@@ -55,7 +55,7 @@ void se_eventNotificationHandle( Engine::EventNotification const & event, nSende
 #endif
 }
 
-static nProtoBufDescriptor< Engine::EventNotification > se_eventNotificationDescriptor(  199, se_eventNotificationHandle );
+static nProtoBufDescriptor< Engine::EventNotification > se_eventNotificationDescriptor(  199, se_eventNotificationHandler );
 
 void se_sendEventNotification( tString const & title, tString const & message )
 {

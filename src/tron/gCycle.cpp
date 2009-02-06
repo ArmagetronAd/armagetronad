@@ -1385,7 +1385,7 @@ gDestination & gDestination::SetGameTime( REAL gameTime )
 
 // ********************************************************
 
-static void new_destination_handler( Game::CycleDestinationSync const & sync, nSenderInfo const & sender )
+static void sg_CycleDestinationSyncHandler( Game::CycleDestinationSync const & sync, nSenderInfo const & sender )
 {
     // read the destination
     unsigned short cycle_id;
@@ -1419,10 +1419,10 @@ static void new_destination_handler( Game::CycleDestinationSync const & sync, nS
     delete dest;
 }
 
-static nProtoBufDescriptor< Game::CycleDestinationSync > destination_descriptor( 321, &new_destination_handler );
+static nProtoBufDescriptor< Game::CycleDestinationSync > sg_cycleDestinationSyncDescriptor( 321, &sg_CycleDestinationSyncHandler );
 
 static void BroadCastNewDestination(gCycleMovement *c, gDestination *dest){
-    nProtoBufMessage< Game::CycleDestinationSync > * m =destination_descriptor.CreateMessage();
+    nProtoBufMessage< Game::CycleDestinationSync > * m =sg_cycleDestinationSyncDescriptor.CreateMessage();
     dest->WriteCreate( m->AccessProtoBuf(), *m, c->ID() );
     m->BroadCast();
 }

@@ -96,9 +96,9 @@ void nAuthentication::SetLoginResultCallback (nAuthentication::LoginResultCallba
 
 // network handler declarations
 
-static nProtoBufDescriptor< Network::PasswordRequest > nPasswordRequest(40, &nAuthentication::HandlePasswordRequest );
+static nProtoBufDescriptor< Network::PasswordRequest > sn_passwordRequestDescriptor(40, &nAuthentication::HandlePasswordRequest );
 
-static nProtoBufDescriptor< Network::PasswordAnswer > nPasswordAnswer(41, &nAuthentication::HandlePasswordAnswer );
+static nProtoBufDescriptor< Network::PasswordAnswer > sn_passwordAnswerDescriptor(41, &nAuthentication::HandlePasswordAnswer );
 
 // password request and answer
 static nKrawall::nPasswordRequest sn_request;
@@ -126,7 +126,7 @@ static void FinishHandlePasswordRequest()
     sn_answer.scrambled.Clear();
 
     // and send it back
-    Network::PasswordAnswer & answer = nPasswordAnswer.Send(0);
+    Network::PasswordAnswer & answer = sn_passwordAnswerDescriptor.Send(0);
     nKrawall::WriteScrambledPassword(egg, *answer.mutable_answer() );
     answer.set_username_raw( sn_answer.username );
     answer.set_aborted( sn_answer.aborted );
@@ -852,7 +852,7 @@ void nLoginProcess::QueryFromClient()
     nKrawall::RandomSalt(salt);
     
     // send the salt value and the username to the
-    Network::PasswordRequest & request = ::nPasswordRequest.Send( userID ); 
+    Network::PasswordRequest & request = ::sn_passwordRequestDescriptor.Send( userID ); 
     nKrawall::WriteSalt( salt, *request.mutable_nonce() );
     request.set_username_raw( username );
     request.set_message( message );

@@ -775,12 +775,12 @@ static tConfItemFunc se_suspendVotes_conf( "VOTES_SUSPEND", &se_SuspendVotes );
 static tConfItemFunc se_unSuspendVotes_conf( "VOTES_UNSUSPEND", &se_UnSuspendVotes );
 
 
-static nProtoBufDescriptor< Engine::VoteSubmission > vote_handler( 230, eVoteItem::GetControlMessage );
+static nProtoBufDescriptor< Engine::VoteSubmission > se_voteSubmissionDescriptor( 230, eVoteItem::GetControlMessage );
 
 // called on the clients to accept or decline the vote
 void eVoteItem::Vote( bool accept )
 {
-    Engine::VoteSubmission & submission = vote_handler.Broadcast();
+    Engine::VoteSubmission & submission = se_voteSubmissionDescriptor.Broadcast();
     submission.set_vote_id( id_ );
     submission.set_accept( accept );
 
@@ -855,11 +855,11 @@ private:
 // **************************************************************************************
 // **************************************************************************************
 
-static void se_HandleServerVoteChanged( Engine::VoteChanges const & change, nSenderInfo const & sender );
-static nProtoBufDescriptor< Engine::VoteChanges > server_vote_expired_handler( 233, se_HandleServerVoteChanged );
+static void se_VoteChangesHandler( Engine::VoteChanges const & change, nSenderInfo const & sender );
+static nProtoBufDescriptor< Engine::VoteChanges > server_vote_expired_handler( 233, se_VoteChangesHandler );
 
 static void se_HandleNewServerVote( Engine::VoteItemServerControlled const & vote, nSenderInfo const & sender );
-static nProtoBufDescriptor< Engine::VoteItemServerControlled > new_server_vote_handler(232,se_HandleNewServerVote );
+static nProtoBufDescriptor< Engine::VoteItemServerControlled > new_server_se_voteSubmissionDescriptor(232,se_HandleNewServerVote );
 
 // something to vote on: completely controlled by the server
 class eVoteItemServerControlled: public virtual eVoteItem
@@ -939,7 +939,7 @@ public:
 
     virtual nMessageBase * CreateMessage() const
     {
-        nProtoBufMessage< Engine::VoteItemServerControlled > * m = new_server_vote_handler.CreateMessage();
+        nProtoBufMessage< Engine::VoteItemServerControlled > * m = new_server_se_voteSubmissionDescriptor.CreateMessage();
         DoFillToMessage( m->AccessProtoBuf() );
 
         return m;
@@ -978,7 +978,7 @@ private:
     bool expired_;                             //!< flag set when the vote expired on the server
 };
 
-static void se_HandleServerVoteChanged( Engine::VoteChanges const & change, nSenderInfo const & sender )
+static void se_VoteChangesHandler( Engine::VoteChanges const & change, nSenderInfo const & sender )
 {
     eVoteItemServerControlled::s_HandleChanged( change, sender );
 }
@@ -1070,8 +1070,8 @@ void se_VoteKickPlayer( ePlayerNetID * p )
     se_VoteKickUser( p->Owner() );
 }
 
-static void se_HandleKickVote( Engine::VoteItemHarm const & kick, nSenderInfo const & sender );
-static nProtoBufDescriptor< Engine::VoteItemHarm > kill_vote_handler( 231, se_HandleKickVote );
+static void se_VoteItemHarmHandler( Engine::VoteItemHarm const & kick, nSenderInfo const & sender );
+static nProtoBufDescriptor< Engine::VoteItemHarm > se_voteItemHarmDescriptor( 231, se_VoteItemHarmHandler );
 
 // something to vote on: harming a player
 class eVoteItemHarm: public virtual eVoteItem
@@ -1115,7 +1115,7 @@ protected:
 
     virtual nMessageBase * CreateMessage( void ) const
     {
-        nProtoBufMessage< Engine::VoteItemHarm > * m = kill_vote_handler.CreateMessage();
+        nProtoBufMessage< Engine::VoteItemHarm > * m = se_voteItemHarmDescriptor.CreateMessage();
         DoFillToMessage( m->AccessProtoBuf() );
         return m;
     }
@@ -1466,7 +1466,7 @@ private:
     bool fromMenu_; // flag set if the vote came from the menu
 };
 
-static void se_HandleKickVote( Engine::VoteItemHarm const & kick, nSenderInfo const & sender )
+static void se_VoteItemHarmHandler( Engine::VoteItemHarm const & kick, nSenderInfo const & sender )
 {
     // set high default access level for menu issued kick votes, the true access level
     // is taken from the highest level player from the sending client later

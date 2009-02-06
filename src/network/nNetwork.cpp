@@ -466,7 +466,7 @@ bool nVersionFeature::Supported( int client ) const
     return ( min_ < 0 || version->Max() >= min_ ) &&  ( max_ < 0 || version->Min() <= max_ );
 }
 
-void handle_version_control( Network::VersionControl const & control, nSenderInfo const & sender )
+void sn_VersionControlHandler( Network::VersionControl const & control, nSenderInfo const & sender )
 {
     if ( sn_GetNetState() == nCLIENT )
     {
@@ -477,7 +477,7 @@ void handle_version_control( Network::VersionControl const & control, nSenderInf
     }
 }
 
-nProtoBufDescriptor< Network::VersionControl > versionControl(10, handle_version_control );
+nProtoBufDescriptor< Network::VersionControl > sn_versionControlDescriptor(10, sn_VersionControlHandler );
 
 void sn_UpdateCurrentVersion()
 {
@@ -535,7 +535,7 @@ void sn_UpdateCurrentVersion()
     {
         sn_currentVersion = version;
 
-        version.WriteSync( *versionControl.Broadcast().mutable_version() );
+        version.WriteSync( *sn_versionControlDescriptor.Broadcast().mutable_version() );
     }
 }
 
@@ -836,7 +836,7 @@ static nStreamDescriptor s_DefaultDescriptor( 0, handleDefault, "default" );
 static nProtoBufDescriptor< Network::Dummy > s_DefaultProtoBufDescriptor( 0, handleDefaultProtoBuf );
 
 // protobuf ack packets
-void ack_handler( Network::Ack const & ack, nSenderInfo const & sender )
+void sn_AckHandler( Network::Ack const & ack, nSenderInfo const & sender )
 {
     for( int i = ack.ack_ids_size() - 1; i >= 0; --i )
     {
@@ -846,14 +846,14 @@ void ack_handler( Network::Ack const & ack, nSenderInfo const & sender )
     }
 }
 
-static nProtoBufDescriptor< Network::Ack > s_Acknowledge( 1, ack_handler );
+static nProtoBufDescriptor< Network::Ack > sn_ackDescriptor( 1, sn_AckHandler );
 
 // send ack message for received packets
 static void sn_SendAcks( int peer, bool immediately )
 {
     std::deque< unsigned short > & acks = sn_Connections[ peer ].acks_;
 
-    nProtoBufMessage< Network::Ack > * m = s_Acknowledge.CreateMessage();
+    nProtoBufMessage< Network::Ack > * m = sn_ackDescriptor.CreateMessage();
     for( std::deque< unsigned short >::const_iterator i = acks.begin(); i != acks.end(); ++i )
     {
         m->AccessProtoBuf().add_ack_ids( *i );
@@ -899,7 +899,7 @@ nWaitForAck::nWaitForAck(nMessageBase* m,int rec)
     if (!message)
         tERR_ERROR("Null ack!");
 
-    if ( sn_StripDescriptor( message->DescriptorID() ) != sn_StripDescriptor( s_Acknowledge.ID() ) )
+    if ( sn_StripDescriptor( message->DescriptorID() ) != sn_StripDescriptor( sn_ackDescriptor.ID() ) )
         sn_Connections[receiver].ackPending++;
     else
         tERR_ERROR("Should not wait for ack of an ack message itself.");
@@ -943,7 +943,7 @@ nWaitForAck::~nWaitForAck(){
     }
 #endif
 
-    if (bool(message) && sn_StripDescriptor( message->DescriptorID() ) != sn_StripDescriptor( s_Acknowledge.ID() ) )
+    if (bool(message) && sn_StripDescriptor( message->DescriptorID() ) != sn_StripDescriptor( sn_ackDescriptor.ID() ) )
     {
         sn_Connections[receiver].ackPending--;
         sn_Connections[receiver].ReliableMessageSent();
@@ -1226,7 +1226,7 @@ nServerInfoBase * sn_PeekRedirectTo()
     return sn_redirectTo.get();
 }
 
-void login_deny_handler( Network::LoginDenied const & denied, nSenderInfo const & sender ){
+static void sn_LoginDeniedHandler( Network::LoginDenied const & denied, nSenderInfo const & sender ){
     if ( denied.has_reason() )
     {
         sn_DenyReason = denied.reason();
@@ -1258,25 +1258,25 @@ void login_deny_handler( Network::LoginDenied const & denied, nSenderInfo const 
     }
 }
 
-static nProtoBufDescriptor< Network::LoginDenied > login_deny( 3, login_deny_handler );
+static nProtoBufDescriptor< Network::LoginDenied > sn_loginDeniedDescriptor( 3, sn_LoginDeniedHandler );
 
 // handles very old and protobuf logins
-void login_handler( Network::Login const & login, nSenderInfo const & sender );
-void login_handler_intermediate( nMessage & m );
-void logout_handler( Network::Logout const &, nSenderInfo const & );
+static void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender );
+static void sn_LoginHandler_intermediate( nMessage & m );
+static void sn_LogoutHandler( Network::Logout const &, nSenderInfo const & );
 
-nProtoBufDescriptor< Network::Login > loginDescriptor ( 6, login_handler, true );
-nStreamDescriptor login_2(11,login_handler_intermediate,"login2", true);
-nProtoBufDescriptor< Network::Logout> logout(7,logout_handler);
+nProtoBufDescriptor< Network::Login > sn_loginDescriptor ( 6, sn_LoginHandler, true );
+nStreamDescriptor login_2(11,sn_LoginHandler_intermediate,"login2", true);
+nProtoBufDescriptor< Network::Logout> logout( 7, sn_LogoutHandler );
 
 tString sn_DenyReason;
 
-void login_ignore_handler( Network::LoginIgnored const &, nSenderInfo const & )
+static void sn_LoginIgnoredHandler( Network::LoginIgnored const &, nSenderInfo const & )
 {
     // ignore.
 }
 
-static nProtoBufDescriptor< Network::LoginIgnored > login_ignore(4,login_ignore_handler);
+static nProtoBufDescriptor< Network::LoginIgnored > sn_loginIgnoredDescriptor( 4, sn_LoginIgnoredHandler );
 
 
 void first_fill_ids();
@@ -1284,7 +1284,7 @@ void first_fill_ids();
 // from nServerInfo.cpp
 extern bool sn_AcceptingFromMaster;
 
-void login_accept_handler( Network::LoginAccepted const & accepted, nSenderInfo const & sender )
+static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nSenderInfo const & sender )
 {
     if ( sn_GetNetState() != nSERVER && sender.SenderID() == 0 )
     {
@@ -1356,7 +1356,7 @@ void login_accept_handler( Network::LoginAccepted const & accepted, nSenderInfo 
     }
 }
 
-static nProtoBufDescriptor< Network::LoginAccepted > login_accept( 5, login_accept_handler, true );
+static nProtoBufDescriptor< Network::LoginAccepted > sn_loginAcceptedDescriptor( 5, sn_LoginAcceptedHandler, true );
 
 //static short new_id=0;
 
@@ -1454,7 +1454,7 @@ extern bool FloodProtection( int senderID );
 static bool sn_lockOut028tTest = true;
 static tSettingItem< bool > sn_lockOut028TestConf( "NETWORK_LOCK_OUT_028_TEST", sn_lockOut028tTest );
 
-void login_handler_intermediate( nMessage &m )
+void sn_LoginHandler_intermediate( nMessage &m )
 {
     Network::Login login;
 
@@ -1496,10 +1496,10 @@ void login_handler_intermediate( nMessage &m )
     }
 
     // delegate to protobuf method
-    login_handler( login, nSenderInfo( m ) );
+    sn_LoginHandler( login, nSenderInfo( m ) );
 }
 
-void login_handler( Network::Login const & login, nSenderInfo const & sender )
+void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
 {
     nCurrentSenderID senderID;
 
@@ -1560,7 +1560,7 @@ void login_handler( Network::Login const & login, nSenderInfo const & sender )
     if ( sender.SenderID()!=MAXCLIENTS+1 )
     {
         //con << "Ignoring second login from " << m.SenderID() << ".\n";
-        login_ignore.Send( sender.SenderID() );
+        sn_loginIgnoredDescriptor.Send( sender.SenderID() );
     }
     else if (sn_Connections[sender.SenderID()].socket)
     {
@@ -1630,7 +1630,7 @@ void login_handler( Network::Login const & login, nSenderInfo const & sender )
         sn_Connections[MAXCLIENTS+1].acks_.clear();
 
         // send login accept message with high priority
-        Network::LoginAccepted & accepted = login_accept.Send( new_id );
+        Network::LoginAccepted & accepted = sn_loginAcceptedDescriptor.Send( new_id );
         accepted.set_net_id( new_id );
         sn_myVersion.WriteSync( *accepted.mutable_version() );
         accepted.set_address( peers[sender.SenderID()].ToString() );
@@ -1658,7 +1658,7 @@ void login_handler( Network::Login const & login, nSenderInfo const & sender )
 
     if ( new_id > 0 )
     {
-        sn_currentVersion.WriteSync( *versionControl.Send( new_id ).mutable_version() );
+        sn_currentVersion.WriteSync( *sn_versionControlDescriptor.Send( new_id ).mutable_version() );
 
         // store big brother message
         if ( login.has_big_brother() && login.big_brother().size() > 0 )
@@ -1672,7 +1672,7 @@ void login_handler( Network::Login const & login, nSenderInfo const & sender )
     }
 }
 
-void logout_handler( Network::Logout const &, nSenderInfo const & sender )
+void sn_LogoutHandler( Network::Logout const &, nSenderInfo const & sender )
 {
     unsigned short id = sender.SenderID();
 
@@ -1897,7 +1897,7 @@ void nMessageBase::SendImmediately(int peer,bool ack){
 
     if (peer==MAXCLIENTS+1){
 #ifdef DEBUG
-        if(descriptorID_==s_Acknowledge.id)
+        if(descriptorID_==sn_ackDescriptor.id)
             con << "Sending ack to login slot.\n";
 #endif
         //      else if (descriptor
@@ -1965,7 +1965,7 @@ void nMessageBase::Send(int peer,REAL priority,bool ack){
 #ifdef DEBUG
 
     if (peer==MAXCLIENTS+1){
-        if(descriptorID_==s_Acknowledge.id)
+        if(descriptorID_==sn_ackDescriptor.id)
             con << "Sending ack to login slot.\n";
         //      else if (descriptor
         //	tERR_ERROR("the last user only should receive denials or acks.");
@@ -1982,7 +1982,7 @@ void nMessageBase::Send(int peer,REAL priority,bool ack){
 
     sent_per_messid[descriptorID_] += Size() + 6;
 
-    tASSERT( sn_StripDescriptor( DescriptorID() )!= sn_StripDescriptor( s_Acknowledge.ID() ) || !ack);
+    tASSERT( sn_StripDescriptor( DescriptorID() )!= sn_StripDescriptor( sn_ackDescriptor.ID() ) || !ack);
 
     new nMessage_planned_send(this,priority+sn_OrderPriority,ack,peer);
     sn_OrderPriority += .01; // to roughly keep the relative order of netmessages
@@ -2019,11 +2019,11 @@ void nMessageBase::Handle()
 class nAckMessage: public nMessage
 {
 public:
-    nAckMessage(): nMessage( s_Acknowledge ){ messageIDBig_ = 0; }
+    nAckMessage(): nMessage( sn_ackDescriptor ){ messageIDBig_ = 0; }
 };
 */
 
-// receive and s_Acknowledge the recently reveived network messages
+// receive and acknowledge the recently reveived network messages
 
 typedef std::deque< tJUST_CONTROLLED_PTR< nMessageBase > > nMessageFifo;
 
@@ -2151,7 +2151,7 @@ static void rec_peer(unsigned int peer){
                                 // do not accept normal packages from the login
                                 // slot; just login and information packets are allowed.
                                 ( sn_GetNetState() != nSERVER && !login_succeeded && !nCallbackAcceptPackedWithoutConnection::Accept( mess ) )
-                                // if we are not yet logged in, accept only login and login_deny.
+                                // if we are not yet logged in, accept only login and sn_loginDeniedDescriptor.
                             )
                             {
                                 //							con << "Ignoring packet " << mess_id << ":" << id << ".\n";
@@ -2163,9 +2163,9 @@ static void rec_peer(unsigned int peer){
                                     unsigned short diff=mess_id-highest_ack[id];
                                     if ( ( diff>0 && diff<10000 ) ||
                                             ((
-                                                 sn_StripDescriptor( mess.DescriptorID() ) == sn_StripDescriptor( login_accept.ID() )||
-                                                 sn_StripDescriptor( mess.DescriptorID() ) == sn_StripDescriptor( login_deny.ID() )   ||
-                                                 sn_StripDescriptor( mess.DescriptorID() ) == sn_StripDescriptor( loginDescriptor.ID() )
+                                                 sn_StripDescriptor( mess.DescriptorID() ) == sn_StripDescriptor( sn_loginAcceptedDescriptor.ID() )||
+                                                 sn_StripDescriptor( mess.DescriptorID() ) == sn_StripDescriptor( sn_loginDeniedDescriptor.ID() )   ||
+                                                 sn_StripDescriptor( mess.DescriptorID() ) == sn_StripDescriptor( sn_loginDescriptor.ID() )
                                              ) && highest_ack[id] == 0)
                                        ){
                                         // the message has a more recent id than anything before.
@@ -2193,9 +2193,9 @@ static void rec_peer(unsigned int peer){
 #ifdef NO_ACK
                                     (mess.MessageID()) &&
 #endif
-                                    ( sn_StripDescriptor( mess.DescriptorID() ) != sn_StripDescriptor( login_ignore.ID() ) ||
+                                    ( sn_StripDescriptor( mess.DescriptorID() ) != sn_StripDescriptor( sn_loginIgnoredDescriptor.ID() ) ||
                                      login_succeeded )){
-                                    // do not ack the login_ignore packet that did not let you in.
+                                    // do not ack the sn_loginIgnoredDescriptor packet that did not let you in.
 
 #ifdef DEBUG
                                     if ( id > MAXCLIENTS )
@@ -2596,7 +2596,7 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
     case Login_Pre0252:
         // just write a protobuf message. In pre-0.2.5.2 mode, it'll get converted
         // to a stream message correctly.
-        mess = loginDescriptor.Transform( login );
+        mess = sn_loginDescriptor.Transform( login );
         break;
     case Login_Post0252:
         // old style login
@@ -2749,7 +2749,7 @@ private:
 static nConsoleFilter sn_consoleFilter;
 #endif
 
-static void sn_ConsoleOut_handler( Network::ConsoleMessage const & message, nSenderInfo const & )
+static void sn_ConsoleMessageHandler( Network::ConsoleMessage const & message, nSenderInfo const & )
 {
     if (sn_GetNetState()!=nSERVER)
     {
@@ -2758,7 +2758,7 @@ static void sn_ConsoleOut_handler( Network::ConsoleMessage const & message, nSen
 }
 
 
-static nProtoBufDescriptor< Network::ConsoleMessage > sn_ConsoleOut_nd( 8, sn_ConsoleOut_handler );
+static nProtoBufDescriptor< Network::ConsoleMessage > sn_consoleOutDescriptor( 8, sn_ConsoleMessageHandler );
 
 // rough maximal packet size, better send nothig bigger, or it will
 // get fragmented.
@@ -2779,7 +2779,7 @@ nMessageBase * sn_ConsoleOutMessage( tString const & message )
         return m;
     }
 
-    nProtoBufMessage< Network::ConsoleMessage > * m = sn_ConsoleOut_nd.CreateMessage();
+    nProtoBufMessage< Network::ConsoleMessage > * m = sn_consoleOutDescriptor.CreateMessage();
     m->AccessProtoBuf().set_message( message );
     return m;
 }
@@ -2840,7 +2840,7 @@ void sn_ConsoleOut(const tOutput& o,int client){
     sn_ConsoleOutString( message, client );
 }
 
-static void client_cen_handler( Network::CenterMessage const & message, nSenderInfo const & )
+static void sn_CenterMessageHandler( Network::CenterMessage const & message, nSenderInfo const & )
 {
     if (sn_GetNetState()!=nSERVER)
     {
@@ -2848,13 +2848,13 @@ static void client_cen_handler( Network::CenterMessage const & message, nSenderI
     }
 }
 
-static nProtoBufDescriptor< Network::CenterMessage > client_cen_nd( 9, client_cen_handler );
+static nProtoBufDescriptor< Network::CenterMessage > sn_centerMessageDescriptor( 9, sn_CenterMessageHandler );
 
 // causes the connected clients to print a message in the center of the screeen
 void sn_CenterMessage(const tOutput &o,int client){
     tString message(o);
 
-    tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::CenterMessage > > m = client_cen_nd.CreateMessage();
+    tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::CenterMessage > > m = sn_centerMessageDescriptor.CreateMessage();
     m->AccessProtoBuf().set_message( message );
     if (client<0){
         m->BroadCast();
@@ -3156,7 +3156,7 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
         // to make sure...
         if ( i!=0 && i != MAXCLIENTS+2 && sn_GetNetState() == nSERVER ){
             for(int j=2;j>=0;j--){
-                nProtoBufMessage< Network::LoginDenied > * mess = login_deny.CreateMessage();
+                nProtoBufMessage< Network::LoginDenied > * mess = sn_loginDeniedDescriptor.CreateMessage();
                 mess->AccessProtoBuf().set_reason( reason );
 
                 // write redirection
@@ -3261,8 +3261,8 @@ void nCallbackReceivedComplete::ReceivedComplete( )
 static bool net_Accept()
 {
     return
-        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( login_accept.ID() ) ||
-        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( login_deny.ID() ) ||
+        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( sn_loginAcceptedDescriptor.ID() ) ||
+        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( sn_loginDeniedDescriptor.ID() ) ||
         nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( nTempVersionOverrider::Descriptor().ID() );
 }
 

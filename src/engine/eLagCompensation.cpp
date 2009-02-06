@@ -119,7 +119,7 @@ private:
 
 static nClientLag se_clientLag;
 
-static void se_receiveLagMessage( Engine::LagNotification const & notification, nSenderInfo const & )
+static void se_LagNotificationHandler( Engine::LagNotification const & notification, nSenderInfo const & )
 {
     if ( sn_GetNetState() != nCLIENT )
         return;
@@ -127,7 +127,7 @@ static void se_receiveLagMessage( Engine::LagNotification const & notification, 
     se_clientLag.ReportLag( notification.lag(), notification.weight() );
 }
 
-static nProtoBufDescriptor< Engine::LagNotification > se_receiveLagMessageDescriptor( 240, se_receiveLagMessage );
+static nProtoBufDescriptor< Engine::LagNotification > se_lagNotificationDescriptor( 240, se_LagNotificationHandler );
 
 // maximal seconds of lag credit
 static REAL se_lagCredit = .5f;
@@ -205,7 +205,7 @@ public:
         lastLag_ = time;
 
         // send a simple message to the client
-        Engine::LagNotification & notification = se_receiveLagMessageDescriptor.Send( client_ );
+        Engine::LagNotification & notification = se_lagNotificationDescriptor.Send( client_ );
         notification.set_lag( lag );
 
         // propose a weight to the client, it will determine how much impact the lag report has

@@ -1352,7 +1352,7 @@ static bool se_IsUserBanned( ePlayerNetID * p, tString const & name );
 #endif
 
 // receive a "login wanted" message from client
-static void se_LoginWanted( Engine::LoginRequest const & request, nSenderInfo const & sender )
+static void se_LoginRequestHandler( Engine::LoginRequest const & request, nSenderInfo const & sender )
 {
 #ifdef KRAWALL_SERVER
 
@@ -1382,7 +1382,7 @@ static void se_LoginWanted( Engine::LoginRequest const & request, nSenderInfo co
 #endif
 }
 
-static nProtoBufDescriptor< Engine::LoginRequest > se_loginWanted( 204, se_LoginWanted );
+static nProtoBufDescriptor< Engine::LoginRequest > se_loginRequestDescriptor( 204, se_LoginRequestHandler );
 
 // request authentication initiation from the client (if p->loginWanted is set)
 static void se_WantLogin( ePlayer * lp )
@@ -1407,7 +1407,7 @@ static void se_WantLogin( ePlayer * lp )
         return;
     }
 
-    Engine::LoginRequest & request = se_loginWanted.Send(0);
+    Engine::LoginRequest & request = se_loginRequestDescriptor.Send(0);
 
     // write player
     request.set_player_id( nNetObject::PointerToID(  p ) );
@@ -1579,9 +1579,9 @@ static nVersionFeature se_chatRelay( 3 );
 static nVersionFeature se_chatHandlerClient( 6 );
 
 // chat message from client to server
-// void handle_chat( nMessage & );
-void handle_chat( Engine::Chat const &, nSenderInfo const & );
-static nProtoBufDescriptor< Engine::Chat > se_serverChatHandler(200,handle_chat);
+// void se_ChatHandlerServer( nMessage & );
+void se_ChatHandlerServer( Engine::Chat const &, nSenderInfo const & );
+static nProtoBufDescriptor< Engine::Chat > se_chatDescriptorServer( 200, se_ChatHandlerServer );
 
 // checks whether text_to_search contains search_for_text
 bool Contains( const tString & search_for_text, const tString & text_to_search ) {
@@ -1755,8 +1755,8 @@ static ePlayerNetID * se_FindPlayerInChatCommand( ePlayerNetID * sender, char co
 }
 
 // chat message from server to client
-void handle_chat_client( Engine::Chat const & chat, nSenderInfo const & sender );
-static nProtoBufDescriptor< Engine::Chat > se_clientChatHandler( 203, handle_chat_client );
+void se_ChatHanderClient( Engine::Chat const & chat, nSenderInfo const & sender );
+static nProtoBufDescriptor< Engine::Chat > se_chatDescriptorClient( 203, se_ChatHanderClient );
 
 static bool se_FilterOutName( tString const & name, tString & toFilter, bool startOnly = false )
 {
@@ -1781,7 +1781,7 @@ static bool se_FilterOutName( tString const & name, tString & toFilter, bool sta
 class nMessageTranslatorChat: public nMessageTranslator< Engine::Chat >
 {
 public:
-    nMessageTranslatorChat(): nMessageTranslator< Engine::Chat >( se_clientChatHandler ){}
+    nMessageTranslatorChat(): nMessageTranslator< Engine::Chat >( se_chatDescriptorClient ){}
 
     //! convert current message format to format suitable for old client
     virtual nMessageBase * Translate( Engine::Chat const & source, int receiver ) const
@@ -1798,7 +1798,7 @@ public:
         if ( se_chatRelay.Supported( receiver ) && (!p || p->Owner() != receiver ) )
         {
             // transform message to server chat message, the client will understand that, too
-            nProtoBufMessage< Engine::Chat > * m = se_serverChatHandler.CreateMessage();
+            nProtoBufMessage< Engine::Chat > * m = se_chatDescriptorServer.CreateMessage();
             Engine::Chat & dest = m->AccessProtoBuf();
             
             dest.set_player_id( source.player_id() );
@@ -1838,7 +1838,7 @@ public:
 static nMessageTranslatorChat se_chatTranslator;
 
 
-void handle_chat_client(  Engine::Chat const & chat, nSenderInfo const & sender )
+void se_ChatHanderClient( Engine::Chat const & chat, nSenderInfo const & sender )
 {
     if(sn_GetNetState()!=nSERVER)
     {
@@ -1927,7 +1927,7 @@ static nMessageBase* se_ServerControlledChatMessageConsole( ePlayerNetID const *
 {
     tASSERT( player );
 
-    nProtoBufMessage< Engine::Chat > * m = se_clientChatHandler.CreateMessage();
+    nProtoBufMessage< Engine::Chat > * m = se_chatDescriptorClient.CreateMessage();
     Engine::Chat & chat = m->AccessProtoBuf();
 
     chat.set_player_id( player->ID() );
@@ -1970,7 +1970,7 @@ static nMessageBase * se_ChatMessageForServer( ePlayerNetID const * player, tStr
     std::ostringstream cleanup;
     se_AppendChat( cleanup, message );
 
-    nProtoBufMessage< Engine::Chat > * m = se_serverChatHandler.CreateMessage();
+    nProtoBufMessage< Engine::Chat > * m = se_chatDescriptorServer.CreateMessage();
     Engine::Chat & chat = m->AccessProtoBuf();
     chat.set_player_id( player->ID() );
     chat.set_chat_line( cleanup.str() );
@@ -3499,7 +3499,7 @@ static void se_Rtfm( tString const &command, ePlayerNetID *p, std::istream &s, e
 void se_ListAdmins( ePlayerNetID *, std::istream &s, tString command );
 #endif
 
-void handle_chat( unsigned short id, tColoredString const & say, nMessageBase const & m )
+void se_ChatHandlerServer( unsigned short id, tColoredString const & say, nMessageBase const & m )
 {
     nTimeRolling currentTime = tSysTimeFloat();
 
@@ -3636,19 +3636,9 @@ void handle_chat( unsigned short id, tColoredString const & say, nMessageBase co
     }
 }
 
-void handle_chat( nMessage &m )
+void se_ChatHandlerServer( Engine::Chat const & message, nSenderInfo const & sender )
 {
-    unsigned short id;
-    m.Read(id);
-    tColoredString say;
-    m >> say;
-    
-    handle_chat( id, say, m );
-}
-
-void handle_chat( Engine::Chat const & message, nSenderInfo const & sender )
-{
-    handle_chat( message.player_id(), tColoredString( message.chat_line().c_str() ), sender.envelope );
+    se_ChatHandlerServer( message.player_id(), tColoredString( message.chat_line().c_str() ), sender.envelope );
 }
 
 // check if a string is a legal player name
@@ -4381,7 +4371,7 @@ ePlayerNetID::~ePlayerNetID()
 #endif
 }
 
-static void player_removed_from_game_handler( Engine::PlayerRemoved const & removed, nSenderInfo const & sender )
+static void se_PlayerRemovedHandler( Engine::PlayerRemoved const & removed, nSenderInfo const & sender )
 {
     // and the ID of the player that was removed
     unsigned short id = removed.player_id();
@@ -4392,7 +4382,7 @@ static void player_removed_from_game_handler( Engine::PlayerRemoved const & remo
     }
 }
 
-static nProtoBufDescriptor< Engine::PlayerRemoved > player_removed_from_game(202,&player_removed_from_game_handler);
+static nProtoBufDescriptor< Engine::PlayerRemoved > se_playerRemovedDescriptor(202,&se_PlayerRemovedHandler);
 
 static eLadderLogWriter se_playerLeftWriter("PLAYER_LEFT", true);
 
@@ -4413,7 +4403,7 @@ void ePlayerNetID::RemoveFromGame()
     {
         nameFromClient_ = nameFromServer_;
 
-        Engine::PlayerRemoved & removed = player_removed_from_game.Broadcast();
+        Engine::PlayerRemoved & removed = se_playerRemovedDescriptor.Broadcast();
         removed.set_player_id( this->ID() );
 
         if ( listID >= 0 ){

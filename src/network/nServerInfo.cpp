@@ -666,19 +666,19 @@ void nServerInfo::Load(const tPath& path, const char *filename)
 
 // used to transfer small server information (adress, port, public key)
 // from the master server or response to a broadcast to the client
-static nProtoBufDescriptor< Network::SmallServerInfo > SmallServerDescriptor(50,nServerInfo::GetSmallServerInfo, true);
+static nProtoBufDescriptor< Network::SmallServerInfo > sn_smallServerInfoDescriptor(50,nServerInfo::GetSmallServerInfo, true);
 
 // used to transfer the rest of the server info (name, number of players, etc)
 // from the server directly to the client
-static nProtoBufDescriptor< Network::BigServerInfo > BigServerDescriptor(51,nServerInfo::GetBigServerInfo, true);
-static nProtoBufDescriptor< Network::BigServerInfo > BigServerMasterDescriptor(54,nServerInfo::GetBigServerInfoMaster, true);
+static nProtoBufDescriptor< Network::BigServerInfo > sn_bigServerInfoDescriptor(51,nServerInfo::GetBigServerInfo, true);
+static nProtoBufDescriptor< Network::BigServerInfo > sn_bigServerInfoDescriptorMaster(54,nServerInfo::GetBigServerInfoMaster, true);
 
 // request small server information from master server/broadcast
-static nProtoBufDescriptor< Network::RequestSmallServerInfo > RequestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo, true);
+static nProtoBufDescriptor< Network::RequestSmallServerInfo > sn_requestSmallServerInfoDescriptor(52,nServerInfo::GiveSmallServerInfo, true);
 
 // request big server information from master server/broadcast
-static nProtoBufDescriptor< Network::RequestBigServerInfo > RequestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo, true);
-static nProtoBufDescriptor< Network::RequestBigServerInfoMaster > RequestBigServerInfoMasterDescriptor(55,nServerInfo::GiveBigServerInfoMaster, true);
+static nProtoBufDescriptor< Network::RequestBigServerInfo > sn_requestBigServerInfoDescriptor(53,nServerInfo::GiveBigServerInfo, true);
+static nProtoBufDescriptor< Network::RequestBigServerInfoMaster > sn_requestBigServerInfoDescriptorMaster(55,nServerInfo::GiveBigServerInfoMaster, true);
 
 // used to transfer the rest of the server info (name, number of players, etc)
 // from the server directly to the client
@@ -690,9 +690,9 @@ static nProtoBufDescriptor< Network::RequestBigServerInfoMaster > RequestBigServ
 static bool net_Accept()
 {
     return
-        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( SmallServerDescriptor.ID() ) ||
-        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( BigServerDescriptor.ID() ) ||
-        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( BigServerMasterDescriptor.ID() );
+        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( sn_smallServerInfoDescriptor.ID() ) ||
+        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( sn_bigServerInfoDescriptor.ID() ) ||
+        nCallbackAcceptPackedWithoutConnection::Descriptor() == sn_StripDescriptor( sn_bigServerInfoDescriptorMaster.ID() );
 }
 
 static nCallbackAcceptPackedWithoutConnection net_acc( &net_Accept );
@@ -1178,7 +1178,7 @@ void nServerInfo::GiveSmallServerInfo( Network::RequestSmallServerInfo const & i
         }
 
         // immediately respond with a small info
-        tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::SmallServerInfo > > ret = SmallServerDescriptor.CreateMessage();
+        tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::SmallServerInfo > > ret = sn_smallServerInfoDescriptor.CreateMessage();
 
         // get small server info
         nServerInfoBase info;
@@ -1289,7 +1289,7 @@ void nServerInfo::GiveBigServerInfo( Network::RequestBigServerInfo const & info,
     me.GetFrom( sn_Connections[sender.SenderID()].socket );
 
     // delegate
-    GiveBigServerInfoCommon( sender.SenderID(), me, BigServerDescriptor );
+    GiveBigServerInfoCommon( sender.SenderID(), me, sn_bigServerInfoDescriptor );
 }
 
 void nServerInfo::SetFromMaster()
@@ -1340,7 +1340,7 @@ void nServerInfo::GiveBigServerInfoMaster( Network::RequestBigServerInfoMaster c
         return;
 
     // delegate
-    GiveBigServerInfoCommon( sender.SenderID(), *server, BigServerMasterDescriptor );
+    GiveBigServerInfoCommon( sender.SenderID(), *server, sn_bigServerInfoDescriptorMaster );
 }
 
 /*
@@ -1566,7 +1566,7 @@ void nServerInfo::GetFromMaster(nServerInfoBase *masterInfo, char const * fileSu
     // send the server list request message
     con << tOutput("$network_master_reqlist");
 
-    Network::RequestSmallServerInfo & request = RequestSmallServerInfoDescriptor.Broadcast();
+    Network::RequestSmallServerInfo & request = sn_requestSmallServerInfoDescriptor.Broadcast();
     if ( GetFirstServer() )
         request.set_transaction( latest );
 
@@ -1643,7 +1643,7 @@ void nServerInfo::GetFromLAN(unsigned int pollBeginPort, unsigned int pollEndPor
     con << tOutput("$network_master_reqlist");
     for (unsigned int port = pollBeginPort; port <= pollEndPort; port++)
     {
-        nMessageBase *m = RequestSmallServerInfoDescriptor.CreateMessage();
+        nMessageBase *m = sn_requestSmallServerInfoDescriptor.CreateMessage();
         m->ClearMessageID();
         m->SendImmediately(0, false);
         nMessageBase::BroadcastCollected(0, port);
@@ -1694,7 +1694,7 @@ void nServerInfo::GetFromLANContinuously(unsigned int pollBeginPort, unsigned in
     // prepare the request message and broadcast it
     for (unsigned int port = pollBeginPort; port <= pollEndPort; port++)
     {
-        nMessageBase * m = RequestSmallServerInfoDescriptor.CreateMessage();
+        nMessageBase * m = sn_requestSmallServerInfoDescriptor.CreateMessage();
         m->ClearMessageID();
         m->SendImmediately(0, false);
         nMessageBase::BroadcastCollected(0, port);
@@ -1788,7 +1788,7 @@ void nServerInfo::TellMasterAboutMe(nServerInfoBase *masterInfo)
     info.GetFrom( connection );
 
     // write it to a network message message
-    Network::SmallServerInfo & reply = SmallServerDescriptor.Broadcast();
+    Network::SmallServerInfo & reply = sn_smallServerInfoDescriptor.Broadcast();
     info.WriteSync( *reply.mutable_base() );
     reply.set_transaction( 0 );
 
@@ -1917,7 +1917,7 @@ void nServerInfo::QueryServer()                                  // start to get
         con << "Pinging " << GetName() << "\n";
 #endif
 
-        tJUST_CONTROLLED_PTR< nMessageBase > req = RequestBigServerInfoDescriptor.CreateMessage();
+        tJUST_CONTROLLED_PTR< nMessageBase > req = sn_requestBigServerInfoDescriptor.CreateMessage();
         req->ClearMessageID();
         req->SendImmediately(0, false);
         nMessageBase::SendCollected(0);
@@ -1927,7 +1927,7 @@ void nServerInfo::QueryServer()                                  // start to get
         // send information query to master
         sn_Bend( GetMasters()->GetAddress() );
 
-        tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::RequestBigServerInfoMaster > > req = RequestBigServerInfoMasterDescriptor.CreateMessage();
+        tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::RequestBigServerInfoMaster > > req = sn_requestBigServerInfoDescriptorMaster.CreateMessage();
         req->ClearMessageID();
 
         // write server info into request packet
@@ -2276,7 +2276,7 @@ void nServerInfo::RunMaster()
                 if (sn_Transmitting[i]->TimesNotAnswered() < sn_TNALostContact )
                 {
                     // tell user i about server sn_Transmitting[i]
-                    Network::SmallServerInfo & reply = SmallServerDescriptor.Send(i);
+                    Network::SmallServerInfo & reply = sn_smallServerInfoDescriptor.Send(i);
                     sn_Transmitting[i]->nServerInfoBase::WriteSync( *reply.mutable_base() );
                     reply.set_transaction( sn_Transmitting[i]->TransactionNr() );
                 }
@@ -2904,7 +2904,7 @@ void nServerInfo::ReadSyncThis(  Network::BigServerInfo const & info,
             nServerInfo * master = GetMasters();
             while( master )
             {
-                tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::SmallServerInfo > > ret = SmallServerDescriptor.CreateMessage();
+                tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::SmallServerInfo > > ret = sn_smallServerInfoDescriptor.CreateMessage();
 
                 // get small server info
                 nServerInfoBase::WriteSync( *ret->AccessProtoBuf().mutable_base() );

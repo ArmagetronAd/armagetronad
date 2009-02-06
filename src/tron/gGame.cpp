@@ -2475,7 +2475,7 @@ void gGame::NetSyncIdle(){
 
 unsigned short client_gamestate[MAXCLIENTS+2];
 
-static void client_gamestate_handler( Game::ClientState const & state, nSenderInfo const & sender )
+static void sg_ClientStateHandler( Game::ClientState const & state, nSenderInfo const & sender )
 {
     client_gamestate[ sender.SenderID() ] = state.state();
 #ifdef DEBUG
@@ -2483,7 +2483,7 @@ static void client_gamestate_handler( Game::ClientState const & state, nSenderIn
 #endif
 }
 
-static nProtoBufDescriptor< Game::ClientState > client_gs(311,client_gamestate_handler,"client_gamestate");
+static nProtoBufDescriptor< Game::ClientState > sg_clientStateDescriptor(311,sg_ClientStateHandler,"client_gamestate");
 
 
 
@@ -2930,7 +2930,7 @@ void gGame::StateUpdate(){
         }
         else if (sn_GetNetState()==nCLIENT){ // inform the server of our progress
             NetSyncIdle();
-            Game::ClientState & clientState = client_gs.Send(0);
+            Game::ClientState & clientState = sg_clientStateDescriptor.Send(0);
             clientState.set_state( state );
 #ifdef DEBUG
             //			con << "sending gamestate " << state << '\n';
@@ -4295,7 +4295,7 @@ static void sg_TodoClientFullscreenMessage()
     sg_ClientFullscreenMessage( sg_fullscreenMessageTitle, sg_fullscreenMessageMessage, sg_fullscreenMessageTimeout );
 }
 
-static void sg_ClientFullscreenMessage( Game::FullscreenMessage const & message, nSenderInfo const & sender )
+static void sg_fullscreenMessageHandler( Game::FullscreenMessage const & message, nSenderInfo const & sender )
 {
     if (sn_GetNetState()!=nSERVER){
         sg_fullscreenMessageTimeout = 60;
@@ -4308,12 +4308,12 @@ static void sg_ClientFullscreenMessage( Game::FullscreenMessage const & message,
     }
 }
 
-static nProtoBufDescriptor< Game::FullscreenMessage > sg_clientFullscreenMessage( 312, sg_ClientFullscreenMessage );
+static nProtoBufDescriptor< Game::FullscreenMessage > sg_fullscreenMessageDescriptor( 312, sg_fullscreenMessageHandler );
 
 // causes the connected clients to break and print a fullscreen message
 void sg_FullscreenMessage(tOutput const & title, tOutput const & message, REAL timeout, int client){
     tJUST_CONTROLLED_PTR< nProtoBufMessage< Game::FullscreenMessage > > m =
-    sg_clientFullscreenMessage.CreateMessage();
+    sg_fullscreenMessageDescriptor.CreateMessage();
     Game::FullscreenMessage & protoBuf = m->AccessProtoBuf();
     protoBuf.set_title( title );
     protoBuf.set_message( message );
