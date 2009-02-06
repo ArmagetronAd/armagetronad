@@ -128,7 +128,7 @@ static void FinishHandlePasswordRequest()
     // and send it back
     Network::PasswordAnswer & answer = nPasswordAnswer.Send(0);
     nKrawall::WriteScrambledPassword(egg, *answer.mutable_answer() );
-    answer.set_username( sn_answer.username );
+    answer.set_username_raw( sn_answer.username );
     answer.set_aborted( sn_answer.aborted );
     answer.set_automatic( sn_answer.automatic );
     answer.set_server_address( sn_answer.serverAddress );
@@ -154,14 +154,14 @@ void nAuthentication::HandlePasswordRequest( Network::PasswordRequest const & re
     ReadSalt( request.nonce(), sn_salt );
 
     // read the username as raw as sanely possible
-    sn_answer.username = request.username();
+    sn_answer.username = request.username_raw();
     sn_request.message = request.message();
 
     sn_request.failureOnLastTry = request.fail_last();
 
     sn_request.method = request.method();
-    sn_request.prefix = request.prefix();
-    sn_request.suffix = request.suffix();
+    sn_request.prefix = request.prefix_raw();
+    sn_request.suffix = request.suffix_raw();
 
     // postpone the answer for a better opportunity since it
     // most likely involves opening a menu and waiting a while (and we
@@ -854,14 +854,14 @@ void nLoginProcess::QueryFromClient()
     // send the salt value and the username to the
     Network::PasswordRequest & request = ::nPasswordRequest.Send( userID ); 
     nKrawall::WriteSalt( salt, *request.mutable_nonce() );
-    request.set_username( username );
+    request.set_username_raw( username );
     request.set_message( message );
     request.set_fail_last( nLoginPersistence::Find( userID ).userAuthFailedLastTime );
     
     // write method info
     request.set_method( method.method );
-    request.set_prefix( method.prefix );
-    request.set_suffix( method.suffix );
+    request.set_prefix_raw( method.prefix );
+    request.set_suffix_raw( method.suffix );
     
     // well, then we wait for the answer.
     con << tOutput( "$login_message_responded", userID, username, method.method, message );
@@ -875,7 +875,7 @@ void nLoginProcess::ProcessClientAnswer( Network::PasswordAnswer const & answer,
     // read password and username from remote
     nKrawall::ReadScrambledPassword( answer.answer(), hash );
 
-    username = answer.username();
+    username = answer.username_raw();
 
     aborted = answer.aborted();
     automatic = answer.automatic();

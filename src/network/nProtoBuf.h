@@ -79,6 +79,10 @@ struct nProtoBufHeader
 
 class nMessageStreamer;
 
+// **********************************************************************
+// nProtoBufMessageBase
+// **********************************************************************
+
 //! protocol buffer message
 class nProtoBufMessageBase: public nMessageBase
 {
@@ -116,6 +120,9 @@ public:
         return DoAccessWorkProtoBuf();
     }
 
+    //! filters incoming protobuf message for illegal stuff
+    static void Filter( nProtoBuf & buf );
+
     //! returns the descriptor
     nProtoBufDescriptorBase const & GetDescriptor() const;
 protected:
@@ -143,6 +150,10 @@ private:
     //! the compatibility streamer
     nMessageStreamer * streamer_;
 };
+
+// **********************************************************************
+// nProtoBufMessage
+// **********************************************************************
 
 //! implementation for each protocol buffer type
 template< class PROTOBUF > 
@@ -181,8 +192,11 @@ protected:
     //! handles the message
     virtual void OnHandle()
     {
+        static PROTOBUF filtered;
+        filtered.CopyFrom( GetProtoBuf() );
+        Filter( filtered );
         nSenderInfo senderInfo( *this );
-        GetDescriptor().Handle( GetProtoBuf(), senderInfo );
+        GetDescriptor().Handle( filtered, senderInfo );
     }
 
 private:
@@ -223,6 +237,10 @@ private:
 template< class PROTOBUF >
 PROTOBUF nProtoBufMessage< PROTOBUF >::workProtoBuf_;
 
+// **********************************************************************
+// nSenderInfo
+// **********************************************************************
+
 //! extra information about the sender of a message
 struct nSenderInfo
 {
@@ -249,6 +267,10 @@ public:
     : envelope( e )
     {}
 };
+
+// **********************************************************************
+// nMessageTranslatorBase
+// **********************************************************************
 
 //! class converting messages for older clients
 class nMessageTranslatorBase
@@ -401,6 +423,10 @@ private:
     static void StreamToDefault( nProtoBuf const & in, nStreamMessage & out, StreamSections sections );
 };
 
+// **********************************************************************
+// nNetObjectDescriptorBase
+// **********************************************************************
+
 // network object descriptors
 class nNetObjectDescriptorBase
 {
@@ -462,6 +488,9 @@ private:
     // virtual nProtoBufMessageBase * DoCreateMessage() const = 0;
 };
 
+// **********************************************************************
+// nMessageStreamer
+// **********************************************************************
 
 //! class converting protobuf messages to stream messages
 class nMessageStreamer
@@ -502,6 +531,10 @@ public:
         return NULL;
     }
 };
+
+// **********************************************************************
+// nProtoBufDescriptor
+// **********************************************************************
 
 // templated version of protocol buffer messages
 template< class PROTOBUF > 
@@ -616,6 +649,10 @@ nMessageBase * nMessage::Transform( PROTOBUF const & message )
 template< class PROTOBUF > 
 nProtoBufDescriptor< PROTOBUF > * nProtoBufDescriptor< PROTOBUF >::instance_ = 0;
 
+// **********************************************************************
+// nProtoBufBaseConverter
+// **********************************************************************
+
 //! class for automatic conversion to 'basse' protobuffers
 template< class SOURCE >
 class nProtoBufBaseConverter
@@ -649,6 +686,10 @@ private:
 
     SOURCE & source_;
 };
+
+// **********************************************************************
+// nNetObjectDescriptor
+// **********************************************************************
 
 //! specialization of descriptor for each network object class
 template< class OBJECT, class PROTOBUF >
@@ -786,6 +827,10 @@ private:
 // template message
 template< class OBJECT, class PROTOBUF >
 const PROTOBUF nNetObjectDescriptor< OBJECT, PROTOBUF >::prototype;
+
+// **********************************************************************
+// nMessageCache
+// **********************************************************************
 
 //! one cache for every protobuf descriptor
 class nMessageCacheByDescriptor

@@ -38,14 +38,14 @@ message Hash
 message PasswordRequest
 {
     optional Hash   nonce     = 1; // the nonce to scramble the password with
-    optional string username  = 2; // username (to be copied into login form)
+    optional string username_raw  = 2; // username (to be copied into login form)
     optional string message   = 3; // message to be displayed in login form
 
     optional bool   fail_last = 4 [default = true]; // true if the last login attempt failed; don't reuse stored passwords, then
     
     optional string method    = 5 [default = "bmd5"]; // hashing method
-    optional string prefix    = 6; // prefix for hashing
-    optional string suffix    = 7; // suffix for hashing    
+    optional string prefix_raw = 6; // prefix for hashing
+    optional string suffix_raw = 7; // suffix for hashing    
 
     // legacy message end marker, extensions go after it
     optional bool legacy_message_end_marker = 20000;
@@ -55,7 +55,7 @@ message PasswordRequest
 message PasswordAnswer
 {
     optional Hash   answer    = 1; // the hash result from processing nonce
-    optional string username  = 2; // username
+    optional string username_raw  = 2; // username
     
     optional bool aborted     = 3; // whether the user aborted the login    
     optional bool automatic   = 4; // whether the reply was automatic (with a pw from cache)

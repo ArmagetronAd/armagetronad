@@ -134,14 +134,7 @@ int nStreamMessage::Size() const
 nStreamMessage& nStreamMessage::operator << (const tString &ss){
     tString s = ss;
 
-    /*
-    // Z-Man: commented out looking for a better way, please don't delete yet until we have a proper
-    // different way of sending UTF8 over the network.
-
     // convert utf8 to latin1. For comments the operator >>.
-    if ( sn_GetNetState() == nSERVER ? !ServerSendsUnicode() : !unicode.Supported(0) )
-    */
-
     {
         try
         {
@@ -268,10 +261,8 @@ nStreamMessage& nStreamMessage::ReadRaw(tString &s )
     return *this;
 }
 
-bool sn_filterColorStrings = false;
-static tConfItem<bool> sn_filterColorStringsConf("FILTER_COLOR_STRINGS",sn_filterColorStrings);
-bool sn_filterDarkColorStrings = false;
-static tConfItem<bool> sn_filterDarkColorStringsConf("FILTER_DARK_COLOR_STRINGS",sn_filterDarkColorStrings);
+extern bool sn_filterColorStrings;
+extern bool sn_filterDarkColorStrings;
 
 nStreamMessage& nStreamMessage::operator >> (tColoredString &s )
 {
@@ -279,27 +270,9 @@ nStreamMessage& nStreamMessage::operator >> (tColoredString &s )
     ReadRaw( s );
 
     // convert latin1 encoding to utf8
-    // The server knows which clients support unicode precisely; every unicode supporting client
-    // sends in utf8 to a unicode supporting server. However, the server has to send back latin1
-    // to all clients once one client does not support unicode, because messages containing strings
-    // can be broadcast. So the client has to do the conversion if only one client is online
-    // that does not support unicode.
-    // if ( sn_GetNetState() == nSERVER ? !unicode.Supported( SenderID() ) : !ServerSendsUnicode() )
     {
         s =  st_Latin1ToUTF8(s);
     }
-    /*
-    // Z-Man: commented out looking for a better way, please don't delete yet until we have a proper
-    // different way of sending UTF8 over the network.
-    else
-    {
-        // the incoming string is supposed to be in utf8 format. check that, and crop it otherwise.
-        // no invalid utf8 string is supposed to be able to enter the system. Maybe it's just a
-        // stray latin1 string? If not, it's set to an error string.
-        if ( !utf8::is_valid( s.begin(), s.end() ) )
-            s = st_Latin1ToUTF8(s);
-    }
-    */
 
     // filter client string messages
     if ( sn_GetNetState() == nSERVER )

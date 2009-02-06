@@ -39,6 +39,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nNetObject.pb.h"
 
 #include "nStreamMessage.h"
+#include "tLocale.h"
+#include "tConfiguration.h"
 
 using namespace google::protobuf;
 
@@ -164,6 +166,92 @@ nProtoBufMessageBase::nProtoBufMessageBase( nProtoBufDescriptorBase const & desc
 : nMessageBase( descriptor ), 
   streamer_( descriptor.GetStreamer() )
 {}
+
+bool sn_filterColorStrings = false;
+static tConfItem<bool> sn_filterColorStringsConf("FILTER_COLOR_STRINGS",sn_filterColorStrings);
+bool sn_filterDarkColorStrings = false;
+static tConfItem<bool> sn_filterDarkColorStringsConf("FILTER_DARK_COLOR_STRINGS",sn_filterDarkColorStrings);
+
+// filters a string
+std::string sn_FilterString( std::string const & s, FieldDescriptor const * field )
+{
+    tColoredString filtered( s );
+
+    if( field->name().rfind( "_raw" ) != std::string::npos )
+    {
+        // raw string, no filtering required
+        return s;
+    }
+
+    // filter client string messages
+    if ( sn_GetNetState() == nSERVER )
+    {
+        filtered.NetFilter();
+        filtered.RemoveTrailingColor();
+    }
+
+    // filter color codes away
+    if ( sn_filterColorStrings )
+        filtered = tColoredString::RemoveColors( filtered, false );
+    else if ( sn_filterDarkColorStrings )
+        filtered = tColoredString::RemoveColors( filtered, true );
+
+    return filtered;
+}
+
+// filter incoming messages for odd stuff. Strings, mostly.
+void nProtoBufMessageBase::Filter( nProtoBuf & buf )
+{
+    // get reflection interface
+    REFLECTION_CONST * r = buf.GetReflection();
+    Descriptor const * descriptor  = buf.GetDescriptor();
+
+    // iterate over fields in ID order
+    int count = descriptor->field_count();
+    for( int i = 0; i < count; ++i )
+    {
+        FieldDescriptor const * field = descriptor->field( i );
+        tASSERT( field );
+        
+        if ( field->label() == FieldDescriptor::LABEL_REPEATED )
+        {
+            for( int j = r->REFL_GET( FieldSize, pub, field ) - 1; j >= 0; --j )
+            {
+                switch( field->cpp_type() )
+                {
+                case FieldDescriptor::CPPTYPE_STRING:
+                {
+                    std::string filter = r->REFL_GET_REP( GetRepeatedString, buf, field, j );
+                    r->REFL_SET_REP( SetRepeatedString, buf, field, j, sn_FilterString( filter, field ) );
+                    break;
+                }
+                case FieldDescriptor::CPPTYPE_MESSAGE:
+                    Filter( *r->REFL_GET_REP( MutableRepeatedMessage, buf, field, j ) );
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+        else
+        {
+            switch( field->cpp_type() )
+            {
+            case FieldDescriptor::CPPTYPE_STRING:
+            {
+                std::string filter = r->REFL_GET( GetString, buf, field );
+                r->REFL_SET( SetString, buf, field, sn_FilterString( filter, field ) );
+                break;
+            }
+            case FieldDescriptor::CPPTYPE_MESSAGE:
+                Filter( *r->REFL_GET( MutableMessage, buf, field ) );
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
 
 //! returns the descriptor
 nProtoBufDescriptorBase const & nProtoBufMessageBase::GetDescriptor() const
@@ -557,8 +645,9 @@ void nProtoBufDescriptorBase::StreamFromDefault( nStreamMessage & in, nProtoBuf 
         case FieldDescriptor::CPPTYPE_STRING:
         {
             tString value;
-            in >> value;
-            reflection->REFL_SET( SetString, &out, field, value );
+            in.ReadRaw( value );
+            
+            reflection->REFL_SET( SetString, &out, field, st_Latin1ToUTF8( value ) );
         }
         break;
         case FieldDescriptor::CPPTYPE_FLOAT:
@@ -700,7 +789,7 @@ void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nStreamMess
             out.Write( reflection->REFL_GET( GetUInt32, in, field ) );
             break;
         case FieldDescriptor::CPPTYPE_STRING:
-            out << reflection->REFL_GET( GetString, in, field );
+            out << tString( reflection->REFL_GET( GetString, in, field ) );
             break;
         case FieldDescriptor::CPPTYPE_FLOAT:
             out << reflection->REFL_GET( GetFloat, in, field );
