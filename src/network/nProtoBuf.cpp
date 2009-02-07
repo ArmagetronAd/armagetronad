@@ -1258,7 +1258,7 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
     Descriptor const * descriptor = target.GetDescriptor();
     nMessageCacheByDescriptor & cache = parts[ descriptor ];
 
-    if ( !cache.queue_.size() == 0 )
+    if ( cache.queue_.size() == 0 )
     {
         target.CopyFrom( source );
         return 0;
