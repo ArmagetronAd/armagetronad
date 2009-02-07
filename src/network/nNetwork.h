@@ -479,6 +479,9 @@ public:
         return messageIDBig_;
     }
 
+    // the last assigned big message ID
+    static unsigned long CurrentMessageIDBig();
+
     //! bends the message ID
     void BendMessageID( unsigned int id )
     {

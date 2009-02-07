@@ -120,6 +120,12 @@ public:
         return DoAccessWorkProtoBuf();
     }
 
+    //! sets the cache hint
+    inline void SetCacheHint( nProtoBufMessageBase * hint )
+    {
+        cacheHint_ = hint;
+    }
+
     //! filters incoming protobuf message for illegal stuff
     static void Filter( nProtoBuf & buf );
 
@@ -146,6 +152,9 @@ private:
 
     //! dummy message used to cache raw data in old message format
     mutable tJUST_CONTROLLED_PTR< nStreamMessage > oldFormat_;
+
+    //! cache hint message: is probably similar to this
+    mutable tJUST_CONTROLLED_PTR< nProtoBufMessageBase > cacheHint_;
 
     //! the compatibility streamer
     nMessageStreamer * streamer_;
@@ -863,7 +872,7 @@ public:
     
     //! find suitable previous message and compresses
     //! the passed protobuf. Return value: the cache ID.
-    unsigned short CompressProtoBuff( nProtoBuf const & source, nProtoBuf & target );
+    unsigned short CompressProtoBuff( nProtoBuf const & source, nProtoBuf & target, nProtoBufMessageBase * hint = 0 );
 
 private:
     // the partial caches

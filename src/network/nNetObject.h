@@ -39,6 +39,7 @@ class nObserver;
 class nSenderInfo;
 class nNetObjectDescriptorBase;
 class nProtoBufDescriptorBase;
+class nProtoBufMessageBase;
 
 namespace Network{ class NetObjectSync; class NetObjectControl; }
 
@@ -80,30 +81,31 @@ private:
 
     int syncListID_;                                 // ID for the list of objects to sync
 public:
-    struct nKnowsAboutInfo{
+    struct nKnowsAboutInfo
+    {
     public:
-    bool knowsAboutExistence:
+        //! the last sync message known to have been received by the peer
+        tJUST_CONTROLLED_PTR< nProtoBufMessageBase > lastSync_;
+
+        bool knowsAboutExistence:
         1; // is the creation message through?
-    bool nextSyncAck:
+        bool nextSyncAck:
         1;         // should the next sync message wait
         // for it's ack?
-    bool syncReq:
+        bool syncReq:
         1;              // should a sync message be sent?
-    unsigned char  acksPending:
+        unsigned char  acksPending:
         4;          // how many messages are underway?
 
-        nKnowsAboutInfo(){
-            memset(this, 0, sizeof(nKnowsAboutInfo) );
-            Reset();
-            syncReq=false;
-        }
+        ~nKnowsAboutInfo();
 
-        void Reset(){
-            knowsAboutExistence=false;
-            nextSyncAck=true;
-            syncReq=true;
-            acksPending=0;
-        }
+        nKnowsAboutInfo();
+        
+        void Reset();
+
+    private:
+        nKnowsAboutInfo( nKnowsAboutInfo const & );
+        nKnowsAboutInfo & operator = ( nKnowsAboutInfo const & );
     };
 
     static nNetObject *Object(int i);

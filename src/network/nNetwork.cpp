@@ -592,7 +592,7 @@ int sn_myNetID=0; // our network identification:  0: server
 //                                            1..MAXCLIENTS: client
 
 #define IDS_RESERVED 16		 // number of message IDs reserved for special purposes: id 0 is reserved for no-ack messages.
-unsigned short current_id=1; // current running network number
+unsigned long current_id=1; // current running network number
 
 
 // the classes that are responsible for the queuing of network send tEvents:
@@ -1129,6 +1129,12 @@ static int max_nMessages=0;
 void sn_BreakOnMessageID( unsigned int id );
 #endif
 
+// the last assigned big message ID
+unsigned long nMessageBase::CurrentMessageIDBig()
+{
+    return current_id;
+}
+
 nMessageBase::nMessageBase( const nDescriptorBase &d, unsigned int messageID )
 : descriptorID_( d.id ),
   messageIDBig_( messageID ),
@@ -1140,8 +1146,8 @@ nMessageBase::nMessageBase( const nDescriptorBase &d, unsigned int messageID )
     if ( !sn_readingFromPeer && !messageIDBig_ )
     {
         current_id++;
-        if (current_id <= IDS_RESERVED)
-            current_id = IDS_RESERVED + 1;
+        if ( ( current_id & 0xffff ) <= IDS_RESERVED )
+            current_id += IDS_RESERVED + 1;
         
         messageIDBig_ = current_id;
         

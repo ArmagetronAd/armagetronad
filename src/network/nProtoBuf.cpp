@@ -301,7 +301,7 @@ int nProtoBufMessageBase::OnWrite( WriteArguments & arguments ) const
         nMessageCache & cache = sn_Connections[ arguments.receiver_ ].messageCacheOut_;
 
         nProtoBufHeader header;
-        header.cacheRef = cache.CompressProtoBuff( fullProtoBuf, workProtoBuf ); 
+        header.cacheRef = cache.CompressProtoBuff( fullProtoBuf, workProtoBuf, cacheHint_ ); 
 
         // dump into plain stringstream
         std::stringstream rw;
@@ -1146,6 +1146,34 @@ void nMessageCache::Clear()
 
 static int sn_messageCacheSize = 1000;
 
+// returns the ID of the last message we should keep in the cache
+static unsigned long sn_GetLastCachedMessageID( bool incoming, unsigned long lastKnownID )
+{
+    const int backlog = sn_messageCacheSize;
+    int back = backlog;
+    if ( incoming )
+    {
+        back = 100 + ( back << 1 );
+    }
+    int max = 0xffff;
+    if ( !incoming )
+    {
+        max /= 2;
+    }
+    if ( back > max )
+    {
+        back = max;
+    }
+
+    return lastKnownID - back;
+}
+
+// returns the ID of the last message we should keep in the outgoing cache
+static unsigned long sn_GetLastCachedMessageIDOutgoing()
+{
+    return sn_GetLastCachedMessageID( false, nMessageBase::CurrentMessageIDBig() );
+}
+
 //! adds a message to the cache
 //! @param message the message to add
 //! @param incoming true for incoming messages, keep an extra long backlog then
@@ -1177,23 +1205,8 @@ void nMessageCache::AddMessage( nProtoBufMessageBase * message, bool incoming, b
     }
 
     // purge old messages
-    const int backlog = sn_messageCacheSize;
-    int back = backlog;
-    if ( incoming )
-    {
-        back = 100 + back * 2;
-    }
-    int max = 0xffff;
-    if ( !incoming )
-    {
-        max /= 2;
-    }
-    if ( back > max )
-    {
-        back = max;
-    }
-
-    while ( cache.queue_.size() > 0 && cache.queue_.front()->MessageID() + back < message->MessageID() )
+    unsigned long back = sn_GetLastCachedMessageID( incoming, message->MessageID() );
+    while ( cache.queue_.size() > 0 && long( back - cache.queue_.front()->MessageID() ) > 0 )
     {
         cache.queue_.pop_front();
     }
@@ -1245,29 +1258,71 @@ bool nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & targ
         }
     }
 
+#ifdef DEBUG
+    con << "Cache miss : " << cacheID << "\n";
+#endif
     nReadError( false );
 
     return false;
 }
 
+static void sn_CheckMessage
+(
+    nProtoBuf const & source,       // message to compress
+    nProtoBufMessageBase * message, // the message to check
+    int & size,                     // total size
+    int & bestDifference,           // best (lowest) difference so far
+    nProtoBufMessageBase * & best,  // best message so far
+    unsigned long lastMessageID     // last cached message ID
+    )
+{
+    nProtoBuf const & cached = message->GetProtoBuf();
+
+    if ( !message && message->MessageIDBig() == 0 )
+    {
+        return;
+    }
+
+    // ignore messages that are older than the first message in the queue.
+    // they may already be expired on the receiver side.
+    if ( long( lastMessageID - message->MessageIDBig() ) > 0 )
+    {
+        int x;
+        x = 0;
+        return;
+    }
+    
+    // the current difference
+    int difference = 0;
+    size = 0;
+    
+    // whether there were removed fields
+    bool removed = false;
+    
+    nProtoBufDescriptorBase::
+    EstimateMessageDifference( cached, source,
+                               size, difference, removed );
+    if ( !removed && ( !best || difference < bestDifference ) )
+    {
+        // best message so far
+        best = message;
+        bestDifference = difference;
+    }
+}
+
 //! find suitable previous message and compresses
 //! the passed protobuf. Return value: the cache ID.
-unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProtoBuf & target )
+unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProtoBuf & target, nProtoBufMessageBase * hint )
 {
     // get the cache belonging to this descriptor
     Descriptor const * descriptor = target.GetDescriptor();
     nMessageCacheByDescriptor & cache = parts[ descriptor ];
 
-    if ( cache.queue_.size() == 0 )
-    {
-        target.CopyFrom( source );
-        return 0;
-    }
-
-    int lastMessageID = cache.queue_.front()->MessageIDBig();
-
     // try to find the best matching message in the queue
     nProtoBufMessageBase * best = 0;
+
+    // fetch the last cached message ID
+    unsigned long lastMessageID = sn_GetLastCachedMessageIDOutgoing();
 
     // total size, maximum size to save
     int size = 0;
@@ -1281,42 +1336,24 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
     // count when last best message was found
     int bestCount = 0;
 
-    // find the cacheID
+    // check the cache hint
+    if( hint )
+    {
+        sn_CheckMessage( source, hint, size, bestDifference, best, lastMessageID );
+    }
+
+    // find the cacheID from the cache
     typedef nMessageCacheByDescriptor::CacheQueue CacheQueue;
     for( CacheQueue::reverse_iterator i = cache.queue_.rbegin();
          i != cache.queue_.rend(); ++i )
     {
-        nProtoBufMessageBase * message = *i;
-
-        // ignore messages that are older than the first message in the queue.
-        // they may already be expired on the receiver side.
-        if ( lastMessageID - message->MessageIDBig() > 0 )
-        {
-            continue;
-        }
-
-        nProtoBuf const & cached = message->GetProtoBuf();
-
-        // the current difference
-        int difference = 0;
-        size = 0;
-
-        // whether there were removed fields
-        bool removed = false;
-
-        nProtoBufDescriptorBase::
-        EstimateMessageDifference( cached, source,
-                                   size, difference, removed );
-        if ( !removed && ( !best || difference < bestDifference ) )
-        {
-            // best message so far
-            best = message;
-            bestDifference = difference;
-        }
+        sn_CheckMessage( source, *i, size, bestDifference, best, lastMessageID );
 
         // check whether it pays to look on
         if ( bestDifference * count > 2 * bestCount * size )
         {
+            int x;
+            x = 0;
             break;
         }
 
@@ -1334,6 +1371,7 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
 
 #ifdef DEBUG_STRINGS
         con << "Size = " << size << ", diff = " << bestDifference << "\n";
+        con << lastMessageID << ", " << best->MessageIDBig() << "\n";
         con << "Base  : " << cached.ShortDebugString() << "\n";
         con << "Source: " << source.ShortDebugString() << "\n";
         con << "Diff  : " << target.ShortDebugString() << "\n";

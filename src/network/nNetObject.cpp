@@ -1028,6 +1028,21 @@ nNetObject::~nNetObject(){
 }
 
 
+nNetObject::nKnowsAboutInfo::~nKnowsAboutInfo(){}
+
+nNetObject::nKnowsAboutInfo::nKnowsAboutInfo(){
+    Reset();
+    syncReq=false;
+}
+
+void nNetObject::nKnowsAboutInfo::Reset()
+{
+    knowsAboutExistence=false;
+    nextSyncAck=true;
+    syncReq=true;
+    acksPending=0;
+    lastSync_ = 0;
+}
 
 nNetObject *nNetObject::Object(int i){
     if (i==0) // the NULL nNetObject
@@ -1138,12 +1153,12 @@ bool nNetObject::ClearToTransmit(int user) const{
     return true;
 }
 
-static nMessageBase * CreationMessage( nNetObject & obj )
+static nProtoBufMessageBase * CreationMessage( nNetObject & obj )
 {
     return obj.GetDescriptor().WriteSync( obj, true );
 }
 
-static nMessageBase * SyncMessage( nNetObject & obj )
+static nProtoBufMessageBase * SyncMessage( nNetObject & obj )
 {
     return obj.GetDescriptor().WriteSync( obj, false );
 }
@@ -1386,9 +1401,12 @@ public:
         nNetObject* obj = sn_netObjects[netobj];
         if ( obj )
         {
-            if ( obj->knowsAbout[receiver].acksPending)
+            nNetObject::nKnowsAboutInfo & knows = obj->knowsAbout[receiver];
+
+            // ack accounting
+            if ( knows.acksPending )
             {
-                obj->knowsAbout[receiver].acksPending--;
+                knows.acksPending--;
             }
             else
             {
@@ -1406,7 +1424,14 @@ public:
             */
 #endif
 
-            obj->knowsAbout[receiver].knowsAboutExistence=true;
+            knows.knowsAboutExistence=true;
+
+            // store last acked sync for caching
+            nProtoBufMessageBase * m = dynamic_cast< nProtoBufMessageBase * >( message.operator->() );
+            if ( m && ( !knows.lastSync_ || ( m->MessageIDBig() - knows.lastSync_->MessageIDBig() ) > 0 ) )
+            {
+                knows.lastSync_ = m;
+            }
         }
         else
         {
@@ -1579,10 +1604,12 @@ void nNetObject::SyncAll(){
                 {
                     short s = nos->id;
 
-                    if (// nos->knowsAbout[user].syncReq &&
-                        !nos->knowsAbout[user].knowsAboutExistence)
+                    nNetObject::nKnowsAboutInfo & knowledge = nos->knowsAbout[user];
+
+                    if (// knowledge.syncReq &&
+                        !knowledge.knowsAboutExistence)
                     {
-                        if (!nos->knowsAbout[user].acksPending){
+                        if (!knowledge.acksPending){
 #ifdef DEBUG
                             //con << "remotely creating object " << s << '\n';
 #endif
@@ -1598,7 +1625,7 @@ void nNetObject::SyncAll(){
                             m->SendImmediately(user, false);
                             m->messageIDBig_ = id;
 
-                            nos->knowsAbout[user].syncReq = false;
+                            knowledge.syncReq = false;
                         }
 #ifdef DEBUG
                         else if (DoDebugPrint())
@@ -1611,16 +1638,16 @@ void nNetObject::SyncAll(){
                         }
 #endif
                     }
-                    else if (nos->knowsAbout[user].syncReq
+                    else if (knowledge.syncReq
                              && sn_Connections[user].bandwidthControl_.Control( nBandwidthControl::Usage_Planning ) >50
-                             && nos->knowsAbout[user].acksPending<=1){
+                             && knowledge.acksPending<=1){
                         // send a sync
-                        tJUST_CONTROLLED_PTR< nMessageBase > m = SyncMessage( *nos );
-                        nos->knowsAbout[user].syncReq=false;
+                        tJUST_CONTROLLED_PTR< nProtoBufMessageBase > m = SyncMessage( *nos );
+                        knowledge.syncReq=false;
 
-                        if (nos->knowsAbout[user].nextSyncAck){
+                        if (knowledge.nextSyncAck){
                             new nWaitForAckSync(m,user,s);
-                            nos->knowsAbout[user].nextSyncAck=false;
+                            knowledge.nextSyncAck=false;
                         }
                         else
                         {
@@ -1629,6 +1656,7 @@ void nNetObject::SyncAll(){
 #ifndef nSIMULATE_PING
                         unsigned long id = m->MessageIDBig();
                         //m->Send(user,0,false);
+                        m->SetCacheHint( knowledge.lastSync_ );
                         m->SendImmediately(user,false);
                         m->messageIDBig_ = id;
 #endif
