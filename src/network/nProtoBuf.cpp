@@ -1258,6 +1258,14 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
     Descriptor const * descriptor = target.GetDescriptor();
     nMessageCacheByDescriptor & cache = parts[ descriptor ];
 
+    if ( !cache.queue_.size() == 0 )
+    {
+        target.CopyFrom( source );
+        return 0;
+    }
+
+    int lastMessageID = cache.queue_.front()->MessageIDBig();
+
     // try to find the best matching message in the queue
     nProtoBufMessageBase * best = 0;
 
@@ -1279,6 +1287,13 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
          i != cache.queue_.rend(); ++i )
     {
         nProtoBufMessageBase * message = *i;
+
+        // ignore messages that are older than the first message in the queue.
+        // they may already be expired on the receiver side.
+        if ( lastMessageID - message->MessageIDBig() > 0 )
+        {
+            continue;
+        }
 
         nProtoBuf const & cached = message->GetProtoBuf();
 
