@@ -215,18 +215,18 @@ void nProtoBufMessageBase::Filter( nProtoBuf & buf )
         
         if ( field->label() == FieldDescriptor::LABEL_REPEATED )
         {
-            for( int j = r->REFL_GET( FieldSize, pub, field ) - 1; j >= 0; --j )
+            for( int j = r->REFL_GET( FieldSize, buf, field ) - 1; j >= 0; --j )
             {
                 switch( field->cpp_type() )
                 {
                 case FieldDescriptor::CPPTYPE_STRING:
                 {
                     std::string filter = r->REFL_GET_REP( GetRepeatedString, buf, field, j );
-                    r->REFL_SET_REP( SetRepeatedString, buf, field, j, sn_FilterString( filter, field ) );
+                    r->REFL_SET_REP( SetRepeatedString, &buf, field, j, sn_FilterString( filter, field ) );
                     break;
                 }
                 case FieldDescriptor::CPPTYPE_MESSAGE:
-                    Filter( *r->REFL_GET_REP( MutableRepeatedMessage, buf, field, j ) );
+                    Filter( *r->REFL_GET_REP( MutableRepeatedMessage, &buf, field, j ) );
                     break;
                 default:
                     break;
@@ -240,11 +240,11 @@ void nProtoBufMessageBase::Filter( nProtoBuf & buf )
             case FieldDescriptor::CPPTYPE_STRING:
             {
                 std::string filter = r->REFL_GET( GetString, buf, field );
-                r->REFL_SET( SetString, buf, field, sn_FilterString( filter, field ) );
+                r->REFL_SET( SetString, &buf, field, sn_FilterString( filter, field ) );
                 break;
             }
             case FieldDescriptor::CPPTYPE_MESSAGE:
-                Filter( *r->REFL_GET( MutableMessage, buf, field ) );
+                Filter( *r->REFL_GET( MutableMessage, &buf, field ) );
                 break;
             default:
                 break;
@@ -1191,12 +1191,6 @@ void nMessageCache::AddMessage( nProtoBufMessageBase * message, bool incoming, b
     if ( back > max )
     {
         back = max;
-    }
-
-    if ( !incoming )
-    {
-        int x;
-        x = 0;
     }
 
     while ( cache.queue_.size() > 0 && cache.queue_.front()->MessageID() + back < message->MessageID() )
