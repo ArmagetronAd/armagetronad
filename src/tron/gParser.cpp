@@ -1569,6 +1569,19 @@ void
 gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
 #ifdef ENABLE_ZONESV2
+    if (myxmlHasProp(cur, "version"))
+    {
+        int zoneVer = myxmlGetPropInt(cur, "version");
+        switch (zoneVer)
+        {
+        case 1:
+            parseZoneArthemis_v1(grid, cur, keyword);
+            break;
+        case 2:
+        default:
+            parseZoneBachus(grid, cur, keyword);
+        }
+    }
     switch (mapVersion)
     {
     case 0:
