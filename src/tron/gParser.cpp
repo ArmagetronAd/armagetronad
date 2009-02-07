@@ -1396,6 +1396,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
     safetymecanism_polygonal_shapeused.Set(true);
 
     string zoneName = "";
+    xmlNodePtr zoneroot = cur;
 
     if (myxmlHasProp(cur, "name"))
         zoneName = myxmlGetProp(cur, "name");
@@ -1420,6 +1421,21 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             if (!zoneName.empty())
                 mapZones[zoneName] = zone;
             zone->setName(zoneName);
+        }
+
+        if (myxmlHasProp(zoneroot, "effect"))
+        {
+            // On Enter for now; TODO: fortress at least will need an inside
+            gVectorExtra< nNetObjectID > noOwners;
+            zEffectGroupPtr ZEG = zEffectGroupPtr(new zEffectGroup(noOwners, noOwners));
+            Triad noTriad;
+            zValidatorPtr ZV = zValidatorPtr(zValidatorAll::create(noTriad, noTriad));
+            zSelectorPtr ZS = zSelectorPtr(zSelectorSelf::create());
+            zEffectorPtr ZE = parseZoneEffectGroupEffector(grid, zoneroot, keyword);
+            ZS->addEffector(ZE);
+            ZV->addSelector(ZS);
+            ZEG->addValidator(ZV);
+            zone->addEffectGroupEnter(ZEG);
         }
 
         while (cur != NULL) {
