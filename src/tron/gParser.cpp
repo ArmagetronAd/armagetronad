@@ -1390,6 +1390,7 @@ gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
 void
 gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
+puts("I AM USING ZONES v2");
     // Currently, we have no compatibility plan for any v2 zone type. When we have one,
     // remove the lines that look like this (apart from the one where really
     // polugonal shapes are parsed)
@@ -1537,6 +1538,7 @@ gParser::parseZoneArthemis_v1(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
     bool shapeFound = false;
     xmlNodePtr shape = cur->xmlChildrenNode;
 
+#ifdef ENABLE_ZONESV2
     if (!(myxmlHasProp(cur, "effect")
      && strcmp(myxmlGetProp(cur, "effect"), "win")
      && strcmp(myxmlGetProp(cur, "effect"), "death")
@@ -1545,6 +1547,7 @@ gParser::parseZoneArthemis_v1(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
         parseZoneBachus(grid, cur, keyword);
         return true;
     }
+#endif
 
     while(shape != NULL && shapeFound==false) {
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
