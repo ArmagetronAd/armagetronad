@@ -1,3 +1,5 @@
+require "rakelib/config"
+
 module AA::Release
   def self.create_dmg(directory, volume_name)
     dmg = temp_file()
@@ -16,11 +18,11 @@ module AA::Release
   end
   
   def self.dmg_name
-    "#{AA::Config::PROGRAM_SHORT_NAME}-#{AA::Config.version}.macosx-#{AA::Config.arch}"
+    "#{AA::CONFIG.program_short_name}-#{AA::CONFIG.version}.macosx-#{AA::CONFIG.arch}"
   end
   
   def self.dmg_path
-    AA::Config.configuration_build_path(dmg_name())
+    AA::CONFIG.configuration_build_path(dmg_name())
   end
   
   def self.temp_file
@@ -44,10 +46,10 @@ namespace "release" do
     end
     
     # Gather files to package
-    cp_r(AA::Config::PACKGAGE_RESOURCE_DIR_BASE, release_directory)
+    cp_r(AA::CONFIG.packgage_resource_dir_base, release_directory)
     
     # Make the dmg
-    uncompressed_dmg = AA::Release.create_dmg(release_directory, AA::Config::PRODUCT_NAME)
+    uncompressed_dmg = AA::Release.create_dmg(release_directory, AA::CONFIG.product_name)
     AA::Release.compress_dmg(uncompressed_dmg, final_dmg)
     
     # Cleanup

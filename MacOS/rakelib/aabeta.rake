@@ -8,21 +8,21 @@
 module AA::AABeta
   
   def self.version_branch
-    File.read(AA::Config.top_path("major_version")).chomp
+    File.read(AA::CONFIG.top_path("major_version")).chomp
   end
   
-  RELEASES_LIST_DIR = AA::Config.generated_path("www-aabeta")
-  RELEASES_LIST = AA::Config.generated_path("www-aabeta/releases.php")
+  RELEASES_LIST_DIR = AA::CONFIG.generated_path("www-aabeta")
+  RELEASES_LIST = AA::CONFIG.generated_path("www-aabeta/releases.php")
   
   DMG_NAME = AA::Release.dmg_name + ".dmg"
   DMG_FILE = AA::Release.dmg_path + ".dmg"
-  BETA_DIR_SHORT = "#{version_branch()}/#{AA::Config.version}"
+  BETA_DIR_SHORT = "#{version_branch()}/#{AA::CONFIG.version}"
   BETA_DIR = "/var/www/armagetron/distfiles/#{BETA_DIR_SHORT}"
   
   SORT_BY = %w[file source branch date tag os arch format packager server]
   
   def self.upload(file, beta_dir)
-    beta_file = AA::Config.combine_path_components(beta_dir, file.pathmap("%f"))
+    beta_file = AA::CONFIG.combine_path_components(beta_dir, file.pathmap("%f"))
     
     sh("ssh aabeta mkdir -m 2775 -p #{beta_dir}")
     sh("scp #{AA::Config.escape_sh file} aabeta:#{beta_dir}")
@@ -111,7 +111,7 @@ namespace "aabeta" do
       "packager" => AA::AABeta.packager,
     }
     
-    if AA::Config::DEDICATED
+    if AA::CONFIG.dedicated?
       params["server"] = true
     end
     
