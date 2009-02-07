@@ -1537,6 +1537,15 @@ gParser::parseZoneArthemis_v1(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
     bool shapeFound = false;
     xmlNodePtr shape = cur->xmlChildrenNode;
 
+    if (!(myxmlHasProp(cur, "effect")
+     && strcmp(myxmlGetProp(cur, "effect"), "win")
+     && strcmp(myxmlGetProp(cur, "effect"), "death")
+    ))
+    {
+        parseZoneBachus(grid, cur, keyword);
+        return true;
+    }
+
     while(shape != NULL && shapeFound==false) {
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
         else if (isElement(shape->name, (const xmlChar *)"ShapeCircle", keyword)) {
