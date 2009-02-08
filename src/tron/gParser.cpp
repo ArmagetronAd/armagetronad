@@ -690,10 +690,14 @@ gParser::parseShapePolygon(eGrid *grid, xmlNodePtr cur, unsigned short idZone, c
     // are used. That way, a single map with polygonial shapes in the rotation will
     // lock out old clients for good. We can remove this only when we have a compatibility
     // plan for polygonial shapes, probably never.
-    safetymecanism_polygonal_shapeused.Set(true);
+    // Moved below to check for zone visibility (if it's invisible, we're OK ;)
 
     zShapePtr shape = zShapePtr( new zShapePolygon(grid, idZone) );
     parseShape(grid, cur, keyword, shape);
+    
+    if (shape->getColor().a_ > .01)
+        // TODO: what should the barrier actually be?
+        safetymecanism_polygonal_shapeused.Set(true);
 
     return shape;
 }
