@@ -266,7 +266,7 @@ void zShapeCircle::WriteSyncV1(nMessage &m)
     }
     m << *_cacheScaledRadius;
 
-    // TODO: Ideally convert tPolynomial<nMessage> rotation2 to a tFunction and send it as well
+    m << (tFunction)rotation2.simplify(lasttime_);
 }
 
 void zShapeCircle::ReadSync(nMessage &m)

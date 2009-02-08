@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ArmageTron_tPolynomial_H
 
 #include "tError.h"
+#include "tFunction.h"
 #include <math.h>
 #include "tArray.h"
 
@@ -62,6 +63,8 @@ public:
 
     virtual REAL evaluate( REAL currentVarValue ) const; //!< evaluates the function
     inline REAL operator()( REAL currentVarValue ) const; //!< evaluation operator
+    
+    virtual tFunction simplify( REAL currentVarValue ) const; //!< evaluates the function only so far as to simplify it to a tFunction
 
     tPolynomial<T> const operator*( REAL constant ) const;
     tPolynomial<T> const operator*( const tPolynomial<T> & tfRight ) const ;
@@ -435,6 +438,33 @@ REAL tPolynomial<T>::evaluate( REAL currentVarValue ) const
 
     return res;
 
+}
+
+template <typename T>
+tFunction tPolynomial<T>::simplify( REAL currentVarValue ) const
+{
+    switch (coefs.Len())
+    {
+    case 0:
+        return tFunction(0, 0);
+    case 1:
+        return tFunction(coefs[0], 0);
+    case 2:
+        return tFunction(coefs[0], coefs[1]);
+    }
+    
+    REAL deltaVariableValue = (currentVarValue - referenceVarValue);
+
+    REAL res = 0.0;
+
+    // Compute res = c[1] + (c[2]/2)*var + (c[3]/3)*var^2 + ... + (c[N]/N)*var^(N-1)
+    // FIXME: TODO: HACK: Someone who has a clue how this works, please check it. Thanks, Luke
+    for (int i=coefs.Len()-1; i>1; i--) {
+        res = (res + coefs[i]/i) * deltaVariableValue;
+    }
+        res += (coefs[1]);
+
+    return tFunction(coefs[0], res);
 }
 
 template <typename T>
