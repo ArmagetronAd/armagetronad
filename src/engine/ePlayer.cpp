@@ -7685,8 +7685,6 @@ void ePlayerNetID::UpdateName( void )
     // monitor name changes
     eNameMessenger messenger( *this );
 
-    con << Owner() << " state: " << sn_GetNetState() << "(" << nSTANDALONE << nCLIENT << nSERVER << ")\n";
-
     // apply client change, stripping excess spaces
     if ( sn_GetNetState() == nSTANDALONE
     || ( Owner() == 0 && sn_GetNetState() != nCLIENT )
