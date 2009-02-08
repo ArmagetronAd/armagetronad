@@ -675,17 +675,8 @@ gParser::parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, unsigned short idZo
     if (myxmlHasProp(cur, "growth"))
     {
         REAL myGrowth = myxmlGetPropFloat(cur, "growth") * sizeMultiplier;
-        tFunction tfScale = shape->getScale();
-        if (tfScale.slope_)
-        {
             tfRadius.SetSlope( myGrowth );
             shapePtr->setRadius( tfRadius );
-        }
-        else
-        {
-            tfScale.SetSlope( myGrowth );
-            shape->setScale( tfScale );
-        }
     }
 
     return shape;
@@ -745,13 +736,18 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
     if (defColor)
         shape->setColor(*defColor);
 
+    tFunction tfScale;
     if (myxmlHasProp(cur, "scale")) {
         string str = string(myxmlGetProp(cur, "scale"));
-        tFunction tfScale;
 
         myCheapParameterSplitter(str, tfScale, false);
-        shape->setScale( tfScale );
     }
+    else
+    {
+        tfScale.SetOffset( 1.0 );
+        tfScale.SetSlope( 0.0 );
+    }
+    shape->setScale( tfScale );
 
     if (myxmlHasProp(cur, "rotation")) {
         string str = string(myxmlGetProp(cur, "rotation"));
