@@ -525,7 +525,7 @@
 		9B437BA00F2CBD8300A10CC6 /* tRectangle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tRectangle.cpp; sourceTree = "<group>"; };
 		9B437BB10F2CBD9E00A10CC6 /* utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utf8.h; sourceTree = "<group>"; };
 		9B715F4C0F0BD95100034EBF /* release.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = release.rake; sourceTree = "<group>"; tabWidth = 2; };
-		9B715F4D0F0BD95100034EBF /* config.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = config.rake; sourceTree = "<group>"; tabWidth = 2; };
+		9B715F4D0F0BD95100034EBF /* config.rb */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = config.rb; sourceTree = "<group>"; tabWidth = 2; };
 		9B715F4E0F0BD95100034EBF /* aabeta.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = aabeta.rake; sourceTree = "<group>"; tabWidth = 2; };
 		9B77E6C80D8618B90022FDF2 /* xcode.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = xcode.rake; sourceTree = "<group>"; tabWidth = 2; };
 		9B77E6C90D8618B90022FDF2 /* rakefile.rb */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = text.script.ruby; path = rakefile.rb; sourceTree = "<group>"; tabWidth = 2; };
@@ -948,7 +948,7 @@
 			isa = PBXGroup;
 			children = (
 				9B715F4E0F0BD95100034EBF /* aabeta.rake */,
-				9B715F4D0F0BD95100034EBF /* config.rake */,
+				9B715F4D0F0BD95100034EBF /* config.rb */,
 				9B715F4C0F0BD95100034EBF /* release.rake */,
 				9B77E6C80D8618B90022FDF2 /* xcode.rake */,
 			);
