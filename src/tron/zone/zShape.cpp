@@ -245,28 +245,18 @@ void zShapeCircle::WriteSyncV1(nMessage &m)
     m << posy_;
     if (!_cacheScaledRadius)
     {
-        REAL O, S;
-        O = scale_.offset_ * radius.offset_;
-        if (scale_.slope_)
-        {
-            if (radius.slope_)
-            {
-                // WARNING: Cannot be represented accurately by a single tFunction :(
+        tPolynomial<nMessage> effectiveRadius;
+        effectiveRadius[0] = scale_.offset_ * radius.offset_;
+        effectiveRadius[1] = (scale_.slope_ * radius.offset_) + (radius.slope_ * scale_.offset_);
+        effectiveRadius[2] = (scale_.slope_ * radius.slope_) * 2;
                 // FIXME: Send a new sync when it differs too much?
-                S = (scale_.slope_ * radius.offset_) + (radius.slope_ * scale_.offset_) +
-                      (scale_.slope_ * radius.slope_ * (lasttime_ - referencetime_))  // VALID NOW *ONLY*
-                ;
-            }
-            else
-                S = scale_.slope_ * radius.offset_;
-        }
-        else
-            S = radius.slope_ * scale_.offset_;
-        _cacheScaledRadius = new tFunction(O, S);
+        _cacheScaledRadius = new tFunction(effectiveRadius.simplify(lasttime_));
     }
     m << *_cacheScaledRadius;
 
-    m << (tFunction)rotation2.simplify(lasttime_);
+    if (!_cacheRotationF)
+        _cacheRotationF = new tFunction(rotation2.simplify(lasttime_));
+    m << *_cacheRotationF;
 }
 
 void zShapeCircle::ReadSync(nMessage &m)
@@ -442,13 +432,21 @@ void zShapeCircle::render2d(tCoord scale) const {
 #endif
 }
 
+void zShapeCircle::setRotation2(const tPolynomial<nMessage> & r) {
+    zShape::setRotation2(r);
+    delete _cacheRotationF;
+    _cacheRotationF = NULL;
+}
+
 void zShapeCircle::setScale(const tFunction & s){
-    scale_ = s;
+    zShape::setScale(s);
+    delete _cacheScaledRadius;
     _cacheScaledRadius = NULL;
 }
 
 void zShapeCircle::setRadius(tFunction radius) {
-    this->radius = radius;
+    zShape::setRadius(radius);
+    delete _cacheScaledRadius;
     _cacheScaledRadius = NULL;
 }
 
