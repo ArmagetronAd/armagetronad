@@ -28,6 +28,7 @@ public:
     void setPosY(const tFunction &y);
     void setRotation2(const tPolynomial<nMessage> & r);
 
+    virtual
     void setScale(const tFunction &s);
     void setColor(const rColor &c);
 
@@ -85,12 +86,14 @@ public :
     bool isEmulatingOldZone() {return emulatingOldZone_;}; 
     bool emulatingOldZone_;
 
-    void setRadius(tFunction radius) {this->radius = radius;};
+    void setScale(const tFunction &s);
+    void setRadius(tFunction radius);
 protected:
     tFunction radius;
 
 private:
     virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
+    tFunction * _cacheScaledRadius;
 };
 
 typedef std::pair<tFunction, tFunction> myPoint;

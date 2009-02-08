@@ -208,6 +208,44 @@ void zShapeCircle::WriteSync(nMessage &m)
     m << radius;
 }
 
+void zShapeCircle::WriteSyncV1(nMessage &m)
+{
+    // Write a zones-v1 sync message
+    eNetGameObject::WriteSync(m);
+
+    m << color_.r_;
+    m << color_.g_;
+    m << color_.b_;
+
+    m << referencetime_;
+    m << posx_;
+    m << posy_;
+    if (!_cacheScaledRadius)
+    {
+        REAL O, S;
+        O = scale_.offset_ * radius.offset_;
+        if (scale_.slope_)
+        {
+            if (radius.slope_)
+            {
+                // WARNING: Cannot be represented accurately by a single tFunction :(
+                // FIXME: Send a new sync when it differs too much?
+                S = (scale_.slope_ * radius.offset_) + (radius.slope_ * scale_.offset_) +
+                      (scale_.slope_ * radius.slope_ * (lasttime_ - referencetime_))  // VALID NOW *ONLY*
+                ;
+            }
+            else
+                S = scale_.slope_ * radius.offset_;
+        }
+        else
+            S = radius.slope_ * scale_.offset_;
+        _cacheScaledRadius = new tFunction(O, S);
+    }
+    m << _cacheScaledRadius;
+
+    // TODO: Ideally convert tPolynomial<nMessage> rotation2 to a tFunction and send it as well
+}
+
 void zShapeCircle::ReadSync(nMessage &m)
 {
     zShape::ReadSync(m);
@@ -379,6 +417,16 @@ void zShapeCircle::render2d(tCoord scale) const {
     RenderEnd();
     glPopMatrix();
 #endif
+}
+
+void zShapeCircle::setScale(const tFunction & s){
+    scale_ = s;
+    _cacheScaledRadius = NULL;
+}
+
+void zShapeCircle::setRadius(tFunction radius) {
+    this->radius = radius;
+    _cacheScaledRadius = NULL;
 }
 
 //
