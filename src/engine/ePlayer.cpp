@@ -2943,9 +2943,11 @@ static void se_SendTo( std::string const & message, ePlayerNetID * receiver )
     }
 }
 
-// prints an indented team member
-static void se_SendTeamMember( ePlayerNetID const * player, int indent, std::ostream & tos )
+// prints an indented team member with position marker
+static void se_SendTeamMember( ePlayerNetID const * player, int indent, std::ostream & tos, int index, int width )
 {
+    tos << '#' << std::setw( width ) << std::left << index+1 << ' ';
+
     // send team name
     for( int i = indent-1; i >= 0; --i )
     {
@@ -2970,18 +2972,19 @@ static void se_ListTeam( ePlayerNetID * receiver, eTeam * team )
 
     // send team members
     int teamMembers = team->NumPlayers();
+    int width = teamMembers >= 10 ? 2 : 1;
 
     int indent = 0;
     // print left wing, the odd team members
     for( int i = (teamMembers/2)*2-1; i>=0; i -= 2 )
     {
-        se_SendTeamMember( team->Player(i), indent, tos );
+        se_SendTeamMember( team->Player(i), indent, tos, i, width );
         indent += 2;
     }
     // print right wing, the even team members
     for( int i = 0; i < teamMembers; i += 2 )
     {
-        se_SendTeamMember( team->Player(i), indent, tos );
+        se_SendTeamMember( team->Player(i), indent, tos, i, width );
         indent -= 2;
     }
 
@@ -3512,6 +3515,14 @@ void handle_chat( nMessage &m )
                     }
                     else if (command == "/teams") {
                         se_ChatTeams( p );
+                        return;
+                    }
+                    else if (command == "/myteam") {
+                        eTeam *currentTeam = se_GetManagedTeam( p );
+                        if( currentTeam )
+                        {
+                            se_ListTeam( p, currentTeam );
+                        }
                         return;
                     }
                     else if (command == "/help") {
