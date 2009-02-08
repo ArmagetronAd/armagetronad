@@ -1090,7 +1090,10 @@ gParser::parseZoneEffectGroupSelector(eGrid * grid, xmlNodePtr cur, const xmlCha
 
         selector = zSelectorPtr((*(iterSelectorFactory->second))());
 
+        if (myxmlHasProp(cur, "count"))
         selector->setCount(myxmlGetPropInt(cur, "count"));
+        else
+            selector->setCount(-1);
 
         cur = cur->xmlChildrenNode;
         while ( cur != NULL) {
@@ -1459,6 +1462,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             Triad noTriad;
             zValidatorPtr ZV = zValidatorPtr(zValidatorAll::create(noTriad, noTriad));
             zSelectorPtr ZS = zSelectorPtr(zSelectorSelf::create());
+            ZS->setCount(-1);
             zEffectorPtr ZE = parseZoneEffectGroupEffector(grid, zoneroot, keyword);
             ZS->addEffector(ZE);
             ZV->addSelector(ZS);
