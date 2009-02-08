@@ -672,6 +672,22 @@ gParser::parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, unsigned short idZo
 
     parseShape(grid, cur, keyword, shape);
 
+    if (myxmlHasProp(cur, "growth"))
+    {
+        REAL myGrowth = myxmlGetPropFloat(cur, "growth") * sizeMultiplier;
+        tFunction tfScale = shape->getScale();
+        if (tfScale.slope_)
+        {
+            tfRadius.SetSlope( myGrowth );
+            shapePtr->setRadius( tfRadius );
+        }
+        else
+        {
+            tfScale.SetSlope( myGrowth );
+            shape->setScale( tfScale );
+        }
+    }
+
     return shape;
 }
 
