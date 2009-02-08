@@ -716,12 +716,18 @@ void gParser::myCheapParameterSplitter(const string &str, tFunction &tf, bool ad
     tf.SetSlope(param[1]);
 }
 
+rColor *defColor = NULL;
+bool defRotation = false;
+
 void
 gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShapePtr &shape)
 {
     tValue::BasePtr xp;
     tValue::BasePtr yp;
     bool centerLocationFound = false;
+
+    if (defColor)
+        shape->setColor(*defColor);
 
     if (myxmlHasProp(cur, "scale")) {
         string str = string(myxmlGetProp(cur, "scale"));
@@ -736,6 +742,14 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
         tPolynomial<nMessage> tpRotation;
 
 	tpRotation.parse(str);
+        shape->setRotation2( tpRotation );
+    }
+    else
+    if (defRotation)
+    {
+        tPolynomial<nMessage> tpRotation(2);
+        tpRotation[0] = 0.0f;
+        tpRotation[1] = .3f;
         shape->setRotation2( tpRotation );
     }
 
@@ -1434,6 +1448,16 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             ZV->addSelector(ZS);
             ZEG->addValidator(ZV);
             zone->addEffectGroupEnter(ZEG);
+            char *effect = myxmlGetProp(zoneroot, "effect");
+            if (!strcmp(effect, "win"))
+                defColor = new rColor(0, 1, 0, .7);
+            else
+            if (!strcmp(effect, "death"))
+                defColor = new rColor(1, 0, 0, .7);
+            else
+                defColor = new rColor(1, 1, 1, .7);
+            defRotation = true;
+            xmlFree(effect);
         }
 
         while (cur != NULL) {
@@ -1491,6 +1515,10 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             }
             cur = cur->next;
         }
+
+        free(defColor);
+        defColor = NULL;
+        defRotation = false;
 
         // leaving zone undeleted is no memory leak here, the grid takes control of it
         if ( zone )
