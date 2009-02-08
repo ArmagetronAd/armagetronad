@@ -143,6 +143,13 @@ void zShape::setColorNow(const rColor &c){
     setColor(c);
 }
 
+tCoord zShape::Position() const {
+    return tCoord(
+        posx_.Evaluate(lasttime_ - referencetime_),
+        posy_.Evaluate(lasttime_ - referencetime_)
+    );
+}
+
 void zShape::animate( REAL time ) {
     // Is this needed as the items are already animated?
 }
@@ -201,6 +208,13 @@ zShapeCircle::zShapeCircle(nMessage &m):
  */
 void zShapeCircle::WriteCreate( nMessage & m )
 {
+    if (!sz_ZonesV2.Supported(SyncedUser()))
+    {
+        eNetGameObject::WriteCreate(m);
+        m << createdtime_;
+        return;
+    }
+    
     zShape::WriteCreate(m);
 
     m << radius;

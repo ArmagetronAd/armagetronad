@@ -34,6 +34,7 @@ public:
 
     void setColorNow(const rColor &c);
 
+    virtual tCoord Position() const;
   tFunction getPosX() {return posx_;};
   tFunction getPosY() {return posy_;};
   tFunction getScale() {return scale_;};
