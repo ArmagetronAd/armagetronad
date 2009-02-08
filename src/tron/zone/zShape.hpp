@@ -77,6 +77,7 @@ public :
     ~zShapeCircle() {};
     void WriteCreate( nMessage & m );
     void WriteSync(nMessage &m);   //!< writes sync data
+    void WriteSyncV1(nMessage &m);   //!< writes zones v1 sync data
     void ReadSync(nMessage &m);    //!< reads sync data
 
     bool isInteracting(eGameObject * target);

@@ -417,7 +417,7 @@ void gZone::OnEnter( gCycle * target, REAL time )
 }
 
 // the zone's network initializator
-static nNOInitialisator<gZone> zone_init(340,"zone");
+nNOInitialisator<gZone> zone_init(340,"zone");
 
 // *******************************************************************************
 // *

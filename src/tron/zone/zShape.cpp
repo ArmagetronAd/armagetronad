@@ -2,6 +2,8 @@
 #include "gCycle.h"
 #include "zZone.h"
 
+static nVersionFeature sz_ZonesV2(20);
+
 zShape::zShape(eGrid* grid, unsigned short idZone)
         :eNetGameObject( grid, eCoord(0,0), eCoord(0,0), NULL, true ),
         posx_(),
@@ -181,12 +183,14 @@ void zShape::joinWithZone() {
 zShapeCircle::zShapeCircle(eGrid *grid, unsigned short idZone):
         zShape(grid, idZone),
         emulatingOldZone_(false),
+        _cacheScaledRadius(NULL),
         radius(1.0, 0.0)
 {}
 
 zShapeCircle::zShapeCircle(nMessage &m):
         zShape(m),
         emulatingOldZone_(false),
+        _cacheScaledRadius(NULL),
         radius(1.0, 0.0)
 {
     m >> radius;
@@ -204,6 +208,11 @@ void zShapeCircle::WriteCreate( nMessage & m )
 
 void zShapeCircle::WriteSync(nMessage &m)
 {
+    if (!sz_ZonesV2.Supported(SyncedUser()))
+    {
+        WriteSyncV1(m);
+        return;
+    }
     zShape::WriteSync(m);
     m << radius;
 }
@@ -241,7 +250,7 @@ void zShapeCircle::WriteSyncV1(nMessage &m)
             S = radius.slope_ * scale_.offset_;
         _cacheScaledRadius = new tFunction(O, S);
     }
-    m << _cacheScaledRadius;
+    m << *_cacheScaledRadius;
 
     // TODO: Ideally convert tPolynomial<nMessage> rotation2 to a tFunction and send it as well
 }
@@ -689,8 +698,13 @@ void zShapePolygon::render2d(tCoord scale) const {
 static nNOInitialisator<zShapeCircle> zoneCircle_init(350,"shapeCircle");
 static nNOInitialisator<zShapePolygon> zonePolygon_init(360,"shapePolygon");
 
+class gZone;
+extern nNOInitialisator<gZone> zone_init;
+
 nDescriptor & zShapeCircle::CreatorDescriptor( void ) const
 {
+    if (!sz_ZonesV2.Supported(SyncedUser()))
+        return zone_init;
     return zoneCircle_init;
 }
 
