@@ -2946,7 +2946,7 @@ static void se_SendTo( std::string const & message, ePlayerNetID * receiver )
 // prints an indented team member with position marker
 static void se_SendTeamMember( ePlayerNetID const * player, int indent, std::ostream & tos, int index, int width )
 {
-    tos << '#' << std::setw( width ) << std::left << index+1 << ' ';
+    tos << '#' << std::setw( width ) << index+1 << ' ';
 
     // send team name
     for( int i = indent-1; i >= 0; --i )
