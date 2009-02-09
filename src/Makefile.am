@@ -49,10 +49,10 @@ protobuf/%.pb: ${srcdir}/protobuf/%.proto
 	protoc $< --cpp_out=protobuf --proto_path=${srcdir}/protobuf 2>&1 | sed -e "s,^\(.*\).proto,${srcdir}/protobuf/\1.proto,"
 
 protobuf/%.pb.cc: protobuf/%.pb
-	true
+	@true
 
 protobuf/%.pb.h: protobuf/%.pb
-	true
+	@true
 
 # library file listings
 
@@ -92,6 +92,9 @@ libprotobuf_a_SOURCES = \
     protobuf/gAIBase.pb.cc protobuf/gAIBase.pb.h
 #    protobuf/.pb.cc protobuf/.pb.h \
 #
+
+# dependency for all automatically generated source files
+#all_protobuf_files: ${libprotobuf_a_SOURCES}
 
 # Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
 # the fragile dependency on undefined behaviour of the linker...)
@@ -231,6 +234,7 @@ endif
 
 #AM_CXXFLAGS= $(BINRELOC_CFLAGS)
 
+libprotobuf_a_CXXFLAGS  =$(AM_CXXFLAGS) -I@srcdir@/protobuf -Iprotobuf
 libtools_a_CXXFLAGS  =$(AM_CXXFLAGS) $(CXXFLAGS_OURFILES) -I@srcdir@/tools -I@srcdir@/resource -I@srcdir@/thirdparty/mathexpr -I@srcdir@/thirdparty/utf8 -I@srcdir@/protobuf -Iprotobuf
 libnetwork_a_CXXFLAGS=$(libtools_a_CXXFLAGS)  -I@srcdir@/network
 librender_a_CXXFLAGS =$(libtools_a_CXXFLAGS)  -I@srcdir@/render
