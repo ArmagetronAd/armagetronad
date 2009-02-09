@@ -1,8 +1,6 @@
 // Protocol buffer types for tFunction.cpp
 package Tools;
 
-import "nNetObject.proto";
-
 /* Translation rules for data types:
 
   Stream type                ProtoBuf types

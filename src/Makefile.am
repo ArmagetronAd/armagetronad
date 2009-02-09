@@ -69,10 +69,10 @@ libprotobuf_a_SOURCES = \
     protobuf/tCoord.pb.cc protobuf/tCoord.pb.h \
     protobuf/tFunction.pb.cc protobuf/tFunction.pb.h \
     protobuf/tPolynomial.pb.cc protobuf/tPolynomial.pb.h \
+    protobuf/nAuthentication.pb.cc protobuf/nAuthentication.pb.h \
     protobuf/nNetwork.pb.cc protobuf/nNetwork.pb.h \
     protobuf/nNetObject.pb.cc protobuf/nNetObject.pb.h \
     protobuf/nNetObjectPrivate.pb.cc protobuf/nNetObjectPrivate.pb.h \
-    protobuf/nAuthentication.pb.cc protobuf/nAuthentication.pb.h \
     protobuf/nServerInfo.pb.cc protobuf/nServerInfo.pb.h \
     protobuf/nConfig.pb.cc protobuf/nConfig.pb.h \
     protobuf/eTeam.pb.cc protobuf/eTeam.pb.h \
