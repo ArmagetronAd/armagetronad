@@ -1986,7 +1986,7 @@ void nMessageBase::Send(int peer,REAL priority,bool ack){
     // the next line was redundant; the send buffer handles that part of accounting.
     //sn_Connections[peer].bandwidthControl_.Use( nBandwidthControl::Usage_Planning, 2*(data.Len()+3) );
 
-    sent_per_messid[descriptorID_] += Size() + 6;
+    sent_per_messid[sn_StripDescriptor(descriptorID_)] += Size() + 6;
 
     tASSERT( sn_StripDescriptor( DescriptorID() )!= sn_StripDescriptor( sn_ackDescriptor.ID() ) || !ack);
 
