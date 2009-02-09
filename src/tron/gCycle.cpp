@@ -2730,14 +2730,6 @@ bool gCycle::Timestep(REAL currentTime){
         }
     }
 
-#ifndef DEDICATED
-    // keep rendering the cycle
-    if ( ret && GOID() >= 0 )
-    {
-        tNEW( gCycleRenderer( this ) );
-    }
-#endif
-
     // checkpoint wall when rubber starts to get used
     if ( currentWall )
     {
