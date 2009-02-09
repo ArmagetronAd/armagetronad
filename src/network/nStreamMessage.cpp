@@ -147,7 +147,7 @@ nStreamMessage& nStreamMessage::operator << (const tString &ss){
             {
                 // just convert every byte of the original latin1 into utf8, assuming unicode matches latin1
                 // where latin1 is defined.
-                uint32_t c = utf8::next( reader, s.end() );
+                utf8::uint32_t c = utf8::next( reader, s.end() );
                 
                 // convert unknown characters to underscores
                 if ( c < 256 )

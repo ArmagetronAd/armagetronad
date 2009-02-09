@@ -667,7 +667,7 @@ template< class SOURCE >
 class nProtoBufBaseConverter
 {
 public:
-    nProtoBufBaseConverter( SOURCE & source )
+    explicit nProtoBufBaseConverter( SOURCE & source )
     : source_( source ){}
 
     operator SOURCE &()
@@ -690,7 +690,8 @@ private:
     template< class MEDIUM >
     nProtoBufBaseConverter< MEDIUM > Convert( MEDIUM & medium )
     {
-        return nProtoBufBaseConverter< MEDIUM >( medium );
+        nProtoBufBaseConverter< MEDIUM > ret( medium );
+        return ret;
     }
 
     SOURCE & source_;
