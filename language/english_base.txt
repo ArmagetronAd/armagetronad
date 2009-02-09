@@ -435,7 +435,6 @@ lag_credit_time_help               Timescale lag credit is restored on.
 
 lag_offset_client_help             Extra amount of lag compensation, determined by the client.
 lag_offset_server_help             Extra amount of lag compensation, determined by the server.
-lag_offset_legacy_help             Extra amount of lag compensation for clients that don't support automatic compensation, determined by the server.
 
 #********************************************
 #********************************************

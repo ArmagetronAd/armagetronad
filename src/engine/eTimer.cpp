@@ -94,17 +94,10 @@ eTimer::~eTimer(){
 // see if a client supports lag compensation
 static nVersionFeature se_clientLagCompensation( 14 );
 
-// old clients need a default lag compensation
-static REAL se_lagOffsetLegacy = 0.0f;
-static tSettingItem< REAL > se_lagOffsetLegacyConf( "LAG_OFFSET_LEGACY", se_lagOffsetLegacy );
-
 void eTimer::WriteSync( Engine::TimerSync & sync, bool init ) const
 {
     nNetObject::WriteSync( *sync.mutable_base(), init );
     REAL time = Time();
-
-    if ( SyncedUser() > 0 && !se_clientLagCompensation.Supported( SyncedUser() ) )
-        time += se_lagOffsetLegacy;
 
     sync.set_time ( time  );
     sync.set_speed( speed );
