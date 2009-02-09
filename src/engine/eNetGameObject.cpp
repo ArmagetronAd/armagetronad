@@ -301,6 +301,9 @@ bool eNetGameObject::ClearToTransmit(int user) const{
 }
 
 bool eNetGameObject::Timestep(REAL currentTime){
+    // object has likely changed
+    this->ClearCache();
+
     // calculate new sr_laggometer
     if (sn_GetNetState() == nSTANDALONE){
         laggometerSmooth=0;

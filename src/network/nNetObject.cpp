@@ -637,6 +637,11 @@ nObserver& nNetObject::GetObserver() const
     return *this->observer_;
 }
 
+void nNetObject::ClearCache() const
+{
+    lastSync_ = 0;
+    lastCreate_ = 0;
+}
 
 // dumps object stats
 void nNetObject::Dump( tConsole& con )
@@ -1153,14 +1158,24 @@ bool nNetObject::ClearToTransmit(int user) const{
     return true;
 }
 
-static nProtoBufMessageBase * CreationMessage( nNetObject & obj )
+nProtoBufMessageBase * nNetObject::CreationMessage()
 {
-    return obj.GetDescriptor().WriteSync( obj, true );
+    if( !lastCreate_ )
+    {
+        lastCreate_ = GetDescriptor().WriteSync( *this, true );
+    }
+
+    return lastCreate_;
 }
 
-static nProtoBufMessageBase * SyncMessage( nNetObject & obj )
+nProtoBufMessageBase * nNetObject::SyncMessage()
 {
-    return obj.GetDescriptor().WriteSync( obj, false );
+    if( !lastSync_ )
+    {
+        lastSync_ = GetDescriptor().WriteSync( *this, false );
+    }
+
+    return lastSync_;
 }
 
 void nNetObject::GetID()
@@ -1193,6 +1208,9 @@ void nNetObject::RequestSync(int user,bool ack){ // only for a single user
 #endif
     this->GetID();
 
+    // object has likely changed
+    this->ClearCache();
+
     if (sn_GetNetState()==nSERVER || (AcceptClientSync() && owner==::sn_myNetID)){
         knowsAbout[user].syncReq=true;
         knowsAbout[user].nextSyncAck |=ack;
@@ -1208,6 +1226,9 @@ void nNetObject::RequestSync(int user,bool ack){ // only for a single user
 
 void nNetObject::RequestSync(bool ack){
     this->GetID();
+
+    // object has likely changed
+    this->ClearCache();
 
 #ifdef nSIMULATE_PING
     ack=true;
@@ -1551,13 +1572,8 @@ bool nNetObject::DoDebugPrint()
 
 static int sn_syncedUser = -1;
 
-//! returns the user that the current WriteSync() is intended for
-int nNetObject::SyncedUser()
+void nNetObject::SyncAll()
 {
-    return sn_syncedUser;
-}
-
-void nNetObject::SyncAll(){
 #ifdef DEBUG
     s_DoPrintDebug = false;
 
@@ -1619,11 +1635,11 @@ void nNetObject::SyncAll(){
                             */
                             // send a creation message
 
-                            tJUST_CONTROLLED_PTR< nMessageBase > m = CreationMessage( *nos );
+                            tJUST_CONTROLLED_PTR< nMessageBase > m = nos->CreationMessage();
                             new nWaitForAckSync(m,user,s);
-                            unsigned long id = m->MessageIDBig();
+                            // unsigned long id = m->MessageIDBig();
                             m->SendImmediately(user, false);
-                            m->messageIDBig_ = id;
+                            // m->messageIDBig_ = id;
 
                             knowledge.syncReq = false;
                         }
@@ -1642,7 +1658,7 @@ void nNetObject::SyncAll(){
                              && sn_Connections[user].bandwidthControl_.Control( nBandwidthControl::Usage_Planning ) >50
                              && knowledge.acksPending<=1){
                         // send a sync
-                        tJUST_CONTROLLED_PTR< nProtoBufMessageBase > m = SyncMessage( *nos );
+                        tJUST_CONTROLLED_PTR< nProtoBufMessageBase > m = nos->SyncMessage();
                         knowledge.syncReq=false;
 
                         if (knowledge.nextSyncAck){
@@ -1654,11 +1670,11 @@ void nNetObject::SyncAll(){
                             new nDontWaitForAck(m,user);
                         }
 #ifndef nSIMULATE_PING
-                        unsigned long id = m->MessageIDBig();
+                        // unsigned long id = m->MessageIDBig();
                         //m->Send(user,0,false);
                         m->SetCacheHint( knowledge.lastSync_ );
                         m->SendImmediately(user,false);
-                        m->messageIDBig_ = id;
+                        // m->messageIDBig_ = id;
 #endif
                     }
 
@@ -2080,14 +2096,14 @@ int  nBandwidthTaskObject::DoEstimateSize() const
 // executes whatever it has to do
 void nBandwidthTaskSync::DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer )
 {
-    tJUST_CONTROLLED_PTR< nMessageBase > message = SyncMessage( Object() );
+    tJUST_CONTROLLED_PTR< nMessageBase > message = Object().SyncMessage();
     buffer.AddMessage( *message, &control, peer );
 }
 
 // executes whatever it has to do
 void nBandwidthTaskCreate::DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer )
 {
-    tJUST_CONTROLLED_PTR< nMessageBase > message = CreationMessage( Object() );
+    tJUST_CONTROLLED_PTR< nMessageBase > message = Object().CreationMessage();
     buffer.AddMessage( *message, &control, peer );
 }
 

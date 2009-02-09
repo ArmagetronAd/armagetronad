@@ -79,6 +79,12 @@ private:
 
     mutable tCONTROLLED_PTR( nObserver ) observer_;  // this object's observer
 
+    //! the last sync message written
+    mutable tJUST_CONTROLLED_PTR< nProtoBufMessageBase > lastSync_;
+
+    //! the last creation message written
+    mutable tJUST_CONTROLLED_PTR< nProtoBufMessageBase > lastCreate_;
+
     int syncListID_;                                 // ID for the list of objects to sync
 public:
     struct nKnowsAboutInfo
@@ -139,6 +145,8 @@ public:
     }
 
     nObserver& GetObserver() const;    // retunrs the observer of this object
+
+    void ClearCache() const; //!< clears the message cache, call on object changes
 
     virtual void Dump( tConsole& con ); // dumps object stats
 
@@ -271,8 +279,12 @@ public:
         }
     }
 
-    // even better new stuff: protocol buffers. The functions are non-virtual; they
-    // get called over the descriptor:
+    //! returns a creation message for this object
+    nProtoBufMessageBase * CreationMessage();
+
+    //! returns a sync message for this object
+    nProtoBufMessageBase * SyncMessage();
+
     //! creates a netobject form sync data
     nNetObject( Network::NetObjectSync const & sync, nSenderInfo const & sender );
     //! reads sync data, returns false if sync was old or otherwise invalid
@@ -291,9 +303,6 @@ private:
     // control functions:
 
 protected:
-    //! returns the user that the current WriteSync() is intended for
-    static int SyncedUser();
-
     Network::NetObjectControl & BroadcastControl();
     // creates a new control message that can be used to control other
     // copies of this nNetObject; control is received with ReceiveControlNet().
