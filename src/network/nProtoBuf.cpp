@@ -418,6 +418,7 @@ int nProtoBufMessageBase::Size() const
 }
 
 nMessageTranslatorBase::nMessageTranslatorBase(){}
+nMessageTranslatorBase::~nMessageTranslatorBase(){}
 
 //! constructor registering with the descriptor
 nMessageTranslatorBase::nMessageTranslatorBase( nProtoBufDescriptorBase & descriptor )

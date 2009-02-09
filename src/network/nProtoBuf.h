@@ -286,6 +286,7 @@ class nMessageTranslatorBase
 {
 public:
     nMessageTranslatorBase();
+    virtual ~nMessageTranslatorBase();
 
     //! constructor registering with the descriptor
     explicit nMessageTranslatorBase( nProtoBufDescriptorBase & descriptor );
