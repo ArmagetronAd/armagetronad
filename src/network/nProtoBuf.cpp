@@ -1144,7 +1144,11 @@ void nMessageCache::Clear()
     parts.clear();
 }
 
+// size of the compression cache in messages
 static int sn_messageCacheSize = 1000;
+
+// effort taken to find an optimal message in the cache
+static REAL sn_messageCacheEffort = 1.0;
 
 // returns the ID of the last message we should keep in the cache
 static unsigned long sn_GetLastCachedMessageID( bool incoming, unsigned long lastKnownID )
@@ -1180,6 +1184,12 @@ static unsigned long sn_GetLastCachedMessageIDOutgoing()
 //! @param reallyAdd true if message should be added. Otherwise, we just purge old messages.
 void nMessageCache::AddMessage( nProtoBufMessageBase * message, bool incoming, bool reallyAdd )
 {
+    // no cache, no compression.
+    if( sn_messageCacheSize == 0 )
+    {
+        return;
+    }
+
     // fetch message filler, ignoring invalid ones
     if ( !message || message->MessageID() == 0 )
     {
@@ -1218,6 +1228,12 @@ void nMessageCache::AddMessage( nProtoBufMessageBase * message, bool incoming, b
 //! @param reallyAdd true if message should be added. Otherwise, we just purge old messages.
 void nMessageCache::AddMessage( nMessageBase * message, bool incoming, bool reallyAdd )
 {
+    // no cache, no compression.
+    if( sn_messageCacheSize == 0 )
+    {
+        return;
+    }
+
     nProtoBufMessageBase * message2 = dynamic_cast< nProtoBufMessageBase * >( message );
     if( message2 )
     {
@@ -1314,6 +1330,13 @@ static void sn_CheckMessage
 //! the passed protobuf. Return value: the cache ID.
 unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProtoBuf & target, nProtoBufMessageBase * hint )
 {
+    // no cache, no compression.
+    if( sn_messageCacheSize == 0 )
+    {
+        target.CopyFrom( source );
+        return 0;
+    }
+
     // get the cache belonging to this descriptor
     Descriptor const * descriptor = target.GetDescriptor();
     nMessageCacheByDescriptor & cache = parts[ descriptor ];
@@ -1347,15 +1370,13 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
     for( CacheQueue::reverse_iterator i = cache.queue_.rbegin();
          i != cache.queue_.rend(); ++i )
     {
-        sn_CheckMessage( source, *i, size, bestDifference, best, lastMessageID );
-
         // check whether it pays to look on
-        if ( bestDifference * count > 2 * bestCount * size )
+        if ( bestDifference * count >= sn_messageCacheEffort * bestCount * size )
         {
-            int x;
-            x = 0;
             break;
         }
+
+        sn_CheckMessage( source, *i, size, bestDifference, best, lastMessageID );
 
         ++count;
     }
@@ -1391,4 +1412,5 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
 #include "nConfig.h"
 
 static nSettingItem< int > sn_messageCacheSizeConf( "MESSAGE_CACHE_SIZE", sn_messageCacheSize );
+static tSettingItem< REAL > sn_messageCacheEffortConf( "MESSAGE_CACHE_EFFORT", sn_messageCacheEffort );
 

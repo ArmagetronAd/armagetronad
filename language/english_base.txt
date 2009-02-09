@@ -612,6 +612,8 @@ dedicated_fps_idle_factor_help Number of times per frame the server should check
 talk_to_master_help		Announce this server on the internet?
 max_out_rate_help		Maximum network output rate
 max_in_rate_help		Maximum network input rate
+message_cache_size_help Size of the network message cache in messages.
+message_cache_effort_help Effort taken to compress network messages.
 ping_charity_help		How much ping are you willing to take over from your opponent?
 ping_charity_max_help	Server option: maximum ping charity value. Set to 0 to avoid instant kills. Active only if all clients are 0.2.8.3 or better.
 ping_charity_min_help	Server option: minimum ping charity value. Use to enforce fairness. Active only if all clients are 0.2.8.3 or better.
