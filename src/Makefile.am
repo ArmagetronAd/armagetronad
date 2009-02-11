@@ -43,9 +43,13 @@ distclean-local:
 ${srcdir}/tools/tLocale.cpp: ${srcdir}/tools/tVersion.cpp
 ${srcdir}/tools/tVersion.cpp: tTrueVersion.h 
 
+protobuf/.dir:
+	test -d protobuf || mkdir protobuf || true
+	for f in ${libprotobuf_a_SOURCES}; do test -r $$f || test -r $${srcdir}/$f || $(MAKE) $$f; done
+	touch $@
+
 # protocol buffer rules
-protobuf/%.pb: ${srcdir}/protobuf/%.proto
-	test -d protobuf || mkdir protobuf
+protobuf/%.pb: ${srcdir}/protobuf/%.proto protobuf/.dir
 	protoc $< --cpp_out=protobuf --proto_path=${srcdir}/protobuf 2>&1 | sed -e "s,^\(.*\).proto,${srcdir}/protobuf/\1.proto,"
 
 protobuf/%.pb.cc: protobuf/%.pb
@@ -94,7 +98,7 @@ libprotobuf_a_SOURCES = \
 #
 
 # dependency for all automatically generated source files
-#all_protobuf_files: ${libprotobuf_a_SOURCES}
+all_protobuf_files: ${libprotobuf_a_SOURCES}
 
 # Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
 # the fragile dependency on undefined behaviour of the linker...)
