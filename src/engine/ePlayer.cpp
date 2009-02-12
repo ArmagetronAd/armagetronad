@@ -2122,6 +2122,32 @@ static tAccessLevel se_opAccessLevelMax = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_opAccessLevelMaxConf( "ACCESS_LEVEL_OP_MAX", se_opAccessLevelMax );
 static tAccessLevelSetter se_opAccessLevelMaxConfLevel( se_opAccessLevelMaxConf, tAccessLevel_Owner );
 
+static bool se_CanChangeAccess( ePlayerNetID * admin, ePlayerNetID * victim, char const * command )
+{
+    tASSERT( admin );
+    tASSERT( victim );
+
+    if ( admin->GetAccessLevel() > se_opAccessLevel ) // Can he even use this command?
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_denied", command ), admin->Owner() );
+    }
+    else if ( victim == admin )
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_self", command ), admin->Owner() );
+    }
+    else if ( admin->GetAccessLevel() >= victim->GetAccessLevel()  )
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_overpowered", command ), admin->Owner() );
+    }
+    else
+    {
+        return true;
+    }
+
+    return false;
+
+}
+
 // an operation that changes the access level of another player
 typedef void (*OPFUNC)( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel accessLevel );
 
@@ -2129,80 +2155,59 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
 {
     bool isexplicit = false;
 
-    if ( admin->GetAccessLevel() <= se_opAccessLevel )
+    ePlayerNetID * victim = se_FindPlayerInChatCommand( admin, command, s );
+
+    if ( victim && se_CanChangeAccess( admin, victim, command ) )
     {
-        ePlayerNetID * victim = se_FindPlayerInChatCommand( admin, command, s );
-        if ( victim )
+        // read optional access level, this part is merly a copypaste from the /shuffle code
+        int level = se_opAccessLevelMax;
+        if ( victim->IsAuthenticated() )
         {
-            if ( victim == admin )
+            level = victim->GetAccessLevel();
+        }
+        char first;
+        s >> first;
+        if ( !s.eof() && !s.fail() )
+        {
+            isexplicit = true;
+            s.unget();
+            int newLevel = 0;
+            s >> newLevel;
+
+            if ( first == '+' || first == '-' )
             {
-                sn_ConsoleOut( tOutput( "$access_level_op_self", command ), admin->Owner() );
-            }
-            else if ( admin->GetAccessLevel() >= victim->GetAccessLevel() )
-            {
-                sn_ConsoleOut( tOutput( "$access_level_op_overpowered", command ), admin->Owner() );
+                level += newLevel;
             }
             else
             {
-                // read optional access level, this part is merly a copypaste from the /shuffle code
-                int level = se_opAccessLevelMax;
-                if ( victim->IsAuthenticated() )
-                {
-                     level = victim->GetAccessLevel();
-                }
-                char first;
-                s >> first;
-                if ( !s.eof() && !s.fail() )
-                {
-                    isexplicit = true;
-                    s.unget();
-                    int newLevel = 0;
-                    s >> newLevel;
-
-                    if ( first == '+' || first == '-' )
-                    {
-                        level += newLevel;
-                    }
-                    else
-                    {
-                        level = newLevel;
-                    }
-                }
-
-                s >> level;
-
-                if ( level <= admin->GetAccessLevel() )
-                    level = admin->GetAccessLevel() + 1;
-
-                tAccessLevel accessLevel;
-
-                accessLevel = static_cast< tAccessLevel >( level );
-
-                if ( accessLevel == victim->GetAccessLevel() )
-                {
-                    if ( isexplicit )
-                    {
-                        sn_ConsoleOut( tOutput( "$access_level_op_same", command ), admin->Owner() );
-                    }
-                    else
-                    {
-                        sn_ConsoleOut( tOutput( "$access_level_op_unclear", command ), admin->Owner() );
-                    }
-                }
-                else if ( accessLevel > admin->GetAccessLevel() )
-                {
-                     (*F)( admin, victim, accessLevel );
-                }
-                else
-                {
-                     sn_ConsoleOut( tOutput( "$access_level_op_denied_max", command ), admin->Owner() );
-                }
+                level = newLevel;
             }
         }
-    }
-    else
-    {
-        sn_ConsoleOut( tOutput( "$access_level_op_denied", command ), admin->Owner() );
+
+        s >> level;
+
+        // Make a last safety check on the given AL, then DON'T TOUCH IT ANYMORE
+        if ( level <= admin->GetAccessLevel() )
+            level = admin->GetAccessLevel() + 1;
+
+        tAccessLevel accessLevel;
+        accessLevel = static_cast< tAccessLevel >( level );
+
+        if ( accessLevel == victim->GetAccessLevel() )
+        {
+            if ( isexplicit )
+            {
+                sn_ConsoleOut( tOutput( "$access_level_op_same", command ), admin->Owner() );
+            }
+            else
+            {
+                sn_ConsoleOut( tOutput( "$access_level_op_unclear", command ), admin->Owner() );
+            }
+        }
+        else if ( accessLevel > admin->GetAccessLevel() )
+        {
+            (*F)( admin, victim, accessLevel );
+        }
     }
 }
 
@@ -2283,11 +2288,20 @@ void se_Op( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel level )
 }
 
 // DeOp takes it away
-void se_DeOp( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel )
+void se_DeOp( ePlayerNetID * admin, std::istream & s, char const * command )
 {
-    if ( victim->IsAuthenticated() )
+    ePlayerNetID * victim = se_FindPlayerInChatCommand( admin, command, s );
+
+    if ( victim && se_CanChangeAccess ( admin, victim, command ) )
     {
-        victim->DeAuthenticate( admin );
+        if ( victim->IsAuthenticated() )
+        {
+            victim->DeAuthenticate( admin );
+        }
+        else
+        {
+            sn_ConsoleOut( tOutput( "$access_level_op_same", command ), admin->Owner() );
+        }
     }
 }
 
@@ -2501,13 +2515,17 @@ static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p, std:
 }
 
 // log out
-static void se_AdminLogout( ePlayerNetID * p )
+static void se_AdminLogout( ePlayerNetID * p, char const * command )
 {
 #ifdef KRAWALL_SERVER
     // revoke the other kind of authentication as well
     if ( p->IsAuthenticated() )
     {
         p->DeAuthenticate();
+    }
+    else
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_same", command ), p->Owner() );
     }
 #else
     if ( p->IsLoggedIn() )
@@ -2561,7 +2579,7 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     if  (command == "/login")
     {
         // Really, there's no reason one would log in and log out all the time
-        spam.factor_ = 2;
+        spam.factor_ = 1;
         if ( spam.Block() )
         {
             return;
@@ -2573,13 +2591,13 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     }
     else  if (command == "/logout")
     {
-        spam.factor_ = 2;
+        spam.factor_ = 1;
         if( spam.Block() )
         {
             return;
         }
 
-        se_AdminLogout( p );
+        se_AdminLogout( p, command );
     }
 #ifdef KRAWALL_SERVER
     else if ( command == "/op" )
@@ -2588,7 +2606,7 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     }
     else if ( command == "/deop" )
     {
-        se_ChangeAccess( p, s, "/deop", &se_DeOp );
+        se_DeOp( p, s, "/deop" );
     }
     else if ( command == "/invite" )
     {
@@ -2915,8 +2933,6 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
             ePlayerNetID * admin = se_PlayerNetIDs(i);
 
             if (
-                admin != p &&
-                (
                 // two cases:
                    (
                     // You are a speccing admin, and you aren't invited to anything:
@@ -2929,7 +2945,6 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
                     // invited players are also authorized
                     currentTeam->IsInvited( admin )
                     )
-                 )
                 )
             {
                 se_SendTeamMessage(currentTeam, p, admin, msg);
@@ -3016,9 +3031,11 @@ static void se_SendTo( std::string const & message, ePlayerNetID * receiver )
     }
 }
 
-// prints an indented team member
-static void se_SendTeamMember( ePlayerNetID const * player, int indent, std::ostream & tos )
+// prints an indented team member with position marker
+static void se_SendTeamMember( ePlayerNetID const * player, int indent, std::ostream & tos, int index, int width )
 {
+    tos << '#' << std::setw( width ) << index+1 << ' ';
+
     // send team name
     for( int i = indent-1; i >= 0; --i )
     {
@@ -3043,18 +3060,19 @@ static void se_ListTeam( ePlayerNetID * receiver, eTeam * team )
 
     // send team members
     int teamMembers = team->NumPlayers();
+    int width = teamMembers >= 10 ? 2 : 1;
 
     int indent = 0;
     // print left wing, the odd team members
     for( int i = (teamMembers/2)*2-1; i>=0; i -= 2 )
     {
-        se_SendTeamMember( team->Player(i), indent, tos );
+        se_SendTeamMember( team->Player(i), indent, tos, i, width );
         indent += 2;
     }
     // print right wing, the even team members
     for( int i = 0; i < teamMembers; i += 2 )
     {
-        se_SendTeamMember( team->Player(i), indent, tos );
+        se_SendTeamMember( team->Player(i), indent, tos, i, width );
         indent -= 2;
     }
 
@@ -3593,6 +3611,14 @@ void se_ChatHandlerServer( unsigned short id, tColoredString const & say, nMessa
                     }
                     else if (command == "/teams") {
                         se_ChatTeams( p );
+                        return;
+                    }
+                    else if (command == "/myteam") {
+                        eTeam *currentTeam = se_GetManagedTeam( p );
+                        if( currentTeam )
+                        {
+                            se_ListTeam( p, currentTeam );
+                        }
                         return;
                     }
                     else if (command == "/help") {

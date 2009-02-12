@@ -844,7 +844,10 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
                 }
 
                 // mode 2: lowest score goes out
-                last = t;
+                if ( !last )
+                {
+                    last = t;
+                }
             }
         }
 
