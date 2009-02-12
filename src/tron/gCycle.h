@@ -222,6 +222,7 @@ private:
     //	unsigned short currentWallID;
 
     nTimeRolling nextSync, nextSyncOwner;
+    mutable REAL lastSyncGameTime_;    //!< time of the last sync
 
     void MyInitAfterCreation();
 
