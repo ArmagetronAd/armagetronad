@@ -446,7 +446,7 @@
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).pb.cc",
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).pb.h",
 			);
-			script = "/Library/Frameworks/ArmagetronAdvanced/current/bin/protoc --cpp_out=\"${DERIVED_FILES_DIR}\" --proto_path=\"${SRCROOT}/../src/protobuf\" \"${INPUT_FILE_PATH}\"";
+			script = "/Library/Frameworks/ArmagetronAdvanced/current/bin/protoc --cpp_out=\"${DERIVED_FILES_DIR}\" --proto_path=\"${SRCROOT}/../src/protobuf\" \"${INPUT_FILE_PATH}\"\ninclude_dir=\"${SYMROOT}/Generated/src/protobuf\"\nmkdir -p \"$include_dir\"\ncp \"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.pb.h\" \"$include_dir\"";
 		};
 		9B9E56620D8208E8008DD17D /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
@@ -1720,7 +1720,6 @@
 			buildPhases = (
 				9B9754670F44AA2700E41662 /* Sources */,
 				9B9754680F44AA2700E41662 /* Frameworks */,
-				9B9754CE0F44AD9B00E41662 /* Run Script: Copy headers */,
 			);
 			buildRules = (
 				9B9754720F44AAD500E41662 /* PBXBuildRule */,
@@ -1868,20 +1867,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/bash -l";
 			shellScript = "PRODUCT_NAME=\"Armagetron Advanced\" rake --trace aabeta:release";
-		};
-		9B9754CE0F44AD9B00E41662 /* Run Script: Copy headers */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Run Script: Copy headers";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "include_dir=\"${SYMROOT}/Generated/src/protobuf\"\n\ntest -d \"$include_dir\" || mkdir -p \"$include_dir\"\ncp \"${DERIVED_FILES_DIR}\"/*.h \"$include_dir\"";
 		};
 		9BD7DB490A2CBA7A00D7033C /* Run script: Prepare */ = {
 			isa = PBXShellScriptBuildPhase;
