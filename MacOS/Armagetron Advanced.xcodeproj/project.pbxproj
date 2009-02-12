@@ -87,6 +87,32 @@
 		9B7CFE230EFCE74700126634 /* tResourceType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE170EFCE74700126634 /* tResourceType.cpp */; };
 		9B83FE950B12161600878E8A /* Growl-WithInstaller.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
 		9B83FF0F0B121B3100878E8A /* Growl-WithInstaller.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */; };
+		9B9753920F44A34A00E41662 /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B9753910F44A34A00E41662 /* libprotobuf.a */; };
+		9B9753BF0F44A60400E41662 /* eEventNotification.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753A60F44A60400E41662 /* eEventNotification.proto */; };
+		9B9753C00F44A60400E41662 /* eLagCompensation.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753A70F44A60400E41662 /* eLagCompensation.proto */; };
+		9B9753C10F44A60400E41662 /* eNetGameObject.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753A80F44A60400E41662 /* eNetGameObject.proto */; };
+		9B9753C20F44A60400E41662 /* ePlayer.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753A90F44A60400E41662 /* ePlayer.proto */; };
+		9B9753C30F44A60400E41662 /* eTeam.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753AA0F44A60400E41662 /* eTeam.proto */; };
+		9B9753C40F44A60400E41662 /* eTimer.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753AB0F44A60400E41662 /* eTimer.proto */; };
+		9B9753C50F44A60400E41662 /* eVoter.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753AC0F44A60400E41662 /* eVoter.proto */; };
+		9B9753C60F44A60400E41662 /* gAIBase.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753AD0F44A60400E41662 /* gAIBase.proto */; };
+		9B9753C70F44A60400E41662 /* gCycle.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753AE0F44A60400E41662 /* gCycle.proto */; };
+		9B9753C80F44A60400E41662 /* gGame.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753AF0F44A60400E41662 /* gGame.proto */; };
+		9B9753C90F44A60400E41662 /* gWall.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753B00F44A60400E41662 /* gWall.proto */; };
+		9B9753CA0F44A60400E41662 /* gZone.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753B10F44A60400E41662 /* gZone.proto */; };
+		9B9753CB0F44A60400E41662 /* nAuthentication.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753B20F44A60400E41662 /* nAuthentication.proto */; };
+		9B9753CC0F44A60400E41662 /* nConfig.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753B30F44A60400E41662 /* nConfig.proto */; };
+		9B9753CD0F44A60400E41662 /* nNetObject.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753B40F44A60400E41662 /* nNetObject.proto */; };
+		9B9753CE0F44A60400E41662 /* nNetObjectPrivate.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753B50F44A60400E41662 /* nNetObjectPrivate.proto */; };
+		9B9753CF0F44A60400E41662 /* nNetwork.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753B60F44A60400E41662 /* nNetwork.proto */; };
+		9B9753D00F44A60400E41662 /* nServerInfo.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753B70F44A60400E41662 /* nServerInfo.proto */; };
+		9B9753D10F44A60400E41662 /* prototype.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753B80F44A60400E41662 /* prototype.proto */; };
+		9B9753D20F44A60400E41662 /* tColor.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753B90F44A60400E41662 /* tColor.proto */; };
+		9B9753D30F44A60400E41662 /* tCoord.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753BA0F44A60400E41662 /* tCoord.proto */; };
+		9B9753D40F44A60400E41662 /* tFunction.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753BB0F44A60400E41662 /* tFunction.proto */; };
+		9B9753D50F44A60400E41662 /* tPolynomial.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753BC0F44A60400E41662 /* tPolynomial.proto */; };
+		9B9753D60F44A60400E41662 /* zShape.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753BD0F44A60400E41662 /* zShape.proto */; };
+		9B9753D70F44A60400E41662 /* zZone.proto in Resources */ = {isa = PBXBuildFile; fileRef = 9B9753BE0F44A60400E41662 /* zZone.proto */; };
 		9BB7B4000D8246A2004FE8C3 /* config in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAE20A2CAE0700D7033C /* config */; };
 		9BB7B4010D8246A2004FE8C3 /* language in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAFE0A2CAE1D00D7033C /* language */; };
 		9BB7B5E10D8302FA004FE8C3 /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B5A60D8302FA004FE8C3 /* eAdvWall.cpp */; };
@@ -394,6 +420,30 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
+		9B9753980F44A3AF00E41662 /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.proto";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).pb.cc",
+				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).pb.h",
+			);
+			script = "/Library/Frameworks/ArmagetronAdvanced/current/bin/protoc --cpp_out=\"${DERIVED_FILES_DIR}\" --proto_path=\"${SRCROOT}/../src/protobuf\" \"${INPUT_FILE_PATH}\"";
+		};
+		9B9753A40F44A5FA00E41662 /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.proto";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).pb.cc",
+				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).pb.h",
+			);
+			script = "/Library/Frameworks/ArmagetronAdvanced/current/bin/protoc --cpp_out=\"${DERIVED_FILES_DIR}\" --proto_path=\"${SRCROOT}/../src/protobuf\" \"${INPUT_FILE_PATH}\"";
+		};
 		9B9E56620D8208E8008DD17D /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
 			compilerSpec = com.apple.compilers.proxy.script;
@@ -536,6 +586,32 @@
 		9B7CFE170EFCE74700126634 /* tResourceType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tResourceType.cpp; sourceTree = "<group>"; };
 		9B7CFE180EFCE74700126634 /* tResourceType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tResourceType.h; sourceTree = "<group>"; };
 		9B83FE940B12161600878E8A /* Growl-WithInstaller.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "Growl-WithInstaller.framework"; path = "/Library/Frameworks/ArmagetronAdvanced/current/Growl-WithInstaller.framework"; sourceTree = "<absolute>"; };
+		9B9753910F44A34A00E41662 /* libprotobuf.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libprotobuf.a; path = /Library/Frameworks/ArmagetronAdvanced/current/libprotobuf.a; sourceTree = "<absolute>"; };
+		9B9753A60F44A60400E41662 /* eEventNotification.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = eEventNotification.proto; sourceTree = "<group>"; };
+		9B9753A70F44A60400E41662 /* eLagCompensation.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = eLagCompensation.proto; sourceTree = "<group>"; };
+		9B9753A80F44A60400E41662 /* eNetGameObject.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = eNetGameObject.proto; sourceTree = "<group>"; };
+		9B9753A90F44A60400E41662 /* ePlayer.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ePlayer.proto; sourceTree = "<group>"; };
+		9B9753AA0F44A60400E41662 /* eTeam.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = eTeam.proto; sourceTree = "<group>"; };
+		9B9753AB0F44A60400E41662 /* eTimer.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = eTimer.proto; sourceTree = "<group>"; };
+		9B9753AC0F44A60400E41662 /* eVoter.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = eVoter.proto; sourceTree = "<group>"; };
+		9B9753AD0F44A60400E41662 /* gAIBase.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = gAIBase.proto; sourceTree = "<group>"; };
+		9B9753AE0F44A60400E41662 /* gCycle.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = gCycle.proto; sourceTree = "<group>"; };
+		9B9753AF0F44A60400E41662 /* gGame.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = gGame.proto; sourceTree = "<group>"; };
+		9B9753B00F44A60400E41662 /* gWall.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = gWall.proto; sourceTree = "<group>"; };
+		9B9753B10F44A60400E41662 /* gZone.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = gZone.proto; sourceTree = "<group>"; };
+		9B9753B20F44A60400E41662 /* nAuthentication.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = nAuthentication.proto; sourceTree = "<group>"; };
+		9B9753B30F44A60400E41662 /* nConfig.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = nConfig.proto; sourceTree = "<group>"; };
+		9B9753B40F44A60400E41662 /* nNetObject.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = nNetObject.proto; sourceTree = "<group>"; };
+		9B9753B50F44A60400E41662 /* nNetObjectPrivate.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = nNetObjectPrivate.proto; sourceTree = "<group>"; };
+		9B9753B60F44A60400E41662 /* nNetwork.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = nNetwork.proto; sourceTree = "<group>"; };
+		9B9753B70F44A60400E41662 /* nServerInfo.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = nServerInfo.proto; sourceTree = "<group>"; };
+		9B9753B80F44A60400E41662 /* prototype.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = prototype.proto; sourceTree = "<group>"; };
+		9B9753B90F44A60400E41662 /* tColor.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tColor.proto; sourceTree = "<group>"; };
+		9B9753BA0F44A60400E41662 /* tCoord.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tCoord.proto; sourceTree = "<group>"; };
+		9B9753BB0F44A60400E41662 /* tFunction.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tFunction.proto; sourceTree = "<group>"; };
+		9B9753BC0F44A60400E41662 /* tPolynomial.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = tPolynomial.proto; sourceTree = "<group>"; };
+		9B9753BD0F44A60400E41662 /* zShape.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = zShape.proto; sourceTree = "<group>"; };
+		9B9753BE0F44A60400E41662 /* zZone.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = zZone.proto; sourceTree = "<group>"; };
 		9B9E56300D81D962008DD17D /* shared.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = shared.xcconfig; sourceTree = "<group>"; };
 		9BB5B9240D84604400BF5F1C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
 		9BB5B9270D84605700BF5F1C /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = English; path = InfoPlist.strings.in; sourceTree = "<group>"; };
@@ -885,6 +961,7 @@
 				9B83FE950B12161600878E8A /* Growl-WithInstaller.framework in Frameworks */,
 				9BCBDF890D9210E10022855B /* ApplicationServices.framework in Frameworks */,
 				9BCBE1E30D9214420022855B /* CoreFoundation.framework in Frameworks */,
+				9B9753920F44A34A00E41662 /* libprotobuf.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -969,6 +1046,39 @@
 			path = ../src/resource;
 			sourceTree = SOURCE_ROOT;
 		};
+		9B9753A50F44A60400E41662 /* protobuf */ = {
+			isa = PBXGroup;
+			children = (
+				9B9753A60F44A60400E41662 /* eEventNotification.proto */,
+				9B9753A70F44A60400E41662 /* eLagCompensation.proto */,
+				9B9753A80F44A60400E41662 /* eNetGameObject.proto */,
+				9B9753A90F44A60400E41662 /* ePlayer.proto */,
+				9B9753AA0F44A60400E41662 /* eTeam.proto */,
+				9B9753AB0F44A60400E41662 /* eTimer.proto */,
+				9B9753AC0F44A60400E41662 /* eVoter.proto */,
+				9B9753AD0F44A60400E41662 /* gAIBase.proto */,
+				9B9753AE0F44A60400E41662 /* gCycle.proto */,
+				9B9753AF0F44A60400E41662 /* gGame.proto */,
+				9B9753B00F44A60400E41662 /* gWall.proto */,
+				9B9753B10F44A60400E41662 /* gZone.proto */,
+				9B9753B20F44A60400E41662 /* nAuthentication.proto */,
+				9B9753B30F44A60400E41662 /* nConfig.proto */,
+				9B9753B40F44A60400E41662 /* nNetObject.proto */,
+				9B9753B50F44A60400E41662 /* nNetObjectPrivate.proto */,
+				9B9753B60F44A60400E41662 /* nNetwork.proto */,
+				9B9753B70F44A60400E41662 /* nServerInfo.proto */,
+				9B9753B80F44A60400E41662 /* prototype.proto */,
+				9B9753B90F44A60400E41662 /* tColor.proto */,
+				9B9753BA0F44A60400E41662 /* tCoord.proto */,
+				9B9753BB0F44A60400E41662 /* tFunction.proto */,
+				9B9753BC0F44A60400E41662 /* tPolynomial.proto */,
+				9B9753BD0F44A60400E41662 /* zShape.proto */,
+				9B9753BE0F44A60400E41662 /* zZone.proto */,
+			);
+			name = protobuf;
+			path = ../src/protobuf;
+			sourceTree = SOURCE_ROOT;
+		};
 		9BB7B5A30D8302DF004FE8C3 /* Source */ = {
 			isa = PBXGroup;
 			children = (
@@ -980,6 +1090,7 @@
 				9BB7B8E30D830448004FE8C3 /* tron */,
 				9BB7B9F30D830473004FE8C3 /* ui */,
 				9BB7B64C0D830321004FE8C3 /* macosx */,
+				9B9753A50F44A60400E41662 /* protobuf */,
 				9BB7B7500D8303BA004FE8C3 /* thirdparty */,
 			);
 			name = Source;
@@ -1474,6 +1585,7 @@
 				9BD7D96B0A2C7CB400D7033C /* libfreetype.a */,
 				9BD7D96C0A2C7CB400D7033C /* libftgl.a */,
 				9BD7D96D0A2C7CB400D7033C /* libpng.framework */,
+				9B9753910F44A34A00E41662 /* libprotobuf.a */,
 				9BD7D9700A2C7CB400D7033C /* SDL.framework */,
 				9BD7D96E0A2C7CB400D7033C /* SDL_image.framework */,
 			);
@@ -1510,6 +1622,7 @@
 				8CAD91B7095A459400DA0ECC /* Run script: Cleanup */,
 			);
 			buildRules = (
+				9B9753A40F44A5FA00E41662 /* PBXBuildRule */,
 				9BB5B8560D845C2500BF5F1C /* PBXBuildRule */,
 			);
 			dependencies = (
@@ -1531,6 +1644,7 @@
 				8CBA6203089F11BE007E21DC /* Run script: Cleanup */,
 			);
 			buildRules = (
+				9B9753980F44A3AF00E41662 /* PBXBuildRule */,
 				9B9E56620D8208E8008DD17D /* PBXBuildRule */,
 				9BC0F61A0B517A8B0041120B /* PBXBuildRule */,
 			);
@@ -1578,6 +1692,31 @@
 				9BD7DB3E0A2CAE4600D7033C /* textures in Resources */,
 				9BD7DB770A2CE28500D7033C /* SDLMain.nib in Resources */,
 				9BD7DB7E0A2CE35600D7033C /* Armagetron Advanced.icns in Resources */,
+				9B9753BF0F44A60400E41662 /* eEventNotification.proto in Resources */,
+				9B9753C00F44A60400E41662 /* eLagCompensation.proto in Resources */,
+				9B9753C10F44A60400E41662 /* eNetGameObject.proto in Resources */,
+				9B9753C20F44A60400E41662 /* ePlayer.proto in Resources */,
+				9B9753C30F44A60400E41662 /* eTeam.proto in Resources */,
+				9B9753C40F44A60400E41662 /* eTimer.proto in Resources */,
+				9B9753C50F44A60400E41662 /* eVoter.proto in Resources */,
+				9B9753C60F44A60400E41662 /* gAIBase.proto in Resources */,
+				9B9753C70F44A60400E41662 /* gCycle.proto in Resources */,
+				9B9753C80F44A60400E41662 /* gGame.proto in Resources */,
+				9B9753C90F44A60400E41662 /* gWall.proto in Resources */,
+				9B9753CA0F44A60400E41662 /* gZone.proto in Resources */,
+				9B9753CB0F44A60400E41662 /* nAuthentication.proto in Resources */,
+				9B9753CC0F44A60400E41662 /* nConfig.proto in Resources */,
+				9B9753CD0F44A60400E41662 /* nNetObject.proto in Resources */,
+				9B9753CE0F44A60400E41662 /* nNetObjectPrivate.proto in Resources */,
+				9B9753CF0F44A60400E41662 /* nNetwork.proto in Resources */,
+				9B9753D00F44A60400E41662 /* nServerInfo.proto in Resources */,
+				9B9753D10F44A60400E41662 /* prototype.proto in Resources */,
+				9B9753D20F44A60400E41662 /* tColor.proto in Resources */,
+				9B9753D30F44A60400E41662 /* tCoord.proto in Resources */,
+				9B9753D40F44A60400E41662 /* tFunction.proto in Resources */,
+				9B9753D50F44A60400E41662 /* tPolynomial.proto in Resources */,
+				9B9753D60F44A60400E41662 /* zShape.proto in Resources */,
+				9B9753D70F44A60400E41662 /* zZone.proto in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
