@@ -1378,7 +1378,7 @@ static void se_LoginRequestHandler( Engine::LoginRequest const & request, nSende
         se_RequestLogin( p );
     }
 #else
-    sn_ConsoleOut( tOutput( "$login_not_supported" ), m.SenderID() );
+    sn_ConsoleOut( tOutput( "$login_not_supported" ), sender.SenderID() );
 #endif
 }
 
