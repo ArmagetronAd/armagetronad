@@ -1978,6 +1978,16 @@ static nVersionFeature sg_noRedundantBrakeCommands( 13 );
 
 bool gCycleMovement::Timestep( REAL currentTime )
 {
+/*
+    static int count = 1;
+    ++count;
+    if ( count == 0 )
+    {
+        int xc;
+        xc = 0;
+    }
+*/
+
     // request regeneration of maximum space
     refreshSpaceAhead_ = true;
 
