@@ -1515,7 +1515,7 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
                 if( !noConfusionFromMoveBack.Supported( Owner() ) && 
                     lastTime - lag < lastSyncOwnerGameTime_ )
                 {
-                    lag = lastTime - lastSyncOwnerGameTime_;
+                    // lag = lastTime - lastSyncOwnerGameTime_;
                 }
 
                 // no compensation? Just quit.
