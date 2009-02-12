@@ -113,7 +113,6 @@
 		9B97549C0F44AB6000E41662 /* zShape.proto in Sources */ = {isa = PBXBuildFile; fileRef = 9B9753BD0F44A60400E41662 /* zShape.proto */; };
 		9B97549D0F44AB6000E41662 /* zZone.proto in Sources */ = {isa = PBXBuildFile; fileRef = 9B9753BE0F44A60400E41662 /* zZone.proto */; };
 		9B9754C50F44ACC900E41662 /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B9753910F44A34A00E41662 /* libprotobuf.a */; };
-		9B9754C60F44ACE400E41662 /* libarmaprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B97546A0F44AA2700E41662 /* libarmaprotobuf.a */; };
 		9B9754C70F44AD1300E41662 /* libarmaprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B97546A0F44AA2700E41662 /* libarmaprotobuf.a */; };
 		9B9754DC0F44AFB700E41662 /* tPolynomial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9754D90F44AFB700E41662 /* tPolynomial.cpp */; };
 		9B9754DD0F44AFB700E41662 /* tPolynomialMarshaler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9754DA0F44AFB700E41662 /* tPolynomialMarshaler.cpp */; };
@@ -129,6 +128,7 @@
 		9B97550E0F44B0AE00E41662 /* tCoord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97550C0F44B0AE00E41662 /* tCoord.cpp */; };
 		9B9755160F44B0DE00E41662 /* nBinary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9755140F44B0DE00E41662 /* nBinary.cpp */; };
 		9B9755170F44B0DE00E41662 /* nBinary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9755140F44B0DE00E41662 /* nBinary.cpp */; };
+		9B97553D0F44B3EC00E41662 /* libarmaprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B97546A0F44AA2700E41662 /* libarmaprotobuf.a */; };
 		9BB7B4000D8246A2004FE8C3 /* config in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAE20A2CAE0700D7033C /* config */; };
 		9BB7B4010D8246A2004FE8C3 /* language in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAFE0A2CAE1D00D7033C /* language */; };
 		9BB7B5E10D8302FA004FE8C3 /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B5A60D8302FA004FE8C3 /* eAdvWall.cpp */; };
@@ -1006,7 +1006,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9B9754C60F44ACE400E41662 /* libarmaprotobuf.a in Frameworks */,
+				9B97553D0F44B3EC00E41662 /* libarmaprotobuf.a in Frameworks */,
 				9B9754C50F44ACC900E41662 /* libprotobuf.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2321,6 +2321,7 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = "armagetronad-dedicated";
 				SECTORDER_FLAGS = "";
+				USER_HEADER_SEARCH_PATHS = ../src/macosx/dedicated;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -2348,6 +2349,7 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = "armagetronad-dedicated";
 				SECTORDER_FLAGS = "";
+				USER_HEADER_SEARCH_PATHS = ../src/macosx/dedicated;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
