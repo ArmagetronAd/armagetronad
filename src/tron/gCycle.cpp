@@ -1508,6 +1508,16 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
                 // for the credit
                 lag = eLag::TakeCredit( Owner(), lag + lagOffset ) - lagOffset;
 
+                // don't go back further than last sync to the owner.
+                // old clients get doubly confused and produce an extra
+                // evil lag slide.
+                static nVersionFeature noConfusionFromMoveBack( 16 );
+                if( !noConfusionFromMoveBack.Supported( Owner() ) && 
+                    lastTime - lag < lastSyncOwnerGameTime_ )
+                {
+                    lag = lastTime - lastSyncOwnerGameTime_;
+                }
+
                 // no compensation? Just quit.
                 if ( lag < 0 )
                     return;
@@ -2297,6 +2307,7 @@ void gCycle::MyInitAfterCreation(){
     //con << "Created cycle.\n";
 #endif
     nextSyncOwner=nextSync=tSysTimeFloat()-1;
+    lastSyncOwnerGameTime_ = 0;
 
     if (sn_GetNetState()!=nCLIENT)
         RequestSync();
@@ -4864,6 +4875,7 @@ gCycle::gCycle(nMessage &m)
     lastTimeAnim = lastTime = -EPS;
 
     nextSync = nextSyncOwner = -1;
+    lastSyncOwnerGameTime_ = 0;
 }
 
 
@@ -4878,6 +4890,11 @@ static nVersionFeature sg_verletIntegration( 7 );
 
 void gCycle::WriteSync(nMessage &m){
     //	eNetGameObject::WriteSync(m);
+
+    if( SyncedUser() == Owner() )
+    {
+        lastSyncOwnerGameTime_ = lastTime;
+    }
 
     if ( Alive() )
     {
