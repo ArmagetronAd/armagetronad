@@ -429,7 +429,8 @@ lag_slow_weight_help               Extra weight lag reports from the server infl
 lag_fast_weight_help               Extra weight lag reports from the server influence the fast lag compensation with.
 
 lag_credit_help                    Maximal seconds of total lag credit.
-lag_credit_single_help             Maximal seconds of lag credit for a single lag event.
+lag_credit_single_help             Maximal seconds of lag credit for a single lag credit event.
+lag_credit_single_help             Maximal multiple of the lag variance for a single lag credit event.
 lag_sweet_spot_help                Sweet spot, the fill ratio of lag credit the server tries to keep the client at.
 lag_credit_time_help               Timescale lag credit is restored on.
 

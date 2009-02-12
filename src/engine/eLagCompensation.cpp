@@ -52,6 +52,21 @@ static tSettingItem< REAL > se_lagFastDecayTimeConf( "LAG_FAST_TIME", se_lagFast
 static tSettingItem< REAL > se_lagSlowWeightConf( "LAG_SLOW_WEIGHT", se_lagSlowWeight );
 static tSettingItem< REAL > se_lagFastWeightConf( "LAG_FAST_WEIGHT", se_lagFastWeight );
 
+// averages over lag events
+static nAverager se_lagAverager;
+
+class eLagAveragerInitializer
+{
+    public:
+    eLagAveragerInitializer()
+    {
+        // start with a large variance
+        se_lagAverager.Add(-1,1);
+        se_lagAverager.Add(1,1);
+    }
+};
+static eLagAveragerInitializer se_lagInitializer;
+
 //! lag tracker on client
 class nClientLag
 {public:
@@ -135,6 +150,9 @@ static nDescriptor se_receiveLagMessageDescriptor( 240, se_receiveLagMessage,"la
 // maximal seconds of lag credit
 static REAL se_lagCredit = .5f;
 
+// maximal lag credit for a single event when compared to the lag variance
+static REAL se_lagCreditVariance = 3.0f;
+
 // sweet spot, the fill ratio of lag credit the server tries to keep the client at
 static REAL se_lagCreditSweetSpot = .5f;
 
@@ -143,6 +161,7 @@ static REAL se_lagCreditTime = 600.0f;
 
 static tSettingItem< REAL > se_lagCreditConf( "LAG_CREDIT", se_lagCredit );
 static tSettingItem< REAL > se_lagCreditSingleConf( "LAG_CREDIT_SINGLE", se_lagCreditSingle );
+static tSettingItem< REAL > se_lagCreditVarianceConf( "LAG_CREDIT_VARIANCE", se_lagCreditVariance );
 static tSettingItem< REAL > se_lagCreditSweetSpotConf( "LAG_SWEET_SPOT", se_lagCreditSweetSpot );
 static tSettingItem< REAL > se_lagCreditTimeConf( "LAG_CREDIT_TIME", se_lagCreditTime );
 
@@ -152,6 +171,11 @@ static tSettingItem< REAL > se_lagThresholdConf( "LAG_THRESHOLD", se_lagThreshol
 
 // see if a client supports lag compensation
 static nVersionFeature se_clientLagCompensation( 14 );
+    //! the version feature telling whether this is supported
+nVersionFeature const & eLag::Feature()
+{
+    return se_clientLagCompensation;
+}
 
 //! lag tracker on server
 class nServerLag
@@ -230,6 +254,11 @@ public:
     REAL TakeCredit( REAL lag )
     {
         lag -= se_lagThreshold;
+
+        se_lagAverager.Add( lag, 1 );
+        se_lagAverager.Timestep( .001 );
+        REAL lagVariance = se_lagAverager.GetDataVariance();
+
         if ( lag > 0 )
         {
 #ifdef DEBUG_LAG
@@ -241,6 +270,12 @@ public:
 
             // clamp
             lag = lag > se_lagCreditSingle ? se_lagCreditSingle : lag;
+
+            if( se_lagCreditVariance > 0 )
+            {
+                REAL lagCreditVariance = sqrt( lagVariance ) * se_lagCreditVariance;
+                lag = lag > lagCreditVariance ? lagCreditVariance : lag;
+            }
 
             // get values
             REAL credit = Credit();
@@ -269,7 +304,7 @@ public:
 
 #ifdef DEBUG_LAG
             {
-                if ( lag > lagBefore )
+                if ( lag < lagBefore )
                     con << "Requesting " << lagBefore << " seconds of lag credit, granting " << lag << ".\n";
                 else
                     con << "Granting " << lag << " seconds of lag credit.\n";

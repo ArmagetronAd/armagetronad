@@ -423,14 +423,14 @@ nVersionFeature::nVersionFeature( int min, int max ) // creates a feature that i
     max_ = max;
 }
 
-bool nVersionFeature::Supported()
+bool nVersionFeature::Supported() const
 {
     return 
     ( min_ < 0 || nTempVersionOverrider::OverriddenVersion().Max() >= min_ ) &&  
     ( max_ < 0 || nTempVersionOverrider::OverriddenVersion().Min() <= max_ );
 }
 
-bool nVersionFeature::Supported( int client )
+bool nVersionFeature::Supported( int client ) const
 {
     if ( client < 0 || client > MAXCLIENTS )
         return false;

@@ -1497,6 +1497,16 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
                 // for the credit
                 lag = eLag::TakeCredit( Owner(), lag + lagOffset ) - lagOffset;
 
+                // don't go back further than last sync to the owner.
+                // old clients get doubly confused and produce an extra
+                // evil lag slide.
+                static nVersionFeature noConfusionFromMoveBack( 16 );
+                if( !noConfusionFromMoveBack.Supported( Owner() ) && 
+                    lastTime - lag < lastSyncOwnerGameTime_ )
+                {
+                    lag = lastTime - lastSyncOwnerGameTime_;
+                }
+
                 // no compensation? Just quit.
                 if ( lag < 0 )
                     return;
@@ -1759,6 +1769,28 @@ void gCycleExtrapolator::CopyFrom( const SyncData& sync, const gCycle& other )
 
     // copy distance
     trueDistance_ = GetDistance();
+
+    // make a small timestep backwards if we passed the next
+    // destination. While this makes us react a tad later to lag slides,
+    // it avoids lag slide false positives, which later cause real
+    // lag slides.
+    if( eLag::Feature().Supported(0) )
+    {
+        gDestination *dest = GetCurrentDestination();
+        if ( dest )
+        {
+            REAL distToDest = eCoord::F( dest->position - pos, dirDrive );
+            if( distToDest < 0 )
+            {
+                // instead of doing a full simulation, just trust the data from the
+                // destination.
+                pos = dest->position;
+                lastTime = dest->gameTime;
+                distance = dest->distance;
+                verletSpeed_ = dest->speed;
+            }
+        }
+    }
 }
 
 gCycleExtrapolator::gCycleExtrapolator(eGrid *grid, const eCoord &pos,const eCoord &dir,ePlayerNetID *p,bool autodelete)
@@ -1850,10 +1882,10 @@ void gCycleExtrapolator::PassEdge(const eWall *ww,REAL time,REAL a,int){
 bool gCycleExtrapolator::TimestepCore(REAL currentTime, bool calculateAcceleration)
 {
     // determine a suitable next destination
-    gDestination destDefault( *parent_ ), *dest=&destDefault;
-    if ( GetCurrentDestination() )
+    gDestination destDefault( *parent_ ), *dest=GetCurrentDestination();
+    if ( !dest )
     {
-        dest = GetCurrentDestination();
+        dest = &destDefault;
     }
 
     // correct distance
@@ -2269,6 +2301,7 @@ void gCycle::MyInitAfterCreation(){
     con << "Created cycle.\n";
 #endif
     nextSyncOwner=nextSync=tSysTimeFloat()-1;
+    lastSyncOwnerGameTime_ = 0;
 
     if (sn_GetNetState()!=nCLIENT)
         RequestSync();
@@ -4932,6 +4965,7 @@ gCycle::gCycle(nMessage &m)
     lastTimeAnim = lastTime = -EPS;
 
     nextSync = nextSyncOwner = -1;
+    lastSyncOwnerGameTime_ = 0;
 }
 
 
@@ -4946,6 +4980,11 @@ static nVersionFeature sg_verletIntegration( 7 );
 
 void gCycle::WriteSync(nMessage &m){
     //	eNetGameObject::WriteSync(m);
+
+    if( SyncedUser() == Owner() )
+    {
+        lastSyncOwnerGameTime_ = lastTime;
+    }
 
     if ( Alive() )
     {
