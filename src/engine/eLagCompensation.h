@@ -31,6 +31,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "defs.h"
 
+class nVersionFeature;
+
 //! class for lag compensation functions in the game code
 class eLag
 {
@@ -52,6 +54,9 @@ public:
 
     //! call on the client: advance time
     static void Timestep( REAL dt );
+
+    //! the version feature telling whether this is supported
+    static nVersionFeature const & Feature();
 };
 
 #endif

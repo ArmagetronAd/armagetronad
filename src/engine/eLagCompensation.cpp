@@ -152,6 +152,11 @@ static tSettingItem< REAL > se_lagThresholdConf( "LAG_THRESHOLD", se_lagThreshol
 
 // see if a client supports lag compensation
 static nVersionFeature se_clientLagCompensation( 14 );
+    //! the version feature telling whether this is supported
+nVersionFeature const & eLag::Feature()
+{
+    return se_clientLagCompensation;
+}
 
 //! lag tracker on server
 class nServerLag
