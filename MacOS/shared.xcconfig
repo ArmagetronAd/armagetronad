@@ -1,6 +1,6 @@
 SHARED_OTHER_LDFLAGS = -lxml2 -lz -lpthread -liconv -lm
 SHARED_LIBRARY_SEARCH_PATHS = /Library/Frameworks/ArmagetronAdvanced/current
-SHARED_HEADER_SEARCH_PATHS = $(SYMROOT)/Generated/src/macosx ../src/tron ../src/tools ../src/engine/sound /usr/include/libxml2 /Library/Frameworks/ArmagetronAdvanced/current/include
+SHARED_HEADER_SEARCH_PATHS = $(SYMROOT)/Generated/src/protobuf $(SYMROOT)/Generated/src/macosx ../src/tron ../src/tools ../src/engine/sound /usr/include/libxml2 /Library/Frameworks/ArmagetronAdvanced/current/include
 GCC_C_LANGUAGE_STANDARD = c99
 SHARED_OTHER_CPLUSPLUSFLAGS = -Wno-long-double
 
