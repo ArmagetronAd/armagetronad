@@ -2336,6 +2336,7 @@
 			buildSettings = {
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)/Armagetron Advanced Dedicated";
 				COPY_PHASE_STRIP = YES;
+				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = "\"$(SRCROOT)/../../Library/Frameworks\"";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
@@ -2349,6 +2350,7 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = "armagetronad-dedicated";
 				SECTORDER_FLAGS = "";
+				STRIP_INSTALLED_PRODUCT = YES;
 				USER_HEADER_SEARCH_PATHS = ../src/macosx/dedicated;
 				WARNING_CFLAGS = (
 					"-Wmost",
