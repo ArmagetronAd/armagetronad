@@ -274,7 +274,7 @@ public:
 
 #ifdef DEBUG_LAG
             {
-                if ( lag > lagBefore )
+                if ( lag < lagBefore )
                     con << "Requesting " << lagBefore << " seconds of lag credit, granting " << lag << ".\n";
                 else
                     con << "Granting " << lag << " seconds of lag credit.\n";
