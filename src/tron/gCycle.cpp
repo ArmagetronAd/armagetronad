@@ -1160,6 +1160,12 @@ void gDestination::CopyFrom(const gCycleMovement &other)
 #endif
     if ( other.Owner() && other.Player() )
         chatting = other.Player()->IsChatting();
+
+    // cheat. If rubber ran out, backdate the time.
+    if ( other.RubberDepleteTime() > 0 )
+    {
+        gameTime = other.RubberDepleteTime();
+    }
 }
 
 void gDestination::CopyFrom(const gCycle &other)

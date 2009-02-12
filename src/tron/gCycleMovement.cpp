@@ -3845,6 +3845,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
     rubberUsage = 0;
 
     // decide over kill
+    bool rubberUsedUp = false;
     if ( rubber > rubber_granted || ( sg_cycleWidthRubberMax == 0 && sg_cycleWidthRubberMin == 0 ) )
     {
         if ( sn_GetNetState() != nCLIENT )
@@ -3852,7 +3853,10 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
             throw gCycleDeath( pos );
         }
         else
+        {
             rubber = rubber_granted;
+            rubberUsedUp = true;
+        }
     }
 
     // use up brake
@@ -3873,9 +3877,24 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
 
 
     // clamp rubber ( mostly for client side HUD display )
-    if ( rubber > rubber_granted )
+    if ( rubber >= rubber_granted )
+    {
         rubber = rubber_granted;
+        rubberUsedUp = true;
+    }
 
+    // record time rubber went out
+    if( rubberUsedUp )
+    {
+        if ( rubberDepleteTime_ <= 0 )
+        {
+            rubberDepleteTime_ = lastTime;
+        }
+    }
+    else
+    {
+        rubberDepleteTime_ = 0;
+    }
 
     lastTime=currentTime;
 
@@ -3928,6 +3947,7 @@ void gCycleMovement::MyInitAfterCreation( void )
     // con << "creating cycle.\n";
 #endif
     brakingReservoir = 1.0f;
+    rubberDepleteTime_ = 0.0f;
 
     braking = false;
 
