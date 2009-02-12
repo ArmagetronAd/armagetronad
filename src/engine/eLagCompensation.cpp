@@ -61,8 +61,8 @@ class eLagAveragerInitializer
     eLagAveragerInitializer()
     {
         // start with a large variance
-        se_lagAverager.Add(-1,1);
-        se_lagAverager.Add(1,1);
+        se_lagAverager.Add(-.1,.1f);
+        se_lagAverager.Add(.1,.1f);
     }
 };
 static eLagAveragerInitializer se_lagInitializer;
@@ -152,6 +152,9 @@ static REAL se_lagCredit = .5f;
 
 // maximal lag credit for a single event when compared to the lag variance
 static REAL se_lagCreditVariance = 3.0f;
+
+// cached value of that times the variance of lag
+static REAL se_lagCreditVarianceCache = 0.0f;
 
 // sweet spot, the fill ratio of lag credit the server tries to keep the client at
 static REAL se_lagCreditSweetSpot = .5f;
@@ -251,12 +254,19 @@ public:
         return Credit() - creditUsed_;
     }
 
+    // clamps a single credit event to the configured bounds
+    static void ClampSingleCredit( REAL & credit )
+    {
+        credit = credit > se_lagCreditSingle ? se_lagCreditSingle : credit;
+        credit = credit > se_lagCreditVarianceCache ? se_lagCreditVarianceCache : credit;
+    }
+        
     REAL TakeCredit( REAL lag )
     {
         lag -= se_lagThreshold;
 
         se_lagAverager.Add( lag, 1 );
-        se_lagAverager.Timestep( .001 );
+        se_lagAverager.Timestep( .01 );
         REAL lagVariance = se_lagAverager.GetDataVariance();
 
         if ( lag > 0 )
@@ -268,14 +278,14 @@ public:
             // if everyone is lagging, delete the used credit
             Balance();
 
-            // clamp
-            lag = lag > se_lagCreditSingle ? se_lagCreditSingle : lag;
-
+            // update variance cache
             if( se_lagCreditVariance > 0 )
             {
-                REAL lagCreditVariance = sqrt( lagVariance ) * se_lagCreditVariance;
-                lag = lag > lagCreditVariance ? lagCreditVariance : lag;
+                se_lagCreditVarianceCache = sqrt( lagVariance ) * se_lagCreditVariance;
             }
+
+            // clamp
+            ClampSingleCredit( lag );
 
             // get values
             REAL credit = Credit();
@@ -439,8 +449,10 @@ REAL eLag::Credit( int client )
     // see how much total credit is left
     REAL credit = se_serverLag[client].CreditLeft();
 
-    // but clamp it with the maximum single credit
-    return credit > se_lagCreditSingle ? se_lagCreditSingle : credit;
+    // and clam pit
+    nServerLag::ClampSingleCredit( credit );
+
+    return credit;
 }
 
 // *******************************************************************************
