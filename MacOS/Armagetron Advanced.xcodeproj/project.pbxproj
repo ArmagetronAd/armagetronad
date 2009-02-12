@@ -115,6 +115,20 @@
 		9B9754C50F44ACC900E41662 /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B9753910F44A34A00E41662 /* libprotobuf.a */; };
 		9B9754C60F44ACE400E41662 /* libarmaprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B97546A0F44AA2700E41662 /* libarmaprotobuf.a */; };
 		9B9754C70F44AD1300E41662 /* libarmaprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B97546A0F44AA2700E41662 /* libarmaprotobuf.a */; };
+		9B9754DC0F44AFB700E41662 /* tPolynomial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9754D90F44AFB700E41662 /* tPolynomial.cpp */; };
+		9B9754DD0F44AFB700E41662 /* tPolynomialMarshaler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9754DA0F44AFB700E41662 /* tPolynomialMarshaler.cpp */; };
+		9B9754DE0F44AFB700E41662 /* tPolynomialWithBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9754DB0F44AFB700E41662 /* tPolynomialWithBase.cpp */; };
+		9B9754DF0F44AFB700E41662 /* tPolynomial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9754D90F44AFB700E41662 /* tPolynomial.cpp */; };
+		9B9754E00F44AFB700E41662 /* tPolynomialMarshaler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9754DA0F44AFB700E41662 /* tPolynomialMarshaler.cpp */; };
+		9B9754E10F44AFB700E41662 /* tPolynomialWithBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9754DB0F44AFB700E41662 /* tPolynomialWithBase.cpp */; };
+		9B9754FA0F44B00100E41662 /* nProtoBuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9754F90F44B00100E41662 /* nProtoBuf.cpp */; };
+		9B9754FB0F44B00100E41662 /* nProtoBuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9754F90F44B00100E41662 /* nProtoBuf.cpp */; };
+		9B9755020F44B03900E41662 /* nStreamMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9755000F44B03900E41662 /* nStreamMessage.cpp */; };
+		9B9755030F44B03900E41662 /* nStreamMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9755000F44B03900E41662 /* nStreamMessage.cpp */; };
+		9B97550D0F44B0AE00E41662 /* tCoord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97550C0F44B0AE00E41662 /* tCoord.cpp */; };
+		9B97550E0F44B0AE00E41662 /* tCoord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B97550C0F44B0AE00E41662 /* tCoord.cpp */; };
+		9B9755160F44B0DE00E41662 /* nBinary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9755140F44B0DE00E41662 /* nBinary.cpp */; };
+		9B9755170F44B0DE00E41662 /* nBinary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B9755140F44B0DE00E41662 /* nBinary.cpp */; };
 		9BB7B4000D8246A2004FE8C3 /* config in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAE20A2CAE0700D7033C /* config */; };
 		9BB7B4010D8246A2004FE8C3 /* language in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9BD7DAFE0A2CAE1D00D7033C /* language */; };
 		9BB7B5E10D8302FA004FE8C3 /* eAdvWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B5A60D8302FA004FE8C3 /* eAdvWall.cpp */; };
@@ -617,6 +631,16 @@
 		9B9753BD0F44A60400E41662 /* zShape.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = zShape.proto; sourceTree = "<group>"; };
 		9B9753BE0F44A60400E41662 /* zZone.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = zZone.proto; sourceTree = "<group>"; };
 		9B97546A0F44AA2700E41662 /* libarmaprotobuf.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libarmaprotobuf.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		9B9754D90F44AFB700E41662 /* tPolynomial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tPolynomial.cpp; sourceTree = "<group>"; };
+		9B9754DA0F44AFB700E41662 /* tPolynomialMarshaler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tPolynomialMarshaler.cpp; sourceTree = "<group>"; };
+		9B9754DB0F44AFB700E41662 /* tPolynomialWithBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tPolynomialWithBase.cpp; sourceTree = "<group>"; };
+		9B9754F80F44B00100E41662 /* nProtoBuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nProtoBuf.h; sourceTree = "<group>"; };
+		9B9754F90F44B00100E41662 /* nProtoBuf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nProtoBuf.cpp; sourceTree = "<group>"; };
+		9B9755000F44B03900E41662 /* nStreamMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nStreamMessage.cpp; sourceTree = "<group>"; };
+		9B9755010F44B03900E41662 /* nStreamMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nStreamMessage.h; sourceTree = "<group>"; };
+		9B97550C0F44B0AE00E41662 /* tCoord.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tCoord.cpp; sourceTree = "<group>"; };
+		9B9755140F44B0DE00E41662 /* nBinary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nBinary.cpp; sourceTree = "<group>"; };
+		9B9755150F44B0DE00E41662 /* nBinary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nBinary.h; sourceTree = "<group>"; };
 		9B9E56300D81D962008DD17D /* shared.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = shared.xcconfig; sourceTree = "<group>"; };
 		9BB5B9240D84604400BF5F1C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = ../src/macosx/Info.plist; sourceTree = SOURCE_ROOT; };
 		9BB5B9270D84605700BF5F1C /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = English; path = InfoPlist.strings.in; sourceTree = "<group>"; };
@@ -1274,6 +1298,8 @@
 				9BB7B6910D830365004FE8C3 /* md5.h */,
 				9BB7B6920D830365004FE8C3 /* nAuthentication.cpp */,
 				9BB7B6930D830365004FE8C3 /* nAuthentication.h */,
+				9B9755140F44B0DE00E41662 /* nBinary.cpp */,
+				9B9755150F44B0DE00E41662 /* nBinary.h */,
 				9BB7B6940D830365004FE8C3 /* nConfig.cpp */,
 				9BB7B6950D830365004FE8C3 /* nConfig.h */,
 				9BB7B6980D830365004FE8C3 /* nKrawall.cpp */,
@@ -1287,6 +1313,8 @@
 				9BB7B6A00D830365004FE8C3 /* nObserver.h */,
 				9BB7B6A10D830365004FE8C3 /* nPriorizing.cpp */,
 				9BB7B6A20D830365004FE8C3 /* nPriorizing.h */,
+				9B9754F90F44B00100E41662 /* nProtoBuf.cpp */,
+				9B9754F80F44B00100E41662 /* nProtoBuf.h */,
 				9BB7B6A30D830365004FE8C3 /* nServerInfo.cpp */,
 				9BB7B6A40D830365004FE8C3 /* nServerInfo.h */,
 				9BB7B6A50D830365004FE8C3 /* nSimulatePing.h */,
@@ -1294,6 +1322,8 @@
 				9BB7B6A70D830366004FE8C3 /* nSocket.h */,
 				9BB7B6A80D830366004FE8C3 /* nSpamProtection.cpp */,
 				9BB7B6A90D830366004FE8C3 /* nSpamProtection.h */,
+				9B9755000F44B03900E41662 /* nStreamMessage.cpp */,
+				9B9755010F44B03900E41662 /* nStreamMessage.h */,
 			);
 			name = network;
 			path = ../src/network;
@@ -1374,6 +1404,7 @@
 				9BB7B7AC0D830422004FE8C3 /* tConfiguration.h */,
 				9BB7B7AD0D830422004FE8C3 /* tConsole.cpp */,
 				9BB7B7AE0D830422004FE8C3 /* tConsole.h */,
+				9B97550C0F44B0AE00E41662 /* tCoord.cpp */,
 				9BB7B7AF0D830422004FE8C3 /* tCoord.h */,
 				9BB7B7B00D830422004FE8C3 /* tCrypt.cpp */,
 				9BB7B7B10D830422004FE8C3 /* tCrypt.h */,
@@ -1406,8 +1437,11 @@
 				9BB7B7CC0D830422004FE8C3 /* tMemStack.h */,
 				9BB7B7CD0D830422004FE8C3 /* tPlayList.cpp */,
 				9BB7B7CE0D830422004FE8C3 /* tPlayList.h */,
+				9B9754D90F44AFB700E41662 /* tPolynomial.cpp */,
 				9BB7B7CF0D830422004FE8C3 /* tPolynomial.h */,
+				9B9754DA0F44AFB700E41662 /* tPolynomialMarshaler.cpp */,
 				9BB7B7D00D830422004FE8C3 /* tPolynomialMarshaler.h */,
+				9B9754DB0F44AFB700E41662 /* tPolynomialWithBase.cpp */,
 				9BB7B7D10D830422004FE8C3 /* tPolynomialWithBase.h */,
 				9BB7B7D20D830422004FE8C3 /* tRandom.cpp */,
 				9BB7B7D30D830422004FE8C3 /* tRandom.h */,
@@ -2015,6 +2049,13 @@
 				9B1ECD080F159F3500288C28 /* cCamview.cpp in Sources */,
 				9B1ECD280F159FF800288C28 /* tVersion.cpp in Sources */,
 				9B437BA40F2CBD8300A10CC6 /* tRectangle.cpp in Sources */,
+				9B9754DF0F44AFB700E41662 /* tPolynomial.cpp in Sources */,
+				9B9754E00F44AFB700E41662 /* tPolynomialMarshaler.cpp in Sources */,
+				9B9754E10F44AFB700E41662 /* tPolynomialWithBase.cpp in Sources */,
+				9B9754FB0F44B00100E41662 /* nProtoBuf.cpp in Sources */,
+				9B9755030F44B03900E41662 /* nStreamMessage.cpp in Sources */,
+				9B97550E0F44B0AE00E41662 /* tCoord.cpp in Sources */,
+				9B9755170F44B0DE00E41662 /* nBinary.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2173,6 +2214,13 @@
 				9B1ECD060F159F3500288C28 /* cCamview.cpp in Sources */,
 				9B1ECD260F159FF800288C28 /* tVersion.cpp in Sources */,
 				9B437BA20F2CBD8300A10CC6 /* tRectangle.cpp in Sources */,
+				9B9754DC0F44AFB700E41662 /* tPolynomial.cpp in Sources */,
+				9B9754DD0F44AFB700E41662 /* tPolynomialMarshaler.cpp in Sources */,
+				9B9754DE0F44AFB700E41662 /* tPolynomialWithBase.cpp in Sources */,
+				9B9754FA0F44B00100E41662 /* nProtoBuf.cpp in Sources */,
+				9B9755020F44B03900E41662 /* nStreamMessage.cpp in Sources */,
+				9B97550D0F44B0AE00E41662 /* tCoord.cpp in Sources */,
+				9B9755160F44B0DE00E41662 /* nBinary.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
