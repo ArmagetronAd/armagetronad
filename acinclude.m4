@@ -763,7 +763,7 @@ AC_ARG_ENABLE(zthreadtest, [  --disable-zthreadtest       Do not try to compile 
            sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
     if test "x$enable_zthreadtest" = "xyes" ; then
       ac_save_CXXFLAGS="$CXXFLAGS"
-      ac_save_CFLAGS="$CXXFLAGS"
+      ac_save_CFLAGS="$CFLAGS"
       ac_save_LIBS="$LIBS"
       CXXFLAGS="$CXXFLAGS $ZTHREAD_CXXFLAGS"
       CFLAGS="$CFLAGS $ZTHREAD_CXXFLAGS"
@@ -887,7 +887,7 @@ int main (int argc, char *argv[]) {
           echo "*** may want to edit the zthread-config script: $ZTHREAD_CONFIG" ])
 
           CC=${CC_OLD}
-          CFLAGS="$ac_save_CXXFLAGS"
+          CFLAGS="$ac_save_CFLAGS"
           CXXFLAGS="$ac_save_CXXFLAGS"
           LIBS="$ac_save_LIBS"
        fi
