@@ -2000,7 +2000,9 @@ private:
         message_ << tColoredString::ColorString(1,.3,.3) << "RA: " << tColoredString::ColorString(1,1,1) << line << "\n";
 
         // don't let message grow indefinitely
-        if (message_.Len() > 600)
+        unsigned long len = message_.Len();
+        tRecorderSync< unsigned long >::Archive( "_MESSAGE_LEN", 3, len );
+        if (len > 600)
         {
             sn_ConsoleOut( message_, netID_ );
             message_.Clear();
