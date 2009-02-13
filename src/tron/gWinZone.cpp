@@ -2536,6 +2536,28 @@ void gBaseZoneHack::OnConquest( void )
 	}
 	float rr = GetRadius();
 	rr *= rr;
+    int totalInZone = 0;
+    for(int i = se_PlayerNetIDs.Len()-1; i >=0; --i)
+	{
+		ePlayerNetID *player = se_PlayerNetIDs(i);
+		if(!player)
+		{
+			continue;
+		}
+		gCycle *cycle = dynamic_cast<gCycle *>(player->Object());
+		if(!cycle)
+		{
+			continue;
+		}
+		if(cycle->Alive() && (cycle->Position() - Position()).NormSquared() < rr)
+		{
+			totalInZone++;
+		}
+	}
+    float percentWon = 0.0;
+    if (totalInZone > 0){
+        percentWon = 1.0 /totalInZone;
+    }
 	for(int i = se_PlayerNetIDs.Len()-1; i >=0; --i)
 	{
 		ePlayerNetID *player = se_PlayerNetIDs(i);
@@ -2551,6 +2573,7 @@ void gBaseZoneHack::OnConquest( void )
 		if(cycle->Alive() && (cycle->Position() - Position()).NormSquared() < rr)
 		{
 			sg_basezoneConquererWriter << player->GetUserName();
+            sg_basezoneConquererWriter << percentWon;
 			sg_basezoneConquererWriter.write();
 		}
 	}
