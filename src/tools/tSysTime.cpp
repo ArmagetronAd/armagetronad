@@ -338,6 +338,29 @@ void tAdvanceFrame( int usecdelay )
         timeRelative = timeNewRelative;
     }
 
+
+#ifdef DEBUG
+    {
+        static tTime oldRelative = timeRelative;
+        tTime timeStep = timeRelative - oldRelative;
+        oldRelative = timeRelative;
+        
+        // detect unusually large timesteps
+        static REAL bigStep = 10;
+        bigStep *= .99;
+        REAL step = float( timeStep.seconds + timeStep.microseconds * 1E-6  );
+        if ( step > 3 * bigStep )
+        {
+            con << "Small timer hickup of " << step << " seconds.\n";
+            bigStep = bigStep * 1.02;
+        }
+        else if ( step > bigStep )
+        {
+            bigStep = step;
+        }
+    }
+#endif
+
     // try to archive it
     TimeArchiver< tRecordingBlock >::Archive( timeRelative );
 #ifdef DEBUG
