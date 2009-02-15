@@ -679,8 +679,8 @@ nWaitForAck::nWaitForAck(nMessage* m,int rec)
 
     timeout=sn_GetTimeout( rec );
 
-#ifdef nSIMULATE_PING
-    timeSendAgain=::netTime + nSIMULATE_PING;
+#ifdef nSIMULATE_PING 
+   timeSendAgain=::netTime + nSIMULATE_PING;
 #ifndef WIN32
     tRandomizer & randomizer = tReproducibleRandomizer::GetInstance();
     timeSendAgain+= randomizer.Get() * nSIMULATE_PING_VARIANT;
@@ -2083,6 +2083,10 @@ void nMessage::SendImmediately(int peer,bool ack){
         tASSERT(messageIDBig_);
 #endif
         new nWaitForAck(this,peer);
+
+#ifdef nSIMULATE_PING
+        return;
+#endif
     }
 
     // server: messages to yourself are a bit strange...
