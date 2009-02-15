@@ -1909,8 +1909,6 @@ void se_SendTeamMessage( eTeam const * team, ePlayerNetID const * sender ,ePlaye
         tColoredString say;
         say << tColoredString::ColorString(1,1,.5) << "( " << *sender;
 
-	con << team->Name() << "\n";
-
         if( !team )
         {
             // foo --> Spectatos: message
@@ -2005,7 +2003,9 @@ private:
         message_ << tColoredString::ColorString(1,.3,.3) << "RA: " << tColoredString::ColorString(1,1,1) << line << "\n";
 
         // don't let message grow indefinitely
-        if (message_.Len() > 600)
+        unsigned long len = message_.Len();
+        tRecorderSync< unsigned long >::Archive( "_MESSAGE_LEN", 3, len );
+        if (len > 600)
         {
             sn_ConsoleOut( message_, netID_ );
             message_.Clear();
@@ -2044,6 +2044,32 @@ static tAccessLevel se_opAccessLevelMax = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_opAccessLevelMaxConf( "ACCESS_LEVEL_OP_MAX", se_opAccessLevelMax );
 static tAccessLevelSetter se_opAccessLevelMaxConfLevel( se_opAccessLevelMaxConf, tAccessLevel_Owner );
 
+static bool se_CanChangeAccess( ePlayerNetID * admin, ePlayerNetID * victim, char const * command )
+{
+    tASSERT( admin );
+    tASSERT( victim );
+
+    if ( admin->GetAccessLevel() > se_opAccessLevel ) // Can he even use this command?
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_denied", command ), admin->Owner() );
+    }
+    else if ( victim == admin )
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_self", command ), admin->Owner() );
+    }
+    else if ( admin->GetAccessLevel() >= victim->GetAccessLevel()  )
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_overpowered", command ), admin->Owner() );
+    }
+    else
+    {
+        return true;
+    }
+
+    return false;
+
+}
+
 // an operation that changes the access level of another player
 typedef void (*OPFUNC)( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel accessLevel );
 
@@ -2051,80 +2077,59 @@ static void se_ChangeAccess( ePlayerNetID * admin, std::istream & s, char const 
 {
     bool isexplicit = false;
 
-    if ( admin->GetAccessLevel() <= se_opAccessLevel )
+    ePlayerNetID * victim = se_FindPlayerInChatCommand( admin, command, s );
+
+    if ( victim && se_CanChangeAccess( admin, victim, command ) )
     {
-        ePlayerNetID * victim = se_FindPlayerInChatCommand( admin, command, s );
-        if ( victim )
+        // read optional access level, this part is merly a copypaste from the /shuffle code
+        int level = se_opAccessLevelMax;
+        if ( victim->IsAuthenticated() )
         {
-            if ( victim == admin )
+            level = victim->GetAccessLevel();
+        }
+        char first;
+        s >> first;
+        if ( !s.eof() && !s.fail() )
+        {
+            isexplicit = true;
+            s.unget();
+            int newLevel = 0;
+            s >> newLevel;
+
+            if ( first == '+' || first == '-' )
             {
-                sn_ConsoleOut( tOutput( "$access_level_op_self", command ), admin->Owner() );
-            }
-            else if ( admin->GetAccessLevel() >= victim->GetAccessLevel() )
-            {
-                sn_ConsoleOut( tOutput( "$access_level_op_overpowered", command ), admin->Owner() );
+                level += newLevel;
             }
             else
             {
-                // read optional access level, this part is merly a copypaste from the /shuffle code
-                int level = se_opAccessLevelMax;
-                if ( victim->IsAuthenticated() )
-                {
-                     level = victim->GetAccessLevel();
-                }
-                char first;
-                s >> first;
-                if ( !s.eof() && !s.fail() )
-                {
-                    isexplicit = true;
-                    s.unget();
-                    int newLevel = 0;
-                    s >> newLevel;
-
-                    if ( first == '+' || first == '-' )
-                    {
-                        level += newLevel;
-                    }
-                    else
-                    {
-                        level = newLevel;
-                    }
-                }
-
-                s >> level;
-
-                if ( level <= admin->GetAccessLevel() )
-                    level = admin->GetAccessLevel() + 1;
-
-                tAccessLevel accessLevel;
-
-                accessLevel = static_cast< tAccessLevel >( level );
-
-                if ( accessLevel == victim->GetAccessLevel() )
-                {
-                    if ( isexplicit )
-                    {
-                        sn_ConsoleOut( tOutput( "$access_level_op_same", command ), admin->Owner() );
-                    }
-                    else
-                    {
-                        sn_ConsoleOut( tOutput( "$access_level_op_unclear", command ), admin->Owner() );
-                    }
-                }
-                else if ( accessLevel > admin->GetAccessLevel() )
-                {
-                     (*F)( admin, victim, accessLevel );
-                }
-                else
-                {
-                     sn_ConsoleOut( tOutput( "$access_level_op_denied_max", command ), admin->Owner() );
-                }
+                level = newLevel;
             }
         }
-    }
-    else
-    {
-        sn_ConsoleOut( tOutput( "$access_level_op_denied", command ), admin->Owner() );
+
+        s >> level;
+
+        // Make a last safety check on the given AL, then DON'T TOUCH IT ANYMORE
+        if ( level <= admin->GetAccessLevel() )
+            level = admin->GetAccessLevel() + 1;
+
+        tAccessLevel accessLevel;
+        accessLevel = static_cast< tAccessLevel >( level );
+
+        if ( accessLevel == victim->GetAccessLevel() )
+        {
+            if ( isexplicit )
+            {
+                sn_ConsoleOut( tOutput( "$access_level_op_same", command ), admin->Owner() );
+            }
+            else
+            {
+                sn_ConsoleOut( tOutput( "$access_level_op_unclear", command ), admin->Owner() );
+            }
+        }
+        else if ( accessLevel > admin->GetAccessLevel() )
+        {
+            (*F)( admin, victim, accessLevel );
+        }
     }
 }
 
@@ -2205,11 +2210,20 @@ void se_Op( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel level )
 }
 
 // DeOp takes it away
-void se_DeOp( ePlayerNetID * admin, ePlayerNetID * victim, tAccessLevel )
+void se_DeOp( ePlayerNetID * admin, std::istream & s, char const * command )
 {
-    if ( victim->IsAuthenticated() )
+    ePlayerNetID * victim = se_FindPlayerInChatCommand( admin, command, s );
+
+    if ( victim && se_CanChangeAccess ( admin, victim, command ) )
     {
-        victim->DeAuthenticate( admin );
+        if ( victim->IsAuthenticated() )
+        {
+            victim->DeAuthenticate( admin );
+        }
+        else
+        {
+            sn_ConsoleOut( tOutput( "$access_level_op_same", command ), admin->Owner() );
+        }
     }
 }
 
@@ -2423,13 +2437,17 @@ static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p, std:
 }
 
 // log out
-static void se_AdminLogout( ePlayerNetID * p )
+static void se_AdminLogout( ePlayerNetID * p, char const * command )
 {
 #ifdef KRAWALL_SERVER
     // revoke the other kind of authentication as well
     if ( p->IsAuthenticated() )
     {
         p->DeAuthenticate();
+    }
+    else
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_same", command ), p->Owner() );
     }
 #else
     if ( p->IsLoggedIn() )
@@ -2483,7 +2501,7 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     if  (command == "/login")
     {
         // Really, there's no reason one would log in and log out all the time
-        spam.factor_ = 2;
+        spam.factor_ = 1;
         if ( spam.Block() )
         {
             return;
@@ -2495,13 +2513,13 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     }
     else  if (command == "/logout")
     {
-        spam.factor_ = 2;
+        spam.factor_ = 1;
         if( spam.Block() )
         {
             return;
         }
 
-        se_AdminLogout( p );
+        se_AdminLogout( p, command );
     }
 #ifdef KRAWALL_SERVER
     else if ( command == "/op" )
@@ -2510,7 +2528,7 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     }
     else if ( command == "/deop" )
     {
-        se_ChangeAccess( p, s, "/deop", &se_DeOp );
+        se_DeOp( p, s, "/deop" );
     }
     else if ( command == "/invite" )
     {
@@ -2839,8 +2857,6 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
             ePlayerNetID * admin = se_PlayerNetIDs(i);
 
             if (
-                admin != p &&
-                (
                 // two cases:
                    (
                     // You are a speccing admin, and you aren't invited to anything:
@@ -2853,7 +2869,6 @@ static void se_ChatTeam( ePlayerNetID * p, std::istream & s, eChatSpamTester & s
                     // invited players are also authorized
                     currentTeam->IsInvited( admin )
                     )
-                 )
                 )
             {
                 se_SendTeamMessage(currentTeam, p, admin, msg);
@@ -2940,9 +2955,11 @@ static void se_SendTo( std::string const & message, ePlayerNetID * receiver )
     }
 }
 
-// prints an indented team member
-static void se_SendTeamMember( ePlayerNetID const * player, int indent, std::ostream & tos )
+// prints an indented team member with position marker
+static void se_SendTeamMember( ePlayerNetID const * player, int indent, std::ostream & tos, int index, int width )
 {
+    tos << '#' << std::setw( width ) << index+1 << ' ';
+
     // send team name
     for( int i = indent-1; i >= 0; --i )
     {
@@ -2967,18 +2984,19 @@ static void se_ListTeam( ePlayerNetID * receiver, eTeam * team )
 
     // send team members
     int teamMembers = team->NumPlayers();
+    int width = teamMembers >= 10 ? 2 : 1;
 
     int indent = 0;
     // print left wing, the odd team members
     for( int i = (teamMembers/2)*2-1; i>=0; i -= 2 )
     {
-        se_SendTeamMember( team->Player(i), indent, tos );
+        se_SendTeamMember( team->Player(i), indent, tos, i, width );
         indent += 2;
     }
     // print right wing, the even team members
     for( int i = 0; i < teamMembers; i += 2 )
     {
-        se_SendTeamMember( team->Player(i), indent, tos );
+        se_SendTeamMember( team->Player(i), indent, tos, i, width );
         indent -= 2;
     }
 
@@ -3525,6 +3543,14 @@ void handle_chat( nMessage &m )
                     }
                     else if (command == "/teams") {
                         se_ChatTeams( p );
+                        return;
+                    }
+                    else if (command == "/myteam") {
+                        eTeam *currentTeam = se_GetManagedTeam( p );
+                        if( currentTeam )
+                        {
+                            se_ListTeam( p, currentTeam );
+                        }
                         return;
                     }
                     else if (command == "/help") {
@@ -7317,7 +7343,7 @@ static tSettingItem< tString > se_defaultKickToServerConf( "DEFAULT_KICK_TO_SERV
 static tSettingItem< int > se_defaultKickToPortConf( "DEFAULT_KICK_TO_PORT", se_defaultKickToPort );
 static tConfItemLine se_defaultKickToReasonConf( "DEFAULT_KICK_TO_REASON", se_defaultKickToReason );
 
-static void se_MoveToConf(std::istream &s, REAL severity )
+static void se_MoveToConf(std::istream &s, REAL severity, const char * command )
 {
     if ( se_NeedsServer( "KICK/MOVE_TO", s ) )
     {
@@ -7334,9 +7360,12 @@ static void se_MoveToConf(std::istream &s, REAL severity )
         s >> server;
     }
 
-    int port = se_defaultKickToPort;
-    if ( !s.eof() )
-        s >> port;
+    int pos, port = se_defaultKickToPort;
+    if ( ( pos = server.StrPos( ":" ) ) != -1 )
+    {
+        port = atoi( server.SubStr( pos + 1 ) );
+        server = server.SubStr( 0, pos );
+    }
 
     nServerInfoRedirect redirect( server, port );
 
@@ -7351,14 +7380,14 @@ static void se_MoveToConf(std::istream &s, REAL severity )
     }
     else
     {
-        con << "Usage: KICK_TO <user ID or name> <server IP to kick to>:<server port to kick to> <Reason>\n";
+        con << "Usage: " << command << " <user ID or name> <server IP to kick to>:<server port to kick to> <Reason>\n";
         return;
     }
 }
 
 static void se_KickToConf(std::istream &s )
 {
-    se_MoveToConf( s, 1 );
+    se_MoveToConf( s, 1, "KICK_TO" );
 }
 
 static tConfItemFunc se_kickToConf("KICK_TO",&se_KickToConf);
@@ -7366,7 +7395,7 @@ static tAccessLevelSetter se_kickToConfLevel( se_kickToConf, tAccessLevel_Modera
 
 static void se_MoveToConf(std::istream &s )
 {
-    se_MoveToConf( s, 0 );
+    se_MoveToConf( s, 0, "MOVE_TO" );
 }
 
 static tConfItemFunc se_moveToConf("MOVE_TO",&se_MoveToConf);

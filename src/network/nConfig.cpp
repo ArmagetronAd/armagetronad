@@ -448,7 +448,8 @@ static char const * sn_versionString[] =
         "0.2.8.2", // 13
         "0.2.8.3_alpha", // 14
         "0.2.8.3_alpha_auth", // 15
-        0
+        "0.2.8.3_beta2", // 16
+       0
     };
 
 int sn_GetCurrentProtocolVersion()

@@ -1,4 +1,9 @@
 Changes since 0.2.8.3_beta1:
+- Better lag slide protection: clients no longer get confused when
+  the server sends their cycle back in time, and the server no longer
+  does that for old clients.
+- Fixed rare wallpassing bug; it required what whould usually be an
+  instakill and infinte wall length.
 
 Changes since 0.2.8.2:
 

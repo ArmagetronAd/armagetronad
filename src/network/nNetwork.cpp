@@ -343,12 +343,12 @@ nVersionFeature::nVersionFeature( int min, int max ) // creates a feature that i
     max_ = max;
 }
 
-bool nVersionFeature::Supported()
+bool nVersionFeature::Supported() const
 {
     return ( min_ < 0 || sn_CurrentVersion().Max() >= min_ ) &&  ( max_ < 0 || sn_CurrentVersion().Min() <= max_ );
 }
 
-bool nVersionFeature::Supported( int client )
+bool nVersionFeature::Supported( int client ) const
 {
     if ( client < 0 || client > MAXCLIENTS )
         return false;
@@ -679,11 +679,11 @@ nWaitForAck::nWaitForAck(nMessage* m,int rec)
 
     timeout=sn_GetTimeout( rec );
 
-#ifdef nSIMULATE_PING
-    timeSendAgain=::netTime + nSIMULATE_PING;
+#ifdef nSIMULATE_PING 
+   timeSendAgain=::netTime + nSIMULATE_PING;
 #ifndef WIN32
     tRandomizer & randomizer = tReproducibleRandomizer::GetInstance();
-    timeSendAgain+= randimizer.Get() * nSIMULATE_PING_VARIANT;
+    timeSendAgain+= randomizer.Get() * nSIMULATE_PING_VARIANT;
     // timeSendAgain+=(nSIMULATE_PING_VARIANT*random())/RAND_MAX;
 #endif
 #else
@@ -2083,6 +2083,10 @@ void nMessage::SendImmediately(int peer,bool ack){
         tASSERT(messageIDBig_);
 #endif
         new nWaitForAck(this,peer);
+
+#ifdef nSIMULATE_PING
+        return;
+#endif
     }
 
     // server: messages to yourself are a bit strange...
