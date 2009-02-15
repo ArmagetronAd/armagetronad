@@ -445,8 +445,7 @@ void zShapeCircle::setScale(const tFunction & s){
 }
 
 void zShapeCircle::setRadius(tFunction radius) {
-    zShape::setRadius(radius);
-    delete _cacheScaledRadius;
+    this->radius = radius;
     _cacheScaledRadius = NULL;
 }
 
