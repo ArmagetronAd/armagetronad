@@ -150,7 +150,7 @@ static REAL maxTimeout=1;  // the maximal timeout in seconds
 static REAL minTimeout=.01;  // the minimal timeout in seconds
 static REAL pingTimeout=1; // the normal timeout in multiples of the ping
 static REAL pingVarianceTimeout=1; // the normal timeout in multiples of the ping variance
-// static REAL zeroTimeout=.01; // additional timeout of first packet
+static REAL zeroTimeout=.01; // additional timeout of first packet
 
 static REAL sn_GetTimeout( int user )
 {
