@@ -150,7 +150,7 @@ static REAL maxTimeout=1;  // the maximal timeout in seconds
 static REAL minTimeout=.01;  // the minimal timeout in seconds
 static REAL pingTimeout=1; // the normal timeout in multiples of the ping
 static REAL pingVarianceTimeout=1; // the normal timeout in multiples of the ping variance
-static REAL zeroTimeout=.01; // additional timeout of first packet
+// static REAL zeroTimeout=.01; // additional timeout of first packet
 
 static REAL sn_GetTimeout( int user )
 {
@@ -683,7 +683,7 @@ nWaitForAck::nWaitForAck(nMessage* m,int rec)
     timeSendAgain=::netTime + nSIMULATE_PING;
 #ifndef WIN32
     tRandomizer & randomizer = tReproducibleRandomizer::GetInstance();
-    timeSendAgain+= randimizer.Get() * nSIMULATE_PING_VARIANT;
+    timeSendAgain+= randomizer.Get() * nSIMULATE_PING_VARIANT;
     // timeSendAgain+=(nSIMULATE_PING_VARIANT*random())/RAND_MAX;
 #endif
 #else
