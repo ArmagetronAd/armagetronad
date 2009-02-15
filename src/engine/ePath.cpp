@@ -182,7 +182,7 @@ void eHalfEdge::FindPath(const eCoord& startPoint, const eFace* startFace,
         // and add all possible ways from there to the open list.
 
         eHalfEdge *e = open.Remove(0);
-        tASSERT( e.origin_ < PATH_CLOSED );
+        tASSERT( e->origin_ < PATH_CLOSED );
 
         int origin = e->origin_;
         origin |= PATH_CLOSED;
