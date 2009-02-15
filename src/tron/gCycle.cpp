@@ -1563,7 +1563,7 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
                 // see if we went back too far (should almost never happen)
                 if ( distance < minDist )
                 {
-                    st_Breakpoint();
+                    // st_Breakpoint();
                     TimestepCore( lastTime + ( minDist - distance )/verletSpeed_ );
                 }
             }
