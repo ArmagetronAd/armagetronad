@@ -52,6 +52,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "gWinZone.h"
 
+#include "zone/zZone.h"
+
 std::deque<zZone *> sz_Zones;
 
 // number of segments to render a zone with
@@ -254,6 +256,16 @@ void zZone::RemoveFromZoneList(void) {
         );
     if(pos_found != sz_Zones.end())
         sz_Zones.erase(pos_found);
+}
+
+void
+zZone::setupVisuals(gParser &)
+{
+}
+void
+zZone::readXML(tXmlParser::node const &)
+{
+    // FIXME: Maybe move the entire zone parsing code in here? :D
 }
 
 // *******************************************************************************
@@ -803,4 +815,28 @@ rColor const  zZone::GetColor( void ) const
     }
     return color;
 }
+
+
+zZoneExtManager::FactoryList zZoneExtManager::_factories;
+
+zZone*
+zZoneExtManager::Create(std::string const & typex, eGrid*grid)
+{
+    std::string type = typex;
+    transform (type.begin(), type.end(), type.begin(), tolower);
+
+    FactoryList::const_iterator iterFactory;
+    if ((iterFactory = _factories.find(type)) == _factories.end())
+        return NULL;
+    
+    return iterFactory->second(grid, type);
+}
+
+void
+zZoneExtManager::Register(std::string const & type, std::string const & desc, NamedFactory_t f)
+{
+    _factories[type] = f;
+}
+
+static zZoneExtRegistration regBasic("", "", zZone::create);
 

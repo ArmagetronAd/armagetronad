@@ -793,17 +793,12 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
     if ((iterZone = mapZones.find(zoneName)) != mapZones.end()) {
         // load the zone
         refZone = iterZone->second;
+        infl = zZoneInfluencePtr(new zZoneInfluence(refZone));
     }
     else {
-        // make an empty zone and store under the right label
-        // It should be populated later
-
-        //  refZone = zZonePtr(new zZone(grid));
-        refZone = tNEW(zZone)(grid);
-        if (!zoneName.empty())
-            mapZones[zoneName] = refZone;
+        infl = zZoneInfluencePtr(new zZoneInfluence());
+        ZIPtoMap[zoneName].push_back(infl);
     }
-    infl = zZoneInfluencePtr(new zZoneInfluence(refZone));
 
     cur = cur->xmlChildrenNode;
     while ( cur != NULL) {
@@ -1334,24 +1329,44 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 
     if (sn_GetNetState() != nCLIENT )
     {
+        state.push();
+
         zZonePtr zone;
-        zoneMap::const_iterator iterZone;
-        // Has this zone been already registered, such as through a zoneInfluence
-        if ((iterZone = mapZones.find(zoneName)) != mapZones.end()) {
-            // Open the zone so we can fill in the details
-            zone = iterZone->second;
-        }
-        else {
+
             // Create a new zone
-            zone = zZonePtr(new zZone(grid));
+        bool needSimpleEffect = false;
+        if (myxmlHasProp(zoneroot, "effect"))
+        {
+            char*ztype = myxmlGetProp(zoneroot, "effect");
+            zZone*zptr = zZoneExtManager::Create(ztype, grid);
+            if (zptr)
+                zone = zZonePtr(zptr);
+            else
+            {
+                zone = zZonePtr(zZoneExtManager::Create("", grid));
+                needSimpleEffect = true;
+            }
+        }
+        else
+            zone = zZonePtr(zZoneExtManager::Create("", grid));
+
             // If a name was assigned to it, save the zone in a map so it can be refered to
             if (!zoneName.empty())
+            {
                 mapZones[zoneName] = zone;
-            zone->setName(zoneName);
-        }
 
-        state.push();
-        if (myxmlHasProp(zoneroot, "effect"))
+                std::vector< zZoneInfluencePtr > myZIP = ZIPtoMap[zoneName];
+                std::vector< zZoneInfluencePtr >::iterator i;
+                for (i = myZIP.begin(); i < myZIP.end(); ++i)
+                    (*i)->bindZone(zone);
+                ZIPtoMap.erase(zoneName);
+            }
+            zone->setName(zoneName);
+
+        zone->setupVisuals(*this);
+        zone->readXML(tXmlParser::node(cur));
+
+        if (needSimpleEffect)
         {
             state.set("color", rColor(1, 1, 1, .7));
 
@@ -1430,6 +1445,8 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             }
             cur = cur->next;
         }
+
+        state.pop();
 
         // leaving zone undeleted is no memory leak here, the grid takes control of it
         if ( zone )
@@ -2278,6 +2295,7 @@ gParser::Parse()
 
 #ifdef ENABLE_ZONESV2
     mapZones.clear();
+    ZIPtoMap.clear();
 #endif
 
     //        fprintf(stderr,"ERROR: Map file is missing root \'Resources\' node");

@@ -173,6 +173,8 @@ public:
     
     State_t state;
     
+    std::map< std::string, std::vector< zZoneInfluencePtr > > ZIPtoMap;
+    
     gArena * __deprecated contextArena(tXmlParser::node const &);
     eGrid * __deprecated contextGrid(tXmlParser::node const &);
 #endif

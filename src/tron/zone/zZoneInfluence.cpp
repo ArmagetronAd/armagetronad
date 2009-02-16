@@ -1,12 +1,23 @@
 #include "zZoneInfluence.h"
 
+zZoneInfluence::zZoneInfluence() : zone(), zoneInfluenceItems() { }
+
 zZoneInfluence::zZoneInfluence(zZonePtr _zone) : zone(_zone), zoneInfluenceItems() { }
 
 zZoneInfluence::~zZoneInfluence() { }
 
 void
+zZoneInfluence::bindZone(zZonePtr _zone)
+{
+    zone = _zone;
+}
+
+void
 zZoneInfluence::apply(const tPolynomial<nMessage> &value)
 {
+    if (!zone)
+        return;
+
     zZoneInfluenceItemList::const_iterator iter;
     for (iter=zoneInfluenceItems.begin();
             iter!=zoneInfluenceItems.end();
