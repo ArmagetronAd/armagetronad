@@ -84,6 +84,16 @@ zEffector::setMessage(tString unformated)
     */
 }
 
+void
+zEffector::readXML(tXmlParser::node const & node)
+{
+    if (node.HasProp("count"))
+        setCount(node.GetPropInt("count"));
+
+    if (node.HasProp("description"))
+        setMessage(node.GetProp("description"));
+}
+
 
 tEffectorManager::FactoryList tEffectorManager::_effectors;
 
@@ -97,7 +107,11 @@ tEffectorManager::Create(std::string const & type, tXmlParser::node const &node)
     VoidFactoryBase*Fy = iterEffectorFactory->second;
 
     if (NullFactory*ptr = dynamic_cast<NullFactory*>(Fy))
-        return ptr->Factory();
+    {
+        zEffector*rv = ptr->Factory();
+        rv->readXML(node);
+        return rv;
+    }
     if (XMLFactory*ptr = dynamic_cast<XMLFactory*>(Fy))
         return ptr->Factory(type, node);
     return NULL;

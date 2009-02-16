@@ -1008,14 +1008,6 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
             effectorSetting->setSettingValue(tString(myxmlGetProp(cur, "settingValue")));
     }
 
-    if (myxmlHasProp(cur, "count"))
-    effector->setCount(myxmlGetPropInt(cur, "count"));
-    else
-        effector->setCount(-1);
-
-    if (myxmlHasProp(cur, "description"))
-        effector->setMessage(tString(myxmlGetProp(cur, "description")));
-
     return effector;
 }
 

@@ -43,7 +43,7 @@ class zEffector
 {
 public:
     static zEffector* create() { return new zEffector(); };
-    zEffector():count(0),message() { }; //<! Constructor
+    zEffector():count(-1),message() { }; //<! Constructor
     zEffector(zEffector const &other) { };
     void operator=(zEffector const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
     virtual zEffector *copy(void) const { return new zEffector(*this); };
@@ -51,6 +51,8 @@ public:
 
     void apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
     virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets) { };
+
+    virtual void readXML(tXmlParser::node const &);
 
     void setCount(int _count) {count = _count;};
     void setMessage(tString unformated);

@@ -517,6 +517,13 @@ case 'y': case 'Y':
     }
 }
 
+int tXmlParser::node::GetPropInt(CHAR const *prop) const {
+    int rv;
+    GetProp(prop, rv);
+    return rv;
+}
+
+
 //! @returns The node as it was before the incrementation
 tXmlParser::node &tXmlParser::node::operator++() {
     tASSERT(m_cur);
