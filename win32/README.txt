@@ -41,8 +41,10 @@ some files you don't need. One way to do that is to use TortoiseSVN
        +- winlibs
 5.  Check you've got python installed and set the path to the executable
     inside python.bat
+    Same for the protobuf compiler protoc
 6.  Go to the armagetronad/win32 directory
     run update_version.bat
+    run protobuf.bat
 7.  Start the Armagetron workspace (Armagetron.workspace)
 8.  To compile you will need to change the project's target to either
     Release, Debug or Profile (it defaults to Release)
