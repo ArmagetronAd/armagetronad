@@ -168,6 +168,8 @@ public:
     virtual zEffectorPoint *copy(void) const { return new zEffectorPoint(*this); };
     virtual ~zEffectorPoint() {};
 
+    void readXML(tXmlParser::node const &);
+
     void setPoint(int p) {d_score = p;};
     int getPoint() const {return d_score;};
 
@@ -252,6 +254,8 @@ public:
     void operator=(zEffectorSetting const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
     virtual zEffectorSetting *copy(void) const { return new zEffectorSetting(*this); };
     virtual ~zEffectorSetting() {};
+
+    void readXML(tXmlParser::node const &);
 
     void setSettingName(tString name) {settingName = name;};
     void setSettingValue(tString value) {settingValue = value;};

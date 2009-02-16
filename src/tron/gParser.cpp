@@ -971,13 +971,6 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
 
     effector = zEffectorPtr(zEffectorManager::Create(effectorAttribute, tXmlParser::node(cur)));
 
-    // Should we load the score information
-    zEffectorPoint *effectorPoint;
-    effectorPoint = dynamic_cast<zEffectorPoint *>(effector.get());
-    if (effectorPoint) {
-        effectorPoint->setPoint(myxmlGetPropInt(cur, "score"));
-    }
-
     // Should we load the acceleration
     zEffectorCycleAcceleration *effectorAcceleration;
     effectorAcceleration = dynamic_cast<zEffectorCycleAcceleration *>(effector.get());
@@ -994,16 +987,6 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
     if (effectorSpawnPlayer) {
         effectorSpawnPlayer->setGrid(grid);
         effectorSpawnPlayer->setArena(sg_GetArena());
-    }
-
-    // Should we set the setting name and value
-    zEffectorSetting *effectorSetting;
-    effectorSetting = dynamic_cast<zEffectorSetting *>(effector.get());
-    if (effectorSetting) {
-        if (myxmlHasProp(cur, "settingName"))
-            effectorSetting->setSettingName(tString(myxmlGetProp(cur, "settingName")));
-        if (myxmlHasProp(cur, "settingValue"))
-            effectorSetting->setSettingValue(tString(myxmlGetProp(cur, "settingValue")));
     }
 
     return effector;

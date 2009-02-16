@@ -168,6 +168,12 @@ void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 
 static zEffectorRegistration regPoint("point", "", zEffectorPoint::create);
 
+void
+zEffectorPoint::readXML(tXmlParser::node const & node)
+{
+    setPoint(node.GetPropInt("score"));
+}
+
 void zEffectorPoint::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -250,6 +256,15 @@ void zEffectorSpawnPlayer::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarg
 }
 
 static zEffectorRegistration regSetting("setting", "", zEffectorSetting::create);
+
+void
+zEffectorSetting::readXML(tXmlParser::node const & node)
+{
+    if (node.HasProp("settingName"))
+        setSettingName(node.GetProp("settingName"));
+    if (node.HasProp("settingValue"))
+        setSettingValue(node.GetProp("settingValue"));
+}
 
 void zEffectorSetting::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
