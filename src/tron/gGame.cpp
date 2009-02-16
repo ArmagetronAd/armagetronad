@@ -3425,7 +3425,7 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 
         eGameObject *e=p->Object();
 
-        if ( ( !e || !e->Alive() && e->DeathTime() < time - .5 ) && sn_GetNetState() != nCLIENT )
+        if ( ( !e || ( !e->Alive() && e->DeathTime() < time - .5 ) ) && sn_GetNetState() != nCLIENT )
         {
             eCoord pos,dir;
             if ( e )
@@ -3445,7 +3445,7 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 #ifdef DEBUG
             //                std::cout << "spawning player " << pni->name << '\n';
 #endif
-            gCycle * cycle = new gCycle(grid, pos, dir, p, 0);
+            gCycle * cycle = new gCycle( grid, pos, dir, p );
             p->ControlObject(cycle);
 
             sg_Timestamp();
@@ -3465,7 +3465,11 @@ void gGame::Timestep(REAL time,bool cam){
 #endif
 
 #ifdef RESPAWN_HACK
-    sg_Respawn(time,grid,Arena);
+    // no respawining while deathzone is active.
+    if( !winDeathZone_ )
+    {
+        sg_Respawn(time,grid,Arena);
+    }
 #endif
 
     // chop timestep into small, managable bits
