@@ -84,6 +84,9 @@ zEffector::setMessage(tString unformated)
     */
 }
 
+
+tEffectorManager::FactoryList tEffectorManager::_effectors;
+
 zEffector*
 tEffectorManager::Create(const char*type, tXmlParser::node*node)
 {
@@ -113,6 +116,7 @@ tEffectorManager::Register(const char*type, const char*desc, XMLFactory_t f)
 {
     _effectors[tString(type)] = new XMLFactory(f);
 }
+
 
 void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
