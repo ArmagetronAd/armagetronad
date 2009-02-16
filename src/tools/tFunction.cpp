@@ -31,14 +31,17 @@ tFunction::tFunction(REAL offset, REAL slope)
 
 // *******************************************************************************
 // *
-// *	tFunction
+// *	parse
 // *
 // *******************************************************************************
 //!
+//!		@param	argument
+//!		@return
 //!
 // *******************************************************************************
 
-tFunction::tFunction(std::string const & str, REAL const * addSizeMultiplier)
+tFunction &
+tFunction::parse(std::string const & str, REAL const * addSizeMultiplier)
 {
     REAL param[2] = {0.0, 0.0};
     int bPos;
@@ -61,6 +64,19 @@ tFunction::tFunction(std::string const & str, REAL const * addSizeMultiplier)
     tFunction & tf = *this;
     tf.SetOffset(param[0]);
     tf.SetSlope(param[1]);
+    return tf;
+}
+tFunction &
+tFunction::parse(std::string const & str, REAL const & sizeMultiplier)
+{
+    return
+    parse(str, &sizeMultiplier);
+}
+tFunction &
+tFunction::parse(std::string const & str)
+{
+    return
+    parse(str, (REAL const *)NULL);
 }
 
 // *******************************************************************************

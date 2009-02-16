@@ -37,9 +37,12 @@ class tFunction
 public:
     tFunction();  //!< constructor
     tFunction(REAL offset, REAL slope);  //!< constructor
-    tFunction(std::string const & parsed, REAL const * sizeMult);  //!< string parsing constructor
     ~tFunction(); //!< destructor
 
+    tFunction & parse(std::string const & parsed, REAL const * sizeMult);  //!< string parsing
+    tFunction & parse(std::string const & parsed, REAL const & sizeMult);  //!< string parsing
+    tFunction & parse(std::string const & parsed);  //!< string parsing
+    
     REAL Evaluate( REAL argument ) const; //!< evaluates the function
     inline REAL operator()( REAL argument ) const; //!< evaluation operator
 

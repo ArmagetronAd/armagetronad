@@ -660,7 +660,7 @@ gParser::parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, unsigned short idZo
     tFunction tfRadius;
     if (myxmlHasProp(cur, "radius")) {
         string str = string(myxmlGetProp(cur, "radius"));
-        myCheapParameterSplitter(str, tfRadius, true);
+        tfRadius = tFunction().parse(str, sizeMultiplier);
     }
     else {
         tfRadius.SetOffset( 1.0 * sizeMultiplier );
@@ -702,11 +702,9 @@ gParser::parseShapePolygon(eGrid *grid, xmlNodePtr cur, unsigned short idZone, c
     return shape;
 }
 
-// Quick stub to allow to operate on tFunction
-// Remove when all that is variant has been ported to ruby
 void gParser::myCheapParameterSplitter(const string &str, tFunction &tf, bool addSizeMultiplier)
 {
-    tf = tFunction(str, addSizeMultiplier ? &sizeMultiplier : NULL);
+    tf = tFunction().parse(str, addSizeMultiplier ? &sizeMultiplier : NULL);
 }
 
 rColor *defColor = NULL;
@@ -726,7 +724,7 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
     if (myxmlHasProp(cur, "scale")) {
         string str = string(myxmlGetProp(cur, "scale"));
 
-        myCheapParameterSplitter(str, tfScale, false);
+        tfScale = tFunction().parse(str);
     }
     else
     {
@@ -758,10 +756,10 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
             /* We need to multipy by sizeMultiper so the item are properly placed*/
             string strX = string(myxmlGetProp(cur, "x"));
             tFunction tfX;
-            myCheapParameterSplitter(strX, tfX, true);
+            tfX.parse(strX, sizeMultiplier);
             string strY = string(myxmlGetProp(cur, "y"));
             tFunction tfY;
-            myCheapParameterSplitter(strY, tfY, true);
+            tfY.parse(strY, sizeMultiplier);
 
             if (centerLocationFound == false) {
                 shape->setPosX( tfX );
@@ -926,9 +924,7 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
       /*
       if (xmlHasProp(cur, (const xmlChar *)"influenceSet")) {
 	string str = string(myxmlGetProp(cur, "influenceSet"));
-        tFunction tfInfluence;
-        myCheapParameterSplitter(str, tfInfluence, false);
-        infl->setInfluenceSet( tfInfluence );
+        infl->setInfluenceSet( tFunction().parse(str) );
       }
       */
 
@@ -957,10 +953,8 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
     zEffectorCycleAcceleration *effectorAcceleration;
     effectorAcceleration = dynamic_cast<zEffectorCycleAcceleration *>(effector.get());
     if (effectorAcceleration) {
-        tFunction tfValue;
         string str = string(myxmlGetProp(cur, "value"));
-        myCheapParameterSplitter(str, tfValue, false);
-        effectorAcceleration->setValue(tfValue);
+        effectorAcceleration->setValue(tFunction().parse(str));
     }
 
     // Should we set the grid and arena for respawning
