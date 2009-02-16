@@ -235,6 +235,8 @@ public:
     virtual zEffectorSpawnPlayer *copy(void) const { return new zEffectorSpawnPlayer(*this); };
     virtual ~zEffectorSpawnPlayer() {};
 
+    void readXML(tXmlParser::node const &);
+
     void setGrid(eGrid *_grid) {grid = _grid;};
     void setArena(gArena *_arena) {arena = _arena;};
 

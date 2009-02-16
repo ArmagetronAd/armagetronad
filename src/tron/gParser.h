@@ -131,6 +131,9 @@ protected:
 public:
     tValue::Expr::varmap_t vars;
     tValue::Expr::funcmap_t functions;
+    
+    gArena * contextArena(tXmlParser::node const &);
+    eGrid * contextGrid(tXmlParser::node const &);
 #endif
 };
 

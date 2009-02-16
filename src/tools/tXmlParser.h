@@ -85,6 +85,7 @@ public:
         operator bool () const; //!< Does this node actually exist?
 
         node GetFirstChild(void) const; //!< Get the first child node
+        tXmlParser*ownerDocument(void) const; //!< DOM ownerDocument as tXmlParser*
     };
 
     node GetRoot();

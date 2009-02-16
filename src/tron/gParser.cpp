@@ -949,14 +949,6 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
 
     effector = zEffectorPtr(zEffectorManager::Create(effectorAttribute, tXmlParser::node(cur)));
 
-    // Should we set the grid and arena for respawning
-    zEffectorSpawnPlayer *effectorSpawnPlayer;
-    effectorSpawnPlayer = dynamic_cast<zEffectorSpawnPlayer *>(effector.get());
-    if (effectorSpawnPlayer) {
-        effectorSpawnPlayer->setGrid(grid);
-        effectorSpawnPlayer->setArena(sg_GetArena());
-    }
-
     return effector;
 }
 
@@ -2161,6 +2153,18 @@ gParser::setSizeMultiplier(REAL aSizeMultiplier)
     // BOP
     sizeMultiplier = aSizeMultiplier;
     // EOP
+}
+
+gArena *
+gParser::contextArena(tXmlParser::node const & node)
+{
+    return theArena;
+}
+
+eGrid *
+gParser::contextGrid(tXmlParser::node const & node)
+{
+    return theGrid;
 }
 
 void
