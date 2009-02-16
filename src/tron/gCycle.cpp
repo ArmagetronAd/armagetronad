@@ -5058,11 +5058,24 @@ bool gCycle::Extrapolate( REAL dt )
     if ( newTime >= lastTime )
     {
         // simulate extrapolator until now
-        eGameObject::TimestepThis( lastTime, extrapolator_ );
+        if( lastTime > extrapolator_->LastTime() )
+        {
+            eGameObject::TimestepThis( lastTime, extrapolator_ );
+        }
 
         // test if there are real (the check for list does that) destinations left; we cannot call it finished if there are.
         gDestination* unhandledDestination = extrapolator_->GetCurrentDestination();
         ret = !unhandledDestination || !unhandledDestination->list;
+        
+        if( !ret )
+        {
+            if ( unhandledDestination->gameTime < newTime - Lag() * 2 - sn_Connections[0].ping.GetPing()*2 - GetTurnDelay()*4 )
+            {
+                // emergency reset.
+                extrapolator_ = 0;
+                resimulate_ = true;
+            }
+        }
 
         newTime = lastTime;
     }
