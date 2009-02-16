@@ -37,6 +37,7 @@ class gCycle;
 #include "eTeam.h"
 #include "tLocale.h"
 #include "tFunction.h"
+#include "tXmlParser.h"
 
 class zEffector
 {
@@ -61,6 +62,54 @@ protected:
     int count;
     tOutput message;
 
+};
+
+
+//! effector manager: put summary here
+/**
+ *   put detailed docs here
+ */
+class tEffectorManager {
+public:
+    static zEffector* Create(const char*type, tXmlParser::node*);
+
+    class VoidFactoryBase {
+    protected:
+        VoidFactoryBase() {};
+        virtual ~VoidFactoryBase() {};
+    };
+    typedef zEffector* (*NullFactory_t)();
+    class NullFactory : public VoidFactoryBase {
+    public:
+        typedef NullFactory_t Factory_t;
+        NullFactory(Factory_t f) : Factory(f) {};
+        Factory_t Factory;
+    };
+    typedef zEffector* (*XMLFactory_t)(const char*type, tXmlParser::node*);
+    class XMLFactory : public VoidFactoryBase {
+    public:
+        typedef XMLFactory_t Factory_t;
+        XMLFactory(Factory_t f) : Factory(f) {};
+        Factory_t Factory;
+    };
+    
+    //! Register an effector type.
+    /**
+            @param name the name of the effector type
+            @param description a human readable description of the effector type
+            @param func a function that returns a new instance of the effector
+     */
+    static void Register(const char*type, const char*desc, NullFactory_t);
+    static void Register(const char*type, const char*desc, XMLFactory_t);
+
+    ~tEffectorManager();
+private:
+    typedef std::map<tString, VoidFactoryBase*> FactoryList;
+    static FactoryList _effectors;
+
+    //! We make the constructor private so that nobody else can
+    /// instantiate this class
+    tEffectorManager();
 };
 
 
