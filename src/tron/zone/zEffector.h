@@ -118,6 +118,17 @@ private:
     tEffectorManager();
 };
 
+class tEffectorRegistration {
+public:
+    template<typename T>
+    tEffectorRegistration(std::string const & type, std::string const & desc, T f);
+};
+template<typename T>
+tEffectorRegistration::tEffectorRegistration(std::string const & type, std::string const & desc, T f)
+{
+    tEffectorManager::Register(type, desc, f);
+}
+
 
 class zEffectorWin : public zEffector
 {

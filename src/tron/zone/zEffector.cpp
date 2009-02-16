@@ -115,6 +115,8 @@ tEffectorManager::Register(std::string const & type, std::string const & desc, X
 }
 
 
+static tEffectorRegistration regWin("win", "", zEffectorWin::create);
+
 void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     // BOP
@@ -130,6 +132,8 @@ void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
     }
 }
 
+static tEffectorRegistration regDeath("death", "", zEffectorDeath::create);
+
 void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -144,6 +148,8 @@ void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 //
 //
 //
+
+static tEffectorRegistration regPoint("point", "", zEffectorPoint::create);
 
 void zEffectorPoint::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -161,6 +167,8 @@ void zEffectorPoint::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 //
 //
 
+static tEffectorRegistration regRubberRecharge("rubberrecharge", "", zEffectorCycleRubber::create);
+
 void zEffectorCycleRubber::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -177,6 +185,8 @@ void zEffectorCycleRubber::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarg
 //
 //
 
+static tEffectorRegistration regBrakeRecharge("brakerecharge", "", zEffectorCycleBrake::create);
+
 void zEffectorCycleBrake::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -191,6 +201,8 @@ void zEffectorCycleBrake::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarge
 //
 //
 //
+
+static tEffectorRegistration regAcceleration("acceleration", "", zEffectorCycleAcceleration::create);
 
 void zEffectorCycleAcceleration::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -207,6 +219,8 @@ void zEffectorCycleAcceleration::effect(gVectorExtra<ePlayerNetID *> &d_calculat
 //
 //
 
+static tEffectorRegistration regSpawnPlayer("spawnplayer", "", zEffectorSpawnPlayer::create);
+
 void zEffectorSpawnPlayer::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -217,6 +231,8 @@ void zEffectorSpawnPlayer::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarg
         sg_RespawnPlayer(grid, arena, (*iter));
     }
 }
+
+static tEffectorRegistration regSetting("setting", "", zEffectorSetting::create);
 
 void zEffectorSetting::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
