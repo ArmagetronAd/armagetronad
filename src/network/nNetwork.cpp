@@ -2825,6 +2825,13 @@ void sn_SetNetState(nNetState x){
                 sn_DisconnectUserNoWarn(i, "$network_kill_shutdown");
             }
 
+            // repeat to clear out pending stuff created during
+            // the last run (destruction messages, for example)
+            for(int i=MAXCLIENTS+1;i>=0;i--)
+            {
+                sn_DisconnectUserNoWarn(i, "$network_kill_shutdown");
+            }
+
             sn_Connections[0].socket = 0;
 
             // shutdown network system to get new socket

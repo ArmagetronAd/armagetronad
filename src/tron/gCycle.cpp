@@ -463,6 +463,10 @@ class Sensor: public gSensor
             , turnedRecently_ ( 0 )
             , owner_ ( owner )
     {
+#ifdef RLBOT
+        rlDir = 1;
+        rlLastTime = -100;
+#endif
     }
 
     // describes walls we like. We like enemy walls. We like to go between them.
@@ -614,9 +618,51 @@ class Sensor: public gSensor
         return owner_->CanMakeTurn( ( action == &gCycle::se_turnRight ) ? 1 : -1 );
     }
 
+#ifdef RLBOT
+    int rlDir;
+    REAL rlLastTime;
+#endif
+
     // does the main thinking
     void Activate( REAL currentTime )
     {
+#ifdef RLBOT
+        // hack chatbot for crazy turning
+        {
+            if (!owner_->Alive() || !owner_->Vulnerable() )
+            {
+                return;
+            }
+            if( fabs( rlLastTime - currentTime) > 1 )
+            {
+                owner_->Act( &gCycle::se_turnRight, 1 );
+                rlDir = -1;
+            }
+            else  if ( rlDir > 0 )
+            {
+                if( CanMakeTurn( &gCycle::se_turnRight ) )
+                {
+                    owner_->Act( &gCycle::se_turnRight, 1 );
+                    owner_->Act( &gCycle::se_turnRight, 1 );
+                    owner_->Act( &gCycle::se_turnRight, 1 );
+                    rlDir = -1;
+                }
+            }
+            else
+            {
+                if( CanMakeTurn( &gCycle::se_turnLeft ) )
+                {
+                    owner_->Act( &gCycle::se_turnLeft, 1 );
+                    owner_->Act( &gCycle::se_turnLeft, 1 );
+                    owner_->Act( &gCycle::se_turnLeft, 1 );
+                    rlDir = 1;
+                }
+            }
+            rlLastTime = currentTime;
+            return;
+        }
+#endif
+
         // is it already time for activation?
         if ( currentTime < nextChatAI_ )
             return;
@@ -5148,11 +5194,24 @@ bool gCycle::Extrapolate( REAL dt )
     if ( newTime >= lastTime )
     {
         // simulate extrapolator until now
-        eGameObject::TimestepThis( lastTime, extrapolator_ );
+        if( lastTime > extrapolator_->LastTime() )
+        {
+            eGameObject::TimestepThis( lastTime, extrapolator_ );
+        }
 
         // test if there are real (the check for list does that) destinations left; we cannot call it finished if there are.
         gDestination* unhandledDestination = extrapolator_->GetCurrentDestination();
         ret = !unhandledDestination || !unhandledDestination->list;
+        
+        if( !ret )
+        {
+            if ( unhandledDestination->gameTime < newTime - Lag() * 2 - sn_Connections[0].ping.GetPing()*2 - GetTurnDelay()*4 )
+            {
+                // emergency reset.
+                extrapolator_ = 0;
+                resimulate_ = true;
+            }
+        }
 
         newTime = lastTime;
     }
