@@ -26,55 +26,6 @@ class gWallRim;
 #endif
 
 
-// NOTE: This desperately wants into 'tools'
-#include <stack>
-#include <deque>
-template< class T, class Container = std::deque<T>, class Stack = std::stack<T, Container> >
-class tScopedPush {
-public:
-    typedef Stack my_stack_t;
-    tScopedPush(my_stack_t & stack) {
-        _stack = &stack;
-        _elem = NULL;
-    };
-    tScopedPush(my_stack_t & stack, T val) {
-        stack.push(val);
-        _stack = &stack;
-        _elem = &(stack.top());
-    };
-    ~tScopedPush() {
-        if (!_elem)
-            return;
-        this->pop();
-    };
-
-    void
-    push(T val) {
-        assert(!_elem);
-        _stack->push(val);
-        _elem = &(_stack->top());
-    };
-    
-    void
-    pop() {
-        assert(_elem == &_stack->top());
-        _stack->pop();
-        _elem = NULL;
-    };
-    
-    void
-    set(T val) {
-        if (_elem)
-            this->pop();
-        this->push(val);
-    };
-
-private:
-    my_stack_t*_stack;
-    T*_elem;
-};
-
-
 /*
 Note to the reader: In the full World idea, the parser should, 
 when called, create a full world structure, from the Empire down,
