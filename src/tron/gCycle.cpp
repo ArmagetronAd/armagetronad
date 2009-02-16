@@ -1149,6 +1149,12 @@ void gDestination::CopyFrom(const gCycleMovement &other)
 #endif
     if ( other.Owner() && other.Player() )
         chatting = other.Player()->IsChatting();
+
+    // cheat. If rubber ran out, backdate the time.
+    if ( other.RubberDepleteTime() > 0 )
+    {
+        gameTime = other.RubberDepleteTime();
+    }
 }
 
 void gDestination::CopyFrom(const gCycle &other)
@@ -1546,7 +1552,7 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
                 // see if we went back too far (should almost never happen)
                 if ( distance < minDist )
                 {
-                    st_Breakpoint();
+                    // st_Breakpoint();
                     TimestepCore( lastTime + ( minDist - distance )/verletSpeed_ );
                 }
             }

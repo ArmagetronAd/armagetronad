@@ -530,7 +530,7 @@ void nLoginProcess::FetchInfoFromAuthority()
     method.prefix = "";
     method.suffix = "";
     
-    bool ret;
+    bool ret = false;
     if ( !tRecorder::IsPlayingBack() )
     {
         if ( authority.Len() <= 1 )
@@ -1067,7 +1067,7 @@ void nLoginProcess::Authorize()
 // the finish task can also be triggered any time by this function:
 void nLoginProcess::Abort()
 {
-    nMemberFunctionRunner::ScheduleForeground( *this, &nLoginProcess::Finish );
+    nMemberFunctionRunner::ScheduleBackground( *this, &nLoginProcess::Finish );
 }
 
 // which, when finished, triggers the foreground task of updating the

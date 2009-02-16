@@ -72,7 +72,7 @@ static const unsigned short net_max_current_id_min = 16000;
 static unsigned short net_max_current_id = net_max_current_id_min;
 
 #ifdef DEBUG
-static void sn_BreakOnObjectID( unsigned int id )
+static void sn_BreakOnObjectID( unsigned short id )
 {
 #ifdef DEBUG_X
     static unsigned int breakOnID = sn_WatchNetID;
@@ -737,6 +737,10 @@ nNetObjectRegistrar::~nNetObjectRegistrar()
 // gegister with the object database
 void nNetObject::Register( const nNetObjectRegistrar& registrar )
 {
+#ifdef DEBUG
+        sn_BreakOnObjectID( registrar.id );
+#endif
+
     tASSERT( this == registrar.object );
     tASSERT( id == 0 || id == registrar.id );
 
@@ -758,9 +762,6 @@ void nNetObject::Register( const nNetObjectRegistrar& registrar )
     }
     else
     {
-#ifdef DEBUG
-        sn_BreakOnObjectID( id );
-#endif
         sn_netObjects[id]=this;
     }
 
@@ -945,7 +946,8 @@ static void sn_DoDestroy()
                     if (!info.actionOnDeleteExecuted)
                         no->ActionOnDelete();
 
-                    sn_netObjects(id)=NULL;
+                    no->TakeOwnership();
+                    tJUST_CONTROLLED_PTR< nNetObject > bounce( no );
                     sn_netObjectsOwner(id)=0;
                 }
                 else
@@ -1776,9 +1778,16 @@ void nNetObject::ClearKnows(int user, bool clear){
 
                 if (clear){
                     if (no->owner==user && user!=sn_myNetID){
+#ifdef DEBUG
+                        sn_BreakOnObjectID(i);
+#endif
                         if (no->ActionOnQuit())
-                            sn_netObjects(i)=NULL; // destroy it
-                        else{
+                        {
+                            no->createdLocally=true;
+                            tControlledPTR< nNetObject > bounce( no ); // destroy it, if noone wants it
+                        }
+                        else
+                        {
                             no->owner=::sn_myNetID; // or make it mine.
                             sn_netObjectsOwner(i)=::sn_myNetID;
                             if (no->AcceptClientSync()){
@@ -1798,7 +1807,12 @@ void ClearKnows(int user, bool clear){
     if (clear)
         for (int i=sn_netObjectsOwner.Len()-1;i>=0;i--){
             if (sn_netObjectsOwner(i)==user)
+            {
+#ifdef DEBUG
+                sn_BreakOnObjectID(i);
+#endif
                 sn_netObjectsOwner(i)=0;
+            }
         }
 }
 
