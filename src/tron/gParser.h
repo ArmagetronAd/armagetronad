@@ -21,6 +21,42 @@ class gWallRim;
 #endif
 
 
+// NOTE: This desperately wants into 'tools'
+#include <stack>
+#include <deque>
+template< class T, class Container = std::deque<T>, class Stack = std::stack<T, Container> >
+class tScopedPush {
+public:
+    typedef Stack my_stack_t;
+    tScopedPush(my_stack_t & stack) {
+        _stack = &stack;
+        _elem = NULL;
+    };
+    tScopedPush(my_stack_t & stack, T val) {
+        stack.push(val);
+        _stack = &stack;
+        _elem = &val;
+    };
+    ~tScopedPush() {
+        if (!_elem)
+            return;
+        assert(_elem == &_stack->top());
+        _stack->pop();
+    };
+
+    void
+    push(T val) {
+        assert(!_elem);
+        _stack->push(val);
+        _elem = &val;
+    };
+
+private:
+    my_stack_t*_stack;
+    T*_elem;
+};
+
+
 /*
 Note to the reader: In the full World idea, the parser should, 
 when called, create a full world structure, from the Empire down,
@@ -134,6 +170,9 @@ public:
     
     gArena * contextArena(tXmlParser::node const &);
     eGrid * contextGrid(tXmlParser::node const &);
+    
+    std::stack<rColor> defColor;
+    std::stack<bool> defRotation;  // FIXME: should be tPolynomial<nMessage>
 #endif
 };
 

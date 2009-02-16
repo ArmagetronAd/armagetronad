@@ -707,9 +707,6 @@ void gParser::myCheapParameterSplitter(const string &str, tFunction &tf, bool ad
     tf = tFunction().parse(str, addSizeMultiplier ? &sizeMultiplier : NULL);
 }
 
-rColor *defColor = NULL;
-bool defRotation = false;
-
 void
 gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShapePtr &shape)
 {
@@ -717,8 +714,8 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
     tValue::BasePtr yp;
     bool centerLocationFound = false;
 
-    if (defColor)
-        shape->setColor(*defColor);
+    if (!defColor.empty())
+        shape->setColor(defColor.top());
 
     tFunction tfScale;
     if (myxmlHasProp(cur, "scale")) {
@@ -741,7 +738,7 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
         shape->setRotation2( tpRotation );
     }
     else
-    if (defRotation)
+    if (!defRotation.empty() && defRotation.top())
     {
         tPolynomial<nMessage> tpRotation(2);
         tpRotation[0] = 0.0f;
@@ -1359,6 +1356,8 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             zone->setName(zoneName);
         }
 
+        tScopedPush<rColor> zoneDefColor(defColor);
+        tScopedPush<bool> zoneDefRotation(defRotation);
         if (myxmlHasProp(zoneroot, "effect"))
         {
             // On Enter for now; TODO: fortress at least will need an inside
@@ -1375,13 +1374,13 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             zone->addEffectGroupEnter(ZEG);
             char *effect = myxmlGetProp(zoneroot, "effect");
             if (!strcmp(effect, "win"))
-                defColor = new rColor(0, 1, 0, .7);
+                zoneDefColor.push(rColor(0, 1, 0, .7));
             else
             if (!strcmp(effect, "death"))
-                defColor = new rColor(1, 0, 0, .7);
+                zoneDefColor.push(rColor(1, 0, 0, .7));
             else
-                defColor = new rColor(1, 1, 1, .7);
-            defRotation = true;
+                zoneDefColor.push(rColor(1, 1, 1, .7));
+            zoneDefRotation.push(true);
             xmlFree(effect);
         }
 
@@ -1440,10 +1439,6 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             }
             cur = cur->next;
         }
-
-        free(defColor);
-        defColor = NULL;
-        defRotation = false;
 
         // leaving zone undeleted is no memory leak here, the grid takes control of it
         if ( zone )
