@@ -971,7 +971,7 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
     string effectorAttribute( myxmlGetProp(cur, "effect"));
     transform (effectorAttribute.begin(), effectorAttribute.end(), effectorAttribute.begin(), tolower);
 
-    effector = zEffectorPtr(tEffectorManager::Create(effectorAttribute, tXmlParser::node(cur)));
+    effector = zEffectorPtr(zEffectorManager::Create(effectorAttribute, tXmlParser::node(cur)));
 
     // Should we load the score information
     zEffectorPoint *effectorPoint;

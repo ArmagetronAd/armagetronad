@@ -95,10 +95,10 @@ zEffector::readXML(tXmlParser::node const & node)
 }
 
 
-tEffectorManager::FactoryList tEffectorManager::_effectors;
+zEffectorManager::FactoryList zEffectorManager::_effectors;
 
 zEffector*
-tEffectorManager::Create(std::string const & type, tXmlParser::node const &node)
+zEffectorManager::Create(std::string const & type, tXmlParser::node const &node)
 {
     FactoryList::const_iterator iterEffectorFactory;
     if ((iterEffectorFactory = _effectors.find(type)) == _effectors.end())
@@ -118,18 +118,18 @@ tEffectorManager::Create(std::string const & type, tXmlParser::node const &node)
 }
 
 void
-tEffectorManager::Register(std::string const & type, std::string const & desc, NullFactory_t f)
+zEffectorManager::Register(std::string const & type, std::string const & desc, NullFactory_t f)
 {
     _effectors[type] = new NullFactory(f);
 }
 void
-tEffectorManager::Register(std::string const & type, std::string const & desc, XMLFactory_t f)
+zEffectorManager::Register(std::string const & type, std::string const & desc, XMLFactory_t f)
 {
     _effectors[type] = new XMLFactory(f);
 }
 
 
-static tEffectorRegistration regWin("win", "", zEffectorWin::create);
+static zEffectorRegistration regWin("win", "", zEffectorWin::create);
 
 void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -146,7 +146,7 @@ void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
     }
 }
 
-static tEffectorRegistration regDeath("death", "", zEffectorDeath::create);
+static zEffectorRegistration regDeath("death", "", zEffectorDeath::create);
 
 void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -163,7 +163,7 @@ void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 //
 //
 
-static tEffectorRegistration regPoint("point", "", zEffectorPoint::create);
+static zEffectorRegistration regPoint("point", "", zEffectorPoint::create);
 
 void zEffectorPoint::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -181,7 +181,7 @@ void zEffectorPoint::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 //
 //
 
-static tEffectorRegistration regRubberRecharge("rubberrecharge", "", zEffectorCycleRubber::create);
+static zEffectorRegistration regRubberRecharge("rubberrecharge", "", zEffectorCycleRubber::create);
 
 void zEffectorCycleRubber::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -199,7 +199,7 @@ void zEffectorCycleRubber::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarg
 //
 //
 
-static tEffectorRegistration regBrakeRecharge("brakerecharge", "", zEffectorCycleBrake::create);
+static zEffectorRegistration regBrakeRecharge("brakerecharge", "", zEffectorCycleBrake::create);
 
 void zEffectorCycleBrake::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -216,7 +216,7 @@ void zEffectorCycleBrake::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarge
 //
 //
 
-static tEffectorRegistration regAcceleration("acceleration", "", zEffectorCycleAcceleration::create);
+static zEffectorRegistration regAcceleration("acceleration", "", zEffectorCycleAcceleration::create);
 
 void zEffectorCycleAcceleration::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -233,7 +233,7 @@ void zEffectorCycleAcceleration::effect(gVectorExtra<ePlayerNetID *> &d_calculat
 //
 //
 
-static tEffectorRegistration regSpawnPlayer("spawnplayer", "", zEffectorSpawnPlayer::create);
+static zEffectorRegistration regSpawnPlayer("spawnplayer", "", zEffectorSpawnPlayer::create);
 
 void zEffectorSpawnPlayer::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -246,7 +246,7 @@ void zEffectorSpawnPlayer::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarg
     }
 }
 
-static tEffectorRegistration regSetting("setting", "", zEffectorSetting::create);
+static zEffectorRegistration regSetting("setting", "", zEffectorSetting::create);
 
 void zEffectorSetting::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {

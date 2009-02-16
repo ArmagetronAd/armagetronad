@@ -71,7 +71,7 @@ protected:
 /**
  *   put detailed docs here
  */
-class tEffectorManager {
+class zEffectorManager {
 public:
     static zEffector* Create(std::string const & type, tXmlParser::node const &);
 
@@ -110,25 +110,25 @@ public:
     static void Register(std::string const & type, std::string const & desc, NullFactory_t);
     static void Register(std::string const & type, std::string const & desc, XMLFactory_t);
 
-    ~tEffectorManager();
+    ~zEffectorManager();
 private:
     typedef std::map<std::string, VoidFactoryBase*> FactoryList;
     static FactoryList _effectors;
 
     //! We make the constructor private so that nobody else can
     /// instantiate this class
-    tEffectorManager();
+    zEffectorManager();
 };
 
-class tEffectorRegistration {
+class zEffectorRegistration {
 public:
     template<typename T>
-    tEffectorRegistration(std::string const & type, std::string const & desc, T f);
+    zEffectorRegistration(std::string const & type, std::string const & desc, T f);
 };
 template<typename T>
-tEffectorRegistration::tEffectorRegistration(std::string const & type, std::string const & desc, T f)
+zEffectorRegistration::zEffectorRegistration(std::string const & type, std::string const & desc, T f)
 {
-    tEffectorManager::Register(type, desc, f);
+    zEffectorManager::Register(type, desc, f);
 }
 
 
