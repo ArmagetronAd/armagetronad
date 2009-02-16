@@ -706,25 +706,7 @@ gParser::parseShapePolygon(eGrid *grid, xmlNodePtr cur, unsigned short idZone, c
 // Remove when all that is variant has been ported to ruby
 void gParser::myCheapParameterSplitter(const string &str, tFunction &tf, bool addSizeMultiplier)
 {
-    REAL param[2] = {0.0, 0.0};
-    int bPos;
-    if ( (bPos = str.find(';')) != -1)
-    {
-        param[0] = atof(str.substr(0, bPos).c_str());
-        param[1] = atof(str.substr(bPos + 1, str.length()).c_str());
-    }
-    else
-    {
-        param[0] = atof(str.c_str());
-    }
-
-    if (addSizeMultiplier)
-    {
-        param[0] = param[0] * sizeMultiplier;
-        param[1] = param[1] * sizeMultiplier;
-    }
-    tf.SetOffset(param[0]);
-    tf.SetSlope(param[1]);
+    tf = tFunction(str, addSizeMultiplier ? &sizeMultiplier : NULL);
 }
 
 rColor *defColor = NULL;
