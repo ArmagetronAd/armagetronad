@@ -1334,8 +1334,6 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 
     if (sn_GetNetState() != nCLIENT )
     {
-        rColor color( 1, 0, 0, .7 );
-
         zZonePtr zone;
         zoneMap::const_iterator iterZone;
         // Has this zone been already registered, such as through a zoneInfluence
