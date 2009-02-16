@@ -20,6 +20,7 @@ class gGame;
 class gWallRim;
 
 #ifdef ENABLE_ZONESV2
+#include "zone/zShape.hpp"
 #include "zone/zZone.h"
 #include "zone/zMisc.h"
 #endif

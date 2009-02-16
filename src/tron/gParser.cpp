@@ -1355,6 +1355,13 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         state.push();
         if (myxmlHasProp(zoneroot, "effect"))
         {
+            state.set("color", rColor(1, 1, 1, .7));
+
+            tPolynomial<nMessage> tpRotation(2);
+            tpRotation[0] = 0.0f;
+            tpRotation[1] = .3f;
+            state.set("rotation", tpRotation);
+
             // On Enter for now; TODO: fortress at least will need an inside
             gVectorExtra< nNetObjectID > noOwners;
             zEffectGroupPtr ZEG = zEffectGroupPtr(new zEffectGroup(noOwners, noOwners));
@@ -1363,26 +1370,11 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             zSelectorPtr ZS = zSelectorPtr(zSelectorSelf::create());
             ZS->setCount(-1);
             zEffectorPtr ZE = parseZoneEffectGroupEffector(grid, zoneroot, keyword);
+            ZE->setupVisuals(*this);
             ZS->addEffector(ZE);
             ZV->addSelector(ZS);
             ZEG->addValidator(ZV);
             zone->addEffectGroupEnter(ZEG);
-            char *effect = myxmlGetProp(zoneroot, "effect");
-            if (!strcmp(effect, "win"))
-                state.set("color", rColor(0, 1, 0, .7));
-            else
-            if (!strcmp(effect, "death"))
-                state.set("color", rColor(1, 0, 0, .7));
-            else
-                state.set("color", rColor(1, 1, 1, .7));
-
-            tPolynomial<nMessage> tpRotation(2);
-            tpRotation[0] = 0.0f;
-            tpRotation[1] = .3f;
-            state.set("rotation", tpRotation);
-            // FIXME: can probably be optimized with a shared_ptr
-
-            xmlFree(effect);
         }
 
         while (cur != NULL) {

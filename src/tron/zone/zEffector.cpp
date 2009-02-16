@@ -96,6 +96,11 @@ zEffector::readXML(tXmlParser::node const & node)
         setMessage(node.GetProp("description"));
 }
 
+void
+zEffector::setupVisuals(gParser & p)
+{
+}
+
 
 zEffectorManager::FactoryList zEffectorManager::_effectors;
 
@@ -151,6 +156,12 @@ void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
     }
 }
 
+void
+zEffectorWin::setupVisuals(gParser & p)
+{
+    p.state.set("color", rColor(0, 1, 0, .7));
+}
+
 static zEffectorRegistration regDeath("death", "", zEffectorDeath::create);
 
 void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
@@ -162,6 +173,12 @@ void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
     {
         static_cast<gCycle *>((*iter)->Object())->Kill();
     }
+}
+
+void
+zEffectorDeath::setupVisuals(gParser & p)
+{
+    p.state.set("color", rColor(1, 0, 0, .7));
 }
 
 //

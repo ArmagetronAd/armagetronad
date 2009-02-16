@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ARMAGETRONAD_H_EFFECTOR
 
 class gCycle;
+class gParser;
 #include <vector>
 #include <memory>
 #include "gVectorExtra.h"
@@ -56,6 +57,8 @@ public:
 
     void setCount(int _count) {count = _count;};
     void setMessage(tString unformated);
+
+    virtual void setupVisuals(gParser &);
 
 protected:
     template <typename T>
@@ -143,6 +146,8 @@ public:
     virtual ~zEffectorWin() {};
 
     virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
+
+    void setupVisuals(gParser &);
 };
 
 class zEffectorDeath : public zEffector
@@ -156,6 +161,8 @@ public:
     virtual ~zEffectorDeath() {};
 
     virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
+
+    void setupVisuals(gParser &);
 };
 
 class zEffectorPoint : public zEffector
