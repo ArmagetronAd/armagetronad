@@ -1082,7 +1082,8 @@ nNetObject::~nNetObject(){
                 }
                 destroyers[user]->Write(id);
 
-                if (destroyers[user]->DataLen()>100){
+                if (destroyers[user]->DataLen() > ( destroyersCount[user] ? 1000 : 100 ) )
+                {
                     sn_SendDestroyer( user );
                 }
 
@@ -1499,18 +1500,6 @@ void nNetObject::SyncAll(){
 
             sn_syncedUser = user;
 
-            // send the destroy messages
-            if (destroyers[user])
-            {
-                // but check whether the opportunity is good (big destroyers message, or a sync packet in the pipe) first
-                if ( destroyers[user]->DataLen() > 75 ||
-                        sn_Connections[user].sendBuffer_.Len() > 0 ||
-                        destroyersTime[user] < tSysTimeFloat()-.5 )
-                {
-                    sn_SendDestroyer( user );
-                }
-            }
-
             // con << sn_SyncRequestedObject.Len() << "/" << sn_netObjects.Len() << "\n";
 
             int currentSync = sn_SyncRequestedObject.Len()-1;
@@ -1529,12 +1518,28 @@ void nNetObject::SyncAll(){
                     if (// nos->knowsAbout[user].syncReq &&
                         !nos->knowsAbout[user].knowsAboutExistence)
                     {
+                        // look for the object ID in the current destruction message
+                        {
+                            if ( destroyers[user] )
+                            {
+                                for( int i = destroyers[user]->DataLen()-1; i >= 0; --i )
+                                {
+                                    if ( destroyers[user]->Data(i) == s )
+                                    {
+                                        // found it. Send the destruction
+                                        // message and wait for its ack.
+                                        sn_SendDestroyer( user );
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
                         if ( destroyersCount[user] )
                         {
-                            sn_SendDestroyer( user );
-
                             // don't send creation messages while destruction
                             // messages are unacknowledged.
+                            --currentSync;
                             continue;
                         }
 
@@ -1601,6 +1606,18 @@ void nNetObject::SyncAll(){
                 }
 
                 currentSync--;
+            }
+
+            // send the destroy messages
+            if (destroyers[user] && !destroyersCount[user] )
+            {
+                // but check whether the opportunity is good (big destroyers message, or a sync packet in the pipe) first
+                if ( destroyers[user]->DataLen() > 75 ||
+                        sn_Connections[user].sendBuffer_.Len() > 0 ||
+                        destroyersTime[user] < tSysTimeFloat()-.5-2*sn_Connections[user].ping.GetPing() )
+                {
+                    sn_SendDestroyer( user );
+                }
             }
 
             sn_syncedUser = -1;
