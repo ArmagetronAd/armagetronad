@@ -41,6 +41,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <set>
 #include <map>
 
+// #define DEBUG
+
 // debug watchs
 #ifdef DEBUG
 int sn_WatchNetID = 0;
@@ -1109,8 +1111,11 @@ nNetObject::~nNetObject(){
         if ( found != sn_netObjectsDeleted.end() )
         {
             nDeletedInfo  & deleted = (*found).second;
-            deleted.Set( NULL );
-            sn_netObjectsDeleted.erase(found);
+            if ( this == deleted.object_ )
+            {
+                deleted.Set( NULL );
+                sn_netObjectsDeleted.erase(found);
+            }
         }
     }
 
