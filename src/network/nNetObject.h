@@ -109,6 +109,9 @@ public:
 
     static nNetObject *ObjectDangerous(int i );
     // the same thin but returns NULL if the object is not yet available.
+    
+    // clears an eventually deleted object of the given ID out of the main lists
+    static void ClearDeleted( unsigned short ID );
 
     virtual void AddRef(); // call this every time you add a pointer
     // to this nNetObject from another nNetObject, so we know when it is
@@ -304,6 +307,8 @@ template<class T> class nNOInitialisator:public nDescriptor{
 
             unsigned short id=m.Data(0);
             //unsigned short owner=m.data(1);
+
+            nNetObject::ClearDeleted(id);
 
             if (sn_netObjectsOwner[id]!=m.SenderID() || bool(sn_netObjects[id]))
             {

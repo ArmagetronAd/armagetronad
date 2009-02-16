@@ -1220,6 +1220,25 @@ nNetObject *nNetObject::ObjectDangerous(int i ){
     return NULL;
 }
 
+void nNetObject::ClearDeleted( unsigned short id )
+{
+    // clear object from info arrays
+    nDeletedInfos::iterator found = sn_netObjectsDeleted.find( id );
+    if ( found != sn_netObjectsDeleted.end() )
+    {
+#ifdef DEBUG
+        sn_BreakOnObjectID( id );
+#endif
+
+        nDeletedInfo  & deleted = (*found).second;
+        if( deleted.object_ == sn_netObjects[id] )
+        {
+            sn_netObjects[id] = 0;
+            sn_netObjectsOwner[id] = 0;
+        }
+    }
+}
+
 void nNetObject::PrintName(tString &s) const
 {
     s << "Nameless NetObject nr. " << id;
@@ -1288,6 +1307,9 @@ void nNetObject::GetID()
         sn_netObjectsOwner[id]=owner;
         sn_netObjects_AcceptClientSync[id]=false;
 
+#ifdef DEBUG
+        sn_BreakOnObjectID(id);
+#endif
         sn_netObjects[id]=this;
     }
 }
