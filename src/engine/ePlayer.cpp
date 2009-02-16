@@ -8524,6 +8524,7 @@ ePlayerNetID & ePlayerNetID::ForceName( tString const & name )
 
         this->nameFromAdmin_ = name;
         this->nameFromAdmin_.NetFilter();
+        se_CutString( this->nameFromAdmin_, 16 );
 
         // crappiest line ever :-/
         newName << tColoredString::ColorString( r/15.0, g/15.0, b/15.0 ) << this->nameFromAdmin_ << tColoredString::ColorString( -1, -1, -1 );

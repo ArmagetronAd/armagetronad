@@ -41,6 +41,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <set>
 #include <map>
 
+// #define DEBUG
+
 // debug watchs
 #ifdef DEBUG
 int sn_WatchNetID = 0;
@@ -1109,8 +1111,11 @@ nNetObject::~nNetObject(){
         if ( found != sn_netObjectsDeleted.end() )
         {
             nDeletedInfo  & deleted = (*found).second;
-            deleted.Set( NULL );
-            sn_netObjectsDeleted.erase(found);
+            if ( this == deleted.object_ )
+            {
+                deleted.Set( NULL );
+                sn_netObjectsDeleted.erase(found);
+            }
         }
     }
 
@@ -1218,6 +1223,25 @@ nNetObject *nNetObject::ObjectDangerous(int i ){
     }
 
     return NULL;
+}
+
+void nNetObject::ClearDeleted( unsigned short id )
+{
+    // clear object from info arrays
+    nDeletedInfos::iterator found = sn_netObjectsDeleted.find( id );
+    if ( found != sn_netObjectsDeleted.end() )
+    {
+#ifdef DEBUG
+        sn_BreakOnObjectID( id );
+#endif
+
+        nDeletedInfo  & deleted = (*found).second;
+        if( deleted.object_ == sn_netObjects[id] )
+        {
+            sn_netObjects[id] = 0;
+            sn_netObjectsOwner[id] = 0;
+        }
+    }
 }
 
 void nNetObject::PrintName(tString &s) const
@@ -1355,6 +1379,9 @@ void nNetObject::GetID()
         sn_netObjectsOwner[id]=owner;
         sn_netObjects_AcceptClientSync[id]=false;
 
+#ifdef DEBUG
+        sn_BreakOnObjectID(id);
+#endif
         sn_netObjects[id]=this;
     }
 }

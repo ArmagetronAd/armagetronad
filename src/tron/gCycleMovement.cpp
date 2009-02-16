@@ -2211,7 +2211,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     if ( !CanMakeTurn( turnTo ) )
                     {
                         con << "Early turn!\n";
-                        st_Breakpoint();
+                        // st_Breakpoint();
                     }
                 }
 #endif
@@ -2304,6 +2304,12 @@ bool gCycleMovement::Timestep( REAL currentTime )
                         }
                         else
                             used = true;
+                    }
+                    else
+                    {
+                        // missed more than one turn. Drat. Ignore and hope for the best.
+                        // st_Breakpoint();
+                        ++turns;
                     }
                     /*
                       con << "turning to   " << currentDestination->position << "," 
@@ -3145,6 +3151,13 @@ bool gCycleMovement::DoTurn( int dir )
         lastTurnPos_ = pos;
 
         turns++;
+        /*
+        if( sn_GetNetState() != nSERVER )
+        {
+            // simulate lost turns
+            turns+=2;
+        }
+        */
 
         AccelerationDiscontinuity();
         verletSpeed_ *= sg_cycleTurnSpeedFactor;
