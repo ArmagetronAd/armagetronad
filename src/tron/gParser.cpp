@@ -966,10 +966,8 @@ zEffectorPtr
 gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword) {
     zEffectorPtr effector;
 
-    // TODO: add tolower()
     // Get the label of the effector to be used
     string effectorAttribute( myxmlGetProp(cur, "effect"));
-    transform (effectorAttribute.begin(), effectorAttribute.end(), effectorAttribute.begin(), tolower);
 
     effector = zEffectorPtr(zEffectorManager::Create(effectorAttribute, tXmlParser::node(cur)));
 

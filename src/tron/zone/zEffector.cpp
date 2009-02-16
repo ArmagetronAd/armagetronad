@@ -98,8 +98,11 @@ zEffector::readXML(tXmlParser::node const & node)
 zEffectorManager::FactoryList zEffectorManager::_effectors;
 
 zEffector*
-zEffectorManager::Create(std::string const & type, tXmlParser::node const &node)
+zEffectorManager::Create(std::string const & typex, tXmlParser::node const &node)
 {
+    std::string type = typex;
+    transform (type.begin(), type.end(), type.begin(), tolower);
+
     FactoryList::const_iterator iterEffectorFactory;
     if ((iterEffectorFactory = _effectors.find(type)) == _effectors.end())
         return NULL;
