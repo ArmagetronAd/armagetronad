@@ -40,8 +40,7 @@ public:
     ~tScopedPush() {
         if (!_elem)
             return;
-        assert(_elem == &_stack->top());
-        _stack->pop();
+        this->pop();
     };
 
     void
@@ -49,6 +48,20 @@ public:
         assert(!_elem);
         _stack->push(val);
         _elem = &(_stack->top());
+    };
+    
+    void
+    pop() {
+        assert(_elem == &_stack->top());
+        _stack->pop();
+        _elem = NULL;
+    };
+    
+    void
+    set(T val) {
+        if (_elem)
+            this->pop();
+        this->push(val);
     };
 
 private:
