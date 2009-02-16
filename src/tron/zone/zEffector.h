@@ -216,6 +216,8 @@ public:
 
     virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
 
+    void readXML(tXmlParser::node const &);
+
     virtual void setValue(tFunction const &accel) { acceleration = accel; };
 protected:
     tFunction acceleration;
