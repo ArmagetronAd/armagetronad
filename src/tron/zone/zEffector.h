@@ -71,21 +71,26 @@ protected:
  */
 class tEffectorManager {
 public:
-    static zEffector* Create(const char*type, tXmlParser::node*);
+    static zEffector* Create(std::string const & type, tXmlParser::node const &);
 
+private:
     class VoidFactoryBase {
     protected:
         VoidFactoryBase() {};
         virtual ~VoidFactoryBase() {};
     };
+public:
     typedef zEffector* (*NullFactory_t)();
+private:
     class NullFactory : public VoidFactoryBase {
     public:
         typedef NullFactory_t Factory_t;
         NullFactory(Factory_t f) : Factory(f) {};
         Factory_t Factory;
     };
-    typedef zEffector* (*XMLFactory_t)(const char*type, tXmlParser::node*);
+public:
+    typedef zEffector* (*XMLFactory_t)(std::string const & type, tXmlParser::node const &);
+private:
     class XMLFactory : public VoidFactoryBase {
     public:
         typedef XMLFactory_t Factory_t;
@@ -93,18 +98,19 @@ public:
         Factory_t Factory;
     };
     
+public:
     //! Register an effector type.
     /**
             @param name the name of the effector type
             @param description a human readable description of the effector type
             @param func a function that returns a new instance of the effector
      */
-    static void Register(const char*type, const char*desc, NullFactory_t);
-    static void Register(const char*type, const char*desc, XMLFactory_t);
+    static void Register(std::string const & type, std::string const & desc, NullFactory_t);
+    static void Register(std::string const & type, std::string const & desc, XMLFactory_t);
 
     ~tEffectorManager();
 private:
-    typedef std::map<tString, VoidFactoryBase*> FactoryList;
+    typedef std::map<std::string, VoidFactoryBase*> FactoryList;
     static FactoryList _effectors;
 
     //! We make the constructor private so that nobody else can

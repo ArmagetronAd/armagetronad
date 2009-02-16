@@ -88,33 +88,30 @@ zEffector::setMessage(tString unformated)
 tEffectorManager::FactoryList tEffectorManager::_effectors;
 
 zEffector*
-tEffectorManager::Create(const char*type, tXmlParser::node*node)
+tEffectorManager::Create(std::string const & type, tXmlParser::node const &node)
 {
     FactoryList::const_iterator iterEffectorFactory;
-    if ((iterEffectorFactory = _effectors.find(tString(type))) == _effectors.end())
+    if ((iterEffectorFactory = _effectors.find(type)) == _effectors.end())
         return NULL;
     
     VoidFactoryBase*Fy = iterEffectorFactory->second;
 
-    if (NullFactory*ptr = dynamic_cast<NullFactory*>(Fy)) {
+    if (NullFactory*ptr = dynamic_cast<NullFactory*>(Fy))
         return ptr->Factory();
-    }
-    else
-    if (XMLFactory*ptr = dynamic_cast<XMLFactory*>(Fy)) {
+    if (XMLFactory*ptr = dynamic_cast<XMLFactory*>(Fy))
         return ptr->Factory(type, node);
-    }
     return NULL;
 }
 
 void
-tEffectorManager::Register(const char*type, const char*desc, NullFactory_t f)
+tEffectorManager::Register(std::string const & type, std::string const & desc, NullFactory_t f)
 {
-    _effectors[tString(type)] = new NullFactory(f);
+    _effectors[type] = new NullFactory(f);
 }
 void
-tEffectorManager::Register(const char*type, const char*desc, XMLFactory_t f)
+tEffectorManager::Register(std::string const & type, std::string const & desc, XMLFactory_t f)
 {
-    _effectors[tString(type)] = new XMLFactory(f);
+    _effectors[type] = new XMLFactory(f);
 }
 
 
