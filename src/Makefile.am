@@ -172,6 +172,12 @@ libtron_a_SOURCES +=\
 	tron/zone/zSelector.h      tron/zone/zSelector.cpp\
 	tron/zone/zEffector.h      tron/zone/zEffector.cpp\
 	tron/zone/zZoneInfluence.h tron/zone/zZoneInfluence.cpp
+
+if BUILD_FORTRESS
+libtron_a_SOURCES +=\
+	tron/zone/zFortress.cpp        tron/zone/zFortress.h
+endif
+
 endif
 
 libtron_a_SOURCES +=\
