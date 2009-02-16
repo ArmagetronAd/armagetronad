@@ -3,7 +3,7 @@
 *************************************************************************
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
-Copyright (C) 2005  by 
+Copyright (C) 2005  by
 and the AA DevTeam (see the file AUTHORS(.txt) in the main source directory)
 
 **************************************************************************
@@ -21,7 +21,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -30,6 +30,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ArmageTron_ProtocolBuffer_H
 
 #include "nProtoBufForward.h"
+
+#ifdef WIN32
+// undo silly defines
+#ifdef GetMessage
+#undef GetMessage
+#endif
+#endif
 
 // TODO: remove
 #include "nStreamMessage.h"
@@ -86,7 +93,7 @@ class nMessageStreamer;
 //! protocol buffer message
 class nProtoBufMessageBase: public nMessageBase
 {
-public: 
+public:
     nProtoBufMessageBase( nProtoBufDescriptorBase const & descriptor );
     ~nProtoBufMessageBase();
 
@@ -101,7 +108,7 @@ public:
     {
         return streamer_;
     }
-    
+
     //! returns the wrapped protcol buffer
     inline nProtoBuf const & GetProtoBuf() const
     {
@@ -165,7 +172,7 @@ private:
 // **********************************************************************
 
 //! implementation for each protocol buffer type
-template< class PROTOBUF > 
+template< class PROTOBUF >
 class nProtoBufMessage: public nProtoBufMessageBase
 {
 public:
@@ -256,7 +263,7 @@ struct nSenderInfo
 public:
     //! reference to the message, it contains all info
     nMessageBase const & envelope;
-    
+
     int SenderID() const
     {
         return envelope.SenderID();
@@ -271,7 +278,7 @@ public:
     {
         return envelope.MessageID();
     }
-    
+
     explicit nSenderInfo( nMessageBase const & e )
     : envelope( e )
     {}
@@ -290,7 +297,7 @@ public:
 
     //! constructor registering with the descriptor
     explicit nMessageTranslatorBase( nProtoBufDescriptorBase & descriptor );
-    
+
     //! convert current message format to format suitable for old client
     virtual nMessageBase * Translate( nProtoBuf const & source, int receiver ) const;
 };
@@ -395,7 +402,7 @@ public:
     // the difference message and a reference to base over to the receiver.
     // The receiver makes a copy of the base message, calls ClearRepeated onn it,
     // then merges the difference message into it.
-    
+
     // flag that marks protocol buffer messages
     static const unsigned short protoBufFlag = 0x8000;
 
@@ -547,7 +554,7 @@ public:
 // **********************************************************************
 
 // templated version of protocol buffer messages
-template< class PROTOBUF > 
+template< class PROTOBUF >
 class nProtoBufDescriptor: public nProtoBufDescriptorBase
 {
 public:
@@ -587,7 +594,7 @@ public:
         nProtoBufMessage< PROTOBUF > * m = CreateMessage();
         lastSent_ = m;
         m->AccessProtoBuf() = protoBuf;
-        
+
         return m;
     }
 
@@ -613,13 +620,13 @@ public:
 #endif
         instance_ = this;
     }
-    
+
     void Handle( PROTOBUF const & message, nSenderInfo const & sender ) const
     {
         tASSERT( handler_ );
         handler_( message, sender );
     }
-    
+
     //! creates a message
     inline nProtoBufMessage< PROTOBUF > * CreateMessage() const
     {
@@ -635,10 +642,10 @@ private:
 #ifdef DEBUG
     bool multipleInstances_;
 #endif
-   
+
     //! function actually handling the incoming message
     Handler * handler_;
-    
+
     //! creates a message
     virtual nProtoBufMessageBase * DoCreateMessage() const
     {
@@ -656,7 +663,7 @@ nMessageBase * nMessage::Transform( PROTOBUF const & message )
 */
 
 //! instance of this descriptor
-template< class PROTOBUF > 
+template< class PROTOBUF >
 nProtoBufDescriptor< PROTOBUF > * nProtoBufDescriptor< PROTOBUF >::instance_ = 0;
 
 // **********************************************************************
@@ -720,7 +727,7 @@ private:
     static void HandleCreation( PROTOBUF const & message, nSenderInfo const & sender )
     {
         unsigned short id = GetObjectID( message );
-        
+
         if( PreCheck( id, sender ) )
         {
             nNetObjectRegistrar registrar;
@@ -728,7 +735,7 @@ private:
             n->InitAfterCreation();
             n->ReadSync( nProtoBufBaseConverter< PROTOBUF const >( message ), sender );
             n->Register( registrar );
-            
+
             PostCheck( n, sender );
         }
     }
@@ -828,7 +835,7 @@ private:
         cast.WriteSync( nProtoBufBaseConverter< PROTOBUF >( sync ), create );
         StreamTo( sync, envelope, create ? nProtoBufDescriptorBase::SECTION_First : nProtoBufDescriptorBase::SECTION_Second );
     }
-    
+
     virtual nProtoBufMessageBase* DoCreateMessage() const
     {
         return CreateMessage();
@@ -871,7 +878,7 @@ public:
 
     //! fill protobuf from cache. Returns true on success.
     bool UncompressProtoBuf( unsigned short cacheID, nProtoBuf & target );
-    
+
     //! find suitable previous message and compresses
     //! the passed protobuf. Return value: the cache ID.
     unsigned short CompressProtoBuff( nProtoBuf const & source, nProtoBuf & target, nProtoBufMessageBase * hint = 0 );

@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eTeam.h"
 #include "eTess2.h"
 
+#include "nProtoBuf.h"
 #include "eNetGameObject.pb.h"
 
 #define MAX_PING_OVERFLOW 3
@@ -140,7 +141,7 @@ eNetGameObject::~eNetGameObject(){
 bool eNetGameObject::SyncIsNew(  Engine::NetGameObjectSync const & sync, nSenderInfo const & sender )
 {
     bool ret = nNetObject::SyncIsNew( sync.base(), sender );
-    
+
     lastAttemptedSyncTime = sync.last_time();
 
 #ifdef DEBUG

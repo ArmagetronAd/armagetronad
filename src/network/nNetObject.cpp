@@ -37,14 +37,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nConfig.h"
 #include "tRecorder.h"
 
+#include <deque>
+#include <set>
+#include <map>
+
 #include "nProtoBuf.h"
 #include "nBinary.h"
 #include "nNetObject.pb.h"
 #include "nNetObjectPrivate.pb.h"
-
-#include <deque>
-#include <set>
-#include <map>
 
 // debug watchs
 #ifdef DEBUG
@@ -410,24 +410,24 @@ void sn_RequestIDsHandler( Network::RequestIDs const & request, nSenderInfo cons
     if (sn_GetNetState()==nSERVER && sender.SenderID()<=MAXCLIENTS)
     {
         unsigned short num = request.num();
-        
+
         // not too many requests accepted. kick violators.
         if ( num > ID_PREFETCH*4 )
         {
             nReadError( true );
         }
-        
+
         Network::GrantIDs & grant = sn_grantIDsDescriptor.Send( sender.SenderID() );
-        
+
         unsigned short begin_block=0;	// begin of the block of currently assigned IDs
         unsigned short block_len=0;		// and it's length
-        
+
         for (int i = num-1; i>=0; i--)
         {
             nNetObjectID id = next_free_server(true);
-            
+
             sn_netObjectsOwner[id] = sender.SenderID();
-            
+
             if (begin_block + block_len == id)	// RLE for allocated IDs
                 block_len++;
             else
@@ -1265,7 +1265,7 @@ static void net_control_handler( Network::NetObjectControl const & control, nSen
     }
 }
 
-class nProtoBufNetControlDescriptor: 
+class nProtoBufNetControlDescriptor:
     public nProtoBufDescriptor< Network::NetObjectControl >,
     public nMessageStreamer
 {
@@ -1290,7 +1290,7 @@ private:
         // bend the descriptor
         target.BendDescriptorID( source.DescriptorID() & ~nProtoBufDescriptorBase::protoBufFlag );
     }
-    
+
     //! function responsible for reading an old message
     virtual void StreamToProtoBuf( nStreamMessage & source, nProtoBufMessageBase & target ) const
     {
@@ -1390,7 +1390,7 @@ public:
     virtual ~nDontWaitForAck(){};
 
     virtual bool DoResend()
-    { 
+    {
         // explicitly don't add message to cache
         sn_Connections[receiver].messageCacheOut_.AddMessage( message, false, false );
 
@@ -1499,7 +1499,7 @@ public:
     {
         // stream to message
         source.GetDescriptor().StreamTo( source.GetProtoBuf(), target, sections );
-    
+
         // bend the descriptor
         target.BendDescriptorID( net_sync.ID() );
     }
@@ -1523,7 +1523,7 @@ public:
     {
         // stream to message
         source.GetDescriptor().StreamTo( source.GetProtoBuf(), target, nProtoBufDescriptorBase::SECTION_All );
-    
+
         // bend the descriptor
         target.BendDescriptorID( source.DescriptorID() & ~nProtoBufDescriptorBase::protoBufFlag );
     }
@@ -2048,7 +2048,7 @@ static void sn_SyncHandler( Network::Sync const & sync, nSenderInfo const & send
         if (sn_GetNetState()!=nSERVER){
             // clients obediently sync...
             sn_Sync(timeout+4,sync_sn_netObjects!=0,false);
-            
+
             // and reply.
             sn_syncAckDescriptor.Send(0).set_token( c_sync );
         }

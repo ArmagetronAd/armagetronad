@@ -473,6 +473,20 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
+		<Unit filename="..\..\src\network\nBinary.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\network\nBinary.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
 		<Unit filename="..\..\src\network\nConfig.cpp">
 			<Option compilerVar="CPP"/>
 			<Option target="Win32 Release"/>
@@ -620,6 +634,20 @@
 			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\network\nSpamProtection.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\network\nStreamMessage.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\network\nStreamMessage.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
@@ -1567,6 +1595,12 @@
 			<Option target="Win32 Debug"/>
 			<Option target="Win32 Profile"/>
 		</Unit>
+		<Unit filename="..\..\src\tools\tCoord.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
 		<Unit filename="..\..\src\tools\tCoord.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
@@ -1774,6 +1808,48 @@
 			<Option target="Win32 Profile"/>
 		</Unit>
 		<Unit filename="..\..\src\tools\tPlayList.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tPolynomial.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tPolynomial.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tPolynomialMarshaler.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tPolynomialMarshaler.h">
+			<Option compilerVar=""/>
+			<Option compile="0"/>
+			<Option link="0"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tPolynomialWithBase.cpp">
+			<Option compilerVar="CPP"/>
+			<Option target="Win32 Release"/>
+			<Option target="Win32 Debug"/>
+			<Option target="Win32 Profile"/>
+		</Unit>
+		<Unit filename="..\..\src\tools\tPolynomialWithBase.h">
 			<Option compilerVar=""/>
 			<Option compile="0"/>
 			<Option link="0"/>
