@@ -30,6 +30,7 @@
 #include "gGame.h"
 
 #ifdef ENABLE_ZONESV2
+#include <boost/any.hpp>
 #include <boost/tokenizer.hpp> // to support splitting a string on ","
 #include <boost/shared_ptr.hpp>
 #endif
@@ -714,8 +715,8 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
     tValue::BasePtr yp;
     bool centerLocationFound = false;
 
-    if (!defColor.empty())
-        shape->setColor(defColor.top());
+    if (state.istype<rColor>("color"))
+        shape->setColor(state.get<rColor>("color"));
 
     tFunction tfScale;
     if (myxmlHasProp(cur, "scale")) {
@@ -738,8 +739,8 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
         shape->setRotation2( tpRotation );
     }
     else
-    if (!defRotation.empty())
-        shape->setRotation2( defRotation.top() );
+    if (state.isset("rotation"))
+        shape->setRotation2( state.get< tPolynomial<nMessage> >("rotation") );
 
     cur = cur->xmlChildrenNode;
     while ( cur != NULL) {
@@ -1351,8 +1352,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             zone->setName(zoneName);
         }
 
-        tScopedPush<rColor> zoneDefColor(defColor);
-        tScopedPush< tPolynomial<nMessage> > zoneDefRotation(defRotation);
+        state.push();
         if (myxmlHasProp(zoneroot, "effect"))
         {
             // On Enter for now; TODO: fortress at least will need an inside
@@ -1369,17 +1369,18 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             zone->addEffectGroupEnter(ZEG);
             char *effect = myxmlGetProp(zoneroot, "effect");
             if (!strcmp(effect, "win"))
-                zoneDefColor.push(rColor(0, 1, 0, .7));
+                state.set("color", rColor(0, 1, 0, .7));
             else
             if (!strcmp(effect, "death"))
-                zoneDefColor.push(rColor(1, 0, 0, .7));
+                state.set("color", rColor(1, 0, 0, .7));
             else
-                zoneDefColor.push(rColor(1, 1, 1, .7));
+                state.set("color", rColor(1, 1, 1, .7));
 
             tPolynomial<nMessage> tpRotation(2);
             tpRotation[0] = 0.0f;
             tpRotation[1] = .3f;
-            zoneDefRotation.push(tpRotation);
+            state.set("rotation", tpRotation);
+            // FIXME: can probably be optimized with a shared_ptr
 
             xmlFree(effect);
         }
@@ -2150,17 +2151,74 @@ gParser::setSizeMultiplier(REAL aSizeMultiplier)
     // EOP
 }
 
+#ifdef ENABLE_ZONESV2
+bool
+gParser::State_t::exists(std::string const & var)
+{
+    return _varstack.front().find(var) != _varstack.front().end();
+}
+
+bool
+gParser::State_t::isset(std::string const & var)
+{
+    return exists(var) && !_varstack.front()[var]->empty();
+}
+
+boost::any
+gParser::State_t::getAny(std::string const & var)
+{
+    return *(_varstack.front()[var]);
+}
+
+void
+gParser::State_t::setAny(std::string const & var, boost::any val)
+{
+    _varstack.front()[var] = boost::shared_ptr<boost::any>(new boost::any(val));
+}
+
+void
+gParser::State_t::unset(std::string const & var)
+{
+    _varstack.front().erase(var);
+}
+
+void
+gParser::State_t::inherit(std::string const & var)
+{
+    if (_varstack.at(1).find(var) == _varstack.at(1).end())
+        _varstack.front().erase(var);
+    else
+        _varstack.front()[var] = _varstack.at(1)[var];
+}
+
+void
+gParser::State_t::push()
+{
+    if (_varstack.empty())
+        _varstack.push_front(my_map_t());
+    else
+        _varstack.push_front(my_map_t(_varstack.front()));
+}
+
+void
+gParser::State_t::pop()
+{
+    _varstack.pop_front();
+}
+
+
 gArena *
 gParser::contextArena(tXmlParser::node const & node)
 {
-    return theArena;
+    return state.get<gArena*>("arena");
 }
 
 eGrid *
 gParser::contextGrid(tXmlParser::node const & node)
 {
-    return theGrid;
+    return state.get<eGrid*>("grid");
 }
+#endif
 
 void
 gParser::Parse()
@@ -2171,6 +2229,9 @@ gParser::Parse()
 
 #ifdef ENABLE_ZONESV2
     monitors.clear();
+    state.push();
+    state.set("arena", theArena);
+    state.set("grid", theGrid);
 #endif
 #ifdef DEBUG_ZONE_SYNC
     newGameRound = true;

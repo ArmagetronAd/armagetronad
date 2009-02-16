@@ -9,6 +9,10 @@
 #include <map>
 #include <string>
 
+#ifdef ENABLE_ZONESV2
+#include <boost/any.hpp>
+#endif
+
 class eGrid;
 class gArena;
 class ePoint;
@@ -180,12 +184,45 @@ protected:
 public:
     tValue::Expr::varmap_t vars;
     tValue::Expr::funcmap_t functions;
+
+    class State_t {
+    private:
+        typedef std::map<std::string, boost::shared_ptr<boost::any> > my_map_t;
+        std::deque< my_map_t > _varstack;
+    public:
+        bool exists(std::string const & var);
+        bool isset(std::string const & var);
+        template<typename T> bool istype(std::string const & var) {
+            if (!isset(var))
+                return false;
+            try {
+                boost::any_cast<T>(*(_varstack.front()[var]));
+                return true;
+            }
+            catch (const boost::bad_any_cast &)
+            {
+                return false;
+            }
+        };
+        boost::any getAny(std::string const & var);
+        template<typename T> T get(std::string const & var) {
+            return boost::any_cast<T>(getAny(var));
+        };
+        void setAny(std::string const & var, boost::any val);
+        template<typename T> void set(std::string const & var, T val) {
+            setAny(var, boost::any(val));
+        };
+        void unset(std::string const & var);
+        void inherit(std::string const & var);
+        
+        void push();
+        void pop();
+    };
     
-    gArena * contextArena(tXmlParser::node const &);
-    eGrid * contextGrid(tXmlParser::node const &);
+    State_t state;
     
-    std::stack<rColor> defColor;
-    std::stack< tPolynomial<nMessage> > defRotation;
+    gArena * __deprecated contextArena(tXmlParser::node const &);
+    eGrid * __deprecated contextGrid(tXmlParser::node const &);
 #endif
 };
 
