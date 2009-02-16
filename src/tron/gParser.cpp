@@ -738,13 +738,8 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
         shape->setRotation2( tpRotation );
     }
     else
-    if (!defRotation.empty() && defRotation.top())
-    {
-        tPolynomial<nMessage> tpRotation(2);
-        tpRotation[0] = 0.0f;
-        tpRotation[1] = .3f;
-        shape->setRotation2( tpRotation );
-    }
+    if (!defRotation.empty())
+        shape->setRotation2( defRotation.top() );
 
     cur = cur->xmlChildrenNode;
     while ( cur != NULL) {
@@ -1357,7 +1352,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         }
 
         tScopedPush<rColor> zoneDefColor(defColor);
-        tScopedPush<bool> zoneDefRotation(defRotation);
+        tScopedPush< tPolynomial<nMessage> > zoneDefRotation(defRotation);
         if (myxmlHasProp(zoneroot, "effect"))
         {
             // On Enter for now; TODO: fortress at least will need an inside
@@ -1380,7 +1375,12 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
                 zoneDefColor.push(rColor(1, 0, 0, .7));
             else
                 zoneDefColor.push(rColor(1, 1, 1, .7));
-            zoneDefRotation.push(true);
+
+            tPolynomial<nMessage> tpRotation(2);
+            tpRotation[0] = 0.0f;
+            tpRotation[1] = .3f;
+            zoneDefRotation.push(tpRotation);
+
             xmlFree(effect);
         }
 

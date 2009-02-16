@@ -35,7 +35,7 @@ public:
     tScopedPush(my_stack_t & stack, T val) {
         stack.push(val);
         _stack = &stack;
-        _elem = &val;
+        _elem = &(stack.top());
     };
     ~tScopedPush() {
         if (!_elem)
@@ -48,7 +48,7 @@ public:
     push(T val) {
         assert(!_elem);
         _stack->push(val);
-        _elem = &val;
+        _elem = &(_stack->top());
     };
 
 private:
@@ -172,7 +172,7 @@ public:
     eGrid * contextGrid(tXmlParser::node const &);
     
     std::stack<rColor> defColor;
-    std::stack<bool> defRotation;  // FIXME: should be tPolynomial<nMessage>
+    std::stack< tPolynomial<nMessage> > defRotation;
 #endif
 };
 
