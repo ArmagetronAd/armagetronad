@@ -2229,7 +2229,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     if ( !CanMakeTurn( turnTo ) )
                     {
                         con << "Early turn!\n";
-                        st_Breakpoint();
+                        // st_Breakpoint();
                     }
                 }
 #endif
@@ -2326,7 +2326,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     else
                     {
                         // missed more than one turn. Drat. Ignore and hope for the best.
-                        st_Breakpoint();
+                        // st_Breakpoint();
                         ++turns;
                     }
                     /*
