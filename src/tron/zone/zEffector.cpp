@@ -227,6 +227,13 @@ void zEffectorCycleBrake::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarge
 
 static zEffectorRegistration regAcceleration("acceleration", "", zEffectorCycleAcceleration::create);
 
+void
+zEffectorCycleAcceleration::readXML(tXmlParser::node const & node)
+{
+    string str = node.GetProp("value");
+    setValue(tFunction().parse(str));
+}
+
 void zEffectorCycleAcceleration::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     gVectorExtra<ePlayerNetID *>::iterator iter;

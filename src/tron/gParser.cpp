@@ -949,14 +949,6 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
 
     effector = zEffectorPtr(zEffectorManager::Create(effectorAttribute, tXmlParser::node(cur)));
 
-    // Should we load the acceleration
-    zEffectorCycleAcceleration *effectorAcceleration;
-    effectorAcceleration = dynamic_cast<zEffectorCycleAcceleration *>(effector.get());
-    if (effectorAcceleration) {
-        string str = string(myxmlGetProp(cur, "value"));
-        effectorAcceleration->setValue(tFunction().parse(str));
-    }
-
     // Should we set the grid and arena for respawning
     zEffectorSpawnPlayer *effectorSpawnPlayer;
     effectorSpawnPlayer = dynamic_cast<zEffectorSpawnPlayer *>(effector.get());
