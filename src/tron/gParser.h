@@ -120,8 +120,8 @@ protected:
     void parseObstacleWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
 #ifdef ENABLE_ZONESV2
-    void myCheapParameterSplitter(const string &str, tFunction &tf, bool addSizeMultiplier=false);
-    void myCheapParameterSplitter2(const string &str, tPolynomial<nMessage> &tp, bool addSizeMultiplier=false);
+    void __deprecated myCheapParameterSplitter(const string &str, tFunction &tf, bool addSizeMultiplier=false);
+    void __deprecated myCheapParameterSplitter2(const string &str, tPolynomial<nMessage> &tp, bool addSizeMultiplier=false);
 #endif
 
     /* This is a hack that will bring shame to my decendants for many generations: */
