@@ -965,41 +965,13 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
 zEffectorPtr
 gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword) {
     zEffectorPtr effector;
-    /*
-      build the effect, in this case give points to the target(s)
-    */
-    typedef zEffector* (*effectorFactory)();
-    std::map<tString, effectorFactory> effectors;
-    // Build the list of supported effector
-    effectors[tString("win")] = zEffectorWin::create;
-    effectors[tString("death")] = zEffectorDeath::create;
-    effectors[tString("point")] = zEffectorPoint::create;
-
-    /*
-      effectors[tString("event")] = zEffectorEvent::create;
-      effectors[tString("cleartrace")] = zEffectorClearrace::create;
-      effectors[tString("teleport")] = zEffectorTeleport::create;
-    */
-    effectors[tString("spawnplayer")] = zEffectorSpawnPlayer::create;
-    effectors[tString("brakerecharge")] = zEffectorCycleBrake::create;
-    effectors[tString("rubberrecharge")] = zEffectorCycleRubber::create;
-    effectors[tString("acceleration")] = zEffectorCycleAcceleration::create;
-    effectors[tString("setting")] = zEffectorSetting::create;
-
 
     // TODO: add tolower()
     // Get the label of the effector to be used
     string effectorAttribute( myxmlGetProp(cur, "effect"));
     transform (effectorAttribute.begin(), effectorAttribute.end(), effectorAttribute.begin(), tolower);
-    std::map<tString, effectorFactory>::const_iterator iterEffectorFactory;
-    // associate the label to the proper effector
-    if ((iterEffectorFactory = effectors.find(effectorAttribute)) != effectors.end()) {
 
-        effector = zEffectorPtr((*(iterEffectorFactory->second))());
-        /*
-        Save the effector for the zone effect
-        */
-    }
+    effector = zEffectorPtr(tEffectorManager::Create(effectorAttribute, tXmlParser::node(cur)));
 
     // Should we load the score information
     zEffectorPoint *effectorPoint;
