@@ -53,6 +53,7 @@ public:
     tPolynomial(REAL value);  //!< constructor for constant polynomial
     tPolynomial(tArray<REAL> newCoefs);  //!< constructor
     tPolynomial(const tPolynomial<T> &tf);  //!< constructor
+    tPolynomial(const tFunction &tf);  //!< constructor
     tPolynomial(std::string str);  //!< constructor
 
     virtual ~tPolynomial() //!< destructor
@@ -182,6 +183,14 @@ template <typename T>
 tPolynomial<T>::tPolynomial(const tPolynomial<T> &tf)  //!< constructor
         : referenceVarValue(tf.referenceVarValue),
         coefs(tf.coefs)
+{
+    // Empty
+}
+
+template <typename T>
+tPolynomial<T>::tPolynomial(const tFunction &tf)  //!< constructor
+        : referenceVarValue(0.0),
+        coefs(tf.offset_, tf.slope_)
 {
     // Empty
 }
