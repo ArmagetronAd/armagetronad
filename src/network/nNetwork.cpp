@@ -2519,10 +2519,11 @@ void sn_Bend( tString const & server, unsigned int port)
     sn_Bend( address );
 }
 
-nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket const * socket ){
+nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket const * socket )
+{
     if ( loginType == Login_All )
     {
-        nConnectError ret;
+        nConnectError ret = nABORT;
         if ( sn_GetNetState() != nCLIENT )
         {
             // ret = sn_Connect( server, Login_Protobuf, socket );
