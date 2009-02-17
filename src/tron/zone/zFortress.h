@@ -50,9 +50,9 @@ public:
     void readXML(tXmlParser::node const &);
 
 private:  // FIXME TODO: These need replacing
-    REAL __deprecated GetRotationSpeed() { shape->getRotation2().adaptToNewReferenceVarValue(lastTime); return shape->getRotation2()[1]; };
+    REAL __deprecated GetRotationSpeed() { return shape->getRotation2().evaluateRate(1, lastTime); };
     void __deprecated SetRotationSpeed(REAL r) { shape->getRotation2().changeRate(r, 1, lastTime); };
-    REAL __deprecated GetRotationAcceleration() { shape->getRotation2().adaptToNewReferenceVarValue(lastTime); return shape->getRotation2()[2]; };
+    REAL __deprecated GetRotationAcceleration() { return shape->getRotation2().evaluateRate(2, lastTime); };
     void __deprecated SetRotationAcceleration(REAL r) { shape->getRotation2().changeRate(r, 2, lastTime); };
 private:
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime

@@ -62,6 +62,7 @@ public:
 
     void parse(std::string str);
 
+    virtual REAL evaluateRate(int index, REAL currentVarValue); //!< evaluates the current rate
     virtual REAL evaluate( REAL currentVarValue ) const; //!< evaluates the function
     inline REAL operator()( REAL currentVarValue ) const; //!< evaluation operator
     
@@ -382,6 +383,20 @@ tPolynomial<T> tPolynomial<T>::translate(REAL currentVarValue) const
 
     tf.setReferenceVarValue(currentVarValue);
     return tf;
+}
+
+/**
+ *
+ */
+template <typename T>
+REAL
+tPolynomial<T>::evaluateRate(int index, REAL currentVarValue)
+{
+    if (coefs.Len() <= newRateIndex)
+        return 0.0;
+
+    *this = adaptToNewReferenceVarValue(currentVarValue);
+    return coefs[index];
 }
 
 /**
