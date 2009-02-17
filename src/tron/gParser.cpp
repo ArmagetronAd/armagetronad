@@ -1383,6 +1383,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             zSelectorPtr ZS = zSelectorPtr(zSelectorSelf::create());
             ZS->setCount(-1);
             zEffectorPtr ZE = parseZoneEffectGroupEffector(grid, zoneroot, keyword);
+            // FIXME: Trap any of the above being NULL
             ZE->setupVisuals(*this);
             ZS->addEffector(ZE);
             ZV->addSelector(ZS);
