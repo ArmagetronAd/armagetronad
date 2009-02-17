@@ -42,6 +42,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tLocale.h"
 #include "tConfiguration.h"
 
+#include <zlib.h>
+
 using namespace google::protobuf;
 
 #ifdef DEBUG
@@ -1285,6 +1287,35 @@ bool nMessageCache::UncompressProtoBuf( unsigned short cacheID, nProtoBuf & targ
     return false;
 }
 
+#ifdef DEBUG_X
+class Stat
+{
+public:
+    int saved, wasted, total;
+    
+    Stat():saved(0), wasted(0), total(0){}
+    ~Stat()
+    {
+        con << "Total zlib: " << total << "\n";
+        con << "Total zlib saving: " << saved << "\n";
+        con << "Total zlib waste: " << wasted << "\n";
+    }
+
+    void Add( int total, int saving )
+    {
+        this->total += total;
+        if ( saving > 0 )
+        {
+            saved += saving;
+        }
+        else
+        {
+            wasted -= saving;
+        }
+    }
+};
+#endif
+
 static void sn_CheckMessage
 (
     nProtoBuf const & source,       // message to compress
@@ -1393,12 +1424,76 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
         nProtoBufDescriptorBase::
         DiffMessages( cached, source, target );
 
-#ifdef DEBUG_STRINGS
+#ifndef DEBUG_STRINGS_X
         con << "Size = " << size << ", diff = " << bestDifference << "\n";
         con << lastMessageID << ", " << best->MessageIDBig() << "\n";
         con << "Base  : " << cached.ShortDebugString() << "\n";
         con << "Source: " << source.ShortDebugString() << "\n";
         con << "Diff  : " << target.ShortDebugString() << "\n";
+
+#ifdef DEBUG_X
+        // test zlib
+        {
+            #define SIZE 10000
+            Bytef basebuf[SIZE], diffbuf[SIZE], fullbuf[SIZE];
+
+            Bytef buf[SIZE];
+
+            cached.SerializeToArray(&basebuf,SIZE);
+            target.SerializeToArray(&diffbuf,SIZE);
+            source.SerializeToArray(&fullbuf,SIZE);
+
+            z_stream stream;
+            memset( &stream, 0, sizeof( stream ) );
+
+            stream.next_in  = basebuf;
+            stream.avail_in = cached.GetCachedSize();
+            
+            stream.next_out = buf;
+            stream.avail_out = SIZE;
+
+            stream.total_in = 0;
+            stream.total_out = 0;
+            stream.msg = NULL;
+            stream.state = NULL;
+            stream.zalloc = Z_NULL;
+            stream.zfree = Z_NULL;
+
+            deflateInit( &stream, 9 );
+
+            // flush 1
+            deflate( &stream, Z_SYNC_FLUSH );
+            tASSERT( stream.avail_in == 0 );
+            int base = stream.total_out;
+
+            // update
+            stream.next_in  = fullbuf;
+            // stream.avail_in = source.GetCachedSize();
+            stream.avail_in = 1;
+
+            // flush 2
+            deflate( &stream, Z_SYNC_FLUSH );
+            tASSERT( stream.avail_in == 0 );
+            deflateEnd( &stream );
+            tASSERT( stream.avail_in == 0 );
+            int second = stream.total_out;
+
+            int reduced = second - base;
+
+            static Stat stat;
+            stat.Add( target.GetCachedSize(), target.GetCachedSize() - reduced );
+            
+            std::cout.flush();
+
+            con << "zlib: " 
+                << cached.GetCachedSize() << " to " 
+                << target.GetCachedSize() << " to " 
+                << reduced << "\n";
+
+            std::cout.flush();
+        }
+#endif
+
 #endif
 
         // and return the message ID
