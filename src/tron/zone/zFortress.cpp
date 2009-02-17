@@ -215,12 +215,13 @@ bool zFortressZone::Timestep( REAL time )
                 rColor color_ = shape->getColor();
             color_.r_ = color_.g_ = color_.b_ = 1;
                 shape->setColor(color_);
-            }
         }
 
         shape->collapse( sg_collapseSpeed );
         SetRotationAcceleration( -GetRotationSpeed()*.4 );
-        RequestSync();
+        shape->RequestSync();
+
+        }
 
         currentState_ = State_Conquered;
     }
@@ -243,6 +244,7 @@ bool zFortressZone::Timestep( REAL time )
 
     // conquest going on
     REAL conquest = sg_conquestRate * enemiesInside_ - sg_defendRate * ownersInside_ - sg_conquestDecayRate;
+//fprintf(stderr, "conq %f + (dt %f * (conqRate %f * badIn %d - defRate %f * OwnIn %d - decay %f))\n", conquered_,dt,sg_conquestRate,enemiesInside_,sg_defendRate,ownersInside_,sg_conquestDecayRate);
     conquered_ += dt * conquest;
 
     if ( touchy_ && enemiesInside_ > 0 )

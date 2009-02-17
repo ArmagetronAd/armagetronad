@@ -134,6 +134,7 @@ void zShape::setGrowth(REAL growth) {
     REAL s = scale_(lasttime_ - referencetime_);
     scale_.SetSlope(growth);
     scale_.SetOffset( s + growth * ( referencetime_ - lasttime_ ) );
+    setScale(scale_);
 }
 
 void zShape::collapse(REAL speed) {
