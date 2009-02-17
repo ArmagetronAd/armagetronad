@@ -68,6 +68,9 @@ private:
 
 class zZone: public eNetGameObject
 {
+private:
+    // TODO FIXME \
+    void*pos;  //!< pos is not valid for zones
 public:
     static zZone* create(eGrid*grid, std::string const & type) { return new zZone(grid); };
     zZone(eGrid *grid); //!< local constructor
