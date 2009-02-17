@@ -61,7 +61,6 @@ static int sg_segments = 11;
 // *******************************************************************************
 //!
 //!		@param	grid Grid to put the zone into
-//!		@param	pos	 Position to spawn the zone at
 //!
 // *******************************************************************************
 
@@ -351,6 +350,7 @@ void zFortressZone::OnVanish( void )
     {
         int kills = int( sg_onConquestKillRatio * team->NumPlayers() );
         kills = kills > sg_onConquestKillMin ? kills : sg_onConquestKillMin;
+        eCoord pos = GetPosition();
 
         while ( kills > 0 )
         {
@@ -562,6 +562,7 @@ void zFortressZone::OnRoundBegin( void )
         const tList<eGameObject>& gameObjects = Grid()->GameObjects();
         gCycle * closest = NULL;
         REAL closestDistance = 0;
+        eCoord pos = GetPosition();
         for (int i=gameObjects.Len()-1;i>=0;i--)
         {
             gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
