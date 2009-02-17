@@ -525,12 +525,12 @@ void zZone::InteractWith( eGameObject * target, REAL time, int recursion )
                     playersInside.insert(prey->Player());
 
                     // Should the player not be marked as being outside
-                    // avoid the OnEnter transition. This happens at game
+                    // avoid the OnEntry transition. This happens at game
                     // start-up for example, when players are neither inside nor outside
                     if( playersOutside.find(prey->Player()) != playersOutside.end() )
                     {
-                        // Passing from outside to inside triggers the OnEnter event
-                        OnEnter( prey, time );
+                        // Passing from outside to inside triggers the OnEntry event
+                        OnEntry( prey, time );
                     }
                     // The player is no longer outside
                     playersOutside.erase(prey->Player());
@@ -545,12 +545,12 @@ void zZone::InteractWith( eGameObject * target, REAL time, int recursion )
                     playersOutside.insert(prey->Player());
 
                     // Should the player not be marked as being inside
-                    // avoid OnLeave transition. This happens at game
+                    // avoid OnExit transition. This happens at game
                     // start-up for example, when players are neither inside nor outside
                     if( playersInside.find(prey->Player()) != playersInside.end() )
                     {
-                        // Passing from inside to outside triggers the OnLeave event
-                        OnLeave( prey, time );
+                        // Passing from inside to outside triggers the OnExit event
+                        OnExit( prey, time );
                     }
                     // The player is no longer inside
                     playersInside.erase(prey->Player());
@@ -566,7 +566,7 @@ REAL asdf[] = {0, 1};
 tPolynomial<nMessage> tpOne(asdf, sizeof(asdf)/sizeof(asdf[0]));
 // *******************************************************************************
 // *
-// *	OnEnter
+// *	OnEntry
 // *
 // *******************************************************************************
 //!
@@ -574,7 +574,7 @@ tPolynomial<nMessage> tpOne(asdf, sizeof(asdf)/sizeof(asdf[0]));
 //!		@param	time    the current time
 //!
 // *******************************************************************************
-void zZone::OnEnter( gCycle * target, REAL time )
+void zZone::OnEntry( gCycle * target, REAL time )
 {
     Triggerer triggerer;
     triggerer.who = target;
@@ -605,7 +605,7 @@ void zZone::OnInside( gCycle * target, REAL time )
         (*iter)->apply(triggerer, time, tpOne);
     }
 }
-void zZone::OnLeave( gCycle * target, REAL time )
+void zZone::OnExit( gCycle * target, REAL time )
 {
     Triggerer triggerer;
     triggerer.who = target;

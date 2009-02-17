@@ -161,8 +161,8 @@ private:
 
     virtual void InteractWith( eGameObject *target,REAL time,int recursion=1 ); //!< looks for objects inzide the zone and reacts on them
 
-    virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects entering the zone
-    virtual void OnLeave( gCycle *target, REAL time ); //!< reacts on objects leaving the zone
+    virtual void OnEntry( gCycle *target, REAL time ); //!< reacts on objects entering the zone
+    virtual void OnExit( gCycle *target, REAL time ); //!< reacts on objects leaving the zone
     virtual void OnInside( gCycle *target, REAL time ); //!< reacts on objects inside the zone
     virtual void OnOutside( gCycle *target, REAL time ); //!< reacts on objects outside the zone
 
