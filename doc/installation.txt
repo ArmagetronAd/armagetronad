@@ -40,6 +40,10 @@ nevertheless.
 Required libraries
 ------------------
 
+- `Boost <http://www.boost.org/>`_ for various helper stuff.
+
+- `Google protobuf <http://code.google.com/p/protobuf/>`_ for the network protocol.
+
 - `LibXML2 <http://xmlsoft.org>`_ version 2.6.0 or later for map file
   parsing.
 
