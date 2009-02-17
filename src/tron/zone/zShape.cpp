@@ -130,6 +130,17 @@ void zShape::setScale(const tFunction & s){
     scale_ = s;
 }
 
+void zShape::setGrowth(REAL growth) {
+    REAL s = scale_(lasttime_ - referencetime_);
+    scale_.SetSlope(growth);
+    scale_.SetOffset( s + growth * ( referencetime_ - lasttime_ ) );
+}
+
+void zShape::collapse(REAL speed) {
+    REAL s = scale_(lasttime_ - referencetime_);
+    setGrowth( - s * speed );
+}
+
 void zShape::setColor(const rColor &c){
     if(color_ != c) {
         color_ = c;
@@ -269,6 +280,8 @@ void zShapeCircle::ReadSync(nMessage &m)
 
 bool zShapeCircle::isInteracting(eGameObject * target)
 {
+    // NOTE: FIXME: TODO: cache effectiveRadius*effectiveRadius for speed comparable to zones v1
+
     bool interact = false;
     gCycle* prey = dynamic_cast< gCycle* >( target );
     if ( prey )
@@ -449,6 +462,14 @@ void zShapeCircle::setScale(const tFunction & s){
 void zShapeCircle::setRadius(tFunction radius) {
     this->radius = radius;
     _cacheScaledRadius = NULL;
+}
+
+void zShapeCircle::setGrowth(REAL growth) {
+    REAL s = radius(lasttime_ - referencetime_);
+    radius.SetSlope(0.);
+    radius.SetOffset(s);
+    
+    zShape::setGrowth(growth);
 }
 
 //
@@ -712,7 +733,11 @@ static nNOInitialisator<zShapeCircle> zoneCircle_init(350,"shapeCircle");
 static nNOInitialisator<zShapePolygon> zonePolygon_init(360,"shapePolygon");
 
 class gZone;
+#ifdef ENABLE_ZONESV1
 extern nNOInitialisator<gZone> zone_init;
+#else
+static nNOInitialisator<zShapeCircle> zone_init(340,"zone");
+#endif
 
 nDescriptor & zShapeCircle::CreatorDescriptor( void ) const
 {
