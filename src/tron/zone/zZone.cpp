@@ -817,7 +817,12 @@ rColor const  zZone::GetColor( void ) const
 }
 
 
-zZoneExtManager::FactoryList zZoneExtManager::_factories;
+zZoneExtManager::FactoryList &
+zZoneExtManager::_factories()
+{
+    static FactoryList _ifl;
+    return _ifl;
+}
 
 zZone*
 zZoneExtManager::Create(std::string const & typex, eGrid*grid)
@@ -826,7 +831,7 @@ zZoneExtManager::Create(std::string const & typex, eGrid*grid)
     transform (type.begin(), type.end(), type.begin(), tolower);
 
     FactoryList::const_iterator iterFactory;
-    if ((iterFactory = _factories.find(type)) == _factories.end())
+    if ((iterFactory = _factories().find(type)) == _factories().end())
         return NULL;
     
     return iterFactory->second(grid, type);
@@ -835,7 +840,7 @@ zZoneExtManager::Create(std::string const & typex, eGrid*grid)
 void
 zZoneExtManager::Register(std::string const & type, std::string const & desc, NamedFactory_t f)
 {
-    _factories[type] = f;
+    _factories().insert(std::make_pair(type, f));
 }
 
 static zZoneExtRegistration regBasic("", "", zZone::create);
