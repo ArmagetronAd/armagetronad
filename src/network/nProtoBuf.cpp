@@ -1424,7 +1424,7 @@ unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProt
         nProtoBufDescriptorBase::
         DiffMessages( cached, source, target );
 
-#ifndef DEBUG_STRINGS_X
+#ifdef DEBUG_STRINGS_X
         con << "Size = " << size << ", diff = " << bestDifference << "\n";
         con << lastMessageID << ", " << best->MessageIDBig() << "\n";
         con << "Base  : " << cached.ShortDebugString() << "\n";
