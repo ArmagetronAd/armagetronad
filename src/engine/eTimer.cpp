@@ -82,8 +82,8 @@ eTimer::eTimer( Engine::TimerSync const & sync, nSenderInfo const & sender )
 
     lastStartTime_ = lastRemoteTime_ = 0;
 
-    // assume strongly the clocks are in sync
-    startTimeDrift_.Add( 0, 100 );
+    // assume VERY strongly the clocks are in sync
+    startTimeDrift_.Add( 0, 10000 );
 }
 
 eTimer::~eTimer(){

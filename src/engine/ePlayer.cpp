@@ -2083,7 +2083,9 @@ private:
         message_ << tColoredString::ColorString(1,.3,.3) << "RA: " << tColoredString::ColorString(1,1,1) << line << "\n";
 
         // don't let message grow indefinitely
-        if (message_.Len() > 600)
+        unsigned long len = message_.Len();
+        tRecorderSync< unsigned long >::Archive( "_MESSAGE_LEN", 3, len );
+        if (len > 600)
         {
             sn_ConsoleOut( message_, netID_ );
             message_.Clear();
@@ -7614,7 +7616,7 @@ static tSettingItem< tString > se_defaultKickToServerConf( "DEFAULT_KICK_TO_SERV
 static tSettingItem< int > se_defaultKickToPortConf( "DEFAULT_KICK_TO_PORT", se_defaultKickToPort );
 static tConfItemLine se_defaultKickToReasonConf( "DEFAULT_KICK_TO_REASON", se_defaultKickToReason );
 
-static void se_MoveToConf(std::istream &s, REAL severity )
+static void se_MoveToConf(std::istream &s, REAL severity, const char * command )
 {
     if ( se_NeedsServer( "KICK/MOVE_TO", s ) )
     {
@@ -7631,9 +7633,12 @@ static void se_MoveToConf(std::istream &s, REAL severity )
         s >> server;
     }
 
-    int port = se_defaultKickToPort;
-    if ( !s.eof() )
-        s >> port;
+    int pos, port = se_defaultKickToPort;
+    if ( ( pos = server.StrPos( ":" ) ) != -1 )
+    {
+        port = atoi( server.SubStr( pos + 1 ) );
+        server = server.SubStr( 0, pos );
+    }
 
     nServerInfoRedirect redirect( server, port );
 
@@ -7648,14 +7653,14 @@ static void se_MoveToConf(std::istream &s, REAL severity )
     }
     else
     {
-        con << "Usage: KICK_TO <user ID or name> <server IP to kick to>:<server port to kick to> <Reason>\n";
+        con << "Usage: " << command << " <user ID or name> <server IP to kick to>:<server port to kick to> <Reason>\n";
         return;
     }
 }
 
 static void se_KickToConf(std::istream &s )
 {
-    se_MoveToConf( s, 1 );
+    se_MoveToConf( s, 1, "KICK_TO" );
 }
 
 static tConfItemFunc se_kickToConf("KICK_TO",&se_KickToConf);
@@ -7663,7 +7668,7 @@ static tAccessLevelSetter se_kickToConfLevel( se_kickToConf, tAccessLevel_Modera
 
 static void se_MoveToConf(std::istream &s )
 {
-    se_MoveToConf( s, 0 );
+    se_MoveToConf( s, 0, "MOVE_TO" );
 }
 
 static tConfItemFunc se_moveToConf("MOVE_TO",&se_MoveToConf);

@@ -77,7 +77,7 @@ static const unsigned short net_max_current_id_min = 16000;
 static unsigned short net_max_current_id = net_max_current_id_min;
 
 #ifdef DEBUG
-static void sn_BreakOnObjectID( unsigned int id )
+static void sn_BreakOnObjectID( unsigned short id )
 {
 #ifdef DEBUG_X
     static unsigned int breakOnID = sn_WatchNetID;
@@ -718,6 +718,10 @@ nNetObjectRegistrar::~nNetObjectRegistrar()
 // gegister with the object database
 void nNetObject::Register( const nNetObjectRegistrar& registrar )
 {
+#ifdef DEBUG
+        sn_BreakOnObjectID( registrar.id );
+#endif
+
     tASSERT( this == registrar.object );
     tASSERT( id == 0 || id == registrar.id );
 
@@ -739,9 +743,6 @@ void nNetObject::Register( const nNetObjectRegistrar& registrar )
     }
     else
     {
-#ifdef DEBUG
-        sn_BreakOnObjectID( id );
-#endif
         sn_netObjects[id]=this;
     }
 
@@ -887,7 +888,8 @@ static void sn_DoDestroy()
                     if (!info.actionOnDeleteExecuted)
                         no->ActionOnDelete();
 
-                    sn_netObjects(id)=NULL;
+                    no->TakeOwnership();
+                    tJUST_CONTROLLED_PTR< nNetObject > bounce( no );
                     sn_netObjectsOwner(id)=0;
                 }
                 else
@@ -919,6 +921,32 @@ static nProtoBufDescriptor< Network::DestroyObjects > sn_destroyObjectsDescripto
 
 static tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::DestroyObjects > > destroyers[MAXCLIENTS+2];
 static REAL                             destroyersTime[MAXCLIENTS+2];
+static int                              destroyersCount[MAXCLIENTS+2];
+
+// special ack for destroy messages
+class nWaitForAckDestroy: public nWaitForAck{
+public:
+    nWaitForAckDestroy(nMessageBase * m,int receiver)
+            :nWaitForAck(m,receiver)
+    {
+        ++destroyersCount[receiver];
+    }
+    virtual ~nWaitForAckDestroy()
+    {
+        --destroyersCount[receiver];
+    }
+};
+
+static void sn_SendDestroyer( int client )
+{
+    tASSERT( 0 <= client && client <= MAXCLIENTS+1 );
+    if ( destroyers[ client ] )
+    {
+        destroyers[ client ]->SendImmediately( client, false );
+        new nWaitForAckDestroy( destroyers[ client ], client );
+        destroyers[ client ] = 0;
+    }
+}
 
 // list of netobjects that have a sync request running
 static tList< nNetObject > sn_SyncRequestedObject;
@@ -996,9 +1024,9 @@ nNetObject::~nNetObject(){
                 }
                 destroyers[user]->AccessProtoBuf().add_ids(id);
 
-                if (destroyers[user]->AccessProtoBuf().ids_size() > 100){
-                    destroyers[user]->Send(user);
-                    destroyers[user]=NULL;
+                if (destroyers[user]->AccessProtoBuf().ids_size() > ( destroyersCount[user] ? 1000 : 100 ) )
+                {
+                    sn_SendDestroyer( user );
                 }
 
 #ifdef DEBUG
@@ -1592,19 +1620,6 @@ void nNetObject::SyncAll()
 
             sn_syncedUser = user;
 
-            // send the destroy messages
-            if (destroyers[user])
-            {
-                // but check whether the opportunity is good (big destroyers message, or a sync packet in the pipe) first
-                if ( destroyers[user]->AccessProtoBuf().ids_size() > 75 ||
-                        sn_Connections[user].sendBuffer_.Len() > 0 ||
-                        destroyersTime[user] < tSysTimeFloat()-.5 )
-                {
-                    destroyers[user]->Send(user);
-                    destroyers[user]=NULL;
-                }
-            }
-
             // con << sn_SyncRequestedObject.Len() << "/" << sn_netObjects.Len() << "\n";
 
             int currentSync = sn_SyncRequestedObject.Len()-1;
@@ -1618,17 +1633,41 @@ void nNetObject::SyncAll()
                         && (sn_GetNetState()!=nCLIENT ||
                             nos->AcceptClientSync()))
                 {
-                    short s = nos->id;
+                    unsigned short s = nos->id;
 
                     nNetObject::nKnowsAboutInfo & knowledge = nos->knowsAbout[user];
 
                     if (// knowledge.syncReq &&
                         !knowledge.knowsAboutExistence)
                     {
-                        if (!knowledge.acksPending){
-#ifdef DEBUG
+                        // look for the object ID in the current destruction message
+                        {
+                            if ( destroyers[user] )
+                            {
+                                for( int i = destroyers[user]->AccessProtoBuf().ids_size()-1; i >= 0; --i )
+                                {
+                                    if ( destroyers[user]->AccessProtoBuf().ids(i)  == s )
+                                    {
+                                        // found it. Send the destruction
+                                        // message and wait for its ack.
+                                        sn_SendDestroyer( user );
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if ( destroyersCount[user] )
+                        {
+                            // don't send creation messages while destruction
+                            // messages are unacknowledged.
+                            --currentSync;
+                            continue;
+                        }
+
+                        if (!knowledge.acksPending)
+                        {
                             //con << "remotely creating object " << s << '\n';
-#endif
                             /*
                               con << "creating object " << s << " at user " << user
                               << " owned by " << sn_netObjects(s)->owner << '\n';
@@ -1681,6 +1720,18 @@ void nNetObject::SyncAll()
                 }
 
                 currentSync--;
+            }
+
+            // send the destroy messages
+            if (destroyers[user])
+            {
+                // but check whether the opportunity is good (big destroyers message, or a sync packet in the pipe) first
+                if ( destroyers[user]->AccessProtoBuf().ids_size() > 75 ||
+                        sn_Connections[user].sendBuffer_.Len() > 0 ||
+                        destroyersTime[user] < tSysTimeFloat()-.5 -2*sn_Connections[user].ping.GetPing() )
+                {
+                    sn_SendDestroyer( user );
+                }
             }
 
             sn_syncedUser = -1;
@@ -1778,10 +1829,9 @@ void nNetObject::ClearAllDeleted()
     // send out object deletion messages
     for ( int i = MAXCLIENTS;i>=0;i--)
     {
-        if ( sn_Connections[i].socket && destroyers[i] )
+        if ( sn_Connections[i].socket )
         {
-            destroyers[i]->Send(i);
-            destroyers[i] = NULL;
+            sn_SendDestroyer(i);
         }
     }
 }
@@ -1824,9 +1874,16 @@ void nNetObject::ClearKnows(int user, bool clear){
 
                 if (clear){
                     if (no->owner==user && user!=sn_myNetID){
+#ifdef DEBUG
+                        sn_BreakOnObjectID(i);
+#endif
                         if (no->ActionOnQuit())
-                            sn_netObjects(i)=NULL; // destroy it
-                        else{
+                        {
+                            no->createdLocally=true;
+                            tControlledPTR< nNetObject > bounce( no ); // destroy it, if noone wants it
+                        }
+                        else
+                        {
                             no->owner=::sn_myNetID; // or make it mine.
                             sn_netObjectsOwner(i)=::sn_myNetID;
                             if (no->AcceptClientSync()){
@@ -1846,7 +1903,12 @@ void ClearKnows(int user, bool clear){
     if (clear)
         for (int i=sn_netObjectsOwner.Len()-1;i>=0;i--){
             if (sn_netObjectsOwner(i)==user)
+            {
+#ifdef DEBUG
+                sn_BreakOnObjectID(i);
+#endif
                 sn_netObjectsOwner(i)=0;
+            }
         }
 }
 
@@ -1918,11 +1980,9 @@ static void login_callback(){
     }
 
     // send and delete the  remaining destroyer message
-    if ( destroyers[user] )
-    {
-        destroyers[user]->Send(user);
-        destroyers[user]=NULL;
-    }
+    sn_SendDestroyer(user);
+
+    destroyersCount[user] = 0;
 }
 
 static nCallbackLoginLogout nlc(&login_callback);
