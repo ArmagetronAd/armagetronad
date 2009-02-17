@@ -32,11 +32,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eGrid.h"
 #include "gCycle.h"
 #include "gGame.h"
+#include "gParser.h"
 #include "eTeam.h"
 #include "ePlayer.h"
 #include "rRender.h"
 #include "nConfig.h"
 #include "tString.h"
+#include "tPolynomial.h"
 #include "rScreen.h"
 #include "eSoundMixer.h"
 
@@ -143,6 +145,9 @@ static tSettingItem< int > sg_baseZonesPerTeamConfig( "FORTRESS_MAX_PER_TEAM", s
 
 void zFortressZone::setupVisuals(gParser & p)
 {
+    REAL tpR[] = {.0f, .3f};
+    tPolynomial<nMessage> tpr(tpR, 2);
+    p.state.set("rotation", tpr);
 }
 
 void zFortressZone::readXML(tXmlParser::node const & node)
