@@ -1090,6 +1090,8 @@ unsigned int nNetObjectDescriptorBase::GetObjectID ( Network::NetObjectSync cons
 //! @return true if all is OK
 bool nNetObjectDescriptorBase::PreCheck( unsigned short id, nSenderInfo sender )
 {
+    nNetObject::ClearDeleted(id);
+
     if (sn_netObjectsOwner[id]!=sender.SenderID() || bool(sn_netObjects[id]))
     {
 #ifdef DEBUG
