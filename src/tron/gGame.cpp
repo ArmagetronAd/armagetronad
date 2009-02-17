@@ -70,6 +70,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eVoter.h"
 #include "tRecorder.h"
 #include "gStatistics.h"
+#include "nProtoBuf.h"
 
 #include "tXmlParser.h"
 #include "gParser.h"
@@ -91,6 +92,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "gArena.h"
 gArena Arena;
+
+#include "gGame.pb.h"
 
 #ifdef KRAWALL_SERVER
 #include "nKrawall.h"
@@ -2283,9 +2286,10 @@ static void ingame_menu_cleanup()
 #endif
 
 
-static nNOInitialisator<gGame> game_init(310,"game");
+static nNetObjectDescriptor< gGame, Game::GameSync > game_init( 310 );
 
-nDescriptor &gGame::CreatorDescriptor() const{
+nNetObjectDescriptorBase const & gGame::DoGetDescriptor() const
+{
     return game_init;
 }
 
@@ -2392,7 +2396,9 @@ gGame::gGame(){
     Init();
 }
 
-gGame::gGame(nMessage &m):nNetObject(m){
+gGame::gGame( Game::GameSync const & sync, nSenderInfo const & sender )
+: nNetObject( sync.base(), sender )
+{
     synced_ = false;
     Init();
 }
@@ -2415,19 +2421,20 @@ gGame::~gGame(){
 }
 
 
-void gGame::WriteSync(nMessage &m){
-    nNetObject::WriteSync(m);
-    m.Write(stateNext);
+void gGame::WriteSync( Game::GameSync & sync, bool init ) const
+{
+    nNetObject::WriteSync( *sync.mutable_base(), init );
+    sync.set_state( stateNext );
 #ifdef DEBUG
     //con << "Wrote game state " << stateNext << ".\n";
 #endif
 }
 
-void gGame::ReadSync(nMessage &m){
-    nNetObject::ReadSync(m);
+void gGame::ReadSync( Game::GameSync const & sync, nSenderInfo const & sender )
+{
+    nNetObject::ReadSync( sync.base(), sender );
 
-    unsigned short newState;
-    m.Read(newState);
+    unsigned short newState = sync.state();
 
 #ifdef DEBUG
     con << "Read gamestate " << newState << ".\n";
@@ -2468,16 +2475,15 @@ void gGame::NetSyncIdle(){
 
 unsigned short client_gamestate[MAXCLIENTS+2];
 
-static void client_gamestate_handler(nMessage &m){
-    unsigned short state;
-    m.Read( state );
-    client_gamestate[m.SenderID()] = state;
+static void sg_ClientStateHandler( Game::ClientState const & state, nSenderInfo const & sender )
+{
+    client_gamestate[ sender.SenderID() ] = state.state();
 #ifdef DEBUG
     //	con << "User " << m.SenderID() << " is in Mode " << state << '\n';
 #endif
 }
 
-static nDescriptor client_gs(311,client_gamestate_handler,"client_gamestate");
+static nProtoBufDescriptor< Game::ClientState > sg_clientStateDescriptor(311,sg_ClientStateHandler,"client_gamestate");
 
 
 
@@ -2924,9 +2930,8 @@ void gGame::StateUpdate(){
         }
         else if (sn_GetNetState()==nCLIENT){ // inform the server of our progress
             NetSyncIdle();
-            nMessage *m=new nMessage(client_gs);
-            m->Write(state);
-            m->Send(0);
+            Game::ClientState & clientState = sg_clientStateDescriptor.Send(0);
+            clientState.set_state( state );
 #ifdef DEBUG
             //			con << "sending gamestate " << state << '\n';
 #endif
@@ -4294,26 +4299,29 @@ static void sg_TodoClientFullscreenMessage()
     sg_ClientFullscreenMessage( sg_fullscreenMessageTitle, sg_fullscreenMessageMessage, sg_fullscreenMessageTimeout );
 }
 
-static void sg_ClientFullscreenMessage(nMessage &m){
+static void sg_fullscreenMessageHandler( Game::FullscreenMessage const & message, nSenderInfo const & sender )
+{
     if (sn_GetNetState()!=nSERVER){
         sg_fullscreenMessageTimeout = 60;
 
-        m >> sg_fullscreenMessageTitle;
-        m >> sg_fullscreenMessageMessage;
-        m >> sg_fullscreenMessageTimeout;
+        sg_fullscreenMessageTitle = message.title();
+        sg_fullscreenMessageMessage = message.message();
+        sg_fullscreenMessageTimeout = message.timeout();
 
         st_ToDo( sg_TodoClientFullscreenMessage );
     }
 }
 
-static nDescriptor sg_clientFullscreenMessage(312,sg_ClientFullscreenMessage,"client_fsm");
+static nProtoBufDescriptor< Game::FullscreenMessage > sg_fullscreenMessageDescriptor( 312, sg_fullscreenMessageHandler );
 
 // causes the connected clients to break and print a fullscreen message
 void sg_FullscreenMessage(tOutput const & title, tOutput const & message, REAL timeout, int client){
-    tJUST_CONTROLLED_PTR< nMessage > m=new nMessage(sg_clientFullscreenMessage);
-    *m << title;
-    *m << message;
-    *m << timeout;
+    tJUST_CONTROLLED_PTR< nProtoBufMessage< Game::FullscreenMessage > > m =
+    sg_fullscreenMessageDescriptor.CreateMessage();
+    Game::FullscreenMessage & protoBuf = m->AccessProtoBuf();
+    protoBuf.set_title( title );
+    protoBuf.set_message( message );
+    protoBuf.set_timeout( timeout );
 
     tString complete( title );
     complete << "\n" << message << "\n";
@@ -4534,7 +4542,7 @@ void oldFortressAutomaticAssignment(zZone *zone, zMonitorPtr monitor)
 
                 zMonitorInfluencePtr inflDefender = zMonitorInfluencePtr(new zMonitorInfluence( monitor ));
 
-                tPolynomial<nMessage> tpInfluenceSlide(2);
+                tPolynomial tpInfluenceSlide(2);
                 tpInfluenceSlide[0] = -1.0 * sg_defendRate;
                 inflDefender->setInfluenceSlide( tpInfluenceSlide );
                 //                inflDefender->setInfluenceSlide( tFunction(-1.0 * sg_defendRate, 0.0) );

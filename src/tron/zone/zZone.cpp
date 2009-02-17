@@ -52,6 +52,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "gWinZone.h"
 
+#include "nProtoBuf.h"
+#include "zZone.pb.h"
+
 std::deque<zZone *> sz_Zones;
 
 // number of segments to render a zone with
@@ -137,8 +140,8 @@ static nVersionFeature sz_ShapedZones(20);
 //!
 // *******************************************************************************
 
-zZone::zZone( nMessage & m )
-        :eNetGameObject( m ),
+zZone::zZone( Zone::ZoneSync const & sync, nSenderInfo const & sender )
+        :eNetGameObject( sync.base(), sender ),
         //rotation_(1,0),
         playersInside(),
         playersOutside(),
@@ -146,7 +149,7 @@ zZone::zZone( nMessage & m )
         name_()
 {
     // read creation time
-    m >> createTime_;
+    createTime_ = sync.create_time();
     referenceTime_ = lastTime = createTime_;
 
     // initialize color to white, ReadSync will fill in the true value if available
@@ -161,67 +164,6 @@ zZone::zZone( nMessage & m )
     //    SetPosition( pos );
     eSoundMixer* mixer = eSoundMixer::GetMixer();
     mixer->PushButton(ZONE_SPAWN, pos);
-
-
-    /*
-    shape = zShapePtr(new zShapeCircle(Grid(), ID()));
-
-    tFunction asdf = tFunction();
-    asdf.SetSlope(0.0);
-    asdf.SetOffset(100.0);
-    shape->setPosX(asdf);
-    shape->setPosY(asdf);
-    shape->setScale(asdf);
-    shape->setRotation(asdf);
-    shape->setScale(asdf);
-    shape->setColor(rColor(0.7, 0.0, 0.7));
-    zShapeCircle *circle = dynamic_cast<zShapeCircle *>( (zShape*)shape );
-
-    circle->emulatingOldZone_ = true;
-    */
-
-    /*
-    if (!m.End() && sz_ShapedZones.Supported() ) 
-      {
-	// Factory to make the shapes
-	// HACK 
-	// This makes them static for the life of the zone
-	// rather than to re-send them all at each updates
-	typedef zShape* (*shapeFactory)(nMessage &);
-	std::map<tString, shapeFactory> shapes;
-	// Build the list of supported shapes
-	shapes[tString("circle")] = zShapeCircle::create;
-	shapes[tString("polygon")] = zShapePolygon::create;
-
-	// Get the name of the shape from the network
-	tString shapeName;
-	m >> shapeName;
-	
-	std::map<tString, shapeFactory>::const_iterator iterShapeFactory;
-	// Build that shape if it is available
-	if((iterShapeFactory = shapes.find(shapeName)) != shapes.end()) 
-	  {
-	    shape = zShapePtr((*(iterShapeFactory->second))(m));
-	  }
-      }
-    else
-      {
-	// Didnt receive a shape information. Assume we are talking to a 0.2.8- server
-	shape = zShapePtr(new zShapeCircle());
-	shape->setPosX(posx_);
-	shape->setPosY(posy_);
-	shape->setScale(scale_);
-	tPolynomial<nMessage> tpRotationSpeed(2);
-	tpRotationSpeed[0] = rotationSpeed_.GetOffset();
-	tpRotationSpeed[0] = rotationSpeed_.GetOffset();
-	shape->setRotation2(tpRotationSpeed);
-	shape->setScale(scale_);
-	shape->setColor(color_);
-	
-	emulateOldZoneShape = true;
-      }
-*/
-
 }
 
 // *******************************************************************************
@@ -258,25 +200,24 @@ void zZone::RemoveFromZoneList(void) {
 
 // *******************************************************************************
 // *
-// *	WriteCreate
+// *	ClearToTransmit
 // *
 // *******************************************************************************
 //!
-//!		@param	m Message to write creation data to
+//!		@param	user the sync message is intended for
 //!
 // *******************************************************************************
 
-void zZone::WriteCreate( nMessage & m )
+bool zZone::ClearToTransmit( int user ) const
 {
-    // delegate
-    eNetGameObject::WriteCreate( m );
+    tASSERT( shape );
+    if( !shape->HasBeenTransmitted( user ) )
+    {
+        return false;
+    }
 
-    m << createTime_;
-
-    /*
-    if(!emulateOldZoneShape && sz_ShapedZones.Supported() )
-      shape->WriteCreate( m );
-    */
+    // falback
+    return eNetGameObject::ClearToTransmit( user );
 }
 
 // *******************************************************************************
@@ -289,42 +230,16 @@ void zZone::WriteCreate( nMessage & m )
 //!
 // *******************************************************************************
 
-void zZone::WriteSync( nMessage & m )
+void zZone::WriteSync(  Zone::ZoneSync & sync, bool init ) const
 {
-    // delegate
-    eNetGameObject::WriteSync( m );
+    eNetGameObject::WriteSync( *sync.mutable_base(), init );
 
-    /*
-    // write color
-    m << color_.r_;
-    m << color_.g_;
-    m << color_.b_;
+    if ( init )
+    {
+        sync.set_create_time( createTime_ );
 
-    // write reference time and functions
-    m << referenceTime_;
-    m << posx_;
-    m << posy_;
-    m << scale_;
-
-    // write rotation speed
-    m << rotationSpeed_;
-    */
-
-    // Simply populate the message with semi-meaningful data
-    m << shape->getColor().r_;
-    m << shape->getColor().g_;
-    m << shape->getColor().b_;
-
-    m << referenceTime_;
-
-    m << shape->getPosX();
-    m << shape->getPosY();
-    m << shape->getScale();
-    // shape->getRotation no longer exist. Fake it!
-    tFunction tfFakedRotation;
-    m << tfFakedRotation;
-
-    m << shape->ID();
+        sync.set_shape_id( nNetObject::PointerToID( shape ) );
+    }
 }
 
 // *******************************************************************************
@@ -337,93 +252,14 @@ void zZone::WriteSync( nMessage & m )
 //!
 // *******************************************************************************
 
-void zZone::ReadSync( nMessage & m )
+void zZone::ReadSync( Zone::ZoneSync const & sync, nSenderInfo const & sender )
 {
     // delegage
-    eNetGameObject::ReadSync( m );
+    eNetGameObject::ReadSync( sync.base(), sender );
 
-    if(shape && shape->isEmulatingOldZone())
+    if( sync.has_shape_id() )
     {
-        // read color
-        rColor aColor(0.0, 0.7, 0.5);
-        if (!m.End())
-        {
-            m >> aColor.r_;
-            m >> aColor.g_;
-            m >> aColor.b_;
-        }
-        se_MakeColorValid(aColor.r_, aColor.g_, aColor.b_, 1.0f);
-        shape->setColor(aColor);
-
-        // read reference time and functions
-        if (!m.End())
-        {
-            m >> referenceTime_;
-            shape->setReferenceTime(referenceTime_);
-            if (!m.End())
-            {
-                tFunction aFunc;
-                m >> aFunc;
-                shape->setPosX(aFunc);
-                m >> aFunc;
-                shape->setPosY(aFunc);
-                m >> aFunc;
-                shape->setScale(aFunc);
-            }
-        }
-        else
-        {
-            // Uses values from the eNetGameObject
-            referenceTime_ = createTime_;
-            shape->setReferenceTime(referenceTime_);
-
-            tFunction aFunc;
-            aFunc.SetOffset( pos.x );
-            aFunc.SetSlope( 0 );
-            shape->setPosX( aFunc );
-
-            aFunc.SetOffset( pos.y );
-            aFunc.SetSlope( 0 );
-            shape->setPosY( aFunc );
-
-            aFunc.SetOffset( sg_initialSize );
-            aFunc.SetSlope( sg_expansionSpeed );
-            shape->setScale( aFunc );
-        }
-
-        // read rotation speed
-        tFunction rotationSpeed;
-        if (!m.End())
-        {
-            m >> rotationSpeed;
-        }
-        else
-        {
-            // set fixed values
-            rotationSpeed.SetOffset( .3f );
-            rotationSpeed.SetSlope( 0.0f );
-        }
-	tPolynomial<nMessage> tpRotationSpeed(2);
-	tpRotationSpeed[0] = rotationSpeed.GetOffset();
-	tpRotationSpeed[1] = rotationSpeed.GetSlope();
-        shape->setRotation2(tpRotationSpeed);
-    }
-    else
-    {
-        bool b;
-
-        //        while(!m.End() ) { m >> b;}
-
-        int count=44-16;
-        // Discard the information
-        while(!m.End() && count-->0) { m >> b;}
-        unsigned short shapeID;
-        m >> shapeID;
-        if(sn_netObjects[shapeID]) {
-            // zShape *asdf = dynamic_cast<zShape*>(&*sn_netObjects[shapeID]);
-            shape = zShapePtr( dynamic_cast<zShape*>(&*sn_netObjects[shapeID]) );
-        }
-
+        IDToPointer( sync.shape_id(), shape );
     }
 }
 
@@ -551,7 +387,7 @@ void zZone::InteractWith( eGameObject * target, REAL time, int recursion )
 }
 
 REAL asdf[] = {0, 1};
-tPolynomial<nMessage> tpOne(asdf, sizeof(asdf)/sizeof(asdf[0]));
+tPolynomial tpOne(asdf, sizeof(asdf)/sizeof(asdf[0]));
 // *******************************************************************************
 // *
 // *	OnEnter
@@ -625,11 +461,11 @@ void zZone::OnOutside( gCycle * target, REAL time )
 }
 
 // the zone's network initializator
-static nNOInitialisator<zZone> zone_init(341,"zonev2");
+static nNetObjectDescriptor< zZone, Zone::ZoneSync > zone_init( 341 );
 
 // *******************************************************************************
 // *
-// *	CreatorDescriptor
+// *	DoGetDescriptor
 // *
 // *******************************************************************************
 //!
@@ -637,7 +473,7 @@ static nNOInitialisator<zZone> zone_init(341,"zonev2");
 //!
 // *******************************************************************************
 
-nDescriptor & zZone::CreatorDescriptor( void ) const
+nNetObjectDescriptorBase const & zZone::DoGetDescriptor() const
 {
     return zone_init;
 }

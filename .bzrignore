@@ -58,3 +58,10 @@ html.m4
 *.dep
 aa_config.h.in
 ./aa_config.h
+*.pb.cc
+*.pb.h
+*.layout
+*.depend
+.objs
+./build
+.objs_release

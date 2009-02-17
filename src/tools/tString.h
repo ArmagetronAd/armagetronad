@@ -203,6 +203,7 @@ public:
     tColoredString();                                       //!< Default constructor
     tColoredString( const tColoredString& other );          //!< Copy constructor
     explicit tColoredString( const tString& other );        //!< Base copy constructor
+    explicit tColoredString( std::string const & other );   //!< Base copy constructor
     explicit tColoredString( const CHAR * other );          //!< Constructor from raw C string
     explicit tColoredString( const tOutput & other );       //!< Constructor from output gatherer
 

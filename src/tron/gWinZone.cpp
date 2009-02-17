@@ -46,6 +46,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <functional>
 #include <deque>
 
+#include "nProtoBuf.h"
+#include "gZone.pb.h"
+
 static int sg_zoneAlphaToggle = 0;
 static tSettingItem<int> sg_zoneAlphaToggleConf( "ZONE_ALPHA_TOGGLE", sg_zoneAlphaToggle );
 
@@ -178,11 +181,11 @@ gZone::gZone( eGrid * grid, const eCoord & pos )
 //!
 // *******************************************************************************
 
-gZone::gZone( nMessage & m )
-        :eNetGameObject( m ), rotation_(1,0)
+gZone::gZone( Game::ZoneV1Sync const & sync, nSenderInfo const & sender )
+        :eNetGameObject( sync.base(), sender ), rotation_(1,0)
 {
     // read creation time
-    m >> createTime_;
+    createTime_ = sync.create_time();
     referenceTime_ = lastTime = createTime_;
 
     // initialize color to white, ReadSync will fill in the true value if available
@@ -221,23 +224,6 @@ gZone::~gZone( void )
     );
 }
 
-// *******************************************************************************
-// *
-// *	WriteCreate
-// *
-// *******************************************************************************
-//!
-//!		@param	m Message to write creation data to
-//!
-// *******************************************************************************
-
-void gZone::WriteCreate( nMessage & m )
-{
-    // delegate
-    eNetGameObject::WriteCreate( m );
-
-    m << createTime_;
-}
 
 // *******************************************************************************
 // *
@@ -249,24 +235,27 @@ void gZone::WriteCreate( nMessage & m )
 //!
 // *******************************************************************************
 
-void gZone::WriteSync( nMessage & m )
+void gZone::WriteSync( Game::ZoneV1Sync & sync, bool init ) const
 {
     // delegate
-    eNetGameObject::WriteSync( m );
+    eNetGameObject::WriteSync( *sync.mutable_base(), init );
+
+    if( init )
+    {
+        sync.set_create_time( createTime_ );
+    }
 
     // write color
-    m << color_.r_;
-    m << color_.g_;
-    m << color_.b_;
+    color_.WriteSync( *sync.mutable_color() );
 
     // write reference time and functions
-    m << referenceTime_;
-    m << posx_;
-    m << posy_;
-    m << radius_;
+    sync.set_reference_time( referenceTime_ );
+    posx_.WriteSync( *sync.mutable_pos_x() );
+    posy_.WriteSync( *sync.mutable_pos_y() );
+    radius_.WriteSync( *sync.mutable_radius() );
 
     // write rotation speed
-    m << rotationSpeed_;
+    rotationSpeed_.WriteSync( *sync.mutable_rotation_speed() );
 }
 
 // *******************************************************************************
@@ -279,27 +268,21 @@ void gZone::WriteSync( nMessage & m )
 //!
 // *******************************************************************************
 
-void gZone::ReadSync( nMessage & m )
+void gZone::ReadSync( Game::ZoneV1Sync const & sync, nSenderInfo const & sender )
 {
     // delegage
-    eNetGameObject::ReadSync( m );
+    eNetGameObject::ReadSync( sync.base(), sender );
 
-    // read color
-    if (!m.End())
-    {
-        m >> color_.r_;
-        m >> color_.g_;
-        m >> color_.b_;
-        se_MakeColorValid(color_.r_, color_.g_, color_.b_, 1.0f);
-    }
+    color_.ReadSync( sync.color() );
+    se_MakeColorValid(color_.r_, color_.g_, color_.b_, 1.0f);
 
     // read reference time and functions
-    if (!m.End())
+    if ( sync.has_radius() )
     {
-        m >> referenceTime_;
-        m >> posx_;
-        m >> posy_;
-        m >> radius_;
+        referenceTime_ = sync.reference_time();
+        posx_.ReadSync( sync.pos_x() );
+        posy_.ReadSync( sync.pos_y() );
+        radius_.ReadSync( sync.radius() );
     }
     else
     {
@@ -313,9 +296,9 @@ void gZone::ReadSync( nMessage & m )
     }
 
     // read rotation speed
-    if (!m.End())
+    if ( sync.has_rotation_speed() )
     {
-        m >> rotationSpeed_;
+        rotationSpeed_.ReadSync( sync.rotation_speed() );
     }
     else
     {
@@ -417,7 +400,7 @@ void gZone::OnEnter( gCycle * target, REAL time )
 }
 
 // the zone's network initializator
-static nNOInitialisator<gZone> zone_init(340,"zone");
+static nNetObjectDescriptor< gZone, Game::ZoneV1Sync > zone_init( 340 );
 
 // *******************************************************************************
 // *
@@ -429,7 +412,7 @@ static nNOInitialisator<gZone> zone_init(340,"zone");
 //!
 // *******************************************************************************
 
-nDescriptor & gZone::CreatorDescriptor( void ) const
+nNetObjectDescriptorBase const & gZone::DoGetDescriptor() const
 {
     return zone_init;
 }
@@ -636,22 +619,6 @@ gWinZoneHack::gWinZoneHack( eGrid * grid, const eCoord & pos )
 
 // *******************************************************************************
 // *
-// *	gWinZoneHack
-// *
-// *******************************************************************************
-//!
-//!		@param	m Message to read creation data from
-//!		@param	null
-//!
-// *******************************************************************************
-
-gWinZoneHack::gWinZoneHack( nMessage & m )
-        : gZone( m )
-{
-}
-
-// *******************************************************************************
-// *
 // *	~gWinZoneHack
 // *
 // *******************************************************************************
@@ -709,22 +676,6 @@ gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos )
 
 // *******************************************************************************
 // *
-// *	gDeathZoneHack
-// *
-// *******************************************************************************
-//!
-//!		@param	m Message to read creation data from
-//!		@param	null
-//!
-// *******************************************************************************
-
-gDeathZoneHack::gDeathZoneHack( nMessage & m )
-        : gZone( m )
-{
-}
-
-// *******************************************************************************
-// *
 // *	~gDeathZoneHack
 // *
 // *******************************************************************************
@@ -778,27 +729,6 @@ gBaseZoneHack::gBaseZoneHack( eGrid * grid, const eCoord & pos )
     touchy_ = false;
 
     color_.r_ = color_.g_ = color_.b_ = 0;
-}
-
-// *******************************************************************************
-// *
-// *	gBaseZoneHack
-// *
-// *******************************************************************************
-//!
-//!		@param	m Message to read creation data from
-//!
-// *******************************************************************************
-
-gBaseZoneHack::gBaseZoneHack( nMessage & m )
-        : gZone( m ), onlySurvivor_( false ), currentState_( State_Safe )
-{
-    enemiesInside_ = ownersInside_ = 0;
-    conquered_ = 0;
-    lastSync_ = -10;
-    teamDistance_ = 0;
-    lastEnemyContact_ = se_GameTime();
-    touchy_ = false;
 }
 
 // *******************************************************************************

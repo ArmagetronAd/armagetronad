@@ -54,7 +54,7 @@ public:
     bool isValidUser(gCycle *possibleUser);
     gVectorExtra <ePlayerNetID *> getCalculatedTarget( gCycle * triggerer );
 
-    void apply( Triggerer target, REAL &time, const tPolynomial<nMessage> & tp ); //!< reacts on objects interacting with  the zone
+    void apply( Triggerer target, REAL &time, const tPolynomial & tp ); //!< reacts on objects interacting with  the zone
 
     //callback functions
     gCycle * cb_PossibleUser(void);           //!< Gets the used rubber for the currently watched cycle

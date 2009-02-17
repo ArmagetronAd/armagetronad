@@ -32,6 +32,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <set>
 
+#include "nProtoBuf.h"
+#include "eTeam.pb.h"
+
 tString & operator << ( tString &s, const eTeam & team)
 {
     if ( !(&team) )
@@ -116,9 +119,11 @@ inline static tColoredStringProxy ColorString( const eTeam * t )
     return tColoredStringProxy( t->R()/15.0f, t->G()/15.0f, t->B()/15.0f );
 }
 
-nNOInitialisator<eTeam> eTeam_init(220,"eTeam");
+nNetObjectDescriptor<eTeam, Engine::TeamSync > eTeam_init(220);
 
-nDescriptor &eTeam::CreatorDescriptor() const{
+//! returns the descriptor responsible for this class
+nNetObjectDescriptorBase const & eTeam::DoGetDescriptor() const
+{
     return eTeam_init;
 }
 
@@ -221,7 +226,7 @@ void eTeam::UpdateProperties()
 // update name and color
 void eTeam::UpdateAppearance()
 {
-    unsigned short oldr = r, oldg = g, oldb = b;
+    tShortColor oldColor( color );
 
     ePlayerNetID* oldest = OldestHumanPlayer();
     if ( !oldest )
@@ -266,9 +271,9 @@ void eTeam::UpdateAppearance()
 
             updateName = newname;
 
-            r = se_team_rgb[colorID][0];
-            g = se_team_rgb[colorID][1];
-            b = se_team_rgb[colorID][2];
+            color.r_ = se_team_rgb[colorID][0];
+            color.g_ = se_team_rgb[colorID][1];
+            color.b_ = se_team_rgb[colorID][2];
         }
         else
         {
@@ -312,9 +317,7 @@ void eTeam::UpdateAppearance()
                     updateName = oldest->GetUserName();
             }
 
-            r = oldest->r;
-            g = oldest->g;
-            b = oldest->b;
+            color = oldest->color;
 
             // update colored player names
             if ( sn_GetNetState() != nSERVER )
@@ -330,7 +333,7 @@ void eTeam::UpdateAppearance()
     {
         // empty team
         updateName = tOutput("$team_empty");
-        r = g = b = 7;
+        color.r_ = color.g_ = color.b_ = 7;
     }
 
     // if the name has been changed then update it
@@ -348,7 +351,7 @@ void eTeam::UpdateAppearance()
             message.SetTemplateParameter(1, name);
 
             tColoredString resetColor;
-            resetColor << tColoredString::ColorString(r,g,b);
+            resetColor << tColoredString::ColorString(color.r_,color.g_,color.b_);
             resetColor << updateName;
             resetColor << tColoredString::ColorString(-1,-1,-1);
             message.SetTemplateParameter(2, resetColor);
@@ -362,7 +365,7 @@ void eTeam::UpdateAppearance()
         RequestSync();
 
     // update team members if the color changed
-    if ( oldr != r || oldg != g || oldb != b )
+    if ( oldColor != color )
     {
         for ( int i = players.Len() - 1; i >= 0; --i )
         {
@@ -1443,29 +1446,29 @@ bool eTeam::ClearToTransmit(int user) const
 
 // syncronisation functions:
 
-// store sync message in m
-void eTeam::WriteSync(nMessage &m)
+//! writes sync data (and initialization data if flat is set)
+void eTeam::WriteSync( Engine::TeamSync & sync, bool init )
 {
-    m << r;
-    m << g;
-    m << b;
-    m << name;
-    m << maxPlayersLocal;
-    m << maxImbalanceLocal;
-    m << score;
+    nNetObject::WriteSync( *sync.mutable_base(), init );
+
+    color.WriteSync( *sync.mutable_color() );
+    sync.set_name( name );
+    sync.set_max_players( maxPlayersLocal );
+    sync.set_max_imbalance( maxImbalanceLocal );
+    sync.set_score( score );
 }
 
 
-// guess what
-void eTeam::ReadSync(nMessage &m)
+//! reads incremental sync data. Returns false if sync was invalid or old.
+void eTeam::ReadSync( Engine::TeamSync const & sync, nSenderInfo const & init )
 {
-    m >> r;
-    m >> g;
-    m >> b;
-    m >> name;
-    m >> maxPlayersLocal;
-    m >> maxImbalanceLocal;
-    m >> score;
+    nNetObject::ReadSync( sync.base(), init );
+
+    color.ReadSync( sync.color() );
+    name = sync.name();
+    maxPlayersLocal = sync.max_players();
+    maxImbalanceLocal = sync.max_imbalance();
+    score = sync.score();
 
     // update colored player names
     if ( sn_GetNetState() != nSERVER )
@@ -1477,7 +1480,7 @@ void eTeam::ReadSync(nMessage &m)
     }
 }
 
-
+/*
 // is the message newer	than the last accepted sync
 bool eTeam::SyncIsNew(nMessage &m)
 {
@@ -1494,15 +1497,7 @@ void eTeam::WriteCreate(nMessage &m)
     nNetObject::WriteCreate(m);
 }
 
-
-// control functions:
-// receives the control message. the data written to the message created
-// by *NewControlMessage() can be read directly from m.
-void eTeam::ReceiveControlNet(nMessage &m)
-{
-}
-
-
+*/
 
 // con/desstruction
 // default constructor
@@ -1514,22 +1509,22 @@ eTeam::eTeam()
     locked_ = false;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;
-    r = g = b = 32; // initialize color so it will be updated, guaranteed
+    color.r_ = color.g_ = color.b_ = 32; // initialize color so it will be updated, guaranteed
     Update();
 }
 
 
 // remote constructor
-eTeam::eTeam(nMessage &m)
-        :nNetObject( m ),
-        colorID(-1),listID(-1)
+eTeam::eTeam( Engine::TeamSync const & sync, nSenderInfo const & sender )
+: nNetObject( sync.base(), sender ),
+  colorID(-1),listID(-1)
 {
     score = 0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;
     locked_ = false;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;
-    r = g = b = 32; // initialize color so it will be updated, guaranteed
+    color.r_ = color.g_ = color.b_ = 32; // initialize color so it will be updated, guaranteed
     Update();
 }
 

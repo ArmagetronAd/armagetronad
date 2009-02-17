@@ -74,6 +74,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 static int sg_cycleDebugPrintLevel = 0;
 #endif
 
+#include "gCycle.pb.h"
+
 // get rubber values in effect
 void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness );
 
@@ -2528,8 +2530,8 @@ gCycleMovement::gCycleMovement( eGrid * grid, const eCoord & pos, const eCoord &
 //!
 // *******************************************************************************************
 
-gCycleMovement::gCycleMovement( nMessage & message )
-        :eNetGameObject(message),
+gCycleMovement::gCycleMovement( Game::CycleMovementSync const & sync, nSenderInfo const & sender )
+        :eNetGameObject( sync.base(), sender ),
         destinationList(NULL),currentDestination(NULL),lastDestination(NULL),
         dirDrive(1,0),
         acceleration(0),

@@ -5,7 +5,7 @@ zZoneInfluence::zZoneInfluence(zZonePtr _zone) : zone(_zone), zoneInfluenceItems
 zZoneInfluence::~zZoneInfluence() { }
 
 void
-zZoneInfluence::apply(const tPolynomial<nMessage> &value)
+zZoneInfluence::apply(const tPolynomial &value)
 {
     zZoneInfluenceItemList::const_iterator iter;
     for (iter=zoneInfluenceItems.begin();
@@ -29,9 +29,9 @@ zZoneInfluenceItemRotation::zZoneInfluenceItemRotation(zZonePtr aZone):
 {}
 
 void
-zZoneInfluenceItemRotation::apply(const tPolynomial<nMessage> &valueEq) {
+zZoneInfluenceItemRotation::apply(const tPolynomial &valueEq) {
 
-    tPolynomial<nMessage> tf = rotation.marshal(valueEq);
+    tPolynomial tf = rotation.marshal(valueEq);
     
     zone->getShape()->setRotation2( tf );
 }
@@ -42,7 +42,7 @@ zZoneInfluenceItemScale::zZoneInfluenceItemScale(zZonePtr aZone):
 {}
 
 void
-zZoneInfluenceItemScale::apply(const tPolynomial<nMessage> &value) {
+zZoneInfluenceItemScale::apply(const tPolynomial &value) {
     tFunction tfScale;
     tfScale.SetOffset( scale );
     tfScale.SetSlope( 0.0f );
@@ -55,7 +55,7 @@ zZoneInfluenceItemPosition::zZoneInfluenceItemPosition(zZonePtr aZone):
 {}
 
 void
-zZoneInfluenceItemPosition::apply(const tPolynomial<nMessage> &value) {
+zZoneInfluenceItemPosition::apply(const tPolynomial &value) {
     tFunction tfPosition;
 
     tfPosition.SetOffset( pos.x );
@@ -72,7 +72,7 @@ zZoneInfluenceItemColor::zZoneInfluenceItemColor(zZonePtr aZone):
 {}
 
 void
-zZoneInfluenceItemColor::apply(const tPolynomial<nMessage> &value) {
+zZoneInfluenceItemColor::apply(const tPolynomial &value) {
     zone->getShape()->setColorNow( color );
 }
 

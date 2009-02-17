@@ -42,6 +42,8 @@ class gCycleMovement;
 class gNetPlayerWall;
 class eTempEdge;
 
+namespace Game { class PlayerWallSync; }
+
 class gWallRim:public eWallRim{
 public:
     gWallRim(eGrid *grid, REAL h=10000);
@@ -186,8 +188,6 @@ public:
     void RealWallReceived( gNetPlayerWall* realwall );
     void Checkpoint(); //!< marks the current distance and time for more accurate interpolation
 
-    gNetPlayerWall(nMessage &m);
-
     //eCoord Vec(){return w->Vec();}
     eCoord Vec();  //!< returns the vector from the beginning to the end of the wall
 #ifdef HUD_MAP
@@ -250,15 +250,7 @@ public:
 
     virtual bool ClearToTransmit(int user) const;
 
-    virtual void WriteSync(nMessage &m);
-    virtual void ReadSync(nMessage &m);
-
-    virtual void WriteCreate(nMessage &m);
-    virtual nDescriptor &CreatorDescriptor() const;
     virtual void PrintName(tString &s) const;
-
-    virtual bool SyncIsNew(nMessage &m);
-
 
     eTempEdge   *Edge(){return this->edge_;}
     gPlayerWall *Wall();
@@ -284,7 +276,20 @@ public:
 
     //! clears the display list
     void ClearDisplayList( int inhibitThis = 2, int inhibitCycle = 0 );
+
+    // even better new stuff: protocol buffers. The functions are non-virtual; they
+    // get called over the descriptor:
+    //! creates a netobject form sync data
+    gNetPlayerWall( Game::PlayerWallSync const & sync, nSenderInfo const & sender );
+    //! reads sync data, returns false if sync was old or otherwise invalid
+    void ReadSync( Game::PlayerWallSync const & sync, nSenderInfo const & sender );
+    //! writes sync data (and initialization data if flag is set)
+    void WriteSync( Game::PlayerWallSync & sync, bool init ) const;
+
 private:
+    //! returns the descriptor responsible for this class
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
+
     tArray<gPlayerWallCoord> coords_;
 
     rDisplayList displayList_;

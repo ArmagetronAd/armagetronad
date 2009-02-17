@@ -1,0 +1,56 @@
+// Protocol buffer types for walls
+
+package Game;
+
+import "nNetObject.proto";
+import "tCoord.proto";
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+message WallCoordSync
+{
+    optional bool  dangerous = 1; // whether the secion following this is dangerous
+    optional float distance  = 2; // driving distance of the section, measured from wall start
+    optional float time      = 3; // time at start of this section
+
+    // legacy end marker
+    optional bool legacy_create_end = 20000;
+}
+
+// sync message of player walls
+message PlayerWallSync
+{
+    // base class init data, needs to come first
+    optional Network.NetObjectSync base = 1;
+
+    optional uint32 cycle_id = 2; // network object ID of owning cycle
+    
+    optional Tools.Position  begin_pos = 3; // the start position of the wall
+    optional Tools.Direction direction = 4; // the direction the wall grows into
+
+    optional float begin_distance      = 5; // distance the cycle had traveled at wall start
+    optional float begin_time          = 6; // game time the wall was created at
+
+    optional int32 preliminary         = 7; // whether the wall is only preliminary
+
+    // legacy creation data end marker
+    optional bool legacy_create_end = 20000;
+
+    optional Tools.Position end_pos  = 8 ; // end position of the wall
+    optional float          end_time = 9 ; // game time the wall was finalized at
+    optional bool           in_grid  = 10; // whether the wall is already copied into the grid
+    
+    repeated WallCoordSync  segments = 11; // the wall segments
+
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
+    // extensions go here
+}

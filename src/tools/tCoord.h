@@ -36,6 +36,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <map>
 #include <vector>
 
+namespace Tools { class Direction; class Position; }
+
 //! Stores any kind of x and y coordinates
 class tCoord{
 public:
@@ -81,6 +83,12 @@ public:
         return (b.y - a.y)/(b.x-a.x);
     }
 
+    // network syncing functions (separate for direction and position coords,
+    // different optimizations may apply to them)
+    void WriteSync( Tools::Position       & position  ) const;
+    void WriteSync( Tools::Direction      & direction ) const;
+    void ReadSync( Tools::Position  const & position  )      ;
+    void ReadSync( Tools::Direction const & direction )      ;
 private:
     class GrahamComparator {
         tCoord const &m_reference;

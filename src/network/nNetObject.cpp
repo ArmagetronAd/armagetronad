@@ -41,12 +41,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <set>
 #include <map>
 
+#include "nProtoBuf.h"
+#include "nBinary.h"
+#include "nNetObject.pb.h"
+#include "nNetObjectPrivate.pb.h"
+
 // #define DEBUG
 
 // debug watchs
 #ifdef DEBUG
 int sn_WatchNetID = 0;
-extern nMessage* sn_WatchMessage;
+extern nMessageBase* sn_WatchMessage;
 #endif
 
 tDEFINE_REFOBJ( nNetObject )
@@ -346,7 +351,9 @@ static unsigned short next_free_server( bool kill ){
         {
             // throw an error
             if ( kill )
-                throw nKillHim();
+            {
+                nReadError( true );
+            }
 
             // or just exit silently
             con << "Emergency exit: desperately ran out of IDs.\n";
@@ -355,27 +362,30 @@ static unsigned short next_free_server( bool kill ){
     }
 }
 
-void req_id_handler(nMessage &m){
+static void sn_GrantIDsHandler( Network::GrantIDs const & ids, nSenderInfo const & sender )
+{
     unsigned short stop = distribute;
     if (distribute == 0)
         stop = ID_PREFETCH;
 
-    if (sn_GetNetState()==nSERVER)
-        Cheater(m.SenderID());
+    if ( sn_GetNetState()==nSERVER )
+    {
+        Cheater( sender.SenderID() );
+    }
     else{
-        while (!m.End())
+        for( int i = ids.blocks_size() - 1; i >= 0; --i )
         {
-            unsigned short id, count=1;
-            m.Read(id);
-            if (!m.End())
-                m.Read(count);
+            Network::IDBlock const & block = ids.blocks(i);
+
+            unsigned short id = block.start();
+            unsigned short count = block.length();
 
             for (unsigned short i=id + count - 1; i>= id && request+1 != stop; i--)
             {
                 if (sn_netObjects[i])
                 {
                     con << "Warning! Network id receive error on ID " << i << " belonging to client " << sn_netObjects[i]->Owner() << "\n";
-                    con << "while recieving ID block " << id << "-" << id+count-1 << " from netmessage " << m.MessageID() << ".\n";
+                    con << "while recieving ID block " << id << "-" << id+count-1 << " from netmessage " << sender.MessageID() << ".\n";
 
                 }
                 else
@@ -393,76 +403,59 @@ void req_id_handler(nMessage &m){
     }
 }
 
-nDescriptor req_id(20,req_id_handler,"req_id");
+nProtoBufDescriptor< Network::GrantIDs > sn_grantIDsDescriptor( 20, sn_GrantIDsHandler, "req_id" );
 
-void id_req_handler(nMessage &m){
+void sn_RequestIDsHandler( Network::RequestIDs const & request, nSenderInfo const & sender )
+{
     // Add security: keep clients from fetching too many ids
 
-    if (sn_GetNetState()==nSERVER && m.SenderID()<=MAXCLIENTS)
+    if (sn_GetNetState()==nSERVER && sender.SenderID()<=MAXCLIENTS)
     {
-        if (m.End())
-        { // old style request; send only one ID back.
-            tJUST_CONTROLLED_PTR< nMessage > rep=new nMessage(req_id);
-            unsigned short id=next_free_server(true);
-            sn_netObjectsOwner[id]=m.SenderID();
-            //	  con << "Assigning ID " << id << "\n";
-            rep->Write(id);
-            rep->Send(m.SenderID());
+        unsigned short num = request.num();
 
-#ifdef DEBUG
-            //con << "distributed id " << net_current_id-1 << " to user " << m.SenderID() << '\n';
-#endif
-        }
-        else
+        // not too many requests accepted. kick violators.
+        if ( num > ID_PREFETCH*4 )
         {
-            // new style request: many IDs
-            unsigned short num;
-            m.Read(num);
+            nReadError( true );
+        }
 
-            // but not too many. kick violators.
-            if ( num > ID_PREFETCH*4 )
+        Network::GrantIDs & grant = sn_grantIDsDescriptor.Send( sender.SenderID() );
+
+        unsigned short begin_block=0;	// begin of the block of currently assigned IDs
+        unsigned short block_len=0;		// and it's length
+
+        for (int i = num-1; i>=0; i--)
+        {
+            nNetObjectID id = next_free_server(true);
+
+            sn_netObjectsOwner[id] = sender.SenderID();
+
+            if (begin_block + block_len == id)	// RLE for allocated IDs
+                block_len++;
+            else
             {
-                throw nKillHim();
-            }
-
-            tJUST_CONTROLLED_PTR< nMessage > rep=new nMessage(req_id);
-
-            unsigned short begin_block=0;	// begin of the block of currently assigned IDs
-            unsigned short block_len=0;		// and it's length
-
-            for (int i = num-1; i>=0; i--)
-            {
-                nNetObjectID id = next_free_server(true);
-
-                sn_netObjectsOwner[id]=m.SenderID();
-
-                if (begin_block + block_len == id)	// RLE for allocated IDs
-                    block_len++;
-                else
+                if (block_len > 0)
                 {
-                    if (block_len > 0)
-                    {
-                        //		      con << "Assigning block " << begin_block << " - " << begin_block + block_len - 1 << "\n";
-                        rep->Write(begin_block);
-                        rep->Write(block_len);
-                    }
-                    begin_block = id;
-                    block_len = 1;
+                    //		      con << "Assigning block " << begin_block << " - " << begin_block + block_len - 1 << "\n";
+                    Network::IDBlock & block = *grant.add_blocks();
+                    block.set_start( begin_block );
+                    block.set_length( block_len );
                 }
+                begin_block = id;
+                block_len = 1;
             }
-            if (block_len > 0)
-            {
-                //	      con << "Assigning block " << begin_block << " - " << begin_block + block_len - 1 << "\n";
-                rep->Write(begin_block);
-                rep->Write(block_len);
-            }
-
-            rep->Send(m.SenderID());
+        }
+        if (block_len > 0)
+        {
+            //	      con << "Assigning block " << begin_block << " - " << begin_block + block_len - 1 << "\n";
+            Network::IDBlock & block = *grant.add_blocks();
+            block.set_start( begin_block );
+            block.set_length( block_len );
         }
     }
 }
 
-nDescriptor id_req(21,id_req_handler,"id_req_handler");
+nProtoBufDescriptor< Network::RequestIDs > sn_requestIDsDescriptor( 21, sn_RequestIDsHandler );
 
 unsigned short next_free(){
     unsigned short ret=0;
@@ -474,9 +467,9 @@ unsigned short next_free(){
                 need_soon -= ID_PREFETCH;
             if (need_soon < (ID_PREFETCH >> 1))
             {
-                tJUST_CONTROLLED_PTR< nMessage > m = new nMessage(id_req);
-                m->Write(ID_PREFETCH >> 2);
-                m->Send(0);
+                // request some IDs
+                Network::RequestIDs & request = sn_requestIDsDescriptor.Send(0);
+                request.set_num( ID_PREFETCH >> 2 );
             }
 
             double timeout=tSysTimeFloat()+60;
@@ -523,9 +516,9 @@ void first_fill_ids(){
 
     distribute=request=0;
 
-    tJUST_CONTROLLED_PTR< nMessage > m = new nMessage(id_req);
-    m->Write(ID_PREFETCH - 10);
-    m->Send(0);
+    // request some IDs
+    Network::RequestIDs & request = sn_requestIDsDescriptor.Send(0);
+    request.set_num( ID_PREFETCH - 10 );
 }
 
 
@@ -646,6 +639,11 @@ nObserver& nNetObject::GetObserver() const
     return *this->observer_;
 }
 
+void nNetObject::ClearCache() const
+{
+    lastSync_ = 0;
+    lastCreate_ = 0;
+}
 
 // dumps object stats
 void nNetObject::Dump( tConsole& con )
@@ -688,23 +686,6 @@ bool sn_Update(unsigned long &old,unsigned long n){
     else
         return false;
 }
-
-// static unsigned long int global_lastSync=0;
-
-bool nNetObject::SyncIsNew(nMessage &m){
-    unsigned long int bigID =  m.MessageIDBig();
-    //    sn_Update(global_lastSync,bigID);
-    return sn_Update(lastSyncID_,bigID);
-}
-
-/*
-static unsigned short global_lastSync=0;
-
-bool nNetObject::SyncIsNew(nMessage &m){
-    sn_Update(global_lastSync,m.MessageID());
-    return sn_Update(lastSyncID,m.MessageID());
-}
-*/
 
 nNetObject::nNetObject(int own):lastSyncID_(0),
 id(0),refCtr_(0),owner(own){
@@ -775,45 +756,6 @@ void nNetObject::Register( const nNetObjectRegistrar& registrar )
     sn_netObjects_AcceptClientSync[id]=false;
 }
 
-nNetObject::nNetObject(nMessage &m):lastSyncID_(m.MessageIDBig()),refCtr_(0){
-    // sn_Update(global_lastSync,lastSyncID_);
-
-    id = 0;
-    owner = 0;
-
-    syncListID_ = -1;
-
-    tASSERT( sn_Registrar );
-    nNetObjectRegistrar& registrar = *sn_Registrar;
-
-    createdLocally = false;
-
-    m.Read( registrar.id );
-#ifdef DEBUG
-    //con << "Netobject " << id << " created on remote order.\n";
-    //  if (id == 383)
-    //  st_Breakpoint();
-#endif
-    m.Read( owner );
-
-    // clients are only allowed to create self-owned objects
-    if ( sn_GetNetState() == nSERVER )
-    {
-        if ( owner != m.SenderID() )
-        {
-            throw nKillHim();
-        }
-    }
-
-    registrar.object = this;
-    registrar.sender = m.SenderID();
-
-    knowsAbout[m.SenderID()].knowsAboutExistence=true;
-#ifdef DEBUG
-    // con << "Netobject " << id  << " created (remote order).\n";
-#endif
-}
-
 void nNetObject::DoBroadcastExistence(){
     if (BroadcastExistence() &&
             ( sn_GetNetState()!=nCLIENT ||
@@ -872,12 +814,12 @@ void nNetObject::InitAfterCreation(){
 } // after remote creation,
 
 
-static void net_destroy_handler(nMessage &m){
+static void sn_DestroyObjectsHandler( Network::DestroyObjects const & destroy, nSenderInfo const & sender )
+{
     //con << "destroy begin\n";
-    unsigned short id;
-    //int count=0;
-    while (!m.End()){
-        m.Read(id);
+    for( int i = destroy.ids_size()-1; i >= 0; --i )
+    {
+        unsigned short id = destroy.ids(i);
 #ifdef DEBUG
         sn_BreakOnObjectID( id );
 #endif
@@ -887,7 +829,7 @@ static void net_destroy_handler(nMessage &m){
 
         nDestroyInfo& info = sn_Destroyed[ sn_Destroyed.Len() ];
         info.id = id;
-        info.sender = m.SenderID();
+        info.sender = sender.SenderID();
         info.actionOnDeleteExecuted=false;
         info.timeout=tSysTimeFloat()+nDeletedTimeout;
 
@@ -977,16 +919,16 @@ void nNetObject::RegisterRegistrar( nNetObjectRegistrar& r )
 }
 */
 
-static nDescriptor net_destroy(22,net_destroy_handler,"net_destroy");
+static nProtoBufDescriptor< Network::DestroyObjects > sn_destroyObjectsDescriptor( 22, sn_DestroyObjectsHandler );
 
-static tJUST_CONTROLLED_PTR< nMessage > destroyers[MAXCLIENTS+2];
+static tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::DestroyObjects > > destroyers[MAXCLIENTS+2];
 static REAL                             destroyersTime[MAXCLIENTS+2];
 static int                              destroyersCount[MAXCLIENTS+2];
 
 // special ack for destroy messages
 class nWaitForAckDestroy: public nWaitForAck{
 public:
-    nWaitForAckDestroy(nMessage* m,int receiver)
+    nWaitForAckDestroy(nMessageBase * m,int receiver)
             :nWaitForAck(m,receiver)
     {
         ++destroyersCount[receiver];
@@ -1079,12 +1021,12 @@ nNetObject::~nNetObject(){
                     knowsAbout[user].acksPending){
                 if (destroyers[user]==NULL)
                 {
-                    destroyers[user]=new nMessage(net_destroy);
+                    destroyers[user] = sn_destroyObjectsDescriptor.CreateMessage();
                     destroyersTime[user]=tSysTimeFloat();
                 }
-                destroyers[user]->Write(id);
+                destroyers[user]->AccessProtoBuf().add_ids(id);
 
-                if (destroyers[user]->DataLen() > ( destroyersCount[user] ? 1000 : 100 ) )
+                if (destroyers[user]->AccessProtoBuf().ids_size() > ( destroyersCount[user] ? 1000 : 100 ) )
                 {
                     sn_SendDestroyer( user );
                 }
@@ -1124,6 +1066,21 @@ nNetObject::~nNetObject(){
 }
 
 
+nNetObject::nKnowsAboutInfo::~nKnowsAboutInfo(){}
+
+nNetObject::nKnowsAboutInfo::nKnowsAboutInfo(){
+    Reset();
+    syncReq=false;
+}
+
+void nNetObject::nKnowsAboutInfo::Reset()
+{
+    knowsAboutExistence=false;
+    nextSyncAck=true;
+    syncReq=true;
+    acksPending=0;
+    lastSync_ = 0;
+}
 
 nNetObject *nNetObject::Object(int i){
     if (i==0) // the NULL nNetObject
@@ -1131,7 +1088,7 @@ nNetObject *nNetObject::Object(int i){
 
     // the last deleted object with specified ID
     nNetObject* deleted = NULL;
-    nDeletedInfos::const_iterator found = sn_netObjectsDeleted.find( id );
+    nDeletedInfos::const_iterator found = sn_netObjectsDeleted.find( i );
     if ( found != sn_netObjectsDeleted.end() )
     {
         deleted = (*found).second.object_;
@@ -1173,12 +1130,6 @@ nNetObject *nNetObject::Object(int i){
                 }
 
                 nReadError();
-
-                con << "Now we need to leave the\n"
-                << "system in an undefined state. I hope this works...\n";
-
-                Cheater(owner); // kill this bastard
-                return NULL; // pray that noone references this pointer
             }
         }
         tAdvanceFrame(10000);
@@ -1259,105 +1210,24 @@ bool nNetObject::ClearToTransmit(int user) const{
     return true;
 }
 
-void nNetObject::WriteSync(nMessage &m, int run )
+nProtoBufMessageBase * nNetObject::CreationMessage()
 {
-    if ( run == 0 )
+    if( !lastCreate_ )
     {
-        WriteSync( m );
+        lastCreate_ = GetDescriptor().WriteSync( *this, true );
     }
+
+    return lastCreate_;
 }
 
-void nNetObject::ReadSync(nMessage &m, int run )
+nProtoBufMessageBase * nNetObject::SyncMessage()
 {
-    if ( run == 0 )
+    if( !lastSync_ )
     {
-        ReadSync( m );
+        lastSync_ = GetDescriptor().WriteSync( *this, false );
     }
-}
 
-void nNetObject::WriteCreate(nMessage &m, int run )
-{
-    if ( run == 0 )
-    {
-        WriteCreate( m );
-    }
-}
-
-void nNetObject::ReadCreate(nMessage &m, int run )
-{
-    // run == 0 would call the constructor, but run == 0 never happens.
-    tASSERT( run > 0 );
-}
-
-void nNetObject::WriteAll( nMessage & m, bool create )
-{
-    int lastLen = -1;
-    int run = 0;
-
-    // write as long as the read functions do something
-    while ( m.DataLen() > lastLen )
-    {
-        lastLen = m.DataLen();
-        if ( create )
-        {
-            WriteCreate(m,run);
-        }
-
-        WriteSync(m,run);
-        ++run;
-    }
-}
-
-void nNetObject::ReadAll ( nMessage & m, bool create )
-{
-    int lastRead = -1;
-    int run = 0;
-
-    // read as long as the read functions do something
-    while ( m.ReadSoFar() > lastRead )
-    {
-        lastRead = m.ReadSoFar();
-        if ( create && run > 0 )
-        {
-            ReadCreate(m,run);
-        }
-
-        ReadSync(m,run);
-        ++run;
-    }
-}
-
-void nNetObject::WriteSync(nMessage &m){
-#ifdef DEBUG
-    if (sn_GetNetState()!=nSERVER && !AcceptClientSync())
-        tERR_ERROR("WriteSync should only be called server-side!");
-#endif
-} // nothing to do yet
-
-
-
-void nNetObject::ReadSync(nMessage &m){
-    if (sn_GetNetState()==nSERVER){
-        bool back=knowsAbout[m.SenderID()].syncReq;
-        RequestSync(); // tell the others about it
-        knowsAbout[m.SenderID()].syncReq=back;
-        // but not the sender of the message; he
-        // knows already.
-    }
-}
-
-extern bool deb_net;
-
-// read and write id and owner
-void nNetObject::WriteCreate(nMessage &m){
-    m.Write(id);
-    m.Write(owner);
-
-    // store the info needed in the destructor
-    sn_netObjects_AcceptClientSync[id]=this->AcceptClientSync();
-
-    if (deb_net)
-        con << "Sending creation message for nNetObject " << id << "\n";
+    return lastSync_;
 }
 
 void nNetObject::GetID()
@@ -1393,6 +1263,9 @@ void nNetObject::RequestSync(int user,bool ack){ // only for a single user
 #endif
     this->GetID();
 
+    // object has likely changed
+    this->ClearCache();
+
     if (sn_GetNetState()==nSERVER || (AcceptClientSync() && owner==::sn_myNetID)){
         knowsAbout[user].syncReq=true;
         knowsAbout[user].nextSyncAck |=ack;
@@ -1408,6 +1281,9 @@ void nNetObject::RequestSync(int user,bool ack){ // only for a single user
 
 void nNetObject::RequestSync(bool ack){
     this->GetID();
+
+    // object has likely changed
+    this->ClearCache();
 
 #ifdef nSIMULATE_PING
     ack=true;
@@ -1428,25 +1304,84 @@ void nNetObject::RequestSync(bool ack){
 }
 
 
-static void net_control_handler(nMessage &m){
+static void net_control_handler( Network::NetObjectControl const & control, nSenderInfo const & sender )
+{
     //con << "control\n";
     if (sn_GetNetState()==nSERVER){
-        unsigned short id;
-        m.Read(id);
+        unsigned short id = control.object_id();
         nNetObject *o = sn_netObjects[id];
         if ( o ){
-            if (m.SenderID()==o->Owner()) // only the owner is
+            if ( sender.SenderID()==o->Owner() ) // only the owner is
                 // allowed to control the object
-                o->ReceiveControlNet(m);
+                o->ReceiveControlNet( control );
             else
-                Cheater(m.SenderID()); // another lame cheater.
+                Cheater( sender.SenderID() ); // another lame cheater.
         }
     }
 }
 
-static nDescriptor net_control(23,net_control_handler,"net_control");
+class nProtoBufNetControlDescriptor:
+    public nProtoBufDescriptor< Network::NetObjectControl >,
+    public nMessageStreamer
+{
+private:
+    //! function responsible for turning message into old stream message
+    virtual void StreamFromProtoBuf( nProtoBufMessageBase const & source, nStreamMessage & target ) const
+    {
+        // cast to correct type
+        Network::NetObjectControl const & control =
+        static_cast< Network::NetObjectControl const & >( source.GetProtoBuf() );
 
-void nNetObject::ReceiveControlNet(nMessage &){
+        // fetch object ID and object
+        unsigned short id = control.object_id();
+        target.Write( id );
+        nNetObject * object = nNetObject::ObjectDangerous( id );
+        if ( object )
+        {
+            // delegate core work
+            object->StreamControl( control, target );
+        }
+
+        // bend the descriptor
+        target.BendDescriptorID( source.DescriptorID() & ~nProtoBufDescriptorBase::protoBufFlag );
+    }
+
+    //! function responsible for reading an old message
+    virtual void StreamToProtoBuf( nStreamMessage & source, nProtoBufMessageBase & target ) const
+    {
+        // cast to correct type
+        Network::NetObjectControl & control =
+        static_cast< Network::NetObjectControl & >( target.AccessProtoBuf() );
+
+        // fetch object ID and object
+        unsigned short id;
+        source.Read( id );
+        control.set_object_id( id );
+        nNetObject * object = nNetObject::ObjectDangerous( id );
+        if ( object )
+        {
+            // delegate core work
+            object->UnstreamControl( source, control );
+        }
+        else
+        {
+            // ignore this message
+            nReadError( false );
+        }
+    }
+
+public:
+    nProtoBufNetControlDescriptor()
+    : nProtoBufDescriptor< Network::NetObjectControl >( 23, net_control_handler )
+    {
+        SetStreamer( this );
+    }
+};
+
+static nProtoBufNetControlDescriptor net_control;
+
+void nNetObject::ReceiveControlNet( Network::NetObjectControl const & )
+{
 #ifdef DEBUG
     if (sn_GetNetState()==nCLIENT)
         tERR_ERROR("rec_cont should not be called client-side!");
@@ -1459,18 +1394,70 @@ void nNetObject::ReceiveControlNet(nMessage &){
 }
 
 // control functions:
-nMessage * nNetObject::NewControlMessage(){
-    nMessage *m=new nMessage(net_control);
-    m->Write(id);
-    return m;
+Network::NetObjectControl & nNetObject::BroadcastControl(){
+    nProtoBufMessage< Network::NetObjectControl > * m = net_control.CreateMessage();
+
+    // broadcast the message. This keeps it alive until the next time the network queue
+    // is flushed, so it's safe to operate on its internal data afterwards.
+    m->BroadCast();
+
+    Network::NetObjectControl & control = m->AccessProtoBuf();
+
+    control.set_object_id( ID() );
+
+    return control;
 }
 
+// conversion for stream legacy control messages
+void nNetObject::StreamControl( Network::NetObjectControl const & control, nStreamMessage & stream )
+{
+    nProtoBuf const * relevant = ExtractControl( control );
+    if ( relevant )
+    {
+        nProtoBufDescriptorBase::StreamToStatic( *relevant, stream, nProtoBufDescriptorBase::SECTION_Default );
+    }
+}
+
+void nNetObject::UnstreamControl( nStreamMessage & stream, Network::NetObjectControl & control )
+{
+    nProtoBuf * relevant = ExtractControl( control );
+    if ( relevant )
+    {
+        nProtoBufDescriptorBase::StreamFromStatic( stream, *relevant, nProtoBufDescriptorBase::SECTION_Default );
+    }
+}
+
+// easier to implement conversion helpers: just extract the relevant sub-protbuf.
+nProtoBuf * nNetObject::ExtractControl( Network::NetObjectControl & control )
+{
+    return NULL;
+}
+nProtoBuf const * nNetObject::ExtractControl( Network::NetObjectControl const & control )
+{
+    return NULL;
+}
+
+// ack that doesn't resend, just wait
+class nDontWaitForAck: public nWaitForAck{
+public:
+    nDontWaitForAck(nMessageBase* m,int rec)
+    : nWaitForAck( m, rec ){}
+    virtual ~nDontWaitForAck(){};
+
+    virtual bool DoResend()
+    {
+        // explicitly don't add message to cache
+        sn_Connections[receiver].messageCacheOut_.AddMessage( message, false, false );
+
+        return false;
+    }
+};
 
 
 class nWaitForAckSync: public nWaitForAck{
     unsigned short netobj;
 public:
-    nWaitForAckSync(nMessage* m,int rec,unsigned short obj)
+    nWaitForAckSync(nMessageBase* m,int rec,unsigned short obj)
             :nWaitForAck(m,rec),netobj(obj){
         if (sn_netObjects(obj)->knowsAbout[rec].acksPending<15)
         {
@@ -1490,9 +1477,12 @@ public:
         nNetObject* obj = sn_netObjects[netobj];
         if ( obj )
         {
-            if ( obj->knowsAbout[receiver].acksPending)
+            nNetObject::nKnowsAboutInfo & knows = obj->knowsAbout[receiver];
+
+            // ack accounting
+            if ( knows.acksPending )
             {
-                obj->knowsAbout[receiver].acksPending--;
+                knows.acksPending--;
             }
             else
             {
@@ -1510,7 +1500,14 @@ public:
             */
 #endif
 
-            obj->knowsAbout[receiver].knowsAboutExistence=true;
+            knows.knowsAboutExistence=true;
+
+            // store last acked sync for caching
+            nProtoBufMessageBase * m = dynamic_cast< nProtoBufMessageBase * >( message.operator->() );
+            if ( m && ( !knows.lastSync_ || ( m->MessageIDBig() - knows.lastSync_->MessageIDBig() ) > 0 ) )
+            {
+                knows.lastSync_ = m;
+            }
         }
         else
         {
@@ -1519,10 +1516,8 @@ public:
     }
 };
 
-
-
-
-static void net_sync_handler(nMessage &m){
+static void net_sync_handler( nStreamMessage & m )
+{
     unsigned short id;
     m.Read(id);
 #ifdef DEBUG
@@ -1534,20 +1529,81 @@ static void net_sync_handler(nMessage &m){
                 (!obj->AcceptClientSync()
                  || obj->Owner()!=m.SenderID())
            ){
-            Cheater(m.SenderID());
+            Cheater( m.SenderID() );
 #ifdef DEBUG
             tERR_ERROR("sync should only be called client-side!");
 #endif
         }
-        else if (obj->SyncIsNew(m)){
-            m.Reset();
-            m.Read(id);
-            obj->ReadAll(m, false);
+        else
+        {
+            obj->GetDescriptor().ReadSync( *obj, m, false );
         }
     }
 }
 
-static nDescriptor net_sync(24,net_sync_handler,"net_sync");
+static nStreamDescriptor net_sync(24,net_sync_handler,"net_sync");
+
+//! class converting sync messages
+class nMessageStreamerSync: public nMessageStreamer
+{
+public:
+    static const nProtoBufDescriptorBase::StreamSections sections;
+
+    //! function responsible for turning message into old stream message
+    virtual void StreamFromProtoBuf( nProtoBufMessageBase const & source, nStreamMessage & target ) const
+    {
+        // stream to message
+        source.GetDescriptor().StreamTo( source.GetProtoBuf(), target, sections );
+
+        // bend the descriptor
+        target.BendDescriptorID( net_sync.ID() );
+    }
+
+    //! function responsible for reading an old message
+    virtual void StreamToProtoBuf( nStreamMessage & source, nProtoBufMessageBase & target ) const
+    {
+        // stream from message
+        target.GetDescriptor().StreamFrom( source, target.AccessProtoBuf(), sections  );
+    }
+};
+
+const nProtoBufDescriptorBase::StreamSections nMessageStreamerSync::sections( nProtoBufDescriptorBase::StreamSections(nProtoBufDescriptorBase::SECTION_ID | nProtoBufDescriptorBase::SECTION_Second) );
+
+//! class converting creation messages
+class nMessageStreamerCreate: public nMessageStreamer
+{
+public:
+    //! function responsible for turning message into old stream message
+    virtual void StreamFromProtoBuf( nProtoBufMessageBase const & source, nStreamMessage & target ) const
+    {
+        // stream to message
+        source.GetDescriptor().StreamTo( source.GetProtoBuf(), target, nProtoBufDescriptorBase::SECTION_All );
+
+        // bend the descriptor
+        target.BendDescriptorID( source.DescriptorID() & ~nProtoBufDescriptorBase::protoBufFlag );
+    }
+
+    //! function responsible for reading an old message
+    virtual void StreamToProtoBuf( nStreamMessage & source, nProtoBufMessageBase & target ) const
+    {
+        // stream from message
+        target.GetDescriptor().StreamFrom( source, target.AccessProtoBuf(), nProtoBufDescriptorBase::SECTION_All );
+    }
+};
+
+//! converter for creation messages
+nMessageStreamer * nNetObjectDescriptorBase::CreationStreamer()
+{
+    static nMessageStreamerCreate create;
+    return &create;
+}
+
+//! converter for sync messages
+nMessageStreamer * nNetObjectDescriptorBase::SyncStreamer()
+{
+    static nMessageStreamerSync sync;
+    return &sync;
+}
 
 bool nNetObject::AcceptClientSync() const{
     return false;
@@ -1571,13 +1627,8 @@ bool nNetObject::DoDebugPrint()
 
 static int sn_syncedUser = -1;
 
-//! returns the user that the current WriteSync() is intended for
-int nNetObject::SyncedUser()
+void nNetObject::SyncAll()
 {
-    return sn_syncedUser;
-}
-
-void nNetObject::SyncAll(){
 #ifdef DEBUG
     s_DoPrintDebug = false;
 
@@ -1609,18 +1660,20 @@ void nNetObject::SyncAll(){
                         && (sn_GetNetState()!=nCLIENT ||
                             nos->AcceptClientSync()))
                 {
-                    short s = nos->id;
+                    unsigned short s = nos->id;
 
-                    if (// nos->knowsAbout[user].syncReq &&
-                        !nos->knowsAbout[user].knowsAboutExistence)
+                    nNetObject::nKnowsAboutInfo & knowledge = nos->knowsAbout[user];
+
+                    if (// knowledge.syncReq &&
+                        !knowledge.knowsAboutExistence)
                     {
                         // look for the object ID in the current destruction message
                         {
                             if ( destroyers[user] )
                             {
-                                for( int i = destroyers[user]->DataLen()-1; i >= 0; --i )
+                                for( int i = destroyers[user]->AccessProtoBuf().ids_size()-1; i >= 0; --i )
                                 {
-                                    if ( destroyers[user]->Data(i) == s )
+                                    if ( destroyers[user]->AccessProtoBuf().ids(i)  == s )
                                     {
                                         // found it. Send the destruction
                                         // message and wait for its ack.
@@ -1639,31 +1692,22 @@ void nNetObject::SyncAll(){
                             continue;
                         }
 
-                        if (!nos->knowsAbout[user].acksPending){
-#ifdef DEBUG
+                        if (!knowledge.acksPending)
+                        {
                             //con << "remotely creating object " << s << '\n';
-#endif
                             /*
                               con << "creating object " << s << " at user " << user
                               << " owned by " << sn_netObjects(s)->owner << '\n';
                             */
                             // send a creation message
 
-                            tJUST_CONTROLLED_PTR< nMessage > m=new nMessage
-                                                               (nos->CreatorDescriptor());
-
-#ifdef DEBUG
-                            if (s == sn_WatchNetID)
-                                sn_WatchMessage = m;
-#endif
-
-                            nos->WriteAll(*m,true);
+                            tJUST_CONTROLLED_PTR< nMessageBase > m = nos->CreationMessage();
                             new nWaitForAckSync(m,user,s);
-                            unsigned long id = m->MessageIDBig();
+                            // unsigned long id = m->MessageIDBig();
                             m->SendImmediately(user, false);
-                            m->messageIDBig_ = id;
+                            // m->messageIDBig_ = id;
 
-                            nos->knowsAbout[user].syncReq = false;
+                            knowledge.syncReq = false;
                         }
 #ifdef DEBUG
                         else if (DoDebugPrint())
@@ -1676,25 +1720,27 @@ void nNetObject::SyncAll(){
                         }
 #endif
                     }
-                    else if (nos->knowsAbout[user].syncReq
+                    else if (knowledge.syncReq
                              && sn_Connections[user].bandwidthControl_.Control( nBandwidthControl::Usage_Planning ) >50
-                             && nos->knowsAbout[user].acksPending<=1){
+                             && knowledge.acksPending<=1){
                         // send a sync
-                        tJUST_CONTROLLED_PTR< nMessage > m = new nMessage(net_sync);
+                        tJUST_CONTROLLED_PTR< nProtoBufMessageBase > m = nos->SyncMessage();
+                        knowledge.syncReq=false;
 
-                        m->Write(s);
-                        nos->WriteAll(*m,false);
-                        nos->knowsAbout[user].syncReq=false;
-
-                        if (nos->knowsAbout[user].nextSyncAck){
+                        if (knowledge.nextSyncAck){
                             new nWaitForAckSync(m,user,s);
-                            nos->knowsAbout[user].nextSyncAck=false;
+                            knowledge.nextSyncAck=false;
+                        }
+                        else
+                        {
+                            new nDontWaitForAck(m,user);
                         }
 #ifndef nSIMULATE_PING
-                        unsigned long id = m->MessageIDBig();
+                        // unsigned long id = m->MessageIDBig();
                         //m->Send(user,0,false);
+                        m->SetCacheHint( knowledge.lastSync_ );
                         m->SendImmediately(user,false);
-                        m->messageIDBig_ = id;
+                        // m->messageIDBig_ = id;
 #endif
                     }
 
@@ -1704,12 +1750,12 @@ void nNetObject::SyncAll(){
             }
 
             // send the destroy messages
-            if (destroyers[user] && !destroyersCount[user] )
+            if (destroyers[user])
             {
                 // but check whether the opportunity is good (big destroyers message, or a sync packet in the pipe) first
-                if ( destroyers[user]->DataLen() > 75 ||
+                if ( destroyers[user]->AccessProtoBuf().ids_size() > 75 ||
                         sn_Connections[user].sendBuffer_.Len() > 0 ||
-                        destroyersTime[user] < tSysTimeFloat()-.5-2*sn_Connections[user].ping.GetPing() )
+                        destroyersTime[user] < tSysTimeFloat()-.5 -2*sn_Connections[user].ping.GetPing() )
                 {
                     sn_SendDestroyer( user );
                 }
@@ -1777,25 +1823,26 @@ void nNetObject::SyncAll(){
 }
 
 
-static void ready_handler(nMessage &m)
+static void sn_ReadyObjectsHandler( Network::ReadyObjects const & ready, nSenderInfo const & sender )
 {
-    is_ready_to_get_objects[m.SenderID()]=true;
+    is_ready_to_get_objects[ sender.SenderID() ]=true;
 
     // reset peer's ping, it's probably unreliable
-    sn_Connections[m.SenderID()].ping.Timestep(100);
+    sn_Connections[ sender.SenderID() ].ping.Timestep(100);
 }
 
-static nDescriptor ready(25,ready_handler,"ready to get objects");
+static nProtoBufDescriptor< Network::ReadyObjects > sn_readyObjectsDescriptor( 25, sn_ReadyObjectsHandler );
 
-
-static void net_clear_handler(nMessage &m){
-    if (sn_GetNetState()!=nSERVER){
+static void sn_ClearObjectsHandler( Network::ClearObjects const & clear, nSenderInfo const & sender )
+{
+    if ( sn_GetNetState()!=nSERVER )
+    {
         nNetObject::ClearAll();
         first_fill_ids();
     }
 }
 
-static nDescriptor net_clear(26,net_clear_handler,"net_clear");
+static nProtoBufDescriptor< Network::ClearObjects > sn_clearObjectsDescriptor( 26, sn_ClearObjectsHandler );
 
 
 void nNetObject::ClearAllDeleted()
@@ -1838,7 +1885,7 @@ void nNetObject::ClearAll(){
         sn_SyncRequestedObject.Remove( n, n->syncListID_ );
     }
 
-    (tNEW(nMessage)(net_clear))->BroadCast(); // just to make sure..
+    sn_clearObjectsDescriptor.Broadcast(); // just to make sure..
 }
 
 
@@ -1939,7 +1986,7 @@ void nNetObject::RelabelOnConnect(){
             }
         }
     }
-    (new nMessage(ready))->Send(0);
+    sn_readyObjectsDescriptor.Send(0);
     is_ready_to_get_objects[0]=true;
 }
 
@@ -1971,18 +2018,17 @@ static nCallbackLoginLogout nlc(&login_callback);
 static bool sync_ack[MAXCLIENTS+2];
 static unsigned short c_sync=0;
 
-static void sync_ack_handler(nMessage &m){
-    unsigned short id;
-    m.Read(id);
+static void sn_SyncAckHandler( Network::SyncAck const & ack, nSenderInfo const & sender )
+{
+    unsigned short id = ack.token();
     if (id==c_sync)
-        sync_ack[m.SenderID()]=true;
+        sync_ack[ sender.SenderID() ] = true;
 }
 
-static nDescriptor sync_ack_nd(27,sync_ack_handler,"sync_ack");
+static nProtoBufDescriptor< Network::SyncAck > sn_syncAckDescriptor( 27, sn_SyncAckHandler );
 
-
-static void sync_msg_handler(nMessage &m);
-static nDescriptor sync_nd(28,sync_msg_handler,"sync_msg");
+static void sn_SyncHandler( Network::Sync const & sync, nSenderInfo const & sender );
+static nProtoBufDescriptor< Network::Sync > sn_syncDescriptor( 28, sn_SyncHandler );
 
 // from nNetwork.C
 
@@ -2008,11 +2054,10 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
             sync_ack[0]=true;
             if ( sg_ServerSync.Supported( 0 ) && otherEnd )
             {
-                tJUST_CONTROLLED_PTR< nMessage > m=new nMessage(sync_nd);
-                *m << timeout;
-                m->Write(sync_sn_netObjects);
-                m->Write(c_sync);
-                m->Send(0);
+                Network::Sync & sync = sn_syncDescriptor.Send(0);
+                sync.set_timeout( timeout );
+                sync.set_sync_netobjects( sync_sn_netObjects );
+                sync.set_token( c_sync );
                 sync_ack[0]=false;
             }
             else
@@ -2040,11 +2085,10 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
         for (int user=MAXCLIENTS;user>0;user--){
             sync_ack[user]=false;
             if (sn_Connections[user].socket){
-                tJUST_CONTROLLED_PTR< nMessage > m=new nMessage(sync_nd);
-                *m << timeout;
-                m->Write(sync_sn_netObjects);
-                m->Write(c_sync);
-                m->Send(user);
+                Network::Sync & sync = sn_syncDescriptor.Send( user );
+                sync.set_timeout( timeout );
+                sync.set_sync_netobjects( sync_sn_netObjects );
+                sync.set_token( c_sync );
             }
         }
 
@@ -2078,33 +2122,30 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
 #endif
 }
 
-static void sync_msg_handler(nMessage &m){
+static void sn_SyncHandler( Network::Sync const & sync, nSenderInfo const & sender )
+{
     static bool recursion=false;
     if (!recursion){
         recursion=true;
 
-        REAL timeout;
-        unsigned short sync_sn_netObjects;
-
-        // sync and write sync response
-        m >> timeout;
-        m.Read(sync_sn_netObjects);
-        unsigned short c_sync;
-        m.Read(c_sync);
+        REAL timeout = sync.timeout();
+        bool sync_sn_netObjects = sync.sync_netobjects();
+        unsigned short c_sync = sync.token();
 
         if (sn_GetNetState()!=nSERVER){
+            // clients obediently sync...
             sn_Sync(timeout+4,sync_sn_netObjects!=0,false);
-            tJUST_CONTROLLED_PTR< nMessage > m=new nMessage(sync_ack_nd);
-            m->Write(c_sync);
-            m->Send(0);
+
+            // and reply.
+            sn_syncAckDescriptor.Send(0).set_token( c_sync );
         }
         else
         {
             // no time for syncing! write sync response immediately with low priority so the client
             // gets it as soon as all other things are sent
-            tJUST_CONTROLLED_PTR< nMessage > response=new nMessage(sync_ack_nd);
-            response->Write(c_sync);
-            response->Send(m.SenderID(),10000000);
+            nProtoBufMessage< Network::SyncAck > * response = sn_syncAckDescriptor.CreateMessage();
+            response->AccessProtoBuf().set_token( c_sync );
+            response->Send( sender.SenderID(), 10000000 );
         }
         recursion=false;
     }
@@ -2140,20 +2181,17 @@ int  nBandwidthTaskObject::DoEstimateSize() const
 }
 
 // executes whatever it has to do
-void nBandwidthTaskSync::DoExecute( nSendBuffer& buffer, nBandwidthControl& control )
+void nBandwidthTaskSync::DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer )
 {
-    tJUST_CONTROLLED_PTR< nMessage > message = tNEW( nMessage )( net_sync );
-    Object().WriteAll( *message, false );
-    buffer.AddMessage( *message, &control );
+    tJUST_CONTROLLED_PTR< nMessageBase > message = Object().SyncMessage();
+    buffer.AddMessage( *message, &control, peer );
 }
 
 // executes whatever it has to do
-void nBandwidthTaskCreate::DoExecute( nSendBuffer& buffer, nBandwidthControl& control )
+void nBandwidthTaskCreate::DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer )
 {
-    tJUST_CONTROLLED_PTR< nMessage > message = tNEW( nMessage )( Object().CreatorDescriptor() );
-    Object().WriteAll( *message, true );
-
-    buffer.AddMessage( *message, &control );
+    tJUST_CONTROLLED_PTR< nMessageBase > message = Object().CreationMessage();
+    buffer.AddMessage( *message, &control, peer );
 }
 
 
@@ -2172,4 +2210,89 @@ nMachine & nNetObject::DoGetMachine( void ) const
     return nMachine::GetMachine( Owner() );
 }
 
+// protocol buffer stuff
+
+//! creates a netobject form sync data
+nNetObject::nNetObject( Network::NetObjectSync const & sync, nSenderInfo const & sender )
+:lastSyncID_(sender.envelope.MessageIDBig() - 1),refCtr_(0)
+{
+    id = 0;
+    owner = 0;
+
+    syncListID_ = -1;
+
+    tASSERT( sn_Registrar );
+    nNetObjectRegistrar& registrar = *sn_Registrar;
+
+    createdLocally = false;
+
+    registrar.id = sync.object_id();
+#ifdef DEBUG
+    //con << "Netobject " << id << " created on remote order.\n";
+    //  if (id == 383)
+    //  st_Breakpoint();
+#endif
+    owner = sync.owner_id();
+
+    // clients are only allowed to create self-owned objects
+    if ( sn_GetNetState() == nSERVER )
+    {
+        if ( owner != sender.SenderID() )
+        {
+            nReadError( true );
+        }
+    }
+
+    registrar.object = this;
+    registrar.sender = sender.SenderID();
+
+    knowsAbout[sender.SenderID()].knowsAboutExistence=true;
+#ifdef DEBUG
+    // con << "Netobject " << id  << " created (remote order).\n";
+#endif
+}
+
+//! reads incremental sync data
+void nNetObject::ReadSync( Network::NetObjectSync const & sync, nSenderInfo const & sender )
+{
+    if (sn_GetNetState()==nSERVER){
+        bool back=knowsAbout[sender.SenderID()].syncReq;
+        RequestSync(); // tell the others about it
+        knowsAbout[sender.SenderID()].syncReq=back;
+        // but not the sender of the message; he
+        // knows already.
+    }
+}
+
+//! reads incremental sync data
+bool nNetObject::SyncIsNew( Network::NetObjectSync const & sync, nSenderInfo const & sender )
+{
+    // check if sync is new
+    unsigned long int bigID =  sender.envelope.MessageIDBig();
+    if ( ID() && !sn_Update(lastSyncID_,bigID) && bigID != 0 )
+    {
+        return false;
+    }
+    return true;
+}
+
+//! writes sync data
+void nNetObject::WriteSync( Network::NetObjectSync & sync, bool init ) const
+{
+    sync.set_object_id( id );
+    if( init )
+    {
+        sync.set_owner_id( owner );
+    }
+}
+
+// nNetObjectDescriptor< nNetObject, Network::NetObjectTotal > sn_pbdescriptor( 0 );
+
+//! returns the descriptor responsible for this class
+nNetObjectDescriptorBase const & nNetObject::DoGetDescriptor() const
+{
+    tASSERT(0);
+    nNetObjectDescriptorBase * ret = 0;
+    return *ret;
+}
 

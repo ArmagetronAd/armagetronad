@@ -32,18 +32,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tSysTime.h"
 #include "nNetObject.h"
 
+namespace Engine { class TimerSync; }
+
 class eTimer:public nNetObject{
 public:
     REAL speed; // the time acceleration
 
     eTimer();
-    eTimer(nMessage &m);
     virtual ~eTimer();
-    virtual void WriteSync(nMessage &m);
-    virtual void ReadSync(nMessage &m);
-    virtual nDescriptor &CreatorDescriptor() const;
 
-    REAL Time();
+    eTimer( Engine::TimerSync const &, nSenderInfo const & );
+    //! reads sync data, returns false if sync was old or otherwise invalid
+    void ReadSync( Engine::TimerSync const &, nSenderInfo const & );
+    //! writes sync data (and initialization data if flag is set)
+    void WriteSync( Engine::TimerSync &, bool init ) const;
+
+    REAL Time() const;
     REAL TimeNoSync(){return REAL(Time()+(tSysTimeFloat()-lastTime_)*speed);}
 
     void pause(bool p);
@@ -57,6 +61,7 @@ public:
 
     bool IsSynced() const; //!< returns whether the timer is synced sufficiently well to allow rendering
 
+private:
 private:
     mutable double creationSystemTime_; //!< the rough system time this timer was created at
     double smoothedSystemTime_;         //!< the smoothed system time
@@ -75,7 +80,10 @@ private:
     nAverager averageSpf_;   //!< averager over seconds per frame
 
     double lastTime_;        //!< the smoothed system time of the last update
-    double nextSync_;        //!< system time of the next sync to the clients
+    mutable double nextSync_; //!< system time of the next sync to the clients
+
+    //! returns the descriptor responsible for this class
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 };
 
 REAL se_GameTime();
