@@ -303,7 +303,7 @@ int nProtoBufMessageBase::OnWrite( WriteArguments & arguments ) const
         nMessageCache & cache = sn_Connections[ arguments.receiver_ ].messageCacheOut_;
 
         nProtoBufHeader header;
-        header.cacheRef = cache.CompressProtoBuff( fullProtoBuf, workProtoBuf, cacheHint_ ); 
+        header.cacheRef = cache.CompressProtoBuff( fullProtoBuf, workProtoBuf, arguments, cacheHint_ ); 
 
         // dump into plain stringstream
         std::stringstream rw;
@@ -1362,10 +1362,11 @@ static void sn_CheckMessage
 
 //! find suitable previous message and compresses
 //! the passed protobuf. Return value: the cache ID.
-unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProtoBuf & target, nProtoBufMessageBase * hint )
+unsigned short nMessageCache::CompressProtoBuff( nProtoBuf const & source, nProtoBuf & target, nMessageBase::WriteArguments const & arguments, nProtoBufMessageBase * hint )
 {
-    // no cache, no compression.
-    if( sn_messageCacheSize == 0 )
+    // no cache or peer request not to compress, no compression.
+    nConnectionInfo const & receiver = sn_Connections[arguments.receiver_];
+    if( sn_messageCacheSize == 0 || ! ( receiver.zipCompression || receiver.diffCompression ) )
     {
         target.CopyFrom( source );
         return 0;

@@ -1296,6 +1296,9 @@ static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nS
     {
         unsigned short id = accepted.net_id();
 
+        sn_Connections[0].diffCompression = accepted.options().diff_compression();
+        sn_Connections[0].zipCompression  = accepted.options().diff_compression();
+
         // read or reset server version info
         if ( accepted.has_version() )
         {
@@ -1501,6 +1504,17 @@ void sn_LoginHandler_intermediate( nMessage &m )
         nKrawall::WriteScrambledPassword( salt, *login.mutable_token() );
     }
 
+    if ( !m.End() )
+    {
+        // read compression options
+        // (yeah, only protobuf enabled clients send them, but maybe over the old protocol)
+        unsigned short diff, zip;
+        m.Read( diff );
+        m.Read( zip );
+        login.mutable_options()->set_diff_compression( diff );
+        login.mutable_options()->set_zip_compression( zip );
+    }
+
     // delegate to protobuf method
     sn_LoginHandler( login, nSenderInfo( m ) );
 }
@@ -1623,6 +1637,9 @@ void sn_LoginHandler( Network::Login const & login, nSenderInfo const & sender )
         sn_Connections[new_id].ping.Reset();
         sn_Connections[new_id].bandwidthControl_.Reset();
         reset_last_acks(new_id);
+
+        sn_Connections[new_id].diffCompression = login.options().diff_compression();
+        sn_Connections[new_id].zipCompression = login.options().diff_compression();
 
         short rate = login.rate();
         if (rate>sn_maxRateOut)
@@ -2637,6 +2654,10 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
         
         // write a random salt
         nKrawall::WriteScrambledPassword( loginSalt, *stream );
+
+        // write encoding options: we understand both.
+        stream->Write(1);
+        stream->Write(1);
         
         break;
     }
@@ -3362,6 +3383,9 @@ void nConnectionInfo::Clear(){
     bandwidthControl_.Reset();
 
     acks_.clear();
+
+    diffCompression=true;
+    zipCompression=false;
 
     // start with 10% packet loss with low statistical weight
     packetLoss_.Reset();

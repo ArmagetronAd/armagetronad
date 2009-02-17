@@ -881,7 +881,7 @@ public:
 
     //! find suitable previous message and compresses
     //! the passed protobuf. Return value: the cache ID.
-    unsigned short CompressProtoBuff( nProtoBuf const & source, nProtoBuf & target, nProtoBufMessageBase * hint = 0 );
+    unsigned short CompressProtoBuff( nProtoBuf const & source, nProtoBuf & target, nMessageBase::WriteArguments const & arguments, nProtoBufMessageBase * hint = 0 );
 
 private:
     // the partial caches

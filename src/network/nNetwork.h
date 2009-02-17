@@ -346,6 +346,10 @@ struct nConnectionInfo     // everything that is needed to manage a connection
     // version info
     nVersion				version;
 
+    // requested options
+    bool                    diffCompression; //!< compress packets with simple per-element diff
+    bool                    zipCompression;  //!< compress packets via incremental zip
+
     // packages to acknowledge
     std::deque< unsigned short > acks_;
 

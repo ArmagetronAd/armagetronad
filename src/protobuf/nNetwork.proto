@@ -65,6 +65,13 @@ message Connection
     optional bool legacy_message_end_marker = 20000;
 }
 
+// protobuf encoding options
+message EncodingOptions
+{
+    optional bool diff_compression = 1 [default = true]; // allow messages to be compressed with the simple diff method
+    optional bool zip_compression  = 2 [default = true]; // allow messages to be compressed with the incremental zlib method
+}
+
 // login denial/kick message
 message LoginDenied
 {
@@ -103,6 +110,8 @@ message LoginAccepted
 
     // legacy message end marker, extensions go after it
     optional bool legacy_message_end_marker = 20000;
+
+    optional EncodingOptions options = 5; // requested encoding options
 }
 
 // current login message
@@ -117,6 +126,8 @@ message Login
     
     optional Hash token = 5;  // token, expected by the client in the login accept message
     
+    optional EncodingOptions options = 6; // requested encoding options
+
     // legacy message end marker, extensions go after it
     optional bool legacy_message_end_marker = 20000;
 }
