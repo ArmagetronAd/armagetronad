@@ -1457,6 +1457,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 }
 #endif
 
+#ifdef ENABLE_ZONESV1
 bool
 gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float &radius, float& growth, const xmlChar * keyword)
 {
@@ -1545,11 +1546,13 @@ gParser::parseZoneArthemis_v1(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
 
     return zone;
 }
+#endif
 
 void
 gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
 #ifdef ENABLE_ZONESV2
+#ifdef ENABLE_ZONESV1
     if (myxmlHasProp(cur, "version"))
     {
         int zoneVer = myxmlGetPropInt(cur, "version");
@@ -1581,12 +1584,15 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
     case 3:
         // well, the above is a really ugly hack to keep things working, better
         // let users of pure zone v2 maps upgrade them to map version 3.
+#endif
         parseZoneBachus(grid, cur, keyword);
+#ifdef ENABLE_ZONESV1
         break;
     default:
         parseZoneBachus(grid, cur, keyword);
         break;
     }
+#endif
 #else
     parseZoneArthemis_v1(grid, cur, keyword);
 #endif
@@ -1862,7 +1868,11 @@ gParser::parseAlternativeContent(eGrid *grid, xmlNodePtr cur)
             parseZone(grid, cur, keyword);
         }
         else if (isElement(cur->name, (const xmlChar *)"Zone_v1", keyword)) {
+#ifdef ENABLE_ZONESV1
             parseZoneArthemis_v1(grid, cur, keyword);
+#else
+            parseZone(grid, cur, keyword);
+#endif
         }
         else if (isElement(cur->name, (const xmlChar *)"Wall", keyword)) {
             parseWall(grid, cur, keyword);
@@ -1945,7 +1955,11 @@ gParser::parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
             parseZone(grid, cur, keyword);
         }
         else if (isElement(cur->name, (const xmlChar *)"Zone_v1", keyword)) {
+#ifdef ENABLE_ZONESV1
             parseZoneArthemis_v1(grid, cur, keyword);
+#else
+            parseZone(grid, cur, keyword);
+#endif
         }
         else if (isElement(cur->name, (const xmlChar *)"Wall", keyword)) {
             parseWall(grid, cur, keyword);

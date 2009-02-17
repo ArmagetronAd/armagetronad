@@ -193,6 +193,11 @@ AC_ENABLE(armathentication,
      esac],enable_armathentication=yes
      )
 
+AC_ARG_ENABLE(zonesv1,
+	AC_HELP_STRING([--enable-zonesv1],
+		[enable deprecated zones v1 code (default=enabled)]),,
+enable_zonesv1=yes)
+
 AC_ARG_ENABLE(zonesv2,
 	AC_HELP_STRING([--enable-zonesv2],
 		[enable experimental zonesv2 code (default=enabled)]),,
@@ -324,6 +329,12 @@ fi
 if test x$enable_armathentication = xyes; then
 AC_DEFINE(KRAWALL_SERVER,,enables krawall server)
 fi
+
+if test x$enable_zonesv1 = xyes; then
+AC_DEFINE(ENABLE_ZONESV1,,enables zonesv1)
+fi
+
+AM_CONDITIONAL(BUILDZONESV1, test x$enable_zonesv1 = xyes)
 
 if test x$enable_zonesv2 = xyes; then
 AC_DEFINE(ENABLE_ZONESV2,,enables zonesv2)
@@ -1246,8 +1257,13 @@ if test x$enable_zonesv2 = xyes; then
 	if test x$enable_fortress = xyes; then
 		zones_info="${zones_info}, Fortress"
 	fi
+	if test x$enable_zonesv1 = xyes; then
+		zones_info="V1, $zones_info"
+	fi
+elif test x$enable_zonesv1 = xyes; then
+	zones_info="V1"
 fi
-echo "     Zones V2 support: $zones_info"
+echo "     Zones support: $zones_info"
 echo ""
 echo "     Binaries will be installed in      : `eval echo ${bindir}`"
 echo "     Static data will be installed in   : `eval echo ${aa_datadir}`"

@@ -180,8 +180,10 @@ endif
 
 endif
 
+if BUILDZONESV1
 libtron_a_SOURCES +=\
 	tron/gWinZone.h            tron/gWinZone.cpp
+endif
 
 libui_a_SOURCES=ui/uInput.cpp ui/uInput.h ui/uInputQueue.cpp ui/uInputQueue.h ui/uMenu.cpp ui/uMenu.h
 endif
