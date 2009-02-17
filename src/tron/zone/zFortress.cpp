@@ -652,7 +652,7 @@ void zFortressZone::OnRoundEnd( void )
 
 // *******************************************************************************
 // *
-// *	OnEnter
+// *	OnInside
 // *
 // *******************************************************************************
 //!
@@ -661,7 +661,7 @@ void zFortressZone::OnRoundEnd( void )
 //!
 // *******************************************************************************
 
-void zFortressZone::OnEnter( gCycle * target, REAL time )
+void zFortressZone::OnInside( gCycle * target, REAL time )
 {
     // determine the team of the player
     tASSERT( target );

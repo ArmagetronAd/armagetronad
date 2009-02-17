@@ -57,7 +57,7 @@ private:  // FIXME TODO: These need replacing
 private:
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
 
-    virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone
+    virtual void OnInside( gCycle *target, REAL time ); //!< reacts on objects inside the zone
     virtual void OnVanish();                           //!< called when the zone vanishes
     virtual void OnConquest();                         //!< called when the zone gets conquered
     virtual void CheckSurvivor();                      //!< checks for the only surviving zone
