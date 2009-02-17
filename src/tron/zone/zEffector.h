@@ -116,7 +116,7 @@ public:
     ~zEffectorManager();
 private:
     typedef std::map<std::string, VoidFactoryBase*> FactoryList;
-    static FactoryList _effectors;
+    static FactoryList & _effectors();
 
     //! We make the constructor private so that nobody else can
     /// instantiate this class

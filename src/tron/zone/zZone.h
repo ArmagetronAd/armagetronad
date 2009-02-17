@@ -203,7 +203,7 @@ public:
     ~zZoneExtManager();
 private:
     typedef std::map<std::string, NamedFactory_t> FactoryList;
-    static FactoryList _factories;
+    static FactoryList & _factories();
 
     //! We make the constructor private so that nobody else can
     /// instantiate this class

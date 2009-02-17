@@ -102,7 +102,12 @@ zEffector::setupVisuals(gParser & p)
 }
 
 
-zEffectorManager::FactoryList zEffectorManager::_effectors;
+zEffectorManager::FactoryList &
+zEffectorManager::_effectors()
+{
+    static FactoryList ifl;
+    return ifl;
+}
 
 zEffector*
 zEffectorManager::Create(std::string const & typex, tXmlParser::node const &node)
@@ -111,7 +116,7 @@ zEffectorManager::Create(std::string const & typex, tXmlParser::node const &node
     transform (type.begin(), type.end(), type.begin(), tolower);
 
     FactoryList::const_iterator iterEffectorFactory;
-    if ((iterEffectorFactory = _effectors.find(type)) == _effectors.end())
+    if ((iterEffectorFactory = _effectors().find(type)) == _effectors().end())
         return NULL;
     
     VoidFactoryBase*Fy = iterEffectorFactory->second;
@@ -130,12 +135,12 @@ zEffectorManager::Create(std::string const & typex, tXmlParser::node const &node
 void
 zEffectorManager::Register(std::string const & type, std::string const & desc, NullFactory_t f)
 {
-    _effectors[type] = new NullFactory(f);
+    _effectors().insert(std::make_pair(type, new NullFactory(f)));
 }
 void
 zEffectorManager::Register(std::string const & type, std::string const & desc, XMLFactory_t f)
 {
-    _effectors[type] = new XMLFactory(f);
+    _effectors().insert(std::make_pair(type, new XMLFactory(f)));
 }
 
 
