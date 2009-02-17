@@ -68,6 +68,9 @@ private:
 
 class zZone: public eNetGameObject
 {
+private:
+    // TODO FIXME \
+    void*pos;  //!< pos is not valid for zones
 public:
     static zZone* create(eGrid*grid, std::string const & type) { return new zZone(grid); };
     zZone(eGrid *grid); //!< local constructor
@@ -158,10 +161,10 @@ private:
 
     virtual void InteractWith( eGameObject *target,REAL time,int recursion=1 ); //!< looks for objects inzide the zone and reacts on them
 
-    void OnEnter( gCycle *target, REAL time ); //!< reacts on objects entering the zone
-    void OnLeave( gCycle *target, REAL time ); //!< reacts on objects leaving the zone
-    void OnInside( gCycle *target, REAL time ); //!< reacts on objects inside the zone
-    void OnOutside( gCycle *target, REAL time ); //!< reacts on objects outside the zone
+    virtual void OnEntry( gCycle *target, REAL time ); //!< reacts on objects entering the zone
+    virtual void OnExit( gCycle *target, REAL time ); //!< reacts on objects leaving the zone
+    virtual void OnInside( gCycle *target, REAL time ); //!< reacts on objects inside the zone
+    virtual void OnOutside( gCycle *target, REAL time ); //!< reacts on objects outside the zone
 
     virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
 
