@@ -46,6 +46,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <set>
 #include <list>
+#include <deque>
+#include <utility>
 
 #define PLAYER_CONFITEMS (30+MAX_INSTANT_CHAT)
 
@@ -195,9 +197,11 @@ public:
 
     int    pID;
     // REAL	rubberstatus;
-    tArray<tString> lastSaid;
-    tArray<nTimeRolling> lastSaidTimes;
-    //	void SetLastSaid(tString ls);
+    
+    typedef std::pair< tString, nTimeRolling > SaidPair;
+    typedef std::deque< SaidPair > LastSaid;
+    LastSaid lastSaid_;
+    
     unsigned short r,g,b; // our color
 
     unsigned short pingCharity; // max ping you are willing to take over

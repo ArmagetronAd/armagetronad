@@ -1439,7 +1439,7 @@ tColoredString & operator <<(tColoredString &s, const tColoredStringProxy &color
 //!
 // *******************************************************************************************
 
-tString tString::StripWhitespace( void )
+tString tString::StripWhitespace( void ) const
 {
     tString toReturn;
 

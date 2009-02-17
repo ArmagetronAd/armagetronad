@@ -57,6 +57,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nNetwork.h"
 #include <time.h>
 
+// Maximum number of chat entries to save for spam analysis
+static int se_lastSaidMaxEntries = 12;
+
 // call on commands that only work on the server; quit if it returns true
 bool se_NeedsServer(char const * command, std::istream & s, bool strict )
 {
@@ -2636,11 +2639,14 @@ bool eChatSpamTester::Block()
 bool eChatSpamTester::Check()
 {
     nTimeRolling currentTime = tSysTimeFloat();
-
+    
     // check if the player already said the same thing not too long ago
-    for (short c = 0; c < player_->lastSaid.Len(); c++)
+    ePlayerNetID::LastSaid const & lastSaid = player_->lastSaid_;
+    const size_t saidSize = lastSaid.size();
+    for ( size_t i = 0; i < saidSize; i++ )
     {
-        if( (say_.StripWhitespace() == player_->lastSaid[c].StripWhitespace()) && ( (currentTime - player_->lastSaidTimes[c]) < se_alreadySaidTimeout * factor_ ) )
+        ePlayerNetID::SaidPair const & said = lastSaid[i];
+        if( (say_.StripWhitespace() == said.first.StripWhitespace()) && ( (currentTime - said.second) < se_alreadySaidTimeout * factor_ ) )
         {
             sn_ConsoleOut( tOutput("$spam_protection_repeat", say_ ), player_->Owner() );
             return true;
@@ -2693,14 +2699,12 @@ bool eChatSpamTester::Check()
 
         // update last said record
         {
-            for( short zz = 12; zz>=1; zz-- )
-            {
-                player_->lastSaid[zz] = player_->lastSaid[zz-1];
-                player_->lastSaidTimes[zz] = player_->lastSaidTimes[zz-1];
-            }
-
-            player_->lastSaid[0] = say_;
-            player_->lastSaidTimes[0] = currentTime;
+            ePlayerNetID::LastSaid & said = player_->lastSaid_;
+            if ( said.size() >= static_cast< size_t >( se_lastSaidMaxEntries ) )
+                said.pop_back();
+            
+            ePlayerNetID::SaidPair pair( say_, currentTime );
+            said.push_front( pair );
         }
 
         return false;
@@ -4012,7 +4016,7 @@ static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
 static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT", tOutput("$spam_protection") );
 
-ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings )
+ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings ), lastSaid_( se_lastSaidMaxEntries )
 {
     // default access level
     lastAccessLevel = tAccessLevel_Default;
@@ -4048,12 +4052,6 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
             loginWanted = P->autoLogin;
         }
     }
-    /*
-    else
-        SetName( "AI" );
-    */
-    lastSaid.SetLen(12);
-    lastSaidTimes.SetLen(12);
 
     se_PlayerNetIDs.Add(this,listID);
     object=NULL;
@@ -4082,7 +4080,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
 
 
 ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
-        , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings )
+        , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings ), lastSaid_( se_lastSaidMaxEntries )
 {
     // default access level
     lastAccessLevel = tAccessLevel_Default;
@@ -4099,8 +4097,6 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
 
     nameTeamAfterMe = false;
 
-    lastSaid.SetLen(12);
-    lastSaidTimes.SetLen(12);
 
     pID=-1;
     se_PlayerNetIDs.Add(this,listID);
