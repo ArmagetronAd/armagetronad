@@ -37,6 +37,11 @@ namespace eSpamSimilarity
     double SpamScore( tString const &, ePlayerNetID::LastSaid const &, nTimeRolling const &, REAL & );
 }
 
+static bool se_IsTeamMessage( tString const & say )
+{
+    return say.StartsWith( "/team" );
+}
+
 // handles spam checking at the right time
 eChatSpamTester::eChatSpamTester( ePlayerNetID * p, tString const & say )
 : tested_( false ), shouldBlock_( false ), player_( p ), say_( say ), factor_( 1 )
@@ -95,15 +100,17 @@ bool eChatSpamTester::Check()
         return true;
     
     // Apply similarity factor
-    REAL similarityPercent = 0;
-    factor *= eSpamSimilarity::SpamScore( say_, player_->lastSaid_, currentTime, similarityPercent );
-    
-    if ( CheckSpam( factor, tOutput("$spam_chat") ) )
+    if ( !se_IsTeamMessage( say_ ) )
     {
-        sn_ConsoleOut( tOutput( "$spam_protection_similarity", similarityPercent, static_cast< int>( player_->lastSaid_.size() ) ), player_->Owner() );
-        return true;
-    }
+        REAL similarityPercent = 0;
+        factor *= eSpamSimilarity::SpamScore( say_, player_->lastSaid_, currentTime, similarityPercent );
         
+        if ( CheckSpam( factor, tOutput("$spam_chat") ) )
+        {
+            sn_ConsoleOut( tOutput( "$spam_protection_similarity", similarityPercent, static_cast< int>( player_->lastSaid_.size() ) ), player_->Owner() );
+            return true;
+        }
+    }
     
     
 #ifdef KRAWALL_SERVER
@@ -139,7 +146,7 @@ bool eChatSpamTester::Check()
     return false;
 }
 
-bool eChatSpamTester::CheckSpam( REAL factor, tOutput const & message )
+bool eChatSpamTester::CheckSpam( REAL factor, tOutput const & message ) const
 {
     if ( nSpamProtection::Level_Mild <= player_->chatSpam_.CheckSpam( factor, player_->Owner(), message ) )
         return true;
@@ -286,6 +293,9 @@ namespace eSpamSimilarity
         for ( size_t i = 0; i < saidSize; i++ )
         {
             ePlayerNetID::SaidPair const & said = lastSaid[i];
+            
+            if ( se_IsTeamMessage( said.first ) )
+                continue;
             
             double similarity = JaroWinklerScore( say, said.first );
             outPercent = std::max( outPercent, static_cast< REAL>( similarity ) );

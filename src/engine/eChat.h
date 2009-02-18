@@ -47,7 +47,7 @@ public:
     tColoredString say_;      //!< the chat line
     REAL factor_;             //!< extra spam weight factor
 private:
-    bool CheckSpam( REAL factor, tOutput const & message );
+    bool CheckSpam( REAL factor, tOutput const & message ) const;
 };
 
 #endif
