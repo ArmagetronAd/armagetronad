@@ -57,8 +57,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nNetwork.h"
 #include <time.h>
 
-// Maximum number of chat entries to save for spam analysis
-static int se_lastSaidMaxEntries = 12;
+int se_lastSaidMaxEntries = 12;
 
 // call on commands that only work on the server; quit if it returns true
 bool se_NeedsServer(char const * command, std::istream & s, bool strict )
@@ -2569,8 +2568,7 @@ static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
 }
 #endif // DEDICATED
 
-// time during which no repeaded chat messages are printed
-static REAL se_alreadySaidTimeout=5.0;
+REAL se_alreadySaidTimeout=5.0;
 static tSettingItem<REAL> se_alreadySaidTimeoutConf("SPAM_PROTECTION_REPEAT",
         se_alreadySaidTimeout);
 
@@ -2588,7 +2586,7 @@ static tAccessLevelSetter se_shuffleUpAccessLevelConfLevel( se_shuffleUpAccessLe
 static bool se_silenceAll = false;        // flag indicating whether new players should be silenced
 
 // minimal access level for chat
-static tAccessLevel se_chatAccessLevel = tAccessLevel_Program;
+tAccessLevel se_chatAccessLevel = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_chatAccessLevelConf( "ACCESS_LEVEL_CHAT", se_chatAccessLevel );
 static tAccessLevelSetter se_chatAccessLevelConfLevel( se_chatAccessLevelConf, tAccessLevel_Owner );
 
@@ -2617,98 +2615,6 @@ static tAccessLevelSetter se_nVerAccessLevelConfLevel( se_nVerAccessLevelConf, t
 
 static tSettingItem<bool> se_silAll("SILENCE_ALL",
                                     se_silenceAll);
-
-// handles spam checking at the right time
-eChatSpamTester::eChatSpamTester( ePlayerNetID * p, tString const & say )
-: tested_( false ), shouldBlock_( false ), player_( p ), say_( say ), factor_( 1 )
-{
-    say_.RemoveTrailingColor();
-}
-
-bool eChatSpamTester::Block()
-{
-    if ( !tested_ )
-    {
-        shouldBlock_ = Check();
-        tested_ = true;
-    }
-
-    return shouldBlock_;
-}
-
-bool eChatSpamTester::Check()
-{
-    nTimeRolling currentTime = tSysTimeFloat();
-    
-    // check if the player already said the same thing not too long ago
-    ePlayerNetID::LastSaid const & lastSaid = player_->lastSaid_;
-    const size_t saidSize = lastSaid.size();
-    for ( size_t i = 0; i < saidSize; i++ )
-    {
-        ePlayerNetID::SaidPair const & said = lastSaid[i];
-        if( (say_.StripWhitespace() == said.first.StripWhitespace()) && ( (currentTime - said.second) < se_alreadySaidTimeout * factor_ ) )
-        {
-            sn_ConsoleOut( tOutput("$spam_protection_repeat", say_ ), player_->Owner() );
-            return true;
-        }
-    }
-
-    REAL lengthMalus = say_.Len() / 20.0;
-    if ( lengthMalus > 4.0 )
-    {
-        lengthMalus = 4.0;
-    }
-
-    // extra spam severity factor
-    REAL factor = factor_;
-
-
-    // count color codes. We hate them. We really do. (Yeah, this calculation is inefficient.)
-    int colorCodes = (say_.Len() - tColoredString::RemoveColors( say_ ).Len())/8;
-    if ( colorCodes < 0 ) colorCodes = 0;
-
-
-    // apply them to the spam severity factor. Burn in hell, color code abusers.
-    static const double log2 = log(2);
-    factor *= log( 2 + colorCodes )/log2;
-
-    if ( nSpamProtection::Level_Mild <= player_->chatSpam_.CheckSpam( (1+lengthMalus)*factor, player_->Owner(), tOutput("$spam_chat") ) )
-    {
-        return true;
-    }
-
-#ifdef KRAWALL_SERVER
-        if ( player_->GetAccessLevel() > se_chatAccessLevel )
-        {
-            // every once in a while, remind the public that someone has something to say
-            static double nextRequest = 0;
-            double now = tSysTimeFloat();
-            if ( now > nextRequest && se_chatRequestTimeout > 0 )
-            {
-                sn_ConsoleOut( tOutput("$access_level_chat_request", player_->GetColoredName(), player_->GetLogName() ), player_->Owner() );
-                nextRequest = now + se_chatRequestTimeout;
-            }
-            else
-            {
-                sn_ConsoleOut( tOutput("$access_level_chat_denied" ), player_->Owner() );
-            }
-
-            return true;
-        }
-#endif
-
-        // update last said record
-        {
-            ePlayerNetID::LastSaid & said = player_->lastSaid_;
-            if ( said.size() >= static_cast< size_t >( se_lastSaidMaxEntries ) )
-                said.pop_back();
-            
-            ePlayerNetID::SaidPair pair( say_, currentTime );
-            said.push_front( pair );
-        }
-
-        return false;
-    }
 
 // checks whether a player is silenced, giving him appropriate warnings if he is
 bool IsSilencedWithWarning( ePlayerNetID const * p )
@@ -4016,7 +3922,7 @@ static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
 static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT", tOutput("$spam_protection") );
 
-ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings ), lastSaid_( se_lastSaidMaxEntries )
+ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings ), lastSaid_()
 {
     // default access level
     lastAccessLevel = tAccessLevel_Default;
@@ -4080,7 +3986,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
 
 
 ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
-        , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings ), lastSaid_( se_lastSaidMaxEntries )
+        , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings ), lastSaid_()
 {
     // default access level
     lastAccessLevel = tAccessLevel_Default;
