@@ -1924,7 +1924,7 @@ void sg_HostGame(){
         int numPlayers = 0;
 
         while(numPlayers == 0 &&
-                (ded_idle<.0001 || tSysTimeFloat()<startTime + ded_idle * 3600 ) && !uMenu::quickexit ){
+                (ded_idle <= 0.0f || tSysTimeFloat()<startTime + ded_idle * 3600 ) && !uMenu::quickexit ){
             sr_Read_stdin();
             st_DoToDo();
             gGame::NetSyncIdle();
@@ -1948,7 +1948,7 @@ void sg_HostGame(){
             }
         }
 
-        if (sg_NumUsers() <= 0 && ded_idle>0.0001 &&
+        if (sg_NumUsers() <= 0 && ded_idle > 0.0f &&
                 tSysTimeFloat()>= startTime + ded_idle * 3600 )
         {
             sg_Timestamp();
@@ -3505,7 +3505,7 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 #ifdef DEBUG
             //                std::cout << "spawning player " << pni->name << '\n';
 #endif
-            gCycle * cycle = new gCycle(grid, pos, dir, p);
+            gCycle * cycle = new gCycle( grid, pos, dir, p );
             p->ControlObject(cycle);
 
             sg_Timestamp();
@@ -3525,7 +3525,11 @@ void gGame::Timestep(REAL time,bool cam){
 #endif
 
 #ifdef RESPAWN_HACK
-    sg_Respawn(time,grid,Arena);
+    // no respawining while deathzone is active.
+    if( !winDeathZone_ )
+    {
+        sg_Respawn(time,grid,Arena);
+    }
 #endif
 
     // chop timestep into small, managable bits
