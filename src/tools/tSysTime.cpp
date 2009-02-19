@@ -339,7 +339,7 @@ void tAdvanceFrame( int usecdelay )
     }
 
 
-#ifdef DEBUG
+#ifdef DEBUG_X
     {
         static tTime oldRelative = timeRelative;
         tTime timeStep = timeRelative - oldRelative;
