@@ -69,7 +69,7 @@ message Connection
 message EncodingOptions
 {
     optional bool diff_compression = 1 [default = true]; // allow messages to be compressed with the simple diff method
-    optional bool zip_compression  = 2 [default = true]; // allow messages to be compressed with the incremental zlib method
+    optional bool zip_compression  = 2 [default = false]; // allow messages to be compressed with the incremental zlib method
 }
 
 // login denial/kick message
