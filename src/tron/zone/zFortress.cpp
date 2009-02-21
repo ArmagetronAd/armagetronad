@@ -236,8 +236,8 @@ bool zFortressZone::Timestep( REAL time )
             rColor color_ = shape->getColor();
         color_.r_ = color_.g_ = color_.b_ = .5;
             shape->setColor(color_);
+            shape->RequestSync();
         }
-        RequestSync();
     }
 
     REAL dt = time - lastTime;
@@ -277,12 +277,13 @@ bool zFortressZone::Timestep( REAL time )
             timeStep *= 100;
 
         if ( sn_GetNetState() != nCLIENT &&
+                shape &&
                 ( ( fabs( omega - GetRotationSpeed() ) + fabs( omegaDot - GetRotationAcceleration() ) ) * timeStep > .5 ) )
         {
             SetRotationSpeed( omega );
             SetRotationAcceleration( omegaDot );
             SetReferenceTime();
-            RequestSync();
+            shape->RequestSync();
             lastSync_ = lastTime;
         }
 
@@ -608,10 +609,10 @@ void zFortressZone::OnRoundBegin( void )
             color_.g_ = team->G()/15.0;
             color_.b_ = team->B()/15.0;
             shape->setColor(color_);
+
+                shape->RequestSync();
             }
             teamDistance_ = closestDistance;
-
-            RequestSync();
         }
 
         // if this zone does not belong to a team, discard it.
