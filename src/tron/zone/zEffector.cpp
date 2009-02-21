@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "zEffector.h"
 #include "tRandom.h"
 #include "gGame.h"
+// Only for SpawnPlayer:
+#include "gParser.h"
 
 
 void zEffector::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
@@ -84,6 +86,66 @@ zEffector::setMessage(tString unformated)
     */
 }
 
+void
+zEffector::readXML(tXmlParser::node const & node)
+{
+    if (node.HasProp("count"))
+        setCount(node.GetPropInt("count"));
+
+    if (node.HasProp("description"))
+        setMessage(node.GetProp("description"));
+}
+
+void
+zEffector::setupVisuals(gParser & p)
+{
+}
+
+
+zEffectorManager::FactoryList &
+zEffectorManager::_effectors()
+{
+    static FactoryList ifl;
+    return ifl;
+}
+
+zEffector*
+zEffectorManager::Create(std::string const & typex, tXmlParser::node const &node)
+{
+    std::string type = typex;
+    transform (type.begin(), type.end(), type.begin(), tolower);
+
+    FactoryList::const_iterator iterEffectorFactory;
+    if ((iterEffectorFactory = _effectors().find(type)) == _effectors().end())
+        return NULL;
+    
+    VoidFactoryBase*Fy = iterEffectorFactory->second;
+
+    if (NullFactory*ptr = dynamic_cast<NullFactory*>(Fy))
+    {
+        zEffector*rv = ptr->Factory();
+        rv->readXML(node);
+        return rv;
+    }
+    if (XMLFactory*ptr = dynamic_cast<XMLFactory*>(Fy))
+        return ptr->Factory(type, node);
+    return NULL;
+}
+
+void
+zEffectorManager::Register(std::string const & type, std::string const & desc, NullFactory_t f)
+{
+    _effectors().insert(std::make_pair(type, new NullFactory(f)));
+}
+void
+zEffectorManager::Register(std::string const & type, std::string const & desc, XMLFactory_t f)
+{
+    _effectors().insert(std::make_pair(type, new XMLFactory(f)));
+}
+
+
+static zEffectorRegistration regWin("win", "", zEffectorWin::create);
+
 void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     // BOP
@@ -99,6 +161,14 @@ void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
     }
 }
 
+void
+zEffectorWin::setupVisuals(gParser & p)
+{
+    p.state.set("color", rColor(0, 1, 0, .7));
+}
+
+static zEffectorRegistration regDeath("death", "", zEffectorDeath::create);
+
 void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -110,9 +180,23 @@ void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
     }
 }
 
+void
+zEffectorDeath::setupVisuals(gParser & p)
+{
+    p.state.set("color", rColor(1, 0, 0, .7));
+}
+
 //
 //
 //
+
+static zEffectorRegistration regPoint("point", "", zEffectorPoint::create);
+
+void
+zEffectorPoint::readXML(tXmlParser::node const & node)
+{
+    setPoint(node.GetPropInt("score"));
+}
 
 void zEffectorPoint::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -130,6 +214,8 @@ void zEffectorPoint::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 //
 //
 
+static zEffectorRegistration regRubberRecharge("rubberrecharge", "", zEffectorCycleRubber::create);
+
 void zEffectorCycleRubber::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -146,6 +232,8 @@ void zEffectorCycleRubber::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarg
 //
 //
 
+static zEffectorRegistration regBrakeRecharge("brakerecharge", "", zEffectorCycleBrake::create);
+
 void zEffectorCycleBrake::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -160,6 +248,15 @@ void zEffectorCycleBrake::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarge
 //
 //
 //
+
+static zEffectorRegistration regAcceleration("acceleration", "", zEffectorCycleAcceleration::create);
+
+void
+zEffectorCycleAcceleration::readXML(tXmlParser::node const & node)
+{
+    string str = node.GetProp("value");
+    setValue(tFunction().parse(str));
+}
 
 void zEffectorCycleAcceleration::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -176,6 +273,21 @@ void zEffectorCycleAcceleration::effect(gVectorExtra<ePlayerNetID *> &d_calculat
 //
 //
 
+static zEffectorRegistration regSpawnPlayer("spawnplayer", "", zEffectorSpawnPlayer::create);
+
+void
+zEffectorSpawnPlayer::readXML(tXmlParser::node const & node)
+{
+    // FIXME: Unique issue, we just care about context, not the node itself
+    // FIXME: Someday, this will need to be checked for the right arena/grid
+
+    gParser*parser = dynamic_cast<gParser*>(node.ownerDocument());
+    assert(parser);
+
+    setGrid(parser->contextGrid(node));
+    setArena(parser->contextArena(node));
+}
+
 void zEffectorSpawnPlayer::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
     gVectorExtra<ePlayerNetID *>::iterator iter;
@@ -185,6 +297,17 @@ void zEffectorSpawnPlayer::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTarg
     {
         sg_RespawnPlayer(grid, arena, (*iter));
     }
+}
+
+static zEffectorRegistration regSetting("setting", "", zEffectorSetting::create);
+
+void
+zEffectorSetting::readXML(tXmlParser::node const & node)
+{
+    if (node.HasProp("settingName"))
+        setSettingName(node.GetProp("settingName"));
+    if (node.HasProp("settingValue"))
+        setSettingValue(node.GetProp("settingValue"));
 }
 
 void zEffectorSetting::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)

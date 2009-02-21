@@ -22,3 +22,6 @@ B>	IPv6 compatibility
 UF>	libcurl resource fetcher
 
 >	XMPP integration
+
+v1v2:
+- If we can detect (or witness) a polygon zone becoming visible, block old clients

@@ -33,13 +33,16 @@ public:
 
     void setPosX(const tFunction &x);
     void setPosY(const tFunction &y);
+    virtual
     void setRotation2(const tPolynomial & r);
 
+    virtual
     void setScale(const tFunction &s);
     void setColor(const rColor &c);
 
     void setColorNow(const rColor &c);
 
+    virtual tCoord Position() const;
   tFunction getPosX() {return posx_;};
   tFunction getPosY() {return posy_;};
   tFunction getScale() {return scale_;};
@@ -83,6 +86,8 @@ public :
     void render(const eCamera * cam );
 	virtual void render2d(tCoord scale) const;
 
+    void setRotation2(const tPolynomial<nMessage> & r);
+    void setScale(const tFunction &s);
     void setRadius(tFunction radius) {this->radius = radius;};
 protected:
     tFunction radius;
@@ -90,6 +95,9 @@ protected:
 private:
     //! returns the descriptor responsible for this class
     virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
+
+    tFunction * _cacheScaledRadius;
+    tFunction * _cacheRotationF;
     
 };
 

@@ -106,6 +106,13 @@ void zShape::setColorNow(const rColor &c){
     setColor(c);
 }
 
+tCoord zShape::Position() const {
+    return tCoord(
+        posx_.Evaluate(lasttime_ - referencetime_),
+        posy_.Evaluate(lasttime_ - referencetime_)
+    );
+}
+
 void zShape::animate( REAL time ) {
     // Is this needed as the items are already animated?
 }
@@ -132,6 +139,8 @@ void zShape::render2d(tCoord scale) const
 
 zShapeCircle::zShapeCircle(eGrid *grid, zZone * zone ):
         zShape(grid, zone ),
+        _cacheScaledRadius(NULL),
+        _cacheRotationF(NULL),
         radius(1.0, 0.0)
 {}
 
@@ -327,6 +336,23 @@ void zShapeCircle::render2d(tCoord scale) const {
     RenderEnd();
     glPopMatrix();
 #endif
+}
+
+void zShapeCircle::setRotation2(const tPolynomial<nMessage> & r) {
+    zShape::setRotation2(r);
+    delete _cacheRotationF;
+    _cacheRotationF = NULL;
+}
+
+void zShapeCircle::setScale(const tFunction & s){
+    zShape::setScale(s);
+    delete _cacheScaledRadius;
+    _cacheScaledRadius = NULL;
+}
+
+void zShapeCircle::setRadius(tFunction radius) {
+    this->radius = radius;
+    _cacheScaledRadius = NULL;
 }
 
 //

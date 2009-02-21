@@ -442,6 +442,8 @@ bool tXmlParser::ValidateXml(FILE* docfd, const char* uri, const char* filepath)
     /* free up the parser context */
     xmlFreeParserCtxt(ctxt);
 
+    m_Doc->_private = this;
+
 #ifndef DEDICATED
     /* reset error handler */
     initGenericErrorDefaultFunc( NULL );
@@ -517,6 +519,13 @@ case 'y': case 'Y':
     }
 }
 
+int tXmlParser::node::GetPropInt(CHAR const *prop) const {
+    int rv;
+    GetProp(prop, rv);
+    return rv;
+}
+
+
 //! @returns The node as it was before the incrementation
 tXmlParser::node &tXmlParser::node::operator++() {
     tASSERT(m_cur);
@@ -535,6 +544,12 @@ tXmlParser::node const tXmlParser::node::operator++(int) {
 tXmlParser::node tXmlParser::node::GetFirstChild(void) const {
     tASSERT(m_cur);
     return m_cur->xmlChildrenNode;
+}
+
+//! @returns A tXmlParser pointer containing this node
+tXmlParser*tXmlParser::node::ownerDocument(void) const {
+    tASSERT(m_cur);
+    return (tXmlParser*)m_cur->doc->_private;
 }
 
 //! @returns true if the object exists, false if it doesn't (any operations on this node will segfault)

@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ARMAGETRONAD_H_EFFECTOR
 
 class gCycle;
+class gParser;
 #include <vector>
 #include <memory>
 #include "gVectorExtra.h"
@@ -37,12 +38,13 @@ class gCycle;
 #include "eTeam.h"
 #include "tLocale.h"
 #include "tFunction.h"
+#include "tXmlParser.h"
 
 class zEffector
 {
 public:
     static zEffector* create() { return new zEffector(); };
-    zEffector():count(0),message() { }; //<! Constructor
+    zEffector():count(-1),message() { }; //<! Constructor
     zEffector(zEffector const &other) { };
     void operator=(zEffector const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
     virtual zEffector *copy(void) const { return new zEffector(*this); };
@@ -51,8 +53,12 @@ public:
     void apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
     virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets) { };
 
+    virtual void readXML(tXmlParser::node const &);
+
     void setCount(int _count) {count = _count;};
     void setMessage(tString unformated);
+
+    virtual void setupVisuals(gParser &);
 
 protected:
     template <typename T>
@@ -62,6 +68,71 @@ protected:
     tOutput message;
 
 };
+
+
+//! effector manager: put summary here
+/**
+ *   put detailed docs here
+ */
+class zEffectorManager {
+public:
+    static zEffector* Create(std::string const & type, tXmlParser::node const &);
+
+private:
+    class VoidFactoryBase {
+    protected:
+        VoidFactoryBase() {};
+        virtual ~VoidFactoryBase() {};
+    };
+public:
+    typedef zEffector* (*NullFactory_t)();
+private:
+    class NullFactory : public VoidFactoryBase {
+    public:
+        typedef NullFactory_t Factory_t;
+        NullFactory(Factory_t f) : Factory(f) {};
+        Factory_t Factory;
+    };
+public:
+    typedef zEffector* (*XMLFactory_t)(std::string const & type, tXmlParser::node const &);
+private:
+    class XMLFactory : public VoidFactoryBase {
+    public:
+        typedef XMLFactory_t Factory_t;
+        XMLFactory(Factory_t f) : Factory(f) {};
+        Factory_t Factory;
+    };
+    
+public:
+    //! Register an effector type.
+    /**
+            @param name the name of the effector type
+            @param description a human readable description of the effector type
+            @param func a function that returns a new instance of the effector
+     */
+    static void Register(std::string const & type, std::string const & desc, NullFactory_t);
+    static void Register(std::string const & type, std::string const & desc, XMLFactory_t);
+
+    ~zEffectorManager();
+private:
+    typedef std::map<std::string, VoidFactoryBase*> FactoryList;
+    static FactoryList & _effectors();
+
+    //! We make the constructor private so that nobody else can
+    /// instantiate this class
+    zEffectorManager();
+};
+
+class zEffectorRegistration {
+public:
+    template<typename T>
+    zEffectorRegistration(std::string const & type, std::string const & desc, T f);
+};
+template<typename T>
+zEffectorRegistration::zEffectorRegistration(std::string const & type, std::string const & desc, T f)
+{
+    zEffectorManager::Register(type, desc, f);
+}
 
 
 class zEffectorWin : public zEffector
@@ -75,6 +146,8 @@ public:
     virtual ~zEffectorWin() {};
 
     virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
+
+    void setupVisuals(gParser &);
 };
 
 class zEffectorDeath : public zEffector
@@ -88,6 +161,8 @@ public:
     virtual ~zEffectorDeath() {};
 
     virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
+
+    void setupVisuals(gParser &);
 };
 
 class zEffectorPoint : public zEffector
@@ -99,6 +174,8 @@ public:
     void operator=(zEffectorPoint const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
     virtual zEffectorPoint *copy(void) const { return new zEffectorPoint(*this); };
     virtual ~zEffectorPoint() {};
+
+    void readXML(tXmlParser::node const &);
 
     void setPoint(int p) {d_score = p;};
     int getPoint() const {return d_score;};
@@ -146,6 +223,8 @@ public:
 
     virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
 
+    void readXML(tXmlParser::node const &);
+
     virtual void setValue(tFunction const &accel) { acceleration = accel; };
 protected:
     tFunction acceleration;
@@ -162,6 +241,8 @@ public:
     void operator=(zEffectorSpawnPlayer const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
     virtual zEffectorSpawnPlayer *copy(void) const { return new zEffectorSpawnPlayer(*this); };
     virtual ~zEffectorSpawnPlayer() {};
+
+    void readXML(tXmlParser::node const &);
 
     void setGrid(eGrid *_grid) {grid = _grid;};
     void setArena(gArena *_arena) {arena = _arena;};
@@ -184,6 +265,8 @@ public:
     void operator=(zEffectorSetting const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
     virtual zEffectorSetting *copy(void) const { return new zEffectorSetting(*this); };
     virtual ~zEffectorSetting() {};
+
+    void readXML(tXmlParser::node const &);
 
     void setSettingName(tString name) {settingName = name;};
     void setSettingValue(tString value) {settingValue = value;};

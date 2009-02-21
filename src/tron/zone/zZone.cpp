@@ -55,6 +55,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nProtoBuf.h"
 #include "zZone.pb.h"
 
+#include "zone/zZone.h"
+
 std::deque<zZone *> sz_Zones;
 
 // number of segments to render a zone with
@@ -196,6 +198,16 @@ void zZone::RemoveFromZoneList(void) {
         );
     if(pos_found != sz_Zones.end())
         sz_Zones.erase(pos_found);
+}
+
+void
+zZone::setupVisuals(gParser &)
+{
+}
+void
+zZone::readXML(tXmlParser::node const &)
+{
+    // FIXME: Maybe move the entire zone parsing code in here? :D
 }
 
 // *******************************************************************************
@@ -349,12 +361,12 @@ void zZone::InteractWith( eGameObject * target, REAL time, int recursion )
                     playersInside.insert(prey->Player());
 
                     // Should the player not be marked as being outside
-                    // avoid the OnEnter transition. This happens at game
+                    // avoid the OnEntry transition. This happens at game
                     // start-up for example, when players are neither inside nor outside
                     if( playersOutside.find(prey->Player()) != playersOutside.end() )
                     {
-                        // Passing from outside to inside triggers the OnEnter event
-                        OnEnter( prey, time );
+                        // Passing from outside to inside triggers the OnEntry event
+                        OnEntry( prey, time );
                     }
                     // The player is no longer outside
                     playersOutside.erase(prey->Player());
@@ -369,12 +381,12 @@ void zZone::InteractWith( eGameObject * target, REAL time, int recursion )
                     playersOutside.insert(prey->Player());
 
                     // Should the player not be marked as being inside
-                    // avoid OnLeave transition. This happens at game
+                    // avoid OnExit transition. This happens at game
                     // start-up for example, when players are neither inside nor outside
                     if( playersInside.find(prey->Player()) != playersInside.end() )
                     {
-                        // Passing from inside to outside triggers the OnLeave event
-                        OnLeave( prey, time );
+                        // Passing from inside to outside triggers the OnExit event
+                        OnExit( prey, time );
                     }
                     // The player is no longer inside
                     playersInside.erase(prey->Player());
@@ -390,7 +402,7 @@ REAL asdf[] = {0, 1};
 tPolynomial tpOne(asdf, sizeof(asdf)/sizeof(asdf[0]));
 // *******************************************************************************
 // *
-// *	OnEnter
+// *	OnEntry
 // *
 // *******************************************************************************
 //!
@@ -398,7 +410,7 @@ tPolynomial tpOne(asdf, sizeof(asdf)/sizeof(asdf[0]));
 //!		@param	time    the current time
 //!
 // *******************************************************************************
-void zZone::OnEnter( gCycle * target, REAL time )
+void zZone::OnEntry( gCycle * target, REAL time )
 {
     Triggerer triggerer;
     triggerer.who = target;
@@ -429,7 +441,7 @@ void zZone::OnInside( gCycle * target, REAL time )
         (*iter)->apply(triggerer, time, tpOne);
     }
 }
-void zZone::OnLeave( gCycle * target, REAL time )
+void zZone::OnExit( gCycle * target, REAL time )
 {
     Triggerer triggerer;
     triggerer.who = target;
@@ -639,4 +651,33 @@ rColor const  zZone::GetColor( void ) const
     }
     return color;
 }
+
+
+zZoneExtManager::FactoryList &
+zZoneExtManager::_factories()
+{
+    static FactoryList _ifl;
+    return _ifl;
+}
+
+zZone*
+zZoneExtManager::Create(std::string const & typex, eGrid*grid)
+{
+    std::string type = typex;
+    transform (type.begin(), type.end(), type.begin(), tolower);
+
+    FactoryList::const_iterator iterFactory;
+    if ((iterFactory = _factories().find(type)) == _factories().end())
+        return NULL;
+    
+    return iterFactory->second(grid, type);
+}
+
+void
+zZoneExtManager::Register(std::string const & type, std::string const & desc, NamedFactory_t f)
+{
+    _factories().insert(std::make_pair(type, f));
+}
+
+static zZoneExtRegistration regBasic("", "", zZone::create);
 

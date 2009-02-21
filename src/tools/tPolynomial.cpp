@@ -74,6 +74,13 @@ tPolynomial::tPolynomial(const tPolynomial &tf)  //!< constructor
     // Empty
 }
 
+tPolynomial::tPolynomial(const tFunction &tf)  //!< constructor
+        : referenceVarValue(0.0),
+        coefs(tf.offset_, tf.slope_)
+{
+    // Empty
+}
+
 // *******************************************************************************
 // *
 // *	operator ( )
@@ -317,6 +324,32 @@ REAL tPolynomial::evaluate( REAL currentVarValue ) const
 
     return res;
 
+}
+
+tFunction tPolynomial::simplify( REAL currentVarValue ) const
+{
+    switch (coefs.Len())
+    {
+    case 0:
+        return tFunction(0, 0);
+    case 1:
+        return tFunction(coefs[0], 0);
+    case 2:
+        return tFunction(coefs[0], coefs[1]);
+    }
+    
+    REAL deltaVariableValue = (currentVarValue - referenceVarValue);
+
+    REAL res = 0.0;
+
+    // Compute res = c[1] + (c[2]/2)*var + (c[3]/3)*var^2 + ... + (c[N]/N)*var^(N-1)
+    // FIXME: TODO: HACK: Someone who has a clue how this works, please check it. Thanks, Luke
+    for (int i=coefs.Len()-1; i>1; i--) {
+        res = (res + coefs[i]/i) * deltaVariableValue;
+    }
+        res += (coefs[1]);
+
+    return tFunction(coefs[0], res);
 }
 
 void tPolynomial::WriteSync(  Tools::PolynomialSync & m ) const
