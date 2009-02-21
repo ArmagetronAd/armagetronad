@@ -204,6 +204,7 @@ zShapeCircle::zShapeCircle(eGrid *grid, unsigned short idZone):
         emulatingOldZone_(false),
         _cacheScaledRadius(NULL),
         _cacheRotationF(NULL),
+        _cacheTime(0.),
         radius(1.0, 0.0)
 {}
 
@@ -212,6 +213,7 @@ zShapeCircle::zShapeCircle(nMessage &m):
         emulatingOldZone_(false),
         _cacheScaledRadius(NULL),
         _cacheRotationF(NULL),
+        _cacheTime(0.),
         radius(1.0, 0.0)
 {
     m >> radius;
