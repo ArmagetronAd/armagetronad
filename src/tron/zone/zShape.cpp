@@ -275,7 +275,7 @@ void zShapeCircle::WriteSyncV1(nMessage &m)
         delete _cacheRotationF;
         tPolynomial<nMessage> & rp = rotation2;
         REAL sp = rp.evaluateRate(1, lasttime_);
-        REAL ac = rp.evaluateRate(2, lasttime_);
+        REAL ac = rp.evaluateRate(2, lasttime_) / 2.;
         _cacheRotationF = new tFunction(sp, ac);
     }
     m << *_cacheRotationF;
