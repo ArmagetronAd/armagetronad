@@ -90,8 +90,6 @@ public :
     void render(const eCamera * cam );
 	virtual void render2d(tCoord scale) const;
 
-    void setRotation2(const tPolynomial<nMessage> & r);
-    void setScale(const tFunction &s);
     void setRadius(tFunction radius) {this->radius = radius;};
     
     void setGrowth(REAL growth);
@@ -101,10 +99,6 @@ protected:
 private:
     //! returns the descriptor responsible for this class
     virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
-
-    tFunction * _cacheScaledRadius;
-    tFunction * _cacheRotationF;
-    REAL _cacheTime;
     
 };
 

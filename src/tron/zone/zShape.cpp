@@ -151,9 +151,6 @@ void zShape::render2d(tCoord scale) const
 
 zShapeCircle::zShapeCircle(eGrid *grid, zZone * zone ):
         zShape(grid, zone ),
-        _cacheScaledRadius(NULL),
-        _cacheRotationF(NULL),
-        _cacheTime(0.),
         radius(1.0, 0.0)
 {}
 
@@ -351,23 +348,6 @@ void zShapeCircle::render2d(tCoord scale) const {
     RenderEnd();
     glPopMatrix();
 #endif
-}
-
-void zShapeCircle::setRotation2(const tPolynomial<nMessage> & r) {
-    zShape::setRotation2(r);
-    delete _cacheRotationF;
-    _cacheRotationF = NULL;
-}
-
-void zShapeCircle::setScale(const tFunction & s){
-    zShape::setScale(s);
-    delete _cacheScaledRadius;
-    _cacheScaledRadius = NULL;
-}
-
-void zShapeCircle::setRadius(tFunction radius) {
-    this->radius = radius;
-    _cacheScaledRadius = NULL;
 }
 
 void zShapeCircle::setGrowth(REAL growth) {
