@@ -67,6 +67,16 @@ typedef nProtoBuf::Reflection Reflection;
 #define REFLECTION_CONST Reflection const
 #endif
 
+void sn_PrintDebug( nProtoBuf const & buf )
+{
+    buf.PrintDebugString();
+}
+
+void sn_PrintDebug( nProtoBufMessageBase const & buf )
+{
+    buf.GetProtoBuf().PrintDebugString();
+}
+
 enum HeaderFlags
 {
     FLAG_MessageID = 1,
@@ -237,6 +247,11 @@ void nProtoBufMessageBase::Filter( nProtoBuf & buf )
         }
         else
         {
+            if ( !r->REFL_GET( HasField, buf, field ) )
+            {
+                continue;
+            }
+
             switch( field->cpp_type() )
             {
             case FieldDescriptor::CPPTYPE_STRING:
@@ -533,6 +548,8 @@ void nProtoBufDescriptorBase::StreamFromDefault( nStreamMessage & in, nProtoBuf 
     int count = descriptor->field_count();
     for( int i = 0; i < count; ++i )
     {
+        // out.PrintDebugString();
+
         FieldDescriptor const * field = descriptor->field( i );
         tASSERT( field );
 

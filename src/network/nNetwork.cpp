@@ -1292,6 +1292,8 @@ extern bool sn_AcceptingFromMaster;
 
 static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nSenderInfo const & sender )
 {
+    // accepted.PrintDebugString();
+
     if ( sn_GetNetState() != nSERVER && sender.SenderID() == 0 )
     {
         unsigned short id = accepted.net_id();
@@ -1323,21 +1325,6 @@ static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nS
         else
             sn_Connections[0].version = nVersion( 0, 0);
 
-        // read my public IP
-        if ( accepted.has_address() )
-        {
-            // only accept it if it is not a LAN address
-            tString address = accepted.address();
-            if ( !sn_IsLANAddress( address ) )
-            {
-                if ( sn_myAddress != address )
-                {
-                    con << "Got address " << address << ".\n";
-                }
-                sn_myAddress = address;
-            }
-        }
-
         if( accepted.has_token() )
         {
             // read salt reply and compare it to what we sent
@@ -1354,6 +1341,21 @@ static void sn_LoginAcceptedHandler( Network::LoginAccepted const & accepted, nS
             if ( compare != 0 )
             {
                 nReadError( false );
+            }
+        }
+
+        // read my public IP
+        if ( accepted.has_address() )
+        {
+            // only accept it if it is not a LAN address
+            tString address = accepted.address();
+            if ( !sn_IsLANAddress( address ) )
+            {
+                if ( sn_myAddress != address )
+                {
+                    con << "Got address " << address << ".\n";
+                }
+                sn_myAddress = address;
             }
         }
 
