@@ -257,20 +257,30 @@ void zShapeCircle::WriteSyncV1(nMessage &m)
     m << referencetime_;
     m << posx_;
     m << posy_;
-    if (!_cacheScaledRadius)
+    if (!_cacheScaledRadius || (_cacheTime < lasttime_ && scale_.slope_ > 0. && radius.slope_ > 0.))
     {
+        delete _cacheScaledRadius;
         tPolynomial<nMessage> effectiveRadius;
         effectiveRadius[0] = scale_.offset_ * radius.offset_;
         effectiveRadius[1] = (scale_.slope_ * radius.offset_) + (radius.slope_ * scale_.offset_);
         effectiveRadius[2] = (scale_.slope_ * radius.slope_) * 2;
-                // FIXME: Send a new sync when it differs too much?
+        // FIXME: Force a new sync when it differs too much?
         _cacheScaledRadius = new tFunction(effectiveRadius.simplify(lasttime_));
     }
     m << *_cacheScaledRadius;
 
-    if (!_cacheRotationF)
-        _cacheRotationF = new tFunction(rotation2.simplify(lasttime_));
+    // FIXME: .Len isn't truncated when there are 0s
+    if (!_cacheRotationF || (_cacheTime < lasttime_ && rotation2.Len() > 3))
+    {
+        delete _cacheRotationF;
+        tPolynomial<nMessage> & rp = rotation2;
+        REAL sp = rp.evaluateRate(1, lasttime_);
+        REAL ac = rp.evaluateRate(2, lasttime_);
+        _cacheRotationF = new tFunction(sp, ac);
+    }
     m << *_cacheRotationF;
+
+    _cacheTime = lasttime_;
 }
 
 void zShapeCircle::ReadSync(nMessage &m)

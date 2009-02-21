@@ -105,6 +105,7 @@ private:
     virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
     tFunction * _cacheScaledRadius;
     tFunction * _cacheRotationF;
+    REAL _cacheTime;
 };
 
 typedef std::pair<tFunction, tFunction> myPoint;
