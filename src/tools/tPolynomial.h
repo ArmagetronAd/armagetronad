@@ -392,7 +392,7 @@ template <typename T>
 REAL
 tPolynomial<T>::evaluateRate(int index, REAL currentVarValue)
 {
-    if (coefs.Len() <= newRateIndex)
+    if (coefs.Len() <= index)
         return 0.0;
 
     *this = adaptToNewReferenceVarValue(currentVarValue);
