@@ -45,11 +45,15 @@ public:
     virtual tCoord Position() const;
   tFunction getPosX() {return posx_;};
   tFunction getPosY() {return posy_;};
+    tPolynomial<nMessage> getRotation2() { return rotation2; };
   tFunction getScale() {return scale_;};
   rColor getColor() {return color_;};
 
     void TimeStep( REAL time );
     void setReferenceTime(REAL time);
+
+    virtual void setGrowth(REAL growth);  //!< similar to old zones v1 setExpansionSpeed, but generic
+    virtual void collapse(REAL speed);  //!< set growth such that collapse happens in a timeframe
 
 protected:
     tFunction posx_; //!< position need not be inside the shape.
@@ -89,6 +93,8 @@ public :
     void setRotation2(const tPolynomial<nMessage> & r);
     void setScale(const tFunction &s);
     void setRadius(tFunction radius) {this->radius = radius;};
+    
+    void setGrowth(REAL growth);
 protected:
     tFunction radius;
 
@@ -98,6 +104,7 @@ private:
 
     tFunction * _cacheScaledRadius;
     tFunction * _cacheRotationF;
+    REAL _cacheTime;
     
 };
 

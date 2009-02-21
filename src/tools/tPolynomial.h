@@ -63,6 +63,7 @@ public:
 
     void parse(std::string str);
 
+    virtual REAL evaluateRate(int index, REAL currentVarValue); //!< evaluates the current rate
     virtual REAL evaluate( REAL currentVarValue ) const; //!< evaluates the function
     inline REAL operator()( REAL currentVarValue ) const; //!< evaluation operator
     

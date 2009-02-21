@@ -268,6 +268,18 @@ tPolynomial tPolynomial::translate(REAL currentVarValue) const
 /**
  *
  */
+REAL tPolynomial::evaluateRate(int index, REAL currentVarValue)
+{
+    if (coefs.Len() <= index)
+        return 0.0;
+
+    *this = adaptToNewReferenceVarValue(currentVarValue);
+    return coefs[index];
+}
+
+/**
+ *
+ */
 void tPolynomial::changeRate(REAL newRate, int newRateIndex, REAL currentVarValue)
 {
     if (coefs.Len() <= newRateIndex) {

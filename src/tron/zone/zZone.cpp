@@ -62,6 +62,11 @@ std::deque<zZone *> sz_Zones;
 // number of segments to render a zone with
 static const int sg_segments = 11;
 
+#ifndef ENABLE_ZONESV1
+REAL sg_expansionSpeed = 1.0f;
+REAL sg_initialSize = 5.0f;
+#endif
+
 // *******************************************************************************
 // *
 // *   EvaluateFunctionNow

@@ -193,10 +193,20 @@ AC_ENABLE(armathentication,
      esac],enable_armathentication=yes
      )
 
+AC_ARG_ENABLE(zonesv1,
+	AC_HELP_STRING([--enable-zonesv1],
+		[enable deprecated zones v1 code (default=enabled)]),,
+enable_zonesv1=yes)
+
 AC_ARG_ENABLE(zonesv2,
 	AC_HELP_STRING([--enable-zonesv2],
 		[enable experimental zonesv2 code (default=enabled)]),,
 enable_zonesv2=yes)
+
+AC_ARG_ENABLE(fortress,
+	AC_HELP_STRING([--enable-fortress],
+		[enable fortress support (default=enabled)]),,
+enable_fortress=yes)
 
 AC_ARG_ENABLE(authentication,
     AC_HELP_STRING([--enable-authentication],
@@ -320,11 +330,19 @@ if test x$enable_armathentication = xyes; then
 AC_DEFINE(KRAWALL_SERVER,,enables krawall server)
 fi
 
+if test x$enable_zonesv1 = xyes; then
+AC_DEFINE(ENABLE_ZONESV1,,enables zonesv1)
+fi
+
+AM_CONDITIONAL(BUILDZONESV1, test x$enable_zonesv1 = xyes)
+
 if test x$enable_zonesv2 = xyes; then
 AC_DEFINE(ENABLE_ZONESV2,,enables zonesv2)
 fi
 
 AM_CONDITIONAL(BUILDZONESV2, test x$enable_zonesv2 = xyes)
+
+AM_CONDITIONAL(BUILD_FORTRESS, test x$enable_fortress = xyes)
 
 dnl developer CXXFLAGS
 test -z "$DEBUGLEVEL" && DEBUGLEVEL=0
@@ -1252,6 +1270,20 @@ fi
 echo "     Sound support: $enable_sound"
 echo "     Particle System support: $enable_particles"
 echo "     Joystick support: $enable_joystick"
+zones_info="NO"
+if test x$enable_zonesv2 = xyes; then
+	zones_info="Basic"
+	if test x$enable_fortress = xyes; then
+		zones_info="${zones_info}, Fortress"
+	fi
+	if test x$enable_zonesv1 = xyes; then
+		zones_info="V1, $zones_info"
+	fi
+elif test x$enable_zonesv1 = xyes; then
+	zones_info="V1"
+fi
+echo "     Zones support: $zones_info"
+echo ""
 echo "     Binaries will be installed in      : `eval echo ${bindir}`"
 echo "     Static data will be installed in   : `eval echo ${aa_datadir}`"
 echo "     Configuration will be installed in : `eval echo ${aa_sysconfdir}`"

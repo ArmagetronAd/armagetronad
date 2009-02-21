@@ -93,6 +93,18 @@ void zShape::setScale(const tFunction & s){
     scale_ = s;
 }
 
+void zShape::setGrowth(REAL growth) {
+    REAL s = scale_(lasttime_ - referencetime_);
+    scale_.SetSlope(growth);
+    scale_.SetOffset( s + growth * ( referencetime_ - lasttime_ ) );
+    setScale(scale_);
+}
+
+void zShape::collapse(REAL speed) {
+    REAL s = scale_(lasttime_ - referencetime_);
+    setGrowth( - s * speed );
+}
+
 void zShape::setColor(const rColor &c){
     if(color_ != c) {
         color_ = c;
@@ -173,6 +185,8 @@ void zShapeCircle::ReadSync( Zone::ShapeCircleSync const & sync, nSenderInfo con
 
 bool zShapeCircle::isInteracting(eGameObject * target)
 {
+    // NOTE: FIXME: TODO: cache effectiveRadius*effectiveRadius for speed comparable to zones v1
+
     bool interact = false;
     gCycle* prey = dynamic_cast< gCycle* >( target );
     if ( prey )
@@ -353,6 +367,14 @@ void zShapeCircle::setScale(const tFunction & s){
 void zShapeCircle::setRadius(tFunction radius) {
     this->radius = radius;
     _cacheScaledRadius = NULL;
+}
+
+void zShapeCircle::setGrowth(REAL growth) {
+    REAL s = radius(lasttime_ - referencetime_);
+    radius.SetSlope(0.);
+    radius.SetOffset(s);
+    
+    zShape::setGrowth(growth);
 }
 
 //
@@ -672,10 +694,14 @@ public:
         scale.ReadSync( shape.scale() );
         radius.ReadSync( source.radius() );
 
+        // FIXME: don't ignore the quadratic term
+        // FIXME: Force a new sync when it differs too much
+        // FIXME: cache this conversion as much as possible
         // mend them together, ignoring the quadratic term
         tFunction mendedRadius( scale.GetOffset() * radius.GetOffset(), scale.GetOffset() * radius.GetSlope() + scale.GetSlope() * radius.GetOffset() );
         mendedRadius.WriteSync( *dest.mutable_radius() );
 
+        // FIXME: the above mostly applies here too
         // calculate rotation speed
         tPolynomial rotation;
         rotation.ReadSync( shape.rotation2() );
