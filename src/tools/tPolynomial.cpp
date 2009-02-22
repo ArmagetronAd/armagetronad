@@ -76,9 +76,10 @@ tPolynomial::tPolynomial(const tPolynomial &tf)  //!< constructor
 
 tPolynomial::tPolynomial(const tFunction &tf)  //!< constructor
         : referenceVarValue(0.0),
-        coefs(tf.offset_, tf.slope_)
+        coefs(2)
 {
-    // Empty
+    coefs[0] = tf.offset_;
+    coefs[1] = tf.slope_;
 }
 
 // *******************************************************************************
