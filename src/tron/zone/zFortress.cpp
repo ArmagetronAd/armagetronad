@@ -79,27 +79,6 @@ zFortressZone::zFortressZone( eGrid * grid )
 
 // *******************************************************************************
 // *
-// *	zFortressZone
-// *
-// *******************************************************************************
-//!
-//!		@param	m Message to read creation data from
-//!
-// *******************************************************************************
-
-zFortressZone::zFortressZone( nMessage & m )
-        : zZone( m ), onlySurvivor_( false ), currentState_( State_Safe )
-{
-    enemiesInside_ = ownersInside_ = 0;
-    conquered_ = 0;
-    lastSync_ = -10;
-    teamDistance_ = 0;
-    lastEnemyContact_ = se_GameTime();
-    touchy_ = false;
-}
-
-// *******************************************************************************
-// *
 // *	~zFortressZone
 // *
 // *******************************************************************************
@@ -146,7 +125,7 @@ static tSettingItem< int > sg_baseZonesPerTeamConfig( "FORTRESS_MAX_PER_TEAM", s
 void zFortressZone::setupVisuals(gParser & p)
 {
     REAL tpR[] = {.0f, .3f};
-    tPolynomial<nMessage> tpr(tpR, 2);
+    tPolynomial tpr(tpR, 2);
     p.state.set("rotation", tpr);
 }
 

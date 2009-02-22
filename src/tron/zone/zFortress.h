@@ -43,7 +43,6 @@ class zFortressZone: public zZone
 public:
     static zZone* create(eGrid*grid, std::string const & type) { return new zFortressZone(grid); };
     zFortressZone(eGrid *grid);                                   //!< local constructor
-    zFortressZone(nMessage &m);                                   //!< network constructor
     ~zFortressZone();                                             //!< destructor
 
     void setupVisuals(gParser &);
@@ -51,9 +50,9 @@ public:
 
 private:  // FIXME TODO: These need replacing
     REAL __deprecated GetRotationSpeed() { return shape->getRotation2().evaluateRate(1, lastTime); };
-    void __deprecated SetRotationSpeed(REAL r) { tPolynomial<nMessage> r2 = shape->getRotation2(); r2.changeRate(r, 1, lastTime); shape->setRotation2(r2); };
+    void __deprecated SetRotationSpeed(REAL r) { tPolynomial r2 = shape->getRotation2(); r2.changeRate(r, 1, lastTime); shape->setRotation2(r2); };
     REAL __deprecated GetRotationAcceleration() { return shape->getRotation2().evaluateRate(2, lastTime); };
-    void __deprecated SetRotationAcceleration(REAL r) { tPolynomial<nMessage> r2 = shape->getRotation2(); r2.changeRate(r, 2, lastTime); shape->setRotation2(r2); };
+    void __deprecated SetRotationAcceleration(REAL r) { tPolynomial r2 = shape->getRotation2(); r2.changeRate(r, 2, lastTime); shape->setRotation2(r2); };
 private:
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
 
