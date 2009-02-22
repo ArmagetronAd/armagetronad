@@ -45,7 +45,7 @@ public:
     virtual tCoord Position() const;
   tFunction getPosX() {return posx_;};
   tFunction getPosY() {return posy_;};
-    tPolynomial<nMessage> getRotation2() { return rotation2; };
+    tPolynomial getRotation2() { return rotation2; };
   tFunction getScale() {return scale_;};
   rColor getColor() {return color_;};
 
