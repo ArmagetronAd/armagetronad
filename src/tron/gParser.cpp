@@ -740,7 +740,7 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
     }
     else
     if (state.isset("rotation"))
-        shape->setRotation2( state.get< tPolynomial<nMessage> >("rotation") );
+        shape->setRotation2( state.get<tPolynomial>("rotation") );
 
     cur = cur->xmlChildrenNode;
     while ( cur != NULL) {
@@ -1365,7 +1365,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         {
             state.set("color", rColor(1, 1, 1, .7));
 
-            tPolynomial<nMessage> tpRotation(2);
+            tPolynomial tpRotation(2);
             tpRotation[0] = 0.0f;
             tpRotation[1] = .3f;
             state.set("rotation", tpRotation);
