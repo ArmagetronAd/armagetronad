@@ -155,15 +155,15 @@ public:
             {
                 return false;
             }
-        };
+        }
         boost::any getAny(std::string const & var);
         template<typename T> T get(std::string const & var) {
             return boost::any_cast<T>(getAny(var));
-        };
+        }
         void setAny(std::string const & var, boost::any val);
         template<typename T> void set(std::string const & var, T val) {
             setAny(var, boost::any(val));
-        };
+        }
         void unset(std::string const & var);
         void inherit(std::string const & var);
         

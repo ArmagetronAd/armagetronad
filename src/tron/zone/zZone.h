@@ -227,7 +227,7 @@ public:
     template<typename T>
     zZoneExtRegistration(std::string const & type, std::string const & desc, T f) {
         zZoneExtManager::Register(type, desc, f);
-    };
+    }
 };
 
 
