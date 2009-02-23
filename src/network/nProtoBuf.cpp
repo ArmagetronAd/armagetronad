@@ -51,7 +51,7 @@ using namespace google::protobuf;
 // #define DEBUG_STRINGS
 #endif
 
-#if GOOGLE_PROTOBUF_VERSION < 2000003
+#if GOOGLE_PROTOBUF_VERSION < 2000002
 // cull first parameter from reflection functions
 #define REFL_GET( function, message, field )        function( field )
 #define REFL_SET( function, message, field, value ) function( field, value )
