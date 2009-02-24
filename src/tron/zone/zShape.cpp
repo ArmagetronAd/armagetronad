@@ -625,6 +625,31 @@ void zShapePolygon::render2d(tCoord scale) const {
 #endif
 }
 
+
+#ifndef ENABLE_ZONESV1
+namespace Game { class ZoneV1Sync; }
+class zNullV1Zone : public nNetObject
+{
+public:
+    zNullV1Zone(const Game::ZoneV1Sync&, const nSenderInfo&);
+private:
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
+};
+
+zNullV1Zone::zNullV1Zone(const Game::ZoneV1Sync&sync, const nSenderInfo&sender)
+{
+    tASSERT(false && "trying to initialize a zNullV1Zone");
+}
+
+static nNetObjectDescriptor< zNullV1Zone, Game::ZoneV1Sync > zone_init( 340 );
+
+nNetObjectDescriptorBase const & zNullV1Zone::DoGetDescriptor() const
+{
+    return zone_init;
+}
+#endif
+
+
 // the shapes's network initializator
 static nNetObjectDescriptor< zShapeCircle, Zone::ShapeCircleSync > zoneCircle_init( 350 );
 static nNetObjectDescriptor< zShapePolygon, Zone::ShapePolygonSync > zonePolygon_init( 360 );
