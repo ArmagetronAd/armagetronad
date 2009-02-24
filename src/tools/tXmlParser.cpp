@@ -177,18 +177,18 @@ static bool sg_IgnoreRequest( tString const & URI )
 #endif
 }
 
-xmlParserInputBufferPtr myxmlParserInputBufferCreateFilenameFunc (const char *URI, xmlCharEncoding enc) {
-    if ( sg_IgnoreRequest( tString( URI ) ) )
+xmlParserInputBufferPtr myxmlParserInputBufferCreateFilenameFunc (const char * filename, xmlCharEncoding enc) {
+    if ( sg_IgnoreRequest( tString( filename ) ) )
     {
 #ifdef DEBUG
-        printf("Ignoring xml request for %s\n", URI);
+        printf("Ignoring xml request for %s\n", filename );
 #endif
         return NULL;
     }
 #ifdef DEBUG
     //  con << "xml wants " << URI << "\n";
 #endif
-    FILE *f = tResourceManager::openResource(URI, NULL);
+    FILE *f = tResourceManager::openResource( filename );
     if (f == NULL)
         return NULL;
     xmlParserInputBufferPtr ret = xmlAllocParserInputBuffer(enc);
