@@ -53,6 +53,7 @@ private:  // FIXME TODO: These need replacing
     void __deprecated SetRotationSpeed(REAL r) { tPolynomial r2 = shape->getRotation2(); r2.changeRate(r, 1, lastTime); shape->setRotation2(r2); };
     REAL __deprecated GetRotationAcceleration() { return shape->getRotation2().evaluateRate(2, lastTime); };
     void __deprecated SetRotationAcceleration(REAL r) { tPolynomial r2 = shape->getRotation2(); r2.changeRate(r, 2, lastTime); shape->setRotation2(r2); };
+    void __deprecated SetReferenceTime() { if (shape) shape->setReferenceTime(lastTime); };
 private:
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
 
