@@ -300,7 +300,7 @@ static void RInclude(std::istream& s)
     tString resourceID;
     s >> resourceID;
 
-    tString filename = tResourceManager::locateResource(NULL, resourceID);
+    tString filename = tResourceManager::locateResource(resourceID);
 
     if ( filename )
     {
