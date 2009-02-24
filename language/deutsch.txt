@@ -424,6 +424,7 @@ lag_fast_weight_help          Gewicht, mit dem Lag-Reports vom Server die schnel
 
 lag_credit_help               Gesamtzeit des Lag-Kredits in Sekunden.
 lag_credit_single_help        Maximaler Lag-Kredits in Sekunden für ein einzelnes Lag-Event.
+lag_credit_variance_help      Maximales vielfaches der gemessenen Lag-Schwankungen, die für ein einzelnes Lag-Event an Kredit gegeben werden.
 lag_sweet_spot_help           "Sweet Spot" des Lag-Kredits. Es wird versucht, den Lag-Kredit auf diesem Füllstand zu halten.
 lag_credit_time_help          Zeitskala, auf der Lag-Kredit verfällt.
 
@@ -907,6 +908,17 @@ player_list_end               \1: \2 Spieler.\n
 admins_help                   Gibt eine Liste der Administratoren. Siehe auch /admins and /listadmins chat commands.
 
 admin_list_cant_see           \1: Zugriff auf Administratorenliste verweigert.\n
+admin_list_authoritylevel     Benutzer von Meldeamt \1
+admin_list_end                \1: \2 Benutzer und \3 Meldeämter auf \4 Zugriffsleveln.\n
+
+admin_list_colors_best_red_help Rot-Komponente des besten Zugriffslevels in der /admins-Liste
+admin_list_colors_best_green_help Grün-Komponente des besten Zugriffslevels in der /admins-Liste
+admin_list_colors_best_blue_help Blau-Komponente des besten Zugriffslevels in der /admins-Liste
+admin_list_colors_worst_red_help Rot-Komponente des besten Zugriffslevels in der /admins-Liste
+admin_list_colors_worst_green_help Grün-Komponente des besten Zugriffslevels in der /admins-Liste
+admin_list_colors_worst_blue_help Blau-Komponente des besten Zugriffslevels in der /admins-Liste
+admin_list_min_access_level_help Minimaler Zugriffslevel, ab dem jemand in /admins gelistet wird
+
 # communication
 console_message_help          Gibt eine Nachricht auf den Konsolen aller angeschlossenen Spieler aus.
 center_message_help           Gibt eine Nachricht in der Bildschirmmitte aller angeschlossenen Spieler aus.
@@ -1545,6 +1557,18 @@ kick_player_details_text      Wenn dieser Vorschlag akzeptiert wird, dann wird \
 kick_player_text              Vertreibe \1
 kick_player_help              Dieser Menupunkt schlägt den anderen Spielern vor, besagten Spieler vom Server zu werfen.
 
+suspend_player_details_text   Wenn dieser Vorschlag akzeptiert wird, dann wird \1 für einige Zeit aus dem Spiel entfernt und zum Zuschauen gezwungen.
+suspend_player_text           Entferne \1
+
+vote_include_details_text     Wenn dieser Vorschlag akzeptiert wird, wird die Konfigurationsdatei \1 geladen.
+vote_include_text             Lade \1
+vote_include_error            Konnte Datei \1 nicht finden oder nicht lesen.\n
+vote_include_message          Binde \1 ein. Nur Benuzer auf Zugriffslevel \2 oder besser können die Ausgabe lesen.\n
+
+vote_command_details_text     Wenn dieser Vorschlag akzeptiert wird, wird das Konsolenkommando "\1" direkt ausgeführt.
+vote_command_text             Kommando \1
+vote_command_message          Führe Kommando "\1" aus.\n
+
 #*************************************
 #*************************************
 #
@@ -1597,10 +1621,17 @@ viewport_belongs_text         Fenster \1 gehört Spieler \2 (\3)
 viewport_assign_text          Fenster zuteilen
 viewport_assign_help          Welcher Spieler spielt in welchem Fenster?
 
+player_authenticate_text      Authentifizierung
+player_authenticate_help      Falls du eine Globale ID hast, dann kannst du dich hier über sie beim Server authentifizieren. Mit dem korrekten Password, versteht sich.
+player_authenticate_action    Authentifizierungsgesuch abgeschickt. Bald sollte der Passwortdialog erscheinen.\n
+
 #player setup
 
 player_name_text              Name:
 player_name_help              Das ... in "Sieger: ... ". Benutze die normalen Editiertasten.
+
+player_global_id_text         Globale ID:
+player_global_id_help         Falls vorhanden, kannst du deine Globale ID hier eintragen. We sie aussieht, hängt von deinem Melteamt ab. Bist du auf forums.armagetronad.net angemeltet, ist sie z.B. dein Benutzername dort, gefolgt von "@forums".
 
 player_input_text             Spiel-Tasten
 player_input_help             Stellt die Tastaturbelegung für die Steuerung der Vehikel ein
@@ -1628,6 +1659,12 @@ player_green_help             Stellt den Grünanteil deiner Farbe ein
 
 player_red_text               Rot:
 player_red_help               Stellt den Rotanteil deiner Farbe ein
+
+player_autologin_text         Automatisches Login:
+player_autologin_help         Falls dies aktiviert ist, wirst du automatisch mit deiner oben angegebenen Globalen ID bei Servern angemeldet, die das unterstützen.
+
+player_stealth_text           Verstecke Globale ID:
+player_stealth_help           Normalerweise wird die Globale ID allen Mitspielern bekanntgegeben. Wenn du das nicht willst, aktiviere diese Option. Administratoren und Moderatoren können deine ID allerdings normalerweise immer noch sehen, und Server dürfen deinen Wunsch auch komplett ignorieren.
 
 player_spectator_text         Nur Zuschauer:
 player_spectator_help         Wenn man nur Zuschauer ist, so steuert man kein eigenes Vehikel und kann nur den anderen zusehen.
@@ -1705,6 +1742,9 @@ team_menu_join_help           Werde Mitglied von diesem Team
 
 team_menu_create              Neues Team/Beliebiges Team
 team_menu_create_help         Gründet ein neues Team und lässt den Spieler beitreten, oder, sollte das nicht möglich sein, tritt einem beliebigen Team bei
+
+team_menu_spectate            Schaue zu
+team_menu_spectate_help       Verlässt das Spiel und schaut von nun an nur noch zu.
 
 team_owned_by                 \1s Team
 team_ai                       Computergegner
@@ -1983,6 +2023,12 @@ misc_fps_help                 Wenn die FPS-Anzeige aktiviert ist, wird die aktue
 #tweaks menu
 tweaks_displaylists_text      Display Lists:
 tweaks_displaylists_help      Display Lists sind ein OpenGL-Feature, um ein Objekt schnell oft rendern zu können; es wird normalerweise für die Vehikel verwendet. Manchmal funktioniert das aber nicht richtig: wenn die Vehikel unsichtbar sind, dann sollte dieses Feature ausgeschaltet werden.
+tweaks_displaylists_off_text  Aus
+tweaks_displaylists_off_help  Verwendet gar keine Display Lists.
+tweaks_displaylists_cac_text  Create and Call
+tweaks_displaylists_cac_help  Verwende Display Lists; sie werden erst erzeugt und danach direkt verwendet. Dies ist der empfohlenen Modus.
+tweaks_displaylists_cae_text  Create and Execute
+tweaks_displaylists_cae_help  Verwende Display Lists; sie werden erzeugt und gleichzeitig verwendet. Create and Call ist besser für die Performance, sagt man.
 
 tweaks_infinity_text          Unendlich:
 tweaks_infinity_help          OpenGL unterstützt eigentlich unendlich ferne Punkte: sie entsprechen einfach nur Richtungen. Senn dieser Menupunkt aktiviert wird, dann verwendet \g diese unendlichen Punkte, um z.B. den Boden zu zeichnen. Meistens ist dieses Feature allerdings kaputtoptimiert.
@@ -2151,11 +2197,23 @@ instant_win_activated         Die Siegzone wurde aktiviert! Finde sie und fahre 
 instant_round_end_activated   Die Rundenendzone wurde aktiviert! Finde sie und fahre hinein um die Runde zu beenden.\n
 instant_death_activated       Die Todeszone wurde aktiviert! Vermeide sie!\n
 
+player_admin_kill             \1 0xRESETTwurde von einem Adminstrator zerschmettert.\n
+player_admin_slap_free        \1 0xRESETTwurde von einem Administrator geohrfeigt.\n
+player_admin_slap_win         \1 wurde von einem Administrator für \2 Punkte umarmt.\n
+player_admin_slap_lose        \1 0xRESETTwurde von einem Administrator für \2 Punkte geohrfeigt.\n
+slap_help                     Ohrfeigt den angegebenen Spielr und zieht im die angegebene Punktzahl ab. Hmm, vielleicht kann man hiermit auch nett sein? :)
 player_win_instant            \1 bekam \2 Punkte durch das Erreichen der Siegzone.\n
 player_win_conquest           \1 bekam \2 Punkte für das erobern der Basis des Feindes.\n
 player_win_held_fortress      \1 bekam \2 Punkte für das Halten der eigenen Basis.\n
+player_lose_held_fortress     \1 verliert \2 points für zu defensives Spiel.\n
 player_win_conquest_specific  \1 bekam \2 Punkte für das erobern der Basis von \3.\n
 player_kill_collapse          \1 wurde von seiner kollabierenden Zone vernichtet.\n
+player_win_hole               \1 erhält \2 Punkte für Opferbereitschaft.\n
+player_lose_hole              0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 verliert \2 Punkte. Weil er ein n00b ist, oder so.\n
+
+player_no_longer_suspended    \1 0x77ff77darf wieder spielen.\n
+player_suspended              \1 0xff7777wird für \2 Runde(n) zum Zuschauen verdammt.\n
+
 zone_collapse_harmless        \1s Zone verpufft harmlos wegen mangelden Feindkontakts.\n
 
 #********************************************
@@ -2168,6 +2226,9 @@ zone_collapse_harmless        \1s Zone verpufft harmlos wegen mangelden Feindkon
 
 player_teamleave_disallowed   Sorry, /teamleave funktionniert nicht, wenn automatische Teamwahl aktiv ist.
 player_teamchanges_disallowed Sorry, der Administrator hat Teamwechsel verboten.\n
+player_teamchanges_suspended  Du darfst für die nächsten \1 Runde(s) noch nicht spielen.\n
+player_teamchanges_accesslevel Du darfst hier nicht spielen. Du bist \1, minimaler Zugriffslevel wäre \2.\n
+player_vote_accesslevel       Dein Zugriffslevel reicht nicht aus, um über das abzustimmen.  Du bist \1, minimaler Zugriffslevel wäre \2.\n
 player_pingcharity_changed    Ping-Spende ist nun \2 (vorher: \1).\n
 spam_protection_repeat        SPAM PROTECTION: du sagsest bereits: \1\n
 spam_protection               LABER-SCHUTZ: du bist für die nächsten \1 Sekunden geknebelt.\n
@@ -2186,13 +2247,19 @@ player_left_spectator         0xff7f7fZuschauer \1 0xff7f7fis weg.\n
 player_left_game              \1 0xff7f7fwurde mit \2 Punkten endgültig gelöscht.\n
 player_leaving_game           \1 0xff7f7fhat das Spiel verlassen.\n
 player_renamed                \2 hat sich auf \1 umbenannt.\n
+player_got_renamed            \2 wurde in \1 umbenannt.\n
+player_will_be_renamed        \2 wird auf \2 umbenannt werden.
 player_rename_rejected_votekick \1 0xffffffdarf sich nicht in \2 0xffffffumbenennen, das könnte die Abstimmenden verwirren.\n
+player_rename_rejected_admin  \1 0xffffffdarf sich nicht auf \20xffffff umbenennen, sein Name ist von einem Administrator gesperrt.\n
+player_allowed_rename         \1 0x7fff7fdarf sich wieder umbenennen.\n
+player_disallowed_rename      \1 0xff7f7fdarf sich nicht mehr umbenennen.\n
 player_welcome                \n\nWilkommen \1! Auf diesem Server läuft Version \2.\n
 player_win_default            \1 erhält aus sehr seltsamen Gründen \2 Punkte.\n
 player_lose_default           \1 verliert aus sehr seltsamen Gründen \2 Punkte.\n
 player_lose_suicide           \1 verliert \2 Punkte wegen Selbstmord.\n
 player_free_suicide           \1 beging Selbstmord.\n
 player_win_frag               \1 liess \3 für \2 Punkte in die Falle laufen.\n
+player_win_survive            \1 erhält \2 Punkte fürs Überleben.\n
 player_free_frag              \1 liess \2 in die Falle laufen.\n
 player_teamkill               \1 hat den Teampartner \2 beseitigt! Buh! Dafür gibt es keinen einzigen Punkt!\n
 player_win_frag_ai            \1 erhält \2 Punkte für das glorreiche Vernichten eines Computergegners.\n
@@ -2212,11 +2279,37 @@ player_creates_team           \1 gründet \2.\n
 player_nocreate_team          \1 kann momentan kein neues Team gründen.\n
 player_nojoin_team            \1 kann sich momentan \2 nicht anschliessen.\n
 player_not_on_team            Du bist in keinem Team.\n
+player_team_message           Teammitglieder
+player_spectator_message      Zuschauer
+no_real_teams                 Keine Teams mit mehr als einem Spieler.\n
 player_topologypolice         Die Topologiepolizei befiehlt: \1
 
 team_shuffle                  \1 wird von Position \2 auf \3 verschoben.\n
 player_noshuffleup            Du darfst dich hier nicht selbst befördern.\n
 player_noshuffle              Dein Positionsänderungswunsch hat keinen Effekt.\n
+player_shuffle_error          /shuffle erwartet eine Zahl als Argument; mit explizitem Vorzeichen (+/-) wird die Position um die angegebene Zahl an Plätzen verändert, ohne Vorzeichen geht es and die angegebene absolute Position.\n
+
+add_help_topic_help           Fügt ein neues Hilfsthema für /help hinzu. Verwendung: ADD_HELP_TOPIC <thema> <kurzbescheibung> <voller text>
+add_help_topic_usage          Verwendung: ADD_HELP_TOPIC <thema> <kurzbescheibung> <voller text>\n
+add_help_topic_success        Hilfsthema "\1" hinzugefügt.\n
+remove_help_topic_help        Entfernt ein Hilfethema.
+remove_help_topic_success     Hilfsthema "\1" entfernt.\n
+remove_help_topic_notfound    Hilfsthema "\1" existiert nicht.\n
+
+rtfm_announcement             \2 macht \3 auf die Existenz von /help \1 aufmerksam.\n
+
+help_introductory_blurb_help  Dieser Text wird vor der Liste der Hilfsthemen angezeigt, wenn jemand /help ohne Argumente aufruft
+
+help_topics_list_start        Sage /help THEMA, um Hilfe bei einem der folgenden Themen zu erhalten:\n
+help_topic_not_found          Hilfsthema \1 nicht gefunden. /help ohne Argument kann dir eine Liste geben.\n
+
+help_commands_shortdesc       Liste aller Chat-Kommandos
+help_commands_text            Direkt gibt es zu diesem Thema keine Hilfe, aber zu den folgenden Unterthemen:
+
+help_commands_chat_shortdesc  Einfache Chat-Kommandos
+help_commands_chat_text       0x88ff88/me <Nachricht>0xffff88: Simuliert eine Handlung, wie in "/me ist ein Depp.", wird als "* <dein Dame > ist ein Depp" ausgegeben.\n0x88ff88/msg <Teil eines Namens> <Nachricht>0xffff88: Schickt eine private Nachricht, die nur der angegebene Spieler lesen kann.\n0x88ff88/team <Nachricht>0xffff88: Schickt eine Nachricht an deine Teammitglieder, oder an alle Zuschauer, falls du gerade nicht spielst
+
+help_commands_team_shortdesc  Kommandos für Team-Management
 msg_toomanymatches            0xff0000Zu viele Treffer bei Suche nach \1. Bitte etwas genauer.\n
 msg_nomatch                   0xff0000Keine Treffer bein Suche nach \1.\n
 
@@ -2320,6 +2413,7 @@ network_login_process         Verbindungsaufbau initiiert. Warte auf Antwort...\
 network_login_failed          Verbindungsaufbau fehlgeschlagen.
 network_login_failed_full     Verbindungsaufbau fehlgeschlagen: Der Server ist voll belegt.\n
 network_login_failed_timeout  Verbindungsaufbau fehlgeschlagen: Keine Antwort erhalten.\n
+network_login_failed_abort    Verbindungsaufbau abgebrochen.\n
 network_login_success         Verbindungsaufbau erfolgreich. Als Benutzer \1 angemeldet.\n
 network_login_sync            Synchronisiere mit dem Server...\n
 network_login_relabeling      NetObjects werden neu geordnet...\n
@@ -2367,6 +2461,7 @@ network_ban_noreason          Kein Grund angegeben.
 vote_accepted                 Vorschlag "\1" wurde angenommen.\n
 vote_rejected                 Vorschlag "\1" wurde abgelehnt.\n
 vote_timeout                  Abstimmung "\1" wurde ohne Ergebnis beendet.\n
+vote_cancel_all               Alle Abstimmungen wurden von einem Administrator abgebrochen.\n
 vote_new                      Neuer Abstimmungsvorschlag: "\1". Gib deine Stimme im Hauptmenu ab.\n
 vote_redundant                Vorschlag abgelehnt, ein identischer Vorschlag wurde bereits vor kurzem gemacht.\n
 vote_maturity                 Vorschlag abgelehnt, du bist noch nicht alt genug, warte \1 Sekunden.\n
@@ -2514,6 +2609,18 @@ nconfig_error_unknown         Konfigurationsänderung für die unbekannte Variable
 nconfig_error_nonet           Konfigurationsänderung über das Netwzerk für die Variable \1 erhalten, die jedoch keinen Netzwerksupport hat.\n\n\n\nWAHRSCHEINLICH SOLLTE EINE NEUE VERSION VON ARMAGETRON INSTALLIERT WERDEN!!!!\n
 nconfig_error_ignoreold       Veraltete Konfigurationsänderung für Einstellung \1 wird ignoriert.\n
 nconfig_value_changed         \1 wurde auf Befehl des Servers von \2 auf \3 verändert.\n
+
+config_accesslevel_0          Besitzer
+config_accesslevel_1          Administrator
+config_accesslevel_2          Moderator
+config_accesslevel_7          Team-Anführer
+config_accesslevel_8          Teammitglied
+config_accesslevel_12         Lokaler Benutzer
+config_accesslevel_15         Fremder
+config_accesslevel_16         Missbilligt
+config_accesslevel_17         Ausgestoßen
+config_accesslevel_19         Eingeloggt
+config_accesslevel_20         Programm
 
 #*************************************
 #*************************************
