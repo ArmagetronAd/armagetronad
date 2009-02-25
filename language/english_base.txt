@@ -2308,7 +2308,7 @@ help_commands_chat_shortdesc Basic chat commands
 help_commands_chat_text      0x88ff88/me <message>0xffff88: Transmit an action, as in "/me is a noob."\n0x88ff88/msg <part of a nickname> <message>0xffff88: Send a private message that only a specific player can see\n0x88ff88/team <message>0xffff88: Send a message to your teammates, or to all spectators if you're not on a team
 
 help_commands_team_shortdesc Basic team management commands
-help_commands_team_text 0x88ff88/teamshuffle0xffff88: Shuffle yourself to be at the outside of your team's wingmen formation\n0x88ff88/teamshuffle <position>0xffff88: Shuffle yourself to be at a specific position\n0x88ff88/teamshuffle [+|-]<offset>0xffff88: Shuffle yourself up/down by a certain number of ranks\n0x88ff88/teamleave0xffff88: Leave your current team. Only works on some servers\n0x88ff88/teams0xffff88: Get a list of all teams with a somewhat graphic representation of their formation
+help_commands_team_text 0x88ff88/teamshuffle0xffff88: Shuffle yourself to be at the outside of your team's wingmen formation\n0x88ff88/teamshuffle <position>0xffff88: Shuffle yourself to be at a specific position\n0x88ff88/teamshuffle [+|-]<offset>0xffff88: Shuffle yourself up/down by a certain number of ranks\n0x88ff88/teamleave0xffff88: Leave your current team. Only works on some servers\n0x88ff88/teams0xffff88: Get a list of all teams with a somewhat graphic representation of their formation.\n0x88ff88/myteam0xffff88: Get the formation and memberlist of your current team
 
 help_commands_pp_shortdesc Player police commands
 help_commands_pp_text 0x88ff88/players [<search>]0xffff88: Get a list of all players, along with some other information. You can also match specific users with the search argument.\n0x88ff88/admins [<access level> [<access level>]]0xffff88: Gets the list of admins. If first parameter is specified, only admins who have this exact level will be shown. If both arguments are set, all the admins in that range of access levels will be listed.\n0x88ff88/vote kick|suspend <player>0xffff88: Start a poll to kick or suspend a player
@@ -2665,7 +2665,7 @@ access_level_usage          usage: ACCESS_LEVEL <config command> <required minim
 access_level_change         Required access level of command \1 changed to "\2".\n
 access_level_error          Required access level of command \1 is "\2", you only have "\3".\n
 
-casacl_help                   For the duratioon of the rest of the configuration file  thiss directive appears in, elevate the access level.
+casacl_help                   For the duration of the rest of the configuration file  thiss directive appears in, elevate the access level.
 casacl_usage                  Usage: CASACL <required access level> <elevated access level>\n
 casacl_not_allowed            CASACL usage not allowed in this context.\n
 
