@@ -339,7 +339,7 @@ tString nKrawall::EncodeString( tString const & original )
     std::istringstream in( static_cast< char const * >( original ) );
     std::ostringstream out;
 
-    char c = in.get();
+    unsigned char c = in.get();
     while ( !in.eof() )
     {
         if ( c == ' ' )
