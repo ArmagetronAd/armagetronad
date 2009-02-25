@@ -131,6 +131,21 @@ cycle_max_refcount_help       Maximale Zahl der Referenzen auf ein Vehikel, bevo
 #********************************************
 #********************************************
 #
+#      Chatbot settings
+#
+#********************************************
+#********************************************
+
+chatbot_always_active_help    Wenn dies auf 1 gesetzt wird, ist der Chatbot immer aktiv.
+chatbot_new_wall_blindness_help Der Chatbot sieht keine Wände, die jünger als diese Zeit in Sekunden sind
+chatbot_min_timestep_help     Kürzestes Interval zwischen Denkvorgängen des Chatbots
+chatbot_delay_help            Zeit zwischen dem Begin des Chatmodus und der ersten Aktion des Chatbots
+chatbot_range_help            Zeit in Sekunden, die der Chatbot vorausplant
+chatbot_decay_help            Rate, mit der die Qualität des Chatbots mit der Zeit abnimmt
+
+#********************************************
+#********************************************
+#
 #      Score rules configuration items
 #
 #********************************************
@@ -334,6 +349,7 @@ idle_kick_time_help           Zeit in Sekunden ohne Steuerungsbefehl, nach der e
 player_name_confitem_help     Spielername
 player_user_confitem_help     Golbale Spieler-ID
 auto_login_confitem_help      Soll sich dieser Spieler automatisch am Server einloggen?
+hide_identity_confitem_help   Soll die Globale ID dieses Spielers versteckt werden?
 camcenter_help                Zentriere die interne Kamera in Fahrtrichtung
 start_cam_help                Lieblingskameramodus
 start_fov_help                Anfänglicher Sichtwinkel
@@ -431,6 +447,8 @@ lag_credit_time_help          Zeitskala, auf der Lag-Kredit verfällt.
 lag_offset_client_help        Auf dem Client wählbar: Zusatzkompensation für Lag. Für sehr schlechte Verbindungen.
 lag_offset_server_help        Auf dem Server wählbar: Zusatzkompensation für Lag. Für sehr schlechte Verbindungen.
 lag_offset_legacy_help        Auf dem Server wählbar: Zusatzkompensation für Lag für Clients, die den Lag-Kredit-Automatismus noch nicht beherrschen. Für sehr schlechte Verbindungen.
+
+lag_threshold_help            Lag in Sekunden, der bei jedem Event nicht korrigiert wird.
 
 #********************************************
 #********************************************
@@ -715,8 +733,8 @@ alpha_blend_help              Aktiviert Transparenzeffekte
 zone_alpha_toggle_help        Dieser wert wird mit ALPHA_BLEND geXORed, um den Rendermodus der Zonen zu bestimmen
 zone_segments_help            Mit wievelen Segmenten Zonen dargestellt werden. Default: 11
 zone_seg_length_help          Der Anteil jedes Zonensegents, der tatsächlich dargestellt wird. Default: .5
-zone_bottom                   Unterer Rand der Zonen. Default: 0.0
-zone_height                   Höhe der Zonen: Default: 5.0
+zone_bottom_help              Unterer Rand der Zonen. Default: 0.0
+zone_height_help              Höhe der Zonen: Default: 5.0
 smooth_shading_help           Aktiviert "Rundes Licht"
 text_out_help                 Aktiviert Textausgabe
 console_columns_help          Anzahl der Spalten der Textausgabe
@@ -754,7 +772,7 @@ ladderlog_write_round_score_team_help Schreibt in ladderlog.txt: ROUND_SCORE_TEA
 ladderlog_write_round_winner_help Schreibt in ladderlog.txt: ROUND_WINNER <Gewinner>
 ladderlog_write_sacrifice_help Schreibt in ladderlog.txt: SACRIFICE <Spieler, der das Loch benutzt hat> <Spieler, der das Loch gemacht hat> <Spieler, dessen Wand durchlöchert wurde>
 ladderlog_write_wait_for_external_script_help Schreibt in ladderlog.txt: WAIT_FOR_EXTERNAL_SCRIPT (beachte ebenfalls: WAIT_FOR_EXTERNAL_SCRIPT und WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
-ladderlog_game_time_interval  Wenn dies auf einen positiven Wert gesetz wird, so wird alle n Sekunden eine Statusmeldung ins Ladder-Log geschrieben.
+ladderlog_game_time_interval_help Wenn dies auf einen positiven Wert gesetz wird, so wird alle n Sekunden eine Statusmeldung ins Ladder-Log geschrieben.
 chat_log_help                 Schreibt maschinenlesbares Chatlog in var/chatlog.txt
 show_fps_help                 Aktiviert Performance-Anzeige 
 floor_mirror_help             Spiegelung des Bodens
@@ -772,6 +790,7 @@ lag_o_meter_blend_help        Bestimmt, wie stark die Farbe eines Spielers sein 
 lag_o_meter_use_old_help      Soll das alte, nicht wirklich korrekte Lag-O-Meter angezeigt werden?
 axes_indicator_help           Sollen Richtungshinweise gezeigt werden?
 predict_objects_help          Vorhersage der Vehikelbewegungen im Netzwerkspiel
+predict_walls_help            Vorhersage der Vehikelwände. Nützlich, um die gefürchteten Instakills etwas einzudämmen.
 textures_hi_help              Verwende 32-Bit-Texturen
 sparks_help                   Lässt die Funken fliegen
 explosion_help                Schaltet Explosionen ein
@@ -878,6 +897,7 @@ players_help                  Gibt eine Liste der eingeloggten Spieler aus
 teams_help                    Gibt eine Liste aller Teams mit einer rudimentären Darstellung der Formation aus. Analog zum Chat-Kommando /teams.
 kill_help                     Tötet den angegebenen Spieler (als Warnung vor einem Rausschmiss)
 silence_help                  Verbietet einem bestimmten Spieler, öffentlich zu Reden
+unsilence_help                Gegenteil von SILENCE
 suspend_help                  Suspendiert einen Spieler für die nächsten N Runden (Defaultwert für N ist SUSPEND_DEFAULT_ROUNDS)
 unsuspend_help                Hebt eine Suspendierung auf.
 suspend_default_rounds_help   Wieviele Runden soll eine Suspendierung normalerweise dauern?
@@ -889,10 +909,11 @@ default_kick_reason_help      Standardgrund für ein KICK-Kommando.
 kick_to_help                  Wirft den angegebenen Spieler vom Server, und, falls möglich, leitet ihn auf einen anderen Server weiter.
 move_to_help                  Wirft den angegebenen Spieler vom Server, und, falls möglich, leitet ihn auf einen anderen Server weiter. Hat keine schädlichen Nebenwirkungen.
 default_kick_to_reason_help   Standardgrund für ein KICK_TO/MOVE_TO-Kommando.
-default_kick_to_server        Standard-IP bzw. Name des Servers, auf den per KICK_TO oder MOVE_TO weitergeleitet wird.
-default_kick_to_port          Standard-Port des Servers, auf den per KICK_TO oder MOVE_TO weitergeleitet wird.
-vote_kick_to_server           IP bzw. Name des Servers, auf den per Abstimmungs-Rausschmiss weitergeleitet wird.
-vote_kick_to_port             Port des Servers, auf den per Abstimmungs-Rausschmiss weitergeleitet wird.
+default_kick_to_server_help   Standard-IP bzw. Name des Servers, auf den per KICK_TO oder MOVE_TO weitergeleitet wird.
+default_kick_to_port_help     Standard-Port des Servers, auf den per KICK_TO oder MOVE_TO weitergeleitet wird.
+vote_kick_to_server_help      IP bzw. Name des Servers, auf den per Abstimmungs-Rausschmiss weitergeleitet wird.
+vote_kick_to_port_help        Port des Servers, auf den per Abstimmungs-Rausschmiss weitergeleitet wird.
+vote_kick_reason_help         Standartgrund, der Spielern für einen Abstimmungs-Rausschmiss gegeben wird.
 
 ban_help                      Wirft den angegebenen Spieler vom Server und verbannt ihn für eine variable Zeit in Minuten.
 ban_ip_help                   Verbannt spieler von der angegebenen IP-Adresse für die angegebene Zeit in Minuten vom Server.
@@ -1486,6 +1507,7 @@ friends_menu                  Meine Freunde
 friends_menu_help             Trage hier deine Freude ein.
 friends_enable                Meine Freude
 friends_enable_help           Schaltet den Freunde-Filter an oder aus.
+enable_friends_help           Schaltet den Freunde-Filter an oder aus.
 friend_word                   Freund
 friend_help                   Server mit diesem Spieler werden angezeigt, wenn der Freunde-Filter aktiv ist.
 
@@ -2289,6 +2311,12 @@ player_noshuffleup            Du darfst dich hier nicht selbst befördern.\n
 player_noshuffle              Dein Positionsänderungswunsch hat keinen Effekt.\n
 player_shuffle_error          /shuffle erwartet eine Zahl als Argument; mit explizitem Vorzeichen (+/-) wird die Position um die angegebene Zahl an Plätzen verändert, ohne Vorzeichen geht es and die angegebene absolute Position.\n
 
+player_message_help           Schickt eine Nachricht an einen Spieler.
+player_message_usage          Verwendung: PLAYER_MESSAGE <ID oder Name> "<Nachricht>"\n
+kick_usage                    Verwendung: KICK <ID oder Name> <Grund>\n
+ban_usage                     Verwendung: BAN <ID oder Name> <Zeit in Minuten(default: 60)> <Grund>\n
+kickmove_usage                Verwendung: \1 <ID oder Name> <IP des Zielservers>:<Port des Zielservers>\n
+
 add_help_topic_help           Fügt ein neues Hilfsthema für /help hinzu. Verwendung: ADD_HELP_TOPIC <thema> <kurzbescheibung> <voller text>
 add_help_topic_usage          Verwendung: ADD_HELP_TOPIC <thema> <kurzbescheibung> <voller text>\n
 add_help_topic_success        Hilfsthema "\1" hinzugefügt.\n
@@ -2772,6 +2800,9 @@ rtfm_denied                   Um andere zu belehren, ist es erforderlich, eingel
 access_level_list_admins_help Minimaler Zugriffslevel, um das /admins-Kommando benutzen zu dürfen.
 access_level_list_admins_see_everyone_help Benutzer mit diesem oder besserem Zugriffslevel dürfen unabhängig von ADMIN_LIST_MIN_ACCESS_LEVEL jeden Administrator sehen.
 
+intercept_commands_help       Liste von Chat-Kommandos, die angenommen und in der Standardausgabe geloggt werden sollen.
+intercept_unknown_commands_help Wenn dies 1 ist, so werden alle unbekannten Chat-Kommandos angenommen und geloggt.
+
 chat_command_unknown          Unbekanntes Chat-Kommando "\1".\n
 chat_command_accesslevel      Dein Zugriffslevel reicht leider nicht aus, um "\1" auszuführen. Du bist \2, erforderlich wäre \3.\n
 
@@ -2779,6 +2810,8 @@ authority_blacklist_help      Komma-unterteilte Liste von Meldeämtern, die vom S
 authority_whitelist_help      Falls diese Komma-unterteilte Liste nicht leer ist, interpretiert sie der Server als einzigen zu akzeptierenden Meldeämter.
 trust_lan_help                Wenn dies auf 1 gesetzt wird, nimmt der Server an, dass es in diesem LAN keine bösartigen Benutzer gibt.
 hash_method_blacklist_help    Liste nicht zugelassener Authentifizierungsmethoden.
+
+legacy_log_names_help         Wenn dies auf 1 gesetzt wird, dann werden die Log-Namen von nicht eingeloggten Spielern genau so wie in früheren Versionen ohne Authentifizierung generiert. Wenn dies auf 0 gesetzt ist, dann werden die Log-Namen von eingeloggten Spielern möglichts "schön" gebildet.
 
 login_message_requested       Spieler \1 bittet um Authentifizierung als "\2@\3".\n
 login_message_delayed         Dein Login-Prozess wird leider erst verspätet beendet werden können, die Server-Konfiguration erlaubt nichts anderes. Wir bitten, diese unannehmlichkeit zu entschuldigen.\n
