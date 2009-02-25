@@ -1,9 +1,18 @@
+#include "rScreen.h"
 #include "zShape.hpp"
 #include "gCycle.h"
 #include "zZone.h"
 
 #include "zShape.pb.h"
 #include "nProtoBuf.h"
+
+#ifndef ENABLE_ZONESV1
+int sz_zoneAlphaToggle = 0;
+static tSettingItem<int> sz_zoneAlphaToggleConf( "ZONE_ALPHA_TOGGLE", sz_zoneAlphaToggle );
+#else
+#include "gWinZone.h"
+#define sz_zoneAlphaToggle sg_zoneAlphaToggle
+#endif
 
 zShape::zShape( eGrid* grid, zZone * zone )
         :eNetGameObject( grid, eCoord(0,0), eCoord(0,0), NULL, true ),
@@ -226,11 +235,13 @@ bool zShapeCircle::isInteracting(eGameObject * target)
 void zShapeCircle::render(const eCamera * cam )
 {
 #ifndef DEDICATED
-
     // HACK
     int sg_segments = 11;
-    bool sr_alphaBlend = true;
     // HACK
+
+    bool useAlpha = sr_alphaBlend;
+    if (sz_zoneAlphaToggle)
+        useAlpha = !useAlpha;
 
     if ( color_.a_ > .7f )
         color_.a_ = .7f;
@@ -507,11 +518,9 @@ bool zShapePolygon::isInteracting(eGameObject * target)
 void zShapePolygon::render(const eCamera * cam )
 {
 #ifndef DEDICATED
-
-    // HACK
-    //  int sg_segments = 11;
-    bool sr_alphaBlend = true;
-    // HACK
+    bool useAlpha = sr_alphaBlend;
+    if (sz_zoneAlphaToggle)
+        useAlpha = !useAlpha;
 
     if ( color_.a_ > .7f )
         color_.a_ = .7f;
@@ -543,7 +552,7 @@ void zShapePolygon::render(const eCamera * cam )
 
         glRotatef(rotation2.evaluate(lasttime_)*180/M_PI, 0.0, 0.0, 1.0);
 
-        if ( sr_alphaBlend ) {
+        if ( useAlpha ) {
             glDepthMask(GL_FALSE);
             BeginQuads();
         } else {
@@ -578,7 +587,7 @@ void zShapePolygon::render(const eCamera * cam )
             glVertex3f(xpp, ypp, top);
             glVertex3f(xpp, ypp, bot);
 
-            if ( !sr_alphaBlend )
+            if ( !useAlpha )
             {
                 glVertex3f(xp, yp, bot);
                 RenderEnd();

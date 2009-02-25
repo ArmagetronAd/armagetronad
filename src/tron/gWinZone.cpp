@@ -49,7 +49,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nProtoBuf.h"
 #include "gZone.pb.h"
 
-static int sg_zoneAlphaToggle = 0;
+int sg_zoneAlphaToggle = 0;
 static tSettingItem<int> sg_zoneAlphaToggleConf( "ZONE_ALPHA_TOGGLE", sg_zoneAlphaToggle );
 
 std::deque<gZone *> sg_Zones;

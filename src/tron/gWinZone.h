@@ -42,6 +42,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 namespace Game { class ZoneV1Sync; }
 
+// misc zone-related settings
+extern int sg_zoneAlphaToggle;
+
 // zone expansion speed and size
 extern REAL sg_expansionSpeed;
 extern REAL sg_initialSize;
