@@ -48,12 +48,13 @@ public:
     void setupVisuals(gParser &);
     void readXML(tXmlParser::node const &);
 
-private:  // FIXME TODO: These need replacing
-    REAL __deprecated GetRotationSpeed() { return shape->getRotation2().evaluateRate(1, lastTime); };
-    void __deprecated SetRotationSpeed(REAL r) { tPolynomial r2 = shape->getRotation2(); r2.changeRate(r, 1, lastTime); shape->setRotation2(r2); };
-    REAL __deprecated GetRotationAcceleration() { return shape->getRotation2().evaluateRate(2, lastTime); };
-    void __deprecated SetRotationAcceleration(REAL r) { tPolynomial r2 = shape->getRotation2(); r2.changeRate(r, 2, lastTime); shape->setRotation2(r2); };
-    void __deprecated SetReferenceTime() { if (shape) shape->setReferenceTime(lastTime); };
+public:  // DEPRECATED methods; please do NOT use in new code, and REPLACE in old code
+    REAL __deprecated GetRotationSpeed();
+    void __deprecated SetRotationSpeed(REAL r);
+    REAL __deprecated GetRotationAcceleration();
+    void __deprecated SetRotationAcceleration(REAL r);
+    void __deprecated SetReferenceTime();
+
 private:
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
 
