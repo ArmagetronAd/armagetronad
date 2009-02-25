@@ -129,6 +129,21 @@ cycle_max_refcount_help				Maximum allowed reference count on cycles before they
 #********************************************
 #********************************************
 #
+#      Chatbot settings
+#
+#********************************************
+#********************************************
+
+chatbot_always_active_help          if set to 1, the chatbot is active all of the time
+chatbot_new_wall_blindness_help     the chatbot won't see walls that were bult less than this many seconds ago
+chatbot_min_timestep_help           minimal time in seconds between chatbot thoughts
+chatbot_delay_help                  time between entering chat and chatbot activation
+chatbot_range_help                  time in seconds the bot is capable of planning ahead
+chatbot_decay_help                  rate at which the quality of the chatbot decays over time
+
+#********************************************
+#********************************************
+#
 #      Score rules configuration items
 #
 #********************************************
@@ -332,6 +347,7 @@ idle_kick_time_help                 Time in seconds after which an inactive play
 player_name_confitem_help	Player name
 player_user_confitem_help	Global player ID
 auto_login_confitem_help	Should this player automatically request authentication?
+hide_identity_confitem_help Should this player hide his ID?
 camcenter_help			Center internal camera on driving direction
 start_cam_help			Initial Camera
 start_fov_help			Initial field of vision
@@ -429,6 +445,8 @@ lag_credit_time_help               Timescale lag credit is restored on.
 lag_offset_client_help             Extra amount of lag compensation, determined by the client.
 lag_offset_server_help             Extra amount of lag compensation, determined by the server.
 lag_offset_legacy_help             Extra amount of lag compensation for clients that don't support automatic compensation, determined by the server.
+
+lag_threshold_help                 Amount of lag not compensated for on each lag event.
 
 #********************************************
 #********************************************
@@ -713,9 +731,9 @@ alpha_blend_help		Enable alpha blending
 zone_alpha_toggle_help		This is XORd with ALPHA_BLEND to determine the way to draw zones
 zone_segments_help		How many segments the zone is formed with. Default is 11
 zone_seg_length_help	The rendered percentual of every segment. Default is .5
-zone_bottom			Where to put the zone along the Z axis. Default is 0.0
-zone_height			The zone segments' height. Default is 5.0
-smooth_shading_help		Enable smooth shading
+zone_bottom_help        Where to put the zone along the Z axis. Default is 0.0
+zone_height_help        The zone segments' height. Default is 5.0
+smooth_shading_help     Enable smooth shading
 text_out_help			Enable console text output
 console_columns_help    Number of characters in each line of console output
 console_rows_help       Number of lines of console output without user intervention
@@ -752,7 +770,7 @@ ladderlog_write_round_score_team_help         Write to ladderlog: ROUND_SCORE_TE
 ladderlog_write_round_winner_help             Write to ladderlog: ROUND_WINNER <winner>
 ladderlog_write_sacrifice_help                Write to ladderlog: SACRIFICE <player who used the hole> <player who created the hole> <player owning the wall the hole was made into>
 ladderlog_write_wait_for_external_script_help Write to ladderlog: WAIT_FOR_EXTERNAL_SCRIPT (see also: WAIT_FOR_EXTERNAL_SCRIPT and WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
-ladderlog_game_time_interval If nonnegative, write a line with the current game time to the ladder log every n seconds.
+ladderlog_game_time_interval_help If nonnegative, write a line with the current game time to the ladder log every n seconds.
 chat_log_help			Write machine parsable chat messages to var/chatlog.txt
 show_fps_help			Enable fps display
 floor_mirror_help		Floor mirror mode
@@ -770,6 +788,7 @@ lag_o_meter_blend_help		Amount the player color should be blended with white to 
 lag_o_meter_use_old_help	Should we use the old buggy Lag-O-Meter? This functionality will go away soon.
 axes_indicator_help		Should the Axis Indicator be rendered?
 predict_objects_help    Predict cycle movement in network play
+predict_walls_help      Predict cycle walls. Useful for avoiding instant kills
 textures_hi_help		Use high colour textures
 sparks_help			    Draw sparks when going too close to a wall
 explosion_help          Enable explosions?
@@ -876,6 +895,7 @@ players_help                Prints list of currently active players
 teams_help                  Get a list of all teams with a somewhat graphic representation of their formation. Same as saying /teams
 kill_help                   Kill a specific player (as warning before a kick)
 silence_help                Silence a specific player so he can't use public chat any more (/msg and /team still work)
+unsilence_help              Reverts a SILENCE command
 suspend_help                Suspend a player from playing for the following N rounds (default is set by SUSPEND_DEFAULT_ROUNDS)
 unsuspend_help              Removes a player suspension.
 suspend_default_rounds_help Sets default round timeout for SUSPEND.
@@ -887,10 +907,11 @@ default_kick_reason_help    The reason given to a player kicked by KICK if none 
 kick_to_help    			Kicks the specified player from the server and, if the client supports it, redirects him to a different server.
 move_to_help    			Kicks the specified player from the server and, if the client supports it, redirects him to a different server. Does not imply an autoban penalty.
 default_kick_to_reason_help The reason given to a player kicked by KICK_TO or MOVE_TO if none is specified.
-default_kick_to_server      Default server IP/name a player is redirected to by KICK_TO and MOVE_TO.
-default_kick_to_port        Default server port a player is redirected to by KICK_TO and MOVE_TO.
-vote_kick_to_server         Server IP/name a player is redirected to by vote kicks.
-vote_kick_to_port           Default server port a player is redirected to by vote kicks.
+default_kick_to_server_help Default server IP/name a player is redirected to by KICK_TO and MOVE_TO.
+default_kick_to_port_help   Default server port a player is redirected to by KICK_TO and MOVE_TO.
+vote_kick_to_server_help    Server IP/name a player is redirected to by vote kicks.
+vote_kick_to_port_help      Default server port a player is redirected to by vote kicks.
+vote_kick_reason_help       Default reason given to players when they're vote-kicked.
 
 ban_help                    Bans the specified player from the server (kicks him first) for a variable time in minutes.
 ban_ip_help                 Bans the spedified IP address from the server for a variable time.
@@ -1483,7 +1504,8 @@ masters_menu_edit_connect_help	Opens a master server like server browser special
 friends_menu				Mates
 friends_menu_help			Edit your mates.
 friends_enable				Mates Enabled
-friends_enable_help			Turn on/off friends mates filtering.
+friends_enable_help			Turn on/off mates filtering.
+enable_friends_help			Turn on/off mates filtering.
 friend_word					Mate
 friend_help					If a server has this name on its players list, it will show when filtering is on.
 
@@ -2287,6 +2309,7 @@ player_noshuffleup      You are not allowed to shuffle up.\n
 player_noshuffle        Your shuffling wish has no effect.\n
 player_shuffle_error    /shuffle expects a number as argument; an explicit sign (+/-) will change your position by the indicated number of steps, no sign will shuffle you to the given position.\n
 
+player_message_help     Sends a message to a specified player.
 player_message_usage    Usage: PLAYER_MESSAGE <user ID or name> "<Message>"\n
 kick_usage              Usage: KICK <user ID or name> <Reason>\n
 ban_usage               Usage: BAN <user ID or name> <time in minutes(defaults to 60)> <Reason>\n
@@ -2775,6 +2798,9 @@ rtfm_denied                 You need to be logged in to teach others.\n
 access_level_list_admins_help Access level required to be able to use the "/admins" command.
 access_level_list_admins_see_everyone_help Users with this access level or better will be able to list any configured admin, regardless of ADMIN_LIST_MIN_ACCESS_LEVEL.
 
+intercept_commands_help     List of chat commands to accept and log to stdout.
+intercept_unknown_commands_help If 1, accept and log all unknown chat commands.
+
 chat_command_unknown        Unknown chat command "\1".\n
 chat_command_accesslevel    Sorry, your access level is not high enough to use the "\1" command. You're \2, required would be \3.\n
 
@@ -2782,6 +2808,8 @@ authority_blacklist_help    Comma separated list of authorities your server shou
 authority_whitelist_help    If non-empty, only authorities on this comma separated list will be queried by your server.
 trust_lan_help              If set to 1, the server assumes that your LAN is safe and that nobody can run a pharming server on it.
 hash_method_blacklist_help  List of hash authentication methods to disable support for.
+
+legacy_log_names_help       If 1, the log names of unauthenticated players are kept like they were before authentication was implemented. If 0, log names are escaped so that authenticated player names look best.
 
 login_message_requested     User \1 requests authentication as "\2@\3".\n
 login_message_delayed       Your login process will be delayed because the server configuration makes it impossible to be processed immedeately in the background. We're sorry for the inconvenience.\n

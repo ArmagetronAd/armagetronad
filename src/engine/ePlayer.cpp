@@ -1117,7 +1117,7 @@ ePlayer::ePlayer(){
     confname.Clear();
     confname << "AUTO_LOGIN_"<< id+1;
     StoreConfitem(tNEW(tConfItem<bool>)(confname,
-                                        "$auto_login_help",
+                                        "$auto_login_confitem_help",
                                         autoLogin));
     autoLogin = false;
 
@@ -1186,7 +1186,7 @@ ePlayer::ePlayer(){
 
     confname << "HIDE_IDENTITY_"<< id+1;
     StoreConfitem(tNEW(tConfItem<bool>)(confname,
-                                        "$hide_identity_help",
+                                        "$hide_identity_confitem_help",
                                         stealth));
     stealth=false;
     confname.Clear();

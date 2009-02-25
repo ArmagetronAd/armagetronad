@@ -58,6 +58,8 @@ font_min_b_help UNDOCUMENTED
 font_min_total_help UNDOCUMENTED
 font_big_threshold_width_help UNDOCUMENTED
 font_big_threshold_height_help UNDOCUMENTED
+font_small_threshold_width_help Minimal pixel size of small font
+font_small_threshold_height_help Minimal pixel size of small font
 
 camera_smart_distance_help UNDOCUMENTED
 camera_smart_height_help UNDOCUMENTED
@@ -104,7 +106,8 @@ fortress_held_score_help          Score you get for holding your fortress.
 fortress_conquest_decay_rate_help Rate a fortress zone "recovers" from being conquered 
 fortress_conquest_rate_help       Rate a fortress zone gets conquered with for each enemy in it 
 fortress_defend_rate_help         Rate a fortress zone "recovers" for each defending player 
-
+fortress_collapse_speed_help      Speed a fortress zone collapses with
+fortress_conquest_timeout_help    time without enemy contact that makes a fortress zone collapse harmlessly
 
 # should not actually be documented, rather hidden
 bookmark_0_address_help           Server adress of the 1st server bookmark 
@@ -240,6 +243,8 @@ cycle_dist_wall_shrink_override_help UNDOCUMENTED
 cycle_first_spawn_protection_override_help  UNDOCUMENTED
 cycle_invulnerable_time_override_help  UNDOCUMENTED
 cycle_wall_time_override_help  UNDOCUMENTED
+
+authority_no_check_help     UNDOCUMENTED
 
 # yet undefined access levels, reserved for future use (we only want them to pop up for
 # translators then)
