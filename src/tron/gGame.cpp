@@ -66,7 +66,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifdef ENABLE_ZONESV2
 #include "zone/zZone.h"
 #endif
+#ifdef ENABLE_ZONESV1
 #include "gWinZone.h"
+#endif
 #include "eVoter.h"
 #include "tRecorder.h"
 #include "gStatistics.h"
@@ -2741,9 +2743,6 @@ void gGame::StateUpdate(){
             }
             just_connected=false;
 
-#ifdef ENABLE_ZONESV2
-            init_second_pass_zones(grid, aParser);
-#endif
             break;
         case GS_TRANSFER_OBJECTS:
             // con << "Transferring objects...\n";
@@ -4441,167 +4440,6 @@ static void LoginCallback(){
         }
     }
 }
-
-#ifdef ENABLE_ZONESV2
-void oldFortressAutomaticAssignment(zZone *zone, zMonitorPtr monitor);
-
-void init_second_pass_zones(eGrid *grid, gParser *parser)
-{
-    const tList<eGameObject>& gameObjects = grid->GameObjects();
-    for (int i=gameObjects.Len()-1;i>=0;i--)
-    {
-        zZone *zone=dynamic_cast<zZone *>(gameObjects(i));
-
-        if (zone && zone->getOldFortressAutomaticAssignmentBehavior() == true)
-        {
-            zMonitorPtr monitor = parser->getMonitor(zone->getName());
-            oldFortressAutomaticAssignment(zone, monitor);
-        }
-    }
-}
-
-void oldFortressAutomaticAssignment(zZone *zone, zMonitorPtr monitor)
-{
-    if (zone->getOldFortressAutomaticAssignmentBehavior() == true)
-    {      // Recreate the automatic assignment of zones to teams as found in Arthemis
-
-        // Do only once
-        zone->setOldFortressAutomaticAssignmentBehavior( false );
-
-        //      teamDistance_ = 0;
-        const tList<eGameObject>& gameObjects = zone->Grid()->GameObjects();
-        gCycle * closest = NULL;
-        REAL closestDistance = 0;
-        eTeam * team;
-        for (int i=gameObjects.Len()-1;i>=0;i--)
-        {
-            gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
-
-            if (other )
-            {
-                // eTeam * otherTeam = other->Player()->CurrentTeam();
-                eCoord otherpos = other->Position() - zone->GetPosition();
-                REAL distance = otherpos.NormSquared();
-                if ( !closest || distance < closestDistance )
-                {
-                    // check whether other zones are already registered to that team
-                    /*
-                    zZone * farthest = NULL;
-                    int count = 0;
-                    if ( sg_baseZonesPerTeam > 0 )
-                      CountZonesOfTeam( Grid(), otherTeam, count, farthest );
-
-                    // only set team if not too many closer other zones are registered
-                    //		  if ( sg_baseZonesPerTeam == 0 || count < sg_baseZonesPerTeam || farthest->teamDistance_ > distance )
-                    */
-                    {
-                        closest = other;
-                        closestDistance = distance;
-                    }
-                }
-            }
-        }
-
-        if ( closest )
-        {
-            // take over team and color
-            team = closest->Player()->CurrentTeam();
-            rColor teamColor;
-            teamColor.r_ = team->R()/15.0;
-            teamColor.g_ = team->G()/15.0;
-            teamColor.b_ = team->B()/15.0;
-            zone->getShape()->setColor(teamColor);
-            // teamDistance_ = closestDistance;
-
-            { // Build the monitor influence objects for this zone
-
-
-                // Load the associated monitor
-                // Its name is the same as the zone, as both are generated in the same way
-                // through a series of #
-
-
-                //
-                zEffectGroupPtr currentZoneEffect;
-
-                // The part for the defender
-                zValidatorPtr validator;
-                if (sg_singlePlayer) {
-                    // In single player mode, all the players teams have the ID 0, making team logic fail
-                    gVectorExtra< nNetObjectID > playerOwners;
-                    playerOwners.push_back(closest->Player()->ID());
-                    currentZoneEffect = zEffectGroupPtr(new zEffectGroup(playerOwners, gVectorExtra< nNetObjectID >()));
-                    validator = zValidatorPtr( new zValidatorOwner(_ignore, _ignore) );
-                }
-                else {
-                    gVectorExtra< nNetObjectID > teamOwners;
-                    teamOwners.push_back(team->ID());
-                    currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), teamOwners));
-                    validator = zValidatorPtr( new zValidatorOwnerTeam(_ignore, _ignore) );
-                }
-
-                zMonitorInfluencePtr inflDefender = zMonitorInfluencePtr(new zMonitorInfluence( monitor ));
-
-                tPolynomial tpInfluenceSlide(2);
-                tpInfluenceSlide[0] = -1.0 * sg_defendRate;
-                inflDefender->setInfluenceSlide( tpInfluenceSlide );
-                //                inflDefender->setInfluenceSlide( tFunction(-1.0 * sg_defendRate, 0.0) );
-
-                // Store all the objects
-                validator->addMonitorInfluence( inflDefender );
-                currentZoneEffect->addValidator( validator );
-
-                // The part for the attaquer
-                if (sg_singlePlayer) {
-                    // In single player mode, all the players teams have the ID 0, making team logic fail
-                    validator = zValidatorPtr( new zValidatorAllButOwner(_ignore, _ignore) );
-                }
-                else {
-                    validator = zValidatorPtr( new zValidatorAllButTeamOwner(_ignore, _ignore) );
-                }
-
-                zMonitorInfluencePtr inflAttaquer = zMonitorInfluencePtr(new zMonitorInfluence( monitor ));
-
-                tpInfluenceSlide[0] = -1.0 * sg_defendRate;
-                inflAttaquer->setInfluenceSlide( tpInfluenceSlide );
-                //                inflAttaquer->setInfluenceSlide(  tFunction(sg_conquestRate, 0.0) );
-                // Store all the objects
-                validator->addMonitorInfluence( inflAttaquer );
-                currentZoneEffect->addValidator( validator );
-
-
-
-                zone->addEffectGroupInside( currentZoneEffect );
-
-            }
-
-            zone->RequestSync();
-        }
-
-        /*
-        // if this zone does not belong to a team, discard it.
-        if ( !team )
-          {
-        return true;
-          }
-
-        // check other zones owned by the same team. Discard the one farthest away
-        // if the max count is exceeded
-        if ( team && sg_baseZonesPerTeam > 0 )
-          {
-        gBaseZoneHack * farthest = 0;
-        int count = 0;
-        CountZonesOfTeam( Grid(), team, count, farthest );
-
-        // discard team of farthest zone
-        if ( count > sg_baseZonesPerTeam )
-        farthest->team = NULL;
-          }
-        */
-    }
-}
-#endif
-
 
 static nCallbackLoginLogout lc(LoginCallback);
 
