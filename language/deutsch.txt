@@ -2739,8 +2739,115 @@ access_level_spy_team_help    Minimaler Zugriffslevel, um als Zuschauer /team-Na
 access_level_spy_msg_help     Minimaler Zugriffslevel, um private Nachrichten anderer Spieler (/msg) lesen zu können.
 access_level_play_help        Minimaler Zugriffslevel, um Spielen zu dürfen
 access_level_shuffle_up_help  Minimaler Zugriffslevel, um sich via /shuffle nach innen bewegen zu dürfen
+access_level_play_sliding_help Variabler minimaler Zugriffslevel zum Spielen. Wenn genug Spieler mit Zugriffslevel ACCESS_LEVEL_PLAY oder höher online sind, dann wird deren Zugriffslevel der minimale Level zum Spielen. Allerdings wird er niemals höher als ACCESS_LEVEL_PLAY_SLIDING.
+access_level_play_sliders_help Der Zugriffslevel, der zum Spielen nötig ist, wird nur nach oben verschoben, wenn mindestens so viele Spieler mit dem höheren Level noch spielen können.
+access_level_play_changed     Zum Spielen benötigter Zugriffslevel von \1 auf \2 verschoben.\n
+
+access_level_vote_suspend_help Minimaler Zugriffslevel, um Suspendierungsabstimmungen starten zu dürfen.
+access_level_vote_kick_help   Minimaler Zugriffslevel, um Rauschmissabstimmungen starten zu dürfen.
+access_level_vote_include_help Minimaler Zugriffslevel, um Konfigurationseinbindungsabstimmungen starten zu dürfen.
+access_level_vote_include_execute_help Minimaler Zugriffslevel, auf dem erfolgreiche Konfigurationseinbindungsabstimmungen ausgeführt werden.
+access_level_vote_command_help Minimaler Zugriffslevel, um Kommandoabstimmungen starten zu dürfen.
+access_level_vote_command_execute_help Minimaler Zugriffslevel, auf dem erfolgreiche Kommandoabstimmungen ausgeführt werden.
+
+access_level_chat_timeout_help Zeit in Sekunden zwischen öffentlichen Nachrichten, dass jemand gerne etwas sagen würde, aber nicht darf. Ein Wert von 0 schaltet die Nachrichten ab.
+access_level_chat_request     \10xRESETT würde gerne Reden, aber darf nicht. Wäre jemand so nett, "/op \2" zu sagen?\n
+access_level_chat_denied      0xff7f7fRede verweigert,0xffffff ungenügender Zugriffslevel.\n
+access_level_op_denied        0xff7f7f\1 verweigert,0xffffff ungenügender Zugriffslevel.\n
+access_level_op_overpowered   0xff7f7f\1 verweigert,0xffffff du brauchst einen höheren Zugriffslevel als dein Opfer.\n
+access_level_op_self          0xff7f7f\1 verweigert,0xffffff du kannst dir das nicht selbst antun :).\n
+access_level_op_denied_max    0xff7f7f\1 verweigert,0xffffff dein Opfer hat bereits maximalen Level.\n
+access_level_op_denied_ai     0xff7f7f\1 verweigert,0xffffff dein Opfer ist ein Computergegner.\n
+access_level_op_same          \1: Das wäre wirkungslos.\n
+access_level_op_unclear       \1: Spieler ist bereits eingeloggt, bitte einen Zugriffslevel spezifizieren.\n
+
+access_level_demote           \1 wurde von \3 zum "\2" degradiert.\n
+access_level_promote          \1 wurde von \3 zum "\2" befördert.\n
+
+access_level_admin_denied     0xff7f7f/admin verweigert,0xffffff ungenügender Zugriffslevel.\n
+access_level_shuffle_up_denied Erforderlicher Zugriffslevel zum Positionswechsel nach innen ist "\1", du bist nur "\2".\n
+access_level_rtfm_denied      Erforderlicher Zugriffslevel zum Belehren ist "\1", du bist nur "\2".\n
+rtfm_denied                   Um andere zu belehren, ist es erforderlich, eingeloggt zu sein.\n
+
+access_level_list_admins_help Minimaler Zugriffslevel, um das /admins-Kommando benutzen zu dürfen.
+access_level_list_admins_see_everyone_help Benutzer mit diesem oder besserem Zugriffslevel dürfen unabhängig von ADMIN_LIST_MIN_ACCESS_LEVEL jeden Administrator sehen.
+
+chat_command_unknown          Unbekanntes Chat-Kommando "\1".\n
+chat_command_accesslevel      Dein Zugriffslevel reicht leider nicht aus, um "\1" auszuführen. Du bist \2, erforderlich wäre \3.\n
+
+authority_blacklist_help      Komma-unterteilte Liste von Meldeämtern, die vom Server nicht anerkannt werden.
+authority_whitelist_help      Falls diese Komma-unterteilte Liste nicht leer ist, interpretiert sie der Server als einzigen zu akzeptierenden Meldeämter.
+trust_lan_help                Wenn dies auf 1 gesetzt wird, nimmt der Server an, dass es in diesem LAN keine bösartigen Benutzer gibt.
+hash_method_blacklist_help    Liste nicht zugelassener Authentifizierungsmethoden.
+
+login_message_requested       Spieler \1 bittet um Authentifizierung als "\2@\3".\n
+login_message_delayed         Dein Login-Prozess wird leider erst verspätet beendet werden können, die Server-Konfiguration erlaubt nichts anderes. Wir bitten, diese unannehmlichkeit zu entschuldigen.\n
+login_message_responded       Passwortanfrage an Benutzer \1 geschickt, Bentzername "\2", Methode \3, Nachricht "\4".\n
+login_message                 \3\1 wurde als \2 Authentifiziert.\n
+login_message_byorder         Anordnung von \1:
+login_message_special         \4\1 wurde als \2 auf Zugriffslevel "\3" eingeloggt.\n
+logout_message                \1 wurde als \2 ausgeloggt.\n
+logout_message_deop           \1 wurde als \2 auf Anordnung von \3 ausgeloggt.\n
+login_failed_message          0xff7f7fLogin fehlgeschlagen,0xffffff Grund: \1\n
 
 # various reasons for logins to fail
+login_error_aborted           Abgebrochen.
+login_error_invalidurl_illegal_hostname Authentifizierungs-URL \1 ungültig, nicht erlaubte Zeichen im Rechnernamensteil (mur ASCII ist erlaubt, und auch da nur Buchstaben, Zahlen und wenige andere).
+login_error_invalidurl_illegal_path Authentifizierungs-URL \1 ungültig, nicht erlaubte Zeichen im Dateipfad (mur ASCII ist erlaubt, und auch da nur Buchstaben, Zahlen, Punkt, Schrägstrich und wenige andere).
+login_error_invalidurl_illegal_port Authentifizierungs-URL \1 ungültig, nicht erlaubte Zeichen im Port (mur Zahlen sind erlaubt).
+login_error_invalidurl_defaultport Authentifizierungs-URL \1 ungültig, Standardport angegeben. Der ist überflüssig.
+login_error_invalidurl_slash  Authentifizierungs-URL \1 ungültig, doppelder Schrägstrich oder Schrägstrich am Ende.
+login_error_invalidurl_rawip  Authentifizierungs-URL \1 ungültig, enhält nackte IP-Adresse.
+login_error_invalidurl_notfound Authentifizierungs-URL \1 ungültig, wurde nicht gefunden.
+login_error_noremote          Authentifizierung via Globaler ID ist auf diesem Server nicht aktiviert. 
+login_error_blacklist         Meldeamt \1 ist auf der schwarzen Liste dieses Servers.
+login_error_whitelist         Meldeamt \1 ist nicht auf der weissen Liste dieses Servers.
+login_error_pharm             Server-Adresse passt nicht, \1 (vom Client) != \2 (Serveraddresse). Pharming möglich. Wenn du dich gerade vom LAN mit deinem eigenen Server verbindest, kannst du "TRUST_LAN" aktivieren (nur wenn sich im LAN keine Bösewichte verstecken, natürlich), oder setze "SERVER_IP", um dem Server seine korrekte Adresse mitzuteilen.
+login_error_pharm_cheap       Ärger mit Server-Adresse. Der Client schickt eine unspeziefische Adresse.
+login_error_methodmismatch    Die lokale Methode zum Passworttest wurde zwischen dem Setzen des Passworts und jetzt verändert. In der Serverkonfiguration müssen alle zur Authentifizierungsmethode relevanten Einstellungen VOR den Passwörtern lokaler Accounts stehen.
+login_error_nomethod          Keine geeignete Authentifizierungsmethode gefunden. Der Client unterstützt \1, der Server \2, und das Meldeamt \3.
+login_error_nomethodlist      Authentifizierungs-URL \1 gibt nicht die Liste der Authentifizierungsmethoden zurück. Statdessen erhalten: Fehlercode \2, Ihhalt "\3".
+login_error_nomethodproperties Authentifizierungs-URL \1 gibt nicht die Liste der Einstellungen zurück. Statdessen erhalten: Fehlercode \2, Ihhalt "\3".
+login_error_nouser            Benutzer existiert nicht, Meldeamt sagt "\1".
+login_error_password          Falsches Passwort, Meldeamt sagt "\2".
+login_error_unknown           Unbekannter Fehlercode \1 erhalten, Inhalt "\2".
+login_error_invalidclaim      Meldeamt "\1" Versucht vergeblich, dich als "\2" auszugeben.
+login_error_unexpected_answer Antwort "\2" vom Server erwartet, stattdessen \2 erhalten.
+
+login_error_local_nouser      Lokalen Benutzer \1 nicht gefunden.
+login_error_local_password    Passwort für lokalen Benutzer \1 falsch.
+
+chatcommand_requires_player   \1 benötigt einen Benutzernamen als zusätzliches Argument.\n
+
+local_user_help               Fügt einen lokalen Benutzer als Name/Paswort-Paar hinzu.
+local_user_syntax             Verwendung: LOCAL_USER <Benutzername> <Password>\n
+
+local_team_help               Fügt einen lokalen Account für ein ganzes Team hinzu (Team-Tags werden verglichen).
+local_team_syntax             Verwendung: LOCAL_TEAM <Team-Tag> <Password>\n
+
+user_remove_help              Entfernt den lokalen Account eines Benutzers oder Teams.
+password_remove_syntax        Verwendung: USER_REMOVE <Benutzername/Team Tag>\n
+md5_password_removed          Benutzer/Team \1 entfernt.\n
+md5_password_remove_notfound  Benutzer/Team \1 nicht gefunden.\n
+
+reserve_screen_name_help      Reserviert einen Spitznamen für einen registrierten Benutzer
+reserve_screen_namne_usage    Verwendung: RESERVE_SCREEN_NAME <Spitzname (in Anfürungszeichen)> <Benutzername>
+reserve_screen_name_change    Der Spitzname "\1" ist für \2 reserviert.\n
+
+user_alias_help               Erlaubt es, Authentifizierungs-IDs umzubiegen: ein Spieler, der eigentlich als X authentifiziert ist, kann als Y erscheinen.
+alias_usage                   Verwendung: USER_ALIAS <eigentlicher Benutzername> <Benutzername, wie er erscheinen soll>
+alias_change                  Benutzer \1 wird als \2 erscheinen.\n
+
+ban_user_help                 Verbannt Spieler mit bestimmter Authentifizierungs-ID
+ban_user_message              Benutzer \1 wurde verbannt.\n
+unban_user_help               Macht BAN_USER rückgängig.
+unban_user_message            Benutzer \1 ist nicht mehr verbannt.\n
+ban_user_list_help            Gibt die Liste der verbannten Authentifizierungs-IDs aus.
+
+md5_prefix_help               Prefix, der bei lokalen Accounts zum Verschüsseln des Passworts verwendet wird
+md5_suffix_help               Suffix, der bei lokalen Accounts zum Verschüsseln des Passworts verwendet wird
+
+global_id_help                Wenn dies auf 1 gesetzt wird, dann wird die Unterstützung von Globalen IDs aktiviert.
 
 # items that should not be translated
 
