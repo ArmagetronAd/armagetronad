@@ -125,6 +125,26 @@ tCoord zShape::Position() const {
     );
 }
 
+REAL zShape::GetRotationSpeed() {
+    return getRotation2().evaluateRate(1, lasttime_);
+}
+
+void zShape::SetRotationSpeed(REAL r) {
+    tPolynomial r2 = getRotation2();
+    r2.changeRate(r, 1, lasttime_);
+    setRotation2(r2);
+}
+
+REAL zShape::GetRotationAcceleration() {
+    return getRotation2().evaluateRate(2, lasttime_);
+}
+
+void zShape::SetRotationAcceleration(REAL r) {
+    tPolynomial r2 = getRotation2();
+    r2.changeRate(r, 2, lasttime_);
+    setRotation2(r2);
+}
+
 void zShape::animate( REAL time ) {
     // Is this needed as the items are already animated?
 }

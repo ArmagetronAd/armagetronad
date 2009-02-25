@@ -49,6 +49,12 @@ public:
   tFunction getScale() {return scale_;};
   rColor getColor() {return color_;};
 
+    //! shortcut rotation functions
+    REAL GetRotationSpeed();
+    void SetRotationSpeed(REAL r);
+    REAL GetRotationAcceleration();
+    void SetRotationAcceleration(REAL r);
+
     void TimeStep( REAL time );
     void setReferenceTime(REAL time);
 

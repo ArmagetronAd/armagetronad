@@ -220,26 +220,22 @@ zZone::readXML(tXmlParser::node const &)
 
 REAL zZone::GetRotationSpeed() {
     tASSERT(shape);
-    return shape->getRotation2().evaluateRate(1, lastTime);
+    return shape->GetRotationSpeed();
 }
 
 void zZone::SetRotationSpeed(REAL r) {
     tASSERT(shape);
-    tPolynomial r2 = shape->getRotation2();
-    r2.changeRate(r, 1, lastTime);
-    shape->setRotation2(r2);
+    shape->SetRotationSpeed(r);
 }
 
 REAL zZone::GetRotationAcceleration() {
     tASSERT(shape);
-    return shape->getRotation2().evaluateRate(2, lastTime);
+    return shape->GetRotationAcceleration();
 }
 
 void zZone::SetRotationAcceleration(REAL r) {
     tASSERT(shape);
-    tPolynomial r2 = shape->getRotation2();
-    r2.changeRate(r, 2, lastTime);
-    shape->setRotation2(r2);
+    shape->SetRotationAcceleration(r);
 }
 
 // SetReferenceTime BELOW....
