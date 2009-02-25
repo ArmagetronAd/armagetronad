@@ -2823,11 +2823,8 @@ local_user_syntax Usage: LOCAL_USER <user name> <password>\n
 local_team_help          Adds a local account for an entire team (team tags are compared).
 local_team_syntax        Usage: LOCAL_TEAM <team tag> <password>\n
 
-md5_password_teamleader_help   Adds an account over the md5-hash based login system for a team leader. Team leaders can pick up players into the game.
-md5_password_teamleader_syntax Usage: MD5_PASSWORD_TEAMLEADER <user name> <password>\n
-
-md5_user_remove_help   Removes an password account for a user or team.
-md5_password_remove_syntax Usage: USER_REMOVE <user name/team tag>\n
+user_remove_help   Removes an password account for a user or team.
+password_remove_syntax Usage: USER_REMOVE <user name/team tag>\n
 md5_password_removed        User name/team tag \1 removed.\n
 md5_password_remove_notfound User name/team tag \1 to remove not found.\n
 
