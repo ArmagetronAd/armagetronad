@@ -182,11 +182,10 @@ bool zFortressZone::Timestep( REAL time )
 
     if ( currentState_ == State_Conquering )
     {
-        // let zone vanish
-        SetReferenceTime();
-
         if (shape)
         {
+            // let zone vanish
+            shape->setReferenceTime(lastTime);
 
         // let it light up in agony
         if ( sg_collapseSpeed < .4 )
@@ -197,26 +196,32 @@ bool zFortressZone::Timestep( REAL time )
         }
 
         shape->collapse( sg_collapseSpeed );
-        SetRotationAcceleration( -GetRotationSpeed()*.4 );
+            shape->SetRotationAcceleration( -shape->GetRotationSpeed()*.4 );
         shape->RequestSync();
 
         }
+        else
+            OnVanish();
 
         currentState_ = State_Conquered;
     }
-    else if ( currentState_ == State_Conquered && GetRotationSpeed() < 0 )
+    else if ( currentState_ == State_Conquered && ( !shape || shape->GetRotationSpeed() < 0 ) )
     {
-        // let zone vanish
-        SetReferenceTime();
-        SetRotationSpeed( 0 );
-        SetRotationAcceleration( 0 );
         if (shape)
         {
+
+        // let zone vanish
+            shape->setReferenceTime(lastTime);
+            shape->SetRotationSpeed( 0 );
+            shape->SetRotationAcceleration( 0 );
+
             rColor color_ = shape->getColor();
         color_.r_ = color_.g_ = color_.b_ = .5;
             shape->setColor(color_);
             shape->RequestSync();
         }
+        else
+            OnVanish();
     }
 
     REAL dt = time - lastTime;
@@ -257,11 +262,11 @@ bool zFortressZone::Timestep( REAL time )
 
         if ( sn_GetNetState() != nCLIENT &&
                 shape &&
-                ( ( fabs( omega - GetRotationSpeed() ) + fabs( omegaDot - GetRotationAcceleration() ) ) * timeStep > .5 ) )
+                ( ( fabs( omega - shape->GetRotationSpeed() ) + fabs( omegaDot - shape->GetRotationAcceleration() ) ) * timeStep > .5 ) )
         {
-            SetRotationSpeed( omega );
-            SetRotationAcceleration( omegaDot );
-            SetReferenceTime();
+            shape->SetRotationSpeed( omega );
+            shape->SetRotationAcceleration( omegaDot );
+            shape->setReferenceTime(lastTime);
             shape->RequestSync();
             lastSync_ = lastTime;
         }
