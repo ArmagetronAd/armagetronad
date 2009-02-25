@@ -330,6 +330,14 @@ if test x$enable_armathentication = xyes; then
 AC_DEFINE(KRAWALL_SERVER,,enables krawall server)
 fi
 
+if test x$enable_zonesv1 = xyes && test x$enable_fortress = xyes; then
+	AC_MSG_WARN([
+	Zones v2 Fortress is incompatible with Zones v1.
+	Therefore, Zones v1 will be disabled.
+	])
+	enable_zonesv1=no
+fi
+
 if test x$enable_zonesv1 = xyes; then
 AC_DEFINE(ENABLE_ZONESV1,,enables zonesv1)
 fi
