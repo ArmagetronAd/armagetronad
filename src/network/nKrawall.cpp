@@ -312,7 +312,7 @@ nKrawall::nCheckResult::nCheckResult( nCheckResult const & other )
 {
 }
 
-static void sn_WriteHexByte( std::ostream & s, int c )
+static void sn_WriteHexByte( std::ostream & s, unsigned int c )
 {
     // don't want to rely on filling type iomanip things, never learned how to use them reliably
     s << std::hex <<  std::setfill('0') << std::setw(2) << c;
