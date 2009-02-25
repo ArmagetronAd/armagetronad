@@ -48,13 +48,6 @@ public:
     void setupVisuals(gParser &);
     void readXML(tXmlParser::node const &);
 
-public:  // DEPRECATED methods; please do NOT use in new code, and REPLACE in old code
-    REAL __deprecated GetRotationSpeed();
-    void __deprecated SetRotationSpeed(REAL r);
-    REAL __deprecated GetRotationAcceleration();
-    void __deprecated SetRotationAcceleration(REAL r);
-    void __deprecated SetReferenceTime();
-
 private:
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
 

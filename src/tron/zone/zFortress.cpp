@@ -133,40 +133,6 @@ void zFortressZone::readXML(tXmlParser::node const & node)
 {
 }
 
-// BEGIN DEPRECATED METHODS
-
-REAL zFortressZone::GetRotationSpeed() {
-    tASSERT(shape);
-    return shape->getRotation2().evaluateRate(1, lastTime);
-}
-
-void zFortressZone::SetRotationSpeed(REAL r) {
-    tASSERT(shape);
-    tPolynomial r2 = shape->getRotation2();
-    r2.changeRate(r, 1, lastTime);
-    shape->setRotation2(r2);
-}
-
-REAL zFortressZone::GetRotationAcceleration() {
-    tASSERT(shape);
-    return shape->getRotation2().evaluateRate(2, lastTime);
-}
-
-void zFortressZone::SetRotationAcceleration(REAL r) {
-    tASSERT(shape);
-    tPolynomial r2 = shape->getRotation2();
-    r2.changeRate(r, 2, lastTime);
-    shape->setRotation2(r2);
-}
-
-void zFortressZone::SetReferenceTime() {
-    if (shape)
-        shape->setReferenceTime(lastTime);
-    zZone::SetReferenceTime();
-}
-
-// END OF DEPRECATED METHODS
-
 // count zones belonging to the given team.
 // fill in count and the zone that is farthest to the team.
 void zFortressZone::CountZonesOfTeam( eGrid const * grid, eTeam * otherTeam, int & count, zFortressZone * & farthest )

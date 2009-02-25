@@ -215,6 +215,38 @@ zZone::readXML(tXmlParser::node const &)
     // FIXME: Maybe move the entire zone parsing code in here? :D
 }
 
+
+// BEGIN DEPRECATED METHODS
+
+REAL zZone::GetRotationSpeed() {
+    tASSERT(shape);
+    return shape->getRotation2().evaluateRate(1, lastTime);
+}
+
+void zZone::SetRotationSpeed(REAL r) {
+    tASSERT(shape);
+    tPolynomial r2 = shape->getRotation2();
+    r2.changeRate(r, 1, lastTime);
+    shape->setRotation2(r2);
+}
+
+REAL zZone::GetRotationAcceleration() {
+    tASSERT(shape);
+    return shape->getRotation2().evaluateRate(2, lastTime);
+}
+
+void zZone::SetRotationAcceleration(REAL r) {
+    tASSERT(shape);
+    tPolynomial r2 = shape->getRotation2();
+    r2.changeRate(r, 2, lastTime);
+    shape->setRotation2(r2);
+}
+
+// SetReferenceTime BELOW....
+
+// END OF DEPRECATED METHODS
+
+
 // *******************************************************************************
 // *
 // *	ClearToTransmit
@@ -617,6 +649,13 @@ void zZone::SetReferenceTime( void )
       this->scale_.SetOffset( EvaluateFunctionNow( this->scale_ ) );
       this->rotationSpeed_.SetOffset( EvaluateFunctionNow( this->rotationSpeed_ ) );
     */
+
+    // FIXME: zZone didn't originally do this, but it is added for compat w/
+    //         Zones v1 porting; nothing in zones v2 seems to actually use this
+    //         function
+    if (shape)
+        shape->setReferenceTime(lastTime);
+
     // reset time
     this->referenceTime_ = lastTime;
 }

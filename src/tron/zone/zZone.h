@@ -73,6 +73,13 @@ class zZone: public eNetGameObject
 private:
     // TODO FIXME \
     void*pos;  //!< pos is not valid for zones
+public:  // DEPRECATED methods: please do NOT use in new code, and REPLACE in old code
+    REAL __deprecated GetRotationSpeed();
+    void __deprecated SetRotationSpeed(REAL r);
+    REAL __deprecated GetRotationAcceleration();
+    void __deprecated SetRotationAcceleration(REAL r);
+    void __deprecated SetReferenceTime();
+
 public:
     static zZone* create(eGrid*grid, std::string const & type) { return new zZone(grid); };
     zZone(eGrid *grid); //!< local constructor
@@ -92,8 +99,6 @@ public:
 
     virtual void setupVisuals(gParser &);
     virtual void readXML(tXmlParser::node const &);
-
-    void SetReferenceTime();               //!< sets the reference time to the current time
 
     eCoord          GetPosition         ( void ) const;	                //!< Gets the current position
     zZone const &   GetPosition         ( eCoord & position ) const;	//!< Gets the current position
