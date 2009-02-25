@@ -1,0 +1,33 @@
+// Protocol buffer types for Timer
+package Engine;
+
+import "nNetObject.proto";
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// legacy sync message
+message TimerSync
+{
+    // base class init data, needs to come first
+    optional Network.NetObjectSync base = 1;
+
+        
+
+    // legacy creation data end marker
+    optional bool legacy_create_end = 20000;
+
+    optional float time  = 2;  // the current time
+    optional float speed = 3;  // timer speed compared to RTC
+    
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
+    // extensions go here
+}

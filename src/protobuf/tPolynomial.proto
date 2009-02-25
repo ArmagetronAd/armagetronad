@@ -1,0 +1,34 @@
+// Protocol buffer types for polynomials
+package Tools;
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// sync message for polynomials
+message PolynomialSync
+{
+    optional float reference          = 1;  // zero point
+    repeated float coefficients       = 2;  // coefficients
+
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
+}
+
+// sync message for polynomials with offset
+message PolynomialWithBaseSync
+{
+    optional PolynomialSync base      = 1;
+
+    optional float offset             = 2;  // fixed offset
+
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
+}

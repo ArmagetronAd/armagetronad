@@ -32,6 +32,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eGameObject.h"
 #include "tCallback.h"
 
+namespace Engine { class NetGameObjectSync; }
+
 // max ping to equalize;
 extern int sn_pingCharityServer;
 
@@ -53,7 +55,11 @@ protected:
     REAL laggometerSmooth;  //!< the lag, smoothed over time
 
     // used to implement the control functions
-    virtual void ReceiveControlNet(nMessage &m);
+    virtual void ReceiveControlNet( Network::NetObjectControl const & control );
+
+    // easier to implement conversion helpers: just extract the relevant sub-protbuf.
+    virtual nProtoBuf       * ExtractControl( Network::NetObjectControl       & control );
+    virtual nProtoBuf const * ExtractControl( Network::NetObjectControl const & control );
 
     virtual ~eNetGameObject();
 
@@ -73,16 +79,10 @@ public:
     virtual void InitAfterCreation();
 
     eNetGameObject(eGrid *grid, const eCoord &pos,const eCoord &dir,ePlayerNetID* p,bool autodelete=false);
-    eNetGameObject(nMessage &m);
 
     virtual void DoRemoveFromGame(); // just remove it from the lists and unregister it
 
-    virtual void WriteCreate(nMessage &m);
-    virtual void WriteSync(nMessage &m);
-    virtual void ReadSync(nMessage &m);
-    //virtual nDescriptor &CreatorDescriptor() const;
     virtual bool ClearToTransmit(int user) const;
-    virtual bool SyncIsNew(nMessage &m);
 
     virtual void AddRef();          //!< adds a reference
     virtual void Release();         //!< removes a reference
@@ -102,10 +102,16 @@ public:
 
     virtual REAL Lag() const;
     virtual REAL LagThreshold() const;
-};
 
-nMessage &operator << (nMessage &m, const eCoord &x);
-nMessage &operator >> (nMessage &m, eCoord &x);
+    //! creates a netobject form sync data
+    eNetGameObject( Engine::NetGameObjectSync const & sync, nSenderInfo const & sender );
+    //! reads sync data, returns false if sync was old or otherwise invalid
+    void ReadSync( Engine::NetGameObjectSync const & sync, nSenderInfo const & sender );
+    //! writes sync data (and initialization data if flag is set)
+    void WriteSync( Engine::NetGameObjectSync & sync, bool init ) const;
+    //! returns true if sync message is new (and updates 
+    bool SyncIsNew( Engine::NetGameObjectSync const & sync, nSenderInfo const & sender );
+};
 
 class eTransferInhibitor: public tCallbackOr{
     static int user;

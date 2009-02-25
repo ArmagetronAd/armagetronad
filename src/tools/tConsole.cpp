@@ -176,12 +176,17 @@ tConsole & tConsole::Print(tString s)
 
     if ( newline )
     {
+        usleep(1000);
+
         // filter
         FilterLine( line_ );
 
         // print
-        if (s_betterConsole)
-            s_betterConsole->DoPrint( line_ );
+        tConsole * better = s_betterConsole;
+        if (better)
+        {
+            better->DoPrint( line_ );
+        }
         else
             DoPrint( line_ );
 

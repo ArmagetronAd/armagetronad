@@ -1,6 +1,8 @@
 
 #include "tFunction.h"
 
+#include "tFunction.pb.h"
+
 // *******************************************************************************
 // *
 // *	tFunction
@@ -106,4 +108,37 @@ tFunction::~tFunction( void )
 REAL tFunction::Evaluate( REAL argument ) const
 {
     return offset_ + slope_ * argument;
+}
+
+
+// *******************************************************************************
+// *
+// *	ReadSync
+// *
+// *******************************************************************************
+//!
+//!		@param	sync protobuf to read from
+//!
+// *******************************************************************************
+
+void tFunction::ReadSync ( Tools::Function const & sync )
+{
+    offset_ = sync.offset();
+    slope_  = sync.slope();
+}
+
+// *******************************************************************************
+// *
+// *	WriteSync
+// *
+// *******************************************************************************
+//!
+//!		@param	sync protobuf to write to
+//!
+// *******************************************************************************
+
+void tFunction::WriteSync( Tools::Function       & sync ) const
+{
+    sync.set_offset( offset_ );
+    sync.set_slope ( slope_  );
 }

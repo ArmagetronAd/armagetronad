@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "tMemManager.h"
+#include "nProtoBuf.h"
 #include "eTimer.h"
 #include "eNetGameObject.h"
 #include "nSimulatePing.h"
@@ -33,6 +34,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tMath.h"
 #include "tConfiguration.h"
 #include "eLagCompensation.h"
+
+#include "eTimer.pb.h"
 
 eTimer *se_mainGameTimer=NULL;
 
@@ -58,7 +61,10 @@ eTimer::eTimer():nNetObject(), startTimeSmoothedOffset_(0){
     creationSystemTime_ = tSysTimeFloat();
 }
 
-eTimer::eTimer(nMessage &m):nNetObject(m), startTimeSmoothedOffset_(0){
+eTimer::eTimer( Engine::TimerSync const & sync, nSenderInfo const & sender )
+: nNetObject( sync.base(), sender )
+, startTimeSmoothedOffset_(0)
+{
     //con << "Creating remote eTimer.\n";
 
     speed = 1.0;
@@ -76,8 +82,8 @@ eTimer::eTimer(nMessage &m):nNetObject(m), startTimeSmoothedOffset_(0){
 
     lastStartTime_ = lastRemoteTime_ = 0;
 
-    // assume strongly the clocks are in sync
-    startTimeDrift_.Add( 0, 100 );
+    // assume VERY strongly the clocks are in sync
+    startTimeDrift_.Add( 0, 10000 );
 }
 
 eTimer::~eTimer(){
@@ -88,19 +94,13 @@ eTimer::~eTimer(){
 // see if a client supports lag compensation
 static nVersionFeature se_clientLagCompensation( 14 );
 
-// old clients need a default lag compensation
-static REAL se_lagOffsetLegacy = 0.0f;
-static tSettingItem< REAL > se_lagOffsetLegacyConf( "LAG_OFFSET_LEGACY", se_lagOffsetLegacy );
-
-void eTimer::WriteSync(nMessage &m){
-    nNetObject::WriteSync(m);
+void eTimer::WriteSync( Engine::TimerSync & sync, bool init ) const
+{
+    nNetObject::WriteSync( *sync.mutable_base(), init );
     REAL time = Time();
 
-    if ( SyncedUser() > 0 && !se_clientLagCompensation.Supported( SyncedUser() ) )
-        time += se_lagOffsetLegacy;
-
-    m << time;
-    m << speed;
+    sync.set_time ( time  );
+    sync.set_speed( speed );
     //std::cerr << "syncing:" << currentTime << ":" << speed << '\n';
 
     // plan next sync
@@ -121,8 +121,9 @@ static tSettingItem<REAL> se_timerStartFudgeConf("TIMER_SYNC_START_FUDGE",se_tim
 static REAL se_timerStartFudgeStop = 2.0;
 static tSettingItem<REAL> se_timerStartFudgeStopConf("TIMER_SYNC_START_FUDGE_STOP",se_timerStartFudgeStop);
 
-void eTimer::ReadSync(nMessage &m){
-    nNetObject::ReadSync(m);
+void eTimer::ReadSync( Engine::TimerSync const & sync, nSenderInfo const & sender )
+{
+    nNetObject::ReadSync( sync.base(), sender );
 
     bool checkDrift = true;
 
@@ -134,9 +135,8 @@ void eTimer::ReadSync(nMessage &m){
     REAL remoteTimeNonQuality = 0;
     {
         //REAL oldTime=currentTime;
-        REAL remote_currentTime, remoteSpeed;
-        m >> remote_currentTime; // read in the remote time
-        m >> remoteSpeed;
+        REAL remote_currentTime = sync.time();
+        REAL remoteSpeed        = sync.speed();
 
         // forget about earlier syncs if the speed changed
         if ( fabs( speed - remoteSpeed ) > 10 * EPS )
@@ -149,7 +149,7 @@ void eTimer::ReadSync(nMessage &m){
         speed = remoteSpeed;
 
         // determine ping
-        nPingAverager & averager = sn_Connections[m.SenderID()].ping;
+        nPingAverager & averager = sn_Connections[sender.SenderID()].ping;
         // pingAverager_.Add( rawAverager.GetPing(), remote_currentTime > .01 ? remote_currentTime : .01 );
         REAL ping = averager.GetPing();
 
@@ -218,9 +218,10 @@ void eTimer::ReadSync(nMessage &m){
     startTimeOffset_.Add( remoteStartTimeOffset, 1/remoteTimeNonQuality );
 }
 
-static nNOInitialisator<eTimer> eTimer_init(210,"eTimer");
+static nNetObjectDescriptor< eTimer, Engine::TimerSync > eTimer_init(210);
 
-nDescriptor &eTimer::CreatorDescriptor() const{
+nNetObjectDescriptorBase const & eTimer::DoGetDescriptor() const
+{
     return eTimer_init;
 }
 
@@ -242,7 +243,7 @@ static bool se_SmoothTime()
     return smooth;
 }
 
-REAL eTimer::Time()
+REAL eTimer::Time() const
 {
     return ( smoothedSystemTime_ - startTime_ ) - startTimeSmoothedOffset_ + eLag::Current();
 }

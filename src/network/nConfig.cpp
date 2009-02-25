@@ -27,10 +27,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nConfig.h"
 #include "nNetObject.h"
+#include "nProtoBuf.h"
 #include "tConsole.h"
 #include "tSysTime.h"
 #include <set>
 #include <string.h>
+
+#include "nConfig.pb.h"
 
 nConfItemBase::nConfItemBase()
         :tConfItemBase(""), lastChangeTime_(-10000), lastChangeMessage_(0), watcher_(0){}
@@ -43,7 +46,7 @@ nConfItemBase::nConfItemBase(const char *title)
 
 nConfItemBase::~nConfItemBase(){}
 
-void nConfItemBase::s_GetConfigMessage(nMessage &m){
+void nConfItemBase::s_GetConfigStream(nStreamMessage &m){
     if (sn_GetNetState()==nSERVER){
         nReadError(); // never accept config messages from the clients
     }
@@ -95,8 +98,93 @@ void nConfItemBase::s_GetConfigMessage(nMessage &m){
 }
 
 
-static nDescriptor transferConfig(60,nConfItemBase::s_GetConfigMessage,
-                                  "transfer config");
+static nStreamDescriptor transferConfig(60,nConfItemBase::s_GetConfigStream,
+                                        "transfer config");
+
+void nConfItemBase::s_GetConfigProtoBuf( Network::Config const & protoBuf, nSenderInfo const & sender ){
+    if (sn_GetNetState()==nSERVER){
+        nReadError(); // never accept config messages from the clients
+    }
+    else{
+        tString name = protoBuf.name();
+
+        //con << "got conf message for " << name << "\n";
+
+        tConfItemMap & confmap = ConfItemMap();
+        tConfItemMap::iterator iter = confmap.find( name );
+        if ( iter != confmap.end() )
+        {
+            tConfItemBase * item = (*iter).second;
+            nConfItemBase *netitem = dynamic_cast<nConfItemBase*> (item);
+            if (netitem)
+            {
+                // check if message was new
+                if ( tSysTimeFloat() > netitem->lastChangeTime_ + 100 || sn_Update( netitem->lastChangeMessage_, sender.MessageIDBig() ) )
+                {
+                    netitem->lastChangeMessage_ = sender.MessageIDBig();
+                    netitem->lastChangeTime_ = tSysTimeFloat();
+                    netitem->NetReadVal( protoBuf );
+                }
+                else
+                {
+                    static bool warn = true;
+                    if ( warn )
+                        con << tOutput( "$nconfig_error_ignoreold", name );
+                    warn = false;
+                }
+            }
+            else
+            {
+                static bool warn = true;
+                if ( warn )
+                    con << tOutput( "$nconfig_error_nonet", name );
+                warn = false;
+            }
+        }
+        else
+        {
+            static bool warn = true;
+            if ( warn )
+                con << tOutput( "$nconfig_error_unknown", name );
+            warn = false;
+        }
+    }
+}
+
+
+static nProtoBufDescriptor< Network::Config >
+sn_ConfigDescriptor( 60, nConfItemBase::s_GetConfigProtoBuf );
+
+// helper functions for templated subclasses
+int     nConfItemBase::NetReadHelper( Network::Config const & protoBuf, int )
+{
+    return protoBuf.int_value();
+}
+
+float   nConfItemBase::NetReadHelper( Network::Config const & protoBuf, float )
+{
+    return protoBuf.float_value();
+}
+
+tString nConfItemBase::NetReadHelper( Network::Config const & protoBuf, tString const & )
+{
+    return protoBuf.string_value();
+}
+
+void nConfItemBase::NetWriteHelper( Network::Config & protoBuf, int value )
+{
+    protoBuf.set_int_value( value );
+}
+
+void nConfItemBase::NetWriteHelper( Network::Config & protoBuf, float value )
+{
+    protoBuf.set_float_value( value );
+}
+
+void nConfItemBase::NetWriteHelper( Network::Config & protoBuf, tString const & value )
+{
+    protoBuf.set_string_value( value );
+}
 
 void nConfItemBase::s_SendConfig(bool force, int peer){
     if(sn_GetNetState()==nSERVER){
@@ -112,20 +200,46 @@ void nConfItemBase::s_SendConfig(bool force, int peer){
     }
 }
 
+static void sn_SendConfig( nStreamMessage * stream, nProtoBufMessageBase * protoBuf, int peer )
+{
+    if ( sn_protoBuf.Supported( peer ) )
+    {
+        protoBuf->Send( peer );
+    }
+    else
+    {
+        stream->Send( peer );
+    }
+}
+
 void nConfItemBase::SendConfig(bool force, int peer){
     if ( (changed || force) && sn_GetNetState()==nSERVER)
     {
         //con << "sending conf message for " << tConfItems(i)->title << "\n";
-        nMessage *m=new nMessage(transferConfig);
+        tJUST_CONTROLLED_PTR< nStreamMessage > m=tNEW(nStreamMessage)(transferConfig);
         *m << title;
         NetWriteVal(*m);
+
+        tJUST_CONTROLLED_PTR< nProtoBufMessage< Network::Config > > m2=sn_ConfigDescriptor.CreateMessage();
+        Network::Config & config = m2->AccessProtoBuf();
+        config.set_name( title );
+        NetWriteVal( config );
+
         if (peer==-1)
         {
-            m->BroadCast();
+            for( int i = MAXCLIENTS; i > 0; --i )
+            {
+                if ( sn_Connections[i].socket )
+                {
+                    sn_SendConfig( m, m2, i );
+                }
+            }
             changed = false;
         }
         else
-            m->Send(peer);
+        {
+            sn_SendConfig( m, m2, peer );
+        }
     }
 }
 
@@ -452,12 +566,12 @@ static char const * sn_versionString[] =
         "0.2.8.2", // 13
         "0.2.8.3_alpha", // 14
         "0.2.8.3_alpha_auth", // 15
-        "0.2.8.3", // 16
+        "0.2.8.3_beta2", // 16
         "0.2.8.4", // 17
         "0.2.8.5_alpha", // 18
         "0.2.8.5", // 19
         "0.3.1", // 20
-        // "0.3.1_utf", // 21
+        "0.3.1_pb", // 21
         0
     };
 

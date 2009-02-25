@@ -40,6 +40,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <vector>
 #include "zone/zShape.hpp"
 
+namespace Zone { class ZoneSync; }
+
 class gParser;
 
 /*
@@ -71,17 +73,32 @@ class zZone: public eNetGameObject
 private:
     // TODO FIXME \
     void*pos;  //!< pos is not valid for zones
+public:  // DEPRECATED methods: please do NOT use in new code, and REPLACE in old code
+    REAL __deprecated GetRotationSpeed();
+    void __deprecated SetRotationSpeed(REAL r);
+    REAL __deprecated GetRotationAcceleration();
+    void __deprecated SetRotationAcceleration(REAL r);
+    void __deprecated SetReferenceTime();
+
 public:
     static zZone* create(eGrid*grid, std::string const & type) { return new zZone(grid); };
     zZone(eGrid *grid); //!< local constructor
-    zZone(nMessage &m);                    //!< network constructor
     ~zZone();                              //!< destructor
     void RemoveFromGame();		   //!< call this instead of the destructor
 
+    //! creates a netobject form sync data
+    zZone( Zone::ZoneSync const & sync, nSenderInfo const & sender );
+    //! reads sync data, returns false if sync was old or otherwise invalid
+    void ReadSync( Zone::ZoneSync const & sync, nSenderInfo const & sender );
+    //! writes sync data (and initialization data if flag is set)
+    void WriteSync( Zone::ZoneSync & sync, bool init ) const;
+
+    // we must not transmit an object that contains pointers
+    // to non-transmitted objects. this function is supposed to check that.
+    virtual bool ClearToTransmit( int user ) const;
+
     virtual void setupVisuals(gParser &);
     virtual void readXML(tXmlParser::node const &);
-
-    void SetReferenceTime();               //!< sets the reference time to the current time
 
     eCoord          GetPosition         ( void ) const;	                //!< Gets the current position
     zZone const &   GetPosition         ( eCoord & position ) const;	//!< Gets the current position
@@ -155,10 +172,6 @@ protected:
     std::set<ePlayerNetID *> playersOutside; //!< The players that are currently outside the zone
 
 private:
-    virtual void WriteCreate(nMessage &m); //!< writes data for network constructor
-    virtual void WriteSync(nMessage &m);   //!< writes sync data
-    virtual void ReadSync(nMessage &m);    //!< reads sync data
-
     virtual void InteractWith( eGameObject *target,REAL time,int recursion=1 ); //!< looks for objects inzide the zone and reacts on them
 
     virtual void OnEntry( gCycle *target, REAL time ); //!< reacts on objects entering the zone
@@ -166,7 +179,8 @@ private:
     virtual void OnInside( gCycle *target, REAL time ); //!< reacts on objects inside the zone
     virtual void OnOutside( gCycle *target, REAL time ); //!< reacts on objects outside the zone
 
-    virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
+    //! returns the descriptor responsible for this class
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 
     //    REAL Scale() const;           //!< returns the current scale
 

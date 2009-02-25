@@ -32,7 +32,7 @@ public:
 
     void bindZone(zZonePtr _zone);
 
-    void apply(const tPolynomial<nMessage> &value);
+    void apply(const tPolynomial &value);
 
     void addZoneInfluenceRule(zZoneInfluenceItemPtr aRule) {
         zoneInfluenceItems.push_back(aRule);
@@ -46,22 +46,22 @@ public:
     zZoneInfluenceItem(zZonePtr aZone);
     virtual ~zZoneInfluenceItem();
 
-    virtual void apply(const tPolynomial<nMessage> &value) {};
+    virtual void apply(const tPolynomial &value) {};
 };
 
 class zZoneInfluenceItemRotation : public zZoneInfluenceItem {
 protected:
-    tPolynomialMarshaler<nMessage> rotation;
+    tPolynomialMarshaler rotation;
 public:
     zZoneInfluenceItemRotation(zZonePtr aZone);
     virtual ~zZoneInfluenceItemRotation() {};
 
-    void set(const tPolynomialMarshaler<nMessage> & other)
+    void set(const tPolynomialMarshaler & other)
     {
 	rotation = other;
     }
 
-    virtual void apply(const tPolynomial<nMessage> &value);
+    virtual void apply(const tPolynomial &value);
 };
 
 class zZoneInfluenceItemScale : public zZoneInfluenceItem {
@@ -74,7 +74,7 @@ public:
     void set(REAL sca) {
         scale = sca;
     };
-    virtual void apply(const tPolynomial<nMessage> &value);
+    virtual void apply(const tPolynomial &value);
 };
 
 class zZoneInfluenceItemPosition : public zZoneInfluenceItem {
@@ -87,7 +87,7 @@ public:
     void set(eCoord const & p) {
         pos = p;
     };
-    virtual void apply(const tPolynomial<nMessage> &value);
+    virtual void apply(const tPolynomial &value);
 };
 
 class zZoneInfluenceItemColor : public zZoneInfluenceItem {
@@ -101,7 +101,7 @@ public:
         color = col;
         color.a_ = color.a_ < 0.0?0.0:(color.a_>0.7?0.7:color.a_);
     };
-    virtual void apply(const tPolynomial<nMessage> &value);
+    virtual void apply(const tPolynomial &value);
 };
 
 #include "zZone.h"

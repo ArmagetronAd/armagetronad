@@ -58,7 +58,7 @@ void zEffectGroup::operator=(zEffectGroup const &other)
     }
 }
 
-void zEffectGroup::apply( Triggerer possibleUser, REAL &time, const tPolynomial<nMessage> & tp )
+void zEffectGroup::apply( Triggerer possibleUser, REAL &time, const tPolynomial & tp )
 {
     std::vector<zValidatorPtr>::const_iterator iter;
     for (iter=validators.begin();

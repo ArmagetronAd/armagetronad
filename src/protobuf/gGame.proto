@@ -1,0 +1,50 @@
+// Protocol buffer types for gGame.cpp
+package Game;
+
+import "nNetObject.proto";
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// client state message
+message ClientState
+{
+    optional uint32 state = 1; // the current state of the game on the client
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// sync message for gGame
+message GameSync
+{
+    // base class init data, needs to come first
+    optional Network.NetObjectSync base = 1;
+
+    // legacy creation data end marker
+    optional bool legacy_create_end = 20000;
+
+    optional uint32 state = 2; // the current state of the game
+
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
+    // extensions go here
+}
+
+// client state message
+message FullscreenMessage
+{
+    optional string title   = 1; // title displayed at the top
+    optional string message = 2; // body text
+    optional float  timeout = 3; // timeout in seconds, message will dissapear after that
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}

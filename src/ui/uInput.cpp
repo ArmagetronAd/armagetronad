@@ -1323,7 +1323,7 @@ bool su_HandleEvent(SDL_Event &e, bool delayed ){
             uBind * bind = info.input->GetBind();
             if ( bind )
             {
-                if ( bind->IsDoubleBind( info.input ) )
+                if ( info.value > 0 && bind->IsDoubleBind( info.input ) )
                 {
                     return true;
                 }

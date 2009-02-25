@@ -35,6 +35,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rColor.h"
 #include "tFunction.h"
 
+namespace Game { class ZoneV1Sync; }
+
 // zone expansion speed and size
 extern REAL sg_expansionSpeed;
 extern REAL sg_initialSize;
@@ -52,7 +54,6 @@ class gZone: public eNetGameObject
 {
 public:
     gZone(eGrid *grid, const eCoord &pos); //!< local constructor
-    gZone(nMessage &m);                    //!< network constructor
     ~gZone();                              //!< destructor
 
     void SetReferenceTime();               //!< sets the reference time to the current time
@@ -77,6 +78,13 @@ public:
     REAL            GetRotationAcceleration( void ) const;	                        //!< Gets the current acceleration of the rotation
     gZone const &   GetRotationAcceleration( REAL & rotationAcceleration ) const;	//!< Gets the current acceleration of the rotation
     rColor const &  GetColor( void ) const;	//!< Gets the current color
+
+    gZone( Game::ZoneV1Sync const & sync, nSenderInfo const & sender );
+    //! reads sync data, returns false if sync was old or otherwise invalid
+    void ReadSync( Game::ZoneV1Sync const & sync, nSenderInfo const & sender );
+    //! writes sync data (and initialization data if flag is set)
+    void WriteSync( Game::ZoneV1Sync & sync, bool init ) const;
+
 protected:
     rColor color_;               //!< the zone's color
     REAL createTime_;            //!< the time the zone was created at
@@ -92,15 +100,12 @@ protected:
     virtual void OnVanish();                     //!< called when the zone vanishes
 
 private:
-    virtual void WriteCreate(nMessage &m); //!< writes data for network constructor
-    virtual void WriteSync(nMessage &m);   //!< writes sync data
-    virtual void ReadSync(nMessage &m);    //!< reads sync data
+    //! returns the descriptor responsible for this class
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 
     virtual void InteractWith( eGameObject *target,REAL time,int recursion=1 ); //!< looks for objects inzide the zone and reacts on them
 
     virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone
-
-    virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
 
     REAL Radius() const;           //!< returns the current radius
 
@@ -121,7 +126,6 @@ class gWinZoneHack: public gZone
 {
 public:
     gWinZoneHack(eGrid *grid, const eCoord &pos); //!< local constructor
-    gWinZoneHack(nMessage &m);                    //!< network constructor
     ~gWinZoneHack();                              //!< destructor
 
 protected:
@@ -134,7 +138,6 @@ class gDeathZoneHack: public gZone
 {
 public:
     gDeathZoneHack(eGrid *grid, const eCoord &pos );              //!< local constructor
-    gDeathZoneHack(nMessage &m);                                  //!< network constructor
     ~gDeathZoneHack();                                            //!< destructor
 
 protected:
@@ -147,7 +150,6 @@ class gBaseZoneHack: public gZone
 {
 public:
     gBaseZoneHack(eGrid *grid, const eCoord &pos );               //!< local constructor
-    gBaseZoneHack(nMessage &m);                                   //!< network constructor
     ~gBaseZoneHack();                                             //!< destructor
 
 private:

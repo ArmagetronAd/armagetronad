@@ -36,16 +36,28 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nObserver.h"
 //#include "tCrypt.h"
 #include "tException.h"
+
 #include <memory>
+#include <deque>
 
 class nSocket;
 class nAddress;
 class nBasicNetworkSystem;
 class nServerInfoBase;
 
+class nMessageCache;
+
+namespace Network { class VersionSync; }
+
 extern nBasicNetworkSystem sn_BasicNetworkSystem;
 
-class nMessage;
+// TODO: rename. nMessageBase ->nMessage, remove typedef
+class nMessageBase;
+class nStreamMessage;
+// typedef nStreamMessage nMessage;
+
+
+
 class tCrypt;
 class tOutput;
 
@@ -136,6 +148,10 @@ public:
     bool Merge( const nVersion& a,
                 const nVersion& b);	// merges two versions to one; the new version supports only features both versions understand. false is returned if no common denominator could be found
 
+    // syncing to protobufs
+    void WriteSync( Network::VersionSync       & sync ) const;
+    void ReadSync ( Network::VersionSync const & sync )      ;
+
     int Min() const	{
         return min_;
     }
@@ -152,9 +168,6 @@ private:
     int min_, max_;
 };
 
-nMessage& operator >> ( nMessage& m, nVersion& ver );
-nMessage& operator << ( nMessage& m, const nVersion& ver );
-
 std::istream& operator >> ( std::istream& s, nVersion& ver );
 std::ostream& operator << ( std::ostream& s, const nVersion& ver );
 
@@ -166,9 +179,9 @@ void sn_UpdateCurrentVersion();         //!< updates the sn_CurrentVersion()
 class nVersionFeature
 {
 public:
-    nVersionFeature( int min, int max = -1 ); // creates a feature that is supported from version min to max; values of -1 indicate no border
-    bool Supported();                         // returns whether this feature is supported by everyone
-    bool Supported( int client );             // returns whether this feature is supported by a certain client ( resp. the server in client mode )
+    explicit nVersionFeature( int min, int max = -1 ); // creates a feature that is supported from version min to max; values of -1 indicate no border
+    bool Supported() const;                            // returns whether this feature is supported by everyone
+    bool Supported( int client ) const;                // returns whether this feature is supported by a certain client ( resp. the server in client mode )
 private:
     int min_, max_;
 };
@@ -179,23 +192,26 @@ class nBandwidthControl;
 class nSendBuffer
 {
 public:
-    int Len				() const {
-        return sendBuffer_.Len();    // returns the length of the buffer
+    typedef tArray<unsigned char> Buffer;
+
+    int Len () const {
+        return sendBuffer_.Len();    // returns the length of the buffer in bytes
     }
 
-    void AddMessage		( nMessage&			message
-                       , nBandwidthControl* control );				// adds a message to the buffer
-    void Send			( nSocket const & 	socket
-                  , const nAddress &	peer
-                  , nBandwidthControl* control );				// send the contents of the buffer to a specific socket
-    void Broadcast		( nSocket const &   socket
-                      , int				    port
-                      , nBandwidthControl* control );				// broadcast the contents of the buffer
+    void AddMessage		( nMessageBase&      message,
+                          nBandwidthControl* control,
+                          int peer );                   //!< adds a message to the buffer
+    void Send			( nSocket const & 	 socket,
+                          const nAddress &	 peer,
+                          nBandwidthControl* control ); //!< send the contents of the buffer to a specific socket
+    void Broadcast		( nSocket const &    socket,
+                          int			     port,
+                          nBandwidthControl* control );	//!< broadcast the contents of the buffer
 
     void Clear();													// clears the buffer
 
 private:
-    tArray<unsigned short> sendBuffer_;
+    Buffer sendBuffer_;
 };
 
 class nBandwidthControl
@@ -311,6 +327,9 @@ protected:
 
 struct nConnectionInfo     // everything that is needed to manage a connection
 {
+    nMessageCache &        messageCacheIn_;
+    nMessageCache &        messageCacheOut_;
+
     nSocket const *        socket;             // the network UDP socket
     int                    ackPending;
 
@@ -327,8 +346,12 @@ struct nConnectionInfo     // everything that is needed to manage a connection
     // version info
     nVersion				version;
 
-    // ack messages
-    tJUST_CONTROLLED_PTR< nMessage >          ackMess;
+    // requested options
+    bool                    diffCompression; //!< compress packets with simple per-element diff
+    bool                    zipCompression;  //!< compress packets via incremental zip
+
+    // packages to acknowledge
+    std::deque< unsigned short > acks_;
 
     // authentication
     // tString                userName;
@@ -362,8 +385,9 @@ extern int sn_maxNoAck;
 enum nLoginType
 {
     Login_Pre0252,  // use the login method known to pre-0.2.5.2 versions
-    Login_Post0252, // use the newer login method
-    Login_All       // first attempt the new one, then the old one
+    Login_Post0252, // use the newer stream login method
+    Login_Protobuf, // use the protobuf method
+    Login_All       // attempt all login types
 };
 
 // go to client mode and connect to server
@@ -378,72 +402,77 @@ extern int sn_myNetID; // our network identification:  0: server
 
 // Network messages and functions that know how to handle them:
 
-class nMessage;
-typedef void nHandler(nMessage &m);
+// basic network message descriptor; describes a message type.
+class nDescriptorBase:public tListItem<nDescriptorBase>
+{
+    friend class nMessageBase;
 
+    unsigned short id;     //!< our id
 
-// types of network messages
-class nDescriptor:public tListItem<nDescriptor>{
-    friend class nMessage;
+    tString name;          //!< our name
 
-    static unsigned short s_nextID;
-
-    unsigned short id;     // our id
-    nHandler *handler;  // function responsible for our type of message
-
-    const char *name;
-
-    const bool acceptWithoutLogin;
+    const bool acceptWithoutLogin; //!< if true, messages of this type will be accepted from unconnected clients
 public:
-    nDescriptor(unsigned short identification,nHandler *handle
-                ,const char *name, bool acceptEvenIfNotLoggedIn = false);
-    //  nDescriptor(nHandler *handle,
-    //		const char *name);
-    static void HandleMessage(nMessage &message);
+    nDescriptorBase(unsigned short identification, const char *name, bool acceptEvenIfNotLoggedIn = false);
+    virtual ~nDescriptorBase();
+
+    //! reads a message from a data buffer
+    static tJUST_CONTROLLED_PTR< nMessageBase > CreateMessage( unsigned char const * & data, unsigned char const * end, int sender );
+
+    //! creates a message of this type for sending
+    nMessageBase * CreateMessage() const;
+
+    tString const & GetName()
+    {
+        return name;
+    }
 
     unsigned short ID() const{
         return id;
     }
+
+private:
+    //! creates a message
+    nMessageBase * CreateReceivedMessage() const;
+
+    //! creates a message
+    virtual nMessageBase * DoCreateMessage() const = 0;
 };
 
-// register the routine that gives the peer the server/client information
-// (game type, number of players online....)
-void RequestInfoHandler(nHandler *handle);
+// strip descriptor of irrelevant bits (protobuf flag and whatever else we come up with)
+inline unsigned int sn_StripDescriptor( unsigned int ID )
+{
+    return ID & 0x7fff;
+}
 
 // the first sn_myNetID available for external use (give some room!)
 #define NET_ID_FIRST 100
 
 // Network messages. Allways to be created with new, get deleted automatically.
-
-class nMessage: public tReferencable< nMessage >{
+class nMessageBase: public tReferencable< nMessageBase >{
     //friend class nMessage_planned_send;
-    friend class tControlledPTR< nMessage >;
-    friend class tReferencable< nMessage >;
+    friend class tControlledPTR< nMessageBase >;
+    friend class tReferencable< nMessageBase >;
 
-    friend class nDescriptor;
+    friend class nDescriptorBase;
+    friend class nProtoBufDescriptorBase;
     friend class nNetObject;
     friend class nWaitForAck;
 
-    //	void AddRef();
-    //	void Release();
-
+    nMessageBase( const nMessageBase & );
 protected:
-    unsigned short descriptor;    // the network message type id
-    // unsigned short messageID_;    // the network message id, every message gets its own (up to overflow)
-    unsigned long messageIDBig_;  // uniquified message ID, the last 16 bits are the same as messageID_
-    short          senderID;      // sender's identification
-    tArray<unsigned short> data;  // assuming ints are 32 bit wide...
+    unsigned short descriptorID_;  //!< the network message type id
+    unsigned long messageIDBig_;  //!< uniquified message ID, the last 16 bits are the same as messageID_
+    short          senderID_;      //!< sender's identification
 
-    unsigned int readOut;
-
-    ~nMessage();
+    virtual ~nMessageBase();
 public:
-    unsigned short Descriptor() const{
-        return descriptor;
+    unsigned short DescriptorID() const{
+        return descriptorID_;
     }
 
     unsigned short SenderID() const{
-        return senderID;
+        return senderID_;
     }
 
     unsigned short MessageID() const{
@@ -454,21 +483,23 @@ public:
         return messageIDBig_;
     }
 
-    unsigned short DataLen() const{
-        return data.Len();
+    // the last assigned big message ID
+    static unsigned long CurrentMessageIDBig();
+
+    //! bends the message ID
+    void BendMessageID( unsigned int id )
+    {
+        messageIDBig_ = id;
     }
 
-    unsigned short Data(unsigned short n) const {
-        return data(n);
-    }
+    // approximate size of the message in bytes
+    virtual int Size() const = 0;
 
     void ClearMessageID(){ // clear the message ID so no acks are sent for it
         messageIDBig_ = 0;
     }
 
-    nMessage(const nDescriptor &);  // create a new message
-    nMessage(unsigned short*& buffer, short sn_myNetID, int lenLeft );
-    // read a message from the network stream
+    explicit nMessageBase( const nDescriptorBase &, unsigned int messageID = 0 );  //!< create a new message with a given ID
 
     // immediately send the message WITHOUT the queue; dangerous!
     void SendImmediately(int peer,bool ack=true);
@@ -483,138 +514,63 @@ public:
     // (the server in client mode, all clients in server mode)
     void BroadCast(bool ack=true);
 
+    // send it to anyone who is interested and upports the given feature
+    void BroadCast( nVersionFeature const & feature, bool ack=true );
+
     // put the message into the send heap
     void Send(int peer,REAL priority=0,bool ack=true);
 
-    void Write(const unsigned short &x){
-        data[data.Len()]=x;
-    }
+    //! handle this message
+    void Handle();
 
-    nMessage& operator<< (const REAL &x);
-    nMessage& operator>> (REAL &x);
-
-    nMessage& operator<< (const unsigned short &x){
-        Write(x);
-        return *this;
-    }
-    nMessage& operator>> (unsigned short &x){
-        Read(x);
-        return *this;
-    }
-
-    nMessage& operator<< (const double &x){
-        return operator<<(REAL(x));
-    }
-
-    nMessage& operator>> (double &x){
-        REAL y;
-        operator>>(y);
-        x=y;
-
-        return *this;
-    }
-
-    // read a string without any kind of filtering
-    nMessage& ReadRaw(tString &s);
-
-    nMessage& operator >> (tString &s);
-    nMessage& operator >> (tColoredString &s);
-    nMessage& operator << (const tString &s);
-    nMessage& operator << (const tColoredString &s);
-    nMessage& operator << (const tOutput &o);
-
-    template<class T> void BinWrite (const T &x){
-        for (unsigned int i=0;i<sizeof(T)/2;i++)
-            Write((reinterpret_cast<const unsigned short *>(&x))[i]);
-        return *this;
-    }
-
-    bool End(){
-        return readOut>=static_cast<unsigned int>(data.Len());
-    }
-
-    void Reset(){
-        readOut=0;
-    }
-
-    int ReadSoFar(){
-        return readOut;
-    }
-
-    void Read(unsigned short &x);
-
-    template<class T> void BinRead (const T &x){
-        for (unsigned int i=0;i<sizeof(T)/2;i++)
-            Read(reinterpret_cast<unsigned short *>(&x)[i]);
-        return *this;
-    }
-
-
-    nMessage& operator<< (const short &x);
-    nMessage& operator>> (short &x);
-
-    nMessage& operator<< (const int &x);
-    nMessage& operator>> (int &x);
-
-    nMessage& operator<< (const unsigned int &x){
-        operator<<(reinterpret_cast<const int&>(x));
-        return *this;
-    }
-    nMessage& operator>> (unsigned int &x){
-        operator>>(reinterpret_cast<int&>(x));
-        return *this;
-    }
-
-    nMessage& operator<< (const bool &x);
-    nMessage& operator>> (bool &x);
-
-    template <class T> nMessage& operator<<(const tArray<T>& a)
+    // arguments passed to fill fucntion
+    struct WriteArguments
     {
-        unsigned short len = a.Len();
-        Write(len);
-        for (int i=a.Len()-1; i>=0; i--)
-            operator<< (a(i));
+        nSendBuffer::Buffer & buffer_; // buffer to write to
+        int receiver_;                 // designated receiver of the buffer
 
-        return *this;
-    }
+        // write one data element, a short.
+        void Write( unsigned short data );
 
-    template <class T> nMessage& operator>>(tArray<T>& a)
+        WriteArguments( nSendBuffer::Buffer & buffer, int receiver );
+    };
+
+    //! fills the receiving buffer with data
+    inline int Write( WriteArguments & arguments ) const
     {
-        unsigned short len;
-        Read(len);
-        a.SetLen(len);
-        for (int i=a.Len()-1; i>=0; i--)
-            operator >> (a(i));
-
-        return *this;
+        return OnWrite( arguments );
     }
 
-    template<class T> nMessage& operator << (const T* p)
+    //! reads data from network buffer
+    void Read( unsigned char const * & buffer, unsigned char const * end )
     {
-        if (p)
-            Write( p->ID() );
-        else
-            Write(0);
-
-        return *this;
+        OnRead( buffer, end );
     }
 
-    //    template<class T> nMessage& operator >> ( T*& p );
-
-    template<class T> nMessage& operator << (const tControlledPTR<T> p)
+    //! returns the descriptor
+    nDescriptorBase const & GetDescriptor() const
     {
-        if (p)
-            Write( p->ID() );
-        else
-            Write(0);
-
-        return *this;
+        return DoGetDescriptor();
     }
+protected:
+    //! handle this message
+    virtual void OnHandle() = 0;
 
-    //    template<class T> nMessage& operator >> ( tControlledPTR<T>& p );
+    //! fills the receiving buffer with data
+    //!  @return descriptor ID to fill in
+    virtual int OnWrite( WriteArguments & arguments ) const = 0;
+
+    //! reads data from network buffer
+    virtual void OnRead( unsigned char const * & buffer, unsigned char const * end ) = 0;
+
+private:
+    //! returns the descriptor
+    virtual nDescriptorBase const & DoGetDescriptor() const = 0;
 };
 
-
+//! expands a short message ID to a full int message ID, assuming it is from a message that was
+//! just received.
+unsigned long int sn_ExpandMessageID( unsigned short id, unsigned short sender );
 
 // the class that is responsible for getting acknowleEdgement for
 // netmessages
@@ -622,7 +578,7 @@ public:
 class nWaitForAck{
 protected:
     int id;
-    tCONTROLLED_PTR(nMessage) message;  // the message
+    tCONTROLLED_PTR(nMessageBase) message;  // the message
     int           receiver;      // the computer who should send the ack
     REAL          timeout;       // the time in seconds between send attempts
     nTimeRolling  timeSendAgain; // for timeout
@@ -631,10 +587,13 @@ protected:
     int           timeouts;
 
 public:
-    nWaitForAck(nMessage* m,int rec);
+    nWaitForAck( nMessageBase * m, int rec );
     virtual ~nWaitForAck();
 
-    virtual void AckExtraAction(){};
+    virtual void AckExtraAction();
+
+    // resend message. Return value: keep ack around?
+    virtual bool DoResend();
 
     static void Ackt(unsigned short id,unsigned short peer);
 
@@ -664,7 +623,7 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects=false, bool otherEnd=true); //
 
 // causes the connected clients to print a message
 void sn_ConsoleOut(const tOutput &message,int client=-1);
-nMessage* sn_ConsoleOutMessage( tString const & message );
+nMessageBase* sn_ConsoleOutMessage( tString const & message );
 
 // causes the connected clients to print a message in the center of the screeen
 void sn_CenterMessage(const tOutput &message,int client=-1);
@@ -698,7 +657,7 @@ public:
 
     nCallbackAcceptPackedWithoutConnection(BOOLRETFUNC *f);
 
-    static bool Accept( const nMessage& m );
+    static bool Accept( const nMessageBase& m );
 };
 
 class nCallbackReceivedComplete: public tCallback
@@ -1107,6 +1066,9 @@ nMachine & nMachine::SetDecorators( nMachineDecorator * decorators )
     this->decorators_ = decorators;
     return *this;
 }
+
+// TODO: remove
+// #include "nStreamMessage.h"
 
 #endif
 

@@ -30,6 +30,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define __eEventNotification_H__
 
 class tString;
-void se_sendEventNotification( tString title, tString message );
+void se_sendEventNotification( tString const & title, tString const & message );
 
 #endif // __eEventNotification_H__

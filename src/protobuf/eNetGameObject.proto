@@ -1,0 +1,64 @@
+// Protocol buffer types for eNetGameObject
+package Engine;
+
+import "nNetObject.proto";
+import "tCoord.proto";
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// legacy message
+message NetGameObject
+{
+    // legacy stuff goes here
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// legacy sync message
+message NetGameObjectSync
+{
+    // base class init data, needs to come first
+    optional Network.NetObjectSync base = 1;
+
+    optional uint32 player_id  = 2; // netobject ID of player owning the object
+    optional bool   autodelete = 3; // flag indicating whether the object should automatically
+                                    // delete itself after death
+
+    // legacy creation data end marker
+    optional bool legacy_create_end = 20000;
+
+    optional float last_time            = 4; // last time the object was simulated
+    optional Tools.Direction direction = 5; // current direction of movement
+    optional Tools.Position  position  = 6; // current position
+
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
+    // extensions go here
+}
+
+// net object control message
+message NetGameObjectControl
+{
+    // legacy data goes here
+    optional float  time = 1;         // time of activation
+    optional uint32 action_id = 2;    // ID of action  
+    optional float  action_level = 3; // strength of action
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// register control
+extend Network.NetObjectControl
+{
+    optional NetGameObjectControl net_game_object_control = 5;
+}

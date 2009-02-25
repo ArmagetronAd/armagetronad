@@ -55,10 +55,10 @@ public:
     };
     void addRule(zMonitorRulePtr aRule);
 
-    void setInit(tPolynomial<nMessage> v) {
+    void setInit(tPolynomial v) {
         valueEq = v;
     };
-    void setDrift(tPolynomial<nMessage> d) {
+    void setDrift(tPolynomial d) {
         drift = d;
     };
     void setClampLow(REAL l)  {
@@ -68,10 +68,10 @@ public:
         maxValue = h;
     };
 
-    void affectSlide(gCycle* user, tPolynomial<nMessage> triggererInfluenceSlide, Triad marked);
+    void affectSlide(gCycle* user, tPolynomial triggererInfluenceSlide, Triad marked);
 
 protected:
-    tPolynomial<nMessage> totalInfluence; //!< The sum of all the individual contributions in one, to be scaled in time
+    tPolynomial totalInfluence; //!< The sum of all the individual contributions in one, to be scaled in time
 
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
 
@@ -79,8 +79,8 @@ protected:
 
     zMonitorRulePtrs rules;
 
-    tPolynomial<nMessage> valueEq; // The current value of the monitor
-    tPolynomial<nMessage> drift; // How much the value of the monitor changes per second
+    tPolynomial valueEq; // The current value of the monitor
+    tPolynomial drift; // How much the value of the monitor changes per second
 
     REAL minValue; //!< Low bound that value can take
     REAL maxValue; //!< High bound that value can take
@@ -88,8 +88,8 @@ protected:
     string name;
 
     // values used to reduce the update transmitted
-    tPolynomial<nMessage> previousValue;
-    tPolynomial<nMessage> previousTotalInfluenceSlide;
+    tPolynomial previousValue;
+    tPolynomial previousTotalInfluenceSlide;
 
 
 };
@@ -106,7 +106,7 @@ public:
     void addEffectGroup(zEffectGroupPtr anEffectGroupPtr) {
         effectGroupList.push_back(anEffectGroupPtr);
     };
-    void applyRule(triggerers &contributors, REAL time, const tPolynomial<nMessage> &valueEq) ;
+    void applyRule(triggerers &contributors, REAL time, const tPolynomial &valueEq) ;
 
     void addMonitorInfluence(zMonitorInfluencePtr newInfluence) {
         monitorInfluences.push_back( newInfluence );
@@ -174,8 +174,8 @@ public:
  */
 class zMonitorInfluence {
     zMonitorPtr monitor;
-    tPolynomialMarshaler<nMessage> influence;
-    tPolynomial<nMessage> influenceSlide;
+    tPolynomialMarshaler influence;
+    tPolynomial influenceSlide;
 
     bool influenceSlideAvailable;
 
@@ -191,16 +191,16 @@ public:
     { };
     ~zMonitorInfluence() { };
 
-    void apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* triggerer, const tPolynomial<nMessage> &valueEq);
+    void apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle* triggerer, const tPolynomial &valueEq);
 
     void setMarked(Triad mark) {
         marked = mark;
     };
-    void setInfluence(tPolynomialMarshaler<nMessage> infl) {
+    void setInfluence(tPolynomialMarshaler infl) {
       influence = infl;
     }
 
-    void setInfluenceSlide(tPolynomial<nMessage> infl) {
+    void setInfluenceSlide(tPolynomial infl) {
         influenceSlide = infl;
         influenceSlideAvailable=true;
     };

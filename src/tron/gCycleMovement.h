@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "rColor.h"
 
+namespace Game { class CycleMovementSync; class CycleDestinationSync; }
+
 class gCycle;
 class gDestination;
 class gPlayerWall;
@@ -134,7 +136,6 @@ public:
             ,                                         const eCoord &        dir
             ,                                         ePlayerNetID *        p=NULL
                     ,                                 bool                  autodelete=1 )          ;   //!< local constructor
-    gCycleMovement                                  ( nMessage &            message      )          ;   //!< remote constructor
     virtual ~gCycleMovement                         ()                                              ;   //!< destructor
     virtual void OnRemoveFromGame(); // called when the cycle is physically removed from the game
 
@@ -167,6 +168,8 @@ public:
     virtual void            CalculateAcceleration   (                                   )           ;   //!< calculate acceleration to apply later
     virtual void            ApplyAcceleration       ( REAL                  dt          )           ;   //!< apply acceleration calculated earlier
 
+    //! creates a netobject form sync data
+    gCycleMovement( Game::CycleMovementSync const & sync, nSenderInfo const & sender );
 protected:
     // destination handling
     REAL                    DistanceToDestination   ( gDestination &        dest        ) const     ;   //!< calculates the distance to the given destination
@@ -241,12 +244,15 @@ protected:
     REAL            rubber;                     //!< the amount rubber used up by the cycle
     REAL            rubberMalus;                //!< additional rubber usage factor
     REAL            rubberSpeedFactor;          //!< the factor by which the speed is currently multiplied by rubber
+    REAL            rubberDepleteTime_;         //!< the time rubber got depleted
 
     REAL            brakeUsage;                 //!< current brake usage
     REAL            rubberUsage;                //!< current rubber usage (not from hitting a wall, but from tunneling. Without taking efficiency into account.)
 
     // room for accessors
 public:
+    REAL RubberDepleteTime() const;                //!< returns the time rubber got fully used (or 0 if it hasn't)
+
     REAL GetMaxSpaceAhead( REAL maxReport ) const; //< Returns the current maximal space ahead
 
     inline REAL GetDistance( void ) const;  //!< Gets the distance traveled so far
@@ -336,7 +342,7 @@ public:
     explicit gDestination(const gCycle &takeitfrom);
 
     // or from a message
-    explicit gDestination( nMessage &m, unsigned short & cycle_id );
+    explicit gDestination( Game::CycleDestinationSync const & sync, nSenderInfo const & sender, unsigned short & cycle_id );
 
     // take pos,dir and time from a cycle
     void CopyFrom(const gCycleMovement &other);
@@ -346,7 +352,7 @@ public:
     int CompareWith( const gDestination& other ) const;
 
     // write all the data into a nMessage
-    void WriteCreate( nMessage &m, unsigned short cycle_id );
+    void WriteCreate( Game::CycleDestinationSync & sync, nMessageBase const & m, unsigned short cycle_id );
 
     // insert yourself into a list ordered by distance
     void InsertIntoList(gDestination **list);
@@ -401,6 +407,20 @@ inline bool gCycleMovement::IsDestinationUsed( const gDestination * dest ) const
 inline void gCycleMovement::DropTempWall( gPlayerWall * wall, eCoord const & pos, eCoord const & dir )
 {
     this->OnDropTempWall( wall, pos, dir );
+}
+
+// *******************************************************************************************
+// *
+// *    RubberDepleteTime
+// *
+// *******************************************************************************************
+//!
+//!     @return     the time rubber got depleted
+//!
+// *******************************************************************************************
+inline REAL gCycleMovement::RubberDepleteTime() const
+{
+    return rubberDepleteTime_;
 }
 
 // *******************************************************************************************

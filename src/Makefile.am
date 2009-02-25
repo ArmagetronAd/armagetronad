@@ -43,6 +43,21 @@ distclean-local:
 ${srcdir}/tools/tLocale.cpp: ${srcdir}/tools/tVersion.cpp
 ${srcdir}/tools/tVersion.cpp: tTrueVersion.h 
 
+protobuf/.dir:
+	test -d protobuf || mkdir protobuf || true
+	for f in ${libprotobuf_a_SOURCES}; do test -r $$f || test -r $${srcdir}/$f || $(MAKE) $$f; done
+	touch $@
+
+# protocol buffer rules
+protobuf/%.pb: ${srcdir}/protobuf/%.proto protobuf/.dir
+	protoc $< --cpp_out=protobuf --proto_path=${srcdir}/protobuf 2>&1 | sed -e "s,^\(.*\).proto,${srcdir}/protobuf/\1.proto,"
+
+protobuf/%.pb.cc: protobuf/%.pb
+	@true
+
+protobuf/%.pb.h: protobuf/%.pb
+	@true
+
 # library file listings
 
 if BUILDMAIN
@@ -51,6 +66,39 @@ else
 tools_extra=
 endif
 
+# protocol buffers. Need to be compiled first so the headers exist for the
+# other modules to include.
+libprotobuf_a_SOURCES = \
+    protobuf/tColor.pb.cc protobuf/tColor.pb.h \
+    protobuf/tCoord.pb.cc protobuf/tCoord.pb.h \
+    protobuf/tFunction.pb.cc protobuf/tFunction.pb.h \
+    protobuf/tPolynomial.pb.cc protobuf/tPolynomial.pb.h \
+    protobuf/nAuthentication.pb.cc protobuf/nAuthentication.pb.h \
+    protobuf/nNetwork.pb.cc protobuf/nNetwork.pb.h \
+    protobuf/nNetObject.pb.cc protobuf/nNetObject.pb.h \
+    protobuf/nNetObjectPrivate.pb.cc protobuf/nNetObjectPrivate.pb.h \
+    protobuf/nServerInfo.pb.cc protobuf/nServerInfo.pb.h \
+    protobuf/nConfig.pb.cc protobuf/nConfig.pb.h \
+    protobuf/eTeam.pb.cc protobuf/eTeam.pb.h \
+    protobuf/ePlayer.pb.cc protobuf/ePlayer.pb.h \
+    protobuf/eNetGameObject.pb.cc protobuf/eNetGameObject.pb.h \
+    protobuf/eVoter.pb.cc protobuf/eVoter.pb.h \
+    protobuf/eEventNotification.pb.cc protobuf/eEventNotification.pb.h \
+    protobuf/eLagCompensation.pb.cc protobuf/eLagCompensation.pb.h \
+    protobuf/eTimer.pb.cc protobuf/eTimer.pb.h \
+    protobuf/zZone.pb.cc protobuf/zZone.pb.h \
+    protobuf/zShape.pb.cc protobuf/zShape.pb.h \
+    protobuf/gGame.pb.cc protobuf/gGame.pb.h \
+    protobuf/gCycle.pb.cc protobuf/gCycle.pb.h \
+    protobuf/gWall.pb.cc protobuf/gWall.pb.h \
+    protobuf/gZone.pb.cc protobuf/gZone.pb.h \
+    protobuf/gWall.pb.cc protobuf/gWall.pb.h \
+    protobuf/gAIBase.pb.cc protobuf/gAIBase.pb.h
+#    protobuf/.pb.cc protobuf/.pb.h \
+#
+
+# dependency for all automatically generated source files
+all_protobuf_files: ${libprotobuf_a_SOURCES}
 
 # Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
 # the fragile dependency on undefined behaviour of the linker...)
@@ -88,10 +136,12 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/tRectangle.h tools/tRectangle.cpp \
 	tools/tPlayList.h tools/tPlayList.cpp\
 	tools/tDecorator.h tools/tDecorator.cpp\
-	tools/tCoord.h\
+	tools/tCoord.h tools/tCoord.cpp\
 	tools/tValue.h tools/tValueParser.h\
 	tools/tFunction.h tools/tFunction.cpp\
-	tools/tPolynomial.h tools/tPolynomialMarshaler.h tools/tPolynomialWithBase.h \
+	tools/tPolynomial.h tools/tPolynomial.cpp\
+	tools/tPolynomialMarshaler.h tools/tPolynomialMarshaler.cpp \
+	tools/tPolynomialWithBase.h tools/tPolynomialWithBase.cpp \
 	tools/tRuby.h tools/tRuby.cpp \
 	tools/tDict.h \
 	resource/tResource.h resource/tResource.cpp resource/tResourceType.h resource/tResourceType.cpp\
@@ -103,6 +153,9 @@ libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentication.cpp\
 	network/nAuthentication.h network/nConfig.cpp network/nConfig.h\
 	network/nKrawall.cpp network/nKrawall.h network/nKrawallPrivate.cpp\
 	network/nNetObject.cpp network/nNetObject.h network/nNetwork.cpp network/nNetwork.h\
+	network/nBinary.cpp network/nBinary.h\
+	network/nStreamMessage.cpp network/nStreamMessage.h\
+	network/nProtoBuf.cpp network/nProtoBuf.h network/nProtoBufForward.h\
 	network/nObserver.cpp network/nObserver.h network/nPriorizing.cpp network/nPriorizing.h\
 	network/nServerInfo.cpp network/nServerInfo.h network/nSimulatePing.h network/nSocket.cpp\
 	network/nSocket.h network/nSpamProtection.cpp network/nSpamProtection.h
@@ -172,10 +225,18 @@ libtron_a_SOURCES +=\
 	tron/zone/zSelector.h      tron/zone/zSelector.cpp\
 	tron/zone/zEffector.h      tron/zone/zEffector.cpp\
 	tron/zone/zZoneInfluence.h tron/zone/zZoneInfluence.cpp
+
+if BUILD_FORTRESS
+libtron_a_SOURCES +=\
+	tron/zone/zFortress.cpp        tron/zone/zFortress.h
 endif
 
+endif
+
+if BUILDZONESV1
 libtron_a_SOURCES +=\
 	tron/gWinZone.h            tron/gWinZone.cpp
+endif
 
 libui_a_SOURCES=ui/uInput.cpp ui/uInput.h ui/uInputQueue.cpp ui/uInputQueue.h ui/uMenu.cpp ui/uMenu.h
 endif
@@ -185,7 +246,8 @@ endif
 
 #AM_CXXFLAGS= $(BINRELOC_CFLAGS)
 
-libtools_a_CXXFLAGS  =$(AM_CXXFLAGS)  -I@srcdir@/tools -I@srcdir@/resource -I@srcdir@/thirdparty/mathexpr -I@srcdir@/thirdparty/utf8
+libprotobuf_a_CXXFLAGS  =$(AM_CXXFLAGS) -I@srcdir@/protobuf -Iprotobuf
+libtools_a_CXXFLAGS  =$(AM_CXXFLAGS) $(CXXFLAGS_OURFILES) -I@srcdir@/tools -I@srcdir@/resource -I@srcdir@/thirdparty/mathexpr -I@srcdir@/thirdparty/utf8 -I@srcdir@/protobuf -Iprotobuf
 libnetwork_a_CXXFLAGS=$(libtools_a_CXXFLAGS)  -I@srcdir@/network
 librender_a_CXXFLAGS =$(libtools_a_CXXFLAGS)  -I@srcdir@/render
 libui_a_CXXFLAGS     =$(librender_a_CXXFLAGS) -I@srcdir@/ui -I@srcdir@/thirdparty/shttpd -I@srcdir@/thirdparty/scrap
@@ -232,10 +294,10 @@ armagetronad_main_master$(EXEEXT): Makefile
 	${BUILDFAKE}
 else
 if BUILDMAIN
-noinst_LIBRARIES = libenginecore.a libengine.a librender.a  libtron.a libui.a libnetwork.a libtools.a
+noinst_LIBRARIES = libprotobuf.a libtools.a libnetwork.a libenginecore.a libengine.a librender.a  libtron.a libui.a
 # librubywrap.a
 else
-noinst_LIBRARIES = libnetwork.a libtools.a
+noinst_LIBRARIES = libprotobuf.a libtools.a libnetwork.a
 endif
 
 if BUILDDEDICATED
@@ -246,13 +308,13 @@ endif
 
 armagetronad_main_SOURCES = tron/gFloor.cpp tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp tron/cockpit/cCamview.cpp 
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
+armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 #  librubywrap.a
 # armagetronad_main_LDFLAGS=
 
 armagetronad_main_master_SOURCES = network/master.cpp
 armagetronad_main_master_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_master_LDADD=libnetwork.a libtools.a
+armagetronad_main_master_LDADD=libnetwork.a libtools.a libprotobuf.a 
 endif
 
 ## Note: tron/gFloor.cpp is not referenced from the outside, but required anyway. So it can't be put into

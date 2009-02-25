@@ -139,6 +139,8 @@ REAL EdgePenalty(const eHalfEdge *e, const eGameObject *g)
 
 void eHalfEdge::SetMinPathLength( REAL length, tHeapBase& heap, ePATH_ORIGIN origin )
 {
+    tASSERT( Heap() != &closedEdges );
+
     origin_ = origin;
     tHeapElement::SetVal( length, heap );
 
@@ -180,6 +182,7 @@ void eHalfEdge::FindPath(const eCoord& startPoint, const eFace* startFace,
         // and add all possible ways from there to the open list.
 
         eHalfEdge *e = openEdges.Remove(0);
+        tASSERT( e->origin_ < PATH_CLOSED );
 
         int origin = e->origin_;
         origin |= PATH_CLOSED;
@@ -319,7 +322,7 @@ void eHalfEdge::PossiblePath( ePATH_ORIGIN newOrigin, REAL minLength ) // tell t
     if( origin_ == PATH_NONE )
     {
         // completely new entry.
-
+        tASSERT( Heap() == 0 );
         SetMinPathLength( minLength, openEdges, newOrigin );
 
 #ifdef DEBUG
@@ -330,6 +333,7 @@ void eHalfEdge::PossiblePath( ePATH_ORIGIN newOrigin, REAL minLength ) // tell t
     else if( minLength <  MinPathLength() && origin_ < PATH_CLOSED)
     {
         // just update our info; the path got shorter.
+        tASSERT( Heap() != &closedEdges );
         SetMinPathLength( minLength, openEdges, newOrigin );
 
 #ifdef DEBUG

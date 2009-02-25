@@ -193,10 +193,20 @@ AC_ENABLE(armathentication,
      esac],enable_armathentication=yes
      )
 
+AC_ARG_ENABLE(zonesv1,
+	AC_HELP_STRING([--enable-zonesv1],
+		[enable deprecated zones v1 code (default=enabled)]),,
+enable_zonesv1=yes)
+
 AC_ARG_ENABLE(zonesv2,
 	AC_HELP_STRING([--enable-zonesv2],
 		[enable experimental zonesv2 code (default=enabled)]),,
 enable_zonesv2=yes)
+
+AC_ARG_ENABLE(fortress,
+	AC_HELP_STRING([--enable-fortress],
+		[enable fortress support (default=enabled)]),,
+enable_fortress=yes)
 
 AC_ARG_ENABLE(authentication,
     AC_HELP_STRING([--enable-authentication],
@@ -320,11 +330,27 @@ if test x$enable_armathentication = xyes; then
 AC_DEFINE(KRAWALL_SERVER,,enables krawall server)
 fi
 
+if test x$enable_zonesv1 = xyes && test x$enable_fortress = xyes; then
+	AC_MSG_WARN([
+	Zones v2 Fortress is incompatible with Zones v1.
+	Therefore, Zones v1 will be disabled.
+	])
+	enable_zonesv1=no
+fi
+
+if test x$enable_zonesv1 = xyes; then
+AC_DEFINE(ENABLE_ZONESV1,,enables zonesv1)
+fi
+
+AM_CONDITIONAL(BUILDZONESV1, test x$enable_zonesv1 = xyes)
+
 if test x$enable_zonesv2 = xyes; then
 AC_DEFINE(ENABLE_ZONESV2,,enables zonesv2)
 fi
 
 AM_CONDITIONAL(BUILDZONESV2, test x$enable_zonesv2 = xyes)
+
+AM_CONDITIONAL(BUILD_FORTRESS, test x$enable_fortress = xyes)
 
 dnl developer CXXFLAGS
 test -z "$DEBUGLEVEL" && DEBUGLEVEL=0
@@ -622,6 +648,28 @@ AC_MSG_ERROR([
 	Please upgrade to 2.6.11 or later
 ])
 )
+
+dnl *************************************************
+dnl         pattern buffers
+dnl *************************************************
+
+dnl check for compiler
+AC_CHECK_PROG([PROTOC],protoc,protoc,no)
+
+dnl check for library
+AC_CHECK_LIB([protobuf],main,,
+AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required, but was not found.]])
+)
+
+AC_LANG([C++])
+
+dnl check for header
+AC_CHECK_HEADERS([google/protobuf/message.h],,
+AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required with all development files, but was not found.]])
+)
+
+AC_LANG([C])
+
 # fi
 
 dnl *************************************************
@@ -1004,25 +1052,6 @@ fi
 
 dnl RUBY and SWIG end
 
-
-
-
-if test "`$CXX -v 2>&1 | grep -v executing | grep pgcc`"  ; then
-AC_MSG_WARN(
-[
-
-
-You are using PGCC to compile Armagetron. Due to a bug in PGCC,
-exception handling needs to be disabled. This makes the server
-mode vulnerable to an attack that causes the server to block or
-crash. (The attack is still detected, but nothing can be done
-about it. You will get the message \"I told you not to use PGCC!\")
-
-
-])
-CXXFLAGS="$CXXFLAGS -fno-exceptions -DNOEXCEPT"
-fi
-
 dnl Replace `main' with a function in -lpthread:
 
 dnl Checks for header files.
@@ -1183,6 +1212,22 @@ AC_SUBST_UNIVERSAL(relocatable)
 AC_USE_SUBST_UNIVERSAL
 AC_AA_REPLACEPATHS
 
+dnl Strip pedantic flags from general CXXFLAGS and put them into a separate variable
+CXXFLAGS_OURFILES=''
+
+if echo ${CXXFLAGS} | grep -- '-Werror' > /dev/null; then
+  CXXFLAGS_OURFILES="${CXXFLAGS_OURFILES} -Werror"
+fi
+
+if echo ${CXXFLAGS} | grep -- '--pedantic' > /dev/null; then
+  CXXFLAGS_OURFILES="${CXXFLAGS_OURFILES} --pedantic"
+fi
+
+CXXFLAGS="`echo ${CXXFLAGS} | sed -e 's,-Werror,,g' | sed -e 's,--pedantic,,g'`"
+
+dnl CXX flags for our own hand-written files. Can be pedantic.
+AC_SUBST(CXXFLAGS_OURFILES)
+
 export CPPFLAGS
 export CXXFLAGS
 export LIBS
@@ -1233,6 +1278,20 @@ fi
 echo "     Sound support: $enable_sound"
 echo "     Particle System support: $enable_particles"
 echo "     Joystick support: $enable_joystick"
+zones_info="NO"
+if test x$enable_zonesv2 = xyes; then
+	zones_info="Basic"
+	if test x$enable_fortress = xyes; then
+		zones_info="${zones_info}, Fortress"
+	fi
+	if test x$enable_zonesv1 = xyes; then
+		zones_info="V1, $zones_info"
+	fi
+elif test x$enable_zonesv1 = xyes; then
+	zones_info="V1"
+fi
+echo "     Zones support: $zones_info"
+echo ""
 echo "     Binaries will be installed in      : `eval echo ${bindir}`"
 echo "     Static data will be installed in   : `eval echo ${aa_datadir}`"
 echo "     Configuration will be installed in : `eval echo ${aa_sysconfdir}`"

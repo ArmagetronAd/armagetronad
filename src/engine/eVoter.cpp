@@ -39,9 +39,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nServerInfo.h"
 
 #include "rConsole.h"
+#include "nProtoBuf.h"
 
 #include "ePlayer.h"
 #include "eGrid.h"
+
+#include "eVoter.pb.h"
 
 #ifndef DEDICATED
 // use server controlled votes (just for the client, to avoid UPGRADE messages)
@@ -167,9 +170,9 @@ static REAL se_defaultVotesSuspendLength = 3;
 static tSettingItem< REAL > se_defaultVotesSuspendLenght_Conf( "VOTES_SUSPEND_DEFAULT", se_defaultVotesSuspendLength );
 static REAL se_votesSuspendTimeout = 0;
 
-static eVoter* se_GetVoter( const nMessage& m )
+static eVoter* se_GetVoter( const nSenderInfo & sender )
 {
-    return eVoter::GetVoter( m.SenderID(), true );
+    return eVoter::GetVoter( sender.SenderID(), true );
 }
 
 eVoterPlayerInfo::eVoterPlayerInfo(): suspended_(0), silenced_(0){}
@@ -212,23 +215,24 @@ public:
 
     virtual ~eVoteItem( void );
 
-    bool FillFromMessage( nMessage& m )
+    template< class SELF, class PROTOBUF >
+    static bool FillFromMessage( SELF * self, PROTOBUF const & protoBuf, nSenderInfo const & sender )
     {
         // cloak the ID of the sener for privacy
         nCurrentSenderID cloak;
         if ( se_votingPrivacy > 1 )
             cloak.SetID(0);
 
-        if ( !DoFillFromMessage( m ) )
+        if ( !self->DoFillFromMessage( protoBuf, sender ) )
             return false;
 
         if ( sn_GetNetState() == nSERVER )
         {
-            if ( !CheckValid( m.SenderID() ) )
+            if ( !self->CheckValid( sender.SenderID() ) )
                 return false;
         }
 
-        ReBroadcast( m.SenderID() );
+        self->ReBroadcast( sender.SenderID() );
 
         return true;
     }
@@ -264,8 +268,8 @@ public:
             }
 
             // create messages for old and new clients
-            tJUST_CONTROLLED_PTR< nMessage > retNew = this->CreateMessage();
-            tJUST_CONTROLLED_PTR< nMessage > retLegacy = this->CreateMessageLegacy();
+            tJUST_CONTROLLED_PTR< nMessageBase > retNew = this->CreateMessage();
+            tJUST_CONTROLLED_PTR< nMessageBase > retLegacy = this->CreateMessageLegacy();
 
             // set so every voter ony gets each vote once
             std::set< eVoter * > sentTo;
@@ -303,26 +307,11 @@ public:
         this->Evaluate();
     };
 
-    nMessage* CreateMessage( void ) const
-    {
-        nMessage* m = tNEW( nMessage )( this->DoGetDescriptor() );
-        this->DoFillToMessage( *m );
-        return m;
-    }
+    virtual nMessageBase * CreateMessage( void ) const = 0 ;
 
-    nMessage* CreateMessageLegacy( void ) const
+    virtual nMessageBase * CreateMessageLegacy( void ) const
     {
-        nDescriptor * descriptor = this->DoGetDescriptorLegacy();
-        if ( descriptor )
-        {
-            nMessage* m = tNEW( nMessage )( *descriptor );
-            this->DoFillToMessageLegacy( *m );
-            return m;
-        }
-        else
-        {
-            return 0;
-        }
+        return NULL;
     }
 
     void SendMessage( void ) const
@@ -414,9 +403,9 @@ public:
         }
     }
 
-    static bool AcceptNewVote( nMessage const & m )										// check if a new voting item should be accepted
+    static bool AcceptNewVote( nSenderInfo const & sender )										// check if a new voting item should be accepted
     {
-        return AcceptNewVote( se_GetVoter( m ), m.SenderID() );
+        return AcceptNewVote( se_GetVoter( sender ), sender.SenderID() );
     }
 
     void RemoveVoter( eVoter* voter )
@@ -437,16 +426,12 @@ public:
     }
 
     // message receival
-    static void GetControlMessage( nMessage& m )								   	// handles a voting message
+    static void GetControlMessage( Engine::VoteSubmission const & submission, nSenderInfo const & sender )								   	// handles a voting message
     {
         if ( sn_GetNetState() == nSERVER )
         {
-            unsigned short id;
-            m.Read( id );
-
-            bool result;
-            m >> result;
-            result = result ? 1 : 0;
+            unsigned short id = submission.vote_id();
+            bool result       = submission.accept();
 
             for ( int i = items_.Len()-1; i>=0; --i )
             {
@@ -454,12 +439,12 @@ public:
                 if ( vote->id_ == id )
                 {
                     // found the vote; find the voter
-                    tCONTROLLED_PTR( eVoter ) voter = se_GetVoter( m );
+                    tCONTROLLED_PTR( eVoter ) voter = se_GetVoter( sender );
                     if ( voter )
                     {
                         // prepare message
                         tOutput voteMessage;
-                        voteMessage.SetTemplateParameter( 1, voter->Name( m.SenderID() ) );
+                        voteMessage.SetTemplateParameter( 1, voter->Name( sender.SenderID() ) );
                         voteMessage.SetTemplateParameter( 2, vote->GetDescription() );
                         if ( result )
                             voteMessage << "$vote_vote_for";
@@ -473,7 +458,7 @@ public:
                             con << voteMessage;				// print it for the server admin
                         else
                         {
-                            sn_ConsoleOut( voteMessage, m.SenderID() );
+                            sn_ConsoleOut( voteMessage, sender.SenderID() );
                         }
 
                         // remove him from the lists
@@ -666,15 +651,15 @@ public:
     virtual void Update() //!< update description and details
     {}
 protected:
-    virtual bool DoFillFromMessage( nMessage& m )
+    bool DoFillFromMessage( Engine::VoteItem const & item, nSenderInfo const & sender )
     {
         // get user
-        user_ = m.SenderID();
+        user_ = sender.SenderID();
 
         // get originator of vote
         if(sn_GetNetState()!=nSERVER)
         {
-            m.Read( id_ );
+            id_ = item.vote_id();
         }
 
         return true;
@@ -682,12 +667,12 @@ protected:
 
     virtual bool DoCheckValid( int senderID ){ return true; }
 
-    virtual void DoFillToMessage( nMessage& m ) const
+    virtual void DoFillToMessage( Engine::VoteItem & item ) const
     {
         if(sn_GetNetState()==nSERVER)
         {
             // write our message ID
-            m.Write( id_ );
+            item.set_vote_id( id_ );
         }
     };
 
@@ -702,17 +687,6 @@ protected:
     }
     static tList< eVoteItem > items_;				// list of vote items
 private:
-    virtual nDescriptor * DoGetDescriptorLegacy() const	// returns the creation descriptor
-    {
-        return 0;
-    }
-
-    virtual void DoFillToMessageLegacy( nMessage& m ) const
-    {
-        return DoFillToMessage( m );
-    };
-
-    virtual nDescriptor& DoGetDescriptor() const = 0;	// returns the creation descriptor
     virtual tString DoGetDescription() const = 0;		// returns the description of the voting item
     virtual void DoExecute() = 0;						// called when the voting was successful
 
@@ -801,22 +775,17 @@ static tConfItemFunc se_suspendVotes_conf( "VOTES_SUSPEND", &se_SuspendVotes );
 static tConfItemFunc se_unSuspendVotes_conf( "VOTES_UNSUSPEND", &se_UnSuspendVotes );
 
 
-static nDescriptor vote_handler(230,eVoteItem::GetControlMessage,"vote cast");
+static nProtoBufDescriptor< Engine::VoteSubmission > se_voteSubmissionDescriptor( 230, eVoteItem::GetControlMessage );
 
 // called on the clients to accept or decline the vote
 void eVoteItem::Vote( bool accept )
 {
-    tJUST_CONTROLLED_PTR< nMessage > m = tNEW( nMessage )( vote_handler );
-    *m << id_;
-    *m << accept;
-    m->BroadCast();
+    Engine::VoteSubmission & submission = se_voteSubmissionDescriptor.Broadcast();
+    submission.set_vote_id( id_ );
+    submission.set_accept( accept );
 
     delete this;
 }
-
-//nDescriptor& eVoteItem::DoGetDescriptor() const;	// returns the creation descriptor
-//tString eVoteItem::DoGetDescription() const;		// returns the description of the voting item
-//void DoExecute();						// called when the voting was successful
 
 // ****************************************************************************************
 // ****************************************************************************************
@@ -886,8 +855,11 @@ private:
 // **************************************************************************************
 // **************************************************************************************
 
-static void se_HandleServerVoteChanged( nMessage& m );
-static nDescriptor server_vote_expired_handler(233,se_HandleServerVoteChanged,"Server controlled vote expired");
+static void se_VoteChangesHandler( Engine::VoteChanges const & change, nSenderInfo const & sender );
+static nProtoBufDescriptor< Engine::VoteChanges > server_vote_expired_handler( 233, se_VoteChangesHandler );
+
+static void se_HandleNewServerVote( Engine::VoteItemServerControlled const & vote, nSenderInfo const & sender );
+static nProtoBufDescriptor< Engine::VoteItemServerControlled > new_server_se_voteSubmissionDescriptor(232,se_HandleNewServerVote );
 
 // something to vote on: completely controlled by the server
 class eVoteItemServerControlled: public virtual eVoteItem
@@ -916,10 +888,9 @@ public:
         }
     }
 
-    static void s_HandleChanged( nMessage & m )
+    static void s_HandleChanged( Engine::VoteChanges const & change, nSenderInfo const & sender )
     {
-        unsigned short id;
-        m.Read( id );
+        unsigned short id = change.vote_id();
         for ( int i = items_.Len()-1; i>=0; --i )
         {
             eVoteItem* vote = items_[i];
@@ -927,18 +898,16 @@ public:
             {
                 eVoteItemServerControlled * vote2 = dynamic_cast< eVoteItemServerControlled * >( vote );
                 if ( vote2 )
-                    vote2->HandleChanged( m );
+                    vote2->HandleChanged( change );
             }
         }
     }
 
-    void HandleChanged( nMessage & m )
+    void HandleChanged( Engine::VoteChanges const & change )
     {
-        unsigned short expired;
-        m.Read( expired );
-        expired_ = expired;
-        m >> description_;
-        m >> details_;
+        expired_     = change.expired();
+        description_ = change.properties().description();
+        details_     = change.properties().details();
 
         Update();
         UpdateMenuItem();
@@ -946,33 +915,38 @@ public:
 
     void SendChanged()
     {
-        tJUST_CONTROLLED_PTR< nMessage > m = tNEW( nMessage )( server_vote_expired_handler );
-        *m << GetID();
-        *m << (unsigned short)expired_;
-        *m << description_;
-        *m << details_;
-        m->BroadCast();
+        Engine::VoteChanges & change = server_vote_expired_handler.Broadcast( serverControlledVotes );
+        change.set_vote_id( GetID() );
+        change.set_expired( expired_ );
+        change.mutable_properties()->set_description( description_ );
+        change.mutable_properties()->set_details( details_ );
     }
-protected:
 
-    virtual bool DoFillFromMessage( nMessage& m )
+    bool DoFillFromMessage( Engine::VoteItemServerControlled const & item, nSenderInfo const & sender )
     {
-        m >> description_;
-        m >> details_;
-        return eVoteItem::DoFillFromMessage( m );
+        description_ = item.properties().description();
+        details_     = item.properties().details();
+        return eVoteItem::DoFillFromMessage( item.base(), sender );
     };
 
-    virtual void DoFillToMessage( nMessage& m ) const
+    void DoFillToMessage( Engine::VoteItemServerControlled & item ) const
     {
-        m << description_;
-        m << details_;
-        eVoteItem::DoFillToMessage( m );
+        item.mutable_properties()->set_description( description_ );
+        item.mutable_properties()->set_details( details_ );
+
+        eVoteItem::DoFillToMessage( *item.mutable_base() );
     };
+
+    virtual nMessageBase * CreateMessage() const
+    {
+        nProtoBufMessage< Engine::VoteItemServerControlled > * m = new_server_se_voteSubmissionDescriptor.CreateMessage();
+        DoFillToMessage( m->AccessProtoBuf() );
+
+        return m;
+    }
 
     virtual void DoExecute(){};						// called when the voting was successful
 protected:
-    virtual nDescriptor& DoGetDescriptor() const;	// returns the creation descriptor
-
     virtual void Evaluate()
     {
         // update clients (i.e. if a player to be kicked changed his name)
@@ -1004,28 +978,20 @@ private:
     bool expired_;                             //!< flag set when the vote expired on the server
 };
 
-static void se_HandleServerVoteChanged( nMessage& m )
+static void se_VoteChangesHandler( Engine::VoteChanges const & change, nSenderInfo const & sender )
 {
-    eVoteItemServerControlled::s_HandleChanged( m );
+    eVoteItemServerControlled::s_HandleChanged( change, sender );
 }
 
-static void se_HandleNewServerVote( nMessage& m )
+static void se_HandleNewServerVote( Engine::VoteItemServerControlled const & vote, nSenderInfo const & sender )
 {
-    if ( sn_GetNetState() != nCLIENT ||  eVoteItem::AcceptNewVote( m ) )
+    if ( sn_GetNetState() != nCLIENT ||  eVoteItem::AcceptNewVote( sender ) )
     {
         // accept message
-        eVoteItem* item = tNEW( eVoteItemServerControlled )();
-        if ( !item->FillFromMessage( m ) )
+        eVoteItemServerControlled * item = tNEW( eVoteItemServerControlled )();
+        if ( !eVoteItem::FillFromMessage( item, vote, sender ) )
             delete item;
     }
-}
-
-static nDescriptor new_server_vote_handler(232,se_HandleNewServerVote,"Server controlled vote");
-
-// returns the creation descriptor
-nDescriptor& eVoteItemServerControlled::DoGetDescriptor() const
-{
-    return new_server_vote_handler;
 }
 
 // *******************************************************************************************
@@ -1104,6 +1070,9 @@ void se_VoteKickPlayer( ePlayerNetID * p )
     se_VoteKickUser( p->Owner() );
 }
 
+static void se_VoteItemHarmHandler( Engine::VoteItemHarm const & kick, nSenderInfo const & sender );
+static nProtoBufDescriptor< Engine::VoteItemHarm > se_voteItemHarmDescriptor( 231, se_VoteItemHarmHandler );
+
 // something to vote on: harming a player
 class eVoteItemHarm: public virtual eVoteItem
 {
@@ -1127,27 +1096,28 @@ public:
         ePlayerNetID const * player = player_;
         return const_cast< ePlayerNetID * >( player );
     }
-protected:
-    // this is a good spot to put in legacy hooks
-    virtual nDescriptor * DoGetDescriptorLegacy() const
-    {
-        return &eVoteItemHarm::DoGetDescriptor();
-    }
 
-    virtual void DoFillToMessageLegacy( nMessage& m ) const
-    {
-        return eVoteItemHarm::DoFillToMessage( m );
-    };
-
-    virtual bool DoFillFromMessage( nMessage& m )
+    bool DoFillFromMessage( Engine::VoteItemHarm const & harm, nSenderInfo const & sender )
     {
         // read player ID
-        unsigned short id;
-        m.Read(id);
-        tJUST_CONTROLLED_PTR< ePlayerNetID > p=dynamic_cast<ePlayerNetID *>(nNetObject::ObjectDangerous(id));
-        player_ = p;
+        unsigned short id = harm.player_id();
+        nNetObject::IDToPointer( id, player_ );
 
-        return eVoteItem::DoFillFromMessage( m );
+        return eVoteItem::DoFillFromMessage( harm.base(), sender );
+    }
+
+protected:
+    // lock legacy message creation to regular creation of this class
+    virtual nMessageBase * CreateMessageLegacy() const
+    {
+        return eVoteItemHarm::CreateMessage();
+    };
+
+    virtual nMessageBase * CreateMessage( void ) const
+    {
+        nProtoBufMessage< Engine::VoteItemHarm > * m = se_voteItemHarmDescriptor.CreateMessage();
+        DoFillToMessage( m->AccessProtoBuf() );
+        return m;
     }
 
     virtual bool DoCheckValid( int senderID )
@@ -1211,19 +1181,14 @@ protected:
         return eVoteItem::DoCheckValid( senderID );
     };
 
-    virtual void DoFillToMessage( nMessage& m  ) const
+    void DoFillToMessage( Engine::VoteItemHarm & harm ) const
     {
-        if ( player_ )
-            m.Write( player_->ID() );
-        else
-            m.Write( 0 );
+        harm.set_player_id( nNetObject::PointerToID( player_ ) );
 
-        eVoteItem::DoFillToMessage( m );
+        eVoteItem::DoFillToMessage( *harm.mutable_base() );
     };
 
 protected:
-    virtual nDescriptor& DoGetDescriptor() const;	// returns the creation descriptor
-
     // get the language string prefix
     virtual char const * DoGetPrefix() const = 0;
 
@@ -1367,10 +1332,15 @@ public:
     ~eVoteItemHarmServerControlled()
     {}
 protected:
-    virtual bool DoFillFromMessage( nMessage& m )
+    virtual nMessageBase * CreateMessage() const
+    {
+        return eVoteItemServerControlled::CreateMessage();
+    }
+
+    bool DoFillFromMessage( Engine::VoteItemHarm const & harm, nSenderInfo const & sender )
     {
         // delegate
-        bool ret = eVoteItemHarm::DoFillFromMessage( m );
+        bool ret = eVoteItemHarm::DoFillFromMessage( harm, sender );
 
         // fill in description
         Update();
@@ -1378,23 +1348,18 @@ protected:
         return ret;
     };
 
-    virtual void DoFillToMessage( nMessage& m  ) const
+    void DoFillToMessage( Engine::VoteItemHarm & harm ) const
     {
         // should never be called on the client
         tASSERT( sn_GetNetState() != nCLIENT );
 
-        eVoteItemServerControlled::DoFillToMessage( m );
+        eVoteItemHarm::DoFillToMessage( harm );
     };
 private:
     virtual void Update() //!< update description and details
     {
         description_ = eVoteItemHarm::DoGetDescription();
         details_ = eVoteItemHarm::DoGetDetails();
-    }
-
-    virtual nDescriptor& DoGetDescriptor() const	// returns the creation descriptor
-    {
-        return eVoteItemServerControlled::DoGetDescriptor();
     }
 
     virtual tString DoGetDescription() const		// returns the description of the voting item
@@ -1501,30 +1466,22 @@ private:
     bool fromMenu_; // flag set if the vote came from the menu
 };
 
-static void se_HandleKickVote( nMessage& m )
+static void se_VoteItemHarmHandler( Engine::VoteItemHarm const & kick, nSenderInfo const & sender )
 {
     // set high default access level for menu issued kick votes, the true access level
     // is taken from the highest level player from the sending client later
     tCurrentAccessLevel level( tAccessLevel_Owner, true );
 
     // accept message
-    if ( eVoteItem::AcceptNewVote( m ) )
+    if ( eVoteItem::AcceptNewVote( sender ) )
     {
-        eVoteItemHarm* item = tNEW( eVoteItemKickServerControlled )( true, 0 );
-        if ( !item->FillFromMessage( m ) )
+        eVoteItemHarm * item = tNEW( eVoteItemKickServerControlled )( true, 0 );
+        if ( !eVoteItem::FillFromMessage( item, kick, sender ) )
         {
             delete item;
             return;
         }
     }
-}
-
-static nDescriptor kill_vote_handler(231,se_HandleKickVote,"Kick vote");
-
-// returns the creation descriptor
-nDescriptor& eVoteItemHarm::DoGetDescriptor() const
-{
-    return kill_vote_handler;
 }
 
 static void se_SendKick( ePlayerNetID* p )
@@ -2062,7 +2019,7 @@ static void se_Cleanup()
         for ( int i = list.Len()-1; i >= 0; -- i)
         {
             eVoteItem* vote = list( i );
-            nMessage* m = vote->CreateMessage();
+            nMessageBase * m = vote->CreateMessage();
             m->Send( nCallbackLoginLogout::User() );
         }
     }

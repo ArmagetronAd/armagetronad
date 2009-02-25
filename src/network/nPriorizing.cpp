@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nPriorizing.h"
 #include "nNetwork.h"
 #include "tMemManager.h"
+#include "nStreamMessage.h"
 
 tDEFINE_REFOBJ( nBandwidthTask )
 tDEFINE_REFOBJ( nBandwidthArbitrator )
@@ -149,7 +150,7 @@ nBandwidthArbitrator::~nBandwidthArbitrator()
 }
 
 // fills the send buffer with top priority messages
-bool nBandwidthArbitrator::Fill( nSendBuffer& buffer, nBandwidthControl& control )
+bool nBandwidthArbitrator::Fill( nSendBuffer& buffer, nBandwidthControl& control, int peer )
 {
     // return whether a message was sent
     bool ret = false;
@@ -182,7 +183,7 @@ bool nBandwidthArbitrator::Fill( nSendBuffer& buffer, nBandwidthControl& control
                         next = this->Next( type );
 
                         // send it
-                        next->Execute( buffer, control );
+                        next->Execute( buffer, control, peer );
 
                         // sum up priority
                         totalPriority += priority;
@@ -349,6 +350,8 @@ void nBandwidthSceduler::RemoveArbitrator	( nBandwidthArbitrator& arbitrator )
 class nBandwitdhDistributor: public nBandwidthArbitrator
 {
 public:
+    nBandwitdhDistributor( int peer ): peer_( peer ){}
+
     nSendBuffer&		SendBuffer()				{ return buffer_; }
     const	nSendBuffer&		SendBuffer()		const	{ return buffer_; }
     nBandwidthControl&	BandwidthControl()			{ return control_; }
@@ -362,6 +365,8 @@ private:
 
     nSendBuffer buffer_;											// buffer taking the messages
     nBandwidthControl control_;										// bandwidth control
+
+    int peer_;
 };
 
 
@@ -372,7 +377,7 @@ private:
 // consumes some bandwidth
 bool nBandwitdhDistributor::DoUseBandwidth( REAL dt )
 {
-    return this->Fill( this->buffer_, this->control_ );
+    return this->Fill( this->buffer_, this->control_, this->peer_ );
 }
 
 
@@ -381,15 +386,15 @@ bool nBandwitdhDistributor::DoUseBandwidth( REAL dt )
 class nBandwidthTaskMessage: public nBandwidthTask
 {
 public:
-    nBandwidthTaskMessage( nType type, nMessage& message );
+    nBandwidthTaskMessage( nType type, nStreamMessage& message );
 
-    nMessage& Message() const { return *message_; }
+    nStreamMessage& Message() const { return *message_; }
 protected:
-    virtual void DoExecute( nSendBuffer& buffer, nBandwidthControl& control );				// executes whatever it has to do
+    virtual void DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer );				// executes whatever it has to do
     virtual int  DoEstimateSize() const;													// estimate bandwidth usage
     //	virtual void DoPriorize();																// rethinks priority
 private:
-    tJUST_CONTROLLED_PTR< nMessage > message_;
+    tJUST_CONTROLLED_PTR< nStreamMessage > message_;
 };
 
 
@@ -399,15 +404,15 @@ private:
 // nBandwidthTaskMessage: message sending bandwidth task
 // *********************************************************
 
-nBandwidthTaskMessage::nBandwidthTaskMessage( nType type, nMessage& message )
+nBandwidthTaskMessage::nBandwidthTaskMessage( nType type, nStreamMessage& message )
         :nBandwidthTask( type ), message_( &message )
 {
 }
 
 // executes whatever it has to do
-void nBandwidthTaskMessage::DoExecute( nSendBuffer& buffer, nBandwidthControl& control )
+void nBandwidthTaskMessage::DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer )
 {
-    buffer.AddMessage( *message_, &control );
+    buffer.AddMessage( *message_, &control, peer );
 }
 
 // estimate bandwidth usage
@@ -433,7 +438,7 @@ int  nBandwidthTaskMessage::DoEstimateSize() const
 
 
 
-#ifdef DEBUG
+#ifdef DEBUG_X
 
 static nDescriptor testDescriptor( 399, NULL, NULL, "test" );
 //static nDescriptor testDescriptor( 399, NULL, NULL, "test" );
@@ -443,7 +448,7 @@ static nDescriptor testDescriptor( 399, NULL, NULL, "test" );
 class nTestObject: public nNetObject
 {
 public:
-    nTestObject( nMessage& m ): nNetObject( m ){}
+    nTestObject( nStreamMessage& m ): nNetObject( m ){}
     nTestObject(){};
     virtual nDescriptor& CreatorDescriptor() const;
     virtual bool AcceptClientSync() const{return true;}
@@ -464,7 +469,7 @@ public:
         nBandwidthSceduler sceduler;
 
         {
-            tJUST_CONTROLLED_PTR< nBandwidthArbitrator > distributor = tNEW( nBandwitdhDistributor );
+            tJUST_CONTROLLED_PTR< nBandwidthArbitrator > distributor = tNEW( nBandwitdhDistributor(0) );
             sceduler.AddArbitrator( *distributor );
 
             {

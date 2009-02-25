@@ -1,0 +1,34 @@
+// Protocol buffer types for zones v2
+
+package Zone;
+
+import "eNetGameObject.proto";
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// legacy sync message
+message ZoneSync
+{
+    // base class init data, needs to come first
+    optional Engine.NetGameObjectSync base = 1;
+
+    optional float  create_time = 2; // time of creation
+    optional uint32 shape_id    = 3; // ID of shape object
+
+    // legacy creation data end marker
+    optional bool legacy_create_end = 20000;
+
+    // legacy sync data goes here
+
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+
+    // extensions go here
+}

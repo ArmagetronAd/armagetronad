@@ -38,16 +38,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #endif
 #endif
 
-void se_eventNotificationHandle( nMessage &m );
+#include "nProtoBuf.h"
+
+#include "eEventNotification.pb.h"
 
 static nVersionFeature se_eventNotificationFeature( 20 );
-static nDescriptor se_eventNotificationDescriptor(  199, se_eventNotificationHandle, "event_notification" );
 
-void se_eventNotificationHandle( nMessage &m )
+void se_eventNotificationHandler( Engine::EventNotification const & event, nSenderInfo const & )
 {
-    tString title, message;
-    m >> title;
-    m >> message;
+    tString title = event.title();
+    tString message = event.message();
 #ifdef MACOSX_XCODE
 #ifndef DEDICATED
     Growl(title, message);
@@ -55,20 +55,16 @@ void se_eventNotificationHandle( nMessage &m )
 #endif
 }
 
-void se_sendEventNotification( tString title, tString message )
-{
-    for ( int user = MAXCLIENTS; user > 0; --user )
-    {
-        if ( sn_Connections[ user ].socket )
-        {
-            if ( se_eventNotificationFeature.Supported( user ) )
-            {
-                nMessage *m = new nMessage( se_eventNotificationDescriptor );
-                *m << title;
-                *m << message;
-                m->Send( user );
-            }
+static nProtoBufDescriptor< Engine::EventNotification > se_eventNotificationDescriptor(  199, se_eventNotificationHandler );
 
-        }
+void se_sendEventNotification( tString const & title, tString const & message )
+{
+    if ( sn_GetNetState() != nSERVER )
+    {
+        return;
     }
+
+    Engine::EventNotification & event = se_eventNotificationDescriptor.Broadcast( se_eventNotificationFeature );
+    event.set_title( title );
+    event.set_message( message );
 }

@@ -429,13 +429,13 @@ lag_slow_weight_help               Extra weight lag reports from the server infl
 lag_fast_weight_help               Extra weight lag reports from the server influence the fast lag compensation with.
 
 lag_credit_help                    Maximal seconds of total lag credit.
-lag_credit_single_help             Maximal seconds of lag credit for a single lag event.
+lag_credit_single_help             Maximal seconds of lag credit for a single lag credit event.
+lag_credit_single_help             Maximal multiple of the lag variance for a single lag credit event.
 lag_sweet_spot_help                Sweet spot, the fill ratio of lag credit the server tries to keep the client at.
 lag_credit_time_help               Timescale lag credit is restored on.
 
 lag_offset_client_help             Extra amount of lag compensation, determined by the client.
 lag_offset_server_help             Extra amount of lag compensation, determined by the server.
-lag_offset_legacy_help             Extra amount of lag compensation for clients that don't support automatic compensation, determined by the server.
 
 #********************************************
 #********************************************
@@ -613,6 +613,8 @@ dedicated_fps_idle_factor_help Number of times per frame the server should check
 talk_to_master_help		Announce this server on the internet?
 max_out_rate_help		Maximum network output rate
 max_in_rate_help		Maximum network input rate
+message_cache_size_help Size of the network message cache in messages.
+message_cache_effort_help Effort taken to compress network messages.
 ping_charity_help		How much ping are you willing to take over from your opponent?
 ping_charity_max_help	Server option: maximum ping charity value. Set to 0 to avoid instant kills. Active only if all clients are 0.2.8.3 or better.
 ping_charity_min_help	Server option: minimum ping charity value. Use to enforce fairness. Active only if all clients are 0.2.8.3 or better.
@@ -2842,10 +2844,10 @@ hud_rubber Rubber
 access_level_hide_of_help      Minimal access level to be able to hide it's own user account information.
 access_level_hide_to_help      Minimal access level to see everyone's user account information.
 access_level_team_help         Minimal access level for /lock, /unlock, /invite and /uninvite team management.
-access_level_op_help           Minimal access level for /op, /deop, /promote and /demote co-admin management commands commands.
-access_level_op_max_help       Maximal access level attainable by /op and /promote commands.
+access_level_op_help           Minimal access level for /op and /deop co-admin management commands commands.
+access_level_op_max_help       Maximal access level directly attainable by /op commands.
 access_level_admin_help        Minimal access level for /admin command.
-access_level_rtfm_help        Minimal access level for /teach or /rtfm command.
+access_level_rtfm_help         Minimal access level for /teach or /rtfm command.
 access_level_chat_help         Minimal access level for chatting.
 access_level_ips_help          Minimal access level you need for seeing IPs of other players in the /players command.
 access_level_nver_help         Minimal access level you need for seeing Network versions/strings from other players in /players.
@@ -2866,7 +2868,7 @@ access_level_vote_command_help    Minimal access level required to issue command
 access_level_vote_command_execute_help    Minimal access level successful command votes will be executed at.
 
 access_level_chat_timeout_help   Time in seconds between public announcements that someone wants to chat, but can't. Set to 0 to disable the public warnings.
-access_level_chat_request   \10xRESETT would like to chat, but is not authorized yet. Would someone be so kind and say "/op \2" or "/promote \2"?\n
+access_level_chat_request   \10xRESETT would like to chat, but is not authorized yet. Would someone be so kind and say "/op \2"?\n
 access_level_chat_denied    0xff7f7fChat denied,0xffffff insufficient access level.\n
 access_level_op_denied      0xff7f7f\1 denied,0xffffff insufficient access level.\n
 access_level_op_overpowered 0xff7f7f\1 denied,0xffffff your need higher access righrs than your victim.\n
@@ -2874,7 +2876,7 @@ access_level_op_self        0xff7f7f\1 denied,0xffffff can't do that to yourself
 access_level_op_denied_max  0xff7f7f\1 denied,0xffffff your victim already has maximal rights.\n
 access_level_op_denied_ai   0xff7f7f\1 denied,0xffffff your victim is an AI.\n
 access_level_op_same        \1: This would have no effect.\n
-access_level_op_unclear     \1: User is already logged in, please explicitely set an access level.\n
+access_level_op_unclear     \1: User is already logged in, please explicitly set an access level.\n
 
 access_level_demote         \1 has been demoted to "\2" by order of \3.\n
 access_level_promote        \1 has been promoted to "\2" by order of \3.\n
