@@ -302,6 +302,8 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls,
         pl_CurPos = cp->GetFocusCycle()->Position();
         min_dist2 = (mw*mw+mh*mh)*1000;
         rad = 0;
+#ifdef ENABLE_ZONESV1
+// FIXME: I don't know what this actually does; should it be replaced? -- Luke-Jr
         for(std::deque<gZone *>::const_iterator i = sg_Zones.begin(); i != sg_Zones.end(); ++i) {
             tASSERT(*i);
             tCoord const &position = (*i)->GetPosition();
@@ -313,6 +315,7 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls,
                 rad = radius;
             }
         }
+#endif
         rad = (rad<15)?15:rad;
         zoom = (w>h)?h/(yscale*m_zoom*rad):w/(xscale*m_zoom*rad);
         zoom = (zoom<1)?1:zoom;
