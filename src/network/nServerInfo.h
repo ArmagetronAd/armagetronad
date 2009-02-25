@@ -41,6 +41,19 @@ class nAddress;
 class nServerInfo;
 class tPath;
 
+namespace Network
+{ 
+    class SmallServerInfoBase; 
+    class SmallServerInfo; 
+    class BigServerInfo; 
+    class RequestSmallServerInfo; 
+    class RequestBigServerInfo; 
+    class RequestBigServerInfoMaster; 
+}
+
+class nSenderInfo;
+template< class T > class nProtoBufDescriptor;
+
 typedef nServerInfo* (sn_ServerInfoCreator)();
 
 //! return the DNS name of this machine, if set
@@ -56,10 +69,9 @@ public:
     bool operator == ( const nServerInfoBase & other ) const;
     bool operator != ( const nServerInfoBase & other ) const;
 
-    inline void NetWrite(nMessage &m) const;    //!< writes data to network message
-    inline void NetRead (nMessage &m);          //!< reads data from network message
-    void NetWriteThis(nMessage &m) const;       //!< writes data to network message
-    void NetReadThis (nMessage &m);             //!< reads data from network message
+    void WriteSync( Network::SmallServerInfoBase & info ) const;  //!< writes data to network message
+    void ReadSync ( Network::SmallServerInfoBase const & info,
+                    nSenderInfo                  const & sender ); //!< reads data from network message
 
     inline void GetFrom( nSocket const * socket );  //!< fills data from this server and the given socket
 
@@ -72,9 +84,6 @@ public:
 
     inline const tString & GetName() const;     //!< returns the server's name
 protected:
-    virtual void DoNetWrite(nMessage &m) const; //!< writes data to network message
-    virtual void DoNetRead (nMessage &m);       //!< reads data from network message
-
     virtual void DoGetFrom( nSocket const * socket );  //!< fills data from this server and the given socket
 
     virtual const tString& DoGetName() const;   //!< returns the server's name
@@ -114,6 +123,16 @@ public:
 class nServerInfo: public tListItem<nServerInfo>, public nServerInfoBase
 {
     int pollID;
+
+public:
+    void WriteSync( Network::BigServerInfo & info ) const;  //!< writes all data to network message
+    void ReadSync ( Network::BigServerInfo const & info,
+                    nSenderInfo            const & sender); //!< reads all data from network message
+
+    void WriteSyncThis( Network::BigServerInfo & info ) const;  //!< writes data to network message, new data of this class only
+    void ReadSyncThis ( Network::BigServerInfo const & info,
+                        nSenderInfo            const & sender); //!< reads data from network message, new data of this class only
+
 protected:
     // information only for the master server
     unsigned int    transactionNr;     // a running number assigned to every server that connects to the master
@@ -153,16 +172,11 @@ protected:
     REAL    score;            // score based on ping and number of users (and game mode...)
     int     scoreBias_;         // score bias for this server
 
-    virtual void DoNetWrite(nMessage &m) const; //!< writes data to network message
-    virtual void DoNetRead (nMessage &m);       //!< reads data from network message
-    void NetWriteThis(nMessage &m) const;       //!< writes data to network message
-    void NetReadThis (nMessage &m);             //!< reads data from network message
-
     virtual void DoGetFrom( nSocket const * socket );  //!< fills data from this server and the given socket
 
     // common subfunctions of the two BigServerInfo functions
-    static nServerInfo* GetBigServerInfoCommon(nMessage &m);
-    static void GiveBigServerInfoCommon(nMessage &m, const nServerInfo & info, nDescriptor& descriptor );
+    static nServerInfo* GetBigServerInfoCommon( Network::BigServerInfo const & info, nSenderInfo const & sender );
+    static void GiveBigServerInfoCommon( int receiver, const nServerInfo & info, nProtoBufDescriptor< Network::BigServerInfo > & descriptor );
 
     nServerInfo( nServerInfo const & other );
     nServerInfo & operator = ( nServerInfo const & other );
@@ -173,14 +187,6 @@ public:
     nServerInfo* Prev();
 
     virtual void CalcScore(); // calculates the score from other data
-
-    // read/write all the information a normal server will broadcast
-    // virtual void NetWrite(nMessage &m);
-    // virtual void NetRead (nMessage &m);
-
-    // the same for the information the master server is responsible for
-    //  virtual void MasterNetWrite(nMessage &m);
-    //  virtual void MasterNetRead (nMessage &m);
 
     virtual void Save(std::ostream &s) const;
     virtual void Load(std::istream &s);
@@ -205,24 +211,30 @@ public:
 
     // reads small server information (adress, port, public key)
     // from the master server or response to a broadcast to the client
-    static void GetSmallServerInfo(nMessage &m);
+    static void GetSmallServerInfo( Network::SmallServerInfo const & info,
+                                    nSenderInfo              const & sender );
 
     // reads request for small server information from master server/broadcast
-    static void GiveSmallServerInfo(nMessage &m);
+    static void GiveSmallServerInfo( Network::RequestSmallServerInfo const & info,
+                                     nSenderInfo                     const & sender );
 
     // reads rest of the server info (name, number of players,
     // etc) from the server
-    static void GetBigServerInfo(nMessage &m);
+    static void GetBigServerInfo( Network::BigServerInfo const & info,
+                                  nSenderInfo            const & sender );
 
     // reads request for big server information on a server
-    static void GiveBigServerInfo(nMessage &m);
+    static void GiveBigServerInfo( Network::RequestBigServerInfo const & info,
+                                   nSenderInfo                   const & sender );
 
     // reads the rest of the server info (name, number of players,
     // etc) from the master
-    static void GetBigServerInfoMaster(nMessage &m);
+    static void GetBigServerInfoMaster( Network::BigServerInfo const & info,
+                                        nSenderInfo            const & sender );
 
     // reads request for big server information on a master
-    static void GiveBigServerInfoMaster(nMessage &m);
+    static void GiveBigServerInfoMaster( Network::RequestBigServerInfoMaster const & info,
+                                         nSenderInfo                         const & sender );
 
     // used to transfer the extra erver info (players, settings
     // etc) from the server directly to the client
@@ -273,11 +285,9 @@ public:
 
     void SetFromMaster();                               //!< indicate that this server was fetched through the master
 
-
     static void RunMaster();                             // run a master server
 
-
-    static void GetSenderData(const nMessage &m,tString& name, int& port);
+    static void GetSenderData( int sender, tString& name, int& port );
 
     // information query
     bool           Reachable()		const;
@@ -410,36 +420,6 @@ nServerInfo & nServerInfo::SetScoreBias( int scoreBias )
 {
     this->scoreBias_ = scoreBias;
     return *this;
-}
-
-// *******************************************************************************************
-// *
-// *	NetWrite
-// *
-// *******************************************************************************************
-//!
-//!		@param	message     message to write info to
-//!
-// *******************************************************************************************
-
-void nServerInfoBase::NetWrite( nMessage & message ) const
-{
-    DoNetWrite( message );
-}
-
-// *******************************************************************************************
-// *
-// *	NetRead
-// *
-// *******************************************************************************************
-//!
-//!		@param	mesage      message to read from
-//!
-// *******************************************************************************************
-
-void nServerInfoBase::NetRead( nMessage & message )
-{
-    DoNetRead( message );
 }
 
 // *******************************************************************************************

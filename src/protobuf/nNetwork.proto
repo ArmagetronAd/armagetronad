@@ -1,0 +1,152 @@
+// Protocol buffer types for nNetwork.cpp
+package Network;
+
+import "nAuthentication.proto";
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// dummy message
+message Dummy
+{
+}
+
+// version info
+message VersionSync
+{
+    optional int32 min = 1; // minimal version ID supported
+    optional int32 max = 2; // maximal version ID supported
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// version override: tell the receiver about our version
+message VersionOverride
+{
+    optional VersionSync version = 1; // version of the sender
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// version control: server tells clients about the current version
+// supported by everyone
+message VersionControl
+{
+    optional VersionSync version = 1; // common version of server and all clients
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// acknowledgement packet
+message Ack
+{
+    repeated uint32 ack_ids = 1; // array of message IDs that were received
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// connection data
+message Connection
+{
+    optional string hostname = 1; // name of the server
+    optional int32  port     = 2; // port of the server
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// protobuf encoding options
+message EncodingOptions
+{
+    optional bool diff_compression = 1 [default = true]; // allow messages to be compressed with the simple diff method
+    optional bool zip_compression  = 2 [default = false]; // allow messages to be compressed with the incremental zlib method
+}
+
+// login denial/kick message
+message LoginDenied
+{
+    optional string reason = 1; // reason for the kick
+
+    optional Connection forward_to = 2; // forward the client to this server    
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// login ignored by server
+message LoginIgnored
+{
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// logout request
+message Logout
+{
+    optional uint32 my_id = 200; // the clients network ID. Yep, very old servers trust it :)
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// login accepted
+message LoginAccepted
+{
+    optional uint32  net_id  = 1; // our client ID
+    optional VersionSync version = 2; // server version
+    
+    optional string address = 3; // client IP the server sees
+    optional Hash   token = 4;   // the token sent to the server during login
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+
+    optional EncodingOptions options = 5; // requested encoding options
+}
+
+// current login message
+message Login
+{
+    optional uint32 rate = 1;              // requested bandwith in kbyte/s
+
+    optional string big_brother = 2;       // big brother hardware stats string
+
+    optional VersionSync version = 3;           // version of client
+    optional string authentication_methods = 4; // authentication methods
+    
+    optional Hash token = 5;  // token, expected by the client in the login accept message
+    
+    optional EncodingOptions options = 6; // requested encoding options
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// console message
+message ConsoleMessage
+{
+    optional string message = 1; // string to print
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// center message
+message CenterMessage
+{
+    optional string message = 1; // string to print
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+

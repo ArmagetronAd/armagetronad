@@ -330,6 +330,14 @@ if test x$enable_armathentication = xyes; then
 AC_DEFINE(KRAWALL_SERVER,,enables krawall server)
 fi
 
+if test x$enable_zonesv1 = xyes && test x$enable_fortress = xyes; then
+	AC_MSG_WARN([
+	Zones v2 Fortress is incompatible with Zones v1.
+	Therefore, Zones v1 will be disabled.
+	])
+	enable_zonesv1=no
+fi
+
 if test x$enable_zonesv1 = xyes; then
 AC_DEFINE(ENABLE_ZONESV1,,enables zonesv1)
 fi
@@ -640,6 +648,28 @@ AC_MSG_ERROR([
 	Please upgrade to 2.6.11 or later
 ])
 )
+
+dnl *************************************************
+dnl         pattern buffers
+dnl *************************************************
+
+dnl check for compiler
+AC_CHECK_PROG([PROTOC],protoc,protoc,no)
+
+dnl check for library
+AC_CHECK_LIB([protobuf],main,,
+AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required, but was not found.]])
+)
+
+AC_LANG([C++])
+
+dnl check for header
+AC_CHECK_HEADERS([google/protobuf/message.h],,
+AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required with all development files, but was not found.]])
+)
+
+AC_LANG([C])
+
 # fi
 
 dnl *************************************************
@@ -1022,25 +1052,6 @@ fi
 
 dnl RUBY and SWIG end
 
-
-
-
-if test "`$CXX -v 2>&1 | grep -v executing | grep pgcc`"  ; then
-AC_MSG_WARN(
-[
-
-
-You are using PGCC to compile Armagetron. Due to a bug in PGCC,
-exception handling needs to be disabled. This makes the server
-mode vulnerable to an attack that causes the server to block or
-crash. (The attack is still detected, but nothing can be done
-about it. You will get the message \"I told you not to use PGCC!\")
-
-
-])
-CXXFLAGS="$CXXFLAGS -fno-exceptions -DNOEXCEPT"
-fi
-
 dnl Replace `main' with a function in -lpthread:
 
 dnl Checks for header files.
@@ -1200,6 +1211,22 @@ AC_SUBST_UNIVERSAL(relocatable)
 
 AC_USE_SUBST_UNIVERSAL
 AC_AA_REPLACEPATHS
+
+dnl Strip pedantic flags from general CXXFLAGS and put them into a separate variable
+CXXFLAGS_OURFILES=''
+
+if echo ${CXXFLAGS} | grep -- '-Werror' > /dev/null; then
+  CXXFLAGS_OURFILES="${CXXFLAGS_OURFILES} -Werror"
+fi
+
+if echo ${CXXFLAGS} | grep -- '--pedantic' > /dev/null; then
+  CXXFLAGS_OURFILES="${CXXFLAGS_OURFILES} --pedantic"
+fi
+
+CXXFLAGS="`echo ${CXXFLAGS} | sed -e 's,-Werror,,g' | sed -e 's,--pedantic,,g'`"
+
+dnl CXX flags for our own hand-written files. Can be pedantic.
+AC_SUBST(CXXFLAGS_OURFILES)
 
 export CPPFLAGS
 export CXXFLAGS

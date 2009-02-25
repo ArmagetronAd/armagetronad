@@ -1,0 +1,31 @@
+// Protocol buffer types for tCoord
+package Tools;
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// message for coordinates
+message Position
+{
+    optional float x = 1;
+    optional float y = 2;
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// message for directions
+message Direction
+{
+    optional float x = 1;
+    optional float y = 2;
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}

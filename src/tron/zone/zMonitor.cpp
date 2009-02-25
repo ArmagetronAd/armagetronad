@@ -10,7 +10,7 @@
  * Keep track of everybody contributing to the monitor (for a tic atm)
  */
 void
-zMonitor::affectSlide(gCycle* user, tPolynomial<nMessage> triggererInfluence, Triad marked) {
+zMonitor::affectSlide(gCycle* user, tPolynomial triggererInfluence, Triad marked) {
     Triggerer triggerer;
     triggerer.who = user;
     // TODO:
@@ -35,7 +35,7 @@ zMonitor::affectSlide(gCycle* user, tPolynomial<nMessage> triggererInfluence, Tr
 
 bool zMonitor::Timestep( REAL time )
 {
-    tPolynomial<nMessage> prevValueEq = valueEq;
+    tPolynomial prevValueEq = valueEq;
 
     if ( totalInfluence != previousTotalInfluenceSlide ) {
 
@@ -98,7 +98,7 @@ zMonitor::addRule(zMonitorRulePtr aRule) {
 
 
 
-void zMonitorRule::applyRule(triggerers &contributors, REAL time, const tPolynomial<nMessage> &valueEq) {
+void zMonitorRule::applyRule(triggerers &contributors, REAL time, const tPolynomial &valueEq) {
     /* We take all the contributors */
     /* And apply the proper effect */
 
@@ -173,10 +173,10 @@ zMonitorRuleOutsideRange::isValid(float monitorValue) {
 }
 
 void
-zMonitorInfluence::apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * user, const tPolynomial<nMessage> &valueEq) {
+zMonitorInfluence::apply(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, gCycle * user, const tPolynomial &valueEq) {
     // Currently, we discard ownership information
 
-    tPolynomial<nMessage> tf = influence.marshal(valueEq);
+    tPolynomial tf = influence.marshal(valueEq);
     monitor->affectSlide(user, tf, marked);
 
 }

@@ -43,9 +43,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eNetGameObject.h"
 #include "tCallbackString.h"
 #include "nSpamProtection.h"
+#include "tColor.h"
 
 #include <set>
 #include <list>
+
+namespace Engine{ class PlayerNetIDSync; }
 
 #define PLAYER_CONFITEMS (30+MAX_INSTANT_CHAT)
 
@@ -207,7 +210,7 @@ public:
     tArray<tString> lastSaid;
     tArray<nTimeRolling> lastSaidTimes;
     //	void SetLastSaid(tString ls);
-    unsigned short r,g,b; // our color
+    tShortColor color; // our color
 
     unsigned short pingCharity; // max ping you are willing to take over
 
@@ -223,7 +226,6 @@ public:
     nSpamProtection chatSpam_;
 
     ePlayerNetID(int p=-1);
-    ePlayerNetID(nMessage &m);
     virtual ~ePlayerNetID();
 
     virtual bool ActionOnQuit();
@@ -258,7 +260,11 @@ public:
 
     void CreateNewTeam(); 	    				// create a new team and join it (on the server)
     void CreateNewTeamWish();	 				// express the wish to create a new team and join it
-    virtual void ReceiveControlNet(nMessage &m);// receive the team control wish
+    virtual void ReceiveControlNet( Network::NetObjectControl const & control );// receive the team control wish
+
+    // easier to implement conversion helpers: just extract the relevant sub-protbuf.
+    virtual nProtoBuf       * ExtractControl( Network::NetObjectControl       & control );
+    virtual nProtoBuf const * ExtractControl( Network::NetObjectControl const & control );
 
     static bool Enemies( ePlayerNetID const * a, ePlayerNetID const * b ); //!< determines whether two players are opponents and can score points against each other
 
@@ -266,11 +272,18 @@ public:
     virtual void 			PrintName(tString &s) const;
 
     virtual bool 			AcceptClientSync() const;
-    virtual void 			WriteSync(nMessage &m);
-    virtual void 			ReadSync(nMessage &m);
-    virtual nDescriptor&	CreatorDescriptor() const;
     virtual void			InitAfterCreation();
     virtual bool			ClearToTransmit(int user) const;
+
+    //! creates a netobject form sync data
+    ePlayerNetID( Engine::PlayerNetIDSync const & sync, nSenderInfo const & sender );
+    //! reads incremental sync data. Returns false if sync was invalid or old.
+    void ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo const & sender );
+    //! writes sync data (and initialization data if flat is set)
+    void WriteSync( Engine::PlayerNetIDSync & sync, bool init );
+    //! returns the descriptor responsible for this class
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
+public:
 
     virtual void 			NewObject(){}        				// called when we control a new object
     virtual void 			RightBeforeDeath(int triesLeft){} 	// is called right before the vehicle gets destroyed.

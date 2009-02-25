@@ -2,9 +2,10 @@
 #include "gCycle.h"
 #include "zZone.h"
 
-static nVersionFeature sz_ZonesV2(20);
+#include "zShape.pb.h"
+#include "nProtoBuf.h"
 
-zShape::zShape(eGrid* grid, unsigned short idZone)
+zShape::zShape( eGrid* grid, zZone * zone )
         :eNetGameObject( grid, eCoord(0,0), eCoord(0,0), NULL, true ),
         posx_(),
         posy_(),
@@ -13,30 +14,17 @@ zShape::zShape(eGrid* grid, unsigned short idZone)
         color_(),
         createdtime_(0.0),
         referencetime_(0.0),
-        lasttime_(0.0),
-        idZone_(idZone),
-        newIdZone_(false)
+        lasttime_(0.0)
 {
-    joinWithZone();
+    tASSERT( zone );
+    zone->setShape( this );
 }
 
-zShape::zShape(nMessage &m):eNetGameObject(m)
+zShape::zShape( Zone::ShapeSync const & sync, nSenderInfo const & sender )
+: eNetGameObject( sync.base(), sender )
 {
-    REAL time;
-    m >> time;
-    setCreatedTime(time);
-
-    networkRead(m);
-
-    unsigned short anIdZone;
-    m >> anIdZone;
-    if(anIdZone != idZone_) {
-        idZone_ = anIdZone;
-        newIdZone_ = true;
-        joinWithZone();
-    }
+    setCreatedTime( sync.creation_time() );
 }
-
 
 void zShape::setCreatedTime(REAL time)
 {
@@ -53,58 +41,33 @@ void zShape::setReferenceTime(REAL time)
     // Do not update lasttime_, referencetime_ might be set in the future for ease of equation writing.
 }
 
-void zShape::networkWrite(nMessage &m)
+void zShape::WriteSync( Zone::ShapeSync & sync, bool init ) const
 {
+    eNetGameObject::WriteSync( *sync.mutable_base(), init );
 
-    m << referencetime_;
-    m << posx_;
-    m << posy_;
-    m << scale_;
-    m << rotation2;
-    m << color_.r_;
-    m << color_.g_;
-    m << color_.b_;
-    m << color_.a_;
+    if ( init )
+    {
+        sync.set_creation_time( createdtime_ );
+    }
+
+    sync.set_reference_time( referencetime_ );
+    posx_.WriteSync( *sync.mutable_pos_x() );
+    posy_.WriteSync( *sync.mutable_pos_y() );
+    scale_.WriteSync( *sync.mutable_scale() );
+    rotation2.WriteSync( *sync.mutable_rotation2() );
+    color_.WriteSync( *sync.mutable_color() );
 }
 
-void zShape::networkRead(nMessage &m)
+void zShape::ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender )
 {
-    REAL time;
-    m >> time;
-    setReferenceTime(time);
-    m >> posx_;
-    m >> posy_;
-    m >> scale_;
-    m >> rotation2;
+    eNetGameObject::ReadSync( sync.base(), sender );
 
-    m >> color_.r_;
-    m >> color_.g_;
-    m >> color_.b_;
-    m >> color_.a_;
-}
-
-/*
- * to create a shape on the clients
- */
-void zShape::WriteCreate( nMessage & m )
-{
-    eNetGameObject::WriteCreate(m);
-
-    m << createdtime_;
-
-    networkWrite(m);
-
-    m << idZone_;
-}
-
-void zShape::WriteSync(nMessage &m)
-{
-    networkWrite(m);
-}
-
-void zShape::ReadSync(nMessage &m)
-{
-    networkRead(m);
+    setReferenceTime( sync.reference_time() );
+    posx_.ReadSync( sync.pos_x() );
+    posy_.ReadSync( sync.pos_y() );
+    scale_.ReadSync( sync.scale() );
+    rotation2.ReadSync( sync.rotation2() );
+    color_.ReadSync( sync.color() );
 }
 
 void zShape::setPosX(const tFunction & x){
@@ -115,7 +78,7 @@ void zShape::setPosY(const tFunction & y){
     posy_ = y;
 }
 
-void zShape::setRotation2(const tPolynomial<nMessage> & r) {
+void zShape::setRotation2(const tPolynomial & r) {
   if(rotation2 == r) {
     // Empty: Nothing to do, no need to send an update
   }
@@ -162,6 +125,26 @@ tCoord zShape::Position() const {
     );
 }
 
+REAL zShape::GetRotationSpeed() {
+    return getRotation2().evaluateRate(1, lasttime_);
+}
+
+void zShape::SetRotationSpeed(REAL r) {
+    tPolynomial r2 = getRotation2();
+    r2.changeRate(r, 1, lasttime_);
+    setRotation2(r2);
+}
+
+REAL zShape::GetRotationAcceleration() {
+    return getRotation2().evaluateRate(2, lasttime_);
+}
+
+void zShape::SetRotationAcceleration(REAL r) {
+    tPolynomial r2 = getRotation2();
+    r2.changeRate(r, 2, lasttime_);
+    setRotation2(r2);
+}
+
 void zShape::animate( REAL time ) {
     // Is this needed as the items are already animated?
 }
@@ -175,11 +158,6 @@ void zShape::TimeStep( REAL time ) {
         // The shape has collapsed and should be removed
       }
     */
-
-    if(newIdZone_) {
-        joinWithZone();
-    }
-
 }
 
 bool zShape::isInteracting(eGameObject * target) {
@@ -191,104 +169,36 @@ void zShape::render(const eCamera *cam )
 void zShape::render2d(tCoord scale) const
     {}
 
-void zShape::joinWithZone() {
-    if(sn_netObjects[idZone_]) {
-        zZone *asdf = dynamic_cast<zZone*>(&*sn_netObjects[idZone_]);
-        asdf->setShape(zShapePtr(this));
-        newIdZone_ = false;
-    }
-}
-
-zShapeCircle::zShapeCircle(eGrid *grid, unsigned short idZone):
-        zShape(grid, idZone),
-        emulatingOldZone_(false),
-        _cacheScaledRadius(NULL),
-        _cacheRotationF(NULL),
-        _cacheTime(0.),
+zShapeCircle::zShapeCircle(eGrid *grid, zZone * zone ):
+        zShape(grid, zone ),
         radius(1.0, 0.0)
 {}
-
-zShapeCircle::zShapeCircle(nMessage &m):
-        zShape(m),
-        emulatingOldZone_(false),
-        _cacheScaledRadius(NULL),
-        _cacheRotationF(NULL),
-        _cacheTime(0.),
-        radius(1.0, 0.0)
-{
-    m >> radius;
-}
 
 /*
  * to create a shape on the clients
  */
-void zShapeCircle::WriteCreate( nMessage & m )
-{
-    if (!sz_ZonesV2.Supported(SyncedUser()))
-    {
-        eNetGameObject::WriteCreate(m);
-        m << createdtime_;
-        return;
-    }
-    
-    zShape::WriteCreate(m);
 
-    m << radius;
+zShapeCircle::zShapeCircle( Zone::ShapeCircleSync const & sync, nSenderInfo const & sender ):
+        zShape( sync.base(), sender ),
+        radius(1.0, 0.0)
+{
 }
 
-void zShapeCircle::WriteSync(nMessage &m)
+void zShapeCircle::WriteSync( Zone::ShapeCircleSync & sync, bool init ) const
 {
-    if (!sz_ZonesV2.Supported(SyncedUser()))
-    {
-        WriteSyncV1(m);
-        return;
-    }
-    zShape::WriteSync(m);
-    m << radius;
+    zShape::WriteSync( *sync.mutable_base(), init );
+
+    radius.WriteSync( *sync.mutable_radius() );
 }
 
-void zShapeCircle::WriteSyncV1(nMessage &m)
+void zShapeCircle::ReadSync( Zone::ShapeCircleSync const & sync, nSenderInfo const & sender )
 {
-    // Write a zones-v1 sync message
-    eNetGameObject::WriteSync(m);
+    zShape::ReadSync( sync.base(), sender );
 
-    m << color_.r_;
-    m << color_.g_;
-    m << color_.b_;
-
-    m << referencetime_;
-    m << posx_;
-    m << posy_;
-    if (!_cacheScaledRadius || (_cacheTime < lasttime_ && scale_.slope_ > 0. && radius.slope_ > 0.))
+    if ( sync.has_radius() )
     {
-        delete _cacheScaledRadius;
-        tPolynomial<nMessage> effectiveRadius;
-        effectiveRadius[0] = scale_.offset_ * radius.offset_;
-        effectiveRadius[1] = (scale_.slope_ * radius.offset_) + (radius.slope_ * scale_.offset_);
-        effectiveRadius[2] = (scale_.slope_ * radius.slope_) * 2;
-        // FIXME: Force a new sync when it differs too much?
-        _cacheScaledRadius = new tFunction(effectiveRadius.simplify(lasttime_));
+        radius.ReadSync( sync.radius() );
     }
-    m << *_cacheScaledRadius;
-
-    // FIXME: .Len isn't truncated when there are 0s
-    if (!_cacheRotationF || (_cacheTime < lasttime_ && rotation2.Len() > 3))
-    {
-        delete _cacheRotationF;
-        tPolynomial<nMessage> & rp = rotation2;
-        REAL sp = rp.evaluateRate(1, lasttime_);
-        REAL ac = rp.evaluateRate(2, lasttime_) / 2.;
-        _cacheRotationF = new tFunction(sp, ac);
-    }
-    m << *_cacheRotationF;
-
-    _cacheTime = lasttime_;
-}
-
-void zShapeCircle::ReadSync(nMessage &m)
-{
-    zShape::ReadSync(m);
-    m >> radius;
 }
 
 bool zShapeCircle::isInteracting(eGameObject * target)
@@ -460,23 +370,6 @@ void zShapeCircle::render2d(tCoord scale) const {
 #endif
 }
 
-void zShapeCircle::setRotation2(const tPolynomial<nMessage> & r) {
-    zShape::setRotation2(r);
-    delete _cacheRotationF;
-    _cacheRotationF = NULL;
-}
-
-void zShapeCircle::setScale(const tFunction & s){
-    zShape::setScale(s);
-    delete _cacheScaledRadius;
-    _cacheScaledRadius = NULL;
-}
-
-void zShapeCircle::setRadius(tFunction radius) {
-    this->radius = radius;
-    _cacheScaledRadius = NULL;
-}
-
 void zShapeCircle::setGrowth(REAL growth) {
     REAL s = radius(lasttime_ - referencetime_);
     radius.SetSlope(0.);
@@ -486,49 +379,60 @@ void zShapeCircle::setGrowth(REAL growth) {
 }
 
 //
-zShapePolygon::zShapePolygon(nMessage &m):zShape(m),
-        points()
+zShapePolygon::zShapePolygon(  Zone::ShapePolygonSync const & sync, nSenderInfo const & sender )
+: zShape( sync.base(), sender ),
+ points()
 {
-    int numPoints;
-    m >> numPoints;
-
+    int numPoints = sync.points_size();
+    
     // read the polygon shape
-    for( ; numPoints>0 && !m.End(); numPoints-- )
+    for ( int i = 0; i < numPoints; ++i )
     {
         tFunction tfX, tfY;
-        m >> tfX;
-        m >> tfY;
-
+        Zone::FunctionPointSync const & point = sync.points(i);
+        tfX.ReadSync( point.x() );
+        tfY.ReadSync( point.y() );
         addPoint( myPoint( tfX, tfY ) );
     }
 }
 
-zShapePolygon::zShapePolygon(eGrid *grid, unsigned short idZone):
-        zShape(grid, idZone),
+zShapePolygon::zShapePolygon(eGrid *grid, zZone * zone ):
+        zShape( grid, zone ),
         points()
 {}
 
 /*
  * to create a shape on the clients
  */
-void zShapePolygon::WriteCreate( nMessage & m )
+void zShapePolygon::WriteSync( Zone::ShapePolygonSync & sync, bool init ) const
 {
-    zShape::WriteCreate(m);
+    zShape::WriteSync( *sync.mutable_base(), init );
 
-    int numPoints;
-    numPoints = points.size();
-    m << numPoints;
+    if ( !init )
+    {
+        return;
+    }
+
+    sync.clear_points();
 
     std::vector< myPoint >::const_iterator iter;
     for(iter = points.begin();
             iter != points.end();
             ++iter)
     {
-        m << (*iter).first;
-        m << (*iter).second;
+        Zone::FunctionPointSync & point = *sync.add_points();
+
+        (*iter).first.WriteSync( *point.mutable_x() );
+        (*iter).second.WriteSync( *point.mutable_y() );
     }
 
     //    WriteSync( m );
+}
+
+//! reads sync data, returns false if sync was old or otherwise invalid
+void zShapePolygon::ReadSync( Zone::ShapePolygonSync const & sync, nSenderInfo const & sender )
+{
+    zShape::ReadSync( sync.base(), sender );
 }
 
 bool zShapePolygon::isInside(eCoord anECoord) {
@@ -741,25 +645,106 @@ void zShapePolygon::render2d(tCoord scale) const {
 #endif
 }
 
-// the shapes's network initializator
-static nNOInitialisator<zShapeCircle> zoneCircle_init(350,"shapeCircle");
-static nNOInitialisator<zShapePolygon> zonePolygon_init(360,"shapePolygon");
 
-class gZone;
-#ifdef ENABLE_ZONESV1
-extern nNOInitialisator<gZone> zone_init;
-#else
-static nNOInitialisator<zShapeCircle> zone_init(340,"zone");
+#ifndef ENABLE_ZONESV1
+namespace Game { class ZoneV1Sync; }
+class zNullV1Zone : public nNetObject
+{
+public:
+    zNullV1Zone(const Game::ZoneV1Sync&, const nSenderInfo&);
+private:
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
+};
+
+zNullV1Zone::zNullV1Zone(const Game::ZoneV1Sync&sync, const nSenderInfo&sender)
+{
+    tASSERT(false && "trying to initialize a zNullV1Zone");
+}
+
+static nNetObjectDescriptor< zNullV1Zone, Game::ZoneV1Sync > zone_init( 340 );
+
+nNetObjectDescriptorBase const & zNullV1Zone::DoGetDescriptor() const
+{
+    return zone_init;
+}
 #endif
 
-nDescriptor & zShapeCircle::CreatorDescriptor( void ) const
+
+// the shapes's network initializator
+static nNetObjectDescriptor< zShapeCircle, Zone::ShapeCircleSync > zoneCircle_init( 350 );
+static nNetObjectDescriptor< zShapePolygon, Zone::ShapePolygonSync > zonePolygon_init( 360 );
+
+nNetObjectDescriptorBase const & zShapeCircle::DoGetDescriptor() const
 {
-    if (!sz_ZonesV2.Supported(SyncedUser()))
-        return zone_init;
     return zoneCircle_init;
 }
 
-nDescriptor & zShapePolygon::CreatorDescriptor( void ) const
+nNetObjectDescriptorBase const & zShapePolygon::DoGetDescriptor() const
 {
     return zonePolygon_init;
 }
+
+#include "gZone.pb.h"
+
+//! convert circle shape messages into zone v1 messages for old clients
+class nZonesV1Translator: public nMessageTranslator< Zone::ShapeCircleSync >
+{
+public:
+    //! constructor registering with the descriptor
+    nZonesV1Translator(): nMessageTranslator< Zone::ShapeCircleSync >( zoneCircle_init )
+    {
+    }
+    
+    //! convert current message format to format suitable for old client
+    virtual nMessageBase * Translate( Zone::ShapeCircleSync const & source, int receiver ) const
+    {
+        if( sn_protoBuf.Supported( receiver ) )
+        {
+            // no translation required for protobuf capable clients
+            return NULL;
+        }
+
+        Zone::ShapeSync const & shape = source.base();
+
+        // copy message over
+        Game::ZoneV1Sync dest;
+        dest.mutable_base()->CopyFrom( shape.base() );
+        dest.mutable_color()->CopyFrom( shape.color() );
+        dest.set_create_time( shape.creation_time() );
+        dest.set_reference_time( shape.reference_time() );
+        dest.mutable_pos_x()->CopyFrom( shape.pos_x() );
+        dest.mutable_pos_y()->CopyFrom( shape.pos_y() );
+
+        // transfer radius function
+        tFunction scale, radius;
+        scale.ReadSync( shape.scale() );
+        radius.ReadSync( source.radius() );
+
+        // FIXME: don't ignore the quadratic term
+        // FIXME: Force a new sync when it differs too much
+        // FIXME: cache this conversion as much as possible
+        // mend them together, ignoring the quadratic term
+        tFunction mendedRadius( scale.GetOffset() * radius.GetOffset(), scale.GetOffset() * radius.GetSlope() + scale.GetSlope() * radius.GetOffset() );
+        mendedRadius.WriteSync( *dest.mutable_radius() );
+
+        // FIXME: the above mostly applies here too
+        // calculate rotation speed
+        tPolynomial rotation;
+        rotation.ReadSync( shape.rotation2() );
+        rotation.adaptToNewReferenceVarValue( shape.reference_time() );
+        tFunction mendedRotation( rotation[1], rotation[2] );
+        mendedRotation.WriteSync( *dest.mutable_rotation_speed() );
+
+        nProtoBufMessageBase * ret = nProtoBufDescriptor< Game::ZoneV1Sync >::TransformStatic( dest );
+
+        if( !shape.has_creation_time() )
+        {
+            // make it a sync message
+            ret->SetStreamer( nNetObjectDescriptorBase::SyncStreamer() );
+        }
+        
+        return ret;
+    }
+};
+
+static nZonesV1Translator sn_v1translator;

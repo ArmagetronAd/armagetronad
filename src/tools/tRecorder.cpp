@@ -561,7 +561,7 @@ static int st_GetDebugLevelPlayback()
     // sync level with recording
     int level = st_debugLevelRecording;
     tRecorder::Playback( "DEBUGLEVEL", level );
-    tRecorder::Record( "DEBUGLEVEL", st_debugLevelRecording );
+    tRecorder::Record( "DEBUGLEVEL", level );
 
     return level;
 }
@@ -596,7 +596,9 @@ int tRecorderSyncBase::GetDebugLevelPlayback( void )
 
 int tRecorderSyncBase::GetDebugLevelRecording( void )
 {
-    return st_debugLevelRecording;
+    // delegate so this doesn't change when the config changes
+    return GetDebugLevelPlayback();
+    // return st_debugLevelRecording;
 }
 
 REAL st_GetDifference( REAL a, REAL b)

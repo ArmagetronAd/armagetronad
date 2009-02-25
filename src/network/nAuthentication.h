@@ -32,6 +32,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class tOutput;
 
+namespace Network { class PasswordRequest; class PasswordAnswer; }
+class nSenderInfo;
+
 class nAuthentication: public nKrawall
 {
 public:
@@ -47,8 +50,8 @@ public:
     static void SetLoginResultCallback (LoginResultCallback* callback);
 
     //! network handlers
-    static void HandlePasswordRequest(nMessage& m);
-    static void HandlePasswordAnswer (nMessage& m);
+    static void HandlePasswordRequest( Network::PasswordRequest const & request, nSenderInfo const & sender );
+    static void HandlePasswordAnswer (  Network::PasswordAnswer const & answer, nSenderInfo const & sender );
 
     //! on the server: request user authentification from login slot
     static bool RequestLogin(const tString& authority, const tString& username, nNetObject & user, const tOutput& message );

@@ -35,37 +35,34 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  *
  */
-template<typename T>
 class tPolynomialMarshaler 
 {
  public:
     tPolynomialMarshaler(); //!< Default constructor
     tPolynomialMarshaler(std::string str); //!< Parsing constructor
     tPolynomialMarshaler(const tPolynomialMarshaler & other); //!< Copy constructor
-    tPolynomialMarshaler(const tPolynomial<T> & _constant, const tPolynomial<T> & _variant); //!< Constructor from 2 tPolynomial
+    tPolynomialMarshaler(const tPolynomial & _constant, const tPolynomial & _variant); //!< Constructor from 2 tPolynomial
 
     void setConstant(REAL value, int index);
     void setVariant(REAL value, int index);
-    void setConstant(const tPolynomial<T> & tpConstant);
-    void setVariant(const tPolynomial<T> & tpVariant);
+    void setConstant(const tPolynomial & tpConstant);
+    void setVariant(const tPolynomial & tpVariant);
     
     void parse(std::string str);
 
-    tPolynomial<T> const marshal(const tPolynomial<T> & other);
+    tPolynomial const marshal(const tPolynomial & other);
 
     std::string toString() const;
 
-    template<typename D>
-    friend bool operator == (const tPolynomialMarshaler<D> & left, const tPolynomialMarshaler<D> & right);
-    template<typename D>
-    friend bool operator != (const tPolynomialMarshaler<D> & left, const tPolynomialMarshaler<D> & right);
+    friend bool operator == (const tPolynomialMarshaler & left, const tPolynomialMarshaler & right);
+    friend bool operator != (const tPolynomialMarshaler & left, const tPolynomialMarshaler & right);
  protected:
     void parsePart(std::string str, tArray<REAL> &array);
     int getLenConstant() const {return constant.Len();};
     int getLenVariant()const {return variant.Len();};
 
-    tPolynomial<T> constant;
-    tPolynomial<T> variant;
+    tPolynomial constant;
+    tPolynomial variant;
 };
 
 // *******************************************************
@@ -73,154 +70,7 @@ class tPolynomialMarshaler
 // *******************************************************
 // *******************************************************
 
-template<typename T>
-bool operator == (const tPolynomialMarshaler<T> & left, const tPolynomialMarshaler<T> & right);
-template<typename T>
-bool operator != (const tPolynomialMarshaler<T> & left, const tPolynomialMarshaler<T> & right);
-
-// *******************************************************
-// *******************************************************
-
-template<typename T>
-tPolynomial<T> const tPolynomialMarshaler<T>::marshal(const tPolynomial<T> & other)
-{
-    tPolynomial<T> tf(0);
-    tPolynomial<T> res(0);
-
-    tf.setAtSameReferenceVarValue(other);
-    res.setAtSameReferenceVarValue(other);
-
-    tf = variant.substitute(other);
-
-    {
-      REAL tData[] = {0.0, 1.0};
-      tPolynomial<T> t(tData, sizeof(tData)/sizeof(tData[0]));
-      t.setAtSameReferenceVarValue(other);
-
-      res = tf * t;
-    }
-
-    // Reset tf for further computation
-    tf = tPolynomial<T>(0);
-    tf.setAtSameReferenceVarValue(other);
-
-    tf = constant.substitute(other);
-
-    res += tf;
-
-    return res;
-}
-
-
-
-template<typename T>
-tPolynomialMarshaler<T>::tPolynomialMarshaler() 
-:constant(0),
-  variant(0)
-{
-  // Empty
-}
-
-template<typename T>
-tPolynomialMarshaler<T>::tPolynomialMarshaler(std::string str)
-:constant(0),
-  variant(0)
-{
-  parse(str);
-}
-
-template<typename T>
-tPolynomialMarshaler<T>::tPolynomialMarshaler(const tPolynomialMarshaler & other)
-:constant(other.constant),
-  variant(other.variant)
-{
-  // Empty
-}
-
-template<typename T>
-tPolynomialMarshaler<T>::tPolynomialMarshaler(const tPolynomial<T> & _constant, const tPolynomial<T> & _variant)
-  :constant(_constant),
-   variant(_variant)
-{
-  // Empty
-}
-
-// **************************************************************    
-// **************************************************************    
-
-template<typename T>
-void tPolynomialMarshaler<T>::parse(std::string str)
-{
-    int bPos;
-#define TPOLYNOMIAL_MARSHALER_DELIMITER ':'
-
-    if ( (bPos = str.find(TPOLYNOMIAL_MARSHALER_DELIMITER)) != -1)
-    {
-        constant.parse(str.substr(0, bPos));
-        variant.parse(str.substr(bPos + 1, str.length()));
-    }
-    else
-    {
-        constant.parse(str);
-        variant = tPolynomial<T>(0);
-    }
-}
-
-template<typename T>
-void tPolynomialMarshaler<T>::setConstant(REAL value, int index)
-{
-  constant[index] = value;
-}
-
-template<typename T>
-void tPolynomialMarshaler<T>::setVariant(REAL value, int index)
-{
-  variant[index] = value;
-}
-
-template<typename T>
-void tPolynomialMarshaler<T>::setConstant(const tPolynomial<T> & tpConstant)
-{
-  constant = tpConstant;
-}
-
-template<typename T>
-void tPolynomialMarshaler<T>::setVariant(const tPolynomial<T> & tpVariant)
-{
-  variant = tpVariant;
-}
-
-// friend
-template<typename T>
-bool operator == (const tPolynomialMarshaler<T> & left, const tPolynomialMarshaler<T> & right)
-{
-  bool res = true;
-  
-  res = (left.constant == right.constant)
-     && (left.variant == right.variant);
-  
-  return res;
-}
-
-// friend
-template<typename T>
-bool operator != (const tPolynomialMarshaler<T> & left, const tPolynomialMarshaler<T> & right)
-{
-  return !(left == right);
-}
-
-template<typename T>
-std::string tPolynomialMarshaler<T>::toString() const
-{
-  std::ostringstream ostr("");
-
-  ostr << "Constant :" << std::endl;
-  ostr << constant.toString() ;
-
-  ostr << std::endl << "Variant :" << std::endl;
-  ostr << variant.toString() ;
-
-  return ostr.str();
-}
+bool operator == (const tPolynomialMarshaler & left, const tPolynomialMarshaler & right);
+bool operator != (const tPolynomialMarshaler & left, const tPolynomialMarshaler & right);
 
 #endif

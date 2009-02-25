@@ -1,5 +1,5 @@
 ServerBegin
-connection  master1.armagetronad.net
+connection  armagetron.kicks-ass.net
 port        4532
 method      0
 key         0  

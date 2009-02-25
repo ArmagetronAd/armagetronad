@@ -56,7 +56,7 @@ public:
         Type_Count  = 3
     };
 
-    void Execute( nSendBuffer& buffer, nBandwidthControl& control )		{	this->DoExecute( buffer, control );	}				// executes the small task
+    void Execute( nSendBuffer& buffer, nBandwidthControl& control, int peer )		{	this->DoExecute( buffer, control, peer );	}				// executes the small task
     void Priorize()														{	if ( this->priorizer_ ) this->DoPriorize(); }		// rethinks priority
 
     int		EstimateSize	( void		) const {	return this->DoEstimateSize(); }	// estimate bandwidth usage
@@ -69,7 +69,7 @@ public:
 void	Timestep		( REAL dt	)		{ waiting_ += dt;	this->Priorize(); }	// adds time
 
 protected:
-    virtual void DoExecute( nSendBuffer& buffer, nBandwidthControl& control ) = 0;				// executes whatever it has to do
+    virtual void DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer ) = 0;				// executes whatever it has to do
     virtual int  DoEstimateSize() const = 0;													// estimate bandwidth usage
     virtual void DoPriorize();																	// rethinks priority
 
@@ -122,7 +122,7 @@ class nBandwidthArbitrator: public nBandwidthTaskPriorizer, public tHeapElement,
     friend class tReferencable< nBandwidthArbitrator >;
 
 public:
-    bool Fill( nSendBuffer& buffer, nBandwidthControl& control );	// fills the send buffer with top priority messages
+    bool Fill( nSendBuffer& buffer, nBandwidthControl& control, int peer );	// fills the send buffer with top priority messages
     void Timestep( REAL dt );										// advances timers of all tasks
     bool UseBandwidth( REAL dt ){ return DoUseBandwidth( dt ); }	// consumes some bandwidth
 protected:
@@ -181,7 +181,7 @@ public:
     {}
 
 protected:
-    virtual void DoExecute( nSendBuffer& buffer, nBandwidthControl& control );				// executes whatever it has to do
+    virtual void DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer );				// executes whatever it has to do
 };
 
 // object syncing bandwidth task
@@ -193,7 +193,7 @@ public:
     {}
 
 protected:
-    virtual void DoExecute( nSendBuffer& buffer, nBandwidthControl& control );				// executes whatever it has to do
+    virtual void DoExecute( nSendBuffer& buffer, nBandwidthControl& control, int peer );				// executes whatever it has to do
 };
 
 #endif

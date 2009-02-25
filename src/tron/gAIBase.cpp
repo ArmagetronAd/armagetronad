@@ -46,6 +46,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <cstdlib>
 #include <memory>
 
+#include "nProtoBuf.h"
+#include "gAIBase.pb.h"
+
 #define AI_REACTION          0 
 #define AI_EMERGENCY         1 
 #define AI_RANGE             2 
@@ -189,9 +192,8 @@ static gAICharacter* BestIQ( int iq )
     return bestIQ;
 }
 
-
-
-gAITeam::gAITeam(nMessage &m) : eTeam(m)
+gAITeam::gAITeam( Game::AITeamSync const & sync, nSenderInfo const & sender )
+  : eTeam( sync.base(), sender )
 {
     //	teams.Remove( this, listID );
 }
@@ -201,9 +203,9 @@ gAITeam::gAITeam()
     //	teams.Remove( this, listID );
 }
 
-static nNOInitialisator<gAITeam> gAITeam_init(331,"gAITeam");
+static nNetObjectDescriptor<gAITeam,Game::AITeamSync> gAITeam_init(331);
 
-nDescriptor &gAITeam::CreatorDescriptor() const
+nNetObjectDescriptorBase const & gAITeam::DoGetDescriptor() const
 {
     return gAITeam_init;
 }
@@ -1078,14 +1080,16 @@ static REAL rgb_ai[MAXAI_COLOR][3]={
                                        {.5,.5,.5}
                                    };
 
-static nNOInitialisator<gAIPlayer> gAIPlayer_init(330,"gAIPlayer");
+static nNetObjectDescriptor<gAIPlayer,Game::AIPlayerSync> gAIPlayer_init(330);
 
-nDescriptor &gAIPlayer::CreatorDescriptor() const{
+nNetObjectDescriptorBase const & gAIPlayer::DoGetDescriptor() const
+{
     return gAIPlayer_init;
 }
 
-gAIPlayer::gAIPlayer(nMessage &m) :
-        ePlayerNetID(m),
+//! creates a netobject form sync data
+gAIPlayer::gAIPlayer( Game::AIPlayerSync const & sync, nSenderInfo const & sender ):
+        ePlayerNetID(sync.base(), sender ),
         character(NULL),
         //	target(NULL),
         lastPath(se_GameTime()-100),
@@ -1132,9 +1136,9 @@ gAIPlayer::gAIPlayer():
                 ePlayerNetID *p=se_PlayerNetIDs(j);
                 if (p && p != this)
                 {
-                    R = p->r/15.0;
-                    G = p->g/15.0;
-                    B = p->b/15.0;
+                    R = p->color.r_/15.0;
+                    G = p->color.g_/15.0;
+                    B = p->color.b_/15.0;
                 }
                 else
                     continue;
@@ -1174,9 +1178,9 @@ gAIPlayer::gAIPlayer():
     }
 
 
-    r = static_cast<int>(rgb_ai[take_ai][0] * 15);
-    g = static_cast<int>(rgb_ai[take_ai][1] * 15);
-    b = static_cast<int>(rgb_ai[take_ai][2] * 15);
+    color.r_ = static_cast<int>(rgb_ai[take_ai][0] * 15);
+    color.g_ = static_cast<int>(rgb_ai[take_ai][1] * 15);
+    color.b_ = static_cast<int>(rgb_ai[take_ai][2] * 15);
 
 
     ping = 0;

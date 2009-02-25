@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-  
+
 ***************************************************************************
 
 */
@@ -34,7 +34,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eTeam.h"
 #include "eTess2.h"
 
-//static nNOInitialisator<eNetGameObject> eNetGameObject_Init("eNetGameObject");
+#include "nProtoBuf.h"
+#include "eNetGameObject.pb.h"
 
 #define MAX_PING_OVERFLOW 3
 #define PING_OVERFLOW_TS .1
@@ -94,17 +95,15 @@ nNetObject(p->Owner()),player(p){
 
 
 
-eNetGameObject::eNetGameObject(nMessage &m)
+eNetGameObject::eNetGameObject( Engine::NetGameObjectSync const & sync, nSenderInfo const & sender )
         :eGameObject(eGrid::CurrentGrid(), eCoord(0,0), eCoord(0,0), NULL),
-nNetObject(m){
+nNetObject( sync.base(), sender ){
     tASSERT(grid);
 
     lastClientsideAction=0;
-    unsigned short pid;
-    m.Read(pid);
+    unsigned short pid = sync.player_id();
     player=static_cast<ePlayerNetID *>(Object(pid));
-    m.Read(pid);
-    autodelete=pid;
+    autodelete = sync.autodelete();
 
     laggometerSmooth=laggometer=0;
 
@@ -139,9 +138,11 @@ eNetGameObject::~eNetGameObject(){
 
 
 
-bool eNetGameObject::SyncIsNew(nMessage &m){
-    bool ret=nNetObject::SyncIsNew(m);
-    m >> lastAttemptedSyncTime;
+bool eNetGameObject::SyncIsNew(  Engine::NetGameObjectSync const & sync, nSenderInfo const & sender )
+{
+    bool ret = nNetObject::SyncIsNew( sync.base(), sender );
+
+    lastAttemptedSyncTime = sync.last_time();
 
 #ifdef DEBUG
     if (Owner()==::sn_myNetID && lastAttemptedSyncTime>lastClientsideAction+100){
@@ -149,10 +150,7 @@ bool eNetGameObject::SyncIsNew(nMessage &m){
     }
 #endif
 
-    eCoord dummy;
-    m >> dummy;
-    m >> dummy;
-    return (ret);	// && lastAttemptedSyncTime>lastClientsideAction); // test for time no longer needed
+    return ret;
 }
 
 void eNetGameObject::AddRef()
@@ -166,14 +164,14 @@ void eNetGameObject::Release()
 }
 
 // control functions:
-void eNetGameObject::ReceiveControlNet(nMessage &m){
-    REAL time;
-    unsigned short act_id;
-    REAL x;
+void eNetGameObject::ReceiveControlNet( Network::NetObjectControl const & controlBase )
+{
+    tASSERT( controlBase.HasExtension( Engine::net_game_object_control ) );
+    Engine::NetGameObjectControl const & control = controlBase.GetExtension( Engine::net_game_object_control );
 
-    m >> time;
-    m.Read(act_id);
-    m >> x;
+    REAL time = control.time();
+    unsigned short act_id = control.action_id();
+    REAL x = control.action_level();
 
     REAL backdate=Lag();//sn_ping[m.SenderID()]*.5;
     if (backdate>sn_pingCharityServer*.001)
@@ -214,12 +212,24 @@ void eNetGameObject::SetPlayer(ePlayerNetID* a_player)
 void eNetGameObject::SendControl(REAL time,uActionPlayer *Act,REAL x){
     if (sn_GetNetState()==nCLIENT && Owner()==::sn_myNetID){
         //con << "sending control at " << time << "\n";
-        nMessage *m=NewControlMessage();
-        *m << time;
-        m->Write(Act->ID());
-        *m << x;
-        m->BroadCast();
+
+        Engine::NetGameObjectControl & control = *BroadcastControl().MutableExtension( Engine::net_game_object_control );
+        control.set_time( time );
+        control.set_action_id( Act->ID() );
+        control.set_action_level( x );
     }
+}
+
+// easier to implement conversion helpers: just extract the relevant sub-protbuf.
+nProtoBuf       * eNetGameObject::ExtractControl( Network::NetObjectControl       & control )
+{
+    return control.MutableExtension( Engine::net_game_object_control );
+}
+
+nProtoBuf const * eNetGameObject::ExtractControl( Network::NetObjectControl const & control )
+{
+    tASSERT( control.HasExtension( Engine::net_game_object_control ) );
+    return & control.GetExtension( Engine::net_game_object_control );
 }
 
 void eNetGameObject::ReceiveControl(REAL time,uActionPlayer *Act,REAL x){
@@ -234,33 +244,28 @@ void eNetGameObject::ReceiveControl(REAL time,uActionPlayer *Act,REAL x){
     RequestSync();
 }
 
+void eNetGameObject::WriteSync( Engine::NetGameObjectSync & sync, bool init ) const
+{
+    nNetObject::WriteSync( *sync.mutable_base(), init );
 
-void eNetGameObject::WriteCreate(nMessage &m){
-    nNetObject::WriteCreate(m);
-    m.Write(player->ID());
-    m.Write(autodelete);
+    if ( init )
+    {
+        sync.set_player_id( player->ID() );
+        sync.set_autodelete( autodelete );
+    }
+
+    sync.set_last_time( lastTime );
+    Direction().WriteSync( *sync.mutable_direction() );
+    Position() .WriteSync( *sync.mutable_position()  );
 }
 
-void eNetGameObject::WriteSync(nMessage &m){
-    nNetObject::WriteSync(m);
-    //con << lastTime << '\n';
-    m << lastTime;
-    m << Direction();
-    m << Position();
+void eNetGameObject::ReadSync( Engine::NetGameObjectSync const & sync, nSenderInfo const & sender )
+{
+    nNetObject::ReadSync( sync.base(), sender );
+    lastTime = sync.last_time();
+    dir.ReadSync( sync.direction() );
+    pos.ReadSync( sync.position() );
 }
-
-void eNetGameObject::ReadSync(nMessage &m){
-    nNetObject::ReadSync(m);
-    m >> lastTime;
-    m >> dir;
-
-    m >> pos;
-}
-
-/*
-nDescriptor &eNetGameObject::CreatorDescriptor() const{
-  return eNetGameObject_init.desc;
-  } */
 
 bool eNetGameObject::ClearToTransmit(int user) const{
 #ifdef DEBUG
@@ -297,6 +302,9 @@ bool eNetGameObject::ClearToTransmit(int user) const{
 }
 
 bool eNetGameObject::Timestep(REAL currentTime){
+    // object has likely changed
+    this->ClearCache();
+
     // calculate new sr_laggometer
     if (sn_GetNetState() == nSTANDALONE){
         laggometerSmooth=0;
@@ -352,19 +360,6 @@ bool eTransferInhibitor::no_transfer(int u){
 
 int eTransferInhibitor::user;
 
-nMessage & operator<< (nMessage &m, const eCoord &x){
-    m << x.x;
-    m << x.y;
-
-    return m;
-}
-
-nMessage & operator>> (nMessage &m, eCoord &x){
-    m >> x.x;
-    m >> x.y;
-
-    return m;
-}
 // *******************************************************************************
 // *
 // *	DoGetMachine

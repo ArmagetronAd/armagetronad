@@ -1,0 +1,23 @@
+// Protocol buffer types for network configuration
+
+package Network;
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+message Config
+{
+    optional string name = 1; // the name of the config item
+
+    // various option for values
+    optional sint32  int_value    = 2;
+    optional string  string_value = 3;
+    optional float   float_value  = 4;
+}
+

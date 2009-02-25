@@ -508,6 +508,7 @@ void gServerFavorites::CustomConnectMenu( void )
     
     // create menu entries
     sg_languageIDPrefix = "$bookmarks_";
+    sg_Connect = &sg_ConnectFavorite;
     gCustomConnectEntries submenu( fav, &net_menu );
 
     net_menu.Enter();

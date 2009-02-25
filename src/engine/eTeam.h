@@ -33,6 +33,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tList.h"
 #include <vector>
 
+namespace Engine{ class TeamSync; }
+
 tString & operator << ( tString&, const eTeam&);
 std::ostream & operator << ( std::ostream&, const eTeam&);
 
@@ -56,7 +58,7 @@ protected:							// protected attributes
 
     int roundsPlayed;               //!< number of rounds played
 
-    unsigned short r,g,b;			// team color
+    tShortColor color;	            // team color
     tString	name;					// our name
 
     bool locked_;                   //!< if set, only invited players may join
@@ -168,15 +170,21 @@ public:												// public methods
     ePlayerNetID*	YoungestAIPlayer(		) const;							// the youngest AI player
     bool			Alive			(		) const;							// is any of the players currently alive?
 
+    // color
+    tShortColor const & Color() const
+    {
+        return color;
+    }
+    
     // name and color
     unsigned short	R() 	const {
-        return r;
+        return color.r_;
     }
     unsigned short	G() 	const {
-        return g;
+        return color.g_;
     }
     unsigned short	B() 	const {
-        return b;
+        return color.b_;
     }
     const tString& 	Name() 	const {
         return name;
@@ -189,21 +197,14 @@ public:												// public methods
 
     virtual bool ClearToTransmit(int user) const;		// we must not transmit an object that contains pointers to non-transmitted objects. this function is supposed to check that.
 
-    // syncronisation functions:
-    virtual void WriteSync(nMessage &m);				// store sync message in m
-    virtual void ReadSync(nMessage &m);					// guess what
-    virtual bool SyncIsNew(nMessage &m);				// is the message newer	than the last accepted sync
-    virtual nDescriptor&	CreatorDescriptor() const;
-
-    // the extra information sent on creation:
-    virtual void WriteCreate(nMessage &m); // store sync message in m
-    // the information written by this function should
-    // be read from the message in the "message"- connstructor
-
-    // control functions:
-    virtual void ReceiveControlNet(nMessage &m);
-    // receives the control message. the data written to the message created
-    // by *NewControlMessage() can be read directly from m.
+    //! creates a netobject form sync data
+    eTeam( Engine::TeamSync const &, nSenderInfo const & );
+    //! reads incremental sync data. Returns false if sync was invalid or old.
+    void ReadSync( Engine::TeamSync const &, nSenderInfo const & );
+    //! writes sync data (and initialization data if flat is set)
+    void WriteSync( Engine::TeamSync &, bool init );
+    //! returns the descriptor responsible for this class
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
 
     // shall the server accept sync messages from the clients?
     virtual bool AcceptClientSync() const	{
@@ -212,7 +213,6 @@ public:												// public methods
 
     // con/desstruction
     eTeam();											// default constructor
-    eTeam(nMessage &m);									// remote constructor
     ~eTeam();											// destructor
 
 private:

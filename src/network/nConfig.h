@@ -31,6 +31,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConfiguration.h"
 #include "nNetwork.h"
 
+#include "nProtoBufForward.h"
+
+#include "nStreamMessage.h"
+
+namespace Network{ class Config; }
+
 template<class T> inline bool sn_compare(T&a, T&b)
 {
     return (a!=b);
@@ -75,15 +81,29 @@ private:
     nIConfItemWatcher * watcher_;       //!< the watcher that reacts on changes of this item
 protected:
     nConfItemBase();
+
+    // helper functions for templated subclasses
+    static int     NetReadHelper( Network::Config const & protoBuf, int );
+    static float   NetReadHelper( Network::Config const & protoBuf, float );
+    static tString NetReadHelper( Network::Config const & protoBuf, tString const & );
+
+    static void NetWriteHelper( Network::Config & protoBuf, int value );
+    static void NetWriteHelper( Network::Config & protoBuf, float value );
+    static void NetWriteHelper( Network::Config & protoBuf, tString const & );
 public:
     //  nConfItemBase(const char *title,const char *help);
     nConfItemBase(const char *title);
     virtual ~nConfItemBase();
 
-    virtual void NetReadVal(nMessage &m)=0;
-    virtual void NetWriteVal(nMessage &m)=0;
+    virtual void NetReadVal(nStreamMessage &m)=0;
+    virtual void NetWriteVal(nStreamMessage &m)=0;
 
-    static void s_GetConfigMessage(nMessage &m);
+    static void s_GetConfigStream( nStreamMessage &m );
+
+    virtual void NetReadVal ( Network::Config const & protoBuf )=0;
+    virtual void NetWriteVal( Network::Config       & protoBuf )=0;
+
+    static void s_GetConfigProtoBuf( Network::Config const & protoBuf, nSenderInfo const & sender );
 
     virtual void WasChanged(bool nonDefault);
 
@@ -126,7 +146,7 @@ public:
     virtual ~nConfItem(){}
 
 
-    virtual void NetReadVal(nMessage &m){
+    virtual void NetReadVal(nStreamMessage &m){
         T dummy;
         m >> dummy;
         if (sn_compare(dummy,*this->target)){
@@ -145,8 +165,31 @@ public:
         }
     }
 
-    virtual void NetWriteVal(nMessage &m){
+    virtual void NetWriteVal(nStreamMessage &m){
         m << *this->target;
+    }
+
+    virtual void NetReadVal( Network::Config const & protoBuf ){
+        T dummy;
+        dummy = NetReadHelper( protoBuf, *this->target );
+        if (sn_compare(dummy,*this->target)){
+            if (printChange)
+            {
+                tOutput o;
+                o.SetTemplateParameter(1, title);
+                o.SetTemplateParameter(2, *this->target);
+                o.SetTemplateParameter(3, dummy);
+                o << "$nconfig_value_changed";
+                con << con.ColorString(1,.3,.3) << o;
+            }
+            *this->target=dummy;
+            this->ExecuteCallback();
+            changed=true;
+        }
+    }
+
+    virtual void NetWriteVal( Network::Config & protoBuf ){
+        NetWriteHelper( protoBuf, *this->target );
     }
 
     void Set( const T& newval )

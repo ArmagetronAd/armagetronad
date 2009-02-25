@@ -339,7 +339,9 @@ static void make_screenshot(){
     }
 
     if (s_videoout)
+    {
         Ignore( write(s_videooutDest, temp->pixels, sr_screenWidth * sr_screenHeight * 3) );
+    }
 
     if (sr_screenshotIsPlanned) {
         // save screenshot in unused slot

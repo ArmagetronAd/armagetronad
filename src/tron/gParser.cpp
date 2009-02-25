@@ -605,9 +605,9 @@ gParser::parseColor(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 }
 
 zShapePtr
-gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, unsigned short idZone, const xmlChar * keyword)
+gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, zZone * zone, const xmlChar * keyword)
 {
-    zShapePtr shape = zShapePtr( new zShapeCircle(grid, idZone) );
+    zShapePtr shape = zShapePtr( new zShapeCircle(grid, zone) );
 
     // Build up the scale information
     {
@@ -619,7 +619,7 @@ gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, unsigned short id
 
     // Set up the default rotation speed
     {
-        tPolynomial<nMessage> tpRotation(2);
+        tPolynomial tpRotation(2);
         tpRotation[0] = 0.0f;
         tpRotation[1] = .3f;
         shape->setRotation2( tpRotation );
@@ -653,9 +653,9 @@ gParser::parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, unsigned short id
 }
 
 zShapePtr
-gParser::parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, unsigned short idZone, const xmlChar * keyword)
+gParser::parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, zZone * zone, const xmlChar * keyword)
 {
-    zShapeCircle *shapePtr = new zShapeCircle(grid, idZone) ;
+    zShapeCircle *shapePtr = new zShapeCircle(grid, zone) ;
 
     // The radius need to be handled separatly
     tFunction tfRadius;
@@ -684,7 +684,7 @@ gParser::parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, unsigned short idZo
 }
 
 zShapePtr
-gParser::parseShapePolygon(eGrid *grid, xmlNodePtr cur, unsigned short idZone, const xmlChar * keyword)
+gParser::parseShapePolygon(eGrid *grid, xmlNodePtr cur, zZone * zone, const xmlChar * keyword)
 {
     // Polygon shapes are not supported by older clients.
     // Yes, it is on purpose that this item is set and never reset once polygonial shapes
@@ -693,7 +693,7 @@ gParser::parseShapePolygon(eGrid *grid, xmlNodePtr cur, unsigned short idZone, c
     // plan for polygonial shapes, probably never.
     // Moved below to check for zone visibility (if it's invisible, we're OK ;)
 
-    zShapePtr shape = zShapePtr( new zShapePolygon(grid, idZone) );
+    zShapePtr shape = zShapePtr( new zShapePolygon(grid, zone) );
     parseShape(grid, cur, keyword, shape);
     
     if (shape->getColor().a_ > .01)
@@ -733,14 +733,14 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
 
     if (myxmlHasProp(cur, "rotation")) {
         string str = string(myxmlGetProp(cur, "rotation"));
-        tPolynomial<nMessage> tpRotation;
+        tPolynomial tpRotation;
 
 	tpRotation.parse(str);
         shape->setRotation2( tpRotation );
     }
     else
     if (state.isset("rotation"))
-        shape->setRotation2( state.get< tPolynomial<nMessage> >("rotation") );
+        shape->setRotation2( state.get<tPolynomial>("rotation") );
 
     cur = cur->xmlChildrenNode;
     while ( cur != NULL) {
@@ -806,7 +806,7 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
         else if (isElement(cur->name, (const xmlChar *)"Rotation", keyword)) {
             zZoneInfluenceItemRotation *b = new zZoneInfluenceItemRotation(refZone);
 
-	    tPolynomialMarshaler<nMessage> tpm;
+	    tPolynomialMarshaler tpm;
 
 	    std::cout << "about to read a rotation " << std::endl;
 	    if( myxmlHasProp(cur, "rotation") ) {
@@ -818,10 +818,10 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
 	    else {
 	      // read the parameters from the old notation
 	      string str = string(myxmlGetProp(cur, "rotationAngle"));
-	      tPolynomial<nMessage> tpRotationAngle(str);
+	      tPolynomial tpRotationAngle(str);
 
 	      str = string(myxmlGetProp(cur, "rotationSpeed"));
-	      tPolynomial<nMessage> tpRotationSpeed(str);
+	      tPolynomial tpRotationSpeed(str);
 
 	      // generate the equivalent polynomial marsaller
 	      tpm.setConstant(tpRotationAngle);
@@ -892,7 +892,7 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
     zMonitorInfluencePtr infl = zMonitorInfluencePtr(new zMonitorInfluence(ref));
     infl->setMarked(myxmlGetPropTriad(cur, "marked"));
 
-    tPolynomialMarshaler<nMessage> tpmInfluence;
+    tPolynomialMarshaler tpmInfluence;
 
     if (myxmlHasProp(cur, (const xmlChar*)"influence")) {
         // new notation, superseed the previous notation
@@ -900,8 +900,8 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
 	tpmInfluence.parse(str);
     }
     else {
-      tPolynomial<nMessage> tpInfluenceConstant;
-      tPolynomial<nMessage> tpInfluenceVariant;
+      tPolynomial tpInfluenceConstant;
+      tPolynomial tpInfluenceVariant;
       if(myxmlHasProp(cur, "influenceAdd")) {
         tpInfluenceConstant.parse( string(myxmlGetProp(cur, "influenceAdd")) );
       }
@@ -1154,11 +1154,6 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
 void
 gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-    // Currently, we have no compatibility plan for any v2 zone type. When we have one,
-    // remove the lines that look like this (apart from the one where really
-    // polugonal shapes are parsed)
-    safetymecanism_polygonal_shapeused.Set(true);
-
     if (sn_GetNetState() != nCLIENT )
     {
         rColor color( 1, 0, 0, .7 );
@@ -1227,9 +1222,9 @@ gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
                 // use the same name as the associated zone
                 monitors[zoneName] = monitor;
                 // TODO: read data and populate t
-                tPolynomial<nMessage> t;
+                tPolynomial t;
                 monitor->setInit( t );
-                tPolynomial<nMessage> drift(2);
+                tPolynomial drift(2);
                 drift[1] = -1.0f * sg_conquestDecayRate;
                 monitor->setDrift( drift );
                 monitor->setClampLow ( 0.0f );
@@ -1275,7 +1270,7 @@ gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
 
                         zZoneInfluenceItemRotation *b = new zZoneInfluenceItemRotation(zone);
 
-			tPolynomialMarshaler<nMessage> tpm;
+			tPolynomialMarshaler tpm;
 
 			string str = string(myxmlGetProp(cur, "rotation"));
 			tpm.parse(str);
@@ -1302,7 +1297,7 @@ gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
         while (cur) {
             if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
             else if (isElement(cur->name, (const xmlChar *)"ShapeCircle", keyword)) {
-                zone->setShape( parseShapeCircleArthemis(grid, cur, zone->ID(), keyword) );
+                zone->setShape( parseShapeCircleArthemis(grid, cur, zone, keyword) );
             }
             else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
                 if (isValidAlternative(cur, keyword)) {
@@ -1370,7 +1365,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         {
             state.set("color", rColor(1, 1, 1, .7));
 
-            tPolynomial<nMessage> tpRotation(2);
+            tPolynomial tpRotation(2);
             tpRotation[0] = 0.0f;
             tpRotation[1] = .3f;
             state.set("rotation", tpRotation);
@@ -1394,10 +1389,10 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         while (cur != NULL) {
             if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
             else if (isElement(cur->name, (const xmlChar *)"ShapeCircle", keyword)) {
-                zone->setShape( parseShapeCircleBachus(grid, cur, zone->ID(), keyword) );
+                zone->setShape( parseShapeCircleBachus(grid, cur, zone, keyword) );
             }
             else if (isElement(cur->name, (const xmlChar *)"ShapePolygon", keyword)) {
-                zone->setShape( parseShapePolygon(grid, cur, zone->ID(), keyword) );
+                zone->setShape( parseShapePolygon(grid, cur, zone, keyword) );
             }
             else if (isElement(cur->name, (const xmlChar *)"Enter", keyword)) {
                 xmlNodePtr cur2 = cur->xmlChildrenNode;
@@ -1624,10 +1619,10 @@ gParser::parseMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         }
 
         // TODO: read data and populate t
-        tPolynomial<nMessage> t;
+        tPolynomial t;
         //        monitor->setInit(myxmlGetPropFloat(cur, "init"));
         monitor->setInit( t );
-        tPolynomial<nMessage> drift(2);
+        tPolynomial drift(2);
         drift[1] = myxmlGetPropFloat(cur, "drift");
         monitor->setDrift( drift );
         monitor->setClampLow (myxmlGetPropFloat(cur, "low"));

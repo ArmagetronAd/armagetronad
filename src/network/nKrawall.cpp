@@ -48,6 +48,10 @@ the executable is not distributed).
 #include <vector>
 #include <string.h>
 
+#include "nStreamMessage.h"
+
+#include "nAuthentication.pb.h"
+
 #ifndef DEDICATED
 // on the client, we want to disable the broken bmd5 by default.
 static tString sn_methodBlacklist( "bmd5" );
@@ -360,13 +364,13 @@ tString nKrawall::EncodeString( tString const & original )
 
 // network read/write operations of these data types
 void nKrawall::WriteScrambledPassword(const nScrambledPassword& scrambled,
-                                      nMessage &m)
+                                      nStreamMessage &m)
 {
     for (int i = 7; i>=0; i--)
-        m.Write(scrambled[i << 1] + (scrambled[(i << 1) + 1] << 8));
+        m.Write(scrambled[i << 1] | (scrambled[(i << 1) + 1] << 8));
 }
 
-void nKrawall::ReadScrambledPassword( nMessage &m,
+void nKrawall::ReadScrambledPassword( nStreamMessage &m,
                                       nScrambledPassword& scrambled)
 {
     for (int i = 7; i>=0; i--)
@@ -378,6 +382,50 @@ void nKrawall::ReadScrambledPassword( nMessage &m,
 
         scrambled[ i << 1     ] = low;
         scrambled[(i << 1) + 1] = high;
+    }
+}
+
+// flips the two 16 bit groups in an int
+static inline unsigned int sn_Flip( unsigned int in )
+{
+    return ( ( in & 0xffff0000 ) >> 16 ) | ( ( in & 0xffff ) << 16 );
+}
+
+// network read/write operations of these data types
+void nKrawall::WriteScrambledPassword(const nScrambledPassword& scrambled,
+                                      Network::Hash & hash )
+{
+    Network::MD5Raw & md5 = *hash.mutable_md5_raw();
+
+    // write totally reversed for network
+    unsigned int intermediate[4];
+    for (int i = 3; i>=0; i--)
+    {
+        intermediate[i] = 
+        (scrambled[(i << 2)+0] << 0 ) | (scrambled[(i << 2) + 1] << 8 ) |
+        (scrambled[(i << 2)+2] << 16) | (scrambled[(i << 2) + 3] << 24);
+    }
+
+    md5.set_a( sn_Flip( intermediate[3] ) );
+    md5.set_b( sn_Flip( intermediate[2] ) );
+    md5.set_c( sn_Flip( intermediate[1] ) );
+    md5.set_d( sn_Flip( intermediate[0] ) );
+}
+
+void nKrawall::ReadScrambledPassword( Network::Hash const & hash,
+                                      nScrambledPassword& scrambled)
+{
+    Network::MD5Raw const & md5 = hash.md5_raw();
+
+    // read totally reversed for network
+    unsigned int intermediate[4] = { sn_Flip( md5.d() ), sn_Flip( md5.c() ), sn_Flip( md5.b() ), sn_Flip( md5.a() ) };
+
+    for (int i = 3; i>=0; i--)
+    {
+        for( int j = 3; j >= 0; j-- )
+        {
+            scrambled[ (i << 2) + j ] = ( intermediate[i] >> (j << 3) ) & 0xff;
+        }
     }
 }
 

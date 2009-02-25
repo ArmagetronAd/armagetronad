@@ -1,0 +1,77 @@
+// Protocol buffer types for ePlayer.cpp
+package Engine;
+
+import "nNetObject.proto";
+import "tColor.proto";
+
+// login request
+message LoginRequest
+{
+    optional uint32 player_id    = 1;                  // the ID of the player
+    optional bool   login_wanted = 2 [default = true]; // flag indicating whether a login is truely wanted
+    optional string username     = 3;                  // the name to authenticate as
+}
+
+// sent when a player is removed from the game
+message PlayerRemoved
+{
+    // the object ID of the player
+    optional uint32 player_id = 1;
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+// chat messages
+message Chat
+{
+    // the object ID of the chatting player
+    optional uint32 player_id = 1;
+    
+    // the fully formatted chat string when sent from server to current client,
+    // the pure chat when sent from client to server or to old clients
+    optional string chat_line = 2;  
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+message PlayerNetIDSync
+{
+    // base class init data
+    optional Network.NetObjectSync base = 1;
+
+    // legacy creation data end marker
+    optional bool legacy_create_end = 20000;
+
+    optional Tools.ShortColor color = 2;
+    optional uint32 ping_charity    = 3;
+    optional string player_name     = 4;
+    optional float  ping            = 5;
+    optional uint32 flags           = 6;
+    optional sint32 score           = 7;
+    optional bool   disconnected    = 8;
+    optional uint32 next_team_id    = 9;
+    optional uint32 current_team_id = 10;
+    optional int32  favorite_number_of_players_per_team = 11;
+    optional bool   name_team_after_me = 12;
+    optional string team_name       = 13;
+
+    // legacy sync data end marker
+    optional bool legacy_sync_end = 20001;
+}
+
+// net object control message
+message PlayerNetIDControl
+{
+    optional uint32 type    = 1; // TEAMCHANGE:0 NEW_TEAM:1
+    optional uint32 team_id = 2; // the ID of the team to change to
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+
+extend Network.NetObjectControl
+{
+    optional PlayerNetIDControl player_control = 100;
+}

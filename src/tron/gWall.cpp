@@ -46,8 +46,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ePlayer.h"
 #include "eTess2.h"
 #include "nConfig.h"
+#include "nProtoBuf.h"
 
 #include <fstream>
+
+#include "gWall.pb.h"
 
 /* **********************************************
    Wall
@@ -1937,21 +1940,8 @@ void gNetPlayerWall::RealWallReceived( gNetPlayerWall* realWall )
 }
 
 
-void gNetPlayerWall::WriteCreate(nMessage &m)
-{
-    tASSERT( this->cycle_ );
-
-    nNetObject::WriteCreate(m);
-    m.Write(this->cycle_->ID());
-    m << beg;
-    m << dir;
-    m << dbegin;
-    m << tBeg;
-    m << static_cast<int>(preliminary);
-}
-
-gNetPlayerWall::gNetPlayerWall(nMessage &m)
-        :nNetObject(m),
+gNetPlayerWall::gNetPlayerWall( Game::PlayerWallSync const & sync, nSenderInfo const & sender )
+        :nNetObject( sync.base(), sender ),
         id(-1),griddedid(-1),
         cycle_(NULL),edge_(NULL), lastWall_(NULL),
         dir(0,0),dbegin(0),
@@ -1959,22 +1949,16 @@ gNetPlayerWall::gNetPlayerWall(nMessage &m)
         tBeg(0),tEnd(0),
         inGrid(0)
 {
-    unsigned short cid;
     gridding=1E+20;
-    m.Read(cid);
-    cycle_=static_cast<gCycle *>(Object(cid));
+    IDToPointer( sync.cycle_id(), cycle_ );
 
-    m >> beg;
+    beg.ReadSync( sync.begin_pos() );
     end=beg;
-    m >> dir;
-    m >> dbegin;
+    dir.ReadSync( sync.direction() );
+    dbegin = sync.begin_distance();
 
-    m >> tBeg;
-    {
-        int preliminary;
-        m >> preliminary;
-        this->preliminary = preliminary;
-    }
+    tBeg = sync.begin_time();
+    preliminary = sync.preliminary();
 
     obsoleted_=-100;
 
@@ -2076,76 +2060,81 @@ bool gNetPlayerWall::ClearToTransmit(int user) const{
            && bool(this->cycle_) && this->cycle_->HasBeenTransmitted(user) && inGrid;
 }
 
-void gNetPlayerWall::WriteSync(nMessage &m){
-    nNetObject::WriteSync(m);
+void gNetPlayerWall::WriteSync( Game::PlayerWallSync & sync, bool init ) const
+{
+    nNetObject::WriteSync( *sync.mutable_base(), init );
+
+    if( init )
+    {
+        sync.set_cycle_id( PointerToID( cycle_ ) );
+        beg.WriteSync( *sync.mutable_begin_pos() );
+        dir.WriteSync( *sync.mutable_direction() );
+        sync.set_begin_distance( dbegin );
+        sync.set_begin_time( tBeg );
+        sync.set_preliminary( preliminary );
+    }
 
     if (inGrid){
-        m << end; // the far end of the eWall
-        m << tEnd; // the endTime
+        end.WriteSync( *sync.mutable_end_pos() ); // the far end of the eWall
+        sync.set_end_time( tEnd ); // the endTime
     }
     else{
-        m << beg;
-        m << tBeg;
+        // write start data instead
+        beg.WriteSync( *sync.mutable_end_pos() );
+        sync.set_end_time( tBeg );
     }
-    m.Write(inGrid);
+    sync.set_in_grid( inGrid );
 
     if ( coords_.Len() > 2 || !coords_(0).IsDangerous || !coords_(1).IsDangerous )
     {
         unsigned short len = coords_.Len();
-        m.Write( len );
-        for ( int i = len-1; i>=0; --i )
+        sync.clear_segments();
+        for ( int i = 0; i < len; ++i )
         {
             const gPlayerWallCoord& coord = coords_(i);
-            m << coord.IsDangerous;
-            m << coord.Pos;
-            m << coord.Time;
+            Game::WallCoordSync * s = sync.add_segments();
+            s->set_dangerous( coord.IsDangerous );
+            s->set_distance( coord.Pos );
+            s->set_time( coord.Time );
         }
     }
 }
 
-bool gNetPlayerWall::SyncIsNew(nMessage &m)
-{
-    //	return (nNetObject::SyncIsNew(m) && !inGrid);
-    return nNetObject::SyncIsNew(m);
-}
-
 static bool sg_ServerSentHoles = false;
 
-void gNetPlayerWall::ReadSync(nMessage &m){
-    nNetObject::ReadSync(m);
+void gNetPlayerWall::ReadSync( Game::PlayerWallSync const & sync, nSenderInfo const & sender )
+{
+    nNetObject::ReadSync( sync.base(), sender );
 
     ClearDisplayList();
 
-    REAL tEnd_new;
+    REAL tEnd_new = sync.end_time();
     eCoord end_new;
-
-    m >> end_new;
-    m >> tEnd_new;
+    end_new.ReadSync( sync.end_pos() );
 
     if ( tEnd_new < tBeg )
     {
         tEnd_new = tBeg;
     }
 
-    unsigned short new_inGrid;
-    m.Read(new_inGrid);
+    unsigned short new_inGrid = sync.in_grid();
 
     if ( griddedid < 0 )
         CreateEdge();
 
-    if ( ! m.End() )
+    if ( sync.segments_size() )
     {
-        unsigned short len;
-        m.Read( len );
+        unsigned short len = sync.segments_size();
 
         coords_.SetLen( len );
 
         for ( int i = len-1; i>=0; --i )
         {
             gPlayerWallCoord& coord = coords_(i);
-            m >> coord.IsDangerous;
-            m >> coord.Pos;
-            m >> coord.Time;
+            Game::WallCoordSync const & s = sync.segments(i);
+            coord.IsDangerous = s.dangerous();
+            coord.Pos         = s.distance();
+            coord.Time        = s.time();
         }
 
         sg_ServerSentHoles = true;
@@ -2194,9 +2183,9 @@ void gNetPlayerWall::ReadSync(nMessage &m){
 #endif
 }
 
-static nNOInitialisator<gNetPlayerWall> gNetPlayerWall_init(300,"gNetPlayerWall");
+static nNetObjectDescriptor< gNetPlayerWall, Game::PlayerWallSync > gNetPlayerWall_init(300);
 
-nDescriptor &gNetPlayerWall::CreatorDescriptor() const
+nNetObjectDescriptorBase const & gNetPlayerWall::DoGetDescriptor() const
 {
     return gNetPlayerWall_init;
 }

@@ -90,7 +90,7 @@ zValidator::isTeamOwner(eTeam *possibleTeamOwner, gVectorExtra< nNetObjectID > &
 }
 
 void
-zValidator::validate(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, Triggerer possibleUser, const tPolynomial<nMessage> &tpValue) {
+zValidator::validate(gVectorExtra< nNetObjectID > &owners, gVectorExtra< nNetObjectID > &teamOwners, Triggerer possibleUser, const tPolynomial &tpValue) {
 
     if (isValid(owners, teamOwners, possibleUser.who) && validateTriad(possibleUser.positive, positive) && validateTriad(possibleUser.marked, marked)) {
         zSelectorPtrs::const_iterator iterSelector;

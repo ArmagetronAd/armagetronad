@@ -91,9 +91,9 @@ protected:
     void parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
 #ifdef ENABLE_ZONESV2
-    zShapePtr parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, short unsigned int idZone, const xmlChar * keyword);
-    zShapePtr parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, short unsigned int idZone, const xmlChar * keyword);
-    zShapePtr parseShapePolygon(eGrid *grid, xmlNodePtr cur, short unsigned int idZone, const xmlChar * keyword);
+    zShapePtr parseShapeCircleArthemis(eGrid *grid, xmlNodePtr cur, zZone * zone, const xmlChar * keyword);
+    zShapePtr parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, zZone * zone, const xmlChar * keyword);
+    zShapePtr parseShapePolygon(eGrid *grid, xmlNodePtr cur, zZone * zone, const xmlChar * keyword);
     void      parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShapePtr &shape);
     void                 parseMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword);
 
@@ -126,7 +126,7 @@ protected:
 
 #ifdef ENABLE_ZONESV2
     void __deprecated myCheapParameterSplitter(const string &str, tFunction &tf, bool addSizeMultiplier=false);
-    void __deprecated myCheapParameterSplitter2(const string &str, tPolynomial<nMessage> &tp, bool addSizeMultiplier=false);
+    void __deprecated myCheapParameterSplitter2(const string &str, tPolynomial &tp, bool addSizeMultiplier=false);
 #endif
 
     /* This is a hack that will bring shame to my decendants for many generations: */
@@ -155,15 +155,15 @@ public:
             {
                 return false;
             }
-        };
+        }
         boost::any getAny(std::string const & var);
         template<typename T> T get(std::string const & var) {
             return boost::any_cast<T>(getAny(var));
-        };
+        }
         void setAny(std::string const & var, boost::any val);
         template<typename T> void set(std::string const & var, T val) {
             setAny(var, boost::any(val));
-        };
+        }
         void unset(std::string const & var);
         void inherit(std::string const & var);
         

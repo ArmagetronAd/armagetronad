@@ -1,0 +1,25 @@
+// Protocol buffer types for LagCompensation
+package Engine;
+
+/* Translation rules for data types:
+
+  Stream type                ProtoBuf types
+  short                      uint32
+  int                        sint32, int32
+  tString                    string
+
+*/
+
+// notification about client lag
+message LagNotification
+{
+    // legacy stuff goes here
+
+    optional float lag    = 1; // the number of seconds the client is (potentially) lagging behind
+    optional float weight = 2; // the relative importance of this report. 1 by default.
+                               // Increased if the client is running out of credit.
+
+    // legacy message end marker, extensions go after it
+    optional bool legacy_message_end_marker = 20000;
+}
+

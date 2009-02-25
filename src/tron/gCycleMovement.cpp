@@ -74,6 +74,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 static int sg_cycleDebugPrintLevel = 0;
 #endif
 
+#include "gCycle.pb.h"
+
 // get rubber values in effect
 void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness );
 
@@ -1960,6 +1962,16 @@ static nVersionFeature sg_noRedundantBrakeCommands( 13 );
 
 bool gCycleMovement::Timestep( REAL currentTime )
 {
+/*
+    static int count = 1;
+    ++count;
+    if ( count == 0 )
+    {
+        int xc;
+        xc = 0;
+    }
+*/
+
     // request regeneration of maximum space
     refreshSpaceAhead_ = true;
 
@@ -2201,7 +2213,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                     if ( !CanMakeTurn( turnTo ) )
                     {
                         con << "Early turn!\n";
-                        st_Breakpoint();
+                        // st_Breakpoint();
                     }
                 }
 #endif
@@ -2294,6 +2306,12 @@ bool gCycleMovement::Timestep( REAL currentTime )
                         }
                         else
                             used = true;
+                    }
+                    else
+                    {
+                        // missed more than one turn. Drat. Ignore and hope for the best.
+                        // st_Breakpoint();
+                        ++turns;
                     }
                     /*
                       con << "turning to   " << currentDestination->position << "," 
@@ -2512,8 +2530,8 @@ gCycleMovement::gCycleMovement( eGrid * grid, const eCoord & pos, const eCoord &
 //!
 // *******************************************************************************************
 
-gCycleMovement::gCycleMovement( nMessage & message )
-        :eNetGameObject(message),
+gCycleMovement::gCycleMovement( Game::CycleMovementSync const & sync, nSenderInfo const & sender )
+        :eNetGameObject( sync.base(), sender ),
         destinationList(NULL),currentDestination(NULL),lastDestination(NULL),
         dirDrive(1,0),
         acceleration(0),
@@ -3135,6 +3153,13 @@ bool gCycleMovement::DoTurn( int dir )
         lastTurnPos_ = pos;
 
         turns++;
+        /*
+        if( sn_GetNetState() != nSERVER )
+        {
+            // simulate lost turns
+            turns+=2;
+        }
+        */
 
         AccelerationDiscontinuity();
         verletSpeed_ *= sg_cycleTurnSpeedFactor;
@@ -3821,6 +3846,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
     rubberUsage = 0;
 
     // decide over kill
+    bool rubberUsedUp = false;
     if ( rubber > rubber_granted || ( sg_cycleWidthRubberMax == 0 && sg_cycleWidthRubberMin == 0 ) )
     {
         if ( sn_GetNetState() != nCLIENT )
@@ -3828,7 +3854,10 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
             throw gCycleDeath( pos );
         }
         else
+        {
             rubber = rubber_granted;
+            rubberUsedUp = true;
+        }
     }
 
     // use up brake
@@ -3849,9 +3878,24 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
 
 
     // clamp rubber ( mostly for client side HUD display )
-    if ( rubber > rubber_granted )
+    if ( rubber >= rubber_granted )
+    {
         rubber = rubber_granted;
+        rubberUsedUp = true;
+    }
 
+    // record time rubber went out
+    if( rubberUsedUp )
+    {
+        if ( rubberDepleteTime_ <= 0 )
+        {
+            rubberDepleteTime_ = lastTime;
+        }
+    }
+    else
+    {
+        rubberDepleteTime_ = 0;
+    }
 
     lastTime=currentTime;
 
@@ -3904,6 +3948,7 @@ void gCycleMovement::MyInitAfterCreation( void )
     // con << "creating cycle.\n";
 #endif
     brakingReservoir = 1.0f;
+    rubberDepleteTime_ = 0.0f;
 
     braking = false;
 
