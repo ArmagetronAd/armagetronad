@@ -748,3 +748,55 @@ public:
 };
 
 static nZonesV1Translator sn_v1translator;
+
+
+//! convert zone v1 messages into circle shape messages
+class nZonesV1V2Translator: public nMessageTranslator< Game::ZoneV1Sync >
+{
+public:
+    //! constructor registering with the descriptor
+    nZonesV1V2Translator(): nMessageTranslator< Game::ZoneV1Sync >( zone_init )
+    {
+    }
+    
+    //! convert zone v1 format to v2
+    virtual nMessageBase * Translate( Game::ZoneV1Sync const & source, int receiver ) const
+    {
+        Zone::ShapeSync shape;
+        
+        shape.mutable_base()->CopyFrom( source.base() );
+        shape.mutable_color()->CopyFrom( source.color() );
+        shape.set_creation_time( source.create_time() );
+        shape.set_reference_time( source.reference_time() );
+        shape.mutable_pos_x()->CopyFrom( source.pos_x() );
+        shape.mutable_pos_y()->CopyFrom( source.pos_y() );
+
+        tFunction old_rotation;
+        old_rotation.ReadSync( source.rotation_speed() );
+        tPolynomial rotation;
+        rotation.adaptToNewReferenceVarValue( source.reference_time() );
+        // FIXME: does rotation[0] need to be set to something?
+        rotation[1] = old_rotation.offset_;
+        rotation[2] = old_rotation.slope_;
+
+        static tFunction tfOne(1., 0.);
+        tfOne.WriteSync( *shape.mutable_scale() );
+
+        Zone::ShapeCircleSync dest;
+
+        dest.mutable_base()->CopyFrom( shape );
+        dest.mutable_radius()->CopyFrom( source.radius() );
+
+        nProtoBufMessageBase * ret = nProtoBufDescriptor< Zone::ShapeCircleSync >::TransformStatic( dest );
+
+        if( !source.has_create_time() )
+        {
+            // make it a sync message
+            ret->SetStreamer( nNetObjectDescriptorBase::SyncStreamer() );
+        }
+        
+        return ret;
+    }
+};
+
+static nZonesV1V2Translator sn_v1v2translator;
