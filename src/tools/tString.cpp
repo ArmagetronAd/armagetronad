@@ -249,28 +249,21 @@ std::istream & operator>> (std::istream &s,tString &x){
     }
 
     while((quoted || !( isblank(c) || c == '\n' || c == '\r') ) && s.good() && !s.eof()){
-        x[i++]=c;
-        c=s.get();
-
         // read and interpret escape sequences
-        if ( !st_ReadEscapeSequence( c, s) )
+        if ( !st_ReadEscapeSequence( c, s) && quoted && c == quoteChar )
         {
-            // interpret special characters
-            if ( quoted && c == quoteChar )
-            {
-                // this marks the end of a quoted string; abort.
-                c = s.get();
-                break;
-            }
+            // no escape, this string is quoted and the current character is an end quote. We're finished.
+            c = s.get();
+            break;
         }
-        else if ( isblank( c ) )
+        else
         {
-            // include escaped spaces
+            // append escaped or regular character
             x[i++]=c;
             c=s.get();
         }
-
     }
+
     s.putback(c);
     x[i]='\0';
     return s;
