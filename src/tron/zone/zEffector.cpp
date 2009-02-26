@@ -97,7 +97,7 @@ zEffector::readXML(tXmlParser::node const & node)
 }
 
 void
-zEffector::setupVisuals(gParser & p)
+zEffector::setupVisuals(gParserState & state)
 {
 }
 
@@ -110,7 +110,7 @@ zEffectorManager::_effectors()
 }
 
 zEffector*
-zEffectorManager::Create(std::string const & typex, tXmlParser::node const &node)
+zEffectorManager::Create(std::string const & typex, tXmlParser::node const * node)
 {
     std::string type = typex;
     transform (type.begin(), type.end(), type.begin(), tolower);
@@ -124,12 +124,28 @@ zEffectorManager::Create(std::string const & typex, tXmlParser::node const &node
     if (NullFactory*ptr = dynamic_cast<NullFactory*>(Fy))
     {
         zEffector*rv = ptr->Factory();
-        rv->readXML(node);
+        if (node)
+            rv->readXML(*node);
         return rv;
     }
     if (XMLFactory*ptr = dynamic_cast<XMLFactory*>(Fy))
-        return ptr->Factory(type, node);
+    {
+        assert(node);
+        return ptr->Factory(type, *node);
+    }
     return NULL;
+}
+
+zEffector*
+zEffectorManager::Create(std::string const & typex, tXmlParser::node const & node_p)
+{
+    Create(typex, &node_p);
+}
+
+zEffector*
+zEffectorManager::Create(std::string const & typex)
+{
+    Create(typex, NULL);
 }
 
 void
@@ -162,9 +178,9 @@ void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 }
 
 void
-zEffectorWin::setupVisuals(gParser & p)
+zEffectorWin::setupVisuals(gParserState & state)
 {
-    p.state.set("color", rColor(0, 1, 0, .7));
+    state.set("color", rColor(0, 1, 0, .7));
 }
 
 static zEffectorRegistration regDeath("death", "", zEffectorDeath::create);
@@ -181,9 +197,9 @@ void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 }
 
 void
-zEffectorDeath::setupVisuals(gParser & p)
+zEffectorDeath::setupVisuals(gParserState & state)
 {
-    p.state.set("color", rColor(1, 0, 0, .7));
+    state.set("color", rColor(1, 0, 0, .7));
 }
 
 //

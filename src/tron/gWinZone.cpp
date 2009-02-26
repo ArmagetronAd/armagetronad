@@ -54,8 +54,10 @@ static tSettingItem<int> sg_zoneAlphaToggleConf( "ZONE_ALPHA_TOGGLE", sg_zoneAlp
 
 std::deque<gZone *> sg_Zones;
 
+#ifndef ENABLE_ZONESV2
 static int sg_zoneDeath = 1;
 static tSettingItem<int> sg_zoneDeathConf( "WIN_ZONE_DEATHS", sg_zoneDeath );
+#endif
 
 REAL sg_expansionSpeed = 1.0f;
 REAL sg_initialSize = 5.0f;
@@ -76,6 +78,7 @@ REAL sg_zoneHeight = 5.0f;
 static tSettingItem<REAL> sg_zoneHeightConf( "ZONE_HEIGHT", sg_zoneHeight );
 
 
+#ifndef ENABLE_ZONESV2
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
 {
@@ -107,6 +110,7 @@ gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
 
     return ret;
 }
+#endif
 
 // number of segments to render a zone with
 static const int sg_segments = 11;

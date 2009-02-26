@@ -64,6 +64,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tDirectories.h"
 #include "gTeam.h"
 #ifdef ENABLE_ZONESV2
+#include "zone/zTimedZone.h"
 #include "zone/zZone.h"
 #endif
 #ifdef ENABLE_ZONESV1
@@ -3263,14 +3264,10 @@ void gGame::Analysis(REAL time){
 
     static nVersionFeature winZone(2);
 
-    /*
-    ***************** ===================== ********************
-    HACK
-    THIS HAS SIMPLY BEEN DEACTIVATED.
-    IT SHOULD BE REACTIVATED WITH THE NEW ZONE CODE
-    ***************** ===================== ********************
-    */
-#ifndef ENABLE_ZONESV2
+#if defined(ENABLE_ZONESV1) || defined(ENABLE_ZONESV2)
+#ifdef ENABLE_ZONESV2
+#define sg_CreateWinDeathZone sz_CreateTimedZone
+#endif
     // activate instant win zone
     if ( winZone.Supported() && !bool( winDeathZone_ ) && winner == 0 && time - lastdeath > sg_currentSettings->winZoneMinLastDeath && time > sg_currentSettings->winZoneMinRoundTime )
     {

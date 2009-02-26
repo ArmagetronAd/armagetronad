@@ -42,7 +42,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 namespace Zone { class ZoneSync; }
 
-class gParser;
+class gParserState;
 
 /*
 class zZone: public eNetGameObject
@@ -97,7 +97,7 @@ public:
     // to non-transmitted objects. this function is supposed to check that.
     virtual bool ClearToTransmit( int user ) const;
 
-    virtual void setupVisuals(gParser &);
+    virtual void setupVisuals(gParserState &);
     virtual void readXML(tXmlParser::node const &);
 
     eCoord          GetPosition         ( void ) const;	                //!< Gets the current position

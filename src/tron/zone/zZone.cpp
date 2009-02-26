@@ -206,7 +206,7 @@ void zZone::RemoveFromZoneList(void) {
 }
 
 void
-zZone::setupVisuals(gParser &)
+zZone::setupVisuals(gParserState & state)
 {
 }
 void

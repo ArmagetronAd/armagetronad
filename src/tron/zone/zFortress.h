@@ -45,7 +45,7 @@ public:
     zFortressZone(eGrid *grid);                                   //!< local constructor
     ~zFortressZone();                                             //!< destructor
 
-    void setupVisuals(gParser &);
+    void setupVisuals(gParser::State_t &);
     void readXML(tXmlParser::node const &);
 
 private:

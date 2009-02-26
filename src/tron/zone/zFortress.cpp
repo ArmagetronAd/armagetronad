@@ -120,11 +120,11 @@ static tSettingItem< int > sg_onConquestConquestWinConfig( "FORTRESS_CONQUERED_W
 static int sg_baseZonesPerTeam = 0;
 static tSettingItem< int > sg_baseZonesPerTeamConfig( "FORTRESS_MAX_PER_TEAM", sg_baseZonesPerTeam );
 
-void zFortressZone::setupVisuals(gParser & p)
+void zFortressZone::setupVisuals(gParser::State_t & state)
 {
     REAL tpR[] = {.0f, .3f};
     tPolynomial tpr(tpR, 2);
-    p.state.set("rotation", tpr);
+    state.set("rotation", tpr);
 }
 
 void zFortressZone::readXML(tXmlParser::node const & node)

@@ -25,6 +25,39 @@ class gWallRim;
 #include "zone/zMisc.h"
 #endif
 
+class gParserState {
+private:
+    typedef std::map<std::string, boost::shared_ptr<boost::any> > my_map_t;
+    std::deque< my_map_t > _varstack;
+public:
+    bool exists(std::string const & var);
+    bool isset(std::string const & var);
+    template<typename T> bool istype(std::string const & var) {
+        if (!isset(var))
+            return false;
+        try {
+            boost::any_cast<T>(*(_varstack.front()[var]));
+            return true;
+        }
+        catch (const boost::bad_any_cast &)
+        {
+            return false;
+        }
+    }
+    boost::any getAny(std::string const & var);
+    template<typename T> T get(std::string const & var) {
+        return boost::any_cast<T>(getAny(var));
+    }
+    void setAny(std::string const & var, boost::any val);
+    template<typename T> void set(std::string const & var, T val) {
+        setAny(var, boost::any(val));
+    }
+    void unset(std::string const & var);
+    void inherit(std::string const & var);
+
+    void push();
+    void pop();
+};
 
 /*
 Note to the reader: In the full World idea, the parser should, 
@@ -137,40 +170,7 @@ public:
     tValue::Expr::varmap_t vars;
     tValue::Expr::funcmap_t functions;
 
-    class State_t {
-    private:
-        typedef std::map<std::string, boost::shared_ptr<boost::any> > my_map_t;
-        std::deque< my_map_t > _varstack;
-    public:
-        bool exists(std::string const & var);
-        bool isset(std::string const & var);
-        template<typename T> bool istype(std::string const & var) {
-            if (!isset(var))
-                return false;
-            try {
-                boost::any_cast<T>(*(_varstack.front()[var]));
-                return true;
-            }
-            catch (const boost::bad_any_cast &)
-            {
-                return false;
-            }
-        }
-        boost::any getAny(std::string const & var);
-        template<typename T> T get(std::string const & var) {
-            return boost::any_cast<T>(getAny(var));
-        }
-        void setAny(std::string const & var, boost::any val);
-        template<typename T> void set(std::string const & var, T val) {
-            setAny(var, boost::any(val));
-        }
-        void unset(std::string const & var);
-        void inherit(std::string const & var);
-        
-        void push();
-        void pop();
-    };
-    
+    typedef gParserState State_t;
     State_t state;
     
     std::map< std::string, std::vector< zZoneInfluencePtr > > ZIPtoMap;

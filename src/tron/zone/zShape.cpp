@@ -4,6 +4,7 @@
 #include "zZone.h"
 
 #include "zShape.pb.h"
+#include "nConfig.h"
 #include "nProtoBuf.h"
 
 #ifndef ENABLE_ZONESV1
@@ -21,6 +22,12 @@ static tSettingItem<REAL> sz_zoneBottomConf( "ZONE_BOTTOM", sz_zoneBottom );
 
 REAL sz_zoneHeight = 5.0f;
 static tSettingItem<REAL> sz_zoneHeightConf( "ZONE_HEIGHT", sz_zoneHeight );
+
+REAL sz_expansionSpeed = 1.0f;
+static nSettingItem<REAL> sz_expansionSpeedConf( "WIN_ZONE_EXPANSION", sz_expansionSpeed );
+
+REAL sz_initialSize = 5.0f;
+static nSettingItem<REAL> sz_initialSizeConf( "WIN_ZONE_INITIAL_SIZE", sz_initialSize );
 #else
 #include "gWinZone.h"
 #define sz_zoneAlphaToggle sg_zoneAlphaToggle
@@ -28,6 +35,8 @@ static tSettingItem<REAL> sz_zoneHeightConf( "ZONE_HEIGHT", sz_zoneHeight );
 #define sz_zoneSegLength   sg_zoneSegLength
 #define sz_zoneBottom      sg_zoneBottom
 #define sz_zoneHeight      sg_zoneHeight
+#define sz_expansionSpeed  sg_expansionSpeed
+#define sz_initialSize     sg_initialSize
 #endif
 
 #define lasttime_ lastTime
@@ -250,7 +259,7 @@ void zShape::Render2D(tCoord scale) const
 
 zShapeCircle::zShapeCircle(eGrid *grid, zZone * zone ):
         zShape(grid, zone ),
-        radius(1.0, 0.0)
+        radius(sz_initialSize, sz_expansionSpeed)
 {}
 
 /*
@@ -259,7 +268,7 @@ zShapeCircle::zShapeCircle(eGrid *grid, zZone * zone ):
 
 zShapeCircle::zShapeCircle( Zone::ShapeCircleSync const & sync, nSenderInfo const & sender ):
         zShape( sync.base(), sender ),
-        radius(1.0, 0.0)
+        radius(sz_initialSize, sz_expansionSpeed)
 {
 }
 

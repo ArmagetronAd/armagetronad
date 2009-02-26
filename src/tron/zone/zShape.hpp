@@ -13,6 +13,10 @@
 extern int sz_zoneAlphaToggle;
 extern int sz_zoneSegments;
 extern REAL sz_zoneSegLength;
+extern REAL sz_zoneBottom;
+extern REAL sz_zoneHeight;
+extern REAL sz_expansionSpeed;
+extern REAL sz_initialSize;
 
 namespace Zone { class ShapeSync; class ShapeCircleSync; class ShapePolygonSync; }
 namespace Game { class ZoneV1Sync; }

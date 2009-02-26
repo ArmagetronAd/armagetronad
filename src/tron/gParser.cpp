@@ -1199,7 +1199,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             }
             zone->setName(zoneName);
 
-        zone->setupVisuals(*this);
+        zone->setupVisuals(state);
         zone->readXML(tXmlParser::node(cur));
 
         if (needSimpleEffect)
@@ -1220,7 +1220,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             ZS->setCount(-1);
             zEffectorPtr ZE = parseZoneEffectGroupEffector(grid, zoneroot, keyword);
             // FIXME: Trap any of the above being NULL
-            ZE->setupVisuals(*this);
+            ZE->setupVisuals(state);
             ZS->addEffector(ZE);
             ZV->addSelector(ZS);
             ZEG->addValidator(ZV);

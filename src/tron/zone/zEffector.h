@@ -29,7 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ARMAGETRONAD_H_EFFECTOR
 
 class gCycle;
-class gParser;
+class gParserState;
+
 #include <vector>
 #include <memory>
 #include "gVectorExtra.h"
@@ -58,7 +59,7 @@ public:
     void setCount(int _count) {count = _count;};
     void setMessage(tString unformated);
 
-    virtual void setupVisuals(gParser &);
+    virtual void setupVisuals(gParserState &);
 
 protected:
     template <typename T>
@@ -76,6 +77,8 @@ protected:
  */
 class zEffectorManager {
 public:
+    static zEffector* Create(std::string const & type);
+    static zEffector* Create(std::string const & type, tXmlParser::node const *);
     static zEffector* Create(std::string const & type, tXmlParser::node const &);
 
 private:
@@ -111,7 +114,7 @@ public:
             @param func a function that returns a new instance of the effector
      */
     static void Register(std::string const & type, std::string const & desc, NullFactory_t);
-    static void Register(std::string const & type, std::string const & desc, XMLFactory_t);
+    static void __deprecated Register(std::string const & type, std::string const & desc, XMLFactory_t);
 
     ~zEffectorManager();
 private:
@@ -147,7 +150,7 @@ public:
 
     virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
 
-    void setupVisuals(gParser &);
+    void setupVisuals(gParserState &);
 };
 
 class zEffectorDeath : public zEffector
@@ -162,7 +165,7 @@ public:
 
     virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
 
-    void setupVisuals(gParser &);
+    void setupVisuals(gParserState &);
 };
 
 class zEffectorPoint : public zEffector
