@@ -694,6 +694,7 @@ v1upgrade( Game::ZoneV1Sync const & source ) {
     // FIXME: does rotation[0] need to be set to something?
     rotation[1] = old_rotation.offset_;
     rotation[2] = old_rotation.slope_;
+    rotation.WriteSync( *shape.mutable_rotation2() );
 
     static tFunction tfOne(1., 0.);
     tfOne.WriteSync( *shape.mutable_scale() );
