@@ -11,6 +11,7 @@
 #include "tPolynomial.h"
 
 namespace Zone { class ShapeSync; class ShapeCircleSync; class ShapePolygonSync; }
+namespace Game { class ZoneV1Sync; }
 
 class zZone;
 
@@ -28,8 +29,11 @@ public:
 
     void animate( REAL time );
     virtual bool isInteracting(eGameObject * target);
-    virtual void render(const eCamera * cam );
-    virtual void render2d(tCoord scale) const;
+    virtual void Render(const eCamera * cam );
+    virtual void Render2D(tCoord scale) const;
+
+    void render(const eCamera*cam) { Render(cam); }
+    void render2d(tCoord&scale) { Render2D(scale); }
 
     void setPosX(const tFunction &x);
     void setPosY(const tFunction &y);
@@ -93,8 +97,8 @@ public :
     void WriteSync( Zone::ShapeCircleSync & sync, bool init ) const;
 
     bool isInteracting(eGameObject * target);
-    void render(const eCamera * cam );
-	virtual void render2d(tCoord scale) const;
+    void Render(const eCamera * cam );
+	virtual void Render2D(tCoord scale) const;
 
     void setRadius(tFunction radius) {this->radius = radius;};
     
@@ -123,8 +127,8 @@ public :
     void WriteSync( Zone::ShapePolygonSync & sync, bool init ) const;
 
     bool isInteracting(eGameObject * target);
-    void render(const eCamera * cam );
-    virtual void render2d(tCoord scale) const;
+    void Render(const eCamera * cam );
+    virtual void Render2D(tCoord scale) const;
     void addPoint( myPoint const &aPoint) { points.push_back(aPoint);};
 
 protected:
@@ -140,6 +144,25 @@ private:
 typedef tJUST_CONTROLLED_PTR< zShape> zShapePtr;
 
 #include "tSysTime.h"
+
+#ifndef ENABLE_ZONESV1
+class zShapeCircleZoneV1 : public zShapeCircle {
+    zShapeCircleZoneV1( eGrid *, zZone * );
+    ~zShapeCircleZoneV1() {};
+
+public:
+    //! creates a netobject form sync data
+    zShapeCircleZoneV1( Game::ZoneV1Sync const &, nSenderInfo const & );
+    //! reads sync data, returns false if sync was old or otherwise invalid
+    void ReadSync( Game::ZoneV1Sync const &, nSenderInfo const & );
+    //! writes sync data (and initialization data if flag is set)
+    void WriteSync( Game::ZoneV1Sync &, bool init ) const;
+
+private:
+    //! returns the descriptor responsible for this class
+    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
+};
+#endif
 
 
 #endif

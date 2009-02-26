@@ -33,6 +33,7 @@ zShape::zShape( Zone::ShapeSync const & sync, nSenderInfo const & sender )
 : eNetGameObject( sync.base(), sender )
 {
     setCreatedTime( sync.creation_time() );
+    this->AddToList();
 }
 
 void zShape::setCreatedTime(REAL time)
@@ -173,9 +174,9 @@ bool zShape::isInteracting(eGameObject * target) {
     return false;
 }
 
-void zShape::render(const eCamera *cam )
+void zShape::Render(const eCamera *cam )
 {}
-void zShape::render2d(tCoord scale) const
+void zShape::Render2D(tCoord scale) const
     {}
 
 zShapeCircle::zShapeCircle(eGrid *grid, zZone * zone ):
@@ -232,7 +233,7 @@ bool zShapeCircle::isInteracting(eGameObject * target)
     return interact;
 }
 
-void zShapeCircle::render(const eCamera * cam )
+void zShapeCircle::Render(const eCamera * cam )
 {
 #ifndef DEDICATED
     // HACK
@@ -327,7 +328,7 @@ void zShapeCircle::render(const eCamera * cam )
 
 //HACK: render2d and render should probably be merged somehow, too much copy and paste here
 
-void zShapeCircle::render2d(tCoord scale) const {
+void zShapeCircle::Render2D(tCoord scale) const {
 #ifndef DEDICATED
 
     // HACK
@@ -515,7 +516,7 @@ bool zShapePolygon::isInteracting(eGameObject * target)
     return interact;
 }
 
-void zShapePolygon::render(const eCamera * cam )
+void zShapePolygon::Render(const eCamera * cam )
 {
 #ifndef DEDICATED
     bool useAlpha = sr_alphaBlend;
@@ -603,7 +604,7 @@ void zShapePolygon::render(const eCamera * cam )
     glPopMatrix();
 #endif
 }
-void zShapePolygon::render2d(tCoord scale) const {
+void zShapePolygon::Render2D(tCoord scale) const {
 #ifndef DEDICATED
 
     //if ( color_.a_ > .7f )
@@ -655,30 +656,6 @@ void zShapePolygon::render2d(tCoord scale) const {
 }
 
 
-#ifndef ENABLE_ZONESV1
-namespace Game { class ZoneV1Sync; }
-class zNullV1Zone : public nNetObject
-{
-public:
-    zNullV1Zone(const Game::ZoneV1Sync&, const nSenderInfo&);
-private:
-    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
-};
-
-zNullV1Zone::zNullV1Zone(const Game::ZoneV1Sync&sync, const nSenderInfo&sender)
-{
-    tASSERT(false && "trying to initialize a zNullV1Zone");
-}
-
-static nNetObjectDescriptor< zNullV1Zone, Game::ZoneV1Sync > zone_init( 340 );
-
-nNetObjectDescriptorBase const & zNullV1Zone::DoGetDescriptor() const
-{
-    return zone_init;
-}
-#endif
-
-
 // the shapes's network initializator
 static nNetObjectDescriptor< zShapeCircle, Zone::ShapeCircleSync > zoneCircle_init( 350 );
 static nNetObjectDescriptor< zShapePolygon, Zone::ShapePolygonSync > zonePolygon_init( 360 );
@@ -694,6 +671,61 @@ nNetObjectDescriptorBase const & zShapePolygon::DoGetDescriptor() const
 }
 
 #include "gZone.pb.h"
+
+#ifndef ENABLE_ZONESV1
+static nNetObjectDescriptor< zShapeCircleZoneV1, Game::ZoneV1Sync > zone_init( 340 );
+
+static
+Zone::ShapeCircleSync const
+v1upgrade( Game::ZoneV1Sync const & source ) {
+    Zone::ShapeSync shape;
+
+    shape.mutable_base()->CopyFrom( source.base() );
+    shape.mutable_color()->CopyFrom( source.color() );
+    shape.set_creation_time( source.create_time() );
+    shape.set_reference_time( source.reference_time() );
+    shape.mutable_pos_x()->CopyFrom( source.pos_x() );
+    shape.mutable_pos_y()->CopyFrom( source.pos_y() );
+
+    tFunction old_rotation;
+    old_rotation.ReadSync( source.rotation_speed() );
+    tPolynomial rotation;
+    rotation.adaptToNewReferenceVarValue( source.reference_time() );
+    // FIXME: does rotation[0] need to be set to something?
+    rotation[1] = old_rotation.offset_;
+    rotation[2] = old_rotation.slope_;
+
+    static tFunction tfOne(1., 0.);
+    tfOne.WriteSync( *shape.mutable_scale() );
+
+    Zone::ShapeCircleSync dest;
+
+    dest.mutable_base()->CopyFrom( shape );
+    dest.mutable_radius()->CopyFrom( source.radius() );
+
+    return dest;
+}
+
+zShapeCircleZoneV1::zShapeCircleZoneV1( Game::ZoneV1Sync const & oldsync, nSenderInfo const & sender ):
+        zShapeCircle( v1upgrade(oldsync), sender )
+{
+}
+
+void zShapeCircleZoneV1::ReadSync( Game::ZoneV1Sync const & oldsync, nSenderInfo const & sender )
+{
+    zShapeCircle::ReadSync( v1upgrade(oldsync), sender );
+}
+
+void zShapeCircleZoneV1::WriteSync( Game::ZoneV1Sync & oldsync, bool init ) const
+{
+    assert( false && "Not implemented" );
+}
+
+nNetObjectDescriptorBase const & zShapeCircleZoneV1::DoGetDescriptor() const
+{
+    return zone_init;
+}
+#endif
 
 //! convert circle shape messages into zone v1 messages for old clients
 class nZonesV1Translator: public nMessageTranslator< Zone::ShapeCircleSync >
@@ -757,55 +789,3 @@ public:
 };
 
 static nZonesV1Translator sn_v1translator;
-
-
-//! convert zone v1 messages into circle shape messages
-class nZonesV1V2Translator: public nMessageTranslator< Game::ZoneV1Sync >
-{
-public:
-    //! constructor registering with the descriptor
-    nZonesV1V2Translator(): nMessageTranslator< Game::ZoneV1Sync >( zone_init )
-    {
-    }
-    
-    //! convert zone v1 format to v2
-    virtual nMessageBase * Translate( Game::ZoneV1Sync const & source, int receiver ) const
-    {
-        Zone::ShapeSync shape;
-        
-        shape.mutable_base()->CopyFrom( source.base() );
-        shape.mutable_color()->CopyFrom( source.color() );
-        shape.set_creation_time( source.create_time() );
-        shape.set_reference_time( source.reference_time() );
-        shape.mutable_pos_x()->CopyFrom( source.pos_x() );
-        shape.mutable_pos_y()->CopyFrom( source.pos_y() );
-
-        tFunction old_rotation;
-        old_rotation.ReadSync( source.rotation_speed() );
-        tPolynomial rotation;
-        rotation.adaptToNewReferenceVarValue( source.reference_time() );
-        // FIXME: does rotation[0] need to be set to something?
-        rotation[1] = old_rotation.offset_;
-        rotation[2] = old_rotation.slope_;
-
-        static tFunction tfOne(1., 0.);
-        tfOne.WriteSync( *shape.mutable_scale() );
-
-        Zone::ShapeCircleSync dest;
-
-        dest.mutable_base()->CopyFrom( shape );
-        dest.mutable_radius()->CopyFrom( source.radius() );
-
-        nProtoBufMessageBase * ret = nProtoBufDescriptor< Zone::ShapeCircleSync >::TransformStatic( dest );
-
-        if( !source.has_create_time() )
-        {
-            // make it a sync message
-            ret->SetStreamer( nNetObjectDescriptorBase::SyncStreamer() );
-        }
-        
-        return ret;
-    }
-};
-
-static nZonesV1V2Translator sn_v1v2translator;
