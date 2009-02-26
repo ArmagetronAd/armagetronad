@@ -63,7 +63,7 @@ REAL sg_initialSize = 5.0f;
 static nSettingItem< REAL > sg_expansionSpeedConf( "WIN_ZONE_EXPANSION", sg_expansionSpeed );
 static nSettingItem< REAL > sg_initialSizeConf( "WIN_ZONE_INITIAL_SIZE", sg_initialSize );
 
-static int sg_zoneSegments = 11;
+int sg_zoneSegments = 11;
 static tSettingItem<int> sg_zoneSegmentsConf( "ZONE_SEGMENTS", sg_zoneSegments );
 
 static REAL sg_zoneSegLength = .5;

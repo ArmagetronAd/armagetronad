@@ -51,9 +51,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <deque>
 
 
-// HACK
-static int sg_segments = 11;
-// HACK
+extern int sz_zoneSegments;
+#define sg_segments sz_zoneSegments
 
 
 // *******************************************************************************

@@ -9,12 +9,17 @@
 #ifndef ENABLE_ZONESV1
 int sz_zoneAlphaToggle = 0;
 static tSettingItem<int> sz_zoneAlphaToggleConf( "ZONE_ALPHA_TOGGLE", sz_zoneAlphaToggle );
+
+int sz_zoneSegments = 11;
+static tSettingItem<int> sz_zoneSegmentsConf( "ZONE_SEGMENTS", sz_zoneSegments );
 #else
 #include "gWinZone.h"
 #define sz_zoneAlphaToggle sg_zoneAlphaToggle
+#define sz_zoneSegments    sg_zoneSegments
 #endif
 
 #define lasttime_ lastTime
+#define sg_segments sz_zoneSegments
 
 zShape::zShape( eGrid* grid, zZone * zone )
         :eNetGameObject( grid, eCoord(0,0), eCoord(0,0), NULL, true ),
@@ -238,10 +243,6 @@ bool zShapeCircle::isInteracting(eGameObject * target)
 void zShapeCircle::Render(const eCamera * cam )
 {
 #ifndef DEDICATED
-    // HACK
-    int sg_segments = 11;
-    // HACK
-
     bool useAlpha = sr_alphaBlend;
     if (sz_zoneAlphaToggle)
         useAlpha = !useAlpha;
@@ -332,11 +333,6 @@ void zShapeCircle::Render(const eCamera * cam )
 
 void zShapeCircle::Render2D(tCoord scale) const {
 #ifndef DEDICATED
-
-    // HACK
-    int sg_segments = 8;
-    // HACK
-
     //if ( color_.a_ > .7f )
     //    color_.a_ = .7f;
     if ( color_.a_ <= 0 )
