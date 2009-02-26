@@ -30,6 +30,8 @@ private:
     typedef std::map<std::string, boost::shared_ptr<boost::any> > my_map_t;
     std::deque< my_map_t > _varstack;
 public:
+    gParserState();
+
     bool exists(std::string const & var);
     bool isset(std::string const & var);
     template<typename T> bool istype(std::string const & var) {

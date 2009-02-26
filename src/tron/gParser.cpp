@@ -2010,6 +2010,11 @@ gParser::setSizeMultiplier(REAL aSizeMultiplier)
 }
 
 #ifdef ENABLE_ZONESV2
+gParserState::gParserState()
+{
+    push();
+}
+
 bool
 gParser::State_t::exists(std::string const & var)
 {
@@ -2087,7 +2092,6 @@ gParser::Parse()
 
 #ifdef ENABLE_ZONESV2
     monitors.clear();
-    state.push();
     state.set("arena", theArena);
     state.set("grid", theGrid);
 #endif
