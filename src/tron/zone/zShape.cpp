@@ -19,7 +19,6 @@ static tSettingItem<int> sz_zoneSegmentsConf( "ZONE_SEGMENTS", sz_zoneSegments )
 #endif
 
 #define lasttime_ lastTime
-#define sg_segments sz_zoneSegments
 
 zShape::zShape( eGrid* grid, zZone * zone )
         :eNetGameObject( grid, eCoord(0,0), eCoord(0,0), NULL, true ),
@@ -27,6 +26,7 @@ zShape::zShape( eGrid* grid, zZone * zone )
         posy_(),
         scale_(),
         rotation2(),
+        segments_(),
         color_(),
         createdtime_(0.0),
         referencetime_(0.0)
@@ -36,7 +36,14 @@ zShape::zShape( eGrid* grid, zZone * zone )
 }
 
 zShape::zShape( Zone::ShapeSync const & sync, nSenderInfo const & sender )
-: eNetGameObject( sync.base(), sender )
+: eNetGameObject( sync.base(), sender ),
+        posx_(),
+        posy_(),
+        scale_(),
+        rotation2(),
+        segments_(),
+        color_(),
+        referencetime_(0.0)
 {
     setCreatedTime( sync.creation_time() );
     this->AddToList();
@@ -71,6 +78,7 @@ void zShape::WriteSync( Zone::ShapeSync & sync, bool init ) const
     posy_.WriteSync( *sync.mutable_pos_y() );
     scale_.WriteSync( *sync.mutable_scale() );
     rotation2.WriteSync( *sync.mutable_rotation2() );
+    segments_.WriteSync( *sync.mutable_segments() );
     color_.WriteSync( *sync.mutable_color() );
 }
 
@@ -83,6 +91,8 @@ void zShape::ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender 
     posy_.ReadSync( sync.pos_y() );
     scale_.ReadSync( sync.scale() );
     rotation2.ReadSync( sync.rotation2() );
+    if (sync.has_segments())
+        segments_.ReadSync( sync.segments() );
     color_.ReadSync( sync.color() );
 }
 
@@ -159,6 +169,12 @@ void zShape::SetRotationAcceleration(REAL r) {
     tPolynomial r2 = getRotation2();
     r2.changeRate(r, 2, lasttime_);
     setRotation2(r2);
+}
+
+int zShape::GetEffectiveSegments() const {
+    if (segments_.Len())
+        return int( segments_.evaluate(lastTime) );
+    return sz_zoneSegments;
 }
 
 void zShape::animate( REAL time ) {
@@ -295,6 +311,7 @@ void zShapeCircle::Render(const eCamera * cam )
     effectiveRadius = scale_.Evaluate(lasttime_ - referencetime_) * radius.Evaluate(lasttime_ - referencetime_);
     if (effectiveRadius >= 0.0)
     {
+        int sg_segments = GetEffectiveSegments();
         for ( int i = sg_segments - 1; i>=0; --i )
         {
             REAL a = i * 2 * 3.14159 / REAL( sg_segments );
@@ -353,6 +370,7 @@ void zShapeCircle::Render2D(tCoord scale) const {
 
     BeginLines();
 
+    int sg_segments = GetEffectiveSegments();
     const REAL seglen = M_PI / sg_segments;
 
     color_.Apply();

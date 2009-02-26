@@ -42,6 +42,7 @@ message ShapeSync
     optional bool legacy_sync_end = 20001;
 
     // extensions go here
+    optional Tools.PolynomialSync segments = 10;
 }
 
 // sync message for circles
