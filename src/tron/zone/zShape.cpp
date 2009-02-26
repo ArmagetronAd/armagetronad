@@ -1,6 +1,7 @@
 #include "rScreen.h"
 #include "zShape.hpp"
 #include "gCycle.h"
+#include "gParser.h"
 #include "zZone.h"
 
 #include "zShape.pb.h"
@@ -131,6 +132,15 @@ void zShape::ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender 
     if (sync.has_segment_length())
         seglength_.ReadSync( sync.segment_length() );
     color_.ReadSync( sync.color() );
+}
+
+void zShape::applyVisuals( gParserState & state ) {
+    if (state.istype<rColor>("color"))
+        setColor(state.get<rColor>("color"));
+    if (state.isset("rotation"))
+        setRotation2( state.get<tPolynomial>("rotation") );
+    if (state.isset("scale"))
+        setScale( state.get<tFunction>("scale") );
 }
 
 void zShape::setPosX(const tFunction & x){
@@ -287,6 +297,12 @@ void zShapeCircle::ReadSync( Zone::ShapeCircleSync const & sync, nSenderInfo con
     {
         radius.ReadSync( sync.radius() );
     }
+}
+
+void zShapeCircle::applyVisuals( gParserState & state ) {
+    zShape::applyVisuals(state);
+    if (state.isset("radius"))
+        setRadius( state.get<tFunction>("radius") );
 }
 
 bool zShapeCircle::isInteracting(eGameObject * target)

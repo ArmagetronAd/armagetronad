@@ -717,8 +717,7 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
     tValue::BasePtr yp;
     bool centerLocationFound = false;
 
-    if (state.istype<rColor>("color"))
-        shape->setColor(state.get<rColor>("color"));
+    shape->applyVisuals(state);
 
     tFunction tfScale;
     if (myxmlHasProp(cur, "scale")) {
@@ -740,9 +739,6 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
 	tpRotation.parse(str);
         shape->setRotation2( tpRotation );
     }
-    else
-    if (state.isset("rotation"))
-        shape->setRotation2( state.get<tPolynomial>("rotation") );
 
     cur = cur->xmlChildrenNode;
     while ( cur != NULL) {

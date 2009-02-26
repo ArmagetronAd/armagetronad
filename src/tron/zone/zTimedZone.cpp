@@ -1,3 +1,4 @@
+#include "eTimer.h"
 #include "gGame.h"
 #include "gParser.h"
 #include "nNetwork.h"
@@ -60,10 +61,9 @@ zZone * sz_CreateTimedZone( eGrid * grid, const eCoord & pos )
 
     zShapePtr shape = zShapePtr( new zShapeCircle(grid, zone) );
 
-    if (state.istype<rColor>("color"))
-        shape->setColor(state.get<rColor>("color"));
-    if (state.isset("rotation"))
-        shape->setRotation2( state.get<tPolynomial>("rotation") );
+    shape->setReferenceTime( se_GameTime() );
+
+    shape->applyVisuals(state);
     shape->setPosX( tFunction( pos.x, .0 ) );
     shape->setPosY( tFunction( pos.y, .0 ) );
 

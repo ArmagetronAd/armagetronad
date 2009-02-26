@@ -22,6 +22,7 @@ namespace Zone { class ShapeSync; class ShapeCircleSync; class ShapePolygonSync;
 namespace Game { class ZoneV1Sync; }
 
 class zZone;
+class gParserState;
 
 class zShape : public eNetGameObject{
 public:
@@ -34,6 +35,8 @@ public:
     void ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender );
     //! writes sync data (and initialization data if flag is set)
     void WriteSync( Zone::ShapeSync & sync, bool init ) const;
+
+    virtual void applyVisuals( gParserState & );
 
     void animate( REAL time );
     virtual bool isInteracting(eGameObject * target);
@@ -113,6 +116,8 @@ public :
     void ReadSync( Zone::ShapeCircleSync const & sync, nSenderInfo const & sender );
     //! writes sync data (and initialization data if flag is set)
     void WriteSync( Zone::ShapeCircleSync & sync, bool init ) const;
+
+    void applyVisuals( gParserState & );
 
     bool isInteracting(eGameObject * target);
     void Render(const eCamera * cam );
