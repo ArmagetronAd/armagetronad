@@ -66,6 +66,8 @@ else
 tools_extra=
 endif
 
+INCLUDED_MODULE_SOURCES=
+
 # protocol buffers. Need to be compiled first so the headers exist for the
 # other modules to include.
 libprotobuf_a_SOURCES = \
@@ -227,7 +229,7 @@ libtron_a_SOURCES +=\
 	tron/zone/zZoneInfluence.h tron/zone/zZoneInfluence.cpp
 
 if BUILD_FORTRESS
-libtron_a_SOURCES +=\
+INCLUDED_MODULE_SOURCES +=\
 	tron/zone/zFortress.cpp        tron/zone/zFortress.h
 endif
 
@@ -306,7 +308,10 @@ else
 extralibs= thirdparty/particles/libparticles.a thirdparty/scrap/libscrap.a
 endif
 
-armagetronad_main_SOURCES = tron/gFloor.cpp tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp tron/cockpit/cCamview.cpp 
+armagetronad_main_SOURCES = \
+	tron/gFloor.cpp \
+	tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp tron/cockpit/cCamview.cpp \
+	$(INCLUDED_MODULE_SOURCES)
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
 armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 #  librubywrap.a
