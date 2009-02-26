@@ -320,9 +320,6 @@ void zZone::ReadSync( Zone::ZoneSync const & sync, nSenderInfo const & sender )
 
 bool zZone::Timestep( REAL time )
 {
-    if(0 != shape) {
-        shape->TimeStep( time );
-    }
     /*
        if(!emulateOldZoneShape) {
            shape->TimeStep( time );

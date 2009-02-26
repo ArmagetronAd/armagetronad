@@ -14,6 +14,8 @@ static tSettingItem<int> sz_zoneAlphaToggleConf( "ZONE_ALPHA_TOGGLE", sz_zoneAlp
 #define sz_zoneAlphaToggle sg_zoneAlphaToggle
 #endif
 
+#define lasttime_ lastTime
+
 zShape::zShape( eGrid* grid, zZone * zone )
         :eNetGameObject( grid, eCoord(0,0), eCoord(0,0), NULL, true ),
         posx_(),
@@ -22,8 +24,7 @@ zShape::zShape( eGrid* grid, zZone * zone )
         rotation2(),
         color_(),
         createdtime_(0.0),
-        referencetime_(0.0),
-        lasttime_(0.0)
+        referencetime_(0.0)
 {
     tASSERT( zone );
     zone->setShape( this );
@@ -159,7 +160,7 @@ void zShape::animate( REAL time ) {
     // Is this needed as the items are already animated?
 }
 
-void zShape::TimeStep( REAL time ) {
+bool zShape::Timestep( REAL time ) {
     lasttime_ = time;
     /*
     REAL scale = scale_.Evaluate(lasttime_ - referencetime_);
@@ -168,6 +169,7 @@ void zShape::TimeStep( REAL time ) {
         // The shape has collapsed and should be removed
       }
     */
+    return false;
 }
 
 bool zShape::isInteracting(eGameObject * target) {

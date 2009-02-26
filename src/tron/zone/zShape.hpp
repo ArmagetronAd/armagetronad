@@ -32,9 +32,6 @@ public:
     virtual void Render(const eCamera * cam );
     virtual void Render2D(tCoord scale) const;
 
-    void render(const eCamera*cam) { Render(cam); }
-    void render2d(tCoord&scale) { Render2D(scale); }
-
     void setPosX(const tFunction &x);
     void setPosY(const tFunction &y);
     virtual
@@ -59,11 +56,16 @@ public:
     REAL GetRotationAcceleration();
     void SetRotationAcceleration(REAL r);
 
-    void TimeStep( REAL time );
+    bool Timestep( REAL time );
     void setReferenceTime(REAL time);
 
     virtual void setGrowth(REAL growth);  //!< similar to old zones v1 setExpansionSpeed, but generic
     virtual void collapse(REAL speed);  //!< set growth such that collapse happens in a timeframe
+
+public:  // DEPRECATED -- DO NOT USE
+    void __deprecated render(const eCamera*cam) { Render(cam); }
+    void __deprecated render2d(tCoord&scale) { Render2D(scale); }
+    void __deprecated TimeStep(REAL time) { Timestep(time); }
 
 protected:
     tFunction posx_; //!< position need not be inside the shape.
@@ -72,13 +74,12 @@ protected:
     tPolynomial rotation2; //!< Rotate the contour around the position at this rate.
     rColor color_;
 
-    eCoord Position() { return eCoord(posx_(lasttime_ - referencetime_), posy_(lasttime_ - referencetime_) ); };
+    eCoord Position() { return eCoord(posx_(lastTime - referencetime_), posy_(lastTime - referencetime_) ); };
 
     void setCreatedTime(REAL time);
 
     REAL createdtime_; // The in-game time when this shape was first instantiated
     REAL referencetime_; // The in-game time when this shape's data was updated, used for evaluation
-    REAL lasttime_; // What is to be considered as the current time for this shape
 };
 
 class zShapeCircle : public zShape {
