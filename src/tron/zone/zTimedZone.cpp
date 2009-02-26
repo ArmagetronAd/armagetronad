@@ -19,6 +19,7 @@ zZone * sz_CreateTimedZone( eGrid * grid, const eCoord & pos )
     zone->setupVisuals(state);
 
     state.set("color", rColor(1, 1, 1, .7));
+    state.set("scale", tFunction(1., 0.));
 
     tPolynomial tpRotation(2);
     tpRotation[0] = 0.0f;
