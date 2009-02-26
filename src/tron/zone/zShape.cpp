@@ -692,7 +692,7 @@ v1upgrade( Game::ZoneV1Sync const & source ) {
     tFunction old_rotation;
     old_rotation.ReadSync( source.rotation_speed() );
     tPolynomial rotation;
-    rotation.adaptToNewReferenceVarValue( source.reference_time() );
+    rotation = rotation.adaptToNewReferenceVarValue( source.reference_time() );
     // FIXME: does rotation[0] need to be set to something?
     rotation[1] = old_rotation.offset_;
     rotation[2] = old_rotation.slope_;
