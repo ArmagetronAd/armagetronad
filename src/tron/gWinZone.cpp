@@ -66,7 +66,7 @@ static nSettingItem< REAL > sg_initialSizeConf( "WIN_ZONE_INITIAL_SIZE", sg_init
 int sg_zoneSegments = 11;
 static tSettingItem<int> sg_zoneSegmentsConf( "ZONE_SEGMENTS", sg_zoneSegments );
 
-static REAL sg_zoneSegLength = .5;
+REAL sg_zoneSegLength = .5;
 static tSettingItem<REAL> sg_zoneSegLengthConf( "ZONE_SEG_LENGTH", sg_zoneSegLength );
 
 static REAL sg_zoneBottom = 0.0f;

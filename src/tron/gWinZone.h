@@ -45,6 +45,7 @@ namespace Game { class ZoneV1Sync; }
 // misc zone-related settings
 extern int sg_zoneAlphaToggle;
 extern int sg_zoneSegments;
+extern REAL sg_zoneSegLength;
 
 // zone expansion speed and size
 extern REAL sg_expansionSpeed;

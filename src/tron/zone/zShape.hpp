@@ -56,6 +56,7 @@ public:
     REAL GetRotationAcceleration();
     void SetRotationAcceleration(REAL r);
     int GetEffectiveSegments() const;
+    REAL GetEffectiveSegmentLength() const;
 
     bool Timestep( REAL time );
     void setReferenceTime(REAL time);
@@ -74,6 +75,7 @@ protected:
     tFunction scale_; //!< Used to affect the contour and not the position
     tPolynomial rotation2; //!< Rotate the contour around the position at this rate.
     tPolynomial segments_; //!< Number of segments to make up the zone
+    tPolynomial seglength_; //!< Length of each segment making up the zone
     rColor color_;
 
     eCoord Position() { return eCoord(posx_(lastTime - referencetime_), posy_(lastTime - referencetime_) ); };

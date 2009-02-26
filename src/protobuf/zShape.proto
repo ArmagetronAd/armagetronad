@@ -43,6 +43,9 @@ message ShapeSync
 
     // extensions go here
     optional Tools.PolynomialSync segments = 10;
+    optional Tools.PolynomialSync segment_length = 11;
+    optional Tools.PolynomialSync pos_z_bottom = 12; // z bottom position of zone
+    optional Tools.PolynomialSync height = 13;
 }
 
 // sync message for circles

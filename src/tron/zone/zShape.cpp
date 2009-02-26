@@ -12,10 +12,14 @@ static tSettingItem<int> sz_zoneAlphaToggleConf( "ZONE_ALPHA_TOGGLE", sz_zoneAlp
 
 int sz_zoneSegments = 11;
 static tSettingItem<int> sz_zoneSegmentsConf( "ZONE_SEGMENTS", sz_zoneSegments );
+
+REAL sz_zoneSegLength = .5;
+static tSettingItem<REAL> sz_zoneSegLengthConf( "ZONE_SEG_LENGTH", sz_zoneSegLength );
 #else
 #include "gWinZone.h"
 #define sz_zoneAlphaToggle sg_zoneAlphaToggle
 #define sz_zoneSegments    sg_zoneSegments
+#define sz_zoneSegLength   sg_zoneSegLength
 #endif
 
 #define lasttime_ lastTime
@@ -27,6 +31,7 @@ zShape::zShape( eGrid* grid, zZone * zone )
         scale_(),
         rotation2(),
         segments_(),
+        seglength_(),
         color_(),
         createdtime_(0.0),
         referencetime_(0.0)
@@ -42,6 +47,7 @@ zShape::zShape( Zone::ShapeSync const & sync, nSenderInfo const & sender )
         scale_(),
         rotation2(),
         segments_(),
+        seglength_(),
         color_(),
         referencetime_(0.0)
 {
@@ -79,6 +85,7 @@ void zShape::WriteSync( Zone::ShapeSync & sync, bool init ) const
     scale_.WriteSync( *sync.mutable_scale() );
     rotation2.WriteSync( *sync.mutable_rotation2() );
     segments_.WriteSync( *sync.mutable_segments() );
+    seglength_.WriteSync( *sync.mutable_segment_length() );
     color_.WriteSync( *sync.mutable_color() );
 }
 
@@ -93,6 +100,8 @@ void zShape::ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender 
     rotation2.ReadSync( sync.rotation2() );
     if (sync.has_segments())
         segments_.ReadSync( sync.segments() );
+    if (sync.has_segment_length())
+        seglength_.ReadSync( sync.segment_length() );
     color_.ReadSync( sync.color() );
 }
 
@@ -175,6 +184,12 @@ int zShape::GetEffectiveSegments() const {
     if (segments_.Len())
         return int( segments_.evaluate(lastTime) );
     return sz_zoneSegments;
+}
+
+REAL zShape::GetEffectiveSegmentLength() const {
+    if (seglength_.Len())
+        return int( seglength_.evaluate(lastTime) );
+    return sz_zoneSegLength;
 }
 
 void zShape::animate( REAL time ) {
@@ -301,9 +316,12 @@ void zShapeCircle::Render(const eCamera * cam )
         BeginLineStrip();
     }
 
-    const REAL seglen = .2f;
+    const int sg_segments = GetEffectiveSegments();
+    const REAL seglen = 2 * M_PI / sg_segments * GetEffectiveSegmentLength();
+    // HACK
     const REAL bot = 0.0f;
     const REAL top = 5.0f; // + ( lastTime - referenceTime_ ) * .1f;
+    // HACK
 
     color_.Apply();
 
@@ -311,7 +329,6 @@ void zShapeCircle::Render(const eCamera * cam )
     effectiveRadius = scale_.Evaluate(lasttime_ - referencetime_) * radius.Evaluate(lasttime_ - referencetime_);
     if (effectiveRadius >= 0.0)
     {
-        int sg_segments = GetEffectiveSegments();
         for ( int i = sg_segments - 1; i>=0; --i )
         {
             REAL a = i * 2 * 3.14159 / REAL( sg_segments );
@@ -371,7 +388,7 @@ void zShapeCircle::Render2D(tCoord scale) const {
     BeginLines();
 
     int sg_segments = GetEffectiveSegments();
-    const REAL seglen = M_PI / sg_segments;
+    const REAL seglen = 2 * M_PI / sg_segments * GetEffectiveSegmentLength();
 
     color_.Apply();
 
@@ -578,9 +595,10 @@ void zShapePolygon::Render(const eCamera * cam )
             BeginLineStrip();
         }
 
-        //    const REAL seglen = .2f;
+        // HACK
         const REAL bot = 0.0f;
         const REAL top = 5.0f; // + ( lastTime - createTime_ ) * .1f;
+        // HACK
 
         color_.Apply();
 
@@ -644,8 +662,6 @@ void zShapePolygon::Render2D(tCoord scale) const {
         glRotatef(rotation2.evaluate(lasttime_)*180/M_PI, 0.0, 0.0, 1.0);
 
         BeginLines();
-
-        //    const REAL seglen = .2f;
 
         color_.Apply();
 
