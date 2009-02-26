@@ -10,6 +10,10 @@
 #include "tFunction.h"
 #include "tPolynomial.h"
 
+extern int sz_zoneAlphaToggle;
+extern int sz_zoneSegments;
+extern REAL sz_zoneSegLength;
+
 namespace Zone { class ShapeSync; class ShapeCircleSync; class ShapePolygonSync; }
 namespace Game { class ZoneV1Sync; }
 
