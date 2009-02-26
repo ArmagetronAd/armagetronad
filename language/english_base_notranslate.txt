@@ -60,6 +60,8 @@ font_min_b_help UNDOCUMENTED
 font_min_total_help UNDOCUMENTED
 font_big_threshold_width_help UNDOCUMENTED
 font_big_threshold_height_help UNDOCUMENTED
+font_small_threshold_width_help Minimal pixel size of small font
+font_small_threshold_height_help Minimal pixel size of small font
 
 camera_smart_distance_help UNDOCUMENTED
 camera_smart_height_help UNDOCUMENTED
@@ -106,7 +108,8 @@ fortress_held_score_help          Score you get for holding your fortress.
 fortress_conquest_decay_rate_help Rate a fortress zone "recovers" from being conquered 
 fortress_conquest_rate_help       Rate a fortress zone gets conquered with for each enemy in it 
 fortress_defend_rate_help         Rate a fortress zone "recovers" for each defending player 
-
+fortress_collapse_speed_help      Speed a fortress zone collapses with
+fortress_conquest_timeout_help    time without enemy contact that makes a fortress zone collapse harmlessly
 
 # should not actually be documented, rather hidden
 bookmark_0_address_help           Server adress of the 1st server bookmark 
@@ -142,6 +145,69 @@ bookmark_8_port_help              Server port of the 9th server bookmark
 bookmark_9_address_help           Server adress of the 10th server bookmark 
 bookmark_9_name_help              Name of the 10th server bookmark 
 bookmark_9_port_help              Server port of the 10th server bookmark 
+
+bookmark__master0_address_help    Address of the first subculture master
+bookmark__master0_name_help       Name of the first subculture
+bookmark__master0_port_help       Port of the first subculture master
+bookmark__master1_address_help    Address of the second subculture master
+bookmark__master1_name_help       Name of the second subculture
+bookmark__master1_port_help       Port of the second subculture master
+bookmark__master2_address_help    Address of the 3rd subculture master
+bookmark__master2_name_help       Name of the 3rd subculture
+bookmark__master2_port_help       Port of the 3rd subculture master
+bookmark__master3_address_help    Address of the 4th subculture master
+bookmark__master3_name_help       Name of the 4th subculture
+bookmark__master3_port_help       Port of the 4th subculture master
+bookmark__master4_address_help    Address of the 5th subculture master
+bookmark__master4_name_help       Name of the 5th subculture
+bookmark__master4_port_help       Port of the 5th subculture master
+bookmark__master5_address_help    Address of the 6th subculture master
+bookmark__master5_name_help       Name of the 6th subculture
+bookmark__master5_port_help       Port of the 6th subculture master
+bookmark__master6_address_help    Address of the 7th subculture master
+bookmark__master6_name_help       Name of the 7th subculture
+bookmark__master6_port_help       Port of the 7th subculture master
+bookmark__master7_address_help    Address of the 8th subculture master
+bookmark__master7_name_help       Name of the 8th subculture
+bookmark__master7_port_help       Port of the 8th subculture master
+bookmark__master8_address_help    Address of the 9th subculture master
+bookmark__master8_name_help       Name of the 9th subculture
+bookmark__master8_port_help       Port of the 9th subculture master
+bookmark__master9_address_help    Address of the 10th subculture master
+bookmark__master9_name_help       Name of the 10th subculture
+bookmark__master9_port_help       Port of the 10th subculture master
+# ????
+bookmark__master10_address_help    Address of the 11th subculture master
+bookmark__master10_name_help       Name of the 11th subculture
+bookmark__master10_port_help       Port of the 11th subculture master
+
+friend_1_help                      A friend
+friend_2_help                      A friend
+friend_3_help                      A friend
+friend_4_help                      A friend
+friend_5_help                      A friend
+friend_6_help                      A friend
+friend_7_help                      A friend
+friend_8_help                      A friend
+friend_9_help                      A friend
+friend_10_help                     A friend
+
+cycle_accel_tunnel_override_help              Block out older clients if CYCLE_ACCEL_TUNNEL differs from its default? 
+cycle_boostfactor_enemy_override_help         Block out older clients if CYCLE_BOOSTFACTOR_ENEMY differs from its default? 
+cycle_boostfactor_rim_override_help           Block out older clients if CYCLE_BOOSTFACTOR_RIM differs from its default? 
+cycle_boostfactor_self_override_help          Block out older clients if CYCLE_BOOSTFACTOR_SELF differs from its default? 
+cycle_boostfactor_team_override_help          Block out older clients if CYCLE_BOOSTFACTOR_TEAM differs from its default? 
+cycle_boost_enemy_override_help               Block out older clients if CYCLE_BOOST_ENEMY differs from its default? 
+cycle_boost_rim_override_help                 Block out older clients if CYCLE_BOOST_RIM differs from its default? 
+cycle_boost_self_override_help                Block out older clients if CYCLE_BOOST_SELF differs from its default? 
+cycle_boost_team_override_help                Block out older clients if CYCLE_BOOST_TEAM differs from its default? 
+cycle_delay_doublebind_bonus_override_help    Block out older clients if CYCLE_DELAY_DOUBLEBIND_BONUS differs from its default? 
+cycle_rubber_mindistance_gap_override_help    Block out older clients if CYCLE_RUBBER_MINDISTANCE_GAP differs from its default? 
+cycle_speed_max_override_help                 Block out older clients if CYCLE_SPEED_MAX differs from its default? 
+cycle_width_override_help                     Block out older clients if CYCLE_WIDTH differs from its default? 
+cycle_width_rubber_max_override_help          Block out older clients if CYCLE_WIDTH_RUBBER_MAX differs from its default? 
+cycle_width_rubber_min_override_help          Block out older clients if CYCLE_WIDTH_RUBBER_MIN differs from its default? 
+cycle_width_side_override_help                Block out older clients if CYCLE_WIDTH_SIDE differs from its default? 
 
 vote_use_server_controlled_kick_override_help Block out older clients when VOTE_USE_SERVER_CONTROLLED_KICK differs from its default? 
 spam_maxlen_override_help         Block out older clients when SPAM_MAXLEN differs from its default? 
@@ -179,6 +245,8 @@ cycle_dist_wall_shrink_override_help UNDOCUMENTED
 cycle_first_spawn_protection_override_help  UNDOCUMENTED
 cycle_invulnerable_time_override_help  UNDOCUMENTED
 cycle_wall_time_override_help  UNDOCUMENTED
+
+authority_no_check_help     UNDOCUMENTED
 
 # yet undefined access levels, reserved for future use (we only want them to pop up for
 # translators then)

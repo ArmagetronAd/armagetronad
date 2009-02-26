@@ -1155,7 +1155,7 @@ ePlayer::ePlayer():cockpit(0){
     confname.Clear();
     confname << "AUTO_LOGIN_"<< id+1;
     StoreConfitem(tNEW(tConfItem<bool>)(confname,
-                                        "$auto_login_help",
+                                        "$auto_login_confitem_help",
                                         autoLogin));
     autoLogin = false;
 
@@ -1225,7 +1225,7 @@ ePlayer::ePlayer():cockpit(0){
 
     confname << "HIDE_IDENTITY_"<< id+1;
     StoreConfitem(tNEW(tConfItem<bool>)(confname,
-                                        "$hide_identity_help",
+                                        "$hide_identity_confitem_help",
                                         stealth));
     stealth=false;
     confname.Clear();
@@ -7563,7 +7563,7 @@ static void se_PlayerMessageConf(std::istream &s)
 
     if ( receiver <= 0 || s.good() )
     {
-        con << "Usage: PLAYER_MESSAGE <user ID or name> \"<Message>\"\n";
+        con << tOutput("$player_message_usage");
         return;
     }
 
@@ -7600,7 +7600,7 @@ static void se_KickConf(std::istream &s)
     }
     else
     {
-        con << "Usage: KICK <user ID or name> <Reason>\n";
+        con << tOutput("$kick_usage");
         return;
     }
 }
@@ -7653,7 +7653,7 @@ static void se_MoveToConf(std::istream &s, REAL severity, const char * command )
     }
     else
     {
-        con << "Usage: " << command << " <user ID or name> <server IP to kick to>:<server port to kick to> <Reason>\n";
+        con << tOutput( "$kickmove_usage", command );
         return;
     }
 }
@@ -7686,7 +7686,7 @@ static void se_BanConf(std::istream &s)
 
     if ( num == 0 && !s.good() )
     {
-        con << "Usage: BAN <user ID or name> <time in minutes(defaults to 60)> <Reason>\n";
+        con << tOutput( "$ban_usage" );
         return;
     }
 
