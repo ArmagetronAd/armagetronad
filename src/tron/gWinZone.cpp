@@ -69,10 +69,10 @@ static tSettingItem<int> sg_zoneSegmentsConf( "ZONE_SEGMENTS", sg_zoneSegments )
 REAL sg_zoneSegLength = .5;
 static tSettingItem<REAL> sg_zoneSegLengthConf( "ZONE_SEG_LENGTH", sg_zoneSegLength );
 
-static REAL sg_zoneBottom = 0.0f;
+REAL sg_zoneBottom = 0.0f;
 static tSettingItem<REAL> sg_zoneBottomConf( "ZONE_BOTTOM", sg_zoneBottom );
 
-static REAL sg_zoneHeight = 5.0f;
+REAL sg_zoneHeight = 5.0f;
 static tSettingItem<REAL> sg_zoneHeightConf( "ZONE_HEIGHT", sg_zoneHeight );
 
 

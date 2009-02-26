@@ -54,6 +54,9 @@ public:
   tFunction getScale() {return scale_;};
   rColor getColor() {return color_;};
 
+    REAL GetEffectiveBottom() const;
+    REAL GetEffectiveHeight() const;
+
     //! shortcut rotation functions
     REAL GetRotationSpeed();
     void SetRotationSpeed(REAL r);
@@ -76,7 +79,9 @@ public:  // DEPRECATED -- DO NOT USE
 protected:
     tFunction posx_; //!< position need not be inside the shape.
     tFunction posy_; //!< positoin need not be inside the shape.
+    tPolynomial bottom_; //!< Z position off the grid (bottom of zone)
     tFunction scale_; //!< Used to affect the contour and not the position
+    tPolynomial height_; //!< Height of the zone, not affected by scale
     tPolynomial rotation2; //!< Rotate the contour around the position at this rate.
     tPolynomial segments_; //!< Number of segments to make up the zone
     tPolynomial seglength_; //!< Length of each segment making up the zone

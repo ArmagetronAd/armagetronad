@@ -15,11 +15,19 @@ static tSettingItem<int> sz_zoneSegmentsConf( "ZONE_SEGMENTS", sz_zoneSegments )
 
 REAL sz_zoneSegLength = .5;
 static tSettingItem<REAL> sz_zoneSegLengthConf( "ZONE_SEG_LENGTH", sz_zoneSegLength );
+
+REAL sz_zoneBottom = 0.0f;
+static tSettingItem<REAL> sz_zoneBottomConf( "ZONE_BOTTOM", sz_zoneBottom );
+
+REAL sz_zoneHeight = 5.0f;
+static tSettingItem<REAL> sz_zoneHeightConf( "ZONE_HEIGHT", sz_zoneHeight );
 #else
 #include "gWinZone.h"
 #define sz_zoneAlphaToggle sg_zoneAlphaToggle
 #define sz_zoneSegments    sg_zoneSegments
 #define sz_zoneSegLength   sg_zoneSegLength
+#define sz_zoneBottom      sg_zoneBottom
+#define sz_zoneHeight      sg_zoneHeight
 #endif
 
 #define lasttime_ lastTime
@@ -28,7 +36,9 @@ zShape::zShape( eGrid* grid, zZone * zone )
         :eNetGameObject( grid, eCoord(0,0), eCoord(0,0), NULL, true ),
         posx_(),
         posy_(),
+        bottom_(),
         scale_(),
+        height_(),
         rotation2(),
         segments_(),
         seglength_(),
@@ -45,7 +55,9 @@ zShape::zShape( Zone::ShapeSync const & sync, nSenderInfo const & sender )
 : eNetGameObject( sync.base(), sender ),
         posx_(),
         posy_(),
+        bottom_(),
         scale_(),
+        height_(),
         rotation2(),
         segments_(),
         seglength_(),
@@ -83,7 +95,9 @@ void zShape::WriteSync( Zone::ShapeSync & sync, bool init ) const
     sync.set_reference_time( referencetime_ );
     posx_.WriteSync( *sync.mutable_pos_x() );
     posy_.WriteSync( *sync.mutable_pos_y() );
+    bottom_.WriteSync( *sync.mutable_pos_z_bottom() );
     scale_.WriteSync( *sync.mutable_scale() );
+    height_.WriteSync( *sync.mutable_height() );
     rotation2.WriteSync( *sync.mutable_rotation2() );
     segments_.WriteSync( *sync.mutable_segments() );
     seglength_.WriteSync( *sync.mutable_segment_length() );
@@ -97,7 +111,11 @@ void zShape::ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender 
     setReferenceTime( sync.reference_time() );
     posx_.ReadSync( sync.pos_x() );
     posy_.ReadSync( sync.pos_y() );
+    if (sync.has_pos_z_bottom())
+        bottom_.ReadSync( sync.pos_z_bottom() );
     scale_.ReadSync( sync.scale() );
+    if (sync.has_height())
+        height_.ReadSync( sync.height() );
     rotation2.ReadSync( sync.rotation2() );
     if (sync.has_segments())
         segments_.ReadSync( sync.segments() );
@@ -159,6 +177,18 @@ tCoord zShape::Position() const {
         posx_.Evaluate(lasttime_ - referencetime_),
         posy_.Evaluate(lasttime_ - referencetime_)
     );
+}
+
+REAL zShape::GetEffectiveBottom() const {
+    if (bottom_.Len())
+        return bottom_.evaluate(lastTime);
+    return sz_zoneBottom;
+}
+
+REAL zShape::GetEffectiveHeight() const {
+    if (height_.Len())
+        return height_.evaluate(lastTime);
+    return sz_zoneHeight;
 }
 
 REAL zShape::GetRotationSpeed() {
@@ -319,10 +349,8 @@ void zShapeCircle::Render(const eCamera * cam )
 
     const int sg_segments = GetEffectiveSegments();
     const REAL seglen = 2 * M_PI / sg_segments * GetEffectiveSegmentLength();
-    // HACK
-    const REAL bot = 0.0f;
-    const REAL top = 5.0f; // + ( lastTime - referenceTime_ ) * .1f;
-    // HACK
+    const REAL bot = GetEffectiveBottom();
+    const REAL top = bot + GetEffectiveHeight();
 
     color_.Apply();
 
@@ -596,10 +624,8 @@ void zShapePolygon::Render(const eCamera * cam )
             BeginLineStrip();
         }
 
-        // HACK
-        const REAL bot = 0.0f;
-        const REAL top = 5.0f; // + ( lastTime - createTime_ ) * .1f;
-        // HACK
+        const REAL bot = GetEffectiveBottom();
+        const REAL top = bot + GetEffectiveHeight();
 
         color_.Apply();
 
