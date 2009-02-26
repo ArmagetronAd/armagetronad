@@ -38,6 +38,7 @@ zShape::zShape( eGrid* grid, zZone * zone )
 {
     tASSERT( zone );
     zone->setShape( this );
+    this->AddToList();
 }
 
 zShape::zShape( Zone::ShapeSync const & sync, nSenderInfo const & sender )
