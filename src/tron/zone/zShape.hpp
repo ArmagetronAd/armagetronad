@@ -67,6 +67,7 @@ public:
   tFunction getPosX() {return posx_;};
   tFunction getPosY() {return posy_;};
     tPolynomial getRotation2() { return rotation2; };
+    REAL GetCurrentScale() const;
   tFunction getScale() {return scale_;};
   rColor getColor() {return color_;};
 

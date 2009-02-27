@@ -224,6 +224,10 @@ tCoord zShape::Position() const {
     );
 }
 
+REAL zShape::GetCurrentScale() const {
+    return scale_.Evaluate(lasttime_ - referencetime_);
+}
+
 REAL zShape::GetEffectiveBottom() const {
     if (bottom_.Len())
         return bottom_.evaluate(lastTime);

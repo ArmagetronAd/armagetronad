@@ -509,8 +509,7 @@ eCoord zZone::GetPosition( void ) const
 zZone const & zZone::GetPosition( eCoord & position ) const
 {
     if(0 != shape) {
-        position.x = EvaluateFunctionNow( shape->getPosX() );
-	position.y = EvaluateFunctionNow( shape->getPosY() );
+        position = shape->Position();
     }
     return *this;
 }
@@ -531,7 +530,7 @@ REAL zZone::GetScale( void ) const
     // Should get this info from the shape, not the zone
     REAL scale = 0.0;
     if(0 != shape) {
-        scale = EvaluateFunctionNow( shape->getScale() ) ;
+        scale = shape->GetCurrentScale();
     }
     return scale;
 }
