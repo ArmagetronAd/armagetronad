@@ -36,7 +36,7 @@ static tSettingItem< REAL > sg_zoneAlphaConf( "ZONE_ALPHA", sz_zoneAlpha );
 
 // the second one under server control. Not used for all kinds of zones, only
 // v1 zones synced from the server and v2 fortress zones.
-REAL sz_zoneAlphaServer = 1.0;
+REAL sz_zoneAlphaServer = 0.7;
 static nSettingItem< REAL > sg_zoneAlphaConfServer( "ZONE_ALPHA_SERVER", sz_zoneAlphaServer );
 #else
 #include "gWinZone.h"
@@ -73,6 +73,8 @@ zShape::zShape( eGrid* grid, zZone * zone )
     tASSERT( zone );
     zone->setShape( this );
     this->AddToList();
+
+    color_.a_ = sz_zoneAlphaServer;
 }
 
 zShape::zShape( Zone::ShapeSync const & sync, nSenderInfo const & sender )
@@ -389,8 +391,6 @@ void zShapeCircle::Render(const eCamera * cam )
     if (sz_zoneAlphaToggle)
         useAlpha = !useAlpha;
 
-    if ( color_.a_ > .7f )
-        color_.a_ = .7f;
     if ( color_.a_ <= 0 )
         return;
 
@@ -479,8 +479,6 @@ void zShapeCircle::Render(const eCamera * cam )
 
 void zShapeCircle::Render2D(tCoord scale) const {
 #ifndef DEDICATED
-    //if ( color_.a_ > .7f )
-    //    color_.a_ = .7f;
     if ( color_.a_ <= 0 )
         return;
 
@@ -684,8 +682,6 @@ void zShapePolygon::Render(const eCamera * cam )
     if (sz_zoneAlphaToggle)
         useAlpha = !useAlpha;
 
-    if ( color_.a_ > .7f )
-        color_.a_ = .7f;
     if ( color_.a_ <= 0 )
         return;
 
@@ -766,12 +762,8 @@ void zShapePolygon::Render(const eCamera * cam )
 }
 void zShapePolygon::Render2D(tCoord scale) const {
 #ifndef DEDICATED
-
-    //if ( color_.a_ > .7f )
-    //    color_.a_ = .7f;
     if ( color_.a_ <= 0 )
         return;
-
 
     ModelMatrix();
     glPushMatrix();
