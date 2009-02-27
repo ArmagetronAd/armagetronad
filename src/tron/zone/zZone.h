@@ -38,7 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tXmlParser.h"
 #include <set>
 #include <vector>
-#include "zone/zShape.hpp"
+#include "zone/zShape.h"
 
 namespace Zone { class ZoneSync; }
 

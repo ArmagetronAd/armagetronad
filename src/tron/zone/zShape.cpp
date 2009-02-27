@@ -1,5 +1,5 @@
 #include "rScreen.h"
-#include "zShape.hpp"
+#include "zShape.h"
 #include "gCycle.h"
 #include "gParser.h"
 #include "zZone.h"
