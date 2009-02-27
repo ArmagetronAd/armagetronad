@@ -90,6 +90,8 @@ zShape::zShape( Zone::ShapeSync const & sync, nSenderInfo const & sender )
 {
     setCreatedTime( sync.creation_time() );
     this->AddToList();
+
+    color_.a_ = sz_zoneAlphaServer;
 }
 
 void zShape::setCreatedTime(REAL time)

@@ -17,7 +17,6 @@ extern REAL sz_zoneBottom;
 extern REAL sz_zoneHeight;
 extern REAL sz_expansionSpeed;
 extern REAL sz_initialSize;
-extern REAL sz_zoneAlphaServer;
 
 namespace Zone { class ShapeSync; class ShapeCircleSync; class ShapePolygonSync; }
 namespace Game { class ZoneV1Sync; }
