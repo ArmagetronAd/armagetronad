@@ -195,8 +195,8 @@ AC_ENABLE(armathentication,
 
 AC_ARG_ENABLE(zonesv1,
 	AC_HELP_STRING([--enable-zonesv1],
-		[enable deprecated zones v1 code (default=enabled)]),,
-enable_zonesv1=yes)
+		[enable deprecated zones v1 code (default=disabled)]),,
+enable_zonesv1=no)
 
 AC_ARG_ENABLE(zonesv2,
 	AC_HELP_STRING([--enable-zonesv2],
