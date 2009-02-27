@@ -111,7 +111,6 @@ zZone::zZone( eGrid * grid )
         effectGroupOutside(),
         playersInside(),
         playersOutside(),
-        oldFortressAutomaticAssignmentBehavior_(false),
         name_()
 {
     // store creation time
@@ -140,7 +139,6 @@ zZone::zZone( Zone::ZoneSync const & sync, nSenderInfo const & sender )
         //rotation_(1,0),
         playersInside(),
         playersOutside(),
-        oldFortressAutomaticAssignmentBehavior_(false),
         name_()
 {
     // read creation time

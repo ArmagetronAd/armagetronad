@@ -89,14 +89,6 @@ public:
     void setShape (zShapePtr aShape) { shape = aShape; };
     zShapePtr getShape() { return shape; };
 
-    // HACK
-    // Enables fortress described in maps from format 1 to be assigned to a team according to the old behavior
-    void setOldFortressAutomaticAssignmentBehavior(bool oldFortressAutomaticAssignmentBehavior)
-    {
-        oldFortressAutomaticAssignmentBehavior_ = oldFortressAutomaticAssignmentBehavior;
-    };
-    bool getOldFortressAutomaticAssignmentBehavior() { return oldFortressAutomaticAssignmentBehavior_; };
-
     void setName(string name) {name_ = name;};
     string getName() { return name_; };
 
@@ -135,8 +127,6 @@ private:
     inline void SetFunctionNow( tFunction & f, REAL value ) const; //!< makes sure EvaluateFunctionNow() returns the given value
 
     void RemoveFromZoneList(void); //!< Removes the zone from the sg_Zones list if it's there
-
-    bool oldFortressAutomaticAssignmentBehavior_;
 
     string name_;
 
