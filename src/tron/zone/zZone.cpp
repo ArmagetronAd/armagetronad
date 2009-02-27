@@ -188,6 +188,8 @@ zZone::~zZone( void )
 }
 
 void zZone::RemoveFromGame(void) {
+    if (shape)
+        shape->RemoveFromGame();
     RemoveFromZoneList();
     eNetGameObject::RemoveFromGame();
 }
