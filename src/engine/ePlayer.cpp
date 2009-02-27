@@ -275,6 +275,9 @@ static std::string se_UnEscapeName( tString const & original )
                 c = ' ';
             }
             filter.put(c);
+
+            // don't chain escapes
+            c = 'x';
         }
         else if ( c == '%' )
         {
@@ -496,7 +499,7 @@ static void PasswordCallback( nKrawall::nPasswordRequest const & request,
 
     if ( request.method != "md5" && request.method != "bmd5" )
     {
-        con << "Unknown password scrambling method requested.";
+        con << "INTERNAL ERROR: Unknown password scrambling method requested.";
         answer.aborted = true;
         return;
     }
@@ -4970,13 +4973,22 @@ static tAccessLevelSetter se_ListAdminsConfLevel( se_ListAdminsConf, tAccessLeve
 class eReserveNick: public eUserConfig< tString >
 {
 #ifdef DEBUG
-    static void TestEscape()
-    {
 #ifdef KRAWALL_SERVER
-        tString test("ä@%bla:");
+    static void TestEscape( char const * t )
+    {
+        tString test(t);
         tString esc(se_EscapeName( test, false ).c_str());
         tString rev(se_UnEscapeName( esc ).c_str());
         tASSERT( test == rev );
+    }
+#endif
+
+    static void TestEscape()
+    {
+#ifdef KRAWALL_SERVER
+        TestEscape("ä@%bla:");
+        TestEscape("a b@%bl%:");
+        TestEscape("a\\_b@%bl%:");
 #endif
     }
 #endif

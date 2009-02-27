@@ -73,6 +73,7 @@ static bool st_ReadEscapeSequence( char & c, char & c2, std::istream & s )
         case '"':
         case ' ':
         case '\'':
+        case '\\':
         case '\n':
             // include quoting character as literal
             return true;
@@ -128,29 +129,26 @@ std::istream & operator>> (std::istream &s,tString &x)
         c = s.get();
     }
 
+    bool lastEscape = false;
     while((quoted || !( isblank(c) || c == '\n' || c == '\r' ) ) && s.good() && !s.eof()){
-        x += c;
-        c=s.get();
-
         // read and interpret escape sequences
-        if ( !st_ReadEscapeSequence( c, s) )
+        bool thisEscape = false;
+        if ( !lastEscape && !( thisEscape = st_ReadEscapeSequence( c, s ) ) && quoted && c == quoteChar )
         {
-            // interpret special characters
-            if ( quoted && c == quoteChar )
-            {
-                // this marks the end of a quoted string; abort.
-                c = s.get();
-                break;
-            }
+            // no escape, this string is quoted and the current character is an end quote. We're finished.
+            c = s.get();
+            break;
         }
-        else if ( isblank( c ) )
+        else
         {
-            // include escaped spaces
+            // append escaped or regular character
             x += c;
             c=s.get();
         }
 
+        // lastEscape = thisEscape;
     }
+
     s.putback(c);
     return s;
 }
