@@ -145,16 +145,10 @@ zZone::zZone( Zone::ZoneSync const & sync, nSenderInfo const & sender )
     createTime_ = sync.create_time();
     referenceTime_ = lastTime = createTime_;
 
-    // initialize color to white, ReadSync will fill in the true value if available
-    //    color_.r_ = color_.g_ = color_.b_ = 1.0f;
-
     // add to game grid
     this->AddToList();
 
     sz_Zones.push_back(this);
-
-    // initialize position functions
-    //    SetPosition( pos );
 }
 
 // *******************************************************************************
