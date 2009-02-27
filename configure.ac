@@ -206,7 +206,7 @@ enable_zonesv2=yes)
 AC_ARG_ENABLE(fortress,
 	AC_HELP_STRING([--enable-fortress],
 		[enable fortress support (default=enabled)]),,
-enable_fortress=yes)
+enable_fortress=$enable_zonesv2)
 
 AC_ARG_ENABLE(authentication,
     AC_HELP_STRING([--enable-authentication],
@@ -343,6 +343,14 @@ AC_DEFINE(ENABLE_ZONESV1,,enables zonesv1)
 fi
 
 AM_CONDITIONAL(BUILDZONESV1, test x$enable_zonesv1 = xyes)
+
+if test x$enable_zonesv2 != xyes && test x$enable_fortress = xyes; then
+	AC_MSG_WARN([
+	Fortress requires support for zones.
+	Enabling zones support.
+	])
+	enable_zonesv2=yes
+fi
 
 if test x$enable_zonesv2 = xyes; then
 AC_DEFINE(ENABLE_ZONESV2,,enables zonesv2)
