@@ -65,3 +65,6 @@ aa_config.h.in
 .objs
 ./build
 .objs_release
+desktop/armagetronad.protocol
+src/vParser.cpp
+src/protobuf/.dir
