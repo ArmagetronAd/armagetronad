@@ -285,6 +285,21 @@ void zShape::Render(const eCamera *cam )
 void zShape::Render2D(tCoord scale) const
     {}
 
+// *******************************************************************************
+// *
+// *	RendersAlpha
+// *
+// *******************************************************************************
+//!
+//!		@return	True if alpha blending is used
+//!
+// *******************************************************************************
+bool zShape::RendersAlpha() const
+{
+	return sr_alphaBlend ? !sz_zoneAlphaToggle : sz_zoneAlphaToggle;
+}
+
+
 zShapeCircle::zShapeCircle(eGrid *grid, zZone * zone ):
         zShape(grid, zone ),
         radius(sz_initialSize, sz_expansionSpeed)

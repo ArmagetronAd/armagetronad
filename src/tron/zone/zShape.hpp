@@ -42,6 +42,7 @@ public:
     virtual bool isInteracting(eGameObject * target);
     virtual void Render(const eCamera * cam );
     virtual void Render2D(tCoord scale) const;
+    virtual bool RendersAlpha() const;
 
     virtual tCoord findPointNear(tCoord&) = 0;
     virtual tCoord findPointFar(tCoord&) = 0;
