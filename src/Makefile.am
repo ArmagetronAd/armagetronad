@@ -39,6 +39,7 @@ tTrueVersion.h: $(wildcard $(top_srcdir)/*_version) $(wildcard $(top_srcdir)/.sv
 # clean up true version
 distclean-local:
 	rm -f tTrueVersion.h
+	rm -f protobuf/*.pb.*
 
 ${srcdir}/tools/tLocale.cpp: ${srcdir}/tools/tVersion.cpp
 ${srcdir}/tools/tVersion.cpp: tTrueVersion.h 
