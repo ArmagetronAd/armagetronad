@@ -68,3 +68,6 @@ aa_config.h.in
 desktop/armagetronad.protocol
 src/vParser.cpp
 src/protobuf/.dir
+./armagetronad
+./armagetronad-dedicated
+./var
