@@ -39,7 +39,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nConfig.h"
 #include "tString.h"
 #include "rScreen.h"
-#include "eSoundMixer.h"
 #include "tPolynomial.h"
 
 
@@ -128,8 +127,6 @@ zZone::zZone( eGrid * grid )
 
     // initialize position functions
     //    SetPosition( pos );
-    eSoundMixer* mixer = eSoundMixer::GetMixer();
-    mixer->PushButton(ZONE_SPAWN, pos);
 }
 
 static nVersionFeature sz_ShapedZones(20);
@@ -166,8 +163,6 @@ zZone::zZone( Zone::ZoneSync const & sync, nSenderInfo const & sender )
 
     // initialize position functions
     //    SetPosition( pos );
-    eSoundMixer* mixer = eSoundMixer::GetMixer();
-    mixer->PushButton(ZONE_SPAWN, pos);
 }
 
 // *******************************************************************************

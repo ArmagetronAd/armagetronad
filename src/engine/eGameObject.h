@@ -57,6 +57,9 @@ class eGameObject{
     // small wrapper of TimestepThis doing preparation and cleanup work
     static void TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObject *t, REAL minTimestep);
 
+    //! called immediately after the object is created, either right after round beginning or mid-game creation
+    virtual void OnBirth();
+
 protected:
     // does a timestep and all interactions for this gameobject,
     // divided in many small steps
@@ -88,6 +91,8 @@ protected:
 
     tJUST_CONTROLLED_PTR<eFace> currentFace;  // the eFace pos it is currently
     tCHECKED_PTR(eGrid) grid;         // the game grid we are on
+
+    bool _born;
 
     // entry and deletion in the list of all eGameObjects
 public:
@@ -163,6 +168,9 @@ public:
 
     //! called when the round ends
     virtual void OnRoundEnd();
+
+    //! call to ensure the object is "born"
+    void EnsureBorn();
 
     //! destroys the gameobject (in the game)
     virtual void Kill();

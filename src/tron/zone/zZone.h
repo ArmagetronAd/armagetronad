@@ -71,7 +71,6 @@ private:
 class zZone: public eNetGameObject
 {
 private:
-    // TODO FIXME \
     void*pos;  //!< pos is not valid for zones
 public:  // DEPRECATED methods: please do NOT use in new code, and REPLACE in old code
     REAL __deprecated GetRotationSpeed();

@@ -1,3 +1,4 @@
+#include "eSoundMixer.h"
 #include "rScreen.h"
 #include "zShape.hpp"
 #include "gCycle.h"
@@ -142,6 +143,13 @@ void zShape::applyVisuals( gParserState & state ) {
     if (state.isset("scale"))
         setScale( state.get<tFunction>("scale") );
 }
+
+void
+zShape::OnBirth() {
+    eSoundMixer* mixer = eSoundMixer::GetMixer();
+    mixer->PushButton(ZONE_SPAWN, Position());
+}
+
 
 REAL zShape::calcDistanceNear(tCoord & p) {
     return (findPointNear(p) - p).Norm();
