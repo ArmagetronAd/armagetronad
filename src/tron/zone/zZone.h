@@ -44,30 +44,6 @@ namespace Zone { class ZoneSync; }
 
 class gParserState;
 
-/*
-class zZone: public eNetGameObject
-{
-    zZone(eGrid *grid); //!< local constructor
-    zZone(nMessage &m);                    //!< network constructor
-    ~zZone();                              //!< destructor
-
-    void SetReferenceTime();               //!< sets the reference time to the current time
-
- protected:
-    virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
-    virtual void OnVanish();                     //!< called when the zone vanishes
-private:
-    virtual void WriteCreate(nMessage &m); //!< writes data for network constructor
-    virtual void WriteSync(nMessage &m);   //!< writes sync data
-    virtual void ReadSync(nMessage &m);    //!< reads sync data
-
-    virtual void InteractWith( eGameObject *target,REAL time,int recursion=1 ); //!< looks for objects inzide the zone and reacts on them
-    virtual nDescriptor& CreatorDescriptor() const; //!< returns the descriptor to recreate this object over the network
-
-    virtual void Render(const eCamera *cam);  //!< renders the zone
-}
-*/
-
 class zZone: public eNetGameObject
 {
 private:
@@ -104,27 +80,6 @@ public:
     tCoord const    GetRotation         ( void ) const;	                //!< Gets the current rotation state
     REAL            GetScale           ( void ) const;	                //!< Gets the current scale
     rColor const    GetColor( void ) const;	//!< Gets the current color
-    /*
-    zZone &         SetPosition         ( eCoord const & position );	//!< Sets the current position
-    zZone &         SetVelocity         ( eCoord const & velocity );	//!< Sets the current velocity
-    eCoord          GetVelocity         ( void ) const;	                //!< Gets the current velocity
-    zZone const &   GetVelocity         ( eCoord & velocity ) const;	//!< Gets the current velocity
-    zZone &         SetScale           ( REAL scale );	            //!< Sets the current scale
-    REAL            GetScale           ( void ) const;	                //!< Gets the current scale
-    zZone const &   GetScale           ( REAL & scale ) const;	    //!< Gets the current scale
-    zZone &         SetExpansionSpeed   ( REAL expansionSpeed );	    //!< Sets the current expansion speed
-    REAL            GetExpansionSpeed   ( void ) const;	                //!< Gets the current expansion speed
-    zZone const &   GetExpansionSpeed   ( REAL & expansionSpeed ) const;//!< Gets the current expansion speed
-    zZone &         SetRotationSpeed    ( REAL rotationSpeed );	        //!< Sets the current rotation speed
-    REAL            GetRotationSpeed    ( void ) const;	                //!< Gets the current rotation speed
-    tCoord const &  GetRotation         ( void ) const;	                //!< Gets the current rotation state
-    zZone const &   GetRotationSpeed    ( REAL & rotationSpeed ) const;	//!< Gets the current rotation speed
-    zZone &         SetRotationAcceleration( REAL rotationAcceleration );	        //!< Sets the current acceleration of the rotation
-    REAL            GetRotationAcceleration( void ) const;	                        //!< Gets the current acceleration of the rotation
-    zZone const &   GetRotationAcceleration( REAL & rotationAcceleration ) const;	//!< Gets the current acceleration of the rotation
-    rColor const &  GetColor( void ) const;	//!< Gets the current color
-    void            SetColor( rColor const & color ); //!< Sets the current color
-    */
 
     void addEffectGroupEnter  (zEffectGroupPtr anEffectGroup) {effectGroupEnter.push_back  (anEffectGroup);};
     void addEffectGroupInside (zEffectGroupPtr anEffectGroup) {effectGroupInside.push_back (anEffectGroup);};
@@ -146,18 +101,10 @@ public:
     string getName() { return name_; };
 
 protected:
-    //    rColor color_;           //!< the zone's color
     REAL createTime_;            //!< the time the zone was created at
     zShapePtr shape; //!< the shape(s) of this zone
 
     REAL referenceTime_;         //!< reference time for function evaluations
-    /*
-    tFunction posx_;             //!< time dependence of x component of position
-    tFunction posy_;             //!< time dependence of y component of position
-    tFunction scale_;           //!< time dependence of scale
-    tFunction rotationSpeed_;    //!< the zone's rotation speed
-    eCoord    rotation_;         //!< the current rotation state
-    */
 
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
     virtual void OnVanish();                     //!< called when the zone vanishes

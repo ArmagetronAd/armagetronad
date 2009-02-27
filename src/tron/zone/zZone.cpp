@@ -60,9 +60,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 std::deque<zZone *> sz_Zones;
 
-// number of segments to render a zone with
-static const int sg_segments = 11;
-
 // *******************************************************************************
 // *
 // *   EvaluateFunctionNow
@@ -124,9 +121,6 @@ zZone::zZone( eGrid * grid )
     this->AddToList();
 
     sz_Zones.push_back(this);
-
-    // initialize position functions
-    //    SetPosition( pos );
 }
 
 static nVersionFeature sz_ShapedZones(20);
@@ -314,31 +308,6 @@ void zZone::ReadSync( Zone::ZoneSync const & sync, nSenderInfo const & sender )
 
 bool zZone::Timestep( REAL time )
 {
-    /*
-       if(!emulateOldZoneShape) {
-           shape->TimeStep( time );
-       }
-       else { // Old representation of zone
-       // rotate
-       REAL speed = GetRotationSpeed();
-       REAL angle = ( time - lastTime ) * speed;
-       // angle /= ( 1 + 2 * 3.14159 * angle/sg_segments );
-       rotation_ = rotation_.Turn( cos( angle ), sin( angle ) );
-
-       // move to new position
-       REAL dt = time - referenceTime_;
-       Move( eCoord( posx_( dt ), posy_( dt ) ), lastTime, time );
-       
-
-       // kill this zone if it shrunk down to zero scale
-       if ( GetExpansionSpeed() < 0 && GetScale() <= 0 )
-       {
-           OnVanish();
-           return true;
-       }
-       }
-       // update time
-       */
     lastTime = time;
 
     return false;
@@ -514,24 +483,6 @@ nNetObjectDescriptorBase const & zZone::DoGetDescriptor() const
     return zone_init;
 }
 
-/*
-// *******************************************************************************
-// *
-// *	Scale
-// *
-// *******************************************************************************
-//!
-//!		@return
-//!
-// *******************************************************************************
-
-REAL zZone::Scale( void ) const
-{
-    //    return GetScale();
-    return shape->getScale();
-}
-*/
-
 
 // *******************************************************************************
 // *
@@ -584,10 +535,6 @@ zZone const & zZone::GetPosition( eCoord & position ) const
 
 REAL zZone::GetScale( void ) const
 {
-    //    REAL ret = EvaluateFunctionNow( this->scale_ );
-    //    ret = ret > 0 ? ret : 0;
-
-
     // HACK, to be implemented later and differently
     // Should get this info from the shape, not the zone
     REAL scale = 0.0;
@@ -608,14 +555,6 @@ REAL zZone::GetScale( void ) const
 
 void zZone::SetReferenceTime( void )
 {
-    // set offsets to current values
-    /*
-      this->posx_.SetOffset( EvaluateFunctionNow( this->posx_ ) );
-      this->posy_.SetOffset( EvaluateFunctionNow( this->posy_ ) );
-      this->scale_.SetOffset( EvaluateFunctionNow( this->scale_ ) );
-      this->rotationSpeed_.SetOffset( EvaluateFunctionNow( this->rotationSpeed_ ) );
-    */
-
     // FIXME: zZone didn't originally do this, but it is added for compat w/
     //         Zones v1 porting; nothing in zones v2 seems to actually use this
     //         function
