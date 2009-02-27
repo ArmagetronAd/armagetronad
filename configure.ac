@@ -1241,6 +1241,7 @@ export CXXFLAGS
 export LIBS
 
 AC_OUTPUT(src/Makefile
+src/protobuf/Makefile
 src/first/Makefile
 Makefile
 batch/Makefile

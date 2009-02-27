@@ -1,6 +1,6 @@
 include $(top_srcdir)/Makefile.paths
 
-SUBDIRS = first thirdparty swig
+SUBDIRS = first protobuf thirdparty swig
 
 # target directory
 gamesdir=${bindir}
@@ -39,25 +39,9 @@ tTrueVersion.h: $(wildcard $(top_srcdir)/*_version) $(wildcard $(top_srcdir)/.sv
 # clean up true version
 distclean-local:
 	rm -f tTrueVersion.h
-	rm -f protobuf/*.pb.*
 
 ${srcdir}/tools/tLocale.cpp: ${srcdir}/tools/tVersion.cpp
 ${srcdir}/tools/tVersion.cpp: tTrueVersion.h 
-
-protobuf/.dir:
-	test -d protobuf || mkdir protobuf || true
-	for f in ${libprotobuf_a_SOURCES}; do test -r $$f || test -r $${srcdir}/$f || $(MAKE) $$f; done
-	touch $@
-
-# protocol buffer rules
-protobuf/%.pb: ${srcdir}/protobuf/%.proto protobuf/.dir
-	protoc $< --cpp_out=protobuf --proto_path=${srcdir}/protobuf 2>&1 | sed -e "s,^\(.*\).proto,${srcdir}/protobuf/\1.proto,"
-
-protobuf/%.pb.cc: protobuf/%.pb
-	@true
-
-protobuf/%.pb.h: protobuf/%.pb
-	@true
 
 # library file listings
 
@@ -68,40 +52,6 @@ tools_extra=
 endif
 
 INCLUDED_MODULE_SOURCES=
-
-# protocol buffers. Need to be compiled first so the headers exist for the
-# other modules to include.
-libprotobuf_a_SOURCES = \
-    protobuf/tColor.pb.cc protobuf/tColor.pb.h \
-    protobuf/tCoord.pb.cc protobuf/tCoord.pb.h \
-    protobuf/tFunction.pb.cc protobuf/tFunction.pb.h \
-    protobuf/tPolynomial.pb.cc protobuf/tPolynomial.pb.h \
-    protobuf/nAuthentication.pb.cc protobuf/nAuthentication.pb.h \
-    protobuf/nNetwork.pb.cc protobuf/nNetwork.pb.h \
-    protobuf/nNetObject.pb.cc protobuf/nNetObject.pb.h \
-    protobuf/nNetObjectPrivate.pb.cc protobuf/nNetObjectPrivate.pb.h \
-    protobuf/nServerInfo.pb.cc protobuf/nServerInfo.pb.h \
-    protobuf/nConfig.pb.cc protobuf/nConfig.pb.h \
-    protobuf/eTeam.pb.cc protobuf/eTeam.pb.h \
-    protobuf/ePlayer.pb.cc protobuf/ePlayer.pb.h \
-    protobuf/eNetGameObject.pb.cc protobuf/eNetGameObject.pb.h \
-    protobuf/eVoter.pb.cc protobuf/eVoter.pb.h \
-    protobuf/eEventNotification.pb.cc protobuf/eEventNotification.pb.h \
-    protobuf/eLagCompensation.pb.cc protobuf/eLagCompensation.pb.h \
-    protobuf/eTimer.pb.cc protobuf/eTimer.pb.h \
-    protobuf/zZone.pb.cc protobuf/zZone.pb.h \
-    protobuf/zShape.pb.cc protobuf/zShape.pb.h \
-    protobuf/gGame.pb.cc protobuf/gGame.pb.h \
-    protobuf/gCycle.pb.cc protobuf/gCycle.pb.h \
-    protobuf/gWall.pb.cc protobuf/gWall.pb.h \
-    protobuf/gZone.pb.cc protobuf/gZone.pb.h \
-    protobuf/gWall.pb.cc protobuf/gWall.pb.h \
-    protobuf/gAIBase.pb.cc protobuf/gAIBase.pb.h
-#    protobuf/.pb.cc protobuf/.pb.h \
-#
-
-# dependency for all automatically generated source files
-all_protobuf_files: ${libprotobuf_a_SOURCES}
 
 # Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
 # the fragile dependency on undefined behaviour of the linker...)
@@ -250,7 +200,6 @@ endif
 
 #AM_CXXFLAGS= $(BINRELOC_CFLAGS)
 
-libprotobuf_a_CXXFLAGS  =$(AM_CXXFLAGS) -I@srcdir@/protobuf -Iprotobuf
 libtools_a_CXXFLAGS  =$(AM_CXXFLAGS) $(CXXFLAGS_OURFILES) -I@srcdir@/tools -I@srcdir@/resource -I@srcdir@/thirdparty/mathexpr -I@srcdir@/thirdparty/utf8 -I@srcdir@/protobuf -Iprotobuf
 libnetwork_a_CXXFLAGS=$(libtools_a_CXXFLAGS)  -I@srcdir@/network
 librender_a_CXXFLAGS =$(libtools_a_CXXFLAGS)  -I@srcdir@/render
@@ -298,10 +247,10 @@ armagetronad_main_master$(EXEEXT): Makefile
 	${BUILDFAKE}
 else
 if BUILDMAIN
-noinst_LIBRARIES = libprotobuf.a libtools.a libnetwork.a libenginecore.a libengine.a librender.a  libtron.a libui.a
+noinst_LIBRARIES = libtools.a libnetwork.a libenginecore.a libengine.a librender.a  libtron.a libui.a
 # librubywrap.a
 else
-noinst_LIBRARIES = libprotobuf.a libtools.a libnetwork.a
+noinst_LIBRARIES = libtools.a libnetwork.a
 endif
 
 if BUILDDEDICATED
@@ -315,13 +264,13 @@ armagetronad_main_SOURCES = \
 	tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp tron/cockpit/cCamview.cpp \
 	$(INCLUDED_MODULE_SOURCES)
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
+armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a protobuf/libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 #  librubywrap.a
 # armagetronad_main_LDFLAGS=
 
 armagetronad_main_master_SOURCES = network/master.cpp
 armagetronad_main_master_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_master_LDADD=libnetwork.a libtools.a libprotobuf.a 
+armagetronad_main_master_LDADD=libnetwork.a libtools.a protobuf/libprotobuf.a 
 endif
 
 ## Note: tron/gFloor.cpp is not referenced from the outside, but required anyway. So it can't be put into
