@@ -814,7 +814,7 @@ static nNetObjectDescriptor< zShapeCircleZoneV1, Game::ZoneV1Sync > zone_init( 3
 
 static
 Zone::ShapeCircleSync const
-v1upgrade( Game::ZoneV1Sync const & source ) {
+v1upgrade( Game::ZoneV1Sync const & source, REAL referenceTime, REAL currentRotation ) {
     Zone::ShapeSync shape;
 
     shape.mutable_base()->CopyFrom( source.base() );
@@ -827,8 +827,8 @@ v1upgrade( Game::ZoneV1Sync const & source ) {
     tFunction old_rotation;
     old_rotation.ReadSync( source.rotation_speed() );
     tPolynomial rotation;
-    rotation = rotation.adaptToNewReferenceVarValue( source.reference_time() );
-    // FIXME: does rotation[0] need to be set to something?
+    rotation = rotation.adaptToNewReferenceVarValue( referenceTime );
+    rotation[0] = currentRotation;
     rotation[1] = old_rotation.offset_;
     rotation[2] = old_rotation.slope_;
     rotation.WriteSync( *shape.mutable_rotation2() );
@@ -845,13 +845,13 @@ v1upgrade( Game::ZoneV1Sync const & source ) {
 }
 
 zShapeCircleZoneV1::zShapeCircleZoneV1( Game::ZoneV1Sync const & oldsync, nSenderInfo const & sender ):
-        zShapeCircle( v1upgrade(oldsync), sender )
+    zShapeCircle( v1upgrade(oldsync, 0, 0), sender )
 {
 }
 
 void zShapeCircleZoneV1::ReadSync( Game::ZoneV1Sync const & oldsync, nSenderInfo const & sender )
 {
-    zShapeCircle::ReadSync( v1upgrade(oldsync), sender );
+    zShapeCircle::ReadSync( v1upgrade(oldsync, lastTime, rotation2(lastTime) ), sender );
 }
 
 void zShapeCircleZoneV1::WriteSync( Game::ZoneV1Sync & oldsync, bool init ) const
