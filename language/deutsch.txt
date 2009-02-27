@@ -2681,6 +2681,7 @@ nconfig_value_changed         \1 wurde auf Befehl des Servers von \2 auf \3 verä
 config_accesslevel_0          Besitzer
 config_accesslevel_1          Administrator
 config_accesslevel_2          Moderator
+config_accesslevel_5          Armatrator
 config_accesslevel_7          Team-Anführer
 config_accesslevel_8          Teammitglied
 config_accesslevel_12         Lokaler Benutzer
