@@ -30,11 +30,14 @@
 #include "gGame.h"
 
 #ifdef ENABLE_ZONESV2
+#include <boost/any.hpp>
 #include <boost/tokenizer.hpp> // to support splitting a string on ","
 #include <boost/shared_ptr.hpp>
 #endif
 
+#ifdef ENABLE_ZONESV1
 #include "gWinZone.h"
+#endif
 
 #ifdef __MINGW32__
 #define xmlFree(x) free(x)
@@ -660,7 +663,7 @@ gParser::parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, zZone * zone, const
     tFunction tfRadius;
     if (myxmlHasProp(cur, "radius")) {
         string str = string(myxmlGetProp(cur, "radius"));
-        myCheapParameterSplitter(str, tfRadius, true);
+        tfRadius = tFunction().parse(str, sizeMultiplier);
     }
     else {
         tfRadius.SetOffset( 1.0 * sizeMultiplier );
@@ -671,6 +674,13 @@ gParser::parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, zZone * zone, const
     zShapePtr shape = zShapePtr( shapePtr );
 
     parseShape(grid, cur, keyword, shape);
+
+    if (myxmlHasProp(cur, "growth"))
+    {
+        REAL myGrowth = myxmlGetPropFloat(cur, "growth") * sizeMultiplier;
+            tfRadius.SetSlope( myGrowth );
+            shapePtr->setRadius( tfRadius );
+    }
 
     return shape;
 }
@@ -683,37 +693,21 @@ gParser::parseShapePolygon(eGrid *grid, xmlNodePtr cur, zZone * zone, const xmlC
     // are used. That way, a single map with polygonial shapes in the rotation will
     // lock out old clients for good. We can remove this only when we have a compatibility
     // plan for polygonial shapes, probably never.
-    safetymecanism_polygonal_shapeused.Set(true);
+    // Moved below to check for zone visibility (if it's invisible, we're OK ;)
 
     zShapePtr shape = zShapePtr( new zShapePolygon(grid, zone) );
     parseShape(grid, cur, keyword, shape);
+    
+    if (shape->getColor().a_ > .01)
+        // TODO: what should the barrier actually be?
+        safetymecanism_polygonal_shapeused.Set(true);
 
     return shape;
 }
 
-// Quick stub to allow to operate on tFunction
-// Remove when all that is variant has been ported to ruby
 void gParser::myCheapParameterSplitter(const string &str, tFunction &tf, bool addSizeMultiplier)
 {
-    REAL param[2] = {0.0, 0.0};
-    int bPos;
-    if ( (bPos = str.find(';')) != -1)
-    {
-        param[0] = atof(str.substr(0, bPos).c_str());
-        param[1] = atof(str.substr(bPos + 1, str.length()).c_str());
-    }
-    else
-    {
-        param[0] = atof(str.c_str());
-    }
-
-    if (addSizeMultiplier)
-    {
-        param[0] = param[0] * sizeMultiplier;
-        param[1] = param[1] * sizeMultiplier;
-    }
-    tf.SetOffset(param[0]);
-    tf.SetSlope(param[1]);
+    tf = tFunction().parse(str, addSizeMultiplier ? &sizeMultiplier : NULL);
 }
 
 void
@@ -723,13 +717,20 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
     tValue::BasePtr yp;
     bool centerLocationFound = false;
 
+    shape->applyVisuals(state);
+
+    tFunction tfScale;
     if (myxmlHasProp(cur, "scale")) {
         string str = string(myxmlGetProp(cur, "scale"));
-        tFunction tfScale;
 
-        myCheapParameterSplitter(str, tfScale, false);
-        shape->setScale( tfScale );
+        tfScale = tFunction().parse(str);
     }
+    else
+    {
+        tfScale.SetOffset( 1.0 );
+        tfScale.SetSlope( 0.0 );
+    }
+    shape->setScale( tfScale );
 
     if (myxmlHasProp(cur, "rotation")) {
         string str = string(myxmlGetProp(cur, "rotation"));
@@ -746,10 +747,10 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
             /* We need to multipy by sizeMultiper so the item are properly placed*/
             string strX = string(myxmlGetProp(cur, "x"));
             tFunction tfX;
-            myCheapParameterSplitter(strX, tfX, true);
+            tfX.parse(strX, sizeMultiplier);
             string strY = string(myxmlGetProp(cur, "y"));
             tFunction tfY;
-            myCheapParameterSplitter(strY, tfY, true);
+            tfY.parse(strY, sizeMultiplier);
 
             if (centerLocationFound == false) {
                 shape->setPosX( tfX );
@@ -790,17 +791,12 @@ gParser::parseZoneEffectGroupZone(eGrid * grid, xmlNodePtr cur, const xmlChar * 
     if ((iterZone = mapZones.find(zoneName)) != mapZones.end()) {
         // load the zone
         refZone = iterZone->second;
+        infl = zZoneInfluencePtr(new zZoneInfluence(refZone));
     }
     else {
-        // make an empty zone and store under the right label
-        // It should be populated later
-
-        //  refZone = zZonePtr(new zZone(grid));
-        refZone = tNEW(zZone)(grid);
-        if (!zoneName.empty())
-            mapZones[zoneName] = refZone;
+        infl = zZoneInfluencePtr(new zZoneInfluence());
+        ZIPtoMap[zoneName].push_back(infl);
     }
-    infl = zZoneInfluencePtr(new zZoneInfluence(refZone));
 
     cur = cur->xmlChildrenNode;
     while ( cur != NULL) {
@@ -914,9 +910,7 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
       /*
       if (xmlHasProp(cur, (const xmlChar *)"influenceSet")) {
 	string str = string(myxmlGetProp(cur, "influenceSet"));
-        tFunction tfInfluence;
-        myCheapParameterSplitter(str, tfInfluence, false);
-        infl->setInfluenceSet( tfInfluence );
+        infl->setInfluenceSet( tFunction().parse(str) );
       }
       */
 
@@ -935,81 +929,11 @@ gParser::parseZoneEffectGroupMonitor(eGrid * grid, xmlNodePtr cur, const xmlChar
 zEffectorPtr
 gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword) {
     zEffectorPtr effector;
-    /*
-      build the effect, in this case give points to the target(s)
-    */
-    typedef zEffector* (*effectorFactory)();
-    std::map<tString, effectorFactory> effectors;
-    // Build the list of supported effector
-    effectors[tString("win")] = zEffectorWin::create;
-    effectors[tString("death")] = zEffectorDeath::create;
-    effectors[tString("point")] = zEffectorPoint::create;
 
-    /*
-      effectors[tString("event")] = zEffectorEvent::create;
-      effectors[tString("cleartrace")] = zEffectorClearrace::create;
-      effectors[tString("teleport")] = zEffectorTeleport::create;
-    */
-    effectors[tString("spawnplayer")] = zEffectorSpawnPlayer::create;
-    effectors[tString("brakerecharge")] = zEffectorCycleBrake::create;
-    effectors[tString("rubberrecharge")] = zEffectorCycleRubber::create;
-    effectors[tString("acceleration")] = zEffectorCycleAcceleration::create;
-    effectors[tString("setting")] = zEffectorSetting::create;
-
-
-    // TODO: add tolower()
     // Get the label of the effector to be used
     string effectorAttribute( myxmlGetProp(cur, "effect"));
-    transform (effectorAttribute.begin(), effectorAttribute.end(), effectorAttribute.begin(), tolower);
-    std::map<tString, effectorFactory>::const_iterator iterEffectorFactory;
-    // associate the label to the proper effector
-    if ((iterEffectorFactory = effectors.find(effectorAttribute)) != effectors.end()) {
 
-        effector = zEffectorPtr((*(iterEffectorFactory->second))());
-        /*
-        Save the effector for the zone effect
-        */
-    }
-
-    // Should we load the score information
-    zEffectorPoint *effectorPoint;
-    effectorPoint = dynamic_cast<zEffectorPoint *>(effector.get());
-    if (effectorPoint) {
-        effectorPoint->setPoint(myxmlGetPropInt(cur, "score"));
-    }
-
-    // Should we load the acceleration
-    zEffectorCycleAcceleration *effectorAcceleration;
-    effectorAcceleration = dynamic_cast<zEffectorCycleAcceleration *>(effector.get());
-    if (effectorAcceleration) {
-        tFunction tfValue;
-        string str = string(myxmlGetProp(cur, "value"));
-        myCheapParameterSplitter(str, tfValue, false);
-        effectorAcceleration->setValue(tfValue);
-    }
-
-    // Should we set the grid and arena for respawning
-    zEffectorSpawnPlayer *effectorSpawnPlayer;
-    effectorSpawnPlayer = dynamic_cast<zEffectorSpawnPlayer *>(effector.get());
-    if (effectorSpawnPlayer) {
-        effectorSpawnPlayer->setGrid(grid);
-        effectorSpawnPlayer->setArena(sg_GetArena());
-    }
-
-    // Should we set the setting name and value
-    zEffectorSetting *effectorSetting;
-    effectorSetting = dynamic_cast<zEffectorSetting *>(effector.get());
-    if (effectorSetting) {
-        if (myxmlHasProp(cur, "settingName"))
-            effectorSetting->setSettingName(tString(myxmlGetProp(cur, "settingName")));
-        if (myxmlHasProp(cur, "settingValue"))
-            effectorSetting->setSettingValue(tString(myxmlGetProp(cur, "settingValue")));
-    }
-
-    effector->setCount(myxmlGetPropInt(cur, "count"));
-
-    if (myxmlHasProp(cur, "description"))
-        effector->setMessage(tString(myxmlGetProp(cur, "description")));
+    effector = zEffectorPtr(zEffectorManager::Create(effectorAttribute, tXmlParser::node(cur)));
 
     return effector;
 }
@@ -1057,7 +981,10 @@ gParser::parseZoneEffectGroupSelector(eGrid * grid, xmlNodePtr cur, const xmlCha
 
         selector = zSelectorPtr((*(iterSelectorFactory->second))());
 
+        if (myxmlHasProp(cur, "count"))
         selector->setCount(myxmlGetPropInt(cur, "count"));
+        else
+            selector->setCount(-1);
 
         cur = cur->xmlChildrenNode;
         while ( cur != NULL) {
@@ -1221,171 +1148,11 @@ gParser::parseZoneEffectGroup(eGrid *grid, xmlNodePtr cur, const xmlChar * keywo
     return currentZoneEffect;
 }
 
-// emulate v1 zone behavior with v2 zones
-void
-gParser::parseZoneArthemis_v2(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
-{
-    if (sn_GetNetState() != nCLIENT )
-    {
-        rColor color( 1, 0, 0, .7 );
-
-        // Create a new zone
-        zZonePtr zone = zZonePtr(new zZone(grid));
-
-        // Insert the zone under a bogus name
-        string zoneName = "";
-        zoneMap::const_iterator iterZone;
-        do
-        {
-            // Fill the zone under the shortest available series of pound.
-            zoneName += "#";
-            iterZone = mapZones.find(zoneName);
-        }
-        while (iterZone != mapZones.end());
-
-        // If a name was assigned to it, save the zone in a map so it can be refered to
-        if (!zoneName.empty())
-            mapZones[zoneName] = zone;
-        zone->setName(zoneName);
-
-
-        enum { win, death, fortress };
-        int effect = win;
-        if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"win")) {
-            effect = win;
-        }
-        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"death")) {
-            effect = death;
-        }
-        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"fortress")) {
-            effect = fortress;
-        }
-
-        if (sn_GetNetState() != nCLIENT )
-        {
-            if (effect != fortress)
-            {
-                // Create an effect group without ownership
-                zEffectGroupPtr currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), gVectorExtra< nNetObjectID >()));
-
-                // Create a validator for everybody (i.e. All)
-                zValidatorPtr validator = zValidatorPtr( new zValidatorAll(_ignore, _ignore) );
-
-                zSelectorPtr selector = zSelectorPtr( new zSelectorSelf() );
-                //selector->setCount( -1 ); // Give infinite usage
-
-                zEffectorPtr effector;
-                if (effect == win)
-                    effector = zEffectorPtr( new zEffectorWin() );
-                else
-                    effector = zEffectorPtr( new zEffectorDeath() );
-
-                effector->setCount( -1 );
-
-                // Store all the objects
-                selector->addEffector( effector );
-                validator->addSelector( selector );
-                currentZoneEffect->addValidator( validator );
-                zone->addEffectGroupEnter( currentZoneEffect );
-            }
-            else {
-                zMonitorPtr monitor = zMonitorPtr(new zMonitor(grid));
-                // use the same name as the associated zone
-                monitors[zoneName] = monitor;
-                // TODO: read data and populate t
-                tPolynomial t;
-                monitor->setInit( t );
-                tPolynomial drift(2);
-                drift[1] = -1.0f * sg_conquestDecayRate;
-                monitor->setDrift( drift );
-                monitor->setClampLow ( 0.0f );
-                monitor->setClampHigh( 1.0f );
-
-                zMonitorRulePtr rule;
-                {
-                    // All that happens once the zone is conquered
-                    rule = zMonitorRulePtr( new zMonitorRuleOver( 1.0f ) );
-
-                    zEffectGroupPtr currentZoneEffect;
-                    {
-                        // Create an effect group without ownership
-                        currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), gVectorExtra< nNetObjectID >()));
-
-                        // Create a validator for everybody (i.e. All)
-                        zValidatorPtr validator = zValidatorPtr( new zValidatorAll(_ignore, _ignore) );
-
-                        // Once the zone is conquered, collapse the zhape
-                        zZoneInfluenceItemScale *scaler = new zZoneInfluenceItemScale(zone);
-                        scaler->set( -1.5f );
-
-                        zZoneInfluencePtr infl = zZoneInfluencePtr(new zZoneInfluence(zone));
-                        infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(scaler));
-
-                        validator->addZoneInfluence( infl );
-                        currentZoneEffect->addValidator( validator );
-                    }
-
-                    rule->addEffectGroup( currentZoneEffect );
-                    monitor->addRule(rule);
-                }
-
-                {
-                    rule = zMonitorRulePtr( new zMonitorRuleUnder( 1.0f ) ); // i.e: Always
-                    zEffectGroupPtr currentZoneEffect;
-                    {
-                        // Create an effect group without ownership
-                        currentZoneEffect = zEffectGroupPtr(new zEffectGroup(gVectorExtra< nNetObjectID >(), gVectorExtra< nNetObjectID >()));
-
-                        // Create a validator for everybody (i.e. All)
-                        zValidatorPtr validator = zValidatorPtr( new zValidatorAll(_ignore, _ignore) );
-
-                        zZoneInfluenceItemRotation *b = new zZoneInfluenceItemRotation(zone);
-
-			tPolynomialMarshaler tpm;
-
-			string str = string(myxmlGetProp(cur, "rotation"));
-			tpm.parse(str);
-			b->set(tpm);
-			
-			//                        b->set( tFunction(0.0f, 0.0f), tFunction(0.3f, 2.0f * 3.141f / 11.0f) );
-
-                        zZoneInfluencePtr infl = zZoneInfluencePtr(new zZoneInfluence(zone));
-                        infl->addZoneInfluenceRule(zZoneInfluenceItemPtr(b));
-
-                        validator->addZoneInfluence( infl );
-                        currentZoneEffect->addValidator( validator );
-                    }
-                    rule->addEffectGroup( currentZoneEffect );
-                    monitor->addRule(rule);
-                }
-
-                zone->setOldFortressAutomaticAssignmentBehavior(true);
-            }
-        }
-
-        cur = cur->xmlChildrenNode;
-
-        while (cur) {
-            if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
-            else if (isElement(cur->name, (const xmlChar *)"ShapeCircle", keyword)) {
-                zone->setShape( parseShapeCircleArthemis(grid, cur, zone, keyword) );
-            }
-            else if (isElement(cur->name, (const xmlChar *)"Alternative", keyword)) {
-                if (isValidAlternative(cur, keyword)) {
-                    parseAlternativeContent(grid, cur);
-                }
-            }
-            cur = cur->next;
-        }
-
-
-    }
-}
-
 void
 gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
     string zoneName = "";
+    xmlNodePtr zoneroot = cur;
 
     if (myxmlHasProp(cur, "name"))
         zoneName = myxmlGetProp(cur, "name");
@@ -1394,22 +1161,66 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 
     if (sn_GetNetState() != nCLIENT )
     {
-        rColor color( 1, 0, 0, .7 );
+        state.push();
 
         zZonePtr zone;
-        zoneMap::const_iterator iterZone;
-        // Has this zone been already registered, such as through a zoneInfluence
-        if ((iterZone = mapZones.find(zoneName)) != mapZones.end()) {
-            // Open the zone so we can fill in the details
-            zone = iterZone->second;
-        }
-        else {
+
             // Create a new zone
-            zone = zZonePtr(new zZone(grid));
+        bool needSimpleEffect = false;
+        if (myxmlHasProp(zoneroot, "effect"))
+        {
+            char*ztype = myxmlGetProp(zoneroot, "effect");
+            zZone*zptr = zZoneExtManager::Create(ztype, grid);
+            if (zptr)
+                zone = zZonePtr(zptr);
+            else
+            {
+                zone = zZonePtr(zZoneExtManager::Create("", grid));
+                needSimpleEffect = true;
+            }
+        }
+        else
+            zone = zZonePtr(zZoneExtManager::Create("", grid));
+
             // If a name was assigned to it, save the zone in a map so it can be refered to
             if (!zoneName.empty())
+            {
                 mapZones[zoneName] = zone;
+
+                std::vector< zZoneInfluencePtr > myZIP = ZIPtoMap[zoneName];
+                std::vector< zZoneInfluencePtr >::iterator i;
+                for (i = myZIP.begin(); i < myZIP.end(); ++i)
+                    (*i)->bindZone(zone);
+                ZIPtoMap.erase(zoneName);
+            }
             zone->setName(zoneName);
+
+        zone->setupVisuals(state);
+        zone->readXML(tXmlParser::node(cur));
+
+        if (needSimpleEffect)
+        {
+            state.set("color", rColor(1, 1, 1, .7));
+
+            tPolynomial tpRotation(2);
+            tpRotation[0] = 0.0f;
+            tpRotation[1] = .3f;
+            state.set("rotation", tpRotation);
+
+            // On Enter for now; TODO: fortress at least will need an inside
+            gVectorExtra< nNetObjectID > noOwners;
+            zEffectGroupPtr ZEG = zEffectGroupPtr(new zEffectGroup(noOwners, noOwners));
+            Triad noTriad;
+            zValidatorPtr ZV = zValidatorPtr(zValidatorAll::create(noTriad, noTriad));
+            zSelectorPtr ZS = zSelectorPtr(zSelectorSelf::create());
+            ZS->setCount(-1);
+            zEffectorPtr ZE = parseZoneEffectGroupEffector(grid, zoneroot, keyword);
+            // FIXME: Trap any of the above being NULL
+            ZE->setupVisuals(state);
+            ZS->addEffector(ZE);
+            ZV->addSelector(ZS);
+            ZEG->addValidator(ZV);
+            zone->addEffectGroupEnter(ZEG);
         }
 
         while (cur != NULL) {
@@ -1468,6 +1279,8 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             cur = cur->next;
         }
 
+        state.pop();
+
         // leaving zone undeleted is no memory leak here, the grid takes control of it
         if ( zone )
         {
@@ -1477,6 +1290,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 }
 #endif
 
+#ifdef ENABLE_ZONESV1
 bool
 gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float &radius, float& growth, const xmlChar * keyword)
 {
@@ -1510,6 +1324,17 @@ gParser::parseZoneArthemis_v1(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
     float x, y, radius, growth;
     bool shapeFound = false;
     xmlNodePtr shape = cur->xmlChildrenNode;
+
+#ifdef ENABLE_ZONESV2
+    if (!(myxmlHasProp(cur, "effect")
+     && strcmp(myxmlGetProp(cur, "effect"), "win")
+     && strcmp(myxmlGetProp(cur, "effect"), "death")
+    ))
+    {
+        parseZoneBachus(grid, cur, keyword);
+        return true;
+    }
+#endif
 
     while(shape != NULL && shapeFound==false) {
         if (!xmlStrcmp(cur->name, (const xmlChar *)"text") || !xmlStrcmp(cur->name, (const xmlChar *)"comment")) {}
@@ -1554,11 +1379,26 @@ gParser::parseZoneArthemis_v1(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
 
     return zone;
 }
+#endif
 
 void
 gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
 #ifdef ENABLE_ZONESV2
+#ifdef ENABLE_ZONESV1
+    if (myxmlHasProp(cur, "version"))
+    {
+        int zoneVer = myxmlGetPropInt(cur, "version");
+        switch (zoneVer)
+        {
+        case 1:
+            parseZoneArthemis_v1(grid, cur, keyword);
+            break;
+        case 2:
+        default:
+            parseZoneBachus(grid, cur, keyword);
+        }
+    }
     switch (mapVersion)
     {
     case 0:
@@ -1577,12 +1417,15 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
     case 3:
         // well, the above is a really ugly hack to keep things working, better
         // let users of pure zone v2 maps upgrade them to map version 3.
+#endif
         parseZoneBachus(grid, cur, keyword);
+#ifdef ENABLE_ZONESV1
         break;
     default:
         parseZoneBachus(grid, cur, keyword);
         break;
     }
+#endif
 #else
     parseZoneArthemis_v1(grid, cur, keyword);
 #endif
@@ -1858,7 +1701,11 @@ gParser::parseAlternativeContent(eGrid *grid, xmlNodePtr cur)
             parseZone(grid, cur, keyword);
         }
         else if (isElement(cur->name, (const xmlChar *)"Zone_v1", keyword)) {
+#ifdef ENABLE_ZONESV1
             parseZoneArthemis_v1(grid, cur, keyword);
+#else
+            parseZone(grid, cur, keyword);
+#endif
         }
         else if (isElement(cur->name, (const xmlChar *)"Wall", keyword)) {
             parseWall(grid, cur, keyword);
@@ -1941,7 +1788,11 @@ gParser::parseField(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
             parseZone(grid, cur, keyword);
         }
         else if (isElement(cur->name, (const xmlChar *)"Zone_v1", keyword)) {
+#ifdef ENABLE_ZONESV1
             parseZoneArthemis_v1(grid, cur, keyword);
+#else
+            parseZone(grid, cur, keyword);
+#endif
         }
         else if (isElement(cur->name, (const xmlChar *)"Wall", keyword)) {
             parseWall(grid, cur, keyword);
@@ -2154,6 +2005,80 @@ gParser::setSizeMultiplier(REAL aSizeMultiplier)
     // EOP
 }
 
+#ifdef ENABLE_ZONESV2
+gParserState::gParserState()
+{
+    push();
+}
+
+bool
+gParser::State_t::exists(std::string const & var)
+{
+    return _varstack.front().find(var) != _varstack.front().end();
+}
+
+bool
+gParser::State_t::isset(std::string const & var)
+{
+    return exists(var) && !_varstack.front()[var]->empty();
+}
+
+boost::any
+gParser::State_t::getAny(std::string const & var)
+{
+    return *(_varstack.front()[var]);
+}
+
+void
+gParser::State_t::setAny(std::string const & var, boost::any val)
+{
+    _varstack.front()[var] = boost::shared_ptr<boost::any>(new boost::any(val));
+}
+
+void
+gParser::State_t::unset(std::string const & var)
+{
+    _varstack.front().erase(var);
+}
+
+void
+gParser::State_t::inherit(std::string const & var)
+{
+    if (_varstack.at(1).find(var) == _varstack.at(1).end())
+        _varstack.front().erase(var);
+    else
+        _varstack.front()[var] = _varstack.at(1)[var];
+}
+
+void
+gParser::State_t::push()
+{
+    if (_varstack.empty())
+        _varstack.push_front(my_map_t());
+    else
+        _varstack.push_front(my_map_t(_varstack.front()));
+}
+
+void
+gParser::State_t::pop()
+{
+    _varstack.pop_front();
+}
+
+
+gArena *
+gParser::contextArena(tXmlParser::node const & node)
+{
+    return state.get<gArena*>("arena");
+}
+
+eGrid *
+gParser::contextGrid(tXmlParser::node const & node)
+{
+    return state.get<eGrid*>("grid");
+}
+#endif
+
 void
 gParser::Parse()
 {
@@ -2163,6 +2088,8 @@ gParser::Parse()
 
 #ifdef ENABLE_ZONESV2
     monitors.clear();
+    state.set("arena", theArena);
+    state.set("grid", theGrid);
 #endif
 #ifdef DEBUG_ZONE_SYNC
     newGameRound = true;
@@ -2219,6 +2146,7 @@ gParser::Parse()
 
 #ifdef ENABLE_ZONESV2
     mapZones.clear();
+    ZIPtoMap.clear();
 #endif
 
     //        fprintf(stderr,"ERROR: Map file is missing root \'Resources\' node");

@@ -26,8 +26,12 @@ protected:
     zZoneInfluenceItemList zoneInfluenceItems;
 
 public:
+    zZoneInfluence();
     zZoneInfluence(zZonePtr _zone);
     ~zZoneInfluence();
+
+    void bindZone(zZonePtr _zone);
+
     void apply(const tPolynomial &value);
 
     void addZoneInfluenceRule(zZoneInfluenceItemPtr aRule) {

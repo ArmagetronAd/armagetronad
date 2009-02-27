@@ -49,13 +49,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "nProtoBuf.h"
 #include "gZone.pb.h"
 
-static int sg_zoneAlphaToggle = 0;
+int sg_zoneAlphaToggle = 0;
 static tSettingItem<int> sg_zoneAlphaToggleConf( "ZONE_ALPHA_TOGGLE", sg_zoneAlphaToggle );
 
 std::deque<gZone *> sg_Zones;
 
+#ifndef ENABLE_ZONESV2
 static int sg_zoneDeath = 1;
 static tSettingItem<int> sg_zoneDeathConf( "WIN_ZONE_DEATHS", sg_zoneDeath );
+#endif
 
 REAL sg_expansionSpeed = 1.0f;
 REAL sg_initialSize = 5.0f;
@@ -63,19 +65,20 @@ REAL sg_initialSize = 5.0f;
 static nSettingItem< REAL > sg_expansionSpeedConf( "WIN_ZONE_EXPANSION", sg_expansionSpeed );
 static nSettingItem< REAL > sg_initialSizeConf( "WIN_ZONE_INITIAL_SIZE", sg_initialSize );
 
-static int sg_zoneSegments = 11;
+int sg_zoneSegments = 11;
 static tSettingItem<int> sg_zoneSegmentsConf( "ZONE_SEGMENTS", sg_zoneSegments );
 
-static REAL sg_zoneSegLength = .5;
+REAL sg_zoneSegLength = .5;
 static tSettingItem<REAL> sg_zoneSegLengthConf( "ZONE_SEG_LENGTH", sg_zoneSegLength );
 
-static REAL sg_zoneBottom = 0.0f;
+REAL sg_zoneBottom = 0.0f;
 static tSettingItem<REAL> sg_zoneBottomConf( "ZONE_BOTTOM", sg_zoneBottom );
 
-static REAL sg_zoneHeight = 5.0f;
+REAL sg_zoneHeight = 5.0f;
 static tSettingItem<REAL> sg_zoneHeightConf( "ZONE_HEIGHT", sg_zoneHeight );
 
 
+#ifndef ENABLE_ZONESV2
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
 {
@@ -107,6 +110,7 @@ gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
 
     return ret;
 }
+#endif
 
 // number of segments to render a zone with
 static const int sg_segments = 11;

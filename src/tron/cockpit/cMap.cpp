@@ -33,7 +33,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "rRender.h"
 #include "rScreen.h"
+#ifdef ENABLE_ZONESV1
 #include "gWinZone.h"
+#endif
+#ifdef ENABLE_ZONESV2
+#include "zone/zZone.h"
+#endif
 #include "eRectangle.h"
 #include "ePlayer.h"
 #include "eTimer.h"
@@ -54,7 +59,12 @@ extern std::vector<tCoord> se_rimWallRubberBand;
 
 #ifndef DEDICATED
 
+#ifdef ENABLE_ZONESV1
 extern std::deque<gZone *> sg_Zones;
+#endif
+#ifdef ENABLE_ZONESV2
+extern std::deque<zZone *> sz_Zones;
+#endif
 
 namespace cWidget {
 
@@ -302,6 +312,8 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls,
         pl_CurPos = cp->GetFocusCycle()->Position();
         min_dist2 = (mw*mw+mh*mh)*1000;
         rad = 0;
+#ifdef ENABLE_ZONESV1
+// FIXME: I don't know what this actually does; should it be replaced? -- Luke-Jr
         for(std::deque<gZone *>::const_iterator i = sg_Zones.begin(); i != sg_Zones.end(); ++i) {
             tASSERT(*i);
             tCoord const &position = (*i)->GetPosition();
@@ -313,6 +325,21 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls,
                 rad = radius;
             }
         }
+#endif
+#ifdef ENABLE_ZONESV2
+        // NOTE: old version compared distance from zone center; this code compares distance from zone border
+        for(std::deque<zZone *>::const_iterator i = sz_Zones.begin(); i != sz_Zones.end(); ++i) {
+            tASSERT(*i);
+            tASSERT((*i)->getShape());
+            zShape & shape = *((*i)->getShape());
+            dist2 = shape.calcDistanceNear(pl_CurPos);
+            if (dist2<min_dist2) {
+                min_dist2 = dist2;
+                m_centre = shape.findCenter();
+                rad = shape.calcBoundSq() / 2;
+            }
+        }
+#endif
         rad = (rad<15)?15:rad;
         zoom = (w>h)?h/(yscale*m_zoom*rad):w/(xscale*m_zoom*rad);
         zoom = (zoom<1)?1:zoom;

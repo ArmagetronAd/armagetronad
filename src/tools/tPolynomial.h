@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ArmageTron_tPolynomial_H
 
 #include "tError.h"
+#include "tFunction.h"
 #include <math.h>
 #include "tArray.h"
 
@@ -53,6 +54,7 @@ public:
     tPolynomial(REAL value);  //!< constructor for constant polynomial
     tPolynomial(tArray<REAL> const & newCoefs);  //!< constructor
     tPolynomial(const tPolynomial &tf);  //!< constructor
+    tPolynomial(const tFunction &tf);  //!< constructor
     tPolynomial(std::string str);  //!< constructor
 
     virtual ~tPolynomial() //!< destructor
@@ -61,8 +63,11 @@ public:
 
     void parse(std::string str);
 
+    virtual REAL evaluateRate(int index, REAL currentVarValue); //!< evaluates the current rate
     virtual REAL evaluate( REAL currentVarValue ) const; //!< evaluates the function
     inline REAL operator()( REAL currentVarValue ) const; //!< evaluation operator
+    
+    virtual tFunction simplify( REAL currentVarValue ) const; //!< evaluates the function only so far as to simplify it to a tFunction
 
     tPolynomial const operator*( REAL constant ) const;
     tPolynomial const operator*( const tPolynomial & tfRight ) const ;

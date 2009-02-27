@@ -63,6 +63,7 @@ public:
         bool HasProp(CHAR const *prop) const; //!< Check if a property of the given name exists
         tString GetProp(CHAR const *prop) const; //!< Get a property of this node as a raw string
         bool GetPropBool(CHAR const *prop) const; //!< Get a boolean value out of a property
+        int GetPropInt(CHAR const *prop) const; //!< Get an integer value out of a property
 #ifndef _MSC_VER
         template<typename T> void GetProp(CHAR const *prop, T &target) const; //!< Get a property, convert to any type
 #else
@@ -84,6 +85,7 @@ public:
         operator bool () const; //!< Does this node actually exist?
 
         node GetFirstChild(void) const; //!< Get the first child node
+        tXmlParser*ownerDocument(void) const; //!< DOM ownerDocument as tXmlParser*
     };
 
     node GetRoot();

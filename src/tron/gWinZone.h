@@ -35,7 +35,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rColor.h"
 #include "tFunction.h"
 
+#ifdef OnEnter
+// Undo Zones V2 safety catch here
+#undef OnEnter
+#endif
+
 namespace Game { class ZoneV1Sync; }
+
+// misc zone-related settings
+extern int sg_zoneAlphaToggle;
+extern int sg_zoneSegments;
+extern REAL sg_zoneSegLength;
+extern REAL sg_zoneBottom;
+extern REAL sg_zoneHeight;
 
 // zone expansion speed and size
 extern REAL sg_expansionSpeed;

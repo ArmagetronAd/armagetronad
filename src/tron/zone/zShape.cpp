@@ -1,29 +1,81 @@
+#include "rScreen.h"
 #include "zShape.hpp"
 #include "gCycle.h"
+#include "gParser.h"
 #include "zZone.h"
 
 #include "zShape.pb.h"
+#include "nConfig.h"
 #include "nProtoBuf.h"
+
+#ifndef ENABLE_ZONESV1
+int sz_zoneAlphaToggle = 0;
+static tSettingItem<int> sz_zoneAlphaToggleConf( "ZONE_ALPHA_TOGGLE", sz_zoneAlphaToggle );
+
+int sz_zoneSegments = 11;
+static tSettingItem<int> sz_zoneSegmentsConf( "ZONE_SEGMENTS", sz_zoneSegments );
+
+REAL sz_zoneSegLength = .5;
+static tSettingItem<REAL> sz_zoneSegLengthConf( "ZONE_SEG_LENGTH", sz_zoneSegLength );
+
+REAL sz_zoneBottom = 0.0f;
+static tSettingItem<REAL> sz_zoneBottomConf( "ZONE_BOTTOM", sz_zoneBottom );
+
+REAL sz_zoneHeight = 5.0f;
+static tSettingItem<REAL> sz_zoneHeightConf( "ZONE_HEIGHT", sz_zoneHeight );
+
+REAL sz_expansionSpeed = 1.0f;
+static nSettingItem<REAL> sz_expansionSpeedConf( "WIN_ZONE_EXPANSION", sz_expansionSpeed );
+
+REAL sz_initialSize = 5.0f;
+static nSettingItem<REAL> sz_initialSizeConf( "WIN_ZONE_INITIAL_SIZE", sz_initialSize );
+#else
+#include "gWinZone.h"
+#define sz_zoneAlphaToggle sg_zoneAlphaToggle
+#define sz_zoneSegments    sg_zoneSegments
+#define sz_zoneSegLength   sg_zoneSegLength
+#define sz_zoneBottom      sg_zoneBottom
+#define sz_zoneHeight      sg_zoneHeight
+#define sz_expansionSpeed  sg_expansionSpeed
+#define sz_initialSize     sg_initialSize
+#endif
+
+#define lasttime_ lastTime
 
 zShape::zShape( eGrid* grid, zZone * zone )
         :eNetGameObject( grid, eCoord(0,0), eCoord(0,0), NULL, true ),
         posx_(),
         posy_(),
+        bottom_(),
         scale_(),
+        height_(),
         rotation2(),
+        segments_(),
+        seglength_(),
         color_(),
         createdtime_(0.0),
-        referencetime_(0.0),
-        lasttime_(0.0)
+        referencetime_(0.0)
 {
     tASSERT( zone );
     zone->setShape( this );
+    this->AddToList();
 }
 
 zShape::zShape( Zone::ShapeSync const & sync, nSenderInfo const & sender )
-: eNetGameObject( sync.base(), sender )
+: eNetGameObject( sync.base(), sender ),
+        posx_(),
+        posy_(),
+        bottom_(),
+        scale_(),
+        height_(),
+        rotation2(),
+        segments_(),
+        seglength_(),
+        color_(),
+        referencetime_(0.0)
 {
     setCreatedTime( sync.creation_time() );
+    this->AddToList();
 }
 
 void zShape::setCreatedTime(REAL time)
@@ -53,8 +105,12 @@ void zShape::WriteSync( Zone::ShapeSync & sync, bool init ) const
     sync.set_reference_time( referencetime_ );
     posx_.WriteSync( *sync.mutable_pos_x() );
     posy_.WriteSync( *sync.mutable_pos_y() );
+    bottom_.WriteSync( *sync.mutable_pos_z_bottom() );
     scale_.WriteSync( *sync.mutable_scale() );
+    height_.WriteSync( *sync.mutable_height() );
     rotation2.WriteSync( *sync.mutable_rotation2() );
+    segments_.WriteSync( *sync.mutable_segments() );
+    seglength_.WriteSync( *sync.mutable_segment_length() );
     color_.WriteSync( *sync.mutable_color() );
 }
 
@@ -65,9 +121,44 @@ void zShape::ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender 
     setReferenceTime( sync.reference_time() );
     posx_.ReadSync( sync.pos_x() );
     posy_.ReadSync( sync.pos_y() );
+    if (sync.has_pos_z_bottom())
+        bottom_.ReadSync( sync.pos_z_bottom() );
     scale_.ReadSync( sync.scale() );
+    if (sync.has_height())
+        height_.ReadSync( sync.height() );
     rotation2.ReadSync( sync.rotation2() );
+    if (sync.has_segments())
+        segments_.ReadSync( sync.segments() );
+    if (sync.has_segment_length())
+        seglength_.ReadSync( sync.segment_length() );
     color_.ReadSync( sync.color() );
+}
+
+void zShape::applyVisuals( gParserState & state ) {
+    if (state.istype<rColor>("color"))
+        setColor(state.get<rColor>("color"));
+    if (state.isset("rotation"))
+        setRotation2( state.get<tPolynomial>("rotation") );
+    if (state.isset("scale"))
+        setScale( state.get<tFunction>("scale") );
+}
+
+REAL zShape::calcDistanceNear(tCoord & p) {
+    return (findPointNear(p) - p).Norm();
+}
+
+REAL zShape::calcDistanceFar(tCoord & p) {
+    return (findPointFar(p) - p).Norm();
+}
+
+tCoord zShape::findCenter() {
+    // NOTE: Should be overridden if not actually center
+    return Position();
+}
+
+REAL zShape::calcBoundSq() {
+    // NOTE: Default implementation assumes a size of 1, scaled
+    return scale_.Evaluate(lasttime_ - referencetime_);
 }
 
 void zShape::setPosX(const tFunction & x){
@@ -93,6 +184,18 @@ void zShape::setScale(const tFunction & s){
     scale_ = s;
 }
 
+void zShape::setGrowth(REAL growth) {
+    REAL s = scale_(lasttime_ - referencetime_);
+    scale_.SetSlope(growth);
+    scale_.SetOffset( s + growth * ( referencetime_ - lasttime_ ) );
+    setScale(scale_);
+}
+
+void zShape::collapse(REAL speed) {
+    REAL s = scale_(lasttime_ - referencetime_);
+    setGrowth( - s * speed );
+}
+
 void zShape::setColor(const rColor &c){
     if(color_ != c) {
         color_ = c;
@@ -106,11 +209,62 @@ void zShape::setColorNow(const rColor &c){
     setColor(c);
 }
 
+tCoord zShape::Position() const {
+    return tCoord(
+        posx_.Evaluate(lasttime_ - referencetime_),
+        posy_.Evaluate(lasttime_ - referencetime_)
+    );
+}
+
+REAL zShape::GetEffectiveBottom() const {
+    if (bottom_.Len())
+        return bottom_.evaluate(lastTime);
+    return sz_zoneBottom;
+}
+
+REAL zShape::GetEffectiveHeight() const {
+    if (height_.Len())
+        return height_.evaluate(lastTime);
+    return sz_zoneHeight;
+}
+
+REAL zShape::GetRotationSpeed() {
+    return getRotation2().evaluateRate(1, lasttime_);
+}
+
+void zShape::SetRotationSpeed(REAL r) {
+    tPolynomial r2 = getRotation2();
+    r2.changeRate(r, 1, lasttime_);
+    setRotation2(r2);
+}
+
+REAL zShape::GetRotationAcceleration() {
+    return getRotation2().evaluateRate(2, lasttime_);
+}
+
+void zShape::SetRotationAcceleration(REAL r) {
+    tPolynomial r2 = getRotation2();
+    r2.changeRate(r, 2, lasttime_);
+    setRotation2(r2);
+}
+
+int zShape::GetEffectiveSegments() const {
+    if (segments_.Len())
+        return int( segments_.evaluate(lastTime) );
+    return sz_zoneSegments;
+}
+
+REAL zShape::GetEffectiveSegmentLength() const {
+    if (seglength_.Len())
+        return int( seglength_.evaluate(lastTime) );
+    return sz_zoneSegLength;
+}
+
 void zShape::animate( REAL time ) {
     // Is this needed as the items are already animated?
 }
 
-void zShape::TimeStep( REAL time ) {
+bool zShape::Timestep( REAL time ) {
     lasttime_ = time;
     /*
     REAL scale = scale_.Evaluate(lasttime_ - referencetime_);
@@ -119,20 +273,21 @@ void zShape::TimeStep( REAL time ) {
         // The shape has collapsed and should be removed
       }
     */
+    return false;
 }
 
 bool zShape::isInteracting(eGameObject * target) {
     return false;
 }
 
-void zShape::render(const eCamera *cam )
+void zShape::Render(const eCamera *cam )
 {}
-void zShape::render2d(tCoord scale) const
+void zShape::Render2D(tCoord scale) const
     {}
 
 zShapeCircle::zShapeCircle(eGrid *grid, zZone * zone ):
         zShape(grid, zone ),
-        radius(1.0, 0.0)
+        radius(sz_initialSize, sz_expansionSpeed)
 {}
 
 /*
@@ -141,7 +296,7 @@ zShapeCircle::zShapeCircle(eGrid *grid, zZone * zone ):
 
 zShapeCircle::zShapeCircle( Zone::ShapeCircleSync const & sync, nSenderInfo const & sender ):
         zShape( sync.base(), sender ),
-        radius(1.0, 0.0)
+        radius(sz_initialSize, sz_expansionSpeed)
 {
 }
 
@@ -162,8 +317,16 @@ void zShapeCircle::ReadSync( Zone::ShapeCircleSync const & sync, nSenderInfo con
     }
 }
 
+void zShapeCircle::applyVisuals( gParserState & state ) {
+    zShape::applyVisuals(state);
+    if (state.isset("radius"))
+        setRadius( state.get<tFunction>("radius") );
+}
+
 bool zShapeCircle::isInteracting(eGameObject * target)
 {
+    // NOTE: FIXME: TODO: cache effectiveRadius*effectiveRadius for speed comparable to zones v1
+
     bool interact = false;
     gCycle* prey = dynamic_cast< gCycle* >( target );
     if ( prey )
@@ -182,14 +345,12 @@ bool zShapeCircle::isInteracting(eGameObject * target)
     return interact;
 }
 
-void zShapeCircle::render(const eCamera * cam )
+void zShapeCircle::Render(const eCamera * cam )
 {
 #ifndef DEDICATED
-
-    // HACK
-    int sg_segments = 11;
-    bool sr_alphaBlend = true;
-    // HACK
+    bool useAlpha = sr_alphaBlend;
+    if (sz_zoneAlphaToggle)
+        useAlpha = !useAlpha;
 
     if ( color_.a_ > .7f )
         color_.a_ = .7f;
@@ -221,7 +382,7 @@ void zShapeCircle::render(const eCamera * cam )
     glMultMatrixf(&m[0][0]);
     //	glScalef(.5,.5,.5);
 
-    if ( sr_alphaBlend ) {
+    if ( useAlpha ) {
         glDepthMask(GL_FALSE);
         BeginQuads();
     } else {
@@ -229,9 +390,10 @@ void zShapeCircle::render(const eCamera * cam )
         BeginLineStrip();
     }
 
-    const REAL seglen = .2f;
-    const REAL bot = 0.0f;
-    const REAL top = 5.0f; // + ( lastTime - referenceTime_ ) * .1f;
+    const int sg_segments = GetEffectiveSegments();
+    const REAL seglen = 2 * M_PI / sg_segments * GetEffectiveSegmentLength();
+    const REAL bot = GetEffectiveBottom();
+    const REAL top = bot + GetEffectiveHeight();
 
     color_.Apply();
 
@@ -254,7 +416,7 @@ void zShapeCircle::render(const eCamera * cam )
             glVertex3f(sb, cb, top);
             glVertex3f(sb, cb, bot);
 
-            if ( !sr_alphaBlend )
+            if ( !useAlpha )
             {
                 glVertex3f(sa, ca, bot);
                 RenderEnd();
@@ -275,13 +437,8 @@ void zShapeCircle::render(const eCamera * cam )
 
 //HACK: render2d and render should probably be merged somehow, too much copy and paste here
 
-void zShapeCircle::render2d(tCoord scale) const {
+void zShapeCircle::Render2D(tCoord scale) const {
 #ifndef DEDICATED
-
-    // HACK
-    int sg_segments = 8;
-    // HACK
-
     //if ( color_.a_ > .7f )
     //    color_.a_ = .7f;
     if ( color_.a_ <= 0 )
@@ -302,7 +459,8 @@ void zShapeCircle::render2d(tCoord scale) const {
 
     BeginLines();
 
-    const REAL seglen = M_PI / sg_segments;
+    int sg_segments = GetEffectiveSegments();
+    const REAL seglen = 2 * M_PI / sg_segments * GetEffectiveSegmentLength();
 
     color_.Apply();
 
@@ -327,6 +485,30 @@ void zShapeCircle::render2d(tCoord scale) const {
     RenderEnd();
     glPopMatrix();
 #endif
+}
+
+tCoord zShapeCircle::findPointNear(tCoord & p) {
+    tCoord angle = p - Position();
+    angle.Normalize();
+    return angle * calcBoundSq();
+}
+
+tCoord zShapeCircle::findPointFar(tCoord & p) {
+    tCoord angle = Position() - p;
+    angle.Normalize();
+    return angle * calcBoundSq();
+}
+
+REAL zShapeCircle::calcBoundSq() {
+    return scale_.Evaluate(lasttime_ - referencetime_) * radius.Evaluate(lasttime_ - referencetime_);
+}
+
+void zShapeCircle::setGrowth(REAL growth) {
+    REAL s = radius(lasttime_ - referencetime_);
+    radius.SetSlope(0.);
+    radius.SetOffset(s);
+    
+    zShape::setGrowth(growth);
 }
 
 //
@@ -455,14 +637,12 @@ bool zShapePolygon::isInteracting(eGameObject * target)
     return interact;
 }
 
-void zShapePolygon::render(const eCamera * cam )
+void zShapePolygon::Render(const eCamera * cam )
 {
 #ifndef DEDICATED
-
-    // HACK
-    //  int sg_segments = 11;
-    bool sr_alphaBlend = true;
-    // HACK
+    bool useAlpha = sr_alphaBlend;
+    if (sz_zoneAlphaToggle)
+        useAlpha = !useAlpha;
 
     if ( color_.a_ > .7f )
         color_.a_ = .7f;
@@ -494,7 +674,7 @@ void zShapePolygon::render(const eCamera * cam )
 
         glRotatef(rotation2.evaluate(lasttime_)*180/M_PI, 0.0, 0.0, 1.0);
 
-        if ( sr_alphaBlend ) {
+        if ( useAlpha ) {
             glDepthMask(GL_FALSE);
             BeginQuads();
         } else {
@@ -503,9 +683,8 @@ void zShapePolygon::render(const eCamera * cam )
             BeginLineStrip();
         }
 
-        //    const REAL seglen = .2f;
-        const REAL bot = 0.0f;
-        const REAL top = 5.0f; // + ( lastTime - createTime_ ) * .1f;
+        const REAL bot = GetEffectiveBottom();
+        const REAL top = bot + GetEffectiveHeight();
 
         color_.Apply();
 
@@ -529,7 +708,7 @@ void zShapePolygon::render(const eCamera * cam )
             glVertex3f(xpp, ypp, top);
             glVertex3f(xpp, ypp, bot);
 
-            if ( !sr_alphaBlend )
+            if ( !useAlpha )
             {
                 glVertex3f(xp, yp, bot);
                 RenderEnd();
@@ -545,7 +724,7 @@ void zShapePolygon::render(const eCamera * cam )
     glPopMatrix();
 #endif
 }
-void zShapePolygon::render2d(tCoord scale) const {
+void zShapePolygon::Render2D(tCoord scale) const {
 #ifndef DEDICATED
 
     //if ( color_.a_ > .7f )
@@ -569,8 +748,6 @@ void zShapePolygon::render2d(tCoord scale) const {
         glRotatef(rotation2.evaluate(lasttime_)*180/M_PI, 0.0, 0.0, 1.0);
 
         BeginLines();
-
-        //    const REAL seglen = .2f;
 
         color_.Apply();
 
@@ -596,6 +773,26 @@ void zShapePolygon::render2d(tCoord scale) const {
 #endif
 }
 
+tCoord zShapePolygon::findPointNear(tCoord & p) {
+    // FIXME: Write real sane code for a polygon
+    tCoord angle = p - Position();
+    angle.Normalize();
+    return angle * calcBoundSq();
+}
+
+tCoord zShapePolygon::findPointFar(tCoord & p) {
+    // FIXME: Write real sane code for a polygon
+    tCoord angle = Position() - p;
+    angle.Normalize();
+    return angle * calcBoundSq();
+}
+
+REAL zShapePolygon::calcBoundSq() {
+    // FIXME: Write real sane code for a polygon
+    return zShape::calcBoundSq();
+}
+
+
 // the shapes's network initializator
 static nNetObjectDescriptor< zShapeCircle, Zone::ShapeCircleSync > zoneCircle_init( 350 );
 static nNetObjectDescriptor< zShapePolygon, Zone::ShapePolygonSync > zonePolygon_init( 360 );
@@ -611,6 +808,62 @@ nNetObjectDescriptorBase const & zShapePolygon::DoGetDescriptor() const
 }
 
 #include "gZone.pb.h"
+
+#ifndef ENABLE_ZONESV1
+static nNetObjectDescriptor< zShapeCircleZoneV1, Game::ZoneV1Sync > zone_init( 340 );
+
+static
+Zone::ShapeCircleSync const
+v1upgrade( Game::ZoneV1Sync const & source ) {
+    Zone::ShapeSync shape;
+
+    shape.mutable_base()->CopyFrom( source.base() );
+    shape.mutable_color()->CopyFrom( source.color() );
+    shape.set_creation_time( source.create_time() );
+    shape.set_reference_time( source.reference_time() );
+    shape.mutable_pos_x()->CopyFrom( source.pos_x() );
+    shape.mutable_pos_y()->CopyFrom( source.pos_y() );
+
+    tFunction old_rotation;
+    old_rotation.ReadSync( source.rotation_speed() );
+    tPolynomial rotation;
+    rotation = rotation.adaptToNewReferenceVarValue( source.reference_time() );
+    // FIXME: does rotation[0] need to be set to something?
+    rotation[1] = old_rotation.offset_;
+    rotation[2] = old_rotation.slope_;
+    rotation.WriteSync( *shape.mutable_rotation2() );
+
+    static tFunction tfOne(1., 0.);
+    tfOne.WriteSync( *shape.mutable_scale() );
+
+    Zone::ShapeCircleSync dest;
+
+    dest.mutable_base()->CopyFrom( shape );
+    dest.mutable_radius()->CopyFrom( source.radius() );
+
+    return dest;
+}
+
+zShapeCircleZoneV1::zShapeCircleZoneV1( Game::ZoneV1Sync const & oldsync, nSenderInfo const & sender ):
+        zShapeCircle( v1upgrade(oldsync), sender )
+{
+}
+
+void zShapeCircleZoneV1::ReadSync( Game::ZoneV1Sync const & oldsync, nSenderInfo const & sender )
+{
+    zShapeCircle::ReadSync( v1upgrade(oldsync), sender );
+}
+
+void zShapeCircleZoneV1::WriteSync( Game::ZoneV1Sync & oldsync, bool init ) const
+{
+    assert( false && "Not implemented" );
+}
+
+nNetObjectDescriptorBase const & zShapeCircleZoneV1::DoGetDescriptor() const
+{
+    return zone_init;
+}
+#endif
 
 //! convert circle shape messages into zone v1 messages for old clients
 class nZonesV1Translator: public nMessageTranslator< Zone::ShapeCircleSync >
@@ -646,10 +899,14 @@ public:
         scale.ReadSync( shape.scale() );
         radius.ReadSync( source.radius() );
 
+        // FIXME: don't ignore the quadratic term
+        // FIXME: Force a new sync when it differs too much
+        // FIXME: cache this conversion as much as possible
         // mend them together, ignoring the quadratic term
         tFunction mendedRadius( scale.GetOffset() * radius.GetOffset(), scale.GetOffset() * radius.GetSlope() + scale.GetSlope() * radius.GetOffset() );
         mendedRadius.WriteSync( *dest.mutable_radius() );
 
+        // FIXME: the above mostly applies here too
         // calculate rotation speed
         tPolynomial rotation;
         rotation.ReadSync( shape.rotation2() );

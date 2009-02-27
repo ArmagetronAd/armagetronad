@@ -66,6 +66,8 @@ else
 tools_extra=
 endif
 
+INCLUDED_MODULE_SOURCES=
+
 # protocol buffers. Need to be compiled first so the headers exist for the
 # other modules to include.
 libprotobuf_a_SOURCES = \
@@ -217,6 +219,7 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 if BUILDZONESV2
 libtron_a_SOURCES +=\
 	tron/zone/zZone.cpp        tron/zone/zZone.h\
+	tron/zone/zTimedZone.cpp   tron/zone/zTimedZone.h\
 	tron/zone/zShape.cpp       tron/zone/zShape.hpp\
 	tron/zone/zMonitor.h       tron/zone/zMonitor.cpp\
 	tron/zone/zEffectGroup.cpp tron/zone/zEffectGroup.h\
@@ -225,10 +228,18 @@ libtron_a_SOURCES +=\
 	tron/zone/zSelector.h      tron/zone/zSelector.cpp\
 	tron/zone/zEffector.h      tron/zone/zEffector.cpp\
 	tron/zone/zZoneInfluence.h tron/zone/zZoneInfluence.cpp
+
+if BUILD_FORTRESS
+INCLUDED_MODULE_SOURCES +=\
+	tron/zone/zFortress.cpp        tron/zone/zFortress.h
 endif
 
+endif
+
+if BUILDZONESV1
 libtron_a_SOURCES +=\
 	tron/gWinZone.h            tron/gWinZone.cpp
+endif
 
 libui_a_SOURCES=ui/uInput.cpp ui/uInput.h ui/uInputQueue.cpp ui/uInputQueue.h ui/uMenu.cpp ui/uMenu.h
 endif
@@ -298,7 +309,10 @@ else
 extralibs= thirdparty/particles/libparticles.a thirdparty/scrap/libscrap.a
 endif
 
-armagetronad_main_SOURCES = tron/gFloor.cpp tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp tron/cockpit/cCamview.cpp 
+armagetronad_main_SOURCES = \
+	tron/gFloor.cpp \
+	tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp tron/cockpit/cCamview.cpp \
+	$(INCLUDED_MODULE_SOURCES)
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
 armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 #  librubywrap.a

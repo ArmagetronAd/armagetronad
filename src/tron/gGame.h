@@ -67,7 +67,9 @@ class gGame:public nNetObject{
 #ifdef ENABLE_ZONESV2
     tJUST_CONTROLLED_PTR< zZone > winDeathZone_; // the win zone
 #else
+#ifdef ENABLE_ZONESV1
     tJUST_CONTROLLED_PTR< gZone > winDeathZone_; // the win zone
+#endif
 #endif
 
     bool goon;

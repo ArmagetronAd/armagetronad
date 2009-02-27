@@ -9,6 +9,10 @@
 #include <map>
 #include <string>
 
+#ifdef ENABLE_ZONESV2
+#include <boost/any.hpp>
+#endif
+
 class eGrid;
 class gArena;
 class ePoint;
@@ -16,10 +20,46 @@ class gGame;
 class gWallRim;
 
 #ifdef ENABLE_ZONESV2
+#include "zone/zShape.hpp"
 #include "zone/zZone.h"
 #include "zone/zMisc.h"
 #endif
 
+class gParserState {
+private:
+    typedef std::map<std::string, boost::shared_ptr<boost::any> > my_map_t;
+    std::deque< my_map_t > _varstack;
+public:
+    gParserState();
+
+    bool exists(std::string const & var);
+    bool isset(std::string const & var);
+    template<typename T> bool istype(std::string const & var) {
+        if (!isset(var))
+            return false;
+        try {
+            boost::any_cast<T>(*(_varstack.front()[var]));
+            return true;
+        }
+        catch (const boost::bad_any_cast &)
+        {
+            return false;
+        }
+    }
+    boost::any getAny(std::string const & var);
+    template<typename T> T get(std::string const & var) {
+        return boost::any_cast<T>(getAny(var));
+    }
+    void setAny(std::string const & var, boost::any val);
+    template<typename T> void set(std::string const & var, T val) {
+        setAny(var, boost::any(val));
+    }
+    void unset(std::string const & var);
+    void inherit(std::string const & var);
+
+    void push();
+    void pop();
+};
 
 /*
 Note to the reader: In the full World idea, the parser should, 
@@ -120,8 +160,8 @@ protected:
     void parseObstacleWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword);
 
 #ifdef ENABLE_ZONESV2
-    void myCheapParameterSplitter(const string &str, tFunction &tf, bool addSizeMultiplier=false);
-    void myCheapParameterSplitter2(const string &str, tPolynomial &tp, bool addSizeMultiplier=false);
+    void __deprecated myCheapParameterSplitter(const string &str, tFunction &tf, bool addSizeMultiplier=false);
+    void __deprecated myCheapParameterSplitter2(const string &str, tPolynomial &tp, bool addSizeMultiplier=false);
 #endif
 
     /* This is a hack that will bring shame to my decendants for many generations: */
@@ -131,6 +171,14 @@ protected:
 public:
     tValue::Expr::varmap_t vars;
     tValue::Expr::funcmap_t functions;
+
+    typedef gParserState State_t;
+    State_t state;
+    
+    std::map< std::string, std::vector< zZoneInfluencePtr > > ZIPtoMap;
+    
+    gArena * __deprecated contextArena(tXmlParser::node const &);
+    eGrid * __deprecated contextGrid(tXmlParser::node const &);
 #endif
 };
 
