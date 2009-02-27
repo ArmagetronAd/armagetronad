@@ -139,12 +139,14 @@ zEffectorManager::Create(std::string const & typex, tXmlParser::node const * nod
 zEffector*
 zEffectorManager::Create(std::string const & typex, tXmlParser::node const & node_p)
 {
+    return
     Create(typex, &node_p);
 }
 
 zEffector*
 zEffectorManager::Create(std::string const & typex)
 {
+    return
     Create(typex, NULL);
 }
 
