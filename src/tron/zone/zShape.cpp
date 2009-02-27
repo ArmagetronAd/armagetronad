@@ -29,8 +29,20 @@ static nSettingItem<REAL> sz_expansionSpeedConf( "WIN_ZONE_EXPANSION", sz_expans
 
 REAL sz_initialSize = 5.0f;
 static nSettingItem<REAL> sz_initialSizeConf( "WIN_ZONE_INITIAL_SIZE", sz_initialSize );
+
+// extra alpha blending factors, the first one under pure client control
+static REAL sz_zoneAlpha = 1.0;
+static tSettingItem< REAL > sg_zoneAlphaConf( "ZONE_ALPHA", sz_zoneAlpha );
+
+// the second one under server control. Not used for all kinds of zones, only
+// v1 zones synced from the server and v2 fortress zones.
+REAL sz_zoneAlphaServer = 1.0;
+static nSettingItem< REAL > sg_zoneAlphaConfServer( "ZONE_ALPHA_SERVER", sz_zoneAlphaServer );
 #else
 #include "gWinZone.h"
+
+extern REAL sg_zoneAlpha, sg_zoneAlphaServer;
+
 #define sz_zoneAlphaToggle sg_zoneAlphaToggle
 #define sz_zoneSegments    sg_zoneSegments
 #define sz_zoneSegLength   sg_zoneSegLength
@@ -38,6 +50,8 @@ static nSettingItem<REAL> sz_initialSizeConf( "WIN_ZONE_INITIAL_SIZE", sz_initia
 #define sz_zoneHeight      sg_zoneHeight
 #define sz_expansionSpeed  sg_expansionSpeed
 #define sz_initialSize     sg_initialSize
+#define sz_zoneAlpha       sg_zoneAlpha
+#define sz_zoneAlphaServer sg_zoneAlphaServer
 #endif
 
 #define lasttime_ lastTime
@@ -132,6 +146,12 @@ void zShape::ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender 
     if (sync.has_segment_length())
         seglength_.ReadSync( sync.segment_length() );
     color_.ReadSync( sync.color() );
+
+    // old servers don't send alpha values; replace them by the server controlled alpha setting
+    if( !sync.color().has_a() )
+    {
+        color_.a_ = sz_zoneAlphaServer;
+    }
 }
 
 void zShape::applyVisuals( gParserState & state ) {
@@ -410,7 +430,10 @@ void zShapeCircle::Render(const eCamera * cam )
     const REAL bot = GetEffectiveBottom();
     const REAL top = bot + GetEffectiveHeight();
 
-    color_.Apply();
+    // apply color, respecting client chosen extra alpha factor
+    rColor color = color_;
+    color.a_ *= sz_zoneAlpha;
+    color.Apply();
 
     REAL effectiveRadius;
     effectiveRadius = scale_.Evaluate(lasttime_ - referencetime_) * radius.Evaluate(lasttime_ - referencetime_);

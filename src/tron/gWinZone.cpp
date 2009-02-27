@@ -437,7 +437,7 @@ REAL gZone::Radius( void ) const
 }
 
 // extra alpha blending factors
-static REAL sg_zoneAlpha = 1.0, sg_zoneAlphaServer = 1.0;
+REAL sg_zoneAlpha = 1.0, sg_zoneAlphaServer = 1.0;
 static tSettingItem< REAL > sg_zoneAlphaConf( "ZONE_ALPHA", sg_zoneAlpha );
 static nSettingItem< REAL > sg_zoneAlphaConfServer( "ZONE_ALPHA_SERVER", sg_zoneAlphaServer );
 

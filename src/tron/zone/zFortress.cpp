@@ -533,6 +533,7 @@ void zFortressZone::ZoneWasHeld( void )
     }
 }
 
+
 // *******************************************************************************
 // *
 // *   OnRoundBegin
@@ -591,6 +592,7 @@ void zFortressZone::OnRoundBegin( void )
             color_.r_ = team->R()/15.0;
             color_.g_ = team->G()/15.0;
             color_.b_ = team->B()/15.0;
+            color_.a_ = sz_zoneAlphaServer;
             shape->setColor(color_);
 
                 shape->RequestSync();
