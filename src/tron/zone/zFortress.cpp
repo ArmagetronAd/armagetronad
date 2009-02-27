@@ -207,6 +207,7 @@ bool zFortressZone::Timestep( REAL time )
     {
         if (shape)
         {
+            // FIXME: Why does Zones v1 *not* do this, and should we?
 
         // let zone vanish
             shape->setReferenceTime(lastTime);
