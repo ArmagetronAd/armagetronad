@@ -32,13 +32,13 @@ private:
 public:
     gParserState();
 
-    bool exists(std::string const & var);
-    bool isset(std::string const & var);
-    template<typename T> bool istype(std::string const & var) {
+    bool exists(std::string const & var) const;
+    bool isset(std::string const & var) const;
+    template<typename T> bool istype(std::string const & var) const {
         if (!isset(var))
             return false;
         try {
-            boost::any_cast<T>(*(_varstack.front()[var]));
+            boost::any_cast<T>(getAny(var));
             return true;
         }
         catch (const boost::bad_any_cast &)
@@ -46,8 +46,8 @@ public:
             return false;
         }
     }
-    boost::any getAny(std::string const & var);
-    template<typename T> T get(std::string const & var) {
+    boost::any getAny(std::string const & var) const;
+    template<typename T> T get(std::string const & var) const {
         return boost::any_cast<T>(getAny(var));
     }
     void setAny(std::string const & var, boost::any val);

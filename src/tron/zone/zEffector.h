@@ -41,6 +41,8 @@ class gParserState;
 #include "tFunction.h"
 #include "tXmlParser.h"
 
+class gParserState;
+
 class zEffector
 {
 public:
@@ -54,6 +56,7 @@ public:
     void apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets);
     virtual void effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets) { };
 
+    virtual void applyContext(gParserState const &);
     virtual void readXML(tXmlParser::node const &);
 
     void setCount(int _count) {count = _count;};
@@ -245,7 +248,7 @@ public:
     virtual zEffectorSpawnPlayer *copy(void) const { return new zEffectorSpawnPlayer(*this); };
     virtual ~zEffectorSpawnPlayer() {};
 
-    void readXML(tXmlParser::node const &);
+    void applyContext(gParserState const &);
 
     void setGrid(eGrid *_grid) {grid = _grid;};
     void setArena(gArena *_arena) {arena = _arena;};
