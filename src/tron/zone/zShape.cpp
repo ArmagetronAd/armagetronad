@@ -143,6 +143,24 @@ void zShape::applyVisuals( gParserState & state ) {
         setScale( state.get<tFunction>("scale") );
 }
 
+REAL zShape::calcDistanceNear(tCoord & p) {
+    return (findPointNear(p) - p).Norm();
+}
+
+REAL zShape::calcDistanceFar(tCoord & p) {
+    return (findPointFar(p) - p).Norm();
+}
+
+tCoord zShape::findCenter() {
+    // NOTE: Should be overridden if not actually center
+    return Position();
+}
+
+REAL zShape::calcBoundSq() {
+    // NOTE: Default implementation assumes a size of 1, scaled
+    return scale_.Evaluate(lasttime_ - referencetime_);
+}
+
 void zShape::setPosX(const tFunction & x){
     posx_ = x;
 }
@@ -469,6 +487,22 @@ void zShapeCircle::Render2D(tCoord scale) const {
 #endif
 }
 
+tCoord zShapeCircle::findPointNear(tCoord & p) {
+    tCoord angle = p - Position();
+    angle.Normalize();
+    return angle * calcBoundSq();
+}
+
+tCoord zShapeCircle::findPointFar(tCoord & p) {
+    tCoord angle = Position() - p;
+    angle.Normalize();
+    return angle * calcBoundSq();
+}
+
+REAL zShapeCircle::calcBoundSq() {
+    return scale_.Evaluate(lasttime_ - referencetime_) * radius.Evaluate(lasttime_ - referencetime_);
+}
+
 void zShapeCircle::setGrowth(REAL growth) {
     REAL s = radius(lasttime_ - referencetime_);
     radius.SetSlope(0.);
@@ -737,6 +771,25 @@ void zShapePolygon::Render2D(tCoord scale) const {
     }
     glPopMatrix();
 #endif
+}
+
+tCoord zShapePolygon::findPointNear(tCoord & p) {
+    // FIXME: Write real sane code for a polygon
+    tCoord angle = p - Position();
+    angle.Normalize();
+    return angle * calcBoundSq();
+}
+
+tCoord zShapePolygon::findPointFar(tCoord & p) {
+    // FIXME: Write real sane code for a polygon
+    tCoord angle = Position() - p;
+    angle.Normalize();
+    return angle * calcBoundSq();
+}
+
+REAL zShapePolygon::calcBoundSq() {
+    // FIXME: Write real sane code for a polygon
+    return zShape::calcBoundSq();
 }
 
 

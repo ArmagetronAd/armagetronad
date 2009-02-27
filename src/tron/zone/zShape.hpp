@@ -43,6 +43,15 @@ public:
     virtual void Render(const eCamera * cam );
     virtual void Render2D(tCoord scale) const;
 
+    virtual tCoord findPointNear(tCoord&) = 0;
+    virtual tCoord findPointFar(tCoord&) = 0;
+    virtual REAL calcDistanceNear(tCoord&);
+    virtual REAL calcDistanceFar(tCoord&);
+
+    virtual tCoord findCenter();
+    //! Calculates the max(height, width) of a bounding box
+    virtual REAL calcBoundSq();
+
     void setPosX(const tFunction &x);
     void setPosY(const tFunction &y);
     virtual
@@ -123,6 +132,12 @@ public :
     void Render(const eCamera * cam );
 	virtual void Render2D(tCoord scale) const;
 
+    tCoord findPointNear(tCoord&);
+    tCoord findPointFar(tCoord&);
+
+    //! Calculates the max(height, width) of a bounding box
+    REAL calcBoundSq();
+
     void setRadius(tFunction radius) {this->radius = radius;};
     
     void setGrowth(REAL growth);
@@ -153,6 +168,12 @@ public :
     void Render(const eCamera * cam );
     virtual void Render2D(tCoord scale) const;
     void addPoint( myPoint const &aPoint) { points.push_back(aPoint);};
+
+    tCoord findPointNear(tCoord&);
+    tCoord findPointFar(tCoord&);
+
+    //! Calculates the max(height, width) of a bounding box
+    REAL calcBoundSq();
 
 protected:
     std::vector< myPoint > points;

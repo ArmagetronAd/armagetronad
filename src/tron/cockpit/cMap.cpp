@@ -33,7 +33,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "rRender.h"
 #include "rScreen.h"
+#ifdef ENABLE_ZONESV1
 #include "gWinZone.h"
+#endif
+#ifdef ENABLE_ZONESV2
+#include "zone/zZone.h"
+#endif
 #include "eRectangle.h"
 #include "ePlayer.h"
 #include "eTimer.h"
@@ -54,7 +59,12 @@ extern std::vector<tCoord> se_rimWallRubberBand;
 
 #ifndef DEDICATED
 
+#ifdef ENABLE_ZONESV1
 extern std::deque<gZone *> sg_Zones;
+#endif
+#ifdef ENABLE_ZONESV2
+extern std::deque<zZone *> sz_Zones;
+#endif
 
 namespace cWidget {
 
@@ -313,6 +323,20 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls,
                 min_dist2 = dist2;
                 m_centre = position;
                 rad = radius;
+            }
+        }
+#endif
+#ifdef ENABLE_ZONESV2
+        // NOTE: old version compared distance from zone center; this code compares distance from zone border
+        for(std::deque<zZone *>::const_iterator i = sz_Zones.begin(); i != sz_Zones.end(); ++i) {
+            tASSERT(*i);
+            tASSERT((*i)->getShape());
+            zShape & shape = *((*i)->getShape());
+            dist2 = shape.calcDistanceNear(pl_CurPos);
+            if (dist2<min_dist2) {
+                min_dist2 = dist2;
+                m_centre = shape.findCenter();
+                rad = shape.calcBoundSq() / 2;
             }
         }
 #endif
