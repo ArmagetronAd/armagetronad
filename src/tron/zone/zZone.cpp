@@ -571,7 +571,9 @@ tCoord const zZone::GetRotation( void ) const
 {
     // HACK, to be implemented later and differently
     // Should get this info from the shape, not the zone
+    if (!shape)
     return tCoord(0.0, 0.0);
+    return shape->GetRotation();
 }
 
 // *******************************************************************************

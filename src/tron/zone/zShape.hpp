@@ -74,6 +74,7 @@ public:
     REAL GetEffectiveHeight() const;
 
     //! shortcut rotation functions
+    tCoord GetRotation() const;
     REAL GetRotationSpeed();
     void SetRotationSpeed(REAL r);
     REAL GetRotationAcceleration();

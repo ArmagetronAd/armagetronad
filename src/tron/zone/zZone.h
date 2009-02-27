@@ -75,11 +75,11 @@ public:
     virtual void setupVisuals(gParserState &);
     virtual void readXML(tXmlParser::node const &);
 
-    eCoord          GetPosition         ( void ) const;	                //!< Gets the current position
-    zZone const &   GetPosition         ( eCoord & position ) const;	//!< Gets the current position
-    tCoord const    GetRotation         ( void ) const;	                //!< Gets the current rotation state
-    REAL            GetScale           ( void ) const;	                //!< Gets the current scale
-    rColor const    GetColor( void ) const;	//!< Gets the current color
+    eCoord         __deprecated GetPosition         ( void ) const;	                //!< Gets the current position
+    zZone const &  __deprecated GetPosition         ( eCoord & position ) const;	//!< Gets the current position
+    tCoord const   __deprecated GetRotation         ( void ) const;	                //!< Gets the current rotation state
+    REAL           __deprecated GetScale           ( void ) const;	                //!< Gets the current scale
+    rColor const   __deprecated GetColor( void ) const;	//!< Gets the current color
 
     void addEffectGroupEnter  (zEffectGroupPtr anEffectGroup) {effectGroupEnter.push_back  (anEffectGroup);};
     void addEffectGroupInside (zEffectGroupPtr anEffectGroup) {effectGroupInside.push_back (anEffectGroup);};

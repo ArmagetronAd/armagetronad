@@ -236,6 +236,12 @@ REAL zShape::GetEffectiveHeight() const {
     return sz_zoneHeight;
 }
 
+tCoord zShape::GetRotation() const {
+    REAL currAngle = rotation2.evaluate(lasttime_);
+    tCoord rot( cos(currAngle), sin(currAngle) );
+    return rot;
+}
+
 REAL zShape::GetRotationSpeed() {
     return getRotation2().evaluateRate(1, lasttime_);
 }
@@ -365,8 +371,7 @@ void zShapeCircle::Render(const eCamera * cam )
     if ( color_.a_ <= 0 )
         return;
 
-    REAL currAngle = rotation2.evaluate(lasttime_);
-    eCoord rot( cos(currAngle), sin(currAngle) );
+    tCoord rot = GetRotation();
 
     GLfloat m[4][4]={{rot.x,rot.y,0,0},
                      {-rot.y,rot.x,0,0},
@@ -452,8 +457,7 @@ void zShapeCircle::Render2D(tCoord scale) const {
     if ( color_.a_ <= 0 )
         return;
 
-    REAL currAngle = rotation2.evaluate(lasttime_);
-    eCoord rot( cos(currAngle), sin(currAngle) );
+    tCoord rot = GetRotation();
 
     GLfloat m[4][4]={{rot.x,rot.y,0,0},
                      {-rot.y,rot.x,0,0},
@@ -594,8 +598,7 @@ bool zShapePolygon::isInside(eCoord anECoord) {
     REAL x_ = (*iter).first.Evaluate(lasttime_ - referencetime_);
     REAL y_ = (*iter).second.Evaluate(lasttime_ - referencetime_);
     tCoord centerPos = tCoord(posx_.Evaluate(lasttime_ - referencetime_), posy_.Evaluate(lasttime_ - referencetime_));
-    //    tCoord rotation = tCoord( cosf(rotation_.Evaluate(lasttime_ - referencetime_)), sinf(rotation_.Evaluate(lasttime_ - referencetime_)) );
-    tCoord rotation = tCoord( cosf(rotation2.evaluate(lasttime_)), sinf(rotation2.evaluate(lasttime_)) );
+    tCoord rotation = GetRotation();
     currentScale = scale_.Evaluate(lasttime_ - referencetime_);
     tCoord previous = tCoord(x_, y_).Turn( rotation )*currentScale + centerPos;
 
