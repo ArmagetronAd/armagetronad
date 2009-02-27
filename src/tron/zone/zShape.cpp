@@ -382,7 +382,7 @@ void zShapeCircle::Render(const eCamera * cam )
     glMultMatrixf(&m[0][0]);
     //	glScalef(.5,.5,.5);
 
-    if ( sr_alphaBlend ) {
+    if ( useAlpha ) {
         glDepthMask(GL_FALSE);
         BeginQuads();
     } else {
@@ -416,7 +416,7 @@ void zShapeCircle::Render(const eCamera * cam )
             glVertex3f(sb, cb, top);
             glVertex3f(sb, cb, bot);
 
-            if ( !sr_alphaBlend )
+            if ( !useAlpha )
             {
                 glVertex3f(sa, ca, bot);
                 RenderEnd();
