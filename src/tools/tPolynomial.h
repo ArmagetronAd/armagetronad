@@ -124,5 +124,20 @@ protected:
 bool operator == (const tPolynomial & left, const tPolynomial & right);
 bool operator != (const tPolynomial & left, const tPolynomial & right);
 
+// *******************************************************************************
+// *
+// *	operator ( )
+// *
+// *******************************************************************************
+//!
+//!		@return		the function value
+//!
+// *******************************************************************************
+
+REAL tPolynomial::operator ( )( REAL currentVarValue ) const
+{
+    return evaluate( currentVarValue );
+}
+
 #endif
 
