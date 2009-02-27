@@ -54,6 +54,7 @@ public:
     tPolynomial(REAL value);  //!< constructor for constant polynomial
     tPolynomial(tArray<REAL> const & newCoefs);  //!< constructor
     tPolynomial(const tPolynomial &tf);  //!< constructor
+    tPolynomial(const tFunction &tf, REAL refValue);  //!< constructor
     tPolynomial(const tFunction &tf);  //!< constructor
     tPolynomial(std::string str);  //!< constructor
 
