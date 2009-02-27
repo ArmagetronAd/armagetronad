@@ -79,6 +79,10 @@
 		9B1ECD280F159FF800288C28 /* tVersion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B1ECD240F159FF800288C28 /* tVersion.cpp */; };
 		9B437BA20F2CBD8300A10CC6 /* tRectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B437BA00F2CBD8300A10CC6 /* tRectangle.cpp */; };
 		9B437BA40F2CBD8300A10CC6 /* tRectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B437BA00F2CBD8300A10CC6 /* tRectangle.cpp */; };
+		9B62588A0F5865410083C429 /* zFortress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B6258860F5865410083C429 /* zFortress.cpp */; };
+		9B62588B0F5865410083C429 /* zTimedZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B6258890F5865410083C429 /* zTimedZone.cpp */; };
+		9B62588C0F5865410083C429 /* zFortress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B6258860F5865410083C429 /* zFortress.cpp */; };
+		9B62588D0F5865410083C429 /* zTimedZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B6258890F5865410083C429 /* zTimedZone.cpp */; };
 		9B7CFE190EFCE74700126634 /* tResource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE130EFCE74700126634 /* tResource.cpp */; };
 		9B7CFE1B0EFCE74700126634 /* tResourceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE150EFCE74700126634 /* tResourceManager.cpp */; };
 		9B7CFE1D0EFCE74700126634 /* tResourceType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B7CFE170EFCE74700126634 /* tResourceType.cpp */; };
@@ -353,7 +357,6 @@
 		9BB7B97F0D830448004FE8C3 /* gStuff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B9240D830448004FE8C3 /* gStuff.cpp */; };
 		9BB7B9810D830448004FE8C3 /* gTeam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B9260D830448004FE8C3 /* gTeam.cpp */; };
 		9BB7B9840D830448004FE8C3 /* gWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B9290D830448004FE8C3 /* gWall.cpp */; };
-		9BB7B9860D830448004FE8C3 /* gWinZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B92B0D830448004FE8C3 /* gWinZone.cpp */; };
 		9BB7B9890D830448004FE8C3 /* zEffectGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B92F0D830448004FE8C3 /* zEffectGroup.cpp */; };
 		9BB7B98B0D830448004FE8C3 /* zEffector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B9310D830448004FE8C3 /* zEffector.cpp */; };
 		9BB7B98E0D830448004FE8C3 /* zMonitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B9340D830448004FE8C3 /* zMonitor.cpp */; };
@@ -397,7 +400,6 @@
 		9BB7B9D80D830448004FE8C3 /* gStuff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B9240D830448004FE8C3 /* gStuff.cpp */; };
 		9BB7B9DA0D830448004FE8C3 /* gTeam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B9260D830448004FE8C3 /* gTeam.cpp */; };
 		9BB7B9DD0D830448004FE8C3 /* gWall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B9290D830448004FE8C3 /* gWall.cpp */; };
-		9BB7B9DF0D830448004FE8C3 /* gWinZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B92B0D830448004FE8C3 /* gWinZone.cpp */; };
 		9BB7B9E20D830448004FE8C3 /* zEffectGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B92F0D830448004FE8C3 /* zEffectGroup.cpp */; };
 		9BB7B9E40D830448004FE8C3 /* zEffector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B9310D830448004FE8C3 /* zEffector.cpp */; };
 		9BB7B9E70D830448004FE8C3 /* zMonitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BB7B9340D830448004FE8C3 /* zMonitor.cpp */; };
@@ -592,6 +594,10 @@
 		9B437B9F0F2CBD8300A10CC6 /* tRectangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tRectangle.h; sourceTree = "<group>"; };
 		9B437BA00F2CBD8300A10CC6 /* tRectangle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tRectangle.cpp; sourceTree = "<group>"; };
 		9B437BB10F2CBD9E00A10CC6 /* utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utf8.h; sourceTree = "<group>"; };
+		9B6258860F5865410083C429 /* zFortress.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zFortress.cpp; sourceTree = "<group>"; };
+		9B6258870F5865410083C429 /* zFortress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zFortress.h; sourceTree = "<group>"; };
+		9B6258880F5865410083C429 /* zTimedZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zTimedZone.h; sourceTree = "<group>"; };
+		9B6258890F5865410083C429 /* zTimedZone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zTimedZone.cpp; sourceTree = "<group>"; };
 		9B715F4C0F0BD95100034EBF /* release.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = release.rake; sourceTree = "<group>"; tabWidth = 2; };
 		9B715F4D0F0BD95100034EBF /* config.rb */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = config.rb; sourceTree = "<group>"; tabWidth = 2; };
 		9B715F4E0F0BD95100034EBF /* aabeta.rake */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = aabeta.rake; sourceTree = "<group>"; tabWidth = 2; };
@@ -1604,6 +1610,8 @@
 				9BB7B9300D830448004FE8C3 /* zEffectGroup.h */,
 				9BB7B9310D830448004FE8C3 /* zEffector.cpp */,
 				9BB7B9320D830448004FE8C3 /* zEffector.h */,
+				9B6258860F5865410083C429 /* zFortress.cpp */,
+				9B6258870F5865410083C429 /* zFortress.h */,
 				9BB7B9330D830448004FE8C3 /* zMisc.h */,
 				9BB7B9340D830448004FE8C3 /* zMonitor.cpp */,
 				9BB7B9350D830448004FE8C3 /* zMonitor.h */,
@@ -1611,6 +1619,8 @@
 				9BB7B9370D830448004FE8C3 /* zSelector.h */,
 				9BB7B9380D830448004FE8C3 /* zShape.cpp */,
 				9BB7B9390D830448004FE8C3 /* zShape.hpp */,
+				9B6258890F5865410083C429 /* zTimedZone.cpp */,
+				9B6258880F5865410083C429 /* zTimedZone.h */,
 				9BB7B93A0D830448004FE8C3 /* zValidator.cpp */,
 				9BB7B93B0D830448004FE8C3 /* zValidator.h */,
 				9BB7B93C0D830448004FE8C3 /* zZone.cpp */,
@@ -2015,7 +2025,6 @@
 				9BB7B9D80D830448004FE8C3 /* gStuff.cpp in Sources */,
 				9BB7B9DA0D830448004FE8C3 /* gTeam.cpp in Sources */,
 				9BB7B9DD0D830448004FE8C3 /* gWall.cpp in Sources */,
-				9BB7B9DF0D830448004FE8C3 /* gWinZone.cpp in Sources */,
 				9BB7B9E20D830448004FE8C3 /* zEffectGroup.cpp in Sources */,
 				9BB7B9E40D830448004FE8C3 /* zEffector.cpp in Sources */,
 				9BB7B9E70D830448004FE8C3 /* zMonitor.cpp in Sources */,
@@ -2041,6 +2050,8 @@
 				9B9755030F44B03900E41662 /* nStreamMessage.cpp in Sources */,
 				9B97550E0F44B0AE00E41662 /* tCoord.cpp in Sources */,
 				9B9755170F44B0DE00E41662 /* nBinary.cpp in Sources */,
+				9B62588C0F5865410083C429 /* zFortress.cpp in Sources */,
+				9B62588D0F5865410083C429 /* zTimedZone.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2179,7 +2190,6 @@
 				9BB7B97F0D830448004FE8C3 /* gStuff.cpp in Sources */,
 				9BB7B9810D830448004FE8C3 /* gTeam.cpp in Sources */,
 				9BB7B9840D830448004FE8C3 /* gWall.cpp in Sources */,
-				9BB7B9860D830448004FE8C3 /* gWinZone.cpp in Sources */,
 				9BB7B9890D830448004FE8C3 /* zEffectGroup.cpp in Sources */,
 				9BB7B98B0D830448004FE8C3 /* zEffector.cpp in Sources */,
 				9BB7B98E0D830448004FE8C3 /* zMonitor.cpp in Sources */,
@@ -2206,6 +2216,8 @@
 				9B9755020F44B03900E41662 /* nStreamMessage.cpp in Sources */,
 				9B97550D0F44B0AE00E41662 /* tCoord.cpp in Sources */,
 				9B9755160F44B0DE00E41662 /* nBinary.cpp in Sources */,
+				9B62588A0F5865410083C429 /* zFortress.cpp in Sources */,
+				9B62588B0F5865410083C429 /* zTimedZone.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
