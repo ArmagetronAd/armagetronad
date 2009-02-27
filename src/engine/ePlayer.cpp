@@ -3877,7 +3877,7 @@ public:
             int i;
             for(i = sizeof(se_simplifiedCommands)/sizeof(se_simplifiedCommands[0]) - 1; i >= 0; --i) {
                 if(pos - len == (int)strlen(se_simplifiedCommands[i]) && string.StartsWith(se_simplifiedCommands[i])) {
-                    actualString = Simplify(match) + " ";
+                    actualString = Quote(Simplify(match)) + " ";
                     break;
                 }
             }
@@ -3886,6 +3886,19 @@ public:
             }
         }
         return DoCompletion(string, pos, len, actualString);
+    }
+    tString Quote(tString const &str) {
+        tString ret = str;
+        if(ret[0] == '\'' || ret[0] == '"') {
+            char otherQuote = ret[0] == '"' ? '\'' : '"';
+            char const *backspace = "\\";
+            tString::size_type pos = -1;
+            while((pos = ret.find(otherQuote, pos+2)) != tString::npos) {
+                ret.insert(pos, backspace);
+            }
+            return otherQuote + ret + otherQuote;
+        }
+        return ret;
     }
     tString Simplify(tString const &str) {
         return ePlayerNetID::FilterName(str);
