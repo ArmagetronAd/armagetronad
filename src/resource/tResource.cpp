@@ -66,6 +66,11 @@ bool tResource::ValidateXml(FILE* docfd, const char* uri, const char* filepath) 
                 con << "\nWARNING: incorrect filepath. The resource wants to be at \"" << rightFilepath << "\", but was loaded from \"" << filepath << "\".\n\n";
             }
         }
+        else
+        if (root.IsOfType("World") && root.GetProp("version") == "0.1")
+        {
+            // NOTE: Legacy map resource
+        }
         else {
             con << "Root node is not of type 'Resource' but '" << root.GetName() << "'.\n";
             return false;
