@@ -72,7 +72,8 @@ function getPassword( $user )
     // of users, you may just get away with expanding this
     // array.
     $passwords= array (
-        'test' => 'password' // clever choice there, test
+        'test' => 'password', // clever choice there, test
+        'z-män' => 'passwörd' // test for utf8 usernames and passwords
         );
 
     $password = $passwords[ $user ];

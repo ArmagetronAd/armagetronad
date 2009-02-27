@@ -308,7 +308,7 @@ nKrawall::nCheckResult::nCheckResult( nCheckResult const & other )
 {
 }
 
-static void sn_WriteHexByte( std::ostream & s, int c )
+static void sn_WriteHexByte( std::ostream & s, unsigned int c )
 {
     // don't want to rely on filling type iomanip things, never learned how to use them reliably
     s << std::hex <<  std::setfill('0') << std::setw(2) << c;
@@ -329,13 +329,21 @@ tString nKrawall::EncodeScrambledPassword( nScrambledPassword const & scrambled 
     return tString( s.str().c_str() );
 }
 
+// write one escaped character
+static void sn_WriteEscaped( std::ostream & out, unsigned char c )
+{
+    out.put('%');
+    out << std::uppercase;
+    sn_WriteHexByte( out, c );
+}
+
 // encode a string for safe inclusion into an URL
 tString nKrawall::EncodeString( tString const & original )
 {
     std::istringstream in( static_cast< char const * >( original ) );
     std::ostringstream out;
 
-    char c = in.get();
+    unsigned char c = in.get();
     while ( !in.eof() )
     {
         if ( c == ' ' )
@@ -346,11 +354,16 @@ tString nKrawall::EncodeString( tString const & original )
         {
             out.put( c );
         }
+        else if( c < 0x80 )
+        {
+            // write single escape for unusual ascii characters
+            sn_WriteEscaped( out, c );
+        }
         else
         {
-            out.put('%');
-            out << std::uppercase;
-            sn_WriteHexByte( out, c );
+            // write utf8 as two escapes
+            sn_WriteEscaped( out, 0xc0 | ( c >> 6 ) );
+            sn_WriteEscaped( out, 0x80 | ( c & 0x3f ) );
         }
         c = in.get();
     }
@@ -406,9 +419,29 @@ void nKrawall::ReadScrambledPassword( std::istream &s,
 void nKrawall::ScramblePassword(const tString& password,
                                 nScrambledPassword &scrambled)
 {
+    // convert from latin1 to utf8
+    std::ostringstream utf8;
+    for( int i = 0; i < password.Len()-1; ++i )
+    {
+        unsigned char c = password[i];
+
+        if( c < 0x80 )
+        {
+            // write ascii
+            utf8.put( c );
+        }
+        else
+        {
+            // write utf8 as two escapes
+            utf8.put( 0xc0 | ( c >> 6 ) );
+            utf8.put( 0x80 | ( c & 0x3f ) );
+        }
+    }
+    std::string const & pw = utf8.str();
+
     md5_state_t state;
     md5_init(&state);
-    md5_append(&state, (md5_byte_t const *)(&password[0]), password.Len() - 1);
+    md5_append(&state, (md5_byte_t const *)(&pw[0]), pw.size());
     md5_finish(&state, scrambled.content);
 }
 

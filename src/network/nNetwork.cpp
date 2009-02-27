@@ -1504,10 +1504,23 @@ void login_accept_handler(nMessage &m){
 
 #ifndef NOEXPIRE
 #ifndef DEDICATED
+            // last checked to be compatible with 0.3.1_pb from trunk.
+            // It's ulikely this branch will introduce more bugs/network code revisions, so we're fine accepting all 
+            int lastCheckedTrunkVersion = 21;
+
+            // start of trunk as seen from this branch
+            int trunkBegin = 20;
+
+            // maximal allowed version from this branch
+            int maxVersionThisBranch = sn_currentProtocolVersion + 1;
+
             // expiration for public beta versions
             if ( !sn_AcceptingFromMaster &&
                     ( strstr( VERSION, "rc" ) || strstr( VERSION, "alpha" ) || strstr( VERSION, "beta" ) ) &&
-                    sn_Connections[0].version.Max() > sn_currentProtocolVersion + 1 )
+                 ( sn_Connections[0].version.Max() > lastCheckedTrunkVersion ||
+                   ( sn_Connections[0].version.Max() > maxVersionThisBranch && sn_Connections[0].version.Max() < trunkBegin )
+                     )
+                )
             {
                 throw tGenericException( tOutput("$testing_version_expired"), tOutput("$testing_version_expired_title" ) );
             }
