@@ -108,8 +108,6 @@ protected:
     tPolynomial seglength_; //!< Length of each segment making up the zone
     rColor color_;
 
-    eCoord Position() { return eCoord(posx_(lastTime - referencetime_), posy_(lastTime - referencetime_) ); };
-
     void setCreatedTime(REAL time);
 
     REAL createdtime_; // The in-game time when this shape was first instantiated
