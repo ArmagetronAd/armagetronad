@@ -155,7 +155,7 @@ void zShape::ReadSync( Zone::ShapeSync const & sync, nSenderInfo const & sender 
     // old servers don't send alpha values; replace them by the server controlled alpha setting
     if( !sync.color().has_a() )
     {
-        color_.a_ = sz_zoneAlphaServer;
+        color_.a_ = sz_zoneAlphaServer * .7;
     }
 }
 
