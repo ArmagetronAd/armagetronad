@@ -94,7 +94,9 @@ public:
 #endif
     }
 
-    explicit nStreamMessage( const nStreamDescriptor &, unsigned int messageID = 0  );  // create a new message
+    nStreamMessage( const nStreamDescriptor &, unsigned int messageID );  // create a new message
+
+    explicit nStreamMessage( const nStreamDescriptor & );  // create a new message
 
     void Write(const unsigned short &x){
         // can't write to a reading message, or one that was finalized

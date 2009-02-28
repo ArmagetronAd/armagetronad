@@ -94,6 +94,7 @@ class nMessageStreamer;
 class nProtoBufMessageBase: public nMessageBase
 {
 public:
+    nProtoBufMessageBase( nProtoBufDescriptorBase const & descriptor, unsigned int messageID );
     nProtoBufMessageBase( nProtoBufDescriptorBase const & descriptor );
     ~nProtoBufMessageBase();
 
@@ -178,6 +179,12 @@ class nProtoBufMessage: public nProtoBufMessageBase
 public:
     explicit nProtoBufMessage( nProtoBufDescriptor< PROTOBUF > const & descriptor )
     : nProtoBufMessageBase( descriptor )
+    , descriptor_( descriptor )
+    {
+    }
+
+    nProtoBufMessage( nProtoBufDescriptor< PROTOBUF > const & descriptor, unsigned int messageID )
+    : nProtoBufMessageBase( descriptor, messageID )
     , descriptor_( descriptor )
     {
     }
@@ -563,7 +570,7 @@ public:
     //! creates and schedules a message for broadcast (in client mode, that means just sending it to the server), returning the protovuf to fill
     PROTOBUF & Broadcast( bool ack = true )
     {
-        nProtoBufMessage< PROTOBUF > * m = CreateMessage();
+        nProtoBufMessage< PROTOBUF > * m = CreateMessageAuto( ack );
         lastSent_ = m;
         m->BroadCast( ack );
         return m->AccessProtoBuf();
@@ -572,7 +579,7 @@ public:
     //! creates and schedules a message for broadcast to all clients supporting a certain feature, returning the protobuf to fill
     PROTOBUF & Broadcast( nVersionFeature const & feature, bool ack = true )
     {
-        nProtoBufMessage< PROTOBUF > * m = CreateMessage();
+        nProtoBufMessage< PROTOBUF > * m = CreateMessageAuto( ack );
         lastSent_ = m;
         m->BroadCast( feature, ack );
         return m->AccessProtoBuf();
@@ -581,7 +588,7 @@ public:
     //! creates and schedules a message for sending to a specific peer, returning the protovuf to fill
     PROTOBUF & Send( unsigned int receiver, bool ack = true )
     {
-        nProtoBufMessage< PROTOBUF > * m = CreateMessage();
+        nProtoBufMessage< PROTOBUF > * m = CreateMessageAuto( ack );
         lastSent_ = m;
         m->Send( receiver, 0, ack );
         return m->AccessProtoBuf();
@@ -633,6 +640,24 @@ public:
         return tNEW(nProtoBufMessage< PROTOBUF >)( *this );
     }
 
+    //! creates a message
+    inline nProtoBufMessage< PROTOBUF > * CreateMessage( unsigned int messageID ) const
+    {
+        return tNEW(nProtoBufMessage< PROTOBUF >)( *this, messageID );
+    }
+
+    //! creates a message
+    inline nProtoBufMessage< PROTOBUF > * CreateMessageAuto( bool ack ) const
+    {
+        if( ack )
+        {
+            return CreateMessage();
+        }
+        else
+        {
+            return CreateMessage(0);
+        }
+    }
 private:
     //! instance of this descriptor
     static nProtoBufDescriptor * instance_;

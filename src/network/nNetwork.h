@@ -499,7 +499,9 @@ public:
         messageIDBig_ = 0;
     }
 
-    explicit nMessageBase( const nDescriptorBase &, unsigned int messageID = 0 );  //!< create a new message with a given ID
+    nMessageBase( const nDescriptorBase &, unsigned int messageID );  //!< create a new message with a given ID
+
+    explicit nMessageBase( const nDescriptorBase & );  //!< create a new message with automatic ID
 
     // immediately send the message WITHOUT the queue; dangerous!
     void SendImmediately(int peer,bool ack=true);

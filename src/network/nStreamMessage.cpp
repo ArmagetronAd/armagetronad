@@ -98,6 +98,11 @@ nStreamMessage::nStreamMessage( nStreamDescriptor const & descriptor, unsigned i
 {
 }
 
+nStreamMessage::nStreamMessage( nStreamDescriptor const & descriptor )
+: nMessageBase( descriptor ), readOut(0), descriptor_( descriptor )
+{
+}
+
 void nStreamMessage::OnRead( unsigned char const * & buffer, unsigned char const * end )
 {
     nBinaryReader reader( buffer, end );    

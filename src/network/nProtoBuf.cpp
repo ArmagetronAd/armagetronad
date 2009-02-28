@@ -174,6 +174,11 @@ void nMessageStreamer::StreamToProtoBuf( nStreamMessage & source, nProtoBufMessa
 
 nProtoBufMessageBase::~nProtoBufMessageBase(){}
 
+nProtoBufMessageBase::nProtoBufMessageBase( nProtoBufDescriptorBase const & descriptor, unsigned int messageID )
+: nMessageBase( descriptor, messageID ), 
+  streamer_( descriptor.GetStreamer() )
+{}
+
 nProtoBufMessageBase::nProtoBufMessageBase( nProtoBufDescriptorBase const & descriptor )
 : nMessageBase( descriptor ), 
   streamer_( descriptor.GetStreamer() )

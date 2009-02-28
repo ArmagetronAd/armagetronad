@@ -853,13 +853,13 @@ static void sn_SendAcks( int peer, bool immediately )
 {
     std::deque< unsigned short > & acks = sn_Connections[ peer ].acks_;
 
-    nProtoBufMessage< Network::Ack > * m = sn_ackDescriptor.CreateMessage();
+    nProtoBufMessage< Network::Ack > * m = sn_ackDescriptor.CreateMessage(0);
     for( std::deque< unsigned short >::const_iterator i = acks.begin(); i != acks.end(); ++i )
     {
         m->AccessProtoBuf().add_ack_ids( *i );
     }
     
-    m->BendMessageID(0);
+    // m->BendMessageID(0);
     if( immediately )
     {
         m->SendImmediately( peer, false );
@@ -1143,7 +1143,18 @@ nMessageBase::nMessageBase( const nDescriptorBase &d, unsigned int messageID )
 #ifdef NET_DEBUG
     nMessages++;
 #endif
-    if ( !sn_readingFromPeer && !messageIDBig_ )
+}
+
+nMessageBase::nMessageBase( const nDescriptorBase & d )
+: descriptorID_( d.id ),
+  messageIDBig_( 0 ),
+  senderID_(::sn_myNetID)
+{
+#ifdef NET_DEBUG
+    nMessages++;
+#endif
+
+    if ( !sn_readingFromPeer )
     {
         current_id++;
         if ( ( current_id & 0xffff ) <= IDS_RESERVED )
