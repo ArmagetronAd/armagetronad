@@ -68,6 +68,7 @@ public:
   tFunction getPosX() {return posx_;};
   tFunction getPosY() {return posy_;};
     tPolynomial getRotation2() { return rotation2; };
+    REAL GetCurrentScale() const;
   tFunction getScale() {return scale_;};
   rColor getColor() {return color_;};
 
@@ -75,6 +76,7 @@ public:
     REAL GetEffectiveHeight() const;
 
     //! shortcut rotation functions
+    tCoord GetRotation() const;
     REAL GetRotationSpeed();
     void SetRotationSpeed(REAL r);
     REAL GetRotationAcceleration();
@@ -87,6 +89,10 @@ public:
 
     virtual void setGrowth(REAL growth);  //!< similar to old zones v1 setExpansionSpeed, but generic
     virtual void collapse(REAL speed);  //!< set growth such that collapse happens in a timeframe
+
+private:
+    //! called immediately after the object is created, either right after round beginning or mid-game creation
+    virtual void OnBirth();
 
 public:  // DEPRECATED -- DO NOT USE
     void __deprecated render(const eCamera*cam) { Render(cam); }
@@ -103,8 +109,6 @@ protected:
     tPolynomial segments_; //!< Number of segments to make up the zone
     tPolynomial seglength_; //!< Length of each segment making up the zone
     rColor color_;
-
-    eCoord Position() { return eCoord(posx_(lastTime - referencetime_), posy_(lastTime - referencetime_) ); };
 
     void setCreatedTime(REAL time);
 

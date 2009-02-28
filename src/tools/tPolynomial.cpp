@@ -74,6 +74,14 @@ tPolynomial::tPolynomial(const tPolynomial &tf)  //!< constructor
     // Empty
 }
 
+tPolynomial::tPolynomial(const tFunction &tf, REAL refValue)  //!< constructor
+        : referenceVarValue(refValue),
+        coefs(2)
+{
+    coefs[0] = tf.offset_;
+    coefs[1] = tf.slope_;
+}
+
 tPolynomial::tPolynomial(const tFunction &tf)  //!< constructor
         : referenceVarValue(0.0),
         coefs(2)

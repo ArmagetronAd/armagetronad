@@ -86,6 +86,9 @@ zEffector::setMessage(tString unformated)
     */
 }
 
+void zEffector::applyContext(gParserState const &) {
+}
+
 void
 zEffector::readXML(tXmlParser::node const & node)
 {
@@ -293,17 +296,9 @@ void zEffectorCycleAcceleration::effect(gVectorExtra<ePlayerNetID *> &d_calculat
 
 static zEffectorRegistration regSpawnPlayer("spawnplayer", "", zEffectorSpawnPlayer::create);
 
-void
-zEffectorSpawnPlayer::readXML(tXmlParser::node const & node)
-{
-    // FIXME: Unique issue, we just care about context, not the node itself
-    // FIXME: Someday, this will need to be checked for the right arena/grid
-
-    gParser*parser = dynamic_cast<gParser*>(node.ownerDocument());
-    assert(parser);
-
-    setGrid(parser->contextGrid(node));
-    setArena(parser->contextArena(node));
+void zEffectorSpawnPlayer::applyContext(gParserState const & state) {
+    setGrid( state.get<eGrid*>("grid") );
+    setArena( state.get<gArena*>("arena") );
 }
 
 void zEffectorSpawnPlayer::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)

@@ -70,14 +70,5 @@ zZone * sz_CreateTimedZone( eGrid * grid, const eCoord & pos )
 
     zone->setShape( shape );
 
-    /* TODO FIXME
-    // initialize radius and expansion speed
-    static_cast<eGameObject*>(ret)->Timestep( se_GameTime() );
-    ret->SetReferenceTime();
-    ret->SetRadius( sg_initialSize );
-    ret->SetExpansionSpeed( sg_expansionSpeed );
-    ret->SetRotationSpeed( .3f );
-    */
-
     return zone;
 }

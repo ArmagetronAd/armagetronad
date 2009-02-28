@@ -933,7 +933,9 @@ gParser::parseZoneEffectGroupEffector(eGrid * grid, xmlNodePtr cur, const xmlCha
     // Get the label of the effector to be used
     string effectorAttribute( myxmlGetProp(cur, "effect"));
 
-    effector = zEffectorPtr(zEffectorManager::Create(effectorAttribute, tXmlParser::node(cur)));
+    effector = zEffectorPtr(zEffectorManager::Create(effectorAttribute));
+    effector->applyContext(state);
+    effector->readXML(tXmlParser::node(cur));
 
     return effector;
 }
@@ -2013,20 +2015,35 @@ gParserState::gParserState()
 
 bool
 gParser::State_t::exists(std::string const & var)
+const
 {
     return _varstack.front().find(var) != _varstack.front().end();
 }
 
 bool
 gParser::State_t::isset(std::string const & var)
+const
 {
-    return exists(var) && !_varstack.front()[var]->empty();
+    if (!exists(var))
+        return false;
+    my_map_t vars = _varstack.front();
+    my_map_t::const_iterator i;
+    if ((i = vars.find(var)) == vars.end())
+        return false;
+    if (i->second->empty())
+        return false;
+    return true;
 }
 
 boost::any
 gParser::State_t::getAny(std::string const & var)
+const
 {
-    return *(_varstack.front()[var]);
+    my_map_t vars = _varstack.front();
+    my_map_t::const_iterator i;
+    if ((i = vars.find(var)) == vars.end())
+        return boost::any();
+    return *(i->second);
 }
 
 void

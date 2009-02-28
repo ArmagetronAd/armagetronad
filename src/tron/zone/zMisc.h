@@ -33,13 +33,4 @@ inline bool validateTriad(Triad a, Triad b) {
     return false;
 }
 
-/*
- * HACK 
- * This is a very bad solution that hopefully will find a better design
- *
- * Basis for the "other" data that might be passed to an effect group 
- * ATM: only the value from the monitor is passed 
- * We use an auto_ptr so we can control if there is a value or not 
-*/
-typedef boost::shared_ptr<REAL> miscDataPtr;
 #endif

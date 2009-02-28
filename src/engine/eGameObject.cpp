@@ -638,6 +638,14 @@ bool eGameObject::Timestep(REAL t){
 
 void eGameObject::OnRoundBegin(){}
 void eGameObject::OnRoundEnd(){}
+void eGameObject::OnBirth(){}
+
+void eGameObject::EnsureBorn() {
+    if (_born)
+        return;
+    _born = true;
+    OnBirth();
+}
 
 void eGameObject::Kill(){}
 
@@ -702,6 +710,8 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
 #endif
 
     tJUST_CONTROLLED_PTR< eGameObject > keep( c ); // keep object alive
+
+    c->EnsureBorn();
 
     REAL maxstep=.2;
 

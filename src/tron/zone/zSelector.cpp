@@ -839,29 +839,6 @@ gVectorExtra<ePlayerNetID *> zSelectorAnotherNotTeammateDead::select(gVectorExtr
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //
 // Count the number of other alive players in the same team as thePlayer, ie: excluding thePlayer
 //

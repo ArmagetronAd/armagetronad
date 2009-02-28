@@ -1,3 +1,4 @@
+#include "eSoundMixer.h"
 #include "rScreen.h"
 #include "zShape.h"
 #include "gCycle.h"
@@ -167,6 +168,13 @@ void zShape::applyVisuals( gParserState & state ) {
         setScale( state.get<tFunction>("scale") );
 }
 
+void
+zShape::OnBirth() {
+    eSoundMixer* mixer = eSoundMixer::GetMixer();
+    mixer->PushButton(ZONE_SPAWN, Position());
+}
+
+
 REAL zShape::calcDistanceNear(tCoord & p) {
     return (findPointNear(p) - p).Norm();
 }
@@ -240,6 +248,10 @@ tCoord zShape::Position() const {
     );
 }
 
+REAL zShape::GetCurrentScale() const {
+    return scale_.Evaluate(lasttime_ - referencetime_);
+}
+
 REAL zShape::GetEffectiveBottom() const {
     if (bottom_.Len())
         return bottom_.evaluate(lastTime);
@@ -250,6 +262,12 @@ REAL zShape::GetEffectiveHeight() const {
     if (height_.Len())
         return height_.evaluate(lastTime);
     return sz_zoneHeight;
+}
+
+tCoord zShape::GetRotation() const {
+    REAL currAngle = rotation2.evaluate(lasttime_);
+    tCoord rot( cos(currAngle), sin(currAngle) );
+    return rot;
 }
 
 REAL zShape::GetRotationSpeed() {
@@ -394,8 +412,7 @@ void zShapeCircle::Render(const eCamera * cam )
     if ( color_.a_ <= 0 )
         return;
 
-    REAL currAngle = rotation2.evaluate(lasttime_);
-    eCoord rot( cos(currAngle), sin(currAngle) );
+    tCoord rot = GetRotation();
 
     GLfloat m[4][4]={{rot.x,rot.y,0,0},
                      {-rot.y,rot.x,0,0},
@@ -482,8 +499,7 @@ void zShapeCircle::Render2D(tCoord scale) const {
     if ( color_.a_ <= 0 )
         return;
 
-    REAL currAngle = rotation2.evaluate(lasttime_);
-    eCoord rot( cos(currAngle), sin(currAngle) );
+    tCoord rot = GetRotation();
 
     GLfloat m[4][4]={{rot.x,rot.y,0,0},
                      {-rot.y,rot.x,0,0},
@@ -624,8 +640,7 @@ bool zShapePolygon::isInside(eCoord anECoord) {
     REAL x_ = (*iter).first.Evaluate(lasttime_ - referencetime_);
     REAL y_ = (*iter).second.Evaluate(lasttime_ - referencetime_);
     tCoord centerPos = tCoord(posx_.Evaluate(lasttime_ - referencetime_), posy_.Evaluate(lasttime_ - referencetime_));
-    //    tCoord rotation = tCoord( cosf(rotation_.Evaluate(lasttime_ - referencetime_)), sinf(rotation_.Evaluate(lasttime_ - referencetime_)) );
-    tCoord rotation = tCoord( cosf(rotation2.evaluate(lasttime_)), sinf(rotation2.evaluate(lasttime_)) );
+    tCoord rotation = GetRotation();
     currentScale = scale_.Evaluate(lasttime_ - referencetime_);
     tCoord previous = tCoord(x_, y_).Turn( rotation )*currentScale + centerPos;
 

@@ -341,7 +341,10 @@ void zFortressZone::OnVanish( void )
     {
         int kills = int( sg_onConquestKillRatio * team->NumPlayers() );
         kills = kills > sg_onConquestKillMin ? kills : sg_onConquestKillMin;
-        eCoord pos = GetPosition();
+        tCoord pos;
+        if (shape)
+            pos = shape->Position();
+        // FIXME: What should we use for origin if there is no shape?
 
         while ( kills > 0 )
         {
@@ -395,7 +398,14 @@ void zFortressZone::OnConquest( void )
 {
     if ( team )
     {
-        sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << GetPosition().x << GetPosition().y;
+        if (shape)
+        {
+            tCoord p = shape->Position();
+
+            sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name()) << p.x << p.y;
+        }
+        else
+            sg_basezoneConqueredWriter << ePlayerNetID::FilterName(team->Name());
         sg_basezoneConqueredWriter.write();
     }
     if (shape)
@@ -554,7 +564,10 @@ void zFortressZone::OnRoundBegin( void )
         const tList<eGameObject>& gameObjects = Grid()->GameObjects();
         gCycle * closest = NULL;
         REAL closestDistance = 0;
-        eCoord pos = GetPosition();
+        tCoord pos;
+        if (shape)
+            pos = shape->Position();
+        // FIXME: What should we use for origin if there is no shape?
         for (int i=gameObjects.Len()-1;i>=0;i--)
         {
             gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));

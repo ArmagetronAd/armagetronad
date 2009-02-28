@@ -2728,6 +2728,7 @@ void gGame::StateUpdate(){
                     if ( e )
                     {
                         e->OnRoundBegin();
+                        e->EnsureBorn();
                     }
                 }
             }
