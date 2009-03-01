@@ -293,6 +293,10 @@ void zFlagZone::OnInside( gCycle * target, REAL time )
 	{
 		//Return the Flag
 		GoHome();
+		tColoredString playerName;
+		playerName << *target->Player() << tColoredString::ColorString(1,1,1);
+		sn_ConsoleOut( tOutput( "$player_flag_return", playerName ) );
+		return;
 	}
 		
 	//check to see if player already has a flag
