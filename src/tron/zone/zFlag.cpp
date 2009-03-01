@@ -316,6 +316,10 @@ void zFlagZone::OnInside( gCycle * target, REAL time )
 		//take the flag
 		owner_ = target;
 	    flagHome_ = false;
+		
+		tColoredString playerName;
+		playerName << *target->Player() << tColoredString::ColorString(1,1,1);
+		sn_ConsoleOut( tOutput( "$player_flag_take", playerName ) );
 		//TODO - kill the flag at its home
 	}
 	else
