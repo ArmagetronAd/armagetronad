@@ -940,7 +940,6 @@
 		9BB7B92A0D830448004FE8C3 /* gWall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gWall.h; sourceTree = "<group>"; };
 		9BB7B92B0D830448004FE8C3 /* gWinZone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gWinZone.cpp; sourceTree = "<group>"; };
 		9BB7B92C0D830448004FE8C3 /* gWinZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gWinZone.h; sourceTree = "<group>"; };
-		9BB7B92E0D830448004FE8C3 /* shapeCircle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shapeCircle.h; sourceTree = "<group>"; };
 		9BB7B92F0D830448004FE8C3 /* zEffectGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zEffectGroup.cpp; sourceTree = "<group>"; };
 		9BB7B9300D830448004FE8C3 /* zEffectGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zEffectGroup.h; sourceTree = "<group>"; };
 		9BB7B9310D830448004FE8C3 /* zEffector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zEffector.cpp; sourceTree = "<group>"; };
@@ -951,7 +950,7 @@
 		9BB7B9360D830448004FE8C3 /* zSelector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zSelector.cpp; sourceTree = "<group>"; };
 		9BB7B9370D830448004FE8C3 /* zSelector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zSelector.h; sourceTree = "<group>"; };
 		9BB7B9380D830448004FE8C3 /* zShape.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zShape.cpp; sourceTree = "<group>"; };
-		9BB7B9390D830448004FE8C3 /* zShape.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = zShape.hpp; sourceTree = "<group>"; };
+		9BB7B9390D830448004FE8C3 /* zShape.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zShape.h; sourceTree = "<group>"; };
 		9BB7B93A0D830448004FE8C3 /* zValidator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zValidator.cpp; sourceTree = "<group>"; };
 		9BB7B93B0D830448004FE8C3 /* zValidator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zValidator.h; sourceTree = "<group>"; };
 		9BB7B93C0D830448004FE8C3 /* zZone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zZone.cpp; sourceTree = "<group>"; };
@@ -1609,7 +1608,6 @@
 		9BB7B92D0D830448004FE8C3 /* zone */ = {
 			isa = PBXGroup;
 			children = (
-				9BB7B92E0D830448004FE8C3 /* shapeCircle.h */,
 				9BB7B92F0D830448004FE8C3 /* zEffectGroup.cpp */,
 				9BB7B9300D830448004FE8C3 /* zEffectGroup.h */,
 				9BB7B9310D830448004FE8C3 /* zEffector.cpp */,
@@ -1624,7 +1622,7 @@
 				9BB7B9360D830448004FE8C3 /* zSelector.cpp */,
 				9BB7B9370D830448004FE8C3 /* zSelector.h */,
 				9BB7B9380D830448004FE8C3 /* zShape.cpp */,
-				9BB7B9390D830448004FE8C3 /* zShape.hpp */,
+				9BB7B9390D830448004FE8C3 /* zShape.h */,
 				9B6258890F5865410083C429 /* zTimedZone.cpp */,
 				9B6258880F5865410083C429 /* zTimedZone.h */,
 				9BB7B93A0D830448004FE8C3 /* zValidator.cpp */,
