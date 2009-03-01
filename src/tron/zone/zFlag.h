@@ -47,14 +47,13 @@ public:
 
     void setupVisuals(gParser::State_t &);
     void readXML(tXmlParser::node const &);
-
+	
 private:
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
 
     virtual void OnInside( gCycle *target, REAL time ); //!< reacts on objects inside the zone
     virtual void OnVanish();                           //!< called when the zone vanishes
-    virtual void OnConquest();                         //!< called when the zone gets conquered
-    virtual void CheckSurvivor();                      //!< checks for the only surviving zone
+	virtual void CheckSurvivor();                      //!< checks for the only surviving zone
     virtual void OnRoundBegin();                       //!< called on the beginning of the round
     virtual void OnRoundEnd();                         //!< called on the end of the round
 
@@ -62,7 +61,7 @@ private:
 	void GoHome();
 	
 	bool init_;
-	eTeam initOwnerTeam_;
+	eTeam *initOwnerTeam_;
     eCoord homePosition_;
     gCycle *owner_;
 	float ownerTime_;
@@ -71,7 +70,7 @@ private:
     float blinkUpdateTime_;
     float blinkTrackUpdateTime_;
     gCycle *ownerDropped_;
-   float ownerDroppedTime_;
+    float ownerDroppedTime_;
     float lastHoldScoreTime_;
     bool positionUpdatePending_;
    
