@@ -586,8 +586,8 @@
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
-		65F881F30F5A17EC006B80AC /* zFlag.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = zFlag.cpp; path = ../src/tron/zone/zFlag.cpp; sourceTree = SOURCE_ROOT; };
-		65F881F40F5A17EC006B80AC /* zFlag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = zFlag.h; path = ../src/tron/zone/zFlag.h; sourceTree = SOURCE_ROOT; };
+		65F881F30F5A17EC006B80AC /* zFlag.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zFlag.cpp; sourceTree = "<group>"; };
+		65F881F40F5A17EC006B80AC /* zFlag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zFlag.h; sourceTree = "<group>"; };
 		8C11CA42095A268E007AE0EA /* armagetronad-dedicated */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "armagetronad-dedicated"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CBA60B0089F00F2007E21DC /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		8D1107320486CEB800E47090 /* Armagetron Advanced.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Armagetron Advanced.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1037,8 +1037,6 @@
 		29B97314FDCFA39411CA2CEA /* Armagetron Advanced */ = {
 			isa = PBXGroup;
 			children = (
-				65F881F30F5A17EC006B80AC /* zFlag.cpp */,
-				65F881F40F5A17EC006B80AC /* zFlag.h */,
 				9B77E6C30D8618970022FDF2 /* MacOS */,
 				9BB7B5A30D8302DF004FE8C3 /* Source */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -1616,6 +1614,8 @@
 				9BB7B9300D830448004FE8C3 /* zEffectGroup.h */,
 				9BB7B9310D830448004FE8C3 /* zEffector.cpp */,
 				9BB7B9320D830448004FE8C3 /* zEffector.h */,
+				65F881F30F5A17EC006B80AC /* zFlag.cpp */,
+				65F881F40F5A17EC006B80AC /* zFlag.h */,
 				9B6258860F5865410083C429 /* zFortress.cpp */,
 				9B6258870F5865410083C429 /* zFortress.h */,
 				9BB7B9330D830448004FE8C3 /* zMisc.h */,

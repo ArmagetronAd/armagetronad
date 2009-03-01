@@ -41,7 +41,7 @@ class gParser;
 class zFlagZone: public zZone
 {
 public:
-    static zZone* create(eGrid*grid, std::string const & type) { return new zFortressZone(grid); };
+    static zZone* create(eGrid*grid, std::string const & type) { return new zFlagZone(grid); };
     zFlagZone(eGrid *grid);                                   //!< local constructor
     ~zFlagZone();                                             //!< destructor
 
@@ -59,7 +59,7 @@ private:
     virtual void OnRoundEnd();                         //!< called on the end of the round
 
     void ZoneWasHeld();                                //!< call when the zone was held as long as possible with the set game rules
-
+	void GoHome();
    
 
    

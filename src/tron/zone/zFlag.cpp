@@ -143,28 +143,6 @@ void zFlagZone::readXML(tXmlParser::node const & node)
 {
 }
 
-// count zones belonging to the given team.
-// fill in count and the zone that is farthest to the team.
-void zFlagZone::CountZonesOfTeam( eGrid const * grid, eTeam * otherTeam, int & count, zFlagZone * & farthest )
-{
-    count = 0;
-    farthest = NULL;
-
-    // check whether other zones are already registered to that team
-    const tList<eGameObject>& gameObjects = grid->GameObjects();
-    for (int j=gameObjects.Len()-1;j>=0;j--)
-    {
-        zFlagZone *otherZone=dynamic_cast<zFlagZone *>(gameObjects(j));
-
-        if ( otherZone && otherTeam == otherZone->Team() )
-        {
-            count++;
-            if ( !farthest || otherZone->teamDistance_ > farthest->teamDistance_ )
-                farthest = otherZone;
-        }
-    }
-}
-
 // *******************************************************************************
 // *
 // *	FlagGoHome
@@ -289,16 +267,19 @@ void zFlagZone::OnInside( gCycle * target, REAL time )
         return;
     }
     
-	if(target->CurrentTeam() == self->Owner()
+	if(target->CurrentTeam() == self->Owner())
+	{
+		
+	}
 		
 	//check to see if player already has a flag
 	bool playerHasFlag = false;
 	const tList<eGameObject>& gameObjects = Grid()->GameObjects();
 	for (int i=gameObjects.Len()-1;i>=0;i--)
 		{
-			gFlagZoneHack *otherFlag=dynamic_cast<gFlagZoneHack *>(gameObjects(i));
+			zFlagZone* otherFlag=dynamic_cast<zFlagZone *>(gameObjects(i));
 			if ((otherFlag)){
-				if (otherFlag->Owner() == target ){
+				if (otherFlag->Owner() == target){
 					playerHasFlag = true;
 					return;
 				}
