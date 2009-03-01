@@ -60,10 +60,6 @@ class eGameObject{
     //! called immediately after the object is created, either right after round beginning or mid-game creation
     virtual void OnBirth();
 
-    bool urgentSimulationRequested_;   //!< Flag set when a pending event needs simulation
-
-    static bool diedWhileMoving_;
-
 protected:
     // does a timestep and all interactions for this gameobject,
     // divided in many small steps
@@ -71,9 +67,6 @@ protected:
 
     // tells game objects how far they are allowed to exeed the given simulation time
     static REAL MaxSimulateAhead();
-
-    //! call if you need to be simulated right now
-    void RequestSimulation(){ urgentSimulationRequested_ = true; }
 
     // a list of all eGameObjects that are interesting to watch
     int interestingID;
@@ -130,8 +123,8 @@ private:
 public:
 
     int GOID() const {return id;}
-    int InterestingID() const {return interestingID;}
     REAL LastTime() const {return lastTime;}
+    virtual REAL NextInterestingTime() const {return lastTime;} //!< the next time something interesting is going to happen with this object
 
     eGameObject(eGrid *grid, const eCoord &p,const eCoord &d, eFace *currentface, bool autodelete=1);
     virtual ~eGameObject();
@@ -142,23 +135,14 @@ public:
     virtual REAL DeathTime()const{return deathTime;}
     virtual REAL  Speed()const{return 20;}
 
-    //! returns a guess about which other object killed this
-    virtual eGameObject const * Killer() const { return NULL; }
-
     // position after FPS dependant extrapolation
     virtual eCoord PredictPosition() const {return pos;}
 
     // makes two gameObjects interact:
     virtual void InteractWith( eGameObject *target,REAL time,int recursion=1 );
 
-    enum ePassEdgeResult
-    {
-        eContinue, // go on moving
-        eAbort,    // abort the movement, freeze in this spot
-    };
-
-    // what happens if we pass eWall w? (at position e->p[0]*a + e->p[1]*(1-a) ) Return value should be eContinue if the movement should be continued, eAbort if not.
-    virtual ePassEdgeResult PassEdge( const eWall *w,REAL time,REAL a,int recursion=1 );
+    // what happens if we pass eWall w? (at position e->p[0]*a + e->p[1]*(1-a) )
+    virtual void PassEdge( const eWall *w,REAL time,REAL a,int recursion=1 );
 
     // what length multiplicator does driving along the given wall get when it is the given distance away?
     virtual REAL PathfindingModifier( const eWall *w ) const { return 1 ;}
@@ -194,11 +178,6 @@ public:
     //! tells whether the object is alive
     virtual bool Alive() const {return false;}
 
-   //! equivalent to old throw eDeath
-   ePassEdgeResult DieWhileMoving();
-   //! returns true ONCE after DieWhileMoving was called
-   bool DiedWhileMoving();
-
     //! draws object to the screen using OpenGL
     virtual void Render(const eCamera *cam);
 
@@ -220,8 +199,8 @@ public:
     virtual void RenderCockpitVirtual(bool primary=false);
 
     //sound output
-    virtual void SoundMix(unsigned char *dest,unsigned int len,
-                          int viewer,REAL rvol,REAL lvol){}
+    //virtual void SoundMix(unsigned char *dest,unsigned int len,
+    //                      int viewer,REAL rvol,REAL lvol){};
 
     // internal camera
     virtual eCoord CamDir()  const {return dir;}
@@ -278,6 +257,14 @@ public:
 
 private:
     virtual void DoRemoveFromGame(); //!< called when removed from the game
+};
+
+//! Exception to throw when a gameobject dies during movement
+class eDeath
+{
+public:
+    eDeath(){};   //!< constructor
+    ~eDeath(){};  //!< destructor
 };
 
 #endif

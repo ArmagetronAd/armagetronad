@@ -25,7 +25,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#include "rGL.h"
 #include "eGameObject.h"
 #include "uInputQueue.h"
 #include "eTimer.h"
@@ -33,8 +32,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eWall.h"
 #include "tConsole.h"
 #include "rScreen.h"
+#include "rGL.h"
 
-#include "eSound.h"
 #include "eSoundMixer.h"
 
 #include "eAdvWall.h"
@@ -47,16 +46,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <map>
 
 uActionPlayer eGameObject::se_turnRight("CYCLE_TURN_RIGHT", -10);
-static uActionTooltip se_turnRightTooltip( uActionTooltip::Level_Essential, eGameObject::se_turnRight, 11, &ePlayer::VetoActiveTooltip );
 
 uActionPlayer eGameObject::se_turnLeft("CYCLE_TURN_LEFT", -10);
-static uActionTooltip se_turnLeftTooltip( uActionTooltip::Level_Essential, eGameObject::se_turnLeft, 10, &ePlayer::VetoActiveTooltip );
 
 
 // entry and deletion in the list of all gameObjects
 void eGameObject::AddToList(){
-    eSoundLocker locker;
-
     if ( id < 0 )
         AddRef();
 
@@ -64,8 +59,6 @@ void eGameObject::AddToList(){
     grid->gameObjects.Add(this,id);
 }
 void eGameObject::RemoveFromList(){
-    eSoundLocker locker;
-
     int oldID = id;
 
     currentFace = 0;
@@ -78,8 +71,6 @@ void eGameObject::RemoveFromList(){
 }
 
 void eGameObject::RemoveFromListsAll(){
-    eSoundLocker locker;
-
     int oldID = id;
 
     currentFace = 0;
@@ -126,7 +117,6 @@ void eGameObject::DoRemoveFromGame()
 eGameObject::eGameObject(eGrid *g,const eCoord &p,const eCoord &d,eFace *currentface,bool autodel)
         :autodelete(autodel),pos(p),dir(d),z(0),grid(g){
     tASSERT(g);
-    urgentSimulationRequested_=false;
     currentFace=currentface;
     lastTime=se_GameTime();
     id=-1;
@@ -135,7 +125,6 @@ eGameObject::eGameObject(eGrid *g,const eCoord &p,const eCoord &d,eFace *current
     if ( lastTime < 0 )
         lastTime=0;
     team = 0;
-    _born = 0;
 }
 
 eGameObject::~eGameObject(){
@@ -152,16 +141,8 @@ eGameObject::~eGameObject(){
 void eGameObject::InteractWith(eGameObject *,REAL,int){}
 
 // what happens if we pass eWall w?
-eGameObject::ePassEdgeResult eGameObject::PassEdge(const eWall *w,REAL,REAL,int){
-    if (w)
-    {
-        Kill();
-        return eAbort;
-    }
-    else
-    {
-        return eContinue;
-    }
+void eGameObject::PassEdge(const eWall *w,REAL,REAL,int){
+    if (w) Kill();
 }
 
 static int se_moveTimeout = 100;
@@ -179,12 +160,10 @@ typedef std::multimap< REAL, eTempEdgePassing > eTempEdgeMap;
 // moves
 void eGameObject::Move( const eCoord &dest, REAL startTime, REAL endTime, bool useTempWalls )
 {
-    diedWhileMoving_ = false;
-
 #ifdef DEBUG
     grid->Check();
 #endif
-    if (!isfinite(dest.x) || !isfinite(dest.y))
+    if (!finite(dest.x) || !finite(dest.y))
     {
         st_Breakpoint();
         return;
@@ -201,7 +180,7 @@ void eGameObject::Move( const eCoord &dest, REAL startTime, REAL endTime, bool u
     grid->Range(stop.NormSquared());
 
 #ifdef DEBUG
-    if (!isfinite(stop.x) || !isfinite(stop.y))
+    if (!finite(stop.x) || !finite(stop.y))
     {
         st_Breakpoint();
 
@@ -261,6 +240,11 @@ void eGameObject::Move( const eCoord &dest, REAL startTime, REAL endTime, bool u
     if (currentFace){
         // start iterator for collisions with temporary walls
         eTempEdgeMap::const_iterator currentTempCollision = tempCollisions.begin();
+
+        // we modify our position while we go; we need to compensate
+        // all time calculations for that. This variable stores how much
+        // of the way to the target position we're already gone.
+        REAL goneRatio = 0;
 
         int timeout = se_moveTimeout;
 
@@ -393,16 +377,14 @@ rerun:
 
             if (best)
             {
+                // update the fraction of the full way we've gone so far
+                goneRatio = goneRatio + ( 1 - goneRatio ) * bestERatio;
+
                 // handle stored temp collisions
-                while ( currentTempCollision != tempCollisions.end() && (*currentTempCollision).first < bestERatio )
+                while ( currentTempCollision != tempCollisions.end() && (*currentTempCollision).first < goneRatio )
                 {
                     eTempEdgePassing const & passing = (*currentTempCollision).second;
-                    auto res = PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
-                    if(res != eContinue)
-                    {
-                        pos = passing.wall->Point(passing.ratio);
-                        return;
-                    }
+                    PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
                     ++ currentTempCollision;
                 }
 
@@ -414,13 +396,7 @@ rerun:
                 // leave this face (through a wall)
                 eWall*     w     = best->GetWall();
                 if (w)
-                {
-                    auto res = PassEdge(w,time,bestRRatio,0);
-                    if(res != eContinue)
-                    {
-                        return;
-                    }
-                }
+                    PassEdge(w,time,bestRRatio,0);
 
                 // set next incoming edge
                 tASSERT(best->Other());
@@ -433,13 +409,7 @@ rerun:
                     w = in->GetWall();
 
                     if (w)
-                    {
-                        auto res = PassEdge(w,time,bestRRatio,0);
-                        if(res != eContinue)
-                        {
-                            return;
-                        }
-                    }
+                        PassEdge(w,time,bestRRatio,0);
                 }
 
                 // switch to the next face
@@ -463,13 +433,7 @@ rerun:
         while ( currentTempCollision != tempCollisions.end() )
         {
             eTempEdgePassing const & passing = (*currentTempCollision).second;
-            auto res = PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
-            if(res != eContinue)
-            {
-                pos = passing.wall->Point(passing.ratio);
-                return;
-            }
-
+            PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
             ++ currentTempCollision;
         }
     }
@@ -539,8 +503,8 @@ void eGameObject::FindCurrentFace(){
 #ifdef DEBUG
         con << "Attempting to get a current face, but object is not in game.\n";
         st_Breakpoint();
-#endif        
         return;
+#endif        
     }
 
     // did that do the trick? If no, use brute force.
@@ -618,16 +582,22 @@ void eGameObject::FindCurrentFace(){
 #ifdef DEBUG
                 eFace * lastFace = currentFace;
 #endif
-                Move( oldPos, lastTime, lastTime, false );
-                if(diedWhileMoving_) // ignore death exceptions and leave object where it would have died
+                try
+                {
+                    Move( oldPos, lastTime, lastTime, false );
+                }
+                catch( eDeath & ) // ignore death exceptions and leave object where it would have died
                 {
 #ifdef DEBUG
                     // try again (yeah, this looks like a WTF, but it really helps in some cases because the situation has changed since the last try. /me blames floating points)
                     // besides, (now, this was changed) the start position changed.
-                    pos = center;
-                    currentFace = lastFace;
-                    Move( oldPos, lastTime, lastTime, false );
-                    diedWhileMoving_ = false;
+                    try
+                    {
+                        pos = center;
+                        currentFace = lastFace;
+                        Move( oldPos, lastTime, lastTime, false );
+                    }
+                    catch( eDeath & ){}
 #endif
                 }
 
@@ -678,21 +648,6 @@ void eGameObject::EnsureBorn() {
 }
 
 void eGameObject::Kill(){}
-
-bool eGameObject::diedWhileMoving_ = false;
-
-eGameObject::ePassEdgeResult eGameObject::DieWhileMoving()
-{
-    diedWhileMoving_ = true;
-    return eAbort;
-}
-
-bool eGameObject::DiedWhileMoving()
-{
-    bool ret = diedWhileMoving_;
-    diedWhileMoving_ = false;
-    return ret;
-}
 
 // draws it to the screen using OpenGL
 void eGameObject::Render(const eCamera *){}
@@ -754,13 +709,15 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
     c->grid->Check();
 #endif
 
-    diedWhileMoving_ = false;
-
     tJUST_CONTROLLED_PTR< eGameObject > keep( c ); // keep object alive
 
     c->EnsureBorn();
 
     REAL maxstep=.2;
+
+    // don't do a thing if the timestep is too small
+    if (fabs(currentTime - c->lastTime) < .001)
+        return false;
 
     // be more careful when going back
     if (currentTime<c->lastTime)
@@ -788,8 +745,6 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
                 c->InteractWith(c->grid->gameObjectsInteresting(j),currentTime,0);
 
         REAL timeThisStep = lastTime+i*(currentTime-lastTime)/number_of_steps;
-
-        c->urgentSimulationRequested_ = false;
         ret = ret || c->Timestep(timeThisStep);
         c->FindCurrentFace();
 
@@ -797,14 +752,6 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
         if ( 2 * c->lastTime < timeThisStep + lastTime )
             break;
     }
-    for(int timeout = 10; timeout >= 0 && c->urgentSimulationRequested_; --timeout )
-    {
-        // simulate on while events are pending
-        c->urgentSimulationRequested_ = false;
-        ret = ret || c->Timestep(currentTime);
-        c->FindCurrentFace();
-    }
-
 #ifdef DEBUG
     c->grid->Check();
 #endif
@@ -813,7 +760,7 @@ bool eGameObject::TimestepThis(REAL currentTime,eGameObject *c){
 }
 
 #ifdef DEDICATED
-static REAL se_maxSimulateAhead = .1f;
+static REAL se_maxSimulateAhead = .01f;
 static tSettingItem<REAL> se_maxSimulateAheadConf( "MAX_SIMULATE_AHEAD", se_maxSimulateAhead );
 #endif
 
@@ -848,14 +795,23 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
 #endif
         simTime -= c->Lag();
 
-    REAL maxSimTime = simTime;
 #ifdef DEDICATED
-    se_maxSimulateAheadLeft = se_maxSimulateAhead+se_lazyLag;
+    REAL nextTime = c->NextInterestingTime();
+
+    // store the time left to simulate
+    se_maxSimulateAheadLeft = simTime + se_maxSimulateAhead - nextTime;
+    if ( se_maxSimulateAheadLeft < 0 )
+        se_maxSimulateAheadLeft = 0;
 
     REAL lagThreshold = c->LagThreshold();
-    if( !c->urgentSimulationRequested_ )
+    if ( simTime - lagThreshold < nextTime && nextTime < simTime + se_maxSimulateAhead )
     {
-        // nothing interesting happening. add an extra portion of lag compensation
+        // something interesting is going to happen, see what it is
+        simTime = nextTime;
+    }
+    else
+    {
+        // add an extra portion of lag compensation
         simTime -= lagThreshold;
 
         if ( simTime < c->LastTime() + minTimestep )
@@ -864,11 +820,6 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
             return;
         }
     }
-    else
-    {
-        maxSimTime += se_maxSimulateAheadLeft;
-    }
-
 #endif
 
     // check for teleports out of arena bounds
@@ -881,7 +832,7 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
     }
 
     // only simulate forward here
-    if ( maxSimTime > c->lastTime )
+    if ( simTime > c->lastTime )
     {
         if (TimestepThis(simTime,c))
         {
@@ -949,9 +900,6 @@ void eGameObject::RenderAll(eGrid *grid, const eCamera *cam){
                 // but the small flickering error is to be tolerated, especially
                 // since alpha blended game objects tend to gently fade in.
                 int firstAlphaID = firstAlpha->id;
-
-                eSoundLocker locker;
-	       
                 grid->gameObjects.Remove(firstAlpha,firstAlpha->id);
                 grid->gameObjects.Add(firstAlpha,firstAlpha->id);
                 grid->gameObjects.Remove(object,object->id);

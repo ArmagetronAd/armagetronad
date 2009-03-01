@@ -9,18 +9,21 @@
 #include <map>
 #include <string>
 
+#ifdef ENABLE_ZONESV2
+#include <boost/any.hpp>
+#endif
+
 class eGrid;
 class gArena;
 class ePoint;
 class gGame;
 class gWallRim;
-class gXMLCharReturn;
 
 #ifdef ENABLE_ZONESV2
-#include <boost/any.hpp>
 #include "zone/zShape.h"
 #include "zone/zZone.h"
 #include "zone/zMisc.h"
+#endif
 
 class gParserState {
 private:
@@ -57,7 +60,6 @@ public:
     void push();
     void pop();
 };
-#endif
 
 /*
 Note to the reader: In the full World idea, the parser should, 
@@ -90,7 +92,7 @@ public:
 
 protected:
     bool trueOrFalse(char *str);
-    gXMLCharReturn myxmlGetProp(xmlNodePtr cur, const char *name);
+    char *myxmlGetProp(xmlNodePtr cur, const char *name);
     int myxmlGetPropInt(xmlNodePtr cur, const char *name);
     float myxmlGetPropFloat(xmlNodePtr cur, const char *name);
     bool myxmlGetPropBool(xmlNodePtr cur, const char *name);

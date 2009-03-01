@@ -53,7 +53,7 @@ namespace Network{ class nNetObjectInit; }
 #include "nNetObject.h"
 
 class nNetObject;
-struct nNetObjectRegistrar;
+class nNetObjectRegistrar;
 
 class nBinaryReader;
 class nBinaryWriter;
@@ -169,37 +169,6 @@ private:
 };
 
 // **********************************************************************
-// nSenderInfo
-// **********************************************************************
-
-//! extra information about the sender of a message
-class nSenderInfo
-{
-public:
-    //! reference to the message, it contains all info
-    nMessageBase const & envelope;
-    
-    int SenderID() const
-    {
-        return envelope.SenderID();
-    }
-    
-    int MessageIDBig() const
-    {
-        return envelope.MessageIDBig();
-    }
-    
-    unsigned short MessageID() const
-    {
-        return envelope.MessageID();
-    }
-    
-    explicit nSenderInfo( nMessageBase const & e )
-    : envelope( e )
-    {}
-};
-
-// **********************************************************************
 // nProtoBufMessage
 // **********************************************************************
 
@@ -290,6 +259,37 @@ private:
 
 template< class PROTOBUF >
 PROTOBUF nProtoBufMessage< PROTOBUF >::workProtoBuf_;
+
+// **********************************************************************
+// nSenderInfo
+// **********************************************************************
+
+//! extra information about the sender of a message
+struct nSenderInfo
+{
+public:
+    //! reference to the message, it contains all info
+    nMessageBase const & envelope;
+
+    int SenderID() const
+    {
+        return envelope.SenderID();
+    }
+
+    int MessageIDBig() const
+    {
+        return envelope.MessageIDBig();
+    }
+
+    unsigned short MessageID() const
+    {
+        return envelope.MessageID();
+    }
+
+    explicit nSenderInfo( nMessageBase const & e )
+    : envelope( e )
+    {}
+};
 
 // **********************************************************************
 // nMessageTranslatorBase
@@ -482,27 +482,18 @@ public:
     static nMessageStreamer * SyncStreamer();
 
 protected:
-    // fetches the network object part from a creation/sync message
-    template< class PROTOBUF >
-    static Network::NetObjectSync const & GetNetObjectSync( PROTOBUF const & message )
-    {
-        tASSERT( message.has_base() );
-        return GetNetObjectSync( message.base() );
-    }
-
-    static Network::NetObjectSync const & GetNetObjectSync ( Network::NetObjectSync const & message );
-
     // fetches the network object ID from a creation message
     template< class PROTOBUF >
     static unsigned int GetObjectID( PROTOBUF const & message )
     {
-        return GetObjectID( GetNetObjectSync( message ) );
+        tASSERT( message.has_base() );
+        return GetObjectID( message.base() );
     }
 
-    static unsigned int GetObjectID( Network::NetObjectSync const & message );
+    static unsigned int GetObjectID ( Network::NetObjectSync const & message );
 
     //! checks to run before creating a new object
-    static bool PreCheck( Network::NetObjectSync const & sync, nSenderInfo sender );
+    static bool PreCheck( unsigned short id, nSenderInfo sender );
 
     //! checks to run after creating a new object
     static void PostCheck( nNetObject * object, nSenderInfo sender );
@@ -760,7 +751,9 @@ private:
 
     static void HandleCreation( PROTOBUF const & message, nSenderInfo const & sender )
     {
-        if( PreCheck( GetNetObjectSync( message ), sender ) )
+        unsigned short id = GetObjectID( message );
+
+        if( PreCheck( id, sender ) )
         {
             nNetObjectRegistrar registrar;
             tJUST_CONTROLLED_PTR< OBJECT > n=tNEW(OBJECT)( message, sender );
@@ -851,7 +844,7 @@ private:
 
         // read sync
         PROTOBUF sync;
-        this->StreamFrom( envelope, sync, create ? nProtoBufDescriptorBase::SECTION_First : nProtoBufDescriptorBase::SECTION_Second );
+        StreamFrom( envelope, sync, create ? nProtoBufDescriptorBase::SECTION_First : nProtoBufDescriptorBase::SECTION_Second );
         cast.ReadSync( nProtoBufBaseConverter< PROTOBUF const >( sync ), nSenderInfo( envelope ) );
     }
 
@@ -865,7 +858,7 @@ private:
         // read sync
         PROTOBUF sync;
         cast.WriteSync( nProtoBufBaseConverter< PROTOBUF >( sync ), create );
-        this->StreamTo( sync, envelope, create ? nProtoBufDescriptorBase::SECTION_First : nProtoBufDescriptorBase::SECTION_Second );
+        StreamTo( sync, envelope, create ? nProtoBufDescriptorBase::SECTION_First : nProtoBufDescriptorBase::SECTION_Second );
     }
 
     virtual nProtoBufMessageBase* DoCreateMessage() const

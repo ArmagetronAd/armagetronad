@@ -11,9 +11,6 @@
 #include <sys/types.h>
 #include <stdarg.h>
 #include <memory>
-#include <boost/assign/list_of.hpp>
-#include <boost/foreach.hpp>
-#define foreach BOOST_FOREACH
 
 #include "eCoord.h"
 #include "eGrid.h"
@@ -69,40 +66,6 @@ static nSettingItemWatched<bool> safetymecanism_polygonal_shapeused("POLYGONAL_S
 
 #endif
 int mapVersion = 0; // The version of the map currently being parsed. Used to adapt parsing to support version specific features
-
-// lean auto-deleting wrapper class for xmlChar * return values the user has to clean after use
-class gXMLCharReturn
-{
-public:
-    gXMLCharReturn( xmlChar * string = NULL ): string_( string ){}
-    ~gXMLCharReturn(){ Destroy(); }
-
-    //! auto_ptrish copy constructor
-    gXMLCharReturn( gXMLCharReturn const & other ): string_( const_cast< gXMLCharReturn & >( other ).Release() ){}
-
-    //! auto_ptrish assignment operator
-    gXMLCharReturn & operator = ( gXMLCharReturn & other ){ string_ = other.Release(); return *this; }
-
-    //! conversion to char *
-    operator char * () const{ return reinterpret_cast< char * >( string_ ); }
-
-    //! conversion to xmlChar *( bad idea, causes overload trouble )
-    // operator xmlChar * () const{ return string_; }
-
-    //! releases ownership of the string and returns it
-    xmlChar * Release(){ xmlChar * ret = string_; string_ = 0; return ret; }
-
-    //! returns the xml string without modifying it
-    xmlChar * GetXML() const { return string_; }
-
-    //! returns the string without modifying it
-    char * Get() const { return *this; }
-
-    //! destroys the string
-    void Destroy(){ xmlFree(string_); string_ = 0; }
-private:
-    xmlChar * string_; //!< the string storage
-};
 
 //! Warn about deprecated map format
 static void sg_Deprecated()
@@ -168,23 +131,24 @@ gParser::trueOrFalse(char *str)
     return (!strncasecmp(str, "t", 1) || !strncasecmp(str, "y", 1) || atoi(str));
 }
 
-gXMLCharReturn
+char *
 gParser::myxmlGetProp(xmlNodePtr cur, const char *name) {
-    return gXMLCharReturn(xmlGetProp(cur, (const xmlChar *)name));
+    return (char *)xmlGetProp(cur, (const xmlChar *)name);
 }
 
 int
 gParser::myxmlGetPropInt(xmlNodePtr cur, const char *name) {
-    gXMLCharReturn v = myxmlGetProp(cur, name);
+    char *v = myxmlGetProp(cur, name);
     if (v == NULL)	return 0;
     int r = atoi(v);
+    xmlFree(v);
     return r;
 }
 
 #ifdef ENABLE_ZONESV2
 rColor
 gParser::myxmlGetPropColorFromHex(xmlNodePtr cur, const char *name) {
-    gXMLCharReturn v = myxmlGetProp(cur, name);
+    char *v = myxmlGetProp(cur, name);
     if (v == NULL)	return rColor();
     int r = strtoul(v, NULL, 0);
     rColor aColor;
@@ -204,23 +168,26 @@ gParser::myxmlGetPropColorFromHex(xmlNodePtr cur, const char *name) {
     aColor.r_ = ((REAL)(r & 255)) / 255.0;
     r /= 256;
 
+    xmlFree(v);
     return aColor;
 }
 #endif
 
 float
 gParser::myxmlGetPropFloat(xmlNodePtr cur, const char *name) {
-    gXMLCharReturn v = myxmlGetProp(cur, name);
+    char *v = myxmlGetProp(cur, name);
     if (v == NULL)	return 0.;
     float r = atof(v);
+    xmlFree(v);
     return r;
 }
 
 bool
 gParser::myxmlGetPropBool(xmlNodePtr cur, const char *name) {
-    gXMLCharReturn v = myxmlGetProp(cur, name);
+    char *v = myxmlGetProp(cur, name);
     if (v == NULL)	return false;
     bool r = trueOrFalse(v);
+    xmlFree(v);
     return r;
 }
 
@@ -228,11 +195,12 @@ gParser::myxmlGetPropBool(xmlNodePtr cur, const char *name) {
 Triad
 gParser::myxmlGetPropTriad(xmlNodePtr cur, const char *name) {
     Triad res = _ignore;
-    gXMLCharReturn v = myxmlGetProp(cur, name);
+    char *v = myxmlGetProp(cur, name);
     if (v == NULL)           res = _false;
     else if (strcmp(v, "true")==0)  res = _true;
     else if (strcmp(v, "false")==0) res = _false;
 
+    xmlFree(v);
     return res;
 }
 #endif
@@ -272,13 +240,13 @@ gParser::isElement(const xmlChar *elementName, const xmlChar *searchedElement, c
  */
 bool
 gParser::isValidAlternative(xmlNodePtr cur, const xmlChar * keyword) {
-    gXMLCharReturn version = myxmlGetProp(cur, "version");
+    xmlChar *version = xmlGetProp(cur, (const xmlChar *) "version");
     /*
      * Find non empty version and
      * Alternative element, ie those having a name starting by "Alternative" and
      * only the Alternative elements that are for our version, ie Arthemis
      */
-    return ((version != NULL) && isElement(cur->name, (const xmlChar *)"Alternative", keyword) && validateVersionRange(version.GetXML(), (const xmlChar*)"Artemis", (const xmlChar*)"0.2.8.0") );
+    return ((version != NULL) && isElement(cur->name, (const xmlChar *)"Alternative", keyword) && validateVersionRange(version, (const xmlChar*)"Artemis", (const xmlChar*)"0.2.8.0") );
 }
 
 bool
@@ -714,7 +682,6 @@ gParser::parseShapeCircleBachus(eGrid *grid, xmlNodePtr cur, zZone * zone, const
             shapePtr->setRadius( tfRadius );
     }
 
-    zone->setShape(shape);
     return shape;
 }
 
@@ -743,17 +710,6 @@ void gParser::myCheapParameterSplitter(const string &str, tFunction &tf, bool ad
     tf = tFunction().parse(str, addSizeMultiplier ? &sizeMultiplier : NULL);
 }
 
-typedef std::map<std::string, void(zShape::*)(const tPolynomial&)> shape_polynomial_settings_map_t;
-static shape_polynomial_settings_map_t shape_polynomial_settings =
-    boost::assign::map_list_of("rotation", &zShape::setRotation2)
-                              ("bottom", &zShape::SetBottom)
-                              ("height", &zShape::SetHeight)
-                              ("segments", &zShape::SetSegments)
-                              ("segment_length", &zShape::SetSegmentLength)
-                              ("segment_steps", &zShape::SetSegmentSteps)
-                              ("floor_scale_pct", &zShape::SetFloorScalePct)
-                              ("proximity_distance", &zShape::SetProximityDistance)
-                              ("proximity_offset", &zShape::SetProximityOffset);
 void
 gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShapePtr &shape)
 {
@@ -776,14 +732,12 @@ gParser::parseShape(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, zShape
     }
     shape->setScale( tfScale );
 
-    foreach(shape_polynomial_settings_map_t::value_type item, shape_polynomial_settings) {
-        const char* name = item.first.c_str();
-        if (myxmlHasProp(cur, name)) {
-            string str = string(myxmlGetProp(cur, name));
-            tPolynomial tpAttribute;
-	    tpAttribute.parse(str);
-            (shape->*item.second)( tpAttribute );
-        }
+    if (myxmlHasProp(cur, "rotation")) {
+        string str = string(myxmlGetProp(cur, "rotation"));
+        tPolynomial tpRotation;
+
+	tpRotation.parse(str);
+        shape->setRotation2( tpRotation );
     }
 
     cur = cur->xmlChildrenNode;
@@ -1217,7 +1171,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
         bool needSimpleEffect = false;
         if (myxmlHasProp(zoneroot, "effect"))
         {
-            string ztype( myxmlGetProp(zoneroot, "effect") );
+            char*ztype = myxmlGetProp(zoneroot, "effect");
             zZone*zptr = zZoneExtManager::Create(ztype, grid);
             if (zptr)
                 zone = zZonePtr(zptr);
@@ -1228,21 +1182,20 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             }
         }
         else
-        {
             zone = zZonePtr(zZoneExtManager::Create("", grid));
-        }
 
-        // If a name was assigned to it, save the zone in a map so it can be refered to
-        if (!zoneName.empty())
-        {
-            mapZones[zoneName] = zone;
-             std::vector< zZoneInfluencePtr > myZIP = ZIPtoMap[zoneName];
-            std::vector< zZoneInfluencePtr >::iterator i;
-            for (i = myZIP.begin(); i < myZIP.end(); ++i)
-                (*i)->bindZone(zone);
-            ZIPtoMap.erase(zoneName);
-        }
-        zone->setName(zoneName);
+            // If a name was assigned to it, save the zone in a map so it can be refered to
+            if (!zoneName.empty())
+            {
+                mapZones[zoneName] = zone;
+
+                std::vector< zZoneInfluencePtr > myZIP = ZIPtoMap[zoneName];
+                std::vector< zZoneInfluencePtr >::iterator i;
+                for (i = myZIP.begin(); i < myZIP.end(); ++i)
+                    (*i)->bindZone(zone);
+                ZIPtoMap.erase(zoneName);
+            }
+            zone->setName(zoneName);
 
         zone->setupVisuals(state);
         zone->readXML(tXmlParser::node(cur));
@@ -1259,7 +1212,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             // On Enter for now; TODO: fortress at least will need an inside
             gVectorExtra< nNetObjectID > noOwners;
             zEffectGroupPtr ZEG = zEffectGroupPtr(new zEffectGroup(noOwners, noOwners));
-            Triad noTriad(_false);
+            Triad noTriad;
             zValidatorPtr ZV = zValidatorPtr(zValidatorAll::create(noTriad, noTriad));
             zSelectorPtr ZS = zSelectorPtr(zSelectorSelf::create());
             ZS->setCount(-1);
@@ -1370,7 +1323,7 @@ gParser::parseShapeCircle(eGrid *grid, xmlNodePtr cur, float &x, float &y, float
 bool
 gParser::parseZoneArthemis_v1(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 {
-    float x = 0, y = 0, radius = 0, growth = 0;
+    float x, y, radius, growth;
     bool shapeFound = false;
     xmlNodePtr shape = cur->xmlChildrenNode;
 
@@ -1406,13 +1359,13 @@ gParser::parseZoneArthemis_v1(eGrid * grid, xmlNodePtr cur, const xmlChar * keyw
     gZone * zone = NULL;
     if (sn_GetNetState() != nCLIENT )
     {
-        if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"win")) {
+        if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"win")) {
             zone = tNEW( gWinZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
-        else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"death")) {
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"death")) {
             zone = tNEW( gDeathZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
-        else if (!xmlStrcmp(myxmlGetProp(cur, "effect").GetXML(), (const xmlChar *)"fortress")) {
+        else if (!xmlStrcmp(xmlGetProp(cur, (const xmlChar *)"effect"), (const xmlChar *)"fortress")) {
             zone = tNEW( gBaseZoneHack) ( grid, eCoord(x*sizeMultiplier,y*sizeMultiplier) );
         }
 
@@ -1625,10 +1578,7 @@ void
 gParser::parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
 {
     ePoint *R = NULL, *sR = NULL;
-#ifdef DEBUG
-    REAL ox, oy;
-#endif
-    REAL x, y;
+    REAL ox, oy, x, y;
 
     REAL height = myxmlGetPropFloat(cur, "height");
     if ( height <= 0 )
@@ -1673,10 +1623,8 @@ gParser::parseWall(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword)
             }
         }
         cur = cur->next;
-#ifdef DEBUG
         ox = x;
         oy = y;
-#endif
     }
 }
 
@@ -1735,8 +1683,7 @@ gParser::processSubAlt(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword) {
 void
 gParser::parseAlternativeContent(eGrid *grid, xmlNodePtr cur)
 {
-    gXMLCharReturn keywordStore = myxmlGetProp(cur, "keyword");
-    xmlChar * keyword = keywordStore.GetXML();
+    const xmlChar * keyword = xmlGetProp(cur, (const xmlChar *) "keyword");
 
     cur = cur->xmlChildrenNode;
 
@@ -2171,9 +2118,8 @@ gParser::Parse()
     }
 
     if (isElement(cur->name, (const xmlChar *) "Resource")) {
-        gXMLCharReturn resType = myxmlGetProp(cur, "type");
-        if (xmlStrcmp((const xmlChar *) "aamap", resType.GetXML())) {
-            con << "Type aamap expected, found " << resType << " instead\n";
+        if (xmlStrcmp((const xmlChar *) "aamap", xmlGetProp(cur, (const xmlChar *) "type"))) {
+            con << "Type aamap expected, found " << xmlGetProp(cur, (const xmlChar *) "type") << " instead\n";
             con << "formalise this message\n";
         }
         else {

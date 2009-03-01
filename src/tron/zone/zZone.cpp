@@ -301,10 +301,6 @@ void zZone::ReadSync( Zone::ZoneSync const & sync, nSenderInfo const & sender )
 bool zZone::Timestep( REAL time )
 {
     lastTime = time;
-    if( shape )
-    {
-        eGameObject::pos = shape->Position();
-    }
 
     return false;
 }

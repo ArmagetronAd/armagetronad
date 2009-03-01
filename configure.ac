@@ -8,11 +8,7 @@ dnl Comment this out to disable autoconf custom directories:
 m4_include(accustomdir.m4)
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(armagetronad,AUTOMATIC_VERSION)
-
-dnl FIXME: remove this in the future, when automake decides to actually set datarootdir by default
-dnl http://www.gnu.org/software/hello/manual/autoconf/Changed-Directory-Variables.html
-AC_DEFUN([AC_DATAROOTDIR_CHECKED])
+AC_INIT(Armagetronad,AUTOMATIC_VERSION)
 
 #set
 #echo args : "$@"
@@ -31,15 +27,13 @@ dnl AC_CANONICAL_HOST
 AC_PROG_RANLIB
 
 dnl use slighly less ancient tar format allowing slighlty longer filenames.
-AM_INIT_AUTOMAKE([tar-ustar filename-length-max=255 subdir-objects])
+AM_INIT_AUTOMAKE([tar-ustar filename-length-max=255])
 
 dnl detect which link commant to use
 AC_PROG_LN_S
 
-dnl find a parser generator to useo
+dnl find a parser generator to use
 AC_PROG_YACC
-test -r $srcdir/src/tools/values/vParser.cpp || AC_MSG_CHECKING(bison version)
-test -r $srcdir/src/tools/values/vParser.cpp || ${YACC} --version | grep bison || AC_MSG_ERROR(GNU Bison is required to compile from source control.)
 
 dnl check whether m4 is available for documentation processing
 AC_CHECK_PROG(HAVE_M4,m4,true,false)
@@ -54,7 +48,6 @@ AC_SUBST(version)
 
 AC_ARG_VAR(XML2_CONFIG,[Configuration script of libxml2 to use, defaults to xml2-config])
 AC_ARG_VAR(SDL_CONFIG,[Configuration script of SDL to use, defaults to sdl-config])
-AC_ARG_VAR(SDL2_CONFIG,[Configuration script of SDL to use, defaults to sdl2-config])
 AC_ARG_VAR(FREETYPE_CONFIG,[Configuration script of freetype to use, defaults to freetype-config])
 AC_ARG_VAR(CXXFLAGS,Flags passed to the C++ compiler)
 AC_ARG_VAR(DEBUGLEVEL,[Debug level for developers, normal users can safely ignore it. Accepted values go from 0 to 5. See README-DEVELOPER for details.])
@@ -67,21 +60,14 @@ AC_ARG_VAR(APBUILD_CXX2,[Autopackage ABI 2 C++ compiler.])
 AC_ARG_VAR(APBUILD_CC,[Autopackage C compiler.])
 AC_ARG_VAR(CXX_ABI,[Autopackage C++ ABI version.])
 AC_ARG_VAR(APBUILD_STATIC,[Autopackage static libraries.])
-AC_ARG_VAR(ARMAGETRONAD_OS_X_TOOLKIT, [Path to the OS X toolkit directory.])
 
 dnl a modern autoconf is required to process this
 AC_PREREQ(2.50)
 
 build_regular=true
-default_enable_sysinstall=yes
-default_enable_uninstall=yes
-enable_automakedefaults_actual_default=no
+
 have_lzma=false
-
-FTGL_CFLAGS=
-FTGL_LIBS=
-
-AC_ARG_WITH(maxclients, AC_HELP_STRING([--with-maxclients],[sets the hardcoded limit for the number of connected clients (default: 16 for clients and 32 for dedicated servers)]),
+    AC_ARG_WITH(maxclients, AC_HELP_STRING([--with-maxclients],[sets the hardcoded limit for the number of connected clients (default: 16 for clients and 32 for dedicated servers)]),
 [ 
     AC_DEFINE_UNQUOTED(MAXCLIENTS,${withval},maximal number of clients)
 ])
@@ -98,28 +84,6 @@ AC_ARG_ENABLE(dedicated,
 	    ;;
        *) AC_MSG_ERROR(bad value ${enableval} for --enable-dedicated) ;;
      esac],[build_dedicated=false])
-
-AC_ARG_ENABLE(sdl2,
-     AC_HELP_STRING([--enable-sdl2],
-		[enables sdl2 support (default=enabled)]),
-     [case "${enableval}" in
-       yes) use_sdl2=true
-	   	;;
-       no)  use_sdl2=false
-	    ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-sdl2) ;;
-     esac],[use_sdl2=true])
-
-AC_ARG_ENABLE(sdl1,
-     AC_HELP_STRING([--enable-sdl1],
-		[enables sdl1.X support (default=enabled)]),
-     [case "${enableval}" in
-       yes) use_sdl1=true
-	   	;;
-       no)  use_sdl1=false
-	    ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-sdl1) ;;
-     esac],[use_sdl1=true])
 
 
 dnl AC_ARG_ENABLE(glout,
@@ -184,104 +148,6 @@ AC_SUBST(progtitle_server)
 AC_SUBST(build_dedicated)
 AC_SUBST(build_regular)
 
-AC_ARG_WITH([os-x-toolkit],
-	[AC_HELP_STRING([--with-os-x-toolkit@<:@=DIR@:>@],
-		[build using the OS X toolkit. See README-Subversion for more information.])],
-	[
-	    if test "x$withval" != "xno"; then
-    		if test "x$withval" != "xyes"; then
-    			ARMAGETRONAD_OS_X_TOOLKIT="${withval}/libraries"
-    		elif test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
-    			ARMAGETRONAD_OS_X_TOOLKIT="${ARMAGETRONAD_OS_X_TOOLKIT}/libraries"
-    		fi
-    		if test -z "${ARMAGETRONAD_OS_X_TOOLKIT}"; then
-    			AC_MSG_ERROR([An OS X toolkit directory was not specified.])
-    		fi
-		fi
-	],
-	[ARMAGETRONAD_OS_X_TOOLKIT=])
-
-AM_CONDITIONAL([OS_X_TOOLKIT], test -n "${ARMAGETRONAD_OS_X_TOOLKIT}")
-
-AC_ARG_WITH([os-x-arch],
-    [AC_HELP_STRING([--with-os-x-arch=ARCH],
-        [specifies which architecture to build for when using the OS X toolkit.])],
-    [
-        if test "x$withval" != "xno"; then
-            if test "x$withval" != "xyes"; then
-                os_x_arch="$withval"
-            else
-                AC_MSG_ERROR([An OS X arch was not specified.])
-            fi
-        fi
-    ],
-    [os_x_arch=])
-
-AC_ARG_WITH([os-x-sdk],
-    [AC_HELP_STRING([--with-os-x-sdk=DIR],
-        [specifies which SDK to use when using the OS X toolkit.])],
-    [
-        if test "x$withval" != "xno"; then
-            if test "x$withval" != "xyes"; then
-                os_x_sdk="$withval"
-            else
-                AC_MSG_ERROR([An OS X SDK was not specified.])
-            fi
-        fi
-    ],
-    [os_x_sdk=])
-    
-AC_ARG_WITH([os-x-version-min],
-    [AC_HELP_STRING([--with-os-x-version-min=VERSION],
-        [specifies the deployment target to use when using the OS X toolkit.])],
-    [
-        if test "x$withval" != "xno"; then
-            if test "x$withval" != "xyes"; then
-                os_x_version_min="$withval"
-            else
-                AC_MSG_ERROR([An OS X deployment target was not specified.])
-            fi
-        fi
-    ],
-    [os_x_version_min=])
-
-if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
-	test -z "${os_x_arch}" && os_x_arch=`arch`
-	AC_SUBST(os_x_minimum_system_version, `$srcdir/batch/make/os-x-minimum-system-version $os_x_version_min`)
-	
-	if test "x$build_regular" = "xtrue"; then
-		LDFLAGS="-F${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks -rpath ${ARMAGETRONAD_OS_X_TOOLKIT}/Frameworks $LDFLAGS"
-		CPPFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include/AllFrameworks $CPPFLAGS"
-		FTGL_CFLAGS="-I${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include/freetype2"
-		FTGL_LIBS="-lftgl -lfreetype -lbz2"
-	fi
-	
-	CXXFLAGS="-arch ${os_x_arch} $CXXFLAGS"
-	if test -n "$os_x_sdk"; then
-		# We could also set the SDKROOT environment variable, instead of using xcrun.
-		XML2_CONFIG="xcrun --sdk $os_x_sdk xml2-config"
-		CXXFLAGS="-isysroot $os_x_sdk $CXXFLAGS"
-	fi
-	test -n "$os_x_version_min" && CXXFLAGS="-mmacosx-version-min=$os_x_version_min $CXXFLAGS"
-	
-	LDFLAGS="$CXXFLAGS -L${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/lib $LDFLAGS"
-	CPPFLAGS="-isystem ${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/include $CPPFLAGS"
-	
-	OBJCXXFLAGS="$CXXFLAGS $OBJCXXFLAGS"
-	OBJCPPFLAGS="$CPPFLAGS $OBJCPPFLAGS"
-	CFLAGS="$CPPFLAGS $CXXFLAGS $CFLAGS"
-	
-	PATH="${ARMAGETRONAD_OS_X_TOOLKIT}/bin:$PATH"
-	PROTOC="${ARMAGETRONAD_OS_X_TOOLKIT}/${os_x_arch}/bin/protoc"
-		
-	dnl TODO rename MACOSX_XCODE => OS_X_TOOLKIT
-	AC_DEFINE([MACOSX_XCODE], 1, [Define if compiling using the OS X toolkit.])
-	
-	default_enable_sysinstall=no
-	default_enable_uninstall=no
-	enable_automakedefaults_actual_default=yes
-fi
-
 AC_ARG_ENABLE(memmanager,
 	AC_HELP_STRING([--enable-memmanager],
 		[enable custom memory manager on systems that allow it (default=disabled)]),,
@@ -344,7 +210,7 @@ enable_fortress=$enable_zonesv2)
 
 AC_ARG_ENABLE(authentication,
     AC_HELP_STRING([--enable-authentication],
-		[enable server side code for the krawall style user authentication (default=enabled)]),
+		[enable server side code for the krawall style user authentication (default=disabled)]),
     [case "${enableval}" in
        yes) enable_armathentication=yes
 	   	;;
@@ -358,12 +224,17 @@ dnl end alias group
 AC_ARG_ENABLE(automakedefaults,
 	AC_HELP_STRING([--enable-automakedefaults],
 		[enforce the default installation directories as set by automake. localstatedir=prefix/var violates the FHS, so this is off by default.]),,
-enable_automakedefaults=$enable_automakedefaults_actual_default enable_automakedefaults_default=yes)
+enable_automakedefaults=no enable_automakedefaults_default=yes)
+
+AC_ARG_ENABLE(dirty,
+	AC_HELP_STRING([--enable-dirty],
+		[allow dirty GL initialisation (like used with SDL 1.0) even if you have SDL 1.1 or up (default=disabled)]),,
+enable_dirty=no)
 
 AC_ARG_ENABLE(sysinstall,
 	AC_HELP_STRING([--enable-sysinstall],
 		[will install configuration files to /etc/armagetron and create a user if possible (default=enabled)]),,
-		enable_sysinstall=$default_enable_sysinstall)
+enable_sysinstall=yes)
 
 AC_ARG_ENABLE(useradd,
 	AC_HELP_STRING([--enable-useradd],
@@ -417,7 +288,7 @@ else
 	enable_uninstall=yes
 	external_uninstall_cmd=$enableval
 fi,
-enable_uninstall=$default_enable_uninstall)
+enable_uninstall=yes)
 AC_SUBST(external_uninstall_cmd)
 
 AC_ARG_ENABLE(multiver,
@@ -498,65 +369,28 @@ test -z "`echo $CXXFLAGS | grep "\-O"`" && CXXFLAGS="$CXXFLAGS -O2"
 
 test $DEBUGLEVEL -ge 1 && CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-O.,,'` -g -O0"
 test $DEBUGLEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -DDEBUG"
-test $DEBUGLEVEL -ge 3 && enable_memmanager=yes CXXFLAGS="$CXXFLAGS -DNO_MALLOC_REPLACEMENT"
+test $DEBUGLEVEL -ge 3 && enable_memmanager=yes
 test $DEBUGLEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -DDEBUG_EXPENSIVE"
 test $DEBUGLEVEL -ge 5 && CXXFLAGS="$CXXFLAGS -DMEM_DEB"
 
-dnl oddly, this macro needs to be called once unconditionally, or automake borks up.
-dnl pick C++11 standard if we can
-AX_CXXFLAGS_GCC_OPTION(-std=c++11)
-if test -z "`echo $CXXFLAGS | grep "\-std="`"; then
-  dnl maybe it is the future and c++11 is deprecated? C++14 should work, too
-  AX_CXXFLAGS_GCC_OPTION(-std=c++14)
-  if test -z "`echo $CXXFLAGS | grep "\-std="`"; then
-	dnl still nothing? Maybe this one:
-	AX_CXXFLAGS_GCC_OPTION(-std=c++17)
-	if test -z "`echo $CXXFLAGS | grep "\-std="`"; then
-	  dnl last call: pre-c++11 standard. Works on mingw, so why not here?
-	  AX_CXXFLAGS_GCC_OPTION(-std=c++0x)
-	fi
-  fi
-fi
-
-dnl
-dnl	dnl maybe it is the future and c++11 is deprecated? C++14 should work, too
-dnl	AX_CXXFLAGS_GCC_OPTION(-std=c++14z,[],[],[
-dnl		dnl still nothing? Maybe this one:
-dnl		AX_CXXFLAGS_GCC_OPTION(-std=c++17z,[],[],[
-dnl			dnl last call: pre-c++11 standard. Works on mingw, so why not here?
-dnl			AX_CXXFLAGS_GCC_OPTION(-std=c++0x)
-dnl		])
-dnl	])
-dnl])
-
+dnl oddly, this macro needs to be called once unconditionally, or automake
+dnl borks up. Backup CXXFLAGS and restore them in case the test passes. Which it does
+dnl for some versions of GCC.
+CXXFLAGS_BACK="${CXXFLAGS}"
+AX_CXXFLAGS_GCC_OPTION(-nobodyreadsconfigureoutputanyway)
+CXXFLAGS="${CXXFLAGS_BACK}"
 
 if test $CODELEVEL -ge 1; then
     CXXFLAGS="$CXXFLAGS -Wall"
     
     dnl careful, only supported on GCC 4.2 and later
     AX_CXXFLAGS_GCC_OPTION(-Wno-strict-overflow)
-
-    if test $DEBUGLEVEL -lt 1; then
-        dnl false positive warnings for this on boost
-        AX_CXXFLAGS_GCC_OPTION(-Wno-error=maybe-uninitialized)
-    fi
-    
-    dnl dropped out of support
-    dnl AX_CXXFLAGS_GCC_OPTION(-Wno-mismatched-tags)
 fi
 
 dnl test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wshadow -Wpointer-arith -Wfloat-equal -W -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code --pedantic -Winline"
-test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wpointer-arith -W -Wcast-qual -Wcast-align --pedantic -Wno-unused-parameter -Wno-long-long"
+test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wpointer-arith -W -Wcast-qual -Wcast-align --pedantic -Wno-unused-parameter"
 test $CODELEVEL -ge 3 && CXXFLAGS="$CXXFLAGS -Weffc++ -Wshadow -Winline -Wfloat-equal -Wconversion"
 test $CODELEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -Werror"
-
-# unused variables should be tolerated while debugging, they're sometimes just there
-# to be printed in the debugger
-if test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1; then
-    AX_CXXFLAGS_GCC_OPTION(-Wno-unused-but-set-variable)
-    AX_CXXFLAGS_GCC_OPTION(-Wno-unused-variable)
-    AX_CXXFLAGS_GCC_OPTION(-Wno-unused-private-field)
-fi
 
 dnl determine whether "games" should be put into paths: not if it was
 dnl requested with --disable-games or if "games" is already included
@@ -577,9 +411,9 @@ AC_SUBST(games_suffix_doc)
 AC_SUBST(games_suffix_var)
 
 dnl determine memmanager state
-dnl if test x$enable_memmanager != xyes ; then
+if test x$enable_memmanager != xyes ; then
   AC_DEFINE(DONTUSEMEMMANAGER)
-dnl fi
+fi
 
 dnl LibTool configuration
 dnl AC_LIBTOOL_DLOPEN
@@ -599,14 +433,6 @@ dnl C++ Compiler:
 AC_PROG_CXX
 AC_PROG_CXXCPP
 dnl AC_OBJEXT
-
-if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
-	AC_PROG_OBJCXX
-	AC_PROG_OBJCXXCPP
-else
-    am__fastdepOBJCXX_TRUE=
-    am__fastdepOBJCXX_FALSE='#'
-fi
 
 dnl Make:
 dnl AC_PROG_MAKE_SET
@@ -662,17 +488,6 @@ prognamebase=$progname
 AC_SUBST(progtitle)
 AC_SUBST(progname)
 AC_SUBST(prognamebase)
-
-if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
-	if test "x$build_regular" = "xtrue"; then
-		prefix="`pwd`/${progtitle}.app/Contents/Resources"
-		AC_DEFINE_UNQUOTED([USER_DATA_DIR], ["~/Library/Application Support/${progtitle}"], [TODO document])
-		AC_DEFINE_UNQUOTED([SCREENSHOT_DIR], ["~/Library/Application Support/${progtitle}/screenshots"], [TODO document])
-	else
-		prefix="`pwd`/${progtitle} Dedicated"
-		AC_DEFINE_UNQUOTED([USER_DATA_DIR], ["~/Library/Application Support/${progtitle} Dedicated"], [TODO document])
-	fi
-fi
 
 AM_CONDITIONAL(USE_SYSINSTALL, test "$enable_sysinstall" = "yes")
 AM_CONDITIONAL(USE_UNINSTALL, test "$enable_uninstall" = "yes")
@@ -737,7 +552,6 @@ GENERICUNIX
 ]
 )
 
-SDL2_CONFIG_DEFAULT=sdl2-config
 SDL_CONFIG_DEFAULT=sdl-config
 
 dnl *************************************************
@@ -796,7 +610,6 @@ SAFEUNIX
 esac
 
 test -z "$SDL_CONFIG" && SDL_CONFIG=$SDL_CONFIG_DEFAULT
-test -z "$SDL2_CONFIG" && SDL2_CONFIG=$SDL2_CONFIG_DEFAULT
 
 AC_SUBST(docstyle)
 
@@ -833,7 +646,7 @@ AC_CHECK_LIB(xml2,xmlParseMemory,
 CPPFLAGS="$CPPFLAGS `$XML2_CONFIG --cflags`"
 LIBS="`$XML2_CONFIG --libs` $LIBS"
 AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the xml2 library (-lxml2).]),
-AC_MSG_ERROR([You need the library xml2 to compile ${progtitle}. Read the file documentation/installation.txt.])
+AC_MSG_ERROR([You need the library xml2 to compile Armagetron. Read the file doc/install_linux.html.])
 ,`$XML2_CONFIG --libs`)
 
 AC_CHECK_FUNC(xmlParserInputBufferCreateFilenameDefault,
@@ -844,66 +657,16 @@ AC_MSG_ERROR([
 ])
 )
 
-# fi
-
 dnl *************************************************
-dnl         Threading
-dnl *************************************************
-AC_LANG([C++])
-
-dnl Boost.System is a mandatory dependency of Boost.Thread
-dnl http://www.boost.org/doc/libs/1_52_0/doc/html/thread/build.html
-AC_CHECK_LIB([boost_system], _ZN5boost6system15system_categoryEv)
-
-AC_CHECK_LIB([boost_thread],_ZN5boost11this_thread5yieldEv,[
-LIBS="-lboost_thread ${LIBS}"
-
-AC_DEFINE(HAVE_LIBBOOST_THREAD,1,[Define if you have boost_thread libraries and header files.])
-
-],[
-
-ACX_PTHREAD([
-
-LIBS="${PTHREAD_LIBS} ${LIBS}"
-CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
-CC="${PTHREAD_CC}"
-AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
-
-])
-
-])
-
-dnl *************************************************
-dnl         Misc
-dnl *************************************************
-
-AC_CHECK_HEADERS([sys/stat.h])
-
-dnl *************************************************
-dnl         protocol buffers
+dnl         pattern buffers
 dnl *************************************************
 
 dnl check for compiler
-AC_CHECK_PROG([PROTOC],protoc,`which protoc`,no)
-if test x$PROTOC = xno
-then
-    AC_MSG_ERROR([[The protobuf C++ compiler(Google Protocol Buffers, http://code.google.com/p/protobuf/) is required, but was not found.]])
-fi
-
-AC_LANG([C++])
+AC_CHECK_PROG([PROTOC],protoc,protoc,no)
 
 dnl check for library
-AC_CHECK_LIB([protobuf],_ZN6google8protobuf7MessageD2Ev,,
-[
-	AC_CHECK_LIB([protobuf],_ZN6google8protobuf7ClosureD2Ev,
-		AC_MSG_WARN([[The library protobuf (Google Protobuf Buffers) has a broken dependency on library pthread on your system.]])
-		AC_DEFINE_UNQUOTED(HAVE_LIBPROTOBUF)
-		LIBS="-lprotobuf -lpthread $LIBS"
-	,
+AC_CHECK_LIB([protobuf],main,,
 AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required, but was not found.]])
-	,[-lpthread]
-	)
-]
 )
 
 AC_LANG([C++])
@@ -913,17 +676,35 @@ AC_CHECK_HEADERS([google/protobuf/message.h],,
 AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required with all development files, but was not found.]])
 )
 
-dnl AC_LANG([C])
+AC_LANG([C])
 
+# fi
+
+dnl *************************************************
+dnl         Armathentication Threading
+dnl *************************************************
+
+if test x$enable_armathentication = xyes; then
+
+AC_LANG([C++])
+
+dnl ACX_PTHREAD([
+
+dnl LIBS="${PTHREAD_LIBS} ${LIBS}"
+dnl CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
+dnl CC="${PTHREAD_CC}"
+dnl AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
+
+dnl ],[
+
+AM_PATH_ZTHREAD_AA(2.3.2)
+CXXFLAGS="${CXXFLAGS} ${ZTHREAD_CXXFLAGS}"
+LIBS="${LIBS} ${ZTHREAD_LIBS}"
+
+dnl ])
+
+fi # krawall
 fi # armamain
-
-dnl *************************************************
-dnl         timer
-dnl *************************************************
-
-dnl just do the checks here, the logic for evaluating it can go into tSysTime.cpp.
-AC_CHECK_HEADERS([time.h])
-AC_CHECK_LIB([rt],[clock_gettime])
 
 dnl *************************************************
 dnl         math
@@ -959,48 +740,31 @@ dnl ****************************************************
  AC_SUBST(needdata)
 else
 
+
+if test x$enable_dirty = xyes; then
+  AC_DEFINE(DIRTY,,[Define if you wish to use the old and dirty OpenGL
+  initialization method])
+fi
+
+
 dnl *************************************************
 dnl         SDL
 dnl *************************************************
 
-#use_sdl1=true
+test -z "$SDL_CONFIG" && SDL_CONFIG=sdl-config
 
-if test x$use_sdl2 = xtrue ; then
-    AC_MSG_CHECKING(whether SDL2 is installed)
-    if SDLLIBS=`${SDL2_CONFIG} --libs`; then
-    	AC_MSG_RESULT(yes)
-    fi
-
-    CPPFLAGS="$CPPFLAGS `${SDL2_CONFIG} --cflags`"
-    LIBS="${SDLLIBS} $LIBS"
-
-    AC_CHECK_FUNC(SDL_GL_SetAttribute,
-    AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
-        use_sdl2=false
-        if test x$use_sdl1 != xtrue ; then
-            AC_MSG_ERROR([You need the library SDL2 to compile ${progtitle}. Read the file documentation/installation.txt.])
-        fi
-    ,)
+AC_MSG_CHECKING(whether SDL is installed)
+if SDLLIBS=`${SDL_CONFIG} --libs`; then
+    AC_MSG_RESULT(yes)
 fi
 
-if test x$use_sdl2 = xtrue ; then
-   use_sdl1=false
-fi
+CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
+LIBS="${SDLLIBS} $LIBS"
 
-if test x$use_sdl1 = xtrue ; then
-    AC_MSG_CHECKING(whether SDL is installed)
-    if SDLLIBS=`${SDL_CONFIG} --libs`; then
-    	AC_MSG_RESULT(yes)
-    fi
-
-    CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
-    LIBS="${SDLLIBS} $LIBS"
-
-    AC_CHECK_FUNC(SDL_GL_GetAttribute,
-    AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
-        AC_MSG_ERROR([You need the library SDL or SDL2 to compile ${progtitle}. Read the file documentation/installation.txt.])
-    ,)
-fi
+AC_CHECK_FUNC(SDL_Init,
+AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
+AC_MSG_ERROR([You need the library SDL to compile Armagetron. Read the file doc/install_linux.html.])
+,)
 
 dnl ***************** OPTIONAL STUFF AFTER THIS POINT **********************
 
@@ -1008,28 +772,20 @@ dnl *************************************************
 dnl         Sound
 dnl *************************************************
 
-if test x$enable_sound = xyes && test x$use_sdl2 = xtrue ; then
-	dnl first do the regular sdl define
- 	AC_DEFINE(HAVE_SDL_FOR_SOUND, 1,  [Define if you have SDL_sound, which is part of the core SDL])
+if test x$enable_sound = xyes; then
 
-	dnl now check for sdl_mixer
- 	AC_CHECK_LIB(SDL2_mixer, Mix_OpenAudio,
-		[AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Define if you have the SDL2_mixer library (-lSDL2_mixer).])
-			LIBS="-lSDL2_mixer $LIBS"],
- 		[AC_MSG_ERROR([SDL2_mixer library not found. It is required for now. Sorry.])],
-		[])
-fi
+dnl first do the regular sdl define
+ AC_DEFINE(HAVE_SDL_FOR_SOUND, 1,  [Define if you have SDL_sound, which is part of the core SDL])
 
-if test x$enable_sound = xyes && test x$use_sdl1 = xtrue ; then
-	dnl first do the regular sdl define
- 	AC_DEFINE(HAVE_SDL_FOR_SOUND, 1,  [Define if you have SDL_sound, which is part of the core SDL])
+dnl now check for sdl_mixer
+ AC_CHECK_LIB(SDL_mixer,Mix_OpenAudio,
+ AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Define if you have the SDL_mixer library (-lSDL_mixer).])
+ LIBS="-lSDL_mixer $LIBS",
+ AC_MSG_ERROR([SDL_mixer library not found. It is required for now. Sorry.])
+ ,)
 
-	dnl now check for sdl_mixer
- 	AC_CHECK_LIB(SDL_mixer, Mix_OpenAudio,
-		[AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Define if you have the SDL_mixer library (-lSDL_mixer).])
-			LIBS="-lSDL_mixer $LIBS"],
- 		[AC_MSG_ERROR([SDL_mixer library not found. It is required for now. Sorry.])],
-		[])
+dnl now we need to know which audio formats to use
+
 fi
 
 dnl *************************************************
@@ -1041,38 +797,30 @@ if test x$enable_joystick = xno; then
 fi
 
 dnl *************************************************
-dnl Winsock linking for cross-compilation. Not really supported.
-dnl *************************************************
-
-if test "`${SDL_CONFIG} --libs | grep windows`" ; then
-	AC_CHECK_LIB(wsock32, connect)
-fi
-
-dnl *************************************************
 dnl         GL
 dnl *************************************************
 
 if test $SYS_GL_LIB && echo $LIBS | grep -v "\-lGL" > /dev/null; then
 
 dnl AC_CHECK_LIB($SYS_GL_LIB, glEnd,,
-AC_CHECK_LIB(X11,XOpenDisplay,
- LIBS="-lX11 -L/usr/X11R6/lib $LIBS"
- AC_DEFINE(HAVE_LIBX11, 1, [Define if you have the X11 library (-lX11).])
- ,
- AC_MSG_WARN([
- Standard X11 library needed by OpenGL not found.
- ]),-L/usr/X11R6/lib)
 
 AC_CHECK_LIB($SYS_GL_LIB, glVertex3f,,
  AC_MSG_RESULT([OpenGL not found. Maybe it needs X11 to compile? Checking that...])
- AC_CHECK_LIB(Xext,XextFindDisplay,-L/usr/X11R6/lib)
- AC_CHECK_LIB(Xt,XtFree,-L/usr/X11R6/lib)
- AC_CHECK_LIB(Xi,XOpenDevice,-L/usr/X11R6/lib)
- AC_CHECK_LIB(Xmu,XmuDrawLogo,-L/usr/X11R6/lib)
- AC_CHECK_LIB($SYS_GL_LIB, glBegin,,AC_MSG_ERROR([
-  You need Mesa or an OpenGL-System to compile ${progtitle}.
+ AC_CHECK_LIB(X11,main,
+  LIBS="-lX11 -L/usr/X11R6/lib $LIBS"
+  AC_DEFINE(HAVE_LIBX11, 1, [Define if you have the X11 library (-lX11).])
+  ,
+  AC_MSG_WARN([
+  Standard X11 library needed by OpenGL not found.
+  ]),-L/usr/X11R6/lib)
+ AC_CHECK_LIB(Xext,main,-L/usr/X11R6/lib)
+  AC_CHECK_LIB(Xt,main,-L/usr/X11R6/lib)
+ AC_CHECK_LIB(Xi,main,-L/usr/X11R6/lib)
+ AC_CHECK_LIB(Xmu,main,-L/usr/X11R6/lib)
+AC_CHECK_LIB($SYS_GL_LIB, glBegin,,AC_MSG_ERROR([
+  You need Mesa or an OpenGL-System to compile Armagetron.
   Maybe your libGL needs the X libraries and your system does not
-  find them? Read the file documentation/installation.txt.]),-L/usr/X11R6/lib)
+  find them? Read the file doc/install_linux.html.]),-L/usr/X11R6/lib)
 )
 
 dnl check for 3DFX-MESA
@@ -1090,10 +838,8 @@ if test $SYS_GLU_LIB && echo $LIBS | grep -v "\-lGLU" > /dev/null; then
 dnl AC_CHECK_LIB($SYS_GLU_LIB, gluBuild2DMipmaps,,
 AC_CHECK_LIB($SYS_GLU_LIB, gluBuild3DMipmaps,,
 AC_MSG_ERROR([
-You need GLU to compile ${progtitle}; it SHOULD have come with OpenGL.
-Read the file documentation/installation.txt.]))
-
-fi
+You need GLU to compile Armagetron; it SHOULD have come with OpenGL.
+Read the file doc/install_linux.html.]))
 
 dnl *************************************************
 dnl         GLEW
@@ -1114,23 +860,6 @@ if test ${have_glew} = true; then
 fi
 
 dnl *************************************************
-dnl         libpng
-dnl *************************************************
-
-AC_MSG_CHECKING(whether libpng is installed)
-if PNGLIBS=`libpng-config --libs`; then
-    AC_MSG_RESULT(yes)
-fi
-
-CPPFLAGS="$CPPFLAGS `libpng-config --cflags`"
-LIBS="$LIBS $PNGLIBS"
-
-AC_CHECK_FUNC(png_sig_cmp,
-,
-AC_MSG_ERROR([You need libpng to compile ${progtitle}.]))
-
-
-dnl *************************************************
 dnl         FTGL
 dnl *************************************************
 
@@ -1138,12 +867,10 @@ AC_LANG([C++])
 
 test -z "$FREETYPE_CONFIG" && FREETYPE_CONFIG=freetype-config
 
-if test -z "$ARMAGETRONAD_OS_X_TOOLKIT"; then
-	FTGL_CFLAGS="`pkg-config ftgl --cflags`"
-	FTGL_LIBS="`pkg-config ftgl --libs`"
-fi
+FTGL_CFLAGS="`pkg-config ftgl --cflags`"
+FTGL_LIBS="`pkg-config ftgl --libs`"
 
-FTGL_ERROR="You need the library ftgl in at least version 2.1.3~rc5 to compile Armagetron. Read the file documentation/installation.txt."
+FTGL_ERROR="You need the library ftgl in at least version 2.1.3~rc5 to compile Armagetron. Read the file doc/install_linux.html."
 
 AC_CHECK_LIB(ftgl,ftglRenderGlyph,
 CPPFLAGS="$CPPFLAGS $FTGL_CFLAGS"
@@ -1155,40 +882,37 @@ $FTGL_LIBS
 
 USE_FTGL=yes
 
-if test -z "$ARMAGETRONAD_OS_X_TOOLKIT"; then
+# `pkg-config ftgl --cflags` doesn't reliably give the include path to FTGL itself, we are on our own finding the includes in some cases.
+# look for FTGL headers in default system header locations and the prefixes of the libraries that do have a -config script
+FTGL_HEADERS="/usr/include/FTGL /usr/local/include/FTGL `$FREETYPE_CONFIG --prefix`/include/FTGL `$SDL_CONFIG --prefix`/include/FTGL `$XML2_CONFIG --prefix/`include/FTGL ${prefix}/include/FTGL "
 
-	# `pkg-config ftgl --cflags` doesn't reliably give the include path to FTGL itself, we are on our own finding the includes in some cases.
-	# look for FTGL headers in default system header locations and the prefixes of the libraries that do have a -config script
-	FTGL_HEADERS="/usr/include/FTGL /usr/local/include/FTGL `$FREETYPE_CONFIG --prefix`/include/FTGL `$SDL_CONFIG --prefix`/include/FTGL `$XML2_CONFIG --prefix/`include/FTGL ${prefix}/include/FTGL "
+AC_ARG_WITH(ftgl,
+    AC_HELP_STRING([--with-ftgl],
+        [use FTGL for rendering (default=enabled, which is currently required), the argument is the location of the FTGL headers]),
+    if test "${withval}" = yes -o "${withval}" = no; then
+        USE_FTGL="${withval}"
+    else
+        FTGL_HEADERS=${withval}
+    fi
+)
 
-	AC_ARG_WITH(ftgl,
-	    AC_HELP_STRING([--with-ftgl],
-	        [use FTGL for rendering (default=enabled, which is currently required), the argument is the location of the FTGL headers]),
-	    if test "${withval}" = yes -o "${withval}" = no; then
-	        USE_FTGL="${withval}"
-	    else
-	        FTGL_HEADERS=${withval}
-	    fi
-	)
+# candidates are collected, walk through them
+if test -z "`echo $FTGL_CFLAGS | grep FTGL`"; then
+    found=false
+    AC_MSG_CHECKING(for location of FTGL includes)
+    for candidate in ${FTGL_HEADERS}; do
+        if test -r ${candidate}/FTGL.h; then
+            AC_MSG_RESULT(${candidate})
+                CPPFLAGS="$CPPFLAGS -I${candidate}"
+                found=true
+                break
+            fi
+    done
 
-	# candidates are collected, walk through them
-	if test -z "`echo $FTGL_CFLAGS | grep FTGL`"; then
-	    found=false
-	    AC_MSG_CHECKING(for location of FTGL includes)
-	    for candidate in ${FTGL_HEADERS}; do
-	        if test -r ${candidate}/FTGL.h || test -r ${candidate}/ftgl.h; then
-	            AC_MSG_RESULT(${candidate})
-	                CPPFLAGS="$CPPFLAGS -I${candidate}"
-	                found=true
-	                break
-	            fi
-	    done
-
-	    if test ${found} = false; then
-	        AC_MSG_RESULT([not found])
-	        AC_MSG_ERROR([FTGL headers not found on your system. Please pass the correct location via --with-ftgl=<path to FTGL include directory>.])
-	    fi
-	fi
+    if test ${found} = false; then
+        AC_MSG_RESULT([not found])
+        AC_MSG_ERROR([FTGL headers not found on your system. Please pass the correct location via --with-ftgl=<path to FTGL include directory>.])
+    fi
 fi
 
 dnl *************************************************
@@ -1202,7 +926,7 @@ AC_CHECK_LIB(freetype,FT_Init_FreeType,
 CPPFLAGS="$CPPFLAGS `$FREETYPE_CONFIG --cflags`"
 LIBS="$LIBS `$FREETYPE_CONFIG --libs`"
 ,
-AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file documentation/installation.txt.])
+AC_MSG_ERROR([You need the library freetype to compile Armagetron. Read the file doc/install_linux.html.])
 )
 
 dnl FTGL again. Check for the headers. First, try the individual header.
@@ -1213,70 +937,63 @@ CXXFLAGS="$CXXFLAGS -Werror -pedantic"
 AC_MSG_CHECKING([whether FTGLPixmapFont.h is deprecated])
 AC_TRY_COMPILE([#include <FTGLPixmapFont.h>],return 0,[AC_MSG_RESULT([no, not checking <ftgl.h>.])],
 [AC_MSG_RESULT([yes])
-AC_CHECK_HEADERS([FTGL/ftgl.h ftgl.h], [break])]
+AC_CHECK_HEADERS(ftgl.h)]
 )
 CXXFLAGS="$CXXFLAGS_SAVE"
+
+# end of dedicated server if/else
+fi
 
 dnl *************************************************
 dnl         Other Stuff
 dnl *************************************************
 
-dnl AC_CHECK_LIB(g++, cin,,
+dnl AC_CHECK_LIB(g++, main,,
 dnl AC_MSG_WARN([C++ standard library not found. You can ignore this warning on non-GNU-systems.]))
 
 AC_LANG([C])
 
-dnl AC_CHECK_LIB(z, gzread,,
-dnl AC_MSG_ERROR([You need libz to compile ${progtitle}.]))
+AC_CHECK_LIB(z, main,,
+AC_MSG_ERROR([You need libz to compile Armagetron.]))
 
-dnl AC_CHECK_LIB(jpeg, jpeg_read_header,,
-dnl	AC_MSG_WARN([
-dnl	libjpeg not found. Expect small graphical errors ( missing moviepack title screen ).]
-dnl	)
+AC_MSG_CHECKING(whether libpng is installed)
+if PNGLIBS=`libpng-config --libs`; then
+    AC_MSG_RESULT(yes)
+fi
+
+CPPFLAGS="$CPPFLAGS `libpng-config --cflags`"
+LIBS="$LIBS $PNGLIBS"
+
+AC_CHECK_FUNC(png_check_sig,
+,
+AC_MSG_ERROR([You need libpng to compile Armagetron.]))
+
+AC_CHECK_LIB(jpeg, main,,
+	AC_MSG_WARN([
+	libjpeg not found. Expect small graphical errors ( missing moviepack title screen ).]
+	)
+)
+
+AC_CHECK_LIB(SDL_image, IMG_Load,,
+dnl AC_CHECK_LIB(IMG, main,,
+AC_MSG_ERROR([You need the library SDL_image to compile Armagetron.]
 dnl )
+))
 
-if test x$use_sdl2 = xtrue; then
-    AC_CHECK_LIB(SDL2_image, IMG_Load,,
-    AC_MSG_ERROR([You need the library SDL2_image to compile ${progtitle}.]
-    ))
-
-    dnl look for the right header for SDL2_image
-    AC_CHECK_HEADERS(SDL_image.h,,
-    [
-    AC_MSG_WARN([SDL_image header not found where it should be ( the SDL include directory ).
-    Trying fallback.])
-    AC_CHECK_HEADERS(SDL2/SDL_image.h,,
-    [AC_MSG_WARN([
-    SDL2_image header not found. The library is there, so something must be unusual
-    in your setup: SDL_image.h does not reside in the same folder as the rest of the SDL
-    inlcudes and not in any SDL subdirectory in the inclue path. If you know the
-    correct path to it, edit src/render/rTexture.cpp and enter it there.])]
-    )
-    ]
-    )
-fi
-
-if test x$use_sdl1 = xtrue; then
-    AC_CHECK_LIB(SDL_image, IMG_Load,,
-    AC_MSG_ERROR([You need the library SDL_image to compile ${progtitle}.]
-    ))
-
-    dnl look for the right header for SDL_image
-    AC_CHECK_HEADERS(SDL_image.h,,
-    [
-    AC_MSG_WARN([SDL_image header not found where it should be ( the SDL include directory ).
-    Trying fallback.])
-    AC_CHECK_HEADERS(SDL/SDL_image.h,,
-    [AC_MSG_WARN([
-    SDL_image header not found. The library is there, so something must be unusual
-    in your setup: SDL_image.h does not reside in the same folder as the rest of the SDL
-    inlcudes and not in any SDL subdirectory in the inclue path. If you know the
-    correct path to it, edit src/render/rTexture.cpp and enter it there.])]
-    )
-    ]
-    )
-fi
-
+dnl look for the right header for SDL_image
+AC_CHECK_HEADERS(SDL_image.h,,
+[
+AC_MSG_WARN([SDL_image header not found where it should be ( the SDL include directory ).
+Trying fallback.])
+AC_CHECK_HEADERS(SDL/SDL_image.h,,
+[AC_MSG_WARN([
+SDL_image header not found. The library is there, so something must be unusual
+in your setup: SDL_image.h does not reside in the same folder as the rest of the SDL
+inlcudes and not in any SDL subdirectory in the inclue path. If you know the
+correct path to it, edit src/render/rTexture.cpp and enter it there.])]
+)
+]
+)
 
 ifelse(,,,
 [
@@ -1299,6 +1016,52 @@ fi dnl (dedicated server)
 
 
 
+dnl *************************************************
+dnl         Ruby
+dnl *************************************************
+
+if test "x$enable_ruby" = "xyes"; then
+AC_CHECK_PROG(RUBY, ruby, ruby, no)
+if test ${RUBY} = no || test -z ${RUBY}; then
+	AC_MSG_ERROR([Ruby 1.8 is required for compilation.])
+else
+ AC_SEARCH_LIBS(ruby_run,ruby ruby1.8 ruby1.9,
+ AC_DEFINE(HAVE_LIBRUBY, 1, [Define if you have the Ruby library (-lruby).])
+ LIBS="$LIBS",
+ AC_MSG_ERROR([Ruby library not found.])
+ ,)
+        export RUBY
+        ruby_include_dir=$(${RUBY} <<EOF
+require "rbconfig"
+print Config::CONFIG@<:@'prefix'@:>@ + '/lib/ruby/1.8/' + Config::CONFIG@<:@'arch'@:>@
+EOF)
+        
+        ruby_include_dir="-I${ruby_include_dir}"
+        
+        ruby_lib_dir=$(${RUBY} <<EOF
+require "rbconfig"
+print Config::CONFIG@<:@'libdir'@:>@
+EOF)
+        
+        ruby_lib_dir="-L${ruby_lib_dir}"
+    fi
+fi
+
+
+export CPPFLAGS="$CPPFLAGS  ${ruby_include_dir}"
+export LIBS="${ruby_lib_dir} $LIBS"
+
+dnl SWIG
+
+if test "x$enable_ruby" = "xyes"; then
+    AC_PROG_SWIG(1.3.29)
+    SWIG_ENABLE_CXX
+fi
+
+dnl RUBY and SWIG end
+
+dnl Replace `main' with a function in -lpthread:
+
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(unistd.h)
@@ -1308,14 +1071,17 @@ AC_C_CONST
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS(select)
-AC_CHECK_FUNCS(atan2f sinf cosf tanf sqrtf logf expf fabsf floorf pow10 pow10f)
+AC_CHECK_FUNCS(atan2f sinf cosf tanf sqrtf logf expf fabsf floorf pow10 pow10f isblank)
 AC_CHECK_FUNCS(wmemset)
 
 # if the compiler is GCC -Os produces faulty code (exceptions cause crashes), at least on AMD64. Replace it with -O2.
 test -z "`$CXX --version | grep '(GCC)'`" || CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-Os,-O2,g' `" CFLAGS="`echo $CFLAGS | sed -e 's,-Os,-O2,g' `"
 
+dnl add current directories to include search path
+CPPFLAGS="-I. -I.. $CPPFLAGS"
+
 if test "$enable_sound" = "yes"; then
-AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Use SDL2_mixer])
+AC_DEFINE(HAVE_LIBSDL_MIXER, 1, [Use SDL_mixer])
 fi
 
 # define
@@ -1323,11 +1089,11 @@ AC_DEFINE_UNQUOTED(TOP_SOURCE_DIR,"${srcdir}", [Define the top source directory]
 AC_DEFINE_UNQUOTED(PROGNAME,"${progname}", [Define the short progam name (with possible -dedicated suffix)])
 AC_DEFINE_UNQUOTED(PROGNAMEBASE,"${prognamebase}", [Define the short progam name])
 
-realprefix="${prefix}"
-test "x${realprefix}" = xNONE && realprefix="${ac_default_prefix}"
+realprefix=${prefix}
+test x${realprefix} = xNONE && realprefix=${ac_default_prefix}
 AC_DEFINE_UNQUOTED(PREFIX,"${realprefix}",[Define to the compiled in prefix where most game directories will be children of])
-realexecprefix="${exec_prefix}"
-test "x${realexecprefix}" = xNONE && realexecprefix="${realprefix}"
+realexecprefix=${exec_prefix}
+test x${realexecprefix} = xNONE && realexecprefix=${realprefix}
 
 AM_CONDITIONAL(NEEDDATA, test "$needdata" = "yes" )
 AM_CONDITIONAL(USE_SDLMIXER, test "$enable_sound" = "yes" )
@@ -1375,7 +1141,7 @@ if test "x$enable_automakedefaults" = "xno"; then
     if test "x${bindir}" = "x\${exec_prefix}/bin" && test "x$enable_games" = "xyes"; then
         for alt in bin/games games games/bin; do
             AC_MSG_CHECKING([alternative binary path ${realexecprefix}/${alt}])
-            if test -d "${realexecprefix}/${alt}" && echo ${PATH} | grep "${realexecprefix}/${alt}" > /dev/null; then
+            if test -d ${realexecprefix}/${alt} && echo ${PATH} | grep ${realexecprefix}/${alt} > /dev/null; then
                 bindir=\${exec_prefix}/${alt}
                 AC_MSG_RESULT(possible)
             else
@@ -1417,8 +1183,8 @@ AC_AA_PATH_NOSUFFIX(scriptdir,${aa_datadir}/scripts,[shell scripts],[DATADIR/scr
 AC_AA_PATH_NOSUFFIX(wwwrootdir,${aa_datadir}/www-root,[web root],[DATADIR/www-root])
 
 # documentation
-dnl AC_AA_PATH_PREPARE(docdir)
-dnl AC_AA_PATH(docdir,${datadir}/doc,[documentation],[DATADIR/doc])
+AC_AA_PATH_PREPARE(docdir)
+AC_AA_PATH(docdir,${datadir}/doc,[documentation],[DATADIR/doc])
 
 # PID files
 AC_AA_PATH_PREPARE(rundir)
@@ -1470,12 +1236,8 @@ CXXFLAGS="`echo ${CXXFLAGS} | sed -e 's,-Werror,,g' | sed -e 's,--pedantic,,g'`"
 dnl CXX flags for our own hand-written files. Can be pedantic.
 AC_SUBST(CXXFLAGS_OURFILES)
 
-export CFLAGS
 export CPPFLAGS
 export CXXFLAGS
-export OBJCPPFLAGS
-export OBJCXXFLAGS
-
 export LIBS
 
 AC_OUTPUT(src/Makefile
@@ -1496,11 +1258,8 @@ resource/Makefile
 config/Makefile
 desktop/Makefile
 www-root/Makefile
-desktop/armagetronad-armagetronad.desktop
-desktop/armagetronad-armagetronad-handler.desktop
-desktop/armagetronad-link.xml
+desktop/armagetronad.desktop
 desktop/armagetronad.protocol
-desktop/os-x/Info.plist
 )
 
 # m4_define(FULLEVAL,stage1=`eval echo $1`; stage2
@@ -1518,21 +1277,16 @@ echo ""
 if test x$build_dedicated = xtrue -o x$armamaster = xtrue ;
 then
 echo "     Build with Armathentication support (server): $enable_armathentication"
+echo "     Init scripts will be installed in  : $initdir"
 echo "     Dynamic data will be kept in       : `eval echo ${aa_localstatedir}`"
 echo "     PID files will be kept in          : `eval echo ${rundir}`"
 echo "     Log files will be kept in          : `eval echo ${logdir}`"
-if test "x$enable_sysinstall" = "xyes"; then
-echo "     Init scripts will be installed in  : $initdir"
 echo "     Add user to run server             : $enable_useradd"
-fi
 echo ""
 fi
-if test x$build_regular = xtrue ;
-then
 echo "     Sound support: $enable_sound"
 echo "     Particle System support: $enable_particles"
 echo "     Joystick support: $enable_joystick"
-fi
 zones_info="NO"
 if test x$enable_zonesv2 = xyes; then
 	zones_info="Basic"
@@ -1550,16 +1304,15 @@ echo ""
 echo "     Binaries will be installed in      : `eval echo ${bindir}`"
 echo "     Static data will be installed in   : `eval echo ${aa_datadir}`"
 echo "     Configuration will be installed in : `eval echo ${aa_sysconfdir}`"
-dnl echo "     Documentation will be installed in : `eval echo ${aa_docdir}`"
-if test "x$enable_sysinstall" = "xyes" -a "x$enable_etc" = "xyes"; then
-echo "     Link to configuration will go to   : /etc/${progname}"
-fi
+echo "     Documentation will be installed in : `eval echo ${aa_docdir}`"
+test "x$enable_etc" = "xyes" && echo "     Link to configuration will go to   : /etc/${progname}"
 echo "     Build with Krawall authentication support: $enable_krawall"
 echo "     Ruby support: $enable_ruby"
 if test "x$enable_ruby" = "xyes"; then
 echo "         Ruby include dir: $ruby_include_dir"
 echo "         Ruby lib dir: $ruby_lib_dir"
 fi
+echo "     Use dirty SDL initialization: $enable_dirty"
 echo "     Call sysinstall: $enable_sysinstall"
 if test "$enable_uninstall" = "yes" &&
    test "$external_uninstall_cmd" != ""; then
@@ -1584,11 +1337,9 @@ echo "     LIBS        : $LIBS"
 # print warning about behavior deviating from automake's defaults
 SWITCHES=""
 test "x$OUTSIDE_OF_PREFIX" = "xyes" && SWITCHES=" --enable-automakedefaults"
-if test "x$enable_sysinstall" = "xyes"; then
-	test "x$enable_useradd_default" = "xyes" && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-useradd"
-	test "x$enable_etc_default" = "xyes" && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-etc"
-	test x$build_dedicated = xtrue -o x$armamaster = xtrue && test "x$enable_initscripts_default" = "xyes" && echo "${initdir}" | grep '^/etc/' > /dev/null && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-initscripts"
-fi
+test "x$enable_useradd_default" = "xyes" && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-useradd"
+test "x$enable_etc_default" = "xyes" && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-etc"
+test x$build_dedicated = xtrue -o x$armamaster = xtrue && test "x$enable_initscripts_default" = "xyes" && echo "${initdir}" | grep '^/etc/' > /dev/null && OUTSIDE_OF_PREFIX=yes SWITCHES="${SWITCHES} --disable-initscripts"
 if test "x$OUTSIDE_OF_PREFIX" = "xyes"; then
     echo ""
     echo "Warning: The configure script decided that, to better work on your system,"
@@ -1602,6 +1353,5 @@ fi
 
 # print warnings about missing optional libraries that cause feature reduction
 if test ${have_glew} = false; then
-	echo ""
     echo "Warning: GLEW library (http://glew.sourceforge.net/) not found or not functional. Advanced graphics effects will be disabled. Ok, we don't have that many of them anyway, so this waring is safe to ignore for now."
 fi

@@ -30,7 +30,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gGame.h"
 // Only for SpawnPlayer:
 #include "gParser.h"
-#include "eLadderLog.h"
 
 
 void zEffector::apply(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
@@ -121,15 +120,9 @@ zEffectorManager::Create(std::string const & typex, tXmlParser::node const * nod
 
     FactoryList::const_iterator iterEffectorFactory;
     if ((iterEffectorFactory = _effectors().find(type)) == _effectors().end())
-    {
-#ifdef DEBUG
-        tERR_WARN("Unknown effect \"" + type + '"');
-#endif
-        return zEffector::create();
-    }
-        
+        return NULL;
     
-    VoidFactoryBase*Fy = iterEffectorFactory->second.get();
+    VoidFactoryBase*Fy = iterEffectorFactory->second;
 
     if (NullFactory*ptr = dynamic_cast<NullFactory*>(Fy))
     {
@@ -163,18 +156,16 @@ zEffectorManager::Create(std::string const & typex)
 void
 zEffectorManager::Register(std::string const & type, std::string const & desc, NullFactory_t f)
 {
-    _effectors()[type] = boost::shared_ptr<NullFactory>(new NullFactory(f));
+    _effectors().insert(std::make_pair(type, new NullFactory(f)));
 }
 void
 zEffectorManager::Register(std::string const & type, std::string const & desc, XMLFactory_t f)
 {
-    _effectors()[type] = boost::shared_ptr<XMLFactory>( new XMLFactory(f));
+    _effectors().insert(std::make_pair(type, new XMLFactory(f)));
 }
 
 
 static zEffectorRegistration regWin("win", "", zEffectorWin::create);
-
-static eLadderLogWriter sg_winZoneWriter( "WINZONE_PLAYER_ENTER", true, "player" );
 
 void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -187,8 +178,6 @@ void zEffectorWin::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
             iter != d_calculatedTargets.end();
             ++iter)
     {
-        sg_winZoneWriter << (*iter)->GetUserName();
-        sg_winZoneWriter.write();
         sg_DeclareWinner((*iter)->CurrentTeam(), message );
     }
 }
@@ -199,12 +188,7 @@ zEffectorWin::setupVisuals(gParserState & state)
     state.set("color", rColor(0, 1, 0, .7));
 }
 
-static int sz_score_deathzone=-1;
-static tSettingItem<int> sz_dz("SCORE_DEATHZONE",sz_score_deathzone);
-
 static zEffectorRegistration regDeath("death", "", zEffectorDeath::create);
-
-static eLadderLogWriter sg_deathZoneWriter( "DEATH_DEATHZONE", true, "player" );
 
 void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
 {
@@ -213,10 +197,7 @@ void zEffectorDeath::effect(gVectorExtra<ePlayerNetID *> &d_calculatedTargets)
             iter != d_calculatedTargets.end();
             ++iter)
     {
-        (*iter)->AddScore(sz_score_deathzone, tOutput(), "$player_lose_suicide");
-        sg_deathZoneWriter << (*iter)->GetUserName();
-        sg_deathZoneWriter.write();
-        (*iter)->Object()->Kill();
+        static_cast<gCycle *>((*iter)->Object())->Kill();
     }
 }
 

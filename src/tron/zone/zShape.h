@@ -65,12 +65,15 @@ public:
     void setColorNow(const rColor &c);
 
     virtual tCoord Position() const;
-    tFunction getPosX() {return posx_;};
-    tFunction getPosY() {return posy_;};
+  tFunction getPosX() {return posx_;};
+  tFunction getPosY() {return posy_;};
     tPolynomial getRotation2() { return rotation2; };
     REAL GetCurrentScale() const;
-    tFunction getScale() {return scale_;};
-    rColor getColor() {return color_;};
+  tFunction getScale() {return scale_;};
+  rColor getColor() {return color_;};
+
+    REAL GetEffectiveBottom() const;
+    REAL GetEffectiveHeight() const;
 
     //! shortcut rotation functions
     tCoord GetRotation() const;
@@ -78,28 +81,11 @@ public:
     void SetRotationSpeed(REAL r);
     REAL GetRotationAcceleration();
     void SetRotationAcceleration(REAL r);
-
-    // Get/Set visual settings
-    REAL GetEffectiveBottom() const;
-    REAL GetEffectiveHeight() const;
-    int  GetEffectiveSegments() const;
+    int GetEffectiveSegments() const;
     REAL GetEffectiveSegmentLength() const;
-    int  GetEffectiveSegmentSteps() const;
-    REAL GetEffectiveFloorScalePct() const;
-    REAL GetEffectiveProximityDistance() const;
-    REAL GetEffectiveProximityOffset() const;
-
-    void SetBottom(const tPolynomial & r);
-    void SetHeight(const tPolynomial & r);
-    void SetSegments(const tPolynomial & r);
-    void SetSegmentLength(const tPolynomial & r);
-    void SetSegmentSteps(const tPolynomial & r);
-    void SetFloorScalePct(const tPolynomial & r);
-    void SetProximityDistance(const tPolynomial & r);
-    void SetProximityOffset(const tPolynomial & r);
 
     bool Timestep( REAL time );
-    virtual void setReferenceTime(REAL time);
+    void setReferenceTime(REAL time);
 
     virtual void setGrowth(REAL growth);  //!< similar to old zones v1 setExpansionSpeed, but generic
     virtual void collapse(REAL speed);  //!< set growth such that collapse happens in a timeframe
@@ -122,10 +108,6 @@ protected:
     tPolynomial rotation2; //!< Rotate the contour around the position at this rate.
     tPolynomial segments_; //!< Number of segments to make up the zone
     tPolynomial seglength_; //!< Length of each segment making up the zone
-    tPolynomial segsteps_; //!< Number of steps to draw each segment making up the zone
-    tPolynomial floorscalepct_; //!< percentage of zone's size used to outline zone on the floor
-    tPolynomial proximitydistance_; //!< distance from which zone's height start to shrink
-    tPolynomial proximityoffset_; //!< offset distance from the zone border where the height reach 0 
     rColor color_;
 
     void setCreatedTime(REAL time);
@@ -154,8 +136,6 @@ public :
     bool isInteracting(eGameObject * target);
     void Render(const eCamera * cam );
 	virtual void Render2D(tCoord scale) const;
-
-    virtual void setReferenceTime(REAL time);
 
     tCoord findPointNear(tCoord&);
     tCoord findPointFar(tCoord&);

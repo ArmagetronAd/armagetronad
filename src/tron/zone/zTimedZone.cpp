@@ -28,7 +28,7 @@ zZone * sz_CreateTimedZone( eGrid * grid, const eCoord & pos )
 
     gVectorExtra< nNetObjectID > noOwners;
     zEffectGroupPtr ZEG = zEffectGroupPtr(new zEffectGroup(noOwners, noOwners));
-    Triad noTriad(_false);
+    Triad noTriad;
     zValidatorPtr ZV = zValidatorPtr(zValidatorAll::create(noTriad, noTriad));
     zSelectorPtr ZS = zSelectorPtr(zSelectorSelf::create());
     ZS->setCount(-1);

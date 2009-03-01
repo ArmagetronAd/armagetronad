@@ -60,8 +60,8 @@ bool tResource::ValidateXml(FILE* docfd, const char* uri, const char* filepath) 
             while((pos = pureFilepath.StrPos("//")) != -1) {
                 pureFilepath.RemoveSubStr(pos, 1);
             }
-            tResourcePath purepath(pureFilepath);
-            if ( m_Path.Valid() && purepath != m_Path )
+        tResourcePath purepath(pureFilepath);
+            if ( purepath != m_Path )
             {
                 con << "\nWARNING: incorrect filepath. The resource wants to be at \"" << rightFilepath << "\", but was loaded from \"" << filepath << "\".\n\n";
             }

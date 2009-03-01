@@ -1,4 +1,5 @@
 include $(top_srcdir)/Makefile.paths
+
 SUBDIRS = first protobuf thirdparty swig
 
 # target directory
@@ -15,13 +16,13 @@ tUniversalVariables.h: Makefile tUniversalVariables.h.in ${top_builddir}/univers
 
 ${srcdir}/tools/tDirectories.cpp: tUniversalVariables.h
 
-EXTRA_DIST = render/rConsoleCout.cpp engine/sound/base/eChannel.h tools/values/vParser.cpp engine/eSound.cpp engine/eSound.h
+EXTRA_DIST = render/rConsoleCout.cpp engine/sound/base/eChannel.h vParser.cpp
 
 dist-hook:
-	cp -R ${srcdir}/config_ide.h ${srcdir}/win32 ${srcdir}/win32_ded $(distdir)
+	cp -R ${srcdir}/config_ide.h ${srcdir}/macosx ${srcdir}/win32 ${srcdir}/win32_ded $(distdir)
 
-#   adapt versions in Windows header files
-	for f in config_ide.h; do\
+#   adapt versions in Mac and Windows header files
+	for f in macosx/version.h.in config_ide.h; do\
 		chmod 644 ${distdir}/$$f;\
 		sed -e "s,#define VERSION.*$$,#define VERSION \"${VERSION}\"," < ${srcdir}/$$f > ${distdir}/$$f;\
 	done
@@ -51,10 +52,13 @@ tools_extra=
 endif
 
 INCLUDED_MODULE_SOURCES=
+
+# Note: tMemManager.cpp must be last to avoid false leak reports (sorry for
+# the fragile dependency on undefined behaviour of the linker...)
 libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVersion.h\
 	tools/tArray.cpp tools/tArray.h \
 	tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.cpp tools/tColor.h\
-	tools/tConfiguration.cpp tools/tConfiguration.h tools/tConsole.cpp tools/tConsole.h \
+	tools/tConfiguration.cpp tools/tConfiguration.h tools/tConsole.cpp tools/tConsole.h tools/tCrypt.cpp tools/tCrypt.h\
 	tools/tDirectories.cpp tools/tDirectories.h tools/tError.cpp tools/tError.h tools/tEventQueue.cpp\
 	tools/tEventQueue.h tools/tHeap.cpp tools/tHeap.h tools/tInitExit.h tools/tLinkedList.cpp tools/tLinkedList.h\
 	tools/tList.h tools/tLocale.cpp tools/tLocale.h tools/tMath.h \
@@ -70,7 +74,6 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/tXmlParser.h tools/tXmlParser.cpp\
 	defs.h\
 	thirdparty/binreloc/prefix.c thirdparty/binreloc/prefix.h\
-	thirdparty/utf8/utf8.h\
 	tools/values/vCore.cpp tools/values/vCore.h \
 	tools/values/vParser.ypp tools/values/vParser.h \
 	tools/values/vRegistry.cpp tools/values/vRegistry.h \
@@ -86,10 +89,6 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/tRectangle.h tools/tRectangle.cpp \
 	tools/tPlayList.h tools/tPlayList.cpp\
 	tools/tDecorator.h tools/tDecorator.cpp\
-	tools/tMutex.h tools/tMutex.cpp\
-	tools/tThread.h\
-	tools/tBackgroundProcess.h\
-	tools/tLockedQueue.h\
 	tools/tCoord.h tools/tCoord.cpp\
 	tools/tValue.h tools/tValueParser.h\
 	tools/tFunction.h tools/tFunction.cpp\
@@ -98,14 +97,12 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/tPolynomialWithBase.h tools/tPolynomialWithBase.cpp \
 	tools/tRuby.h tools/tRuby.cpp \
 	tools/tDict.h \
-	tools/md5.cpp tools/md5.h \
-	tools/tCrypto.h tools/tCrypto.cpp \
 	resource/tResource.h resource/tResource.cpp resource/tResourceType.h resource/tResourceType.cpp\
 	tools/tMemManager.cpp tools/tMemManager.h
 # again, tMemManager.cpp/.h must be last here.
 
 #tools/tCommandLine.cpp tools/tCommandLine.h
-libnetwork_a_SOURCES=network/nAuthentication.cpp\
+libnetwork_a_SOURCES=network/md5.cpp network/md5.h network/nAuthentication.cpp\
 	network/nAuthentication.h network/nConfig.cpp network/nConfig.h\
 	network/nKrawall.cpp network/nKrawall.h network/nKrawallPrivate.cpp\
 	network/nNetObject.cpp network/nNetObject.h network/nNetwork.cpp network/nNetwork.h\
@@ -126,7 +123,7 @@ libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentication
 	engine/eFloor.h \
 	engine/eKrawall.cpp engine/eKrawall.h engine/eNetGameObject.cpp engine/eNetGameObject.h\
 	engine/ePath.cpp engine/ePath.h engine/ePlayer.cpp engine/ePlayer.h engine/eSensor.cpp\
-	engine/eSensor.h engine/eSpawn.cpp engine/eSpawn.h engine/eTeam.cpp engine/eTeam.h engine/eTess2.h\
+	engine/eSensor.h engine/eTeam.cpp engine/eTeam.h engine/eTess2.h\
 	engine/eTimer.cpp engine/eTimer.h engine/eVoter.cpp engine/eVoter.h engine/eWall.cpp engine/eWall.h\
 	engine/eRectangle.h \
 	engine/sound/sdl_mixer/eChannelSDLMixer.cpp \
@@ -136,10 +133,7 @@ libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentication
 	engine/eEventNotification.h engine/eEventNotification.cpp \
 	engine/eLagCompensation.cpp engine/eLagCompensation.h \
 	engine/eSoundMixer.h engine/eSoundMixer.cpp \
-	engine/eChat.cpp engine/eChat.h \
-	engine/eEventNotification.h engine/eEventNotification.cpp \
-	engine/eWarmup.h engine/eWarmup.cpp \
-	engine/eLadderLog.h engine/eLadderLog.cpp
+	engine/eEventNotification.h engine/eEventNotification.cpp
 
 librender_a_SOURCES=render/rConsole.cpp render/rConsoleGraph.cpp render/rConsole.h render/rFont.cpp\
 	render/rFont.h render/rGL.cpp render/rGL.h render/rGLEW.h render/rGLRender.cpp render/rModel.cpp render/rModel.h render/rRender.cpp\
@@ -153,11 +147,10 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/gArmagetron.cpp tron/gCamera.cpp tron/gCamera.h tron/gCycle.cpp tron/gCycle.h tron/gCycleMovement.cpp\
 	tron/gJoystick.h tron/gJoystick.cpp\
 	tron/gCycleMovement.h tron/gExplosion.cpp tron/gExplosion.h tron/gGame.cpp tron/gGame.h\
-	tron/gTutorial.h tron/gTutorial.cpp\
 	tron/gLanguageMenu.cpp tron/gLanguageMenu.h tron/gLogo.cpp tron/gLogo.h\
 	tron/gMenus.cpp tron/gMenus.h tron/gParser.cpp tron/gParser.h tron/gParticles.cpp tron/gParticles.h\
 	tron/gSensor.cpp tron/gSensor.h tron/gServerBrowser.cpp tron/gServerBrowser.h tron/gSparks.cpp tron/gSparks.h\
-	tron/gStuff.cpp tron/gStuff.h tron/gTeam.cpp tron/gTeam.h tron/gWall.cpp\
+	tron/gSpawn.cpp tron/gSpawn.h tron/gStuff.cpp tron/gStuff.h tron/gTeam.cpp tron/gTeam.h tron/gWall.cpp\
 	tron/gWall.h\
 	tron/gServerFavorites.h tron/gServerFavorites.cpp\
 	tron/gStatistics.h tron/gStatistics.cpp\
@@ -200,14 +193,6 @@ libtron_a_SOURCES +=\
 endif
 
 libui_a_SOURCES=ui/uInput.cpp ui/uInput.h ui/uInputQueue.cpp ui/uInputQueue.h ui/uMenu.cpp ui/uMenu.h
-
-if OS_X_TOOLKIT
-if !BUILDDEDICATED
-libtron_a_SOURCES += tron/gOSXURLHandler.mm tron/gOSXURLHandler.h
-libui_a_SOURCES += ui/uOSXPaste.cpp ui/uOSXPaste.h
-endif
-endif
-
 endif
 
 # library include dependency structure. Watch out, don't create circular include dependencies.
@@ -221,15 +206,6 @@ librender_a_CXXFLAGS =$(libtools_a_CXXFLAGS)  -I@srcdir@/render
 libui_a_CXXFLAGS     =$(librender_a_CXXFLAGS) -I@srcdir@/ui -I@srcdir@/thirdparty/shttpd -I@srcdir@/thirdparty/scrap
 libengine_a_CXXFLAGS =$(libui_a_CXXFLAGS)     -I@srcdir@/network -I@srcdir@/engine -I@srcdir@/engine/sound
 libtron_a_CXXFLAGS   =$(libengine_a_CXXFLAGS) -I@srcdir@/thirdparty/particles -I@srcdir@/tron -I@srcdir@/tron/cockpit
-
-if OS_X_TOOLKIT
-libtools_a_OBJCXXFLAGS  =$(libtools_a_CXXFLAGS)
-libnetwork_a_OBJCXXFLAGS=$(libnetwork_a_CXXFLAGS)
-librender_a_OBJCXXFLAGS =$(librender_a_CXXFLAGS)
-libui_a_OBJCXXFLAGS     =$(libui_a_CXXFLAGS)
-libengine_a_OBJCXXFLAGS =$(libengine_a_CXXFLAGS)
-libtron_a_OBJCXXFLAGS   =$(libtron_a_CXXFLAGS)
-endif
 
 # core engine files can get compiled with optimization turned on for more painless debugging
 # on weak computers
@@ -252,9 +228,6 @@ buildmain =
 endif
 
 games_PROGRAMS = $(buildmain) $(buildthemaster)
-if BUILDDEDICATED
-games_PROGRAMS += armagetronad_serverquery$(EXEEXT)
-endif
 #EXTRA_PROGRAMS = armagetronad_main_master
 
 #if ENABLE_RUBY
@@ -283,10 +256,7 @@ endif
 if BUILDDEDICATED
 extralibs=
 else
-extralibs= thirdparty/particles/libparticles.a
-if !OS_X_TOOLKIT
-extralibs += thirdparty/scrap/libscrap.a
-endif
+extralibs= thirdparty/particles/libparticles.a thirdparty/scrap/libscrap.a
 endif
 
 armagetronad_main_SOURCES = \
@@ -296,16 +266,11 @@ armagetronad_main_SOURCES = \
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
 armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a protobuf/libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 #  librubywrap.a
+# armagetronad_main_LDFLAGS=
 
 armagetronad_main_master_SOURCES = network/master.cpp
 armagetronad_main_master_CXXFLAGS =$(libtron_a_CXXFLAGS)
 armagetronad_main_master_LDADD=libnetwork.a libtools.a protobuf/libprotobuf.a 
-
-if BUILDDEDICATED
-armagetronad_serverquery_SOURCES = serverquery/serverquery.cpp serverquery/jsoncpp.cpp serverquery/json/json.h serverquery/json/json-forwards.h
-armagetronad_serverquery_CXXFLAGS = $(AM_CXXFLAGS) -I@srcdir@ -I@srcdir@/serverquery -I@srcdir@/tools -I@srcdir@/network
-armagetronad_serverquery_LDADD = libnetwork.a libtools.a protobuf/libprotobuf.a
-endif
 endif
 
 ## Note: tron/gFloor.cpp is not referenced from the outside, but required anyway. So it can't be put into

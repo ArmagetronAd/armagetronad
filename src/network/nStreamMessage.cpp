@@ -32,7 +32,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConsole.h"
 #include "tLocale.h"
 #include "tConfiguration.h"
-#include "tMath.h"
 
 #include "nBinary.h"
 
@@ -94,10 +93,9 @@ unsigned long int sn_ExpandMessageID( unsigned short id, unsigned short sender )
     return expanders[sender].ExpandMessageID(id);
 }
 
-nStreamMessage::nStreamMessage( nStreamDescriptor const & descriptor, unsigned int messageID, unsigned int senderID )
+nStreamMessage::nStreamMessage( nStreamDescriptor const & descriptor, unsigned int messageID )
 : nMessageBase( descriptor, messageID ), readOut(0), descriptor_( descriptor )
 {
-    senderID_ = senderID;
 }
 
 nStreamMessage::nStreamMessage( nStreamDescriptor const & descriptor )
@@ -472,7 +470,7 @@ nStreamMessage& nStreamMessage::operator>>(REAL &x){
 
 #ifdef DEBUG
 #ifndef WIN32
-    if (!isfinite(x))
+    if (!finite(x))
         st_Breakpoint();
     // con << " , x= " << x << '\n';
 #endif
