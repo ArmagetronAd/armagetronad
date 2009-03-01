@@ -69,7 +69,6 @@ zFlagZone::zFlagZone( eGrid * grid )
         :zZone( grid )
 {
     init_ = false;
-	initOwnerTeam = NULL;
     homePosition_ = shape->Position();
     owner_ = NULL;
     ownerTime_ = 0;
@@ -173,6 +172,27 @@ bool zFlagZone::Timestep( REAL time )
 		 {
 			init_ = true;
 			 
+			 const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+			 gCycle * closest = NULL;
+			 REAL closestDistance = 0;
+			 for (int i=gameObjects.Len()-1;i>=0;i--)
+			 {
+				 gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
+				 
+				 if (other )
+				 {
+					 // eTeam * otherTeam = other->Player()->CurrentTeam();
+					 eCoord otherpos = other->Position() - Position();
+					 REAL distance = otherpos.NormSquared();
+					 if ( !closest || distance < closestDistance )
+					 {
+						 closest = other;
+						 closestDistance = distance;
+					 }
+				 }
+			 
+			initOwnerTeam_ = closest->Player()->CurrentTeam();
+		 }
 		 }
 }
 
@@ -267,9 +287,12 @@ void zFlagZone::OnInside( gCycle * target, REAL time )
         return;
     }
     
-	if(target->CurrentTeam() == self->Owner())
-	{
+	eTeam * TheTeam = target->Player()->CurrentTeam();
 		
+	if(TheTeam == initOwnerTeam_)
+	{
+		//Return the Flag
+		GoHome();
 	}
 		
 	//check to see if player already has a flag
@@ -279,7 +302,7 @@ void zFlagZone::OnInside( gCycle * target, REAL time )
 		{
 			zFlagZone* otherFlag=dynamic_cast<zFlagZone *>(gameObjects(i));
 			if ((otherFlag)){
-				if (otherFlag->Owner() == target){
+				if (otherFlag->initOwnerTeam_ == target->Player()->CurrentTeam()){
 					playerHasFlag = true;
 					return;
 				}

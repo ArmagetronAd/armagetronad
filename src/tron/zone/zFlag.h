@@ -60,6 +60,20 @@ private:
 
     void ZoneWasHeld();                                //!< call when the zone was held as long as possible with the set game rules
 	void GoHome();
+	
+	bool init_;
+	eTeam initOwnerTeam_;
+    eCoord homePosition_;
+    gCycle *owner_;
+	float ownerTime_;
+	bool flagHome_;
+    float chatBlinkUpdateTime_;
+    float blinkUpdateTime_;
+    float blinkTrackUpdateTime_;
+    gCycle *ownerDropped_;
+   float ownerDroppedTime_;
+    float lastHoldScoreTime_;
+    bool positionUpdatePending_;
    
 
    
