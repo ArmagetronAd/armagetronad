@@ -2818,7 +2818,7 @@ bool gCycle::Timestep(REAL currentTime){
 
     // check whether simulation has fallen too far behind the requested time
 #ifdef DEDICATED
-    if ( Alive() && currentTime > lastTime + 4 * Lag() + 10 )
+    if ( Alive() && currentTime > lastTime + Lag() + 1 )
     {
         sn_ConsoleOut( "0xff7777Admin : 0xffff77BUG had to kill a cycle because it lagged behind in the simulation. Probably the invulnerability bug. Investigate!\n" );
         st_Breakpoint();

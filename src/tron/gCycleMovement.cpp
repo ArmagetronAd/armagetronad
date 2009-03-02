@@ -2450,8 +2450,6 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 {
                     REAL lastTimeBack = lastTime;
                     bool ret = TimestepCore( lastTime + tsTodo, false );
-                    if ( lastTime <= lastTimeBack )
-                        return ret;
                 }
                 else
                 {
