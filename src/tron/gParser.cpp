@@ -1212,7 +1212,7 @@ gParser::parseZoneBachus(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
             // On Enter for now; TODO: fortress at least will need an inside
             gVectorExtra< nNetObjectID > noOwners;
             zEffectGroupPtr ZEG = zEffectGroupPtr(new zEffectGroup(noOwners, noOwners));
-            Triad noTriad;
+            Triad noTriad(_false);
             zValidatorPtr ZV = zValidatorPtr(zValidatorAll::create(noTriad, noTriad));
             zSelectorPtr ZS = zSelectorPtr(zSelectorSelf::create());
             ZS->setCount(-1);
