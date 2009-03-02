@@ -67,7 +67,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 FUNCPTR  uMenu::idle(NULL);
 
 bool uMenu::wrap=true;
-bool uMenu::quickexit=false;
+uMenu::QuickExit uMenu::quickexit=uMenu::QuickExit_Off;
 bool uMenu::exitToMain=false;
 
 // *****************************************************

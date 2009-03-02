@@ -67,7 +67,16 @@ protected:
     REAL YPos(int num);
 public:
     static bool          wrap;
-    static bool          quickexit;
+    
+    // different quick exit types
+    enum QuickExit
+    {
+        QuickExit_Off  = 0, // no quick exit, keep going
+        QuickExit_Game = 1, // quit to game selection menu
+        QuickExit_Total = 2 // quit the program
+    };
+
+    static QuickExit     quickexit;
     static bool          exitToMain;
 
     tOutput              title;

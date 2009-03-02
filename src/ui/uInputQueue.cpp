@@ -263,7 +263,7 @@ bool su_GetSDLInput(SDL_Event &tEvent,REAL &time){
     if ( tRecorder::Playback(su_end) )
     {
         tRecorder::Record(su_end);
-        uMenu::quickexit=true;
+        uMenu::quickexit=uMenu::QuickExit_Total;
     }
 
     // try to fetch event from playback
