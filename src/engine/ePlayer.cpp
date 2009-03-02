@@ -2690,7 +2690,7 @@ static tSettingItem< tAccessLevel > se_msgSpyAccessLevelConf( "ACCESS_LEVEL_SPY_
 static tAccessLevelSetter se_msgSpyAccessLevelConfLevel( se_msgSpyAccessLevelConf, tAccessLevel_Owner );
 
 // access level for freedom from spam protection
-static tAccessLevel se_spamAccessLevel = tAccessLevel_5;
+static tAccessLevel se_spamAccessLevel = tAccessLevel_Armatrator;
 static tSettingItem< tAccessLevel > se_spamAccessLevelConf( "ACCESS_LEVEL_SPAM", se_spamAccessLevel );
 static tAccessLevelSetter se_spamAccessLevelConfLevel( se_spamAccessLevelConf, tAccessLevel_Owner );
 
