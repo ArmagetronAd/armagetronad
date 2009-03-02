@@ -2959,7 +2959,7 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 
         if ( ( !e || ( !e->Alive() && e->DeathTime() < time - .5 ) ) && sn_GetNetState() != nCLIENT )
         {
-            sg_RespawnPlayer(time, grid, &arena, p);
+            sg_RespawnPlayer(grid, &arena, p);
         }
     }
 }
