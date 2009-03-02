@@ -253,8 +253,7 @@ authority_no_check_help     UNDOCUMENTED
 
 config_accesslevel_3        Moderator-2
 config_accesslevel_4        Moderator-3
-config_accesslevel_5        Moderator-4
-config_accesslevel_6        Moderator-5
+config_accesslevel_6        Armatrator-2
 config_accesslevel_9        Recruit
 config_accesslevel_10       Recruit-1
 config_accesslevel_11       Recruit-2

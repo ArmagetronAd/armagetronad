@@ -90,6 +90,7 @@ Changes since 0.2.8
 Changes since 0.2.8.3_beta1:
 ============================
 
+- Made ready for Armatrators
 - Authentication routines now use utf8 as forward- compatibility with
   trunk. Previously, non-ASCII usernames simply didn't work at all.
 - Better lag slide protection: clients no longer get confused when

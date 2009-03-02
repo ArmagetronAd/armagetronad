@@ -49,7 +49,7 @@ enum tAccessLevel
     tAccessLevel_Moderator = 2,    // one of the moderators
     tAccessLevel_3 = 3,            // reserved
     tAccessLevel_4 = 4,            // reserved
-    tAccessLevel_5 = 5,            // reserved
+    tAccessLevel_Armatrator = 5,   // reserved
     tAccessLevel_6 = 6,            // reserved
     tAccessLevel_TeamLeader = 7,   // a team leader
     tAccessLevel_TeamMember = 8,   // a team member
