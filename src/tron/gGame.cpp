@@ -2133,6 +2133,8 @@ bool ConnectToServerCore(nServerInfoBase *server)
 
 void ConnectToServer(nServerInfoBase *server)
 {
+    bool to = sr_textOut;
+
     bool okToRedirect = ConnectToServerCore( server );
 
     // REAL redirections = 0;
@@ -2171,6 +2173,17 @@ void ConnectToServer(nServerInfoBase *server)
         redirections *= 1/(1 + dt * maxRedirections * timeout );
         */
     }
+
+    sr_con.autoDisplayAtNewline=false;
+    sr_con.fullscreen=false;
+
+    sn_SetNetState(nSTANDALONE);
+
+    sg_currentGame = NULL;
+    nNetObject::ClearAll();
+    ePlayerNetID::ClearAll();
+
+    sr_textOut=to;
 }
 
 static tConfItem<int> mor("MAX_OUT_RATE",sn_maxRateOut);
