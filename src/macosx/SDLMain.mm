@@ -44,7 +44,7 @@ SDL_Event event;
 - (void)terminate:(id)sender
 {
     st_SaveConfig();
-    uMenu::quickexit=true;  
+    uMenu::quickexit=uMenu::QuickExit_Total;  
 }
 
 @end
@@ -82,7 +82,7 @@ void MacOSX_SetCWD(char **argv) {
 - (void)quit:(id)sender
 {
     st_SaveConfig();
-    uMenu::quickexit=true;    
+    uMenu::quickexit=uMenu::QuickExit_Total;    
 }
 
 /* Fix menu to contain the real app name instead of "SDL App" */
