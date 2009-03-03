@@ -41,7 +41,7 @@ enum eChatMessageType
     eChatMessageType_Private = 1, // Private message chat
     eChatMessageType_Team = 2,    // Team message chat
     eChatMessageType_Public = 3,  // Public chat
-    eChatMessageType_Me = 4       // /me
+    eChatMessageType_Me = 4       // /me 
 };
 
 class eChatSaid

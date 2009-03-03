@@ -37,13 +37,15 @@
 class eChatPrefixSpamTester
 {
 public:
-    eChatPrefixSpamTester( ePlayerNetID * player, const tString & say );
+    eChatPrefixSpamTester( ePlayerNetID * player, const eChatSaid & say );
     virtual ~eChatPrefixSpamTester();
     bool Check( tString & out );
 private:
+    bool ShouldCheckMessage( const eChatMessageType type ) const;
+    
     std::vector< tString > knownPrefixes;
     ePlayerNetID * player_;
-    const tString & say_;
+    const eChatSaid & say_;
 };
 
 
@@ -108,9 +110,11 @@ bool eChatSpamTester::Check()
         }
     }
     
+    eChatSaid saidEntry( say_, currentTime, lastSaidType_ );
+    
     // check for prefix spam
     {
-        eChatPrefixSpamTester tester( player_, say_ );
+        eChatPrefixSpamTester tester( player_, saidEntry );
         tString foundPrefix;
         if ( tester.Check( foundPrefix ) )
         {
@@ -167,7 +171,6 @@ bool eChatSpamTester::Check()
         if ( said.size() >= static_cast< size_t >( se_lastSaidMaxEntries ) )
             said.pop_back();
         
-        eChatSaid saidEntry( say_, currentTime, lastSaidType_ );
         said.push_front( saidEntry );
     }
     
@@ -205,7 +208,7 @@ size_t CommonPrefix(const tString & a, const tString & b)
     return n;
 }
 
-eChatPrefixSpamTester::eChatPrefixSpamTester( ePlayerNetID * player, const tString & say )
+eChatPrefixSpamTester::eChatPrefixSpamTester( ePlayerNetID * player, const eChatSaid & say )
 : knownPrefixes(), player_( player ), say_( say )
 {
 }
@@ -216,10 +219,25 @@ eChatPrefixSpamTester::~eChatPrefixSpamTester()
 
 bool eChatPrefixSpamTester::Check( tString & out )
 {
-    std::map< int, int > foundPrefixes;
-    
+    if ( !ShouldCheckMessage( say_.Type() ) )
+        return false;
+
     eChatLastSaid const & lastSaid = player_->lastSaid_;
     const size_t saidSize = lastSaid.size();
+    
+    // check from known prefixes
+    for ( size_t i = 0; i < saidSize; i++ )
+    {
+        for ( size_t j = 0; j < knownPrefixes.size(); j++ )
+            if ( say_.Said().StartsWith( knownPrefixes[j] ) )
+            {
+                out = knownPrefixes[j];
+                return true;
+            }
+    }
+    
+    std::map< int, int > foundPrefixes;
+    
     for ( size_t i = 0; i < saidSize; i++ )
     {
         eChatSaid const & said = lastSaid[i];
@@ -227,10 +245,10 @@ bool eChatPrefixSpamTester::Check( tString & out )
         if ( said.Type() < eChatMessageType_Public )
             continue;
             
-        if ( say_ == said.Said() )
+        if ( say_.Said() == said.Said() )
             continue;
         
-        int common = CommonPrefix( say_, said.Said() );
+        int common = CommonPrefix( say_.Said(), said.Said() );
         
         if ( common >= se_prefixSpamMinLength )
         {
@@ -241,7 +259,7 @@ bool eChatPrefixSpamTester::Check( tString & out )
 
             if ( foundPrefixes[common] >= se_prefixSpamMinTimesAppeared )
             {
-                out = say_.SubStr(0, common);
+                out = say_.Said().SubStr(0, common);
                 return true;
             }
         }
@@ -249,7 +267,10 @@ bool eChatPrefixSpamTester::Check( tString & out )
     return false;
 }
 
-
+bool eChatPrefixSpamTester::ShouldCheckMessage( const eChatMessageType type ) const
+{
+    return type >= eChatMessageType_Public;
+}
 
 
 
