@@ -34,6 +34,24 @@
 #include "ePlayer.h"
 #include "tSysTime.h"
 
+
+//!< Should spam prefix checking be enabled?
+static bool se_prefixSpamShouldEnable = true;
+static tConfItem< bool > se_prefixSpamShouldEnableConf( "PREFIX_SPAM_ENABLE", se_prefixSpamShouldEnable );
+
+//!< The score from prefix checking a message must get to be considered spam.
+static REAL se_prefixSpamScore = 5.0;
+static tConfItem< REAL > se_prefixSpamScoreConf( "PREFIX_SPAM_SCORE", se_prefixSpamScore );
+
+//!< The length that a prefix must be for it to count as prefix spam
+static int se_prefixSpamMinLength = 3;
+static tConfItem< int > se_prefixSpamMinLengthConf( "PREFIX_SPAM_MIN_LENGTH", se_prefixSpamMinLength );
+
+//<! The number of times the prefix must appear to be considered a prefix
+static int se_prefixSpamMinTimesAppeared = 3;
+static tConfItem< int > se_prefixSpamMinTimesAppearingConf( "PREFIX_SPAM_MIN_TIMES_APPEARED", se_prefixSpamMinTimesAppeared );
+
+
 /**
  * Helper class for predicate stl-comparisons
  */
@@ -249,6 +267,7 @@ bool eChatSpamTester::Check()
     eChatSaidEntry saidEntry( say_, currentTime, lastSaidType_ );
     
     // check for prefix spam
+    if ( se_prefixSpamShouldEnable )
     {
         eChatPrefixSpamTester tester( player_, saidEntry );
         tString foundPrefix;
@@ -307,14 +326,6 @@ bool eChatSpamTester::CheckSpam( REAL factor, tOutput const & message ) const
 
     return false;
 }
-
-//!< The length that a prefix must be for it to count as prefix spam
-static int se_prefixSpamMinLength = 3;
-static tConfItem< int > se_prefixSpamMinLengthConf( "PREFIX_SPAM_MIN_LENGTH", se_prefixSpamMinLength );
-
-//<! The number of times the prefix must appear to be considered a prefix
-static int se_prefixSpamMinTimesAppeared = 3;
-static tConfItem< int > se_prefixSpamMinTimesAppearingConf( "PREFIX_SPAM_MIN_TIMES_APPEARED", se_prefixSpamMinTimesAppeared );
 
 size_t CommonPrefix(const tString & a, const tString & b)
 {
