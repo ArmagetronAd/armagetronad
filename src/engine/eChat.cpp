@@ -91,10 +91,10 @@ private:
      * We should only check certain message types. For example, commands
      * such as /admin should never be checked for prefix-spam.
      *
-     * @param type The type of message that we might want to check
+     * @param said The message that we might want to check
      * @return Should we check this message for prefix-spam?
      */
-    bool ShouldCheckMessage( const eChatMessageType type ) const;
+    bool ShouldCheckMessage( const eChatSaidEntry & said ) const;
 
     ePlayerNetID * player_;
     const eChatSaidEntry & say_;
@@ -339,7 +339,7 @@ eChatPrefixSpamTester::~eChatPrefixSpamTester()
 
 bool eChatPrefixSpamTester::Check( tString & out )
 {
-    if ( !ShouldCheckMessage( say_.Type() ) )
+    if ( !ShouldCheckMessage( say_ ) )
         return false;
 
     eChatLastSaid::SaidList & lastSaid = player_->lastSaid_.LastSaid();
@@ -355,7 +355,7 @@ bool eChatPrefixSpamTester::Check( tString & out )
     {
         eChatSaidEntry & said = lastSaid[i];
         
-        if ( !ShouldCheckMessage( said.Type() ) )
+        if ( !ShouldCheckMessage( said ) )
             continue;
         
         if ( say_.Said() == said.Said() )
@@ -424,7 +424,7 @@ bool eChatPrefixSpamTester::ChatDirectedTowardsPlayer( const tString & prefix ) 
     return false;     
 }
 
-bool eChatPrefixSpamTester::ShouldCheckMessage( const eChatMessageType type ) const
+bool eChatPrefixSpamTester::ShouldCheckMessage( const eChatSaidEntry & said ) const
 {
-    return type >= eChatMessageType_Public;
+    return said.Type() >= eChatMessageType_Public;
 }
