@@ -36,24 +36,50 @@
 
 class ePlayerNetID;
 
+/**
+ * Chat message types. Useful for applying spam-checking against certain
+ * message types.
+ */
 enum eChatMessageType
 {
-    eChatMessageType_Command = 0,       // A remotely issued command
-    eChatMessageType_Private = 1,       // Private message chat
-    eChatMessageType_Team = 2,          // Team message chat
-    eChatMessageType_Public = 3,        // Public chat
-    eChatMessageType_Public_Direct = 4, // Public chat directed towards a player
-    eChatMessageType_Me = 5             // /me 
+    eChatMessageType_Command = 0,       //!< A remotely issued command
+    eChatMessageType_Private = 1,       //!< Private message chat
+    eChatMessageType_Team = 2,          //!< Team message chat
+    eChatMessageType_Public = 3,        //!< Public chat
+    eChatMessageType_Public_Direct = 4, //!< Public chat directed towards a player
+    eChatMessageType_Me = 5             //!< /me
 };
 
+/**
+ * Contains information about an individual chat message
+ */
 class eChatSaidEntry
 {
 public:
     eChatSaidEntry(const tString &, const nTimeRolling &, eChatMessageType);
     ~eChatSaidEntry();
+    
+    /**
+     * @return The string that was said.
+     */
     const tString & Said() const;
+    
+    /**
+     * @return The time the user sent the message.
+     */
     const nTimeRolling & Time() const;
+    
+    /**
+     * @return The type of this message.
+     */
     const eChatMessageType Type() const;
+    
+    /**
+     * Set the message type
+     * 
+     * @param newType The new message type.
+     * @see Type()
+     */
     void SetType(eChatMessageType newType);
 
 private:
@@ -62,6 +88,9 @@ private:
     eChatMessageType type_;
 };
 
+/**
+ * Holds chat messages for one player
+ */
 class eChatLastSaid
 {
 public:
@@ -71,29 +100,66 @@ public:
     eChatLastSaid();
     ~eChatLastSaid();
     
+    /**
+     * @return The last said entry
+     */
     const SaidList & LastSaid() const;
     SaidList & LastSaid();
+    
+    /**
+     * Chat can be checked to guard against prefix-spam. When a prefix has
+     * been consistently used in messages, it will stored in this list.
+     * 
+     * @return The known prefixes
+     */
     const StringList & KnownPrefixes() const;
     
+    /**
+     * Add a new said entry
+     * 
+     * @param saidEntry the new entry
+     */
     void AddSaid( const eChatSaidEntry & saidEntry );
+    
+    /**
+     * Add a new chat prefix
+     *
+     * @param prefix the new prefix
+     */
     void AddPrefix( const tString & prefix );
+    
 private:
     SaidList lastSaid_;
     StringList knownPrefixes_;
 };
 
+/**
+ * Gaurd to stop chat spam.
+ */
 class eChatSpamTester
 {
 public:
     eChatSpamTester( ePlayerNetID * p, tString const & say );
+    /**
+     * Checks the message, if needed, for spam.
+     *
+     * @return Is this message spam?
+     */
     bool Block();
+    
+    /**
+     * Test the message to see if it spam.
+     *
+     * @return Is this message spam?
+     * @see Block()
+     */
     bool Check();
 
-    bool tested_;             //!< flag indicating whether the chat line has already been checked fro spam
-    bool shouldBlock_;        //!< true if the message should be blocked for spam
-    ePlayerNetID * player_;   //!< the chatting player
-    tColoredString say_;      //!< the chat line
-    REAL factor_;             //!< extra spam weight factor
+    bool tested_;                   //!< flag indicating whether the chat line has already been checked fro spam
+    bool shouldBlock_;              //!< true if the message should be blocked for spam
+    ePlayerNetID * player_;         //!< the chatting player
+    tColoredString say_;            //!< the chat line
+    REAL factor_;                   //!< extra spam weight factor
     eChatMessageType lastSaidType_; //!< The last said message type to be contained in an eChatSaidEntry record
 private:
     bool CheckSpam( REAL factor, tOutput const & message ) const;

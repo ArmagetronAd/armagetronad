@@ -34,7 +34,9 @@
 #include "ePlayer.h"
 #include "tSysTime.h"
 
-
+/**
+ * Helper class for predicate stl-comparisons
+ */
 class IsPrefixPredicate
 {
 public:
@@ -44,31 +46,64 @@ private:
     const tString s_;
 };
 
+/**
+ * Checks for prefix spam from a player
+ */
 class eChatPrefixSpamTester
 {
 public:
+    /**
+     * @param player The player to check for prefix spam
+     * @param say the chat message to check, not yet sent to peers
+     */
     eChatPrefixSpamTester( ePlayerNetID * player, const eChatSaidEntry & say );
     virtual ~eChatPrefixSpamTester();
+    
+    /**
+     * Check for prefix spam.
+     *
+     * @param out Will contain the prefix, if one is found
+     * @return Did the message have a common prefix?
+     */
     bool Check( tString & out );
 private:
+    /**
+     * Tests the message against known prefixes.
+     * 
+     * @param out See Check()
+     * @return Did the message start with a known prefix?
+     */
     bool HasKnownPrefix( tString & out ) const;
+    
+    /**
+     * Tests if this message is directed towards another player.
+     *
+     * Example chat message directed to Player 1:
+     *
+     *     Player 1: change your name
+     * 
+     * @param prefix The possible player name
+     * @return Was the prefix a player name?
+     */
     bool ChatDirectedTowardsPlayer( const tString & prefix ) const;
+    
+    /**
+     * We should only check certain message types. For example, commands
+     * such as /admin should never be checked for prefix-spam.
+     *
+     * @param type The type of message that we might want to check
+     * @return Should we check this message for prefix-spam?
+     */
     bool ShouldCheckMessage( const eChatMessageType type ) const;
 
     ePlayerNetID * player_;
     const eChatSaidEntry & say_;
 };
 
-// ******************************************************************************************
-// *
-// *	se_EscapeColors
-// *
-// ******************************************************************************************
-//!
-//!     @param      s the string to escape
-//!     @return     a string with color codes escaped. Example: 0xfff000 -> #fff000
-//!
-// ******************************************************************************************
+/**
+ * @param s The string to escape
+ * @return A string with color codes escaped. Example: 0xfff000 -> #fff000
+ */
 static tString se_EscapeColors( const tString & s )
 {
     tString ret;
@@ -258,14 +293,13 @@ bool eChatSpamTester::CheckSpam( REAL factor, tOutput const & message ) const
     return false;
 }
 
-// The length that a prefix must be for it to count as prefix spam
+//!< The length that a prefix must be for it to count as prefix spam
 static int se_prefixSpamMinLength = 3;
 static tConfItem< int > se_prefixSpamMinLengthConf( "PREFIX_SPAM_MIN_LENGTH", se_prefixSpamMinLength );
 
-// The number of times the prefix must appear to be considered a prefix
+//<! The number of times the prefix must appear to be considered a prefix
 static int se_prefixSpamMinTimesAppeared = 3;
 static tConfItem< int > se_prefixSpamMinTimesAppearingConf( "PREFIX_SPAM_MIN_TIMES_APPEARED", se_prefixSpamMinTimesAppeared );
-
 
 size_t CommonPrefix(const tString & a, const tString & b)
 {
