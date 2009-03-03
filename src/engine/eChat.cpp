@@ -268,8 +268,7 @@ bool eChatSpamTester::Check()
     int colorCodes = se_CountColorCodes( say_ );
     
     // apply them to the spam severity factor. Burn in hell, color code abusers.
-    static const double log2 = log(2);
-    factor *= log( 2 + colorCodes )/log2;
+    factor *= log( 2 + colorCodes )/ log( 2 );
     
     if ( CheckSpam( factor, tOutput("$spam_chat") ) )
         return true;
