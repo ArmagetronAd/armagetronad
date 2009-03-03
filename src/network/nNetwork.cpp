@@ -2644,7 +2644,8 @@ nConnectError sn_Connect( nAddress const & server, nLoginType loginType, nSocket
 
     tJUST_CONTROLLED_PTR< nMessageBase > mess;
 
-    sn_Connections[0].version = sn_myVersion;
+    // set server version to safe version
+    sn_Connections[0].version = sn_currentVersion;
 
     switch( loginType )
     {
