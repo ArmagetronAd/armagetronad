@@ -230,7 +230,7 @@ public:
 
     nSpamProtection chatSpam_;
     
-    eChatLastSaid lastSaid_;
+    eChatLastSaid lastSaid_; //!< last said information
 
     ePlayerNetID(int p=-1);
     ePlayerNetID(nMessage &m);

@@ -32,6 +32,7 @@
 #include "tString.h"
 #include "nNetwork.h"
 #include <deque>
+#include <vector>
 
 class ePlayerNetID;
 
@@ -44,11 +45,11 @@ enum eChatMessageType
     eChatMessageType_Me = 4       // /me 
 };
 
-class eChatSaid
+class eChatSaidEntry
 {
 public:
-    eChatSaid(const tString &, const nTimeRolling &, eChatMessageType);
-    ~eChatSaid();
+    eChatSaidEntry(const tString &, const nTimeRolling &, eChatMessageType);
+    ~eChatSaidEntry();
     const tString & Said() const;
     const nTimeRolling & Time() const;
     const eChatMessageType Type() const;
@@ -59,7 +60,23 @@ private:
     eChatMessageType type_;
 };
 
-typedef std::deque< eChatSaid > eChatLastSaid;
+class eChatLastSaid
+{
+public:
+    typedef std::deque< eChatSaidEntry > SaidList;
+    typedef std::vector< tString > StringList;
+    
+    eChatLastSaid();
+    ~eChatLastSaid();
+    
+    const SaidList & LastSaid() const;
+    const StringList & KnownPrefixes() const;
+    
+    void InsertSaid( const eChatSaidEntry & saidEntry );
+private:
+    SaidList lastSaid_;
+    StringList knownPrefixes_;
+};
 
 class eChatSpamTester
 {
@@ -73,7 +90,7 @@ public:
     ePlayerNetID * player_;   //!< the chatting player
     tColoredString say_;      //!< the chat line
     REAL factor_;             //!< extra spam weight factor
-    eChatMessageType lastSaidType_; //!< The last said message type to be contained in an eChatSaid record
+    eChatMessageType lastSaidType_; //!< The last said message type to be contained in an eChatSaidEntry record
 private:
     bool CheckSpam( REAL factor, tOutput const & message ) const;
 };

@@ -34,18 +34,27 @@
 #include "ePlayer.h"
 #include "tSysTime.h"
 
+
+class IsPrefixPredicate
+{
+public:
+    IsPrefixPredicate( const tString & s ) :s_( s ) { }
+    bool operator() ( const tString & other ) { return s_.StartsWith( other ); }
+private:
+    const tString s_;
+};
+
 class eChatPrefixSpamTester
 {
 public:
-    eChatPrefixSpamTester( ePlayerNetID * player, const eChatSaid & say );
+    eChatPrefixSpamTester( ePlayerNetID * player, const eChatSaidEntry & say );
     virtual ~eChatPrefixSpamTester();
     bool Check( tString & out );
 private:
     bool ShouldCheckMessage( const eChatMessageType type ) const;
-    
-    std::vector< tString > knownPrefixes;
+
     ePlayerNetID * player_;
-    const eChatSaid & say_;
+    const eChatSaidEntry & say_;
 };
 
 // ******************************************************************************************
@@ -78,30 +87,56 @@ static tString se_EscapeColors( const tString & s )
     return ret;
 }
 
-eChatSaid::eChatSaid(const tString & said, const nTimeRolling & t, eChatMessageType type)
+eChatSaidEntry::eChatSaidEntry(const tString & said, const nTimeRolling & t, eChatMessageType type)
 : said_( said ), time_( t ), type_( type )
 {
 }
 
-eChatSaid::~eChatSaid()
+eChatSaidEntry::~eChatSaidEntry()
 {
 }
 
-const tString & eChatSaid::Said() const
+const tString & eChatSaidEntry::Said() const
 {
     return said_;
 }
 
-const nTimeRolling & eChatSaid::Time() const
+const nTimeRolling & eChatSaidEntry::Time() const
 {
     return time_;
 }
 
-const eChatMessageType eChatSaid::Type() const
+const eChatMessageType eChatSaidEntry::Type() const
 {
     return type_;
 }
 
+eChatLastSaid::eChatLastSaid()
+: lastSaid_(), knownPrefixes_()
+{
+}
+
+eChatLastSaid::~eChatLastSaid()
+{
+}
+
+const eChatLastSaid::SaidList & eChatLastSaid::LastSaid() const
+{
+    return lastSaid_;
+}
+
+const eChatLastSaid::StringList & eChatLastSaid::KnownPrefixes() const
+{
+    return knownPrefixes_;
+}
+
+void eChatLastSaid::InsertSaid( const eChatSaidEntry & saidEntry )
+{
+    if ( lastSaid_.size() >= static_cast< size_t >( se_lastSaidMaxEntries ) )
+        lastSaid_.pop_back();
+    
+    lastSaid_.push_front( saidEntry );
+}
 
 // handles spam checking at the right time
 eChatSpamTester::eChatSpamTester( ePlayerNetID * p, tString const & say )
@@ -126,11 +161,11 @@ bool eChatSpamTester::Check()
     nTimeRolling currentTime = tSysTimeFloat();
     
     // check if the player already said the same thing not too long ago
-    eChatLastSaid const & lastSaid = player_->lastSaid_;
+    eChatLastSaid::SaidList const & lastSaid = player_->lastSaid_.LastSaid();
     const size_t saidSize = lastSaid.size();
     for ( size_t i = 0; i < saidSize; i++ )
     {
-        eChatSaid const & said = lastSaid[i];
+        eChatSaidEntry const & said = lastSaid[i];
         if( (say_.StripWhitespace() == said.Said().StripWhitespace()) && ( (currentTime - said.Time()) < se_alreadySaidTimeout * factor_ ) )
         {
             sn_ConsoleOut( tOutput("$spam_protection_repeat", say_ ), player_->Owner() );
@@ -138,7 +173,7 @@ bool eChatSpamTester::Check()
         }
     }
     
-    eChatSaid saidEntry( say_, currentTime, lastSaidType_ );
+    eChatSaidEntry saidEntry( say_, currentTime, lastSaidType_ );
     
     // check for prefix spam
     {
@@ -193,14 +228,7 @@ bool eChatSpamTester::Check()
     }
 #endif
     
-    // update last said record
-    {
-        eChatLastSaid & said = player_->lastSaid_;
-        if ( said.size() >= static_cast< size_t >( se_lastSaidMaxEntries ) )
-            said.pop_back();
-        
-        said.push_front( saidEntry );
-    }
+    player_->lastSaid_.InsertSaid( saidEntry );
     
     return false;
 }
@@ -236,8 +264,8 @@ size_t CommonPrefix(const tString & a, const tString & b)
     return n;
 }
 
-eChatPrefixSpamTester::eChatPrefixSpamTester( ePlayerNetID * player, const eChatSaid & say )
-: knownPrefixes(), player_( player ), say_( say )
+eChatPrefixSpamTester::eChatPrefixSpamTester( ePlayerNetID * player, const eChatSaidEntry & say )
+: player_( player ), say_( say )
 {
 }
 
@@ -250,25 +278,27 @@ bool eChatPrefixSpamTester::Check( tString & out )
     if ( !ShouldCheckMessage( say_.Type() ) )
         return false;
 
-    eChatLastSaid const & lastSaid = player_->lastSaid_;
+    eChatLastSaid::SaidList const & lastSaid = player_->lastSaid_.LastSaid();
     const size_t saidSize = lastSaid.size();
     
     // check from known prefixes
-    for ( size_t i = 0; i < saidSize; i++ )
     {
-        for ( size_t j = 0; j < knownPrefixes.size(); j++ )
-            if ( say_.Said().StartsWith( knownPrefixes[j] ) )
-            {
-                out = se_EscapeColors( knownPrefixes[j] );
-                return true;
-            }
+        const eChatLastSaid::StringList & prefixes = player_->lastSaid_.KnownPrefixes();
+        eChatLastSaid::StringList::const_iterator it =
+            std::find_if( prefixes.begin(), prefixes.end(), IsPrefixPredicate( say_.Said() ) );
+        
+        if ( it != prefixes.end() )
+        {
+            out = se_EscapeColors( *it );
+            return true;
+        }
     }
     
     std::map< int, int > foundPrefixes;
     
     for ( size_t i = 0; i < saidSize; i++ )
     {
-        eChatSaid const & said = lastSaid[i];
+        eChatSaidEntry const & said = lastSaid[i];
         
         if ( said.Type() < eChatMessageType_Public )
             continue;
