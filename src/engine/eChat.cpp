@@ -140,6 +140,11 @@ static int se_CountColorCodes( const tString & s )
     return colorCodes;
 }
 
+static double se_CalcScore( double a )
+{
+    return log( 2 + a ) / log( 2 );
+}
+
 eChatSaidEntry::eChatSaidEntry(const tString & said, const nTimeRolling & t, eChatMessageType type)
 : said_( said ), time_( t ), type_( type )
 {
@@ -264,11 +269,8 @@ bool eChatSpamTester::Check()
     REAL factor = factor_;
     factor *= 1 + lengthMalus;
     
-    // count color codes. We hate them. We really do. (Yeah, this calculation is inefficient.)
-    int colorCodes = se_CountColorCodes( say_ );
-    
-    // apply them to the spam severity factor. Burn in hell, color code abusers.
-    factor *= log( 2 + colorCodes )/ log( 2 );
+    // Apply number of color codes to the spam severity factor. Burn in hell, color code abusers.
+    factor *= se_CalcScore( se_CountColorCodes( say_ ) );
     
     if ( CheckSpam( factor, tOutput("$spam_chat") ) )
         return true;
