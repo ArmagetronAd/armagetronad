@@ -519,7 +519,7 @@ void eGrid::display_simple( eCamera* cam, int viewer,bool floor,
         // send out sensors to find walls close to the camera
         if ( z < 3 )
         {
-            eCamera const * camera = cameras(viewer);
+            eCamera const * camera = cam;
             if( camera )
             {
                 eCoord dir = camera->CameraDir().Turn(1,.5);
