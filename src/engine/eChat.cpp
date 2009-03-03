@@ -101,8 +101,10 @@ private:
 };
 
 /**
+ * Example: se_EscapeColors( "0xfff000" ) -> "#fff000"
+ * 
  * @param s The string to escape
- * @return A string with color codes escaped. Example: 0xfff000 -> #fff000
+ * @return A string with color codes escaped.
  */
 static tString se_EscapeColors( const tString & s )
 {
@@ -122,6 +124,20 @@ static tString se_EscapeColors( const tString & s )
         }
     }
     return ret;
+}
+
+/**
+ * Example: se_CountColorCodes( "0xfff000" ) -> 1
+ * 
+ * @return The number of color codes in s.
+ */
+static int se_CountColorCodes( const tString & s )
+{
+    int colorCodes = ( s.Len() - tColoredString::RemoveColors( s ).Len() ) / 8;
+    if ( colorCodes < 0 )
+        colorCodes = 0;
+    
+    return colorCodes;
 }
 
 eChatSaidEntry::eChatSaidEntry(const tString & said, const nTimeRolling & t, eChatMessageType type)
@@ -249,9 +265,7 @@ bool eChatSpamTester::Check()
     factor *= 1 + lengthMalus;
     
     // count color codes. We hate them. We really do. (Yeah, this calculation is inefficient.)
-    int colorCodes = (say_.Len() - tColoredString::RemoveColors( say_ ).Len())/8;
-    if ( colorCodes < 0 ) colorCodes = 0;
-    
+    int colorCodes = se_CountColorCodes( say_ );
     
     // apply them to the spam severity factor. Burn in hell, color code abusers.
     static const double log2 = log(2);
