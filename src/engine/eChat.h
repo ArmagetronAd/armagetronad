@@ -29,10 +29,36 @@
 #ifndef ArmageTron_eChat_H
 #define ArmageTron_eChat_H
 
-#include "ePlayer.h"
 #include "tString.h"
+#include "nNetwork.h"
+#include <deque>
 
-extern int se_SpamMaxLen;	// maximal length of chat message
+class ePlayerNetID;
+
+enum eChatMessageType
+{
+    eChatMessageType_Command = 0, // A remotely issued command
+    eChatMessageType_Private = 1, // Private message chat
+    eChatMessageType_Team = 2,    // Team message chat
+    eChatMessageType_Public = 3   // Public chat
+};
+
+class eChatSaid
+{
+public:
+    eChatSaid(const tString &, const nTimeRolling &, eChatMessageType);
+    ~eChatSaid();
+    const tString & Said() const;
+    const nTimeRolling & Time() const;
+    const eChatMessageType Type() const;
+
+private:
+    const tString & said_;
+    const nTimeRolling & time_;
+    eChatMessageType type_;
+};
+
+typedef std::deque< eChatSaid > eChatLastSaid;
 
 class eChatSpamTester
 {
@@ -46,6 +72,7 @@ public:
     ePlayerNetID * player_;   //!< the chatting player
     tColoredString say_;      //!< the chat line
     REAL factor_;             //!< extra spam weight factor
+    eChatMessageType lastSaidType_; //!< The last said message type.
 private:
     bool CheckSpam( REAL factor, tOutput const & message ) const;
 };

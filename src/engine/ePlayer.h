@@ -43,14 +43,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eNetGameObject.h"
 #include "tCallbackString.h"
 #include "nSpamProtection.h"
-#include "eChat.h"
 
 #include <set>
 #include <list>
-#include <deque>
 #include <utility>
+#include "eChat.h"
+
 
 #define PLAYER_CONFITEMS (30+MAX_INSTANT_CHAT)
+
+// maximal length of chat message
+extern int se_SpamMaxLen;
 
 // Maximum number of chat entries to save for spam analysis
 extern int se_lastSaidMaxEntries;
@@ -227,9 +230,7 @@ public:
 
     nSpamProtection chatSpam_;
     
-    typedef std::pair< tString, nTimeRolling > SaidPair;
-    typedef std::deque< SaidPair > LastSaid;
-    LastSaid lastSaid_;    
+    eChatLastSaid lastSaid_;
 
     ePlayerNetID(int p=-1);
     ePlayerNetID(nMessage &m);

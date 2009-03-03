@@ -3395,41 +3395,50 @@ void handle_chat( nMessage &m )
                         return;
                     }
                     else if (command == "/teamleave") {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         se_ChatTeamLeave( p );
                         return;
                     }
                     else if (command == "/teamshuffle" || command == "/shuffle") {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         se_ChatShuffle( p, s );
                         return;
                     }
                     else if (command == "/team")
                     {
+                        spam.lastSaidType_ = eChatMessageType_Team;
                         se_ChatTeam( p, s, spam );
                         return;
                     }
                     else if (command == "/msg" ) {
+                        spam.lastSaidType_ = eChatMessageType_Private;
                         se_ChatMsg( p, s, spam );
                         return;
                     }
                     else if (command == "/players" || command == "/listplayers") {
+                        spam.lastSaidType_= eChatMessageType_Command;
                         se_ChatPlayers( p, s, command );
                         return;
                     }
 #if defined(DEDICATED) && defined(KRAWALL_SERVER)
                     else if (command == "/admins" || command == "/listadmins") {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         se_ListAdmins( p, s, command );
                         return;
                     }
 #endif
                     else if (command == "/vote" || command == "/callvote") {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         eVoter::HandleChat( p, s );
                         return;
                     }
                     else if (command == "/teams") {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         se_ChatTeams( p );
                         return;
                     }
                     else if (command == "/myteam") {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         eTeam *currentTeam = se_GetManagedTeam( p );
                         if( currentTeam )
                         {
@@ -3438,16 +3447,19 @@ void handle_chat( nMessage &m )
                         return;
                     }
                     else if (command == "/help") {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         se_Help( p, p, s );
                         return;
                     }
 #ifdef DEDICATED
                     else  if ( command == "/rtfm" || command == "/teach" )
                     {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         se_Rtfm( command, p, s, spam );
                         return;
                     }
                     else {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         handle_chat_admin_commands( p, command, say, s, spam );
                         return;
                     }

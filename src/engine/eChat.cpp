@@ -31,20 +31,36 @@
 
 #include "eChat.h"
 #include "tSysTime.h"
+#include "ePlayer.h"
 
-namespace eSpamSimilarity
+eChatSaid::eChatSaid(const tString & said, const nTimeRolling & t, eChatMessageType type)
+: said_( said ), time_( t ), type_( type )
 {
-    double SpamScore( tString const &, ePlayerNetID::LastSaid const &, nTimeRolling const &, REAL & );
 }
 
-static bool se_IsTeamMessage( tString const & say )
+eChatSaid::~eChatSaid()
 {
-    return say.StartsWith( "/team" );
 }
+
+const tString & eChatSaid::Said() const
+{
+    return said_;
+}
+
+const nTimeRolling & eChatSaid::Time() const
+{
+    return time_;
+}
+
+const eChatMessageType eChatSaid::Type() const
+{
+    return type_;
+}
+
 
 // handles spam checking at the right time
 eChatSpamTester::eChatSpamTester( ePlayerNetID * p, tString const & say )
-: tested_( false ), shouldBlock_( false ), player_( p ), say_( say ), factor_( 1 )
+: tested_( false ), shouldBlock_( false ), player_( p ), say_( say ), factor_( 1 ), lastSaidType_( eChatMessageType_Public )
 {
     say_.RemoveTrailingColor();
 }
@@ -65,12 +81,12 @@ bool eChatSpamTester::Check()
     nTimeRolling currentTime = tSysTimeFloat();
     
     // check if the player already said the same thing not too long ago
-    ePlayerNetID::LastSaid const & lastSaid = player_->lastSaid_;
+    eChatLastSaid const & lastSaid = player_->lastSaid_;
     const size_t saidSize = lastSaid.size();
     for ( size_t i = 0; i < saidSize; i++ )
     {
-        ePlayerNetID::SaidPair const & said = lastSaid[i];
-        if( (say_.StripWhitespace() == said.first.StripWhitespace()) && ( (currentTime - said.second) < se_alreadySaidTimeout * factor_ ) )
+        eChatSaid const & said = lastSaid[i];
+        if( (say_.StripWhitespace() == said.Said().StripWhitespace()) && ( (currentTime - said.Time()) < se_alreadySaidTimeout * factor_ ) )
         {
             sn_ConsoleOut( tOutput("$spam_protection_repeat", say_ ), player_->Owner() );
             return true;
@@ -100,17 +116,17 @@ bool eChatSpamTester::Check()
         return true;
     
     // Apply similarity factor
-    if ( !se_IsTeamMessage( say_ ) )
-    {
-        REAL similarityPercent = 0;
-        factor *= eSpamSimilarity::SpamScore( say_, player_->lastSaid_, currentTime, similarityPercent );
-        
-        if ( CheckSpam( factor, tOutput("$spam_chat") ) )
-        {
-            sn_ConsoleOut( tOutput( "$spam_protection_similarity", similarityPercent, static_cast< int>( player_->lastSaid_.size() ) ), player_->Owner() );
-            return true;
-        }
-    }
+    // if ( !se_IsTeamMessage( say_ ) )
+    // {
+    //     REAL similarityPercent = 0;
+    //     factor *= eSpamSimilarity::SpamScore( say_, player_->lastSaid_, currentTime, similarityPercent );
+    //     
+    //     if ( CheckSpam( factor, tOutput("$spam_chat") ) )
+    //     {
+    //         sn_ConsoleOut( tOutput( "$spam_protection_similarity", similarityPercent, static_cast< int>( player_->lastSaid_.size() ) ), player_->Owner() );
+    //         return true;
+    //     }
+    // }
     
     
 #ifdef KRAWALL_SERVER
@@ -135,12 +151,12 @@ bool eChatSpamTester::Check()
     
     // update last said record
     {
-        ePlayerNetID::LastSaid & said = player_->lastSaid_;
+        eChatLastSaid & said = player_->lastSaid_;
         if ( said.size() >= static_cast< size_t >( se_lastSaidMaxEntries ) )
             said.pop_back();
         
-        ePlayerNetID::SaidPair pair( say_, currentTime );
-        said.push_front( pair );
+        eChatSaid saidEntry( say_, currentTime, lastSaidType_ );
+        said.push_front( saidEntry );
     }
     
     return false;
@@ -153,167 +169,15 @@ bool eChatSpamTester::CheckSpam( REAL factor, tOutput const & message ) const
 
     return false;
 }
+
+class eChatSpamPrefix
+{
+public:
+    eChatSpamPrefix();
+    virtual ~eChatSpamPrefix();
+};
         
 
 namespace eSpamSimilarity
 {
-    //! The minimum percent that the similarity score must give for us to consider it matching
-    static REAL se_spamSimilarityPercent = 0.90;
-    static tConfItem< REAL > confSpamPercent( "SPAM_SIMILARITY_PERCENT", se_spamSimilarityPercent );
-    
-    //! A general multiplier applied at the end of spam calculation
-    static REAL se_spamSimilarityMultiplier = 1;
-    static tConfItem< REAL > confSpamMultiplier( "SPAM_SIMILARITY_MULTIPLIER", se_spamSimilarityMultiplier );
-
-    //! The common prefix length score multiplier
-    static REAL se_spamSimilarityPrefixMultiplier = 0.15;
-    static tConfItem< REAL > confSpamPrefixMultiplier( "SPAM_SIMILARITY_PREFIX_MULTIPLIER", se_spamSimilarityPrefixMultiplier );
-    
-    typedef std::vector< char > CommonCharT;
-    
-    template< typename T >
-    inline const T & min3( const  T & a, const T & b, const T & c )
-    {
-        return std::min( a, std::min( b, c ) );
-    }
-    
-    /*!
-     * Returns the length of the prefix shared by boths strings, upto “maxPrefix”.
-     */
-    int CommonPrefix( tString const & s1, tString const & s2, int maxPrefix=6 )
-    {
-        size_t min = min3( s1.Size(), s2.Size(), maxPrefix );
-        
-        for ( size_t i = 0; i < min; i++ )
-        {
-            if ( s1[i] != s2[i] )
-                return i;
-        }
-        return min;
-    }
-    
-    /*!
-     * Returns the matching characters from two strings. 
-     */
-    CommonCharT CommonCharacters( tString const & s1, tString const & s2, int maxDistance )
-    {
-        CommonCharT common;
-        for ( int i = 0; i < s1.Size(); i++ )
-        {
-            const char & ch = s1[i];
-            for ( int j = std::max( 0, i - maxDistance ); j < std::min( i + maxDistance, static_cast< int >( s2.Size() ) ); j++ )
-            {
-                if ( s2[j] == ch )
-                {
-                    common.push_back( s1[i] );
-                    break;
-                }
-            }
-        }
-        return common;
-    }
-    
-    /*!
-     * Returns a suitable value for the limiting range in CommonCharacters()
-     */
-    int MaxDistance( const size_t a, const size_t b )
-    {
-        double smaller = static_cast< double >( std::min( a, b ) );
-        return static_cast< int >( ceil( smaller / 2 ) ) - 1;
-    }
-    
-    /*!
-     * Returns the number of transpositions between two common character sets
-     */
-    int Transpositions( CommonCharT const & common1, CommonCharT const & common2 )
-    {
-        int transpositions = 0;
-        size_t min = std::min( common1.size(), common2.size() );
-        for ( size_t i = 0; i < min; i++ )
-        {
-            if ( common1[i] != common2[i] )
-                transpositions++;
-        }
-        return transpositions / 2;
-    }
-    
-    /*!
-     * Returns the Jaro score between two strings
-     * <http://en.wikipedia.org/wiki/Jaro-Winkler_distance>
-     */
-    double JaroScore( tString const & s1, tString const & s2 )
-    {
-        size_t size1 = s1.Size();
-        size_t size2 = s2.Size();
-        
-        int maxDistance = MaxDistance( size1, size2 );
-        
-        CommonCharT common1 = CommonCharacters( s1, s2, maxDistance );
-        CommonCharT common2 = CommonCharacters( s2, s1, maxDistance );
-        
-        const size_t commonSize1 = common1.size();
-        const size_t commonSize2 = common2.size();
-        
-        if ( commonSize1 == 0 || commonSize2 == 0 )
-            return 0.0;
-        
-        int transpositions = Transpositions( common1, common2 );
-        
-        double matching = static_cast< double >( commonSize1 );
-        
-        return ( ( matching / size1 ) + ( matching / size2 ) + ( ( matching - transpositions ) / matching ) ) / 3.0f;
-    }
-    
-    /*!
-     * Returns the Jaro-Winkler score between two strings
-     * <http://en.wikipedia.org/wiki/Jaro-Winkler_distance>
-     */
-    double JaroWinklerScore( tString const & s1, tString const & s2 )
-    {
-        double jaro = JaroScore( s1, s2 );
-        int commonPrefix = CommonPrefix( s1, s2 );
-        return jaro + ( commonPrefix * se_spamSimilarityPrefixMultiplier * ( 1 - jaro ) ); 
-    }
-
-    
-    /*!
-     * Returns a spam score, based on similarity, for an input string.
-     * 
-     * \param say the input string
-     * \param lastSaid previously said strings
-     * \param currentTime
-     * \param percent Set to the average percent similarity found
-     */
-    double SpamScore( tString const & say, ePlayerNetID::LastSaid const & lastSaid, nTimeRolling const & currentTime, REAL & outPercent )
-    {
-        outPercent = 0;
-        const double log2 = log( 2 );
-        double score = 0;
-        const size_t saidSize = lastSaid.size();
-        for ( size_t i = 0; i < saidSize; i++ )
-        {
-            ePlayerNetID::SaidPair const & said = lastSaid[i];
-            
-            if ( se_IsTeamMessage( said.first ) )
-                continue;
-            
-            double similarity = JaroWinklerScore( say, said.first );
-            outPercent = std::max( outPercent, static_cast< REAL>( similarity ) );
-            if ( similarity >= se_spamSimilarityPercent )
-            {
-                // Penalize vs order said
-                similarity *= log( saidSize - i ) / log2;
-                
-                // Penalize vs time
-                similarity *= 5.0 / log( currentTime - said.second );
-                
-                score += similarity;
-            }
-        }
-        
-        // Apply user multiplier
-        score *= se_spamSimilarityMultiplier;             
-        
-        return score;
-    }    
 }
