@@ -72,7 +72,7 @@ public:
     ePlayerNetID * player_;   //!< the chatting player
     tColoredString say_;      //!< the chat line
     REAL factor_;             //!< extra spam weight factor
-    eChatMessageType lastSaidType_; //!< The last said message type.
+    eChatMessageType lastSaidType_; //!< The last said message type to be contained in an eChatSaid record
 private:
     bool CheckSpam( REAL factor, tOutput const & message ) const;
 };
