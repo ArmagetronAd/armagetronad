@@ -547,7 +547,11 @@ static bool lowlevel_sr_InitDisplay(){
             sr_desktopWidth = 640;
             sr_desktopHeight = 480;
 
-            if ( sr_DesktopScreensizeSupported() )
+            if ( sr_DesktopScreensizeSupported()
+#ifdef DEBUG
+                 && currentScreensetting.fullscreen && sr_screenWidth + sr_screenHeight == 0
+#endif
+                )
             {
                 sr_screen=SDL_SetVideoMode( 0, 0, CD, attrib );
                 if ( sr_screen )
