@@ -38,11 +38,12 @@ class ePlayerNetID;
 
 enum eChatMessageType
 {
-    eChatMessageType_Command = 0, // A remotely issued command
-    eChatMessageType_Private = 1, // Private message chat
-    eChatMessageType_Team = 2,    // Team message chat
-    eChatMessageType_Public = 3,  // Public chat
-    eChatMessageType_Me = 4       // /me 
+    eChatMessageType_Command = 0,       // A remotely issued command
+    eChatMessageType_Private = 1,       // Private message chat
+    eChatMessageType_Team = 2,          // Team message chat
+    eChatMessageType_Public = 3,        // Public chat
+    eChatMessageType_Public_Direct = 4, // Public chat directed towards a player
+    eChatMessageType_Me = 5             // /me 
 };
 
 class eChatSaidEntry
@@ -53,6 +54,7 @@ public:
     const tString & Said() const;
     const nTimeRolling & Time() const;
     const eChatMessageType Type() const;
+    void SetType(eChatMessageType newType);
 
 private:
     const tString said_;
@@ -70,6 +72,7 @@ public:
     ~eChatLastSaid();
     
     const SaidList & LastSaid() const;
+    SaidList & LastSaid();
     const StringList & KnownPrefixes() const;
     
     void AddSaid( const eChatSaidEntry & saidEntry );

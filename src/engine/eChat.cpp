@@ -111,6 +111,11 @@ const eChatMessageType eChatSaidEntry::Type() const
     return type_;
 }
 
+void eChatSaidEntry::SetType(eChatMessageType newType)
+{
+    type_ = newType;
+}
+
 eChatLastSaid::eChatLastSaid()
 : lastSaid_(), knownPrefixes_()
 {
@@ -121,6 +126,11 @@ eChatLastSaid::~eChatLastSaid()
 }
 
 const eChatLastSaid::SaidList & eChatLastSaid::LastSaid() const
+{
+    return lastSaid_;
+}
+
+eChatLastSaid::SaidList & eChatLastSaid::LastSaid()
 {
     return lastSaid_;
 }
@@ -283,7 +293,7 @@ bool eChatPrefixSpamTester::Check( tString & out )
     if ( !ShouldCheckMessage( say_.Type() ) )
         return false;
 
-    eChatLastSaid::SaidList const & lastSaid = player_->lastSaid_.LastSaid();
+    eChatLastSaid::SaidList & lastSaid = player_->lastSaid_.LastSaid();
     const size_t saidSize = lastSaid.size();
     
     // check from known prefixes
@@ -303,7 +313,7 @@ bool eChatPrefixSpamTester::Check( tString & out )
     
     for ( size_t i = 0; i < saidSize; i++ )
     {
-        eChatSaidEntry const & said = lastSaid[i];
+        eChatSaidEntry & said = lastSaid[i];
         
         if ( !ShouldCheckMessage( said.Type() ) )
             continue;
@@ -323,6 +333,27 @@ bool eChatPrefixSpamTester::Check( tString & out )
             if ( foundPrefixes[common] >= se_prefixSpamMinTimesAppeared )
             {
                 const tString prefix = say_.Said().SubStr(0, common);
+                
+                // User is talking to a player. Not prefix spam
+                // Example: Player 1: grind center. [etc...]
+                {
+                    tString possiblePlayer( prefix );
+                    
+                    // When using 0.3 name completion at the start of a message,
+                    // ':' is appended to the end of the player name.
+                    if ( possiblePlayer[possiblePlayer.Len()] == ':' )
+                        possiblePlayer = possiblePlayer.SubStr( 0, possiblePlayer.Len() - 1 );
+                    
+                    if ( ePlayerNetID::FindPlayerByName( possiblePlayer ) )
+                    {
+                        // mark message so we don't need to check it next time
+                        said.SetType( eChatMessageType_Public_Direct );
+                        return false;
+                    }                    
+                }
+                
+                // it is prefix spam
+                
                 player_->lastSaid_.AddPrefix( prefix );
                 out = se_EscapeColors( prefix );
                 return true;
