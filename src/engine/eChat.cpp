@@ -48,6 +48,26 @@ private:
     const eChatSaid & say_;
 };
 
+static tString se_EscapeColors( const tString & s )
+{
+    tString ret;
+    
+    int size = s.Size();
+    for ( int i = 0; i < size; i++ )
+    {
+        if ( s[i] == '0' && size - i >= 2 && s[i + 1] == 'x' )
+        {
+            ret << '#';
+            i++;
+        }
+        else
+        {
+            ret << s[i];
+        }
+    }
+    return ret;
+}
+
 
 
 eChatSaid::eChatSaid(const tString & said, const nTimeRolling & t, eChatMessageType type)
@@ -231,7 +251,7 @@ bool eChatPrefixSpamTester::Check( tString & out )
         for ( size_t j = 0; j < knownPrefixes.size(); j++ )
             if ( say_.Said().StartsWith( knownPrefixes[j] ) )
             {
-                out = knownPrefixes[j];
+                out = se_EscapeColors( knownPrefixes[j] );
                 return true;
             }
     }
@@ -259,7 +279,7 @@ bool eChatPrefixSpamTester::Check( tString & out )
 
             if ( foundPrefixes[common] >= se_prefixSpamMinTimesAppeared )
             {
-                out = say_.Said().SubStr(0, common);
+                out = se_EscapeColors( say_.Said().SubStr(0, common) );
                 return true;
             }
         }

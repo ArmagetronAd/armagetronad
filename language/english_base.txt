@@ -2230,7 +2230,7 @@ player_vote_accesslevel Sorry, your access level is not high enough to issue a v
 player_pingcharity_changed	Ping charity changed from \1 to \2.\n
 spam_protection_repeat  SPAM PROTECTION: you already said: \1\n
 spam_protection			SPAM PROTECTION: you are silenced for the next \1 seconds.\n
-spam_protection_prefix  SPAM PROTECTION: a common prefix has been found in your messages: \1\n
+spam_protection_prefix  SPAM PROTECTION: a common prefix has been found: \1\n
 
 spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
 spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
