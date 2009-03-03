@@ -26,12 +26,27 @@
  
  */
 
-#include <vector>
 #include <algorithm>
+#include <map>
+#include <vector>
 
 #include "eChat.h"
-#include "tSysTime.h"
 #include "ePlayer.h"
+#include "tSysTime.h"
+
+class eChatPrefixSpamTester
+{
+public:
+    eChatPrefixSpamTester( ePlayerNetID * player, const tString & say );
+    virtual ~eChatPrefixSpamTester();
+    bool Check( tString & out );
+private:
+    std::vector< tString > knownPrefixes;
+    ePlayerNetID * player_;
+    const tString & say_;
+};
+
+
 
 eChatSaid::eChatSaid(const tString & said, const nTimeRolling & t, eChatMessageType type)
 : said_( said ), time_( t ), type_( type )
@@ -93,6 +108,17 @@ bool eChatSpamTester::Check()
         }
     }
     
+    // check for prefix spam
+    {
+        eChatPrefixSpamTester tester( player_, say_ );
+        tString foundPrefix;
+        if ( tester.Check( foundPrefix ) )
+        {
+            sn_ConsoleOut( tOutput("$spam_protection_prefix", foundPrefix ), player_->Owner() );
+            return true;
+        }
+    }
+    
     REAL lengthMalus = say_.Len() / 20.0;
     if ( lengthMalus > 4.0 )
     {
@@ -114,20 +140,6 @@ bool eChatSpamTester::Check()
     
     if ( CheckSpam( factor, tOutput("$spam_chat") ) )
         return true;
-    
-    // Apply similarity factor
-    // if ( !se_IsTeamMessage( say_ ) )
-    // {
-    //     REAL similarityPercent = 0;
-    //     factor *= eSpamSimilarity::SpamScore( say_, player_->lastSaid_, currentTime, similarityPercent );
-    //     
-    //     if ( CheckSpam( factor, tOutput("$spam_chat") ) )
-    //     {
-    //         sn_ConsoleOut( tOutput( "$spam_protection_similarity", similarityPercent, static_cast< int>( player_->lastSaid_.size() ) ), player_->Owner() );
-    //         return true;
-    //     }
-    // }
-    
     
 #ifdef KRAWALL_SERVER
     if ( player_->GetAccessLevel() > se_chatAccessLevel )
@@ -170,14 +182,80 @@ bool eChatSpamTester::CheckSpam( REAL factor, tOutput const & message ) const
     return false;
 }
 
-class eChatSpamPrefix
-{
-public:
-    eChatSpamPrefix();
-    virtual ~eChatSpamPrefix();
-};
-        
+// The length that a prefix must be for it to count as prefix spam
+static int se_prefixSpamMinLength = 3;
+static tConfItem< int > se_prefixSpamMinLengthConf( "PREFIX_SPAM_MIN_LENGTH", se_prefixSpamMinLength );
 
-namespace eSpamSimilarity
+// The number of times the prefix must appear to be considered a prefix
+static int se_prefixSpamMinTimesAppeared = 3;
+static tConfItem< int > se_prefixSpamMinTimesAppearingConf( "PREFIX_SPAM_MIN_TIMES_APPEARED", se_prefixSpamMinTimesAppeared );
+
+
+size_t CommonPrefix(const tString & a, const tString & b)
+{
+    bool aGreater = a > b;
+    const tString & min = aGreater ? b : a;
+    const tString & max = aGreater ? a : b;
+    
+    int n = min.Size();
+    for (int i = 0; i < n; i++)
+        if (min[i] != max[i])
+            return i;
+    
+    return n;
+}
+
+eChatPrefixSpamTester::eChatPrefixSpamTester( ePlayerNetID * player, const tString & say )
+: knownPrefixes(), player_( player ), say_( say )
 {
 }
+
+eChatPrefixSpamTester::~eChatPrefixSpamTester()
+{
+}
+
+bool eChatPrefixSpamTester::Check( tString & out )
+{
+    std::map< int, int > foundPrefixes;
+    
+    eChatLastSaid const & lastSaid = player_->lastSaid_;
+    const size_t saidSize = lastSaid.size();
+    for ( size_t i = 0; i < saidSize; i++ )
+    {
+        eChatSaid const & said = lastSaid[i];
+        
+        if ( said.Type() < eChatMessageType_Public )
+            continue;
+            
+        if ( say_ == said.Said() )
+            continue;
+        
+        int common = CommonPrefix( say_, said.Said() );
+        
+        if ( common >= se_prefixSpamMinLength )
+        {
+            if ( foundPrefixes.find(common) == foundPrefixes.end() )
+                foundPrefixes[common] = 0;
+
+            foundPrefixes[common] += 1;
+
+            if ( foundPrefixes[common] >= se_prefixSpamMinTimesAppeared )
+            {
+                out = say_.SubStr(0, common);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+
+
+
+
+
+
+
+
+
+

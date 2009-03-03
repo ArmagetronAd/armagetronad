@@ -3391,6 +3391,8 @@ void handle_chat( nMessage &m )
                 else
 #endif
                     if (command == "/me") {
+                        spam.lastSaidType_ = eChatMessageType_Me;
+                        spam.say_ = spam.say_.SubStr(3); // cut /me prefix
                         se_ChatMe( p, s, spam );
                         return;
                     }
