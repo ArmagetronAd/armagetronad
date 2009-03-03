@@ -51,6 +51,7 @@ public:
     virtual ~eChatPrefixSpamTester();
     bool Check( tString & out );
 private:
+    bool HasKnownPrefix( tString & out ) const;
     bool ChatDirectedTowardsPlayer( const tString & prefix ) const;
     bool ShouldCheckMessage( const eChatMessageType type ) const;
 
@@ -298,17 +299,8 @@ bool eChatPrefixSpamTester::Check( tString & out )
     const size_t saidSize = lastSaid.size();
     
     // check from known prefixes
-    {
-        const eChatLastSaid::StringList & prefixes = player_->lastSaid_.KnownPrefixes();
-        eChatLastSaid::StringList::const_iterator it =
-            std::find_if( prefixes.begin(), prefixes.end(), IsPrefixPredicate( say_.Said() ) );
-        
-        if ( it != prefixes.end() )
-        {
-            out = se_EscapeColors( *it );
-            return true;
-        }
-    }
+    if ( HasKnownPrefix( out ) )
+        return true;
     
     std::map< int, int > foundPrefixes;
     
@@ -355,6 +347,21 @@ bool eChatPrefixSpamTester::Check( tString & out )
     return false;
 }
 
+bool eChatPrefixSpamTester::HasKnownPrefix( tString & out ) const
+{
+    const eChatLastSaid::StringList & prefixes = player_->lastSaid_.KnownPrefixes();
+    eChatLastSaid::StringList::const_iterator it =
+        std::find_if( prefixes.begin(), prefixes.end(), IsPrefixPredicate( say_.Said() ) );
+    
+    if ( it != prefixes.end() )
+    {
+        out = se_EscapeColors( *it );
+        return true;
+    }
+    
+    return false;
+}
+
 bool eChatPrefixSpamTester::ChatDirectedTowardsPlayer( const tString & prefix ) const
 {
     tString possiblePlayer( prefix );
@@ -374,12 +381,3 @@ bool eChatPrefixSpamTester::ShouldCheckMessage( const eChatMessageType type ) co
 {
     return type >= eChatMessageType_Public;
 }
-
-
-
-
-
-
-
-
-
