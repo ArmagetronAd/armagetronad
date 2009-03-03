@@ -72,7 +72,8 @@ public:
     const SaidList & LastSaid() const;
     const StringList & KnownPrefixes() const;
     
-    void InsertSaid( const eChatSaidEntry & saidEntry );
+    void AddSaid( const eChatSaidEntry & saidEntry );
+    void AddPrefix( const tString & prefix );
 private:
     SaidList lastSaid_;
     StringList knownPrefixes_;

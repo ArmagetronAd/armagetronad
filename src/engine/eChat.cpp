@@ -130,12 +130,17 @@ const eChatLastSaid::StringList & eChatLastSaid::KnownPrefixes() const
     return knownPrefixes_;
 }
 
-void eChatLastSaid::InsertSaid( const eChatSaidEntry & saidEntry )
+void eChatLastSaid::AddSaid( const eChatSaidEntry & saidEntry )
 {
     if ( lastSaid_.size() >= static_cast< size_t >( se_lastSaidMaxEntries ) )
         lastSaid_.pop_back();
     
     lastSaid_.push_front( saidEntry );
+}
+
+void eChatLastSaid::AddPrefix( const tString & prefix )
+{
+    knownPrefixes_.push_back( prefix );
 }
 
 // handles spam checking at the right time
@@ -228,7 +233,7 @@ bool eChatSpamTester::Check()
     }
 #endif
     
-    player_->lastSaid_.InsertSaid( saidEntry );
+    player_->lastSaid_.AddSaid( saidEntry );
     
     return false;
 }
@@ -300,9 +305,9 @@ bool eChatPrefixSpamTester::Check( tString & out )
     {
         eChatSaidEntry const & said = lastSaid[i];
         
-        if ( said.Type() < eChatMessageType_Public )
+        if ( !ShouldCheckMessage( said.Type() ) )
             continue;
-            
+        
         if ( say_.Said() == said.Said() )
             continue;
         
@@ -317,7 +322,9 @@ bool eChatPrefixSpamTester::Check( tString & out )
 
             if ( foundPrefixes[common] >= se_prefixSpamMinTimesAppeared )
             {
-                out = se_EscapeColors( say_.Said().SubStr(0, common) );
+                const tString prefix = say_.Said().SubStr(0, common);
+                player_->lastSaid_.AddPrefix( prefix );
+                out = se_EscapeColors( prefix );
                 return true;
             }
         }
