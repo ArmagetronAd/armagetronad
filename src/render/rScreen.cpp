@@ -880,6 +880,8 @@ bool sr_InitDisplay(){
         {
             lastSuccess=currentScreensetting;
             sr_UnlockSDL();
+            failed_attempts = 0;
+            st_SaveConfig();
             return true;
         }
 
@@ -889,6 +891,8 @@ bool sr_InitDisplay(){
         {
             lastSuccess=currentScreensetting;
             sr_UnlockSDL();
+            failed_attempts = 0;
+            st_SaveConfig();
             return true;
         }
         sr_UnlockSDL();
