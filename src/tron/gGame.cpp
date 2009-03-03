@@ -1470,7 +1470,7 @@ void sg_HostGame(){
         {
             sg_Timestamp();
             con << "Server exiting due to DEDICATED_IDLE after " << (tSysTimeFloat() - startTime)/3600 << " hours.\n";
-            uMenu::quickexit = true;
+            uMenu::quickexit = uMenu::QuickExit_Total;
         }
     }
     cp();
@@ -1977,7 +1977,7 @@ static void Quit_conf(std::istream &){
     // mark end of recording
     tRecorder::Playback("END");
     tRecorder::Record("END");
-    uMenu::quickexit = true;
+    uMenu::quickexit = uMenu::QuickExit_Total;
 }
 
 static tConfItemFunc quit_conf("QUIT",&Quit_conf);
