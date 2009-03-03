@@ -48,6 +48,16 @@ private:
     const eChatSaid & say_;
 };
 
+// ******************************************************************************************
+// *
+// *	se_EscapeColors
+// *
+// ******************************************************************************************
+//!
+//!     @param      s the string to escape
+//!     @return     a string with color codes escaped. Example: 0xfff000 -> #fff000
+//!
+// ******************************************************************************************
 static tString se_EscapeColors( const tString & s )
 {
     tString ret;
@@ -67,8 +77,6 @@ static tString se_EscapeColors( const tString & s )
     }
     return ret;
 }
-
-
 
 eChatSaid::eChatSaid(const tString & said, const nTimeRolling & t, eChatMessageType type)
 : said_( said ), time_( t ), type_( type )
