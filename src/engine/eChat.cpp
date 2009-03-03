@@ -51,6 +51,7 @@ public:
     virtual ~eChatPrefixSpamTester();
     bool Check( tString & out );
 private:
+    bool ChatDirectedTowardsPlayer( const tString & prefix ) const;
     bool ShouldCheckMessage( const eChatMessageType type ) const;
 
     ePlayerNetID * player_;
@@ -336,22 +337,13 @@ bool eChatPrefixSpamTester::Check( tString & out )
                 
                 // User is talking to a player. Not prefix spam
                 // Example: Player 1: grind center. [etc...]
+                if ( ChatDirectedTowardsPlayer( prefix ) )
                 {
-                    tString possiblePlayer( prefix );
-                    
-                    // When using 0.3 name completion at the start of a message,
-                    // ':' is appended to the end of the player name.
-                    if ( possiblePlayer[possiblePlayer.Len()] == ':' )
-                        possiblePlayer = possiblePlayer.SubStr( 0, possiblePlayer.Len() - 1 );
-                    
-                    if ( ePlayerNetID::FindPlayerByName( possiblePlayer ) )
-                    {
-                        // mark message so we don't need to check it next time
-                        said.SetType( eChatMessageType_Public_Direct );
-                        return false;
-                    }                    
+                    // mark message so we don't need to check it next time
+                    said.SetType( eChatMessageType_Public_Direct );
+                    return false;
                 }
-                
+                    
                 // it is prefix spam
                 
                 player_->lastSaid_.AddPrefix( prefix );
@@ -361,6 +353,21 @@ bool eChatPrefixSpamTester::Check( tString & out )
         }
     }
     return false;
+}
+
+bool eChatPrefixSpamTester::ChatDirectedTowardsPlayer( const tString & prefix ) const
+{
+    tString possiblePlayer( prefix );
+    
+    // When using 0.3 name completion at the start of a message,
+    // ": " is appended to the end of the player name.
+    if ( st_StringEndsWith( possiblePlayer, ": " ) )
+        possiblePlayer = possiblePlayer.SubStr( 0, possiblePlayer.Len() - 3 );
+    
+    if ( ePlayerNetID::FindPlayerByName( possiblePlayer ) )
+        return true;
+    
+    return false;     
 }
 
 bool eChatPrefixSpamTester::ShouldCheckMessage( const eChatMessageType type ) const

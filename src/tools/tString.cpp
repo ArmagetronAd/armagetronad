@@ -1714,3 +1714,15 @@ tString st_GetCurrentTime( char const * szFormat )
     strftime(szTemp,sizeof(szTemp),szFormat,pTime);
     return tString(szTemp);
 }
+
+// replacement for tString::EndsWith from the trunk
+bool st_StringEndsWith( tString const & test, tString const & end )
+{
+    int start = test.Len() - end.Len();
+    return start >= 0 && test.SubStr( start ) == end;
+}
+
+bool st_StringEndsWith( tString const & test, char const * end )
+{
+    return st_StringEndsWith( test, tString( end ) );
+}

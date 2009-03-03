@@ -259,6 +259,11 @@ bool operator>=( const tString& first, const tString& second );
 
 tString st_GetCurrentTime(char const *szFormat);
 
+// replacement for tString::EndsWith from the trunk
+bool st_StringEndsWith( tString const & test, tString const & end );
+bool st_StringEndsWith( tString const & test, char const * end );
+
+
 #endif
 
 
