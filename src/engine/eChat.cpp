@@ -509,7 +509,7 @@ bool eChatPrefixSpamTester::Check( tString & out, nTimeRolling & timeOut )
             {
                 
 #ifdef DEBUG
-                con << "Spam prefix found: \"" << prefix << "\" with score " << data.score << '\n';
+                con << "Spam prefix found: \"" << se_EscapeColors( prefix ) << "\" with score " << data.score << '\n';
 #endif
                 nTimeRolling t = player_->lastSaid_.AddPrefix( prefix, data.score, say_.Time() );
                 timeOut = RemainingTime( t );
