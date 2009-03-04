@@ -243,6 +243,11 @@ static double se_CalcScore2( double a )
     return log( 1 + a ) / log( 2 );
 }
 
+static nTimeRolling se_CalcTimeout( double score )
+{
+    return se_CalcScore2( score ) * se_prefixSpamTimeoutMultiplier;
+}
+
 eChatSaidEntry::eChatSaidEntry(const tString & said, const nTimeRolling & t, eChatMessageType type)
 : said_( said ), time_( t ), type_( type )
 {
@@ -328,7 +333,7 @@ void eChatLastSaid::AddSaid( const eChatSaidEntry & saidEntry )
 
 nTimeRolling eChatLastSaid::AddPrefix( const tString & s, REAL score, nTimeRolling now )
 {
-    nTimeRolling timeoutAt = now + se_CalcScore2( score ) * se_prefixSpamTimeoutMultiplier;
+    nTimeRolling timeoutAt = now + se_CalcTimeout( score );
     Prefix prefix( s, score, timeoutAt );
     knownPrefixes_.push_back( prefix );
     return timeoutAt;
@@ -554,9 +559,12 @@ bool eChatPrefixSpamTester::HasKnownPrefix( tString & out, nTimeRolling & timeOu
     
     if ( it != prefixes.end() )
     {
-        it->timeout_ += se_CalcScore2( it->score_ );
+        // Stop saying that!
+        it->timeout_ += se_CalcTimeout( it->score_ ) / 3;
+        
         out = se_EscapeColors( it->prefix_ );
         timeOut = RemainingTime( it->timeout_ );
+        
         return true;
     }
     
