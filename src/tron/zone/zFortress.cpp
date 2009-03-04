@@ -180,26 +180,27 @@ bool zFortressZone::Timestep( REAL time )
 
     if ( currentState_ == State_Conquering )
     {
-        if (shape)
+        if ( shape )
         {
             // let zone vanish
             shape->setReferenceTime(lastTime);
 
-        // let it light up in agony
-        if ( sg_collapseSpeed < .4 )
-        {
+            // let it light up in agony
+            if ( sg_collapseSpeed < .4 )
+            {
                 rColor color_ = shape->getColor();
-            color_.r_ = color_.g_ = color_.b_ = 1;
+                color_.r_ = color_.g_ = color_.b_ = 1;
                 shape->setColor(color_);
-        }
+            }
 
-        shape->collapse( sg_collapseSpeed );
+            shape->collapse( sg_collapseSpeed );
             shape->SetRotationAcceleration( -shape->GetRotationSpeed()*.4 );
-        shape->RequestSync();
-
+            shape->RequestSync();
         }
         else
+        {
             OnVanish();
+        }
 
         currentState_ = State_Conquered;
     }
@@ -207,20 +208,27 @@ bool zFortressZone::Timestep( REAL time )
     {
         if (shape)
         {
-            // FIXME: Why does Zones v1 *not* do this, and should we?
-
-        // let zone vanish
+            // stop zone rotation
             shape->setReferenceTime(lastTime);
             shape->SetRotationSpeed( 0 );
             shape->SetRotationAcceleration( 0 );
 
             rColor color_ = shape->getColor();
-        color_.r_ = color_.g_ = color_.b_ = .5;
+            color_.r_ = color_.g_ = color_.b_ = .5;
             shape->setColor(color_);
             shape->RequestSync();
         }
         else
+        {
             OnVanish();
+        }
+
+        // vanish the zone completely once it shrinks to zero size
+        if( shape && shape->GetCurrentScale() < 0 )
+        {
+            OnVanish();
+            return true;
+        }
     }
 
     REAL dt = time - lastTime;
