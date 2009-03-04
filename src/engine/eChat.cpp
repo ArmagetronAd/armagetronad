@@ -468,8 +468,8 @@ bool eChatPrefixSpamTester::Check( tString & out, nTimeRolling & timeOut )
     
     eChatLastSaid::SaidList & lastSaid = player_->lastSaid_.LastSaid();
     
-    // Map of PrefixLength => Data
-    std::map< int, PrefixEntry > foundPrefixes;
+    // Map of Prefix => Data
+    std::map< tString, PrefixEntry > foundPrefixes;
         
     for ( eChatLastSaid::SaidList::iterator it = lastSaid.begin(); it != lastSaid.end(); ++it )
     {
@@ -493,10 +493,10 @@ bool eChatPrefixSpamTester::Check( tString & out, nTimeRolling & timeOut )
                 return false;
             }
             
-            if ( foundPrefixes.find(common) == foundPrefixes.end() )
-                foundPrefixes[common] = PrefixEntry();
+            if ( foundPrefixes.find(prefix) == foundPrefixes.end() )
+                foundPrefixes[prefix] = PrefixEntry();
             
-            PrefixEntry & data = foundPrefixes[common];
+            PrefixEntry & data = foundPrefixes[prefix];
 
             data.occurrences += 1;
             CalcScore( data, common, prefix );
