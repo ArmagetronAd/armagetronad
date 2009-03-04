@@ -360,6 +360,9 @@ bool eChatSpamTester::CheckSpam( REAL factor, tOutput const & message ) const
     return false;
 }
 
+/**
+ * Brute force common prefix. Suitable for small inputs.
+ */
 size_t CommonPrefix(const tString & a, const tString & b)
 {
     bool aGreater = a > b;
