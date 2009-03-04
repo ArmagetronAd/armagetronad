@@ -178,12 +178,16 @@ libtron_a_SOURCES +=\
 	tron/zone/zValidator.h     tron/zone/zValidator.cpp\
 	tron/zone/zSelector.h      tron/zone/zSelector.cpp\
 	tron/zone/zEffector.h      tron/zone/zEffector.cpp\
-	tron/zone/zFlag.h          tron/zone/zFlag.cpp\
 	tron/zone/zZoneInfluence.h tron/zone/zZoneInfluence.cpp
 
 if BUILD_FORTRESS
 INCLUDED_MODULE_SOURCES +=\
 	tron/zone/zFortress.cpp        tron/zone/zFortress.h
+endif
+
+if BUILD_FLAG
+INCLUDED_MODULE_SOURCES +=\
+	tron/zone/zFlag.cpp        tron/zone/zFlag.h
 endif
 
 endif

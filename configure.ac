@@ -208,6 +208,11 @@ AC_ARG_ENABLE(fortress,
 		[enable fortress support (default=enabled)]),,
 enable_fortress=$enable_zonesv2)
 
+AC_ARG_ENABLE(flags,
+	AC_HELP_STRING([--enable-flags],
+		[enable support for flags (default=enabled)]),,
+enable_flags=$enable_zonesv2)
+
 AC_ARG_ENABLE(authentication,
     AC_HELP_STRING([--enable-authentication],
 		[enable server side code for the krawall style user authentication (default=disabled)]),
@@ -352,6 +357,14 @@ if test x$enable_zonesv2 != xyes && test x$enable_fortress = xyes; then
 	enable_zonesv2=yes
 fi
 
+if test x$enable_zonesv2 != xyes && test x$enable_flags = xyes; then
+	AC_MSG_WARN([
+	Flags require support for zones.
+	Enabling zones support.
+	])
+	enable_zonesv2=yes
+fi
+
 if test x$enable_zonesv2 = xyes; then
 AC_DEFINE(ENABLE_ZONESV2,,enables zonesv2)
 fi
@@ -359,6 +372,8 @@ fi
 AM_CONDITIONAL(BUILDZONESV2, test x$enable_zonesv2 = xyes)
 
 AM_CONDITIONAL(BUILD_FORTRESS, test x$enable_fortress = xyes)
+
+AM_CONDITIONAL(BUILD_FLAG, test x$enable_flags = xyes)
 
 dnl developer CXXFLAGS
 test -z "$DEBUGLEVEL" && DEBUGLEVEL=0
@@ -1292,6 +1307,9 @@ if test x$enable_zonesv2 = xyes; then
 	zones_info="Basic"
 	if test x$enable_fortress = xyes; then
 		zones_info="${zones_info}, Fortress"
+	fi
+	if test x$enable_flags = xyes; then
+		zones_info="${zones_info}, Flags"
 	fi
 	if test x$enable_zonesv1 = xyes; then
 		zones_info="V1, $zones_info"
