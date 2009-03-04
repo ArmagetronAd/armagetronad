@@ -502,6 +502,10 @@ bool eChatPrefixSpamTester::Check( tString & out, nTimeRolling & timeOut )
             CalcScore( data, common, prefix );
             if ( data.score >= se_prefixSpamRequiredScore )
             {
+                
+#ifdef DEBUG
+                con << "Spam prefix found: \"" << prefix << "\" with score " << data.score << '\n';
+#endif
                 nTimeRolling t = player_->lastSaid_.AddPrefix( prefix, data.score, say_.Time() );
                 timeOut = RemainingTime( t );
                 
@@ -531,10 +535,6 @@ void eChatPrefixSpamTester::CalcScore( PrefixEntry & data, const int & len, cons
     // Apply multiplier for annoying color messages
     if ( se_StartsWithColorCode( prefix ) )
         data.score *= se_prefixSpamStartColorMultiplier;
-
-#ifdef DEBUG    
-    std::cout << "Prefix-spam score: " << prefix << ' ' << data.score << '\n';
-#endif
 }
 
 void eChatPrefixSpamTester::RemovePrefixEntries( const tString & prefix, const eChatSaidEntry & e ) const
