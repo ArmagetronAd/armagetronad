@@ -1533,7 +1533,7 @@ ePlayerNetID * CompareBufferToPlayerNames
 }
 
 
-ePlayerNetID * ePlayerNetID::FindPlayerByName( tString const & name, ePlayerNetID * requester )
+ePlayerNetID * ePlayerNetID::FindPlayerByName( tString const & name, ePlayerNetID * requester, bool print )
 {
    int num_matches = 0;
 
@@ -1581,26 +1581,24 @@ ePlayerNetID * ePlayerNetID::FindPlayerByName( tString const & name, ePlayerNetI
     // More than than one match for the current buffer. Complain about that.
     else if (num_matches > 1) {
         tOutput toSender( "$msg_toomanymatches", name );
-        if ( requester )
+        if (print)
         {
-            sn_ConsoleOut(toSender,requester->Owner() );
-        }
-        else
-        {
-            con << toSender;
+            if ( requester )
+                sn_ConsoleOut(toSender,requester->Owner() );
+            else
+                con << toSender;
         }
         return NULL;
     }
     // 0 matches. The user can't spell. Complain about that, too.
     else {
         tOutput toSender( "$msg_nomatch", name );
-        if ( requester )
+        if (print)
         {
-            sn_ConsoleOut(toSender,requester->Owner() );
-        }
-        else
-        {
-            con << toSender;
+            if ( requester )
+                sn_ConsoleOut(toSender,requester->Owner() );
+            else
+                con << toSender;
         }
         return NULL;
     }

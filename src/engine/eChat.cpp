@@ -584,7 +584,7 @@ bool eChatPrefixSpamTester::ChatDirectedTowardsPlayer( const tString & prefix ) 
     if ( st_StringEndsWith( possiblePlayer, ": " ) )
         possiblePlayer = possiblePlayer.SubStr( 0, possiblePlayer.Len() - 3 );
     
-    if ( ePlayerNetID::FindPlayerByName( possiblePlayer ) )
+    if ( ePlayerNetID::FindPlayerByName( possiblePlayer, 0, false ) )
         return true;
     
     return false;     
