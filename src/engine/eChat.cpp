@@ -60,6 +60,10 @@ static tConfItem< REAL > se_prefixNumberKnownPrefixesMultiplierConf( "PREFIX_SPA
 static REAL se_prefixSpamRequiredScore = 10.0;
 static tConfItem< REAL > se_prefixSpamRequiredScoreConf( "PREFIX_SPAM_REQUIRED_SCORE", se_prefixSpamRequiredScore );
 
+//!< Found prefixes will timeout after f( score ) * multiplier seconds.
+static REAL se_prefixSpamTimeoutMultiplier = 15.0;
+static tConfItem< REAL > se_prefixSpamTimeoutMultiplierConf( "PREFIX_SPAM_TIMEOUT_MULTIPLIER", se_prefixSpamTimeoutMultiplier );
+
 /**
  * Helper class for predicate stl-comparisons
  */
@@ -80,6 +84,16 @@ private:
     bool isSuperString_;
 };
 
+template< typename T >
+class TimeOutPredicate
+{
+public:
+    TimeOutPredicate( const T & then ) : then_( then ) { }
+    bool operator() ( const T & now ) { return then_.timeout_ - now.timeout_ >= 0; }
+private:
+    T then_;
+};
+
 /**
  * Checks for prefix spam from a player
  */
@@ -97,9 +111,10 @@ public:
      * Check for prefix spam.
      *
      * @param out Will contain the prefix, if one is found
+     * @param timeOut
      * @return Did the message have a common prefix?
      */
-    bool Check( tString & out );
+    bool Check( tString & out, nTimeRolling & timeOut );
 private:
     class PrefixEntry
     {
@@ -115,9 +130,10 @@ private:
      * Tests the message against known prefixes.
      * 
      * @param out See Check()
+     * @param timeOut See Check()
      * @return Did the message start with a known prefix?
      */
-    bool HasKnownPrefix( tString & out ) const;
+    bool HasKnownPrefix( tString & out, nTimeRolling & timeOut ) const;
     
     /**
      * Tests if this message is directed towards another player.
@@ -151,6 +167,9 @@ private:
      * a word that begins with the found prefix.
      */
     void RemovePrefixEntries( const tString & prefix, const eChatSaidEntry & e ) const;
+    
+    void RemoveTimedOutPrefixes() const;
+    nTimeRolling RemainingTime( nTimeRolling t ) const;
 
     ePlayerNetID * player_;
     const eChatSaidEntry & say_;
@@ -258,6 +277,18 @@ bool eChatSaidEntry::StartsWith( const eChatSaidEntry & other ) const
     return said_.StartsWith( other.Said() );
 }
 
+
+eChatLastSaid::Prefix::Prefix( const tString & prefix, REAL score, nTimeRolling timeout )
+: prefix_( prefix ), score_( score ), timeout_( timeout )
+{
+}
+
+bool eChatLastSaid::Prefix::StartsWith( const eChatLastSaid::Prefix & other ) const
+{
+    return prefix_.StartsWith( other.prefix_ );
+}
+
+
 eChatLastSaid::eChatLastSaid()
 : lastSaid_(), knownPrefixes_()
 {
@@ -277,7 +308,12 @@ eChatLastSaid::SaidList & eChatLastSaid::LastSaid()
     return lastSaid_;
 }
 
-const eChatLastSaid::StringList & eChatLastSaid::KnownPrefixes() const
+const eChatLastSaid::PrefixList & eChatLastSaid::KnownPrefixes() const
+{
+    return knownPrefixes_;
+}
+
+eChatLastSaid::PrefixList & eChatLastSaid::KnownPrefixes()
 {
     return knownPrefixes_;
 }
@@ -290,9 +326,12 @@ void eChatLastSaid::AddSaid( const eChatSaidEntry & saidEntry )
     lastSaid_.push_front( saidEntry );
 }
 
-void eChatLastSaid::AddPrefix( const tString & prefix )
+nTimeRolling eChatLastSaid::AddPrefix( const tString & s, REAL score, nTimeRolling now )
 {
+    nTimeRolling timeoutAt = now + se_CalcScore2( score ) * se_prefixSpamTimeoutMultiplier;
+    Prefix prefix( s, score, timeoutAt );
     knownPrefixes_.push_back( prefix );
+    return timeoutAt;
 }
 
 // handles spam checking at the right time
@@ -337,9 +376,10 @@ bool eChatSpamTester::Check()
     {
         eChatPrefixSpamTester tester( player_, saidEntry );
         tString foundPrefix;
-        if ( tester.Check( foundPrefix ) )
+        nTimeRolling timeOut;
+        if ( tester.Check( foundPrefix, timeOut ) )
         {
-            sn_ConsoleOut( tOutput("$spam_protection_prefix", foundPrefix ), player_->Owner() );
+            sn_ConsoleOut( tOutput("$spam_protection_prefix", foundPrefix, static_cast< float >( timeOut ) ), player_->Owner() );
             return true;
         }
     }
@@ -415,13 +455,15 @@ eChatPrefixSpamTester::~eChatPrefixSpamTester()
 {
 }
 
-bool eChatPrefixSpamTester::Check( tString & out )
+bool eChatPrefixSpamTester::Check( tString & out, nTimeRolling & timeOut )
 {
     if ( !ShouldCheckMessage( say_ ) )
         return false;
+        
+    RemoveTimedOutPrefixes();
     
     // check from known prefixes
-    if ( HasKnownPrefix( out ) )
+    if ( HasKnownPrefix( out, timeOut ) )
         return true;
     
     eChatLastSaid::SaidList & lastSaid = player_->lastSaid_.LastSaid();
@@ -460,7 +502,8 @@ bool eChatPrefixSpamTester::Check( tString & out )
             CalcScore( data, common, prefix );
             if ( data.score >= se_prefixSpamRequiredScore )
             {
-                player_->lastSaid_.AddPrefix( prefix );
+                nTimeRolling t = player_->lastSaid_.AddPrefix( prefix, data.score, say_.Time() );
+                timeOut = RemainingTime( t );
                 
                 // We caught the prefix. Don't catch words that start with the prefix.
                 RemovePrefixEntries( prefix, said );
@@ -501,19 +544,35 @@ void eChatPrefixSpamTester::RemovePrefixEntries( const tString & prefix, const e
     xs.erase( std::remove_if( xs.begin(), xs.end(), IsPrefixPredicate< eChatSaidEntry >( entry, false ) ), xs.end() );
 }
 
-bool eChatPrefixSpamTester::HasKnownPrefix( tString & out ) const
+bool eChatPrefixSpamTester::HasKnownPrefix( tString & out, nTimeRolling & timeOut ) const
 {
-    const eChatLastSaid::StringList & prefixes = player_->lastSaid_.KnownPrefixes();
-    eChatLastSaid::StringList::const_iterator it =
-        std::find_if( prefixes.begin(), prefixes.end(), IsPrefixPredicate< tString >( say_.Said() ) );
+    eChatLastSaid::PrefixList & prefixes = player_->lastSaid_.KnownPrefixes();
+    eChatLastSaid::Prefix testPrefix( say_.Said(), 0, 0 );
+    
+    eChatLastSaid::PrefixList::iterator it =
+        std::find_if( prefixes.begin(), prefixes.end(), IsPrefixPredicate< eChatLastSaid::Prefix >( testPrefix ) );
     
     if ( it != prefixes.end() )
     {
-        out = se_EscapeColors( *it );
+        it->timeout_ += se_CalcScore2( it->score_ );
+        out = se_EscapeColors( it->prefix_ );
+        timeOut = RemainingTime( it->timeout_ );
         return true;
     }
     
     return false;
+}
+
+nTimeRolling eChatPrefixSpamTester::RemainingTime( nTimeRolling t ) const
+{
+    return t - say_.Time();
+}
+
+void eChatPrefixSpamTester::RemoveTimedOutPrefixes() const
+{
+    eChatLastSaid::PrefixList & xs = player_->lastSaid_.KnownPrefixes();
+    eChatLastSaid::Prefix entry( tString(), 0, say_.Time() );
+    xs.erase( std::remove_if( xs.begin(), xs.end(), TimeOutPredicate< eChatLastSaid::Prefix >( entry ) ), xs.end() );
 }
 
 bool eChatPrefixSpamTester::ChatDirectedTowardsPlayer( const tString & prefix ) const

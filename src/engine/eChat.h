@@ -98,9 +98,24 @@ private:
  */
 class eChatLastSaid
 {
-public:
+public:    
+    struct Prefix
+    {
+        Prefix( const tString & prefix, REAL score, nTimeRolling timeout );
+        
+        /**
+         * Does this message start with the other message?
+         */
+        bool StartsWith( const Prefix & other ) const;
+        
+        tString prefix_;
+        REAL score_;
+        nTimeRolling timeout_;
+    };
+    
     typedef std::deque< eChatSaidEntry > SaidList;
-    typedef std::vector< tString > StringList;
+    typedef std::vector< Prefix > PrefixList;
+    
     
     eChatLastSaid();
     ~eChatLastSaid();
@@ -117,7 +132,8 @@ public:
      * 
      * @return The known prefixes
      */
-    const StringList & KnownPrefixes() const;
+    const PrefixList & KnownPrefixes() const;
+    PrefixList & KnownPrefixes();
     
     /**
      * Add a new said entry
@@ -130,12 +146,15 @@ public:
      * Add a new chat prefix
      *
      * @param prefix the new prefix
+     * @param score the score the prefixed received
+     * @param now the time the prefix was found to be spam
+     * @return the time this prefix will be ignored
      */
-    void AddPrefix( const tString & prefix );
+    nTimeRolling AddPrefix( const tString & prefix, REAL score, nTimeRolling now );
     
 private:
     SaidList lastSaid_;
-    StringList knownPrefixes_;
+    PrefixList knownPrefixes_;
 };
 
 /**

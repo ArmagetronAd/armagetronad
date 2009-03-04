@@ -391,6 +391,7 @@ prefix_spam_length_multiplier_help                Multiplier applied to prefix l
 prefix_spam_number_color_codes_multiplier_help    Multiplier applied to the number of color codes in prefix when calculating prefix spam score.
 prefix_spam_number_known_prefixes_multiplier_help Multiplier applied to the number of known spam prefixes when calculating prefix spam score.
 prefix_spam_required_score_help                   The required prefix spam score a prefix must have for it to be considered spam.
+prefix_spam_timeout_multiplier_help               Multiplier applied to time calculation to determine how long a known prefix is remembered.
 
 # spam kick messages
 spam_chat                   You chatted too much.
@@ -2238,7 +2239,7 @@ player_vote_accesslevel Sorry, your access level is not high enough to issue a v
 player_pingcharity_changed	Ping charity changed from \1 to \2.\n
 spam_protection_repeat  SPAM PROTECTION: you already said: \1\n
 spam_protection			SPAM PROTECTION: you are silenced for the next \1 seconds.\n
-spam_protection_prefix  SPAM PROTECTION: your messages have a common prefix: \1\n
+spam_protection_prefix  SPAM PROTECTION: your messages have a common prefix: \1\nSPAM PROTECTION: messages with this prefix will be allowed again in \2 seconds\n
 
 spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
 spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
