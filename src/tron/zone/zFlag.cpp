@@ -194,6 +194,7 @@ bool zFlagZone::Timestep( REAL time )
 			initOwnerTeam_ = closest->Player()->CurrentTeam();
 		 }
 		 }
+	return false;
 }
 
 // *******************************************************************************
