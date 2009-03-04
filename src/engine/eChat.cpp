@@ -34,16 +34,30 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ePlayer.h"
 #include "tSysTime.h"
 
-
 //!< Should spam prefix checking be enabled?
 static bool se_prefixSpamShouldEnable = true;
 static tConfItem< bool > se_prefixSpamShouldEnableConf( "PREFIX_SPAM_ENABLE", se_prefixSpamShouldEnable );
 
-//!< If a prefix begins with a color code it will have a multiplier applied to the score.
-static REAL se_prefixSpamColorMultiplier = 2;
-static tConfItem< REAL > se_prefixSpamColorMultiplierConf( "PREFIX_SPAM_COLOR_MULTIPLIER", se_prefixSpamColorMultiplier );
+//!< If a prefix begins with a color code it will have this multiplier applied to the score.
+static REAL se_prefixSpamStartColorMultiplier = 2;
+static tConfItem< REAL > se_prefixSpamStartColorMultiplierConf( "PREFIX_SPAM_START_COLOR_MULTIPLIER", se_prefixSpamStartColorMultiplier );
 
-//!< The score from prefix checking a message must get to be considered spam.
+//!< Increase score by log( prefix_length * multiplier )
+static REAL se_prefixSpamLengthMultiplier = 1;
+static tConfItem< REAL > se_prefixSpamLengthMultiplierConf( "PREFIX_SPAM_LENGTH_MULTIPLIER", se_prefixSpamLengthMultiplier );
+
+//!< Increase score by log( num_color_codes * multiplier )
+static REAL se_prefixSpamNumberColorCodesMultiplier = 1;
+static tConfItem< REAL > se_prefixSpamNumberColorCodesMultiplierConf( "PREFIX_SPAM_NUMBER_COLOR_CODES_MULTIPLIER",
+                                                                      se_prefixSpamNumberColorCodesMultiplier );
+
+//!< Increase score by log( know_prefixes * multiplier )
+static REAL se_prefixNumberKnownPrefixesMultiplier = 1;
+static tConfItem< REAL > se_prefixNumberKnownPrefixesMultiplierConf( "PREFIX_SPAM_NUMBER_KNOWN_PREFIXES_MULTIPLIER",
+                                                                     se_prefixNumberKnownPrefixesMultiplier );
+
+
+//!< The score, from prefix checking, a message must have for it to be considered spam.
 static REAL se_prefixSpamRequiredScore = 10.0;
 static tConfItem< REAL > se_prefixSpamRequiredScoreConf( "PREFIX_SPAM_REQUIRED_SCORE", se_prefixSpamRequiredScore );
 
@@ -423,12 +437,10 @@ bool eChatPrefixSpamTester::Check( tString & out )
                 return false;
             }
             
-            PrefixEntry data;
-            if ( !se_EnsureKey( foundPrefixes, common, data ) )
-                data = foundPrefixes[common];
-            
+            se_EnsureKey( foundPrefixes, common, PrefixEntry() );
+            PrefixEntry & data = foundPrefixes[common];
+
             data.occurrences += 1;
-            
             CalcScore( data, common, prefix );
             if ( data.score >= se_prefixSpamRequiredScore )
             {
@@ -445,17 +457,17 @@ bool eChatPrefixSpamTester::Check( tString & out )
 void eChatPrefixSpamTester::CalcScore( PrefixEntry & data, const int & len, const tString & prefix )
 {   
     // Apply based on length of found prefix.
-    data.score += se_CalcScore( len );
+    data.score += se_CalcScore( len * se_prefixSpamLengthMultiplier );
 
     // Apply based on number of color codes in prefix.
-    data.score += se_CalcScore( se_CountColorCodes( prefix ) );
+    data.score += se_CalcScore( se_CountColorCodes( prefix ) * se_prefixSpamNumberColorCodesMultiplier );
 
     // Apply based on number of known prefixes.
-    data.score += se_CalcScore( player_->lastSaid_.KnownPrefixes().size() );
+    data.score += se_CalcScore( player_->lastSaid_.KnownPrefixes().size() * se_prefixNumberKnownPrefixesMultiplier );
 
     // Apply multiplier for annoying color messages
     if ( se_StartsWithColorCode( prefix ) )
-        data.score *= se_prefixSpamColorMultiplier;
+        data.score *= se_prefixSpamStartColorMultiplier;
     
     std::cout << "score: " << data.score << '\n';
 }
