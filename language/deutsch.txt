@@ -449,6 +449,7 @@ lag_offset_server_help        Auf dem Server wählbar: Zusatzkompensation für Lag
 lag_offset_legacy_help        Auf dem Server wählbar: Zusatzkompensation für Lag für Clients, die den Lag-Kredit-Automatismus noch nicht beherrschen. Für sehr schlechte Verbindungen.
 
 lag_threshold_help            Lag in Sekunden, der bei jedem Event nicht korrigiert wird.
+lag_frequency_threshold_help  Minimale Häufigkeit an Lag-Events, unterhalb derer der Server den Client nicht informiert. Sollte zwischen 0 und 1 liegen.
 
 #********************************************
 #********************************************
