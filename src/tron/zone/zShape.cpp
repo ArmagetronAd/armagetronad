@@ -108,6 +108,11 @@ void zShape::setCreatedTime(REAL time)
 
 void zShape::setReferenceTime(REAL time)
 {
+    // adapt tFunction members
+    posx_.SetOffset( posx_.Evaluate( time - referencetime_ ) );
+    posy_.SetOffset( posy_.Evaluate( time - referencetime_ ) );
+    scale_.SetOffset( scale_.Evaluate( time - referencetime_ ) );
+
     referencetime_ = time;
     // Do not update lasttime_, referencetime_ might be set in the future for ease of equation writing.
 }
@@ -539,6 +544,12 @@ void zShapeCircle::Render2D(tCoord scale) const {
     RenderEnd();
     glPopMatrix();
 #endif
+}
+
+void zShapeCircle::setReferenceTime(REAL time)
+{
+    radius.SetOffset( radius.Evaluate( time - referencetime_ ) );
+    zShape::setReferenceTime( time );
 }
 
 tCoord zShapeCircle::findPointNear(tCoord & p) {
