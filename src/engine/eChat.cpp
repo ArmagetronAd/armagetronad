@@ -430,13 +430,14 @@ bool eChatPrefixSpamTester::Check( tString & out )
             data.occurrences += 1;
             
             CalcScore( data, common, prefix );
+            if ( data.score >= se_prefixSpamRequiredScore )
+            {
+                player_->lastSaid_.AddPrefix( prefix );
+                out = prefix;
+                return true;
+            }
         }
     }
-    
-    // std::map< int, int >::iterator maxPrefix =
-    //     std::max_element( foundPrefixes.begin(), foundPrefixes.end(), foundPrefixes.key_comp() );
-    // 
-    // // std::cout << "max element: " << (*maxPrefix).second << '\n';
 
     return false;
 }
