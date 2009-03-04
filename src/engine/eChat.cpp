@@ -39,18 +39,13 @@
 static bool se_prefixSpamShouldEnable = true;
 static tConfItem< bool > se_prefixSpamShouldEnableConf( "PREFIX_SPAM_ENABLE", se_prefixSpamShouldEnable );
 
+//!< If a prefix begins with a color code it will have a multiplier applied to the score.
+static REAL se_prefixSpamColorMultiplier = 2;
+static tConfItem< REAL > se_prefixSpamColorMultiplierConf( "PREFIX_SPAM_COLOR_MULTIPLIER", se_prefixSpamColorMultiplier );
+
 //!< The score from prefix checking a message must get to be considered spam.
-static REAL se_prefixSpamScore = 5.0;
-static tConfItem< REAL > se_prefixSpamScoreConf( "PREFIX_SPAM_SCORE", se_prefixSpamScore );
-
-//!< The length that a prefix must be for it to count as prefix spam
-static int se_prefixSpamMinLength = 3;
-static tConfItem< int > se_prefixSpamMinLengthConf( "PREFIX_SPAM_MIN_LENGTH", se_prefixSpamMinLength );
-
-//<! The number of times the prefix must appear to be considered a prefix
-static int se_prefixSpamMinTimesAppeared = 3;
-static tConfItem< int > se_prefixSpamMinTimesAppearingConf( "PREFIX_SPAM_MIN_TIMES_APPEARED", se_prefixSpamMinTimesAppeared );
-
+static REAL se_prefixSpamRequiredScore = 10.0;
+static tConfItem< REAL > se_prefixSpamRequiredScoreConf( "PREFIX_SPAM_REQUIRED_SCORE", se_prefixSpamRequiredScore );
 
 /**
  * Helper class for predicate stl-comparisons
@@ -85,6 +80,16 @@ public:
      */
     bool Check( tString & out );
 private:
+    class PrefixEntry
+    {
+    public:
+        PrefixEntry() : occurrences( 0 ), score( 0 ) { }
+        ~PrefixEntry() { }
+        
+        int occurrences;
+        REAL score;
+    };
+    
     /**
      * Tests the message against known prefixes.
      * 
@@ -113,6 +118,8 @@ private:
      * @return Should we check this message for prefix-spam?
      */
     bool ShouldCheckMessage( const eChatSaidEntry & said ) const;
+    
+    void CalcScore( PrefixEntry & data, const int & len, const tString & prefix );
 
     ePlayerNetID * player_;
     const eChatSaidEntry & say_;
@@ -158,9 +165,38 @@ static int se_CountColorCodes( const tString & s )
     return colorCodes;
 }
 
+/**
+ * Example: se_StartsWithColorCode( "0xfff000asdf" ) -> true
+ * 
+ * @return Does the string start with a color code?
+ */
+static bool se_StartsWithColorCode( const tString & s )
+{
+    return s.StartsWith( "0x" );
+}
+
 static double se_CalcScore( double a )
 {
     return log( 2 + a ) / log( 2 );
+}
+
+/**
+ * Ensure a key is set in a map.
+ *
+ * @param map the associative structure
+ * @param key the key to ensure is set
+ * @param value the default value for the the key if it does not exist.
+ * @return Did the key already exist in the map?
+ */
+template< typename Map, typename Key, typename Value >
+bool se_EnsureKey( Map & map, const Key & key, const Value & value )
+{
+    if ( map.find(key) == map.end() )
+    {
+        map[key] = value;
+        return false;
+    }
+    return true;    
 }
 
 eChatSaidEntry::eChatSaidEntry(const tString & said, const nTimeRolling & t, eChatMessageType type)
@@ -362,49 +398,65 @@ bool eChatPrefixSpamTester::Check( tString & out )
     if ( HasKnownPrefix( out ) )
         return true;
     
-    std::map< int, int > foundPrefixes;
-    
+    // Map of PrefixLength => Data
+    std::map< int, PrefixEntry > foundPrefixes;
+        
     for ( size_t i = 0; i < saidSize; i++ )
     {
         eChatSaidEntry & said = lastSaid[i];
         
-        if ( !ShouldCheckMessage( said ) )
-            continue;
-        
-        if ( say_.Said() == said.Said() )
+        if ( !ShouldCheckMessage( said ) || say_.Said() == said.Said() )
             continue;
         
         int common = CommonPrefix( say_.Said(), said.Said() );
         
-        if ( common >= se_prefixSpamMinLength )
+        if ( common > 0 )
         {
-            if ( foundPrefixes.find(common) == foundPrefixes.end() )
-                foundPrefixes[common] = 0;
-
-            foundPrefixes[common] += 1;
-
-            if ( foundPrefixes[common] >= se_prefixSpamMinTimesAppeared )
+            const tString prefix = say_.Said().SubStr(0, common);
+            
+            // User is talking to a player. Not prefix spam
+            // Example: Player 1: grind center. [etc...]
+            if ( ChatDirectedTowardsPlayer( prefix ) )
             {
-                const tString prefix = say_.Said().SubStr(0, common);
-                
-                // User is talking to a player. Not prefix spam
-                // Example: Player 1: grind center. [etc...]
-                if ( ChatDirectedTowardsPlayer( prefix ) )
-                {
-                    // mark message so we don't need to check it next time
-                    said.SetType( eChatMessageType_Public_Direct );
-                    return false;
-                }
-                    
-                // it is prefix spam
-                
-                player_->lastSaid_.AddPrefix( prefix );
-                out = se_EscapeColors( prefix );
-                return true;
+                // mark message so we don't need to check it next time
+                said.SetType( eChatMessageType_Public_Direct );
+                return false;
             }
+            
+            PrefixEntry data;
+            if ( !se_EnsureKey( foundPrefixes, common, data ) )
+                data = foundPrefixes[common];
+            
+            data.occurrences += 1;
+            
+            CalcScore( data, common, prefix );
         }
     }
+    
+    // std::map< int, int >::iterator maxPrefix =
+    //     std::max_element( foundPrefixes.begin(), foundPrefixes.end(), foundPrefixes.key_comp() );
+    // 
+    // // std::cout << "max element: " << (*maxPrefix).second << '\n';
+
     return false;
+}
+
+void eChatPrefixSpamTester::CalcScore( PrefixEntry & data, const int & len, const tString & prefix )
+{   
+    // Apply based on length of found prefix.
+    data.score += se_CalcScore( len );
+
+    // Apply based on number of color codes in prefix.
+    data.score += se_CalcScore( se_CountColorCodes( prefix ) );
+
+    // Apply based on number of known prefixes.
+    data.score += se_CalcScore( player_->lastSaid_.KnownPrefixes().size() );
+
+    // Apply multiplier for annoying color messages
+    if ( se_StartsWithColorCode( prefix ) )
+        data.score *= se_prefixSpamColorMultiplier;
+    
+    std::cout << "score: " << data.score << '\n';
 }
 
 bool eChatPrefixSpamTester::HasKnownPrefix( tString & out ) const
