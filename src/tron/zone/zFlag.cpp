@@ -69,7 +69,6 @@ zFlagZone::zFlagZone( eGrid * grid )
         :zZone( grid )
 {
     init_ = false;
-    homePosition_ = shape->Position();
     owner_ = NULL;
     ownerTime_ = 0;
 	flagHome_ = true;
@@ -170,6 +169,7 @@ bool zFlagZone::Timestep( REAL time )
 {
     if (!init_)
 		 {
+         homePosition_ = shape->Position();
 			init_ = true;
 			 
 			 const tList<eGameObject>& gameObjects = Grid()->GameObjects();
@@ -194,7 +194,7 @@ bool zFlagZone::Timestep( REAL time )
 			initOwnerTeam_ = closest->Player()->CurrentTeam();
 		 }
 		 }
-	return false;
+    return zZone::Timestep(time);
 }
 
 // *******************************************************************************
