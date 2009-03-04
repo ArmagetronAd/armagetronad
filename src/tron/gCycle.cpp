@@ -1525,7 +1525,7 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
 
         REAL lag = simTime - dest->gameTime;  // the real lag
         REAL lagOffset = simTime - lastTime;  // difference between real lag and practical lag (what we need to compensate)
-        if ( lag > 0 && sn_GetNetState() == nSERVER )
+        if ( sn_GetNetState() == nSERVER )
         {
             eLag::Report( Owner(), lag );
             if ( currentWall && currentWall->Wall() && rubberSpeedFactor >= 1-EPS )

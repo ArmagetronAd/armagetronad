@@ -447,6 +447,7 @@ lag_offset_server_help             Extra amount of lag compensation, determined 
 lag_offset_legacy_help             Extra amount of lag compensation for clients that don't support automatic compensation, determined by the server.
 
 lag_threshold_help                 Amount of lag not compensated for on each lag event.
+lag_frequency_threshold_help       Minimal frequency of lag events (measured against the total number of input events) that needs to be exceeded before the server informs the client.
 
 #********************************************
 #********************************************
