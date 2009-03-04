@@ -194,25 +194,6 @@ static double se_CalcScore( double a )
     return log( 2 + a ) / log( 2 );
 }
 
-/**
- * Ensure a key is set in a map.
- *
- * @param map the associative structure
- * @param key the key to ensure is set
- * @param value the default value for the the key if it does not exist.
- * @return Did the key already exist in the map?
- */
-template< typename Map, typename Key, typename Value >
-bool se_EnsureKey( Map & map, const Key & key, const Value & value )
-{
-    if ( map.find(key) == map.end() )
-    {
-        map[key] = value;
-        return false;
-    }
-    return true;    
-}
-
 eChatSaidEntry::eChatSaidEntry(const tString & said, const nTimeRolling & t, eChatMessageType type)
 : said_( said ), time_( t ), type_( type )
 {
@@ -437,7 +418,9 @@ bool eChatPrefixSpamTester::Check( tString & out )
                 return false;
             }
             
-            se_EnsureKey( foundPrefixes, common, PrefixEntry() );
+            if ( foundPrefixes.find(common) == foundPrefixes.end() )
+                foundPrefixes[common] = PrefixEntry();
+            
             PrefixEntry & data = foundPrefixes[common];
 
             data.occurrences += 1;
@@ -445,7 +428,7 @@ bool eChatPrefixSpamTester::Check( tString & out )
             if ( data.score >= se_prefixSpamRequiredScore )
             {
                 player_->lastSaid_.AddPrefix( prefix );
-                out = prefix;
+                out = se_EscapeColors( prefix );
                 return true;
             }
         }
