@@ -63,13 +63,21 @@ static tConfItem< REAL > se_prefixSpamRequiredScoreConf( "PREFIX_SPAM_REQUIRED_S
 /**
  * Helper class for predicate stl-comparisons
  */
+template< typename T >
 class IsPrefixPredicate
 {
 public:
-    IsPrefixPredicate( const tString & s ) :s_( s ) { }
-    bool operator() ( const tString & other ) { return s_.StartsWith( other ); }
+    IsPrefixPredicate( const T & s, bool isSuperString=true ) :s_( s ), isSuperString_( isSuperString ) { }
+    bool operator() ( const T & other )
+    {
+        const T & a = isSuperString_ ? s_ : other;
+        const T & b = isSuperString_ ? other : s_;
+        
+        return a.StartsWith( b ); 
+    }
 private:
-    const tString s_;
+    const T s_;
+    bool isSuperString_;
 };
 
 /**
@@ -132,7 +140,17 @@ private:
      */
     bool ShouldCheckMessage( const eChatSaidEntry & said ) const;
     
+    /**
+     * Calculate the score for a prefix
+     */
     void CalcScore( PrefixEntry & data, const int & len, const tString & prefix ) const;
+    
+    /**
+     * After a prefix has been found, remove all chat entries with it. We don't want
+     * to penalize users after a prefix is found, and the user starts a message with
+     * a word that begins with the found prefix.
+     */
+    void RemovePrefixEntries( const tString & prefix, const eChatSaidEntry & e ) const;
 
     ePlayerNetID * player_;
     const eChatSaidEntry & say_;
@@ -223,6 +241,11 @@ const eChatMessageType eChatSaidEntry::Type() const
 void eChatSaidEntry::SetType(eChatMessageType newType)
 {
     type_ = newType;
+}
+
+bool eChatSaidEntry::StartsWith( const eChatSaidEntry & other ) const
+{
+    return said_.StartsWith( other.Said() );
 }
 
 eChatLastSaid::eChatLastSaid()
@@ -386,20 +409,19 @@ bool eChatPrefixSpamTester::Check( tString & out )
 {
     if ( !ShouldCheckMessage( say_ ) )
         return false;
-
-    eChatLastSaid::SaidList & lastSaid = player_->lastSaid_.LastSaid();
-    const size_t saidSize = lastSaid.size();
     
     // check from known prefixes
     if ( HasKnownPrefix( out ) )
         return true;
     
+    eChatLastSaid::SaidList & lastSaid = player_->lastSaid_.LastSaid();
+    
     // Map of PrefixLength => Data
     std::map< int, PrefixEntry > foundPrefixes;
         
-    for ( size_t i = 0; i < saidSize; i++ )
+    for ( eChatLastSaid::SaidList::iterator it = lastSaid.begin(); it != lastSaid.end(); ++it )
     {
-        eChatSaidEntry & said = lastSaid[i];
+        eChatSaidEntry & said = *it;
         
         if ( !ShouldCheckMessage( said ) || say_.Said() == said.Said() )
             continue;
@@ -429,6 +451,10 @@ bool eChatPrefixSpamTester::Check( tString & out )
             if ( data.score >= se_prefixSpamRequiredScore )
             {
                 player_->lastSaid_.AddPrefix( prefix );
+                
+                // We caught the prefix. Don't catch words that start with the prefix.
+                RemovePrefixEntries( prefix, said );
+                
                 out = se_EscapeColors( prefix );
                 return true;
             }
@@ -458,11 +484,18 @@ void eChatPrefixSpamTester::CalcScore( PrefixEntry & data, const int & len, cons
 #endif
 }
 
+void eChatPrefixSpamTester::RemovePrefixEntries( const tString & prefix, const eChatSaidEntry & e ) const
+{
+    eChatSaidEntry entry( prefix, e.Time(), e.Type() );
+    eChatLastSaid::SaidList & xs = player_->lastSaid_.LastSaid();
+    xs.erase( std::remove_if( xs.begin(), xs.end(), IsPrefixPredicate< eChatSaidEntry >( entry, false ) ), xs.end() );
+}
+
 bool eChatPrefixSpamTester::HasKnownPrefix( tString & out ) const
 {
     const eChatLastSaid::StringList & prefixes = player_->lastSaid_.KnownPrefixes();
     eChatLastSaid::StringList::const_iterator it =
-        std::find_if( prefixes.begin(), prefixes.end(), IsPrefixPredicate( say_.Said() ) );
+        std::find_if( prefixes.begin(), prefixes.end(), IsPrefixPredicate< tString >( say_.Said() ) );
     
     if ( it != prefixes.end() )
     {

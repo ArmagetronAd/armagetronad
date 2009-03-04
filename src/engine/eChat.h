@@ -81,10 +81,15 @@ public:
      * @see Type()
      */
     void SetType(eChatMessageType newType);
+    
+    /**
+     * Does this message start with the other message?
+     */
+    bool StartsWith( const eChatSaidEntry & other ) const;
 
 private:
-    const tString said_;
-    const nTimeRolling time_;
+    tString said_;
+    nTimeRolling time_;
     eChatMessageType type_;
 };
 
