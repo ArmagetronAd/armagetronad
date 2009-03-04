@@ -365,13 +365,9 @@ bool eChatSpamTester::CheckSpam( REAL factor, tOutput const & message ) const
  */
 size_t CommonPrefix(const tString & a, const tString & b)
 {
-    bool aGreater = a > b;
-    const tString & min = aGreater ? b : a;
-    const tString & max = aGreater ? a : b;
-    
-    int n = min.Size();
-    for (int i = 0; i < n; i++)
-        if (min[i] != max[i])
+    size_t n = std::min( a.Size(), b.Size() );
+    for (size_t i = 0; i < n; i++)
+        if (a[i] != b[i])
             return i;
     
     return n;
