@@ -1772,14 +1772,15 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
     //  REAL ls=left.hit;
     //  REAL rs=right.hit;
 
-    if ( bool( target ) && !IsTrapped(target, Object()) && nextStateChange < se_GameTime() )
+    if ( bool( target ) && !dynamic_cast< zZone const * >( GetTarget() ) && !IsTrapped(target, Object()) && nextStateChange < se_GameTime() )
     {
         gSensor p(Object(),Object()->Position(),target->Position() - Object()->Position());
         p.detect(REAL(1));
         if (p.hit <=  .999999)  // no free line of sight to victim. Switch to path mode.
         {
-            // SwitchToState(AI_PATH, 5);
+            SwitchToState(AI_PATH, 5);
             EmergencySurvive( data );
+
             return;
         }
     }
