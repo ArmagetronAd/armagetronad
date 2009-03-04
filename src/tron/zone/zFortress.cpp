@@ -266,7 +266,6 @@ bool zFortressZone::Timestep( REAL time )
             shape->SetRotationSpeed( omega );
             shape->SetRotationAcceleration( omegaDot );
             shape->setReferenceTime(lastSync_);
-            shape->RequestSync();
             lastSync_ = lastTime;
         }
 
