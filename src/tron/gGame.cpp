@@ -2757,8 +2757,8 @@ void gGame::StateUpdate(){
                     eGameObject * e = gameObjects(i);
                     if ( e )
                     {
-                        e->OnRoundBegin();
                         e->EnsureBorn();
+                        e->OnRoundBegin();
                     }
                 }
             }

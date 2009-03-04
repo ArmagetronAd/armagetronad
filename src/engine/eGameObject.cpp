@@ -134,6 +134,13 @@ eGameObject::~eGameObject(){
     tCHECK_DEST;
 }
 
+eCoord eGameObject::Position()const{return pos;}
+eCoord eGameObject::Direction()const{return dir;}
+eCoord eGameObject::LastDirection()const{return dir;}
+REAL eGameObject::DeathTime()const{return deathTime;}
+REAL  eGameObject::Speed()const{return 0;}
+
+
 // returns the type of this object (important for interaction of
 // two gameObjects)
 //gameobject_type gameobject::type(){return ArmageTron_GENERIC;}

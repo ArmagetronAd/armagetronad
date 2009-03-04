@@ -98,7 +98,7 @@ protected:
     gAICharacter*           character; // our specification of abilities
 
     // for all offensive modes:
-    nObserverPtr< gCycle >    target;  // the current victim
+    nObserverPtr< eNetGameObject >    target;  // the current victim
 
     // for pathfinding mode:
     ePath                   path;    // last found path to the victim
@@ -177,6 +177,14 @@ struct ThinkData : public ThinkDataBase
     virtual void ActOnData( ThinkData & data );
     virtual void ActOnData( ThinkDataBase & data );
 public:
+    // set sight on target (side effects: switch state accordingly)
+    void SetTarget( eNetGameObject * target );
+
+    eNetGameObject const * GetTarget() const
+    {
+        return target;
+    }
+
     gAICharacter* Character() const {return character;}
 
     //	virtual void AddRef();

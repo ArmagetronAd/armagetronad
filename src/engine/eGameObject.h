@@ -129,11 +129,11 @@ public:
     eGameObject(eGrid *grid, const eCoord &p,const eCoord &d, eFace *currentface, bool autodelete=1);
     virtual ~eGameObject();
 
-    virtual eCoord Position()const{return pos;}
-    virtual eCoord Direction()const{return dir;}
-    virtual eCoord LastDirection()const{return dir;}
-    virtual REAL DeathTime()const{return deathTime;}
-    virtual REAL  Speed()const{return 20;}
+    virtual eCoord Position()const;
+    virtual eCoord Direction()const;
+    virtual eCoord LastDirection()const;
+    virtual REAL DeathTime()const;
+    virtual REAL  Speed()const;
 
     // position after FPS dependant extrapolation
     virtual eCoord PredictPosition() const {return pos;}

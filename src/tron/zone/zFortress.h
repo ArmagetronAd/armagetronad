@@ -49,6 +49,9 @@ public:
     void readXML(tXmlParser::node const &);
 
 private:
+    virtual eCoord Position()const;
+    virtual eCoord Direction()const;
+
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
 
     virtual void OnInside( gCycle *target, REAL time ); //!< reacts on objects inside the zone
@@ -57,6 +60,12 @@ private:
     virtual void CheckSurvivor();                      //!< checks for the only surviving zone
     virtual void OnRoundBegin();                       //!< called on the beginning of the round
     virtual void OnRoundEnd();                         //!< called on the end of the round
+
+    //! AI routine. Called about once per second. Use to make AIs aware of this zone.
+    virtual void OnThink();
+
+    //! tells whether the object is alive
+    virtual bool Alive() const;
 
     void ZoneWasHeld();                                //!< call when the zone was held as long as possible with the set game rules
 

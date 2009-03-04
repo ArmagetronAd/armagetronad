@@ -42,6 +42,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tReferenceHolder.h"
 #include "tRandom.h"
 #include "tRecorder.h"
+#include "zone/zZone.h"
 #include <stdlib.h>
 #include <cstdlib>
 #include <memory>
@@ -577,7 +578,14 @@ static bool IsTrapped(const gCycle *trapped, const gCycle *other)
     return false;
 }
 
-
+// see if the given Cycle is trapped currently
+static bool IsTrapped(const eGameObject *trapped, const gCycle *other)
+{
+    gCycle const * cycle = dynamic_cast< gCycle const * >( trapped );
+    if( cycle )
+        return IsTrapped( cycle, other );
+    return false;
+}
 
 
 // data about a loop
@@ -1723,7 +1731,7 @@ void gAIPlayer::ThinkPath( ThinkData & data )
     else // nogood
     {
         lastPath -= 1;
-        SwitchToState(AI_SURVIVE);
+        SwitchToState(AI_CLOSECOMBAT);
     }
 
     EmergencySurvive( data, 1, -lr );
@@ -1737,6 +1745,17 @@ void gAIPlayer::ThinkPath( ThinkData & data )
         data.thinkAgain *= .7;
 }
 
+// set sight on target (side effects: switch state accordingly)
+void gAIPlayer::SetTarget( eNetGameObject * target )
+{
+    this->target = target;
+
+    // let's see how well this works:
+    SwitchToState( AI_CLOSECOMBAT );
+
+    // start with it right now
+    nextTime = -1;
+}
 
 void gAIPlayer::ThinkCloseCombat( ThinkData & data )
 {
@@ -1759,7 +1778,7 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
         p.detect(REAL(1));
         if (p.hit <=  .999999)  // no free line of sight to victim. Switch to path mode.
         {
-            SwitchToState(AI_PATH, 5);
+            // SwitchToState(AI_PATH, 5);
             EmergencySurvive( data );
             return;
         }
@@ -1785,7 +1804,7 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
         REAL enemyspeed=target->Speed();
 
         ed=REAL(fabs(enemypos.x)+fabs(enemypos.y));
-        ed/=enemyspeed;
+        ed/=(enemyspeed+Object()->Speed());
 
         // transform coordinates relative to us:
         enemypos=enemypos.Turn(dir.Conj()).Turn(0,1);
@@ -1921,7 +1940,7 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
     if (!EmergencySurvive(data, 1, -lr))
         nextThought = 0;
 
-    data.thinkAgain = ed/2 + nextThought;
+    data.thinkAgain = ed + nextThought;
 }
 
 
@@ -2111,10 +2130,16 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
       sideDanger[LOOPLEVEL][(1-front.front.lr*enemyevade) >> 1] += 5;
     */  
 
-    if (!isTrapped)
+    // don't check for loops if we're attacking/defending a zone
+    if( dynamic_cast< zZone const * >( GetTarget() ) && front.distance > range )
+    {
+        isTrapped = false;
+    }
+
+    if ( !isTrapped )
         for (i = 1; i>=0; i--)
         {
-            if (front.frontLoop[i].loop && front.distance < 5*sides[i]->distance)
+            if ( front.frontLoop[i].loop && front.distance < 5*sides[i]->distance )
             {
                 // if we would close ourself in, make the danger bigger
                 if (front.front.otherCycle == Object() && i+i-1 == front.front.lr)
@@ -2490,8 +2515,8 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
     // no problem in the preferred direction. Just take it.
     if (preferedSide)
     {
-        if( fDanger  * 3 >= sDanger[1] * 2 - 5 &&
-                sDanger[0] * 3 >= sDanger[1] * 2 - 5)
+        if( fDanger * 3 >= sDanger[1] * 2 - 40 &&
+                sDanger[0] * 3 >= sDanger[1] * 2 - 40 )
         {
             freeSide -= side*100;
             e.turn = side;

@@ -111,7 +111,8 @@ zZone::zZone( eGrid * grid )
         effectGroupOutside(),
         playersInside(),
         playersOutside(),
-        name_()
+        name_(),
+        nextThought_(0)
 {
     // store creation time
     referenceTime_ = createTime_ = lastTime = 0;
@@ -139,7 +140,8 @@ zZone::zZone( Zone::ZoneSync const & sync, nSenderInfo const & sender )
         //rotation_(1,0),
         playersInside(),
         playersOutside(),
-        name_()
+        name_(),
+        nextThought_(0)
 {
     // read creation time
     createTime_ = sync.create_time();
@@ -302,6 +304,13 @@ bool zZone::Timestep( REAL time )
 {
     lastTime = time;
 
+    if( nextThought_ < time )
+    {
+        OnThink();
+        static tReproducibleRandomizer randomizer;
+        nextThought_ = time + 1.0 + randomizer.Get();
+    }
+
     return false;
 }
 
@@ -315,6 +324,20 @@ bool zZone::Timestep( REAL time )
 // *******************************************************************************
 
 void zZone::OnVanish( void )
+{
+}
+
+
+// *******************************************************************************
+// *
+// *	OnThink
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+void zZone::OnThink( void )
 {
 }
 

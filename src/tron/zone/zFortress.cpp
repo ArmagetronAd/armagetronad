@@ -42,6 +42,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rScreen.h"
 #include "eSoundMixer.h"
 
+#include "gAIBase.h"
+
 #include "zone/zFortress.h"
 #include "zone/zZone.h"
 
@@ -49,7 +51,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <algorithm>
 #include <functional>
 #include <deque>
-
 
 #define sg_segments sz_zoneSegments
 
@@ -159,6 +160,23 @@ static tSettingItem< int > sg_onSurviveConquestScoreConfig( "FORTRESS_HELD_SCORE
 static REAL sg_collapseSpeed = .5;
 static tSettingItem< REAL > sg_collapseSpeedConfig( "FORTRESS_COLLAPSE_SPEED", sg_collapseSpeed );
 
+eCoord zFortressZone::Position()const
+{
+    if( getShape() )
+    {
+        return getShape()->Position();
+    }
+    else
+    {
+        // wrong, but what can you do?
+        return eGameObject::Position();
+    }
+}
+
+eCoord zFortressZone::Direction()const
+{
+    return eCoord(0,0);
+}
 
 // *******************************************************************************
 // *
@@ -387,6 +405,153 @@ void zFortressZone::OnVanish( void )
             }
         }
     }
+}
+
+// *******************************************************************************
+// *
+// *	OnThink
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+void zFortressZone::OnThink( void )
+{
+    if( !getShape() || !Alive() )
+    {
+        return;
+    }
+
+    // we want to have that many attackers and defenders
+    int wishDefenders = 1;
+    int wishAttackers = 2;
+
+    // find closest enemy and friendly AI not attacking or defending,
+    // and count those attacking/defending us while we're at it
+    int defenders = 0;
+    int attackers = 0;
+
+    gAIPlayer * closestEnemy = 0;
+    gAIPlayer * closestFriend = 0;
+    
+    // squared distances of closest AIs
+    REAL closestEnemyDistance = 0;
+    REAL closestFriendDistance = 0;
+
+    for( int i = grid->GameObjects().Len()-1; i >= 0; --i )
+    {
+        eNetGameObject const * o = dynamic_cast< eNetGameObject * >( grid->GameObjects()(i) );
+        if ( o && o->Alive() )
+        {
+            gAIPlayer * ai = dynamic_cast< gAIPlayer * >( o->Player() );
+            if( ai )
+            { 
+                REAL distance = ( o->Position() - getShape()->Position() ).NormSquared();
+                {
+                    zZone const * target = dynamic_cast< zZone const * >( ai->GetTarget() );
+
+                    if( ai->CurrentTeam() == team )
+                    {
+                        if ( !target && ( !closestFriend || closestFriendDistance > distance ) )
+                        {
+                            closestFriendDistance = distance;
+                            closestFriend = ai;
+                        }
+
+                        if ( target == this )
+                        {
+                            defenders++;
+                        }
+                    }
+                    else
+                    {
+                        if ( !target && ( !closestEnemy || closestEnemyDistance > distance ) )
+                        {
+                            closestEnemyDistance = distance;
+                            closestEnemy = ai;
+                        }
+                        
+                        if ( target == this )
+                        {
+                            attackers++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // enough attackers and defenders or nothing to do? Fine, quit.
+    if( ( attackers >= wishAttackers && defenders >= wishDefenders )
+        ||
+        ( !closestEnemy && !closestFriend )
+        )
+    {
+        return;
+    }
+
+    // find human players that are not much further away than the AI candidates
+    for( int i = grid->GameObjects().Len()-1; i >= 0; --i )
+    {
+        eNetGameObject const * o = dynamic_cast< eNetGameObject * >( grid->GameObjects()(i) );
+        if ( o && o->Alive() )
+        {
+            ePlayerNetID * p = o->Player();
+            if( p && p->IsHuman() )
+            {
+                REAL distance = ( o->Position() - getShape()->Position() ).NormSquared();
+                if( p->CurrentTeam() == team )
+                {
+                    if( distance < closestFriendDistance * 2 )
+                    {
+                        defenders++;
+                    }
+                }
+                else
+                {
+                    if( distance < closestEnemyDistance * 2 )
+                    {
+                        attackers++;
+                    }
+                }
+            }
+        }
+    }
+
+    // counting complete. Let's act. Assign new attacker and defender.
+    if( closestFriend && wishDefenders > defenders )
+    {
+#ifdef DEBUG
+        closestFriend->Chat( tString( "Defending!" ) );
+#endif
+        closestFriend->SetTarget( this );
+
+        return;
+    }
+
+    if( closestEnemy && wishAttackers > attackers )
+    {
+#ifdef DEBUG
+        closestEnemy->Chat( tString( "Attacking enemy fortress!" ) );
+#endif
+        closestEnemy->SetTarget( this );
+    }
+
+}
+
+// *******************************************************************************
+// *
+// *	Alive
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+bool zFortressZone::Alive() const
+{
+    return State_Safe == currentState_;
 }
 
 // *******************************************************************************

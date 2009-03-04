@@ -88,7 +88,7 @@ public:
     void addEffectGroupOutside(zEffectGroupPtr anEffectGroup) {effectGroupOutside.push_back(anEffectGroup);};
 
     void setShape (zShapePtr aShape) { shape = aShape; };
-    zShapePtr getShape() { return shape; };
+    zShapePtr getShape() const { return shape; };
 
     void setName(string name) {name_ = name;};
     string getName() { return name_; };
@@ -102,6 +102,9 @@ protected:
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
     virtual void OnVanish();                     //!< called when the zone vanishes
 
+    //! AI routine. Called about once per second. Use to make AIs aware of this zone.
+    virtual void OnThink();
+    
     zEffectGroupPtrs effectGroupEnter;
     zEffectGroupPtrs effectGroupInside;
     zEffectGroupPtrs effectGroupLeave;
@@ -129,6 +132,7 @@ private:
 
     string name_;
 
+    REAL nextThought_; //!< next game time Think() should be called
 };
 
 
