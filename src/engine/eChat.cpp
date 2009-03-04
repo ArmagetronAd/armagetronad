@@ -450,8 +450,10 @@ void eChatPrefixSpamTester::CalcScore( PrefixEntry & data, const int & len, cons
     // Apply multiplier for annoying color messages
     if ( se_StartsWithColorCode( prefix ) )
         data.score *= se_prefixSpamStartColorMultiplier;
-    
-    std::cout << "score: " << data.score << '\n';
+
+#ifdef DEBUG    
+    std::cout << "Prefix-spam score: " << prefix << ' ' << data.score << '\n';
+#endif
 }
 
 bool eChatPrefixSpamTester::HasKnownPrefix( tString & out ) const
