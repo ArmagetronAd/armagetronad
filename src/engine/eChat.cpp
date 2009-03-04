@@ -47,7 +47,7 @@ static REAL se_prefixSpamLengthMultiplier = 0.5;
 static tConfItem< REAL > se_prefixSpamLengthMultiplierConf( "PREFIX_SPAM_LENGTH_MULTIPLIER", se_prefixSpamLengthMultiplier );
 
 //!< Increase score by log( num_color_codes * multiplier )
-static REAL se_prefixSpamNumberColorCodesMultiplier = 1;
+static REAL se_prefixSpamNumberColorCodesMultiplier = 1.2;
 static tConfItem< REAL > se_prefixSpamNumberColorCodesMultiplierConf( "PREFIX_SPAM_NUMBER_COLOR_CODES_MULTIPLIER",
                                                                       se_prefixSpamNumberColorCodesMultiplier );
 
