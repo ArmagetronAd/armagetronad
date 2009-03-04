@@ -132,7 +132,7 @@ private:
      */
     bool ShouldCheckMessage( const eChatSaidEntry & said ) const;
     
-    void CalcScore( PrefixEntry & data, const int & len, const tString & prefix );
+    void CalcScore( PrefixEntry & data, const int & len, const tString & prefix ) const;
 
     ePlayerNetID * player_;
     const eChatSaidEntry & say_;
@@ -188,6 +188,9 @@ static bool se_StartsWithColorCode( const tString & s )
     return s.StartsWith( "0x" );
 }
 
+/**
+ * \o/ logarithms
+ */
 static double se_CalcScore( double a )
 {
     return log( 2 + a ) / log( 2 );
@@ -436,7 +439,7 @@ bool eChatPrefixSpamTester::Check( tString & out )
     return false;
 }
 
-void eChatPrefixSpamTester::CalcScore( PrefixEntry & data, const int & len, const tString & prefix )
+void eChatPrefixSpamTester::CalcScore( PrefixEntry & data, const int & len, const tString & prefix ) const
 {   
     // Apply based on length of found prefix.
     data.score += se_CalcScore( len * se_prefixSpamLengthMultiplier );
