@@ -43,7 +43,7 @@ static REAL se_prefixSpamStartColorMultiplier = 2;
 static tConfItem< REAL > se_prefixSpamStartColorMultiplierConf( "PREFIX_SPAM_START_COLOR_MULTIPLIER", se_prefixSpamStartColorMultiplier );
 
 //!< Increase score by log( prefix_length * multiplier )
-static REAL se_prefixSpamLengthMultiplier = 1;
+static REAL se_prefixSpamLengthMultiplier = 0.5;
 static tConfItem< REAL > se_prefixSpamLengthMultiplierConf( "PREFIX_SPAM_LENGTH_MULTIPLIER", se_prefixSpamLengthMultiplier );
 
 //!< Increase score by log( num_color_codes * multiplier )
@@ -56,9 +56,8 @@ static REAL se_prefixNumberKnownPrefixesMultiplier = 1;
 static tConfItem< REAL > se_prefixNumberKnownPrefixesMultiplierConf( "PREFIX_SPAM_NUMBER_KNOWN_PREFIXES_MULTIPLIER",
                                                                      se_prefixNumberKnownPrefixesMultiplier );
 
-
 //!< The score, from prefix checking, a message must have for it to be considered spam.
-static REAL se_prefixSpamRequiredScore = 10.0;
+static REAL se_prefixSpamRequiredScore = 15.0;
 static tConfItem< REAL > se_prefixSpamRequiredScoreConf( "PREFIX_SPAM_REQUIRED_SCORE", se_prefixSpamRequiredScore );
 
 /**
