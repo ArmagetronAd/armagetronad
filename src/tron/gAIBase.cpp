@@ -2682,16 +2682,7 @@ void gAIPlayer::EmergencyCloseCombat( ThinkData & data )
 
 void gAIPlayer::EmergencyGrind( ThinkData & data )
 {
-    if( data.front.front.wallType == gSENSOR_TEAMMATE )
-    {
-        data.turn = data.front.front.lr; // Object()->LastDirection()*Object()->Direction() > 0 ? -1 : 1;
-        data.thinkAgain = Delay() * 2;
-    }
-    else
-    {
-        SwitchToState( AI_SURVIVE );
-        EmergencySurvive( data );
-    }
+    ThinkGrind( data );
 }
 
 
