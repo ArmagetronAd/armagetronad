@@ -1022,7 +1022,13 @@ void gAIPlayer::CycleBlocksWay(const gCycleMovement *aa, const gCycleMovement *b
     if (a->Team() != b->Team())
     {
         gAIPlayer* ai = dynamic_cast<gAIPlayer*>(b->Player());
-        if (ai && ai->Character() && ai->Character()->properties[AI_DETECTTRACE] > 5)
+        if( ai && dynamic_cast< zZone const * >( ai->GetTarget() ) )
+        {
+            // ai is attacking or defending a zone, don't disturb it
+            return;
+        }
+
+        if (ai && ai->Character() && ai->Character()->properties[AI_DETECTTRACE] > 5 )
             if(aDir != bDir && ai->nextStateChange < se_GameTime() + 5 &&
                     ai->lastChangeAttempt < se_GameTime() - 5 )
             {
@@ -1043,6 +1049,13 @@ void gAIPlayer::CycleBlocksWay(const gCycleMovement *aa, const gCycleMovement *b
 
         // what to do if the AI player traces his opponent by accident? Trace On!
         ai = dynamic_cast<gAIPlayer*>(a->Player());
+
+        if( ai && dynamic_cast< zZone const * >( ai->GetTarget() ) )
+        {
+            // ai is attacking or defending a zone, don't disturb it
+            return;
+        }
+
         if (ai && ai->Character() && ai->Character()->properties[AI_DETECTTRACE] > 0)
             if(aDir != bDir && ai->nextStateChange < se_GameTime() + 5 &&
                     ai->lastChangeAttempt < se_GameTime() - 5 )
@@ -1846,10 +1859,17 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
 
         if ( zoneTarget && idler.get() )
         {
-            if ( enemypos.y < 0 )
+            if ( enemypos.y < 0 || ( data.front.front.wallType != gSENSOR_SELF && data.front.front.distance < Object()->Speed() * Object()->GetTurnDelay() ) )
             {
                 gAIIdle::Wish wish( *idler );
                 wish.turn = -side;
+
+                // extra strong turn wish if wall is not mine
+                if( sides[1]->front.wallType != gSENSOR_SELF )
+                {
+                    wish.turn *= 2;
+                }
+
                 if ( enemypos.x > -enemypos.y * 2 )
                 {
                     wish.minDistance = Object()->ThisWallsLength()/2;

@@ -469,26 +469,62 @@ REAL gAIIdle::Activate( REAL currentTime, REAL minstep, REAL penalty, Wish * wis
             REAL minDistance = wish->minDistance;
             if( wish->turn > 0 )
             {
-                if( !( wish->maxDisadvantage + leftOpen + rearLeftOpen < frontOpen + rearRightOpen + rightOpen || 
-                       leftOpen < minDistance ) )
+                if( wish->maxDisadvantage + leftOpen + rearLeftOpen < frontOpen + rightOpen + rearRightOpen )
                 {
-                    bestDir = 1;
+                    wish = 0;
+                }
+                else if ( leftOpen < wish->minDistance )
+                {
+                    if( leftOpen + rearLeftOpen < wish->minDistance || frontOpen < wish->minDistance || rightOpen < wish->minDistance )
+                    {
+                        wish = 0;
+                    }
+                    else if( wish->turn == -1 )
+                    {
+                        wish = 0;
+                    }
+                    else
+                    {
+                        // double back
+                        owner_->Act( &gCycle::se_turnRight, 1 );
+                        owner_->Act( &gCycle::se_turnRight, 1 );
+                        owner_->Act( &gCycle::se_turnRight, 1 );
+                        return owner_->GetTurnDelay() * 3;
+                    }
                 }
                 else
                 {
-                    wish = 0;
+                    bestDir = 1;
                 }
             }
             else if( wish->turn < 0 )
             {
-                if( !( wish->maxDisadvantage + rightOpen + rearRightOpen < frontOpen + leftOpen + rearLeftOpen || 
-                       rightOpen < wish->minDistance ) )
+                if( wish->maxDisadvantage + rightOpen + rearRightOpen < frontOpen + leftOpen + rearLeftOpen )
                 {
-                    bestDir = -1;
+                    wish = 0;
+                }
+                else if ( rightOpen < wish->minDistance )
+                {
+                    if( rightOpen + rearRightOpen < wish->minDistance || frontOpen < wish->minDistance || leftOpen < wish->minDistance )
+                    {
+                        wish = 0;
+                    }
+                    else if( wish->turn == -1 )
+                    {
+                        wish = 0;
+                    }
+                    else
+                    {
+                        // double back
+                        owner_->Act( &gCycle::se_turnLeft, 1 );
+                        owner_->Act( &gCycle::se_turnLeft, 1 );
+                        owner_->Act( &gCycle::se_turnLeft, 1 );
+                        return owner_->GetTurnDelay() * 3;
+                    }
                 }
                 else
                 {
-                    wish = 0;
+                    bestDir = -1;
                 }
             }
 
@@ -501,18 +537,6 @@ REAL gAIIdle::Activate( REAL currentTime, REAL minstep, REAL penalty, Wish * wis
         }
 
         uActionPlayer * bestAction = ( bestDir > 0 ) ? &gCycle::se_turnLeft : &gCycle::se_turnRight;
-
-
-        if( wish )
-        {
-            if ( !CanMakeTurn( bestAction ) )
-            {
-                return -1;
-            }
-            
-            owner_->Act( bestAction, 1 );
-            return Owner()->GetTurnDelay();
-        }
 
         REAL            bestOpen     = ( bestDir > 0 ) ? leftOpen : rightOpen;
         Sensor &        bestForward  = ( bestDir > 0 ) ? forwardLeft : forwardRight;
@@ -528,6 +552,22 @@ REAL gAIIdle::Activate( REAL currentTime, REAL minstep, REAL penalty, Wish * wis
 
         // we have to move forward this much before we can hope to turn
         minMoveOn = bestBackward.HitWallExtends( dir, pos );
+
+        if( wish )
+        {
+            if( backwardHalf < wish->minDistance )
+            {
+                return (minMoveOn/owner_->Speed())*1.1;
+            }
+
+            if ( !CanMakeTurn( bestAction ) )
+            {
+                return owner_->GetNextTurn( -bestDir ) - owner_->LastTime();
+            }
+            
+            owner_->Act( bestAction, 1 );
+            return Owner()->GetTurnDelay();
+        }
 
         // maybe the direct to the side sensor is better?
         REAL minMoveOnOther = direct.HitWallExtends( dir, pos );
@@ -563,7 +603,7 @@ REAL gAIIdle::Activate( REAL currentTime, REAL minstep, REAL penalty, Wish * wis
             {
                 if ( !CanMakeTurn( bestAction ) )
                 {
-                    return -1;
+                    return owner_->GetNextTurn( -bestDir ) - owner_->LastTime();
                 }
 
                 owner_->Act( bestAction, 1 );
@@ -600,7 +640,7 @@ REAL gAIIdle::Activate( REAL currentTime, REAL minstep, REAL penalty, Wish * wis
 
                 if ( !CanMakeTurn( bestAction ) )
                 {
-                    return -1;
+                    return owner_->GetNextTurn( -bestDir ) - owner_->LastTime();
                 }
 
                 // well, after a short turn to the right if space is tight
@@ -615,7 +655,7 @@ REAL gAIIdle::Activate( REAL currentTime, REAL minstep, REAL penalty, Wish * wis
                     {
                         if ( !CanMakeTurn( otherAction ) )
                         {
-                            return -1;
+                            return owner_->GetNextTurn( bestDir ) - owner_->LastTime();
                         }
 
                         owner_->Act( otherAction, 1 );
