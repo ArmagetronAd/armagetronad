@@ -32,9 +32,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gWall.h"
 #include "tRandom.h"
 
-gAIIdlerSettings::gAIIdlerSettings()
-: newWallBlindness(-.1), range( 1 )
+gAIIdle::Settings::Settings()
+: newWallBlindness(-.1)
+, range( 1 )
 {}
+
+gAIIdle::Wish::Wish( gAIIdle const & idler )
+: turn(0)
+, maxDisadvantage( 1E+30 )
+{
+    gCycle & owner = *idler.Owner();
+    minDistance = owner.GetTurnDelay() * owner.Speed();
+}
+
 
 gAIIdle::Sensor::Sensor(gAIIdle & ai,const eCoord &start,const eCoord &d)
 : gSensor(ai.Owner(),start,d)
@@ -296,7 +306,7 @@ bool gAIIdle::CanMakeTurn( uActionPlayer * action )
 }
 
 //! does the main thinking at the current time, knowing the next thought can't be sooner than minstep
-REAL gAIIdle::Activate( REAL currentTime, REAL minstep, REAL penalty )
+REAL gAIIdle::Activate( REAL currentTime, REAL minstep, REAL penalty, Wish * wish )
 {
     REAL lookahead = settings_.range;  // seconds to plan ahead
 
@@ -322,7 +332,7 @@ REAL gAIIdle::Activate( REAL currentTime, REAL minstep, REAL penalty )
     REAL rubberTime = ( rubberGranted - owner_->GetRubber() )*rubberEffectiveness/speed;
     REAL rubberRatio = owner_->GetRubber()/rubberGranted;
 
-    if ( front.ehit )
+    if ( front.ehit || wish )
     {
         turnedRecently_ = false;
 
@@ -446,17 +456,67 @@ REAL gAIIdle::Activate( REAL currentTime, REAL minstep, REAL penalty )
         }
 
         // get the best turn direction
-        uActionPlayer * bestAction = ( leftOpen > rightOpen ) ? &gCycle::se_turnLeft : &gCycle::se_turnRight;
-        int             bestDir      = ( leftOpen > rightOpen ) ? 1 : -1;
-        REAL            bestOpen     = ( leftOpen > rightOpen ) ? leftOpen : rightOpen;
-        Sensor &        bestForward  = ( leftOpen > rightOpen ) ? forwardLeft : forwardRight;
-        Sensor &        bestBackward = ( leftOpen > rightOpen ) ? backwardLeft : backwardRight;
+        int             bestDir      = ( leftOpen + rearLeftOpen > rightOpen + rearRightOpen ) ? 1 : -1;
 
         Sensor direct ( *this, pos, scanDir.Turn( 0, bestDir) );
         direct.detect( 1 );
 
         // restore last wall
         owner_->lastWall = lastWall;
+
+        if( wish && wish->turn )
+        {
+            REAL minDistance = wish->minDistance;
+            if( wish->turn > 0 )
+            {
+                if( !( wish->maxDisadvantage + leftOpen + rearLeftOpen < frontOpen + rearRightOpen + rightOpen || 
+                       leftOpen < minDistance ) )
+                {
+                    bestDir = 1;
+                }
+                else
+                {
+                    wish = 0;
+                }
+            }
+            else if( wish->turn < 0 )
+            {
+                if( !( wish->maxDisadvantage + rightOpen + rearRightOpen < frontOpen + leftOpen + rearLeftOpen || 
+                       rightOpen < wish->minDistance ) )
+                {
+                    bestDir = -1;
+                }
+                else
+                {
+                    wish = 0;
+                }
+            }
+
+            if( !wish && frontOpen > minDistance )
+            {
+                // going straigt is not too bad
+                return Owner()->GetTurnDelay();
+            }
+
+        }
+
+        uActionPlayer * bestAction = ( bestDir > 0 ) ? &gCycle::se_turnLeft : &gCycle::se_turnRight;
+
+
+        if( wish )
+        {
+            if ( !CanMakeTurn( bestAction ) )
+            {
+                return -1;
+            }
+            
+            owner_->Act( bestAction, 1 );
+            return Owner()->GetTurnDelay();
+        }
+
+        REAL            bestOpen     = ( bestDir > 0 ) ? leftOpen : rightOpen;
+        Sensor &        bestForward  = ( bestDir > 0 ) ? forwardLeft : forwardRight;
+        Sensor &        bestBackward = ( bestDir > 0 ) ? backwardLeft : backwardRight;
 
         // only turn if the hole has a shape that allows better entry after we do a zig-zag, or if we're past the good turning point
         // see how the survival chance is distributed between forward and backward half

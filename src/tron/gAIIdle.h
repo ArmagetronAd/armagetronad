@@ -34,21 +34,34 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class gCycle;
 
-//! settings used by the idler bot
-struct gAIIdlerSettings
-{
-    REAL newWallBlindness; //!< number of seconds new walls are invisible to the idler
-    REAL range; //!< seconds to plan ahead
-
-    gAIIdlerSettings();
-};
-
 //! AI helper class that knows the basics of staying alive.
 class gAIIdle
 {
     gAIIdle();
 public:
-    gAIIdlerSettings settings_; // settings to use
+    //! settings used by the idler bot
+    struct Settings
+    {
+        REAL newWallBlindness; //!< number of seconds new walls are invisible to the idler
+        REAL range; //!< seconds to plan ahead
+        
+        Settings();
+    };
+
+    Settings settings_; // settings to use
+
+    //! turn wish passed from outside
+    struct Wish
+    {
+        int turn;             //!< direction to turn into (values >1 turn multiple times)
+
+        REAL maxDisadvantage; //!< maximal disadvantage of the wish direction over others to have it still accepted
+        REAL minDistance;     //!< minimal 'distance' value of the wish direction to have it accepted
+
+        Wish( gAIIdle const & idler );
+    private:
+        Wish();
+    };
 
     // sensor with additional data
     class Sensor: public gSensor
@@ -99,7 +112,7 @@ public:
     bool CanMakeTurn( uActionPlayer * action );
 
     //! does the main thinking at the current time, knowing the next thought can't be sooner than minstep
-    REAL Activate( REAL currentTime, REAL minstep, REAL penalty = 0 );
+    REAL Activate( REAL currentTime, REAL minstep, REAL penalty = 0, Wish * wish = 0 );
 
 private:
     short lastTurn_;         //!< the last turn the chat AI made

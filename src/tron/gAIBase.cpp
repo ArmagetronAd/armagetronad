@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eFloor.h"
 #include "eDebugLine.h"
 #include "gAICharacter.h"
+#include "gAIIdle.h"
 #include "tReferenceHolder.h"
 #include "tRandom.h"
 #include "tRecorder.h"
@@ -1787,7 +1788,8 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
     //  REAL ls=left.hit;
     //  REAL rs=right.hit;
 
-    if ( bool( target ) && !dynamic_cast< zZone const * >( GetTarget() ) && !IsTrapped(target, Object()) && nextStateChange < se_GameTime() )
+    zZone const * zoneTarget = dynamic_cast< zZone const * >( GetTarget() );
+    if ( bool( target ) && !zoneTarget && !IsTrapped(target, Object()) && nextStateChange < se_GameTime() )
     {
         gSensor p(Object(),Object()->Position(),target->Position() - Object()->Position());
         p.detect(REAL(1));
@@ -1842,6 +1844,25 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
         }
         // now we can even assume the enemy is on our right side.
 
+        if ( zoneTarget && idler.get() )
+        {
+            if ( enemypos.y < 0 )
+            {
+                gAIIdle::Wish wish( *idler );
+                wish.turn = -side;
+                if ( enemypos.x > -enemypos.y * 2 )
+                {
+                    wish.minDistance = Object()->ThisWallsLength()/2;
+                }
+                data.thinkAgain = idler->Activate( Object()->LastTime(), 0, 0, &wish );
+            }
+            else
+            {
+                data.thinkAgain = idler->Activate( Object()->LastTime(), 0, 0 );
+            }
+            return;
+        }
+
         // consider his ping and our reaction time
 #define REACTION .2
 
@@ -1860,6 +1881,7 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
 
         REAL ourdist=REACTION*ourspeed;;
 
+        
 
         // now we consider the worst case: we drive straight on,
         enemypos.y-=ourdist;
@@ -2660,8 +2682,14 @@ void gAIPlayer::EmergencyPath( ThinkData & data )
 
 void gAIPlayer::EmergencyCloseCombat( ThinkData & data )
 {
-    EmergencySurvive( data );
-
+    if( idler.get() )
+    {
+        data.thinkAgain = idler->Activate( Object()->LastTime(), 0 );
+    }
+    else
+    {
+        EmergencySurvive( data );
+    }
     /*
       int dir = 0;
 
@@ -2788,6 +2816,8 @@ void gAIPlayer::NewObject()         // called when we control a new object
     
     path.Clear();
 
+    idler.release();
+
     if (character)
     {
         nextTime        = character->properties[AI_STARTSTRAIGHT] * gArena::SizeMultiplier()/gCycleMovement::SpeedMultiplier();
@@ -2873,6 +2903,13 @@ REAL gAIPlayer::Think(){
     {
         return simpleAI_->Think();
     }
+
+    gCycle * cycle = Object();
+    if( cycle && !idler.get() )
+    {
+        idler = std::auto_ptr< gAIIdle >( tNEW( gAIIdle( cycle ) ) );
+    }
+
 
     // get the delay between two turns
     REAL delay = Delay();

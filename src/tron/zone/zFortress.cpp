@@ -527,7 +527,7 @@ void zFortressZone::OnThink( void )
     }
 
     // nobody attacking? Do something.
-    if ( defenders && !attackers && !closestEnemy )
+    if ( defenders && !attackers && !closestEnemy && sg_conquestDecayRate >= 0 )
     {
         static tReproducibleRandomizer randomizer;
         {

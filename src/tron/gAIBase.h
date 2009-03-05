@@ -43,6 +43,7 @@ class gSensor;
 class gAISensor;
 class gAILog;
 class gAICharacter;
+class gAIIdle;
 
 namespace Game{ class AIPlayerSync; class AITeamSync; }
 
@@ -138,6 +139,9 @@ protected:
 
     // log
     gAILog* log;
+
+    // idler
+    std::auto_ptr< gAIIdle > idler;
 
     //  gCycle * Cycle(){return object;}
 
