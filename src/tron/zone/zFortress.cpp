@@ -481,6 +481,7 @@ void zFortressZone::OnThink( void )
             }
         }
     }
+    int aiDefenders = defenders;
 
     // enough attackers and defenders or nothing to do? Fine, quit.
     if( ( attackers >= wishAttackers && defenders >= wishDefenders ) )
@@ -527,7 +528,7 @@ void zFortressZone::OnThink( void )
     }
 
     // nobody attacking? Do something.
-    if ( defenders && !attackers && !closestEnemy && sg_conquestDecayRate >= 0 )
+    if ( aiDefenders && !attackers && !closestEnemy && sg_conquestDecayRate >= 0 )
     {
         static tReproducibleRandomizer randomizer;
         {
@@ -537,7 +538,7 @@ void zFortressZone::OnThink( void )
                 if ( o && o->Alive() )
                 {
                     gAIPlayer * ai = dynamic_cast< gAIPlayer * >( o->Player() );
-                    if( ai && ai->GetTarget() != this && randomizer.Get() < .1 )
+                    if( ai && ai->CurrentTeam() != team && ai->GetTarget() != this && randomizer.Get() < .1 )
                     {
 #ifdef DEBUG
                         ai->Chat( tString( "Bored! Attacking enemy fortress!" ) );
