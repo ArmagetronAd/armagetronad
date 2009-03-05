@@ -1392,8 +1392,6 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
     switch (state)
     {
     case AI_GRIND:
-    case AI_SPLIT_LEFT:
-    case AI_SPLIT_RIGHT:
         thisAbility = 0;
         break;
     case AI_TRACE:
@@ -1406,6 +1404,7 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
         thisAbility = character->properties[AI_STATE_PATH];
         break;
     case AI_SURVIVE:
+    case AI_STATE_COUNT:
         break;
     };
 
@@ -1413,8 +1412,6 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
     switch (nextState)
     {
     case AI_GRIND:
-    case AI_SPLIT_LEFT:
-    case AI_SPLIT_RIGHT:
         nextAbility = 10;
         break;
     case AI_TRACE:
@@ -1426,6 +1423,7 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
     case AI_PATH:
         nextAbility = character->properties[AI_STATE_PATH];
         break;
+    case AI_STATE_COUNT:
     case AI_SURVIVE:
         break;
     };
@@ -1433,6 +1431,8 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
 
     if (nextAbility > thisAbility && Random() * 10 > nextAbility)
         return;
+
+    substate = AI_NONE;
 
 #ifdef DEBUG
     if (state != nextState)
@@ -2060,7 +2060,7 @@ void gAIPlayer::ThinkGrind( ThinkData & data )
 {
     REAL range = Delay() * Object()->Speed() * .5;
 
-    if( data.front.front.wallType == gSENSOR_TEAMMATE )
+    if( data.front.front.wallType == gSENSOR_TEAMMATE && substate == AI_GRIND_GRIND )
     {
         if ( data.front.front.distance > range * .01 )
         {
@@ -2073,13 +2073,14 @@ void gAIPlayer::ThinkGrind( ThinkData & data )
     {
         if ( data.left.front.distance > range )
         {
+            substate = AI_GRIND_GRIND;
             data.turn = -1;
             data.thinkAgain = data.left.front.distance/Object()->Speed();
             return;
         }
-        else
+        else if ( state == AI_GRIND )
         {
-            state = AI_SPLIT_RIGHT;
+            substate = AI_GRIND_SPLIT_RIGHT;
             return;
         }
     }
@@ -2088,26 +2089,45 @@ void gAIPlayer::ThinkGrind( ThinkData & data )
     {
         if ( data.right.front.distance > range )
         {
+            substate = AI_GRIND_GRIND;
             data.turn = 1;
             data.thinkAgain = data.right.front.distance/Object()->Speed();
             return;
         }
-        else
+        else if ( state == AI_GRIND )
         {
-            state = AI_SPLIT_LEFT;
+            substate = AI_GRIND_SPLIT_LEFT;
             return;
         }
     }
 
     // SPLIT!
-    if( state == AI_SPLIT_LEFT && data.right.front.wallType != gSENSOR_TEAMMATE )
-    {
-        data.turn = -1;
+    if( substate == AI_GRIND_SPLIT_LEFT )
+    { 
+        if ( data.right.front.wallType != gSENSOR_TEAMMATE )
+        {
+            data.thinkAgain = data.left.front.distance/Object()->Speed();
+            data.turn = -1;
+        }
+        else
+        {
+            data.thinkAgain = Delay() * 2;
+            return;
+        }
     }
 
-    if( state == AI_SPLIT_RIGHT && data.left.front.wallType != gSENSOR_TEAMMATE )
+    if( substate == AI_GRIND_SPLIT_RIGHT )
     {
-        data.turn = 1;
+        if( data.left.front.wallType != gSENSOR_TEAMMATE )
+        {
+            data.thinkAgain = data.right.front.distance/Object()->Speed();
+            data.turn = 1;
+        }
+        else
+        {
+            data.thinkAgain = Delay() * 2;
+            return;
+        }
     }
 
     SwitchToState( AI_SURVIVE );
@@ -2739,8 +2759,6 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
     switch (state)
     {
     case AI_GRIND:
-    case AI_SPLIT_LEFT:
-    case AI_SPLIT_RIGHT:
         EmergencyGrind(data);
         break;
     case AI_SURVIVE:
@@ -2754,6 +2772,8 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
         break;
     case AI_CLOSECOMBAT:
         EmergencyCloseCombat(data);
+        break;
+    case AI_STATE_COUNT:
         break;
     }
     ActOnData( data );
@@ -2773,6 +2793,8 @@ void gAIPlayer::NewObject()         // called when we control a new object
     lastPath = 0;
     lastChangeAttempt = 0;
     lazySideChange = 0;
+    substate = AI_NONE;
+    
     path.Clear();
 
     if (character)
@@ -2948,8 +2970,6 @@ REAL gAIPlayer::Think(){
         switch (state)
         {
         case AI_GRIND:
-        case AI_SPLIT_LEFT:
-        case AI_SPLIT_RIGHT:
             ThinkGrind(data);
             break;
         case AI_SURVIVE:
@@ -2963,6 +2983,8 @@ REAL gAIPlayer::Think(){
             break;
         case AI_CLOSECOMBAT:
             ThinkCloseCombat(data);
+            break;
+        case AI_STATE_COUNT:
             break;
         }
         ActOnData( data );

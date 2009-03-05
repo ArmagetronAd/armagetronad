@@ -49,12 +49,21 @@ namespace Game{ class AIPlayerSync; class AITeamSync; }
 typedef enum
 { AI_SURVIVE = 0,   // just try to stay alive
   AI_GRIND,         // initial grind to a teammates' wall
-  AI_SPLIT_LEFT, AI_SPLIT_RIGHT,  // split as soon as you overtake your teammate
   AI_TRACE,         // trace a wall
   AI_PATH,          // follow a path to a target
-  AI_CLOSECOMBAT    // try to frag a nearby opponent
+  AI_CLOSECOMBAT,   // try to frag a nearby opponent
+  AI_STATE_COUNT
 }
 gAI_STATE;
+
+typedef enum
+{
+    AI_NONE = 0,
+    AI_GRIND_GRIND, // currently getting closer to teammate's wall
+    AI_GRIND_SPLIT_LEFT, AI_GRIND_SPLIT_RIGHT,  // split as soon as you overtake your teammate
+    AI_SUBSTATE_COUNT
+}
+gAI_SUBSTATE;
 
 class gSimpleAI
 {
@@ -113,6 +122,7 @@ protected:
 
     // state management:
     gAI_STATE state;             // the current mode of operation
+    gAI_SUBSTATE substate;       // the current mode of operation, details
     REAL      nextStateChange;   // when is the operation mode allowed to change?
 
     bool emergency;              // tell if an emergency is present
