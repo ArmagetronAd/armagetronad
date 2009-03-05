@@ -192,6 +192,13 @@ bool zFlagZone::Timestep( REAL time )
 				 }
 			 
 			initOwnerTeam_ = closest->Player()->CurrentTeam();
+				 rColor color_ = shape->getColor();
+				 color_.r_ = initOwnerTeam_->R()/15.0;
+				 color_.g_ = initOwnerTeam_->G()/15.0;
+				 color_.b_ = initOwnerTeam_->B()/15.0;
+				 shape->setColor(color_);
+				 
+				 shape->RequestSync();
 		 }
 		 }
     return zZone::Timestep(time);
