@@ -66,6 +66,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 static tReferenceHolder< gAIPlayer > sg_AIReferences;
 
+static bool sg_RequireVictim( gAI_STATE state )
+{
+    return state == AI_PATH || state == AI_CLOSECOMBAT;
+}
+
 #ifdef DEBUG
 //#define TESTSTATE AI_PATH
 //#define TESTSTATE AI_TRACE
@@ -1386,6 +1391,11 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
     int thisAbility = 10 - character->properties[AI_STATE_TRACE];
     switch (state)
     {
+    case AI_GRIND:
+    case AI_SPLIT_LEFT:
+    case AI_SPLIT_RIGHT:
+        thisAbility = 0;
+        break;
     case AI_TRACE:
         thisAbility = character->properties[AI_STATE_TRACE];
         break;
@@ -1402,6 +1412,11 @@ void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
     int nextAbility = 10;
     switch (nextState)
     {
+    case AI_GRIND:
+    case AI_SPLIT_LEFT:
+    case AI_SPLIT_RIGHT:
+        nextAbility = 10;
+        break;
     case AI_TRACE:
         nextAbility = character->properties[AI_STATE_TRACE];
         break;
@@ -1751,7 +1766,7 @@ void gAIPlayer::SetTarget( eNetGameObject * target )
     this->target = target;
 
     // let's see how well this works:
-    SwitchToState( AI_CLOSECOMBAT );
+    state = AI_CLOSECOMBAT;
 
     // start with it right now
     nextTime = -1;
@@ -2040,6 +2055,64 @@ public:
 #endif
     }
 };
+
+void gAIPlayer::ThinkGrind( ThinkData & data )
+{
+    REAL range = Delay() * Object()->Speed() * .5;
+
+    if( data.front.front.wallType == gSENSOR_TEAMMATE )
+    {
+        if ( data.front.front.distance > range * .01 )
+        {
+            data.thinkAgain = data.front.front.distance/Object()->Speed();
+            return;
+        }
+    }
+
+    if( data.left.front.wallType == gSENSOR_TEAMMATE )
+    {
+        if ( data.left.front.distance > range )
+        {
+            data.turn = -1;
+            data.thinkAgain = data.left.front.distance/Object()->Speed();
+            return;
+        }
+        else
+        {
+            state = AI_SPLIT_RIGHT;
+            return;
+        }
+    }
+
+    if( data.right.front.wallType == gSENSOR_TEAMMATE )
+    {
+        if ( data.right.front.distance > range )
+        {
+            data.turn = 1;
+            data.thinkAgain = data.right.front.distance/Object()->Speed();
+            return;
+        }
+        else
+        {
+            state = AI_SPLIT_LEFT;
+            return;
+        }
+    }
+
+    // SPLIT!
+    if( state == AI_SPLIT_LEFT && data.right.front.wallType != gSENSOR_TEAMMATE )
+    {
+        data.turn = -1;
+    }
+
+    if( state == AI_SPLIT_RIGHT && data.left.front.wallType != gSENSOR_TEAMMATE )
+    {
+        data.turn = 1;
+    }
+
+    SwitchToState( AI_SURVIVE );
+    data.thinkAgain = .5;
+}
 
 // emergency functions:
 bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int preferedSide)
@@ -2554,7 +2627,6 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
     eDebugLine::SetTimeout(0);
 }
 
-
 void gAIPlayer::EmergencyTrace( ThinkData & data )
 {
     EmergencySurvive( data, -1, -traceSide );
@@ -2588,7 +2660,19 @@ void gAIPlayer::EmergencyCloseCombat( ThinkData & data )
     */
 }
 
-
+void gAIPlayer::EmergencyGrind( ThinkData & data )
+{
+    if( data.front.front.wallType == gSENSOR_TEAMMATE )
+    {
+        data.turn = data.front.front.lr; // Object()->LastDirection()*Object()->Direction() > 0 ? -1 : 1;
+        data.thinkAgain = Delay() * 2;
+    }
+    else
+    {
+        SwitchToState( AI_SURVIVE );
+        EmergencySurvive( data );
+    }
+}
 
 
 void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the vehicle gets destroyed.
@@ -2647,13 +2731,18 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
     nextStateChange = se_GameTime() + 100;
 #else
     // switch to survival state if our victim died:
-    if ((!target || !target->Alive()) && state != AI_TRACE)
+    if ( (!target || !target->Alive()) && sg_RequireVictim( state ) )
         SwitchToState(AI_SURVIVE, 1);
 #endif
 
     ThinkData data( front, left, right);
     switch (state)
     {
+    case AI_GRIND:
+    case AI_SPLIT_LEFT:
+    case AI_SPLIT_RIGHT:
+        EmergencyGrind(data);
+        break;
     case AI_SURVIVE:
         EmergencySurvive(data);
         break;
@@ -2697,6 +2786,12 @@ void gAIPlayer::NewObject()         // called when we control a new object
         nextTime        = 10;
         nextStateChange = 30;
         state           = AI_TRACE;
+    }
+
+    if( TeamListID() > 0 )
+    {
+        state = AI_GRIND;
+        nextTime = Delay() * 2 + .1;
     }
 
     if (log)
@@ -2831,7 +2926,7 @@ REAL gAIPlayer::Think(){
     nextStateChange = se_GameTime() + 100;
 #else
     // switch to survival state if our victim died:
-    if (state != AI_SURVIVE && state != AI_TRACE && (!target || !target->Alive()))
+    if ( sg_RequireVictim( state ) && (!target || !target->Alive()))
         SwitchToState(AI_SURVIVE, 1);
 #endif
 
@@ -2852,6 +2947,11 @@ REAL gAIPlayer::Think(){
         ThinkData data( front, *left, *right);
         switch (state)
         {
+        case AI_GRIND:
+        case AI_SPLIT_LEFT:
+        case AI_SPLIT_RIGHT:
+            ThinkGrind(data);
+            break;
         case AI_SURVIVE:
             ThinkSurvive(data);
             break;

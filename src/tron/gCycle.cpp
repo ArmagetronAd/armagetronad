@@ -6118,7 +6118,7 @@ void gCycle::AddDestination(gDestination *dest){
 
 void gCycle::RightBeforeDeath( int numTries )
 {
-    if ( player )
+    if ( player && pendingTurns.size() == 0 )
     {
         player->RightBeforeDeath( numTries );
     }

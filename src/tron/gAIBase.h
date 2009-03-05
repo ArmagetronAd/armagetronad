@@ -48,6 +48,8 @@ namespace Game{ class AIPlayerSync; class AITeamSync; }
 
 typedef enum
 { AI_SURVIVE = 0,   // just try to stay alive
+  AI_GRIND,         // initial grind to a teammates' wall
+  AI_SPLIT_LEFT, AI_SPLIT_RIGHT,  // split as soon as you overtake your teammate
   AI_TRACE,         // trace a wall
   AI_PATH,          // follow a path to a target
   AI_CLOSECOMBAT    // try to frag a nearby opponent
@@ -166,12 +168,14 @@ struct ThinkData : public ThinkDataBase
     virtual void ThinkTrace( ThinkData & data );
     virtual void ThinkPath( ThinkData & data );
     virtual void ThinkCloseCombat( ThinkData & data );
+    virtual void ThinkGrind( ThinkData & data );
 
     // emergency functions:
     virtual bool EmergencySurvive( ThinkData & data, int enemyEvade = -1, int preferedSide = 0);
     virtual void EmergencyTrace( ThinkData & data );
     virtual void EmergencyPath( ThinkData & data );
     virtual void EmergencyCloseCombat( ThinkData & data );
+    virtual void EmergencyGrind( ThinkData & data );
 
     // acting on gathered data
     virtual void ActOnData( ThinkData & data );
@@ -179,6 +183,8 @@ struct ThinkData : public ThinkDataBase
 public:
     // set sight on target (side effects: switch state accordingly)
     void SetTarget( eNetGameObject * target );
+
+    gAI_STATE GetState() const{ return state; }
 
     eNetGameObject const * GetTarget() const
     {
