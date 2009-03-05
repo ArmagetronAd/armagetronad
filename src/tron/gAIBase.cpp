@@ -2816,7 +2816,7 @@ void gAIPlayer::NewObject()         // called when we control a new object
     
     path.Clear();
 
-    idler.release();
+    idler.reset();
 
     if (character)
     {
