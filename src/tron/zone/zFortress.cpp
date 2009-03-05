@@ -453,7 +453,7 @@ void zFortressZone::OnThink( void )
 
                     if( ai->CurrentTeam() == team )
                     {
-                        if ( !target && ( !closestFriend || closestFriendDistance > distance ) )
+                        if ( target != this && ( !closestFriend || closestFriendDistance > distance ) )
                         {
                             closestFriendDistance = distance;
                             closestFriend = ai;
@@ -491,6 +491,16 @@ void zFortressZone::OnThink( void )
         return;
     }
 
+    REAL distanceOffset = 1000;
+    zShape const * shape = getShape();
+    zShapeCircle const * circle = dynamic_cast< zShapeCircle const * >( shape );
+    if( circle )
+    {
+        distanceOffset = circle->getCurrentScaledRadius();
+        distanceOffset *= distanceOffset;
+    }
+
+
     // find human players that are not much further away than the AI candidates
     for( int i = grid->GameObjects().Len()-1; i >= 0; --i )
     {
@@ -503,14 +513,14 @@ void zFortressZone::OnThink( void )
                 REAL distance = ( o->Position() - getShape()->Position() ).NormSquared();
                 if( p->CurrentTeam() == team )
                 {
-                    if( distance < closestFriendDistance * 2 )
+                    if( distance < distanceOffset + closestFriendDistance * 2 )
                     {
                         defenders++;
                     }
                 }
                 else
                 {
-                    if( distance < closestEnemyDistance * 2 )
+                    if( distance < distanceOffset + closestEnemyDistance * 2 )
                     {
                         attackers++;
                     }
@@ -530,7 +540,7 @@ void zFortressZone::OnThink( void )
         return;
     }
 
-    if( closestEnemy && wishAttackers > attackers )
+    if( closestEnemy && wishAttackers > attackers && closestEnemy->GetState() != AI_GRIND )
     {
 #ifdef DEBUG
         closestEnemy->Chat( tString( "Attacking enemy fortress!" ) );
