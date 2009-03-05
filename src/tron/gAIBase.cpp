@@ -1865,7 +1865,7 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
                 wish.turn = -side;
 
                 // extra strong turn wish if wall is not mine
-                if( sides[1]->front.wallType != gSENSOR_SELF )
+                if( sides[1]->front.wallType != gSENSOR_SELF &&  sides[0]->front.wallType != gSENSOR_SELF )
                 {
                     wish.turn *= 2;
                 }
@@ -2102,11 +2102,27 @@ void gAIPlayer::ThinkGrind( ThinkData & data )
 {
     REAL range = Delay() * Object()->Speed() * .5;
 
-    if( data.front.front.wallType == gSENSOR_TEAMMATE && substate == AI_GRIND_GRIND )
+    if( data.front.front.wallType == gSENSOR_TEAMMATE )
     {
-        if ( data.front.front.distance > range * .01 )
+        if ( substate == AI_GRIND_GRIND )
         {
-            data.thinkAgain = data.front.front.distance/Object()->Speed();
+            if ( data.front.front.distance > range * .1 )
+            {
+                data.thinkAgain = data.front.front.distance/Object()->Speed();
+                return;
+            }
+            else
+            {
+                data.turn = data.front.front.lr;
+                data.thinkAgain = Object()->GetTurnDelay();
+                return;
+            }
+        }
+        else
+        {
+            data.turn = data.front.front.lr;
+            data.thinkAgain = Object()->GetTurnDelay();
+            state = AI_SURVIVE;
             return;
         }
     }
