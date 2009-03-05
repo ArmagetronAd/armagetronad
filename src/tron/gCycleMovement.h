@@ -42,6 +42,10 @@ class gCycleMovement;
 class gSensor;
 struct gMaxSpaceAheadHitInfo;
 
+extern void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness );
+extern REAL sg_brakeCycle;
+extern REAL sg_cycleBrakeDeplete;
+
 //! used to clear out dangerous information from hit info after simulation is done
 class gMaxSpaceAheadHitInfoClearer
 {

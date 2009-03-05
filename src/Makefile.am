@@ -143,7 +143,10 @@ librender_a_SOURCES=render/rConsole.cpp render/rConsoleGraph.cpp render/rConsole
 	render/rTextureRenderTarget.cpp render/rTextureRenderTarget.h render/rGLuintObject.cpp render/rGLuintObject.h
 
 
-libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAICharacter.h tron/gArena.cpp tron/gArena.h\
+libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h \
+    tron/gAICharacter.cpp tron/gAICharacter.h \
+    tron/gAIIdle.cpp tron/gAIIdle.h \
+    tron/gArena.cpp tron/gArena.h\
 	tron/gArmagetron.cpp tron/gCamera.cpp tron/gCamera.h tron/gCycle.cpp tron/gCycle.h tron/gCycleMovement.cpp\
 	tron/gJoystick.h tron/gJoystick.cpp\
 	tron/gCycleMovement.h tron/gExplosion.cpp tron/gExplosion.h tron/gGame.cpp tron/gGame.h\
