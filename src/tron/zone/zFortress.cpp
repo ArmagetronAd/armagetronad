@@ -483,10 +483,7 @@ void zFortressZone::OnThink( void )
     }
 
     // enough attackers and defenders or nothing to do? Fine, quit.
-    if( ( attackers >= wishAttackers && defenders >= wishDefenders )
-        ||
-        ( !closestEnemy && !closestFriend )
-        )
+    if( ( attackers >= wishAttackers && defenders >= wishDefenders ) )
     {
         return;
     }
@@ -513,14 +510,14 @@ void zFortressZone::OnThink( void )
                 REAL distance = ( o->Position() - getShape()->Position() ).NormSquared();
                 if( p->CurrentTeam() == team )
                 {
-                    if( distance < distanceOffset + closestFriendDistance * 2 )
+                    if( !closestFriend || distance < distanceOffset + closestFriendDistance * 2 )
                     {
                         defenders++;
                     }
                 }
                 else
                 {
-                    if( distance < distanceOffset + closestEnemyDistance * 2 )
+                    if( !closestEnemy || distance < distanceOffset + closestEnemyDistance * 2 )
                     {
                         attackers++;
                     }
@@ -529,8 +526,32 @@ void zFortressZone::OnThink( void )
         }
     }
 
+    // nobody attacking? Do something.
+    if ( defenders && !attackers && !closestEnemy )
+    {
+        static tReproducibleRandomizer randomizer;
+        {
+            for( int i = grid->GameObjects().Len()-1; i >= 0; --i )
+            {
+                eNetGameObject const * o = dynamic_cast< eNetGameObject * >( grid->GameObjects()(i) );
+                if ( o && o->Alive() )
+                {
+                    gAIPlayer * ai = dynamic_cast< gAIPlayer * >( o->Player() );
+                    if( ai && ai->GetTarget() != this && randomizer.Get() < .1 )
+                    {
+#ifdef DEBUG
+                        ai->Chat( tString( "Bored! Attacking enemy fortress!" ) );
+#endif
+                        ai->SetTarget( this );
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
     // counting complete. Let's act. Assign new attacker and defender.
-    if( closestFriend && wishDefenders > defenders )
+    if( closestFriend && wishDefenders > defenders && ( attackers || closestEnemy || lastTime <= 0.1 ) )
     {
 #ifdef DEBUG
         closestFriend->Chat( tString( "Defending!" ) );
