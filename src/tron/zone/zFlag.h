@@ -60,7 +60,7 @@ private:
     void ZoneWasHeld();                                //!< call when the zone was held as long as possible with the set game rules
 	void GoHome();
 	
-	bool init_;
+    REAL teamDistance_; 
 	eTeam *initOwnerTeam_;
     eCoord homePosition_;
     gCycle *owner_;

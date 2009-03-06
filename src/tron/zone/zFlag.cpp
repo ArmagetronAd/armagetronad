@@ -43,7 +43,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eSoundMixer.h"
 
 #include "zone/zFlag.h"
-#include "zone/zFortress.h"
 #include "zone/zZone.h"
 
 #include <time.h>
@@ -68,7 +67,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 zFlagZone::zFlagZone( eGrid * grid )
         :zZone( grid )
 {
-    init_ = false;
     owner_ = NULL;
     ownerTime_ = 0;
 	flagHome_ = true;
@@ -129,6 +127,15 @@ static tSettingItem<float> sg_flagHoldScoreTimeConfig( "FLAG_HOLD_SCORE_TIME", s
 static int sg_flagHoldScore = 1;
 static tSettingItem<int> sg_flagHoldScoreConfig( "FLAG_HOLD_SCORE", sg_flagHoldScore );
 
+static float sg_flagColorR = -1;
+static tSettingItem<float> sg_flagColorRConfig( "FLAG_COLOR_R", sg_flagColorR );
+
+static float sg_flagColorG = -1;
+static tSettingItem<float> sg_flagColorGConfig( "FLAG_COLOR_G", sg_flagColorG );
+
+static float sg_flagColorB = -1;
+static tSettingItem<float> sg_flagColorBConfig( "FLAG_COLOR_B", sg_flagColorB );
+
 
 void zFlagZone::setupVisuals(gParser::State_t & state)
 {
@@ -167,41 +174,31 @@ void zFlagZone::GoHome()
 
 bool zFlagZone::Timestep( REAL time )
 {
-    if (!init_)
-		 {
-         homePosition_ = shape->Position();
-			init_ = true;
-			 
-			 const tList<eGameObject>& gameObjects = Grid()->GameObjects();
-			 gCycle * closest = NULL;
-			 REAL closestDistance = 0;
-			 for (int i=gameObjects.Len()-1;i>=0;i--)
-			 {
-				 gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
-				 
-				 if (other )
-				 {
-					 // eTeam * otherTeam = other->Player()->CurrentTeam();
-					 eCoord otherpos = other->Position() - Position();
-					 REAL distance = otherpos.NormSquared();
-					 if ( !closest || distance < closestDistance )
-					 {
-						 closest = other;
-						 closestDistance = distance;
-					 }
-				 }
-			 
-			initOwnerTeam_ = closest->Player()->CurrentTeam();
-				 rColor color_ = shape->getColor();
-				 color_.r_ = initOwnerTeam_->R()/15.0;
-				 color_.g_ = initOwnerTeam_->G()/15.0;
-				 color_.b_ = initOwnerTeam_->B()/15.0;
-				 shape->setColor(color_);
-				 
-				 shape->RequestSync();
-		 }
-		 }
-    return zZone::Timestep(time);
+        // check if the flag is owned
+    if (owner_)
+    {
+        ePlayerNetID *player = owner_->Player();
+
+        if ((player) &&
+            (sg_flagHoldTime > 0) &&
+            (time >= (ownerTime_ + sg_flagHoldTime)))
+        {
+            // go home
+            GoHome();
+
+            tColoredString playerName;
+            playerName << *player << tColoredString::ColorString(1,1,1);
+            sn_ConsoleOut( tOutput( "$player_flag_timeout", playerName ) );
+        }
+    }
+    
+    // delegate
+    bool returnStatus = zZone::Timestep( time );
+
+    // any pending position updates have been made
+    positionUpdatePending_ = false;
+
+    return (returnStatus);
 }
 
 // *******************************************************************************
@@ -248,7 +245,81 @@ void zFlagZone::CheckSurvivor( void )
 
 void zFlagZone::OnRoundBegin( void )
 {
+    if ((sg_flagColorR >= 0) &&
+        (sg_flagColorG >= 0) &&
+        (sg_flagColorB >= 0))
+    {
+        rColor color_ = shape->getColor();
 
+        if (color_.r_ > 1.0)
+        {
+            color_.r_ = 1.0;
+        }
+        if (color_.g_ > 1.0)
+        {
+            color_.g_ = 1.0;
+        }
+        if (color_.b_ > 1.0)
+        {
+            color_.b_ = 1.0;
+        }
+        shape->setColor(color_);
+
+        RequestSync();
+    }
+
+    // if this is a team based flag, find the team
+    //??? PIG - FIX to make sure every player has a flag?
+    if (sg_flagTeam)
+    {
+        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+        gCycle * closest = NULL;
+        REAL closestDistance = 0;
+        tCoord pos;
+        if (shape)
+            pos = shape->Position();
+        for (int i=gameObjects.Len()-1;i>=0;i--)
+        {
+            gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
+
+            if (other )
+            {
+                // eTeam * otherTeam = other->Player()->CurrentTeam();
+                eTeam * otherTeam = other->Player()->CurrentTeam();
+                eCoord otherpos = other->Position() - pos;
+                REAL distance = otherpos.NormSquared();
+                if ( !closest || distance < closestDistance )
+                {
+                    closest = other;
+                    closestDistance = distance;
+                }
+            }
+        }
+
+        if ( closest )
+        {
+            // take over team and color
+            team = closest->Player()->CurrentTeam();
+            rColor color_ = shape->getColor();
+            
+            color_.r_ = team->R()/15.0;
+            color_.g_ = team->G()/15.0;
+            color_.b_ = team->B()/15.0;
+
+            color_.r_ += (1.0 - color_.r_) / 1.8;
+            color_.g_ += (1.0 - color_.g_) / 1.8;
+            color_.b_ += (1.0 - color_.b_) / 1.8;
+            shape->setColor(color_);
+            
+            RequestSync();
+        }
+
+        // if this zone does not belong to a team, discard it.
+        if ( !team )
+        {
+            return;
+        }
+    }
 }
 
 // *******************************************************************************
