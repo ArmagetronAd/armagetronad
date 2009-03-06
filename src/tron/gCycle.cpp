@@ -56,7 +56,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gStatistics.h"
 
 #include "cCockpit.h"
-#include "gAIIdle.h"
+#include "gAINavigator.h"
 
 #include "tMath.h"
 #include <stdlib.h>
@@ -321,7 +321,7 @@ static REAL sg_chatBotDecay = .02;
 static gChatBotSetting sg_chatBotDecayConf( "CHATBOT_DECAY",
         sg_chatBotDecay );
 
-class gCycleChatBot: public gAIIdle
+class gCycleChatBot: public gAINavigator
 {
     friend class gCycle;
 
@@ -329,7 +329,7 @@ class gCycleChatBot: public gAIIdle
     REAL timeOnChatAI_;      //!< the total time the player was on chat AI this round
 public:
     gCycleChatBot( gCycle * owner )
-            : gAIIdle( owner )
+            : gAINavigator( owner )
             , nextChatAI_( 0 )
             , timeOnChatAI_( 0 )
     {
@@ -377,7 +377,7 @@ public:
             }
         }
 
-        REAL minTime = gAIIdle::Activate( currentTime, minstep, sg_enemyChatbotTimePenalty );
+        REAL minTime = gAINavigator::Activate( currentTime, minstep, sg_enemyChatbotTimePenalty );
 
         if( minTime < 0 )
         {

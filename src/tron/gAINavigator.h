@@ -26,8 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#ifndef ArmageTron_AI_IDLE_H
-#define ArmageTron_AI_IDLE_H
+#ifndef ArmageTron_AI_NAVIGATOR_H
+#define ArmageTron_AI_NAVIGATOR_H
 
 #include "gSensor.h"
 #include "eCoord.h"
@@ -35,9 +35,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 class gCycle;
 
 //! AI helper class that knows the basics of staying alive.
-class gAIIdle
+class gAINavigator
 {
-    gAIIdle();
+    gAINavigator();
 public:
     //! settings used by the idler bot
     struct Settings
@@ -58,7 +58,7 @@ public:
         REAL maxDisadvantage; //!< maximal disadvantage of the wish direction over others to have it still accepted
         REAL minDistance;     //!< minimal 'distance' value of the wish direction to have it accepted
 
-        Wish( gAIIdle const & idler );
+        Wish( gAINavigator const & idler );
     private:
         Wish();
     };
@@ -67,24 +67,25 @@ public:
     class Sensor: public gSensor
     {
     public:
-        Sensor(gAIIdle & ai,const eCoord &start,const eCoord &d);
+        Sensor(gAINavigator & ai,const eCoord &start,const eCoord &d);
 
         virtual void PassEdge(const eWall *ww,REAL time,REAL a,int r);
-
-        bool DoExtraDetectionStuff();
 
         // check how far the hit wall extends straight into the given direction
         REAL HitWallExtends( eCoord const & dir, eCoord const & origin );
 
-        gAIIdle & ai_;          // AI using this sensor
+        gAINavigator & ai_;          // AI using this sensor
         gCycle * hitOwner_;     // the owner of the hit wall
         REAL     hitTime_;      // the time the hit wall was built at
         REAL     hitDistance_;  // the distance of the wall to the cycle that built it
         short    lrSuggestion_; // sensor's oppinon on whether moving to the left or right of the hit wall is recommended (-1 for left, +1 for right)
         int      windingNumber_; // the number of turns (with sign) the cycle has taken
+
+    private:
+        bool DoExtraDetectionStuff();
     };
 
-    gAIIdle( gCycle * owner );
+    gAINavigator( gCycle * owner );
 
     // describes walls we like. We like enemy walls. We like to go between them.
     class WallHug

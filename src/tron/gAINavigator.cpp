@@ -26,18 +26,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
-#include "gAIIdle.h"
+#include "gAINavigator.h"
 
 #include "gCycle.h"
 #include "gWall.h"
 #include "tRandom.h"
 
-gAIIdle::Settings::Settings()
+gAINavigator::Settings::Settings()
 : newWallBlindness(-.1)
 , range( 1 )
 {}
 
-gAIIdle::Wish::Wish( gAIIdle const & idler )
+gAINavigator::Wish::Wish( gAINavigator const & idler )
 : turn(0)
 , maxDisadvantage( 1E+30 )
 {
@@ -46,7 +46,7 @@ gAIIdle::Wish::Wish( gAIIdle const & idler )
 }
 
 
-gAIIdle::Sensor::Sensor(gAIIdle & ai,const eCoord &start,const eCoord &d)
+gAINavigator::Sensor::Sensor(gAINavigator & ai,const eCoord &start,const eCoord &d)
 : gSensor(ai.Owner(),start,d)
 , ai_( ai )
 , hitOwner_( 0 )
@@ -67,7 +67,7 @@ gSensor::detect( range );
 }
 */
 
-void gAIIdle::Sensor::PassEdge(const eWall *ww,REAL time,REAL a,int r)
+void gAINavigator::Sensor::PassEdge(const eWall *ww,REAL time,REAL a,int r)
 {
     try{
         gSensor::PassEdge(ww,time,a,r);
@@ -79,7 +79,7 @@ void gAIIdle::Sensor::PassEdge(const eWall *ww,REAL time,REAL a,int r)
     }
 }
 
-bool gAIIdle::Sensor::DoExtraDetectionStuff()
+bool gAINavigator::Sensor::DoExtraDetectionStuff()
 {
     // move towards the beginning of a wall
     lrSuggestion_ = -lr;
@@ -108,7 +108,7 @@ bool gAIIdle::Sensor::DoExtraDetectionStuff()
         if ( !hitOwner_ )
             return true;
 
-        // gAIIdle & enemyChatBot = Get( hitOwner_ );
+        // gAINavigator & enemyChatBot = Get( hitOwner_ );
 
         REAL wallAlpha = playerWall->Edge()->Ratio( before_hit );
         // that's an unreliable source
@@ -147,7 +147,7 @@ bool gAIIdle::Sensor::DoExtraDetectionStuff()
 }
 
 // check how far the hit wall extends straight into the given direction
-REAL gAIIdle::Sensor::HitWallExtends( eCoord const & dir, eCoord const & origin )
+REAL gAINavigator::Sensor::HitWallExtends( eCoord const & dir, eCoord const & origin )
 {
     if ( !ehit || !ehit->Other() )
     {
@@ -167,7 +167,7 @@ REAL gAIIdle::Sensor::HitWallExtends( eCoord const & dir, eCoord const & origin 
 }
 
 
-gAIIdle::gAIIdle( gCycle * owner )
+gAINavigator::gAINavigator( gCycle * owner )
 : lastTurn_( 0 )
 , nextTurn_ ( 0 )
 , turnedRecently_ ( 0 )
@@ -175,14 +175,14 @@ gAIIdle::gAIIdle( gCycle * owner )
 {
 }
 
-gAIIdle::WallHug::WallHug()
+gAINavigator::WallHug::WallHug()
 : owner_ ( NULL )
   , lastTimeSeen_ ( 0 )
 {
 }
 
 // promote seen walls to possible wallhug replacements
-void gAIIdle::FindHugReplacement( Sensor const & sensor )
+void gAINavigator::FindHugReplacement( Sensor const & sensor )
 {
     gCycle const * owner = sensor.hitOwner_;
     if (!owner)
@@ -206,7 +206,7 @@ void gAIIdle::FindHugReplacement( Sensor const & sensor )
 
 // determines the distance between two sensors; the size should give the likelyhood
 // to survive if you pass through a gap between the two selected walls
-REAL gAIIdle::Distance( Sensor const & a, Sensor const & b )
+REAL gAINavigator::Distance( Sensor const & a, Sensor const & b )
 {
     // make sure a is left from b
     if ( a.Direction() * b.Direction() < 0 )
@@ -300,13 +300,13 @@ REAL gAIIdle::Distance( Sensor const & a, Sensor const & b )
     return ( a.before_hit - b.before_hit).Norm() * selfHatred;
 }
 
-bool gAIIdle::CanMakeTurn( uActionPlayer * action )
+bool gAINavigator::CanMakeTurn( uActionPlayer * action )
 {
     return owner_->CanMakeTurn( ( action == &gCycle::se_turnRight ) ? 1 : -1 );
 }
 
 //! does the main thinking at the current time, knowing the next thought can't be sooner than minstep
-REAL gAIIdle::Activate( REAL currentTime, REAL minstep, REAL penalty, Wish * wish )
+REAL gAINavigator::Activate( REAL currentTime, REAL minstep, REAL penalty, Wish * wish )
 {
     REAL lookahead = settings_.range;  // seconds to plan ahead
 

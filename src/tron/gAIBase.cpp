@@ -39,7 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eFloor.h"
 #include "eDebugLine.h"
 #include "gAICharacter.h"
-#include "gAIIdle.h"
+#include "gAINavigator.h"
 #include "tReferenceHolder.h"
 #include "tRandom.h"
 #include "tRecorder.h"
@@ -1861,7 +1861,7 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
         {
             if ( enemypos.y < 0 || ( data.front.front.wallType != gSENSOR_SELF && data.front.front.distance < Object()->Speed() * Object()->GetTurnDelay() ) )
             {
-                gAIIdle::Wish wish( *idler );
+                gAINavigator::Wish wish( *idler );
                 wish.turn = -side;
 
                 // extra strong turn wish if wall is not mine
@@ -2943,7 +2943,7 @@ REAL gAIPlayer::Think(){
     gCycle * cycle = Object();
     if( cycle && !idler.get() )
     {
-        idler = std::auto_ptr< gAIIdle >( tNEW( gAIIdle( cycle ) ) );
+        idler = std::auto_ptr< gAINavigator >( tNEW( gAINavigator( cycle ) ) );
     }
 
 

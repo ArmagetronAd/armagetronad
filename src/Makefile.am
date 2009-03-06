@@ -145,7 +145,7 @@ librender_a_SOURCES=render/rConsole.cpp render/rConsoleGraph.cpp render/rConsole
 
 libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h \
     tron/gAICharacter.cpp tron/gAICharacter.h \
-    tron/gAIIdle.cpp tron/gAIIdle.h \
+    tron/gAINavigator.cpp tron/gAINavigator.h \
     tron/gArena.cpp tron/gArena.h\
 	tron/gArmagetron.cpp tron/gCamera.cpp tron/gCamera.h tron/gCycle.cpp tron/gCycle.h tron/gCycleMovement.cpp\
 	tron/gJoystick.h tron/gJoystick.cpp\

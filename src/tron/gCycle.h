@@ -114,7 +114,7 @@ private:
     const gCycleMovement* parent_;												// the cycle that is extrapolated
 };
 
-class gAIIdle;
+class gAINavigator;
 class gCycleChatBot;
 
 #ifndef DEDICATED
@@ -161,7 +161,7 @@ class gCycle: public gCycleMovement
     REAL timeCameIntoView;
 
     friend class gCycleChatBot;
-    friend class gAIIdle;
+    friend class gAINavigator;
     std::auto_ptr< gCycleChatBot > chatBot_;
 
     bool dropWallRequested_; //!< flag indicating that someone requested a wall drop
