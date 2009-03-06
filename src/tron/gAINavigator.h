@@ -85,17 +85,191 @@ public:
         bool DoExtraDetectionStuff();
     };
 
-    gAINavigator( gCycle * owner );
-
-    // describes walls we like. We like enemy walls. We like to go between them.
-    class WallHug
+    //! ways to relay controls to a cycle
+    class CycleController
     {
     public:
-        gCycle const * owner_;  // the cycle the walls we like belong to
-        REAL lastTimeSeen_;    // the last time we saw such a wall
+        virtual void Turn( gCycle & cycle , int dir    ) = 0; //!< turns a cycle. dir < 0 turns left.
+        virtual void Brake( gCycle & cycle, bool brake ) = 0; //!< brakes a cycle
+        virtual ~CycleController();
+    };
+
+    //! use direct control
+    class CycleControllerBasic: public CycleController
+    {
+    public:
+        virtual void Turn( gCycle & cycle , int dir    ); //!< turns a cycle.
+        virtual void Brake( gCycle & cycle, bool brake ); //!< brakes a cycle
+        virtual ~CycleControllerBasic();
+    };
+
+    //! use actions
+    class CycleControllerAction: public CycleController
+    {
+    public:
+        virtual void Turn( gCycle & cycle , int dir    ); //!< turns a cycle.
+        virtual void Brake( gCycle & cycle, bool brake ); //!< brakes a cycle
+        virtual ~CycleControllerAction();
+    };
+
+    //! describes walls
+    struct WallHug
+    {
+        gCycle const * owner;  //! the cycle the walls we like belong to
+        REAL lastTimeSeen;     //! the last time we saw such a wall
+        int  lr;               //! direction the wall is running to as seen from us
 
         WallHug();
     };
+
+    class PathGroup;
+
+    //! a possible path that can be taken
+    class Path
+    {
+        friend class gAINavigator;
+        friend class PathGroup;
+    public:
+        REAL   distance;           //!< expected distance possible to travel this path without getting killed
+        REAL   immediateDistance;  //!< distance to next problem
+        eCoord shortTermDirection; //!< direction to travel in in the short run
+        eCoord longTermDirection;  //!< direction to travel in in the long run
+        int    followedSince;      //!< number of turns this path is already being followed
+
+        WallHug left, right;       //!< walls to the left and right of the path
+    private:
+        // fill in relevant data from sensors
+        void Fill( gAINavigator const & navigator, Sensor const & left, Sensor const & right, eCoord const & shortDir, eCoord const & longDir, int turn );
+        REAL Take( CycleController & controller, gCycle & cycle, REAL maxStep ); //!< take that path. Return value: time to next check
+        ~Path();
+        Path();
+
+        int  turn;    //!< direction to turn to next
+        REAL driveOn; //!< how long to drive straight before doing something (in distance)
+    };
+
+    class PathGroup
+    {
+        friend class gAINavigator;
+    public:
+        //! types of paths
+        enum PathID
+        {
+            PATH_UTURN_LEFT = 0,   //!< turn around completely
+            PATH_PTURN_LEFT,       //!< turn right, then left as often as it takes to turn around
+            PATH_TURN_LEFT,        //!< turn left
+            PATH_ZIGZAG_LEFT,      //!< turn left, then right, or wait, then turn left, looking for a hole
+            PATH_STRAIGHT,         //!< go straight
+            PATH_ZIGZAG_RIGHT,
+            PATH_TURN_RIGHT,
+            PATH_PTURN_RIGHT,
+            PATH_UTURN_RIGHT,
+            PATH_COUNT
+        };
+
+        int GetPathCount() const;                   //!< returns the current number of paths
+        Path const & GetPath( int id ) const;       //!< returns a path
+        REAL TakePath( CycleController & controller, gCycle & cycle, int id, REAL maxStep = 1E+30 );    //!< takes a path
+        Path const & GetLastPath() const;           //!< the last path taken, with old info
+
+        PathGroup();
+        ~PathGroup();
+    private:
+        Path & AccessPath( int id );          //!< returns a path
+
+        Path last;                        //!< last path
+        Path paths[ PATH_COUNT ];         //!< fixed path list. Maybe add dynamic paths later.
+    };
+
+    //! evaluation of a path
+    struct PathEvaluation
+    {
+        bool veto;  //!< was this path vetoed?
+        REAL score; //!< score of the path. 0: pointless suicide, 100: pretty good.
+
+        PathEvaluation();
+    };
+
+    //! class evaluating pathes
+    class PathEvaluator
+    {
+    public:
+        //! evaluate a path.
+        virtual void Evaluate( Path const & path, PathEvaluation & evaluation ) const = 0;
+        virtual ~PathEvaluator();
+
+        //! turns a value between 0 and infinity, where 1 would be an expected value, into a value
+        //! between 0 and 100
+        static REAL Adjust( REAL input )
+        {
+            return 100*(1-1/(1+input));
+        }
+    };
+
+    //! simple evaluator: vetoes certain death moves, picks best space move
+    class SuicideEvaluator: public PathEvaluator
+    {
+    public:
+        SuicideEvaluator( gCycle const & cycle, REAL timeFrame );
+        explicit SuicideEvaluator( gCycle const & cycle );
+
+        //! evaluate a path.
+        virtual void Evaluate( Path const & path, PathEvaluation & evaluation ) const;
+        ~SuicideEvaluator();
+    private:
+        gCycle const & cycle_;
+        REAL   timeFrame_;
+    };
+
+    //! simple evaluator: measures available space compared to a passed-in value
+    class SpaceEvaluator: public PathEvaluator
+    {
+    public:
+        explicit SpaceEvaluator( gCycle const & cycle );
+        explicit SpaceEvaluator( REAL referenceDistance );
+
+        //! evaluate a path.
+        virtual void Evaluate( Path const & path, PathEvaluation & evaluation ) const;
+        ~SpaceEvaluator();
+    private:
+        REAL referenceDistance_;
+    };
+
+    //! simple evaluator: likes to follow through with the plan
+    class PlanEvaluator: public PathEvaluator
+    {
+    public:
+        //! evaluate a path.
+        virtual void Evaluate( Path const & path, PathEvaluation & evaluation ) const;
+        ~PlanEvaluator();
+    };
+
+    class EvaluationManager
+    {
+    public:
+        EvaluationManager( PathGroup & paths );
+        
+        //! evaluate all paths using the evaluator
+        void Evaluate( PathEvaluator const & evaluator, REAL scale );
+
+        //! reset scores, but don't forget veto
+        void Reset();
+
+        //! execute
+        REAL Finish( CycleController & controller, gCycle & cycle, REAL maxStep = 1E+30 );
+    private:
+        PathGroup & paths_; //!< the path group
+
+        int  bestPath_;  //!< best path
+
+        //! list of evaluations fitting to those in the 
+        PathEvaluation evaluations_[ PathGroup::PATH_COUNT ];
+    };
+
+    PathGroup & GetPaths(); //!< returns the paths the navigator knows about
+    void UpdatePaths();     //!< updates the paths to the new cycle position
+
+    gAINavigator( gCycle * owner );
 
     // returns the controlled cycle
     gCycle * Owner() const
@@ -103,12 +277,9 @@ public:
         return owner_;
     }
 
-    // promote seen walls to possible wallhug replacements
-    void FindHugReplacement( Sensor const & sensor );
-
     // determines the distance between two sensors; the size should give the likelyhood
     // to survive if you pass through a gap between the two selected walls
-    REAL Distance( Sensor const & a, Sensor const & b );
+    REAL Distance( Sensor const & a, Sensor const & b ) const;
 
     bool CanMakeTurn( uActionPlayer * action );
 
@@ -120,10 +291,7 @@ private:
     REAL nextTurn_;          //!< the next turn if one is planned
     bool turnedRecently_;    //!< whether the cycle was turned or almost turned recently
     gCycle * owner_;         //!< owner of chatbot
-
-    WallHug hugLeft_;              //!< the wall we like to have on our left side
-    WallHug hugRight_;             //!< the wall we like to have on our right side
-    WallHug hugReplacement_;       //!< a possible replacement candidate for one of the hugged walls
+    PathGroup paths_;        //!< possible future paths
 };
 
 #endif

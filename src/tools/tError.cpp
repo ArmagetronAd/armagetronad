@@ -51,6 +51,12 @@ void st_Breakpoint(){
 #endif
 }
 
+void st_NotImplemented( char const * function )
+{
+    std::cerr << "Missing implementation of " << function << ".\n";
+    st_Breakpoint();
+}
+
 #ifndef WIN32
 
 void st_PresentError( const char* caption, const char *message )

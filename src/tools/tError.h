@@ -52,6 +52,9 @@ extern tLevel st_debugLevel[2];
 
 int st_debugValid(tLevel l,tChannel c);
 
+// marks that something is left to be done here
+void st_NotImplemented( char const * function );
+#define tTODO() st_NotImplemented( __FUNCTION__ )
 
 #define tERR_DUMP(level,stream,stuff) if(st_debugValid(level,stream))  std::cout <<  setw(28) << __FUNCTION__  << " : " << stuff << '\n'
 
@@ -66,6 +69,7 @@ int st_debugValid(tLevel l,tChannel c);
 #define tASSERT_EVAL( x ) { if ( !( x ) ){ char const * mess = "Assertion " #x " failed";  tERR_ERROR_INT( mess ); } }
 
 #else  /* DEBUG */
+#define tTODO()
 #define tERR_DUMP(level,stream,stuff) 
 #define tERR_FLOW()
 #define tERR_FLOW_HIGH()

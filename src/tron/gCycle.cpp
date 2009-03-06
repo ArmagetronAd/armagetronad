@@ -112,8 +112,6 @@ static tSettingItem<float> conf_smoothMinSpeed ("CYCLE_SMOOTH_MIN_SPEED", sg_cyc
 static float sg_cycleSyncSmoothThreshold = .2f;
 static tSettingItem<float> conf_smoothThreshold ("CYCLE_SMOOTH_THRESHOLD", sg_cycleSyncSmoothThreshold);
 
-static REAL sg_enemyChatbotTimePenalty = 30.0f;   //!< penalty for victim in chatbot mode
-static tSettingItem<REAL> sg_enemyChatbotTimePenaltyConf( "ENEMY_CHATBOT_PENALTY", sg_enemyChatbotTimePenalty );
 extern REAL sg_suicideTimeout;
 
 REAL		gCycle::wallsStayUpDelay=8.0f;	// the time the cycle walls stay up ( negative values: they stay up forever )
@@ -348,6 +346,19 @@ public:
         return *cycle->chatBot_;
     }
 
+    REAL Think( REAL minStep )
+    {
+        UpdatePaths();
+        EvaluationManager manager( GetPaths() );
+        manager.Evaluate( SuicideEvaluator( *Owner(), sg_chatBotMinTimestep*1.1 ), 1 );
+        manager.Evaluate( SuicideEvaluator( *Owner(), minStep ), 1 );
+        manager.Reset();
+        manager.Evaluate( SpaceEvaluator( *Owner() ), 1 );
+        manager.Evaluate( PlanEvaluator(), .1 );
+        CycleControllerAction controller;
+        return manager.Finish( controller, *Owner(), minStep );
+    }
+
     void Activate( REAL currentTime )
     {
         // is it already time for activation?
@@ -355,7 +366,7 @@ public:
             return;
 
         REAL minstep   = sg_chatBotMinTimestep; // minimum timestep between thoughts in seconds
-        REAL maxstep   = sg_chatBotMinTimestep * 4 * ( 1 + .1 * tReproducibleRandomizer::GetInstance().Get() );  // maximum timestep between thoughts in seconds
+        REAL maxstep   = sg_chatBotMinTimestep * ( 1 + .5 * tReproducibleRandomizer::GetInstance().Get() );  // maximum timestep between thoughts in seconds
 
         // chat AI wasn't active yet, so don't start immediately
         if ( nextChatAI_ <= EPS )
@@ -377,7 +388,7 @@ public:
             }
         }
 
-        REAL minTime = gAINavigator::Activate( currentTime, minstep, sg_enemyChatbotTimePenalty );
+        REAL minTime = Think( maxstep*2 );
 
         if( minTime < 0 )
         {
