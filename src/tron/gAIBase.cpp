@@ -1965,7 +1965,7 @@ REAL gAIPlayer::Think(){
         // to debug specific situations on playback
         static int count = 0;
         count++;
-        if( count == 83 )
+        if( count == 389 )
         {
             st_Breakpoint();
         }

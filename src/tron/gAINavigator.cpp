@@ -880,8 +880,9 @@ void gAINavigator::UpdatePaths()
     // fill paths, first the simple cases
     self.lr = -1;
     {
+        // U-Turn left
         Path & path = GetPaths().AccessPath( PathGroup::PATH_UTURN_LEFT  );
-        path.Fill( *this, self, backwardLeft, leftDir, backwardDir, -1 );
+        path.Fill( *this, self, left, leftDir, backwardDir, -1 );
         sg_AddSensor( path, left, range, rubberLeft );
     }
     // P-Turn left
@@ -902,7 +903,7 @@ void gAINavigator::UpdatePaths()
     // U-Turn right
     {
         Path & path = GetPaths().AccessPath( PathGroup::PATH_UTURN_RIGHT );
-        path.Fill( *this, backwardRight, self, rightDir, backwardDir, 1 );
+        path.Fill( *this, right, self, rightDir, backwardDir, 1 );
         sg_AddSensor( path, right, range, rubberLeft );
     }
     // P-Turn right
@@ -934,16 +935,13 @@ void gAINavigator::UpdatePaths()
     // immediate turn right
     {
         Path & path = GetPaths().AccessPath( PathGroup::PATH_TURN_RIGHT );
-        path.Fill( *this, right, backwardRight, rightDir, rightDir, 1 );
+        path.Fill( *this, forwardRight, backwardRight, rightDir, rightDir, 1 );
 
-        if( !sg_SameWall( backwardRight, right ) )
+        REAL smallRightDistance = Distance( right, backwardRight );
+        if( sg_SameWall( backwardRight, right ) || path.distance < smallRightDistance )
         {
-            // if we just passed a kink, see if we can get a better value for immediate turns
-            REAL totalRightDistance = Distance( forwardRight, backwardRight );
-            if ( path.distance < totalRightDistance )
-            {
-                path.distance = totalRightDistance;
-            }
+            // we did not pass a kink, so the smaller distance applies
+            path.distance = smallRightDistance;
         }
 
         sg_AddSensor( path, right, range, rubberLeft );
@@ -952,15 +950,12 @@ void gAINavigator::UpdatePaths()
     // immediate turn left
     {
         Path & path = GetPaths().AccessPath( PathGroup::PATH_TURN_LEFT );
-        path.Fill( *this, backwardLeft, left, leftDir, leftDir, -1 );
+        path.Fill( *this, backwardLeft, forwardLeft, leftDir, leftDir, -1 );
 
-        if( !sg_SameWall( backwardLeft, left ) )
+        REAL smallLeftDistance = Distance( backwardLeft, left );
+        if( sg_SameWall( backwardLeft, left ) || path.distance < smallLeftDistance )
         {
-            REAL totalLeftDistance = Distance( backwardLeft, forwardLeft );
-            if ( path.distance < totalLeftDistance )
-            {
-                path.distance = totalLeftDistance;
-            }
+            path.distance = smallLeftDistance;
         }
 
         sg_AddSensor( path, left, range, rubberLeft );

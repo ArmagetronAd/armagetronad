@@ -3654,7 +3654,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
             // clamp rubberneeded to the amout of rubber available
             REAL rubberAvailable = ( rubber_granted - rubber ) * rubberEffectiveness;
 
-            numTries = rubberAvailable/step;
+            numTries = rubberAvailable/step+2;
 
             if ( sn_GetNetState() != nCLIENT && rubberneeded > rubberAvailable && Vulnerable() )
             {
@@ -3673,7 +3673,18 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                             // need many attempts
                             verletSpeed_=lastSpeed;
                             acceleration=lastAcceleration;
-                            return TimestepCore( runOutTime, false ) || TimestepCore( currentTime );
+
+                            // simulate until rubber has run out
+                            if ( TimestepCore( runOutTime, false ) )
+                            {
+                                return true;
+                            }
+                            
+                            // inform AI of its impending doom
+                            RightBeforeDeath(0);
+
+                            // simulate rest of timestep
+                            return TimestepCore( currentTime );
                         }
                     }
                 }
