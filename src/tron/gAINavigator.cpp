@@ -161,7 +161,7 @@ REAL gAINavigator::Sensor::HitWallExtends( eCoord const & dir, eCoord const & or
 {
     if ( !ehit || !ehit->Other() )
     {
-        return HUGE;
+        return 0;
     }
 
     REAL ret = -HUGE;
@@ -420,18 +420,34 @@ gAINavigator::PathEvaluator::~PathEvaluator(){}
 //!@param evaluation  place to store the result
 void gAINavigator::SuicideEvaluator::Evaluate( Path const & path, PathEvaluation & evaluation ) const
 {
-    REAL referenceDistance = cycle_.Speed()*timeFrame_;
+    REAL speed = cycle_.Speed();
+    REAL referenceDistance = speed*timeFrame_;
     REAL distance = path.distance;
     if( path.immediateDistance < distance )
     {
         distance = path.immediateDistance;
     }
+
+    // check if this is the forward path
+    if( !emergency_ &&
+        eCoord::F( path.shortTermDirection, cycle_.Direction() ) > .99 )
+    {
+        distance += cycle_.GetTurnDelay()*speed;
+    }
+
     REAL timeToLive = distance/referenceDistance;
     evaluation.score = Adjust(timeToLive/100);
     if( timeToLive < 1 )
     {
         evaluation.veto = true;
     }
+}
+
+bool gAINavigator::SuicideEvaluator::emergency_ = false;
+
+void gAINavigator::SuicideEvaluator::SetEmergency( bool emergency )
+{
+    emergency_ = emergency;
 }
 
 gAINavigator::SuicideEvaluator::SuicideEvaluator( gCycle const & cycle ): cycle_( cycle ), timeFrame_( cycle.GetTurnDelay() ){}
@@ -929,7 +945,7 @@ void gAINavigator::UpdatePaths()
 
         REAL driveOn = right.HitWallExtends( dir, pos );
         REAL side    = forward.HitWallExtends( rightDir, pos );
-        if( driveOn < forward.hit * range || forward.type == gSENSOR_NONE || side > right.hit * range )
+        if( driveOn < forward.hit * range * ( 1-EPS ) || forward.type == gSENSOR_NONE || side > right.hit * range * ( 1+EPS ) )
         {
             // there is a gap waiting for us. Wait and take it.
             path.driveOn = driveOn;
@@ -951,7 +967,7 @@ void gAINavigator::UpdatePaths()
 
         REAL driveOn = left.HitWallExtends( dir, pos );
         REAL side    = forward.HitWallExtends( leftDir, pos );
-        if( driveOn < forward.hit * range || forward.type == gSENSOR_NONE || side > left.hit * range )
+        if( driveOn < forward.hit * range * ( 1-EPS ) || forward.type == gSENSOR_NONE || side > left.hit * range * ( 1+EPS ) )
         {
             // there is a gap waiting for us. Wait and take it.
             path.driveOn = driveOn;

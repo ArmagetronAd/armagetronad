@@ -1830,10 +1830,14 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
     if (!Object()->Alive() || ( character_ && Random() * 10 > character_->properties[AI_EMERGENCY] ) )
         return;
 
-    if( state_ )
+    if( triesLeft <= 1 )
     {
-        state_->Think();
+        gAINavigator::SuicideEvaluator::SetEmergency( true );
     }
+
+    Think();
+
+    gAINavigator::SuicideEvaluator::SetEmergency( false );
 }
 
 void gAIPlayer::NewObject()         // called when we control a new object
@@ -1960,7 +1964,7 @@ REAL gAIPlayer::Think(){
         // to debug specific situations on playback
         static int count = 0;
         count++;
-        if( count == 227 )
+        if( count == 83 )
         {
             st_Breakpoint();
         }

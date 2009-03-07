@@ -216,9 +216,12 @@ public:
         //! evaluate a path.
         virtual void Evaluate( Path const & path, PathEvaluation & evaluation ) const;
         ~SuicideEvaluator();
+        
+        static void SetEmergency( bool emergency );
     private:
         gCycle const & cycle_;
         REAL   timeFrame_;
+        static bool emergency_;
     };
 
     //! simple evaluator: measures available space compared to a passed-in value

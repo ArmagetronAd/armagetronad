@@ -3653,6 +3653,9 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
 
             // clamp rubberneeded to the amout of rubber available
             REAL rubberAvailable = ( rubber_granted - rubber ) * rubberEffectiveness;
+
+            numTries = rubberAvailable/step;
+
             if ( sn_GetNetState() != nCLIENT && rubberneeded > rubberAvailable && Vulnerable() )
             {
                 // rubber will run out this frame.
@@ -3680,11 +3683,6 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
 
             // update rubber usage
             rubber += rubberneeded / rubberEffectiveness;
-
-            numTries = int((sg_rubberCycleTime * ( rubber_granted - rubber ) - 1 )/(sg_rubberCycleTime * step*1.5 + 1));
-            int numTriesSpace = int(space*10/verletSpeed_);
-            if ( numTriesSpace < numTries )
-                numTriesSpace = 0;
 
             if ( step > 0 )
                 rubberSpeedFactor = 1 - rubberneeded/step;
