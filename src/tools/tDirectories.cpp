@@ -93,10 +93,8 @@ static const char * s_topSourceDir = ".";
 #include <pwd.h>
 #endif
 
-#ifdef TOP_SOURCE_DIR
 // #include "tPaths.h"
 #include "tUniversalVariables.h"
-#endif
 
 #ifndef PREFIX
 #define PREFIX "/usr/local"

@@ -1,0 +1,25 @@
+#cmakedefine HAVE_ATAN2F 1
+#cmakedefine HAVE_COSF 1
+#cmakedefine HAVE_EXPF 1
+#cmakedefine HAVE_FABSF 1
+#cmakedefine HAVE_FLOORF 1
+#cmakedefine HAVE_ISBLANK 1
+#cmakedefine HAVE_LOGF 1
+#cmakedefine HAVE_POW10 1
+#cmakedefine HAVE_POW10F 1
+#cmakedefine HAVE_SELECT 1
+#cmakedefine HAVE_SINF 1
+#cmakedefine HAVE_SQRTF 1
+#cmakedefine HAVE_TANF 1
+
+#cmakedefine HAVE_GOOGLE_PROTOBUF_MESSAGE_H 1
+#cmakedefine HAVE_INTTYPES_H 1
+#cmakedefine HAVE_MEMORY_H 1
+#cmakedefine HAVE_STDINT_H 1
+#cmakedefine HAVE_STDLIB_H 1
+#cmakedefine HAVE_STRINGS_H 1
+#cmakedefine HAVE_STRING_H 1
+#cmakedefine HAVE_SYS_STAT_H 1
+#cmakedefine HAVE_SYS_TYPES_H 1
+#cmakedefine HAVE_UNISTD_H 1
+

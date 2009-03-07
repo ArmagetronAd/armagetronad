@@ -1,0 +1,46 @@
+cmake_minimum_required (VERSION 2.4)
+
+project (ARMA)
+
+# add_executable (armagetronad)
+
+##### CONFIGURE CHECKS #####
+include (CheckIncludeFiles)
+include (CheckFunctionExists)
+include (CheckLibraryExists)
+include (protobuf.cmake)
+include (FindLibXml2)
+
+CHECK_FUNCTION_EXISTS (isblank HAVE_ISBLANK)
+CHECK_FUNCTION_EXISTS (select HAVE_SELECT)
+
+CHECK_LIBRARY_EXISTS (m atan2f "" HAVE_ATAN2F)
+CHECK_LIBRARY_EXISTS (m cosf "" HAVE_COSF)
+CHECK_LIBRARY_EXISTS (m expf "" HAVE_EXPF)
+CHECK_LIBRARY_EXISTS (m fabsf "" HAVE_FABSF)
+CHECK_LIBRARY_EXISTS (m floorf "" HAVE_FLOORF)
+CHECK_LIBRARY_EXISTS (m logf "" HAVE_LOGF)
+CHECK_LIBRARY_EXISTS (m pow10 "" HAVE_POW10)
+CHECK_LIBRARY_EXISTS (m pow10f "" HAVE_POW10F)
+CHECK_LIBRARY_EXISTS (m sinf "" HAVE_SINF)
+CHECK_LIBRARY_EXISTS (m sqrtf "" HAVE_SQRTF)
+CHECK_LIBRARY_EXISTS (m tanf "" HAVE_TANF)
+
+CHECK_INCLUDE_FILES (google/protobuf/message.h HAVE_GOOGLE_PROTOBUF_MESSAGE_H)
+CHECK_INCLUDE_FILES (inttypes.h HAVE_INTTYPES_H)
+CHECK_INCLUDE_FILES (stddef.h HAVE_STDDEF_H)
+CHECK_INCLUDE_FILES (unistd.h HAVE_UNISTD_H)
+CHECK_INCLUDE_FILES (stdint.h HAVE_STDINT_H)
+CHECK_INCLUDE_FILES (stdlib.h HAVE_STDLIB_H)
+CHECK_INCLUDE_FILES (strings.h HAVE_STRINGS_H)
+CHECK_INCLUDE_FILES (string.h HAVE_STRING_H)
+CHECK_INCLUDE_FILES (sys/stat.h HAVE_SYS_STAT_H)
+CHECK_INCLUDE_FILES (sys/types.h HAVE_SYS_TYPES_H)
+CHECK_INCLUDE_FILES (unistd.h HAVE_UNISTD_H)
+
+# FindLibXml2()
+
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/aa_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/aa_config.h)
+
+add_subdirectory (src)
+

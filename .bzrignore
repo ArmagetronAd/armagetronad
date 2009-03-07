@@ -56,8 +56,7 @@ src/doc/Doxyfile
 *.html
 html.m4
 *.dep
-aa_config.h.in
-./aa_config.h
+./src/aa_config.h
 *.pb.cc
 *.pb.h
 *.layout
@@ -71,3 +70,5 @@ src/protobuf/.dir
 ./armagetronad
 ./armagetronad-dedicated
 ./var
+CMakeFiles
+cmake_install.cmake
