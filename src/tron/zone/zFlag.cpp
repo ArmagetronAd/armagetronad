@@ -379,6 +379,9 @@ void zFlagZone::OnRoundBegin( void )
 {
     // save the original radius, can't do this at construction
     //originalRadius_ = GetRadius();
+	
+	//save the original position
+	homePosition_ = GetPosition();
 
     if ((sg_flagColorR >= 0) &&
         (sg_flagColorG >= 0) &&
