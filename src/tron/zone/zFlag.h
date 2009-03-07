@@ -44,14 +44,17 @@ public:
     static zZone* create(eGrid*grid, std::string const & type) { return new zFlagZone(grid); };
     zFlagZone(eGrid *grid);                                   //!< local constructor
     ~zFlagZone();                                             //!< destructor
-
+    void SetTeam(tJUST_CONTROLLED_PTR< eTeam > team) { this->team = team; }
     void setupVisuals(gParser::State_t &);
     void readXML(tXmlParser::node const &);
+    bool IsHome();
+    gCycle* Owner(){return owner_;}
 	
 private:
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
 
     virtual void OnInside( gCycle *target, REAL time ); //!< reacts on objects inside the zone
+    virtual void OnEntry( gCycle * target, REAL time  ); //!< reacts on objects entering the zone
     virtual void OnVanish();                           //!< called when the zone vanishes
 	virtual void CheckSurvivor();                      //!< checks for the only surviving zone
     virtual void OnRoundBegin();                       //!< called on the beginning of the round
@@ -60,7 +63,8 @@ private:
     void ZoneWasHeld();                                //!< call when the zone was held as long as possible with the set game rules
 	void GoHome();
 	
-    REAL teamDistance_; 
+	bool init_;
+    REAL teamDistance_;                     //!< distance to the closest member of the owning team
 	eTeam *initOwnerTeam_;
     eCoord homePosition_;
     gCycle *owner_;
@@ -73,7 +77,9 @@ private:
     float ownerDroppedTime_;
     float lastHoldScoreTime_;
     bool positionUpdatePending_;
-   
+    eCoord originalPosition_;
+    REAL originalRadius_;
+
 
    
 };

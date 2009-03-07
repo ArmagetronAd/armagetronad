@@ -43,6 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eSoundMixer.h"
 
 #include "zone/zFlag.h"
+//#include "zone/zFortress.h"
 #include "zone/zZone.h"
 
 #include <time.h>
@@ -51,7 +52,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <deque>
 
 
-//#define sg_segments sz_zoneSegments
+#define sg_segments sz_zoneSegments
 
 
 // *******************************************************************************
@@ -67,6 +68,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 zFlagZone::zFlagZone( eGrid * grid )
         :zZone( grid )
 {
+    init_ = false;
     owner_ = NULL;
     ownerTime_ = 0;
 	flagHome_ = true;
@@ -93,6 +95,8 @@ zFlagZone::~zFlagZone( void )
 {
 }
 
+static float sg_flagChatBlinkTime = -1;
+static tSettingItem<float> sg_flagChatBlinkTimeConfig( "FLAG_CHAT_BLINK_TIME", sg_flagChatBlinkTime );
 
 static float sg_flagBlinkTime = -1;
 static tSettingItem<float> sg_flagBlinkTimeConfig( "FLAG_BLINK_TIME", sg_flagBlinkTime );
@@ -136,7 +140,6 @@ static tSettingItem<float> sg_flagColorGConfig( "FLAG_COLOR_G", sg_flagColorG );
 static float sg_flagColorB = -1;
 static tSettingItem<float> sg_flagColorBConfig( "FLAG_COLOR_B", sg_flagColorB );
 
-
 void zFlagZone::setupVisuals(gParser::State_t & state)
 {
     REAL tpR[] = {.0f, .3f};
@@ -174,7 +177,8 @@ void zFlagZone::GoHome()
 
 bool zFlagZone::Timestep( REAL time )
 {
-        // check if the flag is owned
+
+    // check if the flag is owned
     if (owner_)
     {
         ePlayerNetID *player = owner_->Player();
@@ -191,7 +195,135 @@ bool zFlagZone::Timestep( REAL time )
             sn_ConsoleOut( tOutput( "$player_flag_timeout", playerName ) );
         }
     }
-    
+
+    // check if the flag is owned
+    if (owner_)
+    {
+        ePlayerNetID *player = owner_->Player();
+
+        if (player)
+        {
+            if ((sg_flagHoldScoreTime > 0) &&
+                (sg_flagHoldScore) &&
+                (time >= (lastHoldScoreTime_ + sg_flagHoldScoreTime)))
+            {
+                lastHoldScoreTime_ = time;
+
+                tOutput win;
+                tOutput lose;
+
+                win << "$player_flag_hold_score_win";
+                lose << "$player_flag_hold_score_lose";
+
+                player->AddScore(sg_flagHoldScore, win, lose);
+            }
+        }
+
+        if (player)
+        {
+            // check if flag chat blinking is enabled
+            if (sg_flagChatBlinkTime > 0)
+            {
+                if (player->flagOverrideChat)
+                {
+                    if (time > (chatBlinkUpdateTime_ + sg_flagChatBlinkTime))
+                    {
+                        chatBlinkUpdateTime_ = time;
+                        player->flagChatState = !player->flagChatState;
+                        player->RequestSync();
+                    }
+                }
+                else
+                {
+                    // start the override
+                    chatBlinkUpdateTime_ = time;
+                    player->flagOverrideChat = true;
+                    player->flagChatState = false;
+                    player->RequestSync();
+                }
+            }
+        }
+
+        /*if (sg_flagBlinkTime > 0)
+        {
+            REAL startRadiusPercent = sg_flagBlinkStart;
+            if (startRadiusPercent < 0)
+            {
+                startRadiusPercent = 0;
+            }
+
+            REAL endRadiusPercent = sg_flagBlinkEnd;
+            if (endRadiusPercent < startRadiusPercent)
+            {
+                endRadiusPercent = startRadiusPercent;
+            }
+
+            // get the time the flag will be on
+            REAL onTime = sg_flagBlinkTime;
+
+            if ((sg_flagBlinkOnTime > 0) &&
+                (sg_flagBlinkOnTime < onTime))
+            {
+                onTime = sg_flagBlinkOnTime;
+            }
+
+            if (time >= (blinkUpdateTime_ + sg_flagBlinkTime))
+            {
+                // start a new blink
+                blinkUpdateTime_ = time;
+                blinkTrackUpdateTime_ = time;
+
+                REAL expansionSpeed =
+                    (originalRadius_ *
+                     (endRadiusPercent - startRadiusPercent)) /
+                    onTime;
+
+                SetReferenceTime();
+
+                if (sg_flagBlinkTrackTime > 0)
+                {
+                    SetPosition(owner_->Position());
+                    SetVelocity(owner_->Direction() * owner_->Speed());
+                }
+                else
+                {
+                    eCoord estimatedPosition =
+                        (owner_->Position() +
+                         (owner_->Direction() *
+                          (sg_flagBlinkEstimatePosition * owner_->Speed() * onTime)));
+
+                    SetPosition(estimatedPosition);
+                    SetVelocity(se_zeroCoord);
+                }
+
+                SetRadius(originalRadius_ * startRadiusPercent);
+                SetExpansionSpeed(expansionSpeed);
+                RequestSync();
+            }
+            else if (GetRadius() > 0)
+            {
+                if (time >= (blinkUpdateTime_ + onTime))
+                {
+                    // kill the blink until the next update time
+                    SetReferenceTime();
+                    SetVelocity(se_zeroCoord);
+                    SetRadius(0);
+                    SetExpansionSpeed(0);
+                    RequestSync();
+                }
+                else if ((sg_flagBlinkTrackTime > 0) &&
+                         (time >= (blinkTrackUpdateTime_ + sg_flagBlinkTrackTime)))
+                {
+                    // track the owner again
+                    SetReferenceTime();
+                    SetPosition(owner_->Position());
+                    SetVelocity(owner_->Direction() * owner_->Speed());
+                    RequestSync();
+                }
+            }
+        }*/
+    }
+
     // delegate
     bool returnStatus = zZone::Timestep( time );
 
@@ -245,6 +377,9 @@ void zFlagZone::CheckSurvivor( void )
 
 void zFlagZone::OnRoundBegin( void )
 {
+    // save the original radius, can't do this at construction
+    //originalRadius_ = GetRadius();
+
     if ((sg_flagColorR >= 0) &&
         (sg_flagColorG >= 0) &&
         (sg_flagColorB >= 0))
@@ -338,6 +473,93 @@ void zFlagZone::OnRoundEnd( void )
 
 // *******************************************************************************
 // *
+// *	OnEntry
+// *
+// *******************************************************************************
+//!
+//!		@param	target  the cycle that has been found inside the zone
+//!		@param	time    the current time
+//!
+// *******************************************************************************
+void zFlagZone::OnEntry( gCycle * target, REAL time )
+{
+    // make sure target, player, and their team are OK
+    if ((!target) ||
+        (!target->Player()) ||
+        (!target->Player()->CurrentTeam()))
+    {
+        return;
+    }
+
+    // don't process if not initialized yet or owned or updating
+    if ((owner_) ||
+        (positionUpdatePending_))
+    {
+        return;
+    }
+
+    //check to see if player already has a flag
+    bool playerHasFlag = false;
+    const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+    for (int i=gameObjects.Len()-1;i>=0;i--)
+    {
+        zFlagZone *otherFlag=dynamic_cast<zFlagZone *>(gameObjects(i));
+        if ((otherFlag)){
+				if (otherFlag->Owner()== target){
+                playerHasFlag = true;
+            }
+        }
+    }
+    
+    // check if the player is on our team or not (check will fail if team not enabled)
+    if (target->Player()->CurrentTeam() == team)
+    {
+        // player is on our team, if we're not at home, go back
+        if (!IsHome())
+        {
+            // go home
+            GoHome();
+
+            tColoredString playerName;
+            playerName << *target->Player() << tColoredString::ColorString(1,1,1);
+            sn_ConsoleOut( tOutput( "$player_flag_return", playerName ) );
+        }
+    }
+    // check if this player dropped the flag previously
+    else if (((target != ownerDropped_) || (time > (ownerDroppedTime_ + sg_flagDropTime))) && (!playerHasFlag))
+    {
+        // take the flag
+        owner_ = target;
+        ownerTime_ = time;
+        lastHoldScoreTime_ = time;
+        //DO later
+        //ownerWarnedNotHome_ = false;
+        //owner_->flag_ = this;
+
+        blinkUpdateTime_ = -1000;
+        blinkTrackUpdateTime_ = -1000;
+
+        // diminish the flag and put it at the original location
+        shape->setReferenceTime(lastTime);
+        shape->SetRotationSpeed( 0 );
+        shape->SetRotationAcceleration( 0 );
+        //shape->SetReferenceTime();
+        //shape->SetVelocity(se_zeroCoord);
+        //shape->SetPosition(originalPosition_);
+        //shape->SetRadius(0);
+        //shape->SetExpansionSpeed(0);
+        shape->RequestSync();
+        positionUpdatePending_ = true;
+
+        tColoredString playerName;
+        playerName << *target->Player() << tColoredString::ColorString(1,1,1);
+        sn_ConsoleOut( tOutput( "$player_flag_take", playerName ) );
+    }
+}
+
+
+// *******************************************************************************
+// *
 // *	OnInside
 // *
 // *******************************************************************************
@@ -349,7 +571,7 @@ void zFlagZone::OnRoundEnd( void )
 
 void zFlagZone::OnInside( gCycle * target, REAL time )
 {
-	if(sg_flagTeam)
+	/*if(sg_flagTeam)
 	{
 	//CTF
     // make sure target, player, and their team are OK
@@ -368,7 +590,7 @@ void zFlagZone::OnInside( gCycle * target, REAL time )
     
 	eTeam * TheTeam = target->Player()->CurrentTeam();
 		
-	if(TheTeam == initOwnerTeam_)
+	if(TheTeam == team)
 	{
 		//Return the Flag
 		GoHome();
@@ -385,7 +607,7 @@ void zFlagZone::OnInside( gCycle * target, REAL time )
 		{
 			zFlagZone* otherFlag=dynamic_cast<zFlagZone *>(gameObjects(i));
 			if ((otherFlag)){
-				if (otherFlag->initOwnerTeam_ == target->Player()->CurrentTeam()){
+				if (otherFlag->Team() == target->Player()->CurrentTeam()){
 					playerHasFlag = true;
 					return;
 				}
@@ -405,7 +627,21 @@ void zFlagZone::OnInside( gCycle * target, REAL time )
 	{
 	//HTF
 		
-	}
+	}*/
+}
+
+bool zFlagZone::IsHome()
+{
+    // flag is at home if at the original position and not owned
+    if ((!owner_) &&
+        (GetPosition() == homePosition_))
+    {
+        return (true);
+    }
+    else
+    {
+        return (false);
+    }
 }
 		
 static zZoneExtRegistration regFlag("flag", "", zFlagZone::create);
