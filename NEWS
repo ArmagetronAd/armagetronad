@@ -1,3 +1,7 @@
+Changes since 0.2.8.3_beta2:
+- SILENCE_ALL can be used on the client to ignore chat from all players
+  locally.
+
 Changes since 0.2.8.3_beta1:
 - Made ready for Armatrators
 - Authentication routines now use utf8 as forward- compatibility with
