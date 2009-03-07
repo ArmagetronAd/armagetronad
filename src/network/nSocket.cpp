@@ -53,9 +53,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifndef MACOSX
 #   include <netinet/ip.h>
-#else
+#else // #ifndef MACOSX
 #   define IPTOS_LOWDELAY 0x10 // http://www.tcpdump.org/cgi-bin/cvsweb/tcpdump/ip.h?rev=1.11
-#endif
+#endif // #ifndef MACOSX
 
 #include <netinet/in_systm.h>
 #include <netinet/in.h>
@@ -63,7 +63,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <sys/param.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
-#else
+#else // #ifndef WIN32
 //#include <winsock2.h>
 //#include <ws2tcpip.h>
 //#include <Ws2tcpip.h>
@@ -82,7 +82,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ENETDOWN WSAENETDOWN
 #ifndef EINTR
 #define EINTR WSAEINTR
-#endif
+#endif // #ifndef EINTR
 #define EINVAL WSAEINVAL
 #define EISCONN WSAEISCONN
 #define ENETRESET WSAENETRESET
@@ -95,7 +95,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ENETUNREACH WSAENETUNREACH
 #define close closesocket
 #define snprintf _snprintf
-#endif
+#endif // #ifndef WIN32
 
 
 #ifdef __sun__

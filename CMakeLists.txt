@@ -7,6 +7,7 @@ project (ARMA)
 include (CheckIncludeFiles)
 include (CheckFunctionExists)
 include (CheckLibraryExists)
+include (CheckTypeSize)
 include (protobuf.cmake)
 include (FindLibXml2)
 
@@ -38,13 +39,17 @@ CHECK_INCLUDE_FILES (sys/stat.h HAVE_SYS_STAT_H)
 CHECK_INCLUDE_FILES (sys/types.h HAVE_SYS_TYPES_H)
 CHECK_INCLUDE_FILES (unistd.h HAVE_UNISTD_H)
 
+SET(CMAKE_EXTRA_INCLUDE_FILES arpa/inet.h)
+CHECK_TYPE_SIZE(socklen_t HAVE_SOCKLEN_T)
+SET(CMAKE_EXTRA_INCLUDE_FILES)
+
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/aa_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/aa_config.h)
 
 add_subdirectory (src)
 
 
-add_executable (armagetronad src/tron/gArmagetron.cpp)
-add_dependencies (armagetronad libtools)
+#add_executable (armagetronad src/tron/gArmagetron.cpp)
+#add_dependencies (armagetronad libtools)
 
 include_directories(${LIBXML2_INCLUDE_DIR})
 message("Include: ${LIBXML2_INCLUDE_DIR} Libraries: ${LIBXML2_LIBRARIES} Definitions: ${LIBXML2_DEFINITIONS}")

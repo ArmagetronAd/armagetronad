@@ -24,3 +24,5 @@
 #cmakedefine HAVE_SYS_TYPES_H 1
 #cmakedefine HAVE_UNISTD_H 1
 
+#cmakedefine HAVE_SOCKLEN_T 1
+
