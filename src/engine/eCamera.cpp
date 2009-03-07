@@ -407,6 +407,11 @@ void eCamera::MyInit(){
 
     centerPos=eCoord(100,100);
     centerSpeedSmooth=0;
+    if( !Center() )
+    {
+        SwitchCenter(1);
+    }
+
     if ( Center() )
     {
         centerPos = Center()->PredictPosition();

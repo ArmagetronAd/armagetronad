@@ -252,11 +252,17 @@ REAL gAINavigator::Path::Take( CycleController & controller, gCycle & cycle, REA
         {
             maxStep = driveOnTime;
         }
+        driveOn = 0;
         return maxStep;
     }
 
     if( turn != 0 )
     {
+        if( !cycle.CanMakeTurn( turn ) )
+        {
+            return driveOn = cycle.GetNextTurn( turn ) - cycle.LastTime();
+        }
+
         controller.Turn( cycle, turn );
     }
     
@@ -303,7 +309,11 @@ gAINavigator::Path const & gAINavigator::PathGroup::GetPath( int id ) const
 //!@param maxStep    maximal timestep the caller suggests
 REAL gAINavigator::PathGroup::TakePath( CycleController & controller, gCycle & cycle, int id, REAL maxStep )
 {
+    // save plan
     last = GetPath( id );
+
+    // execute plan
+    REAL ret = last.Take( controller, cycle, maxStep );
 
     // clear all paths
     for( int i = GetPathCount()-1; i >= 0; --i )
@@ -313,6 +323,14 @@ REAL gAINavigator::PathGroup::TakePath( CycleController & controller, gCycle & c
         path.distance = path.immediateDistance = HUGE;
         path.followedSince = 0;
         path.driveOn = 0;
+    }
+
+    // check whether execution was successful
+    if( last.driveOn > 0 )
+    {
+        // turn was not executed. memorize that it was a good choilce
+        paths[ id ].followedSince++;
+        return ret;
     }
 
     // transfer last use stats
@@ -363,8 +381,7 @@ REAL gAINavigator::PathGroup::TakePath( CycleController & controller, gCycle & c
         break;
     }
 
-    // execute plan
-    return last.Take( controller, cycle, maxStep );
+    return ret;
 }
 
 //!@return    the path taken last time
@@ -745,7 +762,7 @@ void gAINavigator::UpdatePaths()
     // to debug specific situations on playback
     static int count = 0;
     count++;
-    if( count == 182 )
+    if( count == 0 )
     {
         st_Breakpoint();
     }
@@ -832,6 +849,9 @@ void gAINavigator::UpdatePaths()
         sg_AddSensor( path, forward, range, rubberLeft );
         sg_AddSensor( path, right, range, rubberLeft );
         sg_AddSensor( path, forwardRight, range, rubberLeft );
+
+        // slighly favor U-Turns
+        path.distance *= .999;
     }
 
     self.lr = 1;
@@ -850,6 +870,9 @@ void gAINavigator::UpdatePaths()
         sg_AddSensor( path, forward, range, rubberLeft );
         sg_AddSensor( path, left, range, rubberLeft );
         sg_AddSensor( path, forwardLeft, range, rubberLeft );
+
+        // slighly favor U-Turns
+        path.distance *= .999;
     }
 
     // straight ahead
@@ -857,6 +880,9 @@ void gAINavigator::UpdatePaths()
         Path & path = GetPaths().AccessPath( PathGroup::PATH_STRAIGHT );
         path.Fill( *this, forwardLeft, forwardRight, forwardDir, forwardDir, 0 );
         sg_AddSensor( path, forward, range, rubberLeft );
+
+        // slighly favor going straight over anything else
+        path.distance *= 1.0001;
     }
 
     // complicated cases
@@ -902,7 +928,8 @@ void gAINavigator::UpdatePaths()
         path.Fill( *this, forward, right, rightDir, forwardDir, 1 );
 
         REAL driveOn = right.HitWallExtends( dir, pos );
-        if( driveOn < forward.hit * range || forward.type == gSENSOR_NONE )
+        REAL side    = forward.HitWallExtends( rightDir, pos );
+        if( driveOn < forward.hit * range || forward.type == gSENSOR_NONE || side > right.hit * range )
         {
             // there is a gap waiting for us. Wait and take it.
             path.driveOn = driveOn;
@@ -923,7 +950,8 @@ void gAINavigator::UpdatePaths()
         path.Fill( *this, left, forward, leftDir, forwardDir, -1 );
 
         REAL driveOn = left.HitWallExtends( dir, pos );
-        if( driveOn < forward.hit * range || forward.type == gSENSOR_NONE )
+        REAL side    = forward.HitWallExtends( leftDir, pos );
+        if( driveOn < forward.hit * range || forward.type == gSENSOR_NONE || side > left.hit * range )
         {
             // there is a gap waiting for us. Wait and take it.
             path.driveOn = driveOn;

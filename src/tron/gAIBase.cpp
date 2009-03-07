@@ -1956,6 +1956,14 @@ REAL gAIPlayer::Think(){
         eCoord p = Object()->Position();
         eDebugLine::Draw(p, .5, p, 5.5);
         eDebugLine::SetTimeout(0);
+
+        // to debug specific situations on playback
+        static int count = 0;
+        count++;
+        if( count == 227 )
+        {
+            st_Breakpoint();
+        }
     }
 #endif
 
