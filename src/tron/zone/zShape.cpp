@@ -112,6 +112,19 @@ void zShape::setReferenceTime(REAL time)
     // Do not update lasttime_, referencetime_ might be set in the future for ease of equation writing.
 }
 
+
+void zShape::SetVelocity( eCoord const & velocity )
+{
+	// backup position
+	eCoord pos;
+	pos = Position();
+			
+	posx_.SetSlope( velocity.x );
+	posy_.SetSlope( velocity.y );
+	// restore position
+	Position() = pos;
+}
+
 void zShape::WriteSync( Zone::ShapeSync & sync, bool init ) const
 {
     eNetGameObject::WriteSync( *sync.mutable_base(), init );

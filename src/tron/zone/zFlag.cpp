@@ -244,7 +244,7 @@ bool zFlagZone::Timestep( REAL time )
             }
         }
 
-        /*if (sg_flagBlinkTime > 0)
+        if (sg_flagBlinkTime > 0)
         {
             REAL startRadiusPercent = sg_flagBlinkStart;
             if (startRadiusPercent < 0)
@@ -278,12 +278,12 @@ bool zFlagZone::Timestep( REAL time )
                      (endRadiusPercent - startRadiusPercent)) /
                     onTime;
 
-                SetReferenceTime();
+                shape->setReferenceTime(time);
 
                 if (sg_flagBlinkTrackTime > 0)
                 {
-                    SetPosition(owner_->Position());
-                    SetVelocity(owner_->Direction() * owner_->Speed());
+                    shape->Position() = owner_->Position();
+                    shape->SetVelocity(owner_->Direction() * owner_->Speed());
                 }
                 else
                 {
@@ -292,12 +292,12 @@ bool zFlagZone::Timestep( REAL time )
                          (owner_->Direction() *
                           (sg_flagBlinkEstimatePosition * owner_->Speed() * onTime)));
 
-                    SetPosition(estimatedPosition);
-                    SetVelocity(se_zeroCoord);
+                    shape->Position() = estimatedPosition;
+                    shape->SetVelocity(se_zeroCoord);
                 }
 
                 SetRadius(originalRadius_ * startRadiusPercent);
-                SetExpansionSpeed(expansionSpeed);
+                shape->setGrowth(expansionSpeed);
                 RequestSync();
             }
             else if (GetRadius() > 0)
@@ -305,23 +305,23 @@ bool zFlagZone::Timestep( REAL time )
                 if (time >= (blinkUpdateTime_ + onTime))
                 {
                     // kill the blink until the next update time
-                    SetReferenceTime();
-                    SetVelocity(se_zeroCoord);
+                    shape->setReferenceTime(time);
+                    shape->SetVelocity(se_zeroCoord);
                     SetRadius(0);
-                    SetExpansionSpeed(0);
+                    shape->setGrowth(0);
                     RequestSync();
                 }
                 else if ((sg_flagBlinkTrackTime > 0) &&
                          (time >= (blinkTrackUpdateTime_ + sg_flagBlinkTrackTime)))
                 {
                     // track the owner again
-                    SetReferenceTime();
-                    SetPosition(owner_->Position());
-                    SetVelocity(owner_->Direction() * owner_->Speed());
+                    shape->setReferenceTime(time);
+                    shape->Position() = owner_->Position();
+                    shape->SetVelocity(owner_->Direction() * owner_->Speed());
                     RequestSync();
                 }
             }
-        }*/
+        }
     }
 
     // delegate
@@ -381,7 +381,7 @@ void zFlagZone::OnRoundBegin( void )
     //originalRadius_ = GetRadius();
 	
 	//save the original position
-	homePosition_ = GetPosition();
+	homePosition_ = shape->Position();
 
     if ((sg_flagColorR >= 0) &&
         (sg_flagColorG >= 0) &&
@@ -637,7 +637,7 @@ bool zFlagZone::IsHome()
 {
     // flag is at home if at the original position and not owned
     if ((!owner_) &&
-        (GetPosition() == homePosition_))
+        (shape->Position() == homePosition_))
     {
         return (true);
     }

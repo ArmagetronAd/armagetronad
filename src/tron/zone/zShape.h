@@ -79,6 +79,7 @@ public:
     tCoord GetRotation() const;
     REAL GetRotationSpeed();
     void SetRotationSpeed(REAL r);
+	void SetVelocity(eCoord const & velocity); //!< Sets the current velocity
     REAL GetRotationAcceleration();
     void SetRotationAcceleration(REAL r);
     int GetEffectiveSegments() const;
