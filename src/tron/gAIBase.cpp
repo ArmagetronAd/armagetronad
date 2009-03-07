@@ -1056,6 +1056,7 @@ public:
         gAINavigator::EvaluationManager manager( Navigator().GetPaths() );
         manager.Evaluate( gAINavigator::SuicideEvaluator( *Parent().Object() ), 1 );
         manager.Reset();
+        manager.Evaluate( gAINavigator::CowardEvaluator( *Parent().Object() ), 1 );
         manager.Evaluate( gAINavigator::SpaceEvaluator( *Parent().Object() ), 1 );
         manager.Evaluate( gAINavigator::PlanEvaluator(), .1 );
 

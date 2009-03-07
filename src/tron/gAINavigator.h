@@ -224,6 +224,29 @@ public:
         static bool emergency_;
     };
 
+    //! simple evaluator: random noise
+    class RandomEvaluator: public PathEvaluator
+    {
+    public:
+        //! evaluate a path.
+        virtual void Evaluate( Path const & path, PathEvaluation & evaluation ) const;
+        RandomEvaluator();
+        ~RandomEvaluator();
+    };
+
+    //! cowardly evaluator: try to move backwards on enemy walls
+    class CowardEvaluator: public PathEvaluator
+    {
+    public:
+        explicit CowardEvaluator( gCycle const & cycle );
+        ~CowardEvaluator();
+
+        //! evaluate a path.
+        virtual void Evaluate( Path const & path, PathEvaluation & evaluation ) const;
+    private:
+        gCycle const & cycle_;
+    };
+
     //! simple evaluator: measures available space compared to a passed-in value
     class SpaceEvaluator: public PathEvaluator
     {

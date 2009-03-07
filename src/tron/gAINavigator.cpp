@@ -454,6 +454,34 @@ gAINavigator::SuicideEvaluator::SuicideEvaluator( gCycle const & cycle ): cycle_
 gAINavigator::SuicideEvaluator::SuicideEvaluator( gCycle const & cycle, REAL timeFrame ): cycle_( cycle ), timeFrame_( timeFrame ){}
 gAINavigator::SuicideEvaluator::~SuicideEvaluator(){}
 
+void gAINavigator::RandomEvaluator::Evaluate( Path const & path, PathEvaluation & evaluation ) const
+{
+    static tReproducibleRandomizer randomizer;
+    evaluation.score = randomizer.Get() * 100;
+}
+
+gAINavigator::RandomEvaluator::RandomEvaluator(){}
+gAINavigator::RandomEvaluator::~RandomEvaluator(){}
+
+gAINavigator::CowardEvaluator::CowardEvaluator( gCycle const & cycle ): cycle_( cycle ){}
+gAINavigator::CowardEvaluator::~CowardEvaluator(){}
+
+void gAINavigator::CowardEvaluator::Evaluate( Path const & path, PathEvaluation & evaluation ) const
+{
+    evaluation.score = 100;
+    if( path.left.owner && path.right.owner )
+    {
+        if( path.left.owner->Team() != cycle_.Team() && path.left.lr == 1 )
+        {
+            evaluation.score = 0;
+        }
+        if( path.right.owner->Team() != cycle_.Team() && path.right.lr == -1 )
+        {
+            evaluation.score = 0;
+        }
+    }
+}
+
 gAINavigator::SpaceEvaluator::SpaceEvaluator( gCycle const & cycle )
 : referenceDistance_( cycle.MaxWallsLength() )
 {
