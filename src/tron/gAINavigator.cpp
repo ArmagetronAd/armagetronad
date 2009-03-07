@@ -471,11 +471,11 @@ void gAINavigator::CowardEvaluator::Evaluate( Path const & path, PathEvaluation 
     evaluation.score = 100;
     if( path.left.owner && path.right.owner )
     {
-        if( path.left.owner->Team() != cycle_.Team() && path.left.lr == 1 )
+        if( path.left.owner->Alive() && path.left.owner->Team() != cycle_.Team() && path.left.lr == 1 )
         {
             evaluation.score = 0;
         }
-        if( path.right.owner->Team() != cycle_.Team() && path.right.lr == -1 )
+        if( path.right.owner->Alive() && path.right.owner->Team() != cycle_.Team() && path.right.lr == -1 )
         {
             evaluation.score = 0;
         }
