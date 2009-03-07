@@ -562,7 +562,7 @@ void zFortressZone::OnThink( void )
         return;
     }
 
-    if( closestEnemy && wishAttackers > attackers && closestEnemy->GetState() != AI_GRIND )
+    if( closestEnemy && wishAttackers > attackers && 0 == dynamic_cast< gAIPlayer::StateGrind const * >( closestEnemy->GetState() ) )
     {
 #ifdef DEBUG
         closestEnemy->Chat( tString( "Attacking enemy fortress!" ) );

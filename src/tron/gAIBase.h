@@ -47,25 +47,6 @@ class gAINavigator;
 
 namespace Game{ class AIPlayerSync; class AITeamSync; }
 
-typedef enum
-{ AI_SURVIVE = 0,   // just try to stay alive
-  AI_GRIND,         // initial grind to a teammates' wall
-  AI_TRACE,         // trace a wall
-  AI_PATH,          // follow a path to a target
-  AI_CLOSECOMBAT,   // try to frag a nearby opponent
-  AI_STATE_COUNT
-}
-gAI_STATE;
-
-typedef enum
-{
-    AI_NONE = 0,
-    AI_GRIND_GRIND, // currently getting closer to teammate's wall
-    AI_GRIND_SPLIT_LEFT, AI_GRIND_SPLIT_RIGHT,  // split as soon as you overtake your teammate
-    AI_SUBSTATE_COUNT
-}
-gAI_SUBSTATE;
-
 class gSimpleAI
 {
 public:
@@ -103,109 +84,16 @@ private:
 
 class gAIPlayer: public ePlayerNetID{
     friend class gAITeam;
-
-    tReproducibleRandomizer randomizer_;
-protected:
-    gSimpleAI *simpleAI_;
-    gAICharacter*           character; // our specification of abilities
-
-    // for all offensive modes:
-    nObserverPtr< eNetGameObject >    target;  // the current victim
-
-    // for pathfinding mode:
-    ePath                   path;    // last found path to the victim
-    REAL lastPath;                   // when was the last time we did a pathsearch?
-
-    // for trace mode:
-    int  traceSide;
-    REAL lastChangeAttempt;
-    REAL lazySideChange;
-
-    // state management:
-    gAI_STATE state;             // the current mode of operation
-    gAI_SUBSTATE substate;       // the current mode of operation, details
-    REAL      nextStateChange;   // when is the operation mode allowed to change?
-
-    bool emergency;              // tell if an emergency is present
-    int  triesLeft;              // number of tries left before we die
-
-    REAL freeSide;               // number that tells which side is probably free for evasive actions
-
-    // basic thinking:
-    REAL lastTime;
-    REAL nextTime;
-
-    REAL concentration;
-
-    // log
-    gAILog* log;
-
-    // idler
-    std::auto_ptr< gAINavigator > idler;
-
-    //  gCycle * Cycle(){return object;}
-
-    // set trace side:
-    void SetTraceSide(int side);
-
-    // state change:
-    void SwitchToState(gAI_STATE nextState, REAL minTime=10);
-
-    // data structure common to thinking functions
 public:
-    struct ThinkDataBase
-    {
-        int turn;                                   // direction to turn to
-        REAL thinkAgain;                            // when to think again
-
-        ThinkDataBase()
-                : turn(0), thinkAgain(0)
-        {
-        }
-    };
-
-protected:
-struct ThinkData : public ThinkDataBase
-    {
-        gAISensor const & front;                    // sensors cast by upper level function
-        gAISensor const & left;
-        gAISensor const & right;
-
-        ThinkData( gAISensor const & a_front, gAISensor const & a_left, gAISensor const & a_right )
-                : front(a_front), left( a_left ), right( a_right )
-        {
-        }
-    };
-
-    // state update functions:
-    virtual void ThinkSurvive( ThinkData & data );
-    virtual void ThinkTrace( ThinkData & data );
-    virtual void ThinkPath( ThinkData & data );
-    virtual void ThinkCloseCombat( ThinkData & data );
-    virtual void ThinkGrind( ThinkData & data );
-
-    // emergency functions:
-    virtual bool EmergencySurvive( ThinkData & data, int enemyEvade = -1, int preferedSide = 0);
-    virtual void EmergencyTrace( ThinkData & data );
-    virtual void EmergencyPath( ThinkData & data );
-    virtual void EmergencyCloseCombat( ThinkData & data );
-    virtual void EmergencyGrind( ThinkData & data );
-
-    // acting on gathered data
-    virtual void ActOnData( ThinkData & data );
-    virtual void ActOnData( ThinkDataBase & data );
-public:
-    // set sight on target (side effects: switch state accordingly)
+    //! set sight on target (side effects: switch state accordingly)
     void SetTarget( eNetGameObject * target );
-
-    gAI_STATE GetState() const{ return state; }
 
     eNetGameObject const * GetTarget() const
     {
-        return target;
+        return target_;
     }
 
-    gAICharacter* Character() const {return character;}
+    gAICharacter* Character() const {return character_;}
 
     //	virtual void AddRef();
     //	virtual void Release();
@@ -233,7 +121,7 @@ public:
 
     static void SetNumberOfAIs(int num, int minPlayers, int iq, int tries=3); // make sure this many AI players are in the game (with approximately the given IQ)
 
-    void ClearTarget(){target=NULL;}
+    void ClearTarget(){target_=NULL;}
 
     virtual void ControlObject(eNetGameObject *c){ ePlayerNetID::ControlObject( c ); simpleAI_ = NULL; }
     virtual void ClearObject(){ ePlayerNetID::ClearObject(); simpleAI_ = NULL; }
@@ -276,6 +164,73 @@ public:
     // void WriteSync( Game::AIPlayerSync & sync, bool init );
     //! returns the descriptor responsible for this class
     virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
+
+    // an AI state
+    class State: public tReferencable< State >
+    {
+    public:
+        State( gAIPlayer & player );
+        virtual ~State();
+
+        //! executes the state's work
+        virtual REAL Think() = 0;
+    protected:
+        gAIPlayer & Parent(){ return parent_; }
+        gAIPlayer const & Parent() const { return parent_; }
+
+        gAINavigator & Navigator();
+        gAINavigator const & Navigator() const;
+
+        gAICharacter const & Character() const;
+    private:
+        gAIPlayer & parent_;
+    };
+
+    friend class State;
+
+    // state management
+    void SwitchToState( State * newState );
+    State * GetState() const{ return state_; }
+
+    // state for grinding at start
+    class StateGrind: public State
+    {
+    public:
+        enum Substate
+        {
+             AI_NONE = 0,
+             AI_GRIND_GRIND, // currently getting closer to teammate's wall
+             AI_GRIND_SPLIT_LEFT, AI_GRIND_SPLIT_RIGHT,  // split as soon as you overtake your teammate
+             AI_SUBSTATE_COUNT
+        };
+
+        StateGrind( gAIPlayer & player );
+        virtual ~StateGrind();
+
+        //! executes the state's work
+        virtual REAL Think();
+    };
+private:
+    tReproducibleRandomizer randomizer_;
+
+    gSimpleAI    * simpleAI_;
+    gAICharacter * character_; // our specification of abilities
+
+    // for all offensive modes:
+    nObserverPtr< eNetGameObject >  target_;  // the current victim
+
+    // basic thinking resource management
+    REAL lastTime_;
+    REAL nextTime_;
+    REAL concentration_;
+
+    //! navigator
+    std::auto_ptr< gAINavigator > navigator_;
+
+    //! state
+    tJUST_CONTROLLED_PTR< State > state_;
+
+    void CreateNavigator();
 };
 
 // the AI team

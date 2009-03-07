@@ -327,10 +327,10 @@ REAL gAINavigator::PathGroup::TakePath( CycleController & controller, gCycle & c
         paths[ PATH_TURN_RIGHT  ].followedSince = last.followedSince + 1;
         break;
     case PATH_PTURN_LEFT:
-        paths[ PATH_UTURN_LEFT ].followedSince = last.followedSince + 1000; // definitely want to turn back from there.
+        paths[ PATH_UTURN_LEFT ].followedSince = last.followedSince + 1;
         break;
     case PATH_PTURN_RIGHT:
-        paths[ PATH_UTURN_RIGHT ].followedSince = last.followedSince + 1000;
+        paths[ PATH_UTURN_RIGHT ].followedSince = last.followedSince + 1;
         break;
     case PATH_ZIGZAG_LEFT:
         if ( last.driveOn )
@@ -745,7 +745,7 @@ void gAINavigator::UpdatePaths()
     // to debug specific situations on playback
     static int count = 0;
     count++;
-    if( count == 169 )
+    if( count == 182 )
     {
         st_Breakpoint();
     }

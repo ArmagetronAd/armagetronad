@@ -67,17 +67,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 static tReferenceHolder< gAIPlayer > sg_AIReferences;
 
-static bool sg_RequireVictim( gAI_STATE state )
-{
-    return state == AI_PATH || state == AI_CLOSECOMBAT;
-}
-
-#ifdef DEBUG
-//#define TESTSTATE AI_PATH
-//#define TESTSTATE AI_TRACE
-#endif
-//#define DEBUGLINE
-
 static tCONTROLLED_PTR(gAITeam) sg_AITeam = NULL;
 
 gSimpleAIFactory *gSimpleAIFactory::factory_ = NULL;
@@ -166,8 +155,6 @@ static REAL Delay()
 
     return delay;
 }
-
-
 
 static gAICharacter* BestIQ( int iq )
 {
@@ -309,8 +296,8 @@ void gAITeam::BalanceWithAIs(bool balanceWithAIs)
 
                 if ( best )
                 {
-                    gAIPlayer *ai 	= tNEW( gAIPlayer ) ();
-                    ai->character	= best;
+                    gAIPlayer *ai  = tNEW( gAIPlayer ) ();
+                    ai->character_ = best;
                     ai->SetName( best->name );
                     ai->SetTeam( t );
                     ai->UpdateTeam();
@@ -585,7 +572,7 @@ static bool IsTrapped(const gCycle *trapped, const gCycle *other)
 }
 
 // see if the given Cycle is trapped currently
-static bool IsTrapped(const eGameObject *trapped, const gCycle *other)
+bool IsTrapped(const eGameObject *trapped, const gCycle *other)
 {
     gCycle const * cycle = dynamic_cast< gCycle const * >( trapped );
     if( cycle )
@@ -604,6 +591,8 @@ public:
     gLoopData():loop(false), winding(0){}
     void AddCycle(const gCycle* c){closedIn[closedIn.Len()] = c;}
 };
+
+#ifdef OBSOLETES
 
 // hit data
 class gHitData{
@@ -894,7 +883,7 @@ public:
 
 };
 
-
+#endif // OBSOLETES
 
 
 
@@ -988,8 +977,103 @@ static void CycleBlocksWayHelper(const gCycle *a, const gCycle *b,
     }
 }
 
+// *******************
+// * Tracing state   *
+// *******************
 
+class gStateTrace: public gAIPlayer::State
+{
+public:
+    gStateTrace( gAIPlayer & ai, int dir ): gAIPlayer::State( ai ), dir_( dir ){}
 
+    // evaluator for tracing
+    class Evaluator: public gAINavigator::PathEvaluator
+    {
+    public:
+        Evaluator( gCycle & cycle, int dir ): cycle_( cycle ), dir_( dir ){}
+
+        virtual void Evaluate( gAINavigator::Path const & path, gAINavigator::PathEvaluation & evaluation ) const
+        {
+            gAINavigator::WallHug const * hug = 0, * noHug = 0;
+            if( dir_ > 0 )
+            {
+                hug   = &path.left;
+                noHug = &path.right;
+            }
+            else
+            {
+                hug   = &path.right;
+                noHug = &path.left;
+            }
+
+            bool good = hug->owner && hug->owner->Team() != cycle_.Team();
+            if( good )
+            {
+                if( hug->owner != noHug->owner )
+                {
+                    evaluation.score = 50;
+                }
+                else if( ( path.shortTermDirection - path.longTermDirection ).NormSquared() < .01 )
+                {
+                    evaluation.score = 50 + .5*Adjust( path.immediateDistance/(cycle_.Speed()*cycle_.GetTurnDelay() ) );
+                }
+            }
+        }
+    private:
+        gCycle & cycle_;
+        int dir_;
+    };
+    
+    virtual REAL Think()
+    { 
+        Navigator().UpdatePaths();
+        gAINavigator::EvaluationManager manager( Navigator().GetPaths() );
+        manager.Evaluate( gAINavigator::SuicideEvaluator( *Parent().Object() ), 1 );
+        manager.Reset();
+        manager.Evaluate( Evaluator( *Parent().Object(), dir_ ), 1 );
+        manager.Evaluate( gAINavigator::SpaceEvaluator( *Parent().Object() ), .5 );
+        manager.Evaluate( gAINavigator::PlanEvaluator(), .1 );
+
+        gAINavigator::CycleControllerBasic controller;
+        return manager.Finish( controller, *Parent().Object() );
+    }
+private:
+    int dir_;
+};
+
+// *******************
+// * Survival state  *
+// *******************
+
+class gStateSurvive: public gAIPlayer::State
+{
+public:
+    gStateSurvive( gAIPlayer & ai ): gAIPlayer::State( ai ){}
+
+    virtual REAL Think()
+    { 
+        Navigator().UpdatePaths();
+        gAINavigator::EvaluationManager manager( Navigator().GetPaths() );
+        manager.Evaluate( gAINavigator::SuicideEvaluator( *Parent().Object() ), 1 );
+        manager.Reset();
+        manager.Evaluate( gAINavigator::SpaceEvaluator( *Parent().Object() ), 1 );
+        manager.Evaluate( gAINavigator::PlanEvaluator(), .1 );
+
+        gAINavigator::CycleControllerBasic controller;
+        return manager.Finish( controller, *Parent().Object() );
+    }
+};
+
+void gAIPlayer::SetTarget( eNetGameObject * target )
+{
+    this->target_ = target;
+
+    // let's see how well this works:
+    // state = AI_CLOSECOMBAT;
+
+    // start with it right now
+    nextTime_ = -1;
+}
 
 // called whenever cylce a drives close to the wall of cylce b.
 // directions: aDir tells whether the wall is to the left (-1) or right(1)
@@ -999,6 +1083,8 @@ static void CycleBlocksWayHelper(const gCycle *a, const gCycle *b,
 void gAIPlayer::CycleBlocksWay(const gCycleMovement *aa, const gCycleMovement *bb,
                                int aDir, int bDir, REAL bDist, int winding)
 {
+
+    return;
 
 
     tASSERT(aa && bb);
@@ -1029,21 +1115,18 @@ void gAIPlayer::CycleBlocksWay(const gCycleMovement *aa, const gCycleMovement *b
         }
 
         if (ai && ai->Character() && ai->Character()->properties[AI_DETECTTRACE] > 5 )
-            if(aDir != bDir && ai->nextStateChange < se_GameTime() + 5 &&
-                    ai->lastChangeAttempt < se_GameTime() - 5 )
+            if(aDir != bDir )
             {
                 REAL behind = b->GetDistance() - bDist;
                 if (a->Speed() > b->Speed() * 1.2f && behind < (a->Speed() - b->Speed()) * 10)
                 { // a is faster. Try to escape.
-                    ai->SetTraceSide(aDir > 0 ? 1 : -1);
-                    ai->SwitchToState(AI_TRACE, 10);
-                    ai->target = const_cast< gCycle * >( a );
+                    ai->SwitchToState( tNEW(gStateTrace)( *ai, aDir > 0 ? 1 : -1 ) );
+                    ai->target_ = const_cast< gCycle * >( a );
                 }
                 else// if (a->Speed() < b->Speed() * 1.1f)
                 { // b is faster. Attack.
-                    ai->SetTraceSide(aDir > 0 ? -1 : 1);
-                    ai->SwitchToState(AI_TRACE, 10 + behind / ( a->Speed() + b->Speed() ) );
-                    ai->target = const_cast< gCycle * >( a );
+                    ai->SwitchToState( tNEW(gStateTrace)( *ai, aDir > 0 ? -1 : 1 ) );
+                    ai->target_ = const_cast< gCycle * >( a );
                 }
             }
 
@@ -1057,13 +1140,10 @@ void gAIPlayer::CycleBlocksWay(const gCycleMovement *aa, const gCycleMovement *b
         }
 
         if (ai && ai->Character() && ai->Character()->properties[AI_DETECTTRACE] > 0)
-            if(aDir != bDir && ai->nextStateChange < se_GameTime() + 5 &&
-                    ai->lastChangeAttempt < se_GameTime() - 5 )
+            if(aDir != bDir )
             {
-                REAL behind = b->GetDistance() - bDist;
-                ai->SetTraceSide(aDir > 0 ? 1 : -1);
-                ai->SwitchToState(AI_TRACE, 10 + 4 * behind / a->Speed());
-                ai->target = const_cast< gCycle * >( b );
+                ai->SwitchToState( tNEW(gStateTrace)( *ai, aDir > 0 ? 1 : -1 ) );
+                ai->target_ = const_cast< gCycle * >( b );
             }
     }
 }
@@ -1117,35 +1197,25 @@ nNetObjectDescriptorBase const & gAIPlayer::DoGetDescriptor() const
 //! creates a netobject form sync data
 gAIPlayer::gAIPlayer( Game::AIPlayerSync const & sync, nSenderInfo const & sender ):
         ePlayerNetID(sync.base(), sender ),
-        character(NULL),
-        //	target(NULL),
-        lastPath(se_GameTime()-100),
-        lastTime(se_GameTime()),
-        nextTime(0),
-        concentration(1),
-        log(NULL)
+        character_(NULL),
+        lastTime_(se_GameTime()),
+        nextTime_(0),
+        concentration_(1)
 {
 }
 
 
 gAIPlayer::gAIPlayer():
         simpleAI_(NULL),
-        character(NULL),
+        character_(NULL),
         //	target(NULL),
-        lastPath(se_GameTime()-100),
-        lastTime(se_GameTime()),
-        nextTime(0),
-        concentration(1),
-        log(NULL)
+        lastTime_(se_GameTime()),
+        nextTime_(0),
+        concentration_(1)
 {
-    character = NULL;
     ClearTarget();
-    traceSide = 1;
-    freeSide  = 0;
-    log       = NULL;
 
     // find a good color
-
     current_ai=(current_ai+1) % MAXAI_COLOR;
     int take_ai=current_ai;
     int try_ai=current_ai;
@@ -1275,7 +1345,7 @@ void gAIPlayer::SetNumberOfAIs(int num, int minPlayers, int iq, int tries)
                 //				int index = ((int)ai->character - (int)&gAICharacter::s_Characters(0))/sizeof(gAICharacter);
                 //				inGame(index) = true;
 
-                if (!worstIQ || !worstIQ->character || fabs(worstIQ->character->iq - iq) < fabs(ai->character->iq - iq) )
+                if (!worstIQ || !worstIQ->character_ || fabs(worstIQ->character_->iq - iq) < fabs(ai->character_->iq - iq) )
                     worstIQ = ai;
 
                 count++;
@@ -1301,8 +1371,8 @@ void gAIPlayer::SetNumberOfAIs(int num, int minPlayers, int iq, int tries)
             count = pcount;
 
         iqperfect = true;
-        if (bestIQ && worstIQ && worstIQ->character )
-            iqperfect = (fabs(bestIQ->iq - iq) > fabs(worstIQ->character->iq - iq) * .9f);
+        if (bestIQ && worstIQ && worstIQ->character_ )
+            iqperfect = (fabs(bestIQ->iq - iq) > fabs(worstIQ->character_->iq - iq) * .9f);
 
 
         // count complete. Do something!
@@ -1333,7 +1403,7 @@ void gAIPlayer::SetNumberOfAIs(int num, int minPlayers, int iq, int tries)
             // too litte AIs. Create one.
             gAIPlayer *ai = tNEW(gAIPlayer)();
             ai->SetName( bestIQ->name );
-            ai->character = bestIQ;
+            ai->character_ = bestIQ;
 
             sg_AIReferences.Add( ai );
 
@@ -1364,427 +1434,13 @@ void gAIPlayer::SetNumberOfAIs(int num, int minPlayers, int iq, int tries)
 }
 
 
-
-// Possible state changes:
-// Every state -> Survive for 20 seconds if the victim is dead or can be assumed dead soon, or if the situation gets too dangerous
-
-// Survive -> CloseCombat if survival gets too boring
-
-// Trace -> Closecombat
-// Path  -> Closecombat  if the victim gets in view
-
-// Survive -> Trace if an enemy wall is hit
-// Path    -> Trace
-
-// CloseCombat -> Path if the vicim gets out of view
-
-
-void gAIPlayer::SetTraceSide(int side)
-{
-    REAL time = se_GameTime();
-    REAL ts   = time - lastChangeAttempt + 1;
-    lastChangeAttempt = time;
-
-    lazySideChange += ts * side;
-    if (lazySideChange * traceSide <= 0)
-    {
-        // state change!
-        traceSide = lazySideChange > 0 ? 1 : -1;
-        lazySideChange = 10 * traceSide;
-    }
-
-    if (lazySideChange > 10)
-        lazySideChange = 10;
-    if (lazySideChange < -10)
-        lazySideChange = -10;
-}
-
 // state change:
-void gAIPlayer::SwitchToState(gAI_STATE nextState, REAL minTime)
+void gAIPlayer::SwitchToState( State * state )
 {
-    int thisAbility = 10 - character->properties[AI_STATE_TRACE];
-    switch (state)
-    {
-    case AI_GRIND:
-        thisAbility = 0;
-        break;
-    case AI_TRACE:
-        thisAbility = character->properties[AI_STATE_TRACE];
-        break;
-    case AI_CLOSECOMBAT:
-        thisAbility = character->properties[AI_STATE_CLOSECOMBAT];
-        break;
-    case AI_PATH:
-        thisAbility = character->properties[AI_STATE_PATH];
-        break;
-    case AI_SURVIVE:
-    case AI_STATE_COUNT:
-        break;
-    };
-
-    int nextAbility = 10;
-    switch (nextState)
-    {
-    case AI_GRIND:
-        nextAbility = 10;
-        break;
-    case AI_TRACE:
-        nextAbility = character->properties[AI_STATE_TRACE];
-        break;
-    case AI_CLOSECOMBAT:
-        nextAbility = character->properties[AI_STATE_CLOSECOMBAT];
-        break;
-    case AI_PATH:
-        nextAbility = character->properties[AI_STATE_PATH];
-        break;
-    case AI_STATE_COUNT:
-    case AI_SURVIVE:
-        break;
-    };
-
-
-    if (nextAbility > thisAbility && Random() * 10 > nextAbility)
-        return;
-
-    substate = AI_NONE;
-
-#ifdef DEBUG
-    if (state != nextState)
-        con << "Switching to state " << nextState << "\n";
-#endif
-
-    state           = nextState;
-    nextStateChange = se_GameTime() + minTime;
+    state_           = state;
 }
 
-// state update functions:
-void gAIPlayer::ThinkSurvive(  ThinkData & data )
-{
-    if (!character)
-    {
-        st_Breakpoint();
-        return;
-    }
-
-    REAL random = 0;
-    // do nothing much. Rely on the emergency program.
-    /*
-      random=10*(Random()/float(1));
-      if (random < .2)
-      EmergencySurvive(front, left, right, -1, 1);
-      else if (random > 9.8)
-      EmergencySurvive(front, left, right, -1, -1);
-      else
-      if (front.front.wallType == gSENSOR_RIM && front.distance < 10)
-      st_Breakpoint();
-
-
-    */
-
-    if (data.left.front.wallType == gSENSOR_RIM)
-        EmergencySurvive( data, 1);
-    else if (data.right.front.wallType == gSENSOR_RIM)
-        EmergencySurvive( data, -1);
-    else
-        EmergencySurvive( data );
-
-
-
-    if (nextStateChange > se_GameTime())
-    {
-        data.thinkAgain = .5f;
-        return;
-    }
-
-    // switch from Survival to close combat if surviving is too boring
-    random=10*Random();
-    if (random < 5)
-    {
-        // find a new victim:
-        eCoord enemypos=eCoord(1000,100);
-
-        const tList<eGameObject>& gameObjects = Object()->Grid()->GameObjects();
-        gCycle *secondbest = NULL;
-
-        // find the closest enemy
-        for (int i=gameObjects.Len()-1;i>=0;i--){
-            gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
-
-            if (other && other->Team()!=Object()->Team() &&
-                    !IsTrapped(other, Object())){
-                // then, enemy is realy an enemy
-                eCoord otherpos=other->Position()-Object()->Position();
-                if (otherpos.NormSquared()<enemypos.NormSquared()){
-                    // check if the path is clear
-                    gSensor p(Object(),Object()->Position(),otherpos);
-                    p.detect(REAL(.98));
-                    secondbest = dynamic_cast<gCycle *>(other);
-                    if (p.hit>=.98){
-                        enemypos = otherpos;
-                        target = secondbest;
-                    }
-                }
-            }
-        }
-
-        if (!target)
-            target = secondbest;
-
-        if (target)
-            SwitchToState(AI_CLOSECOMBAT, 1);
-    }
-
-    data.thinkAgain = 1;
-}
-
-void gAIPlayer::ThinkTrace( ThinkData & data )
-{
-    gAISensor const & front = data.front;
-    gAISensor const & left = data.left;
-    gAISensor const & right = data.right;
-
-    bool inverse = front.Hit() && front.distance < Object()->Speed() * Delay();
-
-    if (left.front.wallType == gSENSOR_RIM)
-        SetTraceSide(1);
-
-    if (right.front.wallType == gSENSOR_RIM)
-        SetTraceSide(-1);
-
-    bool success = EmergencySurvive(data, 0, traceSide * ( inverse ? -1 : 1));
-
-    REAL & nextTurn = data.thinkAgain;
-    nextTurn = 100;
-    if (left.front.edge)
-    {
-        REAL a = eCoord::F(Object()->Direction(), *left.front.edge->Point() - Object()->Position());
-        REAL b = eCoord::F(Object()->Direction(), *left.front.edge->Other()->Point() - Object()->Position());
-
-        if (a < b)
-            a = b;
-        if ( a > 0 )
-            nextTurn = a;
-    }
-
-    if (right.front.edge)
-    {
-        REAL a = eCoord::F(Object()->Direction(), *right.front.edge->Point() - Object()->Position());
-        REAL b = eCoord::F(Object()->Direction(), *right.front.edge->Other()->Point() - Object()->Position());
-
-        if (a < b)
-            a = b;
-        if ( ( a > 0 && a < nextTurn ) || !left.front.edge)
-            nextTurn = a;
-    }
-
-    nextTurn/= Object()->Speed() * .98f;
-
-    REAL delay = Delay() * 1.5f;
-    if ((!Object()->CanMakeTurn(1) || !Object()->CanMakeTurn(-1) || success) && nextTurn > delay)
-        nextTurn = delay;
-
-    if (nextTurn > .3f)
-        nextTurn = .3f;
-
-    if (nextStateChange > se_GameTime())
-        return;
-
-    // find a new victim:
-    eCoord enemypos=eCoord(1000,100);
-
-    const tList<eGameObject>& gameObjects = Object()->Grid()->GameObjects();
-    gCycle *secondbest = NULL;
-
-    // find the closest enemy
-    for (int i=gameObjects.Len()-1;i>=0;i--){
-        gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
-
-        if (other && other->Team()!=Object()->Team() &&
-                !IsTrapped(other, Object())){
-            // then, enemy is realy an enemy
-            eCoord otherpos=other->Position()-Object()->Position();
-            if (otherpos.NormSquared()<enemypos.NormSquared()){
-                // check if the path is clear
-                gSensor p(Object(),Object()->Position(),otherpos);
-                p.detect(REAL(.98));
-                secondbest = dynamic_cast<gCycle *>(other);
-
-                if (!target)
-                    enemypos = otherpos;
-
-                if (p.hit>=.98){
-                    enemypos = otherpos;
-                    target = secondbest;
-                }
-            }
-        }
-    }
-
-    eCoord relpos=enemypos.Turn(Object()->Direction().Conj()).Turn(0,1);
-
-
-    if (!target)
-        target = secondbest;
-    else
-        SwitchToState(AI_CLOSECOMBAT, 1);
-
-    if (target)
-        SetTraceSide((relpos.x  > 0 ? 10 : -10) *
-                     (target->Speed() > Object()->Speed() ? -1 : 1));
-
-    nextStateChange = se_GameTime() + 10;
-
-    //  SwitchToState(AI_SURVIVE, 1);
-    return;
-}
-
-
-void gAIPlayer::ThinkPath( ThinkData & data )
-{
-    int lr = 0;
-    REAL mindist = 10;
-
-    eCoord dir = Object()->Direction();
-    // REAL fs=front.distance;
-    REAL ls=data.left.distance;
-    REAL rs=data.right.distance;
-
-
-    if (!target->CurrentFace() || IsTrapped(target, Object()))
-    {
-        SwitchToState(AI_SURVIVE, 1);
-        EmergencySurvive( data );
-
-        data.thinkAgain = 4;
-        return;
-    }
-
-    eCoord tDir = target->Position() - Object()->Position();
-
-    if ( nextStateChange < se_GameTime() )
-    {
-        gSensor p(Object(),Object()->Position(), tDir);
-        p.detect(REAL(.9999999));
-        if (p.hit >=  .9999999)  // free line of sight to victim. Switch to close combat.
-        {
-            SwitchToState(AI_CLOSECOMBAT, 5);
-            EmergencySurvive( data );
-
-            return;
-        }
-    }
-
-
-
-    // find a new path if the one we got is outdated:
-    if (lastPath < se_GameTime() - 10)
-        if (target->CurrentFace())
-        {
-            Object()->FindCurrentFace();
-            eHalfEdge::FindPath(Object()->Position(), Object()->CurrentFace(),
-                                target->Position(), target->CurrentFace(),
-                                Object(),
-                                path);
-            lastPath = se_GameTime();
-        }
-
-    if (!path.Valid())
-    {
-        data.thinkAgain = 1;
-        return;
-    }
-
-    // find the most advanced path point that is in our viewing range:
-
-    for (int z = 10; z>=0; z--)
-        path.Proceed();
-
-    bool goon   = path.Proceed();
-    bool nogood = false;
-
-    do
-    {
-        if (goon)
-            goon = path.GoBack();
-        else
-            goon = true;
-
-        eCoord pos   = path.CurrentPosition() + path.CurrentOffset() * 0.1f;
-        eCoord opos  = Object()->Position();
-        eCoord odir  = pos - opos;
-
-        eCoord intermediate = opos + dir * eCoord::F(odir, dir);
-
-        gSensor p(Object(), opos, intermediate - opos);
-        p.detect(1.1f);
-        nogood = (p.hit <= .999999999 || eCoord::F(path.CurrentOffset(), odir) < 0);
-
-        if (!nogood)
-        {
-            gSensor p(Object(), intermediate, pos - intermediate);
-            p.detect(1);
-            nogood = (p.hit <= .99999999 || eCoord::F(path.CurrentOffset(), odir) < 0);
-        }
-
-    }
-    while (goon && nogood);
-
-    if (goon)
-    {
-        // now we have found our next goal. Try to get there.
-        eCoord pos    = Object()->Position();
-        eCoord target = path.CurrentPosition();
-
-        // look how far ahead the target is:
-        REAL ahead = eCoord::F(target - pos, dir)
-                     + eCoord::F(path.CurrentOffset(), dir);
-
-        if ( ahead > 0)
-        {	  // it is still before us. just wait a while.
-            mindist = ahead;
-        }
-        else
-        { // we have passed it. Make a turn towards it.
-            REAL side = (target - pos) * dir;
-
-            if ( !((side > 0 && ls < 3) || (side < 0 && rs < 3))
-                    && (fabs(side) > 3 || ahead < -10) )
-            {
-#ifdef DEBUG
-                con << "Following path...\n";
-#endif
-                lr += (side > 0 ? 1 : -1);
-            }
-        }
-    }
-    else // nogood
-    {
-        lastPath -= 1;
-        SwitchToState(AI_CLOSECOMBAT);
-    }
-
-    EmergencySurvive( data, 1, -lr );
-
-    REAL d = sqrt(tDir.NormSquared()) * .2f;
-    if (d < mindist)
-        mindist = d;
-
-    data.thinkAgain = mindist / Object()->Speed();
-    if (data.thinkAgain > .4)
-        data.thinkAgain *= .7;
-}
-
-// set sight on target (side effects: switch state accordingly)
-void gAIPlayer::SetTarget( eNetGameObject * target )
-{
-    this->target = target;
-
-    // let's see how well this works:
-    state = AI_CLOSECOMBAT;
-
-    // start with it right now
-    nextTime = -1;
-}
+/*
 
 void gAIPlayer::ThinkCloseCombat( ThinkData & data )
 {
@@ -1946,17 +1602,6 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
             }
         }
         else if (enemypos.y*ourspeed<-enemypos.x*enemyspeed){
-            /*
-              // good attack position
-              if (enemypos.x<rs && rs < range*.99){
-              #ifdef DEBUG
-              con << "BOX!\n";
-              #endif
-              turn+=10;
-              lr-=side;
-              }
-
-            */
 
             REAL canCutIfDriveOn = enemypos.x*ourspeed - fs * (enemyspeed - ourspeed);
             canCutIfDriveOn -= enemypos.y*enemyspeed;
@@ -2000,106 +1645,61 @@ void gAIPlayer::ThinkCloseCombat( ThinkData & data )
 
     data.thinkAgain = ed + nextThought;
 }
-
-
-/*
-static void PretendFrontHit(const gAISensor& f, const gAISensor &corridor,
-			    const eCoord& origin, const eCoord& direction)
-{
-  gAISensor& front = (gAISensor&)(f);
-
-  // transfer the easy data
-  front.ehit = corridor.ehit;
-  front.lr   = corridor.lr;
-  front.type = corridor.type;
-
-  REAL a = eCoord::F(*corridor.ehit->Point()          - origin, direction);
-  REAL b = eCoord::F(*corridor.ehit->Other()->Point() - origin, direction);
-
-  if (front.hit > a)
-    front.hit = a;
-  if (front.hit > b)
-    front.hit = b;
-
-  front.before_hit = origin + direction * front.hit * .99f;
-}
 */
 
+// **********
+// * States *
+// **********
 
-#define DANGERLEVELS 4
-#define LOOPLEVEL   0
-#define SPACELEVEL  1
-#define TRAPLEVEL   2
-#define COLIDELEVEL 2
-#define TEAMLEVEL   3
-
-
-class gAILogEntry{
-public:
-    int sideDanger[DANGERLEVELS][2];
-    int frontDanger[DANGERLEVELS];
-    int turn;
-    int tries;
-    REAL time;
-};
-
-#define ENTRIES 10
-
-class gAILog{
-public:
-    gAILogEntry entries[ENTRIES+1];
-    int         current;
-    int         del;
-
-    gAILog():current(0), del(0){}
-
-    void DeleteEntry()
-    {
-        del = 1;
-        if (current > 0)
-            current--;
-    }
-
-    gAILogEntry& NextEntry()
-    {
-        del = 0;
-
-        if (current >= ENTRIES)
-        {
-            for (int i=1; i<ENTRIES; i++)
-                entries[i-1] = entries[i];
-        }
-        else
-            current++;
-
-        gAILogEntry& ret = entries[current-1];
-        ret.time = se_GameTime();
-        return ret;
-    }
-
-    void Print()
-    {
-#ifdef DEBUG
-        con << "Log:\n";
-        for (int i = current + del - 1; i>=0; i--)
-        {
-            for (int j=0; j < DANGERLEVELS; j++)
-            {
-                con << entries[i].sideDanger[j][0] << ' ';
-                con << entries[i].frontDanger[j]   << ' ';
-                con << entries[i].sideDanger[j][1] << "    ";
-            }
-            con << entries[i].turn << ", " << entries[i].tries << "\n";
-        }
-#ifndef DEDICATED
-        //		se_PauseGameTimer(true);
-#endif
-#endif
-    }
-};
-
-void gAIPlayer::ThinkGrind( ThinkData & data )
+//!@param player   the AI player the state belongs to
+gAIPlayer::State::State( gAIPlayer & player )
+: parent_( player )
 {
+}
+
+gAIPlayer::State::~State()
+{
+}
+
+//!@return time in seconds until a new thought is needed
+REAL gAIPlayer::State::Think()
+{
+    tASSERT(0);
+    return 0;
+}
+
+//!@return the navigator to use
+gAINavigator & gAIPlayer::State::Navigator()
+{
+    tASSERT( Parent().navigator_.get() );
+    return *(Parent().navigator_.get());
+}
+
+//!@return the navigator to use
+gAINavigator const & gAIPlayer::State::Navigator() const
+{
+    tASSERT( Parent().navigator_.get() );
+    return *( Parent().navigator_.get() );
+}
+
+//!@return the character
+gAICharacter const & gAIPlayer::State::Character() const
+{
+    tASSERT( Parent().character_ );
+    return *Parent().character_;
+}
+
+gAIPlayer::StateGrind::StateGrind( gAIPlayer & player )
+: State( player )
+{
+}
+
+gAIPlayer::StateGrind::~StateGrind(){}
+
+REAL gAIPlayer::StateGrind::Think()
+{
+    /*
+
     REAL range = Delay() * Object()->Speed() * .5;
 
     if( data.front.front.wallType == gSENSOR_TEAMMATE )
@@ -2190,565 +1790,11 @@ void gAIPlayer::ThinkGrind( ThinkData & data )
 
     SwitchToState( AI_SURVIVE );
     data.thinkAgain = .5;
-}
 
-// emergency functions:
-bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int preferedSide)
-{
-    if (!character)
-    {
-        st_Breakpoint();
-        return false;
-    }
-
-    gAISensor const & front = data.front;
-    gAISensor const & left = data.left;
-    gAISensor const & right = data.right;
-
-    if (!log)
-        log = tNEW(gAILog);
-
-#ifdef DEBUG
-    static int last = 0;
-    if (log->current >= 4
-            && log->entries[log->current-2].time > se_GameTime() - .2
-            && log->entries[log->current-1].turn * last <= 0
-            && log->entries[log->current-1].turn * log->entries[log->current-2].turn < 0
-            //      && log->entries[log->current-3].turn * log->entries[log->current-2].turn < 0
-            //      && log->entries[log->current-3].turn * log->entries[log->current-4].turn < 0
-       )
-    {
-        log->Print();
-        //      st_Breakpoint();
-    }
-    if ( log->current > 0 )
-        last = log->entries[log->current-1].turn;
-#endif
-
-    triesLeft = (triesLeft * character->properties[AI_EMERGENCY])/10;
-
-    freeSide *= .95;
-
-    int i, j;
-
-    // don't do a thing if there may be a better way out of we drive on:
-    if (triesLeft > 0 &&
-            front.front.otherCycle &&
-            front.front.otherCycle != Object() &&
-            ((front.frontLoop[1].loop && front.front.otherCycle != left .front.otherCycle && left .front.otherCycle)||
-             (front.frontLoop[0].loop && front.front.otherCycle != right.front.otherCycle && right.front.otherCycle ) )
-       )
-        return false;
-
-    // get the delay between two turns
-    REAL delay = Delay();
-    REAL range = Object()->Speed() * delay;
-
-    // nothing we can do if we cannot make a turn immediately
-    if (!Object()->CanMakeTurn(1) || !Object()->CanMakeTurn(-1))
-        return false;
-
-    //  bool dontCheckForLoop[2] = { false, false };
-
-
-    // look out if there is anything bad going on in one of the directions:
-    // [signifficance: danger level of n: You'll be (as good as) dead in [10/n delay times] if you drive that way
-    int sideDanger[DANGERLEVELS][2];
-    int frontDanger[DANGERLEVELS];
-    for(i = DANGERLEVELS-1; i>=0; i--)
-    {
-        sideDanger[i][0] = 0;
-        sideDanger[i][1] = 0;
-        frontDanger[i]   = 0;
-    }
-
-    bool canTrapEnemy = false;
-
-    if (emergency)
-    {
-        frontDanger[SPACELEVEL] += 40;
-    }
-
-    const gAISensor* sides[2];
-    sides[0] = &left;
-    sides[1] = &right;
-
-    // avoid loops:
-
-    bool isTrapped = IsTrapped(Object(), NULL);
-
-    /*
-      if (front.front.wallType == gSENSOR_ENEMY)
-      sideDanger[LOOPLEVEL][(1-front.front.lr*enemyevade) >> 1] += 5;
-    */  
-
-    // don't check for loops if we're attacking/defending a zone
-    if( dynamic_cast< zZone const * >( GetTarget() ) && front.distance > range )
-    {
-        isTrapped = false;
-    }
-
-    if ( !isTrapped )
-        for (i = 1; i>=0; i--)
-        {
-            if ( front.frontLoop[i].loop && front.distance < 5*sides[i]->distance )
-            {
-                // if we would close ourself in, make the danger bigger
-                if (front.front.otherCycle == Object() && i+i-1 == front.front.lr)
-                    sideDanger[LOOPLEVEL][i]+=40;
-
-                sideDanger[LOOPLEVEL][i]+=40;
-                for (j = front.frontLoop[i].closedIn.Len()-1; j>=0; j--)
-                    if (front.frontLoop[i].closedIn(j) == target)
-                        canTrapEnemy = true;
-            }
-
-            for (j = 1; j>=0; j--)
-                if (front.sideLoop[i][j].loop)
-                    sideDanger[LOOPLEVEL][j]++;
-
-            // if we would close ourselfs in by a zigzag in direction i,
-            // but not by a u-turn and there is enough space for a u-turn,
-            // do it.
-            if (sides[i]->frontLoop[1-i].loop  &&
-                    !sides[i]->frontLoop[i].loop)
-            {
-                if (sides[i]->distance > range)
-                {
-                    frontDanger[LOOPLEVEL]     += 20;
-                    sideDanger[LOOPLEVEL][1-i] += 10;
-                }
-                else // try to make some room so we can evade:
-                {
-                    frontDanger[LOOPLEVEL]     += 20;
-
-                    sideDanger[LOOPLEVEL][i]   += 10;
-                }
-            }
-
-            // if we would close ourselves in by a U-Turn, don't do it.
-            //	if (sides[i]->frontLoop[i].loop && sides[i].distance < range * 2)
-            //	  sideDanger[LOOPLEVEL][i] += 40;
-        }
-
-    // try to trap the enemy
-    if (character->properties[AI_LOOP] >= 10 && canTrapEnemy && !emergency)
-        return false;
-
-
-    /*
-      // avoid closing yourself or a teammate in.
-      if (front.type == gSENSOR_SELF || front.type == gSENSOR_TEAMMATE)
-      {
-         if (front.lr > 0)
-      sideDanger[][1] +=2;
-         else
-      sideDanger[][0] +=2;
-      }
     */
 
-
-
-    {
-        if (front.Hit() &&
-                ( front.distance + range < sides[0]->distance ||
-                  front.distance + range < sides[1]->distance) )
-        {
-            if ( front.front.wallType == gSENSOR_RIM)
-                frontDanger[SPACELEVEL] += static_cast<int>(100 * range * gArena::SizeMultiplier() / (front.distance + range * .1));
-
-            frontDanger[SPACELEVEL] += static_cast<int>(5 * range / (front.distance + range *.2));
-
-            if (front.distance < range)
-                frontDanger[SPACELEVEL] += static_cast<int>(20 * range / (front.distance + range *.2)) + 1;
-        }
-
-
-        // avoid close corners:
-        for (i = 1; i>=0; i--)
-        {
-            if (sides[i]->Hit() && //sides[i]->distance < range * 3 &&
-                    sides[i]->distance < front.distance + range)
-            {
-                if ( sides[i]->front.wallType == gSENSOR_RIM)
-                    sideDanger[SPACELEVEL][i] += static_cast<int>(150 * range * gArena::SizeMultiplier() / (sides[i]->distance + range * .1));
-
-                sideDanger[SPACELEVEL][i] += static_cast<int>
-                                             (range * 5 / (sides[i]->distance + range * .1));
-
-                if (sides[i]->distance < range)
-                    sideDanger[SPACELEVEL][i] += static_cast<int>
-                                                 (range * 20 / (sides[i]->distance + range * .1));
-            }
-
-            // give us a chance to turn around:
-            if (frontDanger[SPACELEVEL] * 2 < sideDanger[SPACELEVEL][i])
-                sideDanger[LOOPLEVEL][i-i] -= sideDanger[SPACELEVEL][i] * 2;
-        }
-    }
-
-    // avoid close proximity to other cycles
-    const gCycle* target = NULL;
-    const tList<eGameObject>& gameObjects = Object()->Grid()->GameObjects();
-    gCycle *secondbest = NULL;
-    REAL closest = 1000000;
-    eCoord dir     = Object()->Direction();
-
-    // find the closest enemy
-    for (i=gameObjects.Len()-1;i>=0;i--){
-        gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
-
-        if (other && other->Alive() && other != Object())
-        {
-            eCoord otherpos=other->Position()-Object()->Position();
-            REAL otherNorm = otherpos.NormSquared();
-
-            bool nothit = false;
-            if (otherNorm < closest * 4)
-            {
-                gSensor p(other, other->Position(), -otherpos);
-                p.detect(REAL(.9999));
-                gSensor q(Object(), Object()->Position(), otherpos);
-                q.detect(REAL(.9999));
-
-                nothit = p.hit>=.999 && q.hit >=.999;
-            }
-
-            if (other->Team() != Object()->Team())
-            {
-                // then, enemy is realy an enemy
-                //      REAL s = Object()->Speed() * 50;
-                if (/* otherNorm < s*s && */ otherNorm < closest)
-                {
-                    // check if the path is clear
-                    secondbest = dynamic_cast<gCycle *>(other);
-                    if (nothit){
-                        closest = otherNorm;
-                        target = secondbest;
-                    }
-                }
-            }
-            else if (nothit)
-            {
-                // he is a teammate. Avoid him.
-
-                eCoord friendpos=other->Position() - Object()->Position();
-
-                // transform coordinates relative to us:
-                friendpos=friendpos.Turn(dir.Conj()).Turn(0,1);
-
-                if (friendpos.y > fabs(friendpos.x) * 1.5f)
-                    frontDanger[TEAMLEVEL] += 10;
-                if (friendpos.x * 2 > -friendpos.y)
-                    sideDanger[TEAMLEVEL][1] += 10;
-                else if (-friendpos.x * 2 > -friendpos.y)
-                    sideDanger[TEAMLEVEL][0] += 10;
-            }
-        }
-    }
-
-    //  if (!target)
-    //target = secondbest;
-
-    if (target && character->properties[AI_ENEMY] > 0)
-    {
-        bool sdanger = false;
-        for (i = DANGERLEVELS-1; i>=0; i--)
-            sdanger |= sideDanger[i][0] > 4 || sideDanger[i][1] > 4;
-
-        eCoord enemypos=target->Position() - Object()->Position();
-        eCoord enemydir=target->Direction();
-        REAL enemyspeed=target->Speed();
-
-
-        // transform coordinates relative to us:
-        enemypos=enemypos.Turn(dir.Conj()).Turn(0,1);
-        enemydir=enemydir.Turn(dir.Conj()).Turn(0,1);
-
-        if (character->properties[AI_ENEMY] > 7)
-        {
-            // would he be able to trap us if we drive straight on?
-            bool trap[2] = {false, false};
-
-            if (!isTrapped)
-                for (i = 1; i>=0; i--)
-                {
-                    // if the enemy comes racing towards us, check if he could
-                    // close us in by touching our own line ON THE OPPOSITE side of i
-                    tArray<const gCycle*> closedIn;
-                    int winding = 0;
-
-                    bool loop = CheckLoop(target, Object(),
-                                          Object()->GetDistance() + 4 * TOL, i, 0,
-                                          closedIn, winding);
-
-                    winding -= Object()->WindingNumber();
-                    winding += target->WindingNumber();
-
-
-                    // yes! we shoult turn in direction 1-i to get the target
-                    // to the other side.
-                    if (loop)
-                        if (winding * (i+i-1) < 0)
-                        {
-                            trap[i] = true;
-                            REAL x = enemypos.x * (i+i-1);
-                            REAL y = enemypos.y;
-
-                            bool canAccelerateByTurning =
-                                ( sides[1-i]->Hit() &&
-                                  sides[1-i]->distance < Object()->Speed() * delay * 5 &&
-                                  sides[i-i]->distance > Object()->Speed() * delay &&
-                                  !sides[i-i]->frontLoop[i].loop) ;
-
-                            bool ohShit = target->Speed() > Object()->Speed() + sqrt(closest);
-
-                            if (ohShit)
-                            {
-                                SetTraceSide(-(i+i-1));
-                                SwitchToState(AI_TRACE, 10);
-                            }
-
-                            bool turningIsFutile =
-                                front.front.otherCycle == Object() &&
-                                sides[1-i]->front.otherCycle == Object() &&
-                                front.distance < sides[1-1]->distance * 10 ;
-
-                            if (
-                                x < 0 &&
-                                (
-                                    x * Object()->Speed() < -y * target->Speed() + 1000 ||
-                                    canAccelerateByTurning || ohShit
-                                )
-                                &&
-                                !turningIsFutile
-                            )
-                            {
-                                if (enemydir.y < -.2f && y < 0)
-                                    SetTraceSide(-(i+i-1));
-
-                                frontDanger[TRAPLEVEL]    += 10;
-                            }
-
-                            if ( y > 0 || x < 0 || ohShit
-                                    //			   ( y * Object()->Speed() > x * target->Speed()*.9 - 200 || enemyspeed.x * (i+i-1)
-                               )
-                                sideDanger[TRAPLEVEL][i] += 20;
-                            // sideDanger[TRAPLEVEL][i] ++;
-                        }
-                }
-        }
-
-        if (character->properties[AI_ENEMY] > 0)
-        {
-            // imminent collision check
-            REAL totalspeed = enemyspeed + Object()->Speed();
-
-            if ((fabs(enemypos.y) < totalspeed * .3f && fabs(enemypos.x) < totalspeed * .3f))
-            {
-                REAL diffSpeed  = -enemydir.y * enemyspeed + Object()->Speed();
-                if (diffSpeed > 0 && enemydir.y <= .2)
-                {
-                    REAL enemyFront = enemypos.y / diffSpeed;
-                    REAL enemySide  = fabs(enemypos.x) / diffSpeed;
-                    if (enemyFront > 0 && enemyFront < .4 + enemySide && fabs(enemypos.y) > fabs(enemypos.x))
-                    {
-                        frontDanger[COLIDELEVEL] += 1 + int(4 / (enemyFront + .01));
-                        //		      SwitchToState( AI_SURVIVE, enemyFront * 4 + 2 );
-                    }
-                }
-
-                int side = enemypos.x > 0 ? 1 : 0;
-
-                // can we cut him instead of evade him?
-                if (Object()->Team() != target->Team() &&
-                        ( ( enemydir.y <= -.2 &&
-                            enemypos.y*target->Speed()*1.1 > fabs(enemypos.x) * Object()->Speed() ) ||
-                          sideDanger[COLIDELEVEL][side] > 0))
-                    sideDanger[COLIDELEVEL][1-side]+=5;
-                else if ( -(enemypos.y + .3f) * Object()->Speed() < fabs(enemypos.x) * target->Speed()*1.2)
-                    sideDanger[COLIDELEVEL][side]+=10;
-            }
-        }
-    }
-
-    eDebugLine::SetTimeout(.5);
-    eDebugLine::SetColor  (1, 0, 1);
-    eCoord p = Object()->Position();
-    eDebugLine::Draw(p, .5, p, 8.5);
-    eDebugLine::SetTimeout(0);
-
-
-
-    // determine the total danger levels by taking the max of the individual experts:
-    int fDanger = 0;
-    int sDanger[2] = { 0, 0 };
-    for (i = 0; i<DANGERLEVELS; i++)
-        // for (i = 1; i< 2; i++)
-    {
-        if (!fDanger || frontDanger[i] > fDanger + 2)
-            fDanger = frontDanger[i];
-
-        for (int j=1; j>=0; j--)
-            if (!sDanger[j] || sideDanger[i][j] > sDanger[j] + 2)
-                sDanger[j] = sideDanger[i][j];
-    }
-
-    // nothing to do if we are not in immediate danger.
-    if (!fDanger && !preferedSide)
-        return false;
-
-
-    // decide about your direction:
-    int turn = 0;
-
-    turn += sDanger[0];
-    turn -= sDanger[1];
-
-    if (!turn)
-        turn = (int) freeSide;
-
-    if (!turn && front.front.wallType != gSENSOR_RIM)
-        turn = front.front.lr * enemyevade;
-
-    if (!turn)
-        turn = (sides[0]->distance > sides[1]->distance ? -1 : 1);
-
-    if (!turn && log->current)
-        turn = log->entries[log->current-1].turn;
-
-
-
-    // switch to survival mode if we just trapped an enemy
-    if (canTrapEnemy)
-    {
-#ifdef DEBUG
-        if ( !tRecorder::IsRunning() )
-            Chat(tString( "Hehe! Got you!" ) );
-#endif
-        SwitchToState(AI_TRACE, 10);
-
-        if (turn)
-            this->SetTraceSide(-turn);
-    }
-
-    gAILogEntry&e = log->NextEntry();
-    e.turn = 0;
-    e.tries = triesLeft;
-    for (i = DANGERLEVELS-1; i>=0; i--)
-    {
-        e.frontDanger[i]   = frontDanger[i];
-        e.sideDanger[i][0] = sideDanger[i][0];
-        e.sideDanger[i][1] = sideDanger[i][1];
-    }
-
-
-    int side = 1;
-    if (preferedSide < 0)
-    {
-        for (i = DANGERLEVELS-1; i>=0; i--)
-        {
-            int dSwap = sideDanger[i][0];
-            sideDanger[i][0] = sideDanger[i][1];
-            sideDanger[i][1] = dSwap;
-        }
-
-        int dSwap = sDanger[0];
-        sDanger[0] = sDanger[1];
-        sDanger[1] = dSwap;
-
-        sides[1] = &left;
-        sides[0] = &right;
-        side     = -1;
-        preferedSide = 1;
-    }
-
-
-    // no problem in the preferred direction. Just take it.
-    if (preferedSide)
-    {
-        if( fDanger * 3 >= sDanger[1] * 2 - 40 &&
-                sDanger[0] * 3 >= sDanger[1] * 2 - 40 )
-        {
-            freeSide -= side*100;
-            e.turn = side;
-            data.turn = side;
-            return true;
-        }
-
-        if (fDanger * 2 <= sDanger[0] * 3 + 3)
-        {
-            log->DeleteEntry();
-            return false;
-        }
-    }
-
-    // it is safer driving straight on
-    if (fDanger <= sDanger[0] + 3 && fDanger <= sDanger[1] + 3 && fDanger < 20)
-    {
-        log->DeleteEntry();
-        return false;
-    }
-
-
-    if (turn)
-    {
-        freeSide -= side*100;
-        e.turn = turn;
-        data.turn = turn;
-    }
-    else
-        log->DeleteEntry();
-
-    return turn;
-
-    eDebugLine::SetTimeout(0);
+    return 0;
 }
-
-void gAIPlayer::EmergencyTrace( ThinkData & data )
-{
-    EmergencySurvive( data, -1, -traceSide );
-}
-
-
-void gAIPlayer::EmergencyPath( ThinkData & data )
-{
-    EmergencySurvive( data );
-}
-
-void gAIPlayer::EmergencyCloseCombat( ThinkData & data )
-{
-    if( idler.get() )
-    {
-        data.thinkAgain = idler->Activate( Object()->LastTime(), 0 );
-    }
-    else
-    {
-        EmergencySurvive( data );
-    }
-    /*
-      int dir = 0;
-
-      if (target)
-      {
-         eCoord enemyPos = target->Position() - Object()->Position();
-         eCoord dirRel   = Object()->Direction();
-         if (enemyPos * dirRel < 0)
-      dir --;
-         else
-      dir ++;
-      }
-
-
-      EmergencySurvive(front, left, right, 1, dir);
-    */
-}
-
-void gAIPlayer::EmergencyGrind( ThinkData & data )
-{
-    ThinkGrind( data );
-}
-
 
 void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the vehicle gets destroyed.
 {
@@ -2758,16 +1804,18 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
     if ( simpleAI_ )
         return;
 
-    if (!character)
+    if ( !character_ )
     {
         st_Breakpoint();
         return;
     }
 
+    CreateNavigator();
+
     gRandomController random( randomizer_ );
 
     // think again immediately after this
-    nextTime = lastTime;
+    nextTime_ = lastTime_;
 
 #ifdef DEBUG_X
     if (log && !Object()->Alive())
@@ -2779,107 +1827,47 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
     }
 #endif
 
-    if (!Object()->Alive() || ( character && Random() * 10 > character->properties[AI_EMERGENCY] ) )
+    if (!Object()->Alive() || ( character_ && Random() * 10 > character_->properties[AI_EMERGENCY] ) )
         return;
 
-
-    // get the delay between two turns
-    REAL delay = Delay();
-
-    this->triesLeft = triesLeft;
-    this->emergency = (triesLeft < 2);
-
-    REAL speed=Object()->Speed();
-    REAL range=speed;
-    eCoord dir=Object()->Direction();
-    REAL  side = speed*delay;
-
-    gAISensor front(Object(),Object()->Position(),dir, side, range, range*.3, 0);
-    gAISensor left(Object(),Object()->Position(),dir.Turn(eCoord(0,1)), side, range, range*.3, -1);
-    gAISensor right(Object(),Object()->Position(),dir.Turn(eCoord(0,-1)), side, range, range*.3, 1);
-
-
-
-
-#ifdef TESTSTATE  
-    state = TESTSTATE;
-    nextStateChange = se_GameTime() + 100;
-#else
-    // switch to survival state if our victim died:
-    if ( (!target || !target->Alive()) && sg_RequireVictim( state ) )
-        SwitchToState(AI_SURVIVE, 1);
-#endif
-
-    ThinkData data( front, left, right);
-    switch (state)
+    if( state_ )
     {
-    case AI_GRIND:
-        EmergencyGrind(data);
-        break;
-    case AI_SURVIVE:
-        EmergencySurvive(data);
-        break;
-    case AI_PATH:
-        EmergencyPath(data);
-        break;
-    case AI_TRACE:
-        EmergencyTrace(data);
-        break;
-    case AI_CLOSECOMBAT:
-        EmergencyCloseCombat(data);
-        break;
-    case AI_STATE_COUNT:
-        break;
+        state_->Think();
     }
-    ActOnData( data );
-
-#ifdef DEBUG_X
-    {
-        gAISensor front(Object(),Object()->Position(),dir, side, range, range*.3, 0);
-        gAISensor left(Object(),Object()->Position(),dir.Turn(eCoord(0,1)), side, range, range*.3, -1);
-        gAISensor right(Object(),Object()->Position(),dir.Turn(eCoord(0,-1)), side, range, range*.3, 1);
-    }
-#endif
 }
 
 void gAIPlayer::NewObject()         // called when we control a new object
 {
-    lastTime = 0;
-    lastPath = 0;
-    lastChangeAttempt = 0;
-    lazySideChange = 0;
-    substate = AI_NONE;
+    lastTime_ = 0;
     
-    path.Clear();
+    navigator_.reset();
 
-    idler.reset();
-
-    if (character)
+    if ( character_ )
     {
-        nextTime        = character->properties[AI_STARTSTRAIGHT] * gArena::SizeMultiplier()/gCycleMovement::SpeedMultiplier();
-        nextStateChange = character->properties[AI_STATECHANGE];
-        state           = (gAI_STATE)character->properties[AI_STARTSTATE];
+        nextTime_       = character_->properties[AI_STARTSTRAIGHT] * gArena::SizeMultiplier()/gCycleMovement::SpeedMultiplier();
+        switch ( character_->properties[AI_STARTSTATE] )
+        {
+        default:
+            state_          = tNEW(gStateSurvive)(*this);
+            break;
+        }
     }
     else
     {
-        nextTime        = 10;
-        nextStateChange = 30;
-        state           = AI_TRACE;
+        nextTime_        = 10;
+        state_          = tNEW(gStateSurvive)(*this);
     }
 
     if( TeamListID() > 0 )
     {
-        state = AI_GRIND;
-        nextTime = Delay() * 2 + .1;
+        state_ = tNEW(StateGrind)(*this);
+        nextTime_ = Delay() * 2 + .1;
     }
-
-    if (log)
-        delete log;
-    log = NULL;
 
     ClearTarget();
 }
 
+/*
 static gAISensor * sg_GetSensor( int currentDirectionNumber, gCycle const & object, int turn, REAL side, REAL range, REAL corridor, REAL & mindist )
 {
     // determine the current direction
@@ -2924,6 +1912,16 @@ static gAISensor * sg_GetSensor( int currentDirectionNumber, gCycle const & obje
 
     return ret;
 }
+*/
+
+void gAIPlayer::CreateNavigator()
+{
+    gCycle * cycle = Object();
+    if( cycle && !navigator_.get() )
+    {
+        navigator_ = std::auto_ptr< gAINavigator >( tNEW( gAINavigator( cycle ) ) );
+    }
+}
 
 REAL gAIPlayer::Think(){
     if ( !simpleAI_ )
@@ -2935,87 +1933,23 @@ REAL gAIPlayer::Think(){
         }
     }
 
+    CreateNavigator();
+
     if ( simpleAI_ )
     {
         return simpleAI_->Think();
     }
 
-    gCycle * cycle = Object();
-    if( cycle && !idler.get() )
+    if( GetTarget() && ( !GetTarget()->Alive() || IsTrapped( GetTarget(), Object() ) ) )
     {
-        idler = std::auto_ptr< gAINavigator >( tNEW( gAINavigator( cycle ) ) );
+        // no longer makes sense to chase
+        ClearTarget();
     }
-
-
-    // get the delay between two turns
-    REAL delay = Delay();
-
-#ifdef DEBUG_X  
-    if (log && !Object()->Alive())
-    {
-        log->Print();
-        st_Breakpoint();
-        delete log;
-        log = NULL;
-    }
-#endif
 
     if (!Object()->Alive())
         return 100;
 
-    emergency = false;
-    //  return 1;
-
-    // first, find close eWalls and evade them.
-    REAL speed=Object()->Speed();
-    REAL range=speed;
-    eCoord dir=Object()->Direction();
-    REAL side=speed*delay;
-
-    REAL corridor = range;
-    if (corridor < side * 2)
-        corridor = side * 2;
-
-    gAISensor front(Object(),Object()->Position(),dir, side * 2, range, corridor, 0);
-
-#ifdef DEBUG_X
-    if (front.Hit())
-    {
-        gRandomController noRandom;
-
-        if (front.distance < 1)
-        {
-            int x;
-            x = 1;
-        }
-        gAISensor front(Object(),Object()->Position(),dir, side, range, corridor, 0);
-    }
-#endif
-
-    // get the sensors to the left and right with the most free space
-    int currentDirectionNumber = Object()->Grid()->DirectionWinding( dir );
-    REAL mindistLeft = 1E+30, mindistRight = 1E+30;
-    std::auto_ptr< gAISensor > left  ( sg_GetSensor( currentDirectionNumber, *Object(), -1, side, range, corridor, mindistLeft ) );
-    std::auto_ptr< gAISensor > right ( sg_GetSensor( currentDirectionNumber, *Object(), 1, side, range, corridor, mindistRight ) );
-
-    // count intermediate walls to the left and right as if they were in front
-    {
-        REAL mindistFront = mindistLeft > mindistRight ? mindistLeft : mindistRight;
-        if ( mindistFront < front.distance )
-        {
-            front.distance = mindistFront;
-        }
-    }
-
-#ifdef TESTSTATE  
-    state = TESTSTATE;
-    nextStateChange = se_GameTime() + 100;
-#else
-    // switch to survival state if our victim died:
-    if ( sg_RequireVictim( state ) && (!target || !target->Alive()))
-        SwitchToState(AI_SURVIVE, 1);
-#endif
-
+#ifdef DEBUG
     {
         eDebugLine::SetTimeout(.5);
         eDebugLine::SetColor  (0, 1, 0);
@@ -3023,174 +1957,61 @@ REAL gAIPlayer::Think(){
         eDebugLine::Draw(p, .5, p, 5.5);
         eDebugLine::SetTimeout(0);
     }
-
-    triesLeft = 10;
-
-    REAL ret = 1;
-
-    //not the best solution, but still better than segfault...
-    if(left.get() != 0 && right.get() != 0) {
-        ThinkData data( front, *left, *right);
-        switch (state)
-        {
-        case AI_GRIND:
-            ThinkGrind(data);
-            break;
-        case AI_SURVIVE:
-            ThinkSurvive(data);
-            break;
-        case AI_PATH:
-            ThinkPath(data);
-            break;
-        case AI_TRACE:
-            ThinkTrace(data);
-            break;
-        case AI_CLOSECOMBAT:
-            ThinkCloseCombat(data);
-            break;
-        case AI_STATE_COUNT:
-            break;
-        }
-        ActOnData( data );
-        ret = data.thinkAgain;
-    }
-
-#ifdef DEBUG_X
-    {
-        gAISensor front(Object(),Object()->Position(),dir, side, range, range*.3, 0);
-        gAISensor left(Object(),Object()->Position(),dir.Turn(eCoord(0,1)), side, range, range*.3, -1);
-        gAISensor right(Object(),Object()->Position(),dir.Turn(eCoord(0,-1)), side, range, range*.3, 1);
-    }
 #endif
 
-    REAL mindist = front.distance * front.distance * 8;
-
-    const tList<eGameObject>& gameObjects = Object()->Grid()->GameObjects();
-
-    // find the closest enemy
-    for (int i=gameObjects.Len()-1;i>=0;i--){
-        gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
-
-        if (other && other != Object()){
-            // then, enemy is realy an enemy
-            eCoord otherpos=other->Position()-Object()->Position();
-            REAL dist = otherpos.NormSquared();
-
-            if (dist < mindist)
-                mindist = dist;
-        }
-    }
-
-    mindist = sqrt(mindist) / (3 * Object()->Speed());
-
-    if (ret > mindist)
-        ret = mindist;
-
-    return ret;
-}
-
-std::ostream & operator << ( std::ostream & s, gAIPlayer::ThinkDataBase const & data )
-{
-    s << data.turn << " " << data.thinkAgain;
-
-    return s;
-}
-
-std::istream & operator >> ( std::istream & s, gAIPlayer::ThinkDataBase & data )
-{
-    s >> data.turn >> data.thinkAgain;
-
-    return s;
-}
-
-static char const * section = "AI";
-
-void gAIPlayer::ActOnData( ThinkData & data )
-{
-    // delegate
-    ThinkDataBase & base = data;
-    ActOnData( base );
-
-    // sanitize next think time so it will be before we hit the next wall
-    if ( Object()->Speed() > 0 && data.thinkAgain > 0 )
+    if( state_ )
     {
-        gSensor front( Object(), Object()->Position(), Object()->Direction() );
-        front.detect( Object()->Speed() * data.thinkAgain * 1.5 );
-        if ( front.ehit )
-        {
-            REAL thinkAgain = ( front.hit / Object()->Speed() ) * .8;
-            if ( data.thinkAgain > thinkAgain )
-                data.thinkAgain = thinkAgain;
-        }
+        return state_->Think();
     }
+
+    return 10;
 }
-
-void gAIPlayer::ActOnData( ThinkDataBase & data )
-{
-    // archive decision
-    ThinkDataBase copy = data;
-    if ( tRecorder::Playback( section, data ) )
-    {
-        if ( copy.turn != data.turn )
-        {
-            // AI made a different decision than recorded, better let a programmer have a look at it
-            std::cout << "AI turn decision changed!\n";
-            st_Breakpoint();
-        }
-
-        REAL difference =  fabs( copy.thinkAgain - data.thinkAgain );
-        static REAL minReport = EPS;
-        if ( difference > minReport )
-        {
-            minReport = difference * 2;
-            std::cout << "AI timing decision changed by " << difference
-            << " from " << data.thinkAgain << " to " << copy.thinkAgain <<"!\n";
-            st_Breakpoint();
-        }
-    }
-    tRecorder::Record( section, data );
-
-    // execute turn
-    if ( data.turn )
-        Object()->Turn( data.turn );
-}
-
-const REAL relax=25;
 
 void gAIPlayer::Timestep(REAL time){
-    if (!character)
+    if (!character_)
     {
         st_Breakpoint();
         return;
     }
 
+    const REAL relax=25;
+
     // don't think if the object is not up to date
     if ( Object() && Object()->LastTime() < time - EPS )
         return;
 
-    REAL ts=time-lastTime;
-    lastTime=time;
+    REAL ts=time-lastTime_;
+    lastTime_=time;
 
-    if (concentration < 0)
-        concentration = 0;
+    if (concentration_ < 0)
+        concentration_ = 0;
 
-    concentration += 4*(character->properties[AI_REACTION]+1) * ts/relax;
-    concentration=concentration/(1+ts/relax);
+    concentration_ += 4*(character_->properties[AI_REACTION]+1) * ts/relax;
+    concentration_=concentration_/(1+ts/relax);
 
-    if (bool(Object()) && Object()->Alive() && nextTime<time){
+    if (bool(Object()) && Object()->Alive() && nextTime_<time){
         gRandomController random( randomizer_ );
 
         REAL nextthought=Think();
         //    if (nextthought>.9) nextthought=REAL(.9);
 
-        if (nextthought<REAL(.6-concentration)) nextthought=REAL(.6-concentration);
+        if (nextthought<REAL(.6-concentration_)) nextthought=REAL(.6-concentration_);
+        if( concentration_ > 0 )
+        {
+            REAL target = 2;
+            REAL safethought = ( target/concentration_ -.1 )/4;
+            if( nextthought > safethought )
+            {
+                nextthought = safethought;
+            }
+        }
 
-        nextTime=nextTime+nextthought;
+        nextTime_=nextTime_+nextthought;
 
-        //con << concentration << "\t" << nextthought << '\t' << ts << '\n';
+        //con << concentration_ << "\t" << nextthought << '\t' << ts << '\n';
 
         if(.1+4*nextthought<1)
-            concentration*=REAL(.1+4*nextthought);
+            concentration_*=REAL(.1+4*nextthought);
     }
 }
 
@@ -3202,12 +2023,9 @@ void gAIPlayer::Color( REAL&a_r, REAL&a_g, REAL&a_b ) const
 
 gAIPlayer::~gAIPlayer()
 {
-    target=NULL;
+    target_=NULL;
     ClearObject();
     tCHECK_DEST;
-
-    delete log;
-    log = NULL;
 }
 
 void gAIPlayer::ClearAll()
