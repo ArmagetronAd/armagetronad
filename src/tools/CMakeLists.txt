@@ -3,8 +3,11 @@ include_directories (
     ${ARMA_SOURCE_DIR}/src/tools/
     ${ARMA_SOURCE_DIR}/src/resource/
     ${ARMA_SOURCE_DIR}/src/thirdparty/utf8/
+    ${ARMA_SOURCE_DIR}/src/thirdparty/mathexpr/
 
-    ${ARMA_BINARY_DIR}/src/protobuf/    
+    ${ARMA_BINARY_DIR}/src/
+    ${ARMA_BINARY_DIR}/src/protobuf/
+    ${LIBXML2_INCLUDE_DIR}
     )
 
 add_library (libtools

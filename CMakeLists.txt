@@ -2,7 +2,6 @@ cmake_minimum_required (VERSION 2.4)
 
 project (ARMA)
 
-# add_executable (armagetronad)
 
 ##### CONFIGURE CHECKS #####
 include (CheckIncludeFiles)
@@ -13,6 +12,7 @@ include (FindLibXml2)
 
 CHECK_FUNCTION_EXISTS (isblank HAVE_ISBLANK)
 CHECK_FUNCTION_EXISTS (select HAVE_SELECT)
+CHECK_FUNCTION_EXISTS (wmemset HAVE_WMEMSET)
 
 CHECK_LIBRARY_EXISTS (m atan2f "" HAVE_ATAN2F)
 CHECK_LIBRARY_EXISTS (m cosf "" HAVE_COSF)
@@ -38,9 +38,18 @@ CHECK_INCLUDE_FILES (sys/stat.h HAVE_SYS_STAT_H)
 CHECK_INCLUDE_FILES (sys/types.h HAVE_SYS_TYPES_H)
 CHECK_INCLUDE_FILES (unistd.h HAVE_UNISTD_H)
 
-# FindLibXml2()
-
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/aa_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/aa_config.h)
 
 add_subdirectory (src)
+
+
+add_executable (armagetronad src/tron/gArmagetron.cpp)
+add_dependencies (armagetronad libtools)
+
+include_directories(${LIBXML2_INCLUDE_DIR})
+message("Include: ${LIBXML2_INCLUDE_DIR} Libraries: ${LIBXML2_LIBRARIES} Definitions: ${LIBXML2_DEFINITIONS}")
+#SET_TARGET_PROPERTY(armagetron
+#    PROPERTIES 
+        
+#        LINK_FLAGS ${LIBXML2_})
 

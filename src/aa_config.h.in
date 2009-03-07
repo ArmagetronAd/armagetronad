@@ -11,6 +11,7 @@
 #cmakedefine HAVE_SINF 1
 #cmakedefine HAVE_SQRTF 1
 #cmakedefine HAVE_TANF 1
+#cmakedefine HAVE_WMEMSET 1
 
 #cmakedefine HAVE_GOOGLE_PROTOBUF_MESSAGE_H 1
 #cmakedefine HAVE_INTTYPES_H 1
