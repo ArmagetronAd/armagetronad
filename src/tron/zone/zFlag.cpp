@@ -43,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eSoundMixer.h"
 
 #include "zone/zFlag.h"
-//#include "zone/zFortress.h"
+#include "zone/zFortress.h"
 #include "zone/zZone.h"
 
 #include <time.h>
@@ -223,6 +223,24 @@ bool zFlagZone::Timestep( REAL time )
                 lose << "$player_flag_hold_score_lose";
 
                 player->AddScore(sg_flagHoldScore, win, lose);
+            }
+        }
+        
+        if (player)
+        {
+            const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+            for (int i=gameObjects.Len()-1;i>=0;i--)
+            {
+                zFortressZone *other=dynamic_cast<zFortressZone *>(gameObjects(i));
+                if (other )
+                {
+                    if(other->getTeam() == player->CurrentTeam()->Name()){
+                        if(other->getShape()->isInteracting(player->Object())){
+                            //Player with Flag is at home either warn not back yet or reset it and team scores points
+                             
+                        }
+                    }
+                }
             }
         }
 

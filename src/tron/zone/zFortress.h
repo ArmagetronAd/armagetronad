@@ -48,6 +48,8 @@ public:
     void setupVisuals(gParser::State_t &);
     void readXML(tXmlParser::node const &);
 
+    tString getTeam(){return team->Name();}
+
 private:
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
 
@@ -65,9 +67,6 @@ private:
     REAL conquered_;                       //!< conquest status; zero if it is free, 1 if it has been completely conquered by the enemy
     int enemiesInside_;                     //!< count of enemies currently inside the zone
     int ownersInside_;                      //!< count of owners currently inside the zone
-
-    tColoredString enemyPlayerName_;        //!< name of the first enemy player that was inside us
-    tColoredString teamPlayerName_;         //!< name of the first team player that was inside us
 
     bool onlySurvivor_;                     //!< flag set if this zone is the only survivor
 
