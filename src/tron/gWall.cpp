@@ -1531,13 +1531,11 @@ void gNetPlayerWall::InitArray()
 
 void gNetPlayerWall::MyInitAfterCreation()
 {
-#ifndef DEDICATED
     // put yourself into rendering list
     if ( cycle_ )
     {
         Insert( cycle_->displayList_.wallList_ );
     }
-#endif
 
     //w=
 #ifdef DEBUG
@@ -1967,8 +1965,10 @@ gNetPlayerWall::gNetPlayerWall( Game::PlayerWallSync const & sync, nSenderInfo c
 
 eCoord gNetPlayerWall::Vec()
 {
-    if ( edge_ ) return edge_->Vec();
-    else return eCoord();
+    return end - beg;
+    // Odd, this code would never return something useful, but was here.
+    // if ( edge_ ) return edge_->Vec();
+    // else return eCoord();
 }
 
 gPlayerWall *gNetPlayerWall::Wall(){

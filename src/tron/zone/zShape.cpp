@@ -555,13 +555,13 @@ void zShapeCircle::setReferenceTime(REAL time)
 tCoord zShapeCircle::findPointNear(tCoord & p) {
     tCoord angle = p - Position();
     angle.Normalize();
-    return angle * calcBoundSq();
+    return angle * calcBoundSq() + Position();
 }
 
 tCoord zShapeCircle::findPointFar(tCoord & p) {
     tCoord angle = Position() - p;
     angle.Normalize();
-    return angle * calcBoundSq();
+    return angle * calcBoundSq() + Position();
 }
 
 REAL zShapeCircle::calcBoundSq() {
@@ -835,14 +835,14 @@ tCoord zShapePolygon::findPointNear(tCoord & p) {
     // FIXME: Write real sane code for a polygon
     tCoord angle = p - Position();
     angle.Normalize();
-    return angle * calcBoundSq();
+    return angle * calcBoundSq() + Position();
 }
 
 tCoord zShapePolygon::findPointFar(tCoord & p) {
     // FIXME: Write real sane code for a polygon
     tCoord angle = Position() - p;
     angle.Normalize();
-    return angle * calcBoundSq();
+    return angle * calcBoundSq() + Position();
 }
 
 REAL zShapePolygon::calcBoundSq() {

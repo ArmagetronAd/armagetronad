@@ -117,35 +117,39 @@ private:
 class gAINavigator;
 class gCycleChatBot;
 
-#ifndef DEDICATED
 class gCycleWallsDisplayListManager
 {
     friend class gNetPlayerWall;
+    friend class gCycle;
 
 public:
     gCycleWallsDisplayListManager();
 
-    //! checks whether a wall at a certain distance can have a display list
-    static bool CannotHaveList( REAL distance, gCycle const * cycle );
-
-    void RenderAll( eCamera const * camera, gCycle * cycle );
     bool Walls() const
     {
         return wallList_ || wallsWithDisplayList_;
     }
+#ifndef DEDICATED
+    //! checks whether a wall at a certain distance can have a display list
+    static bool CannotHaveList( REAL distance, gCycle const * cycle );
+
+    void RenderAll( eCamera const * camera, gCycle * cycle );
 
     void Clear( int inhibit = 0 )
     {
         displayList_.Clear( inhibit );
     }
+#endif
 private:
     gNetPlayerWall *                wallList_;                      //!< linked list of all walls
     gNetPlayerWall *                wallsWithDisplayList_;          //!< linked list of all walls with display list    
+
+#ifndef DEDICATED
     rDisplayList                    displayList_;                   //!< combined display list
     REAL                            wallsWithDisplayListMinDistance_; //!< minimal distance of the walls with display list
     int                             wallsInDisplayList_;            //!< number of walls in the current display list
-};
 #endif
+};
 
 // a complete lightcycle
 class gCycle: public gCycleMovement
@@ -201,9 +205,7 @@ public:
 private:
     void TransferPositionCorrectionToDistanceCorrection();
 
-#ifndef DEDICATED
     gCycleWallsDisplayListManager displayList_;                     //!< display list manager
-#endif
 
     tCHECKED_PTR(gNetPlayerWall)	currentWall;                    //!< the wall that currenly is attached to the cycle
     tCHECKED_PTR(gNetPlayerWall)	lastWall;                       //!< the last wall that was attached to this cycle
@@ -344,6 +346,21 @@ public:
     //	virtual void AddRef();
     //	virtual void Release();
 
+    //! information about walls
+    struct WallInfo
+    {
+        tCoord tailPos;      //!< the position of the end of the walls
+        tCoord centerOfMass; //!< the center of the total walls
+    };
+    
+    //! fills in tail info, assuming the total wall lenght is the one given
+    void FillWallInfoFlexible( WallInfo & info, REAL totalLength ) const;
+
+    //! fills in tail info using the real wall length assuming the given rubber usage ratio
+    void FillWallInfo( WallInfo & info, REAL rubberRatio ) const;
+
+    //! fills in tail info using the real wall length
+    void FillWallInfo( WallInfo & info ) const;
 private:
     static	REAL	wallsStayUpDelay;			//!< the time the cycle walls stay up ( negative values: they stay up forever )
     static	REAL	wallsLength;				//!< the maximum total length of the walls

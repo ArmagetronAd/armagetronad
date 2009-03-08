@@ -1045,7 +1045,87 @@ private:
 class gZoneEvaluator: public gAINavigator::PathEvaluator
 {
 public:
-    gZoneEvaluator( gCycle const & cycle, zZone const & zone ): cycle_( cycle ), zone_( zone ){}
+    gZoneEvaluator( gCycle const & cycle, zZone const & zone ): cycle_( cycle ), zone_( zone )
+    {
+        zShape * shape = zone_.getShape();
+        if ( !shape )
+        {
+            return;
+        }
+
+        eCoord pos    = cycle_.Position();
+        eCoord center = shape->findCenter();
+
+        // REAL insideness = (pos-center).NormSquared()/(edge-center).NormSquared();
+
+        if( zone.Team() == cycle.Team() )
+        {
+            if ( cycle.GetDistance() < cycle.ThisWallsLength() )
+            {
+                eCoord rand;
+                eCoord edge   = shape->findPointNear( rand );
+                REAL angle = 2 * M_PI * cycle.GetDistance()/cycle.ThisWallsLength();
+                tailToChase_ = center + .9 * ( edge - center ).Turn( cosf(angle), sinf( angle ) );
+            }
+            else
+            {
+                gCycle::WallInfo info;
+                cycle.FillWallInfo( info, .5 );
+                tailToChase_ = info.tailPos;
+
+#ifdef DEBUG
+                eDebugLine::SetTimeout(.5);
+                eDebugLine::SetColor  (0, 1, 1);
+                eDebugLine::Draw(tailToChase_, .5, tailToChase_, 5.5);
+                eDebugLine::SetTimeout(0);
+#endif
+
+                // shift tail in an attempt to restore a circular pattern after a disturbance
+                /*
+                eCoord shift = center - info.centerOfMass;
+                REAL shiftLen = shift.Norm();
+                REAL factor = 2 * shiftLen / cycle.MaxWallsLength();
+                if ( factor > 1 )
+                {
+                    tailToChase_ += shift * ( ( factor - 1 )/factor );
+                }
+                */
+                
+                // make sure tail pos to chase lies inside an acceptable strip around the zone border
+                eCoord tailEdge = shape->findPointNear( tailToChase_ );
+                REAL tailInsideness = (tailToChase_-center).NormSquared()/(tailEdge-center).NormSquared();
+                REAL minInsideness = .7, maxInsideness = 1.1;
+                if( tailInsideness < minInsideness )
+                {
+                    tailToChase_ = center + (tailToChase_-center) * sqrt( minInsideness/tailInsideness );
+                }
+                else if( tailInsideness > maxInsideness )
+                {
+                    tailToChase_ = center + (tailToChase_-center) * sqrt( maxInsideness/tailInsideness );
+                }
+            }
+        }
+        else
+        {
+            tailToChase_ = center;
+        }
+
+#ifdef DEBUG
+        eDebugLine::SetTimeout(.5);
+        eDebugLine::SetColor  (0, 0, 1);
+        eDebugLine::Draw(tailToChase_, .5, tailToChase_, 5.5);
+        eDebugLine::SetTimeout(0);
+#endif
+
+        // determine direction to center
+        toTarget_ = tailToChase_ - cycle_.Position();
+        REAL toTargetLen = toTarget_.Norm();
+        REAL typicalLen = cycle.Speed() * cycle.GetTurnDelay();
+        if ( toTargetLen > typicalLen )
+        {
+            toTarget_ *= typicalLen/toTargetLen;
+        }
+    }
     
     virtual void Evaluate( gAINavigator::Path const & path, gAINavigator::PathEvaluation & evaluation ) const
     {
@@ -1055,15 +1135,15 @@ public:
             return;
         }
 
-        eCoord toCenter = shape->Position() - cycle_.Position();
-        eCoord pathDir = path.longTermDirection + path.shortTermDirection * .1;
-        REAL a = eCoord::F( toCenter, pathDir.Turn(1,1) );
-        REAL b = eCoord::F( toCenter, pathDir.Turn(1,-1) );
-        evaluation.score = a > b ? a : b;
+        eCoord pathDir = path.longTermDirection + path.shortTermDirection*.5;
+        evaluation.score = 100 * eCoord::F( toTarget_, pathDir );
     }
 private:
     gCycle const & cycle_;
     zZone const & zone_;
+
+    eCoord tailToChase_;
+    eCoord toTarget_;
 };
    
 
@@ -1091,7 +1171,7 @@ public:
         zZone const * zoneTarget = dynamic_cast< zZone const * >( Parent().GetTarget() );
         if ( zoneTarget )
         {
-            manager.Evaluate( gZoneEvaluator( cycle, *zoneTarget ), .1 );
+            manager.Evaluate( gZoneEvaluator( cycle, *zoneTarget ), .5 );
         }
 
         gAINavigator::CycleControllerBasic controller;
@@ -2042,11 +2122,17 @@ void gAIPlayer::Timestep(REAL time){
         REAL nextthought=Think();
         //    if (nextthought>.9) nextthought=REAL(.9);
 
+
+
         if (nextthought<REAL(.6-concentration_)) nextthought=REAL(.6-concentration_);
         if( concentration_ > 0 )
         {
-            REAL target = 2;
+            REAL target = 4;
             REAL safethought = ( target/concentration_ -.1 )/4;
+            if( safethought < .3 )
+            {
+                safethought = .3;
+            }
             if( nextthought > safethought )
             {
                 nextthought = safethought;

@@ -3380,15 +3380,19 @@ static void dir_eWall_select()
         dir_eWall.Select();
     }
 }
+#endif
 
 gCycleWallsDisplayListManager::gCycleWallsDisplayListManager()
     : wallList_(0)
     , wallsWithDisplayList_(0)
+#ifndef DEDICATED
     , wallsWithDisplayListMinDistance_(0)
     , wallsInDisplayList_(0)
+#endif
 {
 }
 
+#ifndef DEDICATED
 bool gCycleWallsDisplayListManager::CannotHaveList( REAL distance, gCycle const * cycle )
 {
     return
@@ -5508,4 +5512,87 @@ REAL gCycleExtrapolator::DoGetDistanceSinceLastTurn( void ) const
 bool gCycle::Vulnerable() const
 {
     return Alive() && lastTime > spawnTime_ + sg_cycleInvulnerableTime;
+}
+
+// *************
+// * wall info *
+// *************
+
+struct gWallInfoTemp
+{
+    // center of mass data
+    eCoord com;
+    REAL weight;
+    
+    // tail end
+    eCoord end;
+
+    REAL smallestDist;
+    
+    gWallInfoTemp()
+    : weight( 0 ), smallestDist( HUGE ){}
+
+    void AddWall( gNetPlayerWall * wall, gCycle const & cycle, REAL totalLength )
+    {
+        if ( !wall || !wall->IsDangerousAnywhere( cycle.LastTime() ) )
+        {
+            return;
+        }
+
+        com += wall->EndPoint(0) + wall->EndPoint(1);
+        REAL len = wall->Pos(1) - wall->Pos(0); 
+        weight += len*2;
+        if( len > 0 && wall->Pos(0) < smallestDist )
+        {
+            end = wall->EndPoint(0) + wall->Vec() * ( ( cycle.GetDistance() - totalLength - wall->Pos(0) )/len );
+            smallestDist = wall->Pos(0);
+        }
+    }
+};
+
+// @param info the info to fill
+// @param totalLenght total length of wall to assume
+void gCycle::FillWallInfoFlexible( WallInfo & info, REAL totalLength ) const
+{
+    gWallInfoTemp temp;
+
+    gNetPlayerWall * run = displayList_.wallList_;
+    while( run )
+    {
+        temp.AddWall( run, *this, totalLength );
+        run = run->Next();
+    }
+
+    run = displayList_.wallsWithDisplayList_;
+    while( run )
+    {
+        temp.AddWall( run, *this, totalLength );
+        run = run->Next();
+    }
+
+    info.tailPos = temp.end;
+    if( temp.weight > 0 )
+    {
+        info.centerOfMass = temp.com*(1/temp.weight);
+    }
+}
+
+// @param info the info to fill
+// @param rubberRatio rubber usage ratio to assume
+void gCycle::FillWallInfo( WallInfo & info, REAL rubberRatio ) const
+{
+    REAL max, effectiveness;
+    sg_RubberValues( Player(), verletSpeed_, max, effectiveness );
+    REAL totalLength = sg_CycleWallLengthFromDist( GetDistance() );
+    if ( totalLength > 0 )
+    {
+        totalLength -= rubberRatio * max;
+    }
+    FillWallInfoFlexible( info, totalLength );
+}
+
+// @param info the info to fill
+void gCycle::FillWallInfo( WallInfo & info ) const
+{
+    FillWallInfoFlexible( info, ThisWallsLength() );
 }
