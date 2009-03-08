@@ -248,8 +248,8 @@ void zFlagZone::RemoveOwner()
                 owner_->Player()->RequestSync();
             }
         }
-        owner_ = NULL;
     }
+	owner_ = NULL;
 }
 
 // *******************************************************************************
@@ -277,15 +277,15 @@ bool zFlagZone::Timestep( REAL time )
 		//Check if player is alive or not. If yes, make the flag follow the owner. If not, send the flag home or drop it based on setting
 		if(owner_->Player())
 		{
-		if(!player->Object()->Alive())
-		{
-			OwnerDropped();
-		}
+			if(!player->Object()->Alive())
+			{
+				OwnerDropped();
+			}
 			else
 			{
+
 				shape->Position() = owner_->Position();	
 			}
-
 		}
 		
         if ((player) &&
