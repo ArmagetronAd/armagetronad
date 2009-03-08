@@ -952,6 +952,15 @@ public:
         dest.mutable_pos_x()->CopyFrom( shape.pos_x() );
         dest.mutable_pos_y()->CopyFrom( shape.pos_y() );
 
+        if (shape.color().a_ < .01)
+        {
+            // Transmit invisible zones as a 0 radius
+            static tFunction zeroRadius(.0);
+            zeroRadius.WriteSync( *dest.mutable_radius() );
+        }
+        else
+        {
+
         // transfer radius function
         tFunction scale, radius;
         scale.ReadSync( shape.scale() );
@@ -963,6 +972,8 @@ public:
         // mend them together, ignoring the quadratic term
         tFunction mendedRadius( scale.GetOffset() * radius.GetOffset(), scale.GetOffset() * radius.GetSlope() + scale.GetSlope() * radius.GetOffset() );
         mendedRadius.WriteSync( *dest.mutable_radius() );
+
+        }
 
         // FIXME: the above mostly applies here too
         // calculate rotation speed
