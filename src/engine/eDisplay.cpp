@@ -63,81 +63,29 @@ static tSettingItem<REAL> f_m("FLOOR_MIRROR_INT",sr_floorMirror_strength);
 bool debug_grid=0;
 #endif
 
-REAL se_upperSkyHeight=100;
-REAL se_lowerSkyHeight=50;
+REAL upper_height=100;
+REAL lower_height=50;
 
-static tSettingItem<REAL> sec_upperSkyHeight("UPPER_SKY_HEIGHT",se_upperSkyHeight);
-static tSettingItem<REAL> sec_lowerSkyHeight("LOWER_SKY_HEIGHT",se_lowerSkyHeight);
 
 #ifndef DEDICATED
 
+static rFileTexture sky(rTextureGroups::TEX_FLOOR,"textures/sky.png",1,1,true);
+static rFileTexture sky_moviepack(rTextureGroups::TEX_FLOOR,"moviepack/sky.png",1,1,true);
+
 extern bool sg_MoviePack();
 
-// select the lower sky
-static rFileTexture & se_Sky()
-{
-    static char const * skyPath="textures/sky.png";
-    static char const * skyPathMoviepack="moviepack/sky.png";
-    static rFileTexture sky(rTextureGroups::TEX_FLOOR,skyPath,1,1,true);
-    static rFileTexture sky_moviepack(rTextureGroups::TEX_FLOOR,skyPathMoviepack,1,1,true);
-
+static void sky_select(){
     if (sg_MoviePack()){
         // Since old movie packs usually don't include sky.png we need to
         // be nice and fall back to the default sky tecture. -k
-        tString s = tDirectories::Data().GetReadPath( skyPathMoviepack );
+        tString s = tDirectories::Data().GetReadPath( "moviepack/sky.png" );
         if(strlen(s) > 0)
-            return sky_moviepack;
+            sky_moviepack.Select();
+        else
+            sky.Select();
     }
-
-    return sky;
-}
-
-static void se_SelectSky()
-{
-    static rFileTexture & sky = se_Sky();
-    sky.Select();
-}
-
-static REAL se_upperSkyScale=1;
-static REAL se_upperSkyColorR=.5;
-static REAL se_upperSkyColorG=.5;
-static REAL se_upperSkyColorB=1;
-static tSettingItem<REAL> sec_upperSkyScale("UPPER_SKY_SCALE",se_upperSkyScale);
-static tSettingItem<REAL> sec_upperSkyColorR("UPPER_SKY_RED",se_upperSkyColorR);
-static tSettingItem<REAL> sec_upperSkyColorG("UPPER_SKY_GREEN",se_upperSkyColorG);
-static tSettingItem<REAL> sec_upperSkyColorB("UPPER_SKY_BLUE",se_upperSkyColorB);
-
-// select the upper sky
-static rFileTexture * se_UpperSky()
-{
-    static char const * skyPath="textures/upper_sky.png";
-    static char const * skyPathMoviepack="moviepack/upper_sky.png";
-    static rFileTexture sky(rTextureGroups::TEX_FLOOR,skyPath,1,1,true);
-    static rFileTexture sky_moviepack(rTextureGroups::TEX_FLOOR,skyPathMoviepack,1,1,true);
-
-    if (sg_MoviePack()){
-        tString s = tDirectories::Data().GetReadPath( skyPathMoviepack );
-        if(s.Len() > 1)
-            return &sky_moviepack;
-    }
-
-    if( tDirectories::Data().GetReadPath( skyPath ).Len() > 1 ){
-        return &sky;
-    }
-
-    return NULL;
-}
-
-static void se_SelectUpperSky()
-{
-    static rFileTexture * sky = se_UpperSky();
-    if( sky )
-    {
-        sky->Select();
-    }
-    else
-    {
-        se_glFloorTexture();
+    else {
+        sky.Select();
     }
 }
 
@@ -310,15 +258,13 @@ public:
     }
 
     // called when passing an edge
-    ePassEdgeResult PassEdge( const eWall * w, REAL time, REAL, int) override
+    void PassEdge( const eWall * w, REAL time, REAL, int)
     {
         // adapt zNear and be done
         if( AdaptZNear( zNear_, w, camera_ ) )
         {
-            return eAbort;
+            throw eSensorFinished();
         }
-
-        return eContinue;
     }
 private:
     REAL & zNear_; // the reference to the near clipping plane value
@@ -338,9 +284,9 @@ void paint_sr_lowerSky(eGrid *grid, int viewer,bool sr_upperSky, eCamera* cam ){
         glTranslatef(-300,-200,0);
     }
 
-    se_SelectSky();
+    sky_select();
 
-    REAL sa=(se_lowerSkyHeight-z)*.1;
+    REAL sa=(lower_height-z)*.1;
     if (sa>1) sa=1;
     if (!sr_upperSky){
         sa=1;
@@ -348,7 +294,7 @@ void paint_sr_lowerSky(eGrid *grid, int viewer,bool sr_upperSky, eCamera* cam ){
     }
     if (sa>0){
         glColor4f(1,1,1,sa);
-        infinity_xy_plane(cam->CameraPos(),cam->CameraDir(),se_lowerSkyHeight);
+        infinity_xy_plane(cam->CameraPos(),cam->CameraDir(),lower_height);
     }
     if (!sr_upperSky && sr_alphaBlend)
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -401,22 +347,22 @@ void eGrid::display_simple( eCamera* cam, int viewer,bool floor,
 
             glColor3f(0,0,0);
 
-            if ( z < se_lowerSkyHeight )
-                infinity_xy_plane(cam->CameraPos(), cam->CameraDir(), se_lowerSkyHeight);
+            if ( z < lower_height )
+                infinity_xy_plane(cam->CameraPos(), cam->CameraDir(), lower_height);
 
             glEnable(GL_TEXTURE_2D);
         }
         else {
             TexMatrix();
             glLoadIdentity();
-            glScalef(se_upperSkyScale,se_upperSkyScale,se_upperSkyScale);
+            //      glScalef(.25,.25,.25);
 
-            se_SelectUpperSky();
+            se_glFloorTexture();
 
-            glColor3f(se_upperSkyColorR,se_upperSkyColorG,se_upperSkyColorB);
+            glColor3f(.5,.5,1);
 
-            if ( z < se_upperSkyHeight )
-                infinity_xy_plane(cam->CameraPos(), cam->CameraDir(), se_upperSkyHeight);
+            if ( z < upper_height )
+                infinity_xy_plane(cam->CameraPos(), cam->CameraDir(), upper_height);
         }
     }
 
@@ -574,7 +520,7 @@ void eGrid::display_simple( eCamera* cam, int viewer,bool floor,
         if ( z < 3 )
         {
             eCamera const * camera = cam;
-            if( camera && camera->Center() )
+            if( camera )
             {
                 eCoord dir = camera->CameraDir().Turn(1,.5);
                 for(int i = 8; i > 0; --i)

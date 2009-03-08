@@ -104,13 +104,8 @@ bool su_StoreSDLEvent(const SDL_Event &tEvent){
 
 #ifndef DEDICATED
 // read and write operators for keysyms
-#if SDL_VERSION_ATLEAST(2,0,0)
-tRECORDING_ENUM( SDL_Scancode );
-tRECORDING_ENUM( SDL_Keymod );
-#else
 tRECORDING_ENUM( SDLKey );
 tRECORDING_ENUM( SDLMod );
-#endif
 #endif
 
 static char const * recordingSection = "INPUT";
@@ -122,12 +117,7 @@ public:
 #ifndef DEDICATED
     static void ArchiveKey( Archiver & archive, SDL_KeyboardEvent & key )
     {
-        archive.Archive(key.state).Archive(key.keysym.scancode).Archive(key.keysym.sym).Archive(key.keysym.mod)
-#if SDL_VERSION_ATLEAST(2,0,0)
-        ;
-#else
-        .Archive(key.keysym.unicode);
-#endif
+        archive.Archive(key.state).Archive(key.keysym.scancode).Archive(key.keysym.sym).Archive(key.keysym.mod).Archive(key.keysym.unicode);
     }
 #endif
 
@@ -146,21 +136,12 @@ public:
             archive.Archive(time).Archive(event.type);
             switch ( event.type )
             {
-#if SDL_VERSION_ATLEAST(2,0,0)
-            case SDL_WINDOWEVENT:
-            {
-                SDL_WindowEvent & window = event.window;
-
-                archive.Archive(window.event).Archive(window.data1).Archive(window.data2);
-            }
-#else
             case SDL_ACTIVEEVENT:
             {
                 SDL_ActiveEvent & active = event.active;
 
                 archive.Archive(active.gain).Archive(active.state);
             }
-#endif
             break;
             case SDL_KEYDOWN:
             case SDL_KEYUP:
@@ -184,20 +165,6 @@ public:
                 archive.Archive(button.button).Archive(button.state).Archive(button.x).Archive(button.y);
             }
             break;
-#if SDL_VERSION_ATLEAST(2,0,0)
-            case SDL_TEXTINPUT:
-            {
-                auto &text = event.text.text;
-
-                for(size_t i = 0; i < sizeof(text); ++i)
-                {
-                    archive.Archive(text[i]);
-                    if(!text[i])
-                        break;
-                }
-            }
-            break;
-#endif
             default:
                 // do nothing
                 break;
@@ -236,21 +203,12 @@ void EventArchiver< tRecordingBlock >::ArchiveKey( tRecordingBlock & archive, SD
         default:
             key.keysym.mod = KMOD_NONE;
             key.keysym.sym = SDLK_x;
-#if SDL_VERSION_ATLEAST(2,0,0)
-            key.keysym.scancode = SDL_SCANCODE_UNKNOWN;
-#else
             key.keysym.scancode = 0;
             key.keysym.unicode = '*';
-#endif
         }
     }
 
-    archive.Archive(key.state).Archive(key.keysym.scancode).Archive(key.keysym.sym).Archive(key.keysym.mod)
-#if SDL_VERSION_ATLEAST(2,0,0)
-        ;
-#else
-        .Archive(key.keysym.unicode);
-#endif
+    archive.Archive(key.state).Archive(key.keysym.scancode).Archive(key.keysym.sym).Archive(key.keysym.mod).Archive(key.keysym.unicode);
 }
 #endif
 
@@ -338,42 +296,6 @@ bool su_GetSDLInput(SDL_Event &tEvent,REAL &time){
     // store event in recording
     if ( ret )
         EventArchiver< tRecordingBlock >::Archive( tEvent, time, ret );
-
-#ifndef DEDICATED
-#if !SDL_VERSION_ATLEAST(2,0,0)
-    // filter bogus events. Some keys cause key events with wrong keysyms.
-    static unsigned short blockedScancode = 0xffff;
-    static SDLKey blockedKeysym = SDLK_LAST;
-
-    if( tEvent.type == SDL_KEYDOWN )
-    {
-        // you can spot them by zero unicode; control keys are allowed to have that,
-        // but not letter and number and sign keys
-        if( tEvent.key.keysym.unicode == 0 )
-        {
-            if ( tEvent.key.keysym.sym >= SDLK_ESCAPE && 
-                 tEvent.key.keysym.sym <= SDLK_z )
-            {
-                ret = false;
-
-                blockedScancode = tEvent.key.keysym.scancode;
-                blockedKeysym = tEvent.key.keysym.sym;
-            }
-        }
-    }
-    else if ( tEvent.type == SDL_KEYUP )
-    {
-        if( blockedScancode == tEvent.key.keysym.scancode && 
-            blockedKeysym == tEvent.key.keysym.sym )
-        {
-            ret = false;
-
-            blockedScancode = 0xffff;
-            blockedKeysym = SDLK_LAST;
-        }
-    }
-#endif
-#endif
 
     return ret;
 }

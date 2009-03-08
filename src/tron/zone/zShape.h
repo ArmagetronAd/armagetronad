@@ -86,7 +86,7 @@ public:
     REAL GetEffectiveSegmentLength() const;
 
     bool Timestep( REAL time );
-    void setReferenceTime(REAL time);
+    virtual void setReferenceTime(REAL time);
 
     virtual void setGrowth(REAL growth);  //!< similar to old zones v1 setExpansionSpeed, but generic
     virtual void collapse(REAL speed);  //!< set growth such that collapse happens in a timeframe
@@ -137,6 +137,8 @@ public :
     bool isInteracting(eGameObject * target);
     void Render(const eCamera * cam );
 	virtual void Render2D(tCoord scale) const;
+
+    virtual void setReferenceTime(REAL time);
 
     tCoord findPointNear(tCoord&);
     tCoord findPointFar(tCoord&);

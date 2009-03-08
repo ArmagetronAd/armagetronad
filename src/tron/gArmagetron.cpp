@@ -43,10 +43,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#include "eTess.h"
 #include "rTexture.h"
 #include "tConfiguration.h"
-#include "tRandom.h"
 #include "tRecorder.h"
 #include "tCommandLine.h"
-#include "tToDo.h"
 #include "eAdvWall.h"
 #include "eGameObject.h"
 #include "uMenu.h"
@@ -58,13 +56,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
-#include <bitset>
-#include "tCrypto.h"
 
 #include "nServerInfo.h"
 #include "nSocket.h"
 #include "tRuby.h"
-#include "eLadderLog.h"
 #ifndef DEDICATED
 #include "rRender.h"
 #include "rSDL.h"
@@ -74,8 +69,9 @@ static gCommandLineJumpStartAnalyzer sg_jumpStartAnalyzer;
 #endif
 
 #ifndef DEDICATED
-#ifdef MACOSX_XCODE
-#include "gOSXURLHandler.h"
+#ifdef MACOSX
+#include "AAURLHandler.h"
+#include "version.h"
 #endif
 #endif
 
@@ -83,6 +79,7 @@ static gCommandLineJumpStartAnalyzer sg_jumpStartAnalyzer;
 class gMainCommandLineAnalyzer: public tCommandLineAnalyzer
 {
 public:
+    bool     daemon_;
     bool     fullscreen_;
     bool     windowed_;
     bool     use_directx_;
@@ -90,6 +87,7 @@ public:
 
     gMainCommandLineAnalyzer()
     {
+        daemon_ = false;
         windowed_ = false;
         fullscreen_ = false;
         use_directx_ = false;
@@ -100,7 +98,11 @@ public:
 private:
     virtual bool DoAnalyze( tCommandLineParser & parser )
     {
-        if ( parser.GetSwitch( "-fullscreen", "-f" ) )
+        if ( parser.GetSwitch( "--daemon","-d") )
+        {
+            daemon_ = true;
+        }
+        else if ( parser.GetSwitch( "-fullscreen", "-f" ) )
         {
             fullscreen_=true;
         }
@@ -108,6 +110,7 @@ private:
         {
             windowed_=true;
         }
+
 #ifdef WIN32
         else if ( parser.GetSwitch( "+directx") )
         {
@@ -136,166 +139,25 @@ private:
         << "                               initialisation under MS Windows\n\n";
         s << "\n\nYes, I know this looks ugly. Sorry about that.\n";
 #endif
+#else
+#ifndef WIN32
+        s << "-d, --daemon                 : allow the dedicated server to run as a daemon\n"
+        << "                               (will not poll for input on stdin)\n";
+#endif
 #endif
     }
 };
 
 static gMainCommandLineAnalyzer commandLineAnalyzer;
 
-// flag indicating whether directX is supposed to be used for input (defaults to false, crashes on my Win7)
-static bool sr_useDirectX = false;
-/*
-extern bool sr_useDirectX; // rScreen.cpp
+static bool use_directx=true;
 #ifdef WIN32
 static tConfItem<bool> udx("USE_DIRECTX","makes use of the DirectX input "
                            "fuctions; causes some graphic cards to fail to work (VooDoo 3,...)",
-                           sr_useDirectX);
+                           use_directx);
 #endif
-*/
 
 extern void exit_game_objects(eGrid *grid);
-
-enum gConnection
-{
-    gLeave,
-    gDialup,
-    gISDN,
-    gDSL
-    // gT1
-};
-
-// initial setup menu
-void sg_StartupPlayerMenu()
-{
-    uMenu firstSetup("$first_setup", false);
-    firstSetup.SetBot(-.2);
-
-    uMenuItemExit e2(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
-
-    ePlayer * player = ePlayer::PlayerConfig(0);
-    tASSERT( player );
-
-    gConnection connection = gDSL;
-
-    uMenuItemSelection<gConnection> net(&firstSetup, "$first_setup_net", "$first_setup_net_help", connection );
-    if ( !st_FirstUse )
-    {
-        net.NewChoice( "$first_setup_leave", "$first_setup_leave_help", gLeave );
-        connection = gLeave;
-    }
-    net.NewChoice( "$first_setup_net_dialup", "$first_setup_net_dialup_help", gDialup );
-    net.NewChoice( "$first_setup_net_isdn", "$first_setup_net_isdn_help", gISDN );
-    net.NewChoice( "$first_setup_net_dsl", "$first_setup_net_dsl_help", gDSL );
-
-    tString keyboardTemplate("keys_cursor.cfg");
-
-    uMenuItemSelection<tString> k(&firstSetup, "$first_setup_keys", "$first_setup_keys_help", keyboardTemplate );
-    if ( !st_FirstUse )
-    {
-        k.NewChoice( "$first_setup_leave", "$first_setup_leave_help", tString("") );
-        keyboardTemplate="";
-    }
-
-    k.NewChoice( "$first_setup_keys_cursor", "$first_setup_keys_cursor_help", tString("keys_cursor.cfg") );
-    k.NewChoice( "$first_setup_keys_wasd", "$first_setup_keys_wasd_help", tString("keys_wasd.cfg") );
-#if SDL_VERSION_ATLEAST(2,0,0)
-#else
-    k.NewChoice( "$first_setup_keys_zqsd", "$first_setup_keys_zqsd_help", tString("keys_zqsd.cfg") );
-#endif
-    k.NewChoice( "$first_setup_keys_cursor_single", "$first_setup_keys_cursor_single_help", tString("keys_cursor_single.cfg") );
-    k.NewChoice( "$first_setup_keys_x", "$first_setup_keys_x_help", tString("keys_x.cfg") );
-
-#ifdef DEBUG
-    k.NewChoice( "none", "none", tString("") );
-#endif
-
-    tColor leave(0,0,0,0);
-    tColor color(1,0,0);
-    uMenuItemSelection<tColor> c(&firstSetup,
-                                 "$first_setup_color",
-                                 "$first_setup_color_help",
-                                 color);
-
-    if ( !st_FirstUse )
-    {
-        color = leave;
-        c.NewChoice( "$first_setup_leave", "$first_setup_leave_help", leave );
-    }
-
-    c.NewChoice( "$first_setup_color_red", "", tColor(1,0,0) );
-    c.NewChoice( "$first_setup_color_blue", "", tColor(0,0,1) );
-    c.NewChoice( "$first_setup_color_green", "", tColor(0,1,0) );
-    c.NewChoice( "$first_setup_color_yellow", "", tColor(1,1,0) );
-    c.NewChoice( "$first_setup_color_orange", "", tColor(1,.5,0) );
-    c.NewChoice( "$first_setup_color_purple", "", tColor(.5,0,1) );
-    c.NewChoice( "$first_setup_color_magenta", "", tColor(1,0,1) );
-    c.NewChoice( "$first_setup_color_cyan", "", tColor(0,1,1) );
-    c.NewChoice( "$first_setup_color_white", "", tColor(1,1,1) );
-    c.NewChoice( "$first_setup_color_dark", "", tColor(0,0,0) );
-
-    if ( st_FirstUse )
-    {
-        for(int i=tRandomizer::GetInstance().Get(4); i>=0; --i)
-        {
-            c.LeftRight(1);
-        }
-    }
-
-    uMenuItemString n(&firstSetup,
-                      "$player_name_text",
-                      "$player_name_help",
-                      player->name, ePlayerNetID::MAX_NAME_LENGTH);
-
-    uMenuItemExit e(&firstSetup, "$menuitem_accept", "$menuitem_accept_help");
-
-    firstSetup.Enter();
-
-    // apply network rates
-    switch(connection)
-    {
-    case gDialup:
-        sn_maxRateIn  = 6;
-        sn_maxRateOut = 4;
-        break;
-    case gISDN:
-        sn_maxRateIn  = 8;
-        sn_maxRateOut = 8;
-        break;
-    case gDSL:
-        sn_maxRateIn  = 64;
-        sn_maxRateOut = 16;
-        break;
-    case gLeave:
-        break;
-    }
-
-    // store color
-    if( ! (color == leave) )
-    {
-        player->rgb[0] = int(color.r_*15);
-        player->rgb[1] = int(color.g_*15);
-        player->rgb[2] = int(color.b_*15);
-    }
-
-    // load keyboard layout
-    if( keyboardTemplate.Len() > 1 )
-    {
-        std::ostringstream fullName;
-#if SDL_VERSION_ATLEAST(2,0,0)
-        fullName << "sdl2/";
-#else
-        fullName << "sdl1/";
-#endif
-        fullName << keyboardTemplate;
-
-        std::ifstream s;
-        if( tConfItemBase::OpenFile( s, fullName.str() ) )
-        {
-            tCurrentAccessLevel level( tAccessLevel_Owner, true );
-            tConfItemBase::ReadFile( s );
-        }
-    }
-}
 
 #ifndef DEDICATED
 static void welcome(){
@@ -326,6 +188,7 @@ static void welcome(){
 
     if (st_FirstUse)
     {
+        st_FirstUse=false;
         sr_LoadDefaultConfig();
         textOutBack = sr_textOut;
         sr_textOut = false;
@@ -365,8 +228,8 @@ static void welcome(){
         }
 #endif
 
-#ifdef MACOSX_XCODE
-        sg_StartAAURLHandler( showSplash );
+#ifdef MACOSX
+        StartAAURLHandler();
 #endif
         tRecorder::Record( splashSection, showSplash );
 
@@ -414,14 +277,63 @@ static void welcome(){
     }
     rSysDep::SwapGL();
 
-    sr_textOut = textOutBack;
-    sg_StartupLanguageMenu();
+    sg_LanguageMenu();
 
-    sr_textOut = textOutBack;
-    sg_StartupPlayerMenu();
+    // catch some keyboard input
+    {
+        uInputProcessGuard inputProcessGuard;
+        while (su_GetSDLInput(tEvent)) ;
+    }
 
-    st_FirstUse=false;
+    timeout = tSysTimeFloat() + 10;
 
+    sr_UnlockSDL();
+    uInputProcessGuard inputProcessGuard;
+    while((!su_GetSDLInput(tEvent) || tEvent.type!=SDL_KEYDOWN) &&
+            tSysTimeFloat() < timeout){
+
+        sr_ResetRenderState(true);
+        rViewport::s_viewportFullscreen.Select();
+
+        if ( sr_glOut )
+        {
+            rSysDep::ClearGL();
+
+            uMenu::GenericBackground();
+
+            REAL w=16*2/640.0;
+            REAL h=32*2/480.0;
+
+
+            //REAL middle=-.6;
+
+            Color(1,1,1);
+            DisplayText(0,.8,h,tOutput("$welcome_message_heading"), sr_fontError);
+
+            w/=2;
+            h/=2;
+
+            rTextField c(-.8,.6, h, sr_fontError);
+
+
+            c << tOutput("$welcome_message_intro");
+
+            c.SetIndent(12);
+
+            c << tOutput("$welcome_message_vendor")   << gl_vendor   << '\n';
+            c << tOutput("$welcome_message_renderer") << gl_renderer << '\n';
+            c << tOutput("$welcome_message_version")  << gl_version  << '\n';
+
+            c.SetIndent(0);
+
+            c << tOutput("$welcome_message_finish");
+
+            rSysDep::SwapGL();
+        }
+
+        tAdvanceFrame();
+    }
+    sr_LockSDL();
 
     sr_textOut = textOutBack;
 }
@@ -479,17 +391,7 @@ void cleanup(eGrid *grid){
 }
 
 #ifndef DEDICATED
-static bool sg_active = true;
-static void sg_DelayedActivation()
-{
-    Activate( sg_active );
-}
-
-#if SDL_VERSION_ATLEAST(2,0,0)
-int filter(void*, SDL_Event *tEvent){
-#else
 int filter(const SDL_Event *tEvent){
-#endif
     // recursion avoidance
     static bool recursion = false;
     if ( !recursion )
@@ -515,14 +417,10 @@ int filter(const SDL_Event *tEvent){
         RecursionGuard guard( recursion );
 
         // boss key or OS X quit command
-        if ((tEvent->type==SDL_KEYDOWN && tEvent->key.keysym.sym==SDLK_ESCAPE &&
+        if ((tEvent->type==SDL_KEYDOWN && tEvent->key.keysym.sym==27 &&
                 tEvent->key.keysym.mod & KMOD_SHIFT) ||
-                (tEvent->type==SDL_KEYDOWN && tEvent->key.keysym.sym==SDLK_q &&
-#if SDL_VERSION_ATLEAST(2,0,0)
-                 tEvent->key.keysym.mod & KMOD_GUI) ||
-#else
+                (tEvent->type==SDL_KEYDOWN && tEvent->key.keysym.sym==113 &&
                  tEvent->key.keysym.mod & KMOD_META) ||
-#endif
                 (tEvent->type==SDL_QUIT)){
             // sn_SetNetState(nSTANDALONE);
             // sn_Receive();
@@ -543,30 +441,10 @@ int filter(const SDL_Event *tEvent){
                 tEvent->type!=SDL_MOUSEBUTTONUP &&
                 ((tEvent->motion.x>=sr_screenWidth-10  || tEvent->motion.x<=10) ||
                  (tEvent->motion.y>=sr_screenHeight-10 || tEvent->motion.y<=10)))
-#if SDL_VERSION_ATLEAST(2,0,0)
-            SDL_WarpMouseInWindow(sr_screen, sr_screenWidth/2, sr_screenHeight/2);
-#else
             SDL_WarpMouse(sr_screenWidth/2,sr_screenHeight/2);
-#endif
 
         // fetch alt-tab
 
-#if SDL_VERSION_ATLEAST(2,0,0)
-        if (tEvent->type==SDL_WINDOWEVENT)
-        {
-            // Jonathans fullscreen bugfix.
-#ifdef MACOSX
-            if(currentScreensetting.fullscreen ^ lastSuccess.fullscreen) return false;
-#endif
-	    if ( tEvent->window.event==SDL_WINDOWEVENT_FOCUS_GAINED || tEvent->window.event==SDL_WINDOWEVENT_FOCUS_LOST )
-            {
-                sg_active = tEvent->window.event == SDL_WINDOWEVENT_FOCUS_GAINED;
-                st_ToDo(sg_DelayedActivation);
-            }
-
-            // reload GL stuff if application gets reactivated
-            if ( tEvent->window.event == SDL_WINDOWEVENT_FOCUS_GAINED )
-#else //SDL_VERSION_ATLEAST(2,0,0)
         if (tEvent->type==SDL_ACTIVEEVENT)
         {
             // Jonathans fullscreen bugfix.
@@ -574,20 +452,17 @@ int filter(const SDL_Event *tEvent){
             if(currentScreensetting.fullscreen ^ lastSuccess.fullscreen) return false;
 #endif
             int flags = SDL_APPINPUTFOCUS;
-            if ( tEvent->active.state & flags )
-            {
-                // con << tSysTimeFloat() << " " << "active: " << (tEvent->active.gain ? "on" : "off") << "\n";
-                sg_active = tEvent->active.gain;
-                st_ToDo(sg_DelayedActivation);
-            }
+            if ( tEvent->active.gain && tEvent->active.state & flags )
+                Activate(true);
+            if ( !tEvent->active.gain && tEvent->active.state & flags )
+                Activate(false);
 
             // reload GL stuff if application gets reactivated
             if ( tEvent->active.gain && tEvent->active.state & SDL_APPACTIVE )
-#endif //SDL_VERSION_ATLEAST(2,0,0)
             {
                 // just treat it like a screen mode change, gets the job done
-                st_ToDo(rCallbackBeforeScreenModeChange::Exec);
-                st_ToDo(rCallbackAfterScreenModeChange::Exec);
+                rCallbackBeforeScreenModeChange::Exec();
+                rCallbackAfterScreenModeChange::Exec();
             }
             return false;
         }
@@ -609,7 +484,7 @@ void sg_SetIcon()
 {
 #ifndef DEDICATED
 #ifndef MACOSX
-#ifdef  WIN32_X
+#ifdef  WIN32
     SDL_SysWMinfo	info;
     HICON			icon;
     // get the HWND handle
@@ -624,11 +499,7 @@ void sg_SetIcon()
     //    SDL_Surface *tex=IMG_Load( tDirectories::Data().GetReadPath( "textures/icon.png" ) );
 
     if (tex.GetSurface())
-#if SDL_VERSION_ATLEAST(2,0,0)
-        SDL_SetWindowIcon(sr_screen, tex.GetSurface());
-#else
         SDL_WM_SetIcon(tex.GetSurface(),NULL);
-#endif
 #endif
 #endif
 #endif
@@ -675,14 +546,12 @@ int main(int argc,char **argv){
 
     try
     {
-        // Create this command line analyzer here instead of statically
-        // so it will be the first to display in --help.
-        tDefaultCommandLineAnalyzer defaultCommandLineAnalyzer;
-        tCommandLineData commandLine( st_programVersion );
+        tCommandLineData commandLine;
+        commandLine.programVersion_  = &st_programVersion;
 
         // analyse command line
         // tERR_MESSAGE( "Analyzing command line." );
-        if ( !commandLine.Analyse(argc, argv) )
+        if ( ! commandLine.Analyse(argc, argv) )
             return 0;
 
 
@@ -699,7 +568,7 @@ int main(int argc,char **argv){
             const char * dedicatedSection = "DEDICATED";
             if ( !tRecorder::PlaybackStrict( dedicatedSection, dedicatedServer ) )
             {
-#ifdef DEDICATED
+#ifdef DEDICATED          
                 dedicatedServer = true;
 #endif
             }
@@ -720,19 +589,10 @@ int main(int argc,char **argv){
 #endif
 
 #ifdef WIN32
-#if !SDL_VERSION_ATLEAST(2,0,0)
         // disable DirectX by default; it causes problems with some boards.
-        if (!getenv( "SDL_VIDEODRIVER") ) {
-            if (!sr_useDirectX)
-            {
-                sg_PutEnv( "SDL_VIDEODRIVER=windib" );
-            }
-            else
-            {
-                sg_PutEnv( "SDL_VIDEODRIVER=directx" );
-            }
+        if (!use_directx && !getenv("SDL_VIDEODRIVER") ) {
+            sg_PutEnv("SDL_VIDEODRIVER=windib");
         }
-#endif
 #endif
 
         // atexit(ANET_Shutdown);
@@ -785,7 +645,6 @@ int main(int argc,char **argv){
         // tERR_MESSAGE( "Loading configuration." );
         tLocale::Load("languages.txt");
 
-        eLadderLogInitializer ladderlog;
         st_LoadConfig();
 
         // record and play back the recording debug level
@@ -796,9 +655,9 @@ int main(int argc,char **argv){
         if ( commandLineAnalyzer.windowed_ )
             currentScreensetting.fullscreen   = false;
         if ( commandLineAnalyzer.use_directx_ )
-            sr_useDirectX                       = true;
+            use_directx                       = true;
         if ( commandLineAnalyzer.dont_use_directx_ )
-            sr_useDirectX                       = false;
+            use_directx                       = false;
 
         //gAICharacter::LoadAll(tString( "aiplayers.cfg" ) );
         gAICharacter::LoadAll( aiPlayersConfig );
@@ -854,11 +713,8 @@ int main(int argc,char **argv){
 
             sr_glRendererInit();
 
-#if SDL_VERSION_ATLEAST(2,0,0)
-            SDL_SetEventFilter(&filter, 0);
-#else
             SDL_SetEventFilter(&filter);
-#endif
+
             //std::cout << "set filter\n";
 
             sg_SetIcon();
@@ -900,7 +756,7 @@ int main(int argc,char **argv){
 
                     sn_bigBrotherString = renderer_identification + "VER=" + st_programVersion + "\n\n";
 
-#ifdef HAVE_LIBRUBY
+#ifdef HAVE_LIBRUBY      
                     try {
                         // tRuby::Load(tDirectories::Data(), "scripts/menu.rb");
                         tRuby::Load(tDirectories::Data(), "scripts/ai.rb");
@@ -947,6 +803,9 @@ int main(int argc,char **argv){
 
             SDL_Quit();
 #else // DEDICATED
+            if (!commandLineAnalyzer.daemon_)
+                sr_Unblock_stdin();
+
             sr_glOut=0;
 
             //  nServerInfo::TellMasterAboutMe();
@@ -966,11 +825,7 @@ int main(int argc,char **argv){
 
         //	tLocale::Clear();
     }
-    catch ( tCleanQuit const & e )
-    {
-        return 0;
-    }
-    catch ( tException const & e )
+    catch( tException const & e )
     {
         try
         {

@@ -125,6 +125,7 @@ eGameObject::eGameObject(eGrid *g,const eCoord &p,const eCoord &d,eFace *current
     if ( lastTime < 0 )
         lastTime=0;
     team = 0;
+    _born = 0;
 }
 
 eGameObject::~eGameObject(){

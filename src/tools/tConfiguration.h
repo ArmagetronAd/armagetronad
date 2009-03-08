@@ -40,9 +40,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <string>
 #include <deque>
 #include <map>
-#include <boost/tuple/tuple.hpp>
-#include <boost/tuple/tuple_comparison.hpp>
-#include <boost/tuple/tuple_io.hpp>
 
 //! access levels for admin interfaces; lower numeric values are better
 enum tAccessLevel
@@ -53,7 +50,7 @@ enum tAccessLevel
     tAccessLevel_3 = 3,            // reserved
     tAccessLevel_4 = 4,            // reserved
     tAccessLevel_Armatrator = 5,   // reserved
-    tAccessLevel_Referee = 6,      // a referee elected by players
+    tAccessLevel_6 = 6,            // reserved
     tAccessLevel_TeamLeader = 7,   // a team leader
     tAccessLevel_TeamMember = 8,   // a team member
     tAccessLevel_9 = 9,            // reserved
@@ -84,8 +81,6 @@ class tCasaclPreventer
 public:
     tCasaclPreventer( bool prevent = true );
     ~tCasaclPreventer();
-
-    static bool InRInclude(); //!< returns whether we're currently in an RINCLUDE file
 private:
     bool previous_; //!< previous value of prevention flag
 };
@@ -129,13 +124,8 @@ protected:
     tAccessLevel requiredLevel; //!< access level required to change this setting
     tAccessLevel setLevel;      //!< access level of the user making the last change to this setting
 
-public:
-    // the map of all configuration items
     typedef std::map< tString, tConfItemBase * > tConfItemMap;
-    static tConfItemMap const & GetConfItemMap();
-protected:
     static tConfItemMap & ConfItemMap();
-public:
 
 public:
     typedef void callbackFunc(void);
@@ -173,7 +163,15 @@ public:
     static std::deque<tString> GetCommands(void);
     static tConfItemBase *FindConfigItem(tString const &name);
 
-    static bool OpenFile( std::ifstream & s, tString const & filename ); //! opens a file stream for configuration reading
+    // helper functions for files (use these, they manage recording and playback properly)
+    enum SearchPath
+    {
+        Config = 1,
+        Var    = 2,
+        All    = 3
+    };
+
+    static bool OpenFile( std::ifstream & s, tString const & filename, SearchPath path ); //! opens a file stream for configuration reading
     static void ReadFile( std::ifstream & s ); //! loads configuration from a file
 
     virtual void ReadVal(std::istream &s)=0;
@@ -185,13 +183,7 @@ public:
         return true;
     }
 
-    // should this be saved into user.cfg?
     virtual bool Save(){
-        return true;
-    }
-
-    // CAN this be saved at all?
-    virtual bool CanSave(){
         return true;
     }
 };
@@ -202,17 +194,6 @@ class tAccessLevelSetter
 public:
     //! modifies the access level of <item> to <level>
     tAccessLevelSetter( tConfItemBase & item, tAccessLevel level );
-};
-
-//! Sets tConfItemBase::printChange/printErrors
-class tNoisinessSetter
-{
-public:
-    tNoisinessSetter( bool printChange = true, bool printErrors = true );
-    ~tNoisinessSetter();
-private:
-    bool oldPrintChange;
-    bool oldPrintErrors;
 };
 
 // Arg! Msvc++ could not handle bool IO. Seems to be fine now.
@@ -272,7 +253,7 @@ protected:
     T    *target;
     ShouldChangeFuncT shouldChangeFunc_;
 
-    tConfItem(T &t):tConfItemBase(""),target(&t), shouldChangeFunc_(NULL) {}
+    tConfItem(T &t):tConfItemBase(""),target(&t), shouldChangeFunc_(NULL) {};
 public:
     tConfItem(const char *title,const tOutput& help,T& t, callbackFunc *cb)
             :tConfItemBase(title,help,cb),target(&t), shouldChangeFunc_(NULL) {}
@@ -288,13 +269,6 @@ public:
             :tConfItemBase(title),target(&t),shouldChangeFunc_(changeFunc) {}
 
     virtual ~tConfItem(){}
-
-    tConfItem<T> & SetShouldChangeFunc( ShouldChangeFuncT changeFunc )
-    
-    {
-        this->shouldChangeFunc_ = changeFunc;
-        return *this;
-    }
 
     typedef typename tTypeToConfig< T >::DUMMYREQUIRED DUMMYREQUIRED;
 
@@ -323,35 +297,6 @@ public:
     {
         s << static_cast< typename tTypeToConfig< T >::TOSTREAM >( value );
     }
-    
-    void SetVal( T const & val )
-    {
-        if (!shouldChangeFunc_ || shouldChangeFunc_( val ))
-        {
-            if (printChange)
-            {
-                tOutput o;
-                o.SetTemplateParameter(1, title);
-                o.SetTemplateParameter(2, *target);
-                o.SetTemplateParameter(3, val);
-                o << "$config_value_changed";
-                con << o;
-            }
-            
-            *target = val;
-            changed = true;
-        }
-        else
-        {
-            con << tOutput("$config_value_not_changed", title, *target, val);
-        }
-        ExecuteCallback();    
-    }
-    
-    const T *GetTarget() const
-    {
-        return target;
-    }
 
     virtual void ReadVal(std::istream &s){
         // eat whitepsace
@@ -373,12 +318,26 @@ public:
                     {
                         tOutput o;
                         o.SetTemplateParameter(1, title);
-                        o << "$nconfig_error_protected";
+                        o << "$nconfig_errror_protected";
                         con << "";
                     }
-                    else
-                    {
-                        SetVal( dummy );
+                    else{
+                        if (!shouldChangeFunc_ || shouldChangeFunc_(dummy))
+                        {
+                            if (printChange)
+                            {
+                                tOutput o;
+                                o.SetTemplateParameter(1, title);
+                                o.SetTemplateParameter(2, *target);
+                                o.SetTemplateParameter(3, dummy);
+                                o << "$config_value_changed";
+                                con << o;
+                            }
+
+                            *target = dummy;
+                            changed = true;
+                        }
+                        ExecuteCallback();
                     }
                 }
         }
@@ -449,7 +408,7 @@ public:
 };
 
 // includes a single configuration file by name, searches in var and config directories
-void st_Include( tString const & file );
+void st_Include( tString const & file, bool reportError = true );
 
 void st_LoadConfig();
 void st_SaveConfig();

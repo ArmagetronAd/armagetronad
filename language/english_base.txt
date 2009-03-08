@@ -454,6 +454,7 @@ lag_offset_client_help             Extra amount of lag compensation, determined 
 lag_offset_server_help             Extra amount of lag compensation, determined by the server.
 
 lag_threshold_help                 Amount of lag not compensated for on each lag event.
+lag_frequency_threshold_help       Minimal frequency of lag events (measured against the total number of input events) that needs to be exceeded before the server informs the client. Should be between 0 and 1.
 
 #********************************************
 #********************************************
@@ -2832,6 +2833,7 @@ nconfig_value_changed		\1 changed from \2 to \3 on server order.\n
 config_accesslevel_0        Owner
 config_accesslevel_1        Administrator
 config_accesslevel_2        Moderator
+config_accesslevel_5        Armatrator
 config_accesslevel_7        Team Leader
 config_accesslevel_8        Team Member
 config_accesslevel_12       Local User

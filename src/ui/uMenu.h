@@ -41,61 +41,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #endif
 
 #include <deque>
-#include <vector>
 
 #include "defs.h"
 
 class uMenuItem;
 
-//! crude animation class
-struct uAnimationFrame
-{
-    float duration; //!< duration of the frame in seconds
-    std::vector< std::string > textures; //!< textures; they're all drawn on top of each other, with the first landing at the bottom
-    
-    // convenience constructors
-    explicit uAnimationFrame( float duration_ = 1.0f );
-    uAnimationFrame( char const * texture, float duration_ = 1.0f );
-    uAnimationFrame( char const * texture1, char const * texture2, float duration_ = 1.0f );
-    uAnimationFrame( char const * texture1, char const * texture2, char const * texture3, float duration_ = 1.0f );
-    uAnimationFrame( char const * texture1, char const * texture2, char const * texture3, char const * texture4, float duration_ = 1.0f );
-
-    //! loads an animation from a file
-    static bool Load( std::vector< uAnimationFrame > & animation, char const * filename );
-};
-
-#ifndef DEDICATED
-class tRectangle;
-class rITexture;
-
-//! animation player
-class uAnimationPlayer
-{
-public:
-    //! construct
-    uAnimationPlayer( std::vector< uAnimationFrame > const & animation );
-    ~uAnimationPlayer();
-
-    //! renders the current animation frame into a quad
-    void Render( tRectangle & drawArea );
-private:
-    void ClearTextures();
-
-    //! the animation
-    std::vector< uAnimationFrame > animation_;
-
-    //! current index into the animation
-    int current_;
-
-    //! the current textures
-    std::vector< rITexture * > textures_;
-
-    //! last time the animation changed
-    double lastChange_;
-};
-#endif
-
-//! menus themselves
 class uMenu{
     friend class uMenuItem;
 
@@ -135,15 +85,12 @@ public:
     static void SetIdle(FUNCPTR idle_func) {idle=idle_func;}
 
     // poll input, return true if ESC was pressed
-    static bool IdleInput( bool processInput );
+    static bool IdleInput();
 
     void SetCenter(REAL c) {center=c;}
     void SetTop(REAL t) {menuTop=t;}
     void SetBot(REAL b) {menuBot=b;spaceBelow=1+menuBot;}
-    REAL GetTop() const {return menuTop;}
-    REAL GetBot() const {return menuBot;}
     void SetSelected(int s) {selected = s;}
-    int GetSelected() const {return selected;}
     int  NumItems()         {return items.Len();}
     uMenuItem* Item(int i)  { return items[i]; }
     void AddItem(uMenuItem* item);
@@ -161,7 +108,7 @@ public:
     void ReverseItems();
 
     // paints a nice background
-    static void GenericBackground(REAL top=1.0);
+    static void GenericBackground();
 
     // marks the menu for exit
     inline void Exit(){OnExit();}
@@ -172,11 +119,7 @@ public:
     }
 
     // print a big message and a small interpretation
-    static bool Message(const tOutput& message, const tOutput& interpretation, REAL timeout = -1 );
-
-    // print a big title, small description and animation
-    static bool Message(const tOutput& message, const tOutput& interpretation, REAL timeout, std::vector< uAnimationFrame > const & animation );
-    static bool Message(const tOutput& message, const tOutput& interpretation, REAL timeout, char const * animation );
+    static bool Message(const tOutput& message, const tOutput& interpretation, REAL timeout = -1);
 
     //! returns whether there is currently an active menu
     static bool MenuActive();
@@ -204,7 +147,7 @@ class uMenuItem{
     friend class uMenu;
 
     int idnum;
-    uMenuItem(){}
+    uMenuItem(){};
 protected:
     uMenu  *menu;
     tOutput helpText;
@@ -232,26 +175,20 @@ public:
             menu->items.Remove(this,idnum);
     }
 
-    //! called when the menu item is selected, the incoming parameter says
-    //! whether help should be displayed, the function returns true if 
-    //! the menu code itself should handle the display or whether the menu item
-    //! does that.
-    virtual bool DisplayHelp( bool display, REAL y, REAL alpha ){return display;}
-
-    virtual tString Help(){return tString(helpText);}
+virtual tString Help(){return tString(helpText);}
     // displays the menuitem at position x,y. set selected to true
     // if the item is currently under the cursor
-    virtual void Render(REAL ,REAL ,REAL =1,bool =0){}
+    virtual void Render(REAL ,REAL ,REAL =1,bool =0){};
 
     virtual void RenderBackground(){
         menu->GenericBackground();
-    }
+    };
 
     // if the user presses left/right on menuitem
-    virtual void LeftRight(int ){} //lr=-1:left lr=+1: right
-    virtual void LeftRightRelease(){}
+    virtual void LeftRight(int ){}; //lr=-1:left lr=+1: right
+    virtual void LeftRightRelease(){};
 
-    virtual void Enter(){} // if the user presses enter/space on menu
+    virtual void Enter(){}; // if the user presses enter/space on menu
 
     virtual bool Event(SDL_Event &){return false;} // if the key c is
     // pressed,mouse moved ...
@@ -263,30 +200,8 @@ public:
 
     virtual bool IsSelectable(){return true;};
 
-    virtual void Select() {}   // called when this item is selected and ready to set
-    virtual void Deselect() {} // called when this item is deselected
-
 protected:
     void SetColor( bool selected, REAL alpha );            //!< Sets the color of text output for this menuitem
-};
-
-// A menu-item that acts as a divider
-class uMenuItemDivider : public uMenuItem
-{
-public:
-    uMenuItemDivider( uMenu *menu )
-        :uMenuItem( menu, tOutput() )
-    {
-    }
-    
-    virtual bool IsSelectable()
-    {
-        return false;
-    }
-    
-    virtual void Render( REAL x, REAL y, REAL alpha=1, bool selected=false )
-    {
-    }
 };
 
 
@@ -311,7 +226,7 @@ public:
     // if the item is currently under the cursor
     virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0){
         DisplayTextSpecial(x,y,tString(t),selected,alpha);
-    }
+    };
 
     virtual void Enter(){menu->Exit();}
     // if the user presses enter/space on menu
@@ -339,21 +254,18 @@ protected:
     tOutput               	title;
     int                   	select;
     T *                   	target;
-    typedef void (*TFUNCPTR)(T const&);
-    TFUNCPTR                    onselect;
-    TFUNCPTR                    onenter;
 public:
 #ifdef SLOPPYLOCALE
     uMenuItemSelection(uMenu *m,
                        const char* tit,const char *help,
-                       T &targ, TFUNCPTR onsel=0, TFUNCPTR onent=0)
-            :uMenuItem(m,help),title(tit),select(0),target(&targ),onselect(onsel),onenter(onent){}
+                       T &targ)
+            :uMenuItem(m,help),title(tit),select(0),target(&targ){}
 #endif
 
     uMenuItemSelection(uMenu *m,
                        const tOutput &tit,const tOutput &help,
-                       T &targ, TFUNCPTR onsel=0, TFUNCPTR onent=0)
-            :uMenuItem(m,help),title(tit),select(0),target(&targ),onselect(onsel),onenter(onent){}
+                       T &targ)
+            :uMenuItem(m,help),title(tit),select(0),target(&targ){}
 
     ~uMenuItemSelection(){
         Clear();
@@ -385,23 +297,12 @@ public:
             select=0;
         if (choices.Len())
             *target=choices(select)->value;
-        if (onselect) onselect(*target);
-    }
-
-    virtual void Enter(){
-        if (onenter) onenter(*target);
-    }
-    
-    // selects the correct item according to the value in the controlled variable
-    void PickFromValue()
-    {
-        for(int i=choices.Len()-1;i>=0;i--)
-            if (choices(i)->value==*target)
-                select=i;
     }
 
     virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0){
-        PickFromValue();
+        for(int i=choices.Len()-1;i>=0;i--)
+            if (choices(i)->value==*target)
+                select=i;
 
         DisplayText(REAL(x-.02),y,title,selected,alpha,1);
         if (choices.Len()>0)
@@ -468,7 +369,7 @@ public:
                  const tOutput &help,int &targ,
                  int mi,int ma,int step=1);
 
-    ~uMenuItemInt(){}
+    ~uMenuItemInt(){};
 
     virtual void LeftRight(int);
 
@@ -495,7 +396,7 @@ public:
                  const tOutput &help,REAL &targ,
                  REAL mi,REAL ma,REAL step=1);
 
-    ~uMenuItemReal(){}
+    ~uMenuItemReal(){};
 
     virtual void LeftRight(int);
 
@@ -538,12 +439,6 @@ public:
     {
         return colorMode_;
     }
-
-    void Select();
-    void Deselect();
-
-    //! inserts an entire string at the current cursor
-    bool Insert(tString const &insertion);
 };
 
 //! A class that can provide auto- completion and supports overwriting of parts for special cases.
@@ -596,9 +491,6 @@ public:
 
     virtual bool Event(SDL_Event &e); //!< Handles an event
     virtual void Render(REAL x,REAL y,REAL alpha=1,bool selected=0); //!< Renders the search suggestion if needed and calls uMenuItemString::Render()
-    virtual void RenderBackground(){
-        menu->GenericBackground(menu->GetTop());
-    }
 };
 
 // *****************************************************
@@ -700,7 +592,7 @@ public:
         Reload();
     }
 
-    virtual ~uMenuItemFileSelection() {}
+    virtual ~uMenuItemFileSelection() {};
 
     void SetDir( const char *dir ) { dir_ = dir; }
     void SetFileSpec( const char *fileSpec ) { fileSpec_ = fileSpec; }

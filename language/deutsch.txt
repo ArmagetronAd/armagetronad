@@ -22,8 +22,6 @@ include_help                  bindet die angegebene Datei ein
 sinclude_help                 bindet die angegebene Datei ein, ohne eine Fehlermeldung zu liefern, wenn sie nicht gefunden wurde
 rinclude_help                 bindet die angegebene Datei über das Resourcensystem ein; sie kann so von einem entfernten Server kommen.
 new_team_allowed_help         Kann man momentan ein neues Team eröffnen?
-yes                           Ja
-no                            Nein
 
 #********************************************
 #********************************************
@@ -103,7 +101,6 @@ cycle_rubber_timebased_help   Die Rate, mit der sich das Rubber-Meter füllt, wir
 cycle_rubber_speed_help       Maximale logarithmische Annäherungsgeschwindigket an Wände, wenn Kollisionstoleranz aktiv ist (pro Sekunde kann das Vehikel der Wand nur um den Faktor ca. 0.4^{dieser Wert} näher kommen)
 cycle_rubber_mindistance_help Die Kollisionstoleranz hält Vehikel mindestens in diesem Abstand zu Wänden
 cycle_rubber_mindistance_gap_help Wenn dies auf einen positiven Wert gesetzt wird, dann wirkt es als maximalwert für CYCLE_RUBBER_MINDISTANCE: Wenn ein kleines Loch der Breite x sichtbar ist, wird der effektive Wert von _MINDISTANCE nicht größer als x * CYCLE_RUBBER_MINDISTANCE_GAP. Nützlich für "offenes" Spiel.
-cycle_rubber_mindistance_gap_backdoor_help Wenn > 0, wird CYCLE_RUBBER_MINDISTANCE in der Anwendung niemals größer als dieser Wert mal der Größe aller wahrnehmbaren Hintertürlücken, durch die das Vehikel schlüpfen könnte. Für "Open"-Gameplay. Wenn = 0, gilt CYCLE_RUBBER_MINDISTANCE_GAP auch für Hintertüren.
 cycle_rubber_mindistance_gap_side_help Löcher für CYCLE_RUBBER_MINDISTANCE_GAP werden links und rechts in diesem Abstand gesucht.
 cycle_rubber_mindistance_ratio_help Zusatzwert zu CYCLE_RUBBER_MINDISTANCE, wächst mit der Länge der Wand an
 cycle_rubber_mindistance_reservoir_help Zusatzwert zu CYCLE_RUBBER_MINDISTANCE, der bei leerem Rubber-Meter voll und zum tragen kommt und mit steigendem Füllstand langsam ausgeblendet wird.
@@ -115,7 +112,6 @@ cycle_rubber_delay_help       Während dieser Zeit, die noch mit CYCLE_DELAY mult
 cycle_rubber_delay_bonus_help Faktor für CYCLE_RUBBER_DELAY.
 cycle_ping_rubber_help        Noch mehr Toleranz für Spieler mit hohem Ping
 cycle_rubber_wall_shrink_help Bei endlicher Wandlänge wird der aufgebrauchte Rubber-Vorrat mit diesem Wert multipliziert und das Ergebnis wird von der Wandlänge abgezogen.
-cycle_rubber_sync_help        Soll der Rubber-Wert den Clients mitgeteilt werden? Standardwert ist 1. Das heißt, er wird nur dem Besitzer des Gefährts mitgeteilt. Ist der Wert auf 0, wird er gar nicht synchronisiert, und die Rubber-Anzeige  wird sinnlos. Steht der Wert auf 2, wird der Rubber jedes Gefährts jedem Client mitgeteilt. Dies war die Regel bevor dieses Kommando eingeführt wurde.
 cycle_brake_refill_help       Wiederauffüllgeschwindigkeit des Bremsenreservoirs
 cycle_brake_deplete_help      Entleerungsgeschwindigkeit des Bremsenreservoirs
 cycle_sync_interval_enemy_help Zeit zwischen Positionsupdates der gegnerischen Vehikel in Sekunden
@@ -168,10 +164,6 @@ score_kill_help               Punktzahl, die man für das Beseitigen eines Gegner
 score_suicide_help            Was man für Selbstmord erhält (sollte negativ sein)
 score_win_help                Was man für den Gewinn einer Runde erhält (sollte positiv sein)
 score_deathzone_help          Was Sie für das Schlagen der Todeszone erhalten
-score_explosion_owner_help    Punkte, die ein Explodierender für das Zerstören eines anderen Gegners bekommt.
-score_explosion_help          Punkte für das in der Explosion zerstörte Gefährt des Gegners.
-deadly_explosions_help        Sollen die Fahrzeuge im Zerstörungsradius einer Explosion kaputtgehen?
-
 
 sp_score_win_help             Was man für den Gewinn einer Runde im Einzelspielermodus erhält (sollte positiv sein)
 sp_walls_stay_up_delay_help   Anzahl der Sekunden, die die Wände noch stehenbleiben, wenn ein Spieler crasht; negative Werte lassen die Wände ewig stehen.
@@ -194,7 +186,6 @@ sp_num_ais_help               Anzahl der Computergegner
 sp_limit_score_help           Beende das Match wenn ein Spieler diesen Punktestand erreicht    
 sp_limit_rounds_help          Beende das Match nach dieser Rundenzahl
 sp_limit_time_help            Beende das Match nach Ablauf von soviel Minuten
-sp_limit_advance_help         Beendet das Match im Einzelspielermodus sobald das erste Team diese Anzahl an Punkten mehr als das andere hat
 
 spawn_wingmen_back_help       Bestimmt, wie weit die Flügelmänner in der Teamformation nach hinten versetzt sind.
 spawn_wingmen_side_help       Bestimmt, wie weit die Flügelmänner in der Teamformation zur Seite versetzt sind.
@@ -202,7 +193,6 @@ spawn_wingmen_side_help       Bestimmt, wie weit die Flügelmänner in der Teamfor
 walls_stay_up_delay_help      Anzahl der Sekunden, die die Wände noch stehenbleiben, wenn ein Spieler crasht; negative Werte lassen die Wände ewig stehen.
 walls_length_help             Länge der Wände in Metern; negative Werte lassen die Wand unendlich lang sein.
 explosion_radius_help         Zerstörungsradius der Explosionen
-explosion_radius_speed_factor_help Positive Werte erweitern den Explosionsradius je schneller das Gefährt ist, negative Werte schrumpfen ihn entsprechend
 team_balance_on_quit_help     Gleiche Teams aus, wenn jemand das Spiel verlässt?
 team_balance_with_ais_help    Gleiche Teams mit Computergegnern aus?
 team_max_imbalance_help       Höchste tolerierte Ungleichheit der Teams, temporär
@@ -224,18 +214,12 @@ num_ais_help                  Anzahl der Computergegner
 limit_score_help              Beende das Match wenn ein Spieler diesen Punktestand erreicht
 limit_rounds_help             Beende das Match nach dieser Rundenzahl
 limit_time_help               Beende das Match nach Ablauf von soviel Minuten
-limit_advance_help            Beendet das Match sobald das erste Team diese Anzahl an Punkten mehr als das andere hat
-
-round_min_alive_help          Beendet die Runde mit Unentschieden bei weniger menschlichen Überlebenden als hier angegeben 
-round_draw_warn_time_help     Die den Teams zugeteilte Zeit zu gewinnen bevor die Runde in einem Unentschieden endet.
 
 auto_team_help                Wenn dies auf 1 steht, werden Spieler automatisch einem Team zugeteilt. Steht es auf 0, bleiben sie Zuschauer.
-no_spectators_allowed         Tut uns leid, aber das hier funktioniert nicht zusammen mit dem automatischen Zuweisen zu einem Team.\n
 auto_team_spec_spam_help      Nur wenn der wert 1 ist, werden Zuschauer, die den Server betreten oder verlassen, angekündigt. Hat nur einen Effekt, wenn AUTO_TEAM auf 0 steht.
 
 allow_team_name_color_help    Erlaubt es, ein Team nach einer Farbe zu benennen
 allow_team_name_player_help   Erlaubt es, ein Team nach dem Anführer zu benennen
-allow_team_name_leader_help   Stelle diesen Wert auf 1, um dem Teamleader die Namenswahl zu gestatten, andernfalls 0.
 
 play_time_total_help          Gesamtzeit in Minuten, die mit diesem Client gespielt wurde
 play_time_online_help         Gesamtzeit in Minuten, die mit diesem Client online gespielt wurde
@@ -351,18 +335,9 @@ player_chat_wait_teamleader_help Setze dies auf 1, wenn nur Teamchefs eine Spiel
 wait_for_external_script_help Lässt den Server zwischen zwei Runden auf ein externes Script warten, bis das Script den Wert wieder auf 0 setzt.
 wait_for_external_script_timeout_help Maximale Zeit in Sekunden, die der Server über WAIT_FOR_EXTERNAL_SCRIPT pausiert werden kann. Wenn die Zeit abgelaufen ist, startet die nächste Runde auch so.
 
-spawn_script_help             Führt ein externes Skript vom scripts/-Unterordner im Datenpfad aus.
-respawn_script_help           Führt ein externes Skript vom scripts/-Unterordner im Datenpfad aus, wenn keine bereits laufende Instanz gefunden worden ist.
-force_respawn_script_help     Führt ein externes Skript vom scripts/-Unterordner im Datenpfad aus, nachdem andere möglicherweise laufende Instanzen beendet worden sind.
-kill_script_help              Beendet ein Skript. Das Argument muss zu dem von SPAWN_SCRIPT passen
-check_script_help             Sollen die Skript-Kommandos Sicherheitschecks unterzogen werden? Es wird sehr dringend empfohlen, diese Einstellung so beizubehalten, wie sie ist.
-list_scripts_help             Listet die aktiven Skripte auf.
-script_env_help               Stellt benutzerdefinierte Umgebungsvariablen für Skripte ein. Anwendung: SCRIPT_ENV <Name der Variabel> <Wert>
-
 chatter_remove_time_help      Zeit in Sekunden im Chatbot-Zustand, nach der ein Spieler aus dem Spiel geworfen wird
 idle_remove_time_help         Zeit in Sekunden ohne Steuerungsbefehl, nach der ein Spieler aus dem Spiel geworfen wird
 idle_kick_time_help           Zeit in Sekunden ohne Steuerungsbefehl, nach der ein Spieler vom Server geworfen wird
-keep_player_slot_help         Steht dies auf 1, wird ein entbehrlicher Zuschauer gekickt, wann immer der Server voll ist.
 
 #********************************************
 #********************************************
@@ -373,7 +348,6 @@ keep_player_slot_help         Steht dies auf 1, wird ein entbehrlicher Zuschauer
 #********************************************
 
 player_name_confitem_help     Spielername
-player_teamname_confitem_help Teamname
 player_user_confitem_help     Golbale Spieler-ID
 auto_login_confitem_help      Soll sich dieser Spieler automatisch am Server einloggen?
 hide_identity_confitem_help   Soll die Globale ID dieses Spielers versteckt werden?
@@ -402,7 +376,6 @@ color_r_help                  Vehikel- und Wandfarbe, roter Anteil. Direkte Ände
 
 history_size_console_help     Anzahl der Zeilen im Konsolengedächtnis.
 history_size_chat_help        Anzahl der Zeilen im Chat-Gedächtnis.
-enable_name_hilighting_help   Hebt deinen Namen im Gespräch bei anderen Spielern hervor
 
 #********************************************
 #********************************************
@@ -417,13 +390,7 @@ ping_flood_time_20_help       Kürzeste tolerierte Zeit, während der 10 Pings von
 ping_flood_time_50_help       Kürzeste tolerierte Zeit, während der 10 Pings von einer Maschine kommen dürfen.
 ping_flood_time_100_help      Kürzeste tolerierte Zeit, während der 10 Pings von einer Maschine kommen dürfen.
 ping_flood_global_help        Die Zeiten, die bei PING_FLOOD_TIME_X angegeben sind, zählen, mit diesem Faktor multipliziert, auch für Pings von allen Maschinen zusammengenommen. Ein negativer Wert schaltet dieses Feature ab.
-connection_flood_sensitivity_help Der Wert PING_FLOOD_TIME_X, multipliziert mit dem hier gesetzten Wert, zählt für alle eingehenden Clients, die noch nicht verbunden sind, analog zu PING_FLOOD_TIME_X für einzelne Clients. Eine ungewöhnlich große Flut dieser Verbindungsversuche führt zur Aktivierung der Turtle Mode. Negative Werte deaktivieren diesen Schutzmechanismus.
-connection_limit_help         Maximale Anzahl an Paketen von unbekannten Absendern, die in einem Durchlauf der Hauptschleife verarbeitet werden sollen.
-anti_spoof_help               Wenn auf 1, werden die sich verbindenden Clients auf Gespoofte IPs überprüft. Nur Clients, die einen Test zur Verbindbarkeit bestehen, werden reingelassen. Dies wird in Turtle Mode automatisch gemacht, aber kann auch nützlich sein, wenn es die ganze Zeit angeschaltet bleibt.
-turtle_mode_activated         Server ist schwer belastet, Turtle Mode wird eingeleitet. Kommunikation mit anderen Clients ist begrenzt.\n
-turtle_mode_deactivated       Der Sturm scheint sich gelegt zu haben. Turtle Mode deaktiviert! \n
 
-shuffle_spam_messages_per_round_help Maximale Zahl an Positionsänderungsnachrichten, die pro Spieler und pro Runde gezeigt werden. Null bedeutet keine Grenze.
 spam_protection_repeat_help   Mindestzeit, die zwischen gleichlautenden Chat-Nachrichten liegen muss.
 spam_protection_help          Schärfe des Spamschutzes; der Kehrwert bestimmt die minimale Zeit zwischen zwei Nachrichten.
 spam_protection_vote_help     Extrafaktor auf SPAM_PROTECTION für das eröffnen von Abstimmungen.
@@ -432,29 +399,15 @@ spam_penalty_help             Extrastrafe für eine erkanne Spam-Aktion
 spam_maxlen_help              Maximallänge für die Chat-Nachrichten.
 spam_autokick_help            Spamer-Wert, bei dem der Spieler automatisch vom Server geworfen wird.
 spam_autokick_count_help      Zahl der Spam-Warnungen, bevor ein Spieler gekickt wird.
-silence_default_help          Wenn dieser Wert auf 1 gesetzt ist, dann werden alle neuen Spieler stummgeschaltet.
+silence_all_help              Wenn dieser Wert auf 1 gesetzt ist, dann wird aller Chat unterbunden.
 enable_chat_help              Wenn dies auf 0 gesetzt wird, dann werden alle öffentlichen Chat-Nachrichten unterdrückt (Auf dem Server sind Nachrichten von Administratoren und /msg und /team-Nachrichten Ausnahmen).
 allow_team_change_help        Nur wenn dieser Wert 1 ist dürfen Spieler irh Team beliebig wählen. Wenn dieser Wert 0 ist, muss ein Administrator jeden Teamwechsel mit ALLOW_TEAM_CHANGE_PLAYER authorisieren.
-
-# spam prefix settings
-prefix_spam_enable_help       Soll chat auf nervige gemeinsame Prefixe getestet werden? 1 um die Tests to aktivieren, 0 um sie zu deaktivieren.
-prefix_spam_start_color_multiplier_help Prefixe, die Farbcodes enthalten, bekommen ihre Spam-Bewertung mit diesem Wert multipliziert.
-prefix_spam_length_multiplier_help Die Länge des Prefixes geht mit diesem Faktor in die Spam-Bewertung ein.
-prefix_spam_number_color_codes_multiplier_help Die Zahl der Farbcodes in einem Prefix geht mit diesem Faktor in die Spam-Bewertung ein.
-prefix_spam_number_known_prefixes_multiplier_help Die Anzahl der bisher bekannten Spam-Prefixe geht mit diesem Faktor in die Spam-Bewertung eines neuen Prefixes ein.
-prefix_spam_required_score_help Die Spam-Bewertung, ab der ein Prefix als Spam gewertet und blockiert wird.
-prefix_spam_timeout_multiplier_help Das Produkt aus diesem Wert und der Spam-Bewertung bestimmt, wie lange ein Prefix blockiert bleibt.
-
 
 # spam kick messages
 spam_chat                     Du warst zu laut.
 spam_teamchage                Du hast zu oft das Team gewechselt.
 spam_vote_kick_issue          Du wolltest zu viele andere Spieler vom Server werfen.
 spam_vote_rejected            Zu viele deiner Abstimmungen sind fehlgeschlagen.
-
-# default shouting
-default_shout_spectator_help  1 wenn die Standardaktion beim Versuch eines Zuschauers zu chatten schreien sein sollte, 0 wenn es sich nur an die Zuschauer richten soll, 2 für schreien und gleichzeitiges Ignorieren der Zugriffsbeschränkungen
-default_shout_player_help     1 wenn die Standardaktion beim Versuch eines Spielers zu chatten schreien sein sollte, 0 wenn es sich nur an die Zuschauer richten soll, 2 für schreien und gleichzeitiges Ignorieren der Zugriffsbeschränkungen
 
 #********************************************
 #********************************************
@@ -466,24 +419,11 @@ default_shout_player_help     1 wenn die Standardaktion beim Versuch eines Spiel
 
 allow_enemies_same_ip_help    Wenn dies auf 1 gesetzt wird, dürfen Spieler von derselben Netwerkverbindung für Punkte gegeneinander spielen.
 allow_enemies_same_client_help Wenn dies auf 1 gesetzt wird, dürfen Spieler von derselben Netwerkverbindung für Punkte gegeneinander spielen.
-whitelist_enemies_username_help Erlaube Spielern derselben IP-Adresse, Gegner zu sein - wenn einer authentifiziert und in dieser Liste aufgeführt ist. Anwendung: WHITELIST_ENEMIES_USERNAME <Authenifizierter Name1> <Authentifizierter Name2> ...
-whitelist_enemies_ip_help     Erlaube allen Spielern der spezifizierten IP Adresse, Gegner zu sein. Anwendung: WHITELIST_ENEMIES_IP <ip1> <ip2>...
-whitelist_enemies_success     \1 Einträge zur Whitelist hinzugefügt.
 
 allow_control_during_chat_help Wenn dies auf 1 gesetzt wird, dürfen Spieler vom Chat-Modus aus ihr Vehikel steuern (dabei verlieren sie natürlich den Chatbot und die gelbe Pyramide über dem Vehikel).
 
 allow_imposters_help          Wenn dies auf 1 gesetzt wird, dürfen zwei Spieler denselben Namen tragen. Sonst wird einer automatisch umbenannt.
 allow_impostors_help          Wenn dies auf 1 gesetzt wird, dürfen zwei Spieler denselben Namen tragen. Sonst wird einer automatisch umbenannt.
-
-timebot_kick_severity_help    Wenn Spieler wegen des Verdachts auf Cheating gekickt werden, passiert dies mit dem hier einzustellenden Maß an Strenge.
-timebot_sensitivity_help      Die Sensibilität des Codes, der zum Ermitteln von möglichen Cheatern durch Auto-Navigationsbots verwendet wird. 1.0 ist der Standardwert, von welchem du möglichst nicht mehr als 0.5 abweichen solltest.
-timebot_action_medium_help    Aktion bei einem mittleren Verdacht auf Turnbot-Cheating. 0: tue nichts, 1: Schreib's in das Log, 3: benachrichtige Moderatoren, 3: benachrichtige alle Spieler, 4: Kicke den betreffenden Spieler
-timebot_action_high_help      Aktion bei einem starken Verdacht auf Turnbot-Cheating. 0: tue nichts, 1: Schreib's in das Log, 3: benachrichtige Moderatoren, 3: benachrichtige alle Spieler, 4: Kicke den betreffenden Spieler
-timebot_action_max_help       Aktion bei einem sehr starken Verdacht auf Turnbot-Cheating. 0: tue nichts, 1: Schreib's in das Log, 3: benachrichtige Moderatoren, 3: benachrichtige alle Spieler, 4: Kicke den betreffenden Spieler
-
-timebot_action_medium         \1 zeugt von einem hervorragendem Sinn für Timing...seid ihr sicher, das er ein Mensch ist?\n
-timebot_action_high           \1 hat offenbar eine übermenschliche Gabe. Habt Acht, Vielleicht ist es ein Mutant!\n
-timebot_action_max            \1, kann es sein dass du eine Art Hilfsmotor hast?\n
 
 #********************************************
 #********************************************
@@ -507,6 +447,7 @@ lag_credit_time_help          Zeitskala, auf der Lag-Kredit verfällt.
 
 lag_offset_client_help        Auf dem Client wählbar: Zusatzkompensation für Lag. Für sehr schlechte Verbindungen.
 lag_offset_server_help        Auf dem Server wählbar: Zusatzkompensation für Lag. Für sehr schlechte Verbindungen.
+lag_offset_legacy_help        Auf dem Server wählbar: Zusatzkompensation für Lag für Clients, die den Lag-Kredit-Automatismus noch nicht beherrschen. Für sehr schlechte Verbindungen.
 
 lag_threshold_help            Lag in Sekunden, der bei jedem Event nicht korrigiert wird.
 lag_frequency_threshold_help  Minimale Häufigkeit an Lag-Events, unterhalb derer der Server den Client nicht informiert. Sollte zwischen 0 und 1 liegen.
@@ -577,7 +518,6 @@ vote_rejected_voting_suspended Abstimmungen wuden vom Administrator unterbrochen
 
 fadeout_name_delay_help       Zeit in Sekunden, die die Spielernamen über den Vehikeln gezeigt werden. Ein Wert von 0 zeigt sie gar nicht, ein Wert von -1 immer.
 show_own_name_help            Möchtest du auch deinen eigenen Namen sehen?
-display_colored_names_over_cycles_help Sollen die Namen über den Vehikeln in den Farben des Vehikels dargestellt werden?
 dead_console_decoration       *TOT*
 #********************************************
 #********************************************
@@ -591,7 +531,6 @@ recording_debuglevel_help     Niveau der zusätzlichen Informationen, die zur Feh
 fast_forward_maxstep_help     Maximale Zeit in aufgezeichneten Sekunden, die zwischen Renderschritten im schnellen Vorlauf liegt
 fast_forward_maxstep_real_help Maximale Zeit in echten Sekunden, die zwischen Renderschritten im schnellen Vorlauf liegt
 fast_forward_maxstep_rel_help Maximale Zeit gemessen in der Zeit bis zum Vorspulziel, die zwischen Renderschritten liegt
-stop_recording_help           Stoppt eine momentan laufende Aufnahme um Resourcen zu sparen. Danach muss wieder von vorne angefangen werden, man kann sie nicht einfach vom letzten Stopp aus fortsetzen.
 
 #********************************************
 #********************************************
@@ -607,7 +546,6 @@ camera_forbid_free_help       Verbietet die Benutzung der freien Kamera für alle
 camera_forbid_follow_help     Verbietet die Benutzung der dummen externen Kamera für alle Clients
 camera_forbid_custom_help     Verbietet die Benutzung der einstellbaren Kamera für alle Clients
 camera_forbid_server_custom_help Verbietet die Benutzung der serverbestimmten einstellbaren Kamera für alle Clients
-camera_forbid_mer_help        Verbietet die Benutzung von Meritons Kamera
 
 camera_forbid_custom_glance_help Verbieted die Benutzung der einstellbaren Kamera für das Umsehen.
 camera_override_custom_glance_help Ueberschreibt den Clientseitigen CAMERA_CUSTOM_GLANCE Wert.
@@ -626,11 +564,6 @@ camera_smart_glance_custom_text Einstellbares Umsehen
 camera_free_start_x_help      Startposition der freien Kamera
 camera_free_start_y_help      Startposition der freien Kamera
 camera_free_start_z_help      Startposition der freien Kamera
-camera_free_start_rotate_help Anfängliche Rotation der freien Kamera (relativ zum Blick auf das am Anfang betrachtete Vehikel)
-camera_free_start_pitch_help  Anfänglicher Neigungswinkel der freien Kamera (Bei 0 sieht sie direkt auf das vehikel)
-
-save_cameras_help             Gibt Kommandos aus, die später die derzeitigen Kamerapositionen wiederherstellen.
-warp_camera_help              Ändert sofort die Kameraposition. Format: Format: WARP_CAMERA camera_id posx posy dirx diry height pitch fov.
 
 camera_custom_back_help       Position der einstellbaren Kamera: wie weit liegt sie hinter dem Vehikel?
 camera_custom_rise_help       Position der einstellbaren Kamera: wie weit liegt sie über dem Vehikel?
@@ -656,13 +589,6 @@ camera_glance_back_fromspeed_help Dieser Wert wird mit der Geschwindigkeit des V
 camera_glance_rise_fromspeed_help Dieser Wert wird mit der Geschwindigkeit des Vehikels multipliziert und auf CAMERA_GLANCE_RISE aufgeschlagen.
 camera_glance_pitch_help      Position der Umschau-Kamera: wie weit sieht sie nach oben oder unten?
 
-camera_glance_mode_help       Wie die Kamera beim Umsehen den Übergang vollzieht. Gültige Werte liegen zwischen 0 und 3.
-camera_glance_stacking_help   Wenn dies eingestellt ist, bauen die Umseh-Befehle aufeinander auf, die Blickrichtungen sind dann relativ zum momentanen Blickfeld.
-camera_glance_return_help     Wenn du alle Umseh-Tasten loslässt und dies eingestellt ist, wird der Befehl gegeben direkt nach vorne in Fahrtrichtung zu schauen. Dies kann die Ansicht schneller wieder in den Normalzustand zurueckversetzen.
-camera_glance_return_stop_help Kosinus des Winkels zwischen Fahrt- und Blickrichtung, bei dem der normale Kamera-Code wieder vom Umschau-Code die Kontrolle übernimmt.
-camera_glance_return_stop_smart_help Bei der Smart-Kamera: Kosinus des Winkels zwischen Fahrt- und Blickrichtung, bei dem der normale Kamera-Code wieder vom Umschau-Code die Kontrolle übernimmt.
-camera_glance_snap_help       Wenn der Kosinus zwischen dem gewünschten und dem derzeitigen Blickwinkel kleiner als dieser Wert ist, springt die Kamera direkt zu der gewünschten Position, ungeachtet des Werts bei CAMERA_GLANCE_MODE.
-
 camera_server_glance_back_help Position der serverseitigen Umschau-Kamera: wie weit liegt sie hinter dem Vehikel?
 camera_server_glance_rise_help Position der serverseitigen Umschau-Kamera: wie weit liegt sie über dem Vehikel?
 camera_server_glance_back_fromspeed_help Dieser Wert wird mit der Geschwindigkeit des Vehikels multipliziert und auf CAMERA_SERVER_GLANCE_BACK aufgeschlagen.
@@ -679,12 +605,6 @@ camera_visibility_lower_wall_smart_help wie CAMERA_VISIBILITY_LOWER_WALL, aber s
 bug_transparency_help         Wird nicht unterstützt: schaltet Transparenztests für hohe Wände generell ab.
 bug_transparency_demand_help  Wird nicht unterstützt: anstatt dass die Wände abgesenkt werden, werden einfach die Sichtbarkeitstests für sie ausgeschaltet, so dass sie seltsam transparent erscheinen.
 
-#red/green 3D rendering settings
-camera_eye_distance_help      Die Entfernung zwischen den zwei Kamera-Augen. Stelle dies auf 0 um 3d-Rendering zu deaktivieren.
-camera_eye_1_color_help       Die Farbmaske des ersten Auges der Kamera. 1 ist rot, 2 ist grün, 4 ist blau. Summen dieser Farben kombiniert sie additiv (3: gelb, 5: lila, 6 türkis).
-camera_eye_2_color_help       Die Farbmaske des zweiten Auges der Kamera. 1 ist rot, 2 ist grün, 4 ist blau. Summen dieser Farben kombiniert sie additiv (3: gelb, 5: lila, 6 türkis).
-camera_in_max_focus_distance_help Dies, mit der derzeitigen Geschwindigkeit multipliziert, bestimmt die maximale Entfernung vom Fokus der beiden Augen, es sei denn eine Wand ist näher.
-
 #********************************************
 #********************************************
 #
@@ -698,11 +618,8 @@ dedicated_idle_help           Nach dieser Zeit (in Stunden) beendet sich der Ded
 dedicated_fps_help            Maximale Zahl der Simulationsschritte pro Sekunde, die der Server ausführen soll
 dedicated_fps_idle_factor_help Maximale Zahl der Simulationsschritte pro Sekunde, die der Server ausführen soll, währent gerade kein eingehender Netzwerkverkehr vorliegt
 talk_to_master_help           Soll dieser Server im Internet bekannt gemacht werden?
-add_master_server_help        Kündige diesen Server einem anderen Master Server an. Anwendung: ADD_MASTER_SERVER host port(optional, Standard=4533).
 max_out_rate_help             Maximale Netzwerkbandbreite (Ausgabe)
 max_in_rate_help              Maximale Netzwerkbandbreite (Eingabe)
-message_cache_size_help       Größe des Netzwerk-Nachrichten-Caches in Nachrichten.
-message_cache_effort_help     Aufwand der zum komprimieren von Netzwerknachrichten betrieben wird.
 ping_charity_help             Ping-Spende: Wieviel Ping möchtest Du gerne von deinen minderbemittelten Mitspielern übernehmen?
 ping_charity_max_help         Serverseitig einstellbar: Maximale Ping-Spende, wird nur aktiv, wenn alle Clients Version 0.2.8.3 oder höher sind. Ein Wert von 0 sollte die gefürchteten Instant-Kills vermeiden.
 ping_charity_min_help         Serverseitig einstellbar: Minimale Ping-Spende, wird nur aktiv, wenn alle Clients Version 0.2.8.3 oder höher sind.
@@ -729,20 +646,6 @@ setting_legacy_behavior_annoying_help Bestimmt das Verhalten gegenüber älteren C
 setting_legacy_behavior_cheating_help Bestimmt das Verhalten gegenüber älteren Clients, wenn Einstellungngen geändert wurden, die, wenn ignoriert, als Betrug angesehen werden (z.B. DOUBLEBIND_TIME)
 setting_legacy_behavior_visual_help Bestimmt das Verhalten gegenüber älteren Clients, wenn Einstellungngen geändert wurden, die nur Auswirkungen auf Anzeigen haben (z.B. CYCLE_RUBBER_*)
 
-# server browser
-
-browser_query_filter_help     Filterabfrage. Stelle sie auf 0 um alle Server zu erfassen, 1 für Server mit nichtnegativem Punkteeinfluss, 2 für die mit einem positivem, 3 für gar keine solche Erfassung. Der Ping von nicht-abgefragten Servern wird 999 betragen, Spielerinformationen kommen indirekt vom Masterserver.
-browser_queries_simultaneous_help Maximale Anzahl an gleichzeitigen Anfragenachrichten, die ausgesandt werden
-browser_query_delay_single_help Zeitliche Verzögerung zwischen Anfragen beim gleichen Server
-browser_query_delay_global_help Zeitliche  Verzögerung zwischen allen Anfragen
-browser_num_queries_help      Anzahl der Anfragen je Versuch
-browser_contactloss_help      Anzahl fehlgeschlagener Kontaktversuche bevor der Server als verloren gilt
-browser_sort_key_help         Derzeitiger Suchfilter im Server Browser
-browser_bookmark_priority_ping_help Priorität von Lesezeichen bezüglich der Sortierung nach Ping
-browser_bookmark_priority_users_help Priorität von Lesezeichen bezüglich der Sortierung nach Benutzern
-browser_bookmark_priority_score_help Priorität von Lesezeichen bezüglich der Sortierung nach Punktestand.
-
-
 #********************************************
 #********************************************
 #
@@ -756,9 +659,37 @@ white_sparks_help             Zeichnet Funken in weiß, nicht in der Farbe der Ve
 keep_window_active_help       Auch wenn das Fenster nicht mehr aktiv ist, soll die Bilddarstellung nicht abbrechen.
 
 # hud
-cockpit_file_help             Datei, die Informationen zur Berechnung der Cockpitzeiger enthält.
-forbid_hud_map                Verbiete Clients das Zeigen der HUD Minikarte?
-forbid_cockpit_data_help      Durch Doppelpunkte unterteilte Liste von Cockpitdatenquellen, die Clients nicht für ihre Cockpits verwenden dürfen (z.B. der Rubber ihrer Gegner)
+show_brake_help               Soll die Bremsanzeige im HUD gezeigt werden?
+show_alive_help               Soll der Freund/Feindzähler im HUD gezeigt werden?
+show_fastest_help             Soll der schnellste Spieler im HUD gezeigt werden?
+show_hud_help                 Soll das HUD gezeigt werden?
+show_ping_help                Soll dein Ping im HUD gezeigt werden?
+show_rubber_help              Soll die Rubber-Anzeige im HUD gezeigt werden?
+show_score_help               Soll die Punktzahl im HUD gezeigt werden?
+show_speed_help               Soll das Tachometer im HUD gezeigt werden?
+show_time_help                Soll die aktuelle Uhrzeit im HUD gezeigt werden?
+show_time_24_help             Soll die Uhr im 24-Stunden-Format gezeigt werden?
+speed_gauge_locx_help         Horizontale Position des Tachometers
+speed_gauge_locy_help         Vertikale Position des Tachometers
+speed_gauge_size_help         Göße des Tachometers
+rubber_gauge_locx_help        Horizontale Position des Rubber-Meters
+rubber_gauge_locy_help        Vertikale Position des Rubber-Meters
+rubber_gauge_size_help        Göße des Rubber-Meters
+brake_gauge_locx_help         Horizontale Position der Bremsanzeige
+brake_gauge_locy_help         Vertikale Position der Bremsanzeige
+brake_gauge_size_help         Göße der Bremsanzeige
+alive_locx_help               Horizontale Position des Freund/Feindzählers
+alive_locy_help               Vertikale Position des Freund/Feindzählers
+alive_size_help               Göße des Freund/Feindzählers
+fastest_locx_help             Horizontale Position des schnellsten Spielers in der Anzeige
+fastest_locy_help             Vertikale Position des schnellsten Spielers in der Anzeige
+fastest_size_help             Göße des schnellsten Spielers in der Anzeige
+ping_locx_help                Horizontale Position der Ping-Anzeige
+ping_locy_help                Vertikale Position der Ping-Anzeige
+ping_size_help                Göße der Ping-Anzeige
+score_locx_help               Horizontale Position der Punktzahl in der Anzeige
+score_locy_help               Vertikale Position der Punktzahl in der Anzeige
+score_size_help               Göße der Punktzahl in der Anzeige
 cm_locy_help                  Vertikale Position der Zentralnachrichten vom Server
 
 #floor
@@ -767,15 +698,6 @@ grid_size_moviepack_help      Abstand zwischen Rasterlinien im Moviepack
 floor_red_help                Bodenfarbe
 floor_green_help              Bodenfarbe
 floor_blue_help               Bodenfarbe
-
-upper_sky_red_help            Obere Himmelfarbe
-UPPER_SKY_GREEN_help          Obere Himmelfarbe
-UPPER_SKY_BLUE_help           Obere Himmelfarbe
-
-UPPER_SKY_SCALE_help          Obere Himmelsabmessungen (Verringerung macht Formen größer)
-
-UPPER_SKY_HEIGHT_help         Höhe vom oberen Himmel
-LOWER_SKY_HEIGHT_help         Höhe vom unteren Himmel
 
 rim_wall_stretch_x_help       Ausdehnung der Textur der Arenabegrenzung, horizontal
 rim_wall_stretch_y_help       Ausdehnung der Textur der Arenabegrenzung, vertikal
@@ -790,38 +712,15 @@ moviepack_rim_wall_stretch_x_help Ausdehnung der Textur der Arenabegrenzung, hor
 moviepack_rim_wall_stretch_y_help Ausdehnung der Textur der Arenabegrenzung, vertikal (Für Moviepack)
 
 #detail settings
-swapoptimize_text             Optimiere Swap für:
-swapoptimize_help             Bestimmt den Algorithmus, der für Buffer-Swaps und Syncs benutzt wird.
-swapoptimize_latency_text     Geringe Wartezeit
-swapoptimize_latency_help     Dies optimiert das Spiel für eine geringe Wartezeit zwischen Input und Anzeige (auch bekannt als Input-Lag)
-swapoptimize_auto_text        Automatisch
-swapoptimize_auto_help        Dies wählt den Modus für geringe Wartezeit wenn deine Framerate stabil wirkt und hoch genug ist. Wenn zu viele Frames fallengelassen werden oder die Framerate so hoch ist, dass kein Warten nötig ist, geschieht ein Wechsel zum Verarbeitungsmengenmodus. Empfohlen.
-swapoptimize_throughput_text  Verarbeitungsmenge
-swapoptimize_throughput_help  Dies optimiert das Spiel für hohe FPS-Zahlen und eine geringe Anzahl an fallengelassenen Frames, aber hält den Input-Lag auf weniger als einen Frame.
-swapoptimize_throughput_flush_text Verarbeitungsmenge+Flush
-swapoptimize_throughput_flush_help Das Beste für hohe FPS-Raten und eine geringe Anzahl an fallengelassenen Frames. Es benutzt Pipeline-Flush-Kommandos statt normalen Sync-Kommandos und verursacht dadurch unterschiedlich großen Input-Lag auf einigen Systemen. Also, Vorsicht.
-swapoptimize_throughput_fastest_text Kompromisslose Geschwindigkeit
-swapoptimize_throughput_fastest_help Dies optimiert auf niedrige Zeitverschwendung im Sync. Es kommt dem Rendering nicht in die Quere. Erwarte aber fürchtbar viel Input-Lag und seltsame Leistungseinbrüche.
-swap_optimize_help            Bestimmt den Algorithmus für Swap und Sync. 0: Optimiert für niedrige Wartezeit, 1: Auto, 2: Optimiert für hohe Verarbeitungsmenge, 3 und 4: Optimiere für noch höhere Verarbeitungsmenge (ist aber beides sehr gefährlich!)
-
-framedroptolerance_text       Framedrop Toleranz
-framedroptolerance_help       Im Wartezeitmodus kontrolliert dies, wie sehr das System versucht, zu vermeiden, dass gelegentlich fallengelassene Frames die Wartezeit runterziehen. Je mehr du die Wartezeit reduzieren willst, desto mehr Framedrops musst du dafür in Kauf nehmen.
-
-framedrop_tolerance_lenient_text Mild
-framedrop_tolerance_lenient_help Erwarte einen fallengelassen Frame alle 20 Sekunden.
-
-framedrop_tolerance_normal_text Normal
-framedrop_tolerance_normal_help Erwarte einen fallengelassenen Frame pro Minute.
-
-framedrop_tolerance_strict_text Strikt
-framedrop_tolerance_strict_help Erwarte einen fallengelassenen Frame alle 10 Minuten.
-
-framedrop_tolerance_draconic_text Drakonisch
-framedrop_tolerance_draconic_help Toleriere keine unnötigen Framedrops.
-
-framedrop_tolerance_help      Kontrolliert die Anzahl an fallengelassenen Frames wegen geringerer Wartezeit in der Wartezeit-Swap-Mode toleriert werden. 0 tolerierst die meisten, 4 die wenigsten.
-
-swap_latency_delay_factor_help Sicherheitsfaktor für die Berechnung der Verzögerung nach Swaps im Verzögerungs-Swap-Modus. Zwischen 0 und 1. Sollte nicht manuell verändert werden, es wird automatisch angepasst, deinen FRAMEDROP_TOLERANCE-Einstellungen folgend.
+swapmode_text                 Pufferumschaltmodus:
+swapmode_help                 Bestimmt die Methode, mit der in jedem Renderschritt die Ausgabe mit der Eingabe synchronisiert wird. Der Aktuelle Wert bewirkt:
+swapmode_fastest_text         Schnell
+swapmode_fastest_help         Keine Synchronisation. Das ist am schnellsten, aber die Grafikausgabe kann möglicherweise sehr lange hiter der Eingabe herhinken.
+swapmode_glflush_text         glFlush
+swapmode_glflush_help         Die Funktion glFlush() wird zur Synchronisation verwendet. Die Prozessorbelastung ist gering.
+swapmode_glfinish_text        glFinish
+swapmode_glfinish_help        glFinish() wird zur Synchronisation verwendet. Nur so ist es garantiert, dass Eingabe und Ausgabe wirklich Synchron laufen, aber der Preis ist auf einigen Systemen die Vollauslastung des Prozessors.
+swap_mode_help                Bestimmt, wie Ein- und Ausgabe synchronisiert werden. 0: gar nicht, 1: mit glFlush(), 2: mit glFinish().
 
 texture_mode_0_help           Bodentextur:
 texture_mode_1_help           Wandtexturen:
@@ -843,19 +742,40 @@ text_out_help                 Aktiviert Textausgabe
 console_columns_help          Anzahl der Spalten der Textausgabe
 console_rows_help             Anzahl der Zeilen der Textausgabe (normal)
 console_rows_max_help         Anzahl der Zeilen der Textausgabe (maximal beim Hochscrollen)
-chat_layer_help               Transparenz der Konsole und des Menühintergrundes: 0 für totale Transparenz, 1 für totale Intransparenz
 console_indent_help           Anzahl der Leerzeichen, mit denen die Vortsetzung einer automatisch umgebrochenen Konsolenzeile eingerückt wird
 console_decorate_id_help      Jede Ausgabezeile wird mit der ID-Nummer des Clients, der sie verursacht hat, dekoriert
 console_decorate_ip_help      Jede Ausgabezeile wird mit der IP-Adresse des Clients, der sie verursacht hat, dekoriert
 console_decorate_timestamp_help Dekoriert jede Zeile der Konsolenausgabe mit aktuellem Datum und Uhrzeit
+console_ladder_log_help       Schickt das Ladder-Log auch an die Standardausgabe
 ladderlog_decorate_timestamp_help Dekoriert jede zeile von ladderlog.txt mit aktuellem Datum und Uhrzeit
 ladderlog_write_all_help      Setzt alle LADDER_LOG_WRITE_*-Einstellungen auf denselben Wert
 ladderlog_write_all_usage     Verwendung: LADDER_LOG_WRITE_ALL 1|0
 ladderlog_write_all_enabled   Aktiviert volle Ausgabe nach ladderlog.txt.
 ladderlog_write_all_disabled  Deaktiviert ausgabe nach ladderlog.txt.
+ladderlog_write_authority_blurb_help Schreibt in ladderlog.txt: AUTHORITY_BLURB <Name> <Wert>
+ladderlog_write_basezone_conquered_help Schreibt in ladderlog.txt: BASEZONE_CONQUERED <Team> <cx> <cy>
+ladderlog_write_basezone_conquerer_help Schreibt in ladderlog.txt: BASEZONE_CONQUERER <Spieler>
+ladderlog_write_chat_help     Schreibt in ladderlog.txt: CHAT <Redner> [/me] <was er sagt>
+ladderlog_write_death_frag_help Schreibt in ladderlog.txt: DEATH_FRAG <Beute> <Jäger>
+ladderlog_write_death_suicide_help Schreibt in ladderlog.txt: DEATH_SUICIDE <Spieler>
+ladderlog_write_death_teamkill_help Schreibt in ladderlog.txt: DEATH_TEAMKILL <Beute> <Jäger>
+ladderlog_write_game_end_help Schreibt in ladderlog.txt: GAME_END
+ladderlog_write_game_time_help Schreibt in ladderlog.txt:  GAME_TIME <Zeit> (beachte ebenfalls: GAME_TIME_INTERVAL)
+ladderlog_write_match_winner_help Schreibt in ladderlog.txt: MATCH_WINNER <Gewinner>
+ladderlog_write_new_match_help Schreibt in ladderlog.txt: NEW_MATCH
+ladderlog_write_new_round_help Schreibt in ladderlog.txt: NEW_ROUND
+ladderlog_write_num_humans_help Schreibt in ladderlog.txt: NUM_HUMANS <Zahl der Menschlichen Spieler>
+ladderlog_write_online_player_help Schreibt in ladderlog.txt: ONLINE_PLAYER <Name> [<Ping> [<Team>]]
+ladderlog_write_player_entered_help Schreibt in ladderlog.txt: PLAYER_ENTERED <Name> <IP> <Spitzname>
+ladderlog_write_player_left_help Schreibt in ladderlog.txt: PLAYER_LEFT <Name> <IP>
+ladderlog_write_player_renamed_help Schreibt in ladderlog.txt: PLAYER_RENAMED <alter Name> <neuer Name> <IP> <Spitzname>
+ladderlog_write_round_score_help Schreibt in ladderlog.txt: ROUND_SCORE <Punktzahl diese Runde> <Spieler> [<Team>]
+ladderlog_write_round_score_team_help Schreibt in ladderlog.txt: ROUND_SCORE_TEAM <Punktzahl diese Runde> <Team>
+ladderlog_write_round_winner_help Schreibt in ladderlog.txt: ROUND_WINNER <Gewinner>
+ladderlog_write_sacrifice_help Schreibt in ladderlog.txt: SACRIFICE <Spieler, der das Loch benutzt hat> <Spieler, der das Loch gemacht hat> <Spieler, dessen Wand durchlöchert wurde>
+ladderlog_write_wait_for_external_script_help Schreibt in ladderlog.txt: WAIT_FOR_EXTERNAL_SCRIPT (beachte ebenfalls: WAIT_FOR_EXTERNAL_SCRIPT und WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
 ladderlog_game_time_interval_help Wenn dies auf einen positiven Wert gesetz wird, so wird alle n Sekunden eine Statusmeldung ins Ladder-Log geschrieben.
 chat_log_help                 Schreibt maschinenlesbares Chatlog in var/chatlog.txt
-console_log_help              Schreibe alle Konsolennachrichten in var/consolelog.txt
 show_fps_help                 Aktiviert Performance-Anzeige 
 floor_mirror_help             Spiegelung des Bodens
 floor_detail_help             Detail des Bodens
@@ -879,7 +799,6 @@ explosion_help                Schaltet Explosionen ein
 wrap_menu_help                Kann man ein Menu nach oben verlassen (und es somit von unten wieder betreten)?
 floor_mirror_int_help         Stärke der Bodenspiegelungen
 color_strings_help            Markiere Texte farblich (z.B. Namen im Chat)
-verify_color_strict_help      Verifiziere color codes vor deren Interpretation, wenn dies auf 1 steht. Großbuchstaben und alles was nicht 0-9 oder a-f ist, wird dann nicht als color code gewertet. Wenn auf 0 (Standard), werden ungewöhnliche ASCII-Zeichen akzeptiert und als 0 gelesen.
 filter_color_strings_help     Entferne Farbcodierungen aus allen Texten, die über das Netwerk empfangen werden.
 filter_dark_color_strings_help Entferne zu dunkle Farbcodierungen aus Zeichenketten.
 filter_color_names_help       Entferne Farbcodierungen aus Spielernamen.
@@ -903,11 +822,6 @@ armagetron_screenmode_help    Bildschirmauflösung
 armagetron_last_screenmode_help letzte Bildschirmauflösung
 armagetron_windowsize_help    Fenstergrösse
 armagetron_last_windowsize_help letzte Fenstergrösse
-motion_blur_time_help         Zeitspanne während der die zuletzt gerenderten Frames zusammengeblendet werden sollen
-armagetron_vsync_help         Was mit dem Vertical Sync des Monitors gemacht werden soll
-
-#ORIGINAL TEXT:               What to do with the monitor's vertical sync
-#rmagetron_vsync_last_help    UNTRANSLATED
 fullscreen_help               Vollbild oder Fenster?
 last_fullscreen_help          Vollbild oder Fenster, letzte erfolgreiche Einstellung
 check_errors_help             Soll \g auf Fehler bei der Grafikinitialisierung achten?
@@ -923,9 +837,6 @@ software_renderer_help        Ist der OpenGL Renderer nicht Hadware-Beschleunigt
 
 #model
 use_displaylists_help         Sollen display lists für die Vehikel verwendet werden?
-
-#walls
-simple_trail_help             Wenn auf 1, werden die Lichtwände für mehr Leistung einfacher gerendert.
 
 #********************************************
 #********************************************
@@ -971,13 +882,6 @@ viewport_belongs_help         Dieses Fenster einem Spieler zuweisen
 #********************************************
 #********************************************
 
-rotation_type_help            Bestimmt, wenn Karten- und Konfigurationsrotation geschehen soll. Mögliche Werte: (0) Keine Rotation (1) Rotiere jede Runde (2) Rotiere jedes Match
-map_rotation_help             Eine Liste von Kartendateien für die Rotation mit durch Semikolons abgetrennten Werten.
-config_rotation_help          Eine Liste der Konfigurationsdateien für die Rotation. Die Werte sind durch Semikolons getrennt.
-reset_rotation_help           Setzt Karten- und Config-Rotation zurück
-reset_rotation_on_start_new_match_help Wenn aktiviert werden Karten- und Config-Rotation zurückgesetzt, sobald ein START_NEW_MATCH-Kommando eingegeben wird.
-reset_rotation_message        Karten- und Konfigurationsrotation sind zurückgesetzt worden.
-
 word_delimiters_help          Zeichen, die in Texteingabefeldern als Wortgrenzen zählen.
 
 mouse_grab_help               Fängt den Mauszeiger ein, damit er das Fenster nicht verlässt
@@ -995,8 +899,6 @@ admin_pass_help               Kennwort für das grundlegende im Spiel admin
 
 backward_compatibility_help   Maximale Zahl älterer Versionen, die noch unterstützt werden.
 new_feature_delay_help        Deaktiviert alle Features, die erst während der letzten X Versionen des Netzwerkprotokolls hinzugekommen sind.
-min_protocol_version_help     Minimale Protokollversion die zum Spielen benötigt wird
-max_protocol_version_help     Wenn > 0, ist dies die Maximale Protokollversion, die zum Spielen erforderlich ist. Nicht von dieser Version unterstütze Funktionen sind permanent deaktiviert.
 
 # program control
 quit_help                     Beendet den Serverprozess.
@@ -1025,7 +927,6 @@ default_kick_to_port_help     Standard-Port des Servers, auf den per KICK_TO ode
 vote_kick_to_server_help      IP bzw. Name des Servers, auf den per Abstimmungs-Rausschmiss weitergeleitet wird.
 vote_kick_to_port_help        Port des Servers, auf den per Abstimmungs-Rausschmiss weitergeleitet wird.
 vote_kick_reason_help         Standartgrund, der Spielern für einen Abstimmungs-Rausschmiss gegeben wird.
-full_redirect_server_help     Server, zu dem ein Spieler umgeleitet wird, wenn dieser Server voll ist.
 
 ban_help                      Wirft den angegebenen Spieler vom Server und verbannt ihn für eine variable Zeit in Minuten.
 ban_ip_help                   Verbannt spieler von der angegebenen IP-Adresse für die angegebene Zeit in Minuten vom Server.
@@ -1033,8 +934,6 @@ ban_list_help                 Gibt die Liste der Verbannten IP-Adressen aus.
 unban_ip_help                 Hebt eine Verbannung auf.
 
 player_list_hidden_player_prefix_help Der Prefix, der vor versteckten Globalen IDs gezeigt wird, wenn man sie doch sehen kann.
-player_list_ready             0x7fff7fBereit
-player_list_not_ready         0xff7f7fNicht bereit
 player_list_search            \1: Suchmuster "\n" passt auf:\n
 player_list_search_no_results \1: Suchmuster "\2" liefert keine Treffer.\n
 player_list_search_end        \1: Ende der Suchergebnisse (\2 Treffer).\n
@@ -1062,8 +961,6 @@ say_help                      Lässt den Server-Administrator etwas sagen.
 rename_help                   Benennt den angegebenen Spieler um.
 allow_rename_player_help      Gibt dem angegebenen Spieler die Erlaubnis, seinen Namen wieder zu ändern.
 disallow_rename_player_help   Nimmt dem angegebenen Spieler die Erlaubnis, seinen Namen zu ändern.
-
-silence_enemies_help          Wenn aktiviert, ist der von Feinden gesendete Chat nicht auf deinem Client sichtbar, solange du lebst. Stirbst du, ist er wieder sichtbar.
 
 #********************************************
 #********************************************
@@ -1098,8 +995,6 @@ bug_color_overflow_help       Verhindert nicht den Überlaufsfehler, der es Spiel
 input_items_unbound           Nicht belegt
 input_items_global            Sondertasten
 
-# used for listing key bindings
-input_or                      oder
 
 #********************************************
 #********************************************
@@ -1115,11 +1010,9 @@ input_console_input_help      Hiermit kann man einen Befehl in der Konsole einge
 input_screenshot_text         Screenshot
 input_screenshot_help         Macht einen Screenshot und speichert ihn in der Datei screenshot_X.bmp
 
-input_chat_tooltip            Drücke \1 um zu sprechen.
 input_chat_text               Chat
 input_chat_help               Zum Plaudern in Netzwerkspielen
 
-input_toggle_spectator_tooltip Drücke \1 um Zuschauer zu werden oder wieder zu spielen.
 input_toggle_spectator_text   Zuschauermodus An/Aus
 input_toggle_spectator_help   Aktiviert/Deaktiviert den Zuschauermodus für kleinere Spielpausen.
 
@@ -1135,7 +1028,6 @@ input_toggle_mousegrab_help   Fängt den Mauszeiger im Fenster ein oder befreit i
 input_reload_textures_text    Texturen neu laden
 input_reload_textures_help    Lädt alle Texturen neu. Nützlich für Grafiker, um ihre neuen Werke zu testen.
 
-input_ingame_menu_tooltip     Drücke \1 um zum In-Game-Menü zu gelangen.
 input_ingame_menu_text        Menu aktivieren
 input_ingame_menu_help        Aktiviert das Menu aus dem Spiel heraus. ESC is zusätzlich zu den hier gesetzten Tasten fest darauf einprogrammiert, damit niemand im Spiel gefangen bleibt :)
 
@@ -1156,30 +1048,6 @@ input_mess_up_help            Scrollt die Nachrichten eine Seite nach oben.
 input_mess_down_text          nach unten scrollen
 input_mess_down_help          Scrollt die Nachrichten eine Seite nach unten.
 
-input_mess_end_text           Scrolle zum Ende
-input_mess_end_help           Scrollt zum Ende der Nachrichten, um die aktuellsten zu zeigen.
-
-#********************************************
-#********************************************
-#
-#       cockpit keys
-#
-#********************************************
-#********************************************
-
-input_cockpit_key_1_tooltip   Drücke \1 um durch die Kartenmodi zu blättern.
-input_cockpit_key_1_text      Cockpit-Taste 1
-input_cockpit_key_2_text      Cockpit-Taste 2
-input_cockpit_key_3_text      Cockpit-Taste 3
-input_cockpit_key_4_text      Cockpit-Taste 4
-input_cockpit_key_5_text      Cockpit-Taste 5
-
-input_cockpit_key_1_help      Mit Cockpit-Tasten kann man das HUD verändern, indem man z.B. bestimmte HUD-Elemente zeigt oder versteckt. Der genaue Effekt hängt von der von dir verwendeten Cockpitdatei ab.
-input_cockpit_key_2_help      Mit Cockpit-Tasten kann man das HUD verändern, indem man z.B. bestimmte HUD-Elemente zeigt oder versteckt. Der genaue Effekt hängt von der von dir verwendeten Cockpitdatei ab.
-input_cockpit_key_3_help      Mit Cockpit-Tasten kann man das HUD verändern, indem man z.B. bestimmte HUD-Elemente zeigt oder versteckt. Der genaue Effekt hängt von der von dir verwendeten Cockpitdatei ab.
-input_cockpit_key_4_help      Mit Cockpit-Tasten kann man das HUD verändern, indem man z.B. bestimmte HUD-Elemente zeigt oder versteckt. Der genaue Effekt hängt von der von dir verwendeten Cockpitdatei ab.
-input_cockpit_key_5_help      Mit Cockpit-Tasten kann man das HUD verändern, indem man z.B. bestimmte HUD-Elemente zeigt oder versteckt. Der genaue Effekt hängt von der von dir verwendeten Cockpitdatei ab.
-	
 #********************************************
 #********************************************
 #
@@ -1188,38 +1056,18 @@ input_cockpit_key_5_help      Mit Cockpit-Tasten kann man das HUD verändern, ind
 #********************************************
 #********************************************
 
-input_cycle_brake_tooltip     Drücke \1 um zu bremsen (oder für andere Spezialfunktionen)
 input_cycle_brake_text        Bremsen
 input_cycle_brake_help        Verringert die Geschwindigkeit
 
 input_cycle_brake_toggle_text Bremse ein/ausschalten
 input_cycle_brake_toggle_help Schaltet die Bremse permanent ein oder aus, ohne dass man eine Taste gedrückt halten muss
 
-input_cycle_turn_right_tooltip Drücke \1 um nach rechts zu wenden.
 input_cycle_turn_right_text   Rechts
 input_cycle_turn_right_help   Macht eine scharfe Rechtskurve
 
-input_cycle_turn_left_tooltip Drücke \1 um nach links zu wenden.
-input_cycle_turn_left_text    Biege links ab
-input_cycle_turn_left_help    Macht eine 90-Grad-Drehung nach links
+input_cycle_turn_left_text    Links
+input_cycle_turn_left_help    Macht eine scharfe Linkskurve
 
-#ORIGINAL TEXT:               Turn left
-#TRANSLATION deutsch          Biege links ab
-#input_cycle_turn_left_text   UNTRANSLATED
-
-#ORIGINAL TEXT:               Makes a 90 degrees turn to the left
-#TRANSLATION deutsch          Macht eine 90-Grad-Drehung nach links
-#input_cycle_turn_left_help   UNTRANSLATED
-input_joy_left_text           Joystick links
-input_joy_left_help           Lässt das Vehikel nach links wenden, abhängig vom momentanen Blickwinkel
-input_joy_right_text          Joystick rechts
-input_joy_right_help          Lässt das Vehikel nach rechts wenden, abhängig vom momentanen Blickwinkel
-input_joy_up_text             Joystick auf
-input_joy_up_help             Lässt das Vehikel nach oben wenden, abhängig vom momentanen Blickwinkel
-input_joy_down_text           Joystick ab
-input_joy_down_help           Lässt das Vehikel nach unten wenden, abhängig vom momentanen Blickwinkel
-input_joy_glance_text         Joystick umsehen
-input_joy_glance_help         Gedrückt halten, um die Joystick Bewegungen auf die Kamera und nicht das Vehikel anzuwenden
 
 #********************************************
 #********************************************
@@ -1253,21 +1101,14 @@ input_zoom_out_help           Vergrössert den Bildausschnitt
 input_zoom_in_text            Reinzoomen
 input_zoom_in_help            Verkleinert den Bildauschnitt (erhöht die Vergrösserung)
 
-input_glance_back_tooltip     Drücke und halte \1 um nach hinten zu schauen
 input_glance_back_text        Rückspiegel
 input_glance_back_help        Kehrt die Kamerarichtung um, solange die Taste gedrückt ist.
 
-input_glance_right_tooltip    Drücke und halte \1 um nach rechts zu schauen.
 input_glance_right_text       Rechtsblick
 input_glance_right_help       Dreht die Kamera für kurze Zeit nach rechts.
 
-input_glance_left_tooltip     Drücke und halte \1 um nach links zu schauen
 input_glance_left_text        Linksblick
 input_glance_left_help        Dreht die Kamera für kurze Zeit nach links.
-
-input_glance_forward_tooltip  Drücke \1 um nach vorne zu sehen (halte die Taste gedrückt und drehe dich um ihren Nutzen zu verstehen)
-input_glance_forward_text     Blicke vorwärts
-input_glance_forward_help     Dreht die Kamera vorübergehend nach vorne.
 
 input_bank_down_text          Blick senken
 input_bank_down_help          Dreht die Kamera nach unten (falls das erlaubt ist) oder bewegt sie nach oben
@@ -1281,9 +1122,8 @@ input_look_right_help         Dreht die Kamera nach rechts (falls das erlaubt is
 input_look_left_text          Linksdrehung
 input_look_left_help          Dreht die Kamera nach links (falls das erlaubt ist) oder bewegt sie nach rechts
 
-input_switch_view_tooltip     Drücke \1 um den Kameramodus zu wechseln.
 input_switch_view_text        Umschalten
-input_switch_view_help        Verändert den Kameramodus. Zur Verfügung stehen: Schlaue extene Kamera (Voreinstellung), dumme extene Kamera sowie freie Kamera und interne Kamera.
+input_switch_view_help        Verändert den Kameramodus. Zur Verfügung steheh: Schlaue extene Kamera (Voreinstellung), dumme extene Kamera sowie freie Kamera und interne Kamera.
 
 #********************************************
 #********************************************
@@ -1293,6 +1133,7 @@ input_switch_view_help        Verändert den Kameramodus. Zur Verfügung stehen: S
 #********************************************
 #********************************************
 
+input_instant_chat_text       Kurzmeldung \1
 input_instant_chat_help       Aktiviert eine der vorher eingespeicherten Kurznachrichten an die anderen Spieler
 
 #********************************************
@@ -1334,28 +1175,6 @@ input_music_volume_down_help  Verringert die Lautstärke der Musik
 #********************************************
 #********************************************
 
-#********************************************
-#********************************************
-#
-#             console
-#
-#********************************************
-#********************************************
-
-console_repetition            (\1 Male)\n
-
-#********************************************
-#********************************************
-#
-#               window titles
-#
-#********************************************
-#********************************************
-
-window_title_menu             \g
-window_title_connecting       \g - Verbindung mit \1
-window_title_connected        \g - Spielt in \1
-window_title_local            \g - Lokal spielen
 
 #********************************************
 #********************************************
@@ -1377,36 +1196,7 @@ system_settings_menu_text     System konfigurieren
 system_settings_menu_help     Einstellungen für Sound, Graphik und allgemeines Erscheinungsbild
 
 main_menu_about_text          Über \g
-main_menu_about_help          Zeigt detaillierte Informationen zum Spiel
-
-help_menu_wiki_text           Zeige Wiki
-help_menu_wiki_help           Öffnet Wiki-Dokumentation in einem externen Browser
-help_menu_wiki_uri            http://wiki.armagetronad.net
-
-help_menu_doc_text            Zeige Dokumentation
-help_menu_doc_help            Öffne die mitgelieferte HTML-Dokumentation in einem externen Browser
-help_menu_doc_file            index.html
-
-help_menu_irc_text            Öffne IRC Chatroom
-help_menu_irc_help            Öffnet ein Web-Interface zu unserem IRC-Chatroom, wo du mit etwas Glück einen anständigen Spieler findest, der deine Fragen beantwortet.
-
-help_menu_directories_text    Öffne Ordner
-help_menu_directories_help    Erleichtert den Zugang zu den Spieldateien und Konfigurationsmenüs.
-
-help_menu_userdata_text       Öffne Benutzerdaten
-help_menu_userdata_help       Öffnet die Benutzerdateien, wo du persönliche Änderungen am Spiel speichern kannst.
-
-help_menu_screenshots_text    Öffne Screenshots
-help_menu_screenshots_help    Öffne den Ordner mit deinen Screenshots.
-
-help_menu_systemdata_text     Öffne Systemdateien
-help_menu_systemdata_help     Öffnet den Ordner mit Systemdateien, in welchem du das Spiel modifizieren kannst. Die Änderungen werden alle Benutzer dieses Rechners betreffen; erfordert wahrscheinlich Admin-Zugriff, wird vielleicht beim nächsten Upgrade überschrieben, und Modifizierungen können Sachen kaputtmachen. Allgemein wird empfohlen, diese Dateien nur zu lesen, nicht zu ändern.
-
-help_menu_systemconfig_text   Öffne System-Konfiguration
-help_menu_systemconfig_help   Öffnet den System-Konfigurations-Ordner, in welchem du die Spielkonfiguration modifizieren kannst. Die Änderungen werden alle Benutzer dieses Rechners betreffen; erfordert wahrscheinlich Admin-Zugriff, wird vielleicht beim nächsten Upgrade überschrieben, und Modifizierungen können Sachen kaputtmachen. Allgemein wird empfohlen, diese Dateien nur zu lesen, nicht zu ändern.
-
-main_help_menu_text           Hilfe
-main_help_menu_help           Du hast Probleme oder möchtest mal kurz was nachschlagen? Guckst du hier!
+main_menu_about_help          Displays detailed information about this game.
 
 main_menu_exit_text           Spiel verlassen
 main_menu_exit_help           Auf Wiedersehen!
@@ -1449,12 +1239,6 @@ path_info_data                Daten-Verzeichnisse:
 path_info_screenshot          Screenshot-Verzeichnisse:
 path_info_var                 Verzeichnisse für Spieldaten:
 
-version_info_gl_intro         \n\n0xff8888System OpenGL Informationen:0xRESETT 
-version_info_gl_vendor        \n  GL Anbieter   : 
-version_info_gl_renderer      \n  GL Renderer : 
-version_info_gl_version       \n  GL Version  : 
-
-
 #********************************************
 #********************************************
 #
@@ -1463,13 +1247,10 @@ version_info_gl_version       \n  GL Version  :
 #********************************************
 #********************************************
 
-game_menu_tutorials_text      Tutorials und Herausforderungen
-game_menu_tutorials_help      Kleine Trainingseinheiten, um dich mit den Grundzügen des Spiels vertraut zu machen
-
 game_menu_start_text          Solospiel
 game_menu_start_help          Transportiert alle lokal eingerichteten Spieler auf das Spieleraster.
 
-network_menu_text             Mehrspieler
+network_menu_text             Netzwerkspiel
 network_menu_help             Verbindet dich mit einem Netzwerkspiel oder fängt eines an.
 
 game_settings_menu_text       Spiel konfigurieren
@@ -1654,187 +1435,6 @@ game_menu_wz_mr_help          Bevor die Siegzone aktiviert wird, muss die aktuel
 game_menu_wz_ld_text          Siegzone Min. Ereignis
 game_menu_wz_ld_help          Bevor die Siegzone aktiviert wird, muss das letzte interessante Ereignis ( Tod ) so viele Sekunden zurück liegen.
 
-#********************************************
-#********************************************
-#
-#             tutorials
-#
-#********************************************
-#********************************************
-
-window_title_tutorial         \g - \1
-tutorial_success              Sehr gut!
-tutorial_teamkill             Fehlgeschlagen: Teamkill
-
-tutorial_menu_navigation_text Navigation
-tutorial_menu_navigation_help Navigationstutorial: Lerne, dein Gefährt zu beherrschen
-tutorial_menu_navigation_instructions Benutze die Lenktasten um die grüne Winzone zu erreichen. Gewöhne dich an die grundsätzliche Steuerung. Nimm dir Zeit; noch versucht niemand, dich kaputtzukriegen.\n\nDrücke Escape, um dieses Tutorial abzubrechen, die meisten anderen Tasten lassen dich fortfahren.
-tutorial_menu_navigation_animation textures/tutorials/navigation/navigation.txt
-
-tutorial_menu_survival_text   Überleben
-tutorial_menu_survival_help   Überlebenstraining: lerne zu überleben
-tutorial_menu_survival_instructions Wände sind tödlich in \g - das schließt deine eigene mit ein. Deine Aufgabe in diesem Tutorial ist es, in einer kleinen Arena 30 Sekunden lang in keine Wand zu krachen. Danach wird eine Winzone erscheinden, in die du fahren kannst, um dieses Tutorial zu beenden\n\nDrücke Escape, um dieses Tutorial abzubrechen, die meisten anderen Tasten lassen dich fortfahren.
-tutorial_menu_survival_animation textures/tutorials/survival/survival.txt
-
-tutorial_menu_grind_text      Schleifen
-tutorial_menu_grind_help      Schleiftraining: lerne zu beschleunigen
-tutorial_menu_grind_instructions Wände können in \g auch dein Freund sein. Du kannst nah an einer Lichtwand eines Gefährts fahren, um zu beschleunigen. Ganz richtig machst du es, wenn du Funken siehst.\nNutze dieses Wissen, um den Botgegner im folgenden Rennen abzufertigen.
-tutorial_menu_grind_animation textures/tutorials/grinding/grinding.txt
-
-tutorial_menu_conquest_text   Eroberung
-tutorial_menu_conquest_help   Eroberungstraining: Wie man eine Fortresszone erobert
-tutorial_menu_conquest_instructions Ziel des Fortressmodi ist die Eroberung der gegnerischen Zone und die gleichzeitige Verteidigung der eigenen. Anders als die bereits gezeigten Winzones ist ein simples Hineinfahren nicht ausreichend; du musst drinbleiben und die Verteidiger ausschalten, oder für einige Sekunden hinauszwingen.\nIn dieser Übung wirst du versuchen, die goldene Zone des Gegners anzugreifen. Deine eigene Festung ist sicher. Du musst dir einen Weg durch die Verteidigung bahnen oder diese ganz ausschalten.\n\nLeider ist Fortress noch nicht für den Einzelspielermodus verfügbar, da die Bots dafür noch nicht voll entwickelt sind.
-tutorial_menu_conquest_animation textures/tutorials/conquest/conquest.txt
-tutorial_conquest_ai_retreated Der verteidigende Ai hat sich zurückgezogen. Nimm die goldene Zone ein!
-tutorial_conquest_ai_killed   Der verteidigende AI wurde erledigt. Nimm die goldene Zone ein!
-tutorial_conquest_ai_go       Fahre in die goldene Zone und bleibe für einige Zeit darin.
-tutorial_conquest_ai_gap      Durchbreche die gegnerische Verteidigung, schau nach Lücken!
-
-tutorial_menu_teamstart_text  Teamstart
-tutorial_menu_teamstart_help  Starttraining für Teams: Lerne, wie die Startformationen sich zu bewegen haben
-tutorial_menu_teamstart_instructions Wenn du in einem Team spielst, ist es für gewöhnlich das Beste, nah an den Wänden der anderen Spieler entlang zu schleifen. Die Spieler weiter innen sollten sich dem Mittelspieler anschließen; die ganz außen ebenfalls, auch wenn sie dafür etwas mehr Schritte benötigen. Dieses Tutorial setzt dich auf die Sandwichposition zwischen dem äußersten und einem der sogenannten Flügelspieler. Überlebe den Start und lass niemanden in deinem Team sterben!
-tutorial_menu_teamstart_animation textures/tutorials/teamstart/teamstart.txt
-tutorial_fail_backdoor        Fehlschlag: Folge den anderen Fahrzeugen.
-
-tutorial_menu_doublegrind_text Double-Grind.
-tutorial_menu_doublegrind_help Double-Grind-Training: Erlerne die andere Startformations-Taktik
-tutorial_menu_doublegrind_instructions In vielen Einstellungen wird eine Modifikation der Standard-Formation des Teams begünstigt, die Double-Grinding genannt wird: Die beiden Nachbarn (wings) des Mittelspielers (center) schleifen nicht sofort an diesem entlang, sondern fahren erst nach vorne, drehen sich dann nach Innen zurück, und dann wieder vorwärts. Da sie an mehr Wänden als üblich entlangschleifen, beschleunigen sie mehr. Bist du etwas weiter außen, musst du aufpassen, dass du keinen der Flügelspieler umbringst.\nDouble-Grinding selbst erfordert viel Übung, und das genaue Timing hängt sehr von den Einstellungen ab; deswegen kann es hier nicht einfach beigebracht werden. Aber keine Sorge, es ist meist optional.
-tutorial_menu_doublegrind_animation textures/tutorials/doublegrind/doublegrind.txt
-
-tutorial_menu_speedkill_text  Speedkill
-tutorial_menu_speedkill_help  Speedkill: Erlerne, wie du einen Geschwindigkeitsvorteil nutzen kannst
-tutorial_menu_speedkill_instructions Der Speedkill ist die grundlegendste Methode, um dir in \g Feinde vom Hals zu schaffen. Du schleichst dich an sie ran, indem du ihre Wand entlangschleifst, überholst sie, schneidest ihnen den Weg ab und wickelst sie ein.\nHier kannst du es mal bei einem ahnungslosen Bot probieren.
-tutorial_menu_speedkill_animation textures/tutorials/speedkill/speedkill.txt
-
-tutorial_menu_speedkilldefense_text Speedkill-Abwehr
-tutorial_menu_speedkilldefense_help Abwehr: Lerne, dich gegen Speedkill-Versuche zu verteidigen
-tutorial_menu_speedkilldefense_instructions NEEEIN! Jetzt ist die Situation umgekehrt! Ein Feind schleift deine Wand rechts entlang und ist drauf und dran, dir den Weg abzuschneiden. Gehe zum Gegenangriff über!
-tutorial_menu_speedkilldefense_animation textures/tutorials/speedkilldefense/speedkilldefense.txt
-
-tutorial_menu_congratulations_text Fazit
-tutorial_menu_congratulations_help Nicht alles kann man mithilfe von Tutorials lernen.
-tutorial_menu_congratulations_instructions Glückwunsch, du hast jetzt alle wichtigen Übungen abgeschlossen. Es folgen optionale Herausforderungen. Du bist jetzt bereit um einem richtigen Spiel im Multiplayermodus beizutreten. Bevor du dies jedoch tust, solltest du einige Dinge über Community und Server wissen:\n\nDu kannst durch Nachrichten wie diese mit den Hoch/Runter-Pfeiltasten scrollen,\n\nSumo-Modus: Dir wurden hier die Grundprinzipien von Fortress erklärt; Sumo verwendet dieselbe Spielmechanik, aber meistens nur für Einzelspieler, und die Zonen der Gegner liegen alle übereinander. Und sie schrumpfen.\n\nCapture The Flag (CTF): Ein paar Server bieten einen Spielmodus an, bei dem eine kleine Zone die Flag und eine große die Base repräsentieren, zu der die Flag gebracht werden muss.\n\nAm besten liest du noch die mitgelieferte Dokumentation (rufe das Hilfe-Menü auf, um es als HTML-Dokument anzuzeigen). Und du solltest dich am Anfang erst mal mit den einfachen Spieltypen beschäftigen, deren Einstellungen denen vom Einzelspielermodus ähneln. Der Server-Browser hilft dir hiermit, indem er die Server für Fortgeschrittene erst mal versteckt - du kannst sie aber dennoch jederzeit betreten, sofern du es wagst.
-
-tutorial_menu_bullies_text    Labyrinth-Herausforderung
-tutorial_menu_bullies_help    Labyrinth: Zwei Gegner halten dich zwischen ihren Wänden gefangen. Kannst du überleben?
-tutorial_menu_bullies_instructions Labyrinth: Zwei Gegner halten dich zwischen ihren Wänden gefangen und treiben dich durch ihr Labyrinth. Kannst du überleben?
-tutorial_menu_bullies_animation tutorial_menu_bullies_teamname Rüpel
-
-#ORIGINAL TEXT:               Bullies
-#tutorial_menu_bullies_teamname UNTRANSLATED
-tutorial_menu_hilbert2_text   Labyrinth-Herausforderung: Hilbert 2
-tutorial_menu_hilbert2_help   Labyrinth: Zwei Gegner halten dich zwischen ihren Wänden gefangen. Kannst du überleben? Sie folgen einer Hilbert-Kurve zweiten Grades.
-tutorial_menu_hilbert2_instructions Die beiden Rüpel haben ein Mathebuch gelesen und foltern dich jetzt mit ihren Hilbert-Kurven: Pfade, die ein Quadrat umschreiben, ohne dass sich ihr Abstand voneinander ändert. Beginnen wir, der Einfachheit halber, mit einer Kurve zweiten Grades.
-
-tutorial_menu_hilbert3_text   Labyrinth-Herausforderung: Hilbert 3
-tutorial_menu_hilbert3_help   Labyrinth: Zwei Gegner halten dich zwischen ihren Wänden gefangen. Kannst du überleben? Sie folgen einer Hilbert-Kurve dritten Grades.
-tutorial_menu_hilbert3_instructions Die beiden Trottel zwingen dich jetzt in eine schnellere Hilbert-Kurve dritten Grades.
-
-tutorial_menu_hilbert4_text   Die Ultimative Labyrinth-Herausforderung
-tutorial_menu_hilbert4_help   Labyrinth: Zwei Gegner halten dich zwischen ihren Wänden gefangen. Kannst du überleben? Sie folgen einer Hilbert-Kurve vierten Grades.
-tutorial_menu_hilbert4_instructions Die beiden Versager treiben dich nun in eine extrem schnelle Hilbert-Kurve vierten Grades.\n\nKein Mensch überlebt das.
-
-tutorial_menu_dragon1_text    Labyrinth-Herausforderung: Drache 5
-tutorial_menu_dragon1_help    Labyrinth: Zwei Gegner halten dich zwischen ihren Wänden gefangen. Kannst du überleben? Sie folgen einer simplen Drachen-Kurve fünften Grades.
-tutorial_menu_dragon1_instructions Die beiden Angeber zwingen dich jetzt in eine einfache Drachenkurve fünften Grades (die reguläre würde sich selbst an den Eckpunkten schneiden, was wir nicht zulassen können. Daher folgen wir stattdessen den Diagonalen).
-
-tutorial_menu_dragon2_text    Labyrinth-Herausforderung: Drache 6
-tutorial_menu_dragon2_help    Labyrinth: Zwei Gegner halten dich zwischen ihren Wänden gefangen. Kannst du überleben? Sie folgen einer simplen Drachen-Kurve sechsten Grades.
-tutorial_menu_dragon2_instructions Die beiden Angeber zwingen dich jetzt in eine einfache Drachenkurve sechsten Grades.
-
-tutorial_menu_dragon3_text    Labyrinth-Herausforderung: Drache 7
-tutorial_menu_dragon3_help    Labyrinth: Zwei Gegner halten dich zwischen ihren Wänden gefangen. Kannst du überleben? Sie folgen einer simplen Drachen-Kurve siebten Grades.
-tutorial_menu_dragon3_instructions Die beiden Angeber zwingen dich jetzt in eine einfache Drachenkurve siebten Grades
-
-tutorial_menu_dragon4_text    Labyrinth-Herausforderung: Drache 8
-tutorial_menu_dragon4_help    Labyrinth: Zwei Gegner halten dich zwischen ihren Wänden gefangen. Kannst du überleben? Sie folgen einer simplen Drachen-Kurve achten Grades.
-tutorial_menu_dragon4_instructions Die beiden Angeber zwingen dich jetzt in eine einfache Drachenkurve achten Grades
-
-tutorial_menu_dragon5_text    Labyrinth-Herausforderung: Drache 9
-tutorial_menu_dragon5_help    Labyrinth: Zwei Gegner halten dich zwischen ihren Wänden gefangen. Kannst du überleben? Sie folgen einer simplen Drachen-Kurve neunten Grades.
-tutorial_menu_dragon5_instructions Die beiden Angeber zwingen dich jetzt in eine einfache Drachenkurve neunten Grades
-
-tutorial_menu_survival1_text  Überlebens-Herausforderung 1
-tutorial_menu_survival1_help  Überlebe eine gegebene Zeit.
-tutorial_menu_survival1_instructions Du bist jetzt in einer etwas verzwickten Situation. Deine Bremsen sind offline und dein Motor überlastet, deine Geschwindigkeit steigt exponentiell an. Senke sie ab, indem du oft wendest und überlebe den Countdown bis zur Notabschaltung.\n\nDoublebinding ist für diese Herausforderung deaktiviert.
-
-tutorial_menu_survival2_text  Überlebens-Herausforderung 2
-tutorial_menu_survival2_help  Überlebe eine gegebene Zeit.
-tutorial_menu_survival2_instructions Ja, es ist unser voller Ernst, dass deine Geschwindigkeit exponentiell ansteigt. Im allerallerengsten mathematischen Sinn. Und als wäre das nicht schlimm genug, geschieht es jetzt noch schneller.\n\nAlso, viel Glück. Nebenbei bemerkt sind wir nicht für den Verschleiß von Peripheriegeräten deinerseits verantwortlich, der entsteht, während du \g spielst. Oder den deiner Fingergelenke.
-
-tutorial_menu_survival3_text  Überlebens-Herausforderung 3
-tutorial_menu_survival3_help  Überlebe eine gegebene Zeit.
-tutorial_menu_survival3_instructions Die gute Nachricht: Deine Maschinen sind jetzt wieder in einem etwas besserem Zustand.\nDie schlechte: Du hast noch weniger Platz.
-
-tutorial_menu_survival4_text  Überlebens-Herausforderung 4
-tutorial_menu_survival4_help  Überlebe eine gegebene Zeit.
-tutorial_menu_survival4_instructions Deine Maschinen scheinen jetzt tadellos zu sein, aber es gibt drei unendlich oft wiederkehrende AIs in der Arena, die dir das Leben schwer machen. Und ihren Wänden verdankst du Extra-Beschleunigung
-
-tutorial_menu_ai1_text        AI-Kampf
-tutorial_menu_ai1_help        Spiele gegen einen Bot, ohne Zeitlimit
-tutorial_menu_ai1_instructions Als Letztes lassen wir dich noch gegen einen einsamen Bot antreten.\n\nDie Stützrädchen haben wir abgeschraubt, das Berühren von Wänden ist so tödlich wie es sich gehört.
-
-tutorial_ai_timeout           Fehlschlag: Zeit ist abgelaufen
-tutorial_ai_extratime         Bonus-Zeit
-
-tutorial_menu_controls_text   Erweiterte Einstellungen
-tutorial_menu_controls_help   Lerne das restliche Kontrollschema kennen.
-tutorial_menu_controls_instructions Nach links und rechts zu lenken ist ja ganz nett, aber es gibt auch ein paar andere Dinge, die du mit deiner Tastatur machen kannst. Dieses Tutorial demonstriert sie in einer ungefährlichen Umgebung.\n\nFolge den Anweisungen auf dem Bildschirm. Du wirst schneller fertig, je mehr du mit den neu-erlernten Befehlen experimentierst.
-
-tutorial_menu_ai2_text        AI-Herausforderung 2
-tutorial_menu_ai2_help        Spiele gegen zwei Bots, kein Zeitlimit.
-tutorial_menu_ai2_instructions Spiele gegen zwei etwas schlauere Bots.
-
-tutorial_menu_ai3_text        AI-Herausforderung 3
-tutorial_menu_ai3_help        Spiele gegen drei Bots, kein Zeitlimit.
-tutorial_menu_ai3_instructions Du musst drei Bots besiegen.
-
-tutorial_menu_ai4_text        AI-Herausforderung 4
-tutorial_menu_ai4_help        Erledige die AIs, du spielst gegen die Zeit.
-tutorial_menu_ai4_instructions Von jetzt an werden die Bots unendlich oft wiederbelebt. Es gibt ein Zeitlimit, dass du durch die Beseitigung eines AIs hinauszögern kannst.\n\nDu gewinnst, wenn du vier Bots hintereinander zerlegen kannst, ohne selbst ausgeschaltet zu werden.
-
-tutorial_menu_ai5_text        AI-Herausforderung 5
-tutorial_menu_ai5_help        Erledige die AIs, du spielst gegen die Zeit.
-tutorial_menu_ai5_instructions Schalte 6 Bots aus.
-
-tutorial_menu_ai6_text        AI-Herausforderung 6
-tutorial_menu_ai6_help        Erledige die AIs, du spielst gegen die Zeit.
-tutorial_menu_ai6_instructions Schalte 8 Bots aus.
-
-tutorial_menu_ai7_text        AI-Herausforderung 7
-tutorial_menu_ai7_help        Erledige die AIs, du spielst gegen die Zeit.
-tutorial_menu_ai7_instructions Schalte 10 Bots aus.
-
-tutorial_menu_ai8_text        AI-Herausforderung 8
-tutorial_menu_ai8_help        Erledige die AIs, bevor die Zeit abgelaufen ist.
-tutorial_menu_ai8_instructions Erledige 15 Bots.
-
-tutorial_menu_highrubber_text Einführung: High-Rubber
-tutorial_menu_highrubber_help Bereitet dich auf einige kuriose Einstellungen vor, die du im Internet antreffen wirst.
-tutorial_menu_highrubber_instructions Du erinnerst dich sicher noch an die ersten Tutorials, wo du Wände berühren konntest, ohne sofort in die Luft zu fliegen. Das liegt am sogenannten Rubber (Gummi), den wir aus historischen Gründen so nennen. Einige Server stellen diesen Rubber extrem hoch ein und verwenden gleichzeitig eine winzige Verzögerungszeit zwischen Lenkbefehlen, wodurch es schwerer wird, kaputtzugehen.\n\nAndere menschliche Spieler die du in solchen High Rubber Servern antriffst, neigen meistens dazu, eng-verwinkelte Kurven an bereits vorhandenen Wänden entlang zu verursachen bis es ist fast unmöglich ist, dort wieder hinauszufinden. Deswegen solltest du auf die Spieler selbst, d.h. ihr Gefährt achten.\n\nEs ist hilfreich (aber wenn du den Dreh raus hast, nicht zwingend), zu wissen, wie man 'doublebindet': Geh zur Konfiguration deiner Spieltasten und belege für jede Richtung je zwei Tasten, im Spiel kannst du diese in den meisten Servern simultan nutzen, um etwa eine 180-Grad-Drehung zu machen.\n\n Und jetzt zum Üblichen: Erledige die Bots.
-
-tutorial_menu_brakeboost_text Einführung: Turbo-Booster
-tutorial_menu_brakeboost_help Bereitet dich auf einige kuriose Einstellungen vor, die du im Internet antreffen wirst.
-tutorial_menu_brakeboost_instructions Eine der Stärken von \g ist die Vielfalt an Konfigurationsmöglichkeiten. Diese kleine Spritztour bereitet dich auf die Kuriositäten vor, die dir online begegnen werden.\n\nZuerst etwas Leichteres: Die Bremse kann als Turbobooster genutzt werden. Benutz sie, um die Bots in die Knie zu zwingen.
-
-tutorial_menu_open_text       Einführung: Offenes Spiel
-tutorial_menu_open_help       Bereitet dich auf einige kuriose Einstellungen vor, die du im Internet antreffen wirst.
-tutorial_menu_open_instructions In dieser Herausforderung spielst du in einer High-Rubber-Umgebung, in der du nicht richtig an Wänden entlangschleifen kannst; es wird immer eine Lücke erzwungen. Wenn jemand dir folgen will, kann er durch diese Lücke schlüpfen. Natürlich zögert dies das Unterfangen hinaus, den Gegner auf gewohnte Weise zu bezwingen.\n\n\nVersuche es dennoch, eliminiere die AIs.\n\nEinige Server-Administratoren pochen auf diese 'offene' Spielweise und passen die Einstellungen aus Unkenntnis nicht richtig an. Wenn du dich ihrem absurden Ehrenkodex nicht fügst, kann es sein, dass du gekickt wirst. Mach dir nichts daraus, gute Spieler haben noch nie einen Unterschied zwischen 'offen' und 'geschlossen' gemacht. Was zählt sind die Punkte.
-
-tutorial_menu_turbo_text      Einführung: Hochgeschwindigkeit
-tutorial_menu_turbo_help      Bereitet dich auf einige kuriose Einstellungen vor, die du im Internet antreffen wirst.
-tutorial_menu_turbo_instructions Ein paar Server lassen dich bei absurden Geschwindigkeiten Wettrennen fahren, oder in einer absurd kleinen Arena. Aus Gameplay-Sicht ist beides äquivalent.\n\nÜberlebe. Das Bot-Problem löst sich innerhalb weniger Sekunden von alleine.
-
-tutorial_menu_map_text        Einführung: Maps
-tutorial_menu_map_help        Bereitet dich auf einige kuriose Einstellungen vor, die du im Internet antreffen wirst.
-tutorial_menu_map_instructions Nicht alle Schlachten werden in rechtwinkligen Arenen geführt. Manche verfügen über Hindernisse und Fallen, so wie diese hier.\n\nSchnapp dir die AIs.
-
-tutorial_menu_axes_text       Einführung: Täuschung
-tutorial_menu_axes_help       Bereitet dich auf einige kuriose Einstellungen vor, die du im Internet antreffen wirst.
-tutorial_menu_axes_instructions Als wir gesagt haben, dass du nur 90-Grad-Drehungen machen kannst, haben wir gelogen. In dieser Arena machst du 45-Grad-Drehungen.\n\nÜberlebe die Bots. Interessanterweise ist der einfachste Weg zum Sieg, ihnen beim Fallenstellen aufzulauern.
-
-tutorial_complete_all_help    Markiert alle Tutorials als komplett.
-tutorial_incomplete_all_help  Markiert alle Tutorials und Herausforderungen als komplett.
 
 #********************************************
 #********************************************
@@ -1867,10 +1467,10 @@ network_opts_predict_text     Vorhersage:
 network_opts_predict_help     Sagt die Bewegung der Vehikel im Spiel, basierend auf der Netzwerkverzögerung, voraus. Allerdings wirken die Bewegungen dadurch sehr eckig. Ich persönlich verlasse mich lieber auf das Lag-O-Meter.
 
 network_opts_inrate_text      Bandbreite, eingehend:
-network_opts_inrate_help      Die maximale Anzahl von Kilobytes, die der Server diesem Rechner schickt. Maximale Werte: 3 für 28.8k-Modems, 7 für 56k-Modems, 8 für ISDN, 16 und mehr für Kabelmodems, (A)DSL and LAN.
+network_opts_inrate_help      Die maximale Anzahl von Kilobytes, die der Server diesem Rechner schickt. Maximale Werte: 1 für 9.6k-Modems, 3 für 28.8k-Modems, 7 für 56k-Modems, 8 für ISDN, mehr für Kabelmodems, (A)DSL and LAN. 4 ist üblicherweise ausreichend.
 
 network_opts_outrate_text     Bandbreite, ausgehend:
-network_opts_outrate_help     Die maximale Anzahl von Kilobytes, die das Netzwerk nach aussen schickt. Drei ist normalerweise für Clients völlig ausreichend, zuviel einzutragen schadet aber auch fast nie.
+network_opts_outrate_help     Die maximale Anzahl von Kilobytes, die das Netzwerk nach aussen schickt. Drei ist normalerweise für Clients völlig ausreichend.
 
 
 network_opts_deletepw_text    Passwörter löschen
@@ -1968,8 +1568,6 @@ misc_textout_help             Kontolliert die Ausgabe diverser Textnachrichten (
 misc_moviepack_text           Moviepack:
 misc_moviepack_help           Aktiviert die Unterstützung für das separat verfügbare Moviepack, das die Graphiken mehr an den Film "Tron" angleicht.
 
-misc_initial_menu_title       Ersteinstellungen wiederholen
-misc_initial_menu_help        Startet erneut das erste Setup-Menü, in welchem du Farben und Tastatur-Layouts bestimmen kannst. Dies setzt nicht die gesamte Konfiguration zurück, nur die gewünschten Teile.
 
 #*************************************
 #*************************************
@@ -1984,8 +1582,6 @@ language_second_help          Legt die zweite Wahl für die verwendete Sprache fe
 
 language_menu_title           Spracheinstellungen
 language_menu_help            wählt die Sprache für alle Bildschirmtexte aus
-
-language_firstchoice_help     Drücke Enter, Return oder Leertaste, um deutsche Bildschirmtexte auszuwählen.
 
 language_menu_item_fist       Erste Sprache:
 language_menu_item_first_help \g wird die meisten Textmeldungen in dieser Sprache anzeigen
@@ -2020,11 +1616,6 @@ kick_player_help              Dieser Menupunkt schlägt den anderen Spielern vor,
 suspend_player_details_text   Wenn dieser Vorschlag akzeptiert wird, dann wird \1 für einige Zeit aus dem Spiel entfernt und zum Zuschauen gezwungen.
 suspend_player_text           Entferne \1
 
-referee_player_details_text   Wenn akzeptiert, wird \1 zum Referee ernannt: Er darf die Teams verwalten.
-referee_player_text           Mache \1 zum Referee
-demotereferee_player_details_text Wenn akzeptiert, wird \1 kein referee mehr sein: Er wird keine Teams mehr verwalten dürfen.
-demotereferee_player_text     1\ wird der Referee-Posten aberkannt
-
 vote_include_details_text     Wenn dieser Vorschlag akzeptiert wird, wird die Konfigurationsdatei \1 geladen.
 vote_include_text             Lade \1
 vote_include_error            Konnte Datei \1 nicht finden oder nicht lesen.\n
@@ -2033,9 +1624,6 @@ vote_include_message          Binde \1 ein. Nur Benuzer auf Zugriffslevel \2 ode
 vote_command_details_text     Wenn dieser Vorschlag akzeptiert wird, wird das Konsolenkommando "\1" direkt ausgeführt.
 vote_command_text             Kommando \1
 vote_command_message          Führe Kommando "\1" aus.\n
-
-vote_scramble_details         Wenn akzeptiert, werden alle Spieler aus ihrem Team rausgeworfen und zufällig einem neuen zugeordnet.
-vote_scramble_text            Mische die Teams
 
 #*************************************
 #*************************************
@@ -2098,9 +1686,6 @@ player_authenticate_action    Authentifizierungsgesuch abgeschickt. Bald sollte 
 player_name_text              Name:
 player_name_help              Das ... in "Sieger: ... ". Benutze die normalen Editiertasten.
 
-player_teamname_text          Teamname:
-player_teamname_help          Zur Navigation verwende <left>/<right>, Entf, Rücktaste und all die anderen Tasten.
-
 player_global_id_text         Globale ID:
 player_global_id_help         Falls vorhanden, kannst du deine Globale ID hier eintragen. We sie aussieht, hängt von deinem Melteamt ab. Bist du auf forums.armagetronad.net angemeltet, ist sie z.B. dein Benutzername dort, gefolgt von "@forums".
 
@@ -2119,6 +1704,7 @@ player_camera_help            Stellt den verwendeten Kameramodus ein.
 
 player_chat_text              Kurzmeldungen konfigurieren
 
+player_chat_chat              Kurzmeldung \1
 player_chat_chat_help         Editieren der kurzen Texte, die im Mehrspielermodus auf einen Tastendruck an die Mitspieler gesendet werden können
 
 player_blue_text              Blau:
@@ -2169,9 +1755,6 @@ player_camera_initial_cust_help Eine einstellbare Kamera, die das Vehikel immer 
 player_camera_initial_scust_text Serverberstimmt
 player_camera_initial_scust_help Eine vom Serveradministrator einstellbare Kamera, die das Vehikel immer aus derselben Perspektive zeigt.
 
-player_camera_initial_mer_text Mercam
-player_camera_initial_mer_help Meritons neue Kamera, optimiert für den Nahkampf.
-
 player_camera_fov_text        Sichtfeld:
 player_camera_fov_help        Gibt die Breite des Sichtfeldes (auch Field of Vision, FOV, genannt) an. 120 Grad ist extreme Weitwinkelperspektive, 30 Grad entspricht schon fast einem Teleobjektiv.
 
@@ -2190,16 +1773,10 @@ player_camera_smartcam_help   Erlaubt, die Smartcam auszuwählen. (Eine externe K
 player_camera_custom_text     Erlaube Einstellbar:
 player_camera_custom_help     Erlaubt, die einstellbare Kamera auszuwählen. (Position ist konfigurierbar in settings.cfg)
 
-player_camera_server_custom_text Erlaube Mercam:
-player_camera_server_custom_help Erlaubt die Kamera von Meriton auszuwählen, wenn die Taste zum Kamerawechsel gedrückt wird
+player_camera_server_custom_text Erlaube Serverbestimmt:
+player_camera_server_custom_help Erlaubt, die vom Server aus einstellbare Kamera auszuwählen.
 
-#ORIGINAL TEXT:               Allow Mercam:
-#TRANSLATION deutsch          Erlaube Mercam:
-#player_camera_server_custom_text UNTRANSLATED
 
-#ORIGINAL TEXT:               When pressing the camera switch button, this enables switching into Meriton's camera mode.
-#TRANSLATION deutsch          Erlaubt die Kamera von Meriton auszuwählen, wenn die Taste zum Kamerawechsel gedrückt wird
-#player_camera_server_custom_help UNTRANSLATED
 player_camera_center_int_text Zentrierung der int. Kamera:
 player_camera_center_int_help Ein: die interne Kamera richtet sich ständig an der Fahrtrichtung aus; das ist gut, wenn man nur mit der Tastatur spielt.\nAus: Die Blickrichtung ist weitgehend unabhängig von der Fahrtrichtung. Extrem gut, wenn man sich lieber mit der Maus umsieht.
 
@@ -2219,17 +1796,9 @@ team_menu_player_help         Lässt diesen Spieler das Team wechseln
 team_menu_join                Trete \1 bei
 team_menu_join_help           Werde Mitglied von diesem Team
 
-# values of these "configuration items" are inserted in "\3" at team_menu_join 
-team_menu_color_team_full_help Erlaubt das Prefix/die Farbe von geschlossen Teams zu ändern.
-team_menu_color_team_ok_help  Erlaubt das Ändern des Prefixes und der Farbe der offenen Teams
-
-team_menu_info_current_team   Derzeitiges Team: \1
-team_menu_info_next_team      Nächstes Team: \1
-
 team_menu_create              Neues Team/Beliebiges Team
 team_menu_create_help         Gründet ein neues Team und lässt den Spieler beitreten, oder, sollte das nicht möglich sein, tritt einem beliebigen Team bei
-team_menu_auto                trete zufällig ausgewähltem Team bei
-team_menu_auto_help           Wählt das kleinste Team aus oder schafft ein neues Team für dich.
+
 team_menu_spectate            Schaue zu
 team_menu_spectate_help       Verlässt das Spiel und schaut von nun an nur noch zu.
 
@@ -2368,7 +1937,7 @@ screen_custom_text            Benutzerdefiniert
 screen_custom_help            Setze die Variablen CUSTOM_SCREEN_WIDTH und CUSTOM_SCREEN_HEIGHT in user.cfg, um eine eigene Auflösung zu definieren (z.B. für breite Bildschirme)
 
 screen_fullscreen_text        Vollbild:
-screen_fullscreen_help        Schaltet zwischen Vollbildmodus (Ein) und Fenstermodus (Aus) um. Auf einigen Systemen läuft \g leider nicht im Vollbild. Zum übernehmen muss \g neugestartet oder auf Aktivieren geklickt werden. Im Menu "System konfigurieren/Verschiedenes/Globale Tastatursteuerung" kann man eine Taste wählen, die jederzeit zwischen Vollbild und Fenstermodus wechselt.
+screen_fullscreen_help        Schaltet zwischen Vollbildmodus (Ein) und Fenstermodus (Aus) um. Auf einigen Systemen läuft \g leider nicht im Vollbild. Zum übernehmen muss \g neugestartet oder auf Aktivieren geklickt werden.
 
 screen_colordepth_text        Farbtiefe:
 screen_colordepth_help        Die Farbtiefe bestimmt die Bildqualität.
@@ -2400,23 +1969,6 @@ screen_check_errors_help      Soll \g bei der Graphikinitialisierung auf Warnung
 screen_use_sdl_text           Verwende SDL
 screen_use_sdl_help           Wenn aktiviert, wird OpenGL über die sauberen Initialisierungsroutinen von SDL gestartet. Sonst wird ein Hack benutzt. (SDL: Multiplattformbibliothek, die bei \g für Eingabe, Sound und Fenstermanagement verwendet wird)
 
-screen_vsync_text             VSync:
-screen_vsync_help             Was mit dem Vsync-Signal des Monitors angestellt werden soll
-
-screen_vsync_on_text          Warte
-screen_vsync_on_help          Warte bei jedem Frame darauf. Dies schlägt sich gewöhnlich in sehr flüssigen Animationen nieder, deren Framerate jedoch durch die Refreshrate deines Monitors begrenzt wird, und es ist der einzige Weg, um das Spiel nicht 100% der Zeit deines CPUs verschwenden zu lassen. Empfohlen.
-
-screen_vsync_default_text     Default
-screen_vsync_default_help     Verwendet den Standardwert des Systems.
-
-screen_vsync_off_text         Nicht warten
-screen_vsync_off_help         Ignoriert das Signal. Dies resultiert in höheren Framerates, aber die meisten davon wirst du nicht sehen. Dein Monitor kann sie nicht alle zeigen. Normalerweise Resourcenverschwendung, die Zerreißbilder zur Folge hat.
-
-screen_vsync_motionblur_text  Bewegungsunschärfe
-screen_vsync_motionblur_help  Ignoriere es und benutze zusätzliche Frames um Bewegungsunschärfe zu simulieren. Dadurch werden die Tearing-Artefakte (sog. Einzelbild-Zerreißen) weniger deutlich sichtbar. Powergamern empfohlen.
-
-screen_vsync_motionblur_unsupported Bewegungsunschärfe wird von deinem System nicht unterstützt und ist folglich deaktiviert.\n
-
 screen_grab_mouse_text        Maus einfangen:
 screen_grab_mouse_help        Wenn das hier aktiviert ist, so kann der Mauszeiger das Fenster nicht verlassen. Nur so lässt sich die Maus im Fenstermodus richtig nutzen.
 
@@ -2441,9 +1993,6 @@ detail_floor_mirror_ow_help   eingentlich alles, was im Spiel momentan vorkommt.
 
 detail_floor_mirror_ev_text   Alles
 detail_floor_mirror_ev_help   (Kein Unterschied zu "Objekte und Wände")
-
-detail_simple_trail_text      Einfache Lichtwände:
-detail_simple_trail_help      Wenn aktiviert, werden die Lichtwände in einer einfacheren Form dargestellt, ohne die Entwicklungsstufen direkt hinter dem Vehikel.
 
 detail_dither_text            Rasterung:
 detail_dither_help            Wenn die derzeitigen Einstellungen eine Farbe nicht darstellen können wird sie durch Mischung simuliert. In niedrigen Auflösungen sieht das allerdings nicht gut aus. Auf manchen Systemen erhöht das abschalten die Geschwindigkeit.
@@ -2478,9 +2027,6 @@ pref_sparks_help              Schaltet die Funken, die bei Beinahekollisionen fl
 
 pref_explosion_text           Explosionen:
 pref_explosion_help           Schaltet den Explosionseffekt an oder aus.
-
-pref_explosion_hud_text       Explosion (minimap):
-pref_explosion_hud_help       An-/Ausschalten der Anzeige von Explosionsanimationen auf der Minikarte.
 
 pref_skymove_text             Himmelsbewegung:
 pref_skymove_help             Wenn aktiviert, dann wird die untere Himmelsebene ein wenig animiert.
@@ -2532,7 +2078,7 @@ misc_fps_help                 Wenn die FPS-Anzeige aktiviert ist, wird die aktue
 
 #tweaks menu
 tweaks_displaylists_text      Display Lists:
-tweaks_displaylists_help      Display Lists sind ein OpenGL-Feature, um ein Objekt schnell oft rendern zu können. Manchmal funktioniert das aber nicht richtig: wenn die Vehikel unsichtbar sind, dann sollte dieses Feature ausgeschaltet werden.
+tweaks_displaylists_help      Display Lists sind ein OpenGL-Feature, um ein Objekt schnell oft rendern zu können; es wird normalerweise für die Vehikel verwendet. Manchmal funktioniert das aber nicht richtig: wenn die Vehikel unsichtbar sind, dann sollte dieses Feature ausgeschaltet werden.
 tweaks_displaylists_off_text  Aus
 tweaks_displaylists_off_help  Verwendet gar keine Display Lists.
 tweaks_displaylists_cac_text  Create and Call
@@ -2594,64 +2140,12 @@ timer_hickup                  Die Systemuhr scheint gerade um \1 Sekunden gespru
 #********************************************
 
 welcome_message_heading       Wilkommen bei \g!
-
-welcome_message               Du wirst nun direkt an einem lokalen Spiel teilnehmen, um dich an das Spiel zu gewöhnen. Es wird langsamer als gewöhnliche Spiele sein. Deine Aufgabe ist es, das andere Motorrad dazu zu zwingen, in eine Wand zu fahren. Keine Angst, viel Glück und viel Spaß!
-
-welcome_message_2_heading     Wir hoffen, dass es dir soweit gefallen hat.
-welcome_message_2             Gleich wirst du das reguläre Hauptmenü sehen. Du kannst Spiele nun über "Spielen/Solospiel" im Menü betreten. Allerdings findet das eigentliche Geschehen im Internet statt. Dort haben fleißige Leute interessante Server erstellt, in denen Variationen des Spiels, denen du im Solospiel nicht begegnen wirst, stattfinden. Gehe online und wähle "Spielen/Mehrspieler/Spiel im Internet".
-
-#********************************************
-#********************************************
-#
-#   Initial setup menu and first game
-#
-#********************************************
-#********************************************
-
-first_setup                   Ersteinstellung
-first_game_title              Spiel
-
-first_setup_color             Farbe
-first_setup_color_help        Wählt die Farbe deines Vehikels, indem du Pfeil nach links/rechts drückst. Später kannst du es im Spieler-Menü detaillierter anpassen.
-first_setup_color_red         0xff0000Rot0xRESETT
-first_setup_color_green       0x00ff00Grün0xRESETT
-first_setup_color_blue        0x0000ffBlau0xRESETT
-first_setup_color_yellow      0xffff00Gelb0xRESETT
-first_setup_color_purple      0x7f00ffLila0xRESETT
-first_setup_color_orange      0xff7f00Orange0xRESETT
-first_setup_color_magenta     0xff00ffMagenta0xRESETT
-first_setup_color_cyan        0x00ffffTürkis0xRESETT
-first_setup_color_white       0xffffffWeiß0xRESETT
-first_setup_color_dark        0x000000Dunkel0xRESETT
-
-first_setup_leave             Lass die Finger davon!
-first_setup_leave_help        Verändere dies nicht.
-
-first_setup_keys              Keyboard-Einstellungen
-first_setup_keys_help         Wähle hier deine Tastatureinstellungen. Sie können später angepasst werden, individuelle Tastenbelegungen können geändert werden. Wähle mit linker oder rechter Pfeiltaste aus.
-first_setup_keys_cursor       Pfeiltasten
-first_setup_keys_cursor_help  Steuere dein Motorrad mit den Pfeiltasten und nutze den Rest deiner Tastatur für die Kamerasteuerung, spezielle Einstellungen oder einen zweiten Spieler. Gut für Rechtshänder und unsere allgemeine Empfehlung.
-first_setup_keys_cursor_single Pfeiltasten, Einzelspieler
-first_setup_keys_cursor_single_help Steuere dein Motorrad mit den Pfeiltasten und nutze den Rest deiner Tastatur für die Kamerasteuerung und spezielle Einstellungen. Gut für Rechtshänder falls kein Mitspieler verfügbar ist.
-first_setup_keys_wasd         WASD Tasten
-first_setup_keys_wasd_help    Steuere dein Motorrad mit den Tasten A, S un D sowie umliegenden Tasten. Pfeiltasten und der Rest der Tastatur können für Kamera- und andere Einstellungen benutzt werden. Gut für Linkshänder und Spieler, die in anderen Spielen auch W, A, S und D zum bewegen benutzen. Schlecht für Spieler mit z.B. französischen Tastaturen.
-first_setup_keys_zqsd         ZQSD Tasten
-first_setup_keys_zqsd_help    Steuere dein Motorrad mit den Tasten Q, S und D sowie umliegenden Tasten. Pfeiltesten und der Rest der Tastatur können für Kamera- und andere Einstellungen benutzt werden. Gut für Linkshänder und jene, die an AZERTY Tastaturen gewöhnt sind.
-#first_setup_keys_both       Two Handed
-#first_setup_keys_both_help  Turn and look left with your left hand, turn and look right with the right hand. Good for ambidextrous people who don't want to use the mouse in any way and never play with a second player in split-screen.
-first_setup_keys_x            Traditionell
-first_setup_keys_x_help       Die automatische Einstellung in alten Versionen des Spiels. X lenkt nach rechts, die Taste links davon lenkt nach links. Nur für ältere Spieler empfohlen.
-first_setup_keys_leave        Lass die Finger davon!
-
-first_setup_net               Verbindung:
-first_setup_net_help          Wähle hier den ungefähren Typ deiner Internetverbindung.
-first_setup_net_dialup        Telefonleitung
-first_setup_net_dialup_help   Internetzugang über ein herkömmliches Modem, welches an die Telefon-Leitung angeschlossen ist.
-first_setup_net_isdn          ISDN
-first_setup_net_isdn_help     Internetzugang über eine digitale ISDN-Leitung.
-first_setup_net_dsl           ADSL, Kabel oder besser
-first_setup_net_dsl_help      Internetzugang über DSL, ADSL, Kabel, T1 oder andere Breitbandsysteme.
-
+welcome_message_intro         Die Graphikeinstellungen wurden auf die OpenGL-Konfiguration\n\n
+welcome_message_vendor        Hersteller : 
+welcome_message_renderer      Typ        : 
+welcome_message_version       Version    : 
+welcome_message_finish        \nangepasst.\n\nViel Spass!\n
+#\n\nThis Game is supported from KGN (Krawall Gaming Network, www.krawall.de).
 
 #********************************************
 #********************************************
@@ -2669,7 +2163,7 @@ setting_legacy_change_blocked Die Einstellung \1 (Gruppe: \2) kann jetzt nicht g
 #********************************************
 #********************************************
 #
-#      league/highscore messages
+#      leaque/highscore messages
 #
 #********************************************
 #********************************************
@@ -2694,7 +2188,7 @@ highscore_message_move_pos    und landet auf Rang \4.
 highscore_message_stay_top    und bleibt an der Spitze.
 highscore_message_stay_pos    und bleibt auf Position \4.
 
-ladder_description            Rangliste
+ladder_description            Leiter
 ladder_message_entered        \1 kommt auf die \2 mit \3 Punkten 
 ladder_message_gained         \1 erhält \5 Punkte für die \2 
 ladder_message_lost           \1 verliert \5 Punkte für die \2 
@@ -2728,16 +2222,11 @@ gamestate_reset_center        Neues Match
 gamestate_reset_console       Nach dieser Runde beginnt ein neues Match; Punktzahlen werden zurückgesetzt.\n
 gamestate_resetnow_center     Neues Match
 gamestate_resetnow_console    Setzte Punktzahlen zurück...\n
-gamestate_resetnow_console_matches Spielstand wird zurückgesetzt. Vor euch liegen \1 Match(es).
 gamestate_resetnow_log        Neues Match\n
-gamestate_newround_console    Los (Runde \1 von \2)!\n
+gamestate_newround_console    Los (Runde \1 von \2 )!\n
 gamestate_newround_goldengoal Los (Verlängerung; Wer als erster die Führung übernimmt, gewinnt)!\n
-gamestate_newround_warmup     Los (Aufwärm-Phase; das Match beginnt, sobald genug Spieler bereit sind)!\n
 gamestate_newround_log        Neue Runde\n
 gamestate_chat_wait           Warte bis zu \2 Sekunden auf \1.\n
-
-gamestate_scramble_teams      Nach der Runde wird der Spielstand zurückgesetzt, die Teams werden gemischt.\n
-gamestate_scramble_teams_center Mische Teams...
 
 gamestate_wait_players        Warte auf echte Spieler...\n
 gamestate_wait_players_con    Warte auf echte Spieler ( nur Zuschauer sind online )...\n
@@ -2753,17 +2242,12 @@ gamestate_champ_center        Meister: \1
 gamestate_champ_console       Gesamtsieger: \1 
 gamestate_champ_scorehit      hat das Punktelimit ( \1 / \2 ) erreicht.\n
 gamestate_champ_timehit       nachdem das Zeitlimit von \1 Minuten erreicht war.\n
-gamestate_champ_blowout       nach dem Erringen eines \1-Punkte-Vorteils.\n
 gamestate_champ_default       nach \1 Runden.\n
 gamestate_champ_finalscores   Endergebnis:\n
 
 gamestate_winner_winner       Sieger: 
 gamestate_winner_ai           Computer.
 gamestate_winner_humans       Menschen.
-gamestate_draw_soon           Unentschieden in \1 seconds!\n
-gamestate_draw_center         Unentschieden!
-gamestate_draw_default        Die Runde endet mit einem Unentschieden.\n
-gamestate_draw_minalive       Die Runde endete in einem Unentschieden, denn nicht genug Spieler waren lebendig.\n
 
 instant_win_activated         Die Siegzone wurde aktiviert! Finde sie und fahre hinein um zu gewinnen.\n
 instant_round_end_activated   Die Rundenendzone wurde aktiviert! Finde sie und fahre hinein um die Runde zu beenden.\n
@@ -2782,18 +2266,11 @@ player_win_conquest_specific  \1 bekam \2 Punkte für das erobern der Basis von \
 player_kill_collapse          \1 wurde von seiner kollabierenden Zone vernichtet.\n
 player_win_hole               \1 erhält \2 Punkte für Opferbereitschaft.\n
 player_lose_hole              0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 verliert \2 Punkte. Weil er ein n00b ist, oder so.\n
-player_win_command            \1 erhält \2 Punkte für seinen Rundensieg.\n
-declare_round_winner_help     Erklärt den Gewinner der derzeitigen Runde und beendet sie. Anwendung: DECLARE_ROUND_WINNER <Spieler>
-
-player_base_respawn           \1 wurde von \2 wiederauferweckt.
-player_base_enemy_respawn     \1 wurde dank dem Gegner \2 wiederbelebt.\n
 
 player_no_longer_suspended    \1 0x77ff77darf wieder spielen.\n
 player_suspended              \1 0xff7777wird für \2 Runde(n) zum Zuschauen verdammt.\n
 
-scramble_teams_too_small      Die Teams sind zu klein um sie ordentlich durchzumischen\n.
-
-zone_collapse_harmless        \1s Zone verpufft harmlos wegen mangelnden Feindkontakts.\n
+zone_collapse_harmless        \1s Zone verpufft harmlos wegen mangelden Feindkontakts.\n
 
 #********************************************
 #********************************************
@@ -2811,17 +2288,11 @@ player_vote_accesslevel       Dein Zugriffslevel reicht nicht aus, um über das a
 player_pingcharity_changed    Ping-Spende ist nun \2 (vorher: \1).\n
 spam_protection_repeat        SPAM PROTECTION: du sagsest bereits: \1\n
 spam_protection               LABER-SCHUTZ: du bist für die nächsten \1 Sekunden geknebelt.\n
-spam_protection_prefix        LABER_SCHUTZ: deine Nachrichten fangen alle mit \1 an.\nLABER-SCHUTZ: Nachrichten mit diesem Prefix werden erst wieder in \2 Sekunden erlaubt sein\n
-
 spam_protection_silenceall    LABER-SCHUTZ: öffentliches Reden ist verboten.\n
 spam_protection_silenced      LABER-SCHUTZ: du wurdest vom Administrator geknebelt.\n
 spam_protection_silenced_default LABER-SCHUTZ: der Administrator hat dir dein Rederecht zurückgegeben.
-vote_silenced                 Dir ist nicht gestattet, während deiner Stummschaltung eine Abstimmung anzuzetteln.\n
-player_rename_silenced        Dir ist nicht gestattet, dich während deiner Stummschaltung umzubenennen.
 player_silenced               \10xff7777 wurde geknebelt.\n
-player_silenced_local         \10xff7777 wurde lokal stummgeschaltet.\n
 player_voiced                 \10x77ff77 hat seine Stimme wieder.\n
-player_voiced_local           \10x77ff77 wurde lokal entknebelt.\n
 player_allowed_teamchange     \10x77ff77 darf nun das Team wechseln.\n
 player_disallowed_teamchange  \10xff7777 darf nicht mehr das Team wechseln.\n
 vote_spam_protection          ABSTIMMUNGS-SPAMSCHUTZ: du darft die nächsten \1 Sekunden keine Abstimmung mehr initiieren.\n
@@ -2832,7 +2303,6 @@ player_left_spectator         0xff7f7fZuschauer \1 0xff7f7fis weg.\n
 player_left_game              \1 0xff7f7fwurde mit \2 Punkten endgültig gelöscht.\n
 player_leaving_game           \1 0xff7f7fhat das Spiel verlassen.\n
 player_renamed                \2 hat sich auf \1 umbenannt.\n
-player_renamed_teamname       \2 hat den Teamnamen in \1 geändert.\n
 player_got_renamed            \2 wurde in \1 umbenannt.\n
 player_will_be_renamed        \2 wird auf \2 umbenannt werden.
 player_rename_rejected_votekick \1 0xffffffdarf sich nicht in \2 0xffffffumbenennen, das könnte die Abstimmenden verwirren.\n
@@ -2852,63 +2322,34 @@ player_win_frag_ai            \1 erhält \2 Punkte für das glorreiche Vernichten 
 player_lose_frag              \1 verursacht eine allgemeine Schutzverletzung und verliert \2 Punkte.\n
 player_lose_rim               \1 bekommt \2 Punkte wegen versuchter Flucht aus dem Spieleraster abgezogen.\n
 player_win_survivor           \1 erhält als letztes aktives Team \2 Punkte.\n
-player_dead_explosion         \1 wurde pulverisiert in der von \2 verursachten Explosion.
-player_respawn_center_message Du bist wieder da!\n
 player_joins_team             \1 will ab der nächsten Runde für \2 spielen.\n
 player_joins_team_wish        \1 will immer noch für \2 spielen, darf aber nicht.\n
 player_joins_team_noex        Ignoriere \1s Wunsch, für ein nicht mehr existierendes Team zu spielen.\n
 player_leave_team_wish        \1 will ab der nächsten Runde nicht mehr für \2 spielen.\n
 player_leave_game_wish        \1 will ab der nächsten Runde nicht mehr spielen.\n
 player_joins_team_start       \1 0x7fff7fspielt für \2.\n
-#player_joins_team_now  \1 0x7fff7fnow plays for \2.\n
+#player_joins_team_now   \1 0x7fff7fnow plays for \2.\n
 player_changes_team           \1 0x7f7fffwechselt von \3 zu \2.\n
 player_leaves_team            \1 0xff7f7fverlässt \2.\n
 player_creates_team           \1 gründet \2.\n
 player_nocreate_team          \1 kann momentan kein neues Team gründen.\n
 player_nojoin_team            \1 kann sich momentan \2 nicht anschliessen.\n
 player_not_on_team            Du bist in keinem Team.\n
-team_renamed                  \1 änderte den Teamnamen in \2.\n
 player_team_message           Teammitglieder
 player_spectator_message      Zuschauer
 no_real_teams                 Keine Teams mit mehr als einem Spieler.\n
 player_topologypolice         Die Topologiepolizei befiehlt: \1
 
-team_shuffle                  \1 wird von Position \2 auf \3 verschoben.
-team_preshuffle               \1 wird auf Position \2 dem Spiel beitreten.
-team_shuffle_suppress         Diese Runde werden keine weiteren Verschiebenachrichten für diesen Spieler mehr gezeigt.\n
+team_shuffle                  \1 wird von Position \2 auf \3 verschoben.\n
 player_noshuffleup            Du darfst dich hier nicht selbst befördern.\n
 player_noshuffle              Dein Positionsänderungswunsch hat keinen Effekt.\n
 player_shuffle_error          /shuffle erwartet eine Zahl als Argument; mit explizitem Vorzeichen (+/-) wird die Position um die angegebene Zahl an Plätzen verändert, ohne Vorzeichen geht es and die angegebene absolute Position.\n
-
-player_referee                0x7fff7fAuf Befehl von \10x7fff7f ist \20x7fff7f jetzt ein Referee.\n
-player_referee_anon           \10x7fff7f ist jetzt ein Referee.\n
-player_referee_nomore         0xff7f7fAuf Befehl von \10xff7f7f ist \20xff7f7f kein Referee mehr.\n
-player_referee_nomore_anon    \1 0xff7f7fist kein Referee mehr.\n
 
 player_message_help           Schickt eine Nachricht an einen Spieler.
 player_message_usage          Verwendung: PLAYER_MESSAGE <ID oder Name> "<Nachricht>"\n
 kick_usage                    Verwendung: KICK <ID oder Name> <Grund>\n
 ban_usage                     Verwendung: BAN <ID oder Name> <Zeit in Minuten(default: 60)> <Grund>\n
 kickmove_usage                Verwendung: \1 <ID oder Name> <IP des Zielservers>:<Port des Zielservers>\n
-
-do_warmup_help                Aufwärmrunden laufen ohne Punktevergabe ab, bis alle Spieler bereit sind. Dann wird diese Zahl aufeinanderfolgender Matches gespielt, danach beginnt wieder eine Aufwärmphase.
-warmup_min_players_help       Minimal benötigte Anzahl an Spielern um die Aufwärm-Phase zu beenden.
-warmup_min_ready_frac_help    Erforderliche Anzahl an bereiten Spielern je Team, bevor das Match starten kann.
-warmup_readyup_interval_help  Intervall zwischen den Erinnerungen zur Bereitschaft.
-warmup_respawn_time_help      Zeit in Sekunden,  die Spieler während des Aufwärmens auf ein Respawnen warten müssen. Wird durch -1 deaktiviert.
-
-player_ready_onlywarmup       Dieses Kommando funktioniert nur während der Aufwärm-Phase.
-player_ready_noteam           Du musst in einem Team sein, um dieses Kommando verwenden zu können.\n
-player_ready                  \1 0x7fff7fist bereit!\n
-player_ready_not              \1 0xff7f7fist doch noch nicht bereit.\n
-player_allready               Alle Spieler als bereit markiert.\n
-player_allready_not           Alle Spieler als nicht bereit markiert.\n
-allready_help                 Tut so, als ob alle Spieler bereit sind.
-warmup_needmoreplayers        Das Spiel kann noch nicht losgehen, da noch mindestens \1 Spieler fehlen.\n
-warmup_finished               Genug Spieler sind bereit! Match wird jetzt sofort gestartet.\n
-warmup_finished_allready      Zwingt alle Spieler zur Bereitschaft. Startet das Match jetzt sofort.\n
-warmup_finished_center        Warmup vorbei!
-warmup_rup_compat             0xff3333Bitte sag /ready im Chat
 
 add_help_topic_help           Fügt ein neues Hilfsthema für /help hinzu. Verwendung: ADD_HELP_TOPIC <thema> <kurzbescheibung> <voller text>
 add_help_topic_usage          Verwendung: ADD_HELP_TOPIC <thema> <kurzbescheibung> <voller text>\n
@@ -2920,7 +2361,6 @@ remove_help_topic_notfound    Hilfsthema "\1" existiert nicht.\n
 rtfm_announcement             \2 macht \3 auf die Existenz von /help \1 aufmerksam.\n
 
 help_introductory_blurb_help  Dieser Text wird vor der Liste der Hilfsthemen angezeigt, wenn jemand /help ohne Argumente aufruft
-help_message_help             Veraltetes Alias für HELP_INTRODUCTORY_BLURB
 
 help_topics_list_start        Sage /help THEMA, um Hilfe bei einem der folgenden Themen zu erhalten:\n
 help_topic_not_found          Hilfsthema \1 nicht gefunden. /help ohne Argument kann dir eine Liste geben.\n
@@ -2951,9 +2391,6 @@ help_commands_misc_text       0x88ff88/help0xffff88: Hast schon rausgefunden, wo
 help_commands_tourney_shortdesc Turnierkommandos
 help_commands_tourney_text    0x88ff88/lock0xffff88: Sperrt das aktuelle Team. Niemand kann mehr einfach so beitreten. Das geht erst nach\n0x88ff88/invite <Spieler>0xffff88: Erlaubt dem angegebenen Spieler, deinem Team beizutreten. Der Spieler kann ab dann auch /team-Chatnachrichten lesen und das Team frei verlassen und wieder betreten, bis /uninvite aufgerufen wird.\n0x88ff88/uninvite <Spieler>0xffff88: Hebt /invite auf. Die Einladung wird rückgängig gemacht, und falls der Spieler noch im Team ist, wird er rausgeworfen.\n0x88ff88/unlock0xffff88: Hebt /lock auf und erlaubt wieder jedem, dem Team frei beizutreten.
 
-help_version_shortdesc        Die Version dieser Installation
-help_version_text             0xffff7fThis is running:\n0x7fff7f    \g \v\n0xffff7fIt was built on 0x7fff7f\d0xffff7f, from revision 0x7fff7fr\o0xffff7f(0x7fff7fz\z0xffff7f), which has revision 0x7fff7fr\l0xffff7f(0x7fff7fz\m0xffff7f) for last common ancestor with branch 0x7fff7f\p0xffff7f, which can be found at:\n0x7fff7f    \b\n0xffff7fThis revision's ID is:\n0x7fff7f    \i\n0xffff7fIt was tagged(empty if not tagged):\n0x7fff7f    \t\n0xffff7fSource changed:\n0x7fff7f    \c
-
 invite_no_team                \1 funktionniert nur, wenn du in einem Team bist.\n
 invite_team_locked            \1 gesperrt, ein Team-Anführer oder jemand mit entsprechenden Rechten muss dich erst mit /invite einladen.\n
 invite_team_unlocked          \1 entsperrt, man darf wieder beitreten.\n
@@ -2963,9 +2400,6 @@ invite_team_invite            \10xRESETT wurde in \2 eingeladen.\n
 invite_team_kick              \10xRESETT wurde aus \2 geschmissen.\n
 invite_team_uninvite          \10xRESETT wurde von \2 ausgeladen.\n
 invite_team_locked_list       (gesperrt)
-
-team_list_ready               (0x7fff7fbereit0xRESETT)
-team_list_not_ready           (0xff7f7fnicht bereit0xRESETT)
 
 msg_toomanymatches            0xff0000Zu viele Treffer bei Suche nach \1. Bitte etwas genauer.\n
 msg_nomatch                   0xff0000Keine Treffer bein Suche nach \1.\n
@@ -2982,8 +2416,6 @@ camera_watching_player        Beobachte \1\n
 #score table
 team_scoretable_name          Team:
 team_scoretable_score         Score:
-team_scoretable_members       Mitglieder:
-team_scoretable_alive         Lebendig:
 player_scoretable_name        Spieler:
 player_scoretable_team        Mitglied von Team:
 player_scoretable_score       Punkte:
@@ -3028,17 +2460,14 @@ network_message_abortconn_inter Der Server hat die Verbindung abgebrochen.
 
 network_master_timeout_retry  Einer der Master-Server antwortet nicht. Nächster wird kontaktiert...\n
 network_master_timeout_title  Master-Server antworten nicht
-network_master_timeout_inter  Die Master-Server sind momentan nicht erreichbar und die Liste der Server konnte nicht aktualisiert werden. Wir versuchen es mit der alten Liste.\n\nWahrscheinlichster Grund für diesen Fehler ist ein lokales Netzwerkproblem. Überprufe bitte, ob der Internetzugang im Allgemeinen funktionniert, z.B. indem Du mit einem Web-Browser www.armagetronad.net besuchst.\nManchmal ist auch eine Firewall für Verbindungsprobleme verantwortlich. Am einfachsten testet man das, indem man die betreffende Firewall deaktiviert, und dann erneut ein Internet-Spiel zu starten versucht. Wenn es dann klappt, solltest Du die Firewall wieder aktivieren, aber speziefisch \g den Zugang erlauben. Wir verwenden UDP, Ports 4533 bis 4540. Sorge auch dafür, dass armagetronad(.exe) nicht in der Liste der erlaubten Anwendungen ist.\nWenn Teile des Netzwerkes sich Deiner Kontrolle entziehen, z.B. weil Du an einem öffentlichen WLAN-Hotspot sitzt oder in einem Unternehmens- oder Schulnetzwerk, dann sprich mit dem Administrator des Netzwerks.\nUnwahrscheinlich, aber möglich, ist es auch, dass die Master-Server Infrastruktur gerade zusammengebrochen ist. Besuche das Forum auf forums.armagetronad.net oder den IRC-Kanal armagetron auf irc.freenode.net für aktuelle Nachrichten.
+network_master_timeout_inter  Die Master-Server sind momentan nicht erreichbar und die Liste der Server konnte nicht aktualisiert werden. Wir versuchen es mit der alten Liste.\n\nWahrscheinlichster Grund für diesen Fehler ist ein lokales Netzwerkproblem. Überprufe bitte, ob der Internetzugang im Allgemeinen funktionniert, z.B. indem Du mit einem Web-Browser www.armagetronad.net besuchst.\nManchmal ist auch eine Firewall für Verbindungsprobleme verantwortlich. Am einfachsten testet man das, indem man die betreffende Firewall deaktiviert, und dann erneut ein Internet-Spiel zu starten versucht. Wenn es dann klappt, solltest Du die Firewall wieder aktivieren, aber speziefisch Armagetron den Zugang erlauben. Wir verwenden UDP, Ports 4533 bis 4540. Sorge auch dafür, dass armagetronad(.exe) nicht in der Liste der erlaubten Anwendungen ist.\nWenn Teile des Netzwerkes sich Deiner Kontrolle entziehen, z.B. weil Du an einem öffentlichen WLAN-Hotspot sitzt oder in einem Unternehmens- oder Schulnetzwerk, dann sprich mit dem Administrator des Netzwerks.\nUnwahrscheinlich, aber möglich, ist es auch, dass die Master-Server Infrastruktur gerade zusammengebrochen ist. Besuche das Forum auf forums.armagetronad.net oder den IRC-Kanal #armagetron auf irc.freenode.net für aktuelle Nachrichten.
 
 network_master_denied_title   Verbindung zum Master-Server abgelehnt
 network_master_denied_inter   Der Master-Server lässt keine Verbindung zu sich aufbauen. Vermutlich greifen gerade zu viele Benutzer auf ihn zu.\nWir versuchen es mal mit der alten Liste...
 
 testing_version_expired_title Version abgelaufen
-testing_version_expired       Dies ist eine Testversion, und der Server verwendet eine viel neuere Version. Kompatibilität kann nicht garantiert werden.
+testing_version_expired       Dies ist eine Testversion, und der Server verwendet eine viel neuere Version. Aufgrund unkalkulierbarer Risiken müssen wir leider den Verbindungsaufbau abbrechen. Wahscheinlich gibt es aber bereits eine neuere Testversion auf www.armagetronad.net oder beta.armagetronad.net zum Herunterladen.
 
-network_master_login_needed   Registrierung erforderlich
-network_master_exp_needed     Erfahrund benötigt
-network_master_exp_recommended Erfahrung empfohlen
 network_master_upgrage        Zu neue Version
 network_master_downgrage      Zu alte Version
 network_master_incompatible   Nicht kompatibel
@@ -3048,20 +2477,15 @@ network_master_players        Spieler :
 network_master_players_empty  leer
 network_master_options        Optionen:\n
 
-network_master_exp_recommended_long_oldserver Der Server benutzt alten Code und hat keine Einstellungen übermittelt. Du solltest erst mal \1 Minuten woanders verbringen.\n
-network_master_exp_recommended_long Dieser Server verwendet erweiterte Einstellungen; du solltest wahrscheinlich \1 Minuten mehr damit verbringen, andernorts zu spielen.
-network_master_login_needed_long Du benötigst eine Global ID, um hier spielen zu dürfen. Registrier dich auf forums.armagetronad.net (und logge dich nach Aktivierung einmal aus und ein!)
-network_master_exp_needed_long Dieser Server wird dich nicht spielen lassen, bis du wenigstens \n Minuten woanders gespielt hast. \n
-
 network_connecting_to_server  Verbinde mit \1 ...\n
 network_connecting_gamestate  Warte auf Spielstand...\n
 network_syncing_gamestate     Erhalten! Synchronisiere Spielstand...\n
-network_warn_unknowndescriptor \n\n\nUnbekannte Nachricht (ID \1) erhalten.\n\nES IST RATSAM, EINE NEUE VERSION VON \G ZU BESORGEN!!!!\n
+network_warn_unknowndescriptor \n\n\nUnbekannte Nachricht (ID \1) erhalten.\n\nES IST RATSAM, EINE NEUE VERSION VON ARMAGETRON ZU BESORGEN!!!!\n
 network_error                 Netzwerkfehler.\n
 network_error_timeout         Verbindung zu Benutzer \1 verloren.\n
 network_error_shortmessage    Benutzer \1 sendet eine unzulässige (zu kurze) Nachricht.\n
 network_error_overflow        Benutzer \1 kommt mit dem Netzwerkverkehr nicht hinterher.\n
-network_killuser              Beseitige Benutzer \1, Ping \2, IP \3: \4\n
+network_killuser              Beseitige Benutzer \1, Ping \2.\n
 network_statistics1           Zeit:      \1 Sekunden\n
 network_statistics2           Gesendet:  \2 Bytes in \3 Paketen (\4 Bytes/s)\n
 network_statistics3           Empfangen: \5 Bytes in \6 Paketen (\7 Bytes/s)\n
@@ -3098,7 +2522,6 @@ network_kill_maxidgrabber     Keine ObjektIDs mehr frei; Dein Client hatte die m
 network_kill_maxiduser        Keine ObjektIDs mehr frei; Dein Client hatte die meisten davon belegt ( Bug? ).
 network_kill_cheater          Du hast den Cheater-Alarm ausgelöst. Wenn das nicht gerechtfertigt war, sende bitte einen Bug-Report.
 network_kill_error            Beim Bearbeiten eines Netzwerkpakets von Deinem Client wurde ein Fehler festgestellt. Vermutlich gibt es entweder im Server oder im Client einen Bug.
-network_kill_servercomplete   Transfer der Serverlisten vollständig.
 network_kill_timeout          Dein Client hat zu lange nicht geantwortet.
 network_kill_logout           Du hast dich ausgeloggt.
 network_kill_incompatible     Die Version deines Clients passt nicht zum Server.
@@ -3108,16 +2531,12 @@ network_kill_overflow         Es gab einen Netzwerk-Überlauf.
 network_kill_too_many_players Zu viele Spieler mit identischen Verbindungsdaten.
 network_kill_kick             Der Server-Adminstrator hat Dich vor die Tür gesetzt. Bitte bleibe draussen.
 network_kill_idle             Du wurdest automatisch vor die Tür gesetzt, weil Du gar nicht spielst.
-network_kill_banned           You are banned. Please stay away. The more often you retry to connect, the longer your ban stays.
+network_kill_banned           Der Server-Administrator hat Dich verbannt. Grund: \2. Je öfter Du versuchst, dich mit dem Server zu verbinden, umso länger wird deine Verbannung dauern.
 #network_kill_banned         You are banned. Please stay away. The more often you retry to connect, the longer your ban stays.
 network_kill_unknown          Kein Grund angegeben.
 network_kill_spamkick         Du wurdest wegen Spammings automatisch vom Server entfernt. Sei bitte etwas vorsichtiger.
 voted_kill_kick               Du wurdest von einem wütenden Mob vom Server geschmissen; wahrscheinlich hassen sie dich. Gute Arbeit! Versuche, woanders zu spielen.
 network_kill_spectator        Du warst zu lange nur Beobachter.
-network_kill_unworthy         Der Server ist voll. Deine Verbindung wurde unterbrochen, um Platz für potenzielle Spieler zu machen. Komm nur zurück, wenn du wirklich musst.
-network_kill_unworthy_banreason Der Server ist überlastet und neue Verbindungen müssen gedrosselt werden. Wir entschuldigen uns für die Verzögerung.
-network_kill_unworthy_ban     Der Server ist voll. Deine Verbindung wurde unterbrochen, um Platz für potenzielle Spieler zu machen. Komm nur zurück, wenn du wirklich musst, aber warte noch \1 Minute(n).
-network_kill_unworthy_log     Kickt entbehrlichen Zuschauer \1 für \2 Minuten. \n
 
 network_ban_kph               IP \1 ist nun mit \2 Kicks pro Stunde registriert.\n
 network_ban                   Spieler von IP \1 sind für die nächsten \2 minuten gesperrt. Grund: \3\n
@@ -3150,8 +2569,6 @@ vote_vote_for                 \1 hat für Vorschlag "\2" gestimmt.\n
 vote_vote_against             \1 hat gegen Vorschlag "\2" gestimmt.\n
 vote_unknown_command          Unbekanntes /vote-Kommando \1, zur Verfügung stehen: \2\n
 vote_kick_local               Lokale Spieler und Computergegner wie \1 lassen sich nicht rauswerfen.\n
-vote_referee_already          \10xRESETT ist bereits ein Referee.\n
-vote_demotereferee_notref     \10xRESETT ist kein Referee.\n
 
 #********************************************
 #********************************************
@@ -3177,43 +2594,9 @@ network_master_reqlist        Fordere Server-Liste an...\n
 network_master_status         Empfange Server \1...\n
 network_master_finish         \1 Server empfangen.\n
 network_master_start          Spiel leiten
-network_master_pollanswer     Beantworte den Pings von \1.\n
-network_master_pollanswer_last Beantworte den Ping von \1. Weitere Ereignisse werden nicht mehr geloggt.\n
 network_master_host_inet_help Startet einen Server auf diesem Rechner und macht ihn im Internet bekannt.
 network_master_host_lan_help  Startet einen Server auf diesem Rechner, der nur in diesem lokalen Netz sichtbar ist.
 
-classification_0              kein\1
-classification_1              winzigklein\1
-classification_2              nano \2
-classification_3              mikro \2
-classification_4              extrem \2
-classification_5              sehr \2
-classification_6              \2
-classification_7              normal\1
-classification_8              \3
-classification_9              sehr \3
-classification_10             extrem \3
-classification_11             mega \3
-classification_12             giga \3
-classification_13             wahnwitzig \3
-classification_14             unendlich \3
-
-# The _1, _2 and _3 strings are inserted into the strings above as \1, \2 and \3.
-# Translations can use that to form grammatically correct combinations.
-classification_acceleration_1 e Beschleunigung
-classification_acceleration_2 hohe Beschleunigung
-classification_acceleration_3 niedrige Beschleunigung
-classification_delay_1        e Verzögerung
-classification_delay_2        niedrige Verzögerung
-classification_delay_3        hohe Verzögerung
-classification_rubber_1       es Gummi
-classification_rubber_2       niedriges Gummi
-classification_rubber_3       hohes Gummi
-classification_walls_1        e Wände
-classification_walls_2        kurze Wände
-classification_walls_3        lange Wände
-classification_teams          Kooperation
-classification_maps           Benutzerdefinierte Karte
 
 #********************************************
 #********************************************
@@ -3296,15 +2679,14 @@ texture_error_filenotfound_title Texturfehler
 #********************************************
 #********************************************
 
-#sound_error_no16bit		Sorry. We need 16 bit stereo output (I'm too lazy to support other formats. Maybe if you ask really nice?).\n
-#sound_error_initfailed		Sound initialisation failed.\n
-#sound_firstinit			Trying to start sound. Just restart \g in case of crash.\n
-#sound_inited				Sound initialised: 16 bit stereo at \1 Hz, buffer size \2 samples.\n
-#sound_disabling			Disabling sound...\n
-#sound_disabling_done		Done!\n
-#sound_error_filenotfound	Sound file \1 not found. Have you called \g from the right directory?
-#sound_error_unsupported	Sound file \1 has unsupported format. Sorry!
-sound_error_unknown           Datei \1 konnte nicht geladen werden: \2
+sound_error_no16bit           Ups. \g benötigt leider eine 16-Bit Soundkarte für den Sound.\n
+sound_error_initfailed        Sound-Initialisierung fehlgeschlagen.\n
+sound_firstinit               Sound wird zum ersten mal gestartet. Manchmal stürzt \g dabei ab; ein Neustart hilft dann manchmal.\n
+sound_inited                  Sound intialisiert: 16 Bit Stereo bei \1 Hz, Puffergrösse \2 Samples.\n
+sound_disabling               Deaktiviere Sound...\n
+sound_disabling_done          Fertig!\n
+sound_error_filenotfound      Sound-Datei \1 nicht gefunden. Läuft \g im richtigen Verzeichnis?
+sound_error_unsupported       Sound-Datei \1 ist leider in einem nicht unterstützten Format.
 
 
 #********************************************
@@ -3322,15 +2704,14 @@ config_command_other          Wahrscheinlich war in deinem Sinn:\n
 config_command_more           Es gibt noch weitere Kommandos, aber die wurden weggelassen, um die Konsole nicht zu überfluten.
 config_file_write_error       Konnte Konfiguration nicht speichern!\n
 config_value_changed          \1 wurde von \2 auf \3 verändert.\n
-config_value_not_changed      \1 wurde nicht von \2 zu \3 verändert: die Schutzfunktion hatte etwas dagegen.\n
 config_error_read             Eingabefehler beim Lesen von \1: Ungültiges Format.\n
 config_message_info           \1 steht momentan auf \2.\n
 config_sighup                 SIGHUP erhalten, Konfigurationsdateien werden neu gelesen.\n
 config_abort                  Laden bon Konfigurationsdatei/strom abgebrochen.\n
 
-nconfig_error_protected       Nix da. Nur der Server darf \1 ändern.\n
-nconfig_error_unknown         Konfigurationsänderung für die unbekannte Variable \1 erhalten.\n\n\n\nWAHRSCHEINLICH SOLLTE EINE NEUE VERSION VON \G INSTALLIERT WERDEN!!!!\n
-nconfig_error_nonet           Konfigurationsänderung über das Netwzerk für die Variable \1 erhalten, die jedoch keinen Netzwerksupport hat.\n\n\n\nWAHRSCHEINLICH SOLLTE EINE NEUE VERSION VON \G INSTALLIERT WERDEN!!!!\n
+nconfig_errror_protected      Nix da. Nur der Server darf \1 ändern.\n
+nconfig_error_unknown         Konfigurationsänderung für die unbekannte Variable \1 erhalten.\n\n\n\nWAHRSCHEINLICH SOLLTE EINE NEUE VERSION VON ARMAGETRON INSTALLIERT WERDEN!!!!\n
+nconfig_error_nonet           Konfigurationsänderung über das Netwzerk für die Variable \1 erhalten, die jedoch keinen Netzwerksupport hat.\n\n\n\nWAHRSCHEINLICH SOLLTE EINE NEUE VERSION VON ARMAGETRON INSTALLIERT WERDEN!!!!\n
 nconfig_error_ignoreold       Veraltete Konfigurationsänderung für Einstellung \1 wird ignoriert.\n
 nconfig_value_changed         \1 wurde auf Befehl des Servers von \2 auf \3 verändert.\n
 
@@ -3338,7 +2719,6 @@ config_accesslevel_0          Besitzer
 config_accesslevel_1          Administrator
 config_accesslevel_2          Moderator
 config_accesslevel_5          Armatrator
-config_accesslevel_6          Referee
 config_accesslevel_7          Team-Anführer
 config_accesslevel_8          Teammitglied
 config_accesslevel_12         Lokaler Benutzer
@@ -3350,13 +2730,7 @@ config_accesslevel_20         Programm
 
 access_level_help             Ändert den Zugriffslevel einer Einstellung, um sie z.B. Benutzern mit niedrigeren Rechten zugänglich zu machen.
 access_level_usage            Verwendung: ACCESS_LEVEL <Kommando> <minimaler nötiger Zugriffslevel (numerisch)>\n
-access_level_change           Erforderlicher Zugriffslevel von Kommando \1 geändert in "\2".\n
-access_level_nochange_now     Kann Zugriffslevel von \1 nicht verändern: Es steht zur Zeit auf "\2", du hast aber nur "\3". Das wäre Diebstahl!\n
-access_level_nochange_later   Kann Zugriffslevel von \1 nicht auf "\2" ändern, du hast selber nur "\3" und wärest nicht mehr imstande, das rückgängig zu machen.
-
-#ORIGINAL TEXT:               Required access level of command \1 changed to "\2".\n
-#TRANSLATION deutsch          Erforderlicher Zugriffslevel von Kommando \1 geändert in "\2".\n
-#access_level_change          UNTRANSLATED
+access_level_change           Zugriffslevel von Kommando \1 auf "\2" geändert.\n
 access_level_error            Erforderlicher Zugriffslevel von Kommando \1 ist "\2", du hast aber nur "\3".\n
 
 casacl_help                   Erhöht für den Rest der Datei, in der das Kommando auftaucht, den Zugriffslevel.
@@ -3373,10 +2747,6 @@ user_level_change             Zugriffslevel von \1 auf "\2" geändert.\n
 authority_level_help          Ändert den Zugriffslevel aller Benutzer von einem Meldeamt.
 authority_level_usage         Verwendung: AUTHORITY_LEVEL <Meldeamt> <Zugriffslevel (numerisch)>\n
 authority_level_change        Zugriffslevel von Benutzern von Meldeamt \1 auf "\2" geändert.\n
-
-toggle_help                   Wechsel zwischen 0 und 1 für ein boole'sches und lokal veränderbares Config-Element. Beispiel: TOGGLE PREDICT_OBJECTS\n
-toggle_usage_error            TOGGLE benötigt einen Namen für ein Config-Element. Anwendung: TOGGLE config_element\n
-toggle_invalid_config_item    TOGGLE benötigt ein boole'sches und lokal veränderbares Config-Element. Und \1 ist kein solches.\n
 
 #*************************************
 #*************************************
@@ -3437,9 +2807,7 @@ access_level_op_max_help      Maximaler Zugriffslevel, den man mit /op erhalten 
 access_level_admin_help       Minimaler Zugriffslevel für das /admin-Kommando.
 access_level_rtfm_help        Minimaler Zugriffslevel für /teach und /rtfm.
 access_level_chat_help        Minimaler Zugriffslevel, um Reden zu dürfen.
-access_level_shout_help       Minimales Zugriffslevel für Schreie.
 access_level_ips_help         Minimaler Zugriffslevel, um IPs anderer Spieler in der Ausgabe von /players zu sehen.
-access_level_autokick_immunity_help Minimales Zugriffslevel, das erforderlich ist, um gegen Autokicks gewappnet zu sein.
 access_level_nver_help        Minimaler Zugriffslevel, um die Netzwerkversionen von anderen Spielern in /players zu sehen.
 access_level_spy_console_help Minimaler Zugriffslevel, um die Konsoleneingabe anderer Administratoren zu sehen.
 access_level_spy_team_help    Minimaler Zugriffslevel, um als Zuschauer /team-Nachrichten lesen zu können.
@@ -3460,7 +2828,6 @@ access_level_vote_command_execute_help Minimaler Zugriffslevel, auf dem erfolgre
 access_level_chat_timeout_help Zeit in Sekunden zwischen öffentlichen Nachrichten, dass jemand gerne etwas sagen würde, aber nicht darf. Ein Wert von 0 schaltet die Nachrichten ab.
 access_level_chat_request     \10xRESETT würde gerne Reden, aber darf nicht. Wäre jemand so nett, "/op \2" zu sagen?\n
 access_level_chat_denied      0xff7f7fRede verweigert,0xffffff ungenügender Zugriffslevel.\n
-access_level_shout_denied     0xff7f7fSchreien verweigert,0xffffff ungenügendes Zugriffslevel.\n
 access_level_op_denied        0xff7f7f\1 verweigert,0xffffff ungenügender Zugriffslevel.\n
 access_level_op_overpowered   0xff7f7f\1 verweigert,0xffffff du brauchst einen höheren Zugriffslevel als dein Opfer.\n
 access_level_op_self          0xff7f7f\1 verweigert,0xffffff du kannst dir das nicht selbst antun :).\n
@@ -3470,9 +2837,7 @@ access_level_op_same          \1: Das wäre wirkungslos.\n
 access_level_op_unclear       \1: Spieler ist bereits eingeloggt, bitte einen Zugriffslevel spezifizieren.\n
 
 access_level_demote           \1 wurde von \3 zum "\2" degradiert.\n
-access_level_demote_anon      \1 wurde zu "\2" degradiert.\n
 access_level_promote          \1 wurde von \3 zum "\2" befördert.\n
-access_level_promote_anon     \1 wurde zum "\2" befördert.\n
 
 access_level_admin_denied     0xff7f7f/admin verweigert,0xffffff ungenügender Zugriffslevel.\n
 access_level_shuffle_up_denied Erforderlicher Zugriffslevel zum Positionswechsel nach innen ist "\1", du bist nur "\2".\n
@@ -3489,13 +2854,14 @@ chat_command_unknown          Unbekanntes Chat-Kommando "\1".\n
 chat_command_accesslevel      Dein Zugriffslevel reicht leider nicht aus, um "\1" auszuführen. Du bist \2, erforderlich wäre \3.\n
 
 authority_blacklist_help      Komma-unterteilte Liste von Meldeämtern, die vom Server nicht anerkannt werden.
-authority_whitelist_help      Falls diese Komma-unterteilte Liste nicht leer ist, interpretiert sie der Server als die einzigen zu akzeptierenden Meldeämter.
+authority_whitelist_help      Falls diese Komma-unterteilte Liste nicht leer ist, interpretiert sie der Server als einzigen zu akzeptierenden Meldeämter.
 trust_lan_help                Wenn dies auf 1 gesetzt wird, nimmt der Server an, dass es in diesem LAN keine bösartigen Benutzer gibt.
 hash_method_blacklist_help    Liste nicht zugelassener Authentifizierungsmethoden.
 
 legacy_log_names_help         Wenn dies auf 1 gesetzt wird, dann werden die Log-Namen von nicht eingeloggten Spielern genau so wie in früheren Versionen ohne Authentifizierung generiert. Wenn dies auf 0 gesetzt ist, dann werden die Log-Namen von eingeloggten Spielern möglichts "schön" gebildet.
 
 login_message_requested       Spieler \1 bittet um Authentifizierung als "\2@\3".\n
+login_message_delayed         Dein Login-Prozess wird leider erst verspätet beendet werden können, die Server-Konfiguration erlaubt nichts anderes. Wir bitten, diese unannehmlichkeit zu entschuldigen.\n
 login_message_responded       Passwortanfrage an Benutzer \1 geschickt, Bentzername "\2", Methode \3, Nachricht "\4".\n
 login_message                 \3\1 wurde als \2 Authentifiziert.\n
 login_message_byorder         Anordnung von \1:
@@ -3516,7 +2882,7 @@ login_error_invalidurl_notfound Authentifizierungs-URL \1 ungültig, wurde nicht 
 login_error_noremote          Authentifizierung via Globaler ID ist auf diesem Server nicht aktiviert. 
 login_error_blacklist         Meldeamt \1 ist auf der schwarzen Liste dieses Servers.
 login_error_whitelist         Meldeamt \1 ist nicht auf der weissen Liste dieses Servers.
-login_error_pharm             Server-Adresse passt nicht, \1 (vom Client) != \2 (Serveraddresse). Pharming möglich. Wenn du dich gerade vom LAN mit deinem eigenen Server verbindest, kannst du "TRUST_LAN" aktivieren (nur wenn sich im LAN keine Bösewichte verstecken, natürlich). Wenn nicht, benutze "SERVER_DNS", um dem Server seine korrekte Adresse mitzuteilen.
+login_error_pharm             Server-Adresse passt nicht, \1 (vom Client) != \2 (Serveraddresse). Pharming möglich. Wenn du dich gerade vom LAN mit deinem eigenen Server verbindest, kannst du "TRUST_LAN" aktivieren (nur wenn sich im LAN keine Bösewichte verstecken, natürlich), oder setze "SERVER_IP", um dem Server seine korrekte Adresse mitzuteilen.
 login_error_pharm_cheap       Ärger mit Server-Adresse. Der Client schickt eine unspeziefische Adresse.
 login_error_methodmismatch    Die lokale Methode zum Passworttest wurde zwischen dem Setzen des Passworts und jetzt verändert. In der Serverkonfiguration müssen alle zur Authentifizierungsmethode relevanten Einstellungen VOR den Passwörtern lokaler Accounts stehen.
 login_error_nomethod          Keine geeignete Authentifizierungsmethode gefunden. Der Client unterstützt \1, der Server \2, und das Meldeamt \3.
@@ -3528,7 +2894,7 @@ login_error_unknown           Unbekannter Fehlercode \1 erhalten, Inhalt "\2".
 login_error_invalidclaim      Meldeamt "\1" Versucht vergeblich, dich als "\2" auszugeben.
 login_error_unexpected_answer Antwort "\2" vom Server erwartet, stattdessen \2 erhalten.
 
-login_error_local_nouser      Lokalen Benutzer \1 nicht gefunden. Versuche "/login \1@forums".
+login_error_local_nouser      Lokalen Benutzer \1 nicht gefunden.
 login_error_local_password    Passwort für lokalen Benutzer \1 falsch.
 
 chatcommand_requires_player   \1 benötigt einen Benutzernamen als zusätzliches Argument.\n
@@ -3545,19 +2911,17 @@ md5_password_removed          Benutzer/Team \1 entfernt.\n
 md5_password_remove_notfound  Benutzer/Team \1 nicht gefunden.\n
 
 reserve_screen_name_help      Reserviert einen Spitznamen für einen registrierten Benutzer
-reserve_screen_name_usage     Verwendung: RESERVE_SCREEN_NAME <Spitzname (in Anfürungszeichen)> <Benutzername>\n
+reserve_screen_namne_usage    Verwendung: RESERVE_SCREEN_NAME <Spitzname (in Anfürungszeichen)> <Benutzername>
 reserve_screen_name_change    Der Spitzname "\1" ist für \2 reserviert.\n
 
 user_alias_help               Erlaubt es, Authentifizierungs-IDs umzubiegen: ein Spieler, der eigentlich als X authentifiziert ist, kann als Y erscheinen.
-user_alias_usage              Verwendung: USER_ALIAS <eigentlicher Benutzername> <Benutzername, wie er erscheinen soll>\n
+alias_usage                   Verwendung: USER_ALIAS <eigentlicher Benutzername> <Benutzername, wie er erscheinen soll>
 alias_change                  Benutzer \1 wird als \2 erscheinen.\n
 
 ban_user_help                 Verbannt Spieler mit bestimmter Authentifizierungs-ID
 ban_user_message              Benutzer \1 wurde verbannt.\n
-ban_user_usage                Verwendung: BAN_USER <global ID>\n
 unban_user_help               Macht BAN_USER rückgängig.
 unban_user_message            Benutzer \1 ist nicht mehr verbannt.\n
-unban_user_usage              Verwendung: UNBAN_USER <global ID>\n
 ban_user_list_help            Gibt die Liste der verbannten Authentifizierungs-IDs aus.
 
 md5_prefix_help               Prefix, der bei lokalen Accounts zum Verschüsseln des Passworts verwendet wird
@@ -3569,100 +2933,3 @@ global_id_help                Wenn dies auf 1 gesetzt wird, dann wird die Unters
 
 # Room for lost settings in translation files:
 
-tab_completion_toomanyresults Zu viele Ergebnisse. Bitte mehr Buchstaben! \n
-tab_completion_results        Möglichkeiten:\n
-
-# Outdated:
-sound_error_unsupported       Sound-Datei \1 ist leider in einem nicht unterstützten Format.
-brake_gauge_size_help         Göße der Bremsanzeige
-fastest_locx_help             Horizontale Position des schnellsten Spielers in der Anzeige
-network                       host menu
-ping_size_help                Göße der Ping-Anzeige
-armagetron_vsync_last_help    Was mit dem Vertical Sync des Monitors gemacht werden soll
-sound_error_no16bit           Ups. \g benötigt leider eine 16-Bit Soundkarte für den Sound.\n
-fastest_locy_help             Vertikale Position des schnellsten Spielers in der Anzeige
-swapmode_fastest_help         Keine Synchronisation. Das ist am schnellsten, aber die Grafikausgabe kann möglicherweise sehr lange hiter der Eingabe herhinken.
-score                         table
-\n\nThis                      Game is supported from KGN (Krawall Gaming Network, www.krawall.de).
-show_rubber_help              Soll die Rubber-Anzeige im HUD gezeigt werden?
-brake_gauge_locy_help         Vertikale Position der Bremsanzeige
-speed_gauge_locx_help         Horizontale Position des Tachometers
-score_locx_help               Horizontale Position der Punktzahl in der Anzeige
-options                       that can be set via the console.
-rubber_gauge_size_help        Größe des Rubber-Meters
-welcome_message_renderer      Typ        : 
-show_alive_help               Soll der Freund/Feindzähler im HUD gezeigt werden?
-show_ping_help                Soll dein Ping im HUD gezeigt werden?
-lag_offset_legacy_help        Auf dem Server wählbar: Zusatzkompensation für Lag für Clients, die den Lag-Kredit-Automatismus noch nicht beherrschen. Für sehr schlechte Verbindungen.
-show_time_24_help             Soll die Uhr im 24-Stunden-Format gezeigt werden?
-leaque/highscore              messages
-ping_locy_help                Vertikale Position der Ping-Anzeige
-swapmode_glflush_help         Die Funktion glFlush() wird zur Synchronisation verwendet. Die Prozessorbelastung ist gering.
-swap_mode_help                Bestimmt, wie Ein- und Ausgabe synchronisiert werden. 0: gar nicht, 1: mit glFlush(), 2: mit glFinish().
-show_time_help                Soll die aktuelle Uhrzeit im HUD gezeigt werden?
-game                          settings
-sound_disabling               Deaktiviere Sound...\n
-player_joins_team_now         \1 0x7fff7fnow plays for \2.\n
-login_message_delayed         Dein Login-Prozess wird leider erst verspätet beendet werden können, die Server-Konfiguration erlaubt nichts anderes. Wir bitten, diese unannehmlichkeit zu entschuldigen.\n
-score_size_help               Göße der Punktzahl in der Anzeige
-with                          name NAME has the ID name_help.
-alive_locy_help               Vertikale Position des Freund/Feindzählers
-swapmode_glfinish_help        glFinish() wird zur Synchronisation verwendet. Nur so ist es garantiert, dass Eingabe und Ausgabe wirklich Synchron laufen, aber der Preis ist auf einigen Systemen die Vollauslastung des Prozessors.
-sound_error_initfailed        Sound-Initialisierung fehlgeschlagen.\n
-show_fastest_help             Soll der schnellste Spieler im HUD gezeigt werden?
-swapmode_help                 Bestimmt die Methode, mit der in jedem Renderschritt die Ausgabe mit der Eingabe synchronisiert wird. Der Aktuelle Wert bewirkt:
-rubber_gauge_locx_help        Horizontale Position des Rubber-Meters
-welcome_message_intro         Die Graphikeinstellungen wurden auf die OpenGL-Konfiguration\n\n
-show_hud_help                 Soll das HUD gezeigt werden?
-sound_firstinit               Sound wird zum ersten mal gestartet. Manchmal stürzt \g dabei ab; ein Neustart hilft dann manchmal.\n
-alive_size_help               Göße des Freund/Feindzählers
-The                           text item for a configuration item
-Help                          texts for the various configuration
-first_setup_keys_both_help    Lenke und schau dich nach links mit der linken Hand um, Lenke und schau dich nach rechts mit der rechten Hand um. Gut für beidhändige Spieler, die keinesfalls die Maus benutzen wollen und nie mit anderen Spielern am gleichen Bildschirm spielen.
-respawn                       relevant settings (no server supports respawning yet, but the client is prepared)
-swapmode_glflush_text         glFlush
-swapmode_glfinish_text        glFinish
-speed_gauge_locy_help         Vertikale Position des Tachometers
-camera                        messages
-sound_inited                  Sound intialisiert: 16 Bit Stereo bei \1 Hz, Puffergrösse \2 Samples.\n
-brake_gauge_locx_help         Horizontale Position der Bremsanzeige
-fastest_size_help             Göße des schnellsten Spielers in der Anzeige
-welcome_message_finish        \nangepasst.\n\nViel Spass!\n
-show_score_help               Soll die Punktzahl im HUD gezeigt werden?
-first_setup_keys_both         Zwei-Händig
-swapmode_text                 Pufferumschaltmodus:
-ping_locx_help                Horizontale Position der Ping-Anzeige
-sound_error_filenotfound      Sound-Datei \1 nicht gefunden. Läuft \g im richtigen Verzeichnis?
-alive_locx_help               Horizontale Position des Freund/Feindzählers
-welcome_message_version       Version    : 
-wall                          length modification
-speed_gauge_size_help         Göße des Tachometers
-welcome_message_vendor        Hersteller : 
-sound_disabling_done          Fertig!\n
-swapmode_fastest_text         Schnell
-rubber_gauge_locy_help        Vertikale Position des Rubber-Meters
-show_brake_help               Soll die Bremsanzeige im HUD gezeigt werden?
-show_speed_help               Soll das Tachometer im HUD gezeigt werden?
-score_locy_help               Vertikale Position der Punktzahl in der Anzeige
-# login texts
-# screen mode menu
-# player setup
-# network options
-# model
-# player menu
-     
-# network game menu
-# detail settings
-# menu texts: generic
-# ingame menu
-# walls
-# feature menuitem
-# moviepack settings
-# texture menuitem
-# display menu
-# tweaks menu
-# detail menu
-# camera prefs menu
-# screen mode
-# preferences menu
-# floor

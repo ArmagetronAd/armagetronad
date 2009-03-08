@@ -1470,7 +1470,7 @@ void sg_HostGame(){
         {
             sg_Timestamp();
             con << "Server exiting due to DEDICATED_IDLE after " << (tSysTimeFloat() - startTime)/3600 << " hours.\n";
-            uMenu::quickexit = true;
+            uMenu::quickexit = uMenu::QuickExit_Total;
         }
     }
     cp();
@@ -1545,6 +1545,17 @@ void sg_Receive()
         // servers should ignore data sent to the control socket. It probably would be better
         // to close the socket altogether, but that opens another can of worms.
         sn_DiscardFromControlSocket();
+    }
+}
+
+static void sg_StopQuickExit()
+{
+    st_DoToDo();
+
+    // stop quick exit to game level
+    if ( uMenu::quickexit == uMenu::QuickExit_Game )
+    {
+        uMenu::quickexit = uMenu::QuickExit_Off;
     }
 }
 
@@ -1644,7 +1655,16 @@ bool ConnectToServerCore(nServerInfoBase *server)
 
     bool ret = true;
 
-    if (!sg_RequestedDisconnection && !uMenu::quickexit)
+    sn_SetNetState(nSTANDALONE);
+
+    sg_currentGame = NULL;
+    nNetObject::ClearAll();
+    ePlayerNetID::ClearAll();
+
+    if (!sg_RequestedDisconnection && uMenu::quickexit != uMenu::QuickExit_Total )
+    {
+        sg_StopQuickExit();
+
         switch (sn_GetLastError())
         {
         case nOK:
@@ -1656,15 +1676,10 @@ bool ConnectToServerCore(nServerInfoBase *server)
                                   "$network_message_lostconn_inter", 20);
             break;
         }
+    }
 
     sr_con.autoDisplayAtNewline=false;
     sr_con.fullscreen=false;
-
-    sn_SetNetState(nSTANDALONE);
-
-    sg_currentGame = NULL;
-    nNetObject::ClearAll();
-    ePlayerNetID::ClearAll();
 
     sr_textOut=to;
 
@@ -1673,6 +1688,8 @@ bool ConnectToServerCore(nServerInfoBase *server)
 
 void ConnectToServer(nServerInfoBase *server)
 {
+    bool to = sr_textOut;
+
     bool okToRedirect = ConnectToServerCore( server );
 
     // REAL redirections = 0;
@@ -1711,6 +1728,19 @@ void ConnectToServer(nServerInfoBase *server)
         redirections *= 1/(1 + dt * maxRedirections * timeout );
         */
     }
+
+    sr_con.autoDisplayAtNewline=false;
+    sr_con.fullscreen=false;
+
+    sn_SetNetState(nSTANDALONE);
+
+    sg_currentGame = NULL;
+    nNetObject::ClearAll();
+    ePlayerNetID::ClearAll();
+
+    sr_textOut=to;
+
+    sg_StopQuickExit();
 }
 
 static tConfItem<int> mor("MAX_OUT_RATE",sn_maxRateOut);
@@ -1947,7 +1977,7 @@ static void Quit_conf(std::istream &){
     // mark end of recording
     tRecorder::Playback("END");
     tRecorder::Record("END");
-    uMenu::quickexit = true;
+    uMenu::quickexit = uMenu::QuickExit_Total;
 }
 
 static tConfItemFunc quit_conf("QUIT",&Quit_conf);
@@ -2458,7 +2488,7 @@ void gGame::NetSync(){
     if ( tRecorder::Playback("END") )
     {
         tRecorder::Record("END");
-        uMenu::quickexit=true;
+        uMenu::quickexit=uMenu::QuickExit_Total;
     }
 
 #ifdef DEDICATED
@@ -2959,7 +2989,7 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 
         if ( ( !e || ( !e->Alive() && e->DeathTime() < time - .5 ) ) && sn_GetNetState() != nCLIENT )
         {
-            sg_RespawnPlayer(time, grid, &arena, p);
+            sg_RespawnPlayer(grid, &arena, p);
         }
     }
 }
@@ -3282,7 +3312,7 @@ void gGame::Analysis(REAL time){
     {
         static int lastTeams = 0; // the number of teams when this was last called.
 
-        // check for relevent status change, form 0 to 1 or 1 to 2 or 2 to 1 or 1 to 0 human teams.
+        // check for relevant status change, from 0 to 1 or 1 to 2 or 2 to 1 or 1 to 0 human teams.
         int humanTeamsClamp = human_teams;
         if ( humanTeamsClamp > 2 )
             humanTeamsClamp = 2;
@@ -4299,6 +4329,9 @@ static void sg_TodoClientFullscreenMessage()
 static void sg_fullscreenMessageHandler( Game::FullscreenMessage const & message, nSenderInfo const & sender )
 {
     if (sn_GetNetState()!=nSERVER){
+        // to test timeouts during fullscreen message display:
+        // m.Send( m.SenderID() );
+
         sg_fullscreenMessageTimeout = 60;
 
         sg_fullscreenMessageTitle = message.title();
@@ -4437,6 +4470,21 @@ static void LoginCallback(){
             sg_FullscreenMessage( sg_greetingTitle, sg_greeting, sg_greetingTimeout, nCallbackLoginLogout::User() );
         }
     }
+
+    // flag indicating wether we were in client bode
+    static bool wasClient = false;
+
+    // lost connection to server/disconnected
+    if( wasClient && !nCallbackLoginLogout::Login() && sn_GetNetState() == nSTANDALONE )
+    {
+        // drop all menu activity
+        if ( !uMenu::quickexit )
+        {
+            uMenu::quickexit = uMenu::QuickExit_Game;
+        }
+    }
+
+    wasClient = nCallbackLoginLogout::Login() && nCallbackLoginLogout::User() == 0;
 }
 
 static nCallbackLoginLogout lc(LoginCallback);
