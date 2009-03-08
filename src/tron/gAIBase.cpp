@@ -1041,6 +1041,32 @@ private:
     int dir_;
 };
 
+// evaluator for zone defense
+class gZoneEvaluator: public gAINavigator::PathEvaluator
+{
+public:
+    gZoneEvaluator( gCycle const & cycle, zZone const & zone ): cycle_( cycle ), zone_( zone ){}
+    
+    virtual void Evaluate( gAINavigator::Path const & path, gAINavigator::PathEvaluation & evaluation ) const
+    {
+        zShape * shape = zone_.getShape();
+        if ( !shape )
+        {
+            return;
+        }
+
+        eCoord toCenter = shape->Position() - cycle_.Position();
+        eCoord pathDir = path.longTermDirection + path.shortTermDirection * .1;
+        REAL a = eCoord::F( toCenter, pathDir.Turn(1,1) );
+        REAL b = eCoord::F( toCenter, pathDir.Turn(1,-1) );
+        evaluation.score = a > b ? a : b;
+    }
+private:
+    gCycle const & cycle_;
+    zZone const & zone_;
+};
+   
+
 // *******************
 // * Survival state  *
 // *******************
@@ -1052,13 +1078,21 @@ public:
 
     virtual REAL Think()
     { 
+        gCycle & cycle = *Parent().Object();
         Navigator().UpdatePaths();
         gAINavigator::EvaluationManager manager( Navigator().GetPaths() );
-        manager.Evaluate( gAINavigator::SuicideEvaluator( *Parent().Object() ), 1 );
+        manager.Evaluate( gAINavigator::SuicideEvaluator( cycle ), 1 );
         manager.Reset();
-        manager.Evaluate( gAINavigator::CowardEvaluator( *Parent().Object() ), 1 );
-        manager.Evaluate( gAINavigator::SpaceEvaluator( *Parent().Object() ), 1 );
+        manager.Evaluate( gAINavigator::CowardEvaluator( cycle ), 1 );
+        manager.Evaluate( gAINavigator::SpaceEvaluator( cycle ), 1 );
+        manager.Evaluate( gAINavigator::RandomEvaluator(), .01 );
         manager.Evaluate( gAINavigator::PlanEvaluator(), .1 );
+
+        zZone const * zoneTarget = dynamic_cast< zZone const * >( Parent().GetTarget() );
+        if ( zoneTarget )
+        {
+            manager.Evaluate( gZoneEvaluator( cycle, *zoneTarget ), .1 );
+        }
 
         gAINavigator::CycleControllerBasic controller;
         return manager.Finish( controller, *Parent().Object() );
