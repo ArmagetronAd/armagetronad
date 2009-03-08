@@ -165,6 +165,7 @@ void zFlagZone::GoHome()
 	rColor GoHomeInterfaceColor = shape->getColor();
 	GoHomeInterfaceColor.a_ = 100;
 	shape->setColor(GoHomeInterfaceColor);
+	shape->RequestSync();
 }
 
 
@@ -288,8 +289,8 @@ bool zFlagZone::Timestep( REAL time )
                     shape->SetVelocity(se_zeroCoord);
                 }
 				//do the blink
-				
 				color.a_ = 75;
+				shape->setColor(color);
                 shape->RequestSync();
             }
             else if (color.a_ == 75)
@@ -300,6 +301,7 @@ bool zFlagZone::Timestep( REAL time )
                     shape->setReferenceTime(time);
                     shape->SetVelocity(se_zeroCoord);
 					color.a_ = 0;
+					shape->setColor(color);
                     shape->RequestSync();
                 }
                 else if ((sg_flagBlinkTrackTime > 0) &&
