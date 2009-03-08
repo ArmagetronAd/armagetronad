@@ -955,7 +955,7 @@ public:
         if (shape.color().a_ < .01)
         {
             // Transmit invisible zones as a 0 radius
-            static tFunction zeroRadius(.0);
+            static tFunction zeroRadius(.0, .0);
             zeroRadius.WriteSync( *dest.mutable_radius() );
         }
         else
