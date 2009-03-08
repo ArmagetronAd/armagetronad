@@ -2,5 +2,6 @@ add_subdirectory (mathexpr)
 add_subdirectory (particles)
 add_subdirectory (scrap)
 
-set(INCLUDED_THIRDPARTY_LIBRARIES
-    mathexpr particles scrap)
+add_custom_target (thirdparty
+    DEPENDS mathexpr particles scrap
+    )

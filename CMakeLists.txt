@@ -2,7 +2,6 @@ cmake_minimum_required (VERSION 2.4)
 
 project (ARMA)
 
-
 ##### CONFIGURE CHECKS #####
 include (CheckIncludeFiles)
 include (CheckFunctionExists)
@@ -78,19 +77,6 @@ set (ARMA_INCLUDE_DIRS
     )
 message( "${ARMA_INCLUDE_DIRS}" )
 
-set (ARMA_LINK_LIBRARIES
-    ${SDL_LIBRARY}
-    ${SDLMIXER_LIBRARY}
-    ${SDLIMAGE_LIBRARY}
-    ${OPENGL_LIBRARIES}
-    ${PROTOBUF_LIBRARY}
-    ${FTGL_LIBRARIES}
-    ${LIBXML2_LIBRARIES}
-    ${INCLUDED_THIRDPARTY_LIBRARIES}
-    ${PNG_LIBRARIES}
-    )
-message( "${ARMA_LINK_LIBRARIES}" )
-
 set (ARMA_DEFINES
     -DENABLE_ZONESV2 -DENABLE_ZONESV1 # Hacks :(
     ${PNG_DEFINITIONS}
@@ -100,6 +86,18 @@ add_definitions(${ARMA_DEFINES})
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/aa_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/aa_config.h)
 
 add_subdirectory (src)
+
+set (ARMA_LINK_LIBRARIES
+    ${SDL_LIBRARY}
+    ${SDLMIXER_LIBRARY}
+    ${SDLIMAGE_LIBRARY}
+    ${OPENGL_LIBRARIES}
+    ${PROTOBUF_LIBRARY}
+    ${FTGL_LIBRARIES}
+    ${LIBXML2_LIBRARIES}
+    ${PNG_LIBRARIES}
+    )
+message( "${ARMA_LINK_LIBRARIES}" )
 
 include_directories (
     ${ARMA_SOURCE_DIR}/src/tools/
@@ -117,9 +115,7 @@ include_directories (
     ${ARMA_INCLUDE_DIRS}
     )
 
-message("${SDL_LIBRARY}")
-
 add_executable (armagetronad src/tron/gArmagetron.cpp)
-target_link_libraries (armagetronad ${ARMA_LINK_LIBRARIES} tron engine ui render network tools protos)
+target_link_libraries (armagetronad tron engine ui render network tools protos mathexpr particles scrap ${ARMA_LINK_LIBRARIES})
 
 
