@@ -1,4 +1,4 @@
-add_library(libprotobuf
+add_library(protos
     tColor.pb.cc
     tCoord.pb.cc
     tFunction.pb.cc
@@ -24,7 +24,7 @@ add_library(libprotobuf
     gWall.pb.cc
     gAIBase.pb.cc
 )
-add_dependencies( libprotobuf
+add_dependencies( protos
     tColor.pb.h
     tCoord.pb.h
     tFunction.pb.h

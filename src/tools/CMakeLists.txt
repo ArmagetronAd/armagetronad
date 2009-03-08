@@ -1,16 +1,13 @@
 include_directories (
-    ${ARMA_SOURCE_DIR}/src/
     ${ARMA_SOURCE_DIR}/src/tools/
     ${ARMA_SOURCE_DIR}/src/resource/
-    ${ARMA_SOURCE_DIR}/src/thirdparty/utf8/
-    ${ARMA_SOURCE_DIR}/src/thirdparty/mathexpr/
 
-    ${ARMA_BINARY_DIR}/src/
     ${ARMA_BINARY_DIR}/src/protobuf/
-    ${LIBXML2_INCLUDE_DIR}
+
+    ${ARMA_INCLUDE_DIRS}    
     )
 
-add_library (libtools
+add_library (tools
     tArray.h                    tArray.cpp
     tCallback.h                 tCallback.cpp
     tCallbackString.h
@@ -45,7 +42,7 @@ add_library (libtools
     tXmlParser.h                tXmlParser.cpp
     ../thirdparty/binreloc/prefix.h ../thirdparty/binreloc/prefix.c
     values/vCore.h              values/vCore.cpp
-    values/vParser.h            values/vParser.ypp
+    values/vParser.h            ${ARMA_BINARY_DIR}/src/tools/values/vParser.cpp
     values/vRegistry.h          values/vRegistry.cpp
     values/vCollection.h        values/vCollection.cpp
     values/veComparison.h       values/veComparison.cpp
@@ -68,16 +65,29 @@ add_library (libtools
     tRectangle.h                tRectangle.cpp
     ../resource/tResource.h     ../resource/tResource.cpp
     ../resource/tResourceType.h ../resource/tResourceType.cpp
+    ../resource/tResourceManager.h
+                                ../resource/tResourceManager.cpp
     tRuby.h                     tRuby.cpp
     tMemManager.h               tMemManager.cpp
 )
 
-add_dependencies( libtools
-    libprotobuf
+ADD_CUSTOM_TARGET(vParser echo "Creating vParser.cpp")
+ADD_CUSTOM_COMMAND(
+   SOURCE values/vParser.ypp
+   COMMAND ${BISON_EXECUTABLE} 
+   ARGS -y ${ARMA_SOURCE_DIR}/src/tools/values/vParser.ypp
+        -o ${ARMA_BINARY_DIR}/src/tools/values/vParser.cpp
+   TARGET vParser
+   #   DEPENDS ${Foo_BINARY_DIR}/src/lexer.c
+   OUTPUTS ${ARMA_BINARY_DIR}/src/tools/values/vParser.cpp)
+
+
+add_dependencies (tools
+    protos
     )
 
 ## Set program to define version
-add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/build/info/tTrueVersion.h
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/batch/make/version ${CMAKE_CURRENT_SOURCE_DIR} >${CMAKE_CURRENT_BINARY_DIR}/build/info/tTrueVersion.h
-    )
+#add_custom_command(
+#    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/build/info/tTrueVersion.h
+#    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/batch/make/version ${CMAKE_CURRENT_SOURCE_DIR} >${CMAKE_CURRENT_BINARY_DIR}/build/info/tTrueVersion.h
+#    )

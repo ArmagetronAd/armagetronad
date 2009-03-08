@@ -1,17 +1,14 @@
 include_directories (
-    ${ARMA_SOURCE_DIR}/src/
     ${ARMA_SOURCE_DIR}/src/tools/
     ${ARMA_SOURCE_DIR}/src/resource/
-    ${ARMA_SOURCE_DIR}/src/thirdparty/utf8/
-    ${ARMA_SOURCE_DIR}/src/thirdparty/mathexpr/
     ${ARMA_SOURCE_DIR}/src/network/
 
-    ${ARMA_BINARY_DIR}/src/
     ${ARMA_BINARY_DIR}/src/protobuf/
-    ${LIBXML2_INCLUDE_DIR}
+
+    ${ARMA_INCLUDE_DIRS}
     )
 
-add_library (libnetwork
+add_library (network
     md5.cpp                     md5.h
     nAuthentication.cpp         nAuthentication.h
     nConfig.cpp                 nConfig.h
@@ -31,5 +28,6 @@ add_library (libnetwork
     nSpamProtection.cpp         nSpamProtection.h
     )
 
-add_dependencies (libnetwork
-    libtools libprotobuf)
+add_dependencies(network
+    protos
+    )

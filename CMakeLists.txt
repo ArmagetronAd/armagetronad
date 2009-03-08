@@ -9,7 +9,6 @@ include (CheckFunctionExists)
 include (CheckLibraryExists)
 include (CheckTypeSize)
 include (protobuf.cmake)
-include (FindLibXml2)
 
 CHECK_FUNCTION_EXISTS (isblank HAVE_ISBLANK)
 CHECK_FUNCTION_EXISTS (select HAVE_SELECT)
@@ -43,18 +42,84 @@ SET(CMAKE_EXTRA_INCLUDE_FILES arpa/inet.h)
 CHECK_TYPE_SIZE(socklen_t HAVE_SOCKLEN_T)
 SET(CMAKE_EXTRA_INCLUDE_FILES)
 
+SET (SDL_BUILDING_LIBRARY TRUE)
+
+include (FindLibXml2)
+include (FindSDL)
+include (FindSDL_mixer)
+include (FindSDL_image)
+include (FindFTGL.cmake)
+include (FindFreetype)
+include (FindBoost)
+include (FindOpenGL)
+include (bison.cmake)
+include (FindPNG)
+
+find_package( Boost 1.36.0 )
+
+set (ARMA_INCLUDE_DIRS
+    ${ARMA_BINARY_DIR}/src/
+    ${ARMA_SOURCE_DIR}/src/
+
+    ${ARMA_SOURCE_DIR}/src/thirdparty/utf8/
+    ${ARMA_SOURCE_DIR}/src/thirdparty/mathexpr/
+    ${ARMA_SOURCE_DIR}/src/thirdparty/scrap/
+
+    ${LIBXML2_INCLUDE_DIR}
+    ${FTGL_INCLUDE_DIR}/FTGL/
+    ${FREETYPE_INCLUDE_DIR_ft2build}
+    ${FREETYPE_INCLUDE_DIR_freetype2}
+    ${SDL_INCLUDE_DIR}
+    ${SDLMIXER_INCLUDE_DIR}
+    ${SDLIMAGE_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIRS}
+    ${PROTOBUF_INCLUDE_DIR}
+    ${PNG_INCLUDE_DIR}
+    )
+message( "${ARMA_INCLUDE_DIRS}" )
+
+set (ARMA_LINK_LIBRARIES
+    ${SDL_LIBRARY}
+    ${SDLMIXER_LIBRARY}
+    ${SDLIMAGE_LIBRARY}
+    ${OPENGL_LIBRARIES}
+    ${PROTOBUF_LIBRARY}
+    ${FTGL_LIBRARIES}
+    ${LIBXML2_LIBRARIES}
+    ${INCLUDED_THIRDPARTY_LIBRARIES}
+    ${PNG_LIBRARIES}
+    )
+message( "${ARMA_LINK_LIBRARIES}" )
+
+set (ARMA_DEFINES
+    -DENABLE_ZONESV2 -DENABLE_ZONESV1 # Hacks :(
+    ${PNG_DEFINITIONS}
+    )
+add_definitions(${ARMA_DEFINES})
+
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/aa_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/aa_config.h)
 
 add_subdirectory (src)
 
+include_directories (
+    ${ARMA_SOURCE_DIR}/src/tools/
+    ${ARMA_SOURCE_DIR}/src/resource/
+    ${ARMA_SOURCE_DIR}/src/network/
+    ${ARMA_SOURCE_DIR}/src/render/
+    ${ARMA_SOURCE_DIR}/src/ui/
+    ${ARMA_SOURCE_DIR}/src/engine/
+    ${ARMA_SOURCE_DIR}/src/engine/sound/
+    ${ARMA_SOURCE_DIR}/src/tron/
+    ${ARMA_SOURCE_DIR}/src/tron/cockpit/
 
-#add_executable (armagetronad src/tron/gArmagetron.cpp)
-#add_dependencies (armagetronad libtools)
+    ${ARMA_BINARY_DIR}/src/protobuf/
 
-include_directories(${LIBXML2_INCLUDE_DIR})
-message("Include: ${LIBXML2_INCLUDE_DIR} Libraries: ${LIBXML2_LIBRARIES} Definitions: ${LIBXML2_DEFINITIONS}")
-#SET_TARGET_PROPERTY(armagetron
-#    PROPERTIES 
-        
-#        LINK_FLAGS ${LIBXML2_})
+    ${ARMA_INCLUDE_DIRS}
+    )
+
+message("${SDL_LIBRARY}")
+
+add_executable (armagetronad src/tron/gArmagetron.cpp)
+target_link_libraries (armagetronad ${ARMA_LINK_LIBRARIES} tron engine ui render network tools protos)
+
 
