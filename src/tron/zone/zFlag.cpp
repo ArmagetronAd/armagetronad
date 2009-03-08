@@ -274,13 +274,18 @@ bool zFlagZone::Timestep( REAL time )
         ePlayerNetID *player = owner_->Player();
 
 		
-		//Check if player is alive or not. If not, send the flag home or drop it based on setting
+		//Check if player is alive or not. If yes, make the flag follow the owner. If not, send the flag home or drop it based on setting
 		if(owner_->Player())
 		{
 		if(!player->Object()->Alive())
 		{
 			OwnerDropped();
 		}
+			else
+			{
+				shape->Position() = owner_->Position();	
+			}
+
 		}
 		
         if ((player) &&
