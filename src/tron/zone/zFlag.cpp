@@ -441,18 +441,18 @@ bool zFlagZone::Timestep( REAL time )
 
                 if (sg_flagBlinkTrackTime > 0)
                 {
-                    shape->Position() = owner_->Position();
-                    shape->SetVelocity(owner_->Direction() * owner_->Speed());
+                    //shape->Position() = owner_->Position();
+                    //shape->SetVelocity(owner_->Direction() * owner_->Speed());
                 }
                 else
                 {
-                    eCoord estimatedPosition =
-                        (owner_->Position() +
-                         (owner_->Direction() *
-                          (sg_flagBlinkEstimatePosition * owner_->Speed() * onTime)));
+                    //eCoord estimatedPosition =
+                       // (owner_->Position() +
+                       //  (owner_->Direction() *
+                       //   (sg_flagBlinkEstimatePosition * owner_->Speed() * onTime)));
 
-                    shape->Position() = estimatedPosition;
-                    shape->SetVelocity(se_zeroCoord);
+                    //shape->Position() = estimatedPosition;
+                    //shape->SetVelocity(se_zeroCoord);
                 }
 				//do the blink
 				color.a_ = 75;
@@ -465,7 +465,7 @@ bool zFlagZone::Timestep( REAL time )
                 {
                     // kill the blink until the next update time
                     shape->setReferenceTime(time);
-                    shape->SetVelocity(se_zeroCoord);
+                    //shape->SetVelocity(se_zeroCoord);
 					color.a_ = 0;
 					shape->setColor(color);
                     shape->RequestSync();
@@ -475,8 +475,8 @@ bool zFlagZone::Timestep( REAL time )
                 {
                     // track the owner again
                     shape->setReferenceTime(time);
-                    shape->Position() = owner_->Position();
-                    shape->SetVelocity(owner_->Direction() * owner_->Speed());
+                    //shape->Position() = owner_->Position();
+                    //shape->SetVelocity(owner_->Direction() * owner_->Speed());
                     RequestSync();
                 }
             }
