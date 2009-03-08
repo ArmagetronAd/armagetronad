@@ -63,6 +63,8 @@ private:
     void ZoneWasHeld();                                //!< call when the zone was held as long as possible with the set game rules
 	void GoHome();
 	void WarnFlagNotHome();
+	void RemoveOwner();
+	void OwnerDropped();
 	
 	bool init_;
     REAL teamDistance_;                     //!< distance to the closest member of the owning team

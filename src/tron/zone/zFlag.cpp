@@ -152,6 +152,9 @@ static tSettingItem<bool> sg_flagRequiredHomeConfig("FLAG_REQUIRED_HOME", sg_fla
 static int sg_scoreFlag=3;
 static tSettingItem<int> sg_scoreFlagConfig("SCORE_FLAG", sg_scoreFlag);
 
+static bool sg_flagDropHome = false;
+static tSettingItem<bool> sg_flagDropHomeConfig("FLAG_DROP_HOME", sg_flagDropHome);
+
 void zFlagZone::setupVisuals(gParser::State_t & state)
 {
     REAL tpR[] = {.0f, .3f};
@@ -165,13 +168,13 @@ void zFlagZone::readXML(tXmlParser::node const & node)
 
 // *******************************************************************************
 // *
-// *	FlagGoHome
+// *	GoHome
 // *
 // *******************************************************************************
 
 void zFlagZone::GoHome()
 {
-	owner_ = NULL;
+	RemoveOwner();
 	flagHome_ = true;
 	shape->Position() = homePosition_;
 	rColor GoHomeInterfaceColor = shape->getColor();
@@ -180,6 +183,74 @@ void zFlagZone::GoHome()
 	shape->RequestSync();
 }
 
+// *******************************************************************************
+// *
+// *	OwnerDropped
+// *
+// *******************************************************************************
+
+void zFlagZone::OwnerDropped()
+{
+    if (owner_)
+    {
+        // save the last owner and drop time
+        ownerDropped_ = owner_;
+        ownerDroppedTime_ = lastTime;
+		
+        ePlayerNetID *player = owner_->Player();
+		
+        if (player)
+        {
+            //??? prints after round ends... can check if enemies are alive?
+            //??? add flag for knowing when grid is getting deleted?
+            tColoredString playerName;
+            playerName << *player << tColoredString::ColorString(1,1,1);
+            sn_ConsoleOut( tOutput( "$player_flag_drop", playerName ) );
+        }
+		
+        if (sg_flagDropHome)
+        {
+            // this will take the flag home and remove the owner
+            GoHome();
+        }
+        else
+        {
+            // put the flag at the owner's last position
+			flagHome_ = false;
+			shape->Position() = owner_->Position();
+			rColor DropColor = shape->getColor();
+			DropColor.a_ = 100;
+			shape->setColor(DropColor);
+			shape->RequestSync();
+			
+            // remove the owner
+            RemoveOwner();
+        }
+    }
+}
+
+// *******************************************************************************
+// *
+// *	RemoveOwner
+// *
+// *******************************************************************************
+
+void zFlagZone::RemoveOwner()
+{
+    // get rid of the owner
+    if (owner_)
+    {
+        if (owner_->Player())
+        {
+            if (owner_->Player()->flagOverrideChat)
+            {
+                owner_->Player()->flagOverrideChat = false;
+                owner_->Player()->RequestSync();
+            }
+        }
+        owner_ = NULL;
+    }
+}
 
 // *******************************************************************************
 // *
@@ -215,6 +286,13 @@ bool zFlagZone::Timestep( REAL time )
         }
     }
 
+	//Check if player is alive or not. If not, send the flag home or drop it based on setting
+	
+	if(!player->Object()->Alive())
+	{
+		OwnerDropped();
+	}
+	
     // check if the flag is owned
     if (owner_)
     {
