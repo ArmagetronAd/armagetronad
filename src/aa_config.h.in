@@ -13,6 +13,7 @@
 #cmakedefine HAVE_TANF 1
 #cmakedefine HAVE_WMEMSET 1
 
+#cmakedefine HAVE_FTGL_H 1
 #cmakedefine HAVE_GOOGLE_PROTOBUF_MESSAGE_H 1
 #cmakedefine HAVE_INTTYPES_H 1
 #cmakedefine HAVE_MEMORY_H 1

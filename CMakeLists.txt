@@ -25,7 +25,6 @@ CHECK_LIBRARY_EXISTS (m sinf "" HAVE_SINF)
 CHECK_LIBRARY_EXISTS (m sqrtf "" HAVE_SQRTF)
 CHECK_LIBRARY_EXISTS (m tanf "" HAVE_TANF)
 
-CHECK_INCLUDE_FILES (google/protobuf/message.h HAVE_GOOGLE_PROTOBUF_MESSAGE_H)
 CHECK_INCLUDE_FILES (inttypes.h HAVE_INTTYPES_H)
 CHECK_INCLUDE_FILES (stddef.h HAVE_STDDEF_H)
 CHECK_INCLUDE_FILES (unistd.h HAVE_UNISTD_H)
@@ -53,6 +52,14 @@ include (FindBoost)
 include (FindOpenGL)
 include (bison.cmake)
 include (FindPNG)
+
+if (FTGL_FOUND)
+    set(HAVE_FTGL_H 1)
+endif (FTGL_FOUND)
+
+if (PROTOBUF_FOUND)
+    set(HAVE_GOOGLE_PROTOBUF_MESSAGE_H 1)
+endif (PROTOBUF_FOUND)
 
 find_package( Boost 1.36.0 )
 
@@ -94,6 +101,7 @@ set (ARMA_LINK_LIBRARIES
     ${OPENGL_LIBRARIES}
     ${PROTOBUF_LIBRARY}
     ${FTGL_LIBRARIES}
+    ${FREETYPE_LIBRARIES}
     ${LIBXML2_LIBRARIES}
     ${PNG_LIBRARIES}
     )
