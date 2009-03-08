@@ -952,7 +952,7 @@ public:
         dest.mutable_pos_x()->CopyFrom( shape.pos_x() );
         dest.mutable_pos_y()->CopyFrom( shape.pos_y() );
 
-        if (shape.color().a_ < .01)
+        if (shape.color().a() < .01)
         {
             // Transmit invisible zones as a 0 radius
             static tFunction zeroRadius(.0, .0);
