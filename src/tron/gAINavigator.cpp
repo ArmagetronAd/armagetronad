@@ -344,12 +344,6 @@ REAL gAINavigator::PathGroup::TakePath( CycleController & controller, gCycle & c
         paths[ PATH_UTURN_RIGHT ].followedSince = last.followedSince + 1;
         paths[ PATH_TURN_RIGHT  ].followedSince = last.followedSince + 1;
         break;
-    case PATH_PTURN_LEFT:
-        paths[ PATH_UTURN_LEFT ].followedSince = last.followedSince + 1;
-        break;
-    case PATH_PTURN_RIGHT:
-        paths[ PATH_UTURN_RIGHT ].followedSince = last.followedSince + 1;
-        break;
     case PATH_ZIGZAG_LEFT:
         if ( last.driveOn )
         {
@@ -830,6 +824,9 @@ void gAINavigator::UpdatePaths()
     // REAL rubberTime = rubberLeft/speed;
     // REAL rubberRatio = owner_->GetRubber()/rubberGranted;
 
+    // this distance needs to be considered close
+    REAL close = rubberLeft + speed * owner_->GetTurnDelay();
+
     REAL narrowFront = 1;
 
     // these checks can hit our last wall and fail. Temporarily set it to NULL.
@@ -884,19 +881,20 @@ void gAINavigator::UpdatePaths()
         Path & path = GetPaths().AccessPath( PathGroup::PATH_UTURN_LEFT  );
         path.Fill( *this, self, left, leftDir, backwardDir, -1 );
         sg_AddSensor( path, left, range, rubberLeft );
-    }
-    // P-Turn left
-    {
-        Path & path = GetPaths().AccessPath( PathGroup::PATH_PTURN_LEFT );
-        path.Fill( *this, self, backwardLeft, rightDir, backwardDir, 1 );
 
-        // P-Turning takes a bit of space on the other side
-        sg_AddSensor( path, forward, range, rubberLeft );
-        sg_AddSensor( path, right, range, rubberLeft );
-        sg_AddSensor( path, forwardRight, range, rubberLeft );
-
-        // slighly favor U-Turns
-        path.distance *= .999;
+        // see if there would be more space to the right
+        if( forward.hit > left.hit &&
+            forwardRight.hit > left.hit &&
+            right.hit > left.hit &&
+            left.hit * range < close )
+        {
+            // transform it into a P-Turn
+            path.turn *= -1;
+            path.immediateDistance = HUGE;
+            sg_AddSensor( path, forward, range, rubberLeft );
+            sg_AddSensor( path, right, range, rubberLeft );
+            sg_AddSensor( path, forwardRight, range, rubberLeft );
+        }
     }
 
     self.lr = 1;
@@ -905,19 +903,20 @@ void gAINavigator::UpdatePaths()
         Path & path = GetPaths().AccessPath( PathGroup::PATH_UTURN_RIGHT );
         path.Fill( *this, right, self, rightDir, backwardDir, 1 );
         sg_AddSensor( path, right, range, rubberLeft );
-    }
-    // P-Turn right
-    {
-        Path & path = GetPaths().AccessPath( PathGroup::PATH_PTURN_RIGHT );
-        path.Fill( *this, backwardRight, self, leftDir, backwardDir, -1 );
 
-        // P-Turning takes a bit of space on the other side
-        sg_AddSensor( path, forward, range, rubberLeft );
-        sg_AddSensor( path, left, range, rubberLeft );
-        sg_AddSensor( path, forwardLeft, range, rubberLeft );
-
-        // slighly favor U-Turns
-        path.distance *= .999;
+        // see if there would be more space to the left
+        if( forward.hit > right.hit &&
+            forwardLeft.hit > right.hit &&
+            left.hit > right.hit &&
+            right.hit * range < close )
+        {
+            // transform it into a P-Turn
+            path.turn *= -1;
+            path.immediateDistance = HUGE;
+            sg_AddSensor( path, forward, range, rubberLeft );
+            sg_AddSensor( path, left, range, rubberLeft );
+            sg_AddSensor( path, forwardLeft, range, rubberLeft );
+        }
     }
 
     // straight ahead

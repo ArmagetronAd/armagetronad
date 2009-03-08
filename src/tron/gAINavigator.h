@@ -156,13 +156,11 @@ public:
         enum PathID
         {
             PATH_UTURN_LEFT = 0,   //!< turn around completely
-            PATH_PTURN_LEFT,       //!< turn right, then left as often as it takes to turn around
             PATH_TURN_LEFT,        //!< turn left
             PATH_ZIGZAG_LEFT,      //!< turn left, then right, or wait, then turn left, looking for a hole
             PATH_STRAIGHT,         //!< go straight
             PATH_ZIGZAG_RIGHT,
             PATH_TURN_RIGHT,
-            PATH_PTURN_RIGHT,
             PATH_UTURN_RIGHT,
             PATH_COUNT
         };
