@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#define DEBUGLINE
 #endif
 
-eSensor::eSensor(eGameObject *o,const eCoord &start,const eCoord &d)
+eSensor::eSensor(eGameObject const * o,const eCoord &start,const eCoord &d)
         :eStackGameObject(o->grid, start,d,o->currentFace)
         ,hit(1000),ehit(NULL),lr(0), owned(o) , inverseSpeed_(0)
 {

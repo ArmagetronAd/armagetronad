@@ -43,7 +43,7 @@ public:
     int             lr;         // and direction it goes to (left/right)
     eCoord           before_hit; // a point shortly before that eWall
 
-    eSensor(eGameObject *o,const eCoord &start,const eCoord &d);
+    eSensor(eGameObject const * o,const eCoord &start,const eCoord &d);
 
     virtual void PassEdge(const eWall *w,REAL time,REAL,int =1);
     //  virtual void PassEdge(eEdge *e,REAL time,REAL a,int recursion=1);
@@ -55,7 +55,7 @@ public:
     inline REAL GetInverseSpeed( void ) const;	//!< Gets the inverse speed of the sensor
     inline eSensor const & GetInverseSpeed( REAL & inverseSpeed ) const;	//!< Gets the inverse speed of the sensor
 protected:
-    tCHECKED_PTR(eGameObject) owned;
+    tCHECKED_PTR( eGameObject const ) owned;
 private:
     REAL inverseSpeed_; //! the inverse speed of the sensor; walls far away will be checked for opacity a bit in the future if this is set.
 };

@@ -89,6 +89,8 @@ void gAINavigator::Sensor::PassEdge(const eWall *ww,REAL time,REAL a,int r)
     }
 }
 
+extern REAL sg_cycleRubberWallShrink;
+
 bool gAINavigator::Sensor::DoExtraDetectionStuff()
 {
     // move towards the beginning of a wall
@@ -134,8 +136,35 @@ bool gAINavigator::Sensor::DoExtraDetectionStuff()
         if ( hitTime_ > hitOwner_->LastTime() - ai_.settings_.newWallBlindness && hitOwner_ != owned )
         {
             ehit = false;
-            hit = HUGE;
+            hit = 1.01;
             return false;
+        }
+
+        // don't see vanishing walls
+        {
+            // TODO: this is a bit wrong in the face of diagonals and quantizized driving directions.
+            REAL distanceToHit = dir.Norm() * hit;
+            REAL rubberDistance = 0;
+            
+            // assume we can waste all our rubber waiting for the wall to get lost
+            {
+                REAL rubberGranted, rubberEffectiveness;
+                sg_RubberValues( ai_.owner_->player, ai_.owner_->Speed(), rubberGranted, rubberEffectiveness );
+                rubberDistance = rubberGranted - ai_.owner_->GetRubber();
+            }
+            if( type == gSENSOR_SELF )
+            {
+                rubberDistance *= sg_cycleRubberWallShrink;
+            }
+
+            REAL timeToHit = distanceToHit/ai_.owner_->Speed();
+            if( !playerWall->IsDangerous( wallAlpha, ai_.owner_->LastTime() + timeToHit ) )
+            {
+                // wall will be gone until we get there. ignore.
+                ehit = false;
+                hit = 1.01;
+                return false;
+            }
         }
 
         // REAL cycleDistance = hitOwner_->GetDistance();

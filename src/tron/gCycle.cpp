@@ -990,7 +990,7 @@ void 	gCycle::SetWallsStayUpDelay	( REAL delay )
 }
 
 // how much rubber usage shortens the walls
-static REAL sg_cycleRubberWallShrink = 0;
+REAL sg_cycleRubberWallShrink = 0;
 static nSettingItemWatched<REAL>
 sg_cycleRubberWallShrinkConf("CYCLE_RUBBER_WALL_SHRINK",
                              sg_cycleRubberWallShrink,
