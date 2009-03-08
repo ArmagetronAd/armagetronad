@@ -234,7 +234,7 @@ bool zFlagZone::Timestep( REAL time )
                 zFortressZone *other=dynamic_cast<zFortressZone *>(gameObjects(i));
                 if (other )
                 {
-                    if(other->getTeam() == player->CurrentTeam()->Name()){
+                    if(other->getTeam() == player->CurrentTeam()){
                         if(other->getShape()->isInteracting(player->Object())){
                             //Player with Flag is at home either warn not back yet or reset it and team scores points
                              

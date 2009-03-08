@@ -48,7 +48,7 @@ public:
     void setupVisuals(gParser::State_t &);
     void readXML(tXmlParser::node const &);
 
-    tString getTeam(){return team->Name();}
+    eTeam * getTeam(){return team;}
 
 private:
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
