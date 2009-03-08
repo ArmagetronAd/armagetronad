@@ -62,6 +62,7 @@ private:
 
     void ZoneWasHeld();                                //!< call when the zone was held as long as possible with the set game rules
 	void GoHome();
+	void WarnFlagNotHome();
 	
 	bool init_;
     REAL teamDistance_;                     //!< distance to the closest member of the owning team
@@ -79,7 +80,7 @@ private:
     bool positionUpdatePending_;
     eCoord originalPosition_;
     REAL originalRadius_;
-
+	bool ownerWarnedNotHome_;
 
    
 };

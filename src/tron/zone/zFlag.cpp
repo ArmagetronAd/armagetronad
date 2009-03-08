@@ -79,6 +79,7 @@ zFlagZone::zFlagZone( eGrid * grid )
     ownerDroppedTime_ = 0;
     lastHoldScoreTime_ = -1;
     positionUpdatePending_ = false;
+	ownerWarnedNotHome_ = false;
 
 }
 
@@ -139,6 +140,17 @@ static tSettingItem<float> sg_flagColorGConfig( "FLAG_COLOR_G", sg_flagColorG );
 
 static float sg_flagColorB = -1;
 static tSettingItem<float> sg_flagColorBConfig( "FLAG_COLOR_B", sg_flagColorB );
+
+//number of flags that must be home in order to capture     
+static int sg_minFlagsHome = 0;     
+static tSettingItem<int> sg_minFlagsHomeConfig( "MIN_FLAGS_HOME", sg_minFlagsHome );
+
+// flag indicating whether flags need to be home to score
+static bool sg_flagRequiredHome = true;
+static tSettingItem<bool> sg_flagRequiredHomeConfig("FLAG_REQUIRED_HOME", sg_flagRequiredHome);
+
+static int sg_scoreFlag=3;
+static tSettingItem<int> sg_scoreFlagConfig("SCORE_FLAG", sg_scoreFlag);
 
 void zFlagZone::setupVisuals(gParser::State_t & state)
 {
@@ -237,12 +249,62 @@ bool zFlagZone::Timestep( REAL time )
                     if(other->getTeam() == player->CurrentTeam()){
                         if(other->getShape()->isInteracting(player->Object())){
                             //Player with Flag is at home either warn not back yet or reset it and team scores points
-                             
+							// search for another flag owned by our team
+							bool allFlagsHome = true;
+							int flagsHome = 0;
+							int flagsTaken = 0;
+							const tList<eGameObject>& gameObjects = Grid()->GameObjects();
+							for (int i=gameObjects.Len()-1;i>=0;i--)
+							{
+								zFlagZone *otherFlag=dynamic_cast<zFlagZone *>(gameObjects(i));
+								
+								if ((otherFlag) &&
+									(otherFlag->Team() == team))
+								{
+									// check if flag is at home (starting position)
+									if (!otherFlag->IsHome())
+									{
+										allFlagsHome = false;
+										flagsTaken++;
+									}
+									else
+									{
+										flagsHome++;
+									}
+								}
+							}
+							if (!sg_flagRequiredHome)
+							{
+								if (sg_minFlagsHome > (flagsHome+flagsTaken)){
+									allFlagsHome=false;
+								}else if(sg_minFlagsHome <= flagsHome){
+									allFlagsHome=true;
+								}
+							}
+							
+							if (!allFlagsHome)
+							{
+								WarnFlagNotHome();
+							}
+							else
+							{
+								// player has scored a flag capture
+								tOutput lose;
+								tOutput win;
+								int score = sg_scoreFlag;
+								
+								win << "$player_flag_score";
+								player->AddScore(score, win, lose);
+								
+								// tell the flag to go back home
+								GoHome();
+							}
+						}
+					}
+				}
+							//End flag cast
                         }
                     }
-                }
-            }
-        }
 
         if (player)
         {
@@ -661,5 +723,22 @@ bool zFlagZone::IsHome()
         return (false);
     }
 }
+
+void zFlagZone::WarnFlagNotHome()
+{
+	// if we have an owner, warn them if we haven't already
+	if ((owner_) &&
+		(!ownerWarnedNotHome_))
+	{
+		ownerWarnedNotHome_ = true;
 		
+		if (owner_->Player())
+		{
+			tColoredString playerName;
+			playerName << *owner_->Player() << tColoredString::ColorString(1,1,1);
+			sn_ConsoleOut( tOutput( "$player_flag_cant_score", playerName ) );
+		}
+	}
+}
+
 static zZoneExtRegistration regFlag("flag", "", zFlagZone::create);
