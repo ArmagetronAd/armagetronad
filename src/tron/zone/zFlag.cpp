@@ -273,6 +273,14 @@ bool zFlagZone::Timestep( REAL time )
     {
         ePlayerNetID *player = owner_->Player();
 
+		
+		//Check if player is alive or not. If not, send the flag home or drop it based on setting
+		
+		if(!player->Object()->Alive())
+		{
+			OwnerDropped();
+		}
+		
         if ((player) &&
             (sg_flagHoldTime > 0) &&
             (time >= (ownerTime_ + sg_flagHoldTime)))
@@ -286,13 +294,6 @@ bool zFlagZone::Timestep( REAL time )
         }
     }
 
-	//Check if player is alive or not. If not, send the flag home or drop it based on setting
-	
-	if(!player->Object()->Alive())
-	{
-		OwnerDropped();
-	}
-	
     // check if the flag is owned
     if (owner_)
     {
