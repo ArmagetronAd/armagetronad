@@ -162,6 +162,9 @@ void zFlagZone::GoHome()
 	owner_ = NULL;
 	flagHome_ = true;
 	shape->Position() = homePosition_;
+	rColor GoHomeInterfaceColor = shape->getColor();
+	GoHomeInterfaceColor.a_ = 100;
+	shape->setColor(GoHomeInterfaceColor);
 }
 
 
@@ -178,6 +181,9 @@ void zFlagZone::GoHome()
 bool zFlagZone::Timestep( REAL time )
 {
 
+	tColor color = shape->getColor();
+	
+	
     // check if the flag is owned
     if (owner_)
     {
@@ -246,17 +252,7 @@ bool zFlagZone::Timestep( REAL time )
 
         if (sg_flagBlinkTime > 0)
         {
-            REAL startRadiusPercent = sg_flagBlinkStart;
-            if (startRadiusPercent < 0)
-            {
-                startRadiusPercent = 0;
-            }
 
-            REAL endRadiusPercent = sg_flagBlinkEnd;
-            if (endRadiusPercent < startRadiusPercent)
-            {
-                endRadiusPercent = startRadiusPercent;
-            }
 
             // get the time the flag will be on
             REAL onTime = sg_flagBlinkTime;
@@ -273,10 +269,6 @@ bool zFlagZone::Timestep( REAL time )
                 blinkUpdateTime_ = time;
                 blinkTrackUpdateTime_ = time;
 
-                REAL expansionSpeed =
-                    (originalRadius_ *
-                     (endRadiusPercent - startRadiusPercent)) /
-                    onTime;
 
                 shape->setReferenceTime(time);
 
@@ -295,21 +287,20 @@ bool zFlagZone::Timestep( REAL time )
                     shape->Position() = estimatedPosition;
                     shape->SetVelocity(se_zeroCoord);
                 }
-
-                SetRadius(originalRadius_ * startRadiusPercent);
-                shape->setGrowth(expansionSpeed);
-                RequestSync();
+				//do the blink
+				
+				color.a_ = 75;
+                shape->RequestSync();
             }
-            else if (GetRadius() > 0)
+            else if (color.a_ == 75)
             {
                 if (time >= (blinkUpdateTime_ + onTime))
                 {
                     // kill the blink until the next update time
                     shape->setReferenceTime(time);
                     shape->SetVelocity(se_zeroCoord);
-                    SetRadius(0);
-                    shape->setGrowth(0);
-                    RequestSync();
+					color.a_ = 0;
+                    shape->RequestSync();
                 }
                 else if ((sg_flagBlinkTrackTime > 0) &&
                          (time >= (blinkTrackUpdateTime_ + sg_flagBlinkTrackTime)))
@@ -535,6 +526,10 @@ void zFlagZone::OnEntry( gCycle * target, REAL time )
         owner_ = target;
         ownerTime_ = time;
         lastHoldScoreTime_ = time;
+		rColor setAlphaTakeColor = shape->getColor();
+		setAlphaTakeColor.a_ = 0;
+		shape->setColor(setAlphaTakeColor);
+		shape->RequestSync();
         //DO later
         //ownerWarnedNotHome_ = false;
         //owner_->flag_ = this;
