@@ -1,13 +1,19 @@
-cmake_minimum_required (VERSION 2.4)
+cmake_minimum_required (VERSION 2.6)
 
 project (ARMA)
+set (progtitle "Armagetron Advanced")
+
+list(APPEND CMAKE_MODULE_PATH ${ARMA_SOURCE_DIR}/batch/make/cmake/)
+
+message( "${CMAKE_MODULE_PATH}" )
 
 ##### CONFIGURE CHECKS #####
+include (UniversalVariables)
 include (CheckIncludeFiles)
 include (CheckFunctionExists)
 include (CheckLibraryExists)
 include (CheckTypeSize)
-include (protobuf.cmake)
+include (protobuf)
 
 CHECK_FUNCTION_EXISTS (isblank HAVE_ISBLANK)
 CHECK_FUNCTION_EXISTS (select HAVE_SELECT)
@@ -46,11 +52,11 @@ include (FindLibXml2)
 include (FindSDL)
 include (FindSDL_mixer)
 include (FindSDL_image)
-include (FindFTGL.cmake)
+include (FindFTGL)
 include (FindFreetype)
 include (FindBoost)
 include (FindOpenGL)
-include (bison.cmake)
+include (bison)
 include (FindPNG)
 
 if (FTGL_FOUND)
@@ -82,7 +88,6 @@ set (ARMA_INCLUDE_DIRS
     ${PROTOBUF_INCLUDE_DIR}
     ${PNG_INCLUDE_DIR}
     )
-message( "${ARMA_INCLUDE_DIRS}" )
 
 set (ARMA_DEFINES
     -DENABLE_ZONESV2 -DENABLE_ZONESV1 # Hacks :(
@@ -90,7 +95,48 @@ set (ARMA_DEFINES
     )
 add_definitions(${ARMA_DEFINES})
 
+##### PATHS #####
+UNIVERSAL_INSTALL_VAR (PREFIX "")
+UNIVERSAL_INSTALL_VAR (BINDIR "bin")
+UNIVERSAL_INSTALL_VAR (SBINDIR "sbin")
+UNIVERSAL_INSTALL_VAR (DATADIR "share")
+UNIVERSAL_VAR (DATADIR_SUFFIX "/games/armagetronad")
+UNIVERSAL_VAR (AA_DATADIR ${DATADIR}${DATADIR_SUFFIX})
+UNIVERSAL_INSTALL_VAR (SYSCONFDIR "etc")
+UNIVERSAL_VAR (SYSCONFDIR_SUFFIX "/games/armagetronad")
+UNIVERSAL_VAR (AA_SYSCONFDIR ${SYSCONFDIR}${SYSCONFDIR_SUFFIX})
+UNIVERSAL_INSTALL_VAR (LOCALSTATEDIR "var")
+UNIVERSAL_VAR (LOCALSTATEDIR_SUFFIX "/games/armagetronad")
+UNIVERSAL_VAR (AA_LOCALSTATEDIR "${LOCALSTATEDIR}${LOCALSTATEDIR_SUFFIX}")
+UNIVERSAL_INSTALL_VAR (INFODIR "")
+UNIVERSAL_VAR (INFODIR_SUFFIX "/games/armagetronad")
+UNIVERSAL_VAR (AA_INFODIR "${INFODIR}${INFODIR_SUFFIX}")
+UNIVERSAL_INSTALL_VAR (MANDIR "")
+UNIVERSAL_VAR (MANDIR_SUFFIX "/games/armagetronad")
+UNIVERSAL_VAR (AA_MANDIR "${MANDIR}${MANDIR_SUFFIX}")
+UNIVERSAL_VAR (SCRIPTDIR "${AA_DATADIR}/scripts/")
+UNIVERSAL_VAR (WWWROOTDIR "${AA_DATADIR}/www-root/")
+UNIVERSAL_VAR (DOCDIR "${DATADIR}/doc")
+UNIVERSAL_VAR (DOCDIR_SUFFIX "/games/armagetronad")
+UNIVERSAL_VAR (AA_DOCDIR "${DOCDIR}${DOCDIR_SUFFIX}")
+UNIVERSAL_VAR (RUNDIR "${LOCALSTATEDIR}/run")
+UNIVERSAL_VAR (RUNDIR_SUFFIX "")
+UNIVERSAL_VAR (AA_RUNDIR "${RUNDIR}${RUNDIR_SUFFIX}")
+UNIVERSAL_VAR (LOGDIR "${LOCALSTATEDIR}/log")
+UNIVERSAL_VAR (LOGDIR_SUFFIX "")
+UNIVERSAL_VAR (AA_LOGDIR "${LOGDIR}${LOGDIR_SUFFIX}")
+UNIVERSAL_VAR (OLDVARDIR "${LOCALSTATEDIR}/games/armagetronad/var")
+UNIVERSAL_VAR (OLDVARDIR_SUFFIX "")
+UNIVERSAL_VAR (AA_OLDVARDIR "${OLDVARDIR}${OLDVARDIR_SUFFIX}")
+
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/aa_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/aa_config.h)
+
+message (STATUS "Generating language/languages.txt")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/language/languages.txt.in ${CMAKE_CURRENT_BINARY_DIR}/language/languages.txt)
+
+message (STATUS "Generating src/tUniversalVariables.h")
+WRITE_UNIVARS()
+
 
 add_subdirectory (src)
 
@@ -105,7 +151,6 @@ set (ARMA_LINK_LIBRARIES
     ${LIBXML2_LIBRARIES}
     ${PNG_LIBRARIES}
     )
-message( "${ARMA_LINK_LIBRARIES}" )
 
 include_directories (
     ${ARMA_SOURCE_DIR}/src/tools/
@@ -123,7 +168,22 @@ include_directories (
     ${ARMA_INCLUDE_DIRS}
     )
 
+
 add_executable (armagetronad src/tron/gArmagetron.cpp)
 target_link_libraries (armagetronad tron engine ui render network tools protos mathexpr particles scrap ${ARMA_LINK_LIBRARIES})
+add_dependencies (armagetronad 
+    ${ARMA_SOURCE_DIR}/batch/make/copyresources.py
+    ${ARMA_SOURCE_DIR}/resource/proto/
+    ${ARMA_SOURCE_DIR}/resource/binary/
+    )
 
+add_custom_command (TARGET sortresources
+    COMMAND ${ARMA_SOURCE_DIR}/batch/make/copyresources.py ${ARMA_SOURCE_DIR}/resource/proto/ ${ARMA_BINARY_DIR}/resource/included/ ${ARMA_SOURCE_DIR}/batch/make/sortresources.py
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${ARMA_SOURCE_DIR}/resource/binary/ ${ARMA_SOURCE_DIR}/resource/included/
+    )
 
+add_custom_target (sortresources ALL
+    COMMENT "Sorting resources"
+    )
+
+# add_custom_target ()

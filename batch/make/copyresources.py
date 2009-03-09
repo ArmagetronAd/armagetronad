@@ -1,4 +1,4 @@
-#!/usr/bin/env PYTHON
+#!/usr/bin/python
 
 # This script replaces the previous sortresources shell script
 # links resources from one directory to another and sorts them there
@@ -18,7 +18,7 @@ while not foundModule:
     try:
         import armabuild
         foundModule = True
-        print "Found armabuild!"
+#        print "Found armabuild!"
     except:
         sys.path[0] = os.path.dirname(newPathSearch)
     numAttempts += 1
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     source = sys.argv[1]
     destination = sys.argv[2]
     #sortresources = sys.argv[3]
-    print "Sorting resources from", source, "to", destination
+#    print "Sorting resources from", source, "to", destination
     if os.path.exists(source) is False:
         sys.exit(1)
 
@@ -51,14 +51,17 @@ if __name__ == "__main__":
 
     shutil.copytree(source, destination, IgnoreFiles)
 
-    print "Running sortresources"
-    resource.main(["-v", destination] )
-    print "Done"
+#    print "Running sortresources"
+    resource.main(["", destination] )
+#    print "Done"
 
     if os.path.exists(os.path.join(destination, "AATeam") ) is False:
         os.mkdir(os.path.join(destination, "AATeam") )
 
-    resourceVersion = resource.GetDtdVersion(os.path.join(source, "resource.dtd") )
+    resourceDtd = os.path.join(source, "resource.dtd")
+    if os.path.exists(resourceDtd) is False:
+        resourceDtd = os.path.join(os.path.join(source, "proto"), "resource.dtd")
+    resourceVersion = resource.GetDtdVersion(resourceDtd)
 
     resourceName = "resource-" + resourceVersion + ".dtd"
 

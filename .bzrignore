@@ -73,3 +73,4 @@ src/protobuf/.dir
 CMakeFiles
 cmake_install.cmake
 CMakeCache.txt
+src/tools/values/vParser.cpp

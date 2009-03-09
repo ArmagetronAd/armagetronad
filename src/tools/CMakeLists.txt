@@ -71,15 +71,12 @@ add_library (tools
     tMemManager.h               tMemManager.cpp
 )
 
-ADD_CUSTOM_TARGET(vParser echo "Creating vParser.cpp")
 ADD_CUSTOM_COMMAND(
    SOURCE values/vParser.ypp
    COMMAND ${BISON_EXECUTABLE} 
    ARGS -y ${ARMA_SOURCE_DIR}/src/tools/values/vParser.ypp
         -o ${ARMA_BINARY_DIR}/src/tools/values/vParser.cpp
-   TARGET vParser
-   #   DEPENDS ${Foo_BINARY_DIR}/src/lexer.c
-   OUTPUTS ${ARMA_BINARY_DIR}/src/tools/values/vParser.cpp)
+   OUTPUT ${ARMA_BINARY_DIR}/src/tools/values/vParser.cpp)
 
 
 add_dependencies (tools
