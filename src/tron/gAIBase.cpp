@@ -1083,14 +1083,61 @@ public:
     virtual void Evaluate( gAINavigator::Path const & path, gAINavigator::PathEvaluation & evaluation ) const
     {
         eCoord pathDir = path.longTermDirection + path.shortTermDirection*.5;
-        evaluation.score = 100 * eCoord::F( toTarget_, pathDir );
+        evaluation.score = 50 + 50 * eCoord::F( toTarget_, pathDir );
     }
 protected:
     gCycle const & cycle_; //!< the owning cycle
     gCycle * blocker_;     //!< other cycle blocking the path to the target
     eCoord toTarget_;      //!< direction to target, roughly normalized
 };
+
+// ********************
+// * tailchase helper *
+// ********************
    
+// likes to chase its own tail
+class gTailChaseEvaluator: public gAINavigator::PathEvaluator
+{
+public:
+    gTailChaseEvaluator( gCycle const & cycle ): cycle_( cycle )
+    {
+    }
+
+    void Evaluate( gAINavigator::Path const & path, gAINavigator::PathEvaluation & evaluation ) const
+    {
+        evaluation.score = 0;
+        
+        // don't do anything if we're tunneling. Danger affot.
+        // if( path.left.owner == path.right.owner )
+        // {
+        // return;
+        // }
+
+        // total wall length
+        REAL len  = cycle_.ThisWallsLength();
+        if( len < 0 )
+        {
+            return;
+        }
+
+        if( path.left.owner == &cycle_ ) // && path.left.lr == 1 )
+        {
+            evaluation.score += 200 * path.left.hitDistance/len - 100;
+        }
+        if( path.right.owner == &cycle_ ) // && path.right.lr == -1 )
+        {
+            evaluation.score +=  200 * path.right.hitDistance/len - 100;
+        }
+        if ( evaluation.score < 0 )
+        {
+            evaluation.score = 0;
+        }
+    }
+private:
+    gCycle const & cycle_; //!< the owning cycle
+    
+};
+
 // *************************
 // * Zone attack/defense   *
 // *************************
@@ -1208,11 +1255,12 @@ public:
         manager.Evaluate( gAINavigator::SpaceEvaluator( cycle ), 1 );
         manager.Evaluate( gAINavigator::RandomEvaluator(), .01 );
         manager.Evaluate( gAINavigator::PlanEvaluator(), .1 );
+        manager.Evaluate( gTailChaseEvaluator( cycle ), 1 );
 
         zZone const * zoneTarget = dynamic_cast< zZone const * >( Parent().GetTarget() );
         if ( zoneTarget )
         {
-            manager.Evaluate( gZoneEvaluator( cycle, *zoneTarget ), 1 );
+            manager.Evaluate( gZoneEvaluator( cycle, *zoneTarget ), gAINavigator::EvaluationManager::BLEND_ADD, 1 );
         }
 
         gAINavigator::CycleControllerBasic controller;
@@ -2120,7 +2168,7 @@ REAL gAIPlayer::Think(){
         // to debug specific situations on playback
         static int count = 0;
         count++;
-        if( count == 389 )
+        if( count == 111 )
         {
             st_Breakpoint();
         }

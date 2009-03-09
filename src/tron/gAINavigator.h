@@ -117,9 +117,13 @@ public:
     {
         gCycle const * owner;  //! the cycle the walls we like belong to
         REAL lastTimeSeen;     //! the last time we saw such a wall
+        REAL hitDistance;      //! distance of the wall that was hit
         int  lr;               //! direction the wall is running to as seen from us
 
         WallHug();
+
+        // fill data from sensor
+        void FillFrom( Sensor const & sensor );
     };
 
     class PathGroup;
@@ -273,8 +277,23 @@ public:
     public:
         EvaluationManager( PathGroup & paths );
         
+        //! ways to combine new evaluation with previous results
+        enum BlendMode
+        {
+            BLEND_ADD,
+            BLEND_MULT,
+            BLEND_MAX,
+            BLEND_MIN
+        };
+        
         //! evaluate all paths using the evaluator
-        void Evaluate( PathEvaluator const & evaluator, REAL scale );
+        void Evaluate( PathEvaluator const & evaluator, BlendMode mode = BLEND_ADD, REAL scale = 1.0, REAL offset = 0.0 );
+
+        //! evaluate all paths using the evaluator, adding results
+        void Evaluate( PathEvaluator const & evaluator, REAL scale )
+        {
+            Evaluate( evaluator, BLEND_ADD, scale );
+        }
 
         //! reset scores, but don't forget veto
         void Reset();

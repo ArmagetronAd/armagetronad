@@ -260,10 +260,8 @@ void gAINavigator::Path::Fill( gAINavigator const & navigator, Sensor const & le
     this->shortTermDirection = shortDir;
     this->longTermDirection = longDir;
 
-    this->left.owner = left.hitOwner_;
-    this->right.owner = right.hitOwner_;
-    this->left.lr = left.lr;
-    this->right.lr = right.lr;
+    this->left.FillFrom( left );
+    this->right.FillFrom( right );
 
     this->turn = turn;
     this->driveOn = 0;
@@ -554,7 +552,7 @@ gAINavigator::EvaluationManager::EvaluationManager( PathGroup & paths )
         
 //!@param evaluator  evaluator doing the core work
 //!@param scale      weight factor for that work
-void gAINavigator::EvaluationManager::Evaluate( PathEvaluator const & evaluator, REAL scale )
+void gAINavigator::EvaluationManager::Evaluate( PathEvaluator const & evaluator, BlendMode mode, REAL scale, REAL offset )
 {
     REAL bestScore = -HUGE;
     REAL bestDistance = HUGE;
@@ -570,9 +568,31 @@ void gAINavigator::EvaluationManager::Evaluate( PathEvaluator const & evaluator,
         PathEvaluation evaluation;
         Path const & path = paths_.GetPath(i);
         evaluator.Evaluate( path, evaluation );
+        evaluation.score = evaluation.score * scale + offset;
 
         // update stored evaluation
-        store.score += scale * evaluation.score;
+        switch ( mode )
+        {
+        case BLEND_ADD:
+            store.score += evaluation.score;
+            break;
+        case BLEND_MULT:
+            store.score *= evaluation.score;
+            break;
+        case BLEND_MAX:
+            if( evaluation.score > store.score )
+            {
+                store.score = evaluation.score;
+            }
+            break;
+        case BLEND_MIN:
+            if( evaluation.score < store.score )
+            {
+                store.score = evaluation.score;
+            }
+            break;
+        }
+
         if ( evaluation.veto )
         {
             store.veto = true;
@@ -640,6 +660,17 @@ gAINavigator::gAINavigator( gCycle * owner )
 gAINavigator::WallHug::WallHug()
 : owner ( NULL ), lastTimeSeen ( 0 ), lr( 0 )
 {
+}
+
+void gAINavigator::WallHug::FillFrom( Sensor const & sensor )
+{
+    owner = sensor.hitOwner_;
+    lr = sensor.lr;
+    hitDistance = sensor.hitDistance_;
+    if( owner )
+    {
+        lastTimeSeen = owner->LastTime();
+    }
 }
 
 // determines the distance between two sensors; the size should give the likelyhood
