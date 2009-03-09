@@ -28,11 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "aa_config.h"
 
-#ifdef MACOSX_XCODE
-#   include "version.h"
-#else
-#   include "tTrueVersion.h"
-#endif
+#include "tTrueVersion.h"
 
 #include "tVersion.h"
 #include "tString.h"

@@ -93,6 +93,13 @@ set (ARMA_DEFINES
     -DENABLE_ZONESV2 -DENABLE_ZONESV1 # Hacks :(
     ${PNG_DEFINITIONS}
     )
+
+set(DEDICATED "$ENV{DEDICATED}")
+if (DEDICATED)
+    list(APPEND ARMA_DEFINES -DDEDICATED)
+    message(STATUS "Building Dedicated (Remember that's just a hack)")
+endif()
+
 add_definitions(${ARMA_DEFINES})
 
 ##### PATHS #####
@@ -168,15 +175,6 @@ include_directories (
     ${ARMA_INCLUDE_DIRS}
     )
 
-
-add_executable (armagetronad src/tron/gArmagetron.cpp)
-target_link_libraries (armagetronad tron engine ui render network tools protos mathexpr particles scrap ${ARMA_LINK_LIBRARIES})
-add_dependencies (armagetronad 
-    ${ARMA_SOURCE_DIR}/batch/make/copyresources.py
-    ${ARMA_SOURCE_DIR}/resource/proto/
-    ${ARMA_SOURCE_DIR}/resource/binary/
-    )
-
 add_custom_command (TARGET sortresources
     COMMAND ${ARMA_SOURCE_DIR}/batch/make/copyresources.py ${ARMA_SOURCE_DIR}/resource/proto/ ${ARMA_BINARY_DIR}/resource/included/ ${ARMA_SOURCE_DIR}/batch/make/sortresources.py
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${ARMA_SOURCE_DIR}/resource/binary/ ${ARMA_SOURCE_DIR}/resource/included/
@@ -186,4 +184,20 @@ add_custom_target (sortresources ALL
     COMMENT "Sorting resources"
     )
 
-# add_custom_target ()
+add_custom_command (OUTPUT ${ARMA_BINARY_DIR}/src/tTrueVersion.h
+    COMMAND ${ARMA_SOURCE_DIR}/batch/make/version.py -o ${ARMA_BINARY_DIR}/src/tTrueVersion.h
+    DEPENDS ${ARMA_SOURCE_DIR}/batch/make/version.py
+    WORKING_DIRECTORY ${ARMA_SOURCE_DIR}
+    )
+
+add_custom_target (generateversion ALL
+    COMMENT "Generating version tag"
+    DEPENDS ${ARMA_BINARY_DIR}/src/tTrueVersion.h
+    )
+
+add_executable (armagetronad src/tools/tVersion.cpp)
+target_link_libraries (armagetronad tron engine ui render network tools protos mathexpr particles scrap ${ARMA_LINK_LIBRARIES})
+add_dependencies (armagetronad 
+    generateversion
+    )
+
