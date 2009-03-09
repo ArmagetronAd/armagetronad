@@ -2033,6 +2033,12 @@ REAL gAIPlayer::StateGrind::Think( REAL maxStep )
 
 void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the vehicle gets destroyed.
 {
+    // sadly, we have no energy for this
+    if( triesLeft > concentration_ )
+    {
+        return;
+    }
+
     if ( nCLIENT == sn_GetNetState() )
         return;
 
@@ -2163,6 +2169,8 @@ void gAIPlayer::CreateNavigator()
 }
 
 REAL gAIPlayer::Think( REAL maxStep ){
+    concentration_ -= 1;
+
     if ( !simpleAI_ )
     {
         gSimpleAIFactory * factory = gSimpleAIFactory::Get();
@@ -2221,7 +2229,7 @@ void gAIPlayer::Timestep(REAL time){
         return;
     }
 
-    const REAL relax=25;
+    const REAL relax=3;
 
     // don't think if the object is not up to date
     if ( Object() && Object()->LastTime() < time - EPS )
@@ -2230,33 +2238,30 @@ void gAIPlayer::Timestep(REAL time){
     REAL ts=time-lastTime_;
     lastTime_=time;
 
-    if (concentration_ < 0)
-        concentration_ = 0;
-
-    concentration_ += 4*(character_->properties[AI_REACTION]+1) * ts/relax;
-    concentration_=concentration_/(1+ts/relax);
+    concentration_ += (character_->properties[AI_REACTION]+1) * ts;
+    concentration_ = concentration_/(1+ts/relax);
+    if( concentration_ < 0 )
+    {
+        nextTime_ = time - concentration_ + .01;
+        return;
+    }
 
     if (bool(Object()) && Object()->Alive() && nextTime_<time){
         gRandomController random( randomizer_ );
 
-        REAL target = 4;
-        REAL safethought = ( target/concentration_ -.1 )/4;
-        if( safethought > .3 )
-        {
-            safethought = .3;
-        }
+        REAL target = (character_->properties[AI_REACTION]+1);
+        REAL safethought = 4 / (target + 3 * concentration_ );
 
         REAL nextthought=Think( safethought );
         //    if (nextthought>.9) nextthought=REAL(.9);
 
-        if (nextthought<REAL(.6-concentration_)) nextthought=REAL(.6-concentration_);
-
+        if( nextthought < -concentration_ )
+        {
+            nextthought = -concentration_;
+        }
         nextTime_=nextTime_+nextthought;
 
         //con << concentration_ << "\t" << nextthought << '\t' << ts << '\n';
-
-        if(.1+4*nextthought<1)
-            concentration_*=REAL(.1+4*nextthought);
     }
 }
 
