@@ -1024,7 +1024,7 @@ public:
         int dir_;
     };
     
-    virtual REAL Think()
+    virtual REAL Think( REAL maxStep )
     { 
         Navigator().UpdatePaths();
         gAINavigator::EvaluationManager manager( Navigator().GetPaths() );
@@ -1035,7 +1035,7 @@ public:
         manager.Evaluate( gAINavigator::PlanEvaluator(), .1 );
 
         gAINavigator::CycleControllerBasic controller;
-        return manager.Finish( controller, *Parent().Object() );
+        return manager.Finish( controller, *Parent().Object(), maxStep );
     }
 private:
     int dir_;
@@ -1058,18 +1058,6 @@ public:
         // determine direction to center
         toTarget_ = target - cycle_.Position();
 
-        // check whether the path is blocked
-        gSensor sensor( &cycle_, cycle_.Position(), toTarget_ );
-        sensor.detect( 1 );
-        if( sensor.type != gSENSOR_NONE )
-        {
-            gPlayerWall const * w = dynamic_cast< gPlayerWall const * >( sensor.ehit );
-            if ( w )
-            {
-                blocker_ = w->Cycle();
-            }
-        }
-
         // normalize direction
         REAL typicalLen = cycle_.Speed() * cycle_.GetTurnDelay();
         toTarget_ *= 1/typicalLen;
@@ -1078,6 +1066,35 @@ public:
         {
             toTarget_ *= 1/toTargetLen;
         }
+
+        return;
+
+        // junk code. makes more trouble than it's worth.
+
+        // check whether the path is blocked
+        gSensor sensor( &cycle_, cycle_.Position(), toTarget_ );
+        sensor.detect( .99 );
+
+        if( sensor.type != gSENSOR_NONE )
+        {
+            gPlayerWall const * w = dynamic_cast< gPlayerWall const * >( sensor.ehit->GetWall() );
+            if ( w )
+            {
+                blocker_ = w->Cycle();
+
+                // if we block our own recent path, turn around
+                if( blocker_ == &cycle_ && w->Pos(0) > cycle_.GetDistance() - cycle_.ThisWallsLength()/2 )
+                {
+                    int windingDifference = (cycle_.WindingNumber() - w->WindingNumber())*2;
+                    int fullTurn = cycle_.Grid()->WindingNumber();
+                    if( windingDifference >= fullTurn || windingDifference <= -fullTurn )
+                    {
+                        toTarget_ = cycle_.Direction().Turn( -1, windingDifference/2 );
+                    }
+                }
+            }
+        }
+
     }
 
     virtual void Evaluate( gAINavigator::Path const & path, gAINavigator::PathEvaluation & evaluation ) const
@@ -1148,6 +1165,11 @@ class gZoneEvaluator: public gFollowEvaluator
 public:
     gZoneEvaluator( gCycle const & cycle, zZone const & zone ): gFollowEvaluator( cycle )
     {
+        Init( cycle, zone );
+    }
+
+    void Init( gCycle const & cycle, zZone const & zone )
+    {
         zShape * shape = zone.getShape();
         if ( !shape )
         {
@@ -1166,7 +1188,7 @@ public:
             gCycle::WallInfo info;
             cycle.FillWallInfo( info, .5 );
             tailToChase = info.tailPos;
-
+            
             {
                 // blend in standard circular path
                 REAL blend = 2 - cycle.GetDistance()/cycle.ThisWallsLength();
@@ -1191,24 +1213,32 @@ public:
             eDebugLine::Draw(tailToChase, .5, tailToChase, 5.5);
             eDebugLine::SetTimeout(0);
 #endif
-            
-            // shift tail in an attempt to restore a circular pattern after a disturbance
-            /*
-              eCoord shift = center - info.centerOfMass;
-              REAL shiftLen = shift.Norm();
-              REAL factor = 2 * shiftLen / cycle.MaxWallsLength();
-              if ( factor > 1 )
-              {
-              tailToChase += shift * ( ( factor - 1 )/factor );
-              }
-            */
-            
+
             // make sure tail pos to chase lies inside an acceptable strip around the zone border
             eCoord tailEdge = shape->findPointNear( tailToChase );
             REAL tailInsideness = (tailToChase-center).NormSquared()/(tailEdge-center).NormSquared();
             REAL minInsideness = .5, maxInsideness = .9;
             if( tailInsideness < minInsideness )
             {
+                // close to center. Get opposing point and mirror it.
+                gCycle::WallInfo info2;
+                cycle.FillWallInfoFlexible( info2, cycle.ThisWallsLength()/2 );
+                eCoord tailToChase2 = 2 * center - info2.tailPos;
+                REAL blend = tailInsideness/minInsideness;
+
+#ifdef DEBUG
+                eDebugLine::SetTimeout(.5);
+                eDebugLine::SetColor  (1, 0, 0);
+                eDebugLine::Draw(tailToChase2, .5, tailToChase2, 5.5);
+                eDebugLine::Draw(info2.tailPos, .5, info2.tailPos, 5.5);
+                eDebugLine::SetTimeout(0);
+#endif
+
+                // blend chase point with mirrored opposite point.
+                tailToChase = tailToChase * blend + tailToChase2 * ( 1 - blend );
+
+                tailInsideness = (tailToChase-center).NormSquared()/(tailEdge-center).NormSquared();
+
                 tailToChase = center + (tailToChase-center) * sqrt( minInsideness/tailInsideness );
             }
             else if( tailInsideness > maxInsideness )
@@ -1244,14 +1274,15 @@ class gStateSurvive: public gAIPlayer::State
 public:
     gStateSurvive( gAIPlayer & ai ): gAIPlayer::State( ai ){}
 
-    virtual REAL Think()
+    virtual REAL Think( REAL maxStep )
     { 
         gCycle & cycle = *Parent().Object();
         Navigator().UpdatePaths();
         gAINavigator::EvaluationManager manager( Navigator().GetPaths() );
         manager.Evaluate( gAINavigator::SuicideEvaluator( cycle ), 1 );
+        manager.Evaluate( gAINavigator::SuicideEvaluator( cycle, maxStep ), 1 );
         manager.Reset();
-        manager.Evaluate( gAINavigator::CowardEvaluator( cycle ), 1 );
+        manager.Evaluate( gAINavigator::CowardEvaluator( cycle ), 5 );
         manager.Evaluate( gAINavigator::SpaceEvaluator( cycle ), 1 );
         manager.Evaluate( gAINavigator::RandomEvaluator(), .01 );
         manager.Evaluate( gAINavigator::PlanEvaluator(), .1 );
@@ -1264,7 +1295,7 @@ public:
         }
 
         gAINavigator::CycleControllerBasic controller;
-        return manager.Finish( controller, *Parent().Object() );
+        return manager.Finish( controller, *Parent().Object(), maxStep );
     }
 };
 
@@ -1866,7 +1897,7 @@ gAIPlayer::State::~State()
 }
 
 //!@return time in seconds until a new thought is needed
-REAL gAIPlayer::State::Think()
+REAL gAIPlayer::State::Think( REAL maxStep )
 {
     tASSERT(0);
     return 0;
@@ -1900,7 +1931,7 @@ gAIPlayer::StateGrind::StateGrind( gAIPlayer & player )
 
 gAIPlayer::StateGrind::~StateGrind(){}
 
-REAL gAIPlayer::StateGrind::Think()
+REAL gAIPlayer::StateGrind::Think( REAL maxStep )
 {
     /*
 
@@ -2034,12 +2065,12 @@ void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the ve
     if (!Object()->Alive() || ( character_ && Random() * 10 > character_->properties[AI_EMERGENCY] ) )
         return;
 
-    if( triesLeft <= 1 )
+    if( triesLeft <= 0 )
     {
         gAINavigator::SuicideEvaluator::SetEmergency( true );
     }
 
-    Think();
+    Think( 0 );
 
     gAINavigator::SuicideEvaluator::SetEmergency( false );
 }
@@ -2131,7 +2162,7 @@ void gAIPlayer::CreateNavigator()
     }
 }
 
-REAL gAIPlayer::Think(){
+REAL gAIPlayer::Think( REAL maxStep ){
     if ( !simpleAI_ )
     {
         gSimpleAIFactory * factory = gSimpleAIFactory::Get();
@@ -2145,7 +2176,7 @@ REAL gAIPlayer::Think(){
 
     if ( simpleAI_ )
     {
-        return simpleAI_->Think();
+        return simpleAI_->Think( maxStep );
     }
 
     if( GetTarget() && ( !GetTarget()->Alive() || IsTrapped( GetTarget(), Object() ) ) )
@@ -2168,7 +2199,7 @@ REAL gAIPlayer::Think(){
         // to debug specific situations on playback
         static int count = 0;
         count++;
-        if( count == 111 )
+        if( count == 1528 )
         {
             st_Breakpoint();
         }
@@ -2177,7 +2208,7 @@ REAL gAIPlayer::Think(){
 
     if( state_ )
     {
-        return state_->Think();
+        return state_->Think( maxStep );
     }
 
     return 10;
@@ -2208,22 +2239,16 @@ void gAIPlayer::Timestep(REAL time){
     if (bool(Object()) && Object()->Alive() && nextTime_<time){
         gRandomController random( randomizer_ );
 
-        REAL nextthought=Think();
+        REAL target = 4;
+        REAL safethought = ( target/concentration_ -.1 )/4;
+        if( safethought > .3 )
+        {
+            safethought = .3;
+        }
+
+        REAL nextthought=Think( safethought );
         //    if (nextthought>.9) nextthought=REAL(.9);
 
-        if( concentration_ > 0 )
-        {
-            REAL target = 4;
-            REAL safethought = ( target/concentration_ -.1 )/4;
-            if( safethought > .3 )
-            {
-                safethought = .3;
-            }
-            if( nextthought > safethought )
-            {
-                nextthought = safethought;
-            }
-        }
         if (nextthought<REAL(.6-concentration_)) nextthought=REAL(.6-concentration_);
 
         nextTime_=nextTime_+nextthought;

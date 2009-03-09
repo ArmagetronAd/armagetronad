@@ -5527,10 +5527,10 @@ struct gWallInfoTemp
     // tail end
     eCoord end;
 
-    REAL smallestDist;
+    REAL smallestBlend;
     
     gWallInfoTemp()
-    : weight( 0 ), smallestDist( HUGE ){}
+    : weight( 0 ), smallestBlend( HUGE ){}
 
     void AddWall( gNetPlayerWall * wall, gCycle const & cycle, REAL totalLength )
     {
@@ -5539,13 +5539,17 @@ struct gWallInfoTemp
             return;
         }
 
-        com += wall->EndPoint(0) + wall->EndPoint(1);
         REAL len = wall->Pos(1) - wall->Pos(0); 
+        com += (wall->EndPoint(0) + wall->EndPoint(1))*len;
         weight += len*2;
-        if( len > 0 && wall->Pos(0) < smallestDist )
+        if( len > 0 )
         {
-            end = wall->EndPoint(0) + wall->Vec() * ( ( cycle.GetDistance() - totalLength - wall->Pos(0) )/len );
-            smallestDist = wall->Pos(0);
+            REAL blend = ( ( cycle.GetDistance() - totalLength - wall->Pos(0) )/len );
+            if( blend >= 0 && blend < smallestBlend )
+            {
+                end = wall->EndPoint(0) + wall->Vec() * blend;
+                smallestBlend = blend;
+            }
         }
     }
 };

@@ -3420,7 +3420,6 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
     REAL step=verletSpeed_*ts;
     tASSERT(finite(step));
 
-    int numTries = 0;
     bool emergency = false;
 
     rubberSpeedFactor = 1;
@@ -3530,7 +3529,15 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
 
                     verletSpeed_=lastSpeed;
                     acceleration=lastAcceleration;
-                    return TimestepCore( rubberGetsActiveTime, false ) || TimestepCore( currentTime );
+                    if ( TimestepCore( rubberGetsActiveTime, false ) )
+                    {
+                        return true;
+                    }
+
+                    // inform AI of its impending doom
+                    RightBeforeDeath(1);
+
+                    return TimestepCore( currentTime );
                 }
             }
 #ifdef DEDICATED
@@ -3654,8 +3661,6 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
             // clamp rubberneeded to the amout of rubber available
             REAL rubberAvailable = ( rubber_granted - rubber ) * rubberEffectiveness;
 
-            numTries = rubberAvailable/step+2;
-
             if ( sn_GetNetState() != nCLIENT && rubberneeded > rubberAvailable && Vulnerable() )
             {
                 // rubber will run out this frame.
@@ -3762,7 +3767,6 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
         verletSpeed_ = lastSpeed;
         acceleration = lastAcceleration;
         currentFace = lastFace;
-        numTries = 0;
 
         // don't simulate further
         return false;
@@ -3807,7 +3811,6 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                 verletSpeed_ = lastSpeed;
                 acceleration = lastAcceleration;
                 currentFace = lastFace;
-                numTries = 0;
                 emergency = true;
 
                 // don't simulate further
@@ -3834,7 +3837,6 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
             if ( rubber < 0 )
                 rubber = 0;
 
-            numTries = 0;
             emergency = true;
         }
     }
@@ -3908,7 +3910,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
     // give the AI a chance to evade just in time
     if (emergency)
     {
-        RightBeforeDeath(numTries);
+        RightBeforeDeath(0);
     }
 
 #ifdef DEBUGOUTPUT

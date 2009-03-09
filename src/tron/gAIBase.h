@@ -55,9 +55,9 @@ public:
     }
 
     // do the thinking
-    inline REAL Think()
+    inline REAL Think( REAL maxStep )
     {
-        return DoThink();
+        return DoThink( maxStep );
     }
 
     virtual ~gSimpleAI();
@@ -65,7 +65,7 @@ public:
     gCycle * Object(){ return object_; }
     void SetObject( gCycle * cycle ){ object_ = cycle; }
 protected:
-    virtual REAL DoThink() = 0;
+    virtual REAL DoThink( REAL maxStep ) = 0;
 private:
     tJUST_CONTROLLED_PTR< gCycle > object_;
 };
@@ -127,7 +127,7 @@ public:
     virtual void ClearObject(){ ePlayerNetID::ClearObject(); simpleAI_ = NULL; }
 
     // do some thinking. Return value: time to think again
-    virtual REAL Think();
+    virtual REAL Think( REAL maxStep );
 
     bool Alive(){
         return bool(Object()) && Object()->Alive();
@@ -173,7 +173,7 @@ public:
         virtual ~State();
 
         //! executes the state's work
-        virtual REAL Think() = 0;
+        virtual REAL Think( REAL maxStep ) = 0;
     protected:
         gAIPlayer & Parent(){ return parent_; }
         gAIPlayer const & Parent() const { return parent_; }
@@ -208,7 +208,7 @@ public:
         virtual ~StateGrind();
 
         //! executes the state's work
-        virtual REAL Think();
+        virtual REAL Think( REAL maxStep );
     };
 private:
     tReproducibleRandomizer randomizer_;
