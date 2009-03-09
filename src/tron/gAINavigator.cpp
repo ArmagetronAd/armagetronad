@@ -146,11 +146,11 @@ bool gAINavigator::Sensor::DoExtraDetectionStuff()
             REAL distanceToHit = dir.Norm() * hit;
             REAL rubberDistance = 0;
             
-            // assume we can waste all our rubber waiting for the wall to get lost
+            // assume we can waste half our rubber waiting for the wall to get lost
             {
                 REAL rubberGranted, rubberEffectiveness;
                 sg_RubberValues( ai_.owner_->player, ai_.owner_->Speed(), rubberGranted, rubberEffectiveness );
-                rubberDistance = rubberGranted - ai_.owner_->GetRubber();
+                rubberDistance = ( rubberGranted - ai_.owner_->GetRubber() ) * .5;
             }
             if( type == gSENSOR_SELF )
             {
