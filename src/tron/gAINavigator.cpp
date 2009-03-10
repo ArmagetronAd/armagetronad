@@ -517,13 +517,14 @@ gAINavigator::CowardEvaluator::~CowardEvaluator(){}
 void gAINavigator::CowardEvaluator::Evaluate( Path const & path, PathEvaluation & evaluation ) const
 {
     evaluation.score = 100;
-    if( path.left.owner && path.right.owner )
+    if( path.left.owner || path.right.owner )
     {
-        if( path.left.owner->Alive() && path.left.owner->Team() != cycle_.Team() && path.left.lr == 1 )
+        REAL turnDelay = cycle_.GetTurnDelay() * cycle_.Speed();
+        if( path.right.hitDistance < turnDelay && path.left.owner && path.left.owner->Alive() && path.left.owner->Team() != cycle_.Team() && path.left.lr == 1 )
         {
             evaluation.score = 0;
         }
-        if( path.right.owner->Alive() && path.right.owner->Team() != cycle_.Team() && path.right.lr == -1 )
+        if( path.left.hitDistance < turnDelay && path.right.owner && path.right.owner->Alive() && path.right.owner->Team() != cycle_.Team() && path.right.lr == -1 )
         {
             evaluation.score = 0;
         }
@@ -893,17 +894,6 @@ static void sg_FillSensorGap( gAINavigator::Sensor const & left, gAINavigator::S
 
 void gAINavigator::UpdatePaths()
 {
-#ifdef DEBUG
-    // to debug specific situations on playback
-    static int count = 0;
-    count++;
-    if( count == 0 )
-    {
-        st_Breakpoint();
-    }
-#endif
-
-
     REAL lookahead = settings_.range;  // seconds to plan ahead
 
     // cylce data

@@ -1053,16 +1053,6 @@ gFollowEvaluator::gFollowEvaluator( gCycle const & cycle ): cycle_( cycle ), blo
 {
 }
 
-//! return data of SolveTurn
-struct SolveTurnData
-{
-    REAL turnTime;  //!< seconds to wait before we turn
-    REAL quality;   //!< quality of the turn
-    eCoord turnDir; //!< direction to drive in
-
-    SolveTurnData(): turnTime(0), quality(0){}
-};
-
 //!@ param direction            direction to turn in
 //!@ param targetVelocity       velocity of the target
 //!@ param targetPosition       current position of the target relative to cycle
