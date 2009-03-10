@@ -2615,20 +2615,8 @@ static tAccessLevel se_nVerAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_nVerAccessLevelConf( "ACCESS_LEVEL_NVER", se_nVerAccessLevel );
 static tAccessLevelSetter se_nVerAccessLevelConfLevel( se_nVerAccessLevelConf, tAccessLevel_Owner );
 
-// Set silence status for clients
-static bool silenceAllShouldChange( const bool & newValue )
-{
-    if ( sn_GetNetState() == nCLIENT )
-    {
-        for( int i = se_PlayerNetIDs.Len() - 1; i >=0; --i )
-            se_PlayerNetIDs( i )->SetSilenced( newValue );
-    }
-    return true;
-}
-
 static tSettingItem<bool> se_silAll("SILENCE_ALL",
-                                    se_silenceAll,
-                                    silenceAllShouldChange);
+                                    se_silenceAll);
 
 // handles spam checking at the right time
 eChatSpamTester::eChatSpamTester( ePlayerNetID * p, tString const & say )
