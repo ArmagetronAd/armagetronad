@@ -48,6 +48,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <cstdlib>
 #include <memory>
 
+#ifdef DEBUG
+#include "tCommandLine.h"
+#endif
+
 #include "nProtoBuf.h"
 #include "gAIBase.pb.h"
 
@@ -1042,172 +1046,160 @@ private:
 };
 
 // *************************
-// * following a target    *
+// * gFollowEvaluator      *
 // *************************
 
-// evaluator for zone defense
-class gFollowEvaluator: public gAINavigator::PathEvaluator
+gFollowEvaluator::gFollowEvaluator( gCycle const & cycle ): cycle_( cycle ), blocker_( 0 )
 {
-public:
-    gFollowEvaluator( gCycle const & cycle ): cycle_( cycle ), blocker_( 0 )
-    {
-    }
+}
 
-    //! return data of SolveTurn
-    struct SolveTurnData
-    {
-        REAL turnTime;  //!< seconds to wait before we turn
-        REAL quality;   //!< quality of the turn
-        eCoord turnDir; //!< direction to drive in
+//! return data of SolveTurn
+struct SolveTurnData
+{
+    REAL turnTime;  //!< seconds to wait before we turn
+    REAL quality;   //!< quality of the turn
+    eCoord turnDir; //!< direction to drive in
 
-        SolveTurnData(): turnTime(0), quality(0){}
-    };
+    SolveTurnData(): turnTime(0), quality(0){}
+};
 
-    //! determine when we need to turn in order to catch the target.
-    //!@ param direction            direction to turn in
-    //!@ param targetVelocity       velocity of the target
-    //!@ param targetPosition       current position of the target relative to cycle
-    //!@ param data                 solution filled in
-    void SolveTurn( int direction, eCoord const & targetVelocity, eCoord const & targetPosition, SolveTurnData & data )
-    {
-        eCoord velocityDifference = cycle_.Speed() * cycle_.Direction() - targetVelocity;
+//!@ param direction            direction to turn in
+//!@ param targetVelocity       velocity of the target
+//!@ param targetPosition       current position of the target relative to cycle
+//!@ param data                 solution filled in
+void gFollowEvaluator::SolveTurn( int direction, eCoord const & targetVelocity, eCoord const & targetPosition, SolveTurnData & data )
+{
+    eCoord velocityDifference = cycle_.Speed() * cycle_.Direction() - targetVelocity;
 
-        // get the velocity after the turn
-        int winding = cycle_.WindingNumber();
-        cycle_.Grid()->Turn( winding, direction );
-        data.turnDir = cycle_.Grid()->GetDirection( winding );
-        eCoord turnVelocityDifference = data.turnDir * cycle_.Speed() - targetVelocity;
+    // get the velocity after the turn
+    int winding = cycle_.WindingNumber();
+    cycle_.Grid()->Turn( winding, direction );
+    data.turnDir = cycle_.Grid()->GetDirection( winding );
+    eCoord turnVelocityDifference = data.turnDir * cycle_.Speed() - targetVelocity;
         
-        // some little algebra to solve velocityDifference * turnTime + turnVelocityDifference * Quality == targetPosition
-        REAL determinant = turnVelocityDifference * velocityDifference;
-        if( fabs( determinant ) < EPS )
-        {
-            // division by zero error, problem is not well defined. approximate.
-            data.turnTime = 0;
+    // some little algebra to solve velocityDifference * turnTime + turnVelocityDifference * Quality == targetPosition
+    REAL determinant = turnVelocityDifference * velocityDifference;
+    if( fabs( determinant ) < EPS )
+    {
+        // division by zero error, problem is not well defined. approximate.
+        data.turnTime = 0;
 
-            REAL velocityDifferenceLen = velocityDifference.NormSquared();
-            if( velocityDifferenceLen > EPS )
-            {
-                data.turnTime = eCoord::F( velocityDifference, targetPosition )/velocityDifferenceLen;
-            }
-        }
-        else
-        {
-            // the better case
-            data.turnTime = ( turnVelocityDifference * targetPosition )/determinant;
-        }
-
-        // but halt, clamp it, we can't rewind (we've gone too far)
-        if ( data.turnTime < 0 )
-        {
-            data.turnTime = 0;
-        }
-
-        // fetch an alternative turn direction (the same as before with 4 axes)
-        // so that we have a guaranteed nonnegative positive quality outcome among the two
-        winding = cycle_.WindingNumber();
-        cycle_.Grid()->Turn( winding, -direction );
-        eCoord antiTurnDir = -cycle_.Grid()->GetDirection( winding );
-        turnVelocityDifference = antiTurnDir * cycle_.Speed() - targetVelocity;
-
-        // and handle the rest primitively via dot product
-        data.quality = eCoord::F( turnVelocityDifference, targetPosition - velocityDifference * data.turnTime );
-        REAL velocityDifferenceLen = turnVelocityDifference.NormSquared();
+        REAL velocityDifferenceLen = velocityDifference.NormSquared();
         if( velocityDifferenceLen > EPS )
         {
-            data.quality /= velocityDifferenceLen;
-
-            // turn right now if target is much to the side
-            if( data.quality > 2 * data.turnTime )
-            {
-                data.turnTime = 0;
-            }
+            data.turnTime = eCoord::F( velocityDifference, targetPosition )/velocityDifferenceLen;
         }
     }
-
-    //! set the target to follow
-    //@param minQuality minimal turn quality (measured in seconds)
-    void SetTarget( eCoord const & target, eCoord const & velocity )
+    else
     {
-        // determine direction to center
-        toTarget_ = target - cycle_.Position();
+        // the better case
+        data.turnTime = ( turnVelocityDifference * targetPosition )/determinant;
+    }
 
-        // check whether the path is blocked
-        gSensor sensor( &cycle_, target, -toTarget_ );
-        sensor.detect( .99 );
+    // but halt, clamp it, we can't rewind (we've gone too far)
+    if ( data.turnTime < 0 )
+    {
+        data.turnTime = 0;
+    }
 
-        if( sensor.type != gSENSOR_NONE )
+    // fetch an alternative turn direction (the same as before with 4 axes)
+    // so that we have a guaranteed nonnegative positive quality outcome among the two
+    winding = cycle_.WindingNumber();
+    cycle_.Grid()->Turn( winding, -direction );
+    eCoord antiTurnDir = -cycle_.Grid()->GetDirection( winding );
+    turnVelocityDifference = antiTurnDir * cycle_.Speed() - targetVelocity;
+
+    // and handle the rest primitively via dot product
+    data.quality = eCoord::F( turnVelocityDifference, targetPosition - velocityDifference * data.turnTime );
+    REAL velocityDifferenceLen = turnVelocityDifference.NormSquared();
+    if( velocityDifferenceLen > EPS )
+    {
+        data.quality /= velocityDifferenceLen;
+
+        // turn right now if target is much to the side
+        if( data.quality > 2 * data.turnTime )
         {
-            gPlayerWall const * w = dynamic_cast< gPlayerWall const * >( sensor.ehit->GetWall() );
-            if ( w )
+            data.turnTime = 0;
+        }
+    }
+}
+
+//!@param minQuality minimal turn quality (measured in seconds)
+void gFollowEvaluator::SetTarget( eCoord const & target, eCoord const & velocity )
+{
+    // determine direction to center
+    toTarget_ = target - cycle_.Position();
+
+    // check whether the path is blocked
+    gSensor sensor( &cycle_, target, -toTarget_ );
+    sensor.detect( .99 );
+
+    if( sensor.type != gSENSOR_NONE )
+    {
+        gPlayerWall const * w = dynamic_cast< gPlayerWall const * >( sensor.ehit->GetWall() );
+        if ( w )
+        {
+            blocker_ = w->Cycle();
+            if( blocker_ && ( blocker_ == &cycle_ && w->Pos(.5) > blocker_->GetDistance() - blocker_->ThisWallsLength()*.9 ) )
             {
-                blocker_ = w->Cycle();
-                if( blocker_ && ( blocker_ == &cycle_ && w->Pos(.5) > blocker_->GetDistance() - blocker_->ThisWallsLength()*.9 ) )
+                int lr = toTarget_ * w->Vec() > 0 ? 1 : -1;
+
+                // if we block our own recent path, turn around
+                if( w->Pos(.5) > blocker_->GetDistance() - blocker_->ThisWallsLength()*.75 )
                 {
-                    int lr = toTarget_ * w->Vec() > 0 ? 1 : -1;
-
-                    // if we block our own recent path, turn around
-                    if( w->Pos(.5) > blocker_->GetDistance() - blocker_->ThisWallsLength()*.75 )
-                    {
-                        lr *= -1;
-                    }
-
-                    int winding = cycle_.WindingNumber();
-                    cycle_.Grid()->Turn( winding, lr );
-                    toTarget_ = cycle_.Grid()->GetDirection( winding );
-                    return;
+                    lr *= -1;
                 }
+
+                int winding = cycle_.WindingNumber();
+                cycle_.Grid()->Turn( winding, lr );
+                toTarget_ = cycle_.Grid()->GetDirection( winding );
+                return;
             }
         }
-
-        // determine next possible left or right directions
-        SolveTurnData left, right;
-        SolveTurn( -1, velocity, toTarget_, left );
-        SolveTurn( 1,  velocity, toTarget_, right );
-
-        REAL quality = 0;
-
-        // pick the best one
-        if( left.quality > right.quality )
-        {
-            quality   = left.quality;
-            toTarget_ = left.turnDir;
-            turnTime_ = left.turnTime;
-        }
-        else
-        {
-            quality   = right.quality;
-            toTarget_ = right.turnDir;
-            turnTime_ = right.turnTime;
-        }
-
-        if ( turnTime_ > 0 )
-        {
-            toTarget_ = cycle_.Direction();
-        }
-        else
-        {
-            turnTime_ = HUGE;
-        }
     }
 
-    virtual void Evaluate( gAINavigator::Path const & path, gAINavigator::PathEvaluation & evaluation ) const
+    // determine next possible left or right directions
+    SolveTurnData left, right;
+    SolveTurn( -1, velocity, toTarget_, left );
+    SolveTurn( 1,  velocity, toTarget_, right );
+
+    REAL quality = 0;
+
+    // pick the best one
+    if( left.quality > right.quality )
     {
-        eCoord pathDir = path.shortTermDirection;
-        REAL f = eCoord::F( toTarget_, pathDir );
-        if( f > 0 && f*f > .99 * toTarget_.NormSquared() * pathDir.NormSquared() )
-        {
-            evaluation.nextThought = turnTime_;
-        }
-
-        evaluation.score = 50 * f + 50;
+        quality   = left.quality;
+        toTarget_ = left.turnDir;
+        turnTime_ = left.turnTime;
     }
-protected:
-    gCycle const & cycle_; //!< the owning cycle
-    gCycle * blocker_;     //!< other cycle blocking the path to the target
-    eCoord toTarget_;      //!< direction to target, roughly normalized
-    REAL   turnTime_;      //!< time to make the next turn
-};
+    else
+    {
+        quality   = right.quality;
+        toTarget_ = right.turnDir;
+        turnTime_ = right.turnTime;
+    }
+
+    if ( turnTime_ > 0 )
+    {
+        toTarget_ = cycle_.Direction();
+    }
+    else
+    {
+        turnTime_ = HUGE;
+    }
+}
+
+void gFollowEvaluator::Evaluate( gAINavigator::Path const & path, gAINavigator::PathEvaluation & evaluation ) const
+{
+    eCoord pathDir = path.shortTermDirection;
+    REAL f = eCoord::F( toTarget_, pathDir );
+    if( f > 0 && f*f > .99 * toTarget_.NormSquared() * pathDir.NormSquared() )
+    {
+        evaluation.nextThought = turnTime_;
+    }
+
+    evaluation.score = 50 * f + 50;
+}
 
 // ********************
 // * tailchase helper *
@@ -1253,133 +1245,8 @@ public:
     }
 private:
     gCycle const & cycle_; //!< the owning cycle
-    
 };
 
-// *************************
-// * Zone attack/defense   *
-// *************************
-
-// evaluator for zone defense
-class gZoneEvaluator: public gFollowEvaluator
-{
-public:
-    gZoneEvaluator( gCycle const & cycle, zZone const & zone, REAL maxStep ): gFollowEvaluator( cycle )
-    {
-        Init( cycle, zone, maxStep );
-    }
-
-    void Init( gCycle const & cycle, zZone const & zone, REAL maxStep )
-    {
-        zShape * shape = zone.getShape();
-        if ( !shape )
-        {
-            return;
-        }
-
-        eCoord pos    = cycle_.Position();
-        eCoord center = shape->findCenter();
-
-        // REAL insideness = (pos-center).NormSquared()/(edge-center).NormSquared();
-
-        eCoord tailToChase, tailToChaseVelocity;
-
-        if( zone.Team() == cycle.Team() )
-        {
-            gCycle::WallInfo info;
-            
-            // don't get the real tail. Instead, get a bit in front and extrapolate back.
-            REAL endOffset = cycle.GetTurnDelay();
-            if( maxStep > endOffset )
-            {
-                endOffset = maxStep;
-            }
-
-            cycle.FillWallInfo( info, .5, -endOffset*cycle.Speed() );
-
-            tailToChaseVelocity = info.tailDir * cycle.Speed();
-            tailToChase = info.tailPos - tailToChaseVelocity * endOffset;
-
-            {
-                // blend in standard circular path
-                REAL blend = 2 - cycle.GetDistance()/cycle.ThisWallsLength();
-                if ( blend > 0 )
-                {
-                    if( blend > 1 )
-                    {
-                        blend = 1;
-                    }
-                    
-                    eCoord rand;
-                    eCoord edge   = shape->findPointNear( rand );
-                    REAL angle = 2 * M_PI * cycle.GetDistance()/cycle.ThisWallsLength();
-                    REAL angularVelocity = 2 * M_PI * cycle.Speed()/cycle.ThisWallsLength();
-                    eCoord tailToChase2 = center + .9 * ( edge - center ).Turn( cosf(angle), sinf( angle ) );
-                    eCoord tailToChaseVelocity2 = angularVelocity*( edge - center ).Turn( -sinf( angle ), cosf(angle) );
-                    tailToChase = tailToChase * ( 1 - blend ) + tailToChase2 * blend;
-                    tailToChaseVelocity = tailToChaseVelocity * ( 1 - blend ) + tailToChaseVelocity2 * blend;
-                }
-            }
-
-#ifdef DEBUG
-            eDebugLine::SetTimeout(.5);
-            eDebugLine::SetColor  (0, 1, 1);
-            eDebugLine::Draw(tailToChase, .5, tailToChase, 5.5);
-            eDebugLine::SetTimeout(0);
-#endif
-
-            // make sure tail pos to chase lies inside an acceptable strip around the zone border
-            eCoord tailEdge = shape->findPointNear( tailToChase );
-            REAL tailInsideness = (tailToChase-center).NormSquared()/(tailEdge-center).NormSquared();
-            REAL minInsideness = .5, maxInsideness = .9;
-            if( tailInsideness < minInsideness )
-            {
-                // close to center. Get opposing point and mirror it.
-                gCycle::WallInfo info2;
-                cycle.FillWallInfoFlexible( info2, cycle.ThisWallsLength()/2 );
-                eCoord tailToChase2 = 2 * center - info2.tailPos;
-                eCoord tailToChaseVelocity2 = -info2.tailDir * cycle.Speed();
-                REAL blend = tailInsideness/minInsideness;
-
-#ifdef DEBUG
-                eDebugLine::SetTimeout(.5);
-                eDebugLine::SetColor  (1, 0, 0);
-                eDebugLine::Draw(tailToChase2, .5, tailToChase2, 5.5);
-                eDebugLine::Draw(info2.tailPos, .5, info2.tailPos, 5.5);
-                eDebugLine::SetTimeout(0);
-#endif
-
-                // blend chase point with mirrored opposite point.
-                tailToChase = tailToChase * blend + tailToChase2 * ( 1 - blend );
-                tailToChaseVelocity = tailToChaseVelocity * blend + tailToChaseVelocity2 * ( 1 - blend );
-
-                tailInsideness = (tailToChase-center).NormSquared()/(tailEdge-center).NormSquared();
-
-                tailToChase = center + (tailToChase-center) * sqrt( minInsideness/tailInsideness );
-            }
-            else if( tailInsideness > maxInsideness )
-            {
-                tailToChase = center + (tailToChase-center) * sqrt( maxInsideness/tailInsideness );
-            }
-        }
-        else
-        {
-            tailToChase = center;
-        }
-
-#ifdef DEBUG
-        eDebugLine::SetTimeout(.5);
-        eDebugLine::SetColor  (0, 0, 1);
-        eDebugLine::Draw(tailToChase, .5, tailToChase, 5.5);
-        eDebugLine::SetTimeout(0);
-#endif
-
-        SetTarget( tailToChase, tailToChaseVelocity );
-
-    }
-private:
-};
-   
 
 // *******************
 // * Survival state  *
@@ -1399,17 +1266,10 @@ public:
         manager.Evaluate( gAINavigator::SuicideEvaluator( cycle, maxStep ), 1 );
         manager.Evaluate( gAINavigator::TrapEvaluator( cycle ), 1 );
         manager.Reset();
-        // manager.Evaluate( gAINavigator::CowardEvaluator( cycle ), 5 );
+        manager.Evaluate( gAINavigator::CowardEvaluator( cycle ), 5 );
         manager.Evaluate( gAINavigator::SpaceEvaluator( cycle ), 1 );
         manager.Evaluate( gAINavigator::RandomEvaluator(), .01 );
         manager.Evaluate( gAINavigator::PlanEvaluator(), .1 );
-        // manager.Evaluate( gTailChaseEvaluator( cycle ), 1 );
-
-        zZone const * zoneTarget = dynamic_cast< zZone const * >( Parent().GetTarget() );
-        if ( zoneTarget )
-        {
-            manager.Evaluate( gZoneEvaluator( cycle, *zoneTarget, maxStep ), gAINavigator::EvaluationManager::BLEND_ADD, 2 );
-        }
 
         gAINavigator::CycleControllerBasic controller;
         return manager.Finish( controller, *Parent().Object(), maxStep );
@@ -2285,6 +2145,30 @@ void gAIPlayer::CreateNavigator()
     }
 }
 
+#ifdef DEBUG
+static int sg_breakOnThought = 0;
+class tCommandLineBreakOnThought: public tCommandLineAnalyzer
+{
+    virtual bool DoAnalyze( tCommandLineParser & parser )    //! Analyzes the command line option
+    {
+        tString value;
+        if( parser.GetOption( value, "--breakonthought" ) ) 
+        {
+            sg_breakOnThought = value.ToInt();
+
+            return true;
+        }
+        return false;
+    }
+
+    virtual void DoHelp( std::ostream & s )                  //! Prints option help
+    {
+        s << "--breakonthought <thought>   : sets a breakpoint on the given thought of the AI (the static variable 'count' in gAIBase::Think())\n\n";
+    }
+};
+static tCommandLineBreakOnThought sg_breakOnThoughtCommandLine;
+#endif
+
 REAL gAIPlayer::Think( REAL maxStep ){
     concentration_ -= 1;
 
@@ -2324,7 +2208,7 @@ REAL gAIPlayer::Think( REAL maxStep ){
         // to debug specific situations on playback
         static int count = 0;
         count++;
-        if( count == 181 )
+        if( count == sg_breakOnThought )
         {
             st_Breakpoint();
         }

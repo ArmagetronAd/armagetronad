@@ -25,6 +25,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#include "zone/zFortress.h"
+
 #include "rSDL.h"
 
 #include "eFloor.h"
@@ -44,8 +46,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "gAIBase.h"
 
-#include "zone/zFortress.h"
 #include "zone/zZone.h"
+#include "zone/zAI.h"
 
 #include <time.h>
 #include <algorithm>
@@ -544,6 +546,7 @@ void zFortressZone::OnThink( void )
                         ai->Chat( tString( "Bored! Attacking enemy fortress!" ) );
 #endif
                         ai->SetTarget( this );
+                        ai->SwitchToState( tNEW( zStateDefend )( *ai ) );
                         return;
                     }
                 }
@@ -558,6 +561,7 @@ void zFortressZone::OnThink( void )
         closestFriend->Chat( tString( "Defending!" ) );
 #endif
         closestFriend->SetTarget( this );
+        closestFriend->SwitchToState( tNEW( zStateDefend )( *closestFriend ) );
 
         return;
     }
@@ -568,6 +572,7 @@ void zFortressZone::OnThink( void )
         closestEnemy->Chat( tString( "Attacking enemy fortress!" ) );
 #endif
         closestEnemy->SetTarget( this );
+        closestEnemy->SwitchToState( tNEW( zStateDefend )( *closestEnemy ) );
     }
 
 }

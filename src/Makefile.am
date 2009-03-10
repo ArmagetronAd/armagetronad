@@ -173,6 +173,7 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h \
 if BUILDZONESV2
 libtron_a_SOURCES +=\
 	tron/zone/zZone.cpp        tron/zone/zZone.h\
+	tron/zone/zAI.cpp          tron/zone/zAI.h\
 	tron/zone/zTimedZone.cpp   tron/zone/zTimedZone.h\
 	tron/zone/zShape.cpp       tron/zone/zShape.h\
 	tron/zone/zMonitor.h       tron/zone/zMonitor.cpp\
