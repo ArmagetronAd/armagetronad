@@ -1266,6 +1266,11 @@ public:
     }
 };
 
+void gAIPlayer::SwitchToSurvival()
+{
+    SwitchToState( tNEW( gStateSurvive )( *this ) );
+}
+
 void gAIPlayer::SetTarget( eNetGameObject * target )
 {
     this->target_ = target;
@@ -2207,6 +2212,7 @@ REAL gAIPlayer::Think( REAL maxStep ){
 
     if( state_ )
     {
+        tJUST_CONTROLLED_PTR< State > keepalive( state_ );
         return state_->Think( maxStep );
     }
 

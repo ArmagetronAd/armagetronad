@@ -192,6 +192,9 @@ public:
     void SwitchToState( State * newState );
     State * GetState() const{ return state_; }
 
+    // switch to survival state
+    void SwitchToSurvival();
+
     // state for grinding at start
     class StateGrind: public State
     {

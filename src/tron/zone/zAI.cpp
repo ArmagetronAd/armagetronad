@@ -179,6 +179,10 @@ REAL zStateDefend::Think( REAL maxStep )
     {
         manager.Evaluate( zZoneEvaluator( cycle, *zoneTarget, maxStep ), gAINavigator::EvaluationManager::BLEND_ADD, 2 );
     }
+    else
+    {
+        Parent().SwitchToSurvival();
+    }
 
     gAINavigator::CycleControllerBasic controller;
     return manager.Finish( controller, *Parent().Object(), maxStep );
