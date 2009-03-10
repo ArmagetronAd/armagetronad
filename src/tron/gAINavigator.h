@@ -188,6 +188,7 @@ public:
     {
         bool veto;  //!< was this path vetoed?
         REAL score; //!< score of the path. 0: pointless suicide, 100: pretty good.
+        REAL nextThought; //!< seconds to next thought
 
         PathEvaluation();
     };
@@ -224,6 +225,23 @@ public:
         gCycle const & cycle_;
         REAL   timeFrame_;
         static bool emergency_;
+    };
+
+    //! simple evaluator: vetoes moves that trap self
+    class TrapEvaluator: public PathEvaluator
+    {
+    public:
+        TrapEvaluator( gCycle const & cycle, REAL space );
+        explicit TrapEvaluator( gCycle const & cycle );
+
+        //! evaluate a path.
+        virtual void Evaluate( Path const & path, PathEvaluation & evaluation ) const;
+        ~TrapEvaluator();
+        
+        static void SetEmergency( bool emergency );
+    private:
+        gCycle const & cycle_;
+        REAL   space_;
     };
 
     //! simple evaluator: random noise

@@ -350,6 +350,7 @@ public:
     struct WallInfo
     {
         tCoord tailPos;      //!< the position of the end of the walls
+        tCoord tailDir;      //!< direction the tail is moving in
         tCoord centerOfMass; //!< the center of the total walls
     };
     
@@ -357,7 +358,7 @@ public:
     void FillWallInfoFlexible( WallInfo & info, REAL totalLength ) const;
 
     //! fills in tail info using the real wall length assuming the given rubber usage ratio
-    void FillWallInfo( WallInfo & info, REAL rubberRatio ) const;
+    void FillWallInfo( WallInfo & info, REAL rubberRatio, REAL offset = 0 ) const;
 
     //! fills in tail info using the real wall length
     void FillWallInfo( WallInfo & info ) const;

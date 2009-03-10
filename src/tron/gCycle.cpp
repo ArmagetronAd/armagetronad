@@ -5583,7 +5583,8 @@ void gCycle::FillWallInfoFlexible( WallInfo & info, REAL totalLength ) const
 
 // @param info the info to fill
 // @param rubberRatio rubber usage ratio to assume
-void gCycle::FillWallInfo( WallInfo & info, REAL rubberRatio ) const
+// @param offset offset value to add to the wall length
+void gCycle::FillWallInfo( WallInfo & info, REAL rubberRatio, REAL offset ) const
 {
     REAL max, effectiveness;
     sg_RubberValues( Player(), verletSpeed_, max, effectiveness );
@@ -5592,7 +5593,7 @@ void gCycle::FillWallInfo( WallInfo & info, REAL rubberRatio ) const
     {
         totalLength -= rubberRatio * max;
     }
-    FillWallInfoFlexible( info, totalLength );
+    FillWallInfoFlexible( info, totalLength + offset );
 }
 
 // @param info the info to fill

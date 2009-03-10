@@ -430,7 +430,7 @@ gAINavigator::Path & gAINavigator::PathGroup::AccessPath( int id )
 // * Evaluation            *
 // *************************
 
-gAINavigator::PathEvaluation::PathEvaluation() : veto( false ), score( 0 ){}
+gAINavigator::PathEvaluation::PathEvaluation() : veto( false ), score( 0 ), nextThought( HUGE ){}
 
 //!@param path        the path to evaluate
 //!@param evaluation  place to store the result
@@ -474,6 +474,33 @@ void gAINavigator::SuicideEvaluator::SetEmergency( bool emergency )
 gAINavigator::SuicideEvaluator::SuicideEvaluator( gCycle const & cycle ): cycle_( cycle ), timeFrame_( cycle.GetTurnDelay() ){}
 gAINavigator::SuicideEvaluator::SuicideEvaluator( gCycle const & cycle, REAL timeFrame ): cycle_( cycle ), timeFrame_( timeFrame ){}
 gAINavigator::SuicideEvaluator::~SuicideEvaluator(){}
+
+//!@param path        the path to evaluate
+//!@param evaluation  place to store the result
+void gAINavigator::TrapEvaluator::Evaluate( Path const & path, PathEvaluation & evaluation ) const
+{
+    if( space_ <= 0 )
+    {
+        return;
+    }
+    evaluation.score = Adjust( path.distance/space_ );
+    if( path.distance < space_ && path.left.owner == path.right.owner && path.left.owner && 
+        ( path.immediateDistance < cycle_.GetTurnDelay() * cycle_.Speed() || path.left.owner == &cycle_ ) )
+    {
+        evaluation.veto = true;
+    }
+}
+
+gAINavigator::TrapEvaluator::TrapEvaluator( gCycle const & cycle )
+: cycle_( cycle )
+{
+    space_ = .25 * cycle.ThisWallsLength();
+}
+
+gAINavigator::TrapEvaluator::TrapEvaluator( gCycle const & cycle, REAL space )
+: cycle_( cycle )
+, space_( space ){}
+gAINavigator::TrapEvaluator::~TrapEvaluator(){}
 
 void gAINavigator::RandomEvaluator::Evaluate( Path const & path, PathEvaluation & evaluation ) const
 {
@@ -593,6 +620,11 @@ void gAINavigator::EvaluationManager::Evaluate( PathEvaluator const & evaluator,
             break;
         }
 
+        if ( evaluation.nextThought < store.nextThought )
+        {
+            store.nextThought = evaluation.nextThought;
+        }
+
         if ( evaluation.veto )
         {
             store.veto = true;
@@ -641,6 +673,11 @@ void gAINavigator::EvaluationManager::Reset()
 REAL gAINavigator::EvaluationManager::Finish( CycleController & controller, gCycle & cycle, REAL maxStep ){
     if( bestPath_ >= 0 )
     {
+        REAL thisMaxStep = evaluations_[ bestPath_ ].nextThought;
+        if( maxStep > thisMaxStep )
+        {
+            maxStep = thisMaxStep;
+        }
         return paths_.TakePath( controller, cycle, bestPath_, maxStep );
     }
     else
@@ -927,7 +964,7 @@ void gAINavigator::UpdatePaths()
     eCoord forwardDir  = dir;
     eGrid * grid = owner_->Grid();
     eCoord backwardDir = - forwardDir;
-    int winding = grid->DirectionWinding( forwardDir );
+    int winding = owner_->WindingNumber();
     int wl = winding, wr = winding;
     grid->Turn( wl, -1 );
     grid->Turn( wr, 1 );
@@ -1027,7 +1064,7 @@ void gAINavigator::UpdatePaths()
 
         REAL driveOn = right.HitWallExtends( dir, pos );
         REAL side    = forward.HitWallExtends( rightDir, pos );
-        if( driveOn < forward.hit * range * ( 1-EPS ) || forward.type == gSENSOR_NONE || side > right.hit * range * ( 1+EPS ) )
+        if( driveOn > 0 && ( driveOn < forward.hit * range * ( 1-EPS ) || forward.type == gSENSOR_NONE || side > right.hit * range * ( 1+EPS ) ) )
         {
             // there is a gap waiting for us. Wait and take it.
             path.driveOn = driveOn;
@@ -1049,7 +1086,7 @@ void gAINavigator::UpdatePaths()
 
         REAL driveOn = left.HitWallExtends( dir, pos );
         REAL side    = forward.HitWallExtends( leftDir, pos );
-        if( driveOn < forward.hit * range * ( 1-EPS ) || forward.type == gSENSOR_NONE || side > left.hit * range * ( 1+EPS ) )
+        if( driveOn > 0 && ( driveOn < forward.hit * range * ( 1-EPS ) || forward.type == gSENSOR_NONE || side > left.hit * range * ( 1+EPS ) ) )
         {
             // there is a gap waiting for us. Wait and take it.
             path.driveOn = driveOn;
