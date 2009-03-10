@@ -398,7 +398,7 @@ spam_penalty_help             Extrastrafe für eine erkanne Spam-Aktion
 spam_maxlen_help              Maximallänge für die Chat-Nachrichten.
 spam_autokick_help            Spamer-Wert, bei dem der Spieler automatisch vom Server geworfen wird.
 spam_autokick_count_help      Zahl der Spam-Warnungen, bevor ein Spieler gekickt wird.
-silence_all_help              Wenn dieser Wert auf 1 gesetzt ist, dann wird aller Chat unterbunden.
+silence_default_help          Wenn dieser Wert auf 1 gesetzt ist, dann werden alle neuen Spieler stummgeschaltet.
 enable_chat_help              Wenn dies auf 0 gesetzt wird, dann werden alle öffentlichen Chat-Nachrichten unterdrückt (Auf dem Server sind Nachrichten von Administratoren und /msg und /team-Nachrichten Ausnahmen).
 allow_team_change_help        Nur wenn dieser Wert 1 ist dürfen Spieler irh Team beliebig wählen. Wenn dieser Wert 0 ist, muss ein Administrator jeden Teamwechsel mit ALLOW_TEAM_CHANGE_PLAYER authorisieren.
 

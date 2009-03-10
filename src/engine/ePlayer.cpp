@@ -2615,7 +2615,7 @@ static tAccessLevel se_nVerAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_nVerAccessLevelConf( "ACCESS_LEVEL_NVER", se_nVerAccessLevel );
 static tAccessLevelSetter se_nVerAccessLevelConfLevel( se_nVerAccessLevelConf, tAccessLevel_Owner );
 
-static tSettingItem<bool> se_silAll("SILENCE_ALL",
+static tSettingItem<bool> se_silAll("SILENCE_DEFAULT",
                                     se_silenceAll);
 
 // handles spam checking at the right time
