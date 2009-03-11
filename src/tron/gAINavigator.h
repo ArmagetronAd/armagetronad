@@ -117,7 +117,8 @@ public:
     {
         gCycle const * owner;  //! the cycle the walls we like belong to
         REAL lastTimeSeen;     //! the last time we saw such a wall
-        REAL hitDistance;      //! distance of the wall that was hit
+        REAL hitDistance;      //! driving distance of the wall that was hit
+        REAL distance;         //! distance to the hit wall
         int  lr;               //! direction the wall is running to as seen from us
 
         WallHug();

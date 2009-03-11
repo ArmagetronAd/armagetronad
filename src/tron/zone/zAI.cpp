@@ -169,20 +169,26 @@ REAL zStateDefend::Think( REAL maxStep )
     manager.Evaluate( gAINavigator::SuicideEvaluator( cycle, maxStep ), 1 );
     manager.Evaluate( gAINavigator::TrapEvaluator( cycle ), 1 );
     manager.Reset();
-    manager.Evaluate( gAINavigator::CowardEvaluator( cycle ), -.1 );
     manager.Evaluate( gAINavigator::SpaceEvaluator( cycle ), .1 );
     manager.Evaluate( gAINavigator::RandomEvaluator(), .01 );
     manager.Evaluate( gAINavigator::PlanEvaluator(), .1 );
 
+    REAL cowardice = 5;
     zZone const * zoneTarget = dynamic_cast< zZone const * >( Parent().GetTarget() );
     if ( zoneTarget )
     {
         manager.Evaluate( zZoneEvaluator( cycle, *zoneTarget, maxStep ), gAINavigator::EvaluationManager::BLEND_ADD, 2 );
+        if( zoneTarget->Team() == cycle.Team() )
+        {
+            cowardice = -1;
+        }
     }
     else
     {
         Parent().SwitchToSurvival();
     }
+
+    manager.Evaluate( gAINavigator::CowardEvaluator( cycle ), cowardice );
 
     gAINavigator::CycleControllerBasic controller;
     return manager.Finish( controller, *Parent().Object(), maxStep );

@@ -484,8 +484,9 @@ void gAINavigator::TrapEvaluator::Evaluate( Path const & path, PathEvaluation & 
         return;
     }
     evaluation.score = Adjust( path.distance/space_ );
+    REAL trapLength = cycle_.GetTurnDelay() * cycle_.Speed();
     if( path.distance < space_ && path.left.owner == path.right.owner && path.left.owner && 
-        ( path.immediateDistance < cycle_.GetTurnDelay() * cycle_.Speed() || path.left.owner == &cycle_ ) )
+        ( path.immediateDistance < trapLength || ( path.left.distance < trapLength && path.right.distance < trapLength ) || path.left.owner == &cycle_ ) )
     {
         evaluation.veto = true;
     }
@@ -520,11 +521,11 @@ void gAINavigator::CowardEvaluator::Evaluate( Path const & path, PathEvaluation 
     if( path.left.owner || path.right.owner )
     {
         REAL turnDelay = cycle_.GetTurnDelay() * cycle_.Speed();
-        if( path.right.hitDistance < turnDelay && path.left.owner && path.left.owner->Alive() && path.left.owner->Team() != cycle_.Team() && path.left.lr == 1 )
+        if( path.right.distance < turnDelay && path.left.owner && path.left.owner->Alive() && path.left.owner->Team() != cycle_.Team() && path.left.lr == 1 )
         {
             evaluation.score = 0;
         }
-        if( path.left.hitDistance < turnDelay && path.right.owner && path.right.owner->Alive() && path.right.owner->Team() != cycle_.Team() && path.right.lr == -1 )
+        if( path.left.distance < turnDelay && path.right.owner && path.right.owner->Alive() && path.right.owner->Team() != cycle_.Team() && path.right.lr == -1 )
         {
             evaluation.score = 0;
         }
@@ -651,6 +652,39 @@ void gAINavigator::FollowEvaluator::SolveTurn( int direction, eCoord const & tar
     }
 }
 
+//! sensor picking up several walls between cycle and target
+class gTargetSensor:public gSensor
+{
+public:
+    int lastOwnLR; //!< the last LR value of a hit with an own wall
+    tCHECKED_PTR_CONST(eHalfEdge) lastOwnEHit; //!< the edge hit there
+    
+    gTargetSensor(eGameObject const * o,const eCoord &start,const eCoord &d)
+    :gSensor(o,start,d), lastOwnLR(0), lastOwnEHit(0) {}
+
+    virtual void PassEdge(const eWall *w,REAL time,REAL a,int i)
+    {
+        try
+        {
+            gSensor::PassEdge( w, time, a, i );
+        }
+        catch( eSensorFinished & e )
+        {
+            if( type == gSENSOR_SELF )
+            {
+                // copy the last own wall we see
+                lastOwnLR = lr;
+                lastOwnEHit = ehit;
+                ehit = 0;
+            }
+            else
+            {
+                throw;
+            }
+        }
+    }
+};
+
 //!@param minQuality minimal turn quality (measured in seconds)
 void gAINavigator::FollowEvaluator::SetTarget( eCoord const & target, eCoord const & velocity )
 {
@@ -658,28 +692,47 @@ void gAINavigator::FollowEvaluator::SetTarget( eCoord const & target, eCoord con
     toTarget_ = target - cycle_.Position();
 
     // check whether the path is blocked
-    gSensor sensor( &cycle_, target, -toTarget_ );
+    gTargetSensor sensor( &cycle_, cycle_.Position(), toTarget_ );
     sensor.detect( .99 );
 
     if( sensor.type != gSENSOR_NONE )
     {
-        gPlayerWall const * w = dynamic_cast< gPlayerWall const * >( sensor.ehit->GetWall() );
-        if ( w )
+        if( sensor.lastOwnEHit )
         {
-            blocker_ = w->Cycle();
-            if( blocker_ && ( blocker_ == &cycle_ && w->Pos(.5) > blocker_->GetDistance() - blocker_->ThisWallsLength()*.9 ) )
+            gPlayerWall const * ownWall = dynamic_cast< gPlayerWall const * >( sensor.lastOwnEHit->GetWall() );
+            if ( ownWall )
             {
-                int lr = toTarget_ * w->Vec() > 0 ? 1 : -1;
-
-                // if we block our own recent path, turn around
-                if( w->Pos(.5) > blocker_->GetDistance() - blocker_->ThisWallsLength()*.75 )
+                blocker_ = ownWall->Cycle();
+                tASSERT( blocker_ == &cycle_ );
+                if( ownWall->Pos(.5) > blocker_->GetDistance() - blocker_->ThisWallsLength()*.9 )
                 {
-                    lr *= -1;
-                }
+                    int lr = toTarget_ * ownWall->Vec() > 0 ? 1 : -1;
 
-                int winding = cycle_.WindingNumber();
-                cycle_.Grid()->Turn( winding, lr );
-                toTarget_ = cycle_.Grid()->GetDirection( winding );
+                    // if we block our own recent path, turn around
+                    if( ownWall->Pos(.5) > blocker_->GetDistance() - blocker_->ThisWallsLength()*.75 )
+                    {
+                        lr *= -1;
+                    }
+
+                    int winding = cycle_.WindingNumber();
+                    cycle_.Grid()->Turn( winding, lr );
+                    toTarget_ = cycle_.Grid()->GetDirection( winding );
+                    return;
+                }
+            }
+        }
+        else if ( sensor.ehit )
+        {
+            gPlayerWall const * w = dynamic_cast< gPlayerWall const * >( sensor.ehit->GetWall() );
+            if ( w )
+            {
+                // just follow enemy wall in the inverse direction, but keep an eye on the target
+                toTarget_.Normalize();
+                eCoord follow = - w->Vec();
+                follow.Normalize();
+                toTarget_ += follow * .9;
+                toTarget_.Normalize();
+                toTarget_ *= .1;
                 return;
             }
         }
@@ -846,7 +899,7 @@ gAINavigator::gAINavigator( gCycle * owner )
 }
 
 gAINavigator::WallHug::WallHug()
-: owner ( NULL ), lastTimeSeen ( 0 ), lr( 0 )
+: owner ( NULL ), lastTimeSeen ( 0 ), distance( HUGE ), lr( 0 )
 {
 }
 
@@ -855,6 +908,7 @@ void gAINavigator::WallHug::FillFrom( Sensor const & sensor )
     owner = sensor.hitOwner_;
     lr = sensor.lr;
     hitDistance = sensor.hitDistance_;
+    distance = sensor.hit * sensor.Direction().Norm();
     if( owner )
     {
         lastTimeSeen = owner->LastTime();
