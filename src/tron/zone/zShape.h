@@ -44,10 +44,10 @@ public:
     virtual void Render2D(tCoord scale) const;
     virtual bool RendersAlpha() const;
 
-    virtual tCoord findPointNear(tCoord&) = 0;
-    virtual tCoord findPointFar(tCoord&) = 0;
-    virtual REAL calcDistanceNear(tCoord&);
-    virtual REAL calcDistanceFar(tCoord&);
+    virtual tCoord findPointNear(tCoord const &) = 0;
+    virtual tCoord findPointFar(tCoord const &) = 0;
+    virtual REAL calcDistanceNear(tCoord const &);
+    virtual REAL calcDistanceFar(tCoord const &);
 
     virtual tCoord findCenter();
     //! Calculates the max(height, width) of a bounding box
@@ -139,8 +139,8 @@ public :
 
     virtual void setReferenceTime(REAL time);
 
-    tCoord findPointNear(tCoord&);
-    tCoord findPointFar(tCoord&);
+    tCoord findPointNear(tCoord const &);
+    tCoord findPointFar(tCoord const &);
 
     //! Calculates the max(height, width) of a bounding box
     REAL calcBoundSq();
@@ -180,8 +180,8 @@ public :
     virtual void Render2D(tCoord scale) const;
     void addPoint( myPoint const &aPoint) { points.push_back(aPoint);};
 
-    tCoord findPointNear(tCoord&);
-    tCoord findPointFar(tCoord&);
+    tCoord findPointNear(tCoord const &);
+    tCoord findPointFar(tCoord const &);
 
     //! Calculates the max(height, width) of a bounding box
     REAL calcBoundSq();

@@ -180,11 +180,11 @@ zShape::OnBirth() {
 }
 
 
-REAL zShape::calcDistanceNear(tCoord & p) {
+REAL zShape::calcDistanceNear(tCoord const & p) {
     return (findPointNear(p) - p).Norm();
 }
 
-REAL zShape::calcDistanceFar(tCoord & p) {
+REAL zShape::calcDistanceFar(tCoord const & p) {
     return (findPointFar(p) - p).Norm();
 }
 
@@ -552,13 +552,13 @@ void zShapeCircle::setReferenceTime(REAL time)
     zShape::setReferenceTime( time );
 }
 
-tCoord zShapeCircle::findPointNear(tCoord & p) {
+tCoord zShapeCircle::findPointNear(tCoord const & p) {
     tCoord angle = p - Position();
     angle.Normalize();
     return angle * calcBoundSq() + Position();
 }
 
-tCoord zShapeCircle::findPointFar(tCoord & p) {
+tCoord zShapeCircle::findPointFar(tCoord const & p) {
     tCoord angle = Position() - p;
     angle.Normalize();
     return angle * calcBoundSq() + Position();
@@ -831,14 +831,14 @@ void zShapePolygon::Render2D(tCoord scale) const {
 #endif
 }
 
-tCoord zShapePolygon::findPointNear(tCoord & p) {
+tCoord zShapePolygon::findPointNear(tCoord const & p) {
     // FIXME: Write real sane code for a polygon
     tCoord angle = p - Position();
     angle.Normalize();
     return angle * calcBoundSq() + Position();
 }
 
-tCoord zShapePolygon::findPointFar(tCoord & p) {
+tCoord zShapePolygon::findPointFar(tCoord const & p) {
     // FIXME: Write real sane code for a polygon
     tCoord angle = Position() - p;
     angle.Normalize();
