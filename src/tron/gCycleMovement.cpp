@@ -3640,9 +3640,6 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
             }
             */
 
-            // notify AIs of it
-            emergency = true;
-
             // calculate the step the rubber code should do based on the decay factor
             // calculated earler
             REAL rubberStep = space * rubberFactor;
