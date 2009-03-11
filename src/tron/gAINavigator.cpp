@@ -521,8 +521,8 @@ void gAINavigator::CowardEvaluator::Evaluate( Path const & path, PathEvaluation 
     evaluation.score = 100;
     if( path.left.owner || path.right.owner )
     {
-        REAL turnDelay = cycle_.GetTurnDelay() * cycle_.Speed();
-        if( path.right.distance + path.left.distance < turnDelay * 4 )
+        // REAL turnDelay = cycle_.GetTurnDelay() * cycle_.Speed();
+        // if( path.right.distance + path.left.distance < turnDelay * 4 )
         {
             if(  path.left.owner && path.left.owner->Alive() && path.left.owner->Team() != cycle_.Team() && path.left.lr == 1 )
             {
@@ -623,7 +623,7 @@ void gAINavigator::RubberEvaluator::Init( gCycle const & cycle, REAL maxTime )
     maxRubber_  = maxTime * speed;
 
     // account for inevitable loss
-    rubberLeft_ = rubberLeft_ + maxRubber_;
+    rubberLeft_ = rubberLeft + maxRubber_;
 
     if( maxRubber_ > rubberLeft )
     {
@@ -983,33 +983,15 @@ REAL gAINavigator::Distance( Sensor const & a, Sensor const & b ) const
     bool self = a.type == gSENSOR_SELF || b.type == gSENSOR_SELF;
     bool rim  = a.type == gSENSOR_RIM || b.type == gSENSOR_RIM;
 
-    // avoid. own. walls.
-    REAL selfHatred = 1;
-    if ( a.type == gSENSOR_SELF )
-    {
-        selfHatred *= .5;
-        if ( a.lr > 0 )
-        {
-            selfHatred *= .5;
-            if ( b.type == gSENSOR_RIM )
-                selfHatred *= .25;
-        }
-    }
-    if ( b.type == gSENSOR_SELF )
-    {
-        selfHatred *= .5;
-        if ( b.lr < 0 )
-        {
-            selfHatred *= .5;
-            if ( a.type == gSENSOR_RIM )
-                selfHatred *= .25;
-        }
-    }
-
     // some big distance to return if we don't know anything better
     REAL bigDistance = owner_->MaxWallsLength();
     if ( bigDistance <= 0 )
         bigDistance = owner_->GetDistance();
+
+    REAL totallyFree = bigDistance * 8;
+    REAL halfFree    = bigDistance * 6;
+    REAL rimTunnel   = bigDistance * 4;
+    REAL tunnel      = bigDistance * 2;
 
     if ( a.type == gSENSOR_NONE || b.type == gSENSOR_NONE )
     {
@@ -1017,64 +999,45 @@ REAL gAINavigator::Distance( Sensor const & a, Sensor const & b ) const
         if ( a.type == gSENSOR_NONE && b.type == gSENSOR_NONE )
         {
             // totally empty space! groovy!
-            return bigDistance * 512;
+            return totallyFree;
         }
         else
         {
-            return bigDistance * 256;
+            return halfFree;
         }
     }
     else if ( a.hitOwner_ != b.hitOwner_ )
     {
         // different owners? Great, there has to be a way through!
-        REAL ret = bigDistance;
-
         if ( rim )
         {
-            ret = bigDistance * .001 + ret * .01 + ( a.before_hit - b.before_hit).Norm();
-
-            // we love going between the rim and enemies
             if ( !self )
-                ret = bigDistance * 2;
+            {
+                // we love going between the rim and enemies
+                return rimTunnel;
+            }
+            else
+            {
+                // we don't love going between own wall and rim
+                return bigDistance * .001 + ( a.before_hit - b.before_hit).Norm();
+            }
         }
 
-        // minimal factor should be 1, this path should never return something smaller than the
-        // paths where only one cycle's walls are hit
-        ret *= 16;
-
-        return ret * selfHatred;
+        return tunnel;
     }
     else if ( rim )
     {
-        if( a.type != gSENSOR_RIM || b.type != gSENSOR_RIM )
-        {
-            // not too bad if one of the walls is not the rim
-            selfHatred *= 4;
-        }
-
         // at least one rim wall? Take the distance between the hit positions.
-        return ( a.before_hit - b.before_hit).Norm() * selfHatred;
+        return ( a.before_hit - b.before_hit).Norm();
     }
     else if ( a.lr != b.lr )
     {
-        // different directions? Also great!
-        return 16*bigDistance + fabsf( a.hitDistance_ - b.hitDistance_ ) * selfHatred;
-    }
-    /*
-      else if ( - 2 * a.lr * (a.windingNumber_ - b.windingNumber_ ) > owner_->Grid()->WindingNumber() )
-      {
-      // this looks like a way out to me
-      return fabsf( a.hitDistance_ - b.hitDistance_ ) * 10 * selfHatred;
-      }
-    */
-    else
-    {
         // well, the longer the wall segment between the two points, the better.
-        return fabsf( a.hitDistance_ - b.hitDistance_ ) * selfHatred;
+        return fabsf( a.hitDistance_ - b.hitDistance_ ) * 2;
     }
 
     // default: hit distance
-    return ( a.before_hit - b.before_hit).Norm() * selfHatred;
+    return ( a.before_hit - b.before_hit).Norm();
 }
 
 bool gAINavigator::CanMakeTurn( uActionPlayer * action )
