@@ -150,7 +150,7 @@ bool gAINavigator::Sensor::DoExtraDetectionStuff()
             // assume we can waste half our rubber waiting for the wall to get lost
             {
                 REAL rubberGranted, rubberEffectiveness;
-                sg_RubberValues( ai_.owner_->player, ai_.owner_->Speed(), rubberGranted, rubberEffectiveness );
+                sg_RubberValues( ai_.owner_->Player(), ai_.owner_->Speed(), rubberGranted, rubberEffectiveness );
                 rubberDistance = ( rubberGranted - ai_.owner_->GetRubber() ) * .5;
             }
             if( type == gSENSOR_SELF )
@@ -618,7 +618,7 @@ void gAINavigator::RubberEvaluator::Init( gCycle const & cycle, REAL maxTime )
     // compensate for the addition of rubber in the stored sensor distances
     REAL rubberGranted, rubberEffectiveness;
     REAL speed = cycle.Speed();
-    sg_RubberValues( cycle.player, speed, rubberGranted, rubberEffectiveness );
+    sg_RubberValues( cycle.Player(), speed, rubberGranted, rubberEffectiveness );
     REAL rubberLeft = ( rubberGranted - cycle.GetRubber() )*rubberEffectiveness;
     maxRubber_  = maxTime * speed;
 
