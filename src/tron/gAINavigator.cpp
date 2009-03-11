@@ -1150,6 +1150,7 @@ void gAINavigator::UpdatePaths()
     self.before_hit = pos;
     self.windingNumber_ = owner_->windingNumber_;
     self.type = gSENSOR_SELF;
+    self.hit = 0;
     self.hitDistance_ = 0;
     self.hitOwner_ = owner_;
     self.hitTime_ = owner_->LastTime();

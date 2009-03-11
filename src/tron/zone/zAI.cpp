@@ -143,7 +143,20 @@ void zZoneEvaluator::Init( gCycle const & cycle, zZone const & zone, REAL maxSte
     }
     else
     {
-        tailToChase = center;
+        eCoord edge = shape->findPointNear( cycle.Position() );
+        REAL radiusSquared = (edge-center).NormSquared();
+        REAL insideness = 2*(cycle.Position()-center).NormSquared()/radiusSquared;
+        if( insideness < 1 )
+        {
+            radiusSquared *= insideness;
+        }
+
+        REAL radius = sqrtf( radiusSquared );
+
+        // pick a random target
+        static tReproducibleRandomizer randomizer;
+        eCoord r = center + eCoord( randomizer.Get() * 2 - 1, randomizer.Get() * 2 - 1 ) * radius;
+        tailToChase = r;
     }
 
 #ifdef DEBUG
