@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gAINavigator.h"
 
 #include "tRandom.h"
+#include "tSysTime.h"
 
 #include "eGrid.h"
 
@@ -521,13 +522,16 @@ void gAINavigator::CowardEvaluator::Evaluate( Path const & path, PathEvaluation 
     if( path.left.owner || path.right.owner )
     {
         REAL turnDelay = cycle_.GetTurnDelay() * cycle_.Speed();
-        if( path.right.distance < turnDelay && path.left.owner && path.left.owner->Alive() && path.left.owner->Team() != cycle_.Team() && path.left.lr == 1 )
+        if( path.right.distance + path.left.distance < turnDelay * 4 )
         {
-            evaluation.score = 0;
-        }
-        if( path.left.distance < turnDelay && path.right.owner && path.right.owner->Alive() && path.right.owner->Team() != cycle_.Team() && path.right.lr == -1 )
-        {
-            evaluation.score = 0;
+            if(  path.left.owner && path.left.owner->Alive() && path.left.owner->Team() != cycle_.Team() && path.left.lr == 1 )
+            {
+                evaluation.score = 0;
+            }
+            if( path.right.owner && path.right.owner->Alive() && path.right.owner->Team() != cycle_.Team() && path.right.lr == -1 )
+            {
+                evaluation.score = 0;
+            }
         }
     }
 }
@@ -579,6 +583,59 @@ gAINavigator::EvaluationManager::EvaluationManager( PathGroup & paths )
     }
 }
         
+//! evaluate a path.
+void gAINavigator::RubberEvaluator::Evaluate( Path const & path, PathEvaluation & evaluation ) const
+{
+    // rubber that is about to get burned
+    REAL burn = rubberLeft_ - path.immediateDistance;
+    if( burn < 0 )
+    {
+        burn = 0;
+    }
+    if( burn > maxRubber_ )
+    {
+        burn = maxRubber_;
+    }
+    evaluation.score = ( 1 - burn/maxRubber_ ) * 100;
+}
+
+gAINavigator::RubberEvaluator::RubberEvaluator( gCycle const & cycle )
+{
+    Init( cycle, cycle.GetTurnDelay() );
+}
+
+gAINavigator::RubberEvaluator::RubberEvaluator( gCycle const & cycle, REAL maxTime )
+{
+    Init( cycle, maxTime );
+}
+
+gAINavigator::RubberEvaluator::~RubberEvaluator()
+{
+}
+
+void gAINavigator::RubberEvaluator::Init( gCycle const & cycle, REAL maxTime )
+{
+    // compensate for the addition of rubber in the stored sensor distances
+    REAL rubberGranted, rubberEffectiveness;
+    REAL speed = cycle.Speed();
+    sg_RubberValues( cycle.player, speed, rubberGranted, rubberEffectiveness );
+    REAL rubberLeft = ( rubberGranted - cycle.GetRubber() )*rubberEffectiveness;
+    maxRubber_  = maxTime * speed;
+
+    // account for inevitable loss
+    rubberLeft_ = rubberLeft_ + maxRubber_;
+
+    if( maxRubber_ > rubberLeft )
+    {
+        maxRubber_ = rubberLeft;
+    }
+
+    if( maxRubber_ < EPS )
+    {
+        maxRubber_ = EPS;
+    }
+}
+
 // *************************
 // * FollowEvaluator      *
 // *************************
@@ -970,8 +1027,7 @@ REAL gAINavigator::Distance( Sensor const & a, Sensor const & b ) const
     else if ( a.hitOwner_ != b.hitOwner_ )
     {
         // different owners? Great, there has to be a way through!
-        REAL ret =
-        a.hitDistance_ + b.hitDistance_;
+        REAL ret = bigDistance;
 
         if ( rim )
         {
@@ -1002,7 +1058,7 @@ REAL gAINavigator::Distance( Sensor const & a, Sensor const & b ) const
     else if ( a.lr != b.lr )
     {
         // different directions? Also great!
-        return ( fabsf( a.hitDistance_ - b.hitDistance_ ) + .25 * bigDistance ) * selfHatred;
+        return 16*bigDistance + fabsf( a.hitDistance_ - b.hitDistance_ ) * selfHatred;
     }
     /*
       else if ( - 2 * a.lr * (a.windingNumber_ - b.windingNumber_ ) > owner_->Grid()->WindingNumber() )
@@ -1081,19 +1137,53 @@ static void sg_FillSensorGap( gAINavigator::Sensor const & left, gAINavigator::S
     // check orientation
     tASSERT( left.Direction() * right.Direction() >= 0 );
 
-    // do left and right sensors fit?
-    if( gap.type == gSENSOR_NONE &&
-        left.type != gSENSOR_NONE &&
-        left.type == right.type &&
-        left.lr  == right.lr &&
-        left.hitOwner_ == right.hitOwner_ )
+    if( gap.type == gSENSOR_NONE )
     {
-        gap.type = left.type;
-        gap.lr = left.lr;
-        gap.hitOwner_ = left.hitOwner_;
-        gap.hitTime_  = ( left.hitTime_ + right.hitTime_ )/2;
-        gap.hitDistance_  = ( left.hitDistance_ + right.hitDistance_ )/2;
+        // do left and right sensors fit?
+        if ( left.type != gSENSOR_NONE &&
+             left.type == right.type &&
+             left.lr  == right.lr &&
+             left.hitOwner_ == right.hitOwner_ )
+        {
+            gap.type = left.type;
+            gap.lr = left.lr;
+            gap.hitOwner_ = left.hitOwner_;
+            gap.hitTime_  = ( left.hitTime_ + right.hitTime_ )/2;
+            gap.hitDistance_  = ( left.hitDistance_ + right.hitDistance_ )/2;
+            gap.hit = 1.0;
+
+            return;
+        }
+        
+        // is there an enemy that may block?
+        if( left.type == gSENSOR_ENEMY && left.lr == 1 )
+        {
+            gap.type = left.type;
+            gap.lr = left.lr;
+            gap.hitOwner_ = left.hitOwner_;
+            gap.hitTime_  = left.hitTime_;
+            gap.hitDistance_  = 0;
+            gap.hit = left.hitDistance_/gap.Direction().Norm();
+        }
+
+        // is there an enemy that may block?
+        if( right.type == gSENSOR_ENEMY && right.lr == -1 )
+        {
+            gap.type = right.type;
+            gap.lr = right.lr;
+            gap.hitOwner_ = right.hitOwner_;
+            gap.hitTime_  = right.hitTime_;
+            gap.hitDistance_  = 0;
+            gap.hit = right.hitDistance_/gap.Direction().Norm();
+        }
     }
+}
+
+
+static inline void sg_NoNeg( REAL & r )
+{
+    if( r < 0 )
+        r = 0;
 }
 
 void gAINavigator::UpdatePaths()
@@ -1180,12 +1270,25 @@ void gAINavigator::UpdatePaths()
             right.hit > left.hit &&
             left.hit * range < close )
         {
-            // transform it into a P-Turn
-            path.turn *= -1;
-            path.immediateDistance = HUGE;
-            sg_AddSensor( path, forward, range, rubberLeft );
-            sg_AddSensor( path, right, range, rubberLeft );
-            sg_AddSensor( path, forwardRight, range, rubberLeft );
+            // calculate rubber usage of the two possibilities
+            REAL rubberOffset = owner_->GetTurnDelay() * owner_->Speed()/range;
+            REAL pRubberUsageA = rubberOffset - right.hit;
+            REAL pRubberUsageB = pRubberUsageA - left.hit;
+            REAL pRubberUsageC = rubberOffset - forward.hit;
+            REAL uRubberUsage  = rubberOffset - left.hit;
+            sg_NoNeg( pRubberUsageA );
+            sg_NoNeg( pRubberUsageB );
+            sg_NoNeg( pRubberUsageC );
+            sg_NoNeg( uRubberUsage );
+            if( uRubberUsage > pRubberUsageA + pRubberUsageB + pRubberUsageC )
+            {
+                // transform it into a P-Turn
+                path.turn *= -1;
+                path.immediateDistance = HUGE;
+                sg_AddSensor( path, forward, range, rubberLeft );
+                sg_AddSensor( path, right, range, rubberLeft );
+                sg_AddSensor( path, forwardRight, range, rubberLeft );
+            }
         }
     }
 
@@ -1202,12 +1305,25 @@ void gAINavigator::UpdatePaths()
             left.hit > right.hit &&
             right.hit * range < close )
         {
-            // transform it into a P-Turn
-            path.turn *= -1;
-            path.immediateDistance = HUGE;
-            sg_AddSensor( path, forward, range, rubberLeft );
-            sg_AddSensor( path, left, range, rubberLeft );
-            sg_AddSensor( path, forwardLeft, range, rubberLeft );
+            // calculate rubber usage of the two possibilities
+            REAL rubberOffset = owner_->GetTurnDelay() * owner_->Speed()/range;
+            REAL pRubberUsageA = rubberOffset - left.hit;
+            REAL pRubberUsageB = pRubberUsageA - right.hit;
+            REAL pRubberUsageC = rubberOffset - forward.hit;
+            REAL uRubberUsage  = rubberOffset - right.hit;
+            sg_NoNeg( pRubberUsageA );
+            sg_NoNeg( pRubberUsageB );
+            sg_NoNeg( pRubberUsageC );
+            sg_NoNeg( uRubberUsage );
+            if( uRubberUsage > pRubberUsageA + pRubberUsageB + pRubberUsageC )
+            {
+                // transform it into a P-Turn
+                path.turn *= -1;
+                path.immediateDistance = HUGE;
+                sg_AddSensor( path, forward, range, rubberLeft );
+                sg_AddSensor( path, left, range, rubberLeft );
+                sg_AddSensor( path, forwardLeft, range, rubberLeft );
+            }
         }
     }
 

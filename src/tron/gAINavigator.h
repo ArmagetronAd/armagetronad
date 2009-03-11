@@ -291,6 +291,21 @@ public:
         ~PlanEvaluator();
     };
 
+    //! simple evaluator: does not like it if rubber gets burned
+    class RubberEvaluator: public PathEvaluator
+    {
+    public:
+        //! evaluate a path.
+        virtual void Evaluate( Path const & path, PathEvaluation & evaluation ) const;
+        explicit RubberEvaluator( gCycle const & cylce );
+        RubberEvaluator( gCycle const & cycle, REAL maxTime );
+        ~RubberEvaluator();
+    private:
+        void Init( gCycle const & cycle, REAL maxTime );
+        REAL rubberLeft_; //!< amount of rubber left to burn with inevitable loss due to turn delay factored in
+        REAL maxRubber_;  //!< maximal rubber possible to burn
+    };
+
     //! evaluator for following a moving target
     class FollowEvaluator: public PathEvaluator
     {

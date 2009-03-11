@@ -179,10 +179,11 @@ REAL zStateDefend::Think( REAL maxStep )
     Navigator().UpdatePaths();
     gAINavigator::EvaluationManager manager( Navigator().GetPaths() );
     manager.Evaluate( gAINavigator::SuicideEvaluator( cycle ), 1 );
-    manager.Evaluate( gAINavigator::SuicideEvaluator( cycle, maxStep ), 1 );
+    // manager.Evaluate( gAINavigator::SuicideEvaluator( cycle, maxStep ), 1 );
     manager.Evaluate( gAINavigator::TrapEvaluator( cycle ), 1 );
     manager.Reset();
-    manager.Evaluate( gAINavigator::SpaceEvaluator( cycle ), .1 );
+    manager.Evaluate( gAINavigator::RubberEvaluator( cycle, maxStep ), .5 );
+    manager.Evaluate( gAINavigator::SpaceEvaluator( cycle ), 1 );
     manager.Evaluate( gAINavigator::RandomEvaluator(), .01 );
     manager.Evaluate( gAINavigator::PlanEvaluator(), .1 );
 
