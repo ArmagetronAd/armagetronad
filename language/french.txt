@@ -253,7 +253,6 @@ spam_protection_help          Determine la "puissance" du filtre anti-spam: dete
 spam_penalty_help             Nombre de secondes ou un spammeur ne peut plus poster
 spam_maxlen_help              Taille maximale des messages dans le chat
 spam_autokick_help            Les "points de spam", qui vous bannissent d'un serveur instantanement.
-silence_all_help              Si "1", le chat sera desactive
 # spam kick messages
 
 #********************************************
