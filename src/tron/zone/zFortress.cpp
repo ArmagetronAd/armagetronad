@@ -426,8 +426,8 @@ void zFortressZone::OnThink( void )
     }
 
     // we want to have that many attackers and defenders
-    int wishDefenders = 0;
-    int wishAttackers = 2;
+    int wishDefenders = 1;
+    int wishAttackers = 1;
 
     // find closest enemy and friendly AI not attacking or defending,
     // and count those attacking/defending us while we're at it

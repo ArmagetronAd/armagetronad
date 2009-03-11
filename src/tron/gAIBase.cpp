@@ -1759,6 +1759,7 @@ gAIPlayer::StateGrind::~StateGrind(){}
 
 REAL gAIPlayer::StateGrind::Think( REAL maxStep )
 {
+    Parent().SwitchToSurvival();
     /*
 
     REAL range = Delay() * Object()->Speed() * .5;

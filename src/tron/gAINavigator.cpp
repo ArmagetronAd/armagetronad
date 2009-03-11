@@ -1023,6 +1023,20 @@ REAL gAINavigator::Distance( Sensor const & a, Sensor const & b ) const
             }
         }
 
+        if ( self )
+        {
+            REAL trapFactor = .5;
+            if ( a.type == gSENSOR_SELF && a.lr == +1 )
+            {
+                // we're trapping another player and us with him. bad idea.
+                return a.hitDistance_ * trapFactor;
+            }
+            if ( b.type == gSENSOR_SELF && b.lr == -1 )
+            {
+                return b.hitDistance_ * trapFactor;
+            }
+        }
+
         return tunnel;
     }
     else if ( rim )
