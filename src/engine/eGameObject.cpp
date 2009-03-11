@@ -248,11 +248,6 @@ void eGameObject::Move( const eCoord &dest, REAL startTime, REAL endTime, bool u
         // start iterator for collisions with temporary walls
         eTempEdgeMap::const_iterator currentTempCollision = tempCollisions.begin();
 
-        // we modify our position while we go; we need to compensate
-        // all time calculations for that. This variable stores how much
-        // of the way to the target position we're already gone.
-        REAL goneRatio = 0;
-
         int timeout = se_moveTimeout;
 
         REAL lastDistance = 1E+30; // the distance of pos and stop in the last step
@@ -384,11 +379,8 @@ rerun:
 
             if (best)
             {
-                // update the fraction of the full way we've gone so far
-                goneRatio = goneRatio + ( 1 - goneRatio ) * bestERatio;
-
                 // handle stored temp collisions
-                while ( currentTempCollision != tempCollisions.end() && (*currentTempCollision).first < goneRatio )
+                while ( currentTempCollision != tempCollisions.end() && (*currentTempCollision).first < bestERatio )
                 {
                     eTempEdgePassing const & passing = (*currentTempCollision).second;
                     PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );
