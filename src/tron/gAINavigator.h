@@ -290,6 +290,37 @@ public:
         ~PlanEvaluator();
     };
 
+    //! evaluator for following a moving target
+    class FollowEvaluator: public PathEvaluator
+    {
+    public:
+        FollowEvaluator( gCycle const & cycle );
+        ~FollowEvaluator();
+        
+        //! return data of SolveTurn
+        struct SolveTurnData
+        {
+            REAL turnTime;  //!< seconds to wait before we turn
+            REAL quality;   //!< quality of the turn
+            eCoord turnDir; //!< direction to drive in
+            
+            SolveTurnData(): turnTime(0), quality(0){}
+        };
+        
+        //! determine when we need to turn in order to catch the target.
+        void SolveTurn( int direction, eCoord const & targetVelocity, eCoord const & targetPosition, SolveTurnData & data );
+        
+        //! set the target to follow
+        void SetTarget( eCoord const & target, eCoord const & velocity );
+        virtual void Evaluate( gAINavigator::Path const & path, gAINavigator::PathEvaluation & evaluation ) const;
+    protected:
+        gCycle const & cycle_; //!< the owning cycle
+        gCycle * blocker_;     //!< other cycle blocking the path to the target
+        eCoord toTarget_;      //!< direction to target, roughly normalized
+        REAL   turnTime_;      //!< time to make the next turn
+    };
+
+
     class EvaluationManager
     {
     public:

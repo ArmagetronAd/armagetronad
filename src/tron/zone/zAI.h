@@ -29,13 +29,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef ArmageTron_ZONE_AI_H
 #define ArmageTron_ZONE_AI_H
 
+#include "gAINavigator.h"
 #include "gAIBase.h"
 
 class gCycle;
 class zZone;
 
 //! evaluator for zone defense
-class zZoneEvaluator: public gFollowEvaluator
+class zZoneEvaluator: public gAINavigator::FollowEvaluator
 {
 public:
     zZoneEvaluator( gCycle const & cycle, zZone const & zone, REAL maxStep );

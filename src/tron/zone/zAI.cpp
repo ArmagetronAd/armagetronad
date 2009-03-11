@@ -41,7 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //!@param cycle the cycle to control
 //!@param zone  the zone to protect/attack
 //!@papam maxstep the maximal delay until the next thought
-zZoneEvaluator::zZoneEvaluator( gCycle const & cycle, zZone const & zone, REAL maxStep ): gFollowEvaluator( cycle )
+zZoneEvaluator::zZoneEvaluator( gCycle const & cycle, zZone const & zone, REAL maxStep ): gAINavigator::FollowEvaluator( cycle )
 {
     Init( cycle, zone, maxStep );
 }
