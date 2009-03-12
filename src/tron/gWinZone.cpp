@@ -1132,6 +1132,9 @@ static tSettingItem<bool> conf_shotCollision ("SHOT_COLLISION", sg_shotCollision
 static int sg_shotWallBounce = 0;
 static tSettingItem<int> sg_shotWallBounceConf ("SHOT_WALL_BOUNCE", sg_shotWallBounce);
 
+static bool sg_shotKillInvulnerable = 1;
+static tSettingItem<bool> sg_shotKillInvulnerableConf( "SHOT_KILL_INVULNERABLE", sg_shotKillInvulnerable );
+
 gZone & gDeathZoneHack::SetType(int type)
 {
     if (type < NUM_DEATH_ZONE_TYPES)
@@ -1224,6 +1227,10 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
     }
     else
     {
+        if ( !target->Vulnerable() && !sg_shotKillInvulnerable ) {
+            //Checks to see if their cycle is invulnerable, don't kill invulnerable players
+            return;
+   	}
         //Validate the owner player ID
         pOwner_ = validatePlayer(pOwner_);
         //??? Really need for the player to get cleared when they exit, it is possible for
