@@ -243,6 +243,7 @@ void se_SoundInit()
             o << "$sound_inited";
             con << o;
 #endif
+            se_SoundPause(false);
         }
     }
 
@@ -328,7 +329,7 @@ void se_SoundPause(bool p){
 eWavData* eWavData::s_anchor = NULL;
 
 eWavData::eWavData(const char * fileName,const char *alternative)
-        :tListItem<eWavData>(s_anchor),data(NULL),len(0),freeData(false){
+        :tListItem<eWavData>(s_anchor),data(NULL),len(0),freeData(false), loadError(false){
     //wavs.Add(this,id);
     filename     = fileName;
     filename_alt = alternative;
@@ -339,13 +340,18 @@ void eWavData::Load(){
     //wavs.Add(this,id);
 
     if (data)
+    {
+        loadError = false;
         return;
+    }
 
 #ifndef DEDICATED
 
     static char const * errorName = "Sound Error";
 
     freeData = false;
+
+    loadError = true;
 
     alt=false;
 
@@ -437,6 +443,8 @@ void eWavData::Load(){
     con << "at " << spec.freq << " Hz,\n";
 
     con << samples << " samples in " << len << " bytes.\n";
+
+    loadError = false;
 #endif
 #endif
 #endif
@@ -444,6 +452,8 @@ void eWavData::Load(){
 
 void eWavData::Unload(){
 #ifndef DEDICATED
+    loadError = false;
+
     //wavs.Add(this,id);
     if (data){
         eSoundLocker locker;
@@ -492,7 +502,14 @@ bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
 #ifndef DEDICATED
     if ( !data )
     {
-        return false;
+        if( !loadError )
+        {
+            Load();
+        }
+        if ( !data )
+        {
+            return false;
+        }
     }
 
     playlen/=4;

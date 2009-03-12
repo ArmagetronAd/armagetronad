@@ -68,6 +68,7 @@ class eWavData: public tListItem<eWavData>{
     tString       filename; // the filename
     tString       filename_alt; // the filename
     bool          freeData; // manually free data or use SDL_FreeWAV?
+    bool          loadError; //!< was there an error during loading?
 
     static eWavData* s_anchor; // list anchor
 
