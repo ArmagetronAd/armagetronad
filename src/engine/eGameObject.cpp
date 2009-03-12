@@ -49,17 +49,16 @@ uActionPlayer eGameObject::se_turnLeft("CYCLE_TURN_LEFT", -10);
 
 // entry and deletion in the list of all gameObjects
 void eGameObject::AddToList(){
-    se_SoundLock();
+    eSoundLocker locker;
 
     if ( id < 0 )
         AddRef();
 
     grid->gameObjectsInactive.Remove(this,inactiveID);
     grid->gameObjects.Add(this,id);
-    se_SoundUnlock();
 }
 void eGameObject::RemoveFromList(){
-    se_SoundLock();
+    eSoundLocker locker;
 
     int oldID = id;
 
@@ -70,12 +69,10 @@ void eGameObject::RemoveFromList(){
 
     if ( oldID >= 0 )
         Release();
-
-    se_SoundUnlock();
 }
 
 void eGameObject::RemoveFromListsAll(){
-    se_SoundLock();
+    eSoundLocker locker;
 
     int oldID = id;
 
@@ -87,8 +84,6 @@ void eGameObject::RemoveFromListsAll(){
 
     if ( oldID >= 0 )
         Release();
-
-    se_SoundUnlock();
 }
 
 void eGameObject::RemoveFromGame()

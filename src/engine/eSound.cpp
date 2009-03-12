@@ -256,12 +256,10 @@ void se_SoundInit()
 
 void se_SoundExit(){
 #ifndef DEDICATED
-    se_SoundLock();
+    eSoundLocker locker;
 
     eWavData::UnloadAll();
     se_SoundPause(true);
-
-    se_SoundUnlock();
 
     if (sound_is_there){
 #ifdef DEBUG
@@ -448,7 +446,7 @@ void eWavData::Unload(){
 #ifndef DEDICATED
     //wavs.Add(this,id);
     if (data){
-        se_SoundLock();
+        eSoundLocker locker;
         if ( freeData )
         {
 
@@ -468,7 +466,6 @@ void eWavData::Unload(){
 
         data=NULL;
         len=0;
-        se_SoundUnlock();
     }
 #endif
 }
@@ -743,7 +740,11 @@ eSoundPlayer::eSoundPlayer(eWavData &w,bool l)
         goon[i]=true;
 }
 
-eSoundPlayer::~eSoundPlayer(){}
+eSoundPlayer::~eSoundPlayer()
+{
+    eSoundLocker locker;
+    se_globalPlayers.Remove(this,id);
+}
 
 bool eSoundPlayer::Mix(Uint8 *dest,
                        Uint32 len,
@@ -783,9 +784,8 @@ void eSoundPlayer::End(){
 void eSoundPlayer::MakeGlobal(){
     wav->Load();
 
-    se_SoundLock();
+    eSoundLocker locker;
     se_globalPlayers.Add(this,id);
-    se_SoundUnlock();
 }
 
 
@@ -865,5 +865,15 @@ void se_SoundMenu(){
     }
     //	se_SoundUnlock();
     //  se_SoundPause(false);
+}
+
+eSoundLocker::eSoundLocker()
+{
+    se_SoundLock();
+}
+
+eSoundLocker::~eSoundLocker()
+{
+    se_SoundUnlock();
 }
 

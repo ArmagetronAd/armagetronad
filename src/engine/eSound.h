@@ -36,10 +36,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 void se_SoundInit();
 void se_SoundExit();
-void se_SoundLock();
-void se_SoundUnlock();
+//void se_SoundLock();
+//void se_SoundUnlock();
 void se_SoundPause(bool p);
 void se_SoundMenu();
+
+//! locks sound while in existence.
+class eSoundLocker
+{
+    eSoundLocker( eSoundLocker const & );
+public:
+    eSoundLocker();
+    ~eSoundLocker();
+};
 
 class eAudioPos{
 public:
@@ -92,7 +101,7 @@ public:
 };
 
 class eSoundPlayer{
-    int id;
+    int id; // ID in the global players list
     eWavData *wav; // the sound we should put out
     eAudioPos pos[MAX_VIEWERS]; // the position of all viewers
     bool goon[MAX_VIEWERS];

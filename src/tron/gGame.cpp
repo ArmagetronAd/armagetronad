@@ -1231,6 +1231,8 @@ gArena Arena;
 
 
 void exit_game_grid(eGrid *grid){
+    eSoundLocker soundLocker;
+
     grid->Clear();
 }
 
@@ -1238,6 +1240,8 @@ void exit_game_objects(eGrid *grid){
     sr_con.fullscreen=true;
 
     su_prefetchInput=false;
+
+    eSoundLocker soundLocker;
 
     int i;
     for(i=ePlayer::Num()-1;i>=0;i--){
@@ -1287,6 +1291,8 @@ extern bool sg_axesIndicator;
 void init_game_grid(eGrid *grid, gParser *aParser){
     se_ResetGameTimer();
     se_PauseGameTimer(true);
+
+    eSoundLocker soundLocker;
 
 #ifndef DEDICATED
     if (sr_glOut){
@@ -1438,6 +1444,8 @@ static int sg_spawnPointGroupSize=0;
 static tSettingItem< int > sg_spawnPointGroupSizeConf( "SPAWN_POINT_GROUP_SIZE", sg_spawnPointGroupSize );
 
 void init_game_objects(eGrid *grid){
+    eSoundLocker soundLocker;
+
     /*
       static REAL r[MAX_PLAYERS]={1,.2,.2,1};
       static REAL g[MAX_PLAYERS]={.2,1,.2,1};
@@ -1714,7 +1722,7 @@ static tSettingItem<REAL> sg_dedicatedFPSMinstepConf( "DEDICATED_FPS_IDLE_FACTOR
 
 void s_Timestep(eGrid *grid, REAL time,bool cam){
     gNetPlayerWall::s_CopyIntoGrid();
-    se_SoundLock();
+    eSoundLocker locker;
     REAL minstep = 0;
 #ifdef DEDICATED
     minstep = 1.0/sg_dedicatedFPS;
@@ -1727,7 +1735,6 @@ void s_Timestep(eGrid *grid, REAL time,bool cam){
 
     if (cam)
         eCamera::s_Timestep(grid, time);
-    se_SoundUnlock();
 
     lastTimeTimestep=time;
 }
@@ -2024,18 +2031,20 @@ bool ConnectToServerCore(nServerInfoBase *server)
     rViewport::Update(MAX_PLAYERS);
     // ePlayerNetID::Update();
 
+    bool to=sr_textOut;
+
+    {
 #ifndef DEDICATED
     rSysDep::SwapGL();
     rSysDep::ClearGL();
     rSysDep::SwapGL();
     rSysDep::ClearGL();
-    se_SoundLock();
+    eSoundLocker locker;
 #endif
 
     sr_con.autoDisplayAtNewline=true;
     sr_con.fullscreen=true;
 
-    bool to=sr_textOut;
     sr_textOut=true;
 
     tOutput o;
@@ -2053,32 +2062,20 @@ bool ConnectToServerCore(nServerInfoBase *server)
     {
     case nABORT:
         return false;
-#ifndef DEDICATED
-        se_SoundUnlock();
-#endif
         break;
     case nOK:
         break;
     case nTIMEOUT:
         sg_NetworkError("$network_message_timeout_title", "$network_message_timeout_inter", 20);
-#ifndef DEDICATED
-        se_SoundUnlock();
-#endif
         return false;
         break;
 
     case nDENIED:
         sg_NetworkError("$network_message_denied_title", sn_DenyReason.Len() > 2 ? "$network_message_denied_inter2" : "$network_message_denied_inter", 20);
-#ifndef DEDICATED
-        se_SoundUnlock();
-#endif
         return false;
         break;
     }
-
-#ifndef DEDICATED
-    se_SoundUnlock();
-#endif
+    }
 
     // ePlayerNetID::CompleteRebuild();
 
