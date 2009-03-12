@@ -85,7 +85,6 @@ CLIENTDEP(PNG "libpng")
 CLIENTDEP(SDL "Simple DirectMedia Layer(SDL)")
 CLIENTDEP(SDLMIXER "SDL_mixer")
 CLIENTDEP(SDLIMAGE "SDL_image")
-DEP(INEXISTANT "inexistant")
 
 set (ARMA_INCLUDE_DIRS
     ${ARMA_BINARY_DIR}/src/
@@ -156,7 +155,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/language/languages.txt.in ${CMAKE_CUR
 message (STATUS "Generating src/tUniversalVariables.h")
 WRITE_UNIVARS()
 
-if( (NOT BUILDCLIENT) AND (NOT DEDICATEDONLY) AND (BUILD))
+if( NOT BUILDCLIENT AND NOT DEDICATEDONLY AND BUILD )
     message ("No client will be built!")
 endif()
 
