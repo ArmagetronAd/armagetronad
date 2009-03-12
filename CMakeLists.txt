@@ -211,8 +211,8 @@ add_custom_target (generateversion ALL
     DEPENDS ${ARMA_BINARY_DIR}/src/tTrueVersion.h
     )
 
-if(${BUILDCLIENT})
-    add_executable (armagetronad src/tools/tVersion.cpp src/tron/gClient.cpp WIN32)
+if(BUILDCLIENT)
+    add_executable (armagetronad WIN32 src/tools/tVersion.cpp src/tron/gClient.cpp )
     target_link_libraries (armagetronad tron engine ui render network tools protos mathexpr particles scrap ${ARMA_LINK_LIBRARIES})
     add_dependencies (armagetronad 
         generateversion
