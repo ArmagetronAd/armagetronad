@@ -18,7 +18,6 @@ add_library (tron
     gAIBase.h                   gAIBase.cpp
     gAICharacter.h              gAICharacter.cpp
     gArena.h                    gArena.cpp
-                                gArmagetron.cpp
     gCamera.h                   gCamera.cpp
     gCommandLineJumpStart.h     gCommandLineJumpStart.cpp
     gCycle.h                    gCycle.cpp

@@ -60,19 +60,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nServerInfo.h"
 #include "nSocket.h"
 #include "tRuby.h"
-#ifndef DEDICATED
 #include "rRender.h"
 #include "rSDL.h"
 #include <SDL_syswm.h>
 
 static gCommandLineJumpStartAnalyzer sg_jumpStartAnalyzer;
-#endif
 
-#ifndef DEDICATED
 #ifdef MACOSX
 #include "AAURLHandler.h"
 #include "version.h"
-#endif
 #endif
 
 // data structure for command line parsing
@@ -131,19 +127,10 @@ private:
 
     virtual void DoHelp( std::ostream & s )
     {                                      //
-#ifndef DEDICATED
-        s << "-f, --fullscreen             : start in fullscreen mode\n";
-        s << "-w, --window, --windowed     : start in windowed mode\n\n";
 #ifdef WIN32
         s << "+directx, -directx           : enable/disable usage of DirectX for screen\n"
         << "                               initialisation under MS Windows\n\n";
         s << "\n\nYes, I know this looks ugly. Sorry about that.\n";
-#endif
-#else
-#ifndef WIN32
-        s << "-d, --daemon                 : allow the dedicated server to run as a daemon\n"
-        << "                               (will not poll for input on stdin)\n";
-#endif
 #endif
     }
 };
@@ -159,7 +146,6 @@ static tConfItem<bool> udx("USE_DIRECTX","makes use of the DirectX input "
 
 extern void exit_game_objects(eGrid *grid);
 
-#ifndef DEDICATED
 static void welcome(){
     bool textOutBack = sr_textOut;
     sr_textOut = false;
@@ -219,14 +205,12 @@ static void welcome(){
                 showSplash = tRecorder::IsPlayingBack();
         }
 
-#ifndef DEDICATED
         if ( sg_jumpStartAnalyzer.ShouldConnect() )
         {
             showSplash = false;
             gLogo::SetDisplayed(false);
             sg_jumpStartAnalyzer.Connect();
         }
-#endif
 
 #ifdef MACOSX
         StartAAURLHandler();
@@ -337,7 +321,6 @@ static void welcome(){
 
     sr_textOut = textOutBack;
 }
-#endif
 
 void cleanup(eGrid *grid){
     static bool reentry=true;
@@ -383,14 +366,10 @@ void cleanup(eGrid *grid){
         sr_glOut=false;
         sr_ExitDisplay();
 
-#ifndef DEDICATED
         sr_RendererCleanup();
-#endif
-
     }
 }
 
-#ifndef DEDICATED
 int filter(const SDL_Event *tEvent){
     // recursion avoidance
     static bool recursion = false;
@@ -475,14 +454,12 @@ int filter(const SDL_Event *tEvent){
 
     return 1;
 }
-#endif
 
 //from game.C
 void Update_netPlayer();
 
 void sg_SetIcon()
 {
-#ifndef DEDICATED
 #ifndef MACOSX
 #ifdef  WIN32
     SDL_SysWMinfo	info;
@@ -500,7 +477,6 @@ void sg_SetIcon()
 
     if (tex.GetSurface())
         SDL_WM_SetIcon(tex.GetSurface(),NULL);
-#endif
 #endif
 #endif
 }
@@ -566,12 +542,6 @@ int main(int argc,char **argv){
         {
             // read/write server/client mode from/to recording
             const char * dedicatedSection = "DEDICATED";
-            if ( !tRecorder::PlaybackStrict( dedicatedSection, dedicatedServer ) )
-            {
-#ifdef DEDICATED          
-                dedicatedServer = true;
-#endif
-            }
             tRecorder::Record( dedicatedSection, dedicatedServer );
         }
 
@@ -603,7 +573,6 @@ int main(int argc,char **argv){
 #endif
 #endif
 
-#ifndef DEDICATED
         Uint32 flags = SDL_INIT_VIDEO;
 #ifdef DEBUG
         flags |= SDL_INIT_NOPARACHUTE;
@@ -627,7 +596,6 @@ int main(int argc,char **argv){
             su_JoystickInit();
         }
 #endif // NOJOYSTICK
-#endif // DEDICATED
 
         // tERR_MESSAGE( "Initializing player data." );
         ePlayer::Init();
@@ -707,7 +675,6 @@ int main(int argc,char **argv){
                 }
             }
 
-#ifndef DEDICATED
             sr_glOut=1;
             //std::cout << "checked mp\n";
 
@@ -802,18 +769,7 @@ int main(int argc,char **argv){
             eSoundMixer::ShutDown();
 
             SDL_Quit();
-#else // DEDICATED
-            if (!commandLineAnalyzer.daemon_)
-                sr_Unblock_stdin();
-
-            sr_glOut=0;
-
-            //  nServerInfo::TellMasterAboutMe();
-
-            while (!uMenu::quickexit)
-                sg_HostGame();
-#endif // DEDICATED
-            nNetObject::ClearAll();
+             nNetObject::ClearAll();
             nServerInfo::DeleteAll();
         }
 
@@ -871,15 +827,4 @@ int main(int argc,char **argv){
 
     return 0;
 }
-
-#ifdef DEDICATED
-// settings missing in the dedicated server
-static void st_Dummy(std::istream &s){tString rest; rest.ReadLine(s);}
-static tConfItemFunc st_Dummy10("MASTER_QUERY_INTERVAL", &st_Dummy);
-static tConfItemFunc st_Dummy11("MASTER_SAVE_INTERVAL", &st_Dummy);
-static tConfItemFunc st_Dummy12("MASTER_IDLE", &st_Dummy);
-static tConfItemFunc st_Dummy13("MASTER_PORT", &st_Dummy);
-#endif
-
-
 

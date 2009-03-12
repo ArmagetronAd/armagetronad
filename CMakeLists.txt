@@ -5,7 +5,11 @@ set (progtitle "Armagetron Advanced")
 
 list(APPEND CMAKE_MODULE_PATH ${ARMA_SOURCE_DIR}/batch/make/cmake/)
 
-message( "${CMAKE_MODULE_PATH}" )
+set(DEDICATEDONLY "$ENV{DEDICATEDONLY}")
+if (DEDICATEDONLY)
+    list(APPEND ARMA_DEFINES -DDEDICATED)
+    message(STATUS "Building Dedicated (Remember that's just a hack)")
+endif()
 
 ##### CONFIGURE CHECKS #####
 include (UniversalVariables)
@@ -14,6 +18,7 @@ include (CheckFunctionExists)
 include (CheckLibraryExists)
 include (CheckTypeSize)
 include (protobuf)
+include (Deps)
 
 CHECK_FUNCTION_EXISTS (isblank HAVE_ISBLANK)
 CHECK_FUNCTION_EXISTS (select HAVE_SELECT)
@@ -69,6 +74,19 @@ endif (PROTOBUF_FOUND)
 
 find_package( Boost 1.36.0 )
 
+DEP(Boost Boost)
+DEP(BISON Bison)
+DEP(LIBXML2 LibXml2)
+DEP(PROTOBUF "Google Protocol Buffers")
+
+CLIENTDEP(OPENGL "OpenGL")
+CLIENTDEP(FTGL "FTGL")
+CLIENTDEP(PNG "libpng")
+CLIENTDEP(SDL "Simple DirectMedia Layer(SDL)")
+CLIENTDEP(SDLMIXER "SDL_mixer")
+CLIENTDEP(SDLIMAGE "SDL_image")
+DEP(INEXISTANT "inexistant")
+
 set (ARMA_INCLUDE_DIRS
     ${ARMA_BINARY_DIR}/src/
     ${ARMA_SOURCE_DIR}/src/
@@ -93,12 +111,6 @@ set (ARMA_DEFINES
     -DENABLE_ZONESV2 -DENABLE_ZONESV1 # Hacks :(
     ${PNG_DEFINITIONS}
     )
-
-set(DEDICATED "$ENV{DEDICATED}")
-if (DEDICATED)
-    list(APPEND ARMA_DEFINES -DDEDICATED)
-    message(STATUS "Building Dedicated (Remember that's just a hack)")
-endif()
 
 add_definitions(${ARMA_DEFINES})
 
@@ -144,6 +156,10 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/language/languages.txt.in ${CMAKE_CUR
 message (STATUS "Generating src/tUniversalVariables.h")
 WRITE_UNIVARS()
 
+if( (NOT BUILDCLIENT) AND (NOT DEDICATEDONLY) AND (BUILD))
+    message ("No client will be built!")
+endif()
+
 
 add_subdirectory (src)
 
@@ -175,6 +191,7 @@ include_directories (
     ${ARMA_INCLUDE_DIRS}
     )
 
+
 add_custom_command (TARGET sortresources
     COMMAND ${ARMA_SOURCE_DIR}/batch/make/copyresources.py ${ARMA_SOURCE_DIR}/resource/proto/ ${ARMA_BINARY_DIR}/resource/included/ ${ARMA_SOURCE_DIR}/batch/make/sortresources.py
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${ARMA_SOURCE_DIR}/resource/binary/ ${ARMA_SOURCE_DIR}/resource/included/
@@ -195,9 +212,17 @@ add_custom_target (generateversion ALL
     DEPENDS ${ARMA_BINARY_DIR}/src/tTrueVersion.h
     )
 
-add_executable (armagetronad src/tools/tVersion.cpp)
-target_link_libraries (armagetronad tron engine ui render network tools protos mathexpr particles scrap ${ARMA_LINK_LIBRARIES})
-add_dependencies (armagetronad 
+if(${BUILDCLIENT})
+    add_executable (armagetronad src/tools/tVersion.cpp src/tron/gClient.cpp)
+    target_link_libraries (armagetronad tron engine ui render network tools protos mathexpr particles scrap ${ARMA_LINK_LIBRARIES})
+    add_dependencies (armagetronad 
+        generateversion
+        )
+endif()
+
+add_executable (armagetronad-dedicated src/tools/tVersion.cpp src/tron/gDedicated.cpp)
+target_link_libraries (armagetronad-dedicated tron engine ui render network tools protos mathexpr particles scrap ${ARMA_LINK_LIBRARIES})
+add_dependencies (armagetronad-dedicated 
     generateversion
     )
 
