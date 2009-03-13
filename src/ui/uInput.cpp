@@ -673,7 +673,7 @@ bool su_HandleEvent(SDL_Event &e, bool delayed ){
         if (keymap[sym]->act->type==uAction::uINPUT_ANALOG)
             pm*=ts*key_sensitivity;
         pressed[sym]=(realpm>0);
-        if ( keymap[sym]->IsDoubleBind( sym ) )
+        if ( pm > 0 && keymap[sym]->IsDoubleBind( sym ) )
             return true;
         return (keymap[sym]->Activate(pm, delayed ));
 

@@ -283,6 +283,9 @@ static std::string se_UnEscapeName( tString const & original )
                 c = ' ';
             }
             filter.put(c);
+
+            // don't chain escapes
+            c = 'x';
         }
         else if ( c == '%' )
         {
@@ -504,7 +507,7 @@ static void PasswordCallback( nKrawall::nPasswordRequest const & request,
 
     if ( request.method != "md5" && request.method != "bmd5" )
     {
-        con << "Unknown password scrambling method requested.";
+        con << "INTERNAL ERROR: Unknown password scrambling method requested.";
         answer.aborted = true;
         return;
     }
@@ -772,7 +775,7 @@ static tSettingItem< tAccessLevel > se_hideAccessLevelOfConf( "ACCESS_LEVEL_HIDE
 static tAccessLevelSetter se_hideAccessLevelOfConfLevel( se_hideAccessLevelOfConf, tAccessLevel_Owner );
 
 // but they are only hidden to players with a lower access level than this
-static tAccessLevel se_hideAccessLevelTo = tAccessLevel_Moderator;
+static tAccessLevel se_hideAccessLevelTo = tAccessLevel_Armatrator;
 static tSettingItem< tAccessLevel > se_hideAccessLevelToConf( "ACCESS_LEVEL_HIDE_TO", se_hideAccessLevelTo );
 static tAccessLevelSetter se_hideAccessLevelToConfLevel( se_hideAccessLevelToConf, tAccessLevel_Owner );
 
@@ -1131,7 +1134,7 @@ ePlayer::ePlayer(){
     confname.Clear();
     confname << "AUTO_LOGIN_"<< id+1;
     StoreConfitem(tNEW(tConfItem<bool>)(confname,
-                                        "$auto_login_help",
+                                        "$auto_login_confitem_help",
                                         autoLogin));
     autoLogin = false;
 
@@ -1200,7 +1203,7 @@ ePlayer::ePlayer(){
 
     confname << "HIDE_IDENTITY_"<< id+1;
     StoreConfitem(tNEW(tConfItem<bool>)(confname,
-                                        "$hide_identity_help",
+                                        "$hide_identity_confitem_help",
                                         stealth));
     stealth=false;
     confname.Clear();
@@ -2628,7 +2631,7 @@ static tSettingItem< tAccessLevel > se_shuffleUpAccessLevelConf( "ACCESS_LEVEL_S
 static tAccessLevelSetter se_shuffleUpAccessLevelConfLevel( se_shuffleUpAccessLevelConf, tAccessLevel_Owner );
 #endif
 
-static bool se_silenceAll = false;        // flag indicating whether new players should be silenced
+static bool se_silenceDefault = false;        // flag indicating whether new players should be silenced
 
 // minimal access level for chat
 static tAccessLevel se_chatAccessLevel = tAccessLevel_Program;
@@ -2650,7 +2653,7 @@ static tSettingItem< tAccessLevel > se_msgSpyAccessLevelConf( "ACCESS_LEVEL_SPY_
 static tAccessLevelSetter se_msgSpyAccessLevelConfLevel( se_msgSpyAccessLevelConf, tAccessLevel_Owner );
 
 // access level a user has to have to get IP addresses in /players output
-static tAccessLevel se_ipAccessLevel = tAccessLevel_Moderator;
+static tAccessLevel se_ipAccessLevel = tAccessLevel_Armatrator;
 static tSettingItem< tAccessLevel > se_ipAccessLevelConf( "ACCESS_LEVEL_IPS", se_ipAccessLevel );
 static tAccessLevelSetter se_ipAccessLevelConfLevel( se_ipAccessLevelConf, tAccessLevel_Owner );
 
@@ -2658,8 +2661,8 @@ static tAccessLevel se_nVerAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_nVerAccessLevelConf( "ACCESS_LEVEL_NVER", se_nVerAccessLevel );
 static tAccessLevelSetter se_nVerAccessLevelConfLevel( se_nVerAccessLevelConf, tAccessLevel_Owner );
 
-static tSettingItem<bool> se_silAll("SILENCE_ALL",
-                                    se_silenceAll);
+static tSettingItem<bool> se_silAll("SILENCE_DEFAULT",
+                                    se_silenceDefault);
 
 // handles spam checking at the right time
 // handles spam checking at the right time
@@ -2764,7 +2767,7 @@ bool IsSilencedWithWarning( ePlayerNetID const * p )
     }
     else if ( p->IsSilenced() )
     {
-        if(se_silenceAll) {
+        if(se_silenceDefault) {
             // player is silenced, but all players are silenced by default
             sn_ConsoleOut( tOutput( "$spam_protection_silenced_default" ), p->Owner() );
         } else {
@@ -4242,7 +4245,7 @@ void ePlayerNetID::MyInitAfterCreation()
 {
     this->CreateVoter();
 
-    this->silenced_ = se_silenceAll;
+    this->silenced_ = se_silenceDefault;
     this->renameAllowed_ = true;
 
     // register with machine and kick user if too many players are present
@@ -4880,13 +4883,22 @@ static tAccessLevelSetter se_ListAdminsConfLevel( se_ListAdminsConf, tAccessLeve
 class eReserveNick: public eUserConfig< tString >
 {
 #ifdef DEBUG
-    static void TestEscape()
-    {
 #ifdef KRAWALL_SERVER
-        tString test("ä@%bla:");
+    static void TestEscape( char const * t )
+    {
+        tString test(t);
         tString esc(se_EscapeName( test, false ).c_str());
         tString rev(se_UnEscapeName( esc ).c_str());
         tASSERT( test == rev );
+    }
+#endif
+
+    static void TestEscape()
+    {
+#ifdef KRAWALL_SERVER
+        TestEscape("ä@%bla:");
+        TestEscape("a b@%bl%:");
+        TestEscape("a\\_b@%bl%:");
 #endif
     }
 #endif
@@ -7472,7 +7484,7 @@ static void se_PlayerMessageConf(std::istream &s)
 
     if ( receiver <= 0 || s.good() )
     {
-        con << "Usage: PLAYER_MESSAGE <user ID or name> \"<Message>\"\n";
+        con << tOutput("$player_message_usage");
         return;
     }
 
@@ -7512,7 +7524,7 @@ static void se_KickConf(std::istream &s)
     }
     else
     {
-        con << "Usage: KICK <user ID or name> <Reason>\n";
+        con << tOutput("$kick_usage");
         return;
     }
 }
@@ -7565,7 +7577,7 @@ static void se_MoveToConf(std::istream &s, REAL severity, const char * command )
     }
     else
     {
-        con << "Usage: " << command << " <user ID or name> <server IP to kick to>:<server port to kick to> <Reason>\n";
+        con << tOutput( "$kickmove_usage", command );
         return;
     }
 }
@@ -7598,7 +7610,7 @@ static void se_BanConf(std::istream &s)
 
     if ( num == 0 && !s.good() )
     {
-        con << "Usage: BAN <user ID or name> <time in minutes(defaults to 60)> <Reason>\n";
+        con << tOutput( "$ban_usage" );
         return;
     }
 

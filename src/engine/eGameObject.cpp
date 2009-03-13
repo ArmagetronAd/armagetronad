@@ -49,17 +49,16 @@ uActionPlayer eGameObject::se_turnLeft("CYCLE_TURN_LEFT", -10);
 
 // entry and deletion in the list of all gameObjects
 void eGameObject::AddToList(){
-    se_SoundLock();
+    eSoundLocker locker;
 
     if ( id < 0 )
         AddRef();
 
     grid->gameObjectsInactive.Remove(this,inactiveID);
     grid->gameObjects.Add(this,id);
-    se_SoundUnlock();
 }
 void eGameObject::RemoveFromList(){
-    se_SoundLock();
+    eSoundLocker locker;
 
     int oldID = id;
 
@@ -70,12 +69,10 @@ void eGameObject::RemoveFromList(){
 
     if ( oldID >= 0 )
         Release();
-
-    se_SoundUnlock();
 }
 
 void eGameObject::RemoveFromListsAll(){
-    se_SoundLock();
+    eSoundLocker locker;
 
     int oldID = id;
 
@@ -87,8 +84,6 @@ void eGameObject::RemoveFromListsAll(){
 
     if ( oldID >= 0 )
         Release();
-
-    se_SoundUnlock();
 }
 
 void eGameObject::RemoveFromGame()
@@ -248,11 +243,6 @@ void eGameObject::Move( const eCoord &dest, REAL startTime, REAL endTime, bool u
         // start iterator for collisions with temporary walls
         eTempEdgeMap::const_iterator currentTempCollision = tempCollisions.begin();
 
-        // we modify our position while we go; we need to compensate
-        // all time calculations for that. This variable stores how much
-        // of the way to the target position we're already gone.
-        REAL goneRatio = 0;
-
         int timeout = se_moveTimeout;
 
         REAL lastDistance = 1E+30; // the distance of pos and stop in the last step
@@ -384,11 +374,8 @@ rerun:
 
             if (best)
             {
-                // update the fraction of the full way we've gone so far
-                goneRatio = goneRatio + ( 1 - goneRatio ) * bestERatio;
-
                 // handle stored temp collisions
-                while ( currentTempCollision != tempCollisions.end() && (*currentTempCollision).first < goneRatio )
+                while ( currentTempCollision != tempCollisions.end() && (*currentTempCollision).first < bestERatio )
                 {
                     eTempEdgePassing const & passing = (*currentTempCollision).second;
                     PassEdge( passing.wall, TIME( (*currentTempCollision).first ), passing.ratio, 0 );

@@ -87,6 +87,7 @@ static bool st_ReadEscapeSequence( char & c, char & c2, std::istream & s )
         case '"':
         case ' ':
         case '\'':
+        case '\\':
         case '\n':
             // include quoting character as literal
             return true;
@@ -248,34 +249,65 @@ std::istream & operator>> (std::istream &s,tString &x){
         c = s.get();
     }
 
+    bool lastEscape = false;
     while((quoted || !( isblank(c) || c == '\n' || c == '\r') ) && s.good() && !s.eof()){
-        x[i++]=c;
-        c=s.get();
-
         // read and interpret escape sequences
-        if ( !st_ReadEscapeSequence( c, s) )
+        bool thisEscape = false;
+        if ( !lastEscape && !( thisEscape = st_ReadEscapeSequence( c, s ) ) && quoted && c == quoteChar )
         {
-            // interpret special characters
-            if ( quoted && c == quoteChar )
-            {
-                // this marks the end of a quoted string; abort.
-                c = s.get();
-                break;
-            }
+            // no escape, this string is quoted and the current character is an end quote. We're finished.
+            c = s.get();
+            break;
         }
-        else if ( isblank( c ) )
+        else
         {
-            // include escaped spaces
+            // append escaped or regular character
             x[i++]=c;
             c=s.get();
         }
 
+        // lastEscape = thisEscape;
     }
+
     s.putback(c);
     x[i]='\0';
     return s;
 }
 
+#ifdef DEBUG
+class tQuoteTester
+{
+    // checks that a specific input produces a specific output when read via <<
+    static void Test( char const * in, char const * out )
+    {
+        std::stringstream s;
+        s << in << " NEXTWORD";
+        tString o;
+        s >> o;
+        tASSERT( o == out );
+    }
+
+public:
+    tQuoteTester()
+    {
+        // basic stuff
+        Test( "abc", "abc" );
+        
+        // quoted
+        Test( "'abc'", "abc" );
+
+        // escaped
+        Test( "\\'a\\\"b", "'a\"b" );
+        
+        // chained backslashes
+        Test( "\\\\", "\\" );
+        Test( "\\\\\\\\", "\\\\" );
+        Test( "'\\\\\\\\'", "\\\\" );
+    }
+};
+
+static tQuoteTester tester;
+#endif
 
 // *******************************************************************************************
 // *

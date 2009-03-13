@@ -51,7 +51,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 FUNCPTR  uMenu::idle(NULL);
 
 bool uMenu::wrap=true;
-bool uMenu::quickexit=false;
+uMenu::QuickExit uMenu::quickexit=uMenu::QuickExit_Off;
 bool uMenu::exitToMain=false;
 
 // *****************************************************

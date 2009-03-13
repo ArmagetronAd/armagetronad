@@ -47,6 +47,7 @@ static nSettingItemWatched<int> se_SML("SPAM_MAXLEN",
                                        se_SpamMaxLen,
                                        nConfItemVersionWatcher::Group_Cheating,
                                        3 );
+static tAccessLevelSetter se_SMLAL( se_SML.GetSetting(), tAccessLevel_Owner );
 
 
 nSpamProtectionSettings::nSpamProtectionSettings( REAL timeScale, char const * timeScaleConfig, const tOutput& silence )
