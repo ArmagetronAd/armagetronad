@@ -398,7 +398,7 @@ int filter(const SDL_Event *tEvent){
             tRecorder::Record("END");
 
             st_SaveConfig();
-            uMenu::quickexit=true;
+            uMenu::quickexit=uMenu::QuickExit_Total;
             return false;
         }
 

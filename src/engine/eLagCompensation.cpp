@@ -40,7 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // client side settings
 static REAL se_maxLagSpeedup=.2;        // maximal speed increase of timer while lag is compensated for
 static REAL se_lagSlowDecayTime=30.0;   // timescale the slow lag measurement decays on
-static REAL se_lagFastDecayTime=5.0;    // timescale the fast lag measurement decays on
+static REAL se_lagFastDecayTime=2.0;    // timescale the fast lag measurement decays on
 static REAL se_lagSlowWeight=.2f;       // extra weight lag reports from the server influence the slow lag compensation with
 static REAL se_lagFastWeight=1.0f;      // extra weight lag reports from the server influence the fast lag compensation with
 
@@ -162,11 +162,15 @@ static REAL se_lagCreditSweetSpot = .5f;
 // timescale lag credit is restored on
 static REAL se_lagCreditTime = 600.0f;
 
+// lag frequency not reported back to the client
+static REAL se_lagFrequency = .2f;
+
 static tSettingItem< REAL > se_lagCreditConf( "LAG_CREDIT", se_lagCredit );
 static tSettingItem< REAL > se_lagCreditSingleConf( "LAG_CREDIT_SINGLE", se_lagCreditSingle );
 static tSettingItem< REAL > se_lagCreditVarianceConf( "LAG_CREDIT_VARIANCE", se_lagCreditVariance );
 static tSettingItem< REAL > se_lagCreditSweetSpotConf( "LAG_SWEET_SPOT", se_lagCreditSweetSpot );
 static tSettingItem< REAL > se_lagCreditTimeConf( "LAG_CREDIT_TIME", se_lagCreditTime );
+static tSettingItem< REAL > se_lagFrequencyConf( "LAG_FREQUENCY_THRESHOLD", se_lagFrequency );
 
 // threshold
 static REAL se_lagThreshold = 0.0f;
@@ -204,6 +208,8 @@ public:
         creditUsed_ = se_lagCreditSweetSpot * Credit();
         lastTime_ = lastLag_ = tSysTimeFloat();
         client_ = 0;
+        lagRatio_.Reset();
+        lagRatio_.Add(0,5);
     }
 
     void SetClient( int client )
@@ -218,6 +224,34 @@ public:
         // see if it is useful to report
         if ( ! se_clientLagCompensation.Supported( client_ ) )
             return;
+
+        // measure lag ratio
+        lagRatio_.Timestep(.1);
+        if ( lag < 0 )
+        {
+            lagRatio_.Add(0);
+            return;
+        }
+        lagRatio_.Add(1);
+
+        // cull overly big values of lag frequency cutoff
+        if( se_lagFrequency >= 1 )
+        {
+            se_lagFrequency = 0;
+        }
+
+        // fetch lag ratio
+        REAL ratio = lagRatio_.GetAverage();
+        REAL ratioFactor = ( ratio - se_lagFrequency )/(1-se_lagFrequency);
+        if ( ratioFactor < 0 )
+        {
+            // nothing to report
+            return;
+        }
+        tASSERT( ratioFactor <= 1 );
+
+        // scale down lag
+        lag *= ratioFactor;
 
         // clamp
         lag = lag > se_lagCreditSingle ? se_lagCreditSingle : lag;
@@ -330,6 +364,7 @@ public:
 
     static void Balance();
 private:
+    nAverager lagRatio_; // !< ratio of lagged client input vs. non-lagged client input
     REAL creditUsed_; //!< the used lag credit
     double lastTime_; //!< the last time lag credit was calculated
     double lastLag_;  //!< the last time lag was reported to the client

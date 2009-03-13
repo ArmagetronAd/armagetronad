@@ -1527,7 +1527,7 @@ void gCycle::OnNotifyNewDestination( gDestination* dest )
 
         REAL lag = simTime - dest->gameTime;  // the real lag
         REAL lagOffset = simTime - lastTime;  // difference between real lag and practical lag (what we need to compensate)
-        if ( lag > 0 && sn_GetNetState() == nSERVER )
+        if ( sn_GetNetState() == nSERVER )
         {
             eLag::Report( Owner(), lag );
             if ( currentWall && currentWall->Wall() && rubberSpeedFactor >= 1-EPS )
@@ -2855,7 +2855,7 @@ bool gCycle::Timestep(REAL currentTime){
 
     // check whether simulation has fallen too far behind the requested time
 #ifdef DEDICATED
-    if ( Alive() && currentTime > lastTime + 4 * Lag() + 10 )
+    if ( Alive() && currentTime > lastTime + Lag() + 1 )
     {
         sn_ConsoleOut( "0xff7777Admin : 0xffff77BUG had to kill a cycle because it lagged behind in the simulation. Probably the invulnerability bug. Investigate!\n" );
         st_Breakpoint();

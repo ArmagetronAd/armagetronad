@@ -251,22 +251,48 @@ static int vpb_dir[MAX_VIEWPORTS];
 void rViewport::CorrectViewport(int i, int MAX_PLAYERS){
     if (vpb_dir[i]!=1 && vpb_dir[i]!=-1)
         vpb_dir[i]=1;
+
+    int starta=rViewportConfiguration::s_viewportConfigurations[rViewportConfiguration::next_conf_num]->num_viewports-1;
+    int startb=rViewportConfiguration::s_viewportConfigurations[     conf_num]->num_viewports-1;
+    if (starta>startb)
+        startb=starta;
+    
     s_newViewportBelongsToPlayer[i]+=MAX_PLAYERS-vpb_dir[i];
     s_newViewportBelongsToPlayer[i]%=MAX_PLAYERS;
+
+    int oldValue = s_newViewportBelongsToPlayer[i];
+
     bool again;
+    bool expectChange = false;
     do{
+        // rotate player assignemnt
         s_newViewportBelongsToPlayer[i]+=MAX_PLAYERS+vpb_dir[i];
         s_newViewportBelongsToPlayer[i]%=MAX_PLAYERS;
+
+        // check for conflicts
         again=false;
-        int starta=rViewportConfiguration::s_viewportConfigurations[rViewportConfiguration::next_conf_num]->num_viewports-1;
-        int startb=rViewportConfiguration::s_viewportConfigurations[     conf_num]->num_viewports-1;
-        if (starta>startb)
-            startb=starta;
         for(int j=starta;j>=0;j--)
             if (i!=j && s_newViewportBelongsToPlayer[i]
                     ==s_newViewportBelongsToPlayer[j])
+            {
                 again=true;
+                expectChange=true;
+            }
     } while(again);
+
+    if ( oldValue == s_newViewportBelongsToPlayer[i] && expectChange )
+    {
+        // no change? swap players.
+        s_newViewportBelongsToPlayer[i]+=MAX_PLAYERS+vpb_dir[i];
+        s_newViewportBelongsToPlayer[i]%=MAX_PLAYERS;
+
+        for(int j=starta;j>=0;j--)
+            if (i!=j && s_newViewportBelongsToPlayer[i]
+                    ==s_newViewportBelongsToPlayer[j])
+            {
+                s_newViewportBelongsToPlayer[j] = oldValue;
+            }
+    }
 }
 
 void rViewport::CorrectViewports(int MAX_PLAYERS){

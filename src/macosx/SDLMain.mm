@@ -47,7 +47,7 @@ SDL_Event event;
 //    SDL_PushEvent(&event);
     
     st_SaveConfig();
-    uMenu::quickexit=true;  
+    uMenu::quickexit=uMenu::QuickExit_Total;  
 }
 
 @end
@@ -85,7 +85,7 @@ void MacOSX_SetCWD(char **argv) {
 //    event.type = SDL_QUIT;
 //    SDL_PushEvent(&event); 
     st_SaveConfig();
-    uMenu::quickexit=true;    
+    uMenu::quickexit=uMenu::QuickExit_Total;    
 //    [[NSApplication sharedApplication] terminate:self];
 //    exit(1);   
 }
