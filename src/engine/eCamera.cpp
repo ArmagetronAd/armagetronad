@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "eSensor.h"
 #include "eCamera.h"
+#include "eSound.h"
 #include "rScreen.h"
 #include "eGameObject.h"
 #include "uInputQueue.h"
@@ -426,6 +427,7 @@ vp(view){
 
 
 eCamera::~eCamera(){
+    eSoundLocker locker;
     //  int ID=id;
     //  tDESTROY(foot);
     //  se_cameras.Remove(this,id);

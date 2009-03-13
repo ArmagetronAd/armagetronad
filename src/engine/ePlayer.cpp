@@ -2595,7 +2595,7 @@ static tSettingItem< tAccessLevel > se_shuffleUpAccessLevelConf( "ACCESS_LEVEL_S
 static tAccessLevelSetter se_shuffleUpAccessLevelConfLevel( se_shuffleUpAccessLevelConf, tAccessLevel_Owner );
 #endif
 
-static bool se_silenceAll = false;        // flag indicating whether new players should be silenced
+static bool se_silenceDefault = false;        // flag indicating whether new players should be silenced
 
 // minimal access level for chat
 static tAccessLevel se_chatAccessLevel = tAccessLevel_Program;
@@ -2625,8 +2625,8 @@ static tAccessLevel se_nVerAccessLevel = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_nVerAccessLevelConf( "ACCESS_LEVEL_NVER", se_nVerAccessLevel );
 static tAccessLevelSetter se_nVerAccessLevelConfLevel( se_nVerAccessLevelConf, tAccessLevel_Owner );
 
-static tSettingItem<bool> se_silAll("SILENCE_ALL",
-                                    se_silenceAll);
+static tSettingItem<bool> se_silAll("SILENCE_DEFAULT",
+                                    se_silenceDefault);
 
 // handles spam checking at the right time
 eChatSpamTester::eChatSpamTester( ePlayerNetID * p, tString const & say )
@@ -2730,7 +2730,7 @@ bool IsSilencedWithWarning( ePlayerNetID const * p )
     }
     else if ( p->IsSilenced() )
     {
-        if(se_silenceAll) {
+        if(se_silenceDefault) {
             // player is silenced, but all players are silenced by default
             sn_ConsoleOut( tOutput( "$spam_protection_silenced_default" ), p->Owner() );
         } else {
@@ -4205,7 +4205,7 @@ void ePlayerNetID::MyInitAfterCreation()
 {
     this->CreateVoter();
 
-    this->silenced_ = se_silenceAll;
+    this->silenced_ = se_silenceDefault;
     this->renameAllowed_ = true;
 
     // register with machine and kick user if too many players are present

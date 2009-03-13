@@ -2448,10 +2448,7 @@ bool gCycleMovement::Timestep( REAL currentTime )
                 // core simulation
                 if ( tsTodo > EPS )
                 {
-                    REAL lastTimeBack = lastTime;
-                    bool ret = TimestepCore( lastTime + tsTodo, false );
-                    if ( lastTime <= lastTimeBack )
-                        return ret;
+                    TimestepCore( lastTime + tsTodo, false );
                 }
                 else
                 {
