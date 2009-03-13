@@ -65,12 +65,13 @@ public:
     void setColorNow(const rColor &c);
 
     virtual tCoord Position() const;
-  tFunction getPosX() {return posx_;};
-  tFunction getPosY() {return posy_;};
+    tCoord getPosition(){return Position();}
+    tFunction getPosX() {return posx_;};
+    tFunction getPosY() {return posy_;};
     tPolynomial getRotation2() { return rotation2; };
     REAL GetCurrentScale() const;
-  tFunction getScale() {return scale_;};
-  rColor getColor() {return color_;};
+    tFunction getScale() {return scale_;};
+    rColor getColor() {return color_;};
 
     REAL GetEffectiveBottom() const;
     REAL GetEffectiveHeight() const;

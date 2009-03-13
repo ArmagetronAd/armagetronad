@@ -80,6 +80,8 @@ zFlagZone::zFlagZone( eGrid * grid )
     lastHoldScoreTime_ = -1;
     positionUpdatePending_ = false;
 	ownerWarnedNotHome_ = false;
+    //owner_posX=0;
+    //owner_posY=0;
 
 }
 
@@ -166,91 +168,7 @@ void zFlagZone::readXML(tXmlParser::node const & node)
 {
 }
 
-// *******************************************************************************
-// *
-// *	GoHome
-// *
-// *******************************************************************************
 
-void zFlagZone::GoHome()
-{
-	RemoveOwner();
-	flagHome_ = true;
-	shape->Position() = homePosition_;
-	rColor GoHomeInterfaceColor = shape->getColor();
-	GoHomeInterfaceColor.a_ = 100;
-	shape->setColor(GoHomeInterfaceColor);
-	shape->RequestSync();
-}
-
-// *******************************************************************************
-// *
-// *	OwnerDropped
-// *
-// *******************************************************************************
-
-void zFlagZone::OwnerDropped()
-{
-    if (owner_)
-    {
-        // save the last owner and drop time
-        ownerDropped_ = owner_;
-        ownerDroppedTime_ = lastTime;
-		
-        ePlayerNetID *player = owner_->Player();
-		
-        if (player)
-        {
-            //??? prints after round ends... can check if enemies are alive?
-            //??? add flag for knowing when grid is getting deleted?
-            tColoredString playerName;
-            playerName << *player << tColoredString::ColorString(1,1,1);
-            sn_ConsoleOut( tOutput( "$player_flag_drop", playerName ) );
-        }
-		
-        if (sg_flagDropHome)
-        {
-            // this will take the flag home and remove the owner
-            GoHome();
-        }
-        else
-        {
-            // put the flag at the owner's last position
-			flagHome_ = false;
-			shape->Position() = owner_->Position();
-			rColor DropColor = shape->getColor();
-			DropColor.a_ = 100;
-			shape->setColor(DropColor);
-			shape->RequestSync();
-			
-            // remove the owner
-            RemoveOwner();
-        }
-    }
-}
-
-// *******************************************************************************
-// *
-// *	RemoveOwner
-// *
-// *******************************************************************************
-
-void zFlagZone::RemoveOwner()
-{
-    // get rid of the owner
-    if (owner_)
-    {
-        if (owner_->Player())
-        {
-            if (owner_->Player()->flagOverrideChat)
-            {
-                owner_->Player()->flagOverrideChat = false;
-                owner_->Player()->RequestSync();
-            }
-        }
-        owner_ = NULL;
-    }
-}
 
 // *******************************************************************************
 // *
@@ -264,15 +182,44 @@ void zFlagZone::RemoveOwner()
 
 bool zFlagZone::Timestep( REAL time )
 {
+    if((owner_ != NULL)&& (!owner_->Player())){
+        OwnerDropped();
+    }
 
 	tColor color = shape->getColor();
-	
-	
+    
     // check if the flag is owned
     if (owner_)
     {
         ePlayerNetID *player = owner_->Player();
-
+        /*if(!player)
+        {
+            GoHome();
+        }*/
+		//Check if player is alive or not. If yes, make the flag follow the owner. If not, send the flag home or drop it based on setting
+		if(owner_->Player())
+		{
+			if(!player->Object()->Alive())
+			{
+				OwnerDropped();
+			}
+			else
+			{
+                //owner_posX&= tFunction(owner_->Position().x, owner_->Speed());
+                //owner_posY&=tFunction(owner_->Position().y, owner_->Speed());
+                
+                owner_posX=owner_->Position().x;
+                owner_posY=owner_->Position().y;
+                //shape->setPosX(tFunction(owner_->Position().x, (owner_->Direction().x * owner_->Speed())));
+                //shape->setPosY(tFunction(owner_->Position().y, (owner_->Direction().y * owner_->Speed())));
+                shape->setPosX(tFunction(owner_->Position().x, 0.0));
+                shape->setPosY(tFunction(owner_->Position().y, 0.0));
+                
+				//shape->setPosition(owner_->Position());
+                shape->RequestSync();
+			}
+		}
+		
         if ((player) &&
             (sg_flagHoldTime > 0) &&
             (time >= (ownerTime_ + sg_flagHoldTime)))
@@ -286,13 +233,6 @@ bool zFlagZone::Timestep( REAL time )
         }
     }
 
-	//Check if player is alive or not. If not, send the flag home or drop it based on setting
-	
-	if(!player->Object()->Alive())
-	{
-		OwnerDropped();
-	}
-	
     // check if the flag is owned
     if (owner_)
     {
@@ -331,10 +271,10 @@ bool zFlagZone::Timestep( REAL time )
 							bool allFlagsHome = true;
 							int flagsHome = 0;
 							int flagsTaken = 0;
-							const tList<eGameObject>& gameObjects = Grid()->GameObjects();
-							for (int i=gameObjects.Len()-1;i>=0;i--)
+							const tList<eGameObject>& gameFObjects = Grid()->GameObjects();
+							for (int j=gameFObjects.Len()-1;j>=0;j--)
 							{
-								zFlagZone *otherFlag=dynamic_cast<zFlagZone *>(gameObjects(i));
+								zFlagZone *otherFlag=dynamic_cast<zFlagZone *>(gameFObjects(j));
 								
 								if ((otherFlag) &&
 									(otherFlag->Team() == team))
@@ -380,9 +320,8 @@ bool zFlagZone::Timestep( REAL time )
 						}
 					}
 				}
-							//End flag cast
-                        }
-                    }
+            }
+        }
 
         if (player)
         {
@@ -433,18 +372,18 @@ bool zFlagZone::Timestep( REAL time )
 
                 if (sg_flagBlinkTrackTime > 0)
                 {
-                    shape->Position() = owner_->Position();
-                    shape->SetVelocity(owner_->Direction() * owner_->Speed());
+                    //shape->Position() = owner_->Position();
+                    //shape->SetVelocity(owner_->Direction() * owner_->Speed());
                 }
                 else
                 {
-                    eCoord estimatedPosition =
-                        (owner_->Position() +
-                         (owner_->Direction() *
-                          (sg_flagBlinkEstimatePosition * owner_->Speed() * onTime)));
+                    //eCoord estimatedPosition =
+                       // (owner_->Position() +
+                       //  (owner_->Direction() *
+                       //   (sg_flagBlinkEstimatePosition * owner_->Speed() * onTime)));
 
-                    shape->Position() = estimatedPosition;
-                    shape->SetVelocity(se_zeroCoord);
+                    //shape->Position() = estimatedPosition;
+                    //shape->SetVelocity(se_zeroCoord);
                 }
 				//do the blink
 				color.a_ = 75;
@@ -457,7 +396,7 @@ bool zFlagZone::Timestep( REAL time )
                 {
                     // kill the blink until the next update time
                     shape->setReferenceTime(time);
-                    shape->SetVelocity(se_zeroCoord);
+                    //shape->SetVelocity(se_zeroCoord);
 					color.a_ = 0;
 					shape->setColor(color);
                     shape->RequestSync();
@@ -467,8 +406,8 @@ bool zFlagZone::Timestep( REAL time )
                 {
                     // track the owner again
                     shape->setReferenceTime(time);
-                    shape->Position() = owner_->Position();
-                    shape->SetVelocity(owner_->Direction() * owner_->Speed());
+                    //shape->Position() = owner_->Position();
+                    //shape->SetVelocity(owner_->Direction() * owner_->Speed());
                     RequestSync();
                 }
             }
@@ -532,7 +471,9 @@ void zFlagZone::OnRoundBegin( void )
     //originalRadius_ = GetRadius();
 	
 	//save the original position
-	homePosition_ = shape->Position();
+	//homePosition_ = shape->getPosition();
+    homePosition_X = shape->getPosition().x;
+    homePosition_Y = shape->getPosition().y;
 
     if ((sg_flagColorR >= 0) &&
         (sg_flagColorG >= 0) &&
@@ -566,7 +507,7 @@ void zFlagZone::OnRoundBegin( void )
         REAL closestDistance = 0;
         tCoord pos;
         if (shape)
-            pos = shape->Position();
+            pos = shape->getPosition();
         for (int i=gameObjects.Len()-1;i>=0;i--)
         {
             gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
@@ -692,7 +633,6 @@ void zFlagZone::OnEntry( gCycle * target, REAL time )
 		shape->RequestSync();
         //DO later
         //ownerWarnedNotHome_ = false;
-        //owner_->flag_ = this;
 
         blinkUpdateTime_ = -1000;
         blinkTrackUpdateTime_ = -1000;
@@ -701,11 +641,6 @@ void zFlagZone::OnEntry( gCycle * target, REAL time )
         shape->setReferenceTime(lastTime);
         shape->SetRotationSpeed( 0 );
         shape->SetRotationAcceleration( 0 );
-        //shape->SetReferenceTime();
-        //shape->SetVelocity(se_zeroCoord);
-        //shape->SetPosition(originalPosition_);
-        //shape->SetRadius(0);
-        //shape->SetExpansionSpeed(0);
         shape->RequestSync();
         positionUpdatePending_ = true;
 
@@ -729,70 +664,101 @@ void zFlagZone::OnEntry( gCycle * target, REAL time )
 
 void zFlagZone::OnInside( gCycle * target, REAL time )
 {
-	/*if(sg_flagTeam)
-	{
-	//CTF
-    // make sure target, player, and their team are OK
-    if ((!target) ||
-        (!target->Player()) ||
-        (!target->Player()->CurrentTeam()))
-    {
-        return;
-    }
+}
 
-    // don't process if owned or updating
-    if ((owner_) || (positionUpdatePending_))
+// *******************************************************************************
+// *
+// *	GoHome
+// *
+// *******************************************************************************
+
+void zFlagZone::GoHome()
+{
+	RemoveOwner();
+	flagHome_ = true;
+    shape->setPosX(tFunction(homePosition_X,0.0));
+    shape->setPosY(tFunction(homePosition_Y,0.0));
+	rColor GoHomeInterfaceColor = shape->getColor();
+	GoHomeInterfaceColor.a_ = 100;
+	shape->setColor(GoHomeInterfaceColor);
+	shape->RequestSync();
+}
+
+// *******************************************************************************
+// *
+// *	OwnerDropped
+// *
+// *******************************************************************************
+
+void zFlagZone::OwnerDropped()
+{
+    if (owner_)
     {
-        return;
+        // save the last owner and drop time
+        ownerDropped_ = owner_;
+        ePlayerNetID *player = owner_->Player();
+		ownerDroppedTime_ = lastTime;
+        if (player)
+        {
+            //??? prints after round ends... can check if enemies are alive?
+            //??? add flag for knowing when grid is getting deleted?
+            tColoredString playerName;
+            playerName << *player << tColoredString::ColorString(1,1,1);
+            sn_ConsoleOut( tOutput( "$player_flag_drop", playerName ) );
+        }
     }
-    
-	eTeam * TheTeam = target->Player()->CurrentTeam();
+        
 		
-	if(TheTeam == team)
-	{
-		//Return the Flag
-		GoHome();
-		tColoredString playerName;
-		playerName << *target->Player() << tColoredString::ColorString(1,1,1);
-		sn_ConsoleOut( tOutput( "$player_flag_return", playerName ) );
-		return;
-	}
-		
-	//check to see if player already has a flag
-	bool playerHasFlag = false;
-	const tList<eGameObject>& gameObjects = Grid()->GameObjects();
-	for (int i=gameObjects.Len()-1;i>=0;i--)
-		{
-			zFlagZone* otherFlag=dynamic_cast<zFlagZone *>(gameObjects(i));
-			if ((otherFlag)){
-				if (otherFlag->Team() == target->Player()->CurrentTeam()){
-					playerHasFlag = true;
-					return;
-				}
-			}
-		}
-		
-		//take the flag
-		owner_ = target;
-	    flagHome_ = false;
-		
-		tColoredString playerName;
-		playerName << *target->Player() << tColoredString::ColorString(1,1,1);
-		sn_ConsoleOut( tOutput( "$player_flag_take", playerName ) );
-		//TODO - kill the flag at its home
-	}
-	else
-	{
-	//HTF
-		
-	}*/
+    if (sg_flagDropHome)
+    {
+        // this will take the flag home and remove the owner
+        GoHome();
+    }
+    else
+    {
+        // put the flag at the owner's last position
+        flagHome_ = false;
+        shape->setPosX(tFunction(owner_posX, 0.0));
+        shape->setPosY(tFunction(owner_posY, 0.0));
+        rColor DropColor = shape->getColor();
+        DropColor.a_ = 100;
+        shape->setColor(DropColor);
+        shape->RequestSync();
+        
+        // remove the owner
+        RemoveOwner();
+    }
+}
+
+// *******************************************************************************
+// *
+// *	RemoveOwner
+// *
+// *******************************************************************************
+
+void zFlagZone::RemoveOwner()
+{
+    // get rid of the owner
+    if (owner_)
+    {
+        if (owner_->Player())
+        {
+            if (owner_->Player()->flagOverrideChat)
+            {
+                owner_->Player()->flagOverrideChat = false;
+                owner_->Player()->RequestSync();
+            }
+        }
+    }
+	owner_ = NULL;
 }
 
 bool zFlagZone::IsHome()
 {
     // flag is at home if at the original position and not owned
-    if ((!owner_) &&
-        (shape->Position() == homePosition_))
+    //if ((!owner_) &&
+    if ((shape->getPosition().x == homePosition_X)
+        && (shape->getPosition().y == homePosition_Y))
     {
         return (true);
     }

@@ -70,6 +70,10 @@ private:
     REAL teamDistance_;                     //!< distance to the closest member of the owning team
 	eTeam *initOwnerTeam_;
     eCoord homePosition_;
+    REAL owner_posX;
+    REAL owner_posY;
+    REAL homePosition_X;
+    REAL homePosition_Y;
     gCycle *owner_;
 	float ownerTime_;
 	bool flagHome_;
