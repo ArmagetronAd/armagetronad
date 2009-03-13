@@ -454,43 +454,40 @@ class gBallZoneHack: public gZone
 
 class gFlagZoneHack: public gZone
 {
-	public:
+public:
 								 //!< local constructor
 		gFlagZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, eTeam * teamowner = NULL );
-								 //!< network constructor
-		gFlagZoneHack(nMessage &m);
-		~gFlagZoneHack();		 //!< destructor
+    gFlagZoneHack(nMessage &m);                                  //!< network constructor
+    ~gFlagZoneHack();                                            //!< destructor
 
-		void SetTeam(tJUST_CONTROLLED_PTR< eTeam > team) { this->team = team; }
+    void SetTeam(tJUST_CONTROLLED_PTR< eTeam > team) { this->team = team; }
 
-		void WarnFlagNotHome();
-		bool IsHome();
-		void GoHome();
-		void RemoveOwner();
-		void OwnerDropped();
-        gCycle* Owner(){return owner_;}
-        
-	protected:
-		bool init_;
-		eCoord originalPosition_;
-		eCoord homePosition_;
-		REAL originalRadius_;
-		gCycle *owner_;
-		REAL ownerTime_;
-		bool ownerWarnedNotHome_;
-		REAL chatBlinkUpdateTime_;
-		REAL blinkUpdateTime_;
-		REAL blinkTrackUpdateTime_;
-		gCycle *ownerDropped_;
-		REAL ownerDroppedTime_;
-		REAL lastHoldScoreTime_;
-		bool positionUpdatePending_;
+    void WarnFlagNotHome();
+    bool IsHome();
+    void GoHome();
+    void RemoveOwner();
+    void OwnerDropped();
+    gCycle* Owner(){return owner_;}
 
-	private:
-								 //!< simulates behaviour up to currentTime
-		virtual bool Timestep(REAL currentTime);
-								 //!< reacts on objects inside the zone (kills them)
-		virtual void OnEnter( gCycle *target, REAL time );
+protected:
+    bool init_;
+    eCoord originalPosition_;
+    eCoord homePosition_;
+    REAL originalRadius_;
+    gCycle *owner_;
+    REAL ownerTime_;
+    bool ownerWarnedNotHome_;
+    REAL chatBlinkUpdateTime_;
+    REAL blinkUpdateTime_;
+    REAL blinkTrackUpdateTime_;
+    gCycle *ownerDropped_;
+    REAL ownerDroppedTime_;
+    REAL lastHoldScoreTime_;
+    bool positionUpdatePending_;
+
+private:
+    virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
+    virtual void OnEnter( gCycle *target, REAL time ); //!< reacts on objects inside the zone (kills them)
 };
 
 class gTargetZoneHack: public gZone

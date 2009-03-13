@@ -2853,6 +2853,15 @@ bool gCycle::Timestep(REAL currentTime){
         }
     }
 
+    //check for brake change (probably not the best place to do this)
+    if (sn_GetNetState()!=nCLIENT)
+    {
+        if (braking != oldBraking)
+        {
+            ProcessShoot(false);
+        }
+    }
+
     // check whether simulation has fallen too far behind the requested time
 #ifdef DEDICATED
     if ( Alive() && currentTime > lastTime + Lag() + 1 )

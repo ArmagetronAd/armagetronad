@@ -1473,6 +1473,9 @@ static tSettingItem<bool> conf_shotCollision ("SHOT_COLLISION", sg_shotCollision
 static int sg_shotWallBounce = 0;
 static tSettingItem<int> sg_shotWallBounceConf ("SHOT_WALL_BOUNCE", sg_shotWallBounce);
 
+static bool sg_shotKillInvulnerable = 1;
+static tSettingItem<bool> sg_shotKillInvulnerableConf( "SHOT_KILL_INVULNERABLE", sg_shotKillInvulnerable );
+
 gZone & gDeathZoneHack::SetType(int type)
 {
 	if (type < NUM_DEATH_ZONE_TYPES)
@@ -1565,14 +1568,18 @@ static eLadderLogWriter sg_deathDeathZoneWriter("DEATH_DEATHZONE", true);
 void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 {
 	if (!dynamicCreation_ || ( deathZoneType == TYPE_NORMAL && !team ) )
-	{
+    {
 		target->Player()->AddScore(score_deathzone, tOutput(), "$player_lose_deathzone");
-		target->Kill();
+    target->Kill();
 		sg_deathDeathZoneWriter << ePlayerNetID::FilterName(target->Player()->GetUserName());
 		sg_deathDeathZoneWriter.write();
-	}
-	else
-	{
+    }
+    else
+    {
+        if ( !target->Vulnerable() && !sg_shotKillInvulnerable ) {
+            //Checks to see if their cycle is invulnerable, don't kill invulnerable players
+            return;
+   	}
 
 		// check normal death zone linked to a team ...
 		if (team && deathZoneType == TYPE_NORMAL)
@@ -1584,160 +1591,160 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
 			if (target->Player()->CurrentTeam() == team) return;
 		}
 
-		//Validate the owner player ID
-		pOwner_ = validatePlayer(pOwner_);
-		//??? Really need for the player to get cleared when they exit, it is possible for
-		//a new player to enter and own a zone
+        //Validate the owner player ID
+        pOwner_ = validatePlayer(pOwner_);
+        //??? Really need for the player to get cleared when they exit, it is possible for
+        //a new player to enter and own a zone
 
-		//Get the owner cycle if still around
-		gCycle *pOwnerCycle = NULL;
-		if (pOwner_)
-		{
-			pOwnerCycle = getPlayerCycle(pOwner_);
+        //Get the owner cycle if still around
+        gCycle *pOwnerCycle = NULL;
+        if (pOwner_)
+        {
+            pOwnerCycle = getPlayerCycle(pOwner_);
 
-			if (target->Player() == pOwner_)
-			{
-				//Player entered own shot
-				if (!sg_shotKillSelf)
-				{
-					//Don't kill yourself
-					return;
-				}
-				else
-				{
+            if (target->Player() == pOwner_)
+            {
+                //Player entered own shot
+                if (!sg_shotKillSelf)
+                {
+                    //Don't kill yourself
+                    return;
+                }
+                else
+                {
                     sg_deathShotSuicideWriter << *target->Player()->GetUserName();
                     sg_deathShotSuicideWriter.write();
-					if (!score_shot_suicide)
-					{
-						tColoredString playerName;
-						playerName << *target->Player() << tColoredString::ColorString(1,1,1);
-						sn_ConsoleOut( tOutput( "$player_free_shot_suicide", playerName ) );
-					}
-					else
-					{
-						target->Player()->AddScore(score_shot_suicide, tOutput(), "$player_shot_suicide");
-					}
-					target->Kill();
-				}
-			}
-			else
-			{
-				//The cycle may have been deleted since...  I think this is OK because Player() returns a checked pointer
+                    if (!score_shot_suicide)
+                    {
+                        tColoredString playerName;
+                        playerName << *target->Player() << tColoredString::ColorString(1,1,1);
+                        sn_ConsoleOut( tOutput( "$player_free_shot_suicide", playerName ) );
+                    }
+                    else
+                    {
+                        target->Player()->AddScore(score_shot_suicide, tOutput(), "$player_shot_suicide");
+                    }
+                    target->Kill();
+                }
+            }
+            else
+            {
+                //The cycle may have been deleted since...  I think this is OK because Player() returns a checked pointer
 
-				//Another player entered a shot, find ownership
-				ePlayerNetID *hunter = pOwner_;
-				ePlayerNetID *prey = target->Player();
+                //Another player entered a shot, find ownership
+                ePlayerNetID *hunter = pOwner_;
+                ePlayerNetID *prey = target->Player();
 
-				tOutput lose;
-				tOutput win;
+                tOutput lose;
+                tOutput win;
 
-				tColoredString preyName;
-				preyName << *prey;
-				preyName << tColoredString::ColorString(1,1,1);
+                tColoredString preyName;
+                preyName << *prey;
+                preyName << tColoredString::ColorString(1,1,1);
 
-				if (prey->CurrentTeam() != hunter->CurrentTeam())
-				{
+                if (prey->CurrentTeam() != hunter->CurrentTeam())
+                {
                     sg_deathShotFragWriter << prey->GetUserName() << hunter->GetUserName();
                     sg_deathShotFragWriter.write();
-					char const *pWinString = "$player_win_shot";
-					char const *pFreeString = "$player_free_shot";
-					int score = score_shot;
-					if (deathZoneType == TYPE_DEATH_SHOT)
-					{
-						pWinString = "$player_win_death_shot";
-						pFreeString = "$player_free_death_shot";
-						score = score_death_shot;
-					}
-					else if (deathZoneType == TYPE_SELF_DESTRUCT)
-					{
-						pWinString = "$player_win_self_destruct";
-						pFreeString = "$player_free_self_destruct";
-						score = score_self_destruct;
-					}
-					else if (deathZoneType == TYPE_ZOMBIE_ZONE)
-					{
-						if (target == pSeekingCycle_)
-						{
-							pWinString = "$player_win_zombie_zone_revenge";
-							pFreeString = "$player_free_zombie_zone_revenge";
-							score = score_zombie_zone_revenge;
+                    char const *pWinString = "$player_win_shot";
+                    char const *pFreeString = "$player_free_shot";
+                    int score = score_shot;
+                    if (deathZoneType == TYPE_DEATH_SHOT)
+                    {
+                        pWinString = "$player_win_death_shot";
+                        pFreeString = "$player_free_death_shot";
+                        score = score_death_shot;
+                    }
+                    else if (deathZoneType == TYPE_SELF_DESTRUCT)
+                    {
+                        pWinString = "$player_win_self_destruct";
+                        pFreeString = "$player_free_self_destruct";
+                        score = score_self_destruct;
+                    }
+                    else if (deathZoneType == TYPE_ZOMBIE_ZONE)
+                    {
+                        if (target == pSeekingCycle_)
+                        {
+                            pWinString = "$player_win_zombie_zone_revenge";
+                            pFreeString = "$player_free_zombie_zone_revenge";
+                            score = score_zombie_zone_revenge;
 
-							//Zombie killed his maker - don't seek anymore
-							pSeekingCycle_ = NULL;
-						}
-						else
-						{
-							pWinString = "$player_win_zombie_zone";
-							pFreeString = "$player_free_zombie_zone";
-							score = score_zombie_zone;
-						}
-					}
+                            //Zombie killed his maker - don't seek anymore
+                            pSeekingCycle_ = NULL;
+                        }
+                        else
+                        {
+                            pWinString = "$player_win_zombie_zone";
+                            pFreeString = "$player_free_zombie_zone";
+                            score = score_zombie_zone;
+                        }
+                    }
 
-					if (score)
-					{
-						win.SetTemplateParameter(3, preyName);
-						win << pWinString;
-						hunter->AddScore(score, win, lose);
-					}
-					else
-					{
-						tColoredString hunterName;
-						hunterName << *hunter << tColoredString::ColorString(1,1,1);
-						sn_ConsoleOut( tOutput( pFreeString, hunterName, preyName ) );
-					}
-				}
-				else
-				{
-					//Team member entered shot
-					if (!sg_shotKillSelf)
-					{
-						//Don't kill team
-						return;
-					}
+                    if (score)
+                    {
+                        win.SetTemplateParameter(3, preyName);
+                        win << pWinString;
+                        hunter->AddScore(score, win, lose);
+                    }
+                    else
+                    {
+                        tColoredString hunterName;
+                        hunterName << *hunter << tColoredString::ColorString(1,1,1);
+                        sn_ConsoleOut( tOutput( pFreeString, hunterName, preyName ) );
+                    }
+                }
+                else
+                {
+                    //Team member entered shot
+                    if (!sg_shotKillSelf)
+                    {
+                        //Don't kill team
+                        return;
+                    }
+
                     sg_deathShotTeamkillWriter << prey->GetUserName() << hunter->GetUserName();
                     sg_deathShotTeamkillWriter.write();
-					tColoredString hunterName;
-					hunterName << *hunter << tColoredString::ColorString(1,1,1);
-					sn_ConsoleOut( tOutput( "$player_teamkill", hunterName, preyName ) );
-				}
+                    tColoredString hunterName;
+                    hunterName << *hunter << tColoredString::ColorString(1,1,1);
+                    sn_ConsoleOut( tOutput( "$player_teamkill", hunterName, preyName ) );
+                }
 
-								 //???make this player so it isn't NULL if dead?
-				target->Killed(pOwnerCycle);
+                target->Killed(pOwnerCycle); //???make this player so it isn't NULL if dead?
 
-				target->Kill();
-			}
-		}
-		else
-		{
+                target->Kill();
+            }
+        }
+        else
+        {
 			if(deathZoneType == TYPE_ZOMBIE_ZONE)
 			{
 				target->Player()->AddScore(score_zombie_zone, tOutput(), "$player_lose_suicide");
 			}
 			else
 			{
-				target->Player()->AddScore(score_die, tOutput(), "$player_lose_frag");
+            target->Player()->AddScore(score_die, tOutput(), "$player_lose_frag");
 			}
-			target->Kill();
-		}
+            target->Kill();
+        }
 
-		if (((deathZoneType == TYPE_ZOMBIE_ZONE) && ((!pSeekingCycle_) || (sg_zombieZoneVanish))) ||
-			((deathZoneType == TYPE_SELF_DESTRUCT) && (sg_selfDestructVanish)) ||
-			((deathZoneType < TYPE_SELF_DESTRUCT) && (sg_shotKillVanish)))
-		{
-			#if 0
-			SetReferenceTime();
-			SetExpansionSpeed( -GetRadius()*1 );
-			RequestSync();
-			#else
-			//Instead of making the shot slowly dissapear, we'll get rid of it right away so it doesn't kill the zombie
-			destroyed_ = true;
-			SetReferenceTime();
-			SetExpansionSpeed(-1);
-			SetRadius(0);
-			RequestSync();
-			#endif
-		}
-	}
+        if (((deathZoneType == TYPE_ZOMBIE_ZONE) && ((!pSeekingCycle_) || (sg_zombieZoneVanish))) ||
+            ((deathZoneType == TYPE_SELF_DESTRUCT) && (sg_selfDestructVanish)) ||
+            ((deathZoneType < TYPE_SELF_DESTRUCT) && (sg_shotKillVanish)))
+        {
+#if 0
+            SetReferenceTime();
+            SetExpansionSpeed( -GetRadius()*1 );
+            RequestSync();
+#else
+            //Instead of making the shot slowly dissapear, we'll get rid of it right away so it doesn't kill the zombie
+            destroyed_ = true;
+            SetReferenceTime();
+            SetExpansionSpeed(-1);
+            SetRadius(0);
+            RequestSync();
+#endif
+        }
+    }
 }
 
 
@@ -2034,20 +2041,20 @@ void gRubberZoneHack::OnEnter( gCycle * target, REAL time )
 gBaseZoneHack::gBaseZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, eTeam * teamowner )
 :gZone( grid, pos, dynamicCreation), onlySurvivor_( false ), currentState_( State_Safe )
 {
-	enemiesInside_ = ownersInside_ = 0;
-	conquered_ = 0;
-	lastSync_ = -10;
-	teamDistance_ = 0;
-	lastEnemyContact_ = se_GameTime();
-	lastRespawnRemindTime_ = -500;
-	lastRespawnRemindWaiting_ = 0;
-	touchy_ = false;
+    enemiesInside_ = ownersInside_ = 0;
+    conquered_ = 0;
+    lastSync_ = -10;
+    teamDistance_ = 0;
+    lastEnemyContact_ = se_GameTime();
+    lastRespawnRemindTime_ = -500;
+    lastRespawnRemindWaiting_ = 0;
+    touchy_ = false;
 
 	if (teamowner!=NULL) team = teamowner;
 
 	for (int i=0; i<MAXCLIENTS+1; i++) conquerer_[i]=0;
 
-	color_.r = color_.g = color_.b = 0;
+    color_.r = color_.g = color_.b = 0;
 }
 
 
@@ -2064,14 +2071,14 @@ gBaseZoneHack::gBaseZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCrea
 gBaseZoneHack::gBaseZoneHack( nMessage & m )
 : gZone( m ), onlySurvivor_( false ), currentState_( State_Safe )
 {
-	enemiesInside_ = ownersInside_ = 0;
-	conquered_ = 0;
-	lastSync_ = -10;
-	teamDistance_ = 0;
-	lastEnemyContact_ = se_GameTime();
-	lastRespawnRemindTime_ = -500;
-	lastRespawnRemindWaiting_ = 0;
-	touchy_ = false;
+    enemiesInside_ = ownersInside_ = 0;
+    conquered_ = 0;
+    lastSync_ = -10;
+    teamDistance_ = 0;
+    lastEnemyContact_ = se_GameTime();
+    lastRespawnRemindTime_ = -500;
+    lastRespawnRemindWaiting_ = 0;
+    touchy_ = false;
 	for (int i=0; i<MAXCLIENTS+1; i++) conquerer_[i]=0;
 }
 
@@ -2191,6 +2198,8 @@ extern gArena Arena;
 
 static REAL sg_collapseSpeed = .5;
 static tSettingItem< REAL > sg_collapseSpeedConfig( "FORTRESS_COLLAPSE_SPEED", sg_collapseSpeed );
+
+extern gArena Arena;
 
 // *******************************************************************************
 // *
@@ -4287,21 +4296,22 @@ bool gFlagZoneHack::Timestep( REAL time )
 
 void gFlagZoneHack::OnEnter( gCycle * target, REAL time )
 {
-	// make sure target, player, and their team are OK
-	if ((!target) ||
-		(!target->Player()) ||
-		(!target->Player()->CurrentTeam()))
-	{
-		return;
-	}
+    // make sure target, player, and their team are OK
+    if ((!target) ||
+        (!target->Player()) ||
+        (!target->Player()->CurrentTeam()))
+    {
+        return;
+    }
 
-	// don't process if not initialized yet or owned or updating
-	if ((!init_) ||
-		(owner_) ||
-		(positionUpdatePending_))
-	{
-		return;
-	}
+    // don't process if not initialized yet or owned or updating
+    if ((!init_) ||
+        (owner_) ||
+        (positionUpdatePending_))
+    {
+        return;
+    }
+
     //check to see if player already has a flag
     bool playerHasFlag = false;
     const tList<eGameObject>& gameObjects = Grid()->GameObjects();
@@ -4317,7 +4327,7 @@ void gFlagZoneHack::OnEnter( gCycle * target, REAL time )
                     if (flagHolder){
                         if (flagHolder ==  target->Player())
                         {
-                            playerHasFlag = true;
+                playerHasFlag = true;
                         }
                     }
                 }
@@ -4325,46 +4335,46 @@ void gFlagZoneHack::OnEnter( gCycle * target, REAL time )
         }
     }
     
-	// check if the player is on our team or not (check will fail if team not enabled)
-	if (target->Player()->CurrentTeam() == team)
-	{
-		// player is on our team, if we're not at home, go back
-		if (!IsHome())
-		{
-			// go home
-			GoHome();
+    // check if the player is on our team or not (check will fail if team not enabled)
+    if (target->Player()->CurrentTeam() == team)
+    {
+        // player is on our team, if we're not at home, go back
+        if (!IsHome())
+        {
+            // go home
+            GoHome();
 
-			tColoredString playerName;
-			playerName << *target->Player() << tColoredString::ColorString(1,1,1);
-			sn_ConsoleOut( tOutput( "$player_flag_return", playerName ) );
-		}
-	}
+            tColoredString playerName;
+            playerName << *target->Player() << tColoredString::ColorString(1,1,1);
+            sn_ConsoleOut( tOutput( "$player_flag_return", playerName ) );
+        }
+    }
 	// check if this player dropped the flag previously and ensure that player does not have another flag
-	else if (((target != ownerDropped_) || (time > (ownerDroppedTime_ + sg_flagDropTime))) && (!playerHasFlag))
-	{
-		// take the flag
-		owner_ = target;
-		ownerTime_ = time;
-		lastHoldScoreTime_ = time;
-		ownerWarnedNotHome_ = false;
-		owner_->flag_ = this;
+    else if (((target != ownerDropped_) || (time > (ownerDroppedTime_ + sg_flagDropTime))) && (!playerHasFlag))
+    {
+        // take the flag
+        owner_ = target;
+        ownerTime_ = time;
+        lastHoldScoreTime_ = time;
+        ownerWarnedNotHome_ = false;
+        owner_->flag_ = this;
 
-		blinkUpdateTime_ = -1000;
-		blinkTrackUpdateTime_ = -1000;
+        blinkUpdateTime_ = -1000;
+        blinkTrackUpdateTime_ = -1000;
 
-		// diminish the flag and put it at the original location
-		SetReferenceTime();
-		SetVelocity(se_zeroCoord);
-		SetPosition(originalPosition_);
-		SetRadius(0);
-		SetExpansionSpeed(0);
-		RequestSync();
-		positionUpdatePending_ = true;
+        // diminish the flag and put it at the original location
+        SetReferenceTime();
+        SetVelocity(se_zeroCoord);
+        SetPosition(originalPosition_);
+        SetRadius(0);
+        SetExpansionSpeed(0);
+        RequestSync();
+        positionUpdatePending_ = true;
 
-		tColoredString playerName;
-		playerName << *target->Player() << tColoredString::ColorString(1,1,1);
-		sn_ConsoleOut( tOutput( "$player_flag_take", playerName ) );
-	}
+        tColoredString playerName;
+        playerName << *target->Player() << tColoredString::ColorString(1,1,1);
+        sn_ConsoleOut( tOutput( "$player_flag_take", playerName ) );
+    }
 }
 
 
