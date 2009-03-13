@@ -2427,6 +2427,7 @@ remove_help_topic_notfound Help topic "\1" doesn't exist.\n
 rtfm_announcement \2 wants \3 to know about /help \1.\n
 
 help_introductory_blurb_help Message that is displayed before the list of help topics if someone uses /help without arguments
+help_message_help       Deprecated alias for HELP_INTRODUCTORY_BLURB
 
 help_topics_list_start  Say /help TOPIC to get help on the following topics.\n
 help_topic_not_found    Help topic \1 not found. Try /help with no arguments to see a list of available topics.\n
