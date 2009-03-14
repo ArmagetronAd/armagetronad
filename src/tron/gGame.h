@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nNetObject.h"
 
+class eGameObject;
 class eSoundMixer;
 class eGrid;
 class nServerInfo;
@@ -40,6 +41,7 @@ class eTeam;
 class gParser;
 class gArena;
 class ePlayerNetID;
+class tCoord;
 
 namespace Game { class GameSync; }
 
@@ -153,6 +155,11 @@ void sg_DeclareWinner( eTeam* team, char const * message );
 void sg_FullscreenMessage(tOutput const & title, tOutput const & message,REAL timeout = 60, int client = 0); //!< Displays a message on a specific client or all clients that gets displayed on the whole screen, blocking view to the game
 void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message, REAL timeout = 60 ); //!< Displays a message locally that gets displayed on the whole screen, blocking view to the game
 
+void sg_RespawnPlayer(eGrid *, gArena *, tCoord & pos, tCoord & dir, ePlayerNetID *);
+void sg_RespawnPlayer(eGrid *, gArena *, tCoord & near, ePlayerNetID *);
+void sg_RespawnPlayer(eGrid *, gArena *, tCoord * near, ePlayerNetID *);
+void sg_RespawnPlayer(eGameObject & near, ePlayerNetID *);
+void sg_RespawnPlayer(eGrid *, gArena *, eGameObject * near, ePlayerNetID *); 
 void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p);
 
 // HACK

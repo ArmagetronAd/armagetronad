@@ -2329,6 +2329,9 @@ player_kill_collapse        \1 was eradicated by its collapsing zone.\n
 player_win_hole             \1 got \2 points for a sacrifice for the good of the team.\n
 player_lose_hole            0xffff00ZOMG! 0xff7f00HOLER!!1!!0xRESETT \1 lost \2 points for being a cheap ass lamer.\n
 
+player_base_respawn		\1 was respawned by \2.\n
+player_base_enemy_respawn	\1 was respawned by their enemy \2.\n
+
 player_no_longer_suspended  \1 0x77ff77is allowed to play again.\n
 player_suspended            \1 0xff7777is banned to spectator mode for \2 round(s).\n
 
@@ -2387,6 +2390,7 @@ player_win_frag_ai		\1 got \2 points for core dumping an AI player.\n
 player_lose_frag		\1 lost \2 points since it caused a general protection fault.\n
 player_lose_rim		    \1 lost \2 points for trying to escape from the game grid.\n
 player_win_survivor		\1 was awarded \2 points for being last active team.\n
+player_respawn_center_message	You've been respawned\n
 player_joins_team       \1 wants to play for \2 on the next respawn.\n
 player_joins_team_wish  \1 still wants to play for \2, but isn't currently allowed to.\n
 player_joins_team_noex  \1 wants to play for a team that ceased to exist, ignoring request.\n

@@ -66,6 +66,9 @@ private:
     int enemiesInside_;                     //!< count of enemies currently inside the zone
     int ownersInside_;                      //!< count of owners currently inside the zone
 
+    tColoredString enemyPlayerName_;        //!< name of the first enemy player that was inside us
+    tColoredString teamPlayerName_;         //!< name of the first team player that was inside us
+
     bool onlySurvivor_;                     //!< flag set if this zone is the only survivor
 
     typedef std::vector< tJUST_CONTROLLED_PTR< eTeam > > TeamArray;
