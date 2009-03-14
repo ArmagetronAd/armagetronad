@@ -3441,6 +3441,9 @@ static tConfItemFunc remove_help_topic_conf("REMOVE_HELP_TOPIC",&eHelpTopic::rem
 static tString se_helpIntroductoryBlurb;
 static tConfItemLine se_helpIntroductoryBlurbConf("HELP_INTRODUCTORY_BLURB",se_helpIntroductoryBlurb);
 
+// Sty compatibility
+static tConfItemLine se_helpStyCompat("HELP_MESSAGE",se_helpIntroductoryBlurb);
+
 static void se_Help( ePlayerNetID * sender, ePlayerNetID * receiver, std::istream & s ) {
     std::ws(s);
     tColoredString reply;
