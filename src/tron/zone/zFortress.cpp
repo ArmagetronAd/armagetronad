@@ -123,6 +123,14 @@ static tSettingItem< int > sg_onConquestConquestWinConfig( "FORTRESS_CONQUERED_W
 static int sg_baseZonesPerTeam = 0;
 static tSettingItem< int > sg_baseZonesPerTeamConfig( "FORTRESS_MAX_PER_TEAM", sg_baseZonesPerTeam );
 
+// flag indicating whether base will respawn team if a team player enters it
+static bool sg_baseRespawn = false;
+static tSettingItem<bool> sg_baseRespawnConfig ("BASE_RESPAWN", sg_baseRespawn);
+
+// flag indicating whether base will respawn team if an enemy player enters it
+static bool sg_baseEnemyRespawn = false;
+static tSettingItem<bool> sg_baseEnemyRespawnConfig ("BASE_ENEMY_RESPAWN", sg_baseEnemyRespawn);
+
 void zFortressZone::setupVisuals(gParser::State_t & state)
 {
     REAL tpR[] = {.0f, .3f};
@@ -328,6 +336,48 @@ bool zFortressZone::Timestep( REAL time )
         {
             currentState_ = State_Conquering;
             OnConquest();
+        }
+    }
+
+    if (( ownersInside_ && sg_baseRespawn     )
+     || (enemiesInside_ && sg_baseEnemyRespawn))
+    {
+        eGameObject * near = NULL;
+        if (shape)
+            near = shape;
+
+        for (int i = team->NumPlayers() - 1; i >= 0; --i)
+        {
+            ePlayerNetID *pPlayer = team->Player(i);
+            eGameObject *pGameObject = pPlayer->Object();
+
+            // FIXME: don't hardcode respawn delay
+            if (!((!pGameObject) ||
+                ((!pGameObject->Alive()) &&
+                (pGameObject->DeathTime() < (time - 1)))))
+                continue;
+
+            sg_RespawnPlayer(grid, sg_GetArena(), near, pPlayer);
+
+            // FIXME: only announce group respawns once, regardless of player count
+            tColoredString playerName;
+            playerName << *pPlayer << tColoredString::ColorString(1,1,1);
+            if (ownersInside_ && sg_baseRespawn)
+            {
+                tColoredString spawnerName;
+                spawnerName << teamPlayerName_ << tColoredString::ColorString(1,1,1);
+                sn_ConsoleOut( tOutput( "$player_base_respawn", playerName, spawnerName ) );
+            }
+            else
+            {
+                tColoredString spawnerName;
+                spawnerName << enemyPlayerName_ << tColoredString::ColorString(1,1,1);
+                sn_ConsoleOut( tOutput( "$player_base_enemy_respawn", playerName, spawnerName ) );
+            }
+
+            // send a console message to the player
+            // FIXME: maybe move to sg_RespawnPlayer ?
+            sn_CenterMessage(tOutput("$player_respawn_center_message"), pPlayer->Owner());
         }
     }
 
@@ -890,12 +940,21 @@ void zFortressZone::OnInside( gCycle * target, REAL time )
     // remember who is inside
     if ( team == otherTeam )
     {
+        if ( ownersInside_ == 0 )
+            // store the name
+            teamPlayerName_ = target->Player()->GetColoredName();
+
         ++ ownersInside_;
     }
     else if ( team )
     {
         if ( enemiesInside_ == 0 )
+        {
             enemies_.clear();
+
+            // store the name
+            enemyPlayerName_ = target->Player()->GetColoredName();
+        }
 
         ++ enemiesInside_;
         if ( std::find( enemies_.begin(), enemies_.end(), otherTeam ) == enemies_.end() )

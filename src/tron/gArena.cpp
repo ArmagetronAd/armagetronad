@@ -114,6 +114,34 @@ void gArena::PrepareGrid(eGrid *grid, gParser *aParser)
     eWallRim::UpdateBounds();
 }
 
+// find the closest gSpawnPoint to a location 
+gSpawnPoint * gArena::ClosestSpawnPoint(eCoord pos)
+{
+    gSpawnPoint *ret=NULL;
+    REAL distance = -1;
+
+    for(int i=0;i<spawnPoints.Len();i++)
+    {
+        // get the distance
+        REAL tempDistance = (pos - (spawnPoints(i)->location * SizeMultiplier())).Norm();
+
+        if ((tempDistance < distance) || (distance < 0))
+        {
+            ret = spawnPoints(i);
+            distance = tempDistance;
+
+            //con << "Spawn point chosen: " << spawnPoints(i)->location << " " << pos << '\n';
+        }
+//        else
+            //con << "Spawn point not chosen: " << spawnPoints(i)->location << " " << pos << '\n';
+    }
+
+    if (!ret)
+        tERR_ERROR("No spawnpoint available!");
+
+    return ret;
+} 
+
 // find the best gSpawnPoint
 gSpawnPoint * gArena::LeastDangerousSpawnPoint()
 {

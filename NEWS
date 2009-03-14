@@ -87,6 +87,20 @@ Changes since 0.2.8
 - Added support for armagetronad URLs on Mac OS X and KDE -- armagetronad://<server>[:<port>]. port defaults to 4534.
 - New command-line flag: --connect <server>[:<port>]. Startup the game and connect directly to <server>.
 
+Changes since 0.2.8.3_beta2:
+============================
+- Fixed 'invincibility' bug. It really was cycles freezing in time.
+- Fixed sporadic sound related crash at round end.
+- setting rename: SILENCE_ALL -> SILENCE_DEFAULT.
+- Sound no longer gets muted after you switch the sound settings.
+- Fixed object collision detection that would sometimes pick a wrong 
+  wall to collide with, most likely the reason behind wrongly accredited
+  kills.
+- Fixed inability to switch viewport assignment in four player mode.
+- Better handling of lag clusterbombs.
+- Server disconnects now also take immediate effect even when you're
+  in a menu or chatting.
+
 Changes since 0.2.8.3_beta1:
 ============================
 
