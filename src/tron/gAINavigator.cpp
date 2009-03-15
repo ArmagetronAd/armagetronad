@@ -640,7 +640,7 @@ void gAINavigator::RubberEvaluator::Init( gCycle const & cycle, REAL maxTime )
 // * FollowEvaluator      *
 // *************************
 
-gAINavigator::FollowEvaluator::FollowEvaluator( gCycle const & cycle ): cycle_( cycle ), blocker_( 0 )
+gAINavigator::FollowEvaluator::FollowEvaluator( gCycle const & cycle ): cycle_( cycle ), blocker_( 0 ), blockedBySelf_( false )
 {
 }
 
@@ -742,9 +742,11 @@ public:
     }
 };
 
-//!@param minQuality minimal turn quality (measured in seconds)
 void gAINavigator::FollowEvaluator::SetTarget( eCoord const & target, eCoord const & velocity )
 {
+    blocker_ = 0;
+    blockedBySelf_ = false;
+
     // determine direction to center
     toTarget_ = target - cycle_.Position();
 
@@ -760,6 +762,7 @@ void gAINavigator::FollowEvaluator::SetTarget( eCoord const & target, eCoord con
             if ( ownWall )
             {
                 blocker_ = ownWall->Cycle();
+                blockedBySelf_ = true;
                 tASSERT( blocker_ == &cycle_ );
                 if( ownWall->Pos(.5) > blocker_->GetDistance() - blocker_->ThisWallsLength()*.9 )
                 {
@@ -783,6 +786,8 @@ void gAINavigator::FollowEvaluator::SetTarget( eCoord const & target, eCoord con
             gPlayerWall const * w = dynamic_cast< gPlayerWall const * >( sensor.ehit->GetWall() );
             if ( w )
             {
+                blocker_ = w->Cycle();
+
                 // just follow enemy wall in the inverse direction, but keep an eye on the target
                 toTarget_.Normalize();
                 eCoord follow = - w->Vec();

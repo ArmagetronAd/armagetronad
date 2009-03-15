@@ -328,10 +328,12 @@ public:
         
         //! set the target to follow
         void SetTarget( eCoord const & target, eCoord const & velocity );
+
         virtual void Evaluate( gAINavigator::Path const & path, gAINavigator::PathEvaluation & evaluation ) const;
     protected:
         gCycle const & cycle_; //!< the owning cycle
         gCycle * blocker_;     //!< other cycle blocking the path to the target
+        bool   blockedBySelf_; //!< flag indicating the path is blocked by the cycle itself
         eCoord toTarget_;      //!< direction to target, roughly normalized
         REAL   turnTime_;      //!< time to make the next turn
     };

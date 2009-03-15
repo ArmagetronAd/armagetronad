@@ -39,12 +39,12 @@ class zZone;
 class zZoneEvaluator: public gAINavigator::FollowEvaluator
 {
 public:
-    zZoneEvaluator( gCycle const & cycle, zZone const & zone, REAL maxStep );
+    zZoneEvaluator( gCycle const & cycle, zZone const & zone, eCoord & random, REAL maxStep );
     ~zZoneEvaluator();
 
 private:
     //! constructor helper
-    void Init( gCycle const & cycle, zZone const & zone, REAL maxStep );
+    void Init( gCycle const & cycle, zZone const & zone, eCoord & random, REAL maxStep );
 };
 
 //! state for zone defense   
@@ -55,6 +55,8 @@ public:
     ~zStateDefend();
 
     virtual REAL Think( REAL maxStep );
+private:
+    eCoord randomPos;
 };
 
 

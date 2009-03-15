@@ -40,15 +40,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 //!@param cycle the cycle to control
 //!@param zone  the zone to protect/attack
+//!@param random persistent random coordinates
 //!@papam maxstep the maximal delay until the next thought
-zZoneEvaluator::zZoneEvaluator( gCycle const & cycle, zZone const & zone, REAL maxStep ): gAINavigator::FollowEvaluator( cycle )
+zZoneEvaluator::zZoneEvaluator( gCycle const & cycle, zZone const & zone, eCoord & random, REAL maxStep ): gAINavigator::FollowEvaluator( cycle )
 {
-    Init( cycle, zone, maxStep );
+    Init( cycle, zone, random, maxStep );
 }
 
 zZoneEvaluator::~zZoneEvaluator(){}
 
-void zZoneEvaluator::Init( gCycle const & cycle, zZone const & zone, REAL maxStep )
+void zZoneEvaluator::Init( gCycle const & cycle, zZone const & zone, eCoord & random, REAL maxStep )
 {
     zShape * shape = zone.getShape();
     if ( !shape )
@@ -154,9 +155,7 @@ void zZoneEvaluator::Init( gCycle const & cycle, zZone const & zone, REAL maxSte
         REAL radius = sqrtf( radiusSquared );
 
         // pick a random target
-        static tReproducibleRandomizer randomizer;
-        eCoord r = center + eCoord( randomizer.Get() * 2 - 1, randomizer.Get() * 2 - 1 ) * radius;
-        tailToChase = r;
+        tailToChase = center + random * radius * .5;
     }
 
 #ifdef DEBUG
@@ -167,7 +166,37 @@ void zZoneEvaluator::Init( gCycle const & cycle, zZone const & zone, REAL maxSte
 #endif
 
     SetTarget( tailToChase, tailToChaseVelocity );
+    
+    if( blockedBySelf_ || eCoord::F( cycle_.Direction(), tailToChase - cycle.Position() ) < 0 )
+    {
+        // pick a new random position if the current one seems bad
+        static tReproducibleRandomizer randomizer;
+        random = eCoord( randomizer.Get() * 2 - 1, randomizer.Get() * 2 - 1 );
+    }
+    if( blocker_ && blocker_->Team() != cycle_.Team() )
+    {
+        // blocked by an enemy. kill him.
+        gCycle::WallInfo info;
+        blocker_->FillWallInfo( info );
+        tailToChase = ( info.tailPos + blocker_->Position() ) * .5;
+        tailToChaseVelocity = ( info.tailDir + blocker_->Direction() ) * blocker_->Speed() * .5;
+        tailToChase += tailToChaseVelocity * ( cycle_.LastTime() - blocker_->LastTime() );
+        
+#ifdef DEBUG
+        eDebugLine::SetTimeout(.5);
+        eDebugLine::SetColor  (1, 0, 1);
+        eDebugLine::Draw(tailToChase, .5, tailToChase, 5.5);
+        eDebugLine::SetTimeout(0);
+#endif
 
+        SetTarget( tailToChase, tailToChaseVelocity );
+
+        // free path? Goody.
+        if( !blocker_ )
+        {
+            toTarget_ *= 10;
+        }
+    }
 }
    
 zStateDefend::zStateDefend( gAIPlayer & ai ): gAIPlayer::State( ai ){}
@@ -191,7 +220,7 @@ REAL zStateDefend::Think( REAL maxStep )
     zZone const * zoneTarget = dynamic_cast< zZone const * >( Parent().GetTarget() );
     if ( zoneTarget )
     {
-        manager.Evaluate( zZoneEvaluator( cycle, *zoneTarget, maxStep ), gAINavigator::EvaluationManager::BLEND_ADD, 2 );
+        manager.Evaluate( zZoneEvaluator( cycle, *zoneTarget, randomPos, maxStep ), gAINavigator::EvaluationManager::BLEND_ADD, 2 );
         if( zoneTarget->Team() == cycle.Team() )
         {
             cowardice = -1;
