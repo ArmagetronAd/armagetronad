@@ -1387,18 +1387,18 @@ static tSettingItem< REAL > se_confCameraSmart( "CAMERA_SMART", se_cameraSmart )
 */
 
 static float se_cameraEyeDistance = 0; // .1 to .5 appear to be good values
-static tConfItem<float> secced("CAMERA_EYE_DISTANCE", se_cameraEyeDistance);
+static tSettingItem<float> secced("CAMERA_EYE_DISTANCE", se_cameraEyeDistance);
 
 static int se_cameraEye1Color = 1; // 001b (bgR)
-static tConfItem<int> sece1ca("CAMERA_EYE_1_COLOR", se_cameraEye1Color);
-static tConfItem<int> sece1cb("CAMERA_EYE_1_COLOUR", se_cameraEye1Color);
+static tSettingItem<int> sece1ca("CAMERA_EYE_1_COLOR", se_cameraEye1Color);
+static tSettingItem<int> sece1cb("CAMERA_EYE_1_COLOUR", se_cameraEye1Color);
 
 static int se_cameraEye2Color = 6; // 110b (BGr)
-static tConfItem<int> sece2ca("CAMERA_EYE_2_COLOR", se_cameraEye2Color);
-static tConfItem<int> sece2cb("CAMERA_EYE_2_COLOUR", se_cameraEye2Color);
+static tSettingItem<int> sece2ca("CAMERA_EYE_2_COLOR", se_cameraEye2Color);
+static tSettingItem<int> sece2cb("CAMERA_EYE_2_COLOUR", se_cameraEye2Color);
 
 static float se_cameraInMaxFocusDistance = .5; //factor of the current speed
-static tConfItem<float> secimfd("CAMERA_IN_MAX_FOCUS_DISTANCE", se_cameraInMaxFocusDistance);
+static tSettingItem<float> secimfd("CAMERA_IN_MAX_FOCUS_DISTANCE", se_cameraInMaxFocusDistance);
 
 #ifndef DEDICATED
 bool displaying=false;
