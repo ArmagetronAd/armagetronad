@@ -2995,6 +2995,62 @@ static void sg_Respawn( REAL time, eGrid *grid, gArena & arena )
 }
 #endif
 
+void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord & pos, tCoord & dir, ePlayerNetID * p) {
+    eGameObject *e=p->Object();
+
+    if ( ( !e || !e->Alive()) && sn_GetNetState() != nCLIENT )
+    {
+#ifdef DEBUG
+        //                std::cout << "spawning player " << pni->name << '\n';
+#endif
+        gCycle * cycle = new gCycle(grid, pos, dir, p);
+        p->ControlObject(cycle);
+
+        sg_Timestamp();
+    }
+}
+
+void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord & near, ePlayerNetID * p) {
+    eGameObject *e=p->Object();
+
+    if ( ( !e || !e->Alive()) && sn_GetNetState() != nCLIENT )
+    {
+        tCoord pos,dir;
+        arena->ClosestSpawnPoint(near)->Spawn( pos, dir );
+
+#ifdef DEBUG
+        //                std::cout << "spawning player " << pni->name << '\n';
+#endif
+        gCycle * cycle = new gCycle(grid, pos, dir, p);
+        p->ControlObject(cycle);
+
+        sg_Timestamp();
+    }
+}
+
+void sg_RespawnPlayer(eGrid * grid, gArena * arena, tCoord * near, ePlayerNetID * p) {
+    if (near)
+        sg_RespawnPlayer(grid, arena, *near, p);
+    else
+        sg_RespawnPlayer(grid, arena, p);
+}
+
+void sg_RespawnPlayer(eGameObject & near, ePlayerNetID * p) {
+    // FIXME: how to get arena info from object?
+    tCoord npos = near.Position();
+    sg_RespawnPlayer(near.Grid(), &Arena, npos, p);
+}
+
+void sg_RespawnPlayer(eGrid * grid, gArena * arena, eGameObject * near, ePlayerNetID * p) {
+    if (near)
+    {
+        tCoord npos = near->Position();
+        sg_RespawnPlayer(near->Grid(), arena, npos, p);
+    }
+    else
+        sg_RespawnPlayer(grid, arena, p);
+}
+
 void sg_RespawnPlayer(eGrid *grid, gArena *arena, ePlayerNetID *p)
 {
     eGameObject *e=p->Object();

@@ -29,48 +29,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nConfig.h"
 
-#include "gArena.h"
-
 #include "eGrid.h"
-#include "eSpawn.h"
+#include "gArena.h"
+#include "gSpawn.h"
 #include "gWall.h"
 #include "gParser.h"
 #include "tRandom.h"
 #include "eRectangle.h"
-#include "gCycle.h"
 
 static float sizeMultiplier = .5f;
 static nSettingItem<float> conf_mult ("REAL_ARENA_SIZE_FACTOR", sizeMultiplier);
 
 static int axes = 4;
 static nSettingItemWatched<int> conf_axes ("ARENA_AXES", axes,  nConfItemVersionWatcher::Group_Breaking, 6 );
-
-// formation constants: how much wingmen are placed sideways and backwards
-// relative to the leader
-static REAL sg_spawnBack = 2.202896;
-static REAL sg_spawnSide = 2.75362;
-static tSettingItem< REAL > sg_spawnBackConf( "SPAWN_WINGMEN_BACK", sg_spawnBack );
-static tSettingItem< REAL > sg_spawnSideConf( "SPAWN_WINGMEN_SIDE", sg_spawnSide );
-
-gSpawnPoint::gSpawnPoint(const eCoord &loc,const eCoord &dir)
-:eSpawnPoint(loc, dir)
-{}
-
-void gSpawnPoint::FindPos(eCoord &loc, eCoord &dir)
-{
-    int d,away;
-    if (numberOfUses%2==1){
-        d=1;
-        away=(numberOfUses+1)/2;
-    }
-    else{
-        d=-1;
-        away=numberOfUses/2;
-    }
-
-    dir = direction;
-    loc = location * gArena::SizeMultiplier() - dir.Turn(sg_spawnBack,-d*sg_spawnSide) * away * gCycle::SpeedMultiplier();
-}
 
 gArena::gArena():spawnPoints()
 {

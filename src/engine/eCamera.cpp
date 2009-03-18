@@ -26,18 +26,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // CHECK: consistent with project's logging policy?
-// define if camera should log its state at every timestep
+// define iff camera should log its state at every timestep
 // #define CAMERA_LOGGING
 
 #include "rSDL.h"
-#include "rGL.h"
 
 #ifdef CAMERA_LOGGING
 #include <iostream>
 #endif
 
-#include "tCommandLine.h"
-#include "tRecorder.h"
 #include "eSensor.h"
 #include "eCamera.h"
 #include "rScreen.h"
@@ -200,6 +197,7 @@ uGlanceAction eCamera::se_glance[eCamera::se_glances] = {
         };
 
 
+
 uActionCamera eCamera::se_lookDown("BANK_DOWN",
                                    -120,
                                    uAction::uINPUT_ANALOG);
@@ -219,15 +217,10 @@ uActionCamera eCamera::se_lookLeft("LOOK_LEFT",
 
 uActionCamera eCamera::se_switchView("SWITCH_VIEW", -160);
 
-uActionTooltip eCamera::se_glanceBackTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_BACK], 2 );
-uActionTooltip eCamera::se_glanceForwardTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_FORWARD], 1 );
-uActionTooltip eCamera::se_glanceRightTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_RIGHT], 3 );
-uActionTooltip eCamera::se_glanceLeftTooltip( uActionTooltip::Level_Advanced, eCamera::se_glance[GLANCE_LEFT], 3 );
-uActionTooltip eCamera::se_switchViewTooltip( uActionTooltip::Level_Advanced, eCamera::se_switchView, 2 );
 
 static REAL s_startFollowX = -30, s_startFollowY = -30, s_startFollowZ = 80;
 static REAL s_startSmartX = 10, s_startSmartY = 30, s_startSmartZ = 2;
-static REAL s_startFreeX =  10, s_startFreeY = -70, s_startFreeZ = 100, s_startFreeRotate = 0, s_startFreePitch = 0;
+static REAL s_startFreeX =  10, s_startFreeY = -70, s_startFreeZ = 100;
 
 static tSettingItem<REAL> s_foX("CAMERA_FOLLOW_START_X", s_startFollowX);
 static tSettingItem<REAL> s_smX("CAMERA_SMART_START_X", s_startSmartX);
@@ -240,9 +233,6 @@ static tSettingItem<REAL> s_frY("CAMERA_FREE_START_Y", s_startFreeY);
 static tSettingItem<REAL> s_foZ("CAMERA_FOLLOW_START_Z", s_startFollowZ);
 static tSettingItem<REAL> s_smZ("CAMERA_SMART_START_Z", s_startSmartZ);
 static tSettingItem<REAL> s_frZ("CAMERA_FREE_START_Z", s_startFreeZ);
-
-static tSettingItem<REAL> s_frR("CAMERA_FREE_START_ROTATE", s_startFreeRotate);
-static tSettingItem<REAL> s_frP("CAMERA_FREE_START_PITCH", s_startFreePitch);
 
 // custom camera displacement
 static REAL s_customBack = 30, s_customRise = 20, s_customBackSpeed = 0, s_customRiseSpeed = 0 , s_customPitch = -.7, s_customZoom = 0.5, s_customTurnSpeed=40, s_customTurnSpeed180 = 2;
@@ -275,22 +265,12 @@ static tSettingItem<REAL> s_mercamz("CAMERA_MER_Z",mercamz);
 // glancing configuration
 static int glanceMode = 2;
 static REAL glanceAngularVelocity = 4*M_PI; //!< angular velocity if target direction perpendicular to current one
-static bool se_glanceReturn = true;     // if true, releasing glance keys automatically glances forward
-static bool se_glanceStacking = false;  // if true, subsequent glances stack: pressing left twice quickly glances back etc.
-static REAL se_glanceReturnStop = 0.99; // cosine of the angle between driving direction and glance direction the return glance will automatically stop and return control to the regular camera logic for all but the smart camera
-static REAL se_glanceReturnStopSmart = 0; // same for the smart camera
-static REAL se_glanceSnap = -.5; // if the cosine the angle between glance target and current glance is smaller than this, the glance snaps instantly to the target
 static REAL glanceAngularVelocityBonus = 12.; //!< factor to glanceAngularVelocity for glances larger than M_PI_2
 static REAL smartcamGlancingBack = 20;
 static REAL smartcamGlancingHeight = 10;
 
 static tSettingItem<int>  s_glanceMode("CAMERA_GLANCE_MODE",glanceMode);
 static tSettingItem<REAL> s_glanceRotSpeed("CAMERA_GLANCE_ANGULAR_VELOCITY",glanceAngularVelocity);
-static tSettingItem<bool>  s_glanceReturn("CAMERA_GLANCE_RETURN",se_glanceReturn);
-static tSettingItem<REAL>  s_glanceReturnStop("CAMERA_GLANCE_RETURN_STOP",se_glanceReturnStop);
-static tSettingItem<REAL>  s_glanceReturnStopSmart("CAMERA_GLANCE_RETURN_STOP_SMART",se_glanceReturnStopSmart);
-static tSettingItem<REAL>  s_glanceSnap("CAMERA_GLANCE_SNAP",se_glanceSnap);
-static tSettingItem<bool>  s_glanceStacking("CAMERA_GLANCE_STACKING",se_glanceStacking);
 static tSettingItem<REAL> s_glanceRotSpeedBonus("CAMERA_GLANCE_ANGULAR_VELOCITY_BONUS",glanceAngularVelocityBonus);
 static tSettingItem<REAL> s_smartcamGlanceBack("CAMERA_SMART_GLANCING_BACK",smartcamGlancingBack);
 static tSettingItem<REAL> s_smartcamGlanceHeight("CAMERA_SMART_GLANCING_HEIGHT",smartcamGlancingHeight);
@@ -321,11 +301,6 @@ inline REAL robust_acos(REAL arg) {
 
 
 eCoord eCamera::nextDirIfGlancing(eCoord const & dir, eCoord const & targetDir, REAL ts) {
-
-    if( eCoord::F(dir, targetDir) < se_glanceSnap )
-    {
-        return targetDir;
-    }
 
     switch (glanceMode) {
     case 0: {
@@ -366,49 +341,6 @@ eCoord eCamera::nextDirIfGlancing(eCoord const & dir, eCoord const & targetDir, 
     }
 }
 
-//! loads a camera configuration from a line
-void eCamera::LoadAny( eGrid * grid, std::istream & s )
-{
-    int id;
-    s >> id;
-    if( s.good() && id >= 0 && grid && id < grid->cameras.Len() )
-    {
-        // load the rest
-        grid->cameras(id)->Load( s );
-    }
-}
-
-//! loads this camera configuration from a line
-void eCamera::Load( std::istream & s )
-{
-    s >> pos.x >> pos.y >> dir.x >> dir.y >> z >> rise >> fov;
-    dir.Normalize();
-}
-
-//! saves all this cameras' configuration in a form that can be used from a config file
-void eCamera::SaveAll( eGrid * grid, std::ostream & s )
-{
-    if( !grid )
-    {
-        return;
-    }
-    for( int i = 0; i < grid->cameras.Len(); ++i )
-    {
-        s << "WARP_CAMERA " << i << " ";
-        grid->cameras(i)->Save(s);
-        s << "\n";
-    }
-}
-
-//! saves this camera configuration
-void eCamera::Save( std::ostream & s ) const
-{
-    s << " " << pos.x << " " << pos.y << " " << dir.x << " " << dir.y << " " 
-      << z << " " << rise << " " << fov;
-}
-
-// settings items exploiting these functions are in gGame.cpp, only there they have good
-// access to the grid.
 
 // pointer holding the last player watched actively
 static nObserverPtr< ePlayerNetID > se_watchedPlayer[ MAX_PLAYERS ];
@@ -426,7 +358,6 @@ static nObserverPtr< ePlayerNetID > & se_GetWatchedPlayer( eCamera * cam )
 }
 
 // returns the last watched game object
-/*
 static eGameObject * se_GetWatchedObject( eCamera * cam )
 {
     ePlayerNetID const * player = se_GetWatchedPlayer( cam );
@@ -435,7 +366,6 @@ static eGameObject * se_GetWatchedObject( eCamera * cam )
 
     return NULL;
 }
-*/
 
 static void se_SetWatchedObject( eCamera * cam, eGameObject * obj )
 {
@@ -454,65 +384,6 @@ static void se_SetWatchedObject( eCamera * cam, eGameObject * obj )
     }
 }
 
-#ifdef DEBUG
-// name of player to watch
-static tString se_pleaseWatch;
-static eGameObject * se_GetPleaseWatch()
-{
-    if( !tRecorderBase::IsPlayingBack() )
-    {
-        return NULL;
-    }
-
-    if( se_pleaseWatch.size() == 0 )
-    {
-        return NULL;
-    }
-
-    // yeah, umm, finding players requires authorization. Let's steal it. Just this once.
-    tCurrentAccessLevel thief(tAccessLevel_Owner, true);
-    ePlayerNetID * p = ePlayerNetID::FindPlayerByName( se_pleaseWatch, 0, false );
-    if( !p )
-    {
-        return NULL;
-    }
-
-    eGameObject * ret = p->Object();
-    if( ret && ret->Alive() )
-    {
-        return ret;
-    }
-
-    return NULL;
-}
-
-class rWatchCommandLineAnalyzer: public tCommandLineAnalyzer
-{
-private:
-    virtual bool DoAnalyze( tCommandLineParser & parser )
-    {
-        // get option
-        tString name;
-        if ( parser.GetOption( name, "--watch" ) )
-        {
-            // set fast forward mode
-            se_pleaseWatch = name;
-
-            return true;
-        }
-
-        return false;
-    }
-
-    virtual void DoHelp( std::ostream & s )
-    {                                      //
-        s << "--watch <name>               : during playback, prefers to watch a player with that\n"
-             "                               name (part) instead of the originally active player.";
-    }
-};
-static rWatchCommandLineAnalyzer se_WatchAnalyzer;
-#endif
-
 void eCamera::MyInit(){
     if (localPlayer){
         if (cameraMain_) mode=localPlayer->startCamera; //PENDING:
@@ -524,19 +395,11 @@ void eCamera::MyInit(){
     {
         center = netPlayer->Object();
     }
-    else if ( grid && grid->gameObjectsInteresting.Len() > 0 )
+    else if ( grid->gameObjectsInteresting.Len() > 0 )
     {
         // or an arbitrary game object
         center = grid->gameObjectsInteresting[0];
     }
-
-#ifdef DEBUG
-    eGameObject * pleaseWatch = se_GetPleaseWatch();
-    if( pleaseWatch )
-    {
-        center = pleaseWatch;
-    }
-#endif
 
     // switch away from forbidden camera mode
     if (forbid_camera[mode] && bool(netPlayer) && netPlayer->Object()==Center())
@@ -559,13 +422,8 @@ void eCamera::MyInit(){
     //  foot=tNEW(eGameObject)(pos,dir,0);
     distance=0;
     lastrendertime=se_GameTime();
-    if ( grid )
-    {
-        if ( CameraMain() )
-            grid->cameras.Add(this,id);
-        else
-            grid->subcameras.Add(this,id);
-    }
+	if (CameraMain()) grid->cameras.Add(this,id);
+	else grid->subcameras.Add(this,id);
     //  se_ResetVisibles(id);
     smoothTurning=turning=0;
     centerPosLast=centerposLast=CenterPos();
@@ -615,17 +473,6 @@ void eCamera::MyInit(){
         rise=(CenterZ()-z)/dist;
     }
 
-    // modify rotation and pitch
-    if( mode == CAMERA_FREE )
-    {
-        if( s_startFreePitch != 0 )
-        {
-            rise = s_startFreePitch;
-        }
-        REAL rot = s_startFreeRotate*M_PI/180;
-        dir = dir.Turn( cosf(rot), sinf(rot) );
-    }
-
     activeGlanceRequest=NULL;
 
     lastSwitch=-100;
@@ -640,18 +487,13 @@ eCamera::eCamera(eGrid *g, rViewport *view,ePlayerNetID *p,
         // centerID(0),
         mode(m),pos(0,0),dir(1,0),top(0,0),
         vp(view),
-        returnGlanceRequest(NULL), 
-        cameraMain_(rMain), renderInCockpit_(false),
-        mirrorView_(false)
+        cameraMain_(rMain), renderInCockpit_(false), mirrorView_(false)
 		{
     /*
       if (p->pID>=0)
       localPlayer=playerConfig[p->pID];
     */
     MyInit();
-
-    // dummy timestep to get things set up
-    Timestep(0);
 }
 
 
@@ -668,7 +510,7 @@ eCamera::~eCamera(){
     	grid->cameras.Remove(this, id);
     else
 		grid->subcameras.Remove(this, id);
-
+		
     tCHECK_DEST;
 }
 
@@ -763,12 +605,6 @@ void eCamera::SwitchView(){
     if ( mode == CAMERA_IN || mode == CAMERA_CUSTOM || mode == CAMERA_SERVER_CUSTOM )
         rise=0;
 
-    // custom camera with turn speed 0: align it with the cycle once
-    if( ( mode == CAMERA_CUSTOM && s_customTurnSpeed <= 0 ) || ( mode == CAMERA_SERVER_CUSTOM && s_serverCustomTurnSpeed <= 0 ) )
-    {
-        dir = CenterDir();
-    }
-
     if(mode==CAMERA_SMART){
         smartcamIncamSmooth=1;
         z=z+1;
@@ -832,35 +668,11 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
         uGlanceAction* ga = static_cast<uGlanceAction*>(Act);
         eGlanceRequest* gr = &glanceRequests[ga-se_glance];
         if (x>0) {
-            if (returnGlanceRequest != NULL) { // cancel any returning from glance
-              returnGlanceRequest->Remove();
-              returnGlanceRequest = NULL;
-            }
-
-            // CHECK: proper focal point?
-            eCoord baseDir;
-            if (se_glanceStacking)
-            {
-                baseDir = grid->GetDirection(grid->DirectionWinding(dir));
-            }
-            else
-            {
-                baseDir = grid->GetDirection(grid->DirectionWinding(CenterDir()));
-            }
+            eCoord baseDir = grid->GetDirection(grid->DirectionWinding(dir)); // CHECK: proper focal point?
             gr->dir = baseDir.Turn(ga->relDir);
             gr->Insert(activeGlanceRequest);
-        }
-        else
-        {
-            gr->Remove(); // remove current glance request
-            // now we want to align camera with cycle direction again by forward glance
-            if (se_glanceReturn and activeGlanceRequest == NULL and gr != &glanceRequests[0]) { // but only if enabled and no other glance is active and the released glance is not the forward glance
-                returnGlanceRequest = &glanceRequests[0]; // forward glancing
-                eCoord baseDir = grid->GetDirection(grid->DirectionWinding(CenterDir()));
-                returnGlanceRequest->dir = baseDir;
-                returnGlanceRequest->Insert(activeGlanceRequest);
-            }
-            Timestep(0); // simulate a zero step, mostly to get an immediate return glance abort right
+        } else {
+            gr->Remove();
         }
     } else
         return false;
@@ -897,9 +709,9 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
     pos=pos+dir*mf*.25+dir.Turn(eCoord(0,ml*.25));
 
     fov/=zi;
-    if (fov>160 && zi < 1) fov=160;
+    if (fov>120) fov=120;
 
-    if (fov<30 && zi > 1) fov=30;
+    if (fov<30) fov=30;
 
 
     switch(mode){
@@ -1078,7 +890,7 @@ public:
     //! @param time  usually the game time of the event, here time simply is the fraction of the
     //!              distance from the object to the camera covered so far
     //! @param alpha relative coordinate of the collision point on the wall
-    virtual ePassEdgeResult PassEdge(const eWall *w,REAL time,REAL alpha,int) override
+    virtual void PassEdge(const eWall *w,REAL time,REAL alpha,int)
     {
         // determine the height limit (max. height at which walls will not be considered blockers)
         REAL objectZ = 1.5;
@@ -1088,7 +900,7 @@ public:
 
         // exit early if the wall does not obstruct view
         if ( moved_ || !w || !owned->EdgeIsDangerous(w, time, alpha) || w->Height() <= heightLimit )
-            return eContinue;
+            return;
 
         heightLimit *= .5f;
 
@@ -1121,8 +933,6 @@ public:
             moved_ = correction.distance > .001f;
             camPos_ = correction.correctTo;
         }
-
-        return eContinue;
     }
     bool moved_; //!< flag indicating that the camera position was moved
 
@@ -1497,7 +1307,7 @@ bool eCamera::AutoSwitchIncam(){
         return false;
 }
 
-static inline void makefinite(REAL &x,REAL y=2){if (!isfinite(x)) x=y;}
+static inline void makefinite(REAL &x,REAL y=2){if (!finite(x)) x=y;}
 static inline void makefinite(eCoord &x){makefinite(x.x);makefinite(x.y);}
 
 // Smart camera settings
@@ -1587,10 +1397,8 @@ static int se_cameraEye2Color = 6; // 110b (BGr)
 static tSettingItem<int> sece2ca("CAMERA_EYE_2_COLOR", se_cameraEye2Color);
 static tSettingItem<int> sece2cb("CAMERA_EYE_2_COLOUR", se_cameraEye2Color);
 
-#ifdef DUNNOWHATTHISISSUPPOSEDTODO
 static float se_cameraInMaxFocusDistance = .5; //factor of the current speed
 static tSettingItem<float> secimfd("CAMERA_IN_MAX_FOCUS_DISTANCE", se_cameraInMaxFocusDistance);
-#endif
 
 #ifndef DEDICATED
 bool displaying=false;
@@ -1686,7 +1494,6 @@ void eCamera::Render(){
 		if (mirrorView_) glScalef(-1,1,1);
         vp->Perspective(fov,zNear,1E+20,se_cameraEyeDistance/2.);
 
-        glMatrixMode(GL_MODELVIEW);
         gluLookAt(0,
                   0,
                   0,
@@ -1699,6 +1506,7 @@ void eCamera::Render(){
                   1);
 
         glTranslatef(-pos.x,-pos.y,-z);
+        glMatrixMode(GL_MODELVIEW);
 
         bool draw_center=((CenterPos()-pos).NormSquared()>1 ||
                           fabs(CenterZ() - z)>1);
@@ -1734,16 +1542,13 @@ void eCamera::Render(){
 			if (mirrorView_) glScalef(-1,1,1);
             vp->Perspective(fov,zNear,1E+20,-se_cameraEyeDistance/2.);
 
-#ifdef DUNNOWHATTHISISSUPPOSEDTODO
             float offset = 0;
             if(mode == CAMERA_IN) {
                 eSensor test(Center(), Center()->Position(), Center()->Direction());
                 test.detect(se_cameraInMaxFocusDistance*Center()->Speed());
                 offset = test.hit;
             }
-#endif
-
-            glMatrixMode(GL_MODELVIEW);
+ 
             gluLookAt(0,
                       0,
                       0,
@@ -1756,6 +1561,7 @@ void eCamera::Render(){
                       1);
 
             glTranslatef(-pos.x,-pos.y,-z);
+            glMatrixMode(GL_MODELVIEW);
 
             draw_center=((CenterPos()-pos).NormSquared()>1 ||
                          fabs(CenterZ() - z)>1);
@@ -1805,11 +1611,6 @@ void eCamera::SwitchCenter(int d){
         centerID = center->interestingID;
     center = NULL;
 
-    if( !grid )
-    {
-        return;
-    }
-
     if (centerID>=grid->gameObjectsInteresting.Len())
         centerID=0;
     if (centerID<0)
@@ -1853,11 +1654,7 @@ void eCamera::Timestep(REAL ts){
     }
 
     // the best center is always our own vehicle. Focus on it if possible.
-    if (netPlayer
-#ifdef DEBUG
-        && se_pleaseWatch.size() == 0
-#endif
-        )
+    if (netPlayer)
     {
         eGameObject * bestCenter = netPlayer->Object();
         if ( InterestingToWatch(bestCenter) )
@@ -1906,26 +1703,9 @@ void eCamera::Timestep(REAL ts){
         lastSwitch=lastTime;
 
     if (!InterestingToWatch(Center()) && lastTime-lastSwitch>2 && (center==0 || lastTime-center->deathTime > 4)){ // CHECK: not glancing-related. gives the player a chance to analyse the cause of his death before the camera switches away.
-        if( center )
-        {
-            // switch to the potential killer
-            eGameObject const * killer = center->Killer();
-            if ( killer )
-            {
-                center = const_cast< eGameObject * >( killer );
-                lastSwitch=lastTime;
-            }
-        }
-
-        // center = se_GetWatchedObject( this );
+        center = se_GetWatchedObject( this );
         if ( !center || !InterestingToWatch(center) )
-        {
-            bool switched = false;
-            if ( !switched )
-            {
-                SwitchCenter(1);
-            }
-        }
+            SwitchCenter(1);
 
         if (!InterestingToWatch(Center()))
         {
@@ -1944,11 +1724,6 @@ void eCamera::Timestep(REAL ts){
     if (!Center())
         return;
 
-    // if cycle has just turned, cancel potentional returning from glance
-    if (returnGlanceRequest != NULL and centerDirLast != CenterDir()) {
-        returnGlanceRequest->Remove();
-        returnGlanceRequest = NULL;
-    }
     // watch for turns of the center game object
     if ( fabs( centerDirLast * Center()->Direction() ) > .01 )
     {
@@ -1992,7 +1767,7 @@ void eCamera::Timestep(REAL ts){
     if (!CenterAlive() && (newmode==CAMERA_IN || newmode==CAMERA_SMART_IN)){// || newmode==CAMERA_CUSTOM || newmode==CAMERA_SERVER_CUSTOM)){
         pos=pos-dir.Turn(eCoord(5,1));
         z+=2;
-        mode = ( localPlayer && localPlayer->startCamera != CAMERA_IN ) ? localPlayer->startCamera : CAMERA_SMART;
+        newmode=CAMERA_SMART;
     }
 
     const REAL dirSmooth = se_cameraSmartCenterDirSmooth;
@@ -2087,18 +1862,7 @@ void eCamera::Timestep(REAL ts){
             if ( Center() &&  wrongDirection > 0 )
             {
                 // if so, turn to the side using the last driving direction
-                eCoord normedLastDir = Center()->LastDirection();
-                REAL wrongWrongDirection = -eCoord::F(cycleDir, normedLastDir);
-                if( wrongWrongDirection > 0)
-                {
-                    normedLastDir = normedLastDir + cycleDir * (wrongWrongDirection/cycleDir.NormSquared());
-                    REAL n = normedLastDir.NormSquared();
-                    if(n > 0)
-                    {
-                        normedLastDir *= 1/sqrt(n);
-                    }
-                }
-                newdir = newdir + normedLastDir*(wrongDirection*ts*turnSpeed*customTurnSpeed180);
+                newdir = newdir + Center()->LastDirection()*(wrongDirection*ts*turnSpeed*s_customTurnSpeed180);
             }
         }
         else
@@ -2171,11 +1935,11 @@ void eCamera::Timestep(REAL ts){
         {
             REAL zoom = lastTime > 0 ? 1 : exp( s_customZoom * lastTime );
 
-            newdir=newdir*(1/sqrt(newdir.NormSquared()));          // make newdir vector unit
-            newpos     = newpos - newdir * customBack * zoom;      // an actual position is shifted back
-            usernewpos = usernewpos + CenterPos() - centerPosLast; // usernewpos used for blending with newpos
+            newdir=newdir*(1/sqrt(newdir.NormSquared()));
+            newpos     = newpos - newdir * customBack * zoom;
+            usernewpos = usernewpos + CenterPos() - centerPosLast;
             newrise    = customPitch;
-            newz       = CenterCamZ() + customRise * zoom;         // an actual position is shifted up
+            newz       = CenterCamZ() + customRise * zoom;
         }
 
         break;
@@ -2381,12 +2145,6 @@ void eCamera::Timestep(REAL ts){
     if (activeGlanceRequest) {
         bool internal = mode==CAMERA_IN || mode==CAMERA_SMART_IN;
 
-        // avoid division by zero later
-        if( rise >= 0 )
-        {
-            rise = -1;
-        }
-
         if (internal) {
             pos  = newpos;
             dir  = nextDirIfGlancing(dir,activeGlanceRequest->dir,ts);
@@ -2411,13 +2169,6 @@ void eCamera::Timestep(REAL ts){
             t.Normalize();
             t = nextDirIfGlancing(t,activeGlanceRequest->dir,ts);
 
-            // if we have just finished returning from a glance...
-            if (returnGlanceRequest != NULL and eCoord::F(t,CenterDir()) >= ((mode == CAMERA_SMART) ? se_glanceReturnStopSmart : se_glanceReturnStop)) {
-                // remove returnGlance request
-                returnGlanceRequest->Remove();
-                returnGlanceRequest = NULL;
-            }
-            
             // advance time
             focus = focus + focusTarget - focusTargetLast;
 
@@ -2502,55 +2253,54 @@ void eCamera::s_Timestep(eGrid *grid, REAL time){
 
 #ifndef DEDICATED
 
-void eCamera::SoundMix(Uint8 *dest,unsigned int len){
-    tASSERT_THIS();
+//void eCamera::SoundMix(Uint8 *dest,unsigned int len){
+//    if (!this)
+//        return;
+//
+//    if (id>=0){
+//        eGameObject *c=Center();
+//        for(int i=grid->gameObjects.Len()-1;i>=0;i--){
+//            eGameObject *go=grid->gameObjects(i);
+//            SoundMixGameObject(dest,len,go);
+//        }
+//        if (c && c->id<0)
+//            SoundMixGameObject(dest,len,c);
+//    }
+//}
+//
+//
+//void eCamera::SoundMixGameObject(Uint8 *dest,unsigned int len,eGameObject *go){
+//    eCoord vec((go->pos-pos).Turn(dir.Conj()));
+//    REAL dist_squared=vec.NormSquared()+(z-go->z)*(z-go->z);
+//
+//    //dist_squared*=.1;
+//    if (dist_squared<1)
+//        dist_squared=1;
+//
+//    REAL dist=sqrt(dist_squared);
+//
+//#define MAXVOL .4
+//
+//    REAL l=(dist*.5+vec.y)/dist_squared;
+//    REAL r=(dist*.5-vec.y)/dist_squared;
+//
+//    if (l<0) l=0;
+//    if (r<0) r=0;
+//    if (l>MAXVOL) l=MAXVOL;
+//    if (r>MAXVOL) r=MAXVOL;
+//
+//    if (go==Center()){
+//        if (mode==CAMERA_IN || mode==CAMERA_SMART_IN)
+//            l=r=.2;
+//        else if (mode!=CAMERA_FREE){
+//            l*=.9;
+//            r*=.9;
+//        }
+//    }
+//
+//    go->SoundMix(dest,len,id,r,l);
+//}
 
-    if (id>=0){
-        eGameObject *c=Center();
-        for(int i=grid->gameObjects.Len()-1;i>=0;i--){
-            eGameObject *go=grid->gameObjects(i);
-            SoundMixGameObject(dest,len,go);
-        }
-        if (c && c->id<0)
-            SoundMixGameObject(dest,len,c);
-    }
-}
-
-
-void eCamera::SoundMixGameObject(Uint8 *dest,unsigned int len,eGameObject *go){
-    if(!go)
-        return;
-    
-    eCoord vec((go->pos-pos).Turn(dir.Conj()));
-    REAL dist_squared=vec.NormSquared()+(z-go->z)*(z-go->z);
-
-    //dist_squared*=.1;
-    if (dist_squared<1)
-        dist_squared=1;
-
-    REAL dist=sqrt(dist_squared);
-
-#define MAXVOL .4
-
-    REAL l=(dist*.5+vec.y)/dist_squared;
-    REAL r=(dist*.5-vec.y)/dist_squared;
-
-    if (l<0) l=0;
-    if (r<0) r=0;
-    if (l>MAXVOL) l=MAXVOL;
-    if (r>MAXVOL) r=MAXVOL;
-
-    if (go==Center()){
-        if (mode==CAMERA_IN || mode==CAMERA_SMART_IN)
-            l=r=.2;
-        else if (mode!=CAMERA_FREE){
-            l*=.9;
-            r*=.9;
-        }
-    }
-
-    go->SoundMix(dest,len,id,r,l);
-}
 
 #endif
 
@@ -2644,34 +2394,4 @@ void eCamera::CenterCockpitFixedAfter() const{
         return;
 }
 
-///////////////////////////////////////////////
-// Some functions to grab axis informations for touches support (cf uInput.cpp)
-//
-
-// Return cycle direction relatively to camera current direction (nearest axis)
-// It allows to keep touches consistent with current camera display
-int eCamera::DirectionWinding() const {
-    if (!grid || !center) return -1;
-    int r = (grid->DirectionWinding(center->Direction())-grid->DirectionWinding(dir))%grid->WindingNumber();
-    return r<0 ? grid->WindingNumber()+r : r;
-}
-// Return number of axes of Camera's Grid
-int eCamera::WindingNumber() const {
-    if (!grid) return -1;
-    return grid->WindingNumber();
-}
-
-// Get current camera orientation relative to player's cycle direction
-int GetPlayerCameraClosestDirection(int player) {
-    ePlayer* p = ePlayer::PlayerConfig(player);
-    if (!p || !p->cam) return -1;
-    return p->cam->DirectionWinding();
-}
-
-// Get number of axes in player's camera grid
-int GetPlayerWindingNumber(int player) {
-    ePlayer* p = ePlayer::PlayerConfig(player);
-    if (!p || !p->cam) return -1;
-    return p->cam->WindingNumber();
-}
 

@@ -660,6 +660,7 @@ input_switch_view_help        Change la perspective de la camera. Vues disponibl
 #********************************************
 #********************************************
 
+input_instant_chat_text       Instant Chat \1
 input_instant_chat_help       Publie un macro special pour le chat
 
 
@@ -1138,6 +1139,7 @@ player_camera_help            Configure vos preferences pour la camera
 
 player_chat_text              Configuration du chat
 
+player_chat_chat              Chat \1: 
 player_blue_text              Bleu:
 player_blue_help              Vous permet de choisir le composant bleu de votre couleur.
 
@@ -1414,7 +1416,7 @@ detail_dither_text            Melange de coul.:
 detail_dither_help            Si la profondeur de couleur actuelle ne permet pas qu'une couleur soit dirrectement affichee, elle est simulee en melangeant d'autres couleurs. Le mettre sur "Off" ameliorera l'execution du rendement logiciel sur quelques machines; en mode basse resolution, le mettre sur "Off" ameliorera meme la qualite des graphismes (IMHO)
 
 detail_floor_text             Details du sol:
-detail_floor_help             \g a plusieurs manieres d'afficher le sol et la grille: le plus joli vous coutera un certain nombre de FPS ( Frames par Seconde )
+detail_floor_help             ArmageTron a plusieurs manieres d'afficher le sol et la grille: le plus joli vous coutera un certain nombre de FPS ( Frames par Seconde )
 
 detail_floor_no_text          Pas de sol
 detail_floor_no_help          N'affiche rien du tout. Le plus rapide
@@ -1487,34 +1489,6 @@ tweaks_displaylists_help      Les liste d'affichage sont une propriete d'OpenGL 
 tweaks_infinity_text          Infini:
 tweaks_infinity_help          Quelques plans ( ciel, sol, etc. ) ont une prolongation infinie. Si ceci est active, ils sont vraiment dessines en tant que plans infinis. Quelques rendus d'OpenGL ne semble pas trop apprecier ceci ( toutes les versions de Windows que j'ai vu ). Le desactiver si les textures du sol et/ou du ciel sont deformees
 
-detail_zone_style_text          Mode de Rendu des Zones:
-detail_zone_style_help          Defini comment sont dessinées les zones
-detail_zone_style_vertical_text Vertical
-detail_zone_style_vertical_help Rendu vertical classique
-detail_zone_style_flat_text     Plat
-detail_zone_style_flat_help     Rendu trapezoidale sur le sol
-detail_zone_style_combined_text Combiné
-detail_zone_style_combined_help Rendu combiné vertical et plan
-detail_zone_style_custom_text   Personnalisé
-detail_zone_style_custom_help   Personnalisation du rendu des zones. Pressez "entrée" pour accéder au menu
-
-zone_style_custom_menu          Rendu personnalisé des zones
-zone_style_segments_text        Nombre de Segments
-zone_style_segments_help        Nombre de segments formant les zones
-zone_style_segment_steps_text   Nombre de sous-segments
-zone_style_segment_steps_help   Nombre de sous-segments composant chaque segment
-zone_style_segment_length_text  Longueur des segments
-zone_style_segment_length_help  Longueur des segments en pourcent. 1 signifie que les segments seront contigus
-zone_style_bottom_text          Hauteur de départ
-zone_style_bottom_help          Hauteur de départ pour le rendu vertical
-zone_style_height_text          Hauteur de la zone
-zone_style_height_help          Hauteur pour le rendu vertical
-zone_style_floor_scale_pct_text Taille interieur
-zone_style_floor_scale_pct_help Taille interieur pour le rendu sur le sol
-zone_style_proximity_distance_text Distance de proximité max
-zone_style_proximity_distance_help Distance à partir de laquelle la hauteur de la zone comment à diminuer
-zone_style_proximity_offset_text   Distance de proximité min
-zone_style_proximity_offset_help   Distance à laquelle la hauteur de la zone devient 0
 
 #********************************************
 #********************************************
@@ -1642,7 +1616,7 @@ gamestate_reset_console       Remise a zero des scores et debut d'un nouveau mat
 gamestate_resetnow_center     Nouveau match!
 gamestate_resetnow_console    Remise a zero des scores...\n
 gamestate_resetnow_log        Nouveau match\n
-gamestate_newround_console    C'est parti (round \1 sur \2)!\n
+gamestate_newround_console    C'est parti (round \1 sur \2 )!\n
 gamestate_newround_goldengoal C'est parti! (Round special; le gagnant gagne le match)!\n
 gamestate_newround_log        Nouveau round\n
 gamestate_wait_players        En attente de joueurs reels...\n
@@ -1761,12 +1735,12 @@ network_master_options        Options:\n
 network_connecting_to_server  Connexion a \1...\n
 network_connecting_gamestate  En attente du statut de jeu...\n
 network_syncing_gamestate     Recu! Synchronisation du statut de jeu...\n
-network_warn_unknowndescriptor \n\n\nMessage inconnu recu, avec l'ID \1 \n\nVOUS DEVEZ SANS DOUTE METTRE \G A JOUR!!!!\n
+network_warn_unknowndescriptor \n\n\nMessage inconnu recu, avec l'ID \1 \n\nVOUS DEVEZ SANS DOUTE METTRE ARMAGETRON A JOUR!!!!\n
 network_error                 Erreur de reseau.\n
 network_error_timeout         Le temps de l'utilisateur \1 est ecoule.\n
 network_error_shortmessage    Le message de l'utilisateur \1 est trop court.\n
 network_error_overflow        L'utilisateur \1 ne sait pas suivre le trafic du reseau.\n
-network_killuser              Fin de l'utilisateur \1, ping \2, IP \3: \4\n
+network_killuser              Fin de l'utilisateur \1, ping \2.\n
 network_statistics1           Duree:     \1 secondes\n
 network_statistics2           Envoyes:   \2 octets dans \3 paquets (\4 octets/s)\n
 network_statistics3           Recus:     \5 octets dans \6 paquets (\7 octets/s)\n
@@ -1934,8 +1908,8 @@ config_file_write_error       N'a pas pu ecrire dans le fichier de configuration
 config_value_changed          \1 a change \2 en \3.\n
 config_error_read             erreur de lecture de \1: format non valide.\n
 config_message_info           \1 est actuellement a \2.\n
-nconfig_error_protected       Seul le serveur peut modifier \1.\n
-nconfig_error_unknown         Message recu du setting \1 inconnu...\n\n\n\nVOUS DEVRIEZ PROBABLEMENT METTRE \G A JOUR\n
+nconfig_errror_protected      Seul le serveur peut modifier \1.\n
+nconfig_error_unknown         Message recu du setting \1 inconnu...\n\n\n\nVOUS DEVRIEZ PROBABLEMENT METTRE ARMAGETRON A JOUR\n
 nconfig_value_changed         \1 a change \2 en \3 dans l'ordre du serveur.\n
 
 #*************************************

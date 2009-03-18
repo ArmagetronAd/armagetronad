@@ -30,22 +30,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tList.h"
 #include "eCoord.h"
-#include "eSpawn.h"
+
 
 class eGrid;
+class gSpawnPoint;
 class gParser;
-class gArena;
-
-class gSpawnPoint: public eSpawnPoint
-{
-    friend class gArena;
-
-protected:
-    void FindPos(eCoord &loc,eCoord &dir);
-
-public:
-    gSpawnPoint(const eCoord &loc,const eCoord &dir);
-};
 
 // the fighting arena
 class gArena{

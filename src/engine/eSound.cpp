@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "eSound.h"
-#include "aa_config.h"
+#include "config.h"
 #include "tMemManager.h"
 #include "tDirectories.h"
 #include "tRandom.h"
@@ -43,15 +43,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 //eGrid* eSoundPlayer::S_Grid = NULL;
 
+#ifdef WIN32
+#define HAVE_LIBSDL_MIXER 1
+#endif
+
 #ifndef DEDICATED
 #ifdef  HAVE_LIBSDL_MIXER
 #include <SDL_mixer.h>
-// static Mix_Music* music = NULL;
+static Mix_Music* music = NULL;
 #endif
 
-// static SDL_AudioSpec audio;
-// static bool sound_is_there=false;
-// static bool uses_sdl_mixer=false;
+static SDL_AudioSpec audio;
+static bool sound_is_there=false;
+static bool uses_sdl_mixer=false;
 #endif
 
 // sound quality
@@ -61,7 +65,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SOUND_MED 2
 #define SOUND_HIGH 3
 
-#if 0
 #ifdef WIN32
 static int buffer_shift=1;
 #else
@@ -72,7 +75,6 @@ static tConfItem<int> bs("SOUND_BUFFER_SHIFT",buffer_shift);
 
 int sound_quality=SOUND_MED;
 static tConfItem<int> sq("SOUND_QUALITY",sound_quality);
-#endif
 
 static int sound_sources=10;
 static tConfItem<int> ss("SOUND_SOURCES",sound_sources);
@@ -89,11 +91,7 @@ void fill_audio(void *udata, Uint8 *stream, int len)
     int i;
     if (eGrid::CurrentGrid())
         for(i=eGrid::CurrentGrid()->Cameras().Len()-1;i>=0;i--)
-        {
-            eCamera *pCam = eGrid::CurrentGrid()->Cameras()(i);
-            if(pCam)
-                pCam->SoundMix(stream,len);
-        }
+            eGrid::CurrentGrid()->Cameras()(i)->SoundMix(stream,len);
 
     for(i=se_globalPlayers.Len()-1;i>=0;i--)
         se_globalPlayers(i)->Mix(stream,len,0,1,1);
@@ -138,7 +136,6 @@ static bool se_SoundInitPrepare()
 #endif
 #endif
 
-#if 0
 void se_SoundInit()
 {
 #ifndef DEDICATED
@@ -171,7 +168,6 @@ void se_SoundInit()
     if (!sound_is_there && sound_quality!=SOUND_OFF)
     {
         SDL_AudioSpec desired;
-        memset( &desired, 0, sizeof( SDL_AudioSpec ) );
 
         switch (sound_quality)
         {
@@ -263,7 +259,7 @@ void se_SoundExit(){
 #ifndef DEDICATED
     eSoundLocker locker;
 
-    eLegacyWavData::UnloadAll();
+    eWavData::UnloadAll();
     se_SoundPause(true);
 
     if (sound_is_there){
@@ -301,7 +297,6 @@ void se_SoundExit(){
     sound_is_there=false;
 #endif
 }
-#endif
 
 #ifndef DEDICATED
 static unsigned int locks;
@@ -331,17 +326,17 @@ void se_SoundPause(bool p){
 
 // ***********************************************************
 
-eLegacyWavData* eLegacyWavData::s_anchor = NULL;
+eWavData* eWavData::s_anchor = NULL;
 
-eLegacyWavData::eLegacyWavData(const char * fileName,const char *alternative)
-        :tListItem<eLegacyWavData>(s_anchor),data(NULL),len(0),freeData(false), loadError(false){
+eWavData::eWavData(const char * fileName,const char *alternative)
+        :tListItem<eWavData>(s_anchor),data(NULL),len(0),freeData(false), loadError(false){
     //wavs.Add(this,id);
     filename     = fileName;
     filename_alt = alternative;
 
 }
 
-void eLegacyWavData::Load(){
+void eWavData::Load(){
     //wavs.Add(this,id);
 
     if (data)
@@ -455,7 +450,7 @@ void eLegacyWavData::Load(){
 #endif
 }
 
-void eLegacyWavData::Unload(){
+void eWavData::Unload(){
 #ifndef DEDICATED
     loadError = false;
 
@@ -485,9 +480,9 @@ void eLegacyWavData::Unload(){
 #endif
 }
 
-void eLegacyWavData::UnloadAll(){
+void eWavData::UnloadAll(){
     //wavs.Add(this,id);
-    eLegacyWavData* wav = s_anchor;
+    eWavData* wav = s_anchor;
     while ( wav )
     {
         wav->Unload();
@@ -496,16 +491,13 @@ void eLegacyWavData::UnloadAll(){
 
 }
 
-eLegacyWavData::~eLegacyWavData(){
+eWavData::~eWavData(){
 #ifndef DEDICATED
     Unload();
 #endif
 }
 
-// from eSoundMixer.cpp
-// extern int se_mixerFrequency;
-
-bool eLegacyWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
+bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                    REAL Rvol,REAL Lvol,REAL Speed,bool loop){
 #ifndef DEDICATED
     if ( !data )
@@ -550,7 +542,7 @@ bool eLegacyWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
 
     // adjust for different sample rates:
     Speed*=spec.freq;
-    Speed/=se_mixerFrequency;
+    Speed/=audio.freq;
 
     int speed=int(floor(Speed));
     int speed_fraction=int(SPEED_FRACTION*(Speed-speed));
@@ -688,7 +680,7 @@ bool eLegacyWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
 
 }
 
-void eLegacyWavData::Loop(){
+void eWavData::Loop(){
 #ifndef DEDICATED
     Uint8 *buff2=tNEW(Uint8) [len];
 
@@ -756,7 +748,7 @@ void eAudioPos::Reset(int randomize){
 
 
 
-eSoundPlayer::eSoundPlayer(eLegacyWavData &w,bool l)
+eSoundPlayer::eSoundPlayer(eWavData &w,bool l)
         :id(-1),wav(&w),loop(l){
     if (l)
         wav->Load();
@@ -813,9 +805,9 @@ void eSoundPlayer::MakeGlobal(){
     se_globalPlayers.Add(this,id);
 }
 
+
 // ***************************************************************
 
-#if 0
 uMenu Sound_menu("$sound_menu_text");
 
 static uMenuItemInt sources_men
@@ -891,7 +883,6 @@ void se_SoundMenu(){
     //	se_SoundUnlock();
     //  se_SoundPause(false);
 }
-#endif
 
 eSoundLocker::eSoundLocker()
 {
@@ -902,3 +893,4 @@ eSoundLocker::~eSoundLocker()
 {
     se_SoundUnlock();
 }
+
