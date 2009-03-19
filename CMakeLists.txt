@@ -5,10 +5,10 @@ set (progtitle "Armagetron Advanced")
 
 list(APPEND CMAKE_MODULE_PATH ${ARMA_SOURCE_DIR}/batch/make/cmake/)
 
-set(DEDICATEDONLY "$ENV{DEDICATEDONLY}")
-if (DEDICATEDONLY)
+option(DEDICATED "Build dedicated server (otherwise only a client)" OFF)
+if (DEDICATED)
     list(APPEND ARMA_DEFINES -DDEDICATED)
-    message(STATUS "Building Dedicated (Remember that's just a hack)")
+    message(STATUS "Building Dedicated")
 endif()
 
 ##### CONFIGURE CHECKS #####
@@ -63,6 +63,7 @@ include (FindBoost)
 include (FindOpenGL)
 include (bison)
 include (FindPNG)
+include (FindPythonInterp)
 
 if (FTGL_FOUND)
     set(HAVE_FTGL_H 1)
@@ -78,6 +79,7 @@ DEP(Boost Boost)
 DEP(BISON Bison)
 DEP(LIBXML2 LibXml2)
 DEP(PROTOBUF "Google Protocol Buffers")
+DEP(PYTHONINTERP "a Python interpreter")
 
 CLIENTDEP(OPENGL "OpenGL")
 CLIENTDEP(FTGL "FTGL")
@@ -192,7 +194,7 @@ include_directories (
 
 
 add_custom_command (TARGET sortresources
-    COMMAND ${ARMA_SOURCE_DIR}/batch/make/copyresources.py ${ARMA_SOURCE_DIR}/resource/proto/ ${ARMA_BINARY_DIR}/resource/included/ ${ARMA_SOURCE_DIR}/batch/make/sortresources.py
+    COMMAND ${PYTHON_EXECUTABLE} ${ARMA_SOURCE_DIR}/batch/make/copyresources.py ${ARMA_SOURCE_DIR}/resource/proto/ ${ARMA_BINARY_DIR}/resource/included/ ${ARMA_SOURCE_DIR}/batch/make/sortresources.py
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${ARMA_SOURCE_DIR}/resource/binary/ ${ARMA_SOURCE_DIR}/resource/included/
     )
 
@@ -201,7 +203,7 @@ add_custom_target (sortresources ALL
     )
 
 add_custom_command (OUTPUT ${ARMA_BINARY_DIR}/src/tTrueVersion.h
-    COMMAND ${ARMA_SOURCE_DIR}/batch/make/version.py -o ${ARMA_BINARY_DIR}/src/tTrueVersion.h
+    COMMAND ${PYTHON_EXECUTABLE} ${ARMA_SOURCE_DIR}/batch/make/version.py -o ${ARMA_BINARY_DIR}/src/tTrueVersion.h
     DEPENDS ${ARMA_SOURCE_DIR}/batch/make/version.py
     WORKING_DIRECTORY ${ARMA_SOURCE_DIR}
     )
@@ -211,17 +213,25 @@ add_custom_target (generateversion ALL
     DEPENDS ${ARMA_BINARY_DIR}/src/tTrueVersion.h
     )
 
-if(BUILDCLIENT)
-    add_executable (armagetronad WIN32 src/tools/tVersion.cpp src/tron/gClient.cpp )
+set(EXTRA_SOURCES 
+    src/tron/gFloor.cpp
+	src/tron/cockpit/cCockpit.cpp
+    src/tron/cockpit/cMap.cpp
+    src/tron/cockpit/cCamview.cpp
+    )
+
+if(BUILDCLIENT AND NOT DEDICATED)
+    add_executable (armagetronad WIN32 src/tools/tVersion.cpp ${EXTRA_SOURCES} src/tron/gClient.cpp)
     target_link_libraries (armagetronad tron engine ui render network tools protos mathexpr particles scrap ${ARMA_LINK_LIBRARIES})
     add_dependencies (armagetronad 
         generateversion
         )
 endif()
 
-add_executable (armagetronad-dedicated src/tools/tVersion.cpp src/tron/gDedicated.cpp)
+if(DEDICATED)
+add_executable (armagetronad-dedicated src/tools/tVersion.cpp ${EXTRA_SOURCES} src/tron/gDedicated.cpp)
 target_link_libraries (armagetronad-dedicated tron engine ui render network tools protos mathexpr particles scrap ${ARMA_LINK_LIBRARIES})
 add_dependencies (armagetronad-dedicated 
     generateversion
     )
-
+endif()

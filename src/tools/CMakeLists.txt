@@ -57,7 +57,7 @@ add_library (tools
     tDecorator.h                tDecorator.cpp
     tValue.h
     tValueParser.h
-    tVersion.h                  tVersion.cpp
+    tVersion.h
     tFunction.h                 tFunction.cpp
     tPolynomial.h               tPolynomial.cpp
     tPolynomialMarshaler.h      tPolynomialMarshaler.cpp

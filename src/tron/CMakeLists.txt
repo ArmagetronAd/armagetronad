@@ -24,7 +24,6 @@ add_library (tron
     gCycleMovement.h            gCycleMovement.cpp
     gExplosion.h                gExplosion.cpp
     gFriends.h                  gFriends.cpp
-                                gFloor.cpp
     gGame.h                	    gGame.cpp
     gJoystick.h                 gJoystick.cpp
     gLanguageMenu.h             gLanguageMenu.cpp
@@ -45,10 +44,10 @@ add_library (tron
     gVectorExtra.h
     gWall.h                     gWall.cpp
     gWinZone.h                  gWinZone.cpp
-    cockpit/cCockpit.h          cockpit/cCockpit.cpp
+    cockpit/cCockpit.h
     cockpit/cWidgetBase.h       cockpit/cWidgetBase.cpp
-    cockpit/cMap.h              cockpit/cMap.cpp
-    cockpit/cCamview.h          cockpit/cCamview.cpp
+    cockpit/cMap.h
+    cockpit/cCamview.h
     cockpit/cLabel.h            cockpit/cLabel.cpp
     cockpit/cGauges.h           cockpit/cGauges.cpp
     cockpit/cRectangle.h        cockpit/cRectangle.cpp
@@ -62,6 +61,7 @@ add_library (tron
     zone/zSelector.h            zone/zSelector.cpp
     zone/zEffector.h            zone/zEffector.cpp
     zone/zZoneInfluence.h       zone/zZoneInfluence.cpp
+    #                                gFloor.cpp
     )
 
 add_dependencies (tron
