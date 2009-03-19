@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE Resource SYSTEM "map-0.3.1-c.dtd">
-<Resource type="aamap" name="spinning_square" version="0.0.1" author="Anonymous" category="polygon/regular">
+<!DOCTYPE Resource SYSTEM "map-0.3.1-a.dtd">
+<Resource type="aamap" name="spinning_square" version="0.0.2" author="Anonymous" category="polygon/regular">
 	<Map version="2">
 		<World>
 			<Field>
@@ -19,7 +19,7 @@
 				<Spawn	x="100"	y="295"	xdir="1"	ydir="0"	/>
 				<Spawn	x="400"	y="205"	xdir="-1"	ydir="0"	/>
 				
-				<Wall>
+				<Wall height="0.01">
 						<Point x="-104" y="-104" />
 						<Point x="-104"  y="604" />
 						<Point  x="604"  y="604" />
