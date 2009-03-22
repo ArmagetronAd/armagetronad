@@ -686,10 +686,9 @@ protected:
     void load_Name(std::istream &s,int i){
         std::ws( s );
 
-        // read and filter name
+        // read name
         tString name;
         name.ReadLine( s );
-        ePlayerNetID::FilterName( name, highName[i] );
     }
 
     void save_Name(std::ostream &s,int i){
