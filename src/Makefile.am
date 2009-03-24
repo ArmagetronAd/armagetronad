@@ -1,5 +1,5 @@
 # include $(top_srcdir)/Makefile.paths
-SUBDIRS = first doc thirdparty
+SUBDIRS = first doc thirdparty test
 
 # target directory
 gamesdir=${bindir}
