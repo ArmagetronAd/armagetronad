@@ -522,7 +522,7 @@ bool eChatPrefixSpamTester::ChatDirectedTowardsPlayer( const tString & prefix ) 
     
     // When using 0.3 name completion at the start of a message,
     // ": " is appended to the end of the player name.
-    if ( st_StringEndsWith( possiblePlayer, ": " ) )
+    if ( st_StringEndsWith( possiblePlayer, ": " ) || st_StringEndsWith( possiblePlayer, ", " ) )
         possiblePlayer = possiblePlayer.SubStr( 0, possiblePlayer.Len() - 3 );
     
     if ( ePlayerNetID::FindPlayerByName( possiblePlayer, 0, false ) )
