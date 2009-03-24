@@ -363,7 +363,7 @@ fi
 
 # remove var directory
 if test ${MODE} = uninstall; then
-  rmdir "${DESTDIR}${NEWVARDIR}"
+  test -d "${DESTDIR}${NEWVARDIR}" && rmdir --ignore-fail-on-non-empty "${DESTDIR}${NEWVARDIR}"
 fi
 
 # add user
