@@ -26,7 +26,7 @@ tString ConvertXMLString( const xmlChar *x )
 
 struct Session
 {
-    Session() :player_(), chatlog_() { }
+    Session( int lineNumber ) :lineNumber_( lineNumber ), player_(), chatlog_() { }
     
     void AddSaid( const tString & say , nTimeRolling time )
     {
@@ -34,6 +34,7 @@ struct Session
         chatlog_.push_back( entry );
     }
     
+    int lineNumber_;
     tString player_;
     std::vector< eChatSaidEntry > chatlog_;
 };
@@ -60,7 +61,10 @@ void TestSession( const Session & session )
         if ( tester.Check( out, timeOut, typeOut ) )
         {
             if ( typeOut != eChatPrefixSpamType_Known )
+            {
+                std::cout << "Found from session starting at line number " << session.lineNumber_ << "\n\n";
                 Stats::stats.foundPrefixes += 1;
+            }
         }
         else
         {
@@ -72,7 +76,7 @@ void TestSession( const Session & session )
 
 void ProcessNode( xmlTextReaderPtr reader )
 {
-    static Session currentSession;
+    static Session currentSession( 0 );
     
     int type = xmlTextReaderNodeType( reader );
     
@@ -86,7 +90,7 @@ void ProcessNode( xmlTextReaderPtr reader )
     
     if ( xmlStrEqual( xmlTextReaderConstName( reader ), BAD_CAST "Session" ) )
     {
-        currentSession = Session();
+        currentSession = Session( xmlTextReaderGetParserLineNumber( reader ) );
     }
     else if ( xmlStrEqual( xmlTextReaderConstName( reader ), BAD_CAST "Player" ) )
     {
