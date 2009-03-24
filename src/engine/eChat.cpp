@@ -382,6 +382,11 @@ eChatPrefixSpamTester::~eChatPrefixSpamTester()
 
 bool eChatPrefixSpamTester::Check( tString & out, nTimeRolling & timeOut )
 {
+    eChatPrefixSpamType typeOutIgnore;
+    return Check( out, timeOut, typeOutIgnore );
+}
+bool eChatPrefixSpamTester::Check( tString & out, nTimeRolling & timeOut, eChatPrefixSpamType & typeOut )
+{
     if ( !ShouldCheckMessage( say_ ) )
         return false;
         
@@ -389,7 +394,11 @@ bool eChatPrefixSpamTester::Check( tString & out, nTimeRolling & timeOut )
     
     // check from known prefixes
     if ( HasKnownPrefix( out, timeOut ) )
+    {
+        typeOut = eChatPrefixSpamType_Known;
         return true;
+    }
+        
     
     eChatLastSaid::SaidList & lastSaid = player_->lastSaid_.LastSaid();
     
@@ -438,6 +447,8 @@ bool eChatPrefixSpamTester::Check( tString & out, nTimeRolling & timeOut )
                 RemovePrefixEntries( prefix, said );
                 
                 out = se_EscapeColors( prefix );
+                typeOut = eChatPrefixSpamType_New;
+                
                 return true;
             }
         }

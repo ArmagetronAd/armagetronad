@@ -4159,10 +4159,6 @@ ePlayerNetID::~ePlayerNetID()
     {
         currentTeam->RemovePlayer( this );
     }
-
-#ifdef DEBUG
-    con << *this << " destroyed.\n";
-#endif
 }
 
 static void player_removed_from_game_handler(nMessage &m)

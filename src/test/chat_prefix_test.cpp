@@ -1,24 +1,139 @@
 #include <libxml/xmlreader.h>
 #include <iostream>
+#include <algorithm>
 
 #include "eChat.h"
 #include "tString.h"
+#include "ePlayer.h"
 
-namespace test
+struct Stats
 {
+    Stats() : sessions( 0 ), chats( 0 ), foundPrefixes( 0 ) { }
+    int sessions;
+    int chats;
+    int foundPrefixes;
     
-// struct Session
-// {
-//     Session(const tString & name) :player_(name) { }
-//     void AddSaid(const tString & say, const nTimeRolling & time)
-//     {
-//         player_.lastSaid_.Add
-//     }
-//     
-//     Player player_;
-// };
+    static Stats stats;
+};
+
+Stats Stats::stats = Stats();
 
 
+tString ConvertXMLString( const xmlChar *x )
+{
+    return tString( (const char *)x );
+}
+
+struct Session
+{
+    Session() :player_(), chatlog_() { }
+    
+    void AddSaid( const tString & say , nTimeRolling time )
+    {
+        eChatSaidEntry entry( say, time, eChatMessageType_Public );
+        chatlog_.push_back( entry );
+    }
+    
+    tString player_;
+    std::vector< eChatSaidEntry > chatlog_;
+};
+
+void TestSession( const Session & session )
+{
+    Stats::stats.sessions += 1;
+    
+    ePlayerNetID player;
+    player.SetName( session.player_ );
+    
+    for ( size_t i = 0; i < session.chatlog_.size(); i++)
+    {
+        const eChatSaidEntry & entry = session.chatlog_[i];
+        
+        eChatPrefixSpamTester tester( &player, entry );
+        
+        tString out;
+        nTimeRolling timeOut;
+        eChatPrefixSpamType typeOut;
+        
+        if ( tester.Check( out, timeOut, typeOut ) )
+        {
+            if ( typeOut != eChatPrefixSpamType_Known )
+                Stats::stats.foundPrefixes += 1;
+        }
+        else
+        {
+            Stats::stats.chats += 1;
+            player.lastSaid_.AddSaid( entry );
+        }
+    }
+}
+
+void ProcessNode( xmlTextReaderPtr reader )
+{
+    static Session currentSession;
+    
+    int type = xmlTextReaderNodeType( reader );
+    
+    if ( type == XML_READER_TYPE_END_ELEMENT && xmlStrEqual( xmlTextReaderConstName( reader ), BAD_CAST "Session" ) )
+    {
+        TestSession( currentSession );
+    }
+    
+    if ( type != XML_READER_TYPE_ELEMENT )
+        return;
+    
+    if ( xmlStrEqual( xmlTextReaderConstName( reader ), BAD_CAST "Session" ) )
+    {
+        currentSession = Session();
+    }
+    else if ( xmlStrEqual( xmlTextReaderConstName( reader ), BAD_CAST "Player" ) )
+    {
+        xmlChar *xmlPlayer = xmlTextReaderReadString( reader );
+        currentSession.player_ = ConvertXMLString( xmlPlayer );
+        xmlFree( xmlPlayer );
+    }
+    else if ( xmlStrEqual( xmlTextReaderConstName( reader ), BAD_CAST "Said" ) )
+    {
+        xmlChar *xmlTime = xmlTextReaderGetAttribute( reader, BAD_CAST "time" );
+        xmlChar *xmlSaid = xmlTextReaderReadString( reader );
+        
+        long time = atol( (const char *)xmlTime );
+        tString say = ConvertXMLString( xmlSaid );
+        
+        currentSession.AddSaid( say, time );
+        
+        xmlFree( xmlTime );
+        xmlFree( xmlSaid );
+    }
+}
+
+bool Parse( const char *filename )
+{
+    int status;
+    xmlTextReaderPtr reader = xmlNewTextReaderFilename( filename );
+    if ( reader != NULL )
+    {
+        status = xmlTextReaderRead( reader );
+        while ( status == 1 )
+        {
+            ProcessNode( reader );
+            status = xmlTextReaderRead(reader);
+        }
+        xmlFreeTextReader( reader );
+        
+        if ( status != 0 )
+        {
+            std::cerr << "Parsing error\n";
+            return false;
+        }
+    }
+    else
+    {
+        std::cerr << "Unable to open '" << filename << "'\n";
+        return false;
+    }
+    
+    return true;
 }
 
 int main( int argc, const char *argv[] )
@@ -29,16 +144,11 @@ int main( int argc, const char *argv[] )
         return 1;
     }
     
-    const char *filename = argv[1];
+    int success = Parse( argv[1] ) ? 0 : 1;
     
-    int status;
-    xmlTextReaderPtr reader = xmlNewTextReaderFilename(filename);
-    do
-    {
-        status = xmlTextReaderRead(reader);
-        
-    } while ( status == 1 );
-    xmlFreeTextReader( reader );
-    
-    return 0;
+    std::cout << "chat_prefix_test done!\n";
+    std::cout << "Statistics:\n\tNumber of sessions tested: " << Stats::stats.sessions
+              << "\n\tNumber of chats let through: " << Stats::stats.chats
+              << "\n\tNumber of chat prefixes found: " << Stats::stats.foundPrefixes << "\n";
+    return success;
 }

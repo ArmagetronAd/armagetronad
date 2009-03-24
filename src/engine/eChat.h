@@ -189,6 +189,12 @@ private:
     bool CheckSpam( REAL factor, tOutput const & message ) const;
 };
 
+enum eChatPrefixSpamType
+{
+    eChatPrefixSpamType_New,
+    eChatPrefixSpamType_Known
+};
+
 /**
  * Checks for prefix spam from a player
  */
@@ -210,6 +216,7 @@ public:
      * @return Did the message have a common prefix?
      */
     bool Check( tString & out, nTimeRolling & timeOut );
+    bool Check( tString & out, nTimeRolling & timeOut, eChatPrefixSpamType & typeOut );
 private:
     class PrefixEntry
     {
@@ -269,6 +276,5 @@ private:
     ePlayerNetID * player_;
     const eChatSaidEntry & say_;
 };
-
 
 #endif
