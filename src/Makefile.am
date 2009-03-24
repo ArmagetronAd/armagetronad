@@ -1,5 +1,5 @@
 # include $(top_srcdir)/Makefile.paths
-SUBDIRS = first doc thirdparty
+SUBDIRS = first doc thirdparty test
 
 # target directory
 gamesdir=${bindir}
@@ -87,7 +87,8 @@ libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentication
 	engine/eSensor.h engine/eSound.cpp engine/eSound.h engine/eTeam.cpp engine/eTeam.h engine/eTess2.h\
 	engine/eTimer.cpp engine/eTimer.h engine/eVoter.cpp engine/eVoter.h engine/eWall.cpp engine/eWall.h\
 	engine/eRectangle.cpp engine/eRectangle.h\
-	engine/eLagCompensation.cpp engine/eLagCompensation.h
+	engine/eLagCompensation.cpp engine/eLagCompensation.h\
+	engine/eChat.cpp engine/eChat.h
 
 
 librender_a_SOURCES=render/rConsole.cpp render/rConsoleGraph.cpp render/rConsole.h render/rFont.cpp\

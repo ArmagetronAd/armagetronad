@@ -931,24 +931,12 @@ int myxmlInputCloseFILE (void *context) {
     return (fclose((FILE *)context) == 0) ? 0 : -1;
 }
 
-// replacement for tString::EndsWith from the trunk
-static bool sg_StringEndsWith( tString const & test, tString const & end )
-{
-    int start = test.Len() - end.Len();
-    return start >= 0 && test.SubStr( start ) == end;
-}
-
-static bool sg_StringEndsWith( tString const & test, char const * end )
-{
-    return sg_StringEndsWith( test, tString( end ) );
-}
-
 static bool sg_IgnoreRequest( tString const & URI )
 {
 #ifdef WIN32
-    return sg_StringEndsWith( URI, "../etc/catalog" );
+    return st_StringEndsWith( URI, "../etc/catalog" );
 #else
-    return URI.StartsWith( "file:///" ) && strstr( URI, "xml" ) && sg_StringEndsWith( URI, "catalog" );
+    return URI.StartsWith( "file:///" ) && strstr( URI, "xml" ) && st_StringEndsWith( URI, "catalog" );
 #endif
 }
 

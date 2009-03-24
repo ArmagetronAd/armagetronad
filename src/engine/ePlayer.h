@@ -46,8 +46,27 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <set>
 #include <list>
+#include <utility>
+#include "eChat.h"
+
 
 #define PLAYER_CONFITEMS (30+MAX_INSTANT_CHAT)
+
+// maximal length of chat message
+extern int se_SpamMaxLen;
+
+// Maximum number of chat entries to save for spam analysis
+extern int se_lastSaidMaxEntries;
+
+// time during which no repeaded chat messages are printed
+extern REAL se_alreadySaidTimeout;
+
+// minimal access level for chat
+extern tAccessLevel se_chatAccessLevel;
+
+// time between public chat requests, set to 0 to disable
+extern REAL se_chatRequestTimeout;
+
 
 // call on commands that only work on the server; quit if it returns true
 bool se_NeedsServer(char const * command, std::istream & s, bool strict = true );
@@ -195,9 +214,7 @@ public:
 
     int    pID;
     // REAL	rubberstatus;
-    tArray<tString> lastSaid;
-    tArray<nTimeRolling> lastSaidTimes;
-    //	void SetLastSaid(tString ls);
+        
     unsigned short r,g,b; // our color
 
     unsigned short pingCharity; // max ping you are willing to take over
@@ -212,6 +229,8 @@ public:
     bool renameAllowed_;     //!< specifies if the player is allowed to rename or not, does not know about votes.
 
     nSpamProtection chatSpam_;
+    
+    eChatLastSaid lastSaid_; //!< last said information
 
     ePlayerNetID(int p=-1);
     ePlayerNetID(nMessage &m);
@@ -351,7 +370,7 @@ public:
     void BeNotLoggedIn() { SetAccessLevel( tAccessLevel_Program ); }
     tAccessLevel GetLastAccessLevel() const { return lastAccessLevel; }
 
-    static ePlayerNetID * FindPlayerByName( tString const & name, ePlayerNetID * requester = 0 ); //!< finds a player by name using lax name matching. Reports errors to the console or to the requesting player.
+    static ePlayerNetID * FindPlayerByName( tString const & name, ePlayerNetID * requester = 0, bool print=true ); //!< finds a player by name using lax name matching. Reports errors to the console or to the requesting player.
 
     void UpdateName();                                           //!< update the player name from either the client's wishes, either the admin's wishes.
     static void FilterName( tString const & in, tString & out ); //!< filters a name (removes unprintables, color codes and spaces)
@@ -479,23 +498,6 @@ public:
     static ePlayerNetID* Greeted(){return greeted;}
 
     eCallbackGreeting(STRINGRETFUNC* f);
-};
-
-extern int se_SpamMaxLen;	// maximal length of chat message
-
-class eChatSpamTester
-{
-public:
-    eChatSpamTester( ePlayerNetID * p, tString const & say );
-    bool Block();
-    bool Check();
-
-    bool tested_;             //!< flag indicating whether the chat line has already been checked fro spam
-    bool shouldBlock_;        //!< true if the message should be blocked for spam
-    ePlayerNetID * player_;   //!< the chatting player
-    tColoredString say_;      //!< the chat line
-    REAL factor_;             //!< extra spam weight factor
-
 };
 
 void ForceName ( std::istream & s );
