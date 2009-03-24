@@ -1,6 +1,5 @@
 #include <libxml/xmlreader.h>
 #include <iostream>
-#include <algorithm>
 
 #include "eChat.h"
 #include "tString.h"
