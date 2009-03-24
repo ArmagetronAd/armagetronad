@@ -7,9 +7,10 @@
 
 struct Stats
 {
-    Stats() : sessions( 0 ), chats( 0 ), foundPrefixes( 0 ) { }
+    Stats() : sessions( 0 ), chats( 0 ), chatsThrough( 0 ), foundPrefixes( 0 ) { }
     int sessions;
     int chats;
+    int chatsThrough;
     int foundPrefixes;
     
     static Stats stats;
@@ -46,6 +47,8 @@ void TestSession( const Session & session )
     
     for ( size_t i = 0; i < session.chatlog_.size(); i++)
     {
+        Stats::stats.chats += 1;
+        
         const eChatSaidEntry & entry = session.chatlog_[i];
         
         eChatPrefixSpamTester tester( &player, entry );
@@ -61,7 +64,7 @@ void TestSession( const Session & session )
         }
         else
         {
-            Stats::stats.chats += 1;
+            Stats::stats.chatsThrough += 1;
             player.lastSaid_.AddSaid( entry );
         }
     }
@@ -147,7 +150,9 @@ int main( int argc, const char *argv[] )
     
     std::cout << "chat_prefix_test done!\n";
     std::cout << "Statistics:\n\tNumber of sessions tested: " << Stats::stats.sessions
-              << "\n\tNumber of chats let through: " << Stats::stats.chats
+              << "\n\tNumber of chats: " << Stats::stats.chats
+              << "\n\tNumber of chats let through: " << Stats::stats.chatsThrough
+              << "\n\tNumber of chats blocked: " << Stats::stats.chats - Stats::stats.chatsThrough
               << "\n\tNumber of chat prefixes found: " << Stats::stats.foundPrefixes << "\n";
     return success;
 }
