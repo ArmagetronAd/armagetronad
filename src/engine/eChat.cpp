@@ -230,17 +230,7 @@ const eChatLastSaid::SaidList & eChatLastSaid::LastSaid() const
     return lastSaid_;
 }
 
-eChatLastSaid::SaidList & eChatLastSaid::LastSaid()
-{
-    return lastSaid_;
-}
-
 const eChatLastSaid::PrefixList & eChatLastSaid::KnownPrefixes() const
-{
-    return knownPrefixes_;
-}
-
-eChatLastSaid::PrefixList & eChatLastSaid::KnownPrefixes()
 {
     return knownPrefixes_;
 }
@@ -402,7 +392,7 @@ bool eChatPrefixSpamTester::Check( tString & out, nTimeRolling & timeOut, eChatP
     }
         
     
-    eChatLastSaid::SaidList & lastSaid = player_->lastSaid_.LastSaid();
+    eChatLastSaid::SaidList & lastSaid = player_->lastSaid_.lastSaid_;
     
     // Map of Prefix => Data
     std::map< tString, PrefixEntry > foundPrefixes;
@@ -420,13 +410,17 @@ bool eChatPrefixSpamTester::Check( tString & out, nTimeRolling & timeOut, eChatP
         {
             const tString prefix = say_.Said().SubStr(0, common);
             
-            // User is talking to a player. Not prefix spam
+            // User is talking to a player. Not prefix spam, but we still check the
+            // message text excluding the player name.
             // Example: Player 1: grind center. [etc...]
-            if ( ChatDirectedTowardsPlayer( prefix ) )
+            int nameLen;
+            if ( ChatDirectedTowardsPlayer( prefix, nameLen ) )
             {
-                // mark message so we don't need to check it next time
                 said.SetType( eChatMessageType_Public_Direct );
+                said.said_ = said.said_.SubStr( nameLen + 1 );
+                
                 return false;
+                
             }
             
             if ( foundPrefixes.find(prefix) == foundPrefixes.end() )
@@ -478,13 +472,13 @@ void eChatPrefixSpamTester::CalcScore( PrefixEntry & data, const int & len, cons
 void eChatPrefixSpamTester::RemovePrefixEntries( const tString & prefix, const eChatSaidEntry & e ) const
 {
     eChatSaidEntry entry( prefix, e.Time(), e.Type() );
-    eChatLastSaid::SaidList & xs = player_->lastSaid_.LastSaid();
+    eChatLastSaid::SaidList & xs = player_->lastSaid_.lastSaid_;
     xs.erase( std::remove_if( xs.begin(), xs.end(), IsPrefixPredicate< eChatSaidEntry >( entry, false ) ), xs.end() );
 }
 
 bool eChatPrefixSpamTester::HasKnownPrefix( tString & out, nTimeRolling & timeOut ) const
 {
-    eChatLastSaid::PrefixList & prefixes = player_->lastSaid_.KnownPrefixes();
+    eChatLastSaid::PrefixList & prefixes = player_->lastSaid_.knownPrefixes_;
     eChatLastSaid::Prefix testPrefix( say_.Said(), 0, 0 );
     
     eChatLastSaid::PrefixList::iterator it =
@@ -511,12 +505,12 @@ nTimeRolling eChatPrefixSpamTester::RemainingTime( nTimeRolling t ) const
 
 void eChatPrefixSpamTester::RemoveTimedOutPrefixes() const
 {
-    eChatLastSaid::PrefixList & xs = player_->lastSaid_.KnownPrefixes();
+    eChatLastSaid::PrefixList & xs = player_->lastSaid_.knownPrefixes_;
     eChatLastSaid::Prefix entry( tString(), 0, say_.Time() );
     xs.erase( std::remove_if( xs.begin(), xs.end(), TimeOutPredicate< eChatLastSaid::Prefix >( entry ) ), xs.end() );
 }
 
-bool eChatPrefixSpamTester::ChatDirectedTowardsPlayer( const tString & prefix ) const
+bool eChatPrefixSpamTester::ChatDirectedTowardsPlayer( const tString & prefix, int & nameLen ) const
 {
     tString possiblePlayer( prefix );
     
@@ -526,12 +520,15 @@ bool eChatPrefixSpamTester::ChatDirectedTowardsPlayer( const tString & prefix ) 
         possiblePlayer = possiblePlayer.SubStr( 0, possiblePlayer.Len() - 3 );
     
     if ( ePlayerNetID::FindPlayerByName( possiblePlayer, 0, false ) )
+    {
+        nameLen = possiblePlayer.Len();
         return true;
+    }
     
     return false;     
 }
 
 bool eChatPrefixSpamTester::ShouldCheckMessage( const eChatSaidEntry & said ) const
 {
-    return said.Type() >= eChatMessageType_Public;
+    return said.Type() >= eChatMessageType_Public_Direct;
 }

@@ -50,6 +50,8 @@ enum eChatMessageType
     eChatMessageType_Me = 5             //!< /me
 };
 
+class eChatPrefixSpamTester;
+
 /**
  * Contains information about an individual chat message
  */
@@ -80,7 +82,7 @@ public:
      * @param newType The new message type.
      * @see Type()
      */
-    void SetType(eChatMessageType newType);
+    void SetType( eChatMessageType newType );
     
     /**
      * Does this message start with the other message?
@@ -88,6 +90,9 @@ public:
     bool StartsWith( const eChatSaidEntry & other ) const;
 
 private:
+    
+    friend class eChatPrefixSpamTester;
+    
     tString said_;
     nTimeRolling time_;
     eChatMessageType type_;
@@ -124,7 +129,6 @@ public:
      * @return The last said entry
      */
     const SaidList & LastSaid() const;
-    SaidList & LastSaid();
     
     /**
      * Chat can be checked to guard against prefix-spam. When a prefix has
@@ -133,7 +137,6 @@ public:
      * @return The known prefixes
      */
     const PrefixList & KnownPrefixes() const;
-    PrefixList & KnownPrefixes();
     
     /**
      * Add a new said entry
@@ -153,6 +156,8 @@ public:
     nTimeRolling AddPrefix( const tString & prefix, REAL score, nTimeRolling now );
     
 private:
+    friend class eChatPrefixSpamTester;
+    
     SaidList lastSaid_;
     PrefixList knownPrefixes_;
 };
@@ -217,7 +222,9 @@ public:
      */
     bool Check( tString & out, nTimeRolling & timeOut );
     bool Check( tString & out, nTimeRolling & timeOut, eChatPrefixSpamType & typeOut );
+    
 private:
+        
     class PrefixEntry
     {
     public:
@@ -245,9 +252,10 @@ private:
      *     Player 1: change your name
      * 
      * @param prefix The possible player name
+     * @param nameLen The length of the name searched for
      * @return Was the prefix a player name?
      */
-    bool ChatDirectedTowardsPlayer( const tString & prefix ) const;
+    bool ChatDirectedTowardsPlayer( const tString & prefix, int & nameLen ) const;
     
     /**
      * We should only check certain message types. For example, commands
