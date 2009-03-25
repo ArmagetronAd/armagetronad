@@ -39,7 +39,7 @@ static bool se_prefixSpamShouldEnable = true;
 static tConfItem< bool > se_prefixSpamShouldEnableConf( "PREFIX_SPAM_ENABLE", se_prefixSpamShouldEnable );
 
 //!< If a prefix begins with a color code it will have this multiplier applied to the score.
-static REAL se_prefixSpamStartColorMultiplier = 2;
+static REAL se_prefixSpamStartColorMultiplier = 1.5;
 static tConfItem< REAL > se_prefixSpamStartColorMultiplierConf( "PREFIX_SPAM_START_COLOR_MULTIPLIER", se_prefixSpamStartColorMultiplier );
 
 //!< Increase score by f( prefix_length * multiplier )
