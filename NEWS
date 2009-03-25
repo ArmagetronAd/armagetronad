@@ -87,6 +87,12 @@ Changes since 0.2.8
 - Added support for armagetronad URLs on Mac OS X and KDE -- armagetronad://<server>[:<port>]. port defaults to 4534.
 - New command-line flag: --connect <server>[:<port>]. Startup the game and connect directly to <server>.
 
+Changes since 0.2.8.3_beta3:
+============================
+- Chat prefix spam protection. Guards against prefix spam, such as when a
+  user always changes their chat message color, or prefixes all messages
+  with a clan tag. Enable/disable with the PREFIX_SPAM_ENABLE setting.
+
 Changes since 0.2.8.3_beta2:
 ============================
 - Fixed 'invincibility' bug. It really was cycles freezing in time.
