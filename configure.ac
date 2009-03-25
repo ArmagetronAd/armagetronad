@@ -957,7 +957,6 @@ language/languages.txt
 config/rc.config config/aiplayers.cfg
 src/doc/Makefile src/doc/net/Makefile src/doc/Doxyfile
 src/doc/html.m4
-src/test/Makefile
 src/thirdparty/Makefile
 src/thirdparty/particles/Makefile
 resource/Makefile
