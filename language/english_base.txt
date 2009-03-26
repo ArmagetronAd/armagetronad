@@ -400,6 +400,16 @@ silence_default_help				If set to 1, new players will be silenced
 enable_chat_help					If set to 0, all chat will be surpressed (if reset on the server, messages from logged in players and private/team messages are still shown)
 allow_team_change_help				If set to 1, all players can change teams. If set to 0, players can only change teams if they've been specifically allowed to by ALLOW_TEAM_CHANGE_PLAYER
 
+# spam prefix settings
+prefix_spam_enable_help                           Should spam prefix checking be enabled? Set to 1 to enable, 0 to disable.
+prefix_spam_start_color_multiplier_help           If a prefix begins with a color code it will have this multiplier applied to its score.
+prefix_spam_length_multiplier_help                Multiplier applied to prefix length when calculating prefix spam score.
+prefix_spam_number_color_codes_multiplier_help    Multiplier applied to the number of color codes in prefix when calculating prefix spam score.
+prefix_spam_number_known_prefixes_multiplier_help Multiplier applied to the number of known spam prefixes when calculating prefix spam score.
+prefix_spam_required_score_help                   The required prefix spam score a prefix must have for it to be considered spam.
+prefix_spam_timeout_multiplier_help               Multiplier applied to time calculation to determine how long a known prefix is remembered.
+
+
 # spam kick messages
 spam_chat                   You chatted too much.
 spam_teamchage              You switched teams too often.
@@ -2253,6 +2263,8 @@ player_vote_accesslevel Sorry, your access level is not high enough to issue a v
 player_pingcharity_changed	Ping charity changed from \1 to \2.\n
 spam_protection_repeat  SPAM PROTECTION: you already said: \1\n
 spam_protection			SPAM PROTECTION: you are silenced for the next \1 seconds.\n
+spam_protection_prefix  SPAM PROTECTION: your messages have a common prefix: \1\nSPAM PROTECTION: messages with this prefix will be allowed again in \2 seconds\n
+
 spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
 spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
 spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in order to chat publically.\n

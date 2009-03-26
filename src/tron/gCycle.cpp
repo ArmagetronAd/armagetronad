@@ -91,7 +91,7 @@ static nNOInitialisator<gCycle> cycle_init(320,"cycle");
 //tCONTROLLED_PTR(ePlayerNetID)   lastEnemyInfluence;  	// the last enemy wall we encountered
 //REAL							lastTime;				// the time it was drawn at
 bool headlights=1;
-bool cycleprograminited=0;
+extern bool cycleprograminited;
 
 static float sg_cycleSyncSmoothTime = .1f;
 static tSettingItem<float> conf_smoothTime ("CYCLE_SMOOTH_TIME", sg_cycleSyncSmoothTime);

@@ -673,10 +673,8 @@ protected:
     void load_Name(std::istream &s,int i){
         std::ws( s );
 
-        // read and filter name
-        tString name;
-        name.ReadLine( s );
-        ePlayerNetID::FilterName( name, highName[i] );
+        // read name
+        highName[i].ReadLine( s );
     }
 
     void save_Name(std::ostream &s,int i){
@@ -933,12 +931,10 @@ template<class T>class highscores: public gHighscoresBase{
     void Check(const ePlayerNetID* player,T score){
         tASSERT( player );
         tString name = player->GetUserName();
-        int len = high_score.Len();
-        if (len<=0 || score>high_score[len-1]){
-            // find the name in the list
-            int found=Find(name,true);
-            checkPos(found,name,score);
-        }
+
+        // find the name in the list
+        int found=Find(name,true);
+        checkPos(found,name,score);
     }
 
     highscores(char const * name,char const * sd,int max=0)
