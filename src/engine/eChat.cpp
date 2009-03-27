@@ -38,9 +38,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 static bool se_prefixSpamShouldEnable = true;
 static tConfItem< bool > se_prefixSpamShouldEnableConf( "PREFIX_SPAM_ENABLE", se_prefixSpamShouldEnable );
 
-#ifdef DEBUG
 //!< If a prefix begins with a color code it will have this multiplier applied to the score.
-static REAL se_prefixSpamStartColorMultiplier = 2;
+static REAL se_prefixSpamStartColorMultiplier = 1.5;
 static tConfItem< REAL > se_prefixSpamStartColorMultiplierConf( "PREFIX_SPAM_START_COLOR_MULTIPLIER", se_prefixSpamStartColorMultiplier );
 
 //!< Increase score by f( prefix_length * multiplier )
@@ -64,7 +63,6 @@ static tConfItem< REAL > se_prefixSpamRequiredScoreConf( "PREFIX_SPAM_REQUIRED_S
 //!< Found prefixes will timeout after f( score ) * multiplier seconds.
 static REAL se_prefixSpamTimeoutMultiplier = 15.0;
 static tConfItem< REAL > se_prefixSpamTimeoutMultiplierConf( "PREFIX_SPAM_TIMEOUT_MULTIPLIER", se_prefixSpamTimeoutMultiplier );
-#endif
 
 /**
  * Helper class for predicate stl-comparisons

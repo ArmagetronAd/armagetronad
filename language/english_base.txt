@@ -410,6 +410,13 @@ allow_team_change_help				If set to 1, all players can change teams. If set to 0
 
 # spam prefix settings
 prefix_spam_enable_help                           Should spam prefix checking be enabled? Set to 1 to enable, 0 to disable.
+prefix_spam_start_color_multiplier_help           If a prefix begins with a color code it will have this multiplier applied to its score.
+prefix_spam_length_multiplier_help                Multiplier applied to prefix length when calculating prefix spam score.
+prefix_spam_number_color_codes_multiplier_help    Multiplier applied to the number of color codes in prefix when calculating prefix spam score.
+prefix_spam_number_known_prefixes_multiplier_help Multiplier applied to the number of known spam prefixes when calculating prefix spam score.
+prefix_spam_required_score_help                   The required prefix spam score a prefix must have for it to be considered spam.
+prefix_spam_timeout_multiplier_help               Multiplier applied to time calculation to determine how long a known prefix is remembered.
+
 
 # spam kick messages
 spam_chat                   You chatted too much.
@@ -2638,7 +2645,7 @@ vote_accepted						Poll "\1" has been accepted. (\2 Players voted for the poll, 
 vote_rejected						Poll "\1" has been rejected. (\2 Players voted for the poll, \3 against, \4 didn't vote)\n
 vote_timeout						Poll "\1" timed out.\n
 vote_cancel_all                     All polls have been canceled by an administrator.\n
-vote_new							New poll: "\1". Enter the main menu vote on it.\n
+vote_new							New poll: "\1". Enter the main menu to vote on it.\n
 vote_redundant                      Poll rejected, same suggestion was made already recently.\n
 vote_maturity                       Poll rejected, you're not old enough to issue votes, wait \1 seconds.\n
 vote_overflow						Poll rejected, too many pending polls.\n
