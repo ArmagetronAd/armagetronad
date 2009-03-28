@@ -2566,7 +2566,7 @@ vote_accepted						Poll "\1" has been accepted.\n
 vote_rejected						Poll "\1" has been rejected.\n
 vote_timeout						Poll "\1" timed out.\n
 vote_cancel_all                     All polls have been canceled by an administrator.\n
-vote_new							New poll: "\1". Enter the main menu vote on it.\n
+vote_new							New poll: "\1". Enter the main menu to vote on it.\n
 vote_redundant                      Poll rejected, same suggestion was made already recently.\n
 vote_maturity                       Poll rejected, you're not old enough to issue votes, wait \1 seconds.\n
 vote_overflow						Poll rejected, too many pending polls.\n
