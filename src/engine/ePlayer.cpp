@@ -59,6 +59,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "../tron/gWinZone.h"
 #include "eGrid.h"
 #include <time.h>
+#include "../tron/gCycle.h"
+#include "../tron/gWinZone.h"
+#include "eGrid.h"
 
 int se_lastSaidMaxEntries = 8;
 
@@ -2612,6 +2615,9 @@ static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
     return admin->CurrentTeam();
 }
 #endif // DEDICATED
+ 
+static bool se_silenceDead = false;
+static tSettingItem<bool> se_silenceDeadConf("SILENCE_DEAD", se_silenceDead);
 
 static bool se_silenceDead = false;
 static tSettingItem<bool> se_silenceDeadConf("SILENCE_DEAD", se_silenceDead);
