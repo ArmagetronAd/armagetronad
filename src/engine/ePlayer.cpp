@@ -55,10 +55,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tRecorder.h"
 #include "nConfig.h"
 #include "nNetwork.h"
-#include <time.h>
 #include "../tron/gCycle.h"
 #include "../tron/gWinZone.h"
 #include "eGrid.h"
+#include <time.h>
+
+int se_lastSaidMaxEntries = 8;
 
 // call on commands that only work on the server; quit if it returns true
 bool se_NeedsServer(char const * command, std::istream & s, bool strict )
@@ -1549,7 +1551,7 @@ ePlayerNetID * CompareBufferToPlayerNames
 }
 
 
-ePlayerNetID * ePlayerNetID::FindPlayerByName( tString const & name, ePlayerNetID * requester )
+ePlayerNetID * ePlayerNetID::FindPlayerByName( tString const & name, ePlayerNetID * requester, bool print )
 {
    int num_matches = 0;
 
@@ -1597,26 +1599,24 @@ ePlayerNetID * ePlayerNetID::FindPlayerByName( tString const & name, ePlayerNetI
     // More than than one match for the current buffer. Complain about that.
     else if (num_matches > 1) {
         tOutput toSender( "$msg_toomanymatches", name );
-        if ( requester )
+        if (print)
         {
-            sn_ConsoleOut(toSender,requester->Owner() );
-        }
-        else
-        {
-            con << toSender;
+            if ( requester )
+                sn_ConsoleOut(toSender,requester->Owner() );
+            else
+                con << toSender;
         }
         return NULL;
     }
     // 0 matches. The user can't spell. Complain about that, too.
     else {
         tOutput toSender( "$msg_nomatch", name );
-        if ( requester )
+        if (print)
         {
-            sn_ConsoleOut(toSender,requester->Owner() );
-        }
-        else
-        {
-            con << toSender;
+            if ( requester )
+                sn_ConsoleOut(toSender,requester->Owner() );
+            else
+                con << toSender;
         }
         return NULL;
     }
@@ -2621,7 +2621,7 @@ static tString se_helpMessage("");
 static tConfItemLine se_helpMessageConf("HELP_MESSAGE",se_helpMessage);
 
 // time during which no repeaded chat messages are printed
-static REAL se_alreadySaidTimeout=5.0;
+REAL se_alreadySaidTimeout=5.0;
 static tSettingItem<REAL> se_alreadySaidTimeoutConf("SPAM_PROTECTION_REPEAT",
         se_alreadySaidTimeout);
 
@@ -2639,7 +2639,7 @@ static tAccessLevelSetter se_shuffleUpAccessLevelConfLevel( se_shuffleUpAccessLe
 static bool se_silenceDefault = false;        // flag indicating whether new players should be silenced
 
 // minimal access level for chat
-static tAccessLevel se_chatAccessLevel = tAccessLevel_Program;
+tAccessLevel se_chatAccessLevel = tAccessLevel_Program;
 static tSettingItem< tAccessLevel > se_chatAccessLevelConf( "ACCESS_LEVEL_CHAT", se_chatAccessLevel );
 static tAccessLevelSetter se_chatAccessLevelConfLevel( se_chatAccessLevelConf, tAccessLevel_Owner );
 
@@ -3550,61 +3550,69 @@ void handle_chat( nMessage &m )
                 else
 #endif
                     if (command == "/me") {
+                        spam.lastSaidType_ = eChatMessageType_Me;
+                        spam.say_ = spam.say_.SubStr(4); // cut /me prefix
                         se_ChatMe( p, s, spam );
                         return;
                     }
                     else if (command == "/teamleave") {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         se_ChatTeamLeave( p );
                         return;
                     }
                     else if (command == "/teamshuffle" || command == "/shuffle") {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         se_ChatShuffle( p, s );
                         return;
                     }
                     else if (command == "/team")
                     {
+                        spam.lastSaidType_ = eChatMessageType_Team;
                         se_ChatTeam( p, s, spam );
                         return;
                     }
                     else if (command == "/msg" ) {
+                        spam.lastSaidType_ = eChatMessageType_Private;
                         se_ChatMsg( p, s, spam );
                         return;
                     }
                     else if (command == "/drop")
                     {
+                        spam.lastSaidType_= eChatMessageType_Command;
                         p->DropFlag();
                         return;
                     }
                     else if (command == "/players" || command == "/listplayers") {
+                        spam.lastSaidType_= eChatMessageType_Command;
                         se_ChatPlayers( p, s, command );
                         return;
                     }
 #if defined(DEDICATED) && defined(KRAWALL_SERVER)
                     else if (command == "/admins" || command == "/listadmins") {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         se_ListAdmins( p, s, command );
                         return;
                     }
 #endif
                     else if (command == "/vote" || command == "/callvote") {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         eVoter::HandleChat( p, s );
                         return;
                     }
                     else if (command == "/help")
                     {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         sn_ConsoleOut(se_helpMessage + "\n", p->Owner());
                         se_DisplayChatLocally(p, say);
                         return;
                     }
-                    else if (command == "/drop")
-                    {
-                        p->DropFlag();
-                        return;
-                    }
                     else if (command == "/teams") {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         se_ChatTeams( p );
                         return;
                     }
                     else if (command == "/myteam") {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         eTeam *currentTeam = se_GetManagedTeam( p );
                         if( currentTeam )
                         {
@@ -3613,16 +3621,19 @@ void handle_chat( nMessage &m )
                         return;
                     }
                     else if (command == "/help") {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         se_Help( p, p, s );
                         return;
                     }
 #ifdef DEDICATED
                     else  if ( command == "/rtfm" || command == "/teach" )
                     {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         se_Rtfm( command, p, s, spam );
                         return;
                     }
                     else {
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         handle_chat_admin_commands( p, command, say, s, spam );
                         return;
                     }
@@ -4097,7 +4108,7 @@ static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
 static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT", tOutput("$spam_protection") );
 
-ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings )
+ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings ), lastSaid_()
 {
     flagOverrideChat = false;
     flagChatState = false;
@@ -4136,12 +4147,6 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
             loginWanted = P->autoLogin;
         }
     }
-    /*
-    else
-        SetName( "AI" );
-    */
-    lastSaid.SetLen(12);
-    lastSaidTimes.SetLen(12);
 
     se_PlayerNetIDs.Add(this,listID);
     object=NULL;
@@ -4170,7 +4175,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
 
 
 ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
-        , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings )
+        , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings ), lastSaid_()
 {
     flagOverrideChat = false;
     flagChatState = false;
@@ -4190,8 +4195,6 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
 
     nameTeamAfterMe = false;
 
-    lastSaid.SetLen(12);
-    lastSaidTimes.SetLen(12);
 
     pID=-1;
     se_PlayerNetIDs.Add(this,listID);
@@ -4336,10 +4339,6 @@ ePlayerNetID::~ePlayerNetID()
     {
         currentTeam->RemovePlayer( this );
     }
-
-#ifdef DEBUG
-    con << *this << " destroyed.\n";
-#endif
 }
 
 static void player_removed_from_game_handler(nMessage &m)
