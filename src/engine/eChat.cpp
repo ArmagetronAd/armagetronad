@@ -504,7 +504,8 @@ nTimeRolling eChatPrefixSpamTester::RemainingTime( nTimeRolling t ) const
 void eChatPrefixSpamTester::RemoveTimedOutPrefixes() const
 {
     eChatLastSaid::PrefixList & xs = player_->lastSaid_.knownPrefixes_;
-    eChatLastSaid::Prefix entry( tString(), 0, say_.Time() );
+    tString empty;
+    eChatLastSaid::Prefix entry( empty, 0, say_.Time() );
     xs.erase( std::remove_if( xs.begin(), xs.end(), TimeOutPredicate< eChatLastSaid::Prefix >( entry ) ), xs.end() );
 }
 
