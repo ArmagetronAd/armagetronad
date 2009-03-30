@@ -1153,10 +1153,10 @@ protected:
         double time = tSysTimeFloat();
 
         // check whether the issuer is allowed to start a vote
-        if ( sender && sender->lastChange_ + se_votingMaturity > tSysTimeFloat() && sender->lastChange_ * 2 > tSysTimeFloat() )
+        if ( sender && player_ && player_->GetTimeCreated() + se_votingMaturity > time )
         {
-            REAL time = sender->lastChange_ + se_votingMaturity - tSysTimeFloat();
-            tOutput message( "$vote_maturity", time );
+            REAL timeLeft = player_->GetTimeCreated() + se_votingMaturity - time;
+            tOutput message( "$vote_maturity", timeLeft );
             sn_ConsoleOut( message, senderID );
             return false;
         }

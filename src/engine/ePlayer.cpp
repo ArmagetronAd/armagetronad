@@ -4027,7 +4027,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
 
 
 
-ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
+ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() )
         , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings ), lastSaid_()
 {
     flagOverrideChat = false;
