@@ -3961,7 +3961,7 @@ static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
 static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT", tOutput("$spam_protection") );
 
-ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings ), lastSaid_()
+ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings ), lastSaid_()
 {
     flagOverrideChat = false;
     flagChatState = false;
