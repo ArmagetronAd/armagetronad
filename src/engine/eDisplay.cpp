@@ -515,7 +515,7 @@ void eGrid::display_simple( int viewer,bool floor,
         if ( z < 3 )
         {
             eCamera const * camera = cameras(viewer);
-            if( camera )
+            if( camera && camera->Center() )
             {
                 eCoord dir = camera->CameraDir().Turn(1,.5);
                 for(int i = 8; i > 0; --i)

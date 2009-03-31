@@ -129,6 +129,21 @@ cycle_max_refcount_help				Maximum allowed reference count on cycles before they
 #********************************************
 #********************************************
 #
+#      Chatbot settings
+#
+#********************************************
+#********************************************
+
+chatbot_always_active_help          if set to 1, the chatbot is active all of the time
+chatbot_new_wall_blindness_help     the chatbot won't see walls that were bult less than this many seconds ago
+chatbot_min_timestep_help           minimal time in seconds between chatbot thoughts
+chatbot_delay_help                  time between entering chat and chatbot activation
+chatbot_range_help                  time in seconds the bot is capable of planning ahead
+chatbot_decay_help                  rate at which the quality of the chatbot decays over time
+
+#********************************************
+#********************************************
+#
 #      Score rules configuration items
 #
 #********************************************
@@ -332,6 +347,7 @@ idle_kick_time_help                 Time in seconds after which an inactive play
 player_name_confitem_help	Player name
 player_user_confitem_help	Global player ID
 auto_login_confitem_help	Should this player automatically request authentication?
+hide_identity_confitem_help Should this player hide his ID?
 camcenter_help			Center internal camera on driving direction
 start_cam_help			Initial Camera
 start_fov_help			Initial field of vision
@@ -380,9 +396,19 @@ spam_penalty_help					Number of seconds to silence a spammer.
 spam_maxlen_help					Maximal length of chat message.
 spam_autokick_help					Spam score that causes you to get kicked instantly.
 spam_autokick_count_help			Number of spam warnings before a player gets spamkicked.
-silence_all_help					If set to 1, new players will be silenced
+silence_default_help				If set to 1, new players will be silenced
 enable_chat_help					If set to 0, all chat will be surpressed (if reset on the server, messages from logged in players and private/team messages are still shown)
 allow_team_change_help				If set to 1, all players can change teams. If set to 0, players can only change teams if they've been specifically allowed to by ALLOW_TEAM_CHANGE_PLAYER
+
+# spam prefix settings
+prefix_spam_enable_help                           Should spam prefix checking be enabled? Set to 1 to enable, 0 to disable.
+prefix_spam_start_color_multiplier_help           If a prefix begins with a color code it will have this multiplier applied to its score.
+prefix_spam_length_multiplier_help                Multiplier applied to prefix length when calculating prefix spam score.
+prefix_spam_number_color_codes_multiplier_help    Multiplier applied to the number of color codes in prefix when calculating prefix spam score.
+prefix_spam_number_known_prefixes_multiplier_help Multiplier applied to the number of known spam prefixes when calculating prefix spam score.
+prefix_spam_required_score_help                   The required prefix spam score a prefix must have for it to be considered spam.
+prefix_spam_timeout_multiplier_help               Multiplier applied to time calculation to determine how long a known prefix is remembered.
+
 
 # spam kick messages
 spam_chat                   You chatted too much.
@@ -422,13 +448,16 @@ lag_fast_weight_help               Extra weight lag reports from the server infl
 
 lag_credit_help                    Maximal seconds of total lag credit.
 lag_credit_single_help             Maximal seconds of lag credit for a single lag credit event.
-lag_credit_single_help             Maximal multiple of the lag variance for a single lag credit event.
+lag_credit_variance_help           Maximal multiple of the lag variance for a single lag credit event.
 lag_sweet_spot_help                Sweet spot, the fill ratio of lag credit the server tries to keep the client at.
 lag_credit_time_help               Timescale lag credit is restored on.
 
 lag_offset_client_help             Extra amount of lag compensation, determined by the client.
 lag_offset_server_help             Extra amount of lag compensation, determined by the server.
 lag_offset_legacy_help             Extra amount of lag compensation for clients that don't support automatic compensation, determined by the server.
+
+lag_threshold_help                 Amount of lag not compensated for on each lag event.
+lag_frequency_threshold_help       Minimal frequency of lag events (measured against the total number of input events) that needs to be exceeded before the server informs the client. Should be between 0 and 1.
 
 #********************************************
 #********************************************
@@ -713,9 +742,9 @@ alpha_blend_help		Enable alpha blending
 zone_alpha_toggle_help		This is XORd with ALPHA_BLEND to determine the way to draw zones
 zone_segments_help		How many segments the zone is formed with. Default is 11
 zone_seg_length_help	The rendered percentual of every segment. Default is .5
-zone_bottom			Where to put the zone along the Z axis. Default is 0.0
-zone_height			The zone segments' height. Default is 5.0
-smooth_shading_help		Enable smooth shading
+zone_bottom_help        Where to put the zone along the Z axis. Default is 0.0
+zone_height_help        The zone segments' height. Default is 5.0
+smooth_shading_help     Enable smooth shading
 text_out_help			Enable console text output
 console_columns_help    Number of characters in each line of console output
 console_rows_help       Number of lines of console output without user intervention
@@ -754,7 +783,7 @@ ladderlog_write_round_score_team_help         Write to ladderlog: ROUND_SCORE_TE
 ladderlog_write_round_winner_help             Write to ladderlog: ROUND_WINNER <winner>
 ladderlog_write_sacrifice_help                Write to ladderlog: SACRIFICE <player who used the hole> <player who created the hole> <player owning the wall the hole was made into>
 ladderlog_write_wait_for_external_script_help Write to ladderlog: WAIT_FOR_EXTERNAL_SCRIPT (see also: WAIT_FOR_EXTERNAL_SCRIPT and WAIT_FOR_EXTERNAL_SCRIPT_TIMEOUT)
-ladderlog_game_time_interval If nonnegative, write a line with the current game time to the ladder log every n seconds.
+ladderlog_game_time_interval_help If nonnegative, write a line with the current game time to the ladder log every n seconds.
 
 
 chat_log_help			Write machine parsable chat messages to var/chatlog.txt
@@ -777,6 +806,7 @@ lag_o_meter_blend_help		Amount the player color should be blended with white to 
 lag_o_meter_use_old_help	Should we use the old buggy Lag-O-Meter? This functionality will go away soon.
 axes_indicator_help		Should the Axis Indicator be rendered?
 predict_objects_help    Predict cycle movement in network play
+predict_walls_help      Predict cycle walls. Useful for avoiding instant kills
 textures_hi_help		Use high colour textures
 sparks_help			    Draw sparks when going too close to a wall
 explosion_help          Enable explosions?
@@ -883,6 +913,7 @@ players_help                Prints list of currently active players
 teams_help                  Get a list of all teams with a somewhat graphic representation of their formation. Same as saying /teams
 kill_help                   Kill a specific player (as warning before a kick)
 silence_help                Silence a specific player so he can't use public chat any more (/msg and /team still work)
+unsilence_help              Reverts a SILENCE command
 suspend_help                Suspend a player from playing for the following N rounds (default is set by SUSPEND_DEFAULT_ROUNDS)
 unsuspend_help              Removes a player suspension.
 suspend_default_rounds_help Sets default round timeout for SUSPEND.
@@ -894,10 +925,11 @@ default_kick_reason_help    The reason given to a player kicked by KICK if none 
 kick_to_help    			Kicks the specified player from the server and, if the client supports it, redirects him to a different server.
 move_to_help    			Kicks the specified player from the server and, if the client supports it, redirects him to a different server. Does not imply an autoban penalty.
 default_kick_to_reason_help The reason given to a player kicked by KICK_TO or MOVE_TO if none is specified.
-default_kick_to_server      Default server IP/name a player is redirected to by KICK_TO and MOVE_TO.
-default_kick_to_port        Default server port a player is redirected to by KICK_TO and MOVE_TO.
-vote_kick_to_server         Server IP/name a player is redirected to by vote kicks.
-vote_kick_to_port           Default server port a player is redirected to by vote kicks.
+default_kick_to_server_help Default server IP/name a player is redirected to by KICK_TO and MOVE_TO.
+default_kick_to_port_help   Default server port a player is redirected to by KICK_TO and MOVE_TO.
+vote_kick_to_server_help    Server IP/name a player is redirected to by vote kicks.
+vote_kick_to_port_help      Default server port a player is redirected to by vote kicks.
+vote_kick_reason_help       Default reason given to players when they're vote-kicked.
 
 ban_help                    Bans the specified player from the server (kicks him first) for a variable time in minutes.
 ban_ip_help                 Bans the spedified IP address from the server for a variable time.
@@ -1490,7 +1522,8 @@ masters_menu_edit_connect_help	Opens a master server like server browser special
 friends_menu				Mates
 friends_menu_help			Edit your mates.
 friends_enable				Mates Enabled
-friends_enable_help			Turn on/off friends mates filtering.
+friends_enable_help			Turn on/off mates filtering.
+enable_friends_help			Turn on/off mates filtering.
 friend_word					Mate
 friend_help					If a server has this name on its players list, it will show when filtering is on.
 
@@ -2237,6 +2270,8 @@ player_vote_accesslevel Sorry, your access level is not high enough to issue a v
 player_pingcharity_changed	Ping charity changed from \1 to \2.\n
 spam_protection_repeat  SPAM PROTECTION: you already said: \1\n
 spam_protection			SPAM PROTECTION: you are silenced for the next \1 seconds.\n
+spam_protection_prefix  SPAM PROTECTION: your messages have a common prefix: \1\nSPAM PROTECTION: messages with this prefix will be allowed again in \2 seconds\n
+
 spam_protection_silenceall SPAM PROTECTION: public chat is disabled.\n
 spam_protection_silenced SPAM PROTECTION: you have been silenced by the server administrator.\n
 spam_protection_silenced_default SPAM PROTECTION: you have to be given voice in order to chat publically.\n
@@ -2336,6 +2371,12 @@ player_noshuffleup      You are not allowed to shuffle up.\n
 player_noshuffle        Your shuffling wish has no effect.\n
 player_shuffle_error    /shuffle expects a number as argument; an explicit sign (+/-) will change your position by the indicated number of steps, no sign will shuffle you to the given position.\n
 
+player_message_help     Sends a message to a specified player.
+player_message_usage    Usage: PLAYER_MESSAGE <user ID or name> "<Message>"\n
+kick_usage              Usage: KICK <user ID or name> <Reason>\n
+ban_usage               Usage: BAN <user ID or name> <time in minutes(defaults to 60)> <Reason>\n
+kickmove_usage          Usage: \1 <user ID or name> <server IP to kick to>:<server port to kick to> <Reason>\n
+
 add_help_topic_help     Add a new help topic to be used with /help. Usage: ADD_HELP_TOPIC <topic> <short description> <text>
 add_help_topic_usage    Usage: ADD_HELP_TOPIC <topic> <short description> <text>\n
 add_help_topic_success  Added help topic "\1".\n
@@ -2357,7 +2398,7 @@ help_commands_chat_shortdesc Basic chat commands
 help_commands_chat_text      0x88ff88/me <message>0xffff88: Transmit an action, as in "/me is a noob."\n0x88ff88/msg <part of a nickname> <message>0xffff88: Send a private message that only a specific player can see\n0x88ff88/team <message>0xffff88: Send a message to your teammates, or to all spectators if you're not on a team
 
 help_commands_team_shortdesc Basic team management commands
-help_commands_team_text 0x88ff88/teamshuffle0xffff88: Shuffle yourself to be at the outside of your team's wingmen formation\n0x88ff88/teamshuffle <position>0xffff88: Shuffle yourself to be at a specific position\n0x88ff88/teamshuffle [+|-]<offset>0xffff88: Shuffle yourself up/down by a certain number of ranks\n0x88ff88/teamleave0xffff88: Leave your current team. Only works on some servers\n0x88ff88/teams0xffff88: Get a list of all teams with a somewhat graphic representation of their formation
+help_commands_team_text 0x88ff88/teamshuffle0xffff88: Shuffle yourself to be at the outside of your team's wingmen formation\n0x88ff88/teamshuffle <position>0xffff88: Shuffle yourself to be at a specific position\n0x88ff88/teamshuffle [+|-]<offset>0xffff88: Shuffle yourself up/down by a certain number of ranks\n0x88ff88/teamleave0xffff88: Leave your current team. Only works on some servers\n0x88ff88/teams0xffff88: Get a list of all teams with a somewhat graphic representation of their formation.\n0x88ff88/myteam0xffff88: Get the formation and memberlist of your current team
 
 help_commands_pp_shortdesc Player police commands
 help_commands_pp_text 0x88ff88/players [<search>]0xffff88: Get a list of all players, along with some other information. You can also match specific users with the search argument.\n0x88ff88/admins [<access level> [<access level>]]0xffff88: Gets the list of admins. If first parameter is specified, only admins who have this exact level will be shown. If both arguments are set, all the admins in that range of access levels will be listed.\n0x88ff88/vote kick|suspend <player>0xffff88: Start a poll to kick or suspend a player
@@ -2539,7 +2580,7 @@ vote_accepted						Poll "\1" has been accepted.\n
 vote_rejected						Poll "\1" has been rejected.\n
 vote_timeout						Poll "\1" timed out.\n
 vote_cancel_all                     All polls have been canceled by an administrator.\n
-vote_new							New poll: "\1". Enter the main menu vote on it.\n
+vote_new							New poll: "\1". Enter the main menu to vote on it.\n
 vote_redundant                      Poll rejected, same suggestion was made already recently.\n
 vote_maturity                       Poll rejected, you're not old enough to issue votes, wait \1 seconds.\n
 vote_overflow						Poll rejected, too many pending polls.\n
@@ -2700,6 +2741,7 @@ nconfig_value_changed		\1 changed from \2 to \3 on server order.\n
 config_accesslevel_0        Owner
 config_accesslevel_1        Administrator
 config_accesslevel_2        Moderator
+config_accesslevel_5        Armatrator
 config_accesslevel_7        Team Leader
 config_accesslevel_8        Team Member
 config_accesslevel_12       Local User
@@ -2714,7 +2756,7 @@ access_level_usage          usage: ACCESS_LEVEL <config command> <required minim
 access_level_change         Required access level of command \1 changed to "\2".\n
 access_level_error          Required access level of command \1 is "\2", you only have "\3".\n
 
-casacl_help                   For the duratioon of the rest of the configuration file  thiss directive appears in, elevate the access level.
+casacl_help                   For the duration of the rest of the configuration file  thiss directive appears in, elevate the access level.
 casacl_usage                  Usage: CASACL <required access level> <elevated access level>\n
 casacl_not_allowed            CASACL usage not allowed in this context.\n
 
@@ -2819,6 +2861,9 @@ rtfm_denied                 You need to be logged in to teach others.\n
 access_level_list_admins_help Access level required to be able to use the "/admins" command.
 access_level_list_admins_see_everyone_help Users with this access level or better will be able to list any configured admin, regardless of ADMIN_LIST_MIN_ACCESS_LEVEL.
 
+intercept_commands_help     List of chat commands to accept and log to stdout.
+intercept_unknown_commands_help If 1, accept and log all unknown chat commands.
+
 chat_command_unknown        Unknown chat command "\1".\n
 chat_command_accesslevel    Sorry, your access level is not high enough to use the "\1" command. You're \2, required would be \3.\n
 
@@ -2826,6 +2871,8 @@ authority_blacklist_help    Comma separated list of authorities your server shou
 authority_whitelist_help    If non-empty, only authorities on this comma separated list will be queried by your server.
 trust_lan_help              If set to 1, the server assumes that your LAN is safe and that nobody can run a pharming server on it.
 hash_method_blacklist_help  List of hash authentication methods to disable support for.
+
+legacy_log_names_help       If 1, the log names of unauthenticated players are kept like they were before authentication was implemented. If 0, log names are escaped so that authenticated player names look best.
 
 login_message_requested     User \1 requests authentication as "\2@\3".\n
 login_message_delayed       Your login process will be delayed because the server configuration makes it impossible to be processed immedeately in the background. We're sorry for the inconvenience.\n
@@ -2872,11 +2919,8 @@ local_user_syntax Usage: LOCAL_USER <user name> <password>\n
 local_team_help          Adds a local account for an entire team (team tags are compared).
 local_team_syntax        Usage: LOCAL_TEAM <team tag> <password>\n
 
-md5_password_teamleader_help   Adds an account over the md5-hash based login system for a team leader. Team leaders can pick up players into the game.
-md5_password_teamleader_syntax Usage: MD5_PASSWORD_TEAMLEADER <user name> <password>\n
-
-md5_user_remove_help   Removes an password account for a user or team.
-md5_password_remove_syntax Usage: USER_REMOVE <user name/team tag>\n
+user_remove_help   Removes an password account for a user or team.
+password_remove_syntax Usage: USER_REMOVE <user name/team tag>\n
 md5_password_removed        User name/team tag \1 removed.\n
 md5_password_remove_notfound User name/team tag \1 to remove not found.\n
 

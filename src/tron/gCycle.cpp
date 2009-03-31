@@ -92,7 +92,7 @@ static nNOInitialisator<gCycle> cycle_init(320,"cycle");
 //tCONTROLLED_PTR(ePlayerNetID)   lastEnemyInfluence;  	// the last enemy wall we encountered
 //REAL							lastTime;				// the time it was drawn at
 bool headlights=1;
-bool cycleprograminited=0;
+extern bool cycleprograminited;
 
 static float sg_cycleSyncSmoothTime = .1f;
 static tSettingItem<float> conf_smoothTime ("CYCLE_SMOOTH_TIME", sg_cycleSyncSmoothTime);
@@ -2850,6 +2850,15 @@ bool gCycle::Timestep(REAL currentTime){
         if ( rubberSpeedFactor < .99 && rubberSpeedFactorBack >= .99 )
         {
             RequestSyncOwner();
+        }
+    }
+
+    //check for brake change (probably not the best place to do this)
+    if (sn_GetNetState()!=nCLIENT)
+    {
+        if (braking != oldBraking)
+        {
+            ProcessShoot(false);
         }
     }
 

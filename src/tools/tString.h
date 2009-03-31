@@ -118,7 +118,7 @@ public:
     static int CompareAlphaNumerical( const tString& a, const tString &b);
 
     //! strips all whitespace from a string
-    tString StripWhitespace( void );
+    tString StripWhitespace( void ) const;
 
     int PosWordRight(int start);                //! Computes the position of the next delimiter relative to start
     int PosWordLeft(int start);                 //! Computes the position of the previous delimiter relative to start
@@ -260,6 +260,11 @@ bool operator>=( const tString& first, const tString& second );
 */
 
 tString st_GetCurrentTime(char const *szFormat);
+
+// replacement for tString::EndsWith from the trunk
+bool st_StringEndsWith( tString const & test, tString const & end );
+bool st_StringEndsWith( tString const & test, char const * end );
+
 
 #endif
 
