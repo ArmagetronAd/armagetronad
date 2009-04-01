@@ -58,6 +58,39 @@ bool           tConfItemBase::printErrors=true;
 // flag indicating the currently loaded config is in latin1 encoding (default: utf8)
 static bool st_loadAsLatin1 = false;
 
+static void st_ToggleConfigItem( std::istream & s )
+{
+    tString name;
+    s >> name;
+    
+    if ( name.Size() == 0 )
+    {
+        con << tOutput( "$toggle_usage_error" );
+        return;
+    }
+    
+    tConfItemBase *base = tConfItemBase::FindConfigItem( name );
+    
+    if ( !base )
+    {
+        con << tOutput( "$config_command_unknown", name );
+        return;
+    }
+    
+    tConfItem< bool > *confItem = dynamic_cast< tConfItem< bool > * >( base );
+    if ( confItem )
+    {
+        confItem->SetVal( !*confItem->GetTarget() );
+    }
+    else
+    {
+        tOutput o( "$toggle_invalid_config_item", name );
+        con << o;
+    }
+}
+
+static tConfItemFunc toggleConfItemFunc( "TOGGLE", st_ToggleConfigItem );
+
 //! @param newLevel         the new access level to set over the course of the lifetime of this object
 //! @param allowElevation   only if set to true, getting higher access rights is possible. Use with extreme care.
 tCurrentAccessLevel::tCurrentAccessLevel( tAccessLevel newLevel, bool allowElevation )

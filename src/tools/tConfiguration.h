@@ -297,6 +297,31 @@ public:
     {
         s << static_cast< typename tTypeToConfig< T >::TOSTREAM >( value );
     }
+    
+    void SetVal( T const & val )
+    {
+        if (!shouldChangeFunc_ || shouldChangeFunc_( val ))
+        {
+            if (printChange)
+            {
+                tOutput o;
+                o.SetTemplateParameter(1, title);
+                o.SetTemplateParameter(2, *target);
+                o.SetTemplateParameter(3, val);
+                o << "$config_value_changed";
+                con << o;
+            }
+            
+            *target = val;
+            changed = true;
+        }
+        ExecuteCallback();    
+    }
+    
+    const T *GetTarget() const
+    {
+        return target;
+    }
 
     virtual void ReadVal(std::istream &s){
         // eat whitepsace
@@ -321,23 +346,9 @@ public:
                         o << "$nconfig_errror_protected";
                         con << "";
                     }
-                    else{
-                        if (!shouldChangeFunc_ || shouldChangeFunc_(dummy))
-                        {
-                            if (printChange)
-                            {
-                                tOutput o;
-                                o.SetTemplateParameter(1, title);
-                                o.SetTemplateParameter(2, *target);
-                                o.SetTemplateParameter(3, dummy);
-                                o << "$config_value_changed";
-                                con << o;
-                            }
-
-                            *target = dummy;
-                            changed = true;
-                        }
-                        ExecuteCallback();
+                    else
+                    {
+                        SetVal( dummy );
                     }
                 }
         }

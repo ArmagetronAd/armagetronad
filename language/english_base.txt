@@ -2837,6 +2837,10 @@ authority_level_help             Changes the access level for all users from the
 authority_level_usage            usage: AUTHORITY_LEVEL <authority> <new access level (numerical)>\n
 authority_level_change           Access level of users from authority \1 changed to "\2".\n
 
+toggle_help                 Cycle between 0 and 1 for a boolean config item. Example: TOGGLE PREDICT_OBJECTS\n
+toggle_usage_error          TOGGLE requires a config item name. Usage: TOGGLE config_item\n
+toggle_invalid_config_item  TOGGLE requires a boolean config item, and \1 is not.\n
+
 #*************************************
 #*************************************
 #
