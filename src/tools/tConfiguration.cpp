@@ -84,8 +84,7 @@ static void st_ToggleConfigItem( std::istream & s )
     }
     else
     {
-        tOutput o( "$toggle_invalid_config_item", name );
-        con << o;
+        con << tOutput( "$toggle_invalid_config_item", name );
     }
 }
 
