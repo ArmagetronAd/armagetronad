@@ -4,6 +4,9 @@ Changes since 0.2.8.3_beta3:
   with a clan tag. Toggle with the PREFIX_SPAM_ENABLE setting.
 - Fixed VOTING_MATURITY to use the time when the player entered as its 
   reference time.
+- Fixed single player highscore list not containing everyone.
+- Fixed generation of duplicate names in highscore lists.
+- Fixed camera crash when the grid is empty.
 
 Changes since 0.2.8.3_beta2:
 - Fixed 'invincibility' bug. It really was cycles freezing in time.
