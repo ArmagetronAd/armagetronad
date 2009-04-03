@@ -4131,7 +4131,7 @@ static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
 static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT", tOutput("$spam_protection") );
 
-ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings )
+ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p), chatSpam_( se_chatSpamSettings )
 {
     // default access level
     lastAccessLevel = tAccessLevel_Default;
@@ -4191,7 +4191,6 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
     if(sn_GetNetState()==nSERVER)
         RequestSync();
 }
-
 
 void ePlayerNetID::Activity()
 {
@@ -5592,7 +5591,7 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
 
 //! creates a netobject form sync data
 ePlayerNetID::ePlayerNetID( Engine::PlayerNetIDSync const & sync, nSenderInfo const & sender )
-: nNetObject( sync.base(), sender ),listID(-1), teamListID(-1)
+: nNetObject( sync.base(), sender ),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() )
  , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings )
 {
     // default access level
