@@ -16,7 +16,7 @@ autoheader || { rm config.h.in; exit 1; }
 echo "Running autoconf..."
 autoconf || { rm configure; exit 1; }
 echo "Running automake..."
-automake -a || exit 1
+automake -a -Wno-portability || exit 1
 
 echo "Flagging scripts as executable..."
 chmod a+x $MYDIR/*.sh || exit 1
