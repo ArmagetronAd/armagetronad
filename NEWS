@@ -1,3 +1,6 @@
+Changes since 0.2.8.3_rc1:
+- Fixed FILTER_DARK_COLOR_STRINGS to not filter the reset color.
+
 Changes since 0.2.8.3_beta3:
 - Chat prefix spam protection. Guards against prefix spam, such as when a
   user always changes their chat message color, or prefixes all messages
