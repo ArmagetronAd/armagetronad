@@ -1133,19 +1133,12 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
         {
             if( len >= 8 && darkonly )
             {
-                // Don't filter color reset
-                if ( strncmp( c, "0xRESETT", 8 ) == 0 )
-                {
-                    ret << "0xRESETT";
-                }
+                tColor colorToFilter( c );
+                if ( !colorToFilter.IsDark() || strncmp( c, "0xRESETT", 8 ) == 0 )
+                    ret << c[0] << c[1] << c[2] << c[3] << c[4] << c[5] << c[6] << c[7];
                 else
-                {
-                    tColor colorToFilter( c );
-                    if ( !colorToFilter.IsDark() )
-                        ret << c[0] << c[1] << c[2] << c[3] << c[4] << c[5] << c[6] << c[7];
-                    else
-                        removed = true;
-                }
+                    removed = true;
+
                 c   += 8;
                 len -= 8;	
             }
