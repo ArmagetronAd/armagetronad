@@ -814,14 +814,14 @@ void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, H
     }
     else
     {
-        // well, the admin will want to see it.
-        con << message;
-
         bool canSee[ MAXCLIENTS+1 ];
         for( int i = MAXCLIENTS; i>=0; --i )
         {
             canSee[i] = false;
         }
+        
+        // well, the admin will want to see it.
+        canSee[0] = true;
 
         // look which clients have someone who can see the message
         for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
