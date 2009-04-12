@@ -1570,12 +1570,6 @@ static void se_DisplayChatLocallyClient( ePlayerNetID* p, const tString& message
             }
         }
         con << actualMessage << "\n";
-
-        tString msgCore = tColoredString::RemoveColors(message);
-        int skip = msgCore.find(": eval");
-        if (skip > 0) {
-            se_rubyEval(msgCore.SubStr(skip + 6));
-        }
     }
 }
 
