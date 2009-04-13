@@ -839,7 +839,7 @@ static bool lowlevel_sr_InitDisplay(){
     return true;
 }
 
-extern bool cycleprograminited;
+bool cycleprograminited = false;
 
 bool sr_InitDisplay(){
     cycleprograminited = false;

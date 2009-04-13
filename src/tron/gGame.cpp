@@ -2754,7 +2754,7 @@ void gGame::StateUpdate(){
                 const tList<eGameObject>& gameObjects = Grid()->GameObjects();
                 for (int i=gameObjects.Len()-1;i>=0;i--)
                 {
-                    eGameObject * e = gameObjects(i);
+                    tJUST_CONTROLLED_PTR< eGameObject > e = gameObjects(i);
                     if ( e )
                     {
                         e->OnRoundBegin();

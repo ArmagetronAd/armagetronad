@@ -1,5 +1,4 @@
 include $(top_srcdir)/Makefile.paths
-
 SUBDIRS = first protobuf thirdparty swig
 
 # target directory
@@ -133,6 +132,7 @@ libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentication
 	engine/eEventNotification.h engine/eEventNotification.cpp \
 	engine/eLagCompensation.cpp engine/eLagCompensation.h \
 	engine/eSoundMixer.h engine/eSoundMixer.cpp \
+	engine/eChat.cpp engine/eChat.h \
 	engine/eEventNotification.h engine/eEventNotification.cpp
 
 librender_a_SOURCES=render/rConsole.cpp render/rConsoleGraph.cpp render/rConsole.h render/rFont.cpp\

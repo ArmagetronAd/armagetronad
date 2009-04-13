@@ -58,18 +58,13 @@ class eChatPrefixSpamTester;
 class eChatSaidEntry
 {
 public:
-    eChatSaidEntry(const tString & message, const tString & playerName, const nTimeRolling &, eChatMessageType);
+    eChatSaidEntry(const tString &, const nTimeRolling &, eChatMessageType);
     ~eChatSaidEntry();
     
     /**
      * @return The string that was said.
      */
     const tString & Said() const;
-
-    /**
-     * @return The player name at that time.
-     */
-    const tString & PlayerName() const;
     
     /**
      * @return The time the user sent the message.
@@ -79,7 +74,7 @@ public:
     /**
      * @return The type of this message.
      */
-    eChatMessageType Type() const;
+    const eChatMessageType Type() const;
     
     /**
      * Set the message type
@@ -99,7 +94,6 @@ private:
     friend class eChatPrefixSpamTester;
     
     tString said_;
-    tString playerName_;
     nTimeRolling time_;
     eChatMessageType type_;
 };
@@ -150,19 +144,7 @@ public:
      * @param saidEntry the new entry
      */
     void AddSaid( const eChatSaidEntry & saidEntry );
-
-    /**
-     * Marks chatter as disconnected (gets reverted on AddSaid())
-     */
-    void MarkDisconnected();
     
-    /**
-     * Is this chatter to be considered disconnected?
-     * 
-     * @return true if disconnected
-     */
-    bool Disconnected() const;
-
     /**
      * Add a new chat prefix
      *
@@ -178,7 +160,6 @@ private:
     
     SaidList lastSaid_;
     PrefixList knownPrefixes_;
-    bool disconnected_;
 };
 
 /**
@@ -302,23 +283,6 @@ private:
 
     ePlayerNetID * player_;
     const eChatSaidEntry & say_;
-};
-
-/**
- * Checks for annoying /shuffle message spam
- */
-class eShuffleSpamTester
-{
-public:
-    eShuffleSpamTester();
-    bool ShouldAnnounce() const;
-    void Reset();
-    void Shuffle();
-    tString ShuffleMessage( ePlayerNetID *player, int position ) const; //!< print message for player wishing to pre-join shuffle to position
-    tString ShuffleMessage( ePlayerNetID *player, int fromPosition, int toPosition ) const; //!< print message for player shuffling in-team
-protected:
-    bool ShouldDisplaySuppressMessage() const;
-    int numberShuffles_;
 };
 
 #endif

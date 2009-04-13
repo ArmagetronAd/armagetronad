@@ -2,6 +2,8 @@ Changes since 0.3.1
 ===================
 - Switched to utf-8 encoded strings internally and for config files.
   Language files can be either utf-8 or latin-1.
+- New command: “TOGGLE”. Cycle between 0 and 1 for a boolean config item.
+  Example: Create an instant chat with the text “/console toggle predict_objects”.
 
 Changes since 0.3.0
 ===================
@@ -86,6 +88,17 @@ Changes since 0.2.8
 - Voting outcome messages show how many players voted for/against the poll and how many didn't vote yet
 - Added support for armagetronad URLs on Mac OS X and KDE -- armagetronad://<server>[:<port>]. port defaults to 4534.
 - New command-line flag: --connect <server>[:<port>]. Startup the game and connect directly to <server>.
+
+Changes since 0.2.8.3_beta3:
+============================
+- Chat prefix spam protection. Guards against prefix spam, such as when a
+  user always changes their chat message color, or prefixes all messages
+  with a clan tag. Toggle with the PREFIX_SPAM_ENABLE setting.
+- Fixed VOTING_MATURITY to use the time when the player entered as its 
+  reference time.
+- Fixed single player highscore list not containing everyone.
+- Fixed generation of duplicate names in highscore lists.
+- Fixed camera crash when the grid is empty.
 
 Changes since 0.2.8.3_beta2:
 ============================

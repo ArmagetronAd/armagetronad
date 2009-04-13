@@ -296,54 +296,23 @@ fi
 install_link ${BINDIR}/@progname@-@version@            ${BINDIR}/@progname@
 install_link ${BINDIR}/@prognamebase@-master-@version@ ${BINDIR}/@prognamebase@-master
 
-# install desktop files
-if test @enable_desktop@ = yes; then
+# add KDE icons and desktop link
+if test @enable_desktop@ = yes && kde-config --install icon > /dev/null 2>&1; then
     DESKTOPSOURCE=@aa_datadir@/desktop
-
-    # rebrand icons and desktop file
-    if test "$MODE" = "install"; then
-        if test @prognamebase@ = armagetronad; then
-            true # echo no rebranding
-        else
-            for f in large small medium; do mv ${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png; done
-            for suffix in .desktop -handler.desktop;
-            do
-                mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad-armagetronad${suffix} ${DESTDIR}${DESKTOPSOURCE}/armagetronad-@prognamebase@${suffix}
-            done
-        fi
+    ICONSDEST=`kde_get_write_path icon ${DESTDIR}`
+    if test -z "${ICONSDEST}"; then
+        echo "No permission to write to KDE icons directory."
+    else
+        echo "${INSTALLING} KDE icon in ${ICONSDEST}..."
+        install_link ${DESKTOPSOURCE}/icons/large/armagetronad.png ${ICONSDEST}/@progname@.png
     fi
 
-    # add standard icons
-    for icontype in "16 small" "32 medium" "48 large"
-    do
-        set -- $icontype
-        xdg-icon-resource install --size $1 ${DESTDIR}${DESKTOPSOURCE}/icons/$2/@prognamebase@.png armagetronad-@prognamebase@
-    done
-
-    # add standard menu entry
-    xdg-desktop-menu install ${DESTDIR}${DESKTOPSOURCE}/armagetronad-@prognamebase@.desktop
-
-    # add standard filetype and association for armagetronad:// links
-    xdg-mime install ${DESTDIR}${DESKTOPSOURCE}/armagetronad-link.xml
-    xdg-desktop-menu install ${DESTDIR}${DESKTOPSOURCE}/armagetronad-@prognamebase@-handler.desktop
-
-    # add KDE icons and desktop link
-    if kde-config --install icon > /dev/null 2>&1; then
-        ICONSDEST=`kde_get_write_path icon ${DESTDIR}`
-        if test -z "${ICONSDEST}"; then
-            echo "No permission to write to KDE icons directory."
-        else
-            echo "${INSTALLING} KDE icon in ${ICONSDEST}..."
-            install_link ${DESKTOPSOURCE}/icons/large/@prognamebase@.png ${ICONSDEST}/@progname@.png
-        fi
-
-        DESKTOPDEST=`kde_get_write_path apps ${DESTDIR}`
-        if test -z "${DESKTOPDEST}"; then
-            echo "No permission to write to KDE application menu directory."
-        else
-            echo "${INSTALLING} KDE start menu entry in ${DESKTOPDEST}..."
-            install_link ${DESKTOPSOURCE}/@prognamebase@.desktop ${DESKTOPDEST}/@progname@.desktop
-        fi
+    DESKTOPDEST=`kde_get_write_path apps ${DESTDIR}`
+    if test -z "${DESKTOPDEST}"; then
+        echo "No permission to write to KDE application menu directory."
+    else
+        echo "${INSTALLING} KDE start menu entry in ${DESKTOPDEST}..."
+        install_link ${DESKTOPSOURCE}/armagetronad.desktop ${DESKTOPDEST}/@progname@.desktop
     fi
 fi
 
