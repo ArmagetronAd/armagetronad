@@ -4351,7 +4351,7 @@ protected:
             usageKey += GetTitle();
             usageKey += "_usage";
             tToLower( usageKey );
-            con << tOutput( (const char *)usageKey ) << '\n';
+            con << tOutput( (const char *)usageKey );
             return;
         }
 
@@ -4813,7 +4813,7 @@ public:
 
         if ( alias == "" )
         {
-            con << tOutput( "$alias_usage" );
+            con << tOutput( "$user_alias_usage" );
             return GetDefault();
         }
 
