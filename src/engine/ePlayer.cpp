@@ -4344,6 +4344,16 @@ protected:
     {
         tString name;
         s >> name;
+        
+        if ( name == "" )
+        {
+            tString usageKey("$");
+            usageKey += GetTitle();
+            usageKey += "_usage";
+            tToLower( usageKey );
+            con << tOutput( (const char *)usageKey ) << '\n';
+            return;
+        }
 
         TransformName( name );
 
