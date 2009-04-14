@@ -2876,7 +2876,7 @@ md5_password_removed        User name/team tag \1 removed.\n
 md5_password_remove_notfound User name/team tag \1 to remove not found.\n
 
 reserve_screen_name_help      Reserves a screen name to a registered user
-reserve_screen_namne_usage   Usage: RESERVE_SCREEN_NAME <screen name (in quotes if it contains spaces)> <user>
+reserve_screen_name_usage   Usage: RESERVE_SCREEN_NAME <screen name (in quotes if it contains spaces)> <user>
 reserve_screen_name_change   Screen name "\1" reserved for user \2.\n
 
 user_alias_help               Allows bending authenticated names around: a player authenticated as X originally can appear as y.

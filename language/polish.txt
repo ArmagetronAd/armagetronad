@@ -2888,7 +2888,7 @@ md5_password_removed          Nazwa uzytkownika/tag druzyny \1 usuniety.\n
 md5_password_remove_notfound  Nazwa uzytkownika/tag druzyny \1 nie znaleziony.\n
 
 reserve_screen_name_help      Rezerwuje nazwy graczy dla zalogowanych uzytkowników.
-reserve_screen_namne_usage    Uzycie: RESERVE_SCREEN_NAME <nazwa gracza (w cudzyslowie, jezeli zawiera spacje)> <uzytkownik>
+reserve_screen_name_usage    Uzycie: RESERVE_SCREEN_NAME <nazwa gracza (w cudzyslowie, jezeli zawiera spacje)> <uzytkownik>
 reserve_screen_name_change    Nazwa gracza "\1" jest zarezerwowana dla uzytkownika \2.\n
 
 user_alias_help               Nadaje przezwiska uzytkownikom, uzytkownik X moze byc znany pod nazwa Y.
