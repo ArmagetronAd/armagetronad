@@ -2764,7 +2764,7 @@ abort_loading_name          Loading Abort
 abort_loading_description   Current config file/stream loading was aborted by command \1.
 
 user_level_help             Changes the access level of a user.
-user_level_usage            usage: USER_LEVEL <authenticated name> <user access level (numerical)>\n
+user_level_usage            Usage: USER_LEVEL <authenticated name> <user access level (numerical)>\n
 user_level_change           Access level of user \1 changed to "\2".\n
 
 authority_level_help             Changes the access level for all users from the same authority. Mainly only useful for private authorities.
@@ -2925,17 +2925,19 @@ md5_password_removed        User name/team tag \1 removed.\n
 md5_password_remove_notfound User name/team tag \1 to remove not found.\n
 
 reserve_screen_name_help      Reserves a screen name to a registered user
-reserve_screen_namne_usage   Usage: RESERVE_SCREEN_NAME <screen name (in quotes if it contains spaces)> <user>
+reserve_screen_name_usage   Usage: RESERVE_SCREEN_NAME <screen name (in quotes if it contains spaces)> <user>\n
 reserve_screen_name_change   Screen name "\1" reserved for user \2.\n
 
 user_alias_help               Allows bending authenticated names around: a player authenticated as X originally can appear as y.
-alias_usage                   Usage: USER_ALIAS <user> <alias of user>
+user_alias_usage              Usage: USER_ALIAS <user> <alias of user>\n
 alias_change                  User \1 will be known as \2.\n
 
 ban_user_help                 Allows to ban players based on their authentication ID.
 ban_user_message              User \1 has been banned.\n
+ban_user_usage                Usage: BAN_USER <authenticated name>\n
 unban_user_help               Undoes BAN_USER.
 unban_user_message            User \1 has been unbanned.\n
+unban_user_usage              Usage: UNBAN_USER <authenticated name>\n
 ban_user_list_help            Gives a list of banned users.
 
 md5_prefix_help               Extra hash prefix for local accounts used to scramble the password

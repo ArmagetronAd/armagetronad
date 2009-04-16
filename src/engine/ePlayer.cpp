@@ -829,14 +829,14 @@ void se_SecretConsoleOut( tOutput const & message, ePlayerNetID const * hider, H
     }
     else
     {
-        // well, the admin will want to see it.
-        con << message;
-
         bool canSee[ MAXCLIENTS+1 ];
         for( int i = MAXCLIENTS; i>=0; --i )
         {
             canSee[i] = false;
         }
+        
+        // well, the admin will want to see it.
+        canSee[0] = true;
 
         // look which clients have someone who can see the message
         for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
@@ -4006,7 +4006,7 @@ static int IMPOSSIBLY_LOW_SCORE=(-1 << 31);
 
 static nSpamProtectionSettings se_chatSpamSettings( 1.0f, "SPAM_PROTECTION_CHAT", tOutput("$spam_protection") );
 
-ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings ), lastSaid_()
+ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() ), allowTeamChange_(false), registeredMachine_(0), pID(p),chatSpam_( se_chatSpamSettings ), lastSaid_()
 {
     flagOverrideChat = false;
     flagChatState = false;
@@ -4072,7 +4072,7 @@ ePlayerNetID::ePlayerNetID(int p):nNetObject(),listID(-1), teamListID(-1), allow
 
 
 
-ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
+ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1), timeCreated_( tSysTimeFloat() )
         , allowTeamChange_(false), registeredMachine_(0), chatSpam_( se_chatSpamSettings ), lastSaid_()
 {
     flagOverrideChat = false;
@@ -4419,6 +4419,16 @@ protected:
     {
         tString name;
         s >> name;
+        
+        if ( name == "" )
+        {
+            tString usageKey("$");
+            usageKey += GetTitle();
+            usageKey += "_usage";
+            tToLower( usageKey );
+            con << tOutput( (const char *)usageKey );
+            return;
+        }
 
         TransformName( name );
 
@@ -4878,7 +4888,7 @@ public:
 
         if ( alias == "" )
         {
-            con << tOutput( "$alias_usage" );
+            con << tOutput( "$user_alias_usage" );
             return GetDefault();
         }
 

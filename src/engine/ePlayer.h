@@ -170,6 +170,7 @@ private:
     bool							silenced_;		// flag indicating whether the player has been silenced
     int                             suspended_;     //! number of rounds the player is currently suspended from playing
 
+    nTimeAbsolute                   timeCreated_;   // the time the player was created
     nTimeAbsolute					timeJoinedTeam; // the time the player joined the team he is in now
     tCONTROLLED_PTR(eTeam)			nextTeam;		// the team we're in ( logically )
     tCONTROLLED_PTR(eTeam)			currentTeam;	// the team we currently are spawned for
@@ -383,6 +384,8 @@ public:
     void GetScoreFromDisconnectedCopy(); // get the player's data from the previous login
 
     void Chat(const tString &s);
+    
+    nTimeAbsolute GetTimeCreated() const { return timeCreated_; }
 
     virtual void Color( REAL&r, REAL&g, REAL&b ) const;
     virtual void TrailColor( REAL&r, REAL&g, REAL&b ) const;
