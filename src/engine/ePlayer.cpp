@@ -2616,10 +2616,6 @@ static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
 static bool se_silenceDead = false;
 static tSettingItem<bool> se_silenceDeadConf("SILENCE_DEAD", se_silenceDead);
 
-// help message printed out to whoever asks for it
-static tString se_helpMessage("");
-static tConfItemLine se_helpMessageConf("HELP_MESSAGE",se_helpMessage);
-
 // time during which no repeaded chat messages are printed
 REAL se_alreadySaidTimeout=5.0;
 static tSettingItem<REAL> se_alreadySaidTimeoutConf("SPAM_PROTECTION_REPEAT",
@@ -3506,13 +3502,6 @@ void handle_chat( nMessage &m )
                     else if (command == "/vote" || command == "/callvote") {
                         spam.lastSaidType_ = eChatMessageType_Command;
                         eVoter::HandleChat( p, s );
-                        return;
-                    }
-                    else if (command == "/help")
-                    {
-                        spam.lastSaidType_ = eChatMessageType_Command;
-                        sn_ConsoleOut(se_helpMessage + "\n", p->Owner());
-                        se_DisplayChatLocally(p, say);
                         return;
                     }
                     else if (command == "/teams") {
