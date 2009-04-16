@@ -187,7 +187,7 @@ const nTimeRolling & eChatSaidEntry::Time() const
     return time_;
 }
 
-const eChatMessageType eChatSaidEntry::Type() const
+eChatMessageType eChatSaidEntry::Type() const
 {
     return type_;
 }

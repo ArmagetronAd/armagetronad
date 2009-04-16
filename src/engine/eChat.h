@@ -74,7 +74,7 @@ public:
     /**
      * @return The type of this message.
      */
-    const eChatMessageType Type() const;
+    eChatMessageType Type() const;
     
     /**
      * Set the message type
