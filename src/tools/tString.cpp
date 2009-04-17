@@ -1123,32 +1123,26 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
 {
     // st_Breakpoint();
     tString ret;
-
     int len = strlen(c);
-
     bool removed = false;
-
+    
     // walk through string
     while (*c!='\0'){
         // skip color codes
         if (*c=='0' && len >= 2 && c[1]=='x')
         {
-	    if( len >= 8 && darkonly && strncmp( c, "0xRESETT", 8 ) != 0 )
-	    {
-		tColor colorToFilter;
-		colorToFilter = tColor( c );
-		if ( !colorToFilter.IsDark() )
-		{
-	            ret << c[0] << c[1] << c[2] << c[3] << c[4] << c[5] << c[6] << c[7];
-		}
-		else
-		{
+            if( len >= 8 && darkonly )
+            {
+                tColor colorToFilter( c );
+                if ( !colorToFilter.IsDark() || strncmp( c, "0xRESETT", 8 ) == 0 )
+                    ret << c[0] << c[1] << c[2] << c[3] << c[4] << c[5] << c[6] << c[7];
+                else
                     removed = true;
-		}
-		c   += 8;
-		len -= 8;	
-	    }
-	    else if( len >= 8 )
+
+                c   += 8;
+                len -= 8;	
+            }
+            else if( len >= 8 )
             {
                 c   += 8;
                 len -= 8;
@@ -1159,7 +1153,7 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
                 // skip incomplete color codes, too
                 return RemoveColors( ret, darkonly );
             }
-	    // st_Breakpoint();
+            // st_Breakpoint();
         }
         else
         {
@@ -1167,9 +1161,9 @@ tString tColoredString::RemoveColors( const char * c, bool darkonly )
             len--;
         }
     }
-
+    
     // st_Breakpoint();
-
+    
     return removed ? RemoveColors( ret, darkonly ) : ret;
 }
 
