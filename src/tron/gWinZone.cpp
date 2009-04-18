@@ -4744,7 +4744,7 @@ bool gTargetZoneHack::Timestep( REAL time )
 					REAL r = this->GetRadius();
 					if (!prey->Alive() || (( prey->Position() - this->Position() ).NormSquared() >= r*r))
 					{
-						sg_targetzonePlayerLeftWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << p->GetUserName() << p->Object()->Position().x << p->Object()->Position().y;
+						sg_targetzonePlayerLeftWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << p->GetUserName() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y ;
 						sg_targetzonePlayerLeftWriter.write();
 						playersFlags[i] = 1;
 					}
@@ -4852,7 +4852,7 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
 	// message in edlog
 	if (playersFlags[target->Player()->ListID()] != 2)
 	{
-		sg_targetzonePlayerEnterWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName() << target->Player()->Object()->Position().x << target->Player()->Object()->Position().y;
+		sg_targetzonePlayerEnterWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName() << target->Player()->Object()->Position().x << target->Player()->Object()->Position().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y;
 		sg_targetzonePlayerEnterWriter.write();
 		playersFlags[target->Player()->ListID()] = 2;
 	}
