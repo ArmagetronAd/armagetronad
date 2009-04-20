@@ -117,9 +117,7 @@ void rModel::Load(std::istream &in,const char *fileName){
         int offset=0;       //
         int current_vertex=0; //
 
-#define MAXVERT 10000
-
-        int   translate[MAXVERT];
+        tArray< int > translate(10000);
 
         enum {VERTICES,FACES} status=VERTICES;
 
