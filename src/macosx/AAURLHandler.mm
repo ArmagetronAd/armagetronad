@@ -64,8 +64,11 @@
         tString servername;
         tString port;
         ExtractConnectionInformation( raw, servername, port );
-        nServerInfoRedirect server( servername, port.ToInt() );
-        AAURLHandlerConnect( &server );
+        if ( servername != "" )
+        {
+            nServerInfoRedirect server( servername, port.ToInt() );
+            AAURLHandlerConnect( &server );
+        }
     }
 }
 
