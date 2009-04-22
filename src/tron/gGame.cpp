@@ -127,6 +127,16 @@ static tSettingItem<REAL> sg_waitForExternalScriptTimeoutConf( "WAIT_FOR_EXTERNA
 
 static nSettingItemWatched<tString> conf_mapfile("MAP_FILE",mapfile, nConfItemVersionWatcher::Group_Breaking, 8 );
 
+// enable/disable sound, supporting two different pause reasons:
+// if fromActivity is set, the pause comes from losing input focus.
+// otherwise, it's from game state changes.
+static void sg_SoundPause( bool pause, bool fromActivity )
+{
+    bool flags[2]={true, false};
+    flags[ fromActivity ] = pause;
+    se_SoundPause( flags[0] || flags[1] );
+}
+
 // bool globalingame=false;
 tString sg_GetCurrentTime( char const * szFormat )
 {
@@ -3330,12 +3340,14 @@ void gGame::StateUpdate(){
             //con << ePlayerNetID::Ranking();
 
             se_PauseGameTimer(false);
+            sg_SoundPause( false, false );
             se_SyncGameTimer();
             sr_con.fullscreen=false;
             sr_con.autoDisplayAtNewline=false;
 
             break;
         case GS_PLAY:
+            sg_SoundPause( true, false );
             sr_con.autoDisplayAtNewline=false;
 #ifdef DEDICATED
             {
@@ -4470,6 +4482,8 @@ void sg_EnterGameCore( nNetState enter_state ){
     introPlayer.MakeGlobal();
     introPlayer.Reset();
 
+    sg_SoundPause( true, false );
+
     //  exit_game_objects(grid);
 
     // enter single player settings
@@ -4515,6 +4529,8 @@ void sg_EnterGameCore( nNetState enter_state ){
 
         st_DoToDo();
     }
+
+    sg_SoundPause( false, false );
 
     extroPlayer.MakeGlobal();
     extroPlayer.Reset();
@@ -4612,9 +4628,9 @@ void Activate(bool act){
 
     sr_Activate( act );
 
-    se_SoundPause(!act);
+    sg_SoundPause( !act, true );
 
-    if (!tRecorder::IsRunning() )
+    if ( !tRecorder::IsRunning() )
     {
         if (sn_GetNetState()==nSTANDALONE)
         {
