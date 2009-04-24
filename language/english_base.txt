@@ -2198,7 +2198,7 @@ gamestate_reset_console		Resetting scores and starting new match after this roun
 gamestate_resetnow_center	New Match
 gamestate_resetnow_console	Resetting scores...\n
 gamestate_resetnow_log		New Match\n
-gamestate_newround_console	Go (round \1 of \2 )!\n
+gamestate_newround_console	Go (round \1 of \2)!\n
 gamestate_newround_goldengoal	Go (extra round; whoever gains the lead wins)!\n
 gamestate_newround_log		New Round\n
 gamestate_chat_wait         Waiting up to \2 seconds for \1 to finish chatting.\n

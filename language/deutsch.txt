@@ -2200,7 +2200,7 @@ gamestate_reset_console       Nach dieser Runde beginnt ein neues Match; Punktza
 gamestate_resetnow_center     Neues Match
 gamestate_resetnow_console    Setzte Punktzahlen zurück...\n
 gamestate_resetnow_log        Neues Match\n
-gamestate_newround_console    Los (Runde \1 von \2 )!\n
+gamestate_newround_console    Los (Runde \1 von \2)!\n
 gamestate_newround_goldengoal Los (Verlängerung; Wer als erster die Führung übernimmt, gewinnt)!\n
 gamestate_newround_log        Neue Runde\n
 gamestate_chat_wait           Warte bis zu \2 Sekunden auf \1.\n
