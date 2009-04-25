@@ -1,6 +1,8 @@
 Changes since 0.2.8.3_rc1:
 - Fixed dark color filters, such as FILTER_DARK_COLOR_STRINGS, to not filter
   the reset color.
+- ASE moviepack models no longer have a vertex count limit
+- Fixed endless recursion crash between rounds
 
 Changes since 0.2.8.3_beta3:
 - Chat prefix spam protection. Guards against prefix spam, such as when a
