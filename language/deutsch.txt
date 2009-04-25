@@ -2878,7 +2878,7 @@ md5_password_removed          Benutzer/Team \1 entfernt.\n
 md5_password_remove_notfound  Benutzer/Team \1 nicht gefunden.\n
 
 reserve_screen_name_help      Reserviert einen Spitznamen für einen registrierten Benutzer
-reserve_screen_name_usage    Verwendung: RESERVE_SCREEN_NAME <Spitzname (in Anfürungszeichen)> <Benutzername>\n
+reserve_screen_name_usage     Verwendung: RESERVE_SCREEN_NAME <Spitzname (in Anfürungszeichen)> <Benutzername>\n
 reserve_screen_name_change    Der Spitzname "\1" ist für \2 reserviert.\n
 
 user_alias_help               Erlaubt es, Authentifizierungs-IDs umzubiegen: ein Spieler, der eigentlich als X authentifiziert ist, kann als Y erscheinen.
@@ -2887,8 +2887,10 @@ alias_change                  Benutzer \1 wird als \2 erscheinen.\n
 
 ban_user_help                 Verbannt Spieler mit bestimmter Authentifizierungs-ID
 ban_user_message              Benutzer \1 wurde verbannt.\n
+ban_user_usage                Verwendung: BAN_USER <global ID>\n
 unban_user_help               Macht BAN_USER rückgängig.
 unban_user_message            Benutzer \1 ist nicht mehr verbannt.\n
+unban_user_usage              Verwendung: UNBAN_USER <global ID>\n
 ban_user_list_help            Gibt die Liste der verbannten Authentifizierungs-IDs aus.
 
 md5_prefix_help               Prefix, der bei lokalen Accounts zum Verschüsseln des Passworts verwendet wird
