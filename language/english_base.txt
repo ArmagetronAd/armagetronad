@@ -961,6 +961,8 @@ rename_help		    Renames the given player.
 allow_rename_player_help    Gives the given player the ability to rename.
 disallow_rename_player_help Prevents the given player from renameing.
 
+silence_enemies_help        When enabled, chat sent from enemies is not displayed on your client if you are alive. If you are dead all chat is displayed.
+
 #********************************************
 #********************************************
 #

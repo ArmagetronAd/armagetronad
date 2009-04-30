@@ -4,6 +4,9 @@ Changes since 0.3.1
   Language files can be either utf-8 or latin-1.
 - New command: “TOGGLE”. Cycle between 0 and 1 for a boolean config item.
   Example: Create an instant chat with the text “/console toggle predict_objects”.
+- New setting SILENCE_ENEMIES (boolean). When enabled, chat sent from enemies
+  is not displayed on your client if you are alive. If you are dead all chat
+  is displayed.
 
 Changes since 0.3.0
 ===================
