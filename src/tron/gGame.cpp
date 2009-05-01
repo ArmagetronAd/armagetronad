@@ -3973,9 +3973,15 @@ bool gGame::GameLoop(bool input){
     static float lastTime = 1e42;
 
     if(sg_gameTimeInterval >= 0 && (gtime >= lastTime + sg_gameTimeInterval || gtime < lastTime)) {
-        sg_gameTimeWriter << gtime;
+        double time;
+        if (sg_gameTimeInterval >0){
+            time = (floor(gtime/sg_gameTimeInterval))*sg_gameTimeInterval;
+        } else{
+            time = gtime;
+        }
+        sg_gameTimeWriter << time;
         sg_gameTimeWriter.write();
-        lastTime = gtime;
+        lastTime = time;
     }
 
     if (state==GS_PLAY){
