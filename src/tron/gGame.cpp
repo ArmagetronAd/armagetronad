@@ -2608,6 +2608,8 @@ static void sg_VoteMenuIdle()
 static eLadderLogWriter sg_newRoundWriter("NEW_ROUND", true);
 static eLadderLogWriter sg_newMatchWriter("NEW_MATCH", true);
 static eLadderLogWriter sg_waitForExternalScriptWriter("WAIT_FOR_EXTERNAL_SCRIPT", true);
+static eLadderLogWriter sg_nextRoundWriter("NEXT_ROUND", false);
+static  eLadderLogWriter sg_roundCommencingWriter("ROUND_COMMENCING", false);
 
 void gGame::StateUpdate(){
 
@@ -2673,6 +2675,7 @@ void gGame::StateUpdate(){
             // log scores before players get renamed
             ePlayerNetID::LogScoreDifferences();
             ePlayerNetID::UpdateSuspensions();
+            sg_newRoundWriter << sg_GetCurrentTime("%Y-%m-%d %H:%M:%S");
             sg_newRoundWriter.write();
             se_sendEventNotification(tString("New Round"), tString("Starting a new round"));
 
@@ -2859,6 +2862,8 @@ void gGame::StateUpdate(){
 
                     if (strlen(sg_roundConsoleMessage) > 2)
                         sn_ConsoleOut(sg_roundConsoleMessage + "\n");
+                    sg_nextRoundWriter << rounds+1 << sg_currentSettings->limitRounds << mapfile << sg_roundCenterMessage;
+		            sg_nextRoundWriter.write();
                 }
                 else
                     mess << "$gamestate_newround_goldengoal";
@@ -2885,6 +2890,9 @@ void gGame::StateUpdate(){
                     goon = 0;
 
                 Analysis(0);
+                
+                sg_roundCommencingWriter << rounds+1 << sg_currentSettings->limitRounds;
+                sg_roundCommencingWriter.write();
 
                 // wait for external script to end its work if needed
                 REAL timeout = tSysTimeFloat() + sg_waitForExternalScriptTimeout;
@@ -3735,6 +3743,7 @@ void gGame::StartNewMatch(){
 void gGame::StartNewMatchNow(){
     if ( rounds != 0 )
     {
+        sg_newMatchWriter << sg_GetCurrentTime("%Y-%m-%d %H:%M:%S");
         sg_newMatchWriter.write();
         se_sendEventNotification(tString("New match"), tString("Starting a new match"));
     }
