@@ -2605,6 +2605,9 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
     }
 }
 
+static eLadderLogWriter se_commandWriter("COMMAND", false);
+static eLadderLogWriter se_invalidCommandWriter("INVALID_COMMAND", false);
+
 static void handle_chat_admin_commands( ePlayerNetID * p, tString const & command, tString const & say, std::istream & s, eChatSpamTester &spam )
 {
     if  (command == "/login")
@@ -2660,7 +2663,22 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     {
         se_AdminAdmin( p, s );
     }
+    else  if ( command == "/cmd" && se_commandWriter.isEnabled() )
+    {
+        tString str;
+        str.ReadLine(s);
+        se_commandWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel() << str;
+        se_commandWriter.write();
+    }
     else
+    {
+        if (se_invalidCommandWriter.isEnabled() )
+        {
+            tString str;
+            str.ReadLine(s);
+            se_invalidCommandWriter << command << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel() << str;
+            se_invalidCommandWriter.write();
+        }
         if (se_interceptUnknownCommands)
         {
             handle_command_intercept(p, say);
@@ -2669,6 +2687,7 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
         {
             sn_ConsoleOut( tOutput( "$chat_command_unknown", command ), p->Owner() );
         }
+    }
 }
 #else // DEDICATED
 // returns the team managed by an admin
