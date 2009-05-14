@@ -6205,7 +6205,10 @@ void ePlayerNetID::RankingLadderLog() {
         if(p->Owner() == 0) continue; // ignore AIs
 
         se_onlinePlayerWriter << p->GetLogName();
-
+        
+        // add player color to the message
+		se_onlinePlayerWriter << p->color.r_ << p->color.g_ << p->color.b_;
+        
         if(p->IsActive()) {
             se_onlinePlayerWriter << p->ping;
             if(p->currentTeam) {
