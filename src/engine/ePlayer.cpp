@@ -2446,6 +2446,9 @@ static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
 }
 #endif // KRAWALL
 
+static eLadderLogWriter se_adminLoginWriter("ADMIN_LOGIN", false);
+static eLadderLogWriter se_adminLogoutWriter("ADMIN_LOGOUT", false);
+
 // the following function really is only supposed to be called from here and nowhere else
 // (access right escalation risk):
 // log in (via admin password or hash based login)
@@ -2491,6 +2494,8 @@ static void se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( ePlayerNetID * p, std:
         // the following function really is only supposed to be called from here and nowhere else
         // (access right escalation risk)
         se_AdminLogin_ReallyOnlyCallFromChatKTHNXBYE( p );
+        se_adminLoginWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP();
+	    se_adminLoginWriter.write();
     }
     else
     {
@@ -2551,10 +2556,14 @@ static void se_AdminLogout( ePlayerNetID * p, char const * command )
     if ( p->IsLoggedIn() )
     {
         sn_ConsoleOut("You have been logged out!\n",p->Owner());
+        se_adminLogoutWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP();
+        se_adminLogoutWriter.write();
     }
     p->BeNotLoggedIn();
 #endif
 }
+
+static eLadderLogWriter se_adminCommandWriter("ADMIN_COMMAND", false);
 
 // access level a user has to have to be able to see what's being typed at /admin
 static tAccessLevel se_consoleSpyAccessLevel = tAccessLevel_Moderator;
@@ -2577,6 +2586,8 @@ static void se_AdminAdmin( ePlayerNetID * p, std::istream & s )
 
     tString str;
     str.ReadLine(s);
+    se_adminCommandWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->GetAccessLevel() << str;
+    se_adminCommandWriter.write();
     tColoredString msg;
     msg << tColoredString::ColorString(1,0,0) << "Remote admin command" << tColoredString::ColorString(-1,-1,-1) << " by " << tColoredString::ColorString(1,1,.5) << p->GetUserName() << tColoredString::ColorString(-1,-1,-1) << ": " << tColoredString::ColorString(.5,.5,1) << str << "\n";
     se_SecretConsoleOut( msg, p, &se_cannotSeeConsole, p );
