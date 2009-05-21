@@ -536,24 +536,51 @@ class gTargetZoneHack: public gZone
 		void SetOnVanishCmd(tString &cmd, tString &mode) {if (mode=="add") OnVanishCmd << "\n" << cmd; else OnVanishCmd = cmd;};
 };
 
-class gBlastZoneHack: public gZone
+class gTeleportZoneHack: public gZone
 {
 	public:
 								 //!< local constructor
-		gBlastZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false );
+		gTeleportZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false );
 								 //!< network constructor
-		gBlastZoneHack(nMessage &m);
-		~gBlastZoneHack();		 //!< destructor
+		gTeleportZoneHack(nMessage &m);
+		~gTeleportZoneHack();		 //!< destructor
+
+	void SetJump(eCoord coord, bool rel) { this->jump = coord; this->relative = rel; }
+	eCoord GetJump() { return this->jump; }
+	bool IsRelativeJump() { return this->relative; }
 
 	protected:
 
 	private:
-								 //!< simulates behaviour up to currentTime
+		//!< simulates behaviour up to currentTime
+		virtual bool Timestep(REAL currentTime);
+		//!< called when the zone vanishes
+		virtual void OnVanish();
+		//!< reacts on objects inside the zone
+		virtual void OnEnter( gCycle *target, REAL time );
+	
+	    eCoord jump;
+	    bool relative;
+};
+
+class gBlastZoneHack: public gZone
+	{
+	public:
+		//!< local constructor
+		gBlastZoneHack(eGrid *grid, const eCoord &pos, bool dynamicCreation = false );
+		//!< network constructor
+		gBlastZoneHack(nMessage &m);
+		~gBlastZoneHack();		 //!< destructor
+		
+	protected:
+		
+	private:
+		//!< simulates behaviour up to currentTime
 		virtual bool Timestep(REAL currentTime);
 		virtual void OnVanish(); //!< called when the zone vanishes
-								 //!< reacts on objects inside the zone
+		//!< reacts on objects inside the zone
 		virtual void OnEnter( gCycle *target, REAL time );
-};
+	};
 
 //! creates a win or death zone (according to configuration) at the specified position
 gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos );

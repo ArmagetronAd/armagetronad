@@ -4886,6 +4886,136 @@ void gTargetZoneHack::OnVanish( void )
 
 // *******************************************************************************
 // *
+// *	gTeleportZoneHack
+// *
+// *******************************************************************************
+//!
+//!		@param	grid Grid to put the zone into
+//!		@param	pos	 Position to spawn the zone at
+//!
+// *******************************************************************************
+
+gTeleportZoneHack::gTeleportZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation)
+:gZone( grid, pos, dynamicCreation )
+{
+	color_.r = 0.0f;
+	color_.g = 1.0f;
+	color_.b = 0.0f;
+
+	grid->AddGameObjectInteresting(this);
+
+	SetExpansionSpeed(0);
+	SetRotationSpeed( .3f );
+	RequestSync();
+}
+
+
+// *******************************************************************************
+// *
+// *	gTeleportZoneHack
+// *
+// *******************************************************************************
+//!
+//!		@param	m Message to read creation data from
+//!		@param	null
+//!
+// *******************************************************************************
+
+gTeleportZoneHack::gTeleportZoneHack( nMessage & m )
+: gZone( m )
+{
+}
+
+
+// *******************************************************************************
+// *
+// *	~gTeleportZoneHack
+// *
+// *******************************************************************************
+//!
+//!
+// *******************************************************************************
+
+gTeleportZoneHack::~gTeleportZoneHack( void )
+{
+}
+
+
+// *******************************************************************************
+// *
+// *	Timestep
+// *
+// *******************************************************************************
+//!
+//!		@param	time    the current time
+//!
+// *******************************************************************************
+
+bool gTeleportZoneHack::Timestep( REAL time )
+{
+	// delegate
+	bool returnStatus = gZone::Timestep( time );
+
+	return (returnStatus);
+}
+
+
+// *******************************************************************************
+// *
+// *	OnEnter
+// *
+// *******************************************************************************
+//!
+//!		@param	target  the cycle that has been found inside the zone
+//!		@param	time    the current time
+//!
+// *******************************************************************************
+
+void gTeleportZoneHack::OnEnter( gCycle * target, REAL time )
+{
+	// make sure target and player are OK
+	if ((!target) ||
+		(!target->Player()))
+	{
+		return;
+	}
+	// Jump to new position without creating walls
+	gNetPlayerWall *nwall1 = target->CurrentWall()->NetWall();
+	target->DropWall(false);
+	if (!nwall1) nwall1->RequestSync();
+	eCoord d = target->Direction();
+	d.Normalize();
+	eCoord p = target->Position();
+	eCoord v = GetPosition() - p;
+	v.Normalize();
+	REAL l = (eCoord::F(v,d)*GetRadius()*2.0+0.1)/target->Direction().Norm();
+	eCoord newPos = (relative? p + jump: jump)+d*l;
+	// check if newPos is inside this zone
+	if ((newPos-GetPosition()).Norm()<=GetRadius()+0.1) return;
+	// if not, let's jump
+	target->MoveSafely(newPos,time,time);
+	target->SetLastTurnPos(newPos); // hacky way to ensure to build the wall properly
+	target->SetLastTurnTime(time);
+	target->DropWall();
+	target->CurrentWall()->NetWall()->RequestSync();
+	target->RequestSync();
+
+}
+
+
+// *******************************************************************************
+// *
+// *	OnVanish
+// *
+// *******************************************************************************
+
+void gTeleportZoneHack::OnVanish( void )
+{
+}
+
+
+// *******************************************************************************
+// *
 // *	gBlastZoneHack
 // *
 // *******************************************************************************
@@ -4901,9 +5031,9 @@ gBlastZoneHack::gBlastZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
 	color_.r = 0.0f;
 	color_.g = 1.0f;
 	color_.b = 0.0f;
-
+	
 	grid->AddGameObjectInteresting(this);
-
+	
 	SetExpansionSpeed(0);
 	SetRotationSpeed( .3f );
 	RequestSync();
@@ -4961,34 +5091,34 @@ void S_BlastWalls( eWall * w )
 	// determine the point closest to s_blastCoord
 	eCoord normal = w->Vec().Conj();
 	normal.Normalize();
-
+	
 	eCoord Pos1 = normal.Turn( w->EndPoint(0) - s_blastCoord );
 	eCoord Pos2 = normal.Turn( w->EndPoint(1) - s_blastCoord );
-
+	
 	tASSERT( fabs( Pos1.y - Pos2.y ) <= fabs( Pos1.y + Pos2.y + .1f ) * .1f );
-
+	
 	REAL alpha = .5f;
 	if ( Pos1.x != Pos2.x)
 		alpha = Pos1.x / ( Pos1.x - Pos2.x );
-
+	
 	REAL radius = s_blastRadius * s_blastRadius - Pos1.y * Pos2.y;
-
+	
 	// wall too far away
 	if ( radius < 0 )
 		return;
-
+	
 	radius = sqrt( radius );
-
+	
 	// works only for player walls
 	gPlayerWall* wall = dynamic_cast<gPlayerWall*>( w );
 	if ( ! wall )
 		return;
-
+	
 	REAL closestPos = wall->Pos( alpha );
-
+	
 	REAL start = closestPos - radius;
 	REAL end = closestPos + radius;
-
+	
 	// cut away walls in the zone (if they are not reduced to a point)
 	REAL wallEnd = wall->EndPos();
 	REAL wallBeg = wall->BegPos();
@@ -5000,7 +5130,7 @@ void S_BlastWalls( eWall * w )
 	// std::cout << wall->BegTime() << "\n";
 	clamp01( endAlpha );
 	end = wall->Pos( endAlpha );
-
+	
 	if ( end > start )
 	{
 		wall->BlowHole ( start, end, NULL );
@@ -5013,18 +5143,18 @@ bool gBlastZoneHack::Timestep( REAL time )
 {
 	s_blastCoord  = GetPosition();
 	s_blastRadius = GetRadius();
-
+	
 	if ( s_blastRadius > 0 )
 	{
 		grid->ProcessWallsInRange( &S_BlastWalls,
-			s_blastCoord,
-			s_blastRadius,
-			CurrentFace() );
+								  s_blastCoord,
+								  s_blastRadius,
+								  CurrentFace() );
 	}
-
+	
 	// delegate
 	bool returnStatus = gZone::Timestep( time );
-
+	
 	return (returnStatus);
 }
 
@@ -5158,6 +5288,19 @@ static void sg_CreateZone_conf(std::istream &s)
         zoneRubber = atof(zoneRubberStr);
         con << zoneRubber;
     }
+    eCoord zoneJump;
+	bool relJump;
+    if(zoneTypeStr == "teleport"){
+		tString  zoneJumpXStr;
+		tString  zoneJumpYStr;
+        zoneJumpXStr = params.ExtractNonBlankSubString(pos);
+        zoneJumpYStr = params.ExtractNonBlankSubString(pos);
+        zoneJump = eCoord(atof(zoneJumpXStr),atof(zoneJumpYStr));
+        tString zoneRelAbsStr = params.ExtractNonBlankSubString(pos);
+		if (zoneRelAbsStr=="rel") relJump=true;
+		else relJump = false;
+        con << zoneRubber;
+    }
 	const tString zoneInteractive = params.ExtractNonBlankSubString(pos);
 	const tString zoneRedStr = params.ExtractNonBlankSubString(pos);
 	const tString zoneGreenStr = params.ExtractNonBlankSubString(pos);
@@ -5235,7 +5378,13 @@ static void sg_CreateZone_conf(std::istream &s)
 	else if ( zoneTypeStr=="rubber")
 	{
         gRubberZoneHack *rZone = tNEW(gRubberZoneHack(grid, zonePos, true));
-			rZone->SetRubber(zoneRubber);
+		rZone->SetRubber(zoneRubber);
+		Zone = rZone;
+	}
+	else if ( zoneTypeStr=="teleport")
+	{
+        gTeleportZoneHack *rZone = tNEW(gTeleportZoneHack(grid, zonePos, true));
+		rZone->SetJump(zoneJump,relJump);
 		Zone = rZone;
 	}
 	else if ( zoneTypeStr=="ball" || zoneTypeStr=="ballTeam" )
@@ -5322,7 +5471,8 @@ static void sg_CreateZone_conf(std::istream &s)
 		usage:
 		con << "Usage:\n"
 			"SPAWN_ZONE <win|death|ball|target|blast> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
-            "SPAWN_ZONE rubber <x> <y> <size> <growth> <xdir> <ydir> <rubber> <interactive> <r> <g> <b> <target_size> \n"
+			"SPAWN_ZONE rubber <x> <y> <size> <growth> <xdir> <ydir> <rubber> <interactive> <r> <g> <b> <target_size> \n"
+			"SPAWN_ZONE teleport <x> <y> <size> <growth> <xdir> <ydir> <xjump> <yjump> <rel|abs> <interactive> <r> <g> <b> <target_size> \n"
 			"SPAWN_ZONE <fortress|flag|deathTeam|ballTeam> <team> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
 			"SPAWN_ZONE zombie <player> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
 			"SPAWN_ZONE zombieOwner <player> <owner> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> \n"
@@ -5462,6 +5612,9 @@ static void sg_SetZoneRoute(std::istream &s)
 	const tString object_id_str = params.ExtractNonBlankSubString(pos);
 	//        const tString mode_str = params.ExtractNonBlankSubString(pos);
 	std::vector<eCoord> route;
+	tString speedstr;
+	speedstr = params.ExtractNonBlankSubString(pos);
+	REAL speed = atof(speedstr);
 	tString x,y;
 	while(true)
 	{
@@ -5499,6 +5652,10 @@ static void sg_SetZoneRoute(std::istream &s)
 					zone->AddWaypoint(*iter + curPos);
 				}
 			}
+			REAL magnitude = zoneDir.Norm();
+			if (speed<=0) speed = magnitude;
+			if (magnitude!=0.0) zoneDir.Normalize();
+			zoneDir*=speed;
 			zone->SetVelocity(zoneDir);
 			zone->RequestSync();
 		}
@@ -5507,6 +5664,97 @@ static void sg_SetZoneRoute(std::istream &s)
 }
 
 static tConfItemFunc sg_SetZoneRoute_conf("SET_ZONE_POSITION",&sg_SetZoneRoute);
+
+static void sg_SetZoneSpeed(std::istream &s)
+{
+	tString params;
+	params.ReadLine( s, true );
+	
+	// parse the line to get the param : object_id, speed ...
+	int pos = 0;				 //
+	const tString object_id_str = params.ExtractNonBlankSubString(pos);
+	//        const tString mode_str = params.ExtractNonBlankSubString(pos);
+	tString speedstr;
+	speedstr = params.ExtractNonBlankSubString(pos);
+	REAL speed = atof(speedstr);
+	
+	// first check for the name
+	int zone_id;
+	zone_id=gZone::FindFirst(object_id_str);
+	if (zone_id==-1)
+	{
+		zone_id = atoi(object_id_str);
+		if (zone_id==0 && object_id_str!="0") return;
+	}
+	
+	const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+	while (zone_id!=-1)
+	{
+		// get the zone ...
+		gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+		if (zone)
+		{
+			zone->SetReferenceTime();
+			eCoord zoneDir = zone->GetVelocity();
+			REAL magnitude = zoneDir.Norm();
+			if (speed<=0) speed = magnitude;
+			if (magnitude!=0.0) zoneDir.Normalize();
+			zoneDir*=speed;
+			zone->SetVelocity(zoneDir);
+			zone->RequestSync();
+		}
+		zone_id=gZone::FindNext(object_id_str, zone_id);
+	}
+}
+
+static tConfItemFunc sg_SetZoneSpeed_conf("SET_ZONE_SPEED",&sg_SetZoneSpeed);
+
+static void sg_SetZoneColor(std::istream &s)
+{
+	tString params;
+	params.ReadLine( s, true );
+	
+	// parse the line to get the param : object_id, r, g, b ...
+	int pos = 0;				 //
+	const tString object_id_str = params.ExtractNonBlankSubString(pos);
+	//        const tString mode_str = params.ExtractNonBlankSubString(pos);
+	const tString zoneRedStr = params.ExtractNonBlankSubString(pos);
+	const tString zoneGreenStr = params.ExtractNonBlankSubString(pos);
+	const tString zoneBlueStr = params.ExtractNonBlankSubString(pos);
+	gRealColor zoneColor;
+	if ((zoneRedStr=="")||(zoneGreenStr=="")||(zoneBlueStr=="")) return;
+	zoneColor.r = atof(zoneRedStr);
+	zoneColor.g = atof(zoneGreenStr);
+	zoneColor.b = atof(zoneBlueStr);
+	
+	// first check for the name
+	int zone_id;
+	zone_id=gZone::FindFirst(object_id_str);
+	if (zone_id==-1)
+	{
+		zone_id = atoi(object_id_str);
+		if (zone_id==0 && object_id_str!="0") return;
+	}
+	
+	const tList<eGameObject>& gameObjects = eGrid::CurrentGrid()->GameObjects();
+	while (zone_id!=-1)
+	{
+		// get the zone ...
+		gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+		if (zone)
+		{
+			zone->SetReferenceTime();
+			zoneColor.r = (zoneColor.r>1.0)?1.0:zoneColor.r;
+			zoneColor.g = (zoneColor.g>1.0)?1.0:zoneColor.g;
+			zoneColor.b = (zoneColor.b>1.0)?1.0:zoneColor.b;
+			zone->SetColor(zoneColor);
+			zone->RequestSync();
+		}
+		zone_id=gZone::FindNext(object_id_str, zone_id);
+	}
+}
+
+static tConfItemFunc sg_SetZoneColor_conf("SET_ZONE_COLOR",&sg_SetZoneColor);
 
 static void sg_SetTargetCmd(std::istream &s)
 {
