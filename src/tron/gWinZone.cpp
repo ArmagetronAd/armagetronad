@@ -4980,24 +4980,32 @@ void gTeleportZoneHack::OnEnter( gCycle * target, REAL time )
 		return;
 	}
 	// Jump to new position without creating walls
-	gNetPlayerWall *nwall1 = target->CurrentWall()->NetWall();
+	gNetPlayerWall *nwall1;
+	if (!target->CurrentWall())
+		nwall1 = target->CurrentWall()->NetWall();
+	else
+		nwall1 = 0;
 	target->DropWall(false);
 	if (!nwall1) nwall1->RequestSync();
 	eCoord d = target->Direction();
 	d.Normalize();
+	eCoord n = eCoord(-d.y,d.x);
 	eCoord p = target->Position();
 	eCoord v = GetPosition() - p;
+	REAL vn = v.Norm();
 	v.Normalize();
-	REAL l = (eCoord::F(v,d)*GetRadius()*2.0+0.1)/target->Direction().Norm();
-	eCoord newPos = (relative? p + jump: jump)+d*l;
+	REAL l = (eCoord::F(v,d)*vn*2.0);
+	// if center is behind, you might have been teleported in this zone. Don't jump !
+	if (l<=0) return;
+	eCoord newPos = (relative? p + jump: jump - v)+d*l;
 	// check if newPos is inside this zone
-	if ((newPos-GetPosition()).Norm()<=GetRadius()+0.1) return;
+	if ((newPos-GetPosition()).Norm()<=GetRadius()) return;
 	// if not, let's jump
 	target->MoveSafely(newPos,time,time);
 	target->SetLastTurnPos(newPos); // hacky way to ensure to build the wall properly
 	target->SetLastTurnTime(time);
 	target->DropWall();
-	target->CurrentWall()->NetWall()->RequestSync();
+	if ((!target->CurrentWall()) && (!target->CurrentWall()->NetWall())) target->CurrentWall()->NetWall()->RequestSync();
 	target->RequestSync();
 
 }
@@ -5297,6 +5305,7 @@ static void sg_CreateZone_conf(std::istream &s)
         zoneJumpYStr = params.ExtractNonBlankSubString(pos);
         zoneJump = eCoord(atof(zoneJumpXStr),atof(zoneJumpYStr));
         tString zoneRelAbsStr = params.ExtractNonBlankSubString(pos);
+		if (zoneRelAbsStr=="") zoneRelAbsStr="rel";
 		if (zoneRelAbsStr=="rel") relJump=true;
 		else relJump = false;
         con << zoneRubber;
@@ -5556,8 +5565,8 @@ static void sg_CollapseZone(std::istream &s)
 	}
 }
 
-
 static tConfItemFunc sg_CollapseZone_conf("COLLAPSE_ZONE",&sg_CollapseZone);
+
 
 static void sg_SetZoneRadius(std::istream &s)
 {
@@ -5612,9 +5621,9 @@ static void sg_SetZoneRoute(std::istream &s)
 	const tString object_id_str = params.ExtractNonBlankSubString(pos);
 	//        const tString mode_str = params.ExtractNonBlankSubString(pos);
 	std::vector<eCoord> route;
-	tString speedstr;
+/*	tString speedstr;
 	speedstr = params.ExtractNonBlankSubString(pos);
-	REAL speed = atof(speedstr);
+	REAL speed = atof(speedstr);*/
 	tString x,y;
 	while(true)
 	{
@@ -5652,10 +5661,10 @@ static void sg_SetZoneRoute(std::istream &s)
 					zone->AddWaypoint(*iter + curPos);
 				}
 			}
-			REAL magnitude = zoneDir.Norm();
+/*			REAL magnitude = zoneDir.Norm();
 			if (speed<=0) speed = magnitude;
 			if (magnitude!=0.0) zoneDir.Normalize();
-			zoneDir*=speed;
+			zoneDir*=speed;*/
 			zone->SetVelocity(zoneDir);
 			zone->RequestSync();
 		}

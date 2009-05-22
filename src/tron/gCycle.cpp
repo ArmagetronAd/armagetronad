@@ -6634,3 +6634,58 @@ static void sg_RespawnPlayer(std::istream &s)
 static tConfItemFunc sg_RespawnPlayer_conf("RESPAWN_PLAYER",&sg_RespawnPlayer);
 
 
+static void sg_TeleportPlayer(std::istream &s)
+{
+	eGrid *grid = eGrid::CurrentGrid();
+	if(!grid) {
+		con << "Must be called while a grid exists!\n";
+		return;
+	}
+	
+	tString params;
+	params.ReadLine( s, true );
+	
+	// first parse the line to get the params : <player name> <message flag> <x> <y> <dirx> <diry>
+	int pos = 0; //
+	tString PlayerName = ePlayerNetID::FilterName(params.ExtractNonBlankSubString(pos));
+	ePlayerNetID *pPlayer = 0;
+	pPlayer = ePlayerNetID::FindPlayerByName(PlayerName, NULL);
+	if(!pPlayer) {
+		return;
+	}
+	const tString x_str = params.ExtractNonBlankSubString(pos);
+	REAL x = atof(x_str);
+	const tString y_str = params.ExtractNonBlankSubString(pos);
+	REAL y = atof(y_str);
+	tString relabs = params.ExtractNonBlankSubString(pos);
+	if (relabs=="") relabs="rel";
+	// prepare new coord ...
+	eCoord ppos;
+	if ((x_str == "") && (y_str == "")) {
+		return;
+	}
+	ppos = eCoord(x,y);
+
+	// let's teleport now ...
+	gCycle *pGameObject = dynamic_cast<gCycle *>(pPlayer->Object());
+	if ((pGameObject) &&
+		(pGameObject->Alive()))
+	{		
+		if (relabs=="rel") ppos = ppos + pGameObject->Position();
+		// Jump to new position without creating walls
+		gNetPlayerWall *nwall1 = pGameObject->CurrentWall()->NetWall();
+		pGameObject->DropWall(false);
+		if (!nwall1) nwall1->RequestSync();
+		REAL time = pGameObject->LastTime();
+		pGameObject->MoveSafely(ppos,time,time);
+		pGameObject->SetLastTurnPos(ppos); // hacky way to ensure to build the wall properly
+		pGameObject->SetLastTurnTime(time);
+		pGameObject->DropWall();
+		pGameObject->CurrentWall()->NetWall()->RequestSync();
+		pGameObject->RequestSync();		
+	}
+}
+
+static tConfItemFunc sg_TeleportPlayer_conf("TELEPORT_PLAYER",&sg_TeleportPlayer);
+
+
