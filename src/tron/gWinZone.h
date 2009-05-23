@@ -545,9 +545,13 @@ class gTeleportZoneHack: public gZone
 		gTeleportZoneHack(nMessage &m);
 		~gTeleportZoneHack();		 //!< destructor
 
-	void SetJump(eCoord coord, bool rel) { this->jump = coord; this->relative = rel; }
+	void SetJump(eCoord coord, int rel) { this->jump = coord; this->relative = rel; }
 	eCoord GetJump() { return this->jump; }
-	bool IsRelativeJump() { return this->relative; }
+	void SetNewDir(eCoord coord) { this->ndir = coord; }
+	eCoord GetNewDir() { return this->ndir; }
+	int IsRelativeJump() { return this->relative; }
+	void SetReloc(REAL factor) { this->reloc = factor; }
+	REAL GetReloc() { return this->reloc; }
 
 	protected:
 
@@ -559,8 +563,10 @@ class gTeleportZoneHack: public gZone
 		//!< reacts on objects inside the zone
 		virtual void OnEnter( gCycle *target, REAL time );
 	
-	    eCoord jump;
-	    bool relative;
+	eCoord jump;
+	eCoord ndir;
+	int relative; // 0=absolute ie map basis, 1=relative to cycle with map basis, 2=relative to cycle with cycle basis
+	REAL reloc;   // add extra jump to pretend to cross the zone 
 };
 
 class gBlastZoneHack: public gZone

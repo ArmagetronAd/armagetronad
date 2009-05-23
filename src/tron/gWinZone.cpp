@@ -4980,13 +4980,6 @@ void gTeleportZoneHack::OnEnter( gCycle * target, REAL time )
 		return;
 	}
 	// Jump to new position without creating walls
-	gNetPlayerWall *nwall1;
-	if (!target->CurrentWall())
-		nwall1 = target->CurrentWall()->NetWall();
-	else
-		nwall1 = 0;
-	target->DropWall(false);
-	if (!nwall1) nwall1->RequestSync();
 	eCoord d = target->Direction();
 	d.Normalize();
 	eCoord n = eCoord(-d.y,d.x);
@@ -4997,17 +4990,11 @@ void gTeleportZoneHack::OnEnter( gCycle * target, REAL time )
 	REAL l = (eCoord::F(v,d)*vn*2.0);
 	// if center is behind, you might have been teleported in this zone. Don't jump !
 	if (l<=0) return;
-	eCoord newPos = (relative? p + jump: jump - v)+d*l;
+	eCoord newPos = (relative==1? p + jump : (relative==2? p + d*jump.x + n*jump.y: jump - v))+d*l*reloc;
 	// check if newPos is inside this zone
 	if ((newPos-GetPosition()).Norm()<=GetRadius()) return;
 	// if not, let's jump
-	target->MoveSafely(newPos,time,time);
-	target->SetLastTurnPos(newPos); // hacky way to ensure to build the wall properly
-	target->SetLastTurnTime(time);
-	target->DropWall();
-	if ((!target->CurrentWall()) && (!target->CurrentWall()->NetWall())) target->CurrentWall()->NetWall()->RequestSync();
-	target->RequestSync();
-
+	target->TeleportTo(newPos, ndir, time);
 }
 
 
@@ -5089,77 +5076,8 @@ gBlastZoneHack::~gBlastZoneHack( void )
 //!
 // *******************************************************************************
 
-eCoord s_blastCoord;
-REAL   s_blastRadius;
-extern void clamp01(REAL &c);
-
-// remove walls in the blast zone ...
-void S_BlastWalls( eWall * w )
-{
-	// determine the point closest to s_blastCoord
-	eCoord normal = w->Vec().Conj();
-	normal.Normalize();
-	
-	eCoord Pos1 = normal.Turn( w->EndPoint(0) - s_blastCoord );
-	eCoord Pos2 = normal.Turn( w->EndPoint(1) - s_blastCoord );
-	
-	tASSERT( fabs( Pos1.y - Pos2.y ) <= fabs( Pos1.y + Pos2.y + .1f ) * .1f );
-	
-	REAL alpha = .5f;
-	if ( Pos1.x != Pos2.x)
-		alpha = Pos1.x / ( Pos1.x - Pos2.x );
-	
-	REAL radius = s_blastRadius * s_blastRadius - Pos1.y * Pos2.y;
-	
-	// wall too far away
-	if ( radius < 0 )
-		return;
-	
-	radius = sqrt( radius );
-	
-	// works only for player walls
-	gPlayerWall* wall = dynamic_cast<gPlayerWall*>( w );
-	if ( ! wall )
-		return;
-	
-	REAL closestPos = wall->Pos( alpha );
-	
-	REAL start = closestPos - radius;
-	REAL end = closestPos + radius;
-	
-	// cut away walls in the zone (if they are not reduced to a point)
-	REAL wallEnd = wall->EndPos();
-	REAL wallBeg = wall->BegPos();
-	if ( wallEnd <= wallBeg )
-	{
-		return;
-	}
-	REAL endAlpha = ( end - wallBeg ) / ( wallEnd - wallBeg );
-	// std::cout << wall->BegTime() << "\n";
-	clamp01( endAlpha );
-	end = wall->Pos( endAlpha );
-	
-	if ( end > start )
-	{
-		wall->BlowHole ( start, end, NULL );
-		wall->NetWall()->RequestSync ();
-	}
-}
-
-
 bool gBlastZoneHack::Timestep( REAL time )
 {
-	s_blastCoord  = GetPosition();
-	s_blastRadius = GetRadius();
-	
-	if ( s_blastRadius > 0 )
-	{
-		grid->ProcessWallsInRange( &S_BlastWalls,
-								  s_blastCoord,
-								  s_blastRadius,
-								  CurrentFace() );
-	}
-	
 	// delegate
 	bool returnStatus = gZone::Timestep( time );
 	
@@ -5180,6 +5098,7 @@ bool gBlastZoneHack::Timestep( REAL time )
 
 void gBlastZoneHack::OnEnter( gCycle * target, REAL time )
 {
+	target->SetWallBuilding(false);
 }
 
 
@@ -5297,7 +5216,9 @@ static void sg_CreateZone_conf(std::istream &s)
         con << zoneRubber;
     }
     eCoord zoneJump;
-	bool relJump;
+	int relJump;
+	eCoord ndir;
+	REAL reloc;
     if(zoneTypeStr == "teleport"){
 		tString  zoneJumpXStr;
 		tString  zoneJumpYStr;
@@ -5306,9 +5227,20 @@ static void sg_CreateZone_conf(std::istream &s)
         zoneJump = eCoord(atof(zoneJumpXStr),atof(zoneJumpYStr));
         tString zoneRelAbsStr = params.ExtractNonBlankSubString(pos);
 		if (zoneRelAbsStr=="") zoneRelAbsStr="rel";
-		if (zoneRelAbsStr=="rel") relJump=true;
-		else relJump = false;
-        con << zoneRubber;
+		if (zoneRelAbsStr=="rel") relJump=1;
+		else if (zoneRelAbsStr=="cycle") relJump=2;
+		else relJump = 0;
+		
+		const tString xdir_str = params.ExtractNonBlankSubString(pos);
+		REAL xdir = atof(xdir_str);
+		const tString ydir_str = params.ExtractNonBlankSubString(pos);
+		REAL ydir = atof(ydir_str);
+		if (xdir_str == "") xdir = 0.0;
+		if (ydir_str == "") ydir = 0.0;
+		ndir = eCoord(xdir,ydir);
+		const tString reloc_str = params.ExtractNonBlankSubString(pos);
+		reloc = atof(reloc_str);
+		if (reloc_str == "") reloc = 1.0;
     }
 	const tString zoneInteractive = params.ExtractNonBlankSubString(pos);
 	const tString zoneRedStr = params.ExtractNonBlankSubString(pos);
@@ -5394,6 +5326,8 @@ static void sg_CreateZone_conf(std::istream &s)
 	{
         gTeleportZoneHack *rZone = tNEW(gTeleportZoneHack(grid, zonePos, true));
 		rZone->SetJump(zoneJump,relJump);
+		rZone->SetNewDir(ndir);
+		rZone->SetReloc(reloc);
 		Zone = rZone;
 	}
 	else if ( zoneTypeStr=="ball" || zoneTypeStr=="ballTeam" )
@@ -5474,6 +5408,10 @@ static void sg_CreateZone_conf(std::istream &s)
 	else if ( zoneTypeStr=="target" )
 	{
 		Zone = tNEW( gTargetZoneHack( grid, zonePos, true ) );
+	}
+	else if ( zoneTypeStr=="blast" )
+	{
+		Zone = tNEW( gBlastZoneHack( grid, zonePos, true ) );
 	}
 	else
 	{

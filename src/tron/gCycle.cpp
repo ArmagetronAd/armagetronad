@@ -6576,6 +6576,46 @@ void gCycle::ProcessShoot(bool deathShot)
     }
 }
 
+void gCycle::SetWallBuilding(bool build) {
+	// Cycle must be alive !
+	if (!Alive()) return;
+	// Get current wall if exists ...
+	gNetPlayerWall *nwall = ((CurrentWall())?CurrentWall()->NetWall():0);
+	if (build&&!nwall) DropWall(true);
+	else if (nwall&&!build) DropWall(false);
+	if (nwall) nwall->RequestSync();
+	if ((CurrentWall()) && (CurrentWall()->NetWall())) CurrentWall()->NetWall()->RequestSync();
+}
+
+void gCycle::TeleportTo(eCoord dest, eCoord dir, REAL time) {
+	// Cycle must be alive !
+	if (!Alive()) return;
+	// Drop current wall if exists, without building a new one ...
+	gNetPlayerWall *nwall = ((CurrentWall())?CurrentWall()->NetWall():0);
+	if (nwall) {
+		DropWall(false);
+		nwall->RequestSync();
+	}
+	// Do a safe move to destination
+	MoveSafely(dest,time,time);
+	SetLastTurnPos(dest); // hacky way to ensure to build the wall properly
+	SetLastTurnTime(time);
+	// if dir is not (0,0), do a turn ...
+	if ((dir.x != 0.0) || (dir.y != 0.0)) {
+		int d = Grid()->DirectionWinding(dir);
+        eCoord nextDirDrive = Grid()->GetDirection(d);
+		lastDirDrive = gCycleMovement::dirDrive;
+		dirDrive = nextDirDrive;
+		SetWindingNumberWrapped( d );
+	}
+	// If cycle was linked to a wall at start position, build a new wall at new position
+	if (!nwall) {
+		DropWall();
+		if ((CurrentWall()) && (CurrentWall()->NetWall())) CurrentWall()->NetWall()->RequestSync();
+	}
+	RequestSync();		
+}
+
 static void sg_RespawnPlayer(std::istream &s)
 {
         eGrid *grid = eGrid::CurrentGrid();
@@ -6659,6 +6699,16 @@ static void sg_TeleportPlayer(std::istream &s)
 	REAL y = atof(y_str);
 	tString relabs = params.ExtractNonBlankSubString(pos);
 	if (relabs=="") relabs="rel";
+
+	const tString xdir_str = params.ExtractNonBlankSubString(pos);
+	REAL xdir = atof(xdir_str);
+	const tString ydir_str = params.ExtractNonBlankSubString(pos);
+	REAL ydir = atof(ydir_str);
+	if ((xdir_str == "") && (ydir_str == "")) {
+		xdir = ydir = 0.0;
+	}
+    eCoord dir = eCoord(xdir,ydir);
+	
 	// prepare new coord ...
 	eCoord ppos;
 	if ((x_str == "") && (y_str == "")) {
@@ -6673,16 +6723,8 @@ static void sg_TeleportPlayer(std::istream &s)
 	{		
 		if (relabs=="rel") ppos = ppos + pGameObject->Position();
 		// Jump to new position without creating walls
-		gNetPlayerWall *nwall1 = pGameObject->CurrentWall()->NetWall();
-		pGameObject->DropWall(false);
-		if (!nwall1) nwall1->RequestSync();
 		REAL time = pGameObject->LastTime();
-		pGameObject->MoveSafely(ppos,time,time);
-		pGameObject->SetLastTurnPos(ppos); // hacky way to ensure to build the wall properly
-		pGameObject->SetLastTurnTime(time);
-		pGameObject->DropWall();
-		pGameObject->CurrentWall()->NetWall()->RequestSync();
-		pGameObject->RequestSync();		
+		pGameObject->TeleportTo(ppos, dir, time);
 	}
 }
 

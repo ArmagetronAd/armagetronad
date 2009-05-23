@@ -270,6 +270,7 @@ public:
     inline REAL const & GetLastTurnTime( void ) const;	//!< Gets the time of the last turn
     inline gCycleMovement const & GetLastTurnTime( REAL & lastTurnTime ) const;	//!< Gets the time of the last turn
     inline gCycleMovement & SetRubber( REAL rubber );   //!< Sets the amount rubber used up by the cycle
+protected:
     inline gCycleMovement & SetLastTurnPos( eCoord const & lastTurnPos );	//!< Sets the location of the last turn
     inline gCycleMovement & SetLastTurnTime( REAL const & lastTurnTime );	//!< Sets the time of the last turn
 private:
