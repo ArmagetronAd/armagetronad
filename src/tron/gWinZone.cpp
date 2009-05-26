@@ -1949,7 +1949,14 @@ void gRubberZoneHack::OnVanish( void )
 gZone & gRubberZoneHack::SetRubber(REAL rubber)
 {
 	rmRubber = rubber;
-
+    
+    color_.r = 1.0f;
+    REAL p_rubber = (1-(rmRubber/sg_rubberCycle));
+    if (p_rubber <0)
+        p_rubber=0;
+    color_.g = (p_rubber);
+    color_.b = (p_rubber/3);
+    
 	return (*this);
 }
 
