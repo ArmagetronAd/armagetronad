@@ -4999,7 +4999,7 @@ void gTeleportZoneHack::OnEnter( gCycle * target, REAL time )
 	if (l<=0) return;
 	eCoord newPos = (relative==1? p + jump : (relative==2? p + d*jump.x + n*jump.y: jump - v))+d*l*reloc;
 	// check if newPos is inside this zone
-	if ((newPos-GetPosition()).Norm()<=GetRadius()) return;
+	//if ((newPos-GetPosition()).Norm()<=GetRadius()) return;
 	// if not, let's jump
 	target->TeleportTo(newPos, ndir, time);
 }

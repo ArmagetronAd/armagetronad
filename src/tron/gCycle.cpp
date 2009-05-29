@@ -6604,9 +6604,9 @@ void gCycle::TeleportTo(eCoord dest, eCoord dir, REAL time) {
 	if ((dir.x != 0.0) || (dir.y != 0.0)) {
 		int d = Grid()->DirectionWinding(dir);
         eCoord nextDirDrive = Grid()->GetDirection(d);
-		lastDirDrive = gCycleMovement::dirDrive;
-		dirDrive = nextDirDrive;
 		SetWindingNumberWrapped( d );
+		lastDirDrive = dirDrive;
+		dirDrive = nextDirDrive;
 	}
 	// If cycle was linked to a wall at start position, build a new wall at new position
 	if (!nwall) {
