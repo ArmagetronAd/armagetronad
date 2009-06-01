@@ -1345,6 +1345,8 @@ gWinZoneHack::~gWinZoneHack( void )
 //!
 // *******************************************************************************
 
+static eLadderLogWriter sg_winzonePlayerEnterWriter("WINZONE_PLAYER_ENTER", false);
+
 void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 {
 	static const char* message="$player_win_instant";
@@ -1357,6 +1359,11 @@ void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 		SetExpansionSpeed( -GetRadius()*.5 );
 		RequestSync();
 	}
+
+	// message in edlog
+	if ((!target) && (!target->Player())) return;
+	sg_winzonePlayerEnterWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName() << target->Player()->Object()->Position().x << target->Player()->Object()->Position().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y << time;
+		sg_winzonePlayerEnterWriter.write();
 }
 
 
@@ -4859,7 +4866,7 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
 	// message in edlog
 	if (playersFlags[target->Player()->ListID()] != 2)
 	{
-		sg_targetzonePlayerEnterWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName() << target->Player()->Object()->Position().x << target->Player()->Object()->Position().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y;
+		sg_targetzonePlayerEnterWriter << this->GOID() << name_ << GetPosition().x << GetPosition().y << target->Player()->GetUserName() << target->Player()->Object()->Position().x << target->Player()->Object()->Position().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y << time;
 		sg_targetzonePlayerEnterWriter.write();
 		playersFlags[target->Player()->ListID()] = 2;
 	}
