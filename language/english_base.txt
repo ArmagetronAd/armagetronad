@@ -388,6 +388,7 @@ ping_flood_time_50_help             Minimum time for 50 ping packets from one ma
 ping_flood_time_100_help            Minimum time for 100 ping packets from one machine to arrive.
 ping_flood_global_help              The times PING_FLOOD_TIME_X, multiplied by this value, count for all pings from all machines. Negative values disable global flood protection.
 
+shuffle_spam_messages_per_round_help Per round, per player limit on the number of shuffle messages displayed.
 spam_protection_repeat_help         Minimum time between identical chat messages.
 spam_protection_help				Harshness of spam protection; determines min delay between chat messages accepted.
 spam_protection_vote_help           Extra factor for SPAM_PROTECTION for votes.
@@ -2317,7 +2318,8 @@ player_spectator_message Spectators
 no_real_teams           No teams with more than one player.\n
 player_topologypolice	Order from Topology Police: \1
 
-team_shuffle            \1 gets shuffled from rank \2 to \3.\n
+team_shuffle            \1 gets shuffled from rank \2 to \3.
+team_shuffle_suppress   Further shuffle messages from this player will be suppressed.\n
 player_noshuffleup      You are not allowed to shuffle up.\n
 player_noshuffle        Your shuffling wish has no effect.\n
 player_shuffle_error    /shuffle expects a number as argument; an explicit sign (+/-) will change your position by the indicated number of steps, no sign will shuffle you to the given position.\n

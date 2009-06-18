@@ -2319,7 +2319,7 @@ player_spectator_message      Zuschauer
 no_real_teams                 Keine Teams mit mehr als einem Spieler.\n
 player_topologypolice         Die Topologiepolizei befiehlt: \1
 
-team_shuffle                  \1 wird von Position \2 auf \3 verschoben.\n
+team_shuffle                  \1 wird von Position \2 auf \3 verschoben.
 player_noshuffleup            Du darfst dich hier nicht selbst befördern.\n
 player_noshuffle              Dein Positionsänderungswunsch hat keinen Effekt.\n
 player_shuffle_error          /shuffle erwartet eine Zahl als Argument; mit explizitem Vorzeichen (+/-) wird die Position um die angegebene Zahl an Plätzen verändert, ohne Vorzeichen geht es and die angegebene absolute Position.\n
