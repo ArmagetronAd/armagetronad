@@ -77,6 +77,7 @@ public:
     static void HandleChat( ePlayerNetID * p, std::istream & message ); //!< handles player "/vote" command.
 
     tString Name(int senderID = -1) const;						// returns the name of the voter
+    tString LadderName(int senderID = -1) const;						// returns the name of the voter
 
     REAL Age() const;                                           //!< how long does this voter exist?
 

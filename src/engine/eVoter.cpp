@@ -198,7 +198,8 @@ static tAccessLevel se_GetAccessLevel( int userID )
 static nVersionFeature serverControlledVotesBroken( 10 );
 static nVersionFeature serverControlledVotes( 15 );
 
-
+static eLadderLogWriter sg_voteCreatedWriter("VOTE_CREATED", false);
+static eLadderLogWriter sg_voterWriter("VOTER", false);
 // something to vote on
 class eVoteItem: public tListMember
 {
@@ -233,7 +234,6 @@ public:
         return true;
     }
 
-    
     void ReBroadcast( int exceptTo )
     {
         // rebroadcast message to all non-voters that may be able to vote
@@ -262,7 +262,9 @@ public:
                     con << voteMessage;				// print it for the server admin
                 }
             }
-
+            sg_voteCreatedWriter << suggestor_->LadderName( user_ ) << GetDescription();
+            sg_voteCreatedWriter.write();
+            
             // create messages for old and new clients
             tJUST_CONTROLLED_PTR< nMessage > retNew = this->CreateMessage();
             tJUST_CONTROLLED_PTR< nMessage > retLegacy = this->CreateMessageLegacy();
@@ -461,10 +463,16 @@ public:
                         tOutput voteMessage;
                         voteMessage.SetTemplateParameter( 1, voter->Name( m.SenderID() ) );
                         voteMessage.SetTemplateParameter( 2, vote->GetDescription() );
-                        if ( result )
+                        sg_voterWriter << voter->LadderName( m.SenderID() );
+                        if ( result ){
                             voteMessage << "$vote_vote_for";
-                        else
+                            sg_voterWriter << "1";
+                        }else{
                             voteMessage << "$vote_vote_against";
+                            sg_voterWriter << "0";
+                        }
+                        sg_voterWriter << vote->GetDescription();
+                        sg_voterWriter.write();
 
                         // print it
                         if ( se_votingPrivacy <= -2 )
@@ -2115,6 +2123,35 @@ tString eVoter::Name( int senderID ) const
 
     if ( name.Len() < 2 )
         name = machine_.GetIP();
+
+    return name;
+}
+
+// *******************************************************************************************
+// *
+// *	LadderName
+// *
+// *******************************************************************************************
+//!
+//!		@param senderID 	the ID of the network user ( default: take any )
+//!		@return				the name of the voter ( all players of that IP )
+//!
+// *******************************************************************************************
+
+tString eVoter::LadderName( int senderID ) const
+{
+    tString name;
+
+    // collect the names of all players associated with this voter
+    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+    {
+        ePlayerNetID* p = se_PlayerNetIDs(i);
+        
+        if ( p->Owner() == senderID )
+        {
+            name = p->GetUserName();
+        }
+    }
 
     return name;
 }
