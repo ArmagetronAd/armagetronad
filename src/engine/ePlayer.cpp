@@ -8299,6 +8299,8 @@ void ePlayerNetID::Suspend( int rounds )
     {
         sn_ConsoleOut( tOutput( "$player_suspended", GetColoredName(), suspended ) );
         SetTeam( NULL );
+        if ( Object() && Object()->Alive() )
+            Object()->Kill();
     }
 }
 
