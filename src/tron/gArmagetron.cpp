@@ -229,7 +229,8 @@ static void welcome(){
 #endif
 
 #ifdef MACOSX
-        StartAAURLHandler();
+        StartAAURLHandler( showSplash );
+        std::cout << "showSplash = " << showSplash << '\n';
 #endif
         tRecorder::Record( splashSection, showSplash );
 
