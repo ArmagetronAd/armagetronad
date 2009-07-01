@@ -39,6 +39,8 @@
 - (void) setShouldConnect:(BOOL)shouldConnect showSplash:(bool *)showSplash;
 @end
 
+void ret_to_MainMenu();
+
 @implementation AAURLHandler
 
 - (id) init
@@ -68,6 +70,7 @@
         {
             if ( showSplash )
                 *showSplash = false;
+            ret_to_MainMenu();
             nServerInfoRedirect server( servername, port.ToInt() );
             AAURLHandlerConnect( &server );
         }
