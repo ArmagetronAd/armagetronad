@@ -310,6 +310,12 @@ public:
         // finish all pending tasks
         while( pendingForBreak_.size() > 0 )
         {
+            // sync the network so built up auth requests don't cause connection drops so quickly
+            sn_Receive();
+            nNetObject::SyncAll();
+            tAdvanceFrame();
+            sn_SendPlanned();
+
             nMemberFunctionRunnerTemplate & next = pendingForBreak_.front();
             next.run();
             pendingForBreak_.pop_front();
