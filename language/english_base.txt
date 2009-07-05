@@ -2796,7 +2796,7 @@ access_level_chat_timeout_help   Time in seconds between public announcements th
 access_level_chat_request   \10xRESETT would like to chat, but is not authorized yet. Would someone be so kind and say "/op \2"?\n
 access_level_chat_denied    0xff7f7fChat denied,0xffffff insufficient access level.\n
 access_level_op_denied      0xff7f7f\1 denied,0xffffff insufficient access level.\n
-access_level_op_overpowered 0xff7f7f\1 denied,0xffffff your need higher access righrs than your victim.\n
+access_level_op_overpowered 0xff7f7f\1 denied,0xffffff your need higher access rights than your victim.\n
 access_level_op_self        0xff7f7f\1 denied,0xffffff can't do that to yourself :).\n
 access_level_op_denied_max  0xff7f7f\1 denied,0xffffff your victim already has maximal rights.\n
 access_level_op_denied_ai   0xff7f7f\1 denied,0xffffff your victim is an AI.\n
