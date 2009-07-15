@@ -905,7 +905,7 @@ if test -z "`echo $FTGL_CFLAGS | grep FTGL`"; then
     found=false
     AC_MSG_CHECKING(for location of FTGL includes)
     for candidate in ${FTGL_HEADERS}; do
-        if test -r ${candidate}/FTGL.h; then
+        if test -r ${candidate}/FTGL.h || test -r ${candidate}/ftgl.h; then
             AC_MSG_RESULT(${candidate})
                 CPPFLAGS="$CPPFLAGS -I${candidate}"
                 found=true
