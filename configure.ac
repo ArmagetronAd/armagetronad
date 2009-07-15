@@ -1020,50 +1020,6 @@ fi dnl (dedicated server)
 
 
 
-dnl *************************************************
-dnl         Ruby
-dnl *************************************************
-
-if test "x$enable_ruby" = "xyes"; then
-AC_CHECK_PROG(RUBY, ruby, ruby, no)
-if test ${RUBY} = no || test -z ${RUBY}; then
-	AC_MSG_ERROR([Ruby 1.8 is required for compilation.])
-else
- AC_SEARCH_LIBS(ruby_run,ruby ruby1.8 ruby1.9,
- AC_DEFINE(HAVE_LIBRUBY, 1, [Define if you have the Ruby library (-lruby).])
- LIBS="$LIBS",
- AC_MSG_ERROR([Ruby library not found.])
- ,)
-        export RUBY
-        ruby_include_dir=$(${RUBY} <<EOF
-require "rbconfig"
-print Config::CONFIG@<:@'prefix'@:>@ + '/lib/ruby/1.8/' + Config::CONFIG@<:@'arch'@:>@
-EOF)
-        
-        ruby_include_dir="-I${ruby_include_dir}"
-        
-        ruby_lib_dir=$(${RUBY} <<EOF
-require "rbconfig"
-print Config::CONFIG@<:@'libdir'@:>@
-EOF)
-        
-        ruby_lib_dir="-L${ruby_lib_dir}"
-    fi
-fi
-
-
-export CPPFLAGS="$CPPFLAGS  ${ruby_include_dir}"
-export LIBS="${ruby_lib_dir} $LIBS"
-
-dnl SWIG
-
-if test "x$enable_ruby" = "xyes"; then
-    AC_PROG_SWIG(1.3.29)
-    SWIG_ENABLE_CXX
-fi
-
-dnl RUBY and SWIG end
-
 dnl Replace `main' with a function in -lpthread:
 
 dnl Checks for header files.
