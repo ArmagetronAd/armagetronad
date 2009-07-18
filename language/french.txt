@@ -1615,7 +1615,7 @@ gamestate_reset_console       Remise a zero des scores et debut d'un nouveau mat
 gamestate_resetnow_center     Nouveau match!
 gamestate_resetnow_console    Remise a zero des scores...\n
 gamestate_resetnow_log        Nouveau match\n
-gamestate_newround_console    C'est parti (round \1 sur \2 )!\n
+gamestate_newround_console    C'est parti (round \1 sur \2)!\n
 gamestate_newround_goldengoal C'est parti! (Round special; le gagnant gagne le match)!\n
 gamestate_newround_log        Nouveau round\n
 gamestate_wait_players        En attente de joueurs reels...\n

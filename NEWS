@@ -1,6 +1,13 @@
+Changes since 0.2.8.3_rc2:
+- Players can no longer spam chat with /shuffle messages. Added new setting
+  SHUFFLE_SPAM_MESSAGES_PER_ROUND, a per round, per player limit on the number
+  of shuffle messages displayed.
+
 Changes since 0.2.8.3_rc1:
 - Fixed dark color filters, such as FILTER_DARK_COLOR_STRINGS, to not filter
   the reset color.
+- ASE moviepack models no longer have a vertex count limit
+- Fixed endless recursion crash between rounds
 
 Changes since 0.2.8.3_beta3:
 - Chat prefix spam protection. Guards against prefix spam, such as when a
