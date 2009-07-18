@@ -2492,8 +2492,13 @@ static void sg_startChallenge(int sets=2) {
 	}
 }
 
+static eLadderLogWriter sg_startChallengeWriter("START_CHALLENGE", true);
+static eLadderLogWriter sg_endChallengeWriter("END_CHALLENGE", true);
+
 static void sg_endChallenge() {
 	if (eTeam::ongoingChallenge) {
+       	sg_endChallengeWriter << sg_GetCurrentTime("%Y-%m-%d %H:%M:%S");
+       	sg_endChallengeWriter.write();
 		// end the current challenge ...
 		eTeam::ongoingChallenge = false;
 		sg_currentSettings->limitSet = previous_limitSet;
@@ -3415,6 +3420,10 @@ void gGame::StateUpdate(){
                     sn_ConsoleOut("$gamestate_resetnow_console");
                     StartNewMatchNow();
                     int setsPlayed = eTeam::SetsPlayed ( );
+                    if (eTeam::ongoingChallenge && setsPlayed==0) {
+                    	sg_startChallengeWriter << sg_GetCurrentTime("%Y-%m-%d %H:%M:%S");
+                    	sg_startChallengeWriter.write();
+                    }
                     if ((sg_currentSettings->limitSet>1) && (setsPlayed>0)) {
                     	sn_CenterMessage("$gamestate_set_start_center");
 				        sg_newSetWriter << (setsPlayed+1) << sg_GetCurrentTime("%Y-%m-%d %H:%M:%S");
