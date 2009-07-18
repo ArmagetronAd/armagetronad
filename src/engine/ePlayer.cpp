@@ -6135,7 +6135,6 @@ void ePlayerNetID::TacticalPositioning() {
         }
         // if position changed, send a message and store new one
         if ((p->tactical_pos != newTacticalPos) || ((p->closest_zoneid != newClosestZoneID) && (newTacticalPos>=6))) {
-            nMachine const &machine = nMachine::GetMachine(p->Owner());
             se_tacticalPositionWriter << p->GetUserName() << TacPosStr;
             se_tacticalPositionWriter.write();
             p->tactical_pos = newTacticalPos;
@@ -8702,7 +8701,6 @@ static void sg_AddScorePlayer(std::istream &s)
         tString PlayerStr = tString("");
         PlayerStr = params.ExtractNonBlankSubString(pos);
         ePlayerNetID *pPlayer = 0;
-        int num_matches = -1;
         pPlayer = ePlayerNetID::FindPlayerByName(PlayerStr, NULL);
         if (!pPlayer) return;
         tString ScoreStr = tString("");
@@ -8727,7 +8725,6 @@ static void sg_SetPlayerTeam(std::istream &s)
         tString PlayerStr = tString("");
         PlayerStr = params.ExtractNonBlankSubString(pos);
         ePlayerNetID *pPlayer = 0;
-        int num_matches = -1;
         pPlayer = ePlayerNetID::FindPlayerByName(PlayerStr, NULL);
         if (!pPlayer) return;
 

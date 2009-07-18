@@ -41,6 +41,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rConsole.h"
 
 #include "ePlayer.h"
+#include "eTeam.h"
 #include "eGrid.h"
 
 #ifndef DEDICATED
@@ -105,6 +106,10 @@ static tSettingItem< int > se_vbInclude( "VOTING_BIAS_INCLUDE", se_votingBiasInc
 static int se_votingBiasCommand = 0;
 static tSettingItem< int > se_vbCommand( "VOTING_BIAS_COMMAND", se_votingBiasCommand );
 
+// the number set here always acts as additional votes against a challenge vote.
+static int se_votingBiasChallenge = 0;
+static tSettingItem< int > se_vbChallenge( "VOTING_BIAS_CHALLENGE", se_votingBiasChallenge );
+
 // voting privacy level. -2 means total disclosure, +2 total secrecy.
 static int se_votingPrivacy = 1;
 static tSettingItem< int > se_vp( "VOTING_PRIVACY", se_votingPrivacy );
@@ -160,6 +165,11 @@ static tAccessLevelSetter se_accessLevelVoteCommandSILevel( se_accessLevelVoteCo
 static tAccessLevel se_accessLevelVoteCommandExecute = tAccessLevel_Moderator;
 static tSettingItem< tAccessLevel > se_accessLevelVoteCommandExecuteSI( "ACCESS_LEVEL_VOTE_COMMAND_EXECUTE", se_accessLevelVoteCommandExecute );
 static tAccessLevelSetter se_accessLevelVoteCommandExecuteSILevel( se_accessLevelVoteCommandExecuteSI, tAccessLevel_Owner );
+
+// minimal access level for direct challenge votes
+static tAccessLevel se_accessLevelVoteChallenge = tAccessLevel_Program;
+static tSettingItem< tAccessLevel > se_accessLevelVoteChallengeSI( "ACCESS_LEVEL_VOTE_CHALLENGE", se_accessLevelVoteChallenge );
+static tAccessLevelSetter se_accessLevelVoteChallengeSILevel( se_accessLevelVoteChallengeSI, tAccessLevel_Owner );
 
 #endif
 
@@ -449,7 +459,6 @@ public:
             bool result;
             m >> result;
             result = result ? 1 : 0;
-
             for ( int i = items_.Len()-1; i>=0; --i )
             {
                 eVoteItem* vote = items_[i];
@@ -1724,6 +1733,61 @@ protected:
 
 #endif
 
+// challenge vote items
+class eVoteItemChallenge: public eVoteItemServerControlled
+{
+public:
+    // constructors/destructor
+    eVoteItemChallenge( tString const & command )
+    : eVoteItemServerControlled()
+    {
+        setsToWin_ = command.toInt();
+        if (setsToWin_<1) setsToWin_=1;
+        description_ = tOutput( "$vote_challenge_text", setsToWin_*2-1 );
+        details_ = tOutput( "$vote_challenge_details_text", setsToWin_*2-1 );
+        challengeRequest_++;
+    }
+
+    ~eVoteItemChallenge()
+    {
+    	challengeRequest_--;
+    }
+protected:
+    virtual bool DoCheckValid( int senderID )
+    {
+    	if ((challengeRequest_!=1) || (eTeam::ongoingChallenge)) {
+            tOutput message( "$vote_challenge_error" );
+            sn_ConsoleOut( message, senderID );
+            return false;
+    	}
+        return true;
+    }
+    
+    // access level required for this kind of vote
+    virtual tAccessLevel DoGetAccessLevel() const
+    {
+        return se_accessLevelVoteChallenge;
+    }
+
+    // return vote-specific extra bias
+    virtual int DoGetExtraBias() const
+    {
+        return se_votingBiasChallenge;
+    }
+
+    virtual void DoExecute()						// called when the voting was successful
+    {
+    	// to access function from the tron subdir, we'll send a START_CHALLENGE command
+    	std::stringstream str;
+    	str << "START_CHALLENGE " << setsToWin_ << "\n";
+    	tConfItemBase::LoadLine(str);
+    }
+	
+	int setsToWin_;
+	static int challengeRequest_;
+};
+int eVoteItemChallenge::challengeRequest_=0;
+
 // **************************************************************************************
 // **************************************************************************************
 
@@ -2248,6 +2312,15 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
         }
     }
 #endif
+    else if ( command == "challenge" )
+    {
+        tString console;
+        console.ReadLine( message );
+        {
+            // accept message
+            item = tNEW( eVoteItemChallenge )( console );
+        }
+    }
     else
     {
 #ifdef KRAWALL_SERVER

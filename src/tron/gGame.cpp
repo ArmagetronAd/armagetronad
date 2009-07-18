@@ -198,7 +198,7 @@ static eWavData extro("moviesounds/extro.wav");
 #define AUTO_AI_LOSE    1
 
 gGameSettings::gGameSettings(int a_scoreWin, int a_scoreDiffWin,
-                             int a_limitTime, int a_limitRounds, int a_limitScore,
+                             int a_limitTime, int a_limitRounds, int a_limitScore, int a_limitSet,
                              int a_numAIs,    int a_minPlayers,  int a_AI_IQ,
                              bool a_autoNum, bool a_autoIQ,
                              int a_speedFactor, int a_sizeFactor,
@@ -207,7 +207,7 @@ gGameSettings::gGameSettings(int a_scoreWin, int a_scoreDiffWin,
                              REAL a_winZoneMinRoundTime, REAL a_winZoneMinLastDeath
                             )
         :scoreWin(a_scoreWin), scoreDiffWin(a_scoreDiffWin),
-        limitTime(a_limitTime), limitRounds(a_limitRounds), limitScore(a_limitScore),
+        limitTime(a_limitTime), limitRounds(a_limitRounds), limitScore(a_limitScore), limitSet(a_limitSet),
         numAIs(a_numAIs),       minPlayers(a_minPlayers),   AI_IQ(a_AI_IQ),
         autoNum(a_autoNum),     autoIQ(a_autoIQ),
         speedFactor(a_speedFactor), sizeFactor(a_sizeFactor),
@@ -525,7 +525,7 @@ void gGameSettings::Menu()
 }
 
 gGameSettings singlePlayer(10, 1,
-                           30, 10, 100000,
+                           30, 10, 100000, 1,
                            1,   0, 30,
                            true, true,
                            0  ,  -3,
@@ -533,7 +533,7 @@ gGameSettings singlePlayer(10, 1,
                            100000, 1000000);
 
 gGameSettings multiPlayer(10, 1,
-                          30, 10, 100,
+                          30, 10, 100, 1,
                           0,   4, 100,
                           false, false,
                           0  ,  -3,
@@ -547,6 +547,7 @@ static tSettingItem<int> mp_sd("SCORE_DIFF_WIN"   ,multiPlayer.scoreDiffWin);
 static tSettingItem<int> mp_lt("LIMIT_TIME"  ,multiPlayer.limitTime);
 static tSettingItem<int> mp_lr("LIMIT_ROUNDS",multiPlayer.limitRounds);
 static tSettingItem<int> mp_ls("LIMIT_SCORE" ,multiPlayer.limitScore);
+static tSettingItem<int> mp_lset("LIMIT_SETS" ,multiPlayer.limitSet);
 
 static tConfItem<int>    mp_na("NUM_AIS"     ,multiPlayer.numAIs);
 static tConfItem<int>    mp_mp("MIN_PLAYERS" ,multiPlayer.minPlayers);
@@ -581,6 +582,7 @@ static tSettingItem<int> sp_sd("SP_SCORE_DIFF_WIN"   ,singlePlayer.scoreDiffWin)
 static tSettingItem<int> sp_lt("SP_LIMIT_TIME"  ,singlePlayer.limitTime);
 static tSettingItem<int> sp_lr("SP_LIMIT_ROUNDS",singlePlayer.limitRounds);
 static tSettingItem<int> sp_ls("SP_LIMIT_SCORE" ,singlePlayer.limitScore);
+static tSettingItem<int> sp_lset("SP_LIMIT_SETS" ,singlePlayer.limitSet);
 
 static tConfItem<int>    sp_na("SP_NUM_AIS"     ,singlePlayer.numAIs);
 static tConfItem<int>    sp_mp("SP_MIN_PLAYERS" ,singlePlayer.minPlayers);
@@ -1384,6 +1386,7 @@ static void sg_copySettings()
     gArena::SetSizeMultiplier 	( exponent( sg_currentSettings->sizeFactor ) );
 }
 
+static void sg_endChallenge();
 void update_settings( bool const * goon )
 {
     if (sn_GetNetState()!=nCLIENT)
@@ -1399,6 +1402,7 @@ void update_settings( bool const * goon )
                 if ( !restarted && bool(sg_currentGame) )
                 {
                     sg_currentGame->StartNewMatch();
+                    if (eTeam::ongoingChallenge) sg_endChallenge();
                     restarted = true;
                 }
 
@@ -2443,8 +2447,17 @@ static void StartNewMatch(){
     if (sg_currentGame)
         sg_currentGame->StartNewMatch();
     if (sn_GetNetState()!=nCLIENT){
-        sn_CenterMessage("$gamestate_reset_center");
-        sn_ConsoleOut("$gamestate_reset_console");
+    	if (eTeam::ongoingChallenge) {
+    		int sets = sg_currentSettings->limitSet;
+    		if (sets < 1) sets = 1;
+            tOutput message;
+            message.SetTemplateParameter(1, sets*2-1 );
+            message << "$gamestate_reset_challenge";
+            sn_CenterMessage(message);
+    	} else {
+	        sn_CenterMessage("$gamestate_reset_center");
+	        sn_ConsoleOut("$gamestate_reset_console");
+    	}
     }
 }
 
@@ -2453,6 +2466,59 @@ static void StartNewMatch_conf(std::istream &){
 }
 
 static tConfItemFunc snm("START_NEW_MATCH",&StartNewMatch_conf);
+
+// ************************************
+// Challenge management
+// ************************************
+
+// start a challenge : store current game state, lock teams, and reset game ...
+// end a challenge : restore previous game state and open team
+static int previous_limitSet;
+static void sg_startChallenge(int sets=2) {
+	if (!(eTeam::ongoingChallenge)) {
+		// no ongoing challenge, let start one ...
+		eTeam::ongoingChallenge = true;
+		previous_limitSet = sg_currentSettings->limitSet;
+		sg_currentSettings->limitSet = sets;
+		// lock all teams
+	    for ( int i = eTeam::teams.Len()-1; i>=0; --i )
+	    {
+	        (eTeam::teams(i))->SetLocked( true );
+	    }
+	    // start the challenge
+	    StartNewMatch();
+	} else {
+		// there's already a challenge running ...
+	}
+}
+
+static void sg_endChallenge() {
+	if (eTeam::ongoingChallenge) {
+		// end the current challenge ...
+		eTeam::ongoingChallenge = false;
+		sg_currentSettings->limitSet = previous_limitSet;
+		// unlock all teams
+	    for ( int i = eTeam::teams.Len()-1; i>=0; --i )
+	    {
+	        (eTeam::teams(i))->SetLocked( false );
+	    }
+	} else {
+		// no challenge to end ...
+	}
+}
+
+static void Challenge_conf(std::istream &s){
+    // read nb sets
+    REAL sets;
+    s >> sets;
+    
+	if (sets<1) sets=1;
+	
+    sg_startChallenge(sets);
+}
+
+static tConfItemFunc sc("START_CHALLENGE",&Challenge_conf);
+
 
 #ifdef DEDICATED
 static void Quit_conf(std::istream &){
@@ -3107,6 +3173,7 @@ static void sg_VoteMenuIdle()
 }
 
 static eLadderLogWriter sg_newRoundWriter("NEW_ROUND", true);
+static eLadderLogWriter sg_newSetWriter("NEW_SET", true);
 static eLadderLogWriter sg_newMatchWriter("NEW_MATCH", true);
 static eLadderLogWriter sg_waitForExternalScriptWriter("WAIT_FOR_EXTERNAL_SCRIPT", true);
 static eLadderLogWriter sg_nextRoundWriter("NEXT_ROUND", false);
@@ -3347,7 +3414,20 @@ void gGame::StateUpdate(){
                 if (rounds<=0){
                     sn_ConsoleOut("$gamestate_resetnow_console");
                     StartNewMatchNow();
-                    sn_CenterMessage("$gamestate_resetnow_center");
+                    int setsPlayed = eTeam::SetsPlayed ( );
+                    if ((sg_currentSettings->limitSet>1) && (setsPlayed>0)) {
+                    	sn_CenterMessage("$gamestate_set_start_center");
+				        sg_newSetWriter << (setsPlayed+1) << sg_GetCurrentTime("%Y-%m-%d %H:%M:%S");
+				        sg_newSetWriter.write();
+                    } else {
+                    	sn_CenterMessage("$gamestate_resetnow_center");
+                    }
+                    if (sg_currentSettings->limitSet>1) {
+                       	tOutput mess;
+                       	mess.SetTemplateParameter(1, setsPlayed+1);
+                       	mess << "$gamestate_set_start_console";
+						sn_ConsoleOut(mess); 
+                    }
                     se_SaveToScoreFile("$gamestate_resetnow_log");
                 }
 
@@ -3595,6 +3675,7 @@ static REAL sg_winZoneRandomness = .8;
 static tSettingItem< REAL > sg_winZoneSpreadConf( "WIN_ZONE_RANDOMNESS", sg_winZoneRandomness );
 
 static eLadderLogWriter sg_roundWinnerWriter("ROUND_WINNER", true);
+static eLadderLogWriter sg_setWinnerWriter("SET_WINNER", true);
 static eLadderLogWriter sg_matchWinnerWriter("MATCH_WINNER", true);
 
 void gGame::Analysis(REAL time){
@@ -3820,6 +3901,7 @@ void gGame::Analysis(REAL time){
         if ( humanTeamsClamp != lastTeams )
         {
             StartNewMatch();
+            if (eTeam::ongoingChallenge) sg_endChallenge();
             // if this is the beginning of a round, just start the match now
             if ( time < -100 )
             {
@@ -3967,7 +4049,7 @@ void gGame::Analysis(REAL time){
              sn_GetNetState()!=nCLIENT && se_PlayerNetIDs.Len()){
         ePlayerNetID::SortByScore();
         eTeam::SortByScore();
-        if ( eTeam::teams.Len() > 0 )
+        if ( eTeam::teams.Len() > 0 ) {
             if (eTeam::teams.Len() <= 1
                     || ( eTeam::teams(0)->Score() > eTeam::teams(1)->Score() && sg_EnemyExists(0))){
 
@@ -3986,28 +4068,54 @@ void gGame::Analysis(REAL time){
                         declareChampion = false;
                         holdBackNextRound= true;
                     }
-
+					
                     if ( declareChampion )
                     {
+						// handle sets before declaring the winner ...
+						bool flagSets=false; // true is this is the end of a set instead of a match ...
+						int setsPlayed=0;
+                    	if (sg_currentSettings->limitSet>1) {
+							eTeam::teams(0)->IncrementSets();
+							setsPlayed = eTeam::SetsPlayed();
+							flagSets= eTeam::teams(0)->SetsWon()<sg_currentSettings->limitSet ? true : false;
+                    	}
+                    	
                         lastdeath = time + ( sg_currentSettings->finishType==gFINISH_EXPRESS ? 2.0f : 6.0f );
-
-                        {
-                            tOutput message;
-                            message.SetTemplateParameter(1, eTeam::teams[0]->Name() );
-                            message << "$gamestate_champ_center";
-                            sn_CenterMessage(message);
-                        }
 
                         tOutput message;
                         tColoredString name;
                         name << eTeam::teams[0]->Name();
                         name << tColoredString::ColorString(1,1,1);
 
-                        sg_matchWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[0]->Name() );
-                        sg_matchWinnerWriter.write();
-
-                        message.SetTemplateParameter(1, name);
-                        message << "$gamestate_champ_console";
+						if (flagSets) {
+	                        {
+	                            tOutput message;
+	                            message.SetTemplateParameter(1, setsPlayed );
+	                            message.SetTemplateParameter(2, name );
+	                            message << "$gamestate_set_center";
+	                            sn_CenterMessage(message);
+	                        }
+	
+	                        sg_setWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[0]->Name() );
+	                        sg_setWinnerWriter.write();
+	
+                            message.SetTemplateParameter(1, setsPlayed );
+                            message.SetTemplateParameter(2, name );
+	                        message << "$gamestate_set_console";
+						} else {
+	                        {
+	                            tOutput message;
+	                            message.SetTemplateParameter(1, eTeam::teams[0]->Name() );
+	                            message << "$gamestate_champ_center";
+	                            sn_CenterMessage(message);
+	                        }
+	
+	                        sg_matchWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[0]->Name() );
+	                        sg_matchWinnerWriter.write();
+	
+	                        message.SetTemplateParameter(1, name);
+	                        message << "$gamestate_champ_console";
+						}
 
                         if (eTeam::teams(0)->Score() >=sg_currentSettings->limitScore)
                         {
@@ -4029,7 +4137,19 @@ void gGame::Analysis(REAL time){
 						ePlayerNetID::LogMatchScores();
 						
                         se_SaveToScoreFile(message);
-                        se_SaveToScoreFile("$gamestate_champ_finalscores");
+                        
+                        if (flagSets) {
+                        	tOutput mess;
+                        	mess.SetTemplateParameter(1, setsPlayed);
+                        	mess << "$gamestate_set_scores";
+                        	se_SaveToScoreFile(mess);
+                        } else {
+                        	se_SaveToScoreFile("$gamestate_champ_finalscores");
+                    		eTeam::ResetAllSets();
+                    		if (eTeam::ongoingChallenge) {
+								sg_endChallenge();
+                    		}
+                        }
                         se_SaveToScoreFile(eTeam::Ranking( -1, false ));
                         se_SaveToScoreFile(ePlayerNetID::Ranking( -1, false ));
                         se_SaveToScoreFile(sg_GetCurrentTime( "Time: %Y/%m/%d %H:%M:%S\n" ));
@@ -4052,6 +4172,7 @@ void gGame::Analysis(REAL time){
                     }
                 }
             }
+        }
     }
 
 
@@ -4922,5 +5043,4 @@ static void LoginCallback(){
 }
 
 static nCallbackLoginLogout lc(LoginCallback);
-
 

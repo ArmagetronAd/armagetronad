@@ -44,6 +44,7 @@ protected:							// protected attributes
     int listID; 					// ID in the list of all teams
     int score;						// score the team has accumulated
     int lastScore_;                 //!< score from the beginning of the round
+    int setsWon;					// number of sets the team has won
 
     int numHumans;					// number of human players on the team
     int numAIs;						// number of AI players on the team
@@ -134,6 +135,13 @@ public:												// public methods
                         const tOutput& reasonwin,
                         const tOutput& reasonlose );
 
+    int				SetsWon			(		) const { return setsWon; }
+    void			IncrementSets	(		);
+    static int		SetsPlayed		(		);
+    static void		ResetAllSets	(		);
+
+	static bool ongoingChallenge;		 // a challenge is currently underway, block any new challenge request
+	
     static void ResetScoreDifferences(); //<! Resets the last stored score so ScoreDifferences takes this as a reference time
     static void LogScoreDifferences();   //<! Logs accumulated scores of all players since the last call to ResetScoreDifferences() to ladderlog.txt
     void LogScoreDifference();           //<! Logs accumulated scores since the last call to ResetScoreDifferences() to ladderlog.txt

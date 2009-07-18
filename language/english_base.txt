@@ -1607,6 +1607,10 @@ vote_command_details_text			If accepted, the console command "\1" will be execut
 vote_command_text					Command \1
 vote_command_message				Executing command "\1".\n
 
+vote_challenge_details_text			If accepted, a best of \1 match will start.
+vote_challenge_text					Challenge request : Best of \1
+vote_challenge_error				Ongoing challenge or pending challenge request. Retry later.\n
+
 #*************************************
 #*************************************
 #
@@ -2219,6 +2223,14 @@ gamestate_minute_warn		One minute left!\n
 gamestate_2minutes_warn		Two minutes left!\n
 gamestate_5minutes_warn		Five minutes left!\n
 gamestate_10minutes_warn	Ten minutes left!\n
+
+gamestate_set_start_center	New Set
+gamestate_set_start_console	Starting Set \1!\n
+gamestate_set_center		Set \1 Winner: \2
+gamestate_set_console		Set \1 Winner: \2 
+gamestate_set_scores		Set \1 Scores:\n
+
+gamestate_reset_challenge		Start Challenge Best of \1 Next Round !
 
 gamestate_champ_center		Match Winner: \1
 gamestate_champ_console		Overall Winner: \1 

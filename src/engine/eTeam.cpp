@@ -473,6 +473,30 @@ void eTeam::AddScore(int points,
     se_SaveToScoreFile(message);
 }
 
+void eTeam::IncrementSets ( )
+{
+    setsWon++;
+
+	// no network sync as sets will be handle by server
+}
+
+int eTeam::SetsPlayed ( )
+{
+    int i, total=0;
+    for (i=teams.Len()-1;i>=0;i--)
+        total += teams(i)->setsWon;
+    return total;
+}
+
+void eTeam::ResetAllSets ( )
+{
+    int i;
+    for (i=teams.Len()-1;i>=0;i--)
+        teams(i)->setsWon = 0;
+}
+
+bool eTeam::ongoingChallenge=false;
+
 // *******************************************************************************
 // *
 // *	ResetScoreDifferences
@@ -514,12 +538,12 @@ static eLadderLogWriter se_matchScoreTeamWriter("MATCH_SCORE_TEAM", true);
 
 void eTeam::LogMatchScores( void )
 {
-    for ( int i = teams.Len()-1; i>=0; --i )
+   for ( int i = teams.Len()-1; i>=0; --i )
     {
         eTeam* t = teams(i);
 		if ( t->IsHuman() )
 		{
-			se_matchScoreTeamWriter << t->score << ePlayerNetID::FilterName( t->Name() );
+			se_matchScoreTeamWriter << t->score << ePlayerNetID::FilterName( t->Name() ) << t->setsWon;
 			se_matchScoreTeamWriter.write();
 		}
     }
@@ -1396,6 +1420,7 @@ eTeam::eTeam()
         :colorID(-1),listID(-1), roundsPlayed(0)
 {
     score = 0;
+    setsWon = 0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;
     locked_ = false;
     maxPlayersLocal = maxPlayers;
@@ -1411,6 +1436,7 @@ eTeam::eTeam(nMessage &m)
         colorID(-1),listID(-1)
 {
     score = 0;
+    setsWon = 0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;
     locked_ = false;
     maxPlayersLocal = maxPlayers;
