@@ -3420,10 +3420,22 @@ void gGame::StateUpdate(){
                     sn_ConsoleOut("$gamestate_resetnow_console");
                     StartNewMatchNow();
                     int setsPlayed = eTeam::SetsPlayed ( );
+                    // first challenge log message if needed
                     if (eTeam::ongoingChallenge && setsPlayed==0) {
                     	sg_startChallengeWriter << sg_GetCurrentTime("%Y-%m-%d %H:%M:%S");
                     	sg_startChallengeWriter.write();
                     }
+                    // second match log message if needed
+                    if (setsPlayed==0)
+                    	se_SaveToScoreFile("$gamestate_resetnow_log");
+                    // third set log message if needed
+                    if (sg_currentSettings->limitSet>1) {
+                       	tOutput mess;
+                       	mess.SetTemplateParameter(1, setsPlayed+1);
+                       	mess << "$gamestate_set_start_console";
+						se_SaveToScoreFile(mess);
+                    }
+                    // finally, center message
                     if ((sg_currentSettings->limitSet>1) && (setsPlayed>0)) {
                     	sn_CenterMessage("$gamestate_set_start_center");
 				        sg_newSetWriter << (setsPlayed+1) << sg_GetCurrentTime("%Y-%m-%d %H:%M:%S");
@@ -3431,13 +3443,6 @@ void gGame::StateUpdate(){
                     } else {
                     	sn_CenterMessage("$gamestate_resetnow_center");
                     }
-                    if (sg_currentSettings->limitSet>1) {
-                       	tOutput mess;
-                       	mess.SetTemplateParameter(1, setsPlayed+1);
-                       	mess << "$gamestate_set_start_console";
-						sn_ConsoleOut(mess); 
-                    }
-                    se_SaveToScoreFile("$gamestate_resetnow_log");
                 }
 
                 tOutput mess;
@@ -3449,8 +3454,8 @@ void gGame::StateUpdate(){
 
                     if (strlen(sg_roundConsoleMessage) > 2)
                         sn_ConsoleOut(sg_roundConsoleMessage + "\n");
-		    sg_nextRoundWriter << rounds+1 << sg_currentSettings->limitRounds << mapfile << sg_roundCenterMessage;
-		    sg_nextRoundWriter.write();
+				    sg_nextRoundWriter << rounds+1 << sg_currentSettings->limitRounds << mapfile << sg_roundCenterMessage;
+				    sg_nextRoundWriter.write();
                 }
                 else
                     mess << "$gamestate_newround_goldengoal";
