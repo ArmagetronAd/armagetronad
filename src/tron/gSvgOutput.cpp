@@ -88,7 +88,7 @@ void SvgOutput::WriteSvgFooter() {
 
 void SvgOutput::DrawRimWalls( std::vector<ePolyLine> &list ) {
 	int last_cr=0;
-	for (int i=0; i < list.size(); ++i)
+	for (unsigned int i=0; i < list.size(); ++i)
 	{
 		ePolyLine P = list[i];
 		if (i-last_cr>=8) {
