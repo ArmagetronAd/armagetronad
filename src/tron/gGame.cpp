@@ -2512,7 +2512,7 @@ static void sg_endChallenge() {
 	}
 }
 
-static void Challenge_conf(std::istream &s){
+static void StartChallenge_conf(std::istream &s){
     // read nb sets
     REAL sets;
     s >> sets;
@@ -2522,8 +2522,13 @@ static void Challenge_conf(std::istream &s){
     sg_startChallenge(sets);
 }
 
-static tConfItemFunc sc("START_CHALLENGE",&Challenge_conf);
+static tConfItemFunc ssc("START_CHALLENGE",&StartChallenge_conf);
 
+static void EndChallenge_conf(std::istream &s){
+    sg_endChallenge();
+}
+
+static tConfItemFunc sec("END_CHALLENGE",&EndChallenge_conf);
 
 #ifdef DEDICATED
 static void Quit_conf(std::istream &){
@@ -3418,7 +3423,6 @@ void gGame::StateUpdate(){
             if (sn_GetNetState()!=nCLIENT){
                 if (rounds<=0){
                     sn_ConsoleOut("$gamestate_resetnow_console");
-                    StartNewMatchNow();
                     int setsPlayed = eTeam::SetsPlayed ( );
                     // first challenge log message if needed
                     if (eTeam::ongoingChallenge && setsPlayed==0) {
@@ -3426,6 +3430,7 @@ void gGame::StateUpdate(){
                     	sg_startChallengeWriter.write();
                     }
                     // second match log message if needed
+                    StartNewMatchNow();
                     if (setsPlayed==0)
                     	se_SaveToScoreFile("$gamestate_resetnow_log");
                     // third set log message if needed
@@ -3434,12 +3439,12 @@ void gGame::StateUpdate(){
                        	mess.SetTemplateParameter(1, setsPlayed+1);
                        	mess << "$gamestate_set_start_console";
 						se_SaveToScoreFile(mess);
+				        sg_newSetWriter << (setsPlayed+1) << sg_GetCurrentTime("%Y-%m-%d %H:%M:%S");
+				        sg_newSetWriter.write();
                     }
                     // finally, center message
                     if ((sg_currentSettings->limitSet>1) && (setsPlayed>0)) {
                     	sn_CenterMessage("$gamestate_set_start_center");
-				        sg_newSetWriter << (setsPlayed+1) << sg_GetCurrentTime("%Y-%m-%d %H:%M:%S");
-				        sg_newSetWriter.write();
                     } else {
                     	sn_CenterMessage("$gamestate_resetnow_center");
                     }

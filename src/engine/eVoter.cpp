@@ -1731,8 +1731,6 @@ protected:
     tAccessLevel level_; //!< the level to execute the file with
 };
 
-#endif
-
 // challenge vote items
 class eVoteItemChallenge: public eVoteItemServerControlled
 {
@@ -1760,7 +1758,7 @@ protected:
             sn_ConsoleOut( message, senderID );
             return false;
     	}
-        return true;
+        return eVoteItemServerControlled::DoCheckValid( senderID );
     }
     
     // access level required for this kind of vote
@@ -1787,6 +1785,8 @@ protected:
 	static int challengeRequest_;
 };
 int eVoteItemChallenge::challengeRequest_=0;
+
+#endif
 
 // **************************************************************************************
 // **************************************************************************************
@@ -2311,7 +2311,6 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
             item = tNEW( eVoteItemCommand )( console, p->GetAccessLevel() );
         }
     }
-#endif
     else if ( command == "challenge" )
     {
         tString console;
@@ -2321,6 +2320,7 @@ void eVoter::HandleChat( ePlayerNetID * p, std::istream & message ) //!< handles
             item = tNEW( eVoteItemChallenge )( console );
         }
     }
+#endif
     else
     {
 #ifdef KRAWALL_SERVER
