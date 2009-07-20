@@ -1775,6 +1775,7 @@ protected:
 
     virtual void DoExecute()						// called when the voting was successful
     {
+		tCurrentAccessLevel level( tAccessLevel_Owner, true );
     	// to access function from the tron subdir, we'll send a START_CHALLENGE command
     	std::stringstream str;
     	str << "START_CHALLENGE " << setsToWin_ << "\n";
