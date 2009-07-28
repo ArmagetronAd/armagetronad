@@ -3885,6 +3885,7 @@ void gGame::Analysis(REAL time){
                         se_SaveToScoreFile(message);
 
                         sg_roundWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[winner-1]->Name() );
+                        eTeam::WritePlayers( sg_roundWinnerWriter, eTeam::teams[winner-1] );
                         sg_roundWinnerWriter.write();
                     }
                 }
@@ -3956,6 +3957,7 @@ void gGame::Analysis(REAL time){
                         name << tColoredString::ColorString(1,1,1);
 
                         sg_matchWinnerWriter << ePlayerNetID::FilterName( eTeam::teams[0]->Name() );
+                        eTeam::WritePlayers( sg_matchWinnerWriter, eTeam::teams[0] );
                         sg_matchWinnerWriter.write();
 
                         message.SetTemplateParameter(1, name);
