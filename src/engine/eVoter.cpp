@@ -363,7 +363,7 @@ public:
         }
 
         // enough voters online?
-        if ( eVoter::voters_.Len() < se_minVoters )
+        if ( eVoter::voters_.Len() < se_minVoters || eVoter::voters_.Len() < 2 )
         {
             tOutput message("$vote_toofew");
             sn_ConsoleOut( message, senderID );
@@ -519,7 +519,7 @@ public:
         if ( sn_GetNetState() == nSERVER )
         {
             // see if there are enough voters
-            if ( total <= se_minVoters )
+            if ( total < se_minVoters || total < 2 )
             {
                 this->BroadcastMessage( tOutput("$vote_toofew") );
                 delete this;
@@ -553,9 +553,9 @@ public:
 
                 tOutput voteMessage;
                 voteMessage.SetTemplateParameter( 1, GetDescription() );
-                voteMessage.SetTemplateParameter( 2, pro-1 );
-                voteMessage.SetTemplateParameter( 3, con-se_votingBias );
-                voteMessage.SetTemplateParameter( 4, total-se_votingBias);
+                voteMessage.SetTemplateParameter( 2, pro );
+                voteMessage.SetTemplateParameter( 3, con-bias );
+                voteMessage.SetTemplateParameter( 4, total-pro-con+bias );
                 voteMessage << "$vote_rejected";
                 this->BroadcastMessage( voteMessage );
                 delete this;
@@ -565,14 +565,14 @@ public:
             // see if the vote has been accepted
             if ( pro >= con && pro * 2 > total )
             {
-                this->DoExecute();
                 tOutput voteMessage;
                 voteMessage.SetTemplateParameter( 1, GetDescription() );
-                voteMessage.SetTemplateParameter( 2, pro-1 );
-                voteMessage.SetTemplateParameter( 3, con-se_votingBias );
-                voteMessage.SetTemplateParameter( 4, total-se_votingBias);
+                voteMessage.SetTemplateParameter( 2, pro );
+                voteMessage.SetTemplateParameter( 3, con-bias );
+                voteMessage.SetTemplateParameter( 4, total-pro-con+bias );
                 voteMessage << "$vote_accepted";
                 this->BroadcastMessage( voteMessage );
+                this->DoExecute();
                 delete this;
                 return;
             }
