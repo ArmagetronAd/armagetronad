@@ -2282,6 +2282,7 @@ void se_OpBase( ePlayerNetID * admin, ePlayerNetID * victim, char const * comman
     if ( !victim->IsHuman() )
     {
         sn_ConsoleOut( tOutput( "$access_level_op_denied_ai", command ), admin->Owner() );
+        return;
     }
 
     victim->Authenticate( authName, accessLevel, admin );
@@ -2324,6 +2325,147 @@ void se_DeOp( ePlayerNetID * admin, std::istream & s, char const * command )
         }
     }
 }
+
+// Changes the access level of a player, from console or other anonymous sources
+// and which is not to be called when you can call an OPFUNC
+// This isn't meant to be an user command, rather a simple switch between promoting and logging in, so make necessary checks yourself
+void se_AnonOp( ePlayerNetID * victim, tAccessLevel accessLevel, bool messages=true )
+{
+    if ( !victim->IsHuman() )
+    {
+        return;
+    }
+
+    if ( victim->IsAuthenticated() )
+    {
+        if ( accessLevel > tAccessLevel_Authenticated )
+        {
+            accessLevel = tAccessLevel_Authenticated;
+        }
+        if ( accessLevel < tCurrentAccessLevel::GetAccessLevel() + 1 )
+        {
+            accessLevel = static_cast< tAccessLevel >( tCurrentAccessLevel::GetAccessLevel() + 1 );
+        }
+        tAccessLevel oldAccessLevel = victim->GetAccessLevel();
+        victim->SetAccessLevel( accessLevel );
+
+
+        if ( accessLevel < oldAccessLevel && messages )
+        {
+            se_SecretConsoleOut( tOutput( "$access_level_promote_anon",
+                                          victim->GetLogName(),
+                                          tCurrentAccessLevel::GetName( accessLevel )
+                                            ), victim, &se_Hide, 0, 0, &se_CanHide );
+        }
+        else if ( accessLevel > oldAccessLevel && messages )
+        {
+            se_SecretConsoleOut( tOutput( "$access_level_demote_anon",
+                                 victim->GetLogName(),
+                                 tCurrentAccessLevel::GetName( accessLevel )
+                                        ), victim, &se_Hide, 0, 0, &se_CanHide );
+        }
+    }
+    else
+    {
+        tString authName = victim->GetUserName() + "@L_OP";
+        if ( victim->IsAuthenticated() )
+        {
+            authName = victim->GetRawAuthenticatedName();
+        }
+
+        victim->Authenticate( authName, accessLevel, 0, messages );
+    }
+}
+
+// Console command for it
+void se_OpConf( std::istream &s )
+{
+    if ( se_NeedsServer( "OP", s ) )
+    {
+        return;
+    }
+
+    ePlayerNetID * victim = se_FindPlayerInChatCommand( 0, "OP", s );
+    bool isexplicit = false;
+
+    if ( victim )
+    {
+        // read optional access level, this part is merly a copypaste from the /shuffle code
+        int level = se_opAccessLevelMax;
+        if ( victim->IsAuthenticated() )
+        {
+            level = victim->GetAccessLevel();
+        }
+        char first;
+        s >> first;
+        if ( !s.eof() && !s.fail() )
+        {
+            isexplicit = true;
+            s.unget();
+            int newLevel = 0;
+            s >> newLevel;
+
+            if ( first == '+' || first == '-' )
+            {
+                level += newLevel;
+            }
+            else
+            {
+                level = newLevel;
+            }
+        }
+
+        s >> level;
+
+        tAccessLevel accessLevel;
+        accessLevel = static_cast< tAccessLevel >( level );
+
+        if ( accessLevel == victim->GetAccessLevel() )
+        {
+            if ( isexplicit )
+            {
+                sn_ConsoleOut( tOutput( "$access_level_op_same", "OP" ), 0 );
+            }
+            else
+            {
+                sn_ConsoleOut( tOutput( "$access_level_op_unclear", "OP" ), 0 );
+            }
+        }
+        else
+        {
+            se_AnonOp( victim, accessLevel );
+        }
+    }
+
+}
+
+static tConfItemFunc se_opConf( "OP", &se_OpConf );
+static tAccessLevelSetter se_opConfLevel( se_opConf, tAccessLevel_Owner );
+
+void se_AnonDeOp( ePlayerNetID * victim, bool messages=true )
+{
+    if ( victim->IsAuthenticated() )
+    {
+        victim->DeAuthenticate( 0, messages );
+    }
+}
+void se_DeOpConf( std::istream &s )
+{
+    if ( se_NeedsServer( "DEOP", s ) )
+    {
+        return;
+    }
+
+    ePlayerNetID * victim = se_FindPlayerInChatCommand( 0, "DEOP", s );
+
+    if ( victim )
+    {
+        se_AnonDeOp( victim, true );
+    }
+}
+
+static tConfItemFunc se_deOpConf( "DEOP", &se_DeOpConf );
+static tAccessLevelSetter se_deOpConfLevel( se_deOpConf, tAccessLevel_Owner );
 
 // minimal access level for /team management
 static tAccessLevel se_teamAccessLevel = tAccessLevel_TeamLeader;
@@ -5116,7 +5258,7 @@ static void se_CheckAccessLevel( tAccessLevel & level, tString const & authName 
     }
 }
 
-void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLevel_, ePlayerNetID const * admin )
+void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLevel_, ePlayerNetID const * admin, bool messages )
 {
     tString newAuthenticatedName( se_EscapeName( authName ).c_str() );
 
@@ -5162,28 +5304,30 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
             SetAccessLevel( accessLevel_ );
         }
 
-        tString order( "" );
-        if ( admin )
+        if ( messages )
         {
-            order = tOutput( "$login_message_byorder",
-                             admin->GetLogName() );
-        }
-
-        if ( IsHuman() )
-        {
-            if ( GetAccessLevel() != tAccessLevel_Default )
+            tString order( "" );
+            if ( admin )
             {
-                se_SecretConsoleOut( tOutput( "$login_message_special",
-                                              GetName(),
-                                              newAuthenticatedName,
-                                              tCurrentAccessLevel::GetName( GetAccessLevel() ),
-                                              order ), this, &se_Hide, admin, 0, &se_CanHide );
-            }
-            else
-            {
-                se_SecretConsoleOut( tOutput( "$login_message", GetName(), newAuthenticatedName, order ), this, &se_Hide, admin, 0, &se_CanHide );
+                order = tOutput( "$login_message_byorder",
+                                 admin->GetLogName() );
             }
 
+            if ( IsHuman() )
+            {
+                if ( GetAccessLevel() != tAccessLevel_Remote )
+                {
+                    se_SecretConsoleOut( tOutput( "$login_message_special",
+                                                  GetName(),
+                                                  newAuthenticatedName,
+                                                  tCurrentAccessLevel::GetName( GetAccessLevel() ),
+                                                  order ), this, &se_Hide, admin, 0, &se_CanHide );
+                }
+                else
+                {
+                    se_SecretConsoleOut( tOutput( "$login_message", GetName(), newAuthenticatedName, order ), this, &se_Hide, admin, 0, &se_CanHide );
+                }
+            }
         }
     }
 
@@ -5193,14 +5337,14 @@ void ePlayerNetID::Authenticate( tString const & authName, tAccessLevel accessLe
     UpdateName();
 }
 
-void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin ){
+void ePlayerNetID::DeAuthenticate( ePlayerNetID const * admin, bool messages ){
     if ( IsAuthenticated() )
     {
-        if ( admin )
+        if ( admin && messages )
         {
             se_SecretConsoleOut( tOutput( "$logout_message_deop", GetName(), GetFilteredAuthenticatedName(), admin->GetLogName() ), this, &se_Hide, admin, 0, &se_CanHide );
         }
-        else
+        else if ( messages )
         {
             se_SecretConsoleOut( tOutput( "$logout_message", GetName(), GetFilteredAuthenticatedName() ), this, &se_Hide, 0, 0, &se_CanHide );
         }
