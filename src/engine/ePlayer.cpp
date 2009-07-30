@@ -2342,10 +2342,7 @@ void se_AnonOp( ePlayerNetID * victim, tAccessLevel accessLevel, bool messages=t
         {
             accessLevel = tAccessLevel_Authenticated;
         }
-        if ( accessLevel < tCurrentAccessLevel::GetAccessLevel() + 1 )
-        {
-            accessLevel = static_cast< tAccessLevel >( tCurrentAccessLevel::GetAccessLevel() + 1 );
-        }
+
         tAccessLevel oldAccessLevel = victim->GetAccessLevel();
         victim->SetAccessLevel( accessLevel );
 
@@ -2466,6 +2463,32 @@ void se_DeOpConf( std::istream &s )
 
 static tConfItemFunc se_deOpConf( "DEOP", &se_DeOpConf );
 static tAccessLevelSetter se_deOpConfLevel( se_deOpConf, tAccessLevel_Owner );
+
+void se_MakeReferee( ePlayerNetID * victim, ePlayerNetID * admin )
+{
+    se_AnonOp( victim, tAccessLevel_Referee, false );
+    if ( admin )
+    {
+        sn_ConsoleOut( tOutput( "$player_referee", admin->GetColoredName(), victim->GetColoredName() ) );
+    }
+    else
+    {
+        sn_ConsoleOut( tOutput( "$player_referee_anon", victim->GetColoredName() ) );
+    }
+}
+
+void se_CancelReferee( ePlayerNetID * victim, ePlayerNetID * admin )
+{
+    se_AnonDeOp( victim, false );
+    if ( admin )
+    {
+        sn_ConsoleOut( tOutput( "$player_referee_nomore", admin->GetColoredName(), victim->GetColoredName() ) );
+    }
+    else
+    {
+        sn_ConsoleOut( tOutput( "$player_referee_nomore_anon", victim->GetColoredName() ) );
+    }
+}
 
 // minimal access level for /team management
 static tAccessLevel se_teamAccessLevel = tAccessLevel_TeamLeader;

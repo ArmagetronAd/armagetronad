@@ -535,6 +535,9 @@ public:
 
 void ForceName ( std::istream & s );
 
+void se_MakeReferee( ePlayerNetID * victim, ePlayerNetID * admin = 0 );
+void se_CancelReferee( ePlayerNetID * victim, ePlayerNetID * admin = 0 );
+
 // ******************************************************************************************
 // *
 // *	GetNameFromClient
