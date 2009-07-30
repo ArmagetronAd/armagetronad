@@ -329,6 +329,20 @@ void eTeam::Update()
     UpdateAppearance();
 }
 
+
+
+// set spawn position for the next round
+void eTeam::SetPosition( int position )
+{
+    position_ = position;
+}
+
+// returns the current spawn position
+int eTeam::GetPosition() const
+{
+    return position_;
+}
+
 // sets the lock status
 void eTeam::SetLocked( bool locked )
 {
@@ -599,6 +613,20 @@ void eTeam::SortByScore(){
         int i;
         for (i=teams.Len()-2;i>=0;i--)
             if (teams(i)->score < teams(i+1)->score){
+                SwapTeamsNo(i,i+1);
+                inorder=false;
+            }
+    }
+}
+
+void eTeam::SortByPosition(){
+    // switch positions of teams, only works for 2 teams
+    bool inorder=false;
+    while (!inorder){
+        inorder=true;
+        int i;
+        for (i=teams.Len()-2;i>=0;i--)
+            if (teams(i)->position_ < teams(i+1)->position_){
                 SwapTeamsNo(i,i+1);
                 inorder=false;
             }
@@ -1422,6 +1450,7 @@ eTeam::eTeam()
     score = 0;
     setsWon = 0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;
+    position_ = 2;
     locked_ = false;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;
@@ -1438,6 +1467,7 @@ eTeam::eTeam(nMessage &m)
     score = 0;
     setsWon = 0;
     lastScore_=IMPOSSIBLY_LOW_SCORE;
+    position_ = 2;
     locked_ = false;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;

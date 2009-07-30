@@ -1468,6 +1468,15 @@ void update_settings( bool const * goon )
 static int sg_spawnPointGroupSize=0;
 static tSettingItem< int > sg_spawnPointGroupSizeConf( "SPAWN_POINT_GROUP_SIZE", sg_spawnPointGroupSize );
 
+// 0 loser first 1 winners first
+static int sg_spawnWinnersFirst = 0;
+static tSettingItem<int> sg_spawnWinnersFirstConf( "SPAWN_WINNERS_FIRST", sg_spawnWinnersFirst);
+
+static int sg_spawnAlternate = 0;
+static tSettingItem<int> sg_spawnAlternateConf( "SPAWN_ALTERNATE", sg_spawnAlternate);
+
+static eLadderLogWriter sg_spawnPositionTeamWriter("SPAWN_POSITION_TEAM", true);
+
 void init_game_objects(eGrid *grid){
     eSoundLocker soundLocker;
 
@@ -1476,10 +1485,7 @@ void init_game_objects(eGrid *grid){
       static REAL g[MAX_PLAYERS]={.2,1,.2,1};
       static REAL b[MAX_PLAYERS]={.2,.2,1,.2};
     */
- // 0 loser first 1 winners first
-static int sg_spawnWinnersFirst = 0;
-static tSettingItem<int> sg_spawnWinnersFirstConf( "SPAWN_WINNERS_FIRST", sg_spawnWinnersFirst);
-
+    
     if (sn_GetNetState()!=nCLIENT)
     {
         // update team settings
@@ -1488,17 +1494,47 @@ static tSettingItem<int> sg_spawnWinnersFirstConf( "SPAWN_WINNERS_FIRST", sg_spa
                                   sg_currentSettings->AI_IQ);
 
         int spawnPointsUsed = 0;
-
+        
+        if( sg_spawnAlternate == 1 )
+        {
+            eTeam::SortByPosition();
+        }
+        
         for(int t=eTeam::teams.Len()-1;t>=0;t--)
         {
             int z;
             if (sg_spawnWinnersFirst == 1){
                 z =(-1*t)+ eTeam::teams.Len()-1;
-            }else{
+            }
+            else
+            {
                 z =t;
             }
             eTeam *team = eTeam::teams(z);
 
+            if ( eTeam::teams.Len() == 2 && sg_spawnAlternate == 1 ) //switch position for next round
+            {
+                if ( team->GetPosition() == 2 ) //first spawn for this team
+                {
+                    team->SetPosition(spawnPointsUsed);
+                }
+                if ( team->GetPosition() == 0 )
+                {
+                    sg_spawnPositionTeamWriter << ePlayerNetID::FilterName( team->Name() );
+                    sg_spawnPositionTeamWriter << "0";
+                    sg_spawnPositionTeamWriter.write();
+                    team->SetPosition(1); //next round
+                }
+                else
+                {
+                    sg_spawnPositionTeamWriter << ePlayerNetID::FilterName( team->Name() );
+                    sg_spawnPositionTeamWriter << "1";
+                    sg_spawnPositionTeamWriter.write();
+                    team->SetPosition(0);
+                }
+            }
+            
+            
             // reset team color of fresh teams
             if ( team->RoundsPlayed() == 0 )
             {

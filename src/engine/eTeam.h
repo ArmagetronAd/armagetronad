@@ -58,6 +58,8 @@ protected:							// protected attributes
 
     unsigned short r,g,b;			// team color
     tString	name;					// our name
+    
+    int position_;                  // last spawn position
 
     bool locked_;                   //!< if set, only invited players may join
 
@@ -81,6 +83,9 @@ public:							// public configuration options
     void UpdateAppearance();		// update name and color
     void Update();					// update all properties
 
+    void SetPosition( int position ); // sets the last team spawn position - 0 being first spawn 
+    int GetPosition() const;          // returns the position
+    
     void SetLocked( bool locked );  // sets the lock status (whether invitations are required)
     bool IsLocked() const;          // returns the lock status
 
@@ -96,6 +101,8 @@ public:												// public methods
     static void	EnforceConstraints();					// make sure the limits on team number and such are met
 
     static void SortByScore();							// brings the teams into the right order
+    
+    static void SortByPosition();							// brings the teams into the right spawn
 
     static void SwapTeamsNo(int a,int b);             	// swaps the teams a and b
 
