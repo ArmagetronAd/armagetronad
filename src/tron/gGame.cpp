@@ -1602,7 +1602,8 @@ void init_game_objects(eGrid *grid){
                 // se_PauseGameTimer(true);
             }
         }
-
+        
+        eTeam::SortByScore(); //sort again by score, so new players will join the losing team.
 
 #ifdef ALLOW_NO_TEAM
         for(int p=se_PlayerNetIDs.Len()-1;p>=0;p--){
