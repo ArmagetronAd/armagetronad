@@ -2184,6 +2184,14 @@ void nMessage::Send(int peer,REAL priority,bool ack){
     if (!ack)
         messageIDBig_ = 0;
 #endif
+    
+    // don't send messages to unsupported peers
+    if( peer > MAXCLIENTS+1 )
+    {
+        tJUST_CONTROLLED_PTR< nMessage > bounce(this);
+        return;
+    }
+
 
     // messages to yourself are a bit strange...
     if ( sn_GetNetState() == nSERVER && peer == 0 && ack )

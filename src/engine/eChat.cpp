@@ -531,3 +531,48 @@ bool eChatPrefixSpamTester::ShouldCheckMessage( const eChatSaidEntry & said ) co
 {
     return said.Type() >= eChatMessageType_Public_Direct;
 }
+
+//
+// Shuffle message spam checks
+//
+
+static int se_shuffleSpamMessagesPerRound = 3;
+static tSettingItem< int > se_shuffleSpamMessagesPerRoundConf( "SHUFFLE_SPAM_MESSAGES_PER_ROUND", se_shuffleSpamMessagesPerRound );
+
+eShuffleSpamTester::eShuffleSpamTester()
+    :numberShuffles_( 0 )
+{
+}
+
+void eShuffleSpamTester::Shuffle()
+{
+    numberShuffles_++;
+}
+
+void eShuffleSpamTester::Reset()
+{
+    numberShuffles_ = 0;
+}
+
+tString eShuffleSpamTester::ShuffleMessage( ePlayerNetID *player, int fromPosition, int toPosition ) const
+{
+    tString message;
+    message << tOutput( "$team_shuffle", player->GetName(), fromPosition, toPosition );
+    
+    if ( ShouldDisplaySuppressMessage() )
+        message << " " << tOutput( "$team_shuffle_suppress" );
+    else
+        message << '\n';
+    
+    return message;
+}
+
+bool eShuffleSpamTester::ShouldAnnounce() const
+{
+    return se_shuffleSpamMessagesPerRound <= 0 || numberShuffles_ < se_shuffleSpamMessagesPerRound;
+}
+
+bool eShuffleSpamTester::ShouldDisplaySuppressMessage() const
+{
+    return se_shuffleSpamMessagesPerRound > 0 && numberShuffles_ + 1 >= se_shuffleSpamMessagesPerRound;
+}

@@ -2200,7 +2200,7 @@ gamestate_reset_console       Nach dieser Runde beginnt ein neues Match; Punktza
 gamestate_resetnow_center     Neues Match
 gamestate_resetnow_console    Setzte Punktzahlen zurück...\n
 gamestate_resetnow_log        Neues Match\n
-gamestate_newround_console    Los (Runde \1 von \2 )!\n
+gamestate_newround_console    Los (Runde \1 von \2)!\n
 gamestate_newround_goldengoal Los (Verlängerung; Wer als erster die Führung übernimmt, gewinnt)!\n
 gamestate_newround_log        Neue Runde\n
 gamestate_chat_wait           Warte bis zu \2 Sekunden auf \1.\n
@@ -2319,7 +2319,7 @@ player_spectator_message      Zuschauer
 no_real_teams                 Keine Teams mit mehr als einem Spieler.\n
 player_topologypolice         Die Topologiepolizei befiehlt: \1
 
-team_shuffle                  \1 wird von Position \2 auf \3 verschoben.\n
+team_shuffle                  \1 wird von Position \2 auf \3 verschoben.
 player_noshuffleup            Du darfst dich hier nicht selbst befördern.\n
 player_noshuffle              Dein Positionsänderungswunsch hat keinen Effekt.\n
 player_shuffle_error          /shuffle erwartet eine Zahl als Argument; mit explizitem Vorzeichen (+/-) wird die Position um die angegebene Zahl an Plätzen verändert, ohne Vorzeichen geht es and die angegebene absolute Position.\n
@@ -2878,7 +2878,7 @@ md5_password_removed          Benutzer/Team \1 entfernt.\n
 md5_password_remove_notfound  Benutzer/Team \1 nicht gefunden.\n
 
 reserve_screen_name_help      Reserviert einen Spitznamen für einen registrierten Benutzer
-reserve_screen_name_usage    Verwendung: RESERVE_SCREEN_NAME <Spitzname (in Anfürungszeichen)> <Benutzername>\n
+reserve_screen_name_usage     Verwendung: RESERVE_SCREEN_NAME <Spitzname (in Anfürungszeichen)> <Benutzername>\n
 reserve_screen_name_change    Der Spitzname "\1" ist für \2 reserviert.\n
 
 user_alias_help               Erlaubt es, Authentifizierungs-IDs umzubiegen: ein Spieler, der eigentlich als X authentifiziert ist, kann als Y erscheinen.
@@ -2887,8 +2887,10 @@ alias_change                  Benutzer \1 wird als \2 erscheinen.\n
 
 ban_user_help                 Verbannt Spieler mit bestimmter Authentifizierungs-ID
 ban_user_message              Benutzer \1 wurde verbannt.\n
+ban_user_usage                Verwendung: BAN_USER <global ID>\n
 unban_user_help               Macht BAN_USER rückgängig.
 unban_user_message            Benutzer \1 ist nicht mehr verbannt.\n
+unban_user_usage              Verwendung: UNBAN_USER <global ID>\n
 ban_user_list_help            Gibt die Liste der verbannten Authentifizierungs-IDs aus.
 
 md5_prefix_help               Prefix, der bei lokalen Accounts zum Verschüsseln des Passworts verwendet wird

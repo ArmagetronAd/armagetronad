@@ -285,4 +285,20 @@ private:
     const eChatSaidEntry & say_;
 };
 
+/**
+ * Checks for annoying /shuffle message spam
+ */
+class eShuffleSpamTester
+{
+public:
+    eShuffleSpamTester();
+    bool ShouldAnnounce() const;
+    void Reset();
+    void Shuffle();
+    tString ShuffleMessage( ePlayerNetID *player, int fromPosition, int toPosition ) const;
+protected:
+    bool ShouldDisplaySuppressMessage() const;
+    int numberShuffles_;
+};
+
 #endif

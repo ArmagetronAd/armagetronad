@@ -8568,6 +8568,8 @@ void ePlayerNetID::Suspend( int rounds )
     {
         sn_ConsoleOut( tOutput( "$player_suspended", GetColoredName(), suspended ) );
         SetTeam( NULL );
+        if ( Object() && Object()->Alive() )
+            Object()->Kill();
     }
 }
 
@@ -8628,6 +8630,15 @@ void ePlayerNetID::UpdateSuspensions() {
                 p->Suspend( suspended - 1 );
             }
         }
+    }
+}
+
+void ePlayerNetID::UpdateShuffleSpamTesters()
+{
+    for ( int i = se_PlayerNetIDs.Len()-1; i>=0; --i )
+    {
+        ePlayerNetID *p = se_PlayerNetIDs( i );
+        p->shuffleSpam.Reset();
     }
 }
 
