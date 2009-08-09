@@ -3815,7 +3815,7 @@ void gBallZoneHack::OnEnter( gCycle * target, REAL time )
 		return;
 
 	REAL r1 = this->GetRadius();
-	REAL r2 = 0.2;				 // the cycle "radius". to be adjusted ...
+	REAL r2 = target->Player()->ping/.2;				 // the cycle "radius". accomidates for higher ping players
 	REAL R = r1 + r2;
 	eCoord p1 = this->Position();
 	eCoord dp = p2 - p1;
